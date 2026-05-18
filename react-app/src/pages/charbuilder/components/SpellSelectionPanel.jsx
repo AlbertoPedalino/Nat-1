@@ -63,7 +63,7 @@ export default function SpellSelectionPanel({ state, dispatch }) {
   const pool = dedupeSpells([...autoPool.filter((spell) => Number(spell.level || 0) === level), ...basePool])
     .filter((spell) => !query || spell.name.toLowerCase().includes(query) || String(spell.schoolFull || spell.school || '').toLowerCase().includes(query))
     .slice(0, 120);
-  const isCaster = !!profile.casterProgression || cantrips > 0 || spells > 0 || maxLevel > 0;
+  const isCaster = !!profile.casterProgression || cantrips > 0 || spells > 0 || maxLevel > 0 || autoGrantedSpells.length > 0;
   const wizardBookMode = activeIsWizard && wizardMode === 'book';
 
   useEffect(() => {

@@ -128,44 +128,90 @@ registerSpeciesAdapter("Aasimar_XPHB", function (s) {
   });
 
   specs.push({ key: 'species_size', label: 'Choose Size', type: 'generic_choice', from: ['Medium', 'Small'], count: 1, level: 1 });
-  specs.push({ key: 'species_spell_ability', label: 'Spellcasting Ability (Aasimar)', type: 'ability_choice', from: ['int', 'wis', 'cha'], count: 1, level: 1 });
-
-  const revelationOpts = [
-    { key: 'Heavenly Wings',    label: 'Heavenly Wings (Flight)' },
-    { key: 'Inner Radiance',    label: 'Inner Radiance (Light)' },
-    { key: 'Necrotic Shroud',   label: 'Necrotic Shroud (Fear)' },
-  ];
-  specs.push({ key: 'species_version', label: 'Celestial Revelation (Lv.3)', type: 'option', options: revelationOpts, count: 1, level: 3 });
   return specs;
 });
 
 registerSpeciesSheetCommonChoiceMeta("Aasimar_XPHB", {
   labels: {
-    species_version: 'Celestial Revelation',
-    species_spell_ability: 'Spellcasting Ability (Aasimar)',
     species_size: 'Size',
   },
 });
 registerSpeciesSheetActions("Aasimar_XPHB", [
   {
+    name: 'Healing Hands',
+    icon: 'cross',
+    cat: 'action',
+    uses: '1 / LR',
+    resKey: 'aasimar_healing_hands',
+    healFormula: ({ character }) => {
+      const lv = Number(character?.level || 1);
+      const pb = Math.floor((lv - 1) / 4) + 2;
+      return `${pb}d4`;
+    },
+    minLevel: 1,
+    desc: 'Magic action: touch a creature and roll a number of d4s equal to your Proficiency Bonus. The creature regains Hit Points equal to the total. Recharge: Long Rest.',
+  },
+  {
     name: 'Celestial Revelation',
     icon: '',
     cat: 'bonus',
-    uses: 'PB / LR',
+    uses: '1 / LR',
     resKey: 'aasimar_revelation',
     minLevel: 3,
-    desc: 'Manifest your celestial power (wings, radiance, or shroud) for 1 minute.',
+    detailType: 'panel',
+    detail: ({ character }) => {
+      const lv = Number(character?.level || 1);
+      const pb = Math.floor((lv - 1) / 4) + 2;
+      const chaScore = character?.finalScores?.cha ?? 10;
+      const chaMod = Math.floor((chaScore - 10) / 2);
+      const saveDc = 8 + pb + chaMod;
+      return {
+        sections: [
+          {
+            title: 'Heavenly Wings',
+            accent: '#70b7e6',
+            body: `<b>Movement.</b> Gain a Fly Speed equal to your Speed for 1 minute.<br><b>Extra Damage.</b> Once on each of your turns, when you damage a target with an attack or spell, deal +${pb} Radiant damage to one target.`,
+          },
+          {
+            title: 'Inner Radiance',
+            accent: '#edd48a',
+            body: `<b>Light.</b> Shed Bright Light in a 10-foot radius and Dim Light for an additional 10 feet for 1 minute.<br><b>Area Damage.</b> At the end of each of your turns, each creature within 10 feet of you takes ${pb} Radiant damage.<br><b>Extra Damage.</b> Once on each of your turns, when you damage a target with an attack or spell, deal +${pb} Radiant damage to one target.`,
+          },
+          {
+            title: 'Necrotic Shroud',
+            accent: '#b58fd9',
+            body: `<b>Save DC.</b> Nearby creatures make a Charisma save, DC ${saveDc}. On a failed save, a creature has the Frightened condition until the end of your next turn.<br><b>Extra Damage.</b> Once on each of your turns, when you damage a target with an attack or spell, deal +${pb} Necrotic damage to one target.`,
+          },
+        ],
+      };
+    },
+    desc: 'Bonus Action at character level 3: transform for 1 minute, ending early with no action. Choose the option each time you transform: Heavenly Wings grants Fly Speed equal to Speed; Inner Radiance sheds light and damages nearby creatures at the end of your turns; Necrotic Shroud can Frighten nearby enemies. Once on each of your turns during the transformation, deal extra damage equal to PB to one target you damage with an attack or spell. Damage is Necrotic for Necrotic Shroud, Radiant for Heavenly Wings or Inner Radiance. Recharge: Long Rest.',
   },
 ]);
 registerSpeciesSheetResources("Aasimar_XPHB", [
+  {
+    key: 'aasimar_healing_hands',
+    name: 'Healing Hands',
+    icon: 'cross',
+    recharge: 'LR',
+    max: 1,
+  },
   {
     key: 'aasimar_revelation',
     name: 'Celestial Revelation',
     icon: 'sparkles',
     recharge: 'LR',
-    max: (lv) => Math.floor((Number(lv) - 1) / 4) + 2,
+    max: 1,
   },
 ]);
 
-}
+registerSpeciesRuntimeConfig("Aasimar_XPHB", {
+  spellcasting: {
+    ability: 'cha',
+    alwaysKnownSpells: [
+      { name: 'Light', level: 0, source: 'Light Bearer', sourceType: 'species', ability: 'cha' },
+    ],
+  },
+});
 
+}

@@ -118,7 +118,7 @@ export function buildSpellInfo(C, spellIndex) {
   });
 
   collectAtWillSpells(C).forEach(({ name, source }) => push(name, source, true));
-  collectAutoGrantedSpells(C).forEach(({ name, level, source, ownerClassName }) => push(name, source, true, null, level, ownerClassName));
+  collectAutoGrantedSpells(C).forEach(({ name, level, source, ownerClassName, spellcastingAbility }) => push(name, source, true, null, level, ownerClassName, spellcastingAbility));
   collectChoiceSpells(C, spellIndex).forEach(({ name, source, ownerClassName, spellcastingAbility }) => push(name, source, true, null, 0, ownerClassName, spellcastingAbility));
 
   const all = [...rows.values()];
@@ -353,6 +353,23 @@ function collectAutoGrantedSpells(C) {
     });
   });
 
+  const speciesCfg = installedRegistry.getSpeciesRuntimeConfig(C?.speciesName, C?.speciesSource)?.spellcasting || {};
+  [
+    ...(speciesCfg.alwaysKnownSpells || []).map((spell) => ({ spell, mode: 'known' })),
+    ...(speciesCfg.alwaysPreparedSpells || []).map((spell) => ({ spell, mode: 'prepared' })),
+  ].forEach(({ spell, mode }) => {
+    const name = typeof spell === 'string' ? spell : spell?.name;
+    if (!name || Number(C?.level || 1) < Number(spell?.minLevel || 1)) return;
+    const srcLabel = spell?.source || C?.speciesName || 'Species';
+    runtimeOut.push({
+      name,
+      level: Number(spell?.level ?? 0),
+      source: { label: srcLabel, color: '#70b7a6', originType: 'species', originLabel: C?.speciesName || 'Species' },
+      ownerClassName: null,
+      spellcastingAbility: spell?.ability || speciesCfg.ability || null,
+    });
+  });
+
   const runtimeByName = new Map();
   runtimeOut.forEach((entry) => {
     const key = norm(entry.name);
@@ -369,7 +386,13 @@ function collectAutoGrantedSpells(C) {
     const allCfgSpells = [...(cfg?.alwaysKnownSpells || []), ...(cfg?.alwaysPreparedSpells || [])];
     const cfgEntry = allCfgSpells.find((s) => norm(s?.name || '') === key);
     if (cfgEntry?.invocation && !warlockHasInvocation(C, cfgEntry.invocation)) return;
-    runtimeByName.set(key, { name: entry.name, level: Number(entry.level ?? 0), source: { label: entry.source || 'Auto', color: '#70b7a6', originType: 'auto_granted', originLabel: entry.source || 'Auto' }, ownerClassName: ownerClass });
+    runtimeByName.set(key, {
+      name: entry.name,
+      level: Number(entry.level ?? 0),
+      source: { label: entry.source || 'Auto', color: '#70b7a6', originType: entry.sourceType || 'auto_granted', originLabel: entry.source || 'Auto' },
+      ownerClassName: ownerClass,
+      spellcastingAbility: entry.spellcastingAbility || entry.ability || null,
+    });
   });
 
   return [...runtimeByName.values()];

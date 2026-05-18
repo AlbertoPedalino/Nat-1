@@ -170,6 +170,26 @@ export function collectAutoGrantedSpells(character, profile = getSpellcastingPro
     }))
     .filter((spell) => spell.name && classLevel >= spell.minLevel);
 
+  const speciesSpellcasting = installedRegistry.getSpeciesRuntimeConfig(
+    character?.speciesName,
+    character?.speciesSource,
+  )?.spellcasting || {};
+  [
+    ...(speciesSpellcasting.alwaysKnownSpells || []).map((spell) => ({ spell, mode: 'known' })),
+    ...(speciesSpellcasting.alwaysPreparedSpells || []).map((spell) => ({ spell, mode: 'prepared' })),
+  ]
+    .map(({ spell, mode }) => ({
+      name: typeof spell === 'string' ? spell : spell?.name,
+      minLevel: Number(spell?.minLevel || 1),
+      level: spell?.level ?? null,
+      mode,
+      source: spell?.source || character?.speciesName || 'Species',
+      sourceType: spell?.sourceType || 'species',
+      spellcastingAbility: spell?.ability || speciesSpellcasting.ability || null,
+    }))
+    .filter((spell) => spell.name && Number(character?.level || 1) >= spell.minLevel)
+    .forEach((spell) => out.push(spell));
+
   collectSubclassFeatureSpells(character).forEach((spell) => out.push(spell));
 
   const seen = new Set();

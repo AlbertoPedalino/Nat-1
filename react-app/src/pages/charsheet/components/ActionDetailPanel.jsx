@@ -63,13 +63,28 @@ function SectionBody({ html, accent }) {
   );
 }
 
+function resolveMaybeFunction(value, context, fallback = value) {
+  if (typeof value !== 'function') return value ?? fallback;
+  try {
+    const next = value(context);
+    return next ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 export default function ActionDetailPanel({ action, character, sheet, onShowToast }) {
   const [result, setResult] = useState(null);
-  const detail = action?.detail || {};
+  const detail = resolveMaybeFunction(action?.detail, { action, character, sheet }, {}) || {};
   const charLevel = detail.levelClass
     ? getClassLevel(character, detail.levelClass)
     : Number(character?.level || 0);
-  const sections = (detail.sections || []).filter((s) => !s.minLevel || charLevel >= Number(s.minLevel));
+  const sections = (detail.sections || [])
+    .filter((s) => !s.minLevel || charLevel >= Number(s.minLevel))
+    .map((section) => ({
+      ...section,
+      body: resolveMaybeFunction(section.body, { action, character, sheet, charLevel, section }, ''),
+    }));
   const roll = detail.roll || null;
   const tableMeta = roll?.tableKey ? getRollTable(roll.tableKey) : null;
   const dual = Boolean(roll?.dualRollFromLevel != null && charLevel >= Number(roll.dualRollFromLevel));
