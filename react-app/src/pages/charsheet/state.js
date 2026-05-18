@@ -104,6 +104,14 @@ export function saveResources(resources) {
   setStorageJson('5e_resources', resources);
 }
 
+export function loadFreeCastUses() {
+  return getStorageJson('5e_freecast_used', {});
+}
+
+export function saveFreeCastUses(uses) {
+  setStorageJson('5e_freecast_used', uses);
+}
+
 export function getEncumberedLevel(C, inventory) {
   if (!C) return 0;
   const strength = getFinal(C, 'str');

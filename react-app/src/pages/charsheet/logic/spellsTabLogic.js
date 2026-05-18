@@ -5,6 +5,8 @@ import { getFinal as getFinalScore, getMod as getAbilityMod } from './calculatio
 import { isRitualSpell } from '../../../shared/spellTags.js';
 import { warlockHasInvocation } from '../../../shared/character/warlockUtils.js';
 import { getClassSpellLimits } from '../../../shared/character/spellProgression.js';
+import { filterByRequiredChoice } from '../../../shared/character/lineageMatch.js';
+import { collectFreeCastsForGrant, mergeFreeCastsById, normalizeFreeCast, getFeatFreeCastTemplate, applyFreeCastRest } from '../../../shared/character/spellFreeCasts.js';
 
 const _GENERIC_LABELS = new Set([
   'class', 'subclass', 'species', 'feat', 'feature', 'granted', 'auto',
@@ -88,7 +90,8 @@ function _mergeRow(existing, incoming, incomingLocked) {
 export function buildSpellInfo(C, spellIndex) {
   const rows = new Map();
   const lockedNames = new Set();
-  const push = (name, source, locked = false, castLevel = null, fallbackLevel = 0, ownerClassName = null, spellcastingAbility = null) => {
+  const freeCastsByKey = new Map();
+  const push = (name, source, locked = false, castLevel = null, fallbackLevel = 0, ownerClassName = null, spellcastingAbility = null, freeCasts = null) => {
     const full = spellIndex.get(norm(name));
     const spell = { ...(full || {}), name, level: Number(full?.level ?? fallbackLevel ?? 0) };
     const key = `${norm(name)}|${castLevel || spell.level}`;
@@ -98,6 +101,9 @@ export function buildSpellInfo(C, spellIndex) {
     if (locked) {
       lockedNames.add(name);
       lockedNames.add(norm(name));
+    }
+    if (Array.isArray(freeCasts) && freeCasts.length) {
+      freeCastsByKey.set(key, mergeFreeCastsById(freeCastsByKey.get(key) || [], freeCasts));
     }
   };
 
@@ -118,12 +124,15 @@ export function buildSpellInfo(C, spellIndex) {
   });
 
   collectAtWillSpells(C).forEach(({ name, source }) => push(name, source, true));
-  collectAutoGrantedSpells(C).forEach(({ name, level, source, ownerClassName, spellcastingAbility }) => push(name, source, true, null, level, ownerClassName, spellcastingAbility));
-  collectChoiceSpells(C, spellIndex).forEach(({ name, source, ownerClassName, spellcastingAbility }) => push(name, source, true, null, 0, ownerClassName, spellcastingAbility));
+  collectAutoGrantedSpells(C).forEach(({ name, level, source, ownerClassName, spellcastingAbility, freeCasts }) => push(name, source, true, null, level, ownerClassName, spellcastingAbility, freeCasts));
+  collectChoiceSpells(C, spellIndex).forEach(({ name, source, ownerClassName, spellcastingAbility, freeCasts }) => push(name, source, true, null, 0, ownerClassName, spellcastingAbility, freeCasts));
 
   const all = [...rows.values()];
   all.forEach((entry) => {
     Object.assign(entry, resolveSpellMeta(entry, C));
+    const fcKey = `${norm(entry.name)}|${entry.castLevel || entry.level || 0}`;
+    const fc = freeCastsByKey.get(fcKey);
+    if (fc?.length) entry.freeCasts = fc;
   });
   const cantrips = all.filter((entry) => Number(entry.level || 0) === 0 && !entry.isAtWill).sort(sortByName);
   const atWill = all.filter((entry) => entry.isAtWill).sort(sortByName);
@@ -134,7 +143,8 @@ export function buildSpellInfo(C, spellIndex) {
     leveled[level].push(entry);
   });
   Object.values(leveled).forEach((entries) => entries.sort(sortByName));
-  return { cantrips, atWill, leveled, lockedNames, lockedEntries: all.filter((entry) => entry.locked || lockedNames.has(entry.name) || lockedNames.has(norm(entry.name))) };
+  const freeCastDefs = mergeFreeCastsById(all.flatMap((entry) => entry.freeCasts || []));
+  return { cantrips, atWill, leveled, lockedNames, freeCastDefs, lockedEntries: all.filter((entry) => entry.locked || lockedNames.has(entry.name) || lockedNames.has(norm(entry.name))) };
 
   function pushKnown(name, level, source, ownerClassName) {
     const full = spellIndex.get(norm(name));
@@ -161,6 +171,71 @@ export function buildSpellInfo(C, spellIndex) {
     });
   }
 }
+
+export function getFreeCastDefsForCharacter(C) {
+  const defs = [];
+  const speciesCfg = installedRegistry.getSpeciesRuntimeConfig(C?.speciesName, C?.speciesSource)?.spellcasting || {};
+  filterByRequiredChoice([
+    ...(speciesCfg.alwaysKnownSpells || []),
+    ...(speciesCfg.alwaysPreparedSpells || []),
+  ], C).forEach((entry) => {
+    if (Number(C?.level || 1) < Number(entry.minLevel || 1)) return;
+    defs.push(...collectFreeCastsForGrant(entry, {
+      character: C,
+      source: entry.source || C?.speciesName,
+      sourceType: entry.sourceType || 'species',
+      spellName: entry.name,
+    }));
+  });
+
+  spellModifierEntities(C).forEach(({ className, subclassShortName, level }) => {
+    const cfgs = [
+      { cfg: installedRegistry.getClassRuntimeConfig(className), type: 'class', label: className },
+      { cfg: installedRegistry.getSubclassRuntimeConfig(className, subclassShortName), type: 'subclass', label: subclassShortName || className },
+    ];
+    cfgs.forEach(({ cfg, type, label }) => {
+      const sp = cfg?.spellcasting;
+      if (!sp) return;
+      [...(sp.alwaysKnownSpells || []), ...(sp.alwaysPreparedSpells || [])].forEach((entry) => {
+        if (Number(level || 1) < Number(entry?.minLevel || 1)) return;
+        defs.push(...collectFreeCastsForGrant(entry, {
+          character: C,
+          source: entry.source || label,
+          sourceType: entry.sourceType || type,
+          spellName: entry.name,
+        }));
+      });
+    });
+  });
+
+  const featMeta = _buildFeatMetaMap(C);
+  Object.entries(C?.choices || {}).forEach(([key, value]) => {
+    const slotKey = _getSlotKey(C, key);
+    const meta = slotKey ? featMeta.get(slotKey) : null;
+    if (!meta) return;
+    const isCantrip = _choiceKeyIsCantripChoice(key);
+    const tpl = getFeatFreeCastTemplate(meta.name, { isCantrip });
+    if (!tpl) return;
+    const values = Array.isArray(value) ? value : [value];
+    values.forEach((entry) => {
+      if (typeof entry !== 'string') return;
+      const name = entry.split('|')[0].trim();
+      if (!name) return;
+      const fc = normalizeFreeCast(tpl, { character: C, sourceType: 'feat', source: meta.name, spellName: name });
+      if (fc) defs.push(fc);
+    });
+  });
+
+  return mergeFreeCastsById(defs);
+}
+
+function _choiceKeyIsCantripChoice(key) {
+  const m = String(key || '').match(/_spell_(?:known|innate|prepared|expanded)_\d+_(\d+)\|/);
+  if (m) return Number(m[1]) === 0;
+  return /(^|_)cantrip(s)?(_|$)/i.test(String(key || ''));
+}
+
+export { applyFreeCastRest };
 
 const _MODIFIER_ONLY_CHOICE_KEY = /^warlock_(agonizing_blast|repelling_blast|eldritch_spear)_cantrip/;
 
@@ -206,12 +281,19 @@ function _isFeatLikeSlotKey(C, slotKey) {
 
 function getChoiceSpellAbility(C, key) {
   const slotKey = _extractChoiceSpellSlotKey(key);
-  if (!slotKey) return null;
-  const abilityKey = `${slotKey}_spell_ability`;
-  const raw = C?.choices?.[abilityKey];
-  const val = _choiceValue(raw);
-  if (val) {
-    const normalized = _normalizeAbility(val);
+  if (slotKey) {
+    const abilityKey = `${slotKey}_spell_ability`;
+    const raw = C?.choices?.[abilityKey];
+    const val = _choiceValue(raw);
+    if (val) {
+      const normalized = _normalizeAbility(val);
+      if (normalized) return normalized;
+    }
+  }
+  if (String(key || '').startsWith('species_')) {
+    const speciesAbility = C?.normalizedChoices?.species?.spellAbility
+      || _choiceValue(C?.choices?.species_spell_ability);
+    const normalized = _normalizeAbility(speciesAbility);
     if (normalized) return normalized;
   }
   return null;
@@ -294,12 +376,27 @@ function _ownerClassFromChoiceKey(C, key) {
   return C?.className || null;
 }
 
+function _speciesChoiceKeyLineage(key) {
+  const m = String(key || '').match(/^species_(.+?)_(cantrip|spell)(?:_|$)/);
+  if (!m) return null;
+  return m[1].replace(/_/g, '').toLowerCase();
+}
+
+function _speciesChoiceKeyMatchesActiveLineage(C, key) {
+  const keyLineage = _speciesChoiceKeyLineage(key);
+  if (!keyLineage) return true;
+  const stored = String(C?.normalizedChoices?.species?.version || C?.choices?.species_version || '');
+  const storedNorm = stored.toLowerCase().replace(/[^a-z0-9]/g, '');
+  return !storedNorm || storedNorm === keyLineage;
+}
+
 function collectChoiceSpells(C, spellIndex) {
   const featMetaMap = _buildFeatMetaMap(C);
   const out = [];
   Object.entries(C?.choices || {}).forEach(([key, value]) => {
     const cleanKey = key.replace(/^mc\d+_/, '');
     if (_MODIFIER_ONLY_CHOICE_KEY.test(cleanKey)) return;
+    if (!_speciesChoiceKeyMatchesActiveLineage(C, cleanKey)) return;
     const values = Array.isArray(value) ? value : [value];
     values.forEach((entry) => {
       if (typeof entry !== 'string') return;
@@ -310,12 +407,19 @@ function collectChoiceSpells(C, spellIndex) {
       const slotKey = _getSlotKey(C, key);
       const meta = slotKey ? featMetaMap.get(slotKey) : null;
       const ownerClassName = _ownerClassFromChoiceKey(C, key);
+      const spellLevelInfo = spellIndex.get(norm(name));
+      const isCantrip = Number(spellLevelInfo?.level || 0) === 0 || _choiceKeyIsCantripChoice(key);
       if (meta) {
+        const featTpl = getFeatFreeCastTemplate(meta.name, { isCantrip });
+        const freeCasts = featTpl
+          ? [normalizeFreeCast(featTpl, { character: C, sourceType: 'feat', source: meta.name, spellName: name })].filter(Boolean)
+          : [];
         out.push({
           name,
           source: { label: meta.name, color: '#caa550', originType: 'feat', originLabel: meta.name },
           spellcastingAbility: meta.ability,
           ownerClassName,
+          freeCasts,
         });
       } else {
         out.push({
@@ -354,19 +458,26 @@ function collectAutoGrantedSpells(C) {
   });
 
   const speciesCfg = installedRegistry.getSpeciesRuntimeConfig(C?.speciesName, C?.speciesSource)?.spellcasting || {};
-  [
-    ...(speciesCfg.alwaysKnownSpells || []).map((spell) => ({ spell, mode: 'known' })),
-    ...(speciesCfg.alwaysPreparedSpells || []).map((spell) => ({ spell, mode: 'prepared' })),
-  ].forEach(({ spell, mode }) => {
-    const name = typeof spell === 'string' ? spell : spell?.name;
-    if (!name || Number(C?.level || 1) < Number(spell?.minLevel || 1)) return;
-    const srcLabel = spell?.source || C?.speciesName || 'Species';
+  const speciesChosenAbility = C?.normalizedChoices?.species?.spellAbility || null;
+  const toSpeciesEntry = (spell, mode) => ({
+    ...(typeof spell === 'object' ? spell : { name: spell }),
+    mode,
+  });
+  filterByRequiredChoice([
+    ...(speciesCfg.alwaysKnownSpells || []).map((spell) => toSpeciesEntry(spell, 'known')),
+    ...(speciesCfg.alwaysPreparedSpells || []).map((spell) => toSpeciesEntry(spell, 'prepared')),
+  ], C).forEach((entry) => {
+    if (!entry.name || Number(C?.level || 1) < Number(entry.minLevel || 1)) return;
+    const srcLabel = entry.source || C?.speciesName || 'Species';
+    const sourceType = entry.sourceType || 'species';
+    const freeCasts = collectFreeCastsForGrant(entry, { character: C, source: srcLabel, sourceType, spellName: entry.name });
     runtimeOut.push({
-      name,
-      level: Number(spell?.level ?? 0),
+      name: entry.name,
+      level: Number(entry.level ?? 0),
       source: { label: srcLabel, color: '#70b7a6', originType: 'species', originLabel: C?.speciesName || 'Species' },
       ownerClassName: null,
-      spellcastingAbility: spell?.ability || speciesCfg.ability || null,
+      spellcastingAbility: entry.ability || speciesCfg.ability || speciesChosenAbility || null,
+      freeCasts,
     });
   });
 
@@ -462,7 +573,14 @@ function sourceFromChoiceKey(C, key) {
   if (featName) return { label: String(featName), color: '#caa550', originType: 'feat', originLabel: String(featName) };
   if (key.startsWith('feat_')) return { label: 'Feat', color: '#caa550', originType: 'feat', originLabel: 'Feat' };
   if (key.startsWith('subclass_')) return { label: C?.subclassShortName || 'Subclass', color: '#9d7fb8', originType: 'subclass', originLabel: C?.subclassShortName || 'Subclass' };
-  if (key.startsWith('species_')) return { label: C?.speciesName || 'Species', color: '#70b7a6', originType: 'species', originLabel: C?.speciesName || 'Species' };
+  if (key.startsWith('species_')) {
+    const lineage = C?.normalizedChoices?.species?.version
+      || (Array.isArray(C?.choices?.species_version) ? C.choices.species_version[0] : C?.choices?.species_version);
+    if (_speciesChoiceKeyLineage(key) && lineage) {
+      return { label: `${lineage} Lineage`, color: '#70b7a6', originType: 'species', originLabel: String(lineage) };
+    }
+    return { label: C?.speciesName || 'Species', color: '#70b7a6', originType: 'species', originLabel: C?.speciesName || 'Species' };
+  }
   if (key.includes('tome')) return { label: 'Pact of the Tome', color: '#9d7fb8', originType: 'invocation', originLabel: 'Pact of the Tome' };
   if (key.includes('mystic_arcanum')) return { label: 'M. Arcanum', color: '#d69245', originType: 'mystic_arcanum', originLabel: 'Mystic Arcanum' };
   if (key.startsWith('warlock_')) {

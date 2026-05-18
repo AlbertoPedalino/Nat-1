@@ -1,4 +1,5 @@
 import { createAdapterBindings } from '../adapterBindings.js';
+import { buildLineageOptions } from './lineageOptions.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -121,25 +122,11 @@ export default function install(registry, context = {}) {
   } = createAdapterBindings(registry, context);
 registerSpeciesAdapter("Tiefling_XPHB", function (s) {
   let specs = getGenericSpeciesChoiceSpecs(s);
-  // Fiendish resistance is derived from the chosen legacy; do not render a separate resistance choice.
   specs = specs.filter(function (x) { return !String(x.key || '').startsWith('species_resist'); });
 
-  const fallbackLegacies = ['Abyssal', 'Chthonic', 'Infernal'];
-  let opts = [];
-  if (Array.isArray(s._versions)) {
-    opts = s._versions.map(function (v) {
-      const label = String(v.name || '').includes(';') ? String(v.name).split(';')[1].trim() : v.name;
-      return { key: v.name, label };
-    }).filter(function (opt) { return opt.key && opt.label; });
-  }
+  const legacyOptions = buildLineageOptions(s._versions, { parentName: 'Tiefling', suffixes: ['Legacy'] });
 
-  fallbackLegacies.forEach(function (name) {
-    if (!opts.some(function (opt) { return String(opt.label || opt.key).toLowerCase() === name.toLowerCase(); })) {
-      opts.push({ key: name, label: name });
-    }
-  });
-
-  specs.push({ key: 'species_version', label: 'Fiendish Legacy', type: 'option', options: opts, count: 1, level: 1 });
+  specs.push({ key: 'species_version', label: 'Fiendish Legacy', type: 'option', options: legacyOptions, count: 1, level: 1 });
   specs.push({ key: 'species_spell_ability', label: 'Spellcasting Ability (Tiefling)', type: 'ability_choice', from: ['int', 'wis', 'cha'], count: 1, level: 1 });
   return specs;
 });
@@ -162,6 +149,36 @@ registerSpeciesSheetEffects("Tiefling_XPHB", [
     minLevel: 1,
     note: 'Fiendish Legacy',
   },
+  {
+    type: 'sense',
+    senseType: 'darkvision',
+    value: 120,
+    minLevel: 1,
+    note: 'Abyssal Legacy',
+    requiredChoice: { key: 'species_version', value: 'Abyssal' },
+  },
 ]);
+
+registerSpeciesRuntimeConfig("Tiefling_XPHB", {
+  spellcasting: {
+    alwaysKnownSpells: [
+      // Abyssal Legacy
+      { name: 'Thaumaturgy',       level: 0, minLevel: 1, source: 'Abyssal Legacy',  sourceType: 'species', requiredChoice: { key: 'species_version', value: 'Abyssal' } },
+      { name: 'Poison Spray',      level: 0, minLevel: 1, source: 'Abyssal Legacy',  sourceType: 'species', requiredChoice: { key: 'species_version', value: 'Abyssal' } },
+      { name: 'Ray of Sickness',   level: 1, minLevel: 3, source: 'Abyssal Legacy',  sourceType: 'species', requiredChoice: { key: 'species_version', value: 'Abyssal' }, freeCast: { maxUses: 1, recharge: 'longRest', canAlsoUseSlots: true } },
+      { name: 'Hold Person',       level: 2, minLevel: 5, source: 'Abyssal Legacy',  sourceType: 'species', requiredChoice: { key: 'species_version', value: 'Abyssal' }, freeCast: { maxUses: 1, recharge: 'longRest', canAlsoUseSlots: true } },
+      // Chthonic Legacy
+      { name: 'Thaumaturgy',       level: 0, minLevel: 1, source: 'Chthonic Legacy', sourceType: 'species', requiredChoice: { key: 'species_version', value: 'Chthonic' } },
+      { name: 'Chill Touch',       level: 0, minLevel: 1, source: 'Chthonic Legacy', sourceType: 'species', requiredChoice: { key: 'species_version', value: 'Chthonic' } },
+      { name: 'False Life',        level: 1, minLevel: 3, source: 'Chthonic Legacy', sourceType: 'species', requiredChoice: { key: 'species_version', value: 'Chthonic' }, freeCast: { maxUses: 1, recharge: 'longRest', canAlsoUseSlots: true } },
+      { name: 'Ray of Enfeeblement', level: 2, minLevel: 5, source: 'Chthonic Legacy', sourceType: 'species', requiredChoice: { key: 'species_version', value: 'Chthonic' }, freeCast: { maxUses: 1, recharge: 'longRest', canAlsoUseSlots: true } },
+      // Infernal Legacy
+      { name: 'Thaumaturgy',       level: 0, minLevel: 1, source: 'Infernal Legacy', sourceType: 'species', requiredChoice: { key: 'species_version', value: 'Infernal' } },
+      { name: 'Fire Bolt',         level: 0, minLevel: 1, source: 'Infernal Legacy', sourceType: 'species', requiredChoice: { key: 'species_version', value: 'Infernal' } },
+      { name: 'Hellish Rebuke',    level: 1, minLevel: 3, source: 'Infernal Legacy', sourceType: 'species', requiredChoice: { key: 'species_version', value: 'Infernal' }, freeCast: { maxUses: 1, recharge: 'longRest', canAlsoUseSlots: true } },
+      { name: 'Darkness',          level: 2, minLevel: 5, source: 'Infernal Legacy', sourceType: 'species', requiredChoice: { key: 'species_version', value: 'Infernal' }, freeCast: { maxUses: 1, recharge: 'longRest', canAlsoUseSlots: true } },
+    ],
+  },
+});
 
 }

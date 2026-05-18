@@ -1,4 +1,5 @@
 import { createAdapterBindings } from '../adapterBindings.js';
+import { buildLineageOptions } from './lineageOptions.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -120,28 +121,21 @@ export default function install(registry, context = {}) {
     getGenericBackgroundOriginFeat,
   } = createAdapterBindings(registry, context);
 registerSpeciesAdapter("Elf_XPHB", function (s) {
-  let specs = getGenericSpeciesChoiceSpecs(s);
-  const fallbackLineages = ['Drow', 'High Elf', 'Wood Elf'];
-  let opts = [];
+  const specs = getGenericSpeciesChoiceSpecs(s);
+  const lineageOptions = buildLineageOptions(s._versions, { parentName: 'Elf', suffixes: ['Lineage'] });
 
-  if (Array.isArray(s._versions)) {
-    opts = s._versions
-      .filter(function (v) { return v.name !== 'Elf' && !String(v.name || '').endsWith('; Elf'); })
-      .map(function (v) {
-        const label = String(v.name || '').includes(';') ? String(v.name).split(';')[1].trim() : v.name;
-        return { key: v.name, label };
-      })
-      .filter(function (opt) { return opt.key && opt.label; });
-  }
-
-  fallbackLineages.forEach(function (name) {
-    if (!opts.some(function (opt) { return String(opt.label || opt.key).toLowerCase() === name.toLowerCase(); })) {
-      opts.push({ key: name, label: name });
-    }
-  });
-
-  specs.push({ key: 'species_version', label: 'Elven Lineage', type: 'option', options: opts, count: 1, level: 1 });
+  specs.push({ key: 'species_version', label: 'Elven Lineage', type: 'option', options: lineageOptions, count: 1, level: 1 });
   specs.push({ key: 'species_spell_ability', label: 'Spellcasting Ability (Elf)', type: 'ability_choice', from: ['int', 'wis', 'cha'], count: 1, level: 1 });
+  specs.push({
+    key: 'species_high_elf_cantrip',
+    label: 'Wizard Cantrip (High Elf)',
+    type: 'spell_choice',
+    count: 1,
+    level: 1,
+    spellFilter: { spellLevels: [0], classes: ['Wizard'] },
+    classes: ['Wizard'],
+    requiredChoice: { key: 'species_version', value: 'High Elf' },
+  });
   return specs;
 });
 
@@ -149,6 +143,42 @@ registerSpeciesSheetCommonChoiceMeta("Elf_XPHB", {
   labels: {
     species_version: 'Elven Lineage',
     species_spell_ability: 'Spellcasting Ability (Elf)',
+  },
+});
+
+registerSpeciesSheetEffects("Elf_XPHB", [
+  {
+    type: 'sense',
+    senseType: 'darkvision',
+    value: 120,
+    minLevel: 1,
+    note: 'Drow lineage',
+    requiredChoice: { key: 'species_version', value: 'Drow' },
+  },
+  {
+    type: 'speed',
+    value: 5,
+    minLevel: 1,
+    note: 'Wood Elf lineage (Speed 35)',
+    requiredChoice: { key: 'species_version', value: 'Wood Elf' },
+  },
+]);
+
+registerSpeciesRuntimeConfig("Elf_XPHB", {
+  spellcasting: {
+    alwaysKnownSpells: [
+      // Drow Lineage
+      { name: 'Dancing Lights', level: 0, minLevel: 1, source: 'Drow Lineage', sourceType: 'species', requiredChoice: { key: 'species_version', value: 'Drow' } },
+      { name: 'Faerie Fire',    level: 1, minLevel: 3, source: 'Drow Lineage', sourceType: 'species', requiredChoice: { key: 'species_version', value: 'Drow' } },
+      { name: 'Darkness',       level: 2, minLevel: 5, source: 'Drow Lineage', sourceType: 'species', requiredChoice: { key: 'species_version', value: 'Drow' } },
+      // High Elf Lineage
+      { name: 'Detect Magic',   level: 1, minLevel: 3, source: 'High Elf Lineage', sourceType: 'species', requiredChoice: { key: 'species_version', value: 'High Elf' } },
+      { name: 'Misty Step',     level: 2, minLevel: 5, source: 'High Elf Lineage', sourceType: 'species', requiredChoice: { key: 'species_version', value: 'High Elf' } },
+      // Wood Elf Lineage
+      { name: 'Druidcraft',     level: 0, minLevel: 1, source: 'Wood Elf Lineage', sourceType: 'species', requiredChoice: { key: 'species_version', value: 'Wood Elf' } },
+      { name: 'Longstrider',    level: 1, minLevel: 3, source: 'Wood Elf Lineage', sourceType: 'species', requiredChoice: { key: 'species_version', value: 'Wood Elf' } },
+      { name: 'Pass Without Trace', level: 2, minLevel: 5, source: 'Wood Elf Lineage', sourceType: 'species', requiredChoice: { key: 'species_version', value: 'Wood Elf' } },
+    ],
   },
 });
 

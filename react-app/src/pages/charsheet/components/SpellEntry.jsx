@@ -40,6 +40,58 @@ function Badge({ label, color, bg = 'transparent' }) {
   );
 }
 
+function FreeCastsBlock({ freeCasts, freeCastUses, onToggleFreeCast }) {
+  if (!Array.isArray(freeCasts) || !freeCasts.length) return null;
+  const interactive = typeof onToggleFreeCast === 'function';
+  return (
+    <Box sx={{ mt: 1, pt: 0.8, borderTop: '1px dashed', borderColor: 'divider' }}>
+      <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.08em', color: '#caa550', mb: 0.4 }}>
+        Free Cast
+      </Typography>
+      <Stack spacing={0.45}>
+        {freeCasts.map((fc) => {
+          const used = Math.max(0, Number(freeCastUses?.[fc.id] || 0));
+          const max = Math.max(1, Number(fc.max) || 1);
+          return (
+            <Box key={fc.id} sx={{ display: 'flex', alignItems: 'center', gap: 0.6, flexWrap: 'wrap' }}>
+              <Box sx={{ display: 'inline-flex', gap: '3px', alignItems: 'center' }}>
+                {Array.from({ length: max }).map((_, i) => {
+                  const isUsed = i < used;
+                  return (
+                    <Box
+                      key={`${fc.id}-dot-${i}`}
+                      onClick={interactive ? (e) => { e.stopPropagation(); onToggleFreeCast(fc); } : undefined}
+                      sx={{
+                        width: 12,
+                        height: 12,
+                        borderRadius: '50%',
+                        border: 1,
+                        borderColor: '#caa550',
+                        bgcolor: isUsed ? '#caa550' : 'transparent',
+                        cursor: interactive ? 'pointer' : 'default',
+                        transition: 'background-color 0.15s',
+                        '&:hover': interactive ? { boxShadow: '0 0 0 2px rgba(202,165,80,0.35)' } : undefined,
+                      }}
+                    />
+                  );
+                })}
+              </Box>
+              <Typography variant="caption" sx={{ color: 'text.primary', fontWeight: 700 }}>
+                {fc.label}
+              </Typography>
+              <Typography variant="caption" color={used >= max ? '#a04848' : 'text.secondary'}>
+                · {fc.rechargeLabel}
+                {fc.canAlsoUseSlots === false ? ' · free only' : ' · also slots'}
+                {used >= max ? ' · spent' : ''}
+              </Typography>
+            </Box>
+          );
+        })}
+      </Stack>
+    </Box>
+  );
+}
+
 function EntryBlocks({ blocks }) {
   if (!blocks?.length) {
     return <Typography variant="body2" color="text.secondary">No description.</Typography>;
@@ -146,7 +198,7 @@ function groupModifierDetails(details) {
   return Array.from(groups.entries()).map(([label, items]) => ({ label, items }));
 }
 
-export default function SpellEntry({ entry, onShowToast, atk: fallbackAtk, spellMod: fallbackSpellMod, C, installedRegistry }) {
+export default function SpellEntry({ entry, onShowToast, atk: fallbackAtk, spellMod: fallbackSpellMod, C, installedRegistry, freeCastUses, onToggleFreeCast }) {
   const [open, setOpen] = useState(false);
   const castLevel = entry.castLevel || entry.level || 0;
   const baseLevel = entry.level || 0;
@@ -375,6 +427,7 @@ export default function SpellEntry({ entry, onShowToast, atk: fallbackAtk, spell
               <EntryBlocks blocks={higherBlocks} />
             </Box>
           ) : null}
+          <FreeCastsBlock freeCasts={entry.freeCasts} freeCastUses={freeCastUses} onToggleFreeCast={onToggleFreeCast} />
         </Box>
       ) : null}
     </Box>

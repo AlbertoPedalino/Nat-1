@@ -12,9 +12,10 @@ import Movement from './components/Movement.jsx';
 import RightTop from './components/RightTop.jsx';
 import TabsPanel from './components/TabsPanel.jsx';
 import DiceToast from './components/DiceToast.jsx';
-import { loadCharacter, loadSheetState, saveHPState, saveDeathSaves, saveInspiration, saveConditions, saveInventory, saveCurrency, saveCurrentCharacter, loadResources, saveResources } from './state.js';
+import { loadCharacter, loadSheetState, saveHPState, saveDeathSaves, saveInspiration, saveConditions, saveInventory, saveCurrency, saveCurrentCharacter, loadResources, saveResources, loadFreeCastUses, saveFreeCastUses } from './state.js';
 import { calcMaxHP, getMod, getFinal, getPB, getSaveBonus } from './logic/calculations.js';
 import { applyResourceRest, getAllResourceDefs, getHitDicePools, getUsedHitDiceTotal, normalizeResourceMax } from './logic/restResources.js';
+import { applyFreeCastRest, getFreeCastDefsForCharacter } from './logic/spellsTabLogic.js';
 import { setStorageItem, setStorageJson, getStorageItem as getRaw, getStorageJson as getJson } from '../../shared/storage.js';
 import { loadCoreAdapters, loadClassAdapters, installedRegistry } from '../../adapters/index.js';
 
@@ -37,6 +38,7 @@ export default function CharacterSheet() {
   const [diceToast, setDiceToast] = useState(null);
   const [rollLog, setRollLog] = useState([]);
   const [resources, setResources] = useState({});
+  const [freeCastUses, setFreeCastUses] = useState({});
   const [shortRestOpen, setShortRestOpen] = useState(false);
   const [longRestOpen, setLongRestOpen] = useState(false);
   const [hdToSpend, setHdToSpend] = useState({});
@@ -70,6 +72,7 @@ export default function CharacterSheet() {
         });
         setResources(merged);
         saveResources(merged);
+        setFreeCastUses(loadFreeCastUses());
       }
     });
 
@@ -162,6 +165,9 @@ export default function CharacterSheet() {
       res = applyResourceRest(res, getAllResourceDefs(C), C, 'short');
       setResources(res);
       saveResources(res);
+      const nextFC = applyFreeCastRest(freeCastUses, getFreeCastDefsForCharacter(C), 'short');
+      setFreeCastUses(nextFC);
+      saveFreeCastUses(nextFC);
     }
 
     setSheet(s);
@@ -170,7 +176,7 @@ export default function CharacterSheet() {
       ? `Healed ${totalHeal} HP (${totalSpent} HD spent)`
       : 'Short Rest complete (no Hit Dice spent).';
     showDiceToast('Short Rest', msg, totalHeal, rolls);
-  }, [sheet, resources, C, hdToSpend]);
+  }, [sheet, resources, freeCastUses, C, hdToSpend]);
 
   const openLongRest = useCallback(() => {
     setLongRestOpen(true);
@@ -197,6 +203,9 @@ export default function CharacterSheet() {
       res = applyResourceRest(res, getAllResourceDefs(C), C, 'long');
       setResources(res);
       saveResources(res);
+      const nextFC = applyFreeCastRest(freeCastUses, getFreeCastDefsForCharacter(C), 'long');
+      setFreeCastUses(nextFC);
+      saveFreeCastUses(nextFC);
       if (C.bladesongActive) {
         updateCurrentCharacter(prev => ({ ...prev, bladesongActive: false }));
       }
@@ -213,7 +222,7 @@ export default function CharacterSheet() {
     setSheet(s);
     setLongRestOpen(false);
     showDiceToast('Long Rest', 'Fully restored!', 0, []);
-  }, [sheet, resources, C]);
+  }, [sheet, resources, freeCastUses, C]);
 
   const doRest = useCallback((type) => {
     const s = { ...sheet };
@@ -245,9 +254,12 @@ export default function CharacterSheet() {
       res = applyResourceRest(res, getAllResourceDefs(C), C, type);
       setResources(res);
       saveResources(res);
+      const nextFC = applyFreeCastRest(freeCastUses, getFreeCastDefsForCharacter(C), type);
+      setFreeCastUses(nextFC);
+      saveFreeCastUses(nextFC);
     }
     setSheet(s);
-  }, [sheet, resources, C]);
+  }, [sheet, resources, freeCastUses, C]);
 
   const adjustHP = useCallback((dir, amount = 1) => {
     if (!sheet) return;
@@ -469,7 +481,20 @@ export default function CharacterSheet() {
               onToggleInspiration={toggleInspiration}
               resources={resources} setResources={setResources} onShowToast={showDiceToast} />
             <TabsPanel C={C} sheet={sheet} tab={tab} setTab={setTab} onRoll={rollD20}
-              resources={resources} setResources={setResources} onRest={doRest} onShowToast={showDiceToast}
+              resources={resources} setResources={setResources}
+              freeCastUses={freeCastUses}
+              onToggleFreeCast={(freeCast) => {
+                setFreeCastUses((prev) => {
+                  const used = Math.max(0, Number(prev?.[freeCast.id] || 0));
+                  const max = Math.max(1, Number(freeCast.max || 1));
+                  const next = { ...(prev || {}) };
+                  if (used >= max) delete next[freeCast.id];
+                  else next[freeCast.id] = used + 1;
+                  saveFreeCastUses(next);
+                  return next;
+                });
+              }}
+              onRest={doRest} onShowToast={showDiceToast}
               onUpdateInventory={updateInventory} onUpdateCurrency={updateCurrency} onUpdateSpells={updateSpells} onUpdateSheet={syncSheet}
               onUpdateCharacter={updateCurrentCharacter} />
           </Box>

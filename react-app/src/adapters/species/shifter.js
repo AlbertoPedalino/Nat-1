@@ -1,4 +1,5 @@
 import { createAdapterBindings } from '../adapterBindings.js';
+import { buildLineageOptions } from './lineageOptions.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -121,29 +122,13 @@ export default function install(registry, context = {}) {
   } = createAdapterBindings(registry, context);
 registerSpeciesAdapter("Shifter_EFA", function (s) {
   const specs = getGenericSpeciesChoiceSpecs(s);
-  const fallbackLineages = ['Beasthide', 'Longtooth', 'Swiftstride', 'Wildhunt'];
-  let opts = [];
-
-  if (Array.isArray(s._versions) && s._versions.length) {
-    opts = s._versions.map(v => ({
-      key: v.name,
-      label: String(v.name || '').includes(';')
-        ? String(v.name).split(';')[1].trim()
-        : v.name,
-    })).filter(function (opt) { return opt.key && opt.label; });
-  }
-
-  fallbackLineages.forEach(function (name) {
-    if (!opts.some(function (opt) { return String(opt.label || opt.key).toLowerCase() === name.toLowerCase(); })) {
-      opts.push({ key: name, label: name });
-    }
-  });
+  const lineageOptions = buildLineageOptions(s._versions, { parentName: 'Shifter' });
 
   specs.push({
     key: 'species_version',
     label: 'Shifter Lineage',
     type: 'option',
-    options: opts,
+    options: lineageOptions,
     count: 1,
     level: 1,
   });
@@ -179,6 +164,33 @@ registerSpeciesSheetResources("Shifter_EFA", [
     icon: 'moon',
     recharge: 'LR',
     max: (lv) => Math.floor((Number(lv) - 1) / 4) + 2,
+  },
+]);
+
+registerSpeciesSheetEffects("Shifter_EFA", [
+  {
+    type: 'reminder',
+    minLevel: 1,
+    note: 'Beasthide (while shifted): +1d6 extra Temporary Hit Points on Shift, +1 AC.',
+    requiredChoice: { key: 'species_version', value: 'Beasthide' },
+  },
+  {
+    type: 'reminder',
+    minLevel: 1,
+    note: 'Longtooth (while shifted): on Shift and as a Bonus Action on other turns, make an Unarmed Strike with elongated fangs; on hit, deal 1d6 + STR Piercing damage.',
+    requiredChoice: { key: 'species_version', value: 'Longtooth' },
+  },
+  {
+    type: 'reminder',
+    minLevel: 1,
+    note: 'Swiftstride (while shifted): Speed +10 ft; once per round move up to 10 ft as a Reaction when a creature ends its turn within 5 ft (no Opportunity Attacks provoked).',
+    requiredChoice: { key: 'species_version', value: 'Swiftstride' },
+  },
+  {
+    type: 'reminder',
+    minLevel: 1,
+    note: 'Wildhunt (while shifted): Advantage on Wisdom checks; no creature within 30 ft can have Advantage on attack rolls against you unless you are Incapacitated.',
+    requiredChoice: { key: 'species_version', value: 'Wildhunt' },
   },
 ]);
 

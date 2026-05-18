@@ -4,6 +4,7 @@ import BuilderPanel from '../components/BuilderPanel.jsx';
 import ChoiceBlock from '../components/ChoiceBlock.jsx';
 import { FeatCategorySlot, ExpandableDescription } from '../components/FeatSlots.jsx';
 import SearchList from '../components/SearchList.jsx';
+import SpellChoiceList from '../components/SpellChoiceList.jsx';
 import { speciesChoiceSpecs } from '../logic/choiceSpecs.js';
 
 export default function SpeciesStep({ state, dispatch }) {
@@ -40,11 +41,15 @@ export default function SpeciesStep({ state, dispatch }) {
           Active species: {character.speciesName}
         </Typography>
         <Stack spacing={1.5}>
-          {speciesChoiceSpecs(character).map((spec) =>
-            spec.type === 'feat_cat'
-              ? <FeatCategorySlot key={spec.key} spec={spec} feats={state.data.feats} character={character} state={state} dispatch={dispatch} />
-              : <ChoiceBlock key={spec.key} spec={spec} choices={character.choices} dispatch={dispatch} character={character} />
-          )}
+          {speciesChoiceSpecs(character).map((spec) => {
+            if (spec.type === 'feat_cat') {
+              return <FeatCategorySlot key={spec.key} spec={spec} feats={state.data.feats} character={character} state={state} dispatch={dispatch} />;
+            }
+            if (spec.type === 'spell_choice' || spec.type === 'spell_grant') {
+              return <SpellChoiceList key={spec.key} spec={spec} state={state} dispatch={dispatch} />;
+            }
+            return <ChoiceBlock key={spec.key} spec={spec} choices={character.choices} dispatch={dispatch} character={character} />;
+          })}
         </Stack>
       </BuilderPanel>
     </Stack>

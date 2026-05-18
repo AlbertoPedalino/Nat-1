@@ -1,5 +1,6 @@
 import { installedRegistry } from '../../../adapters/index.js';
 import { canonicalDisplayLabel, cleanProficiencyText } from '../../../shared/character/proficiencyDisplay.js';
+import { matchesRequiredChoice } from '../../../shared/character/lineageMatch.js';
 
 function asArray(value) {
   if (value == null) return [];
@@ -80,14 +81,7 @@ function conditionPasses(effect, context) {
 function requiredChoicePasses(effect, character) {
   const rc = effect?.requiredChoice;
   if (!rc?.key) return true;
-
-  const stored = choiceValue(character, rc.key);
-  const expected = norm(cleanText(rc.value).split('|')[0]);
-
-  if (!expected) return true;
-
-  const values = asArray(stored).map((v) => norm(cleanText(v).split('|')[0]));
-  return values.includes(expected);
+  return matchesRequiredChoice(character, rc);
 }
 
 function requiredItemFlagPasses(effect, character) {

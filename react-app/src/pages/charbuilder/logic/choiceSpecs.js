@@ -15,6 +15,7 @@ import {
   SPECIAL_LANGUAGES,
   getLanguageOptions,
 } from '../../../shared/character/languages.js';
+import { filterByRequiredChoice } from '../../../shared/character/lineageMatch.js';
 
 const ALL_SKILLS = ['Acrobatics', 'Animal Handling', 'Arcana', 'Athletics', 'Deception', 'History', 'Insight', 'Intimidation', 'Investigation', 'Medicine', 'Nature', 'Perception', 'Performance', 'Persuasion', 'Religion', 'Sleight of Hand', 'Stealth', 'Survival'];
 const STD_LANGS = STANDARD_LANGUAGES;
@@ -377,7 +378,7 @@ export function classChoiceSpecs(character, context = {}) {
     }
   }
 
-  return dedupSpecs(all);
+  return dedupSpecs(filterByRequiredChoice(all, character));
 }
 
 export function speciesChoiceSpecs(character) {
@@ -396,7 +397,9 @@ export function speciesChoiceSpecs(character) {
   const adapter = installedRegistry.getSpeciesAdapter(character.speciesName, character.speciesSource);
   if (adapter) {
     const adapterSpecs = adapter(species);
-    if (Array.isArray(adapterSpecs)) return dedupSpecs([...specs, ...adapterSpecs]);
+    if (Array.isArray(adapterSpecs)) {
+      return dedupSpecs(filterByRequiredChoice([...specs, ...adapterSpecs], character));
+    }
   }
   (species.skillProficiencies || []).forEach((block, index) => {
     const spec = choiceFromBlock(`species_skill_${index}`, 'Species Skill', block, ALL_SKILLS);
@@ -452,7 +455,7 @@ export function backgroundChoiceSpecs(character) {
     if (spec) specs.push({ ...spec, type: 'language_choice' });
     else if (block.anyStandard) specs.push({ key: `bg_language_${index}`, label: 'Background Language', type: 'language_choice', from: STD_LANGS, count: block.anyStandard });
   });
-  return specs;
+  return filterByRequiredChoice(specs, character);
 }
 
 function parseChooseString(value) {

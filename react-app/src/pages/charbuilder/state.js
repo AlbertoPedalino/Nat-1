@@ -162,6 +162,21 @@ function clearSpeciesChoices(choices = {}) {
   return next;
 }
 
+function pruneStaleSpeciesLineageChoices(choices = {}, versionValue) {
+  const stored = String(Array.isArray(versionValue) ? versionValue[0] : versionValue || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '');
+  const next = { ...choices };
+  Object.keys(next).forEach((key) => {
+    const m = key.match(/^species_(.+?)_(cantrip|spell)(?:_|$)/);
+    if (!m) return;
+    if (key === 'species_spell_ability') return;
+    const keyLineage = m[1].replace(/_/g, '').toLowerCase();
+    if (!stored || keyLineage !== stored) delete next[key];
+  });
+  return next;
+}
+
 function clearChoicePrefix(choices = {}, prefix) {
   const target = String(prefix || '');
   if (!target) return { ...choices };
@@ -501,8 +516,13 @@ export function builderReducer(state, action) {
     case 'wizard/spellbook-toggle': {
       return handleWizardSpellbookToggle(state, action, { updateCharacter });
     }
-    case 'choice/set':
-      return updateNestedCharacter(state, 'choices', { [action.key]: action.value });
+    case 'choice/set': {
+      const merged = { ...(state.character.choices || {}), [action.key]: action.value };
+      const next = action.key === 'species_version'
+        ? pruneStaleSpeciesLineageChoices(merged, action.value)
+        : merged;
+      return updateCharacter(state, { choices: next });
+    }
     case 'choice/set-entry': {
       const base = clearChoicePrefix(state.character.choices || {}, action.clearPrefix);
       base[action.key] = action.value;
@@ -516,7 +536,11 @@ export function builderReducer(state, action) {
       const next = exists
         ? current.filter((item) => item !== action.value)
         : [...(current.length >= max ? current.slice(1) : current), action.value];
-      return updateNestedCharacter(state, 'choices', { [action.key]: next });
+      const mergedChoices = { ...(state.character.choices || {}), [action.key]: next };
+      const finalChoices = action.key === 'species_version'
+        ? pruneStaleSpeciesLineageChoices(mergedChoices, next)
+        : mergedChoices;
+      return updateCharacter(state, { choices: finalChoices });
     }
     case 'character/restore':
       return { ...state, character: { ...initialCharacter, ...action.character } };

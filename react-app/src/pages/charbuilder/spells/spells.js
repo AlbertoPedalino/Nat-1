@@ -2,6 +2,7 @@ import { installedRegistry } from '../../../adapters/index.js';
 import { FULL_SLOTS, HALF_SLOTS, PACT_SLOTS, THIRD_SLOTS } from '../constants.js';
 import { getPrimaryClassLevel } from '../logic/calculations.js';
 import { getClassSpellLimits } from '../../../shared/character/spellProgression.js';
+import { filterByRequiredChoice } from '../../../shared/character/lineageMatch.js';
 
 export function normClassKey(value) {
   return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -174,21 +175,26 @@ export function collectAutoGrantedSpells(character, profile = getSpellcastingPro
     character?.speciesName,
     character?.speciesSource,
   )?.spellcasting || {};
-  [
-    ...(speciesSpellcasting.alwaysKnownSpells || []).map((spell) => ({ spell, mode: 'known' })),
-    ...(speciesSpellcasting.alwaysPreparedSpells || []).map((spell) => ({ spell, mode: 'prepared' })),
-  ]
-    .map(({ spell, mode }) => ({
-      name: typeof spell === 'string' ? spell : spell?.name,
-      minLevel: Number(spell?.minLevel || 1),
-      level: spell?.level ?? null,
-      mode,
-      source: spell?.source || character?.speciesName || 'Species',
-      sourceType: spell?.sourceType || 'species',
-      spellcastingAbility: spell?.ability || speciesSpellcasting.ability || null,
+  const speciesChosenAbility = character?.normalizedChoices?.species?.spellAbility || null;
+  const toEntry = (spell, mode) => ({
+    ...(typeof spell === 'object' ? spell : { name: spell }),
+    mode,
+  });
+  filterByRequiredChoice([
+    ...(speciesSpellcasting.alwaysKnownSpells || []).map((spell) => toEntry(spell, 'known')),
+    ...(speciesSpellcasting.alwaysPreparedSpells || []).map((spell) => toEntry(spell, 'prepared')),
+  ], character)
+    .map((entry) => ({
+      name: entry.name,
+      minLevel: Number(entry.minLevel || 1),
+      level: entry.level ?? null,
+      mode: entry.mode,
+      source: entry.source || character?.speciesName || 'Species',
+      sourceType: entry.sourceType || 'species',
+      spellcastingAbility: entry.ability || speciesSpellcasting.ability || speciesChosenAbility || null,
     }))
-    .filter((spell) => spell.name && Number(character?.level || 1) >= spell.minLevel)
-    .forEach((spell) => out.push(spell));
+    .filter((entry) => entry.name && Number(character?.level || 1) >= entry.minLevel)
+    .forEach((entry) => out.push(entry));
 
   collectSubclassFeatureSpells(character).forEach((spell) => out.push(spell));
 
