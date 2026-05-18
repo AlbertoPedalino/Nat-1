@@ -6,6 +6,7 @@ import { SPELL_LEVEL_LABELS } from '../constants.js';
 import { SpellNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 import { collectAutoGrantedSpells, getSpellCounts, maxSpellLevel, spellMatchesAnyClass } from '../spells/spells.js';
 import { isConcentrationSpell, isRitualSpell } from '../../../shared/spellTags.js';
+import { entriesToPlainText } from '../../../shared/character/spellEntries.js';
 
 export default function SpellSelectionPanel({ state, dispatch }) {
   const [wizardMode, setWizardMode] = useState('prepare');
@@ -144,6 +145,13 @@ export default function SpellSelectionPanel({ state, dispatch }) {
                     && (level === 0 ? selectedCantrips.length >= cantrips : selectedSpellsCount >= spells);
                   const requiresWizardBook = activeIsWizard && !wizardBookMode && !autoSelected && !inWizardBook;
                   const disabled = wizardBookMode ? false : (autoSelected || atLimit || requiresWizardBook);
+                  const meta = [
+                    spell.schoolFull || spell.school,
+                    spell.castingTimeLabel || spell.castingTime,
+                    spell.rangeLabel || spell.rangeText,
+                    spell.componentsLabel,
+                  ].filter(Boolean).join(' - ');
+                  const description = entriesToPlainText(spell.descriptionEntries || spell.entries, { maxLength: 220 });
                   const onClick = () => {
                     if (disabled) return;
                     if (wizardBookMode) {
@@ -169,7 +177,21 @@ export default function SpellSelectionPanel({ state, dispatch }) {
                             <SpellMiniTags spell={spell} />
                           </Stack>
                         )}
-                        secondary={[spell.schoolFull || spell.school, spell.castingTime, spell.rangeText].filter(Boolean).join(' - ')}
+                        secondary={(
+                          <Stack spacing={0.25} sx={{ minWidth: 0 }}>
+                            <Typography variant="caption" color="text.secondary" noWrap>{meta}</Typography>
+                            {description ? (
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                sx={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.25 }}
+                              >
+                                {description}
+                              </Typography>
+                            ) : null}
+                          </Stack>
+                        )}
+                        secondaryTypographyProps={{ component: 'div' }}
                       />
                       <Chip
                         size="small"

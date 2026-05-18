@@ -14,7 +14,7 @@ import {
   getSpellAbilityForEntry,
   getSpellStatusChips,
   getUpcastStep,
-  renderEntries,
+  entriesToTextBlocks,
   resolveDmgBonusValue,
 } from '../logic/spellsTabLogic.js';
 import { inlineButtonSx, spellBodySx, spellRowSx } from './spellsTabStyles.js';
@@ -37,6 +37,75 @@ function Badge({ label, color, bg = 'transparent' }) {
     <Box component="span" sx={{ border: 1, borderColor: color, color, bgcolor: bg, borderRadius: '3px', px: '6px', py: '1px', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.56rem', lineHeight: 1.35, flexShrink: 0 }}>
       {label}
     </Box>
+  );
+}
+
+function EntryBlocks({ blocks }) {
+  if (!blocks?.length) {
+    return <Typography variant="body2" color="text.secondary">No description.</Typography>;
+  }
+
+  return (
+    <Stack spacing={0.65}>
+      {blocks.map((block, index) => {
+        if (block.kind === 'heading') {
+          return (
+            <Typography key={`h-${index}`} variant="body2" sx={{ fontWeight: 800, color: 'text.primary', lineHeight: 1.25 }}>
+              {block.text}
+            </Typography>
+          );
+        }
+        if (block.kind === 'listItem') {
+          return (
+            <Box key={`li-${index}`} component="ul" sx={{ m: 0, pl: 2.2, color: 'text.secondary' }}>
+              <Typography component="li" variant="body2" color="text.secondary" sx={{ lineHeight: 1.38 }}>
+                {block.text}
+              </Typography>
+            </Box>
+          );
+        }
+        if (block.kind === 'table') {
+          return (
+            <Box key={`tbl-${index}`} sx={{ overflowX: 'auto' }}>
+              {block.caption ? (
+                <Typography variant="body2" sx={{ fontWeight: 800, color: 'text.primary', mb: 0.35 }}>
+                  {block.caption}
+                </Typography>
+              ) : null}
+              <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.72rem' }}>
+                {block.headers?.length ? (
+                  <Box component="thead">
+                    <Box component="tr">
+                      {block.headers.map((cell, cellIndex) => (
+                        <Box key={`th-${cellIndex}`} component="th" sx={{ textAlign: 'left', p: '3px 6px', borderBottom: '1px solid', borderColor: 'divider', color: 'text.primary' }}>
+                          {cell}
+                        </Box>
+                      ))}
+                    </Box>
+                  </Box>
+                ) : null}
+                <Box component="tbody">
+                  {(block.rows || []).map((row, rowIndex) => (
+                    <Box key={`tr-${rowIndex}`} component="tr">
+                      {row.map((cell, cellIndex) => (
+                        <Box key={`td-${rowIndex}-${cellIndex}`} component="td" sx={{ p: '3px 6px', borderBottom: '1px solid', borderColor: 'divider', color: 'text.secondary', verticalAlign: 'top' }}>
+                          {cell}
+                        </Box>
+                      ))}
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+            </Box>
+          );
+        }
+        return (
+          <Typography key={`p-${index}`} variant="body2" color="text.secondary" sx={{ lineHeight: 1.42 }}>
+            {block.text}
+          </Typography>
+        );
+      })}
+    </Stack>
   );
 }
 
@@ -83,8 +152,9 @@ export default function SpellEntry({ entry, onShowToast, atk: fallbackAtk, spell
   const baseLevel = entry.level || 0;
   const school = SCHOOL_LABELS[entry.school] || entry.school || '';
   const metaLine = getMetaLine(entry);
-  const body = renderEntries(entry.entries);
-  const higherBody = entry.entriesHigherLevel ? renderEntries(entry.entriesHigherLevel) : '';
+  const bodyBlocks = entriesToTextBlocks(entry.descriptionEntries || entry.entries);
+  const higherEntries = entry.higherLevelEntries || entry.entriesHigherLevel;
+  const higherBlocks = higherEntries ? entriesToTextBlocks(higherEntries) : [];
   const rawDamages = extractDamageDice(entry.entries || []);
   const hasAttack = !!entry.spellAttack;
   const spellData = installedRegistry.getSpellData(entry.name);
@@ -258,7 +328,7 @@ export default function SpellEntry({ entry, onShowToast, atk: fallbackAtk, spell
       {open ? (
         <Box sx={spellBodySx}>
           {metaLine ? <Box sx={{ fontSize: '0.65rem', color: 'text.secondary', mb: '5px' }}>{metaLine}</Box> : null}
-          <Box dangerouslySetInnerHTML={{ __html: body }} />
+          <EntryBlocks blocks={bodyBlocks} />
           {modifierDetailGroups.length ? (
             <Stack spacing={0.8} sx={{ mt: 1 }}>
               {modifierDetailGroups.map((group) => (
@@ -299,10 +369,10 @@ export default function SpellEntry({ entry, onShowToast, atk: fallbackAtk, spell
               ))}
             </Stack>
           ) : null}
-          {higherBody ? (
+          {higherBlocks.length ? (
             <Box sx={{ mt: 1, pt: 1, borderTop: '1px dashed', borderColor: 'divider' }}>
               <Box sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.08em', color: '#9d7fb8', mb: 0.5 }}>Higher Level</Box>
-              <Box dangerouslySetInnerHTML={{ __html: higherBody }} />
+              <EntryBlocks blocks={higherBlocks} />
             </Box>
           ) : null}
         </Box>

@@ -6,6 +6,12 @@ import {
   SPELL_FILES,
 } from '../constants.js';
 import { normalizeName } from './text.js';
+import { dedupeSpellsBySourcePriority, normalizeSpellRecord } from '../../../shared/character/spellNormalization.js';
+import {
+  compareSourcePriority,
+  isSupportedSubclassFeature,
+  isSupportedSubclassRecord,
+} from '../../../shared/character/sourceFiltering.js';
 
 async function getJson(path) {
   const response = await fetch(DATA_BASE + path);
@@ -33,21 +39,20 @@ export async function loadClassIndex() {
     const data = entry.value;
     cache[file] = data;
     classes.push(...(data.class || []).filter((cls) => ALLOWED_SOURCES.includes(cls.source)));
-    const allSubs = (data.subclass || []).filter(
-      (sub) => ALLOWED_SOURCES.includes(sub.source) || ALLOWED_SOURCES.includes(sub.classSource)
-    );
+    const allSubs = (data.subclass || []).filter(isSupportedSubclassRecord);
     const subByKey = {};
     allSubs.forEach((sub) => {
       const key = `${sub.className}|${sub.classSource}|${sub.shortName}`;
       const existing = subByKey[key];
       if (!existing) { subByKey[key] = sub; return; }
-      const existingOK = ALLOWED_SOURCES.includes(existing.source);
-      const subOK = ALLOWED_SOURCES.includes(sub.source);
-      if (subOK && !existingOK) subByKey[key] = sub;
+      if (compareSourcePriority(sub, existing) < 0) subByKey[key] = sub;
     });
-    subclasses.push(...Object.values(subByKey));
+    const supportedSubclasses = Object.values(subByKey);
+    subclasses.push(...supportedSubclasses);
     classFeatures.push(...(data.classFeature || []).filter((feature) => !feature.isReprinted));
-    subclassFeatures.push(...(data.subclassFeature || []).filter((feature) => !feature.isReprinted));
+    subclassFeatures.push(...(data.subclassFeature || []).filter((feature) => (
+      !feature.isReprinted && isSupportedSubclassFeature(feature, supportedSubclasses)
+    )));
   });
 
   return {
@@ -99,13 +104,16 @@ export async function loadFeats() {
 
 export async function loadSpells() {
   const entries = await Promise.allSettled(SPELL_FILES.map((file) => getJson(`spells/${file}`)));
-  const spells = entries.flatMap((entry) => (entry.status === 'fulfilled' ? entry.value.spell || [] : []));
+  const spells = entries
+    .flatMap((entry) => (entry.status === 'fulfilled' ? entry.value.spell || [] : []))
+    .map(normalizeSpellRecord);
+  const dedupedSpells = dedupeSpellsBySourcePriority(spells);
 
-  debugLog('[loadSpells] Loaded', spells.length, 'spells total');
+  debugLog('[loadSpells] Loaded', dedupedSpells.length, 'spells total');
   
   // Log first spell structure to understand format
-  if (spells.length > 0) {
-    debugLog('[loadSpells] First spell:', spells[0].name, 'classes:', spells[0].classes);
+  if (dedupedSpells.length > 0) {
+    debugLog('[loadSpells] First spell:', dedupedSpells[0].name, 'classes:', dedupedSpells[0].classes);
   }
 
   let classSpellIndex = {};
@@ -119,7 +127,7 @@ export async function loadSpells() {
     debugLog('[loadSpells] gendata not found, error:', err.message);
     debugLog('[loadSpells] building from spell metadata');
     // If gendata doesn't exist, build index from spell metadata
-    classSpellIndex = buildClassSpellIndexFromSpells(spells);
+    classSpellIndex = buildClassSpellIndexFromSpells(dedupedSpells);
   }
 
   debugLog('[loadSpells] Final classSpellIndex keys:', Object.keys(classSpellIndex));
@@ -131,7 +139,7 @@ export async function loadSpells() {
   }
 
   return {
-    spells: spells.sort((a, b) => (a.level - b.level) || a.name.localeCompare(b.name)),
+    spells: dedupedSpells.sort((a, b) => (a.level - b.level) || a.name.localeCompare(b.name)),
     classSpellIndex,
   };
 }

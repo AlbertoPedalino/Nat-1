@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { Box, Button, Stack, Typography } from '@mui/material';
 import { getRollTable, rollTable } from '../../../shared/character/rollTables.js';
 
@@ -24,12 +24,42 @@ function FeatureBox({ title, accent, children }) {
   );
 }
 
+function renderSafeInlineBody(value) {
+  const nodes = [];
+  let bold = false;
+  String(value || '').split(/(<br\s*\/?>|<\/?b>)/gi).forEach((part, index) => {
+    if (!part) return;
+    const token = part.toLowerCase();
+    if (/^<br\s*\/?>$/.test(token)) {
+      nodes.push(<br key={`br-${index}`} />);
+      return;
+    }
+    if (token === '<b>') {
+      bold = true;
+      return;
+    }
+    if (token === '</b>') {
+      bold = false;
+      return;
+    }
+    nodes.push(bold ? (
+      <Box key={`b-${index}`} component="span" sx={{ color: 'text.primary', fontWeight: 700 }}>
+        {part}
+      </Box>
+    ) : (
+      <Fragment key={`t-${index}`}>{part}</Fragment>
+    ));
+  });
+  return nodes;
+}
+
 function SectionBody({ html, accent }) {
   return (
     <Typography
       sx={{ fontSize: '0.68rem', color: accent || 'text.secondary', lineHeight: 1.5 }}
-      dangerouslySetInnerHTML={{ __html: html || '' }}
-    />
+    >
+      {renderSafeInlineBody(html)}
+    </Typography>
   );
 }
 

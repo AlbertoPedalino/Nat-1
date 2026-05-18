@@ -1,3 +1,5 @@
+import { normalizeSpellRecord } from '../shared/character/spellNormalization.js';
+
 const SCHOOL_FULL = {
   A: 'Abjuration',
   C: 'Conjuration',
@@ -276,18 +278,12 @@ export function adaptSpellRecord(rawSpell, registry, context = {}) {
   const name = String(raw.name || '').trim();
   const level = typeof raw.level === 'number' ? raw.level : 0;
   const adapterData = level === 0 ? registry.getCantripData(name) : registry.getSpellData(name);
-  const spell = {
+  const spell = normalizeSpellRecord({
     ...raw,
     name: name || 'Unknown Spell',
     source: String(raw.source || context.defaultSource || '').trim(),
     level,
     isCantrip: level === 0,
-    schoolFull: SCHOOL_FULL[String(raw.school || '')] || String(raw.school || ''),
-    rangeText: normalizeRange(raw.range),
-    castingTime: castingTime(raw.time),
-    durationText: durationText(raw.duration),
-    concentration: arr(raw.duration).some((duration) => duration?.concentration),
-    ritual: !!(raw.ritual || raw.meta?.ritual),
     ...(adapterData && typeof adapterData === 'object' ? { _adapterData: adapterData } : {}),
     _meta: {
       ...(raw._meta && typeof raw._meta === 'object' ? raw._meta : {}),
@@ -295,7 +291,7 @@ export function adaptSpellRecord(rawSpell, registry, context = {}) {
       isCantrip: level === 0,
       isAdapted: true,
     },
-  };
+  });
   return runAdapters(spell, registry.getGlobalSpellAdapters(), 'SpellAdapter', context);
 }
 

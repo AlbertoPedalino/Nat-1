@@ -1,6 +1,6 @@
 import { FULL_SLOTS, HALF_SLOTS, PACT_SLOTS, THIRD_SLOTS } from '../../charbuilder/constants.js';
 import { installedRegistry } from '../../../adapters/index.js';
-import { renderEntries as renderSafeEntries } from './renderEntries.js';
+import { entriesToPlainText, entriesToTextBlocks, renderEntries as renderSafeEntries } from './renderEntries.js';
 import { getFinal as getFinalScore, getMod as getAbilityMod } from './calculations.js';
 import { isRitualSpell } from '../../../shared/spellTags.js';
 import { warlockHasInvocation } from '../../../shared/character/warlockUtils.js';
@@ -933,16 +933,25 @@ export function getCastBadge(spell) {
 }
 
 export function getMetaLine(spell) {
-  const time = spell?.time?.[0] ? `${spell.time[0].number || 1} ${spell.time[0].unit}` : '';
-  const range = formatSpellField(spell?.range);
-  const components = formatComponents(spell?.components);
-  const duration = formatSpellField(spell?.duration);
+  const time = spell?.castingTimeLabel || spell?.castingTime || (spell?.time?.[0] ? `${spell.time[0].number || 1} ${spell.time[0].unit}` : '');
+  const range = spell?.rangeLabel || spell?.rangeText || formatSpellField(spell?.range);
+  const componentsBase = spell?.componentsLabel || formatComponents(spell?.components);
+  const material = spell?.materialLabel || formatMaterial(spell?.components?.m);
+  const components = componentsBase && material ? `${componentsBase} (${material})` : componentsBase;
+  const duration = spell?.durationLabel || spell?.durationText || formatSpellField(spell?.duration);
   return [time, range, components, duration].filter(Boolean).join(' - ');
 }
 
 function formatComponents(components) {
   if (!components || typeof components !== 'object') return '';
   return [components.v ? 'V' : null, components.s ? 'S' : null, components.m ? 'M' : null].filter(Boolean).join(', ');
+}
+
+function formatMaterial(material) {
+  if (!material) return '';
+  if (typeof material === 'string') return material;
+  if (typeof material === 'object') return material.text || material.name || '';
+  return '';
 }
 
 function formatSpellField(value) {
@@ -962,6 +971,8 @@ export function renderEntries(entries) {
   return renderSafeEntries(entries);
 }
 
+export { entriesToPlainText, entriesToTextBlocks };
+
 export function toSnapshot(spell) {
   return {
     name: spell.name,
@@ -976,6 +987,13 @@ export function toSnapshot(spell) {
     concentration: !!spell.concentration,
     entries: spell.entries || [],
     entriesHigherLevel: spell.entriesHigherLevel || null,
+    descriptionEntries: spell.descriptionEntries || spell.entries || [],
+    higherLevelEntries: spell.higherLevelEntries || spell.entriesHigherLevel || null,
+    castingTimeLabel: spell.castingTimeLabel || spell.castingTime || null,
+    rangeLabel: spell.rangeLabel || spell.rangeText || null,
+    componentsLabel: spell.componentsLabel || null,
+    materialLabel: spell.materialLabel || null,
+    durationLabel: spell.durationLabel || spell.durationText || null,
     scalingLevelDice: spell.scalingLevelDice || null,
     spellAttack: spell.spellAttack || null,
     damageInflict: spell.damageInflict || null,

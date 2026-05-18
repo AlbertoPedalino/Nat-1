@@ -95,6 +95,7 @@ export default function BackgroundTab({ C }) {
   const bgName = C?.bgName || '';
   const bgSource = C?.bgSource || '';
   const entries = bg.entries || [];
+  const description = entries.length ? renderEntries(entries) : '';
 
   const skills = listProficiencies(bg.skillProficiencies);
   const tools = listProficiencies(bg.toolProficiencies);
@@ -123,11 +124,14 @@ export default function BackgroundTab({ C }) {
             </Typography>
             <Box sx={{
               color: 'text.secondary', fontSize: '0.75rem', lineHeight: 1.45, wordBreak: 'break-word',
+              whiteSpace: 'pre-line',
               '& b': { color: 'text.primary', fontWeight: 700 },
               '& i': { color: 'text.secondary' },
               '& ul': { my: 0.35 },
               '& li': { mb: 0.2 },
-            }} dangerouslySetInnerHTML={{ __html: renderEntries(entries) }} />
+            }}>
+              {description}
+            </Box>
           </CardContent>
         </Card>
       )}

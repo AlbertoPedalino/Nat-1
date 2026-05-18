@@ -3,6 +3,7 @@ import { Chip, List, ListItemButton, ListItemText, Paper, Stack, Typography } fr
 import { spellMatchesAnyClass } from '../spells/spells.js';
 import { isConcentrationSpell, isRitualSpell } from '../../../shared/spellTags.js';
 import { SpellNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
+import { entriesToPlainText } from '../../../shared/character/spellEntries.js';
 
 const SPELL_LEVEL_LABELS = ['Cantrip', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th'];
 
@@ -19,6 +20,10 @@ function _spellDealsDamage(spell) {
   if (spell.damageInflict && Array.isArray(spell.damageInflict) && spell.damageInflict.length) return true;
   if (spell.damage) return true;
   return false;
+}
+
+function spellSnippet(spell) {
+  return entriesToPlainText(spell.descriptionEntries || spell.entries, { maxLength: 220 });
 }
 
 export default function SpellChoiceList({ spec, state, dispatch }) {
@@ -74,6 +79,13 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
             {pool.map((spell) => {
               const active = selected.includes(spell.name);
               const full = !active && selected.length >= max;
+              const meta = [
+                SPELL_LEVEL_LABELS[spell.level] || `Lv ${spell.level}`,
+                spell.schoolFull || spell.school,
+                spell.castingTimeLabel || spell.castingTime,
+                spell.rangeLabel || spell.rangeText,
+              ].filter(Boolean).join(' - ');
+              const description = spellSnippet(spell);
               return (
                 <ListItemButton
                   key={`${spec.key}-${spell.name}-${spell.source}`}
@@ -90,7 +102,21 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
                         <SpellMiniTags spell={spell} />
                       </Stack>
                     )}
-                    secondary={[SPELL_LEVEL_LABELS[spell.level] || `Lv ${spell.level}`, spell.schoolFull || spell.school].filter(Boolean).join(' - ')}
+                    secondary={(
+                      <Stack spacing={0.25} sx={{ minWidth: 0 }}>
+                        <Typography variant="caption" color="text.secondary" noWrap>{meta}</Typography>
+                        {description ? (
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.25 }}
+                          >
+                            {description}
+                          </Typography>
+                        ) : null}
+                      </Stack>
+                    )}
+                    secondaryTypographyProps={{ component: 'div' }}
                   />
                   <Chip size="small" color={active ? 'primary' : 'default'} label={spell.source} />
                 </ListItemButton>

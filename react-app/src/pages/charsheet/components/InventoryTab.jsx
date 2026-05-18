@@ -694,7 +694,9 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, 
         </Tooltip>
       </Box>
       {open && body ? (
-        <Box sx={{ fontSize: '0.7rem', color: 'text.secondary', lineHeight: 1.45, bgcolor: '#12100e', border: 1, borderColor: 'divider', borderRadius: 1, px: '10px', py: '6px', mt: '-2px', mb: '4px' }} dangerouslySetInnerHTML={{ __html: body }} />
+        <Box sx={{ fontSize: '0.7rem', color: 'text.secondary', lineHeight: 1.45, whiteSpace: 'pre-line', bgcolor: '#12100e', border: 1, borderColor: 'divider', borderRadius: 1, px: '10px', py: '6px', mt: '-2px', mb: '4px' }}>
+          {body}
+        </Box>
       ) : null}
     </Box>
   );
