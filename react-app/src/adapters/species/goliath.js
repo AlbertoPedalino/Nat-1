@@ -119,6 +119,21 @@ export default function install(registry, context = {}) {
     getGenericBackgroundChoiceMeta,
     getGenericBackgroundOriginFeat,
   } = createAdapterBindings(registry, context);
+function selectedSpeciesVersionIncludes(character, token) {
+  const raw = character?.choices?.species_version
+    ?? character?.normalizedChoices?.species?.options?.species_version
+    ?? character?.normalizedChoices?.rawByKey?.species_version
+    ?? '';
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  return String(value || '').toLowerCase().includes(String(token || '').toLowerCase());
+}
+
+function requiresGiantAncestry(token) {
+  return function (character) {
+    return selectedSpeciesVersionIncludes(character, token);
+  };
+}
+
 // Goliath XPHB: Giant Ancestry — scelta del tipo di gigante (determina resistenza e abilità)
 registerSpeciesAdapter("Goliath_XPHB", function (s) {
   let specs = getGenericSpeciesChoiceSpecs(s);
@@ -139,6 +154,106 @@ registerSpeciesSheetCommonChoiceMeta("Goliath_XPHB", {
     species_version: 'Giant Ancestry',
   },
 });
+registerSpeciesSheetActions("Goliath_XPHB", [
+  {
+    name: "Cloud's Jaunt",
+    icon: '',
+    cat: 'bonus',
+    uses: 'PB / LR',
+    resKey: 'goliath_giant_ancestry',
+    minLevel: 1,
+    condition: requiresGiantAncestry('cloud'),
+    desc: 'Bonus Action: magically teleport up to 30 feet to an unoccupied space you can see. Uses are shared with your chosen Giant Ancestry benefit.',
+  },
+  {
+    name: "Fire's Burn",
+    icon: '',
+    cat: 'action',
+    uses: 'PB / LR',
+    resKey: 'goliath_giant_ancestry',
+    damageFormula: '1d10',
+    minLevel: 1,
+    condition: requiresGiantAncestry('fire'),
+    desc: 'No action: when you hit a target with an attack roll and deal damage to it, also deal 1d10 Fire damage to that target. Uses are shared with your chosen Giant Ancestry benefit.',
+  },
+  {
+    name: "Frost's Chill",
+    icon: '',
+    cat: 'action',
+    uses: 'PB / LR',
+    resKey: 'goliath_giant_ancestry',
+    damageFormula: '1d6',
+    minLevel: 1,
+    condition: requiresGiantAncestry('frost'),
+    desc: 'No action: when you hit a target with an attack roll and deal damage to it, also deal 1d6 Cold damage and reduce its Speed by 10 feet until the start of your next turn. Uses are shared with your chosen Giant Ancestry benefit.',
+  },
+  {
+    name: "Hill's Tumble",
+    icon: '',
+    cat: 'action',
+    uses: 'PB / LR',
+    resKey: 'goliath_giant_ancestry',
+    minLevel: 1,
+    condition: requiresGiantAncestry('hill'),
+    desc: 'No action: when you hit a Large or smaller creature with an attack roll and deal damage to it, give that target the Prone condition. Uses are shared with your chosen Giant Ancestry benefit.',
+  },
+  {
+    name: "Stone's Endurance",
+    icon: '',
+    cat: 'reaction',
+    uses: 'PB / LR',
+    resKey: 'goliath_giant_ancestry',
+    minLevel: 1,
+    condition: requiresGiantAncestry('stone'),
+    inlinePills: ({ character }) => {
+      const conScore = character?.finalScores?.con ?? 10;
+      const conMod = Math.floor((conScore - 10) / 2);
+      return [{ icon: 'shield', label: 'Reduction', value: `1d12${conMod >= 0 ? '+' : ''}${conMod}` }];
+    },
+    desc: 'Reaction: when you take damage, roll 1d12, add your Constitution modifier, and reduce the damage by that total. Uses are shared with your chosen Giant Ancestry benefit.',
+  },
+  {
+    name: "Storm's Thunder",
+    icon: '',
+    cat: 'reaction',
+    uses: 'PB / LR',
+    resKey: 'goliath_giant_ancestry',
+    damageFormula: '1d8',
+    minLevel: 1,
+    condition: requiresGiantAncestry('storm'),
+    desc: 'Reaction: when you take damage from a creature within 60 feet of you, deal 1d8 Thunder damage to that creature. Uses are shared with your chosen Giant Ancestry benefit.',
+  },
+  {
+    name: 'Large Form',
+    icon: '',
+    cat: 'bonus',
+    uses: '1 / LR',
+    resKey: 'goliath_large_form',
+    minLevel: 5,
+    inlinePills: [
+      { icon: 'timer', label: 'Duration', value: '10 min' },
+      { icon: 'footprints', label: 'Speed', value: '+10 ft' },
+    ],
+    desc: 'Bonus Action: if you are in a big enough space, become Large for 10 minutes or until you end it with no action. For the duration, you have Advantage on Strength checks and your Speed increases by 10 feet. Recharge: Long Rest.',
+  },
+]);
+registerSpeciesSheetResources("Goliath_XPHB", [
+  {
+    key: 'goliath_giant_ancestry',
+    name: 'Giant Ancestry',
+    icon: 'mountain',
+    recharge: 'LR',
+    max: (lv) => Math.floor((Number(lv) - 1) / 4) + 2,
+  },
+  {
+    key: 'goliath_large_form',
+    name: 'Large Form',
+    icon: 'maximize',
+    recharge: 'LR',
+    minLevel: 5,
+    max: 1,
+  },
+]);
 
 }
 

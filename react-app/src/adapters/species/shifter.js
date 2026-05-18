@@ -164,7 +164,12 @@ registerSpeciesSheetActions("Shifter_EFA", [
     uses: 'PB / LR',
     resKey: 'shifter_shift',
     minLevel: 1,
-    desc: 'Shift for 1 minute and gain lineage-specific benefits.',
+    inlinePills: ({ character }) => {
+      const lv = Number(character?.level || 1);
+      const pb = Math.floor((lv - 1) / 4) + 2;
+      return [{ icon: 'heart', label: 'Temp HP', value: 2 * pb }];
+    },
+    desc: 'Bonus Action: shift for 1 minute or until you revert as a Bonus Action. When you shift, gain temporary hit points equal to 2 times your Proficiency Bonus, plus lineage-specific benefits.',
   },
 ]);
 registerSpeciesSheetResources("Shifter_EFA", [
@@ -178,4 +183,3 @@ registerSpeciesSheetResources("Shifter_EFA", [
 ]);
 
 }
-

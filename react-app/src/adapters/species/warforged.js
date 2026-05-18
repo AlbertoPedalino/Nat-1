@@ -124,6 +124,14 @@ registerSpeciesAdapter("Warforged_EFA", function (s) {
 });
 
 registerSpeciesSheetCommonChoiceMeta("Warforged_EFA");
+registerSpeciesSheetEffects("Warforged_EFA", [
+  {
+    type: 'acBonus',
+    value: 1,
+    minLevel: 1,
+    note: 'Integrated Protection',
+  },
+]);
 
 }
 

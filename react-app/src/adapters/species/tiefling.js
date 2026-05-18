@@ -150,6 +150,18 @@ registerSpeciesSheetCommonChoiceMeta("Tiefling_XPHB", {
     species_spell_ability: 'Spellcasting Ability (Tiefling)',
   },
 });
+registerSpeciesSheetEffects("Tiefling_XPHB", [
+  {
+    type: 'resistance-choice',
+    key: 'species_version',
+    map: {
+      abyssal: 'Poison',
+      chthonic: 'Necrotic',
+      infernal: 'Fire',
+    },
+    minLevel: 1,
+    note: 'Fiendish Legacy',
+  },
+]);
 
 }
-

@@ -129,10 +129,24 @@ registerSpeciesSheetActions("Orc_XPHB", [
     name: 'Adrenaline Rush',
     icon: '',
     cat: 'bonus',
-    uses: 'PB / LR',
+    uses: 'PB / SR or LR',
     resKey: 'orc_adrenaline_rush',
     minLevel: 1,
-    desc: 'Take the Dash action as a Bonus Action and gain temporary hit points.',
+    inlinePills: ({ character }) => {
+      const lv = Number(character?.level || 1);
+      const pb = Math.floor((lv - 1) / 4) + 2;
+      return [{ icon: 'heart', label: 'Temp HP', value: pb }];
+    },
+    desc: 'Take the Dash action as a Bonus Action and gain temporary hit points equal to your Proficiency Bonus. Recharge: Short or Long Rest.',
+  },
+  {
+    name: 'Relentless Endurance',
+    icon: '',
+    cat: 'reaction',
+    uses: '1 / LR',
+    resKey: 'orc_relentless_endurance',
+    minLevel: 1,
+    desc: 'Reaction trigger: when you are reduced to 0 Hit Points but not killed outright, drop to 1 Hit Point instead. Recharge: Long Rest.',
   },
 ]);
 registerSpeciesSheetResources("Orc_XPHB", [
@@ -140,8 +154,15 @@ registerSpeciesSheetResources("Orc_XPHB", [
     key: 'orc_adrenaline_rush',
     name: 'Adrenaline Rush',
     icon: 'zap',
-    recharge: 'LR',
+    recharge: 'SR+LR',
     max: (lv) => Math.floor((Number(lv) - 1) / 4) + 2,
+  },
+  {
+    key: 'orc_relentless_endurance',
+    name: 'Relentless Endurance',
+    icon: 'heart',
+    recharge: 'LR',
+    max: 1,
   },
 ]);
 

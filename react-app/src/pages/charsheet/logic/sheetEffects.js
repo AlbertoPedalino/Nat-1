@@ -695,7 +695,6 @@ function bladesingerIntMod(character) {
 }
 
 export function getAcBonusEffects(character = {}) {
-  if (!bladesongActive(character)) return 0;
   let total = 0;
   collectSheetEffects(character).forEach((effect) => {
     if (norm(effect.type) !== 'acbonus') return;
@@ -729,7 +728,6 @@ export function getConcentrationBonus(character = {}) {
 }
 
 export function getSpeedBonus(character = {}) {
-  if (!bladesongActive(character)) return 0;
   let total = 0;
   collectSheetEffects(character).forEach((effect) => {
     if (!norm(effect.type).includes('speed')) return;

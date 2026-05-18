@@ -120,10 +120,27 @@ export default function install(registry, context = {}) {
     getGenericBackgroundOriginFeat,
   } = createAdapterBindings(registry, context);
 registerSpeciesAdapter("Changeling_EFA", function (s) {
-  return getGenericSpeciesChoiceSpecs(s);
+  const specs = getGenericSpeciesChoiceSpecs(s);
+  const instincts = specs.find(function (spec) { return spec.key === 'species_skill_0'; });
+  if (instincts && Array.isArray(instincts.from) && !instincts.from.some(function (name) {
+    return String(name || '').toLowerCase() === 'performance';
+  })) {
+    instincts.from = [...instincts.from, 'Performance'];
+  }
+  return specs;
 });
 
 registerSpeciesSheetCommonChoiceMeta("Changeling_EFA");
+registerSpeciesSheetActions("Changeling_EFA", [
+  {
+    name: 'Shape-Shifter',
+    icon: '',
+    cat: 'action',
+    uses: 'At will',
+    minLevel: 1,
+    desc: 'Action: change your appearance and voice, including coloration, hair length, sex, height, weight, and size between Medium and Small. Your game statistics, clothing, and equipment do not change. While shape-shifted, you have Advantage on Charisma checks. Take an action to revert.',
+  },
+]);
 
 }
 

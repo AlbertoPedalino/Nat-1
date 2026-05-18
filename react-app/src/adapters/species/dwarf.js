@@ -131,10 +131,29 @@ registerSpeciesSheetHpBonus("Dwarf_PHB", 1);
 registerSpeciesSheetHpBonus("Hill Dwarf_XPHB", 1);
 registerSpeciesSheetHpBonus("Hill Dwarf_PHB", 1);
 
-// Dwarven Combat Training: proficiency with battleaxe, handaxe, light hammer, warhammer
-registerSpeciesSheetProficiencies("Dwarf_XPHB", [
-  { type: "weapon", values: ["Battleaxe", "Handaxe", "Light hammer", "Warhammer"], minLevel: 1 },
+registerSpeciesSheetActions("Dwarf_XPHB", [
+  {
+    name: 'Stonecunning',
+    icon: '',
+    cat: 'bonus',
+    uses: 'PB / LR',
+    resKey: 'dwarf_stonecunning',
+    minLevel: 1,
+    inlinePills: [
+      { icon: 'radar', label: 'Sense', value: 'Tremorsense 60 ft' },
+      { icon: 'timer', label: 'Duration', value: '10 min' },
+    ],
+    desc: 'Bonus Action: gain Tremorsense with a range of 60 feet for 10 minutes. You must be on or touching a natural or worked stone surface. Recharge: Long Rest.',
+  },
+]);
+registerSpeciesSheetResources("Dwarf_XPHB", [
+  {
+    key: 'dwarf_stonecunning',
+    name: 'Stonecunning',
+    icon: 'radar',
+    recharge: 'LR',
+    max: (lv) => Math.floor((Number(lv) - 1) / 4) + 2,
+  },
 ]);
 
 }
-
