@@ -2,6 +2,25 @@ import { getMod, getFinal, calcMaxHP, getSkillProficiency, getSkillBonus, getPB,
 import { mapCharacterToBuilderState } from '../../shared/builderSync.js';
 import { getStorageItem, getStorageJson, setStorageItem, setStorageJson } from '../../shared/storage.js';
 
+function getActiveCharId() {
+  return getStorageItem('gb_active_char_id') || null;
+}
+
+function getScopedJson(key, fallback = null) {
+  const charId = getActiveCharId();
+  if (charId) {
+    const scoped = getStorageJson(`gb:char:${charId}:${key}`, undefined);
+    if (scoped !== undefined) return scoped;
+  }
+  return getStorageJson(key, fallback);
+}
+
+function setScopedJson(key, value) {
+  setStorageJson(key, value);
+  const charId = getActiveCharId();
+  if (charId) setStorageJson(`gb:char:${charId}:${key}`, value);
+}
+
 export function loadCharacter() {
   const ch = getStorageJson('5e_current_char', null);
   if (ch && ch.bladesongActive == null) ch.bladesongActive = false;
@@ -32,12 +51,15 @@ export function loadSheetState(C) {
   const createdSpellSlots = getStorageJson('5e_created_slots', {});
   const arcaneArmorItemKey = getStorageItem('5e_arcane_armor_item') || null;
 
-  let sheetInventory = getStorageJson('5e_inventory', C.inventory || []);
-  if (Array.isArray(sheetInventory) && !sheetInventory.length && Array.isArray(C?.inventory) && C.inventory.length) {
-    sheetInventory = JSON.parse(JSON.stringify(C.inventory));
-  }
+  const storedInventory = getScopedJson('5e_inventory', undefined);
+  const sheetInventory = Array.isArray(C?.inventory)
+    ? JSON.parse(JSON.stringify(C.inventory))
+    : (Array.isArray(storedInventory) ? storedInventory : []);
 
-  const sheetCurrency = getStorageJson('5e_currency', C.currency || { cp: 0, sp: 0, ep: 0, gp: 10, pp: 0 });
+  const storedCurrency = getScopedJson('5e_currency', undefined);
+  const sheetCurrency = C?.currency && typeof C.currency === 'object'
+    ? { ...C.currency }
+    : (storedCurrency && typeof storedCurrency === 'object' ? storedCurrency : { cp: 0, sp: 0, ep: 0, gp: 10, pp: 0 });
 
   const sheetInspiration = getStorageItem('5e_inspiration') === 'true' || C?.inspiration || false;
 
@@ -75,25 +97,33 @@ export function saveConditions(conditions) {
 }
 
 export function saveInventory(inventory) {
-  setStorageJson('5e_inventory', inventory || []);
+  setScopedJson('5e_inventory', inventory || []);
 }
 
 export function saveCurrency(currency) {
-  setStorageJson('5e_currency', currency || {});
+  setScopedJson('5e_currency', currency || {});
 }
 
 export function saveCurrentCharacter(character) {
-  setStorageJson('5e_current_char', character);
+  setScopedJson('5e_current_char', character);
+  if (character?.inventory !== undefined) setScopedJson('5e_inventory', character.inventory || []);
+  if (character?.currency !== undefined) setScopedJson('5e_currency', character.currency || {});
   syncBuilderState(character);
 }
 
-function syncBuilderState(character) {
+function syncBuilderStateAtKey(character, key) {
   if (!character || typeof character !== 'object') return;
   try {
-    const previous = getStorageJson('5e_builder_state', {});
+    const previous = getStorageJson(key, {});
     const mapped = mapCharacterToBuilderState(character);
-    setStorageJson('5e_builder_state', { ...previous, ...mapped });
+    setStorageJson(key, { ...previous, ...mapped });
   } catch {}
+}
+
+function syncBuilderState(character) {
+  syncBuilderStateAtKey(character, '5e_builder_state');
+  const charId = getActiveCharId();
+  if (charId) syncBuilderStateAtKey(character, `gb:char:${charId}:5e_builder_state`);
 }
 
 export function loadResources(C) {

@@ -59,7 +59,15 @@ export function mapCharacterToBuilderState(source) {
 export function mergeSheetIntoBuilder(builder, sheet) {
   if (!sheet || typeof sheet !== 'object') return builder;
   if (builder?.name && sheet.name && builder.name !== sheet.name) return builder;
-  const merged = { ...(builder || {}), ...mapCharacterToBuilderState(sheet) };
+  const sheetMapped = mapCharacterToBuilderState(sheet);
+  const merged = { ...(builder || {}), ...sheetMapped };
+  if (Array.isArray(builder?.inventory) && builder.inventory.length && !sheetMapped.inventory?.length) {
+    merged.inventory = builder.inventory;
+  }
+  if (builder?.currency && Object.values(builder.currency).some((value) => Number(value || 0) > 0)
+    && (!sheetMapped.currency || !Object.values(sheetMapped.currency).some((value) => Number(value || 0) > 0))) {
+    merged.currency = builder.currency;
+  }
   merged.normalizedChoices = normalizeCharacterChoices(merged);
   return merged;
 }

@@ -21,7 +21,7 @@ import { STEPS } from './constants.js';
 import { adapterRegistry, loadClassAdapters, loadCoreAdapters } from '../../adapters/index.js';
 import { getMod, getFinal } from '../charsheet/logic/calculations.js';
 import { adaptBuilderData } from '../../adapters/adapterPipeline.js';
-import { loadBackgrounds, loadClassIndex, loadFeats, loadItems, loadSpecies, loadSpells, extractSheetData, importSheetPayload, patchCharacterField } from './logic/index.js';
+import { loadBackgrounds, loadClassIndex, loadFeats, loadItems, loadSpecies, loadSpells, extractSheetData, importSheetPayload, patchCharacterField, saveCharacter } from './logic/index.js';
 import { builderReducer, initialBuilderState } from './state.js';
 import { BackgroundStep, ClassStep, EquipmentStep, ScoresStep, SheetStep, SpeciesStep } from './steps/index.js';
 import { mergeSheetIntoBuilder } from '../../shared/builderSync.js';
@@ -101,6 +101,19 @@ function createInitialBuilderState() {
   return initialBuilderState;
 }
 
+function isSheetReady(character) {
+  return Boolean(
+    character?.name
+    && character?.className
+    && character?.speciesName
+    && character?.backgroundName
+  );
+}
+
+function hasFinishedLoading(loading) {
+  return !Object.values(loading || {}).some(Boolean);
+}
+
 export default function CharBuilder() {
   const [state, dispatch] = useReducer(builderReducer, undefined, createInitialBuilderState);
   const activeStep = STEPS[state.tab];
@@ -173,6 +186,20 @@ export default function CharBuilder() {
     const adaptedData = adaptBuilderData(state.data, adapterRegistry, { items: state.data.items });
     dispatch({ type: 'data/adapt', payload: adaptedData });
   }, [state.adaptersLoaded, state.dataAdapted, state.loading, state.data]);
+
+  useEffect(() => {
+    if (!isSheetReady(state.character) || !hasFinishedLoading(state.loading)) return;
+    saveCharacter(state.character, state.data);
+  }, [
+    state.character.inventory,
+    state.character.currency,
+    state.character.name,
+    state.character.className,
+    state.character.speciesName,
+    state.character.backgroundName,
+    state.loading,
+    state.data,
+  ]);
 
   useEffect(() => {
     if (!state.character.cls && state.data.classes.length) {

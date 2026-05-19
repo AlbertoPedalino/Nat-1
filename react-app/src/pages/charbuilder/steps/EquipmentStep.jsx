@@ -18,6 +18,28 @@ function cpToCoins(cpValue) {
   return { gp, sp, cp };
 }
 
+function parseItemRef(ref) {
+  const [name, source] = String(ref || '').split('|');
+  return {
+    name: cleanText(name || '').trim(),
+    source: String(source || '').trim().toUpperCase(),
+  };
+}
+
+function itemSearchText(item) {
+  return [
+    item?.name,
+    item?.source,
+    item?.legacySource,
+    item?.type,
+    item?.rarity,
+    item?.scfType,
+    Array.isArray(item?.focus) ? item.focus.join(' ') : '',
+    Array.isArray(item?.group) ? item.group.join(' ') : '',
+    Array.isArray(item?.items) ? item.items.map((ref) => parseItemRef(ref).name).join(' ') : '',
+  ].filter(Boolean).join(' ').toLowerCase();
+}
+
 function flattenEquip(node, items = []) {
   if (!node) return items;
   if (typeof node === 'string') {
@@ -74,7 +96,8 @@ function extractEquipItems(node, result = { items: [], cp: 0 }) {
   if (typeof node === 'object') {
     if (node.value) result.cp += Number(node.value || 0);
     if (node.containsValue) result.cp += Number(node.containsValue || 0);
-    if (node.item) result.items.push({ name: String(node.item).split('|')[0].trim(), qty: node.quantity || 1 });
+    if (node.item) result.items.push({ ...parseItemRef(node.item), qty: node.quantity || 1 });
+    else if (node.equipmentType) result.items.push({ ...parseItemRef(node.equipmentType), qty: node.quantity || 1, equipmentType: true });
     else if (node.entries) extractEquipItems(node.entries, result);
     else Object.entries(node).forEach(([key, value]) => {
       if (!['source', 'page', 'type', 'displayName', 'quantity', 'value', 'containsValue'].includes(key)) extractEquipItems(value, result);
@@ -124,22 +147,37 @@ function collectChoiceBlocks(eq, prefix) {
   return blocks;
 }
 
-function resolveEquipmentItems(extracted, itemDb, fallbackSource) {
+function resolveEquipmentItems(extracted, itemDb) {
   const out = [];
-  const addResolved = (name, qty) => {
-    const dbItem = itemDb.find((item) => item.name.toLowerCase() === String(name).toLowerCase());
+  const findDbItem = (name, source) => {
+    const targetName = String(name || '').toLowerCase();
+    const targetSource = String(source || '').toUpperCase();
+    const exact = itemDb.find((item) => (
+      item.name.toLowerCase() === targetName
+      && (!targetSource || String(item.source || '').toUpperCase() === targetSource)
+    ));
+    if (exact) return exact;
+    return itemDb.find((item) => (
+      Array.isArray(item.group)
+      && item.group.some((group) => String(group || '').toLowerCase() === targetName)
+      && (!targetSource || String(item.source || '').toUpperCase() === targetSource)
+    ));
+  };
+  const addResolved = (name, qty, source = '') => {
+    const dbItem = findDbItem(name, source);
     if (dbItem?.packContents?.length && !['A', 'AF', 'AT'].includes(String(dbItem.type || '').split('|')[0])) {
       dbItem.packContents.forEach((entry) => {
         const ref = typeof entry === 'string' ? entry : entry.item || '';
-        const entryName = ref.split('|')[0].trim();
+        const parsed = parseItemRef(ref);
+        const entryName = parsed.name;
         const entryQty = typeof entry === 'object' ? entry.quantity || 1 : 1;
-        if (entryName) addResolved(entryName, entryQty * qty);
+        if (entryName) addResolved(entryName, entryQty * qty, parsed.source);
       });
       return;
     }
-    out.push(dbItem ? { ...dbItem, qty } : { name, source: fallbackSource, type: 'OTH', rarity: 'none', weight: 0, value: 0, qty });
+    if (dbItem) out.push({ ...dbItem, qty });
   };
-  extracted.items.forEach((item) => addResolved(item.name || item, item.qty || 1));
+  extracted.items.forEach((item) => addResolved(item.name || item, item.qty || 1, item.source));
   return out;
 }
 
@@ -189,7 +227,7 @@ function StartingEquipmentBlock({ title, eq, prefix, character, items, dispatch 
                         dispatch({
                           type: 'equipment/add-extracted',
                           currency: cpToCoins(extracted.cp),
-                          items: resolveEquipmentItems(extracted, items, prefix === 'bg' ? 'Background' : 'Class'),
+                          items: resolveEquipmentItems(extracted, items),
                         });
                       }
                     }}
@@ -229,7 +267,7 @@ export default function EquipmentStep({ state, dispatch }) {
     };
     const filtered = state.data.items.filter((item) => {
       const matchesFilter = inventoryFilter === 'all' || groupOf(item) === inventoryFilter;
-      const matchesQuery = item.name.toLowerCase().includes(query);
+      const matchesQuery = !query || itemSearchText(item).includes(query);
       return matchesFilter && matchesQuery;
     });
     return filtered.sort((a, b) => {

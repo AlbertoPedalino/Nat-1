@@ -260,38 +260,73 @@ function buildClassSpellIndex(node) {
 }
 
 const ITEM_SOURCES_2024 = ITEM_SOURCE_PRIORITY;
-const PHB_2024_EQUIPMENT_TYPES = ['M', 'R', 'LA', 'MA', 'HA', 'S', 'A', 'G', 'AT', 'GS', 'INS', 'SCF', 'WD', 'RD', 'ST'];
+const SCF_TYPE_FOCUS = {
+  holy: ['Cleric', 'Paladin'],
+};
 
 function itemSource(item) {
   return String(item?.source || '').trim();
 }
 
-function reprintedSource(item, allowedSources = ITEM_SOURCES_2024) {
-  if (!Array.isArray(item?.reprintedAs)) return '';
-  const allowed = new Set(allowedSources);
-  const found = item.reprintedAs
-    .map((entry) => String(entry || '').split('|')[1] || '')
-    .find((source) => allowed.has(source));
-  return found || '';
+function itemKey(name, source) {
+  return `${normalizeName(formatLeadingBonusName(name))}|${String(source || '').trim()}`;
+}
+
+function itemRecordKey(item, source = itemSource(item)) {
+  return itemKey(item?.name || '', source);
 }
 
 function canonicalItemSource(item) {
   const source = itemSource(item);
   if (ITEM_SOURCES_2024.includes(source)) return source;
-  return reprintedSource(item);
+  return '';
 }
 
 function isItem2024(item) {
-  return Boolean(canonicalItemSource(item));
+  return ITEM_SOURCES_2024.includes(itemSource(item));
 }
 
-function isAllowedPhbEquipment(item) {
-  if (!item) return false;
-  if (itemSource(item) !== 'PHB') return false;
-  const type = String(item.type || '').split('|')[0].toUpperCase();
-  if (!PHB_2024_EQUIPMENT_TYPES.includes(type)) return false;
-  if (item.rarity && item.rarity !== 'none') return false;
-  return canonicalItemSource(item) === 'XPHB';
+function itemRef(item) {
+  const source = canonicalItemSource(item) || itemSource(item);
+  return `${formatLeadingBonusName(item?.name || '')}|${source}`;
+}
+
+function focusForScfType(scfType) {
+  return SCF_TYPE_FOCUS[String(scfType || '').toLowerCase()] || null;
+}
+
+function buildMissingGroupParents(items) {
+  const existingKeys = new Set(items.map((item) => itemRecordKey(item, canonicalItemSource(item) || itemSource(item))));
+  const groups = new Map();
+
+  items.forEach((item) => {
+    const source = canonicalItemSource(item) || itemSource(item);
+    if (!ITEM_SOURCES_2024.includes(source) || !Array.isArray(item.group)) return;
+    item.group.forEach((groupName) => {
+      const name = String(groupName || '').trim();
+      if (!name) return;
+      const key = itemKey(name, source);
+      if (existingKeys.has(key)) return;
+      if (!groups.has(key)) {
+        groups.set(key, {
+          name,
+          source,
+          type: item.type || 'G',
+          rarity: item.rarity || 'none',
+          scfType: item.scfType || null,
+          focus: Array.isArray(item.focus) ? item.focus.slice() : focusForScfType(item.scfType),
+          items: [],
+          entries: [],
+          _generatedGroupParent: true,
+        });
+      }
+      const group = groups.get(key);
+      const ref = itemRef(item);
+      if (ref && !group.items.includes(ref)) group.items.push(ref);
+    });
+  });
+
+  return [...groups.values()];
 }
 
 function isAllowedMagicVariant(variant) {
@@ -300,7 +335,6 @@ function isAllowedMagicVariant(variant) {
   return Boolean(
     canonicalItemSource(variant)
     || canonicalItemSource(inherited)
-    || reprintedSource(variant, ITEM_SOURCE_PRIORITY)
   );
 }
 
@@ -322,14 +356,17 @@ export async function loadItems() {
     getJson('magicvariants.json'),
   ]);
 
+  const rawBaseItems = base.status === 'fulfilled' ? (base.value.baseitem || []) : [];
+  const rawDataItems = magic.status === 'fulfilled' ? (magic.value.item || []) : [];
+
   const baseItems = base.status === 'fulfilled'
-    ? (base.value.baseitem || [])
-        .filter((item) => isItem2024(item) || isAllowedPhbEquipment(item))
+    ? rawBaseItems
+        .filter(isItem2024)
         .map(withCanonicalSource)
     : [];
 
   const magicItems = magic.status === 'fulfilled'
-    ? (magic.value.item || [])
+    ? rawDataItems
         .filter(isItem2024)
         .map(withCanonicalSource)
     : [];
@@ -347,6 +384,7 @@ export async function loadItems() {
     ...magicItems,
     ...magicVariants,
   ].filter(isItem2024);
+  all.push(...buildMissingGroupParents(all));
 
   const byName = new Map();
   all.forEach((item) => {
@@ -387,6 +425,10 @@ function itemRichness(item) {
   if (item.weaponCategory) score += 2;
   if (Array.isArray(item.entries) && item.entries.length) score += 1;
   if (item.type && !['weapon', 'armor', 'gear', 'magic'].includes(String(item.type).toLowerCase())) score += 1;
+  if (item.scfType) score += 1;
+  if (Array.isArray(item.focus) && item.focus.length) score += 1;
+  if (Array.isArray(item.items) && item.items.length) score += 1;
+  if (Array.isArray(item.group) && item.group.length) score += 1;
   return score;
 }
 
@@ -413,6 +455,10 @@ function normalizeItem(item) {
     property: Array.isArray(item.property) ? item.property.map((p) => String(p).split('|')[0]) : [],
     entries: item.entries || [],
     packContents: item.packContents || null,
+    scfType: item.scfType || null,
+    focus: Array.isArray(item.focus) ? item.focus.slice() : null,
+    items: Array.isArray(item.items) ? item.items.slice() : null,
+    group: Array.isArray(item.group) ? item.group.slice() : null,
   };
 }
 
@@ -422,8 +468,7 @@ function expandMagicVariants(variants, baseItems) {
     const inherits = variant.inherits || {};
     const requires = variant.requires || [];
     const variantSource = canonicalItemSource(variant)
-      || canonicalItemSource(inherits)
-      || reprintedSource(variant, ITEM_SOURCE_PRIORITY);
+      || canonicalItemSource(inherits);
 
     if (!variantSource) return;
 

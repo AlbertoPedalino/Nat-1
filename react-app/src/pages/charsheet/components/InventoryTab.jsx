@@ -126,11 +126,15 @@ function itemSearchText(item) {
     item?.legacySource,
     item?.type,
     item?.rarity,
+    item?.scfType,
     item?.weaponCategory,
     item?.dmgType,
     Array.isArray(item?.property) ? item.property.join(' ') : '',
     Array.isArray(item?.properties) ? item.properties.join(' ') : '',
     Array.isArray(item?.mastery) ? item.mastery.join(' ') : '',
+    Array.isArray(item?.focus) ? item.focus.join(' ') : '',
+    Array.isArray(item?.group) ? item.group.join(' ') : '',
+    Array.isArray(item?.items) ? item.items.map((ref) => String(ref || '').split('|')[0]).join(' ') : '',
   ].filter(Boolean).join(' '));
 }
 
