@@ -318,7 +318,7 @@ function collectAdapterProfGrants(C) {
 
 function collectFixedFeatureProfs(C, field) {
   const out = new Set();
-  const features = [...(C?.allClassFeatures || []), ...(C?.allFeatSnapshots || []), ...(C?.bgSnapshot ? [C.bgSnapshot] : [])];
+  const features = [...(C?.allClassFeatures || []), ...(C?.allFeatSnapshots || []), ...(C?.backgroundSnapshot ? [C.backgroundSnapshot] : [])];
   features.forEach(f => {
     const raw = f?.[field];
     if (!raw) return;
@@ -387,8 +387,8 @@ export function collectEquipmentProficiencySets(C) {
   if (C?.speciesSnapshot?.armorProficiencies) addFixed(C.speciesSnapshot.armorProficiencies, armorSet);
   if (C?.speciesSnapshot?.weaponProficiencies) addFixed(C.speciesSnapshot.weaponProficiencies, weaponSet);
 
-  if (C?.bgSnapshot?.armorProficiencies) addFixed(C.bgSnapshot.armorProficiencies, armorSet);
-  if (C?.bgSnapshot?.weaponProficiencies) addFixed(C.bgSnapshot.weaponProficiencies, weaponSet);
+  if (C?.backgroundSnapshot?.armorProficiencies) addFixed(C.backgroundSnapshot.armorProficiencies, armorSet);
+  if (C?.backgroundSnapshot?.weaponProficiencies) addFixed(C.backgroundSnapshot.weaponProficiencies, weaponSet);
 
   collectFixedFeatureProfs(C, 'armorProficiencies').forEach(v => armorSet.add(v));
   collectFixedFeatureProfs(C, 'weaponProficiencies').forEach(v => weaponSet.add(v));
@@ -533,7 +533,7 @@ export function collectAllProficiencies(C) {
     addFixed(gained.languageProficiencies, langSet);
   });
 
-  const bg = C?.bgSnapshot || {};
+  const bg = C?.backgroundSnapshot || {};
   const species = C?.speciesSnapshot || {};
   if (species.toolProficiencies) addFixed(species.toolProficiencies, toolSet);
   if (species.languageProficiencies) addFixed(species.languageProficiencies, langSet);

@@ -12,28 +12,26 @@ import Movement from './components/Movement.jsx';
 import RightTop from './components/RightTop.jsx';
 import TabsPanel from './components/TabsPanel.jsx';
 import DiceToast from './components/DiceToast.jsx';
-import { loadCharacter, loadSheetState, saveHPState, saveDeathSaves, saveInspiration, saveConditions, saveInventory, saveCurrency, saveCurrentCharacter, loadResources, saveResources, loadFreeCastUses, saveFreeCastUses } from './state.js';
+import { deriveSheetState } from './state.js';
 import { calcMaxHP, getMod, getFinal, getPB, getSaveBonus } from './logic/calculations.js';
 import { applyResourceRest, getAllResourceDefs, getHitDicePools, getUsedHitDiceTotal, normalizeResourceMax } from './logic/restResources.js';
 import { applyFreeCastRest, getFreeCastDefsForCharacter } from './logic/spellsTabLogic.js';
-import { setStorageItem, setStorageJson, getStorageItem as getRaw, getStorageJson as getJson } from '../../shared/storage.js';
 import { loadCoreAdapters, loadClassAdapters, installedRegistry } from '../../adapters/index.js';
+import {
+  getActiveCharId,
+  loadCharacter as storeLoadCharacter,
+  patchCharacter as storePatchCharacter,
+  setActiveCharId,
+} from '../../shared/character/store.js';
 
-function getCharId() {
-  return new URLSearchParams(window.location.search).get('char') || getRaw('gb_active_char_id');
-}
-
-function readRegistry() {
-  try { return JSON.parse(localStorage.getItem('gb_char_registry') || '[]'); } catch { return []; }
-}
-
-function writeRegistry(list) {
-  try { localStorage.setItem('gb_char_registry', JSON.stringify(list)); } catch {}
+function getCharIdFromUrl() {
+  return new URLSearchParams(window.location.search).get('char') || getActiveCharId();
 }
 
 export default function CharacterSheet() {
   const [C, setC] = useState(null);
   const [sheet, setSheet] = useState(null);
+  const [charId, setCharId] = useState(null);
   const [tab, setTab] = useState(0);
   const [diceToast, setDiceToast] = useState(null);
   const [rollLog, setRollLog] = useState([]);
@@ -45,10 +43,9 @@ export default function CharacterSheet() {
 
   useEffect(() => {
     let alive = true;
-    const charId = getCharId();
-    let ch = charId ? getJson(`gb:char:${charId}:5e_current_char`, null) : null;
-    if (!ch) ch = loadCharacter();
-    if (charId && ch) setStorageItem('gb_active_char_id', charId);
+    const id = getCharIdFromUrl();
+    const ch = id ? storeLoadCharacter(id) : null;
+    if (id && ch) setActiveCharId(id);
 
     const classNames = [ch?.className, ...(ch?.extraClasses || []).map((extra) => extra.name)].filter(Boolean);
     const context = { getMod, getFinal, getPB };
@@ -58,69 +55,69 @@ export default function CharacterSheet() {
       loadClassAdapters(classNames, context),
     ]).finally(() => {
       if (!alive) return;
+      setCharId(id);
       setC(ch);
       if (ch) {
-        const s = loadSheetState(ch);
-        setSheet(s);
-        const stored = loadResources(ch);
+        setSheet(deriveSheetState(ch));
+        const stored = ch.resources && typeof ch.resources === 'object' ? ch.resources : {};
         const allResDefs = getAllResourceDefs(ch);
         const merged = { ...stored };
-        allResDefs.forEach(def => {
+        allResDefs.forEach((def) => {
           if (def.key && merged[def.key] == null) {
             merged[def.key] = normalizeResourceMax(def, ch);
           }
         });
         setResources(merged);
-        saveResources(merged);
-        setFreeCastUses(loadFreeCastUses());
+        if (id) storePatchCharacter(id, { resources: merged });
+        setFreeCastUses(ch.freeCastUses && typeof ch.freeCastUses === 'object' ? ch.freeCastUses : {});
       }
     });
 
     return () => { alive = false; };
   }, []);
 
+  const persist = useCallback((patch) => {
+    if (!charId || !patch) return;
+    const next = storePatchCharacter(charId, patch);
+    if (next) setC(next);
+  }, [charId]);
+
   const syncSheet = useCallback((updates) => {
-    setSheet(prev => ({ ...prev, ...updates }));
+    setSheet((prev) => ({ ...prev, ...updates }));
   }, []);
 
   const updateCurrentCharacter = useCallback((updater) => {
-    setC(prev => {
+    setC((prev) => {
       if (!prev) return prev;
       const next = typeof updater === 'function' ? updater(prev) : updater;
-      saveCurrentCharacter(next);
-      const charId = getCharId();
-      if (charId) {
-        setStorageJson(`gb:char:${charId}:5e_current_char`, next);
-        try {
-          const registry = readRegistry();
-          const idx = registry.findIndex((e) => e.id === charId);
-          if (idx >= 0) {
-            registry[idx] = { ...registry[idx], name: next.name || registry[idx].name, updatedAt: Date.now() };
-          } else {
-            registry.unshift({ id: charId, name: next.name || 'Character', createdAt: Date.now(), updatedAt: Date.now() });
-          }
-          writeRegistry(registry);
-        } catch {}
-      }
+      if (charId) storePatchCharacter(charId, next);
       return next;
     });
-  }, []);
+  }, [charId]);
 
   const updateInventory = useCallback((inventory) => {
-    saveInventory(inventory);
-    setSheet(prev => ({ ...prev, sheetInventory: inventory }));
-    updateCurrentCharacter(prev => ({ ...prev, inventory }));
+    setSheet((prev) => ({ ...prev, sheetInventory: inventory }));
+    updateCurrentCharacter((prev) => ({ ...prev, inventory }));
   }, [updateCurrentCharacter]);
 
   const updateCurrency = useCallback((currency) => {
-    saveCurrency(currency);
-    setSheet(prev => ({ ...prev, sheetCurrency: currency }));
-    updateCurrentCharacter(prev => ({ ...prev, currency }));
+    setSheet((prev) => ({ ...prev, sheetCurrency: currency }));
+    updateCurrentCharacter((prev) => ({ ...prev, currency }));
   }, [updateCurrentCharacter]);
 
   const updateSpells = useCallback((nextSpellData) => {
-    updateCurrentCharacter(prev => ({ ...prev, ...nextSpellData }));
+    updateCurrentCharacter((prev) => ({ ...prev, ...nextSpellData }));
   }, [updateCurrentCharacter]);
+
+  const saveResourcesState = useCallback((next) => {
+    setResources(next);
+    persist({ resources: next });
+  }, [persist]);
+
+  const saveFreeCastState = useCallback((next) => {
+    setFreeCastUses(next);
+    persist({ freeCastUses: next });
+  }, [persist]);
 
   const openShortRest = useCallback(() => {
     setHdToSpend({});
@@ -148,6 +145,7 @@ export default function CharacterSheet() {
     });
     const totalSpent = getUsedHitDiceTotal(spendByPool);
 
+    const patch = {};
     if (totalSpent > 0) {
       s.currentHP = Math.min(s.maxHP, s.currentHP + totalHeal);
       const nextUsedPools = {};
@@ -156,27 +154,29 @@ export default function CharacterSheet() {
       });
       s.usedHDPools = nextUsedPools;
       s.usedHD = getUsedHitDiceTotal(nextUsedPools);
-      saveHPState(s.currentHP, s.tempHP, s.maxHPBonus);
-      setStorageItem('5e_hd_used', s.usedHD);
-      setStorageJson('5e_hd_used_pools', s.usedHDPools);
+      Object.assign(patch, {
+        currentHP: s.currentHP, tempHP: s.tempHP, maxHPBonus: s.maxHPBonus,
+        usedHD: s.usedHD, usedHDPools: s.usedHDPools,
+      });
     }
 
     if (C) {
       res = applyResourceRest(res, getAllResourceDefs(C), C, 'short');
       setResources(res);
-      saveResources(res);
+      patch.resources = res;
       const nextFC = applyFreeCastRest(freeCastUses, getFreeCastDefsForCharacter(C), 'short');
       setFreeCastUses(nextFC);
-      saveFreeCastUses(nextFC);
+      patch.freeCastUses = nextFC;
     }
 
     setSheet(s);
+    if (Object.keys(patch).length) persist(patch);
     setShortRestOpen(false);
     const msg = totalSpent > 0
       ? `Healed ${totalHeal} HP (${totalSpent} HD spent)`
       : 'Short Rest complete (no Hit Dice spent).';
     showDiceToast('Short Rest', msg, totalHeal, rolls);
-  }, [sheet, resources, freeCastUses, C, hdToSpend]);
+  }, [sheet, resources, freeCastUses, C, hdToSpend, persist]);
 
   const openLongRest = useCallback(() => {
     setLongRestOpen(true);
@@ -192,41 +192,42 @@ export default function CharacterSheet() {
     s.deathSaves = { success: 0, fail: 0 };
     s.spellSlotUsed = {};
     s.createdSpellSlots = {};
-    saveDeathSaves(s.deathSaves);
-    setStorageJson('5e_slots_used', {});
-    setStorageJson('5e_created_slots', {});
-    saveHPState(s.currentHP, s.tempHP, s.maxHPBonus);
-    setStorageItem('5e_hd_used', 0);
-    setStorageJson('5e_hd_used_pools', {});
+
+    const patch = {
+      currentHP: s.currentHP, tempHP: s.tempHP, maxHPBonus: s.maxHPBonus,
+      usedHD: 0, usedHDPools: {},
+      deathSaves: s.deathSaves,
+      spellSlotsUsed: {}, createdSpellSlots: {},
+    };
 
     if (C) {
       res = applyResourceRest(res, getAllResourceDefs(C), C, 'long');
       setResources(res);
-      saveResources(res);
+      patch.resources = res;
       const nextFC = applyFreeCastRest(freeCastUses, getFreeCastDefsForCharacter(C), 'long');
       setFreeCastUses(nextFC);
-      saveFreeCastUses(nextFC);
-      if (C.bladesongActive) {
-        updateCurrentCharacter(prev => ({ ...prev, bladesongActive: false }));
-      }
+      patch.freeCastUses = nextFC;
+      if (C.bladesongActive) patch.bladesongActive = false;
     }
 
     if (C?.speciesName) {
       const grants = installedRegistry.getSpeciesLongRestGrants(C.speciesName, C.speciesSource);
       if (grants?.inspiration) {
         s.sheetInspiration = true;
-        saveInspiration(true);
+        patch.inspiration = true;
       }
     }
 
     setSheet(s);
+    persist(patch);
     setLongRestOpen(false);
     showDiceToast('Long Rest', 'Fully restored!', 0, []);
-  }, [sheet, resources, freeCastUses, C]);
+  }, [sheet, resources, freeCastUses, C, persist]);
 
   const doRest = useCallback((type) => {
     const s = { ...sheet };
     let res = { ...resources };
+    const patch = {};
     if (type === 'long') {
       s.currentHP = s.maxHP;
       s.tempHP = 0;
@@ -235,31 +236,36 @@ export default function CharacterSheet() {
       s.spellSlotUsed = {};
       s.createdSpellSlots = {};
       s.usedHDPools = {};
-      saveDeathSaves(s.deathSaves);
-      setStorageJson('5e_slots_used', {});
-      setStorageJson('5e_created_slots', {});
+      Object.assign(patch, {
+        currentHP: s.currentHP, tempHP: 0, maxHPBonus: s.maxHPBonus,
+        usedHD: 0, usedHDPools: {},
+        deathSaves: s.deathSaves,
+        spellSlotsUsed: {}, createdSpellSlots: {},
+      });
       if (C?.speciesName) {
         const grants = installedRegistry.getSpeciesLongRestGrants(C.speciesName, C.speciesSource);
         if (grants?.inspiration) {
           s.sheetInspiration = true;
-          saveInspiration(true);
+          patch.inspiration = true;
         }
       }
+    } else {
+      Object.assign(patch, {
+        currentHP: s.currentHP, tempHP: s.tempHP, maxHPBonus: s.maxHPBonus,
+        usedHD: s.usedHD, usedHDPools: s.usedHDPools || {},
+      });
     }
-    s.usedHD = Math.min(s.usedHD || 0, type === 'short' ? s.usedHD : 0);
-    saveHPState(s.currentHP, s.tempHP, s.maxHPBonus);
-    setStorageItem('5e_hd_used', s.usedHD);
-    setStorageJson('5e_hd_used_pools', s.usedHDPools || {});
     if (C) {
       res = applyResourceRest(res, getAllResourceDefs(C), C, type);
       setResources(res);
-      saveResources(res);
+      patch.resources = res;
       const nextFC = applyFreeCastRest(freeCastUses, getFreeCastDefsForCharacter(C), type);
       setFreeCastUses(nextFC);
-      saveFreeCastUses(nextFC);
+      patch.freeCastUses = nextFC;
     }
     setSheet(s);
-  }, [sheet, resources, freeCastUses, C]);
+    persist(patch);
+  }, [sheet, resources, freeCastUses, C, persist]);
 
   const adjustHP = useCallback((dir, amount = 1) => {
     if (!sheet) return;
@@ -276,20 +282,21 @@ export default function CharacterSheet() {
       }
       s.currentHP = Math.max(0, s.currentHP - remaining);
     }
+    const patch = { currentHP: s.currentHP, tempHP: s.tempHP, maxHPBonus: s.maxHPBonus };
     if (s.currentHP > 0) {
       s.deathSaves = { success: 0, fail: 0 };
-      saveDeathSaves(s.deathSaves);
+      patch.deathSaves = s.deathSaves;
     }
-    saveHPState(s.currentHP, s.tempHP, s.maxHPBonus);
     setSheet(s);
-  }, [sheet]);
+    persist(patch);
+  }, [sheet, persist]);
 
   const adjustTempHP = useCallback((dir) => {
     if (!sheet) return;
     const s = { ...sheet, tempHP: Math.max(0, sheet.tempHP + dir) };
-    saveHPState(s.currentHP, s.tempHP, s.maxHPBonus);
     setSheet(s);
-  }, [sheet]);
+    persist({ tempHP: s.tempHP });
+  }, [sheet, persist]);
 
   const adjustMaxHpBonus = useCallback((dir) => {
     if (!sheet || !C) return;
@@ -297,20 +304,21 @@ export default function CharacterSheet() {
     const baseMax = Math.max(1, calcMaxHP(C));
     s.maxHP = Math.max(1, baseMax + s.maxHPBonus);
     if (s.currentHP > s.maxHP) s.currentHP = s.maxHP;
-    saveHPState(s.currentHP, s.tempHP, s.maxHPBonus);
     setSheet(s);
-  }, [sheet, C]);
+    persist({ currentHP: s.currentHP, maxHPBonus: s.maxHPBonus });
+  }, [sheet, C, persist]);
 
   const setCurrentHP = useCallback((next) => {
     if (!sheet) return;
     const s = { ...sheet, currentHP: Math.max(0, Math.min(sheet.maxHP, parseInt(next) || 0)) };
+    const patch = { currentHP: s.currentHP, tempHP: s.tempHP, maxHPBonus: s.maxHPBonus };
     if (s.currentHP > 0) {
       s.deathSaves = { success: 0, fail: 0 };
-      saveDeathSaves(s.deathSaves);
+      patch.deathSaves = s.deathSaves;
     }
-    saveHPState(s.currentHP, s.tempHP, s.maxHPBonus);
     setSheet(s);
-  }, [sheet]);
+    persist(patch);
+  }, [sheet, persist]);
 
   const rollDeathSave = useCallback(() => {
     if (!sheet) return;
@@ -328,22 +336,21 @@ export default function CharacterSheet() {
     if (roll === 1) { ds.fail = Math.min(3, ds.fail + 2); }
     else if (roll === 20) {
       ds.success = 0; ds.fail = 0;
-      saveDeathSaves(ds);
       const s = { ...sheet, deathSaves: ds, currentHP: Math.min(sheet.maxHP, 1) };
-      saveHPState(s.currentHP, s.tempHP, s.maxHPBonus);
       setSheet(s);
+      persist({ currentHP: s.currentHP, tempHP: s.tempHP, maxHPBonus: s.maxHPBonus, deathSaves: ds });
       showDiceToast('Death Save', 'Critical success: regain 1 HP', roll, [{ v: roll, faces: 20 }]);
       return;
     } else if (roll >= 10) { ds.success = Math.min(3, ds.success + 1); }
     else { ds.fail = Math.min(3, ds.fail + 1); }
 
-    saveDeathSaves(ds);
     if (ds.success >= 3) extra = 'Stable (0 HP).';
     else if (ds.fail >= 3) extra = 'Dead.';
     else extra = `${ds.success} success / ${ds.fail} fail`;
     setSheet({ ...sheet, deathSaves: ds });
+    persist({ deathSaves: ds });
     showDiceToast('Death Save', extra, roll, [{ v: roll, faces: 20 }]);
-  }, [sheet]);
+  }, [sheet, persist]);
 
   const toggleCondition = useCallback((key) => {
     if (!sheet) return;
@@ -351,27 +358,27 @@ export default function CharacterSheet() {
     const next = [...sheet.activeConditions];
     if (idx >= 0) next.splice(idx, 1);
     else next.push(key);
-    saveConditions(next);
     setSheet({ ...sheet, activeConditions: next });
-  }, [sheet]);
+    persist({ activeConditions: next });
+  }, [sheet, persist]);
 
   const clearConditions = useCallback(() => {
     if (!sheet) return;
-    saveConditions([]);
     setSheet({ ...sheet, activeConditions: [] });
-  }, [sheet]);
+    persist({ activeConditions: [] });
+  }, [sheet, persist]);
 
   const toggleInspiration = useCallback(() => {
     if (!sheet) return;
     const next = !sheet.sheetInspiration;
-    saveInspiration(next);
     setSheet({ ...sheet, sheetInspiration: next });
-  }, [sheet]);
+    persist({ inspiration: next });
+  }, [sheet, persist]);
 
   const showDiceToast = useCallback((label, detail, total, rolls, meta) => {
     const entry = { label, detail, total, rolls, meta, timestamp: Date.now() };
     setDiceToast(entry);
-    setRollLog(prev => [entry, ...prev].slice(0, 50));
+    setRollLog((prev) => [entry, ...prev].slice(0, 50));
   }, []);
 
   const rollD20 = useCallback((bonus, label, advantage) => {
@@ -406,15 +413,14 @@ export default function CharacterSheet() {
 
   const updateXp = useCallback((val) => {
     const xp = parseInt(val) || 0;
-    setStorageItem('5e_xp', xp);
-    setSheet(prev => ({ ...prev, xpStored: xp }));
-    updateCurrentCharacter(prev => ({ ...prev, xp }));
+    setSheet((prev) => ({ ...prev, xpStored: xp }));
+    updateCurrentCharacter((prev) => ({ ...prev, xp }));
   }, [updateCurrentCharacter]);
 
   const updateNotes = useCallback((val) => {
-    setStorageItem('5e_notes', val);
-    setSheet(prev => ({ ...prev, notes: val }));
-  }, []);
+    setSheet((prev) => ({ ...prev, notes: val }));
+    persist({ notes: val });
+  }, [persist]);
 
   const downloadSheet = useCallback(() => {
     if (!C) return;
@@ -479,9 +485,9 @@ export default function CharacterSheet() {
             <RightTop C={C} sheet={sheet} onRoll={rollD20}
               onToggleCondition={toggleCondition} onClearConditions={clearConditions}
               onToggleInspiration={toggleInspiration}
-              resources={resources} setResources={setResources} onShowToast={showDiceToast} />
+              resources={resources} setResources={saveResourcesState} onShowToast={showDiceToast} />
             <TabsPanel C={C} sheet={sheet} tab={tab} setTab={setTab} onRoll={rollD20}
-              resources={resources} setResources={setResources}
+              resources={resources} setResources={saveResourcesState}
               freeCastUses={freeCastUses}
               onToggleFreeCast={(freeCast) => {
                 setFreeCastUses((prev) => {
@@ -490,12 +496,12 @@ export default function CharacterSheet() {
                   const next = { ...(prev || {}) };
                   if (used >= max) delete next[freeCast.id];
                   else next[freeCast.id] = used + 1;
-                  saveFreeCastUses(next);
+                  persist({ freeCastUses: next });
                   return next;
                 });
               }}
               onRest={doRest} onShowToast={showDiceToast}
-              onUpdateInventory={updateInventory} onUpdateCurrency={updateCurrency} onUpdateSpells={updateSpells} onUpdateSheet={syncSheet}
+              onUpdateInventory={updateInventory} onUpdateCurrency={updateCurrency} onUpdateSpells={updateSpells} onUpdateSheet={syncSheet} onUpdateNotes={updateNotes}
               onUpdateCharacter={updateCurrentCharacter} />
           </Box>
         </Box>

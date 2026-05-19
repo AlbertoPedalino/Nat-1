@@ -105,7 +105,7 @@ function collectBlockedForKind({ character, choices, currentKey, kind }) {
       ]
     ).forEach((item) => addChoiceValueToKindSet(blocked, item, 'skill'));
     (character.normalizedChoices?.skills || []).forEach((item) => addChoiceValueToKindSet(blocked, item, 'skill'));
-    addFixedBlocks(blocked, character.bgObj?.skillProficiencies || character.backgroundObj?.skillProficiencies || character.bgSnapshot?.skillProficiencies, 'skill');
+    addFixedBlocks(blocked, character.backgroundObj?.skillProficiencies || character.backgroundSnapshot?.skillProficiencies, 'skill');
     addFixedBlocks(blocked, character.speciesObj?.skillProficiencies || character.speciesSnapshot?.skillProficiencies, 'skill');
   }
 
@@ -114,7 +114,7 @@ function collectBlockedForKind({ character, choices, currentKey, kind }) {
     (character.normalizedChoices?.tools || []).forEach((item) => addChoiceValueToKindSet(blocked, item, 'tool'));
     addFixedBlocks(blocked, character.cls?.startingProficiencies?.tools || character.clsSnapshot?.startingProficiencies?.tools, 'tool');
     addFixedBlocks(blocked, character.cls?.startingProficiencies?.toolProficiencies || character.clsSnapshot?.startingProficiencies?.toolProficiencies, 'tool');
-    addFixedBlocks(blocked, character.bgObj?.toolProficiencies || character.backgroundObj?.toolProficiencies || character.bgSnapshot?.toolProficiencies, 'tool');
+    addFixedBlocks(blocked, character.backgroundObj?.toolProficiencies || character.backgroundSnapshot?.toolProficiencies, 'tool');
     addFixedBlocks(blocked, character.speciesObj?.toolProficiencies || character.speciesSnapshot?.toolProficiencies, 'tool');
   }
 
@@ -123,7 +123,7 @@ function collectBlockedForKind({ character, choices, currentKey, kind }) {
     (character.normalizedChoices?.languages || []).forEach((item) => addChoiceValueToKindSet(blocked, item, 'language'));
     addFixedBlocks(blocked, character.cls?.startingProficiencies?.languages || character.clsSnapshot?.startingProficiencies?.languages, 'language');
     addFixedBlocks(blocked, character.cls?.startingProficiencies?.languageProficiencies || character.clsSnapshot?.startingProficiencies?.languageProficiencies, 'language');
-    addFixedBlocks(blocked, character.bgObj?.languageProficiencies || character.backgroundObj?.languageProficiencies || character.bgSnapshot?.languageProficiencies, 'language');
+    addFixedBlocks(blocked, character.backgroundObj?.languageProficiencies || character.backgroundSnapshot?.languageProficiencies, 'language');
     addFixedBlocks(blocked, character.speciesObj?.languageProficiencies || character.speciesSnapshot?.languageProficiencies, 'language');
   }
 
@@ -171,7 +171,7 @@ function collectCurrentProficientSkills({ character, choices }) {
   (character?.normalizedChoices?.skills || []).forEach(addSkill);
   (character?.normalizedChoices?.expertise || []).forEach(addSkill);
 
-  addFixedBlocks(skills, character?.bgObj?.skillProficiencies || character?.backgroundObj?.skillProficiencies || character?.bgSnapshot?.skillProficiencies, 'skill');
+  addFixedBlocks(skills, character?.backgroundObj?.skillProficiencies || character?.backgroundSnapshot?.skillProficiencies, 'skill');
   addFixedBlocks(skills, character?.speciesObj?.skillProficiencies || character?.speciesSnapshot?.skillProficiencies, 'skill');
 
   [

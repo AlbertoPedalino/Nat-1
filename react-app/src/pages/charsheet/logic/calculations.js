@@ -57,9 +57,8 @@ export function getBase(C, stat) {
 }
 
 export function bgBonus(C, stat) {
-  if (C?.bgBonusMap) return C.bgBonusMap[stat] || 0;
-  if (!C?.bgAbility?.length) return 0;
-  const idx = C.bgAbility.indexOf(stat);
+  if (!C?.backgroundAbilities?.length) return 0;
+  const idx = C.backgroundAbilities.indexOf(stat);
   return idx < 0 ? 0 : idx === 0 ? 2 : 1;
 }
 
@@ -172,7 +171,7 @@ export function getSkillProficiency(C, skillName) {
   const expList = Array.isArray(skillData) ? [] : (skillData.expert || []);
   if (valuesIncludeSkill(expList, skillName)) return 'exp';
   if (valuesIncludeSkill(profList, skillName)) return 'prof';
-  const bgFixed = (C?.bgSnapshot?.skillProficiencies || []).flatMap(sp => Object.keys(sp).filter(k => k !== 'choose'));
+  const bgFixed = (C?.backgroundSnapshot?.skillProficiencies || []).flatMap(sp => Object.keys(sp).filter(k => k !== 'choose'));
   if (valuesIncludeSkill(bgFixed, skillName)) return 'prof';
   if (C?.choices) {
     for (const [key, val] of Object.entries(C.choices)) {

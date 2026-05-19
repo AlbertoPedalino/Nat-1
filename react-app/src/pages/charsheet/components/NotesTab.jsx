@@ -1,7 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Box, IconButton, TextField, Typography } from '@mui/material';
 import { Plus, Minus, PencilLine, Check } from 'lucide-react';
-import { setStorageJson } from '../../../shared/storage.js';
 
 function normalizePages(raw) {
   if (!raw) return [{ id: 'page_1', name: 'General', content: '' }];
@@ -29,7 +28,7 @@ function PageTab({ page, active, onClick }) {
   );
 }
 
-export default function NotesTab({ sheet, onUpdateSheet }) {
+export default function NotesTab({ sheet, onUpdateNotes }) {
   const [pages, setPages] = useState(() => normalizePages(sheet?.notes));
   const [activeIdx, setActiveIdx] = useState(0);
   const [editingName, setEditingName] = useState(null);
@@ -38,9 +37,8 @@ export default function NotesTab({ sheet, onUpdateSheet }) {
 
   useEffect(() => {
     if (isFirstMount.current) { isFirstMount.current = false; return; }
-    setStorageJson('5e_notes', pages);
-    onUpdateSheet?.({ notes: pages });
-  }, [pages, onUpdateSheet]);
+    onUpdateNotes?.(pages);
+  }, [pages, onUpdateNotes]);
 
   useEffect(() => {
     if (editingName != null && nameInputRef.current) {

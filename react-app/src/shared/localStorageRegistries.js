@@ -1,3 +1,5 @@
+import { deleteCharacter, listCharacters, renameCharacter, getActiveCharId, setActiveCharId } from './character/store.js';
+
 export const REGISTRY_META = {
   gb_board_registry: {
     label: 'GM Board',
@@ -15,20 +17,21 @@ export const REGISTRY_META = {
   },
   gb_char_registry: {
     label: 'Personaggio',
-    prefix: (id) => `gb:char:${id}:`,
-    activeKey: 'gb_active_char_id',
     route: (id) => `/charsheet?char=${encodeURIComponent(id)}`,
     newRoute: '/charbuilder?char=new',
+    custom: true,
   },
 };
 
 export function readRegistry(key) {
+  if (key === 'gb_char_registry') return listCharacters().slice(0, 10);
   try {
     return JSON.parse(localStorage.getItem(key) || '[]').filter((x) => x && x.id).slice(0, 10);
   } catch { return []; }
 }
 
 export function writeRegistry(key, list) {
+  if (key === 'gb_char_registry') return;
   try {
     localStorage.setItem(key, JSON.stringify(list));
   } catch {}
@@ -43,6 +46,11 @@ export function deleteRegistryEntry(registryKey, id) {
   if (!meta) return false;
   if (!window.confirm(`Eliminare questo salvataggio ${meta.label} e tutti i suoi dati locali?`)) return false;
 
+  if (registryKey === 'gb_char_registry') {
+    deleteCharacter(id);
+    return true;
+  }
+
   const prefix = meta.prefix(id);
   Object.keys(localStorage)
     .filter((k) => k.startsWith(prefix))
@@ -50,16 +58,6 @@ export function deleteRegistryEntry(registryKey, id) {
 
   if (localStorage.getItem(meta.activeKey) === id) {
     localStorage.removeItem(meta.activeKey);
-  }
-
-  if (registryKey === 'gb_char_registry') {
-    const UNSCOPED_KEYS = [
-      '5e_current_char', '5e_builder_state', '5e_inventory', '5e_currency',
-      '5e_hp_current', '5e_hp_max_bonus', '5e_hp_temp', '5e_death_saves',
-      '5e_hd_used', '5e_hd_used_pools', '5e_slots_used', '5e_created_slots', '5e_inspiration',
-      '5e_conditions_active', '5e_xp', '5e_notes', '5e_resources',
-    ];
-    UNSCOPED_KEYS.forEach((k) => localStorage.removeItem(k));
   }
 
   const next = readRegistry(registryKey).filter((entry) => entry.id !== id);
@@ -72,6 +70,12 @@ export function renameRegistryEntry(registryKey, id, nextName) {
   if (!meta) return false;
   const name = nextName || prompt('Nome salvataggio', id);
   if (!name || !name.trim()) return false;
+
+  if (registryKey === 'gb_char_registry') {
+    renameCharacter(id, name.trim());
+    return true;
+  }
+
   const list = readRegistry(registryKey);
   const next = list.map((x) => x.id === id ? { ...x, name: name.trim(), updatedAt: Date.now() } : x);
   writeRegistry(registryKey, next);

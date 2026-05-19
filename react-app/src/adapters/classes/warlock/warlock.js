@@ -1,5 +1,4 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
-import { setStorageJson } from '../../../shared/storage.js';
 import { warlockHasInvocation, warlockLevel, warlockKnownInvocations, warlockInvocationSelections } from '../../../shared/character/warlockUtils.js';
 import { registerChoiceLevelMap } from '../../../shared/character/choiceLevels.js';
 

@@ -1,7 +1,13 @@
 import { calcMaxHp, getAllFinalScores, getPrimaryClassLevel, getSelectedFeatNames } from './calculations.js';
 import { getMod, getFinal } from '../../charsheet/logic/calculations.js';
 import { installedRegistry } from '../../../adapters/index.js';
-import { getStorageItem, setStorageItem, setStorageJson } from '../../../shared/storage.js';
+import {
+  createCharacter as storeCreateCharacter,
+  getActiveCharId,
+  loadCharacter as storeLoadCharacter,
+  saveCharacter as storeSaveCharacter,
+  setActiveCharId,
+} from '../../../shared/character/store.js';
 import { collectAutoGrantedSpells as collectEntityAutoGrantedSpells } from '../spells/spells.js';
 import {
   splitTypedProficiencies,
@@ -78,22 +84,6 @@ function mergeNormalizedChoices(normalizedChoices, typedProfs) {
   normalized.languages = uniqueProficiencyLabels([...(normalized.languages || []), ...typedProfs.languages]);
 
   return normalized;
-}
-
-export function patchCharacterField(field, value) {
-  const key = '5e_current_char';
-  try {
-    const current = JSON.parse(localStorage.getItem(key) || '{}');
-    current[field] = value;
-    localStorage.setItem(key, JSON.stringify(current));
-    const charId = localStorage.getItem('gb_active_char_id');
-    if (charId) {
-      const scopedKey = `gb:char:${charId}:${key}`;
-      const scoped = JSON.parse(localStorage.getItem(scopedKey) || '{}');
-      scoped[field] = value;
-      localStorage.setItem(scopedKey, JSON.stringify(scoped));
-    }
-  } catch {}
 }
 
 function normalizeProficiencyChoicesForPersistence(character = {}) {
@@ -249,10 +239,10 @@ export function makeSheetPayload(character, data) {
     extraClasses: character.extraClasses || [],
     speciesName: character.speciesName,
     speciesSource: character.speciesSource,
-    bgName: character.backgroundName,
-    bgSource: character.backgroundSource,
-    bgAbility: character.backgroundAbilities,
-    bgPattern: character.backgroundPattern || [2, 1],
+    backgroundName: character.backgroundName,
+    backgroundSource: character.backgroundSource,
+    backgroundAbilities: character.backgroundAbilities,
+    backgroundPattern: character.backgroundPattern || [2, 1],
     scoreMethod: character.scoreMethod,
     hpMode: character.hpMode || 'average',
     hpManualRolls: { ...(character.hpManualRolls || {}) },
@@ -293,7 +283,7 @@ export function makeSheetPayload(character, data) {
         ? installedRegistry.getSpeciesSheetHpBonus(character.speciesName, character.speciesSource) || 0
         : 0),
     },
-    bgSnapshot: {
+    backgroundSnapshot: {
       skillProficiencies: character.backgroundObj?.skillProficiencies || [],
       languageProficiencies: character.backgroundObj?.languageProficiencies || [],
       toolProficiencies: character.backgroundObj?.toolProficiencies || [],
@@ -349,6 +339,7 @@ export function makeSheetPayload(character, data) {
     finalScores: getAllFinalScores(character),
     inventory: character.inventory || [],
     currency: character.currency || { cp: 0, sp: 0, ep: 0, gp: 10, pp: 0 },
+    equipChoices: character.equipChoices || {},
     grantSpellNames: choiceSpellNames,
     spellSnapshots,
     classIconColor: character.classIconColor || null,
@@ -382,33 +373,38 @@ function collectAutoGrantedSpells(character) {
   return out;
 }
 
+const HEAVY_BUILDER_FIELDS = [
+  'cls', 'speciesObj', 'backgroundObj',
+  'allFeatures', 'allClassFeatures', 'allSubFeatures', 'allFeatSnapshots',
+  'subclasses', 'dicePool',
+];
+
+function stripHeavyFields(character) {
+  const out = { ...character };
+  HEAVY_BUILDER_FIELDS.forEach((key) => { delete out[key]; });
+  if (Array.isArray(out.extraClasses)) {
+    out.extraClasses = out.extraClasses.map((extra) => {
+      const trimmed = { ...extra };
+      HEAVY_BUILDER_FIELDS.forEach((key) => { delete trimmed[key]; });
+      return trimmed;
+    });
+  }
+  return out;
+}
+
 export function saveCharacter(character, data) {
   const builderCharacter = normalizeProficiencyChoicesForPersistence(character);
   const payload = makeSheetPayload(builderCharacter, data);
-  setStorageJson('5e_current_char', payload);
-  setStorageJson('5e_inventory', builderCharacter.inventory || []);
-  setStorageJson('5e_currency', builderCharacter.currency || {});
-  setStorageItem('5e_xp', builderCharacter.xp || 0);
-  setStorageJson('5e_builder_state', builderCharacter);
-
-  const charId = getStorageItem('gb_active_char_id');
-  if (charId) {
-    setStorageJson(`gb:char:${charId}:5e_current_char`, payload);
-    setStorageJson(`gb:char:${charId}:5e_builder_state`, builderCharacter);
-    setStorageJson(`gb:char:${charId}:5e_inventory`, builderCharacter.inventory || []);
-    setStorageJson(`gb:char:${charId}:5e_currency`, builderCharacter.currency || {});
-    setStorageItem(`gb:char:${charId}:5e_xp`, builderCharacter.xp || 0);
-    try {
-      const registry = JSON.parse(localStorage.getItem('gb_char_registry') || '[]');
-      const idx = registry.findIndex((e) => e.id === charId);
-      if (idx >= 0) {
-        registry[idx] = { ...registry[idx], name: builderCharacter.name || registry[idx].name, updatedAt: Date.now() };
-      }
-      localStorage.setItem('gb_char_registry', JSON.stringify(registry));
-    } catch {}
+  const existing = storeLoadCharacter(getActiveCharId()) || {};
+  const unified = stripHeavyFields({ ...existing, ...builderCharacter, ...payload });
+  let id = getActiveCharId();
+  if (!id) {
+    const created = storeCreateCharacter(unified);
+    id = created.id;
+    setActiveCharId(id);
+    return created;
   }
-
-  return payload;
+  return storeSaveCharacter(id, unified);
 }
 
 function unwrapStructuredSheetPayload(payload) {
@@ -424,15 +420,18 @@ function isStructuredSheetPayload(payload) {
     payload.className
     || payload.clsSnapshot
     || payload.speciesSnapshot
-    || payload.bgSnapshot
+    || payload.backgroundSnapshot
     || payload.choices
     || payload.finalScores
   );
 }
 
 function buildBuilderStateFromSheetPayload(data) {
-  const backgroundName = data.backgroundName || data.bgName || data.bgSnapshot?.name || '';
-  const backgroundSource = data.backgroundSource || data.bgSource || data.bgSnapshot?.source || '';
+  const backgroundSnapshot = data.backgroundSnapshot || null;
+  const backgroundName = data.backgroundName || backgroundSnapshot?.name || '';
+  const backgroundSource = data.backgroundSource || backgroundSnapshot?.source || '';
+  const backgroundAbilities = data.backgroundAbilities || [];
+  const backgroundPattern = data.backgroundPattern || [2, 1];
   const speciesName = data.speciesName || data.speciesSnapshot?.name || '';
   const speciesSource = data.speciesSource || data.speciesSnapshot?.source || '';
 
@@ -452,14 +451,9 @@ function buildBuilderStateFromSheetPayload(data) {
 
     backgroundName,
     backgroundSource,
-    backgroundObj: data.backgroundObj || data.bgSnapshot || null,
-    backgroundAbilities: data.backgroundAbilities || data.bgAbility || [],
-    backgroundPattern: data.backgroundPattern || data.bgPattern || [2, 1],
-
-    bgName: backgroundName,
-    bgSource: backgroundSource,
-    bgAbility: data.bgAbility || data.backgroundAbilities || [],
-    bgPattern: data.bgPattern || data.backgroundPattern || [2, 1],
+    backgroundObj: data.backgroundObj || backgroundSnapshot,
+    backgroundAbilities,
+    backgroundPattern,
 
     scoreMethod: data.scoreMethod || 'pointbuy',
     hpMode: data.hpMode || 'average',
@@ -470,6 +464,7 @@ function buildBuilderStateFromSheetPayload(data) {
     manualScores: data.manualScores || {},
 
     choices: data.choices || {},
+    equipChoices: data.equipChoices || {},
     normalizedChoices: data.normalizedChoices || null,
     selectedSkills: data.selectedSkills || [],
     selectedLanguages: data.selectedLanguages || [],
@@ -497,30 +492,6 @@ function buildBuilderStateFromSheetPayload(data) {
   return normalizeProficiencyChoicesForPersistence(builderState);
 }
 
-function updateActiveCharacterStorage(data, builderState) {
-  const charId = getStorageItem('gb_active_char_id');
-  if (!charId) return;
-
-  setStorageJson(`gb:char:${charId}:5e_current_char`, data);
-  setStorageJson(`gb:char:${charId}:5e_builder_state`, builderState);
-  setStorageJson(`gb:char:${charId}:5e_inventory`, data.inventory || []);
-  setStorageJson(`gb:char:${charId}:5e_currency`, data.currency || {});
-  setStorageItem(`gb:char:${charId}:5e_xp`, data.xp || 0);
-
-  try {
-    const registry = JSON.parse(localStorage.getItem('gb_char_registry') || '[]');
-    const idx = registry.findIndex((entry) => entry.id === charId);
-    if (idx >= 0) {
-      registry[idx] = {
-        ...registry[idx],
-        name: data.name || registry[idx].name,
-        updatedAt: Date.now(),
-      };
-      localStorage.setItem('gb_char_registry', JSON.stringify(registry));
-    }
-  } catch {}
-}
-
 export function importSheetPayload(payload, confirmOverwrite = () => true) {
   const data = unwrapStructuredSheetPayload(payload);
 
@@ -528,19 +499,19 @@ export function importSheetPayload(payload, confirmOverwrite = () => true) {
     throw new Error('Formato file non riconosciuto: carica un JSON scheda GM-Board strutturato.');
   }
 
-  const hasExisting = getStorageItem('5e_builder_state') != null;
+  const activeId = getActiveCharId();
+  const hasExisting = activeId && storeLoadCharacter(activeId) != null;
   if (hasExisting && !confirmOverwrite()) return 0;
 
   const normalizedData = normalizeProficiencyChoicesForPersistence(data);
   const builderState = buildBuilderStateFromSheetPayload(normalizedData);
+  const unified = stripHeavyFields({ ...builderState, ...normalizedData });
 
-  setStorageJson('5e_current_char', normalizedData);
-  setStorageJson('5e_builder_state', builderState);
-  setStorageJson('5e_inventory', normalizedData.inventory || []);
-  setStorageJson('5e_currency', normalizedData.currency || {});
-  setStorageItem('5e_xp', normalizedData.xp || 0);
-
-  updateActiveCharacterStorage(normalizedData, builderState);
+  if (activeId) storeSaveCharacter(activeId, unified);
+  else {
+    const created = storeCreateCharacter(unified);
+    setActiveCharId(created.id);
+  }
 
   return 1;
 }

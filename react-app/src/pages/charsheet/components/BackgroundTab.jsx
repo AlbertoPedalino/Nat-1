@@ -91,27 +91,27 @@ function ProfList({ title, items }) {
 }
 
 export default function BackgroundTab({ C }) {
-  const bg = C?.bgSnapshot || {};
-  const bgName = C?.bgName || '';
-  const bgSource = C?.bgSource || '';
-  const entries = bg.entries || [];
+  const background = C?.backgroundSnapshot || {};
+  const backgroundName = C?.backgroundName || '';
+  const backgroundSource = C?.backgroundSource || '';
+  const entries = background.entries || [];
   const description = entries.length ? renderEntries(entries) : '';
 
-  const skills = listProficiencies(bg.skillProficiencies);
-  const tools = listProficiencies(bg.toolProficiencies);
-  const languages = listProficiencies(bg.languageProficiencies);
-  const feats = listFeats(bg.feats);
-  const equipment = renderEquipment(bg.startingEquipment);
+  const skills = listProficiencies(background.skillProficiencies);
+  const tools = listProficiencies(background.toolProficiencies);
+  const languages = listProficiencies(background.languageProficiencies);
+  const feats = listFeats(background.feats);
+  const equipment = renderEquipment(background.startingEquipment);
 
   return (
     <Paper variant="outlined" sx={{ p: 1.5, bgcolor: 'rgba(35,32,26,1)', overflow: 'hidden' }}>
       <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mb: 1, pb: 0.5, borderBottom: 1, borderColor: 'rgba(237,212,138,0.22)' }}>
         <GraduationCap size={16} color={BG} />
         <Typography variant="overline" sx={{ letterSpacing: 1, color: BG, fontWeight: 700 }}>
-          Background — {bgName || '?'}
+          Background — {backgroundName || '?'}
         </Typography>
-        {bgSource ? (
-          <Chip size="small" label={bgSource} variant="outlined"
+        {backgroundSource ? (
+          <Chip size="small" label={backgroundSource} variant="outlined"
             sx={{ color: BG, borderColor: BG, fontWeight: 700, fontSize: '0.5rem', height: 18, '& .MuiChip-label': { color: BG } }} />
         ) : null}
       </Stack>

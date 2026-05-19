@@ -1,4 +1,4 @@
-import { useEffect, useReducer } from 'react';
+import { useEffect, useReducer, useRef } from 'react';
 import {
   AppBar,
   Box,
@@ -21,15 +21,15 @@ import { STEPS } from './constants.js';
 import { adapterRegistry, loadClassAdapters, loadCoreAdapters } from '../../adapters/index.js';
 import { getMod, getFinal } from '../charsheet/logic/calculations.js';
 import { adaptBuilderData } from '../../adapters/adapterPipeline.js';
-import { loadBackgrounds, loadClassIndex, loadFeats, loadItems, loadSpecies, loadSpells, extractSheetData, importSheetPayload, patchCharacterField, saveCharacter } from './logic/index.js';
+import { loadBackgrounds, loadClassIndex, loadFeats, loadItems, loadSpecies, loadSpells, extractSheetData, importSheetPayload, saveCharacter } from './logic/index.js';
 import { builderReducer, initialBuilderState } from './state.js';
 import { BackgroundStep, ClassStep, EquipmentStep, ScoresStep, SheetStep, SpeciesStep } from './steps/index.js';
-import { mergeSheetIntoBuilder } from '../../shared/builderSync.js';
-import { getStorageJson } from '../../shared/storage.js';
-
-function generateId() {
-  try { return crypto.randomUUID(); } catch { return Date.now().toString(36) + Math.random().toString(36).slice(2, 10); }
-}
+import {
+  createCharacter as storeCreateCharacter,
+  getActiveCharId,
+  loadCharacter as storeLoadCharacter,
+  setActiveCharId,
+} from '../../shared/character/store.js';
 
 function StepLabel({ step, index }) {
   const Icon = step.icon;
@@ -65,49 +65,36 @@ function ActiveStep({ state, dispatch }) {
 function createInitialBuilderState() {
   const params = new URLSearchParams(window.location.search);
   const charParam = params.get('char');
-
-  if (charParam === 'new') {
-    const id = generateId();
-    localStorage.setItem('gb_active_char_id', id);
-    try {
-      const registry = JSON.parse(localStorage.getItem('gb_char_registry') || '[]');
-      registry.unshift({ id, name: 'New Character', createdAt: Date.now(), updatedAt: Date.now() });
-      localStorage.setItem('gb_char_registry', JSON.stringify(registry));
-    } catch {}
-    return initialBuilderState;
-  }
-
-  if (charParam) {
-    const scopedBuilder = getStorageJson(`gb:char:${charParam}:5e_builder_state`, null);
-    const scopedSheet = getStorageJson(`gb:char:${charParam}:5e_current_char`, null);
-    if (scopedBuilder || scopedSheet) {
-      localStorage.setItem('gb_active_char_id', charParam);
-      const saved = mergeSheetIntoBuilder(scopedBuilder, scopedSheet);
-      if (saved) {
-        return { ...initialBuilderState, character: { ...initialBuilderState.character, ...saved } };
-      }
-    }
-  }
-
-  const savedBuilder = getStorageJson('5e_builder_state', null);
-  const savedSheet = getStorageJson('5e_current_char', null);
-  if (savedBuilder || savedSheet) {
-    const saved = mergeSheetIntoBuilder(savedBuilder, savedSheet);
-    if (saved) {
-      return { ...initialBuilderState, character: { ...initialBuilderState.character, ...saved } };
-    }
-  }
-
-  return initialBuilderState;
+  const targetId = (charParam && charParam !== 'new') ? charParam : getActiveCharId();
+  if (!targetId) return initialBuilderState;
+  const stored = storeLoadCharacter(targetId);
+  if (!stored) return initialBuilderState;
+  return { ...initialBuilderState, character: { ...initialBuilderState.character, ...stored } };
 }
 
-function isSheetReady(character) {
-  return Boolean(
-    character?.name
-    && character?.className
-    && character?.speciesName
-    && character?.backgroundName
-  );
+function ensureActiveCharacter() {
+  const params = new URLSearchParams(window.location.search);
+  const charParam = params.get('char');
+
+  if (charParam && charParam !== 'new') {
+    const stored = storeLoadCharacter(charParam);
+    if (stored) {
+      setActiveCharId(charParam);
+      return;
+    }
+  }
+
+  if (charParam !== 'new') {
+    const activeId = getActiveCharId();
+    if (activeId && storeLoadCharacter(activeId)) {
+      setActiveCharId(activeId);
+      return;
+    }
+  }
+
+  const created = storeCreateCharacter({ name: 'New Character' });
+  setActiveCharId(created.id);
+  window.history.replaceState(null, '', `${window.location.pathname}?char=${created.id}`);
 }
 
 function hasFinishedLoading(loading) {
@@ -118,6 +105,13 @@ export default function CharBuilder() {
   const [state, dispatch] = useReducer(builderReducer, undefined, createInitialBuilderState);
   const activeStep = STEPS[state.tab];
   const ActiveIcon = activeStep.icon;
+  const ensuredRef = useRef(false);
+
+  useEffect(() => {
+    if (ensuredRef.current) return;
+    ensuredRef.current = true;
+    ensureActiveCharacter();
+  }, []);
 
   useEffect(() => {
     const run = async (scope, loader, mapResult) => {
@@ -188,18 +182,10 @@ export default function CharBuilder() {
   }, [state.adaptersLoaded, state.dataAdapted, state.loading, state.data]);
 
   useEffect(() => {
-    if (!isSheetReady(state.character) || !hasFinishedLoading(state.loading)) return;
-    saveCharacter(state.character, state.data);
-  }, [
-    state.character.inventory,
-    state.character.currency,
-    state.character.name,
-    state.character.className,
-    state.character.speciesName,
-    state.character.backgroundName,
-    state.loading,
-    state.data,
-  ]);
+    if (!hasFinishedLoading(state.loading)) return;
+    const handle = setTimeout(() => saveCharacter(state.character, state.data), 300);
+    return () => clearTimeout(handle);
+  }, [state.character, state.loading, state.data]);
 
   useEffect(() => {
     if (!state.character.cls && state.data.classes.length) {
@@ -225,7 +211,7 @@ export default function CharBuilder() {
           try {
             const payload = extractSheetData(await file.text());
             const result = importSheetPayload(payload, () => window.confirm('Esiste gia un personaggio in questo slot. Sovrascrivere?'));
-            const activeCharId = localStorage.getItem('gb_active_char_id');
+            const activeCharId = localStorage.getItem('gb:active_char');
             if (activeCharId) {
               window.history.replaceState(null, '', `${window.location.pathname}?char=${activeCharId}`);
             }

@@ -261,8 +261,26 @@ function buildClassSpellIndex(node) {
 
 const ITEM_SOURCES_2024 = ITEM_SOURCE_PRIORITY;
 const SCF_TYPE_FOCUS = {
+  arcane: ['Sorcerer', 'Warlock', 'Wizard'],
+  druidic: ['Druid', 'Ranger'],
   holy: ['Cleric', 'Paladin'],
 };
+
+const itemBaseType = (item) => String(item?.type || '').split('|')[0].toUpperCase();
+
+export const EQUIPMENT_TYPE_MATCHERS = Object.freeze({
+  arcaneFocus: (item) => item.scfType === 'arcane',
+  druidicFocus: (item) => item.scfType === 'druidic',
+  holySymbol: (item) => item.scfType === 'holy',
+  instrumentMusical: (item) => itemBaseType(item) === 'INS',
+  gamingSet: (item) => itemBaseType(item) === 'GS',
+});
+
+export function resolveEquipmentTypeItem(code, items) {
+  const matcher = EQUIPMENT_TYPE_MATCHERS[code];
+  if (!matcher) return null;
+  return items.find((item) => item.generatedGroupParent && matcher(item)) || null;
+}
 
 function itemSource(item) {
   return String(item?.source || '').trim();
@@ -317,7 +335,7 @@ function buildMissingGroupParents(items) {
           focus: Array.isArray(item.focus) ? item.focus.slice() : focusForScfType(item.scfType),
           items: [],
           entries: [],
-          _generatedGroupParent: true,
+          generatedGroupParent: true,
         });
       }
       const group = groups.get(key);
@@ -459,6 +477,7 @@ function normalizeItem(item) {
     focus: Array.isArray(item.focus) ? item.focus.slice() : null,
     items: Array.isArray(item.items) ? item.items.slice() : null,
     group: Array.isArray(item.group) ? item.group.slice() : null,
+    generatedGroupParent: !!item.generatedGroupParent,
   };
 }
 

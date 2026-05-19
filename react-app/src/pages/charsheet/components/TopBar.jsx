@@ -90,7 +90,7 @@ export default function TopBar({ C, sheet, onShortRest, onLongRest, onDownload, 
   const pLv = C.classLevel || C.level;
   const sc = C.subclassShortName ? ` (${C.subclassShortName})` : '';
   const race = C.speciesName || '';
-  const bg = C.bgName || '';
+  const bg = C.backgroundName || '';
   const Icon = classIcon(C.className);
 
   let clsDisplay;
@@ -182,7 +182,7 @@ export default function TopBar({ C, sheet, onShortRest, onLongRest, onDownload, 
           <Button size="small" variant="outlined" color="primary" startIcon={<ArrowLeft size={14} />}
             onClick={() => {
               const params = new URLSearchParams(window.location.search);
-              const charId = params.get('char') || localStorage.getItem('gb_active_char_id') || 'new';
+              const charId = params.get('char') || localStorage.getItem('gb:active_char') || 'new';
               navigate(`/charbuilder?char=${encodeURIComponent(charId)}`);
             }}
             sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', letterSpacing: '0.08em' }}>

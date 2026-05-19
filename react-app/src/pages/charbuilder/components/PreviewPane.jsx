@@ -365,7 +365,7 @@ function collectSkillProficiencies(character) {
   (character.normalizedChoices?.skills || []).forEach(pushSkill);
   (character.normalizedChoices?.expertise || []).forEach(pushSkill);
 
-  pushFixed(character.bgSnapshot?.skillProficiencies || character.backgroundObj?.skillProficiencies);
+  pushFixed(character.backgroundSnapshot?.skillProficiencies || character.backgroundObj?.skillProficiencies);
   pushFixed(character.speciesSnapshot?.skillProficiencies || character.speciesObj?.skillProficiencies);
   [
     ...(character.allFeatures || []),
@@ -405,7 +405,7 @@ function collectPreviewProficiencies(character) {
   const sheetLike = {
     ...character,
     clsSnapshot: character.clsSnapshot || character.cls || {},
-    bgSnapshot: character.bgSnapshot || character.backgroundObj || {},
+    backgroundSnapshot: character.backgroundSnapshot || character.backgroundObj || {},
     speciesSnapshot: {
       ...(character.speciesSnapshot || character.speciesObj || {}),
       languageProficiencies: [{ common: true }, ...((character.speciesSnapshot || character.speciesObj || {}).languageProficiencies || [])],

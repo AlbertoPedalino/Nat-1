@@ -3,7 +3,6 @@ import { Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, T
 import { Cross, Dices, Sword } from 'lucide-react';
 import { getMod, getFinal, fbonus } from '../logic/calculations.js';
 import { installedRegistry, loadCoreAdapters, loadClassAdapters } from '../../../adapters/index.js';
-import { setStorageJson } from '../../../shared/storage.js';
 import { PACT_SLOTS, SPELL_LEVEL_LABELS } from '../../charbuilder/constants.js';
 import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { getChoiceValue } from '../../../shared/character/choiceUtils.js';
@@ -122,7 +121,6 @@ export default function ActionsTab({ C, sheet, onRoll, resources, setResources, 
     }
     res[targetKey] = after;
     setResources(res);
-    setStorageJson('5e_resources', res);
     onShowToast?.(result.label || 'Resource Recovery', `Recovered ${recovered} ${resNameMap[targetKey] || targetKey}`, recovered, []);
   };
 
@@ -150,12 +148,11 @@ export default function ActionsTab({ C, sheet, onRoll, resources, setResources, 
     if (beforeSP < cost) { onShowToast?.('Create Spell Slot', 'Not enough Sorcery Points.', 0, []); return; }
     res[createSlotDialog.sourceKey] = beforeSP - cost;
     setResources(res);
-    setStorageJson('5e_resources', res);
     const created = { ...(sheet?.createdSpellSlots || {}) };
     const key = String(level);
     created[key] = (created[key] || 0) + 1;
-    setStorageJson('5e_created_slots', created);
     onUpdateSheet?.({ createdSpellSlots: created });
+    onUpdateCharacter?.((prev) => ({ ...prev, createdSpellSlots: created }));
     setCreateSlotDialog(null);
     setCreateSlotSelection(null);
     onShowToast?.('Create Spell Slot', `Created a temporary level ${level} spell slot (lasts until Long Rest).`, 0, []);
@@ -199,19 +196,18 @@ export default function ActionsTab({ C, sheet, onRoll, resources, setResources, 
     if ((created[ckey] || 0) > 0) {
       created[ckey] = (created[ckey] || 0) - 1;
       if (created[ckey] <= 0) delete created[ckey];
-      setStorageJson('5e_created_slots', created);
       onUpdateSheet?.({ createdSpellSlots: created });
+      onUpdateCharacter?.((prev) => ({ ...prev, createdSpellSlots: created }));
     } else {
       const used = { ...(sheet?.spellSlotUsed || {}) };
       const slotsData = getSheetSlots(C);
       const maxTotal = Number((slotsData?.regular || [])[level - 1] || 0);
       used[String(level)] = Math.max(0, Math.min(maxTotal, Number(used[String(level)] || 0) + 1));
-      setStorageJson('5e_slots_used', used);
       onUpdateSheet?.({ spellSlotUsed: used });
+      onUpdateCharacter?.((prev) => ({ ...prev, spellSlotsUsed: used }));
     }
     res[targetKey] = afterSP;
     setResources(res);
-    setStorageJson('5e_resources', res);
     setConvertSlotDialog(null);
     setConvertSlotSelection(null);
     onShowToast?.('Convert Spell Slot', `Converted a level ${level} spell slot into ${spGain} Sorcery Points.`, 0, []);
@@ -238,11 +234,10 @@ export default function ActionsTab({ C, sheet, onRoll, resources, setResources, 
       if (beforeWS <= 0) { onShowToast?.('Wild Resurgence', 'No Wild Shape uses available.', 0, []); return; }
       res.wild_shape = beforeWS - 1;
       setResources(res);
-      setStorageJson('5e_resources', res);
-      const created = { ...(sheet?.createdSpellSlots || {}) };
+        const created = { ...(sheet?.createdSpellSlots || {}) };
       created[1] = (created[1] || 0) + 1;
-      setStorageJson('5e_created_slots', created);
       onUpdateSheet?.({ createdSpellSlots: created });
+      onUpdateCharacter?.((prev) => ({ ...prev, createdSpellSlots: created }));
       onShowToast?.('Wild Resurgence', 'Expended 1 Wild Shape use to create a temporary level 1 spell slot.', 0, []);
     } else if (choice === 'slot_to_shape') {
       const slots = getSheetSlots(C);
@@ -259,13 +254,13 @@ export default function ActionsTab({ C, sheet, onRoll, resources, setResources, 
           const next = { ...created };
           next[lv] = (next[lv] || 0) - 1;
           if (next[lv] <= 0) delete next[lv];
-          setStorageJson('5e_created_slots', next);
           onUpdateSheet?.({ createdSpellSlots: next });
+          onUpdateCharacter?.((prev) => ({ ...prev, createdSpellSlots: next }));
         } else {
           const next = { ...used };
           next[String(lv)] = (next[String(lv)] || 0) + 1;
-          setStorageJson('5e_slots_used', next);
           onUpdateSheet?.({ spellSlotUsed: next });
+          onUpdateCharacter?.((prev) => ({ ...prev, spellSlotsUsed: next }));
         }
         consumed = true;
         break;
@@ -278,8 +273,7 @@ export default function ActionsTab({ C, sheet, onRoll, resources, setResources, 
       const maxWS = druidLv >= 17 ? 4 : druidLv >= 6 ? 3 : 2;
       res.wild_shape = Math.min(maxWS, beforeWS + 1);
       setResources(res);
-      setStorageJson('5e_resources', res);
-      onShowToast?.('Wild Resurgence', 'Regained 1 Wild Shape use by spending a spell slot.', 0, []);
+        onShowToast?.('Wild Resurgence', 'Regained 1 Wild Shape use by spending a spell slot.', 0, []);
     }
   };
 
@@ -340,19 +334,18 @@ export default function ActionsTab({ C, sheet, onRoll, resources, setResources, 
     if ((created[ckey] || 0) > 0) {
       created[ckey] = (created[ckey] || 0) - 1;
       if (created[ckey] <= 0) delete created[ckey];
-      setStorageJson('5e_created_slots', created);
       onUpdateSheet?.({ createdSpellSlots: created });
+      onUpdateCharacter?.((prev) => ({ ...prev, createdSpellSlots: created }));
     } else {
       const used = { ...(sheet?.spellSlotUsed || {}) };
       const slotsData = getSheetSlots(C);
       const maxTotal = Number((slotsData?.regular || [])[level - 1] || 0);
       used[String(level)] = Math.max(0, Math.min(maxTotal, Number(used[String(level)] || 0) + 1));
-      setStorageJson('5e_slots_used', used);
       onUpdateSheet?.({ spellSlotUsed: used });
+      onUpdateCharacter?.((prev) => ({ ...prev, spellSlotsUsed: used }));
     }
     res[targetKey] = afterTarget;
     setResources(res);
-    setStorageJson('5e_resources', res);
     setSpendSlotRecoverDialog(null);
     setSpendSlotRecoverSelection(null);
     const label = resNameMap[targetKey] || targetKey;
@@ -393,8 +386,8 @@ export default function ActionsTab({ C, sheet, onRoll, resources, setResources, 
       pactMax,
       (Number(used[String(level)] || 0) + amount)
     );
-    setStorageJson('5e_slots_used', used);
     onUpdateSheet?.({ spellSlotUsed: used });
+    onUpdateCharacter?.((prev) => ({ ...prev, spellSlotsUsed: used }));
     setConsumePactSlotDialog(null);
     onShowToast?.(consumePactSlotDialog.label, `Expended ${amount} Pact Magic slot${amount > 1 ? 's' : ''} (level ${level}).`, 0, []);
   };
@@ -407,8 +400,8 @@ export default function ActionsTab({ C, sheet, onRoll, resources, setResources, 
     const after = Math.max(0, before - Number(result.recover || 0));
     const recovered = before - after;
     used[level] = after;
-    setStorageJson('5e_slots_used', used);
     onUpdateSheet?.({ spellSlotUsed: used });
+    onUpdateCharacter?.((prev) => ({ ...prev, spellSlotsUsed: used }));
     if (recovered > 0) {
       const label = result.label || 'Spell Recovery';
       onShowToast?.(label, `Recovered ${recovered} Pact Magic slot${recovered === 1 ? '' : 's'}`, recovered, []);
@@ -484,8 +477,8 @@ export default function ActionsTab({ C, sheet, onRoll, resources, setResources, 
     setSlotRecoverySelection({});
     if (!recovered) return;
 
-    setStorageJson('5e_slots_used', used);
     onUpdateSheet?.({ spellSlotUsed: used });
+    onUpdateCharacter?.((prev) => ({ ...prev, spellSlotsUsed: used }));
 
     // Arcane Recovery also restores 1 expended Bladesong use
     if (C?.bladesongActive != null) {
@@ -500,8 +493,7 @@ export default function ActionsTab({ C, sheet, onRoll, resources, setResources, 
         if (bladeCur < bladeMax) {
           const nextRes = { ...resources, bladesong: Math.min(bladeMax, bladeCur + 1) };
           setResources(nextRes);
-          setStorageJson('5e_resources', nextRes);
-          onShowToast?.('Arcane Recovery', `Recovered 1 Bladesong use (${Math.min(bladeMax, bladeCur + 1)}/${bladeMax})`, 1, []);
+              onShowToast?.('Arcane Recovery', `Recovered 1 Bladesong use (${Math.min(bladeMax, bladeCur + 1)}/${bladeMax})`, 1, []);
         }
       }
     }
@@ -520,7 +512,6 @@ export default function ActionsTab({ C, sheet, onRoll, resources, setResources, 
     const res = { ...resources };
     res[key] = Math.max(0, Math.min(max, (res[key] || 0) + delta));
     setResources(res);
-    setStorageJson('5e_resources', res);
 
     if (delta < 0) {
       const sideEffect = installedRegistry.getResourceSideEffect(key);

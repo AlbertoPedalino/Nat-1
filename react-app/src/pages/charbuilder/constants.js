@@ -77,12 +77,6 @@ export const PACT_SLOTS = {
   17: { slots: 4, level: 5 }, 18: { slots: 4, level: 5 }, 19: { slots: 4, level: 5 }, 20: { slots: 4, level: 5 },
 };
 
-export const SHEET_KEYS = [
-  '5e_current_char', '5e_inventory', '5e_currency', '5e_xp', '5e_hp_current', '5e_hp_temp', '5e_hp_max_bonus',
-  '5e_death_saves', '5e_conditions_active', '5e_hd_used', '5e_slots_used', '5e_notes', '5e_skill_adv',
-  '5e_resources', '5e_builder_state', '5e_inspiration',
-];
-
 export const CLASS_SUMMARIES = [
   { name: 'Barbarian', source: 'XPHB', hitDie: 'd12', primary: 'STR', icon: Sword },
   { name: 'Bard', source: 'XPHB', hitDie: 'd8', primary: 'CHA', icon: Wand2 },

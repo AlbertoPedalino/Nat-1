@@ -1,5 +1,3 @@
-import { setStorageJson } from '../storage.js';
-
 export function getCreatedSpellSlots(sheet) {
   return (sheet?.createdSpellSlots) || {};
 }
@@ -13,12 +11,12 @@ export function getAvailableRegularSlots(regularSlots, sheet, level) {
   return Math.max(0, max - used + created);
 }
 
-export function persistCreatedSlots(createdSlots, onUpdateSheet) {
-  setStorageJson('5e_created_slots', createdSlots);
+export function persistCreatedSlots(createdSlots, onUpdateSheet, onUpdateCharacter) {
   if (typeof onUpdateSheet === 'function') onUpdateSheet({ createdSpellSlots: createdSlots });
+  if (typeof onUpdateCharacter === 'function') onUpdateCharacter((prev) => ({ ...prev, createdSpellSlots: createdSlots }));
 }
 
-export function consumeSlot(regularSlots, sheet, level, onUpdateSheet) {
+export function consumeSlot(regularSlots, sheet, level, onUpdateSheet, onUpdateCharacter) {
   const idx = Number(level) - 1;
   if (idx < 0 || idx >= regularSlots.length) return false;
   const max = Number(regularSlots[idx] || 0);
@@ -31,12 +29,12 @@ export function consumeSlot(regularSlots, sheet, level, onUpdateSheet) {
     const next = { ...(sheet?.createdSpellSlots || {}) };
     next[level] = created - 1;
     if (next[level] <= 0) delete next[level];
-    persistCreatedSlots(next, onUpdateSheet);
+    persistCreatedSlots(next, onUpdateSheet, onUpdateCharacter);
   } else {
     const next = { ...(sheet?.spellSlotUsed || {}) };
     next[level] = used + 1;
-    setStorageJson('5e_slots_used', next);
     if (typeof onUpdateSheet === 'function') onUpdateSheet({ spellSlotUsed: next });
+    if (typeof onUpdateCharacter === 'function') onUpdateCharacter((prev) => ({ ...prev, spellSlotsUsed: next }));
   }
   return true;
 }

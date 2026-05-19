@@ -91,7 +91,6 @@ export function collectKnownArtificerToolKeys(ctx = {}, cls = null) {
   addFixedToolBlocks(out, starting.tools);
   addFixedToolBlocks(out, starting.toolProficiencies);
 
-  addFixedToolBlocks(out, character.bgObj?.toolProficiencies);
   addFixedToolBlocks(out, character.backgroundObj?.toolProficiencies);
   addFixedToolBlocks(out, character.speciesObj?.toolProficiencies);
 

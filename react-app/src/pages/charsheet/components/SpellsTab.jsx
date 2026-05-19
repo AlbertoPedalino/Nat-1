@@ -19,7 +19,6 @@ import { SCHOOL_LABELS, SLBL, getFinal, getMod, getPB } from '../logic/calculati
 import { loadSpells } from '../../charbuilder/logic/dataLoaders.js';
 import { spellMatchesClass } from '../../charbuilder/spells/spells.js';
 import { installedRegistry, loadClassAdapters, loadCoreAdapters, loadSpellsAdapters } from '../../../adapters/index.js';
-import { setStorageJson } from '../../../shared/storage.js';
 import { isConcentrationSpell, isRitualSpell } from '../../../shared/spellTags.js';
 import { getEquippedArmorPenalties } from '../logic/armorPenalties.js';
 import {
@@ -50,7 +49,7 @@ import SpellEntry from './SpellEntry.jsx';
 import { Empty, SlotPanel, SpellSection, StatBox } from './SpellsUiParts.jsx';
 import { SpellNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 
-export default function SpellsTab({ C, sheet, onUpdateSpells, onShowToast, onUpdateSheet, freeCastUses, onToggleFreeCast }) {
+export default function SpellsTab({ C, sheet, onUpdateSpells, onShowToast, onUpdateSheet, freeCastUses, onToggleFreeCast, onUpdateCharacter }) {
   const [spellDb, setSpellDb] = useState([]);
   const [classSpellIndex, setClassSpellIndex] = useState({});
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -246,15 +245,15 @@ export default function SpellsTab({ C, sheet, onUpdateSpells, onShowToast, onUpd
       next[level] = created - 1;
       if (next[level] <= 0) delete next[level];
       setCreatedSlots(next);
-      setStorageJson('5e_created_slots', next);
       onUpdateSheet?.({ createdSpellSlots: next });
+      onUpdateCharacter?.((prev) => ({ ...prev, createdSpellSlots: next }));
       return;
     }
     const nextUsed = index < used ? Math.max(0, index) : index + 1;
     const next = { ...slotUsed, [level]: nextUsed };
     setSlotUsed(next);
-    setStorageJson('5e_slots_used', next);
     onUpdateSheet?.({ spellSlotUsed: next });
+    onUpdateCharacter?.((prev) => ({ ...prev, spellSlotsUsed: next }));
   };
 
   const addSpell = (spell) => {

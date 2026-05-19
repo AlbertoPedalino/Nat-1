@@ -561,7 +561,7 @@ function collectSelectedSpeciesResistanceChoices(character = {}, source = 'Speci
 function collectStaticDefenseItems(character = {}) {
   const species = character.speciesSnapshot || character.speciesObj || {};
   const cls = character.clsSnapshot || character.cls || {};
-  const bg = character.bgSnapshot || character.backgroundObj || {};
+  const bg = character.backgroundSnapshot || character.backgroundObj || {};
 
   const groups = [
     { source: species.name || character.speciesName || 'Species', data: species },
