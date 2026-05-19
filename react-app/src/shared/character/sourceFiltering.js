@@ -1,9 +1,11 @@
 import {
   CORE_2024_SOURCE,
+  SUBCLASS_ALLOWED_SOURCES,
+  SUBCLASS_SOURCE_PRIORITY,
+  compareBySourcePriority,
+  isAllowedSource,
   isSupportedEdition,
-  isSupportedSource,
   normalizeSource,
-  sourceRank,
 } from './sourcePriority.js';
 
 function normKey(value) {
@@ -17,7 +19,7 @@ export function isSupported2024Source(source, edition) {
 }
 
 export function isSupportedSubclassSource(source, edition) {
-  return isSupportedSource(source) && isSupportedEdition(edition);
+  return isAllowedSource(source, SUBCLASS_ALLOWED_SOURCES) && isSupportedEdition(edition);
 }
 
 export function isSupportedSubclassRecord(subclass) {
@@ -40,11 +42,5 @@ export function isSupportedSubclassFeature(feature, supportedSubclasses = []) {
 }
 
 export function compareSourcePriority(a, b) {
-  const aRecord = a && typeof a === 'object' ? a : { source: a };
-  const bRecord = b && typeof b === 'object' ? b : { source: b };
-  const rankDiff = sourceRank(aRecord.source) - sourceRank(bRecord.source);
-  if (rankDiff) return rankDiff;
-  const aEdition = isSupportedEdition(aRecord.edition) ? 0 : 1;
-  const bEdition = isSupportedEdition(bRecord.edition) ? 0 : 1;
-  return aEdition - bEdition;
+  return compareBySourcePriority(a, b, SUBCLASS_SOURCE_PRIORITY);
 }

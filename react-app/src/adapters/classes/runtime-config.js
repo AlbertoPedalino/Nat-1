@@ -216,6 +216,25 @@ export default function install(registry, context = {}) {
       casterProgression: "half",
       preparedMode: "prepared",
       preparedSpellsProgression: _PREP_HALF,
+      alwaysPreparedSpells: [
+        {
+          name: "Divine Smite",
+          minLevel: 2,
+          level: 1,
+          source: "Paladin's Smite",
+          sourceType: "class",
+          freeCast: {
+            id: "paladin-paladins-smite-divine-smite",
+            label: "Paladin's Smite",
+            source: "Paladin's Smite",
+            sourceType: "class",
+            maxUses: 1,
+            recharge: "longRest",
+            consumesSlot: false,
+            canAlsoUseSlots: true,
+          },
+        },
+      ],
     },
   });
   regClass("Ranger", {

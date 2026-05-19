@@ -12,6 +12,7 @@ import {
 } from '../logic/equipmentSlots.js';
 
 import { ItemNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
+import { INVENTORY_SOURCE_PRIORITY, sourceRank } from '../../../shared/character/sourcePriority.js';
 import { setStorageItem, setStorageJson } from '../../../shared/storage.js';
 import { getArmorPenalties } from '../logic/armorPenalties.js';
 import { renderEntries } from '../logic/renderEntries.js';
@@ -141,9 +142,7 @@ function itemMatchesSearch(item, query) {
 }
 
 function sourcePriority(source) {
-  const order = ['XPHB', 'XDMG', 'EFA', 'FRAiF', 'FRHoF', 'Custom'];
-  const idx = order.indexOf(String(source || ''));
-  return idx === -1 ? 999 : idx;
+  return sourceRank(source, INVENTORY_SOURCE_PRIORITY);
 }
 
 function rarityPriority(rarity) {

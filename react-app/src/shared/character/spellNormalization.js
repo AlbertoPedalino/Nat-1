@@ -1,5 +1,5 @@
 import { strip5eMarkup } from './spellEntries.js';
-import { sourceRank } from './sourcePriority.js';
+import { SPELL_SOURCE_PRIORITY, sourceRank } from './sourcePriority.js';
 
 const SCHOOL_FULL = {
   A: 'Abjuration',
@@ -165,8 +165,8 @@ export function dedupeSpellsBySourcePriority(spells) {
       byName.set(key, spell);
       return;
     }
-    const incomingRank = sourceRank(spell.source);
-    const existingRank = sourceRank(existing.source);
+    const incomingRank = sourceRank(spell.source, SPELL_SOURCE_PRIORITY);
+    const existingRank = sourceRank(existing.source, SPELL_SOURCE_PRIORITY);
     if (incomingRank < existingRank || (incomingRank === existingRank && richness(spell) > richness(existing))) {
       byName.set(key, spell);
     }

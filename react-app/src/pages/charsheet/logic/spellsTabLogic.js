@@ -310,36 +310,8 @@ function _findFeatName(C, slotKey) {
     try {
       const byKey = norm.feats?.byKey?.[slotKey];
       if (byKey && typeof byKey === 'string') return byKey;
-      if (norm.feats?.origin?.length) {
-        const originFeat = String(norm.feats.origin[0]);
-        if (originFeat) return originFeat;
-      }
     } catch {}
   }
-
-  const originFromChoices = C?.choices?.feat_origin;
-  if (originFromChoices && typeof originFromChoices === 'string' && !originFromChoices.startsWith('feat_')) return originFromChoices;
-
-  const snapshots = C?.allFeatSnapshots;
-  if (Array.isArray(snapshots)) {
-    for (const feat of snapshots) {
-      if (feat?.name && typeof feat.name === 'string' && feat.additionalSpells) {
-        return feat.name;
-      }
-    }
-  }
-
-  return _originFeatForBackground(C?.bgName);
-}
-
-/** Legacy fallback for old characters saved before origin_feat was persisted. */
-function _originFeatForBackground(bgName) {
-  if (!bgName || typeof bgName !== 'string') return null;
-  const n = bgName.toLowerCase().replace(/[^a-z]/g, '');
-  if (n === 'guide' || n === 'acolyte' || n === 'sage') return 'Magic Initiate';
-  if (n === 'farmer') return 'Tough';
-  if (n === 'sailor') return 'Skilled';
-  if (n === 'wayfarer') return 'Musician';
   return null;
 }
 
@@ -450,9 +422,11 @@ function collectAutoGrantedSpells(C) {
         if (spell?.invocation && !warlockHasInvocation(C, spell.invocation)) return;
         const hasExplicitSource = !!spell?.source;
         const srcLabel = hasExplicitSource ? spell.source : (entity.subclassShortName ? `${entity.subclassShortName} Spells` : entity.className || 'Auto');
-        const srcOriginType = hasExplicitSource ? 'auto_granted' : (entity.subclassShortName ? 'subclass' : 'class');
+        const sourceType = spell?.sourceType || (hasExplicitSource ? 'auto_granted' : (entity.subclassShortName ? 'subclass' : 'class'));
+        const srcOriginType = sourceType;
         const srcOriginLabel = hasExplicitSource ? spell.source : (entity.subclassShortName ? `${entity.subclassShortName} Spells` : entity.className || 'Auto');
-        runtimeOut.push({ name, level: Number(spell?.level ?? 0), source: { label: srcLabel, color: '#70b7a6', originType: srcOriginType, originLabel: srcOriginLabel }, ownerClassName: entity.className });
+        const freeCasts = collectFreeCastsForGrant(spell, { character: C, source: srcLabel, sourceType, spellName: name });
+        runtimeOut.push({ name, level: Number(spell?.level ?? 0), source: { label: srcLabel, color: '#70b7a6', originType: srcOriginType, originLabel: srcOriginLabel }, ownerClassName: entity.className, freeCasts });
       });
     });
   });

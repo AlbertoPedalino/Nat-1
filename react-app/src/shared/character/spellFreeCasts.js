@@ -107,6 +107,7 @@ export function normalizeFreeCast(rawDef, ctx = {}) {
     max,
     recharge,
     rechargeLabel: formatRechargeLabel(recharge, max),
+    consumesSlot: rawDef.consumesSlot === true,
     canAlsoUseSlots: rawDef.canAlsoUseSlots !== false,
     sourceType,
     source,
@@ -196,7 +197,7 @@ export function getFeatFreeCastTemplate(featName, { isCantrip = false } = {}) {
 // Seed with XPHB feats that have well-defined free-cast rules.
 // Feat adapter modules can register additional templates via the same API.
 registerFeatFreeCastTemplate('Magic Initiate', {
-  template: { maxUses: 1, recharge: 'longRest', canAlsoUseSlots: false },
+  template: { maxUses: 1, recharge: 'longRest', canAlsoUseSlots: true },
   appliesToCantrips: false,
 });
 registerFeatFreeCastTemplate('Fey Touched', {

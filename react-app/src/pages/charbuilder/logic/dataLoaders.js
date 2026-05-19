@@ -1,5 +1,4 @@
 import {
-  ALLOWED_SOURCES,
   CLASS_FILES,
   DATA_BASE,
   ITEM_SUMMARIES,
@@ -7,6 +6,15 @@ import {
 } from '../constants.js';
 import { normalizeName } from './text.js';
 import { dedupeSpellsBySourcePriority, normalizeSpellRecord } from '../../../shared/character/spellNormalization.js';
+import {
+  BACKGROUND_ALLOWED_SOURCES,
+  CLASS_ALLOWED_SOURCES,
+  FEAT_ALLOWED_SOURCES,
+  ITEM_SOURCE_PRIORITY,
+  SPECIES_ALLOWED_SOURCES,
+  isAllowedSource,
+  sourceRank,
+} from '../../../shared/character/sourcePriority.js';
 import {
   compareSourcePriority,
   isSupportedSubclassFeature,
@@ -38,7 +46,7 @@ export async function loadClassIndex() {
     const file = CLASS_FILES[index];
     const data = entry.value;
     cache[file] = data;
-    classes.push(...(data.class || []).filter((cls) => ALLOWED_SOURCES.includes(cls.source)));
+    classes.push(...(data.class || []).filter((cls) => isAllowedSource(cls.source, CLASS_ALLOWED_SOURCES)));
     const allSubs = (data.subclass || []).filter(isSupportedSubclassRecord);
     const subByKey = {};
     allSubs.forEach((sub) => {
@@ -67,7 +75,7 @@ export async function loadClassIndex() {
 export async function loadSpecies() {
   const data = await getJson('races.json');
   return (data.race || data.species || [])
-    .filter((species) => ALLOWED_SOURCES.includes(species.source))
+    .filter((species) => isAllowedSource(species.source, SPECIES_ALLOWED_SOURCES))
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
@@ -77,7 +85,7 @@ export async function loadBackgrounds() {
     getJson('fluff-backgrounds.json'),
   ]);
   const backgrounds = (data.status === 'fulfilled' ? (data.value.background || []) : [])
-    .filter((background) => ALLOWED_SOURCES.includes(background.source));
+    .filter((background) => isAllowedSource(background.source, BACKGROUND_ALLOWED_SOURCES));
   if (fluffData.status === 'fulfilled') {
     const fluffIndex = {};
     (fluffData.value.backgroundFluff || []).forEach((entry) => {
@@ -98,7 +106,7 @@ export async function loadBackgrounds() {
 export async function loadFeats() {
   const data = await getJson('feats.json');
   return (data.feat || [])
-    .filter((feat) => ALLOWED_SOURCES.includes(feat.source))
+    .filter((feat) => isAllowedSource(feat.source, FEAT_ALLOWED_SOURCES))
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
@@ -251,7 +259,7 @@ function buildClassSpellIndex(node) {
   return result;
 }
 
-const ITEM_SOURCES_2024 = ['XPHB', 'XDMG', 'EFA', 'FRAiF', 'FRHoF'];
+const ITEM_SOURCES_2024 = ITEM_SOURCE_PRIORITY;
 const PHB_2024_EQUIPMENT_TYPES = ['M', 'R', 'LA', 'MA', 'HA', 'S', 'A', 'G', 'AT', 'GS', 'INS', 'SCF', 'WD', 'RD', 'ST'];
 
 function itemSource(item) {
@@ -292,7 +300,7 @@ function isAllowedMagicVariant(variant) {
   return Boolean(
     canonicalItemSource(variant)
     || canonicalItemSource(inherited)
-    || reprintedSource(variant, ['XDMG', 'XPHB', 'EFA', 'FRAiF', 'FRHoF'])
+    || reprintedSource(variant, ITEM_SOURCE_PRIORITY)
   );
 }
 
@@ -356,9 +364,7 @@ export async function loadItems() {
 
 function sourcePriority(item) {
   const source = canonicalItemSource(item);
-  const order = ['XPHB', 'XDMG', 'EFA', 'FRAiF', 'FRHoF'];
-  const idx = order.indexOf(source);
-  return idx === -1 ? 999 : idx;
+  return sourceRank(source, ITEM_SOURCE_PRIORITY);
 }
 
 function shouldReplaceItem(existing, incoming) {
@@ -417,7 +423,7 @@ function expandMagicVariants(variants, baseItems) {
     const requires = variant.requires || [];
     const variantSource = canonicalItemSource(variant)
       || canonicalItemSource(inherits)
-      || reprintedSource(variant, ['XDMG', 'XPHB', 'EFA', 'FRAiF', 'FRHoF']);
+      || reprintedSource(variant, ITEM_SOURCE_PRIORITY);
 
     if (!variantSource) return;
 

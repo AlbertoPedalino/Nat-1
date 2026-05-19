@@ -6,7 +6,6 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
-    "test:spells": "echo No spell tests configured.",
     "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {

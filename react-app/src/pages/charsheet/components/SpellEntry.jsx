@@ -40,54 +40,54 @@ function Badge({ label, color, bg = 'transparent' }) {
   );
 }
 
-function FreeCastsBlock({ freeCasts, freeCastUses, onToggleFreeCast }) {
+function FreeCastsInline({ freeCasts, freeCastUses, onToggleFreeCast }) {
   if (!Array.isArray(freeCasts) || !freeCasts.length) return null;
   const interactive = typeof onToggleFreeCast === 'function';
   return (
-    <Box sx={{ mt: 1, pt: 0.8, borderTop: '1px dashed', borderColor: 'divider' }}>
-      <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.08em', color: '#caa550', mb: 0.4 }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap', mt: 0.35, px: '7px', py: '4px', border: 1, borderColor: 'rgba(202,165,80,0.28)', borderRadius: '5px', bgcolor: 'rgba(202,165,80,0.06)' }}>
+      <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontFamily: '"Cinzel", Georgia, serif', mr: 0.25, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
         Free Cast
       </Typography>
-      <Stack spacing={0.45}>
         {freeCasts.map((fc) => {
           const used = Math.max(0, Number(freeCastUses?.[fc.id] || 0));
           const max = Math.max(1, Number(fc.max) || 1);
           return (
-            <Box key={fc.id} sx={{ display: 'flex', alignItems: 'center', gap: 0.6, flexWrap: 'wrap' }}>
+            <Box key={fc.id} sx={{ display: 'flex', alignItems: 'center', gap: 0.55, flexWrap: 'wrap' }}>
+              <Typography variant="caption" sx={{ color: 'text.primary', fontWeight: 700, lineHeight: 1.1 }}>
+                {fc.label}
+              </Typography>
               <Box sx={{ display: 'inline-flex', gap: '3px', alignItems: 'center' }}>
                 {Array.from({ length: max }).map((_, i) => {
                   const isUsed = i < used;
                   return (
                     <Box
                       key={`${fc.id}-dot-${i}`}
+                      title={isUsed ? 'Free cast used' : 'Free cast available'}
                       onClick={interactive ? (e) => { e.stopPropagation(); onToggleFreeCast(fc); } : undefined}
                       sx={{
-                        width: 12,
-                        height: 12,
+                        width: 10,
+                        height: 10,
                         borderRadius: '50%',
-                        border: 1,
-                        borderColor: '#caa550',
+                        border: '1.5px solid',
+                        borderColor: isUsed ? '#edd48a' : 'rgba(202,165,80,0.35)',
                         bgcolor: isUsed ? '#caa550' : 'transparent',
+                        flexShrink: 0,
                         cursor: interactive ? 'pointer' : 'default',
                         transition: 'background-color 0.15s',
-                        '&:hover': interactive ? { boxShadow: '0 0 0 2px rgba(202,165,80,0.35)' } : undefined,
+                        '&:hover': interactive ? { borderColor: '#edd48a', boxShadow: '0 0 0 2px rgba(202,165,80,0.22)' } : undefined,
                       }}
                     />
                   );
                 })}
               </Box>
-              <Typography variant="caption" sx={{ color: 'text.primary', fontWeight: 700 }}>
-                {fc.label}
-              </Typography>
-              <Typography variant="caption" color={used >= max ? '#a04848' : 'text.secondary'}>
-                · {fc.rechargeLabel}
+              <Typography variant="caption" color={used >= max ? '#a04848' : 'text.secondary'} sx={{ lineHeight: 1.1 }}>
+                {fc.rechargeLabel}
                 {fc.canAlsoUseSlots === false ? ' · free only' : ' · also slots'}
                 {used >= max ? ' · spent' : ''}
               </Typography>
             </Box>
           );
         })}
-      </Stack>
     </Box>
   );
 }
@@ -375,6 +375,7 @@ export default function SpellEntry({ entry, onShowToast, atk: fallbackAtk, spell
             <Badge {...getCastBadge(entry)} />
           </Box>
         </Box>
+        <FreeCastsInline freeCasts={entry.freeCasts} freeCastUses={freeCastUses} onToggleFreeCast={onToggleFreeCast} />
       </Box>
 
       {open ? (
@@ -427,7 +428,6 @@ export default function SpellEntry({ entry, onShowToast, atk: fallbackAtk, spell
               <EntryBlocks blocks={higherBlocks} />
             </Box>
           ) : null}
-          <FreeCastsBlock freeCasts={entry.freeCasts} freeCastUses={freeCastUses} onToggleFreeCast={onToggleFreeCast} />
         </Box>
       ) : null}
     </Box>
