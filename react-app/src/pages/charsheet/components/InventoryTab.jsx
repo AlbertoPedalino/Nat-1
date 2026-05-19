@@ -13,6 +13,7 @@ import {
 
 import { ItemNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 import { INVENTORY_SOURCE_PRIORITY, sourceRank } from '../../../shared/character/sourcePriority.js';
+import { addInventoryEntries } from '../../../shared/character/itemContainers.js';
 import { getArmorPenalties } from '../logic/armorPenalties.js';
 import { renderEntries } from '../logic/renderEntries.js';
 
@@ -62,17 +63,25 @@ function itemType(item) {
 }
 
 function normalizeStoredItem(item) {
+  const {
+    _itemType,
+    _searchName,
+    _searchText,
+    _sourcePriority,
+    _rarityPriority,
+    ...baseItem
+  } = item || {};
   return {
-    ...item,
-    name: item.name,
-    source: item.source || 'Custom',
-    type: item.type || 'gear',
-    rarity: item.rarity || 'none',
-    weight: Number(item.weight || item.weightLb || 0),
-    value: Number(item.value || 0),
-    qty: Math.max(1, Number(item.qty || item.quantity || 1)),
-    equipped: !!item.equipped,
-    custom: !!item.custom,
+    ...baseItem,
+    name: baseItem.name,
+    source: baseItem.source || 'Custom',
+    type: baseItem.type || 'gear',
+    rarity: baseItem.rarity || 'none',
+    weight: Number(baseItem.weight || baseItem.weightLb || 0),
+    value: Number(baseItem.value || 0),
+    qty: Math.max(1, Number(baseItem.qty || baseItem.quantity || 1)),
+    equipped: !!baseItem.equipped,
+    custom: !!baseItem.custom,
   };
 }
 
@@ -315,13 +324,8 @@ export default function InventoryTab({ C, sheet, onUpdateInventory, onUpdateCurr
   const addItem = useCallback((item) => {
     if (!item?.name) return;
     const current = invRef.current || [];
-    const stored = normalizeStoredItem(item);
-    const idx = current.findIndex((entry) => entry.name === stored.name && entry.source === stored.source);
-    const next = idx === -1
-      ? [...current, stored]
-      : current.map((entry, index) => (index === idx ? { ...entry, qty: qty(entry) + 1 } : entry));
-    updateInv(next);
-  }, [updateInv]);
+    updateInv(addInventoryEntries(current, [item], itemsDb, normalizeStoredItem));
+  }, [itemsDb, updateInv]);
 
   const addCustom = () => {
     const name = customName.trim();

@@ -49,6 +49,33 @@ function setStore(store, rawKey, value) {
   if (norm) store.set(norm, value);
 }
 
+function isPlainObject(value) {
+  return Boolean(value && typeof value === 'object' && !Array.isArray(value));
+}
+
+function mergeRuntimeConfig(base, patch) {
+  if (!isPlainObject(base)) return isPlainObject(patch) ? { ...patch } : {};
+  if (!isPlainObject(patch)) return { ...base };
+
+  const merged = { ...base };
+  Object.entries(patch).forEach(([key, value]) => {
+    const current = merged[key];
+    merged[key] = isPlainObject(current) && isPlainObject(value)
+      ? mergeRuntimeConfig(current, value)
+      : value;
+  });
+  return merged;
+}
+
+function setMergedStore(store, rawKey, value) {
+  const raw = String(rawKey || '');
+  const norm = normKey(raw);
+  const existing = (raw && store.get(raw)) || (norm && store.get(norm)) || {};
+  const merged = mergeRuntimeConfig(existing, value);
+  if (raw) store.set(raw, merged);
+  if (norm) store.set(norm, merged);
+}
+
 function getStore(store, rawKey, fallbackKey = '') {
   const raw = String(rawKey || '');
   return store.get(raw) || store.get(normKey(raw)) || (fallbackKey ? store.get(fallbackKey) : null);
@@ -205,19 +232,21 @@ export function createAdapterRegistry() {
       return getStore(stores.featEffects, name) || [];
     },
     registerClassRuntimeConfig(name, config) {
-      setStore(stores.classRuntimeConfigs, name, config && typeof config === 'object' ? config : {});
+      setMergedStore(stores.classRuntimeConfigs, name, config);
     },
     getClassRuntimeConfig(name) {
       return getStore(stores.classRuntimeConfigs, name) || {};
     },
     registerSubclassRuntimeConfig(className, subclassShortName, config) {
-      stores.subclassRuntimeConfigs.set(subclassKey(className, subclassShortName), config && typeof config === 'object' ? config : {});
+      const key = subclassKey(className, subclassShortName);
+      stores.subclassRuntimeConfigs.set(key, mergeRuntimeConfig(stores.subclassRuntimeConfigs.get(key), config));
     },
     getSubclassRuntimeConfig(className, subclassShortName) {
       return getSubclassStore(stores.subclassRuntimeConfigs, className, subclassShortName) || {};
     },
     registerSpeciesRuntimeConfig(speciesName, speciesSource, config) {
-      stores.speciesRuntimeConfigs.set(speciesKey(speciesName, speciesSource), config && typeof config === 'object' ? config : {});
+      const key = speciesKey(speciesName, speciesSource);
+      stores.speciesRuntimeConfigs.set(key, mergeRuntimeConfig(stores.speciesRuntimeConfigs.get(key), config));
     },
     getSpeciesRuntimeConfig(speciesName, speciesSource) {
       return stores.speciesRuntimeConfigs.get(speciesKey(speciesName, speciesSource)) || {};

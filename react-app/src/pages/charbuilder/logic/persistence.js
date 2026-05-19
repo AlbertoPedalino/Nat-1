@@ -98,6 +98,36 @@ function normalizeProficiencyChoicesForPersistence(character = {}) {
   };
 }
 
+function makeClassSnapshot(cls = null) {
+  if (!cls || typeof cls !== 'object') return null;
+  return {
+    hd: cls.hd,
+    proficiency: cls.proficiency || [],
+    casterProgression: cls.casterProgression || null,
+    preparedSpellsProgression: cls.preparedSpellsProgression || null,
+    cantripProgression: cls.cantripProgression || null,
+    subclassLevel: cls.subclassLevel || 3,
+    subclassTitle: cls.subclassTitle || '',
+    startingProficiencies: cls.startingProficiencies || {},
+    multiclassProficienciesGained: cls.multiclassProficienciesGained || {},
+    startingEquipment: cls.startingEquipment || null,
+  };
+}
+
+function serializeExtraClass(extra = {}) {
+  const source = extra && typeof extra === 'object' ? extra : {};
+  const classFeatures = Array.isArray(source.allClassFeatures) && source.allClassFeatures.length
+    ? source.allClassFeatures
+    : (source.allFeatures || source.allClassFeatures || []);
+
+  return {
+    ...source,
+    clsSnapshot: source.clsSnapshot || makeClassSnapshot(source.cls),
+    allClassFeatures: classFeatures,
+    allSubFeatures: source.allSubFeatures || [],
+  };
+}
+
 export function makeSheetPayload(character, data) {
   character = normalizeProficiencyChoicesForPersistence(character);
   const primaryClassLevel = getPrimaryClassLevel(character);
@@ -236,7 +266,7 @@ export function makeSheetPayload(character, data) {
     classSource: character.classSource,
     subclassShortName: character.subclassShortName || null,
     subclassSource: character.subclassSource || null,
-    extraClasses: character.extraClasses || [],
+    extraClasses: (character.extraClasses || []).map(serializeExtraClass),
     speciesName: character.speciesName,
     speciesSource: character.speciesSource,
     backgroundName: character.backgroundName,
@@ -255,18 +285,7 @@ export function makeSheetPayload(character, data) {
     selectedSkills: character.selectedSkills || [],
     selectedLanguages: character.selectedLanguages || [],
     selectedTools: character.selectedTools || [],
-    clsSnapshot: {
-      hd: character.cls?.hd,
-      proficiency: character.cls?.proficiency || [],
-      casterProgression: character.cls?.casterProgression || null,
-      preparedSpellsProgression: character.cls?.preparedSpellsProgression || null,
-      cantripProgression: character.cls?.cantripProgression || null,
-      subclassLevel: character.cls?.subclassLevel || 3,
-      subclassTitle: character.cls?.subclassTitle || '',
-      startingProficiencies: character.cls?.startingProficiencies || {},
-      multiclassProficienciesGained: character.cls?.multiclassProficienciesGained || {},
-      startingEquipment: character.cls?.startingEquipment || null,
-    },
+    clsSnapshot: character.clsSnapshot || makeClassSnapshot(character.cls),
     speciesSnapshot: {
       name: character.speciesName,
       speed: character.speciesObj?.speed || 30,
@@ -375,7 +394,7 @@ function collectAutoGrantedSpells(character) {
 
 const HEAVY_BUILDER_FIELDS = [
   'cls', 'speciesObj', 'backgroundObj',
-  'allFeatures', 'allClassFeatures', 'allSubFeatures', 'allFeatSnapshots',
+  'allFeatures',
   'subclasses', 'dicePool',
 ];
 

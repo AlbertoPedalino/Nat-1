@@ -798,12 +798,21 @@ if (typeof registerResourceSideEffect === 'function') {
 }
 
 if (typeof registerClassRuntimeConfig === 'function') {
+  const existingRuntimeConfig = typeof getClassRuntimeConfig === 'function' ? (getClassRuntimeConfig('Warlock') || {}) : {};
+  const existingSpellcasting = existingRuntimeConfig.spellcasting || {};
+  const warlockCantripKnown = existingSpellcasting.cantripKnown || [2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4];
+  const warlockPreparedSpells = existingSpellcasting.preparedSpellsProgression || existingSpellcasting.spellsKnown || [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15];
+
   registerClassRuntimeConfig('Warlock', {
+    ...existingRuntimeConfig,
     multiclassPrerequisites: [{ cha: 13 }],
     spellcasting: {
+      ...existingSpellcasting,
       ability: 'cha',
       casterProgression: 'pact',
       preparedMode: 'prepared',
+      cantripKnown: warlockCantripKnown,
+      preparedSpellsProgression: warlockPreparedSpells,
       alwaysPreparedSpells: [
         { name: 'Contact Other Plane', minLevel: 9, level: 5, source: 'Contact Patron', sourceType: 'class' },
       ],
@@ -812,6 +821,7 @@ if (typeof registerClassRuntimeConfig === 'function') {
         { name: 'Water Breathing', minLevel: 5, level: 3, source: 'Gift of the Depths', sourceType: 'class', invocation: 'Gift of the Depths' },
       ],
       choiceSpellSources: {
+        ...(existingSpellcasting.choiceSpellSources || {}),
         warlock_tome_cantrip_1: { label: 'Pact of the Tome', ability: 'cha' },
         warlock_tome_cantrip_2: { label: 'Pact of the Tome', ability: 'cha' },
         warlock_tome_cantrip_3: { label: 'Pact of the Tome', ability: 'cha' },

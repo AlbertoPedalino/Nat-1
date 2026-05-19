@@ -7,6 +7,7 @@ import { CURRENCY, ITEM_FILTERS } from '../constants.js';
 import { ItemNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 import { cleanText } from '../logic/text.js';
 import { resolveEquipmentTypeItem } from '../logic/dataLoaders.js';
+import { findInventoryItem } from '../../../shared/character/itemContainers.js';
 
 const CHOICE_KEYS = ['A', 'B', 'C', 'D', 'E', 'a', 'b', 'c', 'd', 'e'];
 
@@ -150,33 +151,13 @@ function collectChoiceBlocks(eq, prefix) {
 
 function resolveEquipmentItems(extracted, itemDb) {
   const out = [];
-  const matchSource = (item, targetSource) => !targetSource || String(item.source || '').toUpperCase() === targetSource;
-  const findByName = (name, source) => {
-    const targetName = String(name || '').toLowerCase();
-    const targetSource = String(source || '').toUpperCase();
-    const exact = itemDb.find((item) => item.name.toLowerCase() === targetName && matchSource(item, targetSource));
-    if (exact) return exact;
-    return itemDb.find((item) => Array.isArray(item.group)
-      && item.group.some((group) => String(group || '').toLowerCase() === targetName)
-      && matchSource(item, targetSource));
-  };
   const resolveDbItem = (entry) => (entry.equipmentType
     ? resolveEquipmentTypeItem(entry.name, itemDb)
-    : findByName(entry.name, entry.source));
+    : findInventoryItem(itemDb, entry.name, entry.source));
   const add = (entry) => {
     const dbItem = resolveDbItem(entry);
     if (!dbItem) return;
-    const baseType = String(dbItem.type || '').split('|')[0];
-    if (dbItem.packContents?.length && !['A', 'AF', 'AT'].includes(baseType)) {
-      dbItem.packContents.forEach((packEntry) => {
-        const ref = typeof packEntry === 'string' ? packEntry : packEntry.item || '';
-        const parsed = parseItemRef(ref);
-        const packQty = typeof packEntry === 'object' ? packEntry.quantity || 1 : 1;
-        if (parsed.name) add({ name: parsed.name, source: parsed.source, qty: packQty * entry.qty });
-      });
-      return;
-    }
-    out.push({ ...dbItem, qty: entry.qty });
+    out.push({ ...dbItem, qty: entry.qty || 1 });
   };
   extracted.items.forEach((item) => add({
     name: item.name,

@@ -10,6 +10,7 @@ import {
 import { getBackgroundPattern, getLevelFromXp } from './logic/calculations.js';
 import { handleBackgroundSelect, handleClassSelect, handleSpellToggle, handleWizardSpellbookToggle } from './stateHandlers.js';
 import { getChoiceLevel } from '../../shared/character/choiceLevels.js';
+import { addInventoryEntries } from '../../shared/character/itemContainers.js';
 
 function hasLevelAbove(key, classLevel) {
   const k = String(key || '');
@@ -479,10 +480,7 @@ export function builderReducer(state, action) {
     case 'inventory/filter':
       return { ...state, inventoryFilter: action.filter };
     case 'inventory/add': {
-      const idx = state.character.inventory.findIndex((item) => item.name === action.item.name && item.source === action.item.source);
-      const inventory = idx === -1
-        ? [...state.character.inventory, { ...action.item, qty: 1 }]
-        : state.character.inventory.map((item, itemIdx) => (itemIdx === idx ? { ...item, qty: item.qty + 1 } : item));
+      const inventory = addInventoryEntries(state.character.inventory, [action.item], state.data.items);
       return updateCharacter(state, { inventory });
     }
     case 'inventory/custom':
@@ -494,12 +492,11 @@ export function builderReducer(state, action) {
       Object.entries(action.currency || {}).forEach(([coin, value]) => {
         currency[coin] = Number(currency[coin] || 0) + Number(value || 0);
       });
-      const inventory = [...state.character.inventory];
-      (action.items || []).forEach((item) => {
-        const idx = inventory.findIndex((entry) => entry.name === item.name && entry.source === item.source);
-        if (idx === -1) inventory.push({ ...item, qty: item.qty || 1 });
-        else inventory[idx] = { ...inventory[idx], qty: Number(inventory[idx].qty || 1) + Number(item.qty || 1) };
-      });
+      const inventory = addInventoryEntries(
+        state.character.inventory,
+        action.items || [],
+        state.data.items,
+      );
       return updateCharacter(state, { currency, inventory });
     }
     case 'inventory/qty': {
