@@ -2,7 +2,7 @@ name: Deploy React app to Pages
 
 on:
   push:
-    branches: ["react-material-ui-lucide"]
+    branches: ["feature/unified-character-storage"]
   workflow_dispatch:
 
 permissions:
