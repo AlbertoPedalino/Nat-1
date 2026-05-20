@@ -120,7 +120,13 @@ export default function install(registry, context = {}) {
     getGenericBackgroundChoiceSpecs,
     getGenericBackgroundChoiceMeta,
     getGenericBackgroundOriginFeat,
+    registerFeatOwnerKeyPattern,
   } = createAdapterBindings(registry, context);
+
+if (typeof registerFeatOwnerKeyPattern === 'function') {
+  registerFeatOwnerKeyPattern(/^(?:mc\d+_)?warlock_lessons(?:_first_ones_origin)?_feat(?:_\d+)?$/i);
+}
+
 // Eldritch Invocations XPHB 2024 — name, minLevel, prereqInvocation, description
 const _INV_DATA = [
   { name: 'Agonizing Blast', minLevel: 2, prereq: null,

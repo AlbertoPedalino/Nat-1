@@ -119,6 +119,7 @@ export default function install(registry, context = {}) {
     getGenericBackgroundChoiceMeta,
     getGenericBackgroundOriginFeat,
   } = createAdapterBindings(registry, context);
+
 registerClassAdapter("Fighter", function (cls, lv, specs, ctx = {}) {
   if (lv >= 1) {
     const weapons = typeof allItemsDb !== 'undefined'

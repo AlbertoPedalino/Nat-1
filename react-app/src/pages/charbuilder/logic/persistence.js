@@ -1,4 +1,5 @@
-import { calcMaxHp, getAllFinalScores, getPrimaryClassLevel, getSelectedFeatNames } from './calculations.js';
+import { calcMaxHp, getAllFinalScores, getPrimaryClassLevel } from './calculations.js';
+import { collectOwnedFeatNames } from '../../../shared/character/selectedFeats.js';
 import { getMod, getFinal } from '../../charsheet/logic/calculations.js';
 import { installedRegistry } from '../../../adapters/index.js';
 import {
@@ -163,6 +164,7 @@ function serializeExtraClass(extra = {}) {
 export function makeSheetPayload(character, data) {
   character = normalizeProficiencyChoicesForPersistence(character);
   const primaryClassLevel = getPrimaryClassLevel(character);
+  const ownedFeatNames = collectOwnedFeatNames(character);
   const selectedSpellLevels = new Map();
   (character.selectedCantrips || []).forEach((name) => selectedSpellLevels.set(name, 0));
   Object.entries(character.selectedSpells || {}).forEach(([level, names]) => {
@@ -345,7 +347,7 @@ export function makeSheetPayload(character, data) {
       entries: character.backgroundObj?.entries || [],
     },
     allFeatSnapshots: (data.feats || [])
-      .filter((feat) => getSelectedFeatNames(character).includes(feat.name))
+      .filter((feat) => ownedFeatNames.includes(feat.name))
       .map((feat) => {
         const adapter = installedRegistry.getFeatAdapter
           ? installedRegistry.getFeatAdapter(feat.name)
@@ -368,9 +370,9 @@ export function makeSheetPayload(character, data) {
       speciesActions: installedRegistry.getSpeciesSheetActions(character.speciesName, character.speciesSource),
       speciesResources: (installedRegistry.getSpeciesSheetResources(character.speciesName, character.speciesSource) || []).map(r => ({ ...r, maxComputed: typeof r.max === 'function' ? r.max(character.level, characterMods) : r.max })),
       speciesEffects: installedRegistry.getSpeciesSheetEffects(character.speciesName, character.speciesSource),
-      featActions: getSelectedFeatNames(character).flatMap((feat) => installedRegistry.getFeatSheetActions(feat)),
-      featResources: getSelectedFeatNames(character).flatMap((feat) => (installedRegistry.getFeatSheetResources(feat) || []).map(r => ({ ...r, maxComputed: typeof r.max === 'function' ? r.max(character.level, characterMods) : r.max }))),
-      featEffects: getSelectedFeatNames(character).flatMap((feat) => installedRegistry.getFeatSheetEffects(feat)),
+      featActions: ownedFeatNames.flatMap((feat) => installedRegistry.getFeatSheetActions(feat)),
+      featResources: ownedFeatNames.flatMap((feat) => (installedRegistry.getFeatSheetResources(feat) || []).map(r => ({ ...r, maxComputed: typeof r.max === 'function' ? r.max(character.level, characterMods) : r.max }))),
+      featEffects: ownedFeatNames.flatMap((feat) => installedRegistry.getFeatSheetEffects(feat)),
     },
     selectedCantrips: character.selectedCantrips || [],
     selectedSpells: character.selectedSpells || {},

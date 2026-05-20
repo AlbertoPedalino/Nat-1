@@ -132,6 +132,11 @@ export function createAdapterRegistry() {
     globalItemAdapters: [],
     itemFlagDefs: new Map(),
     weaponAbilityOverrides: [],
+    featOwnerKeyExact: new Set(),
+    featOwnerKeyPrefixes: [],
+    featOwnerKeyPrefixSet: new Set(),
+    featOwnerKeyPatterns: [],
+    featOwnerKeyPatternSigs: new Set(),
   };
 
   return {
@@ -441,6 +446,40 @@ export function createAdapterRegistry() {
     },
     getWeaponAbilityOverrides() {
       return stores.weaponAbilityOverrides.slice();
+    },
+    registerFeatOwnerKey(key) {
+      if (typeof key === 'string' && key) stores.featOwnerKeyExact.add(key);
+    },
+    registerFeatOwnerKeyPrefix(prefix) {
+      if (typeof prefix !== 'string' || !prefix) return;
+      if (stores.featOwnerKeyPrefixSet.has(prefix)) return;
+      stores.featOwnerKeyPrefixSet.add(prefix);
+      stores.featOwnerKeyPrefixes.push(prefix);
+    },
+    registerFeatOwnerKeyPattern(pattern) {
+      if (pattern == null) return;
+      if (typeof pattern === 'string' && pattern) {
+        stores.featOwnerKeyExact.add(pattern);
+        return;
+      }
+      const sig = pattern instanceof RegExp
+        ? `re:${pattern.source}::${pattern.flags}`
+        : typeof pattern === 'function'
+          ? `fn:${pattern.toString()}`
+          : null;
+      if (!sig) return;
+      if (stores.featOwnerKeyPatternSigs.has(sig)) return;
+      stores.featOwnerKeyPatternSigs.add(sig);
+      stores.featOwnerKeyPatterns.push(pattern);
+    },
+    getFeatOwnerKeyExact() {
+      return stores.featOwnerKeyExact;
+    },
+    getFeatOwnerKeyPrefixes() {
+      return stores.featOwnerKeyPrefixes.slice();
+    },
+    getFeatOwnerKeyPatterns() {
+      return stores.featOwnerKeyPatterns.slice();
     },
     snapshot() {
       return stores;

@@ -2,6 +2,7 @@ import { STATS, STAT_LABELS } from '../constants.js';
 import { cleanText } from '../logic/text.js';
 import { installedRegistry } from '../../../adapters/index.js';
 import { getPrimaryClassLevel } from '../logic/calculations.js';
+import { backgroundOriginFeat } from '../../../shared/character/selectedFeats.js';
 import { getMulticlassChoiceSpecs } from '../../../shared/character/multiclassProficiencies.js';
 import {
   parseTypedProficiencyValue,
@@ -422,26 +423,6 @@ export function speciesChoiceSpecs(character) {
     else if (block.anyStandard) specs.push({ key: `species_language_${index}`, label: 'Species Language', type: 'language_choice', from: STD_LANGS, count: block.anyStandard });
   });
   return specs;
-}
-
-function backgroundOriginFeat(background) {
-  if (!background) return null;
-  if (background.feat) return { fixed: background.feat };
-  const feats = Array.isArray(background.feats) ? background.feats : [];
-  const first = feats[0];
-  if (!first) return null;
-  const keys = Object.keys(first).filter((key) => key !== 'choose');
-  if (!keys.length) return null;
-  const raw = String(keys[0] || '').split(';')[0].trim().split('|')[0];
-  const classHint = (() => {
-    const semicol = String(keys[0] || '').split(';').slice(1).map((value) => value.trim().split('|')[0]).find(Boolean);
-    if (semicol) return semicol.toLowerCase().replace(/[^a-z]/g, '');
-    const pipeParts = String(keys[0] || '').split('|').map((value) => value.trim()).filter(Boolean);
-    if (pipeParts.length >= 3) return pipeParts[2].toLowerCase().replace(/[^a-z]/g, '');
-    return null;
-  })();
-  const camelToTitle = (value) => String(value || '').replace(/([A-Z])/g, ' $1').replace(/^./, (char) => char.toUpperCase()).trim();
-  return { fixed: camelToTitle(raw), classHint };
 }
 
 export function backgroundChoiceSpecs(character) {

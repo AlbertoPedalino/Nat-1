@@ -10,7 +10,7 @@ import {
 } from '../constants.js';
 import { computeMaxHp as sharedComputeMaxHp } from '../../../shared/character/hp.js';
 import { getFeatAsiBonus } from '../../../shared/character/abilityBonuses.js';
-import { isFeatDetailKey } from '../../../shared/featChoiceKeys.js';
+import { collectOwnedFeatNames } from '../../../shared/character/selectedFeats.js';
 
 export function getLevelFromXp(xp) {
   let level = 1;
@@ -186,21 +186,5 @@ export function getPrimaryClassLevel(character) {
 }
 
 export function getSelectedFeatNames(character) {
-  const out = new Set();
-  const isLessonsOriginFeatKey = (key) => (
-    /^warlock_lessons_first_ones_origin_feat(?:_\d+)?$/i.test(key)
-    || /^mc\d+_warlock_lessons_first_ones_origin_feat(?:_\d+)?$/i.test(key)
-    || /^warlock_lessons_feat(?:_\d+)?$/i.test(key)
-    || /^mc\d+_warlock_lessons_feat(?:_\d+)?$/i.test(key)
-  );
-  Object.entries(character?.choices || {}).forEach(([key, value]) => {
-    if (!value) return;
-    if (isFeatDetailKey(key)) return;
-    if (!(key === 'feat_origin' || key === 'species_origin_feat' || key.startsWith('feat_') || /^mc\d+_feat_/.test(key) || key.startsWith('paladin_') || key === 'fighter_fighting_style' || key === 'fighter_epic_boon' || key.includes('_fighting_style') || key.includes('_epic_boon') || /^feat_asi_lv\d+$/.test(key) || isLessonsOriginFeatKey(key))) return;
-    const values = Array.isArray(value) ? value : [value];
-    values.forEach((entry) => {
-      if (typeof entry === 'string' && entry) out.add(entry);
-    });
-  });
-  return [...out];
+  return collectOwnedFeatNames(character);
 }
