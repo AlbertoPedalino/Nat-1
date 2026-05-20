@@ -15,6 +15,7 @@ import DiceToast from './components/DiceToast.jsx';
 import { deriveSheetState } from './state.js';
 import { ProficiencySetsProvider } from './context/ProficiencySetsContext.jsx';
 import { buildD20Meta, formatD20Detail, rollD20 as rollD20Dice } from '../../shared/character/dice.js';
+import { aggregateSavingThrowBonus } from '../../shared/character/itemBonus.js';
 import { calcMaxHP, getMod, getFinal, getPB, getSaveBonus } from './logic/calculations.js';
 import { applyResourceRest, getAllResourceDefs, getHitDicePools, getUsedHitDiceTotal, normalizeResourceMax } from './logic/restResources.js';
 import { applyFreeCastRest, getFreeCastDefsForCharacter } from './logic/spellsTabLogic.js';
@@ -392,10 +393,11 @@ export default function CharacterSheet() {
 
   const rollSave = useCallback((stat, options = {}) => {
     if (!C) return;
-    const bonus = getSaveBonus(C, stat);
+    const inventory = sheet?.sheetInventory || C?.inventory || [];
+    const bonus = getSaveBonus(C, stat) + aggregateSavingThrowBonus(inventory);
     const lbl = stat.charAt(0).toUpperCase() + stat.slice(1) + ' Save';
     rollD20(bonus, lbl, options.disadvantage ? false : (options.advantage || undefined));
-  }, [C, rollD20]);
+  }, [C, sheet, rollD20]);
 
   const rollSkill = useCallback((skillName, bonus, options = {}) => {
     rollD20(bonus, skillName + ' Check', options.disadvantage ? false : (options.advantage || undefined));

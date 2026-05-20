@@ -16,6 +16,7 @@ import {
   getOffHandDamageMod,
   hasTwoWeaponFightingStyle,
 } from './equipmentSlots.js';
+import { weaponEnhancement } from '../../../shared/character/itemBonus.js';
 
 export const FILTERS = ['all', 'action', 'bonus', 'reaction'];
 export const CAT_COLORS = { attack: '#de675f', action: '#caa550', bonus: '#70b7a6', reaction: '#9d7fb8' };
@@ -422,8 +423,9 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
     return 'str';
   })() : ability;
   const mod = getMod(getFinal(C, finalAbility));
+  const enhancement = weaponEnhancement(item);
   const base = opts.damageBase != null ? opts.damageBase : weaponDamageBase(item);
-  const finalMod = opts.damageMod != null ? opts.damageMod : mod;
+  const finalMod = (opts.damageMod != null ? opts.damageMod : mod) + enhancement.damage;
   const damageFormula = base ? base + (finalMod !== 0 ? (finalMod >= 0 ? '+' : '') + finalMod : '') : '';
   const dtype = weaponDamageType(item);
   const disAdv = untrainedArmor && (finalAbility === 'str' || finalAbility === 'dex');
@@ -441,12 +443,13 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
     cat: opts.cat || 'attack',
     uses: opts.uses || 'Equipped',
     _source: 'Weapon',
-    attackBonus: profInfo.proficient ? getPB(C) + mod : mod,
+    attackBonus: (profInfo.proficient ? getPB(C) + mod : mod) + enhancement.attack,
     damageFormula,
     damageButtonLabel: damageFormula ? `Damage ${damageFormula}${dtype ? ` ${dtype}` : ''}` : 'Damage',
     rollLabelPrefix: opts.rollLabelPrefix || item.name || 'Weapon',
     noDescription: true,
     _item: item,
+    _enhancement: enhancement.attack || enhancement.damage ? enhancement : null,
     _weaponIndex: index,
     _weaponMastery: mastery || null,
     _weaponMasteryText: masteryText || '',
@@ -490,12 +493,13 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
       if (typeof o.condition === 'function' && !o.condition(C)) return false;
       return true;
     });
-    const ohProfInfo = getWeaponProficiencyInfo(C, offHandItem, ohOverride, profSets);
+    const ohProfInfo = getWeaponProficiencyInfo(C, offHandItem, ohOverride, equipmentSets);
     const ohAbility = weaponAbility(C, offHandItem, ohOverride);
     const ohMod = getMod(getFinal(C, ohAbility));
+    const ohEnhancement = weaponEnhancement(offHandItem);
     const ohBase = weaponDamageBase(offHandItem);
     const ohDtype = weaponDamageType(offHandItem);
-    const ohDmgMod = getOffHandDamageMod(ohMod, hasTWF);
+    const ohDmgMod = getOffHandDamageMod(ohMod, hasTWF) + ohEnhancement.damage;
     const ohSelectedEntry = selectedMasteriesByWeapon.get(normalizeWeaponName(offHandItem?.name || '')) || null;
     const ohDirectMastery = ohSelectedEntry ? resolveWeaponMasteryForItem(offHandItem) : null;
     const ohDbItem = ohSelectedEntry && !ohDirectMastery
@@ -514,12 +518,13 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
       uses: isNick ? 'Part of Attack action (Nick)' : 'Bonus Action (Light)',
       _source: 'Weapon',
       _attackColor: true,
-      attackBonus: ohProfInfo.proficient ? getPB(C) + ohMod : ohMod,
+      attackBonus: (ohProfInfo.proficient ? getPB(C) + ohMod : ohMod) + ohEnhancement.attack,
       damageFormula: ohDamageFormula,
       damageButtonLabel: ohDamageFormula ? `Damage ${ohDamageFormula}${ohDtype ? ` ${ohDtype}` : ''}` : 'Damage',
       rollLabelPrefix: `Off-hand ${offHandItem.name}`,
       noDescription: true,
       _item: offHandItem,
+      _enhancement: ohEnhancement.attack || ohEnhancement.damage ? ohEnhancement : null,
       _weaponIndex: ohIndex,
       _weaponSlot: offHandItem.equippedSlot || null,
       _weaponMastery: ohMastery || null,

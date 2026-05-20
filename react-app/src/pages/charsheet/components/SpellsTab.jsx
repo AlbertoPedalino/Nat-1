@@ -22,6 +22,7 @@ import { installedRegistry, loadClassAdapters, loadCoreAdapters, loadSpellsAdapt
 import { isConcentrationSpell, isRitualSpell } from '../../../shared/spellTags.js';
 import { getEquippedArmorPenalties } from '../logic/armorPenalties.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
+import { aggregateSpellBonuses } from '../../../shared/character/itemBonus.js';
 import {
   buildSpellInfo,
   canManageSpells,
@@ -199,8 +200,10 @@ export default function SpellsTab({ C, sheet, onRoll, onUpdateSpells, onShowToas
   const armorPenalties = useMemo(() => getEquippedArmorPenalties(C, C?.inventory || [], profSets), [C, profSets]);
   const ability = getSpellAbility(C);
   const spellMod = getMod(getFinal(C, ability));
-  const dc = 8 + getPB(C) + spellMod;
-  const atk = getPB(C) + spellMod;
+  const inventoryForBonuses = sheet?.sheetInventory || C?.inventory || [];
+  const spellItemBonuses = aggregateSpellBonuses(inventoryForBonuses);
+  const dc = 8 + getPB(C) + spellMod + spellItemBonuses.spellSaveDc;
+  const atk = getPB(C) + spellMod + spellItemBonuses.spellAttack;
 
   useEffect(() => {
     if (pickerLevel > 0 && pickerLevel > maxSpellLevel) setPickerLevel(maxSpellLevel > 0 ? maxSpellLevel : 0);

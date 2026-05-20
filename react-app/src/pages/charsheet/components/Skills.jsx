@@ -5,6 +5,7 @@ import { getEquippedArmorPenalties } from '../logic/armorPenalties.js';
 import { matchesChoiceRequirement, inventoryHasFlag } from '../../../shared/character/choiceUtils.js';
 import { getSkillAdvantageFromEffects } from '../logic/sheetEffects.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
+import { aggregateAbilityCheckBonus } from '../../../shared/character/itemBonus.js';
 
 const _SKILL_ADVANTAGES = [
   {
@@ -52,7 +53,9 @@ function getSkillAdvantage(C, skillName) {
 
 export default function Skills({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
-  const armorPenalties = getEquippedArmorPenalties(C, sheet?.sheetInventory || C?.inventory || [], profSets);
+  const inventory = sheet?.sheetInventory || C?.inventory || [];
+  const armorPenalties = getEquippedArmorPenalties(C, inventory, profSets);
+  const itemCheckBonus = aggregateAbilityCheckBonus(inventory);
   
   return (
     <Paper variant="outlined" sx={{ overflow: 'hidden' }}>
@@ -69,7 +72,7 @@ export default function Skills({ C, sheet, onRoll }) {
       </Box>
       {SKILLS.map(sk => {
         const training = getSkillTraining(C, sk.n);
-        const bonus = getSkillBonus(C, sk);
+        const bonus = getSkillBonus(C, sk) + itemCheckBonus;
         const isStealth = String(sk.n || '').toLowerCase() === 'stealth';
         const hasDisadv = armorPenalties.hasPenalty && (
           armorPenalties.disadvantageOn.includes(`${sk.a}-checks`)

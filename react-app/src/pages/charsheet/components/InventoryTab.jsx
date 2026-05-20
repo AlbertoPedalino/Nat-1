@@ -15,6 +15,7 @@ import { ItemNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 import { INVENTORY_SOURCE_PRIORITY, sourceRank } from '../../../shared/character/sourcePriority.js';
 import { addInventoryEntries } from '../../../shared/character/itemContainers.js';
 import { ItemPropertyTable } from '../../../shared/character/ItemPropertyTable.jsx';
+import { countAttunedItems } from '../../../shared/character/itemBonus.js';
 import { getArmorPenalties } from '../logic/armorPenalties.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
@@ -425,6 +426,14 @@ export default function InventoryTab({ C, sheet, onUpdateInventory, onUpdateCurr
     updateInv(next);
   }, [updateInv]);
 
+  const toggleAttuned = useCallback((index) => {
+    const current = invRef.current || [];
+    const target = current[index];
+    if (!target?.reqAttune) return;
+    const next = current.map((item, idx) => idx === index ? { ...item, attuned: !item.attuned } : item);
+    updateInv(next);
+  }, [updateInv]);
+
   const updateCoin = useCallback((coin, value) => {
     const next = { ...currency, [coin]: Math.max(0, Number(value || 0)) };
     onUpdateCurrency?.(next);
@@ -454,6 +463,15 @@ export default function InventoryTab({ C, sheet, onUpdateInventory, onUpdateCurr
       <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 0.5 }}>
         <Box sx={statPillSx}>Weight: <b>{totalWeight.toFixed(1)} / {maxCarry} lb</b></Box>
         <Box sx={statPillSx}>Value: <b>{totalGp.toFixed(1)} GP</b></Box>
+        {(() => {
+          const attunedCount = countAttunedItems(inv);
+          const over = attunedCount > 3;
+          return (
+            <Box sx={{ ...statPillSx, bgcolor: over ? 'rgba(222,103,95,0.12)' : 'rgba(35,32,26,1)', borderColor: over ? '#de675f' : 'divider', '& b': { color: over ? '#de675f' : '#edd48a', fontFamily: '"Cinzel", Georgia, serif' } }}>
+              Attuned: <b>{attunedCount} / 3</b>{over ? ' (over limit)' : ''}
+            </Box>
+          );
+        })()}
         <Box sx={{ width: '100%', mt: 0.3 }}>
           <Box sx={{ height: 6, borderRadius: 1, bgcolor: 'rgba(255,255,255,0.08)', overflow: 'hidden', border: 1, borderColor: 'divider' }}>
             <Box sx={{ width: `${carryPct}%`, height: '100%', bgcolor: overloaded ? '#de675f' : '#58b879' }} />
@@ -589,6 +607,7 @@ export default function InventoryTab({ C, sheet, onUpdateInventory, onUpdateCurr
                 isArmorer={isArmorer}
                 hasArcaneArmor={hasItemFlag(item, 'arcaneArmor')}
                 onArcaneArmor={toggleArcaneArmor}
+                onAttune={toggleAttuned}
 
               />
             ))}
@@ -646,7 +665,7 @@ const getPenaltyMessage = (() => {
   };
 })();
 
-const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, onEquip, onEquipSlot, penaltyMsg, canPactWeapon, onPactWeapon, isArmorer, hasArcaneArmor, onArcaneArmor }) {
+const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, onEquip, onEquipSlot, penaltyMsg, canPactWeapon, onPactWeapon, isArmorer, hasArcaneArmor, onArcaneArmor, onAttune }) {
   const [open, setOpen] = useState(false);
   const type = String(item.type || '').toUpperCase();
   const canEquip = ['M', 'R', 'LA', 'MA', 'HA', 'S', 'SCF', 'WD', 'RD', 'ST', 'WI', 'WEAPON', 'ARMOR'].includes(type);
@@ -664,6 +683,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, 
               {item.custom ? <Box component="span" sx={{ fontSize: '0.56rem', color: 'text.secondary' }}>[custom]</Box> : null}
               {hasItemFlag(item, 'pactWeapon') ? <Box component="span" sx={{ ml: 0.5, fontSize: '0.56rem', color: '#9d7fb8', fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}>[Pact Weapon]</Box> : null}
               {hasItemFlag(item, 'arcaneArmor') ? <Box component="span" sx={{ ml: 0.5, fontSize: '0.56rem', color: '#58b879', fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}>[Arcane Armor]</Box> : null}
+              {item.attuned ? <Box component="span" sx={{ ml: 0.5, fontSize: '0.56rem', color: '#d69245', fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}>[Attuned]</Box> : null}
             </Box>
             {penaltyMsg && (
               <Typography sx={{ fontSize: '0.6rem', color: 'warning.main', mt: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -701,6 +721,12 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, 
             <Button size="small" onClick={() => onArcaneArmor(index)} startIcon={hasArcaneArmor ? <Check size={11} /> : null}
               sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: hasArcaneArmor ? '#58b879' : 'divider', borderRadius: '3px', color: hasArcaneArmor ? '#58b879' : 'text.secondary', bgcolor: hasArcaneArmor ? 'rgba(88,184,121,0.14)' : 'transparent', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem' }}>
               {hasArcaneArmor ? 'Arcane' : 'Arcane Armor'}
+            </Button>
+          ) : null}
+          {item.reqAttune ? (
+            <Button size="small" onClick={() => onAttune?.(index)} startIcon={item.attuned ? <Check size={11} /> : null}
+              sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: item.attuned ? '#d69245' : 'divider', borderRadius: '3px', color: item.attuned ? '#d69245' : 'text.secondary', bgcolor: item.attuned ? 'rgba(214,146,69,0.14)' : 'transparent', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem' }}>
+              {item.attuned ? 'Attuned' : 'Attune'}
             </Button>
           ) : null}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, ml: 'auto' }}>

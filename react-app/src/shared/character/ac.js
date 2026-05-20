@@ -153,11 +153,13 @@ export function getEquippedShield(character, items) {
   return (items || []).find((i) => i.equipped && i.type === 'S');
 }
 
+import { aggregateMiscAcBonus, armorEnhancement } from './itemBonus.js';
+
 export function computeArmorItemAc(character, items) {
   const armor = getEquippedArmor(character, items);
   if (!armor) return null;
   const dex = getAbilityMod(character, 'dex');
-  const base = Number(armor.ac) || 10;
+  const base = (Number(armor.ac) || 10) + armorEnhancement(armor);
   if (armor.type === 'LA') return { value: base + dex, source: armor.name || 'Light Armor', label: 'Light Armor' };
   if (armor.type === 'MA') return { value: base + Math.min(2, dex), source: armor.name || 'Medium Armor', label: 'Medium Armor' };
   if (armor.type === 'HA') return { value: base, source: armor.name || 'Heavy Armor', label: 'Heavy Armor' };
@@ -173,7 +175,8 @@ export function computeAcFormulaValue(character, formula) {
 export function computeBestArmorClass(character, items, shieldTrained) {
   const shield = getEquippedShield(character, items);
   const hasShield = !!shield;
-  const shieldBonus = hasShield && shieldTrained !== false ? 2 : 0;
+  const shieldBonus = hasShield && shieldTrained !== false ? 2 + armorEnhancement(shield) : 0;
+  const miscAcBonus = aggregateMiscAcBonus(items);
   const candidates = [];
 
   const armorAc = computeArmorItemAc(character, items);
@@ -216,7 +219,7 @@ export function computeBestArmorClass(character, items, shieldTrained) {
     sourceType: 'base',
   });
 
-  const acBonus = getAcBonusEffects(character);
+  const acBonus = getAcBonusEffects(character) + miscAcBonus;
   if (acBonus > 0) {
     candidates.forEach(c => c.value += acBonus);
   }

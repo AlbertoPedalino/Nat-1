@@ -149,13 +149,13 @@ function makeClassSnapshot(cls = null) {
 
 function serializeExtraClass(extra = {}) {
   const source = extra && typeof extra === 'object' ? extra : {};
-  const classFeatures = Array.isArray(source.allClassFeatures) && source.allClassFeatures.length
-    ? source.allClassFeatures
-    : (source.allFeatures || source.allClassFeatures || []);
+  const classFeatures = Array.isArray(source.allFeatures) && source.allFeatures.length
+    ? source.allFeatures
+    : (source.allClassFeatures || []);
 
   return {
     ...source,
-    clsSnapshot: source.clsSnapshot || makeClassSnapshot(source.cls),
+    clsSnapshot: source.cls ? makeClassSnapshot(source.cls) : (source.clsSnapshot || null),
     allClassFeatures: classFeatures,
     allSubFeatures: source.allSubFeatures || [],
   };
@@ -319,7 +319,7 @@ export function makeSheetPayload(character, data) {
     selectedSkills: character.selectedSkills || [],
     selectedLanguages: character.selectedLanguages || [],
     selectedTools: character.selectedTools || [],
-    clsSnapshot: character.clsSnapshot || makeClassSnapshot(character.cls),
+    clsSnapshot: character.cls ? makeClassSnapshot(character.cls) : (character.clsSnapshot || null),
     speciesSnapshot: {
       name: character.speciesName,
       speed: character.speciesObj?.speed || 30,

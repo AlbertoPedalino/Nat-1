@@ -5,6 +5,7 @@ import { getEquippedArmorPenalties } from '../logic/armorPenalties.js';
 import { installedRegistry } from '../../../adapters/index.js';
 import { getConcentrationBonus } from '../logic/sheetEffects.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
+import { aggregateSavingThrowBonus } from '../../../shared/character/itemBonus.js';
 
 
 function collectSaveEffects(C, stat) {
@@ -34,7 +35,9 @@ function collectSaveEffects(C, stat) {
 
 export default function SavingThrows({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
-  const armorPenalties = getEquippedArmorPenalties(C, sheet?.sheetInventory || C?.inventory || [], profSets);
+  const inventory = sheet?.sheetInventory || C?.inventory || [];
+  const armorPenalties = getEquippedArmorPenalties(C, inventory, profSets);
+  const itemSaveBonus = aggregateSavingThrowBonus(inventory);
   
   return (
     <Paper variant="outlined" sx={{ mb: '0.6rem', overflow: 'hidden' }}>
@@ -46,7 +49,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
       </Box>
       <Box sx={{ p: '0.55rem 0.8rem' }}>
         {STATS.map(st => {
-          const bonus = getSaveBonus(C, st);
+          const bonus = getSaveBonus(C, st) + itemSaveBonus;
           const prof = hasSaveProficiency(C, st);
           const hasDisadv = armorPenalties.hasPenalty && armorPenalties.disadvantageOn.includes(`${st}-saves`);
           const saveEffects = collectSaveEffects(C, st);

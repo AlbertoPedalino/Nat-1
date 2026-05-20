@@ -1,4 +1,5 @@
 import { getWeaponMasteryReminderText } from './weaponMastery.js';
+import { formatSignedBonus, parseSignedBonus } from './itemBonus.js';
 
 // Type codes match 5etools schema. Note: "R" here means a Ranged Weapon item type;
 // the same letter as a weapon property means "Reach" (see WEAPON_PROPERTY_LABELS).
@@ -265,6 +266,34 @@ export function registerItemPropertySegment(kind, builder) {
 registerItemPropertySegment('type', (item) => {
   const label = decodeItemTypeLabel(item);
   return label ? [{ kind: 'type', label: 'Type', value: label }] : [];
+});
+registerItemPropertySegment('attunement', (item) => {
+  if (!item?.reqAttune) return [];
+  const detail = typeof item.reqAttune === 'string' ? item.reqAttune : '';
+  const status = item.attuned ? ' — attuned' : ' — not attuned';
+  const value = (detail ? `Required (${detail})` : 'Required') + status;
+  return [{ kind: 'attunement', label: 'Attunement', value }];
+});
+registerItemPropertySegment('enhancement', (item) => {
+  const atk = parseSignedBonus(item?.bonusWeaponAttack ?? item?.bonusWeapon);
+  const dmg = parseSignedBonus(item?.bonusWeaponDamage ?? item?.bonusWeapon);
+  const ac = parseSignedBonus(item?.bonusAc);
+  const save = parseSignedBonus(item?.bonusSavingThrow);
+  const check = parseSignedBonus(item?.bonusAbilityCheck);
+  const spellAtk = parseSignedBonus(item?.bonusSpellAttack);
+  const spellDc = parseSignedBonus(item?.bonusSpellSaveDc);
+  const parts = [];
+  if (atk && atk === dmg) parts.push(`${formatSignedBonus(atk)} attack & damage`);
+  else {
+    if (atk) parts.push(`${formatSignedBonus(atk)} attack`);
+    if (dmg) parts.push(`${formatSignedBonus(dmg)} damage`);
+  }
+  if (ac) parts.push(`${formatSignedBonus(ac)} AC`);
+  if (save) parts.push(`${formatSignedBonus(save)} saves`);
+  if (check) parts.push(`${formatSignedBonus(check)} ability checks`);
+  if (spellAtk) parts.push(`${formatSignedBonus(spellAtk)} spell attack`);
+  if (spellDc) parts.push(`${formatSignedBonus(spellDc)} spell DC`);
+  return parts.length ? [{ kind: 'enhancement', label: 'Enhancement', value: parts.join(', ') }] : [];
 });
 registerItemPropertySegment('damage', (item) => {
   if (!item?.dmg1) return [];
