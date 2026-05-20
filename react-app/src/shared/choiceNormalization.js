@@ -1,3 +1,5 @@
+import { isFeatKey, isFeatDetailKey } from './featChoiceKeys.js';
+
 const SKILL_NAMES = [
   'Acrobatics',
   'Animal Handling',
@@ -163,11 +165,6 @@ function isLanguageKey(key) {
   return k.includes('language') || k.endsWith('lang') || k.includes('polyglot');
 }
 
-function isFeatKey(key) {
-  const k = compact(key);
-  return k.includes('feat') || k.includes('boon') || k.includes('fightingstyle');
-}
-
 function isSpellChoiceKey(key) {
   const k = compact(key);
   return k.includes('spell') || k.includes('cantrip') || k.includes('arcanum');
@@ -267,7 +264,18 @@ function normalizeChoiceEntry(out, key, value) {
     if (isSkillKey(key)) out.choiceKeysByCategory.skills.push(key);
     if (isToolKey(key)) out.choiceKeysByCategory.tools.push(key);
     if (isLanguageKey(key)) out.choiceKeysByCategory.languages.push(key);
+    if (isFeatKey(key)) return;
   }
+
+  if (isSpellChoiceKey(key)) {
+    out.spells.byKey[key] = out.rawByKey[key];
+    if (compact(key).includes('cantrip')) uniquePushMany(out.spells.cantrips, values);
+    else uniquePushMany(out.spells.spells, values);
+    out.choiceKeysByCategory.spells.push(key);
+    return;
+  }
+
+  if (isFeatDetailKey(key)) return;
 
   if (isFeatKey(key)) {
     out.feats.byKey[key] = out.rawByKey[key];
@@ -276,14 +284,6 @@ function normalizeChoiceEntry(out, key, value) {
       uniquePushMany(out.feats.origin, values);
     }
     out.choiceKeysByCategory.feats.push(key);
-    return;
-  }
-
-  if (isSpellChoiceKey(key)) {
-    out.spells.byKey[key] = out.rawByKey[key];
-    if (compact(key).includes('cantrip')) uniquePushMany(out.spells.cantrips, values);
-    else uniquePushMany(out.spells.spells, values);
-    out.choiceKeysByCategory.spells.push(key);
     return;
   }
 

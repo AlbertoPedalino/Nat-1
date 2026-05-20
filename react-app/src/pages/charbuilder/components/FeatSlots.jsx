@@ -273,7 +273,12 @@ export function FeatCategorySlot({ spec, feats, character, state, dispatch }) {
                   divider
                   selected={active}
                   alignItems="flex-start"
-                  onClick={() => dispatch({ type: 'choice/set', key: spec.key, value: active ? null : feat.name })}
+                  onClick={() => dispatch({
+                    type: 'choice/set',
+                    key: spec.key,
+                    value: active ? null : feat.name,
+                    clearPrefix: `${spec.key}_`,
+                  })}
                 >
                   <ListItemText
                     primary={<Typography fontWeight={active ? 700 : 500} noWrap>{feat.name}</Typography>}

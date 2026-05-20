@@ -11,6 +11,24 @@ import { getBackgroundPattern, getLevelFromXp } from './logic/calculations.js';
 import { handleBackgroundSelect, handleClassSelect, handleSpellToggle, handleWizardSpellbookToggle } from './stateHandlers.js';
 import { getChoiceLevel } from '../../shared/character/choiceLevels.js';
 import { addInventoryEntries } from '../../shared/character/itemContainers.js';
+import { isFeatKey, isFeatDetailKey } from '../../shared/featChoiceKeys.js';
+
+function pruneOrphanFeatChoices(choices = {}) {
+  if (!choices || typeof choices !== 'object') return choices;
+  const ownerKeys = Object.keys(choices)
+    .filter((key) => isFeatKey(key) && !isFeatDetailKey(key) && choices[key] != null && choices[key] !== '');
+  const next = { ...choices };
+  let mutated = false;
+  Object.keys(next).forEach((key) => {
+    if (!isFeatDetailKey(key)) return;
+    const hasOwner = ownerKeys.some((owner) => key === owner || key.startsWith(`${owner}_`));
+    if (!hasOwner) {
+      delete next[key];
+      mutated = true;
+    }
+  });
+  return mutated ? next : choices;
+}
 
 function hasLevelAbove(key, classLevel) {
   const k = String(key || '');
@@ -127,7 +145,11 @@ export const initialBuilderState = {
 };
 
 function updateCharacter(state, patch) {
-  return { ...state, character: { ...state.character, ...patch } };
+  const merged = { ...state.character, ...patch };
+  if (patch && Object.prototype.hasOwnProperty.call(patch, 'choices')) {
+    merged.choices = pruneOrphanFeatChoices(merged.choices);
+  }
+  return { ...state, character: merged };
 }
 
 function updateNestedCharacter(state, key, patch) {
@@ -514,7 +536,10 @@ export function builderReducer(state, action) {
       return handleWizardSpellbookToggle(state, action, { updateCharacter });
     }
     case 'choice/set': {
-      const merged = { ...(state.character.choices || {}), [action.key]: action.value };
+      const merged = action.clearPrefix
+        ? clearChoicePrefix(state.character.choices || {}, action.clearPrefix)
+        : { ...(state.character.choices || {}) };
+      merged[action.key] = action.value;
       const next = action.key === 'species_version'
         ? pruneStaleSpeciesLineageChoices(merged, action.value)
         : merged;

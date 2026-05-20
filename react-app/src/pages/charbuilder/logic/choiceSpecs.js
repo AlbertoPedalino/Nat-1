@@ -109,9 +109,20 @@ function choiceFromBlock(prefix, label, block, fallbackFrom = []) {
       || 1,
     );
   }
-  from = from?.length ? from : fallbackFrom;
+  if (typeof from === 'string') {
+    const token = from.trim();
+    from = token && !/^(any|classSkillList)$/i.test(token) ? [token] : fallbackFrom;
+  }
+  from = specUniq(from?.length ? from : fallbackFrom);
   if (!from?.length) return null;
   return { key: prefix, label, type: 'generic_choice', from, count };
+}
+
+function choiceSpecsFromProficiencyBlocks({ blocks, slotKey, keySuffix, label, type, fallbackFrom = [] }) {
+  return (blocks || []).flatMap((block, index) => {
+    const spec = choiceFromBlock(`${slotKey}_${keySuffix}_${index}`, label, block, fallbackFrom);
+    return spec ? [{ ...spec, type }] : [];
+  });
 }
 
 function asiLevelsFromClass(cls, classFeatures) {
@@ -578,6 +589,61 @@ export function featChoiceSpecs(feat, options = {}) {
     from: ui.weaponMastery.weapons || ui.weaponMastery.options || [],
     count: ui.weaponMastery.count || 1,
   });
+
+  if (!ui.skillProficiency && !ui.skillOrToolProficiency) {
+    specs.push(...choiceSpecsFromProficiencyBlocks({
+      blocks: feat?.skillProficiencies,
+      slotKey,
+      keySuffix: 'skill',
+      label: `${feat.name} Skill`,
+      type: 'skill_choice',
+      fallbackFrom: ALL_SKILLS,
+    }));
+  }
+
+  if (!ui.toolProficiency && !ui.instrumentProficiency && !ui.skillOrToolProficiency) {
+    specs.push(...choiceSpecsFromProficiencyBlocks({
+      blocks: feat?.toolProficiencies,
+      slotKey,
+      keySuffix: 'tool',
+      label: `${feat.name} Tool`,
+      type: 'generic_choice',
+      fallbackFrom: ALL_TOOLS,
+    }));
+  }
+
+  if (!ui.languageProficiency) {
+    specs.push(...choiceSpecsFromProficiencyBlocks({
+      blocks: feat?.languageProficiencies,
+      slotKey,
+      keySuffix: 'language',
+      label: `${feat.name} Language`,
+      type: 'language_choice',
+      fallbackFrom: ALL_LANGS,
+    }));
+  }
+
+  if (!ui.weaponProficiency && !ui.weaponMastery) {
+    specs.push(...choiceSpecsFromProficiencyBlocks({
+      blocks: feat?.weaponProficiencies,
+      slotKey,
+      keySuffix: 'weapon',
+      label: `${feat.name} Weapon`,
+      type: 'generic_choice',
+      fallbackFrom: [],
+    }));
+  }
+
+  if (!ui.skillOrToolProficiency) {
+    specs.push(...choiceSpecsFromProficiencyBlocks({
+      blocks: feat?.skillToolLanguageProficiencies,
+      slotKey,
+      keySuffix: 'skill_tool_language',
+      label: `${feat.name} Proficiency`,
+      type: 'skill_tool_choice',
+      fallbackFrom: [...ALL_SKILLS, ...ALL_TOOLS, ...ALL_LANGS],
+    }));
+  }
 
   specs.push(...additionalSpellChoices(feat, slotKey, options.entryIdx));
   return specs;

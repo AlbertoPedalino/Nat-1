@@ -65,6 +65,7 @@ function ActiveStep({ state, dispatch }) {
 function createInitialBuilderState() {
   const params = new URLSearchParams(window.location.search);
   const charParam = params.get('char');
+  if (charParam === 'new') return initialBuilderState;
   const targetId = (charParam && charParam !== 'new') ? charParam : getActiveCharId();
   if (!targetId) return initialBuilderState;
   const stored = storeLoadCharacter(targetId);

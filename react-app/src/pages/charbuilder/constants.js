@@ -118,7 +118,9 @@ export const BACKGROUND_SUMMARIES = [
 
 export const FEAT_SUMMARIES = [
   { name: 'Alert', category: 'Origin' },
+  { name: 'Crafter', category: 'Origin' },
   { name: 'Magic Initiate', category: 'Origin' },
+  { name: 'Savage Attacker', category: 'Origin' },
   { name: 'Skilled', category: 'Origin' },
   { name: 'Tough', category: 'Origin' },
   { name: 'War Caster', category: 'General' },

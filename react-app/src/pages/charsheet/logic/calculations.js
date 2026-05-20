@@ -1,6 +1,7 @@
 import { computeMaxHp as sharedComputeMaxHp } from '../../../shared/character/hp.js';
 import { getFeatAsiBonus } from '../../../shared/character/abilityBonuses.js';
 import { installedRegistry } from '../../../adapters/index.js';
+import { extractFixedProficiencyLabels } from '../../../shared/character/typedProficiencies.js';
 
 const PB_TABLE = [null, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6];
 const STATS = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
@@ -106,6 +107,30 @@ function valuesIncludeSkill(values, skillName) {
     .some((value) => normSkill(skillChoiceLabel(value)) === nsk);
 }
 
+function proficiencyBearingFeatures(C) {
+  return [
+    C?.backgroundSnapshot,
+    C?.speciesSnapshot,
+    ...(C?.allClassFeatures || []),
+    ...(C?.allSubFeatures || []),
+    ...(C?.allFeatSnapshots || []),
+    ...((C?.extraClasses || []).flatMap((extra) => [
+      ...(extra?.allClassFeatures || extra?.allFeatures || []),
+      ...(extra?.allSubFeatures || []),
+    ])),
+  ].filter(Boolean);
+}
+
+function collectFixedProficiencyLabels(C, fields) {
+  const features = proficiencyBearingFeatures(C);
+  return features.flatMap((feature) => (Array.isArray(fields) ? fields : [fields])
+    .flatMap((field) => extractFixedProficiencyLabels(feature[field])));
+}
+
+function collectFixedSkillLabels(C) {
+  return collectFixedProficiencyLabels(C, ['skillProficiencies', 'skillToolLanguageProficiencies']);
+}
+
 function characterClassEntities(C) {
   if (!C) return [];
   const out = [];
@@ -173,6 +198,7 @@ export function getSkillProficiency(C, skillName) {
   if (valuesIncludeSkill(profList, skillName)) return 'prof';
   const bgFixed = (C?.backgroundSnapshot?.skillProficiencies || []).flatMap(sp => Object.keys(sp).filter(k => k !== 'choose'));
   if (valuesIncludeSkill(bgFixed, skillName)) return 'prof';
+  if (valuesIncludeSkill(collectFixedSkillLabels(C), skillName)) return 'prof';
   if (C?.choices) {
     for (const [key, val] of Object.entries(C.choices)) {
       if (!val) continue;

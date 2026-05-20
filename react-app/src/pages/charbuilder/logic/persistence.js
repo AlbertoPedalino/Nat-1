@@ -14,6 +14,38 @@ import {
   uniqueProficiencyLabels,
 } from '../../../shared/character/typedProficiencies.js';
 
+const FEAT_SNAPSHOT_FIELDS = [
+  'name',
+  'source',
+  'category',
+  'categories',
+  'entries',
+  'prerequisite',
+  'ability',
+  'skillProficiencies',
+  'toolProficiencies',
+  'languageProficiencies',
+  'skillToolLanguageProficiencies',
+  'savingThrowProficiencies',
+  'expertise',
+  'armorProficiencies',
+  'weaponProficiencies',
+  'resist',
+  'immune',
+  'vulnerable',
+  'senses',
+  'additionalSpells',
+  'choiceUi',
+];
+
+function pickFields(source, fields) {
+  const out = {};
+  fields.forEach((field) => {
+    if (source[field] !== undefined) out[field] = source[field];
+  });
+  return out;
+}
+
 export function extractSheetData(text) {
   try {
     const doc = new DOMParser().parseFromString(text, 'text/html');
@@ -320,14 +352,7 @@ export function makeSheetPayload(character, data) {
           : null;
         const adapted = typeof adapter === 'function' ? (adapter(feat) || {}) : {};
         return {
-          name: feat.name,
-          source: feat.source,
-          category: feat.category,
-          categories: feat.categories,
-          entries: feat.entries,
-          prerequisite: feat.prerequisite,
-          armorProficiencies: feat.armorProficiencies,
-          weaponProficiencies: feat.weaponProficiencies,
+          ...pickFields(feat, FEAT_SNAPSHOT_FIELDS),
           hpBonusPerLevel: Number(adapted.hpBonusPerLevel || feat.hpBonusPerLevel || 0),
         };
       }),
