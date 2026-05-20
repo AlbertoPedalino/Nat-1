@@ -244,3 +244,13 @@ export function dedupeRules(rules) {
   });
   return out;
 }
+
+// Canonical display form for a free-text weapon proficiency label.
+// Mirrors the rule pipeline so callers that track hidden labels (set
+// subtraction) line up with the formatted labels populated in weaponSet.
+export function labelToFormattedWeaponLabel(label) {
+  const rule = inferRuleFromLabel(label);
+  if (!rule) return label;
+  const norm = normalizeRule(rule);
+  return norm ? formatRule(norm) : label;
+}

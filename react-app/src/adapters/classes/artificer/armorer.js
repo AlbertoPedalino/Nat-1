@@ -166,7 +166,7 @@ registerSubclassSheetActions("Artificer_Armorer", [
     "uses": "At will",
     "minLevel": 3,
     "requiresChoice": { "key": "armorer_model", "value": "Guardian" },
-    "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"] },
+    "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true },
     "attackBonus": ({ character }) => {
       if (typeof getPB !== 'function' || typeof getMod !== 'function' || typeof getFinal !== 'function') return 0;
       try { return getPB(character) + getMod(getFinal(character, 'int')); } catch { return 0; }
@@ -189,7 +189,7 @@ registerSubclassSheetActions("Artificer_Armorer", [
     "uses": "At will (while Bloodied)",
     "minLevel": 3,
     "requiresChoice": { "key": "armorer_model", "value": "Guardian" },
-    "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"] },
+    "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true },
     "desc": "Guardian model. While Bloodied (at or below half HP), take a Bonus Action to gain Temporary HP equal to your Artificer level. Lost if you doff the armor."
   },
   {
@@ -199,7 +199,7 @@ registerSubclassSheetActions("Artificer_Armorer", [
     "uses": "At will",
     "minLevel": 3,
     "requiresChoice": { "key": "armorer_model", "value": "Infiltrator" },
-    "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"] },
+    "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true },
     "attackBonus": ({ character }) => {
       if (typeof getPB !== 'function' || typeof getMod !== 'function' || typeof getFinal !== 'function') return 0;
       try { return getPB(character) + getMod(getFinal(character, 'int')); } catch { return 0; }
@@ -222,7 +222,7 @@ registerSubclassSheetActions("Artificer_Armorer", [
     "uses": "Once/turn",
     "minLevel": 3,
     "requiresChoice": { "key": "armorer_model", "value": "Infiltrator" },
-    "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"] },
+    "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true },
     "damageFormula": "1d6",
     "damageButtonLabel": "+1d6 lightning (extra)",
     "damageKind": "damage",
@@ -235,7 +235,7 @@ registerSubclassSheetActions("Artificer_Armorer", [
     "uses": "Passive",
     "minLevel": 3,
     "requiresChoice": { "key": "armorer_model", "value": "Infiltrator" },
-    "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"] },
+    "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true },
     "desc": "Infiltrator model passive: your Speed increases by 5 ft."
   },
   {
@@ -245,7 +245,7 @@ registerSubclassSheetActions("Artificer_Armorer", [
     "uses": "Passive",
     "minLevel": 3,
     "requiresChoice": { "key": "armorer_model", "value": "Infiltrator" },
-    "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"] },
+    "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true },
     "desc": "Infiltrator model passive: Advantage on DEX (Stealth) checks. If the armor imposes Disadvantage on such checks, they cancel each other."
   },
   {
@@ -255,7 +255,7 @@ registerSubclassSheetActions("Artificer_Armorer", [
     "uses": "At will",
     "minLevel": 3,
     "requiresChoice": { "key": "armorer_model", "value": "Dreadnaught" },
-    "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"] },
+    "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true },
     "attackBonus": ({ character }) => {
       if (typeof getPB !== 'function' || typeof getMod !== 'function' || typeof getFinal !== 'function') return 0;
       try { return getPB(character) + getMod(getFinal(character, 'int')); } catch { return 0; }
@@ -279,7 +279,7 @@ registerSubclassSheetActions("Artificer_Armorer", [
     "resKey": "armorer_giant_stature",
     "minLevel": 3,
     "requiresChoice": { "key": "armorer_model", "value": "Dreadnaught" },
-    "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"] },
+    "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true },
     "desc": "Dreadnaught model. Bonus Action: enlarge armor for 1 minute — reach +5 ft, and if smaller than Large you become Large (if space permits). Uses: INT modifier (min 1) per Long Rest."
   },
   {
@@ -337,7 +337,7 @@ registerSubclassSheetResources("Artificer_Armorer", [
     "recharge": "LR",
     "max": (lv, { int } = {}) => Math.max(1, int ?? 0),
     "requiresChoice": { "key": "armorer_model", "value": "Dreadnaught" },
-    "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"] }
+    "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true }
   },
   {
     "key": "perfected_guardian",
@@ -346,7 +346,7 @@ registerSubclassSheetResources("Artificer_Armorer", [
     "recharge": "LR",
     "max": (lv, { int } = {}) => Math.max(1, int ?? 0),
     "requiresChoice": { "key": "armorer_model", "value": "Guardian" },
-    "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"] }
+    "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true }
   },
   {
     "key": "perfected_infiltrator",
@@ -355,7 +355,7 @@ registerSubclassSheetResources("Artificer_Armorer", [
     "recharge": "LR",
     "max": (lv, { int } = {}) => Math.max(1, int ?? 0),
     "requiresChoice": { "key": "armorer_model", "value": "Infiltrator" },
-    "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"] }
+    "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true }
   }
 ]);
 registerSubclassSheetProficiencies("Artificer_Armorer", [
@@ -376,11 +376,11 @@ if (typeof registerItemFlagDef === 'function') {
 registerSubclassSheetEffects("Artificer_Armorer", [
   // Infiltrator model — gated on Arcane Armor flag + model choice
   { type: "speed", speedType: "walk", value: 5, minLevel: 3,
-    requiredChoice: { key: "armorer_model", value: ["Infiltrator", "infiltrator"] },
-    requiredItemFlag: "arcaneArmor", note: "Powered Steps" },
+    requiredChoice: { key: "armorer_model", value: "Infiltrator" },
+    requiredItemFlag: { flag: "arcaneArmor", itemType: ["LA", "MA", "HA"], equipped: true }, note: "Powered Steps" },
   { type: "advantage", target: "skill", skill: "Stealth", minLevel: 3,
-    requiredChoice: { key: "armorer_model", value: ["Infiltrator", "infiltrator"] },
-    requiredItemFlag: "arcaneArmor", note: "Dampening Field" },
+    requiredChoice: { key: "armorer_model", value: "Infiltrator" },
+    requiredItemFlag: { flag: "arcaneArmor", itemType: ["LA", "MA", "HA"], equipped: true }, note: "Dampening Field" },
 ]);
 registerSubclassSheetFeatureFilter("Artificer_Armorer", (ctx, features) => {
   const prefix = String(ctx?.choicePrefix || "");

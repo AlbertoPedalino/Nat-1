@@ -5,6 +5,7 @@ export {
   getWeaponCategory,
   inferRuleFromLabel,
   itemHasProperty,
+  labelToFormattedWeaponLabel,
   normalizeRule,
   normKey,
   processStructuredWeaponProficiencies,
@@ -12,6 +13,12 @@ export {
   weaponMatchesRule,
   weaponNameKeys,
 } from './weaponRules.js';
+
+export {
+  ARMOR_KIND_KEYS,
+  armorSetTrainsKind,
+  getArmorKindEntry,
+} from './armorRules.js';
 
 export {
   collectEquipmentProficiencySets,

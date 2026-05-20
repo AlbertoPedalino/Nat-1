@@ -19,10 +19,13 @@ export function matchesChoiceRequirement(C, requirement) {
 
 export function inventoryHasFlag(inventory, requirement) {
   if (!requirement || !inventory) return false;
-  const flag = requirement.flag;
+  const spec = typeof requirement === 'string' ? { flag: requirement } : requirement;
+  const flag = spec.flag;
   if (!flag) return true;
-  const itemType = requirement.itemType;
+  const itemType = spec.itemType;
+  const requireEquipped = spec.equipped === true;
   return inventory.some((item) => {
+    if (requireEquipped && !item.equipped) return false;
     if (itemType) {
       const type = String(item.type || '').toUpperCase();
       const types = Array.isArray(itemType) ? itemType : [itemType];

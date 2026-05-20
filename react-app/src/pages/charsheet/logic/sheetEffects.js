@@ -1,6 +1,7 @@
 import { installedRegistry } from '../../../adapters/index.js';
 import { canonicalDisplayLabel, cleanProficiencyText } from '../../../shared/character/proficiencyDisplay.js';
 import { matchesRequiredChoice } from '../../../shared/character/lineageMatch.js';
+import { inventoryHasFlag } from '../../../shared/character/choiceUtils.js';
 
 function asArray(value) {
   if (value == null) return [];
@@ -85,10 +86,10 @@ function requiredChoicePasses(effect, character) {
 }
 
 function requiredItemFlagPasses(effect, character) {
-  const flag = effect?.requiredItemFlag;
-  if (!flag) return true;
+  const requirement = effect?.requiredItemFlag;
+  if (!requirement) return true;
   const inv = character?.inventory || [];
-  return inv.some((item) => (item.flags || []).includes(flag));
+  return inventoryHasFlag(inv, requirement);
 }
 
 function effectIsActive(effect, context) {

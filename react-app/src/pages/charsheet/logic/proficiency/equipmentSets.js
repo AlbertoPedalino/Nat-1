@@ -3,7 +3,7 @@ import {
   dedupeRules,
   formatRule,
   inferRuleFromLabel,
-  normalizeRule,
+  labelToFormattedWeaponLabel,
   processStructuredWeaponProficiencies,
 } from './weaponRules.js';
 import {
@@ -12,13 +12,6 @@ import {
   collectFixedFeatureProfs,
   normalizeLabel,
 } from './helpers.js';
-
-function labelToFormattedWeaponLabel(label) {
-  const rule = inferRuleFromLabel(label);
-  if (!rule) return label;
-  const norm = normalizeRule(rule);
-  return norm ? formatRule(norm) : label;
-}
 
 function isProficiencyChoiceKey(lowerKey) {
   return lowerKey.includes('proficiency');

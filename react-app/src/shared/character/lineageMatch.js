@@ -63,10 +63,11 @@ function readChoiceValue(character, key) {
 
 export function matchesRequiredChoice(character, requiredChoice) {
   if (!requiredChoice?.key) return true;
-  const expected = norm(requiredChoice.value);
-  if (!expected) return true;
+  const expectedValues = asArray(requiredChoice.value).map(norm).filter(Boolean);
+  if (!expectedValues.length) return true;
   const stored = readChoiceValue(character, requiredChoice.key);
-  return asArray(stored).map(norm).includes(expected);
+  const storedNorms = asArray(stored).map(norm);
+  return expectedValues.some((expected) => storedNorms.includes(expected));
 }
 
 export function filterByRequiredChoice(items, character) {

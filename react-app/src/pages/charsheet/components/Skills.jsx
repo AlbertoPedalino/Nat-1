@@ -11,7 +11,7 @@ const _SKILL_ADVANTAGES = [
     skill: 'stealth',
     label: 'Dampening Field',
     requiresChoice: { key: 'armorer_model', value: 'infiltrator' },
-    requiresInventoryFlag: { flag: 'arcaneArmor', itemType: ['LA', 'MA', 'HA'] },
+    requiresInventoryFlag: { flag: 'arcaneArmor', itemType: ['LA', 'MA', 'HA'], equipped: true },
   },
 ];
 
