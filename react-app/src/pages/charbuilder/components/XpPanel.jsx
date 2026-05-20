@@ -3,6 +3,11 @@ import { Layers } from 'lucide-react';
 import BuilderPanel from './BuilderPanel.jsx';
 import { getXpProgress } from '../logic/calculations.js';
 
+function normalizeXpInput(value) {
+  const digits = String(value ?? '').replace(/\D/g, '');
+  return digits.replace(/^0+(?=\d)/, '') || '0';
+}
+
 export default function XpPanel({ character, dispatch }) {
   const progress = getXpProgress(character.xp, character.level);
   return (
@@ -10,11 +15,12 @@ export default function XpPanel({ character, dispatch }) {
       <Stack spacing={1.25}>
         <LinearProgress variant="determinate" value={progress} />
         <TextField
-          type="number"
-          value={character.xp}
-          inputProps={{ min: 0 }}
+          type="text"
+          value={String(character.xp ?? 0)}
+          slotProps={{ input: { inputMode: 'numeric' } }}
           placeholder="Total XP"
-          onChange={(event) => dispatch({ type: 'xp/set', value: Number(event.target.value) || 0 })}
+          onFocus={(event) => event.currentTarget.select()}
+          onChange={(event) => dispatch({ type: 'xp/set', value: Number(normalizeXpInput(event.target.value)) })}
         />
       </Stack>
     </BuilderPanel>

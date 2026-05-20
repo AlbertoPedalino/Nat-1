@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Box, Stack, Typography, Button, TextField, Dialog, DialogActions, DialogContent, DialogTitle, Chip } from '@mui/material';
-import { ArrowLeft, Sun, Moon, Download, Wand2, Hammer, Axe, Music, Cross, Feather, Sword, Dumbbell, Shield, Compass, Eye, Sparkles, Flame, BookOpen, Dices, Trash2 } from 'lucide-react';
+import { ArrowLeft, Home, Sun, Moon, Download, Wand2, Hammer, Axe, Music, Cross, Feather, Sword, Dumbbell, Shield, Compass, Eye, Sparkles, Flame, BookOpen, Dices, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getLevelFromXp, getXpForNextLevel } from '../logic/calculations.js';
 import IconColorPicker from '../../../shared/character/IconColorPicker.jsx';
@@ -63,6 +63,11 @@ function modFromDice(rolls, total) {
   return total - diceSum;
 }
 
+function normalizeXpInput(value) {
+  const digits = String(value ?? '').replace(/\D/g, '');
+  return digits.replace(/^0+(?=\d)/, '') || '0';
+}
+
 const ROLL_LOG_SX = {
   dialogPaper: {
     sx: { bgcolor: 'rgba(26,23,19,0.98)', border: 1, borderColor: 'divider', borderRadius: 1, backgroundImage: 'none', boxShadow: '0 18px 52px rgba(0,0,0,0.62)' },
@@ -80,6 +85,12 @@ const ROLL_LOG_SX = {
   rollBreakdown: { fontSize: '0.58rem', color: '#70b7a6', fontFamily: '"JetBrains Mono", monospace', lineHeight: 1.2, my: 0 },
   total: { fontFamily: '"Cinzel", Georgia, serif', fontSize: '1.1rem', color: 'primary.main', fontWeight: 700, flexShrink: 0, pl: 0.5, lineHeight: 1, my: 0 },
   empty: { fontSize: '0.75rem', color: 'text.secondary', fontStyle: 'italic', textAlign: 'center', py: 3 },
+};
+
+const appNavButtonSx = {
+  fontFamily: '"Cinzel", Georgia, serif',
+  fontSize: '0.625rem',
+  letterSpacing: '0.08em',
 };
 
 export default function TopBar({ C, sheet, onShortRest, onLongRest, onDownload, onUpdateXp, onUpdateCharacter, rollLog, onClearRollLog }) {
@@ -118,6 +129,28 @@ export default function TopBar({ C, sheet, onShortRest, onLongRest, onDownload, 
     }}>
       <Box sx={{ maxWidth: 1280, mx: { md: 'auto' }, px: { xs: '0.6rem', md: '1.1rem' } }}>
       <Box sx={{
+        display: 'flex',
+        justifyContent: 'flex-start',
+        gap: '0.35rem',
+        py: '0.35rem',
+        borderBottom: 1,
+        borderColor: 'rgba(237,212,138,0.14)',
+      }}>
+        <Button size="small" variant="outlined" color="primary" startIcon={<Home size={14} />}
+          onClick={() => navigate('/')} sx={appNavButtonSx}>
+          HOME
+        </Button>
+        <Button size="small" variant="outlined" color="primary" startIcon={<ArrowLeft size={14} />}
+          onClick={() => {
+            const params = new URLSearchParams(window.location.search);
+            const charId = params.get('char') || localStorage.getItem('gb:active_char') || 'new';
+            navigate(`/charbuilder?char=${encodeURIComponent(charId)}`);
+          }}
+          sx={appNavButtonSx}>
+          Builder
+        </Button>
+      </Box>
+      <Box sx={{
         display: 'flex', alignItems: 'center', gap: { xs: '0.4rem', md: '1rem' },
         flexDirection: { xs: 'column', md: 'row' },
         justifyContent: { md: 'space-between' },
@@ -153,15 +186,26 @@ export default function TopBar({ C, sheet, onShortRest, onLongRest, onDownload, 
           </Box>
         </Box>
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.3, width: { xs: '100%', md: 'auto' }, minWidth: { md: 120 }, alignItems: 'center' }}>
-          <Box sx={{ width: '100%', height: 6, bgcolor: 'rgba(46,42,34,1)', borderRadius: 1, border: '1px solid', borderColor: 'divider', overflow: 'hidden' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.35, width: { xs: '100%', md: 280, lg: 340 }, flexShrink: 0, alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', width: '100%', gap: 1 }}>
+            <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.62rem', color: '#edd48a', letterSpacing: '0.08em', fontWeight: 700 }}>
+              XP
+            </Typography>
+            <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary', whiteSpace: 'nowrap' }}>
+              {currentXp} / {nextXp}
+            </Typography>
+          </Box>
+          <Box sx={{ width: '100%', height: 8, bgcolor: 'rgba(46,42,34,1)', borderRadius: 1, border: '1px solid', borderColor: 'divider', overflow: 'hidden' }}>
             <Box sx={{ height: '100%', bgcolor: 'primary.main', borderRadius: 1, transition: 'width 0.4s', width: `${Math.min(100, xpProgress)}%` }} />
           </Box>
           <TextField
-            size="small" type="number" value={sheet.xpStored}
-            onChange={e => onUpdateXp(e.target.value)}
-            sx={{ width: { xs: '100%', md: 100 }, '& input': { textAlign: 'center', fontSize: '0.75rem', py: 0.5, color: '#edd48a', fontFamily: '"Cinzel", Georgia, serif', fontWeight: 600 } }}
-            slotProps={{ input: { sx: { '& fieldset': { borderColor: 'transparent', borderBottom: '1px solid', borderBottomColor: 'primary.main' } } } }}
+            size="small"
+            type="text"
+            value={String(sheet.xpStored ?? 0)}
+            onFocus={(event) => event.currentTarget.select()}
+            onChange={(event) => onUpdateXp(normalizeXpInput(event.target.value))}
+            sx={{ width: { xs: '100%', md: 132 }, '& input': { textAlign: 'center', fontSize: '0.75rem', py: 0.5, color: '#edd48a', fontFamily: '"Cinzel", Georgia, serif', fontWeight: 600 } }}
+            slotProps={{ input: { inputMode: 'numeric', sx: { '& fieldset': { borderColor: 'transparent', borderBottom: '1px solid', borderBottomColor: 'primary.main' } } } }}
           />
         </Box>
 
@@ -178,15 +222,6 @@ export default function TopBar({ C, sheet, onShortRest, onLongRest, onDownload, 
             onClick={() => setRollLogOpen(true)}
             sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', letterSpacing: '0.08em', color: '#58b879', borderColor: 'rgba(88,184,121,0.4)' }}>
             LOG ({rollLog?.length || 0})
-          </Button>
-          <Button size="small" variant="outlined" color="primary" startIcon={<ArrowLeft size={14} />}
-            onClick={() => {
-              const params = new URLSearchParams(window.location.search);
-              const charId = params.get('char') || localStorage.getItem('gb:active_char') || 'new';
-              navigate(`/charbuilder?char=${encodeURIComponent(charId)}`);
-            }}
-            sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', letterSpacing: '0.08em' }}>
-            Builder
           </Button>
           <Button size="small" variant="outlined" color="secondary" startIcon={<Download size={14} />}
             onClick={onDownload} sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', letterSpacing: '0.08em' }}>

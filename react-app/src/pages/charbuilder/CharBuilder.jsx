@@ -1,4 +1,5 @@
 import { useEffect, useReducer, useRef } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 import {
   AppBar,
   Box,
@@ -13,7 +14,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { ChevronLeft, ChevronRight, Wand2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Home, Wand2 } from 'lucide-react';
 import ChoiceDescriptionDialog from './components/ChoiceDescriptionDialog.jsx';
 import ImportSheetFab from './components/ImportSheetFab.jsx';
 import PreviewPane from './components/PreviewPane.jsx';
@@ -227,6 +228,17 @@ export default function CharBuilder() {
 
       <AppBar position="sticky" color="default" elevation={0} sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'rgba(26,23,19,0.98)', backgroundImage: 'none' }}>
         <Toolbar sx={{ gap: 1, minHeight: '52px !important', pr: { xs: 12, md: 16 } }}>
+          <Button
+            component={RouterLink}
+            to="/"
+            size="small"
+            variant="outlined"
+            startIcon={<Home size={14} />}
+            sx={{ flexShrink: 0 }}
+          >
+            Home
+          </Button>
+          <Divider orientation="vertical" flexItem sx={{ borderColor: 'rgba(237,212,138,0.18)', my: 1 }} />
           <Wand2 size={19} />
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography variant="h1" noWrap sx={{ fontSize: '1.12rem', letterSpacing: '0.04em', color: '#edd48a' }}>
