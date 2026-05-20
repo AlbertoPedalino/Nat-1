@@ -209,6 +209,135 @@ export function buildItemPropertyChips(item, options = {}) {
   return out;
 }
 
+export const DAMAGE_TYPE_LABELS = {
+  A: 'acid',
+  B: 'bludgeoning',
+  C: 'cold',
+  F: 'fire',
+  O: 'force',
+  L: 'lightning',
+  N: 'necrotic',
+  P: 'piercing',
+  I: 'poison',
+  Y: 'psychic',
+  R: 'radiant',
+  S: 'slashing',
+  T: 'thunder',
+};
+
+export function decodeDamageType(code) {
+  if (!code) return '';
+  const key = String(code).toUpperCase().split('|')[0].trim();
+  return DAMAGE_TYPE_LABELS[key] || String(code).toLowerCase();
+}
+
+function formatGpValue(rawValue) {
+  const gp = Number(rawValue || 0) / 100;
+  if (!gp) return '';
+  return `${Number.isInteger(gp) ? gp : gp.toFixed(2)} gp`;
+}
+
+const WEAPON_MASTERY_DISPLAY = {
+  cleave: 'Cleave',
+  graze: 'Graze',
+  nick: 'Nick',
+  push: 'Push',
+  sap: 'Sap',
+  slow: 'Slow',
+  topple: 'Topple',
+  vex: 'Vex',
+};
+
+function masteryDisplayName(rawCode) {
+  const code = rawPropertyCode(rawCode).toLowerCase();
+  return WEAPON_MASTERY_DISPLAY[code] || (code.charAt(0).toUpperCase() + code.slice(1));
+}
+
+const SEGMENT_BUILDERS = new Map();
+const SEGMENT_ORDER = [];
+
+export function registerItemPropertySegment(kind, builder) {
+  if (!kind || typeof builder !== 'function') return;
+  if (!SEGMENT_BUILDERS.has(kind)) SEGMENT_ORDER.push(kind);
+  SEGMENT_BUILDERS.set(kind, builder);
+}
+
+registerItemPropertySegment('type', (item) => {
+  const label = decodeItemTypeLabel(item);
+  return label ? [{ kind: 'type', label: 'Type', value: label }] : [];
+});
+registerItemPropertySegment('damage', (item) => {
+  if (!item?.dmg1) return [];
+  const out = [{ kind: 'damage', label: 'Damage', value: item.dmg1 }];
+  if (item.dmgType) out.push({ kind: 'damageType', label: 'Damage Type', value: decodeDamageType(item.dmgType) });
+  return out;
+});
+registerItemPropertySegment('versatile', (item) => {
+  if (!item?.dmg2) return [];
+  return [{ kind: 'versatile', label: 'Versatile Damage', value: item.dmg2 }];
+});
+registerItemPropertySegment('ac', (item) => {
+  if (item?.ac == null) return [];
+  const t = rawTypeCode(item);
+  const dexCap = item?.dexterityMax;
+  const value =
+    t === 'LA' ? `${item.ac} + Dex`
+    : t === 'MA' ? `${item.ac} + Dex (max ${dexCap ?? 2})`
+    : t === 'S' ? `+${item.ac} (Shield)`
+    : `${item.ac}`;
+  return [{ kind: 'ac', label: 'Armor Class', value }];
+});
+registerItemPropertySegment('properties', (item) => {
+  const codes = collectRawProperties(item);
+  const labels = codes
+    .map((code) => decodeProperty(code, item))
+    .filter(Boolean)
+    .map((decoded) => decoded.label);
+  if (!labels.length) return [];
+  return [{ kind: 'properties', label: 'Properties', value: labels.join(', ') }];
+});
+registerItemPropertySegment('mastery', (item) => {
+  const arr = Array.isArray(item?.mastery) ? item.mastery : [];
+  if (!arr.length) return [];
+  return [{ kind: 'mastery', label: 'Mastery', value: arr.map(masteryDisplayName).join(', ') }];
+});
+registerItemPropertySegment('range', (item) => {
+  if (!item?.range) return [];
+  const handledByProperty = collectRawProperties(item).some((code) => /^(T|A|AF)$/.test(rawPropertyCode(code)));
+  if (handledByProperty) return [];
+  return [{ kind: 'range', label: 'Range', value: String(item.range) }];
+});
+registerItemPropertySegment('req', (item) => {
+  if (!item?.strength) return [];
+  return [{ kind: 'req', label: 'Strength', value: String(item.strength) }];
+});
+registerItemPropertySegment('stealth', (item) => {
+  if (!item?.stealth) return [];
+  return [{ kind: 'stealth', label: 'Stealth', value: 'Disadvantage' }];
+});
+registerItemPropertySegment('weight', (item) => {
+  if (!item?.weight) return [];
+  return [{ kind: 'weight', label: 'Weight', value: `${item.weight} lb` }];
+});
+registerItemPropertySegment('value', (item) => {
+  const gp = formatGpValue(item?.value);
+  return gp ? [{ kind: 'value', label: 'Value', value: gp }] : [];
+});
+
+export const ITEM_PROPERTY_SEGMENT_KINDS = SEGMENT_ORDER;
+
+export function buildItemPropertySegments(item, options = {}) {
+  if (!item) return [];
+  const { kinds, exclude } = options;
+  const include = Array.isArray(kinds) && kinds.length ? kinds : SEGMENT_ORDER;
+  const excludeSet = new Set(Array.isArray(exclude) ? exclude : []);
+  return include.flatMap((kind) => {
+    if (excludeSet.has(kind)) return [];
+    const builder = SEGMENT_BUILDERS.get(kind);
+    return builder ? builder(item) : [];
+  });
+}
+
 export const PROPERTY_CHIP_TONES = {
   prop: { color: '#c4b393', borderColor: 'rgba(196,179,147,0.45)', bgcolor: 'rgba(196,179,147,0.10)' },
   damage: { color: '#de675f', borderColor: 'rgba(222,103,95,0.45)', bgcolor: 'rgba(222,103,95,0.12)' },

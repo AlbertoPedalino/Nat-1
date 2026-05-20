@@ -14,6 +14,7 @@ import TabsPanel from './components/TabsPanel.jsx';
 import DiceToast from './components/DiceToast.jsx';
 import { deriveSheetState } from './state.js';
 import { ProficiencySetsProvider } from './context/ProficiencySetsContext.jsx';
+import { buildD20Meta, formatD20Detail, rollD20 as rollD20Dice } from '../../shared/character/dice.js';
 import { calcMaxHP, getMod, getFinal, getPB, getSaveBonus } from './logic/calculations.js';
 import { applyResourceRest, getAllResourceDefs, getHitDicePools, getUsedHitDiceTotal, normalizeResourceMax } from './logic/restResources.js';
 import { applyFreeCastRest, getFreeCastDefsForCharacter } from './logic/spellsTabLogic.js';
@@ -383,22 +384,10 @@ export default function CharacterSheet() {
   }, []);
 
   const rollD20 = useCallback((bonus, label, advantage) => {
-    const b = Number(bonus) || 0;
-    const bonusText = b >= 0 ? `+${b}` : `${b}`;
-    if (advantage === true) {
-      const r1 = Math.floor(Math.random() * 20) + 1;
-      const r2 = Math.floor(Math.random() * 20) + 1;
-      const best = Math.max(r1, r2);
-      showDiceToast(label, `Advantage: keep ${best}; d20 ${bonusText} = ${best + b}`, best + b, [{ v: r1, faces: 20, kept: r1 >= r2 }, { v: r2, faces: 20, kept: r2 > r1 }], { bonus: b, mode: 'advantage', kept: best });
-    } else if (advantage === false) {
-      const r1 = Math.floor(Math.random() * 20) + 1;
-      const r2 = Math.floor(Math.random() * 20) + 1;
-      const worst = Math.min(r1, r2);
-      showDiceToast(label, `Disadvantage: keep ${worst}; d20 ${bonusText} = ${worst + b}`, worst + b, [{ v: r1, faces: 20, kept: r1 <= r2 }, { v: r2, faces: 20, kept: r2 < r1 }], { bonus: b, mode: 'disadvantage', kept: worst });
-    } else {
-      const r = Math.floor(Math.random() * 20) + 1;
-      showDiceToast(label, `d20 ${bonusText} = ${r + b}`, r + b, [{ v: r, faces: 20, kept: true }], { bonus: b, kept: r });
-    }
+    const result = rollD20Dice(bonus, {
+      advantage: advantage === true ? true : advantage === false ? false : undefined,
+    });
+    showDiceToast(label, formatD20Detail(result), result.total, result.rolls, buildD20Meta(result));
   }, [showDiceToast]);
 
   const rollSave = useCallback((stat, options = {}) => {

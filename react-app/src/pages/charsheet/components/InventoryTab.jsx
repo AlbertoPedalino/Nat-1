@@ -1,5 +1,5 @@
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
-import { Box, Button, Chip, IconButton, TextField, Tooltip, Typography, Alert } from '@mui/material';
+import { Box, Button, IconButton, TextField, Tooltip, Typography, Alert } from '@mui/material';
 import { Backpack, Check, ChevronDown, ChevronRight, Minus, Package, Plus, Search, Shield, Sparkles, Swords, Trash2, AlertTriangle } from 'lucide-react';
 import { loadItems } from '../../charbuilder/logic/dataLoaders.js';
 import { getFinal } from '../logic/calculations.js';
@@ -14,14 +14,10 @@ import {
 import { ItemNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 import { INVENTORY_SOURCE_PRIORITY, sourceRank } from '../../../shared/character/sourcePriority.js';
 import { addInventoryEntries } from '../../../shared/character/itemContainers.js';
-import {
-  buildItemPropertyChips,
-  decodeItemTypeLabel,
-  PROPERTY_CHIP_TONES,
-} from '../../../shared/character/itemCodes.js';
+import { ItemPropertyTable } from '../../../shared/character/ItemPropertyTable.jsx';
 import { getArmorPenalties } from '../logic/armorPenalties.js';
-import { renderEntries } from '../logic/renderEntries.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
+import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
 
 const CURRENCY_TYPES = [
   { key: 'cp', label: 'CP' },
@@ -655,9 +651,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, 
   const type = String(item.type || '').toUpperCase();
   const canEquip = ['M', 'R', 'LA', 'MA', 'HA', 'S', 'SCF', 'WD', 'RD', 'ST', 'WI', 'WEAPON', 'ARMOR'].includes(type);
 
-  const body = useMemo(() => (open ? renderEntries(item.entries) : ''), [open, item.entries]);
-  const propertyChips = useMemo(() => (open ? buildItemPropertyChips(item) : []), [open, item]);
-  const typeFullLabel = useMemo(() => decodeItemTypeLabel(item), [item]);
+  const hasEntries = open && Array.isArray(item.entries) && item.entries.length > 0;
 
   return (
     <Box>
@@ -725,49 +719,8 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, 
       </Box>
       {open ? (
         <Box sx={{ fontSize: '0.7rem', color: 'text.secondary', lineHeight: 1.45, bgcolor: '#12100e', border: 1, borderColor: 'divider', borderRadius: 1, px: '10px', py: '6px', mt: '-2px', mb: '4px' }}>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: '4px', alignItems: 'center', mb: body ? '6px' : 0 }}>
-            <Chip
-              size="small"
-              label={typeFullLabel}
-              variant="outlined"
-              sx={{
-                height: 18,
-                fontSize: '0.55rem',
-                fontFamily: '"Cinzel", Georgia, serif',
-                letterSpacing: '0.06em',
-                textTransform: 'uppercase',
-                color: '#edd48a',
-                borderColor: 'rgba(237,212,138,0.55)',
-                bgcolor: 'rgba(237,212,138,0.10)',
-              }}
-            />
-            {propertyChips.map((chip, i) => {
-              const tone = PROPERTY_CHIP_TONES[chip.kind] || PROPERTY_CHIP_TONES.prop;
-              const node = (
-                <Chip
-                  size="small"
-                  label={chip.label}
-                  variant="outlined"
-                  sx={{
-                    height: 18,
-                    fontSize: '0.55rem',
-                    fontFamily: '"Cinzel", Georgia, serif',
-                    letterSpacing: '0.05em',
-                    ...tone,
-                  }}
-                />
-              );
-              const key = `${chip.kind}-${i}-${chip.label}`;
-              return chip.description ? (
-                <Tooltip key={key} title={chip.description} arrow placement="top">
-                  <span>{node}</span>
-                </Tooltip>
-              ) : (
-                <Box key={key} component="span">{node}</Box>
-              );
-            })}
-          </Box>
-          {body ? <Box sx={{ whiteSpace: 'pre-line' }}>{body}</Box> : null}
+          <ItemPropertyTable item={item} sx={{ mb: hasEntries ? '6px' : 0 }} />
+          {hasEntries ? <Box sx={{ mt: '6px' }}><EntryBlocks entries={item.entries} emptyText="" /></Box> : null}
         </Box>
       ) : null}
     </Box>

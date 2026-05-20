@@ -5,6 +5,7 @@ import { SPELL_LEVEL_LABELS } from '../../charbuilder/constants.js';
 import { SpellNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 import { RichInline } from '../../../shared/character/RichText.jsx';
 import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
+import { formatRollTitle, rollFormula as rollFormulaDice } from '../../../shared/character/dice.js';
 import { SCHOOL_LABELS, fbonus, getFinal, getMod, getPB } from '../logic/calculations.js';
 import {
   applySpellModifiers,
@@ -133,7 +134,7 @@ function groupModifierDetails(details) {
   return Array.from(groups.entries()).map(([label, items]) => ({ label, items }));
 }
 
-export default function SpellEntry({ entry, onShowToast, atk: fallbackAtk, spellMod: fallbackSpellMod, C, installedRegistry, freeCastUses, onToggleFreeCast }) {
+export default function SpellEntry({ entry, onRoll, onShowToast, atk: fallbackAtk, spellMod: fallbackSpellMod, C, installedRegistry, freeCastUses, onToggleFreeCast }) {
   const [open, setOpen] = useState(false);
   const castLevel = entry.castLevel || entry.level || 0;
   const baseLevel = entry.level || 0;
@@ -225,38 +226,23 @@ export default function SpellEntry({ entry, onShowToast, atk: fallbackAtk, spell
 
   const rollAtk = (e) => {
     e.stopPropagation();
-    const r = Math.floor(Math.random() * 20) + 1;
-    const bonusText = atk >= 0 ? `+${atk}` : `${atk}`;
-    onShowToast(`${entry.name} — Spell Attack${levelLabel}`, `d20 ${bonusText} = ${r + atk}`, r + atk, [{ v: r, faces: 20, kept: true }], { bonus: atk, kept: r });
+    onRoll?.(atk, formatRollTitle(entry.name, `Spell Attack${levelLabel}`));
   };
 
   const rollDmg = (e, formula, label) => {
     e.stopPropagation();
-    const match = formula.match(/(\d+)d(\d+)(?:\s*\+\s*(\d+))?/);
-    if (!match) { onShowToast(`${entry.name} — ${label}${levelLabel}`, formula, 0, []); return; }
-    const n = parseInt(match[1]);
-    const faces = parseInt(match[2]);
-    const flat = match[3] ? parseInt(match[3]) : 0;
-    let total = 0;
-    const rolls = [];
-    for (let i = 0; i < n; i++) { const v = Math.floor(Math.random() * faces) + 1; rolls.push({ v, faces }); total += v; }
-    total += flat;
-    onShowToast(`${entry.name} — ${label}${levelLabel}`, formula, total, rolls);
+    const title = formatRollTitle(entry.name, `${label}${levelLabel}`);
+    if (!formula) { onShowToast(title, '', 0, []); return; }
+    const { total, rolls } = rollFormulaDice(formula);
+    onShowToast(title, formula, total, rolls);
   };
 
   const rollHeal = (e, formula) => {
     e.stopPropagation();
-    if (!formula) { onShowToast(`${entry.name} — Heal${levelLabel}`, '', 0, []); return; }
-    const match = formula.match(/(\d+)d(\d+)(?:\s*\+\s*(\d+))?/);
-    if (!match) { onShowToast(`${entry.name} — Heal${levelLabel}`, formula, 0, []); return; }
-    const n = parseInt(match[1]);
-    const faces = parseInt(match[2]);
-    const flat = match[3] ? parseInt(match[3]) : 0;
-    let total = 0;
-    const rolls = [];
-    for (let i = 0; i < n; i++) { const v = Math.floor(Math.random() * faces) + 1; rolls.push({ v, faces }); total += v; }
-    total += flat;
-    onShowToast(`${entry.name} — Heal${levelLabel}`, formula, total, rolls);
+    const title = formatRollTitle(entry.name, `Heal${levelLabel}`);
+    if (!formula) { onShowToast(title, '', 0, []); return; }
+    const { total, rolls } = rollFormulaDice(formula);
+    onShowToast(title, formula, total, rolls);
   };
 
   return (

@@ -174,12 +174,38 @@ export function resolveActionFormulas(action, C) {
 
 // Normalize feature names so lookups survive minor adapter/data drift:
 //   "Action Surge (One Use)" → "actionsurge"
-//   "Maneuvers: Trip Attack" → "maneuverstripattack"
+//   "Maneuvers: Trip Attack" → "maneuverstripattack" (full) + "tripattack" (tail)
 function nameKey(value) {
   return String(value || '').toLowerCase().replace(/\([^)]*\)/g, '').replace(/[^a-z0-9]/g, '').trim();
 }
 
-function collectNamedEntries(entries) {
+function nameKeyCandidates(value) {
+  const raw = String(value || '');
+  const candidates = new Set();
+  const full = nameKey(raw);
+  if (full) candidates.add(full);
+  const colonParts = raw.split(':').map((s) => s.trim()).filter(Boolean);
+  if (colonParts.length > 1) {
+    colonParts.forEach((part) => {
+      const key = nameKey(part);
+      if (key) candidates.add(key);
+    });
+  }
+  return Array.from(candidates);
+}
+
+const _featureKeyConflicts = typeof Set === 'function' ? new Set() : null;
+function reportKeyConflict(scope, key, existingName, incomingName) {
+  if (typeof import.meta === 'undefined' || !import.meta.env?.DEV) return;
+  if (!_featureKeyConflicts) return;
+  const cacheKey = `${scope}|${key}`;
+  if (_featureKeyConflicts.has(cacheKey)) return;
+  _featureKeyConflicts.add(cacheKey);
+  // eslint-disable-next-line no-console
+  console.warn(`[actions] Feature-name collision in ${scope}: "${existingName}" and "${incomingName}" both normalize to "${key}". Keeping first.`);
+}
+
+function collectNamedEntries(entries, scope) {
   const map = new Map();
   const walk = (node) => {
     if (!node) return;
@@ -187,7 +213,14 @@ function collectNamedEntries(entries) {
     if (typeof node !== 'object') return;
     if (node.name && Array.isArray(node.entries)) {
       const key = nameKey(node.name);
-      if (key && !map.has(key)) map.set(key, node.entries);
+      if (key) {
+        const existing = map.get(key);
+        if (!existing) {
+          map.set(key, Object.assign(node.entries.slice(), { _name: node.name }));
+        } else if (existing._name !== node.name) {
+          reportKeyConflict(scope, key, existing._name, node.name);
+        }
+      }
     }
     if (Array.isArray(node.entries)) walk(node.entries);
     if (Array.isArray(node.items)) walk(node.items);
@@ -196,12 +229,18 @@ function collectNamedEntries(entries) {
   return map;
 }
 
-function buildFeatureMapFromRecords(records) {
+function buildFeatureMapFromRecords(records, scope) {
   const map = new Map();
   (records || []).forEach((feature) => {
     if (!feature?.name || !Array.isArray(feature.entries)) return;
     const key = nameKey(feature.name);
-    if (key && !map.has(key)) map.set(key, feature.entries);
+    if (!key) return;
+    const existing = map.get(key);
+    if (!existing) {
+      map.set(key, Object.assign(feature.entries.slice(), { _name: feature.name }));
+    } else if (existing._name !== feature.name) {
+      reportKeyConflict(scope, key, existing._name, feature.name);
+    }
   });
   return map;
 }
@@ -218,34 +257,33 @@ function warnMissingDescription(action, source) {
 }
 
 /**
- * Action description rendering priority (see ActionsTab.jsx):
- *   1. `action.descOverride` — adapter-forced custom text. Use when the action
- *      intentionally diverges from the official XPHB / XDMG / EFA / FRAiF /
- *      FRHoF wording (e.g. Lucky's 3-fixed Luck Points).
- *   2. `action.entries` — auto-resolved from character snapshots via the
- *      feature-name maps built below. This is the canonical source for every
- *      class, subclass, species, background, and feat action whose name
- *      matches the corresponding 5etools record.
+ * Action card descriptions come solely from `action.entries`, auto-resolved
+ * from character snapshots (XPHB / XDMG / EFA / FRAiF / FRHoF) via the
+ * feature-name maps built below.
  *
- * Adapters MUST supply one of those two. The legacy `desc` field is no longer
- * rendered; if `descOverride` is missing and the snapshot lookup fails, the
- * action card shows no description and a dev-mode warning is emitted.
+ * Adapter-side `desc` / `descOverride` fields are no longer rendered. When the
+ * snapshot lookup fails (and the action isn't flagged `noDescription`), a
+ * dev-mode warning is emitted so the missing feature mapping can be fixed.
  */
 export function collectAdapterActions(C, sheet) {
   const out = [];
-  const featSnapshotByName = new Map(
-    (C?.allFeatSnapshots || [])
-      .filter((feat) => feat?.name)
-      .map((feat) => [nameKey(feat.name), feat]),
-  );
-  const classFeatureByName = buildFeatureMapFromRecords(C?.allClassFeatures);
-  const subclassFeatureByName = buildFeatureMapFromRecords(C?.allSubFeatures);
-  const extraFeatureMaps = (C?.extraClasses || []).flatMap((extra) => [
-    buildFeatureMapFromRecords(extra?.allClassFeatures),
-    buildFeatureMapFromRecords(extra?.allSubFeatures),
+  const featSnapshotByName = new Map();
+  (C?.allFeatSnapshots || []).forEach((feat) => {
+    if (!feat?.name) return;
+    const key = nameKey(feat.name);
+    if (!key) return;
+    const existing = featSnapshotByName.get(key);
+    if (!existing) featSnapshotByName.set(key, feat);
+    else if (existing.name !== feat.name) reportKeyConflict('feats', key, existing.name, feat.name);
+  });
+  const classFeatureByName = buildFeatureMapFromRecords(C?.allClassFeatures, 'class features');
+  const subclassFeatureByName = buildFeatureMapFromRecords(C?.allSubFeatures, 'subclass features');
+  const extraFeatureMaps = (C?.extraClasses || []).flatMap((extra, idx) => [
+    buildFeatureMapFromRecords(extra?.allClassFeatures, `extra class features [${idx}]`),
+    buildFeatureMapFromRecords(extra?.allSubFeatures, `extra subclass features [${idx}]`),
   ]);
-  const speciesFeatureByName = collectNamedEntries(C?.speciesSnapshot?.entries || []);
-  const backgroundFeatureByName = collectNamedEntries(C?.backgroundSnapshot?.entries || []);
+  const speciesFeatureByName = collectNamedEntries(C?.speciesSnapshot?.entries || [], 'species features');
+  const backgroundFeatureByName = collectNamedEntries(C?.backgroundSnapshot?.entries || [], 'background features');
 
   const lookupByName = (key) => {
     if (!key) return null;
@@ -259,11 +297,17 @@ export function collectAdapterActions(C, sheet) {
 
   const resolveOfficialEntries = (action, source) => {
     if (action.entries) return action.entries;
-    const ownerKey = nameKey(action.ownerName || source);
-    const feat = ownerKey ? featSnapshotByName.get(ownerKey) : null;
-    if (feat?.entries) return feat.entries;
-    const actionKey = nameKey(action.name);
-    return lookupByName(actionKey);
+    const ownerCandidates = nameKeyCandidates(action.ownerName || source);
+    for (const candidate of ownerCandidates) {
+      const feat = featSnapshotByName.get(candidate);
+      if (feat?.entries) return feat.entries;
+    }
+    const actionCandidates = nameKeyCandidates(action.name);
+    for (const candidate of actionCandidates) {
+      const entries = lookupByName(candidate);
+      if (entries) return entries;
+    }
+    return null;
   };
 
   const pushFiltered = (arr, source, ownerLevel = C?.level ?? 1) => {
@@ -274,10 +318,10 @@ export function collectAdapterActions(C, sheet) {
       if (!hasCondition(a, C, sheet)) return;
       if (!isExecutableAction(a)) return;
       const officialEntries = resolveOfficialEntries(a, source);
-      if (!officialEntries && !a.descOverride) {
+      if (!officialEntries && !a.noDescription) {
         warnMissingDescription(a, source);
       }
-      const { desc: _legacyDesc, ...rest } = a;
+      const { desc: _legacyDesc, descOverride: _legacyOverride, ...rest } = a;
       out.push({
         ...rest,
         ownerLevel: lv,
@@ -401,7 +445,8 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
     damageFormula,
     damageButtonLabel: damageFormula ? `Damage ${damageFormula}${dtype ? ` ${dtype}` : ''}` : 'Damage',
     rollLabelPrefix: opts.rollLabelPrefix || item.name || 'Weapon',
-    desc: opts.desc || `${String(finalAbility).toUpperCase()} weapon attack.${dtype ? ` Damage type: ${dtype}.` : ''}${profInfo.proficient ? '' : ' Not proficient.'}${overrideBlocked ? ' Not proficient for Bladesong.' : ''}${disAdv ? ' DIS (armor).' : ''}`,
+    noDescription: true,
+    _item: item,
     _weaponIndex: index,
     _weaponMastery: mastery || null,
     _weaponMasteryText: masteryText || '',
@@ -473,7 +518,8 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
       damageFormula: ohDamageFormula,
       damageButtonLabel: ohDamageFormula ? `Damage ${ohDamageFormula}${ohDtype ? ` ${ohDtype}` : ''}` : 'Damage',
       rollLabelPrefix: `Off-hand ${offHandItem.name}`,
-      desc: `Off-hand ${String(ohAbility).toUpperCase()} weapon attack via Light property.${ohDtype ? ` Damage type: ${ohDtype}.` : ''}${hasTWF ? ' Two-Weapon Fighting applies ability modifier to damage.' : ''}${ohProfInfo.proficient ? '' : ' Not proficient.'}${isNick ? ' Nick mastery: this attack is part of the Attack action (not a Bonus Action).' : ''}`,
+      noDescription: true,
+      _item: offHandItem,
       _weaponIndex: ohIndex,
       _weaponSlot: offHandItem.equippedSlot || null,
       _weaponMastery: ohMastery || null,
@@ -498,7 +544,7 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
     damageFormula: die + (mod !== 0 ? (mod >= 0 ? '+' : '') + mod : ''),
     damageButtonLabel: `Damage ${die}${mod !== 0 ? (mod >= 0 ? '+' : '') + mod : ''} bludgeoning`,
     rollLabelPrefix: 'Unarmed Strike',
-    desc: `${String(ability).toUpperCase()} attack. Damage: ${die} + ${String(ability).toUpperCase()} modifier bludgeoning.`,
+    noDescription: true,
     detailType: 'unarmedStrike',
     unarmedStrikeSaveDc: unarmedSaveDc,
     unarmedStrikeAbility: ability,
@@ -520,7 +566,7 @@ export function makeWeaponMasteryReminderActions(C, items = []) {
       cat: 'action',
       uses: 'Passive',
       _source: 'Weapon Mastery',
-      desc: reminder ? `${summary} ${reminder}` : summary,
+      noDescription: true,
     };
   });
 }
@@ -536,25 +582,3 @@ export function resolveButtonLabel(label, formula, action, C, fallback) {
   return label || fallback;
 }
 
-export function rollFormula(formula) {
-  const clean = String(formula || '').replace(/\s+/g, '');
-  const diceRe = /([+-]?)(\d*)d(\d+)|([+-]?\d+)/gi;
-  let total = 0;
-  const rolls = [];
-  let match;
-  while ((match = diceRe.exec(clean))) {
-    if (match[3]) {
-      const sign = match[1] === '-' ? -1 : 1;
-      const count = Number(match[2] || 1);
-      const faces = Number(match[3]);
-      for (let i = 0; i < count; i++) {
-        const v = Math.floor(Math.random() * faces) + 1;
-        rolls.push({ v, faces });
-        total += sign * v;
-      }
-    } else if (match[4]) {
-      total += Number(match[4]);
-    }
-  }
-  return { total, rolls };
-}

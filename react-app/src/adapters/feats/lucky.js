@@ -141,7 +141,6 @@ export default function install(registry, context = {}) {
         cat:    'reaction',
         uses:   '3 / Long Rest',
         resKey: 'lucky_points',
-        descOverride: "You have inexplicable luck that kicks in at fortunate moments. You have 3 Luck Points and regain expended points when you finish a Long Rest. You can spend the points on the benefits below.\n\n{@b Advantage.} When you make a D20 Test, you can spend 1 Luck Point to give yourself Advantage on the roll.\n\n{@b Disadvantage.} When a creature makes an attack roll against you, you can spend 1 Luck Point to impose Disadvantage on the roll.",
       },
     ]);
   }

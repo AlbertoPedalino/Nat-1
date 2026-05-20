@@ -25,7 +25,7 @@ export default function TabsPanel({
       </Box>
       <Box sx={{ p: '0.62rem' }}>
         {tab === 0 && <ActionsTab C={C} sheet={sheet} onRoll={onRoll} resources={resources} setResources={setResources} onRest={onRest} onShowToast={onShowToast} onUpdateSheet={onUpdateSheet} onUpdateCharacter={onUpdateCharacter} />}
-        {tab === 1 && <SpellsTab C={C} sheet={sheet} resources={resources} setResources={setResources} onUpdateSpells={onUpdateSpells} onShowToast={onShowToast} onUpdateSheet={onUpdateSheet} onUpdateCharacter={onUpdateCharacter} freeCastUses={freeCastUses} onToggleFreeCast={onToggleFreeCast} />}
+        {tab === 1 && <SpellsTab C={C} sheet={sheet} onRoll={onRoll} resources={resources} setResources={setResources} onUpdateSpells={onUpdateSpells} onShowToast={onShowToast} onUpdateSheet={onUpdateSheet} onUpdateCharacter={onUpdateCharacter} freeCastUses={freeCastUses} onToggleFreeCast={onToggleFreeCast} />}
         {tab === 2 && <InventoryTab C={C} sheet={sheet} onUpdateInventory={onUpdateInventory} onUpdateCurrency={onUpdateCurrency} />}
         {tab === 3 && <FeaturesTab C={C} />}
         {tab === 4 && <NotesTab sheet={sheet} onUpdateSheet={onUpdateSheet} onUpdateNotes={onUpdateNotes} />}

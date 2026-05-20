@@ -16,8 +16,6 @@ import {
   collectAdapterActions,
   makeWeaponActions,
   resolveFormula,
-  resolveButtonLabel,
-  rollFormula,
 } from '../logic/actionsTabLogic.js';
 import { getSheetSlots } from '../logic/spellsTabLogic.js';
 import { loadItems } from '../../charbuilder/logic/dataLoaders.js';
@@ -37,6 +35,8 @@ import UnarmedStrikeOptionsPanel from './UnarmedStrikeOptionsPanel.jsx';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 import { RichInline, RichText } from '../../../shared/character/RichText.jsx';
 import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
+import { ItemPropertyTable } from '../../../shared/character/ItemPropertyTable.jsx';
+import { formatRollTitle, rollFormula as rollFormulaDice } from '../../../shared/character/dice.js';
 
 const ACTION_DETAIL_RENDERERS = {
   panel: ActionDetailPanel,
@@ -862,16 +862,12 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
   const rollFormulaButton = (kind) => {
     const formula = resolveFormula(kind === 'heal' ? action.healFormula : action.damageFormula, action, C);
     if (!formula || !onShowToast) return;
-    const { total, rolls } = rollFormula(formula);
+    const { total, rolls } = rollFormulaDice(formula);
     const damageKind = String(action?.damageKind || '').toLowerCase();
-    const fallbackVerb = kind === 'heal'
+    const titleLabel = kind === 'heal'
       ? 'Heal'
       : (damageKind === 'utility' ? 'Roll' : damageKind === 'heal' ? 'Heal' : 'Damage');
-    const labelSource = kind === 'heal'
-      ? (action.healButtonLabel ?? action.damageButtonLabel)
-      : (action.damageButtonLabel ?? action.healButtonLabel);
-    const label = resolveButtonLabel(labelSource, formula, action, C, `${fallbackVerb} ${formula}`);
-    onShowToast(`${action.rollLabelPrefix || action.name} - ${label}`, formula, total, rolls);
+    onShowToast(formatRollTitle(action.rollLabelPrefix || action.name, titleLabel), formula, total, rolls);
   };
   const damageKind = String(action?.damageKind || '').toLowerCase();
   const damageVerb = damageKind === 'utility' ? 'Roll' : damageKind === 'heal' ? 'Heal' : 'Dmg';
@@ -900,7 +896,7 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
                   <Button
                     size="small"
                     variant="outlined"
-                    onClick={(e) => { e.stopPropagation(); onRoll?.(action.attackBonus, `${action.name} Attack`, action._disadvantage ? false : undefined); }}
+                    onClick={(e) => { e.stopPropagation(); onRoll?.(action.attackBonus, formatRollTitle(action.name, 'Attack'), action._disadvantage ? false : undefined); }}
                     sx={{ ...inlineButtonSx, borderColor: action._notProficient ? 'rgba(222,103,95,0.4)' : 'rgba(77,149,214,0.4)', color: action._notProficient ? '#de675f' : '#4d95d6' }}
                   >
                     <Sword size={12} style={{ marginRight: 2 }} /> Hit {fbonus(action.attackBonus)}{action._disadvantage ? ' DIS' : ''}
@@ -1072,11 +1068,8 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
 
       {open ? (
         <Box sx={{ ...spellBodySx, mt: hasRes ? 0 : '-1px', mb: '4px' }}>
-          {action.descOverride
-            ? <RichText text={action.descOverride} sx={{ fontSize: '0.72rem' }} />
-            : action.entries
-              ? <EntryBlocks entries={action.entries} emptyText="" />
-              : null}
+          {action._item ? <ItemPropertyTable item={action._item} sx={{ mb: '6px' }} /> : null}
+          {action.entries ? <EntryBlocks entries={action.entries} emptyText="" /> : null}
           {action.choiceKey && onUpdateCharacter ? (
             <ChoicePicker action={action} C={C} onUpdateCharacter={onUpdateCharacter} onShowToast={onShowToast} />
           ) : null}
