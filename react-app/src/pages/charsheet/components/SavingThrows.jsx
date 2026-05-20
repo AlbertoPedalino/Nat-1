@@ -4,6 +4,7 @@ import { STATS, SLBL, FULL_LBL, hasSaveProficiency, getSaveBonus, fbonus } from 
 import { getEquippedArmorPenalties } from '../logic/armorPenalties.js';
 import { installedRegistry } from '../../../adapters/index.js';
 import { getConcentrationBonus } from '../logic/sheetEffects.js';
+import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 
 
 function collectSaveEffects(C, stat) {
@@ -32,7 +33,8 @@ function collectSaveEffects(C, stat) {
 }
 
 export default function SavingThrows({ C, sheet, onRoll }) {
-  const armorPenalties = getEquippedArmorPenalties(C, sheet?.sheetInventory || C?.inventory || []);
+  const profSets = useProficiencySets();
+  const armorPenalties = getEquippedArmorPenalties(C, sheet?.sheetInventory || C?.inventory || [], profSets);
   
   return (
     <Paper variant="outlined" sx={{ mb: '0.6rem', overflow: 'hidden' }}>

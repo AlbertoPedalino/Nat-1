@@ -254,7 +254,8 @@ function weaponDamageType(item) {
   return item?.damage?.[0]?.type || item?.dmgType || '';
 }
 
-function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, inventory, items, opts = {}) {
+function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, inventory, items, ctx = {}, opts = {}) {
+  const { profSets, untrainedArmor } = ctx;
   const weaponOverride = overrides.find(o => {
     const type = String(item?.type || '').toUpperCase();
     if (o.weaponTypes && !o.weaponTypes.includes(type)) return false;
@@ -262,7 +263,7 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
     if (typeof o.condition === 'function' && !o.condition(C)) return false;
     return true;
   });
-  const profInfo = getWeaponProficiencyInfo(C, item, weaponOverride);
+  const profInfo = getWeaponProficiencyInfo(C, item, weaponOverride, profSets);
   const ability = weaponAbility(C, item, weaponOverride);
   const overrideBlocked = weaponOverride?.requiresProficiency && !profInfo.proficient;
   const finalAbility = overrideBlocked ? (() => {
@@ -278,7 +279,6 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
   const finalMod = opts.damageMod != null ? opts.damageMod : mod;
   const damageFormula = base ? base + (finalMod !== 0 ? (finalMod >= 0 ? '+' : '') + finalMod : '') : '';
   const dtype = weaponDamageType(item);
-  const untrainedArmor = hasNonProficientArmor(C, inventory);
   const disAdv = untrainedArmor && (finalAbility === 'str' || finalAbility === 'dex');
   const selectedEntry = selectedMasteriesByWeapon.get(normalizeWeaponName(item?.name || '')) || null;
   const directMastery = selectedEntry ? resolveWeaponMasteryForItem(item) : null;
@@ -308,13 +308,19 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
   };
 }
 
-export function makeWeaponActions(C, attacks, inventory, items = []) {
+export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSets) {
+  if (!equipmentSets) {
+    throw new Error('makeWeaponActions requires equipmentSets from collectEquipmentProficiencySets(character)');
+  }
   const overrides = installedRegistry.getWeaponAbilityOverrides();
   const selectedMasteriesByWeapon = new Map(
     collectResolvedWeaponMasteries(C, items)
       .map((entry) => [normalizeWeaponName(entry.weaponName), entry])
       .filter(([name]) => !!name),
   );
+
+  const untrainedArmor = hasNonProficientArmor(C, inventory, equipmentSets);
+  const ctx = { profSets: equipmentSets, untrainedArmor };
 
   const weaponActions = [];
   const hasTWF = hasTwoWeaponFightingStyle(C);
@@ -324,7 +330,7 @@ export function makeWeaponActions(C, attacks, inventory, items = []) {
   attacks.forEach((item) => {
     if (item.equippedSlot === 'offHand' && canLightExtra) return;
     const base = getWeaponDamageDice(item, item.equippedSlot);
-    weaponActions.push(makeWeaponAction(C, item, attacks.indexOf(item), overrides, selectedMasteriesByWeapon, inventory, items, { damageBase: base }));
+    weaponActions.push(makeWeaponAction(C, item, attacks.indexOf(item), overrides, selectedMasteriesByWeapon, inventory, items, ctx, { damageBase: base }));
   });
 
   if (canLightExtra && offHandItem) {
@@ -336,7 +342,7 @@ export function makeWeaponActions(C, attacks, inventory, items = []) {
       if (typeof o.condition === 'function' && !o.condition(C)) return false;
       return true;
     });
-    const ohProfInfo = getWeaponProficiencyInfo(C, offHandItem, ohOverride);
+    const ohProfInfo = getWeaponProficiencyInfo(C, offHandItem, ohOverride, profSets);
     const ohAbility = weaponAbility(C, offHandItem, ohOverride);
     const ohMod = getMod(getFinal(C, ohAbility));
     const ohBase = weaponDamageBase(offHandItem);

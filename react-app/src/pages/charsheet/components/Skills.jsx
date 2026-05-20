@@ -4,6 +4,7 @@ import { SKILLS, getSkillTraining, getSkillBonus, fbonus, SLBL } from '../logic/
 import { getEquippedArmorPenalties } from '../logic/armorPenalties.js';
 import { matchesChoiceRequirement, inventoryHasFlag } from '../../../shared/character/choiceUtils.js';
 import { getSkillAdvantageFromEffects } from '../logic/sheetEffects.js';
+import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 
 const _SKILL_ADVANTAGES = [
   {
@@ -50,7 +51,8 @@ function getSkillAdvantage(C, skillName) {
 }
 
 export default function Skills({ C, sheet, onRoll }) {
-  const armorPenalties = getEquippedArmorPenalties(C, sheet?.sheetInventory || C?.inventory || []);
+  const profSets = useProficiencySets();
+  const armorPenalties = getEquippedArmorPenalties(C, sheet?.sheetInventory || C?.inventory || [], profSets);
   
   return (
     <Paper variant="outlined" sx={{ overflow: 'hidden' }}>

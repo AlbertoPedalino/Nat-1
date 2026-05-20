@@ -11,22 +11,27 @@
 import { getArmorTrainingInfo } from './proficiencies.js';
 import { getFinal } from './calculations.js';
 
-function normKey(v) {
-  return String(v || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+function requireSets(sets, fnName) {
+  if (!sets) {
+    throw new Error(`${fnName} requires equipmentSets from collectEquipmentProficiencySets(character)`);
+  }
+  return sets;
 }
 
-export function getArmorPenalties(C, item) {
+export function getArmorPenalties(C, item, equipmentSets) {
   if (!item || !['LA', 'MA', 'HA', 'S'].includes(item.type)) {
     return { hasPenalty: false, penalties: [], cannotCastSpells: false };
   }
+  const sets = requireSets(equipmentSets, 'getArmorPenalties');
 
   const penalties = [];
-  const { trained } = getArmorTrainingInfo(C, item);
+  const info = getArmorTrainingInfo(C, item, null, sets);
+  const { trained, kind } = info;
 
   if (!trained && ['LA', 'MA', 'HA'].includes(item.type)) {
     penalties.push(
-      { type: 'disadvantage', applies: ['str-checks', 'str-saves', 'dex-checks', 'dex-saves'], reason: `No ${getArmorTrainingInfo(C, item).kind} Training` },
-      { type: 'no-spellcasting', reason: `No ${getArmorTrainingInfo(C, item).kind} Training` },
+      { type: 'disadvantage', applies: ['str-checks', 'str-saves', 'dex-checks', 'dex-saves'], reason: `No ${kind} Training` },
+      { type: 'no-spellcasting', reason: `No ${kind} Training` },
     );
   }
 
@@ -50,13 +55,14 @@ export function getArmorPenalties(C, item) {
   };
 }
 
-export function getEquippedArmorPenalties(C, inventory) {
+export function getEquippedArmorPenalties(C, inventory, equipmentSets) {
+  const sets = requireSets(equipmentSets, 'getEquippedArmorPenalties');
   const equippedArmor = (inventory || [])
     .filter(item => item.equipped && ['LA', 'MA', 'HA', 'S'].includes(item.type));
 
   const allPenalties = equippedArmor
     .flatMap(item => {
-      const { hasPenalty, penalties } = getArmorPenalties(C, item);
+      const { hasPenalty, penalties } = getArmorPenalties(C, item, sets);
       return hasPenalty ? penalties.map(p => ({ ...p, item: item.name })) : [];
     });
 

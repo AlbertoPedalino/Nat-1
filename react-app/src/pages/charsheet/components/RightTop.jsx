@@ -7,6 +7,7 @@ import { getArmorTrainingInfo } from '../logic/proficiencies.js';
 import { collectResolvedResistanceItems, collectResolvedImmunityItems } from '../logic/sheetEffects.js';
 import { computeBestArmorClass } from '../../../shared/character/ac.js';
 import { resolveInitiativeTriggeredResourceRecoveries } from '../../../shared/character/initiativeEffects.js';
+import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 
 export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearConditions, onToggleInspiration, resources, setResources, onShowToast }) {
   const initMod = getMod(getFinal(C, 'dex'));
@@ -48,7 +49,8 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
   const active = CONDITIONS.filter(c => sheet.activeConditions.includes(c.key));
   const inv = sheet?.sheetInventory || [];
   const equippedShield = inv.find(i => i.equipped && i.type === 'S');
-  const shieldUnproficient = equippedShield ? !getArmorTrainingInfo(C, equippedShield).trained : false;
+  const profSets = useProficiencySets();
+  const shieldUnproficient = equippedShield ? !getArmorTrainingInfo(C, equippedShield, null, profSets).trained : false;
   const shieldTrained = !shieldUnproficient;
   const acResult = computeBestArmorClass(C, inv, shieldTrained);
   const ac = acResult?.value ?? 10;

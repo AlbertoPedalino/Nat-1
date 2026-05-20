@@ -4,7 +4,7 @@ import { ChevronDown, Feather, Languages, Layers, Shield, Sparkles, Sword } from
 import { STAT_LABELS, STATS } from '../constants.js';
 import { calcMaxHp, formatMod, getAllFinalScores, getPrimaryClassLevel } from '../logic/calculations.js';
 import { installedRegistry } from '../../../adapters/index.js';
-import { collectAllProficiencies } from '../../charsheet/logic/proficiencies.js';
+import { collectAllProficiencies, collectEquipmentProficiencySets } from '../../charsheet/logic/proficiencies.js';
 import { collectPreviewDefenseSections, collectPreviewEffectProficiencySections } from '../../charsheet/logic/sheetEffects.js';
 import { collapseWeaponProficiencies, uniqueDisplayLabels } from '../../../shared/character/proficiencyDisplay.js';
 import { ExpandableDescription } from './FeatSlots.jsx';
@@ -419,7 +419,7 @@ function collectPreviewProficiencies(character) {
       ]),
     ],
   };
-  const sections = collectAllProficiencies(sheetLike).map((section) => ({
+  const sections = collectAllProficiencies(sheetLike, collectEquipmentProficiencySets(sheetLike)).map((section) => ({
     title: section.title,
     items: section.title === 'Weapons' ? collapseWeaponProficiencies(section.items) : uniqueClean(section.items),
   }));

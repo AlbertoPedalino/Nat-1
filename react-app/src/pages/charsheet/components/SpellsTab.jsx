@@ -21,6 +21,7 @@ import { spellMatchesClass } from '../../charbuilder/spells/spells.js';
 import { installedRegistry, loadClassAdapters, loadCoreAdapters, loadSpellsAdapters } from '../../../adapters/index.js';
 import { isConcentrationSpell, isRitualSpell } from '../../../shared/spellTags.js';
 import { getEquippedArmorPenalties } from '../logic/armorPenalties.js';
+import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 import {
   buildSpellInfo,
   canManageSpells,
@@ -194,7 +195,8 @@ export default function SpellsTab({ C, sheet, onUpdateSpells, onShowToast, onUpd
   const activeCounts = useMemo(() => activePicker ? getBucketCounts(activePicker.bucket) : { cantrips: 0, spells: 0 }, [activePicker]);
   const activeIsWizard = String(activePicker?.className || '').toLowerCase() === 'wizard';
   const activeSpellbookSize = activeIsWizard ? getSpellbookSize(activePicker?.bucket) : 0;
-  const armorPenalties = useMemo(() => getEquippedArmorPenalties(C, C?.inventory || []), [C]);
+  const profSets = useProficiencySets();
+  const armorPenalties = useMemo(() => getEquippedArmorPenalties(C, C?.inventory || [], profSets), [C, profSets]);
   const ability = getSpellAbility(C);
   const spellMod = getMod(getFinal(C, ability));
   const dc = 8 + getPB(C) + spellMod;

@@ -1,6 +1,6 @@
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
-import { Box, Button, IconButton, TextField, Tooltip, Typography, Alert, Stack } from '@mui/material';
-import { Backpack, Check, Minus, Package, Plus, Shield, Sparkles, Swords, Trash2, AlertTriangle } from 'lucide-react';
+import { Box, Button, Chip, IconButton, TextField, Tooltip, Typography, Alert } from '@mui/material';
+import { Backpack, Check, ChevronDown, ChevronRight, Minus, Package, Plus, Search, Shield, Sparkles, Swords, Trash2, AlertTriangle } from 'lucide-react';
 import { loadItems } from '../../charbuilder/logic/dataLoaders.js';
 import { getFinal } from '../logic/calculations.js';
 import {
@@ -14,8 +14,14 @@ import {
 import { ItemNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 import { INVENTORY_SOURCE_PRIORITY, sourceRank } from '../../../shared/character/sourcePriority.js';
 import { addInventoryEntries } from '../../../shared/character/itemContainers.js';
+import {
+  buildItemPropertyChips,
+  decodeItemTypeLabel,
+  PROPERTY_CHIP_TONES,
+} from '../../../shared/character/itemCodes.js';
 import { getArmorPenalties } from '../logic/armorPenalties.js';
 import { renderEntries } from '../logic/renderEntries.js';
+import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 
 const CURRENCY_TYPES = [
   { key: 'cp', label: 'CP' },
@@ -40,14 +46,6 @@ const GROUPS = [
   { key: 'gear', label: 'Gear', icon: Backpack },
 ];
 
-const rarityColor = {
-  common: '#c4b393',
-  uncommon: '#58b879',
-  rare: '#4d95d6',
-  'very rare': '#9d7fb8',
-  legendary: '#d69245',
-  artifact: '#de675f',
-};
 
 const compactInputSx = {
   '& .MuiOutlinedInput-root': { bgcolor: 'rgba(35,32,26,1)', borderRadius: 1 },
@@ -266,6 +264,7 @@ export default function InventoryTab({ C, sheet, onUpdateInventory, onUpdateCurr
   const [search, setSearch] = useState('');
   const deferredSearch = useDeferredValue(search);
   const [filter, setFilter] = useState('all');
+  const [addPanelOpen, setAddPanelOpen] = useState(false);
   const [itemsDb, setItemsDb] = useState([]);
   const [customName, setCustomName] = useState('');
   const [customWeight, setCustomWeight] = useState('');
@@ -307,6 +306,7 @@ export default function InventoryTab({ C, sheet, onUpdateInventory, onUpdateCurr
   const maxCarry = useMemo(() => Math.max(1, getFinal(C, 'str') * 15), [C]);
   const carryPct = Math.min(100, (totalWeight / maxCarry) * 100);
   const overloaded = totalWeight > maxCarry;
+  const profSets = useProficiencySets();
 
   const searchResults = useMemo(() => {
     const q = deferredSearch.trim();
@@ -471,68 +471,99 @@ export default function InventoryTab({ C, sheet, onUpdateInventory, onUpdateCurr
         </Box>
       </Box>
 
-      <TextField
-        size="small"
-        fullWidth
-        placeholder="Search 2024 items by name, source, type, property..."
-        value={search}
-        onChange={(event) => setSearch(event.target.value)}
-        sx={{ ...compactInputSx, mb: 0.5 }}
-      />
+      <Box
+        onClick={() => setAddPanelOpen((prev) => !prev)}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0.5,
+          cursor: 'pointer',
+          fontFamily: '"Cinzel", Georgia, serif',
+          fontSize: '0.65rem',
+          fontWeight: 700,
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase',
+          color: addPanelOpen ? '#edd48a' : 'text.secondary',
+          borderBottom: 1,
+          borderColor: 'divider',
+          pb: '3px',
+          mt: 0.4,
+          mb: 0.5,
+          userSelect: 'none',
+          '&:hover': { color: '#caa550' },
+        }}
+      >
+        {addPanelOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+        <Search size={12} />
+        Add Items
+      </Box>
 
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: '4px', mb: 0.6 }}>
-        {FILTERS.map((filterDef) => {
-          const Icon = filterDef.icon;
-          return (
-            <Button
-              key={filterDef.key}
-              size="small"
-              onClick={() => setFilter(filterDef.key)}
-              startIcon={Icon ? <Icon size={12} /> : null}
-              sx={{
-                minHeight: 0,
-                px: '10px',
-                py: '3px',
-                border: 1,
-                borderColor: filter === filterDef.key ? '#caa550' : 'divider',
-                borderRadius: 999,
-                bgcolor: filter === filterDef.key ? 'rgba(202,165,80,0.12)' : 'transparent',
-                color: filter === filterDef.key ? '#edd48a' : 'text.secondary',
-                fontFamily: '"Cinzel", Georgia, serif',
-                fontSize: '0.56rem',
-                fontWeight: 700,
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-              }}
-            >
-              {filterDef.label}
+      {addPanelOpen ? (
+        <>
+          <TextField
+            size="small"
+            fullWidth
+            placeholder="Search 2024 items by name, source, type, property..."
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            sx={{ ...compactInputSx, mb: 0.5 }}
+          />
+
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: '4px', mb: 0.6 }}>
+            {FILTERS.map((filterDef) => {
+              const Icon = filterDef.icon;
+              return (
+                <Button
+                  key={filterDef.key}
+                  size="small"
+                  onClick={() => setFilter(filterDef.key)}
+                  startIcon={Icon ? <Icon size={12} /> : null}
+                  sx={{
+                    minHeight: 0,
+                    px: '10px',
+                    py: '3px',
+                    border: 1,
+                    borderColor: filter === filterDef.key ? '#caa550' : 'divider',
+                    borderRadius: 999,
+                    bgcolor: filter === filterDef.key ? 'rgba(202,165,80,0.12)' : 'transparent',
+                    color: filter === filterDef.key ? '#edd48a' : 'text.secondary',
+                    fontFamily: '"Cinzel", Georgia, serif',
+                    fontSize: '0.56rem',
+                    fontWeight: 700,
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  {filterDef.label}
+                </Button>
+              );
+            })}
+          </Box>
+
+          {deferredSearch !== search ? (
+            <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', fontStyle: 'italic', mb: 0.3 }}>
+              Updating results...
+            </Typography>
+          ) : null}
+          <SearchResultsList items={searchResults} itemsDbCount={itemsDb.length} onAddItem={addItem} />
+
+          <Box sx={{ display: 'flex', gap: '6px', mb: 0.75, flexWrap: 'wrap' }}>
+            <TextField size="small" value={customName} placeholder="Add custom item..." onChange={(event) => setCustomName(event.target.value)}
+              onKeyDown={(event) => { if (event.key === 'Enter') addCustom(); }}
+              sx={{ ...compactInputSx, flex: 1, minWidth: 120 }} />
+            <TextField size="small" type="number" value={customWeight} placeholder="lb" onChange={(event) => setCustomWeight(event.target.value)}
+              onKeyDown={(event) => { if (event.key === 'Enter') addCustom(); }}
+              inputProps={{ min: 0, step: 0.1 }} sx={{ ...compactInputSx, width: 58 }} />
+            <TextField size="small" type="number" value={customValue} placeholder="gp" onChange={(event) => setCustomValue(event.target.value)}
+              onKeyDown={(event) => { if (event.key === 'Enter') addCustom(); }}
+              inputProps={{ min: 0, step: 0.01 }} sx={{ ...compactInputSx, width: 62 }} />
+            <Button size="small" onClick={addCustom} disabled={!customName.trim()}
+              sx={{ px: '14px', border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: 'rgba(35,32,26,1)', color: 'text.secondary', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.65rem', whiteSpace: 'nowrap', '&:hover': { borderColor: '#caa550', color: '#caa550' } }}>
+              + Add
             </Button>
-          );
-        })}
-      </Box>
-
-      {deferredSearch !== search ? (
-        <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', fontStyle: 'italic', mb: 0.3 }}>
-          Updating results...
-        </Typography>
+          </Box>
+        </>
       ) : null}
-      <SearchResultsList items={searchResults} itemsDbCount={itemsDb.length} onAddItem={addItem} />
-
-      <Box sx={{ display: 'flex', gap: '6px', mb: 0.75, flexWrap: 'wrap' }}>
-        <TextField size="small" value={customName} placeholder="Add custom item..." onChange={(event) => setCustomName(event.target.value)}
-          onKeyDown={(event) => { if (event.key === 'Enter') addCustom(); }}
-          sx={{ ...compactInputSx, flex: 1, minWidth: 120 }} />
-        <TextField size="small" type="number" value={customWeight} placeholder="lb" onChange={(event) => setCustomWeight(event.target.value)}
-          onKeyDown={(event) => { if (event.key === 'Enter') addCustom(); }}
-          inputProps={{ min: 0, step: 0.1 }} sx={{ ...compactInputSx, width: 58 }} />
-        <TextField size="small" type="number" value={customValue} placeholder="gp" onChange={(event) => setCustomValue(event.target.value)}
-          onKeyDown={(event) => { if (event.key === 'Enter') addCustom(); }}
-          inputProps={{ min: 0, step: 0.01 }} sx={{ ...compactInputSx, width: 62 }} />
-        <Button size="small" onClick={addCustom} disabled={!customName.trim()}
-          sx={{ px: '14px', border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: 'rgba(35,32,26,1)', color: 'text.secondary', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.65rem', whiteSpace: 'nowrap', '&:hover': { borderColor: '#caa550', color: '#caa550' } }}>
-          + Add
-        </Button>
-      </Box>
 
       <SectionHeader icon={Package} label={`Inventory (${totalItems} items)`} />
 
@@ -556,7 +587,7 @@ export default function InventoryTab({ C, sheet, onUpdateInventory, onUpdateCurr
                 onRemove={removeItem}
                 onEquip={toggleEquipped}
                 onEquipSlot={equipToSlot}
-                penaltyMsg={getPenaltyMessage(C, item)}
+                penaltyMsg={getPenaltyMessage(C, item, profSets)}
                 canPactWeapon={canUsePactWeaponFlag(C, item)}
                 onPactWeapon={togglePactWeapon}
                 isArmorer={isArmorer}
@@ -586,7 +617,7 @@ const getPenaltyMessage = (() => {
   let lastC = null;
   let cache = new WeakMap();
 
-  return function getPenaltyMessage(C, item) {
+  return function getPenaltyMessage(C, item, precomputedSets) {
     if (lastC !== C) {
       lastC = C;
       cache = new WeakMap();
@@ -594,7 +625,7 @@ const getPenaltyMessage = (() => {
     if (!item || !item.equipped || !['LA', 'MA', 'HA', 'S'].includes(item.type) || !C) return '';
     if (cache.has(item)) return cache.get(item);
 
-    const armorPenalty = getArmorPenalties(C, item);
+    const armorPenalty = getArmorPenalties(C, item, precomputedSets);
     const msg = armorPenalty?.hasPenalty ? (() => {
       const parts = [];
       if (armorPenalty.penalties) {
@@ -623,85 +654,120 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, 
   const [open, setOpen] = useState(false);
   const type = String(item.type || '').toUpperCase();
   const canEquip = ['M', 'R', 'LA', 'MA', 'HA', 'S', 'SCF', 'WD', 'RD', 'ST', 'WI', 'WEAPON', 'ARMOR'].includes(type);
-  const rarity = item.rarity && item.rarity !== 'none' ? item.rarity : null;
-  const color = rarityColor[rarity] || '#c4b393';
-  const typeLabel = rarity || item.type || 'gear';
-  const meta = [
-    item.weight ? `${item.weight}lb` : null,
-    item.dmg1 ? `${item.dmg1}${item.dmgType ? ` ${item.dmgType}` : ''}` : null,
-    item.ac ? `AC ${item.ac}` : null,
-    Array.isArray(item.property) && item.property.length ? item.property.join(', ') : null,
-  ].filter(Boolean).join(' - ');
-  
+
   const body = useMemo(() => (open ? renderEntries(item.entries) : ''), [open, item.entries]);
+  const propertyChips = useMemo(() => (open ? buildItemPropertyChips(item) : []), [open, item]);
+  const typeFullLabel = useMemo(() => decodeItemTypeLabel(item), [item]);
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: '7px', px: '10px', py: '6px', bgcolor: item.equipped ? 'rgba(26,188,156,0.06)' : 'rgba(35,32,26,1)', border: 1, borderColor: penaltyMsg ? 'warning.main' : (item.equipped ? '#2ca797' : 'divider'), borderRadius: 1, mb: '3px', '&:hover': { borderColor: 'rgba(202,165,80,0.34)' } }}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '2px', flexShrink: 0, minWidth: 52 }}>
-          <Box sx={{ color, border: 1, borderColor: color, borderRadius: '3px', px: '5px', py: '1px', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.56rem', lineHeight: 1.35, textTransform: 'uppercase', textAlign: 'center' }}>{typeLabel}</Box>
-        </Box>
-        <Box onClick={() => setOpen(!open)} sx={{ flex: 1, minWidth: 0, cursor: body ? 'pointer' : 'default' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', flexWrap: 'wrap' }}>
-            <ItemNameIcon item={item} />
-            <Typography noWrap sx={{ fontSize: '0.875rem', color: 'text.primary' }}>{item.name}</Typography>
-            {item.custom ? <Box component="span" sx={{ fontSize: '0.56rem', color: 'text.secondary' }}>[custom]</Box> : null}
-            {hasItemFlag(item, 'pactWeapon') ? <Box component="span" sx={{ ml: 0.5, fontSize: '0.56rem', color: '#9d7fb8', fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}>[Pact Weapon]</Box> : null}
-            {hasItemFlag(item, 'arcaneArmor') ? <Box component="span" sx={{ ml: 0.5, fontSize: '0.56rem', color: '#58b879', fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}>[Arcane Armor]</Box> : null}
-
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px', px: '10px', py: '6px', bgcolor: item.equipped ? 'rgba(26,188,156,0.06)' : 'rgba(35,32,26,1)', border: 1, borderColor: penaltyMsg ? 'warning.main' : (item.equipped ? '#2ca797' : 'divider'), borderRadius: 1, mb: '3px', '&:hover': { borderColor: 'rgba(202,165,80,0.34)' } }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+          <Box onClick={() => setOpen(!open)} sx={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', flexWrap: 'wrap' }}>
+              <ItemNameIcon item={item} />
+              <Typography noWrap sx={{ fontSize: '0.875rem', color: 'text.primary' }}>{item.name}</Typography>
+              {item.custom ? <Box component="span" sx={{ fontSize: '0.56rem', color: 'text.secondary' }}>[custom]</Box> : null}
+              {hasItemFlag(item, 'pactWeapon') ? <Box component="span" sx={{ ml: 0.5, fontSize: '0.56rem', color: '#9d7fb8', fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}>[Pact Weapon]</Box> : null}
+              {hasItemFlag(item, 'arcaneArmor') ? <Box component="span" sx={{ ml: 0.5, fontSize: '0.56rem', color: '#58b879', fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}>[Arcane Armor]</Box> : null}
+            </Box>
+            {penaltyMsg && (
+              <Typography sx={{ fontSize: '0.6rem', color: 'warning.main', mt: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <AlertTriangle size={10} /> {penaltyMsg}
+              </Typography>
+            )}
           </Box>
-          {meta ? <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', mt: '1px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{meta}</Typography> : null}
-          {penaltyMsg && (
-            <Typography sx={{ fontSize: '0.6rem', color: 'warning.main', mt: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <AlertTriangle size={10} /> {penaltyMsg}
-            </Typography>
-          )}
         </Box>
-        {isWeapon(item) ? (
-          <Box sx={{ display: 'flex', gap: '2px' }}>
-            {canOneHand(item) ? (
-              <SlotBtn active={item.equippedSlot === 'mainHand'} onClick={() => onEquipSlot(index, 'mainHand')} label="MH" />
-            ) : null}
-            {canOneHand(item) ? (
-              <SlotBtn active={item.equippedSlot === 'offHand'} onClick={() => onEquipSlot(index, 'offHand')} label="OH" />
-            ) : null}
-            {canTwoHand(item) ? (
-              <SlotBtn active={item.equippedSlot === 'twoHands'} onClick={() => onEquipSlot(index, 'twoHands')} label="2H" />
-            ) : null}
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', flexWrap: 'wrap' }}>
+          {isWeapon(item) ? (
+            <Box sx={{ display: 'flex', gap: '2px' }}>
+              {canOneHand(item) ? (
+                <SlotBtn active={item.equippedSlot === 'mainHand'} onClick={() => onEquipSlot(index, 'mainHand')} label="MH" />
+              ) : null}
+              {canOneHand(item) ? (
+                <SlotBtn active={item.equippedSlot === 'offHand'} onClick={() => onEquipSlot(index, 'offHand')} label="OH" />
+              ) : null}
+              {canTwoHand(item) ? (
+                <SlotBtn active={item.equippedSlot === 'twoHands'} onClick={() => onEquipSlot(index, 'twoHands')} label="2H" />
+              ) : null}
+            </Box>
+          ) : canEquip ? (
+            <Button size="small" onClick={() => onEquip(index)} startIcon={item.equipped ? <Check size={11} /> : null}
+              sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: item.equipped ? '#2ca797' : 'divider', borderRadius: '3px', color: item.equipped ? '#2ca797' : 'text.secondary', bgcolor: item.equipped ? 'rgba(26,188,156,0.12)' : 'transparent', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem' }}>
+              {item.equipped ? 'Equip.' : 'Equip'}
+            </Button>
+          ) : null}
+          {canPactWeapon ? (
+            <Button size="small" onClick={() => onPactWeapon(index)} startIcon={hasItemFlag(item, 'pactWeapon') ? <Check size={11} /> : null}
+              sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: hasItemFlag(item, 'pactWeapon') ? '#9d7fb8' : 'divider', borderRadius: '3px', color: hasItemFlag(item, 'pactWeapon') ? '#9d7fb8' : 'text.secondary', bgcolor: hasItemFlag(item, 'pactWeapon') ? 'rgba(157,127,184,0.14)' : 'transparent', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem' }}>
+              {hasItemFlag(item, 'pactWeapon') ? 'Pact' : 'Pact Weapon'}
+            </Button>
+          ) : null}
+          {isArmorer && (() => { const t = String(item.type || '').toUpperCase(); const n = String(item.name || '').toLowerCase(); return ['LA', 'MA', 'HA'].includes(t) && !['S', 'SHIELD'].includes(t) && n !== 'shield' && !n.endsWith(' shield'); })() ? (
+            <Button size="small" onClick={() => onArcaneArmor(index)} startIcon={hasArcaneArmor ? <Check size={11} /> : null}
+              sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: hasArcaneArmor ? '#58b879' : 'divider', borderRadius: '3px', color: hasArcaneArmor ? '#58b879' : 'text.secondary', bgcolor: hasArcaneArmor ? 'rgba(88,184,121,0.14)' : 'transparent', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem' }}>
+              {hasArcaneArmor ? 'Arcane' : 'Arcane Armor'}
+            </Button>
+          ) : null}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, ml: 'auto' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+              <QtyButton onClick={() => onQty(index, -1)}><Minus size={12} /></QtyButton>
+              <Box sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.8125rem', fontWeight: 700, color: '#edd48a', minWidth: 18, textAlign: 'center' }}>{qty(item)}</Box>
+              <QtyButton onClick={() => onQty(index, 1)}><Plus size={12} /></QtyButton>
+            </Box>
+            <Tooltip title="Remove">
+              <span>
+                <QtyButton danger onClick={() => onRemove(index)}><Trash2 size={12} /></QtyButton>
+              </span>
+            </Tooltip>
           </Box>
-        ) : canEquip ? (
-          <Button size="small" onClick={() => onEquip(index)} startIcon={item.equipped ? <Check size={11} /> : null}
-            sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: item.equipped ? '#2ca797' : 'divider', borderRadius: '3px', color: item.equipped ? '#2ca797' : 'text.secondary', bgcolor: item.equipped ? 'rgba(26,188,156,0.12)' : 'transparent', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem' }}>
-            {item.equipped ? 'Equip.' : 'Equip'}
-          </Button>
-        ) : null}
-        {canPactWeapon ? (
-          <Button size="small" onClick={() => onPactWeapon(index)} startIcon={hasItemFlag(item, 'pactWeapon') ? <Check size={11} /> : null}
-            sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: hasItemFlag(item, 'pactWeapon') ? '#9d7fb8' : 'divider', borderRadius: '3px', color: hasItemFlag(item, 'pactWeapon') ? '#9d7fb8' : 'text.secondary', bgcolor: hasItemFlag(item, 'pactWeapon') ? 'rgba(157,127,184,0.14)' : 'transparent', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem' }}>
-            {hasItemFlag(item, 'pactWeapon') ? 'Pact' : 'Pact Weapon'}
-          </Button>
-        ) : null}
-        {isArmorer && (() => { const t = String(item.type || '').toUpperCase(); const n = String(item.name || '').toLowerCase(); return ['LA', 'MA', 'HA'].includes(t) && !['S', 'SHIELD'].includes(t) && n !== 'shield' && !n.endsWith(' shield'); })() ? (
-          <Button size="small" onClick={() => onArcaneArmor(index)} startIcon={hasArcaneArmor ? <Check size={11} /> : null}
-            sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: hasArcaneArmor ? '#58b879' : 'divider', borderRadius: '3px', color: hasArcaneArmor ? '#58b879' : 'text.secondary', bgcolor: hasArcaneArmor ? 'rgba(88,184,121,0.14)' : 'transparent', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem' }}>
-            {hasArcaneArmor ? 'Arcane' : 'Arcane Armor'}
-          </Button>
-        ) : null}
-
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
-          <QtyButton onClick={() => onQty(index, -1)}><Minus size={12} /></QtyButton>
-          <Box sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.8125rem', fontWeight: 700, color: '#edd48a', minWidth: 18, textAlign: 'center' }}>{qty(item)}</Box>
-          <QtyButton onClick={() => onQty(index, 1)}><Plus size={12} /></QtyButton>
         </Box>
-        <Tooltip title="Remove">
-          <span>
-            <QtyButton danger onClick={() => onRemove(index)}><Trash2 size={12} /></QtyButton>
-          </span>
-        </Tooltip>
       </Box>
-      {open && body ? (
-        <Box sx={{ fontSize: '0.7rem', color: 'text.secondary', lineHeight: 1.45, whiteSpace: 'pre-line', bgcolor: '#12100e', border: 1, borderColor: 'divider', borderRadius: 1, px: '10px', py: '6px', mt: '-2px', mb: '4px' }}>
-          {body}
+      {open ? (
+        <Box sx={{ fontSize: '0.7rem', color: 'text.secondary', lineHeight: 1.45, bgcolor: '#12100e', border: 1, borderColor: 'divider', borderRadius: 1, px: '10px', py: '6px', mt: '-2px', mb: '4px' }}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: '4px', alignItems: 'center', mb: body ? '6px' : 0 }}>
+            <Chip
+              size="small"
+              label={typeFullLabel}
+              variant="outlined"
+              sx={{
+                height: 18,
+                fontSize: '0.55rem',
+                fontFamily: '"Cinzel", Georgia, serif',
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+                color: '#edd48a',
+                borderColor: 'rgba(237,212,138,0.55)',
+                bgcolor: 'rgba(237,212,138,0.10)',
+              }}
+            />
+            {propertyChips.map((chip, i) => {
+              const tone = PROPERTY_CHIP_TONES[chip.kind] || PROPERTY_CHIP_TONES.prop;
+              const node = (
+                <Chip
+                  size="small"
+                  label={chip.label}
+                  variant="outlined"
+                  sx={{
+                    height: 18,
+                    fontSize: '0.55rem',
+                    fontFamily: '"Cinzel", Georgia, serif',
+                    letterSpacing: '0.05em',
+                    ...tone,
+                  }}
+                />
+              );
+              const key = `${chip.kind}-${i}-${chip.label}`;
+              return chip.description ? (
+                <Tooltip key={key} title={chip.description} arrow placement="top">
+                  <span>{node}</span>
+                </Tooltip>
+              ) : (
+                <Box key={key} component="span">{node}</Box>
+              );
+            })}
+          </Box>
+          {body ? <Box sx={{ whiteSpace: 'pre-line' }}>{body}</Box> : null}
         </Box>
       ) : null}
     </Box>

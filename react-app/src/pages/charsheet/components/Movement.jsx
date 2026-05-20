@@ -3,6 +3,7 @@ import { Footprints, AlertCircle } from 'lucide-react';
 import { getEquippedArmorPenalties } from '../logic/armorPenalties.js';
 import { getFinal } from '../logic/calculations.js';
 import { collectMovementEffects, effectSummary, effectTitle, getSpeedBonus } from '../logic/sheetEffects.js';
+import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 
 function normalizeSpeed(speed) {
   if (typeof speed === 'number') return { walk: speed };
@@ -29,7 +30,8 @@ function totalCarriedWeight(inventory) {
 
 export default function Movement({ C, sheet }) {
   const inventory = sheet?.sheetInventory || C?.inventory || [];
-  const penalties = getEquippedArmorPenalties(C, inventory);
+  const profSets = useProficiencySets();
+  const penalties = getEquippedArmorPenalties(C, inventory, profSets);
   const baseSpeeds = normalizeSpeed(C?.speciesSnapshot?.speed);
   const speedPenalty = penalties.speedPenalty || 0;
   const maxCarry = Math.max(1, getFinal(C, 'str') * 15);

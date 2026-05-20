@@ -1,10 +1,12 @@
 import { Box, Typography } from '@mui/material';
 import { getEquippedArmorPenalties } from '../logic/armorPenalties.js';
 import { STATS, SLBL, FULL_LBL, getFinal, getMod, getPB, fbonus } from '../logic/calculations.js';
+import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 
 export default function AbilityScores({ C, sheet, onRoll }) {
   const pb = getPB(C);
-  const armorPenalties = getEquippedArmorPenalties(C, sheet?.sheetInventory || C?.inventory || []);
+  const profSets = useProficiencySets();
+  const armorPenalties = getEquippedArmorPenalties(C, sheet?.sheetInventory || C?.inventory || [], profSets);
 
   return (
     <Box sx={{

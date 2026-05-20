@@ -1,9 +1,11 @@
 import { Box, Paper, Typography } from '@mui/material';
 import { ScrollText } from 'lucide-react';
 import { collectAllProficiencies } from '../logic/proficiencies.js';
+import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 
 export default function Proficiencies({ C }) {
-  const sections = collectAllProficiencies(C);
+  const profSets = useProficiencySets();
+  const sections = collectAllProficiencies(C, profSets);
   return (
     <Paper variant="outlined" sx={{ mb: '0.6rem', overflow: 'hidden' }}>
       <Box sx={{ bgcolor: 'rgba(35,32,26,1)', borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1, px: '0.8rem', py: '0.48rem', borderLeft: 3, borderLeftColor: 'primary.main' }}>

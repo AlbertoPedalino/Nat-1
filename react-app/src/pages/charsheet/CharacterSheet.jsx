@@ -13,6 +13,7 @@ import RightTop from './components/RightTop.jsx';
 import TabsPanel from './components/TabsPanel.jsx';
 import DiceToast from './components/DiceToast.jsx';
 import { deriveSheetState } from './state.js';
+import { ProficiencySetsProvider } from './context/ProficiencySetsContext.jsx';
 import { calcMaxHP, getMod, getFinal, getPB, getSaveBonus } from './logic/calculations.js';
 import { applyResourceRest, getAllResourceDefs, getHitDicePools, getUsedHitDiceTotal, normalizeResourceMax } from './logic/restResources.js';
 import { applyFreeCastRest, getFreeCastDefsForCharacter } from './logic/spellsTabLogic.js';
@@ -448,6 +449,7 @@ export default function CharacterSheet() {
   const conMod = getMod(getFinal(C, 'con'));
 
   return (
+    <ProficiencySetsProvider character={C}>
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pb: 4, width: '100%' }}>
       <TopBar C={C} sheet={sheet} onShortRest={openShortRest} onLongRest={openLongRest} onDownload={downloadSheet} onUpdateXp={updateXp} onUpdateCharacter={updateCurrentCharacter}
         rollLog={rollLog} onClearRollLog={() => setRollLog([])} />
@@ -573,6 +575,7 @@ export default function CharacterSheet() {
         </DialogActions>
       </Dialog>
     </Box>
+    </ProficiencySetsProvider>
   );
 }
 

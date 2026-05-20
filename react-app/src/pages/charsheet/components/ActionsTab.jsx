@@ -34,6 +34,7 @@ import {
 import { Empty } from './SpellsUiParts.jsx';
 import ActionDetailPanel from './ActionDetailPanel.jsx';
 import UnarmedStrikeOptionsPanel from './UnarmedStrikeOptionsPanel.jsx';
+import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 
 const ACTION_DETAIL_RENDERERS = {
   panel: ActionDetailPanel,
@@ -79,8 +80,9 @@ export default function ActionsTab({ C, sheet, onRoll, resources, setResources, 
   const inv = sheet?.sheetInventory || [];
   const attacks = inv.filter(i => i.equipped && ['M', 'R'].includes(String(i.type || '').toUpperCase()));
   const masteryItems = itemsDb.length ? itemsDb : inv;
+  const profSets = useProficiencySets();
   const adapterActions = [
-    ...makeWeaponActions(C, attacks, inv, masteryItems),
+    ...makeWeaponActions(C, attacks, inv, masteryItems, profSets),
     ...collectAdapterActions(C, sheet),
   ].map((action) => resolveActionFormulas(action, C));
   const showAttacks = false;
@@ -885,13 +887,13 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
           <Box sx={{ width: 6, height: 28, borderRadius: 1, bgcolor: action._attackColor ? CAT_COLORS.attack : CAT_COLORS[action.cat], flexShrink: 0, opacity: 0.95 }} />
         )}
 
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap', minWidth: 0 }}>
-            <Typography sx={{ fontSize: '0.78rem', fontWeight: 700, color: 'text.primary', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+            <Typography sx={{ flex: 1, fontSize: '0.78rem', fontWeight: 700, color: 'text.primary', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {action.name}
             </Typography>
             {hasRollers ? (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0, flexWrap: 'wrap' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                 {Number.isFinite(action.attackBonus) ? (
                   <Button
                     size="small"
@@ -929,59 +931,60 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
               </Box>
             ) : null}
           </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap', mt: 0.25 }}>
-            {action._source ? (
-              <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontStyle: 'italic', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{action._source}</Typography>
-            ) : null}
-            {action.uses ? (
-              <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary' }}>{action.uses}</Typography>
-            ) : null}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+            <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap', minWidth: 0 }}>
+              {action._source ? (
+                <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontStyle: 'italic', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{action._source}</Typography>
+              ) : null}
+              {action.uses ? (
+                <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary' }}>{action.uses}</Typography>
+              ) : null}
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.4, flexWrap: 'wrap', justifyContent: 'flex-end', flexShrink: 0 }}>
+              {action.cat ? (
+                <Chip
+                  size="small"
+                  label={action.cat}
+                  variant="outlined"
+                  sx={{ ...tinyMetaChipSx, color: action._attackColor ? CAT_COLORS.attack : (CAT_COLORS[action.cat] || 'text.secondary'), borderColor: action._attackColor ? CAT_COLORS.attack : (CAT_COLORS[action.cat] || 'divider'), bgcolor: action._attackColor ? `${CAT_COLORS.attack}14` : `${CAT_COLORS[action.cat] || 'transparent'}14` }}
+                />
+              ) : null}
+              {action.minLevel ? (
+                <Chip size="small" label={`Lv${action.minLevel}`} variant="outlined" sx={{ ...tinyMetaChipSx, color: 'text.secondary' }} />
+              ) : null}
+              {action._weaponMastery ? (
+                <Chip
+                  size="small"
+                  label={action._weaponMastery}
+                  variant="outlined"
+                  sx={{
+                    ...tinyMetaChipSx,
+                    color: '#edd48a',
+                    borderColor: 'rgba(237,212,138,0.55)',
+                    bgcolor: 'rgba(237,212,138,0.12)',
+                  }}
+                />
+              ) : null}
+              {action._notProficient ? (
+                <Chip size="small" label="NO PROF" variant="outlined" sx={{ ...tinyMetaChipSx, color: '#de675f', borderColor: '#de675f', bgcolor: 'rgba(222,103,95,0.14)' }} />
+              ) : null}
+              {action._disadvantage ? (
+                <Chip size="small" label="DIS" variant="outlined" sx={{ ...tinyMetaChipSx, color: '#d69245', borderColor: '#d69245', bgcolor: 'rgba(213,138,61,0.14)' }} />
+              ) : null}
+              {action._weaponSlot ? (
+                <Chip size="small" label={action._weaponSlot} variant="outlined" sx={{ ...tinyMetaChipSx, color: '#58b879', borderColor: 'rgba(88,184,121,0.55)', bgcolor: 'rgba(88,184,121,0.12)' }} />
+              ) : null}
+              {inlinePills.map((pill, idx) => (
+                <Chip
+                  key={`${pill.label || 'pill'}-${idx}`}
+                  size="small"
+                  variant="outlined"
+                  label={`${pill.label || ''}${pill.value != null ? ` ${pill.value}` : ''}`.trim()}
+                  sx={{ ...tinyMetaChipSx, color: '#edd48a', borderColor: 'rgba(237,212,138,0.4)', bgcolor: 'rgba(237,212,138,0.12)' }}
+                />
+              ))}
+            </Box>
           </Box>
-        </Box>
-
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.4, flexWrap: 'wrap', justifyContent: 'flex-end', flexShrink: 0 }}>
-          {action.cat ? (
-            <Chip
-              size="small"
-              label={action.cat}
-              variant="outlined"
-              sx={{ ...tinyMetaChipSx, color: action._attackColor ? CAT_COLORS.attack : (CAT_COLORS[action.cat] || 'text.secondary'), borderColor: action._attackColor ? CAT_COLORS.attack : (CAT_COLORS[action.cat] || 'divider'), bgcolor: action._attackColor ? `${CAT_COLORS.attack}14` : `${CAT_COLORS[action.cat] || 'transparent'}14` }}
-            />
-          ) : null}
-          {action.minLevel ? (
-            <Chip size="small" label={`Lv${action.minLevel}`} variant="outlined" sx={{ ...tinyMetaChipSx, color: 'text.secondary' }} />
-          ) : null}
-          {action._weaponMastery ? (
-            <Chip
-              size="small"
-              label={action._weaponMastery}
-              variant="outlined"
-              sx={{
-                ...tinyMetaChipSx,
-                color: '#edd48a',
-                borderColor: 'rgba(237,212,138,0.55)',
-                bgcolor: 'rgba(237,212,138,0.12)',
-              }}
-            />
-          ) : null}
-          {action._notProficient ? (
-            <Chip size="small" label="NO PROF" variant="outlined" sx={{ ...tinyMetaChipSx, color: '#de675f', borderColor: '#de675f', bgcolor: 'rgba(222,103,95,0.14)' }} />
-          ) : null}
-          {action._disadvantage ? (
-            <Chip size="small" label="DIS" variant="outlined" sx={{ ...tinyMetaChipSx, color: '#d69245', borderColor: '#d69245', bgcolor: 'rgba(213,138,61,0.14)' }} />
-          ) : null}
-          {action._weaponSlot ? (
-            <Chip size="small" label={action._weaponSlot} variant="outlined" sx={{ ...tinyMetaChipSx, color: '#58b879', borderColor: 'rgba(88,184,121,0.55)', bgcolor: 'rgba(88,184,121,0.12)' }} />
-          ) : null}
-          {inlinePills.map((pill, idx) => (
-            <Chip
-              key={`${pill.label || 'pill'}-${idx}`}
-              size="small"
-              variant="outlined"
-              label={`${pill.label || ''}${pill.value != null ? ` ${pill.value}` : ''}`.trim()}
-              sx={{ ...tinyMetaChipSx, color: '#edd48a', borderColor: 'rgba(237,212,138,0.4)', bgcolor: 'rgba(237,212,138,0.12)' }}
-            />
-          ))}
         </Box>
       </Box>
 
