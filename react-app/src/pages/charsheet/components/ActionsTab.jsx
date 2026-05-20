@@ -35,6 +35,8 @@ import { Empty } from './SpellsUiParts.jsx';
 import ActionDetailPanel from './ActionDetailPanel.jsx';
 import UnarmedStrikeOptionsPanel from './UnarmedStrikeOptionsPanel.jsx';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
+import { RichInline, RichText } from '../../../shared/character/RichText.jsx';
+import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
 
 const ACTION_DETAIL_RENDERERS = {
   panel: ActionDetailPanel,
@@ -1070,7 +1072,11 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
 
       {open ? (
         <Box sx={{ ...spellBodySx, mt: hasRes ? 0 : '-1px', mb: '4px' }}>
-          {action.desc}
+          {action.descOverride
+            ? <RichText text={action.descOverride} sx={{ fontSize: '0.72rem' }} />
+            : action.entries
+              ? <EntryBlocks entries={action.entries} emptyText="" />
+              : null}
           {action.choiceKey && onUpdateCharacter ? (
             <ChoicePicker action={action} C={C} onUpdateCharacter={onUpdateCharacter} onShowToast={onShowToast} />
           ) : null}
@@ -1079,9 +1085,7 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
               <Typography sx={{ fontSize: '0.66rem', color: '#edd48a', fontWeight: 700 }}>
                 Weapon Mastery — {action._weaponMastery}
               </Typography>
-              <Typography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>
-                {action._weaponMasteryText}
-              </Typography>
+              <RichText text={action._weaponMasteryText} sx={{ fontSize: '0.72rem' }} />
             </Box>
           ) : null}
           {DetailRenderer ? (
@@ -1132,8 +1136,8 @@ function ChoicePicker({ action, C, onUpdateCharacter, onShowToast }) {
           <ToggleButton key={opt.value} value={opt.value}>{opt.label}</ToggleButton>
         ))}
       </ToggleButtonGroup>
-      <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', mt: 0.2, fontStyle: 'italic' }}>
-        {action.choiceRestNote || 'Change when you finish a Short or Long Rest (Smith\'s Tools required).'}
+      <Typography component="div" sx={{ fontSize: '0.55rem', color: 'text.secondary', mt: 0.2, fontStyle: 'italic' }}>
+        <RichInline text={action.choiceRestNote || "Change when you finish a Short or Long Rest (Smith's Tools required)."} keyPrefix={`choice-${action.choiceKey || 'note'}`} />
       </Typography>
     </Box>
   );

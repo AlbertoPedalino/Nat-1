@@ -1,19 +1,22 @@
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { Box, Button, Stack, Typography } from '@mui/material';
 import { Cross, Sword } from 'lucide-react';
 import { SPELL_LEVEL_LABELS } from '../../charbuilder/constants.js';
 import { SpellNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
+import { RichInline } from '../../../shared/character/RichText.jsx';
+import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
 import { SCHOOL_LABELS, fbonus, getFinal, getMod, getPB } from '../logic/calculations.js';
 import {
   applySpellModifiers,
   computeScaledFormula,
   extractDamageDice,
   getCastBadge,
-  getMetaLine,
+  getMetaSegments,
   getResolvedCantripData,
   getSpellAbilityForEntry,
   getSpellStatusChips,
   getUpcastStep,
+  entriesToHigherLevelBlocks,
   entriesToTextBlocks,
   resolveDmgBonusValue,
 } from '../logic/spellsTabLogic.js';
@@ -92,74 +95,6 @@ function FreeCastsInline({ freeCasts, freeCastUses, onToggleFreeCast }) {
   );
 }
 
-function EntryBlocks({ blocks }) {
-  if (!blocks?.length) {
-    return <Typography variant="body2" color="text.secondary">No description.</Typography>;
-  }
-
-  return (
-    <Stack spacing={0.65}>
-      {blocks.map((block, index) => {
-        if (block.kind === 'heading') {
-          return (
-            <Typography key={`h-${index}`} variant="body2" sx={{ fontWeight: 800, color: 'text.primary', lineHeight: 1.25 }}>
-              {block.text}
-            </Typography>
-          );
-        }
-        if (block.kind === 'listItem') {
-          return (
-            <Box key={`li-${index}`} component="ul" sx={{ m: 0, pl: 2.2, color: 'text.secondary' }}>
-              <Typography component="li" variant="body2" color="text.secondary" sx={{ lineHeight: 1.38 }}>
-                {block.text}
-              </Typography>
-            </Box>
-          );
-        }
-        if (block.kind === 'table') {
-          return (
-            <Box key={`tbl-${index}`} sx={{ overflowX: 'auto' }}>
-              {block.caption ? (
-                <Typography variant="body2" sx={{ fontWeight: 800, color: 'text.primary', mb: 0.35 }}>
-                  {block.caption}
-                </Typography>
-              ) : null}
-              <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.72rem' }}>
-                {block.headers?.length ? (
-                  <Box component="thead">
-                    <Box component="tr">
-                      {block.headers.map((cell, cellIndex) => (
-                        <Box key={`th-${cellIndex}`} component="th" sx={{ textAlign: 'left', p: '3px 6px', borderBottom: '1px solid', borderColor: 'divider', color: 'text.primary' }}>
-                          {cell}
-                        </Box>
-                      ))}
-                    </Box>
-                  </Box>
-                ) : null}
-                <Box component="tbody">
-                  {(block.rows || []).map((row, rowIndex) => (
-                    <Box key={`tr-${rowIndex}`} component="tr">
-                      {row.map((cell, cellIndex) => (
-                        <Box key={`td-${rowIndex}-${cellIndex}`} component="td" sx={{ p: '3px 6px', borderBottom: '1px solid', borderColor: 'divider', color: 'text.secondary', verticalAlign: 'top' }}>
-                          {cell}
-                        </Box>
-                      ))}
-                    </Box>
-                  ))}
-                </Box>
-              </Box>
-            </Box>
-          );
-        }
-        return (
-          <Typography key={`p-${index}`} variant="body2" color="text.secondary" sx={{ lineHeight: 1.42 }}>
-            {block.text}
-          </Typography>
-        );
-      })}
-    </Stack>
-  );
-}
 
 function normalizeModifierDetails(cantripData) {
   const raw = [
@@ -203,10 +138,10 @@ export default function SpellEntry({ entry, onShowToast, atk: fallbackAtk, spell
   const castLevel = entry.castLevel || entry.level || 0;
   const baseLevel = entry.level || 0;
   const school = SCHOOL_LABELS[entry.school] || entry.school || '';
-  const metaLine = getMetaLine(entry);
+  const metaSegments = getMetaSegments(entry);
   const bodyBlocks = entriesToTextBlocks(entry.descriptionEntries || entry.entries);
   const higherEntries = entry.higherLevelEntries || entry.entriesHigherLevel;
-  const higherBlocks = higherEntries ? entriesToTextBlocks(higherEntries) : [];
+  const higherBlocks = higherEntries ? entriesToHigherLevelBlocks(higherEntries) : [];
   const rawDamages = extractDamageDice(entry.entries || []);
   const hasAttack = !!entry.spellAttack;
   const spellData = installedRegistry.getSpellData(entry.name);
@@ -380,7 +315,20 @@ export default function SpellEntry({ entry, onShowToast, atk: fallbackAtk, spell
 
       {open ? (
         <Box sx={spellBodySx}>
-          {metaLine ? <Box sx={{ fontSize: '0.65rem', color: 'text.secondary', mb: '5px' }}>{metaLine}</Box> : null}
+          {metaSegments.length ? (
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'auto 1fr', columnGap: '8px', rowGap: '2px', fontSize: '0.65rem', mb: '6px' }}>
+              {metaSegments.map((segment) => (
+                <Fragment key={segment.label}>
+                  <Box sx={{ fontFamily: '"Cinzel", Georgia, serif', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#9d7fb8', fontSize: '0.55rem', alignSelf: 'center' }}>
+                    {segment.label}
+                  </Box>
+                  <Box sx={{ color: 'text.primary' }}>
+                    {segment.value}
+                  </Box>
+                </Fragment>
+              ))}
+            </Box>
+          ) : null}
           <EntryBlocks blocks={bodyBlocks} />
           {modifierDetailGroups.length ? (
             <Stack spacing={0.8} sx={{ mt: 1 }}>
@@ -424,7 +372,7 @@ export default function SpellEntry({ entry, onShowToast, atk: fallbackAtk, spell
           ) : null}
           {higherBlocks.length ? (
             <Box sx={{ mt: 1, pt: 1, borderTop: '1px dashed', borderColor: 'divider' }}>
-              <Box sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.08em', color: '#9d7fb8', mb: 0.5 }}>Higher Level</Box>
+              <Box sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.08em', color: '#9d7fb8', mb: 0.5 }}>Using a Higher-Level Spell Slot</Box>
               <EntryBlocks blocks={higherBlocks} />
             </Box>
           ) : null}

@@ -121,12 +121,6 @@ export default function install(registry, context = {}) {
   } = createAdapterBindings(registry, context);
 
 
-  if (typeof registerFeatAdapter === "function") {
-    registerFeatAdapter("Lucky", function (feat) {
-      return { ...feat, luckPoints: 3 };
-    });
-  }
-
   if (typeof registerFeatSheetResources === "function") {
     registerFeatSheetResources("Lucky", [
       {
@@ -144,9 +138,10 @@ export default function install(registry, context = {}) {
       {
         name:   'Lucky',
         icon:   'clover',
-        cat:    'action',
+        cat:    'reaction',
+        uses:   '3 / Long Rest',
         resKey: 'lucky_points',
-        desc:   'Immediately after you roll the d20 for a D20 Test, expend 1 Luck Point to gain Advantage on that roll (roll a second d20 and use either result). You can also expend a Luck Point when a creature rolls a d20 to attack you: the attacker must use the new roll.',
+        descOverride: "You have inexplicable luck that kicks in at fortunate moments. You have 3 Luck Points and regain expended points when you finish a Long Rest. You can spend the points on the benefits below.\n\n{@b Advantage.} When you make a D20 Test, you can spend 1 Luck Point to give yourself Advantage on the roll.\n\n{@b Disadvantage.} When a creature makes an attack roll against you, you can spend 1 Luck Point to impose Disadvantage on the roll.",
       },
     ]);
   }

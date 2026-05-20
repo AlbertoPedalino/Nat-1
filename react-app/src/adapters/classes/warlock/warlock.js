@@ -444,7 +444,7 @@ registerClassSheetActions("Warlock", [
     "uses": "1 / LR",
     "resKey": "magical_cunning",
     "minLevel": 2,
-    "desc": "Perform esoteric rite for 1 minute. At end, regain expended Pact Magic slots up to half your maximum (round up). Once used, unavailable until Long Rest."
+    "desc": "You can perform an esoteric rite for 1 minute. At the end of it, you regain expended Pact Magic spell slots but no more than a number equal to half your maximum (round up). Once you use this feature, you can't do so again until you finish a Long Rest."
   },
   {
     "name": "Contact Patron",
@@ -469,7 +469,7 @@ registerClassSheetActions("Warlock", [
     "cat": "action",
     "uses": "1 / LR",
     "minLevel": 20,
-    "desc": "Magical Cunning is upgraded: when you use its 1-minute ritual, you regain ALL expended Pact Magic slots (instead of half). Once per Long Rest."
+    "desc": "You can perform the rite of {@b Magical Cunning} as a Bonus Action, and when you finish that rite, you regain {@b all} your expended Pact Magic spell slots. Once you use this benefit, you can't do so again until you finish a Long Rest."
   },
 
   {

@@ -149,7 +149,7 @@ registerSpeciesSheetActions("Aasimar_XPHB", [
       return `${pb}d4`;
     },
     minLevel: 1,
-    desc: 'Magic action: touch a creature and roll a number of d4s equal to your Proficiency Bonus. The creature regains Hit Points equal to the total. Recharge: Long Rest.',
+    desc: "As a {@b Magic} action, you touch a creature and roll a number of d4s equal to your Proficiency Bonus. The creature regains a number of Hit Points equal to the roll's total. Once you use this trait, you can't do so again until you finish a Long Rest.",
   },
   {
     name: 'Celestial Revelation',

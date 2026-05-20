@@ -172,8 +172,100 @@ export function resolveActionFormulas(action, C) {
   return action;
 }
 
+// Normalize feature names so lookups survive minor adapter/data drift:
+//   "Action Surge (One Use)" → "actionsurge"
+//   "Maneuvers: Trip Attack" → "maneuverstripattack"
+function nameKey(value) {
+  return String(value || '').toLowerCase().replace(/\([^)]*\)/g, '').replace(/[^a-z0-9]/g, '').trim();
+}
+
+function collectNamedEntries(entries) {
+  const map = new Map();
+  const walk = (node) => {
+    if (!node) return;
+    if (Array.isArray(node)) { node.forEach(walk); return; }
+    if (typeof node !== 'object') return;
+    if (node.name && Array.isArray(node.entries)) {
+      const key = nameKey(node.name);
+      if (key && !map.has(key)) map.set(key, node.entries);
+    }
+    if (Array.isArray(node.entries)) walk(node.entries);
+    if (Array.isArray(node.items)) walk(node.items);
+  };
+  walk(entries);
+  return map;
+}
+
+function buildFeatureMapFromRecords(records) {
+  const map = new Map();
+  (records || []).forEach((feature) => {
+    if (!feature?.name || !Array.isArray(feature.entries)) return;
+    const key = nameKey(feature.name);
+    if (key && !map.has(key)) map.set(key, feature.entries);
+  });
+  return map;
+}
+
+const _missingDescWarned = typeof Set === 'function' ? new Set() : null;
+function warnMissingDescription(action, source) {
+  if (typeof import.meta === 'undefined' || !import.meta.env?.DEV) return;
+  if (!_missingDescWarned) return;
+  const key = `${source || ''}|${action?.name || ''}`;
+  if (_missingDescWarned.has(key)) return;
+  _missingDescWarned.add(key);
+  // eslint-disable-next-line no-console
+  console.warn(`[actions] No description for "${action?.name}" (source: ${source || 'unknown'}). Add a matching 5etools feature entry or set descOverride.`);
+}
+
+/**
+ * Action description rendering priority (see ActionsTab.jsx):
+ *   1. `action.descOverride` — adapter-forced custom text. Use when the action
+ *      intentionally diverges from the official XPHB / XDMG / EFA / FRAiF /
+ *      FRHoF wording (e.g. Lucky's 3-fixed Luck Points).
+ *   2. `action.entries` — auto-resolved from character snapshots via the
+ *      feature-name maps built below. This is the canonical source for every
+ *      class, subclass, species, background, and feat action whose name
+ *      matches the corresponding 5etools record.
+ *
+ * Adapters MUST supply one of those two. The legacy `desc` field is no longer
+ * rendered; if `descOverride` is missing and the snapshot lookup fails, the
+ * action card shows no description and a dev-mode warning is emitted.
+ */
 export function collectAdapterActions(C, sheet) {
   const out = [];
+  const featSnapshotByName = new Map(
+    (C?.allFeatSnapshots || [])
+      .filter((feat) => feat?.name)
+      .map((feat) => [nameKey(feat.name), feat]),
+  );
+  const classFeatureByName = buildFeatureMapFromRecords(C?.allClassFeatures);
+  const subclassFeatureByName = buildFeatureMapFromRecords(C?.allSubFeatures);
+  const extraFeatureMaps = (C?.extraClasses || []).flatMap((extra) => [
+    buildFeatureMapFromRecords(extra?.allClassFeatures),
+    buildFeatureMapFromRecords(extra?.allSubFeatures),
+  ]);
+  const speciesFeatureByName = collectNamedEntries(C?.speciesSnapshot?.entries || []);
+  const backgroundFeatureByName = collectNamedEntries(C?.backgroundSnapshot?.entries || []);
+
+  const lookupByName = (key) => {
+    if (!key) return null;
+    if (classFeatureByName.has(key)) return classFeatureByName.get(key);
+    if (subclassFeatureByName.has(key)) return subclassFeatureByName.get(key);
+    for (const map of extraFeatureMaps) if (map.has(key)) return map.get(key);
+    if (speciesFeatureByName.has(key)) return speciesFeatureByName.get(key);
+    if (backgroundFeatureByName.has(key)) return backgroundFeatureByName.get(key);
+    return null;
+  };
+
+  const resolveOfficialEntries = (action, source) => {
+    if (action.entries) return action.entries;
+    const ownerKey = nameKey(action.ownerName || source);
+    const feat = ownerKey ? featSnapshotByName.get(ownerKey) : null;
+    if (feat?.entries) return feat.entries;
+    const actionKey = nameKey(action.name);
+    return lookupByName(actionKey);
+  };
+
   const pushFiltered = (arr, source, ownerLevel = C?.level ?? 1) => {
     (arr || []).forEach(a => {
       if (!a || !a.name) return;
@@ -181,7 +273,18 @@ export function collectAdapterActions(C, sheet) {
       if (a.minLevel && lv < Number(a.minLevel)) return;
       if (!hasCondition(a, C, sheet)) return;
       if (!isExecutableAction(a)) return;
-      out.push({ ...a, ownerLevel: lv, ownerName: a.ownerName || source, _source: a.ownerName || source });
+      const officialEntries = resolveOfficialEntries(a, source);
+      if (!officialEntries && !a.descOverride) {
+        warnMissingDescription(a, source);
+      }
+      const { desc: _legacyDesc, ...rest } = a;
+      out.push({
+        ...rest,
+        ownerLevel: lv,
+        ownerName: a.ownerName || source,
+        _source: a.ownerName || source,
+        entries: officialEntries || null,
+      });
     });
   };
 
