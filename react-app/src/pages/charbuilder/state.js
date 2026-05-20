@@ -378,6 +378,7 @@ export function builderReducer(state, action) {
               name: classObject.name,
               source: classObject.source,
               cls: classObject,
+              clsSnapshot: null,
               level: Math.max(1, Number(extraClass.level) || 1),
               subclassShortName: sameClass ? (extraClass.subclassShortName || '') : '',
               subclasses,

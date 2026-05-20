@@ -14,6 +14,7 @@ import {
 } from '../../../shared/character/typedProficiencies.js';
 import { collectResolvedWeaponMasteries } from '../../../shared/character/weaponMastery.js';
 import { collectAcFormulas, getEquippedArmor, getEquippedShield, computeAcFormulaValue } from '../../../shared/character/ac.js';
+import { buildPreviewSheetCharacter } from '../logic/previewSheet.js';
 
 const SOURCE_COLOR = {
   class: '#d7ad52',
@@ -402,23 +403,7 @@ function mergePreviewSection(sections, title, items, prepend = false) {
 }
 
 function collectPreviewProficiencies(character) {
-  const sheetLike = {
-    ...character,
-    clsSnapshot: character.clsSnapshot || character.cls || {},
-    backgroundSnapshot: character.backgroundSnapshot || character.backgroundObj || {},
-    speciesSnapshot: {
-      ...(character.speciesSnapshot || character.speciesObj || {}),
-      languageProficiencies: [{ common: true }, ...((character.speciesSnapshot || character.speciesObj || {}).languageProficiencies || [])],
-    },
-    allClassFeatures: [
-      ...(character.allFeatures || []),
-      ...(character.allSubFeatures || []),
-      ...(character.extraClasses || []).flatMap((extra) => [
-        ...(extra.allFeatures || []),
-        ...(extra.allSubFeatures || []),
-      ]),
-    ],
-  };
+  const sheetLike = buildPreviewSheetCharacter(character);
   const sections = collectAllProficiencies(sheetLike, collectEquipmentProficiencySets(sheetLike)).map((section) => ({
     title: section.title,
     items: section.title === 'Weapons' ? collapseWeaponProficiencies(section.items) : uniqueClean(section.items),

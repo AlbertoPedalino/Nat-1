@@ -53,13 +53,13 @@ export function handleClassSelect(state, action, { findByNameSource, updateChara
     const sameExtraClass = currentExtra?.name === className && (!source || currentExtra?.source === source);
     const extraClasses = state.character.extraClasses.map((extraClass, itemIndex) => (
       itemIndex === index
-        ? { ...extraClass, name: className, source, cls: classObject, subclassShortName: '', subclasses, allFeatures, allSubFeatures }
+        ? { ...extraClass, name: className, source, cls: classObject, clsSnapshot: classObject ? null : extraClass.clsSnapshot, subclassShortName: '', subclasses, allFeatures, allSubFeatures }
         : extraClass
     ));
     if (sameExtraClass) {
       return updateCharacter(state, {
         extraClasses: state.character.extraClasses.map((extraClass, itemIndex) => (
-          itemIndex === index ? { ...extraClass, name: className, source, cls: classObject, subclasses, allFeatures, allSubFeatures } : extraClass
+          itemIndex === index ? { ...extraClass, name: className, source, cls: classObject, clsSnapshot: classObject ? null : extraClass.clsSnapshot, subclasses, allFeatures, allSubFeatures } : extraClass
         )),
       });
     }
@@ -74,6 +74,7 @@ export function handleClassSelect(state, action, { findByNameSource, updateChara
       className,
       classSource: source,
       cls: classObject,
+      clsSnapshot: classObject ? null : state.character.clsSnapshot,
       subclasses,
       allFeatures,
       allSubFeatures,
@@ -83,6 +84,7 @@ export function handleClassSelect(state, action, { findByNameSource, updateChara
     className,
     classSource: source,
     cls: classObject,
+    clsSnapshot: null,
     subclassShortName: '',
     subclasses,
     allFeatures,
