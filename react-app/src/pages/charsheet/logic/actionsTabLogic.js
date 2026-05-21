@@ -232,16 +232,28 @@ function collectNamedEntries(entries, scope) {
 
 function buildFeatureMapFromRecords(records, scope) {
   const map = new Map();
+  const indexNamedNode = (node) => {
+    if (!node || typeof node !== 'object') return;
+    const entriesArr = Array.isArray(node.entries)
+      ? node.entries
+      : (Array.isArray(node.items) ? node.items : null);
+    if (node.name && entriesArr) {
+      const key = nameKey(node.name);
+      if (key) {
+        const existing = map.get(key);
+        if (!existing) {
+          map.set(key, Object.assign(entriesArr.slice(), { _name: node.name }));
+        } else if (existing._name !== node.name) {
+          reportKeyConflict(scope, key, existing._name, node.name);
+        }
+      }
+    }
+    if (Array.isArray(node.entries)) node.entries.forEach(indexNamedNode);
+    if (Array.isArray(node.items)) node.items.forEach(indexNamedNode);
+  };
   (records || []).forEach((feature) => {
     if (!feature?.name || !Array.isArray(feature.entries)) return;
-    const key = nameKey(feature.name);
-    if (!key) return;
-    const existing = map.get(key);
-    if (!existing) {
-      map.set(key, Object.assign(feature.entries.slice(), { _name: feature.name }));
-    } else if (existing._name !== feature.name) {
-      reportKeyConflict(scope, key, existing._name, feature.name);
-    }
+    indexNamedNode(feature);
   });
   return map;
 }

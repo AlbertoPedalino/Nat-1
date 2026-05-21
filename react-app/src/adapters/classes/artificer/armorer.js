@@ -160,7 +160,7 @@ registerSubclassSheetActions("Artificer_Armorer", [
     "desc": "Magic action (Smith's Tools in hand): turn worn armor into Arcane Armor. Benefits: no Strength requirement, don/doff as Utilize action (can't be removed against will), use as spellcasting focus. Change armor model on Short or Long Rest (Smith's Tools required)."
   },
   {
-    "name": "Thunder Gauntlets",
+    "name": "Thunder Pulse",
     "icon": "",
     "cat": "attack",
     "uses": "At will",
@@ -214,19 +214,6 @@ registerSubclassSheetActions("Artificer_Armorer", [
     "damageButtonLabel": ({ formula }) => `${formula} lightning`,
     "damageKind": "damage",
     "desc": "Infiltrator model Simple Ranged weapon (range 90/300, INT to attack/damage). Once per turn, one creature you hit also takes an extra 1d6 Lightning damage."
-  },
-  {
-    "name": "Lightning Launcher Extra",
-    "icon": "",
-    "cat": "attack",
-    "uses": "Once/turn",
-    "minLevel": 3,
-    "requiresChoice": { "key": "armorer_model", "value": "Infiltrator" },
-    "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true },
-    "damageFormula": "1d6",
-    "damageButtonLabel": "+1d6 lightning (extra)",
-    "damageKind": "damage",
-    "desc": "Once on each of your turns when you hit a creature with Lightning Launcher, you can deal an extra 1d6 Lightning damage."
   },
   {
     "name": "Powered Steps",
