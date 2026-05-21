@@ -108,6 +108,21 @@ export default function CharBuilder() {
   const activeStep = STEPS[state.tab];
   const ActiveIcon = activeStep.icon;
   const ensuredRef = useRef(false);
+  const handleImportSheetFile = async (file) => {
+    try {
+      const payload = extractSheetData(await file.text());
+      const result = importSheetPayload(payload, () => window.confirm('Esiste gia un personaggio in questo slot. Sovrascrivere?'));
+      const activeCharId = localStorage.getItem('gb:active_char');
+      if (activeCharId) {
+        window.history.replaceState(null, '', `${window.location.pathname}?char=${activeCharId}`);
+      }
+      const importedCount = typeof result === 'number' ? result : (result?.imported ? 1 : 0);
+      dispatch({ type: 'import/message', message: `Imported ${importedCount} character. Reloading...` });
+      window.setTimeout(() => window.location.reload(), 350);
+    } catch (error) {
+      dispatch({ type: 'import/message', message: `Error: ${error?.message || error}` });
+    }
+  };
 
   useEffect(() => {
     if (ensuredRef.current) return;
@@ -206,49 +221,41 @@ export default function CharBuilder() {
 
   return (
     <Box sx={builderRootSx}>
-      <ImportSheetFab
-        message={state.importMessage}
-        onMessage={(message) => dispatch({ type: 'import/message', message })}
-        onFile={async (file) => {
-          try {
-            const payload = extractSheetData(await file.text());
-            const result = importSheetPayload(payload, () => window.confirm('Esiste gia un personaggio in questo slot. Sovrascrivere?'));
-            const activeCharId = localStorage.getItem('gb:active_char');
-            if (activeCharId) {
-              window.history.replaceState(null, '', `${window.location.pathname}?char=${activeCharId}`);
-            }
-            const importedCount = typeof result === 'number' ? result : (result?.imported ? 1 : 0);
-            dispatch({ type: 'import/message', message: `Imported ${importedCount} character. Reloading...` });
-            window.setTimeout(() => window.location.reload(), 350);
-          } catch (error) {
-            dispatch({ type: 'import/message', message: `Error: ${error?.message || error}` });
-          }
-        }}
-      />
-
       <AppBar position="sticky" color="default" elevation={0} sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'rgba(26,23,19,0.98)', backgroundImage: 'none' }}>
-        <Toolbar sx={{ gap: 1, minHeight: '52px !important', pr: { xs: 12, md: 16 } }}>
-          <Button
-            component={RouterLink}
-            to="/"
-            size="small"
-            variant="outlined"
-            startIcon={<Home size={14} />}
-            sx={{ flexShrink: 0 }}
-          >
-            Home
-          </Button>
-          <Divider orientation="vertical" flexItem sx={{ borderColor: 'rgba(237,212,138,0.18)', my: 1 }} />
-          <Wand2 size={19} />
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography variant="h1" noWrap sx={{ fontSize: '1.12rem', letterSpacing: '0.04em', color: '#edd48a' }}>
-              Character Builder
-            </Typography>
-            <Typography variant="body2" color="text.secondary" noWrap sx={{ fontSize: '0.64rem' }}>
-              D&D 5e 2024
-            </Typography>
+        <Box sx={{ maxWidth: 1360, width: '100%', mx: 'auto', px: { xs: 0.75, md: 1.1 } }}>
+          <Box sx={builderAppNavSx}>
+            <Button
+              component={RouterLink}
+              to="/"
+              size="small"
+              variant="outlined"
+              color="primary"
+              startIcon={<Home size={14} />}
+              sx={appNavButtonSx}
+            >
+              HOME
+            </Button>
+            <ImportSheetFab
+              message={state.importMessage}
+              onMessage={(message) => dispatch({ type: 'import/message', message })}
+              onFile={handleImportSheetFile}
+              sx={{ ml: 'auto' }}
+              buttonSx={appNavButtonSx}
+            />
           </Box>
-        </Toolbar>
+
+          <Toolbar disableGutters sx={{ gap: 1, minHeight: '52px !important', pr: { xs: 12, md: 16 } }}>
+            <Wand2 size={19} />
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography variant="h1" noWrap sx={{ fontSize: '1.12rem', letterSpacing: '0.04em', color: '#edd48a' }}>
+                Character Builder
+              </Typography>
+              <Typography variant="body2" color="text.secondary" noWrap sx={{ fontSize: '0.64rem' }}>
+                D&D 5e 2024
+              </Typography>
+            </Box>
+          </Toolbar>
+        </Box>
       </AppBar>
 
       <Box sx={{ maxWidth: 1360, mx: 'auto', px: { xs: 0.75, md: 1.1 }, py: 1.1 }}>
@@ -410,4 +417,21 @@ const builderRootSx = {
     p: 0.75,
     '&:last-child': { pb: 0.75 },
   },
+};
+
+const builderAppNavSx = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'flex-start',
+  flexWrap: 'wrap',
+  gap: '0.35rem',
+  py: '0.35rem',
+  borderBottom: 1,
+  borderColor: 'rgba(237,212,138,0.14)',
+};
+
+const appNavButtonSx = {
+  fontFamily: '"Cinzel", Georgia, serif',
+  fontSize: '0.625rem',
+  letterSpacing: '0.08em',
 };

@@ -2,7 +2,7 @@ import { Button, Stack, Typography } from '@mui/material';
 import { Upload } from 'lucide-react';
 import { useRef } from 'react';
 
-export default function ImportSheetFab({ message, onMessage, onFile }) {
+export default function ImportSheetFab({ message, onMessage, onFile, sx, buttonSx }) {
   const inputRef = useRef(null);
 
   return (
@@ -10,10 +10,13 @@ export default function ImportSheetFab({ message, onMessage, onFile }) {
       direction="row"
       spacing={1}
       alignItems="center"
-      sx={{ position: 'fixed', top: 14, right: 14, zIndex: 1400 }}
+      sx={sx}
     >
       {message ? (
-        <Typography variant="caption" sx={{ px: 1, py: 0.5, borderRadius: 1, bgcolor: 'rgba(12,16,26,.78)' }}>
+        <Typography
+          variant="caption"
+          sx={{ px: 1, py: 0.5, borderRadius: 1, bgcolor: 'rgba(12,16,26,.78)', maxWidth: { xs: 160, sm: 260 }, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+        >
           {message}
         </Typography>
       ) : null}
@@ -40,7 +43,7 @@ export default function ImportSheetFab({ message, onMessage, onFile }) {
           event.target.value = '';
         }}
       />
-      <Button variant="outlined" size="small" startIcon={<Upload size={16} />} onClick={() => inputRef.current?.click()}>
+      <Button variant="outlined" size="small" startIcon={<Upload size={16} />} onClick={() => inputRef.current?.click()} sx={buttonSx}>
         Load Sheet JSON
       </Button>
     </Stack>

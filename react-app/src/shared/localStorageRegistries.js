@@ -1,4 +1,4 @@
-import { deleteCharacter, listCharacters, renameCharacter, getActiveCharId, setActiveCharId } from './character/store.js';
+import { deleteCharacter, listCharacters, renameCharacter } from './character/store.js';
 
 export const REGISTRY_META = {
   gb_board_registry: {

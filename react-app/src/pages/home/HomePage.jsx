@@ -1,11 +1,12 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Box, Typography, Card, CardContent } from '@mui/material';
+import { Box, Button, Typography, Card, CardContent } from '@mui/material';
 import { ScrollText, UserPen, LayoutDashboard, Swords, Pencil, Trash2 } from 'lucide-react';
 import {
   readRegistry, deleteRegistryEntry, renameRegistryEntry,
   REGISTRY_META,
 } from '../../shared/localStorageRegistries.js';
+import { clearAppLocalStorage, listAppLocalStorageKeys } from '../../shared/storage.js';
 
 const TOOLS = [
   { path: '/charsheet', label: 'Character Sheet', desc: 'View and manage your character in play', icon: ScrollText, color: '#2ecc71', borderColor: 'rgba(46,204,113,0.3)' },
@@ -68,7 +69,7 @@ function RecentPanel({ registryKey, entries, onDelete, onRename }) {
   );
 }
 
-function ContinueSection() {
+function ContinueSection({ refreshKey, onStorageChange }) {
   const [registries, setRegistries] = useState({ boards: [], chars: [], encounters: [] });
 
   const refresh = useCallback(() => {
@@ -79,11 +80,14 @@ function ContinueSection() {
     });
   }, []);
 
-  useEffect(() => { refresh(); }, [refresh]);
+  useEffect(() => { refresh(); }, [refresh, refreshKey]);
 
   const handleDelete = useCallback((registryKey, id) => {
-    if (deleteRegistryEntry(registryKey, id)) refresh();
-  }, [refresh]);
+    if (deleteRegistryEntry(registryKey, id)) {
+      refresh();
+      onStorageChange?.();
+    }
+  }, [onStorageChange, refresh]);
 
   const handleRename = useCallback((registryKey, id) => {
     if (renameRegistryEntry(registryKey, id)) refresh();
@@ -120,6 +124,30 @@ function ContinueSection() {
 }
 
 export default function HomePage() {
+  const [clearMessage, setClearMessage] = useState('');
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [appDataCount, setAppDataCount] = useState(0);
+
+  const refreshAppDataCount = useCallback(() => {
+    setAppDataCount(listAppLocalStorageKeys().length);
+  }, []);
+
+  useEffect(() => {
+    refreshAppDataCount();
+    window.addEventListener('storage', refreshAppDataCount);
+    return () => window.removeEventListener('storage', refreshAppDataCount);
+  }, [refreshAppDataCount]);
+
+  const handleClearAppData = useCallback(() => {
+    const confirmed = window.confirm('Eliminare tutti i dati locali di GM Board in questo browser? Personaggi, board, encounter e dati legacy verranno rimossi.');
+    if (!confirmed) return;
+
+    const removed = clearAppLocalStorage();
+    setRefreshKey((value) => value + 1);
+    setAppDataCount(0);
+    setClearMessage(removed ? `Deleted ${removed} local data ${removed === 1 ? 'entry' : 'entries'}.` : 'No local app data found.');
+  }, []);
+
   return (
     <Box sx={homeRootSx}>
       <Box sx={heroSx}>
@@ -146,7 +174,27 @@ export default function HomePage() {
         ))}
       </Box>
 
-      <ContinueSection />
+      <ContinueSection refreshKey={refreshKey} onStorageChange={refreshAppDataCount} />
+
+      {(appDataCount > 0 || clearMessage) ? (
+        <Box sx={clearDataWrapSx}>
+          {appDataCount > 0 ? (
+            <Button
+              variant="outlined"
+              size="small"
+              color="error"
+              startIcon={<Trash2 size={15} />}
+              onClick={handleClearAppData}
+              sx={clearDataButtonSx}
+            >
+              Clear App Data
+            </Button>
+          ) : null}
+          {clearMessage ? (
+            <Typography sx={clearDataMessageSx}>{clearMessage}</Typography>
+          ) : null}
+        </Box>
+      ) : null}
     </Box>
   );
 }
@@ -330,4 +378,31 @@ const recentBtnSx = {
   cursor: 'pointer',
   p: 0,
   '&:hover': { borderColor: '#c8a84b', color: '#e8c96a' },
+};
+
+const clearDataWrapSx = {
+  mt: '1rem',
+  minHeight: '42px',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: '0.35rem',
+};
+
+const clearDataButtonSx = {
+  borderColor: 'rgba(222,103,95,0.42)',
+  color: '#de675f',
+  fontFamily: '"Cinzel", Georgia, serif',
+  fontSize: '0.64rem',
+  letterSpacing: '0.08em',
+  '&:hover': {
+    borderColor: '#de675f',
+    bgcolor: 'rgba(222,103,95,0.08)',
+  },
+};
+
+const clearDataMessageSx = {
+  color: '#7a6a4a',
+  fontSize: '0.72rem',
+  fontFamily: '"EB Garamond", Georgia, serif',
 };
