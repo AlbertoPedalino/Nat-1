@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Box, Stack, Button, Dialog, DialogActions, DialogContent, DialogTitle, Slider, Typography } from '@mui/material';
+import { SHEET_GRID, SHEET_GRID_ITEM_SX } from './layout.js';
 import TopBar from './components/TopBar.jsx';
 import AbilityScores from './components/AbilityScores.jsx';
 import HPBlock from './components/HPBlock.jsx';
@@ -445,8 +446,8 @@ export default function CharacterSheet() {
       <TopBar C={C} sheet={sheet} onShortRest={openShortRest} onLongRest={openLongRest} onDownload={downloadSheet} onUpdateXp={updateXp} onUpdateCharacter={updateCurrentCharacter}
         rollLog={rollLog} onClearRollLog={() => setRollLog([])} />
       <Box sx={{ maxWidth: 1280, mx: { md: 'auto' }, px: { xs: '0.6rem', md: '1.1rem' }, overflow: 'hidden' }}>
-        <Box sx={{ bgcolor: 'rgba(35,32,26,1)', borderBottom: 1, borderColor: 'divider', py: '0.55rem' }}>
-          <Stack direction={{ xs: 'column', md: 'row' }} spacing={0.6} alignItems={{ md: 'stretch' }}>
+        <Box sx={{ bgcolor: 'rgba(35,32,26,1)', borderBottom: 1, borderColor: 'divider', py: '0.55rem', px: { xs: '0.45rem', md: '0.6rem' } }}>
+          <Stack direction={{ xs: 'column-reverse', md: 'row' }} spacing={0.6} alignItems={{ md: 'stretch' }}>
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <AbilityScores C={C} sheet={sheet} onRoll={rollD20} />
             </Box>
@@ -458,23 +459,30 @@ export default function CharacterSheet() {
         <Box sx={{
           display: 'grid',
           width: '100%',
-          gridTemplateColumns: { xs: '1fr', md: '200px 210px 1fr' },
-          gap: '0.55rem',
+          ...SHEET_GRID,
           pt: '0.55rem',
           alignItems: 'start',
           minWidth: 0,
         }}>
-          <Box sx={{ minWidth: 0, overflow: 'hidden' }}>
+          <Box sx={{ ...SHEET_GRID_ITEM_SX, gridArea: 'saves' }}>
             <SavingThrows C={C} sheet={sheet} onRoll={rollSave} />
+          </Box>
+          <Box sx={{ ...SHEET_GRID_ITEM_SX, gridArea: 'senses' }}>
             <Senses C={C} />
+          </Box>
+          <Box sx={{ ...SHEET_GRID_ITEM_SX, gridArea: 'movement' }}>
             <Movement C={C} sheet={sheet} />
+          </Box>
+          <Box sx={{ ...SHEET_GRID_ITEM_SX, gridArea: 'profs' }}>
             <Proficiencies C={C} />
+          </Box>
+          <Box sx={{ ...SHEET_GRID_ITEM_SX, gridArea: 'hitdice' }}>
             <HitDice C={C} sheet={sheet} />
           </Box>
-          <Box sx={{ minWidth: 0, overflow: 'hidden' }}>
+          <Box sx={{ ...SHEET_GRID_ITEM_SX, gridArea: 'skills' }}>
             <Skills C={C} sheet={sheet} onRoll={rollSkill} />
           </Box>
-          <Box sx={{ minWidth: 0 }}>
+          <Stack spacing={0.55} sx={{ ...SHEET_GRID_ITEM_SX, gridArea: 'right' }}>
             <RightTop C={C} sheet={sheet} onRoll={rollD20}
               onToggleCondition={toggleCondition} onClearConditions={clearConditions}
               onToggleInspiration={toggleInspiration}
@@ -496,7 +504,7 @@ export default function CharacterSheet() {
               onRest={doRest} onShowToast={showDiceToast}
               onUpdateInventory={updateInventory} onUpdateCurrency={updateCurrency} onUpdateSpells={updateSpells} onUpdateSheet={syncSheet} onUpdateNotes={updateNotes}
               onUpdateCharacter={updateCurrentCharacter} />
-          </Box>
+          </Stack>
         </Box>
       </Box>
       {diceToast && <DiceToast toast={diceToast} onClose={() => setDiceToast(null)} />}
