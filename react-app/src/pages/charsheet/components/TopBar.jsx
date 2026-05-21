@@ -130,24 +130,31 @@ export default function TopBar({ C, sheet, onShortRest, onLongRest, onDownload, 
       <Box sx={{ maxWidth: 1280, mx: { md: 'auto' }, px: { xs: '0.6rem', md: '1.1rem' } }}>
       <Box sx={{
         display: 'flex',
-        justifyContent: 'flex-start',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         gap: '0.35rem',
         py: '0.35rem',
         borderBottom: 1,
         borderColor: 'rgba(237,212,138,0.14)',
       }}>
-        <Button size="small" variant="outlined" color="primary" startIcon={<Home size={14} />}
-          onClick={() => navigate('/')} sx={appNavButtonSx}>
-          HOME
-        </Button>
-        <Button size="small" variant="outlined" color="primary" startIcon={<ArrowLeft size={14} />}
-          onClick={() => {
-            const params = new URLSearchParams(window.location.search);
-            const charId = params.get('char') || localStorage.getItem('gb:active_char') || 'new';
-            navigate(`/charbuilder?char=${encodeURIComponent(charId)}`);
-          }}
-          sx={appNavButtonSx}>
-          Builder
+        <Box sx={{ display: 'flex', gap: '0.35rem' }}>
+          <Button size="small" variant="outlined" color="primary" startIcon={<Home size={14} />}
+            onClick={() => navigate('/')} sx={appNavButtonSx}>
+            HOME
+          </Button>
+          <Button size="small" variant="outlined" color="primary" startIcon={<ArrowLeft size={14} />}
+            onClick={() => {
+              const params = new URLSearchParams(window.location.search);
+              const charId = params.get('char') || localStorage.getItem('gb:active_char') || 'new';
+              navigate(`/charbuilder?char=${encodeURIComponent(charId)}`);
+            }}
+            sx={appNavButtonSx}>
+            Builder
+          </Button>
+        </Box>
+        <Button size="small" variant="outlined" color="secondary" startIcon={<Download size={14} />}
+          onClick={onDownload} sx={appNavButtonSx}>
+          DOWNLOAD
         </Button>
       </Box>
       <Box sx={{
@@ -222,10 +229,6 @@ export default function TopBar({ C, sheet, onShortRest, onLongRest, onDownload, 
             onClick={() => setRollLogOpen(true)}
             sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', letterSpacing: '0.08em', color: '#58b879', borderColor: 'rgba(88,184,121,0.4)' }}>
             LOG ({rollLog?.length || 0})
-          </Button>
-          <Button size="small" variant="outlined" color="secondary" startIcon={<Download size={14} />}
-            onClick={onDownload} sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', letterSpacing: '0.08em' }}>
-            DOWNLOAD
           </Button>
       </Box>
       </Box>
