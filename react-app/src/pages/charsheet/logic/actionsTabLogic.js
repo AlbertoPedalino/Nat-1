@@ -440,7 +440,11 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
   const finalMod = (opts.damageMod != null ? opts.damageMod : mod) + enhancement.damage;
   const damageFormula = base ? base + (finalMod !== 0 ? (finalMod >= 0 ? '+' : '') + finalMod : '') : '';
   const dtype = weaponDamageType(item);
-  const disAdv = untrainedArmor && (finalAbility === 'str' || finalAbility === 'dex');
+  // XPHB 2024 Heavy weapon: Disadvantage on attack rolls if both STR and DEX < 13.
+  const props = itemProps(item);
+  const isHeavyWeapon = props.includes('h') || props.includes('heavy');
+  const heavyUnderStat = isHeavyWeapon && getFinal(C, 'str') < 13 && getFinal(C, 'dex') < 13;
+  const disAdv = (untrainedArmor && (finalAbility === 'str' || finalAbility === 'dex')) || heavyUnderStat;
   const selectedEntry = selectedMasteriesByWeapon.get(normalizeWeaponName(item?.name || '')) || null;
   const directMastery = selectedEntry ? resolveWeaponMasteryForItem(item) : null;
   const dbItem = selectedEntry && !directMastery

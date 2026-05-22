@@ -603,10 +603,25 @@ function formatVariantName(baseName, inherits) {
   return `${prefix ? `${prefix} ` : ''}${baseName}${suffix ? ` ${suffix}` : ''}`.trim();
 }
 
+function normRequireName(value) {
+  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
 function matchesRequires(item, requires) {
   if (!requires.length) return true;
   return requires.some((requirement) => {
     const type = String(item.type || '').split('|')[0].toUpperCase();
+
+    // Explicit name match (XDMG variants list specific base items by name).
+    if (requirement.name) {
+      if (normRequireName(item.name) !== normRequireName(requirement.name)) return false;
+      if (requirement.source) {
+        const itemSrc = String(item.source || '').toUpperCase();
+        const reqSrc = String(requirement.source || '').toUpperCase();
+        if (itemSrc !== reqSrc) return false;
+      }
+    }
+
     if (requirement.type) {
       const reqType = String(requirement.type || '').split('|')[0].toUpperCase();
       if (reqType === 'WEAPON' && !isWeaponType(type)) return false;
@@ -616,6 +631,13 @@ function matchesRequires(item, requires) {
     if (requirement.weapon && !isWeaponType(type)) return false;
     if (requirement.weaponCategory && requirement.weaponCategory !== item.weaponCategory) return false;
     if (requirement.armor && !isArmorType(type)) return false;
+
+    // Reject requirements with only unrecognized fields (e.g. classic DMG
+    // `{sword: true}` flags) to avoid applying a variant to every base item.
+    const KNOWN = new Set(['name', 'source', 'type', 'weapon', 'weaponCategory', 'armor']);
+    const hasKnownConstraint = Object.keys(requirement).some((k) => KNOWN.has(k));
+    if (!hasKnownConstraint) return false;
+
     return true;
   });
 }
