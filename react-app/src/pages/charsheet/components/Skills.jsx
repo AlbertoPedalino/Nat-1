@@ -6,6 +6,7 @@ import { matchesChoiceRequirement, inventoryHasFlag } from '../../../shared/char
 import { getSkillAdvantageFromEffects } from '../logic/sheetEffects.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 import { aggregateAbilityCheckBonus } from '../../../shared/character/itemBonus.js';
+import { getItemAdvantageOnSkill } from '../../../shared/character/itemEffects.js';
 
 const _SKILL_ADVANTAGES = [
   {
@@ -48,6 +49,8 @@ function getSkillAdvantage(C, skillName) {
   }
   const fromEffects = getSkillAdvantageFromEffects(C, skillName);
   if (fromEffects) return fromEffects;
+  const fromItem = getItemAdvantageOnSkill(C, skillName);
+  if (fromItem && fromItem.length) return { source: fromItem[0] };
   return null;
 }
 

@@ -7,6 +7,7 @@ import { warlockHasInvocation } from '../../../shared/character/warlockUtils.js'
 import { getClassSpellLimits } from '../../../shared/character/spellProgression.js';
 import { filterByRequiredChoice } from '../../../shared/character/lineageMatch.js';
 import { collectFreeCastsForGrant, mergeFreeCastsById, normalizeFreeCast, getFeatFreeCastTemplate, applyFreeCastRest } from '../../../shared/character/spellFreeCasts.js';
+import { collectItemAttachedSpells } from '../../../shared/character/itemAttachedSpells.js';
 
 const _GENERIC_LABELS = new Set([
   'class', 'subclass', 'species', 'feat', 'feature', 'granted', 'auto',
@@ -127,6 +128,23 @@ export function buildSpellInfo(C, spellIndex) {
   collectAutoGrantedSpells(C).forEach(({ name, level, source, ownerClassName, spellcastingAbility, freeCasts }) => push(name, source, true, null, level, ownerClassName, spellcastingAbility, freeCasts));
   collectChoiceSpells(C, spellIndex).forEach(({ name, source, ownerClassName, spellcastingAbility, freeCasts }) => push(name, source, true, null, 0, ownerClassName, spellcastingAbility, freeCasts));
 
+  // Item-attached spells (Cloak of the Bat, Boots of Levitation, etc.). The
+  // `freeCastTemplate` (when set) becomes a normalized free-cast entry so the
+  // existing free-cast UI + rest pipeline drive uses/recovery.
+  collectItemAttachedSpells(C).forEach((grant) => {
+    let freeCasts = null;
+    if (grant.freeCastTemplate) {
+      const normalized = normalizeFreeCast(grant.freeCastTemplate, {
+        character: C,
+        sourceType: 'item',
+        source: grant.itemName,
+        spellName: grant.name,
+      });
+      if (normalized) freeCasts = [normalized];
+    }
+    push(grant.name, grant.source, true, null, 0, null, null, freeCasts);
+  });
+
   const all = [...rows.values()];
   all.forEach((entry) => {
     Object.assign(entry, resolveSpellMeta(entry, C));
@@ -224,6 +242,18 @@ export function getFreeCastDefsForCharacter(C) {
       const fc = normalizeFreeCast(tpl, { character: C, sourceType: 'feat', source: meta.name, spellName: name });
       if (fc) defs.push(fc);
     });
+  });
+
+  // Item-attached spells with daily/limited uses (Cloak of the Bat, etc.).
+  collectItemAttachedSpells(C).forEach((grant) => {
+    if (!grant.freeCastTemplate) return;
+    const fc = normalizeFreeCast(grant.freeCastTemplate, {
+      character: C,
+      sourceType: 'item',
+      source: grant.itemName,
+      spellName: grant.name,
+    });
+    if (fc) defs.push(fc);
   });
 
   return mergeFreeCastsById(defs);

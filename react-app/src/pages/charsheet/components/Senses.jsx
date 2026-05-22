@@ -2,13 +2,24 @@ import { Box, Paper, Typography } from '@mui/material';
 import { Eye } from 'lucide-react';
 import { getSkillBonus } from '../logic/calculations.js';
 import { collectSenseEffects, effectSummary, effectTitle } from '../logic/sheetEffects.js';
+import { getItemSenses } from '../../../shared/character/itemEffects.js';
+
+const SENSE_LABELS = {
+  darkvision: 'Darkvision',
+  blindsight: 'Blindsight',
+  truesight: 'Truesight',
+  tremorsense: 'Tremorsense',
+};
 
 export default function Senses({ C }) {
   const passPerc = 10 + getSkillBonus(C, { n: 'Perception', a: 'wis' });
   const passInv = 10 + getSkillBonus(C, { n: 'Investigation', a: 'int' });
   const passIns = 10 + getSkillBonus(C, { n: 'Insight', a: 'wis' });
-  const dv = C.speciesSnapshot?.darkvision || 0;
+  const speciesDv = C.speciesSnapshot?.darkvision || 0;
+  const itemSenses = getItemSenses(C);
+  const dv = Math.max(speciesDv, itemSenses.darkvision || 0);
   const senseEffects = collectSenseEffects(C);
+  const extraItemSenses = Object.entries(itemSenses).filter(([type]) => type !== 'darkvision');
 
   return (
     <Paper variant="outlined" sx={{ mb: '0.6rem', overflow: 'hidden' }}>
@@ -23,6 +34,9 @@ export default function Senses({ C }) {
         <SenseRow value={passInv} label="Passive Investigation" />
         <SenseRow value={passIns} label="Passive Insight" />
         {dv > 0 && <SenseRow value={`${dv} ft`} label="Darkvision" color="secondary.main" />}
+        {extraItemSenses.map(([type, dist]) => (
+          <SenseRow key={`item-sense-${type}`} value={`${dist} ft`} label={SENSE_LABELS[type] || type} color="secondary.main" />
+        ))}
         {senseEffects.map((effect, index) => (
           <SenseRow
             key={`${effect.ownerName}-${effect.type}-${index}`}

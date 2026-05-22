@@ -21,6 +21,7 @@ import { calcMaxHP, getMod, getFinal, getPB, getSaveBonus } from './logic/calcul
 import { applyResourceRest, getAllResourceDefs, getHitDicePools, getUsedHitDiceTotal, normalizeResourceMax } from './logic/restResources.js';
 import { applyFreeCastRest, getFreeCastDefsForCharacter } from './logic/spellsTabLogic.js';
 import { loadCoreAdapters, loadClassAdapters, installedRegistry } from '../../adapters/index.js';
+import { loadItems, reconcileInventoryWithItemsDb } from '../charbuilder/logic/dataLoaders.js';
 import {
   getActiveCharId,
   loadCharacter as storeLoadCharacter,
@@ -57,23 +58,37 @@ export default function CharacterSheet() {
     Promise.all([
       loadCoreAdapters(context),
       loadClassAdapters(classNames, context),
-    ]).finally(() => {
+      loadItems().catch(() => []),
+    ]).then(([, , itemsDb]) => {
       if (!alive) return;
+
+      // Re-merge structured effect fields from the items DB into the stored
+      // inventory so items added before a schema update gain newly normalized
+      // fields without requiring users to re-add them.
+      let nextChar = ch;
+      if (ch && Array.isArray(ch.inventory) && itemsDb?.length) {
+        const reconciled = reconcileInventoryWithItemsDb(ch.inventory, itemsDb);
+        if (reconciled !== ch.inventory) {
+          nextChar = { ...ch, inventory: reconciled };
+          if (id) storePatchCharacter(id, { inventory: reconciled });
+        }
+      }
+
       setCharId(id);
-      setC(ch);
-      if (ch) {
-        setSheet(deriveSheetState(ch));
-        const stored = ch.resources && typeof ch.resources === 'object' ? ch.resources : {};
-        const allResDefs = getAllResourceDefs(ch);
+      setC(nextChar);
+      if (nextChar) {
+        setSheet(deriveSheetState(nextChar));
+        const stored = nextChar.resources && typeof nextChar.resources === 'object' ? nextChar.resources : {};
+        const allResDefs = getAllResourceDefs(nextChar);
         const merged = { ...stored };
         allResDefs.forEach((def) => {
           if (def.key && merged[def.key] == null) {
-            merged[def.key] = normalizeResourceMax(def, ch);
+            merged[def.key] = normalizeResourceMax(def, nextChar);
           }
         });
         setResources(merged);
         if (id) storePatchCharacter(id, { resources: merged });
-        setFreeCastUses(ch.freeCastUses && typeof ch.freeCastUses === 'object' ? ch.freeCastUses : {});
+        setFreeCastUses(nextChar.freeCastUses && typeof nextChar.freeCastUses === 'object' ? nextChar.freeCastUses : {});
       }
     });
 
@@ -447,13 +462,13 @@ export default function CharacterSheet() {
         rollLog={rollLog} onClearRollLog={() => setRollLog([])} />
       <Box sx={{ maxWidth: 1280, mx: { md: 'auto' }, px: { xs: '0.6rem', md: '1.1rem' }, overflow: 'hidden' }}>
         <Box sx={{ bgcolor: 'rgba(35,32,26,1)', borderBottom: 1, borderColor: 'divider', py: '0.55rem', px: { xs: '0.45rem', md: '0.6rem' } }}>
-          <Stack direction={{ xs: 'column-reverse', md: 'row' }} spacing={0.6} alignItems={{ md: 'stretch' }}>
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              <AbilityScores C={C} sheet={sheet} onRoll={rollD20} />
-            </Box>
+          <Stack direction={{ xs: 'column', md: 'row-reverse' }} spacing={0.6} alignItems={{ md: 'stretch' }}>
             <HPBlock sheet={sheet}
               onHeal={(amt) => adjustHP(1, amt)} onDamage={(amt) => adjustHP(-1, amt)}
               onTempHP={adjustTempHP} onMaxHPBonus={adjustMaxHpBonus} onSetHP={setCurrentHP} onDeathSave={rollDeathSave} />
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <AbilityScores C={C} sheet={sheet} onRoll={rollD20} />
+            </Box>
           </Stack>
         </Box>
         <Box sx={{

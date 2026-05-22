@@ -16,6 +16,7 @@ import { INVENTORY_SOURCE_PRIORITY, sourceRank } from '../../../shared/character
 import { addInventoryEntries } from '../../../shared/character/itemContainers.js';
 import { ItemPropertyTable } from '../../../shared/character/ItemPropertyTable.jsx';
 import { countAttunedItems } from '../../../shared/character/itemBonus.js';
+import { isConsumableTome, extractTomeBonus, hasAbilityChoice, getAbilityChoiceGroups } from '../../../shared/character/itemEffects.js';
 import { getArmorPenalties } from '../logic/armorPenalties.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
@@ -257,7 +258,7 @@ const SearchResultsList = memo(function SearchResultsList({ items, itemsDbCount,
   );
 });
 
-export default function InventoryTab({ C, sheet, onUpdateInventory, onUpdateCurrency }) {
+export default function InventoryTab({ C, sheet, onUpdateInventory, onUpdateCurrency, onUpdateCharacter, onShowToast }) {
   const [search, setSearch] = useState('');
   const deferredSearch = useDeferredValue(search);
   const [filter, setFilter] = useState('all');
@@ -434,6 +435,35 @@ export default function InventoryTab({ C, sheet, onUpdateInventory, onUpdateCurr
     updateInv(next);
   }, [updateInv]);
 
+  const setAbilityChoice = useCallback((index, groupIdx, abilities) => {
+    const current = invRef.current || [];
+    const next = current.map((item, idx) => {
+      if (idx !== index) return item;
+      const prev = item.abilityChoice && typeof item.abilityChoice === 'object' ? { ...item.abilityChoice } : {};
+      prev[groupIdx] = abilities;
+      return { ...item, abilityChoice: prev };
+    });
+    updateInv(next);
+  }, [updateInv]);
+
+  const consumeTome = useCallback((index) => {
+    const current = invRef.current || [];
+    const target = current[index];
+    const bonus = extractTomeBonus(target);
+    if (!bonus || !onUpdateCharacter) return;
+    onUpdateCharacter((prev) => {
+      const existing = Array.isArray(prev?.consumedItemBonuses) ? prev.consumedItemBonuses : [];
+      return { ...prev, consumedItemBonuses: [...existing, bonus] };
+    });
+    const nextInv = current.flatMap((item, idx) => {
+      if (idx !== index) return [item];
+      const nextQty = Math.max(0, qty(item) - 1);
+      return nextQty > 0 ? [{ ...item, qty: nextQty }] : [];
+    });
+    updateInv(nextInv);
+    onShowToast?.(`Read ${target.name}`, `Permanent +${bonus.value} to ${bonus.ability.toUpperCase()}`, 0, []);
+  }, [updateInv, onUpdateCharacter, onShowToast]);
+
   const updateCoin = useCallback((coin, value) => {
     const next = { ...currency, [coin]: Math.max(0, Number(value || 0)) };
     onUpdateCurrency?.(next);
@@ -608,7 +638,8 @@ export default function InventoryTab({ C, sheet, onUpdateInventory, onUpdateCurr
                 hasArcaneArmor={hasItemFlag(item, 'arcaneArmor')}
                 onArcaneArmor={toggleArcaneArmor}
                 onAttune={toggleAttuned}
-
+                onSetAbilityChoice={setAbilityChoice}
+                onConsumeTome={consumeTome}
               />
             ))}
           </Box>
@@ -665,12 +696,14 @@ const getPenaltyMessage = (() => {
   };
 })();
 
-const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, onEquip, onEquipSlot, penaltyMsg, canPactWeapon, onPactWeapon, isArmorer, hasArcaneArmor, onArcaneArmor, onAttune }) {
+const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, onEquip, onEquipSlot, penaltyMsg, canPactWeapon, onPactWeapon, isArmorer, hasArcaneArmor, onArcaneArmor, onAttune, onSetAbilityChoice, onConsumeTome }) {
   const [open, setOpen] = useState(false);
   const type = String(item.type || '').toUpperCase();
   const canEquip = ['M', 'R', 'LA', 'MA', 'HA', 'S', 'SCF', 'WD', 'RD', 'ST', 'WI', 'WEAPON', 'ARMOR'].includes(type);
 
   const hasEntries = open && Array.isArray(item.entries) && item.entries.length > 0;
+  const showAbilityChoice = hasAbilityChoice(item);
+  const showTomeConsume = isConsumableTome(item);
 
   return (
     <Box>
@@ -747,11 +780,87 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, 
         <Box sx={{ fontSize: '0.7rem', color: 'text.secondary', lineHeight: 1.45, bgcolor: '#12100e', border: 1, borderColor: 'divider', borderRadius: 1, px: '10px', py: '6px', mt: '-2px', mb: '4px' }}>
           <ItemPropertyTable item={item} sx={{ mb: hasEntries ? '6px' : 0 }} />
           {hasEntries ? <Box sx={{ mt: '6px' }}><EntryBlocks entries={item.entries} emptyText="" /></Box> : null}
+          {showTomeConsume ? (
+            <TomeConsumePanel item={item} onConsume={() => onConsumeTome?.(index)} />
+          ) : null}
+          {showAbilityChoice ? (
+            <AbilityChoicePanel
+              item={item}
+              onPick={(groupIdx, abilities) => onSetAbilityChoice?.(index, groupIdx, abilities)}
+            />
+          ) : null}
         </Box>
       ) : null}
     </Box>
   );
 });
+
+const ABILITY_LABEL = { str: 'STR', dex: 'DEX', con: 'CON', int: 'INT', wis: 'WIS', cha: 'CHA' };
+
+function TomeConsumePanel({ item, onConsume }) {
+  const bonus = extractTomeBonus(item);
+  if (!bonus) return null;
+  return (
+    <Box sx={{ mt: '8px', pt: '8px', borderTop: '1px dashed', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1 }}>
+      <Typography sx={{ flex: 1, fontSize: '0.66rem', color: 'text.secondary' }}>
+        Read & study to permanently gain <b style={{ color: '#edd48a' }}>+{bonus.value} {ABILITY_LABEL[bonus.ability]}</b>. The book then loses its magic.
+      </Typography>
+      <Button size="small" variant="outlined" onClick={onConsume}
+        sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.6rem', letterSpacing: '0.06em', borderColor: '#edd48a', color: '#edd48a', '&:hover': { bgcolor: 'rgba(237,212,138,0.08)', borderColor: '#edd48a' } }}>
+        Read & Consume
+      </Button>
+    </Box>
+  );
+}
+
+function AbilityChoicePanel({ item, onPick }) {
+  const groups = getAbilityChoiceGroups(item);
+  if (!groups.length) return null;
+  const stored = (item.abilityChoice && typeof item.abilityChoice === 'object') ? item.abilityChoice : {};
+
+  return (
+    <Box sx={{ mt: '8px', pt: '8px', borderTop: '1px dashed', borderColor: 'divider' }}>
+      <Typography sx={{ fontSize: '0.6rem', color: '#edd48a', fontFamily: '"Cinzel", Georgia, serif', fontWeight: 700, letterSpacing: '0.08em', mb: 0.3 }}>
+        Ability Choice
+      </Typography>
+      {groups.map((group, groupIdx) => {
+        const from = Array.isArray(group.from) ? group.from : [];
+        const count = Math.max(1, Number(group.count || 1));
+        const amount = group.amount ?? 2;
+        const current = Array.isArray(stored[groupIdx]) ? stored[groupIdx] : (stored[groupIdx] ? [stored[groupIdx]] : []);
+
+        const togglePick = (abil) => {
+          const exists = current.includes(abil);
+          let next;
+          if (exists) next = current.filter((a) => a !== abil);
+          else next = count === 1 ? [abil] : [...current, abil].slice(-count);
+          onPick(groupIdx, next);
+        };
+
+        return (
+          <Box key={groupIdx} sx={{ mb: 0.4 }}>
+            <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', mb: 0.25 }}>
+              Pick {count} (+{amount} each)
+            </Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.3 }}>
+              {from.map((abil) => {
+                const isOn = current.includes(abil);
+                return (
+                  <Button key={abil} size="small" variant={isOn ? 'contained' : 'outlined'}
+                    onClick={() => togglePick(abil)}
+                    sx={{ minWidth: 0, px: '8px', py: '2px', fontSize: '0.6rem', fontFamily: '"Cinzel", Georgia, serif',
+                      ...(isOn ? { bgcolor: 'rgba(237,212,138,0.18)', color: '#edd48a', borderColor: '#edd48a' } : { color: 'text.secondary' }) }}>
+                    {ABILITY_LABEL[abil] || abil.toUpperCase()}
+                  </Button>
+                );
+              })}
+            </Box>
+          </Box>
+        );
+      })}
+    </Box>
+  );
+}
 
 function QtyButton({ children, danger = false, onClick }) {
   return (

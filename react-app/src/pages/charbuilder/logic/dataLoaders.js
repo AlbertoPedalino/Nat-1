@@ -418,6 +418,51 @@ export async function loadItems() {
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
+// Fields refreshed from the items DB on inventory reconciliation. Keeping the
+// list explicit (rather than spreading the entire fresh item) avoids stomping
+// on user-managed state (qty, equipped, attuned, equippedSlot, flags, custom).
+const RECONCILED_ITEM_FIELDS = [
+  'ability', 'modifySpeed', 'senses',
+  'resist', 'immune', 'vulnerable', 'conditionImmune',
+  'bonusAc', 'bonusSavingThrow', 'bonusAbilityCheck',
+  'bonusSpellAttack', 'bonusSpellSaveDc',
+  'bonusWeapon', 'bonusWeaponAttack', 'bonusWeaponDamage',
+  'bonusProficiencyBonus', 'attachedSpells',
+  'reqAttune', 'property', 'mastery', 'entries',
+  'rarity', 'weight', 'value', 'type', 'weaponCategory',
+  'dmg1', 'dmg2', 'dmgType', 'ac', 'strength', 'stealth',
+  'scfType', 'focus', 'items', 'group',
+];
+
+// Refresh structured effect fields on persisted inventory items by re-merging
+// from the live items database. Preserves user-managed flags (qty, equipped,
+// attuned, equippedSlot, custom flags). Use this once at sheet boot to bring
+// legacy persisted items in line with the current normalize schema.
+export function reconcileInventoryWithItemsDb(inventory, itemsDb) {
+  if (!Array.isArray(inventory) || !Array.isArray(itemsDb) || itemsDb.length === 0) {
+    return inventory || [];
+  }
+  const byKey = new Map();
+  itemsDb.forEach((item) => {
+    if (!item?.name) return;
+    byKey.set(itemKey(item.name, item.source || ''), item);
+  });
+  let changed = false;
+  const next = inventory.map((stored) => {
+    if (!stored?.name || stored.custom) return stored;
+    const fresh = byKey.get(itemKey(stored.name, stored.source || ''));
+    if (!fresh) return stored;
+    const patch = {};
+    RECONCILED_ITEM_FIELDS.forEach((field) => {
+      if (fresh[field] !== undefined) patch[field] = fresh[field];
+    });
+    const merged = { ...stored, ...patch };
+    if (RECONCILED_ITEM_FIELDS.some((f) => stored[f] !== merged[f])) changed = true;
+    return merged;
+  });
+  return changed ? next : inventory;
+}
+
 function sourcePriority(item) {
   const source = canonicalItemSource(item);
   return sourceRank(source, ITEM_SOURCE_PRIORITY);
@@ -498,6 +543,15 @@ function normalizeItem(item) {
     bonusAbilityCheck: item.bonusAbilityCheck || null,
     bonusSpellAttack: item.bonusSpellAttack || null,
     bonusSpellSaveDc: item.bonusSpellSaveDc || null,
+    ability: item.ability || null,
+    modifySpeed: item.modifySpeed || null,
+    senses: item.senses || null,
+    resist: item.resist || null,
+    immune: item.immune || null,
+    vulnerable: item.vulnerable || null,
+    conditionImmune: item.conditionImmune || null,
+    attachedSpells: item.attachedSpells || null,
+    bonusProficiencyBonus: item.bonusProficiencyBonus || null,
     reqAttune: item.reqAttune ?? null,
     property: Array.isArray(item.property) ? item.property.map((p) => String(p).split('|')[0]) : [],
     entries: Array.isArray(item.entries) ? stripTemplatedEntries(item.entries) : (item.entries || []),

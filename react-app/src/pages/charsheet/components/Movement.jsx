@@ -3,6 +3,7 @@ import { Footprints, AlertCircle } from 'lucide-react';
 import { getEquippedArmorPenalties } from '../logic/armorPenalties.js';
 import { getFinal } from '../logic/calculations.js';
 import { collectMovementEffects, effectSummary, effectTitle, getSpeedBonus } from '../logic/sheetEffects.js';
+import { collectItemEffects } from '../../../shared/character/itemEffects.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 
 function normalizeSpeed(speed) {
@@ -45,11 +46,27 @@ export default function Movement({ C, sheet }) {
     return true;
   });
   const runtimeSpeedBonus = getSpeedBonus(C);
-  const entries = Object.entries(baseSpeeds).map(([key, value]) => ({
-    key,
-    base: value,
-    final: speedZero ? 0 : overloaded ? Math.min(5, Math.max(0, value + speedPenalty + runtimeSpeedBonus)) : Math.max(0, value + speedPenalty + runtimeSpeedBonus),
-  }));
+  const itemEffects = collectItemEffects(C?.inventory);
+  // Compose modes referenced by `equal` rules even if they aren't in baseSpeeds.
+  const allModes = new Set(Object.keys(baseSpeeds));
+  Object.keys(itemEffects.speedEqual || {}).forEach((mode) => allModes.add(mode));
+  const entries = [...allModes].map((key) => {
+    const value = baseSpeeds[key] || 0;
+    const equal = itemEffects.speedEqual[key];
+    const equalSource = equal ? (baseSpeeds[equal.from] || 0) : 0;
+    const baseAfterEqual = Math.max(value, equalSource);
+    const itemOverride = itemEffects.speedOverride[key];
+    const baseAfterOverride = itemOverride ? Math.max(baseAfterEqual, itemOverride.value) : baseAfterEqual;
+    const itemBonus = itemEffects.speedBonus[key] || 0;
+    const subtotal = baseAfterOverride + speedPenalty + runtimeSpeedBonus + itemBonus;
+    const multiplier = itemEffects.speedMultiplier[key]?.value || 1;
+    const computed = subtotal * multiplier;
+    return {
+      key,
+      base: value,
+      final: speedZero ? 0 : overloaded ? Math.min(5, Math.max(0, computed)) : Math.max(0, computed),
+    };
+  });
   const hasPenalty = speedPenalty < 0 || overloaded || speedZero;
   const reasons = [
     speedZero ? 'Grappled: speed 0' : null,

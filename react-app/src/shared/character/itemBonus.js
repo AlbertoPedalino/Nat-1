@@ -6,12 +6,30 @@ export function requiresAttunement(item) {
   return !!item?.reqAttune;
 }
 
-// An item-granted bonus is active only when the item is on the character's
-// body AND, if it requires attunement, the user has flagged it attuned.
+// Item types that must be held/worn in an equip slot for their bonuses to
+// apply (weapons must be wielded, armor must be worn, focuses/wands/rods/staves
+// must be held). Other magic items (rings, cloaks, belts, boots, goggles,
+// amulets, etc.) become active on attunement alone — attunement implies
+// wearing per RAW and they have no dedicated equip slot in our model.
+const HELD_OR_WORN_TYPES = new Set(['M', 'R', 'LA', 'MA', 'HA', 'S', 'WEAPON', 'ARMOR', 'WD', 'RD', 'ST', 'SCF']);
+
+function requiresEquipForBonus(item) {
+  return HELD_OR_WORN_TYPES.has(String(item?.type || '').toUpperCase());
+}
+
+// An item-granted bonus is active depending on item kind:
+//   - Held/worn-slot items: must be `equipped`; if they also require
+//     attunement, must additionally be `attuned`.
+//   - Slotless magic items requiring attunement: active on `attuned` alone.
+//   - Slotless items without attunement: need `equipped` (mundane bag/pack
+//     items rarely carry numeric bonuses; included for completeness).
 export function isItemBonusActive(item) {
   if (!item) return false;
-  if (requiresAttunement(item) && !item.attuned) return false;
-  return true;
+  if (requiresAttunement(item)) {
+    if (!item.attuned) return false;
+    return requiresEquipForBonus(item) ? !!item.equipped : true;
+  }
+  return !!item.equipped;
 }
 
 export function parseSignedBonus(value) {
@@ -40,7 +58,7 @@ export function armorEnhancement(item) {
 }
 
 function activeEquippedItems(inventory) {
-  return (inventory || []).filter((item) => item?.equipped && isItemBonusActive(item));
+  return (inventory || []).filter((item) => isItemBonusActive(item));
 }
 
 function sumField(inventory, field) {

@@ -2,6 +2,7 @@ import { computeMaxHp as sharedComputeMaxHp } from '../../../shared/character/hp
 import { getFeatAsiBonus } from '../../../shared/character/abilityBonuses.js';
 import { installedRegistry } from '../../../adapters/index.js';
 import { extractFixedProficiencyLabels } from '../../../shared/character/typedProficiencies.js';
+import { getFinalAbilityScore, getItemProficiencyBonus } from '../../../shared/character/itemEffects.js';
 
 const PB_TABLE = [null, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6];
 const STATS = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
@@ -68,12 +69,16 @@ export function getAsiFeatBonus(C, stat) {
 }
 
 export function getFinal(C, stat) {
-  return getBase(C, stat) + bgBonus(C, stat) + getAsiFeatBonus(C, stat);
+  const base = getBase(C, stat) + bgBonus(C, stat) + getAsiFeatBonus(C, stat);
+  return getFinalAbilityScore(C, stat, base);
 }
 
 export function getMod(v) { return Math.floor((v - 10) / 2); }
 
-export function getPB(C) { return C ? (PB_TABLE[C.level] || 2) : 2; }
+export function getPB(C) {
+  const base = C ? (PB_TABLE[C.level] || 2) : 2;
+  return base + getItemProficiencyBonus(C);
+}
 
 export function fmod(v) { const m = getMod(v); return (m >= 0 ? '+' : '') + m; }
 

@@ -5,6 +5,7 @@ import { getMod, getFinal } from '../logic/calculations.js';
 import { CONDITIONS } from '../logic/calculations.js';
 import { getArmorTrainingInfo } from '../logic/proficiencies.js';
 import { collectResolvedResistanceItems, collectResolvedImmunityItems } from '../logic/sheetEffects.js';
+import { collectItemResistanceItems, collectItemImmunityItems, collectItemConditionImmunityItems, collectItemEffects } from '../../../shared/character/itemEffects.js';
 import { computeBestArmorClass } from '../../../shared/character/ac.js';
 import { resolveInitiativeTriggeredResourceRecoveries } from '../../../shared/character/initiativeEffects.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
@@ -137,9 +138,25 @@ function InspirationBlock({ sheet, onToggle }) {
 }
 
 function DefensesBlock({ C }) {
+  const itemEffects = collectItemEffects(C?.inventory);
+  const advSaves = [...itemEffects.advantageOnSaveAgainst.entries()].flatMap(([target, sources]) =>
+    sources.map((src) => ({ type: `Save vs ${target}`, kind: 'Adv', source: src })),
+  );
+  const attackerDisadv = (itemEffects.disadvantageOnAttackersAgainstYou || []).map((entry) => ({
+    type: 'Attackers DIS', kind: '', source: entry.source, note: entry.note,
+  }));
+  const passiveTraits = (itemEffects.passiveTraits || []).map((entry) => ({
+    type: entry.text, kind: 'Trait', source: entry.source,
+  }));
   const all = [
     ...collectResolvedResistanceItems(C).map((item) => ({ type: item.label, kind: 'Resist', source: item.source })),
+    ...collectItemResistanceItems(C).map((item) => ({ type: item.label, kind: 'Resist', source: item.source })),
     ...collectResolvedImmunityItems(C).map((item) => ({ type: item.label, kind: 'Immune', source: item.source })),
+    ...collectItemImmunityItems(C).map((item) => ({ type: item.label, kind: 'Immune', source: item.source })),
+    ...collectItemConditionImmunityItems(C).map((item) => ({ type: item.label, kind: 'Cond. Immune', source: item.source })),
+    ...advSaves,
+    ...attackerDisadv,
+    ...passiveTraits,
   ];
 
   return (
