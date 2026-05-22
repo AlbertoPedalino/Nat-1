@@ -94,8 +94,9 @@ export function buildSpellInfo(C, spellIndex) {
   const freeCastsByKey = new Map();
   const push = (name, source, locked = false, castLevel = null, fallbackLevel = 0, ownerClassName = null, spellcastingAbility = null, freeCasts = null) => {
     const full = spellIndex.get(norm(name));
-    const spell = { ...(full || {}), name, level: Number(full?.level ?? fallbackLevel ?? 0) };
-    const key = `${norm(name)}|${castLevel || spell.level}`;
+    const canonicalName = full?.name || name;
+    const spell = { ...(full || {}), name: canonicalName, level: Number(full?.level ?? fallbackLevel ?? 0) };
+    const key = `${norm(canonicalName)}|${castLevel || spell.level}`;
     const row = { ...spell, sourceInfo: source, castLevel, ownerClassName, spellcastingAbility, locked };
     const existing = rows.get(key);
     rows.set(key, _mergeRow(existing, row, locked));

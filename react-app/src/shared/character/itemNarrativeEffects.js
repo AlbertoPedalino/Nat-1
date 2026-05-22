@@ -126,6 +126,103 @@ export const ITEM_NARRATIVE_EFFECTS = {
   'Hat of Wizardry|XDMG': {
     passiveTraits: ['+1 wizard cantrip known', '1/day disguise self / minor illusion / prestidigitation'],
   },
+
+  // Cloak of the Bat: advantage on Stealth; conditional fly 40 in dim/dark.
+  'Cloak of the Bat|XDMG': {
+    advantageOnSkill: ['stealth'],
+    passiveTraits: ['Fly 40 ft in Dim Light or Darkness (grip cloak)'],
+  },
+
+  // Cloak of Arachnida: spider climb + web immunity, no save vs poison from spiders.
+  'Cloak of Arachnida|XDMG': {
+    advantageOnSaveAgainst: ['poison'],
+    passiveTraits: ['Spider Climb (climb speed = walk)', 'Move through webs without hindrance'],
+  },
+
+  // Boots of Speed: bonus action double speed 10 min; attackers DIS when active.
+  'Boots of Speed|XDMG': {
+    passiveTraits: ['Bonus Action: double Speed 10 min/day', 'Attackers DIS while active'],
+  },
+
+  // Winged Boots: fly 30 ft for 4 hours/day total (limited use, modifySpeed handled).
+  'Winged Boots|XDMG': {
+    passiveTraits: ['Fly 30 ft up to 4 hours/day'],
+  },
+
+  // Eyes of Minute Seeing: see fine detail at 1 ft → adv Investigation close-up.
+  'Eyes of Minute Seeing|XDMG': {
+    advantageOnSkill: ['investigation'],
+    passiveTraits: ['See fine detail within 1 ft as if normal'],
+  },
+
+  // Eyes of the Eagle: adv on Perception checks involving sight.
+  'Eyes of the Eagle|XDMG': {
+    advantageOnSkill: ['perception'],
+  },
+
+  // Ring of Spell Turning: adv on saves vs any spell that targets only you;
+  // crit-success reflects spell back.
+  'Ring of Spell Turning|XDMG': {
+    advantageOnSaveAgainst: ['spell'],
+    passiveTraits: ['Reflect spell on save crit (single-target spells)'],
+  },
+
+  // Sentinel Shield: adv on Initiative + Perception.
+  'Sentinel Shield|XDMG': {
+    advantageOnSkill: ['perception'],
+    passiveTraits: ['Advantage on Initiative'],
+  },
+
+  // Talisman of the Sphere: adv Arcana to control Sphere of Annihilation.
+  'Talisman of the Sphere|XDMG': {
+    advantageOnSkill: ['arcana'],
+  },
+
+  // Perfume of Bewitching: 1-hour adv on Charisma checks (limited consumable);
+  // surface as passive note (user tracks 1h duration).
+  'Perfume of Bewitching|XDMG': {
+    advantageOnSkill: ['deception', 'persuasion'],
+    passiveTraits: ['1 hour (after application)'],
+  },
+
+  // Boots of False Tracks: leaves different humanoid tracks.
+  'Boots of False Tracks|XDMG': {
+    passiveTraits: ['Leaves false humanoid footprints'],
+  },
+
+  // Gloves of Thievery: +5 bonus to Sleight of Hand and lockpicking.
+  'Gloves of Thievery|XDMG': {
+    passiveTraits: ['+5 to Sleight of Hand', '+5 to Dex checks to pick locks'],
+  },
+
+  // Goggles of Night: darkvision 60 ft (no structured field in 5etools).
+  'Goggles of Night|XDMG': {
+    passiveTraits: ['Darkvision 60 ft (worn)'],
+  },
+
+  // Lantern of Revealing: invisible creatures visible in 30 ft bright light.
+  'Lantern of Revealing|XDMG': {
+    passiveTraits: ['Reveals invisible creatures within 30 ft (bright)'],
+  },
+
+  // Slippers of Spider Climbing: climb speed = walk, walk on ceilings (no
+  // structured modifySpeed in 5etools for this item).
+  'Slippers of Spider Climbing|XDMG': {
+    passiveTraits: ['Climb speed = walk', 'Climb walls/ceilings hands-free'],
+  },
+
+  // Necklace of Prayer Beads: bead spells via Bonus Action.
+  'Necklace of Prayer Beads|XDMG': {
+    passiveTraits: ['Bonus Action to cast bead spells'],
+  },
+
+  // Ring of Jumping: bonus action cast Jump on self.
+  'Ring of Jumping|XDMG': {
+    passiveTraits: ['Bonus Action: cast Jump on self'],
+  },
+
+  // Pipes of Haunting: 30-ft fear save (active), no passive numeric.
+  // Skipped (active ability).
 };
 
 function narrativeKey(name, source) {
