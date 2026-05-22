@@ -50,6 +50,31 @@ const compactInputSx = {
   '& input': { fontSize: '0.75rem', py: '7px' },
 };
 
+const inventoryListSx = {
+  maxHeight: { xs: 320, md: 'min(46vh, 520px)' },
+  overflowY: 'auto',
+  overflowX: 'hidden',
+  pr: 0.5,
+  mr: -0.5,
+  scrollbarGutter: 'stable',
+};
+
+const filterButtonSx = (active) => ({
+  minHeight: 0,
+  px: '10px',
+  py: '3px',
+  border: 1,
+  borderColor: active ? '#caa550' : 'divider',
+  borderRadius: 1,
+  bgcolor: active ? 'rgba(202,165,80,0.12)' : 'transparent',
+  color: active ? '#edd48a' : 'text.secondary',
+  fontFamily: '"Cinzel", Georgia, serif',
+  fontSize: '0.56rem',
+  fontWeight: 700,
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase',
+});
+
 function itemType(item) {
   const type = String(item?.type || '').toUpperCase();
   if (['M', 'R'].includes(type) || type === 'WEAPON') return 'weapon';
@@ -258,10 +283,35 @@ const SearchResultsList = memo(function SearchResultsList({ items, itemsDbCount,
   );
 });
 
+function InventoryFilterButtons({ value, onChange }) {
+  return (
+    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: '4px', mb: 0.6 }}>
+      {FILTERS.map((filterDef) => {
+        const Icon = filterDef.icon;
+        const active = value === filterDef.key;
+        return (
+          <Button
+            key={filterDef.key}
+            size="small"
+            onClick={() => onChange(filterDef.key)}
+            startIcon={Icon ? <Icon size={12} /> : null}
+            sx={filterButtonSx(active)}
+          >
+            {filterDef.label}
+          </Button>
+        );
+      })}
+    </Box>
+  );
+}
+
 export default function InventoryTab({ C, sheet, onUpdateInventory, onUpdateCurrency, onUpdateCharacter, onShowToast }) {
   const [search, setSearch] = useState('');
   const deferredSearch = useDeferredValue(search);
   const [filter, setFilter] = useState('all');
+  const [inventorySearch, setInventorySearch] = useState('');
+  const deferredInventorySearch = useDeferredValue(inventorySearch);
+  const [inventoryFilter, setInventoryFilter] = useState('all');
   const [addPanelOpen, setAddPanelOpen] = useState(false);
   const [itemsDb, setItemsDb] = useState([]);
   const [customName, setCustomName] = useState('');
@@ -286,13 +336,20 @@ export default function InventoryTab({ C, sheet, onUpdateInventory, onUpdateCurr
   }, []);
 
   const resolvedInv = useMemo(() => inv.map((item, index) => ({ item, index, type: itemType(item) })), [inv]);
+  const visibleInventory = useMemo(() => {
+    const q = deferredInventorySearch.trim();
+    return resolvedInv.filter((entry) => {
+      if (inventoryFilter !== 'all' && entry.type !== inventoryFilter) return false;
+      return itemMatchesSearch(entry.item, q);
+    });
+  }, [deferredInventorySearch, inventoryFilter, resolvedInv]);
   const groupedInventory = useMemo(() => {
     const groups = Object.fromEntries(GROUPS.map((group) => [group.key, []]));
-    resolvedInv.forEach((entry) => {
+    visibleInventory.forEach((entry) => {
       if (groups[entry.type]) groups[entry.type].push(entry);
     });
     return groups;
-  }, [resolvedInv]);
+  }, [visibleInventory]);
   const slotWarnings = useMemo(() => getSlotConflictWarnings(inv), [inv]);
   const inventoryStats = useMemo(() => {
     const totalItems = inv.reduce((sum, item) => sum + qty(item), 0);
@@ -301,6 +358,8 @@ export default function InventoryTab({ C, sheet, onUpdateInventory, onUpdateCurr
     return { totalItems, totalWeight, totalGp };
   }, [inv]);
   const { totalItems, totalWeight, totalGp } = inventoryStats;
+  const visibleTotalItems = useMemo(() => visibleInventory.reduce((sum, entry) => sum + qty(entry.item), 0), [visibleInventory]);
+  const inventoryFiltered = inventoryFilter !== 'all' || deferredInventorySearch.trim().length > 0;
   const maxCarry = useMemo(() => Math.max(1, getFinal(C, 'str') * 15), [C]);
   const carryPct = Math.min(100, (totalWeight / maxCarry) * 100);
   const overloaded = totalWeight > maxCarry;
@@ -553,36 +612,7 @@ export default function InventoryTab({ C, sheet, onUpdateInventory, onUpdateCurr
             sx={{ ...compactInputSx, mb: 0.5 }}
           />
 
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: '4px', mb: 0.6 }}>
-            {FILTERS.map((filterDef) => {
-              const Icon = filterDef.icon;
-              return (
-                <Button
-                  key={filterDef.key}
-                  size="small"
-                  onClick={() => setFilter(filterDef.key)}
-                  startIcon={Icon ? <Icon size={12} /> : null}
-                  sx={{
-                    minHeight: 0,
-                    px: '10px',
-                    py: '3px',
-                    border: 1,
-                    borderColor: filter === filterDef.key ? '#caa550' : 'divider',
-                    borderRadius: 999,
-                    bgcolor: filter === filterDef.key ? 'rgba(202,165,80,0.12)' : 'transparent',
-                    color: filter === filterDef.key ? '#edd48a' : 'text.secondary',
-                    fontFamily: '"Cinzel", Georgia, serif',
-                    fontSize: '0.56rem',
-                    fontWeight: 700,
-                    letterSpacing: '0.08em',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  {filterDef.label}
-                </Button>
-              );
-            })}
-          </Box>
+          <InventoryFilterButtons value={filter} onChange={setFilter} />
 
           {deferredSearch !== search ? (
             <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', fontStyle: 'italic', mb: 0.3 }}>
@@ -609,43 +639,61 @@ export default function InventoryTab({ C, sheet, onUpdateInventory, onUpdateCurr
         </>
       ) : null}
 
-      <SectionHeader icon={Package} label={`Inventory (${totalItems} items)`} />
+      <SectionHeader icon={Package} label={`Inventory (${inventoryFiltered ? `${visibleTotalItems} / ` : ''}${totalItems} items)`} />
 
-      {GROUPS.map((group) => {
-        const inGroup = groupedInventory[group.key] || [];
-        if (!inGroup.length) return null;
-        return (
-          <Box key={group.key}>
-            <SectionHeader icon={group.icon} label={group.label} />
-            {group.key === 'weapon' && slotWarnings.length > 0 ? slotWarnings.map((w, i) => (
-              <Alert key={i} severity="warning" sx={{ fontSize: '0.65rem', py: '2px', px: '8px', mb: '3px' }}>
-                {w}
-              </Alert>
-            )) : null}
-            {inGroup.map(({ item, index }) => (
-              <InventoryRow
-                key={`${item.name}-${item.source}-${index}`}
-                item={item}
-                index={index}
-                onQty={adjustQty}
-                onRemove={removeItem}
-                onEquip={toggleEquipped}
-                onEquipSlot={equipToSlot}
-                penaltyMsg={getPenaltyMessage(C, item, profSets)}
-                canPactWeapon={canUsePactWeaponFlag(C, item)}
-                onPactWeapon={togglePactWeapon}
-                isArmorer={isArmorer}
-                hasArcaneArmor={hasItemFlag(item, 'arcaneArmor')}
-                onArcaneArmor={toggleArcaneArmor}
-                onAttune={toggleAttuned}
-                onSetAbilityChoice={setAbilityChoice}
-                onConsumeTome={consumeTome}
-              />
-            ))}
-          </Box>
-        );
-      })}
-      {!inv.length && <Typography sx={{ fontSize: '0.8125rem', color: 'text.secondary', fontStyle: 'italic', py: 0.5 }}>Inventory empty.</Typography>}
+      <TextField
+        size="small"
+        fullWidth
+        placeholder="Search inventory by name, source, type, property..."
+        value={inventorySearch}
+        onChange={(event) => setInventorySearch(event.target.value)}
+        sx={{ ...compactInputSx, mb: 0.5 }}
+      />
+
+      <InventoryFilterButtons value={inventoryFilter} onChange={setInventoryFilter} />
+
+      <Box sx={inventoryListSx}>
+        {GROUPS.map((group) => {
+          const inGroup = groupedInventory[group.key] || [];
+          if (!inGroup.length) return null;
+          return (
+            <Box key={group.key}>
+              <SectionHeader icon={group.icon} label={group.label} />
+              {group.key === 'weapon' && slotWarnings.length > 0 ? slotWarnings.map((w, i) => (
+                <Alert key={i} severity="warning" sx={{ fontSize: '0.65rem', py: '2px', px: '8px', mb: '3px' }}>
+                  {w}
+                </Alert>
+              )) : null}
+              {inGroup.map(({ item, index }) => (
+                <InventoryRow
+                  key={`${item.name}-${item.source}-${index}`}
+                  item={item}
+                  index={index}
+                  onQty={adjustQty}
+                  onRemove={removeItem}
+                  onEquip={toggleEquipped}
+                  onEquipSlot={equipToSlot}
+                  penaltyMsg={getPenaltyMessage(C, item, profSets)}
+                  canPactWeapon={canUsePactWeaponFlag(C, item)}
+                  onPactWeapon={togglePactWeapon}
+                  isArmorer={isArmorer}
+                  hasArcaneArmor={hasItemFlag(item, 'arcaneArmor')}
+                  onArcaneArmor={toggleArcaneArmor}
+                  onAttune={toggleAttuned}
+                  onSetAbilityChoice={setAbilityChoice}
+                  onConsumeTome={consumeTome}
+                />
+              ))}
+            </Box>
+          );
+        })}
+        {!inv.length && <Typography sx={{ fontSize: '0.8125rem', color: 'text.secondary', fontStyle: 'italic', py: 0.5 }}>Inventory empty.</Typography>}
+        {inv.length > 0 && !visibleInventory.length && (
+          <Typography sx={{ fontSize: '0.8125rem', color: 'text.secondary', fontStyle: 'italic', py: 0.5 }}>
+            No inventory items match this search or filter.
+          </Typography>
+        )}
+      </Box>
     </Box>
   );
 }
