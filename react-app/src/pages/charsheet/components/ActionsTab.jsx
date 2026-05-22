@@ -19,6 +19,7 @@ import {
 } from '../logic/actionsTabLogic.js';
 import { getSheetSlots } from '../logic/spellsTabLogic.js';
 import { loadItems } from '../../charbuilder/logic/dataLoaders.js';
+import { loadMasteryEntries } from '../../../shared/character/weaponMastery.js';
 import {
   filterChipSx,
   inlineButtonSx,
@@ -51,6 +52,7 @@ function actionLabel(value) {
 export default function ActionsTab({ C, sheet, onRoll, resources, setResources, onShowToast, onUpdateSheet, onUpdateCharacter }) {
   const [filter, setFilter] = useState('all');
   const [itemsDb, setItemsDb] = useState([]);
+  const [, setMasteriesLoaded] = useState(false);
   const [slotRecovery, setSlotRecovery] = useState(null);
   const [slotRecoverySelection, setSlotRecoverySelection] = useState({});
   const [createSlotDialog, setCreateSlotDialog] = useState(null);
@@ -76,6 +78,9 @@ export default function ActionsTab({ C, sheet, onRoll, resources, setResources, 
     loadItems()
       .then((items) => { if (alive) setItemsDb(items || []); })
       .catch(() => { if (alive) setItemsDb([]); });
+    loadMasteryEntries()
+      .then(() => { if (alive) setMasteriesLoaded(true); })
+      .catch(() => {});
     return () => { alive = false; };
   }, []);
 
@@ -1073,12 +1078,14 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
           {action.choiceKey && onUpdateCharacter ? (
             <ChoicePicker action={action} C={C} onUpdateCharacter={onUpdateCharacter} onShowToast={onShowToast} />
           ) : null}
-          {action._weaponMasteryText ? (
+          {action._weaponMastery ? (
             <Box sx={{ mt: 0.7 }}>
               <Typography sx={{ fontSize: '0.66rem', color: '#edd48a', fontWeight: 700 }}>
                 Weapon Mastery — {action._weaponMastery}
               </Typography>
-              <RichText text={action._weaponMasteryText} sx={{ fontSize: '0.72rem' }} />
+              {action._weaponMasteryEntries?.length ? (
+                <EntryBlocks entries={action._weaponMasteryEntries} emptyText="" />
+              ) : null}
             </Box>
           ) : null}
           {DetailRenderer ? (

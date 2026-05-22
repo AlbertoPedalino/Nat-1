@@ -102,7 +102,8 @@
       "Bash(cp /tmp/races.json C:/Users/alber/AppData/Local/Temp/races.json)",
       "Read(//c/Users/alber/AppData/Local/Temp/**)",
       "Bash(curl -s 'https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/feats.json')",
-      "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/class/class-artificer.json\" -o /tmp/art.json)"
+      "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/class/class-artificer.json\" -o /tmp/art.json)",
+      "Bash(curl -sL \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/items-base.json\" -o /tmp/ib.json)"
     ]
   }
 }

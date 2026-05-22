@@ -5,7 +5,7 @@ import { getWeaponProficiencyInfo, hasNonProficientArmor } from './proficiencies
 import {
   collectResolvedWeaponMasteries,
   findWeaponItemByName,
-  getWeaponMasteryReminderText,
+  getWeaponMasteryEntries,
   normalizeWeaponName,
   resolveWeaponMasteryForItem,
 } from '../../../shared/character/weaponMastery.js';
@@ -449,7 +449,6 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
   const mastery = selectedEntry
     ? (selectedEntry.mastery || directMastery || resolveWeaponMasteryForItem(dbItem))
     : null;
-  const masteryText = mastery ? getWeaponMasteryReminderText(mastery) : '';
   return {
     name: opts.name || item.name || 'Weapon',
     cat: opts.cat || 'attack',
@@ -464,7 +463,7 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
     _enhancement: enhancement.attack || enhancement.damage ? enhancement : null,
     _weaponIndex: index,
     _weaponMastery: mastery || null,
-    _weaponMasteryText: masteryText || '',
+    _weaponMasteryEntries: mastery ? getWeaponMasteryEntries(mastery) : null,
     _weaponSlot: item.equippedSlot || null,
     _notProficient: !profInfo.proficient,
     _disadvantage: disAdv,
@@ -520,7 +519,6 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
     const ohMastery = ohSelectedEntry
       ? (ohSelectedEntry.mastery || ohDirectMastery || resolveWeaponMasteryForItem(ohDbItem))
       : null;
-    const ohMasteryText = ohMastery ? getWeaponMasteryReminderText(ohMastery) : '';
     const isNick = ohMastery === 'Nick';
     const ohDamageFormula = ohBase ? ohBase + (ohDmgMod !== 0 ? (ohDmgMod >= 0 ? '+' : '') + ohDmgMod : '') : '';
 
@@ -540,7 +538,7 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
       _weaponIndex: ohIndex,
       _weaponSlot: offHandItem.equippedSlot || null,
       _weaponMastery: ohMastery || null,
-      _weaponMasteryText: ohMasteryText || '',
+      _weaponMasteryEntries: ohMastery ? getWeaponMasteryEntries(ohMastery) : null,
       _notProficient: !ohProfInfo.proficient,
       _disadvantage: false,
     });
@@ -574,10 +572,6 @@ export function makeWeaponMasteryReminderActions(C, items = []) {
   const resolved = collectResolvedWeaponMasteries(C, items);
   return resolved.map((entry) => {
     const masteryLabel = entry.mastery ? ` — ${entry.mastery}` : '';
-    const reminder = entry.mastery
-      ? getWeaponMasteryReminderText(entry.mastery)
-      : '';
-    const summary = `Reminder for your selected weapon mastery. When you hit with ${entry.weaponName}${entry.mastery ? `, apply the ${entry.mastery} mastery effect.` : ', apply its mastery effect.'}`;
     return {
       name: `Weapon Mastery: ${entry.weaponName}${masteryLabel}`,
       cat: 'action',

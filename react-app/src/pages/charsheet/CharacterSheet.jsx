@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Box, Stack, Button, Dialog, DialogActions, DialogContent, DialogTitle, Slider, Typography } from '@mui/material';
-import { SHEET_GRID, SHEET_GRID_ITEM_SX } from './layout.js';
+import { SHEET_AREAS, SHEET_GRID, SHEET_GRID_ITEM_SX } from './layout.js';
 import TopBar from './components/TopBar.jsx';
 import AbilityScores from './components/AbilityScores.jsx';
 import HPBlock from './components/HPBlock.jsx';
@@ -464,25 +464,37 @@ export default function CharacterSheet() {
           alignItems: 'start',
           minWidth: 0,
         }}>
-          <Box sx={{ ...SHEET_GRID_ITEM_SX, gridArea: 'saves' }}>
-            <SavingThrows C={C} sheet={sheet} onRoll={rollSave} />
+          {/* Left column: `display: contents` on xs lets each child participate in the
+              outer grid via its own gridArea. On md the wrapper collapses into a single
+              `leftCol` grid cell containing the panels as flex children, decoupling
+              their row heights from the right column. */}
+          <Box sx={{
+            display: { xs: 'contents', md: 'flex' },
+            flexDirection: { md: 'column' },
+            gap: { md: '0.55rem' },
+            gridArea: { md: SHEET_AREAS.leftCol },
+            ...SHEET_GRID_ITEM_SX,
+          }}>
+            <Box sx={{ gridArea: { xs: SHEET_AREAS.saves } }}>
+              <SavingThrows C={C} sheet={sheet} onRoll={rollSave} />
+            </Box>
+            <Box sx={{ gridArea: { xs: SHEET_AREAS.senses } }}>
+              <Senses C={C} />
+            </Box>
+            <Box sx={{ gridArea: { xs: SHEET_AREAS.movement } }}>
+              <Movement C={C} sheet={sheet} />
+            </Box>
+            <Box sx={{ gridArea: { xs: SHEET_AREAS.profs } }}>
+              <Proficiencies C={C} />
+            </Box>
+            <Box sx={{ gridArea: { xs: SHEET_AREAS.hitdice } }}>
+              <HitDice C={C} sheet={sheet} />
+            </Box>
           </Box>
-          <Box sx={{ ...SHEET_GRID_ITEM_SX, gridArea: 'senses' }}>
-            <Senses C={C} />
-          </Box>
-          <Box sx={{ ...SHEET_GRID_ITEM_SX, gridArea: 'movement' }}>
-            <Movement C={C} sheet={sheet} />
-          </Box>
-          <Box sx={{ ...SHEET_GRID_ITEM_SX, gridArea: 'profs' }}>
-            <Proficiencies C={C} />
-          </Box>
-          <Box sx={{ ...SHEET_GRID_ITEM_SX, gridArea: 'hitdice' }}>
-            <HitDice C={C} sheet={sheet} />
-          </Box>
-          <Box sx={{ ...SHEET_GRID_ITEM_SX, gridArea: 'skills' }}>
+          <Box sx={{ ...SHEET_GRID_ITEM_SX, gridArea: SHEET_AREAS.skills }}>
             <Skills C={C} sheet={sheet} onRoll={rollSkill} />
           </Box>
-          <Stack spacing={0.55} sx={{ ...SHEET_GRID_ITEM_SX, gridArea: 'right' }}>
+          <Stack spacing={0.55} sx={{ ...SHEET_GRID_ITEM_SX, gridArea: SHEET_AREAS.right }}>
             <RightTop C={C} sheet={sheet} onRoll={rollD20}
               onToggleCondition={toggleCondition} onClearConditions={clearConditions}
               onToggleInspiration={toggleInspiration}

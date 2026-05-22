@@ -450,6 +450,28 @@ function itemRichness(item) {
   return score;
 }
 
+const TEMPLATE_PLACEHOLDER_RE = /\{=[^}]+\}/;
+
+function stripTemplatedEntries(node) {
+  if (node == null) return node;
+  if (typeof node === 'string') {
+    return TEMPLATE_PLACEHOLDER_RE.test(node) ? null : node;
+  }
+  if (Array.isArray(node)) {
+    return node
+      .map((child) => stripTemplatedEntries(child))
+      .filter((child) => child != null && !(Array.isArray(child) && child.length === 0));
+  }
+  if (typeof node === 'object') {
+    const out = {};
+    for (const [key, value] of Object.entries(node)) {
+      out[key] = stripTemplatedEntries(value);
+    }
+    return out;
+  }
+  return node;
+}
+
 function normalizeItem(item) {
   const rawType = item.type ? String(item.type).split('|')[0] : '';
   return {
@@ -478,7 +500,7 @@ function normalizeItem(item) {
     bonusSpellSaveDc: item.bonusSpellSaveDc || null,
     reqAttune: item.reqAttune ?? null,
     property: Array.isArray(item.property) ? item.property.map((p) => String(p).split('|')[0]) : [],
-    entries: item.entries || [],
+    entries: Array.isArray(item.entries) ? stripTemplatedEntries(item.entries) : (item.entries || []),
     packContents: item.packContents || null,
     scfType: item.scfType || null,
     focus: Array.isArray(item.focus) ? item.focus.slice() : null,

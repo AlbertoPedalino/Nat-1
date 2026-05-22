@@ -1,56 +1,11 @@
-const MASTERY_NAMES = ['Sap', 'Vex', 'Topple', 'Push', 'Slow', 'Cleave', 'Graze', 'Nick'];
+const MASTERY_DATA_URL = 'https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/items-base.json';
 
-const WEAPON_MASTERY_FALLBACK = {
-  club: 'Slow',
-  dagger: 'Nick',
-  greatclub: 'Push',
-  handaxe: 'Vex',
-  javelin: 'Slow',
-  lighthammer: 'Nick',
-  mace: 'Sap',
-  quarterstaff: 'Topple',
-  sickle: 'Nick',
-  spear: 'Sap',
-  lightcrossbow: 'Slow',
-  dart: 'Vex',
-  shortbow: 'Vex',
-  sling: 'Slow',
-  battleaxe: 'Topple',
-  flail: 'Sap',
-  glaive: 'Graze',
-  greataxe: 'Cleave',
-  greatsword: 'Graze',
-  halberd: 'Cleave',
-  lance: 'Topple',
-  longsword: 'Sap',
-  maul: 'Topple',
-  morningstar: 'Sap',
-  pike: 'Push',
-  rapier: 'Vex',
-  scimitar: 'Nick',
-  shortsword: 'Vex',
-  trident: 'Topple',
-  warpick: 'Sap',
-  warhammer: 'Push',
-  whip: 'Slow',
-  blowgun: 'Vex',
-  handcrossbow: 'Vex',
-  heavycrossbow: 'Push',
-  longbow: 'Slow',
-  musket: 'Slow',
-  pistol: 'Vex',
-};
+const _masteries = new Map();
+let _masteryLoadPromise = null;
 
-const MASTERY_DESCRIPTIONS = {
-  Sap: "The target has disadvantage on its next attack roll before the start of your next turn.",
-  Vex: "You have advantage on your next attack roll against the target before the end of your next turn.",
-  Topple: 'The target must save or fall Prone.',
-  Push: 'You can push the target.',
-  Slow: "You reduce the target's speed.",
-  Cleave: 'You can make an extra attack against another creature near the target.',
-  Graze: 'You deal ability modifier damage even on a miss.',
-  Nick: 'You can make the extra Light weapon attack as part of the Attack action.',
-};
+function compactKey(value) {
+  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+}
 
 function asArray(value) {
   if (value == null) return [];
@@ -64,10 +19,6 @@ function cleanTagText(value) {
     .replace(/\{@[a-z]+ ([^|}]+)(?:\|[^}]*)?\}/gi, '$1')
     .replace(/[{}]/g, '')
     .trim();
-}
-
-function compactKey(value) {
-  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
 function splitNameAndSource(value) {
@@ -84,13 +35,6 @@ function toTitleCase(value) {
   return String(value || '')
     .toLowerCase()
     .replace(/\b[a-z]/g, (char) => char.toUpperCase());
-}
-
-function aliasWeaponKey(key) {
-  if (key === 'crossbowlight') return 'lightcrossbow';
-  if (key === 'crossbowhand') return 'handcrossbow';
-  if (key === 'crossbowheavy') return 'heavycrossbow';
-  return key;
 }
 
 function parseChoiceValue(value) {
@@ -110,24 +54,62 @@ function parseChoiceValue(value) {
   return [];
 }
 
+export async function loadMasteryEntries() {
+  if (_masteries.size > 0) return _masteries;
+  if (_masteryLoadPromise) return _masteryLoadPromise;
+  _masteryLoadPromise = (async () => {
+    try {
+      const response = await fetch(MASTERY_DATA_URL);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      (data?.itemMastery || []).forEach((entry) => {
+        if (!entry?.name || !Array.isArray(entry.entries)) return;
+        _masteries.set(compactKey(entry.name), { name: entry.name, entries: entry.entries });
+      });
+    } catch {
+      _masteryLoadPromise = null;
+    }
+    return _masteries;
+  })();
+  return _masteryLoadPromise;
+}
+
+function getMasteryRecord(value) {
+  if (!value) return null;
+  return _masteries.get(compactKey(value)) || null;
+}
+
+export function getWeaponMasteryEntries(mastery) {
+  return getMasteryRecord(mastery)?.entries || null;
+}
+
+export function getWeaponMasteryReminderText(mastery) {
+  const entries = getWeaponMasteryEntries(mastery);
+  if (!entries?.length) return '';
+  const first = entries.find((node) => typeof node === 'string');
+  return first || '';
+}
+
+function canonicalMasteryName(value) {
+  return getMasteryRecord(value)?.name || null;
+}
+
 function itemMasteryFromProperties(item) {
   const properties = [...asArray(item?.property), ...asArray(item?.properties)].map((prop) => String(prop).trim());
   for (const prop of properties) {
-    const exact = MASTERY_NAMES.find((name) => compactKey(name) === compactKey(prop));
-    if (exact) return exact;
+    const canonical = canonicalMasteryName(prop);
+    if (canonical) return canonical;
   }
   return null;
 }
 
 function itemMasteryFromEntries(item) {
-  const entriesText = asArray(item?.entries).join(' ');
-  const lower = entriesText.toLowerCase();
-  return MASTERY_NAMES.find((name) => lower.includes(name.toLowerCase())) || null;
-}
-
-function fallbackMasteryForWeaponName(weaponName) {
-  const key = aliasWeaponKey(compactKey(weaponName));
-  return WEAPON_MASTERY_FALLBACK[key] || null;
+  const entriesText = asArray(item?.entries).join(' ').toLowerCase();
+  if (!entriesText) return null;
+  for (const record of _masteries.values()) {
+    if (entriesText.includes(record.name.toLowerCase())) return record.name;
+  }
+  return null;
 }
 
 export function normalizeWeaponName(value) {
@@ -167,32 +149,32 @@ export function resolveWeaponMasteryForItem(item) {
   if (!item || typeof item !== 'object') return null;
   const direct = item.mastery ?? item.weaponMastery ?? item.masteryProperty ?? item.masteryName;
   if (typeof direct === 'string' && direct.trim()) {
-    const exact = MASTERY_NAMES.find((name) => compactKey(name) === compactKey(direct));
-    if (exact) return exact;
+    const canonical = canonicalMasteryName(direct);
+    if (canonical) return canonical;
   }
   if (Array.isArray(direct)) {
     const first = direct.map((value) => String(value || '').trim()).find(Boolean);
-    const exact = MASTERY_NAMES.find((name) => compactKey(name) === compactKey(first));
-    if (exact) return exact;
+    const canonical = canonicalMasteryName(first);
+    if (canonical) return canonical;
   }
-  return itemMasteryFromProperties(item) || itemMasteryFromEntries(item) || fallbackMasteryForWeaponName(item.name);
+  return itemMasteryFromProperties(item) || itemMasteryFromEntries(item);
 }
 
 export function findWeaponItemByName(items, weaponName, source = '') {
-  const targetName = aliasWeaponKey(compactKey(normalizeWeaponName(weaponName)));
+  const targetName = compactKey(normalizeWeaponName(weaponName));
   const targetSource = compactKey(source);
   if (!targetName) return null;
 
   const weaponItems = asArray(items).filter((item) => item && typeof item === 'object');
   const direct = weaponItems.find((item) => {
-    const itemName = aliasWeaponKey(compactKey(normalizeWeaponName(item.name)));
+    const itemName = compactKey(normalizeWeaponName(item.name));
     if (itemName !== targetName) return false;
     if (!targetSource) return true;
     return compactKey(item.source) === targetSource;
   });
   if (direct) return direct;
 
-  return weaponItems.find((item) => aliasWeaponKey(compactKey(normalizeWeaponName(item.name))) === targetName) || null;
+  return weaponItems.find((item) => compactKey(normalizeWeaponName(item.name)) === targetName) || null;
 }
 
 export function collectResolvedWeaponMasteries(character, items = []) {
@@ -202,7 +184,7 @@ export function collectResolvedWeaponMasteries(character, items = []) {
 
   entries.forEach((entry) => {
     const item = findWeaponItemByName(items, entry.weaponName, entry.source);
-    const mastery = resolveWeaponMasteryForItem(item) || fallbackMasteryForWeaponName(entry.weaponName);
+    const mastery = resolveWeaponMasteryForItem(item);
     const dedupeKey = compactKey(entry.weaponName);
     if (seen.has(dedupeKey)) return;
     seen.add(dedupeKey);
@@ -215,12 +197,4 @@ export function collectResolvedWeaponMasteries(character, items = []) {
   });
 
   return out.sort((a, b) => a.weaponName.localeCompare(b.weaponName));
-}
-
-export function getWeaponMasteryReminderText(mastery) {
-  return MASTERY_DESCRIPTIONS[mastery] || '';
-}
-
-export function getWeaponMasteryFallbackMap() {
-  return { ...WEAPON_MASTERY_FALLBACK };
 }
