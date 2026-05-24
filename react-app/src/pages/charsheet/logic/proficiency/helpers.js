@@ -71,17 +71,17 @@ function choiceMatches(character, requiredChoice, prefix = '') {
 
 export function collectAdapterProfGrants(character) {
   const grants = [];
-  const push = (list, level, prefix = '') => {
+  const push = (list, level, prefix = '', sourceType = '', sourceName = '') => {
     (list || []).forEach((grant) => {
       if (!grant || typeof grant !== 'object') return;
       if ((level || 1) < Number(grant.minLevel || 1)) return;
       if (grant.requiredChoice && !choiceMatches(character, grant.requiredChoice, prefix)) return;
-      grants.push(grant);
+      grants.push({ ...grant, sourceType, sourceName });
     });
   };
   const collectEntity = (className, subclassShortName, level, prefix = '') => {
-    push(installedRegistry.getClassSheetProficiencies(className), level, prefix);
-    push(installedRegistry.getSubclassSheetProficiencies(className, subclassShortName), level, prefix);
+    push(installedRegistry.getClassSheetProficiencies(className), level, prefix, 'class', className);
+    push(installedRegistry.getSubclassSheetProficiencies(className, subclassShortName), level, prefix, 'subclass', subclassShortName);
   };
   collectEntity(
     character?.className || '',
@@ -96,6 +96,8 @@ export function collectAdapterProfGrants(character) {
     installedRegistry.getSpeciesSheetProficiencies(character?.speciesName || '', character?.speciesSource || ''),
     character?.level || 1,
     '',
+    'species',
+    character?.speciesName || '',
   );
   return grants;
 }

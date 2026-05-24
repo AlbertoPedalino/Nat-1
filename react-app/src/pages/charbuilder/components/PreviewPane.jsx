@@ -414,13 +414,8 @@ function collectPreviewProficiencies(character) {
   });
 
   collectPreviewEffectProficiencySections(sheetLike).forEach((section) => {
-    if (section.title === 'Armor Training') {
-      mergePreviewSection(sections, 'Armor', section.items);
-    } else if (section.title === 'Weapon Training') {
-      mergePreviewSection(sections, 'Weapons', section.items);
-    } else {
-      mergePreviewSection(sections, section.title, section.items);
-    }
+    if (section.title === 'Armor Training' || section.title === 'Weapon Training') return;
+    mergePreviewSection(sections, section.title, section.items);
   });
 
   const skillItems = collectSkillProficiencies(character);

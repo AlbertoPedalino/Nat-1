@@ -5,7 +5,8 @@
       "Bash(node --check src/shared/character/selectedFeats.js)",
       "Bash(node --input-type=module -e \"import\\('./src/shared/character/selectedFeats.js'\\).then\\(\\(\\)=>console.log\\('ok'\\)\\).catch\\(e=>console.error\\(e.message\\)\\)\")",
       "Bash(npx --no eslint src/shared/character/selectedFeats.js src/adapters/registry.js src/adapters/classes/fighter/fighter.js src/adapters/classes/warlock/warlock.js src/pages/charbuilder/logic/choiceSpecs.js src/pages/charbuilder/logic/persistence.js)",
-      "Bash(node *)"
+      "Bash(node *)",
+      "Bash(npx vite *)"
     ]
   }
 }

@@ -168,9 +168,6 @@ if (typeof registerSubclassRuntimeConfig === "function") {
 }
 
 registerSubclassSheetEffects("Cleric_War", [
-
-  { type: "armorTraining", values: ["Heavy"], minLevel: 3, note: "War Domain Proficiency" },
-  { type: "weaponTraining", values: ["Martial"], minLevel: 3, note: "War Domain Proficiency" },
   { type: "attackBonus", value: 10, minLevel: 3, note: "Guided Strike: add +10 to a missed attack roll using Channel Divinity." },
   { type: "resistance", damageTypes: ["Bludgeoning", "Piercing", "Slashing"], minLevel: 17, note: "Avatar of Battle." },
 ]);

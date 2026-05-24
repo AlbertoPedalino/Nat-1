@@ -123,11 +123,6 @@ export default function install(registry, context = {}) {
 // L3: Disciple of Life, Preserve Life (CD)
 // L6: Blessed Healer
 // L17: Supreme Healing
-// Life Domain grants Heavy Armor proficiency
-registerSubclassSheetProficiencies("Cleric_Life", [
-  { type: "armor", values: ["Heavy"], minLevel: 3 },
-]);
-
 registerSubclassAdapter("Cleric_Life", function (cls, lv, specs) {
   // nessuna spec
 });
@@ -214,8 +209,6 @@ if (typeof registerSubclassRuntimeConfig === "function") {
 }
 
 registerSubclassSheetEffects("Cleric_Life", [
-
-  { type: "armorTraining", values: ["Heavy"], minLevel: 3, note: "Life Domain Proficiency" },
   { type: "passiveNote", minLevel: 3, note: "Disciple of Life: healing spell with a slot restores +2 + slot level HP." },
   { type: "passiveNote", minLevel: 6, note: "Blessed Healer: when healing another creature with a spell slot, regain 2 + slot level HP." },
   { type: "healingMaximized", minLevel: 17, note: "Supreme Healing: use maximum values on healing dice." },
