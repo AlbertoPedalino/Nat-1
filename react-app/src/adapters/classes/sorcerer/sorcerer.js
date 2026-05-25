@@ -222,6 +222,7 @@ registerClassSheetActions("Sorcerer", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 20,
     "desc": "While Innate Sorcery is active, you can use one Metamagic option on each spell you cast without spending Sorcery Points."
   }

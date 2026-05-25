@@ -285,6 +285,7 @@ registerClassSheetActions("Cleric", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "desc": "Choose at lv.1 — Protector: proficiency with Martial weapons and Heavy armor; or Thaumaturge: learn one extra Cleric cantrip and gain a bonus equal to your WIS modifier (min +1) to Intelligence (Arcana or Religion) checks."
   },
   {
@@ -338,7 +339,8 @@ registerClassSheetActions("Cleric", [
     "name": "Sear Undead",
     "icon": "",
     "cat": "action",
-    "uses": "On Turn Undead",
+    "uses": "With Turn Undead",
+    "resKey": "channel_div",
     "minLevel": 5,
     "damageFormula": ({ character }) => {
       const wis = typeof getMod === 'function' && typeof getFinal === 'function'

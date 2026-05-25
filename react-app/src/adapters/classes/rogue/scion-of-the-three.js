@@ -139,6 +139,7 @@ registerSubclassSheetActions("Rogue_Scion of the Three", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 3,
     "desc": "Swear allegiance to one of the Dead Three (changeable on Long Rest). Bane: Resistance to Psychic damage; learn the Minor Illusion cantrip. Bhaal: Resistance to Poison damage; learn the Blade Ward cantrip. Myrkul: Resistance to Necrotic damage; learn the Chill Touch cantrip. The cantrip counts as a Rogue spell; INT is your spellcasting ability for it."
   },
@@ -164,6 +165,7 @@ registerSubclassSheetActions("Rogue_Scion of the Three", [
     "icon": "",
     "cat": "action",
     "uses": "On Bloodthirst",
+    "passive": true,
     "minLevel": 13,
     "desc": "Passive upgrade to Bloodthirst: when you teleport using Bloodthirst, each creature within 10 ft of either the space you left or the space you arrive in (other than the triggering creature) takes damage equal to your INT modifier. Damage type matches your Dread Allegiance (Bane: Psychic, Bhaal: Poison, Myrkul: Necrotic). This damage ignores Resistance."
   },
@@ -172,6 +174,7 @@ registerSubclassSheetActions("Rogue_Scion of the Three", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 17,
     "desc": "Cutthroat: when you finish a Short Rest, you regain 1 expended use of Bloodthirst. Murderous Intent: when you roll Sneak Attack damage, treat any die result of 1 or 2 as a 3."
   }

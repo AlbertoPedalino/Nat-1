@@ -220,6 +220,7 @@ registerSubclassSheetActions("Artificer_Armorer", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 3,
     "requiresChoice": { "key": "armorer_model", "value": "Infiltrator" },
     "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true },
@@ -230,6 +231,7 @@ registerSubclassSheetActions("Artificer_Armorer", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 3,
     "requiresChoice": { "key": "armorer_model", "value": "Infiltrator" },
     "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true },
@@ -274,6 +276,7 @@ registerSubclassSheetActions("Artificer_Armorer", [
     "icon": "",
     "cat": "attack",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 5,
     "desc": "Passive: you can attack twice whenever you take the Attack action on your turn."
   },
@@ -282,6 +285,7 @@ registerSubclassSheetActions("Artificer_Armorer", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 9,
     "desc": "Armor Replication: learn one additional Replicate Magic Item plan (must be Armor category); can also create one additional item from it. Improved Arsenal: gain +1 bonus to attack and damage rolls made with the special weapon of your Arcane Armor model."
   },

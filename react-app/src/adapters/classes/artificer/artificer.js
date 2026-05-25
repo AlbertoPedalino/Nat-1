@@ -249,6 +249,7 @@ registerClassSheetActions("Artificer", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 1,
     "desc": "Passive: using Tinker's Tools, you can imbue a Tiny nonmagical object with one minor magical property (light, recorded message, odor/vision, or faint magical aura). Up to a number of objects equal to your INT modifier can be active at once."
   },
@@ -282,6 +283,7 @@ registerClassSheetActions("Artificer", [
     "icon": "",
     "cat": "reaction",
     "uses": "Passive + Reaction",
+    "passive": true,
     "minLevel": 20,
     "desc": "Passive: you gain +1 bonus to all saving throws per magic item you are currently attuned to (max +6). Reaction: when you are reduced to 0 HP, you can end one of your attunements — you drop to 1 HP instead."
   }

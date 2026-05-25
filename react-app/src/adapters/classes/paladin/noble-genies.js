@@ -139,6 +139,7 @@ registerSubclassSheetActions("Paladin_Noble Genies", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 3,
     "desc": "Passive: while you aren't wearing armor, your AC equals 10 + DEX modifier + CHA modifier (shield still applies). You gain proficiency in one skill of your choice from Acrobatics, Intimidation, Performance, or Persuasion."
   },
@@ -162,6 +163,7 @@ registerSubclassSheetActions("Paladin_Noble Genies", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 7,
     "desc": "Passive: at the start of each of your turns (no action required), choose one damage type: Acid, Cold, Fire, Lightning, or Thunder. You and friendly creatures within your Aura of Protection gain Resistance to that damage type until the start of your next turn."
   },

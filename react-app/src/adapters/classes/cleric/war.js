@@ -142,6 +142,7 @@ registerSubclassSheetActions("Cleric_War", [
   { name: "Channel: War God's Blessing", icon: "", cat: "reaction", uses: "1 Channel", resKey: "channel_div", minLevel: 6,
     desc: "Reaction: when a creature within 30 ft of you makes an attack roll, expend one use of Channel Divinity to grant that creature a +10 bonus to the roll. You make this choice after you see the roll, but before the DM says whether it hits or misses." },
   { name: "Avatar of Battle", icon: "", cat: "action", uses: "Passive", minLevel: 17,
+  passive: true,
     desc: "Resistance to Bludgeoning, Piercing, and Slashing damage." },
 ]);
 registerSubclassSheetResources("Cleric_War", [

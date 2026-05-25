@@ -132,8 +132,10 @@ registerSubclassSheetActions("Wizard_Abjurer", [
   { name: "Projected Ward", icon: "", cat: "reaction", uses: "Reaction", minLevel: 6,
     desc: "When a creature you can see within 30 ft takes damage, use your Reaction: your Arcane Ward absorbs that damage instead. If it reduces the ward to 0 HP, the creature takes any remaining damage (the creature's own Resistances/Vulnerabilities apply before reducing the ward's HP)." },
   { name: "Spell Breaker", icon: "", cat: "action", uses: "Passive", minLevel: 10,
+  passive: true,
     desc: "Counterspell and Dispel Magic are always prepared for you. You can cast Dispel Magic as a Bonus Action, and add your Proficiency Bonus to its ability check. When you cast either spell with a spell slot, that slot is not expended if the spell fails to stop a spell." },
   { name: "Spell Resistance", icon: "", cat: "action", uses: "Passive", minLevel: 14,
+  passive: true,
     desc: "Advantage on saving throws against spells. Resistance to the damage of spells." },
 ]);
 registerSubclassSheetResources("Wizard_Abjurer", [

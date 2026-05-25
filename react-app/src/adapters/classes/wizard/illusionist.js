@@ -128,6 +128,7 @@ registerSubclassAdapter("Wizard_Illusionist", function (cls, lv, specs) {
 // [SheetRuntime] START
 registerSubclassSheetActions("Wizard_Illusionist", [
   { name: "Improved Illusions", icon: "", cat: "action", uses: "Passive", minLevel: 3,
+  passive: true,
     desc: "You can cast Illusion spells without providing Verbal components. If an Illusion spell you cast has a range of 10 ft or more, its range increases by 60 ft. You also know Minor Illusion (doesn't count against cantrips known); you can create both a sound and an image with a single casting, and you can cast it as a Bonus Action." },
   { name: "Phantasmal Creatures", icon: "", cat: "action", uses: "2 / LR", resKey: "phantasmal_creatures", minLevel: 6,
     desc: "Summon Beast and Summon Fey are always prepared for you. Whenever you cast either spell, you can change its school to Illusion (the summoned creature appears spectral). Once per LR each, you can cast the Illusion version without expending a spell slot — the summoned creature has half its normal HP when cast this way." },

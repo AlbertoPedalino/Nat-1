@@ -41,6 +41,7 @@ export default function install(registry, context = {}) {
         icon: 'tool',
         cat: 'action',
         uses: 'Passive',
+        passive: true,
         desc: "Proficient with three Artisan's Tools; 20% discount on nonmagical gear you buy; craft items faster during a Long Rest.",
       },
     ]);

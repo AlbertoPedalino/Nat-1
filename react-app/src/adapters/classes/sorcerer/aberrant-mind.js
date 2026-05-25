@@ -145,6 +145,7 @@ registerSubclassSheetActions("Sorcerer_Aberrant Mind", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 6,
     "desc": "Passive: Resistance to Psychic damage. Advantage on saving throws to avoid or end the Charmed or Frightened condition."
   },

@@ -36,11 +36,13 @@ export default function install(registry, context = {}) {
     { name: "Moon's Inspiration", icon: "", cat: "bonus", uses: "With Bardic Insp.", minLevel: 3,
       desc: "Inspired Eclipse — When you use a Bonus Action to give Bardic Inspiration, you can become Invisible and teleport up to 30 ft to an unoccupied space you can see. The Invisibility lasts until the start of your next turn (ends early if you make an attack roll, damage roll, or cast a spell).\n\nLunar Vitality — Once per turn when you restore HP with a spell, you can expend one Bardic Inspiration to increase the healing by a roll of your Bardic Inspiration die. The target's Speed also increases by 10 ft until the end of your next turn." },
     { name: "Primal Lore", icon: "", cat: "action", uses: "Passive", minLevel: 3,
+    passive: true,
       desc: "You learn Druidic, gain one Druid cantrip, and gain proficiency in one listed skill. Select choices in the builder." },
     { name: "Blessing of Moonlight", icon: "", cat: "action", uses: "1 / LR", resKey: "moon_blessing", minLevel: 6,
       healFormula: "2d4",
       desc: "Moonbeam is always prepared. When you cast Moonbeam, you can modify it: the Moonbeam sheds dim light in a 5-ft radius, and when a creature fails its save against Moonbeam, one creature of your choice within 60 ft regains 2d4 HP. 1/Long Rest." },
     { name: "Eventide's Splendor", icon: "", cat: "action", uses: "Passive", minLevel: 14,
+    passive: true,
       desc: "Shadow of the New Moon — When you use Inspired Eclipse, the target of your Bardic Inspiration can also use its Reaction to teleport up to 30 ft and become Invisible until the start of its next turn.\n\nVibrance of the Full Moon — When you use Lunar Vitality, you can roll 1d6 and use that instead of expending a Bardic Inspiration die." },
   ]);
 

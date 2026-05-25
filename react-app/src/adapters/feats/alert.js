@@ -128,6 +128,7 @@ export default function install(registry, context = {}) {
         icon:  "eye",
         cat:   "action",
         uses:  "Passive",
+        passive: true,
         desc:  "Add your Proficiency Bonus to Initiative rolls. You can't be Surprised."
       },
       {

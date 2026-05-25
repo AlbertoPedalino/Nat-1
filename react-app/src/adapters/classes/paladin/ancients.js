@@ -126,6 +126,7 @@ registerSubclassSheetActions("Paladin_Ancients", [
   { name: "Channel: Nature's Wrath", icon: "", cat: "action", uses: "1 Channel", resKey: "paladin_channel_div",
     desc: "Magic action: expend one use of Channel Divinity to conjure spectral vines. Each creature of your choice you can see within 15 ft must succeed on a STR saving throw (spell save DC) or have the Restrained condition for 1 minute. A Restrained creature repeats the save at the end of each of its turns, ending the effect on a success." },
   { name: "Aura of Warding", icon: "", cat: "action", uses: "Passive", minLevel: 7,
+  passive: true,
     desc: "While conscious, you and friendly creatures within your Aura of Protection have Resistance to Necrotic, Psychic, and Radiant damage. Range: 10 ft (30 ft at lv.18)." },
   { name: "Undying Sentinel", icon: "", cat: "action", uses: "1 / LR", resKey: "ancients_undying_sentinel", minLevel: 15,
     desc: "When you are reduced to 0 HP and not killed outright, you can drop to 1 HP instead and regain HP equal to 3 times your Paladin level. You also can't be aged magically and cease visibly aging. Recharge: Long Rest." },

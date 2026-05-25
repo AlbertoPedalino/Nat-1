@@ -148,6 +148,7 @@ export default function install(registry, context = {}) {
         icon: "crosshair",
         cat: "action",
         uses: "Passive",
+        passive: true,
         desc: "You learn one cantrip that requires an attack roll from any class. Double the range of spells that require attack rolls. Your ranged spell attacks ignore half and three-quarters cover."
       }
     ]);

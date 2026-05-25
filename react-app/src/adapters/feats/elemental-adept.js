@@ -150,6 +150,7 @@ export default function install(registry, context = {}) {
         icon: "zap",
         cat: "action",
         uses: "Passive",
+        passive: true,
         desc: "Your spells ignore Resistance to your chosen damage type (Acid, Cold, Fire, Lightning, or Thunder). When you roll damage for a spell of that type, treat any 1 on a die as a 2. Can be taken multiple times for different types."
       }
     ]);

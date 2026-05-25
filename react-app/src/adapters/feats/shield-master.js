@@ -135,6 +135,7 @@ export default function install(registry, context = {}) {
         icon: "shield",
         cat: "action",
         uses: "Passive",
+        passive: true,
         desc: "Add your shield's AC bonus to Dexterity saving throws. On a successful Dex save that deals half damage, take no damage instead (or half on a failed save) if you are not Incapacitated."
       }
     ]);

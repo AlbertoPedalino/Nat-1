@@ -186,6 +186,7 @@ registerClassSheetActions("Druid", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "desc": "Choose at lv.1 — Magician: learn one extra Druid cantrip; or Warden: proficiency with Martial weapons and training with Medium armor (if not already proficient)."
   },
   {
@@ -219,6 +220,7 @@ registerClassSheetActions("Druid", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 7,
     "damageFormula": "1d8",
     "damageButtonLabel": "+1d8",
@@ -229,6 +231,7 @@ registerClassSheetActions("Druid", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 15,
     "desc": "Your Elemental Fury improves — Potent Spellcasting: your Druid cantrip range increases by 300 ft; Primal Strike: the extra damage increases to 2d8."
   },
@@ -237,6 +240,7 @@ registerClassSheetActions("Druid", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 18,
     "desc": "While in Wild Shape, you can cast any Druid spell you have prepared, as long as it has no Material components or its Material components have no cost."
   },
@@ -245,6 +249,7 @@ registerClassSheetActions("Druid", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 20,
     "desc": "Three benefits: (1) Evergreen Wild Shape — when you roll Initiative, you regain one expended Wild Shape use; (2) Nature Magician — spend 2 Wild Shape uses to regain one expended spell slot of 5th level or lower (1/LR); (3) Longevity — you age at 1/10 the normal rate and can't be aged magically."
   }

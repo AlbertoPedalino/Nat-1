@@ -128,6 +128,7 @@ registerSubclassSheetActions("Ranger_Winter Walker", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 3,
     "desc": "Passive: Biting Cold — your weapon attacks and ranger spell attacks ignore Resistance to Cold damage. Frost Resistance — you have Resistance to Cold damage. Polar Strikes — once per turn when you hit with a weapon attack or ranger spell attack, deal an extra 1d4 Cold damage (1d6 at lv.11)."
   },
@@ -136,6 +137,7 @@ registerSubclassSheetActions("Ranger_Winter Walker", [
     "icon": "",
     "cat": "action",
     "uses": "On Hunter's Mark",
+    "passive": true,
     "minLevel": 3,
     "desc": "When you cast Hunter's Mark: you gain Temporary HP equal to 1d10 + your Ranger level. While Hunter's Mark is active, the marked creature can't take the Disengage action."
   },

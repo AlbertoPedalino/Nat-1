@@ -136,6 +136,7 @@ registerSubclassSheetActions("Rogue_Thief", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 3,
     "desc": "Passive: you gain a Climb Speed equal to your Speed. You can determine your jump distance using your DEX modifier rather than your STR modifier."
   },
@@ -152,6 +153,7 @@ registerSubclassSheetActions("Rogue_Thief", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 13,
     "desc": "Passive: you can attune to up to four magic items at once. Whenever you use a magic item property that expends charges, roll 1d6 — on a 6, you use the property without expending the charges. You can use any Spell Scroll (using INT as your spellcasting ability). Cantrips and level 1 spells work reliably; higher-level scrolls require an INT (Arcana) check (DC = 10 + spell's level) — on success you cast the spell, on failure the scroll disintegrates."
   },
@@ -160,6 +162,7 @@ registerSubclassSheetActions("Rogue_Thief", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 17,
     "desc": "Passive: you can take two turns during the first round of any combat. You take your first turn at your normal initiative count and your second turn at your initiative count minus 10."
   }

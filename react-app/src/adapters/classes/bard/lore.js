@@ -150,10 +150,12 @@ registerSubclassAdapter("Bard_Lore", function (cls, lv, specs) {
 // [SheetRuntime] START
 registerSubclassSheetActions("Bard_Lore", [
   { name: "Bonus Proficiencies", icon: "", cat: "action", uses: "Passive", minLevel: 3,
+  passive: true,
     desc: "Gain proficiency in three skills of your choice. Select them in the builder." },
   { name: "Cutting Words", icon: "", cat: "reaction", uses: "With Bardic Insp.", minLevel: 3,
     desc: "When a creature you can see within 60 ft makes a damage roll or succeeds on an ability check or attack roll, use your Reaction and expend one Bardic Inspiration: roll the die and subtract the result from the creature's roll, potentially reducing damage or turning a success into a failure." },
   { name: "Magical Discoveries", icon: "", cat: "action", uses: "Passive", minLevel: 6,
+  passive: true,
     desc: "Choose 2 spells (cantrips or spells for which you have slots) from the Cleric, Druid, or Wizard spell list. They are always prepared as Bard spells. On each Bard level up, you can replace one of the chosen spells with another that meets these requirements." },
   { name: "Peerless Skill", icon: "", cat: "action", uses: "With Bardic Insp.", minLevel: 14,
     desc: "When you make an ability check or attack roll and fail, expend one use of Bardic Inspiration: roll the die and add the result to the d20, potentially turning failure into success. If the roll still fails, the Bardic Inspiration is not expended." },

@@ -128,6 +128,7 @@ registerSubclassSheetActions("Paladin_Glory", [
   { name: "Channel: Peerless Athlete", icon: "", cat: "bonus", uses: "1 Channel", resKey: "paladin_channel_div",
     desc: "Bonus Action: expend one use of Channel Divinity. For 1 hour, gain Advantage on STR (Athletics) and DEX (Acrobatics) checks, and your Long and High Jump distances increase by 10 ft (costs movement as normal)." },
   { name: "Aura of Alacrity", icon: "", cat: "action", uses: "Passive", minLevel: 7,
+  passive: true,
     desc: "Your Speed increases by 10 ft. Whenever an ally enters your Aura of Protection for the first time on a turn or starts their turn there, their Speed increases by 10 ft until the end of their next turn. Range: 10 ft (30 ft at lv.18)." },
   { name: "Glorious Defense", icon: "", cat: "reaction", uses: "CHA mod / LR", resKey: "glory_glorious_defense", minLevel: 15,
     desc: "Reaction when you or a creature you can see within 10 ft is hit by an attack: grant a bonus to that creature's AC equal to your CHA modifier (min +1), potentially causing the attack to miss. If it misses, you can make one attack with a weapon against the attacker as part of this Reaction (if within range). Uses = CHA modifier per Long Rest." },

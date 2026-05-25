@@ -155,6 +155,7 @@ export default function install(registry, context = {}) {
         icon: "sparkles",
         cat: "action",
         uses: "Passive",
+        passive: true,
         desc: "You learn the Mage Hand cantrip. The hand is invisible, has range 60 ft, and you can use it as a Bonus Action. The spell's spellcasting ability is your chosen ability."
       }
     ]);

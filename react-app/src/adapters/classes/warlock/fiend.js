@@ -147,6 +147,7 @@ registerSubclassSheetActions("Warlock_Fiend", [
   { name: "Dark One's Own Luck", icon: "dice-6", cat: "reaction", uses: "CHA mod / LR", resKey: "fiend_luck", minLevel: 6,
     desc: "When you make an ability check or saving throw, expend one use to add 1d10 to the roll. You can do so after seeing the roll but before the outcome is determined. Recharge: Long Rest." },
   { name: "Fiendish Resilience", icon: "shield", cat: "action", uses: "Passive — change on rest", minLevel: 10,
+  passive: true,
     inlinePills: ({ character }) => [{ icon: "shield", label: "Resistance", value: String(fiendChoice(character, "fiend_resilience_damage_type") || "Choose") }],
     desc: "You have Resistance to the chosen damage type. At the end of a Short or Long Rest, you can change the type. Select the type in the builder (or adjust manually if the builder choice doesn't support rest-based updates)." },
   { name: "Hurl Through Hell", icon: "flame", cat: "action", uses: "1 / LR or Pact Magic slot", resKey: "fiend_hurl", minLevel: 14,

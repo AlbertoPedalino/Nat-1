@@ -31,6 +31,7 @@ export default function install(registry, context = {}) {
         icon: "music",
         cat: "action",
         uses: "Passive",
+        passive: true,
         desc: "You gain proficiency with three Musical Instruments of your choice. When you finish a Short or Long Rest, you can play a song and give Heroic Inspiration to allies who hear it."
       }
     ]);

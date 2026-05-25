@@ -136,6 +136,7 @@ registerSubclassSheetActions("Sorcerer_Spellfire", [
     "icon": "",
     "cat": "reaction",
     "uses": "On Counterspell",
+    "passive": true,
     "minLevel": 6,
     "desc": "Counterspell is always prepared for you. When you cast Counterspell and the target fails its CON saving throw (its spell is countered), you regain 1d4 Sorcery Points."
   },

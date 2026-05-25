@@ -27,6 +27,44 @@ export const SECTION_DEFS = [
   { key: 'reaction', title: 'Reactions', cats: ['reaction'] },
 ];
 
+export const TAG_PRESETS = {
+  mastery:    { color: '#edd48a', borderColor: 'rgba(237,212,138,0.55)', bgColor: 'rgba(237,212,138,0.12)' },
+  noprof:     { color: '#de675f', borderColor: '#de675f',               bgColor: 'rgba(222,103,95,0.14)' },
+  dis:        { color: '#d69245', borderColor: '#d69245',               bgColor: 'rgba(213,138,61,0.14)' },
+  slot:       { color: '#58b879', borderColor: 'rgba(88,184,121,0.55)', bgColor: 'rgba(88,184,121,0.12)' },
+  inlinePill: { color: '#edd48a', borderColor: 'rgba(237,212,138,0.4)', bgColor: 'rgba(237,212,138,0.12)' },
+};
+
+export function buildActionTags(action, C) {
+  const tags = [];
+  const ownerLevel = action.ownerLevel ?? C?.classLevel ?? C?.level ?? 1;
+
+  if (action._weaponMastery) {
+    tags.push({ key: 'mastery', label: action._weaponMastery, ...TAG_PRESETS.mastery });
+  }
+  if (action._notProficient) {
+    tags.push({ key: 'noprof', label: 'NO PROF', ...TAG_PRESETS.noprof });
+  }
+  if (action._disadvantage) {
+    tags.push({ key: 'dis', label: 'DIS', ...TAG_PRESETS.dis });
+  }
+  if (action._weaponSlot) {
+    tags.push({ key: 'slot', label: action._weaponSlot, ...TAG_PRESETS.slot });
+  }
+
+  const pills = typeof action.inlinePills === 'function'
+    ? action.inlinePills({ character: C, ownerLevel })
+    : (Array.isArray(action.inlinePills) ? action.inlinePills : []);
+  pills.forEach((pill, idx) => {
+    const label = `${pill.label || ''}${pill.value != null ? ` ${pill.value}` : ''}`.trim();
+    if (label) {
+      tags.push({ key: `pill-${idx}`, label, ...TAG_PRESETS.inlinePill });
+    }
+  });
+
+  return { ...action, tags };
+}
+
 function resourceOwnerLevel(def, C) {
   return Number(def?.ownerLevel ?? C?.classLevel ?? C?.level ?? 1);
 }
@@ -134,24 +172,10 @@ function uniqBySignature(items) {
   return [...byKey.values()];
 }
 
-function hasExplicitActionText(action) {
-  const cat = String(action?.cat || '').toLowerCase();
-  const desc = String(action?.desc || '').toLowerCase();
-  if (cat === 'reaction') return /\breaction\b/.test(desc);
-  if (cat === 'bonus') return /\bbonus action\b/.test(desc);
-  if (cat === 'action') return /\b(action|magic action)\b/.test(desc);
-  return false;
-}
-
 function isExecutableAction(action) {
   const cat = String(action?.cat || '').toLowerCase();
-  const uses = String(action?.uses || '').trim().toLowerCase();
-  const desc = String(action?.desc || '').trim().toLowerCase();
   if (!EXECUTABLE_CATS.has(cat)) return false;
-  if (/^on\b/.test(uses) && !action?.resKey) return false;
-  if ((uses === 'passive' || /^passive\s*\(/.test(uses) || /^passive:/.test(desc)) && !hasExplicitActionText(action)) {
-    return false;
-  }
+  if (action.passive) return false;
   return true;
 }
 
@@ -455,7 +479,7 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
     : null;
   return {
     name: opts.name || item.name || 'Weapon',
-    cat: opts.cat || 'attack',
+    cat: opts.cat || 'action',
     uses: opts.uses || 'Equipped',
     _source: 'Weapon',
     attackBonus: (profInfo.proficient ? getPB(C) + mod : mod) + enhancement.attack,
@@ -469,6 +493,7 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
     _weaponMastery: mastery || null,
     _weaponMasteryEntries: mastery ? getWeaponMasteryEntries(mastery) : null,
     _weaponSlot: item.equippedSlot || null,
+    _colorBarCat: 'attack',
     _notProficient: !profInfo.proficient,
     _disadvantage: disAdv,
   };
@@ -528,10 +553,10 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
 
     weaponActions.push({
       name: offHandItem.name,
-      cat: isNick ? 'attack' : 'bonus',
+      cat: isNick ? 'action' : 'bonus',
       uses: isNick ? 'Part of Attack action (Nick)' : 'Bonus Action (Light)',
       _source: 'Weapon',
-      _attackColor: true,
+      _colorBarCat: 'attack',
       attackBonus: (ohProfInfo.proficient ? getPB(C) + ohMod : ohMod) + ohEnhancement.attack,
       damageFormula: ohDamageFormula,
       damageButtonLabel: ohDamageFormula ? `Damage ${ohDamageFormula}${ohDtype ? ` ${ohDtype}` : ''}` : 'Damage',
@@ -556,7 +581,8 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
   const unarmedSaveDc = 8 + getPB(C) + mod;
   weaponActions.push({
     name: 'Unarmed Strike',
-    cat: 'attack',
+    cat: 'action',
+    _colorBarCat: 'attack',
     uses: monkLevel ? 'Martial Arts' : 'Attack',
     _source: 'Basic',
     attackBonus: getPB(C) + mod,

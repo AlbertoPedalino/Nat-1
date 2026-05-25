@@ -160,6 +160,7 @@ export default function install(registry, context = {}) {
         icon: "message-circle",
         cat: "action",
         uses: "Passive",
+        passive: true,
         desc: "You can speak telepathically to any creature within 60 ft that you can see. The creature understands you only if you share a language. You can't receive thoughts this way."
       },
       {

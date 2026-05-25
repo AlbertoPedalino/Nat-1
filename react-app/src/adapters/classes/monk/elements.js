@@ -137,8 +137,10 @@ registerSubclassSheetActions("Monk_Elements", [
     damageKind: "damage",
     desc: "Magic action: expend 2 Focus Points. Choose Acid/Cold/Fire/Lightning/Thunder. 20-ft radius Sphere centered on a point within 120 ft: each creature makes a DEX save (spell save DC), fail = 3 × Martial Arts die damage, success = half." },
   { name: "Stride of the Elements", icon: "", cat: "action", uses: "Passive", minLevel: 11,
+  passive: true,
     desc: "While Elemental Attunement is active: gain Fly Speed and Swim Speed equal to your Speed." },
   { name: "Elemental Epitome", icon: "", cat: "action", uses: "Passive", minLevel: 17,
+  passive: true,
     desc: "While Elemental Attunement is active, also gain — Damage Resistance: choose Acid/Cold/Fire/Lightning/Thunder resistance (can change at the start of each of your turns); Destructive Stride: Step of the Wind gives +20 Speed until end of turn, and creatures within 5 ft that you enter take 1 Martial Arts die elemental damage (once per creature per turn); Empowered Strikes: once per turn, deal extra 1 Martial Arts die elemental damage on an Unarmed Strike hit." },
 ]);
 if (typeof registerSubclassRuntimeConfig === "function") {

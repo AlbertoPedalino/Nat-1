@@ -135,6 +135,7 @@ export default function install(registry, context = {}) {
         icon: "shield",
         cat: "action",
         uses: "Passive",
+        passive: true,
         desc: "Advantage on saving throws against spells cast by creatures within 5 ft of you."
       }
     ]);

@@ -135,6 +135,7 @@ export default function install(registry, context = {}) {
         icon: "swords",
         cat: "action",
         uses: "Passive",
+        passive: true,
         desc: "When you hit with a Heavy weapon attack, add your Proficiency Bonus to the damage roll."
       }
     ]);

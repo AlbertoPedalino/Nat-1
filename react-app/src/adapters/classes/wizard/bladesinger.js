@@ -158,6 +158,7 @@ const _wizardBladesingerActions = [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 3,
     "desc": "You gain proficiency with all Melee Martial weapons that don't have the Heavy or Two-Handed property, and you can use a proficient Melee weapon as a spellcasting focus for your Wizard spells. Choose one skill proficiency: Acrobatics, Athletics, Performance, or Persuasion."
   },
@@ -166,6 +167,7 @@ const _wizardBladesingerActions = [
     "icon": "",
     "cat": "attack",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 6,
     "desc": "You can attack twice when you take the Attack action. You can cast one Wizard cantrip with a casting time of an action in place of one of those attacks."
   },

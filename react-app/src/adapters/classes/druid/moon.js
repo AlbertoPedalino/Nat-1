@@ -137,6 +137,7 @@ registerSubclassSheetActions("Druid_Moon", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 6,
     "desc": "While in a Wild Shape form: each of your attacks can deal its normal damage type or Radiant damage (your choice each time you hit). You can add your WIS modifier to your CON saving throws."
   },

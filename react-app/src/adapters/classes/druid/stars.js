@@ -155,6 +155,7 @@ registerSubclassSheetActions("Druid_Stars", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 10,
     "desc": "Passive: while in Starry Form, the Archer and Chalice damage/healing increases to 2d8+WIS. The Dragon form instead grants a Fly Speed of 20 ft with Hover. Additionally, at the start of each of your turns while in Starry Form, you can change which constellation glimmers on your body."
   },
@@ -163,6 +164,7 @@ registerSubclassSheetActions("Druid_Stars", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 14,
     "desc": "Passive: while in Starry Form, you become partially incorporeal and gain Resistance to Bludgeoning, Piercing, and Slashing damage."
   }

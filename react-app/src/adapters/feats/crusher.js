@@ -128,6 +128,7 @@ export default function install(registry, context = {}) {
         icon: "hand",
         cat: "action",
         uses: "Passive",
+        passive: true,
         desc: "Once per turn when you hit a creature with a bludgeoning damage weapon, push the creature 5 ft away from you (if it is no more than one size larger)."
       },
       {
@@ -135,6 +136,7 @@ export default function install(registry, context = {}) {
         icon: "zap",
         cat: "action",
         uses: "Passive",
+        passive: true,
         desc: "On a critical hit with a bludgeoning weapon, each creature within 30 ft of the target has Disadvantage on attack rolls until the start of your next turn."
       }
     ]);

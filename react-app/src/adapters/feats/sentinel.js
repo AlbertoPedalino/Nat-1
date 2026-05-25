@@ -128,6 +128,7 @@ export default function install(registry, context = {}) {
         icon: "eye",
         cat: "action",
         uses: "Passive",
+        passive: true,
         desc: "When you hit a creature with an Opportunity Attack, its Speed becomes 0 for the rest of the turn."
       },
       {
@@ -135,6 +136,7 @@ export default function install(registry, context = {}) {
         icon: "eye",
         cat: "action",
         uses: "Passive",
+        passive: true,
         desc: "Creatures within your reach provoke Opportunity Attacks even if they take the Disengage action."
       },
       {

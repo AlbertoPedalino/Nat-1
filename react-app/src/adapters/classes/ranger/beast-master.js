@@ -147,6 +147,7 @@ registerSubclassSheetActions("Ranger_Beast Master", [
     "icon": "",
     "cat": "bonus",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 7,
     "desc": "When you use a Bonus Action to command your Primal Companion to take an action, it can also take the Dash, Disengage, Dodge, or Help action using its Bonus Action. In addition, whenever it hits with an attack roll and deals damage, it can deal Force damage or its normal damage type (your choice)."
   },
@@ -155,6 +156,7 @@ registerSubclassSheetActions("Ranger_Beast Master", [
     "icon": "",
     "cat": "attack",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 11,
     "desc": "When you command your Primal Companion to use Beast's Strike, it can use that action twice. In addition, the first time each turn it hits a creature under the effect of your Hunter's Mark, the beast deals extra Force damage equal to Hunter's Mark's bonus damage."
   },
@@ -163,6 +165,7 @@ registerSubclassSheetActions("Ranger_Beast Master", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 15,
     "desc": "Passive: when you cast a spell targeting yourself, you can also affect your Primal Companion with the spell if the beast is within 30 ft of you."
   }

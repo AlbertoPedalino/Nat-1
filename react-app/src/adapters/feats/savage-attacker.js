@@ -128,6 +128,7 @@ export default function install(registry, context = {}) {
         icon: "activity",
         cat: "action",
         uses: "Passive",
+        passive: true,
         desc: "Once per turn when you roll damage for a melee weapon attack, reroll the weapon's damage dice and use either result."
       }
     ]);

@@ -155,6 +155,7 @@ registerSubclassSheetActions("Barbarian_Wild Heart", [
     icon: "",
     cat: "action",
     uses: "Passive (change on LR)",
+    passive: true,
     minLevel: 6,
     desc: "Choose a permanent trait (can change after each Long Rest) — Owl: Darkvision 60 ft (or +60 ft if already have it); Panther: Climb Speed = walking Speed; Salmon: Swim Speed = walking Speed."
   },

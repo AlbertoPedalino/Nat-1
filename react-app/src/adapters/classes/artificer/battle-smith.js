@@ -141,6 +141,7 @@ registerSubclassSheetActions("Artificer_Battle Smith", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 3,
     "desc": "Passive: you gain proficiency with martial weapons. When you attack with a magic weapon, you can use your INT modifier instead of STR or DEX for the attack and damage rolls. You can use a weapon with which you have proficiency as a spellcasting focus for your Artificer spells."
   },
@@ -157,6 +158,7 @@ registerSubclassSheetActions("Artificer_Battle Smith", [
     "icon": "",
     "cat": "attack",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 5,
     "desc": "Attack twice instead of once when you take the Attack action. You can forgo one of those attacks to command your Steel Defender to take the Force-Empowered Rend action."
   },
@@ -178,6 +180,7 @@ registerSubclassSheetActions("Artificer_Battle Smith", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 15,
     "desc": "Improved Jolt: Arcane Jolt damage/healing increases to 4d6. Improved Deflection: when your Steel Defender uses Deflect Attack, the attacker takes Force damage equal to 1d4 + your INT modifier."
   }

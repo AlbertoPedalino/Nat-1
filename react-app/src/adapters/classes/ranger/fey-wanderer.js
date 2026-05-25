@@ -150,6 +150,7 @@ registerSubclassSheetActions("Ranger_Fey Wanderer", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 3,
     "desc": "Passive: whenever you make a Charisma check, add your WIS modifier as a bonus (minimum +1). You gain proficiency in one of: Deception, Performance, or Persuasion (your choice)."
   },

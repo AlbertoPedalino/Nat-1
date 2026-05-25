@@ -128,6 +128,7 @@ export default function install(registry, context = {}) {
         icon: "crosshair",
         cat: "action",
         uses: "Passive",
+        passive: true,
         desc: "Ignore the Loading property of crossbows you are proficient with. Being within 5 ft of a creature doesn't impose disadvantage on your ranged attack rolls."
       },
       {

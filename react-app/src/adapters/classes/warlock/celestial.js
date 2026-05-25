@@ -130,6 +130,7 @@ registerSubclassSheetActions("Warlock_Celestial", [
     damageButtonLabel: "Healing Light 1d6",
     desc: "Bonus Action: expend one or more d6s from your Healing Light pool to restore HP to one creature within 60 ft. Max dice per use = CHA modifier (minimum 1). Pool = 1 + Warlock level. Recharge: Long Rest." },
   { name: "Radiant Soul", icon: "sun", cat: "action", uses: "Passive", minLevel: 6,
+  passive: true,
     inlinePills: ({ character }) => {
       const cha = typeof getMod === "function" && typeof getFinal === "function"
         ? Number(getMod(getFinal(character, "cha")) || 0) : 0;

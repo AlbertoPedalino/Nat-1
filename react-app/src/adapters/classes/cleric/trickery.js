@@ -136,6 +136,7 @@ registerSubclassSheetActions("Cleric_Trickery", [
   { name: "Channel: Cloak of Shadows", icon: "", cat: "action", uses: "1 Channel", resKey: "channel_div", minLevel: 6,
     desc: "As an action, expend one use of Channel Divinity to become Invisible until the end of your next turn. You become visible if you make an attack roll or cast a spell." },
   { name: "Improved Duplicity", icon: "", cat: "action", uses: "Passive", minLevel: 17,
+  passive: true,
     desc: "You can create up to four duplicates of yourself, instead of one, when you use Invoke Duplicity. As a Bonus Action on your turn, you can move any number of them up to 30 ft, to a maximum range of 120 ft." },
 ]);
 if (typeof registerSubclassRuntimeConfig === "function") {

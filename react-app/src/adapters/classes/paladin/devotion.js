@@ -128,8 +128,10 @@ registerSubclassSheetActions("Paladin_Devotion", [
   { name: "Channel: Sacred Weapon", icon: "", cat: "action", uses: "1 Channel", resKey: "paladin_channel_div",
     desc: "When you take the Attack action, expend one use of Channel Divinity to imbue one melee weapon you're holding. For 10 minutes or until you use this feature again: add your CHA modifier (min +1) to attack rolls with that weapon; each hit deals its normal damage type or Radiant damage (your choice per hit); emits Bright Light 20 ft and Dim Light 20 ft beyond. You can end this early (no action). Ends if you aren't carrying the weapon." },
   { name: "Aura of Devotion", icon: "", cat: "action", uses: "Passive", minLevel: 7,
+  passive: true,
     desc: "While conscious, you and friendly creatures within your Aura of Protection have Immunity to the Charmed condition. If a Charmed ally enters the aura, that condition has no effect on them while there. Range: 10 ft (30 ft at lv.18)." },
   { name: "Smite of Protection", icon: "", cat: "action", uses: "Passive", minLevel: 15,
+  passive: true,
     desc: "Whenever you cast Divine Smite, you and your allies have Half Cover while in your Aura of Protection until the start of your next turn." },
   { name: "Holy Nimbus", icon: "", cat: "bonus", uses: "1 / LR or lv5 slot", resKey: "devotion_holy_nimbus", minLevel: 20,
     inlinePills: ({ ownerLevel, character }) => {

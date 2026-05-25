@@ -233,6 +233,7 @@ registerClassSheetActions("Rogue", [
     "icon": "",
     "cat": "reaction",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 7,
     "desc": "DEX save: take no damage on success, half on failure. Doesn't work if Incapacitated."
   },
@@ -241,6 +242,7 @@ registerClassSheetActions("Rogue", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 7,
     "desc": "When you make an ability check using a skill you are proficient in, treat a d20 roll of 9 or lower as a 10."
   },
@@ -249,6 +251,7 @@ registerClassSheetActions("Rogue", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 15,
     "desc": "Proficiency in WIS and CHA saving throws."
   },
@@ -257,6 +260,7 @@ registerClassSheetActions("Rogue", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 18,
     "desc": "No attack roll has Advantage against you while you are not Incapacitated."
   },

@@ -128,6 +128,7 @@ export default function install(registry, context = {}) {
         icon: "activity",
         cat: "action",
         uses: "Passive",
+        passive: true,
         desc: "Once per turn when you hit a creature with a slashing weapon, reduce its Speed by 10 ft until the start of your next turn."
       },
       {
@@ -135,6 +136,7 @@ export default function install(registry, context = {}) {
         icon: "zap",
         cat: "action",
         uses: "Passive",
+        passive: true,
         desc: "On a critical hit with a slashing weapon, the target has Disadvantage on attack rolls until the start of your next turn."
       }
     ]);

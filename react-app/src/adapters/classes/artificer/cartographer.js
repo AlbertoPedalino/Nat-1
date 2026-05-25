@@ -141,6 +141,7 @@ registerSubclassSheetActions("Artificer_Cartographer", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 3,
     "desc": "Passive: when you scribe a Spell Scroll using the crafting rules, the time required is halved."
   },
@@ -174,6 +175,7 @@ registerSubclassSheetActions("Artificer_Cartographer", [
     "icon": "",
     "cat": "reaction",
     "uses": "On Flash of Genius",
+    "passive": true,
     "minLevel": 9,
     "desc": "When you use Flash of Genius, you or one willing creature you can see within 30 ft can also teleport up to 30 ft to an unoccupied space you can see, as part of the same Reaction."
   },
@@ -182,6 +184,7 @@ registerSubclassSheetActions("Artificer_Cartographer", [
     "icon": "",
     "cat": "action",
     "uses": "Passive + 1/LR",
+    "passive": true,
     "resKey": "superior_atlas_path",
     "minLevel": 15,
     "desc": "Safe Haven: when a map holder would drop to 0 HP but not be killed outright, that creature can destroy its map — its HP instead change to twice your Artificer level, and it teleports to within 5 ft of you or another map holder of its choice. Unerring Path: if you are one of the map holders, cast Find the Path without a spell slot, without preparing it, and without spell components. 1/LR."

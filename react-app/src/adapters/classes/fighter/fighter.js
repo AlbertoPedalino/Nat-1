@@ -200,6 +200,7 @@ registerClassSheetActions("Fighter", [
     icon: '',
     cat: 'attack',
     uses: 'Passive',
+    passive: true,
     minLevel: 5,
     desc: 'Attack twice when you take the Attack action (lv.5). Three times at lv.11. Four times at lv.20.'
   },
@@ -208,6 +209,7 @@ registerClassSheetActions("Fighter", [
     icon: '',
     cat: 'attack',
     uses: 'Passive',
+    passive: true,
     minLevel: 9,
     desc: 'Passive: when you attack with a weapon whose Mastery property you can use, you can replace that Mastery property with Push, Sap, or Slow for that attack only.'
   },
@@ -216,6 +218,7 @@ registerClassSheetActions("Fighter", [
     icon: '',
     cat: 'attack',
     uses: 'Passive',
+    passive: true,
     minLevel: 13,
     desc: 'Passive: when you miss with an attack roll using a weapon, you gain Advantage on your next attack roll against the same target before the end of your next turn.'
   },
@@ -233,6 +236,7 @@ registerClassSheetActions("Fighter", [
     icon: '',
     cat: 'bonus',
     uses: 'On Second Wind',
+    passive: true,
     minLevel: 5,
     desc: "When you use Second Wind, you can move up to half your Speed without provoking Opportunity Attacks."
   }

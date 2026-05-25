@@ -178,6 +178,7 @@ registerSubclassSheetSpellModifiers("Cleric_Life", [
 // [SheetRuntime] START
 registerSubclassSheetActions("Cleric_Life", [
   { name: "Disciple of Life", icon: "", cat: "action", uses: "Passive", minLevel: 3,
+  passive: true,
     desc: "When you cast a spell with a spell slot that restores HP to a creature, that creature regains additional HP equal to 2 + the spell slot's level." },
   { name: "Channel: Preserve Life", icon: "", cat: "action", uses: "1 Channel", resKey: "channel_div",
     inlinePills: ({ ownerLevel }) => [
@@ -185,8 +186,10 @@ registerSubclassSheetActions("Cleric_Life", [
     ],
     desc: "As an action, present your Holy Symbol and expend one use of Channel Divinity to restore HP equal to 5 × your Cleric level. Choose any creatures within 30 ft of yourself and divide those HP among them. Cannot restore a creature beyond half its HP maximum. Cannot be used on Undead or Constructs." },
   { name: "Blessed Healer", icon: "", cat: "action", uses: "Passive", minLevel: 6,
+  passive: true,
     desc: "When you cast a spell with a spell slot that restores HP to one creature other than you, you regain HP equal to 2 + the spell slot's level." },
   { name: "Supreme Healing", icon: "", cat: "action", uses: "Passive", minLevel: 17,
+  passive: true,
     desc: "When you would roll dice to restore HP with a spell or Channel Divinity, don't roll — instead use the highest number possible for each die (e.g., d6 = 6, d8 = 8)." },
 ]);
 if (typeof registerSubclassRuntimeConfig === "function") {

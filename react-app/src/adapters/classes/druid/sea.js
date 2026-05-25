@@ -137,6 +137,7 @@ registerSubclassSheetActions("Druid_Sea", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 6,
     "desc": "Passive: the size of the Wrath of the Sea Emanation increases to 10 ft. You gain a Swim Speed equal to your Speed."
   },

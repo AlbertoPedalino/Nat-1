@@ -149,6 +149,7 @@ registerSubclassSheetActions("Artificer_Alchemist", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 5,
     "desc": "Passive: when you cast an Artificer spell using Alchemist's Supplies as the spellcasting focus, add your INT modifier (min +1) to one roll that deals Acid, Fire, or Poison damage — or restores Hit Points."
   },
@@ -166,6 +167,7 @@ registerSubclassSheetActions("Artificer_Alchemist", [
     "icon": "",
     "cat": "action",
     "uses": "Passive + 1/LR",
+    "passive": true,
     "resKey": "chemical_mastery",
     "minLevel": 15,
     "desc": "Alchemical Eruption: when you cast an Artificer spell that deals Acid, Fire, or Poison damage to a target, also deal 2d8 Force damage to that target (once per turn). Chemical Resistance: Resistance to Acid and Poison damage; Immunity to the Poisoned condition. Conjured Cauldron: cast Tasha's Bubbling Cauldron without a spell slot, without preparing it, and without Material components (uses Alchemist's Supplies as focus). 1/LR."

@@ -169,6 +169,7 @@ registerSubclassSheetActions("Rogue_Arcane Trickster", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 9,
     "desc": "Passive: if you have the Invisible condition when you cast a spell on a creature, it has Disadvantage on any saving throw it makes against the spell on the same turn."
   },

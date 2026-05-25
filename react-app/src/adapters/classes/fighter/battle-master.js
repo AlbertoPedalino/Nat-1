@@ -182,6 +182,7 @@ registerSubclassSheetActions("Fighter_Battle Master", [
   { name: "Relentless", icon: "", cat: "action", uses: "1 / turn", minLevel: 15,
     desc: "Once per turn, when you use a maneuver, you can roll a d8 and use the number rolled instead of expending a Superiority Die." },
   { name: "Ultimate Combat Superiority", icon: "", cat: "action", uses: "Passive", minLevel: 18,
+  passive: true,
     desc: "Your Superiority Die becomes a d12." },
 ]);
 registerSubclassSheetResources("Fighter_Battle Master", [

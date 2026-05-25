@@ -149,6 +149,7 @@ registerClassSheetActions("Monk", [
     icon: '',
     cat: 'action',
     uses: 'Passive',
+    passive: true,
     desc: 'While not wearing armor and not using a Shield: your AC equals 10 + DEX modifier + WIS modifier.'
   },
   {
@@ -156,6 +157,7 @@ registerClassSheetActions("Monk", [
     icon: '',
     cat: 'attack',
     uses: 'Passive',
+    passive: true,
     damageFormula: ({ ownerLevel }) => {
       const lv = Number(ownerLevel || 1);
       const die = lv >= 17 ? 12 : lv >= 11 ? 10 : lv >= 5 ? 8 : 6;
@@ -168,6 +170,7 @@ registerClassSheetActions("Monk", [
     icon: '',
     cat: 'action',
     uses: 'Passive',
+    passive: true,
     minLevel: 2,
     desc: 'Speed increases by 10 ft while not wearing armor or using a Shield (+15 at lv.6, +20 at lv.10, +25 at lv.14, +30 at lv.18).'
   },
@@ -237,6 +240,7 @@ registerClassSheetActions("Monk", [
     icon: '',
     cat: 'reaction',
     uses: 'Passive',
+    passive: true,
     minLevel: 4,
     desc: 'Reaction when falling: reduce falling damage by an amount equal to your Monk level × 5.'
   },
@@ -245,6 +249,7 @@ registerClassSheetActions("Monk", [
     icon: '',
     cat: 'attack',
     uses: 'Passive',
+    passive: true,
     minLevel: 5,
     desc: 'You can attack twice, instead of once, whenever you take the Attack action on your turn.'
   },
@@ -262,6 +267,7 @@ registerClassSheetActions("Monk", [
     icon: '',
     cat: 'attack',
     uses: 'Passive',
+    passive: true,
     minLevel: 6,
     desc: 'Your Unarmed Strikes deal your choice of Force damage or their normal Bludgeoning damage.'
   },
@@ -270,6 +276,7 @@ registerClassSheetActions("Monk", [
     icon: '',
     cat: 'reaction',
     uses: 'Passive',
+    passive: true,
     minLevel: 7,
     desc: "When you are subjected to an effect that allows a DEX save for half damage: take no damage on success, half on failure. Doesn't work if you have the Incapacitated condition."
   },
@@ -278,6 +285,7 @@ registerClassSheetActions("Monk", [
     icon: '',
     cat: 'action',
     uses: 'Passive',
+    passive: true,
     minLevel: 9,
     desc: 'You can move along vertical surfaces and across liquids on your turn without falling during the move.'
   },
@@ -286,6 +294,7 @@ registerClassSheetActions("Monk", [
     icon: '',
     cat: 'action',
     uses: 'Passive',
+    passive: true,
     minLevel: 10,
     desc: 'Your three Focus Point techniques are enhanced: Flurry of Blows adds a 3rd strike; Patient Defense (Focus Point version) also grants Temp HP equal to two Martial Arts dice; Step of the Wind (Focus Point version) also lets you move one willing ally within 5 ft up to your Speed without Opportunity Attacks.'
   },
@@ -294,6 +303,7 @@ registerClassSheetActions("Monk", [
     icon: '',
     cat: 'action',
     uses: 'Passive',
+    passive: true,
     minLevel: 10,
     desc: 'At the end of each of your turns, you can end one of the following conditions on yourself: Charmed, Frightened, or Poisoned.'
   },
@@ -302,6 +312,7 @@ registerClassSheetActions("Monk", [
     icon: '',
     cat: 'action',
     uses: 'Passive',
+    passive: true,
     minLevel: 13,
     desc: 'Deflect Attacks now works against all damage types (not just Bludgeoning, Piercing, and Slashing).'
   },
@@ -319,6 +330,7 @@ registerClassSheetActions("Monk", [
     icon: '',
     cat: 'action',
     uses: 'Passive',
+    passive: true,
     minLevel: 15,
     desc: "When you roll Initiative and don't use Uncanny Metabolism, if you have 3 or fewer Focus Points remaining, you regain Focus Points until you have 4."
   },
@@ -336,6 +348,7 @@ registerClassSheetActions("Monk", [
     icon: '',
     cat: 'action',
     uses: 'Passive',
+    passive: true,
     minLevel: 20,
     desc: 'Your Dexterity and Wisdom scores each increase by 4, to a maximum of 25.'
   }

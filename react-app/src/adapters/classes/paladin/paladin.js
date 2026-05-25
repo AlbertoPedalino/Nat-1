@@ -186,6 +186,7 @@ registerClassSheetActions("Paladin", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 6,
     "desc": "While conscious: you and friendly creatures within 10 ft gain +CHA modifier to saving throws (min +1)."
   },
@@ -194,6 +195,7 @@ registerClassSheetActions("Paladin", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 10,
     "desc": "While conscious: you and friendly creatures within your aura are immune to the Frightened condition."
   },
@@ -220,6 +222,7 @@ registerClassSheetActions("Paladin", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 18,
     "desc": "Your Aura of Protection and Aura of Courage now extend to 30 ft."
   },
@@ -228,6 +231,7 @@ registerClassSheetActions("Paladin", [
     "icon": "",
     "cat": "attack",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 11,
     "damageFormula": "1d8",
     "damageButtonLabel": "+1d8 radiant",

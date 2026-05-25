@@ -148,6 +148,7 @@ export default function install(registry, context = {}) {
         icon: "book-open",
         cat: "action",
         uses: "Passive",
+        passive: true,
         desc: "You have a ritual book. When you gain this feat, add two 1st-level ritual spells from the chosen class. Cast any ritual spell from your book in 10 extra minutes without expending a spell slot. Add rituals by copying from scrolls or spellbooks."
       }
     ]);

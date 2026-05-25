@@ -428,6 +428,7 @@ registerClassSheetActions("Warlock", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "desc": "Learn 1 invocation at lv.1 (more at odd levels). Key passive options: Agonizing Blast (add CHA to EB damage), Devil's Sight (see 120 ft in magical darkness), Eldritch Mind (Adv. on Concentration), Eldritch Spear (EB range 300 ft), Repelling Blast (push 10 ft), Witch Sight (see true forms)."
   },
   {
@@ -435,6 +436,7 @@ registerClassSheetActions("Warlock", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "desc": "Your spell slots recharge on a Short Rest or Long Rest. All your slots are the same level (lv.1–5, scales with Warlock level). You learn a limited number of spells from the Warlock list."
   },
   {
@@ -495,6 +497,7 @@ registerClassSheetActions("Warlock", [
     "icon": "book-open",
     "cat": "action",
     "uses": "Passive / Focus",
+    "passive": true,
     "minLevel": 1,
     "condition": function(C) { return _warlockHasInvocation(C, 'Pact of the Tome'); },
     "desc": "Your Book of Shadows functions as a spellcasting focus for your Warlock spells and grants three cantrips plus two 1st-level rituals from any spell list."
@@ -556,6 +559,7 @@ registerClassSheetActions("Warlock", [
     "icon": "swords",
     "cat": "attack",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 5,
     "condition": function(C) { return _warlockHasInvocation(C, 'Thirsting Blade') && _warlockHasInvocation(C, 'Pact of the Blade'); },
     "desc": "Extra Attack: when you take the Attack action, you attack twice instead of once with your Pact Weapon. Requires Pact of the Blade."
@@ -565,6 +569,7 @@ registerClassSheetActions("Warlock", [
     "icon": "swords",
     "cat": "attack",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 12,
     "condition": function(C) { return _warlockHasInvocation(C, 'Devouring Blade') && _warlockHasInvocation(C, 'Thirsting Blade'); },
     "desc": "Your second Pact Weapon attack (from Thirsting Blade) can target a different creature within 5 ft of the first target. Requires Thirsting Blade."
@@ -585,6 +590,7 @@ registerClassSheetActions("Warlock", [
     "icon": "droplets",
     "cat": "attack",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 9,
     "condition": function(C) { return _warlockHasInvocation(C, 'Lifedrinker') && _warlockHasInvocation(C, 'Pact of the Blade'); },
     "damageFormula": "1d6",

@@ -124,6 +124,7 @@ registerSubclassAdapter("Monk_Mercy", function (cls, lv, specs) {});
 // [SheetRuntime] START
 registerSubclassSheetActions("Monk_Mercy", [
   { name: "Implements of Mercy", icon: "", cat: "action", uses: "Passive", minLevel: 3,
+  passive: true,
     desc: "Proficiency in Insight and Medicine skills, and proficiency with the Herbalism Kit." },
   { name: "Hand of Harm", icon: "", cat: "attack", uses: "1 Focus Point / turn", resKey: "ki", minLevel: 3,
     damageFormula: ({ ownerLevel }) => {
@@ -137,6 +138,7 @@ registerSubclassSheetActions("Monk_Mercy", [
   { name: "Hand of Healing", icon: "", cat: "action", uses: "1 Focus Point", resKey: "ki", minLevel: 3,
     desc: "Magic action: spend 1 Focus Point to touch a creature and restore HP equal to one roll of your Martial Arts die + your WIS modifier. When you use Flurry of Blows, you can replace one of the Unarmed Strikes with a use of this feature without expending a Focus Point for the healing." },
   { name: "Physician's Touch", icon: "", cat: "action", uses: "Passive", minLevel: 6,
+  passive: true,
     desc: "Hand of Harm upgrade: also inflict the Poisoned condition until end of your next turn. Hand of Healing upgrade: also end one condition on the healed creature: Blinded, Deafened, Paralyzed, Poisoned, or Stunned." },
   { name: "Flurry of Healing and Harm", icon: "", cat: "bonus", uses: "WIS mod / LR", resKey: "mercy_flurry", minLevel: 11,
     desc: "When you use Flurry of Blows, you can replace each Unarmed Strike with Hand of Healing without expending Focus Points. Additionally, when a Flurry of Blows Unarmed Strike deals damage, you can use Hand of Harm without expending a Focus Point (still once per turn). These free-use benefits total WIS modifier uses per LR." },

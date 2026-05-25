@@ -163,6 +163,7 @@ registerSubclassSheetActions("Druid_Land", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 10,
     "desc": "Passive: you are immune to the Poisoned condition. You have Resistance to a damage type associated with your current land choice (see the Nature's Ward table in your subclass description)."
   },

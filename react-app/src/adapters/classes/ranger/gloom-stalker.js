@@ -140,6 +140,7 @@ registerSubclassSheetActions("Ranger_Gloom Stalker", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 3,
     "desc": "Passive: you gain Darkvision with a range of 60 ft (or +60 ft if you already have it). While entirely in Darkness, you have the Invisible condition to any creature that relies on Darkvision to see you in that Darkness."
   },
@@ -148,6 +149,7 @@ registerSubclassSheetActions("Ranger_Gloom Stalker", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 7,
     "desc": "Passive: you gain proficiency in WIS saving throws. If you already have this proficiency, you instead gain proficiency in INT or CHA saving throws (your choice)."
   },
@@ -156,6 +158,7 @@ registerSubclassSheetActions("Ranger_Gloom Stalker", [
     "icon": "",
     "cat": "attack",
     "uses": "On Dread Ambusher hit",
+    "passive": true,
     "minLevel": 11,
     "desc": "Your Dread Ambusher Psychic damage increases to 2d8. In addition, when you deal that extra Psychic damage, you can cause one of these additional effects: Extra Strike — make another attack with the same weapon against a different creature within 5 ft of the original target and within weapon range; Mass Fear — the target and each creature within 10 ft of it must make a WIS saving throw (spell save DC) or have the Frightened condition until the start of your next turn."
   },

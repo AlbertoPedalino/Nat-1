@@ -150,6 +150,7 @@ registerSubclassSheetActions("Artificer_Artillerist", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 5,
     "desc": "Passive: after a Long Rest, use Woodcarver's Tools to carve sigils into a wand, staff, or rod — it becomes your Arcane Firearm. While holding it as a spellcasting focus, once per turn when you cast an Artificer spell through it, roll 1d8 and add it to one damage roll of that spell."
   },
@@ -158,6 +159,7 @@ registerSubclassSheetActions("Artificer_Artillerist", [
     "icon": "",
     "cat": "reaction",
     "uses": "On Cannon Hit",
+    "passive": true,
     "minLevel": 9,
     "damageFormula": "3d10",
     "damageButtonLabel": ({ formula }) => `${formula} force`,
@@ -170,6 +172,7 @@ registerSubclassSheetActions("Artificer_Artillerist", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 15,
     "desc": "Double Firepower: create both cannons with the same Magic action (expend two uses/spell slots), activate both with the same Bonus Action. Can't create a third. Shimmering Field Projection: you and allies have Half Cover within 10 ft of your Eldritch Cannon."
   }

@@ -167,6 +167,7 @@ registerClassSheetActions("Barbarian", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "desc": "While not wearing armor: your AC equals 10 + DEX modifier + CON modifier. You can use a Shield and still gain this benefit."
   },
   {
@@ -190,6 +191,7 @@ registerClassSheetActions("Barbarian", [
     "icon": "",
     "cat": "reaction",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 2,
     "desc": "You have Advantage on Dexterity saving throws unless you have the Incapacitated condition."
   },
@@ -198,6 +200,7 @@ registerClassSheetActions("Barbarian", [
     "icon": "",
     "cat": "attack",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 5,
     "desc": "You can attack twice, instead of once, whenever you take the Attack action on your turn."
   },
@@ -206,6 +209,7 @@ registerClassSheetActions("Barbarian", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 5,
     "desc": "Your Speed increases by 10 ft while you aren't wearing Heavy Armor."
   },
@@ -214,6 +218,7 @@ registerClassSheetActions("Barbarian", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 7,
     "desc": "You have Advantage on Initiative rolls."
   },
@@ -222,6 +227,7 @@ registerClassSheetActions("Barbarian", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 7,
     "desc": "When you enter your Rage using a Bonus Action, you can move up to half your Speed as part of that same Bonus Action."
   },
@@ -268,6 +274,7 @@ registerClassSheetActions("Barbarian", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 15,
     "desc": "When you roll Initiative, you can regain all expended uses of Rage (usable once per Long Rest). Your Rage lasts 10 minutes and ends early only if you have the Unconscious condition, don Heavy Armor, or choose to end it."
   },
@@ -276,6 +283,7 @@ registerClassSheetActions("Barbarian", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 18,
     "desc": "If your total for a STR check is lower than your STR score, use your STR score in its place."
   },
@@ -284,6 +292,7 @@ registerClassSheetActions("Barbarian", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 20,
     "desc": "Your STR score increases by 4 and your CON score increases by 4, to a maximum of 25."
   }

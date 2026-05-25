@@ -124,6 +124,7 @@ registerSubclassAdapter("Barbarian_World Tree", function (cls, lv, specs) {});
 // [SheetRuntime] START
 registerSubclassSheetActions("Barbarian_World Tree", [
   { name: "Vitality of the Tree", icon: "", cat: "action", uses: "Passive", minLevel: 3,
+  passive: true,
     desc: "Two benefits — Vitality Surge: when you activate your Rage, gain Temporary HP equal to your Barbarian level. Life-Giving Force: at the start of each of your turns while Raging, choose another creature within 10 ft of you; it gains Temporary HP equal to a number of d6s rolled equal to your Rage Damage bonus (these THP vanish when your Rage ends)." },
   { name: "Branches of the Tree", icon: "", cat: "reaction", uses: "While Raging", minLevel: 6,
     desc: "Reaction when a creature you can see starts its turn within 30 ft of you while you're Raging: that creature must succeed on a STR save (DC = 8 + STR mod + PB) or be teleported to an unoccupied space you can see within 5 ft of yourself (or the nearest unoccupied space). After it teleports, you can reduce its Speed to 0 until the end of the current turn." },

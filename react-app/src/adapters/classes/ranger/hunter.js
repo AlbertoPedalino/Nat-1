@@ -149,6 +149,7 @@ registerSubclassSheetActions("Ranger_Hunter", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 3,
     "desc": "Passive: while a creature is marked by your Hunter's Mark, you know whether that creature has any Immunities, Resistances, or Vulnerabilities, and if so, what they are."
   },
@@ -157,6 +158,7 @@ registerSubclassSheetActions("Ranger_Hunter", [
     "icon": "",
     "cat": "attack",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 3,
     "noRoll": true,
     "desc": "Choose one option (swappable on Short or Long Rest): Colossus Slayer — when you hit a creature with a weapon, deal an extra 1d8 damage if the target is missing any HP (once per turn). Horde Breaker — once per turn when you make an attack with a weapon, make another attack with the same weapon against a different creature within 5 ft of the original target (within weapon range) that you haven't attacked this turn."
@@ -166,6 +168,7 @@ registerSubclassSheetActions("Ranger_Hunter", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 7,
     "desc": "Choose one option (swappable on Short or Long Rest): Escape the Horde — Opportunity Attacks against you have Disadvantage. Multiattack Defense — when a creature hits you with an attack roll, that creature has Disadvantage on all other attack rolls against you for the rest of this turn."
   },

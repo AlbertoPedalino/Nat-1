@@ -148,6 +148,7 @@ registerSubclassSheetActions("Fighter_Banneret", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 3,
     "desc": "Comprehension: cast Comprehend Languages as a Ritual (CHA spellcasting). Polyglot: know one language; after a Long Rest, can swap for any language heard/seen/read in the past 24h. Well Spoken: proficiency in one of Insight, Intimidation, Persuasion, or Performance."
   },
@@ -156,6 +157,7 @@ registerSubclassSheetActions("Fighter_Banneret", [
     "icon": "",
     "cat": "action",
     "uses": "On Second Wind / SR",
+    "passive": true,
     "minLevel": 3,
     "desc": "When you use Second Wind, choose up to CHA modifier (min 1) allies within 30 ft. Each chosen ally regains 1d4 + your Fighter level HP. Recharge: Short or Long Rest."
   },
@@ -164,6 +166,7 @@ registerSubclassSheetActions("Fighter_Banneret", [
     "icon": "",
     "cat": "action",
     "uses": "On Group Recovery",
+    "passive": true,
     "minLevel": 7,
     "desc": "When you use Group Recovery, each chosen ally has Advantage on D20 Tests until the start of your next turn."
   },
@@ -172,6 +175,7 @@ registerSubclassSheetActions("Fighter_Banneret", [
     "icon": "",
     "cat": "action",
     "uses": "On Action Surge",
+    "passive": true,
     "minLevel": 10,
     "desc": "When you use Action Surge, choose up to CHA modifier (min 1) allies within 30 ft. Each can immediately use a Reaction to either: Attack (one weapon or Unarmed Strike), or Move (half Speed, no Opportunity Attacks)."
   },
@@ -188,6 +192,7 @@ registerSubclassSheetActions("Fighter_Banneret", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 18,
     "desc": "Bolstered Rally: Group Recovery and Rallying Surge areas expand to 60 ft Emanation. Unshakable Bravery: you have Immunity to the Charmed and Frightened conditions."
   }

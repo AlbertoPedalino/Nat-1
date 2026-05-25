@@ -188,6 +188,7 @@ registerClassSheetActions("Ranger", [
     "icon": "",
     "cat": "bonus",
     "uses": "Passive",
+    "passive": true,
     "desc": "You always have Hunter's Mark prepared (doesn't count against spells known). You can cast it without expending a spell slot: 2 free casts per LR at lv.1, scaling to 3 (lv.5), 4 (lv.9), 5 (lv.13), 6 (lv.17)."
   },
   {
@@ -205,6 +206,7 @@ registerClassSheetActions("Ranger", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 2,
     "desc": "Expertise in one skill. Learn two languages."
   },
@@ -213,6 +215,7 @@ registerClassSheetActions("Ranger", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 6,
     "desc": "Your Speed increases by 10 ft. You gain Climb Speed and Swim Speed equal to your Speed."
   },
@@ -221,6 +224,7 @@ registerClassSheetActions("Ranger", [
     "icon": "",
     "cat": "attack",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 5,
     "desc": "Attack twice when you take the Attack action."
   },
@@ -238,6 +242,7 @@ registerClassSheetActions("Ranger", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 13,
     "desc": "Taking damage can't break your Concentration on Hunter's Mark."
   },
@@ -255,6 +260,7 @@ registerClassSheetActions("Ranger", [
     "icon": "",
     "cat": "attack",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 17,
     "desc": "You have Advantage on attack rolls against the creature currently marked by your Hunter's Mark."
   },
@@ -263,6 +269,7 @@ registerClassSheetActions("Ranger", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 18,
     "desc": "You gain Blindsight 30 ft."
   },
@@ -271,6 +278,7 @@ registerClassSheetActions("Ranger", [
     "icon": "",
     "cat": "attack",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 20,
     "desc": "The extra damage die from Hunter's Mark increases to 1d10 (instead of 1d6)."
   }

@@ -126,6 +126,7 @@ registerSubclassSheetActions("Paladin_Vengeance", [
   { name: "Channel: Vow of Enmity", icon: "", cat: "action", uses: "1 Channel", resKey: "paladin_channel_div",
     desc: "When you take the Attack action, you can expend one use of Channel Divinity to utter a vow of enmity against a creature you can see within 30 ft. You have Advantage on attack rolls against that creature for 1 minute or until you use this feature again. If it drops to 0 HP before the vow ends, you can transfer the vow to a different creature within 30 ft (no action required)." },
   { name: "Relentless Avenger", icon: "", cat: "reaction", uses: "Passive", minLevel: 7,
+  passive: true,
     desc: "When you hit a creature with an Opportunity Attack, you can reduce that creature's Speed to 0 until the end of the current turn, then move up to half your Speed as part of the same Reaction without provoking Opportunity Attacks." },
   { name: "Soul of Vengeance", icon: "", cat: "reaction", uses: "At will", minLevel: 15,
     desc: "Reaction immediately after a creature under the effect of your Vow of Enmity hits or misses with an attack roll: make one melee attack against that creature if it is within range." },

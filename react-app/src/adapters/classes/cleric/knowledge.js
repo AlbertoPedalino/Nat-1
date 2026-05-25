@@ -155,6 +155,7 @@ registerSubclassSheetActions("Cleric_Knowledge", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 6,
     "desc": "You gain Telepathy out to 60 ft. When you use this Telepathy, you can simultaneously contact a number of creatures equal to your WIS modifier (minimum 1). Additionally, you gain proficiency in Intelligence saving throws. If you already have that proficiency, gain proficiency in one other saving throw of your choice."
   },

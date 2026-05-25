@@ -128,6 +128,7 @@ export default function install(registry, context = {}) {
         icon: "anchor",
         cat: "action",
         uses: "Passive",
+        passive: true,
         desc: "Advantage on Constitution saving throws to maintain Concentration. You can perform somatic spell components even when holding weapons or a shield in both hands."
       },
       {

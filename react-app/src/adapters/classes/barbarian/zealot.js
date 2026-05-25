@@ -124,6 +124,7 @@ registerSubclassAdapter("Barbarian_Zealot", function (cls, lv, specs) {});
 // [SheetRuntime] START
 registerSubclassSheetActions("Barbarian_Zealot", [
   { name: "Divine Fury", icon: "", cat: "attack", uses: "Passive", minLevel: 3,
+  passive: true,
     damageFormula: ({ ownerLevel }) => `1d6+${Math.floor(Number(ownerLevel||1)/2)}`,
     damageButtonLabel: ({ formula }) => `+${formula} necrotic/radiant`,
     damageKind: "damage",

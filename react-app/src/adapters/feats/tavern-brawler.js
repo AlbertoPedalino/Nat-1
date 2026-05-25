@@ -128,6 +128,7 @@ export default function install(registry, context = {}) {
         icon: "hand",
         cat: "action",
         uses: "Passive",
+        passive: true,
         desc: "Proficiency with improvised weapons. Your unarmed strikes deal 1d4 + Strength modifier bludgeoning damage."
       },
       {

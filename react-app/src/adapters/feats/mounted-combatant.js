@@ -128,6 +128,7 @@ export default function install(registry, context = {}) {
         icon: "activity",
         cat: "action",
         uses: "Passive",
+        passive: true,
         desc: "Advantage on melee attack rolls against unmounted creatures smaller than your mount. You can force an attack targeting your mount to target you instead. When your mount fails a Dex saving throw, you can use your Reaction to let it succeed or halve the damage on a fail."
       },
       {

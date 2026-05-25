@@ -145,6 +145,7 @@ registerSubclassSheetActions("Sorcerer_Draconic", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 3,
     "desc": "Passive: your Hit Point maximum increases by 3 at lv.3 and by 1 for each additional Sorcerer level. While you aren't wearing armor, your base AC equals 10 + DEX modifier + CHA modifier."
   },
@@ -153,6 +154,7 @@ registerSubclassSheetActions("Sorcerer_Draconic", [
     "icon": "",
     "cat": "action",
     "uses": "Passive",
+    "passive": true,
     "minLevel": 6,
     "desc": "Choose one damage type: Acid, Cold, Fire, Lightning, or Poison. You have permanent Resistance to that damage type. When you cast a spell that deals damage of that type, you can add your CHA modifier to one damage roll of that spell."
   },
