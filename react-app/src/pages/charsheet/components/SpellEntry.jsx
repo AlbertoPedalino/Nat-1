@@ -1,6 +1,6 @@
 import { Fragment, useState } from 'react';
 import { Box, Button, Stack, Typography } from '@mui/material';
-import { Cross, Sword } from 'lucide-react';
+import { Cross, Dices, Sword } from 'lucide-react';
 import { SPELL_LEVEL_LABELS } from '../../charbuilder/constants.js';
 import { SpellNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 import { RichInline } from '../../../shared/character/RichText.jsx';
@@ -166,6 +166,9 @@ export default function SpellEntry({ entry, onRoll, onShowToast, atk: fallbackAt
     : damages;
 
   const cantripData = baseLevel === 0 ? getResolvedCantripData(C, entry.name) : null;
+  const entryData = cantripData || spellData;
+  const utilityDie = entryData?.utilityDie || null;
+  const utilityLabel = entryData?.utilityLabel || 'Roll';
   const modifierDetails = normalizeModifierDetails(cantripData);
   const modifierDetailGroups = groupModifierDetails(modifierDetails);
   const detailTagLabels = modifierDetails.map((item) => item.tagLabel).filter(Boolean);
@@ -254,7 +257,7 @@ export default function SpellEntry({ entry, onRoll, onShowToast, atk: fallbackAt
           <Typography noWrap sx={{ overflow: 'hidden', minWidth: 0, fontSize: '0.875rem', color: 'text.primary', textOverflow: 'ellipsis' }}>{entry.name}</Typography>
           {castLevel > baseLevel ? <Badge label={`Lv.${castLevel}`} color="#d69245" bg="rgba(214,146,69,0.14)" /> : null}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', ml: 'auto', flexShrink: 0 }}>
-            {(hasAttack || hasDamage || hasHeal) ? (
+            {(hasAttack || hasDamage || hasHeal || utilityDie) ? (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                 {hasAttack ? (
                   <Button size="small" variant="outlined"
@@ -275,6 +278,13 @@ export default function SpellEntry({ entry, onRoll, onShowToast, atk: fallbackAt
                     onClick={(e) => rollHeal(e, healDisplayFormula)}
                     sx={{ ...inlineButtonSx, borderColor: 'rgba(88,184,121,0.4)', color: '#58b879' }}>
                     <Cross size={12} style={{ marginRight: 2 }} /> Heal {healDisplayFormula}
+                  </Button>
+                ) : null}
+                {utilityDie && !hasDamage && !hasHeal ? (
+                  <Button size="small" variant="outlined"
+                    onClick={(e) => rollDmg(e, utilityDie, utilityLabel)}
+                    sx={{ ...inlineButtonSx, borderColor: 'rgba(77,149,214,0.4)', color: '#4d95d6' }}>
+                    <Dices size={12} style={{ marginRight: 2 }} /> {utilityLabel} {utilityDie}
                   </Button>
                 ) : null}
               </Box>

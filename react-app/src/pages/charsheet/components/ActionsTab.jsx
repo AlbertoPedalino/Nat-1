@@ -35,6 +35,7 @@ import { Empty } from './SpellsUiParts.jsx';
 import ActionDetailPanel from './ActionDetailPanel.jsx';
 import UnarmedStrikeOptionsPanel from './UnarmedStrikeOptionsPanel.jsx';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
+import ResourceBar from './ResourceBar.jsx';
 import { RichInline, RichText } from '../../../shared/character/RichText.jsx';
 import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
 import { ItemPropertyTable } from '../../../shared/character/ItemPropertyTable.jsx';
@@ -105,10 +106,12 @@ export default function ActionsTab({ C, sheet, onRoll, resources, setResources, 
 
   const resMaxMap = {};
   const resNameMap = {};
+  const resPoolMap = {};
   getAllResourceDefs(C).forEach(def => {
     if (!def.key) return;
     resMaxMap[def.key] = normalizeResourceMax(def, C);
     resNameMap[def.key] = def.name || def.key;
+    if (def.pool) resPoolMap[def.key] = true;
   });
 
   const slotRecoverySpent = slotRecovery
@@ -619,6 +622,7 @@ export default function ActionsTab({ C, sheet, onRoll, resources, setResources, 
                 onRoll={onRoll}
                 onShowToast={onShowToast}
                 resMax={resMaxMap[action.resKey]}
+                isPool={resPoolMap[action.resKey]}
                 onUpdateCharacter={onUpdateCharacter}
               />
             ))}
@@ -842,7 +846,7 @@ export default function ActionsTab({ C, sheet, onRoll, resources, setResources, 
   );
 }
 
-function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, onShowToast, resMax, onUpdateCharacter }) {
+function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, onShowToast, resMax, isPool, onUpdateCharacter }) {
   const [open, setOpen] = useState(false);
 
   const DetailRenderer = action.detailType ? ACTION_DETAIL_RENDERERS[action.detailType] : null;
@@ -1010,6 +1014,8 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
             ) : (
               <Typography sx={{ fontSize: '0.7rem', color: '#edd48a', fontFamily: '"Cinzel", Georgia, serif', fontWeight: 700 }}>∞</Typography>
             )
+          ) : (isPool || safeMax > 10) ? (
+            <ResourceBar value={resCur} max={safeMax} onChange={(delta) => onResChange(action.resKey, delta)} />
           ) : (
             Array.from({ length: safeMax }, (_, i) => {
               const available = i >= safeMax - resCur;

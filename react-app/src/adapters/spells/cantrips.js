@@ -278,6 +278,8 @@ export default function install(registry, context = {}) {
     range: "Touch",
     toHit: false, hasSave: false,
     concentration: true,
+    utilityDie: "1d4",
+    utilityLabel: "Bonus",
     notes: "Choose a skill. Until the spell ends, the willing creature adds 1d4 to ability checks using that skill."
   });
   registerCantripData("Light", {

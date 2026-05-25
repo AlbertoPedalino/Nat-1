@@ -148,6 +148,17 @@ export default function install(registry, context = {}) {
   /* ════════════════════════════
      LIVELLO 1
   ════════════════════════════ */
+  registerSpellData("Bless", {
+    icon: "sparkles",
+    toHit: false, hasSave: false, saveAbility: null,
+    dmgType: "",
+    baseDie: "", upcastDie: "",
+    range: "30 ft", aoe: "",
+    heal: false, concentration: true,
+    utilityDie: "1d4",
+    utilityLabel: "Bonus",
+    notes: "Up to 3 creatures add 1d4 to attack rolls and saving throws. +1 creature per slot above 1st."
+  });
   registerSpellData("Magic Missile", {
     icon: "zap",
     toHit: false, hasSave: false, saveAbility: null,
