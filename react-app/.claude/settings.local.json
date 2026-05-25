@@ -6,7 +6,8 @@
       "Bash(node --input-type=module -e \"import\\('./src/shared/character/selectedFeats.js'\\).then\\(\\(\\)=>console.log\\('ok'\\)\\).catch\\(e=>console.error\\(e.message\\)\\)\")",
       "Bash(npx --no eslint src/shared/character/selectedFeats.js src/adapters/registry.js src/adapters/classes/fighter/fighter.js src/adapters/classes/warlock/warlock.js src/pages/charbuilder/logic/choiceSpecs.js src/pages/charbuilder/logic/persistence.js)",
       "Bash(node *)",
-      "Bash(npx vite *)"
+      "Bash(npx vite *)",
+      "PowerShell(npx vite build --logLevel error 2>&1 | Select-Object -Last 5)"
     ]
   }
 }

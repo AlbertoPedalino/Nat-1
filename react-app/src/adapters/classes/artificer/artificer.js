@@ -245,13 +245,13 @@ registerClassAdapter("Artificer", function (cls, lv, specs) {
 // [SheetRuntime] START
 registerClassSheetActions("Artificer", [
   {
-    "name": "Magical Tinkering",
+    "name": "Tinker's Magic",
     "icon": "",
     "cat": "action",
-    "uses": "Passive",
-    "passive": true,
+    "uses": "INT mod / LR",
+    "resKey": "tinkers_magic",
     "minLevel": 1,
-    "desc": "Passive: using Tinker's Tools, you can imbue a Tiny nonmagical object with one minor magical property (light, recorded message, odor/vision, or faint magical aura). Up to a number of objects equal to your INT modifier can be active at once."
+    "desc": "You know the Mending cantrip. As a Magic action while holding Tinker's Tools, create one item (Ball Bearings, Caltrops, Rope, Torch, etc.) in an unoccupied space within 5 ft. Item lasts until Long Rest. Uses equal to INT modifier (min 1), recharge on Long Rest."
   },
   {
     "name": "Replicate Magic Item",
@@ -289,6 +289,13 @@ registerClassSheetActions("Artificer", [
   }
 ]);
 registerClassSheetResources("Artificer", [
+  {
+    "key": "tinkers_magic",
+    "name": "Tinker's Magic",
+    "icon": "wrench",
+    "recharge": "LR",
+    "max": (lv, { int } = {}) => Math.max(1, int ?? 0)
+  },
   {
     "key": "flash_genius",
     "name": "Flash of Genius",

@@ -37,12 +37,19 @@ export default function install(registry, context = {}) {
   if (typeof registerFeatSheetActions === 'function') {
     registerFeatSheetActions('Crafter', [
       {
-        name: 'Crafter',
-        icon: 'tool',
+        name: 'Crafter: Discount',
+        icon: '',
         cat: 'action',
         uses: 'Passive',
         passive: true,
-        desc: "Proficient with three Artisan's Tools; 20% discount on nonmagical gear you buy; craft items faster during a Long Rest.",
+        desc: "Whenever you buy a nonmagical item, you receive a 20 percent discount on it.",
+      },
+      {
+        name: 'Fast Crafting',
+        icon: '',
+        cat: 'action',
+        uses: '1 item / LR',
+        desc: "When you finish a Long Rest, craft one piece of gear from the Fast Crafting table (requires proficiency with the associated Artisan's Tools). Item lasts until you finish another Long Rest.",
       },
     ]);
   }
