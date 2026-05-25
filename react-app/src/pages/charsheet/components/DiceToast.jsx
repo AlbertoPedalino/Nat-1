@@ -1,6 +1,71 @@
 import { useEffect } from 'react';
-import { Box, Typography, IconButton } from '@mui/material';
+import { Box, Chip, Typography, IconButton } from '@mui/material';
 import { X } from 'lucide-react';
+
+const FONT = '"Cinzel", Georgia, serif';
+
+const MODE_CHIP = {
+  advantage:    { label: 'ADV', color: '#58b879', borderColor: 'rgba(88,184,121,0.55)', bgColor: 'rgba(88,184,121,0.14)' },
+  disadvantage: { label: 'DIS', color: '#d69245', borderColor: 'rgba(214,146,69,0.55)', bgColor: 'rgba(214,146,69,0.14)' },
+};
+
+const toastRootSx = {
+  position: 'fixed', bottom: '1.2rem', right: '1.2rem', zIndex: 999,
+  bgcolor: 'rgba(26,23,19,0.97)', border: 2, borderColor: 'divider', borderRadius: 2,
+  p: '1rem 1.2rem', minWidth: 240, maxWidth: 340,
+  boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
+  backdropFilter: 'blur(8px)',
+};
+
+const modeChipSx = (chip) => ({
+  height: 20, fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.06em',
+  borderRadius: 1, mb: 0.3, color: chip.color, borderColor: chip.borderColor,
+  bgcolor: chip.bgColor, '& .MuiChip-label': { px: 0.5 },
+});
+
+function diceColor(value, faces) {
+  if (value >= (faces || 20)) return '#edd48a';
+  if (value <= 1) return '#de675f';
+  return 'text.primary';
+}
+
+function formatBonus(n) {
+  const b = Number(n) || 0;
+  return b >= 0 ? `+${b}` : `${b}`;
+}
+
+function resolveToastLayout(toast) {
+  const rolls = toast.rolls || [];
+  const d20s = rolls.filter((r) => r.faces === 20);
+  const keptD20 = d20s.find((r) => r.kept) || d20s[0];
+
+  const mode = toast.meta?.mode;
+  const bonus = toast.meta?.bonus;
+  const hasBonus = Number.isFinite(bonus);
+  const formulaMod = d20s.length === 0
+    ? String(toast.detail || '').match(/([+-]\d+)$/)?.[1] || null
+    : null;
+
+  const modifier = hasBonus ? formatBonus(bonus) : formulaMod;
+
+  let totalColor = 'text.primary';
+  if (keptD20?.v >= 20) totalColor = '#edd48a';
+  else if (keptD20?.v <= 1) totalColor = '#de675f';
+
+  return {
+    label: toast.label,
+    modeChip: MODE_CHIP[mode] || null,
+    dice: rolls.map((r) => ({
+      value: r.v,
+      faces: r.faces,
+      color: diceColor(r.v, r.faces),
+      dimmed: r.kept === false,
+    })),
+    modifier,
+    total: toast.total != null && toast.total !== '' ? toast.total : null,
+    totalColor,
+  };
+}
 
 export default function DiceToast({ toast, onClose }) {
   useEffect(() => {
@@ -11,53 +76,48 @@ export default function DiceToast({ toast, onClose }) {
 
   if (!toast) return null;
 
-  const d20Rolls = (toast.rolls || []).filter((r) => r.faces === 20);
-  const keptD20 = d20Rolls.find((r) => r.kept) || d20Rolls[0];
-  const isCrit = keptD20?.v >= 20;
-  const isFail = keptD20?.v <= 1;
-  const totalClass = isCrit ? '#edd48a' : isFail ? '#de675f' : 'text.primary';
+  const layout = resolveToastLayout(toast);
 
   return (
-    <Box sx={{
-      position: 'fixed', bottom: '1.2rem', right: '1.2rem', zIndex: 999,
-      bgcolor: 'rgba(26,23,19,0.97)', border: 2, borderColor: 'divider', borderRadius: 2,
-      p: '1rem 1.2rem', minWidth: 240, maxWidth: 340,
-      boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
-      backdropFilter: 'blur(8px)',
-    }}>
+    <Box sx={toastRootSx}>
       <IconButton size="small" onClick={onClose} sx={{ position: 'absolute', top: 6, right: 8, color: 'text.secondary' }}>
         <X size={14} />
       </IconButton>
-      <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'text.secondary', mb: 0.3 }}>
-        {toast.label}
+
+      <Typography sx={{ fontFamily: FONT, fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'text.secondary', mb: 0.3 }}>
+        {layout.label}
       </Typography>
-      {toast.rolls?.length > 0 && (
+
+      {layout.modeChip && (
+        <Chip size="small" label={layout.modeChip.label} variant="outlined" sx={modeChipSx(layout.modeChip)} />
+      )}
+
+      {(layout.dice.length > 0 || layout.modifier) && (
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.3, my: 0.4, alignItems: 'center' }}>
-          {toast.rolls.map((r, i) => (
+          {layout.dice.map((d, i) => (
             <Box key={i} sx={{
-              bgcolor: r.kept ? 'rgba(202,165,80,0.16)' : 'rgba(46,42,34,1)', border: 1, borderColor: r.kept ? 'primary.main' : 'divider', borderRadius: 1,
+              bgcolor: d.dimmed ? 'rgba(46,42,34,1)' : 'rgba(202,165,80,0.16)',
+              border: 1, borderColor: d.dimmed ? 'divider' : 'primary.main', borderRadius: 1,
               width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.875rem', fontWeight: 700,
-              color: r.v >= (r.faces || 20) ? '#edd48a' : r.v <= 1 ? '#de675f' : 'text.primary',
+              fontFamily: FONT, fontSize: '0.875rem', fontWeight: 700,
+              opacity: d.dimmed ? 0.35 : 1, color: d.color,
             }}>
-              {r.v}
+              {d.value}
             </Box>
           ))}
+          {layout.modifier && (
+            <Typography sx={{ fontSize: '0.875rem', color: 'text.secondary', fontFamily: FONT, fontWeight: 700, ml: 0.3 }}>
+              {layout.modifier}
+            </Typography>
+          )}
         </Box>
       )}
-      <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '1.5rem', fontWeight: 900, lineHeight: 1, textAlign: 'center', my: 0.3, color: totalClass }}>
-        {toast.total > 0 ? toast.total : ''}
-      </Typography>
-      {toast.detail && (
-        <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary', textAlign: 'center', mb: 0.4 }}>
-          {toast.detail}
+
+      {layout.total != null && (
+        <Typography sx={{ fontFamily: FONT, fontSize: '1.5rem', fontWeight: 900, lineHeight: 1, textAlign: 'center', my: 0.3, color: layout.totalColor }}>
+          {layout.total}
         </Typography>
       )}
-      {Number.isFinite(toast.meta?.bonus) ? (
-        <Typography sx={{ fontSize: '0.56rem', color: 'text.secondary', textAlign: 'center', fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-          Modifier {toast.meta.bonus >= 0 ? `+${toast.meta.bonus}` : toast.meta.bonus}
-        </Typography>
-      ) : null}
     </Box>
   );
 }
