@@ -263,18 +263,44 @@ export default function TopBar({ C, sheet, onShortRest, onLongRest, onDownload, 
               const breakdownText = diceText && bonus != null
                 ? `${diceText}${bonus !== 0 ? formatMod(bonus) : ''} = ${entry.total}`
                 : '';
+              const d20s = (entry.rolls || []).filter((r) => r.faces === 20);
+              const keptD20 = d20s.find((r) => r.kept) || d20s[0];
+              const isCrit = keptD20?.v >= 20;
+              const isFail = keptD20?.v <= 1;
+              const mode = entry.meta?.mode;
+              const modeLabel = mode === 'advantage' ? 'ADV' : mode === 'disadvantage' ? 'DIS' : null;
+              const modeColor = mode === 'advantage' ? '#58b879' : mode === 'disadvantage' ? '#d69245' : null;
               return (
-              <Box key={entry.timestamp + '-' + i} sx={{ ...ROLL_LOG_SX.entry, display: 'flex', gap: 0.5 }}>
+              <Box key={entry.timestamp + '-' + i} sx={{
+                ...ROLL_LOG_SX.entry, display: 'flex', gap: 0.5,
+                ...(isCrit ? { borderColor: '#edd48a', bgcolor: 'rgba(237,212,138,0.06)' } : {}),
+                ...(isFail ? { borderColor: '#de675f', bgcolor: 'rgba(222,103,95,0.06)' } : {}),
+              }}>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography sx={ROLL_LOG_SX.label}>{labelParts.clean}</Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.15 }}>
+                    <Typography sx={{ ...ROLL_LOG_SX.label, mb: 0 }}>{labelParts.clean}</Typography>
+                    {modeLabel && (
+                      <Box component="span" sx={{ fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.06em', color: modeColor, border: 1, borderColor: modeColor, borderRadius: 0.5, px: 0.4, py: 0.1, lineHeight: 1.2 }}>
+                        {modeLabel}
+                      </Box>
+                    )}
+                  </Box>
+                  {(isCrit || isFail) && (
+                    <Typography sx={{ fontSize: '0.55rem', fontWeight: 900, letterSpacing: '0.08em', color: isCrit ? '#edd48a' : '#de675f', fontFamily: '"Cinzel", Georgia, serif', mb: 0.15 }}>
+                      {isCrit ? 'NATURAL 20!' : 'NATURAL 1'}
+                    </Typography>
+                  )}
                   <Typography sx={ROLL_LOG_SX.formula}>{formulaText}{suffixStr}</Typography>
                   {breakdownText ? (
                     <Typography sx={ROLL_LOG_SX.rollBreakdown}>{breakdownText}</Typography>
                   ) : null}
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 32, pr: 0.5 }}>
-                  <Typography sx={ROLL_LOG_SX.total}>
-                    <Box component="span" sx={{ fontSize: '0.68rem', color: '#edd48a', fontWeight: 500, mr: 0.35 }}>Result = </Box>
+                  <Typography sx={{
+                    ...ROLL_LOG_SX.total,
+                    ...(isCrit ? { color: '#edd48a', fontSize: '1.3rem' } : {}),
+                    ...(isFail ? { color: '#de675f', fontSize: '1.3rem' } : {}),
+                  }}>
                     {entry.total}
                   </Typography>
                 </Box>

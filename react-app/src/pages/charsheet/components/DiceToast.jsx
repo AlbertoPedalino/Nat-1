@@ -48,13 +48,17 @@ function resolveToastLayout(toast) {
 
   const modifier = hasBonus ? formatBonus(bonus) : formulaMod;
 
+  const isCrit = keptD20?.v >= 20;
+  const isFail = keptD20?.v <= 1;
   let totalColor = 'text.primary';
-  if (keptD20?.v >= 20) totalColor = '#edd48a';
-  else if (keptD20?.v <= 1) totalColor = '#de675f';
+  if (isCrit) totalColor = '#edd48a';
+  else if (isFail) totalColor = '#de675f';
 
   return {
     label: toast.label,
     modeChip: MODE_CHIP[mode] || null,
+    isCrit,
+    isFail,
     dice: rolls.map((r) => ({
       value: r.v,
       faces: r.faces,
@@ -79,7 +83,11 @@ export default function DiceToast({ toast, onClose }) {
   const layout = resolveToastLayout(toast);
 
   return (
-    <Box sx={toastRootSx}>
+    <Box sx={{
+      ...toastRootSx,
+      ...(layout.isCrit ? { borderColor: '#edd48a', boxShadow: '0 8px 32px rgba(0,0,0,0.6), 0 0 20px rgba(237,212,138,0.25)' } : {}),
+      ...(layout.isFail ? { borderColor: '#de675f', boxShadow: '0 8px 32px rgba(0,0,0,0.6), 0 0 20px rgba(222,103,95,0.25)' } : {}),
+    }}>
       <IconButton size="small" onClick={onClose} sx={{ position: 'absolute', top: 6, right: 8, color: 'text.secondary' }}>
         <X size={14} />
       </IconButton>
@@ -87,6 +95,17 @@ export default function DiceToast({ toast, onClose }) {
       <Typography sx={{ fontFamily: FONT, fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'text.secondary', mb: 0.3 }}>
         {layout.label}
       </Typography>
+
+      {layout.isCrit && (
+        <Typography sx={{ fontFamily: FONT, fontSize: '0.75rem', fontWeight: 900, letterSpacing: '0.1em', color: '#edd48a', mb: 0.3 }}>
+          NATURAL 20!
+        </Typography>
+      )}
+      {layout.isFail && (
+        <Typography sx={{ fontFamily: FONT, fontSize: '0.75rem', fontWeight: 900, letterSpacing: '0.1em', color: '#de675f', mb: 0.3 }}>
+          NATURAL 1
+        </Typography>
+      )}
 
       {layout.modeChip && (
         <Chip size="small" label={layout.modeChip.label} variant="outlined" sx={modeChipSx(layout.modeChip)} />
@@ -114,7 +133,11 @@ export default function DiceToast({ toast, onClose }) {
       )}
 
       {layout.total != null && (
-        <Typography sx={{ fontFamily: FONT, fontSize: '1.5rem', fontWeight: 900, lineHeight: 1, textAlign: 'center', my: 0.3, color: layout.totalColor }}>
+        <Typography sx={{
+          fontFamily: FONT, fontWeight: 900, lineHeight: 1, textAlign: 'center', my: 0.3,
+          fontSize: (layout.isCrit || layout.isFail) ? '2rem' : '1.5rem',
+          color: layout.totalColor,
+        }}>
           {layout.total}
         </Typography>
       )}
