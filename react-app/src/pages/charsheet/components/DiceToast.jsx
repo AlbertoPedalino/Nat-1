@@ -42,7 +42,7 @@ function resolveToastLayout(toast) {
   const mode = toast.meta?.mode;
   const bonus = toast.meta?.bonus;
   const hasBonus = Number.isFinite(bonus);
-  const formulaMod = d20s.length === 0
+  const formulaMod = d20s.length === 0 && rolls.length > 0
     ? String(toast.detail || '').match(/([+-]\d+)$/)?.[1] || null
     : null;
 
