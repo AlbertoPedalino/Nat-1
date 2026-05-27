@@ -6,6 +6,7 @@ import { getItemSenses } from '../../../shared/character/itemEffects.js';
 
 const SENSE_LABELS = {
   darkvision: 'Darkvision',
+  devilsSight: "Devil's Sight",
   blindsight: 'Blindsight',
   truesight: 'Truesight',
   tremorsense: 'Tremorsense',

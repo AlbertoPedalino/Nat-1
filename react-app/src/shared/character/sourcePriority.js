@@ -17,6 +17,7 @@ export const SUBCLASS_ALLOWED_SOURCES = frozenList(['XPHB', 'FRAiF', 'FRHoF', 'E
 export const SUBCLASS_SOURCE_PRIORITY = frozenList(['XPHB', 'FRAiF', 'FRHoF', 'EFA']);
 export const BACKGROUND_ALLOWED_SOURCES = frozenList(['XPHB', 'EFA', 'FRAiF', 'FRHoF']);
 export const FEAT_ALLOWED_SOURCES = frozenList(['XPHB', 'EFA', 'FRAiF', 'FRHoF']);
+export const OPTIONAL_FEATURE_ALLOWED_SOURCES = frozenList(['XPHB', 'EFA', 'FRAiF', 'FRHoF']);
 
 export function normalizeSource(source) {
   return String(source || '').trim();

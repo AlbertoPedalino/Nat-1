@@ -11,6 +11,7 @@ import {
   CLASS_ALLOWED_SOURCES,
   FEAT_ALLOWED_SOURCES,
   ITEM_SOURCE_PRIORITY,
+  OPTIONAL_FEATURE_ALLOWED_SOURCES,
   SPECIES_ALLOWED_SOURCES,
   isAllowedSource,
   sourceRank,
@@ -108,6 +109,13 @@ export async function loadFeats() {
   return (data.feat || [])
     .filter((feat) => isAllowedSource(feat.source, FEAT_ALLOWED_SOURCES))
     .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export async function loadOptionalFeatures() {
+  const data = await getJson('optionalfeatures.json');
+  return (data.optionalfeature || [])
+    .filter((f) => isAllowedSource(f.source, OPTIONAL_FEATURE_ALLOWED_SOURCES) && Array.isArray(f.entries))
+    .map((f) => ({ name: f.name, source: f.source, featureType: f.featureType, entries: stripTemplatedEntries(f.entries) }));
 }
 
 export async function loadSpells() {

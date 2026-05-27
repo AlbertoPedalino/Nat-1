@@ -21,7 +21,7 @@ import { calcMaxHP, getMod, getFinal, getPB, getSaveBonus } from './logic/calcul
 import { applyResourceRest, getAllResourceDefs, getHitDicePools, getUsedHitDiceTotal, normalizeResourceMax } from './logic/restResources.js';
 import { applyFreeCastRest, getFreeCastDefsForCharacter } from './logic/spellsTabLogic.js';
 import { loadCoreAdapters, loadClassAdapters, installedRegistry } from '../../adapters/index.js';
-import { loadItems, reconcileInventoryWithItemsDb } from '../charbuilder/logic/dataLoaders.js';
+import { loadItems, loadOptionalFeatures, reconcileInventoryWithItemsDb } from '../charbuilder/logic/dataLoaders.js';
 import {
   getActiveCharId,
   loadCharacter as storeLoadCharacter,
@@ -59,7 +59,8 @@ export default function CharacterSheet() {
       loadCoreAdapters(context),
       loadClassAdapters(classNames, context),
       loadItems().catch(() => []),
-    ]).then(([, , itemsDb]) => {
+      loadOptionalFeatures().catch(() => []),
+    ]).then(([, , itemsDb, optFeatures]) => {
       if (!alive) return;
 
       // Re-merge structured effect fields from the items DB into the stored
@@ -73,6 +74,8 @@ export default function CharacterSheet() {
           if (id) storePatchCharacter(id, { inventory: reconciled });
         }
       }
+
+      if (optFeatures?.length) nextChar = { ...nextChar, optionalFeatureEntries: optFeatures };
 
       setCharId(id);
       setC(nextChar);

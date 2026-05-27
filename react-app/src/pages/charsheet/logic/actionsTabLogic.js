@@ -321,6 +321,10 @@ export function collectAdapterActions(C, sheet) {
   ]);
   const speciesFeatureByName = collectNamedEntries(C?.speciesSnapshot?.entries || [], 'species features');
   const backgroundFeatureByName = collectNamedEntries(C?.backgroundSnapshot?.entries || [], 'background features');
+  const optionalFeatureByName = new Map();
+  (C?.optionalFeatureEntries || []).forEach((f) => {
+    if (f?.name && Array.isArray(f.entries)) optionalFeatureByName.set(nameKey(f.name), f.entries);
+  });
 
   const lookupByName = (key) => {
     if (!key) return null;
@@ -329,6 +333,7 @@ export function collectAdapterActions(C, sheet) {
     for (const map of extraFeatureMaps) if (map.has(key)) return map.get(key);
     if (speciesFeatureByName.has(key)) return speciesFeatureByName.get(key);
     if (backgroundFeatureByName.has(key)) return backgroundFeatureByName.get(key);
+    if (optionalFeatureByName.has(key)) return optionalFeatureByName.get(key);
     return null;
   };
 
