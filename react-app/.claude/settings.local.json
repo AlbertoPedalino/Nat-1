@@ -7,7 +7,14 @@
       "Bash(npx --no eslint src/shared/character/selectedFeats.js src/adapters/registry.js src/adapters/classes/fighter/fighter.js src/adapters/classes/warlock/warlock.js src/pages/charbuilder/logic/choiceSpecs.js src/pages/charbuilder/logic/persistence.js)",
       "Bash(node *)",
       "Bash(npx vite *)",
-      "PowerShell(npx vite build --logLevel error 2>&1 | Select-Object -Last 5)"
+      "PowerShell(npx vite build --logLevel error 2>&1 | Select-Object -Last 5)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(cd C:\\\\Users\\\\alber\\\\Documents\\\\DND\\\\GM-Board\\\\react-app *)",
+      "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/items.json\")",
+      "Bash(python3 -c ' *)",
+      "Bash(python -c ' *)",
+      "PowerShell($json = Invoke-WebRequest -Uri \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/items.json\" -UseBasicParsing | Select-Object -ExpandProperty Content | ConvertFrom-Json; $potions = @\\($json.item | Where-Object { $_.name -eq \"Potion of Healing\" }\\); Write-Host \"=== Potion of Healing \\(DMG\\) ===\" ; $potions[0] | ConvertTo-Json -Depth 10; Write-Host \"\"; Write-Host \"=== Potion of Healing \\(XDMG\\) ===\" ; $potions[1] | ConvertTo-Json -Depth 10)",
+      "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/items-base.json\")"
     ]
   }
 }

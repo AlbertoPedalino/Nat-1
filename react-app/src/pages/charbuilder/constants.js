@@ -149,5 +149,5 @@ export const ITEM_SUMMARIES = [
   { name: 'Longsword', type: 'weapon', source: 'XPHB', weight: 3, value: 1500 },
   { name: 'Shield', type: 'armor', source: 'XPHB', weight: 6, value: 1000 },
   { name: 'Explorer Pack', type: 'gear', source: 'XPHB', weight: 59, value: 1000 },
-  { name: 'Healing Potion', type: 'magic', source: 'XDMG', weight: 0.5, value: 5000 },
+  { name: 'Potion of Healing', type: 'magic', source: 'XDMG', weight: 0.5, value: 5000 },
 ];

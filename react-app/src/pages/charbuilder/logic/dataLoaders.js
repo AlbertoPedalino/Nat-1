@@ -396,12 +396,11 @@ export async function loadItems() {
       ).map(withCanonicalSource)
     : [];
 
-  const all = [
-    ...ITEM_SUMMARIES.map(withCanonicalSource),
-    ...baseItems,
-    ...magicItems,
-    ...magicVariants,
-  ].filter(isItem2024);
+  const fetchedItems = [...baseItems, ...magicItems, ...magicVariants];
+  const fallback = fetchedItems.length === 0
+    ? ITEM_SUMMARIES.map(withCanonicalSource)
+    : [];
+  const all = [...fallback, ...fetchedItems].filter(isItem2024);
   all.push(...buildMissingGroupParents(all));
 
   const byName = new Map();
