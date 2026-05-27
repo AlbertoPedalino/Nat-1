@@ -145,7 +145,7 @@ if (typeof registerSubclassRuntimeConfig === "function") {
 
 registerSubclassSheetEffects("Monk_Shadow", [
 
-  { type: "darkvision", value: 60, minLevel: 3, note: "Shadow Arts: Darkvision if needed." },
+  { type: "darkvision", value: 60, additive: true, minLevel: 3, note: "Shadow Arts: Darkvision 60 ft or +60 ft if you already have it." },
   { type: "teleport", minLevel: 6, note: "Shadow Step." },
   { type: "invisibility", minLevel: 11, note: "Improved Shadow Step / Cloak of Shadows." },
   { type: "reactionAttack", minLevel: 17, note: "Opportunist." },

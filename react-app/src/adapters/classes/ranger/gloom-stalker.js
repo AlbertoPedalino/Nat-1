@@ -197,7 +197,7 @@ if (typeof registerSubclassRuntimeConfig === "function") {
 
 registerSubclassSheetEffects("Ranger_Gloom Stalker", [
 
-  { type: "sense", senseType: "darkvision", value: 60, minLevel: 3, note: "Umbral Sight: gain Darkvision 60 ft or +60 ft if you already have it." },
+  { type: "sense", senseType: "darkvision", value: 60, additive: true, minLevel: 3, note: "Umbral Sight: gain Darkvision 60 ft or +60 ft if you already have it." },
   { type: "saveProficiency", ability: "wis", minLevel: 7, note: "Iron Mind: if already proficient, choose INT or CHA instead." },
 
 ]);

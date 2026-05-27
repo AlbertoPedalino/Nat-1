@@ -11,15 +11,39 @@ const SENSE_LABELS = {
   tremorsense: 'Tremorsense',
 };
 
+function isDarkvisionEffect(effect) {
+  const type = String(effect?.type || '').toLowerCase();
+  const sense = String(effect?.senseType || '').toLowerCase();
+  return type === 'darkvision' || sense === 'darkvision';
+}
+
+function mergeDarkvision(baseDv, effects) {
+  let best = baseDv;
+  const sources = [];
+  effects.forEach((e) => {
+    const v = Number(e.value || 0);
+    if (!v) return;
+    const effective = e.additive ? baseDv + v : v;
+    if (effective > best) {
+      best = effective;
+      if (e.ownerName) sources.push(e.ownerName);
+    }
+  });
+  return { value: best, sources };
+}
+
 export default function Senses({ C }) {
   const passPerc = 10 + getSkillBonus(C, { n: 'Perception', a: 'wis' });
   const passInv = 10 + getSkillBonus(C, { n: 'Investigation', a: 'int' });
   const passIns = 10 + getSkillBonus(C, { n: 'Insight', a: 'wis' });
   const speciesDv = C.speciesSnapshot?.darkvision || 0;
   const itemSenses = getItemSenses(C);
-  const dv = Math.max(speciesDv, itemSenses.darkvision || 0);
+  const baseDv = Math.max(speciesDv, itemSenses.darkvision || 0);
   const senseEffects = collectSenseEffects(C);
+  const dvEffects = senseEffects.filter(isDarkvisionEffect);
+  const otherEffects = senseEffects.filter((e) => !isDarkvisionEffect(e));
   const extraItemSenses = Object.entries(itemSenses).filter(([type]) => type !== 'darkvision');
+  const dv = mergeDarkvision(baseDv, dvEffects);
 
   return (
     <Paper variant="outlined" sx={{ mb: '0.6rem', overflow: 'hidden' }}>
@@ -33,11 +57,17 @@ export default function Senses({ C }) {
         <SenseRow value={passPerc} label="Passive Perception" />
         <SenseRow value={passInv} label="Passive Investigation" />
         <SenseRow value={passIns} label="Passive Insight" />
-        {dv > 0 && <SenseRow value={`${dv} ft`} label="Darkvision" color="secondary.main" />}
+        {dv.value > 0 && (
+          <SenseRow
+            value={`${dv.value} ft`}
+            label={`Darkvision${dv.sources.length ? ` · ${dv.sources.join(', ')}` : ''}`}
+            color="secondary.main"
+          />
+        )}
         {extraItemSenses.map(([type, dist]) => (
           <SenseRow key={`item-sense-${type}`} value={`${dist} ft`} label={SENSE_LABELS[type] || type} color="secondary.main" />
         ))}
-        {senseEffects.map((effect, index) => (
+        {otherEffects.map((effect, index) => (
           <SenseRow
             key={`${effect.ownerName}-${effect.type}-${index}`}
             value={senseEffectValue(effect)}

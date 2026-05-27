@@ -16,7 +16,10 @@
       "PowerShell($json = Invoke-WebRequest -Uri \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/items.json\" -UseBasicParsing | Select-Object -ExpandProperty Content | ConvertFrom-Json; $potions = @\\($json.item | Where-Object { $_.name -eq \"Potion of Healing\" }\\); Write-Host \"=== Potion of Healing \\(DMG\\) ===\" ; $potions[0] | ConvertTo-Json -Depth 10; Write-Host \"\"; Write-Host \"=== Potion of Healing \\(XDMG\\) ===\" ; $potions[1] | ConvertTo-Json -Depth 10)",
       "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/items-base.json\")",
       "Bash(Select-Object -Last 20)",
-      "PowerShell(npx vite build --mode development 2>&1 | Select-Object -Last 20)"
+      "PowerShell(npx vite build --mode development 2>&1 | Select-Object -Last 20)",
+      "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/races.json\")",
+      "PowerShell(npx vite build --mode development 2>&1 | Select-Object -Last 5)",
+      "PowerShell(npx vite build --mode development 2>&1 | Select-Object -Last 3)"
     ]
   }
 }
