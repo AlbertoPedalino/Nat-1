@@ -353,6 +353,14 @@ registerItemPropertySegment('value', (item) => {
   return gp ? [{ kind: 'value', label: 'Value', value: gp }] : [];
 });
 
+const MISC_TAG_LABELS = { CNS: 'Consumable', TT: 'Trinket', 'CF/W': 'Crafts/Wondrous' };
+registerItemPropertySegment('tags', (item) => {
+  const tags = Array.isArray(item?.miscTags) ? item.miscTags : [];
+  const labels = tags.map((t) => MISC_TAG_LABELS[t] || t).filter(Boolean);
+  if (!labels.length) return [];
+  return [{ kind: 'tags', label: 'Tags', value: labels.join(', ') }];
+});
+
 export const ITEM_PROPERTY_SEGMENT_KINDS = SEGMENT_ORDER;
 
 export function buildItemPropertySegments(item, options = {}) {
