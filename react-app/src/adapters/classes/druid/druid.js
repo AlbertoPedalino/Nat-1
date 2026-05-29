@@ -278,6 +278,17 @@ registerClassSheetProficiencies("Druid", [
   { type: "weapon", values: ["Martial"], minLevel: 1, requiredChoice: { key: "druid_primal_order", value: "Warden" } }
 ]);
 
+// Druidic feature (lv.1) always keeps Speak with Animals prepared.
+if (typeof registerClassRuntimeConfig === "function") {
+  registerClassRuntimeConfig("Druid", {
+    spellcasting: {
+      alwaysPreparedSpells: [
+        { name: "Speak with Animals", minLevel: 1, level: 1 }
+      ],
+    },
+  });
+}
+
 if (typeof registerResourceSideEffect === 'function') {
   registerResourceSideEffect('wild_resurgence', function (ctx = {}) {
     const C = ctx.character || ctx.C;
