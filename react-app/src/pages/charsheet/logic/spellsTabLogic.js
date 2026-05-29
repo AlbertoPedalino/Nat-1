@@ -26,8 +26,25 @@ const _PREP_RANK = {
 
 const _SPECIAL_ORIGIN = new Set(['at_will', 'invocation', 'mystic_arcanum', 'spellbook']);
 
+// Union of contributing sources across merged duplicates of the same spell,
+// deduped by origin label. Lets the UI show every source a spell came from
+// (e.g. a Forest Gnome Druid's Speak with Animals) on a single consolidated row.
+function _unionSources(a, b) {
+  const out = [];
+  const seen = new Set();
+  [...(a || []), ...(b || [])].forEach((src) => {
+    if (!src) return;
+    const key = norm(src.originLabel || src.label || '');
+    if (!key || seen.has(key)) return;
+    seen.add(key);
+    out.push(src);
+  });
+  return out;
+}
+
 function _mergeRow(existing, incoming, incomingLocked) {
-  if (!existing) return { ...incoming, locked: incomingLocked };
+  const mergedSources = _unionSources(existing?.sources, incoming?.sources);
+  if (!existing) return { ...incoming, locked: incomingLocked, sources: mergedSources };
 
   const mergeMeta = (a, b) => {
     const srcA = a.sourceInfo || {};
@@ -75,29 +92,31 @@ function _mergeRow(existing, incoming, incomingLocked) {
   const aHasInfo = srcA.label || srcA.kind || srcA.originType;
   const bHasInfo = srcB.label || srcB.kind || srcB.originType;
 
+  let merged;
   if (!aHasInfo && !bHasInfo) {
-    return { ...existing, ...incoming, locked: existing.locked || incomingLocked };
-  }
-  if (!aHasInfo && bHasInfo) {
-    return { ...existing, ...incoming, locked: existing.locked || incomingLocked };
-  }
-  if (aHasInfo && !bHasInfo) {
-    return { ...existing, locked: existing.locked || incomingLocked };
+    merged = { ...existing, ...incoming, locked: existing.locked || incomingLocked };
+  } else if (!aHasInfo && bHasInfo) {
+    merged = { ...existing, ...incoming, locked: existing.locked || incomingLocked };
+  } else if (aHasInfo && !bHasInfo) {
+    merged = { ...existing, locked: existing.locked || incomingLocked };
+  } else {
+    merged = { ...existing, ...mergeMeta(existing, incoming) };
   }
 
-  return { ...existing, ...mergeMeta(existing, incoming) };
+  merged.sources = mergedSources;
+  return merged;
 }
 
 export function buildSpellInfo(C, spellIndex) {
   const rows = new Map();
   const lockedNames = new Set();
   const freeCastsByKey = new Map();
-  const push = (name, source, locked = false, castLevel = null, fallbackLevel = 0, ownerClassName = null, spellcastingAbility = null, freeCasts = null) => {
+  const push = (name, source, locked = false, castLevel = null, fallbackLevel = 0, ownerClassName = null, spellcastingAbility = null, freeCasts = null, sources = null) => {
     const full = spellIndex.get(norm(name));
     const canonicalName = full?.name || name;
     const spell = { ...(full || {}), name: canonicalName, level: Number(full?.level ?? fallbackLevel ?? 0) };
     const key = `${norm(canonicalName)}|${castLevel || spell.level}`;
-    const row = { ...spell, sourceInfo: source, castLevel, ownerClassName, spellcastingAbility, locked };
+    const row = { ...spell, sourceInfo: source, sources: (Array.isArray(sources) && sources.length) ? sources : (source ? [source] : []), castLevel, ownerClassName, spellcastingAbility, locked };
     const existing = rows.get(key);
     rows.set(key, _mergeRow(existing, row, locked));
     if (locked) {
@@ -126,7 +145,7 @@ export function buildSpellInfo(C, spellIndex) {
   });
 
   collectAtWillSpells(C).forEach(({ name, source }) => push(name, source, true));
-  collectAutoGrantedSpells(C).forEach(({ name, level, source, ownerClassName, spellcastingAbility, freeCasts }) => push(name, source, true, null, level, ownerClassName, spellcastingAbility, freeCasts));
+  collectAutoGrantedSpells(C).forEach(({ name, level, source, sources, ownerClassName, spellcastingAbility, freeCasts }) => push(name, source, true, null, level, ownerClassName, spellcastingAbility, freeCasts, sources));
   collectChoiceSpells(C, spellIndex).forEach(({ name, source, ownerClassName, spellcastingAbility, freeCasts }) => push(name, source, true, null, 0, ownerClassName, spellcastingAbility, freeCasts));
 
   // Item-attached spells (Cloak of the Bat, Boots of Levitation, etc.). The
@@ -170,7 +189,7 @@ export function buildSpellInfo(C, spellIndex) {
     if (full) push(name, source, false, null, 0, ownerClassName);
     else {
       const key = `${norm(name)}|${level}`;
-      if (!rows.has(key)) rows.set(key, { name, level: Number(level || 0), sourceInfo: source, ownerClassName });
+      if (!rows.has(key)) rows.set(key, { name, level: Number(level || 0), sourceInfo: source, sources: source ? [source] : [], ownerClassName });
     }
   }
 
@@ -486,10 +505,22 @@ function collectAutoGrantedSpells(C) {
     });
   });
 
+  // Collapse same-named grants to one entry, but accumulate every contributing
+  // source (and their free casts) so a spell granted by multiple origins — e.g.
+  // a Forest Gnome Druid's Speak with Animals — keeps all its source tags.
   const runtimeByName = new Map();
   runtimeOut.forEach((entry) => {
     const key = norm(entry.name);
-    if (key) runtimeByName.set(key, entry);
+    if (!key) return;
+    const existing = runtimeByName.get(key);
+    if (existing) {
+      existing.sources = _unionSources(existing.sources, [entry.source]);
+      if (entry.freeCasts?.length) existing.freeCasts = mergeFreeCastsById(existing.freeCasts || [], entry.freeCasts);
+      existing.spellcastingAbility = existing.spellcastingAbility || entry.spellcastingAbility;
+      existing.ownerClassName = existing.ownerClassName || entry.ownerClassName;
+    } else {
+      runtimeByName.set(key, { ...entry, sources: [entry.source] });
+    }
   });
 
   (C?.autoGrantedSpells || []).forEach((entry) => {
@@ -502,10 +533,12 @@ function collectAutoGrantedSpells(C) {
     const allCfgSpells = [...(cfg?.alwaysKnownSpells || []), ...(cfg?.alwaysPreparedSpells || [])];
     const cfgEntry = allCfgSpells.find((s) => norm(s?.name || '') === key);
     if (cfgEntry?.invocation && !warlockHasInvocation(C, cfgEntry.invocation)) return;
+    const fallbackSource = { label: entry.source || 'Auto', color: '#70b7a6', originType: entry.sourceType || 'auto_granted', originLabel: entry.source || 'Auto' };
     runtimeByName.set(key, {
       name: entry.name,
       level: Number(entry.level ?? 0),
-      source: { label: entry.source || 'Auto', color: '#70b7a6', originType: entry.sourceType || 'auto_granted', originLabel: entry.source || 'Auto' },
+      source: fallbackSource,
+      sources: [fallbackSource],
       ownerClassName: ownerClass,
       spellcastingAbility: entry.spellcastingAbility || entry.ability || null,
     });

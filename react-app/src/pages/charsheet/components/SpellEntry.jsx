@@ -1,5 +1,5 @@
 import { Fragment, useState } from 'react';
-import { Box, Button, Stack, Typography } from '@mui/material';
+import { Box, Button, Stack, Tooltip, Typography } from '@mui/material';
 import { Cross, Dices, Sword } from 'lucide-react';
 import { SPELL_LEVEL_LABELS } from '../../charbuilder/constants.js';
 import { SpellNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
@@ -42,6 +42,21 @@ function Badge({ label, color, bg = 'transparent' }) {
       {label}
     </Box>
   );
+}
+
+// Source badge for a spell row. When the same spell is granted by more than
+// one source (e.g. a Forest Gnome Druid's Speak with Animals), the row stays
+// consolidated to a single badge showing the primary source plus a `+N`
+// indicator, with all contributing sources listed in a tooltip.
+function SourceBadge({ sourceInfo, sources, suffix = '' }) {
+  if (!sourceInfo) return null;
+  const all = (sources && sources.length ? sources : [sourceInfo]).filter(Boolean);
+  const extra = all.length - 1;
+  const label = sourceInfo.label + suffix + (extra > 0 ? ` +${extra}` : '');
+  const badge = <Badge label={label} color={sourceInfo.color || '#9d7fb8'} bg="rgba(157,127,184,0.16)" />;
+  if (extra <= 0) return badge;
+  const title = 'Sources: ' + all.map((s) => s.originLabel || s.label).filter(Boolean).join(', ');
+  return <Tooltip title={title} arrow><Box component="span" sx={{ display: 'inline-flex' }}>{badge}</Box></Tooltip>;
 }
 
 function FreeCastsInline({ freeCasts, freeCastUses, onToggleFreeCast }) {
@@ -293,7 +308,7 @@ export default function SpellEntry({ entry, onRoll, onShowToast, atk: fallbackAt
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', flexWrap: 'wrap', justifyContent: 'space-between' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', flexWrap: 'wrap' }}>
-            {entry.sourceInfo ? <Badge label={entry.sourceInfo.label + (beamBonus ? ` ${beamBonus >= 0 ? '+' : ''}${beamBonus}` : '')} color={entry.sourceInfo.color || '#9d7fb8'} bg="rgba(157,127,184,0.16)" /> : null}
+            <SourceBadge sourceInfo={entry.sourceInfo} sources={entry.sources} suffix={beamBonus ? ` ${beamBonus >= 0 ? '+' : ''}${beamBonus}` : ''} />
             {modifierTags.map(function (tag) { return <Badge key={tag} label={tag} color="#9d7fb8" bg="rgba(157,127,184,0.16)" />; })}
             {getSpellStatusChips(entry).map((chip) => <Badge key={chip.key} label={chip.label} color={chip.color} bg={chip.bg} />)}
             {ritualOnly ? <Badge label="Ritual only" color="#58b879" bg="rgba(63,166,108,0.14)" /> : null}
