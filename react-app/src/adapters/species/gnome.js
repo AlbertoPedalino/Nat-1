@@ -120,9 +120,13 @@ export default function install(registry, context = {}) {
     getGenericBackgroundChoiceMeta,
     getGenericBackgroundOriginFeat,
   } = createAdapterBindings(registry, context);
+// Canonical lineage tokens — single source for both the choice options
+// (validated against _versions via `expect`) and the requiredChoice predicates.
+const GNOME_LINEAGE = { FOREST: 'Forest Gnome', ROCK: 'Rock Gnome' };
+
 registerSpeciesAdapter("Gnome_XPHB", function (s) {
   const specs = getGenericSpeciesChoiceSpecs(s);
-  const lineageOptions = buildLineageOptions(s._versions, { parentName: 'Gnome', suffixes: ['Lineage'] });
+  const lineageOptions = buildLineageOptions(s._versions, { parentName: 'Gnome', suffixes: ['Lineage'], expect: Object.values(GNOME_LINEAGE) });
   specs.push({ key: 'species_version', label: 'Gnomish Lineage', type: 'option', options: lineageOptions, count: 1, level: 1 });
   specs.push({ key: 'species_spell_ability', label: 'Spellcasting Ability (Gnome)', type: 'ability_choice', from: ['int', 'wis', 'cha'], count: 1, level: 1 });
   return specs;
@@ -139,11 +143,11 @@ registerSpeciesRuntimeConfig("Gnome_XPHB", {
   spellcasting: {
     alwaysKnownSpells: [
       // Forest Gnome Lineage
-      { name: 'Minor Illusion',    level: 0, minLevel: 1, source: 'Forest Gnome Lineage', sourceType: 'species', requiredChoice: { key: 'species_version', value: 'Forest Gnome' } },
-      { name: 'Speak with Animals', level: 1, minLevel: 3, source: 'Forest Gnome Lineage', sourceType: 'species', requiredChoice: { key: 'species_version', value: 'Forest Gnome' }, freeCast: { usesFormula: 'proficiencyBonus', recharge: 'longRest', canAlsoUseSlots: true } },
+      { name: 'Minor Illusion',    level: 0, minLevel: 1, source: 'Forest Gnome Lineage', sourceType: 'species', requiredChoice: { key: 'species_version', value: GNOME_LINEAGE.FOREST } },
+      { name: 'Speak with Animals', level: 1, minLevel: 1, source: 'Forest Gnome Lineage', sourceType: 'species', requiredChoice: { key: 'species_version', value: GNOME_LINEAGE.FOREST }, freeCast: { usesFormula: 'proficiencyBonus', recharge: 'longRest', canAlsoUseSlots: true } },
       // Rock Gnome Lineage
-      { name: 'Mending',           level: 0, minLevel: 1, source: 'Rock Gnome Lineage', sourceType: 'species', requiredChoice: { key: 'species_version', value: 'Rock Gnome' } },
-      { name: 'Prestidigitation',  level: 0, minLevel: 1, source: 'Rock Gnome Lineage', sourceType: 'species', requiredChoice: { key: 'species_version', value: 'Rock Gnome' } },
+      { name: 'Mending',           level: 0, minLevel: 1, source: 'Rock Gnome Lineage', sourceType: 'species', requiredChoice: { key: 'species_version', value: GNOME_LINEAGE.ROCK } },
+      { name: 'Prestidigitation',  level: 0, minLevel: 1, source: 'Rock Gnome Lineage', sourceType: 'species', requiredChoice: { key: 'species_version', value: GNOME_LINEAGE.ROCK } },
     ],
   },
 });

@@ -120,9 +120,13 @@ export default function install(registry, context = {}) {
     getGenericBackgroundChoiceMeta,
     getGenericBackgroundOriginFeat,
   } = createAdapterBindings(registry, context);
+// Canonical lineage tokens — single source for both the choice options
+// (validated against _versions via `expect`) and the requiredChoice predicates.
+const SHIFTER_LINEAGE = { BEASTHIDE: 'Beasthide', LONGTOOTH: 'Longtooth', SWIFTSTRIDE: 'Swiftstride', WILDHUNT: 'Wildhunt' };
+
 registerSpeciesAdapter("Shifter_EFA", function (s) {
   const specs = getGenericSpeciesChoiceSpecs(s);
-  const lineageOptions = buildLineageOptions(s._versions, { parentName: 'Shifter' });
+  const lineageOptions = buildLineageOptions(s._versions, { parentName: 'Shifter', expect: Object.values(SHIFTER_LINEAGE) });
 
   specs.push({
     key: 'species_version',
@@ -172,25 +176,25 @@ registerSpeciesSheetEffects("Shifter_EFA", [
     type: 'reminder',
     minLevel: 1,
     note: 'Beasthide (while shifted): +1d6 extra Temporary Hit Points on Shift, +1 AC.',
-    requiredChoice: { key: 'species_version', value: 'Beasthide' },
+    requiredChoice: { key: 'species_version', value: SHIFTER_LINEAGE.BEASTHIDE },
   },
   {
     type: 'reminder',
     minLevel: 1,
     note: 'Longtooth (while shifted): on Shift and as a Bonus Action on other turns, make an Unarmed Strike with elongated fangs; on hit, deal 1d6 + STR Piercing damage.',
-    requiredChoice: { key: 'species_version', value: 'Longtooth' },
+    requiredChoice: { key: 'species_version', value: SHIFTER_LINEAGE.LONGTOOTH },
   },
   {
     type: 'reminder',
     minLevel: 1,
     note: 'Swiftstride (while shifted): Speed +10 ft; once per round move up to 10 ft as a Reaction when a creature ends its turn within 5 ft (no Opportunity Attacks provoked).',
-    requiredChoice: { key: 'species_version', value: 'Swiftstride' },
+    requiredChoice: { key: 'species_version', value: SHIFTER_LINEAGE.SWIFTSTRIDE },
   },
   {
     type: 'reminder',
     minLevel: 1,
     note: 'Wildhunt (while shifted): Advantage on Wisdom checks; no creature within 30 ft can have Advantage on attack rolls against you unless you are Incapacitated.',
-    requiredChoice: { key: 'species_version', value: 'Wildhunt' },
+    requiredChoice: { key: 'species_version', value: SHIFTER_LINEAGE.WILDHUNT },
   },
 ]);
 
