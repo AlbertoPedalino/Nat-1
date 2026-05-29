@@ -273,7 +273,9 @@ registerClassSheetResources("Druid", [
   }
 ]);
 registerClassSheetProficiencies("Druid", [
-  { type: "language", values: ["Druidic"], minLevel: 1 }
+  { type: "language", values: ["Druidic"], minLevel: 1 },
+  { type: "armor",  values: ["Medium"],  minLevel: 1, requiredChoice: { key: "druid_primal_order", value: "Warden" } },
+  { type: "weapon", values: ["Martial"], minLevel: 1, requiredChoice: { key: "druid_primal_order", value: "Warden" } }
 ]);
 
 if (typeof registerResourceSideEffect === 'function') {
