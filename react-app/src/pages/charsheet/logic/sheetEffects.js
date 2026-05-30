@@ -442,14 +442,18 @@ export function collectEffectCategories(character = {}) {
   return grouped;
 }
 
+// Known sense-effect type tokens. Adapters may register either `type:'sense'`
+// (+ senseType) or the sense name directly (e.g. Shadow Arts → type:'darkvision').
+const SENSE_EFFECT_TYPES = [
+  'sense', 'darkvision', 'devilssight', 'blindsight', 'truesight', 'tremorsense',
+  'telepathy', 'underwaterbreathing',
+];
+
 export function collectSenseEffects(character = {}) {
   return collectSheetEffects(character).filter((effect) => {
+    if (effect.senseType) return true;
     const type = norm(effect.type);
-    return type.includes('sense')
-      || type.includes('darkvision')
-      || type.includes('truesight')
-      || type.includes('telepathy')
-      || type.includes('underwaterbreathing');
+    return SENSE_EFFECT_TYPES.some((token) => type.includes(token));
   });
 }
 

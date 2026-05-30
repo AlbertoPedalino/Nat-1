@@ -1,50 +1,44 @@
-import { Box, Paper, Typography } from '@mui/material';
-import { Eye } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Box, Collapse, Paper, Typography } from '@mui/material';
+import { ChevronDown, Eye } from 'lucide-react';
 import { getSkillBonus } from '../logic/calculations.js';
-import { collectSenseEffects, effectSummary, effectTitle } from '../logic/sheetEffects.js';
-import { getItemSenses } from '../../../shared/character/itemEffects.js';
-
-const SENSE_LABELS = {
-  darkvision: 'Darkvision',
-  devilsSight: "Devil's Sight",
-  blindsight: 'Blindsight',
-  truesight: 'Truesight',
-  tremorsense: 'Tremorsense',
-};
-
-function isDarkvisionEffect(effect) {
-  const type = String(effect?.type || '').toLowerCase();
-  const sense = String(effect?.senseType || '').toLowerCase();
-  return type === 'darkvision' || sense === 'darkvision';
-}
-
-function mergeDarkvision(baseDv, effects) {
-  let best = baseDv;
-  const sources = [];
-  effects.forEach((e) => {
-    const v = Number(e.value || 0);
-    if (!v) return;
-    const effective = e.additive ? baseDv + v : v;
-    if (effective > best) {
-      best = effective;
-      if (e.ownerName) sources.push(e.ownerName);
-    }
-  });
-  return { value: best, sources };
-}
+import { collectSenses } from '../logic/visionSenses.js';
+import { loadSenseDescriptions, getSenseDescriptionEntries, getFeatureDescriptionEntries } from '../../../shared/character/senseDescriptions.js';
+import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
 
 export default function Senses({ C }) {
   const passPerc = 10 + getSkillBonus(C, { n: 'Perception', a: 'wis' });
   const passInv = 10 + getSkillBonus(C, { n: 'Investigation', a: 'int' });
   const passIns = 10 + getSkillBonus(C, { n: 'Insight', a: 'wis' });
-  const speciesDv = C.speciesSnapshot?.darkvision || 0;
-  const itemSenses = getItemSenses(C);
-  const baseDv = Math.max(speciesDv, itemSenses.darkvision || 0);
-  const senseEffects = collectSenseEffects(C);
-  const dvEffects = senseEffects.filter(isDarkvisionEffect);
-  const otherEffects = senseEffects.filter((e) => !isDarkvisionEffect(e));
-  const extraItemSenses = Object.entries(itemSenses).filter(([type]) => type !== 'darkvision');
-  const dv = mergeDarkvision(baseDv, dvEffects);
+  const { vision: visionRows, other: otherRows } = collectSenses(C);
+  const [expanded, setExpanded] = useState(null);
+  const [, setDescLoaded] = useState(false);
+  const toggle = (key) => setExpanded((cur) => (cur === key ? null : key));
+
+  // Live rules text from 5etools (same source as spells/items), loaded once.
+  useEffect(() => {
+    let alive = true;
+    loadSenseDescriptions().then(() => { if (alive) setDescLoaded(true); }).catch(() => {});
+    return () => { alive = false; };
+  }, []);
+
+  const renderRow = (key, value, row) => {
+    // Live rules text: generic sense first, then the granting feature, then note.
+    const entries = getSenseDescriptionEntries(row.type) || getFeatureDescriptionEntries(row.featureName);
+    return (
+      <SenseRow
+        key={key}
+        value={value}
+        label={row.label}
+        source={row.source}
+        entries={entries}
+        note={entries ? null : row.note}
+        expanded={expanded === key}
+        onToggle={() => toggle(key)}
+        color="secondary.main"
+      />
+    );
+  };
 
   return (
     <Paper variant="outlined" sx={{ mb: '0.6rem', overflow: 'hidden' }}>
@@ -58,47 +52,61 @@ export default function Senses({ C }) {
         <SenseRow value={passPerc} label="Passive Perception" />
         <SenseRow value={passInv} label="Passive Investigation" />
         <SenseRow value={passIns} label="Passive Insight" />
-        {dv.value > 0 && (
-          <SenseRow
-            value={`${dv.value} ft`}
-            label={`Darkvision${dv.sources.length ? ` · ${dv.sources.join(', ')}` : ''}`}
-            color="secondary.main"
-          />
-        )}
-        {extraItemSenses.map(([type, dist]) => (
-          <SenseRow key={`item-sense-${type}`} value={`${dist} ft`} label={SENSE_LABELS[type] || type} color="secondary.main" />
-        ))}
-        {otherEffects.map((effect, index) => (
-          <SenseRow
-            key={`${effect.ownerName}-${effect.type}-${index}`}
-            value={senseEffectValue(effect)}
-            label={`${effectTitle(effect)}${effect.ownerName ? ` · ${effect.ownerName}` : ''}`}
-            color="secondary.main"
-          />
-        ))}
+        {visionRows.map((row) => renderRow(`vision-${row.type}`, `${row.range} ft`, row))}
+        {otherRows.map((row) => renderRow(row.key, row.value, row))}
       </Box>
     </Paper>
   );
 }
 
-function SenseRow({ value, label, color }) {
+function SenseRow({ value, label, source, color, entries, note, expanded, onToggle }) {
+  const clickable = !!(entries?.length || note);
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 1, py: 0.25, bgcolor: 'rgba(35,32,26,1)', border: 1, borderColor: 'divider', borderRadius: 1, mb: 0.2 }}>
-      <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '1.15rem', fontWeight: 700, color: color || '#edd48a', flexShrink: 0 }}>
-        {value}
-      </Typography>
-      <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary' }}>{label}</Typography>
+    <Box sx={{ bgcolor: 'rgba(35,32,26,1)', border: 1, borderColor: 'divider', borderRadius: 1, mb: 0.2, overflow: 'hidden' }}>
+      <Box
+        onClick={clickable ? onToggle : undefined}
+        sx={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, px: 1, py: 0.25,
+          cursor: clickable ? 'pointer' : 'default',
+          '&:hover': clickable ? { bgcolor: 'rgba(202,165,80,0.05)' } : undefined,
+        }}
+      >
+        <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '1.15rem', fontWeight: 700, color: color || '#edd48a', flexShrink: 0 }}>
+          {value}
+        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, minWidth: 0 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: 0 }}>
+            <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary', textAlign: 'right', lineHeight: 1.2 }}>{label}</Typography>
+            {source ? (
+              <Typography sx={{ fontSize: '0.56rem', color: 'text.secondary', fontStyle: 'italic', opacity: 0.7, textAlign: 'right', lineHeight: 1.2 }}>
+                {source}
+              </Typography>
+            ) : null}
+          </Box>
+          {clickable ? (
+            <ChevronDown
+              size={13}
+              style={{ color: '#caa550', flexShrink: 0, opacity: 0.7, transition: 'transform 0.15s', transform: expanded ? 'rotate(180deg)' : 'none' }}
+            />
+          ) : null}
+        </Box>
+      </Box>
+      {clickable ? (
+        <Collapse in={expanded} unmountOnExit>
+          <Box sx={{
+            px: 1, pb: 0.6, pt: 0.1,
+            // Scale 5etools EntryBlocks (body2) down to the compact panel size.
+            '& .MuiTypography-root': { fontSize: '0.62rem', lineHeight: 1.45 },
+            '& th, & td': { fontSize: '0.62rem' },
+          }}>
+            {entries?.length ? (
+              <EntryBlocks entries={entries} spacing={0.4} emptyText="" />
+            ) : (
+              <Typography sx={{ fontSize: '0.62rem', color: 'text.secondary', lineHeight: 1.45 }}>{note}</Typography>
+            )}
+          </Box>
+        </Collapse>
+      ) : null}
     </Box>
   );
-}
-
-
-function senseEffectValue(effect) {
-  if (effect?.value != null) {
-    if (typeof effect.value === 'number') return `${effect.value} ft`;
-    return String(effect.value);
-  }
-  if (effect?.senseType) return String(effect.senseType).replace(/^\w/, (c) => c.toUpperCase());
-  const summary = effectSummary(effect);
-  return summary || 'Yes';
 }
