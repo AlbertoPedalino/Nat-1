@@ -156,4 +156,9 @@ registerSpeciesSheetResources("Dwarf_XPHB", [
   },
 ]);
 
+// Dwarven Resilience: Advantage on saves to avoid or end the Poisoned condition.
+registerSpeciesSheetEffects("Dwarf_XPHB", [
+  { type: 'advantage', target: 'save', conditions: ['Poisoned'], minLevel: 1, note: 'Dwarven Resilience' },
+]);
+
 }

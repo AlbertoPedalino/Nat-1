@@ -17,6 +17,7 @@ import {
   hasTwoWeaponFightingStyle,
 } from './equipmentSlots.js';
 import { weaponEnhancement } from '../../../shared/character/itemBonus.js';
+import { getMeleeStrDamageBonus } from './sheetEffects.js';
 
 export const FILTERS = ['all', 'action', 'bonus', 'reaction'];
 export const CAT_COLORS = { attack: '#de675f', action: '#caa550', bonus: '#70b7a6', reaction: '#9d7fb8' };
@@ -466,7 +467,10 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
   const mod = getMod(getFinal(C, finalAbility));
   const enhancement = weaponEnhancement(item);
   const base = opts.damageBase != null ? opts.damageBase : weaponDamageBase(item);
-  const finalMod = (opts.damageMod != null ? opts.damageMod : mod) + enhancement.damage;
+  // Rage Damage (and similar): adds to Strength-based melee weapon attacks only.
+  const isRangedWeapon = String(item?.type || '').toUpperCase() === 'R';
+  const strMeleeDamageBonus = finalAbility === 'str' && !isRangedWeapon ? (ctx.strMeleeDamageBonus || 0) : 0;
+  const finalMod = (opts.damageMod != null ? opts.damageMod : mod) + enhancement.damage + strMeleeDamageBonus;
   const damageFormula = base ? base + (finalMod !== 0 ? (finalMod >= 0 ? '+' : '') + finalMod : '') : '';
   const dtype = weaponDamageType(item);
   // XPHB 2024 Heavy weapon: Disadvantage on attack rolls if both STR and DEX < 13.
@@ -516,7 +520,7 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
   );
 
   const untrainedArmor = hasNonProficientArmor(C, inventory, equipmentSets);
-  const ctx = { profSets: equipmentSets, untrainedArmor };
+  const ctx = { profSets: equipmentSets, untrainedArmor, strMeleeDamageBonus: getMeleeStrDamageBonus(C) };
 
   const weaponActions = [];
   const hasTWF = hasTwoWeaponFightingStyle(C);
@@ -544,7 +548,9 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
     const ohEnhancement = weaponEnhancement(offHandItem);
     const ohBase = weaponDamageBase(offHandItem);
     const ohDtype = weaponDamageType(offHandItem);
-    const ohDmgMod = getOffHandDamageMod(ohMod, hasTWF) + ohEnhancement.damage;
+    const ohRanged = String(offHandItem?.type || '').toUpperCase() === 'R';
+    const ohStrMeleeDamageBonus = ohAbility === 'str' && !ohRanged ? ctx.strMeleeDamageBonus : 0;
+    const ohDmgMod = getOffHandDamageMod(ohMod, hasTWF) + ohEnhancement.damage + ohStrMeleeDamageBonus;
     const ohSelectedEntry = selectedMasteriesByWeapon.get(normalizeWeaponName(offHandItem?.name || '')) || null;
     const ohDirectMastery = ohSelectedEntry ? resolveWeaponMasteryForItem(offHandItem) : null;
     const ohDbItem = ohSelectedEntry && !ohDirectMastery
@@ -582,6 +588,8 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
   const useDexUnarmed = monkLevel > 0 && getMod(getFinal(C, 'dex')) > getMod(getFinal(C, 'str'));
   const ability = useDexUnarmed ? 'dex' : 'str';
   const mod = getMod(getFinal(C, ability));
+  // Rage Damage applies to Strength-based Unarmed Strikes too.
+  const unarmedDmgMod = mod + (ability === 'str' ? ctx.strMeleeDamageBonus : 0);
   const die = monkLevel >= 17 ? '1d12' : monkLevel >= 11 ? '1d10' : monkLevel >= 5 ? '1d8' : monkLevel >= 1 ? '1d6' : hasFeat(C, 'Tavern Brawler') ? '1d4' : '1';
   const unarmedSaveDc = 8 + getPB(C) + mod;
   weaponActions.push({
@@ -591,8 +599,8 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
     uses: monkLevel ? 'Martial Arts' : 'Attack',
     _source: 'Basic',
     attackBonus: getPB(C) + mod,
-    damageFormula: die + (mod !== 0 ? (mod >= 0 ? '+' : '') + mod : ''),
-    damageButtonLabel: `Damage ${die}${mod !== 0 ? (mod >= 0 ? '+' : '') + mod : ''} bludgeoning`,
+    damageFormula: die + (unarmedDmgMod !== 0 ? (unarmedDmgMod >= 0 ? '+' : '') + unarmedDmgMod : ''),
+    damageButtonLabel: `Damage ${die}${unarmedDmgMod !== 0 ? (unarmedDmgMod >= 0 ? '+' : '') + unarmedDmgMod : ''} bludgeoning`,
     rollLabelPrefix: 'Unarmed Strike',
     noDescription: true,
     detailType: 'unarmedStrike',

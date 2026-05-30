@@ -205,7 +205,10 @@ export default function CharBuilder() {
   }, [state.character, state.loading, state.data]);
 
   useEffect(() => {
-    if (!state.character.cls && state.data.classes.length) {
+    // Re-hydrate the PRIMARY class object only. class/select is tab-aware: on an
+    // extra-class tab it would write the primary class into the extra slot, so
+    // guard on the primary tab. (data/adapt also restores cls tab-agnostically.)
+    if (!state.character.cls && state.character.activeClassTab === 0 && state.data.classes.length) {
       const cls = state.data.classes.find((item) => item.name === state.character.className && item.source === state.character.classSource);
       if (cls) dispatch({ type: 'class/select', className: cls.name, source: cls.source, classObject: cls });
     }

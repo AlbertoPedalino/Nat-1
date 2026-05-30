@@ -151,6 +151,8 @@ registerSpeciesSheetCommonChoiceMeta("Elf_XPHB", {
 });
 
 registerSpeciesSheetEffects("Elf_XPHB", [
+  // Fey Ancestry: Advantage on saves to avoid or end the Charmed condition.
+  { type: 'advantage', target: 'save', conditions: ['Charmed'], minLevel: 1, note: 'Fey Ancestry' },
   {
     type: 'sense',
     senseType: 'darkvision',

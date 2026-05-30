@@ -131,6 +131,8 @@ registerSpeciesSheetEffects("Warforged_EFA", [
     minLevel: 1,
     note: 'Integrated Protection',
   },
+  // Constructed Resilience: Advantage on saves against being Poisoned.
+  { type: 'advantage', target: 'save', conditions: ['Poisoned'], minLevel: 1, note: 'Constructed Resilience' },
 ]);
 
 }

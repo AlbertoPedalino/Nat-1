@@ -139,6 +139,11 @@ registerSpeciesSheetCommonChoiceMeta("Gnome_XPHB", {
   },
 });
 
+// Gnomish Cunning: Advantage on Intelligence, Wisdom, and Charisma saving throws.
+registerSpeciesSheetEffects("Gnome_XPHB", [
+  { type: 'advantage', target: 'save', abilities: ['int', 'wis', 'cha'], minLevel: 1, note: 'Gnomish Cunning' },
+]);
+
 registerSpeciesRuntimeConfig("Gnome_XPHB", {
   spellcasting: {
     alwaysKnownSpells: [

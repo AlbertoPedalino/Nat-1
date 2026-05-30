@@ -19,6 +19,7 @@ import { buildD20Meta, formatD20Detail, rollD20 as rollD20Dice } from '../../sha
 import { aggregateSavingThrowBonus } from '../../shared/character/itemBonus.js';
 import { calcMaxHP, getMod, getFinal, getPB, getSaveBonus } from './logic/calculations.js';
 import { applyResourceRest, getAllResourceDefs, getHitDicePools, getUsedHitDiceTotal, normalizeResourceMax } from './logic/restResources.js';
+import { clearedToggles } from './logic/toggleState.js';
 import { applyFreeCastRest, getFreeCastDefsForCharacter } from './logic/spellsTabLogic.js';
 import { loadCoreAdapters, loadClassAdapters, installedRegistry } from '../../adapters/index.js';
 import { loadItems, loadOptionalFeatures, reconcileInventoryWithItemsDb } from '../charbuilder/logic/dataLoaders.js';
@@ -229,7 +230,7 @@ export default function CharacterSheet() {
       const nextFC = applyFreeCastRest(freeCastUses, getFreeCastDefsForCharacter(C), 'long');
       setFreeCastUses(nextFC);
       patch.freeCastUses = nextFC;
-      if (C.bladesongActive) patch.bladesongActive = false;
+      Object.assign(patch, clearedToggles(C));
     }
 
     if (C?.speciesName) {

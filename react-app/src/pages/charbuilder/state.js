@@ -243,12 +243,27 @@ export function builderReducer(state, action) {
     }
     case 'data/adapt': {
       const data = action.payload || state.data;
+      // Derive the class-scoped data (subclasses + feature lists) for one class.
+      // Shared by the primary class and every multiclass entry so re-hydration
+      // after a reload (when heavy fields were stripped) is identical for both.
+      const deriveClassData = (name, source, subclassSource = '') => ({
+        subclasses: data.subclasses.filter((s) => s.className === name && (s.classSource === source || !s.classSource)),
+        allFeatures: data.classFeatures.filter((f) => f.className === name && (f.classSource === source || !f.classSource)),
+        allSubFeatures: data.subclassFeatures.filter((f) => f.className === name && (f.classSource === source || !f.classSource) && (!subclassSource || !f._copy || f.subclassSource === subclassSource)),
+      });
+
       const classObject = findByNameSource(data.classes, state.character.className, state.character.classSource) || state.character.cls;
       const speciesObj = findByNameSource(data.species, state.character.speciesName, state.character.speciesSource) || state.character.speciesObj;
       const backgroundObj = findByNameSource(data.backgrounds, state.character.backgroundName, state.character.backgroundSource) || state.character.backgroundObj;
       const className = classObject?.name || state.character.className;
       const classSource = classObject?.source || state.character.classSource;
-      const subclassSource = state.character.subclassSource || '';
+
+      const extraClasses = (state.character.extraClasses || []).map((extra) => {
+        const extraCls = findByNameSource(data.classes, extra.name, extra.source) || extra.cls;
+        if (!extraCls) return extra;
+        return { ...extra, cls: extraCls, ...deriveClassData(extraCls.name, extraCls.source, extra.subclassSource || '') };
+      });
+
       return {
         ...state,
         data,
@@ -258,9 +273,8 @@ export function builderReducer(state, action) {
           cls: classObject,
           speciesObj,
           backgroundObj,
-          subclasses: data.subclasses.filter((subclass) => subclass.className === className && (subclass.classSource === classSource || !subclass.classSource)),
-          allFeatures: data.classFeatures.filter((feature) => feature.className === className && (feature.classSource === classSource || !feature.classSource)),
-          allSubFeatures: data.subclassFeatures.filter((feature) => feature.className === className && (feature.classSource === classSource || !feature.classSource) && (!subclassSource || !feature._copy || feature.subclassSource === subclassSource)),
+          extraClasses,
+          ...deriveClassData(className, classSource, state.character.subclassSource || ''),
         },
       };
     }

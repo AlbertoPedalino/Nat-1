@@ -1,47 +1,24 @@
 import { useState } from 'react';
 import { Box, Paper, Typography, Tooltip, Menu, MenuItem } from '@mui/material';
-import { Dice5, AlertCircle, Sparkles, ChevronDown } from 'lucide-react';
+import { Dice5, AlertCircle, Sparkles, ChevronDown, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { STATS, SLBL, FULL_LBL, hasSaveProficiency, getSaveBonus, fbonus } from '../logic/calculations.js';
-import { getEquippedArmorPenalties } from '../logic/armorPenalties.js';
-import { installedRegistry } from '../../../adapters/index.js';
 import { getConcentrationBonus } from '../logic/sheetEffects.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 import { aggregateSavingThrowBonus } from '../../../shared/character/itemBonus.js';
 import { collectItemEffects } from '../../../shared/character/itemEffects.js';
+import { collectSaveModifiers, fixedModifiersForAbility, summarizeSaveModifiers } from '../logic/saveModifiers.js';
 
-
-function collectSaveEffects(C, stat) {
-  const out = [];
-  const push = (list, ownerLevel) => {
-    (list || []).forEach((effect) => {
-      if (!effect) return;
-      if (effect.minLevel && Number(ownerLevel || 1) < Number(effect.minLevel)) return;
-      if (effect.target !== 'save') return;
-      if (effect.ability && String(effect.ability).toLowerCase() !== String(stat).toLowerCase()) return;
-      if (typeof effect.condition === 'function') {
-        try { if (!effect.condition(C)) return; } catch { return; }
-      }
-      out.push(effect);
-    });
-  };
-  const primaryLevel = Number(C?.classLevel || C?.level || 1);
-  push(installedRegistry.getClassSheetEffects(C?.className), primaryLevel);
-  push(installedRegistry.getSubclassSheetEffects(C?.className, C?.subclassShortName), primaryLevel);
-  (C?.extraClasses || []).forEach((extra) => {
-    const level = Number(extra?.level || 1);
-    push(installedRegistry.getClassSheetEffects(extra?.name), level);
-    push(installedRegistry.getSubclassSheetEffects(extra?.name, extra?.subclassShortName), level);
-  });
-  return out;
-}
+const ADV_COLOR = '#70b7a6';
+const DISADV_COLOR = '#ff9800';
 
 export default function SavingThrows({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
   const inventory = sheet?.sheetInventory || C?.inventory || [];
-  const armorPenalties = getEquippedArmorPenalties(C, inventory, profSets);
   const itemSaveBonus = aggregateSavingThrowBonus(inventory);
   const itemEffects = collectItemEffects(C?.inventory);
   const saveContexts = [...itemEffects.advantageOnSaveAgainst.entries()];
+  const saveModifiers = collectSaveModifiers(C, inventory, profSets);
+  const modifierRows = summarizeSaveModifiers(saveModifiers);
 
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [menuStat, setMenuStat] = useState(null);
@@ -78,10 +55,10 @@ export default function SavingThrows({ C, sheet, onRoll }) {
         {STATS.map(st => {
           const bonus = getSaveBonus(C, st) + itemSaveBonus;
           const prof = hasSaveProficiency(C, st);
-          const hasDisadv = armorPenalties.hasPenalty && armorPenalties.disadvantageOn.includes(`${st}-saves`);
-          const saveEffects = collectSaveEffects(C, st);
-          const hasAdv = saveEffects.some((effect) => effect.type === 'advantage');
-          const tooltipText = hasDisadv ? 'Disadvantage from armor' : hasAdv ? saveEffects.map((effect) => effect.note).filter(Boolean).join(' • ') || 'Advantage' : '';
+          const fixedMods = fixedModifiersForAbility(saveModifiers, st);
+          const hasDisadv = fixedMods.some((m) => m.kind === 'disadvantage');
+          const hasAdv = fixedMods.some((m) => m.kind === 'advantage');
+          const tooltipText = fixedMods.map((m) => `${m.kind === 'advantage' ? 'Advantage' : 'Disadvantage'}: ${m.source}`).join(' • ');
           const hasContextMenu = saveContexts.length > 0;
 
           return (
@@ -116,6 +93,34 @@ export default function SavingThrows({ C, sheet, onRoll }) {
           );
         })}
       </Box>
+
+      {modifierRows.length > 0 && (
+        <Box sx={{ borderTop: 1, borderColor: 'divider', px: '0.8rem', py: '0.5rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {modifierRows.map((mod, i) => {
+            const adv = mod.kind === 'advantage';
+            const Icon = adv ? ShieldCheck : ShieldAlert;
+            const color = adv ? ADV_COLOR : DISADV_COLOR;
+            return (
+              <Box key={`${mod.label}-${mod.source}-${i}`} sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75 }}>
+                <Icon size={13} style={{ color, flexShrink: 0, marginTop: 2 }} />
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
+                    <Typography component="span" sx={{ fontSize: '0.7rem', color, fontWeight: 700, flexShrink: 0 }}>
+                      {adv ? 'Adv' : 'Disadv'}
+                    </Typography>
+                    <Typography component="span" sx={{ fontSize: '0.7rem', color: 'text.primary' }}>
+                      {mod.label}
+                    </Typography>
+                  </Box>
+                  <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary', fontStyle: 'italic', mt: '1px' }}>
+                    {mod.source}
+                  </Typography>
+                </Box>
+              </Box>
+            );
+          })}
+        </Box>
+      )}
 
       <Menu anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={() => setMenuAnchor(null)}
         slotProps={{ paper: { sx: { bgcolor: 'rgba(26,23,19,0.98)', border: 1, borderColor: 'divider' } } }}>

@@ -156,8 +156,17 @@ registerClassAdapter("Barbarian", function (cls, lv, specs) {
   }
 });
 
+function _barbarianRaging(C) { return !!C && C.rageActive === true; }
+
 registerClassSheetEffects("Barbarian", [
   { type: "acFormula", key: "barbarian_unarmored_defense", label: "Unarmored Defense", base: 10, abilities: ["dex", "con"], allowShield: true, minLevel: 1, requiresNoArmor: true },
+  // Danger Sense: Advantage on DEX saves (unless Incapacitated).
+  { type: "advantage", target: "save", ability: "dex", minLevel: 2, note: "Danger Sense" },
+  // Rage (while active): Advantage on STR saves + Rage Damage to STR melee attacks.
+  { type: "advantage", target: "save", ability: "str", minLevel: 1, note: "Rage", condition: _barbarianRaging },
+  { type: "meleeDamageBonus", ability: "str", value: 2, minLevel: 1,  note: "Rage", condition: _barbarianRaging },
+  { type: "meleeDamageBonus", ability: "str", value: 3, minLevel: 9,  note: "Rage", condition: _barbarianRaging },
+  { type: "meleeDamageBonus", ability: "str", value: 4, minLevel: 16, note: "Rage", condition: _barbarianRaging },
 ]);
 
 // [SheetRuntime] START
@@ -176,7 +185,15 @@ registerClassSheetActions("Barbarian", [
     "cat": "bonus",
     "uses": "2+ / LR (+1 SR)",
     "resKey": "rage",
-    "desc": "Bonus Action. Enter Rage for 1 minute: +2 damage on attacks (→+3 lv.9, →+4 lv.16), resistance to Bludgeoning/Piercing/Slashing, advantage on STR checks and saves. Uses: 2 (lv.1), 3 (lv.3), 4 (lv.6), 5 (lv.12), 6 (lv.17), unlimited (lv.20). Recharge: Long Rest; recover 1 expended use on a Short Rest."
+    "_toggleKey": "rage",
+    "_toggleCondition": function (ctx) {
+      var C = ctx && ctx.C;
+      var hasHeavyArmor = (C && C.inventory || []).some(function (i) {
+        return i.equipped && String(i.type || '').toUpperCase() === 'HA';
+      });
+      return { canActivate: !hasHeavyArmor, isSuppressed: hasHeavyArmor };
+    },
+    "desc": "Bonus Action. Enter Rage for 1 minute: +2 damage on attacks (→+3 lv.9, →+4 lv.16), resistance to Bludgeoning/Piercing/Slashing, advantage on STR checks and saves. Uses: 2 (lv.1), 3 (lv.3), 4 (lv.6), 5 (lv.12), 6 (lv.17), unlimited (lv.20). Recharge: Long Rest; recover 1 expended use on a Short Rest. Ends if you don Heavy Armor."
   },
   {
     "name": "Reckless Attack",

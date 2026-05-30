@@ -43,7 +43,7 @@ function ownerLevelOf(character, className, isPrimary) {
   return Number(found?.level || 1);
 }
 
-function selectedFeatNames(character) {
+export function selectedFeatNames(character) {
   const out = new Set();
 
   asArray(character?.allFeatSnapshots).forEach((feat) => {
@@ -720,6 +720,19 @@ export function getConcentrationBonus(character = {}) {
     else total += Number(effect.value ?? 0);
   });
   return total;
+}
+
+// Additive damage bonus for Strength-based melee attacks (e.g. Barbarian Rage).
+// Tiers are separate effects gated by minLevel + condition; only the active
+// ones survive collectSheetEffects, so the highest value is the current tier.
+export function getMeleeStrDamageBonus(character = {}) {
+  let bonus = 0;
+  collectSheetEffects(character).forEach((effect) => {
+    if (norm(effect.type) !== 'meleedamagebonus') return;
+    if (effect.ability && String(effect.ability).toLowerCase() !== 'str') return;
+    bonus = Math.max(bonus, Number(effect.value ?? 0));
+  });
+  return bonus;
 }
 
 export function getSpeedBonus(character = {}) {

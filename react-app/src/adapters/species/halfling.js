@@ -125,5 +125,10 @@ registerSpeciesAdapter("Halfling_XPHB", function (s) {
 
 registerSpeciesSheetCommonChoiceMeta("Halfling_XPHB");
 
+// Brave: Advantage on saves to avoid or end the Frightened condition.
+registerSpeciesSheetEffects("Halfling_XPHB", [
+  { type: 'advantage', target: 'save', conditions: ['Frightened'], minLevel: 1, note: 'Brave' },
+]);
+
 }
 

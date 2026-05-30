@@ -7,6 +7,7 @@ import { PACT_SLOTS, SPELL_LEVEL_LABELS } from '../../charbuilder/constants.js';
 import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { getChoiceValue } from '../../../shared/character/choiceUtils.js';
 import { getAllResourceDefs } from '../logic/restResources.js';
+import { toggleActiveField } from '../logic/toggleState.js';
 import {
   FILTERS,
   CAT_COLORS,
@@ -962,7 +963,8 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
 
       {action._toggleKey && onUpdateCharacter ? (() => {
         const toggleCtx = { C, action, hasRes, resCur };
-        const isActive = C?.bladesongActive === true;
+        const toggleField = toggleActiveField(action._toggleKey);
+        const isActive = C?.[toggleField] === true;
         const toggleInfo = typeof action._toggleCondition === 'function'
           ? action._toggleCondition(toggleCtx) : {};
         const canToggleOn = !isActive && hasRes && resCur > 0
@@ -978,9 +980,9 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
             variant="outlined"
             onClick={() => {
               if (isActive) {
-                onUpdateCharacter(prev => ({ ...prev, bladesongActive: false }));
+                onUpdateCharacter(prev => ({ ...prev, [toggleField]: false }));
               } else if (canToggleOn) {
-                onUpdateCharacter(prev => ({ ...prev, bladesongActive: true }));
+                onUpdateCharacter(prev => ({ ...prev, [toggleField]: true }));
                 onResChange?.(action.resKey, -1);
               }
             }}

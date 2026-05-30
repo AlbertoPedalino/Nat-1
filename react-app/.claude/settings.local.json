@@ -21,7 +21,10 @@
       "PowerShell(npx vite build --mode development 2>&1 | Select-Object -Last 5)",
       "PowerShell(npx vite build --mode development 2>&1 | Select-Object -Last 3)",
       "PowerShell(npx vite dev --port 5173 2>&1 | Select-Object -First 5)",
-      "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/optionalfeatures.json\")"
+      "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/optionalfeatures.json\")",
+      "Bash(npx eslint *)",
+      "Bash(grep -iA3 \"error\\\\|fail\")",
+      "PowerShell(npx vite build 2>&1 | Select-Object -Last 4)"
     ]
   }
 }
