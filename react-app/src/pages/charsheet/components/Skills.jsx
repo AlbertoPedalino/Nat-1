@@ -1,22 +1,11 @@
 import { Box, Paper, Typography, Tooltip } from '@mui/material';
-import { AlertCircle, Sparkles } from 'lucide-react';
+import { advantageVisual } from './advantageMark.jsx';
 import { SKILLS, getSkillTraining, getSkillBonus, fbonus, SLBL } from '../logic/calculations.js';
 import { getEquippedArmorPenalties } from '../logic/armorPenalties.js';
-import { matchesChoiceRequirement, inventoryHasFlag } from '../../../shared/character/choiceUtils.js';
 import { getSkillAdvantageFromEffects } from '../logic/sheetEffects.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 import { aggregateAbilityCheckBonus } from '../../../shared/character/itemBonus.js';
 import { getItemAdvantageOnSkill } from '../../../shared/character/itemEffects.js';
-
-const _SKILL_ADVANTAGES = [
-  {
-    skill: 'stealth',
-    label: 'Dampening Field',
-    requiresChoice: { key: 'armorer_model', value: 'infiltrator' },
-    requiresInventoryFlag: { flag: 'arcaneArmor', itemType: ['LA', 'MA', 'HA'], equipped: true },
-  },
-];
-
 
 function SkillProficiencyDot({ training }) {
   const dotColor = training === 'exp' ? 'secondary.main' : training ? 'primary.main' : 'divider';
@@ -38,15 +27,11 @@ function SkillProficiencyDot({ training }) {
   );
 }
 
+// Skill advantage from two domains: sheet effects (class/subclass/species/feat,
+// already gated by minLevel/condition/requiredChoice/requiredItemFlag) and
+// magic items. Adding a source = register a `{ type:'advantage', target:'skill',
+// skill }` sheet effect in its adapter; nothing here changes.
 function getSkillAdvantage(C, skillName) {
-  const inv = C?.inventory || [];
-  const s = String(skillName || '').toLowerCase();
-  for (const config of _SKILL_ADVANTAGES) {
-    if (config.skill !== s) continue;
-    if (config.requiresChoice && !matchesChoiceRequirement(C, config.requiresChoice)) continue;
-    if (config.requiresInventoryFlag && !inventoryHasFlag(inv, config.requiresInventoryFlag)) continue;
-    return { source: config.label };
-  }
   const fromEffects = getSkillAdvantageFromEffects(C, skillName);
   if (fromEffects) return fromEffects;
   const fromItem = getItemAdvantageOnSkill(C, skillName);
@@ -83,7 +68,11 @@ export default function Skills({ C, sheet, onRoll }) {
         );
         const hasAdv = getSkillAdvantage(C, sk.n);
         const hasBoth = hasAdv && hasDisadv;
-        
+        const visual = advantageVisual(!!hasAdv, hasDisadv);
+        const skillTooltip = hasBoth
+          ? 'Advantage and Disadvantage cancel'
+          : hasAdv ? `Advantage (${hasAdv.source})` : 'Disadvantage from armor';
+
         return (
           <Box key={sk.n} onClick={() => {
             const withAdv = hasAdv && !hasDisadv;
@@ -103,14 +92,9 @@ export default function Skills({ C, sheet, onRoll }) {
               <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.75rem', fontWeight: 600, color: 'text.primary', textAlign: 'right' }}>
                 {fbonus(bonus)}
               </Typography>
-              {hasAdv && (
-                <Tooltip title={hasBoth ? 'Advantage and Disadvantage cancel' : `Advantage (${hasAdv.source})`}>
-                  <Sparkles size={10} style={{ color: hasBoth ? '#c4b393' : '#58b879', marginLeft: '2px' }} />
-                </Tooltip>
-              )}
-              {hasDisadv && !hasAdv && (
-                <Tooltip title="Disadvantage from armor">
-                  <AlertCircle size={10} style={{ color: '#ff9800', marginLeft: '2px' }} />
+              {visual && (
+                <Tooltip title={skillTooltip}>
+                  <visual.Icon size={11} style={{ color: visual.color, marginLeft: '2px' }} />
                 </Tooltip>
               )}
             </Box>

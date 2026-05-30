@@ -681,10 +681,6 @@ export function collectPreviewDefenseSections(character = {}) {
   ].filter(Boolean);
 }
 
-function bladesongActive(character) {
-  return character?.bladesongActive === true;
-}
-
 function bladesingerIntMod(character) {
   return Math.max(1, Math.floor((Number(character?.finalScores?.int ?? 10) - 10) / 2));
 }
@@ -708,11 +704,12 @@ export function getSkillAdvantageFromEffects(character = {}, skillName) {
     if (String(effect.skill || '').toLowerCase() !== s) return;
     found = { source: effect.note || effect.ownerName || 'Advantage' };
   });
-  return bladesongActive(character) ? found : null;
+  // No extra toggle gate: any toggle/condition (e.g. Bladesong) is already
+  // enforced per-effect by collectSheetEffects via `condition`.
+  return found;
 }
 
 export function getConcentrationBonus(character = {}) {
-  if (!bladesongActive(character)) return 0;
   let total = 0;
   collectSheetEffects(character).forEach((effect) => {
     if (norm(effect.type) !== 'concentrationbonus') return;

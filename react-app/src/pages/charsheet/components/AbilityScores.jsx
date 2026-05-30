@@ -1,7 +1,8 @@
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, Tooltip } from '@mui/material';
 import { getEquippedArmorPenalties } from '../logic/armorPenalties.js';
 import { STATS, SLBL, FULL_LBL, getFinal, getMod, getPB, fbonus } from '../logic/calculations.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
+import { advantageVisual } from './advantageMark.jsx';
 
 export default function AbilityScores({ C, sheet, onRoll }) {
   const pb = getPB(C);
@@ -21,6 +22,7 @@ export default function AbilityScores({ C, sheet, onRoll }) {
           const val = getFinal(C, s);
           const mod = getMod(val);
           const hasDisadv = armorPenalties.hasPenalty && armorPenalties.disadvantageOn.includes(`${s}-checks`);
+          const visual = advantageVisual(false, hasDisadv);
           return (
             <Box key={s} onClick={() => onRoll(mod, FULL_LBL[s] + ' Check', hasDisadv ? false : undefined)}
               sx={{
@@ -42,10 +44,10 @@ export default function AbilityScores({ C, sheet, onRoll }) {
               }}>
                 {val}
               </Box>
-              {hasDisadv ? (
-                <Typography sx={{ mt: 0.2, fontSize: '0.44rem', color: 'warning.main', fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.08em' }}>
-                  DIS
-                </Typography>
+              {visual ? (
+                <Tooltip title="Disadvantage from armor">
+                  <visual.Icon size={12} style={{ color: visual.color, marginTop: '2px' }} />
+                </Tooltip>
               ) : null}
             </Box>
           );

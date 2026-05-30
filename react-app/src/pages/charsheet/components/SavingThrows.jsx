@@ -1,15 +1,13 @@
 import { useState } from 'react';
 import { Box, Paper, Typography, Tooltip, Menu, MenuItem } from '@mui/material';
-import { Dice5, AlertCircle, Sparkles, ChevronDown, ShieldCheck, ShieldAlert } from 'lucide-react';
+import { Dice5, Sparkles, ChevronDown } from 'lucide-react';
 import { STATS, SLBL, FULL_LBL, hasSaveProficiency, getSaveBonus, fbonus } from '../logic/calculations.js';
 import { getConcentrationBonus } from '../logic/sheetEffects.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 import { aggregateSavingThrowBonus } from '../../../shared/character/itemBonus.js';
 import { collectItemEffects } from '../../../shared/character/itemEffects.js';
 import { collectSaveModifiers, fixedModifiersForAbility, summarizeSaveModifiers } from '../logic/saveModifiers.js';
-
-const ADV_COLOR = '#70b7a6';
-const DISADV_COLOR = '#ff9800';
+import { advantageVisual } from './advantageMark.jsx';
 
 export default function SavingThrows({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
@@ -18,7 +16,10 @@ export default function SavingThrows({ C, sheet, onRoll }) {
   const itemEffects = collectItemEffects(C?.inventory);
   const saveContexts = [...itemEffects.advantageOnSaveAgainst.entries()];
   const saveModifiers = collectSaveModifiers(C, inventory, profSets);
-  const modifierRows = summarizeSaveModifiers(saveModifiers);
+  // Reminder list shows only situational modifiers (e.g. "vs Frightened").
+  // Fixed ones (e.g. Gnomish Cunning on INT/WIS/CHA, armor) are already
+  // surfaced per-stat (icon + auto-roll), so they're excluded here.
+  const modifierRows = summarizeSaveModifiers(saveModifiers.filter((m) => m.mode === 'conditional'));
 
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [menuStat, setMenuStat] = useState(null);
@@ -59,6 +60,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
           const hasDisadv = fixedMods.some((m) => m.kind === 'disadvantage');
           const hasAdv = fixedMods.some((m) => m.kind === 'advantage');
           const tooltipText = fixedMods.map((m) => `${m.kind === 'advantage' ? 'Advantage' : 'Disadvantage'}: ${m.source}`).join(' • ');
+          const visual = advantageVisual(hasAdv, hasDisadv);
           const hasContextMenu = saveContexts.length > 0;
 
           return (
@@ -79,9 +81,9 @@ export default function SavingThrows({ C, sheet, onRoll }) {
                   </Tooltip>
                 ) : null}
               </Typography>
-              {(hasDisadv || hasAdv) && (
+              {visual && (
                 <Tooltip title={tooltipText}>
-                  <AlertCircle size={12} style={{ color: hasDisadv ? '#ff9800' : '#70b7a6', flexShrink: 0 }} />
+                  <visual.Icon size={12} style={{ color: visual.color, flexShrink: 0 }} />
                 </Tooltip>
               )}
               {hasContextMenu ? (
@@ -98,8 +100,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
         <Box sx={{ borderTop: 1, borderColor: 'divider', px: '0.8rem', py: '0.5rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
           {modifierRows.map((mod, i) => {
             const adv = mod.kind === 'advantage';
-            const Icon = adv ? ShieldCheck : ShieldAlert;
-            const color = adv ? ADV_COLOR : DISADV_COLOR;
+            const { Icon, color } = advantageVisual(adv, !adv);
             return (
               <Box key={`${mod.label}-${mod.source}-${i}`} sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75 }}>
                 <Icon size={13} style={{ color, flexShrink: 0, marginTop: 2 }} />
