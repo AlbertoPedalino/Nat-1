@@ -3,7 +3,7 @@ import { Box, Collapse, Paper, Typography } from '@mui/material';
 import { ChevronDown, Eye } from 'lucide-react';
 import { getSkillBonus } from '../logic/calculations.js';
 import { collectSenses } from '../logic/visionSenses.js';
-import { loadSenseDescriptions, getSenseDescriptionEntries, getFeatureDescriptionEntries } from '../../../shared/character/senseDescriptions.js';
+import { loadSenseDescriptions, getSenseDescriptionEntries, getFeatureDescriptionEntries } from '../logic/senseDescriptions.js';
 import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
 
 export default function Senses({ C }) {

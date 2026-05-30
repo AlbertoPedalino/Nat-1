@@ -7,17 +7,29 @@ function frozenList(values) {
 /**
  * Lower index = higher priority. Unknown sources rank after listed sources.
  */
-export const SPELL_SOURCE_PRIORITY = frozenList(['XPHB', 'FRAiF', 'FRHoF', 'EFA', 'XDMG']);
-export const ITEM_SOURCE_PRIORITY = frozenList(['XPHB', 'XDMG', 'EFA', 'FRAiF', 'FRHoF']);
-export const INVENTORY_SOURCE_PRIORITY = frozenList([...ITEM_SOURCE_PRIORITY, 'Custom']);
+// ── Single source of truth for supported 2024 (5.5e) manuals ──────────────
+// ADD A NEW MANUAL HERE (in priority order) and every content whitelist below
+// that derives from it picks it up automatically. Whitelisting a book that
+// lacks a given content type is harmless — no phantom data appears.
+export const CORE_2024_SOURCE_PRIORITY = frozenList(['XPHB', 'XDMG', 'EFA', 'FRAiF', 'FRHoF']);
 
+// Content available across all 2024 manuals → membership derived from the
+// master set. (These feed isAllowedSource; order is irrelevant for them.)
+export const ITEM_SOURCE_PRIORITY = CORE_2024_SOURCE_PRIORITY;
+export const SPECIES_ALLOWED_SOURCES = CORE_2024_SOURCE_PRIORITY;
+export const SUBCLASS_ALLOWED_SOURCES = CORE_2024_SOURCE_PRIORITY;
+export const BACKGROUND_ALLOWED_SOURCES = CORE_2024_SOURCE_PRIORITY;
+export const FEAT_ALLOWED_SOURCES = CORE_2024_SOURCE_PRIORITY;
+export const OPTIONAL_FEATURE_ALLOWED_SOURCES = CORE_2024_SOURCE_PRIORITY;
+export const INVENTORY_SOURCE_PRIORITY = frozenList([...CORE_2024_SOURCE_PRIORITY, 'Custom']);
+
+// Classes ship only in the 2024 core PHB and Eberron — kept deliberately narrow.
 export const CLASS_ALLOWED_SOURCES = frozenList(['XPHB', 'EFA']);
-export const SPECIES_ALLOWED_SOURCES = frozenList(['XPHB', 'EFA', 'FRAiF', 'FRHoF']);
-export const SUBCLASS_ALLOWED_SOURCES = frozenList(['XPHB', 'FRAiF', 'FRHoF', 'EFA']);
+
+// Order-sensitive dedup priorities (a source appearing in several books): the
+// ordering is intentional and independent of the membership lists above.
+export const SPELL_SOURCE_PRIORITY = frozenList(['XPHB', 'FRAiF', 'FRHoF', 'EFA', 'XDMG']);
 export const SUBCLASS_SOURCE_PRIORITY = frozenList(['XPHB', 'FRAiF', 'FRHoF', 'EFA']);
-export const BACKGROUND_ALLOWED_SOURCES = frozenList(['XPHB', 'EFA', 'FRAiF', 'FRHoF']);
-export const FEAT_ALLOWED_SOURCES = frozenList(['XPHB', 'EFA', 'FRAiF', 'FRHoF']);
-export const OPTIONAL_FEATURE_ALLOWED_SOURCES = frozenList(['XPHB', 'EFA', 'FRAiF', 'FRHoF']);
 
 export function normalizeSource(source) {
   return String(source || '').trim();

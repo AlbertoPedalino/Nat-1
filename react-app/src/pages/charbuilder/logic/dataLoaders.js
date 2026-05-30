@@ -22,10 +22,22 @@ import {
   isSupportedSubclassRecord,
 } from '../../../shared/character/sourceFiltering.js';
 
-async function getJson(path) {
-  const response = await fetch(DATA_BASE + path);
-  if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
-  return response.json();
+// Memoize by path: 5etools data is static per session, so repeated loads of the
+// same file (across builder + sheet panels) share one network request. The
+// promise is cached; on failure it's evicted so a later call can retry.
+const _jsonCache = new Map();
+
+function getJson(path) {
+  const cached = _jsonCache.get(path);
+  if (cached) return cached;
+  const promise = (async () => {
+    const response = await fetch(DATA_BASE + path);
+    if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
+    return response.json();
+  })();
+  promise.catch(() => _jsonCache.delete(path));
+  _jsonCache.set(path, promise);
+  return promise;
 }
 
 const DEBUG_LOADERS = import.meta.env.DEV;
@@ -109,6 +121,11 @@ export async function loadFeats() {
   return (data.feat || [])
     .filter((feat) => isAllowedSource(feat.source, FEAT_ALLOWED_SOURCES))
     .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export async function loadSenses() {
+  const data = await getJson('senses.json');
+  return data.sense || [];
 }
 
 export async function loadOptionalFeatures() {
