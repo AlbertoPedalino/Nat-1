@@ -2414,7 +2414,7 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
       if (!m || !m.name || !m.source) return '';
 
       const folder = m.source; // Manteniamo il caso originale del manuale (es: FRAiF)
-      const fileName = m.name.replace(/["'’]/g, "");
+      const fileName = m.name.replace(/[’]/g, "'"); // normalizza apostrofo curvo, mantiene quello dritto (es: Will-o'-Wisp)
 
       // Proviamo il percorso moderno che hai trovato, che funziona per XMM, FRAiF, ecc.
       // La struttura è: /bestiary/tokens/FONTE/Nome.webp
