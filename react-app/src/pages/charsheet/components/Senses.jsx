@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Box, Collapse, Paper, Typography } from '@mui/material';
+import { Box, Paper, Typography } from '@mui/material';
 import { ChevronDown, Eye } from 'lucide-react';
 import { getSkillBonus } from '../logic/calculations.js';
 import { collectSenses } from '../logic/visionSenses.js';
 import { loadSenseDescriptions, getSenseDescriptionEntries, getFeatureDescriptionEntries } from '../logic/senseDescriptions.js';
 import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
+import CollapsibleBody from '../../../shared/character/CollapsibleBody.jsx';
 
 export default function Senses({ C }) {
   const passPerc = 10 + getSkillBonus(C, { n: 'Perception', a: 'wis' });
@@ -92,7 +93,7 @@ function SenseRow({ value, label, source, color, entries, note, expanded, onTogg
         </Box>
       </Box>
       {clickable ? (
-        <Collapse in={expanded} unmountOnExit>
+        <CollapsibleBody open={expanded}>
           <Box sx={{
             px: 1, pb: 0.6, pt: 0.1,
             // Scale 5etools EntryBlocks (body2) down to the compact panel size.
@@ -105,7 +106,7 @@ function SenseRow({ value, label, source, color, entries, note, expanded, onTogg
               <Typography sx={{ fontSize: '0.62rem', color: 'text.secondary', lineHeight: 1.45 }}>{note}</Typography>
             )}
           </Box>
-        </Collapse>
+        </CollapsibleBody>
       ) : null}
     </Box>
   );

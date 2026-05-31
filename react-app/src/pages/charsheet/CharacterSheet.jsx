@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Box, Stack, Button, Dialog, DialogActions, DialogContent, DialogTitle, Slider, Typography } from '@mui/material';
+import { Box, Stack, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
 import { SHEET_AREAS, SHEET_GRID, SHEET_GRID_ITEM_SX } from './layout.js';
 import TopBar from './components/TopBar.jsx';
 import AbilityScores from './components/AbilityScores.jsx';
@@ -7,7 +7,7 @@ import HPBlock from './components/HPBlock.jsx';
 import SavingThrows from './components/SavingThrows.jsx';
 import Senses from './components/Senses.jsx';
 import Proficiencies from './components/Proficiencies.jsx';
-import HitDice from './components/HitDice.jsx';
+import HitDiceSpendControl from './components/HitDiceSpendControl.jsx';
 import Skills from './components/Skills.jsx';
 import Movement from './components/Movement.jsx';
 import RightTop from './components/RightTop.jsx';
@@ -506,9 +506,6 @@ export default function CharacterSheet() {
             <Box sx={{ gridArea: { xs: SHEET_AREAS.profs } }}>
               <Proficiencies C={C} />
             </Box>
-            <Box sx={{ gridArea: { xs: SHEET_AREAS.hitdice } }}>
-              <HitDice C={C} sheet={sheet} />
-            </Box>
           </Box>
           <Box sx={{ ...SHEET_GRID_ITEM_SX, gridArea: SHEET_AREAS.skills }}>
             <Skills C={C} sheet={sheet} onRoll={rollSkill} />
@@ -553,30 +550,13 @@ export default function CharacterSheet() {
             {hitDicePools.map((pool) => {
               const value = Math.max(0, Math.min(Number(hdToSpend[pool.key] || 0), pool.remaining));
               return (
-                <Box key={pool.key} sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 1, bgcolor: 'rgba(35,32,26,0.72)' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.72rem', color: 'primary.main', flex: 1 }}>
-                      {pool.label} d{pool.faces}
-                    </Typography>
-                    <Typography sx={{ fontSize: '0.66rem', color: 'text.secondary' }}>
-                      {pool.remaining}/{pool.total} left
-                    </Typography>
-                  </Box>
-                  <Slider
-                    value={value}
-                    onChange={(_, next) => setHdToSpend((prev) => ({ ...prev, [pool.key]: next }))}
-                    min={0}
-                    max={Math.max(1, pool.remaining)}
-                    step={1}
-                    marks
-                    disabled={pool.remaining === 0}
-                    valueLabelDisplay="auto"
-                    sx={{ color: '#caa550', my: 0.25 }}
-                  />
-                  <Typography sx={{ fontSize: '0.66rem', color: 'text.secondary', textAlign: 'right' }}>
-                    Spend: {value}d{pool.faces}{conMod >= 0 ? '+' : ''}{conMod} each
-                  </Typography>
-                </Box>
+                <HitDiceSpendControl
+                  key={pool.key}
+                  pool={pool}
+                  value={value}
+                  conMod={conMod}
+                  onChange={(next) => setHdToSpend((prev) => ({ ...prev, [pool.key]: next }))}
+                />
               );
             })}
           </Stack>

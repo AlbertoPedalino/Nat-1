@@ -5,6 +5,8 @@ import { SPELL_LEVEL_LABELS } from '../../charbuilder/constants.js';
 import { SpellNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 import { RichInline } from '../../../shared/character/RichText.jsx';
 import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
+import CollapsibleBody from '../../../shared/character/CollapsibleBody.jsx';
+import PipButton from '../../../shared/character/PipButton.jsx';
 import { formatRollTitle, rollFormula as rollFormulaDice } from '../../../shared/character/dice.js';
 import { SCHOOL_LABELS, fbonus, getFinal, getMod, getPB } from '../logic/calculations.js';
 import {
@@ -79,21 +81,18 @@ function FreeCastsInline({ freeCasts, freeCastUses, onToggleFreeCast }) {
                 {Array.from({ length: max }).map((_, i) => {
                   const isUsed = i < used;
                   return (
-                    <Box
+                    <PipButton
                       key={`${fc.id}-dot-${i}`}
+                      size={10}
+                      round
                       title={isUsed ? 'Free cast used' : 'Free cast available'}
+                      aria-label={`${fc.label}: ${isUsed ? 'free cast used' : 'free cast available'}`}
                       onClick={interactive ? (e) => { e.stopPropagation(); onToggleFreeCast(fc); } : undefined}
                       sx={{
-                        width: 10,
-                        height: 10,
-                        borderRadius: '50%',
                         border: '1.5px solid',
                         borderColor: isUsed ? '#edd48a' : 'rgba(202,165,80,0.35)',
                         bgcolor: isUsed ? '#caa550' : 'transparent',
-                        flexShrink: 0,
-                        cursor: interactive ? 'pointer' : 'default',
-                        transition: 'background-color 0.15s',
-                        '&:hover': interactive ? { borderColor: '#edd48a', boxShadow: '0 0 0 2px rgba(202,165,80,0.22)' } : undefined,
+                        '&:hover:not(:disabled)': interactive ? { borderColor: '#edd48a', boxShadow: '0 0 0 2px rgba(202,165,80,0.22)' } : undefined,
                       }}
                     />
                   );
@@ -324,7 +323,7 @@ export default function SpellEntry({ entry, onRoll, onShowToast, atk: fallbackAt
         <FreeCastsInline freeCasts={entry.freeCasts} freeCastUses={freeCastUses} onToggleFreeCast={onToggleFreeCast} />
       </Box>
 
-      {open ? (
+      <CollapsibleBody open={open}>
         <Box sx={spellBodySx}>
           {metaSegments.length ? (
             <Box sx={{ display: 'grid', gridTemplateColumns: 'auto 1fr', columnGap: '8px', rowGap: '2px', fontSize: '0.65rem', mb: '6px' }}>
@@ -388,7 +387,7 @@ export default function SpellEntry({ entry, onRoll, onShowToast, atk: fallbackAt
             </Box>
           ) : null}
         </Box>
-      ) : null}
+      </CollapsibleBody>
     </Box>
   );
 }

@@ -39,6 +39,8 @@ import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 import ResourceBar from './ResourceBar.jsx';
 import { RichInline, RichText } from '../../../shared/character/RichText.jsx';
 import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
+import CollapsibleBody from '../../../shared/character/CollapsibleBody.jsx';
+import PipButton from '../../../shared/character/PipButton.jsx';
 import { ItemPropertyTable } from '../../../shared/character/ItemPropertyTable.jsx';
 import { formatRollTitle, rollFormula as rollFormulaDice } from '../../../shared/character/dice.js';
 
@@ -972,7 +974,7 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
         const isSuppressed = isActive && toggleInfo.isSuppressed;
         const label = isSuppressed ? 'Suppressed' : (isActive ? 'Active' : 'Inactive');
         return (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', px: '10px', py: '5px', border: 1, borderTop: 'none', borderColor: 'divider', borderRadius: '0 0 8px 8px', bgcolor: 'rgba(129,179,232,0.06)', mb: open ? 0 : '4px' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', px: '10px', py: '5px', border: 1, borderTop: 'none', borderColor: 'divider', borderRadius: '0 0 8px 8px', bgcolor: 'rgba(129,179,232,0.06)' }}>
           <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontFamily: '"Cinzel", Georgia, serif', mr: 0.5, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Status</Typography>
           <Chip
             size="small"
@@ -1003,7 +1005,7 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
       })() : null}
 
       {hasRes ? (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', px: '10px', py: '5px', border: 1, borderTop: 'none', borderColor: 'divider', borderRadius: '0 0 8px 8px', bgcolor: 'rgba(202,165,80,0.06)', mb: open ? 0 : '4px' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', px: '10px', py: '5px', border: 1, borderTop: 'none', borderColor: 'divider', borderRadius: '0 0 8px 8px', bgcolor: 'rgba(202,165,80,0.06)' }}>
           <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontFamily: '"Cinzel", Georgia, serif', mr: 0.5, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Uses</Typography>
           {safeMax === Infinity ? (
             typeof onResChange === 'function' ? (
@@ -1022,20 +1024,17 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
             Array.from({ length: safeMax }, (_, i) => {
               const available = i >= safeMax - resCur;
               return (
-                <Box
+                <PipButton
                   key={i}
+                  size={10}
+                  round
                   title={available ? 'Available' : 'Used'}
+                  aria-label={`${action.name}: ${available ? 'spend use' : 'recover use'}`}
                   onClick={(e) => { e.stopPropagation(); onResChange(action.resKey, available ? -1 : 1); }}
                   sx={{
-                    width: 10,
-                    height: 10,
-                    borderRadius: '50%',
-                    cursor: 'pointer',
                     border: '1.5px solid',
-                    flexShrink: 0,
                     bgcolor: available ? 'transparent' : '#edd48a',
                     borderColor: available ? 'rgba(202,165,80,0.35)' : '#edd48a',
-                    '&:hover': { borderColor: '#edd48a' },
                   }}
                 />
               );
@@ -1044,8 +1043,8 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
         </Box>
       ) : null}
 
-      {open ? (
-        <Box sx={{ ...spellBodySx, mt: hasRes ? 0 : '-1px', mb: '4px' }}>
+      <CollapsibleBody open={open}>
+        <Box sx={{ ...spellBodySx, mt: hasRes ? 0 : '-1px' }}>
           {action._item ? <ItemPropertyTable item={action._item} sx={{ mb: '6px' }} /> : null}
           {action.entries ? <EntryBlocks entries={action.entries} emptyText="" /> : null}
           {action.choiceKey && onUpdateCharacter ? (
@@ -1065,7 +1064,7 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
             <DetailRenderer action={action} character={C} sheet={sheet} onShowToast={onShowToast} />
           ) : null}
         </Box>
-      ) : null}
+      </CollapsibleBody>
     </Box>
   );
 }

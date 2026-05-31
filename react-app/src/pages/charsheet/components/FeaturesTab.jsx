@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { Box, Typography, Chip } from '@mui/material';
 import { installedRegistry } from '../../../adapters/index.js';
 import { warlockInvocationSelections } from '../../../shared/character/warlockUtils.js';
+import CollapsibleBody from '../../../shared/character/CollapsibleBody.jsx';
+import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
+import { entriesToTextBlocks } from '../../../shared/character/spellEntries.js';
 
 const SOURCE_COLOR = {
   class: '#d7ad52',
@@ -30,8 +33,7 @@ export default function FeaturesTab({ C }) {
     if (backgroundEntries.length) {
       const raw = Array.isArray(backgroundEntries) ? backgroundEntries : [backgroundEntries];
       raw.forEach(e => {
-        const test = renderFeatureEntries(e);
-        if (test.trim()) out.push(e);
+        if (entriesToTextBlocks(e).length) out.push(e);
       });
     }
 
@@ -436,51 +438,15 @@ function FeatureItem({ feature, tone }) {
           {feature.level && <Chip size="small" label={`Lv ${feature.level}`} variant="outlined" sx={{ fontSize: '0.44rem', height: 16, color: 'text.secondary' }} />}
         </Box>
       </Box>
-      {open && feature.entries && (
-        <Box
-          sx={{
-            px: '12px',
-            py: '8px',
-            borderTop: 1,
-            borderColor: 'divider',
-            fontSize: '0.8125rem',
-            color: 'text.secondary',
-            lineHeight: 1.6,
-            '& b': { color: 'text.primary', fontWeight: 700 },
-            '& i': { color: 'text.secondary' },
-            '& ul': { pl: 2.5, my: 0.5 },
-            '& li': { mb: 0.25 },
-            '& table': { color: 'text.secondary' },
-          }}
-          dangerouslySetInnerHTML={{ __html: renderFeatureEntries(feature.entries) }}
-        />
-      )}
+      <CollapsibleBody open={open}>
+        {feature.entries ? (
+          <Box sx={{ px: '12px', py: '8px', borderTop: 1, borderColor: 'divider' }}>
+            <EntryBlocks entries={feature.entries} emptyText="" />
+          </Box>
+        ) : null}
+      </CollapsibleBody>
     </Box>
   );
-}
-
-function renderFeatureEntries(entries) {
-  if (!entries) return '';
-  if (typeof entries === 'string') return cleanText(entries);
-  if (Array.isArray(entries)) return entries.map((entry) => renderFeatureEntries(entry)).join('<br/>');
-  if (typeof entries === 'object') {
-    if (entries.type === 'list') {
-      const lis = (entries.items || []).map((item) => renderFeatureEntries(item)).filter(h => h.trim());
-      if (!lis.length) return '';
-      return `<ul style="margin:0.3rem 0 0.3rem 1.2rem">${lis.map(h => `<li>${h}</li>`).join('')}</ul>`;
-    }
-    if (entries.type === 'table') {
-      let h = '<table style="width:100%;border-collapse:collapse;font-size:0.7rem;margin:0.4rem 0">';
-      if (entries.colLabels) h += `<thead><tr>${entries.colLabels.map((label) => `<th style="font-family:&quot;Cinzel&quot;,Georgia,serif;font-size:0.56rem;letter-spacing:0.08em;color:var(--text3);padding:3px 6px;border-bottom:1px solid var(--bdr)">${cleanText(label)}</th>`).join('')}</tr></thead>`;
-      h += `<tbody>${(entries.rows || []).map((row) => `<tr>${row.map((cell) => `<td style="padding:2px 6px;border-bottom:1px solid var(--bdr)">${renderFeatureEntries(cell)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
-      return h;
-    }
-    if (entries.name && entries.entries) {
-      return `<b>${cleanText(entries.name)}.</b> ${renderFeatureEntries(entries.entries)}`;
-    }
-    if (entries.entries) return renderFeatureEntries(entries.entries);
-  }
-  return '';
 }
 
 function asArray(value) {
@@ -505,28 +471,3 @@ function cleanChoiceText(text) {
 }
 
 
-function escapeHtml(value) {
-  return String(value || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function cleanText(s) {
-  if (!s) return '';
-  return escapeHtml(String(s))
-    .replace(/\{@hit ([^}]+)\}/g, '<b>$1</b>')
-    .replace(/\{@damage ([^}]+)\}/g, '<b>$1</b>')
-    .replace(/\{@dc ([^}]+)\}/g, 'CD $1')
-    .replace(/\{@spell ([^|}]+)[^}]*\}/g, '<i>$1</i>')
-    .replace(/\{@condition ([^|}]+)[^}]*\}/g, '<b>$1</b>')
-    .replace(/\{@action ([^|}]+)[^}]*\}/g, '<b>$1</b>')
-    .replace(/\{@skill ([^|}]+)[^}]*\}/g, '$1')
-    .replace(/\{@ability ([^|}]+)[^}]*\}/g, '$1')
-    .replace(/\{@b ([^}]+)\}/g, '<b>$1</b>')
-    .replace(/\{@i ([^}]+)\}/g, '<i>$1</i>')
-    .replace(/\{@[a-z]+ ([^|}]+)[^}]*\}/gi, '$1')
-    .replace(/\{[^}]+\}/g, '');
-}

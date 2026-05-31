@@ -20,6 +20,7 @@ import { isConsumableTome, extractTomeBonus, hasAbilityChoice, getAbilityChoiceG
 import { getArmorPenalties } from '../logic/armorPenalties.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
+import CollapsibleBody from '../../../shared/character/CollapsibleBody.jsx';
 
 const CURRENCY_TYPES = [
   { key: 'cp', label: 'CP' },
@@ -749,7 +750,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, 
   const type = String(item.type || '').toUpperCase();
   const canEquip = ['M', 'R', 'LA', 'MA', 'HA', 'S', 'SCF', 'WD', 'RD', 'ST', 'WI', 'WEAPON', 'ARMOR'].includes(type);
 
-  const hasEntries = open && Array.isArray(item.entries) && item.entries.length > 0;
+  const hasEntries = Array.isArray(item.entries) && item.entries.length > 0;
   const showAbilityChoice = hasAbilityChoice(item);
   const showTomeConsume = isConsumableTome(item);
 
@@ -824,7 +825,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, 
           </Box>
         </Box>
       </Box>
-      {open ? (
+      <CollapsibleBody open={open}>
         <Box sx={{ fontSize: '0.7rem', color: 'text.secondary', lineHeight: 1.45, bgcolor: '#12100e', border: 1, borderColor: 'divider', borderRadius: 1, px: '10px', py: '6px', mt: '-2px', mb: '4px' }}>
           <ItemPropertyTable item={item} sx={{ mb: hasEntries ? '6px' : 0 }} />
           {hasEntries ? <Box sx={{ mt: '6px' }}><EntryBlocks entries={item.entries} emptyText="" /></Box> : null}
@@ -838,7 +839,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, 
             />
           ) : null}
         </Box>
-      ) : null}
+      </CollapsibleBody>
     </Box>
   );
 });
