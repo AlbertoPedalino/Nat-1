@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Box, Stack, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
+import { Box, Stack, Button, Typography } from '@mui/material';
+import { Hourglass, Moon } from 'lucide-react';
 import { SHEET_AREAS, SHEET_GRID, SHEET_GRID_ITEM_SX } from './layout.js';
 import TopBar from './components/TopBar.jsx';
 import AbilityScores from './components/AbilityScores.jsx';
@@ -8,6 +9,7 @@ import SavingThrows from './components/SavingThrows.jsx';
 import Senses from './components/Senses.jsx';
 import Proficiencies from './components/Proficiencies.jsx';
 import HitDiceSpendControl from './components/HitDiceSpendControl.jsx';
+import SheetDialog from '../../shared/character/SheetDialog.jsx';
 import Skills from './components/Skills.jsx';
 import Movement from './components/Movement.jsx';
 import RightTop from './components/RightTop.jsx';
@@ -537,90 +539,62 @@ export default function CharacterSheet() {
       </Box>
       {diceToast && <DiceToast toast={diceToast} onClose={() => setDiceToast(null)} />}
 
-      <Dialog open={shortRestOpen} onClose={() => setShortRestOpen(false)} maxWidth="xs" fullWidth slotProps={sheetDialogSlotProps}>
-        <DialogTitle sx={sheetDialogTitleSx}>Short Rest</DialogTitle>
-        <DialogContent sx={sheetDialogContentSx}>
-          <Typography sx={{ fontSize: '0.8rem', color: 'text.secondary', mb: 2 }}>
-            Optionally spend Hit Dice to recover HP. Each die adds CON mod ({conMod}). Resources that recharge on a Short Rest will still recover even if you spend no Hit Dice.
-          </Typography>
-          <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary', mb: 1 }}>
-            Available: {totalHitDiceRemaining} HD
-          </Typography>
-          <Stack spacing={1.25}>
-            {hitDicePools.map((pool) => {
-              const value = Math.max(0, Math.min(Number(hdToSpend[pool.key] || 0), pool.remaining));
-              return (
-                <HitDiceSpendControl
-                  key={pool.key}
-                  pool={pool}
-                  value={value}
-                  conMod={conMod}
-                  onChange={(next) => setHdToSpend((prev) => ({ ...prev, [pool.key]: next }))}
-                />
-              );
-            })}
-          </Stack>
-          <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary', textAlign: 'center', mt: 1.25 }}>
-            {totalHitDiceToSpend > 0 ? `Spending ${totalHitDiceToSpend} HD` : 'No Hit Dice will be spent'}
-          </Typography>
-        </DialogContent>
-        <DialogActions sx={sheetDialogActionsSx}>
-          <Button onClick={() => setShortRestOpen(false)} sx={{ color: 'text.secondary' }}>Cancel</Button>
-          <Button variant="contained" onClick={confirmShortRest}>
-            Take Short Rest
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <SheetDialog
+        open={shortRestOpen}
+        onClose={() => setShortRestOpen(false)}
+        title="Short Rest"
+        icon={<Hourglass size={20} />}
+        actions={(
+          <>
+            <Button onClick={() => setShortRestOpen(false)} sx={{ color: 'text.secondary' }}>Cancel</Button>
+            <Button variant="contained" onClick={confirmShortRest}>
+              Take Short Rest
+            </Button>
+          </>
+        )}
+      >
+        <Typography sx={{ fontSize: '0.8rem', color: 'text.secondary', mb: 2 }}>
+          Optionally spend Hit Dice to recover HP. Each die adds CON mod ({conMod}). Resources that recharge on a Short Rest will still recover even if you spend no Hit Dice.
+        </Typography>
+        <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary', mb: 1 }}>
+          Available: {totalHitDiceRemaining} HD
+        </Typography>
+        <Stack spacing={1.25}>
+          {hitDicePools.map((pool) => {
+            const value = Math.max(0, Math.min(Number(hdToSpend[pool.key] || 0), pool.remaining));
+            return (
+              <HitDiceSpendControl
+                key={pool.key}
+                pool={pool}
+                value={value}
+                conMod={conMod}
+                onChange={(next) => setHdToSpend((prev) => ({ ...prev, [pool.key]: next }))}
+              />
+            );
+          })}
+        </Stack>
+        <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary', textAlign: 'center', mt: 1.25 }}>
+          {totalHitDiceToSpend > 0 ? `Spending ${totalHitDiceToSpend} HD` : 'No Hit Dice will be spent'}
+        </Typography>
+      </SheetDialog>
 
-      <Dialog open={longRestOpen} onClose={() => setLongRestOpen(false)} maxWidth="xs" fullWidth slotProps={sheetDialogSlotProps}>
-        <DialogTitle sx={sheetDialogTitleSx}>Take a Long Rest?</DialogTitle>
-        <DialogContent sx={sheetDialogContentSx}>
-          <Typography sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
-            This will restore all HP, Hit Dice, spell slots, and class resources.
-          </Typography>
-        </DialogContent>
-        <DialogActions sx={sheetDialogActionsSx}>
-          <Button onClick={() => setLongRestOpen(false)} sx={{ color: 'text.secondary' }}>Cancel</Button>
-          <Button variant="contained" onClick={confirmLongRest}>Confirm Long Rest</Button>
-        </DialogActions>
-      </Dialog>
+      <SheetDialog
+        open={longRestOpen}
+        onClose={() => setLongRestOpen(false)}
+        title="Take a Long Rest?"
+        icon={<Moon size={20} />}
+        actions={(
+          <>
+            <Button onClick={() => setLongRestOpen(false)} sx={{ color: 'text.secondary' }}>Cancel</Button>
+            <Button variant="contained" onClick={confirmLongRest}>Confirm Long Rest</Button>
+          </>
+        )}
+      >
+        <Typography sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
+          This will restore all HP, Hit Dice, spell slots, and class resources.
+        </Typography>
+      </SheetDialog>
     </Box>
     </ProficiencySetsProvider>
   );
 }
-
-const sheetDialogSlotProps = {
-  paper: {
-    sx: {
-      bgcolor: 'rgba(26,23,19,0.98)',
-      border: 1,
-      borderColor: 'divider',
-      borderRadius: 1,
-      backgroundImage: 'none',
-      boxShadow: '0 18px 52px rgba(0,0,0,0.62)',
-    },
-  },
-};
-
-const sheetDialogTitleSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
-  color: '#edd48a',
-  bgcolor: 'rgba(35,32,26,1)',
-  borderBottom: 1,
-  borderColor: 'divider',
-  fontSize: '1rem',
-  letterSpacing: '0.06em',
-};
-
-const sheetDialogContentSx = {
-  bgcolor: 'rgba(26,23,19,0.98)',
-  pt: 2,
-};
-
-const sheetDialogActionsSx = {
-  px: 3,
-  pb: 2,
-  bgcolor: 'rgba(26,23,19,0.98)',
-  borderTop: 1,
-  borderColor: 'divider',
-};

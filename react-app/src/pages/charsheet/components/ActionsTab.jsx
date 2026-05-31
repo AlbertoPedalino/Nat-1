@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
+import { Box, Button, Chip, Typography } from '@mui/material';
 import { Cross, Dices, Sword } from 'lucide-react';
 import { getMod, getFinal, fbonus } from '../logic/calculations.js';
 import { installedRegistry, loadCoreAdapters, loadClassAdapters } from '../../../adapters/index.js';
@@ -41,6 +41,7 @@ import { RichInline, RichText } from '../../../shared/character/RichText.jsx';
 import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
 import CollapsibleBody from '../../../shared/character/CollapsibleBody.jsx';
 import PipButton from '../../../shared/character/PipButton.jsx';
+import SheetDialog from '../../../shared/character/SheetDialog.jsx';
 import { ItemPropertyTable } from '../../../shared/character/ItemPropertyTable.jsx';
 import { formatRollTitle, rollFormula as rollFormulaDice } from '../../../shared/character/dice.js';
 
@@ -635,215 +636,217 @@ export default function ActionsTab({ C, sheet, onRoll, resources, setResources, 
 
       {!actionSections.length ? <Empty text="No actions for this filter." /> : null}
 
-      <Dialog open={Boolean(createSlotDialog)} onClose={() => setCreateSlotDialog(null)} maxWidth="xs" fullWidth>
-        <DialogTitle sx={{ fontFamily: '"Cinzel", Georgia, serif', color: '#edd48a', bgcolor: 'rgba(35,32,26,1)', borderBottom: 1, borderColor: 'divider' }}>
-          {createSlotDialog?.label || 'Create Spell Slot'}
-        </DialogTitle>
-        <DialogContent sx={{ bgcolor: 'rgba(26,23,19,0.98)', pt: 1.25 }}>
-          {createSlotDialog ? (
-            <Box sx={{ display: 'grid', gap: 0.75 }}>
-              <Typography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>
-                Choose a spell slot level to create.
-              </Typography>
-              {createSlotDialog.levels.map(({ level, cost }) => (
-                <Box
-                  key={level}
-                  onClick={() => setCreateSlotSelection(level)}
-                  sx={{
-                    display: 'flex', alignItems: 'center', gap: 1, border: 1,
-                    borderColor: createSlotSelection === level ? '#edd48a' : 'divider',
-                    borderRadius: 1, px: 1, py: 0.8, cursor: 'pointer',
-                    bgcolor: createSlotSelection === level ? 'rgba(237,212,138,0.1)' : 'transparent',
-                    '&:hover': { borderColor: '#edd48a', bgcolor: 'rgba(237,212,138,0.06)' },
-                  }}
-                >
-                  <Typography sx={{ flex: 1, fontSize: '0.78rem', color: 'text.primary' }}>
-                    Level {level}
+      <SheetDialog
+        open={Boolean(createSlotDialog)}
+        onClose={() => setCreateSlotDialog(null)}
+        title={createSlotDialog?.label || 'Create Spell Slot'}
+        actions={(
+          <>
+            <Button onClick={() => setCreateSlotDialog(null)} sx={{ color: 'text.secondary' }}>Cancel</Button>
+            <Button variant="contained" onClick={confirmCreateSlot} disabled={createSlotSelection == null}>
+              Create
+            </Button>
+          </>
+        )}
+      >
+        {createSlotDialog ? (
+          <Box sx={{ display: 'grid', gap: 0.75 }}>
+            <Typography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>
+              Choose a spell slot level to create.
+            </Typography>
+            {createSlotDialog.levels.map(({ level, cost }) => (
+              <Box
+                key={level}
+                onClick={() => setCreateSlotSelection(level)}
+                sx={{
+                  display: 'flex', alignItems: 'center', gap: 1, border: 1,
+                  borderColor: createSlotSelection === level ? '#edd48a' : 'divider',
+                  borderRadius: 1, px: 1, py: 0.8, cursor: 'pointer',
+                  bgcolor: createSlotSelection === level ? 'rgba(237,212,138,0.1)' : 'transparent',
+                  '&:hover': { borderColor: '#edd48a', bgcolor: 'rgba(237,212,138,0.06)' },
+                }}
+              >
+                <Typography sx={{ flex: 1, fontSize: '0.78rem', color: 'text.primary' }}>
+                  Level {level}
+                </Typography>
+                <Typography sx={{ fontSize: '0.7rem', color: '#9d7fb8' }}>
+                  {cost} SP
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        ) : null}
+      </SheetDialog>
+
+      <SheetDialog
+        open={Boolean(convertSlotDialog)}
+        onClose={() => setConvertSlotDialog(null)}
+        title={convertSlotDialog?.label || 'Convert Spell Slot'}
+        actions={(
+          <>
+            <Button onClick={() => setConvertSlotDialog(null)} sx={{ color: 'text.secondary' }}>Cancel</Button>
+            <Button variant="contained" onClick={confirmConvertSlot} disabled={convertSlotSelection == null}>
+              Convert
+            </Button>
+          </>
+        )}
+      >
+        {convertSlotDialog ? (
+          <Box sx={{ display: 'grid', gap: 0.75 }}>
+            <Typography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>
+              Choose an expended spell slot to convert into Sorcery Points.
+            </Typography>
+            {convertSlotDialog.levels.map(({ level, available, hasCreated }) => (
+              <Box
+                key={level}
+                onClick={() => setConvertSlotSelection(level)}
+                sx={{
+                  display: 'flex', alignItems: 'center', gap: 1, border: 1,
+                  borderColor: convertSlotSelection === level ? '#edd48a' : 'divider',
+                  borderRadius: 1, px: 1, py: 0.8, cursor: 'pointer',
+                  bgcolor: convertSlotSelection === level ? 'rgba(237,212,138,0.1)' : 'transparent',
+                  '&:hover': { borderColor: '#edd48a', bgcolor: 'rgba(237,212,138,0.06)' },
+                }}
+              >
+                <Typography sx={{ flex: 1, fontSize: '0.78rem', color: 'text.primary' }}>
+                  Level {level} ({available} available{hasCreated ? ' · includes temporary' : ''})
+                </Typography>
+                <Typography sx={{ fontSize: '0.7rem', color: '#9d7fb8' }}>
+                  +{level} SP
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        ) : null}
+      </SheetDialog>
+
+      <SheetDialog
+        open={Boolean(wildResurgenceDialog)}
+        onClose={() => setWildResurgenceDialog(null)}
+        title={wildResurgenceDialog?.label || 'Wild Resurgence'}
+        actions={<Button onClick={() => setWildResurgenceDialog(null)} sx={{ color: 'text.secondary' }}>Cancel</Button>}
+      >
+        {wildResurgenceDialog ? (
+          <Box sx={{ display: 'grid', gap: 0.75 }}>
+            <Typography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>
+              Choose an option (Wild Shape remaining: {wildResurgenceDialog.currentWS}).
+            </Typography>
+            {wildResurgenceDialog.options.map((opt) => (
+              <Box
+                key={opt.key}
+                onClick={() => { confirmWildResurgence(opt.key); }}
+                sx={{
+                  display: 'flex', alignItems: 'center', gap: 1, border: 1,
+                  borderColor: 'divider', borderRadius: 1, px: 1, py: 0.8, cursor: 'pointer',
+                  '&:hover': { borderColor: '#edd48a', bgcolor: 'rgba(237,212,138,0.06)' },
+                }}
+              >
+                <Box sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.72rem', color: '#edd48a' }}>{opt.label}</Box>
+              </Box>
+            ))}
+          </Box>
+        ) : null}
+      </SheetDialog>
+
+      <SheetDialog
+        open={Boolean(spendSlotRecoverDialog)}
+        onClose={() => setSpendSlotRecoverDialog(null)}
+        title={spendSlotRecoverDialog?.label || 'Spell Slot Recovery'}
+        actions={(
+          <>
+            <Button onClick={() => setSpendSlotRecoverDialog(null)} sx={{ color: 'text.secondary' }}>Cancel</Button>
+            <Button variant="contained" onClick={confirmSpendSlotRecover} disabled={spendSlotRecoverSelection == null}>
+              Spend Slot & Recover
+            </Button>
+          </>
+        )}
+      >
+        {spendSlotRecoverDialog ? (
+          <Box sx={{ display: 'grid', gap: 0.75 }}>
+            <Typography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>
+              Spend one spell slot to recover {resNameMap[spendSlotRecoverDialog.targetKey] || spendSlotRecoverDialog.targetKey}.
+              {spendSlotRecoverDialog.note ? ` ${spendSlotRecoverDialog.note}` : ''}
+            </Typography>
+            {spendSlotRecoverDialog.levels.map(({ level, available }) => (
+              <Box
+                key={level}
+                onClick={() => setSpendSlotRecoverSelection(level)}
+                sx={{
+                  display: 'flex', alignItems: 'center', gap: 1, border: 1,
+                  borderColor: spendSlotRecoverSelection === level ? '#edd48a' : 'divider',
+                  borderRadius: 1, px: 1, py: 0.8, cursor: 'pointer',
+                  bgcolor: spendSlotRecoverSelection === level ? 'rgba(237,212,138,0.1)' : 'transparent',
+                  '&:hover': { borderColor: '#edd48a', bgcolor: 'rgba(237,212,138,0.06)' },
+                }}
+              >
+                <Typography sx={{ flex: 1, fontSize: '0.78rem', color: 'text.primary' }}>
+                  {SPELL_LEVEL_LABELS[level] || `Level ${level}`} · {available} available
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        ) : null}
+      </SheetDialog>
+
+      <SheetDialog
+        open={Boolean(consumePactSlotDialog)}
+        onClose={() => setConsumePactSlotDialog(null)}
+        title={consumePactSlotDialog?.label || 'Spend Pact Slot'}
+        actions={(
+          <>
+            <Button onClick={() => setConsumePactSlotDialog(null)} sx={{ color: 'text.secondary' }}>Cancel</Button>
+            <Button variant="contained" onClick={() => confirmConsumePactSlot(1)}>
+              Spend Pact Slot
+            </Button>
+          </>
+        )}
+      >
+        {consumePactSlotDialog ? (
+          <Box sx={{ display: 'grid', gap: 0.75 }}>
+            <Typography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>
+              Expend one Pact Magic slot (level {consumePactSlotDialog.slotLevel}) to power this feature.
+            </Typography>
+          </Box>
+        ) : null}
+      </SheetDialog>
+
+      <SheetDialog
+        open={Boolean(slotRecovery)}
+        onClose={() => setSlotRecovery(null)}
+        title={slotRecovery?.label || 'Recover Spell Slots'}
+        actions={(
+          <>
+            <Button onClick={() => setSlotRecovery(null)} sx={{ color: 'text.secondary' }}>Cancel</Button>
+            <Button variant="contained" onClick={confirmSlotRecovery} disabled={!slotRecovery || slotRecoverySpent <= 0}>
+              Recover
+            </Button>
+          </>
+        )}
+      >
+        {slotRecovery ? (
+          <Box sx={{ display: 'grid', gap: 0.75 }}>
+            <Typography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>
+              Recover expended spell slots. Budget {slotRecoverySpent}/{slotRecovery.budget}.
+            </Typography>
+            {slotRecovery.levels.map((entry) => {
+              const value = Number(slotRecoverySelection[String(entry.level)] || 0);
+              return (
+                <Box key={entry.level} sx={{ display: 'flex', alignItems: 'center', gap: 0.6, border: 1, borderColor: 'divider', borderRadius: 1, px: 0.8, py: 0.6 }}>
+                  <Typography sx={{ flex: 1, fontSize: '0.72rem', color: 'text.primary' }}>
+                    {SPELL_LEVEL_LABELS[entry.level] || `Level ${entry.level}`} · expended {entry.expended}
                   </Typography>
-                  <Typography sx={{ fontSize: '0.7rem', color: '#9d7fb8' }}>
-                    {cost} SP
-                  </Typography>
+                  <Button size="small" variant="outlined" onClick={() => adjustSlotRecoveryLevel(entry.level, -1)} sx={{ minWidth: 26, px: 0.7 }}>-</Button>
+                  <Typography sx={{ minWidth: 16, textAlign: 'center', fontSize: '0.78rem', color: '#edd48a', fontFamily: '"Cinzel", Georgia, serif' }}>{value}</Typography>
+                  <Button size="small" variant="outlined" onClick={() => adjustSlotRecoveryLevel(entry.level, 1)} disabled={slotRecoveryRemaining < entry.level || value >= entry.expended} sx={{ minWidth: 26, px: 0.7 }}>+</Button>
                 </Box>
-              ))}
-            </Box>
-          ) : null}
-        </DialogContent>
-        <DialogActions sx={{ bgcolor: 'rgba(35,32,26,1)', borderTop: 1, borderColor: 'divider' }}>
-          <Button onClick={() => setCreateSlotDialog(null)} sx={{ color: 'text.secondary' }}>Cancel</Button>
-          <Button variant="contained" onClick={confirmCreateSlot} disabled={createSlotSelection == null}>
-            Create
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog open={Boolean(convertSlotDialog)} onClose={() => setConvertSlotDialog(null)} maxWidth="xs" fullWidth>
-        <DialogTitle sx={{ fontFamily: '"Cinzel", Georgia, serif', color: '#edd48a', bgcolor: 'rgba(35,32,26,1)', borderBottom: 1, borderColor: 'divider' }}>
-          {convertSlotDialog?.label || 'Convert Spell Slot'}
-        </DialogTitle>
-        <DialogContent sx={{ bgcolor: 'rgba(26,23,19,0.98)', pt: 1.25 }}>
-          {convertSlotDialog ? (
-            <Box sx={{ display: 'grid', gap: 0.75 }}>
-              <Typography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>
-                Choose an expended spell slot to convert into Sorcery Points.
-              </Typography>
-              {convertSlotDialog.levels.map(({ level, available, hasCreated }) => (
-                <Box
-                  key={level}
-                  onClick={() => setConvertSlotSelection(level)}
-                  sx={{
-                    display: 'flex', alignItems: 'center', gap: 1, border: 1,
-                    borderColor: convertSlotSelection === level ? '#edd48a' : 'divider',
-                    borderRadius: 1, px: 1, py: 0.8, cursor: 'pointer',
-                    bgcolor: convertSlotSelection === level ? 'rgba(237,212,138,0.1)' : 'transparent',
-                    '&:hover': { borderColor: '#edd48a', bgcolor: 'rgba(237,212,138,0.06)' },
-                  }}
-                >
-                  <Typography sx={{ flex: 1, fontSize: '0.78rem', color: 'text.primary' }}>
-                    Level {level} ({available} available{hasCreated ? ' · includes temporary' : ''})
-                  </Typography>
-                  <Typography sx={{ fontSize: '0.7rem', color: '#9d7fb8' }}>
-                    +{level} SP
-                  </Typography>
-                </Box>
-              ))}
-            </Box>
-          ) : null}
-        </DialogContent>
-        <DialogActions sx={{ bgcolor: 'rgba(35,32,26,1)', borderTop: 1, borderColor: 'divider' }}>
-          <Button onClick={() => setConvertSlotDialog(null)} sx={{ color: 'text.secondary' }}>Cancel</Button>
-          <Button variant="contained" onClick={confirmConvertSlot} disabled={convertSlotSelection == null}>
-            Convert
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog open={Boolean(wildResurgenceDialog)} onClose={() => setWildResurgenceDialog(null)} maxWidth="xs" fullWidth>
-        <DialogTitle sx={{ fontFamily: '"Cinzel", Georgia, serif', color: '#edd48a', bgcolor: 'rgba(35,32,26,1)', borderBottom: 1, borderColor: 'divider' }}>
-          {wildResurgenceDialog?.label || 'Wild Resurgence'}
-        </DialogTitle>
-        <DialogContent sx={{ bgcolor: 'rgba(26,23,19,0.98)', pt: 1.25 }}>
-          {wildResurgenceDialog ? (
-            <Box sx={{ display: 'grid', gap: 0.75 }}>
-              <Typography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>
-                Choose an option (Wild Shape remaining: {wildResurgenceDialog.currentWS}).
-              </Typography>
-              {wildResurgenceDialog.options.map((opt) => (
-                <Box
-                  key={opt.key}
-                  onClick={() => { confirmWildResurgence(opt.key); }}
-                  sx={{
-                    display: 'flex', alignItems: 'center', gap: 1, border: 1,
-                    borderColor: 'divider', borderRadius: 1, px: 1, py: 0.8, cursor: 'pointer',
-                    '&:hover': { borderColor: '#edd48a', bgcolor: 'rgba(237,212,138,0.06)' },
-                  }}
-                >
-                  <Box sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.72rem', color: '#edd48a' }}>{opt.label}</Box>
-                </Box>
-              ))}
-            </Box>
-          ) : null}
-        </DialogContent>
-        <DialogActions sx={{ bgcolor: 'rgba(35,32,26,1)', borderTop: 1, borderColor: 'divider' }}>
-          <Button onClick={() => setWildResurgenceDialog(null)} sx={{ color: 'text.secondary' }}>Cancel</Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog open={Boolean(spendSlotRecoverDialog)} onClose={() => setSpendSlotRecoverDialog(null)} maxWidth="xs" fullWidth>
-        <DialogTitle sx={{ fontFamily: '"Cinzel", Georgia, serif', color: '#edd48a', bgcolor: 'rgba(35,32,26,1)', borderBottom: 1, borderColor: 'divider' }}>
-          {spendSlotRecoverDialog?.label || 'Spell Slot Recovery'}
-        </DialogTitle>
-        <DialogContent sx={{ bgcolor: 'rgba(26,23,19,0.98)', pt: 1.25 }}>
-          {spendSlotRecoverDialog ? (
-            <Box sx={{ display: 'grid', gap: 0.75 }}>
-              <Typography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>
-                Spend one spell slot to recover {resNameMap[spendSlotRecoverDialog.targetKey] || spendSlotRecoverDialog.targetKey}.
-                {spendSlotRecoverDialog.note ? ` ${spendSlotRecoverDialog.note}` : ''}
-              </Typography>
-              {spendSlotRecoverDialog.levels.map(({ level, available }) => (
-                <Box
-                  key={level}
-                  onClick={() => setSpendSlotRecoverSelection(level)}
-                  sx={{
-                    display: 'flex', alignItems: 'center', gap: 1, border: 1,
-                    borderColor: spendSlotRecoverSelection === level ? '#edd48a' : 'divider',
-                    borderRadius: 1, px: 1, py: 0.8, cursor: 'pointer',
-                    bgcolor: spendSlotRecoverSelection === level ? 'rgba(237,212,138,0.1)' : 'transparent',
-                    '&:hover': { borderColor: '#edd48a', bgcolor: 'rgba(237,212,138,0.06)' },
-                  }}
-                >
-                  <Typography sx={{ flex: 1, fontSize: '0.78rem', color: 'text.primary' }}>
-                    {SPELL_LEVEL_LABELS[level] || `Level ${level}`} · {available} available
-                  </Typography>
-                </Box>
-              ))}
-            </Box>
-          ) : null}
-        </DialogContent>
-        <DialogActions sx={{ bgcolor: 'rgba(35,32,26,1)', borderTop: 1, borderColor: 'divider' }}>
-          <Button onClick={() => setSpendSlotRecoverDialog(null)} sx={{ color: 'text.secondary' }}>Cancel</Button>
-          <Button variant="contained" onClick={confirmSpendSlotRecover} disabled={spendSlotRecoverSelection == null}>
-            Spend Slot & Recover
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog open={Boolean(consumePactSlotDialog)} onClose={() => setConsumePactSlotDialog(null)} maxWidth="xs" fullWidth>
-        <DialogTitle sx={{ fontFamily: '"Cinzel", Georgia, serif', color: '#edd48a', bgcolor: 'rgba(35,32,26,1)', borderBottom: 1, borderColor: 'divider' }}>
-          {consumePactSlotDialog?.label || 'Spend Pact Slot'}
-        </DialogTitle>
-        <DialogContent sx={{ bgcolor: 'rgba(26,23,19,0.98)', pt: 1.25 }}>
-          {consumePactSlotDialog ? (
-            <Box sx={{ display: 'grid', gap: 0.75 }}>
-              <Typography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>
-                Expend one Pact Magic slot (level {consumePactSlotDialog.slotLevel}) to power this feature.
-              </Typography>
-            </Box>
-          ) : null}
-        </DialogContent>
-        <DialogActions sx={{ bgcolor: 'rgba(35,32,26,1)', borderTop: 1, borderColor: 'divider' }}>
-          <Button onClick={() => setConsumePactSlotDialog(null)} sx={{ color: 'text.secondary' }}>Cancel</Button>
-          <Button variant="contained" onClick={() => confirmConsumePactSlot(1)}>
-            Spend Pact Slot
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog open={Boolean(slotRecovery)} onClose={() => setSlotRecovery(null)} maxWidth="xs" fullWidth>
-        <DialogTitle sx={{ fontFamily: '"Cinzel", Georgia, serif', color: '#edd48a', bgcolor: 'rgba(35,32,26,1)', borderBottom: 1, borderColor: 'divider' }}>
-          {slotRecovery?.label || 'Recover Spell Slots'}
-        </DialogTitle>
-        <DialogContent sx={{ bgcolor: 'rgba(26,23,19,0.98)', pt: 1.25 }}>
-          {slotRecovery ? (
-            <Box sx={{ display: 'grid', gap: 0.75 }}>
-              <Typography sx={{ fontSize: '0.72rem', color: 'text.secondary' }}>
-                Recover expended spell slots. Budget {slotRecoverySpent}/{slotRecovery.budget}.
-              </Typography>
-              {slotRecovery.levels.map((entry) => {
-                const value = Number(slotRecoverySelection[String(entry.level)] || 0);
-                return (
-                  <Box key={entry.level} sx={{ display: 'flex', alignItems: 'center', gap: 0.6, border: 1, borderColor: 'divider', borderRadius: 1, px: 0.8, py: 0.6 }}>
-                    <Typography sx={{ flex: 1, fontSize: '0.72rem', color: 'text.primary' }}>
-                      {SPELL_LEVEL_LABELS[entry.level] || `Level ${entry.level}`} · expended {entry.expended}
-                    </Typography>
-                    <Button size="small" variant="outlined" onClick={() => adjustSlotRecoveryLevel(entry.level, -1)} sx={{ minWidth: 26, px: 0.7 }}>-</Button>
-                    <Typography sx={{ minWidth: 16, textAlign: 'center', fontSize: '0.78rem', color: '#edd48a', fontFamily: '"Cinzel", Georgia, serif' }}>{value}</Typography>
-                    <Button size="small" variant="outlined" onClick={() => adjustSlotRecoveryLevel(entry.level, 1)} disabled={slotRecoveryRemaining < entry.level || value >= entry.expended} sx={{ minWidth: 26, px: 0.7 }}>+</Button>
-                  </Box>
-                );
-              })}
-              <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary' }}>
-                Remaining budget: {slotRecoveryRemaining}
-              </Typography>
-            </Box>
-          ) : null}
-        </DialogContent>
-        <DialogActions sx={{ bgcolor: 'rgba(35,32,26,1)', borderTop: 1, borderColor: 'divider' }}>
-          <Button onClick={() => setSlotRecovery(null)} sx={{ color: 'text.secondary' }}>Cancel</Button>
-          <Button variant="contained" onClick={confirmSlotRecovery} disabled={!slotRecovery || slotRecoverySpent <= 0}>
-            Recover
-          </Button>
-        </DialogActions>
-      </Dialog>
+              );
+            })}
+            <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary' }}>
+              Remaining budget: {slotRecoveryRemaining}
+            </Typography>
+          </Box>
+        ) : null}
+      </SheetDialog>
 
     </Box>
   );

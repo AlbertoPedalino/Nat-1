@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Box, Stack, Typography, Button, TextField, Dialog, DialogActions, DialogContent, DialogTitle, Chip } from '@mui/material';
+import { Box, Typography, Button, TextField, Chip } from '@mui/material';
 import { ArrowLeft, Home, Sun, Moon, Download, Wand2, Hammer, Axe, Music, Cross, Feather, Sword, Dumbbell, Shield, Compass, Eye, Sparkles, Flame, BookOpen, Dices, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getLevelFromXp, getXpForNextLevel } from '../logic/calculations.js';
 import { rollFormula as rollFormulaDice, formatRollTitle } from '../../../shared/character/dice.js';
 import IconColorPicker from '../../../shared/character/IconColorPicker.jsx';
+import SheetDialog from '../../../shared/character/SheetDialog.jsx';
 
 const CLASS_ICONS = {
   Artificer: Hammer,
@@ -70,13 +71,6 @@ function normalizeXpInput(value) {
 }
 
 const ROLL_LOG_SX = {
-  dialogPaper: {
-    sx: { bgcolor: 'rgba(26,23,19,0.98)', border: 1, borderColor: 'divider', borderRadius: 1, backgroundImage: 'none', boxShadow: '0 18px 52px rgba(0,0,0,0.62)' },
-  },
-  title: {
-    fontFamily: '"Cinzel", Georgia, serif', color: '#edd48a', bgcolor: 'rgba(35,32,26,1)', borderBottom: 1, borderColor: 'divider', fontSize: '0.85rem', letterSpacing: '0.06em',
-  },
-  content: { bgcolor: 'rgba(26,23,19,0.98)', pt: 1.25 },
   entry: {
     border: 1, borderColor: 'divider', borderRadius: 1, px: 1, py: 0.5, mb: 0.4,
     bgcolor: 'rgba(35,32,26,0.6)',
@@ -241,21 +235,26 @@ export default function TopBar({ C, sheet, onShortRest, onLongRest, onDownload, 
       </Box>
       </Box>
 
-      <Dialog open={rollLogOpen} onClose={() => setRollLogOpen(false)} maxWidth="sm" fullWidth slotProps={{ paper: ROLL_LOG_SX.dialogPaper }}>
-        <DialogTitle sx={ROLL_LOG_SX.title}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            Roll Log
-            {rollLog?.length > 0 && (
-              <Button size="small" variant="text" startIcon={<Trash2 size={12} />}
-                onClick={() => { onClearRollLog?.(); }}
-                sx={{ fontSize: '0.55rem', color: 'text.secondary', minWidth: 0, p: 0.3 }}>
-                Clear
-              </Button>
-            )}
-          </Box>
-        </DialogTitle>
-        <DialogContent sx={ROLL_LOG_SX.content}>
-          {!rollLog?.length ? (
+      <SheetDialog
+        open={rollLogOpen}
+        onClose={() => setRollLogOpen(false)}
+        maxWidth="sm"
+        title="Roll Log"
+        icon={<Dices size={20} />}
+        headerRight={rollLog?.length > 0 ? (
+          <Button size="small" variant="text" startIcon={<Trash2 size={12} />}
+            onClick={() => { onClearRollLog?.(); }}
+            sx={{ fontSize: '0.6rem', color: 'text.secondary', minWidth: 0, p: 0.3 }}>
+            Clear
+          </Button>
+        ) : null}
+        actions={(
+          <Button onClick={() => setRollLogOpen(false)} variant="outlined" size="small" sx={{ color: 'text.secondary' }}>
+            Close
+          </Button>
+        )}
+      >
+        {!rollLog?.length ? (
             <Typography sx={ROLL_LOG_SX.empty}>No rolls yet. Make an ability check, save, or attack to see it here.</Typography>
           ) : (
             rollLog.slice(0, 50).map((entry, i) => {
@@ -315,13 +314,7 @@ export default function TopBar({ C, sheet, onShortRest, onLongRest, onDownload, 
               );
             })
           )}
-        </DialogContent>
-        <DialogActions sx={{ bgcolor: 'rgba(35,32,26,1)', borderTop: 1, borderColor: 'divider', px: 2, py: 1 }}>
-          <Button onClick={() => setRollLogOpen(false)} variant="outlined" size="small" sx={{ fontSize: '0.6rem', color: 'text.secondary' }}>
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
+      </SheetDialog>
 
       <CustomRollDialog open={customRollOpen} onClose={() => setCustomRollOpen(false)} onShowToast={onShowToast} />
     </Box>
@@ -330,9 +323,6 @@ export default function TopBar({ C, sheet, onShortRest, onLongRest, onDownload, 
 
 const DICE_TYPES = [4, 6, 8, 10, 12, 20, 100];
 const CUSTOM_ROLL_SX = {
-  dialogPaper: { sx: { bgcolor: 'rgba(26,23,19,0.98)', border: 1, borderColor: 'divider', borderRadius: 1, backgroundImage: 'none' } },
-  title: { fontFamily: '"Cinzel", Georgia, serif', color: '#edd48a', bgcolor: 'rgba(35,32,26,1)', borderBottom: 1, borderColor: 'divider', fontSize: '0.85rem', letterSpacing: '0.06em' },
-  content: { bgcolor: 'rgba(26,23,19,0.98)', pt: 1.5 },
   diceRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 0.5, py: 0.4, borderBottom: 1, borderColor: 'divider' },
   diceLabel: { fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.8rem', fontWeight: 700, color: 'text.primary', minWidth: 42 },
   countLabel: { fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.9rem', fontWeight: 700, color: '#edd48a', minWidth: 24, textAlign: 'center' },
@@ -375,9 +365,21 @@ function CustomRollDialog({ open, onClose, onShowToast }) {
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth slotProps={{ paper: CUSTOM_ROLL_SX.dialogPaper }}>
-      <DialogTitle sx={CUSTOM_ROLL_SX.title}>Custom Roll</DialogTitle>
-      <DialogContent sx={CUSTOM_ROLL_SX.content}>
+    <SheetDialog
+      open={open}
+      onClose={handleClose}
+      title="Custom Roll"
+      icon={<Dices size={20} />}
+      actions={(
+        <>
+          <Button onClick={handleReset} variant="text" size="small" sx={{ color: 'text.secondary', mr: 'auto' }}>Reset</Button>
+          <Button onClick={handleClose} variant="outlined" size="small" sx={{ color: 'text.secondary' }}>Close</Button>
+          <Button onClick={handleRoll} variant="contained" size="small" disabled={!hasSelection}>
+            Roll
+          </Button>
+        </>
+      )}
+    >
         {DICE_TYPES.map((faces) => (
           <Box key={faces} sx={CUSTOM_ROLL_SX.diceRow}>
             <Typography sx={CUSTOM_ROLL_SX.diceLabel}>d{faces}</Typography>
@@ -397,17 +399,6 @@ function CustomRollDialog({ open, onClose, onShowToast }) {
         {hasSelection && (
           <Typography sx={CUSTOM_ROLL_SX.formula}>{formula}</Typography>
         )}
-      </DialogContent>
-      <DialogActions sx={{ bgcolor: 'rgba(35,32,26,1)', borderTop: 1, borderColor: 'divider', px: 2, py: 1, justifyContent: 'space-between' }}>
-        <Button onClick={handleReset} variant="text" size="small" sx={{ fontSize: '0.6rem', color: 'text.secondary' }}>Reset</Button>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button onClick={handleClose} variant="outlined" size="small" sx={{ fontSize: '0.6rem', color: 'text.secondary' }}>Close</Button>
-          <Button onClick={handleRoll} variant="contained" size="small" disabled={!hasSelection}
-            sx={{ fontSize: '0.65rem', fontFamily: '"Cinzel", Georgia, serif', fontWeight: 700, letterSpacing: '0.06em' }}>
-            Roll
-          </Button>
-        </Box>
-      </DialogActions>
-    </Dialog>
+    </SheetDialog>
   );
 }

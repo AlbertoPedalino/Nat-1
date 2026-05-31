@@ -4,16 +4,12 @@ import {
   Alert,
   Button,
   Chip,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  IconButton,
   TextField,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
 } from '@mui/material';
-import { Plus, Search, X } from 'lucide-react';
+import { Plus, Search, Sparkles } from 'lucide-react';
 import { SPELL_LEVEL_LABELS } from '../../charbuilder/constants.js';
 import { SCHOOL_LABELS, SLBL, getFinal, getMod, getPB } from '../logic/calculations.js';
 import { loadSpells } from '../../charbuilder/logic/dataLoaders.js';
@@ -23,6 +19,7 @@ import { isConcentrationSpell, isRitualSpell } from '../../../shared/spellTags.j
 import { getEquippedArmorPenalties } from '../logic/armorPenalties.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 import { aggregateSpellBonuses } from '../../../shared/character/itemBonus.js';
+import SheetDialog from '../../../shared/character/SheetDialog.jsx';
 import {
   buildSpellInfo,
   canManageSpells,
@@ -392,33 +389,20 @@ export default function SpellsTab({ C, sheet, onRoll, onUpdateSpells, onShowToas
         </Box>
       ) : null}
 
-      <Dialog
+      <SheetDialog
         open={pickerOpen}
         onClose={() => setPickerOpen(false)}
-        fullWidth
         maxWidth="md"
-        slotProps={{
-          paper: {
-            sx: {
-              bgcolor: 'rgba(26,23,19,0.98)',
-              border: 1,
-              borderColor: 'divider',
-              borderRadius: 1,
-              backgroundImage: 'none',
-              boxShadow: '0 18px 52px rgba(0,0,0,0.62)',
-            },
-          },
-        }}
-      >
-        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1, fontFamily: '"Cinzel", Georgia, serif', color: '#edd48a', borderBottom: 1, borderColor: 'divider', bgcolor: 'rgba(35,32,26,1)' }}>
-          Spells
-          <Box sx={{ flex: 1 }} />
+        title="Spells"
+        icon={<Sparkles size={20} />}
+        showClose
+        contentSx={{ pt: 1.5 }}
+        headerRight={(
           <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
             {activePicker ? `${activePicker.label} - Cantrips ${activeCounts.cantrips}/${activeLimits.cantrips ?? '-'} - Spells ${activeCounts.spells}/${activeLimits.spells ?? '-'}` : 'No caster class'}
           </Typography>
-          <IconButton onClick={() => setPickerOpen(false)}><X size={18} /></IconButton>
-        </DialogTitle>
-        <DialogContent sx={{ bgcolor: 'rgba(26,23,19,0.98)', pt: 1.1 }}>
+        )}
+      >
           {casterPickers.length > 1 ? (
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 0.75 }}>
               {casterPickers.map((caster, index) => (
@@ -520,8 +504,7 @@ export default function SpellsTab({ C, sheet, onRoll, onUpdateSpells, onShowToas
               <Empty text={activeIsWizard && pickerWizardMode === 'prepare' ? 'No spells in this Wizard spellbook level.' : 'No spells found for this class/level.'} />
             ) : null}
           </Box>
-        </DialogContent>
-      </Dialog>
+      </SheetDialog>
     </Box>
   );
 }
