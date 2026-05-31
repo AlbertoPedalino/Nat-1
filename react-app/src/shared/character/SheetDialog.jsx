@@ -39,8 +39,12 @@ const titleTextSx = {
   lineHeight: 1.3,
 };
 
-// Extra top padding so the body breathes below the accent bar.
-const contentSx = { bgcolor: 'rgba(26,23,19,0.98)', px: 2.25, pt: 3.25, pb: 2 };
+// Base content padding. Top padding uses the `&.MuiDialogContent-root`
+// selector to match the specificity of MUI's default
+// `.MuiDialogTitle-root + .MuiDialogContent-root { padding-top: 0 }` rule —
+// a plain `pt` loses to it and is silently ignored. The gap below the title
+// bar is set via the `topPad` prop.
+const contentSx = { bgcolor: 'rgba(26,23,19,0.98)', px: 2.25, pb: 2 };
 
 const actionsSx = {
   px: 2.25,
@@ -74,6 +78,7 @@ export default function SheetDialog({
   actions,
   maxWidth = 'xs',
   fullWidth = true,
+  topPad = 3,
   contentSx: contentSxOverride,
   ...props
 }) {
@@ -91,7 +96,7 @@ export default function SheetDialog({
           </Stack>
         </DialogTitle>
       ) : null}
-      <DialogContent sx={{ ...contentSx, ...contentSxOverride }}>{children}</DialogContent>
+      <DialogContent sx={{ ...contentSx, '&.MuiDialogContent-root': { pt: topPad }, ...contentSxOverride }}>{children}</DialogContent>
       {actions != null ? <DialogActions sx={actionsSx}>{actions}</DialogActions> : null}
     </Dialog>
   );

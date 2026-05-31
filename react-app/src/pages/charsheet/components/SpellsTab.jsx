@@ -396,7 +396,7 @@ export default function SpellsTab({ C, sheet, onRoll, onUpdateSpells, onShowToas
         title="Spells"
         icon={<Sparkles size={20} />}
         showClose
-        contentSx={{ pt: 1.5 }}
+        topPad={2}
         headerRight={(
           <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
             {activePicker ? `${activePicker.label} - Cantrips ${activeCounts.cantrips}/${activeLimits.cantrips ?? '-'} - Spells ${activeCounts.spells}/${activeLimits.spells ?? '-'}` : 'No caster class'}
