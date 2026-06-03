@@ -1,16 +1,16 @@
 import { useState, useCallback } from 'react';
 import { Box, Typography, Chip, Tooltip } from '@mui/material';
-import { Swords, Shield, Sparkles, ListChecks, X, AlertCircle } from 'lucide-react';
+import { Swords, Shield, Sparkles, AlertCircle } from 'lucide-react';
 import { getMod, getFinal } from '../logic/calculations.js';
-import { CONDITIONS } from '../logic/calculations.js';
 import { getArmorTrainingInfo } from '../logic/proficiencies.js';
 import { collectResolvedResistanceItems, collectResolvedImmunityItems } from '../logic/sheetEffects.js';
 import { collectItemResistanceItems, collectItemImmunityItems, collectItemConditionImmunityItems, collectItemEffects } from '../../../shared/character/itemEffects.js';
 import { computeBestArmorClass } from '../../../shared/character/ac.js';
 import { resolveInitiativeTriggeredResourceRecoveries } from '../../../shared/character/initiativeEffects.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
+import ConditionsBlock from './ConditionsBlock.jsx';
 
-export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearConditions, onToggleInspiration, resources, setResources, onShowToast }) {
+export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearConditions, conditionEntries, onToggleInspiration, resources, setResources, onShowToast }) {
   const initMod = getMod(getFinal(C, 'dex'));
   const [lastInitiativeRoll, setLastInitiativeRoll] = useState(null);
   const [initiativeMessage, setInitiativeMessage] = useState('');
@@ -47,7 +47,6 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
     }
   }, [C, resources, setResources, onShowToast, initMod]);
 
-  const active = CONDITIONS.filter(c => sheet.activeConditions.includes(c.key));
   const inv = sheet?.sheetInventory || [];
   const equippedShield = inv.find(i => i.equipped && i.type === 'S');
   const profSets = useProficiencySets();
@@ -78,7 +77,7 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
         <InspirationBlock sheet={sheet} onToggle={onToggleInspiration} />
         <DefensesBlock C={C} />
       </Box>
-      <ConditionsBlock active={active} sheet={sheet} onToggle={onToggleCondition} onClear={onClearConditions} />
+      <ConditionsBlock sheet={sheet} onToggle={onToggleCondition} onClear={onClearConditions} conditionEntries={conditionEntries} />
     </Box>
   );
 }
@@ -175,46 +174,3 @@ function DefensesBlock({ C }) {
     </Box>
   );
 }
-
-function ConditionsBlock({ active, sheet, onToggle, onClear }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <Box sx={{ flex: 1, minWidth: 140, bgcolor: 'rgba(35,32,26,1)', border: 1, borderColor: 'divider', borderRadius: 1, p: '0.4rem 0.62rem' }}>
-      <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'primary.main', mb: 0.4 }}>Conditions</Typography>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.25 }}>
-          {active.length === 0 && <Chip size="small" label="— None" variant="outlined" sx={{ fontSize: '0.5rem', borderStyle: 'dashed' }} />}
-          {active.map(c => (
-            <Chip key={c.key} size="small" label={c.label} onDelete={() => onToggle(c.key)}
-              sx={{ fontSize: '0.5rem', color: '#d69245', borderColor: '#d69245', bgcolor: 'rgba(213,138,61,0.14)' }} />
-          ))}
-        </Box>
-        <Box sx={{ border: '1px dashed', borderColor: 'divider', borderRadius: 1, p: '3px 6px' }}>
-          <Box component="summary" onClick={() => setOpen(!open)}
-            sx={{ cursor: 'pointer', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.56rem', color: 'text.secondary', letterSpacing: '0.06em', display: 'inline-flex', alignItems: 'center', gap: 0.5, userSelect: 'none' }}>
-            <ListChecks size={12} /> Manage ({active.length})
-          </Box>
-          {open && (
-            <Box>
-              <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(108px,1fr))', gap: 0.25, mt: 0.5 }}>
-                {CONDITIONS.map(c => {
-                  const isOn = sheet.activeConditions.includes(c.key);
-                  return (
-                    <Chip key={c.key} size="small" label={c.label} variant={isOn ? 'filled' : 'outlined'}
-                      onClick={() => onToggle(c.key)}
-                      sx={{ fontSize: '0.5rem', cursor: 'pointer', justifyContent: 'flex-start', ...(isOn ? { color: '#d69245', bgcolor: 'rgba(213,138,61,0.14)' } : {}) }} />
-                  );
-                })}
-              </Box>
-              {active.length > 0 && (
-                <Chip size="small" label="Clear" onDelete={onClear} deleteIcon={<X size={12} />} sx={{ mt: 0.5, fontSize: '0.5rem' }} />
-              )}
-            </Box>
-          )}
-        </Box>
-      </Box>
-    </Box>
-  );
-}
-
-

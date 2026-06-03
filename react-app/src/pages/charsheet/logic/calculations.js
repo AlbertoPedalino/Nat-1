@@ -43,6 +43,16 @@ export const CONDITIONS = [
   { key: 'exhaustion', label: 'Exhaustion', icon: 'BatteryLow' },
 ];
 
+// Conditions that inherently impose other conditions (XPHB 2024). Applying the
+// parent auto-applies these so the sheet reflects the full rules effect. Removal
+// is not cascaded (the implied condition may also stand on its own).
+export const CONDITION_IMPLIES = {
+  paralyzed: ['incapacitated'],
+  petrified: ['incapacitated'],
+  stunned: ['incapacitated'],
+  unconscious: ['incapacitated', 'prone'],
+};
+
 export const SCHOOL_LABELS = { A: 'Abjuration', C: 'Conjuration', D: 'Divination', E: 'Enchantment', I: 'Illusion', N: 'Necromancy', T: 'Transmutation', V: 'Evocation' };
 export const SPELL_LEVEL_LABELS = ['Cantrip', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th'];
 const XP_TABLE = [0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000, 85000, 100000, 120000, 140000, 165000, 195000, 225000, 265000, 305000, 355000];

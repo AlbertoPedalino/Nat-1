@@ -19,12 +19,12 @@ import { deriveSheetState } from './state.js';
 import { ProficiencySetsProvider } from './context/ProficiencySetsContext.jsx';
 import { buildD20Meta, formatD20Detail, rollD20 as rollD20Dice } from '../../shared/character/dice.js';
 import { aggregateSavingThrowBonus } from '../../shared/character/itemBonus.js';
-import { calcMaxHP, getMod, getFinal, getPB, getSaveBonus } from './logic/calculations.js';
+import { calcMaxHP, getMod, getFinal, getPB, getSaveBonus, CONDITION_IMPLIES } from './logic/calculations.js';
 import { applyResourceRest, getAllResourceDefs, getHitDicePools, getUsedHitDiceTotal, normalizeResourceMax } from './logic/restResources.js';
 import { clearedToggles } from './logic/toggleState.js';
 import { applyFreeCastRest, getFreeCastDefsForCharacter } from './logic/spellsTabLogic.js';
 import { loadCoreAdapters, loadClassAdapters, installedRegistry } from '../../adapters/index.js';
-import { loadItems, loadOptionalFeatures, reconcileInventoryWithItemsDb } from '../charbuilder/logic/dataLoaders.js';
+import { loadItems, loadOptionalFeatures, loadConditions, reconcileInventoryWithItemsDb } from '../charbuilder/logic/dataLoaders.js';
 import {
   getActiveCharId,
   loadCharacter as storeLoadCharacter,
@@ -48,6 +48,7 @@ export default function CharacterSheet() {
   const [shortRestOpen, setShortRestOpen] = useState(false);
   const [longRestOpen, setLongRestOpen] = useState(false);
   const [hdToSpend, setHdToSpend] = useState({});
+  const [conditionEntries, setConditionEntries] = useState({});
 
   useEffect(() => {
     let alive = true;
@@ -63,8 +64,10 @@ export default function CharacterSheet() {
       loadClassAdapters(classNames, context),
       loadItems().catch(() => []),
       loadOptionalFeatures().catch(() => []),
-    ]).then(([, , itemsDb, optFeatures]) => {
+      loadConditions().catch(() => ({})),
+    ]).then(([, , itemsDb, optFeatures, condEntries]) => {
       if (!alive) return;
+      setConditionEntries(condEntries || {});
 
       // Re-merge structured effect fields from the items DB into the stored
       // inventory so items added before a schema update gain newly normalized
@@ -381,8 +384,16 @@ export default function CharacterSheet() {
     if (!sheet) return;
     const idx = sheet.activeConditions.indexOf(key);
     const next = [...sheet.activeConditions];
-    if (idx >= 0) next.splice(idx, 1);
-    else next.push(key);
+    if (idx >= 0) {
+      next.splice(idx, 1);
+    } else {
+      next.push(key);
+      // Apply conditions inherently imposed by this one (e.g. Unconscious also
+      // grants Incapacitated + Prone), without duplicating already-active ones.
+      (CONDITION_IMPLIES[key] || []).forEach((implied) => {
+        if (!next.includes(implied)) next.push(implied);
+      });
+    }
     setSheet({ ...sheet, activeConditions: next });
     persist({ activeConditions: next });
   }, [sheet, persist]);
@@ -515,6 +526,7 @@ export default function CharacterSheet() {
           <Stack spacing={0.55} sx={{ ...SHEET_GRID_ITEM_SX, gridArea: SHEET_AREAS.right }}>
             <RightTop C={C} sheet={sheet} onRoll={rollD20}
               onToggleCondition={toggleCondition} onClearConditions={clearConditions}
+              conditionEntries={conditionEntries}
               onToggleInspiration={toggleInspiration}
               resources={resources} setResources={saveResourcesState} onShowToast={showDiceToast} />
             <TabsPanel C={C} sheet={sheet} tab={tab} setTab={setTab} onRoll={rollD20}

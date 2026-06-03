@@ -128,6 +128,18 @@ export async function loadSenses() {
   return data.sense || [];
 }
 
+// XPHB (2024) condition descriptions, keyed by lowercased name to match the
+// CONDITIONS table keys in calculations.js (e.g. "blinded"). Returns a map of
+// key -> 5etools entries[] for rendering via entriesToTextBlocks/EntryBlocks.
+export async function loadConditions() {
+  const data = await getJson('conditionsdiseases.json');
+  const out = {};
+  (data.condition || [])
+    .filter((c) => c.source === 'XPHB')
+    .forEach((c) => { out[String(c.name).toLowerCase()] = c.entries || []; });
+  return out;
+}
+
 export async function loadOptionalFeatures() {
   const data = await getJson('optionalfeatures.json');
   return (data.optionalfeature || [])
