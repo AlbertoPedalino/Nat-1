@@ -368,7 +368,7 @@ export default function InventoryTab({ C, sheet, onUpdateInventory, onUpdateCurr
   const charClassNames = useMemo(() => (
     [C?.className, ...((C?.extraClasses || []).map((ec) => ec?.name))].filter(Boolean)
   ), [C]);
-  const attunementFull = countAttunedItems(inv) >= ATTUNEMENT_LIMIT;
+  const attunementFull = useMemo(() => countAttunedItems(inv) >= ATTUNEMENT_LIMIT, [inv]);
 
   const searchResults = useMemo(() => {
     const q = deferredSearch.trim();
@@ -816,28 +816,9 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, 
               {hasArcaneArmor ? 'Arcane' : 'Arcane Armor'}
             </Button>
           ) : null}
-          {item.reqAttune ? (() => {
-            const reqText = attunementRequirementText(item);
-            const eligible = meetsAttunementClassRequirement(item, charClassNames);
-            const blocked = !item.attuned && attunementFull;
-            const tip = [
-              reqText,
-              blocked ? `Attunement limit reached (${ATTUNEMENT_LIMIT})` : null,
-              !eligible ? 'Your class may not meet this requirement' : null,
-            ].filter(Boolean).join(' · ');
-            const accent = item.attuned ? '#d69245' : (!eligible ? '#c9923f' : null);
-            return (
-              <Tooltip title={tip} arrow>
-                <span>
-                  <Button size="small" disabled={blocked} onClick={() => onAttune?.(index)}
-                    startIcon={item.attuned ? <Check size={11} /> : (!eligible ? <AlertTriangle size={11} /> : null)}
-                    sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: accent || 'divider', borderRadius: '3px', color: accent || 'text.secondary', bgcolor: item.attuned ? 'rgba(214,146,69,0.14)' : 'transparent', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem', '&.Mui-disabled': { opacity: 0.4 } }}>
-                    {item.attuned ? 'Attuned' : 'Attune'}
-                  </Button>
-                </span>
-              </Tooltip>
-            );
-          })() : null}
+          {item.reqAttune ? (
+            <AttuneButton item={item} index={index} attunementFull={attunementFull} charClassNames={charClassNames} onAttune={onAttune} />
+          ) : null}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, ml: 'auto' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
               <QtyButton onClick={() => onQty(index, -1)}><Minus size={12} /></QtyButton>
@@ -966,6 +947,32 @@ function SlotBtn({ active, onClick, label }) {
     >
       {label}
     </IconButton>
+  );
+}
+
+// Attune toggle for an item requiring attunement. Surfaces the requirement text
+// (tooltip), disables when the RAW attunement cap is reached, and flags a soft
+// class-eligibility warning. All rules logic comes from itemBonus.js.
+function AttuneButton({ item, index, attunementFull, charClassNames, onAttune }) {
+  const reqText = attunementRequirementText(item);
+  const eligible = meetsAttunementClassRequirement(item, charClassNames);
+  const blocked = !item.attuned && attunementFull;
+  const tip = [
+    reqText,
+    blocked ? `Attunement limit reached (${ATTUNEMENT_LIMIT})` : null,
+    !eligible ? 'Your class may not meet this requirement' : null,
+  ].filter(Boolean).join(' · ');
+  const accent = item.attuned ? '#d69245' : (!eligible ? '#c9923f' : null);
+  return (
+    <Tooltip title={tip} arrow>
+      <span>
+        <Button size="small" disabled={blocked} onClick={() => onAttune?.(index)}
+          startIcon={item.attuned ? <Check size={11} /> : (!eligible ? <AlertTriangle size={11} /> : null)}
+          sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: accent || 'divider', borderRadius: '3px', color: accent || 'text.secondary', bgcolor: item.attuned ? 'rgba(214,146,69,0.14)' : 'transparent', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem', '&.Mui-disabled': { opacity: 0.4 } }}>
+          {item.attuned ? 'Attuned' : 'Attune'}
+        </Button>
+      </span>
+    </Tooltip>
   );
 }
 

@@ -109,12 +109,12 @@ export const ATTUNEMENT_LIMIT = 3;
 export function attunementRequirementText(item) {
   const req = item?.reqAttune;
   if (!req) return null;
+  if (req === true || typeof req !== 'string') return 'Requires attunement';
   const format = (value) => {
     const trimmed = String(value).trim();
     if (!trimmed) return 'Requires attunement';
-    return /^by /i.test(trimmed) ? `Requires attunement ${trimmed}` : `Requires attunement (${trimmed})`;
+    return trimmed.toLowerCase().startsWith('by ') ? `Requires attunement ${trimmed}` : `Requires attunement (${trimmed})`;
   };
-  if (req === true || typeof req !== 'string') return 'Requires attunement';
   const alt = typeof item?.reqAttuneAlt === 'string' ? ` or ${item.reqAttuneAlt.trim()}` : '';
   return format(req) + alt;
 }
@@ -123,6 +123,25 @@ const ATTUNEMENT_CLASS_NAMES = [
   'artificer', 'barbarian', 'bard', 'cleric', 'druid', 'fighter',
   'monk', 'paladin', 'ranger', 'rogue', 'sorcerer', 'warlock', 'wizard',
 ];
+const ATTUNEMENT_CLASS_SET = new Set(ATTUNEMENT_CLASS_NAMES);
+
+// Split text into lowercased whole-word tokens without regex: letters form a
+// word, anything else is a boundary. Whole-word matching avoids substring false
+// positives (e.g. "monk" inside another word).
+function wordTokens(text) {
+  const out = [];
+  let word = '';
+  for (const ch of String(text).toLowerCase()) {
+    if (ch >= 'a' && ch <= 'z') {
+      word += ch;
+    } else if (word) {
+      out.push(word);
+      word = '';
+    }
+  }
+  if (word) out.push(word);
+  return out;
+}
 
 // Class names named in the attunement qualifier (e.g. "by a cleric or paladin"
 // -> ['cleric','paladin']). Returns null when the qualifier names no class we
@@ -131,8 +150,7 @@ const ATTUNEMENT_CLASS_NAMES = [
 export function attunementClasses(item) {
   const parts = [item?.reqAttune, item?.reqAttuneAlt].filter((v) => typeof v === 'string');
   if (!parts.length) return null;
-  const lower = parts.join(' ').toLowerCase();
-  const found = ATTUNEMENT_CLASS_NAMES.filter((cls) => new RegExp(`\\b${cls}\\b`).test(lower));
+  const found = [...new Set(wordTokens(parts.join(' ')))].filter((token) => ATTUNEMENT_CLASS_SET.has(token));
   return found.length ? found : null;
 }
 
