@@ -98,3 +98,50 @@ export function aggregateSpellBonuses(inventory) {
 export function countAttunedItems(inventory) {
   return (inventory || []).filter((item) => requiresAttunement(item) && item?.attuned).length;
 }
+
+// RAW cap on simultaneously attuned items.
+export const ATTUNEMENT_LIMIT = 3;
+
+// Human-readable attunement requirement. 5etools `reqAttune` is either `true`
+// (generic) or a qualifier string ("by a wizard", "by a creature of good
+// alignment"). `reqAttuneAlt` carries an alternative qualifier on the rare item
+// that has one. Returns null when the item needs no attunement.
+export function attunementRequirementText(item) {
+  const req = item?.reqAttune;
+  if (!req) return null;
+  const format = (value) => {
+    const trimmed = String(value).trim();
+    if (!trimmed) return 'Requires attunement';
+    return /^by /i.test(trimmed) ? `Requires attunement ${trimmed}` : `Requires attunement (${trimmed})`;
+  };
+  if (req === true || typeof req !== 'string') return 'Requires attunement';
+  const alt = typeof item?.reqAttuneAlt === 'string' ? ` or ${item.reqAttuneAlt.trim()}` : '';
+  return format(req) + alt;
+}
+
+const ATTUNEMENT_CLASS_NAMES = [
+  'artificer', 'barbarian', 'bard', 'cleric', 'druid', 'fighter',
+  'monk', 'paladin', 'ranger', 'rogue', 'sorcerer', 'warlock', 'wizard',
+];
+
+// Class names named in the attunement qualifier (e.g. "by a cleric or paladin"
+// -> ['cleric','paladin']). Returns null when the qualifier names no class we
+// can validate against (alignment / species / "spellcaster" / generic) so
+// callers treat null as "can't validate — don't warn".
+export function attunementClasses(item) {
+  const parts = [item?.reqAttune, item?.reqAttuneAlt].filter((v) => typeof v === 'string');
+  if (!parts.length) return null;
+  const lower = parts.join(' ').toLowerCase();
+  const found = ATTUNEMENT_CLASS_NAMES.filter((cls) => new RegExp(`\\b${cls}\\b`).test(lower));
+  return found.length ? found : null;
+}
+
+// Best-effort eligibility: true unless the qualifier names specific classes and
+// the character has none of them. Conservative — only the explicit-class case
+// is validated, to avoid false negatives on freeform qualifiers.
+export function meetsAttunementClassRequirement(item, characterClassNames) {
+  const required = attunementClasses(item);
+  if (!required) return true;
+  const have = (characterClassNames || []).map((c) => String(c).toLowerCase());
+  return required.some((cls) => have.includes(cls));
+}
