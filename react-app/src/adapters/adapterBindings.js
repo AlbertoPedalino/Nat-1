@@ -102,6 +102,8 @@ export function createAdapterBindings(registry, context = {}) {
     getAllItemFlagDefs: registry.getAllItemFlagDefs,
     registerWeaponAbilityOverride: registry.registerWeaponAbilityOverride,
     getWeaponAbilityOverrides: registry.getWeaponAbilityOverrides,
+    registerWeaponExtraAttack: registry.registerWeaponExtraAttack,
+    getWeaponExtraAttacks: registry.getWeaponExtraAttacks,
     registerFeatOwnerKey: registry.registerFeatOwnerKey,
     registerFeatOwnerKeyPrefix: registry.registerFeatOwnerKeyPrefix,
     registerFeatOwnerKeyPattern: registry.registerFeatOwnerKeyPattern,

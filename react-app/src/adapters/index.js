@@ -1,11 +1,12 @@
 import { adapterRegistry, installAdapters } from './registry.js';
 
-const adapterModules = import.meta.glob('./{classes,feats,species,spells}/**/*.js');
+const adapterModules = import.meta.glob('./{classes,feats,species,spells,items}/**/*.js');
 const loadedPaths = new Set();
 const inFlightPathPromises = new Map();
 const installedAdapters = [];
 const speciesPathPattern = /^\.\/species\//;
 const featPathPattern = /^\.\/feats\//;
+const itemPathPattern = /^\.\/items\//;
 const runtimeConfigPathPattern = /\/runtime-config\.js$/;
 
 function classFolderToken(name) {
@@ -25,6 +26,10 @@ function pathsForSpecies() {
 
 function pathsForFeats() {
   return Object.keys(adapterModules).filter((path) => featPathPattern.test(path));
+}
+
+function pathsForItems() {
+  return Object.keys(adapterModules).filter((path) => itemPathPattern.test(path));
 }
 
 function pathsForCoreRuntime() {
@@ -70,6 +75,7 @@ export async function loadCoreAdapters(context = {}) {
   await Promise.all([
     loadPaths(pathsForSpecies(), context),
     loadPaths(pathsForFeats(), context),
+    loadPaths(pathsForItems(), context),
     loadPaths(pathsForCoreRuntime(), context),
   ]);
   return adapterRegistry;

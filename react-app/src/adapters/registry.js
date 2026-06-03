@@ -132,6 +132,7 @@ export function createAdapterRegistry() {
     globalItemAdapters: [],
     itemFlagDefs: new Map(),
     weaponAbilityOverrides: [],
+    weaponExtraAttacks: [],
     featOwnerKeyExact: new Set(),
     featOwnerKeyPrefixes: [],
     featOwnerKeyPrefixSet: new Set(),
@@ -446,6 +447,15 @@ export function createAdapterRegistry() {
     },
     getWeaponAbilityOverrides() {
       return stores.weaponAbilityOverrides.slice();
+    },
+    // Magic items granting an extra attack with the weapon itself (e.g. Scimitar
+    // of Speed's Bonus Action attack). `match(item, C)` decides per equipped
+    // weapon; a matching override clones the weapon's attack card into `cat`.
+    registerWeaponExtraAttack(config) {
+      if (config?.key && typeof config.match === 'function') stores.weaponExtraAttacks.push(config);
+    },
+    getWeaponExtraAttacks() {
+      return stores.weaponExtraAttacks.slice();
     },
     registerFeatOwnerKey(key) {
       if (typeof key === 'string' && key) stores.featOwnerKeyExact.add(key);

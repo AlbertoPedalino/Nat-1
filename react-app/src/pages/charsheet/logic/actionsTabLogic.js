@@ -508,6 +508,26 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
   };
 }
 
+// Clone a weapon's attack card for each registered extra-attack override that
+// matches it (e.g. Scimitar of Speed → a Bonus Action attack). Reuses the
+// computed attack/damage so item enhancement, mastery and proficiency stay
+// consistent; only category/label change.
+function pushWeaponExtraAttacks(out, mainAction, item, C, overrides) {
+  overrides.forEach((ov) => {
+    let matched = false;
+    try { matched = ov.match(item, C); } catch { matched = false; }
+    if (!matched) return;
+    out.push({
+      ...mainAction,
+      name: ov.name || mainAction.name,
+      cat: ov.cat || 'bonus',
+      uses: ov.uses || 'Bonus Action',
+      _colorBarCat: 'attack',
+      _extraAttackKey: ov.key,
+    });
+  });
+}
+
 export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSets) {
   if (!equipmentSets) {
     throw new Error('makeWeaponActions requires equipmentSets from collectEquipmentProficiencySets(character)');
@@ -526,11 +546,14 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
   const hasTWF = hasTwoWeaponFightingStyle(C);
   const offHandItem = attacks.find(i => i.equippedSlot === 'offHand');
   const canLightExtra = offHandItem && canUseLightExtraAttack(C, inventory);
+  const extraAttackOverrides = installedRegistry.getWeaponExtraAttacks();
 
   attacks.forEach((item) => {
     if (item.equippedSlot === 'offHand' && canLightExtra) return;
     const base = getWeaponDamageDice(item, item.equippedSlot);
-    weaponActions.push(makeWeaponAction(C, item, attacks.indexOf(item), overrides, selectedMasteriesByWeapon, inventory, items, ctx, { damageBase: base }));
+    const mainAction = makeWeaponAction(C, item, attacks.indexOf(item), overrides, selectedMasteriesByWeapon, inventory, items, ctx, { damageBase: base });
+    weaponActions.push(mainAction);
+    pushWeaponExtraAttacks(weaponActions, mainAction, item, C, extraAttackOverrides);
   });
 
   if (canLightExtra && offHandItem) {
