@@ -18,18 +18,16 @@ function requiresEquipForBonus(item) {
 }
 
 // An item-granted bonus is active depending on item kind:
-//   - Held/worn-slot items: must be `equipped`; if they also require
-//     attunement, must additionally be `attuned`.
-//   - Slotless magic items requiring attunement: active on `attuned` alone.
-//   - Slotless items without attunement: need `equipped` (mundane bag/pack
-//     items rarely carry numeric bonuses; included for completeness).
+//   - Items requiring attunement: must be `attuned` (and, if held/worn, also
+//     `equipped`).
+//   - Held/worn-slot items: must be `equipped`.
+//   - Slotless items (rings, wondrous): no equip toggle exists in our model, so
+//     they apply by possession. Mundane bag/pack items reach here too but carry
+//     no effect fields, so they contribute nothing.
 export function isItemBonusActive(item) {
   if (!item) return false;
-  if (requiresAttunement(item)) {
-    if (!item.attuned) return false;
-    return requiresEquipForBonus(item) ? !!item.equipped : true;
-  }
-  return !!item.equipped;
+  if (requiresAttunement(item) && !item.attuned) return false;
+  return requiresEquipForBonus(item) ? !!item.equipped : true;
 }
 
 export function parseSignedBonus(value) {
