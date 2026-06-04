@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Box, Typography, Chip, Tooltip } from '@mui/material';
 import { Swords, Shield, Sparkles, AlertCircle } from 'lucide-react';
-import { getMod, getFinal } from '../logic/calculations.js';
+import { getMod, getFinal, getConditionsWithEffect, exhaustionD20Penalty } from '../logic/calculations.js';
 import { getArmorTrainingInfo } from '../logic/proficiencies.js';
 import { collectResolvedResistanceItems, collectResolvedImmunityItems } from '../logic/sheetEffects.js';
 import { collectItemResistanceItems, collectItemImmunityItems, collectItemConditionImmunityItems, collectItemEffects } from '../../../shared/character/itemEffects.js';
@@ -10,8 +10,11 @@ import { resolveInitiativeTriggeredResourceRecoveries } from '../../../shared/ch
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 import ConditionsBlock from './ConditionsBlock.jsx';
 
-export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearConditions, conditionEntries, onToggleInspiration, resources, setResources, onShowToast }) {
-  const initMod = getMod(getFinal(C, 'dex'));
+export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearConditions, onSetExhaustion, conditionEntries, onToggleInspiration, resources, setResources, onShowToast }) {
+  // Initiative is a DEX check (D20 Test) but rolls its own d20 here (it also fires
+  // initiative-triggered recoveries), so the exhaustion −2/level penalty is applied
+  // to the modifier directly rather than via rollD20.
+  const initMod = getMod(getFinal(C, 'dex')) - exhaustionD20Penalty(sheet?.exhaustionLevel);
   const [lastInitiativeRoll, setLastInitiativeRoll] = useState(null);
   const [initiativeMessage, setInitiativeMessage] = useState('');
 
@@ -75,9 +78,9 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
         </Box>
         <ACDisplay value={ac} shieldUnproficient={shieldUnproficient} source={acSource} showBadge={showAcBadge} badgeLabel={acSource} />
         <InspirationBlock sheet={sheet} onToggle={onToggleInspiration} />
-        <DefensesBlock C={C} />
+        <DefensesBlock C={C} activeConditions={sheet?.activeConditions || []} />
       </Box>
-      <ConditionsBlock sheet={sheet} onToggle={onToggleCondition} onClear={onClearConditions} conditionEntries={conditionEntries} />
+      <ConditionsBlock sheet={sheet} onToggle={onToggleCondition} onClear={onClearConditions} onSetExhaustion={onSetExhaustion} conditionEntries={conditionEntries} />
     </Box>
   );
 }
@@ -136,8 +139,11 @@ function InspirationBlock({ sheet, onToggle }) {
   );
 }
 
-function DefensesBlock({ C }) {
+function DefensesBlock({ C, activeConditions = [] }) {
   const itemEffects = collectItemEffects(C?.inventory);
+  // Conditions granting resistance to all damage (e.g. Petrified).
+  const conditionResistAll = getConditionsWithEffect(activeConditions, 'resistAllDmg')
+    .map((source) => ({ type: 'All damage', kind: 'Resist', source }));
   const advSaves = [...itemEffects.advantageOnSaveAgainst.entries()].flatMap(([target, sources]) =>
     sources.map((src) => ({ type: `Save vs ${target}`, kind: 'Adv', source: src })),
   );
@@ -148,6 +154,7 @@ function DefensesBlock({ C }) {
     type: entry.text, kind: 'Trait', source: entry.source,
   }));
   const all = [
+    ...conditionResistAll,
     ...collectResolvedResistanceItems(C).map((item) => ({ type: item.label, kind: 'Resist', source: item.source })),
     ...collectItemResistanceItems(C).map((item) => ({ type: item.label, kind: 'Resist', source: item.source })),
     ...collectResolvedImmunityItems(C).map((item) => ({ type: item.label, kind: 'Immune', source: item.source })),

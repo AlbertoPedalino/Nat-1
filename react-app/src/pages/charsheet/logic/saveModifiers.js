@@ -23,7 +23,7 @@
 import { collectItemEffects } from '../../../shared/character/itemEffects.js';
 import { getEquippedArmorPenalties } from './armorPenalties.js';
 import { collectSheetEffects } from './sheetEffects.js';
-import { SLBL, STATS } from './calculations.js';
+import { SLBL, STATS, getConditionsWithEffect } from './calculations.js';
 
 function titleCase(value) {
   return String(value || '').replace(/\b\w/g, (c) => c.toUpperCase());
@@ -108,13 +108,31 @@ function collectItemSaveAdvantages(inventory) {
   }));
 }
 
+// --- Active conditions (XPHB 2024) --------------------------------------
+// Restrained → disadvantage on DEX saves (fixed, drives the auto-roll).
+// Paralyzed/Petrified/Stunned/Unconscious → auto-fail STR & DEX saves; that is
+// harsher than disadvantage and isn't a roll modifier, so it's surfaced as a
+// situational reminder rather than flipping the roll.
+
+function collectConditionSaveModifiers(activeConditions = []) {
+  const out = [];
+  getConditionsWithEffect(activeConditions, 'dexSaveDisadv').forEach((source) => {
+    out.push({ kind: 'disadvantage', mode: 'fixed', ability: 'dex', label: abilityLabel('dex'), source });
+  });
+  getConditionsWithEffect(activeConditions, 'autoFailStrDexSave').forEach((source) => {
+    out.push({ kind: 'autofail', mode: 'conditional', ability: null, label: 'STR & DEX saves', source });
+  });
+  return out;
+}
+
 // --- Public API ----------------------------------------------------------
 
-export function collectSaveModifiers(C, inventory, profSets) {
+export function collectSaveModifiers(C, inventory, profSets, activeConditions = []) {
   return [
     ...collectSheetSaveEffects(C).flatMap(normalizeSheetEffect),
     ...collectArmorSaveDisadvantages(C, inventory, profSets),
     ...collectItemSaveAdvantages(inventory),
+    ...collectConditionSaveModifiers(activeConditions),
   ];
 }
 

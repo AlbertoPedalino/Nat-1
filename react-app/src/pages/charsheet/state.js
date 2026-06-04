@@ -29,12 +29,13 @@ export function deriveSheetState(C) {
 
   const sheetInspiration = Boolean(C?.inspiration);
   const activeConditions = Array.isArray(C?.activeConditions) ? C.activeConditions : [];
+  const exhaustionLevel = Math.max(0, Math.min(6, Math.floor(Number(C?.exhaustionLevel) || 0)));
   const xpStored = Number(C?.xp || 0);
   const notes = C?.notes ?? '';
 
   return {
     currentHP, maxHP, maxHPBonus, tempHP, deathSaves, usedHD, usedHDPools, spellSlotUsed, createdSpellSlots,
-    sheetInventory, sheetCurrency, sheetInspiration, activeConditions, xpStored, notes, arcaneArmorItemKey,
+    sheetInventory, sheetCurrency, sheetInspiration, activeConditions, exhaustionLevel, xpStored, notes, arcaneArmorItemKey,
   };
 }
 

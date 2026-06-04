@@ -19,7 +19,7 @@ import { deriveSheetState } from './state.js';
 import { ProficiencySetsProvider } from './context/ProficiencySetsContext.jsx';
 import { buildD20Meta, formatD20Detail, rollD20 as rollD20Dice } from '../../shared/character/dice.js';
 import { aggregateSavingThrowBonus } from '../../shared/character/itemBonus.js';
-import { calcMaxHP, getMod, getFinal, getPB, getSaveBonus, CONDITION_IMPLIES } from './logic/calculations.js';
+import { calcMaxHP, getMod, getFinal, getPB, getSaveBonus, CONDITION_IMPLIES, clampExhaustion, exhaustionD20Penalty, EXHAUSTION_MAX } from './logic/calculations.js';
 import { applyResourceRest, getAllResourceDefs, getHitDicePools, getUsedHitDiceTotal, normalizeResourceMax } from './logic/restResources.js';
 import { clearedToggles } from './logic/toggleState.js';
 import { applyFreeCastRest, getFreeCastDefsForCharacter } from './logic/spellsTabLogic.js';
@@ -34,6 +34,16 @@ import {
 
 function getCharIdFromUrl() {
   return new URLSearchParams(window.location.search).get('char') || getActiveCharId();
+}
+
+// A long rest reduces Exhaustion by 1 (XPHB 2024). Returns the patch fields that
+// lower the level and drop the pill once it reaches 0. Shared by both rest paths.
+function longRestExhaustionPatch(sheet) {
+  const exhaustionLevel = clampExhaustion((sheet.exhaustionLevel || 0) - 1);
+  const activeConditions = exhaustionLevel === 0
+    ? (sheet.activeConditions || []).filter((k) => k !== 'exhaustion')
+    : (sheet.activeConditions || []);
+  return { exhaustionLevel, activeConditions };
 }
 
 export default function CharacterSheet() {
@@ -220,12 +230,16 @@ export default function CharacterSheet() {
     s.deathSaves = { success: 0, fail: 0 };
     s.spellSlotUsed = {};
     s.createdSpellSlots = {};
+    const exRest = longRestExhaustionPatch(s);
+    s.exhaustionLevel = exRest.exhaustionLevel;
+    s.activeConditions = exRest.activeConditions;
 
     const patch = {
       currentHP: s.currentHP, tempHP: s.tempHP, maxHPBonus: s.maxHPBonus,
       usedHD: 0, usedHDPools: {},
       deathSaves: s.deathSaves,
       spellSlotsUsed: {}, createdSpellSlots: {},
+      exhaustionLevel: exRest.exhaustionLevel, activeConditions: exRest.activeConditions,
     };
 
     if (C) {
@@ -250,49 +264,6 @@ export default function CharacterSheet() {
     persist(patch);
     setLongRestOpen(false);
     showDiceToast('Long Rest', 'Fully restored!', 0, []);
-  }, [sheet, resources, freeCastUses, C, persist]);
-
-  const doRest = useCallback((type) => {
-    const s = { ...sheet };
-    let res = { ...resources };
-    const patch = {};
-    if (type === 'long') {
-      s.currentHP = s.maxHP;
-      s.tempHP = 0;
-      s.usedHD = 0;
-      s.deathSaves = { success: 0, fail: 0 };
-      s.spellSlotUsed = {};
-      s.createdSpellSlots = {};
-      s.usedHDPools = {};
-      Object.assign(patch, {
-        currentHP: s.currentHP, tempHP: 0, maxHPBonus: s.maxHPBonus,
-        usedHD: 0, usedHDPools: {},
-        deathSaves: s.deathSaves,
-        spellSlotsUsed: {}, createdSpellSlots: {},
-      });
-      if (C?.speciesName) {
-        const grants = installedRegistry.getSpeciesLongRestGrants(C.speciesName, C.speciesSource);
-        if (grants?.inspiration) {
-          s.sheetInspiration = true;
-          patch.inspiration = true;
-        }
-      }
-    } else {
-      Object.assign(patch, {
-        currentHP: s.currentHP, tempHP: s.tempHP, maxHPBonus: s.maxHPBonus,
-        usedHD: s.usedHD, usedHDPools: s.usedHDPools || {},
-      });
-    }
-    if (C) {
-      res = applyResourceRest(res, getAllResourceDefs(C), C, type);
-      setResources(res);
-      patch.resources = res;
-      const nextFC = applyFreeCastRest(freeCastUses, getFreeCastDefsForCharacter(C), type);
-      setFreeCastUses(nextFC);
-      patch.freeCastUses = nextFC;
-    }
-    setSheet(s);
-    persist(patch);
   }, [sheet, resources, freeCastUses, C, persist]);
 
   const adjustHP = useCallback((dir, amount = 1) => {
@@ -359,6 +330,12 @@ export default function CharacterSheet() {
       return;
     }
     const roll = Math.floor(Math.random() * 20) + 1;
+    // A death saving throw is a D20 Test, so Exhaustion (−2/level) lowers the total
+    // versus DC 10. The natural die still governs the crit (1 → two fails, 20 →
+    // regain 1 HP) regardless of the penalty.
+    const penalty = exhaustionD20Penalty(sheet.exhaustionLevel);
+    const total = roll - penalty;
+    const penaltyNote = penalty ? ` (Exhaustion −${penalty})` : '';
     const ds = { ...sheet.deathSaves };
     let extra = '';
     if (roll === 1) { ds.fail = Math.min(3, ds.fail + 2); }
@@ -369,7 +346,7 @@ export default function CharacterSheet() {
       persist({ currentHP: s.currentHP, tempHP: s.tempHP, maxHPBonus: s.maxHPBonus, deathSaves: ds });
       showDiceToast('Death Save', 'Critical success: regain 1 HP', roll, [{ v: roll, faces: 20 }]);
       return;
-    } else if (roll >= 10) { ds.success = Math.min(3, ds.success + 1); }
+    } else if (total >= 10) { ds.success = Math.min(3, ds.success + 1); }
     else { ds.fail = Math.min(3, ds.fail + 1); }
 
     if (ds.success >= 3) extra = 'Stable (0 HP).';
@@ -377,11 +354,32 @@ export default function CharacterSheet() {
     else extra = `${ds.success} success / ${ds.fail} fail`;
     setSheet({ ...sheet, deathSaves: ds });
     persist({ deathSaves: ds });
-    showDiceToast('Death Save', extra, roll, [{ v: roll, faces: 20 }]);
+    showDiceToast('Death Save', extra + penaltyNote, total, [{ v: roll, faces: 20 }]);
+  }, [sheet, persist]);
+
+  // Exhaustion is graded (1–6), so it carries a level alongside its presence in
+  // activeConditions. Level 0 removes it; >0 keeps the pill and drives penalties.
+  const setExhaustion = useCallback((level) => {
+    if (!sheet) return;
+    const lvl = clampExhaustion(level);
+    const present = sheet.activeConditions.includes('exhaustion');
+    let next = sheet.activeConditions;
+    if (lvl > 0 && !present) next = [...sheet.activeConditions, 'exhaustion'];
+    else if (lvl === 0 && present) next = sheet.activeConditions.filter((k) => k !== 'exhaustion');
+    const patch = { activeConditions: next, exhaustionLevel: lvl };
+    // Level 6 = death (XPHB 2024): drop to 0 HP so the HP panel reflects it.
+    if (lvl >= EXHAUSTION_MAX) patch.currentHP = 0;
+    setSheet({ ...sheet, ...patch });
+    persist(patch);
   }, [sheet, persist]);
 
   const toggleCondition = useCallback((key) => {
     if (!sheet) return;
+    // Exhaustion toggles between level 0 and 1; the stepper sets exact levels.
+    if (key === 'exhaustion') {
+      setExhaustion(sheet.activeConditions.includes('exhaustion') ? 0 : 1);
+      return;
+    }
     const idx = sheet.activeConditions.indexOf(key);
     const next = [...sheet.activeConditions];
     if (idx >= 0) {
@@ -396,12 +394,12 @@ export default function CharacterSheet() {
     }
     setSheet({ ...sheet, activeConditions: next });
     persist({ activeConditions: next });
-  }, [sheet, persist]);
+  }, [sheet, persist, setExhaustion]);
 
   const clearConditions = useCallback(() => {
     if (!sheet) return;
-    setSheet({ ...sheet, activeConditions: [] });
-    persist({ activeConditions: [] });
+    setSheet({ ...sheet, activeConditions: [], exhaustionLevel: 0 });
+    persist({ activeConditions: [], exhaustionLevel: 0 });
   }, [sheet, persist]);
 
   const toggleInspiration = useCallback(() => {
@@ -418,11 +416,16 @@ export default function CharacterSheet() {
   }, []);
 
   const rollD20 = useCallback((bonus, label, advantage) => {
-    const result = rollD20Dice(bonus, {
+    // Exhaustion (XPHB 2024): −2 per level to every D20 Test. rollD20 is the single
+    // executor for saves/checks/skills/attacks/initiative, so applying it here
+    // covers all of them in one place.
+    const exPenalty = exhaustionD20Penalty(sheet?.exhaustionLevel);
+    const finalLabel = exPenalty ? `${label} (Exhaustion −${exPenalty})` : label;
+    const result = rollD20Dice(bonus - exPenalty, {
       advantage: advantage === true ? true : advantage === false ? false : undefined,
     });
-    showDiceToast(label, formatD20Detail(result), result.total, result.rolls, buildD20Meta(result));
-  }, [showDiceToast]);
+    showDiceToast(finalLabel, formatD20Detail(result), result.total, result.rolls, buildD20Meta(result));
+  }, [showDiceToast, sheet]);
 
   const rollSave = useCallback((stat, options = {}) => {
     if (!C) return;
@@ -526,6 +529,7 @@ export default function CharacterSheet() {
           <Stack spacing={0.55} sx={{ ...SHEET_GRID_ITEM_SX, gridArea: SHEET_AREAS.right }}>
             <RightTop C={C} sheet={sheet} onRoll={rollD20}
               onToggleCondition={toggleCondition} onClearConditions={clearConditions}
+              onSetExhaustion={setExhaustion}
               conditionEntries={conditionEntries}
               onToggleInspiration={toggleInspiration}
               resources={resources} setResources={saveResourcesState} onShowToast={showDiceToast} />
@@ -543,7 +547,7 @@ export default function CharacterSheet() {
                   return next;
                 });
               }}
-              onRest={doRest} onShowToast={showDiceToast}
+              onShowToast={showDiceToast}
               onUpdateInventory={updateInventory} onUpdateCurrency={updateCurrency} onUpdateSpells={updateSpells} onUpdateSheet={syncSheet} onUpdateNotes={updateNotes}
               onUpdateCharacter={updateCurrentCharacter} />
           </Stack>

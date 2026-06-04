@@ -9,7 +9,7 @@ import NotesTab from './NotesTab.jsx';
 const TABS = ['Actions', 'Spells', 'Inventory', 'Features', 'Notes'];
 
 export default function TabsPanel({
-  C, sheet, tab, setTab, onRoll, resources, setResources, onRest, onShowToast,
+  C, sheet, tab, setTab, onRoll, resources, setResources, onShowToast,
   onUpdateInventory, onUpdateCurrency, onUpdateSpells, onUpdateSheet, onUpdateCharacter, onUpdateNotes,
   freeCastUses, onToggleFreeCast,
 }) {
@@ -24,7 +24,7 @@ export default function TabsPanel({
         </Tabs>
       </Box>
       <Box sx={{ p: '0.62rem' }}>
-        {tab === 0 && <ActionsTab C={C} sheet={sheet} onRoll={onRoll} resources={resources} setResources={setResources} onRest={onRest} onShowToast={onShowToast} onUpdateSheet={onUpdateSheet} onUpdateCharacter={onUpdateCharacter} />}
+        {tab === 0 && <ActionsTab C={C} sheet={sheet} onRoll={onRoll} resources={resources} setResources={setResources} onShowToast={onShowToast} onUpdateSheet={onUpdateSheet} onUpdateCharacter={onUpdateCharacter} />}
         {tab === 1 && <SpellsTab C={C} sheet={sheet} onRoll={onRoll} resources={resources} setResources={setResources} onUpdateSpells={onUpdateSpells} onShowToast={onShowToast} onUpdateSheet={onUpdateSheet} onUpdateCharacter={onUpdateCharacter} freeCastUses={freeCastUses} onToggleFreeCast={onToggleFreeCast} />}
         {tab === 2 && <InventoryTab C={C} sheet={sheet} onUpdateInventory={onUpdateInventory} onUpdateCurrency={onUpdateCurrency} onUpdateCharacter={onUpdateCharacter} onShowToast={onShowToast} />}
         {tab === 3 && <FeaturesTab C={C} />}

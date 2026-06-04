@@ -1,6 +1,6 @@
 import { Box, Paper, Typography, Tooltip } from '@mui/material';
-import { advantageVisual } from './advantageMark.jsx';
-import { SKILLS, getSkillTraining, getSkillBonus, fbonus, SLBL } from '../logic/calculations.js';
+import { advantageVisual, conditionalDisadvantageVisual } from './advantageMark.jsx';
+import { SKILLS, getSkillTraining, getSkillBonus, fbonus, SLBL, describeCheckDisadvantage, effectiveD20Modifier } from '../logic/calculations.js';
 import { getEquippedArmorPenalties } from '../logic/armorPenalties.js';
 import { getSkillAdvantageFromEffects } from '../logic/sheetEffects.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
@@ -44,7 +44,8 @@ export default function Skills({ C, sheet, onRoll }) {
   const inventory = sheet?.sheetInventory || C?.inventory || [];
   const armorPenalties = getEquippedArmorPenalties(C, inventory, profSets);
   const itemCheckBonus = aggregateAbilityCheckBonus(inventory);
-  
+  const activeConditions = sheet?.activeConditions || [];
+
   return (
     <Paper variant="outlined" sx={{ overflow: 'hidden' }}>
       <Box sx={{ bgcolor: 'rgba(35,32,26,1)', borderBottom: 1, borderColor: 'divider', px: '0.8rem', py: '0.48rem', borderLeft: 3, borderLeftColor: 'primary.main' }}>
@@ -61,17 +62,26 @@ export default function Skills({ C, sheet, onRoll }) {
       {SKILLS.map(sk => {
         const training = getSkillTraining(C, sk.n);
         const bonus = getSkillBonus(C, sk) + itemCheckBonus;
+        const shownBonus = effectiveD20Modifier(bonus, sheet?.exhaustionLevel);
         const isStealth = String(sk.n || '').toLowerCase() === 'stealth';
-        const hasDisadv = armorPenalties.hasPenalty && (
+        const armorDisadv = armorPenalties.hasPenalty && (
           armorPenalties.disadvantageOn.includes(`${sk.a}-checks`)
           || (isStealth && armorPenalties.disadvantageOn.includes('dex-stealth'))
         );
+        const { has: hasDisadv, reason: disadvReason, conditional } = describeCheckDisadvantage(activeConditions, armorDisadv);
+        const condNotes = conditional.map((c) => `${c.source} (${c.note})`);
+        const situational = condNotes.length ? ` • Situational: ${condNotes.join('; ')}` : '';
         const hasAdv = getSkillAdvantage(C, sk.n);
         const hasBoth = hasAdv && hasDisadv;
-        const visual = advantageVisual(!!hasAdv, hasDisadv);
+        // Solid adv/disadv drive the roll; a purely situational disadvantage is a hint only.
+        const visual = (hasAdv || hasDisadv)
+          ? advantageVisual(!!hasAdv, hasDisadv)
+          : (condNotes.length ? conditionalDisadvantageVisual() : null);
         const skillTooltip = hasBoth
-          ? 'Advantage and Disadvantage cancel'
-          : hasAdv ? `Advantage (${hasAdv.source})` : 'Disadvantage from armor';
+          ? `Advantage and Disadvantage cancel${situational}`
+          : hasAdv ? `Advantage (${hasAdv.source})${situational}`
+          : hasDisadv ? `Disadvantage: ${disadvReason}${situational}`
+          : `Situational disadvantage: ${condNotes.join('; ')}`;
 
         return (
           <Box key={sk.n} onClick={() => {
@@ -90,7 +100,7 @@ export default function Skills({ C, sheet, onRoll }) {
                 {SLBL[sk.a]}
               </Typography>
               <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.75rem', fontWeight: 600, color: 'text.primary', textAlign: 'right' }}>
-                {fbonus(bonus)}
+                {fbonus(shownBonus)}
               </Typography>
               {visual && (
                 <Tooltip title={skillTooltip}>

@@ -1,7 +1,7 @@
 import { Box, Chip, Paper, Tooltip, Typography } from '@mui/material';
 import { Footprints, AlertCircle } from 'lucide-react';
 import { getEquippedArmorPenalties } from '../logic/armorPenalties.js';
-import { getFinal } from '../logic/calculations.js';
+import { getFinal, getSpeedZeroConditions, exhaustionSpeedPenalty } from '../logic/calculations.js';
 import { collectMovementEffects, effectSummary, effectTitle, getSpeedBonus } from '../logic/sheetEffects.js';
 import { collectItemEffects } from '../../../shared/character/itemEffects.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
@@ -38,7 +38,10 @@ export default function Movement({ C, sheet }) {
   const maxCarry = Math.max(1, getFinal(C, 'str') * 15);
   const carriedWeight = totalCarriedWeight(inventory);
   const overloaded = carriedWeight > maxCarry;
-  const speedZero = (sheet?.activeConditions || []).includes('grappled');
+  const speedZeroConditions = getSpeedZeroConditions(sheet?.activeConditions || []);
+  const speedZero = speedZeroConditions.length > 0;
+  const exhaustionLevel = sheet?.exhaustionLevel || 0;
+  const exhaustionPenalty = exhaustionSpeedPenalty(exhaustionLevel);
   const movementEffects = collectMovementEffects(C).filter((effect) => {
     if (String(effect.type || '').toLowerCase() === 'speed' && typeof effect.value === 'number') {
       return getSpeedBonus(C) > 0;
@@ -60,17 +63,18 @@ export default function Movement({ C, sheet }) {
     const itemBonus = itemEffects.speedBonus[key] || 0;
     const subtotal = baseAfterOverride + speedPenalty + runtimeSpeedBonus + itemBonus;
     const multiplier = itemEffects.speedMultiplier[key]?.value || 1;
-    const computed = subtotal * multiplier;
+    const computed = subtotal * multiplier - exhaustionPenalty;
     return {
       key,
       base: value,
       final: speedZero ? 0 : overloaded ? Math.min(5, Math.max(0, computed)) : Math.max(0, computed),
     };
   });
-  const hasPenalty = speedPenalty < 0 || overloaded || speedZero;
+  const hasPenalty = speedPenalty < 0 || overloaded || speedZero || exhaustionPenalty > 0;
   const reasons = [
-    speedZero ? 'Grappled: speed 0' : null,
+    speedZero ? `${speedZeroConditions.join(', ')}: speed 0` : null,
     overloaded ? `Over carry: speed 5 ft (${carriedWeight.toFixed(1)} / ${maxCarry} lb)` : null,
+    exhaustionPenalty > 0 ? `Exhaustion ${exhaustionLevel}: −${exhaustionPenalty} ft` : null,
     speedPenalty < 0 ? `Armor STR requirement: ${speedPenalty} ft` : null,
   ].filter(Boolean);
   const reason = reasons.join(' • ');

@@ -27,7 +27,20 @@
       "PowerShell(npx vite build 2>&1 | Select-Object -Last 4)",
       "WebFetch(domain:api.github.com)",
       "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/bestiary/bestiary-mm.json\")",
-      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); m=[x for x in d['monster'] if 'Wisp' in x['name']]; print\\(json.dumps\\(m, indent=1\\)[:1500]\\)\")"
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); m=[x for x in d['monster'] if 'Wisp' in x['name']]; print\\(json.dumps\\(m, indent=1\\)[:1500]\\)\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/conditionsdiseases.json\")",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); conds=d.get\\('condition',[]\\); print\\('total',len\\(conds\\)\\); xphb=[c for c in conds if c.get\\('source'\\)=='XPHB']; print\\('XPHB',len\\(xphb\\)\\); print\\([c['name'] for c in xphb]\\); import json as j; print\\(j.dumps\\(next\\(c for c in xphb if c['name']=='Blinded'\\), indent=1\\)[:800]\\)\")",
+      "Bash(python -c \"import sys,json; print\\(json.load\\(sys.stdin\\).get\\('scripts'\\)\\)\")",
+      "PowerShell(Set-Content *)",
+      "Bash(git -C \"C:/Users/alber/Documents/DND/GM-Board/react-app\" add -A)",
+      "Bash(git -C \"C:/Users/alber/Documents/DND/GM-Board/react-app\" status --short)",
+      "Bash(git reset *)",
+      "Bash(git add *)",
+      "Bash(git commit -m '@ *)",
+      "Bash(git commit *)",
+      "Bash(rm .git/COMMIT_MSG_TMP.txt)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); items=d.get\\('item',[]\\); from collections import Counter; vals=Counter\\(type\\(i.get\\('reqAttune'\\)\\).__name__ for i in items if 'reqAttune' in i\\); print\\('types',dict\\(vals\\)\\); ex=[i['reqAttune'] for i in items if isinstance\\(i.get\\('reqAttune'\\),str\\)][:12]; print\\('string examples:'\\); [print\\(' -',e\\) for e in ex]; print\\('reqAttuneAlt count:', sum\\(1 for i in items if 'reqAttuneAlt' in i\\)\\)\")",
+      "Bash(python -c \"import json,sys; print\\(json.load\\(sys.stdin\\).get\\('scripts',{}\\)\\)\")"
     ]
   }
 }

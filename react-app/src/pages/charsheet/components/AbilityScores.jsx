@@ -1,13 +1,14 @@
 import { Box, Typography, Tooltip } from '@mui/material';
 import { getEquippedArmorPenalties } from '../logic/armorPenalties.js';
-import { STATS, SLBL, FULL_LBL, getFinal, getMod, getPB, fbonus } from '../logic/calculations.js';
+import { STATS, SLBL, FULL_LBL, getFinal, getMod, getPB, fbonus, describeCheckDisadvantage, effectiveD20Modifier } from '../logic/calculations.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
-import { advantageVisual } from './advantageMark.jsx';
+import { advantageVisual, conditionalDisadvantageVisual } from './advantageMark.jsx';
 
 export default function AbilityScores({ C, sheet, onRoll }) {
   const pb = getPB(C);
   const profSets = useProficiencySets();
   const armorPenalties = getEquippedArmorPenalties(C, sheet?.sheetInventory || C?.inventory || [], profSets);
+  const activeConditions = sheet?.activeConditions || [];
 
   return (
     <Box sx={{
@@ -21,8 +22,17 @@ export default function AbilityScores({ C, sheet, onRoll }) {
         {STATS.map(s => {
           const val = getFinal(C, s);
           const mod = getMod(val);
-          const hasDisadv = armorPenalties.hasPenalty && armorPenalties.disadvantageOn.includes(`${s}-checks`);
-          const visual = advantageVisual(false, hasDisadv);
+          const shownMod = effectiveD20Modifier(mod, sheet?.exhaustionLevel);
+          const armorDisadv = armorPenalties.hasPenalty && armorPenalties.disadvantageOn.includes(`${s}-checks`);
+          const { has: hasDisadv, reason: disadvReason, conditional } = describeCheckDisadvantage(activeConditions, armorDisadv);
+          const condNotes = conditional.map((c) => `${c.source} (${c.note})`);
+          // Solid disadvantage drives the roll; a purely situational one is a hint only.
+          const visual = hasDisadv
+            ? advantageVisual(false, true)
+            : (condNotes.length ? conditionalDisadvantageVisual() : null);
+          const tooltipText = hasDisadv
+            ? `Disadvantage: ${disadvReason}${condNotes.length ? ` • Situational: ${condNotes.join('; ')}` : ''}`
+            : `Situational disadvantage: ${condNotes.join('; ')}`;
           return (
             <Box key={s} onClick={() => onRoll(mod, FULL_LBL[s] + ' Check', hasDisadv ? false : undefined)}
               sx={{
@@ -35,7 +45,7 @@ export default function AbilityScores({ C, sheet, onRoll }) {
                 {SLBL[s]}
               </Typography>
               <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '1.5rem', fontWeight: 700, color: '#edd48a', lineHeight: 1 }}>
-                {fbonus(mod)}
+                {fbonus(shownMod)}
               </Typography>
               <Box sx={{
                 fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.56rem', fontWeight: 600, color: 'text.secondary',
@@ -45,7 +55,7 @@ export default function AbilityScores({ C, sheet, onRoll }) {
                 {val}
               </Box>
               {visual ? (
-                <Tooltip title="Disadvantage from armor">
+                <Tooltip title={tooltipText}>
                   <visual.Icon size={12} style={{ color: visual.color, marginTop: '2px' }} />
                 </Tooltip>
               ) : null}

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Box, Typography, IconButton, TextField, Button } from '@mui/material';
-import { HeartPulse, Plus, Minus, Sparkles } from 'lucide-react';
+import { HeartPulse, Plus, Minus, Sparkles, Skull } from 'lucide-react';
+import { EXHAUSTION_MAX } from '../logic/calculations.js';
 
 export default function HPBlock({ sheet, onHeal, onDamage, onTempHP, onMaxHPBonus, onSetHP, onDeathSave }) {
   const [amountStr, setAmountStr] = useState('1');
@@ -11,6 +12,7 @@ export default function HPBlock({ sheet, onHeal, onDamage, onTempHP, onMaxHPBonu
   const dsSuccess = Math.max(0, Math.min(3, sheet.deathSaves.success || 0));
   const dsFail = Math.max(0, Math.min(3, sheet.deathSaves.fail || 0));
   const atZero = sheet.currentHP === 0;
+  const dead = (sheet.exhaustionLevel || 0) >= EXHAUSTION_MAX;
 
   useEffect(() => {
     if (editingHP && hpRef.current) {
@@ -26,6 +28,14 @@ export default function HPBlock({ sheet, onHeal, onDamage, onTempHP, onMaxHPBonu
       <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.5rem', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'text.secondary' }}>
         HP
       </Typography>
+      {dead && (
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, my: 0.3, py: 0.2, border: 1, borderColor: '#e5484d', borderRadius: 1, bgcolor: 'rgba(229,72,77,0.12)' }}>
+          <Skull size={12} style={{ color: '#e5484d' }} />
+          <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#e5484d' }}>
+            Dead — Exhaustion {EXHAUSTION_MAX}
+          </Typography>
+        </Box>
+      )}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
         <IconButton size="small" onClick={() => onHeal(parseInt(amountStr) || 1)} sx={{ width: 24, height: 24, border: 1, borderColor: '#58b879', color: '#58b879', borderRadius: 1 }}>
           <Plus size={12} />
@@ -89,7 +99,7 @@ export default function HPBlock({ sheet, onHeal, onDamage, onTempHP, onMaxHPBonu
           <IconButton size="small" onClick={() => onMaxHPBonus(1)} sx={{ width: 18, height: 18, border: 1, borderColor: 'divider', borderRadius: '4px', color: 'text.secondary' }}>+</IconButton>
         </Box>
       </Box>
-      {atZero && (
+      {atZero && !dead && (
         <Box sx={{ mt: 0.25, pt: 0.25, borderTop: '1px dashed', borderColor: 'divider' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
             <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.56rem', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'text.secondary' }}>

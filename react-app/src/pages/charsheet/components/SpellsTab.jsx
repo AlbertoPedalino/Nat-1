@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import { Plus, Search, Sparkles } from 'lucide-react';
 import { SPELL_LEVEL_LABELS } from '../../charbuilder/constants.js';
-import { SCHOOL_LABELS, SLBL, getFinal, getMod, getPB } from '../logic/calculations.js';
+import { SCHOOL_LABELS, SLBL, getFinal, getMod, getPB, effectiveD20Modifier } from '../logic/calculations.js';
 import { loadSpells } from '../../charbuilder/logic/dataLoaders.js';
 import { spellMatchesClass } from '../../charbuilder/spells/spells.js';
 import { installedRegistry, loadClassAdapters, loadCoreAdapters, loadSpellsAdapters } from '../../../adapters/index.js';
@@ -350,7 +350,7 @@ export default function SpellsTab({ C, sheet, onRoll, onUpdateSpells, onShowToas
     <Box>
       <Box sx={{ display: 'flex', gap: 1, mb: 0.75, flexWrap: 'wrap' }}>
         <StatBox value={dc} label="Spell DC" />
-        <StatBox value={formatBonus(atk)} label="Spell Attack" />
+        <StatBox value={formatBonus(effectiveD20Modifier(atk, sheet?.exhaustionLevel))} label="Spell Attack" />
         <StatBox value={SLBL[ability] || ability.toUpperCase()} label="Spell Ability" />
       </Box>
 
@@ -363,19 +363,19 @@ export default function SpellsTab({ C, sheet, onRoll, onUpdateSpells, onShowToas
       <SlotPanel slots={slots} used={slotUsed} created={createdSlots} onToggle={toggleSlot} />
 
       <SpellSection title="Cantrip">
-        {spellInfo.cantrips.map((entry) => <SpellEntry key={entry.name} entry={entry} onRoll={onRoll} onShowToast={onShowToast} atk={atk} spellMod={spellMod} C={C} installedRegistry={installedRegistry} freeCastUses={freeCastUses} onToggleFreeCast={onToggleFreeCast} />)}
+        {spellInfo.cantrips.map((entry) => <SpellEntry key={entry.name} entry={entry} onRoll={onRoll} onShowToast={onShowToast} spellAttackBonus={spellItemBonuses.spellAttack} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} installedRegistry={installedRegistry} freeCastUses={freeCastUses} onToggleFreeCast={onToggleFreeCast} />)}
         {!spellInfo.cantrips.length ? <Empty text="None" /> : null}
       </SpellSection>
 
       {spellInfo.atWill.length ? (
         <SpellSection title="At Will">
-          {spellInfo.atWill.map((entry) => <SpellEntry key={`at-will-${entry.name}`} entry={entry} onRoll={onRoll} onShowToast={onShowToast} atk={atk} spellMod={spellMod} C={C} installedRegistry={installedRegistry} freeCastUses={freeCastUses} onToggleFreeCast={onToggleFreeCast} />)}
+          {spellInfo.atWill.map((entry) => <SpellEntry key={`at-will-${entry.name}`} entry={entry} onRoll={onRoll} onShowToast={onShowToast} spellAttackBonus={spellItemBonuses.spellAttack} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} installedRegistry={installedRegistry} freeCastUses={freeCastUses} onToggleFreeCast={onToggleFreeCast} />)}
         </SpellSection>
       ) : null}
 
       {Object.entries(expandedSpellInfo.leveled).map(([level, entries]) => (
         <SpellSection key={level} title={SPELL_LEVEL_LABELS[level] || `Level ${level}`}>
-          {entries.map((entry) => <SpellEntry key={`${level}-${entry.name}-${entry.castLevel || 'base'}`} entry={entry} onRoll={onRoll} onShowToast={onShowToast} atk={atk} spellMod={spellMod} C={C} installedRegistry={installedRegistry} freeCastUses={freeCastUses} onToggleFreeCast={onToggleFreeCast} />)}
+          {entries.map((entry) => <SpellEntry key={`${level}-${entry.name}-${entry.castLevel || 'base'}`} entry={entry} onRoll={onRoll} onShowToast={onShowToast} spellAttackBonus={spellItemBonuses.spellAttack} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} installedRegistry={installedRegistry} freeCastUses={freeCastUses} onToggleFreeCast={onToggleFreeCast} />)}
         </SpellSection>
       ))}
 

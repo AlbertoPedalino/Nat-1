@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Box, Typography, Chip, Button, alpha } from '@mui/material';
-import { ChevronDown, ListChecks, X } from 'lucide-react';
-import { CONDITIONS } from '../logic/calculations.js';
+import { ChevronDown, ListChecks, X, Minus, Plus } from 'lucide-react';
+import { CONDITIONS, EXHAUSTION_MAX } from '../logic/calculations.js';
 import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
 
 const COND_ACCENT = '#d69245';
 const COND_BODY = '#cabd9f';
+const DEAD_ACCENT = '#e5484d';
 
 // Active-condition pill. Body click toggles its detail card (chevron hints the
 // expandable affordance + rotates when open, bright fill shows which card is
@@ -32,6 +33,35 @@ function ConditionPill({ c, hasDesc, isOpen, onToggle, onRemove }) {
         '&:hover': hasDesc ? { bgcolor: alpha(COND_ACCENT, 0.24) } : undefined,
       }}
     />
+  );
+}
+
+// Exhaustion is graded 1–6: a stepper pill instead of a plain toggle. − at level
+// 1 removes it (level 0); + caps at 6 (death, shown red). The label still expands
+// the description card like other pills.
+function ExhaustionPill({ level, onSet, hasDesc, isOpen, onToggle }) {
+  const dead = level >= EXHAUSTION_MAX;
+  const accent = dead ? DEAD_ACCENT : COND_ACCENT;
+  const StepButton = ({ label, onClick, disabled, children }) => (
+    <Box component="button" type="button" aria-label={label} disabled={disabled}
+      onClick={(e) => { e.stopPropagation(); if (!disabled) onClick(); }}
+      sx={{ display: 'inline-flex', p: 0, border: 0, bgcolor: 'transparent', color: accent, cursor: disabled ? 'default' : 'pointer', opacity: disabled ? 0.35 : 1 }}>
+      {children}
+    </Box>
+  );
+  return (
+    <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: '2px', height: 20, px: '3px', border: 1, borderColor: accent, borderRadius: '11px', bgcolor: alpha(accent, isOpen ? 0.3 : 0.14), boxShadow: isOpen ? `0 0 0 1px ${accent}` : 'none' }}>
+      <StepButton label="Decrease exhaustion" onClick={() => onSet(level - 1)}><Minus size={11} /></StepButton>
+      <Typography component="span" onClick={hasDesc ? onToggle : undefined}
+        sx={{ fontSize: '0.5rem', fontWeight: 700, color: accent, px: '1px', userSelect: 'none', cursor: hasDesc ? 'pointer' : 'default' }}>
+        {dead ? '☠ Exhaustion 6' : `Exhaustion ${level}`}
+      </Typography>
+      <StepButton label="Increase exhaustion" onClick={() => onSet(level + 1)} disabled={dead}><Plus size={11} /></StepButton>
+      {hasDesc ? (
+        <ChevronDown size={10} style={{ color: accent, transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform .15s', cursor: 'pointer' }}
+          onClick={(e) => { e.stopPropagation(); onToggle(); }} />
+      ) : null}
+    </Box>
   );
 }
 
@@ -68,7 +98,7 @@ function ConditionCard({ c, entries, onClose }) {
   );
 }
 
-export default function ConditionsBlock({ sheet, onToggle, onClear, conditionEntries }) {
+export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaustion, conditionEntries }) {
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState([]);
   const active = CONDITIONS.filter((c) => sheet.activeConditions.includes(c.key));
@@ -86,14 +116,25 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, conditionEnt
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.3 }}>
           {active.length === 0 && <Chip size="small" label="— None" variant="outlined" sx={{ fontSize: '0.5rem', borderStyle: 'dashed' }} />}
           {active.map((c) => (
-            <ConditionPill
-              key={c.key}
-              c={c}
-              hasDesc={!!conditionEntries?.[c.key]?.length}
-              isOpen={expanded.includes(c.key)}
-              onToggle={() => toggleCard(c.key)}
-              onRemove={() => onToggle(c.key)}
-            />
+            c.key === 'exhaustion' ? (
+              <ExhaustionPill
+                key={c.key}
+                level={sheet.exhaustionLevel || 0}
+                onSet={onSetExhaustion}
+                hasDesc={!!conditionEntries?.[c.key]?.length}
+                isOpen={expanded.includes(c.key)}
+                onToggle={() => toggleCard(c.key)}
+              />
+            ) : (
+              <ConditionPill
+                key={c.key}
+                c={c}
+                hasDesc={!!conditionEntries?.[c.key]?.length}
+                isOpen={expanded.includes(c.key)}
+                onToggle={() => toggleCard(c.key)}
+                onRemove={() => onToggle(c.key)}
+              />
+            )
           ))}
         </Box>
 

@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Box, Paper, Typography, Tooltip, Menu, MenuItem } from '@mui/material';
 import { Dice5, Sparkles, ChevronDown } from 'lucide-react';
-import { STATS, SLBL, FULL_LBL, hasSaveProficiency, getSaveBonus, fbonus } from '../logic/calculations.js';
+import { STATS, SLBL, FULL_LBL, hasSaveProficiency, getSaveBonus, fbonus, effectiveD20Modifier } from '../logic/calculations.js';
 import { getConcentrationBonus } from '../logic/sheetEffects.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 import { aggregateSavingThrowBonus } from '../../../shared/character/itemBonus.js';
 import { collectItemEffects } from '../../../shared/character/itemEffects.js';
 import { collectSaveModifiers, fixedModifiersForAbility, summarizeSaveModifiers } from '../logic/saveModifiers.js';
-import { advantageVisual } from './advantageMark.jsx';
+import { advantageVisual, autoFailVisual } from './advantageMark.jsx';
 
 export default function SavingThrows({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
@@ -15,7 +15,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
   const itemSaveBonus = aggregateSavingThrowBonus(inventory);
   const itemEffects = collectItemEffects(C?.inventory);
   const saveContexts = [...itemEffects.advantageOnSaveAgainst.entries()];
-  const saveModifiers = collectSaveModifiers(C, inventory, profSets);
+  const saveModifiers = collectSaveModifiers(C, inventory, profSets, sheet?.activeConditions || []);
   // Reminder list shows only situational modifiers (e.g. "vs Frightened").
   // Fixed ones (e.g. Gnomish Cunning on INT/WIS/CHA, armor) are already
   // surfaced per-stat (icon + auto-roll), so they're excluded here.
@@ -55,6 +55,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
       <Box sx={{ p: '0.55rem 0.8rem' }}>
         {STATS.map(st => {
           const bonus = getSaveBonus(C, st) + itemSaveBonus;
+          const shownBonus = effectiveD20Modifier(bonus, sheet?.exhaustionLevel);
           const prof = hasSaveProficiency(C, st);
           const fixedMods = fixedModifiersForAbility(saveModifiers, st);
           const hasDisadv = fixedMods.some((m) => m.kind === 'disadvantage');
@@ -74,7 +75,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
                 {FULL_LBL[st]}
               </Typography>
               <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.75rem', fontWeight: 600, color: 'text.primary', ml: 'auto' }}>
-                {fbonus(bonus)}
+                {fbonus(shownBonus)}
                 {st === 'con' && getConcentrationBonus(C) > 0 ? (
                   <Tooltip title={`Concentration saves: +${getConcentrationBonus(C)} (Bladesong)`}>
                     <Sparkles size={11} style={{ color: '#70b7a6', marginLeft: 4, verticalAlign: 'middle', cursor: 'help' }} />
@@ -100,14 +101,15 @@ export default function SavingThrows({ C, sheet, onRoll }) {
         <Box sx={{ borderTop: 1, borderColor: 'divider', px: '0.8rem', py: '0.5rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
           {modifierRows.map((mod, i) => {
             const adv = mod.kind === 'advantage';
-            const { Icon, color } = advantageVisual(adv, !adv);
+            const visual = mod.kind === 'autofail' ? autoFailVisual() : advantageVisual(adv, !adv);
+            const { Icon, color, label: kindLabel } = visual;
             return (
               <Box key={`${mod.label}-${mod.source}-${i}`} sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75 }}>
                 <Icon size={13} style={{ color, flexShrink: 0, marginTop: 2 }} />
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
                     <Typography component="span" sx={{ fontSize: '0.7rem', color, fontWeight: 700, flexShrink: 0 }}>
-                      {adv ? 'Adv' : 'Disadv'}
+                      {kindLabel}
                     </Typography>
                     <Typography component="span" sx={{ fontSize: '0.7rem', color: 'text.primary' }}>
                       {mod.label}

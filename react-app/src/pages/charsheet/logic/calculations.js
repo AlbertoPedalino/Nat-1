@@ -53,6 +53,123 @@ export const CONDITION_IMPLIES = {
   unconscious: ['incapacitated', 'prone'],
 };
 
+// Machine-actionable mechanical effects per condition (XPHB 2024). One row per
+// condition; each flag is read by a UI panel. Flag VALUE encodes conditionality:
+//   true     → always applies while the condition is active (auto-applied to the
+//              roll: drives advantage/disadvantage automatically).
+//   <string> → conditional; applies only in the situation the string describes
+//              (e.g. "while the source of fear is in sight"). Surfaced as a
+//              situational reminder, never forced onto the roll — matches the
+//              fixed/conditional split already used for saving throws.
+// Flag vocabulary:
+//   speedZero               Speed is 0.
+//   yourAttacksDisadv       Disadvantage on your attack rolls.
+//   yourAttacksAdv          Advantage on your attack rolls.
+//   attacksAgainstHaveAdv   Attack rolls against you have advantage.
+//   attacksAgainstHaveDisadv Attack rolls against you have disadvantage.
+//   abilityChecksDisadv     Disadvantage on ability checks (and thus skills).
+//   dexSaveDisadv           Disadvantage on DEX saving throws.
+//   autoFailStrDexSave      Auto-fail STR and DEX saving throws.
+//   autoFailSight           Auto-fail checks requiring sight.
+//   autoFailHearing         Auto-fail checks requiring hearing.
+//   noActions/noReactions/noConcentration  Can't act / react / concentrate.
+//   meleeAgainstAdv         Melee attacks against you have advantage.
+//   rangedAgainstDisadv     Ranged attacks against you have disadvantage.
+//   critIfWithin5ft         A hit from within 5 ft is a critical hit.
+//   resistAllDmg            Resistance to all damage.
+// NOTE: consumed today — speedZero (Movement), attack/check disadvantage
+// (ActionsTab, AbilityScores/Skills), DEX-save + auto-fail (SavingThrows),
+// resistAllDmg (RightTop Defenses). The rest (attacksAgainstHaveAdv, crit,
+// sense/hearing auto-fail, action economy) are accurate reference data — wire a
+// consumer before relying on them.
+// Exhaustion is graded/numeric (−2 per level to d20 tests, −5 ft Speed) and is
+// modelled elsewhere, not here.
+const IN_SIGHT = 'while the source of fear is in sight';
+export const CONDITION_EFFECTS = {
+  blinded:       { yourAttacksDisadv: true, attacksAgainstHaveAdv: true, autoFailSight: true },
+  charmed:       {}, // social-only; no d20 flag
+  deafened:      { autoFailHearing: true },
+  frightened:    { yourAttacksDisadv: IN_SIGHT, abilityChecksDisadv: IN_SIGHT },
+  grappled:      { speedZero: true, yourAttacksDisadv: 'vs targets other than the grappler' },
+  incapacitated: { noActions: true, noReactions: true, noConcentration: true },
+  invisible:     { yourAttacksAdv: true, attacksAgainstHaveDisadv: true },
+  paralyzed:     { speedZero: true, autoFailStrDexSave: true, attacksAgainstHaveAdv: true, critIfWithin5ft: true },
+  petrified:     { speedZero: true, autoFailStrDexSave: true, attacksAgainstHaveAdv: true, resistAllDmg: true },
+  poisoned:      { yourAttacksDisadv: true, abilityChecksDisadv: true },
+  prone:         { yourAttacksDisadv: true, meleeAgainstAdv: true, rangedAgainstDisadv: true }, // movement = crawl, not Speed 0
+  restrained:    { speedZero: true, yourAttacksDisadv: true, attacksAgainstHaveAdv: true, dexSaveDisadv: true },
+  stunned:       { speedZero: true, autoFailStrDexSave: true, attacksAgainstHaveAdv: true },
+  unconscious:   { speedZero: true, autoFailStrDexSave: true, attacksAgainstHaveAdv: true, critIfWithin5ft: true },
+};
+
+const CONDITION_LABELS = Object.fromEntries(CONDITIONS.map((c) => [c.key, c.label]));
+
+// Active conditions that ALWAYS impose `flag` (value === true), as labels.
+// Conditional (string-valued) effects are excluded — fetch those separately.
+export function getConditionsWithEffect(activeConditions = [], flag) {
+  return activeConditions
+    .filter((key) => CONDITION_EFFECTS[key]?.[flag] === true)
+    .map((key) => CONDITION_LABELS[key] || key);
+}
+
+// True if any active condition ALWAYS imposes `flag` (drives the auto-roll).
+export function hasConditionEffect(activeConditions = [], flag) {
+  return activeConditions.some((key) => CONDITION_EFFECTS[key]?.[flag] === true);
+}
+
+// Active conditions where `flag` is CONDITIONAL (value is a qualifier string):
+// [{ source, note }]. These are reminders only — never forced onto the roll.
+export function getConditionalConditionEffects(activeConditions = [], flag) {
+  return activeConditions
+    .filter((key) => typeof CONDITION_EFFECTS[key]?.[flag] === 'string')
+    .map((key) => ({ source: CONDITION_LABELS[key] || key, note: CONDITION_EFFECTS[key][flag] }));
+}
+
+// Active conditions (labels) that zero Speed.
+export function getSpeedZeroConditions(activeConditions = []) {
+  return getConditionsWithEffect(activeConditions, 'speedZero');
+}
+
+// Exhaustion (XPHB 2024) is graded 1–6, not a boolean condition, so it lives in
+// sheet.exhaustionLevel rather than CONDITION_EFFECTS. Each level: −2 to every
+// D20 Test and −5 ft Speed; level 6 = death. The numbers live here as the single
+// source — consumers (rollD20, Movement) derive penalties from these helpers.
+export const EXHAUSTION_MAX = 6;
+const EXHAUSTION_D20_PER_LEVEL = 2;
+const EXHAUSTION_SPEED_PER_LEVEL = 5;
+export function clampExhaustion(level) {
+  return Math.max(0, Math.min(EXHAUSTION_MAX, Math.floor(Number(level) || 0)));
+}
+export function exhaustionD20Penalty(level = 0) {
+  return EXHAUSTION_D20_PER_LEVEL * clampExhaustion(level);
+}
+export function exhaustionSpeedPenalty(level = 0) {
+  return EXHAUSTION_SPEED_PER_LEVEL * clampExhaustion(level);
+}
+
+// The d20 modifier actually used once Exhaustion is applied. Every roll-button
+// display calls this so the shown number matches what rollD20 produces (rollD20
+// applies the same penalty to the live roll). Single source = no per-site drift.
+// Displays show the effective value but still pass the RAW bonus to the roller,
+// which subtracts the penalty itself — so the penalty is counted exactly once.
+export function effectiveD20Modifier(rawBonus, exhaustionLevel = 0) {
+  return rawBonus - exhaustionD20Penalty(exhaustionLevel);
+}
+
+// Disadvantage on ability checks (covers skills — skills are ability checks),
+// combined with an external armor disadvantage. Shared by AbilityScores + Skills.
+//   has    → an unconditional disadvantage applies (drives the roll + solid icon).
+//   reason → its sources (armor + always-on conditions), comma-joined.
+//   conditional → situational disadvantages [{source, note}] (reminder only).
+export function describeCheckDisadvantage(activeConditions = [], armorDisadv = false) {
+  const condSources = getConditionsWithEffect(activeConditions, 'abilityChecksDisadv');
+  return {
+    has: !!armorDisadv || condSources.length > 0,
+    reason: [armorDisadv ? 'armor' : null, ...condSources].filter(Boolean).join(', '),
+    conditional: getConditionalConditionEffects(activeConditions, 'abilityChecksDisadv'),
+  };
+}
+
 export const SCHOOL_LABELS = { A: 'Abjuration', C: 'Conjuration', D: 'Divination', E: 'Enchantment', I: 'Illusion', N: 'Necromancy', T: 'Transmutation', V: 'Evocation' };
 export const SPELL_LEVEL_LABELS = ['Cantrip', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th'];
 const XP_TABLE = [0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000, 85000, 100000, 120000, 140000, 165000, 195000, 225000, 265000, 305000, 355000];

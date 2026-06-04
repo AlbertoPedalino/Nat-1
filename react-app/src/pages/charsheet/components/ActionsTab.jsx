@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Box, Button, Chip, Typography } from '@mui/material';
 import { Cross, Dices, Sword } from 'lucide-react';
-import { getMod, getFinal, fbonus } from '../logic/calculations.js';
+import { getMod, getFinal, fbonus, hasConditionEffect, getConditionalConditionEffects } from '../logic/calculations.js';
 import { installedRegistry, loadCoreAdapters, loadClassAdapters } from '../../../adapters/index.js';
 import { PACT_SLOTS, SPELL_LEVEL_LABELS } from '../../charbuilder/constants.js';
 import { ToggleButton, ToggleButtonGroup } from '@mui/material';
@@ -34,6 +34,7 @@ import {
 } from './spellsTabStyles.js';
 import { Empty } from './SpellsUiParts.jsx';
 import ActionDetailPanel from './ActionDetailPanel.jsx';
+import AttackRollButton from './AttackRollButton.jsx';
 import UnarmedStrikeOptionsPanel from './UnarmedStrikeOptionsPanel.jsx';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 import ResourceBar from './ResourceBar.jsx';
@@ -891,6 +892,23 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
       : { borderColor: 'rgba(255,107,53,0.4)', color: '#ff6b35' };
   const hasRollers = Number.isFinite(action.attackBonus) || action.damageFormula || action.healFormula;
 
+  // Attack-roll advantage/disadvantage from active conditions, combined with the
+  // weapon-level disadvantage (heavy/untrained). XPHB 2024: any advantage + any
+  // disadvantage cancel to a straight roll.
+  const activeConditions = sheet?.activeConditions || [];
+  const attackHasDisadv = !!action._disadvantage || hasConditionEffect(activeConditions, 'yourAttacksDisadv');
+  const attackHasAdv = hasConditionEffect(activeConditions, 'yourAttacksAdv');
+  const attackAdv = attackHasAdv && !attackHasDisadv;
+  const attackDisadv = attackHasDisadv && !attackHasAdv;
+  const attackAdvArg = attackDisadv ? false : attackAdv ? true : undefined;
+  // Situational disadvantage (Frightened in sight, Grappled vs non-grappler):
+  // a reminder only — never forced onto the roll.
+  const attackCondNotes = getConditionalConditionEffects(activeConditions, 'yourAttacksDisadv')
+    .map((c) => `${c.source} (${c.note})`);
+  const attackSituational = !attackDisadv && !attackAdv && attackCondNotes.length > 0;
+  const attackTag = attackDisadv ? ' DIS' : attackAdv ? ' ADV' : attackSituational ? ' DIS?' : '';
+  const attackTooltip = attackCondNotes.length ? `Situational disadvantage: ${attackCondNotes.join('; ')}` : '';
+
   return (
     <Box sx={{ overflow: 'hidden' }}>
       <Box onClick={handleCardClick} sx={{ ...spellRowSx, mb: 0, py: '7px', cursor: 'pointer' }}>
@@ -906,14 +924,16 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
             {hasRollers ? (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                 {Number.isFinite(action.attackBonus) ? (
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    onClick={(e) => { e.stopPropagation(); onRoll?.(action.attackBonus, formatRollTitle(action.name, 'Attack'), action._disadvantage ? false : undefined); }}
-                    sx={{ ...inlineButtonSx, borderColor: action._notProficient ? 'rgba(222,103,95,0.4)' : 'rgba(77,149,214,0.4)', color: action._notProficient ? '#de675f' : '#4d95d6' }}
-                  >
-                    <Sword size={12} style={{ marginRight: 2 }} /> Hit {fbonus(action.attackBonus)}{action._disadvantage ? ' DIS' : ''}
-                  </Button>
+                  <AttackRollButton
+                    rawBonus={action.attackBonus}
+                    exhaustionLevel={sheet?.exhaustionLevel}
+                    label={formatRollTitle(action.name, 'Attack')}
+                    advArg={attackAdvArg}
+                    tag={attackTag}
+                    tooltip={attackTooltip}
+                    onRoll={onRoll}
+                    sx={{ borderColor: action._notProficient ? 'rgba(222,103,95,0.4)' : 'rgba(77,149,214,0.4)', color: action._notProficient ? '#de675f' : '#4d95d6' }}
+                  />
                 ) : null}
                 {action.damageFormula ? (
                   <Button

@@ -8,7 +8,7 @@ import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
 import CollapsibleBody from '../../../shared/character/CollapsibleBody.jsx';
 import PipButton from '../../../shared/character/PipButton.jsx';
 import { formatRollTitle, rollFormula as rollFormulaDice } from '../../../shared/character/dice.js';
-import { SCHOOL_LABELS, fbonus, getFinal, getMod, getPB } from '../logic/calculations.js';
+import { SCHOOL_LABELS, getFinal, getMod, getPB } from '../logic/calculations.js';
 import {
   applySpellModifiers,
   computeScaledFormula,
@@ -24,6 +24,7 @@ import {
   resolveDmgBonusValue,
 } from '../logic/spellsTabLogic.js';
 import { inlineButtonSx, spellBodySx, spellRowSx } from './spellsTabStyles.js';
+import AttackRollButton from './AttackRollButton.jsx';
 import { isConcentrationSpell, isRitualSpell } from '../../../shared/spellTags.js';
 
 function applyFlatToFormula(formula, flat) {
@@ -148,7 +149,7 @@ function groupModifierDetails(details) {
   return Array.from(groups.entries()).map(([label, items]) => ({ label, items }));
 }
 
-export default function SpellEntry({ entry, onRoll, onShowToast, atk: fallbackAtk, spellMod: fallbackSpellMod, C, installedRegistry, freeCastUses, onToggleFreeCast }) {
+export default function SpellEntry({ entry, onRoll, onShowToast, spellAttackBonus = 0, C, exhaustionLevel = 0, installedRegistry, freeCastUses, onToggleFreeCast }) {
   const [open, setOpen] = useState(false);
   const castLevel = entry.castLevel || entry.level || 0;
   const baseLevel = entry.level || 0;
@@ -171,7 +172,9 @@ export default function SpellEntry({ entry, onRoll, onShowToast, atk: fallbackAt
 
   const spellAbility = getSpellAbilityForEntry(C, entry);
   const spellMod = getMod(getFinal(C, spellAbility));
-  const atk = getPB(C) + spellMod;
+  // Per-entry casting ability + global magic-item spell-attack bonus (matches the
+  // SpellsTab header so the button and the summary agree).
+  const atk = getPB(C) + spellMod + spellAttackBonus;
 
 
   const upcastStepDie = (steps > 0) ? (spellData?.upcastDie || getUpcastStep(entry.entriesHigherLevel)?.stepDie) : null;
@@ -241,11 +244,6 @@ export default function SpellEntry({ entry, onRoll, onShowToast, atk: fallbackAt
 
   const levelLabel = castLevel > baseLevel ? ` (Lv.${castLevel})` : '';
 
-  const rollAtk = (e) => {
-    e.stopPropagation();
-    onRoll?.(atk, formatRollTitle(entry.name, `Spell Attack${levelLabel}`));
-  };
-
   const rollDmg = (e, formula, label) => {
     e.stopPropagation();
     const title = formatRollTitle(entry.name, `${label}${levelLabel}`);
@@ -274,11 +272,13 @@ export default function SpellEntry({ entry, onRoll, onShowToast, atk: fallbackAt
             {(hasAttack || hasDamage || hasHeal || utilityDie) ? (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                 {hasAttack ? (
-                  <Button size="small" variant="outlined"
-                    onClick={rollAtk}
-                    sx={{ ...inlineButtonSx, borderColor: 'rgba(77,149,214,0.4)', color: '#4d95d6' }}>
-                    <Sword size={12} style={{ marginRight: 2 }} /> Hit {fbonus(atk)}
-                  </Button>
+                  <AttackRollButton
+                    rawBonus={atk}
+                    exhaustionLevel={exhaustionLevel}
+                    label={formatRollTitle(entry.name, `Spell Attack${levelLabel}`)}
+                    onRoll={onRoll}
+                    sx={{ borderColor: 'rgba(77,149,214,0.4)', color: '#4d95d6' }}
+                  />
                 ) : null}
                 {scaledDamages.map((dmg, i) => (
                   <Button key={i} size="small" variant="outlined"
