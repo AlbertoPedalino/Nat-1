@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Box, Button, Stack, Tooltip, Typography } from '@mui/material';
 import { Cross, Dices, Sword } from 'lucide-react';
 import { SPELL_LEVEL_LABELS } from '../../charbuilder/constants.js';
@@ -6,7 +5,7 @@ import { SpellNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 import { RichInline } from '../../../shared/character/RichText.jsx';
 import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
 import { SpellMetaGrid, HigherLevelBlock } from '../../../shared/character/SpellReference.jsx';
-import CollapsibleBody from '../../../shared/character/CollapsibleBody.jsx';
+import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import PipButton from '../../../shared/character/PipButton.jsx';
 import { formatRollTitle, rollFormula as rollFormulaDice } from '../../../shared/character/dice.js';
 import { SCHOOL_LABELS, getFinal, getMod, getPB } from '../logic/calculations.js';
@@ -149,7 +148,6 @@ function groupModifierDetails(details) {
 }
 
 export default function SpellEntry({ entry, onRoll, onShowToast, spellAttackBonus = 0, C, exhaustionLevel = 0, installedRegistry, freeCastUses, onToggleFreeCast }) {
-  const [open, setOpen] = useState(false);
   const castLevel = entry.castLevel || entry.level || 0;
   const baseLevel = entry.level || 0;
   const school = SCHOOL_LABELS[entry.school] || entry.school || '';
@@ -258,9 +256,11 @@ export default function SpellEntry({ entry, onRoll, onShowToast, spellAttackBonu
   };
 
   return (
-    <Box>
-      <Box onClick={() => setOpen(!open)}
-        sx={{ ...spellRowSx, flexDirection: 'column', gap: '3px', alignItems: 'stretch' }}>
+    <ExpandableCard
+      bodySx={spellBodySx}
+      header={({ toggle }) => (
+        <Box onClick={toggle}
+          sx={{ ...spellRowSx, flexDirection: 'column', gap: '3px', alignItems: 'stretch' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', minWidth: 0 }}>
           <SpellNameIcon spell={entry} />
           <Typography noWrap sx={{ overflow: 'hidden', minWidth: 0, fontSize: '0.875rem', color: 'text.primary', textOverflow: 'ellipsis' }}>{entry.name}</Typography>
@@ -318,10 +318,10 @@ export default function SpellEntry({ entry, onRoll, onShowToast, spellAttackBonu
           </Box>
         </Box>
         <FreeCastsInline freeCasts={entry.freeCasts} freeCastUses={freeCastUses} onToggleFreeCast={onToggleFreeCast} />
-      </Box>
-
-      <CollapsibleBody open={open}>
-        <Box sx={spellBodySx}>
+        </Box>
+      )}
+      body={(
+        <>
           <SpellMetaGrid spell={entry} sx={{ mb: '6px' }} />
           <EntryBlocks blocks={bodyBlocks} />
           {modifierDetailGroups.length ? (
@@ -365,8 +365,8 @@ export default function SpellEntry({ entry, onRoll, onShowToast, spellAttackBonu
             </Stack>
           ) : null}
           <HigherLevelBlock entries={higherEntries} />
-        </Box>
-      </CollapsibleBody>
-    </Box>
+        </>
+      )}
+    />
   );
 }

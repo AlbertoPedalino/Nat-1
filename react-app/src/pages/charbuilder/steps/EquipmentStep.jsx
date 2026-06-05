@@ -1,6 +1,5 @@
-import { memo, useDeferredValue, useEffect, useMemo, useState } from 'react';
-import { List as VList } from 'react-window';
-import { Box, Button, Chip, Divider, Grid, InputAdornment, List, ListItem, ListItemButton, ListItemText, Paper, Stack, TextField, Typography } from '@mui/material';
+import { useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { Box, Button, Chip, Divider, Grid, InputAdornment, List, ListItemButton, ListItemText, Paper, Stack, TextField, Typography } from '@mui/material';
 import { Backpack, Coins, PackagePlus, Search } from 'lucide-react';
 import BuilderPanel from '../components/BuilderPanel.jsx';
 import { CURRENCY, ITEM_FILTERS } from '../constants.js';
@@ -8,8 +7,14 @@ import { ItemNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 import { cleanText } from '../logic/text.js';
 import { resolveEquipmentTypeItem } from '../logic/dataLoaders.js';
 import { findInventoryItem } from '../../../shared/character/itemContainers.js';
+import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
+import { ItemReferenceBody, QuantityAdder } from '../../../shared/character/ItemReference.jsx';
 
 const CHOICE_KEYS = ['A', 'B', 'C', 'D', 'E', 'a', 'b', 'c', 'd', 'e'];
+
+// Cap the non-virtualized add list. Rows are search-driven, so a small cap keeps
+// the DOM light; beyond it we show a "refine search" hint.
+const ADD_LIST_CAP = 120;
 
 function cpToCoins(cpValue) {
   let cp = Number(cpValue || 0);
@@ -168,24 +173,50 @@ function resolveEquipmentItems(extracted, itemDb) {
   return out;
 }
 
-const ItemRow = memo(function ItemRow({ item, onAdd, style }) {
+// Add-list row: tap to expand the item reference (props + live rich text),
+// pick a quantity, then Add. The quantity adder stops propagation so it never
+// toggles the expand.
+function AddItemRow({ item, onAdd }) {
   return (
-    <ListItemButton divider onClick={onAdd} sx={{ gap: 1 }} style={style}>
-      <ItemNameIcon item={item} />
-      <ListItemText
-        primary={<Typography fontWeight={500} noWrap>{item.name}</Typography>}
-        secondary={[item.source, item.rarity && item.rarity !== 'none' ? item.rarity : null, `${item.weight || 0} lb`].filter(Boolean).join(' - ')}
-      />
-      <Chip size="small" label={item.type} />
-    </ListItemButton>
+    <ExpandableCard
+      containerSx={{ borderBottom: 1, borderColor: 'divider' }}
+      bodySx={{ px: 2, pt: 0.25, pb: 1.5 }}
+      body={<ItemReferenceBody item={item} />}
+      header={({ open, toggle }) => (
+        <ListItemButton onClick={toggle} aria-expanded={open} sx={{ gap: 1, alignItems: 'flex-start' }}>
+          <ItemNameIcon item={item} />
+          <ListItemText primary={<Typography fontWeight={500} noWrap>{item.name}</Typography>} />
+          <QuantityAdder onAdd={(qty) => onAdd(item, qty)} sx={{ alignSelf: 'center' }} />
+        </ListItemButton>
+      )}
+    />
   );
-});
+}
 
-const VirtualItemRow = ({ index, style, items, onAdd }) => {
-  const item = items[index];
-  if (!item) return null;
-  return <ItemRow item={item} onAdd={() => onAdd(item)} style={style} />;
-};
+// Current-inventory row: tap the name to expand the item reference; keep the
+// existing -/+ quantity controls on the right.
+function CurrentInventoryRow({ item, index, dispatch }) {
+  return (
+    <ExpandableCard
+      containerSx={{ borderBottom: 1, borderColor: 'divider' }}
+      bodySx={{ px: 2, pt: 0.25, pb: 1.5 }}
+      body={<ItemReferenceBody item={item} />}
+      header={({ toggle }) => (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, py: 0.75 }}>
+          <Box onClick={toggle} sx={{ flex: 1, minWidth: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 1 }}>
+            <ItemNameIcon item={item} />
+            <Typography sx={{ fontWeight: 500, fontSize: '0.875rem', minWidth: 0 }} noWrap>{item.name}</Typography>
+          </Box>
+          <Stack direction="row" spacing={0.75} alignItems="center" sx={{ flexShrink: 0 }}>
+            <Button size="small" onClick={() => dispatch({ type: 'inventory/qty', index, delta: -1 })}>-</Button>
+            <Typography sx={{ width: 28, textAlign: 'center' }}>{item.qty}</Typography>
+            <Button size="small" onClick={() => dispatch({ type: 'inventory/qty', index, delta: 1 })}>+</Button>
+          </Stack>
+        </Box>
+      )}
+    />
+  );
+}
 
 function StartingEquipmentBlock({ title, eq, prefix, character, items, dispatch }) {
   const blocks = collectChoiceBlocks(eq, prefix);
@@ -264,7 +295,8 @@ export default function EquipmentStep({ state, dispatch }) {
       return a.name.localeCompare(b.name);
     });
   }, [state.data.items, inventoryFilter, query]);
-  const visibleItems = useMemo(() => sortedItems.slice(0, query ? 1500 : 800), [sortedItems, query]);
+  const visibleItems = useMemo(() => sortedItems.slice(0, ADD_LIST_CAP), [sortedItems]);
+  const addItemWithQty = (item, qty) => dispatch({ type: 'inventory/add', item: { ...item, qty } });
   const totalWeight = character.inventory.reduce((sum, item) => sum + (item.weight || 0) * (item.qty || 1), 0);
 
   return (
@@ -323,15 +355,12 @@ export default function EquipmentStep({ state, dispatch }) {
             ))}
           </Stack>
 
-          <Paper variant="outlined" sx={{ height: 430, overflow: 'hidden' }}>
-            <VList
-              rowComponent={VirtualItemRow}
-              rowCount={visibleItems.length}
-              rowHeight={64}
-              rowProps={{ items: visibleItems, onAdd: (item) => dispatch({ type: 'inventory/add', item }) }}
-              defaultHeight={430}
-              style={{ height: 430 }}
-            />
+          <Paper variant="outlined" sx={{ maxHeight: 430, overflow: 'auto' }}>
+            <List dense disablePadding>
+              {visibleItems.map((item) => (
+                <AddItemRow key={`${item.name}-${item.source}`} item={item} onAdd={addItemWithQty} />
+              ))}
+            </List>
           </Paper>
           {sortedItems.length > visibleItems.length ? (
             <Typography variant="caption" color="text.secondary">
@@ -343,24 +372,9 @@ export default function EquipmentStep({ state, dispatch }) {
           <Typography variant="h2">Current Inventory</Typography>
           <Paper variant="outlined" sx={{ maxHeight: 430, overflow: 'auto' }}>
             <List dense disablePadding>
-            {character.inventory.map((item, index) => (
-              <ListItem key={`${item.name}-${index}`} divider secondaryAction={(
-                <Stack direction="row" spacing={0.75} alignItems="center">
-                  <Button size="small" onClick={() => dispatch({ type: 'inventory/qty', index, delta: -1 })}>
-                    -
-                  </Button>
-                  <Typography sx={{ width: 28, textAlign: 'center' }}>{item.qty}</Typography>
-                  <Button size="small" onClick={() => dispatch({ type: 'inventory/qty', index, delta: 1 })}>
-                    +
-                  </Button>
-                </Stack>
-              )}>
-                <ListItemText
-                  primary={<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}><ItemNameIcon item={item} /><Typography sx={{ fontWeight: 500, fontSize: '0.875rem' }}>{item.name}</Typography></Box>}
-                  secondary={[item.source, `${item.weight || 0} lb each`, item.type].filter(Boolean).join(' - ')}
-                />
-              </ListItem>
-            ))}
+              {character.inventory.map((item, index) => (
+                <CurrentInventoryRow key={`${item.name}-${index}`} item={item} index={index} dispatch={dispatch} />
+              ))}
             </List>
           </Paper>
         </Stack>

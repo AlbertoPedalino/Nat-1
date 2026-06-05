@@ -56,7 +56,8 @@
       "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/bestiary/bestiary-mm.json\" -o mm.json)",
       "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/js/utils.js\" -o utils.js)",
       "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/js/parser.js\" -o parser.js)",
-      "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/bestiary/index.json\" -o bidx.json)"
+      "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/bestiary/index.json\" -o bidx.json)",
+      "Bash(git push *)"
     ]
   }
 }

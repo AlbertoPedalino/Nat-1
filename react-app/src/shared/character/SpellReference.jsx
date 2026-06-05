@@ -92,7 +92,7 @@ export function SpellSelectButton({ selected, disabled, onToggle, addColor = 'pr
       color={selected ? 'error' : addColor}
       disabled={disabled}
       onClick={(event) => { event.stopPropagation(); onToggle(); }}
-      sx={{ flexShrink: 0, minWidth: 76, ...sx }}
+      sx={{ flexShrink: 0, minWidth: 56, px: '8px', py: '1px', fontSize: '0.62rem', lineHeight: 1.5, ...sx }}
     >
       {selected ? 'Remove' : 'Add'}
     </Button>

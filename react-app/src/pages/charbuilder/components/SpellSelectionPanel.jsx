@@ -7,7 +7,7 @@ import { SpellNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 import { collectAutoGrantedSpells, getSpellCounts, maxSpellLevel, spellMatchesAnyClass } from '../spells/spells.js';
 import { getSpellMetaLine } from '../../../shared/character/spellMeta.js';
 import { SpellMiniTags, SpellReferenceBody, SpellSelectButton } from '../../../shared/character/SpellReference.jsx';
-import CollapsibleBody from '../../../shared/character/CollapsibleBody.jsx';
+import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 
 export default function SpellSelectionPanel({ state, dispatch }) {
   const [wizardMode, setWizardMode] = useState('prepare');
@@ -188,43 +188,36 @@ export default function SpellSelectionPanel({ state, dispatch }) {
 // One spell row. Tapping the row expands the full rich-text reference
 // (SpellReferenceBody: meta grid + description + upcast). Selection is an
 // explicit Add/Remove button on the right (auto-granted spells show a static
-// source chip instead). The caret is a decorative open/closed indicator.
+// source chip instead). Expand mechanic lives in ExpandableCard.
 function SpellRow({ spell, meta, selected, disabled, autoSelected, autoLabel, onToggle }) {
-  const [open, setOpen] = useState(false);
-
   return (
-    <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-      <ListItemButton
-        selected={selected}
-        aria-expanded={open}
-        sx={{ alignItems: 'flex-start', gap: 0.5 }}
-        onClick={() => setOpen((value) => !value)}
-      >
-        <SpellNameIcon spell={spell} />
-        <ListItemText
-          primary={(
-            <Stack direction="row" spacing={0.5} alignItems="center" sx={{ minWidth: 0 }}>
-              <Typography fontWeight={selected ? 700 : 500} noWrap sx={{ minWidth: 0 }}>{spell.name}</Typography>
-              <SpellMiniTags spell={spell} />
-            </Stack>
+    <ExpandableCard
+      containerSx={{ borderBottom: 1, borderColor: 'divider' }}
+      bodySx={{ px: 2, pt: 0.25, pb: 1.25 }}
+      body={<SpellReferenceBody spell={spell} />}
+      header={({ open, toggle }) => (
+        <ListItemButton selected={selected} aria-expanded={open} sx={{ alignItems: 'flex-start', gap: 0.5 }} onClick={toggle}>
+          <SpellNameIcon spell={spell} />
+          <ListItemText
+            primary={(
+              <Stack direction="row" spacing={0.5} alignItems="center" sx={{ minWidth: 0 }}>
+                <Typography fontWeight={selected ? 700 : 500} noWrap sx={{ minWidth: 0 }}>{spell.name}</Typography>
+                <SpellMiniTags spell={spell} />
+              </Stack>
+            )}
+            secondary={(
+              <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block', minWidth: 0 }}>{meta}</Typography>
+            )}
+            secondaryTypographyProps={{ component: 'div' }}
+          />
+          {autoSelected ? (
+            <Chip size="small" color="secondary" label={autoLabel} sx={{ flexShrink: 0 }} />
+          ) : (
+            <SpellSelectButton selected={selected} disabled={disabled} onToggle={onToggle} />
           )}
-          secondary={(
-            <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block', minWidth: 0 }}>{meta}</Typography>
-          )}
-          secondaryTypographyProps={{ component: 'div' }}
-        />
-        {autoSelected ? (
-          <Chip size="small" color="secondary" label={autoLabel} sx={{ flexShrink: 0 }} />
-        ) : (
-          <SpellSelectButton selected={selected} disabled={disabled} onToggle={onToggle} />
-        )}
-      </ListItemButton>
-      <CollapsibleBody open={open}>
-        <Box sx={{ px: 2, pt: 0.25, pb: 1.25 }}>
-          <SpellReferenceBody spell={spell} />
-        </Box>
-      </CollapsibleBody>
-    </Box>
+        </ListItemButton>
+      )}
+    />
   );
 }
 

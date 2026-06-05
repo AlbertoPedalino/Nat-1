@@ -14,13 +14,12 @@ import {
 import { ItemNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 import { INVENTORY_SOURCE_PRIORITY, sourceRank } from '../../../shared/character/sourcePriority.js';
 import { addInventoryEntries } from '../../../shared/character/itemContainers.js';
-import { ItemPropertyTable } from '../../../shared/character/ItemPropertyTable.jsx';
 import { countAttunedItems, ATTUNEMENT_LIMIT, attunementRequirementText, meetsAttunementClassRequirement } from '../../../shared/character/itemBonus.js';
 import { isConsumableTome, extractTomeBonus, hasAbilityChoice, getAbilityChoiceGroups } from '../../../shared/character/itemEffects.js';
 import { getArmorPenalties } from '../logic/armorPenalties.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
-import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
-import CollapsibleBody from '../../../shared/character/CollapsibleBody.jsx';
+import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
+import { ItemReferenceBody, QuantityAdder } from '../../../shared/character/ItemReference.jsx';
 
 const CURRENCY_TYPES = [
   { key: 'cp', label: 'CP' },
@@ -135,12 +134,6 @@ function canUsePactWeaponFlag(C, item) {
   return hasWarlock && hasWarlockInvocation(C, 'Pact of the Blade');
 }
 
-function formatGp(value) {
-  const gp = Number(value || 0) / 100;
-  if (!gp) return '';
-  return `${Number.isInteger(gp) ? gp : gp.toFixed(2)} GP`;
-}
-
 function normalizeSearch(value) {
   return String(value || '')
     .toLowerCase()
@@ -234,8 +227,7 @@ function itemMatchesPreparedSearch(item, query) {
   return q.split(' ').every((part) => haystack.includes(part));
 }
 
-const SEARCH_ROW_HEIGHT = 34;
-const SEARCH_OVERSCAN = 8;
+const SEARCH_CAP = 120;
 
 let itemsCachePromise = null;
 
@@ -246,35 +238,38 @@ function loadItemsCached() {
   return itemsCachePromise;
 }
 
-const SearchResultsList = memo(function SearchResultsList({ items, itemsDbCount, onAddItem }) {
-  const [scrollTop, setScrollTop] = useState(0);
-  const viewportHeight = 260;
-  const visibleCount = Math.ceil(viewportHeight / SEARCH_ROW_HEIGHT) + SEARCH_OVERSCAN * 2;
-  const start = Math.max(0, Math.floor(scrollTop / SEARCH_ROW_HEIGHT) - SEARCH_OVERSCAN);
-  const end = Math.min(items.length, start + visibleCount);
-  const visibleItems = items.slice(start, end);
-  const topPad = start * SEARCH_ROW_HEIGHT;
-  const bottomPad = Math.max(0, (items.length - end) * SEARCH_ROW_HEIGHT);
-
+// Add-list row: tap to expand the item reference (props + live rich text),
+// pick a quantity, then Add. The quantity adder stops propagation so it never
+// toggles the expand.
+function AddResultRow({ item, onAdd }) {
   return (
-    <Box
-      onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
-      sx={{ maxHeight: viewportHeight, overflowY: 'auto', mb: 0.75, border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: 'rgba(18,16,14,0.65)' }}
-    >
-      {topPad ? <Box sx={{ height: topPad }} /> : null}
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: '2px', p: '2px' }}>
-        {visibleItems.map((item) => (
-          <Box key={`${item.name}-${item.source}`} onClick={() => onAddItem(item)}
-            sx={{ height: SEARCH_ROW_HEIGHT - 2, display: 'flex', alignItems: 'center', gap: 1, px: '10px', py: '4px', bgcolor: 'rgba(35,32,26,1)', border: 1, borderColor: 'divider', borderRadius: 1, cursor: 'pointer', '&:hover': { borderColor: '#caa550', bgcolor: 'rgba(44,40,33,1)' } }}>
-            <ItemNameIcon item={item} />
-            <Typography noWrap sx={{ flex: 1, minWidth: 0, fontSize: '0.875rem', color: 'text.primary' }}>{item.name}</Typography>
-            <Typography sx={{ fontSize: '0.62rem', color: '#edd48a', flexShrink: 0, fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}>{item.source || '—'}</Typography>
-            <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary', flexShrink: 0 }}>{item.type || 'gear'}</Typography>
-            <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', flexShrink: 0 }}>{formatGp(item.value)}</Typography>
-          </Box>
-        ))}
-      </Box>
-      {bottomPad ? <Box sx={{ height: bottomPad }} /> : null}
+    <ExpandableCard
+      containerSx={{ flexShrink: 0, border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: 'rgba(35,32,26,1)', overflow: 'hidden', '&:hover': { borderColor: '#caa550' } }}
+      bodySx={{ px: '10px', pt: '2px', pb: '8px', bgcolor: '#12100e', fontSize: '0.7rem', color: 'text.secondary' }}
+      body={<ItemReferenceBody item={item} />}
+      header={({ toggle }) => (
+        <Box onClick={toggle} sx={{ display: 'flex', alignItems: 'center', gap: 1, px: '10px', py: '5px', cursor: 'pointer' }}>
+          <ItemNameIcon item={item} />
+          <Typography noWrap sx={{ flex: 1, minWidth: 0, fontSize: '0.875rem', color: 'text.primary' }}>{item.name}</Typography>
+          <QuantityAdder onAdd={(qty) => onAdd(item, qty)} addColor="success" />
+        </Box>
+      )}
+    />
+  );
+}
+
+const SearchResultsList = memo(function SearchResultsList({ items, itemsDbCount, onAddItem }) {
+  const visibleItems = items.slice(0, SEARCH_CAP);
+  return (
+    <Box sx={{ maxHeight: 320, overflowY: 'auto', mb: 0.75, border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: 'rgba(18,16,14,0.65)', p: '2px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+      {visibleItems.map((item) => (
+        <AddResultRow key={`${item.name}-${item.source}`} item={item} onAdd={onAddItem} />
+      ))}
+      {items.length > SEARCH_CAP ? (
+        <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', fontStyle: 'italic', px: 1, py: 0.5 }}>
+          {items.length - SEARCH_CAP} more. Refine your search.
+        </Typography>
+      ) : null}
       {!items.length && (
         <Typography sx={{ fontSize: '0.8125rem', color: 'text.secondary', fontStyle: 'italic', py: 0.75, px: 1 }}>
           {itemsDbCount ? 'No items found.' : 'Loading items.'}
@@ -383,10 +378,11 @@ export default function InventoryTab({ C, sheet, onUpdateInventory, onUpdateCurr
 
   const updateInv = useCallback((next) => onUpdateInventory?.(next), [onUpdateInventory]);
 
-  const addItem = useCallback((item) => {
+  const addItem = useCallback((item, count = 1) => {
     if (!item?.name) return;
     const current = invRef.current || [];
-    updateInv(addInventoryEntries(current, [item], itemsDb, normalizeStoredItem));
+    const qtyToAdd = Math.max(1, Number(count) || 1);
+    updateInv(addInventoryEntries(current, [{ ...item, qty: qtyToAdd }], itemsDb, normalizeStoredItem));
   }, [itemsDb, updateInv]);
 
   const addCustom = () => {
@@ -757,19 +753,33 @@ const getPenaltyMessage = (() => {
 })();
 
 const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, onEquip, onEquipSlot, penaltyMsg, canPactWeapon, onPactWeapon, isArmorer, hasArcaneArmor, onArcaneArmor, onAttune, attunementFull, charClassNames, onSetAbilityChoice, onConsumeTome }) {
-  const [open, setOpen] = useState(false);
   const type = String(item.type || '').toUpperCase();
   const canEquip = ['M', 'R', 'LA', 'MA', 'HA', 'S', 'SCF', 'WD', 'RD', 'ST', 'WI', 'WEAPON', 'ARMOR'].includes(type);
 
-  const hasEntries = Array.isArray(item.entries) && item.entries.length > 0;
   const showAbilityChoice = hasAbilityChoice(item);
   const showTomeConsume = isConsumableTome(item);
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px', px: '10px', py: '6px', bgcolor: item.equipped ? 'rgba(26,188,156,0.06)' : 'rgba(35,32,26,1)', border: 1, borderColor: penaltyMsg ? 'warning.main' : (item.equipped ? '#2ca797' : 'divider'), borderRadius: 1, mb: '3px', '&:hover': { borderColor: 'rgba(202,165,80,0.34)' } }}>
+    <ExpandableCard
+      bodySx={{ fontSize: '0.7rem', color: 'text.secondary', lineHeight: 1.45, bgcolor: '#12100e', border: 1, borderColor: 'divider', borderRadius: 1, px: '10px', py: '6px', mt: '-2px', mb: '4px' }}
+      body={(
+        <>
+          <ItemReferenceBody item={item} />
+          {showTomeConsume ? (
+            <TomeConsumePanel item={item} onConsume={() => onConsumeTome?.(index)} />
+          ) : null}
+          {showAbilityChoice ? (
+            <AbilityChoicePanel
+              item={item}
+              onPick={(groupIdx, abilities) => onSetAbilityChoice?.(index, groupIdx, abilities)}
+            />
+          ) : null}
+        </>
+      )}
+      header={({ toggle }) => (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px', px: '10px', py: '6px', bgcolor: item.equipped ? 'rgba(26,188,156,0.06)' : 'rgba(35,32,26,1)', border: 1, borderColor: penaltyMsg ? 'warning.main' : (item.equipped ? '#2ca797' : 'divider'), borderRadius: 1, mb: '3px', '&:hover': { borderColor: 'rgba(202,165,80,0.34)' } }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
-          <Box onClick={() => setOpen(!open)} sx={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
+          <Box onClick={toggle} sx={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', flexWrap: 'wrap' }}>
               <ItemNameIcon item={item} />
               <Typography noWrap sx={{ fontSize: '0.875rem', color: 'text.primary' }}>{item.name}</Typography>
@@ -833,22 +843,8 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, 
           </Box>
         </Box>
       </Box>
-      <CollapsibleBody open={open}>
-        <Box sx={{ fontSize: '0.7rem', color: 'text.secondary', lineHeight: 1.45, bgcolor: '#12100e', border: 1, borderColor: 'divider', borderRadius: 1, px: '10px', py: '6px', mt: '-2px', mb: '4px' }}>
-          <ItemPropertyTable item={item} sx={{ mb: hasEntries ? '6px' : 0 }} />
-          {hasEntries ? <Box sx={{ mt: '6px' }}><EntryBlocks entries={item.entries} emptyText="" /></Box> : null}
-          {showTomeConsume ? (
-            <TomeConsumePanel item={item} onConsume={() => onConsumeTome?.(index)} />
-          ) : null}
-          {showAbilityChoice ? (
-            <AbilityChoicePanel
-              item={item}
-              onPick={(groupIdx, abilities) => onSetAbilityChoice?.(index, groupIdx, abilities)}
-            />
-          ) : null}
-        </Box>
-      </CollapsibleBody>
-    </Box>
+      )}
+    />
   );
 });
 

@@ -46,7 +46,7 @@ import {
 import SpellEntry from './SpellEntry.jsx';
 import { Empty, SlotPanel, SpellSection, StatBox } from './SpellsUiParts.jsx';
 import { SpellNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
-import CollapsibleBody from '../../../shared/character/CollapsibleBody.jsx';
+import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import { SpellMiniTags, SpellReferenceBody, SpellSelectButton } from '../../../shared/character/SpellReference.jsx';
 
 export default function SpellsTab({ C, sheet, onRoll, onUpdateSpells, onShowToast, onUpdateSheet, freeCastUses, onToggleFreeCast, onUpdateCharacter }) {
@@ -506,33 +506,31 @@ export default function SpellsTab({ C, sheet, onRoll, onUpdateSpells, onShowToas
 // an explicit Add/Remove button; auto-granted (locked) spells show a static
 // AUTO chip. The caret is a decorative open/closed indicator.
 function PickerSpellRow({ spell, selected, disabled, atLimit, locked, onToggle }) {
-  const [open, setOpen] = useState(false);
-
   return (
-    <Box sx={{ flexShrink: 0, border: 1, borderColor: selected ? '#58b879' : 'transparent', borderRadius: 1, overflow: 'hidden', opacity: atLimit ? 0.5 : 1, '&:hover': { borderColor: selected ? '#58b879' : 'divider' } }}>
-      <Box
-        onClick={() => setOpen((value) => !value)}
-        sx={{ display: 'flex', alignItems: 'center', gap: 0.5, px: '9px', py: '6px', cursor: 'pointer', bgcolor: selected ? 'rgba(39,174,96,0.08)' : 'transparent', '&:hover': { bgcolor: selected ? 'rgba(39,174,96,0.08)' : 'rgba(35,32,26,1)' } }}
-      >
-        <Box sx={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 0.4 }}>
-          <SpellNameIcon spell={spell} />
-          <Typography noWrap sx={{ minWidth: 0, fontSize: '0.875rem', color: 'text.primary' }}>{spell.name}</Typography>
-          <SpellMiniTags spell={spell} />
+    <ExpandableCard
+      containerSx={{ flexShrink: 0, border: 1, borderColor: selected ? '#58b879' : 'transparent', borderRadius: 1, overflow: 'hidden', opacity: atLimit ? 0.5 : 1, '&:hover': { borderColor: selected ? '#58b879' : 'divider' } }}
+      bodySx={{ px: '9px', pt: '2px', pb: '8px' }}
+      body={<SpellReferenceBody spell={spell} />}
+      header={({ toggle }) => (
+        <Box
+          onClick={toggle}
+          sx={{ display: 'flex', alignItems: 'center', gap: 0.5, px: '9px', py: '6px', cursor: 'pointer', bgcolor: selected ? 'rgba(39,174,96,0.08)' : 'transparent', '&:hover': { bgcolor: selected ? 'rgba(39,174,96,0.08)' : 'rgba(35,32,26,1)' } }}
+        >
+          <Box sx={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 0.4 }}>
+            <SpellNameIcon spell={spell} />
+            <Typography noWrap sx={{ minWidth: 0, fontSize: '0.875rem', color: 'text.primary' }}>{spell.name}</Typography>
+            <SpellMiniTags spell={spell} />
+          </Box>
+          <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', flexShrink: 0 }}>{SPELL_LEVEL_LABELS[spell.level] || `Lv ${spell.level}`}</Typography>
+          <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', flexShrink: 0 }}>{SCHOOL_LABELS[spell.school] || spell.school}</Typography>
+          {locked ? (
+            <Box sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.7rem', color: '#58b879', flexShrink: 0 }}>AUTO</Box>
+          ) : (
+            <SpellSelectButton selected={selected} disabled={disabled} onToggle={onToggle} addColor="success" />
+          )}
         </Box>
-        <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', flexShrink: 0 }}>{SPELL_LEVEL_LABELS[spell.level] || `Lv ${spell.level}`}</Typography>
-        <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', flexShrink: 0 }}>{SCHOOL_LABELS[spell.school] || spell.school}</Typography>
-        {locked ? (
-          <Box sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.7rem', color: '#58b879', flexShrink: 0 }}>AUTO</Box>
-        ) : (
-          <SpellSelectButton selected={selected} disabled={disabled} onToggle={onToggle} addColor="success" sx={{ py: '1px', fontSize: '0.68rem' }} />
-        )}
-      </Box>
-      <CollapsibleBody open={open}>
-        <Box sx={{ px: '9px', pt: '2px', pb: '8px' }}>
-          <SpellReferenceBody spell={spell} />
-        </Box>
-      </CollapsibleBody>
-    </Box>
+      )}
+    />
   );
 }
 
