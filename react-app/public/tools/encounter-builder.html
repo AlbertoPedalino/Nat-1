@@ -2600,11 +2600,26 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
       selCombatant = null;
     }
 
+    // Build the 5e.tools bestiary page URL for a monster.
+    // Mirrors 5etools' UrlUtil.getSluggedHash(Parser.stringToSlug(`${name}_${source}`)):
+    // lowercase, strip diacritics, drop non-[\w ] chars, spaces/underscores -> hyphens.
+    function mon5eUrl(m) {
+      if (!m || !m.name || !m.source) return null;
+      const slug = `${m.name}_${m.source}`
+        .trim().toLowerCase()
+        .normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .replace(/[^\w ]+/g, '')
+        .replace(/[ _]+/g, '-');
+      return `https://5e.tools/bestiary/${slug}.html`;
+    }
+
     function renderSB(m, showAdd) {
       const cr = getCR(m.cr);
       const size = (m.size && m.size[0]) ? SIZES[m.size[0]] || m.size[0] : '';
       const type = getType(m.type);
-      const sub = typeof m.type === 'object' && m.type.tags ? ` (${m.type.tags.join(', ')})` : ' ';
+      const sub = typeof m.type === 'object' && m.type.tags ? ` (${m.type.tags.map(t =>
+        typeof t === 'string' ? t : (t.prefixHidden ? t.tag : [t.prefix, t.tag].filter(Boolean).join(' '))
+      ).join(', ')})` : ' ';
       const align = Array.isArray(m.alignment) ? m.alignment.join(' ') : m.alignment || '';
       const spd = m.speed ? Object.entries(m.speed).filter(([, v]) => v).map(([k, v]) => k === 'walk' ? v + ' ft.' : k + ' ' + v + ' ft.').join(', ') : '—';
       const saves = m.save ? Object.entries(m.save).map(([k, v]) =>
@@ -2629,8 +2644,9 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
     <div style="display:flex; align-items:center; gap:15px; margin-bottom:15px; padding:0 10px">
       <img src="${getMonIcon(m)}" style="width:70px; height:70px; border-radius:50%; border:2px solid var(--gold); background:var(--bg3); object-fit:contain" onerror="this.src='https://5etools-mirror-3.github.io/5etools-img/token/mm/skeleton.webp';">
       <div>
-        <div class="sbname" style="font-size:22px">${esc(m.name)}</div>
+        <div class="sbname" style="font-size:22px">${(() => { const u = mon5eUrl(m); return u ? `<a href="${u}" target="_blank" rel="noopener" style="color:inherit; text-decoration:none" title="Apri su 5e.tools" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${esc(m.name)}</a>` : esc(m.name); })()}</div>
         <div class="sbmeta">${esc(size)} ${esc(type)}${esc(sub)}${align ? ', ' + esc(align) : ''}</div>
+        ${m.source ? `<div style="margin-top:5px"><span style="display:inline-block; background:var(--bg3); border:1px solid var(--gold); color:var(--gold); font-size:11px; font-weight:600; padding:2px 8px; border-radius:10px" title="Manuale di provenienza">${esc(m.source)}</span></div>` : ''}
       </div>
     </div>
     <div class="sbdiv"></div>
