@@ -25,7 +25,7 @@ export function deriveSheetState(C) {
   const sheetInventory = Array.isArray(C?.inventory) ? JSON.parse(JSON.stringify(C.inventory)) : [];
   const sheetCurrency = C?.currency && typeof C.currency === 'object'
     ? { ...C.currency }
-    : { cp: 0, sp: 0, ep: 0, gp: 10, pp: 0 };
+    : { cp: 0, sp: 0, gp: 10, pp: 0 };
 
   const sheetInspiration = Boolean(C?.inspiration);
   const activeConditions = Array.isArray(C?.activeConditions) ? C.activeConditions : [];

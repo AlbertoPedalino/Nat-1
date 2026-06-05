@@ -18,8 +18,8 @@ import { countAttunedItems, ATTUNEMENT_LIMIT, attunementRequirementText, meetsAt
 import { isConsumableTome, extractTomeBonus, hasAbilityChoice, getAbilityChoiceGroups } from '../../../shared/character/itemEffects.js';
 import { getArmorPenalties } from '../logic/armorPenalties.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
-import { CurrencyCoinBox } from '../../../shared/character/CurrencyCoinBox.jsx';
-import { CURRENCY_TYPES, normalizeCoinAmount } from '../../../shared/character/currency.js';
+import { CurrencyRow } from '../../../shared/character/CurrencyCoinBox.jsx';
+import { normalizeCoinAmount } from '../../../shared/character/currency.js';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import { ItemReferenceBody, QuantityAdder } from '../../../shared/character/ItemReference.jsx';
 import { carryCapacity, formatWeight, itemQty as qty, totalInventoryWeight } from '../../../shared/character/weight.js';
@@ -586,20 +586,7 @@ export default function InventoryTab({ C, sheet, onUpdateInventory, onUpdateCurr
 
   return (
     <Box>
-      <Box sx={{ overflowX: 'auto', pb: 0.5, mb: 0.75 }}>
-        <Box sx={{ display: 'flex', gap: '6px', flexWrap: 'nowrap', minWidth: 500, pr: 0.5 }}>
-          {CURRENCY_TYPES.map((ct) => (
-            <Box key={ct.key} sx={{ flex: '0 0 96px', minWidth: 96 }}>
-              <CurrencyCoinBox
-                coin={ct}
-                value={currency[ct.key]}
-                mode="sheet"
-                onChange={(value) => updateCoin(ct.key, value)}
-              />
-            </Box>
-          ))}
-        </Box>
-      </Box>
+      <CurrencyRow mode="sheet" currency={currency} onCoinChange={updateCoin} sx={{ mb: 0.75 }} />
 
       <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 0.5 }}>
         <Box sx={statPillSx}>Weight: <b>{formatWeight(totalWeight)} / {formatWeight(maxCarry)} lb</b></Box>

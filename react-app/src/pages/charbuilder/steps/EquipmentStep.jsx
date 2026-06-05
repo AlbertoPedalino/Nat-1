@@ -2,11 +2,11 @@ import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { Box, Button, Chip, Divider, IconButton, InputAdornment, List, ListItemButton, ListItemText, Paper, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import { Backpack, Coins, PackagePlus, Search, Trash2 } from 'lucide-react';
 import BuilderPanel from '../components/BuilderPanel.jsx';
-import { CURRENCY, ITEM_FILTERS } from '../constants.js';
+import { ITEM_FILTERS } from '../constants.js';
 import { ItemNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 import { cleanText } from '../logic/text.js';
 import { resolveEquipmentTypeItem } from '../logic/dataLoaders.js';
-import { CurrencyCoinBox } from '../../../shared/character/CurrencyCoinBox.jsx';
+import { CurrencyRow } from '../../../shared/character/CurrencyCoinBox.jsx';
 import { findInventoryItem } from '../../../shared/character/itemContainers.js';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import { ItemReferenceBody, QuantityAdder } from '../../../shared/character/ItemReference.jsx';
@@ -324,19 +324,10 @@ export default function EquipmentStep({ state, dispatch }) {
       </BuilderPanel>
 
       <BuilderPanel id="panel-currency" title="Currency" icon={Coins}>
-        <Box sx={{ overflowX: 'auto', pb: 0.5 }}>
-          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'nowrap', minWidth: 540, pr: 0.5 }}>
-            {CURRENCY.map((coin) => (
-              <Box key={coin.key} sx={{ flex: '0 0 108px', minWidth: 108 }}>
-                <CurrencyCoinBox
-                  coin={coin}
-                  value={character.currency?.[coin.key]}
-                  onChange={(value) => dispatch({ type: 'currency/set', coin: coin.key, value })}
-                />
-              </Box>
-            ))}
-          </Box>
-        </Box>
+        <CurrencyRow
+          currency={character.currency}
+          onCoinChange={(coin, value) => dispatch({ type: 'currency/set', coin, value })}
+        />
       </BuilderPanel>
 
       <BuilderPanel id="panel-inventory" title="Inventory" icon={Backpack} note={`${formatWeight(totalWeight)} lb carried`}>

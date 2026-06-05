@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Box, IconButton, TextField, Tooltip, Typography } from '@mui/material';
+import { Box, IconButton, TextField, Tooltip, Typography, useMediaQuery } from '@mui/material';
 import { Minus, Plus } from 'lucide-react';
-import { normalizeCoinAmount, sanitizeCoinInput } from './currency.js';
+import { CURRENCY_TYPES, normalizeCoinAmount, sanitizeCoinInput } from './currency.js';
 
 // Accent colors shared across every variant.
 const HOVER_SUBTRACT = '#de675f';
@@ -223,6 +223,38 @@ export function CurrencyCoinBox({ coin, value, onChange, mode = 'builder' }) {
             <Plus size={v.stepper.icon} />
           </IconButton>
         </Tooltip>
+      </Box>
+    </Box>
+  );
+}
+
+// Per-mode row layout. `basis` is each coin's preferred width.
+const ROW_LAYOUT = {
+  builder: { gap: 1, basis: 108 },
+  sheet: { gap: 0.75, basis: 96 },
+};
+
+// Desktop (>= sm): coins flex to fill the row. Mobile (< sm): coins keep their
+// `basis` width on a horizontally scrollable row so they stay legible.
+// useMediaQuery (matchMedia) is used instead of an sx `{ xs, sm }` object
+// because the `flex` shorthand does not reliably emit per-breakpoint values.
+export function CurrencyRow({ currency, onCoinChange, mode = 'builder', sx }) {
+  const { gap, basis } = ROW_LAYOUT[mode] ?? ROW_LAYOUT.builder;
+  const compact = useMediaQuery((theme) => theme.breakpoints.down('sm'), { noSsr: true });
+
+  return (
+    <Box sx={{ overflowX: 'auto', pb: compact ? 0.25 : 0, ...sx }}>
+      <Box sx={{ display: 'flex', gap, width: compact ? 'max-content' : 'auto' }}>
+        {CURRENCY_TYPES.map((coin) => (
+          <Box key={coin.key} sx={{ flex: compact ? `0 0 ${basis}px` : 1, minWidth: 0 }}>
+            <CurrencyCoinBox
+              coin={coin}
+              mode={mode}
+              value={currency?.[coin.key]}
+              onChange={(value) => onCoinChange(coin.key, value)}
+            />
+          </Box>
+        ))}
       </Box>
     </Box>
   );

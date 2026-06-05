@@ -109,7 +109,10 @@
       "Read(//c/temp/**)",
       "Bash(curl -s -o /c/temp/mv.json \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/magicvariants.json\")",
       "Bash(npx eslint *)",
-      "Bash(npx vite *)"
+      "Bash(npx vite *)",
+      "WebSearch",
+      "WebFetch(domain:www.dndbeyond.com)",
+      "WebFetch(domain:thealexandrian.net)"
     ]
   }
 }

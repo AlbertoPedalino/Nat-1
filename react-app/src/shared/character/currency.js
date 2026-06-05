@@ -1,7 +1,8 @@
+// XPHB 2024 coins: copper, silver, gold, platinum. Electrum (EP) was dropped
+// from the 2024 Player's Handbook and is intentionally not included.
 export const CURRENCY_TYPES = [
   { key: 'cp', label: 'Copper', shortLabel: 'CP', tone: '#b87333' },
   { key: 'sp', label: 'Silver', shortLabel: 'SP', tone: '#b8b8b8' },
-  { key: 'ep', label: 'Electrum', shortLabel: 'EP', tone: '#9f9f9f' },
   { key: 'gp', label: 'Gold', shortLabel: 'GP', tone: '#d7ad52' },
   { key: 'pp', label: 'Platinum', shortLabel: 'PP', tone: '#dde1ff' },
 ];

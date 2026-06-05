@@ -384,7 +384,7 @@ export function makeSheetPayload(character, data) {
     maxHp: calcMaxHp(character),
     finalScores: getAllFinalScores(character),
     inventory: character.inventory || [],
-    currency: character.currency || { cp: 0, sp: 0, ep: 0, gp: 10, pp: 0 },
+    currency: character.currency || { cp: 0, sp: 0, gp: 10, pp: 0 },
     equipChoices: character.equipChoices || {},
     grantSpellNames: choiceSpellNames,
     spellSnapshots,
@@ -531,7 +531,7 @@ function buildBuilderStateFromSheetPayload(data) {
     autoGrantedSpells: data.autoGrantedSpells || [],
 
     inventory: data.inventory || [],
-    currency: data.currency || { cp: 0, sp: 0, ep: 0, gp: 10, pp: 0 },
+    currency: data.currency || { cp: 0, sp: 0, gp: 10, pp: 0 },
     xp: Number(data.xp || 0),
   };
 
