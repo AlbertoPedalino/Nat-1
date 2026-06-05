@@ -1,6 +1,6 @@
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { Box, Button, IconButton, TextField, Tooltip, Typography, Alert } from '@mui/material';
-import { Backpack, Check, ChevronDown, ChevronRight, Minus, Package, Plus, Search, Shield, Sparkles, Swords, Trash2, AlertTriangle } from 'lucide-react';
+import { Backpack, Check, ChevronDown, ChevronRight, Minus, Package, Plus, Shield, Sparkles, Swords, Trash2, AlertTriangle } from 'lucide-react';
 import { loadItems } from '../../charbuilder/logic/dataLoaders.js';
 import { getFinal } from '../logic/calculations.js';
 import {
@@ -73,6 +73,58 @@ const filterButtonSx = (active) => ({
   fontWeight: 700,
   letterSpacing: '0.08em',
   textTransform: 'uppercase',
+});
+
+const inventorySectionSx = {
+  border: 1,
+  borderColor: 'divider',
+  borderRadius: 1,
+  bgcolor: 'rgba(18,16,14,0.48)',
+  p: '8px',
+  mb: 1,
+};
+
+const inventorySectionHeaderSx = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: '8px',
+  flexWrap: 'wrap',
+};
+
+const inventorySectionTitleSx = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 0.5,
+  minWidth: 0,
+  fontFamily: '"Cinzel", Georgia, serif',
+  fontSize: '0.65rem',
+  fontWeight: 700,
+  letterSpacing: '0.12em',
+  textTransform: 'uppercase',
+  color: 'text.secondary',
+};
+
+const addPanelToggleSx = (open) => ({
+  minHeight: 0,
+  px: '12px',
+  py: '4px',
+  border: 1,
+  borderColor: open ? '#caa550' : 'divider',
+  borderRadius: 1,
+  bgcolor: open ? 'rgba(202,165,80,0.14)' : 'rgba(35,32,26,1)',
+  color: open ? '#edd48a' : 'text.secondary',
+  fontFamily: '"Cinzel", Georgia, serif',
+  fontSize: '0.6rem',
+  fontWeight: 700,
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase',
+  whiteSpace: 'nowrap',
+  '&:hover': {
+    borderColor: '#caa550',
+    color: '#edd48a',
+    bgcolor: open ? 'rgba(202,165,80,0.18)' : 'rgba(202,165,80,0.08)',
+  },
 });
 
 function itemType(item) {
@@ -580,129 +632,130 @@ export default function InventoryTab({ C, sheet, onUpdateInventory, onUpdateCurr
         </Box>
       </Box>
 
-      <Box
-        onClick={() => setAddPanelOpen((prev) => !prev)}
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 0.5,
-          cursor: 'pointer',
-          fontFamily: '"Cinzel", Georgia, serif',
-          fontSize: '0.65rem',
-          fontWeight: 700,
-          letterSpacing: '0.12em',
-          textTransform: 'uppercase',
-          color: addPanelOpen ? '#edd48a' : 'text.secondary',
-          borderBottom: 1,
-          borderColor: 'divider',
-          pb: '3px',
-          mt: 0.4,
-          mb: 0.5,
-          userSelect: 'none',
-          '&:hover': { color: '#caa550' },
-        }}
-      >
-        {addPanelOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-        <Search size={12} />
-        Add Items
+      <Box sx={inventorySectionSx}>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: addPanelOpen ? 0.75 : 0 }}>
+          <Button
+            size="small"
+            aria-expanded={addPanelOpen}
+            onClick={() => setAddPanelOpen((prev) => !prev)}
+            startIcon={addPanelOpen ? null : <Plus size={12} />}
+            endIcon={addPanelOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+            sx={addPanelToggleSx(addPanelOpen)}
+          >
+            {addPanelOpen ? 'Close' : 'Add Item'}
+          </Button>
+        </Box>
+
+        {addPanelOpen ? (
+          <Box sx={{ pt: 0.75, borderTop: 1, borderColor: 'divider' }}>
+            <TextField
+              size="small"
+              fullWidth
+              placeholder="Search 2024 items by name, source, type, property..."
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              sx={{ ...compactInputSx, mb: 0.5 }}
+            />
+
+            <InventoryFilterButtons value={filter} onChange={setFilter} />
+
+            {deferredSearch !== search ? (
+              <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', fontStyle: 'italic', mb: 0.3 }}>
+                Updating results...
+              </Typography>
+            ) : null}
+            <SearchResultsList items={searchResults} itemsDbCount={itemsDb.length} onAddItem={addItem} />
+
+            <Box sx={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+              <TextField size="small" value={customName} placeholder="Add custom item..." onChange={(event) => setCustomName(event.target.value)}
+                onKeyDown={(event) => { if (event.key === 'Enter') addCustom(); }}
+                sx={{ ...compactInputSx, flex: 1, minWidth: 120 }} />
+              <TextField size="small" type="number" value={customWeight} placeholder="lb" onChange={(event) => setCustomWeight(event.target.value)}
+                onKeyDown={(event) => { if (event.key === 'Enter') addCustom(); }}
+                inputProps={{ min: 0, step: 0.1 }} sx={{ ...compactInputSx, width: 58 }} />
+              <TextField size="small" type="number" value={customValue} placeholder="gp" onChange={(event) => setCustomValue(event.target.value)}
+                onKeyDown={(event) => { if (event.key === 'Enter') addCustom(); }}
+                inputProps={{ min: 0, step: 0.01 }} sx={{ ...compactInputSx, width: 62 }} />
+              <Button size="small" onClick={addCustom} disabled={!customName.trim()}
+                sx={{ px: '14px', border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: 'rgba(35,32,26,1)', color: 'text.secondary', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.65rem', whiteSpace: 'nowrap', '&:hover': { borderColor: '#caa550', color: '#caa550' } }}>
+                + Add
+              </Button>
+            </Box>
+          </Box>
+        ) : null}
       </Box>
 
-      {addPanelOpen ? (
-        <>
-          <TextField
-            size="small"
-            fullWidth
-            placeholder="Search 2024 items by name, source, type, property..."
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            sx={{ ...compactInputSx, mb: 0.5 }}
-          />
+      <Box sx={{ ...inventorySectionSx, mb: 0 }}>
+        <Box sx={{ ...inventorySectionHeaderSx, mb: 0.75 }}>
+          <InventorySectionTitle icon={Package} label={`Inventory (${inventoryFiltered ? `${visibleTotalItems} / ` : ''}${totalItems})`} />
+        </Box>
 
-          <InventoryFilterButtons value={filter} onChange={setFilter} />
+        <TextField
+          size="small"
+          fullWidth
+          placeholder="Search inventory by name, source, type, property..."
+          value={inventorySearch}
+          onChange={(event) => setInventorySearch(event.target.value)}
+          sx={{ ...compactInputSx, mb: 0.5 }}
+        />
 
-          {deferredSearch !== search ? (
-            <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', fontStyle: 'italic', mb: 0.3 }}>
-              Updating results...
+        <InventoryFilterButtons value={inventoryFilter} onChange={setInventoryFilter} />
+
+        <Box sx={inventoryListSx}>
+          {GROUPS.map((group) => {
+            const inGroup = groupedInventory[group.key] || [];
+            if (!inGroup.length) return null;
+            return (
+              <Box key={group.key}>
+                <SectionHeader icon={group.icon} label={group.label} />
+                {group.key === 'weapon' && slotWarnings.length > 0 ? slotWarnings.map((w, i) => (
+                  <Alert key={i} severity="warning" sx={{ fontSize: '0.65rem', py: '2px', px: '8px', mb: '3px' }}>
+                    {w}
+                  </Alert>
+                )) : null}
+                {inGroup.map(({ item, index }) => (
+                  <InventoryRow
+                    key={`${item.name}-${item.source}-${index}`}
+                    item={item}
+                    index={index}
+                    onQty={adjustQty}
+                    onRemove={removeItem}
+                    onEquip={toggleEquipped}
+                    onEquipSlot={equipToSlot}
+                    penaltyMsg={getPenaltyMessage(C, item, profSets)}
+                    canPactWeapon={canUsePactWeaponFlag(C, item)}
+                    onPactWeapon={togglePactWeapon}
+                    isArmorer={isArmorer}
+                    hasArcaneArmor={hasItemFlag(item, 'arcaneArmor')}
+                    onArcaneArmor={toggleArcaneArmor}
+                    onAttune={toggleAttuned}
+                    attunementFull={attunementFull}
+                    charClassNames={charClassNames}
+                    onSetAbilityChoice={setAbilityChoice}
+                    onConsumeTome={consumeTome}
+                  />
+                ))}
+              </Box>
+            );
+          })}
+          {!inv.length && <Typography sx={{ fontSize: '0.8125rem', color: 'text.secondary', fontStyle: 'italic', py: 0.5 }}>Inventory empty.</Typography>}
+          {inv.length > 0 && !visibleInventory.length && (
+            <Typography sx={{ fontSize: '0.8125rem', color: 'text.secondary', fontStyle: 'italic', py: 0.5 }}>
+              No inventory items match this search or filter.
             </Typography>
-          ) : null}
-          <SearchResultsList items={searchResults} itemsDbCount={itemsDb.length} onAddItem={addItem} />
-
-          <Box sx={{ display: 'flex', gap: '6px', mb: 0.75, flexWrap: 'wrap' }}>
-            <TextField size="small" value={customName} placeholder="Add custom item..." onChange={(event) => setCustomName(event.target.value)}
-              onKeyDown={(event) => { if (event.key === 'Enter') addCustom(); }}
-              sx={{ ...compactInputSx, flex: 1, minWidth: 120 }} />
-            <TextField size="small" type="number" value={customWeight} placeholder="lb" onChange={(event) => setCustomWeight(event.target.value)}
-              onKeyDown={(event) => { if (event.key === 'Enter') addCustom(); }}
-              inputProps={{ min: 0, step: 0.1 }} sx={{ ...compactInputSx, width: 58 }} />
-            <TextField size="small" type="number" value={customValue} placeholder="gp" onChange={(event) => setCustomValue(event.target.value)}
-              onKeyDown={(event) => { if (event.key === 'Enter') addCustom(); }}
-              inputProps={{ min: 0, step: 0.01 }} sx={{ ...compactInputSx, width: 62 }} />
-            <Button size="small" onClick={addCustom} disabled={!customName.trim()}
-              sx={{ px: '14px', border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: 'rgba(35,32,26,1)', color: 'text.secondary', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.65rem', whiteSpace: 'nowrap', '&:hover': { borderColor: '#caa550', color: '#caa550' } }}>
-              + Add
-            </Button>
-          </Box>
-        </>
-      ) : null}
-
-      <SectionHeader icon={Package} label={`Inventory (${inventoryFiltered ? `${visibleTotalItems} / ` : ''}${totalItems} items)`} />
-
-      <TextField
-        size="small"
-        fullWidth
-        placeholder="Search inventory by name, source, type, property..."
-        value={inventorySearch}
-        onChange={(event) => setInventorySearch(event.target.value)}
-        sx={{ ...compactInputSx, mb: 0.5 }}
-      />
-
-      <InventoryFilterButtons value={inventoryFilter} onChange={setInventoryFilter} />
-
-      <Box sx={inventoryListSx}>
-        {GROUPS.map((group) => {
-          const inGroup = groupedInventory[group.key] || [];
-          if (!inGroup.length) return null;
-          return (
-            <Box key={group.key}>
-              <SectionHeader icon={group.icon} label={group.label} />
-              {group.key === 'weapon' && slotWarnings.length > 0 ? slotWarnings.map((w, i) => (
-                <Alert key={i} severity="warning" sx={{ fontSize: '0.65rem', py: '2px', px: '8px', mb: '3px' }}>
-                  {w}
-                </Alert>
-              )) : null}
-              {inGroup.map(({ item, index }) => (
-                <InventoryRow
-                  key={`${item.name}-${item.source}-${index}`}
-                  item={item}
-                  index={index}
-                  onQty={adjustQty}
-                  onRemove={removeItem}
-                  onEquip={toggleEquipped}
-                  onEquipSlot={equipToSlot}
-                  penaltyMsg={getPenaltyMessage(C, item, profSets)}
-                  canPactWeapon={canUsePactWeaponFlag(C, item)}
-                  onPactWeapon={togglePactWeapon}
-                  isArmorer={isArmorer}
-                  hasArcaneArmor={hasItemFlag(item, 'arcaneArmor')}
-                  onArcaneArmor={toggleArcaneArmor}
-                  onAttune={toggleAttuned}
-                  attunementFull={attunementFull}
-                  charClassNames={charClassNames}
-                  onSetAbilityChoice={setAbilityChoice}
-                  onConsumeTome={consumeTome}
-                />
-              ))}
-            </Box>
-          );
-        })}
-        {!inv.length && <Typography sx={{ fontSize: '0.8125rem', color: 'text.secondary', fontStyle: 'italic', py: 0.5 }}>Inventory empty.</Typography>}
-        {inv.length > 0 && !visibleInventory.length && (
-          <Typography sx={{ fontSize: '0.8125rem', color: 'text.secondary', fontStyle: 'italic', py: 0.5 }}>
-            No inventory items match this search or filter.
-          </Typography>
-        )}
+          )}
+        </Box>
       </Box>
     </Box>
+  );
+}
+
+function InventorySectionTitle({ icon: Icon, label }) {
+  return (
+    <Typography sx={inventorySectionTitleSx}>
+      {Icon ? <Icon size={12} /> : null}
+      {label}
+    </Typography>
   );
 }
 
