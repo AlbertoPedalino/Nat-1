@@ -5,7 +5,7 @@ import { getFinal, getSpeedZeroConditions, exhaustionSpeedPenalty } from '../log
 import { collectMovementEffects, effectSummary, effectTitle, getSpeedBonus } from '../logic/sheetEffects.js';
 import { collectItemEffects } from '../../../shared/character/itemEffects.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
-import { formatWeight, totalInventoryWeight } from '../../../shared/character/weight.js';
+import { carryCapacity, formatWeight, totalInventoryWeight } from '../../../shared/character/weight.js';
 
 function normalizeSpeed(speed) {
   if (typeof speed === 'number') return { walk: speed };
@@ -28,7 +28,7 @@ export default function Movement({ C, sheet }) {
   const penalties = getEquippedArmorPenalties(C, inventory, profSets);
   const baseSpeeds = normalizeSpeed(C?.speciesSnapshot?.speed);
   const speedPenalty = penalties.speedPenalty || 0;
-  const maxCarry = Math.max(1, getFinal(C, 'str') * 15);
+  const maxCarry = carryCapacity(getFinal(C, 'str'));
   const carriedWeight = totalInventoryWeight(inventory);
   const overloaded = carriedWeight > maxCarry;
   const speedZeroConditions = getSpeedZeroConditions(sheet?.activeConditions || []);

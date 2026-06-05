@@ -10,6 +10,7 @@ import {
 import { getBackgroundPattern } from './logic/calculations.js';
 import { handleBackgroundSelect, handleClassSelect, handleSpellToggle, handleWizardSpellbookToggle } from './stateHandlers.js';
 import { getChoiceLevel } from '../../shared/character/choiceLevels.js';
+import { normalizeCoinAmount } from '../../shared/character/currency.js';
 import { addInventoryEntries } from '../../shared/character/itemContainers.js';
 import { isFeatKey, isFeatDetailKey } from '../../shared/featChoiceKeys.js';
 
@@ -526,7 +527,7 @@ export function builderReducer(state, action) {
       });
     }
     case 'currency/set':
-      return updateNestedCharacter(state, 'currency', { [action.coin]: action.value });
+      return updateNestedCharacter(state, 'currency', { [action.coin]: normalizeCoinAmount(action.value) });
     case 'inventory/filter':
       return { ...state, inventoryFilter: action.filter };
     case 'inventory/add': {
@@ -540,7 +541,7 @@ export function builderReducer(state, action) {
     case 'equipment/add-extracted': {
       const currency = { ...state.character.currency };
       Object.entries(action.currency || {}).forEach(([coin, value]) => {
-        currency[coin] = Number(currency[coin] || 0) + Number(value || 0);
+        currency[coin] = normalizeCoinAmount(currency[coin]) + normalizeCoinAmount(value);
       });
       const inventory = addInventoryEntries(
         state.character.inventory,

@@ -13,6 +13,7 @@ import {
   Wand2,
 } from 'lucide-react';
 import { XP_THRESHOLDS } from '../../shared/character/xp.js';
+import { CURRENCY_TYPES } from '../../shared/character/currency.js';
 
 export const DATA_BASE = 'https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/';
 export const STATS = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
@@ -130,13 +131,7 @@ export const FEAT_SUMMARIES = [
   { name: 'Resilient', category: 'General' },
 ];
 
-export const CURRENCY = [
-  { key: 'cp', label: 'Copper', tone: '#b87333' },
-  { key: 'sp', label: 'Silver', tone: '#b8b8b8' },
-  { key: 'ep', label: 'Electrum', tone: '#9f9f9f' },
-  { key: 'gp', label: 'Gold', tone: '#d7ad52' },
-  { key: 'pp', label: 'Platinum', tone: '#dde1ff' },
-];
+export const CURRENCY = CURRENCY_TYPES;
 
 export const ITEM_FILTERS = [
   { key: 'all', label: 'All' },

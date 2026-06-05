@@ -1,5 +1,4 @@
-import { getFinal, calcMaxHP } from './logic/calculations.js';
-import { totalInventoryWeight } from '../../shared/character/weight.js';
+import { calcMaxHP } from './logic/calculations.js';
 
 export function deriveSheetState(C) {
   const baseMax = Math.max(1, calcMaxHP(C));
@@ -38,14 +37,4 @@ export function deriveSheetState(C) {
     currentHP, maxHP, maxHPBonus, tempHP, deathSaves, usedHD, usedHDPools, spellSlotUsed, createdSpellSlots,
     sheetInventory, sheetCurrency, sheetInspiration, activeConditions, exhaustionLevel, xpStored, notes, arcaneArmorItemKey,
   };
-}
-
-export function getEncumberedLevel(C, inventory) {
-  if (!C) return 0;
-  const strength = getFinal(C, 'str');
-  const carryCap = strength * 15;
-  const totalWeight = totalInventoryWeight(inventory);
-  if (totalWeight > carryCap) return 2;
-  if (totalWeight > carryCap * 0.666) return 1;
-  return 0;
 }

@@ -18,17 +18,11 @@ import { countAttunedItems, ATTUNEMENT_LIMIT, attunementRequirementText, meetsAt
 import { isConsumableTome, extractTomeBonus, hasAbilityChoice, getAbilityChoiceGroups } from '../../../shared/character/itemEffects.js';
 import { getArmorPenalties } from '../logic/armorPenalties.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
+import { CurrencyCoinBox } from '../../../shared/character/CurrencyCoinBox.jsx';
+import { CURRENCY_TYPES, normalizeCoinAmount } from '../../../shared/character/currency.js';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import { ItemReferenceBody, QuantityAdder } from '../../../shared/character/ItemReference.jsx';
-import { formatWeight, itemQty as qty, totalInventoryWeight } from '../../../shared/character/weight.js';
-
-const CURRENCY_TYPES = [
-  { key: 'cp', label: 'CP' },
-  { key: 'sp', label: 'SP' },
-  { key: 'ep', label: 'EP' },
-  { key: 'gp', label: 'GP' },
-  { key: 'pp', label: 'PP' },
-];
+import { carryCapacity, formatWeight, itemQty as qty, totalInventoryWeight } from '../../../shared/character/weight.js';
 
 const FILTERS = [
   { key: 'all', label: 'All', icon: null },
@@ -412,7 +406,7 @@ export default function InventoryTab({ C, sheet, onUpdateInventory, onUpdateCurr
   const { totalItems, totalWeight, totalGp } = inventoryStats;
   const visibleTotalItems = useMemo(() => visibleInventory.reduce((sum, entry) => sum + qty(entry.item), 0), [visibleInventory]);
   const inventoryFiltered = inventoryFilter !== 'all' || deferredInventorySearch.trim().length > 0;
-  const maxCarry = useMemo(() => Math.max(1, getFinal(C, 'str') * 15), [C]);
+  const maxCarry = useMemo(() => carryCapacity(getFinal(C, 'str')), [C]);
   const carryPct = Math.min(100, (totalWeight / maxCarry) * 100);
   const overloaded = totalWeight > maxCarry;
   const profSets = useProficiencySets();
@@ -586,29 +580,25 @@ export default function InventoryTab({ C, sheet, onUpdateInventory, onUpdateCurr
   }, [updateInv, onUpdateCharacter, onShowToast]);
 
   const updateCoin = useCallback((coin, value) => {
-    const next = { ...currency, [coin]: Math.max(0, Number(value || 0)) };
+    const next = { ...currency, [coin]: normalizeCoinAmount(value) };
     onUpdateCurrency?.(next);
   }, [currency, onUpdateCurrency]);
 
   return (
     <Box>
-      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: '5px', mb: 0.75 }}>
-        {CURRENCY_TYPES.map((ct) => (
-          <Box key={ct.key} sx={{ bgcolor: 'rgba(35,32,26,1)', border: 1, borderColor: 'divider', borderRadius: 1, p: '5px 4px', textAlign: 'center' }}>
-            <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.56rem', letterSpacing: '0.08em', mb: '3px', color: 'text.secondary' }}>{ct.label}</Typography>
-            <TextField
-              type="number"
-              variant="standard"
-              value={currency[ct.key] || 0}
-              onChange={(event) => updateCoin(ct.key, event.target.value)}
-              inputProps={{ min: 0 }}
-              sx={{
-                width: '100%',
-                '& input': { textAlign: 'center', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.875rem', fontWeight: 700, color: '#edd48a', py: '2px' },
-              }}
-            />
-          </Box>
-        ))}
+      <Box sx={{ overflowX: 'auto', pb: 0.5, mb: 0.75 }}>
+        <Box sx={{ display: 'flex', gap: '6px', flexWrap: 'nowrap', minWidth: 500, pr: 0.5 }}>
+          {CURRENCY_TYPES.map((ct) => (
+            <Box key={ct.key} sx={{ flex: '0 0 96px', minWidth: 96 }}>
+              <CurrencyCoinBox
+                coin={ct}
+                value={currency[ct.key]}
+                mode="sheet"
+                onChange={(value) => updateCoin(ct.key, value)}
+              />
+            </Box>
+          ))}
+        </Box>
       </Box>
 
       <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 0.5 }}>

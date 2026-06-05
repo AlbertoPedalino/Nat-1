@@ -1,11 +1,12 @@
 import { useDeferredValue, useEffect, useMemo, useState } from 'react';
-import { Box, Button, Chip, Divider, Grid, IconButton, InputAdornment, List, ListItemButton, ListItemText, Paper, Stack, TextField, Tooltip, Typography } from '@mui/material';
+import { Box, Button, Chip, Divider, IconButton, InputAdornment, List, ListItemButton, ListItemText, Paper, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import { Backpack, Coins, PackagePlus, Search, Trash2 } from 'lucide-react';
 import BuilderPanel from '../components/BuilderPanel.jsx';
 import { CURRENCY, ITEM_FILTERS } from '../constants.js';
 import { ItemNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 import { cleanText } from '../logic/text.js';
 import { resolveEquipmentTypeItem } from '../logic/dataLoaders.js';
+import { CurrencyCoinBox } from '../../../shared/character/CurrencyCoinBox.jsx';
 import { findInventoryItem } from '../../../shared/character/itemContainers.js';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import { ItemReferenceBody, QuantityAdder } from '../../../shared/character/ItemReference.jsx';
@@ -323,21 +324,19 @@ export default function EquipmentStep({ state, dispatch }) {
       </BuilderPanel>
 
       <BuilderPanel id="panel-currency" title="Currency" icon={Coins}>
-        <Grid container spacing={1.5}>
-          {CURRENCY.map((coin) => (
-            <Grid key={coin.key} item xs={6} sm={4} md={2.4}>
-              <TextField
-                fullWidth
-                type="number"
-                label={`${coin.label} (${coin.key.toUpperCase()})`}
-                value={character.currency[coin.key]}
-                inputProps={{ min: 0 }}
-                sx={{ '& label': { color: coin.tone } }}
-                onChange={(event) => dispatch({ type: 'currency/set', coin: coin.key, value: Number(event.target.value) || 0 })}
-              />
-            </Grid>
-          ))}
-        </Grid>
+        <Box sx={{ overflowX: 'auto', pb: 0.5 }}>
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'nowrap', minWidth: 540, pr: 0.5 }}>
+            {CURRENCY.map((coin) => (
+              <Box key={coin.key} sx={{ flex: '0 0 108px', minWidth: 108 }}>
+                <CurrencyCoinBox
+                  coin={coin}
+                  value={character.currency?.[coin.key]}
+                  onChange={(value) => dispatch({ type: 'currency/set', coin: coin.key, value })}
+                />
+              </Box>
+            ))}
+          </Box>
+        </Box>
       </BuilderPanel>
 
       <BuilderPanel id="panel-inventory" title="Inventory" icon={Backpack} note={`${formatWeight(totalWeight)} lb carried`}>

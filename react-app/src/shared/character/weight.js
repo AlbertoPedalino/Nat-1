@@ -1,5 +1,14 @@
 const WEIGHT_PRECISION = 1000;
 
+// XPHB 2024 (p.362): carrying capacity = Strength score × 15 (Medium size).
+// Over this, Speed is capped at 5 ft. No "encumbered" tiers in 2024.
+export const CARRY_CAPACITY_PER_STR = 15;
+
+export function carryCapacity(strScore) {
+  const str = Math.max(0, Number(strScore) || 0);
+  return Math.max(1, str * CARRY_CAPACITY_PER_STR);
+}
+
 export function itemQty(item) {
   return Math.max(1, Number(item?.qty ?? 1) || 1);
 }
