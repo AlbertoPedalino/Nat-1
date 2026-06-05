@@ -1,4 +1,5 @@
 import { getFinal, calcMaxHP } from './logic/calculations.js';
+import { totalInventoryWeight } from '../../shared/character/weight.js';
 
 export function deriveSheetState(C) {
   const baseMax = Math.max(1, calcMaxHP(C));
@@ -43,7 +44,7 @@ export function getEncumberedLevel(C, inventory) {
   if (!C) return 0;
   const strength = getFinal(C, 'str');
   const carryCap = strength * 15;
-  const totalWeight = (inventory || []).reduce((s, i) => s + ((i.weight || i.weightLb || 0) * (i.qty || i.quantity || 1)), 0);
+  const totalWeight = totalInventoryWeight(inventory);
   if (totalWeight > carryCap) return 2;
   if (totalWeight > carryCap * 0.666) return 1;
   return 0;

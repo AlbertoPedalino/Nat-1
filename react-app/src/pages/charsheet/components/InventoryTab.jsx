@@ -20,6 +20,7 @@ import { getArmorPenalties } from '../logic/armorPenalties.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import { ItemReferenceBody, QuantityAdder } from '../../../shared/character/ItemReference.jsx';
+import { formatWeight, itemQty as qty, totalInventoryWeight } from '../../../shared/character/weight.js';
 
 const CURRENCY_TYPES = [
   { key: 'cp', label: 'CP' },
@@ -142,6 +143,8 @@ function normalizeStoredItem(item) {
     _searchText,
     _sourcePriority,
     _rarityPriority,
+    quantity: _sourceQuantity,
+    weightLb: _sourceWeightLb,
     ...baseItem
   } = item || {};
   return {
@@ -150,20 +153,21 @@ function normalizeStoredItem(item) {
     source: baseItem.source || 'Custom',
     type: baseItem.type || 'gear',
     rarity: baseItem.rarity || 'none',
-    weight: Number(baseItem.weight || baseItem.weightLb || 0),
+    weight: Number(baseItem.weight ?? 0),
     value: Number(baseItem.value || 0),
-    qty: Math.max(1, Number(baseItem.qty || baseItem.quantity || 1)),
+    qty: Math.max(1, Number(baseItem.qty ?? 1) || 1),
     equipped: !!baseItem.equipped,
     custom: !!baseItem.custom,
   };
 }
 
-function qty(item) {
-  return Number(item.qty || item.quantity || 1);
-}
-
 function itemFlags(item) {
   return Array.isArray(item?.flags) ? item.flags : [];
+}
+
+function parseDecimalInput(value) {
+  const parsed = Number(String(value ?? '').trim().replace(',', '.'));
+  return Number.isFinite(parsed) ? parsed : 0;
 }
 
 function hasItemFlag(item, flag) {
@@ -198,7 +202,7 @@ function itemSearchText(item) {
   return normalizeSearch([
     item?.name,
     item?.source,
-    item?.legacySource,
+    item?.sourceAlias,
     item?.type,
     item?.rarity,
     item?.scfType,
@@ -401,7 +405,7 @@ export default function InventoryTab({ C, sheet, onUpdateInventory, onUpdateCurr
   const slotWarnings = useMemo(() => getSlotConflictWarnings(inv), [inv]);
   const inventoryStats = useMemo(() => {
     const totalItems = inv.reduce((sum, item) => sum + qty(item), 0);
-    const totalWeight = inv.reduce((sum, item) => sum + Number(item.weight || item.weightLb || 0) * qty(item), 0);
+    const totalWeight = totalInventoryWeight(inv);
     const totalGp = inv.reduce((sum, item) => sum + (Number(item.value || 0) / 100) * qty(item), 0);
     return { totalItems, totalWeight, totalGp };
   }, [inv]);
@@ -445,7 +449,7 @@ export default function InventoryTab({ C, sheet, onUpdateInventory, onUpdateCurr
       source: 'Custom',
       type: 'gear',
       custom: true,
-      weight: Number(customWeight || 0),
+      weight: Math.max(0, parseDecimalInput(customWeight)),
       value: Number(customValue || 0) * 100,
     });
     setCustomName('');
@@ -608,7 +612,7 @@ export default function InventoryTab({ C, sheet, onUpdateInventory, onUpdateCurr
       </Box>
 
       <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 0.5 }}>
-        <Box sx={statPillSx}>Weight: <b>{totalWeight.toFixed(1)} / {maxCarry} lb</b></Box>
+        <Box sx={statPillSx}>Weight: <b>{formatWeight(totalWeight)} / {formatWeight(maxCarry)} lb</b></Box>
         <Box sx={statPillSx}>Value: <b>{totalGp.toFixed(1)} GP</b></Box>
         {(() => {
           const attunedCount = countAttunedItems(inv);
@@ -624,7 +628,7 @@ export default function InventoryTab({ C, sheet, onUpdateInventory, onUpdateCurr
             <Box sx={{ width: `${carryPct}%`, height: '100%', bgcolor: overloaded ? '#de675f' : '#58b879' }} />
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.65rem', mt: 0.25 }}>
-            <Box sx={{ color: 'text.secondary', fontFamily: '"Cinzel", Georgia, serif' }}>{totalWeight.toFixed(1)} / {maxCarry} lb</Box>
+            <Box sx={{ color: 'text.secondary', fontFamily: '"Cinzel", Georgia, serif' }}>{formatWeight(totalWeight)} / {formatWeight(maxCarry)} lb</Box>
             <Box sx={{ px: 0.75, py: '1px', borderRadius: 1, bgcolor: overloaded ? 'rgba(222,103,95,0.14)' : 'rgba(63,166,108,0.14)', color: overloaded ? '#de675f' : '#58b879', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.6rem' }}>
               {overloaded ? 'Over Capacity' : 'OK'}
             </Box>
@@ -670,9 +674,9 @@ export default function InventoryTab({ C, sheet, onUpdateInventory, onUpdateCurr
               <TextField size="small" value={customName} placeholder="Add custom item..." onChange={(event) => setCustomName(event.target.value)}
                 onKeyDown={(event) => { if (event.key === 'Enter') addCustom(); }}
                 sx={{ ...compactInputSx, flex: 1, minWidth: 120 }} />
-              <TextField size="small" type="number" value={customWeight} placeholder="lb" onChange={(event) => setCustomWeight(event.target.value)}
+              <TextField size="small" value={customWeight} placeholder="lb" onChange={(event) => setCustomWeight(event.target.value)}
                 onKeyDown={(event) => { if (event.key === 'Enter') addCustom(); }}
-                inputProps={{ min: 0, step: 0.1 }} sx={{ ...compactInputSx, width: 58 }} />
+                inputProps={{ inputMode: 'decimal' }} sx={{ ...compactInputSx, width: 58 }} />
               <TextField size="small" type="number" value={customValue} placeholder="gp" onChange={(event) => setCustomValue(event.target.value)}
                 onKeyDown={(event) => { if (event.key === 'Enter') addCustom(); }}
                 inputProps={{ min: 0, step: 0.01 }} sx={{ ...compactInputSx, width: 62 }} />

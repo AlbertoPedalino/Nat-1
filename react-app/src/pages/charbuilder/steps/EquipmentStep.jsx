@@ -1,6 +1,6 @@
 import { useDeferredValue, useEffect, useMemo, useState } from 'react';
-import { Box, Button, Chip, Divider, Grid, InputAdornment, List, ListItemButton, ListItemText, Paper, Stack, TextField, Typography } from '@mui/material';
-import { Backpack, Coins, PackagePlus, Search } from 'lucide-react';
+import { Box, Button, Chip, Divider, Grid, IconButton, InputAdornment, List, ListItemButton, ListItemText, Paper, Stack, TextField, Tooltip, Typography } from '@mui/material';
+import { Backpack, Coins, PackagePlus, Search, Trash2 } from 'lucide-react';
 import BuilderPanel from '../components/BuilderPanel.jsx';
 import { CURRENCY, ITEM_FILTERS } from '../constants.js';
 import { ItemNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
@@ -9,6 +9,7 @@ import { resolveEquipmentTypeItem } from '../logic/dataLoaders.js';
 import { findInventoryItem } from '../../../shared/character/itemContainers.js';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import { ItemReferenceBody, QuantityAdder } from '../../../shared/character/ItemReference.jsx';
+import { formatWeight, totalInventoryWeight } from '../../../shared/character/weight.js';
 
 const CHOICE_KEYS = ['A', 'B', 'C', 'D', 'E', 'a', 'b', 'c', 'd', 'e'];
 
@@ -37,7 +38,7 @@ function itemSearchText(item) {
   return [
     item?.name,
     item?.source,
-    item?.legacySource,
+    item?.sourceAlias,
     item?.type,
     item?.rarity,
     item?.scfType,
@@ -162,12 +163,12 @@ function resolveEquipmentItems(extracted, itemDb) {
   const add = (entry) => {
     const dbItem = resolveDbItem(entry);
     if (!dbItem) return;
-    out.push({ ...dbItem, qty: entry.qty || 1 });
+    out.push({ ...dbItem, qty: entry.qty ?? 1 });
   };
   extracted.items.forEach((item) => add({
     name: item.name,
     source: item.source,
-    qty: item.qty || 1,
+    qty: item.qty ?? 1,
     equipmentType: item.equipmentType,
   }));
   return out;
@@ -194,7 +195,7 @@ function AddItemRow({ item, onAdd }) {
 }
 
 // Current-inventory row: tap the name to expand the item reference; keep the
-// existing -/+ quantity controls on the right.
+// quantity controls and full-row remove action on the right.
 function CurrentInventoryRow({ item, index, dispatch }) {
   return (
     <ExpandableCard
@@ -209,8 +210,18 @@ function CurrentInventoryRow({ item, index, dispatch }) {
           </Box>
           <Stack direction="row" spacing={0.75} alignItems="center" sx={{ flexShrink: 0 }}>
             <Button size="small" onClick={() => dispatch({ type: 'inventory/qty', index, delta: -1 })}>-</Button>
-            <Typography sx={{ width: 28, textAlign: 'center' }}>{item.qty}</Typography>
+            <Typography sx={{ width: 28, textAlign: 'center' }}>{item.qty ?? 1}</Typography>
             <Button size="small" onClick={() => dispatch({ type: 'inventory/qty', index, delta: 1 })}>+</Button>
+            <Tooltip title="Remove row">
+              <IconButton
+                size="small"
+                aria-label={`Remove ${item.name}`}
+                onClick={() => dispatch({ type: 'inventory/remove', index })}
+                sx={{ color: 'text.secondary', '&:hover': { color: 'error.main' } }}
+              >
+                <Trash2 size={16} />
+              </IconButton>
+            </Tooltip>
           </Stack>
         </Box>
       )}
@@ -297,7 +308,7 @@ export default function EquipmentStep({ state, dispatch }) {
   }, [state.data.items, inventoryFilter, query]);
   const visibleItems = useMemo(() => sortedItems.slice(0, ADD_LIST_CAP), [sortedItems]);
   const addItemWithQty = (item, qty) => dispatch({ type: 'inventory/add', item: { ...item, qty } });
-  const totalWeight = character.inventory.reduce((sum, item) => sum + (item.weight || 0) * (item.qty || 1), 0);
+  const totalWeight = totalInventoryWeight(character.inventory);
 
   return (
     <Stack spacing={2}>
@@ -329,7 +340,7 @@ export default function EquipmentStep({ state, dispatch }) {
         </Grid>
       </BuilderPanel>
 
-      <BuilderPanel id="panel-inventory" title="Inventory" icon={Backpack} note={`${totalWeight.toFixed(1)} lb carried`}>
+      <BuilderPanel id="panel-inventory" title="Inventory" icon={Backpack} note={`${formatWeight(totalWeight)} lb carried`}>
         <Stack spacing={1.5}>
           <TextField
             fullWidth

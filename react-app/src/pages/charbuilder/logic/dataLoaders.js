@@ -400,7 +400,7 @@ function withCanonicalSource(item) {
   return {
     ...item,
     source: canonical,
-    legacySource: source && source !== canonical ? source : item.legacySource || null,
+    sourceAlias: source && source !== canonical ? source : item.sourceAlias || null,
   };
 }
 
@@ -455,8 +455,8 @@ export async function loadItems() {
 }
 
 // Fields refreshed from the items DB on inventory reconciliation. Keeping the
-// list explicit (rather than spreading the entire fresh item) avoids stomping
-// on user-managed state (qty, equipped, attuned, equippedSlot, flags, custom).
+// list explicit avoids stomping on user-managed state (qty, equipped, attuned,
+// equippedSlot, flags, custom).
 const RECONCILED_ITEM_FIELDS = [
   'ability', 'modifySpeed', 'senses',
   'resist', 'immune', 'vulnerable', 'conditionImmune',
@@ -465,15 +465,14 @@ const RECONCILED_ITEM_FIELDS = [
   'bonusWeapon', 'bonusWeaponAttack', 'bonusWeaponDamage',
   'bonusProficiencyBonus', 'attachedSpells',
   'reqAttune', 'reqAttuneAlt', 'property', 'mastery', 'miscTags', 'entries',
-  'rarity', 'weight', 'value', 'type', 'weaponCategory',
+  'rarity', 'weight', 'value', 'type', 'weaponCategory', 'sourceAlias',
   'dmg1', 'dmg2', 'dmgType', 'ac', 'strength', 'stealth',
   'scfType', 'focus', 'items', 'group',
 ];
 
 // Refresh structured effect fields on persisted inventory items by re-merging
 // from the live items database. Preserves user-managed flags (qty, equipped,
-// attuned, equippedSlot, custom flags). Use this once at sheet boot to bring
-// legacy persisted items in line with the current normalize schema.
+// attuned, equippedSlot, custom flags).
 export function reconcileInventoryWithItemsDb(inventory, itemsDb) {
   if (!Array.isArray(inventory) || !Array.isArray(itemsDb) || itemsDb.length === 0) {
     return inventory || [];
@@ -513,7 +512,7 @@ function shouldReplaceItem(existing, incoming) {
   const existingRichness = itemRichness(existing);
   if (incomingRichness !== existingRichness) return incomingRichness > existingRichness;
 
-  return Boolean(incoming.legacySource) === false && Boolean(existing.legacySource);
+  return Boolean(incoming.sourceAlias) === false && Boolean(existing.sourceAlias);
 }
 
 function itemRichness(item) {
@@ -558,7 +557,7 @@ function normalizeItem(item) {
   return {
     name: formatLeadingBonusName(item.name),
     source: canonicalItemSource(item) || item.source || '',
-    legacySource: item.legacySource || null,
+    sourceAlias: item.sourceAlias || null,
     type: rawType || 'gear',
     rarity: item.rarity || 'none',
     weight: Number(item.weight || 0),

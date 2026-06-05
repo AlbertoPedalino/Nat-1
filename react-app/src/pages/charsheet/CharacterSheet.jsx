@@ -80,8 +80,8 @@ export default function CharacterSheet() {
       setConditionEntries(condEntries || {});
 
       // Re-merge structured effect fields from the items DB into the stored
-      // inventory so items added before a schema update gain newly normalized
-      // fields without requiring users to re-add them.
+      // inventory so sheet calculations and item effects read canonical item
+      // records while preserving user-managed inventory state.
       let nextChar = ch;
       if (ch && Array.isArray(ch.inventory) && itemsDb?.length) {
         const reconciled = reconcileInventoryWithItemsDb(ch.inventory, itemsDb);

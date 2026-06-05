@@ -21,6 +21,10 @@ function matchSource(item, source) {
   return !source || String(item?.source || '').toUpperCase() === String(source || '').toUpperCase();
 }
 
+function inventoryQty(item) {
+  return Math.max(1, Number(item?.qty ?? 1) || 1);
+}
+
 export function findInventoryItem(itemDb, name, source = '') {
   const targetName = norm(name);
   if (!targetName) return null;
@@ -61,7 +65,7 @@ function specialItem(entry, qty, parent) {
 export function expandInventoryItem(item, itemDb, qty = 1, visited = new Set()) {
   if (!item?.name) return [];
 
-  const itemQty = Math.max(1, Number(qty || 1));
+  const itemQty = Math.max(1, Number(qty ?? 1) || 1);
   const key = `${norm(item.name)}|${String(item.source || '').toUpperCase()}`;
   if (visited.has(key) || !shouldExpandItemContents(item)) {
     return [{ ...item, qty: itemQty }];
@@ -101,16 +105,16 @@ export function addInventoryEntries(inventory, entries, itemDb = null, normalize
   const normalize = typeof normalizeEntry === 'function' ? normalizeEntry : (entry) => entry;
   const additions = (entries || []).flatMap((item) => {
     if (!item?.name) return [];
-    const qty = Math.max(1, Number(item.qty || item.quantity || 1));
+    const qty = inventoryQty(item);
     const expanded = itemDb ? expandInventoryItem(item, itemDb, qty) : [{ ...item, qty }];
     return expanded.map(normalize).filter((entry) => entry?.name);
   });
 
   additions.forEach((item) => {
     const idx = next.findIndex((entry) => entry.name === item.name && entry.source === item.source);
-    const qty = Math.max(1, Number(item.qty || item.quantity || 1));
+    const qty = inventoryQty(item);
     if (idx === -1) next.push({ ...item, qty });
-    else next[idx] = { ...next[idx], qty: Number(next[idx].qty || 1) + qty };
+    else next[idx] = { ...next[idx], qty: inventoryQty(next[idx]) + qty };
   });
   return next;
 }

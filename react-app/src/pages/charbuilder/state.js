@@ -552,11 +552,15 @@ export function builderReducer(state, action) {
     case 'inventory/qty': {
       const inventory = state.character.inventory.flatMap((item, idx) => {
         if (idx !== action.index) return [item];
-        const qty = Math.max(0, item.qty + action.delta);
+        const qty = Math.max(0, Number(item.qty ?? 1) + action.delta);
         return qty > 0 ? [{ ...item, qty }] : [];
       });
       return updateCharacter(state, { inventory });
     }
+    case 'inventory/remove':
+      return updateCharacter(state, {
+        inventory: state.character.inventory.filter((_, idx) => idx !== action.index),
+      });
     case 'spell/toggle': {
       return handleSpellToggle(state, action, { updateCharacter });
     }

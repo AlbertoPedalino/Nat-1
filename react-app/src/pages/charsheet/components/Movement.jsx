@@ -5,6 +5,7 @@ import { getFinal, getSpeedZeroConditions, exhaustionSpeedPenalty } from '../log
 import { collectMovementEffects, effectSummary, effectTitle, getSpeedBonus } from '../logic/sheetEffects.js';
 import { collectItemEffects } from '../../../shared/character/itemEffects.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
+import { formatWeight, totalInventoryWeight } from '../../../shared/character/weight.js';
 
 function normalizeSpeed(speed) {
   if (typeof speed === 'number') return { walk: speed };
@@ -21,14 +22,6 @@ function speedLabel(key) {
   return key === 'walk' ? 'Walk' : key.charAt(0).toUpperCase() + key.slice(1);
 }
 
-function qty(item) {
-  return Number(item?.qty || item?.quantity || 1);
-}
-
-function totalCarriedWeight(inventory) {
-  return (inventory || []).reduce((sum, item) => sum + Number(item?.weight || item?.weightLb || 0) * qty(item), 0);
-}
-
 export default function Movement({ C, sheet }) {
   const inventory = sheet?.sheetInventory || C?.inventory || [];
   const profSets = useProficiencySets();
@@ -36,7 +29,7 @@ export default function Movement({ C, sheet }) {
   const baseSpeeds = normalizeSpeed(C?.speciesSnapshot?.speed);
   const speedPenalty = penalties.speedPenalty || 0;
   const maxCarry = Math.max(1, getFinal(C, 'str') * 15);
-  const carriedWeight = totalCarriedWeight(inventory);
+  const carriedWeight = totalInventoryWeight(inventory);
   const overloaded = carriedWeight > maxCarry;
   const speedZeroConditions = getSpeedZeroConditions(sheet?.activeConditions || []);
   const speedZero = speedZeroConditions.length > 0;
@@ -73,7 +66,7 @@ export default function Movement({ C, sheet }) {
   const hasPenalty = speedPenalty < 0 || overloaded || speedZero || exhaustionPenalty > 0;
   const reasons = [
     speedZero ? `${speedZeroConditions.join(', ')}: speed 0` : null,
-    overloaded ? `Over carry: speed 5 ft (${carriedWeight.toFixed(1)} / ${maxCarry} lb)` : null,
+    overloaded ? `Over carry: speed 5 ft (${formatWeight(carriedWeight)} / ${formatWeight(maxCarry)} lb)` : null,
     exhaustionPenalty > 0 ? `Exhaustion ${exhaustionLevel}: −${exhaustionPenalty} ft` : null,
     speedPenalty < 0 ? `Armor STR requirement: ${speedPenalty} ft` : null,
   ].filter(Boolean);
