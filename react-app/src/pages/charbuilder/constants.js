@@ -12,6 +12,7 @@ import {
   Sword,
   Wand2,
 } from 'lucide-react';
+import { XP_THRESHOLDS } from '../../shared/character/xp.js';
 
 export const DATA_BASE = 'https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/';
 export const STATS = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
@@ -20,7 +21,7 @@ export const PROFICIENCY_BONUS = [null, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5
 export const PB_COST = { 8: 0, 9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 7, 15: 9 };
 export const STANDARD_ARRAY = [15, 14, 13, 12, 10, 8];
 export const SPELL_LEVEL_LABELS = ['Cantrip', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th'];
-export const XP_TOTAL = [0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000, 85000, 100000, 120000, 140000, 165000, 195000, 225000, 265000, 305000, 355000];
+export const XP_TOTAL = XP_THRESHOLDS; // single source of truth: shared/character/xp.js
 
 export const STEPS = [
   { id: 'class', label: 'Class', icon: Sword },

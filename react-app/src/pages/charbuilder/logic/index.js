@@ -1,5 +1,5 @@
 export {
-  getLevelFromXp, getXpProgress, formatMod, statMod, pointBuySpent,
+  formatMod, statMod, pointBuySpent,
   getBackgroundPool, getBackgroundPattern, getBackgroundBonus,
   getFinalScore, getAllFinalScores, getHitDieFaces, calcMaxHp,
   getCasterProgression, getCasterContribution, getSpellSlots,

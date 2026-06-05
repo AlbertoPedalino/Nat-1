@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Box, Typography, Button, TextField, Chip } from '@mui/material';
+import { Box, Typography, Button, Chip } from '@mui/material';
 import { ArrowLeft, Home, Sun, Moon, Download, Wand2, Hammer, Axe, Music, Cross, Feather, Sword, Dumbbell, Shield, Compass, Eye, Sparkles, Flame, BookOpen, Dices, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { getLevelFromXp, getXpForNextLevel } from '../logic/calculations.js';
+import { levelFromXp, xpForLevel, xpProgressPct, MAX_LEVEL } from '../../../shared/character/xp.js';
 import { rollFormula as rollFormulaDice, formatRollTitle } from '../../../shared/character/dice.js';
 import IconColorPicker from '../../../shared/character/IconColorPicker.jsx';
 import SheetDialog from '../../../shared/character/SheetDialog.jsx';
+import XpDeltaControl from '../../../shared/character/XpDeltaControl.jsx';
 
 const CLASS_ICONS = {
   Artificer: Hammer,
@@ -65,11 +66,6 @@ function modFromDice(rolls, total) {
   return total - diceSum;
 }
 
-function normalizeXpInput(value) {
-  const digits = String(value ?? '').replace(/\D/g, '');
-  return digits.replace(/^0+(?=\d)/, '') || '0';
-}
-
 const ROLL_LOG_SX = {
   entry: {
     border: 1, borderColor: 'divider', borderRadius: 1, px: 1, py: 0.5, mb: 0.4,
@@ -112,12 +108,11 @@ export default function TopBar({ C, sheet, onShortRest, onLongRest, onDownload, 
     clsDisplay = (C.className || '—') + sc + ' Lv.' + C.level;
   }
 
-  const currentLevel = getLevelFromXp(sheet.xpStored);
   const currentXp = sheet.xpStored;
-  const nextXp = getXpForNextLevel(currentLevel + 1);
-  const prevXp = getXpForNextLevel(currentLevel);
-  const xpInLevel = nextXp - prevXp;
-  const xpProgress = xpInLevel > 0 ? ((currentXp - prevXp) / xpInLevel) * 100 : 0;
+  const level = levelFromXp(currentXp);
+  const isMaxLevel = level >= MAX_LEVEL;
+  const nextXp = xpForLevel(level + 1);
+  const xpProgress = xpProgressPct(currentXp, level);
 
   return (
     <Box sx={{
@@ -192,23 +187,20 @@ export default function TopBar({ C, sheet, onShortRest, onLongRest, onDownload, 
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.35, width: { xs: '100%', md: 280, lg: 340 }, flexShrink: 0, alignItems: 'center' }}>
           <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', width: '100%', gap: 1 }}>
             <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.62rem', color: '#edd48a', letterSpacing: '0.08em', fontWeight: 700 }}>
-              XP
+              XP · Level {level}
             </Typography>
             <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary', whiteSpace: 'nowrap' }}>
-              {currentXp} / {nextXp}
+              {isMaxLevel ? `${currentXp.toLocaleString()} XP` : `${currentXp.toLocaleString()} / ${nextXp.toLocaleString()}`}
             </Typography>
           </Box>
           <Box sx={{ width: '100%', height: 8, bgcolor: 'rgba(46,42,34,1)', borderRadius: 1, border: '1px solid', borderColor: 'divider', overflow: 'hidden' }}>
             <Box sx={{ height: '100%', bgcolor: 'primary.main', borderRadius: 1, transition: 'width 0.4s', width: `${Math.min(100, xpProgress)}%` }} />
           </Box>
-          <TextField
-            size="small"
-            type="text"
-            value={String(sheet.xpStored ?? 0)}
-            onFocus={(event) => event.currentTarget.select()}
-            onChange={(event) => onUpdateXp(normalizeXpInput(event.target.value))}
-            sx={{ width: { xs: '100%', md: 132 }, '& input': { textAlign: 'center', fontSize: '0.75rem', py: 0.5, color: '#edd48a', fontFamily: '"Cinzel", Georgia, serif', fontWeight: 600 } }}
-            slotProps={{ input: { inputMode: 'numeric', sx: { '& fieldset': { borderColor: 'transparent', borderBottom: '1px solid', borderBottomColor: 'primary.main' } } } }}
+          <XpDeltaControl
+            currentXp={currentXp}
+            onApply={(total) => onUpdateXp(String(total))}
+            variant="compact"
+            sx={{ width: { xs: '100%', md: 180 } }}
           />
         </Box>
 

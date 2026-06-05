@@ -7,7 +7,7 @@ import {
   STANDARD_ARRAY,
   STATS,
 } from './constants.js';
-import { getBackgroundPattern, getLevelFromXp } from './logic/calculations.js';
+import { getBackgroundPattern } from './logic/calculations.js';
 import { handleBackgroundSelect, handleClassSelect, handleSpellToggle, handleWizardSpellbookToggle } from './stateHandlers.js';
 import { getChoiceLevel } from '../../shared/character/choiceLevels.js';
 import { addInventoryEntries } from '../../shared/character/itemContainers.js';
@@ -46,6 +46,20 @@ function cleanChoicesForLevel(choices, classLevel) {
     if (!hasLevelAbove(key, classLevel)) out[key] = choices[key];
   });
   return out;
+}
+
+// Sum of levels from selected (named) multiclass slots. A blank slot — just added
+// but not yet assigned a class — contributes nothing until a class is chosen.
+function extraClassLevels(extraClasses) {
+  return (extraClasses || [])
+    .filter((ec) => ec && ec.name)
+    .reduce((sum, ec) => sum + (Number(ec.level) || 1), 0);
+}
+
+// Total character level = primary class level + selected multiclass levels.
+// Single source of truth for the stats level; XP is tracked separately (xp/set).
+function totalCharacterLevel(classLevel, extraClasses) {
+  return (Number(classLevel) || 1) + extraClassLevels(extraClasses);
 }
 
 function normChoice(value) {
@@ -283,7 +297,7 @@ export function builderReducer(state, action) {
     case 'field/set': {
       if (action.field === 'level') {
         const total = Math.max(1, Number(action.value) || 1);
-        const extras = (state.character.extraClasses || []).reduce((sum, ec) => sum + (Number(ec.level) || 0), 0);
+        const extras = extraClassLevels(state.character.extraClasses);
         const classLevel = Math.max(1, total - extras);
         const choices = cleanChoicesForLevel(state.character.choices || {}, classLevel);
         return updateCharacter(state, { level: total, classLevel, choices });
@@ -291,12 +305,11 @@ export function builderReducer(state, action) {
       return updateCharacter(state, { [action.field]: action.value });
     }
     case 'xp/set': {
-      const xp = Number(action.value) || 0;
-      const level = getLevelFromXp(xp);
-      const extras = (state.character.extraClasses || []).reduce((sum, ec) => sum + (Number(ec.level) || 0), 0);
-      const classLevel = Math.max(1, level - extras);
-      const choices = cleanChoicesForLevel(state.character.choices || {}, classLevel);
-      return updateCharacter(state, { xp, level, classLevel, choices });
+      // XP is an independent progress tracker — it does NOT drive the character
+      // level used for stats. Stats level comes from the class panels (level +
+      // classLevel + extraClasses). See XpPanel / LevelPanel.
+      const xp = Math.max(0, Number(action.value) || 0);
+      return updateCharacter(state, { xp });
     }
     case 'search/set':
       return { ...state, search: { ...state.search, [action.scope]: action.value } };
@@ -316,7 +329,7 @@ export function builderReducer(state, action) {
           allSubFeatures: [],
         },
       ];
-      const total = (state.character.classLevel || 1) + extraClasses.filter((ec) => ec.name).reduce((sum, ec) => sum + (ec.level || 1), 0);
+      const total = totalCharacterLevel(state.character.classLevel, extraClasses);
       return updateCharacter(state, {
         activeClassTab: extraClasses.length,
         extraClasses,
@@ -343,7 +356,7 @@ export function builderReducer(state, action) {
           remappedChoices[key] = value;
         }
       });
-      const total = (state.character.classLevel || 1) + extraClasses.reduce((sum, ec) => sum + (ec.level || 1), 0);
+      const total = totalCharacterLevel(state.character.classLevel, extraClasses);
       return updateCharacter(state, { extraClasses, activeClassTab: 0, choices: remappedChoices, level: total });
     }
     case 'class/select': {
@@ -401,7 +414,7 @@ export function builderReducer(state, action) {
             }
           : extraClass
       ));
-      const total = (state.character.classLevel || 1) + extraClasses.reduce((sum, ec) => sum + (Number(ec.level) || 1), 0);
+      const total = totalCharacterLevel(state.character.classLevel, extraClasses);
       return updateCharacter(state, { extraClasses, choices, activeClassTab: idx + 1, level: total });
     }
     case 'extra-subclass/select': {
@@ -434,7 +447,7 @@ export function builderReducer(state, action) {
       const extraClasses = state.character.extraClasses.map((extraClass, itemIndex) => (
         itemIndex === idx ? { ...extraClass, level: newLevel } : extraClass
       ));
-      const total = (state.character.classLevel || 1) + extraClasses.filter((ec) => ec.name).reduce((sum, ec) => sum + (ec.level || 1), 0);
+      const total = totalCharacterLevel(state.character.classLevel, extraClasses);
       const prefix = `mc${idx}_`;
       const choices = { ...(state.character.choices || {}) };
       Object.keys(choices).forEach(function(key) {

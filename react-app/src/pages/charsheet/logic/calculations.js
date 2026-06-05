@@ -3,6 +3,7 @@ import { getFeatAsiBonus } from '../../../shared/character/abilityBonuses.js';
 import { installedRegistry } from '../../../adapters/index.js';
 import { extractFixedProficiencyLabels } from '../../../shared/character/typedProficiencies.js';
 import { getFinalAbilityScore, getItemProficiencyBonus } from '../../../shared/character/itemEffects.js';
+import { XP_THRESHOLDS } from '../../../shared/character/xp.js';
 
 const PB_TABLE = [null, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6];
 const STATS = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
@@ -172,7 +173,7 @@ export function describeCheckDisadvantage(activeConditions = [], armorDisadv = f
 
 export const SCHOOL_LABELS = { A: 'Abjuration', C: 'Conjuration', D: 'Divination', E: 'Enchantment', I: 'Illusion', N: 'Necromancy', T: 'Transmutation', V: 'Evocation' };
 export const SPELL_LEVEL_LABELS = ['Cantrip', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th'];
-const XP_TABLE = [0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000, 85000, 100000, 120000, 140000, 165000, 195000, 225000, 265000, 305000, 355000];
+const XP_TABLE = XP_THRESHOLDS; // single source of truth: shared/character/xp.js
 
 export { STATS, SLBL, FULL_LBL, XP_TABLE };
 
@@ -367,15 +368,4 @@ export function getSkillBonus(C, sk) {
 export function calcMaxHP(C) {
   if (!C) return 10;
   return sharedComputeMaxHp(C, getMod(getFinal(C, 'con')));
-}
-
-export function getLevelFromXp(xp) {
-  for (let i = XP_TABLE.length - 1; i >= 0; i--) {
-    if (xp >= XP_TABLE[i]) return i;
-  }
-  return 1;
-}
-
-export function getXpForNextLevel(level) {
-  return XP_TABLE[level] || 0;
 }

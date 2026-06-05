@@ -6,26 +6,10 @@ import {
   PROFICIENCY_BONUS,
   STATS,
   THIRD_SLOTS,
-  XP_TOTAL,
 } from '../constants.js';
 import { computeMaxHp as sharedComputeMaxHp } from '../../../shared/character/hp.js';
 import { getFeatAsiBonus } from '../../../shared/character/abilityBonuses.js';
 import { collectOwnedFeatNames } from '../../../shared/character/selectedFeats.js';
-
-export function getLevelFromXp(xp) {
-  let level = 1;
-  for (let index = 1; index < XP_TOTAL.length; index += 1) {
-    if (Number(xp || 0) >= XP_TOTAL[index]) level = index + 1;
-  }
-  return level;
-}
-
-export function getXpProgress(xp, level) {
-  const current = XP_TOTAL[level - 1] || 0;
-  const next = XP_TOTAL[level] || XP_TOTAL[19];
-  if (level >= 20) return 100;
-  return Math.min(100, Math.round(((Number(xp || 0) - current) / (next - current)) * 100));
-}
 
 export function formatMod(value) {
   const mod = Math.floor((Number(value || 0) - 10) / 2);

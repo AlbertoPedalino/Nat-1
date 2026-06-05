@@ -40,7 +40,16 @@
       "Bash(git commit *)",
       "Bash(rm .git/COMMIT_MSG_TMP.txt)",
       "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); items=d.get\\('item',[]\\); from collections import Counter; vals=Counter\\(type\\(i.get\\('reqAttune'\\)\\).__name__ for i in items if 'reqAttune' in i\\); print\\('types',dict\\(vals\\)\\); ex=[i['reqAttune'] for i in items if isinstance\\(i.get\\('reqAttune'\\),str\\)][:12]; print\\('string examples:'\\); [print\\(' -',e\\) for e in ex]; print\\('reqAttuneAlt count:', sum\\(1 for i in items if 'reqAttuneAlt' in i\\)\\)\")",
-      "Bash(python -c \"import json,sys; print\\(json.load\\(sys.stdin\\).get\\('scripts',{}\\)\\)\")"
+      "Bash(python -c \"import json,sys; print\\(json.load\\(sys.stdin\\).get\\('scripts',{}\\)\\)\")",
+      "PowerShell(npx eslint src/pages/charsheet/components/TopBar.jsx src/pages/charbuilder/components/XpPanel.jsx)",
+      "PowerShell(npx vite build 2>&1 | Select-Object -Last 20)",
+      "PowerShell(npx vite build 2>&1 | Select-Object -Last 6)",
+      "PowerShell(npx vite build 2>&1 | Select-Object -Last 3)",
+      "Read(//c/c/Users/alber/Documents/DND/GM-Board/react-app/public/tools/**)",
+      "PowerShell(npx vite build 2>&1 | Select-Object -First 25)",
+      "WebSearch",
+      "WebFetch(domain:roll20.net)",
+      "WebFetch(domain:5thsrd.org)"
     ]
   }
 }
