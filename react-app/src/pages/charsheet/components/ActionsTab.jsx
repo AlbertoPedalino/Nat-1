@@ -40,7 +40,7 @@ import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 import ResourceBar from './ResourceBar.jsx';
 import { RichInline, RichText } from '../../../shared/character/RichText.jsx';
 import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
-import CollapsibleBody from '../../../shared/character/CollapsibleBody.jsx';
+import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import PipButton from '../../../shared/character/PipButton.jsx';
 import SheetDialog from '../../../shared/character/SheetDialog.jsx';
 import { ItemPropertyTable } from '../../../shared/character/ItemPropertyTable.jsx';
@@ -854,24 +854,32 @@ export default function ActionsTab({ C, sheet, onRoll, resources, setResources, 
 }
 
 function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, onShowToast, resMax, isPool, onUpdateCharacter }) {
-  const [open, setOpen] = useState(false);
-
   const DetailRenderer = action.detailType ? ACTION_DETAIL_RENDERERS[action.detailType] : null;
-
-  const handleCardClick = () => {
-    if (DetailRenderer) {
-      setOpen(!open);
-      return;
-    }
-    if (action.controller && action.resKey && typeof onResChange === 'function') {
-      onResChange(action.resKey, -1);
-    } else {
-      setOpen(!open);
-    }
-  };
   const hasRes = action.resKey && resources && resources[action.resKey] != null;
   const resCur = hasRes ? (resources[action.resKey] ?? 0) : 0;
   const safeMax = resMax === Infinity ? Infinity : Math.max(0, Number(resMax ?? 1) || 1);
+  const hasEntries = Array.isArray(action.entries) ? action.entries.length > 0 : Boolean(action.entries);
+  const hasActionDetails = Boolean(
+    action._item
+    || hasEntries
+    || (action.choiceKey && onUpdateCharacter)
+    || action._weaponMastery
+    || DetailRenderer
+  );
+  const hasStatusRow = Boolean(action._toggleKey && onUpdateCharacter);
+  const hasPersistentRows = hasStatusRow || hasRes;
+  const persistentRowSx = (bgcolor, isLast, open) => ({
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+    px: '10px',
+    py: '5px',
+    border: 1,
+    borderTop: 'none',
+    borderColor: 'divider',
+    borderRadius: isLast && !open ? '0 0 8px 8px' : 0,
+    bgcolor,
+  });
 
   const rollFormulaButton = (kind) => {
     const formula = resolveFormula(kind === 'heal' ? action.healFormula : action.damageFormula, action, C);
@@ -910,83 +918,88 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
   const attackTooltip = attackCondNotes.length ? `Situational disadvantage: ${attackCondNotes.join('; ')}` : '';
 
   return (
-    <Box sx={{ overflow: 'hidden' }}>
-      <Box onClick={handleCardClick} sx={{ ...spellRowSx, mb: 0, py: '7px', cursor: 'pointer' }}>
-        {action.cat && CAT_COLORS[action.cat] && (
-          <Box sx={{ width: 6, height: 28, borderRadius: 1, bgcolor: CAT_COLORS[action._colorBarCat || action.cat], flexShrink: 0, opacity: 0.95 }} />
-        )}
+    <ExpandableCard
+      containerSx={{ overflow: 'hidden' }}
+      disabled={!hasActionDetails}
+      summary={({ toggle, disabled, open }) => (
+          <Box onClick={disabled ? undefined : toggle} sx={{ ...spellRowSx, mb: 0, py: '7px', borderRadius: open || hasPersistentRows ? '8px 8px 0 0' : 1, cursor: disabled ? 'default' : 'pointer' }}>
+            {action.cat && CAT_COLORS[action.cat] && (
+              <Box sx={{ width: 6, height: 28, borderRadius: 1, bgcolor: CAT_COLORS[action._colorBarCat || action.cat], flexShrink: 0, opacity: 0.95 }} />
+            )}
 
-        <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '2px' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
-            <Typography sx={{ flex: 1, fontSize: '0.78rem', fontWeight: 700, color: 'text.primary', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {action.name}
-            </Typography>
-            {hasRollers ? (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                {Number.isFinite(action.attackBonus) ? (
-                  <AttackRollButton
-                    rawBonus={action.attackBonus}
-                    exhaustionLevel={sheet?.exhaustionLevel}
-                    label={formatRollTitle(action.name, 'Attack')}
-                    advArg={attackAdvArg}
-                    tag={attackTag}
-                    tooltip={attackTooltip}
-                    onRoll={onRoll}
-                    sx={{ borderColor: action._notProficient ? 'rgba(222,103,95,0.4)' : 'rgba(77,149,214,0.4)', color: action._notProficient ? '#de675f' : '#4d95d6' }}
-                  />
-                ) : null}
-                {action.damageFormula ? (
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    onClick={(e) => { e.stopPropagation(); rollFormulaButton('damage'); }}
-                    sx={{ ...inlineButtonSx, ...damageButtonTone }}
-                  >
-                    {damageKind === 'utility'
-                      ? <Dices size={12} style={{ marginRight: 2 }} />
-                      : <Sword size={12} style={{ marginRight: 2 }} />}
-                    {damageVerb} {resolveFormula(action.damageFormula, action, C)}
-                  </Button>
-                ) : null}
-                {action.healFormula ? (
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    color="success"
-                    onClick={(e) => { e.stopPropagation(); rollFormulaButton('heal'); }}
-                    sx={{ ...inlineButtonSx, borderColor: 'rgba(88,184,121,0.4)', color: '#58b879' }}
-                  >
-                    <Cross size={12} style={{ marginRight: 2 }} /> Heal {resolveFormula(action.healFormula, action, C)}
-                  </Button>
+            <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '2px' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+                <Typography sx={{ flex: 1, fontSize: '0.78rem', fontWeight: 700, color: 'text.primary', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {action.name}
+                </Typography>
+                {hasRollers ? (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                    {Number.isFinite(action.attackBonus) ? (
+                      <AttackRollButton
+                        rawBonus={action.attackBonus}
+                        exhaustionLevel={sheet?.exhaustionLevel}
+                        label={formatRollTitle(action.name, 'Attack')}
+                        advArg={attackAdvArg}
+                        tag={attackTag}
+                        tooltip={attackTooltip}
+                        onRoll={onRoll}
+                        sx={{ borderColor: action._notProficient ? 'rgba(222,103,95,0.4)' : 'rgba(77,149,214,0.4)', color: action._notProficient ? '#de675f' : '#4d95d6' }}
+                      />
+                    ) : null}
+                    {action.damageFormula ? (
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        onClick={(e) => { e.stopPropagation(); rollFormulaButton('damage'); }}
+                        sx={{ ...inlineButtonSx, ...damageButtonTone }}
+                      >
+                        {damageKind === 'utility'
+                          ? <Dices size={12} style={{ marginRight: 2 }} />
+                          : <Sword size={12} style={{ marginRight: 2 }} />}
+                        {damageVerb} {resolveFormula(action.damageFormula, action, C)}
+                      </Button>
+                    ) : null}
+                    {action.healFormula ? (
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        color="success"
+                        onClick={(e) => { e.stopPropagation(); rollFormulaButton('heal'); }}
+                        sx={{ ...inlineButtonSx, borderColor: 'rgba(88,184,121,0.4)', color: '#58b879' }}
+                      >
+                        <Cross size={12} style={{ marginRight: 2 }} /> Heal {resolveFormula(action.healFormula, action, C)}
+                      </Button>
+                    ) : null}
+                  </Box>
                 ) : null}
               </Box>
-            ) : null}
-          </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
-            <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap', minWidth: 0 }}>
-              {action._source ? (
-                <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontStyle: 'italic', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{action._source}</Typography>
-              ) : null}
-              {action.uses ? (
-                <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary' }}>{action.uses}</Typography>
-              ) : null}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+                <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap', minWidth: 0 }}>
+                  {action._source ? (
+                    <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontStyle: 'italic', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{action._source}</Typography>
+                  ) : null}
+                  {action.uses ? (
+                    <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary' }}>{action.uses}</Typography>
+                  ) : null}
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.4, flexWrap: 'wrap', justifyContent: 'flex-end', flexShrink: 0 }}>
+                  {(action.tags || []).map((tag) => (
+                    <Chip
+                      key={tag.key}
+                      size="small"
+                      variant="outlined"
+                      label={tag.label}
+                      sx={{ ...tinyMetaChipSx, color: tag.color, borderColor: tag.borderColor, bgcolor: tag.bgColor }}
+                    />
+                  ))}
+                </Box>
+              </Box>
             </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.4, flexWrap: 'wrap', justifyContent: 'flex-end', flexShrink: 0 }}>
-              {(action.tags || []).map((tag) => (
-                <Chip
-                  key={tag.key}
-                  size="small"
-                  variant="outlined"
-                  label={tag.label}
-                  sx={{ ...tinyMetaChipSx, color: tag.color, borderColor: tag.borderColor, bgcolor: tag.bgColor }}
-                />
-              ))}
-            </Box>
           </Box>
-        </Box>
-      </Box>
-
-      {action._toggleKey && onUpdateCharacter ? (() => {
+      )}
+      persistent={({ open }) => (
+        <>
+      {hasStatusRow ? (() => {
         const toggleCtx = { C, action, hasRes, resCur };
         const toggleField = toggleActiveField(action._toggleKey);
         const isActive = C?.[toggleField] === true;
@@ -997,7 +1010,7 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
         const isSuppressed = isActive && toggleInfo.isSuppressed;
         const label = isSuppressed ? 'Suppressed' : (isActive ? 'Active' : 'Inactive');
         return (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', px: '10px', py: '5px', border: 1, borderTop: 'none', borderColor: 'divider', borderRadius: '0 0 8px 8px', bgcolor: 'rgba(129,179,232,0.06)' }}>
+        <Box sx={persistentRowSx('rgba(129,179,232,0.06)', !hasRes, open)}>
           <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontFamily: '"Cinzel", Georgia, serif', mr: 0.5, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Status</Typography>
           <Chip
             size="small"
@@ -1028,7 +1041,7 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
       })() : null}
 
       {hasRes ? (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', px: '10px', py: '5px', border: 1, borderTop: 'none', borderColor: 'divider', borderRadius: '0 0 8px 8px', bgcolor: 'rgba(202,165,80,0.06)' }}>
+        <Box sx={persistentRowSx('rgba(202,165,80,0.06)', true, open)}>
           <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontFamily: '"Cinzel", Georgia, serif', mr: 0.5, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Uses</Typography>
           {safeMax === Infinity ? (
             typeof onResChange === 'function' ? (
@@ -1065,11 +1078,13 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
           )}
         </Box>
       ) : null}
-
-      <CollapsibleBody open={open}>
-        <Box sx={{ ...spellBodySx, mt: hasRes ? 0 : '-1px' }}>
+        </>
+      )}
+      detailsSx={{ ...spellBodySx, mt: 0, mb: 0 }}
+      details={hasActionDetails ? (
+        <>
           {action._item ? <ItemPropertyTable item={action._item} sx={{ mb: '6px' }} /> : null}
-          {action.entries ? <EntryBlocks entries={action.entries} emptyText="" /> : null}
+          {hasEntries ? <EntryBlocks entries={action.entries} emptyText="" /> : null}
           {action.choiceKey && onUpdateCharacter ? (
             <ChoicePicker action={action} C={C} onUpdateCharacter={onUpdateCharacter} onShowToast={onShowToast} />
           ) : null}
@@ -1086,9 +1101,9 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
           {DetailRenderer ? (
             <DetailRenderer action={action} character={C} sheet={sheet} onShowToast={onShowToast} />
           ) : null}
-        </Box>
-      </CollapsibleBody>
-    </Box>
+        </>
+      ) : null}
+    />
   );
 }
 

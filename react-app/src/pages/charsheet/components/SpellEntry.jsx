@@ -60,11 +60,11 @@ function SourceBadge({ sourceInfo, sources, suffix = '' }) {
   return <Tooltip title={title} arrow><Box component="span" sx={{ display: 'inline-flex' }}>{badge}</Box></Tooltip>;
 }
 
-function FreeCastsInline({ freeCasts, freeCastUses, onToggleFreeCast }) {
+function FreeCastsInline({ freeCasts, freeCastUses, onToggleFreeCast, sx }) {
   if (!Array.isArray(freeCasts) || !freeCasts.length) return null;
   const interactive = typeof onToggleFreeCast === 'function';
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap', mt: 0.35, px: '7px', py: '4px', border: 1, borderColor: 'rgba(202,165,80,0.28)', borderRadius: '5px', bgcolor: 'rgba(202,165,80,0.06)' }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap', mt: 0.35, px: '7px', py: '4px', border: 1, borderColor: 'rgba(202,165,80,0.28)', borderRadius: '5px', bgcolor: 'rgba(202,165,80,0.06)', ...(sx || {}) }}>
       <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontFamily: '"Cinzel", Georgia, serif', mr: 0.25, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
         Free Cast
       </Typography>
@@ -238,6 +238,7 @@ export default function SpellEntry({ entry, onRoll, onShowToast, spellAttackBonu
     : null;
 
   const levelLabel = castLevel > baseLevel ? ` (Lv.${castLevel})` : '';
+  const hasFreeCasts = Array.isArray(entry.freeCasts) && entry.freeCasts.length > 0;
 
   const rollDmg = (e, formula, label) => {
     e.stopPropagation();
@@ -257,10 +258,11 @@ export default function SpellEntry({ entry, onRoll, onShowToast, spellAttackBonu
 
   return (
     <ExpandableCard
-      bodySx={spellBodySx}
-      header={({ toggle }) => (
+      containerSx={{ mb: '4px', overflow: 'hidden' }}
+      detailsSx={{ ...spellBodySx, mt: 0, mb: 0 }}
+      summary={({ toggle, open }) => (
         <Box onClick={toggle}
-          sx={{ ...spellRowSx, flexDirection: 'column', gap: '3px', alignItems: 'stretch' }}>
+          sx={{ ...spellRowSx, mb: 0, borderRadius: open || hasFreeCasts ? '8px 8px 0 0' : 1, flexDirection: 'column', gap: '3px', alignItems: 'stretch' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', minWidth: 0 }}>
           <SpellNameIcon spell={entry} />
           <Typography noWrap sx={{ overflow: 'hidden', minWidth: 0, fontSize: '0.875rem', color: 'text.primary', textOverflow: 'ellipsis' }}>{entry.name}</Typography>
@@ -317,10 +319,22 @@ export default function SpellEntry({ entry, onRoll, onShowToast, spellAttackBonu
             <Badge {...getCastBadge(entry)} />
           </Box>
         </Box>
-        <FreeCastsInline freeCasts={entry.freeCasts} freeCastUses={freeCastUses} onToggleFreeCast={onToggleFreeCast} />
         </Box>
       )}
-      body={(
+      persistent={({ open }) => (
+        <FreeCastsInline
+          freeCasts={entry.freeCasts}
+          freeCastUses={freeCastUses}
+          onToggleFreeCast={onToggleFreeCast}
+          sx={{
+            mt: 0,
+            borderTop: 'none',
+            borderColor: 'divider',
+            borderRadius: open ? 0 : '0 0 8px 8px',
+          }}
+        />
+      )}
+      details={(
         <>
           <SpellMetaGrid spell={entry} sx={{ mb: '6px' }} />
           <EntryBlocks blocks={bodyBlocks} />

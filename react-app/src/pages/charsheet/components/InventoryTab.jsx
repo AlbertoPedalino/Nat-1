@@ -245,9 +245,9 @@ function AddResultRow({ item, onAdd }) {
   return (
     <ExpandableCard
       containerSx={{ flexShrink: 0, border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: 'rgba(35,32,26,1)', overflow: 'hidden', '&:hover': { borderColor: '#caa550' } }}
-      bodySx={{ px: '10px', pt: '2px', pb: '8px', bgcolor: '#12100e', fontSize: '0.7rem', color: 'text.secondary' }}
-      body={<ItemReferenceBody item={item} />}
-      header={({ toggle }) => (
+      detailsSx={{ px: '10px', pt: '2px', pb: '8px', bgcolor: '#12100e', fontSize: '0.7rem', color: 'text.secondary' }}
+      details={<ItemReferenceBody item={item} />}
+      summary={({ toggle }) => (
         <Box onClick={toggle} sx={{ display: 'flex', alignItems: 'center', gap: 1, px: '10px', py: '5px', cursor: 'pointer' }}>
           <ItemNameIcon item={item} />
           <Typography noWrap sx={{ flex: 1, minWidth: 0, fontSize: '0.875rem', color: 'text.primary' }}>{item.name}</Typography>
@@ -758,11 +758,13 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, 
 
   const showAbilityChoice = hasAbilityChoice(item);
   const showTomeConsume = isConsumableTome(item);
+  const rowBorderColor = penaltyMsg ? 'warning.main' : (item.equipped ? '#2ca797' : 'divider');
 
   return (
     <ExpandableCard
-      bodySx={{ fontSize: '0.7rem', color: 'text.secondary', lineHeight: 1.45, bgcolor: '#12100e', border: 1, borderColor: 'divider', borderRadius: 1, px: '10px', py: '6px', mt: '-2px', mb: '4px' }}
-      body={(
+      containerSx={{ mb: '4px', overflow: 'hidden' }}
+      detailsSx={{ fontSize: '0.7rem', color: 'text.secondary', lineHeight: 1.45, bgcolor: '#12100e', border: 1, borderTop: 'none', borderColor: rowBorderColor, borderRadius: '0 0 8px 8px', px: '10px', py: '6px', mt: 0, mb: 0 }}
+      details={(
         <>
           <ItemReferenceBody item={item} />
           {showTomeConsume ? (
@@ -776,8 +778,8 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, 
           ) : null}
         </>
       )}
-      header={({ toggle }) => (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px', px: '10px', py: '6px', bgcolor: item.equipped ? 'rgba(26,188,156,0.06)' : 'rgba(35,32,26,1)', border: 1, borderColor: penaltyMsg ? 'warning.main' : (item.equipped ? '#2ca797' : 'divider'), borderRadius: 1, mb: '3px', '&:hover': { borderColor: 'rgba(202,165,80,0.34)' } }}>
+      summary={({ toggle, open }) => (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px', px: '10px', py: '6px', bgcolor: item.equipped ? 'rgba(26,188,156,0.06)' : 'rgba(35,32,26,1)', border: 1, borderColor: rowBorderColor, borderRadius: open ? '8px 8px 0 0' : 1, mb: 0, '&:hover': { borderColor: 'rgba(202,165,80,0.34)' } }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
           <Box onClick={toggle} sx={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', flexWrap: 'wrap' }}>
