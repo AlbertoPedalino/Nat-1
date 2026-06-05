@@ -15,7 +15,6 @@ import { SCHOOL_LABELS, SLBL, getFinal, getMod, getPB, effectiveD20Modifier } fr
 import { loadSpells } from '../../charbuilder/logic/dataLoaders.js';
 import { spellMatchesClass } from '../../charbuilder/spells/spells.js';
 import { installedRegistry, loadClassAdapters, loadCoreAdapters, loadSpellsAdapters } from '../../../adapters/index.js';
-import { isConcentrationSpell, isRitualSpell } from '../../../shared/spellTags.js';
 import { getEquippedArmorPenalties } from '../logic/armorPenalties.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 import { aggregateSpellBonuses } from '../../../shared/character/itemBonus.js';
@@ -47,6 +46,8 @@ import {
 import SpellEntry from './SpellEntry.jsx';
 import { Empty, SlotPanel, SpellSection, StatBox } from './SpellsUiParts.jsx';
 import { SpellNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
+import CollapsibleBody from '../../../shared/character/CollapsibleBody.jsx';
+import { SpellMiniTags, SpellReferenceBody, SpellSelectButton } from '../../../shared/character/SpellReference.jsx';
 
 export default function SpellsTab({ C, sheet, onRoll, onUpdateSpells, onShowToast, onUpdateSheet, freeCastUses, onToggleFreeCast, onUpdateCharacter }) {
   const [spellDb, setSpellDb] = useState([]);
@@ -472,32 +473,22 @@ export default function SpellsTab({ C, sheet, onRoll, onUpdateSpells, onShowToas
                 || (spell.level > 0 && activeLimits.spells != null && activeCounts.spells >= activeLimits.spells)
                 || (spell.level > 0 && activePicker && spell.level > activePicker.maxLevel));
               const disabled = locked || atLimit || !activePicker;
-              const onClick = () => {
+              const onToggle = () => {
                 if (disabled) return;
                 if (activeIsWizard && pickerWizardMode === 'book') { toggleWizardBookSpell(spell); return; }
                 if (activeIsWizard) { toggleWizardPreparedSpell(spell); return; }
                 manualSelected ? removeSpell(spell) : addSpell(spell);
               };
-              const status = locked ? 'AUTO'
-                : activeIsWizard && pickerWizardMode === 'book' ? (inWizardBook ? 'BOOK' : '+ BOOK')
-                : selected ? 'ON'
-                : atLimit ? 'MAX'
-                : activeIsWizard ? 'PREP'
-                : '+';
               return (
-                <Box key={`${spell.name}-${spell.source}`} onClick={onClick}
-                  sx={{ display: 'flex', alignItems: 'center', gap: 0.5, px: '9px', py: '6px', border: 1, borderColor: selected ? '#58b879' : 'transparent', borderRadius: 1, bgcolor: selected ? 'rgba(39,174,96,0.08)' : 'transparent', opacity: atLimit ? 0.5 : 1, cursor: disabled ? 'not-allowed' : 'pointer', '&:hover': { borderColor: selected ? '#58b879' : 'divider', bgcolor: selected ? 'rgba(39,174,96,0.08)' : 'rgba(35,32,26,1)' } }}>
-                  <Box sx={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 0.4 }}>
-                    <SpellNameIcon spell={spell} />
-                    <Typography noWrap sx={{ minWidth: 0, fontSize: '0.875rem', color: 'text.primary' }}>{spell.name}</Typography>
-                    <SpellMiniTags spell={spell} />
-                  </Box>
-                  <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', flexShrink: 0 }}>{SPELL_LEVEL_LABELS[spell.level] || `Lv ${spell.level}`}</Typography>
-                  <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', flexShrink: 0 }}>{SCHOOL_LABELS[spell.school] || spell.school}</Typography>
-                  <Box sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.7rem', color: selected ? '#58b879' : '#edd48a', flexShrink: 0 }}>
-                    {status}
-                  </Box>
-                </Box>
+                <PickerSpellRow
+                  key={`${spell.name}-${spell.source}`}
+                  spell={spell}
+                  selected={selected}
+                  disabled={disabled}
+                  atLimit={atLimit}
+                  locked={locked}
+                  onToggle={onToggle}
+                />
               );
             })}
             {!pickerList.length ? (
@@ -510,38 +501,37 @@ export default function SpellsTab({ C, sheet, onRoll, onUpdateSpells, onShowToas
 }
 
 
-function SpellMiniTags({ spell }) {
-  const tags = [
-    isConcentrationSpell(spell) ? { label: 'C', color: '#9d7fb8', bg: 'rgba(157,127,184,0.16)', title: 'Concentration' } : null,
-    isRitualSpell(spell) ? { label: 'R', color: '#58b879', bg: 'rgba(63,166,108,0.14)', title: 'Ritual' } : null,
-  ].filter(Boolean);
-
-  if (!tags.length) return null;
+// Picker row for the Add/Remove + Wizard Spellbook dialog. Tapping the row
+// expands the full rich reference (meta + description + upcast). Selection is
+// an explicit Add/Remove button; auto-granted (locked) spells show a static
+// AUTO chip. The caret is a decorative open/closed indicator.
+function PickerSpellRow({ spell, selected, disabled, atLimit, locked, onToggle }) {
+  const [open, setOpen] = useState(false);
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', flexShrink: 0 }}>
-      {tags.map((tag) => (
-        <Box
-          key={tag.label}
-          title={tag.title}
-          component="span"
-          sx={{
-            border: 1,
-            borderColor: tag.color,
-            color: tag.color,
-            bgcolor: tag.bg,
-            borderRadius: '3px',
-            px: '5px',
-            py: '1px',
-            fontFamily: '"Cinzel", Georgia, serif',
-            fontSize: '0.55rem',
-            fontWeight: 700,
-            lineHeight: 1.25,
-          }}
-        >
-          {tag.label}
+    <Box sx={{ flexShrink: 0, border: 1, borderColor: selected ? '#58b879' : 'transparent', borderRadius: 1, overflow: 'hidden', opacity: atLimit ? 0.5 : 1, '&:hover': { borderColor: selected ? '#58b879' : 'divider' } }}>
+      <Box
+        onClick={() => setOpen((value) => !value)}
+        sx={{ display: 'flex', alignItems: 'center', gap: 0.5, px: '9px', py: '6px', cursor: 'pointer', bgcolor: selected ? 'rgba(39,174,96,0.08)' : 'transparent', '&:hover': { bgcolor: selected ? 'rgba(39,174,96,0.08)' : 'rgba(35,32,26,1)' } }}
+      >
+        <Box sx={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 0.4 }}>
+          <SpellNameIcon spell={spell} />
+          <Typography noWrap sx={{ minWidth: 0, fontSize: '0.875rem', color: 'text.primary' }}>{spell.name}</Typography>
+          <SpellMiniTags spell={spell} />
         </Box>
-      ))}
+        <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', flexShrink: 0 }}>{SPELL_LEVEL_LABELS[spell.level] || `Lv ${spell.level}`}</Typography>
+        <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', flexShrink: 0 }}>{SCHOOL_LABELS[spell.school] || spell.school}</Typography>
+        {locked ? (
+          <Box sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.7rem', color: '#58b879', flexShrink: 0 }}>AUTO</Box>
+        ) : (
+          <SpellSelectButton selected={selected} disabled={disabled} onToggle={onToggle} addColor="success" sx={{ py: '1px', fontSize: '0.68rem' }} />
+        )}
+      </Box>
+      <CollapsibleBody open={open}>
+        <Box sx={{ px: '9px', pt: '2px', pb: '8px' }}>
+          <SpellReferenceBody spell={spell} />
+        </Box>
+      </CollapsibleBody>
     </Box>
   );
 }

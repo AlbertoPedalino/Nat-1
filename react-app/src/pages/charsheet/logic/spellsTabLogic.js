@@ -1111,55 +1111,10 @@ export function getCastBadge(spell) {
   return { label: unit, color: '#c4b393' };
 }
 
-export function getMetaLine(spell) {
-  const time = spell?.castingTimeLabel || spell?.castingTime || (spell?.time?.[0] ? `${spell.time[0].number || 1} ${spell.time[0].unit}` : '');
-  const range = spell?.rangeLabel || spell?.rangeText || formatSpellField(spell?.range);
-  const componentsBase = spell?.componentsLabel || formatComponents(spell?.components);
-  const material = spell?.materialLabel || formatMaterial(spell?.components?.m);
-  const components = componentsBase && material ? `${componentsBase} (${material})` : componentsBase;
-  const duration = spell?.durationLabel || spell?.durationText || formatSpellField(spell?.duration);
-  return [time, range, components, duration].filter(Boolean).join(' - ');
-}
-
-export function getMetaSegments(spell) {
-  const time = spell?.castingTimeLabel || spell?.castingTime || (spell?.time?.[0] ? `${spell.time[0].number || 1} ${spell.time[0].unit}` : '');
-  const range = spell?.rangeLabel || spell?.rangeText || formatSpellField(spell?.range);
-  const componentsBase = spell?.componentsLabel || formatComponents(spell?.components);
-  const material = spell?.materialLabel || formatMaterial(spell?.components?.m);
-  const components = componentsBase && material ? `${componentsBase} (${material})` : componentsBase;
-  const duration = spell?.durationLabel || spell?.durationText || formatSpellField(spell?.duration);
-  return [
-    { label: 'Casting Time', value: time },
-    { label: 'Range', value: range },
-    { label: 'Components', value: components },
-    { label: 'Duration', value: duration },
-  ].filter((segment) => segment.value);
-}
-
-function formatComponents(components) {
-  if (!components || typeof components !== 'object') return '';
-  return [components.v ? 'V' : null, components.s ? 'S' : null, components.m ? 'M' : null].filter(Boolean).join(', ');
-}
-
-function formatMaterial(material) {
-  if (!material) return '';
-  if (typeof material === 'string') return material;
-  if (typeof material === 'object') return material.text || material.name || '';
-  return '';
-}
-
-function formatSpellField(value) {
-  if (value == null) return '';
-  if (typeof value === 'string' || typeof value === 'number') return String(value);
-  if (Array.isArray(value)) return value.map(formatSpellField).filter(Boolean).join(', ');
-  if (typeof value === 'object') {
-    if (value.type && value.amount) return `${value.amount} ${value.type}`;
-    if (value.distance) return formatSpellField(value.distance);
-    if (value.unit && value.number) return `${value.number} ${value.unit}`;
-    if (value.type) return String(value.type);
-  }
-  return '';
-}
+// Meta formatting (Casting Time / Range / Components / Duration) lives in the
+// shared spellMeta module; re-exported here under the existing names so sheet
+// callers stay unchanged while the builder reads from the same source.
+export { getSpellMetaLine as getMetaLine, getSpellMetaSegments as getMetaSegments } from '../../../shared/character/spellMeta.js';
 
 export function renderEntries(entries) {
   return renderSafeEntries(entries);

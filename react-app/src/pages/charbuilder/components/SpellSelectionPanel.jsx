@@ -5,8 +5,9 @@ import BuilderPanel from './BuilderPanel.jsx';
 import { SPELL_LEVEL_LABELS } from '../constants.js';
 import { SpellNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 import { collectAutoGrantedSpells, getSpellCounts, maxSpellLevel, spellMatchesAnyClass } from '../spells/spells.js';
-import { isConcentrationSpell, isRitualSpell } from '../../../shared/spellTags.js';
-import { entriesToPlainText } from '../../../shared/character/spellEntries.js';
+import { getSpellMetaLine } from '../../../shared/character/spellMeta.js';
+import { SpellMiniTags, SpellReferenceBody, SpellSelectButton } from '../../../shared/character/SpellReference.jsx';
+import CollapsibleBody from '../../../shared/character/CollapsibleBody.jsx';
 
 export default function SpellSelectionPanel({ state, dispatch }) {
   const [wizardMode, setWizardMode] = useState('prepare');
@@ -145,14 +146,11 @@ export default function SpellSelectionPanel({ state, dispatch }) {
                     && (level === 0 ? selectedCantrips.length >= cantrips : selectedSpellsCount >= spells);
                   const requiresWizardBook = activeIsWizard && !wizardBookMode && !autoSelected && !inWizardBook;
                   const disabled = wizardBookMode ? false : (autoSelected || atLimit || requiresWizardBook);
-                  const meta = [
-                    spell.schoolFull || spell.school,
-                    spell.castingTimeLabel || spell.castingTime,
-                    spell.rangeLabel || spell.rangeText,
-                    spell.componentsLabel,
-                  ].filter(Boolean).join(' - ');
-                  const description = entriesToPlainText(spell.descriptionEntries || spell.entries, { maxLength: 220 });
-                  const onClick = () => {
+                  const meta = getSpellMetaLine(spell, { includeSchool: true });
+                  const autoLabel = autoSelected
+                    ? getAutoGrantedLabel(autoByName.get(spell.name) || spell._autoGranted, activeCharacter)
+                    : null;
+                  const onToggle = () => {
                     if (disabled) return;
                     if (wizardBookMode) {
                       dispatch({ type: 'wizard/spellbook-toggle', level, name: spell.name, extraIndex });
@@ -161,54 +159,16 @@ export default function SpellSelectionPanel({ state, dispatch }) {
                     dispatch({ type: 'spell/toggle', level, name: spell.name, max: level === 0 ? cantrips : spells, extraIndex });
                   };
                   return (
-                    <ListItemButton
+                    <SpellRow
                       key={`${spell.name}-${spell.source}`}
-                      divider
+                      spell={spell}
+                      meta={meta}
                       selected={selected}
                       disabled={disabled}
-                      sx={{ alignItems: 'flex-start', opacity: disabled ? 0.55 : 1 }}
-                      onClick={onClick}
-                    >
-                      <SpellNameIcon spell={spell} />
-                      <ListItemText
-                        primary={(
-                          <Stack direction="row" spacing={0.5} alignItems="center" sx={{ minWidth: 0 }}>
-                            <Typography fontWeight={selected ? 700 : 500} noWrap sx={{ minWidth: 0 }}>{spell.name}</Typography>
-                            <SpellMiniTags spell={spell} />
-                          </Stack>
-                        )}
-                        secondary={(
-                          <Stack spacing={0.25} sx={{ minWidth: 0 }}>
-                            <Typography variant="caption" color="text.secondary" noWrap>{meta}</Typography>
-                            {description ? (
-                              <Typography
-                                variant="caption"
-                                color="text.secondary"
-                                sx={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.25 }}
-                              >
-                                {description}
-                              </Typography>
-                            ) : null}
-                          </Stack>
-                        )}
-                        secondaryTypographyProps={{ component: 'div' }}
-                      />
-                      <Chip
-                        size="small"
-                        color={selected ? 'primary' : 'default'}
-                        label={
-                          autoSelected
-                            ? getAutoGrantedLabel(autoByName.get(spell.name) || spell._autoGranted, activeCharacter)
-                            : wizardBookMode
-                              ? (inWizardBook ? 'Book' : '+ Book')
-                              : selected
-                                ? 'On'
-                                : activeIsWizard
-                                  ? 'Prep'
-                                  : `Lv ${spell.level}`
-                        }
-                      />
-                    </ListItemButton>
+                      autoSelected={autoSelected}
+                      autoLabel={autoLabel}
+                      onToggle={onToggle}
+                    />
                   );
                 })}
               </List>
@@ -222,6 +182,49 @@ export default function SpellSelectionPanel({ state, dispatch }) {
         )}
       </Stack>
     </BuilderPanel>
+  );
+}
+
+// One spell row. Tapping the row expands the full rich-text reference
+// (SpellReferenceBody: meta grid + description + upcast). Selection is an
+// explicit Add/Remove button on the right (auto-granted spells show a static
+// source chip instead). The caret is a decorative open/closed indicator.
+function SpellRow({ spell, meta, selected, disabled, autoSelected, autoLabel, onToggle }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+      <ListItemButton
+        selected={selected}
+        aria-expanded={open}
+        sx={{ alignItems: 'flex-start', gap: 0.5 }}
+        onClick={() => setOpen((value) => !value)}
+      >
+        <SpellNameIcon spell={spell} />
+        <ListItemText
+          primary={(
+            <Stack direction="row" spacing={0.5} alignItems="center" sx={{ minWidth: 0 }}>
+              <Typography fontWeight={selected ? 700 : 500} noWrap sx={{ minWidth: 0 }}>{spell.name}</Typography>
+              <SpellMiniTags spell={spell} />
+            </Stack>
+          )}
+          secondary={(
+            <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block', minWidth: 0 }}>{meta}</Typography>
+          )}
+          secondaryTypographyProps={{ component: 'div' }}
+        />
+        {autoSelected ? (
+          <Chip size="small" color="secondary" label={autoLabel} sx={{ flexShrink: 0 }} />
+        ) : (
+          <SpellSelectButton selected={selected} disabled={disabled} onToggle={onToggle} />
+        )}
+      </ListItemButton>
+      <CollapsibleBody open={open}>
+        <Box sx={{ px: 2, pt: 0.25, pb: 1.25 }}>
+          <SpellReferenceBody spell={spell} />
+        </Box>
+      </CollapsibleBody>
+    </Box>
   );
 }
 
@@ -291,41 +294,4 @@ function getSpellbookSize(book) {
 
 function isInWizardBook(book, name, level) {
   return getSpellbookLevel(book, level).some((entry) => normSpell(entry) === normSpell(name));
-}
-
-
-function SpellMiniTags({ spell }) {
-  const tags = [
-    isConcentrationSpell(spell) ? { label: 'C', color: '#9d7fb8', bg: 'rgba(157,127,184,0.16)', title: 'Concentration' } : null,
-    isRitualSpell(spell) ? { label: 'R', color: '#58b879', bg: 'rgba(63,166,108,0.14)', title: 'Ritual' } : null,
-  ].filter(Boolean);
-
-  if (!tags.length) return null;
-
-  return (
-    <Stack direction="row" spacing={0.25} alignItems="center" sx={{ flexShrink: 0 }}>
-      {tags.map((tag) => (
-        <Box
-          key={tag.label}
-          title={tag.title}
-          component="span"
-          sx={{
-            border: 1,
-            borderColor: tag.color,
-            color: tag.color,
-            bgcolor: tag.bg,
-            borderRadius: '3px',
-            px: '5px',
-            py: '1px',
-            fontFamily: '"Cinzel", Georgia, serif',
-            fontSize: '0.55rem',
-            fontWeight: 700,
-            lineHeight: 1.25,
-          }}
-        >
-          {tag.label}
-        </Box>
-      ))}
-    </Stack>
-  );
 }

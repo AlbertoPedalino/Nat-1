@@ -1,10 +1,11 @@
-import { Fragment, useState } from 'react';
+import { useState } from 'react';
 import { Box, Button, Stack, Tooltip, Typography } from '@mui/material';
 import { Cross, Dices, Sword } from 'lucide-react';
 import { SPELL_LEVEL_LABELS } from '../../charbuilder/constants.js';
 import { SpellNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 import { RichInline } from '../../../shared/character/RichText.jsx';
 import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
+import { SpellMetaGrid, HigherLevelBlock } from '../../../shared/character/SpellReference.jsx';
 import CollapsibleBody from '../../../shared/character/CollapsibleBody.jsx';
 import PipButton from '../../../shared/character/PipButton.jsx';
 import { formatRollTitle, rollFormula as rollFormulaDice } from '../../../shared/character/dice.js';
@@ -14,12 +15,10 @@ import {
   computeScaledFormula,
   extractDamageDice,
   getCastBadge,
-  getMetaSegments,
   getResolvedCantripData,
   getSpellAbilityForEntry,
   getSpellStatusChips,
   getUpcastStep,
-  entriesToHigherLevelBlocks,
   entriesToTextBlocks,
   resolveDmgBonusValue,
 } from '../logic/spellsTabLogic.js';
@@ -154,10 +153,8 @@ export default function SpellEntry({ entry, onRoll, onShowToast, spellAttackBonu
   const castLevel = entry.castLevel || entry.level || 0;
   const baseLevel = entry.level || 0;
   const school = SCHOOL_LABELS[entry.school] || entry.school || '';
-  const metaSegments = getMetaSegments(entry);
   const bodyBlocks = entriesToTextBlocks(entry.descriptionEntries || entry.entries);
   const higherEntries = entry.higherLevelEntries || entry.entriesHigherLevel;
-  const higherBlocks = higherEntries ? entriesToHigherLevelBlocks(higherEntries) : [];
   const rawDamages = extractDamageDice(entry.entries || []);
   const hasAttack = !!entry.spellAttack;
   const spellData = installedRegistry.getSpellData(entry.name);
@@ -325,20 +322,7 @@ export default function SpellEntry({ entry, onRoll, onShowToast, spellAttackBonu
 
       <CollapsibleBody open={open}>
         <Box sx={spellBodySx}>
-          {metaSegments.length ? (
-            <Box sx={{ display: 'grid', gridTemplateColumns: 'auto 1fr', columnGap: '8px', rowGap: '2px', fontSize: '0.65rem', mb: '6px' }}>
-              {metaSegments.map((segment) => (
-                <Fragment key={segment.label}>
-                  <Box sx={{ fontFamily: '"Cinzel", Georgia, serif', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#9d7fb8', fontSize: '0.55rem', alignSelf: 'center' }}>
-                    {segment.label}
-                  </Box>
-                  <Box sx={{ color: 'text.primary' }}>
-                    {segment.value}
-                  </Box>
-                </Fragment>
-              ))}
-            </Box>
-          ) : null}
+          <SpellMetaGrid spell={entry} sx={{ mb: '6px' }} />
           <EntryBlocks blocks={bodyBlocks} />
           {modifierDetailGroups.length ? (
             <Stack spacing={0.8} sx={{ mt: 1 }}>
@@ -380,12 +364,7 @@ export default function SpellEntry({ entry, onRoll, onShowToast, spellAttackBonu
               ))}
             </Stack>
           ) : null}
-          {higherBlocks.length ? (
-            <Box sx={{ mt: 1, pt: 1, borderTop: '1px dashed', borderColor: 'divider' }}>
-              <Box sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.08em', color: '#9d7fb8', mb: 0.5 }}>Using a Higher-Level Spell Slot</Box>
-              <EntryBlocks blocks={higherBlocks} />
-            </Box>
-          ) : null}
+          <HigherLevelBlock entries={higherEntries} />
         </Box>
       </CollapsibleBody>
     </Box>
