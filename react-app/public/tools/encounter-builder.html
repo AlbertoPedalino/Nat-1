@@ -2658,36 +2658,49 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
       h += `<div class="sbprop"><span class="sbkey">Challenge</span> ${esc(cr)} (${fmt(crXP(cr))} XP)</div>`;
 
       const blk = list => list.map(a => `<div class="sbact"><span class="sbact-n">${esc(clean(a.name))}.</span> ${renderE(a.entries)}</div>`).join('');
-      if (m.trait && m.trait.length) { h += `<div class="sbdiv" style="margin-top:8px"></div>${blk(m.trait)}`; }
-      if (m.action && m.action.length) { h += `<div class="sbsec">Actions</div>${blk(m.action)}`; }
-      if (m.spellcasting && m.spellcasting.length) {
-        m.spellcasting.forEach(sc => {
-          let st = `<div class="sbact"><span class="sbact-n">${esc(clean(sc.name))}.</span> `;
-          if (sc.headerEntries) st += renderE(sc.headerEntries);
-          let sl = [];
-          if (sc.will) sl.push(`<i>At will:</i> ${sc.will.map(s => renderE(s)).join(', ')}`);
-          if (sc.daily) {
-            for (const [k, v] of Object.entries(sc.daily)) {
-              let lab = k.includes('e') ? k.replace('e', '/day each') : k + '/day';
-              let spl = Array.isArray(v) ? v : v.spells || [];
-              sl.push(`<i>${lab}:</i> ${spl.map(s => renderE(s)).join(', ')}`);
-            }
+
+      // Render a single spellcasting entry to HTML. Respects the `hidden` array
+      // (5etools hides keys whose info is already in the name/header, e.g. "3/Day").
+      const renderSC = sc => {
+        let st = `<div class="sbact"><span class="sbact-n">${esc(clean(sc.name))}.</span> `;
+        if (sc.headerEntries) st += renderE(sc.headerEntries);
+        const hidden = sc.hidden || [];
+        let sl = [];
+        if (sc.will && !hidden.includes('will')) sl.push(`<i>At will:</i> ${sc.will.map(s => renderE(s)).join(', ')}`);
+        if (sc.daily && !hidden.includes('daily')) {
+          for (const [k, v] of Object.entries(sc.daily)) {
+            let lab = k.includes('e') ? k.replace('e', '/day each') : k + '/day';
+            let spl = Array.isArray(v) ? v : v.spells || [];
+            sl.push(`<i>${lab}:</i> ${spl.map(s => renderE(s)).join(', ')}`);
           }
-          if (sc.spells) {
-            for (const [k, v] of Object.entries(sc.spells)) {
-              let lvl = k === '0' ? 'Cantrips' : `Level ${k}`;
-              let slot = v.slots ? ` (${v.slots} slot)` : '';
-              sl.push(`<i>${lvl}${slot}:</i> ${v.spells.map(s => renderE(s)).join(', ')}`);
-            }
+        }
+        if (sc.spells && !hidden.includes('spells')) {
+          for (const [k, v] of Object.entries(sc.spells)) {
+            let lvl = k === '0' ? 'Cantrips' : `Level ${k}`;
+            let slot = v.slots ? ` (${v.slots} slot)` : '';
+            sl.push(`<i>${lvl}${slot}:</i> ${v.spells.map(s => renderE(s)).join(', ')}`);
           }
-          if (sl.length) st += `<div style="margin-left:15px; margin-top:4px">${sl.join('<br>')}</div>`;
-          if (sc.footerEntries) st += `<div style="margin-top:4px">${renderE(sc.footerEntries)}</div>`;
-          st += `</div>`;
-          h += st;
-        });
-      }
-      if (m.bonus && m.bonus.length) { h += `<div class="sbsec">Bonus Actions</div>${blk(m.bonus)}`; }
-      if (m.reaction && m.reaction.length) { h += `<div class="sbsec">Reactions</div>${blk(m.reaction)}`; }
+        }
+        if (sl.length) st += `<div style="margin-left:15px; margin-top:4px">${sl.join('<br>')}</div>`;
+        if (sc.footerEntries) st += `<div style="margin-top:4px">${renderE(sc.footerEntries)}</div>`;
+        st += `</div>`;
+        return st;
+      };
+
+      // Route spellcasting entries to the section named by `displayAs`
+      // (default 'action'). This is how 2024 stat blocks express e.g. a
+      // bonus-action spell like the Priest's "Divine Aid (3/Day)".
+      const scByDisplay = { trait: [], action: [], bonus: [], reaction: [] };
+      (m.spellcasting || []).forEach(sc => {
+        const d = sc.displayAs || 'action';
+        (scByDisplay[d] || scByDisplay.action).push(sc);
+      });
+      const scHtml = key => scByDisplay[key].map(renderSC).join('');
+
+      if ((m.trait && m.trait.length) || scByDisplay.trait.length) { h += `<div class="sbdiv" style="margin-top:8px"></div>${blk(m.trait || [])}${scHtml('trait')}`; }
+      if ((m.action && m.action.length) || scByDisplay.action.length) { h += `<div class="sbsec">Actions</div>${blk(m.action || [])}${scHtml('action')}`; }
+      if ((m.bonus && m.bonus.length) || scByDisplay.bonus.length) { h += `<div class="sbsec">Bonus Actions</div>${blk(m.bonus || [])}${scHtml('bonus')}`; }
+      if ((m.reaction && m.reaction.length) || scByDisplay.reaction.length) { h += `<div class="sbsec">Reactions</div>${blk(m.reaction || [])}${scHtml('reaction')}`; }
       if (m.legendary && m.legendary.length) {
         h += `<div class="sbsec">Legendary Actions</div>`;
         if (m.legendaryHeader) h += `<div class="sbact">${renderE(m.legendaryHeader)}</div>`;

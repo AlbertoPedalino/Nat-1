@@ -49,7 +49,11 @@
       "PowerShell(npx vite build 2>&1 | Select-Object -First 25)",
       "WebSearch",
       "WebFetch(domain:roll20.net)",
-      "WebFetch(domain:5thsrd.org)"
+      "WebFetch(domain:5thsrd.org)",
+      "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/bestiary/bestiary-xmm.json\" -o /tmp/xmm.json)",
+      "Read(//c/Users/alber/AppData/Local/Temp/**)",
+      "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/bestiary/bestiary-xmm.json\" -o xmm.json)",
+      "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/bestiary/bestiary-mm.json\" -o mm.json)"
     ]
   }
 }
