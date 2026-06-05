@@ -66,8 +66,8 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.15 }}>
           <CircleStat onClick={handleInitiativeRoll} value={initMod >= 0 ? `+${initMod}` : initMod} label="Initiative" clickable />
           {lastInitiativeRoll && (
-            <Typography variant="caption" sx={{ fontSize: '0.5rem', color: 'text.secondary', textAlign: 'center', lineHeight: 1.2 }}>
-              Last: {lastInitiativeRoll.total} ({lastInitiativeRoll.d20}{lastInitiativeRoll.mod >= 0 ? ` + ${lastInitiativeRoll.mod}` : ` - ${Math.abs(lastInitiativeRoll.mod)}`})
+            <Typography variant="caption" sx={{ fontSize: '0.72rem', color: 'text.secondary', textAlign: 'center', lineHeight: 1.25 }}>
+              Last: <Box component="span" sx={{ fontWeight: 700, color: '#edd48a' }}>{lastInitiativeRoll.total}</Box> ({lastInitiativeRoll.d20}{lastInitiativeRoll.mod >= 0 ? ` + ${lastInitiativeRoll.mod}` : ` - ${Math.abs(lastInitiativeRoll.mod)}`})
             </Typography>
           )}
           {initiativeMessage && (

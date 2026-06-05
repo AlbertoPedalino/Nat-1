@@ -3443,7 +3443,8 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
       list.unshift(entry); // più recente in cima
       localStorage.setItem(LIB_KEY, JSON.stringify(list));
       _currentEncounterId = entry.id;
-      if (typeof gbRegisterEncounterScope === 'function') gbRegisterEncounterScope(name, {force: true});
+      // Bump instance recency only — do NOT rename the builder instance (it represents a party/group, not a single encounter)
+      if (typeof gbRegisterEncounterScope === 'function') gbRegisterEncounterScope();
 
       nameInput.value = '';
       const confirm = document.getElementById('save-confirm');
