@@ -111,6 +111,7 @@ export function CurrencyCoinBox({ coin, value, onChange, mode = 'builder' }) {
     const next = normalizeCoinAmount(base + delta);
     commit(next);
     if (focused) setDraft(next > 0 ? String(next) : '');
+    setStepDraft('');
   };
 
   return (
