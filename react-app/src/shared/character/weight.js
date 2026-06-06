@@ -2,7 +2,7 @@ import { CURRENCY_TYPES, normalizeCoinAmount } from './currency.js';
 
 const WEIGHT_PRECISION = 1000;
 
-// XPHB 2024 (p.150): 50 coins weigh 1 lb, regardless of denomination.
+// XPHB 2024: 50 coins weigh 1 lb, regardless of denomination.
 export const COIN_WEIGHT_LB = 1 / 50;
 
 // XPHB 2024 (p.362): carrying capacity = Strength score × 15 (Medium size).
