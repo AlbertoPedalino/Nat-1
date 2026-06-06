@@ -15,6 +15,7 @@ export default function install(registry, context = {}) {
   const {
     registerFeatAdapter,
     registerFeatSheetActions,
+    registerFeatSheetResources,
   } = createAdapterBindings(registry, context);
 
   if (typeof registerFeatAdapter !== 'function') return;
@@ -34,6 +35,18 @@ export default function install(registry, context = {}) {
     return next;
   });
 
+  if (typeof registerFeatSheetResources === 'function') {
+    registerFeatSheetResources('Crafter', [
+      {
+        key:      'crafter_fast_crafting',
+        name:     'Fast Crafting',
+        icon:     '',
+        recharge: 'LR',
+        max:      1,
+      },
+    ]);
+  }
+
   if (typeof registerFeatSheetActions === 'function') {
     registerFeatSheetActions('Crafter', [
       {
@@ -49,6 +62,7 @@ export default function install(registry, context = {}) {
         icon: '',
         cat: 'action',
         uses: '1 item / LR',
+        resKey: 'crafter_fast_crafting',
         desc: "When you finish a Long Rest, craft one piece of gear from the Fast Crafting table (requires proficiency with the associated Artisan's Tools). Item lasts until you finish another Long Rest.",
       },
     ]);
