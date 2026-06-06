@@ -164,6 +164,8 @@ registerClassSheetEffects("Barbarian", [
   { type: "advantage", target: "save", ability: "dex", minLevel: 2, note: "Danger Sense" },
   // Rage (while active): Advantage on STR saves + Rage Damage to STR melee attacks.
   { type: "advantage", target: "save", ability: "str", minLevel: 1, note: "Rage", condition: _barbarianRaging },
+  // Feral Instinct: Advantage on Initiative rolls.
+  { type: "advantage", target: "initiative", minLevel: 7, note: "Feral Instinct." },
   { type: "meleeDamageBonus", ability: "str", value: 2, minLevel: 1,  note: "Rage", condition: _barbarianRaging },
   { type: "meleeDamageBonus", ability: "str", value: 3, minLevel: 9,  note: "Rage", condition: _barbarianRaging },
   { type: "meleeDamageBonus", ability: "str", value: 4, minLevel: 16, note: "Rage", condition: _barbarianRaging },

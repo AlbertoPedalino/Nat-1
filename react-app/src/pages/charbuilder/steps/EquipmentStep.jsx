@@ -5,7 +5,7 @@ import BuilderPanel from '../components/BuilderPanel.jsx';
 import { ITEM_FILTERS } from '../constants.js';
 import { ItemNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 import { cleanText } from '../logic/text.js';
-import { resolveEquipmentTypeItem } from '../logic/dataLoaders.js';
+import { equipmentTypeCandidates } from '../logic/dataLoaders.js';
 import { CurrencyRow } from '../../../shared/character/CurrencyCoinBox.jsx';
 import { findInventoryItem } from '../../../shared/character/itemContainers.js';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
@@ -13,6 +13,21 @@ import { ItemReferenceBody, QuantityAdder } from '../../../shared/character/Item
 import { formatWeight, totalCarriedWeight } from '../../../shared/character/weight.js';
 
 const CHOICE_KEYS = ['A', 'B', 'C', 'D', 'E', 'a', 'b', 'c', 'd', 'e'];
+
+// Human labels for 5etools `equipmentType` codes that resolve to a player choice.
+// Keys must match EQUIPMENT_TYPE_MATCHERS in dataLoaders.js.
+const EQUIP_TYPE_LABELS = {
+  focusSpellcastingArcane: 'Arcane Focus',
+  focusSpellcastingDruidic: 'Druidic Focus',
+  focusSpellcastingHoly: 'Holy Symbol',
+  instrumentMusical: 'Musical Instrument',
+  setGaming: 'Gaming Set',
+  toolArtisan: "Artisan's Tools",
+  weaponSimple: 'Simple Weapon',
+  weaponSimpleMelee: 'Simple Melee Weapon',
+  weaponMartial: 'Martial Weapon',
+  weaponMartialMelee: 'Martial Melee Weapon',
+};
 
 // Cap the non-virtualized add list. Rows are search-driven, so a small cap keeps
 // the DOM light; beyond it we show a "refine search" hint.
@@ -158,21 +173,36 @@ function collectChoiceBlocks(eq, prefix) {
 
 function resolveEquipmentItems(extracted, itemDb) {
   const out = [];
-  const resolveDbItem = (entry) => (entry.equipmentType
-    ? resolveEquipmentTypeItem(entry.name, itemDb)
-    : findInventoryItem(itemDb, entry.name, entry.source));
-  const add = (entry) => {
-    const dbItem = resolveDbItem(entry);
-    if (!dbItem) return;
-    out.push({ ...dbItem, qty: entry.qty ?? 1 });
-  };
-  extracted.items.forEach((item) => add({
-    name: item.name,
-    source: item.source,
-    qty: item.qty ?? 1,
-    equipmentType: item.equipmentType,
-  }));
+  extracted.items.forEach((item) => {
+    // equipmentType entries (gaming set, focus, …) are picked explicitly via the
+    // per-slot picker, not auto-resolved to a generic placeholder.
+    if (item.equipmentType) return;
+    const dbItem = findInventoryItem(itemDb, item.name, item.source);
+    if (dbItem) out.push({ ...dbItem, qty: item.qty ?? 1 });
+  });
   return out;
+}
+
+// equipmentType slots that need an explicit item pick, derived from the currently
+// selected option of each choice block (or the whole block when it has no choices).
+function collectEquipmentTypeSlots(eq, prefix, blocks, equipChoices) {
+  const slots = [];
+  const pushFrom = (node, keyBase) => {
+    extractEquipItems(node).items
+      .filter((entry) => entry.equipmentType)
+      .forEach((entry, index) => slots.push({ slotKey: `${keyBase}__et${index}`, code: entry.name }));
+  };
+  if (blocks.length) {
+    blocks.forEach((block) => {
+      const selected = equipChoices[block.key];
+      if (!selected) return;
+      const option = block.options.find((opt) => opt.value === selected);
+      if (option) pushFrom(option.node, `${block.key}_${selected}`);
+    });
+  } else {
+    pushFrom(eq, prefix);
+  }
+  return slots;
 }
 
 // Add-list row: tap to expand the item reference (props + live rich text),
@@ -233,6 +263,7 @@ function CurrentInventoryRow({ item, index, dispatch }) {
 function StartingEquipmentBlock({ title, eq, prefix, character, items, dispatch }) {
   const blocks = collectChoiceBlocks(eq, prefix);
   const summary = flattenEquip(eq, []).slice(0, 8);
+  const typeSlots = collectEquipmentTypeSlots(eq, prefix, blocks, character.equipChoices);
   if (!eq) return null;
   return (
     <Paper variant="outlined" sx={{ p: 1.5 }}>
@@ -269,6 +300,40 @@ function StartingEquipmentBlock({ title, eq, prefix, character, items, dispatch 
             </Stack>
           </Paper>
         ))}
+        {typeSlots.map((slot) => {
+          const candidates = equipmentTypeCandidates(slot.code, items);
+          if (!candidates.length) return null;
+          const selectedRef = character.equipChoices[slot.slotKey] || null;
+          return (
+            <Paper key={slot.slotKey} variant="outlined" sx={{ p: 1.25, bgcolor: 'background.default' }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                Choose {EQUIP_TYPE_LABELS[slot.code] || 'item'}
+              </Typography>
+              <Stack spacing={0.75}>
+                {candidates.map((cand) => {
+                  const ref = `${cand.name}|${cand.source}`;
+                  const selected = selectedRef === ref;
+                  return (
+                    <Button
+                      key={ref}
+                      size="small"
+                      variant={selected ? 'contained' : 'outlined'}
+                      sx={{ justifyContent: 'flex-start', textAlign: 'left' }}
+                      onClick={() => dispatch({
+                        type: 'equipment/select-type-item',
+                        key: slot.slotKey,
+                        item: { ...cand, qty: 1 },
+                        prevRef: selectedRef,
+                      })}
+                    >
+                      {cand.name}
+                    </Button>
+                  );
+                })}
+              </Stack>
+            </Paper>
+          );
+        })}
         {!blocks.length ? summary.map((line, index) => <Chip key={`${line}-${index}`} label={line} sx={{ justifyContent: 'flex-start' }} />) : null}
       </Stack>
     </Paper>

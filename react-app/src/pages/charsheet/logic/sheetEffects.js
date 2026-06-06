@@ -713,6 +713,19 @@ export function getSkillAdvantageFromEffects(character = {}, skillName) {
   return found;
 }
 
+// Advantage on Initiative rolls from any source (Barbarian Feral Instinct,
+// Champion Remarkable Athlete, Assassin Assassinate, …). Canonical effect shape:
+// { type: 'advantage', target: 'initiative' }.
+export function getInitiativeAdvantageFromEffects(character = {}) {
+  let found = null;
+  collectSheetEffects(character).forEach((effect) => {
+    if (norm(effect.type) !== 'advantage') return;
+    if (effect.target !== 'initiative') return;
+    found = { source: effect.note || effect.ownerName || 'Advantage' };
+  });
+  return found;
+}
+
 export function getConcentrationBonus(character = {}) {
   let total = 0;
   collectSheetEffects(character).forEach((effect) => {

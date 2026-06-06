@@ -226,18 +226,22 @@ function initEffectType(t) {
   return String(t || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
-// Passive, always-on bonuses to Initiative granted by adapters via sheet effects:
+// Passive, always-on bonuses to Initiative. Adapters (class/subclass/species/feat)
+// grant these via sheet effects:
 //   { type: 'initiativeProficiency' }            → + Proficiency Bonus (Alert feat)
 //   { type: 'initiativeAbilityMod', ability:'wis'} → + ability modifier  (e.g. Gloom Stalker)
 //   { type: 'initiativeFlat', value: n }         → + flat n
+// Plus Jack of All Trades (+½ PB), derived from the same trait that feeds skills.
 // Conditional bonuses (e.g. Bard Dance "Tandem Footwork", which expends a Bardic
 // Inspiration) are intentionally NOT collected here — they are display-only.
 // Returns a breakdown [{ source, amount }] so callers can also show a tooltip.
 export function collectInitiativeModifiers(C) {
   const out = [];
+  let hasFullProficiency = false;
   collectSheetEffects(C).forEach((e) => {
     const t = initEffectType(e.type);
     if (t === 'initiativeproficiency') {
+      hasFullProficiency = true;
       out.push({ source: e.note || e.ownerName || 'Proficiency', amount: getPB(C) });
     } else if (t === 'initiativeabilitymod' && e.ability) {
       out.push({ source: e.note || e.ownerName || String(e.ability).toUpperCase(), amount: getMod(getFinal(C, e.ability)) });
@@ -245,6 +249,11 @@ export function collectInitiativeModifiers(C) {
       out.push({ source: e.note || e.ownerName || 'Bonus', amount: Number(e.value) || 0 });
     }
   });
+  // Jack of All Trades adds ½ PB only to checks that don't already include PB,
+  // so skip it when something (e.g. Alert) already grants full Proficiency Bonus.
+  if (!hasFullProficiency && hasHalfProficiencyOnUntrainedChecks(C)) {
+    out.push({ source: 'Jack of All Trades', amount: Math.floor(getPB(C) / 2) });
+  }
   return out;
 }
 

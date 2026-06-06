@@ -304,19 +304,34 @@ const SCF_TYPE_FOCUS = {
 };
 
 const itemBaseType = (item) => String(item?.type || '').split('|')[0].toUpperCase();
+const weaponCategoryOf = (item) => String(item?.weaponCategory || '').toLowerCase();
+const isWeaponItem = (item) => ['M', 'R'].includes(itemBaseType(item));
 
+// Maps 5etools `equipmentType` codes (exactly as they appear in startingEquipment
+// data) to a predicate selecting the concrete items a player may pick for that
+// slot. Add a new code here + a label in EquipmentStep to support more grants.
 export const EQUIPMENT_TYPE_MATCHERS = Object.freeze({
-  arcaneFocus: (item) => item.scfType === 'arcane',
-  druidicFocus: (item) => item.scfType === 'druidic',
-  holySymbol: (item) => item.scfType === 'holy',
+  focusSpellcastingArcane: (item) => item.scfType === 'arcane',
+  focusSpellcastingDruidic: (item) => item.scfType === 'druid',
+  focusSpellcastingHoly: (item) => item.scfType === 'holy',
   instrumentMusical: (item) => itemBaseType(item) === 'INS',
-  gamingSet: (item) => itemBaseType(item) === 'GS',
+  setGaming: (item) => itemBaseType(item) === 'GS',
+  toolArtisan: (item) => itemBaseType(item) === 'AT',
+  weaponSimple: (item) => weaponCategoryOf(item) === 'simple' && isWeaponItem(item),
+  weaponSimpleMelee: (item) => weaponCategoryOf(item) === 'simple' && itemBaseType(item) === 'M',
+  weaponMartial: (item) => weaponCategoryOf(item) === 'martial' && isWeaponItem(item),
+  weaponMartialMelee: (item) => weaponCategoryOf(item) === 'martial' && itemBaseType(item) === 'M',
 });
 
-export function resolveEquipmentTypeItem(code, items) {
+// Concrete items the player can pick for an `equipmentType` slot (e.g. setGaming
+// → the individual gaming sets). Excludes the synthetic generic group parents so
+// the user chooses a real item instead of a generic placeholder.
+export function equipmentTypeCandidates(code, items) {
   const matcher = EQUIPMENT_TYPE_MATCHERS[code];
-  if (!matcher) return null;
-  return items.find((item) => item.generatedGroupParent && matcher(item)) || null;
+  if (!matcher) return [];
+  return (items || [])
+    .filter((item) => item && !item.generatedGroupParent && matcher(item))
+    .sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
 }
 
 function itemSource(item) {

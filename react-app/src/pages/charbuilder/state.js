@@ -184,6 +184,20 @@ function findByNameSource(list, name, source) {
   return list.find((item) => item.name === name && (!source || item.source === source)) || null;
 }
 
+// Remove a single unit of the item identified by `name|source` (decrement qty,
+// drop the row when it hits zero). Used to swap equipment-type picker selections.
+function removeOneByRef(inventory, ref) {
+  const [name, source = ''] = String(ref || '').split('|');
+  const list = inventory || [];
+  const idx = list.findIndex((item) => item.name === name && (item.source || '') === source);
+  if (idx === -1) return list;
+  const next = [...list];
+  const qty = Math.max(0, Number(next[idx].qty ?? 1) - 1);
+  if (qty > 0) next[idx] = { ...next[idx], qty };
+  else next.splice(idx, 1);
+  return next;
+}
+
 function isSpeciesChoiceKey(key) {
   const k = String(key || '');
   return (
@@ -538,6 +552,18 @@ export function builderReducer(state, action) {
       return updateCharacter(state, { inventory: [...state.character.inventory, { ...action.item, custom: true, qty: 1 }] });
     case 'equipment/select':
       return updateNestedCharacter(state, 'equipChoices', { [action.key]: state.character.equipChoices[action.key] === action.value ? null : action.value });
+    case 'equipment/select-type-item': {
+      const { key, item } = action;
+      const prevRef = action.prevRef || null;
+      const newRef = item ? `${item.name}|${item.source}` : null;
+      const toggleOff = prevRef && newRef === prevRef;
+      let inventory = prevRef ? removeOneByRef(state.character.inventory, prevRef) : state.character.inventory;
+      if (!toggleOff && item) {
+        inventory = addInventoryEntries(inventory, [{ ...item, qty: item.qty ?? 1 }], state.data.items);
+      }
+      const equipChoices = { ...state.character.equipChoices, [key]: toggleOff ? null : newRef };
+      return updateCharacter(state, { inventory, equipChoices });
+    }
     case 'equipment/add-extracted': {
       const currency = { ...state.character.currency };
       Object.entries(action.currency || {}).forEach(([coin, value]) => {

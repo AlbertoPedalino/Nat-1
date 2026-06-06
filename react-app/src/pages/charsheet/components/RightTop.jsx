@@ -3,7 +3,8 @@ import { Box, Typography, Chip, Tooltip } from '@mui/material';
 import { Swords, Shield, Sparkles, AlertCircle } from 'lucide-react';
 import { getInitiative, getConditionsWithEffect } from '../logic/calculations.js';
 import { getArmorTrainingInfo } from '../logic/proficiencies.js';
-import { collectResolvedResistanceItems, collectResolvedImmunityItems } from '../logic/sheetEffects.js';
+import { collectResolvedResistanceItems, collectResolvedImmunityItems, getInitiativeAdvantageFromEffects } from '../logic/sheetEffects.js';
+import { advantageVisual } from './advantageMark.jsx';
 import { collectItemResistanceItems, collectItemImmunityItems, collectItemConditionImmunityItems, collectItemEffects } from '../../../shared/character/itemEffects.js';
 import { computeBestArmorClass } from '../../../shared/character/ac.js';
 import { resolveInitiativeTriggeredResourceRecoveries } from '../../../shared/character/initiativeEffects.js';
@@ -16,15 +17,21 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
   // to the modifier directly rather than via rollD20. Adapter-granted bonuses
   // (e.g. Alert feat → +PB) are folded in by getInitiative.
   const initMod = getInitiative(C, sheet);
+  const initAdv = getInitiativeAdvantageFromEffects(C);
+  const hasInitAdv = !!initAdv;
   const [lastInitiativeRoll, setLastInitiativeRoll] = useState(null);
   const [initiativeMessage, setInitiativeMessage] = useState('');
 
   const handleInitiativeRoll = useCallback(() => {
-    const d20 = Math.floor(Math.random() * 20) + 1;
+    // Roll with Advantage (keep higher of 2d20) when a source grants it.
+    const r1 = Math.floor(Math.random() * 20) + 1;
+    const r2 = hasInitAdv ? Math.floor(Math.random() * 20) + 1 : null;
+    const d20 = r2 != null ? Math.max(r1, r2) : r1;
     const total = d20 + initMod;
     setLastInitiativeRoll({ d20, mod: initMod, total });
 
     const bonusText = initMod >= 0 ? `+${initMod}` : `${initMod}`;
+    const advText = hasInitAdv ? ' (Adv)' : '';
     const recoveryParts = [];
 
     if (resources && typeof setResources === 'function') {
@@ -42,14 +49,18 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
       setInitiativeMessage('');
     }
 
+    const dice = r2 != null
+      ? [{ v: r1, faces: 20, kept: r1 >= r2 }, { v: r2, faces: 20, kept: r2 > r1 }]
+      : [{ v: d20, faces: 20, kept: true }];
+
     const toastDetail = recoveryParts.length
-      ? `d20 ${bonusText} = ${total} · ${recoveryParts.map(a => `${a.label}: ${a.resourceLabel || a.resourceKey} ${a.from} → ${a.to}`).join(', ')}`
-      : `d20 ${bonusText} = ${total}`;
+      ? `d20${advText} ${bonusText} = ${total} · ${recoveryParts.map(a => `${a.label}: ${a.resourceLabel || a.resourceKey} ${a.from} → ${a.to}`).join(', ')}`
+      : `d20${advText} ${bonusText} = ${total}`;
 
     if (typeof onShowToast === 'function') {
-      onShowToast('Initiative', toastDetail, total, [{ v: d20, faces: 20, kept: true }], { bonus: initMod, kept: d20 });
+      onShowToast('Initiative', toastDetail, total, dice, { bonus: initMod, kept: d20 });
     }
-  }, [C, resources, setResources, onShowToast, initMod]);
+  }, [C, resources, setResources, onShowToast, initMod, hasInitAdv]);
 
   const inv = sheet?.sheetInventory || [];
   const equippedShield = inv.find(i => i.equipped && i.type === 'S');
@@ -65,7 +76,21 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
     <Box sx={{ width: '100%' }}>
       <Box sx={{ display: 'flex', gap: '0.45rem', mb: '0.4rem', flexWrap: 'wrap' }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.15 }}>
-          <CircleStat onClick={handleInitiativeRoll} value={initMod >= 0 ? `+${initMod}` : initMod} label="Initiative" clickable />
+          <Tooltip title={initAdv ? `Advantage on Initiative — ${initAdv.source}` : ''}>
+            <Box>
+              <CircleStat onClick={handleInitiativeRoll} value={initMod >= 0 ? `+${initMod}` : initMod} label="Initiative" clickable />
+            </Box>
+          </Tooltip>
+          {initAdv && (() => {
+            const v = advantageVisual(true, false);
+            const Icon = v.Icon;
+            return (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
+                <Icon size={11} color={v.color} />
+                <Typography sx={{ fontSize: '0.5rem', color: v.color, fontWeight: 700, letterSpacing: '0.06em' }}>{v.label}</Typography>
+              </Box>
+            );
+          })()}
           {lastInitiativeRoll && (
             <Typography variant="caption" sx={{ fontSize: '0.72rem', color: 'text.secondary', textAlign: 'center', lineHeight: 1.25 }}>
               Last: <Box component="span" sx={{ fontWeight: 700, color: '#edd48a' }}>{lastInitiativeRoll.total}</Box> ({lastInitiativeRoll.d20}{lastInitiativeRoll.mod >= 0 ? ` + ${lastInitiativeRoll.mod}` : ` - ${Math.abs(lastInitiativeRoll.mod)}`})
