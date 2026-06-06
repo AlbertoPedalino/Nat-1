@@ -149,7 +149,8 @@ registerSubclassSheetActions("Bard_Dance", [
 registerSubclassSheetEffects("Bard_Dance", [
 
   { type: "unarmedStrikeDamage", value: "Bardic Inspiration die", minLevel: 3, note: "Dazzling Footwork." },
-  { type: "initiativeBonus", ability: "cha", minLevel: 6, note: "Tandem Footwork." },
+  // Tandem Footwork (L6) is conditional (expend Bardic Inspiration; bonus = die rolled),
+  // not a passive modifier — covered by its feature action above, no sheet effect.
   { type: "evasion", minLevel: 14, note: "Evasion." },
 ]);
 // [SheetRuntime] END

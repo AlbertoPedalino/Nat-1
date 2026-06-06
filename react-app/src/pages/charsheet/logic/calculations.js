@@ -4,6 +4,7 @@ import { installedRegistry } from '../../../adapters/index.js';
 import { extractFixedProficiencyLabels } from '../../../shared/character/typedProficiencies.js';
 import { getFinalAbilityScore, getItemProficiencyBonus } from '../../../shared/character/itemEffects.js';
 import { XP_THRESHOLDS } from '../../../shared/character/xp.js';
+import { collectSheetEffects } from './sheetEffects.js';
 
 const PB_TABLE = [null, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6];
 const STATS = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
@@ -219,6 +220,39 @@ export function hasSaveProficiency(C, stat) {
 export function getSaveBonus(C, stat) {
   const m = getMod(getFinal(C, stat));
   return m + (hasSaveProficiency(C, stat) ? getPB(C) : 0);
+}
+
+function initEffectType(t) {
+  return String(t || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+// Passive, always-on bonuses to Initiative granted by adapters via sheet effects:
+//   { type: 'initiativeProficiency' }            → + Proficiency Bonus (Alert feat)
+//   { type: 'initiativeAbilityMod', ability:'wis'} → + ability modifier  (e.g. Gloom Stalker)
+//   { type: 'initiativeFlat', value: n }         → + flat n
+// Conditional bonuses (e.g. Bard Dance "Tandem Footwork", which expends a Bardic
+// Inspiration) are intentionally NOT collected here — they are display-only.
+// Returns a breakdown [{ source, amount }] so callers can also show a tooltip.
+export function collectInitiativeModifiers(C) {
+  const out = [];
+  collectSheetEffects(C).forEach((e) => {
+    const t = initEffectType(e.type);
+    if (t === 'initiativeproficiency') {
+      out.push({ source: e.note || e.ownerName || 'Proficiency', amount: getPB(C) });
+    } else if (t === 'initiativeabilitymod' && e.ability) {
+      out.push({ source: e.note || e.ownerName || String(e.ability).toUpperCase(), amount: getMod(getFinal(C, e.ability)) });
+    } else if (t === 'initiativeflat' && e.value != null) {
+      out.push({ source: e.note || e.ownerName || 'Bonus', amount: Number(e.value) || 0 });
+    }
+  });
+  return out;
+}
+
+// Final Initiative modifier: DEX mod + adapter bonuses − exhaustion D20 penalty.
+export function getInitiative(C, sheet) {
+  const dex = getMod(getFinal(C, 'dex'));
+  const bonus = collectInitiativeModifiers(C).reduce((sum, m) => sum + (Number(m.amount) || 0), 0);
+  return dex + bonus - exhaustionD20Penalty(sheet?.exhaustionLevel);
 }
 
 export function normSkill(s) {

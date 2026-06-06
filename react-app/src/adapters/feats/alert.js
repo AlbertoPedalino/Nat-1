@@ -141,6 +141,11 @@ export default function install(registry, context = {}) {
     ]);
   }
 
+  if (typeof registerFeatSheetEffects === "function") {
+    registerFeatSheetEffects("Alert", [
+      { type: "initiativeProficiency", note: "Alert." }
+    ]);
+  }
 
 }
 

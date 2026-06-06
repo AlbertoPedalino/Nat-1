@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Box, Typography, Chip, Tooltip } from '@mui/material';
 import { Swords, Shield, Sparkles, AlertCircle } from 'lucide-react';
-import { getMod, getFinal, getConditionsWithEffect, exhaustionD20Penalty } from '../logic/calculations.js';
+import { getInitiative, getConditionsWithEffect } from '../logic/calculations.js';
 import { getArmorTrainingInfo } from '../logic/proficiencies.js';
 import { collectResolvedResistanceItems, collectResolvedImmunityItems } from '../logic/sheetEffects.js';
 import { collectItemResistanceItems, collectItemImmunityItems, collectItemConditionImmunityItems, collectItemEffects } from '../../../shared/character/itemEffects.js';
@@ -13,8 +13,9 @@ import ConditionsBlock from './ConditionsBlock.jsx';
 export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearConditions, onSetExhaustion, conditionEntries, onToggleInspiration, resources, setResources, onShowToast }) {
   // Initiative is a DEX check (D20 Test) but rolls its own d20 here (it also fires
   // initiative-triggered recoveries), so the exhaustion −2/level penalty is applied
-  // to the modifier directly rather than via rollD20.
-  const initMod = getMod(getFinal(C, 'dex')) - exhaustionD20Penalty(sheet?.exhaustionLevel);
+  // to the modifier directly rather than via rollD20. Adapter-granted bonuses
+  // (e.g. Alert feat → +PB) are folded in by getInitiative.
+  const initMod = getInitiative(C, sheet);
   const [lastInitiativeRoll, setLastInitiativeRoll] = useState(null);
   const [initiativeMessage, setInitiativeMessage] = useState('');
 
