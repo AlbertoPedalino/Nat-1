@@ -22,7 +22,7 @@ import { CurrencyRow } from '../../../shared/character/CurrencyCoinBox.jsx';
 import { normalizeCoinAmount } from '../../../shared/character/currency.js';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import { ItemReferenceBody, QuantityAdder } from '../../../shared/character/ItemReference.jsx';
-import { carryCapacity, formatWeight, itemQty as qty, totalInventoryWeight } from '../../../shared/character/weight.js';
+import { carryCapacity, formatWeight, itemQty as qty, totalCarriedWeight } from '../../../shared/character/weight.js';
 
 const FILTERS = [
   { key: 'all', label: 'All', icon: null },
@@ -399,10 +399,10 @@ export default function InventoryTab({ C, sheet, onUpdateInventory, onUpdateCurr
   const slotWarnings = useMemo(() => getSlotConflictWarnings(inv), [inv]);
   const inventoryStats = useMemo(() => {
     const totalItems = inv.reduce((sum, item) => sum + qty(item), 0);
-    const totalWeight = totalInventoryWeight(inv);
+    const totalWeight = totalCarriedWeight(inv, currency);
     const totalGp = inv.reduce((sum, item) => sum + (Number(item.value || 0) / 100) * qty(item), 0);
     return { totalItems, totalWeight, totalGp };
-  }, [inv]);
+  }, [inv, currency]);
   const { totalItems, totalWeight, totalGp } = inventoryStats;
   const visibleTotalItems = useMemo(() => visibleInventory.reduce((sum, entry) => sum + qty(entry.item), 0), [visibleInventory]);
   const inventoryFiltered = inventoryFilter !== 'all' || deferredInventorySearch.trim().length > 0;

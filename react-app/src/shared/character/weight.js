@@ -1,4 +1,9 @@
+import { CURRENCY_TYPES, normalizeCoinAmount } from './currency.js';
+
 const WEIGHT_PRECISION = 1000;
+
+// XPHB 2024 (p.150): 50 coins weigh 1 lb, regardless of denomination.
+export const COIN_WEIGHT_LB = 1 / 50;
 
 // XPHB 2024 (p.362): carrying capacity = Strength score × 15 (Medium size).
 // Over this, Speed is capped at 5 ft. No "encumbered" tiers in 2024.
@@ -24,6 +29,16 @@ export function roundWeight(value) {
 export function totalInventoryWeight(inventory) {
   const total = (inventory || []).reduce((sum, item) => sum + itemWeight(item) * itemQty(item), 0);
   return roundWeight(total);
+}
+
+export function currencyWeight(currency) {
+  const coins = CURRENCY_TYPES.reduce((sum, coin) => sum + normalizeCoinAmount(currency?.[coin.key]), 0);
+  return roundWeight(coins * COIN_WEIGHT_LB);
+}
+
+// Total carried weight = items + coins (XPHB counts coins toward encumbrance).
+export function totalCarriedWeight(inventory, currency) {
+  return roundWeight(totalInventoryWeight(inventory) + currencyWeight(currency));
 }
 
 export function formatWeight(value) {

@@ -10,7 +10,7 @@ import { CurrencyRow } from '../../../shared/character/CurrencyCoinBox.jsx';
 import { findInventoryItem } from '../../../shared/character/itemContainers.js';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import { ItemReferenceBody, QuantityAdder } from '../../../shared/character/ItemReference.jsx';
-import { formatWeight, totalInventoryWeight } from '../../../shared/character/weight.js';
+import { formatWeight, totalCarriedWeight } from '../../../shared/character/weight.js';
 
 const CHOICE_KEYS = ['A', 'B', 'C', 'D', 'E', 'a', 'b', 'c', 'd', 'e'];
 
@@ -309,7 +309,7 @@ export default function EquipmentStep({ state, dispatch }) {
   }, [state.data.items, inventoryFilter, query]);
   const visibleItems = useMemo(() => sortedItems.slice(0, ADD_LIST_CAP), [sortedItems]);
   const addItemWithQty = (item, qty) => dispatch({ type: 'inventory/add', item: { ...item, qty } });
-  const totalWeight = totalInventoryWeight(character.inventory);
+  const totalWeight = totalCarriedWeight(character.inventory, character.currency);
 
   return (
     <Stack spacing={2}>
