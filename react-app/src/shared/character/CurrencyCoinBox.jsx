@@ -245,7 +245,7 @@ export function CurrencyRow({ currency, onCoinChange, mode = 'builder', sx }) {
 
   return (
     <Box sx={{ overflowX: 'auto', overflowY: 'hidden', overscrollBehaviorX: 'none', pb: compact ? 0.25 : 0, ...sx }}>
-      <Box sx={{ display: 'flex', gap, width: compact ? 'fit-content' : 'auto' }}>
+      <Box sx={{ display: 'flex', gap, width: compact ? 'max-content' : 'auto' }}>
         {CURRENCY_TYPES.map((coin) => (
           <Box key={coin.key} sx={{ flex: compact ? '0 0 auto' : 1, width: compact ? basis : 'auto', minWidth: 0 }}>
             <CurrencyCoinBox
