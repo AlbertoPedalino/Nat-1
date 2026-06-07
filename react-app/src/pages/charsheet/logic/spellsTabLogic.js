@@ -3,9 +3,10 @@ import { installedRegistry } from '../../../adapters/index.js';
 import { entriesToHigherLevelBlocks, entriesToPlainText, entriesToTextBlocks, renderEntries as renderSafeEntries } from './renderEntries.js';
 import { getFinal as getFinalScore, getMod as getAbilityMod } from './calculations.js';
 import { isRitualSpell } from '../../../shared/spellTags.js';
-import { warlockHasInvocation } from '../../../shared/character/warlockUtils.js';
 import { getClassSpellLimits } from '../../../shared/character/spellProgression.js';
 import { filterByRequiredChoice } from '../../../shared/character/lineageMatch.js';
+import { isGrantUnlocked } from '../../../shared/character/spellGrants.js';
+import { enumerateAutoGrantedSpells } from '../../../shared/character/autoGrantedSpells.js';
 import { collectFreeCastsForGrant, mergeFreeCastsById, normalizeFreeCast, getFeatFreeCastTemplate, applyFreeCastRest } from '../../../shared/character/spellFreeCasts.js';
 import { collectItemAttachedSpells } from '../../../shared/character/itemAttachedSpells.js';
 
@@ -457,52 +458,32 @@ function collectChoiceSpells(C, spellIndex) {
 }
 
 function collectAutoGrantedSpells(C) {
-  const runtimeOut = [];
-  const entities = [{ className: C?.className, subclassShortName: C?.subclassShortName, level: C?.classLevel || C?.level || 1 }];
-  (C?.extraClasses || []).forEach((ec) => entities.push({ className: ec.name, subclassShortName: ec.subclassShortName, level: ec.level || 1 }));
-  entities.forEach((entity) => {
-    const cfgs = [
-      installedRegistry.getClassRuntimeConfig(entity.className),
-      installedRegistry.getSubclassRuntimeConfig(entity.className, entity.subclassShortName),
-    ];
-    cfgs.forEach((cfg) => {
-      [...(cfg?.spellcasting?.alwaysKnownSpells || []), ...(cfg?.spellcasting?.alwaysPreparedSpells || [])].forEach((spell) => {
-        const name = typeof spell === 'string' ? spell : spell?.name;
-        if (!name || entity.level < Number(spell?.minLevel || 1)) return;
-        if (spell?.invocation && !warlockHasInvocation(C, spell.invocation)) return;
-        const hasExplicitSource = !!spell?.source;
-        const srcLabel = hasExplicitSource ? spell.source : (entity.subclassShortName ? `${entity.subclassShortName} Spells` : entity.className || 'Auto');
-        const sourceType = spell?.sourceType || (hasExplicitSource ? 'auto_granted' : (entity.subclassShortName ? 'subclass' : 'class'));
-        const srcOriginType = sourceType;
-        const srcOriginLabel = hasExplicitSource ? spell.source : (entity.subclassShortName ? `${entity.subclassShortName} Spells` : entity.className || 'Auto');
-        const freeCasts = collectFreeCastsForGrant(spell, { character: C, source: srcLabel, sourceType, spellName: name });
-        runtimeOut.push({ name, level: Number(spell?.level ?? 0), source: { label: srcLabel, color: '#70b7a6', originType: srcOriginType, originLabel: srcOriginLabel }, ownerClassName: entity.className, freeCasts });
-      });
-    });
-  });
-
-  const speciesCfg = installedRegistry.getSpeciesRuntimeConfig(C?.speciesName, C?.speciesSource)?.spellcasting || {};
-  const speciesChosenAbility = C?.normalizedChoices?.species?.spellAbility || null;
-  const toSpeciesEntry = (spell, mode) => ({
-    ...(typeof spell === 'object' ? spell : { name: spell }),
-    mode,
-  });
-  filterByRequiredChoice([
-    ...(speciesCfg.alwaysKnownSpells || []).map((spell) => toSpeciesEntry(spell, 'known')),
-    ...(speciesCfg.alwaysPreparedSpells || []).map((spell) => toSpeciesEntry(spell, 'prepared')),
-  ], C).forEach((entry) => {
-    if (!entry.name || Number(C?.level || 1) < Number(entry.minLevel || 1)) return;
-    const srcLabel = entry.source || C?.speciesName || 'Species';
-    const sourceType = entry.sourceType || 'species';
-    const freeCasts = collectFreeCastsForGrant(entry, { character: C, source: srcLabel, sourceType, spellName: entry.name });
-    runtimeOut.push({
-      name: entry.name,
-      level: Number(entry.level ?? 0),
-      source: { label: srcLabel, color: '#70b7a6', originType: 'species', originLabel: C?.speciesName || 'Species' },
-      ownerClassName: null,
-      spellcastingAbility: entry.ability || speciesCfg.ability || speciesChosenAbility || null,
-      freeCasts,
-    });
+  // Single shared entry point: class runtime config + subclass-feature text +
+  // species, all gated & level-filtered. Project each canonical record into the
+  // sheet's source-object shape (branching only on species vs class origin).
+  const runtimeOut = enumerateAutoGrantedSpells(C).map((r) => {
+    if (r.origin === 'species') {
+      const srcLabel = r.explicitSource || C?.speciesName || 'Species';
+      const sourceType = r.sourceType || 'species';
+      return {
+        name: r.name,
+        level: Number(r.level ?? 0),
+        source: { label: srcLabel, color: '#70b7a6', originType: 'species', originLabel: C?.speciesName || 'Species' },
+        ownerClassName: null,
+        spellcastingAbility: r.ability,
+        freeCasts: collectFreeCastsForGrant(r.entry, { character: C, source: srcLabel, sourceType, spellName: r.name }),
+      };
+    }
+    const hasExplicitSource = !!r.explicitSource;
+    const srcLabel = hasExplicitSource ? r.explicitSource : (r.subclassShortName ? `${r.subclassShortName} Spells` : r.ownerClassName || 'Auto');
+    const sourceType = r.sourceType || (hasExplicitSource ? 'auto_granted' : (r.subclassShortName ? 'subclass' : 'class'));
+    return {
+      name: r.name,
+      level: Number(r.level ?? 0),
+      source: { label: srcLabel, color: '#70b7a6', originType: sourceType, originLabel: srcLabel },
+      ownerClassName: r.ownerClassName,
+      freeCasts: collectFreeCastsForGrant(r.entry, { character: C, source: srcLabel, sourceType, spellName: r.name }),
+    };
   });
 
   // Collapse same-named grants to one entry, but accumulate every contributing
@@ -532,7 +513,7 @@ function collectAutoGrantedSpells(C) {
     const cfg = ownerClass ? installedRegistry.getClassRuntimeConfig(ownerClass)?.spellcasting : null;
     const allCfgSpells = [...(cfg?.alwaysKnownSpells || []), ...(cfg?.alwaysPreparedSpells || [])];
     const cfgEntry = allCfgSpells.find((s) => norm(s?.name || '') === key);
-    if (cfgEntry?.invocation && !warlockHasInvocation(C, cfgEntry.invocation)) return;
+    if (cfgEntry && !isGrantUnlocked(cfgEntry, C)) return;
     const fallbackSource = { label: entry.source || 'Auto', color: '#70b7a6', originType: entry.sourceType || 'auto_granted', originLabel: entry.source || 'Auto' };
     runtimeByName.set(key, {
       name: entry.name,
@@ -553,7 +534,7 @@ function collectAtWillSpells(C) {
   entities.forEach((entity) => {
     (installedRegistry.getClassAtWillSpells(entity.name) || []).forEach((entry) => {
       if (entity.level < Number(entry.minLevel || 1)) return;
-      if (entry.invocation && !warlockHasInvocation(C, entry.invocation)) return;
+      if (!isGrantUnlocked(entry, C)) return;
       out.push({ name: entry.spell, source: { label: entry.invocation || 'At Will', color: '#9d7fb8', kind: 'atWill', originType: 'invocation', originLabel: entry.invocation || 'At Will' } });
     });
   });

@@ -2,7 +2,7 @@ import { installedRegistry } from '../../../adapters/index.js';
 import { FULL_SLOTS, HALF_SLOTS, PACT_SLOTS, THIRD_SLOTS } from '../constants.js';
 import { getPrimaryClassLevel } from '../logic/calculations.js';
 import { getClassSpellLimits } from '../../../shared/character/spellProgression.js';
-import { filterByRequiredChoice } from '../../../shared/character/lineageMatch.js';
+import { enumerateClassGrants, enumerateSpeciesGrants, enumerateSubclassFeatureSpells } from '../../../shared/character/autoGrantedSpells.js';
 
 export function normClassKey(value) {
   return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -84,119 +84,38 @@ function getClassSpellLevel(character) {
   return Math.max(1, Math.min(20, Number(character.classLevel || getPrimaryClassLevel(character) || character.level || 1)));
 }
 
-function getSpellTagName(value) {
-  return String(value || '').split('|')[0].trim();
-}
-
-function pushSpellTags(text, out) {
-  const regex = /\{@spell\s+([^}]+)\}/gi;
-  let match = regex.exec(String(text || ''));
-  while (match) {
-    const name = getSpellTagName(match[1]);
-    if (name) out.push(name);
-    match = regex.exec(String(text || ''));
-  }
-}
-
-function getRowMinLevel(row) {
-  const first = Array.isArray(row) ? row[0] : row?.row?.[0];
-  if (first == null) return null;
-  const match = String(first).match(/\d+/);
-  const level = match ? Number(match[0]) : null;
-  return level && level >= 1 && level <= 20 ? level : null;
-}
-
-function collectSpellTags(node, classLevel, out = []) {
-  if (!node) return out;
-  if (typeof node === 'string') {
-    pushSpellTags(node, out);
-    return out;
-  }
-  if (Array.isArray(node)) {
-    const rowLevel = getRowMinLevel(node);
-    if (rowLevel && rowLevel > classLevel) return out;
-    node.forEach((item) => collectSpellTags(item, classLevel, out));
-    return out;
-  }
-  if (typeof node !== 'object') return out;
-
-  if (node.type === 'table' && Array.isArray(node.rows)) {
-    node.rows.forEach((row) => collectSpellTags(row, classLevel, out));
-    return out;
-  }
-
-  ['entries', 'entry', 'items', 'rows', 'row'].forEach((key) => collectSpellTags(node[key], classLevel, out));
-  return out;
-}
-
-function collectSubclassFeatureSpells(character) {
-  const classLevel = getClassSpellLevel(character);
-  const subclassShortName = String(character.subclassShortName || '');
-  if (!subclassShortName) return [];
-
-  const out = [];
-  (character.allSubFeatures || [])
-    .filter((feature) => !feature?.isReprinted)
-    .filter((feature) => !feature?.subclassShortName || feature.subclassShortName === subclassShortName)
-    .filter((feature) => Number(feature?.level || 1) <= classLevel)
-    .filter((feature) => /spells?/i.test(String(feature?.name || '')))
-    .forEach((feature) => {
-      collectSpellTags(feature.entries, classLevel).forEach((name) => {
-        out.push({
-          name,
-          minLevel: Number(feature.level || 1),
-          level: null,
-          mode: 'prepared',
-          source: feature.name || subclassShortName,
-          sourceType: 'subclass',
-        });
-      });
-    });
-  return out;
-}
-
-export function collectAutoGrantedSpells(character, profile = getSpellcastingProfile(character)) {
-  const classLevel = getClassSpellLevel(character);
+export function collectAutoGrantedSpells(character) {
+  const entity = {
+    className: character?.className,
+    subclassShortName: character?.subclassShortName,
+    level: getClassSpellLevel(character),
+    allSubFeatures: character?.allSubFeatures || [],
+  };
+  // Class runtime-config grants and subclass-feature-text grants share the same
+  // class projection (string source label).
+  const classRecords = [
+    ...enumerateClassGrants(entity, character),
+    ...enumerateSubclassFeatureSpells(entity),
+  ];
   const out = [
-    ...(profile.alwaysKnownSpells || []).map((spell) => ({ spell, mode: 'known' })),
-    ...(profile.alwaysPreparedSpells || []).map((spell) => ({ spell, mode: 'prepared' })),
-  ]
-    .map(({ spell, mode }) => ({
-      name: typeof spell === 'string' ? spell : spell?.name,
-      minLevel: Number(spell?.minLevel || 1),
-      level: spell?.level ?? null,
-      mode,
-      source: spell?.source || (mode === 'known' ? 'Class' : 'Subclass'),
-      sourceType: spell?.sourceType || mode,
-    }))
-    .filter((spell) => spell.name && classLevel >= spell.minLevel);
-
-  const speciesSpellcasting = installedRegistry.getSpeciesRuntimeConfig(
-    character?.speciesName,
-    character?.speciesSource,
-  )?.spellcasting || {};
-  const speciesChosenAbility = character?.normalizedChoices?.species?.spellAbility || null;
-  const toEntry = (spell, mode) => ({
-    ...(typeof spell === 'object' ? spell : { name: spell }),
-    mode,
-  });
-  filterByRequiredChoice([
-    ...(speciesSpellcasting.alwaysKnownSpells || []).map((spell) => toEntry(spell, 'known')),
-    ...(speciesSpellcasting.alwaysPreparedSpells || []).map((spell) => toEntry(spell, 'prepared')),
-  ], character)
-    .map((entry) => ({
-      name: entry.name,
-      minLevel: Number(entry.minLevel || 1),
-      level: entry.level ?? null,
-      mode: entry.mode,
-      source: entry.source || character?.speciesName || 'Species',
-      sourceType: entry.sourceType || 'species',
-      spellcastingAbility: entry.ability || speciesSpellcasting.ability || speciesChosenAbility || null,
-    }))
-    .filter((entry) => entry.name && Number(character?.level || 1) >= entry.minLevel)
-    .forEach((entry) => out.push(entry));
-
-  collectSubclassFeatureSpells(character).forEach((spell) => out.push(spell));
+    ...classRecords.map((r) => ({
+      name: r.name,
+      minLevel: r.minLevel,
+      level: r.level,
+      mode: r.mode,
+      source: r.explicitSource || (r.mode === 'known' ? 'Class' : 'Subclass'),
+      sourceType: r.sourceType || r.mode,
+    })),
+    ...enumerateSpeciesGrants(character).map((r) => ({
+      name: r.name,
+      minLevel: r.minLevel,
+      level: r.level,
+      mode: r.mode,
+      source: r.explicitSource || character?.speciesName || 'Species',
+      sourceType: r.sourceType || 'species',
+      spellcastingAbility: r.ability,
+    })),
+  ];
 
   const seen = new Set();
   return out.filter((spell) => {

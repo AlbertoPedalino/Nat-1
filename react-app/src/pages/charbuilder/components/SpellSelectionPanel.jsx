@@ -36,7 +36,7 @@ export default function SpellSelectionPanel({ state, dispatch }) {
   const activeIsWizard = String(activeCharacter.className || '').toLowerCase() === 'wizard';
   const activeWizardSpellbook = (activeExtra ? activeExtra.wizardSpellbook : character.wizardSpellbook) || {};
   const activeSpellbookSize = activeIsWizard ? getSpellbookSize(activeWizardSpellbook) : 0;
-  const autoGrantedSpells = collectAutoGrantedSpells(activeCharacter, profile);
+  const autoGrantedSpells = collectAutoGrantedSpells(activeCharacter);
   const query = state.search.spells.toLowerCase();
   const levels = [0, ...Array.from({ length: Math.max(0, maxLevel) }, (_, index) => index + 1)];
   const classNames = [activeCharacter.className].filter(Boolean);
