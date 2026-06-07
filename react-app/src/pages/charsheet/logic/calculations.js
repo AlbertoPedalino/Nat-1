@@ -2,11 +2,11 @@ import { computeMaxHp as sharedComputeMaxHp } from '../../../shared/character/hp
 import { getFeatAsiBonus } from '../../../shared/character/abilityBonuses.js';
 import { installedRegistry } from '../../../adapters/index.js';
 import { extractFixedProficiencyLabels } from '../../../shared/character/typedProficiencies.js';
-import { getFinalAbilityScore, getItemProficiencyBonus } from '../../../shared/character/itemEffects.js';
+import { getFinalAbilityScore } from '../../../shared/character/itemEffects.js';
+import { getProficiencyBonus } from '../../../shared/character/proficiency.js';
 import { XP_THRESHOLDS } from '../../../shared/character/xp.js';
 import { collectSheetEffects } from './sheetEffects.js';
 
-const PB_TABLE = [null, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6];
 const STATS = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
 const SLBL = { str: 'STR', dex: 'DEX', con: 'CON', int: 'INT', wis: 'WIS', cha: 'CHA' };
 const FULL_LBL = { str: 'Strength', dex: 'Dexterity', con: 'Constitution', int: 'Intelligence', wis: 'Wisdom', cha: 'Charisma' };
@@ -204,10 +204,7 @@ export function getFinal(C, stat) {
 
 export function getMod(v) { return Math.floor((v - 10) / 2); }
 
-export function getPB(C) {
-  const base = C ? (PB_TABLE[C.level] || 2) : 2;
-  return base + getItemProficiencyBonus(C);
-}
+export const getPB = getProficiencyBonus;
 
 export function fmod(v) { const m = getMod(v); return (m >= 0 ? '+' : '') + m; }
 

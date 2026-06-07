@@ -123,7 +123,9 @@
       "PowerShell($b = Invoke-RestMethod \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/items-base.json\"; $i = Invoke-RestMethod \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/items.json\"; $all = @\\($b.baseitem\\) + @\\($i.item\\); $all | Where-Object { $_.name -match 'Gaming Set|Musical Instrument' } | Select-Object name,source,type,@{n='group';e={ if\\($_.group\\){$_.group -join ','}else{'<none>'} }} | Format-Table -AutoSize)",
       "Bash(awk -F/ '{print $1}')",
       "Bash(npm i *)",
-      "Bash(npx playwright *)"
+      "Bash(npx playwright *)",
+      "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/feats.json\" -o /tmp/feats.json)",
+      "PowerShell(Invoke-WebRequest \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/feats.json\" -OutFile \"$env:TEMP\\\\feats.json\"; node -e \"const d=require\\(process.env.TEMP+'/feats.json'\\);for\\(const f of d.feat\\){if\\(f.name==='Lucky'&&f.source==='XPHB'\\)console.log\\(JSON.stringify\\(f,null,2\\)\\);}\")"
     ]
   }
 }

@@ -1,5 +1,7 @@
 import { installedRegistry } from '../../../adapters/index.js';
-import { getFinal, getMod } from './calculations.js';
+import { getFinal, getMod, getPB } from './calculations.js';
+import { resolveScalingFormula } from '../../../shared/character/scalingFormula.js';
+import { rechargesOnRest, isKnownRecharge } from '../../../shared/character/rechargeRules.js';
 import { hasActionRequirement } from '../../../shared/character/choiceUtils.js';
 function resourceOwnerLevel(def, character) {
   return Number(def?.ownerLevel ?? character?.classLevel ?? character?.level ?? 1);
@@ -18,9 +20,13 @@ function resourceAbilityMods(character) {
 
 export function normalizeResourceMax(def, character = null) {
   const raw = def?.max ?? 1;
+  if (typeof raw === 'string') {
+    const resolved = resolveScalingFormula(raw, character);
+    if (resolved != null) return Math.max(0, Math.floor(resolved));
+  }
   if (typeof raw === 'function') {
     try {
-      const value = raw(resourceOwnerLevel(def, character), resourceAbilityMods(character), { character, resource: def });
+      const value = raw(resourceOwnerLevel(def, character), resourceAbilityMods(character), { character, resource: def, pb: getPB(character) });
       const n = Number(value);
       if (!Number.isFinite(n)) return value === Infinity ? Infinity : 1;
       return Math.max(0, Math.floor(n));
@@ -65,11 +71,23 @@ function selectedFeatNames(character) {
   return (character?.allFeatSnapshots || []).map((feat) => feat?.name).filter(Boolean);
 }
 
+const _badRechargeWarned = typeof Set === 'function' ? new Set() : null;
+function warnUnknownRecharge(def, ownerName) {
+  if (typeof import.meta === 'undefined' || !import.meta.env?.DEV) return;
+  if (!_badRechargeWarned || !def?.recharge || isKnownRecharge(def.recharge)) return;
+  const cacheKey = `${ownerName || def.ownerName || ''}|${def.key}|${def.recharge}`;
+  if (_badRechargeWarned.has(cacheKey)) return;
+  _badRechargeWarned.add(cacheKey);
+  // eslint-disable-next-line no-console
+  console.warn(`[resources] Unknown recharge "${def.recharge}" on "${def.key}" (${ownerName || def.ownerName || '?'}). Use LR / SR / SR+LR.`);
+}
+
 function pushResource(out, def, character, ownerName, ownerLevel) {
   if (!def?.key) return;
   const lv = Number(def.ownerLevel ?? ownerLevel ?? character?.level ?? 1);
   if (def.minLevel && lv < Number(def.minLevel)) return;
   if (!hasCondition(def, character)) return;
+  warnUnknownRecharge(def, ownerName);
   out.push({ ...def, ownerName: def.ownerName || ownerName, ownerLevel: lv });
 }
 
@@ -85,16 +103,10 @@ function uniqResources(resources) {
   return out;
 }
 
-function resourceRestText(def) {
-  return String(def?.recharge || '').toLowerCase();
-}
-
-function shortRestFullyRecovers(def, character) {
-  const recharge = resourceRestText(def);
-  if (!/\b(sr|short)\b/.test(recharge)) return false;
+function srBlockedByLevel(def, character) {
+  if (!def?.srMinLevel) return false;
   const ownerLevel = Number(def?.ownerLevel ?? character?.classLevel ?? character?.level ?? 1);
-  if (def?.srMinLevel && ownerLevel < Number(def.srMinLevel)) return false;
-  return true;
+  return ownerLevel < Number(def.srMinLevel);
 }
 
 export function getAllResourceDefs(character) {
@@ -174,7 +186,7 @@ export function applyResourceRest(resources, defs, character, type) {
       next[def.key] = max;
       return;
     }
-    if (shortRestFullyRecovers(def, character)) {
+    if (rechargesOnRest(def.recharge, 'short') && !srBlockedByLevel(def, character)) {
       next[def.key] = max;
       return;
     }

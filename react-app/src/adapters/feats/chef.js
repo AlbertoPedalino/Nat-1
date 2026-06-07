@@ -128,11 +128,7 @@ export default function install(registry, context = {}) {
         name: "Bolstering Treats",
         icon: "chef-hat",
         recharge: "LR",
-        max: function (char) {
-          return typeof getProfBonus === "function"
-            ? getProfBonus(char && (char.classLevel || char.level) || 1)
-            : 2;
-        }
+        max: 'proficiencyBonus'
       }
     ]);
   }

@@ -243,7 +243,7 @@ registerSpeciesSheetResources("Goliath_XPHB", [
     name: 'Giant Ancestry',
     icon: 'mountain',
     recharge: 'LR',
-    max: (lv) => Math.floor((Number(lv) - 1) / 4) + 2,
+    max: 'proficiencyBonus',
   },
   {
     key: 'goliath_large_form',

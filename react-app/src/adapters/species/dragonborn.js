@@ -194,7 +194,7 @@ registerSpeciesSheetResources("Dragonborn_XPHB", [
     name: 'Breath Weapon',
     icon: 'flame',
     recharge: 'LR',
-    max: (lv) => Math.floor((Number(lv) - 1) / 4) + 2,
+    max: 'proficiencyBonus',
   },
   {
     key: 'dragonborn_flight',

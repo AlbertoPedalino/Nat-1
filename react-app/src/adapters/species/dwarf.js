@@ -152,7 +152,7 @@ registerSpeciesSheetResources("Dwarf_XPHB", [
     name: 'Stonecunning',
     icon: 'radar',
     recharge: 'LR',
-    max: (lv) => Math.floor((Number(lv) - 1) / 4) + 2,
+    max: 'proficiencyBonus',
   },
 ]);
 

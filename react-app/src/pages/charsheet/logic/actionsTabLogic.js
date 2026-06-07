@@ -66,37 +66,10 @@ export function buildActionTags(action, C) {
   return { ...action, tags };
 }
 
-function resourceOwnerLevel(def, C) {
-  return Number(def?.ownerLevel ?? C?.classLevel ?? C?.level ?? 1);
-}
-
-function resourceAbilityMods(C) {
-  return {
-    str: getMod(getFinal(C, 'str')),
-    dex: getMod(getFinal(C, 'dex')),
-    con: getMod(getFinal(C, 'con')),
-    int: getMod(getFinal(C, 'int')),
-    wis: getMod(getFinal(C, 'wis')),
-    cha: getMod(getFinal(C, 'cha')),
-  };
-}
-
-export function normalizeResourceMax(def, C = null) {
-  const raw = def?.max ?? 1;
-  if (typeof raw === 'function') {
-    try {
-      const value = raw(resourceOwnerLevel(def, C), resourceAbilityMods(C), { character: C, resource: def });
-      const n = Number(value);
-      if (!Number.isFinite(n)) return value === Infinity ? Infinity : 1;
-      return Math.max(0, Math.floor(n));
-    } catch {
-      return 1;
-    }
-  }
-  const n = Number(raw);
-  if (!Number.isFinite(n)) return raw === Infinity ? Infinity : 1;
-  return Math.max(0, Math.floor(n));
-}
+// Single source of truth lives in restResources (handles string formulas like
+// 'proficiencyBonus' + function form). Re-exported so ActionsTab builds its
+// resource-max map from the same resolver instead of a divergent copy.
+export { normalizeResourceMax } from './restResources.js';
 
 function hasCondition(def, C, sheet) {
   if (typeof def?.condition !== 'function' && !def?.requiresChoice && !(def?.choiceKey && def?.model) && !def?.requiresInventoryFlag) return true;

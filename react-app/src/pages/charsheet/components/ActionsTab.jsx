@@ -51,6 +51,17 @@ const ACTION_DETAIL_RENDERERS = {
   unarmedStrike: UnarmedStrikeOptionsPanel,
 };
 
+const _danglingResKeyWarned = typeof Set === 'function' ? new Set() : null;
+function warnDanglingResKey(action, resMaxMap) {
+  if (typeof import.meta === 'undefined' || !import.meta.env?.DEV) return;
+  if (!_danglingResKeyWarned || !action?.resKey || resMaxMap[action.resKey] != null) return;
+  const cacheKey = `${action._source || action.ownerName || ''}|${action.name}|${action.resKey}`;
+  if (_danglingResKeyWarned.has(cacheKey)) return;
+  _danglingResKeyWarned.add(cacheKey);
+  // eslint-disable-next-line no-console
+  console.warn(`[actions] Action "${action.name}" references resKey "${action.resKey}" with no matching resource def (${action._source || action.ownerName || '?'}).`);
+}
+
 function actionLabel(value) {
   if (value === 'all') return 'All';
   return value.charAt(0).toUpperCase() + value.slice(1);
@@ -118,6 +129,7 @@ export default function ActionsTab({ C, sheet, onRoll, resources, setResources, 
     resNameMap[def.key] = def.name || def.key;
     if (def.pool) resPoolMap[def.key] = true;
   });
+  adapterActions.forEach((a) => warnDanglingResKey(a, resMaxMap));
 
   const slotRecoverySpent = slotRecovery
     ? slotRecovery.levels.reduce((sum, entry) => sum + (entry.level * Number(slotRecoverySelection[String(entry.level)] || 0)), 0)

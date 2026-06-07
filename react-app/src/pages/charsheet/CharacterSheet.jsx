@@ -101,9 +101,12 @@ export default function CharacterSheet() {
         const allResDefs = getAllResourceDefs(nextChar);
         const merged = { ...stored };
         allResDefs.forEach((def) => {
-          if (def.key && merged[def.key] == null) {
-            merged[def.key] = normalizeResourceMax(def, nextChar);
-          }
+          if (!def.key) return;
+          const max = normalizeResourceMax(def, nextChar);
+          const cur = merged[def.key];
+          // Initialize new pools to max; clamp existing remaining to the
+          // recomputed max (e.g. after a level-up changed Proficiency Bonus).
+          merged[def.key] = cur == null ? max : Math.min(Math.max(0, Number(cur) || 0), max);
         });
         setResources(merged);
         if (id) storePatchCharacter(id, { resources: merged });

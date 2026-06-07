@@ -128,7 +128,7 @@ export default function install(registry, context = {}) {
         name:     'Lucky',
         icon:     'clover',
         recharge: 'LR',
-        max:      function () { return 3; },
+        max:      'proficiencyBonus', // XPHB 2024: Luck Points = Proficiency Bonus
       },
     ]);
   }
@@ -139,7 +139,7 @@ export default function install(registry, context = {}) {
         name:   'Lucky',
         icon:   'clover',
         cat:    'reaction',
-        uses:   '3 / Long Rest',
+        uses:   'PB / Long Rest',
         resKey: 'lucky_points',
       },
     ]);

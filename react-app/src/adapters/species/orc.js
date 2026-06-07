@@ -155,7 +155,7 @@ registerSpeciesSheetResources("Orc_XPHB", [
     name: 'Adrenaline Rush',
     icon: 'zap',
     recharge: 'SR+LR',
-    max: (lv) => Math.floor((Number(lv) - 1) / 4) + 2,
+    max: 'proficiencyBonus',
   },
   {
     key: 'orc_relentless_endurance',

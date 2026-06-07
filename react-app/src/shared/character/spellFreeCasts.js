@@ -10,72 +10,27 @@
  * granted spell entry. The spell pipeline runs entries through
  * `normalizeFreeCast` to produce the rendered shape consumed by `SpellEntry`.
  */
-
-const RECHARGE_LABELS = {
-  longrest: 'LR',
-  shortrest: 'SR',
-  shortorlongrest: 'SR or LR',
-  none: '—',
-};
-
-const RECHARGE_ALIASES = {
-  lr: 'longRest',
-  'long-rest': 'longRest',
-  longrest: 'longRest',
-  long: 'longRest',
-  dawn: 'longRest',
-  daily: 'longRest',
-  perday: 'longRest',
-  '1/day': 'longRest',
-  sr: 'shortRest',
-  'short-rest': 'shortRest',
-  shortrest: 'shortRest',
-  short: 'shortRest',
-  'sr+lr': 'shortOrLongRest',
-  'sr-lr': 'shortOrLongRest',
-  shortorlongrest: 'shortOrLongRest',
-  shortorlong: 'shortOrLongRest',
-};
-
-function normRecharge(value) {
-  const key = String(value || '').toLowerCase().replace(/\s+/g, '');
-  return RECHARGE_ALIASES[key] || (key ? value : 'longRest');
-}
-
-function proficiencyBonus(character) {
-  const level = Number(character?.level || character?.classLevel || 1);
-  return Math.floor((Math.max(1, level) - 1) / 4) + 2;
-}
-
-function abilityMod(character, ability) {
-  const score = Number(character?.finalScores?.[ability] ?? 10);
-  return Math.floor((score - 10) / 2);
-}
+import { getProficiencyBonus } from './proficiency.js';
+import { resolveScalingFormula } from './scalingFormula.js';
+import { normalizeRecharge, rechargeLabel, rechargesOnRest } from './rechargeRules.js';
 
 function resolveMaxUses(raw, character) {
   const formula = raw?.usesFormula;
   if (typeof formula === 'function') {
     try {
-      const value = formula({ character, pb: proficiencyBonus(character) });
+      const value = formula({ character, pb: getProficiencyBonus(character) });
       const n = Number(value);
       if (Number.isFinite(n)) return Math.max(1, Math.floor(n));
     } catch { /* ignore */ }
   }
-  if (typeof formula === 'string') {
-    const key = formula.toLowerCase();
-    if (key === 'proficiencybonus' || key === 'pb') return Math.max(1, proficiencyBonus(character));
-    if (key.startsWith('abilitymod:')) {
-      const ability = key.split(':')[1];
-      return Math.max(1, abilityMod(character, ability));
-    }
-  }
+  const resolved = resolveScalingFormula(formula, character);
+  if (resolved != null) return Math.max(1, Math.floor(resolved));
   const n = Number(raw?.maxUses ?? 1);
   return Number.isFinite(n) && n > 0 ? Math.floor(n) : 1;
 }
 
 export function formatRechargeLabel(recharge, max) {
-  const key = String(recharge || '').toLowerCase().replace(/\s+/g, '');
-  const suffix = RECHARGE_LABELS[key] || 'LR';
+  const suffix = rechargeLabel(recharge);
   if (!max || max === 1) return `1/${suffix}`;
   return `${max}/${suffix}`;
 }
@@ -96,7 +51,7 @@ export function normalizeFreeCast(rawDef, ctx = {}) {
   const spellName = ctx.spellName || rawDef.spellName || '';
   if (!spellName) return null;
 
-  const recharge = normRecharge(rawDef.recharge);
+  const recharge = normalizeRecharge(rawDef.recharge);
   const max = resolveMaxUses(rawDef, character);
   const label = rawDef.label || source;
   const id = rawDef.id || makeFreeCastId({ sourceType, source, spellName });
@@ -136,13 +91,6 @@ export function mergeFreeCastsById(...lists) {
   return [...byId.values()];
 }
 
-function rechargeMatchesRest(recharge, restType) {
-  const norm = String(recharge || '').toLowerCase();
-  if (restType === 'long') return true;
-  if (restType === 'short') return norm === 'shortrest' || norm === 'shortorlongrest';
-  return false;
-}
-
 export function applyFreeCastRest(uses = {}, defs = [], restType = 'long') {
   const defById = new Map();
   (defs || []).forEach((def) => {
@@ -152,7 +100,7 @@ export function applyFreeCastRest(uses = {}, defs = [], restType = 'long') {
   Object.entries(uses || {}).forEach(([id, used]) => {
     const def = defById.get(id);
     if (!def) return;
-    if (rechargeMatchesRest(def.recharge, restType)) return;
+    if (rechargesOnRest(def.recharge, restType)) return;
     next[id] = used;
   });
   return next;
