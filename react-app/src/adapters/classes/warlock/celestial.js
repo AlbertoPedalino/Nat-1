@@ -161,7 +161,7 @@ registerSubclassSheetEffects("Warlock_Celestial", [
 registerSubclassSheetResources("Warlock_Celestial", [
   { key: "celestial_heal_light", name: "Healing Light", icon: "sun",   recharge: "LR",
     max: (lv) => 1 + lv,
-    pool: true },
+    pool: true, track: "used" },
   { key: "celestial_searing_ven", name: "Searing Vengeance", icon: "flame", recharge: "LR", max: () => 1 },
 ]);
 

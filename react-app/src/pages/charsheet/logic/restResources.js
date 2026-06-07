@@ -71,15 +71,27 @@ function selectedFeatNames(character) {
   return (character?.allFeatSnapshots || []).map((feat) => feat?.name).filter(Boolean);
 }
 
-const _badRechargeWarned = typeof Set === 'function' ? new Set() : null;
-function warnUnknownRecharge(def, ownerName) {
-  if (typeof import.meta === 'undefined' || !import.meta.env?.DEV) return;
-  if (!_badRechargeWarned || !def?.recharge || isKnownRecharge(def.recharge)) return;
-  const cacheKey = `${ownerName || def.ownerName || ''}|${def.key}|${def.recharge}`;
-  if (_badRechargeWarned.has(cacheKey)) return;
-  _badRechargeWarned.add(cacheKey);
-  // eslint-disable-next-line no-console
-  console.warn(`[resources] Unknown recharge "${def.recharge}" on "${def.key}" (${ownerName || def.ownerName || '?'}). Use LR / SR / SR+LR.`);
+const KNOWN_TRACK = new Set(['used', 'remaining']);
+const _badResourceDefWarned = typeof Set === 'function' ? new Set() : null;
+function warnBadResourceDef(def, ownerName) {
+  if (typeof import.meta === 'undefined' || !import.meta.env?.DEV || !_badResourceDefWarned) return;
+  const owner = ownerName || def.ownerName || '?';
+  if (def?.recharge && !isKnownRecharge(def.recharge)) {
+    const cacheKey = `recharge|${owner}|${def.key}|${def.recharge}`;
+    if (!_badResourceDefWarned.has(cacheKey)) {
+      _badResourceDefWarned.add(cacheKey);
+      // eslint-disable-next-line no-console
+      console.warn(`[resources] Unknown recharge "${def.recharge}" on "${def.key}" (${owner}). Use LR / SR / SR+LR.`);
+    }
+  }
+  if (def?.track && !KNOWN_TRACK.has(def.track)) {
+    const cacheKey = `track|${owner}|${def.key}|${def.track}`;
+    if (!_badResourceDefWarned.has(cacheKey)) {
+      _badResourceDefWarned.add(cacheKey);
+      // eslint-disable-next-line no-console
+      console.warn(`[resources] Unknown track "${def.track}" on "${def.key}" (${owner}). Use 'used' or 'remaining'.`);
+    }
+  }
 }
 
 function pushResource(out, def, character, ownerName, ownerLevel) {
@@ -87,7 +99,7 @@ function pushResource(out, def, character, ownerName, ownerLevel) {
   const lv = Number(def.ownerLevel ?? ownerLevel ?? character?.level ?? 1);
   if (def.minLevel && lv < Number(def.minLevel)) return;
   if (!hasCondition(def, character)) return;
-  warnUnknownRecharge(def, ownerName);
+  warnBadResourceDef(def, ownerName);
   out.push({ ...def, ownerName: def.ownerName || ownerName, ownerLevel: lv });
 }
 
@@ -177,17 +189,25 @@ function getHitDieFaces(hd) {
   return parsed ? Number(parsed[1]) || 8 : 8;
 }
 
+// The value a resource holds when fully available: 0 for 'used'-tracked pools
+// (they store amount spent), max for default 'remaining' resources. Single
+// source of truth for both the rest recharge and the initial/clamp logic.
+export function resourceFullValue(def, max) {
+  return def?.track === 'used' ? 0 : max;
+}
+
 export function applyResourceRest(resources, defs, character, type) {
   const next = { ...resources };
   defs.forEach(def => {
     if (!def.key) return;
     const max = normalizeResourceMax(def, character);
+    const rechargedValue = resourceFullValue(def, max);
     if (type === 'long') {
-      next[def.key] = max;
+      next[def.key] = rechargedValue;
       return;
     }
     if (rechargesOnRest(def.recharge, 'short') && !srBlockedByLevel(def, character)) {
-      next[def.key] = max;
+      next[def.key] = rechargedValue;
       return;
     }
     if (def.srRecover) {

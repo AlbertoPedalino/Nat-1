@@ -153,7 +153,7 @@ registerSubclassSheetResources("Fighter_Psi Warrior", [
   { key: "psi_dice", name: "Psionic Energy Dice", icon: "orbit", recharge: "LR",
     max: (lv) => lv >= 17 ? 12 : lv >= 13 ? 10 : lv >= 9 ? 8 : lv >= 5 ? 6 : 4,
     die: (lv) => lv >= 17 ? "d12" : lv >= 11 ? "d10" : lv >= 5 ? "d8" : "d6",
-    pool: true },
+    pool: true, track: "used" },
   { key: "telekinetic_movement", name: "Telekinetic Movement", icon: "wind",   recharge: "SR", max: () => 1 },
   { key: "psi_leap",             name: "Psi-Powered Leap",     icon: "arrow-up", recharge: "SR", max: () => 1 },
   { key: "bulwark_force",        name: "Bulwark of Force",     icon: "shield", recharge: "LR", max: () => 1 },

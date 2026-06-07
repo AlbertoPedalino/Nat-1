@@ -189,7 +189,7 @@ registerSubclassSheetResources("Fighter_Battle Master", [
   { key: "superiority_dice", name: "Superiority Dice", actionName: "Combat Maneuvers", icon: "swords", recharge: "SR",
     max: (lv) => lv >= 15 ? 6 : lv >= 7 ? 5 : 4,
     die: (lv) => lv >= 18 ? "d12" : lv >= 10 ? "d10" : "d8",
-    pool: true },
+    pool: true, track: "used" },
   { key: "know_your_enemy", name: "Know Your Enemy", icon: "eye", recharge: "LR", max: () => 1 },
 ]);
 

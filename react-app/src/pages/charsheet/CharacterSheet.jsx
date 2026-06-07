@@ -20,7 +20,7 @@ import { ProficiencySetsProvider } from './context/ProficiencySetsContext.jsx';
 import { buildD20Meta, formatD20Detail, rollD20 as rollD20Dice } from '../../shared/character/dice.js';
 import { aggregateSavingThrowBonus } from '../../shared/character/itemBonus.js';
 import { calcMaxHP, getMod, getFinal, getPB, getSaveBonus, CONDITION_IMPLIES, clampExhaustion, exhaustionD20Penalty, EXHAUSTION_MAX } from './logic/calculations.js';
-import { applyResourceRest, getAllResourceDefs, getHitDicePools, getUsedHitDiceTotal, normalizeResourceMax } from './logic/restResources.js';
+import { applyResourceRest, getAllResourceDefs, getHitDicePools, getUsedHitDiceTotal, normalizeResourceMax, resourceFullValue } from './logic/restResources.js';
 import { clearedToggles } from './logic/toggleState.js';
 import { applyFreeCastRest, getFreeCastDefsForCharacter } from './logic/spellsTabLogic.js';
 import { loadCoreAdapters, loadClassAdapters, installedRegistry } from '../../adapters/index.js';
@@ -103,10 +103,13 @@ export default function CharacterSheet() {
         allResDefs.forEach((def) => {
           if (!def.key) return;
           const max = normalizeResourceMax(def, nextChar);
+          // 'used'-tracked pools (e.g. Lay on Hands) start empty (0 spent);
+          // 'remaining'-tracked resources start full (max).
+          const initial = resourceFullValue(def, max);
           const cur = merged[def.key];
-          // Initialize new pools to max; clamp existing remaining to the
-          // recomputed max (e.g. after a level-up changed Proficiency Bonus).
-          merged[def.key] = cur == null ? max : Math.min(Math.max(0, Number(cur) || 0), max);
+          // Initialize new pools; clamp existing value to the recomputed max
+          // (e.g. after a level-up changed Proficiency Bonus).
+          merged[def.key] = cur == null ? initial : Math.min(Math.max(0, Number(cur) || 0), max);
         });
         setResources(merged);
         if (id) storePatchCharacter(id, { resources: merged });

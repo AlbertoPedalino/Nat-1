@@ -123,10 +123,12 @@ export default function ActionsTab({ C, sheet, onRoll, resources, setResources, 
   const resMaxMap = {};
   const resNameMap = {};
   const resPoolMap = {};
+  const resTrackMap = {};
   getAllResourceDefs(C).forEach(def => {
     if (!def.key) return;
     resMaxMap[def.key] = normalizeResourceMax(def, C);
     resNameMap[def.key] = def.name || def.key;
+    resTrackMap[def.key] = def.track || 'remaining';
     if (def.pool) resPoolMap[def.key] = true;
   });
   adapterActions.forEach((a) => warnDanglingResKey(a, resMaxMap));
@@ -640,6 +642,7 @@ export default function ActionsTab({ C, sheet, onRoll, resources, setResources, 
                 onShowToast={onShowToast}
                 resMax={resMaxMap[action.resKey]}
                 isPool={resPoolMap[action.resKey]}
+                resTrack={resTrackMap[action.resKey]}
                 onUpdateCharacter={onUpdateCharacter}
               />
             ))}
@@ -865,7 +868,7 @@ export default function ActionsTab({ C, sheet, onRoll, resources, setResources, 
   );
 }
 
-function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, onShowToast, resMax, isPool, onUpdateCharacter }) {
+function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, onShowToast, resMax, isPool, resTrack, onUpdateCharacter }) {
   const DetailRenderer = action.detailType ? ACTION_DETAIL_RENDERERS[action.detailType] : null;
   const hasRes = action.resKey && resources && resources[action.resKey] != null;
   const resCur = hasRes ? (resources[action.resKey] ?? 0) : 0;
@@ -1054,7 +1057,7 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
 
       {hasRes ? (
         <Box sx={persistentRowSx('rgba(202,165,80,0.06)', true, open)}>
-          <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontFamily: '"Cinzel", Georgia, serif', mr: 0.5, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Uses</Typography>
+          <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontFamily: '"Cinzel", Georgia, serif', mr: 0.5, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{resTrack === 'used' ? 'Spent' : 'Uses'}</Typography>
           {safeMax === Infinity ? (
             typeof onResChange === 'function' ? (
               <Button

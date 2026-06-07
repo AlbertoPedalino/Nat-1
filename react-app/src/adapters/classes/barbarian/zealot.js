@@ -141,7 +141,7 @@ registerSubclassSheetActions("Barbarian_Zealot", [
 registerSubclassSheetResources("Barbarian_Zealot", [
   { key: "zealot_warrior_pool", name: "Warrior of the Gods", icon: "heart", recharge: "LR",
     max: (lv) => lv >= 17 ? 7 : lv >= 12 ? 6 : lv >= 6 ? 5 : 4,
-    pool: true },
+    pool: true, track: "used" },
   { key: "zealous_presence",    name: "Zealous Presence",   icon: "megaphone", recharge: "LR", max: () => 1 },
   { key: "zealot_rage_gods",    name: "Rage of the Gods",   icon: "flame",     recharge: "LR", max: () => 1 },
 ]);

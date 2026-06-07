@@ -245,7 +245,8 @@ registerClassSheetResources("Paladin", [
     "icon": "hands",
     "recharge": "LR",
     "max": (lv)=>lv*5,
-    "pool": true
+    "pool": true,
+    "track": "used"
   },
   {
     "key": "paladin_channel_div",

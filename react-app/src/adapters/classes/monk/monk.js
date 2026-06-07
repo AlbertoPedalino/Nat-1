@@ -360,7 +360,8 @@ registerClassSheetResources("Monk", [
     icon: 'orbit',
     recharge: 'SR',
     max: (lv) => lv,
-    pool: true
+    pool: true,
+    track: 'used'
   },
   {
     key: 'uncanny_metabolism',
