@@ -575,6 +575,8 @@ function normalizeItem(item) {
     sourceAlias: item.sourceAlias || null,
     type: rawType || 'gear',
     rarity: item.rarity || 'none',
+    wondrous: !!item.wondrous,
+    curse: !!item.curse,
     weight: Number(item.weight || 0),
     value: Number(item.value || 0),
     weaponCategory: item.weaponCategory || null,

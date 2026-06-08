@@ -1,4 +1,7 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
+import { REPLICATE_BUCKETS, isReplicateBucketLabel } from '../../../shared/character/replicateMagicItem.js';
+
+const _REPLICATE_BUCKET_LABEL = Object.fromEntries(REPLICATE_BUCKETS.map((b) => [b.id, b.label]));
 
 export default function install(registry, context = {}) {
   const {
@@ -134,7 +137,7 @@ const _ARTIFICER_REPLICATE_TIERS = [
       'Alchemy Jug',
       'Bag of Holding',
       'Cap of Water Breathing',
-      'Common wondrous items',
+      _REPLICATE_BUCKET_LABEL['common-any'],
       'Goggles of Night',
       'Manifold Tool',
       'Repeating Shot',
@@ -173,7 +176,6 @@ const _ARTIFICER_REPLICATE_TIERS = [
       'Ring of Water Walking',
       'Sentinel Shield',
       'Spell-Refueling Ring',
-      'Uncommon wondrous items',
       'Wand of Magic Missiles',
       'Wand of Web',
       'Weapon of Warning',
@@ -194,6 +196,7 @@ const _ARTIFICER_REPLICATE_TIERS = [
       'Wand of the War Mage +2',
       'Weapon +2',
       'Wraps of Unarmed Power +2',
+      _REPLICATE_BUCKET_LABEL['uncommon-wondrous'],
     ],
   },
   {
@@ -204,7 +207,7 @@ const _ARTIFICER_REPLICATE_TIERS = [
       'Armor +2',
       'Arrow-Catching Shield',
       'Flame Tongue',
-      'Rare wondrous items',
+      _REPLICATE_BUCKET_LABEL['rare-wondrous'],
       'Ring of Free Action',
       'Ring of Protection',
       'Ring of the Ram',
@@ -332,6 +335,10 @@ registerClassSheetActions("Artificer", [
           break;
         }
       }
+      // Generic plan buckets (e.g. "Common magic item…") are resolved to a
+      // concrete item in the builder; drop any unresolved bucket/legacy
+      // placeholder so the card never shows a fictitious inventory entry.
+      plans = plans.filter((p) => !isReplicateBucketLabel(p));
       return {
         flag: 'replicated',
         tagLabel: 'Replicated Items',

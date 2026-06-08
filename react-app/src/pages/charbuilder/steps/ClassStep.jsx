@@ -5,6 +5,7 @@ import BuilderPanel from '../components/BuilderPanel.jsx';
 import ChoiceBlock from '../components/ChoiceBlock.jsx';
 import { FeatCategorySlot, FeatFixedSlot } from '../components/FeatSlots.jsx';
 import SpellChoiceList from '../components/SpellChoiceList.jsx';
+import ReplicateMagicItemChoice from '../components/ReplicateMagicItemChoice.jsx';
 import { classChoiceSpecs } from '../logic/choiceSpecs.js';
 import NamePanel from '../components/NamePanel.jsx';
 import XpPanel from '../components/XpPanel.jsx';
@@ -33,6 +34,9 @@ export default function ClassStep({ state, dispatch }) {
     }
     if (spec.type === 'feat_fixed') {
       return <FeatFixedSlot key={spec.key} spec={spec} feats={state.data.feats} character={character} state={state} dispatch={dispatch} />;
+    }
+    if (spec.key.replace(/^mc\d+_/, '') === 'artificer_replicate_magic_item_plans') {
+      return <ReplicateMagicItemChoice key={spec.key} spec={spec} character={character} dispatch={dispatch} items={state.data.items} />;
     }
     return <ChoiceBlock key={spec.key} spec={spec} choices={character.choices} dispatch={dispatch} character={character} />;
   };
