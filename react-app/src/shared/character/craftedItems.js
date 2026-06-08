@@ -38,10 +38,9 @@ export function isCraftedItem(item) {
   return craftedFlagOf(item) !== '';
 }
 
-// `craftedFrom` is the canonical link; `replicatedFrom` is read for back-compat
-// with items saved before this module was generalised.
+// The plan/recipe an item was crafted from.
 function craftedSourceOf(item) {
-  return String(item?.craftedFrom ?? item?.replicatedFrom ?? '');
+  return String(item?.craftedFrom ?? '');
 }
 
 // Total crafted items for a flag across every source (counts quantities).

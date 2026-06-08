@@ -55,13 +55,21 @@ function get5eToolsSpellUrl(spell) {
   return `https://5e.tools/spells/${slug}-${source}.html`;
 }
 
+// The app reorders a leading magic bonus to a trailing one for display
+// ("+1 Longsword" → "Longsword +1"), but 5e.tools keys those items by the
+// leading-bonus name ("+1 longsword_xdmg"). Reverse a trailing "+N" so the
+// link hash matches 5e.tools.
+function toLeadingBonusName(name) {
+  return String(name || '').replace(/^(.+?)\s+(\+\d+)$/i, '$2 $1').trim();
+}
+
 function get5eToolsItemUrl(item) {
   if (!item?.name) return null;
   if (item.url && String(item.url).startsWith('https://5e.tools/')) return item.url;
   if (item.href && String(item.href).startsWith('https://5e.tools/')) return item.href;
   if (item.hash) return `https://5e.tools/items.html#${item.hash}`;
   if (String(item.source || '').toLowerCase() === 'custom') return null;
-  const namePart = String(item.name || '').trim().toLowerCase();
+  const namePart = toLeadingBonusName(item.name).toLowerCase();
   if (!namePart) return null;
   const source = normalize5eToolsSource(item.source || item.src || item.sourceShort || item.sourceAbbreviation);
   if (!source) return null;

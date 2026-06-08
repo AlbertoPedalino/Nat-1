@@ -1,48 +1,103 @@
 // Artificer "Replicate Magic Item" (EFA) generic plan rows ("buckets").
 //
 // The official Magic Item Plans tables mix concrete named items with generic
-// {@filter ...} rows. Those generic rows are NOT all "wondrous items" — the
-// rules differ per table:
+// rows. Those generic rows are NOT all "wondrous items" — the rules differ:
 //   - Lv 2+ : any Common magic item that isn't a Potion, a Scroll, or cursed
 //   - Lv 10+: an Uncommon Wondrous Item that isn't cursed
 //   - Lv 14+: a Rare Wondrous Item that isn't cursed
 // (Lv 6+ has no generic row.)
+// "Weapon +1" (Lv 2), "Weapon +2" (Lv 10), "Armor +1" (Lv 6) and "Armor +2"
+// (Lv 14) are likewise generic: a +N bonus applied to a base weapon/armor of
+// the player's choice. They are modelled as buckets too, resolving to a
+// concrete "<base item> +N" item. (Shields stay a concrete "Shield +N" plan —
+// one base item, no choice.)
 //
 // A bucket is not a real item: the builder must resolve it to a concrete item
 // matching the filter, which is what gets stored as the plan. This module is
 // the single source of truth for the bucket labels and their filter predicate,
 // shared by the Artificer adapter (pool generation), the builder picker, and
 // the sheet card (legacy clean-up).
+//
+// Every bucket exposes a single `match(item)` predicate. The declarative
+// builders below (rarityFilter, plusVariant) compile common shapes into one, so
+// the consumers never branch on bucket shape — adding a bucket is one entry,
+// built from a helper or a bespoke predicate.
 
 const norm = (value) => String(value || '').split('|')[0];
 const lc = (value) => String(value || '').toLowerCase();
+const typeOf = (item) => norm(item?.type).toUpperCase();
 
 // 5etools type codes excluded from the Common bucket.
 const POTION = 'P';
 const SCROLL = 'SC';
 
+const isWeapon = (item) => ['M', 'R'].includes(typeOf(item)); // Melee / Ranged
+// Body armor (Light / Medium / Heavy). Excludes shields (S): a shield is a
+// single base item, so "Shield +N" stays a concrete plan with no choice.
+const isBodyArmor = (item) => ['LA', 'MA', 'HA'].includes(typeOf(item));
+// Standard fantasy weapon: drop modern/futuristic firearms (5etools tags them
+// with `age` = "modern"/"futuristic"; renaissance Musket/Pistol carry none).
+const isMundaneWeapon = (item) => isWeapon(item) && !item.age;
+
+// Predicate for a rarity-class bucket (Common / Uncommon Wondrous / …). A
+// common/uncommon/rare rarity already implies a magic item.
+function rarityFilter({ rarity, wondrousOnly = false, excludeTypes = [], excludeCursed = true }) {
+  const excluded = new Set(excludeTypes);
+  return (item) => {
+    if (lc(item.rarity) !== rarity) return false;
+    if (wondrousOnly && !item.wondrous) return false;
+    if (excluded.has(norm(item.type))) return false;
+    if (excludeCursed && item.curse === true) return false;
+    return true;
+  };
+}
+
+// Predicate for a "+N applied to a base item" bucket. `bonusVariant` is tagged
+// by the items loader on plain +N magic variants only, so named magic items
+// that merely grant a bonus (Sun Blade, Dagger of Venom, …) are excluded.
+function plusVariant(baseFilter, bonus) {
+  return (item) => baseFilter(item) && item.bonusVariant === bonus;
+}
+
 export const REPLICATE_BUCKETS = [
   {
     id: 'common-any',
     label: 'Common magic item (not Potion, Scroll, or cursed)',
-    rarity: 'common',
-    wondrousOnly: false,
-    excludeTypes: [POTION, SCROLL],
-    excludeCursed: true,
+    match: rarityFilter({ rarity: 'common', excludeTypes: [POTION, SCROLL] }),
   },
   {
     id: 'uncommon-wondrous',
     label: 'Uncommon Wondrous Item (not cursed)',
-    rarity: 'uncommon',
-    wondrousOnly: true,
-    excludeCursed: true,
+    match: rarityFilter({ rarity: 'uncommon', wondrousOnly: true }),
   },
   {
     id: 'rare-wondrous',
     label: 'Rare Wondrous Item (not cursed)',
-    rarity: 'rare',
-    wondrousOnly: true,
-    excludeCursed: true,
+    match: rarityFilter({ rarity: 'rare', wondrousOnly: true }),
+  },
+  {
+    id: 'weapon-plus-1',
+    label: 'Weapon +1',
+    pickLabel: 'Pick a weapon…',
+    match: plusVariant(isMundaneWeapon, '+1'),
+  },
+  {
+    id: 'weapon-plus-2',
+    label: 'Weapon +2',
+    pickLabel: 'Pick a weapon…',
+    match: plusVariant(isMundaneWeapon, '+2'),
+  },
+  {
+    id: 'armor-plus-1',
+    label: 'Armor +1',
+    pickLabel: 'Pick armor…',
+    match: plusVariant(isBodyArmor, '+1'),
+  },
+  {
+    id: 'armor-plus-2',
+    label: 'Armor +2',
+    pickLabel: 'Pick armor…',
+    match: plusVariant(isBodyArmor, '+2'),
   },
 ];
 
@@ -55,23 +110,16 @@ export function replicateBucketFromLabel(label) {
   return BY_LABEL.get(String(label || '').trim()) || null;
 }
 
-// True for any current bucket label or a legacy placeholder from older saves
-// ("Common wondrous items", "Uncommon wondrous items", ...). Used by the card
-// to drop unresolved buckets so they never show as a fictitious inventory item.
+// True for a bucket label. Used by the card to drop unresolved buckets so a
+// generic plan never shows as a fictitious inventory item.
 export function isReplicateBucketLabel(label) {
-  const s = String(label || '').trim();
-  if (BY_LABEL.has(s)) return true;
-  return /\bwondrous items?$/i.test(s) || /^common magic item\b/i.test(s);
+  return BY_LABEL.has(String(label || '').trim());
 }
 
 // Whether a DB item satisfies a bucket's filter.
 export function itemMatchesBucket(item, bucket) {
-  if (!item || !bucket) return false;
-  if (lc(item.rarity) !== bucket.rarity) return false; // rarity==common/uncommon/rare ⇒ magic
-  if (bucket.wondrousOnly && !item.wondrous) return false;
-  if (bucket.excludeTypes && bucket.excludeTypes.includes(norm(item.type))) return false;
-  if (bucket.excludeCursed && item.curse === true) return false;
-  return true;
+  if (!item || typeof bucket?.match !== 'function') return false;
+  return bucket.match(item);
 }
 
 // Sorted, de-duplicated concrete item names a bucket can resolve to.

@@ -580,6 +580,8 @@ function normalizeItem(item) {
     weight: Number(item.weight || 0),
     value: Number(item.value || 0),
     weaponCategory: item.weaponCategory || null,
+    age: item.age || null,
+    bonusVariant: item.bonusVariant || null,
     mastery: Array.isArray(item.mastery) ? item.mastery.map((m) => String(m).split('|')[0]) : null,
     dmg1: item.dmg1 || null,
     dmg2: item.dmg2 || null,
@@ -637,6 +639,13 @@ function expandMagicVariants(variants, baseItems) {
       return;
     }
 
+    // A "+N" namePrefix marks a plain bonus variant (e.g. "+1 Weapon"), which we
+    // tag so generic pickers (Artificer Replicate "Weapon +1/+2") can offer the
+    // expanded base weapons without catching named magic weapons that merely
+    // grant a +N bonus (Sun Blade, Dagger of Venom, …).
+    const bonusPrefix = String(inherits.namePrefix || '').trim();
+    const bonusVariant = /^\+\d+$/.test(bonusPrefix) ? bonusPrefix : null;
+
     baseItems.forEach((base) => {
       if (!matchesRequires(base, requires)) return;
       expanded.push(withCanonicalSource({
@@ -644,6 +653,7 @@ function expandMagicVariants(variants, baseItems) {
         ...inherits,
         name: formatVariantName(base.name, inherits),
         source: variantSource || base.source,
+        ...(bonusVariant ? { bonusVariant } : {}),
       }));
     });
   });

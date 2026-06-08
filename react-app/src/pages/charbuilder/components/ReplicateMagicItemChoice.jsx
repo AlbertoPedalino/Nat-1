@@ -75,14 +75,6 @@ export default function ReplicateMagicItemChoice({ spec, character, dispatch, it
     return itemMatchesBucket(itemByName.get(lc(v)), bucket);
   });
 
-  // Anything selected that is neither a specific plan nor a classified bucket
-  // pick (e.g. a legacy literal "Common wondrous items" from an old save).
-  const classified = new Set([
-    ...selected.filter((v) => specificSet.has(lc(v))).map(lc),
-    ...buckets.flatMap((b) => picksForBucket(b)).map(lc),
-  ]);
-  const leftover = selected.filter((v) => !classified.has(lc(v)));
-
   return (
     <Paper variant="outlined" sx={{ p: 1, minWidth: 0 }}>
       <Stack spacing={0.8} sx={{ minWidth: 0 }}>
@@ -176,7 +168,7 @@ export default function ReplicateMagicItemChoice({ spec, character, dispatch, it
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    placeholder={full ? 'Plans Known full' : 'Pick a concrete item…'}
+                    placeholder={full ? 'Plans Known full' : (bucket.pickLabel || 'Pick a concrete item…')}
                     variant="outlined"
                   />
                 )}
@@ -184,19 +176,6 @@ export default function ReplicateMagicItemChoice({ spec, character, dispatch, it
             </Stack>
           );
         })}
-
-        {leftover.length ? (
-          <Stack spacing={0.4}>
-            <Typography sx={{ color: 'warning.main', fontSize: '0.62rem', fontWeight: 700 }}>
-              Unresolved plans (pick a concrete item)
-            </Typography>
-            <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
-              {leftover.map((p) => (
-                <Chip key={`${spec.key}-left-${p}`} size="small" label={p} onDelete={() => removeItem(p)} color="warning" variant="outlined" />
-              ))}
-            </Stack>
-          </Stack>
-        ) : null}
       </Stack>
     </Paper>
   );
