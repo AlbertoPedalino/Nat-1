@@ -1,6 +1,7 @@
 import { Fragment, useState } from 'react';
 import { Box, Button, Stack, Typography } from '@mui/material';
 import { getRollTable, rollTable } from '../../../shared/character/rollTables.js';
+import { useSheetActions } from '../context/SheetActionsContext.jsx';
 
 function getClassLevel(C, className) {
   if (!C || !className) return Number(C?.level || 0);
@@ -73,7 +74,8 @@ function resolveMaybeFunction(value, context, fallback = value) {
   }
 }
 
-export default function ActionDetailPanel({ action, character, sheet, onShowToast }) {
+export default function ActionDetailPanel({ action, character, sheet }) {
+  const { onShowToast } = useSheetActions();
   const [result, setResult] = useState(null);
   const detail = resolveMaybeFunction(action?.detail, { action, character, sheet }, {}) || {};
   const charLevel = detail.levelClass

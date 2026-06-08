@@ -49,8 +49,10 @@ import { Empty, SlotPanel, SpellSection, StatBox } from './SpellsUiParts.jsx';
 import { SpellNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import { SpellMiniTags, SpellReferenceBody, SpellSelectButton } from '../../../shared/character/SpellReference.jsx';
+import { useSheetActions } from '../context/SheetActionsContext.jsx';
 
-export default function SpellsTab({ C, sheet, onRoll, onUpdateSpells, onShowToast, onUpdateSheet, freeCastUses, onToggleFreeCast, onUpdateCharacter }) {
+export default function SpellsTab({ C, sheet, freeCastUses }) {
+  const { onRoll, onUpdateSpells, onShowToast, onUpdateSheet, onToggleFreeCast, onUpdateCharacter } = useSheetActions();
   const [spellDb, setSpellDb] = useState([]);
   const [classSpellIndex, setClassSpellIndex] = useState({});
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -365,19 +367,19 @@ export default function SpellsTab({ C, sheet, onRoll, onUpdateSpells, onShowToas
       <SlotPanel slots={slots} used={slotUsed} created={createdSlots} onToggle={toggleSlot} />
 
       <SpellSection title="Cantrip">
-        {spellInfo.cantrips.map((entry) => <SpellEntry key={entry.name} entry={entry} onRoll={onRoll} onShowToast={onShowToast} spellAttackBonus={spellItemBonuses.spellAttack} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} onToggleFreeCast={onToggleFreeCast} />)}
+        {spellInfo.cantrips.map((entry) => <SpellEntry key={entry.name} entry={entry} spellAttackBonus={spellItemBonuses.spellAttack} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} />)}
         {!spellInfo.cantrips.length ? <Empty text="None" /> : null}
       </SpellSection>
 
       {spellInfo.atWill.length ? (
         <SpellSection title="At Will">
-          {spellInfo.atWill.map((entry) => <SpellEntry key={`at-will-${entry.name}`} entry={entry} onRoll={onRoll} onShowToast={onShowToast} spellAttackBonus={spellItemBonuses.spellAttack} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} onToggleFreeCast={onToggleFreeCast} />)}
+          {spellInfo.atWill.map((entry) => <SpellEntry key={`at-will-${entry.name}`} entry={entry} spellAttackBonus={spellItemBonuses.spellAttack} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} />)}
         </SpellSection>
       ) : null}
 
       {Object.entries(expandedSpellInfo.leveled).map(([level, entries]) => (
         <SpellSection key={level} title={SPELL_LEVEL_LABELS[level] || `Level ${level}`}>
-          {entries.map((entry) => <SpellEntry key={`${level}-${entry.name}-${entry.castLevel || 'base'}`} entry={entry} onRoll={onRoll} onShowToast={onShowToast} spellAttackBonus={spellItemBonuses.spellAttack} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} onToggleFreeCast={onToggleFreeCast} />)}
+          {entries.map((entry) => <SpellEntry key={`${level}-${entry.name}-${entry.castLevel || 'base'}`} entry={entry} spellAttackBonus={spellItemBonuses.spellAttack} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} />)}
         </SpellSection>
       ))}
 

@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Box, IconButton, TextField, Typography } from '@mui/material';
 import { Plus, Minus, PencilLine, Check } from 'lucide-react';
+import { useSheetActions } from '../context/SheetActionsContext.jsx';
 
 function normalizePages(raw) {
   if (!raw) return [{ id: 'page_1', name: 'General', content: '' }];
@@ -28,7 +29,8 @@ function PageTab({ page, active, onClick }) {
   );
 }
 
-export default function NotesTab({ sheet, onUpdateNotes }) {
+export default function NotesTab({ sheet }) {
+  const { onUpdateNotes } = useSheetActions();
   const [pages, setPages] = useState(() => normalizePages(sheet?.notes));
   const [activeIdx, setActiveIdx] = useState(0);
   const [editingName, setEditingName] = useState(null);

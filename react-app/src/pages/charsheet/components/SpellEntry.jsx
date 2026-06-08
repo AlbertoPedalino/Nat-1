@@ -25,6 +25,7 @@ import {
 import { inlineButtonSx, spellBodySx, spellRowSx } from './spellsTabStyles.js';
 import AttackRollButton from './AttackRollButton.jsx';
 import { isConcentrationSpell, isRitualSpell } from '../../../shared/spellTags.js';
+import { useSheetActions } from '../context/SheetActionsContext.jsx';
 
 function applyFlatToFormula(formula, flat) {
   if (!formula) return formula;
@@ -148,7 +149,8 @@ function groupModifierDetails(details) {
   return Array.from(groups.entries()).map(([label, items]) => ({ label, items }));
 }
 
-export default function SpellEntry({ entry, onRoll, onShowToast, spellAttackBonus = 0, C, exhaustionLevel = 0, activeConditions = [], installedRegistry, freeCastUses, onToggleFreeCast }) {
+export default function SpellEntry({ entry, spellAttackBonus = 0, C, exhaustionLevel = 0, activeConditions = [], installedRegistry, freeCastUses }) {
+  const { onRoll, onShowToast, onToggleFreeCast } = useSheetActions();
   const castLevel = entry.castLevel || entry.level || 0;
   const baseLevel = entry.level || 0;
   const school = SCHOOL_LABELS[entry.school] || entry.school || '';

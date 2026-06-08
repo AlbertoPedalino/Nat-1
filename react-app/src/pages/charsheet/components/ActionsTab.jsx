@@ -38,6 +38,7 @@ import ReplicateMagicItemPanel from './ReplicateMagicItemPanel.jsx';
 import AttackRollButton from './AttackRollButton.jsx';
 import UnarmedStrikeOptionsPanel from './UnarmedStrikeOptionsPanel.jsx';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
+import { useSheetActions } from '../context/SheetActionsContext.jsx';
 import ResourceBar from './ResourceBar.jsx';
 import { RichInline, RichText } from '../../../shared/character/RichText.jsx';
 import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
@@ -69,7 +70,8 @@ function actionLabel(value) {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
-export default function ActionsTab({ C, sheet, onRoll, resources, setResources, onShowToast, onUpdateSheet, onUpdateCharacter, onUpdateInventory }) {
+export default function ActionsTab({ C, sheet, resources }) {
+  const { onRoll, setResources, onShowToast, onUpdateSheet, onUpdateCharacter } = useSheetActions();
   const [filter, setFilter] = useState('all');
   const [itemsDb, setItemsDb] = useState([]);
   const [, setMasteriesLoaded] = useState(false);
@@ -645,8 +647,6 @@ export default function ActionsTab({ C, sheet, onRoll, resources, setResources, 
                 resMax={resMaxMap[action.resKey]}
                 isPool={resPoolMap[action.resKey]}
                 resTrack={resTrackMap[action.resKey]}
-                onUpdateCharacter={onUpdateCharacter}
-                onUpdateInventory={onUpdateInventory}
               />
             ))}
           </Box>
@@ -871,7 +871,8 @@ export default function ActionsTab({ C, sheet, onRoll, resources, setResources, 
   );
 }
 
-function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, onShowToast, resMax, isPool, resTrack, onUpdateCharacter, onUpdateInventory }) {
+function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, onShowToast, resMax, isPool, resTrack }) {
+  const { onUpdateCharacter } = useSheetActions();
   const DetailRenderer = action.detailType ? ACTION_DETAIL_RENDERERS[action.detailType] : null;
   const hasRes = action.resKey && resources && resources[action.resKey] != null;
   const resCur = hasRes ? (resources[action.resKey] ?? 0) : 0;
@@ -1117,7 +1118,7 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
             </Box>
           ) : null}
           {DetailRenderer ? (
-            <DetailRenderer action={action} character={C} sheet={sheet} onShowToast={onShowToast} onUpdateInventory={onUpdateInventory} />
+            <DetailRenderer action={action} character={C} sheet={sheet} />
           ) : null}
         </>
       ) : null}

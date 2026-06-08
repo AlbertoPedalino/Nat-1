@@ -23,6 +23,7 @@ import { normalizeCoinAmount } from '../../../shared/character/currency.js';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import { ItemReferenceBody, QuantityAdder } from '../../../shared/character/ItemReference.jsx';
 import { carryCapacity, formatWeight, itemQty as qty, totalCarriedWeight } from '../../../shared/character/weight.js';
+import { useSheetActions } from '../context/SheetActionsContext.jsx';
 
 const FILTERS = [
   { key: 'all', label: 'All', icon: null },
@@ -351,7 +352,8 @@ function InventoryFilterButtons({ value, onChange }) {
   );
 }
 
-export default function InventoryTab({ C, sheet, onUpdateInventory, onUpdateCurrency, onUpdateCharacter, onShowToast }) {
+export default function InventoryTab({ C, sheet }) {
+  const { onUpdateInventory, onUpdateCurrency, onUpdateCharacter, onShowToast } = useSheetActions();
   const [search, setSearch] = useState('');
   const deferredSearch = useDeferredValue(search);
   const [filter, setFilter] = useState('all');

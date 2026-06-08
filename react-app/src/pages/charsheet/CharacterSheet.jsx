@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Box, Stack, Button, Typography } from '@mui/material';
 import { Hourglass, Moon } from 'lucide-react';
 import { SHEET_AREAS, SHEET_GRID, SHEET_GRID_ITEM_SX } from './layout.js';
@@ -17,6 +17,7 @@ import TabsPanel from './components/TabsPanel.jsx';
 import DiceToast from './components/DiceToast.jsx';
 import { deriveSheetState } from './state.js';
 import { ProficiencySetsProvider } from './context/ProficiencySetsContext.jsx';
+import { SheetActionsProvider } from './context/SheetActionsContext.jsx';
 import { buildD20Meta, formatD20Detail, rollD20 as rollD20Dice } from '../../shared/character/dice.js';
 import { aggregateSavingThrowBonus } from '../../shared/character/itemBonus.js';
 import { calcMaxHP, getMod, getFinal, getPB, getSaveBonus, CONDITION_IMPLIES, clampExhaustion, exhaustionD20Penalty, EXHAUSTION_MAX } from './logic/calculations.js';
@@ -463,6 +464,35 @@ export default function CharacterSheet() {
     persist({ notes: val });
   }, [persist]);
 
+  const toggleFreeCast = useCallback((freeCast) => {
+    setFreeCastUses((prev) => {
+      const used = Math.max(0, Number(prev?.[freeCast.id] || 0));
+      const max = Math.max(1, Number(freeCast.max || 1));
+      const next = { ...(prev || {}) };
+      if (used >= max) delete next[freeCast.id];
+      else next[freeCast.id] = used + 1;
+      persist({ freeCastUses: next });
+      return next;
+    });
+  }, [persist]);
+
+  // Stable, cross-cutting handlers shared with the deep tab/card tree via context.
+  const sheetActions = useMemo(() => ({
+    onRoll: rollD20,
+    onShowToast: showDiceToast,
+    setResources: saveResourcesState,
+    onUpdateInventory: updateInventory,
+    onUpdateCurrency: updateCurrency,
+    onUpdateSpells: updateSpells,
+    onUpdateSheet: syncSheet,
+    onUpdateNotes: updateNotes,
+    onUpdateCharacter: updateCurrentCharacter,
+    onToggleFreeCast: toggleFreeCast,
+  }), [
+    rollD20, showDiceToast, saveResourcesState, updateInventory, updateCurrency,
+    updateSpells, syncSheet, updateNotes, updateCurrentCharacter, toggleFreeCast,
+  ]);
+
   const downloadSheet = useCallback(() => {
     if (!C) return;
     const data = JSON.stringify({ type: 'gb-sheet-export', data: C, version: 1 }, null, 2);
@@ -490,6 +520,7 @@ export default function CharacterSheet() {
 
   return (
     <ProficiencySetsProvider character={C}>
+    <SheetActionsProvider value={sheetActions}>
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pb: 4, width: '100%' }}>
       <TopBar C={C} sheet={sheet} onShortRest={openShortRest} onLongRest={openLongRest} onDownload={downloadSheet} onUpdateXp={updateXp} onUpdateCharacter={updateCurrentCharacter}
         rollLog={rollLog} onClearRollLog={() => setRollLog([])} onShowToast={showDiceToast} />
@@ -546,23 +577,8 @@ export default function CharacterSheet() {
               conditionEntries={conditionEntries}
               onToggleInspiration={toggleInspiration}
               resources={resources} setResources={saveResourcesState} onShowToast={showDiceToast} />
-            <TabsPanel C={C} sheet={sheet} tab={tab} setTab={setTab} onRoll={rollD20}
-              resources={resources} setResources={saveResourcesState}
-              freeCastUses={freeCastUses}
-              onToggleFreeCast={(freeCast) => {
-                setFreeCastUses((prev) => {
-                  const used = Math.max(0, Number(prev?.[freeCast.id] || 0));
-                  const max = Math.max(1, Number(freeCast.max || 1));
-                  const next = { ...(prev || {}) };
-                  if (used >= max) delete next[freeCast.id];
-                  else next[freeCast.id] = used + 1;
-                  persist({ freeCastUses: next });
-                  return next;
-                });
-              }}
-              onShowToast={showDiceToast}
-              onUpdateInventory={updateInventory} onUpdateCurrency={updateCurrency} onUpdateSpells={updateSpells} onUpdateSheet={syncSheet} onUpdateNotes={updateNotes}
-              onUpdateCharacter={updateCurrentCharacter} />
+            <TabsPanel C={C} sheet={sheet} tab={tab} setTab={setTab}
+              resources={resources} freeCastUses={freeCastUses} />
           </Stack>
         </Box>
       </Box>
@@ -624,6 +640,7 @@ export default function CharacterSheet() {
         </Typography>
       </SheetDialog>
     </Box>
+    </SheetActionsProvider>
     </ProficiencySetsProvider>
   );
 }

@@ -11,6 +11,7 @@ import {
   replicatedCount,
   replicatedCountFor,
 } from '../../../shared/character/replicatedItems.js';
+import { useSheetActions } from '../context/SheetActionsContext.jsx';
 
 // Exact normalised key (order-preserving) — primary, collision-free match.
 function exactKey(name) {
@@ -51,7 +52,8 @@ const stepBtnSx = (disabled) => ({
   '&:hover': disabled ? {} : { borderColor: '#caa550', color: '#caa550' },
 });
 
-export default function ReplicateMagicItemPanel({ action, character, sheet, onUpdateInventory }) {
+export default function ReplicateMagicItemPanel({ action, character, sheet }) {
+  const { onUpdateInventory } = useSheetActions();
   const [itemsDb, setItemsDb] = useState([]);
   const detail = useMemo(() => resolveDetail(action, character, sheet), [action, character, sheet]);
   const plans = Array.isArray(detail.plans) ? detail.plans : [];
