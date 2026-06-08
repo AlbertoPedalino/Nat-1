@@ -56,6 +56,7 @@ function resolveToastLayout(toast) {
 
   return {
     label: toast.label,
+    detail: toast.detail || null,
     modeChip: MODE_CHIP[mode] || null,
     isCrit,
     isFail,
@@ -139,6 +140,12 @@ export default function DiceToast({ toast, onClose }) {
           color: layout.totalColor,
         }}>
           {layout.total}
+        </Typography>
+      )}
+
+      {layout.total == null && layout.dice.length === 0 && layout.detail && (
+        <Typography sx={{ fontSize: '0.8rem', color: 'text.primary', mt: 0.2 }}>
+          {layout.detail}
         </Typography>
       )}
     </Box>

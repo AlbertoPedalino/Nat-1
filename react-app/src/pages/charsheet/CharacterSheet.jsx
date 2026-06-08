@@ -163,6 +163,18 @@ export default function CharacterSheet() {
     persist({ freeCastUses: next });
   }, [persist]);
 
+  const showDiceToast = useCallback((label, detail, total, rolls, meta) => {
+    const entry = { label, detail, total, rolls, meta, timestamp: Date.now() };
+    setDiceToast(entry);
+    setRollLog((prev) => [entry, ...prev].slice(0, 50));
+  }, []);
+
+  // Non-dice events (rests, death-save guards): no roll, no numeric total — just a
+  // labelled message. Routes through the same toast so DiceToast renders the detail.
+  const showNotice = useCallback((label, message) => {
+    showDiceToast(label, message, null, []);
+  }, [showDiceToast]);
+
   const openShortRest = useCallback(() => {
     setHdToSpend({});
     setShortRestOpen(true);
@@ -216,11 +228,12 @@ export default function CharacterSheet() {
     setSheet(s);
     if (Object.keys(patch).length) persist(patch);
     setShortRestOpen(false);
-    const msg = totalSpent > 0
-      ? `Healed ${totalHeal} HP (${totalSpent} HD spent)`
-      : 'Short Rest complete (no Hit Dice spent).';
-    showDiceToast('Short Rest', msg, totalHeal, rolls);
-  }, [sheet, resources, freeCastUses, C, hdToSpend, persist]);
+    if (totalSpent > 0) {
+      showDiceToast('Short Rest', `Healed ${totalHeal} HP (${totalSpent} HD spent)`, totalHeal, rolls);
+    } else {
+      showNotice('Short Rest', 'Short Rest complete (no Hit Dice spent).');
+    }
+  }, [sheet, resources, freeCastUses, C, hdToSpend, persist, showDiceToast, showNotice]);
 
   const openLongRest = useCallback(() => {
     setLongRestOpen(true);
@@ -269,8 +282,8 @@ export default function CharacterSheet() {
     setSheet(s);
     persist(patch);
     setLongRestOpen(false);
-    showDiceToast('Long Rest', 'Fully restored!', 0, []);
-  }, [sheet, resources, freeCastUses, C, persist]);
+    showNotice('Long Rest', 'Fully restored!');
+  }, [sheet, resources, freeCastUses, C, persist, showNotice]);
 
   const adjustHP = useCallback((dir, amount = 1) => {
     if (!sheet) return;
@@ -328,11 +341,11 @@ export default function CharacterSheet() {
   const rollDeathSave = useCallback(() => {
     if (!sheet) return;
     if (sheet.currentHP > 0) {
-      showDiceToast('Death Save', 'Available only at 0 HP', 0, []);
+      showNotice('Death Save', 'Available only at 0 HP');
       return;
     }
     if (sheet.deathSaves.success >= 3 || sheet.deathSaves.fail >= 3) {
-      showDiceToast('Death Save', sheet.deathSaves.success >= 3 ? 'Already stable' : 'Character is dead', 0, []);
+      showNotice('Death Save', sheet.deathSaves.success >= 3 ? 'Already stable' : 'Character is dead');
       return;
     }
     const roll = Math.floor(Math.random() * 20) + 1;
@@ -361,7 +374,7 @@ export default function CharacterSheet() {
     setSheet({ ...sheet, deathSaves: ds });
     persist({ deathSaves: ds });
     showDiceToast('Death Save', extra + penaltyNote, total, [{ v: roll, faces: 20 }]);
-  }, [sheet, persist]);
+  }, [sheet, persist, showDiceToast, showNotice]);
 
   // Exhaustion is graded (1–6), so it carries a level alongside its presence in
   // activeConditions. Level 0 removes it; >0 keeps the pill and drives penalties.
@@ -414,12 +427,6 @@ export default function CharacterSheet() {
     setSheet({ ...sheet, sheetInspiration: next });
     persist({ inspiration: next });
   }, [sheet, persist]);
-
-  const showDiceToast = useCallback((label, detail, total, rolls, meta) => {
-    const entry = { label, detail, total, rolls, meta, timestamp: Date.now() };
-    setDiceToast(entry);
-    setRollLog((prev) => [entry, ...prev].slice(0, 50));
-  }, []);
 
   const rollD20 = useCallback((bonus, label, advantage) => {
     // Exhaustion (XPHB 2024): −2 per level to every D20 Test. rollD20 is the single
