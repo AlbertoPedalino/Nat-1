@@ -202,7 +202,7 @@ const _wizardBladesingerProficiencies = [
     type: "weapon",
     values: ["Melee Martial weapons without Heavy or Two-Handed property"],
     match: { type: "M", category: "martial", excludeProperties: ["H", "2H"] },
-    display: false,
+    display: true,
     minLevel: 3
   }
 ];

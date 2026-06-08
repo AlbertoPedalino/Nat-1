@@ -20,6 +20,10 @@ export default function SavingThrows({ C, sheet, onRoll }) {
   // Fixed ones (e.g. Gnomish Cunning on INT/WIS/CHA, armor) are already
   // surfaced per-stat (icon + auto-roll), so they're excluded here.
   const modifierRows = summarizeSaveModifiers(saveModifiers.filter((m) => m.mode === 'conditional'));
+  // Concentration bonus (e.g. Bladesong) applies only to Concentration saves,
+  // not every CON save, so it's surfaced as a situational reminder rather than
+  // an icon on the CON stat row.
+  const concentrationBonus = getConcentrationBonus(C);
 
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [menuStat, setMenuStat] = useState(null);
@@ -76,11 +80,6 @@ export default function SavingThrows({ C, sheet, onRoll }) {
               </Typography>
               <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.75rem', fontWeight: 600, color: 'text.primary', ml: 'auto' }}>
                 {fbonus(shownBonus)}
-                {st === 'con' && getConcentrationBonus(C) > 0 ? (
-                  <Tooltip title={`Concentration saves: +${getConcentrationBonus(C)} (Bladesong)`}>
-                    <Sparkles size={11} style={{ color: '#70b7a6', marginLeft: 4, verticalAlign: 'middle', cursor: 'help' }} />
-                  </Tooltip>
-                ) : null}
               </Typography>
               {visual && (
                 <Tooltip title={tooltipText}>
@@ -97,8 +96,26 @@ export default function SavingThrows({ C, sheet, onRoll }) {
         })}
       </Box>
 
-      {modifierRows.length > 0 && (
+      {(modifierRows.length > 0 || concentrationBonus > 0) && (
         <Box sx={{ borderTop: 1, borderColor: 'divider', px: '0.8rem', py: '0.5rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {concentrationBonus > 0 && (
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75 }}>
+              <Sparkles size={13} style={{ color: '#70b7a6', flexShrink: 0, marginTop: 2 }} />
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
+                  <Typography component="span" sx={{ fontSize: '0.7rem', color: '#70b7a6', fontWeight: 700, flexShrink: 0 }}>
+                    +{concentrationBonus}
+                  </Typography>
+                  <Typography component="span" sx={{ fontSize: '0.7rem', color: 'text.primary' }}>
+                    Concentration saves
+                  </Typography>
+                </Box>
+                <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary', fontStyle: 'italic', mt: '1px' }}>
+                  Bladesong
+                </Typography>
+              </Box>
+            </Box>
+          )}
           {modifierRows.map((mod, i) => {
             const adv = mod.kind === 'advantage';
             const visual = mod.kind === 'autofail' ? autoFailVisual() : advantageVisual(adv, !adv);
