@@ -736,6 +736,32 @@ export function getConcentrationBonus(character = {}) {
   return total;
 }
 
+// Additive bonus to spell save DC from active effects (e.g. Sorcerer Innate
+// Sorcery while toggled on). Only active effects survive collectSheetEffects.
+export function getSpellSaveDcBonus(character = {}) {
+  let total = 0;
+  collectSheetEffects(character).forEach((effect) => {
+    if (norm(effect.type) !== 'spellsavedcbonus') return;
+    total += Number(effect.value ?? 0);
+  });
+  return total;
+}
+
+// Advantage on spell attack rolls from active effects (e.g. Sorcerer Innate
+// Sorcery while toggled on). An effect may scope to a class via `spellClass`;
+// when set it only applies to spells whose owning class matches the entry's
+// ownerClassName (multiclass-safe). Returns the source label or null.
+export function getSpellAttackAdvantage(character = {}, { ownerClassName } = {}) {
+  let found = null;
+  collectSheetEffects(character).forEach((effect) => {
+    if (found) return;
+    if (norm(effect.type) !== 'spellattackadvantage') return;
+    if (effect.spellClass && norm(effect.spellClass) !== norm(ownerClassName)) return;
+    found = { source: effect.note || effect.ownerName || 'Advantage' };
+  });
+  return found;
+}
+
 // Additive damage bonus for Strength-based melee attacks (e.g. Barbarian Rage).
 // Tiers are separate effects gated by minLevel + condition; only the active
 // ones survive collectSheetEffects, so the highest value is the current tier.

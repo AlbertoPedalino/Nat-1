@@ -158,6 +158,7 @@ registerClassSheetActions("Sorcerer", [
     "cat": "bonus",
     "uses": "2 / LR",
     "resKey": "innate_sorcery",
+    "_toggleKey": "innate_sorcery",
     "minLevel": 1,
     "desc": "Bonus Action: unleash magical energy for 1 minute. During this time your spell save DC increases by 1, and you have Advantage on the attack rolls of Sorcerer spells you cast. Uses: 2 per Long Rest. Recharge: Long Rest."
   },
@@ -226,6 +227,16 @@ registerClassSheetActions("Sorcerer", [
     "minLevel": 20,
     "desc": "While Innate Sorcery is active, you can use one Metamagic option on each spell you cast without spending Sorcery Points."
   }
+]);
+// Innate Sorcery (while active): +1 spell save DC and Advantage on the attack
+// rolls of Sorcerer spells. The on/off flag lives on the character as
+// innate_sorceryActive, set by the action's _toggleKey toggle. spellAttackAdvantage
+// is scoped via spellClass so only Sorcerer-owned spells benefit (multiclass-safe).
+function _sorcererInnateActive(C) { return !!C && C.innate_sorceryActive === true; }
+
+registerClassSheetEffects("Sorcerer", [
+  { type: "spellSaveDcBonus", value: 1, minLevel: 1, note: "Innate Sorcery", condition: _sorcererInnateActive },
+  { type: "spellAttackAdvantage", spellClass: "Sorcerer", minLevel: 1, note: "Innate Sorcery", condition: _sorcererInnateActive },
 ]);
 registerClassSheetResources("Sorcerer", [
   {
