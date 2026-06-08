@@ -34,7 +34,7 @@ import {
 } from './spellsTabStyles.js';
 import { Empty } from './SpellsUiParts.jsx';
 import ActionDetailPanel from './ActionDetailPanel.jsx';
-import ReplicateMagicItemPanel from './ReplicateMagicItemPanel.jsx';
+import CreatedItemsPanel from './CreatedItemsPanel.jsx';
 import AttackRollButton from './AttackRollButton.jsx';
 import UnarmedStrikeOptionsPanel from './UnarmedStrikeOptionsPanel.jsx';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
@@ -51,7 +51,7 @@ import { formatRollTitle, rollFormula as rollFormulaDice } from '../../../shared
 const ACTION_DETAIL_RENDERERS = {
   panel: ActionDetailPanel,
   unarmedStrike: UnarmedStrikeOptionsPanel,
-  replicateMagicItem: ReplicateMagicItemPanel,
+  createdItems: CreatedItemsPanel,
 };
 
 const _danglingResKeyWarned = typeof Set === 'function' ? new Set() : null;

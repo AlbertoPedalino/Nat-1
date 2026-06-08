@@ -18,6 +18,7 @@ import DiceToast from './components/DiceToast.jsx';
 import { deriveSheetState } from './state.js';
 import { ProficiencySetsProvider } from './context/ProficiencySetsContext.jsx';
 import { SheetActionsProvider } from './context/SheetActionsContext.jsx';
+import { clearCraftedByFlag, VANISH_ON_LONG_REST_FLAGS } from '../../shared/character/craftedItems.js';
 import { buildD20Meta, formatD20Detail, rollD20 as rollD20Dice } from '../../shared/character/dice.js';
 import { aggregateSavingThrowBonus } from '../../shared/character/itemBonus.js';
 import { calcMaxHP, getMod, getFinal, getPB, getSaveBonus, CONDITION_IMPLIES, clampExhaustion, exhaustionD20Penalty, EXHAUSTION_MAX } from './logic/calculations.js';
@@ -254,6 +255,12 @@ export default function CharacterSheet() {
     s.exhaustionLevel = exRest.exhaustionLevel;
     s.activeConditions = exRest.activeConditions;
 
+    // Crafted items that last only until a Long Rest (Tinker's Magic, Fast
+    // Crafting) vanish now. Replicate Magic Item items persist and are untouched.
+    const prunedInv = clearCraftedByFlag(s.sheetInventory || [], VANISH_ON_LONG_REST_FLAGS);
+    const inventoryVanished = prunedInv.length !== (s.sheetInventory || []).length;
+    if (inventoryVanished) s.sheetInventory = prunedInv;
+
     const patch = {
       currentHP: s.currentHP, tempHP: s.tempHP, maxHPBonus: s.maxHPBonus,
       usedHD: 0, usedHDPools: {},
@@ -261,6 +268,7 @@ export default function CharacterSheet() {
       spellSlotsUsed: {}, createdSpellSlots: {},
       exhaustionLevel: exRest.exhaustionLevel, activeConditions: exRest.activeConditions,
     };
+    if (inventoryVanished) patch.inventory = prunedInv;
 
     if (C) {
       res = applyResourceRest(res, getAllResourceDefs(C), C, 'long');

@@ -281,15 +281,35 @@ registerClassAdapter("Artificer", function (cls, lv, specs) {
 });
 
 // [SheetRuntime] START
+// EFA Tinker's Magic item list (created with Tinker's Tools, vanish at Long Rest).
+const _TINKER_MAGIC_ITEMS = [
+  'Ball Bearings', 'Basket', 'Bedroll', 'Bell', 'Blanket', 'Block and Tackle',
+  'Glass Bottle', 'Bucket', 'Caltrops', 'Candle', 'Crowbar', 'Flask',
+  'Grappling Hook', 'Hunting Trap', 'Jug', 'Lamp', 'Manacles', 'Net', 'Oil',
+  'Paper', 'Parchment', 'Pole', 'Pouch', 'Rope', 'Sack', 'Shovel',
+  'Iron Spikes', 'String', 'Tinderbox', 'Torch', 'Vial',
+];
+
 registerClassSheetActions("Artificer", [
   {
     "name": "Tinker's Magic",
     "icon": "",
     "cat": "action",
     "uses": "INT mod / LR",
-    "resKey": "tinkers_magic",
     "minLevel": 1,
-    "desc": "You know the Mending cantrip. As a Magic action while holding Tinker's Tools, create one item (Ball Bearings, Caltrops, Rope, Torch, etc.) in an unoccupied space within 5 ft. Item lasts until Long Rest. Uses equal to INT modifier (min 1), recharge on Long Rest."
+    // Description (incl. Mending cantrip) lives in the Features tab; the card
+    // only drives the interactive create panel.
+    "entries": [],
+    "noDescription": true,
+    detailType: 'createdItems',
+    detail: () => ({
+      flag: 'tinker',
+      tagLabel: "Tinker's Magic",
+      items: _TINKER_MAGIC_ITEMS,
+      maxAbility: 'int',
+      minMax: 1,
+      emptyHint: 'No items available.',
+    }),
   },
   {
     "name": "Replicate Magic Item",
@@ -301,7 +321,7 @@ registerClassSheetActions("Artificer", [
     // interactive create/remove panel, so no rich-text entries here.
     "entries": [],
     "noDescription": true,
-    detailType: 'replicateMagicItem',
+    detailType: 'createdItems',
     detail: ({ action, character }) => {
       const lv = Number(action?.ownerLevel || character?.classLevel || character?.level || 1);
       const choices = character?.choices || {};
@@ -313,9 +333,11 @@ registerClassSheetActions("Artificer", [
         }
       }
       return {
-        plans,
-        maxPlans: _artificerPlansKnownAtLevel(lv),
-        maxActive: _artificerActiveItemsAtLevel(lv),
+        flag: 'replicated',
+        tagLabel: 'Replicated Items',
+        items: plans,
+        max: _artificerActiveItemsAtLevel(lv),
+        emptyHint: 'No plans chosen yet — pick them in the character builder.',
       };
     }
   },
@@ -347,13 +369,6 @@ registerClassSheetActions("Artificer", [
   }
 ]);
 registerClassSheetResources("Artificer", [
-  {
-    "key": "tinkers_magic",
-    "name": "Tinker's Magic",
-    "icon": "wrench",
-    "recharge": "LR",
-    "max": (lv, { int } = {}) => Math.max(1, int ?? 0)
-  },
   {
     "key": "flash_genius",
     "name": "Flash of Genius",

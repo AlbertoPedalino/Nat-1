@@ -11,11 +11,23 @@ const ARTISAN_TOOLS_CHOICES = [
   "woodcarver's tools",
 ];
 
+// XPHB Crafter "Fast Crafting" table: gear craftable with each Artisan's Tools.
+// The sheet panel only shows rows for tools the character is proficient with.
+const FAST_CRAFTING_TABLE = [
+  { tool: "Carpenter's Tools", items: ['Ladder', 'Torch'] },
+  { tool: "Leatherworker's Tools", items: ['Crossbow Bolt Case', 'Map or Scroll Case', 'Pouch'] },
+  { tool: "Mason's Tools", items: ['Block and Tackle'] },
+  { tool: "Potter's Tools", items: ['Jug', 'Lamp'] },
+  { tool: "Smith's Tools", items: ['Ball Bearings', 'Bucket', 'Caltrops', 'Grappling Hook', 'Iron Pot'] },
+  { tool: "Tinker's Tools", items: ['Bell', 'Shovel', 'Tinderbox'] },
+  { tool: "Weaver's Tools", items: ['Basket', 'Rope', 'Net', 'Tent'] },
+  { tool: "Woodcarver's Tools", items: ['Club', 'Greatclub', 'Quarterstaff'] },
+];
+
 export default function install(registry, context = {}) {
   const {
     registerFeatAdapter,
     registerFeatSheetActions,
-    registerFeatSheetResources,
   } = createAdapterBindings(registry, context);
 
   if (typeof registerFeatAdapter !== 'function') return;
@@ -35,18 +47,6 @@ export default function install(registry, context = {}) {
     return next;
   });
 
-  if (typeof registerFeatSheetResources === 'function') {
-    registerFeatSheetResources('Crafter', [
-      {
-        key:      'crafter_fast_crafting',
-        name:     'Fast Crafting',
-        icon:     '',
-        recharge: 'LR',
-        max:      1,
-      },
-    ]);
-  }
-
   if (typeof registerFeatSheetActions === 'function') {
     registerFeatSheetActions('Crafter', [
       {
@@ -62,8 +62,17 @@ export default function install(registry, context = {}) {
         icon: '',
         cat: 'action',
         uses: '1 item / LR',
-        resKey: 'crafter_fast_crafting',
-        desc: "When you finish a Long Rest, craft one piece of gear from the Fast Crafting table (requires proficiency with the associated Artisan's Tools). Item lasts until you finish another Long Rest.",
+        // Description lives in the Features tab; the card drives the create panel.
+        entries: [],
+        noDescription: true,
+        detailType: 'createdItems',
+        detail: () => ({
+          flag: 'fastcraft',
+          tagLabel: 'Fast Crafting',
+          toolGroups: FAST_CRAFTING_TABLE,
+          max: 1,
+          emptyHint: "Gain proficiency with an Artisan's Tools to craft gear here.",
+        }),
       },
     ]);
   }

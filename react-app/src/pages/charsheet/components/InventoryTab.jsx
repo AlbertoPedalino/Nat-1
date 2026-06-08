@@ -24,6 +24,7 @@ import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import { ItemReferenceBody, QuantityAdder } from '../../../shared/character/ItemReference.jsx';
 import { carryCapacity, formatWeight, itemQty as qty, totalCarriedWeight } from '../../../shared/character/weight.js';
 import { useSheetActions } from '../context/SheetActionsContext.jsx';
+import { CRAFTED_FLAG_META, craftedFlagOf } from '../../../shared/character/craftedItems.js';
 
 const FILTERS = [
   { key: 'all', label: 'All', icon: null },
@@ -395,6 +396,11 @@ export default function InventoryTab({ C, sheet }) {
     const groups = Object.fromEntries(GROUPS.map((group) => [group.key, []]));
     visibleInventory.forEach((entry) => {
       if (groups[entry.type]) groups[entry.type].push(entry);
+    });
+    // Sort each group alphabetically by name; the original inventory index stays
+    // attached to each entry, so qty/equip/remove keep targeting the right item.
+    Object.values(groups).forEach((entries) => {
+      entries.sort((a, b) => String(a.item?.name || '').localeCompare(String(b.item?.name || ''), undefined, { sensitivity: 'base' }));
     });
     return groups;
   }, [visibleInventory]);
@@ -822,7 +828,10 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, 
               <ItemNameIcon item={item} />
               <Typography noWrap sx={{ fontSize: '0.875rem', color: 'text.primary' }}>{item.name}</Typography>
               {item.custom ? <Box component="span" sx={{ fontSize: '0.56rem', color: 'text.secondary' }}>[custom]</Box> : null}
-              {hasItemFlag(item, 'replicated') ? <Box component="span" sx={{ ml: 0.5, fontSize: '0.56rem', color: '#6fb0c9', fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}>[Replicated]</Box> : null}
+              {(() => {
+                const meta = CRAFTED_FLAG_META[craftedFlagOf(item)];
+                return meta ? <Box component="span" sx={{ ml: 0.5, fontSize: '0.56rem', color: meta.color, fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}>[{meta.label}]</Box> : null;
+              })()}
               {hasItemFlag(item, 'pactWeapon') ? <Box component="span" sx={{ ml: 0.5, fontSize: '0.56rem', color: '#9d7fb8', fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}>[Pact Weapon]</Box> : null}
               {hasItemFlag(item, 'arcaneArmor') ? <Box component="span" sx={{ ml: 0.5, fontSize: '0.56rem', color: '#58b879', fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}>[Arcane Armor]</Box> : null}
               {item.attuned ? <Box component="span" sx={{ ml: 0.5, fontSize: '0.56rem', color: '#d69245', fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}>[Attuned]</Box> : null}

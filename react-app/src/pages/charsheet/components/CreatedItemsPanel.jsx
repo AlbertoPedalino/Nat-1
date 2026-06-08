@@ -6,20 +6,30 @@ import { ItemNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import { ItemReferenceBody } from '../../../shared/character/ItemReference.jsx';
 import {
-  addReplicatedItem,
-  removeOneReplicated,
-  replicatedCount,
-  replicatedCountFor,
-} from '../../../shared/character/replicatedItems.js';
+  addCraftedItem,
+  removeOneCrafted,
+  craftedCount,
+  craftedCountFor,
+} from '../../../shared/character/craftedItems.js';
+import { collectAllProficiencies } from '../logic/proficiency/index.js';
+import { getMod, getFinal } from '../logic/calculations.js';
 import { useSheetActions } from '../context/SheetActionsContext.jsx';
+import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
+
+// Generic interactive "create items from a list" panel. Driven entirely by the
+// action's `detail` config so Replicate Magic Item, Tinker's Magic and Fast
+// Crafting all reuse it:
+//   { flag, tagLabel, items?, toolGroups?, max?, maxAbility?, minMax?, emptyHint? }
+// - items: flat list of item names.
+// - toolGroups: [{ tool, items }] filtered to the tools the character has.
+// - max: fixed cap, or maxAbility (e.g. 'int') for an ability-mod cap.
 
 // Exact normalised key (order-preserving) — primary, collision-free match.
 function exactKey(name) {
   return String(name || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
 }
 
-// Order-independent key so "Shield +1" matches a DB "+1 Shield". Used only as a
-// fallback when no exact match exists, since sorting can rarely alias names.
+// Order-independent key so "Shield +1" matches a DB "+1 Shield". Fallback only.
 function looseKey(name) {
   return String(name || '')
     .toLowerCase()
@@ -52,17 +62,45 @@ const stepBtnSx = (disabled) => ({
   '&:hover': disabled ? {} : { borderColor: '#caa550', color: '#caa550' },
 });
 
-export default function ReplicateMagicItemPanel({ action, character, sheet }) {
+export default function CreatedItemsPanel({ action, character, sheet }) {
   const { onUpdateInventory } = useSheetActions();
+  const profSets = useProficiencySets();
   const [itemsDb, setItemsDb] = useState([]);
   const detail = useMemo(() => resolveDetail(action, character, sheet), [action, character, sheet]);
-  const plans = Array.isArray(detail.plans) ? detail.plans : [];
-  const maxActive = Math.max(0, Number(detail.maxActive || 0));
+
+  const flag = detail.flag;
+  const tagLabel = detail.tagLabel || 'Created';
+  const emptyHint = detail.emptyHint || 'Nothing available to create.';
   const inv = sheet?.sheetInventory || [];
+
+  // Resolve the cap: fixed number or an ability modifier (min `minMax`).
+  const max = useMemo(() => {
+    if (detail.maxAbility) {
+      return Math.max(Number(detail.minMax || 1), getMod(getFinal(character, detail.maxAbility)));
+    }
+    return Math.max(0, Number(detail.max || 0));
+  }, [detail.maxAbility, detail.minMax, detail.max, character]);
+
+  // Resolve the craftable list: flat items, or tool-gated groups filtered to the
+  // tools the character is proficient with.
+  const items = useMemo(() => {
+    if (Array.isArray(detail.items)) return detail.items;
+    if (Array.isArray(detail.toolGroups)) {
+      const sections = collectAllProficiencies(character, profSets) || [];
+      const toolItems = (sections.find((s) => s.title === 'Tools')?.items) || [];
+      const known = new Set(toolItems.map((t) => exactKey(t)));
+      const out = [];
+      detail.toolGroups.forEach((group) => {
+        if (known.has(exactKey(group.tool))) (group.items || []).forEach((it) => out.push(it));
+      });
+      return [...new Set(out)];
+    }
+    return [];
+  }, [detail.items, detail.toolGroups, character, profSets]);
 
   useEffect(() => {
     let alive = true;
-    loadItems().then((items) => { if (alive) setItemsDb(items || []); }).catch(() => {});
+    loadItems().then((db) => { if (alive) setItemsDb(db || []); }).catch(() => {});
     return () => { alive = false; };
   }, []);
 
@@ -78,30 +116,30 @@ export default function ReplicateMagicItemPanel({ action, character, sheet }) {
     return { exactMap: exact, looseMap: loose };
   }, [itemsDb]);
 
-  const resolveItem = (plan) => exactMap.get(exactKey(plan)) || looseMap.get(looseKey(plan)) || null;
+  const resolveItem = (name) => exactMap.get(exactKey(name)) || looseMap.get(looseKey(name)) || null;
 
-  const total = replicatedCount(inv);
-  const remaining = Math.max(0, maxActive - total);
+  const total = craftedCount(inv, flag);
+  const remaining = Math.max(0, max - total);
 
-  const handleAdd = (plan) => {
+  const handleAdd = (name) => {
     if (remaining <= 0 || !onUpdateInventory) return;
-    const dbItem = resolveItem(plan);
-    const itemData = dbItem ? { ...dbItem } : { name: plan };
-    itemData.name = plan; // keep the plan's wording as the inventory label
-    onUpdateInventory(addReplicatedItem(inv, itemData, plan, maxActive));
+    const dbItem = resolveItem(name);
+    const itemData = dbItem ? { ...dbItem } : { name };
+    itemData.name = name; // keep the recipe wording as the inventory label
+    onUpdateInventory(addCraftedItem(inv, itemData, flag, name, max));
   };
 
-  const handleRemove = (plan) => {
+  const handleRemove = (name) => {
     if (!onUpdateInventory) return;
-    if (replicatedCountFor(inv, plan) <= 0) return;
-    onUpdateInventory(removeOneReplicated(inv, plan));
+    if (craftedCountFor(inv, flag, name) <= 0) return;
+    onUpdateInventory(removeOneCrafted(inv, flag, name));
   };
 
-  if (!plans.length) {
+  if (!items.length) {
     return (
       <Box onClick={(e) => e.stopPropagation()} sx={panelSx}>
         <Typography sx={{ fontSize: '0.66rem', color: 'text.secondary', fontStyle: 'italic' }}>
-          No plans chosen yet — pick them in the character builder.
+          {emptyHint}
         </Typography>
       </Box>
     );
@@ -110,25 +148,25 @@ export default function ReplicateMagicItemPanel({ action, character, sheet }) {
   return (
     <Box onClick={(e) => e.stopPropagation()} sx={panelSx}>
       <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', mb: 0.6 }}>
-        <Typography sx={headerSx}>Replicated Items</Typography>
+        <Typography sx={headerSx}>{tagLabel}</Typography>
         <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.62rem', fontWeight: 700, color: remaining > 0 ? '#edd48a' : '#de675f' }}>
-          {total} / {maxActive} active
+          {total} / {max} active
         </Typography>
       </Box>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-        {plans.map((plan) => {
-          const count = replicatedCountFor(inv, plan);
-          const dbItem = resolveItem(plan);
+        {items.map((name) => {
+          const count = craftedCountFor(inv, flag, name);
+          const dbItem = resolveItem(name);
           const addDisabled = remaining <= 0;
           const removeDisabled = count <= 0;
           const stepper = (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
-              <IconButton size="small" aria-label={`Remove ${plan}`} disabled={removeDisabled} onClick={() => handleRemove(plan)} sx={stepBtnSx(removeDisabled)}>
+              <IconButton size="small" aria-label={`Remove ${name}`} disabled={removeDisabled} onClick={() => handleRemove(name)} sx={stepBtnSx(removeDisabled)}>
                 <Minus size={13} />
               </IconButton>
               <Box sx={{ minWidth: 16, textAlign: 'center', fontFamily: '"Cinzel", Georgia, serif', fontWeight: 700, fontSize: '0.78rem', color: '#edd48a' }}>{count}</Box>
-              <IconButton size="small" aria-label={`Add ${plan}`} disabled={addDisabled} onClick={() => handleAdd(plan)} sx={stepBtnSx(addDisabled)}>
+              <IconButton size="small" aria-label={`Add ${name}`} disabled={addDisabled} onClick={() => handleAdd(name)} sx={stepBtnSx(addDisabled)}>
                 <Plus size={13} />
               </IconButton>
             </Box>
@@ -138,8 +176,8 @@ export default function ReplicateMagicItemPanel({ action, character, sheet }) {
 
           if (!dbItem) {
             return (
-              <Box key={plan} sx={{ display: 'flex', alignItems: 'center', gap: '7px', px: '8px', py: '5px', border: 1, borderColor: rowBorder, borderRadius: 1, bgcolor: rowBg }}>
-                <Typography noWrap sx={{ flex: 1, minWidth: 0, fontSize: '0.8rem', color: 'text.primary' }}>{plan}</Typography>
+              <Box key={name} sx={{ display: 'flex', alignItems: 'center', gap: '7px', px: '8px', py: '5px', border: 1, borderColor: rowBorder, borderRadius: 1, bgcolor: rowBg }}>
+                <Typography noWrap sx={{ flex: 1, minWidth: 0, fontSize: '0.8rem', color: 'text.primary' }}>{name}</Typography>
                 {stepper}
               </Box>
             );
@@ -147,7 +185,7 @@ export default function ReplicateMagicItemPanel({ action, character, sheet }) {
 
           return (
             <ExpandableCard
-              key={plan}
+              key={name}
               containerSx={{ border: 1, borderColor: rowBorder, borderRadius: 1, bgcolor: rowBg, overflow: 'hidden' }}
               detailsSx={{ px: '10px', pt: '2px', pb: '8px', bgcolor: '#12100e', fontSize: '0.7rem', color: 'text.secondary' }}
               details={<ItemReferenceBody item={dbItem} />}
@@ -155,7 +193,7 @@ export default function ReplicateMagicItemPanel({ action, character, sheet }) {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: '7px', px: '8px', py: '5px' }}>
                   <Box onClick={toggle} sx={{ display: 'flex', alignItems: 'center', gap: '7px', flex: 1, minWidth: 0, cursor: 'pointer' }}>
                     <ItemNameIcon item={dbItem} />
-                    <Typography noWrap sx={{ flex: 1, minWidth: 0, fontSize: '0.8rem', color: 'text.primary' }}>{plan}</Typography>
+                    <Typography noWrap sx={{ flex: 1, minWidth: 0, fontSize: '0.8rem', color: 'text.primary' }}>{name}</Typography>
                   </Box>
                   {stepper}
                 </Box>
@@ -167,7 +205,7 @@ export default function ReplicateMagicItemPanel({ action, character, sheet }) {
 
       {remaining <= 0 ? (
         <Typography sx={{ fontSize: '0.58rem', color: 'text.secondary', fontStyle: 'italic', mt: 0.5 }}>
-          Active limit reached. Remove one to replicate another.
+          Active limit reached. Remove one to make another.
         </Typography>
       ) : null}
     </Box>
