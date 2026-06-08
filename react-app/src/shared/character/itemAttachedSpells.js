@@ -15,7 +15,7 @@
 // Spell names come as "name|source"; strip the source suffix and lower-case
 // for normalization.
 
-import { isItemBonusActive } from './itemBonus.js';
+import { isItemEffectActive } from './itemAttunement.js';
 
 function stripSpellRef(raw) {
   if (raw == null) return { name: '', source: '' };
@@ -111,7 +111,7 @@ export function collectItemAttachedSpells(C) {
   const out = [];
 
   inventory.forEach((item) => {
-    if (!isItemBonusActive(item)) return;
+    if (!isItemEffectActive(item)) return;
     if (!item.attachedSpells) return;
 
     const grants = parseAttachedSpells(item.attachedSpells);

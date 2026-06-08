@@ -6,6 +6,7 @@ import {
 } from '../constants.js';
 import { normalizeName } from './text.js';
 import { dedupeSpellsBySourcePriority, normalizeSpellRecord } from '../../../shared/character/spellNormalization.js';
+import { itemIdentityKey } from '../../../shared/character/itemIdentity.js';
 import {
   BACKGROUND_ALLOWED_SOURCES,
   CLASS_ALLOWED_SOURCES,
@@ -339,7 +340,7 @@ function itemSource(item) {
 }
 
 function itemKey(name, source) {
-  return `${normalizeName(formatLeadingBonusName(name))}|${String(source || '').trim()}`;
+  return itemIdentityKey(formatLeadingBonusName(name), source);
 }
 
 function itemRecordKey(item, source = itemSource(item)) {
@@ -479,8 +480,8 @@ const RECONCILED_ITEM_FIELDS = [
   'bonusSpellAttack', 'bonusSpellSaveDc',
   'bonusWeapon', 'bonusWeaponAttack', 'bonusWeaponDamage',
   'bonusProficiencyBonus', 'attachedSpells',
-  'reqAttune', 'reqAttuneAlt', 'property', 'mastery', 'miscTags', 'entries',
-  'rarity', 'weight', 'value', 'type', 'weaponCategory', 'sourceAlias',
+  'reqAttune', 'reqAttuneAlt', 'reqAttuneTags', 'property', 'mastery', 'miscTags', 'entries',
+  'rarity', 'weight', 'value', 'type', 'weaponCategory', 'sourceAlias', 'curse',
   'dmg1', 'dmg2', 'dmgType', 'ac', 'strength', 'stealth',
   'scfType', 'focus', 'items', 'group',
 ];
@@ -489,16 +490,15 @@ const RECONCILED_ITEM_FIELDS = [
 // from the live items database. Preserves user-managed flags (qty, equipped,
 // attuned, equippedSlot, custom flags).
 export function reconcileInventoryWithItemsDb(inventory, itemsDb) {
-  if (!Array.isArray(inventory) || !Array.isArray(itemsDb) || itemsDb.length === 0) {
-    return inventory || [];
-  }
+  const current = Array.isArray(inventory) ? inventory : [];
+  if (!Array.isArray(itemsDb) || itemsDb.length === 0) return current;
   const byKey = new Map();
   itemsDb.forEach((item) => {
     if (!item?.name) return;
     byKey.set(itemKey(item.name, item.source || ''), item);
   });
   let changed = false;
-  const next = inventory.map((stored) => {
+  const next = current.map((stored) => {
     if (!stored?.name || stored.custom) return stored;
     const fresh = byKey.get(itemKey(stored.name, stored.source || ''));
     if (!fresh) return stored;
@@ -510,7 +510,7 @@ export function reconcileInventoryWithItemsDb(inventory, itemsDb) {
     if (RECONCILED_ITEM_FIELDS.some((f) => stored[f] !== merged[f])) changed = true;
     return merged;
   });
-  return changed ? next : inventory;
+  return changed ? next : current;
 }
 
 function sourcePriority(item) {
@@ -608,6 +608,9 @@ function normalizeItem(item) {
     bonusProficiencyBonus: item.bonusProficiencyBonus || null,
     reqAttune: item.reqAttune ?? null,
     reqAttuneAlt: item.reqAttuneAlt ?? null,
+    reqAttuneTags: item.reqAttuneTags
+      ? (Array.isArray(item.reqAttuneTags) ? item.reqAttuneTags.map((tag) => ({ ...tag })) : [{ ...item.reqAttuneTags }])
+      : null,
     property: Array.isArray(item.property) ? item.property.map((p) => String(p).split('|')[0]) : [],
     entries: Array.isArray(item.entries) ? stripTemplatedEntries(item.entries) : (item.entries || []),
     packContents: item.packContents || null,

@@ -448,11 +448,15 @@ export function createAdapterRegistry() {
     getWeaponAbilityOverrides() {
       return stores.weaponAbilityOverrides.slice();
     },
-    // Magic items granting an extra attack with the weapon itself (e.g. Scimitar
-    // of Speed's Bonus Action attack). `match(item, C)` decides per equipped
-    // weapon; a matching override clones the weapon's attack card into `cat`.
+    // Magic items granting an extra attack with the weapon itself. Item identity
+    // is declarative and source-qualified; the consumer applies the shared item
+    // activation policy before evaluating an optional character condition.
     registerWeaponExtraAttack(config) {
-      if (config?.key && typeof config.match === 'function') stores.weaponExtraAttacks.push(config);
+      if (!config?.key || !config?.item?.name || !config?.item?.source) return;
+      stores.weaponExtraAttacks.push({
+        ...config,
+        item: { name: config.item.name, source: config.item.source },
+      });
     },
     getWeaponExtraAttacks() {
       return stores.weaponExtraAttacks.slice();

@@ -5,7 +5,8 @@
 // Consumers query the returned bag instead of re-walking inventory, so adding
 // support for a new 5etools field requires one mapper case + one consumer.
 
-import { isItemBonusActive, parseSignedBonus } from './itemBonus.js';
+import { parseSignedBonus } from './itemBonus.js';
+import { isItemEffectActive } from './itemAttunement.js';
 import { getItemNarrativeEffects } from './itemNarrativeEffects.js';
 
 const ABILITY_KEYS = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
@@ -253,7 +254,7 @@ function applyItemToEffects(item, out) {
 function computeEffects(inventory) {
   const out = createEmptyEffects();
   (inventory || []).forEach((rawItem) => {
-    if (!isItemBonusActive(rawItem)) return;
+    if (!isItemEffectActive(rawItem)) return;
     applyItemToEffects(rawItem, out);
   });
   return out;

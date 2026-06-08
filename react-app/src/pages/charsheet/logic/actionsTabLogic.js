@@ -17,6 +17,8 @@ import {
   hasTwoWeaponFightingStyle,
 } from './equipmentSlots.js';
 import { weaponEnhancement } from '../../../shared/character/itemBonus.js';
+import { isItemEffectActive } from '../../../shared/character/itemAttunement.js';
+import { matchesItemReference } from '../../../shared/character/itemIdentity.js';
 import { getMeleeStrDamageBonus } from './sheetEffects.js';
 
 export const FILTERS = ['all', 'action', 'bonus', 'reaction'];
@@ -486,10 +488,14 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
 // computed attack/damage so item enhancement, mastery and proficiency stay
 // consistent; only category/label change.
 function pushWeaponExtraAttacks(out, mainAction, item, C, overrides) {
+  if (!isItemEffectActive(item)) return;
   overrides.forEach((ov) => {
-    let matched = false;
-    try { matched = ov.match(item, C); } catch { matched = false; }
-    if (!matched) return;
+    if (!matchesItemReference(item, ov.item)) return;
+    if (typeof ov.condition === 'function') {
+      let allowed = false;
+      try { allowed = ov.condition(C, item); } catch { allowed = false; }
+      if (!allowed) return;
+    }
     out.push({
       ...mainAction,
       name: ov.name || mainAction.name,
@@ -631,4 +637,3 @@ export function resolveButtonLabel(label, formula, action, C, fallback) {
   if (typeof label === 'function') return label({ formula, character: C, ownerLevel: action.ownerLevel ?? C?.classLevel ?? C?.level ?? 1 });
   return label || fallback;
 }
-

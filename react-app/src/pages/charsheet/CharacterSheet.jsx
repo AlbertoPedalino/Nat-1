@@ -22,6 +22,7 @@ import { clearCraftedByFlag, VANISH_ON_LONG_REST_FLAGS } from '../../shared/char
 import { buildD20Meta, formatD20Detail, rollD20 as rollD20Dice } from '../../shared/character/dice.js';
 import { aggregateSavingThrowBonus } from '../../shared/character/itemBonus.js';
 import { calcMaxHP, getMod, getFinal, getPB, getSaveBonus, CONDITION_IMPLIES, clampExhaustion, exhaustionD20Penalty, EXHAUSTION_MAX } from './logic/calculations.js';
+import { normalizeCharacterAttunement } from './logic/attunement.js';
 import { applyResourceRest, getAllResourceDefs, getHitDicePools, getUsedHitDiceTotal, normalizeResourceMax, resourceFullValue } from './logic/restResources.js';
 import { clearedToggles } from './logic/toggleState.js';
 import { applyFreeCastRest, getFreeCastDefsForCharacter } from './logic/spellsTabLogic.js';
@@ -85,8 +86,9 @@ export default function CharacterSheet() {
       // inventory so sheet calculations and item effects read canonical item
       // records while preserving user-managed inventory state.
       let nextChar = ch;
-      if (ch && Array.isArray(ch.inventory) && itemsDb?.length) {
-        const reconciled = reconcileInventoryWithItemsDb(ch.inventory, itemsDb);
+      if (ch && Array.isArray(ch.inventory)) {
+        const refreshed = reconcileInventoryWithItemsDb(ch.inventory, itemsDb);
+        const reconciled = normalizeCharacterAttunement({ ...ch, inventory: refreshed }, refreshed);
         if (reconciled !== ch.inventory) {
           nextChar = { ...ch, inventory: reconciled };
           if (id) storePatchCharacter(id, { inventory: reconciled });
@@ -142,9 +144,10 @@ export default function CharacterSheet() {
   }, [charId]);
 
   const updateInventory = useCallback((inventory) => {
-    setSheet((prev) => ({ ...prev, sheetInventory: inventory }));
-    updateCurrentCharacter((prev) => ({ ...prev, inventory }));
-  }, [updateCurrentCharacter]);
+    const normalized = normalizeCharacterAttunement(C, inventory);
+    setSheet((prev) => ({ ...prev, sheetInventory: normalized }));
+    updateCurrentCharacter((prev) => ({ ...prev, inventory: normalized }));
+  }, [C, updateCurrentCharacter]);
 
   const updateCurrency = useCallback((currency) => {
     setSheet((prev) => ({ ...prev, sheetCurrency: currency }));

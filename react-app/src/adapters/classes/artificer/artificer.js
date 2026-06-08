@@ -368,11 +368,11 @@ registerClassSheetActions("Artificer", [
   {
     "name": "Soul of Artifice",
     "icon": "",
-    "cat": "reaction",
-    "uses": "Passive + Reaction",
+    "cat": "action",
+    "uses": "Passive",
     "passive": true,
     "minLevel": 20,
-    "desc": "Passive: you gain +1 bonus to all saving throws per magic item you are currently attuned to (max +6). Reaction: when you are reduced to 0 HP, you can end one of your attunements — you drop to 1 HP instead."
+    "desc": "Cheat Death: when reduced to 0 HP, you can disintegrate replicated Uncommon or Rare magic items to remain at 20 HP per item. Magical Guidance: after a Short Rest, regain all Flash of Genius uses if you are attuned to at least one magic item."
   }
 ]);
 registerClassSheetResources("Artificer", [
@@ -383,6 +383,11 @@ registerClassSheetResources("Artificer", [
     "recharge": "LR",
     "max": (lv, { int } = {}) => Math.max(1, int ?? 0)
   }
+]);
+registerClassSheetEffects("Artificer", [
+  { type: "attunementSlots", value: 4, minLevel: 10, note: "Magic Item Adept." },
+  { type: "attunementSlots", value: 5, minLevel: 14, note: "Magic Item Savant." },
+  { type: "attunementSlots", value: 6, minLevel: 18, note: "Magic Item Master." },
 ]);
 registerClassSheetChoiceMeta("Artificer", {
   sectionTitle: "Artificer Choices",
@@ -467,4 +472,3 @@ registerClassChoiceLabelProvider("Artificer", function (baseKey) {
 });
 
 }
-

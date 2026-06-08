@@ -130,7 +130,10 @@
       "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/items.json\" -o ./_items_tmp.json)",
       "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/items.json\" -o ./_it.json)",
       "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/magicvariants.json\" -o /tmp/mv.json)",
-      "PowerShell(Remove-Item *)"
+      "PowerShell(Remove-Item *)",
+      "Bash(rg -rn \"ExtraAttacks?\\\\b\" --type js -g '!adapters/registry.js')",
+      "Bash(rg -rn \"reconcileInventoryWithItemsDb\" --type js --type jsx -g '!dataLoaders.js')",
+      "Bash(rg -rn \"reconcileInventoryWithItemsDb\" -g '*.js' -g '*.jsx' -g '!dataLoaders.js')"
     ]
   }
 }

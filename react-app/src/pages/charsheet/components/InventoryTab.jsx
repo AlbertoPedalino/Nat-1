@@ -14,9 +14,15 @@ import {
 import { ItemNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 import { INVENTORY_SOURCE_PRIORITY, sourceRank } from '../../../shared/character/sourcePriority.js';
 import { addInventoryEntries } from '../../../shared/character/itemContainers.js';
-import { countAttunedItems, ATTUNEMENT_LIMIT, attunementRequirementText, meetsAttunementClassRequirement } from '../../../shared/character/itemBonus.js';
+import {
+  attunementRequirementText,
+  countAttunedItems,
+  getAttunementEligibility,
+  toggleItemAttunement,
+} from '../../../shared/character/itemAttunement.js';
 import { isConsumableTome, extractTomeBonus, hasAbilityChoice, getAbilityChoiceGroups } from '../../../shared/character/itemEffects.js';
 import { getArmorPenalties } from '../logic/armorPenalties.js';
+import { getCharacterAttunementState } from '../logic/attunement.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 import { CurrencyRow } from '../../../shared/character/CurrencyCoinBox.jsx';
 import { normalizeCoinAmount } from '../../../shared/character/currency.js';
@@ -418,10 +424,11 @@ export default function InventoryTab({ C, sheet }) {
   const carryPct = Math.min(100, (totalWeight / maxCarry) * 100);
   const overloaded = totalWeight > maxCarry;
   const profSets = useProficiencySets();
-  const charClassNames = useMemo(() => (
-    [C?.className, ...((C?.extraClasses || []).map((ec) => ec?.name))].filter(Boolean)
-  ), [C]);
-  const attunementFull = useMemo(() => countAttunedItems(inv) >= ATTUNEMENT_LIMIT, [inv]);
+  const attunementState = useMemo(() => getCharacterAttunementState(C), [C]);
+  const attunementFull = useMemo(
+    () => countAttunedItems(inv) >= attunementState.limit,
+    [attunementState.limit, inv],
+  );
 
   const searchResults = useMemo(() => {
     const q = deferredSearch.trim();
@@ -545,18 +552,31 @@ export default function InventoryTab({ C, sheet }) {
     updateInv(next);
   }, [updateInv]);
 
-  const toggleAttuned = useCallback((index) => {
+  const toggleAttuned = useCallback((index, { curseBroken = false } = {}) => {
     const current = invRef.current || [];
-    const target = current[index];
-    if (!target?.reqAttune) return;
-    // Enforce the RAW cap when attuning a new item (un-attuning is always free).
-    if (!target.attuned && countAttunedItems(current) >= ATTUNEMENT_LIMIT) {
-      onShowToast?.('Attunement limit', `You can attune to at most ${ATTUNEMENT_LIMIT} items. End attunement on another item first.`, 0, []);
+    const result = toggleItemAttunement(current, index, {
+      ...attunementState,
+      character: C,
+      curseBroken,
+    });
+    if (result.status === 'limit') {
+      onShowToast?.('Attunement limit', `You can attune to at most ${attunementState.limit} items. End attunement on another item first.`, 0, []);
       return;
     }
-    const next = current.map((item, idx) => idx === index ? { ...item, attuned: !item.attuned } : item);
-    updateInv(next);
-  }, [updateInv, onShowToast]);
+    if (result.status === 'duplicate') {
+      onShowToast?.('Attunement duplicate', 'You cannot attune to more than one copy of the same magic item.', 0, []);
+      return;
+    }
+    if (result.status === 'requirement') {
+      onShowToast?.('Attunement requirement', result.eligibility?.reason || 'This character does not meet the attunement requirement.', 0, []);
+      return;
+    }
+    if (result.status === 'cursed') {
+      onShowToast?.('Cursed item', 'Attunement cannot be ended voluntarily. Break the curse first.', 0, []);
+      return;
+    }
+    if (result.status === 'updated') updateInv(result.inventory);
+  }, [C, attunementState, updateInv, onShowToast]);
 
   const setAbilityChoice = useCallback((index, groupIdx, abilities) => {
     const current = invRef.current || [];
@@ -601,10 +621,10 @@ export default function InventoryTab({ C, sheet }) {
         <Box sx={statPillSx}>Value: <b>{totalGp.toFixed(1)} GP</b></Box>
         {(() => {
           const attunedCount = countAttunedItems(inv);
-          const over = attunedCount > 3;
+          const over = attunedCount > attunementState.limit;
           return (
             <Box sx={{ ...statPillSx, bgcolor: over ? 'rgba(222,103,95,0.12)' : 'rgba(35,32,26,1)', borderColor: over ? '#de675f' : 'divider', '& b': { color: over ? '#de675f' : '#edd48a', fontFamily: '"Cinzel", Georgia, serif' } }}>
-              Attuned: <b>{attunedCount} / 3</b>{over ? ' (over limit)' : ''}
+              Attuned: <b>{attunedCount} / {attunementState.limit}</b>{over ? ' (over limit)' : ''}
             </Box>
           );
         })()}
@@ -719,7 +739,9 @@ export default function InventoryTab({ C, sheet }) {
                     onArcaneArmor={toggleArcaneArmor}
                     onAttune={toggleAttuned}
                     attunementFull={attunementFull}
-                    charClassNames={charClassNames}
+                    character={C}
+                    attunementContext={attunementState.context}
+                    attunementLimit={attunementState.limit}
                     onSetAbilityChoice={setAbilityChoice}
                     onConsumeTome={consumeTome}
                   />
@@ -794,7 +816,7 @@ const getPenaltyMessage = (() => {
   };
 })();
 
-const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, onEquip, onEquipSlot, penaltyMsg, canPactWeapon, onPactWeapon, isArmorer, hasArcaneArmor, onArcaneArmor, onAttune, attunementFull, charClassNames, onSetAbilityChoice, onConsumeTome }) {
+const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, onEquip, onEquipSlot, penaltyMsg, canPactWeapon, onPactWeapon, isArmorer, hasArcaneArmor, onArcaneArmor, onAttune, attunementFull, character, attunementContext, attunementLimit, onSetAbilityChoice, onConsumeTome }) {
   const type = String(item.type || '').toUpperCase();
   const canEquip = ['M', 'R', 'LA', 'MA', 'HA', 'S', 'SCF', 'WD', 'RD', 'ST', 'WI', 'WEAPON', 'ARMOR'].includes(type);
 
@@ -875,7 +897,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, 
             </Button>
           ) : null}
           {item.reqAttune ? (
-            <AttuneButton item={item} index={index} attunementFull={attunementFull} charClassNames={charClassNames} onAttune={onAttune} />
+            <AttuneButton item={item} index={index} attunementFull={attunementFull} character={character} attunementContext={attunementContext} attunementLimit={attunementLimit} onAttune={onAttune} />
           ) : null}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, ml: 'auto' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
@@ -994,29 +1016,42 @@ function SlotBtn({ active, onClick, label }) {
   );
 }
 
-// Attune toggle for an item requiring attunement. Surfaces the requirement text
-// (tooltip), disables when the RAW attunement cap is reached, and flags a soft
-// class-eligibility warning. All rules logic comes from itemBonus.js.
-function AttuneButton({ item, index, attunementFull, charClassNames, onAttune }) {
+// Attune toggle for an item requiring attunement. Structured prerequisite
+// failures block attunement; unmodeled alternatives remain advisory.
+function AttuneButton({ item, index, attunementFull, character, attunementContext, attunementLimit, onAttune }) {
   const reqText = attunementRequirementText(item);
-  const eligible = meetsAttunementClassRequirement(item, charClassNames);
-  const blocked = !item.attuned && attunementFull;
+  const eligibility = getAttunementEligibility(item, character, attunementContext);
+  const hasRequirementWarning = eligibility.status === 'ineligible' || eligibility.status === 'unknown';
+  const blockedByLimit = !item.attuned && attunementFull;
+  const blocked = blockedByLimit || (!item.attuned && eligibility.status === 'ineligible');
+  const cursedAttuned = Boolean(item.attuned && item.curse);
   const tip = [
     reqText,
-    blocked ? `Attunement limit reached (${ATTUNEMENT_LIMIT})` : null,
-    !eligible ? 'Your class may not meet this requirement' : null,
+    blockedByLimit ? `Attunement limit reached (${attunementLimit})` : null,
+    hasRequirementWarning ? eligibility.reason : null,
+    cursedAttuned ? 'A cursed item cannot be unattuned voluntarily' : null,
   ].filter(Boolean).join(' · ');
-  const accent = item.attuned ? '#d69245' : (!eligible ? '#c9923f' : null);
+  const accent = item.attuned ? '#d69245' : (hasRequirementWarning ? '#c9923f' : null);
   return (
-    <Tooltip title={tip} arrow>
-      <span>
-        <Button size="small" disabled={blocked} onClick={() => onAttune?.(index)}
-          startIcon={item.attuned ? <Check size={11} /> : (!eligible ? <AlertTriangle size={11} /> : null)}
-          sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: accent || 'divider', borderRadius: '3px', color: accent || 'text.secondary', bgcolor: item.attuned ? 'rgba(214,146,69,0.14)' : 'transparent', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem', '&.Mui-disabled': { opacity: 0.4 } }}>
-          {item.attuned ? 'Attuned' : 'Attune'}
-        </Button>
-      </span>
-    </Tooltip>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+      <Tooltip title={tip} arrow>
+        <span>
+          <Button size="small" disabled={blocked} onClick={() => onAttune?.(index)}
+            startIcon={cursedAttuned ? <AlertTriangle size={11} /> : (item.attuned ? <Check size={11} /> : (hasRequirementWarning ? <AlertTriangle size={11} /> : null))}
+            sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: accent || 'divider', borderRadius: '3px', color: accent || 'text.secondary', bgcolor: item.attuned ? 'rgba(214,146,69,0.14)' : 'transparent', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem', '&.Mui-disabled': { opacity: 0.4 } }}>
+            {cursedAttuned ? 'Cursed' : (item.attuned ? 'Attuned' : 'Attune')}
+          </Button>
+        </span>
+      </Tooltip>
+      {cursedAttuned ? (
+        <Tooltip title="Use Remove Curse or equivalent magic, then end attunement" arrow>
+          <Button size="small" onClick={() => onAttune?.(index, { curseBroken: true })}
+            sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: '#a75d5d', borderRadius: '3px', color: '#d99292', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem' }}>
+            Break Curse & Unattune
+          </Button>
+        </Tooltip>
+      ) : null}
+    </Box>
   );
 }
 
