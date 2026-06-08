@@ -820,6 +820,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, 
               <ItemNameIcon item={item} />
               <Typography noWrap sx={{ fontSize: '0.875rem', color: 'text.primary' }}>{item.name}</Typography>
               {item.custom ? <Box component="span" sx={{ fontSize: '0.56rem', color: 'text.secondary' }}>[custom]</Box> : null}
+              {hasItemFlag(item, 'replicated') ? <Box component="span" sx={{ ml: 0.5, fontSize: '0.56rem', color: '#6fb0c9', fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}>[Replicated]</Box> : null}
               {hasItemFlag(item, 'pactWeapon') ? <Box component="span" sx={{ ml: 0.5, fontSize: '0.56rem', color: '#9d7fb8', fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}>[Pact Weapon]</Box> : null}
               {hasItemFlag(item, 'arcaneArmor') ? <Box component="span" sx={{ ml: 0.5, fontSize: '0.56rem', color: '#58b879', fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}>[Arcane Armor]</Box> : null}
               {item.attuned ? <Box component="span" sx={{ ml: 0.5, fontSize: '0.56rem', color: '#d69245', fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}>[Attuned]</Box> : null}

@@ -120,88 +120,126 @@ export default function install(registry, context = {}) {
     getGenericBackgroundOriginFeat,
   } = createAdapterBindings(registry, context);
 
-const _ARTIFICER_PLAN_POOL_LV2 = [
-  'Alchemy Jug',
-  'Bag of Holding',
-  'Cap of Water Breathing',
-  'Common magic item (non-Potion, non-Scroll, non-cursed)',
-  'Goggles of Night',
-  'Manifold Tool',
-  'Repeating Shot',
-  'Returning Weapon',
-  'Rope of Climbing',
-  'Sending Stones',
-  'Shield +1',
-  'Wand of Magic Detection',
-  'Wand of Secrets',
-  'Wand of the War Mage +1',
-  'Weapon +1',
-  'Wraps of Unarmed Power +1',
+// ── EFA (Eberron: Forge of the Artificer) — Replicate Magic Item ──
+// Single source of truth for the whole feature. Each tier unlocks at `level`,
+// raising known `plans` and simultaneously-active `items`, and adding a block
+// of replicable item plans. Derived accessors below read this table, so adding
+// a tier or item only requires touching this array.
+const _ARTIFICER_REPLICATE_TIERS = [
+  {
+    level: 2,
+    plans: 4,
+    items: 2,
+    pool: [
+      'Alchemy Jug',
+      'Bag of Holding',
+      'Cap of Water Breathing',
+      'Common wondrous items',
+      'Goggles of Night',
+      'Manifold Tool',
+      'Repeating Shot',
+      'Returning Weapon',
+      'Rope of Climbing',
+      'Sending Stones',
+      'Shield +1',
+      'Wand of Magic Detection',
+      'Wand of Secrets',
+      'Wand of the War Mage +1',
+      'Weapon +1',
+      'Wraps of Unarmed Power +1',
+    ],
+  },
+  {
+    level: 6,
+    plans: 5,
+    items: 3,
+    pool: [
+      'Armor +1',
+      'Boots of Elvenkind',
+      'Boots of the Winding Path',
+      'Cloak of Elvenkind',
+      'Cloak of the Manta Ray',
+      'Dazzling Weapon',
+      'Eyes of Charming',
+      'Eyes of Minute Seeing',
+      'Gloves of Thievery',
+      'Helm of Awareness',
+      'Lantern of Revealing',
+      'Mind Sharpener',
+      'Necklace of Adaptation',
+      'Pipes of Haunting',
+      'Repulsion Shield',
+      'Ring of Swimming',
+      'Ring of Water Walking',
+      'Sentinel Shield',
+      'Spell-Refueling Ring',
+      'Uncommon wondrous items',
+      'Wand of Magic Missiles',
+      'Wand of Web',
+      'Weapon of Warning',
+    ],
+  },
+  {
+    level: 10,
+    plans: 6,
+    items: 4,
+    pool: [
+      'Armor of Resistance',
+      'Dagger of Venom',
+      'Elven Chain',
+      'Ring of Feather Falling',
+      'Ring of Jumping',
+      'Ring of Mind Shielding',
+      'Shield +2',
+      'Wand of the War Mage +2',
+      'Weapon +2',
+      'Wraps of Unarmed Power +2',
+    ],
+  },
+  {
+    level: 14,
+    plans: 7,
+    items: 5,
+    pool: [
+      'Armor +2',
+      'Arrow-Catching Shield',
+      'Flame Tongue',
+      'Rare wondrous items',
+      'Ring of Free Action',
+      'Ring of Protection',
+      'Ring of the Ram',
+    ],
+  },
+  {
+    level: 18,
+    plans: 8,
+    items: 6,
+    pool: [],
+  },
 ];
 
-const _ARTIFICER_PLAN_POOL_LV6 = [
-  'Armor +1',
-  'Boots of Elvenkind',
-  'Boots of the Winding Path',
-  'Cloak of Elvenkind',
-  'Cloak of the Manta Ray',
-  'Dazzling Weapon',
-  'Eyes of Charming',
-  'Eyes of Minute Seeing',
-  'Gloves of Thievery',
-  'Helm of Awareness',
-  'Lantern of Revealing',
-  'Mind Sharpener',
-  'Necklace of Adaptation',
-  'Pipes of Haunting',
-  'Repulsion Shield',
-  'Ring of Swimming',
-  'Ring of Water Walking',
-  'Sentinel Shield',
-  'Spell-Refueling Ring',
-  'Wand of Magic Missiles',
-  'Wand of Web',
-  'Weapon of Warning',
-];
-
-const _ARTIFICER_PLAN_POOL_LV10 = [
-  'Armor of Resistance',
-  'Dagger of Venom',
-  'Elven Chain',
-  'Ring of Feather Falling',
-  'Ring of Jumping',
-  'Ring of Mind Shielding',
-  'Shield +2',
-  'Uncommon Wondrous Item (non-cursed)',
-  'Wand of the War Mage +2',
-  'Weapon +2',
-  'Wraps of Unarmed Power +2',
-];
-
-const _ARTIFICER_PLAN_POOL_LV14 = [
-  'Armor +2',
-  'Arrow-Catching Shield',
-  'Flame Tongue',
-  'Rare Wondrous Item (non-cursed)',
-  'Ring of Free Action',
-  'Ring of Protection',
-  'Ring of the Ram',
-];
+function _artificerReplicateTier(level) {
+  let current = { plans: 0, items: 0 };
+  for (const tier of _ARTIFICER_REPLICATE_TIERS) {
+    if (level >= tier.level) current = tier;
+  }
+  return current;
+}
 
 function _artificerPlansKnownAtLevel(level) {
-  if (level < 2) return 0;
-  if (level >= 18) return 8;
-  if (level >= 14) return 7;
-  if (level >= 10) return 6;
-  if (level >= 6) return 5;
-  return 4;
+  return level < 2 ? 0 : _artificerReplicateTier(level).plans;
+}
+
+// EFA Replicate Magic Item: "Magic Items" column (active items at once).
+function _artificerActiveItemsAtLevel(level) {
+  return level < 2 ? 0 : _artificerReplicateTier(level).items;
 }
 
 function _artificerPlanPoolForLevel(level) {
-  let pool = _ARTIFICER_PLAN_POOL_LV2.slice();
-  if (level >= 6) pool = pool.concat(_ARTIFICER_PLAN_POOL_LV6);
-  if (level >= 10) pool = pool.concat(_ARTIFICER_PLAN_POOL_LV10);
-  if (level >= 14) pool = pool.concat(_ARTIFICER_PLAN_POOL_LV14);
+  const pool = [];
+  for (const tier of _ARTIFICER_REPLICATE_TIERS) {
+    if (level >= tier.level) pool.push(...tier.pool);
+  }
   return [...new Set(pool)];
 }
 
@@ -259,7 +297,27 @@ registerClassSheetActions("Artificer", [
     "cat": "action",
     "uses": "After Long Rest",
     "minLevel": 2,
-    "desc": "After a Long Rest, create magic items from the plans you know. Plans known and active items increase with Artificer level."
+    // Description lives in the Features tab — the Action card only drives the
+    // interactive create/remove panel, so no rich-text entries here.
+    "entries": [],
+    "noDescription": true,
+    detailType: 'replicateMagicItem',
+    detail: ({ action, character }) => {
+      const lv = Number(action?.ownerLevel || character?.classLevel || character?.level || 1);
+      const choices = character?.choices || {};
+      let plans = [];
+      for (const [k, v] of Object.entries(choices)) {
+        if (k.replace(/^mc\d+_/, '') === 'artificer_replicate_magic_item_plans') {
+          plans = Array.isArray(v) ? v : (v ? [v] : []);
+          break;
+        }
+      }
+      return {
+        plans,
+        maxPlans: _artificerPlansKnownAtLevel(lv),
+        maxActive: _artificerActiveItemsAtLevel(lv),
+      };
+    }
   },
   {
     "name": "Flash of Genius",

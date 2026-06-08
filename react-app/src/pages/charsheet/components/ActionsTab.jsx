@@ -34,6 +34,7 @@ import {
 } from './spellsTabStyles.js';
 import { Empty } from './SpellsUiParts.jsx';
 import ActionDetailPanel from './ActionDetailPanel.jsx';
+import ReplicateMagicItemPanel from './ReplicateMagicItemPanel.jsx';
 import AttackRollButton from './AttackRollButton.jsx';
 import UnarmedStrikeOptionsPanel from './UnarmedStrikeOptionsPanel.jsx';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
@@ -49,6 +50,7 @@ import { formatRollTitle, rollFormula as rollFormulaDice } from '../../../shared
 const ACTION_DETAIL_RENDERERS = {
   panel: ActionDetailPanel,
   unarmedStrike: UnarmedStrikeOptionsPanel,
+  replicateMagicItem: ReplicateMagicItemPanel,
 };
 
 const _danglingResKeyWarned = typeof Set === 'function' ? new Set() : null;
@@ -67,7 +69,7 @@ function actionLabel(value) {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
-export default function ActionsTab({ C, sheet, onRoll, resources, setResources, onShowToast, onUpdateSheet, onUpdateCharacter }) {
+export default function ActionsTab({ C, sheet, onRoll, resources, setResources, onShowToast, onUpdateSheet, onUpdateCharacter, onUpdateInventory }) {
   const [filter, setFilter] = useState('all');
   const [itemsDb, setItemsDb] = useState([]);
   const [, setMasteriesLoaded] = useState(false);
@@ -644,6 +646,7 @@ export default function ActionsTab({ C, sheet, onRoll, resources, setResources, 
                 isPool={resPoolMap[action.resKey]}
                 resTrack={resTrackMap[action.resKey]}
                 onUpdateCharacter={onUpdateCharacter}
+                onUpdateInventory={onUpdateInventory}
               />
             ))}
           </Box>
@@ -868,7 +871,7 @@ export default function ActionsTab({ C, sheet, onRoll, resources, setResources, 
   );
 }
 
-function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, onShowToast, resMax, isPool, resTrack, onUpdateCharacter }) {
+function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, onShowToast, resMax, isPool, resTrack, onUpdateCharacter, onUpdateInventory }) {
   const DetailRenderer = action.detailType ? ACTION_DETAIL_RENDERERS[action.detailType] : null;
   const hasRes = action.resKey && resources && resources[action.resKey] != null;
   const resCur = hasRes ? (resources[action.resKey] ?? 0) : 0;
@@ -1114,7 +1117,7 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
             </Box>
           ) : null}
           {DetailRenderer ? (
-            <DetailRenderer action={action} character={C} sheet={sheet} onShowToast={onShowToast} />
+            <DetailRenderer action={action} character={C} sheet={sheet} onShowToast={onShowToast} onUpdateInventory={onUpdateInventory} />
           ) : null}
         </>
       ) : null}

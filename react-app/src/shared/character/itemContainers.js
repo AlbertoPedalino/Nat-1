@@ -25,6 +25,12 @@ function inventoryQty(item) {
   return Math.max(1, Number(item?.qty ?? 1) || 1);
 }
 
+// Replicated (artificer) items stay separate from identically-named mundane
+// items, so they must never merge into the same stack.
+function isReplicated(item) {
+  return Array.isArray(item?.flags) && item.flags.includes('replicated');
+}
+
 export function findInventoryItem(itemDb, name, source = '') {
   const targetName = norm(name);
   if (!targetName) return null;
@@ -111,7 +117,7 @@ export function addInventoryEntries(inventory, entries, itemDb = null, normalize
   });
 
   additions.forEach((item) => {
-    const idx = next.findIndex((entry) => entry.name === item.name && entry.source === item.source);
+    const idx = next.findIndex((entry) => entry.name === item.name && entry.source === item.source && isReplicated(entry) === isReplicated(item));
     const qty = inventoryQty(item);
     if (idx === -1) next.push({ ...item, qty });
     else next[idx] = { ...next[idx], qty: inventoryQty(next[idx]) + qty };
