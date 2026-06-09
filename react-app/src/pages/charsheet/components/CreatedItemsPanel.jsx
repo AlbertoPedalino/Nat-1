@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Box, IconButton, Typography } from '@mui/material';
-import { Minus, Plus } from 'lucide-react';
+import { Box, IconButton, InputAdornment, TextField, Typography } from '@mui/material';
+import { Minus, Plus, Search } from 'lucide-react';
 import { loadItems } from '../../charbuilder/logic/dataLoaders.js';
 import { ItemNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
@@ -71,6 +71,20 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
   const flag = detail.flag;
   const tagLabel = detail.tagLabel || 'Created';
   const emptyHint = detail.emptyHint || 'Nothing available to create.';
+  // Per-item active cap (e.g. Replicate Magic Item: one copy of each item).
+  // Any non-positive / non-finite config means "no per-item limit".
+  const maxPerItem = useMemo(() => {
+    const n = Number(detail.maxPerItem);
+    return Number.isFinite(n) && n > 0 ? n : Infinity;
+  }, [detail.maxPerItem]);
+  const searchable = !!detail.searchable;
+  // Cap the list height (px) past which it scrolls instead of growing forever.
+  // 0 / non-finite means "no cap" (grow to fit).
+  const maxHeight = useMemo(() => {
+    const n = Number(detail.maxHeight);
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  }, [detail.maxHeight]);
+  const [query, setQuery] = useState('');
   const inv = sheet?.sheetInventory || [];
 
   // Resolve the cap: fixed number or an ability modifier (min `minMax`).
@@ -123,6 +137,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
 
   const handleAdd = (name) => {
     if (remaining <= 0 || !onUpdateInventory) return;
+    if (craftedCountFor(inv, flag, name) >= maxPerItem) return;
     const dbItem = resolveItem(name);
     const itemData = dbItem ? { ...dbItem } : { name };
     itemData.name = name; // keep the recipe wording as the inventory label
@@ -134,6 +149,18 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
     if (craftedCountFor(inv, flag, name) <= 0) return;
     onUpdateInventory(removeOneCrafted(inv, flag, name));
   };
+
+  const q = query.trim().toLowerCase();
+  const visibleItems = useMemo(() => (
+    searchable && q
+      ? items.filter((name) => String(name).toLowerCase().includes(q))
+      : items
+  ), [items, searchable, q]);
+
+  // "No more can be made" when every craftable is blocked — either the global
+  // cap is full, or each item already sits at its per-item limit.
+  const noneAddable = remaining <= 0
+    || items.every((name) => craftedCountFor(inv, flag, name) >= maxPerItem);
 
   if (!items.length) {
     return (
@@ -154,11 +181,39 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
         </Typography>
       </Box>
 
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-        {items.map((name) => {
+      {searchable ? (
+        <TextField
+          size="small"
+          fullWidth
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onClick={(e) => e.stopPropagation()}
+          placeholder="Search items…"
+          sx={{ mb: 0.6, '& .MuiInputBase-input': { fontSize: '0.78rem', py: '5px' } }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search size={14} />
+              </InputAdornment>
+            ),
+          }}
+        />
+      ) : null}
+
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '4px',
+          // Rows must not flex-shrink, else they collapse to thin lines when
+          // their total height exceeds maxHeight — they should scroll instead.
+          ...(maxHeight ? { maxHeight, overflowY: 'auto', pr: '4px', '& > *': { flexShrink: 0 } } : {}),
+        }}
+      >
+        {visibleItems.length ? visibleItems.map((name) => {
           const count = craftedCountFor(inv, flag, name);
           const dbItem = resolveItem(name);
-          const addDisabled = remaining <= 0;
+          const addDisabled = remaining <= 0 || count >= maxPerItem;
           const removeDisabled = count <= 0;
           const stepper = (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
@@ -200,12 +255,18 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
               )}
             />
           );
-        })}
+        }) : (
+          <Typography sx={{ fontSize: '0.66rem', color: 'text.secondary', fontStyle: 'italic', py: 0.5 }}>
+            No items match “{query.trim()}”.
+          </Typography>
+        )}
       </Box>
 
-      {remaining <= 0 ? (
+      {noneAddable ? (
         <Typography sx={{ fontSize: '0.58rem', color: 'text.secondary', fontStyle: 'italic', mt: 0.5 }}>
-          Active limit reached. Remove one to make another.
+          {remaining <= 0
+            ? 'Active limit reached. Remove one to make another.'
+            : 'Each item already made. Remove one to remake it.'}
         </Typography>
       ) : null}
     </Box>

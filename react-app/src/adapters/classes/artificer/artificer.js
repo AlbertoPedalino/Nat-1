@@ -311,6 +311,8 @@ registerClassSheetActions("Artificer", [
       items: _TINKER_MAGIC_ITEMS,
       maxAbility: 'int',
       minMax: 1,
+      searchable: true,
+      maxHeight: 280,
       emptyHint: 'No items available.',
     }),
   },
@@ -344,6 +346,7 @@ registerClassSheetActions("Artificer", [
         tagLabel: 'Replicated Items',
         items: plans,
         max: _artificerActiveItemsAtLevel(lv),
+        maxPerItem: 1,
         emptyHint: 'No plans chosen yet — pick them in the character builder.',
       };
     }
