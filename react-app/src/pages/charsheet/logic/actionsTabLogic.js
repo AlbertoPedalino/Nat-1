@@ -15,11 +15,15 @@ import {
   canUseLightExtraAttack,
   getOffHandDamageMod,
   hasTwoWeaponFightingStyle,
+  isTwoHandedWeapon,
+  isThrownWeapon,
+  isWieldingWeaponOrShield,
+  isWeapon,
 } from './equipmentSlots.js';
 import { weaponEnhancement } from '../../../shared/character/itemBonus.js';
 import { isItemEffectActive } from '../../../shared/character/itemAttunement.js';
 import { matchesItemReference } from '../../../shared/character/itemIdentity.js';
-import { getMeleeStrDamageBonus } from './sheetEffects.js';
+import { getMeleeStrDamageBonus, getWeaponEffectBonuses } from './sheetEffects.js';
 
 export const FILTERS = ['all', 'action', 'bonus', 'reaction'];
 export const CAT_COLORS = { attack: '#de675f', action: '#caa550', bonus: '#70b7a6', reaction: '#9d7fb8' };
@@ -445,7 +449,17 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
   // Rage Damage (and similar): adds to Strength-based melee weapon attacks only.
   const isRangedWeapon = String(item?.type || '').toUpperCase() === 'R';
   const strMeleeDamageBonus = finalAbility === 'str' && !isRangedWeapon ? (ctx.strMeleeDamageBonus || 0) : 0;
-  const finalMod = (opts.damageMod != null ? opts.damageMod : mod) + enhancement.damage + strMeleeDamageBonus;
+  // Fighting Style and similar weapon-scoped bonuses (Archery, Dueling, Thrown Weapon).
+  const wieldedTwoHanded = item?.equippedSlot === 'twoHands' || isTwoHandedWeapon(item);
+  const fsBonus = getWeaponEffectBonuses(C, {
+    ranged: isRangedWeapon,
+    melee: String(item?.type || '').toUpperCase() === 'M',
+    thrown: isThrownWeapon(item),
+    twoHanded: wieldedTwoHanded,
+    oneHanded: !wieldedTwoHanded,
+    soloWeapon: ctx.soloWeapon,
+  });
+  const finalMod = (opts.damageMod != null ? opts.damageMod : mod) + enhancement.damage + strMeleeDamageBonus + fsBonus.damage;
   const damageFormula = base ? base + (finalMod !== 0 ? (finalMod >= 0 ? '+' : '') + finalMod : '') : '';
   const dtype = weaponDamageType(item);
   // XPHB 2024 Heavy weapon: Disadvantage on attack rolls if both STR and DEX < 13.
@@ -466,7 +480,7 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
     cat: opts.cat || 'action',
     uses: opts.uses || 'Equipped',
     _source: 'Weapon',
-    attackBonus: (profInfo.proficient ? getPB(C) + mod : mod) + enhancement.attack,
+    attackBonus: (profInfo.proficient ? getPB(C) + mod : mod) + enhancement.attack + fsBonus.attack,
     damageFormula,
     damageButtonLabel: damageFormula ? `Damage ${damageFormula}${dtype ? ` ${dtype}` : ''}` : 'Damage',
     rollLabelPrefix: opts.rollLabelPrefix || item.name || 'Weapon',
@@ -519,7 +533,18 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
   );
 
   const untrainedArmor = hasNonProficientArmor(C, inventory, equipmentSets);
-  const ctx = { profSets: equipmentSets, untrainedArmor, strMeleeDamageBonus: getMeleeStrDamageBonus(C) };
+  // "Solo weapon" = exactly one weapon wielded (any hand slot, or equipped with no
+  // explicit slot). Gates Fighting Style: Dueling ("a melee weapon in one hand and
+  // no other weapons"); a Shield is not a weapon, so sword-and-board still qualifies.
+  const wieldedWeaponCount = (inventory || []).filter((i) =>
+    isWeapon(i) && (['mainHand', 'offHand', 'twoHands'].includes(i.equippedSlot) || (i.equipped && !i.equippedSlot)),
+  ).length;
+  const ctx = {
+    profSets: equipmentSets,
+    untrainedArmor,
+    strMeleeDamageBonus: getMeleeStrDamageBonus(C),
+    soloWeapon: wieldedWeaponCount <= 1,
+  };
 
   const weaponActions = [];
   const hasTWF = hasTwoWeaponFightingStyle(C);
@@ -552,7 +577,17 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
     const ohDtype = weaponDamageType(offHandItem);
     const ohRanged = String(offHandItem?.type || '').toUpperCase() === 'R';
     const ohStrMeleeDamageBonus = ohAbility === 'str' && !ohRanged ? ctx.strMeleeDamageBonus : 0;
-    const ohDmgMod = getOffHandDamageMod(ohMod, hasTWF) + ohEnhancement.damage + ohStrMeleeDamageBonus;
+    // Off-hand implies a second weapon → oneHanded=false so Dueling does not apply;
+    // ranged/thrown bonuses (Archery, Thrown Weapon) still resolve.
+    const ohFsBonus = getWeaponEffectBonuses(C, {
+      ranged: ohRanged,
+      melee: String(offHandItem?.type || '').toUpperCase() === 'M',
+      thrown: isThrownWeapon(offHandItem),
+      twoHanded: false,
+      oneHanded: false,
+      soloWeapon: false, // off-hand implies a second weapon → never solo
+    });
+    const ohDmgMod = getOffHandDamageMod(ohMod, hasTWF) + ohEnhancement.damage + ohStrMeleeDamageBonus + ohFsBonus.damage;
     const ohSelectedEntry = selectedMasteriesByWeapon.get(normalizeWeaponName(offHandItem?.name || '')) || null;
     const ohDirectMastery = ohSelectedEntry ? resolveWeaponMasteryForItem(offHandItem) : null;
     const ohDbItem = ohSelectedEntry && !ohDirectMastery
@@ -570,7 +605,7 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
       uses: isNick ? 'Part of Attack action (Nick)' : 'Bonus Action (Light)',
       _source: 'Weapon',
       _colorBarCat: 'attack',
-      attackBonus: (ohProfInfo.proficient ? getPB(C) + ohMod : ohMod) + ohEnhancement.attack,
+      attackBonus: (ohProfInfo.proficient ? getPB(C) + ohMod : ohMod) + ohEnhancement.attack + ohFsBonus.attack,
       damageFormula: ohDamageFormula,
       damageButtonLabel: ohDamageFormula ? `Damage ${ohDamageFormula}${ohDtype ? ` ${ohDtype}` : ''}` : 'Damage',
       rollLabelPrefix: `Off-hand ${offHandItem.name}`,
@@ -592,7 +627,16 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
   const mod = getMod(getFinal(C, ability));
   // Rage Damage applies to Strength-based Unarmed Strikes too.
   const unarmedDmgMod = mod + (ability === 'str' ? ctx.strMeleeDamageBonus : 0);
-  const die = monkLevel >= 17 ? '1d12' : monkLevel >= 11 ? '1d10' : monkLevel >= 5 ? '1d8' : monkLevel >= 1 ? '1d6' : hasFeat(C, 'Tavern Brawler') ? '1d4' : '1';
+  // Unarmed Strike die = largest face among Monk Martial Arts, Fighting Style:
+  // Unarmed Fighting (d6, or d8 while not wielding any weapon or Shield), and
+  // Tavern Brawler (d4). Defaults to a flat 1.
+  const monkDie = monkLevel >= 17 ? 12 : monkLevel >= 11 ? 10 : monkLevel >= 5 ? 8 : monkLevel >= 1 ? 6 : 0;
+  const unarmedFightingDie = hasFeat(C, 'Unarmed Fighting')
+    ? (isWieldingWeaponOrShield(inventory) ? 6 : 8)
+    : 0;
+  const tavernBrawlerDie = hasFeat(C, 'Tavern Brawler') ? 4 : 0;
+  const dieFace = Math.max(monkDie, unarmedFightingDie, tavernBrawlerDie, 1);
+  const die = dieFace > 1 ? `1d${dieFace}` : '1';
   const unarmedSaveDc = 8 + getPB(C) + mod;
   weaponActions.push({
     name: 'Unarmed Strike',

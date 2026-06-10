@@ -31,6 +31,19 @@ export function canOneHand(item) {
   return !isTwoHandedWeapon(item);
 }
 
+export function isThrownWeapon(item) {
+  return hasAnyProperty(item, 't', 'thrown');
+}
+
+// True if a weapon or Shield is currently held in a hand. Used by Fighting Style:
+// Unarmed Fighting (d8 die only when not wielding any weapon or a Shield).
+export function isWieldingWeaponOrShield(inventory) {
+  const list = inventory || [];
+  const shield = list.some((i) => i.equipped && String(i.type || '').toUpperCase() === 'S');
+  const weapon = list.some((i) => ['mainHand', 'offHand', 'twoHands'].includes(i.equippedSlot) && isWeapon(i));
+  return shield || weapon;
+}
+
 export function canTwoHand(item) {
   return isTwoHandedWeapon(item) || isVersatileWeapon(item);
 }

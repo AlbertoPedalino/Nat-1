@@ -2,6 +2,7 @@ import { installedRegistry } from '../../../adapters/index.js';
 import { canonicalDisplayLabel, cleanProficiencyText } from '../../../shared/character/proficiencyDisplay.js';
 import { matchesRequiredChoice } from '../../../shared/character/lineageMatch.js';
 import { inventoryHasFlag } from '../../../shared/character/choiceUtils.js';
+import { weaponFilterMatches } from '../../../shared/character/weaponFilters.js';
 
 function asArray(value) {
   if (value == null) return [];
@@ -689,14 +690,39 @@ function bladesingerIntMod(character) {
   return Math.max(1, Math.floor((Number(character?.finalScores?.int ?? 10) - 10) / 2));
 }
 
-export function getAcBonusEffects(character = {}) {
+// Additive AC bonus from active effects. Some effects are gated on wearing armor
+// (Fighting Style: Defense → +1 AC only while wearing armor); the caller passes
+// `ctx.wearingArmor` since equipped-armor state lives in the AC layer, not here.
+export function getAcBonusEffects(character = {}, ctx = {}) {
   let total = 0;
   collectSheetEffects(character).forEach((effect) => {
     if (norm(effect.type) !== 'acbonus') return;
+    if (effect.requiresArmor && !ctx.wearingArmor) return;
     if (effect.ability === 'int') total += bladesingerIntMod(character);
     else total += Number(effect.value ?? 1);
   });
   return total;
+}
+
+// Weapon-scoped attack/damage bonuses from active effects (e.g. Fighting Style:
+// Archery +2 ranged attack, Dueling +2 one-handed melee damage, Thrown Weapon
+// +2 thrown damage). `info` carries precomputed weapon flags
+// ({ ranged, melee, thrown, oneHanded, twoHanded, soloWeapon }) so this stays
+// decoupled from the equipment helpers and can be called per weapon from the
+// actions layer. `requiresSoloWeapon` effects (Dueling: "no other weapons")
+// apply only when no other weapon is wielded.
+export function getWeaponEffectBonuses(character = {}, info = {}) {
+  let attack = 0;
+  let damage = 0;
+  collectSheetEffects(character).forEach((effect) => {
+    const type = norm(effect.type);
+    if (type !== 'weaponattackbonus' && type !== 'weapondamagebonus') return;
+    if (effect.requiresSoloWeapon && !info.soloWeapon) return;
+    if (!weaponFilterMatches(effect.weaponFilter, info)) return;
+    if (type === 'weaponattackbonus') attack += Number(effect.value ?? 0);
+    else damage += Number(effect.value ?? 0);
+  });
+  return { attack, damage };
 }
 
 export function getSkillAdvantageFromEffects(character = {}, skillName) {

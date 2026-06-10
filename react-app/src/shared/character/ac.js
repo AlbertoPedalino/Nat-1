@@ -219,7 +219,8 @@ export function computeBestArmorClass(character, items, shieldTrained) {
     sourceType: 'base',
   });
 
-  const acBonus = getAcBonusEffects(character) + miscAcBonus;
+  const wearingArmor = !!getEquippedArmor(character, items);
+  const acBonus = getAcBonusEffects(character, { wearingArmor }) + miscAcBonus;
   if (acBonus > 0) {
     candidates.forEach(c => c.value += acBonus);
   }
