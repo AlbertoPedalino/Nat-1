@@ -3250,6 +3250,18 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
     document.getElementById('tyf').addEventListener('change', applyF);
     document.getElementById('overlay').addEventListener('click', e => { if (e.target === document.getElementById('overlay')) closeOverlay(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeOverlay(); });
+    // Click a numeric box (HP, initiative, AC, delta...) → select all so you can
+    // type the new value immediately, no need to clear first. Delegated once so
+    // it covers every current and future template-rendered input. The one-shot
+    // mouseup re-select guards against the click's caret placement clearing the
+    // selection.
+    document.addEventListener('focusin', e => {
+      const el = e.target;
+      if (!el.matches('input[type="number"]')) return;
+      el.select();
+      const reselect = () => { el.select(); el.removeEventListener('mouseup', reselect); };
+      el.addEventListener('mouseup', reselect);
+    });
 
     _buildCrOptions('crf', 'applyF()');
     renderPlayers();
