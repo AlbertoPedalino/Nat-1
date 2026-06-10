@@ -350,6 +350,31 @@ export default function CharacterSheet() {
     persist(patch);
   }, [sheet, persist]);
 
+  const setTempHP = useCallback((next) => {
+    if (!sheet) return;
+    const s = { ...sheet, tempHP: Math.max(0, parseInt(next) || 0) };
+    setSheet(s);
+    persist({ tempHP: s.tempHP });
+  }, [sheet, persist]);
+
+  const setMaxHpBonus = useCallback((next) => {
+    if (!sheet || !C) return;
+    const bonus = parseInt(next) || 0;
+    const baseMax = Math.max(1, calcMaxHP(C));
+    const s = { ...sheet, maxHPBonus: bonus, maxHP: Math.max(1, baseMax + bonus) };
+    if (s.currentHP > s.maxHP) s.currentHP = s.maxHP;
+    setSheet(s);
+    persist({ currentHP: s.currentHP, maxHPBonus: s.maxHPBonus });
+  }, [sheet, C, persist]);
+
+  const setDeathSave = useCallback((type, count) => {
+    if (!sheet) return;
+    const value = Math.max(0, Math.min(3, count));
+    const ds = { ...sheet.deathSaves, [type]: value };
+    setSheet({ ...sheet, deathSaves: ds });
+    persist({ deathSaves: ds });
+  }, [sheet, persist]);
+
   const rollDeathSave = useCallback(() => {
     if (!sheet) return;
     if (sheet.currentHP > 0) {
@@ -540,7 +565,9 @@ export default function CharacterSheet() {
           <Stack direction={{ xs: 'column', md: 'row-reverse' }} spacing={0.6} alignItems={{ md: 'stretch' }}>
             <HPBlock sheet={sheet}
               onHeal={(amt) => adjustHP(1, amt)} onDamage={(amt) => adjustHP(-1, amt)}
-              onTempHP={adjustTempHP} onMaxHPBonus={adjustMaxHpBonus} onSetHP={setCurrentHP} onDeathSave={rollDeathSave} />
+              onTempHP={adjustTempHP} onMaxHPBonus={adjustMaxHpBonus}
+              onSetHP={setCurrentHP} onSetTempHP={setTempHP} onSetMaxHPBonus={setMaxHpBonus}
+              onDeathSave={rollDeathSave} onDeathSaveSet={setDeathSave} />
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <AbilityScores C={C} sheet={sheet} onRoll={rollD20} />
             </Box>
