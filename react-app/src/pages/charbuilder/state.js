@@ -10,7 +10,14 @@ import {
 import { getBackgroundPattern } from './logic/calculations.js';
 import { handleBackgroundSelect, handleClassSelect, handleSpellToggle, handleWizardSpellbookToggle } from './stateHandlers.js';
 import { getChoiceLevel } from '../../shared/character/choiceLevels.js';
-import { normalizeCoinAmount } from '../../shared/character/currency.js';
+import {
+  normalizeCoinAmount,
+  setCoinAmount,
+  addCustomCurrency,
+  updateCustomCurrency,
+  removeCustomCurrency,
+  reorderCurrency,
+} from '../../shared/character/currency.js';
 import { addInventoryEntries } from '../../shared/character/itemContainers.js';
 import { isFeatKey, isFeatDetailKey } from '../../shared/featChoiceKeys.js';
 
@@ -114,7 +121,7 @@ export const initialCharacter = {
   selectedSkills: [],
   selectedLanguages: [],
   selectedTools: [],
-  currency: { cp: 0, sp: 0, gp: 0, pp: 0 },
+  currency: { cp: 0, sp: 0, gp: 0, pp: 0, custom: [] },
   inventory: [],
 };
 
@@ -543,7 +550,15 @@ export function builderReducer(state, action) {
       });
     }
     case 'currency/set':
-      return updateNestedCharacter(state, 'currency', { [action.coin]: normalizeCoinAmount(action.value) });
+      return updateCharacter(state, { currency: setCoinAmount(state.character.currency, action.coin, action.value) });
+    case 'currency/custom-add':
+      return updateCharacter(state, { currency: addCustomCurrency(state.character.currency, action.entry) });
+    case 'currency/custom-update':
+      return updateCharacter(state, { currency: updateCustomCurrency(state.character.currency, action.id, action.patch) });
+    case 'currency/custom-remove':
+      return updateCharacter(state, { currency: removeCustomCurrency(state.character.currency, action.id) });
+    case 'currency/reorder':
+      return updateCharacter(state, { currency: reorderCurrency(state.character.currency, action.key, action.dir) });
     case 'inventory/filter':
       return { ...state, inventoryFilter: action.filter };
     case 'inventory/add': {

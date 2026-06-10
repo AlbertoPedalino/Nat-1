@@ -8,7 +8,7 @@ export const ICON_COLORS = [
   '#f4a261', '#e76f51', '#a8adb8', '#264653',
 ];
 
-export default function IconColorPicker({ anchorEl, onClose, currentColor, onSelect }) {
+export default function IconColorPicker({ anchorEl, onClose, currentColor, onSelect, title = 'Icon Color' }) {
   const open = Boolean(anchorEl);
   const inputRef = useRef(null);
   const [localColor, setLocalColor] = useState(currentColor);
@@ -31,7 +31,7 @@ export default function IconColorPicker({ anchorEl, onClose, currentColor, onSel
       slotProps={{ paper: { sx: { bgcolor: 'rgba(26,23,19,0.98)', border: 1, borderColor: 'divider', borderRadius: 1, p: 1 } } }}
     >
       <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary', mb: 0.5, fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-        Icon Color
+        {title}
       </Typography>
       <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '4px' }}>
         {ICON_COLORS.map((color) => (

@@ -1,4 +1,5 @@
 import { calcMaxHP } from './logic/calculations.js';
+import { normalizeCurrency } from '../../shared/character/currency.js';
 
 export function deriveSheetState(C) {
   const baseMax = Math.max(1, calcMaxHP(C));
@@ -23,9 +24,9 @@ export function deriveSheetState(C) {
   const arcaneArmorItemKey = C?.arcaneArmorItemKey || null;
 
   const sheetInventory = Array.isArray(C?.inventory) ? JSON.parse(JSON.stringify(C.inventory)) : [];
-  const sheetCurrency = C?.currency && typeof C.currency === 'object'
-    ? { ...C.currency }
-    : { cp: 0, sp: 0, gp: 10, pp: 0 };
+  const sheetCurrency = normalizeCurrency(
+    C?.currency && typeof C.currency === 'object' ? C.currency : { cp: 0, sp: 0, gp: 10, pp: 0 },
+  );
 
   const sheetInspiration = Boolean(C?.inspiration);
   const activeConditions = Array.isArray(C?.activeConditions) ? C.activeConditions : [];

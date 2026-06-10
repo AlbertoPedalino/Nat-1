@@ -10,6 +10,7 @@ import {
   setActiveCharId,
 } from '../../../shared/character/store.js';
 import { collectAutoGrantedSpells as collectEntityAutoGrantedSpells } from '../spells/spells.js';
+import { normalizeCurrency } from '../../../shared/character/currency.js';
 import {
   splitTypedProficiencies,
   uniqueProficiencyLabels,
@@ -384,7 +385,7 @@ export function makeSheetPayload(character, data) {
     maxHp: calcMaxHp(character),
     finalScores: getAllFinalScores(character),
     inventory: character.inventory || [],
-    currency: character.currency || { cp: 0, sp: 0, gp: 10, pp: 0 },
+    currency: normalizeCurrency(character.currency || { cp: 0, sp: 0, gp: 10, pp: 0 }),
     equipChoices: character.equipChoices || {},
     grantSpellNames: choiceSpellNames,
     spellSnapshots,
@@ -531,7 +532,7 @@ function buildBuilderStateFromSheetPayload(data) {
     autoGrantedSpells: data.autoGrantedSpells || [],
 
     inventory: data.inventory || [],
-    currency: data.currency || { cp: 0, sp: 0, gp: 10, pp: 0 },
+    currency: normalizeCurrency(data.currency || { cp: 0, sp: 0, gp: 10, pp: 0 }),
     xp: Number(data.xp || 0),
   };
 

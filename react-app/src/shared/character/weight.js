@@ -1,4 +1,4 @@
-import { CURRENCY_TYPES, normalizeCoinAmount } from './currency.js';
+import { CURRENCY_TYPES, normalizeCoinAmount, customCurrencyUnits } from './currency.js';
 
 const WEIGHT_PRECISION = 1000;
 
@@ -32,8 +32,10 @@ export function totalInventoryWeight(inventory) {
 }
 
 export function currencyWeight(currency) {
+  // Custom entries weigh the same as a coin (50 units = 1 lb).
   const coins = CURRENCY_TYPES.reduce((sum, coin) => sum + normalizeCoinAmount(currency?.[coin.key]), 0);
-  return roundWeight(coins * COIN_WEIGHT_LB);
+  const custom = customCurrencyUnits(currency);
+  return roundWeight((coins + custom) * COIN_WEIGHT_LB);
 }
 
 // Total carried weight = items + coins (XPHB counts coins toward encumbrance).

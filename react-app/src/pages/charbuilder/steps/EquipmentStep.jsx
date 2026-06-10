@@ -392,6 +392,11 @@ export default function EquipmentStep({ state, dispatch }) {
         <CurrencyRow
           currency={character.currency}
           onCoinChange={(coin, value) => dispatch({ type: 'currency/set', coin, value })}
+          onCustomAmountChange={(id, value) => dispatch({ type: 'currency/custom-update', id, patch: { amount: value } })}
+          onCustomMetaChange={(id, patch) => dispatch({ type: 'currency/custom-update', id, patch })}
+          onCustomRemove={(id) => dispatch({ type: 'currency/custom-remove', id })}
+          onCustomAdd={() => dispatch({ type: 'currency/custom-add' })}
+          onReorder={(key, dir) => dispatch({ type: 'currency/reorder', key, dir })}
         />
       </BuilderPanel>
 

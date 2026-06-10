@@ -25,7 +25,7 @@ import { getArmorPenalties } from '../logic/armorPenalties.js';
 import { getCharacterAttunementState } from '../logic/attunement.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 import { CurrencyRow } from '../../../shared/character/CurrencyCoinBox.jsx';
-import { normalizeCoinAmount } from '../../../shared/character/currency.js';
+import { setCoinAmount, updateCustomCurrency } from '../../../shared/character/currency.js';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import { ItemReferenceBody, QuantityAdder } from '../../../shared/character/ItemReference.jsx';
 import { carryCapacity, formatWeight, itemQty as qty, totalCarriedWeight } from '../../../shared/character/weight.js';
@@ -608,13 +608,23 @@ export default function InventoryTab({ C, sheet }) {
   }, [updateInv, onUpdateCharacter, onShowToast]);
 
   const updateCoin = useCallback((coin, value) => {
-    const next = { ...currency, [coin]: normalizeCoinAmount(value) };
-    onUpdateCurrency?.(next);
+    onUpdateCurrency?.(setCoinAmount(currency, coin, value));
+  }, [currency, onUpdateCurrency]);
+
+  // Custom currencies are created in the builder; the sheet only adjusts amounts.
+  const updateCustomAmount = useCallback((id, value) => {
+    onUpdateCurrency?.(updateCustomCurrency(currency, id, { amount: value }));
   }, [currency, onUpdateCurrency]);
 
   return (
     <Box>
-      <CurrencyRow mode="sheet" currency={currency} onCoinChange={updateCoin} sx={{ mb: 0.75 }} />
+      <CurrencyRow
+        mode="sheet"
+        currency={currency}
+        onCoinChange={updateCoin}
+        onCustomAmountChange={updateCustomAmount}
+        sx={{ mb: 0.75 }}
+      />
 
       <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 0.5 }}>
         <Box sx={statPillSx}>Weight: <b>{formatWeight(totalWeight)} / {formatWeight(maxCarry)} lb</b></Box>
