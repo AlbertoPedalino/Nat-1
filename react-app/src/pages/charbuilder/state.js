@@ -128,6 +128,7 @@ export const initialBuilderState = {
     feats: true,
     spells: true,
     items: true,
+    optionalFeatures: true,
   },
   errors: {},
   data: {
@@ -142,6 +143,7 @@ export const initialBuilderState = {
     spells: [],
     classSpellIndex: {},
     items: ITEM_SUMMARIES,
+    optionalFeatures: [],
   },
   search: {
     species: '',

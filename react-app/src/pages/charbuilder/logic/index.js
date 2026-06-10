@@ -5,7 +5,7 @@ export {
   getCasterProgression, getCasterContribution, getSpellSlots,
   getProficiencyBonus, getPrimaryClassLevel, getSelectedFeatNames,
 } from './calculations.js';
-export { loadClassIndex, loadSpecies, loadBackgrounds, loadFeats, loadSpells, loadItems } from './dataLoaders.js';
+export { loadClassIndex, loadSpecies, loadBackgrounds, loadFeats, loadSpells, loadItems, loadOptionalFeatures } from './dataLoaders.js';
 export { extractSheetData, makeSheetPayload, saveCharacter, importSheetPayload } from './persistence.js';
 export { buildPreviewSheetCharacter } from './previewSheet.js';
 export { cleanText, renderEntryText, normalizeName } from './text.js';

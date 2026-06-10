@@ -22,7 +22,7 @@ import { STEPS } from './constants.js';
 import { adapterRegistry, loadClassAdapters, loadCoreAdapters } from '../../adapters/index.js';
 import { getMod, getFinal } from '../charsheet/logic/calculations.js';
 import { adaptBuilderData } from '../../adapters/adapterPipeline.js';
-import { loadBackgrounds, loadClassIndex, loadFeats, loadItems, loadSpecies, loadSpells, extractSheetData, importSheetPayload, saveCharacter } from './logic/index.js';
+import { loadBackgrounds, loadClassIndex, loadFeats, loadItems, loadSpecies, loadSpells, loadOptionalFeatures, extractSheetData, importSheetPayload, saveCharacter } from './logic/index.js';
 import { builderReducer, initialBuilderState } from './state.js';
 import { BackgroundStep, ClassStep, EquipmentStep, ScoresStep, SheetStep, SpeciesStep } from './steps/index.js';
 import {
@@ -153,6 +153,7 @@ export default function CharBuilder() {
     run('feats', loadFeats, (feats) => ({ feats }));
     run('spells', loadSpells, (result) => ({ spells: result.spells, classSpellIndex: result.classSpellIndex }));
     run('items', loadItems, (items) => ({ items }));
+    run('optionalFeatures', loadOptionalFeatures, (optionalFeatures) => ({ optionalFeatures }));
   }, []);
 
   useEffect(() => {

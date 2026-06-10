@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Box, Button, Chip, Collapse, List, ListItemButton, ListItemText, Paper, Stack, Typography } from '@mui/material';
+import { Box, Button, Chip, Collapse, IconButton, List, ListItemButton, ListItemText, Paper, Stack, Typography } from '@mui/material';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import ChoiceBlock from './ChoiceBlock.jsx';
 import SpellChoiceList from './SpellChoiceList.jsx';
+import { ExpandableDescription, FullDescription } from './ExpandableDescription.jsx';
 import { featChoiceSpecs } from '../logic/choiceSpecs.js';
 import { getPrimaryClassLevel } from '../logic/calculations.js';
-import { renderEntryText, cleanText } from '../logic/text.js';
 
 function featMinLevel(feat) {
   const prereq = Array.isArray(feat?.prerequisite) ? feat.prerequisite : [];
@@ -107,124 +108,14 @@ export function FeatFixedSlot({ spec, feats, character, state, dispatch, accent 
   );
 }
 
-function renderEntryNode(entry, key) {
-  if (entry == null) return null;
-  if (typeof entry === 'string' || typeof entry === 'number') {
-    return <Typography key={key} variant="body2" color="text.secondary" sx={{ mb: 0.25 }}>{cleanText(String(entry))}</Typography>;
-  }
-  if (Array.isArray(entry)) {
-    return entry.map((e, i) => renderEntryNode(e, `${key}-${i}`));
-  }
-  if (typeof entry !== 'object') return null;
-  const k = key;
-  if (entry.type === 'list' && Array.isArray(entry.items)) {
-    return entry.items.map((item, i) => renderEntryNode(item, `${k}-item-${i}`));
-  }
-  if (entry.type === 'item' && entry.name && entry.entry != null) {
-    return (
-      <Box key={k} sx={{ mb: 0.25 }}>
-        <Box component="span" sx={{ fontWeight: 700, color: 'text.primary' }}>{entry.name}</Box>
-        <Box component="span" sx={{ color: 'text.secondary' }}>
-          {typeof entry.entry === 'string' ? ` ${cleanText(entry.entry)}` : renderEntryNode(entry.entry, `${k}-val`)}
-        </Box>
-      </Box>
-    );
-  }
-  if (entry.type === 'item' && entry.entry != null) {
-    return <Box key={k} sx={{ mb: 0.25, color: 'text.secondary' }}>{typeof entry.entry === 'string' ? cleanText(entry.entry) : renderEntryNode(entry.entry, `${k}-val`)}</Box>;
-  }
-  if (entry.type === 'entries' || entry.name) {
-    return (
-      <Box key={k} sx={{ mb: 0.5 }}>
-        {entry.name ? <Typography variant="body2" sx={{ fontWeight: 700, color: 'text.primary', mb: 0.15 }}>{entry.name}</Typography> : null}
-        {entry.entries ? renderEntryNode(entry.entries, `${k}-body`) : null}
-      </Box>
-    );
-  }
-  if (entry.entries) return <Box key={k} sx={{ mb: 0.25 }}>{renderEntryNode(entry.entries, `${k}-body`)}</Box>;
-  if (entry.entry) return <Box key={k} sx={{ mb: 0.25 }}>{renderEntryNode(entry.entry, `${k}-val`)}</Box>;
-  if (entry.items) return <Box key={k} sx={{ mb: 0.25 }}>{renderEntryNode(entry.items, `${k}-items`)}</Box>;
-  return null;
-}
-
-export function ExpandableDescription({ entries, initialClamp = 3, simpleText }) {
-  const [open, setOpen] = useState(false);
-  if (simpleText != null) {
-    const isLong = simpleText.length > 250;
-    const lines = simpleText.split('\n').filter(Boolean);
-    return (
-      <Box sx={{ minWidth: 0 }}>
-        <Collapse in={open} collapsedSize={initialClamp * 24}>
-          <Typography variant="body2" color="text.secondary" component="div" sx={{ overflow: 'hidden' }}>
-            {lines.slice(0, open ? lines.length : initialClamp).map((line, i) => {
-              const colonIdx = line.indexOf(':');
-              if (colonIdx > 0) return (
-                <Box key={i} sx={{ mb: 0.25 }}>
-                  <Box component="span" sx={{ fontWeight: 700, color: 'text.primary' }}>{line.slice(0, colonIdx + 1)}</Box>
-                  <Box component="span">{line.slice(colonIdx + 1)}</Box>
-                </Box>
-              );
-              return <Box key={i} sx={{ mb: 0.25 }}>{line}</Box>;
-            })}
-            {!open && lines.length > initialClamp ? <Box sx={{ color: 'text.disabled', fontStyle: 'italic' }}>...</Box> : null}
-          </Typography>
-        </Collapse>
-        {isLong ? (
-          <Button size="small" onClick={() => setOpen(!open)}
-            sx={{ mt: 0.25, fontSize: '0.7rem', minWidth: 0, px: 0.5, color: 'primary.light', textTransform: 'none' }}>
-            {open ? 'Show less' : 'Show more'}
-          </Button>
-        ) : null}
-      </Box>
-    );
-  }
-  const arr = Array.isArray(entries) ? entries : (entries ? [entries] : []);
-  const rendered = arr.flatMap((e, i) => renderEntryNode(e, `e${i}`)).filter(Boolean);
-  const totalText = renderEntryText(entries);
-  const isLong = rendered.length > initialClamp || totalText.length > 250;
-  const visible = open ? rendered : rendered.slice(0, initialClamp);
-  return (
-    <Box sx={{ minWidth: 0 }}>
-      <Collapse in={open} collapsedSize={initialClamp * 24}>
-        {visible}
-        {!open && rendered.length > initialClamp ? <Box sx={{ color: 'text.disabled', fontStyle: 'italic', mt: 0.25 }}>...</Box> : null}
-      </Collapse>
-      {isLong ? (
-        <Button size="small" onClick={() => setOpen(!open)}
-          sx={{ mt: 0.25, fontSize: '0.7rem', minWidth: 0, px: 0.5, color: 'primary.light', textTransform: 'none' }}>
-          {open ? 'Show less' : 'Show more'}
-        </Button>
-      ) : null}
-    </Box>
-  );
-}
-
-function ExpandableDesc({ text }) {
-  const [open, setOpen] = useState(false);
-  const isLong = text.length > 250;
-  return (
-    <Box sx={{ minWidth: 0 }}>
-      <Collapse in={open} collapsedSize={72}>
-        <Typography variant="body2" color="text.secondary" sx={{
-          display: '-webkit-box',
-          WebkitLineClamp: open ? 'unset' : 3,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
-        }}>
-          {text}
-        </Typography>
-      </Collapse>
-      {isLong ? (
-        <Button size="small" onClick={() => setOpen(!open)}
-          sx={{ mt: 0.25, fontSize: '0.7rem', minWidth: 0, px: 0.5, color: 'primary.light', textTransform: 'none' }}>
-          {open ? 'Show less' : 'Show more'}
-        </Button>
-      ) : null}
-    </Box>
-  );
-}
-
 export function FeatCategorySlot({ spec, feats, character, state, dispatch }) {
+  const [expanded, setExpanded] = useState(() => new Set());
+  const toggleExpanded = (name) => setExpanded((prev) => {
+    const next = new Set(prev);
+    if (next.has(name)) next.delete(name); else next.add(name);
+    return next;
+  });
+
   const effectiveLevel = getPrimaryClassLevel(character) + (character.extraClasses || []).reduce((sum, ec) => sum + (ec.level || 0), 0);
   const taken = new Set(Object.entries(character.choices || {})
     .filter(([key]) => key !== spec.key)
@@ -267,25 +158,47 @@ export function FeatCategorySlot({ spec, feats, character, state, dispatch }) {
           <List dense disablePadding>
             {pool.map((feat) => {
               const active = selected === feat.name;
+              const isOpen = expanded.has(feat.name);
+              const hasDesc = Array.isArray(feat.entries) ? feat.entries.length > 0 : !!feat.entries;
               return (
-                <ListItemButton
-                  key={`${spec.key}-${feat.name}-${feat.source}`}
-                  divider
-                  selected={active}
-                  alignItems="flex-start"
-                  onClick={() => dispatch({
-                    type: 'choice/set',
-                    key: spec.key,
-                    value: active ? null : feat.name,
-                    clearPrefix: `${spec.key}_`,
-                  })}
-                >
-                  <ListItemText
-                    primary={<Typography fontWeight={active ? 700 : 500} noWrap>{feat.name}</Typography>}
-                    secondary={[feat.category || feat.categories?.[0], featPrereqLabel(feat)].filter(Boolean).join(' - ')}
-                  />
-                  <Chip size="small" color={active ? 'primary' : 'default'} label={feat.source} />
-                </ListItemButton>
+                <Box key={`${spec.key}-${feat.name}-${feat.source}`}>
+                  <ListItemButton
+                    divider={!isOpen}
+                    selected={active}
+                    alignItems="flex-start"
+                    onClick={() => dispatch({
+                      type: 'choice/set',
+                      key: spec.key,
+                      value: active ? null : feat.name,
+                      clearPrefix: `${spec.key}_`,
+                    })}
+                  >
+                    <ListItemText
+                      primary={<Typography fontWeight={active ? 700 : 500} noWrap>{feat.name}</Typography>}
+                      secondary={[feat.category || feat.categories?.[0], featPrereqLabel(feat)].filter(Boolean).join(' - ')}
+                    />
+                    <Stack direction="row" spacing={0.5} alignItems="center">
+                      <Chip size="small" color={active ? 'primary' : 'default'} label={feat.source} />
+                      {hasDesc ? (
+                        <IconButton
+                          size="small"
+                          edge="end"
+                          aria-label={isOpen ? 'Collapse description' : 'Expand description'}
+                          onClick={(e) => { e.stopPropagation(); toggleExpanded(feat.name); }}
+                        >
+                          {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                        </IconButton>
+                      ) : null}
+                    </Stack>
+                  </ListItemButton>
+                  {hasDesc ? (
+                    <Collapse in={isOpen} unmountOnExit>
+                      <Box sx={{ px: 1.5, py: 0.75, bgcolor: 'background.default', borderBottom: 1, borderColor: 'divider' }}>
+                        <FullDescription entries={feat.entries} />
+                      </Box>
+                    </Collapse>
+                  ) : null}
+                </Box>
               );
             })}
           </List>
@@ -310,7 +223,6 @@ export function FeatCategorySlot({ spec, feats, character, state, dispatch }) {
             </Stack>
           </Stack>
         ) : null}
-        {selectedFeat?.entries ? <ExpandableDescription entries={selectedFeat.entries} /> : null}
         {grants.map((grant) => renderGrantSpec({ grant, character, state, dispatch }))}
       </Stack>
     </Paper>

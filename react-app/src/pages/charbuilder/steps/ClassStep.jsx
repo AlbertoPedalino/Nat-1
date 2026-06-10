@@ -25,6 +25,40 @@ export default function ClassStep({ state, dispatch }) {
     [character, state.data.items, activeTab, activeExtra?.cls, state.adaptersVersion],
   );
 
+  // Live 2024 optional-feature descriptions (XPHB/XDMG/EFA/FRAiF/FRHoF), indexed by
+  // featureType so a spec resolves only its own kind (e.g. Eldritch Invocations →
+  // featureType 'EI'); `byName` is the type-agnostic fallback index.
+  const optionalFeatureIndex = useMemo(() => {
+    const norm = (v) => String(v || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const byType = new Map();
+    const byName = new Map();
+    (state.data.optionalFeatures || []).forEach((f) => {
+      if (!f?.name || !Array.isArray(f.entries) || !f.entries.length) return;
+      const nm = norm(f.name);
+      if (!byName.has(nm)) byName.set(nm, f.entries);
+      const types = Array.isArray(f.featureType) ? f.featureType : (f.featureType ? [f.featureType] : []);
+      types.forEach((t) => {
+        const tk = String(t).toLowerCase();
+        if (!byType.has(tk)) byType.set(tk, new Map());
+        if (!byType.get(tk).has(nm)) byType.get(tk).set(nm, f.entries);
+      });
+    });
+    return { byType, byName, norm };
+  }, [state.data.optionalFeatures]);
+
+  // Returns a per-option description resolver for choice lists that opt in via
+  // `descSource: 'optionalFeature'` (live entries, optionally scoped by
+  // `featureType`) and/or carry a curated `descMap` fallback. Other specs → none.
+  const makeOptionDescription = (spec) => {
+    const wantsLive = spec?.descSource === 'optionalFeature';
+    const descMap = spec?.descMap || null;
+    if (!wantsLive && !descMap) return undefined;
+    const { byType, byName, norm } = optionalFeatureIndex;
+    const typeKey = spec?.featureType ? String(spec.featureType).toLowerCase() : null;
+    const liveMap = wantsLive ? (typeKey ? (byType.get(typeKey) || new Map()) : byName) : null;
+    return (value) => (liveMap ? liveMap.get(norm(value)) : null) || (descMap ? descMap[value] : null) || null;
+  };
+
   const renderSpec = (spec) => {
     if (spec.type === 'spell_choice' || spec.type === 'spell_grant') {
       return <SpellChoiceList key={spec.key} spec={spec} state={state} dispatch={dispatch} />;
@@ -38,7 +72,7 @@ export default function ClassStep({ state, dispatch }) {
     if (spec.key.replace(/^mc\d+_/, '') === 'artificer_replicate_magic_item_plans') {
       return <ReplicateMagicItemChoice key={spec.key} spec={spec} character={character} dispatch={dispatch} items={state.data.items} />;
     }
-    return <ChoiceBlock key={spec.key} spec={spec} choices={character.choices} dispatch={dispatch} character={character} />;
+    return <ChoiceBlock key={spec.key} spec={spec} choices={character.choices} dispatch={dispatch} character={character} getOptionDescription={makeOptionDescription(spec)} />;
   };
 
   return (

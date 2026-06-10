@@ -7,7 +7,7 @@ import { installedRegistry } from '../../../adapters/index.js';
 import { collectAllProficiencies, collectEquipmentProficiencySets } from '../../charsheet/logic/proficiencies.js';
 import { collectPreviewDefenseSections, collectPreviewEffectProficiencySections } from '../../charsheet/logic/sheetEffects.js';
 import { collapseWeaponProficiencies, uniqueDisplayLabels } from '../../../shared/character/proficiencyDisplay.js';
-import { ExpandableDescription } from './FeatSlots.jsx';
+import { ExpandableDescription } from './ExpandableDescription.jsx';
 import {
   parseTypedProficiencyValue,
   extractFixedProficiencyLabels,

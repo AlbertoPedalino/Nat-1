@@ -1,5 +1,7 @@
-import { Chip, List, ListItemButton, ListItemText, Paper, Stack, Typography } from '@mui/material';
-import { Check } from 'lucide-react';
+import { useState } from 'react';
+import { Box, Chip, Collapse, IconButton, List, ListItemButton, ListItemText, Paper, Stack, Typography } from '@mui/material';
+import { Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { FullDescription } from './ExpandableDescription.jsx';
 import {
   parseTypedProficiencyValue,
   isChoicePlaceholderValue,
@@ -198,7 +200,13 @@ function collectAlreadyExpertiseSkills({ choices, currentKey }) {
   return expertise;
 }
 
-export default function ChoiceBlock({ spec, choices, dispatch, character }) {
+export default function ChoiceBlock({ spec, choices, dispatch, character, getOptionDescription }) {
+  const [expanded, setExpanded] = useState(() => new Set());
+  const toggleExpanded = (value) => setExpanded((prev) => {
+    const next = new Set(prev);
+    if (next.has(value)) next.delete(value); else next.add(value);
+    return next;
+  });
   const selected = Array.isArray(choices[spec.key]) ? choices[spec.key] : (choices[spec.key] ? [choices[spec.key]] : []);
   const proficiencyKind = specProficiencyKind(spec);
   const blockedValues = proficiencyKind
@@ -262,48 +270,70 @@ export default function ChoiceBlock({ spec, choices, dispatch, character }) {
               const parsed = parseTypedChoiceValue(value);
               const optionKind = parsed.kind || (proficiencyKind === 'mixed' ? null : proficiencyKind);
               const duplicate = !active && optionKind && blockedValues.has(proficiencyBlockKey(optionKind, parsed.label));
+              const desc = getOptionDescription ? getOptionDescription(value) : null;
+              const isOpen = expanded.has(value);
               return (
-                <ListItemButton
-                  key={`${spec.key}-${value}`}
-                  divider
-                  selected={active}
-                  disabled={full || duplicate}
-                  onClick={() => dispatch({
-                    type: 'choice/toggle-item',
-                    key: spec.key,
-                    value,
-                    max,
-                    blockedValues: blockedValuesForReducer,
-                  })}
-                  sx={{
-                    minWidth: 0,
-                    py: 0.65,
-                    px: 1,
-                    '&.Mui-selected': {
-                      bgcolor: 'primary.main',
-                      color: 'primary.contrastText',
-                    },
-                    '&.Mui-selected:hover': {
-                      bgcolor: 'primary.dark',
-                    },
-                  }}
-                >
-                  <ListItemText
-                    primary={
-                      <Typography
-                        noWrap
-                        sx={{
-                          color: active ? 'inherit' : 'text.primary',
-                          fontSize: '0.82rem',
-                          fontWeight: active ? 800 : 500,
-                        }}
+                <Box key={`${spec.key}-${value}`} sx={{ borderBottom: isOpen ? 0 : 1, borderColor: 'divider' }}>
+                  <Stack direction="row" alignItems="stretch" sx={{ minWidth: 0 }}>
+                    <ListItemButton
+                      selected={active}
+                      disabled={full || duplicate}
+                      onClick={() => dispatch({
+                        type: 'choice/toggle-item',
+                        key: spec.key,
+                        value,
+                        max,
+                        blockedValues: blockedValuesForReducer,
+                      })}
+                      sx={{
+                        flex: 1,
+                        minWidth: 0,
+                        py: 0.65,
+                        px: 1,
+                        '&.Mui-selected': {
+                          bgcolor: 'primary.main',
+                          color: 'primary.contrastText',
+                        },
+                        '&.Mui-selected:hover': {
+                          bgcolor: 'primary.dark',
+                        },
+                      }}
+                    >
+                      <ListItemText
+                        primary={
+                          <Typography
+                            noWrap
+                            sx={{
+                              color: active ? 'inherit' : 'text.primary',
+                              fontSize: '0.82rem',
+                              fontWeight: active ? 800 : 500,
+                            }}
+                          >
+                            {label}
+                          </Typography>
+                        }
+                      />
+                      {active ? <Check size={16} color="currentColor" /> : null}
+                    </ListItemButton>
+                    {desc ? (
+                      <IconButton
+                        size="small"
+                        aria-label={isOpen ? 'Collapse description' : 'Expand description'}
+                        onClick={() => toggleExpanded(value)}
+                        sx={{ borderRadius: 0, color: 'text.secondary' }}
                       >
-                        {label}
-                      </Typography>
-                    }
-                  />
-                  {active ? <Check size={16} color="currentColor" /> : null}
-                </ListItemButton>
+                        {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      </IconButton>
+                    ) : null}
+                  </Stack>
+                  {desc ? (
+                    <Collapse in={isOpen} unmountOnExit>
+                      <Box sx={{ px: 1, py: 0.75, bgcolor: 'background.paper' }}>
+                        <FullDescription entries={desc} />
+                      </Box>
+                    </Collapse>
+                  ) : null}
+                </Box>
               );
             })}
           </List>

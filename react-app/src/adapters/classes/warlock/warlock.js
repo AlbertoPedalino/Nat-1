@@ -311,6 +311,10 @@ registerClassAdapter("Warlock", function (cls, lv, specs, adapterContext = {}) {
           from: slotInvocations,
           count: 1,
           level: threshold,
+          // Live 2024 descriptions resolved from optionalfeatures.json (featureType
+          // EI), with descMap as curated fallback. See ClassStep.makeOptionDescription.
+          descSource: 'optionalFeature',
+          featureType: 'EI',
           descMap: _INV_DESCS
         });
       }
