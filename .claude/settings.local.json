@@ -133,7 +133,8 @@
       "PowerShell(Remove-Item *)",
       "Bash(rg -rn \"ExtraAttacks?\\\\b\" --type js -g '!adapters/registry.js')",
       "Bash(rg -rn \"reconcileInventoryWithItemsDb\" --type js --type jsx -g '!dataLoaders.js')",
-      "Bash(rg -rn \"reconcileInventoryWithItemsDb\" -g '*.js' -g '*.jsx' -g '!dataLoaders.js')"
+      "Bash(rg -rn \"reconcileInventoryWithItemsDb\" -g '*.js' -g '*.jsx' -g '!dataLoaders.js')",
+      "Bash(npm test *)"
     ]
   }
 }

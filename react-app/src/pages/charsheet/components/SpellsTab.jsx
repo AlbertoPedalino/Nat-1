@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import { Plus, Search, Sparkles } from 'lucide-react';
 import { SPELL_LEVEL_LABELS } from '../../charbuilder/constants.js';
-import { SCHOOL_LABELS, SLBL, getFinal, getMod, getPB, effectiveD20Modifier } from '../logic/calculations.js';
+import { SLBL, getFinal, getMod, getPB, effectiveD20Modifier } from '../logic/calculations.js';
 import { loadSpells } from '../../charbuilder/logic/dataLoaders.js';
 import { spellMatchesClass } from '../../charbuilder/spells/spells.js';
 import { installedRegistry, loadClassAdapters, loadCoreAdapters, loadSpellsAdapters } from '../../../adapters/index.js';
@@ -46,9 +46,8 @@ import {
 } from './spellsTabStyles.js';
 import SpellEntry from './SpellEntry.jsx';
 import { Empty, SlotPanel, SpellSection, StatBox } from './SpellsUiParts.jsx';
-import { SpellNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
-import { SpellMiniTags, SpellReferenceBody, SpellSelectButton } from '../../../shared/character/SpellReference.jsx';
+import { SpellReferenceBody, SpellRowLabel, SpellSelectButton } from '../../../shared/character/SpellReference.jsx';
 import { useSheetActions } from '../context/SheetActionsContext.jsx';
 
 export default function SpellsTab({ C, sheet, freeCastUses }) {
@@ -519,13 +518,7 @@ function PickerSpellRow({ spell, selected, disabled, atLimit, locked, onToggle }
           onClick={toggle}
           sx={{ display: 'flex', alignItems: 'center', gap: 0.5, px: '9px', py: '6px', cursor: 'pointer', bgcolor: selected ? 'rgba(39,174,96,0.08)' : 'transparent', '&:hover': { bgcolor: selected ? 'rgba(39,174,96,0.08)' : 'rgba(35,32,26,1)' } }}
         >
-          <Box sx={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 0.4 }}>
-            <SpellNameIcon spell={spell} />
-            <Typography noWrap sx={{ minWidth: 0, fontSize: '0.875rem', color: 'text.primary' }}>{spell.name}</Typography>
-            <SpellMiniTags spell={spell} />
-          </Box>
-          <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', flexShrink: 0 }}>{SPELL_LEVEL_LABELS[spell.level] || `Lv ${spell.level}`}</Typography>
-          <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', flexShrink: 0 }}>{SCHOOL_LABELS[spell.school] || spell.school}</Typography>
+          <SpellRowLabel spell={spell} selected={selected} nameSx={{ fontSize: '0.875rem' }} sx={{ gap: 0.4 }} />
           {locked ? (
             <Box sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.7rem', color: '#58b879', flexShrink: 0 }}>AUTO</Box>
           ) : (

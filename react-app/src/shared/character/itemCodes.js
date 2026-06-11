@@ -254,6 +254,38 @@ function masteryDisplayName(rawCode) {
   return WEAPON_MASTERY_DISPLAY[code] || (code.charAt(0).toUpperCase() + code.slice(1));
 }
 
+function formatRarity(rarity) {
+  const r = String(rarity || '').trim().toLowerCase();
+  if (!r || r === 'none' || r === 'unknown' || r === 'varies') return '';
+  return r.replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+const RECHARGE_LABELS = {
+  dawn: 'at dawn', dusk: 'at dusk', midnight: 'at midnight',
+  restShort: 'on a Short Rest', restLong: 'on a Long Rest',
+  round: 'each round', week: 'each week', month: 'each month',
+  decade: 'each decade', special: 'on a special trigger',
+};
+
+function formatRecharge(item) {
+  const code = String(item?.recharge || '').trim();
+  if (!code) return '';
+  const when = RECHARGE_LABELS[code] || code;
+  const amount = item?.rechargeAmount != null && item.rechargeAmount !== '' ? String(item.rechargeAmount) : '';
+  return amount ? `regains ${amount} ${when}` : `recharges ${when}`;
+}
+
+const ITEM_ABILITY_ABBR = { str: 'STR', dex: 'DEX', con: 'CON', int: 'INT', wis: 'WIS', cha: 'CHA' };
+
+function formatAbilitySet(ability) {
+  if (!ability || typeof ability !== 'object') return '';
+  const src = ability.static && typeof ability.static === 'object' ? ability.static : ability;
+  return Object.keys(ITEM_ABILITY_ABBR)
+    .filter((k) => typeof src[k] === 'number')
+    .map((k) => `${ITEM_ABILITY_ABBR[k]} ${src[k]}`)
+    .join(', ');
+}
+
 const SEGMENT_BUILDERS = new Map();
 const SEGMENT_ORDER = [];
 
@@ -266,6 +298,10 @@ export function registerItemPropertySegment(kind, builder) {
 registerItemPropertySegment('type', (item) => {
   const label = decodeItemTypeLabel(item);
   return label ? [{ kind: 'type', label: 'Type', value: label }] : [];
+});
+registerItemPropertySegment('rarity', (item) => {
+  const value = formatRarity(item?.rarity);
+  return value ? [{ kind: 'rarity', label: 'Rarity', value }] : [];
 });
 registerItemPropertySegment('attunement', (item) => {
   if (!item?.reqAttune) return [];
@@ -294,6 +330,12 @@ registerItemPropertySegment('enhancement', (item) => {
   if (spellAtk) parts.push(`${formatSignedBonus(spellAtk)} spell attack`);
   if (spellDc) parts.push(`${formatSignedBonus(spellDc)} spell DC`);
   return parts.length ? [{ kind: 'enhancement', label: 'Enhancement', value: parts.join(', ') }] : [];
+});
+registerItemPropertySegment('charges', (item) => {
+  if (item?.charges == null || item.charges === '') return [];
+  const recharge = formatRecharge(item);
+  const value = recharge ? `${item.charges} (${recharge})` : String(item.charges);
+  return [{ kind: 'charges', label: 'Charges', value }];
 });
 registerItemPropertySegment('damage', (item) => {
   if (!item?.dmg1) return [];
@@ -352,6 +394,16 @@ registerItemPropertySegment('value', (item) => {
   const gp = formatGpValue(item?.value);
   return gp ? [{ kind: 'value', label: 'Value', value: gp }] : [];
 });
+registerItemPropertySegment('abilitySet', (item) => {
+  const value = formatAbilitySet(item?.ability);
+  return value ? [{ kind: 'abilitySet', label: 'Sets Ability', value }] : [];
+});
+registerItemPropertySegment('tier', (item) => {
+  const t = String(item?.tier || '').trim();
+  return t ? [{ kind: 'tier', label: 'Tier', value: t.charAt(0).toUpperCase() + t.slice(1) }] : [];
+});
+registerItemPropertySegment('cursed', (item) => (item?.curse ? [{ kind: 'cursed', label: 'Curse', value: 'Cursed' }] : []));
+registerItemPropertySegment('sentient', (item) => (item?.sentient ? [{ kind: 'sentient', label: 'Sentient', value: 'Yes' }] : []));
 
 const MISC_TAG_LABELS = { CNS: 'Consumable', TT: 'Trinket', 'CF/W': 'Crafts/Wondrous' };
 registerItemPropertySegment('tags', (item) => {

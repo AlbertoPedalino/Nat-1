@@ -65,3 +65,33 @@ export function warlockKnownInvocations(character) {
     .map(function (name) { return norm(name); })
     .filter(Boolean);
 }
+
+// ── Eldritch Invocations that attach a modifier to a chosen damaging cantrip ──
+// Single source of truth for the "choose a known Warlock cantrip" invocations.
+// Drives the builder choice specs and sheet cantrip modifiers (see warlock.js),
+// plus the choice-key exclusion below so these picks are not treated as granted
+// or known spells. Add an entry here to support a new such invocation.
+// `minRangeFeet` narrows the eligible cantrips to those with at least that range
+// (Eldritch Spear: "a range of 10 feet or greater"); omit for no range restriction.
+export const WARLOCK_MODIFIER_CANTRIP_INVOCATIONS = [
+  { invocation: 'Agonizing Blast', slug: 'agonizing_blast', minLevel: 2 },
+  { invocation: 'Repelling Blast', slug: 'repelling_blast', minLevel: 2 },
+  { invocation: 'Eldritch Spear', slug: 'eldritch_spear', minLevel: 2, minRangeFeet: 10 },
+];
+
+const _MODIFIER_CANTRIP_CHOICE_KEY_RE = new RegExp(
+  '^warlock_(' + WARLOCK_MODIFIER_CANTRIP_INVOCATIONS.map(function (m) { return m.slug; }).join('|') + ')_cantrip'
+);
+
+// Builder choice key for a modifier-cantrip invocation slot. Index suffix is added
+// only when the invocation is taken more than once, matching the legacy key shape.
+export function warlockModifierCantripChoiceKey(slug, index, total) {
+  const base = 'warlock_' + slug + '_cantrip';
+  return total > 1 ? base + '_' + index : base;
+}
+
+// True for choice keys produced by warlockModifierCantripChoiceKey. Such choices
+// store a cantrip name but only attach a modifier — they are not granted/known spells.
+export function isWarlockModifierCantripChoiceKey(key) {
+  return _MODIFIER_CANTRIP_CHOICE_KEY_RE.test(String(key || '').replace(/^mc\d+_/, ''));
+}

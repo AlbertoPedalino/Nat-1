@@ -1,9 +1,10 @@
 import { Fragment } from 'react';
-import { Box, Button } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import { EntryBlocks } from './EntryBlocks.jsx';
 import { entriesToHigherLevelBlocks } from './spellEntries.js';
 import { getSpellMetaSegments } from './spellMeta.js';
 import { isConcentrationSpell, isRitualSpell } from '../spellTags.js';
+import { SpellNameIcon } from './FiveEToolsLink.jsx';
 
 const META_LABEL_SX = {
   fontFamily: '"Cinzel", Georgia, serif',
@@ -76,6 +77,22 @@ export function SpellMiniTags({ spell }) {
           {tag.label}
         </Box>
       ))}
+    </Box>
+  );
+}
+
+// Icon + name + concentration/ritual tags cluster shared by every spell row
+// (builder choice panels, builder selection panel, sheet picker dialog). Callers
+// supply their own row container and trailing control (select button, source chip).
+// `showIcon=false` hides the 5e.tools link (compact rows); `nameSx` themes the name.
+export function SpellRowLabel({ spell, selected = false, showIcon = true, nameSx, sx }) {
+  return (
+    <Box sx={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 0.5, ...sx }}>
+      {showIcon ? <SpellNameIcon spell={spell} /> : null}
+      <Typography noWrap sx={{ minWidth: 0, fontWeight: selected ? 700 : 500, color: 'text.primary', ...nameSx }}>
+        {spell.name}
+      </Typography>
+      <SpellMiniTags spell={spell} />
     </Box>
   );
 }

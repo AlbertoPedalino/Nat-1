@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Box, Typography, Chip } from '@mui/material';
 import { installedRegistry } from '../../../adapters/index.js';
 import { warlockInvocationSelections } from '../../../shared/character/warlockUtils.js';
+import { buildOptionalFeatureEntryLookup } from '../../../shared/character/optionalFeatures.js';
 import CollapsibleBody from '../../../shared/character/CollapsibleBody.jsx';
 import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
 import { entriesToTextBlocks } from '../../../shared/character/spellEntries.js';
@@ -140,6 +141,8 @@ function collectWarlockInvocationFeatures(C) {
   const invByName = new Map(
     invocationData.map((entry) => [norm(entry?.name), entry]).filter(([key]) => key),
   );
+  // Live 2024 invocation descriptions (rich 5etools entries) from optionalfeatures.json.
+  const liveEntries = buildOptionalFeatureEntryLookup(C?.optionalFeatureEntries, 'EI');
   const out = [];
   const pushForPrefix = (keyPrefix, ownerLevel = 1) => {
     const selected = warlockInvocationSelections(C, keyPrefix);
@@ -152,13 +155,13 @@ function collectWarlockInvocationFeatures(C) {
     });
     counts.forEach((count, selectedName) => {
       const data = invByName.get(norm(selectedName)) || null;
-      const repeatable = !!data?.repeatable || /more than once/i.test(String(data?.desc || ''));
+      const repeatable = !!data?.repeatable;
       out.push({
         name: count > 1 ? `${selectedName} x${count}` : selectedName,
         level: Number(data?.minLevel || ownerLevel || 1),
         source: repeatable ? 'Invocation - Repeatable' : 'Invocation',
         sourceKind: 'class',
-        entries: data?.entries || data?.desc || '',
+        entries: liveEntries(selectedName) || null,
       });
     });
   };

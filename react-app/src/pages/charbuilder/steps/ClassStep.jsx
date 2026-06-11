@@ -7,6 +7,7 @@ import { FeatCategorySlot, FeatFixedSlot } from '../components/FeatSlots.jsx';
 import SpellChoiceList from '../components/SpellChoiceList.jsx';
 import ReplicateMagicItemChoice from '../components/ReplicateMagicItemChoice.jsx';
 import { classChoiceSpecs } from '../logic/choiceSpecs.js';
+import { buildOptionalFeatureEntryLookup } from '../../../shared/character/optionalFeatures.js';
 import NamePanel from '../components/NamePanel.jsx';
 import XpPanel from '../components/XpPanel.jsx';
 import ClassPanel from '../components/ClassPanel.jsx';
@@ -25,38 +26,27 @@ export default function ClassStep({ state, dispatch }) {
     [character, state.data.items, activeTab, activeExtra?.cls, state.adaptersVersion],
   );
 
-  // Live 2024 optional-feature descriptions (XPHB/XDMG/EFA/FRAiF/FRHoF), indexed by
-  // featureType so a spec resolves only its own kind (e.g. Eldritch Invocations →
-  // featureType 'EI'); `byName` is the type-agnostic fallback index.
-  const optionalFeatureIndex = useMemo(() => {
-    const norm = (v) => String(v || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-    const byType = new Map();
-    const byName = new Map();
-    (state.data.optionalFeatures || []).forEach((f) => {
-      if (!f?.name || !Array.isArray(f.entries) || !f.entries.length) return;
-      const nm = norm(f.name);
-      if (!byName.has(nm)) byName.set(nm, f.entries);
-      const types = Array.isArray(f.featureType) ? f.featureType : (f.featureType ? [f.featureType] : []);
-      types.forEach((t) => {
-        const tk = String(t).toLowerCase();
-        if (!byType.has(tk)) byType.set(tk, new Map());
-        if (!byType.get(tk).has(nm)) byType.get(tk).set(nm, f.entries);
-      });
-    });
-    return { byType, byName, norm };
-  }, [state.data.optionalFeatures]);
+  // Live 2024 optional-feature descriptions (XPHB/XDMG/EFA/FRAiF/FRHoF). Lookups are
+  // memoized per featureType so a spec resolves only its own kind (e.g. Eldritch
+  // Invocations → 'EI'); featureType null matches by name across all types.
+  const optionalFeatureLookups = useMemo(() => new Map(), [state.data.optionalFeatures]);
+  const getOptionalFeatureLookup = (featureType) => {
+    const cacheKey = featureType ? String(featureType).toLowerCase() : '*';
+    if (!optionalFeatureLookups.has(cacheKey)) {
+      optionalFeatureLookups.set(cacheKey, buildOptionalFeatureEntryLookup(state.data.optionalFeatures, featureType));
+    }
+    return optionalFeatureLookups.get(cacheKey);
+  };
 
   // Returns a per-option description resolver for choice lists that opt in via
-  // `descSource: 'optionalFeature'` (live entries, optionally scoped by
-  // `featureType`) and/or carry a curated `descMap` fallback. Other specs → none.
+  // `descSource: 'optionalFeature'` (live entries, optionally scoped by `featureType`)
+  // and/or carry a curated `descMap` fallback. Other specs → none.
   const makeOptionDescription = (spec) => {
     const wantsLive = spec?.descSource === 'optionalFeature';
     const descMap = spec?.descMap || null;
     if (!wantsLive && !descMap) return undefined;
-    const { byType, byName, norm } = optionalFeatureIndex;
-    const typeKey = spec?.featureType ? String(spec.featureType).toLowerCase() : null;
-    const liveMap = wantsLive ? (typeKey ? (byType.get(typeKey) || new Map()) : byName) : null;
-    return (value) => (liveMap ? liveMap.get(norm(value)) : null) || (descMap ? descMap[value] : null) || null;
+    const lookup = wantsLive ? getOptionalFeatureLookup(spec?.featureType || null) : null;
+    return (value) => (lookup ? lookup(value) : null) || (descMap ? descMap[value] : null) || null;
   };
 
   const renderSpec = (spec) => {

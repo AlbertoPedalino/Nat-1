@@ -9,6 +9,7 @@ import { isGrantUnlocked } from '../../../shared/character/spellGrants.js';
 import { enumerateAutoGrantedSpells } from '../../../shared/character/autoGrantedSpells.js';
 import { collectFreeCastsForGrant, mergeFreeCastsById, normalizeFreeCast, getFeatFreeCastTemplate, applyFreeCastRest } from '../../../shared/character/spellFreeCasts.js';
 import { collectItemAttachedSpells } from '../../../shared/character/itemAttachedSpells.js';
+import { isWarlockModifierCantripChoiceKey } from '../../../shared/character/warlockUtils.js';
 
 const _GENERIC_LABELS = new Set([
   'class', 'subclass', 'species', 'feat', 'feature', 'granted', 'auto',
@@ -288,8 +289,6 @@ function _choiceKeyIsCantripChoice(key) {
 
 export { applyFreeCastRest };
 
-const _MODIFIER_ONLY_CHOICE_KEY = /^warlock_(agonizing_blast|repelling_blast|eldritch_spear)_cantrip/;
-
 function _choiceValue(raw) {
   if (raw == null) return null;
   const val = Array.isArray(raw) ? raw[0] : raw;
@@ -418,7 +417,7 @@ function collectChoiceSpells(C, spellIndex) {
   const out = [];
   Object.entries(C?.choices || {}).forEach(([key, value]) => {
     const cleanKey = key.replace(/^mc\d+_/, '');
-    if (_MODIFIER_ONLY_CHOICE_KEY.test(cleanKey)) return;
+    if (isWarlockModifierCantripChoiceKey(cleanKey)) return;
     if (!_speciesChoiceKeyMatchesActiveLineage(C, cleanKey)) return;
     const values = Array.isArray(value) ? value : [value];
     values.forEach((entry) => {

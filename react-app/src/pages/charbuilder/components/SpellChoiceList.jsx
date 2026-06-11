@@ -1,11 +1,7 @@
 import { useMemo } from 'react';
-import { Chip, List, ListItemButton, ListItemText, Paper, Stack, Typography } from '@mui/material';
+import { Chip, List, ListItemButton, Paper, Stack, Typography } from '@mui/material';
 import { spellMatchesAnyClass } from '../spells/spells.js';
-import { isConcentrationSpell, isRitualSpell } from '../../../shared/spellTags.js';
-import { SpellNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
-import { entriesToPlainText } from '../../../shared/character/spellEntries.js';
-
-const SPELL_LEVEL_LABELS = ['Cantrip', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th'];
+import { SpellRowLabel } from '../../../shared/character/SpellReference.jsx';
 
 function _knownCantripNames(character) {
   const names = new Set();
@@ -14,16 +10,6 @@ function _knownCantripNames(character) {
     (ec.selectedCantrips || []).forEach(function (name) { names.add(name); });
   });
   return names;
-}
-
-function _spellDealsDamage(spell) {
-  if (spell.damageInflict && Array.isArray(spell.damageInflict) && spell.damageInflict.length) return true;
-  if (spell.damage) return true;
-  return false;
-}
-
-function spellSnippet(spell) {
-  return entriesToPlainText(spell.descriptionEntries || spell.entries, { maxLength: 220 });
 }
 
 export default function SpellChoiceList({ spec, state, dispatch }) {
@@ -37,6 +23,10 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
   const allSpells = filter.allSpells === true || !classes.length;
   const selected = Array.isArray(state.character.choices[spec.key]) ? state.character.choices[spec.key] : [];
   const max = spec.count || 1;
+  // Modifier-only choices (Agonizing/Repelling Blast, Eldritch Spear) attach an effect
+  // to an already-known cantrip — render a compact row: name + tags only, no 5e.tools
+  // link, meta, description, or source chip.
+  const compact = !!filter.modifierOnly;
   const pool = useMemo(() => {
     var spells = state.data.spells
       .filter((spell) => levels.includes(Number(spell.level)))
@@ -46,6 +36,11 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
     if (filter.knownCantripOnly) {
       var known = _knownCantripNames(state.character);
       spells = spells.filter(function (spell) { return known.has(spell.name); });
+    }
+
+    if (Array.isArray(filter.cantripAllowList) && filter.cantripAllowList.length) {
+      var allow = new Set(filter.cantripAllowList.map(function (n) { return String(n).toLowerCase(); }));
+      spells = spells.filter(function (spell) { return allow.has(String(spell.name).toLowerCase()); });
     }
 
     if (filter.modifierOnly) {
@@ -65,7 +60,7 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
     }
 
     return spells.slice(0, 200);
-  }, [state.data.spells, state.data.classSpellIndex, levels, classes, filter.schools, allSpells, filter.knownCantripOnly, filter.modifierOnly, state.character, spec.key]);
+  }, [state.data.spells, state.data.classSpellIndex, levels, classes, filter.schools, allSpells, filter.knownCantripOnly, filter.modifierOnly, filter.cantripAllowList, state.character, spec.key]);
 
   return (
     <Paper variant="outlined" sx={{ p: 1.5, minWidth: 0 }}>
@@ -79,13 +74,6 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
             {pool.map((spell) => {
               const active = selected.includes(spell.name);
               const full = !active && selected.length >= max;
-              const meta = [
-                SPELL_LEVEL_LABELS[spell.level] || `Lv ${spell.level}`,
-                spell.schoolFull || spell.school,
-                spell.castingTimeLabel || spell.castingTime,
-                spell.rangeLabel || spell.rangeText,
-              ].filter(Boolean).join(' - ');
-              const description = spellSnippet(spell);
               return (
                 <ListItemButton
                   key={`${spec.key}-${spell.name}-${spell.source}`}
@@ -94,31 +82,8 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
                   disabled={full}
                   onClick={() => dispatch({ type: 'choice/toggle-item', key: spec.key, value: spell.name, max })}
                 >
-                  <SpellNameIcon spell={spell} />
-                  <ListItemText
-                    primary={(
-                      <Stack direction="row" spacing={0.5} alignItems="center" sx={{ minWidth: 0 }}>
-                        <Typography fontWeight={active ? 700 : 500} noWrap sx={{ minWidth: 0 }}>{spell.name}</Typography>
-                        <SpellMiniTags spell={spell} />
-                      </Stack>
-                    )}
-                    secondary={(
-                      <Stack spacing={0.25} sx={{ minWidth: 0 }}>
-                        <Typography variant="caption" color="text.secondary" noWrap>{meta}</Typography>
-                        {description ? (
-                          <Typography
-                            variant="caption"
-                            color="text.secondary"
-                            sx={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.25 }}
-                          >
-                            {description}
-                          </Typography>
-                        ) : null}
-                      </Stack>
-                    )}
-                    secondaryTypographyProps={{ component: 'div' }}
-                  />
-                  <Chip size="small" color={active ? 'primary' : 'default'} label={spell.source} />
+                  <SpellRowLabel spell={spell} selected={active} showIcon={!compact} />
+                  {compact ? null : <Chip size="small" color={active ? 'primary' : 'default'} label={spell.source} />}
                 </ListItemButton>
               );
             })}
@@ -127,42 +92,5 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
         {!pool.length ? <Typography variant="body2" color="text.secondary">No spells found for this filter.</Typography> : null}
       </Stack>
     </Paper>
-  );
-}
-
-
-function SpellMiniTags({ spell }) {
-  const tags = [
-    isConcentrationSpell(spell) ? { label: 'C', color: '#9d7fb8', bg: 'rgba(157,127,184,0.16)', title: 'Concentration' } : null,
-    isRitualSpell(spell) ? { label: 'R', color: '#58b879', bg: 'rgba(63,166,108,0.14)', title: 'Ritual' } : null,
-  ].filter(Boolean);
-
-  if (!tags.length) return null;
-
-  return (
-    <Stack direction="row" spacing={0.25} alignItems="center" sx={{ flexShrink: 0 }}>
-      {tags.map((tag) => (
-        <Typography
-          key={tag.label}
-          title={tag.title}
-          component="span"
-          sx={{
-            border: 1,
-            borderColor: tag.color,
-            color: tag.color,
-            bgcolor: tag.bg,
-            borderRadius: '3px',
-            px: '5px',
-            py: '1px',
-            fontFamily: '"Cinzel", Georgia, serif',
-            fontSize: '0.55rem',
-            fontWeight: 700,
-            lineHeight: 1.25,
-          }}
-        >
-          {tag.label}
-        </Typography>
-      ))}
-    </Stack>
   );
 }

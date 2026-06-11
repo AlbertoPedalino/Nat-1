@@ -1,12 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Box, Chip, InputAdornment, List, ListItemButton, ListItemText, Paper, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { Box, Chip, InputAdornment, List, ListItemButton, Paper, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { BookOpen, Search } from 'lucide-react';
 import BuilderPanel from './BuilderPanel.jsx';
 import { SPELL_LEVEL_LABELS } from '../constants.js';
-import { SpellNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 import { collectAutoGrantedSpells, getSpellCounts, maxSpellLevel, spellMatchesAnyClass } from '../spells/spells.js';
-import { getSpellMetaLine } from '../../../shared/character/spellMeta.js';
-import { SpellMiniTags, SpellReferenceBody, SpellSelectButton } from '../../../shared/character/SpellReference.jsx';
+import { SpellReferenceBody, SpellRowLabel, SpellSelectButton } from '../../../shared/character/SpellReference.jsx';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 
 export default function SpellSelectionPanel({ state, dispatch }) {
@@ -146,7 +144,6 @@ export default function SpellSelectionPanel({ state, dispatch }) {
                     && (level === 0 ? selectedCantrips.length >= cantrips : selectedSpellsCount >= spells);
                   const requiresWizardBook = activeIsWizard && !wizardBookMode && !autoSelected && !inWizardBook;
                   const disabled = wizardBookMode ? false : (autoSelected || atLimit || requiresWizardBook);
-                  const meta = getSpellMetaLine(spell, { includeSchool: true });
                   const autoLabel = autoSelected
                     ? getAutoGrantedLabel(autoByName.get(spell.name) || spell._autoGranted, activeCharacter)
                     : null;
@@ -162,7 +159,6 @@ export default function SpellSelectionPanel({ state, dispatch }) {
                     <SpellRow
                       key={`${spell.name}-${spell.source}`}
                       spell={spell}
-                      meta={meta}
                       selected={selected}
                       disabled={disabled}
                       autoSelected={autoSelected}
@@ -189,27 +185,15 @@ export default function SpellSelectionPanel({ state, dispatch }) {
 // (SpellReferenceBody: meta grid + description + upcast). Selection is an
 // explicit Add/Remove button on the right (auto-granted spells show a static
 // source chip instead). Expand mechanic lives in ExpandableCard.
-function SpellRow({ spell, meta, selected, disabled, autoSelected, autoLabel, onToggle }) {
+function SpellRow({ spell, selected, disabled, autoSelected, autoLabel, onToggle }) {
   return (
     <ExpandableCard
       containerSx={{ borderBottom: 1, borderColor: 'divider' }}
       bodySx={{ px: 2, pt: 0.25, pb: 1.25 }}
       body={<SpellReferenceBody spell={spell} />}
       header={({ open, toggle }) => (
-        <ListItemButton selected={selected} aria-expanded={open} sx={{ alignItems: 'flex-start', gap: 0.5 }} onClick={toggle}>
-          <SpellNameIcon spell={spell} />
-          <ListItemText
-            primary={(
-              <Stack direction="row" spacing={0.5} alignItems="center" sx={{ minWidth: 0 }}>
-                <Typography fontWeight={selected ? 700 : 500} noWrap sx={{ minWidth: 0 }}>{spell.name}</Typography>
-                <SpellMiniTags spell={spell} />
-              </Stack>
-            )}
-            secondary={(
-              <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block', minWidth: 0 }}>{meta}</Typography>
-            )}
-            secondaryTypographyProps={{ component: 'div' }}
-          />
+        <ListItemButton selected={selected} aria-expanded={open} sx={{ alignItems: 'center', gap: 0.5 }} onClick={toggle}>
+          <SpellRowLabel spell={spell} selected={selected} />
           {autoSelected ? (
             <Chip size="small" color="secondary" label={autoLabel} sx={{ flexShrink: 0 }} />
           ) : (

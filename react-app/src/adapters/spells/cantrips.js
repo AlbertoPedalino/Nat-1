@@ -234,6 +234,13 @@ export default function install(registry, context = {}) {
     toHit: false, hasSave: true,
     notes: "1d12 if target is already injured"
   });
+  registerCantripData("Mind Sliver", {
+    icon: "brain",
+    die: "1d6", dmgType: "psychic",
+    range: "60 ft",
+    toHit: false, hasSave: true,
+    notes: "INT save — target subtracts 1d4 from its next saving throw before the end of your next turn"
+  });
   registerCantripData("Poison Spray", {
     icon: "circle",
     die: "1d12", dmgType: "poison",

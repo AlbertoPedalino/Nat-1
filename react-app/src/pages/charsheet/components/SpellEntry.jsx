@@ -8,7 +8,7 @@ import { SpellMetaGrid, HigherLevelBlock } from '../../../shared/character/Spell
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import PipButton from '../../../shared/character/PipButton.jsx';
 import { formatRollTitle, rollFormula as rollFormulaDice } from '../../../shared/character/dice.js';
-import { SCHOOL_LABELS, getFinal, getMod, getPB, hasConditionEffect, getConditionalConditionEffects } from '../logic/calculations.js';
+import { getFinal, getMod, getPB, hasConditionEffect, getConditionalConditionEffects } from '../logic/calculations.js';
 import { getSpellAttackAdvantage } from '../logic/sheetEffects.js';
 import {
   applySpellModifiers,
@@ -153,7 +153,6 @@ export default function SpellEntry({ entry, spellAttackBonus = 0, C, exhaustionL
   const { onRoll, onShowToast, onToggleFreeCast } = useSheetActions();
   const castLevel = entry.castLevel || entry.level || 0;
   const baseLevel = entry.level || 0;
-  const school = SCHOOL_LABELS[entry.school] || entry.school || '';
   const bodyBlocks = entriesToTextBlocks(entry.descriptionEntries || entry.entries);
   const higherEntries = entry.higherLevelEntries || entry.entriesHigherLevel;
   const rawDamages = extractDamageDice(entry.entries || []);
@@ -339,7 +338,6 @@ export default function SpellEntry({ entry, spellAttackBonus = 0, C, exhaustionL
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', flexShrink: 0 }}>
             {beamCount > 1 ? <Badge label={`${beamCount} beams`} color="#9d7fb8" bg="rgba(157,127,184,0.16)" /> : null}
-            {school ? <Badge label={school} color="#c4b393" /> : null}
             {hasConcentrationTag ? <Badge label="C" color="#9d7fb8" bg="rgba(157,127,184,0.16)" /> : null}
             {hasRitualTag ? <Badge label="R" color="#58b879" bg="rgba(63,166,108,0.14)" /> : null}
             <Badge {...getCastBadge(entry)} />
