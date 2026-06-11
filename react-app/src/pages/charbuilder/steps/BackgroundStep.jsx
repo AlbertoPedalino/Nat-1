@@ -68,7 +68,7 @@ function BackgroundDetailCard({ background }) {
         <Divider />
         {originFeat ? (
           <Box sx={{ minWidth: 0 }}>
-            <Typography variant="body2" sx={{ color: ENTITY_COLORS.feat, fontWeight: 700 }}>Origin Feat</Typography>
+            <Typography variant="body2" sx={{ color: ENTITY_COLORS.background, fontWeight: 700 }}>Origin Feat</Typography>
             <Typography variant="body2" color="text.secondary">{originFeat}</Typography>
           </Box>
         ) : null}
@@ -108,7 +108,7 @@ export default function BackgroundStep({ state, dispatch }) {
                 {(item.abilities || getBackgroundPool(item)).map((ability) => (
                   <Chip key={ability} size="small" label={STAT_LABELS[ability]} />
                 ))}
-                {featLabel ? <Chip size="small" label={featLabel} sx={entityChipSx('feat')} /> : null}
+                {featLabel ? <Chip size="small" label={featLabel} sx={entityChipSx('background')} /> : null}
               </Stack>
             );
           }}
@@ -162,10 +162,10 @@ export default function BackgroundStep({ state, dispatch }) {
         <Stack spacing={1.5}>
           {backgroundChoiceSpecs(character).map((spec) => {
             if (spec.type === 'feat_fixed') {
-              return <FeatFixedSlot key={spec.key} spec={spec} feats={state.data.feats} character={character} state={state} dispatch={dispatch} />;
+              return <FeatFixedSlot key={spec.key} spec={spec} feats={state.data.feats} character={character} state={state} dispatch={dispatch} kind="background" />;
             }
             if (spec.type === 'feat_cat') {
-              return <FeatCategorySlot key={spec.key} spec={spec} feats={state.data.feats} character={character} state={state} dispatch={dispatch} />;
+              return <FeatCategorySlot key={spec.key} spec={spec} feats={state.data.feats} character={character} state={state} dispatch={dispatch} kind="background" />;
             }
             return <ChoiceBlock key={spec.key} spec={spec} choices={character.choices} dispatch={dispatch} character={character} />;
           })}

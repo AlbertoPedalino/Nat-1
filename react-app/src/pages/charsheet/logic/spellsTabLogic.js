@@ -6,21 +6,33 @@ import { isRitualSpell } from '../../../shared/spellTags.js';
 import { getClassSpellLimits } from '../../../shared/character/spellProgression.js';
 import { filterByRequiredChoice } from '../../../shared/character/lineageMatch.js';
 import { isGrantUnlocked } from '../../../shared/character/spellGrants.js';
-import { enumerateAutoGrantedSpells } from '../../../shared/character/autoGrantedSpells.js';
+import { enumerateAutoGrantedSpells, grantSourceLabel } from '../../../shared/character/autoGrantedSpells.js';
+import { featSlotOrigin } from '../../../shared/featChoiceKeys.js';
 import { collectFreeCastsForGrant, mergeFreeCastsById, normalizeFreeCast, getFeatFreeCastTemplate, applyFreeCastRest } from '../../../shared/character/spellFreeCasts.js';
 import { collectItemAttachedSpells } from '../../../shared/character/itemAttachedSpells.js';
 import { isWarlockModifierCantripChoiceKey } from '../../../shared/character/warlockUtils.js';
+import { ENTITY_COLORS } from '../../../shared/entityColors.js';
 
-// Spell source tag colors. WARNING: these hex values are persisted inside saved
-// characters' `sourceInfo` and compared against when classifying entries (see
-// originType fallback below) — do NOT change them, or old saves misclassify.
+// Display colors for spell-source tags. Entity-linked tags follow the canonical
+// entity palette (shared/entityColors.js); the rest are spell-domain-only tags.
 const SRC_COLOR = {
-  feat: '#caa550',
+  class: ENTITY_COLORS.class,
+  subclass: ENTITY_COLORS.subclass,
+  species: ENTITY_COLORS.species,
+  background: ENTITY_COLORS.background,
+  feat: ENTITY_COLORS.feat,
   granted: '#70b7a6',
   choice: '#9d7fb8',
   ritual: '#58b879',
   arcanum: '#d69245',
 };
+
+// Feats granted by a background/species slot are tagged with that entity's
+// color so the chip shows where the feat came from (e.g. Magic Initiate via
+// Acolyte → background orange). Free feat slots (ASI etc.) stay feat red.
+function featSlotTone(slotOrChoiceKey) {
+  return SRC_COLOR[featSlotOrigin(slotOrChoiceKey)];
+}
 
 const _GENERIC_LABELS = new Set([
   'class', 'subclass', 'species', 'feat', 'feature', 'granted', 'auto',
@@ -146,9 +158,9 @@ export function buildSpellInfo(C, spellIndex) {
     (names || []).forEach((name) => pushKnown(name, Number(level), null, C?.className));
   });
   (C?.extraClasses || []).forEach((ec) => {
-    (ec.selectedCantrips || []).forEach((name) => pushKnown(name, 0, { label: ec.name || 'Class', color: SRC_COLOR.choice }, ec.name));
+    (ec.selectedCantrips || []).forEach((name) => pushKnown(name, 0, { label: ec.name || 'Class', color: SRC_COLOR.class }, ec.name));
     Object.entries(ec.selectedSpells || {}).forEach(([level, names]) => {
-      (names || []).forEach((name) => pushKnown(name, Number(level), { label: ec.name || 'Class', color: SRC_COLOR.choice }, ec.name));
+      (names || []).forEach((name) => pushKnown(name, Number(level), { label: ec.name || 'Class', color: SRC_COLOR.class }, ec.name));
     });
   });
 
@@ -449,7 +461,7 @@ function collectChoiceSpells(C, spellIndex) {
           : [];
         out.push({
           name,
-          source: { label: meta.name, color: SRC_COLOR.feat, originType: 'feat', originLabel: meta.name },
+          source: { label: meta.name, color: featSlotTone(slotKey || key), originType: 'feat', originLabel: meta.name },
           spellcastingAbility: meta.ability,
           ownerClassName,
           freeCasts,
@@ -473,24 +485,23 @@ function collectAutoGrantedSpells(C) {
   // sheet's source-object shape (branching only on species vs class origin).
   const runtimeOut = enumerateAutoGrantedSpells(C).map((r) => {
     if (r.origin === 'species') {
-      const srcLabel = r.explicitSource || C?.speciesName || 'Species';
+      const srcLabel = grantSourceLabel(r, C?.speciesName || 'Species');
       const sourceType = r.sourceType || 'species';
       return {
         name: r.name,
         level: Number(r.level ?? 0),
-        source: { label: srcLabel, color: SRC_COLOR.granted, originType: 'species', originLabel: C?.speciesName || 'Species' },
+        source: { label: srcLabel, color: SRC_COLOR.species, originType: 'species', originLabel: C?.speciesName || 'Species' },
         ownerClassName: null,
         spellcastingAbility: r.ability,
         freeCasts: collectFreeCastsForGrant(r.entry, { character: C, source: srcLabel, sourceType, spellName: r.name }),
       };
     }
-    const hasExplicitSource = !!r.explicitSource;
-    const srcLabel = hasExplicitSource ? r.explicitSource : (r.subclassShortName ? `${r.subclassShortName} Spells` : r.ownerClassName || 'Auto');
-    const sourceType = r.sourceType || (hasExplicitSource ? 'auto_granted' : (r.subclassShortName ? 'subclass' : 'class'));
+    const srcLabel = grantSourceLabel(r);
+    const sourceType = r.sourceType || (r.explicitSource ? 'auto_granted' : (r.subclassShortName ? 'subclass' : 'class'));
     return {
       name: r.name,
       level: Number(r.level ?? 0),
-      source: { label: srcLabel, color: SRC_COLOR.granted, originType: sourceType, originLabel: srcLabel },
+      source: { label: srcLabel, color: SRC_COLOR[sourceType] || SRC_COLOR.granted, originType: sourceType, originLabel: srcLabel },
       ownerClassName: r.ownerClassName,
       freeCasts: collectFreeCastsForGrant(r.entry, { character: C, source: srcLabel, sourceType, spellName: r.name }),
     };
@@ -524,7 +535,7 @@ function collectAutoGrantedSpells(C) {
     const allCfgSpells = [...(cfg?.alwaysKnownSpells || []), ...(cfg?.alwaysPreparedSpells || [])];
     const cfgEntry = allCfgSpells.find((s) => norm(s?.name || '') === key);
     if (cfgEntry && !isGrantUnlocked(cfgEntry, C)) return;
-    const fallbackSource = { label: entry.source || 'Auto', color: SRC_COLOR.granted, originType: entry.sourceType || 'auto_granted', originLabel: entry.source || 'Auto' };
+    const fallbackSource = { label: entry.source || 'Auto', color: SRC_COLOR[entry.sourceType] || SRC_COLOR.granted, originType: entry.sourceType || 'auto_granted', originLabel: entry.source || 'Auto' };
     runtimeByName.set(key, {
       name: entry.name,
       level: Number(entry.level ?? 0),
@@ -599,16 +610,16 @@ function sourceFromChoiceKey(C, key) {
     const slotKey = _getSlotKey(C, key);
     if (slotKey) featName = _findFeatName(C, slotKey);
   }
-  if (featName) return { label: String(featName), color: SRC_COLOR.feat, originType: 'feat', originLabel: String(featName) };
-  if (key.startsWith('feat_')) return { label: 'Feat', color: SRC_COLOR.feat, originType: 'feat', originLabel: 'Feat' };
-  if (key.startsWith('subclass_')) return { label: C?.subclassShortName || 'Subclass', color: SRC_COLOR.choice, originType: 'subclass', originLabel: C?.subclassShortName || 'Subclass' };
+  if (featName) return { label: String(featName), color: featSlotTone(key), originType: 'feat', originLabel: String(featName) };
+  if (key.startsWith('feat_')) return { label: 'Feat', color: featSlotTone(key), originType: 'feat', originLabel: 'Feat' };
+  if (key.startsWith('subclass_')) return { label: C?.subclassShortName || 'Subclass', color: SRC_COLOR.subclass, originType: 'subclass', originLabel: C?.subclassShortName || 'Subclass' };
   if (key.startsWith('species_')) {
     const lineage = C?.normalizedChoices?.species?.version
       || (Array.isArray(C?.choices?.species_version) ? C.choices.species_version[0] : C?.choices?.species_version);
     if (_speciesChoiceKeyLineage(key) && lineage) {
-      return { label: `${lineage} Lineage`, color: SRC_COLOR.granted, originType: 'species', originLabel: String(lineage) };
+      return { label: `${lineage} Lineage`, color: SRC_COLOR.species, originType: 'species', originLabel: String(lineage) };
     }
-    return { label: C?.speciesName || 'Species', color: SRC_COLOR.granted, originType: 'species', originLabel: C?.speciesName || 'Species' };
+    return { label: C?.speciesName || 'Species', color: SRC_COLOR.species, originType: 'species', originLabel: C?.speciesName || 'Species' };
   }
   if (key.includes('tome')) return { label: 'Pact of the Tome', color: SRC_COLOR.choice, originType: 'invocation', originLabel: 'Pact of the Tome' };
   if (key.includes('mystic_arcanum')) return { label: 'M. Arcanum', color: SRC_COLOR.arcanum, originType: 'mystic_arcanum', originLabel: 'Mystic Arcanum' };
@@ -1014,8 +1025,6 @@ function resolveSpellMeta(entry, C) {
     else if (!entry.sourceInfo) { originType = 'class'; originLabel = ownerClass || 'Class'; }
     else if (C?.extraClasses?.some((ec) => ec.name === label)) { originType = 'class'; originLabel = label; }
     else if (label === 'Pact of the Tome') { originType = 'invocation'; originLabel = label; }
-    else if (src.color === SRC_COLOR.feat) { originType = 'feat'; originLabel = label || 'Feat'; }
-    else if (src.color === SRC_COLOR.granted) { originType = 'auto_granted'; originLabel = label || 'Auto'; }
     else { originType = 'unknown'; }
   }
 
@@ -1077,7 +1086,6 @@ const _STATUS_CHIP_CONFIG = {
   ritual_spellbook: { label: 'Ritual Book', color: SRC_COLOR.ritual },
   at_will: { label: 'At Will', color: SRC_COLOR.choice },
   mystic_arcanum: { label: 'M. Arcanum', color: SRC_COLOR.arcanum },
-  always_prepared: { label: 'Always Prep.', color: SRC_COLOR.granted },
   granted: { label: 'Granted', color: SRC_COLOR.granted },
   known: { label: 'Known', color: SRC_COLOR.ritual },
 };

@@ -1,4 +1,4 @@
-import { Box, Button, Stack, Tooltip, Typography } from '@mui/material';
+import { alpha, Box, Button, Stack, Tooltip, Typography } from '@mui/material';
 import { Cross, Dices, Sword } from 'lucide-react';
 import { SPELL_LEVEL_LABELS } from '../../charbuilder/constants.js';
 import { SpellNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
@@ -56,7 +56,8 @@ function SourceBadge({ sourceInfo, sources, suffix = '' }) {
   const all = (sources && sources.length ? sources : [sourceInfo]).filter(Boolean);
   const extra = all.length - 1;
   const label = sourceInfo.label + suffix + (extra > 0 ? ` +${extra}` : '');
-  const badge = <Badge label={label} color={sourceInfo.color || '#9d7fb8'} bg="rgba(157,127,184,0.16)" />;
+  const tone = sourceInfo.color || '#9d7fb8';
+  const badge = <Badge label={label} color={tone} bg={alpha(tone, 0.16)} />;
   if (extra <= 0) return badge;
   const title = 'Sources: ' + all.map((s) => s.originLabel || s.label).filter(Boolean).join(', ');
   return <Tooltip title={title} arrow><Box component="span" sx={{ display: 'inline-flex' }}>{badge}</Box></Tooltip>;

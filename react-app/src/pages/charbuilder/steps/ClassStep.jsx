@@ -72,7 +72,6 @@ export default function ClassStep({ state, dispatch }) {
       <ClassPanel state={state} character={character} dispatch={dispatch} />
       <LevelPanel character={character} dispatch={dispatch} />
       <SubclassPanel character={character} dispatch={dispatch} />
-      <SpellSlotsPanel character={character} />
       <BuilderPanel id="panel-class-choices" title="Class Choices" icon={Layers} note="Class, subclass, ASI, expertise, optional, plus feat slots (Fighting Style, Epic Boon, ASI feat).">
         <Stack spacing={1.5}>
           {choiceSpecs.map(renderSpec)}
@@ -81,6 +80,7 @@ export default function ClassStep({ state, dispatch }) {
           ) : null}
         </Stack>
       </BuilderPanel>
+      <SpellSlotsPanel character={character} />
       <SpellSelectionPanel state={state} dispatch={dispatch} />
     </Stack>
   );

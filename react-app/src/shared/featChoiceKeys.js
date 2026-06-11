@@ -44,3 +44,14 @@ export function isFeatDetailKey(key) {
   const k = compact(key);
   return COMPACT_DETAIL_TOKENS.some((token) => k.includes(token));
 }
+
+// Which entity granted a feat slot, derived from its choice-key convention:
+// background origin feat ('feat_origin*', 'bg_*'), species feat
+// ('species_origin_feat*'), or a free feat slot (ASI etc.). Single home for
+// these prefixes — color coding and choice partitioning both key off it.
+export function featSlotOrigin(key) {
+  const k = String(key || '');
+  if (k === 'feat_origin' || k.startsWith('feat_origin_') || k.startsWith('bg_')) return 'background';
+  if (k === 'species_origin_feat' || k.startsWith('species_origin_feat_')) return 'species';
+  return 'feat';
+}

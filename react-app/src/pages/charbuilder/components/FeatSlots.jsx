@@ -68,7 +68,9 @@ function grantLabel(entry) {
   return entry?.name || '?';
 }
 
-export function FeatFixedSlot({ spec, feats, character, state, dispatch }) {
+// `kind` colors the slot's feat chip by the granting entity (background origin
+// feat → background orange, species feat → species purple, free slots → feat red).
+export function FeatFixedSlot({ spec, feats, character, state, dispatch, kind = 'feat' }) {
   const feat = findFeat(feats, spec.fixed);
   const additional = Array.isArray(feat?.additionalSpells) ? feat.additionalSpells : [];
   const entryKey = `${spec.key}_entry`;
@@ -81,7 +83,7 @@ export function FeatFixedSlot({ spec, feats, character, state, dispatch }) {
       <Stack spacing={1} sx={{ minWidth: 0 }}>
         <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
           <Typography variant="h2" sx={{ flex: 1, minWidth: 0 }}>{feat ? feat.name : spec.fixed}</Typography>
-          <Chip size="small" label={spec.label} sx={entityChipSx('feat')} />
+          <Chip size="small" label={spec.label} sx={entityChipSx(kind)} />
         </Stack>
         {additional.length > 1 ? (
           <Stack spacing={0.6}>
@@ -109,7 +111,7 @@ export function FeatFixedSlot({ spec, feats, character, state, dispatch }) {
   );
 }
 
-export function FeatCategorySlot({ spec, feats, character, state, dispatch }) {
+export function FeatCategorySlot({ spec, feats, character, state, dispatch, kind = 'feat' }) {
   const [expanded, setExpanded] = useState(() => new Set());
   const toggleExpanded = (name) => setExpanded((prev) => {
     const next = new Set(prev);
@@ -153,7 +155,7 @@ export function FeatCategorySlot({ spec, feats, character, state, dispatch }) {
         <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
           <Typography variant="h2" sx={{ flex: 1, minWidth: 0 }}>{spec.label}</Typography>
           <Chip size="small" label={(spec.categories || []).join('/')} />
-          {selected ? <Chip size="small" label={selected} sx={entityChipSx('feat')} /> : null}
+          {selected ? <Chip size="small" label={selected} sx={entityChipSx(kind)} /> : null}
         </Stack>
         <Paper variant="outlined" sx={{ maxHeight: 260, overflow: 'auto' }}>
           <List dense disablePadding>

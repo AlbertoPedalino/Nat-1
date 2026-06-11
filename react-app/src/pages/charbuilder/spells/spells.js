@@ -2,7 +2,7 @@ import { installedRegistry } from '../../../adapters/index.js';
 import { FULL_SLOTS, HALF_SLOTS, PACT_SLOTS, THIRD_SLOTS } from '../constants.js';
 import { getPrimaryClassLevel } from '../logic/calculations.js';
 import { getClassSpellLimits } from '../../../shared/character/spellProgression.js';
-import { enumerateClassGrants, enumerateSpeciesGrants, enumerateSubclassFeatureSpells } from '../../../shared/character/autoGrantedSpells.js';
+import { enumerateEntityGrants, enumerateSpeciesGrants, grantSourceLabel } from '../../../shared/character/autoGrantedSpells.js';
 
 export function normClassKey(value) {
   return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -91,27 +91,21 @@ export function collectAutoGrantedSpells(character) {
     level: getClassSpellLevel(character),
     allSubFeatures: character?.allSubFeatures || [],
   };
-  // Class runtime-config grants and subclass-feature-text grants share the same
-  // class projection (string source label).
-  const classRecords = [
-    ...enumerateClassGrants(entity, character),
-    ...enumerateSubclassFeatureSpells(entity),
-  ];
   const out = [
-    ...classRecords.map((r) => ({
+    ...enumerateEntityGrants(entity, character).map((r) => ({
       name: r.name,
       minLevel: r.minLevel,
       level: r.level,
       mode: r.mode,
-      source: r.explicitSource || (r.mode === 'known' ? 'Class' : 'Subclass'),
-      sourceType: r.sourceType || r.mode,
+      source: grantSourceLabel(r, 'Class'),
+      sourceType: r.sourceType || (r.subclassShortName ? 'subclass' : 'class'),
     })),
     ...enumerateSpeciesGrants(character).map((r) => ({
       name: r.name,
       minLevel: r.minLevel,
       level: r.level,
       mode: r.mode,
-      source: r.explicitSource || character?.speciesName || 'Species',
+      source: grantSourceLabel(r, character?.speciesName || 'Species'),
       sourceType: r.sourceType || 'species',
       spellcastingAbility: r.ability,
     })),

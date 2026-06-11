@@ -87,21 +87,6 @@ export default function SpellSelectionPanel({ state, dispatch }) {
               <Chip color={selectedSpellsCount > spells ? 'error' : 'primary'} label={`Spells ${selectedSpellsCount}/${spells}`} />
               {profile.ability ? <Chip label={`Ability ${profile.ability.toUpperCase()}`} /> : null}
             </Stack>
-            {autoGrantedSpells.length ? (
-              <Box>
-                <Typography variant="overline" color="text.secondary">Auto Granted</Typography>
-                <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
-                  {autoGrantedSpells.map((spell) => (
-                    <Chip
-                      key={`${spell.name}-${spell.mode}-${spell.source || ''}`}
-                      size="small"
-                      color="secondary"
-                      label={`${spell.name} (${getAutoGrantedLabel(spell, activeCharacter)})`}
-                    />
-                  ))}
-                </Stack>
-              </Box>
-            ) : null}
             <TextField
               fullWidth
               value={state.search.spells}

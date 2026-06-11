@@ -1,8 +1,49 @@
-import { Box, Chip, FormControl, Grid, InputLabel, MenuItem, Paper, Select, Stack, Typography } from '@mui/material';
-import { Sparkles } from 'lucide-react';
+import { Accordion, AccordionDetails, AccordionSummary, Box, Chip, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from '@mui/material';
+import { ChevronDown, Sparkles } from 'lucide-react';
 import BuilderPanel from './BuilderPanel.jsx';
+import { FullDescription } from './ExpandableDescription.jsx';
 import { getPrimaryClassLevel } from '../logic/calculations.js';
-import { renderEntryText } from '../logic/text.js';
+import { ENTITY_COLORS, entityChipSx } from '../../../shared/entityColors.js';
+
+function SubclassFeatureRow({ feature }) {
+  return (
+    <Accordion
+      disableGutters
+      square
+      variant="outlined"
+      sx={{
+        minWidth: 0,
+        bgcolor: 'transparent',
+        backgroundImage: 'none',
+        borderLeft: `3px solid ${ENTITY_COLORS.subclass}`,
+        '&:before': { display: 'none' },
+        '&.Mui-expanded': { my: 0 },
+      }}
+    >
+      <AccordionSummary
+        expandIcon={<ChevronDown size={14} />}
+        sx={{
+          minHeight: 36,
+          px: 1.25,
+          py: 0,
+          '&.Mui-expanded': { minHeight: 36 },
+          '& .MuiAccordionSummary-content': { my: 0.6, minWidth: 0 },
+          '& .MuiAccordionSummary-content.Mui-expanded': { my: 0.6 },
+        }}
+      >
+        <Stack direction="row" spacing={1} alignItems="center" sx={{ minWidth: 0 }}>
+          <Chip size="small" label={`Lv ${feature.level}`} sx={entityChipSx('subclass')} />
+          <Typography variant="body2" fontWeight={700} noWrap sx={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {feature.name}
+          </Typography>
+        </Stack>
+      </AccordionSummary>
+      <AccordionDetails sx={{ px: 1.25, pt: 0, pb: 1 }}>
+        <FullDescription entries={feature.entries} />
+      </AccordionDetails>
+    </Accordion>
+  );
+}
 
 export default function SubclassPanel({ character, dispatch }) {
   const tab = character.activeClassTab || 0;
@@ -41,28 +82,14 @@ export default function SubclassPanel({ character, dispatch }) {
         </FormControl>
         {subclassShortName ? (
           <Box sx={{ maxHeight: 450, overflowY: 'auto', overflowX: 'hidden', minWidth: 0 }}>
-            <Grid container spacing={1}>
+            <Stack spacing={0.5} sx={{ minWidth: 0 }}>
               {subclassFeatures.map((feature) => (
-                <Grid key={`${feature.name}-${feature.level}`} item xs={12} md={6}>
-                  <Paper variant="outlined" sx={{ p: 1.25, minWidth: 0, overflow: 'hidden' }}>
-                    <Stack spacing={0.75} sx={{ minWidth: 0 }}>
-                      <Stack direction="row" spacing={1} alignItems="center" sx={{ minWidth: 0 }}>
-                        <Chip size="small" label={`Lv ${feature.level}`} />
-                        <Typography variant="h2" noWrap sx={{ overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>{feature.name}</Typography>
-                      </Stack>
-                      <Typography variant="body2" color="text.secondary" sx={{ overflow: 'hidden', maxHeight: '6em', lineHeight: 1.4, wordBreak: 'break-word' }}>
-                        {renderEntryText(feature.entries).slice(0, 500)}
-                      </Typography>
-                    </Stack>
-                  </Paper>
-                </Grid>
+                <SubclassFeatureRow key={`${feature.name}-${feature.level}`} feature={feature} />
               ))}
               {!subclassFeatures.length ? (
-                <Grid item xs={12}>
-                  <Typography color="text.secondary">No subclass features loaded for this subclass.</Typography>
-                </Grid>
+                <Typography color="text.secondary">No subclass features loaded for this subclass.</Typography>
               ) : null}
-            </Grid>
+            </Stack>
           </Box>
         ) : null}
       </Stack>

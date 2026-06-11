@@ -17,7 +17,8 @@ import { isGrantUnlocked } from './spellGrants.js';
  *   {
  *     name, minLevel, level, mode,           // grant identity
  *     origin: 'class' | 'species',           // class also covers subclass cfg
- *     ownerClassName, subclassShortName,      // provenance
+ *     ownerClassName, subclassShortName,      // provenance (subclass fields only
+ *     subclassName,                           //  when granted BY the subclass)
  *     explicitSource, sourceType, ability,    // raw adapter hints (may be null)
  *     entry,                                  // original adapter entry (free casts, …)
  *   }
@@ -46,12 +47,13 @@ function gatedEntries(spellcasting, character, level) {
  */
 export function enumerateClassGrants(entity, character) {
   const level = Number(entity?.level || 1);
+  const subclassName = subclassFullName(entity);
   const configs = [
-    installedRegistry.getClassRuntimeConfig(entity?.className)?.spellcasting,
-    installedRegistry.getSubclassRuntimeConfig(entity?.className, entity?.subclassShortName)?.spellcasting,
+    { spellcasting: installedRegistry.getClassRuntimeConfig(entity?.className)?.spellcasting, fromSubclass: false },
+    { spellcasting: installedRegistry.getSubclassRuntimeConfig(entity?.className, entity?.subclassShortName)?.spellcasting, fromSubclass: true },
   ];
   const out = [];
-  configs.forEach((spellcasting) => {
+  configs.forEach(({ spellcasting, fromSubclass }) => {
     gatedEntries(spellcasting, character, level).forEach((entry) => {
       out.push({
         name: entry.name,
@@ -60,7 +62,8 @@ export function enumerateClassGrants(entity, character) {
         mode: entry.mode,
         origin: 'class',
         ownerClassName: entity?.className || null,
-        subclassShortName: entity?.subclassShortName || null,
+        subclassShortName: fromSubclass ? (entity?.subclassShortName || null) : null,
+        subclassName: fromSubclass ? subclassName : null,
         explicitSource: entry.source || null,
         sourceType: entry.sourceType || null,
         ability: entry.ability || null,
@@ -69,6 +72,16 @@ export function enumerateClassGrants(entity, character) {
     });
   });
   return out;
+}
+
+// Full subclass name ("Oath of Glory") resolved from the entity's subclass
+// features, which carry both shortName and full name in 5etools data.
+function subclassFullName(entity) {
+  const shortName = entity?.subclassShortName;
+  if (!shortName) return null;
+  return (entity?.allSubFeatures || []).find(
+    (feature) => feature?.subclassShortName === shortName && feature?.subclassName,
+  )?.subclassName || null;
 }
 
 /** Grants from the character's species. */
@@ -169,6 +182,7 @@ export function enumerateSubclassFeatureSpells(entity) {
           origin: 'class',
           ownerClassName: entity?.className || null,
           subclassShortName,
+          subclassName: feature.subclassName || null,
           explicitSource: feature.name || subclassShortName,
           sourceType: 'subclass',
           ability: null,
@@ -197,16 +211,49 @@ function classEntities(character) {
   ];
 }
 
+function normName(value) {
+  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+/**
+ * All grants for one class entity: runtime config + subclass-feature text.
+ * A feature-text scrape of a spell already granted by runtime config is dropped
+ * (the config record is richer: gates, ability, free casts) — otherwise e.g.
+ * Oath of Glory spells would tag twice. Single composition point for every
+ * consumer that works per-entity (builder spell panel) or whole-character
+ * (sheet, via enumerateAutoGrantedSpells).
+ */
+export function enumerateEntityGrants(entity, character) {
+  const configGrants = enumerateClassGrants(entity, character);
+  const granted = new Set(configGrants.map((r) => normName(r.name)));
+  return [
+    ...configGrants,
+    ...enumerateSubclassFeatureSpells(entity).filter((r) => !granted.has(normName(r.name))),
+  ];
+}
+
+/**
+ * Canonical display label for a grant record: adapter-declared source first,
+ * then the granting subclass's full name, shortName, owner class, fallback.
+ * Both the builder and the sheet derive their tags from this.
+ */
+export function grantSourceLabel(record, fallback = 'Auto') {
+  return record?.explicitSource
+    || record?.subclassName
+    || record?.subclassShortName
+    || record?.ownerClassName
+    || fallback;
+}
+
 /**
  * All auto-granted spells for a character: every class entity (primary +
- * multiclass; runtime config + subclass-feature text) plus species. Records are
- * not deduped — consumers decide how to collapse same-named grants.
+ * multiclass) plus species. Distinct-origin duplicates are kept; consumers
+ * decide how to collapse same-named grants across entities.
  */
 export function enumerateAutoGrantedSpells(character) {
   const out = [];
   classEntities(character).forEach((entity) => {
-    enumerateClassGrants(entity, character).forEach((r) => out.push(r));
-    enumerateSubclassFeatureSpells(entity).forEach((r) => out.push(r));
+    enumerateEntityGrants(entity, character).forEach((r) => out.push(r));
   });
   enumerateSpeciesGrants(character).forEach((r) => out.push(r));
   return out;
