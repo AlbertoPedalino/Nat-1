@@ -1,6 +1,6 @@
 import { Box, Card, CardContent, Chip, Paper, Stack, Typography } from '@mui/material';
 import { GraduationCap } from 'lucide-react';
-import { renderEntries } from '../logic/renderEntries.js';
+import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
 import { ENTITY_COLORS } from '../../../shared/entityColors.js';
 
 const BG = ENTITY_COLORS.background;
@@ -96,7 +96,7 @@ export default function BackgroundTab({ C }) {
   const backgroundName = C?.backgroundName || '';
   const backgroundSource = C?.backgroundSource || '';
   const entries = background.entries || [];
-  const description = entries.length ? renderEntries(entries) : '';
+  const hasEntries = !Array.isArray(entries) || entries.length > 0;
 
   const skills = listProficiencies(background.skillProficiencies);
   const tools = listProficiencies(background.toolProficiencies);
@@ -117,7 +117,7 @@ export default function BackgroundTab({ C }) {
         ) : null}
       </Stack>
 
-      {entries.length > 0 && (
+      {hasEntries && (
         <Card variant="outlined" sx={{ minWidth: 0, borderLeft: `3px solid ${BG}`, mb: 0.75 }}>
           <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
             <Typography variant="caption" sx={{ color: BG, fontWeight: 700, mb: 0.3, display: 'block' }}>
@@ -125,13 +125,9 @@ export default function BackgroundTab({ C }) {
             </Typography>
             <Box sx={{
               color: 'text.secondary', fontSize: '0.75rem', lineHeight: 1.45, wordBreak: 'break-word',
-              whiteSpace: 'pre-line',
-              '& b': { color: 'text.primary', fontWeight: 700 },
-              '& i': { color: 'text.secondary' },
-              '& ul': { my: 0.35 },
-              '& li': { mb: 0.2 },
+              '& .MuiTypography-root': { fontSize: '0.75rem', lineHeight: 1.45 },
             }}>
-              {description}
+              <EntryBlocks entries={entries} emptyText="" />
             </Box>
           </CardContent>
         </Card>
@@ -158,7 +154,7 @@ export default function BackgroundTab({ C }) {
         </Box>
       )}
 
-      {!entries.length && !skills && !tools && !languages && !feats && !equipment.length && (
+      {!hasEntries && !skills && !tools && !languages && !feats && !equipment.length && (
         <Typography sx={{ fontSize: '0.8125rem', color: 'text.secondary', fontStyle: 'italic' }}>
           No background details available.
         </Typography>

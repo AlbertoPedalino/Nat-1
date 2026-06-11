@@ -10,6 +10,7 @@ import PipButton from '../../../shared/character/PipButton.jsx';
 import { formatRollTitle, rollFormula as rollFormulaDice } from '../../../shared/character/dice.js';
 import { getFinal, getMod, getPB, hasConditionEffect, getConditionalConditionEffects } from '../logic/calculations.js';
 import { getSpellAttackAdvantage } from '../logic/sheetEffects.js';
+import { entriesToTextBlocks } from '../../../shared/character/spellEntries.js';
 import {
   applySpellModifiers,
   computeScaledFormula,
@@ -19,7 +20,6 @@ import {
   getSpellAbilityForEntry,
   getSpellStatusChips,
   getUpcastStep,
-  entriesToTextBlocks,
   resolveDmgBonusValue,
 } from '../logic/spellsTabLogic.js';
 import { inlineButtonSx, spellBodySx, spellRowSx } from './spellsTabStyles.js';

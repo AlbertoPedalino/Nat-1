@@ -8,4 +8,3 @@ export {
 export { loadClassIndex, loadSpecies, loadBackgrounds, loadFeats, loadSpells, loadItems, loadOptionalFeatures } from './dataLoaders.js';
 export { extractSheetData, makeSheetPayload, saveCharacter, importSheetPayload } from './persistence.js';
 export { buildPreviewSheetCharacter } from './previewSheet.js';
-export { cleanText, renderEntryText, normalizeName } from './text.js';

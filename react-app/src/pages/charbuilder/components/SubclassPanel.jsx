@@ -1,7 +1,7 @@
 import { Accordion, AccordionDetails, AccordionSummary, Box, Chip, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from '@mui/material';
 import { ChevronDown, Sparkles } from 'lucide-react';
 import BuilderPanel from './BuilderPanel.jsx';
-import { FullDescription } from './ExpandableDescription.jsx';
+import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
 import { getPrimaryClassLevel } from '../logic/calculations.js';
 import { ENTITY_COLORS, entityChipSx } from '../../../shared/entityColors.js';
 
@@ -39,7 +39,7 @@ function SubclassFeatureRow({ feature }) {
         </Stack>
       </AccordionSummary>
       <AccordionDetails sx={{ px: 1.25, pt: 0, pb: 1 }}>
-        <FullDescription entries={feature.entries} />
+        <EntryBlocks entries={feature.entries} emptyText="" />
       </AccordionDetails>
     </Accordion>
   );

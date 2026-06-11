@@ -3,7 +3,8 @@ import { Box, Button, Chip, Collapse, IconButton, List, ListItemButton, ListItem
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import ChoiceBlock from './ChoiceBlock.jsx';
 import SpellChoiceList from './SpellChoiceList.jsx';
-import { ExpandableDescription, FullDescription } from './ExpandableDescription.jsx';
+import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
+import { ExpandableEntryBlocks } from '../../../shared/character/ExpandableEntryBlocks.jsx';
 import { featChoiceSpecs } from '../logic/choiceSpecs.js';
 import { getPrimaryClassLevel } from '../logic/calculations.js';
 import { entityChipSx } from '../../../shared/entityColors.js';
@@ -104,7 +105,7 @@ export function FeatFixedSlot({ spec, feats, character, state, dispatch, kind = 
             </Stack>
           </Stack>
         ) : null}
-        {feat?.entries ? <ExpandableDescription entries={feat.entries} /> : null}
+        {feat?.entries ? <ExpandableEntryBlocks entries={feat.entries} /> : null}
         {grants.map((grant) => renderGrantSpec({ grant, character, state, dispatch }))}
       </Stack>
     </Paper>
@@ -197,7 +198,7 @@ export function FeatCategorySlot({ spec, feats, character, state, dispatch, kind
                   {hasDesc ? (
                     <Collapse in={isOpen} unmountOnExit>
                       <Box sx={{ px: 1.5, py: 0.75, bgcolor: 'background.default', borderBottom: 1, borderColor: 'divider' }}>
-                        <FullDescription entries={feat.entries} />
+                        <EntryBlocks entries={feat.entries} emptyText="" />
                       </Box>
                     </Collapse>
                   ) : null}

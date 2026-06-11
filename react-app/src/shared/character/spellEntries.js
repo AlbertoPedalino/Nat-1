@@ -5,9 +5,14 @@ function asArray(value) {
 
 function pickTagDisplay(tag, rawValue) {
   const parts = String(rawValue || '').split('|').map((part) => part.trim()).filter(Boolean);
+  if (tag === 'h') return 'Hit: ';
   if (!parts.length) return '';
   if (tag === 'dc') return `DC ${parts[0]}`;
   if (tag === 'hit') return `+${parts[0].replace(/^\+/, '')}`;
+  if (tag === 'd20') return `${Number(parts[0]) >= 0 ? '+' : ''}${parts[0]}`;
+  if (tag === 'atk') return `${parts[0]} Attack:`;
+  if (tag === 'recharge') return `(Recharge ${parts[0]}-6)`;
+  if (tag === 'chance') return `${parts[0]}%`;
   // {@scaledamage base|levels|step} — cantrip scaling at character levels: show base + per-level step.
   if (tag === 'scaledamage') {
     return parts[2] ? `${parts[0]} (+${parts[2]}/level)` : parts[0];

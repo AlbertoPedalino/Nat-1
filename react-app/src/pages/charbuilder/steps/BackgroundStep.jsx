@@ -5,11 +5,11 @@ import ChoiceBlock from '../components/ChoiceBlock.jsx';
 import { FeatCategorySlot, FeatFixedSlot } from '../components/FeatSlots.jsx';
 import SearchList from '../components/SearchList.jsx';
 import { STAT_LABELS } from '../constants.js';
-import { cleanText } from '../logic/text.js';
 import { getBackgroundPattern, getBackgroundPool } from '../logic/calculations.js';
 import { backgroundChoiceSpecs, fixedKeysFromBlocks } from '../logic/choiceSpecs.js';
 import { ENTITY_COLORS, entityChipSx } from '../../../shared/entityColors.js';
 import { backgroundOriginFeat } from '../../../shared/character/selectedFeats.js';
+import { strip5eMarkup } from '../../../shared/character/spellEntries.js';
 
 
 function titleCase(value) {
@@ -33,14 +33,14 @@ function ProfList({ title, items, color }) {
 }
 
 function extractBackgroundLore(background) {
-  if (background?._lore) return cleanText(background._lore);
+  if (background?._lore) return strip5eMarkup(background._lore);
   const entries = background?.entries;
   if (!Array.isArray(entries)) return '';
   const first = entries[0];
-  if (typeof first === 'string') return cleanText(first);
+  if (typeof first === 'string') return strip5eMarkup(first);
   if (first?.type === 'entries' && Array.isArray(first.entries)) {
     const inner = first.entries[0];
-    if (typeof inner === 'string') return cleanText(inner);
+    if (typeof inner === 'string') return strip5eMarkup(inner);
   }
   return '';
 }

@@ -1,9 +1,9 @@
 import { STATS, STAT_LABELS } from '../constants.js';
-import { cleanText } from '../logic/text.js';
 import { installedRegistry } from '../../../adapters/index.js';
 import { getPrimaryClassLevel } from '../logic/calculations.js';
 import { backgroundOriginFeat } from '../../../shared/character/selectedFeats.js';
 import { getMulticlassChoiceSpecs } from '../../../shared/character/multiclassProficiencies.js';
+import { strip5eMarkup } from '../../../shared/character/spellEntries.js';
 import {
   parseTypedProficiencyValue,
   splitTypedProficiencies,
@@ -640,6 +640,6 @@ export function summarizeFixedProficiencies(entity) {
 export function optionLabel(value) {
   const parsed = parseSkillToolChoiceValue(value);
   if (parsed?.name) return parsed.name;
-  const raw = cleanText(String(value || '').split('|')[0]);
+  const raw = strip5eMarkup(String(value || '').split('|')[0]);
   return STAT_LABELS[raw] || raw.replace(/_/g, ' ');
 }

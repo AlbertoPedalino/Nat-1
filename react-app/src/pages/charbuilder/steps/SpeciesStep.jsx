@@ -3,7 +3,7 @@ import { ScrollText, Sparkles } from 'lucide-react';
 import BuilderPanel from '../components/BuilderPanel.jsx';
 import ChoiceBlock from '../components/ChoiceBlock.jsx';
 import { FeatCategorySlot } from '../components/FeatSlots.jsx';
-import { ExpandableDescription } from '../components/ExpandableDescription.jsx';
+import { ExpandableEntryBlocks } from '../../../shared/character/ExpandableEntryBlocks.jsx';
 import SearchList from '../components/SearchList.jsx';
 import SpellChoiceList from '../components/SpellChoiceList.jsx';
 import { speciesChoiceSpecs } from '../logic/choiceSpecs.js';
@@ -19,7 +19,7 @@ function SpeciesDetailCard({ species }) {
         </Stack>
         <Divider />
         {species.entries ? (
-          <ExpandableDescription entries={species.entries} initialClamp={6} />
+          <ExpandableEntryBlocks entries={species.entries} initialBlocks={6} />
         ) : (
           <Typography color="text.secondary">No description available.</Typography>
         )}

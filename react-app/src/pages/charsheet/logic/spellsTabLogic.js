@@ -1,6 +1,5 @@
 import { FULL_SLOTS, HALF_SLOTS, PACT_SLOTS, THIRD_SLOTS } from '../../charbuilder/constants.js';
 import { installedRegistry } from '../../../adapters/index.js';
-import { entriesToHigherLevelBlocks, entriesToPlainText, entriesToTextBlocks, renderEntries as renderSafeEntries } from './renderEntries.js';
 import { getFinal as getFinalScore, getMod as getAbilityMod } from './calculations.js';
 import { isRitualSpell } from '../../../shared/spellTags.js';
 import { getClassSpellLimits } from '../../../shared/character/spellProgression.js';
@@ -1109,17 +1108,6 @@ export function getCastBadge(spell) {
   if (unit === 'action' || unit === '') return { label: 'A', color: '#4d95d6' };
   return { label: unit, color: '#c4b393' };
 }
-
-// Meta formatting (Casting Time / Range / Components / Duration) lives in the
-// shared spellMeta module; re-exported here under the existing names so sheet
-// callers stay unchanged while the builder reads from the same source.
-export { getSpellMetaLine as getMetaLine, getSpellMetaSegments as getMetaSegments } from '../../../shared/character/spellMeta.js';
-
-export function renderEntries(entries) {
-  return renderSafeEntries(entries);
-}
-
-export { entriesToHigherLevelBlocks, entriesToPlainText, entriesToTextBlocks };
 
 export function toSnapshot(spell) {
   return {

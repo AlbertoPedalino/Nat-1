@@ -4,7 +4,6 @@ import {
   ITEM_SUMMARIES,
   SPELL_FILES,
 } from '../constants.js';
-import { normalizeName } from './text.js';
 import { dedupeSpellsBySourcePriority, normalizeSpellRecord } from '../../../shared/character/spellNormalization.js';
 import { itemIdentityKey } from '../../../shared/character/itemIdentity.js';
 import {
@@ -22,6 +21,10 @@ import {
   isSupportedSubclassFeature,
   isSupportedSubclassRecord,
 } from '../../../shared/character/sourceFiltering.js';
+
+function normalizeName(value) {
+  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+}
 
 // Memoize by path: 5etools data is static per session, so repeated loads of the
 // same file (across builder + sheet panels) share one network request. The

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Box, Chip, Collapse, IconButton, List, ListItemButton, ListItemText, Paper, Stack, Typography } from '@mui/material';
 import { Check, ChevronDown, ChevronUp } from 'lucide-react';
-import { FullDescription } from './ExpandableDescription.jsx';
+import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
 import {
   parseTypedProficiencyValue,
   isChoicePlaceholderValue,
@@ -329,7 +329,7 @@ export default function ChoiceBlock({ spec, choices, dispatch, character, getOpt
                   {desc ? (
                     <Collapse in={isOpen} unmountOnExit>
                       <Box sx={{ px: 1, py: 0.75, bgcolor: 'background.paper' }}>
-                        <FullDescription entries={desc} />
+                        <EntryBlocks entries={desc} emptyText="" />
                       </Box>
                     </Collapse>
                   ) : null}

@@ -4,12 +4,12 @@ import { Backpack, Coins, PackagePlus, Search, Trash2 } from 'lucide-react';
 import BuilderPanel from '../components/BuilderPanel.jsx';
 import { ITEM_FILTERS } from '../constants.js';
 import { ItemNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
-import { cleanText } from '../logic/text.js';
 import { equipmentTypeCandidates } from '../logic/dataLoaders.js';
 import { CurrencyRow } from '../../../shared/character/CurrencyCoinBox.jsx';
 import { findInventoryItem } from '../../../shared/character/itemContainers.js';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import { ItemReferenceBody, QuantityAdder } from '../../../shared/character/ItemReference.jsx';
+import { strip5eMarkup } from '../../../shared/character/spellEntries.js';
 import { formatWeight, totalCarriedWeight } from '../../../shared/character/weight.js';
 
 const CHOICE_KEYS = ['A', 'B', 'C', 'D', 'E', 'a', 'b', 'c', 'd', 'e'];
@@ -45,7 +45,7 @@ function cpToCoins(cpValue) {
 function parseItemRef(ref) {
   const [name, source] = String(ref || '').split('|');
   return {
-    name: cleanText(name || '').trim(),
+    name: strip5eMarkup(name || '').trim(),
     source: String(source || '').trim().toUpperCase(),
   };
 }
@@ -67,7 +67,7 @@ function itemSearchText(item) {
 function flattenEquip(node, items = []) {
   if (!node) return items;
   if (typeof node === 'string') {
-    items.push(cleanText(node).replace(/\|[a-zA-Z0-9-]+/g, ''));
+    items.push(strip5eMarkup(node).replace(/\|[a-zA-Z0-9-]+/g, ''));
     return items;
   }
   if (typeof node === 'number') return items;
@@ -86,9 +86,9 @@ function flattenEquip(node, items = []) {
       const name = String(node.item || '').split('|')[0];
       const qty = node.quantity && node.quantity > 1 ? ` x${node.quantity}` : '';
       const value = node.containsValue || node.value || 0;
-      items.push(`${cleanText(name)}${qty}${value ? ` (${Math.floor(value / 100)} gp)` : ''}`);
-    } else if (node.special) items.push(cleanText(node.special));
-    else if (node.equipmentType) items.push(cleanText(node.equipmentType));
+      items.push(`${strip5eMarkup(name)}${qty}${value ? ` (${Math.floor(value / 100)} gp)` : ''}`);
+    } else if (node.special) items.push(strip5eMarkup(node.special));
+    else if (node.equipmentType) items.push(strip5eMarkup(node.equipmentType));
     else if (node.containsValue || node.value) items.push(`${Math.floor((node.containsValue || node.value) / 100)} gp`);
     else if (node.entries) flattenEquip(node.entries, items);
     else Object.entries(node).forEach(([key, value]) => {

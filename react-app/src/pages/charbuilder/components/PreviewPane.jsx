@@ -7,17 +7,17 @@ import { installedRegistry } from '../../../adapters/index.js';
 import { collectAllProficiencies, collectEquipmentProficiencySets } from '../../charsheet/logic/proficiencies.js';
 import { collectPreviewDefenseSections, collectPreviewEffectProficiencySections } from '../../charsheet/logic/sheetEffects.js';
 import { collapseWeaponProficiencies, uniqueDisplayLabels } from '../../../shared/character/proficiencyDisplay.js';
-import { ExpandableDescription } from './ExpandableDescription.jsx';
 import {
   parseTypedProficiencyValue,
   extractFixedProficiencyLabels,
 } from '../../../shared/character/typedProficiencies.js';
 import { collectResolvedWeaponMasteries } from '../../../shared/character/weaponMastery.js';
+import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
 import { collectAcFormulas, getEquippedArmor, getEquippedShield, computeAcFormulaValue } from '../../../shared/character/ac.js';
 import { buildPreviewSheetCharacter } from '../logic/previewSheet.js';
 
 import { ENTITY_COLORS as SOURCE_COLOR, NEUTRAL_TONE } from '../../../shared/entityColors.js';
-import { featSlotOrigin } from '../../../shared/featChoiceKeys.js';
+import { featSlotOrigin, isFeatDetailKey } from '../../../shared/featChoiceKeys.js';
 
 const darkChipText = '#17120d';
 
@@ -163,98 +163,33 @@ function outlinedChipSx(color) {
   };
 }
 
-function escapeHtml(value) {
-  return String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+// Shared 5etools entry renderer at the preview's compact type scale.
+function PreviewEntryText({ entries }) {
+  return (
+    <Box sx={{ minWidth: 0, wordBreak: 'break-word', '& .MuiTypography-root': { fontSize: '0.75rem', lineHeight: 1.45 } }}>
+      <EntryBlocks entries={entries} emptyText="" />
+    </Box>
+  );
 }
 
-function cleanPreviewText(value) {
-  return escapeHtml(value)
-    .replace(/\{@hit ([^}]+)\}/g, '<b>$1</b>')
-    .replace(/\{@damage ([^}]+)\}/g, '<b>$1</b>')
-    .replace(/\{@dc ([^}]+)\}/g, 'DC $1')
-    .replace(/\{@spell ([^|}]+)[^}]*\}/g, '<i>$1</i>')
-    .replace(/\{@item ([^|}]+)[^}]*\}/g, '<i>$1</i>')
-    .replace(/\{@condition ([^|}]+)[^}]*\}/g, '<b>$1</b>')
-    .replace(/\{@action ([^|}]+)[^}]*\}/g, '<b>$1</b>')
-    .replace(/\{@skill ([^|}]+)[^}]*\}/g, '$1')
-    .replace(/\{@ability ([^|}]+)[^}]*\}/g, '$1')
-    .replace(/\{@b ([^}]+)\}/g, '<b>$1</b>')
-    .replace(/\{@i ([^}]+)\}/g, '<i>$1</i>')
-    .replace(/\{@[a-z]+ ([^|}]+)[^}]*\}/gi, '$1')
-    .replace(/\{[^}]+\}/g, '');
-}
-
-function renderPreviewEntries(entries) {
-  if (!entries) return '';
-  if (typeof entries === 'string' || typeof entries === 'number') return cleanPreviewText(entries);
-  if (Array.isArray(entries)) return entries.map((entry) => renderPreviewEntries(entry)).filter(Boolean).join('<br/>');
-  if (typeof entries === 'object') {
-    if (entries.type === 'list') {
-      return `<ul style="margin:0.3rem 0 0.3rem 1.2rem;padding-left:0.4rem">${(entries.items || []).map((item) => `<li>${renderPreviewEntries(item)}</li>`).join('')}</ul>`;
-    }
-    if (entries.type === 'table') {
-      let html = '<table style="width:100%;border-collapse:collapse;font-size:0.7rem;margin:0.4rem 0">';
-      if (entries.colLabels) {
-        html += `<thead><tr>${entries.colLabels.map((label) => `<th style="text-align:left;padding:3px 6px;border-bottom:1px solid rgba(237,212,138,0.25)">${cleanPreviewText(label)}</th>`).join('')}</tr></thead>`;
-      }
-      html += `<tbody>${(entries.rows || []).map((row) => `<tr>${(row || []).map((cell) => `<td style="padding:2px 6px;border-bottom:1px solid rgba(237,212,138,0.16)">${renderPreviewEntries(cell)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
-      return `${html}</table>`;
-    }
-    if (entries.name && entries.entries) return `<b>${cleanPreviewText(entries.name)}.</b> ${renderPreviewEntries(entries.entries)}`;
-    if (entries.entries) return renderPreviewEntries(entries.entries);
-    if (entries.items) return renderPreviewEntries(entries.items);
+function getFeatureBody(feature) {
+  if (!feature || typeof feature !== 'object') return feature;
+  if (feature.entries != null) return feature.entries;
+  if (feature.entry != null) return feature.entry;
+  if (feature.type === 'list' || feature.type === 'table') {
+    const { name, ...body } = feature;
+    return body;
   }
-  return '';
-}
-
-function HtmlCaption({ html, clamp = false }) {
-  if (!html) return null;
-  return (
-    <Box
-      component="div"
-      sx={{
-        color: 'text.secondary',
-        fontSize: '0.75rem',
-        lineHeight: 1.45,
-        wordBreak: 'break-word',
-        ...(clamp ? { display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' } : {}),
-        '& b': { color: 'text.primary', fontWeight: 700 },
-        '& i': { color: 'text.secondary' },
-        '& ul': { my: 0.35 },
-        '& li': { mb: 0.2 },
-      }}
-      dangerouslySetInnerHTML={{ __html: html }}
-    />
-  );
-}
-
-function FeatureCard({ name, level, source, body, sublabel }) {
-  const tone = SOURCE_COLOR[source] || SOURCE_COLOR.class;
-  return (
-    <Card variant="outlined" sx={{ minWidth: 0, borderLeft: `3px solid ${tone}` }}>
-      <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
-        <Stack spacing={0.5} sx={{ minWidth: 0 }}>
-          <Stack direction="row" spacing={0.5} alignItems="center" sx={{ minWidth: 0 }}>
-            {level != null ? <Chip size="small" label={`Lv ${level}`} sx={{ ...filledChipSx(tone), height: 18, fontSize: '0.65rem' }} /> : null}
-            <Typography variant="body2" fontWeight={700} sx={{ flex: 1, minWidth: 0, color: tone, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</Typography>
-            {sublabel ? <Chip size="small" variant="outlined" label={sublabel} sx={{ ...outlinedChipSx(tone), height: 18, fontSize: '0.6rem' }} /> : null}
-          </Stack>
-          {body ? <HtmlCaption html={renderPreviewEntries(body)} clamp /> : null}
-        </Stack>
-      </CardContent>
-    </Card>
-  );
+  if (feature.items != null) return feature.items;
+  if (feature.rows != null) return feature.rows;
+  return null;
 }
 
 function FeatureWithChips({ entry, source, extraSublabel }) {
   const { feature, runtimeChips } = entry;
   const tone = SOURCE_COLOR[source] || SOURCE_COLOR.class;
-  const bodyHtml = renderPreviewEntries(feature.entries);
+  const body = getFeatureBody(feature);
+  const hasBody = Array.isArray(body) ? body.length > 0 : body != null && body !== '';
   return (
     <Accordion
       disableGutters
@@ -294,7 +229,7 @@ function FeatureWithChips({ entry, source, extraSublabel }) {
               ))}
             </Stack>
           ) : null}
-          {bodyHtml ? <HtmlCaption html={bodyHtml} /> : (
+          {hasBody ? <PreviewEntryText entries={body} /> : (
             <Typography variant="caption" component="div" color="text.secondary" sx={{ lineHeight: 1.45, wordBreak: 'break-word' }}>
               No description.
             </Typography>
@@ -303,6 +238,26 @@ function FeatureWithChips({ entry, source, extraSublabel }) {
       </AccordionDetails>
     </Accordion>
   );
+}
+
+// Named 5etools entries as collapsed accordion rows (description only on
+// expand); unnamed intro text is grouped under a leading "Description" row.
+function EntryAccordions({ source, entries }) {
+  const list = entries == null ? [] : (Array.isArray(entries) ? entries : [entries]);
+  const named = list.filter((entry) => entry && typeof entry === 'object' && entry.name);
+  const unnamed = list.filter((entry) => !(entry && typeof entry === 'object' && entry.name));
+  const rows = [
+    ...(unnamed.length ? [{ name: 'Description', entries: unnamed }] : []),
+    ...named,
+  ];
+  return rows.map((feature, index) => (
+    <FeatureWithChips key={`${feature.name}-${index}`} entry={{ feature }} source={source} />
+  ));
+}
+
+function hasDescriptionEntries(entries) {
+  if (entries == null || entries === '') return false;
+  return !Array.isArray(entries) || entries.length > 0;
 }
 
 function LevelGroup({ level, classFeatures, subFeatures }) {
@@ -605,9 +560,12 @@ function ClassSection({ icon: Icon, title, subtitle, classFeatures, subFeatures,
 }
 
 function partitionChoices(choices) {
-  const out = { class: [], multiclass: {}, subclass: [], species: [], background: [], feat: [], other: [] };
+  const out = { class: [], multiclass: {}, subclass: [], feat: [] };
   Object.entries(choices || {}).forEach(([key, value]) => {
     if (value == null || value === '') return;
+    // Feat detail picks (spell lists, entry index, spell ability…) are noise
+    // here — the slot's main choice card already names the feat.
+    if (isFeatDetailKey(key)) return;
     const values = Array.isArray(value) ? value.filter((item) => item != null && item !== '') : [value];
     if (!values.length) return;
     const entry = { key, values };
@@ -619,12 +577,12 @@ function partitionChoices(choices) {
       return;
     }
     if (key.startsWith('subclass_')) out.subclass.push(entry);
-    else if (key.startsWith('species_') && key !== 'species_origin_feat') out.species.push(entry);
     else if (key === 'species_origin_feat') out.feat.push(entry);
-    else if (featSlotOrigin(key) === 'background') out.background.push(entry);
+    // Species/background picks have no card here: those sections show the
+    // entity's entry descriptions instead.
+    else if (key.startsWith('species_') || featSlotOrigin(key) === 'background') return;
     else if (key.startsWith('feat_')) out.feat.push(entry);
     else if (key.startsWith('class_') || key.startsWith('start_') || key.startsWith('auto_') || key.includes('_skill_') || key.includes('_lang_') || key.includes('_tool_') || key.includes('_opt_') || key.includes('_exp_')) out.class.push(entry);
-    else out.other.push(entry);
   });
   return out;
 }
@@ -665,6 +623,8 @@ function PreviewPaneImpl({ character, items = [], adaptersVersion = 0 }) {
   const partitioned = partitionChoices(character.choices);
   const proficiencySections = collectPreviewProficiencies(character);
   const weaponMasteries = collectResolvedWeaponMasteries(character, items);
+  const species = character.speciesObj || character.speciesSnapshot;
+  const background = character.backgroundObj || character.backgroundSnapshot;
 
   const classActions = installedRegistry
     .getClassSheetActions(character.className)
@@ -748,17 +708,13 @@ function PreviewPaneImpl({ character, items = [], adaptersVersion = 0 }) {
           title="Species"
           subtitle={character.speciesName || 'Not selected'}
           tone={SOURCE_COLOR.species}
-          emptyText="No species abilities yet."
+          emptyText="No species description yet."
         >
-          <Stack spacing={0.6} sx={{ minWidth: 0 }}>
-            {(() => {
-              const s = character.speciesObj || character.speciesSnapshot;
-              return s?.entries?.length ? <ExpandableDescription entries={s.entries} initialClamp={2} /> : null;
-            })()}
-            {partitioned.species.map((entry) => (
-              <ChoiceCard key={entry.key} entry={entry} source="species" />
-            ))}
-          </Stack>
+          {hasDescriptionEntries(species?.entries) ? (
+            <Stack spacing={0.6} sx={{ minWidth: 0 }}>
+              <EntryAccordions source="species" entries={species.entries} />
+            </Stack>
+          ) : null}
         </PreviewSection>
 
         <PreviewSection
@@ -766,13 +722,11 @@ function PreviewPaneImpl({ character, items = [], adaptersVersion = 0 }) {
           title="Background"
           subtitle={character.backgroundName || 'Not selected'}
           tone={SOURCE_COLOR.background}
-          emptyText="No background choices yet."
+          emptyText="No background description yet."
         >
-          {partitioned.background.length ? (
+          {hasDescriptionEntries(background?.entries) ? (
             <Stack spacing={0.6} sx={{ minWidth: 0 }}>
-              {partitioned.background.map((entry) => (
-                <ChoiceCard key={entry.key} entry={entry} source="background" />
-              ))}
+              <EntryAccordions source="background" entries={background.entries} />
             </Stack>
           ) : null}
         </PreviewSection>
