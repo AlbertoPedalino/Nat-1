@@ -6,6 +6,7 @@ import SpellChoiceList from './SpellChoiceList.jsx';
 import { ExpandableDescription, FullDescription } from './ExpandableDescription.jsx';
 import { featChoiceSpecs } from '../logic/choiceSpecs.js';
 import { getPrimaryClassLevel } from '../logic/calculations.js';
+import { entityChipSx } from '../../../shared/entityColors.js';
 
 function featMinLevel(feat) {
   const prereq = Array.isArray(feat?.prerequisite) ? feat.prerequisite : [];
@@ -67,7 +68,7 @@ function grantLabel(entry) {
   return entry?.name || '?';
 }
 
-export function FeatFixedSlot({ spec, feats, character, state, dispatch, accent = 'secondary' }) {
+export function FeatFixedSlot({ spec, feats, character, state, dispatch }) {
   const feat = findFeat(feats, spec.fixed);
   const additional = Array.isArray(feat?.additionalSpells) ? feat.additionalSpells : [];
   const entryKey = `${spec.key}_entry`;
@@ -79,8 +80,8 @@ export function FeatFixedSlot({ spec, feats, character, state, dispatch, accent 
     <Paper variant="outlined" sx={{ p: 1.5, minWidth: 0 }}>
       <Stack spacing={1} sx={{ minWidth: 0 }}>
         <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
-          <Typography variant="h2" sx={{ flex: 1, minWidth: 0 }}>{spec.label}</Typography>
-          <Chip size="small" color={accent} label={feat ? feat.name : spec.fixed} />
+          <Typography variant="h2" sx={{ flex: 1, minWidth: 0 }}>{feat ? feat.name : spec.fixed}</Typography>
+          <Chip size="small" label={spec.label} sx={entityChipSx('feat')} />
         </Stack>
         {additional.length > 1 ? (
           <Stack spacing={0.6}>
@@ -152,7 +153,7 @@ export function FeatCategorySlot({ spec, feats, character, state, dispatch }) {
         <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
           <Typography variant="h2" sx={{ flex: 1, minWidth: 0 }}>{spec.label}</Typography>
           <Chip size="small" label={(spec.categories || []).join('/')} />
-          {selected ? <Chip size="small" color="primary" label={selected} /> : null}
+          {selected ? <Chip size="small" label={selected} sx={entityChipSx('feat')} /> : null}
         </Stack>
         <Paper variant="outlined" sx={{ maxHeight: 260, overflow: 'auto' }}>
           <List dense disablePadding>

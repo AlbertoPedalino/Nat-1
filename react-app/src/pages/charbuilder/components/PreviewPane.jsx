@@ -16,15 +16,15 @@ import { collectResolvedWeaponMasteries } from '../../../shared/character/weapon
 import { collectAcFormulas, getEquippedArmor, getEquippedShield, computeAcFormulaValue } from '../../../shared/character/ac.js';
 import { buildPreviewSheetCharacter } from '../logic/previewSheet.js';
 
-const SOURCE_COLOR = {
-  class: '#d7ad52',
-  subclass: '#70b7a6',
-  species: '#b58fd9',
-  background: '#d69245',
-  feat: '#de675f',
-};
+import { ENTITY_COLORS as SOURCE_COLOR, NEUTRAL_TONE } from '../../../shared/entityColors.js';
 
 const darkChipText = '#17120d';
+
+const PROF_TYPE_COLOR = {
+  Skills: SOURCE_COLOR.skill,
+  Tools: SOURCE_COLOR.tool,
+  Languages: SOURCE_COLOR.language,
+};
 
 
 const PANEL_SX = {
@@ -61,7 +61,7 @@ function EmptyCaption({ children }) {
   );
 }
 
-function PreviewSection({ icon: Icon, title, subtitle, tone = '#edd48a', children, emptyText }) {
+function PreviewSection({ icon: Icon, title, subtitle, tone = NEUTRAL_TONE, children, emptyText }) {
   const hasContent = Boolean(children);
   return (
     <Card variant="outlined" sx={SECTION_CARD_SX}>
@@ -102,7 +102,7 @@ function PreviewHeader({ character, hp }) {
           <Typography
             variant="h2"
             noWrap
-            sx={{ color: '#edd48a', fontSize: '1.15rem', lineHeight: 1.15, fontWeight: 800 }}
+            sx={{ color: NEUTRAL_TONE, fontSize: '1.15rem', lineHeight: 1.15, fontWeight: 800 }}
           >
             {character.name || 'Unnamed Character'}
           </Typography>
@@ -110,7 +110,7 @@ function PreviewHeader({ character, hp }) {
             <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.72rem', lineHeight: 1.2 }}>
               {subtitle || 'No class selected'}
             </Typography>
-            <Chip size="small" label={`${hp || '-'} HP`} sx={{ ...filledChipSx('#edd48a'), height: 19, fontSize: '0.62rem' }} />
+            <Chip size="small" label={`${hp || '-'} HP`} sx={{ ...filledChipSx(NEUTRAL_TONE), height: 19, fontSize: '0.62rem' }} />
           </Stack>
         </Stack>
       </CardContent>
@@ -233,7 +233,7 @@ function HtmlCaption({ html, clamp = false }) {
 }
 
 function FeatureCard({ name, level, source, body, sublabel }) {
-  const tone = SOURCE_COLOR[source] || '#d7ad52';
+  const tone = SOURCE_COLOR[source] || SOURCE_COLOR.class;
   return (
     <Card variant="outlined" sx={{ minWidth: 0, borderLeft: `3px solid ${tone}` }}>
       <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
@@ -289,7 +289,7 @@ function FeatureWithChips({ entry, source, extraSublabel }) {
           {runtimeChips?.length ? (
             <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
               {runtimeChips.map((chip, idx) => (
-                <Chip key={`rt-${idx}`} size="small" label={chip} sx={{ ...outlinedChipSx('#edd48a'), height: 20, fontSize: '0.62rem', bgcolor: 'rgba(215, 173, 82, 0.12)' }} />
+                <Chip key={`rt-${idx}`} size="small" label={chip} sx={{ ...outlinedChipSx(NEUTRAL_TONE), height: 20, fontSize: '0.62rem', bgcolor: 'rgba(215, 173, 82, 0.12)' }} />
               ))}
             </Stack>
           ) : null}
@@ -313,7 +313,7 @@ function LevelGroup({ level, classFeatures, subFeatures }) {
           size="small"
           label={`Level ${level}`}
           sx={{
-            ...filledChipSx('#edd48a'),
+            ...filledChipSx(NEUTRAL_TONE),
             height: 20,
             fontSize: '0.58rem',
             textTransform: 'uppercase',
@@ -428,7 +428,7 @@ function AcFormulasSection({ character }) {
   const formulas = collectAcFormulas(character);
   if (!formulas.length) return null;
   return (
-    <PreviewSection icon={Shield} title="Defense" subtitle="Armor Class formulas" tone={SOURCE_COLOR.class}>
+    <PreviewSection icon={Shield} title="Defense" subtitle="Armor Class formulas">
       <Stack spacing={0.5} sx={{ minWidth: 0 }}>
         {formulas.map((f) => {
           const val = computeAcFormulaValue(character, f);
@@ -454,7 +454,7 @@ function AcFormulasSection({ character }) {
 function ProficiencySection({ sections }) {
   if (!sections.length) return null;
   return (
-    <PreviewSection icon={Languages} title="Proficiencies" subtitle="Skills, equipment, languages" tone={SOURCE_COLOR.subclass}>
+    <PreviewSection icon={Languages} title="Proficiencies" subtitle="Skills, equipment, languages">
       <Stack spacing={0.85} sx={{ minWidth: 0 }}>
         {sections.map((section) => (
           <Box key={section.title} sx={{ minWidth: 0 }}>
@@ -472,29 +472,32 @@ function ProficiencySection({ sections }) {
               {section.title}
             </Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.45, mt: 0.45, width: '100%', minWidth: 0, maxWidth: '100%', overflowX: 'hidden' }}>
-              {section.items.map((item) => (
-                <Chip
-                  key={`${section.title}-${item}`}
-                  size="small"
-                  variant="outlined"
-                  label={item}
-                  sx={{
-                    ...outlinedChipSx(section.title === 'Languages' ? SOURCE_COLOR.subclass : '#edd48a'),
-                    flex: '0 1 auto',
-                    minWidth: 0,
-                    height: 20,
-                    maxWidth: '100%',
-                    '& .MuiChip-label': {
-                      color: section.title === 'Languages' ? SOURCE_COLOR.subclass : '#edd48a',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      fontSize: '0.61rem',
-                      fontWeight: 700,
-                    },
-                  }}
-                />
-              ))}
+              {section.items.map((item) => {
+                const tone = PROF_TYPE_COLOR[section.title] || NEUTRAL_TONE;
+                return (
+                  <Chip
+                    key={`${section.title}-${item}`}
+                    size="small"
+                    variant="outlined"
+                    label={item}
+                    sx={{
+                      ...outlinedChipSx(tone),
+                      flex: '0 1 auto',
+                      minWidth: 0,
+                      height: 20,
+                      maxWidth: '100%',
+                      '& .MuiChip-label': {
+                        color: tone,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        fontSize: '0.61rem',
+                        fontWeight: 700,
+                      },
+                    }}
+                  />
+                );
+              })}
             </Box>
           </Box>
         ))}
@@ -506,7 +509,7 @@ function ProficiencySection({ sections }) {
 function WeaponMasterySection({ items }) {
   if (!items.length) return null;
   return (
-    <PreviewSection icon={Sword} title="Weapon Masteries" subtitle="Resolved from selected weapons" tone={SOURCE_COLOR.class}>
+    <PreviewSection icon={Sword} title="Weapon Masteries" subtitle="Resolved from selected weapons">
       <Box component="ul" sx={{ m: 0, pl: 2.1, color: 'text.secondary' }}>
         {items.map((item) => (
           <Typography

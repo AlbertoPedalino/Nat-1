@@ -1,5 +1,5 @@
-import { Chip, Stack, Typography } from '@mui/material';
-import { Sparkles } from 'lucide-react';
+import { Box, Chip, Divider, Stack, Typography } from '@mui/material';
+import { ScrollText, Sparkles } from 'lucide-react';
 import BuilderPanel from '../components/BuilderPanel.jsx';
 import ChoiceBlock from '../components/ChoiceBlock.jsx';
 import { FeatCategorySlot } from '../components/FeatSlots.jsx';
@@ -8,14 +8,35 @@ import SearchList from '../components/SearchList.jsx';
 import SpellChoiceList from '../components/SpellChoiceList.jsx';
 import { speciesChoiceSpecs } from '../logic/choiceSpecs.js';
 
+function SpeciesDetailCard({ species }) {
+  if (!species) return null;
+  return (
+    <Box sx={{ minWidth: 0, p: 1 }}>
+      <Stack spacing={1.25} sx={{ minWidth: 0 }}>
+        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+          <Typography variant="h2" sx={{ flex: 1, minWidth: 0 }}>{species.name}</Typography>
+          <Chip size="small" label={species.source || ''} />
+        </Stack>
+        <Divider />
+        {species.entries ? (
+          <ExpandableDescription entries={species.entries} initialClamp={6} />
+        ) : (
+          <Typography color="text.secondary">No description available.</Typography>
+        )}
+      </Stack>
+    </Box>
+  );
+}
+
 export default function SpeciesStep({ state, dispatch }) {
   const { character, search } = state;
   const query = search.species.toLowerCase();
   const species = state.data.species.filter((item) => item.name.toLowerCase().includes(query));
+  const selectedSpecies = character.speciesObj || species.find((item) => item.name === character.speciesName);
 
   return (
     <Stack spacing={2}>
-      <BuilderPanel id="panel-species" title="Species" icon={Sparkles} note="Search list, selected card, and adapter choice regions.">
+      <BuilderPanel id="panel-species" title="Species" icon={Sparkles} note="Species picker. Card sotto mostra dettagli completi.">
         <SearchList
           value={search.species}
           placeholder="Search species"
@@ -23,18 +44,15 @@ export default function SpeciesStep({ state, dispatch }) {
           selectedName={character.speciesName}
           onSearch={(value) => dispatch({ type: 'search/set', scope: 'species', value })}
           onSelect={(item) => dispatch({ type: 'species/select', name: item.name, source: item.source, speciesObj: item })}
-          meta={(item) => (
-            <Stack spacing={1} sx={{ mt: 1.5 }}>
-              <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
-              {(item.traits || item.lineage || item.size || []).slice(0, 4).map((trait) => (
-                <Chip key={trait} size="small" label={trait} />
-              ))}
-                {item.speed ? <Chip size="small" label={`Speed ${typeof item.speed === 'number' ? item.speed : item.speed.walk || 30}`} /> : null}
-              </Stack>
-              {item.entries ? <ExpandableDescription entries={item.entries} initialClamp={2} /> : null}
-            </Stack>
-          )}
         />
+      </BuilderPanel>
+
+      <BuilderPanel id="panel-species-detail" title="Species Detail" icon={ScrollText} note="Traits, speeds, description.">
+        {selectedSpecies ? (
+          <SpeciesDetailCard species={selectedSpecies} />
+        ) : (
+          <Typography color="text.secondary">Select a species.</Typography>
+        )}
       </BuilderPanel>
 
       <BuilderPanel id="panel-species-choices" title="Species Choices" icon={Sparkles}>

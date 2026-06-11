@@ -8,41 +8,14 @@ import { STAT_LABELS } from '../constants.js';
 import { cleanText } from '../logic/text.js';
 import { getBackgroundPattern, getBackgroundPool } from '../logic/calculations.js';
 import { backgroundChoiceSpecs, fixedKeysFromBlocks } from '../logic/choiceSpecs.js';
+import { ENTITY_COLORS, entityChipSx } from '../../../shared/entityColors.js';
+import { backgroundOriginFeat } from '../../../shared/character/selectedFeats.js';
 
 
 function titleCase(value) {
   return String(value || '').replace(/[_-]/g, ' ')
     .replace(/(^|\s)\w/g, (c) => c.toUpperCase())
     .replace(/'\w/g, (m) => m.toLowerCase());
-}
-
-function camelToTitle(value) {
-  const v = String(value || '');
-  return v.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase()).trim();
-}
-
-function extractBackgroundFeat(item) {
-  if (!item) return { feat: null, classHint: null };
-  if (item.feat) return { feat: item.feat, classHint: null };
-  const feats = Array.isArray(item.feats) ? item.feats : [];
-  const first = feats[0];
-  if (!first) return { feat: null, classHint: null };
-  if (typeof first === 'string') {
-    const parts = first.split('|');
-    const classHint = parts[2] ? parts[2].toLowerCase().replace(/[^a-z]/g, '') : null;
-    return { feat: camelToTitle(parts[0]), classHint };
-  }
-  const key = Object.keys(first).find((k) => k !== 'choose' && first[k]);
-  if (!key) return { feat: null, classHint: null };
-  const raw = key.split('|')[0].split(';')[0];
-  let classHint = null;
-  const semicol = key.split(';').slice(1).map((s) => s.trim().split('|')[0]).find(Boolean);
-  if (semicol) classHint = semicol.toLowerCase().replace(/[^a-z]/g, '');
-  else {
-    const pipeParts = key.split('|').map((s) => s.trim()).filter(Boolean);
-    if (pipeParts.length >= 3) classHint = pipeParts[2].toLowerCase().replace(/[^a-z]/g, '');
-  }
-  return { feat: camelToTitle(raw), classHint };
 }
 
 function ProfList({ title, items, color }) {
@@ -77,6 +50,7 @@ function BackgroundDetailCard({ background }) {
   const fixedSkills = fixedKeysFromBlocks(background.skillProficiencies || []);
   const fixedTools = fixedKeysFromBlocks(background.toolProficiencies || [], ['choose', 'any', 'anyTool', 'anyArtisansTool', 'anyMusicalInstrument', 'anyGamingSet']);
   const fixedLangs = fixedKeysFromBlocks(background.languageProficiencies || [], ['choose', 'any', 'anyStandard', 'anyExotic']);
+  const originFeat = backgroundOriginFeat(background)?.fixed;
   const lore = extractBackgroundLore(background);
 
   return (
@@ -92,9 +66,15 @@ function BackgroundDetailCard({ background }) {
           </Typography>
         ) : null}
         <Divider />
-        <ProfList title="Skills (granted)" items={fixedSkills} color="#d7ad52" />
-        <ProfList title="Tools (granted)" items={fixedTools} color="#70b7a6" />
-        <ProfList title="Languages (granted)" items={fixedLangs} color="#b58fd9" />
+        {originFeat ? (
+          <Box sx={{ minWidth: 0 }}>
+            <Typography variant="body2" sx={{ color: ENTITY_COLORS.feat, fontWeight: 700 }}>Origin Feat</Typography>
+            <Typography variant="body2" color="text.secondary">{originFeat}</Typography>
+          </Box>
+        ) : null}
+        <ProfList title="Skills (granted)" items={fixedSkills} color={ENTITY_COLORS.skill} />
+        <ProfList title="Tools (granted)" items={fixedTools} color={ENTITY_COLORS.tool} />
+        <ProfList title="Languages (granted)" items={fixedLangs} color={ENTITY_COLORS.language} />
       </Stack>
     </Box>
   );
@@ -118,17 +98,20 @@ export default function BackgroundStep({ state, dispatch }) {
           selectedName={character.backgroundName}
           onSearch={(value) => dispatch({ type: 'search/set', scope: 'background', value })}
           onSelect={(item) => {
-            const { feat, classHint } = extractBackgroundFeat(item);
-            dispatch({ type: 'background/select', name: item.name, source: item.source, feat, classHint, backgroundObj: item });
+            const origin = backgroundOriginFeat(item);
+            dispatch({ type: 'background/select', name: item.name, source: item.source, feat: origin?.fixed || null, classHint: origin?.classHint || null, backgroundObj: item });
           }}
-          meta={(item) => (
-            <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap sx={{ mt: 1.5 }}>
-              {(item.abilities || getBackgroundPool(item)).map((ability) => (
-                <Chip key={ability} size="small" label={STAT_LABELS[ability]} />
-              ))}
-              {item.feat ? <Chip size="small" color="secondary" label={item.feat} /> : null}
-            </Stack>
-          )}
+          meta={(item) => {
+            const featLabel = backgroundOriginFeat(item)?.fixed;
+            return (
+              <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap sx={{ mt: 1.5 }}>
+                {(item.abilities || getBackgroundPool(item)).map((ability) => (
+                  <Chip key={ability} size="small" label={STAT_LABELS[ability]} />
+                ))}
+                {featLabel ? <Chip size="small" label={featLabel} sx={entityChipSx('feat')} /> : null}
+              </Stack>
+            );
+          }}
         />
       </BuilderPanel>
 

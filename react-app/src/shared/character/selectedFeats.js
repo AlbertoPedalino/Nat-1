@@ -56,6 +56,11 @@ export function backgroundOriginFeat(background) {
   const feats = Array.isArray(background.feats) ? background.feats : [];
   const first = feats[0];
   if (!first) return null;
+  if (typeof first === 'string') {
+    const parts = first.split('|');
+    const classHint = parts[2] ? parts[2].toLowerCase().replace(/[^a-z]/g, '') : null;
+    return { fixed: camelToTitle(parts[0]), classHint };
+  }
   const keys = Object.keys(first).filter((key) => key !== 'choose');
   if (!keys.length) return null;
   const raw = String(keys[0] || '').split(';')[0].trim().split('|')[0];
@@ -67,6 +72,20 @@ export function backgroundOriginFeat(background) {
     return null;
   })();
   return { fixed: camelToTitle(raw), classHint };
+}
+
+// All fixed feat names granted by a background's `feats` blocks (5etools shape:
+// strings "name|source|class" or objects { "name|source": true, choose: {...} }).
+export function backgroundFeatNames(background) {
+  const feats = Array.isArray(background?.feats) ? background.feats : [];
+  return feats.flatMap((entry) => {
+    if (typeof entry === 'string') return [camelToTitle(entry.split('|')[0])];
+    if (!entry || typeof entry !== 'object') return [];
+    return Object.keys(entry)
+      .filter((key) => key !== 'choose' && entry[key])
+      .map((key) => camelToTitle(String(key).split(';')[0].split('|')[0].trim()))
+      .filter(Boolean);
+  });
 }
 
 function fromChoices(character) {

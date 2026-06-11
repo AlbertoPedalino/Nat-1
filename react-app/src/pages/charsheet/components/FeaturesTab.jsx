@@ -6,14 +6,9 @@ import { buildOptionalFeatureEntryLookup } from '../../../shared/character/optio
 import CollapsibleBody from '../../../shared/character/CollapsibleBody.jsx';
 import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
 import { entriesToTextBlocks } from '../../../shared/character/spellEntries.js';
+import { backgroundFeatNames } from '../../../shared/character/selectedFeats.js';
 
-const SOURCE_COLOR = {
-  class: '#d7ad52',
-  subclass: '#70b7a6',
-  species: '#b58fd9',
-  background: '#d69245',
-  feat: '#de675f',
-};
+import { ENTITY_COLORS as SOURCE_COLOR } from '../../../shared/entityColors.js';
 
 export default function FeaturesTab({ C }) {
   if (!C) return null;
@@ -23,10 +18,7 @@ export default function FeaturesTab({ C }) {
   const speciesEntries = C?.speciesSnapshot?.entries || [];
   const backgroundSnapshot = C?.backgroundSnapshot || {};
   const backgroundEntries = backgroundSnapshot.entries || [];
-  const backgroundFeats = (backgroundSnapshot.feats || []).flatMap(f => {
-    if (typeof f === 'string') return [f];
-    return Object.keys(f).filter(k => k !== 'choose' && f[k]).map(k => k.split('|')[0]);
-  });
+  const backgroundFeats = backgroundFeatNames(backgroundSnapshot);
   const selectedFeats = C?.allFeatSnapshots || [];
 
   function renderBackgroundEntries() {

@@ -1,4 +1,5 @@
 import { createTheme } from '@mui/material';
+import { chipTintStyle } from './shared/entityColors.js';
 
 export const theme = createTheme({
   palette: {
@@ -92,6 +93,22 @@ export const theme = createTheme({
           maxWidth: '100%',
           minWidth: 0,
           flexShrink: 1,
+          fontWeight: 700,
+          border: '1px solid transparent',
+          // Clickable colored chips act as toggles: selected state gets a
+          // solid fill so it stands apart from the tinted resting style.
+          '&.MuiChip-clickable.MuiChip-colorPrimary': {
+            backgroundColor: '#d7ad52',
+            borderColor: '#d7ad52',
+            color: '#17120d',
+            '&:hover': { backgroundColor: '#e2bf70' },
+          },
+          '&.MuiChip-clickable.MuiChip-colorSecondary': {
+            backgroundColor: '#70b7a6',
+            borderColor: '#70b7a6',
+            color: '#11201c',
+            '&:hover': { backgroundColor: '#8ac8b9' },
+          },
         },
         label: {
           overflow: 'hidden',
@@ -99,6 +116,12 @@ export const theme = createTheme({
           whiteSpace: 'nowrap',
           minWidth: 0,
         },
+        colorDefault: chipTintStyle('#f0e6d4', { bgAlpha: 0.10, borderAlpha: 0.32 }),
+        colorPrimary: chipTintStyle('#d7ad52', { text: '#e8c87a' }),
+        colorSecondary: chipTintStyle('#70b7a6', { text: '#96d8c6' }),
+        colorError: chipTintStyle('#de675f', { text: '#f0958d' }),
+        colorWarning: chipTintStyle('#d69245', { text: '#e9b275' }),
+        colorSuccess: chipTintStyle('#58b879', { text: '#86d8a6' }),
       },
     },
     MuiStack: {

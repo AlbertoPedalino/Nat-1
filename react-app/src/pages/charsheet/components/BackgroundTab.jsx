@@ -1,8 +1,9 @@
 import { Box, Card, CardContent, Chip, Paper, Stack, Typography } from '@mui/material';
 import { GraduationCap } from 'lucide-react';
 import { renderEntries } from '../logic/renderEntries.js';
+import { ENTITY_COLORS } from '../../../shared/entityColors.js';
 
-const BG = '#d69245';
+const BG = ENTITY_COLORS.background;
 
 function listProficiencies(arr) {
   if (!arr || !arr.length) return null;

@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Box, Button, Collapse, Typography } from '@mui/material';
 import { renderEntryText, cleanText } from '../logic/text.js';
+// Gold accent for entry/section titles so they stand apart from the beige body text.
+import { NEUTRAL_TONE as TITLE_COLOR } from '../../../shared/entityColors.js';
 
 // Render a single 5etools entry node (string, list, item, nested entries…) into
 // MUI elements. Shared by the builder choice panels (Fighting Style, Eldritch
@@ -21,7 +23,7 @@ export function renderEntryNode(entry, key) {
   if (entry.type === 'item' && entry.name && entry.entry != null) {
     return (
       <Box key={k} sx={{ mb: 0.25 }}>
-        <Box component="span" sx={{ fontWeight: 700, color: 'text.primary' }}>{entry.name}</Box>
+        <Box component="span" sx={{ fontWeight: 700, color: TITLE_COLOR }}>{entry.name}</Box>
         <Box component="span" sx={{ color: 'text.secondary' }}>
           {typeof entry.entry === 'string' ? ` ${cleanText(entry.entry)}` : renderEntryNode(entry.entry, `${k}-val`)}
         </Box>
@@ -34,7 +36,7 @@ export function renderEntryNode(entry, key) {
   if (entry.type === 'entries' || entry.name) {
     return (
       <Box key={k} sx={{ mb: 0.5 }}>
-        {entry.name ? <Typography variant="body2" sx={{ fontWeight: 700, color: 'text.primary', mb: 0.15 }}>{entry.name}</Typography> : null}
+        {entry.name ? <Typography variant="body2" sx={{ fontWeight: 700, color: TITLE_COLOR, mb: 0.15 }}>{entry.name}</Typography> : null}
         {entry.entries ? renderEntryNode(entry.entries, `${k}-body`) : null}
       </Box>
     );
@@ -70,7 +72,7 @@ export function ExpandableDescription({ entries, initialClamp = 3, simpleText })
               const colonIdx = line.indexOf(':');
               if (colonIdx > 0) return (
                 <Box key={i} sx={{ mb: 0.25 }}>
-                  <Box component="span" sx={{ fontWeight: 700, color: 'text.primary' }}>{line.slice(0, colonIdx + 1)}</Box>
+                  <Box component="span" sx={{ fontWeight: 700, color: TITLE_COLOR }}>{line.slice(0, colonIdx + 1)}</Box>
                   <Box component="span">{line.slice(colonIdx + 1)}</Box>
                 </Box>
               );

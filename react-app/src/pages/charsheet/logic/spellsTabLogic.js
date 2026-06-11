@@ -11,6 +11,17 @@ import { collectFreeCastsForGrant, mergeFreeCastsById, normalizeFreeCast, getFea
 import { collectItemAttachedSpells } from '../../../shared/character/itemAttachedSpells.js';
 import { isWarlockModifierCantripChoiceKey } from '../../../shared/character/warlockUtils.js';
 
+// Spell source tag colors. WARNING: these hex values are persisted inside saved
+// characters' `sourceInfo` and compared against when classifying entries (see
+// originType fallback below) — do NOT change them, or old saves misclassify.
+const SRC_COLOR = {
+  feat: '#caa550',
+  granted: '#70b7a6',
+  choice: '#9d7fb8',
+  ritual: '#58b879',
+  arcanum: '#d69245',
+};
+
 const _GENERIC_LABELS = new Set([
   'class', 'subclass', 'species', 'feat', 'feature', 'granted', 'auto',
   'auto granted', 'always prepared', 'unknown', 'choice',
@@ -59,7 +70,7 @@ function _mergeRow(existing, incoming, incomingLocked) {
     else if (_isGenericLabel(srcA.label) && !_isGenericLabel(srcB.label)) mergedSource.label = srcB.label;
     else mergedSource.label = srcA.label;
 
-    mergedSource.color = srcB.color || srcA.color || '#9d7fb8';
+    mergedSource.color = srcB.color || srcA.color || SRC_COLOR.choice;
 
     mergedSource.kind = srcA.kind || srcB.kind || undefined;
 
@@ -135,9 +146,9 @@ export function buildSpellInfo(C, spellIndex) {
     (names || []).forEach((name) => pushKnown(name, Number(level), null, C?.className));
   });
   (C?.extraClasses || []).forEach((ec) => {
-    (ec.selectedCantrips || []).forEach((name) => pushKnown(name, 0, { label: ec.name || 'Class', color: '#9d7fb8' }, ec.name));
+    (ec.selectedCantrips || []).forEach((name) => pushKnown(name, 0, { label: ec.name || 'Class', color: SRC_COLOR.choice }, ec.name));
     Object.entries(ec.selectedSpells || {}).forEach(([level, names]) => {
-      (names || []).forEach((name) => pushKnown(name, Number(level), { label: ec.name || 'Class', color: '#9d7fb8' }, ec.name));
+      (names || []).forEach((name) => pushKnown(name, Number(level), { label: ec.name || 'Class', color: SRC_COLOR.choice }, ec.name));
     });
   });
 
@@ -206,7 +217,7 @@ export function buildSpellInfo(C, spellIndex) {
         if ((selectedAtLevel || []).some((entry) => norm(entry) === norm(name))) return;
         const full = spellIndex.get(norm(name));
         if (!isRitualSpell(full)) return;
-        push(name, { label: 'Ritual Book', color: '#58b879', kind: 'ritualBook' }, false, null, spellLevel, ownerClassName);
+        push(name, { label: 'Ritual Book', color: SRC_COLOR.ritual, kind: 'ritualBook' }, false, null, spellLevel, ownerClassName);
       });
     });
   }
@@ -438,7 +449,7 @@ function collectChoiceSpells(C, spellIndex) {
           : [];
         out.push({
           name,
-          source: { label: meta.name, color: '#caa550', originType: 'feat', originLabel: meta.name },
+          source: { label: meta.name, color: SRC_COLOR.feat, originType: 'feat', originLabel: meta.name },
           spellcastingAbility: meta.ability,
           ownerClassName,
           freeCasts,
@@ -467,7 +478,7 @@ function collectAutoGrantedSpells(C) {
       return {
         name: r.name,
         level: Number(r.level ?? 0),
-        source: { label: srcLabel, color: '#70b7a6', originType: 'species', originLabel: C?.speciesName || 'Species' },
+        source: { label: srcLabel, color: SRC_COLOR.granted, originType: 'species', originLabel: C?.speciesName || 'Species' },
         ownerClassName: null,
         spellcastingAbility: r.ability,
         freeCasts: collectFreeCastsForGrant(r.entry, { character: C, source: srcLabel, sourceType, spellName: r.name }),
@@ -479,7 +490,7 @@ function collectAutoGrantedSpells(C) {
     return {
       name: r.name,
       level: Number(r.level ?? 0),
-      source: { label: srcLabel, color: '#70b7a6', originType: sourceType, originLabel: srcLabel },
+      source: { label: srcLabel, color: SRC_COLOR.granted, originType: sourceType, originLabel: srcLabel },
       ownerClassName: r.ownerClassName,
       freeCasts: collectFreeCastsForGrant(r.entry, { character: C, source: srcLabel, sourceType, spellName: r.name }),
     };
@@ -513,7 +524,7 @@ function collectAutoGrantedSpells(C) {
     const allCfgSpells = [...(cfg?.alwaysKnownSpells || []), ...(cfg?.alwaysPreparedSpells || [])];
     const cfgEntry = allCfgSpells.find((s) => norm(s?.name || '') === key);
     if (cfgEntry && !isGrantUnlocked(cfgEntry, C)) return;
-    const fallbackSource = { label: entry.source || 'Auto', color: '#70b7a6', originType: entry.sourceType || 'auto_granted', originLabel: entry.source || 'Auto' };
+    const fallbackSource = { label: entry.source || 'Auto', color: SRC_COLOR.granted, originType: entry.sourceType || 'auto_granted', originLabel: entry.source || 'Auto' };
     runtimeByName.set(key, {
       name: entry.name,
       level: Number(entry.level ?? 0),
@@ -534,7 +545,7 @@ function collectAtWillSpells(C) {
     (installedRegistry.getClassAtWillSpells(entity.name) || []).forEach((entry) => {
       if (entity.level < Number(entry.minLevel || 1)) return;
       if (!isGrantUnlocked(entry, C)) return;
-      out.push({ name: entry.spell, source: { label: entry.invocation || 'At Will', color: '#9d7fb8', kind: 'atWill', originType: 'invocation', originLabel: entry.invocation || 'At Will' } });
+      out.push({ name: entry.spell, source: { label: entry.invocation || 'At Will', color: SRC_COLOR.choice, kind: 'atWill', originType: 'invocation', originLabel: entry.invocation || 'At Will' } });
     });
   });
   return out;
@@ -588,24 +599,24 @@ function sourceFromChoiceKey(C, key) {
     const slotKey = _getSlotKey(C, key);
     if (slotKey) featName = _findFeatName(C, slotKey);
   }
-  if (featName) return { label: String(featName), color: '#caa550', originType: 'feat', originLabel: String(featName) };
-  if (key.startsWith('feat_')) return { label: 'Feat', color: '#caa550', originType: 'feat', originLabel: 'Feat' };
-  if (key.startsWith('subclass_')) return { label: C?.subclassShortName || 'Subclass', color: '#9d7fb8', originType: 'subclass', originLabel: C?.subclassShortName || 'Subclass' };
+  if (featName) return { label: String(featName), color: SRC_COLOR.feat, originType: 'feat', originLabel: String(featName) };
+  if (key.startsWith('feat_')) return { label: 'Feat', color: SRC_COLOR.feat, originType: 'feat', originLabel: 'Feat' };
+  if (key.startsWith('subclass_')) return { label: C?.subclassShortName || 'Subclass', color: SRC_COLOR.choice, originType: 'subclass', originLabel: C?.subclassShortName || 'Subclass' };
   if (key.startsWith('species_')) {
     const lineage = C?.normalizedChoices?.species?.version
       || (Array.isArray(C?.choices?.species_version) ? C.choices.species_version[0] : C?.choices?.species_version);
     if (_speciesChoiceKeyLineage(key) && lineage) {
-      return { label: `${lineage} Lineage`, color: '#70b7a6', originType: 'species', originLabel: String(lineage) };
+      return { label: `${lineage} Lineage`, color: SRC_COLOR.granted, originType: 'species', originLabel: String(lineage) };
     }
-    return { label: C?.speciesName || 'Species', color: '#70b7a6', originType: 'species', originLabel: C?.speciesName || 'Species' };
+    return { label: C?.speciesName || 'Species', color: SRC_COLOR.granted, originType: 'species', originLabel: C?.speciesName || 'Species' };
   }
-  if (key.includes('tome')) return { label: 'Pact of the Tome', color: '#9d7fb8', originType: 'invocation', originLabel: 'Pact of the Tome' };
-  if (key.includes('mystic_arcanum')) return { label: 'M. Arcanum', color: '#d69245', originType: 'mystic_arcanum', originLabel: 'Mystic Arcanum' };
+  if (key.includes('tome')) return { label: 'Pact of the Tome', color: SRC_COLOR.choice, originType: 'invocation', originLabel: 'Pact of the Tome' };
+  if (key.includes('mystic_arcanum')) return { label: 'M. Arcanum', color: SRC_COLOR.arcanum, originType: 'mystic_arcanum', originLabel: 'Mystic Arcanum' };
   if (key.startsWith('warlock_')) {
     var invName = key.replace(/^warlock_/, '').replace(/_(cantrip|ritual).*$/, '').replace(/_/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
-    if (invName) return { label: invName, color: '#9d7fb8', originType: 'invocation', originLabel: invName };
+    if (invName) return { label: invName, color: SRC_COLOR.choice, originType: 'invocation', originLabel: invName };
   }
-  return { label: 'Choice', color: '#9d7fb8', originType: 'unknown', originLabel: 'Choice' };
+  return { label: 'Choice', color: SRC_COLOR.choice, originType: 'unknown', originLabel: 'Choice' };
 }
 
 function normalizeWizardBook(book) {
@@ -1003,8 +1014,8 @@ function resolveSpellMeta(entry, C) {
     else if (!entry.sourceInfo) { originType = 'class'; originLabel = ownerClass || 'Class'; }
     else if (C?.extraClasses?.some((ec) => ec.name === label)) { originType = 'class'; originLabel = label; }
     else if (label === 'Pact of the Tome') { originType = 'invocation'; originLabel = label; }
-    else if (src.color === '#caa550') { originType = 'feat'; originLabel = label || 'Feat'; }
-    else if (src.color === '#70b7a6') { originType = 'auto_granted'; originLabel = label || 'Auto'; }
+    else if (src.color === SRC_COLOR.feat) { originType = 'feat'; originLabel = label || 'Feat'; }
+    else if (src.color === SRC_COLOR.granted) { originType = 'auto_granted'; originLabel = label || 'Auto'; }
     else { originType = 'unknown'; }
   }
 
@@ -1063,12 +1074,12 @@ function resolveSpellMeta(entry, C) {
 }
 
 const _STATUS_CHIP_CONFIG = {
-  ritual_spellbook: { label: 'Ritual Book', color: '#58b879' },
-  at_will: { label: 'At Will', color: '#9d7fb8' },
-  mystic_arcanum: { label: 'M. Arcanum', color: '#d69245' },
-  always_prepared: { label: 'Always Prep.', color: '#70b7a6' },
-  granted: { label: 'Granted', color: '#70b7a6' },
-  known: { label: 'Known', color: '#58b879' },
+  ritual_spellbook: { label: 'Ritual Book', color: SRC_COLOR.ritual },
+  at_will: { label: 'At Will', color: SRC_COLOR.choice },
+  mystic_arcanum: { label: 'M. Arcanum', color: SRC_COLOR.arcanum },
+  always_prepared: { label: 'Always Prep.', color: SRC_COLOR.granted },
+  granted: { label: 'Granted', color: SRC_COLOR.granted },
+  known: { label: 'Known', color: SRC_COLOR.ritual },
 };
 
 export function getSpellStatusChips(entry) {
