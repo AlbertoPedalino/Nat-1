@@ -1,5 +1,5 @@
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
-import { Box, Button, IconButton, TextField, Tooltip, Typography, Alert } from '@mui/material';
+import { Box, Button, IconButton, TextField, Tooltip, Typography, Alert, alpha } from '@mui/material';
 import { Backpack, Check, ChevronDown, ChevronRight, Minus, Package, Plus, Shield, Sparkles, Swords, Trash2, AlertTriangle } from 'lucide-react';
 import { loadItems } from '../../charbuilder/logic/dataLoaders.js';
 import { getFinal } from '../logic/calculations.js';
@@ -14,6 +14,7 @@ import {
 import { ItemNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 import { INVENTORY_SOURCE_PRIORITY, sourceRank } from '../../../shared/character/sourcePriority.js';
 import { addInventoryEntries } from '../../../shared/character/itemContainers.js';
+import { ITEM_ATTUNEMENT } from '../../../shared/entityColors.js';
 import {
   attunementRequirementText,
   countAttunedItems,
@@ -866,7 +867,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, 
               })()}
               {hasItemFlag(item, 'pactWeapon') ? <Box component="span" sx={{ ml: 0.5, fontSize: '0.56rem', color: '#9d7fb8', fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}>[Pact Weapon]</Box> : null}
               {hasItemFlag(item, 'arcaneArmor') ? <Box component="span" sx={{ ml: 0.5, fontSize: '0.56rem', color: '#58b879', fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}>[Arcane Armor]</Box> : null}
-              {item.attuned ? <Box component="span" sx={{ ml: 0.5, fontSize: '0.56rem', color: '#d69245', fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}>[Attuned]</Box> : null}
+              {item.attuned ? <Box component="span" sx={{ ml: 0.5, fontSize: '0.56rem', color: ITEM_ATTUNEMENT, fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}>[Attuned]</Box> : null}
             </Box>
             {penaltyMsg && (
               <Typography sx={{ fontSize: '0.6rem', color: 'warning.main', mt: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -1041,14 +1042,14 @@ function AttuneButton({ item, index, attunementFull, character, attunementContex
     hasRequirementWarning ? eligibility.reason : null,
     cursedAttuned ? 'A cursed item cannot be unattuned voluntarily' : null,
   ].filter(Boolean).join(' · ');
-  const accent = item.attuned ? '#d69245' : (hasRequirementWarning ? '#c9923f' : null);
+  const accent = item.attuned ? ITEM_ATTUNEMENT : (hasRequirementWarning ? '#c9923f' : null);
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
       <Tooltip title={tip} arrow>
         <span>
           <Button size="small" disabled={blocked} onClick={() => onAttune?.(index)}
             startIcon={cursedAttuned ? <AlertTriangle size={11} /> : (item.attuned ? <Check size={11} /> : (hasRequirementWarning ? <AlertTriangle size={11} /> : null))}
-            sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: accent || 'divider', borderRadius: '3px', color: accent || 'text.secondary', bgcolor: item.attuned ? 'rgba(214,146,69,0.14)' : 'transparent', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem', '&.Mui-disabled': { opacity: 0.4 } }}>
+            sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: accent || 'divider', borderRadius: '3px', color: accent || 'text.secondary', bgcolor: item.attuned ? alpha(ITEM_ATTUNEMENT, 0.14) : 'transparent', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem', '&.Mui-disabled': { opacity: 0.4 } }}>
             {cursedAttuned ? 'Cursed' : (item.attuned ? 'Attuned' : 'Attune')}
           </Button>
         </span>

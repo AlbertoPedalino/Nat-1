@@ -16,6 +16,7 @@
 // for normalization.
 
 import { isItemEffectActive } from './itemAttunement.js';
+import { ITEM_ATTUNEMENT } from '../entityColors.js';
 
 function stripSpellRef(raw) {
   if (raw == null) return { name: '', source: '' };
@@ -121,7 +122,7 @@ export function collectItemAttachedSpells(C) {
         name: grant.name,
         source: {
           label: item.name || 'Item',
-          color: '#edd48a',
+          color: ITEM_ATTUNEMENT,
           originType: 'item',
           originLabel: item.name || 'Item',
         },

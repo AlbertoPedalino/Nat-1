@@ -17,6 +17,11 @@ export const ENTITY_COLORS = {
 // (section headers, entry titles inside descriptions, generic highlights).
 export const NEUTRAL_TONE = '#edd48a';
 
+// Bordeaux accent for everything item/attunement related: item source chips on
+// spells and the attune button/attuned state. Items are not an entity kind, so
+// this lives apart from ENTITY_COLORS but follows the same "one hex" rule.
+export const ITEM_ATTUNEMENT = '#a23b4d';
+
 // Single recipe for the translucent tint+border chip look. Both the theme's
 // MuiChip color overrides and entityChipSx derive from this, so the visual
 // language stays in one place.

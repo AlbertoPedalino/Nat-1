@@ -10,7 +10,7 @@ import { featSlotOrigin } from '../../../shared/featChoiceKeys.js';
 import { collectFreeCastsForGrant, mergeFreeCastsById, normalizeFreeCast, getFeatFreeCastTemplate, applyFreeCastRest } from '../../../shared/character/spellFreeCasts.js';
 import { collectItemAttachedSpells } from '../../../shared/character/itemAttachedSpells.js';
 import { isWarlockModifierCantripChoiceKey } from '../../../shared/character/warlockUtils.js';
-import { ENTITY_COLORS } from '../../../shared/entityColors.js';
+import { ENTITY_COLORS, ITEM_ATTUNEMENT } from '../../../shared/entityColors.js';
 
 // Display colors for spell-source tags. Entity-linked tags follow the canonical
 // entity palette (shared/entityColors.js); the rest are spell-domain-only tags.
@@ -20,6 +20,7 @@ const SRC_COLOR = {
   species: ENTITY_COLORS.species,
   background: ENTITY_COLORS.background,
   feat: ENTITY_COLORS.feat,
+  item: ITEM_ATTUNEMENT,
   granted: '#70b7a6',
   choice: '#9d7fb8',
   ritual: '#58b879',
