@@ -153,6 +153,7 @@ export const initialBuilderState = {
     optionalFeatures: [],
   },
   search: {
+    classes: '',
     species: '',
     background: '',
     inventory: '',

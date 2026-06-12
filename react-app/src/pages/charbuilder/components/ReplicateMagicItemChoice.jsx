@@ -117,15 +117,13 @@ export default function ReplicateMagicItemChoice({ spec, character, dispatch, it
                       minWidth: 0,
                       py: 0.65,
                       px: 1,
-                      '&.Mui-selected': { bgcolor: 'primary.main', color: 'primary.contrastText' },
-                      '&.Mui-selected:hover': { bgcolor: 'primary.dark' },
                     }}
                   >
                     <ListItemText
                       primary={(
                         <Typography
                           noWrap
-                          sx={{ color: active ? 'inherit' : 'text.primary', fontSize: '0.82rem', fontWeight: active ? 800 : 500 }}
+                          sx={{ color: 'text.primary', fontSize: '0.82rem', fontWeight: 500 }}
                         >
                           {name}
                         </Typography>

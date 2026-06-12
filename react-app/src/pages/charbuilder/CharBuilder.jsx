@@ -369,18 +369,6 @@ const builderRootSx = {
     color: 'text.secondary',
   },
   '& .MuiTabs-indicator': { bgcolor: 'primary.main' },
-  '& .MuiListItemButton-root': {
-    py: 0.55,
-    px: 0.9,
-    bgcolor: 'rgba(35,32,26,1)',
-    '&.Mui-selected': {
-      bgcolor: 'rgba(202,165,80,0.12)',
-      borderLeft: '3px solid #caa550',
-    },
-    '&:hover': {
-      bgcolor: 'rgba(46,42,34,1)',
-    },
-  },
   '& .MuiInputBase-root': {
     bgcolor: 'rgba(26,23,19,1)',
     borderRadius: 1,
@@ -408,6 +396,12 @@ const builderRootSx = {
 // selectors in `builderRootSx`. This keeps component `sx` authoritative for
 // custom colors/sizes. Scoped to the builder via the ThemeProvider in render.
 const CINZEL = '"Cinzel", Georgia, serif';
+const BUILDER_SELECTED_SX = {
+  color: '#f0e6d4',
+  backgroundColor: 'rgba(215, 173, 82, 0.20)',
+  boxShadow: 'inset 3px 0 0 #d7ad52',
+};
+const BUILDER_SELECTED_HOVER_BG = 'rgba(215, 173, 82, 0.28)';
 const builderTheme = createTheme(theme, {
   components: {
     MuiTypography: {
@@ -430,6 +424,42 @@ const builderTheme = createTheme(theme, {
           letterSpacing: '0.04em',
           backgroundColor: 'rgba(202,165,80,0.08)',
           borderColor: 'rgba(202,165,80,0.28)',
+        },
+      },
+    },
+    MuiListItemButton: {
+      styleOverrides: {
+        root: {
+          padding: '4.4px 7.2px',
+          backgroundColor: 'rgba(35,32,26,1)',
+          '&.Mui-selected': BUILDER_SELECTED_SX,
+          '&.Mui-selected:hover': {
+            backgroundColor: BUILDER_SELECTED_HOVER_BG,
+          },
+          '&:hover': {
+            backgroundColor: 'rgba(46,42,34,1)',
+          },
+        },
+      },
+    },
+    MuiToggleButton: {
+      styleOverrides: {
+        root: {
+          color: '#bda98a',
+          '&.Mui-selected': BUILDER_SELECTED_SX,
+          '&.Mui-selected:hover': {
+            backgroundColor: BUILDER_SELECTED_HOVER_BG,
+          },
+        },
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          '&.Mui-selected': BUILDER_SELECTED_SX,
+          '&.Mui-selected:hover': {
+            backgroundColor: BUILDER_SELECTED_HOVER_BG,
+          },
         },
       },
     },

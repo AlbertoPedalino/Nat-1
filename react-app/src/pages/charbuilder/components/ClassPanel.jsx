@@ -1,9 +1,9 @@
 import { Box, Button, Chip, List, ListItemButton, ListItemText, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { AlertCircle, Axe, BookOpen, Compass, Cross, Dumbbell, Eye, Feather, Flame, Hammer, Music, Plus, Shield, Sparkles, Sword, Trash2, Wand2 } from 'lucide-react';
 import BuilderPanel from './BuilderPanel.jsx';
-import { getFinalScore } from '../logic/calculations.js';
+import { SearchField } from './SearchList.jsx';
+import { getPrimaryClassLevel } from '../logic/calculations.js';
 import { checkMulticlassPrerequisite, checkSpellcastingMulticlass, getMulticlassProficienciesGained } from '../logic/multiclassRules.js';
-import { installedRegistry } from '../../../adapters/index.js';
 
 const CLASS_ICONS = {
   Artificer: Hammer,
@@ -42,7 +42,7 @@ function ClassRow({ cls, selected, onSelect, prereqMet = true, prereqReason = ''
           <Icon size={15} />
         </Box>
         <ListItemText
-          primary={<Typography fontWeight={selected ? 700 : 500} sx={{ fontSize: '0.76rem' }}>{cls.name}</Typography>}
+          primary={<Typography fontWeight={500} sx={{ fontSize: '0.76rem' }}>{cls.name}</Typography>}
           secondary={(
             <Stack direction="row" spacing={0.45} flexWrap="wrap" useFlexGap sx={{ mt: 0.35 }}>
               <Chip size="small" label={`Hit Die ${hitDie}`} />
@@ -77,10 +77,17 @@ function checkMcPrereq(character, className) {
 
 export default function ClassPanel({ state, character, dispatch }) {
   const classes = state.data.classes;
+  const search = state.search.classes || '';
+  const query = search.trim().toLowerCase();
+  const visibleClasses = classes.filter((cls) => (
+    cls.name.toLowerCase().includes(query)
+    || String(cls.source || '').toLowerCase().includes(query)
+  ));
   const activeExtra = character.activeClassTab > 0 ? character.extraClasses[character.activeClassTab - 1] : null;
   const isExtraTab = !!activeExtra;
   const takenNames = new Set([character.className, ...character.extraClasses.map((extra) => extra.name)]);
   const PanelIcon = classIcon(activeExtra?.name || character.className);
+  const primaryLevel = getPrimaryClassLevel(character);
   return (
     <BuilderPanel
       title="Class"
@@ -101,16 +108,21 @@ export default function ClassPanel({ state, character, dispatch }) {
     >
       <Stack spacing={0.85}>
         <ToggleButtonGroup value={character.activeClassTab} exclusive size="small" onChange={(_, tab) => tab != null && dispatch({ type: 'class-tab/set', tab })}>
-          <ToggleButton value={0}>{character.className || 'Primary'}</ToggleButton>
+          <ToggleButton value={0}>{character.className || 'Primary'} Lv {primaryLevel}</ToggleButton>
           {character.extraClasses.map((extraClass, index) => (
             <ToggleButton key={`${extraClass.name}-${index}`} value={index + 1}>
               {extraClass.name || `Class ${index + 2}`} Lv {extraClass.level || 1}
             </ToggleButton>
           ))}
         </ToggleButtonGroup>
+        <SearchField
+          value={search}
+          placeholder="Search classes"
+          onChange={(value) => dispatch({ type: 'search/set', scope: 'classes', value })}
+        />
         <Paper variant="outlined" sx={{ maxHeight: 390, overflow: 'auto' }}>
           <List dense disablePadding>
-            {classes.map((cls) => {
+            {visibleClasses.map((cls) => {
               const selected = activeExtra
                 ? activeExtra.name === cls.name && activeExtra.source === cls.source
                 : character.className === cls.name && character.classSource === cls.source;
@@ -138,6 +150,11 @@ export default function ClassPanel({ state, character, dispatch }) {
                 />
               );
             })}
+            {!visibleClasses.length ? (
+              <Typography color="text.secondary" sx={{ px: 1, py: 1.25 }}>
+                No classes found.
+              </Typography>
+            ) : null}
           </List>
         </Paper>
       </Stack>

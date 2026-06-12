@@ -203,7 +203,7 @@ export function FeatCategorySlot({ spec, feats, character, state, dispatch }) {
                     })}
                   >
                     <ListItemText
-                      primary={<Typography fontWeight={active ? 700 : 500} noWrap>{feat.name}</Typography>}
+                      primary={<Typography fontWeight={500} noWrap>{feat.name}</Typography>}
                       secondary={[feat.category || feat.categories?.[0], featPrereqLabel(feat)].filter(Boolean).join(' - ')}
                     />
                     <Chip size="small" color={active ? 'primary' : 'default'} label={feat.source} />
