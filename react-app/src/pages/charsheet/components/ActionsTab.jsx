@@ -48,6 +48,7 @@ import PipButton from '../../../shared/character/PipButton.jsx';
 import SheetDialog from '../../../shared/character/SheetDialog.jsx';
 import { ItemPropertyTable } from '../../../shared/character/ItemPropertyTable.jsx';
 import { formatRollTitle, rollFormula as rollFormulaDice } from '../../../shared/character/dice.js';
+import { CHIP_TONES, chipToneStyle } from '../../../shared/entityColors.js';
 
 const ACTION_DETAIL_RENDERERS = {
   panel: ActionDetailPanel,
@@ -1009,7 +1010,7 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
                       size="small"
                       variant="outlined"
                       label={tag.label}
-                      sx={{ ...tinyMetaChipSx, color: tag.color, borderColor: tag.borderColor, bgcolor: tag.bgColor }}
+                      sx={{ ...tinyMetaChipSx, ...tag.style }}
                     />
                   ))}
                 </Box>
@@ -1029,6 +1030,8 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
           && toggleInfo.canActivate !== false;
         const isSuppressed = isActive && toggleInfo.isSuppressed;
         const label = isSuppressed ? 'Suppressed' : (isActive ? 'Active' : 'Inactive');
+        const statusTone = isSuppressed ? CHIP_TONES.negative : (isActive ? CHIP_TONES.positive : CHIP_TONES.info);
+        const statusStyle = chipToneStyle(statusTone);
         return (
         <Box sx={persistentRowSx('rgba(129,179,232,0.06)', !hasRes, open)}>
           <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontFamily: '"Cinzel", Georgia, serif', mr: 0.5, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Status</Typography>
@@ -1050,10 +1053,8 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
               fontFamily: '"Cinzel", Georgia, serif',
               fontWeight: 700,
               letterSpacing: '0.06em',
-              color: isSuppressed ? '#de675f' : (isActive ? '#58b879' : 'text.secondary'),
-              borderColor: isSuppressed ? '#de675f' : (isActive ? '#58b879' : 'divider'),
-              bgcolor: isSuppressed ? 'rgba(222,103,95,0.14)' : (isActive ? 'rgba(88,184,121,0.14)' : 'transparent'),
-              '&:hover': { borderColor: isActive || canToggleOn ? (isActive ? '#58b879' : 'rgba(202,165,80,0.5)') : 'divider' },
+              ...statusStyle,
+              '&:hover': { borderColor: (isActive || canToggleOn) ? statusTone : statusStyle.borderColor },
             }}
           />
         </Box>

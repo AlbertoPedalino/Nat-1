@@ -23,11 +23,12 @@ import { weaponEnhancement } from '../../../shared/character/itemBonus.js';
 import { isItemEffectActive } from '../../../shared/character/itemAttunement.js';
 import { matchesItemReference } from '../../../shared/character/itemIdentity.js';
 import { getMeleeStrDamageBonus, getWeaponEffectBonuses } from './sheetEffects.js';
-import { ACTION_COLORS } from '../../../shared/entityColors.js';
+import { ACTION_COLORS, CHIP_TONES, chipToneStyle } from '../../../shared/entityColors.js';
 
 export const FILTERS = ['all', 'action', 'bonus', 'reaction'];
-// Weapon/unarmed attacks are Actions, so they share the action colour.
-export const CAT_COLORS = { ...ACTION_COLORS, attack: ACTION_COLORS.action };
+// Weapon/unarmed attacks get a red left-bar so attacks stand apart from other
+// Actions at a glance; the rest follow the shared action-economy colours.
+export const CAT_COLORS = { ...ACTION_COLORS, attack: '#de675f' };
 const EXECUTABLE_CATS = new Set(['attack', 'action', 'bonus', 'reaction']);
 export const SECTION_DEFS = [
   { key: 'action', title: 'Actions', cats: ['action', 'attack'] },
@@ -35,12 +36,13 @@ export const SECTION_DEFS = [
   { key: 'reaction', title: 'Reactions', cats: ['reaction'] },
 ];
 
+// Each tag's chip style comes from the shared chipToneStyle recipe, keyed by a
+// semantic CHIP_TONES value. The style object spreads straight into the Chip sx.
 export const TAG_PRESETS = {
-  mastery:    { color: '#edd48a', borderColor: 'rgba(237,212,138,0.55)', bgColor: 'rgba(237,212,138,0.12)' },
-  noprof:     { color: '#de675f', borderColor: '#de675f',               bgColor: 'rgba(222,103,95,0.14)' },
-  dis:        { color: '#d69245', borderColor: '#d69245',               bgColor: 'rgba(213,138,61,0.14)' },
-  slot:       { color: '#58b879', borderColor: 'rgba(88,184,121,0.55)', bgColor: 'rgba(88,184,121,0.12)' },
-  inlinePill: { color: '#edd48a', borderColor: 'rgba(237,212,138,0.4)', bgColor: 'rgba(237,212,138,0.12)' },
+  mastery:    chipToneStyle(CHIP_TONES.mastery),   // active weapon mastery
+  noprof:     chipToneStyle(CHIP_TONES.negative),  // warning: non-proficient
+  slot:       chipToneStyle(CHIP_TONES.info),      // neutral fact: weapon hand
+  inlinePill: chipToneStyle(CHIP_TONES.info),      // neutral fact: range/DC/etc.
 };
 
 export function buildActionTags(action, C) {
@@ -48,25 +50,27 @@ export function buildActionTags(action, C) {
   const ownerLevel = action.ownerLevel ?? C?.classLevel ?? C?.level ?? 1;
 
   if (action._weaponMastery) {
-    tags.push({ key: 'mastery', label: action._weaponMastery, ...TAG_PRESETS.mastery });
+    tags.push({ key: 'mastery', label: action._weaponMastery, style: TAG_PRESETS.mastery });
   }
   if (action._notProficient) {
-    tags.push({ key: 'noprof', label: 'NO PROF', ...TAG_PRESETS.noprof });
-  }
-  if (action._disadvantage) {
-    tags.push({ key: 'dis', label: 'DIS', ...TAG_PRESETS.dis });
+    tags.push({ key: 'noprof', label: 'NO PROF', style: TAG_PRESETS.noprof });
   }
   if (action._weaponSlot) {
-    tags.push({ key: 'slot', label: action._weaponSlot, ...TAG_PRESETS.slot });
+    tags.push({ key: 'slot', label: action._weaponSlot, style: TAG_PRESETS.slot });
   }
 
+  // Convention: an adapter's `inlinePills` are for facts the action's resource
+  // bar can't show (range, duration, save DC, THP amount, a chosen damage type,
+  // etc.). Never add a pill that just restates the action's own resource-bar
+  // value — e.g. a "Pool = level×5 HP" pill on an action whose resKey already
+  // tracks that pool. That's redundant; let the bar own the number.
   const pills = typeof action.inlinePills === 'function'
     ? action.inlinePills({ character: C, ownerLevel })
     : (Array.isArray(action.inlinePills) ? action.inlinePills : []);
   pills.forEach((pill, idx) => {
     const label = `${pill.label || ''}${pill.value != null ? ` ${pill.value}` : ''}`.trim();
     if (label) {
-      tags.push({ key: `pill-${idx}`, label, ...TAG_PRESETS.inlinePill });
+      tags.push({ key: `pill-${idx}`, label, style: TAG_PRESETS.inlinePill });
     }
   });
 

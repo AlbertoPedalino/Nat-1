@@ -40,6 +40,17 @@ export const SPELL_TAG_COLORS = {
   ritual: '#58b879',        // green
 };
 
+// Semantic tones for the action-tab entry chips. Muted on purpose so a chip
+// reads as a status/fact, never as an entity-kind tag. `info` = neutral fact
+// (weapon hand, range, duration, save DC…), `positive`/`negative` = good/bad
+// status (Active vs Suppressed, proficient vs not), `mastery` = active mastery.
+export const CHIP_TONES = {
+  info: '#A7B1BD',
+  positive: '#A8D8B9',
+  negative: '#E7A6A1',
+  mastery: '#D7C37A',
+};
+
 // Single recipe for the translucent tint+border chip look. Both the theme's
 // MuiChip color overrides and entityChipSx derive from this, so the visual
 // language stays in one place.
@@ -55,4 +66,11 @@ export function chipTintStyle(tone, { bgAlpha = 0.18, borderAlpha = 0.65, text =
 // MuiChip root override; this only sets the kind's tint.
 export function entityChipSx(kind) {
   return chipTintStyle(ENTITY_COLORS[kind] || ENTITY_COLORS.class);
+}
+
+// Standard tint for the action-tab entry chips (tag chips + Active/Suppressed
+// status). One alpha config so every such chip reads identically; pass a
+// CHIP_TONES value.
+export function chipToneStyle(tone) {
+  return chipTintStyle(tone, { bgAlpha: 0.14, borderAlpha: 0.55 });
 }
