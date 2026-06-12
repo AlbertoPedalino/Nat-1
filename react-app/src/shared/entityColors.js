@@ -22,6 +22,11 @@ export const NEUTRAL_TONE = '#edd48a';
 // this lives apart from ENTITY_COLORS but follows the same "one hex" rule.
 export const ITEM_ATTUNEMENT = '#a23b4d';
 
+// Dedicated accent for structured rich-text descriptions. Kept separate from
+// entity, action, spell-tag, and item-state colors so highlighted rules text
+// never implies one of those semantic meanings.
+export const RICH_TEXT_ACCENT = '#b7d36b';
+
 // Action-economy accents (action / bonus action / reaction). Deliberately
 // outside every entity-kind hue (teal/violet/blue/etc.) so action type never
 // reads as an entity. Shared by the Actions tab category bar and the spell

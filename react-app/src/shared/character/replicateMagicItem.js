@@ -6,22 +6,23 @@
 //   - Lv 10+: an Uncommon Wondrous Item that isn't cursed
 //   - Lv 14+: a Rare Wondrous Item that isn't cursed
 // (Lv 6+ has no generic row.)
-// "Weapon +1" (Lv 2), "Weapon +2" (Lv 10), "Armor +1" (Lv 6) and "Armor +2"
-// (Lv 14) are likewise generic: a +N bonus applied to a base weapon/armor of
-// the player's choice. They are modelled as buckets too, resolving to a
-// concrete "<base item> +N" item. (Shields stay a concrete "Shield +N" plan —
-// one base item, no choice.)
+// "Weapon +1" (Lv 2), "Weapon +2" (Lv 10), "Armor +1" (Lv 6), "Armor +2"
+// (Lv 14), Repeating Shot and Returning Weapon are likewise generic plans:
+// each must resolve to a compatible concrete base item. Shields stay concrete
+// plans because they have only one possible base item.
 //
 // A bucket is not a real item: the builder must resolve it to a concrete item
 // matching the filter, which is what gets stored as the plan. This module is
 // the single source of truth for the bucket labels and their filter predicate,
 // shared by the Artificer adapter (pool generation), the builder picker, and
-// the sheet card (legacy clean-up).
+// the sheet card.
 //
 // Every bucket exposes a single `match(item)` predicate. The declarative
 // builders below (rarityFilter, plusVariant) compile common shapes into one, so
 // the consumers never branch on bucket shape — adding a bucket is one entry,
 // built from a helper or a bespoke predicate.
+
+import { itemIdentityKey } from './itemIdentity.js';
 
 const norm = (value) => String(value || '').split('|')[0];
 const lc = (value) => String(value || '').toLowerCase();
@@ -38,6 +39,21 @@ const isBodyArmor = (item) => ['LA', 'MA', 'HA'].includes(typeOf(item));
 // Standard fantasy weapon: drop modern/futuristic firearms (5etools tags them
 // with `age` = "modern"/"futuristic"; renaissance Musket/Pistol carry none).
 const isMundaneWeapon = (item) => isWeapon(item) && !item.age;
+const isBaseWeapon = (item) => (
+  isMundaneWeapon(item)
+  && ['simple', 'martial'].includes(lc(item.weaponCategory))
+  && ['none', ''].includes(lc(item.rarity))
+  && !item.bonusVariant
+);
+const propertyCodes = (item) => new Set(
+  (Array.isArray(item?.property) ? item.property : [])
+    .map((value) => norm(value).toUpperCase()),
+);
+const hasAnyProperty = (...codes) => (item) => {
+  const properties = propertyCodes(item);
+  return codes.some((code) => properties.has(code));
+};
+const matchesAll = (...predicates) => (item) => predicates.every((predicate) => predicate(item));
 
 // Predicate for a rarity-class bucket (Common / Uncommon Wondrous / …). A
 // common/uncommon/rare rarity already implies a magic item.
@@ -82,6 +98,51 @@ export const REPLICATE_BUCKETS = [
     match: plusVariant(isMundaneWeapon, '+1'),
   },
   {
+    id: 'repeating-shot',
+    label: 'Repeating Shot',
+    pickLabel: 'Pick a weapon with the Ammunition property…',
+    requirementLabel: 'Simple or martial weapon with Ammunition; requires attunement.',
+    match: matchesAll(isBaseWeapon, hasAnyProperty('A', 'AF')),
+    itemPlan: {
+      nameSuffix: 'Repeating Shot',
+      patch: {
+        bonusWeaponAttack: '+1',
+        bonusWeaponDamage: '+1',
+        reqAttune: true,
+      },
+      entries: [{
+        type: 'entries',
+        name: 'Repeating Shot',
+        entries: [
+          'This weapon grants a +1 bonus to attack and damage rolls made with it.',
+          'It ignores the Loading property. If it has no ammunition loaded when you make a ranged attack with it, the weapon produces one piece of ammunition, which vanishes after the attack.',
+        ],
+      }],
+    },
+  },
+  {
+    id: 'returning-weapon',
+    label: 'Returning Weapon',
+    pickLabel: 'Pick a weapon with the Thrown property…',
+    requirementLabel: 'Simple or martial weapon with Thrown.',
+    match: matchesAll(isBaseWeapon, hasAnyProperty('T')),
+    itemPlan: {
+      nameSuffix: 'Returning Weapon',
+      patch: {
+        bonusWeaponAttack: '+1',
+        bonusWeaponDamage: '+1',
+      },
+      entries: [{
+        type: 'entries',
+        name: 'Returning Weapon',
+        entries: [
+          'This weapon grants a +1 bonus to attack and damage rolls made with it.',
+          'Immediately after you make a ranged attack with this weapon, it returns to your hand.',
+        ],
+      }],
+    },
+  },
+  {
     id: 'weapon-plus-2',
     label: 'Weapon +2',
     pickLabel: 'Pick a weapon…',
@@ -102,6 +163,8 @@ export const REPLICATE_BUCKETS = [
 ];
 
 const BY_LABEL = new Map(REPLICATE_BUCKETS.map((b) => [b.label, b]));
+const BY_ID = new Map(REPLICATE_BUCKETS.map((b) => [b.id, b]));
+const CHOICE_PREFIX = 'replicate-choice:v1:';
 
 export const REPLICATE_BUCKET_LABELS = REPLICATE_BUCKETS.map((b) => b.label);
 
@@ -110,10 +173,140 @@ export function replicateBucketFromLabel(label) {
   return BY_LABEL.get(String(label || '').trim()) || null;
 }
 
-// True for a bucket label. Used by the card to drop unresolved buckets so a
-// generic plan never shows as a fictitious inventory item.
-export function isReplicateBucketLabel(label) {
-  return BY_LABEL.has(String(label || '').trim());
+function itemReference(itemOrName, source = '') {
+  if (itemOrName && typeof itemOrName === 'object') {
+    return {
+      itemName: String(itemOrName.name || ''),
+      itemSource: String(itemOrName.source || ''),
+    };
+  }
+  return {
+    itemName: String(itemOrName || ''),
+    itemSource: String(source || ''),
+  };
+}
+
+function encodePart(value) {
+  return encodeURIComponent(String(value || ''));
+}
+
+function decodePart(value) {
+  return decodeURIComponent(String(value || ''));
+}
+
+// All newly-selected plans carry the concrete item source. This keeps choice
+// identity stable when different books contain items with the same name.
+export function replicateItemChoiceValue(itemOrName, source = '') {
+  const ref = itemReference(itemOrName, source);
+  if (!ref.itemName || !ref.itemSource) return '';
+  return `${CHOICE_PREFIX}item:${encodePart(ref.itemName)}:${encodePart(ref.itemSource)}`;
+}
+
+export function replicateBucketChoiceValue(bucket, itemOrName, source = '') {
+  if (!bucket?.itemPlan) return replicateItemChoiceValue(itemOrName, source);
+  const ref = itemReference(itemOrName, source);
+  if (!ref.itemName || !ref.itemSource) return '';
+  return `${CHOICE_PREFIX}plan:${encodePart(bucket.id)}:${encodePart(ref.itemName)}:${encodePart(ref.itemSource)}`;
+}
+
+export function parseReplicateChoice(value) {
+  const raw = String(value || '');
+  if (!raw.startsWith(CHOICE_PREFIX)) return null;
+  const parts = raw.slice(CHOICE_PREFIX.length).split(':');
+  try {
+    if (parts[0] === 'item' && parts.length === 3) {
+      const itemName = decodePart(parts[1]);
+      const itemSource = decodePart(parts[2]);
+      return itemName && itemSource ? {
+        kind: 'item',
+        itemName,
+        itemSource,
+        version: 1,
+      } : null;
+    }
+    if (parts[0] === 'plan' && parts.length === 4) {
+      const bucket = BY_ID.get(decodePart(parts[1]));
+      const itemName = decodePart(parts[2]);
+      const itemSource = decodePart(parts[3]);
+      return bucket?.itemPlan && itemName && itemSource ? {
+        kind: 'plan',
+        bucket,
+        itemName,
+        itemSource,
+        version: 1,
+      } : null;
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
+export function parseReplicateBucketChoice(value) {
+  const parsed = parseReplicateChoice(value);
+  return parsed?.kind === 'plan' ? parsed : null;
+}
+
+export function replicateChoiceLabel(value) {
+  const parsed = parseReplicateChoice(value);
+  if (!parsed) return String(value || '');
+  if (parsed.kind === 'item') return parsed.itemName;
+  return `${parsed.itemName} (${parsed.bucket.itemPlan.nameSuffix || parsed.bucket.label})`;
+}
+
+// Apply a plan to a real base item. This derives a transient reference record
+// for the builder/sheet; it does not insert synthetic entries into the item DB.
+export function applyReplicateItemPlan(item, bucket) {
+  if (!item || !bucket?.itemPlan) return item || null;
+  const plan = bucket.itemPlan;
+  const entries = [
+    ...(Array.isArray(item.entries) ? item.entries : []),
+    ...(Array.isArray(plan.entries) ? plan.entries : []),
+  ];
+  return {
+    ...item,
+    ...(plan.patch || {}),
+    displayName: `${item.name} (${plan.nameSuffix || bucket.label})`,
+    entries,
+  };
+}
+
+function findReferencedItem(items, itemName, itemSource) {
+  if (!itemName || !itemSource) return null;
+  const targetKey = itemIdentityKey(itemName, itemSource);
+  return (items || []).find((candidate) => itemIdentityKey(candidate) === targetKey) || null;
+}
+
+export function resolveReplicateBucketChoice(value, items) {
+  const parsed = parseReplicateBucketChoice(value);
+  if (!parsed) return null;
+  const item = findReferencedItem(items, parsed.itemName, parsed.itemSource);
+  if (!item || !itemMatchesBucket(item, parsed.bucket)) return null;
+  return {
+    bucket: parsed.bucket,
+    baseItem: item,
+    item: applyReplicateItemPlan(item, parsed.bucket),
+  };
+}
+
+export function resolveReplicateChoice(value, items) {
+  const parsed = parseReplicateChoice(value);
+  if (!parsed) return null;
+  if (parsed.kind === 'plan') return resolveReplicateBucketChoice(value, items);
+  const item = findReferencedItem(items, parsed.itemName, parsed.itemSource);
+  return item ? { bucket: null, baseItem: item, item } : null;
+}
+
+// Rebuild a replicated inventory item from its current source-qualified plan.
+// This keeps database reconciliation from replacing plan effects with the base
+// item's fields.
+export function resolveReplicateCraftedItem(item, items) {
+  if (
+    !Array.isArray(item?.flags)
+    || !item.flags.includes('replicated')
+    || !item.craftedFrom
+  ) return null;
+  return resolveReplicateChoice(item.craftedFrom, items)?.item || null;
 }
 
 // Whether a DB item satisfies a bucket's filter.
@@ -122,14 +315,22 @@ export function itemMatchesBucket(item, bucket) {
   return bucket.match(item);
 }
 
-// Sorted, de-duplicated concrete item names a bucket can resolve to.
-export function replicateBucketOptions(items, bucket, excludeNames) {
-  const exclude = excludeNames instanceof Set ? excludeNames : new Set(excludeNames || []);
-  const out = [];
+// Sorted, de-duplicated concrete items a bucket can resolve to. Returning the
+// full records lets pickers show the same property/description reference used
+// by inventory rows, including generated +N weapon and armor variants.
+export function replicateBucketItems(items, bucket, excludeNames) {
+  const exclude = new Set(
+    [...(excludeNames instanceof Set ? excludeNames : new Set(excludeNames || []))]
+      .map((value) => lc(value)),
+  );
+  const byIdentity = new Map();
   (items || []).forEach((it) => {
     if (!it?.name || !itemMatchesBucket(it, bucket)) return;
-    if (exclude.has(lc(it.name))) return;
-    out.push(it.name);
+    const identity = itemIdentityKey(it);
+    if (exclude.has(lc(it.name)) || exclude.has(lc(identity))) return;
+    if (!byIdentity.has(identity)) byIdentity.set(identity, it);
   });
-  return [...new Set(out)].sort((a, b) => a.localeCompare(b));
+  return [...byIdentity.values()].sort(
+    (a, b) => a.name.localeCompare(b.name) || String(a.source || '').localeCompare(String(b.source || '')),
+  );
 }

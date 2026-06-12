@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Box, Typography } from '@mui/material';
 import { EntryBlocks } from './EntryBlocks.jsx';
+import { RICH_TEXT_ACCENT } from '../entityColors.js';
 import {
   areMasteriesLoaded,
   getWeaponMasteryEntries,
@@ -42,9 +43,9 @@ export function WeaponMasteryBlock({ mastery, variant = 'tag', fontSize, sx }) {
   return (
     <Box sx={{ mt: variant === 'tag' ? 0.7 : 0, ...sx }}>
       {variant === 'title' ? (
-        <Typography variant="h2">{name}</Typography>
+        <Typography variant="h2" sx={{ color: RICH_TEXT_ACCENT }}>{name}</Typography>
       ) : (
-        <Typography sx={{ fontSize: '0.66rem', color: '#edd48a', fontWeight: 700 }}>
+        <Typography sx={{ fontSize: '0.66rem', color: RICH_TEXT_ACCENT, fontWeight: 700 }}>
           Weapon Mastery — {name}
         </Typography>
       )}

@@ -21,7 +21,7 @@ import {
 } from './equipmentSlots.js';
 import { weaponEnhancement } from '../../../shared/character/itemBonus.js';
 import { isItemEffectActive } from '../../../shared/character/itemAttunement.js';
-import { matchesItemReference } from '../../../shared/character/itemIdentity.js';
+import { itemDisplayName, matchesItemReference } from '../../../shared/character/itemIdentity.js';
 import { getMeleeStrDamageBonus, getWeaponEffectBonuses } from './sheetEffects.js';
 import { ACTION_COLORS, CHIP_TONES, chipToneStyle } from '../../../shared/entityColors.js';
 
@@ -481,14 +481,14 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
     ? (selectedEntry.mastery || directMastery || resolveWeaponMasteryForItem(dbItem))
     : null;
   return {
-    name: opts.name || item.name || 'Weapon',
+    name: opts.name || itemDisplayName(item, 'Weapon'),
     cat: opts.cat || 'action',
     uses: opts.uses || 'Equipped',
     _source: 'Weapon',
     attackBonus: (profInfo.proficient ? getPB(C) + mod : mod) + enhancement.attack + fsBonus.attack,
     damageFormula,
     damageButtonLabel: damageFormula ? `Damage ${damageFormula}${dtype ? ` ${dtype}` : ''}` : 'Damage',
-    rollLabelPrefix: opts.rollLabelPrefix || item.name || 'Weapon',
+    rollLabelPrefix: opts.rollLabelPrefix || itemDisplayName(item, 'Weapon'),
     noDescription: true,
     _item: item,
     _enhancement: enhancement.attack || enhancement.damage ? enhancement : null,
@@ -604,7 +604,7 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
     const ohDamageFormula = ohBase ? ohBase + (ohDmgMod !== 0 ? (ohDmgMod >= 0 ? '+' : '') + ohDmgMod : '') : '';
 
     weaponActions.push({
-      name: offHandItem.name,
+      name: itemDisplayName(offHandItem, 'Weapon'),
       cat: isNick ? 'action' : 'bonus',
       uses: isNick ? 'Part of Attack action (Nick)' : 'Bonus Action (Light)',
       _source: 'Weapon',
@@ -612,7 +612,7 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
       attackBonus: (ohProfInfo.proficient ? getPB(C) + ohMod : ohMod) + ohEnhancement.attack + ohFsBonus.attack,
       damageFormula: ohDamageFormula,
       damageButtonLabel: ohDamageFormula ? `Damage ${ohDamageFormula}${ohDtype ? ` ${ohDtype}` : ''}` : 'Damage',
-      rollLabelPrefix: `Off-hand ${offHandItem.name}`,
+      rollLabelPrefix: `Off-hand ${itemDisplayName(offHandItem, 'Weapon')}`,
       noDescription: true,
       _item: offHandItem,
       _enhancement: ohEnhancement.attack || ohEnhancement.damage ? ohEnhancement : null,

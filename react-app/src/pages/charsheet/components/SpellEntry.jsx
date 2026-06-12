@@ -26,7 +26,7 @@ import {
 import { inlineButtonSx, spellBodySx, spellRowSx } from './spellsTabStyles.js';
 import AttackRollButton from './AttackRollButton.jsx';
 import { isConcentrationSpell, isRitualSpell } from '../../../shared/spellTags.js';
-import { ENTITY_COLORS, SPELL_TAG_COLORS } from '../../../shared/entityColors.js';
+import { ENTITY_COLORS, RICH_TEXT_ACCENT, SPELL_TAG_COLORS } from '../../../shared/entityColors.js';
 import { useSheetActions } from '../context/SheetActionsContext.jsx';
 
 function applyFlatToFormula(formula, flat) {
@@ -375,7 +375,7 @@ export default function SpellEntry({ entry, spellAttackBonus = 0, C, exhaustionL
                       fontSize: '0.6rem',
                       fontWeight: 700,
                       letterSpacing: '0.08em',
-                      color: '#9d7fb8',
+                      color: RICH_TEXT_ACCENT,
                       lineHeight: 1.15,
                     }}
                   >

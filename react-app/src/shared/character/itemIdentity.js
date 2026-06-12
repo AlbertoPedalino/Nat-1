@@ -13,6 +13,10 @@ export function itemIdentityKey(nameOrItem, source = '') {
   return `${normalizeItemIdentityName(name)}|${normalizeItemIdentitySource(itemSource)}`;
 }
 
+export function itemDisplayName(item, fallback = '') {
+  return String(item?.displayName || item?.name || fallback);
+}
+
 export function matchesItemReference(item, reference) {
   if (!item?.name || !item?.source || !reference?.name || !reference?.source) return false;
   return itemIdentityKey(item) === itemIdentityKey(reference);

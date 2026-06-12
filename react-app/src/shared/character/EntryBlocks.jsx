@@ -1,6 +1,7 @@
 import { Box, Stack, Typography } from '@mui/material';
 import { RichInline } from './RichText.jsx';
 import { entriesToTextBlocks } from './spellEntries.js';
+import { RICH_TEXT_ACCENT } from '../entityColors.js';
 
 function groupBlocks(blocks) {
   const grouped = [];
@@ -29,10 +30,12 @@ export function EntryBlocks({
   entries,
   spacing = 0.65,
   emptyText = 'No description.',
-  headingColor = 'text.primary',
+  headingColor = RICH_TEXT_ACCENT,
   bodyColor = 'text.secondary',
-  markerColor,
+  markerColor = RICH_TEXT_ACCENT,
+  strongColor = RICH_TEXT_ACCENT,
   fontSize,
+  headingFontSize = fontSize,
 }) {
   const resolved = Array.isArray(blocks) ? blocks : entriesToTextBlocks(entries);
   if (!resolved?.length) {
@@ -45,8 +48,8 @@ export function EntryBlocks({
       {grouped.map((block, index) => {
         if (block.kind === 'heading') {
           return (
-            <Typography key={`h-${index}`} variant="body2" sx={{ fontWeight: 800, color: headingColor, lineHeight: 1.25, fontSize }}>
-              {block.tokens?.length ? <RichInline tokens={block.tokens} keyPrefix={`h-${index}`} /> : block.text}
+            <Typography key={`h-${index}`} variant="body2" sx={{ fontWeight: 800, color: headingColor, lineHeight: 1.25, fontSize: headingFontSize }}>
+              {block.tokens?.length ? <RichInline tokens={block.tokens} keyPrefix={`h-${index}`} strongColor={strongColor} /> : block.text}
             </Typography>
           );
         }
@@ -55,7 +58,7 @@ export function EntryBlocks({
             <Box key={`lg-${index}`} component="ul" sx={{ m: 0, pl: 2.2, color: bodyColor }}>
               {block.items.map((item, itemIndex) => (
                 <Typography key={`li-${index}-${itemIndex}`} component="li" variant="body2" sx={{ color: bodyColor, lineHeight: 1.38, fontSize, ...(markerColor ? { '&::marker': { color: markerColor } } : null) }}>
-                  {item.tokens?.length ? <RichInline tokens={item.tokens} keyPrefix={`li-${index}-${itemIndex}`} /> : item.text}
+                  {item.tokens?.length ? <RichInline tokens={item.tokens} keyPrefix={`li-${index}-${itemIndex}`} strongColor={strongColor} /> : item.text}
                 </Typography>
               ))}
             </Box>
@@ -65,7 +68,7 @@ export function EntryBlocks({
           return (
             <Box key={`tbl-${index}`} sx={{ overflowX: 'auto' }}>
               {block.caption ? (
-                <Typography variant="body2" sx={{ fontWeight: 800, color: headingColor, mb: 0.35, fontSize }}>
+                <Typography variant="body2" sx={{ fontWeight: 800, color: headingColor, mb: 0.35, fontSize: headingFontSize }}>
                   {block.caption}
                 </Typography>
               ) : null}
@@ -98,7 +101,7 @@ export function EntryBlocks({
         }
         return (
           <Typography key={`p-${index}`} variant="body2" sx={{ color: bodyColor, lineHeight: 1.42, fontSize }}>
-            {block.tokens?.length ? <RichInline tokens={block.tokens} keyPrefix={`p-${index}`} /> : block.text}
+            {block.tokens?.length ? <RichInline tokens={block.tokens} keyPrefix={`p-${index}`} strongColor={strongColor} /> : block.text}
           </Typography>
         );
       })}

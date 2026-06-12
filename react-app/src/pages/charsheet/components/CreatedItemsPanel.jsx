@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Box, IconButton, InputAdornment, TextField, Typography } from '@mui/material';
 import { Minus, Plus, Search } from 'lucide-react';
 import { loadItems } from '../../charbuilder/logic/dataLoaders.js';
@@ -15,31 +15,25 @@ import { collectAllProficiencies } from '../logic/proficiency/index.js';
 import { getMod, getFinal } from '../logic/calculations.js';
 import { useSheetActions } from '../context/SheetActionsContext.jsx';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
+import {
+  buildCreatedItemLookup,
+  exactCreatedItemKey,
+  prepareCreatedItemData,
+  resolveCreatedItemValue,
+} from '../../../shared/character/createdItemResolution.js';
 
 // Generic interactive "create items from a list" panel. Driven entirely by the
 // action's `detail` config so Replicate Magic Item, Tinker's Magic and Fast
 // Crafting all reuse it:
-//   { flag, tagLabel, items?, toolGroups?, max?, maxAbility?, minMax?, emptyHint? }
+//   { flag, tagLabel, items?, toolGroups?, itemLabel?, resolveItem?,
+//     requireResolvedItem?,
+//     max?, maxAbility?, minMax?, emptyHint? }
 // - items: flat list of item names.
 // - toolGroups: [{ tool, items }] filtered to the tools the character has.
+// - itemLabel: optional display label for an item value.
+// - resolveItem: optional (value, itemsDb) => concrete/derived item record.
+// - requireResolvedItem: fail closed when the resolver cannot produce an item.
 // - max: fixed cap, or maxAbility (e.g. 'int') for an ability-mod cap.
-
-// Exact normalised key (order-preserving) — primary, collision-free match.
-function exactKey(name) {
-  return String(name || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
-}
-
-// Order-independent key so "Shield +1" matches a DB "+1 Shield". Fallback only.
-function looseKey(name) {
-  return String(name || '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, ' ')
-    .trim()
-    .split(' ')
-    .filter(Boolean)
-    .sort()
-    .join('');
-}
 
 function resolveDetail(action, character, sheet) {
   const raw = action?.detail;
@@ -78,6 +72,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
     return Number.isFinite(n) && n > 0 ? n : Infinity;
   }, [detail.maxPerItem]);
   const searchable = !!detail.searchable;
+  const requireResolvedItem = !!detail.requireResolvedItem;
   // Cap the list height (px) past which it scrolls instead of growing forever.
   // 0 / non-finite means "no cap" (grow to fit).
   const maxHeight = useMemo(() => {
@@ -102,10 +97,10 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
     if (Array.isArray(detail.toolGroups)) {
       const sections = collectAllProficiencies(character, profSets) || [];
       const toolItems = (sections.find((s) => s.title === 'Tools')?.items) || [];
-      const known = new Set(toolItems.map((t) => exactKey(t)));
+      const known = new Set(toolItems.map((t) => exactCreatedItemKey(t)));
       const out = [];
       detail.toolGroups.forEach((group) => {
-        if (known.has(exactKey(group.tool))) (group.items || []).forEach((it) => out.push(it));
+        if (known.has(exactCreatedItemKey(group.tool))) (group.items || []).forEach((it) => out.push(it));
       });
       return [...new Set(out)];
     }
@@ -118,49 +113,60 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
     return () => { alive = false; };
   }, []);
 
-  const { exactMap, looseMap } = useMemo(() => {
-    const exact = new Map();
-    const loose = new Map();
-    (itemsDb || []).forEach((item) => {
-      const ek = exactKey(item?.name);
-      const lk = looseKey(item?.name);
-      if (ek && !exact.has(ek)) exact.set(ek, item);
-      if (lk && !loose.has(lk)) loose.set(lk, item);
-    });
-    return { exactMap: exact, looseMap: loose };
-  }, [itemsDb]);
+  const { exactMap, looseMap } = useMemo(() => buildCreatedItemLookup(itemsDb), [itemsDb]);
 
-  const resolveItem = (name) => exactMap.get(exactKey(name)) || looseMap.get(looseKey(name)) || null;
+  const resolveItem = useCallback((value) => resolveCreatedItemValue(value, {
+    itemsDb,
+    exactMap,
+    looseMap,
+    resolver: detail.resolveItem,
+    requireResolvedItem,
+  }), [detail.resolveItem, exactMap, itemsDb, looseMap, requireResolvedItem]);
+  const itemLabel = useCallback((value) => {
+    if (typeof detail.itemLabel === 'function') {
+      try {
+        const label = String(detail.itemLabel(value) || '').trim();
+        if (label) return label;
+      } catch {
+        // Fall through to the resolved/raw item name.
+      }
+    }
+    return resolveItem(value)?.name || String(value || '');
+  }, [detail.itemLabel, resolveItem]);
 
   const total = craftedCount(inv, flag);
   const remaining = Math.max(0, max - total);
 
-  const handleAdd = (name) => {
+  const handleAdd = (value) => {
     if (remaining <= 0 || !onUpdateInventory) return;
-    if (craftedCountFor(inv, flag, name) >= maxPerItem) return;
-    const dbItem = resolveItem(name);
-    const itemData = dbItem ? { ...dbItem } : { name };
-    itemData.name = name; // keep the recipe wording as the inventory label
-    onUpdateInventory(addCraftedItem(inv, itemData, flag, name, max, action?.name));
+    if (craftedCountFor(inv, flag, value) >= maxPerItem) return;
+    const resolvedItem = resolveItem(value);
+    if (requireResolvedItem && !resolvedItem) return;
+    const label = itemLabel(value);
+    const itemData = prepareCreatedItemData(resolvedItem, label);
+    onUpdateInventory(addCraftedItem(inv, itemData, flag, value, max, action?.name));
   };
 
-  const handleRemove = (name) => {
+  const handleRemove = (value) => {
     if (!onUpdateInventory) return;
-    if (craftedCountFor(inv, flag, name) <= 0) return;
-    onUpdateInventory(removeOneCrafted(inv, flag, name));
+    if (craftedCountFor(inv, flag, value) <= 0) return;
+    onUpdateInventory(removeOneCrafted(inv, flag, value));
   };
 
   const q = query.trim().toLowerCase();
   const visibleItems = useMemo(() => (
     searchable && q
-      ? items.filter((name) => String(name).toLowerCase().includes(q))
+      ? items.filter((value) => itemLabel(value).toLowerCase().includes(q))
       : items
-  ), [items, searchable, q]);
+  ), [itemLabel, items, searchable, q]);
 
   // "No more can be made" when every craftable is blocked — either the global
   // cap is full, or each item already sits at its per-item limit.
   const noneAddable = remaining <= 0
-    || items.every((name) => craftedCountFor(inv, flag, name) >= maxPerItem);
+    || items.every((value) => (
+      craftedCountFor(inv, flag, value) >= maxPerItem
+      || (requireResolvedItem && !resolveItem(value))
+    ));
 
   if (!items.length) {
     return (
@@ -210,18 +216,20 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
           ...(maxHeight ? { maxHeight, overflowY: 'auto', pr: '4px', '& > *': { flexShrink: 0 } } : {}),
         }}
       >
-        {visibleItems.length ? visibleItems.map((name) => {
-          const count = craftedCountFor(inv, flag, name);
-          const dbItem = resolveItem(name);
-          const addDisabled = remaining <= 0 || count >= maxPerItem;
+        {visibleItems.length ? visibleItems.map((value) => {
+          const label = itemLabel(value);
+          const count = craftedCountFor(inv, flag, value);
+          const dbItem = resolveItem(value);
+          const unavailable = requireResolvedItem && !dbItem;
+          const addDisabled = remaining <= 0 || count >= maxPerItem || unavailable;
           const removeDisabled = count <= 0;
           const stepper = (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
-              <IconButton size="small" aria-label={`Remove ${name}`} disabled={removeDisabled} onClick={() => handleRemove(name)} sx={stepBtnSx(removeDisabled)}>
+              <IconButton size="small" aria-label={`Remove ${label}`} disabled={removeDisabled} onClick={() => handleRemove(value)} sx={stepBtnSx(removeDisabled)}>
                 <Minus size={13} />
               </IconButton>
               <Box sx={{ minWidth: 16, textAlign: 'center', fontFamily: '"Cinzel", Georgia, serif', fontWeight: 700, fontSize: '0.78rem', color: '#edd48a' }}>{count}</Box>
-              <IconButton size="small" aria-label={`Add ${name}`} disabled={addDisabled} onClick={() => handleAdd(name)} sx={stepBtnSx(addDisabled)}>
+              <IconButton size="small" aria-label={`Add ${label}`} disabled={addDisabled} onClick={() => handleAdd(value)} sx={stepBtnSx(addDisabled)}>
                 <Plus size={13} />
               </IconButton>
             </Box>
@@ -231,8 +239,11 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
 
           if (!dbItem) {
             return (
-              <Box key={name} sx={{ display: 'flex', alignItems: 'center', gap: '7px', px: '8px', py: '5px', border: 1, borderColor: rowBorder, borderRadius: 1, bgcolor: rowBg }}>
-                <Typography noWrap sx={{ flex: 1, minWidth: 0, fontSize: '0.8rem', color: 'text.primary' }}>{name}</Typography>
+              <Box key={value} sx={{ display: 'flex', alignItems: 'center', gap: '7px', px: '8px', py: '5px', border: 1, borderColor: rowBorder, borderRadius: 1, bgcolor: rowBg }}>
+                <Typography noWrap sx={{ flex: 1, minWidth: 0, fontSize: '0.8rem', color: 'text.primary' }}>{label}</Typography>
+                {unavailable ? (
+                  <Typography sx={{ fontSize: '0.58rem', color: 'text.secondary' }}>Unavailable</Typography>
+                ) : null}
                 {stepper}
               </Box>
             );
@@ -240,7 +251,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
 
           return (
             <ExpandableCard
-              key={name}
+              key={value}
               containerSx={{ border: 1, borderColor: rowBorder, borderRadius: 1, bgcolor: rowBg, overflow: 'hidden' }}
               detailsSx={{ px: '10px', pt: '2px', pb: '8px', bgcolor: '#12100e', fontSize: '0.7rem', color: 'text.secondary' }}
               details={<ItemReferenceBody item={dbItem} />}
@@ -248,7 +259,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: '7px', px: '8px', py: '5px' }}>
                   <Box onClick={toggle} sx={{ display: 'flex', alignItems: 'center', gap: '7px', flex: 1, minWidth: 0, cursor: 'pointer' }}>
                     <ItemNameIcon item={dbItem} />
-                    <Typography noWrap sx={{ flex: 1, minWidth: 0, fontSize: '0.8rem', color: 'text.primary' }}>{name}</Typography>
+                    <Typography noWrap sx={{ flex: 1, minWidth: 0, fontSize: '0.8rem', color: 'text.primary' }}>{label}</Typography>
                   </Box>
                   {stepper}
                 </Box>
@@ -266,7 +277,9 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
         <Typography sx={{ fontSize: '0.58rem', color: 'text.secondary', fontStyle: 'italic', mt: 0.5 }}>
           {remaining <= 0
             ? 'Active limit reached. Remove one to make another.'
-            : 'Each item already made. Remove one to remake it.'}
+            : (requireResolvedItem && items.every((value) => !resolveItem(value))
+              ? 'Item data unavailable. No item can be created.'
+              : 'Each item already made or unavailable. Remove one to remake it.')}
         </Typography>
       ) : null}
     </Box>

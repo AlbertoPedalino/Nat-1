@@ -5,7 +5,7 @@ import { RichInline } from './RichText.jsx';
 import { entriesToHigherLevelBlocks } from './spellEntries.js';
 import { getSpellMetaSegments } from './spellMeta.js';
 import { isConcentrationSpell, isRitualSpell } from '../spellTags.js';
-import { SPELL_TAG_COLORS } from '../entityColors.js';
+import { RICH_TEXT_ACCENT, SPELL_TAG_COLORS } from '../entityColors.js';
 import MiniBadge from './MiniBadge.jsx';
 import { SpellNameIcon } from './FiveEToolsLink.jsx';
 
@@ -14,7 +14,7 @@ const META_LABEL_SX = {
   fontWeight: 700,
   letterSpacing: '0.06em',
   textTransform: 'uppercase',
-  color: '#9d7fb8',
+  color: RICH_TEXT_ACCENT,
   fontSize: '0.55rem',
   alignSelf: 'center',
 };
@@ -24,7 +24,7 @@ const SECTION_HEADING_SX = {
   fontSize: '0.6rem',
   fontWeight: 700,
   letterSpacing: '0.08em',
-  color: '#9d7fb8',
+  color: RICH_TEXT_ACCENT,
   mb: 0.5,
 };
 
@@ -56,7 +56,7 @@ export function HigherLevelBlock({ entries, fontSize, sx }) {
   if (!blocks.length) return null;
   // 5etools tags the higher-level block with its own "Using a Higher-Level
   // Spell Slot" name. Pull that heading out and render it live through the
-  // section-heading style (Cinzel / violet) instead of duplicating it as a
+  // shared rich-text section-heading style instead of duplicating it as a
   // plain white heading; fall back to a fixed label when the data has none.
   const headingIdx = blocks.findIndex((block) => block.kind === 'heading' && _REDUNDANT_HL_HEADING.test(String(block.text || '').trim()));
   const headingBlock = headingIdx >= 0 ? blocks[headingIdx] : null;

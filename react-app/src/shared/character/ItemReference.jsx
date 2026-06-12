@@ -15,7 +15,14 @@ export function ItemReferenceBody({ item, fontSize = '0.72rem', sx }) {
   return (
     <Box sx={sx}>
       <ItemPropertyTable item={item} sx={{ mb: hasEntries ? '6px' : 0 }} />
-      {hasEntries ? <EntryBlocks entries={item.entries} fontSize={fontSize} emptyText="" /> : null}
+      {hasEntries ? (
+        <EntryBlocks
+          entries={item.entries}
+          fontSize={fontSize}
+          headingFontSize="0.66rem"
+          emptyText=""
+        />
+      ) : null}
       <WeaponMasteryBlock mastery={item?.mastery} fontSize={fontSize} />
     </Box>
   );

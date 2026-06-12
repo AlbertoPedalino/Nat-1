@@ -1,5 +1,9 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
-import { REPLICATE_BUCKETS, isReplicateBucketLabel } from '../../../shared/character/replicateMagicItem.js';
+import {
+  REPLICATE_BUCKETS,
+  replicateChoiceLabel,
+  resolveReplicateChoice,
+} from '../../../shared/character/replicateMagicItem.js';
 
 const _REPLICATE_BUCKET_LABEL = Object.fromEntries(REPLICATE_BUCKETS.map((b) => [b.id, b.label]));
 
@@ -14,7 +18,6 @@ export default function install(registry, context = {}) {
     _EXOTIC_LANGS,
     _ALL_LANGS,
     _ALL_TOOLS,
-    allItemsDb,
     registerClassAdapter,
     getClassAdapter,
     registerSubclassAdapter,
@@ -140,8 +143,8 @@ const _ARTIFICER_REPLICATE_TIERS = [
       _REPLICATE_BUCKET_LABEL['common-any'],
       'Goggles of Night',
       'Manifold Tool',
-      'Repeating Shot',
-      'Returning Weapon',
+      _REPLICATE_BUCKET_LABEL['repeating-shot'],
+      _REPLICATE_BUCKET_LABEL['returning-weapon'],
       'Rope of Climbing',
       'Sending Stones',
       'Shield +1',
@@ -337,14 +340,13 @@ registerClassSheetActions("Artificer", [
           break;
         }
       }
-      // Generic plan buckets (e.g. "Common magic item…") are resolved to a
-      // concrete item in the builder; drop any unresolved bucket/legacy
-      // placeholder so the card never shows a fictitious inventory entry.
-      plans = plans.filter((p) => !isReplicateBucketLabel(p));
       return {
         flag: 'replicated',
         tagLabel: 'Replicated Items',
         items: plans,
+        itemLabel: replicateChoiceLabel,
+        resolveItem: (plan, itemsDb) => resolveReplicateChoice(plan, itemsDb)?.item || null,
+        requireResolvedItem: true,
         max: _artificerActiveItemsAtLevel(lv),
         maxPerItem: 1,
         emptyHint: 'No plans chosen yet — pick them in the character builder.',
@@ -429,6 +431,9 @@ registerClassSheetChoiceMeta("Artificer", {
     const k = String(key || "");
     const raw = String(value || "").split("|")[0].replace(/\{@\w+ /g, "").replace(/\}/g, "").trim();
     if (!raw) return "";
+    if (k.replace(/^mc\d+_/, "") === "artificer_replicate_magic_item_plans") {
+      return replicateChoiceLabel(raw);
+    }
     if (k === "armorer_model" || /^auto_(primary|ec\d+)_feat_.*_opt_\d+$/i.test(k)) {
       const nk = raw.toLowerCase().replace(/[^a-z0-9]/g, "");
       if (nk === "dreadnaught" || nk.includes("dreadnought")) return "Dreadnought";

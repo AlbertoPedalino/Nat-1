@@ -30,6 +30,7 @@ import { CurrencyRow } from '../../../shared/character/CurrencyCoinBox.jsx';
 import { setCoinAmount, updateCustomCurrency } from '../../../shared/character/currency.js';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import { ItemReferenceBody, QuantityAdder } from '../../../shared/character/ItemReference.jsx';
+import { itemDisplayName } from '../../../shared/character/itemIdentity.js';
 import { carryCapacity, formatWeight, itemQty as qty, totalCarriedWeight } from '../../../shared/character/weight.js';
 import { useSheetActions } from '../context/SheetActionsContext.jsx';
 import { craftedFlagOf, craftedTagColor } from '../../../shared/character/craftedItems.js';
@@ -204,6 +205,7 @@ function normalizeSearch(value) {
 
 function itemSearchText(item) {
   return normalizeSearch([
+    itemDisplayName(item),
     item?.name,
     item?.source,
     item?.sourceAlias,
@@ -273,7 +275,7 @@ function prepareSearchItem(item) {
   return {
     ...item,
     _itemType: itemType(item),
-    _searchName: normalizeSearch(item?.name),
+    _searchName: normalizeSearch(itemDisplayName(item)),
     _searchText: itemSearchText(item),
     _sourcePriority: sourcePriority(item?.source),
     _rarityPriority: rarityPriority(item?.rarity),
@@ -860,7 +862,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, 
           <Box onClick={toggle} sx={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', flexWrap: 'wrap' }}>
               <ItemNameIcon item={item} />
-              <Typography noWrap sx={{ fontSize: '0.875rem', color: 'text.primary' }}>{item.name}</Typography>
+              <Typography noWrap sx={{ fontSize: '0.875rem', color: 'text.primary' }}>{itemDisplayName(item)}</Typography>
               {item.custom ? <Box component="span" sx={{ fontSize: '0.56rem', color: 'text.secondary' }}>[custom]</Box> : null}
               {(() => {
                 const flag = craftedFlagOf(item);
@@ -868,9 +870,6 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, 
                 const tone = craftedTagColor(flag, character);
                 return <MiniBadge label={item.craftedLabel} color={tone} bg={alpha(tone, 0.16)} sx={{ ml: 0.5 }} />;
               })()}
-              {hasItemFlag(item, 'pactWeapon') ? <Box component="span" sx={{ ml: 0.5, fontSize: '0.56rem', color: '#9d7fb8', fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}>[Pact Weapon]</Box> : null}
-              {hasItemFlag(item, 'arcaneArmor') ? <Box component="span" sx={{ ml: 0.5, fontSize: '0.56rem', color: '#58b879', fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}>[Arcane Armor]</Box> : null}
-              {item.attuned ? <Box component="span" sx={{ ml: 0.5, fontSize: '0.56rem', color: ITEM_ATTUNEMENT, fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}>[Attuned]</Box> : null}
             </Box>
             {penaltyMsg && (
               <Typography sx={{ fontSize: '0.6rem', color: 'warning.main', mt: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>

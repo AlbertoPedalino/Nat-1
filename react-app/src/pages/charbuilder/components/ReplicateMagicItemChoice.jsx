@@ -1,22 +1,27 @@
 import { useMemo } from 'react';
 import {
-  Autocomplete,
   Box,
   Chip,
+  IconButton,
   List,
   ListItemButton,
   ListItemText,
   Paper,
   Stack,
-  TextField,
   Typography,
 } from '@mui/material';
-import { Check } from 'lucide-react';
+import { Check, ChevronDown, ChevronUp } from 'lucide-react';
 import SelectionSearch, { useOptionSearch } from './SelectionSearch.jsx';
+import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
+import { ItemReferenceBody } from '../../../shared/character/ItemReference.jsx';
+import { ItemNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 import {
+  applyReplicateItemPlan,
+  parseReplicateChoice,
   replicateBucketFromLabel,
-  replicateBucketOptions,
-  itemMatchesBucket,
+  replicateBucketChoiceValue,
+  replicateBucketItems,
+  replicateItemChoiceValue,
 } from '../../../shared/character/replicateMagicItem.js';
 
 // Replicate Magic Item (EFA) plan picker. The plan pool mixes concrete named
@@ -29,12 +34,119 @@ import {
 
 const lc = (value) => String(value || '').toLowerCase();
 
+const itemDetailsSx = {
+  px: 1,
+  py: 0.75,
+  bgcolor: 'background.paper',
+  color: 'text.secondary',
+};
+
+function ItemPlanRow({ name, source, item, active, selectionDisabled, onSelect }) {
+  return (
+    <ExpandableCard
+      disabled={!item}
+      containerSx={{ borderBottom: 1, borderColor: 'divider' }}
+      detailsSx={itemDetailsSx}
+      details={item ? <ItemReferenceBody item={item} /> : null}
+      summary={({ open, toggle, disabled: expandDisabled }) => (
+        <Stack direction="row" alignItems="stretch" sx={{ minWidth: 0 }}>
+          <ListItemButton
+            selected={active}
+            disabled={selectionDisabled}
+            onClick={onSelect}
+            sx={{ flex: 1, minWidth: 0, gap: 0.75, py: 0.65, px: 1 }}
+          >
+            {item ? <ItemNameIcon item={item} /> : null}
+            <ListItemText
+              primary={(
+                <Typography noWrap sx={{ color: 'text.primary', fontSize: '0.82rem', fontWeight: 500 }}>
+                  {name}
+                </Typography>
+              )}
+              secondary={source || null}
+              secondaryTypographyProps={{ noWrap: true, sx: { fontSize: '0.58rem' } }}
+            />
+            {active ? <Check size={16} color="currentColor" /> : null}
+          </ListItemButton>
+          <IconButton
+            size="small"
+            disabled={expandDisabled}
+            aria-label={open ? `Collapse ${name}` : `Expand ${name}`}
+            onClick={toggle}
+            sx={{ borderRadius: 0, px: 1, color: 'text.secondary' }}
+          >
+            {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </IconButton>
+        </Stack>
+      )}
+    />
+  );
+}
+
+function ItemPlanPanel({
+  title,
+  note,
+  options,
+  selected,
+  full,
+  onToggle,
+  searchPlaceholder,
+  emptyText = 'No items available.',
+}) {
+  const { query, setQuery, showSearch, visibleOptions } = useOptionSearch(
+    options,
+    { getText: (option) => `${option.name} ${option.source || ''}` },
+  );
+  return (
+    <Stack spacing={0.6} sx={{ minWidth: 0 }}>
+      <Typography sx={{ color: 'text.secondary', fontSize: '0.68rem', fontWeight: 700 }}>
+        {title}
+      </Typography>
+      {note ? (
+        <Typography sx={{ color: 'text.secondary', fontSize: '0.62rem', fontStyle: 'italic' }}>
+          {note}
+        </Typography>
+      ) : null}
+      {showSearch ? (
+        <SelectionSearch value={query} onChange={setQuery} placeholder={searchPlaceholder} />
+      ) : null}
+      <Paper variant="outlined" sx={{ maxHeight: 210, overflow: 'auto', bgcolor: 'background.default' }}>
+        {visibleOptions.length ? (
+          <List dense disablePadding>
+            {visibleOptions.map(({ value, name, source, item }) => {
+              const active = selected.includes(value);
+              return (
+                <ItemPlanRow
+                  key={value}
+                  name={name}
+                  source={source}
+                  item={item}
+                  active={active}
+                  selectionDisabled={!item || (!active && full)}
+                  onSelect={() => onToggle(value)}
+                />
+              );
+            })}
+          </List>
+        ) : (
+          <Box sx={{ px: 1, py: 0.75 }}>
+            <Typography color="text.secondary" sx={{ fontSize: '0.78rem' }}>
+              {options.length ? 'No matches.' : emptyText}
+            </Typography>
+          </Box>
+        )}
+      </Paper>
+    </Stack>
+  );
+}
+
 export default function ReplicateMagicItemChoice({ spec, character, dispatch, items }) {
   const pool = useMemo(() => spec.from || [], [spec.from]);
   const max = spec.count || 1;
   const selected = useMemo(() => {
     const raw = character?.choices?.[spec.key];
-    return Array.isArray(raw) ? raw : raw ? [raw] : [];
+    const values = Array.isArray(raw) ? raw : raw ? [raw] : [];
+    return values.filter((value) => parseReplicateChoice(value));
   }, [character?.choices, spec.key]);
 
   // Pool split: concrete named plans vs generic filter buckets (pool order).
@@ -49,40 +161,27 @@ export default function ReplicateMagicItemChoice({ spec, character, dispatch, it
     return { specifics: s, buckets: b };
   }, [pool]);
 
-  const specificSet = useMemo(() => new Set(specifics.map(lc)), [specifics]);
-  // Search over the concrete plan list (named items are plain strings, so the
-  // searchable text is the name itself). Field only shows past the shared
-  // threshold, matching the other builder selection panels.
-  const { query, setQuery, showSearch, visibleOptions: visibleSpecifics } = useOptionSearch(
-    specifics,
-    { getText: (name) => name },
-  );
-  const itemByName = useMemo(() => {
-    const m = new Map();
-    (items || []).forEach((it) => { if (it?.name) m.set(lc(it.name), it); });
-    return m;
-  }, [items]);
+  const specificOptions = useMemo(() => specifics.flatMap((name) => {
+    const matches = (items || []).filter((item) => lc(item?.name) === lc(name));
+    if (!matches.length) return [{ value: name, name, source: '', item: null }];
+    const seen = new Set();
+    return matches.flatMap((item) => {
+      const value = replicateItemChoiceValue(item);
+      if (seen.has(value)) return [];
+      seen.add(value);
+      return [{ value, name: item.name, source: item.source, item }];
+    });
+  }), [specifics, items]);
+  const specificNames = useMemo(() => new Set(specifics.map(lc)), [specifics]);
 
   const total = selected.length;
   const full = total >= max;
   const setPlans = (next) => dispatch({ type: 'choice/set', key: spec.key, value: next });
 
-  const toggleSpecific = (name) => {
+  const togglePlan = (name) => {
     if (selected.includes(name)) setPlans(selected.filter((v) => v !== name));
     else if (!full) setPlans([...selected, name]);
   };
-  const addBucketItem = (name) => {
-    if (!name || full || selected.includes(name)) return;
-    setPlans([...selected, name]);
-  };
-  const removeItem = (name) => setPlans(selected.filter((v) => v !== name));
-
-  // Selected concrete picks that resolve to a given bucket (excludes named
-  // specifics so e.g. Goggles of Night stays under its own row).
-  const picksForBucket = (bucket) => selected.filter((v) => {
-    if (specificSet.has(lc(v))) return false;
-    return itemMatchesBucket(itemByName.get(lc(v)), bucket);
-  });
 
   return (
     <Paper variant="outlined" sx={{ p: 1, minWidth: 0 }}>
@@ -111,85 +210,36 @@ export default function ReplicateMagicItemChoice({ spec, character, dispatch, it
         </Stack>
 
         {specifics.length ? (
-          <Stack spacing={0.6} sx={{ minWidth: 0 }}>
-            {showSearch ? <SelectionSearch value={query} onChange={setQuery} placeholder="Search plans…" /> : null}
-            <Paper variant="outlined" sx={{ maxHeight: 210, overflow: 'auto', bgcolor: 'background.default' }}>
-              {visibleSpecifics.length ? (
-                <List dense disablePadding>
-                  {visibleSpecifics.map((name) => {
-                    const active = selected.includes(name);
-                    return (
-                      <ListItemButton
-                        key={`${spec.key}-${name}`}
-                        divider
-                        selected={active}
-                        disabled={!active && full}
-                        onClick={() => toggleSpecific(name)}
-                        sx={{
-                          minWidth: 0,
-                          py: 0.65,
-                          px: 1,
-                        }}
-                      >
-                        <ListItemText
-                          primary={(
-                            <Typography
-                              noWrap
-                              sx={{ color: 'text.primary', fontSize: '0.82rem', fontWeight: 500 }}
-                            >
-                              {name}
-                            </Typography>
-                          )}
-                        />
-                        {active ? <Check size={16} color="currentColor" /> : null}
-                      </ListItemButton>
-                    );
-                  })}
-                </List>
-              ) : (
-                <Box sx={{ px: 1, py: 0.75 }}>
-                  <Typography color="text.secondary" sx={{ fontSize: '0.78rem' }}>No matches.</Typography>
-                </Box>
-              )}
-            </Paper>
-          </Stack>
+          <ItemPlanPanel
+            title="Named magic items"
+            options={specificOptions}
+            selected={selected}
+            full={full}
+            onToggle={togglePlan}
+            searchPlaceholder="Search named plans…"
+          />
         ) : null}
 
         {buckets.map((bucket) => {
-          const picks = picksForBucket(bucket);
-          const options = replicateBucketOptions(items, bucket, new Set([
-            ...specifics.map(lc),
-            ...selected.map(lc),
-          ]));
+          const options = replicateBucketItems(items, bucket, specificNames)
+            .map((item) => ({
+              value: replicateBucketChoiceValue(bucket, item),
+              name: item.name,
+              source: item.source,
+              item: applyReplicateItemPlan(item, bucket),
+            }));
           return (
-            <Stack key={`${spec.key}-bucket-${bucket.id}`} spacing={0.6} sx={{ minWidth: 0 }}>
-              <Typography sx={{ color: 'text.secondary', fontSize: '0.68rem', fontWeight: 700 }}>
-                {bucket.label}
-              </Typography>
-              {picks.length ? (
-                <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
-                  {picks.map((p) => (
-                    <Chip key={`${spec.key}-pick-${p}`} size="small" label={p} onDelete={() => removeItem(p)} color="primary" variant="outlined" />
-                  ))}
-                </Stack>
-              ) : null}
-              <Autocomplete
-                size="small"
-                options={options}
-                value={null}
-                blurOnSelect
-                clearOnBlur
-                disabled={full || !options.length}
-                onChange={(_e, value) => { if (value) addBucketItem(value); }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    placeholder={full ? 'Plans Known full' : (bucket.pickLabel || 'Pick a concrete item…')}
-                    variant="outlined"
-                  />
-                )}
-              />
-            </Stack>
+            <ItemPlanPanel
+              key={`${spec.key}-bucket-${bucket.id}`}
+              title={bucket.label}
+              note={bucket.requirementLabel}
+              options={options}
+              selected={selected}
+              full={full}
+              onToggle={togglePlan}
+              searchPlaceholder={`Search ${bucket.label.toLowerCase()}…`}
+              emptyText="No matching items available."
+            />
           );
         })}
       </Stack>

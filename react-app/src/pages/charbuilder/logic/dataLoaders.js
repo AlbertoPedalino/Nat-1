@@ -6,6 +6,7 @@ import {
 } from '../constants.js';
 import { dedupeSpellsBySourcePriority, normalizeSpellRecord } from '../../../shared/character/spellNormalization.js';
 import { itemIdentityKey } from '../../../shared/character/itemIdentity.js';
+import { resolveReplicateCraftedItem } from '../../../shared/character/replicateMagicItem.js';
 import {
   BACKGROUND_ALLOWED_SOURCES,
   CLASS_ALLOWED_SOURCES,
@@ -503,7 +504,8 @@ export function reconcileInventoryWithItemsDb(inventory, itemsDb) {
   let changed = false;
   const next = current.map((stored) => {
     if (!stored?.name || stored.custom) return stored;
-    const fresh = byKey.get(itemKey(stored.name, stored.source || ''));
+    const fresh = resolveReplicateCraftedItem(stored, itemsDb)
+      || byKey.get(itemKey(stored.name, stored.source || ''));
     if (!fresh) return stored;
     const patch = {};
     RECONCILED_ITEM_FIELDS.forEach((field) => {
