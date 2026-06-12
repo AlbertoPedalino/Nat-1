@@ -15,18 +15,13 @@ import { collectResolvedWeaponMasteries } from '../../../shared/character/weapon
 import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
 import { EntryAccordion, splitNamedEntries } from '../../../shared/character/EntryAccordion.jsx';
 import { collectAcFormulas, getEquippedArmor, getEquippedShield, computeAcFormulaValue } from '../../../shared/character/ac.js';
+import { collectOwnedFeatNames } from '../../../shared/character/selectedFeats.js';
 import { buildPreviewSheetCharacter } from '../logic/previewSheet.js';
 
 import { ENTITY_COLORS as SOURCE_COLOR, NEUTRAL_TONE } from '../../../shared/entityColors.js';
-import { featSlotOrigin, isFeatDetailKey } from '../../../shared/featChoiceKeys.js';
 
 const darkChipText = '#17120d';
-
-const PROF_TYPE_COLOR = {
-  Skills: SOURCE_COLOR.skill,
-  Tools: SOURCE_COLOR.tool,
-  Languages: SOURCE_COLOR.language,
-};
+const PROFICIENCY_TONE = NEUTRAL_TONE;
 
 
 const PANEL_SX = {
@@ -89,12 +84,38 @@ function PreviewSection({ icon: Icon, title, subtitle, tone = NEUTRAL_TONE, chil
   );
 }
 
+function InlineMetadata({ items }) {
+  const visibleItems = items.filter((item) => item.value != null && item.value !== '');
+  if (!visibleItems.length) return null;
+
+  return (
+    <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.72rem', lineHeight: 1.2 }}>
+      {visibleItems.map((item, index) => (
+        <Box component="span" key={item.key}>
+          {index > 0 ? (
+            <Box component="span" aria-hidden="true" sx={{ mx: 0.65, color: 'text.disabled' }}>
+              ·
+            </Box>
+          ) : null}
+          <Box component="span" sx={item.sx}>
+            {item.value}
+          </Box>
+        </Box>
+      ))}
+    </Typography>
+  );
+}
+
 function PreviewHeader({ character, hp }) {
   const subtitle = [
     `Lv ${character.level || 1}`,
     character.speciesName,
     character.className,
   ].filter(Boolean).join(' ');
+  const metadata = [
+    { key: 'identity', value: subtitle || 'No class selected' },
+    { key: 'hp', value: `${hp ?? '-'} HP`, sx: { color: NEUTRAL_TONE, fontWeight: 800 } },
+  ];
 
   return (
     <Card variant="outlined" sx={{ ...SECTION_CARD_SX, borderColor: 'rgba(237, 212, 138, 0.32)' }}>
@@ -108,12 +129,7 @@ function PreviewHeader({ character, hp }) {
           >
             {character.name || 'Unnamed Character'}
           </Typography>
-          <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap alignItems="center">
-            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.72rem', lineHeight: 1.2 }}>
-              {subtitle || 'No class selected'}
-            </Typography>
-            <Chip size="small" label={`${hp || '-'} HP`} sx={{ ...filledChipSx(NEUTRAL_TONE), height: 19, fontSize: '0.62rem' }} />
-          </Stack>
+          <InlineMetadata items={metadata} />
         </Stack>
       </CardContent>
     </Card>
@@ -162,6 +178,36 @@ function outlinedChipSx(color) {
     fontWeight: 700,
     '& .MuiChip-label': { color },
   };
+}
+
+function PreviewChipList({ items, tone = PROFICIENCY_TONE, getKey = (item) => item, getLabel = (item) => item }) {
+  return (
+    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.45, mt: 0.45, width: '100%', minWidth: 0, maxWidth: '100%', overflowX: 'hidden' }}>
+      {items.map((item) => (
+        <Chip
+          key={getKey(item)}
+          size="small"
+          variant="outlined"
+          label={getLabel(item)}
+          sx={{
+            ...outlinedChipSx(tone),
+            flex: '0 1 auto',
+            minWidth: 0,
+            height: 20,
+            maxWidth: '100%',
+            '& .MuiChip-label': {
+              color: tone,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              fontSize: '0.61rem',
+              fontWeight: 700,
+            },
+          }}
+        />
+      ))}
+    </Box>
+  );
 }
 
 // Shared 5etools entry renderer at the preview's compact type scale.
@@ -378,7 +424,7 @@ function AcFormulasSection({ character }) {
 function ProficiencySection({ sections }) {
   if (!sections.length) return null;
   return (
-    <PreviewSection icon={Languages} title="Proficiencies" subtitle="Skills, equipment, languages">
+    <PreviewSection icon={Languages} title="Proficiencies" subtitle="Skills, equipment, languages" tone={PROFICIENCY_TONE}>
       <Stack spacing={0.85} sx={{ minWidth: 0 }}>
         {sections.map((section) => (
           <Box key={section.title} sx={{ minWidth: 0 }}>
@@ -386,7 +432,7 @@ function ProficiencySection({ sections }) {
               variant="caption"
               sx={{
                 display: 'block',
-                color: 'text.secondary',
+                color: PROFICIENCY_TONE,
                 fontSize: '0.64rem',
                 fontWeight: 800,
                 letterSpacing: '0.05em',
@@ -395,34 +441,10 @@ function ProficiencySection({ sections }) {
             >
               {section.title}
             </Typography>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.45, mt: 0.45, width: '100%', minWidth: 0, maxWidth: '100%', overflowX: 'hidden' }}>
-              {section.items.map((item) => {
-                const tone = PROF_TYPE_COLOR[section.title] || NEUTRAL_TONE;
-                return (
-                  <Chip
-                    key={`${section.title}-${item}`}
-                    size="small"
-                    variant="outlined"
-                    label={item}
-                    sx={{
-                      ...outlinedChipSx(tone),
-                      flex: '0 1 auto',
-                      minWidth: 0,
-                      height: 20,
-                      maxWidth: '100%',
-                      '& .MuiChip-label': {
-                        color: tone,
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        fontSize: '0.61rem',
-                        fontWeight: 700,
-                      },
-                    }}
-                  />
-                );
-              })}
-            </Box>
+            <PreviewChipList
+              items={section.items}
+              getKey={(item) => `${section.title}-${item}`}
+            />
           </Box>
         ))}
       </Stack>
@@ -433,19 +455,12 @@ function ProficiencySection({ sections }) {
 function WeaponMasterySection({ items }) {
   if (!items.length) return null;
   return (
-    <PreviewSection icon={Sword} title="Weapon Masteries" subtitle="Resolved from selected weapons">
-      <Box component="ul" sx={{ m: 0, pl: 2.1, color: 'text.secondary' }}>
-        {items.map((item) => (
-          <Typography
-            key={`${item.weaponName}-${item.mastery || 'none'}`}
-            component="li"
-            variant="caption"
-            sx={{ color: 'text.secondary', fontSize: '0.72rem', lineHeight: 1.45 }}
-          >
-            {item.mastery ? `${item.weaponName} — ${item.mastery}` : item.weaponName}
-          </Typography>
-        ))}
-      </Box>
+    <PreviewSection icon={Sword} title="Weapon Masteries" tone={PROFICIENCY_TONE}>
+      <PreviewChipList
+        items={items}
+        getKey={(item) => `${item.weaponName}-${item.mastery || 'none'}`}
+        getLabel={(item) => item.mastery ? `${item.weaponName} — ${item.mastery}` : item.weaponName}
+      />
     </PreviewSection>
   );
 }
@@ -454,7 +469,7 @@ function normName(value) {
   return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
-function ClassSection({ icon: Icon, title, subtitle, classFeatures, subFeatures, subclassName, level, runtimeActions, runtimeResources, choiceCards }) {
+function ClassSection({ icon: Icon, title, subtitle, classFeatures, subFeatures, subclassName, level, runtimeActions, runtimeResources }) {
   const valid = classFeatures.filter((feature) => !feature?.isReprinted && (feature.level || 0) <= level);
   const validSub = subFeatures.filter((feature) => !feature?.isReprinted && (feature.level || 0) <= level && feature.subclassShortName === subclassName);
   const runtimeByName = new Map();
@@ -489,11 +504,10 @@ function ClassSection({ icon: Icon, title, subtitle, classFeatures, subFeatures,
     byLevel[lv].s.push({ feature, runtimeChips: enrich(feature) });
   });
   const levels = Object.keys(byLevel).map(Number).sort((a, b) => a - b);
-  const hasContent = levels.length || choiceCards?.length;
 
   return (
     <PreviewSection icon={Icon} title={title} subtitle={subtitle} tone={SOURCE_COLOR.class} emptyText="No class features yet.">
-      {hasContent ? (
+      {levels.length ? (
         <Stack spacing={0.85} sx={{ minWidth: 0 }}>
           {levels.map((lv) => (
             <LevelGroup
@@ -503,94 +517,61 @@ function ClassSection({ icon: Icon, title, subtitle, classFeatures, subFeatures,
               subFeatures={byLevel[lv].s}
             />
           ))}
-          {choiceCards?.length ? (
-            <Stack spacing={0.55} sx={{ minWidth: 0 }}>
-              <Typography
-                variant="caption"
-                sx={{
-                  display: 'block',
-                  color: 'text.secondary',
-                  fontSize: '0.64rem',
-                  fontWeight: 800,
-                  letterSpacing: '0.05em',
-                  textTransform: 'uppercase',
-                }}
-              >
-                Selected Choices
-              </Typography>
-              {choiceCards}
-            </Stack>
-          ) : null}
         </Stack>
       ) : null}
     </PreviewSection>
   );
 }
 
-function partitionChoices(choices) {
-  const out = { class: [], multiclass: {}, subclass: [], feat: [] };
-  Object.entries(choices || {}).forEach(([key, value]) => {
-    if (value == null || value === '') return;
-    // Feat detail picks (spell lists, entry index, spell ability…) are noise
-    // here — the slot's main choice card already names the feat.
-    if (isFeatDetailKey(key)) return;
-    const values = Array.isArray(value) ? value.filter((item) => item != null && item !== '') : [value];
-    if (!values.length) return;
-    const entry = { key, values };
-    const mc = key.match(/^mc(\d+)_(.*)$/);
-    if (mc) {
-      const idx = Number(mc[1]);
-      if (!out.multiclass[idx]) out.multiclass[idx] = [];
-      out.multiclass[idx].push({ ...entry, key: mc[2] });
-      return;
-    }
-    if (key.startsWith('subclass_')) out.subclass.push(entry);
-    else if (key === 'species_origin_feat') out.feat.push(entry);
-    // Species/background picks have no card here: those sections show the
-    // entity's entry descriptions instead.
-    else if (key.startsWith('species_') || featSlotOrigin(key) === 'background') return;
-    else if (key.startsWith('feat_')) out.feat.push(entry);
-    else if (key.startsWith('class_') || key.startsWith('start_') || key.startsWith('auto_') || key.includes('_skill_') || key.includes('_lang_') || key.includes('_tool_') || key.includes('_opt_') || key.includes('_exp_')) out.class.push(entry);
-  });
-  return out;
-}
-
-function labelFromKey(key) {
-  return key
-    .replace(/^auto_(primary|ec\d+)_feat_/, '')
-    .replace(/_(skill|lang|tool|opt|exp)_\d+$/, '')
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, (c) => c.toUpperCase())
-    .trim();
-}
-
-function ChoiceCard({ entry, source }) {
-  const tone = SOURCE_COLOR[source] || '#bda98a';
+function FeatNameCard({ name }) {
   return (
-    <Card variant="outlined" sx={{ minWidth: 0, borderLeft: `3px dashed ${tone}` }}>
+    <Card variant="outlined" sx={{ minWidth: 0, borderLeft: `3px solid ${SOURCE_COLOR.feat}` }}>
       <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
-        <Stack spacing={0.5} sx={{ minWidth: 0 }}>
-          <Typography variant="caption" sx={{ color: tone, fontWeight: 700 }}>{labelFromKey(entry.key)}</Typography>
-          <Box component="ul" sx={{ m: 0, pl: 2.25, color: 'text.secondary' }}>
-            {entry.values.map((value, idx) => (
-              <Typography key={`${value}-${idx}`} component="li" variant="caption" sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {String(value)}
-              </Typography>
-            ))}
-          </Box>
-        </Stack>
+        <Typography variant="body2" sx={{ color: SOURCE_COLOR.feat, fontWeight: 700 }}>
+          {name}
+        </Typography>
       </CardContent>
     </Card>
   );
 }
 
-function PreviewPaneImpl({ character, items = [], adaptersVersion = 0 }) {
+function normalizedName(value) {
+  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+function collectPreviewFeats(character, feats) {
+  const ownedNames = collectOwnedFeatNames(character);
+  if (!ownedNames.length) return [];
+
+  const byName = new Map();
+  [
+    ...(character.allFeatSnapshots || []),
+    ...(feats || []),
+  ].forEach((feat) => {
+    const key = normalizedName(feat?.name);
+    if (key && !byName.has(key)) byName.set(key, feat);
+  });
+
+  return ownedNames.map((name) => {
+    const feat = byName.get(normalizedName(name));
+    return feat ? { ...feat, name: feat.name || name } : { name, entries: [] };
+  });
+}
+
+function PreviewFeat({ feat }) {
+  if (hasDescriptionEntries(feat.entries)) {
+    return <FeatureWithChips entry={{ feature: feat }} source="feat" />;
+  }
+  return <FeatNameCard name={feat.name} />;
+}
+
+function PreviewPaneImpl({ character, items = [], feats = [], adaptersVersion = 0 }) {
   const scores = getAllFinalScores(character);
   const hp = calcMaxHp(character);
   const primaryLv = getPrimaryClassLevel(character);
-  const partitioned = partitionChoices(character.choices);
   const proficiencySections = collectPreviewProficiencies(character);
   const weaponMasteries = collectResolvedWeaponMasteries(character, items);
+  const previewFeats = collectPreviewFeats(character, feats);
   const species = character.speciesObj || character.speciesSnapshot;
   const background = character.backgroundObj || character.backgroundSnapshot;
 
@@ -632,10 +613,6 @@ function PreviewPaneImpl({ character, items = [], adaptersVersion = 0 }) {
             level={primaryLv}
             runtimeActions={[...classActions, ...subclassActions]}
             runtimeResources={[...classResources, ...subclassResources]}
-            choiceCards={[
-              ...partitioned.class.map((entry) => <ChoiceCard key={`pc-${entry.key}`} entry={entry} source="class" />),
-              ...partitioned.subclass.map((entry) => <ChoiceCard key={`ps-${entry.key}`} entry={entry} source="subclass" />),
-            ]}
           />
         ) : null}
 
@@ -652,7 +629,6 @@ function PreviewPaneImpl({ character, items = [], adaptersVersion = 0 }) {
             ? installedRegistry.getSubclassSheetResources(extra.name, extra.subclassShortName)
               .filter((resource) => !resource.minLevel || ecLv >= Number(resource.minLevel))
             : [];
-          const ecChoices = partitioned.multiclass[index] || [];
           return (
             <Box key={`${extra.name}-${index}`} sx={{ minWidth: 0 }}>
               <ClassSection
@@ -665,7 +641,6 @@ function PreviewPaneImpl({ character, items = [], adaptersVersion = 0 }) {
                 level={ecLv}
                 runtimeActions={[...ecActions, ...ecSubActions]}
                 runtimeResources={[...ecResources, ...ecSubResources]}
-                choiceCards={ecChoices.map((entry) => <ChoiceCard key={`mc-${index}-${entry.key}`} entry={entry} source={entry.key.startsWith('subclass_') ? 'subclass' : 'class'} />)}
               />
             </Box>
           );
@@ -699,11 +674,11 @@ function PreviewPaneImpl({ character, items = [], adaptersVersion = 0 }) {
           ) : null}
         </PreviewSection>
 
-        {partitioned.feat.length ? (
+        {previewFeats.length ? (
           <PreviewSection icon={Layers} title="Feats" tone={SOURCE_COLOR.feat}>
             <Stack spacing={0.6} sx={{ minWidth: 0 }}>
-              {partitioned.feat.map((entry) => (
-                <ChoiceCard key={entry.key} entry={entry} source="feat" />
+              {previewFeats.map((feat) => (
+                <PreviewFeat key={normalizedName(feat.name)} feat={feat} />
               ))}
             </Stack>
           </PreviewSection>
@@ -714,4 +689,9 @@ function PreviewPaneImpl({ character, items = [], adaptersVersion = 0 }) {
   );
 }
 
-export default memo(PreviewPaneImpl, (prev, next) => prev.character === next.character && prev.items === next.items && prev.adaptersVersion === next.adaptersVersion);
+export default memo(PreviewPaneImpl, (prev, next) => (
+  prev.character === next.character
+  && prev.items === next.items
+  && prev.feats === next.feats
+  && prev.adaptersVersion === next.adaptersVersion
+));

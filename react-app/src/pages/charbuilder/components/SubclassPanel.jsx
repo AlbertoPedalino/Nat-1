@@ -3,7 +3,7 @@ import { Sparkles } from 'lucide-react';
 import BuilderPanel from './BuilderPanel.jsx';
 import { EntryAccordion } from '../../../shared/character/EntryAccordion.jsx';
 import { getPrimaryClassLevel } from '../logic/calculations.js';
-import { ENTITY_COLORS, entityChipSx } from '../../../shared/entityColors.js';
+import { ENTITY_COLORS } from '../../../shared/entityColors.js';
 
 function SubclassFeatureRow({ feature }) {
   return (
@@ -11,7 +11,7 @@ function SubclassFeatureRow({ feature }) {
       title={feature.name}
       entries={feature.entries}
       tone={ENTITY_COLORS.subclass}
-      leading={<Chip size="small" label={`Lv ${feature.level}`} sx={{ ...entityChipSx('subclass'), color: '#fff' }} />}
+      leading={<Chip size="small" label={`Lv ${feature.level}`} />}
     />
   );
 }

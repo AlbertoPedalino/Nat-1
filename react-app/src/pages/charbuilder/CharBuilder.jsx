@@ -319,7 +319,12 @@ export default function CharBuilder() {
           </Box>
 
           <Box sx={{ minWidth: 0 }}>
-            <PreviewPane character={state.character} items={state.data.items} adaptersVersion={state.adaptersVersion} />
+            <PreviewPane
+              character={state.character}
+              items={state.data.items}
+              feats={state.data.feats}
+              adaptersVersion={state.adaptersVersion}
+            />
           </Box>
         </Box>
 
@@ -343,19 +348,8 @@ const builderRootSx = {
     borderColor: 'divider',
     borderRadius: 1,
   },
-  // Builder typography (compact Cinzel scale) lives in `builderTheme` below, not
-  // here. Theme `styleOverrides` apply at the variant class (specificity 0,1,0),
-  // so a component's own `sx` color/size still wins — a descendant rule here
-  // (0,2,0) would override every h2's sx and silently break per-title colors.
-  '& .MuiChip-root': {
-    height: 19,
-    borderRadius: '3px',
-    fontFamily: '"Cinzel", Georgia, serif',
-    fontSize: '0.54rem',
-    letterSpacing: '0.04em',
-    bgcolor: 'rgba(202,165,80,0.08)',
-    borderColor: 'rgba(202,165,80,0.28)',
-  },
+  // Builder component defaults live in `builderTheme` below. Theme overrides
+  // keep specificity low so component `sx` can still set colors and sizing.
   '& .MuiButton-root': {
     minHeight: 0,
     borderRadius: 1,
@@ -410,12 +404,9 @@ const builderRootSx = {
   },
 };
 
-// Builder-scoped typography: the compact Cinzel scale, applied as theme variant
-// overrides (specificity 0,1,0) instead of descendant rules in `builderRootSx`
-// (0,2,0). This keeps the size/font as defaults while letting any component's
-// own `sx` (color, size) win — the previous descendant rules silently overrode
-// per-title `sx` colors. Scoped to the builder via the ThemeProvider in render;
-// the character sheet keeps the base theme typography.
+// Builder-scoped component defaults use theme overrides instead of descendant
+// selectors in `builderRootSx`. This keeps component `sx` authoritative for
+// custom colors/sizes. Scoped to the builder via the ThemeProvider in render.
 const CINZEL = '"Cinzel", Georgia, serif';
 const builderTheme = createTheme(theme, {
   components: {
@@ -427,6 +418,19 @@ const builderTheme = createTheme(theme, {
         body2: { fontSize: '0.72rem' },
         caption: { fontSize: '0.62rem' },
         overline: { fontFamily: CINZEL, fontSize: '0.56rem', lineHeight: 1.6, fontWeight: 800 },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          height: 19,
+          borderRadius: '3px',
+          fontFamily: CINZEL,
+          fontSize: '0.54rem',
+          letterSpacing: '0.04em',
+          backgroundColor: 'rgba(202,165,80,0.08)',
+          borderColor: 'rgba(202,165,80,0.28)',
+        },
       },
     },
   },

@@ -103,12 +103,13 @@ function fromChoices(character) {
 }
 
 function fromBackground(character) {
-  const origin = backgroundOriginFeat(character?.backgroundObj);
+  const origin = backgroundOriginFeat(character?.backgroundObj || character?.backgroundSnapshot);
   return origin?.fixed ? [origin.fixed] : [];
 }
 
 function fromSpecies(character) {
-  const feats = Array.isArray(character?.speciesObj?.feats) ? character.speciesObj.feats : [];
+  const species = character?.speciesObj || character?.speciesSnapshot;
+  const feats = Array.isArray(species?.feats) ? species.feats : [];
   const out = [];
   feats.forEach((entry) => {
     if (typeof entry === 'string') { out.push(entry); return; }
@@ -127,7 +128,11 @@ const FEAT_SOURCES = [fromChoices, fromBackground, fromSpecies];
 const ownedNamesCache = new WeakMap();
 
 function cacheKey(character) {
-  return [character.choices, character.backgroundObj, character.speciesObj];
+  return [
+    character.choices,
+    character.backgroundObj || character.backgroundSnapshot,
+    character.speciesObj || character.speciesSnapshot,
+  ];
 }
 
 function sameKey(a, b) {
