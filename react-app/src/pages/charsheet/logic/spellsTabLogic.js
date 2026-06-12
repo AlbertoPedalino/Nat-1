@@ -10,7 +10,7 @@ import { featSlotOrigin } from '../../../shared/featChoiceKeys.js';
 import { collectFreeCastsForGrant, mergeFreeCastsById, normalizeFreeCast, getFeatFreeCastTemplate, applyFreeCastRest } from '../../../shared/character/spellFreeCasts.js';
 import { collectItemAttachedSpells } from '../../../shared/character/itemAttachedSpells.js';
 import { isWarlockModifierCantripChoiceKey } from '../../../shared/character/warlockUtils.js';
-import { ENTITY_COLORS, ITEM_ATTUNEMENT } from '../../../shared/entityColors.js';
+import { ENTITY_COLORS, ITEM_ATTUNEMENT, ACTION_COLORS } from '../../../shared/entityColors.js';
 
 // Display colors for spell-source tags. Entity-linked tags follow the canonical
 // entity palette (shared/entityColors.js); the rest are spell-domain-only tags.
@@ -1104,9 +1104,9 @@ export function getSpellStatusChips(entry) {
 
 export function getCastBadge(spell) {
   const unit = spell?.time?.[0]?.unit || '';
-  if (unit === 'bonus') return { label: 'BA', color: '#f5c542' };
-  if (unit === 'reaction') return { label: 'RE', color: '#f5a623' };
-  if (unit === 'action' || unit === '') return { label: 'A', color: '#4d95d6' };
+  if (unit === 'bonus') return { label: 'BA', color: ACTION_COLORS.bonus };
+  if (unit === 'reaction') return { label: 'RE', color: ACTION_COLORS.reaction };
+  if (unit === 'action' || unit === '') return { label: 'A', color: ACTION_COLORS.action };
   return { label: unit, color: '#c4b393' };
 }
 

@@ -22,6 +22,24 @@ export const NEUTRAL_TONE = '#edd48a';
 // this lives apart from ENTITY_COLORS but follows the same "one hex" rule.
 export const ITEM_ATTUNEMENT = '#a23b4d';
 
+// Action-economy accents (action / bonus action / reaction). Deliberately
+// outside every entity-kind hue (teal/violet/blue/etc.) so action type never
+// reads as an entity. Shared by the Actions tab category bar and the spell
+// tab's cast-time chip, so a given action type looks identical everywhere.
+export const ACTION_COLORS = {
+  action: '#22c7e0',   // vivid electric cyan (kept clear of the muted subclass teal)
+  bonus: '#6f8fd8',    // steel blue
+  reaction: '#c46fd9', // orchid purple
+};
+
+// Spell-tag mini-chip accents (Concentration / Ritual) shown next to spell
+// names everywhere: sheet spell card, builder lists, picker dialogs and the
+// wizard spellbook. One home so the chip reads identically across all of them.
+export const SPELL_TAG_COLORS = {
+  concentration: '#e07a9e', // rose, kept clear of the species/choice violets
+  ritual: '#58b879',        // green
+};
+
 // Single recipe for the translucent tint+border chip look. Both the theme's
 // MuiChip color overrides and entityChipSx derive from this, so the visual
 // language stays in one place.

@@ -5,6 +5,7 @@ import { SpellNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 import { RichInline } from '../../../shared/character/RichText.jsx';
 import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
 import { SpellMetaGrid, HigherLevelBlock } from '../../../shared/character/SpellReference.jsx';
+import MiniBadge from '../../../shared/character/MiniBadge.jsx';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import PipButton from '../../../shared/character/PipButton.jsx';
 import { formatRollTitle, rollFormula as rollFormulaDice } from '../../../shared/character/dice.js';
@@ -25,6 +26,7 @@ import {
 import { inlineButtonSx, spellBodySx, spellRowSx } from './spellsTabStyles.js';
 import AttackRollButton from './AttackRollButton.jsx';
 import { isConcentrationSpell, isRitualSpell } from '../../../shared/spellTags.js';
+import { ENTITY_COLORS, SPELL_TAG_COLORS } from '../../../shared/entityColors.js';
 import { useSheetActions } from '../context/SheetActionsContext.jsx';
 
 function applyFlatToFormula(formula, flat) {
@@ -39,14 +41,6 @@ function applyFlatToFormula(formula, flat) {
   return `${count}d${faces}${total ? (total > 0 ? '+' : '') + total : ''}`;
 }
 
-function Badge({ label, color, bg = 'transparent' }) {
-  return (
-    <Box component="span" sx={{ border: 1, borderColor: color, color, bgcolor: bg, borderRadius: '3px', px: '6px', py: '1px', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.56rem', lineHeight: 1.35, flexShrink: 0 }}>
-      {label}
-    </Box>
-  );
-}
-
 // Source badge for a spell row. When the same spell is granted by more than
 // one source (e.g. a Forest Gnome Druid's Speak with Animals), the row stays
 // consolidated to a single badge showing the primary source plus a `+N`
@@ -57,7 +51,7 @@ function SourceBadge({ sourceInfo, sources, suffix = '' }) {
   const extra = all.length - 1;
   const label = sourceInfo.label + suffix + (extra > 0 ? ` +${extra}` : '');
   const tone = sourceInfo.color || '#9d7fb8';
-  const badge = <Badge label={label} color={tone} bg={alpha(tone, 0.16)} />;
+  const badge = <MiniBadge label={label} color={tone} bg={alpha(tone, 0.16)} />;
   if (extra <= 0) return badge;
   const title = 'Sources: ' + all.map((s) => s.originLabel || s.label).filter(Boolean).join(', ');
   return <Tooltip title={title} arrow><Box component="span" sx={{ display: 'inline-flex' }}>{badge}</Box></Tooltip>;
@@ -289,7 +283,7 @@ export default function SpellEntry({ entry, spellAttackBonus = 0, C, exhaustionL
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', minWidth: 0 }}>
           <SpellNameIcon spell={entry} />
           <Typography noWrap sx={{ overflow: 'hidden', minWidth: 0, fontSize: '0.875rem', color: 'text.primary', textOverflow: 'ellipsis' }}>{entry.name}</Typography>
-          {castLevel > baseLevel ? <Badge label={`Lv.${castLevel}`} color="#d69245" bg="rgba(214,146,69,0.14)" /> : null}
+          {castLevel > baseLevel ? <MiniBadge label={`Lv.${castLevel}`} color={ENTITY_COLORS.class} bg={alpha(ENTITY_COLORS.class, 0.14)} /> : null}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', ml: 'auto', flexShrink: 0 }}>
             {(hasAttack || hasDamage || hasHeal || utilityDie) ? (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -333,15 +327,15 @@ export default function SpellEntry({ entry, spellAttackBonus = 0, C, exhaustionL
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', flexWrap: 'wrap', justifyContent: 'space-between' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', flexWrap: 'wrap' }}>
             <SourceBadge sourceInfo={entry.sourceInfo} sources={entry.sources} suffix={beamBonus ? ` ${beamBonus >= 0 ? '+' : ''}${beamBonus}` : ''} />
-            {modifierTags.map(function (tag) { return <Badge key={tag} label={tag} color="#9d7fb8" bg="rgba(157,127,184,0.16)" />; })}
-            {getSpellStatusChips(entry).map((chip) => <Badge key={chip.key} label={chip.label} color={chip.color} bg={chip.bg} />)}
-            {ritualOnly ? <Badge label="Ritual only" color="#58b879" bg="rgba(63,166,108,0.14)" /> : null}
+            {modifierTags.map(function (tag) { return <MiniBadge key={tag} label={tag} color="#9d7fb8" bg="rgba(157,127,184,0.16)" />; })}
+            {getSpellStatusChips(entry).map((chip) => <MiniBadge key={chip.key} label={chip.label} color={chip.color} bg={chip.bg} />)}
+            {ritualOnly ? <MiniBadge label="Ritual only" color={SPELL_TAG_COLORS.ritual} bg={alpha(SPELL_TAG_COLORS.ritual, 0.16)} /> : null}
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', flexShrink: 0 }}>
-            {beamCount > 1 ? <Badge label={`${beamCount} beams`} color="#9d7fb8" bg="rgba(157,127,184,0.16)" /> : null}
-            {hasConcentrationTag ? <Badge label="C" color="#9d7fb8" bg="rgba(157,127,184,0.16)" /> : null}
-            {hasRitualTag ? <Badge label="R" color="#58b879" bg="rgba(63,166,108,0.14)" /> : null}
-            <Badge {...getCastBadge(entry)} />
+            {beamCount > 1 ? <MiniBadge label={`${beamCount} beams`} color="#9d7fb8" bg="rgba(157,127,184,0.16)" /> : null}
+            {hasConcentrationTag ? <MiniBadge label="C" color={SPELL_TAG_COLORS.concentration} bg={alpha(SPELL_TAG_COLORS.concentration, 0.16)} /> : null}
+            {hasRitualTag ? <MiniBadge label="R" color={SPELL_TAG_COLORS.ritual} bg={alpha(SPELL_TAG_COLORS.ritual, 0.16)} /> : null}
+            <MiniBadge {...getCastBadge(entry)} />
           </Box>
         </Box>
         </Box>

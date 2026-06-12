@@ -23,9 +23,11 @@ import { weaponEnhancement } from '../../../shared/character/itemBonus.js';
 import { isItemEffectActive } from '../../../shared/character/itemAttunement.js';
 import { matchesItemReference } from '../../../shared/character/itemIdentity.js';
 import { getMeleeStrDamageBonus, getWeaponEffectBonuses } from './sheetEffects.js';
+import { ACTION_COLORS } from '../../../shared/entityColors.js';
 
 export const FILTERS = ['all', 'action', 'bonus', 'reaction'];
-export const CAT_COLORS = { attack: '#de675f', action: '#caa550', bonus: '#70b7a6', reaction: '#9d7fb8' };
+// Weapon/unarmed attacks are Actions, so they share the action colour.
+export const CAT_COLORS = { ...ACTION_COLORS, attack: ACTION_COLORS.action };
 const EXECUTABLE_CATS = new Set(['attack', 'action', 'bonus', 'reaction']);
 export const SECTION_DEFS = [
   { key: 'action', title: 'Actions', cats: ['action', 'attack'] },

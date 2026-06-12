@@ -1,9 +1,12 @@
 import { Fragment } from 'react';
-import { Box, Button, Typography } from '@mui/material';
+import { alpha, Box, Button, Typography } from '@mui/material';
 import { EntryBlocks } from './EntryBlocks.jsx';
+import { RichInline } from './RichText.jsx';
 import { entriesToHigherLevelBlocks } from './spellEntries.js';
 import { getSpellMetaSegments } from './spellMeta.js';
 import { isConcentrationSpell, isRitualSpell } from '../spellTags.js';
+import { SPELL_TAG_COLORS } from '../entityColors.js';
+import MiniBadge from './MiniBadge.jsx';
 import { SpellNameIcon } from './FiveEToolsLink.jsx';
 
 const META_LABEL_SX = {
@@ -45,14 +48,27 @@ export function SpellMetaGrid({ spell, fontSize = '0.65rem', sx }) {
 
 // "Using a Higher-Level Spell Slot" upcast block. Accepts raw higher-level
 // entries; renders nothing when absent/empty.
+const _REDUNDANT_HL_HEADING = /^(using a higher[- ]level spell slot|at higher levels)\.?$/i;
+
 export function HigherLevelBlock({ entries, fontSize, sx }) {
   if (!entries) return null;
   const blocks = entriesToHigherLevelBlocks(entries);
   if (!blocks.length) return null;
+  // 5etools tags the higher-level block with its own "Using a Higher-Level
+  // Spell Slot" name. Pull that heading out and render it live through the
+  // section-heading style (Cinzel / violet) instead of duplicating it as a
+  // plain white heading; fall back to a fixed label when the data has none.
+  const headingIdx = blocks.findIndex((block) => block.kind === 'heading' && _REDUNDANT_HL_HEADING.test(String(block.text || '').trim()));
+  const headingBlock = headingIdx >= 0 ? blocks[headingIdx] : null;
+  const bodyBlocks = headingIdx >= 0 ? blocks.filter((_, i) => i !== headingIdx) : blocks;
   return (
     <Box sx={{ mt: 1, pt: 1, borderTop: '1px dashed', borderColor: 'divider', ...sx }}>
-      <Box sx={SECTION_HEADING_SX}>Using a Higher-Level Spell Slot</Box>
-      <EntryBlocks blocks={blocks} fontSize={fontSize} emptyText="" />
+      <Box sx={SECTION_HEADING_SX}>
+        {headingBlock?.tokens?.length
+          ? <RichInline tokens={headingBlock.tokens} keyPrefix="hl-heading" />
+          : (headingBlock?.text || 'Using a Higher-Level Spell Slot')}
+      </Box>
+      <EntryBlocks blocks={bodyBlocks} fontSize={fontSize} emptyText="" />
     </Box>
   );
 }
@@ -61,21 +77,14 @@ export function HigherLevelBlock({ entries, fontSize, sx }) {
 // Shared by every spell row (builder list + sheet picker dialog).
 export function SpellMiniTags({ spell }) {
   const tags = [
-    isConcentrationSpell(spell) ? { label: 'C', color: '#9d7fb8', bg: 'rgba(157,127,184,0.16)', title: 'Concentration' } : null,
-    isRitualSpell(spell) ? { label: 'R', color: '#58b879', bg: 'rgba(63,166,108,0.14)', title: 'Ritual' } : null,
+    isConcentrationSpell(spell) ? { label: 'C', color: SPELL_TAG_COLORS.concentration, bg: alpha(SPELL_TAG_COLORS.concentration, 0.16), title: 'Concentration' } : null,
+    isRitualSpell(spell) ? { label: 'R', color: SPELL_TAG_COLORS.ritual, bg: alpha(SPELL_TAG_COLORS.ritual, 0.16), title: 'Ritual' } : null,
   ].filter(Boolean);
   if (!tags.length) return null;
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', flexShrink: 0 }}>
       {tags.map((tag) => (
-        <Box
-          key={tag.label}
-          title={tag.title}
-          component="span"
-          sx={{ border: 1, borderColor: tag.color, color: tag.color, bgcolor: tag.bg, borderRadius: '3px', px: '5px', py: '1px', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.55rem', fontWeight: 700, lineHeight: 1.25 }}
-        >
-          {tag.label}
-        </Box>
+        <MiniBadge key={tag.label} label={tag.label} color={tag.color} bg={tag.bg} title={tag.title} />
       ))}
     </Box>
   );
