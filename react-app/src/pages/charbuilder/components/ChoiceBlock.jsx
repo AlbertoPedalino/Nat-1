@@ -5,6 +5,7 @@ import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
 import { findWeaponItemByName } from '../../../shared/character/weaponMastery.js';
 import { WeaponMasteryBlock } from '../../../shared/character/WeaponMasteryBlock.jsx';
 import ExpandableSelectionList from './ExpandableSelectionList.jsx';
+import SelectionSearch, { useOptionSearch } from './SelectionSearch.jsx';
 import {
   parseTypedProficiencyValue,
   isChoicePlaceholderValue,
@@ -246,6 +247,7 @@ export default function ChoiceBlock({ spec, choices, dispatch, character, getOpt
     if (spec.excludeAlreadyExpertise && alreadyExpertise && !active && alreadyExpertise.has(skillKey)) return false;
     return true;
   });
+  const { query, setQuery, showSearch, visibleOptions } = useOptionSearch(options);
   const max = spec.count || 1;
   const blockedValuesForReducer = [...new Set([
     ...Array.from(blockedValues),
@@ -304,9 +306,11 @@ export default function ChoiceBlock({ spec, choices, dispatch, character, getOpt
           </Typography>
           <Chip size="small" label={`${selected.length}/${max}`} color={selected.length >= max ? 'primary' : 'default'} variant={selected.length >= max ? 'filled' : 'outlined'} />
         </Stack>
+        {showSearch ? <SelectionSearch value={query} onChange={setQuery} /> : null}
         <Paper variant="outlined" sx={{ maxHeight: 210, overflow: 'auto', bgcolor: 'background.default' }}>
+          {visibleOptions.length ? (
           <List dense disablePadding>
-            {options.map(({ value, label }) => {
+            {visibleOptions.map(({ value, label }) => {
               const active = selected.includes(value);
               const full = !active && selected.length >= max;
               const parsed = parseTypedChoiceValue(value);
@@ -366,6 +370,11 @@ export default function ChoiceBlock({ spec, choices, dispatch, character, getOpt
               );
             })}
           </List>
+          ) : (
+            <Box sx={{ px: 1, py: 0.75 }}>
+              <Typography color="text.secondary" sx={{ fontSize: '0.78rem' }}>No matches.</Typography>
+            </Box>
+          )}
         </Paper>
       </Stack>
     </Paper>

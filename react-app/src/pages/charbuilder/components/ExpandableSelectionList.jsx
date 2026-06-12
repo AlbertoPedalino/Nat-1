@@ -1,6 +1,7 @@
 import { Box, IconButton, List, ListItemButton, ListItemText, Paper, Stack, Typography } from '@mui/material';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
+import SelectionSearch, { useOptionSearch } from './SelectionSearch.jsx';
 
 function selectionStatus(selectedCount, max) {
   if (!Number.isFinite(max) || max <= 0) return null;
@@ -17,6 +18,7 @@ export default function ExpandableSelectionList({
   maxHeight = 320,
 }) {
   const status = selectionStatus(selectedCount, max);
+  const { query, setQuery, showSearch, visibleOptions } = useOptionSearch(options);
 
   return (
     <Paper variant="outlined" sx={{ p: 1.5, minWidth: 0 }}>
@@ -32,10 +34,20 @@ export default function ExpandableSelectionList({
           ) : null}
         </Stack>
 
-        {options.length ? (
+        {showSearch ? <SelectionSearch value={query} onChange={setQuery} /> : null}
+
+        {!options.length ? (
+          <Box sx={{ px: 0.25 }}>
+            <Typography color="text.secondary">{emptyText}</Typography>
+          </Box>
+        ) : !visibleOptions.length ? (
+          <Box sx={{ px: 0.25 }}>
+            <Typography color="text.secondary">No matches.</Typography>
+          </Box>
+        ) : (
           <Paper variant="outlined" sx={{ maxHeight, overflow: 'auto', bgcolor: 'background.default' }}>
             <List dense disablePadding>
-              {options.map((option) => (
+              {visibleOptions.map((option) => (
                 <ExpandableCard
                   key={option.key ?? option.value}
                   details={option.details}
@@ -81,10 +93,6 @@ export default function ExpandableSelectionList({
               ))}
             </List>
           </Paper>
-        ) : (
-          <Box sx={{ px: 0.25 }}>
-            <Typography color="text.secondary">{emptyText}</Typography>
-          </Box>
         )}
       </Stack>
     </Paper>
