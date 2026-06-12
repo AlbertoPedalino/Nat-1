@@ -198,10 +198,10 @@ export default function BackgroundStep({ state, dispatch }) {
         <Stack spacing={1.5}>
           {backgroundChoiceSpecs(character).map((spec) => {
             if (spec.type === 'feat_fixed') {
-              return <FeatFixedSlot key={spec.key} spec={spec} feats={state.data.feats} character={character} state={state} dispatch={dispatch} kind="background" />;
+              return <FeatFixedSlot key={spec.key} spec={spec} feats={state.data.feats} character={character} state={state} dispatch={dispatch} />;
             }
             if (spec.type === 'feat_cat') {
-              return <FeatCategorySlot key={spec.key} spec={spec} feats={state.data.feats} character={character} state={state} dispatch={dispatch} kind="background" />;
+              return <FeatCategorySlot key={spec.key} spec={spec} feats={state.data.feats} character={character} state={state} dispatch={dispatch} />;
             }
             return <ChoiceBlock key={spec.key} spec={spec} choices={character.choices} dispatch={dispatch} character={character} />;
           })}

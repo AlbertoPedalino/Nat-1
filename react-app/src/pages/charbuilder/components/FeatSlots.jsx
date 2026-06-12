@@ -1,13 +1,9 @@
-import { useState } from 'react';
-import { Box, Button, Chip, Collapse, IconButton, List, ListItemButton, ListItemText, Paper, Stack, Typography } from '@mui/material';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { Button, Chip, List, ListItemButton, ListItemText, Paper, Stack, Typography } from '@mui/material';
 import ChoiceBlock from './ChoiceBlock.jsx';
 import SpellChoiceList from './SpellChoiceList.jsx';
-import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
-import { ExpandableEntryBlocks } from '../../../shared/character/ExpandableEntryBlocks.jsx';
+import { EntryAccordion, splitNamedEntries } from '../../../shared/character/EntryAccordion.jsx';
 import { featChoiceSpecs } from '../logic/choiceSpecs.js';
 import { getPrimaryClassLevel } from '../logic/calculations.js';
-import { entityChipSx } from '../../../shared/entityColors.js';
 
 function featMinLevel(feat) {
   const prereq = Array.isArray(feat?.prerequisite) ? feat.prerequisite : [];
@@ -69,57 +65,93 @@ function grantLabel(entry) {
   return entry?.name || '?';
 }
 
-// `kind` colors the slot's feat chip by the granting entity (background origin
-// feat → background orange, species feat → species purple, free slots → feat red).
-export function FeatFixedSlot({ spec, feats, character, state, dispatch, kind = 'feat' }) {
-  const feat = findFeat(feats, spec.fixed);
+// Spell-list picker for feats that grant a choice of spell list (e.g. Magic
+// Initiate / Fey Touched). Renders nothing unless the feat offers more than one
+// list. Shared by the fixed and category feat slots.
+function FeatSpellListSelector({ feat, additional, entryIdx, slotKey, dispatch }) {
+  if (!Array.isArray(additional) || additional.length <= 1) return null;
+  const entryKey = `${slotKey}_entry`;
+  return (
+    <Stack spacing={0.6}>
+      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 700 }}>
+        {feat?.choiceUi?.listLabel || `${feat?.name || 'Feat'} Spell List`}
+      </Typography>
+      <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
+        {additional.map((entry, idx) => (
+          <Button
+            key={`${slotKey}-entry-${idx}`}
+            size="small"
+            variant={idx === entryIdx ? 'contained' : 'outlined'}
+            onClick={() => dispatch({ type: 'choice/set-entry', key: entryKey, value: idx, clearPrefix: `${slotKey}_spell_` })}
+          >
+            {grantLabel(entry)}
+          </Button>
+        ))}
+      </Stack>
+    </Stack>
+  );
+}
+
+// Feat description as collapsed accordion rows: named feat sub-entries become one
+// row each (like species traits); a flat feat collapses under a single
+// "Description" row. Shared by both feat slots so descriptions look uniform.
+function FeatDescriptionRows({ feat }) {
+  const rows = feat?.entries ? splitNamedEntries(feat.entries) : [];
+  if (!rows.length) return null;
+  return (
+    <Stack spacing={0.5} sx={{ minWidth: 0 }}>
+      {rows.map((row, idx) => (
+        <EntryAccordion key={`${row.name}-${idx}`} title={row.name} entries={row.entries} />
+      ))}
+    </Stack>
+  );
+}
+
+// Separate, always-visible panel with everything selectable for a feat (spell
+// list + granted choices). Renders nothing when the feat has no choices. Shared
+// by both feat slots so selection always lives in its own panel.
+function FeatChoicesPanel({ feat, slotKey, character, state, dispatch }) {
   const additional = Array.isArray(feat?.additionalSpells) ? feat.additionalSpells : [];
-  const entryKey = `${spec.key}_entry`;
+  const entryKey = `${slotKey}_entry`;
   const entryChoiceEnabled = additional.length > 1;
   const rawEntryIdx = character.choices[entryKey];
   const entryIdx = entryChoiceEnabled && rawEntryIdx != null ? Number(rawEntryIdx) : null;
-  const grants = feat ? featChoiceSpecs(feat, { slotKey: spec.key, entryIdx }) : [];
+  const grants = feat ? featChoiceSpecs(feat, { slotKey, entryIdx }) : [];
+  if (!entryChoiceEnabled && grants.length === 0) return null;
   return (
     <Paper variant="outlined" sx={{ p: 1.5, minWidth: 0 }}>
       <Stack spacing={1} sx={{ minWidth: 0 }}>
-        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
-          <Typography variant="h2" sx={{ flex: 1, minWidth: 0 }}>{feat ? feat.name : spec.fixed}</Typography>
-          <Chip size="small" label={spec.label} sx={entityChipSx(kind)} />
-        </Stack>
-        {additional.length > 1 ? (
-          <Stack spacing={0.6}>
-            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 700 }}>
-              {feat?.choiceUi?.listLabel || `${feat?.name || 'Feat'} Spell List`}
-            </Typography>
-            <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
-            {additional.map((entry, idx) => (
-              <Button
-                key={`${spec.key}-entry-${idx}`}
-                size="small"
-                variant={idx === entryIdx ? 'contained' : 'outlined'}
-                onClick={() => dispatch({ type: 'choice/set-entry', key: entryKey, value: idx, clearPrefix: `${spec.key}_spell_` })}
-              >
-                {grantLabel(entry)}
-              </Button>
-            ))}
-            </Stack>
-          </Stack>
-        ) : null}
-        {feat?.entries ? <ExpandableEntryBlocks entries={feat.entries} /> : null}
+        <FeatSpellListSelector feat={feat} additional={additional} entryIdx={entryIdx} slotKey={slotKey} dispatch={dispatch} />
         {grants.map((grant) => renderGrantSpec({ grant, character, state, dispatch }))}
       </Stack>
     </Paper>
   );
 }
 
-export function FeatCategorySlot({ spec, feats, character, state, dispatch, kind = 'feat' }) {
-  const [expanded, setExpanded] = useState(() => new Set());
-  const toggleExpanded = (name) => setExpanded((prev) => {
-    const next = new Set(prev);
-    if (next.has(name)) next.delete(name); else next.add(name);
-    return next;
-  });
+// Fixed feat (e.g. a background's origin feat): name + neutral chip + description
+// rows, with the selectable choices in a separate panel below.
+export function FeatFixedSlot({ spec, feats, character, state, dispatch }) {
+  const feat = findFeat(feats, spec.fixed);
+  return (
+    <Stack spacing={1.5} sx={{ minWidth: 0 }}>
+      <Paper variant="outlined" sx={{ p: 1.5, minWidth: 0 }}>
+        <Stack spacing={1} sx={{ minWidth: 0 }}>
+          <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+            <Typography variant="h2" sx={{ flex: 1, minWidth: 0 }}>{feat ? feat.name : spec.fixed}</Typography>
+            <Chip size="small" label={spec.label} />
+          </Stack>
+          <FeatDescriptionRows feat={feat} />
+        </Stack>
+      </Paper>
+      <FeatChoicesPanel feat={feat} slotKey={spec.key} character={character} state={state} dispatch={dispatch} />
+    </Stack>
+  );
+}
 
+// Category feat slot: pick a feat from a category, then its description (accordion
+// rows) and selectable choices render exactly like the fixed slot, so both feat
+// surfaces look the same.
+export function FeatCategorySlot({ spec, feats, character, state, dispatch }) {
   const effectiveLevel = getPrimaryClassLevel(character) + (character.extraClasses || []).reduce((sum, ec) => sum + (ec.level || 0), 0);
   const taken = new Set(Object.entries(character.choices || {})
     .filter(([key]) => key !== spec.key)
@@ -144,30 +176,23 @@ export function FeatCategorySlot({ spec, feats, character, state, dispatch, kind
     .slice(0, 80);
   const selected = character.choices[spec.key] || null;
   const selectedFeat = feats.find((feat) => feat.name === selected);
-  const additional = Array.isArray(selectedFeat?.additionalSpells) ? selectedFeat.additionalSpells : [];
-  const entryKey = `${spec.key}_entry`;
-  const entryChoiceEnabled = additional.length > 1;
-  const rawEntryIdx = character.choices[entryKey];
-  const entryIdx = entryChoiceEnabled && rawEntryIdx != null ? Number(rawEntryIdx) : null;
-  const grants = selectedFeat ? featChoiceSpecs(selectedFeat, { slotKey: spec.key, entryIdx }) : [];
   return (
-    <Paper variant="outlined" sx={{ p: 1.5, minWidth: 0 }}>
-      <Stack spacing={1} sx={{ minWidth: 0 }}>
-        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
-          <Typography variant="h2" sx={{ flex: 1, minWidth: 0 }}>{spec.label}</Typography>
-          <Chip size="small" label={(spec.categories || []).join('/')} />
-          {selected ? <Chip size="small" label={selected} sx={entityChipSx(kind)} /> : null}
-        </Stack>
-        <Paper variant="outlined" sx={{ maxHeight: 260, overflow: 'auto' }}>
-          <List dense disablePadding>
-            {pool.map((feat) => {
-              const active = selected === feat.name;
-              const isOpen = expanded.has(feat.name);
-              const hasDesc = Array.isArray(feat.entries) ? feat.entries.length > 0 : !!feat.entries;
-              return (
-                <Box key={`${spec.key}-${feat.name}-${feat.source}`}>
+    <Stack spacing={1.5} sx={{ minWidth: 0 }}>
+      <Paper variant="outlined" sx={{ p: 1.5, minWidth: 0 }}>
+        <Stack spacing={1} sx={{ minWidth: 0 }}>
+          <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+            <Typography variant="h2" sx={{ flex: 1, minWidth: 0 }}>{spec.label}</Typography>
+            <Chip size="small" label={(spec.categories || []).join('/')} />
+            {selected ? <Chip size="small" label={selected} /> : null}
+          </Stack>
+          <Paper variant="outlined" sx={{ maxHeight: 260, overflow: 'auto' }}>
+            <List dense disablePadding>
+              {pool.map((feat) => {
+                const active = selected === feat.name;
+                return (
                   <ListItemButton
-                    divider={!isOpen}
+                    key={`${spec.key}-${feat.name}-${feat.source}`}
+                    divider
                     selected={active}
                     alignItems="flex-start"
                     onClick={() => dispatch({
@@ -181,54 +206,17 @@ export function FeatCategorySlot({ spec, feats, character, state, dispatch, kind
                       primary={<Typography fontWeight={active ? 700 : 500} noWrap>{feat.name}</Typography>}
                       secondary={[feat.category || feat.categories?.[0], featPrereqLabel(feat)].filter(Boolean).join(' - ')}
                     />
-                    <Stack direction="row" spacing={0.5} alignItems="center">
-                      <Chip size="small" color={active ? 'primary' : 'default'} label={feat.source} />
-                      {hasDesc ? (
-                        <IconButton
-                          size="small"
-                          edge="end"
-                          aria-label={isOpen ? 'Collapse description' : 'Expand description'}
-                          onClick={(e) => { e.stopPropagation(); toggleExpanded(feat.name); }}
-                        >
-                          {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                        </IconButton>
-                      ) : null}
-                    </Stack>
+                    <Chip size="small" color={active ? 'primary' : 'default'} label={feat.source} />
                   </ListItemButton>
-                  {hasDesc ? (
-                    <Collapse in={isOpen} unmountOnExit>
-                      <Box sx={{ px: 1.5, py: 0.75, bgcolor: 'background.default', borderBottom: 1, borderColor: 'divider' }}>
-                        <EntryBlocks entries={feat.entries} emptyText="" />
-                      </Box>
-                    </Collapse>
-                  ) : null}
-                </Box>
-              );
-            })}
-          </List>
-        </Paper>
-        {!pool.length ? <Typography color="text.secondary">No feats match.</Typography> : null}
-        {selectedFeat && additional.length > 1 ? (
-          <Stack spacing={0.6}>
-            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 700 }}>
-              {selectedFeat?.choiceUi?.listLabel || `${selectedFeat?.name || 'Feat'} Spell List`}
-            </Typography>
-            <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
-              {additional.map((entry, idx) => (
-                <Button
-                  key={`${spec.key}-entry-${idx}`}
-                  size="small"
-                  variant={idx === entryIdx ? 'contained' : 'outlined'}
-                  onClick={() => dispatch({ type: 'choice/set-entry', key: entryKey, value: idx, clearPrefix: `${spec.key}_spell_` })}
-                >
-                  {grantLabel(entry)}
-                </Button>
-              ))}
-            </Stack>
-          </Stack>
-        ) : null}
-        {grants.map((grant) => renderGrantSpec({ grant, character, state, dispatch }))}
-      </Stack>
-    </Paper>
+                );
+              })}
+            </List>
+          </Paper>
+          {!pool.length ? <Typography color="text.secondary">No feats match.</Typography> : null}
+          <FeatDescriptionRows feat={selectedFeat} />
+        </Stack>
+      </Paper>
+      <FeatChoicesPanel feat={selectedFeat} slotKey={spec.key} character={character} state={state} dispatch={dispatch} />
+    </Stack>
   );
 }

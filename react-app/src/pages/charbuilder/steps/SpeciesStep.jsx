@@ -69,7 +69,7 @@ export default function SpeciesStep({ state, dispatch }) {
         <Stack spacing={1.5}>
           {speciesChoiceSpecs(character).map((spec) => {
             if (spec.type === 'feat_cat') {
-              return <FeatCategorySlot key={spec.key} spec={spec} feats={state.data.feats} character={character} state={state} dispatch={dispatch} kind="species" />;
+              return <FeatCategorySlot key={spec.key} spec={spec} feats={state.data.feats} character={character} state={state} dispatch={dispatch} />;
             }
             if (spec.type === 'spell_choice' || spec.type === 'spell_grant') {
               return <SpellChoiceList key={spec.key} spec={spec} state={state} dispatch={dispatch} />;
