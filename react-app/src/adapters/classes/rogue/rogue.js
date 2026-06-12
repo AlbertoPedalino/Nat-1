@@ -12,6 +12,9 @@ export default function install(registry, context = {}) {
     _ALL_LANGS,
     _ALL_TOOLS,
     allItemsDb,
+    getWeaponMasteryChoiceCount,
+    getWeaponMasteryChoiceNames,
+    WEAPON_MASTERY_RULES,
     registerClassAdapter,
     getClassAdapter,
     registerSubclassAdapter,
@@ -123,11 +126,7 @@ registerClassAdapter("Rogue", function (cls, lv, specs, ctx = {}) {
   const expertiseFrom = typeof SKILLS !== 'undefined'
     ? SKILLS.map(function (s) { return s.n; }).concat(["Thieves' Tools"])
     : ["Thieves' Tools"];
-  const weapons = typeof allItemsDb !== 'undefined'
-    ? allItemsDb
-        .filter(function (i) { return (i.type === 'M' || i.type === 'R') && (!i.rarity || i.rarity === 'none'); })
-        .map(function (i) { return i.name; })
-    : [];
+  const weapons = getWeaponMasteryChoiceNames(ctx.items, allItemsDb, WEAPON_MASTERY_RULES.rogue);
 
   if (lv >= 1) {
     specs.push({
@@ -144,7 +143,7 @@ registerClassAdapter("Rogue", function (cls, lv, specs, ctx = {}) {
       label: 'Weapon Mastery (Rogue)',
       type: 'generic_choice',
       from: weapons,
-      count: 2,
+      count: getWeaponMasteryChoiceCount('rogue', lv),
       level: 1
     });
   }
@@ -296,4 +295,3 @@ registerClassSheetProficiencies("Rogue", [
 // [SheetRuntime] END
 
 }
-

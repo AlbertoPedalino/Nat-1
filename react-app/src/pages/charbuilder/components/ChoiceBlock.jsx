@@ -264,7 +264,7 @@ export default function ChoiceBlock({ spec, choices, dispatch, character, getOpt
   if (weaponMasterySpec) {
     const masteryOptions = options.map(({ value, label }) => {
       const active = selected.includes(value);
-      const item = findWeaponItemByName(items, value);
+      const item = findWeaponItemByName(items, value, '', { supportedOnly: true });
       return {
         key: `${spec.key}-${value}`,
         value,

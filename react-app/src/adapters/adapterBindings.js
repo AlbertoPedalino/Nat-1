@@ -9,6 +9,11 @@ import {
   STANDARD_LANGUAGES,
   VEHICLE_TOOLS,
 } from './gameData.js';
+import {
+  getWeaponMasteryChoiceCount,
+  getWeaponMasteryChoiceNames,
+  WEAPON_MASTERY_RULES,
+} from '../shared/character/weaponMastery.js';
 
 export function splitClassSubclass(rawKey) {
   const value = String(rawKey || '');
@@ -43,6 +48,9 @@ export function createAdapterBindings(registry, context = {}) {
     _ALL_LANGS: ALL_LANGUAGES,
     _ALL_TOOLS: ALL_TOOLS,
     allItemsDb: context.items || [],
+    getWeaponMasteryChoiceCount,
+    getWeaponMasteryChoiceNames,
+    WEAPON_MASTERY_RULES,
 
     registerClassAdapter: registry.registerClassAdapter,
     getClassAdapter: registry.getClassAdapter,

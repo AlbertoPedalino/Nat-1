@@ -3,7 +3,7 @@ import { Lock } from 'lucide-react';
 import ChoiceBlock from './ChoiceBlock.jsx';
 import ExpandableSelectionList from './ExpandableSelectionList.jsx';
 import SpellChoiceList from './SpellChoiceList.jsx';
-import { EntryAccordion, splitNamedEntries } from '../../../shared/character/EntryAccordion.jsx';
+import { EntryAccordion, partitionNamedEntries } from '../../../shared/character/EntryAccordion.jsx';
 import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
 import { findSpellListEntryIndexByClass } from '../../../shared/character/featSpellLists.js';
 import { featChoiceSpecs } from '../logic/choiceSpecs.js';
@@ -108,25 +108,20 @@ function FeatSpellListSelector({ feat, additional, entryIdx, slotKey, dispatch, 
   );
 }
 
-// Feat description as collapsed accordion rows: named feat sub-entries become one
-// row each (like species traits); a flat feat collapses under a single
-// "Description" row. Shared by both feat slots so descriptions look uniform.
-//
-// Feats with no named sub-entries (e.g. every Fighting Style — just a flat
-// description) skip the accordion and render the text directly, so expanding the
-// option card already shows the description instead of a redundant nested toggle.
+// Feat descriptions render directly inside the expanded option. Only named
+// sub-entries become accordion rows, avoiding a redundant nested "Description"
+// toggle for feats and Fighting Styles.
 function FeatDescriptionRows({ feat }) {
-  const rows = feat?.entries ? splitNamedEntries(feat.entries) : [];
-  if (!rows.length) {
+  const { introEntries, namedEntries } = partitionNamedEntries(feat?.entries);
+  if (!introEntries.length && !namedEntries.length) {
     return <Typography color="text.secondary">No description available.</Typography>;
-  }
-  const hasNamedEntries = rows.length > 1 || rows[0].name !== 'Description';
-  if (!hasNamedEntries) {
-    return <EntryBlocks entries={rows[0].entries} emptyText="No description available." />;
   }
   return (
     <Stack spacing={0.5} sx={{ minWidth: 0 }}>
-      {rows.map((row, idx) => (
+      {introEntries.length ? (
+        <EntryBlocks entries={introEntries} emptyText="No description available." />
+      ) : null}
+      {namedEntries.map((row, idx) => (
         <EntryAccordion key={`${row.name}-${idx}`} title={row.name} entries={row.entries} />
       ))}
     </Stack>

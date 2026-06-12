@@ -12,6 +12,9 @@ export default function install(registry, context = {}) {
     _ALL_LANGS,
     _ALL_TOOLS,
     allItemsDb,
+    getWeaponMasteryChoiceCount,
+    getWeaponMasteryChoiceNames,
+    WEAPON_MASTERY_RULES,
     registerClassAdapter,
     getClassAdapter,
     registerSubclassAdapter,
@@ -119,19 +122,15 @@ export default function install(registry, context = {}) {
     getGenericBackgroundChoiceMeta,
     getGenericBackgroundOriginFeat,
   } = createAdapterBindings(registry, context);
-registerClassAdapter("Barbarian", function (cls, lv, specs) {
+registerClassAdapter("Barbarian", function (cls, lv, specs, ctx = {}) {
   if (lv >= 1) {
-    const weapons = typeof allItemsDb !== 'undefined'
-      ? allItemsDb
-          .filter(function (i) { return (i.type === 'M' || i.type === 'R') && (!i.rarity || i.rarity === 'none'); })
-          .map(function (i) { return i.name; })
-      : [];
+    const weapons = getWeaponMasteryChoiceNames(ctx.items, allItemsDb, WEAPON_MASTERY_RULES.barbarian);
     specs.push({
       key: 'barbarian_weapon_mastery',
-      label: 'Weapon Mastery (choose 2)',
+      label: 'Weapon Mastery (Barbarian)',
       type: 'generic_choice',
       from: weapons,
-      count: 2,
+      count: getWeaponMasteryChoiceCount('barbarian', lv),
       level: 1
     });
   }
@@ -329,4 +328,3 @@ registerClassSheetResources("Barbarian", [
 // [SheetRuntime] END
 
 }
-

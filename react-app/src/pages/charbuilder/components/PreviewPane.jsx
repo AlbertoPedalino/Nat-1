@@ -13,7 +13,7 @@ import {
 } from '../../../shared/character/typedProficiencies.js';
 import { collectResolvedWeaponMasteries } from '../../../shared/character/weaponMastery.js';
 import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
-import { EntryAccordion, splitNamedEntries } from '../../../shared/character/EntryAccordion.jsx';
+import { EntryAccordion, partitionNamedEntries, splitNamedEntries } from '../../../shared/character/EntryAccordion.jsx';
 import { collectAcFormulas, getEquippedArmor, getEquippedShield, computeAcFormulaValue } from '../../../shared/character/ac.js';
 import { collectOwnedFeatNames } from '../../../shared/character/selectedFeats.js';
 import { buildPreviewSheetCharacter } from '../logic/previewSheet.js';
@@ -235,11 +235,11 @@ function getFeatureBody(feature) {
 // Preview-pane feature row: compact (dense) accordion with a tone-colored title
 // plus optional sublabel/runtime chips above the body. Reuses the shared
 // EntryAccordion shell; the chip stack + compact body live here as `children`.
-function FeatureWithChips({ entry, source, extraSublabel }) {
+function FeatureWithChips({ entry, source, extraSublabel, children }) {
   const { feature, runtimeChips } = entry;
   const tone = SOURCE_COLOR[source] || SOURCE_COLOR.class;
   const body = getFeatureBody(feature);
-  const hasBody = Array.isArray(body) ? body.length > 0 : body != null && body !== '';
+  const hasDefaultBody = Array.isArray(body) ? body.length > 0 : body != null && body !== '';
   return (
     <EntryAccordion title={feature.name} tone={tone} titleColor={tone} dense>
       <Stack spacing={0.75} sx={{ minWidth: 0 }}>
@@ -251,7 +251,7 @@ function FeatureWithChips({ entry, source, extraSublabel }) {
             ))}
           </Stack>
         ) : null}
-        {hasBody ? <PreviewEntryText entries={body} /> : (
+        {children != null ? children : hasDefaultBody ? <PreviewEntryText entries={body} /> : (
           <Typography variant="caption" component="div" color="text.secondary" sx={{ lineHeight: 1.45, wordBreak: 'break-word' }}>
             No description.
           </Typography>
@@ -559,10 +559,24 @@ function collectPreviewFeats(character, feats) {
 }
 
 function PreviewFeat({ feat }) {
-  if (hasDescriptionEntries(feat.entries)) {
-    return <FeatureWithChips entry={{ feature: feat }} source="feat" />;
-  }
-  return <FeatNameCard name={feat.name} />;
+  if (!hasDescriptionEntries(feat.entries)) return <FeatNameCard name={feat.name} />;
+
+  const { introEntries, namedEntries } = partitionNamedEntries(feat.entries);
+
+  return (
+    <FeatureWithChips entry={{ feature: feat }} source="feat">
+      <Stack spacing={0.5} sx={{ minWidth: 0 }}>
+        {introEntries.length ? <PreviewEntryText entries={introEntries} /> : null}
+        {namedEntries.map((row, index) => (
+          <FeatureWithChips
+            key={`${row.name}-${index}`}
+            entry={{ feature: row }}
+            source="feat"
+          />
+        ))}
+      </Stack>
+    </FeatureWithChips>
+  );
 }
 
 function PreviewPaneImpl({ character, items = [], feats = [], adaptersVersion = 0 }) {
@@ -677,8 +691,8 @@ function PreviewPaneImpl({ character, items = [], feats = [], adaptersVersion = 
         {previewFeats.length ? (
           <PreviewSection icon={Layers} title="Feats" tone={SOURCE_COLOR.feat}>
             <Stack spacing={0.6} sx={{ minWidth: 0 }}>
-              {previewFeats.map((feat) => (
-                <PreviewFeat key={normalizedName(feat.name)} feat={feat} />
+              {previewFeats.map((feat, index) => (
+                <PreviewFeat key={`${normalizedName(feat.name)}-${index}`} feat={feat} />
               ))}
             </Stack>
           </PreviewSection>

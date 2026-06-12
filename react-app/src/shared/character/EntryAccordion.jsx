@@ -1,19 +1,7 @@
 import { Accordion, AccordionDetails, AccordionSummary, Stack, Typography } from '@mui/material';
 import { ChevronDown } from 'lucide-react';
 import { EntryBlocks } from './EntryBlocks.jsx';
-
-// Split 5etools `entries` into named rows + a leading group of unnamed intro
-// text collapsed under a single `introLabel` row. Named sub-entries (e.g. each
-// species trait or subclass feature) map one-to-one to accordion rows.
-export function splitNamedEntries(entries, introLabel = 'Description') {
-  const list = entries == null ? [] : (Array.isArray(entries) ? entries : [entries]);
-  const named = list.filter((entry) => entry && typeof entry === 'object' && entry.name);
-  const unnamed = list.filter((entry) => !(entry && typeof entry === 'object' && entry.name));
-  return [
-    ...(unnamed.length ? [{ name: introLabel, entries: unnamed }] : []),
-    ...named,
-  ];
-}
+export { partitionNamedEntries, splitNamedEntries } from './entryStructure.js';
 
 // One collapsed accordion row: title (+ optional `leading` element such as a
 // level chip) visible, body on expand. `tone` sets the left border (falls back

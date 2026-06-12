@@ -12,6 +12,9 @@ export default function install(registry, context = {}) {
     _ALL_LANGS,
     _ALL_TOOLS,
     allItemsDb,
+    getWeaponMasteryChoiceCount,
+    getWeaponMasteryChoiceNames,
+    WEAPON_MASTERY_RULES,
     registerClassAdapter,
     getClassAdapter,
     registerSubclassAdapter,
@@ -121,17 +124,13 @@ export default function install(registry, context = {}) {
   } = createAdapterBindings(registry, context);
 registerClassAdapter("Paladin", function (cls, lv, specs, ctx = {}) {
   if (lv >= 1) {
-    const weapons = typeof allItemsDb !== 'undefined'
-      ? allItemsDb
-          .filter(function (i) { return (i.type === 'M' || i.type === 'R') && (!i.rarity || i.rarity === 'none'); })
-          .map(function (i) { return i.name; })
-      : [];
+    const weapons = getWeaponMasteryChoiceNames(ctx.items, allItemsDb, WEAPON_MASTERY_RULES.paladin);
     specs.push({
       key: 'paladin_weapon_mastery',
       label: 'Weapon Mastery (Paladin)',
       type: 'generic_choice',
       from: weapons,
-      count: 2,
+      count: getWeaponMasteryChoiceCount('paladin', lv),
       level: 1
     });
   }
@@ -259,4 +258,3 @@ registerClassSheetResources("Paladin", [
 // [SheetRuntime] END
 
 }
-

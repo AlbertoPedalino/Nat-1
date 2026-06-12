@@ -12,6 +12,9 @@ export default function install(registry, context = {}) {
     _ALL_LANGS,
     _ALL_TOOLS,
     allItemsDb,
+    getWeaponMasteryChoiceCount,
+    getWeaponMasteryChoiceNames,
+    WEAPON_MASTERY_RULES,
     registerClassAdapter,
     getClassAdapter,
     registerSubclassAdapter,
@@ -124,17 +127,13 @@ registerClassAdapter("Ranger", function (cls, lv, specs, ctx = {}) {
     ? SKILLS.map(function (s) { return s.n; })
     : ['Acrobatics','Animal Handling','Arcana','Athletics','Deception','History','Insight','Intimidation','Investigation','Medicine','Nature','Perception','Performance','Persuasion','Religion','Sleight of Hand','Stealth','Survival'];
   if (lv >= 1) {
-    const weapons = typeof allItemsDb !== 'undefined'
-      ? allItemsDb
-          .filter(function (i) { return (i.type === 'M' || i.type === 'R') && (!i.rarity || i.rarity === 'none'); })
-          .map(function (i) { return i.name; })
-      : [];
+    const weapons = getWeaponMasteryChoiceNames(ctx.items, allItemsDb, WEAPON_MASTERY_RULES.ranger);
     specs.push({
       key: 'ranger_weapon_mastery',
       label: 'Weapon Mastery (Ranger)',
       type: 'generic_choice',
       from: weapons,
-      count: 2,
+      count: getWeaponMasteryChoiceCount('ranger', lv),
       level: 1
     });
   }
@@ -311,4 +310,3 @@ registerClassSheetResources("Ranger", [
 // [SheetRuntime] END
 
 }
-

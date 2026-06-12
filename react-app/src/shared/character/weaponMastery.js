@@ -1,3 +1,9 @@
+import {
+  isAllowedSource,
+  isSupportedEdition,
+  ITEM_SOURCE_PRIORITY,
+} from './sourcePriority.js';
+
 const MASTERY_DATA_URL = 'https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/items-base.json';
 
 const _masteries = new Map();
@@ -12,6 +18,120 @@ function asArray(value) {
   if (Array.isArray(value)) return value.flatMap(asArray);
   if (value instanceof Set) return Array.from(value).flatMap(asArray);
   return [value];
+}
+
+function isMundaneWeapon(item) {
+  if (!item || typeof item !== 'object' || !item.name) return false;
+  const type = String(item.type || '').toLowerCase();
+  const isWeapon = type === 'm'
+    || type === 'r'
+    || type === 'weapon'
+    || item?._meta?.isWeapon === true;
+  const rarity = String(item.rarity || 'none').toLowerCase();
+  return isWeapon && rarity === 'none';
+}
+
+function isSupportedMasteryItem(item) {
+  return isAllowedSource(item?.source, ITEM_SOURCE_PRIORITY) && isSupportedEdition(item);
+}
+
+const ALL_WEAPON_MASTERY_RULES = Object.freeze([
+  Object.freeze({}),
+]);
+
+export const WEAPON_MASTERY_RULES = Object.freeze({
+  barbarian: Object.freeze([
+    Object.freeze({ melee: true }),
+  ]),
+  fighter: ALL_WEAPON_MASTERY_RULES,
+  paladin: ALL_WEAPON_MASTERY_RULES,
+  ranger: ALL_WEAPON_MASTERY_RULES,
+  rogue: Object.freeze([
+    Object.freeze({ category: 'simple' }),
+    Object.freeze({ category: 'martial', propertiesAny: Object.freeze(['F', 'L']) }),
+  ]),
+});
+
+const WEAPON_MASTERY_PROGRESSIONS = Object.freeze({
+  barbarian: Object.freeze([
+    Object.freeze({ level: 1, count: 2 }),
+    Object.freeze({ level: 4, count: 3 }),
+    Object.freeze({ level: 10, count: 4 }),
+  ]),
+  fighter: Object.freeze([
+    Object.freeze({ level: 1, count: 3 }),
+    Object.freeze({ level: 4, count: 4 }),
+    Object.freeze({ level: 10, count: 5 }),
+    Object.freeze({ level: 16, count: 6 }),
+  ]),
+  paladin: Object.freeze([
+    Object.freeze({ level: 1, count: 2 }),
+  ]),
+  ranger: Object.freeze([
+    Object.freeze({ level: 1, count: 2 }),
+  ]),
+  rogue: Object.freeze([
+    Object.freeze({ level: 1, count: 2 }),
+  ]),
+});
+
+function canonicalWeaponProperty(value) {
+  const key = compactKey(value);
+  if (key === 'finesse') return 'f';
+  if (key === 'light') return 'l';
+  return key;
+}
+
+function itemHasProperty(item, property) {
+  const target = canonicalWeaponProperty(property);
+  return [...asArray(item?.property), ...asArray(item?.properties)]
+    .some((value) => {
+      const itemProperty = typeof value === 'object'
+        ? (value?.name ?? value?.abbreviation ?? value?.id)
+        : value;
+      return canonicalWeaponProperty(itemProperty) === target;
+    });
+}
+
+function weaponMatchesRule(item, rule) {
+  if (rule?.melee === true) {
+    const type = String(item?.type || '').toLowerCase();
+    if (type !== 'm' && item?._meta?.isMeleeWeapon !== true) return false;
+  }
+
+  if (rule?.category) {
+    const category = String(item?.weaponCategory || item?.category || '').toLowerCase();
+    if (category !== String(rule.category).toLowerCase()) return false;
+  }
+
+  if (Array.isArray(rule?.propertiesAny) && rule.propertiesAny.length > 0) {
+    if (!rule.propertiesAny.some((property) => itemHasProperty(item, property))) return false;
+  }
+
+  return true;
+}
+
+export function getWeaponMasteryChoiceNames(items, fallbackItems = [], rules = ALL_WEAPON_MASTERY_RULES) {
+  const primary = asArray(items).filter((item) => item && typeof item === 'object');
+  const fallback = asArray(fallbackItems).filter((item) => item && typeof item === 'object');
+  const itemDb = primary.length ? primary : fallback;
+  const activeRules = Array.isArray(rules) && rules.length ? rules : ALL_WEAPON_MASTERY_RULES;
+  const names = itemDb
+    .filter(isSupportedMasteryItem)
+    .filter(isMundaneWeapon)
+    .filter((item) => activeRules.some((rule) => weaponMatchesRule(item, rule)))
+    .map((item) => String(item.name).trim())
+    .filter(Boolean);
+  return [...new Set(names)].sort((a, b) => a.localeCompare(b));
+}
+
+export function getWeaponMasteryChoiceCount(className, level) {
+  const progression = WEAPON_MASTERY_PROGRESSIONS[compactKey(className)] || [];
+  const currentLevel = Number(level) || 0;
+  return progression.reduce(
+    (count, step) => currentLevel >= step.level ? step.count : count,
+    0,
+  );
 }
 
 function cleanTagText(value) {
@@ -105,6 +225,19 @@ function canonicalMasteryName(value) {
   return getMasteryRecord(value)?.name || null;
 }
 
+function normalizeExplicitMasteryName(value) {
+  const raw = cleanTagText(value).split('|')[0].trim();
+  if (!raw) return null;
+  return canonicalMasteryName(raw) || toTitleCase(raw);
+}
+
+function getExplicitItemMastery(item) {
+  const direct = item?.mastery ?? item?.weaponMastery ?? item?.masteryProperty ?? item?.masteryName;
+  return asArray(direct)
+    .map(normalizeExplicitMasteryName)
+    .find(Boolean) || null;
+}
+
 function itemMasteryFromProperties(item) {
   const properties = [...asArray(item?.property), ...asArray(item?.properties)].map((prop) => String(prop).trim());
   for (const prop of properties) {
@@ -158,34 +291,28 @@ export function collectWeaponMasteryChoiceEntries(character) {
 
 export function resolveWeaponMasteryForItem(item) {
   if (!item || typeof item !== 'object') return null;
-  const direct = item.mastery ?? item.weaponMastery ?? item.masteryProperty ?? item.masteryName;
-  if (typeof direct === 'string' && direct.trim()) {
-    const canonical = canonicalMasteryName(direct);
-    if (canonical) return canonical;
-  }
-  if (Array.isArray(direct)) {
-    const first = direct.map((value) => String(value || '').trim()).find(Boolean);
-    const canonical = canonicalMasteryName(first);
-    if (canonical) return canonical;
-  }
-  return itemMasteryFromProperties(item) || itemMasteryFromEntries(item);
+  return getExplicitItemMastery(item) || itemMasteryFromProperties(item) || itemMasteryFromEntries(item);
 }
 
-export function findWeaponItemByName(items, weaponName, source = '') {
+export function findWeaponItemByName(items, weaponName, source = '', { supportedOnly = false } = {}) {
   const targetName = compactKey(normalizeWeaponName(weaponName));
   const targetSource = compactKey(source);
   if (!targetName) return null;
 
   const weaponItems = asArray(items).filter((item) => item && typeof item === 'object');
-  const direct = weaponItems.find((item) => {
+  const matchingItems = weaponItems.filter((item) => {
+    if (supportedOnly && !isSupportedMasteryItem(item)) return false;
     const itemName = compactKey(normalizeWeaponName(item.name));
-    if (itemName !== targetName) return false;
-    if (!targetSource) return true;
-    return compactKey(item.source) === targetSource;
+    return itemName === targetName;
   });
-  if (direct) return direct;
+  if (!matchingItems.length) return null;
 
-  return weaponItems.find((item) => compactKey(normalizeWeaponName(item.name)) === targetName) || null;
+  if (targetSource) {
+    const sourceMatch = matchingItems.find((item) => compactKey(item.source) === targetSource);
+    if (sourceMatch) return sourceMatch;
+  }
+
+  return matchingItems[0];
 }
 
 export function collectResolvedWeaponMasteries(character, items = []) {
@@ -194,7 +321,8 @@ export function collectResolvedWeaponMasteries(character, items = []) {
   const seen = new Set();
 
   entries.forEach((entry) => {
-    const item = findWeaponItemByName(items, entry.weaponName, entry.source);
+    const item = findWeaponItemByName(items, entry.weaponName, entry.source, { supportedOnly: true });
+    if (!item) return;
     const mastery = resolveWeaponMasteryForItem(item);
     const dedupeKey = compactKey(entry.weaponName);
     if (seen.has(dedupeKey)) return;
