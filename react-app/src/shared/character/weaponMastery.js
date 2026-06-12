@@ -76,11 +76,22 @@ export async function loadMasteryEntries() {
 
 function getMasteryRecord(value) {
   if (!value) return null;
-  return _masteries.get(compactKey(value)) || null;
+  // Mastery values may carry a source suffix ("Graze|XPHB"); compactKey would
+  // fold that into "grazexphb" and miss the record, so strip the source first.
+  const name = String(value).split('|')[0];
+  return _masteries.get(compactKey(name)) || null;
+}
+
+export function areMasteriesLoaded() {
+  return _masteries.size > 0;
 }
 
 export function getWeaponMasteryEntries(mastery) {
   return getMasteryRecord(mastery)?.entries || null;
+}
+
+export function getWeaponMasteryName(mastery) {
+  return getMasteryRecord(mastery)?.name || null;
 }
 
 export function getWeaponMasteryReminderText(mastery) {

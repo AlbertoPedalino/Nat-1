@@ -62,7 +62,17 @@ export default function ClassStep({ state, dispatch }) {
     if (spec.key.replace(/^mc\d+_/, '') === 'artificer_replicate_magic_item_plans') {
       return <ReplicateMagicItemChoice key={spec.key} spec={spec} character={character} dispatch={dispatch} items={state.data.items} />;
     }
-    return <ChoiceBlock key={spec.key} spec={spec} choices={character.choices} dispatch={dispatch} character={character} getOptionDescription={makeOptionDescription(spec)} />;
+    return (
+      <ChoiceBlock
+        key={spec.key}
+        spec={spec}
+        choices={character.choices}
+        dispatch={dispatch}
+        character={character}
+        items={state.data.items}
+        getOptionDescription={makeOptionDescription(spec)}
+      />
+    );
   };
 
   return (

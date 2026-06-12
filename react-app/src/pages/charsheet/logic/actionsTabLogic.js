@@ -5,7 +5,6 @@ import { getWeaponProficiencyInfo, hasNonProficientArmor } from './proficiencies
 import {
   collectResolvedWeaponMasteries,
   findWeaponItemByName,
-  getWeaponMasteryEntries,
   normalizeWeaponName,
   resolveWeaponMasteryForItem,
 } from '../../../shared/character/weaponMastery.js';
@@ -489,7 +488,6 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
     _enhancement: enhancement.attack || enhancement.damage ? enhancement : null,
     _weaponIndex: index,
     _weaponMastery: mastery || null,
-    _weaponMasteryEntries: mastery ? getWeaponMasteryEntries(mastery) : null,
     _weaponSlot: item.equippedSlot || null,
     _colorBarCat: 'attack',
     _notProficient: !profInfo.proficient,
@@ -615,7 +613,6 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
       _weaponIndex: ohIndex,
       _weaponSlot: offHandItem.equippedSlot || null,
       _weaponMastery: ohMastery || null,
-      _weaponMasteryEntries: ohMastery ? getWeaponMasteryEntries(ohMastery) : null,
       _notProficient: !ohProfInfo.proficient,
       _disadvantage: false,
     });

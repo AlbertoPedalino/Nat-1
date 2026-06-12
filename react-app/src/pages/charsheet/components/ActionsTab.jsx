@@ -22,6 +22,7 @@ import {
 import { getSheetSlots } from '../logic/spellsTabLogic.js';
 import { loadItems } from '../../charbuilder/logic/dataLoaders.js';
 import { loadMasteryEntries } from '../../../shared/character/weaponMastery.js';
+import { WeaponMasteryBlock } from '../../../shared/character/WeaponMasteryBlock.jsx';
 import {
   filterChipSx,
   inlineButtonSx,
@@ -1107,16 +1108,7 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
           {action.choiceKey && onUpdateCharacter ? (
             <ChoicePicker action={action} C={C} onUpdateCharacter={onUpdateCharacter} onShowToast={onShowToast} />
           ) : null}
-          {action._weaponMastery ? (
-            <Box sx={{ mt: 0.7 }}>
-              <Typography sx={{ fontSize: '0.66rem', color: '#edd48a', fontWeight: 700 }}>
-                Weapon Mastery — {action._weaponMastery}
-              </Typography>
-              {action._weaponMasteryEntries?.length ? (
-                <EntryBlocks entries={action._weaponMasteryEntries} emptyText="" />
-              ) : null}
-            </Box>
-          ) : null}
+          <WeaponMasteryBlock mastery={action._weaponMastery} />
           {DetailRenderer ? (
             <DetailRenderer action={action} character={C} sheet={sheet} />
           ) : null}

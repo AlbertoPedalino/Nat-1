@@ -3,16 +3,20 @@ import { Box, Button, IconButton } from '@mui/material';
 import { Minus, Plus } from 'lucide-react';
 import { EntryBlocks } from './EntryBlocks.jsx';
 import { ItemPropertyTable } from './ItemPropertyTable.jsx';
+import { WeaponMasteryBlock } from './WeaponMasteryBlock.jsx';
 
 // Read-only reference body for an item: property grid + rich-text entries
 // (live 5etools entries from the items DB). Shared by the builder + sheet
 // inventory rows so the expanded view stays identical everywhere.
+// A weapon's mastery is always shown here as reference (unlike the Actions tab,
+// which only surfaces it when the character actually has that mastery).
 export function ItemReferenceBody({ item, fontSize = '0.72rem', sx }) {
   const hasEntries = Array.isArray(item?.entries) && item.entries.length > 0;
   return (
     <Box sx={sx}>
       <ItemPropertyTable item={item} sx={{ mb: hasEntries ? '6px' : 0 }} />
       {hasEntries ? <EntryBlocks entries={item.entries} fontSize={fontSize} emptyText="" /> : null}
+      <WeaponMasteryBlock mastery={item?.mastery} fontSize={fontSize} />
     </Box>
   );
 }

@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { Box, Chip, Collapse, IconButton, List, ListItemButton, ListItemText, Paper, Stack, Typography } from '@mui/material';
 import { Check, ChevronDown, ChevronUp } from 'lucide-react';
 import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
+import { findWeaponItemByName } from '../../../shared/character/weaponMastery.js';
+import { WeaponMasteryBlock } from '../../../shared/character/WeaponMasteryBlock.jsx';
+import ExpandableSelectionList from './ExpandableSelectionList.jsx';
 import {
   parseTypedProficiencyValue,
   isChoicePlaceholderValue,
@@ -200,8 +203,15 @@ function collectAlreadyExpertiseSkills({ choices, currentKey }) {
   return expertise;
 }
 
-export default function ChoiceBlock({ spec, choices, dispatch, character, getOptionDescription }) {
+function isWeaponMasterySpec(spec) {
+  const key = String(spec?.key || '').replace(/^mc\d+_/, '').toLowerCase();
+  return key.includes('weapon_mastery') || (key.includes('weapon') && key.includes('mastery'));
+}
+
+export default function ChoiceBlock({ spec, choices, dispatch, character, getOptionDescription, items = [] }) {
   const [expanded, setExpanded] = useState(() => new Set());
+  const weaponMasterySpec = isWeaponMasterySpec(spec);
+
   const toggleExpanded = (value) => setExpanded((prev) => {
     const next = new Set(prev);
     if (next.has(value)) next.delete(value); else next.add(value);
@@ -241,6 +251,38 @@ export default function ChoiceBlock({ spec, choices, dispatch, character, getOpt
     ...Array.from(blockedValues),
     ...Array.from(blockedValues).map((value) => value.split(':').slice(1).join(':')).filter(Boolean),
   ])];
+  const toggleOption = (value) => dispatch({
+    type: 'choice/toggle-item',
+    key: spec.key,
+    value,
+    max,
+    blockedValues: blockedValuesForReducer,
+  });
+
+  if (weaponMasterySpec) {
+    const masteryOptions = options.map(({ value, label }) => {
+      const active = selected.includes(value);
+      const item = findWeaponItemByName(items, value);
+      return {
+        key: `${spec.key}-${value}`,
+        value,
+        label,
+        selected: active,
+        disabled: !active && selected.length >= max,
+        details: <WeaponMasteryBlock mastery={item?.mastery} variant="title" />,
+      };
+    });
+
+    return (
+      <ExpandableSelectionList
+        title={spec.label}
+        options={masteryOptions}
+        selectedCount={selected.length}
+        max={max}
+        onSelect={(option) => toggleOption(option.value)}
+      />
+    );
+  }
 
   return (
     <Paper variant="outlined" sx={{ p: 1, minWidth: 0 }}>
@@ -278,13 +320,7 @@ export default function ChoiceBlock({ spec, choices, dispatch, character, getOpt
                     <ListItemButton
                       selected={active}
                       disabled={full || duplicate}
-                      onClick={() => dispatch({
-                        type: 'choice/toggle-item',
-                        key: spec.key,
-                        value,
-                        max,
-                        blockedValues: blockedValuesForReducer,
-                      })}
+                      onClick={() => toggleOption(value)}
                       sx={{
                         flex: 1,
                         minWidth: 0,
