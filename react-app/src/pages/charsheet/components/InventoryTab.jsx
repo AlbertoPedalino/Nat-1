@@ -31,7 +31,7 @@ import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import { ItemReferenceBody, QuantityAdder } from '../../../shared/character/ItemReference.jsx';
 import { carryCapacity, formatWeight, itemQty as qty, totalCarriedWeight } from '../../../shared/character/weight.js';
 import { useSheetActions } from '../context/SheetActionsContext.jsx';
-import { CRAFTED_FLAG_META, craftedFlagOf } from '../../../shared/character/craftedItems.js';
+import { craftedFlagOf, craftedTagColor } from '../../../shared/character/craftedItems.js';
 
 const FILTERS = [
   { key: 'all', label: 'All', icon: null },
@@ -862,8 +862,8 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, 
               <Typography noWrap sx={{ fontSize: '0.875rem', color: 'text.primary' }}>{item.name}</Typography>
               {item.custom ? <Box component="span" sx={{ fontSize: '0.56rem', color: 'text.secondary' }}>[custom]</Box> : null}
               {(() => {
-                const meta = CRAFTED_FLAG_META[craftedFlagOf(item)];
-                return meta ? <Box component="span" sx={{ ml: 0.5, fontSize: '0.56rem', color: meta.color, fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}>[{meta.label}]</Box> : null;
+                const flag = craftedFlagOf(item);
+                return flag && item.craftedLabel ? <Box component="span" sx={{ ml: 0.5, fontSize: '0.56rem', color: craftedTagColor(flag, character), fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}>[{item.craftedLabel}]</Box> : null;
               })()}
               {hasItemFlag(item, 'pactWeapon') ? <Box component="span" sx={{ ml: 0.5, fontSize: '0.56rem', color: '#9d7fb8', fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}>[Pact Weapon]</Box> : null}
               {hasItemFlag(item, 'arcaneArmor') ? <Box component="span" sx={{ ml: 0.5, fontSize: '0.56rem', color: '#58b879', fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}>[Arcane Armor]</Box> : null}

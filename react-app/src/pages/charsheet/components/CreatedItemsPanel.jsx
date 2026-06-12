@@ -141,7 +141,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
     const dbItem = resolveItem(name);
     const itemData = dbItem ? { ...dbItem } : { name };
     itemData.name = name; // keep the recipe wording as the inventory label
-    onUpdateInventory(addCraftedItem(inv, itemData, flag, name, max));
+    onUpdateInventory(addCraftedItem(inv, itemData, flag, name, max, action?.name));
   };
 
   const handleRemove = (name) => {

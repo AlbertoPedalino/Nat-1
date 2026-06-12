@@ -1,3 +1,6 @@
+import { ENTITY_COLORS } from '../entityColors.js';
+import { featOriginKind } from './selectedFeats.js';
+
 // Crafted/created inventory items shared infra (Artificer Replicate Magic Item,
 // Tinker's Magic, Crafter feat Fast Crafting, ...).
 //
@@ -7,15 +10,37 @@
 // merge into the same stack. Each feature passes its own flag, so adding a new
 // "create item from a list" feature is just a new flag + config, no new logic.
 
-// Single source of truth for every crafted flag: its inventory tag label/colour
-// and whether its items vanish at a Long Rest. Adding a "create from a list"
-// feature = one entry here (+ a detail config on the action). The derived
-// constants below are computed from this map.
+// Single source of truth for every crafted flag: the entity that grants the
+// crafting feature (for provenance-coloured tags) and whether its items vanish
+// at a Long Rest. Adding a "create from a list" feature = one entry here (+ a
+// detail config on the action). The derived constants below are computed from
+// this map. The tag label is not stored here: each crafted item carries its own
+// `craftedLabel`, stamped at creation from the granting feature's real name
+// (see `addCraftedItem` / CreatedItemsPanel).
+//
+// Provenance follows the app-wide entity-colour rules (see `craftedTagColor`):
+// - `originKind`: a fixed entity kind (e.g. Artificer class features).
+// - `originFeat`: a feat name whose granting entity is resolved per character
+//   (background origin feat → background tone, free slot → feat tone, ...).
 export const CRAFTED_FLAG_META = {
-  replicated: { label: 'Replicated', color: '#6fb0c9', vanishesOnLongRest: false },
-  tinker: { label: 'Tinker', color: '#c9a36f', vanishesOnLongRest: true },
-  fastcraft: { label: 'Fast Crafting', color: '#9fc96f', vanishesOnLongRest: true },
+  replicated: { originKind: 'class', vanishesOnLongRest: false },
+  tinker: { originKind: 'class', vanishesOnLongRest: true },
+  fastcraft: { originFeat: 'Crafter', vanishesOnLongRest: true },
 };
+
+// Entity-colour for a crafted flag's tag, by provenance. Class-granted features
+// use the class tone; feat-granted ones inherit the colour of whatever granted
+// the feat for this character. Returns null for unknown flags.
+export function craftedTagColor(flag, character) {
+  const meta = CRAFTED_FLAG_META[flag];
+  if (!meta) return null;
+  if (meta.originKind) return ENTITY_COLORS[meta.originKind] || ENTITY_COLORS.class;
+  if (meta.originFeat) {
+    const kind = featOriginKind(character, meta.originFeat);
+    return ENTITY_COLORS[kind] || ENTITY_COLORS.feat;
+  }
+  return ENTITY_COLORS.class;
+}
 
 export const CRAFTED_FLAGS = Object.keys(CRAFTED_FLAG_META);
 
@@ -63,11 +88,12 @@ export function craftedCountFor(inventory, flag, source) {
 // Append one crafted item, stacking with an existing crafted entry of the same
 // flag/source/name/source-book. `max` caps the total active items for the flag
 // (defence-in-depth against rapid clicks).
-export function addCraftedItem(inventory, itemData, flag, source, max = Infinity) {
+export function addCraftedItem(inventory, itemData, flag, source, max = Infinity, label = '') {
   if (craftedCount(inventory, flag) >= max) return inventory || [];
   const src = String(source || '');
   const base = itemData && itemData.name ? itemData : { name: src };
   const flags = [...new Set([...(Array.isArray(base.flags) ? base.flags : []), flag])];
+  const tagLabel = String(label || '').trim();
   const entry = {
     ...base,
     name: base.name || src,
@@ -80,6 +106,7 @@ export function addCraftedItem(inventory, itemData, flag, source, max = Infinity
     qty: 1,
     flags,
     craftedFrom: src,
+    ...(tagLabel ? { craftedLabel: tagLabel } : {}),
   };
 
   const next = [...(inventory || [])];

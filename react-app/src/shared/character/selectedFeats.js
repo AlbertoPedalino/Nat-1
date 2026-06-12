@@ -1,4 +1,4 @@
-import { isFeatDetailKey } from '../featChoiceKeys.js';
+import { isFeatDetailKey, featSlotOrigin } from '../featChoiceKeys.js';
 import { installedRegistry } from '../../adapters/index.js';
 
 const FRAMEWORK_EXACT = new Set(['feat_origin', 'species_origin_feat']);
@@ -160,4 +160,29 @@ export function collectOwnedFeatNames(character) {
 
 export function getChoiceSelectedFeatNames(character) {
   return [...new Set(fromChoices(character))];
+}
+
+// Which entity granted a named feat to this character: 'background' (origin
+// feat), 'species', or 'feat' (free/ASI slot). Resolves by name against each
+// source, then maps the owning choice-slot key through `featSlotOrigin`. Used
+// for provenance-coloured tags (e.g. crafted-item flags). Returns 'feat' when
+// the character does not own the feat or its origin can't be determined.
+export function featOriginKind(character, featName) {
+  const target = String(featName || '').trim().toLowerCase();
+  if (!target || !character || typeof character !== 'object') return 'feat';
+
+  const bgNames = backgroundFeatNames(character.backgroundObj || character.backgroundSnapshot);
+  if (bgNames.some((name) => name.toLowerCase() === target)) return 'background';
+
+  if (fromSpecies(character).some((name) => name.toLowerCase() === target)) return 'species';
+
+  const choices = character.choices || {};
+  for (const [key, value] of Object.entries(choices)) {
+    if (!value || !isChoiceFeatOwnerKey(key)) continue;
+    const values = Array.isArray(value) ? value : [value];
+    if (values.some((entry) => typeof entry === 'string' && entry.toLowerCase() === target)) {
+      return featSlotOrigin(key);
+    }
+  }
+  return 'feat';
 }
