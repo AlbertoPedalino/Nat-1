@@ -12,6 +12,7 @@ import {
 } from '../logic/equipmentSlots.js';
 
 import { ItemNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
+import MiniBadge from '../../../shared/character/MiniBadge.jsx';
 import { INVENTORY_SOURCE_PRIORITY, sourceRank } from '../../../shared/character/sourcePriority.js';
 import { addInventoryEntries } from '../../../shared/character/itemContainers.js';
 import { ITEM_ATTUNEMENT } from '../../../shared/entityColors.js';
@@ -863,7 +864,9 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, 
               {item.custom ? <Box component="span" sx={{ fontSize: '0.56rem', color: 'text.secondary' }}>[custom]</Box> : null}
               {(() => {
                 const flag = craftedFlagOf(item);
-                return flag && item.craftedLabel ? <Box component="span" sx={{ ml: 0.5, fontSize: '0.56rem', color: craftedTagColor(flag, character), fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}>[{item.craftedLabel}]</Box> : null;
+                if (!flag || !item.craftedLabel) return null;
+                const tone = craftedTagColor(flag, character);
+                return <MiniBadge label={item.craftedLabel} color={tone} bg={alpha(tone, 0.16)} sx={{ ml: 0.5 }} />;
               })()}
               {hasItemFlag(item, 'pactWeapon') ? <Box component="span" sx={{ ml: 0.5, fontSize: '0.56rem', color: '#9d7fb8', fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}>[Pact Weapon]</Box> : null}
               {hasItemFlag(item, 'arcaneArmor') ? <Box component="span" sx={{ ml: 0.5, fontSize: '0.56rem', color: '#58b879', fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}>[Arcane Armor]</Box> : null}
