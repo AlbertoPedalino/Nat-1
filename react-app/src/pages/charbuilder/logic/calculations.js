@@ -164,8 +164,12 @@ export function getProficiencyBonus(level) {
 }
 
 export function getPrimaryClassLevel(character) {
+  const explicit = Number(character?.classLevel);
+  if (Number.isFinite(explicit) && explicit > 0) return explicit;
   const total = Number(character?.level || 0) || 1;
-  const extras = (character?.extraClasses || []).reduce((sum, ec) => sum + (Number(ec?.level) || 0), 0);
+  const extras = (character?.extraClasses || [])
+    .filter((extra) => extra?.name)
+    .reduce((sum, extra) => sum + (Number(extra.level) || 1), 0);
   return Math.max(1, total - extras);
 }
 

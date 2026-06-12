@@ -7,7 +7,7 @@ import {
   STANDARD_ARRAY,
   STATS,
 } from './constants.js';
-import { getBackgroundPattern } from './logic/calculations.js';
+import { getBackgroundPattern, getPrimaryClassLevel } from './logic/calculations.js';
 import { handleBackgroundSelect, handleClassSelect, handleSpellToggle, handleWizardSpellbookToggle } from './stateHandlers.js';
 import { getChoiceLevel } from '../../shared/character/choiceLevels.js';
 import {
@@ -70,6 +70,15 @@ function totalCharacterLevel(classLevel, extraClasses) {
   return (Number(classLevel) || 1) + extraClassLevels(extraClasses);
 }
 
+export function normalizeCharacterLevels(character = {}) {
+  const classLevel = getPrimaryClassLevel(character);
+  return {
+    ...character,
+    classLevel,
+    level: totalCharacterLevel(classLevel, character.extraClasses),
+  };
+}
+
 function normChoice(value) {
   return String(value || '')
     .split('|')[0]
@@ -84,7 +93,7 @@ export const initialCharacter = {
   activeClassTab: 0,
   className: '',
   classSource: '',
-  classLevel: 0,
+  classLevel: 1,
   cls: null,
   allFeatures: [],
   subclasses: [],
@@ -319,15 +328,17 @@ export function builderReducer(state, action) {
     }
     case 'tab/set':
       return { ...state, tab: action.tab };
-    case 'field/set': {
-      if (action.field === 'level') {
-        const total = Math.max(1, Number(action.value) || 1);
-        const extras = extraClassLevels(state.character.extraClasses);
-        const classLevel = Math.max(1, total - extras);
-        const choices = cleanChoicesForLevel(state.character.choices || {}, classLevel);
-        return updateCharacter(state, { level: total, classLevel, choices });
-      }
+    case 'field/set':
       return updateCharacter(state, { [action.field]: action.value });
+    case 'class/level': {
+      const extras = extraClassLevels(state.character.extraClasses);
+      const classLevel = Math.min(Math.max(1, 20 - extras), Math.max(1, Number(action.level) || 1));
+      const choices = cleanChoicesForLevel(state.character.choices || {}, classLevel);
+      return updateCharacter(state, {
+        classLevel,
+        level: totalCharacterLevel(classLevel, state.character.extraClasses),
+        choices,
+      });
     }
     case 'xp/set': {
       // XP is an independent progress tracker — it does NOT drive the character
@@ -341,6 +352,8 @@ export function builderReducer(state, action) {
     case 'class-tab/set':
       return updateCharacter(state, { activeClassTab: action.tab });
     case 'multiclass/add': {
+      if (Number(state.character.level || 1) >= 20) return state;
+      if ((state.character.extraClasses || []).some((extraClass) => !extraClass?.name)) return state;
       const extraClasses = [
         ...state.character.extraClasses,
         {
@@ -440,6 +453,7 @@ export function builderReducer(state, action) {
           : extraClass
       ));
       const total = totalCharacterLevel(state.character.classLevel, extraClasses);
+      if (!previous.name && total > 20) return state;
       return updateCharacter(state, { extraClasses, choices, activeClassTab: idx + 1, level: total });
     }
     case 'extra-subclass/select': {
@@ -467,8 +481,13 @@ export function builderReducer(state, action) {
     }
     case 'extra-class/level': {
       const idx = Number(action.index);
-      const newLevel = Math.max(1, Number(action.level) || 1);
       if (!Number.isInteger(idx) || idx < 0) return state;
+      const primaryLevel = getPrimaryClassLevel(state.character);
+      const otherExtraLevels = (state.character.extraClasses || [])
+        .filter((extraClass, itemIndex) => itemIndex !== idx && extraClass?.name)
+        .reduce((sum, extraClass) => sum + (Number(extraClass.level) || 1), 0);
+      const maxLevel = Math.max(1, 20 - primaryLevel - otherExtraLevels);
+      const newLevel = Math.min(maxLevel, Math.max(1, Number(action.level) || 1));
       const extraClasses = state.character.extraClasses.map((extraClass, itemIndex) => (
         itemIndex === idx ? { ...extraClass, level: newLevel } : extraClass
       ));
@@ -642,7 +661,10 @@ export function builderReducer(state, action) {
       return updateCharacter(state, { choices: finalChoices });
     }
     case 'character/restore':
-      return { ...state, character: { ...initialCharacter, ...action.character } };
+      return {
+        ...state,
+        character: { ...initialCharacter, ...normalizeCharacterLevels(action.character) },
+      };
     case 'choice/open':
       return { ...state, choiceDialog: { title: action.title, body: action.body } };
     case 'choice/close':

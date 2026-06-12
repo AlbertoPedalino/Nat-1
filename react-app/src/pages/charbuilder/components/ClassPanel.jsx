@@ -88,6 +88,8 @@ export default function ClassPanel({ state, character, dispatch }) {
   const takenNames = new Set([character.className, ...character.extraClasses.map((extra) => extra.name)]);
   const PanelIcon = classIcon(activeExtra?.name || character.className);
   const primaryLevel = getPrimaryClassLevel(character);
+  const canAddMulticlass = Number(character.level || 1) < 20
+    && !character.extraClasses.some((extra) => !extra?.name);
   return (
     <BuilderPanel
       title="Class"
@@ -100,7 +102,12 @@ export default function ClassPanel({ state, character, dispatch }) {
               Remove
             </Button>
           ) : null}
-          <Button size="small" startIcon={<Plus size={16} />} onClick={() => dispatch({ type: 'multiclass/add' })}>
+          <Button
+            size="small"
+            startIcon={<Plus size={16} />}
+            disabled={!canAddMulticlass}
+            onClick={() => dispatch({ type: 'multiclass/add' })}
+          >
             Multiclass
           </Button>
         </Stack>
@@ -126,8 +133,13 @@ export default function ClassPanel({ state, character, dispatch }) {
               const selected = activeExtra
                 ? activeExtra.name === cls.name && activeExtra.source === cls.source
                 : character.className === cls.name && character.classSource === cls.source;
+              const hasLevelRoom = Boolean(activeExtra?.name) || Number(character.level || 1) < 20;
               const { met: prereqMet, reason: prereqReason } = isExtraTab && !selected
-                ? !takenNames.has(cls.name) ? checkMcPrereq(character, cls.name) : { met: false, reason: 'Class already taken' }
+                ? !hasLevelRoom
+                  ? { met: false, reason: 'Maximum total level reached' }
+                  : !takenNames.has(cls.name)
+                    ? checkMcPrereq(character, cls.name)
+                    : { met: false, reason: 'Class already taken' }
                 : { met: true, reason: '' };
               const spellWarning = isExtraTab && !selected && prereqMet
                 ? checkSpellcastingMulticlass(character, cls.name)

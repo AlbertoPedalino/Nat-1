@@ -11,24 +11,34 @@ export default function LevelPanel({ character, dispatch }) {
   const cls = isExtra ? extraClass?.cls : character.cls;
   const hp = calcMaxHp(character);
   const faces = cls?.hd?.faces || cls?.hitDie || '?';
-  const otherExtra = (character.extraClasses || []).filter((_, idx) => idx !== extraIdx).reduce((sum, ec) => sum + (Number(ec.level) || 0), 0);
+  const selectedExtraLevels = (character.extraClasses || [])
+    .filter((extra) => extra?.name)
+    .reduce((sum, extra) => sum + (Number(extra.level) || 1), 0);
+  const otherExtra = (character.extraClasses || [])
+    .filter((extra, idx) => idx !== extraIdx && extra?.name)
+    .reduce((sum, extra) => sum + (Number(extra.level) || 1), 0);
   const primaryLv = getPrimaryClassLevel(character);
-  const maxLv = isExtra ? Math.max(1, 20 - primaryLv - otherExtra) : 20;
-  const currentLevel = isExtra ? (extraClass?.level || 1) : character.level;
+  const maxLv = isExtra
+    ? Math.max(1, 20 - primaryLv - otherExtra)
+    : Math.max(1, 20 - selectedExtraLevels);
+  const currentLevel = isExtra ? (extraClass?.level || 1) : primaryLv;
   const rollLevels = isExtra
     ? Array.from({ length: currentLevel }, (_, index) => index + 1)
     : Array.from({ length: Math.max(0, primaryLv - 1) }, (_, index) => index + 2);
   const rollKeyFor = (level) => (isExtra ? `extra_${extraIdx}_${level}` : level);
   const setLevel = (value) => {
     if (isExtra) dispatch({ type: 'extra-class/level', index: extraIdx, level: value });
-    else dispatch({ type: 'field/set', field: 'level', value });
+    else dispatch({ type: 'class/level', level: value });
   };
+  if (isExtra && !extraClass?.name) return null;
   return (
     <BuilderPanel
       id="panel-level"
-      title={isExtra ? `Level — ${extraClass?.name || ''}` : 'Level'}
+      title={`Level - ${isExtra ? extraClass.name : (character.className || 'Primary')}`}
       icon={HeartPulse}
-      note={isExtra ? `Lv ${currentLevel} (max ${maxLv}) - Hit Die ${faces}` : `HP ${hp || '-'} - PB +${getProficiencyBonus(character.level)} - Hit Die ${faces}`}
+      note={isExtra
+        ? `Class Lv ${currentLevel} (max ${maxLv}) - Total Lv ${character.level} - Hit Die ${faces}`
+        : `Class Lv ${currentLevel} - Total Lv ${character.level} - HP ${hp || '-'} - PB +${getProficiencyBonus(character.level)} - Hit Die ${faces}`}
     >
       <Grid container spacing={1.5} alignItems="center">
         <Grid item xs={12} md={4} sx={{ display: { xs: 'block', md: 'none' } }}>

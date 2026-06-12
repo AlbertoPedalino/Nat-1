@@ -485,7 +485,7 @@ function buildBuilderStateFromSheetPayload(data) {
   const builderState = {
     name: data.name || '',
     level: Number(data.level || 1),
-    classLevel: Number(data.classLevel || data.level || 1),
+    classLevel: getPrimaryClassLevel(data),
     className: data.className || data.clsSnapshot?.name || '',
     classSource: data.classSource || data.clsSnapshot?.source || '',
     subclassShortName: data.subclassShortName || '',

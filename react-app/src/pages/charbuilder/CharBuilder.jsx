@@ -26,7 +26,7 @@ import { adapterRegistry, loadClassAdapters, loadCoreAdapters } from '../../adap
 import { getMod, getFinal } from '../charsheet/logic/calculations.js';
 import { adaptBuilderData } from '../../adapters/adapterPipeline.js';
 import { loadBackgrounds, loadClassIndex, loadFeats, loadItems, loadSpecies, loadSpells, loadOptionalFeatures, extractSheetData, importSheetPayload, saveCharacter } from './logic/index.js';
-import { builderReducer, initialBuilderState } from './state.js';
+import { builderReducer, initialBuilderState, normalizeCharacterLevels } from './state.js';
 import { BackgroundStep, ClassStep, EquipmentStep, ScoresStep, SheetStep, SpeciesStep } from './steps/index.js';
 import {
   createCharacter as storeCreateCharacter,
@@ -74,7 +74,10 @@ function createInitialBuilderState() {
   if (!targetId) return initialBuilderState;
   const stored = storeLoadCharacter(targetId);
   if (!stored) return initialBuilderState;
-  return { ...initialBuilderState, character: { ...initialBuilderState.character, ...stored } };
+  return {
+    ...initialBuilderState,
+    character: { ...initialBuilderState.character, ...normalizeCharacterLevels(stored) },
+  };
 }
 
 function ensureActiveCharacter() {

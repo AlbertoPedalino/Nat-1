@@ -3,7 +3,6 @@ import ChoiceBlock from './ChoiceBlock.jsx';
 import SpellChoiceList from './SpellChoiceList.jsx';
 import { EntryAccordion, splitNamedEntries } from '../../../shared/character/EntryAccordion.jsx';
 import { featChoiceSpecs } from '../logic/choiceSpecs.js';
-import { getPrimaryClassLevel } from '../logic/calculations.js';
 
 function featMinLevel(feat) {
   const prereq = Array.isArray(feat?.prerequisite) ? feat.prerequisite : [];
@@ -152,7 +151,7 @@ export function FeatFixedSlot({ spec, feats, character, state, dispatch }) {
 // rows) and selectable choices render exactly like the fixed slot, so both feat
 // surfaces look the same.
 export function FeatCategorySlot({ spec, feats, character, state, dispatch }) {
-  const effectiveLevel = getPrimaryClassLevel(character) + (character.extraClasses || []).reduce((sum, ec) => sum + (ec.level || 0), 0);
+  const effectiveLevel = Number(character.level || 1);
   const taken = new Set(Object.entries(character.choices || {})
     .filter(([key]) => key !== spec.key)
     .map(([, value]) => Array.isArray(value) ? value : [value])
