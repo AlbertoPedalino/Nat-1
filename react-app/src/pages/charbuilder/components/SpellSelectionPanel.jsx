@@ -6,6 +6,7 @@ import { SPELL_LEVEL_LABELS } from '../constants.js';
 import { collectAutoGrantedSpells, getSpellCounts, maxSpellLevel, spellMatchesAnyClass } from '../spells/spells.js';
 import { SpellReferenceBody, SpellRowLabel, SpellSelectButton } from '../../../shared/character/SpellReference.jsx';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
+import { entityChipSx } from '../../../shared/entityColors.js';
 
 export default function SpellSelectionPanel({ state, dispatch }) {
   const [wizardMode, setWizardMode] = useState('prepare');
@@ -129,9 +130,11 @@ export default function SpellSelectionPanel({ state, dispatch }) {
                     && (level === 0 ? selectedCantrips.length >= cantrips : selectedSpellsCount >= spells);
                   const requiresWizardBook = activeIsWizard && !wizardBookMode && !autoSelected && !inWizardBook;
                   const disabled = wizardBookMode ? false : (autoSelected || atLimit || requiresWizardBook);
+                  const autoSource = autoByName.get(spell.name) || spell._autoGranted;
                   const autoLabel = autoSelected
-                    ? getAutoGrantedLabel(autoByName.get(spell.name) || spell._autoGranted, activeCharacter)
+                    ? getAutoGrantedLabel(autoSource, activeCharacter)
                     : null;
+                  const autoKind = autoSource?.sourceType || 'class';
                   const onToggle = () => {
                     if (disabled) return;
                     if (wizardBookMode) {
@@ -148,6 +151,7 @@ export default function SpellSelectionPanel({ state, dispatch }) {
                       disabled={disabled}
                       autoSelected={autoSelected}
                       autoLabel={autoLabel}
+                      autoKind={autoKind}
                       onToggle={onToggle}
                     />
                   );
@@ -170,7 +174,7 @@ export default function SpellSelectionPanel({ state, dispatch }) {
 // (SpellReferenceBody: meta grid + description + upcast). Selection is an
 // explicit Add/Remove button on the right (auto-granted spells show a static
 // source chip instead). Expand mechanic lives in ExpandableCard.
-function SpellRow({ spell, selected, disabled, autoSelected, autoLabel, onToggle }) {
+function SpellRow({ spell, selected, disabled, autoSelected, autoLabel, autoKind, onToggle }) {
   return (
     <ExpandableCard
       containerSx={{ borderBottom: 1, borderColor: 'divider' }}
@@ -180,7 +184,7 @@ function SpellRow({ spell, selected, disabled, autoSelected, autoLabel, onToggle
         <ListItemButton selected={selected} aria-expanded={open} sx={{ alignItems: 'center', gap: 0.5 }} onClick={toggle}>
           <SpellRowLabel spell={spell} selected={selected} />
           {autoSelected ? (
-            <Chip size="small" color="secondary" label={autoLabel} sx={{ flexShrink: 0 }} />
+            <Chip size="small" label={autoLabel} sx={{ ...entityChipSx(autoKind), flexShrink: 0 }} />
           ) : (
             <SpellSelectButton selected={selected} disabled={disabled} onToggle={onToggle} />
           )}

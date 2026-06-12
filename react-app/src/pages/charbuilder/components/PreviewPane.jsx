@@ -1,6 +1,6 @@
 import { memo } from 'react';
-import { Accordion, AccordionDetails, AccordionSummary, Box, Card, CardContent, Chip, Divider, Grid, Paper, Stack, Typography } from '@mui/material';
-import { ChevronDown, Feather, Languages, Layers, Shield, Sparkles, Sword } from 'lucide-react';
+import { Box, Card, CardContent, Chip, Divider, Grid, Paper, Stack, Typography } from '@mui/material';
+import { Feather, Languages, Layers, Shield, Sparkles, Sword } from 'lucide-react';
 import { STAT_LABELS, STATS } from '../constants.js';
 import { calcMaxHp, formatMod, getAllFinalScores, getPrimaryClassLevel } from '../logic/calculations.js';
 import { installedRegistry } from '../../../adapters/index.js';
@@ -13,6 +13,7 @@ import {
 } from '../../../shared/character/typedProficiencies.js';
 import { collectResolvedWeaponMasteries } from '../../../shared/character/weaponMastery.js';
 import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
+import { EntryAccordion, splitNamedEntries } from '../../../shared/character/EntryAccordion.jsx';
 import { collectAcFormulas, getEquippedArmor, getEquippedShield, computeAcFormulaValue } from '../../../shared/character/ac.js';
 import { buildPreviewSheetCharacter } from '../logic/previewSheet.js';
 
@@ -185,72 +186,39 @@ function getFeatureBody(feature) {
   return null;
 }
 
+// Preview-pane feature row: compact (dense) accordion with a tone-colored title
+// plus optional sublabel/runtime chips above the body. Reuses the shared
+// EntryAccordion shell; the chip stack + compact body live here as `children`.
 function FeatureWithChips({ entry, source, extraSublabel }) {
   const { feature, runtimeChips } = entry;
   const tone = SOURCE_COLOR[source] || SOURCE_COLOR.class;
   const body = getFeatureBody(feature);
   const hasBody = Array.isArray(body) ? body.length > 0 : body != null && body !== '';
   return (
-    <Accordion
-      disableGutters
-      square
-      variant="outlined"
-      sx={{
-        minWidth: 0,
-        bgcolor: 'transparent',
-        backgroundImage: 'none',
-        borderLeft: `3px solid ${tone}`,
-        '&:before': { display: 'none' },
-        '&.Mui-expanded': { my: 0 },
-      }}
-    >
-      <AccordionSummary
-        expandIcon={<ChevronDown size={14} />}
-        sx={{
-          minHeight: 32,
-          px: 1,
-          py: 0,
-          '&.Mui-expanded': { minHeight: 32 },
-          '& .MuiAccordionSummary-content': { my: 0.5, minWidth: 0 },
-          '& .MuiAccordionSummary-content.Mui-expanded': { my: 0.5 },
-        }}
-      >
-        <Typography variant="body2" fontWeight={700} sx={{ minWidth: 0, color: tone, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {feature.name}
-        </Typography>
-      </AccordionSummary>
-      <AccordionDetails sx={{ px: 1, pt: 0, pb: 1 }}>
-        <Stack spacing={0.75} sx={{ minWidth: 0 }}>
-          {extraSublabel ? <Chip size="small" variant="outlined" label={extraSublabel} sx={{ ...outlinedChipSx(tone), alignSelf: 'flex-start', height: 20, fontSize: '0.62rem' }} /> : null}
-          {runtimeChips?.length ? (
-            <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
-              {runtimeChips.map((chip, idx) => (
-                <Chip key={`rt-${idx}`} size="small" label={chip} sx={{ ...outlinedChipSx(NEUTRAL_TONE), height: 20, fontSize: '0.62rem', bgcolor: 'rgba(215, 173, 82, 0.12)' }} />
-              ))}
-            </Stack>
-          ) : null}
-          {hasBody ? <PreviewEntryText entries={body} /> : (
-            <Typography variant="caption" component="div" color="text.secondary" sx={{ lineHeight: 1.45, wordBreak: 'break-word' }}>
-              No description.
-            </Typography>
-          )}
-        </Stack>
-      </AccordionDetails>
-    </Accordion>
+    <EntryAccordion title={feature.name} tone={tone} titleColor={tone} dense>
+      <Stack spacing={0.75} sx={{ minWidth: 0 }}>
+        {extraSublabel ? <Chip size="small" variant="outlined" label={extraSublabel} sx={{ ...outlinedChipSx(tone), alignSelf: 'flex-start', height: 20, fontSize: '0.62rem' }} /> : null}
+        {runtimeChips?.length ? (
+          <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+            {runtimeChips.map((chip, idx) => (
+              <Chip key={`rt-${idx}`} size="small" label={chip} sx={{ ...outlinedChipSx(NEUTRAL_TONE), height: 20, fontSize: '0.62rem', bgcolor: 'rgba(215, 173, 82, 0.12)' }} />
+            ))}
+          </Stack>
+        ) : null}
+        {hasBody ? <PreviewEntryText entries={body} /> : (
+          <Typography variant="caption" component="div" color="text.secondary" sx={{ lineHeight: 1.45, wordBreak: 'break-word' }}>
+            No description.
+          </Typography>
+        )}
+      </Stack>
+    </EntryAccordion>
   );
 }
 
 // Named 5etools entries as collapsed accordion rows (description only on
 // expand); unnamed intro text is grouped under a leading "Description" row.
 function EntryAccordions({ source, entries }) {
-  const list = entries == null ? [] : (Array.isArray(entries) ? entries : [entries]);
-  const named = list.filter((entry) => entry && typeof entry === 'object' && entry.name);
-  const unnamed = list.filter((entry) => !(entry && typeof entry === 'object' && entry.name));
-  const rows = [
-    ...(unnamed.length ? [{ name: 'Description', entries: unnamed }] : []),
-    ...named,
-  ];
-  return rows.map((feature, index) => (
+  return splitNamedEntries(entries).map((feature, index) => (
     <FeatureWithChips key={`${feature.name}-${index}`} entry={{ feature }} source={source} />
   ));
 }

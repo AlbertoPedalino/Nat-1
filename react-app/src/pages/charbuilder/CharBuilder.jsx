@@ -13,8 +13,11 @@ import {
   Toolbar,
   Tooltip,
   Typography,
+  ThemeProvider,
+  createTheme,
 } from '@mui/material';
 import { ChevronLeft, ChevronRight, Home, Wand2 } from 'lucide-react';
+import { theme } from '../../theme.js';
 import ChoiceDescriptionDialog from './components/ChoiceDescriptionDialog.jsx';
 import ImportSheetFab from './components/ImportSheetFab.jsx';
 import PreviewPane from './components/PreviewPane.jsx';
@@ -224,6 +227,7 @@ export default function CharBuilder() {
   }, [state.data.classes, state.data.species, state.data.backgrounds, state.character]);
 
   return (
+    <ThemeProvider theme={builderTheme}>
     <Box sx={builderRootSx}>
       <AppBar position="sticky" color="default" elevation={0} sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'rgba(26,23,19,0.98)', backgroundImage: 'none' }}>
         <Box sx={{ maxWidth: 1360, width: '100%', mx: 'auto', px: { xs: 0.75, md: 1.1 } }}>
@@ -326,6 +330,7 @@ export default function CharBuilder() {
 
       <ChoiceDescriptionDialog value={state.choiceDialog} onClose={() => dispatch({ type: 'choice/close' })} />
     </Box>
+    </ThemeProvider>
   );
 }
 
@@ -338,28 +343,10 @@ const builderRootSx = {
     borderColor: 'divider',
     borderRadius: 1,
   },
-  '& .MuiTypography-h1': {
-    fontFamily: '"Cinzel", Georgia, serif',
-    fontSize: '1.08rem',
-    lineHeight: 1.15,
-    fontWeight: 800,
-  },
-  '& .MuiTypography-h2': {
-    fontFamily: '"Cinzel", Georgia, serif',
-    fontSize: '0.82rem',
-    lineHeight: 1.2,
-    fontWeight: 800,
-    color: 'text.primary',
-  },
-  '& .MuiTypography-body1': { fontSize: '0.8rem' },
-  '& .MuiTypography-body2': { fontSize: '0.72rem' },
-  '& .MuiTypography-caption': { fontSize: '0.62rem' },
-  '& .MuiTypography-overline': {
-    fontFamily: '"Cinzel", Georgia, serif',
-    fontSize: '0.56rem',
-    lineHeight: 1.6,
-    fontWeight: 800,
-  },
+  // Builder typography (compact Cinzel scale) lives in `builderTheme` below, not
+  // here. Theme `styleOverrides` apply at the variant class (specificity 0,1,0),
+  // so a component's own `sx` color/size still wins — a descendant rule here
+  // (0,2,0) would override every h2's sx and silently break per-title colors.
   '& .MuiChip-root': {
     height: 19,
     borderRadius: '3px',
@@ -422,6 +409,28 @@ const builderRootSx = {
     '&:last-child': { pb: 0.75 },
   },
 };
+
+// Builder-scoped typography: the compact Cinzel scale, applied as theme variant
+// overrides (specificity 0,1,0) instead of descendant rules in `builderRootSx`
+// (0,2,0). This keeps the size/font as defaults while letting any component's
+// own `sx` (color, size) win — the previous descendant rules silently overrode
+// per-title `sx` colors. Scoped to the builder via the ThemeProvider in render;
+// the character sheet keeps the base theme typography.
+const CINZEL = '"Cinzel", Georgia, serif';
+const builderTheme = createTheme(theme, {
+  components: {
+    MuiTypography: {
+      styleOverrides: {
+        h1: { fontFamily: CINZEL, fontSize: '1.08rem', lineHeight: 1.15, fontWeight: 800 },
+        h2: { fontFamily: CINZEL, fontSize: '0.82rem', lineHeight: 1.2, fontWeight: 800 },
+        body1: { fontSize: '0.8rem' },
+        body2: { fontSize: '0.72rem' },
+        caption: { fontSize: '0.62rem' },
+        overline: { fontFamily: CINZEL, fontSize: '0.56rem', lineHeight: 1.6, fontWeight: 800 },
+      },
+    },
+  },
+});
 
 const builderAppNavSx = {
   display: 'flex',

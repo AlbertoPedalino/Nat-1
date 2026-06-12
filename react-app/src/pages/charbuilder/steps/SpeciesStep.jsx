@@ -3,13 +3,16 @@ import { ScrollText, Sparkles } from 'lucide-react';
 import BuilderPanel from '../components/BuilderPanel.jsx';
 import ChoiceBlock from '../components/ChoiceBlock.jsx';
 import { FeatCategorySlot } from '../components/FeatSlots.jsx';
-import { ExpandableEntryBlocks } from '../../../shared/character/ExpandableEntryBlocks.jsx';
+import { EntryAccordion, splitNamedEntries } from '../../../shared/character/EntryAccordion.jsx';
 import SearchList from '../components/SearchList.jsx';
 import SpellChoiceList from '../components/SpellChoiceList.jsx';
 import { speciesChoiceSpecs } from '../logic/choiceSpecs.js';
 
 function SpeciesDetailCard({ species }) {
   if (!species) return null;
+  // Species feature data is already split into named sub-entries, so each trait
+  // becomes one collapsible row (name visible, description on expand).
+  const rows = splitNamedEntries(species.entries);
   return (
     <Box sx={{ minWidth: 0, p: 1 }}>
       <Stack spacing={1.25} sx={{ minWidth: 0 }}>
@@ -18,8 +21,12 @@ function SpeciesDetailCard({ species }) {
           <Chip size="small" label={species.source || ''} />
         </Stack>
         <Divider />
-        {species.entries ? (
-          <ExpandableEntryBlocks entries={species.entries} initialBlocks={6} />
+        {rows.length ? (
+          <Stack spacing={0.5} sx={{ minWidth: 0 }}>
+            {rows.map((row, index) => (
+              <EntryAccordion key={`${row.name}-${index}`} title={row.name} entries={row.entries} />
+            ))}
+          </Stack>
         ) : (
           <Typography color="text.secondary">No description available.</Typography>
         )}

@@ -1,47 +1,18 @@
-import { Accordion, AccordionDetails, AccordionSummary, Box, Chip, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from '@mui/material';
-import { ChevronDown, Sparkles } from 'lucide-react';
+import { Box, Chip, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from '@mui/material';
+import { Sparkles } from 'lucide-react';
 import BuilderPanel from './BuilderPanel.jsx';
-import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
+import { EntryAccordion } from '../../../shared/character/EntryAccordion.jsx';
 import { getPrimaryClassLevel } from '../logic/calculations.js';
 import { ENTITY_COLORS, entityChipSx } from '../../../shared/entityColors.js';
 
 function SubclassFeatureRow({ feature }) {
   return (
-    <Accordion
-      disableGutters
-      square
-      variant="outlined"
-      sx={{
-        minWidth: 0,
-        bgcolor: 'transparent',
-        backgroundImage: 'none',
-        borderLeft: `3px solid ${ENTITY_COLORS.subclass}`,
-        '&:before': { display: 'none' },
-        '&.Mui-expanded': { my: 0 },
-      }}
-    >
-      <AccordionSummary
-        expandIcon={<ChevronDown size={14} />}
-        sx={{
-          minHeight: 36,
-          px: 1.25,
-          py: 0,
-          '&.Mui-expanded': { minHeight: 36 },
-          '& .MuiAccordionSummary-content': { my: 0.6, minWidth: 0 },
-          '& .MuiAccordionSummary-content.Mui-expanded': { my: 0.6 },
-        }}
-      >
-        <Stack direction="row" spacing={1} alignItems="center" sx={{ minWidth: 0 }}>
-          <Chip size="small" label={`Lv ${feature.level}`} sx={entityChipSx('subclass')} />
-          <Typography variant="body2" fontWeight={700} noWrap sx={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {feature.name}
-          </Typography>
-        </Stack>
-      </AccordionSummary>
-      <AccordionDetails sx={{ px: 1.25, pt: 0, pb: 1 }}>
-        <EntryBlocks entries={feature.entries} emptyText="" />
-      </AccordionDetails>
-    </Accordion>
+    <EntryAccordion
+      title={feature.name}
+      entries={feature.entries}
+      tone={ENTITY_COLORS.subclass}
+      leading={<Chip size="small" label={`Lv ${feature.level}`} sx={{ ...entityChipSx('subclass'), color: '#fff' }} />}
+    />
   );
 }
 

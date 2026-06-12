@@ -57,7 +57,16 @@
       "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/js/utils.js\" -o utils.js)",
       "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/js/parser.js\" -o parser.js)",
       "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/bestiary/index.json\" -o bidx.json)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(tasklist)",
+      "Bash(curl -s \"http://127.0.0.1:5173/GM-Board/src/pages/charbuilder/steps/BackgroundStep.jsx\")",
+      "Bash(npx --no-install playwright --version)",
+      "Bash(curl -s \"http://127.0.0.1:5180/GM-Board/src/pages/charbuilder/steps/BackgroundStep.jsx\")",
+      "Bash(git --no-pager diff --stat)",
+      "Bash(npx --no-install eslint src/pages/charbuilder/steps/BackgroundStep.jsx src/pages/charbuilder/steps/SpeciesStep.jsx src/pages/charbuilder/components/SubclassPanel.jsx src/pages/charbuilder/components/SpellSelectionPanel.jsx)",
+      "Bash(git *)",
+      "Read(//c/Users/alber/Documents/DND/GM-Board/**)",
+      "Read(//c/Users/alber/Documents/DND/GM-Board/docs/**)"
     ]
   }
 }

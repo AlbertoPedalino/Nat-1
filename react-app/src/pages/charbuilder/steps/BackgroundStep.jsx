@@ -7,7 +7,7 @@ import SearchList from '../components/SearchList.jsx';
 import { STAT_LABELS } from '../constants.js';
 import { getBackgroundPattern, getBackgroundPool } from '../logic/calculations.js';
 import { backgroundChoiceSpecs, fixedKeysFromBlocks } from '../logic/choiceSpecs.js';
-import { ENTITY_COLORS, entityChipSx } from '../../../shared/entityColors.js';
+import { NEUTRAL_TONE } from '../../../shared/entityColors.js';
 import { backgroundOriginFeat } from '../../../shared/character/selectedFeats.js';
 import { strip5eMarkup } from '../../../shared/character/spellEntries.js';
 
@@ -18,18 +18,50 @@ function titleCase(value) {
     .replace(/'\w/g, (m) => m.toLowerCase());
 }
 
-function ProfList({ title, items, color }) {
-  if (!items?.length) return null;
+// One label/value row inside the grants grid (label column + wrapped values).
+function GrantRow({ label, values }) {
+  if (!values?.length) return null;
   return (
-    <Box sx={{ minWidth: 0 }}>
-      <Typography variant="body2" sx={{ color, fontWeight: 700 }}>{title}</Typography>
-      <Box component="ul" sx={{ m: 0, pl: 2.25, color: 'text.secondary' }}>
-        {items.map((item) => (
-          <Typography key={item} component="li" variant="body2">{titleCase(item)}</Typography>
-        ))}
-      </Box>
-    </Box>
+    <>
+      <Typography variant="body2" sx={{ color: NEUTRAL_TONE, fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>{label}</Typography>
+      <Typography variant="body2" sx={{ color: 'text.primary', minWidth: 0 }}>{values.join(', ')}</Typography>
+    </>
   );
+}
+
+// Backgrounds encode their summary inside `entries` (Ability Scores, Feat,
+// Skill/Tool Proficiencies, Equipment). Newer sources use list `{type:'item'}`
+// nodes ({name, entry}); older ones use "{@b Label:} value" strings. Pull each
+// labeled fact out so the detail card shows the same info as the preview.
+function factValue(node) {
+  const raw = node?.entry != null ? node.entry : node?.entries;
+  const parts = Array.isArray(raw) ? raw : [raw];
+  return strip5eMarkup(parts.filter((part) => typeof part === 'string').join(' ')).trim();
+}
+
+function extractBackgroundFacts(background) {
+  const out = [];
+  const visit = (node) => {
+    if (!node) return;
+    if (Array.isArray(node)) { node.forEach(visit); return; }
+    if (typeof node === 'object') {
+      if (node.type === 'item' && node.name) {
+        const label = strip5eMarkup(node.name).replace(/:\s*$/, '').trim();
+        const value = factValue(node);
+        if (label && value) out.push({ label, value });
+        return;
+      }
+      (node.items || []).forEach(visit);
+      (node.entries || []).forEach(visit);
+      return;
+    }
+    if (typeof node === 'string') {
+      const match = node.match(/^\{@b\s+(.+?):?\}\s*:?\s*(.*)$/s);
+      if (match) out.push({ label: match[1].trim(), value: strip5eMarkup(match[2]).trim() });
+    }
+  };
+  visit(Array.isArray(background?.entries) ? background.entries : []);
+  return out;
 }
 
 function extractBackgroundLore(background) {
@@ -52,12 +84,13 @@ function BackgroundDetailCard({ background }) {
   const fixedLangs = fixedKeysFromBlocks(background.languageProficiencies || [], ['choose', 'any', 'anyStandard', 'anyExotic']);
   const originFeat = backgroundOriginFeat(background)?.fixed;
   const lore = extractBackgroundLore(background);
+  const facts = extractBackgroundFacts(background);
 
   return (
     <Box sx={{ minWidth: 0, p: 1 }}>
       <Stack spacing={1.25} sx={{ minWidth: 0 }}>
         <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
-          <Typography variant="h2" sx={{ flex: 1, minWidth: 0 }}>{background.name}</Typography>
+          <Typography variant="h2" sx={{ flex: 1, minWidth: 0, color: 'primary.main' }}>{background.name}</Typography>
           <Chip size="small" label={background.source || ''} />
         </Stack>
         {lore ? (
@@ -66,15 +99,18 @@ function BackgroundDetailCard({ background }) {
           </Typography>
         ) : null}
         <Divider />
-        {originFeat ? (
-          <Box sx={{ minWidth: 0 }}>
-            <Typography variant="body2" sx={{ color: ENTITY_COLORS.background, fontWeight: 700 }}>Origin Feat</Typography>
-            <Typography variant="body2" color="text.secondary">{originFeat}</Typography>
-          </Box>
-        ) : null}
-        <ProfList title="Skills (granted)" items={fixedSkills} color={ENTITY_COLORS.skill} />
-        <ProfList title="Tools (granted)" items={fixedTools} color={ENTITY_COLORS.tool} />
-        <ProfList title="Languages (granted)" items={fixedLangs} color={ENTITY_COLORS.language} />
+        <Box sx={{ display: 'grid', gridTemplateColumns: 'auto 1fr', columnGap: 1.5, rowGap: 0.75, alignItems: 'baseline', minWidth: 0 }}>
+          {facts.length ? (
+            facts.map((fact) => <GrantRow key={fact.label} label={fact.label} values={[fact.value]} />)
+          ) : (
+            <>
+              <GrantRow label="Origin Feat" values={originFeat ? [originFeat] : []} />
+              <GrantRow label="Skills" values={fixedSkills.map(titleCase)} />
+              <GrantRow label="Tools" values={fixedTools.map(titleCase)} />
+              <GrantRow label="Languages" values={fixedLangs.map(titleCase)} />
+            </>
+          )}
+        </Box>
       </Stack>
     </Box>
   );
@@ -108,7 +144,7 @@ export default function BackgroundStep({ state, dispatch }) {
                 {(item.abilities || getBackgroundPool(item)).map((ability) => (
                   <Chip key={ability} size="small" label={STAT_LABELS[ability]} />
                 ))}
-                {featLabel ? <Chip size="small" label={featLabel} sx={entityChipSx('background')} /> : null}
+                {featLabel ? <Chip size="small" label={featLabel} /> : null}
               </Stack>
             );
           }}
