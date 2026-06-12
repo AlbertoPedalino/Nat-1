@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box, Button, Chip, Typography } from '@mui/material';
+import { Box, Button, Chip, Typography, alpha } from '@mui/material';
 import { Cross, Dices, Sword } from 'lucide-react';
 import { getMod, getFinal, fbonus, hasConditionEffect, getConditionalConditionEffects } from '../logic/calculations.js';
 import { installedRegistry, loadCoreAdapters, loadClassAdapters } from '../../../adapters/index.js';
@@ -937,6 +937,15 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
   const attackSituational = !attackDisadv && !attackAdv && attackCondNotes.length > 0;
   const attackTag = attackDisadv ? ' DIS' : attackAdv ? ' ADV' : attackSituational ? ' DIS?' : '';
   const attackTooltip = attackCondNotes.length ? `Situational disadvantage: ${attackCondNotes.join('; ')}` : '';
+  // When the roll carries disadvantage (DIS), tint the roller with the malus tone
+  // (CHIP_TONES.negative) so the penalty reads at a glance. Otherwise keep the
+  // not-proficient red / default blue.
+  const attackRollerColor = attackDisadv
+    ? CHIP_TONES.negative
+    : action._notProficient ? '#de675f' : '#4d95d6';
+  const attackRollerBorder = attackDisadv
+    ? alpha(CHIP_TONES.negative, 0.4)
+    : action._notProficient ? 'rgba(222,103,95,0.4)' : 'rgba(77,149,214,0.4)';
 
   return (
     <ExpandableCard
@@ -964,7 +973,7 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
                         tag={attackTag}
                         tooltip={attackTooltip}
                         onRoll={onRoll}
-                        sx={{ borderColor: action._notProficient ? 'rgba(222,103,95,0.4)' : 'rgba(77,149,214,0.4)', color: action._notProficient ? '#de675f' : '#4d95d6' }}
+                        sx={{ borderColor: attackRollerBorder, color: attackRollerColor }}
                       />
                     ) : null}
                     {action.damageFormula ? (
