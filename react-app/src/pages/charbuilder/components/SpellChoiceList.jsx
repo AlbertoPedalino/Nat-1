@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import { Chip, List, ListItemButton, Paper, Stack, Typography } from '@mui/material';
 import { spellMatchesAnyClass } from '../spells/spells.js';
-import { SpellRowLabel } from '../../../shared/character/SpellReference.jsx';
+import { SpellReferenceBody, SpellRowLabel, SpellSelectButton } from '../../../shared/character/SpellReference.jsx';
+import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 
 function _knownCantripNames(character) {
   const names = new Set();
@@ -25,7 +26,9 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
   const max = spec.count || 1;
   // Modifier-only choices (Agonizing/Repelling Blast, Eldritch Spear) attach an effect
   // to an already-known cantrip — render a compact row: name + tags only, no 5e.tools
-  // link, meta, description, or source chip.
+  // link, meta, description, or source chip. Everything else (feat spell/cantrip
+  // pickers like Magic Initiate / Blessed Warrior) uses the same expandable row as
+  // the main spell panel: name + Add button, tap to expand the live 5etools body.
   const compact = !!filter.modifierOnly;
   const pool = useMemo(() => {
     var spells = state.data.spells
@@ -74,17 +77,33 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
             {pool.map((spell) => {
               const active = selected.includes(spell.name);
               const full = !active && selected.length >= max;
+              const toggle = () => dispatch({ type: 'choice/toggle-item', key: spec.key, value: spell.name, max });
+              if (compact) {
+                return (
+                  <ListItemButton
+                    key={`${spec.key}-${spell.name}-${spell.source}`}
+                    divider
+                    selected={active}
+                    disabled={full}
+                    onClick={toggle}
+                  >
+                    <SpellRowLabel spell={spell} selected={active} showIcon={false} />
+                  </ListItemButton>
+                );
+              }
               return (
-                <ListItemButton
+                <ExpandableCard
                   key={`${spec.key}-${spell.name}-${spell.source}`}
-                  divider
-                  selected={active}
-                  disabled={full}
-                  onClick={() => dispatch({ type: 'choice/toggle-item', key: spec.key, value: spell.name, max })}
-                >
-                  <SpellRowLabel spell={spell} selected={active} showIcon={!compact} />
-                  {compact ? null : <Chip size="small" color={active ? 'primary' : 'default'} label={spell.source} />}
-                </ListItemButton>
+                  containerSx={{ borderBottom: 1, borderColor: 'divider' }}
+                  bodySx={{ px: 2, pt: 0.25, pb: 1.25 }}
+                  body={<SpellReferenceBody spell={spell} />}
+                  header={({ open, toggle: toggleOpen }) => (
+                    <ListItemButton selected={active} aria-expanded={open} sx={{ alignItems: 'center', gap: 0.5 }} onClick={toggleOpen}>
+                      <SpellRowLabel spell={spell} selected={active} />
+                      <SpellSelectButton selected={active} disabled={full} onToggle={toggle} />
+                    </ListItemButton>
+                  )}
+                />
               );
             })}
           </List>

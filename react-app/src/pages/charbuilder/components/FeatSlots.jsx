@@ -1,8 +1,11 @@
-import { Button, Paper, Stack, Typography } from '@mui/material';
+import { Button, Chip, Paper, Stack, Typography } from '@mui/material';
+import { Lock } from 'lucide-react';
 import ChoiceBlock from './ChoiceBlock.jsx';
 import ExpandableSelectionList from './ExpandableSelectionList.jsx';
 import SpellChoiceList from './SpellChoiceList.jsx';
 import { EntryAccordion, splitNamedEntries } from '../../../shared/character/EntryAccordion.jsx';
+import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
+import { findSpellListEntryIndexByClass } from '../../../shared/character/featSpellLists.js';
 import { featChoiceSpecs } from '../logic/choiceSpecs.js';
 
 function featMinLevel(feat) {
@@ -66,27 +69,41 @@ function grantLabel(entry) {
 
 // Spell-list picker for feats that grant a choice of spell list (e.g. Magic
 // Initiate / Fey Touched). Renders nothing unless the feat offers more than one
-// list. Shared by the fixed and category feat slots.
-function FeatSpellListSelector({ feat, additional, entryIdx, slotKey, dispatch }) {
+// list. Shared by the fixed and category feat slots. When `locked` (the granting
+// source fixed the list, e.g. Acolyte → Magic Initiate (Cleric)) it renders the
+// chosen list as a read-only chip instead of switchable buttons.
+function FeatSpellListSelector({ feat, additional, entryIdx, slotKey, dispatch, locked = false }) {
   if (!Array.isArray(additional) || additional.length <= 1) return null;
   const entryKey = `${slotKey}_entry`;
+  const listLabel = feat?.choiceUi?.listLabel || `${feat?.name || 'Feat'} Spell List`;
   return (
     <Stack spacing={0.6}>
       <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 700 }}>
-        {feat?.choiceUi?.listLabel || `${feat?.name || 'Feat'} Spell List`}
+        {listLabel}
       </Typography>
-      <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
-        {additional.map((entry, idx) => (
-          <Button
-            key={`${slotKey}-entry-${idx}`}
-            size="small"
-            variant={idx === entryIdx ? 'contained' : 'outlined'}
-            onClick={() => dispatch({ type: 'choice/set-entry', key: entryKey, value: idx, clearPrefix: `${slotKey}_spell_` })}
-          >
-            {grantLabel(entry)}
-          </Button>
-        ))}
-      </Stack>
+      {locked ? (
+        <Chip
+          size="small"
+          color="primary"
+          variant="outlined"
+          icon={<Lock size={12} />}
+          label={grantLabel(additional[entryIdx] || additional[0])}
+          sx={{ alignSelf: 'flex-start' }}
+        />
+      ) : (
+        <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
+          {additional.map((entry, idx) => (
+            <Button
+              key={`${slotKey}-entry-${idx}`}
+              size="small"
+              variant={idx === entryIdx ? 'contained' : 'outlined'}
+              onClick={() => dispatch({ type: 'choice/set-entry', key: entryKey, value: idx, clearPrefix: `${slotKey}_spell_` })}
+            >
+              {grantLabel(entry)}
+            </Button>
+          ))}
+        </Stack>
+      )}
     </Stack>
   );
 }
@@ -94,10 +111,18 @@ function FeatSpellListSelector({ feat, additional, entryIdx, slotKey, dispatch }
 // Feat description as collapsed accordion rows: named feat sub-entries become one
 // row each (like species traits); a flat feat collapses under a single
 // "Description" row. Shared by both feat slots so descriptions look uniform.
+//
+// Feats with no named sub-entries (e.g. every Fighting Style — just a flat
+// description) skip the accordion and render the text directly, so expanding the
+// option card already shows the description instead of a redundant nested toggle.
 function FeatDescriptionRows({ feat }) {
   const rows = feat?.entries ? splitNamedEntries(feat.entries) : [];
   if (!rows.length) {
     return <Typography color="text.secondary">No description available.</Typography>;
+  }
+  const hasNamedEntries = rows.length > 1 || rows[0].name !== 'Description';
+  if (!hasNamedEntries) {
+    return <EntryBlocks entries={rows[0].entries} emptyText="No description available." />;
   }
   return (
     <Stack spacing={0.5} sx={{ minWidth: 0 }}>
@@ -111,19 +136,27 @@ function FeatDescriptionRows({ feat }) {
 // Separate, always-visible panel with everything selectable for a feat (spell
 // list + granted choices). Renders nothing when the feat has no choices. Shared
 // by both feat slots so selection always lives in its own panel.
-function FeatChoicesPanel({ feat, slotKey, character, state, dispatch }) {
+//
+// `lockedListClass` (only the background origin-feat slot passes one) fixes the
+// spell list to that class — the list selector renders read-only and the entry
+// index is derived from the hint rather than the player's pick.
+function FeatChoicesPanel({ feat, slotKey, character, state, dispatch, lockedListClass = null }) {
   const additional = Array.isArray(feat?.additionalSpells) ? feat.additionalSpells : [];
   const entryKey = `${slotKey}_entry`;
-  const entryChoiceEnabled = additional.length > 1;
+  const multiList = additional.length > 1;
+  const lockIdx = multiList ? findSpellListEntryIndexByClass(additional, lockedListClass) : -1;
+  const locked = lockIdx >= 0;
   const rawEntryIdx = character.choices[entryKey];
-  const entryIdx = entryChoiceEnabled && rawEntryIdx != null ? Number(rawEntryIdx) : null;
+  const entryIdx = locked
+    ? lockIdx
+    : (multiList && rawEntryIdx != null ? Number(rawEntryIdx) : null);
   const grants = feat ? featChoiceSpecs(feat, { slotKey, entryIdx }) : [];
-  if (!entryChoiceEnabled && grants.length === 0) return null;
+  if (!multiList && grants.length === 0) return null;
   return (
     <Paper variant="outlined" sx={{ p: 1.5, minWidth: 0 }}>
       <Stack spacing={1} sx={{ minWidth: 0 }}>
         <Typography variant="h2">{feat.name} Choices</Typography>
-        <FeatSpellListSelector feat={feat} additional={additional} entryIdx={entryIdx} slotKey={slotKey} dispatch={dispatch} />
+        <FeatSpellListSelector feat={feat} additional={additional} entryIdx={entryIdx} slotKey={slotKey} dispatch={dispatch} locked={locked} />
         {grants.map((grant) => renderGrantSpec({ grant, character, state, dispatch }))}
       </Stack>
     </Paper>
@@ -142,7 +175,7 @@ export function FeatFixedSlot({ spec, feats, character, state, dispatch }) {
           <FeatDescriptionRows feat={feat} />
         </Stack>
       </Paper>
-      <FeatChoicesPanel feat={feat} slotKey={spec.key} character={character} state={state} dispatch={dispatch} />
+      <FeatChoicesPanel feat={feat} slotKey={spec.key} character={character} state={state} dispatch={dispatch} lockedListClass={spec.classHint} />
     </Stack>
   );
 }

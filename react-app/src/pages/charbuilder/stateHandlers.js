@@ -1,4 +1,5 @@
 import { getBackgroundPattern } from './logic/calculations.js';
+import { findSpellListEntryIndexByClass } from '../../shared/character/featSpellLists.js';
 
 function normKey(value) {
   return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -116,26 +117,8 @@ export function handleBackgroundSelect(state, action, { findByNameSource, update
     choices.feat_origin = action.feat;
     if (action.classHint) {
       const featObj = state.data.feats.find((feat) => normKey(feat.name) === normKey(action.feat));
-      const additional = Array.isArray(featObj?.additionalSpells) ? featObj.additionalSpells : [];
-      if (additional.length > 1) {
-        const hint = action.classHint;
-        const idx = additional.findIndex((entry) => {
-          const sources = [];
-          ['known', 'innate', 'prepared', 'expanded'].forEach((mode) => {
-            const section = entry?.[mode];
-            if (!section) return;
-            Object.values(section).forEach((items) => {
-              if (!Array.isArray(items)) return;
-              items.forEach((spell) => {
-                if (typeof spell === 'string') sources.push(spell.split('|')[0]);
-              });
-            });
-          });
-          if (entry?.name) sources.push(entry.name);
-          return sources.some((source) => String(source).toLowerCase().includes(hint));
-        });
-        if (idx >= 0) choices.feat_origin_entry = idx;
-      }
+      const idx = findSpellListEntryIndexByClass(featObj?.additionalSpells, action.classHint);
+      if (idx >= 0) choices.feat_origin_entry = idx;
     }
   }
   return updateCharacter(state, {

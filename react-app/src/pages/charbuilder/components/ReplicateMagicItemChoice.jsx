@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import {
   Autocomplete,
+  Box,
   Chip,
   List,
   ListItemButton,
@@ -11,6 +12,7 @@ import {
   Typography,
 } from '@mui/material';
 import { Check } from 'lucide-react';
+import SelectionSearch, { useOptionSearch } from './SelectionSearch.jsx';
 import {
   replicateBucketFromLabel,
   replicateBucketOptions,
@@ -48,6 +50,13 @@ export default function ReplicateMagicItemChoice({ spec, character, dispatch, it
   }, [pool]);
 
   const specificSet = useMemo(() => new Set(specifics.map(lc)), [specifics]);
+  // Search over the concrete plan list (named items are plain strings, so the
+  // searchable text is the name itself). Field only shows past the shared
+  // threshold, matching the other builder selection panels.
+  const { query, setQuery, showSearch, visibleOptions: visibleSpecifics } = useOptionSearch(
+    specifics,
+    { getText: (name) => name },
+  );
   const itemByName = useMemo(() => {
     const m = new Map();
     (items || []).forEach((it) => { if (it?.name) m.set(lc(it.name), it); });
@@ -102,39 +111,48 @@ export default function ReplicateMagicItemChoice({ spec, character, dispatch, it
         </Stack>
 
         {specifics.length ? (
-          <Paper variant="outlined" sx={{ maxHeight: 210, overflow: 'auto', bgcolor: 'background.default' }}>
-            <List dense disablePadding>
-              {specifics.map((name) => {
-                const active = selected.includes(name);
-                return (
-                  <ListItemButton
-                    key={`${spec.key}-${name}`}
-                    divider
-                    selected={active}
-                    disabled={!active && full}
-                    onClick={() => toggleSpecific(name)}
-                    sx={{
-                      minWidth: 0,
-                      py: 0.65,
-                      px: 1,
-                    }}
-                  >
-                    <ListItemText
-                      primary={(
-                        <Typography
-                          noWrap
-                          sx={{ color: 'text.primary', fontSize: '0.82rem', fontWeight: 500 }}
-                        >
-                          {name}
-                        </Typography>
-                      )}
-                    />
-                    {active ? <Check size={16} color="currentColor" /> : null}
-                  </ListItemButton>
-                );
-              })}
-            </List>
-          </Paper>
+          <Stack spacing={0.6} sx={{ minWidth: 0 }}>
+            {showSearch ? <SelectionSearch value={query} onChange={setQuery} placeholder="Search plans…" /> : null}
+            <Paper variant="outlined" sx={{ maxHeight: 210, overflow: 'auto', bgcolor: 'background.default' }}>
+              {visibleSpecifics.length ? (
+                <List dense disablePadding>
+                  {visibleSpecifics.map((name) => {
+                    const active = selected.includes(name);
+                    return (
+                      <ListItemButton
+                        key={`${spec.key}-${name}`}
+                        divider
+                        selected={active}
+                        disabled={!active && full}
+                        onClick={() => toggleSpecific(name)}
+                        sx={{
+                          minWidth: 0,
+                          py: 0.65,
+                          px: 1,
+                        }}
+                      >
+                        <ListItemText
+                          primary={(
+                            <Typography
+                              noWrap
+                              sx={{ color: 'text.primary', fontSize: '0.82rem', fontWeight: 500 }}
+                            >
+                              {name}
+                            </Typography>
+                          )}
+                        />
+                        {active ? <Check size={16} color="currentColor" /> : null}
+                      </ListItemButton>
+                    );
+                  })}
+                </List>
+              ) : (
+                <Box sx={{ px: 1, py: 0.75 }}>
+                  <Typography color="text.secondary" sx={{ fontSize: '0.78rem' }}>No matches.</Typography>
+                </Box>
+              )}
+            </Paper>
+          </Stack>
         ) : null}
 
         {buckets.map((bucket) => {
