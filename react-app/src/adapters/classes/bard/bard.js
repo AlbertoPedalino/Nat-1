@@ -133,8 +133,7 @@ registerClassAdapter("Bard", function (cls, lv, specs, ctx = {}) {
       candidateSource: 'proficientSkills',
       count: 2,
       level: 2,
-      requiresProficiency: true,
-      excludeAlreadyExpertise: true
+      requiresProficiency: true
     });
   }
   if (lv >= 9) {
@@ -146,8 +145,7 @@ registerClassAdapter("Bard", function (cls, lv, specs, ctx = {}) {
       candidateSource: 'proficientSkills',
       count: 2,
       level: 9,
-      requiresProficiency: true,
-      excludeAlreadyExpertise: true
+      requiresProficiency: true
     });
   }
   if (lv >= 10) {

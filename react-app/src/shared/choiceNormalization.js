@@ -145,6 +145,12 @@ function isWeaponMasteryKey(key) {
   return k.includes('weaponmastery') || (k.includes('weapon') && k.includes('mastery'));
 }
 
+// Plain weapon-proficiency choices (not mastery, which is handled above first).
+function isWeaponProficiencyKey(key) {
+  const k = compact(key);
+  return k.includes('weapon') && !k.includes('mastery');
+}
+
 function isExpertiseKey(key) {
   const raw = String(key || '').toLowerCase();
   // Match both spelled-out keys (rogue_expertise_lv1, bard_expertise) and the
@@ -258,6 +264,12 @@ function normalizeChoiceEntry(out, key, value) {
     return;
   }
 
+  if (isWeaponProficiencyKey(key)) {
+    uniquePushMany(out.weapons, values);
+    out.choiceKeysByCategory.weapons.push(key);
+    return;
+  }
+
   if (isExpertiseKey(key)) {
     values.forEach((item) => classifyProficiencyValue(out, key, item, { expertise: true }));
     out.choiceKeysByCategory.expertise.push(key);
@@ -317,6 +329,7 @@ function emptyNormalizedChoices() {
     expertise: [],
     tools: [],
     languages: [],
+    weapons: [],
     weaponMasteries: [],
     feats: {
       selected: [],
@@ -346,6 +359,7 @@ function emptyNormalizedChoices() {
       expertise: [],
       tools: [],
       languages: [],
+      weapons: [],
       weaponMasteries: [],
       feats: [],
       spells: [],
