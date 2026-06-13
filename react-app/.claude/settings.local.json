@@ -70,7 +70,8 @@
       "PowerShell(npm run *)",
       "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/feats.json\" -o /tmp/feats.json)",
       "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/feats.json\" -o ./_feats_tmp.json)",
-      "Bash(npm test *)"
+      "Bash(npm test *)",
+      "PowerShell($p='src\\\\pages\\\\charsheet\\\\logic\\\\calculations.js'; \\(Get-Content $p\\)[270])"
     ]
   }
 }

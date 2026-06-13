@@ -158,9 +158,9 @@ export function buildSpellInfo(C, spellIndex) {
     (names || []).forEach((name) => pushKnown(name, Number(level), null, C?.className));
   });
   (C?.extraClasses || []).forEach((ec) => {
-    (ec.selectedCantrips || []).forEach((name) => pushKnown(name, 0, { label: ec.name || 'Class', color: SRC_COLOR.class }, ec.name));
+    (ec.selectedCantrips || []).forEach((name) => pushKnown(name, 0, null, ec.name));
     Object.entries(ec.selectedSpells || {}).forEach(([level, names]) => {
-      (names || []).forEach((name) => pushKnown(name, Number(level), { label: ec.name || 'Class', color: SRC_COLOR.class }, ec.name));
+      (names || []).forEach((name) => pushKnown(name, Number(level), null, ec.name));
     });
   });
 
@@ -1096,7 +1096,7 @@ export function getSpellStatusChips(entry) {
   if (!state || !_STATUS_CHIP_CONFIG[state]) return chips;
   if (entry.sourceInfo?.kind === 'ritualBook') return chips;
   if (entry.sourceInfo?.kind === 'atWill') return chips;
-  if (entry.originType === 'feat' && state === 'granted') return chips;
+  if ((entry.originType === 'feat' || entry.originType === 'species') && state === 'granted') return chips;
   const cfg = _STATUS_CHIP_CONFIG[state];
   chips.push({ key: state, label: cfg.label, color: cfg.color, bg: `${cfg.color}1a` });
   return chips;

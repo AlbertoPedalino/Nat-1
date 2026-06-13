@@ -472,6 +472,14 @@ export default function InventoryTab({ C, sheet }) {
 
   const adjustQty = useCallback((index, delta) => {
     const current = invRef.current || [];
+    const target = current[index];
+    if (!target) return;
+    if (delta > 0 && (target.equipped || target.equippedSlot)) {
+      const unequippedCopy = { ...target, qty: delta, equipped: false };
+      delete unequippedCopy.equippedSlot;
+      updateInv(addInventoryEntries(current, [unequippedCopy]));
+      return;
+    }
     const next = current.flatMap((item, idx) => {
       if (idx !== index) return [item];
       const nextQty = Math.max(0, qty(item) + delta);

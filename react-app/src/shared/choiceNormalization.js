@@ -146,6 +146,11 @@ function isWeaponMasteryKey(key) {
 }
 
 function isExpertiseKey(key) {
+  const raw = String(key || '').toLowerCase();
+  // Match both spelled-out keys (rogue_expertise_lv1, bard_expertise) and the
+  // abbreviated feat-granted form (..._feat_exp_..., ..._exp). Underscore
+  // boundaries keep this from matching unrelated words like "export".
+  if (raw.includes('expertise') || raw.includes('_exp_') || raw.endsWith('_exp')) return true;
   const k = compact(key);
   return k.includes('expertise') || k.includes('expert');
 }
@@ -365,7 +370,16 @@ export function normalizeCharacterChoices(character = {}) {
     normalizeChoiceEntry(out, String(key), value);
   });
 
-  uniquePushMany(out.skills, character.selectedSkills);
+  const selectedSkills = character.selectedSkills;
+  if (Array.isArray(selectedSkills)) {
+    uniquePushMany(out.skills, selectedSkills);
+  } else if (selectedSkills && typeof selectedSkills === 'object') {
+    uniquePushMany(out.skills, selectedSkills.proficient);
+    uniquePushMany(out.skills, selectedSkills.expert);
+    uniquePushMany(out.skills, selectedSkills.expertise);
+    uniquePushMany(out.expertise, selectedSkills.expert);
+    uniquePushMany(out.expertise, selectedSkills.expertise);
+  }
   uniquePushMany(out.languages, character.selectedLanguages);
   uniquePushMany(out.tools, character.selectedTools);
   uniquePushMany(out.spells.cantrips, character.selectedCantrips);

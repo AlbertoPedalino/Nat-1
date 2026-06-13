@@ -1,5 +1,3 @@
-import { getMod, getFinal } from './calculations.js';
-
 export function itemProps(item) {
   return [...(Array.isArray(item?.property) ? item.property : []), ...(Array.isArray(item?.properties) ? item.properties : [])]
     .map(p => String(p).toLowerCase());
@@ -126,38 +124,97 @@ export function getSlotConflictWarnings(inventory) {
   return warnings;
 }
 
+function itemQty(item) {
+  return Math.max(1, Number(item?.qty ?? 1) || 1);
+}
+
+function unequipItem(item) {
+  const next = { ...item, equipped: false };
+  delete next.equippedSlot;
+  return next;
+}
+
+function stableValue(value) {
+  if (Array.isArray(value)) return `[${value.map(stableValue).join(',')}]`;
+  if (value && typeof value === 'object') {
+    return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${stableValue(value[key])}`).join(',')}}`;
+  }
+  return JSON.stringify(value);
+}
+
+function stackSignature(item) {
+  const copy = { ...item };
+  delete copy.qty;
+  delete copy.equipped;
+  delete copy.equippedSlot;
+  return stableValue(copy);
+}
+
+function compactUnequippedStacks(inventory) {
+  const next = [];
+  const stackIndexes = new Map();
+
+  (inventory || []).forEach((item) => {
+    if (item.equipped || item.equippedSlot) {
+      next.push(item);
+      return;
+    }
+
+    const key = stackSignature(item);
+    const existingIndex = stackIndexes.get(key);
+    if (existingIndex === undefined) {
+      stackIndexes.set(key, next.length);
+      next.push({ ...item, qty: itemQty(item), equipped: false });
+      return;
+    }
+
+    next[existingIndex] = {
+      ...next[existingIndex],
+      qty: itemQty(next[existingIndex]) + itemQty(item),
+    };
+  });
+
+  return next;
+}
+
 export function equipToSlot(inventory, index, slot) {
   const target = inventory[index];
   if (!target) return inventory;
 
-  return inventory.map((item, idx) => {
+  if (target.equippedSlot === slot) {
+    return compactUnequippedStacks(inventory.map((item, idx) => (
+      idx === index ? unequipItem(item) : item
+    )));
+  }
+
+  const next = [];
+  inventory.forEach((item, idx) => {
     if (idx === index) {
-      if (item.equippedSlot === slot) {
-        const next = { ...item, equipped: false };
-        delete next.equippedSlot;
-        return next;
+      const count = itemQty(item);
+      if (count > 1) {
+        next.push(unequipItem({ ...item, qty: count - 1 }));
       }
-      return { ...item, equipped: true, equippedSlot: slot };
+      next.push({ ...item, qty: 1, equipped: true, equippedSlot: slot });
+      return;
     }
 
     if (slot === 'twoHands' && (item.equippedSlot === 'mainHand' || item.equippedSlot === 'offHand')) {
-      const next = { ...item, equipped: false };
-      delete next.equippedSlot;
-      return next;
+      next.push(unequipItem(item));
+      return;
     }
 
     if ((slot === 'mainHand' || slot === 'offHand') && item.equippedSlot === 'twoHands') {
-      const next = { ...item, equipped: false };
-      delete next.equippedSlot;
-      return next;
+      next.push(unequipItem(item));
+      return;
     }
 
     if (item.equippedSlot === slot) {
-      const next = { ...item, equipped: false };
-      delete next.equippedSlot;
-      return next;
+      next.push(unequipItem(item));
+      return;
     }
 
-    return item;
+    next.push(item);
   });
+
+  return compactUnequippedStacks(next);
 }

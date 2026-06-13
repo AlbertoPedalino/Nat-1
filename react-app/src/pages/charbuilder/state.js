@@ -20,6 +20,28 @@ import {
 } from '../../shared/character/currency.js';
 import { addInventoryEntries } from '../../shared/character/itemContainers.js';
 import { isFeatKey, isFeatDetailKey } from '../../shared/featChoiceKeys.js';
+import { normalizeCharacterChoices } from '../../shared/choiceNormalization.js';
+
+// Fields whose value feeds normalizeCharacterChoices. When a reducer patch touches
+// any of them, normalizedChoices is rebuilt so it stays the single source of truth
+// for derived proficiencies/expertise/spells (consumed by the sheet and previews).
+const NORMALIZE_SOURCE_FIELDS = [
+  'choices',
+  'selectedSkills',
+  'selectedTools',
+  'selectedLanguages',
+  'selectedCantrips',
+  'selectedSpells',
+  'wizardSpellbook',
+  'wizardSpellMastery',
+  'wizardSignatureSpells',
+];
+
+function patchTouchesNormalizeSource(patch) {
+  return !!patch && NORMALIZE_SOURCE_FIELDS.some(
+    (field) => Object.prototype.hasOwnProperty.call(patch, field),
+  );
+}
 
 function pruneOrphanFeatChoices(choices = {}) {
   if (!choices || typeof choices !== 'object') return choices;
@@ -182,6 +204,9 @@ function updateCharacter(state, patch) {
   const merged = { ...state.character, ...patch };
   if (patch && Object.prototype.hasOwnProperty.call(patch, 'choices')) {
     merged.choices = pruneOrphanFeatChoices(merged.choices);
+  }
+  if (patchTouchesNormalizeSource(patch)) {
+    merged.normalizedChoices = normalizeCharacterChoices(merged);
   }
   return { ...state, character: merged };
 }
@@ -511,7 +536,6 @@ export function builderReducer(state, action) {
         speciesSource: action.source,
         speciesObj,
         choices: sameSpecies ? state.character.choices : clearSpeciesChoices(state.character.choices),
-        normalizedChoices: undefined,
       });
     }
     case 'background/select': {
@@ -660,11 +684,11 @@ export function builderReducer(state, action) {
         : mergedChoices;
       return updateCharacter(state, { choices: finalChoices });
     }
-    case 'character/restore':
-      return {
-        ...state,
-        character: { ...initialCharacter, ...normalizeCharacterLevels(action.character) },
-      };
+    case 'character/restore': {
+      const restored = { ...initialCharacter, ...normalizeCharacterLevels(action.character) };
+      restored.normalizedChoices = normalizeCharacterChoices(restored);
+      return { ...state, character: restored };
+    }
     case 'choice/open':
       return { ...state, choiceDialog: { title: action.title, body: action.body } };
     case 'choice/close':

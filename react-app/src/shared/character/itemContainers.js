@@ -113,7 +113,16 @@ export function addInventoryEntries(inventory, entries, itemDb = null, normalize
   });
 
   additions.forEach((item) => {
-    const idx = next.findIndex((entry) => entry.name === item.name && entry.source === item.source && craftedFlagOf(entry) === craftedFlagOf(item));
+    const canStack = !item.equipped && !item.equippedSlot;
+    const idx = canStack
+      ? next.findIndex((entry) => (
+        !entry.equipped
+        && !entry.equippedSlot
+        && entry.name === item.name
+        && entry.source === item.source
+        && craftedFlagOf(entry) === craftedFlagOf(item)
+      ))
+      : -1;
     const qty = inventoryQty(item);
     if (idx === -1) next.push({ ...item, qty });
     else next[idx] = { ...next[idx], qty: inventoryQty(next[idx]) + qty };

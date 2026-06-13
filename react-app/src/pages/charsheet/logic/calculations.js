@@ -6,6 +6,7 @@ import { getFinalAbilityScore } from '../../../shared/character/itemEffects.js';
 import { getProficiencyBonus } from '../../../shared/character/proficiency.js';
 import { XP_THRESHOLDS } from '../../../shared/character/xp.js';
 import { collectSheetEffects } from './sheetEffects.js';
+import { getNormalizedChoices } from '../../../shared/choiceNormalization.js';
 
 const STATS = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
 const SLBL = { str: 'STR', dex: 'DEX', con: 'CON', int: 'INT', wis: 'WIS', cha: 'CHA' };
@@ -361,31 +362,18 @@ function hasHalfProficiencyOnUntrainedChecks(C) {
 }
 
 export function getSkillProficiency(C, skillName) {
-  const normalized = C?.normalizedChoices || {};
+  // normalizedChoices is the single source of truth for choice-derived skills and
+  // expertise (built in the builder reducer, recomputed here if absent). Expertise
+  // is checked first because it upgrades a skill that is also recorded as a plain
+  // proficiency — otherwise the 'prof' match would mask it.
+  const normalized = getNormalizedChoices(C);
   if (valuesIncludeSkill(normalized.expertise || [], skillName)) return 'exp';
   if (valuesIncludeSkill(normalized.skills || [], skillName)) return 'prof';
-  const skillData = C?.selectedSkills || {};
-  const profList = Array.isArray(skillData) ? skillData : (skillData.proficient || []);
-  const expList = Array.isArray(skillData) ? [] : (skillData.expert || []);
-  if (valuesIncludeSkill(expList, skillName)) return 'exp';
-  if (valuesIncludeSkill(profList, skillName)) return 'prof';
+  // Fixed proficiencies from background/species/features are not choice-derived,
+  // so they live outside normalizedChoices and are resolved separately.
   const bgFixed = (C?.backgroundSnapshot?.skillProficiencies || []).flatMap(sp => Object.keys(sp).filter(k => k !== 'choose'));
   if (valuesIncludeSkill(bgFixed, skillName)) return 'prof';
   if (valuesIncludeSkill(collectFixedSkillLabels(C), skillName)) return 'prof';
-  if (C?.choices) {
-    for (const [key, val] of Object.entries(C.choices)) {
-      if (!val) continue;
-      const lk = String(key || '').toLowerCase();
-      if (lk.includes('exp') || lk.includes('expertise')) {
-        const vals = Array.isArray(val) ? val : [val];
-        if (valuesIncludeSkill(vals, skillName)) return 'exp';
-      }
-      if (lk.includes('skill') || lk.startsWith('start_skills')) {
-        const vals = Array.isArray(val) ? val : [val];
-        if (valuesIncludeSkill(vals, skillName)) return 'prof';
-      }
-    }
-  }
   return null;
 }
 
