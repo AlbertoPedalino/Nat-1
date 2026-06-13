@@ -1,4 +1,4 @@
-import { craftedFlagOf } from './craftedItems.js';
+import { canStackInventoryItems } from './itemIdentity.js';
 
 export function parseInventoryItemRef(ref) {
   const [name, source] = String(ref || '').split('|');
@@ -113,16 +113,7 @@ export function addInventoryEntries(inventory, entries, itemDb = null, normalize
   });
 
   additions.forEach((item) => {
-    const canStack = !item.equipped && !item.equippedSlot;
-    const idx = canStack
-      ? next.findIndex((entry) => (
-        !entry.equipped
-        && !entry.equippedSlot
-        && entry.name === item.name
-        && entry.source === item.source
-        && craftedFlagOf(entry) === craftedFlagOf(item)
-      ))
-      : -1;
+    const idx = next.findIndex((entry) => canStackInventoryItems(entry, item));
     const qty = inventoryQty(item);
     if (idx === -1) next.push({ ...item, qty });
     else next[idx] = { ...next[idx], qty: inventoryQty(next[idx]) + qty };

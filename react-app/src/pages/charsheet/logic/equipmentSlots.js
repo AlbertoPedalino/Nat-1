@@ -1,3 +1,5 @@
+import { inventoryStackKey, isInventoryItemStackable } from '../../../shared/character/itemIdentity.js';
+
 export function itemProps(item) {
   return [...(Array.isArray(item?.property) ? item.property : []), ...(Array.isArray(item?.properties) ? item.properties : [])]
     .map(p => String(p).toLowerCase());
@@ -134,33 +136,17 @@ function unequipItem(item) {
   return next;
 }
 
-function stableValue(value) {
-  if (Array.isArray(value)) return `[${value.map(stableValue).join(',')}]`;
-  if (value && typeof value === 'object') {
-    return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${stableValue(value[key])}`).join(',')}}`;
-  }
-  return JSON.stringify(value);
-}
-
-function stackSignature(item) {
-  const copy = { ...item };
-  delete copy.qty;
-  delete copy.equipped;
-  delete copy.equippedSlot;
-  return stableValue(copy);
-}
-
 function compactUnequippedStacks(inventory) {
   const next = [];
   const stackIndexes = new Map();
 
   (inventory || []).forEach((item) => {
-    if (item.equipped || item.equippedSlot) {
+    if (!isInventoryItemStackable(item)) {
       next.push(item);
       return;
     }
 
-    const key = stackSignature(item);
+    const key = inventoryStackKey(item);
     const existingIndex = stackIndexes.get(key);
     if (existingIndex === undefined) {
       stackIndexes.set(key, next.length);
