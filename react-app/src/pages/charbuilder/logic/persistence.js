@@ -49,18 +49,7 @@ function pickFields(source, fields) {
 }
 
 export function extractSheetData(text) {
-  try {
-    const doc = new DOMParser().parseFromString(text, 'text/html');
-    const tag = doc.getElementById('gb-sheet-payload');
-    if (tag?.textContent) {
-      const payload = JSON.parse(tag.textContent);
-      if (payload?.type === 'gb-sheet-import' && payload.data) return payload.data;
-    }
-  } catch (_) {}
-  const match = text.match(/var\s+d\s*=\s*(\{[\s\S]+\})\s*;\s*var\s+k\s*=/);
-  if (match) {
-    try { return JSON.parse(match[1]); } catch (_) {}
-  }
+  // Canonical export is a JSON file: { type, data, version } (or a bare character).
   try {
     const json = JSON.parse(text);
     return json?.data || json;
@@ -456,21 +445,14 @@ export function saveCharacter(character, data) {
 
 function unwrapStructuredSheetPayload(payload) {
   if (!payload || typeof payload !== 'object') return null;
-  if (payload.type === 'gb-sheet-import' && payload.data && typeof payload.data === 'object') return payload.data;
-  if (payload.data && typeof payload.data === 'object' && !payload.className && !payload.clsSnapshot) return payload.data;
+  // Tolerate a still-wrapped { data } payload; a real character carries className.
+  if (payload.data && typeof payload.data === 'object' && !payload.className) return payload.data;
   return payload;
 }
 
 function isStructuredSheetPayload(payload) {
   if (!payload || typeof payload !== 'object') return false;
-  return Boolean(
-    payload.className
-    || payload.clsSnapshot
-    || payload.speciesSnapshot
-    || payload.backgroundSnapshot
-    || payload.choices
-    || payload.finalScores
-  );
+  return Boolean(payload.className || payload.choices);
 }
 
 function buildBuilderStateFromSheetPayload(data) {

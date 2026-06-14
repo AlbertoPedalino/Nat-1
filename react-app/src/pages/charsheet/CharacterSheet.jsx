@@ -28,6 +28,7 @@ import { clearedToggles } from './logic/toggleState.js';
 import { applyFreeCastRest, getFreeCastDefsForCharacter } from './logic/spellsTabLogic.js';
 import { loadCoreAdapters, loadClassAdapters, installedRegistry } from '../../adapters/index.js';
 import { loadItems, loadOptionalFeatures, loadConditions, reconcileInventoryWithItemsDb } from '../charbuilder/logic/dataLoaders.js';
+import { createCharacterExport } from '../charbuilder/logic/characterExport.js';
 import {
   getActiveCharId,
   loadCharacter as storeLoadCharacter,
@@ -531,7 +532,7 @@ export default function CharacterSheet() {
 
   const downloadSheet = useCallback(() => {
     if (!C) return;
-    const data = JSON.stringify({ type: 'gb-sheet-export', data: C, version: 1 }, null, 2);
+    const data = JSON.stringify(createCharacterExport(C), null, 2);
     const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
