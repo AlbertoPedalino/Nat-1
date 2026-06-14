@@ -957,13 +957,13 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
               <Box sx={{ width: 6, height: 28, borderRadius: 1, bgcolor: CAT_COLORS[action._colorBarCat || action.cat], flexShrink: 0, opacity: 0.95 }} />
             )}
 
-            <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '2px' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
-                <Typography sx={{ flex: 1, fontSize: '0.78rem', fontWeight: 700, color: 'text.primary', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {action.name}
-                </Typography>
+            <Box sx={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Typography sx={{ flex: 1, fontSize: '0.78rem', fontWeight: 700, color: 'text.primary', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {action.name}
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'center', gap: '2px', flexShrink: 0 }}>
                 {hasRollers ? (
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px', flexWrap: 'wrap' }}>
                     {Number.isFinite(action.attackBonus) ? (
                       <AttackRollButton
                         rawBonus={action.attackBonus}
@@ -1002,17 +1002,7 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
                     ) : null}
                   </Box>
                 ) : null}
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
-                <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap', minWidth: 0 }}>
-                  {action._source ? (
-                    <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontStyle: 'italic', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{action._source}</Typography>
-                  ) : null}
-                  {action.uses ? (
-                    <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary' }}>{action.uses}</Typography>
-                  ) : null}
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.4, flexWrap: 'wrap', justifyContent: 'flex-end', flexShrink: 0 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 0.4, flexWrap: 'wrap' }}>
                   {(action.tags || []).map((tag) => (
                     <Chip
                       key={tag.key}
