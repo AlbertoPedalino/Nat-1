@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
-import { InputAdornment, TextField } from '@mui/material';
-import { Search } from 'lucide-react';
+import SearchField from '../../../shared/character/SearchField.jsx';
 
 // Threshold above which a selection panel is worth a search field.
 export const SEARCH_MIN_OPTIONS = 6;
@@ -49,19 +48,11 @@ export function useOptionSearch(options, { getText = defaultGetText, minOptions 
 // (feats, fighting styles, weapon mastery, skills, ...).
 export default function SelectionSearch({ value, onChange, placeholder = 'Search…' }) {
   return (
-    <TextField
-      size="small"
+    <SearchField
       value={value}
-      onChange={(event) => onChange(event.target.value)}
+      onChange={onChange}
       placeholder={placeholder}
-      fullWidth
-      InputProps={{
-        startAdornment: (
-          <InputAdornment position="start">
-            <Search size={15} />
-          </InputAdornment>
-        ),
-      }}
+      iconSize={15}
       sx={{ '& .MuiInputBase-input': { fontSize: '0.8rem', py: 0.55 } }}
     />
   );

@@ -1,20 +1,14 @@
-import { Chip, InputAdornment, List, ListItemButton, ListItemText, Paper, Stack, TextField, Typography } from '@mui/material';
-import { Search } from 'lucide-react';
+import { Chip, List, ListItemButton, ListItemText, Paper, Stack, Typography } from '@mui/material';
+import SharedSearchField from '../../../shared/character/SearchField.jsx';
 
 export function SearchField({ value, onChange, placeholder }) {
   return (
-    <TextField
-      fullWidth
+    <SharedSearchField
       value={value}
+      onChange={onChange}
       placeholder={placeholder}
-      onChange={(event) => onChange(event.target.value)}
-      slotProps={{ input: {
-        startAdornment: (
-          <InputAdornment position="start">
-            <Search size={14} />
-          </InputAdornment>
-        ),
-      } }}
+      size="medium"
+      iconSize={14}
     />
   );
 }

@@ -1,6 +1,7 @@
 import { useDeferredValue, useEffect, useMemo, useState } from 'react';
-import { Box, Button, Chip, Divider, IconButton, InputAdornment, List, ListItemButton, ListItemText, Paper, Stack, TextField, Tooltip, Typography } from '@mui/material';
-import { Backpack, Coins, PackagePlus, Search, Trash2 } from 'lucide-react';
+import { Box, Button, Chip, Divider, IconButton, List, ListItemButton, ListItemText, Paper, Stack, Tooltip, Typography } from '@mui/material';
+import { Backpack, Coins, PackagePlus, Trash2 } from 'lucide-react';
+import SearchField from '../../../shared/character/SearchField.jsx';
 import BuilderPanel from '../components/BuilderPanel.jsx';
 import { ITEM_FILTERS } from '../constants.js';
 import { ItemNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
@@ -402,18 +403,12 @@ export default function EquipmentStep({ state, dispatch }) {
 
       <BuilderPanel id="panel-inventory" title="Inventory" icon={Backpack} note={`${formatWeight(totalWeight)} lb carried`}>
         <Stack spacing={1.5}>
-          <TextField
-            fullWidth
+          <SearchField
             value={localQuery}
+            onChange={setLocalQuery}
             placeholder="Search items"
-            onChange={(event) => setLocalQuery(event.target.value)}
-            slotProps={{ input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search size={18} />
-                </InputAdornment>
-              ),
-            } }}
+            size="medium"
+            iconSize={18}
           />
           <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
             {ITEM_FILTERS.map((filter) => (

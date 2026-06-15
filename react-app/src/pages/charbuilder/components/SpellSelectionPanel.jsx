@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Box, Chip, InputAdornment, List, ListItemButton, Paper, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
-import { BookOpen, Search } from 'lucide-react';
+import { Box, Chip, List, ListItemButton, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { BookOpen } from 'lucide-react';
+import SearchField from '../../../shared/character/SearchField.jsx';
 import BuilderPanel from './BuilderPanel.jsx';
 import { SPELL_LEVEL_LABELS } from '../constants.js';
 import { collectAutoGrantedSpells, getSpellCounts, maxSpellLevel, spellMatchesAnyClass } from '../spells/spells.js';
@@ -88,18 +89,12 @@ export default function SpellSelectionPanel({ state, dispatch }) {
               <Chip color={selectedSpellsCount > spells ? 'error' : 'primary'} label={`Spells ${selectedSpellsCount}/${spells}`} />
               {profile.ability ? <Chip label={`Ability ${profile.ability.toUpperCase()}`} /> : null}
             </Stack>
-            <TextField
-              fullWidth
+            <SearchField
               value={state.search.spells}
+              onChange={(value) => dispatch({ type: 'search/set', scope: 'spells', value })}
               placeholder="Search spells"
-              onChange={(event) => dispatch({ type: 'search/set', scope: 'spells', value: event.target.value })}
-              slotProps={{ input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Search size={18} />
-                  </InputAdornment>
-                ),
-              } }}
+              size="medium"
+              iconSize={18}
             />
             <ToggleButtonGroup size="small" exclusive value={level} onChange={(_, next) => next != null && dispatch({ type: 'field/set', field: 'activeSpellLevel', value: next })}>
               {levels.map((spellLevel) => (

@@ -4,12 +4,12 @@ import {
   Alert,
   Button,
   Chip,
-  TextField,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
 } from '@mui/material';
-import { Plus, Search, Sparkles } from 'lucide-react';
+import { Plus, Sparkles } from 'lucide-react';
+import SearchField from '../../../shared/character/SearchField.jsx';
 import { SPELL_LEVEL_LABELS } from '../../charbuilder/constants.js';
 import { SLBL, getFinal, getMod, getPB, effectiveD20Modifier } from '../logic/calculations.js';
 import { loadSpells } from '../../charbuilder/logic/dataLoaders.js';
@@ -449,13 +449,11 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
           ) : null}
 
           <Box sx={{ display: 'grid', gap: 0.5, mb: 0.75 }}>
-            <TextField
-              size="small"
-              fullWidth
+            <SearchField
               placeholder={spellDb.length ? 'Search spells...' : 'Loading spells...'}
               value={pickerSearch}
-              onChange={(event) => setPickerSearch(event.target.value)}
-              slotProps={{ input: { startAdornment: <Search size={14} /> } }}
+              onChange={setPickerSearch}
+              iconSize={14}
               sx={compactInputSx}
             />
             <Box sx={{ overflowX: 'auto', pb: 0.2 }}>

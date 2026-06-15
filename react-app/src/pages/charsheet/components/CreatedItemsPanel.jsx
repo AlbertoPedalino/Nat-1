@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Box, IconButton, InputAdornment, TextField, Typography } from '@mui/material';
-import { Minus, Plus, Search } from 'lucide-react';
+import { Box, IconButton, Typography } from '@mui/material';
+import { Minus, Plus } from 'lucide-react';
+import SearchField from '../../../shared/character/SearchField.jsx';
 import { loadItems } from '../../charbuilder/logic/dataLoaders.js';
 import { ItemNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
@@ -188,21 +189,13 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
       </Box>
 
       {searchable ? (
-        <TextField
-          size="small"
-          fullWidth
+        <SearchField
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onClick={(e) => e.stopPropagation()}
+          onChange={setQuery}
           placeholder="Search items…"
+          iconSize={14}
+          stopPropagation
           sx={{ mb: 0.6, '& .MuiInputBase-input': { fontSize: '0.78rem', py: '5px' } }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search size={14} />
-              </InputAdornment>
-            ),
-          }}
         />
       ) : null}
 

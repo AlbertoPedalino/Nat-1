@@ -1,8 +1,9 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Chip, List, ListItemButton, Paper, Stack, Typography } from '@mui/material';
 import { spellMatchesAnyClass } from '../spells/spells.js';
 import { SpellMiniTags, SpellReferenceBody, SpellRowLabel, SpellSelectButton } from '../../../shared/character/SpellReference.jsx';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
+import SelectionSearch, { filterOptions, SEARCH_MIN_OPTIONS } from './SelectionSearch.jsx';
 
 function _knownCantripNames(character) {
   const names = new Set();
@@ -30,7 +31,8 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
   // pickers like Magic Initiate / Blessed Warrior) uses the same expandable row as
   // the main spell panel: name + Add button, tap to expand the live 5etools body.
   const compact = !!filter.modifierOnly;
-  const pool = useMemo(() => {
+  const [query, setQuery] = useState('');
+  const basePool = useMemo(() => {
     var spells = state.data.spells
       .filter((spell) => levels.includes(Number(spell.level)))
       .filter((spell) => !filter.schools?.length || filter.schools.includes(spell.school) || filter.schools.includes(spell.schoolFull))
@@ -62,8 +64,14 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
       }
     }
 
-    return spells.slice(0, 200);
+    return spells;
   }, [state.data.spells, state.data.classSpellIndex, levels, classes, filter.schools, allSpells, filter.knownCantripOnly, filter.modifierOnly, filter.cantripAllowList, state.character, spec.key]);
+
+  const showSearch = basePool.length >= SEARCH_MIN_OPTIONS;
+  const pool = useMemo(
+    () => filterOptions(basePool, showSearch ? query : '', (spell) => spell.name).slice(0, 200),
+    [basePool, query, showSearch],
+  );
 
   return (
     <Paper variant="outlined" sx={{ p: 1.5, minWidth: 0 }}>
@@ -72,6 +80,9 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
           <Typography variant="h2" sx={{ flex: 1, minWidth: 0 }}>{spec.label}</Typography>
           <Chip size="small" label={`${selected.length}/${max}`} color={selected.length >= max ? 'primary' : 'default'} />
         </Stack>
+        {showSearch ? (
+          <SelectionSearch value={query} onChange={setQuery} placeholder="Search spells" />
+        ) : null}
         <Paper variant="outlined" sx={{ maxHeight: 260, overflow: 'auto' }}>
           <List dense disablePadding>
             {pool.map((spell) => {

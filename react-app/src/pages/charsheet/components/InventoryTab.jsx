@@ -1,6 +1,7 @@
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { Box, Button, IconButton, TextField, Tooltip, Typography, Alert, alpha } from '@mui/material';
 import { Backpack, Check, ChevronDown, ChevronRight, Minus, Package, Plus, Shield, Sparkles, Swords, Trash2, AlertTriangle } from 'lucide-react';
+import SearchField from '../../../shared/character/SearchField.jsx';
 import { loadItems } from '../../charbuilder/logic/dataLoaders.js';
 import { getFinal } from '../logic/calculations.js';
 import {
@@ -679,12 +680,12 @@ export default function InventoryTab({ C, sheet }) {
 
         {addPanelOpen ? (
           <Box sx={{ pt: 0.75, borderTop: 1, borderColor: 'divider' }}>
-            <TextField
-              size="small"
-              fullWidth
+            <SearchField
               placeholder="Search 2024 items by name, source, type, property..."
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={setSearch}
+              showSearchIcon={false}
+              iconSize={14}
               sx={{ ...compactInputSx, mb: 0.5 }}
             />
 
@@ -721,12 +722,12 @@ export default function InventoryTab({ C, sheet }) {
           <InventorySectionTitle icon={Package} label={`Inventory (${inventoryFiltered ? `${visibleTotalItems} / ` : ''}${totalItems})`} />
         </Box>
 
-        <TextField
-          size="small"
-          fullWidth
+        <SearchField
           placeholder="Search inventory by name, source, type, property..."
           value={inventorySearch}
-          onChange={(event) => setInventorySearch(event.target.value)}
+          onChange={setInventorySearch}
+          showSearchIcon={false}
+          iconSize={14}
           sx={{ ...compactInputSx, mb: 0.5 }}
         />
 
