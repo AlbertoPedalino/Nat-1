@@ -129,9 +129,9 @@ registerSubclassSheetActions("Rogue_Soulknife", [
     "cat": "attack",
     "uses": "Unlimited",
     "minLevel": 3,
-    "damageFormula": "1d6",
-    "damageButtonLabel": ({ formula }) => `${formula} psychic`,
-    "damageKind": "damage",
+    "rollFormula": "1d6",
+    "rollButtonLabel": ({ formula }) => `${formula} psychic`,
+    "rollKind": "damage",
     "rollLabelPrefix": "Psychic Blades",
     "desc": "Whenever you take the Attack action or make an Opportunity Attack, you can manifest a Psychic Blade in your free hand and attack with it (Finesse, range 60 ft, 1d6 psychic; disappears after the hit or miss). After attacking with a blade on your turn, you can make a melee or ranged attack with a second blade as a Bonus Action (damage die is 1d4 instead of 1d6; no ability modifier added to damage unless negative)."
   },

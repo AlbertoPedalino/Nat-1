@@ -140,9 +140,9 @@ registerSubclassSheetActions("Ranger_Fey Wanderer", [
     "cat": "attack",
     "uses": "1 / turn",
     "minLevel": 3,
-    "damageFormula": ({ ownerLevel }) => Number(ownerLevel || 1) >= 11 ? "1d6" : "1d4",
-    "damageButtonLabel": ({ formula }) => `+${formula} psychic`,
-    "damageKind": "damage",
+    "rollFormula": ({ ownerLevel }) => Number(ownerLevel || 1) >= 11 ? "1d6" : "1d4",
+    "rollButtonLabel": ({ formula }) => `+${formula} psychic`,
+    "rollKind": "damage",
     "desc": "Once per turn when you hit a creature with a weapon, deal an extra 1d4 Psychic damage (1d6 at lv.11)."
   },
   {

@@ -130,9 +130,9 @@ registerSubclassSheetActions("Monk_Open Hand", [
   { name: "Fleet Step", icon: "", cat: "bonus", uses: "After any Bonus Action", minLevel: 11,
     desc: "When you take a Bonus Action other than Step of the Wind, you can also use Step of the Wind immediately after that Bonus Action." },
   { name: "Quivering Palm", icon: "", cat: "attack", uses: "4 Focus Points", resKey: "ki", minLevel: 17,
-    damageFormula: "10d12",
-    damageButtonLabel: ({ formula }) => `${formula} force`,
-    damageKind: "damage",
+    rollFormula: "10d12",
+    rollButtonLabel: ({ formula }) => `${formula} force`,
+    rollKind: "damage",
     desc: "When you hit a creature with an Unarmed Strike, expend 4 Focus Points to set up lethal vibrations lasting a number of days equal to your Monk level. You can end them (no action required, harmlessly) or as an Action, or by forgoing one attack of your Attack action — target must be on the same plane. Target makes a CON save (spell save DC): fail = 10d12 Force damage; success = half. Only one creature at a time." },
 ]);
 registerSubclassSheetResources("Monk_Open Hand", [

@@ -475,7 +475,12 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: '2px', maxHeight: '58vh', overflowY: 'auto' }}>
             {pickerList.map((spell) => {
               const manualSelected = selectedManualNames.has(spell.name);
-              const locked = pickerWizardMode === 'book' ? false : spellInfo.lockedNames.has(spell.name);
+              // `autoGranted` = the spell is granted by a source (class/subclass/feat/…),
+              // so it always carries a source badge. `locked` = not user-editable in the
+              // current mode. In Wizard "book" mode the row stays editable (you manage the
+              // spellbook), but the badge must still show — hence the two are decoupled.
+              const autoGranted = spellInfo.lockedNames.has(spell.name);
+              const locked = pickerWizardMode === 'book' ? false : autoGranted;
               const inWizardBook = activeIsWizard && isInWizardBook(activePicker?.bucket, spell.name, Number(spell.level || 0));
               const selected = activeIsWizard && pickerWizardMode === 'book' ? inWizardBook : (manualSelected || locked);
               const atLimit = !selected && !locked && pickerWizardMode !== 'book' && ((spell.level === 0 && activeLimits.cantrips != null && activeCounts.cantrips >= activeLimits.cantrips)
@@ -488,7 +493,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
                 if (activeIsWizard) { toggleWizardPreparedSpell(spell); return; }
                 manualSelected ? removeSpell(spell) : addSpell(spell);
               };
-              const lockedEntry = locked ? lockedSourceByName.get(norm(spell.name)) : null;
+              const autoEntry = autoGranted ? lockedSourceByName.get(norm(spell.name)) : null;
               return (
                 <PickerSpellRow
                   key={`${spell.name}-${spell.source}`}
@@ -496,9 +501,10 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
                   selected={selected}
                   disabled={disabled}
                   atLimit={atLimit}
+                  autoGranted={autoGranted}
                   locked={locked}
-                  sourceInfo={lockedEntry?.sourceInfo}
-                  sources={lockedEntry?.sources}
+                  sourceInfo={autoEntry?.sourceInfo}
+                  sources={autoEntry?.sources}
                   onToggle={onToggle}
                 />
               );
@@ -514,12 +520,13 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
 
 
 // Picker row for the Add/Remove + Wizard Spellbook dialog. Tapping the row
-// expands the full rich reference (meta + description + upcast). Selection is
-// an explicit Add/Remove button; auto-granted (locked) spells show the same
-// tinted source chip used on the sheet spell rows (class/subclass/feat/etc.),
-// falling back to a plain AUTO label when no source info is available. The
-// caret is a decorative open/closed indicator.
-function PickerSpellRow({ spell, selected, disabled, atLimit, locked, sourceInfo, sources, onToggle }) {
+// expands the full rich reference (meta + description + upcast). An auto-granted
+// spell always shows its tinted source chip (class/subclass/feat/etc., the same
+// badge used on the sheet spell rows), falling back to a plain AUTO label when no
+// source info is available. The Add/Remove button shows whenever the row is
+// editable (`!locked`) — so in Wizard "book" mode an auto-granted spell shows both
+// its badge and the spellbook toggle. The caret is a decorative indicator.
+function PickerSpellRow({ spell, selected, disabled, atLimit, autoGranted, locked, sourceInfo, sources, onToggle }) {
   return (
     <ExpandableCard
       containerSx={{ flexShrink: 0, border: 1, borderColor: selected ? '#58b879' : 'transparent', borderRadius: 1, overflow: 'hidden', opacity: atLimit ? 0.5 : 1, '&:hover': { borderColor: selected ? '#58b879' : 'divider' } }}
@@ -531,13 +538,14 @@ function PickerSpellRow({ spell, selected, disabled, atLimit, locked, sourceInfo
           sx={{ display: 'flex', alignItems: 'center', gap: 0.5, px: '9px', py: '6px', cursor: 'pointer', bgcolor: selected ? 'rgba(39,174,96,0.08)' : 'transparent', '&:hover': { bgcolor: selected ? 'rgba(39,174,96,0.08)' : 'rgba(35,32,26,1)' } }}
         >
           <SpellRowLabel spell={spell} selected={selected} nameSx={{ fontSize: '0.875rem' }} sx={{ gap: 0.4 }} />
-          {locked ? (
+          {autoGranted ? (
             sourceInfo
               ? <SourceBadge sourceInfo={sourceInfo} sources={sources} />
               : <Box sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.7rem', color: '#58b879', flexShrink: 0 }}>AUTO</Box>
-          ) : (
+          ) : null}
+          {!locked ? (
             <SpellSelectButton selected={selected} disabled={disabled} onToggle={onToggle} addColor="success" />
-          )}
+          ) : null}
         </Box>
       )}
     />

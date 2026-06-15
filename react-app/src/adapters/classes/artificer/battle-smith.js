@@ -169,9 +169,9 @@ registerSubclassSheetActions("Artificer_Battle Smith", [
     "uses": "INT mod / LR",
     "resKey": "arcane_jolt",
     "minLevel": 9,
-    "damageFormula": ({ ownerLevel }) => Number(ownerLevel || 1) >= 15 ? '4d6' : '2d6',
-    "damageButtonLabel": ({ formula }) => `+${formula} force`,
-    "damageKind": "damage",
+    "rollFormula": ({ ownerLevel }) => Number(ownerLevel || 1) >= 15 ? '4d6' : '2d6',
+    "rollButtonLabel": ({ formula }) => `+${formula} force`,
+    "rollKind": "damage",
     "rollLabelPrefix": "Arcane Jolt",
     "desc": "When you or your Steel Defender hits with an attack, channel arcane energy: either deal extra Force damage (2d6; 4d6 at lv.15) to the target, OR restore HP to a creature within 30 ft of the target (same amount). Uses: INT modifier (min 1) per Long Rest. Recharge: Long Rest."
   },

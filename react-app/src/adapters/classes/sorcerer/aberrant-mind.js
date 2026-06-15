@@ -165,9 +165,9 @@ registerSubclassSheetActions("Sorcerer_Aberrant Mind", [
     "uses": "1 / LR",
     "resKey": "aberrant_implosion",
     "minLevel": 18,
-    "damageFormula": "3d10",
-    "damageButtonLabel": ({ formula }) => `${formula} force`,
-    "damageKind": "damage",
+    "rollFormula": "3d10",
+    "rollButtonLabel": ({ formula }) => `${formula} force`,
+    "rollKind": "damage",
     "desc": "Magic action: teleport to an unoccupied space you can see within 120 ft. Each creature within 30 ft of the space you left must make a STR saving throw (spell save DC). On a failed save: 3d10 Force damage and pulled straight toward that space (ending in nearest unoccupied space). On success: half damage only. 1/LR, or spend 5 Sorcery Points (no action) to restore this use."
   }
 ]);

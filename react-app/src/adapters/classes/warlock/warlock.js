@@ -597,8 +597,8 @@ registerClassSheetActions("Warlock", [
     "uses": "Spend a Pact Slot on hit",
     "minLevel": 5,
     "condition": function(C) { return _warlockHasInvocation(C, 'Eldritch Smite') && _warlockHasInvocation(C, 'Pact of the Blade'); },
-    "damageFormula": function(ctx) { var lv = Number(ctx.ownerLevel || 1); var slotLevel = lv >= 9 ? 5 : lv >= 7 ? 4 : lv >= 5 ? 3 : 1; return (slotLevel + 1) + 'd8'; },
-    "damageButtonLabel": function(ctx) { var lv = Number(ctx.ownerLevel || 1); var slotLevel = lv >= 9 ? 5 : lv >= 7 ? 4 : lv >= 5 ? 3 : 1; return 'Smite ' + (slotLevel + 1) + 'd8 Force'; }
+    "rollFormula": function(ctx) { var lv = Number(ctx.ownerLevel || 1); var slotLevel = lv >= 9 ? 5 : lv >= 7 ? 4 : lv >= 5 ? 3 : 1; return (slotLevel + 1) + 'd8'; },
+    "rollButtonLabel": function(ctx) { var lv = Number(ctx.ownerLevel || 1); var slotLevel = lv >= 9 ? 5 : lv >= 7 ? 4 : lv >= 5 ? 3 : 1; return 'Smite ' + (slotLevel + 1) + 'd8 Force'; }
   },
   {
     "name": "Lifedrinker",
@@ -608,8 +608,8 @@ registerClassSheetActions("Warlock", [
     "passive": true,
     "minLevel": 9,
     "condition": function(C) { return _warlockHasInvocation(C, 'Lifedrinker') && _warlockHasInvocation(C, 'Pact of the Blade'); },
-    "damageFormula": "1d6",
-    "damageButtonLabel": "Lifedrinker 1d6"
+    "rollFormula": "1d6",
+    "rollButtonLabel": "Lifedrinker 1d6"
   }
 ]);
 // [SheetRuntime] END

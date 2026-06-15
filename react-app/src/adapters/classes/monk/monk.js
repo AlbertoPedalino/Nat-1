@@ -158,7 +158,7 @@ registerClassSheetActions("Monk", [
     cat: 'attack',
     uses: 'Passive',
     passive: true,
-    damageFormula: ({ ownerLevel }) => {
+    rollFormula: ({ ownerLevel }) => {
       const lv = Number(ownerLevel || 1);
       const die = lv >= 17 ? 12 : lv >= 11 ? 10 : lv >= 5 ? 8 : 6;
       return `1d${die}`;
@@ -190,7 +190,7 @@ registerClassSheetActions("Monk", [
     uses: '1 Focus Point',
     resKey: 'ki',
     minLevel: 2,
-    damageFormula: ({ ownerLevel }) => {
+    rollFormula: ({ ownerLevel }) => {
       const lv = Number(ownerLevel || 1);
       const die = lv >= 17 ? 12 : lv >= 11 ? 10 : lv >= 5 ? 8 : 6;
       return `2d${die}`;
@@ -222,7 +222,7 @@ registerClassSheetActions("Monk", [
     uses: 'Free / 1 FP redirect',
     resKey: 'ki',
     minLevel: 3,
-    damageFormula: ({ ownerLevel, character }) => {
+    rollFormula: ({ ownerLevel, character }) => {
       const lv = Number(ownerLevel || 1);
       const dex = typeof getMod === 'function' && typeof getFinal === 'function'
         ? Number(getMod(getFinal(character, 'dex')) || 0)
@@ -230,8 +230,8 @@ registerClassSheetActions("Monk", [
       const total = dex + lv;
       return `1d10${total >= 0 ? '+' : ''}${total}`;
     },
-    damageKind: 'utility',
-    damageButtonLabel: ({ formula }) => `${String(formula || '')} reduce`,
+    rollKind: 'utility',
+    rollButtonLabel: ({ formula }) => `${String(formula || '')} reduce`,
     rollLabelPrefix: 'Deflect Attacks',
     desc: 'Reaction when you take B/P/S damage (lv.3) or any damage type (lv.13 Deflect Energy). Reduce the damage by 1d10 + DEX modifier + Monk level. If reduced to 0: spend 1 Focus Point to redirect as a ranged attack (20/60 ft, Martial Arts die + DEX).'
   },

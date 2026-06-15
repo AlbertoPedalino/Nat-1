@@ -127,7 +127,6 @@ registerSubclassAdapter("Warlock_Celestial", function (cls, lv, specs) {});
 registerSubclassSheetActions("Warlock_Celestial", [
   { name: "Healing Light", icon: "sun", cat: "bonus", uses: "Pool / LR", resKey: "celestial_heal_light", minLevel: 3,
     healFormula: "1d6",
-    damageButtonLabel: "Healing Light 1d6",
     desc: "Bonus Action: expend one or more d6s from your Healing Light pool to restore HP to one creature within 60 ft. Max dice per use = CHA modifier (minimum 1). Pool = 1 + Warlock level. Recharge: Long Rest." },
   { name: "Radiant Soul", icon: "sun", cat: "action", uses: "Passive", minLevel: 6,
   passive: true,
@@ -149,9 +148,9 @@ registerSubclassSheetActions("Warlock_Celestial", [
     },
     desc: "When you finish a Short or Long Rest, or when you use Magical Cunning, you gain Temporary HP equal to Warlock level + CHA modifier. Up to five creatures within 10 ft gain Temporary HP equal to half Warlock level + CHA modifier." },
   { name: "Searing Vengeance", icon: "flame", cat: "reaction", uses: "1 / LR", resKey: "celestial_searing_ven", minLevel: 14,
-    damageFormula: "2d8",
-    damageButtonLabel: "Searing Vengeance 2d8 Radiant",
-    damageKind: "damage",
+    rollFormula: "2d8",
+    rollButtonLabel: "Searing Vengeance 2d8 Radiant",
+    rollKind: "damage",
     desc: "When you or an ally within 60 ft is about to make a Death Saving Throw, the creature regains HP equal to half its HP maximum and can stand if Prone. Each creature of your choice within 30 ft takes 2d8 Radiant damage + CHA modifier and is Blinded until the end of the current turn. Recharge: Long Rest." },
 ]);
 

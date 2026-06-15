@@ -167,8 +167,6 @@ registerClassSheetActions("Fighter", [
       const lvNum = Number(ownerLevel || 1);
       return `1d10${lvNum >= 0 ? '+' : ''}${lvNum}`;
     },
-    damageKind: 'heal',
-    damageButtonLabel: ({ formula }) => `Heal ${String(formula || '')}`,
     rollLabelPrefix: 'Heal',
     desc: 'Bonus Action: regain 1d10 + Fighter level HP. Uses: 2 (lv.1), 3 (lv.4), 4 (lv.10). Recharge: Short or Long Rest.'
   },
@@ -187,9 +185,9 @@ registerClassSheetActions("Fighter", [
     cat: 'reaction',
     uses: 'Second Wind',
     minLevel: 2,
-    damageFormula: '1d10',
-    damageKind: 'utility',
-    damageButtonLabel: '+1d10',
+    rollFormula: '1d10',
+    rollKind: 'utility',
+    rollButtonLabel: '+1d10',
     rollLabelPrefix: 'Roll',
     desc: 'When you fail an ability check, you can expend a use of Second Wind (as a Reaction) to add 1d10 to the check result, possibly changing the outcome.'
   },

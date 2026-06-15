@@ -161,9 +161,9 @@ registerSubclassSheetActions("Artificer_Artillerist", [
     "uses": "On Cannon Hit",
     "passive": true,
     "minLevel": 9,
-    "damageFormula": "3d10",
-    "damageButtonLabel": ({ formula }) => `${formula} force`,
-    "damageKind": "damage",
+    "rollFormula": "3d10",
+    "rollButtonLabel": ({ formula }) => `${formula} force`,
+    "rollKind": "damage",
     "rollLabelPrefix": "Detonate",
     "desc": "Reaction when your Eldritch Cannon takes damage (while within 60 ft): command it to detonate. Each creature within 20 ft must succeed on a DEX save (DC = spell save DC) or take 3d10 Force damage (half on success). The cannon is then destroyed."
   },

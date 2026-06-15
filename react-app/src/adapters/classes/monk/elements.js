@@ -128,13 +128,13 @@ registerSubclassSheetActions("Monk_Elements", [
   { name: "Elemental Attunement", icon: "", cat: "action", uses: "1 Focus Point", resKey: "ki", minLevel: 3,
     desc: "Start of your turn: spend 1 Focus Point. For 10 minutes (or until Incapacitated) gain — Reach: Unarmed Strike reach +10 ft; Elemental Strikes: when you hit with an Unarmed Strike, choose Acid/Cold/Fire/Lightning/Thunder as damage type instead of normal, and force a STR save or move the target up to 10 ft toward or away from you." },
   { name: "Elemental Burst", icon: "", cat: "action", uses: "2 Focus Points", resKey: "ki", minLevel: 6,
-    damageFormula: ({ ownerLevel }) => {
+    rollFormula: ({ ownerLevel }) => {
       const lv = Number(ownerLevel || 1);
       const die = lv >= 17 ? 12 : lv >= 11 ? 10 : lv >= 5 ? 8 : 6;
       return `3d${die}`;
     },
-    damageButtonLabel: ({ formula }) => `${formula} elemental`,
-    damageKind: "damage",
+    rollButtonLabel: ({ formula }) => `${formula} elemental`,
+    rollKind: "damage",
     desc: "Magic action: expend 2 Focus Points. Choose Acid/Cold/Fire/Lightning/Thunder. 20-ft radius Sphere centered on a point within 120 ft: each creature makes a DEX save (spell save DC), fail = 3 × Martial Arts die damage, success = half." },
   { name: "Stride of the Elements", icon: "", cat: "action", uses: "Passive", minLevel: 11,
   passive: true,

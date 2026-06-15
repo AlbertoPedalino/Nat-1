@@ -264,19 +264,25 @@ export function makeSheetPayload(character, data) {
     }));
 
   const annotateActions = (actions, ownerName, ownerLevel, ownerType) => (
-    (actions || []).map((action) => ({
-      ...action,
-      ownerName, ownerLevel, ownerType,
-      healFormula: typeof action.healFormula === 'function'
-        ? action.healFormula({ character, ownerLevel })
-        : action.healFormula,
-      damageFormula: typeof action.damageFormula === 'function'
-        ? action.damageFormula({ character, ownerLevel })
-        : action.damageFormula,
-      damageButtonLabel: typeof action.damageButtonLabel === 'function'
-        ? action.damageButtonLabel({ character, ownerLevel })
-        : action.damageButtonLabel,
-    }))
+    (actions || []).map((action) => {
+      const rollFormula = typeof action.rollFormula === 'function'
+        ? action.rollFormula({ character, ownerLevel })
+        : action.rollFormula;
+      return {
+        ...action,
+        ownerName, ownerLevel, ownerType,
+        healFormula: typeof action.healFormula === 'function'
+          ? action.healFormula({ character, ownerLevel })
+          : action.healFormula,
+        rollFormula,
+        // Resolve the curated label with the rolled formula in scope so values
+        // like "2d6 thunder" / "Smite 5d8 Force" serialize correctly (functions
+        // can't be persisted). Must come after rollFormula is resolved.
+        rollButtonLabel: typeof action.rollButtonLabel === 'function'
+          ? action.rollButtonLabel({ character, ownerLevel, formula: rollFormula })
+          : action.rollButtonLabel,
+      };
+    })
   );
   const characterMods = {};
   ['str','dex','con','int','wis','cha'].forEach(stat => {

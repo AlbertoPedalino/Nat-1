@@ -170,12 +170,12 @@ registerClassSheetActions("Rogue", [
     "icon": "",
     "cat": "attack",
     "uses": "1 / turn",
-    "damageFormula": ({ ownerLevel }) => {
+    "rollFormula": ({ ownerLevel }) => {
       const lv = Number(ownerLevel || 1);
       const dice = Math.max(1, Math.ceil(lv / 2));
       return `${dice}d6`;
     },
-    "damageButtonLabel": ({ formula }) => `${String(formula || '')} extra`,
+    "rollButtonLabel": ({ formula }) => `${String(formula || '')} extra`,
     "rollLabelPrefix": "Damage",
     "desc": "Once per turn, deal extra damage with a Finesse or ranged weapon if you have Advantage on the attack OR a conscious ally is within 5 ft of the target (you must not have Disadvantage). Dice: 1d6 at lv.1, +1d6 every 2 levels."
   },

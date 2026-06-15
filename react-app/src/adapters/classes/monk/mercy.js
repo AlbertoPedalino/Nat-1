@@ -127,13 +127,13 @@ registerSubclassSheetActions("Monk_Mercy", [
   passive: true,
     desc: "Proficiency in Insight and Medicine skills, and proficiency with the Herbalism Kit." },
   { name: "Hand of Harm", icon: "", cat: "attack", uses: "1 Focus Point / turn", resKey: "ki", minLevel: 3,
-    damageFormula: ({ ownerLevel }) => {
+    rollFormula: ({ ownerLevel }) => {
       const lv = Number(ownerLevel || 1);
       const die = lv >= 17 ? 12 : lv >= 11 ? 10 : lv >= 5 ? 8 : 6;
       return `1d${die}+WIS`;
     },
-    damageButtonLabel: ({ formula }) => `+${formula} necrotic`,
-    damageKind: "damage",
+    rollButtonLabel: ({ formula }) => `+${formula} necrotic`,
+    rollKind: "damage",
     desc: "Once per turn when you hit a creature with an Unarmed Strike and deal damage, spend 1 Focus Point to deal extra Necrotic damage equal to one roll of your Martial Arts die + your WIS modifier." },
   { name: "Hand of Healing", icon: "", cat: "action", uses: "1 Focus Point", resKey: "ki", minLevel: 3,
     desc: "Magic action: spend 1 Focus Point to touch a creature and restore HP equal to one roll of your Martial Arts die + your WIS modifier. When you use Flurry of Blows, you can replace one of the Unarmed Strikes with a use of this feature without expending a Focus Point for the healing." },

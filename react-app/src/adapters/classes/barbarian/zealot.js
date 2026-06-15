@@ -125,9 +125,9 @@ registerSubclassAdapter("Barbarian_Zealot", function (cls, lv, specs) {});
 registerSubclassSheetActions("Barbarian_Zealot", [
   { name: "Divine Fury", icon: "", cat: "attack", uses: "Passive", minLevel: 3,
   passive: true,
-    damageFormula: ({ ownerLevel }) => `1d6+${Math.floor(Number(ownerLevel||1)/2)}`,
-    damageButtonLabel: ({ formula }) => `+${formula} necrotic/radiant`,
-    damageKind: "damage",
+    rollFormula: ({ ownerLevel }) => `1d6+${Math.floor(Number(ownerLevel||1)/2)}`,
+    rollButtonLabel: ({ formula }) => `+${formula} necrotic/radiant`,
+    rollKind: "damage",
     desc: "While Raging, the first creature you hit each turn with a weapon or Unarmed Strike takes extra damage equal to 1d6 + half your Barbarian level. You choose the damage type (Necrotic or Radiant) each time you deal this damage." },
   { name: "Warrior of the Gods", icon: "", cat: "bonus", uses: "Pool / LR", resKey: "zealot_warrior_pool", minLevel: 3,
     desc: "A divine pool of healing dice sustains you. Bonus Action: expend any number of d12s from your pool, roll them, and regain that many HP. Pool starts at 4d12 (grows to 5d12 at lv.6, 6d12 at lv.12, 7d12 at lv.17). Recharge: Long Rest." },

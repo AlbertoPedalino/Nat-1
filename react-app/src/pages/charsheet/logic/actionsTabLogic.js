@@ -131,7 +131,7 @@ function actionSpecificityScore(item) {
   let score = 0;
   if (!item?._runtimeFallback) score += 100;
   if (item?.desc) score += 10;
-  if (item?.damageFormula || item?.healFormula || item?.attackBonus != null) score += 5;
+  if (item?.rollFormula || item?.damageFormula || item?.healFormula || item?.attackBonus != null) score += 5;
   if (item?.ownerName && !/^(runtime|feat)$/i.test(String(item.ownerName))) score += 1;
   return score;
 }
@@ -171,8 +171,9 @@ export function resolveActionFormulas(action, C) {
   const patch = {};
 
   if (typeof action.healFormula === 'function') patch.healFormula = action.healFormula(ctx);
-  if (typeof action.damageFormula === 'function') patch.damageFormula = action.damageFormula(ctx);
-  if (typeof action.damageButtonLabel === 'function') patch.damageButtonLabel = action.damageButtonLabel(ctx);
+  if (typeof action.rollFormula === 'function') patch.rollFormula = action.rollFormula(ctx);
+  // rollButtonLabel is resolved at render time (where the rolled formula is in
+  // scope and can be passed to the label function) — see resolveButtonLabel.
   if (typeof action.attackBonus === 'function') {
     const resolved = action.attackBonus(ctx);
     if (Number.isFinite(resolved)) patch.attackBonus = resolved;
@@ -486,8 +487,8 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
     uses: opts.uses || 'Equipped',
     _source: 'Weapon',
     attackBonus: (profInfo.proficient ? getPB(C) + mod : mod) + enhancement.attack + fsBonus.attack,
-    damageFormula,
-    damageButtonLabel: damageFormula ? `Damage ${damageFormula}${dtype ? ` ${dtype}` : ''}` : 'Damage',
+    rollFormula: damageFormula,
+    rollButtonLabel: damageFormula ? `Damage ${damageFormula}${dtype ? ` ${dtype}` : ''}` : 'Damage',
     rollLabelPrefix: opts.rollLabelPrefix || itemDisplayName(item, 'Weapon'),
     noDescription: true,
     _item: item,
@@ -610,8 +611,8 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
       _source: 'Weapon',
       _colorBarCat: 'attack',
       attackBonus: (ohProfInfo.proficient ? getPB(C) + ohMod : ohMod) + ohEnhancement.attack + ohFsBonus.attack,
-      damageFormula: ohDamageFormula,
-      damageButtonLabel: ohDamageFormula ? `Damage ${ohDamageFormula}${ohDtype ? ` ${ohDtype}` : ''}` : 'Damage',
+      rollFormula: ohDamageFormula,
+      rollButtonLabel: ohDamageFormula ? `Damage ${ohDamageFormula}${ohDtype ? ` ${ohDtype}` : ''}` : 'Damage',
       rollLabelPrefix: `Off-hand ${itemDisplayName(offHandItem, 'Weapon')}`,
       noDescription: true,
       _item: offHandItem,
@@ -648,8 +649,8 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
     uses: monkLevel ? 'Martial Arts' : 'Attack',
     _source: 'Basic',
     attackBonus: getPB(C) + mod,
-    damageFormula: die + (unarmedDmgMod !== 0 ? (unarmedDmgMod >= 0 ? '+' : '') + unarmedDmgMod : ''),
-    damageButtonLabel: `Damage ${die}${unarmedDmgMod !== 0 ? (unarmedDmgMod >= 0 ? '+' : '') + unarmedDmgMod : ''} bludgeoning`,
+    rollFormula: die + (unarmedDmgMod !== 0 ? (unarmedDmgMod >= 0 ? '+' : '') + unarmedDmgMod : ''),
+    rollButtonLabel: `Damage ${die}${unarmedDmgMod !== 0 ? (unarmedDmgMod >= 0 ? '+' : '') + unarmedDmgMod : ''} bludgeoning`,
     rollLabelPrefix: 'Unarmed Strike',
     noDescription: true,
     detailType: 'unarmedStrike',

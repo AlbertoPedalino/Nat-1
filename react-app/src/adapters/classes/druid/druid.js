@@ -222,8 +222,8 @@ registerClassSheetActions("Druid", [
     "uses": "Passive",
     "passive": true,
     "minLevel": 7,
-    "damageFormula": "1d8",
-    "damageButtonLabel": "+1d8",
+    "rollFormula": "1d8",
+    "rollButtonLabel": "+1d8",
     "desc": "Choose at lv.7 — Potent Spellcasting: add WIS modifier to Druid cantrip damage rolls; or Primal Strike: once per turn when you hit with a weapon or Beast attack, deal +1d8 Cold, Fire, Lightning, or Thunder damage (chosen when feature is gained)."
   },
   {

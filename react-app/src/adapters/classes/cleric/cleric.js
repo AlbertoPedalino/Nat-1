@@ -321,7 +321,7 @@ registerClassSheetActions("Cleric", [
       const dice = lv >= 18 ? 4 : lv >= 13 ? 3 : lv >= 7 ? 2 : 1;
       return `${dice}d8${wis >= 0 ? "+" : ""}${wis}`;
     },
-    "damageFormula": ({ character, ownerLevel }) => {
+    "rollFormula": ({ character, ownerLevel }) => {
       const wis = typeof getMod === "function" && typeof getFinal === "function"
         ? Number(getMod(getFinal(character, "wis")) || 0)
         : 0;
@@ -329,9 +329,9 @@ registerClassSheetActions("Cleric", [
       const dice = lv >= 18 ? 4 : lv >= 13 ? 3 : lv >= 7 ? 2 : 1;
       return `${dice}d8${wis >= 0 ? "+" : ""}${wis}`;
     },
-    "damageKind": "damage",
+    "rollKind": "damage",
     "healButtonLabel": ({ formula }) => `Heal ${String(formula || "")}`,
-    "damageButtonLabel": ({ formula }) => `${String(formula || "")} radiant/necrotic`,
+    "rollButtonLabel": ({ formula }) => `${String(formula || "")} radiant/necrotic`,
     "rollLabelPrefix": "Divine Spark",
     "desc": "Channel Divinity option. As a Magic action, point your Holy Symbol at a creature within 30 ft. Roll 1d8 + WIS modifier (scales by level: 2d8 at lv.7, 3d8 at lv.13, 4d8 at lv.18). Either restore that many HP, or force the creature to make a CON save — on failure it takes Radiant or Necrotic damage (your choice) equal to that total; on success it takes half."
   },
@@ -342,14 +342,14 @@ registerClassSheetActions("Cleric", [
     "uses": "With Turn Undead",
     "resKey": "channel_div",
     "minLevel": 5,
-    "damageFormula": ({ character }) => {
+    "rollFormula": ({ character }) => {
       const wis = typeof getMod === 'function' && typeof getFinal === 'function'
         ? Number(getMod(getFinal(character, 'wis')) || 1)
         : 1;
       return `${Math.max(1, wis)}d8`;
     },
-    "damageButtonLabel": ({ formula }) => `${formula} radiant`,
-    "damageKind": "damage",
+    "rollButtonLabel": ({ formula }) => `${formula} radiant`,
+    "rollKind": "damage",
     "desc": "When you use Turn Undead, each Undead that fails its WIS save also takes Radiant damage equal to a number of d8s equal to your WIS modifier (minimum 1d8). This damage doesn't end the turn effect."
   },
   {
@@ -368,11 +368,11 @@ registerClassSheetActions("Cleric", [
     "uses": "Once/turn",
     "minLevel": 7,
     "condition": (character) => hasCharacterChoice(character, "cleric_blessed_strikes", "Divine Strike"),
-    "damageFormula": ({ ownerLevel }) => {
+    "rollFormula": ({ ownerLevel }) => {
       const lv = Number(ownerLevel || 1);
       return lv >= 14 ? "2d8" : "1d8";
     },
-    "damageButtonLabel": ({ character, ownerLevel }) => {
+    "rollButtonLabel": ({ character, ownerLevel }) => {
       const lv = Number(ownerLevel || 1);
       const dice = lv >= 14 ? "2d8" : "1d8";
       return `+${dice} ${divineStrikeDamageType(character).toLowerCase()}`;

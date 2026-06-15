@@ -126,13 +126,13 @@ registerSubclassSheetActions("Fighter_Psi Warrior", [
   { name: "Protective Field", icon: "", cat: "reaction", uses: "1 Psi Die", resKey: "psi_dice", minLevel: 3,
     desc: "Reaction when you or another creature you can see within 30 ft takes damage: expend one Psionic Energy Die, roll it, and reduce the damage taken by the number rolled plus your INT modifier (minimum reduction of 1)." },
   { name: "Psionic Strike", icon: "", cat: "attack", uses: "1 Psi Die / turn", resKey: "psi_dice", minLevel: 3,
-    damageFormula: ({ ownerLevel }) => {
+    rollFormula: ({ ownerLevel }) => {
       const lv = Number(ownerLevel || 1);
       const die = lv >= 17 ? 'd12' : lv >= 11 ? 'd10' : lv >= 5 ? 'd8' : 'd6';
       return `1${die}+INT`;
     },
-    damageButtonLabel: ({ formula }) => `+${formula} force`,
-    damageKind: "damage",
+    rollButtonLabel: ({ formula }) => `+${formula} force`,
+    rollKind: "damage",
     desc: "Once per turn, immediately after hitting a target within 30 ft with a weapon and dealing damage, expend one Psionic Energy Die: deal extra Force damage equal to the roll + your INT modifier." },
   { name: "Telekinetic Movement", icon: "", cat: "action", uses: "1 / SR+LR or Psi Die", resKey: "telekinetic_movement", minLevel: 3,
     desc: "Magic action: choose one target within 30 ft — a loose Large or smaller object, or a willing creature other than you. Transport it up to 30 ft to an unoccupied space you can see. If target is a Tiny object, can move it to or from your hand instead. 1/SR or LR, or expend a Psionic Energy Die (no action) to restore." },
