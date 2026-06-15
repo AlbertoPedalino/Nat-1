@@ -183,7 +183,11 @@ export function enumerateSubclassFeatureSpells(entity) {
           ownerClassName: entity?.className || null,
           subclassShortName,
           subclassName: feature.subclassName || null,
-          explicitSource: feature.name || subclassShortName,
+          // explicitSource is reserved for an adapter's *curated* label (e.g.
+          // "Facilitated Revival"). A scraped feature has none — its name is the
+          // verbose "<Subclass> Spells" — so leave it null and let grantSourceLabel
+          // derive the subclass identity, matching config grants that omit `source`.
+          explicitSource: null,
           sourceType: 'subclass',
           ability: null,
           entry: feature,

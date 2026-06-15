@@ -44,7 +44,7 @@ import {
   compactInputSx,
   levelToggleSx,
 } from './spellsTabStyles.js';
-import SpellEntry from './SpellEntry.jsx';
+import SpellEntry, { SourceBadge } from './SpellEntry.jsx';
 import { Empty, SlotPanel, SpellSection, StatBox } from './SpellsUiParts.jsx';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import { SpellReferenceBody, SpellRowLabel, SpellSelectButton } from '../../../shared/character/SpellReference.jsx';
@@ -169,6 +169,13 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
     });
     return result;
   }, [spellInfo, slots, C]);
+  const lockedSourceByName = useMemo(() => {
+    const map = new Map();
+    (spellInfo?.lockedEntries || []).forEach((entry) => {
+      if (entry?.name) map.set(norm(entry.name), entry);
+    });
+    return map;
+  }, [spellInfo]);
   const maxSpellLevel = useMemo(() => getMaxLearnableSpellLevel(C), [C, classSpellIndex]);
   const limits = useMemo(() => getSpellLimits(C), [C, classSpellIndex]);
   const canManageSpellList = useMemo(() => canManageSpells(C, limits), [C, limits]);
@@ -481,6 +488,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
                 if (activeIsWizard) { toggleWizardPreparedSpell(spell); return; }
                 manualSelected ? removeSpell(spell) : addSpell(spell);
               };
+              const lockedEntry = locked ? lockedSourceByName.get(norm(spell.name)) : null;
               return (
                 <PickerSpellRow
                   key={`${spell.name}-${spell.source}`}
@@ -489,6 +497,8 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
                   disabled={disabled}
                   atLimit={atLimit}
                   locked={locked}
+                  sourceInfo={lockedEntry?.sourceInfo}
+                  sources={lockedEntry?.sources}
                   onToggle={onToggle}
                 />
               );
@@ -505,9 +515,11 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
 
 // Picker row for the Add/Remove + Wizard Spellbook dialog. Tapping the row
 // expands the full rich reference (meta + description + upcast). Selection is
-// an explicit Add/Remove button; auto-granted (locked) spells show a static
-// AUTO chip. The caret is a decorative open/closed indicator.
-function PickerSpellRow({ spell, selected, disabled, atLimit, locked, onToggle }) {
+// an explicit Add/Remove button; auto-granted (locked) spells show the same
+// tinted source chip used on the sheet spell rows (class/subclass/feat/etc.),
+// falling back to a plain AUTO label when no source info is available. The
+// caret is a decorative open/closed indicator.
+function PickerSpellRow({ spell, selected, disabled, atLimit, locked, sourceInfo, sources, onToggle }) {
   return (
     <ExpandableCard
       containerSx={{ flexShrink: 0, border: 1, borderColor: selected ? '#58b879' : 'transparent', borderRadius: 1, overflow: 'hidden', opacity: atLimit ? 0.5 : 1, '&:hover': { borderColor: selected ? '#58b879' : 'divider' } }}
@@ -520,7 +532,9 @@ function PickerSpellRow({ spell, selected, disabled, atLimit, locked, onToggle }
         >
           <SpellRowLabel spell={spell} selected={selected} nameSx={{ fontSize: '0.875rem' }} sx={{ gap: 0.4 }} />
           {locked ? (
-            <Box sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.7rem', color: '#58b879', flexShrink: 0 }}>AUTO</Box>
+            sourceInfo
+              ? <SourceBadge sourceInfo={sourceInfo} sources={sources} />
+              : <Box sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.7rem', color: '#58b879', flexShrink: 0 }}>AUTO</Box>
           ) : (
             <SpellSelectButton selected={selected} disabled={disabled} onToggle={onToggle} addColor="success" />
           )}

@@ -45,7 +45,7 @@ function applyFlatToFormula(formula, flat) {
 // one source (e.g. a Forest Gnome Druid's Speak with Animals), the row stays
 // consolidated to a single badge showing the primary source plus a `+N`
 // indicator, with all contributing sources listed in a tooltip.
-function SourceBadge({ sourceInfo, sources, suffix = '' }) {
+export function SourceBadge({ sourceInfo, sources, suffix = '' }) {
   if (!sourceInfo) return null;
   const all = (sources && sources.length ? sources : [sourceInfo]).filter(Boolean);
   const extra = all.length - 1;
