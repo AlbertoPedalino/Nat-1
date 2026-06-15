@@ -2162,6 +2162,8 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
 
   <script>
     const BASE = 'https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/bestiary/';
+    const IMG_BASE = 'https://raw.githubusercontent.com/5etools-mirror-3/5etools-img/main/';
+    const FALLBACK_MON_ICON = 'bestiary/tokens/MM/Skeleton.webp';
     const CR_XP = { '0': 10, '1/8': 25, '1/4': 50, '1/2': 100, '1': 200, '2': 450, '3': 700, '4': 1100, '5': 1800, '6': 2300, '7': 2900, '8': 3900, '9': 5000, '10': 5900, '11': 7200, '12': 8400, '13': 10000, '14': 11500, '15': 13000, '16': 15000, '17': 18000, '18': 20000, '19': 22000, '20': 25000, '21': 33000, '22': 41000, '23': 50000, '24': 62000, '25': 75000, '26': 90000, '27': 105000, '28': 120000, '29': 135000, '30': 155000 };
     const CR_ORDER = ['0','1/8','1/4','1/2','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30'];
     function _buildCrOptions(selId, onchange) {
@@ -2197,7 +2199,7 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
     ];
     const DLABS = ['Low', 'Moderate', 'High', 'Deadly']; DCLS = ['beasy', 'bmed', 'bhard', 'bdead'], TCLS = ['teasy', 'tmed', 'thard', 'tdead'], BARCLR = ['#27ae60', '#f39c12', '#e67e22', '#c0392b'];
     const SIZES = { T: 'Tiny', S: 'Small', M: 'Medium', L: 'Large', H: 'Huge', G: 'Gargantuan' };
-    const PREF = ['XMM', 'XDMG', 'XPHB', 'FRAiF', 'FRHoF', 'EFA'];
+    const PREF = ['XMM', 'XDMG', 'XPHB', 'FRAiF', 'FRHoF', 'EFA', 'RHW'];
 
     const FULL_NAMES = {
       'XPHB': "Player's Handbook (2024)",
@@ -2205,7 +2207,8 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
       'XMM': "Monster Manual (2024)",
       'FRAiF': "Forgotten Realms: Adventures in Faerûn",
       'FRHoF': "Forgotten Realms: Heroes of Faerûn",
-      'EFA': "Eberron: Forge of the Artificer"
+      'EFA': "Eberron: Forge of the Artificer",
+      'RHW': "Ravenloft: The Horrors Within"
     };
 
     let allM = [], filtM = [], encounter = [], combatants = [], currentTurn = 0, round = 1;
@@ -2282,7 +2285,7 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
     function renderFights() { renderLibrary(); }
     let pid = 0, pg = 0;
     const PS = 50;
-    let sources = {}, activeSrcs = new Set(), selMon = null;
+    let sources = {}, legendaryGroups = new Map(), activeSrcs = new Set(), selMon = null;
 
     // Sistema etichette combat (simbolo+lettera per tipo di mostro)
     const SHAPES      = ['■','●','⬟','⬢','▲','◆','★','◉','▼','◈'];
@@ -2347,6 +2350,7 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
     }
 
     const esc = s => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const escAttr = s => esc(s).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     const fmt = n => Number(n).toLocaleString('it-IT');
     const mstr = v => { const m = Math.floor((v - 10) / 2); return (m >= 0 ? '+' : '') + m; };
     const multXP = n => n <= 1 ? 1 : n === 2 ? 1.5 : n <= 6 ? 2 : n <= 10 ? 2.5 : n <= 14 ? 3 : 4;
@@ -2374,6 +2378,15 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
     function clean(s) {
       if (!s) return '';
       return String(s)
+        .replace(/\{@actSave (str|dex|con|int|wis|cha)\}/gi, (_, ability) => {
+          const names = { str: 'Strength', dex: 'Dexterity', con: 'Constitution', int: 'Intelligence', wis: 'Wisdom', cha: 'Charisma' };
+          return `<i>${names[ability.toLowerCase()]} Saving Throw:</i>`;
+        })
+        .replace(/\{@actSaveFail(?: ([^}]+))?\}/g, (_, level) => `<i>Failure${level ? ` ${level}` : ''}:</i>`)
+        .replace(/\{@actSaveSuccess\}/g, '<i>Success:</i>')
+        .replace(/\{@actSaveSuccessOrFail\}/g, '<i>Failure or Success:</i>')
+        .replace(/\{@actTrigger\}/g, '<i>Trigger:</i>')
+        .replace(/\{@actResponse\}/g, '<i>Response:</i>')
         // Trasforma i tiri per colpire in d20 cliccabili
         .replace(/\{@hit ([^}]+)\}/g, (_, v) => {
           let val = Number(v) >= 0 ? '+' + v : v;
@@ -2411,15 +2424,42 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
         .replace(/\{[^}]+\}/g, '');
     }
 
-    function getMonIcon(m) {
-      if (!m || !m.name || !m.source) return '';
+    function getMonIconCandidates(m) {
+      if (!m || !m.name || !m.source) return [IMG_BASE + FALLBACK_MON_ICON];
 
-      const folder = m.source; // Manteniamo il caso originale del manuale (es: FRAiF)
-      const fileName = m.name.replace(/[’]/g, "'"); // normalizza apostrofo curvo, mantiene quello dritto (es: Will-o'-Wisp)
+      const fileName = m.name.replace(/[’]/g, "'");
+      const encodedName = encodeURIComponent(fileName);
+      const paths = [];
+      const addPath = path => {
+        if (path && !paths.includes(path)) paths.push(path);
+      };
 
-      // Proviamo il percorso moderno che hai trovato, che funziona per XMM, FRAiF, ecc.
-      // La struttura è: /bestiary/tokens/FONTE/Nome.webp
-      return `https://raw.githubusercontent.com/5etools-mirror-3/5etools-img/main/bestiary/tokens/${folder}/${encodeURIComponent(fileName)}.webp`;
+      addPath(`bestiary/tokens/${m.source}/${encodedName}.webp`);
+      addPath(FALLBACK_MON_ICON);
+      return paths.map(path => IMG_BASE + path);
+    }
+
+    function getMonIconAttrs(m) {
+      const [src, ...fallbacks] = getMonIconCandidates(m);
+      return `src="${escAttr(src)}" data-icon-fallbacks="${escAttr(JSON.stringify(fallbacks))}" onerror="loadNextMonIcon(this)"`;
+    }
+
+    function loadNextMonIcon(img) {
+      let fallbacks = [];
+      try {
+        fallbacks = JSON.parse(img.dataset.iconFallbacks || '[]');
+      } catch (e) {
+        // Invalid persisted metadata should only disable further fallbacks.
+      }
+
+      const next = fallbacks.shift();
+      if (!next) {
+        img.onerror = null;
+        return;
+      }
+
+      img.dataset.iconFallbacks = JSON.stringify(fallbacks);
+      img.src = next;
     }
 
     function renderE(entries) {
@@ -2432,6 +2472,10 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
           return `<ul style="margin: 5px 0 5px 15px; list-style: disc;">` +
             (entries.items || []).map(i => `<li>${renderE(i)}</li>`).join('') +
             `</ul>`;
+        }
+        if (entries.type === 'item') {
+          const body = entries.entry != null ? entries.entry : entries.entries;
+          return `${entries.name ? `<b><i>${clean(entries.name)}.</i></b> ` : ''}${renderE(body)}`;
         }
         if (entries.type === 'table') {
           let html = `<table style="width:100%; border-collapse:collapse; margin:10px 0; font-size:13px; border:1px solid rgba(122,32,13,0.2)">`;
@@ -2446,12 +2490,65 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
           ).join('') + `</tbody></table>`;
           return html;
         }
+        if (entries.type === 'insetReadaloud') {
+          return `<div style="margin:8px 0;padding:8px 10px;border-left:3px solid var(--gold);background:var(--bg3);font-style:italic">${renderE(entries.entries)}</div>`;
+        }
         if (entries.name && entries.entries) {
           return `<div style="margin-bottom:6px"><b><i>${clean(entries.name)}.</i></b> ${renderE(entries.entries)}</div>`;
         }
+        if (entries.entry != null) return renderE(entries.entry);
         if (entries.entries) return renderE(entries.entries);
       }
       return '';
+    }
+
+    const legendaryGroupKey = (name, source) => `${source || ''}__${name || ''}`;
+
+    function loadLegendaryGroups(data) {
+      const rawGroups = new Map((data?.legendaryGroup || []).map(group => [
+        legendaryGroupKey(group.name, group.source),
+        group
+      ]));
+      const resolved = new Map();
+
+      function resolve(group, visited = new Set()) {
+        if (!group) return null;
+        const key = legendaryGroupKey(group.name, group.source);
+        if (resolved.has(key)) return resolved.get(key);
+        if (visited.has(key)) return group;
+
+        const copy = group._copy;
+        if (!copy?.name || !copy?.source) {
+          resolved.set(key, group);
+          return group;
+        }
+
+        const nextVisited = new Set(visited);
+        nextVisited.add(key);
+        const base = resolve(rawGroups.get(legendaryGroupKey(copy.name, copy.source)), nextVisited);
+        const merged = { ...(base || {}), ...group };
+        delete merged._copy;
+
+        for (const [prop, mod] of Object.entries(copy._mod || {})) {
+          if (!mod || !Array.isArray(mod.items)) continue;
+          const current = Array.isArray(merged[prop]) ? merged[prop] : [];
+          if (mod.mode === 'prependArr') merged[prop] = [...mod.items, ...current];
+          else if (mod.mode === 'appendArr') merged[prop] = [...current, ...mod.items];
+          else if (mod.mode === 'replaceArr') merged[prop] = [...mod.items];
+        }
+
+        resolved.set(key, merged);
+        return merged;
+      }
+
+      rawGroups.forEach(group => resolve(group));
+      legendaryGroups = resolved;
+    }
+
+    function getLegendaryGroup(monster) {
+      const ref = monster?.legendaryGroup;
+      if (!ref?.name || !ref?.source) return null;
+      return legendaryGroups.get(legendaryGroupKey(ref.name, ref.source)) || null;
     }
 
     function setView(v) {
@@ -2515,8 +2612,12 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
 
     async function loadIndex() {
       try {
-        const r = await fetch(BASE + 'index.json');
+        const [r, legendaryResponse] = await Promise.all([
+          fetch(BASE + 'index.json'),
+          fetch(BASE + 'legendarygroups.json')
+        ]);
         sources = await r.json();
+        if (legendaryResponse.ok) loadLegendaryGroups(await legendaryResponse.json());
         renderChips();
         // Rimosso loadSrc('MM'); <--- Questo caricava il 2014 per primo
       } catch (e) {
@@ -2570,7 +2671,7 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
       if (!sl.length) { ml.innerHTML = '<div class="phmsg">No monsters found</div>'; document.getElementById('lmw').innerHTML = ''; return; }
       ml.innerHTML = sl.map((m, i) =>
         `<div class="mrow" onclick="showStat(${i})">
-      <img src="${getMonIcon(m)}" loading="lazy" style="width:24px; height:24px; border-radius:50%; margin-right:8px; border:1px solid var(--bdr2); background:var(--bg3); object-fit:contain" onerror="this.src='https://5etools-mirror-3.github.io/5etools-img/token/mm/skeleton.webp';">
+      <img ${getMonIconAttrs(m)} loading="lazy" style="width:24px; height:24px; border-radius:50%; margin-right:8px; border:1px solid var(--bdr2); background:var(--bg3); object-fit:contain">
       <span class="mn">${esc(m.name)}</span>
       <span class="mtp">${getType(m.type)}</span>
       <span class="mcr">CR ${getCR(m.cr)} · ${Number(crXP(getCR(m.cr))).toLocaleString('it-IT')} XP</span>
@@ -2616,6 +2717,7 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
 
     function renderSB(m, showAdd) {
       const cr = getCR(m.cr);
+      const legendaryGroup = getLegendaryGroup(m);
       const size = (m.size && m.size[0]) ? SIZES[m.size[0]] || m.size[0] : '';
       const type = getType(m.type);
       const sub = typeof m.type === 'object' && m.type.tags ? ` (${m.type.tags.map(t =>
@@ -2643,7 +2745,7 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
       let h = `<div class="sbbar"></div>
     <button class="sbclose" onclick="closeOverlay()"><i data-lucide="x" class="lucide-emoji" aria-hidden="true"></i></button>
     <div style="display:flex; align-items:center; gap:15px; margin-bottom:15px; padding:0 10px">
-      <img src="${getMonIcon(m)}" style="width:70px; height:70px; border-radius:50%; border:2px solid var(--gold); background:var(--bg3); object-fit:contain" onerror="this.src='https://5etools-mirror-3.github.io/5etools-img/token/mm/skeleton.webp';">
+      <img ${getMonIconAttrs(m)} style="width:70px; height:70px; border-radius:50%; border:2px solid var(--gold); background:var(--bg3); object-fit:contain">
       <div>
         <div class="sbname" style="font-size:22px">${(() => { const u = mon5eUrl(m); return u ? `<a href="${u}" target="_blank" rel="noopener" style="color:inherit; text-decoration:none" title="Apri su 5e.tools" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${esc(m.name)}</a>` : esc(m.name); })()}</div>
         <div class="sbmeta">${esc(size)} ${esc(type)}${esc(sub)}${align ? ', ' + esc(align) : ''}</div>
@@ -2674,7 +2776,14 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
       h += `<div class="sbprop"><span class="sbkey">Languages</span> ${esc(langs)}</div>`;
       h += `<div class="sbprop"><span class="sbkey">Challenge</span> ${esc(cr)} (${fmt(crXP(cr))} XP)</div>`;
 
-      const blk = list => list.map(a => `<div class="sbact"><span class="sbact-n">${esc(clean(a.name))}.</span> ${renderE(a.entries)}</div>`).join('');
+      const blk = list => (list || []).map(a => `<div class="sbact"><span class="sbact-n">${esc(clean(a.name))}.</span> ${renderE(a.entries)}</div>`).join('');
+      const legendaryIntro = () => {
+        if (m.legendaryHeader) return renderE(m.legendaryHeader);
+        const uses = m.legendaryActions || 3;
+        const lairUses = m.legendaryActionsLair || uses;
+        const possessive = m.isNamedCreature ? 'their' : 'its';
+        return `<i>Legendary Action Uses: ${uses}${lairUses !== uses ? ` (${lairUses} in Lair)` : ''}.</i> Immediately after another creature's turn, ${esc(m.name)} can expend a use to take one of the following actions. ${esc(m.name)} regains all expended uses at the start of each of ${possessive} turns.`;
+      };
 
       // Render a single spellcasting entry to HTML. Respects the `hidden` array
       // (5etools hides keys whose info is already in the name/header, e.g. "3/Day").
@@ -2704,13 +2813,12 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
         return st;
       };
 
-      // Route spellcasting entries to the section named by `displayAs`
-      // (default 'action'). This is how 2024 stat blocks express e.g. a
-      // bonus-action spell like the Priest's "Divine Aid (3/Day)".
-      const scByDisplay = { trait: [], action: [], bonus: [], reaction: [] };
+      // Legacy stat blocks omit `displayAs` and present spellcasting as a trait.
+      // Revised stat blocks set it explicitly, including legendary spell actions.
+      const scByDisplay = { trait: [], action: [], bonus: [], reaction: [], legendary: [] };
       (m.spellcasting || []).forEach(sc => {
-        const d = sc.displayAs || 'action';
-        (scByDisplay[d] || scByDisplay.action).push(sc);
+        const d = sc.displayAs || 'trait';
+        (scByDisplay[d] || scByDisplay.trait).push(sc);
       });
       const scHtml = key => scByDisplay[key].map(renderSC).join('');
 
@@ -2718,10 +2826,22 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
       if ((m.action && m.action.length) || scByDisplay.action.length) { h += `<div class="sbsec">Actions</div>${blk(m.action || [])}${scHtml('action')}`; }
       if ((m.bonus && m.bonus.length) || scByDisplay.bonus.length) { h += `<div class="sbsec">Bonus Actions</div>${blk(m.bonus || [])}${scHtml('bonus')}`; }
       if ((m.reaction && m.reaction.length) || scByDisplay.reaction.length) { h += `<div class="sbsec">Reactions</div>${blk(m.reaction || [])}${scHtml('reaction')}`; }
-      if (m.legendary && m.legendary.length) {
+      if ((m.legendary && m.legendary.length) || scByDisplay.legendary.length) {
         h += `<div class="sbsec">Legendary Actions</div>`;
-        if (m.legendaryHeader) h += `<div class="sbact">${renderE(m.legendaryHeader)}</div>`;
-        h += blk(m.legendary);
+        h += `<div class="sbact">${legendaryIntro()}</div>`;
+        h += blk(m.legendary) + scHtml('legendary');
+      }
+      if (m.mythic && m.mythic.length) {
+        h += `<div class="sbsec">Mythic Actions</div>${blk(m.mythic)}`;
+      }
+      if (legendaryGroup?.lairActions?.length) {
+        h += `<div class="sbsec">Lair Actions</div><div class="sbact">${renderE(legendaryGroup.lairActions)}</div>`;
+      }
+      if (legendaryGroup?.regionalEffects?.length) {
+        h += `<div class="sbsec">Regional Effects</div><div class="sbact">${renderE(legendaryGroup.regionalEffects)}</div>`;
+      }
+      if (legendaryGroup?.mythicEncounter?.length) {
+        h += `<div class="sbsec">${esc(m.name)} as a Mythic Encounter</div><div class="sbact">${renderE(legendaryGroup.mythicEncounter)}</div>`;
       }
       if (showAdd) h += `<button class="sbaddbtn" onclick="addFromModal()">+ Add to Encounter</button>`;
       h += `<div class="sbbar bot"></div>`;
@@ -3013,7 +3133,7 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
         <div class="c-arr">${isAct ? '▶' : ''}</div>
         <div class="c-init-col"><input type="number" value="${c.initiative}" onchange="setInit(${c.id},this.value)"></div>
         <div class="c-name-col">
-          ${mon && c.monsterData ? `<img src="${getMonIcon(c.monsterData)}" class="mon-icon" onerror="this.src='https://raw.githubusercontent.com/5etools-mirror-3/5etools-img/main/bestiary/tokens/MM/Skeleton.webp';">` : `<div class="mon-icon" style="display:flex;align-items:center;justify-content:center;font-size:9px;color:#111;background:${c.color||'#a0a0ff'};border-radius:50%;font-weight:700">PG</div>`}
+          ${mon && c.monsterData ? `<img ${getMonIconAttrs(c.monsterData)} class="mon-icon">` : `<div class="mon-icon" style="display:flex;align-items:center;justify-content:center;font-size:9px;color:#111;background:${c.color||'#a0a0ff'};border-radius:50%;font-weight:700">PG</div>`}
           ${c.shape ? `<span class="combat-label" style="color:${c.shapeClr}" title="${esc(c.name)} ${c.label}"><span class="lbl-shape">${c.shape}</span><span class="lbl-letter">${c.label}</span></span>` : ''}
           <span class="c-nm${mon && c.monsterData ? ' click' : ''}" ${mon && c.monsterData ? `onclick="showStatCombat(${c.id})"` : ''}>${esc(c.name)}</span>
         </div>
@@ -3095,8 +3215,7 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
         html += `
       <div class="mrow" onclick="addMonsterToCombat('${safeName}', '${m.source}')" 
            style="display: flex !important; align-items: center; gap: 10px; padding: 10px; background: var(--bg3); border: 1px solid var(--bdr); margin-bottom: 4px; cursor: pointer;">
-        <img src="${getMonIcon(m)}" style="width:24px; height:24px; border-radius:50%; border:1px solid var(--gold);" 
-             onerror="this.src='https://raw.githubusercontent.com/5etools-mirror-3/5etools-img/main/bestiary/tokens/MM/Skeleton.webp';">
+        <img ${getMonIconAttrs(m)} style="width:24px; height:24px; border-radius:50%; border:1px solid var(--gold);">
         <div style="flex: 1; min-width: 0;">
           <div style="color: var(--text); font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${esc(m.name)}</div>
           <div style="color: var(--text3); font-size: 10px; font-style: italic;">${esc(m.source)}</div>

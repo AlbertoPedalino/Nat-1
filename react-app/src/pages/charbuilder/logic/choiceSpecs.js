@@ -432,6 +432,16 @@ export function backgroundChoiceSpecs(character) {
   const origin = backgroundOriginFeat(background);
   if (origin?.fixed) {
     specs.push({ key: 'feat_origin', label: 'Origin Feat', type: 'feat_fixed', fixed: origin.fixed, classHint: origin.classHint || null, count: 1, level: 0 });
+  } else if (origin?.fixedOptions?.length || origin?.categories?.length) {
+    specs.push({
+      key: 'feat_origin',
+      label: 'Origin Feat',
+      type: 'feat_cat',
+      fixedOptions: origin.fixedOptions || [],
+      categories: origin.categories || [],
+      count: 1,
+      level: 0,
+    });
   }
   (background.skillProficiencies || []).forEach((block, index) => {
     const spec = choiceFromBlock(`bg_skill_${index}`, 'Background Skill', block, ALL_SKILLS);
@@ -625,6 +635,22 @@ export function featChoiceSpecs(feat, options = {}) {
       fallbackFrom: [...ALL_SKILLS, ...ALL_TOOLS, ...ALL_LANGS],
     }));
   }
+
+  (Array.isArray(feat?.expertise) ? feat.expertise : (feat?.expertise ? [feat.expertise] : []))
+    .forEach((block, index) => {
+      if (!block || typeof block !== 'object') return;
+      const choose = block.choose || {};
+      const count = Number(block.anyProficientSkill || choose.count || 0);
+      if (!count) return;
+      specPush(specs, {
+        key: `${slotKey}_expertise_${index}`,
+        label: `${feat.name} Expertise`,
+        type: 'expertise',
+        from: choose.from || ALL_SKILLS,
+        count,
+        requiresProficiency: true,
+      });
+    });
 
   specs.push(...additionalSpellChoices(feat, slotKey, options.entryIdx));
   return specs;

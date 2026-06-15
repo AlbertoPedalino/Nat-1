@@ -1,5 +1,9 @@
 import { isFeatDetailKey, featSlotOrigin } from '../featChoiceKeys.js';
 import { installedRegistry } from '../../adapters/index.js';
+import {
+  backgroundGuaranteedFeatNames,
+  backgroundOriginFeat as normalizeBackgroundOriginFeat,
+} from './backgroundFeatOptions.js';
 
 const FRAMEWORK_EXACT = new Set(['feat_origin', 'species_origin_feat']);
 const FRAMEWORK_PREFIXES = ['feat_'];
@@ -43,49 +47,12 @@ function isChoiceFeatOwnerKey(key) {
   return false;
 }
 
-function camelToTitle(value) {
-  return String(value || '')
-    .replace(/([A-Z])/g, ' $1')
-    .replace(/^./, (c) => c.toUpperCase())
-    .trim();
-}
-
 export function backgroundOriginFeat(background) {
-  if (!background) return null;
-  if (background.feat) return { fixed: background.feat };
-  const feats = Array.isArray(background.feats) ? background.feats : [];
-  const first = feats[0];
-  if (!first) return null;
-  if (typeof first === 'string') {
-    const parts = first.split('|');
-    const classHint = parts[2] ? parts[2].toLowerCase().replace(/[^a-z]/g, '') : null;
-    return { fixed: camelToTitle(parts[0]), classHint };
-  }
-  const keys = Object.keys(first).filter((key) => key !== 'choose');
-  if (!keys.length) return null;
-  const raw = String(keys[0] || '').split(';')[0].trim().split('|')[0];
-  const classHint = (() => {
-    const semicol = String(keys[0] || '').split(';').slice(1).map((value) => value.trim().split('|')[0]).find(Boolean);
-    if (semicol) return semicol.toLowerCase().replace(/[^a-z]/g, '');
-    const pipeParts = String(keys[0] || '').split('|').map((value) => value.trim()).filter(Boolean);
-    if (pipeParts.length >= 3) return pipeParts[2].toLowerCase().replace(/[^a-z]/g, '');
-    return null;
-  })();
-  return { fixed: camelToTitle(raw), classHint };
+  return normalizeBackgroundOriginFeat(background);
 }
 
-// All fixed feat names granted by a background's `feats` blocks (5etools shape:
-// strings "name|source|class" or objects { "name|source": true, choose: {...} }).
 export function backgroundFeatNames(background) {
-  const feats = Array.isArray(background?.feats) ? background.feats : [];
-  return feats.flatMap((entry) => {
-    if (typeof entry === 'string') return [camelToTitle(entry.split('|')[0])];
-    if (!entry || typeof entry !== 'object') return [];
-    return Object.keys(entry)
-      .filter((key) => key !== 'choose' && entry[key])
-      .map((key) => camelToTitle(String(key).split(';')[0].split('|')[0].trim()))
-      .filter(Boolean);
-  });
+  return backgroundGuaranteedFeatNames(background);
 }
 
 function fromChoices(character) {
@@ -118,7 +85,7 @@ function fromSpecies(character) {
       .filter((key) => key !== 'choose' && entry[key])
       .map((key) => String(key).split(';')[0].split('|')[0].trim())
       .filter(Boolean)
-      .forEach((raw) => out.push(camelToTitle(raw)));
+      .forEach((raw) => out.push(raw.replace(/\b\w/g, (char) => char.toUpperCase())));
   });
   return out;
 }

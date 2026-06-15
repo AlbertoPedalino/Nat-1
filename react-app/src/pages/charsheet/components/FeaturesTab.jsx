@@ -18,7 +18,10 @@ export default function FeaturesTab({ C }) {
   const speciesEntries = C?.speciesSnapshot?.entries || [];
   const backgroundSnapshot = C?.backgroundSnapshot || {};
   const backgroundEntries = backgroundSnapshot.entries || [];
-  const backgroundFeats = backgroundFeatNames(backgroundSnapshot);
+  const backgroundFeats = [
+    ...backgroundFeatNames(backgroundSnapshot),
+    ...(C?.choices?.feat_origin ? [C.choices.feat_origin] : []),
+  ];
   const selectedFeats = C?.allFeatSnapshots || [];
 
   function renderBackgroundEntries() {
@@ -60,7 +63,7 @@ export default function FeaturesTab({ C }) {
     if (allSkills.length) grants.push(`Skills: ${allSkills.join(', ')}`);
     if (allTools.length) grants.push(`Tools: ${allTools.join(', ')}`);
     if (allLangs.length) grants.push(`Languages: ${allLangs.join(', ')}`);
-    if (backgroundFeats.length) grants.push(`Feat: ${backgroundFeats.join(', ')}`);
+    if (backgroundFeats.length) grants.push(`Feat: ${[...new Set(backgroundFeats)].join(', ')}`);
 
     if (grants.length) {
       out.push({ type: 'list', items: grants });

@@ -469,7 +469,15 @@ function normName(value) {
   return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
-function ClassSection({ icon: Icon, title, subtitle, classFeatures, subFeatures, subclassName, level, runtimeActions, runtimeResources }) {
+function abilityModsFromScores(scores) {
+  const out = {};
+  ['str', 'dex', 'con', 'int', 'wis', 'cha'].forEach((stat) => {
+    out[stat] = Math.floor((Number(scores?.[stat] ?? 10) - 10) / 2);
+  });
+  return out;
+}
+
+function ClassSection({ icon: Icon, title, subtitle, classFeatures, subFeatures, subclassName, level, runtimeActions, runtimeResources, scores }) {
   const valid = classFeatures.filter((feature) => !feature?.isReprinted && (feature.level || 0) <= level);
   const validSub = subFeatures.filter((feature) => !feature?.isReprinted && (feature.level || 0) <= level && feature.subclassShortName === subclassName);
   const runtimeByName = new Map();
@@ -484,7 +492,11 @@ function ClassSection({ icon: Icon, title, subtitle, classFeatures, subFeatures,
     const rt = runtimeByName.get(normName(feature.name));
     if (!rt) return null;
     runtimeByName.delete(normName(feature.name));
-    const maxValue = typeof rt.max === 'function' ? rt.max(level) : rt.max;
+    // Mirror the sheet's resource-max signature (level, abilityMods, { pb }) so
+    // resources whose max scales off an ability modifier preview correctly.
+    const maxValue = typeof rt.max === 'function'
+      ? rt.max(level, abilityModsFromScores(scores), { pb: Math.floor((level - 1) / 4) + 2 })
+      : rt.max;
     const chips = [];
     if (rt.uses) chips.push(rt.uses);
     if (rt.recharge) chips.push(rt.recharge);
@@ -627,6 +639,7 @@ function PreviewPaneImpl({ character, items = [], feats = [], adaptersVersion = 
             level={primaryLv}
             runtimeActions={[...classActions, ...subclassActions]}
             runtimeResources={[...classResources, ...subclassResources]}
+            scores={scores}
           />
         ) : null}
 
@@ -655,6 +668,7 @@ function PreviewPaneImpl({ character, items = [], feats = [], adaptersVersion = 
                 level={ecLv}
                 runtimeActions={[...ecActions, ...ecSubActions]}
                 runtimeResources={[...ecResources, ...ecSubResources]}
+                scores={scores}
               />
             </Box>
           );

@@ -10,6 +10,7 @@ import { featSlotOrigin } from '../../../shared/featChoiceKeys.js';
 import { collectFreeCastsForGrant, mergeFreeCastsById, normalizeFreeCast, getFeatFreeCastTemplate, applyFreeCastRest } from '../../../shared/character/spellFreeCasts.js';
 import { collectItemAttachedSpells } from '../../../shared/character/itemAttachedSpells.js';
 import { isWarlockModifierCantripChoiceKey } from '../../../shared/character/warlockUtils.js';
+import { enumerateFixedAdditionalSpells } from '../../../shared/character/additionalSpellGrants.js';
 import { ENTITY_COLORS, ITEM_ATTUNEMENT, ACTION_COLORS } from '../../../shared/entityColors.js';
 
 // Display colors for spell-source tags. Entity-linked tags follow the canonical
@@ -109,6 +110,9 @@ function _mergeRow(existing, incoming, incomingLocked) {
       castLevel: b.castLevel != null ? b.castLevel : a.castLevel,
       locked: a.locked || incomingLocked,
       spellcastingAbility: b.spellcastingAbility || a.spellcastingAbility || null,
+      spellOverrides: { ...(a.spellOverrides || {}), ...(b.spellOverrides || {}) },
+      grantModifiers: [...(a.grantModifiers || []), ...(b.grantModifiers || [])],
+      ownerSubclassShortName: b.ownerSubclassShortName || a.ownerSubclassShortName || null,
     };
   };
 
@@ -136,12 +140,26 @@ export function buildSpellInfo(C, spellIndex) {
   const rows = new Map();
   const lockedNames = new Set();
   const freeCastsByKey = new Map();
-  const push = (name, source, locked = false, castLevel = null, fallbackLevel = 0, ownerClassName = null, spellcastingAbility = null, freeCasts = null, sources = null) => {
+  const push = (name, source, locked = false, castLevel = null, fallbackLevel = 0, ownerClassName = null, spellcastingAbility = null, freeCasts = null, sources = null, grantMeta = null) => {
     const full = spellIndex.get(norm(name));
     const canonicalName = full?.name || name;
-    const spell = { ...(full || {}), name: canonicalName, level: Number(full?.level ?? fallbackLevel ?? 0) };
+    const spell = applySpellGrantOverrides(
+      { ...(full || {}), name: canonicalName, level: Number(full?.level ?? fallbackLevel ?? 0) },
+      grantMeta?.spellOverrides,
+    );
     const key = `${norm(canonicalName)}|${castLevel || spell.level}`;
-    const row = { ...spell, sourceInfo: source, sources: (Array.isArray(sources) && sources.length) ? sources : (source ? [source] : []), castLevel, ownerClassName, spellcastingAbility, locked };
+    const row = {
+      ...spell,
+      sourceInfo: source,
+      sources: (Array.isArray(sources) && sources.length) ? sources : (source ? [source] : []),
+      castLevel,
+      ownerClassName,
+      ownerSubclassShortName: grantMeta?.ownerSubclassShortName || null,
+      spellcastingAbility,
+      spellOverrides: grantMeta?.spellOverrides || null,
+      grantModifiers: grantMeta?.modifiers || [],
+      locked,
+    };
     const existing = rows.get(key);
     rows.set(key, _mergeRow(existing, row, locked));
     if (locked) {
@@ -170,8 +188,13 @@ export function buildSpellInfo(C, spellIndex) {
   });
 
   collectAtWillSpells(C).forEach(({ name, source }) => push(name, source, true));
-  collectAutoGrantedSpells(C).forEach(({ name, level, source, sources, ownerClassName, spellcastingAbility, freeCasts }) => push(name, source, true, null, level, ownerClassName, spellcastingAbility, freeCasts, sources));
+  collectAutoGrantedSpells(C).forEach(({ name, level, source, sources, ownerClassName, ownerSubclassShortName, spellcastingAbility, freeCasts, spellOverrides, modifiers }) => (
+    push(name, source, true, null, level, ownerClassName, spellcastingAbility, freeCasts, sources, { ownerSubclassShortName, spellOverrides, modifiers })
+  ));
   collectChoiceSpells(C, spellIndex).forEach(({ name, source, ownerClassName, spellcastingAbility, freeCasts }) => push(name, source, true, null, 0, ownerClassName, spellcastingAbility, freeCasts));
+  collectFixedFeatSpells(C).forEach(({ name, source, ownerClassName, spellcastingAbility, freeCasts, spellOverrides, modifiers }) => (
+    push(name, source, true, null, 0, ownerClassName, spellcastingAbility, freeCasts, null, { spellOverrides, modifiers })
+  ));
 
   // Item-attached spells (Cloak of the Bat, Boots of Levitation, etc.). The
   // `freeCastTemplate` (when set) becomes a normalized free-cast entry so the
@@ -288,6 +311,9 @@ export function getFreeCastDefsForCharacter(C) {
       if (fc) defs.push(fc);
     });
   });
+  collectFixedFeatSpells(C).forEach((grant) => {
+    defs.push(...(grant.freeCasts || []));
+  });
 
   // Item-attached spells with daily/limited uses (Cloak of the Bat, etc.).
   collectItemAttachedSpells(C).forEach((grant) => {
@@ -391,19 +417,97 @@ function _findFeatName(C, slotKey) {
 function _buildFeatMetaMap(C) {
   const map = new Map();
   const choices = C?.choices || {};
-  Object.entries(choices).forEach(([key]) => {
+  const snapshots = Array.isArray(C?.allFeatSnapshots) ? C.allFeatSnapshots : [];
+  const snapshotByName = new Map(snapshots.map((feat) => [norm(feat?.name), feat]));
+  const addMeta = (slotKey, name) => {
+    const snapshot = snapshotByName.get(norm(name));
+    if (!slotKey || !snapshot || map.has(slotKey)) return;
+    const abilityKey = `${slotKey}_spell_ability`;
+    const ability = _normalizeAbility(
+      _choiceValue(choices[abilityKey])
+      || _choiceValue(choices[`${slotKey}_asi`])
+      || _choiceValue(choices[`${slotKey}_first_asi`]),
+    );
+    map.set(slotKey, { name: snapshot.name, ability, snapshot });
+  };
+
+  Object.entries(choices).forEach(([key, value]) => {
+    if (!_isFeatLikeSlotKey(C, key)) return;
+    const selected = _choiceValue(value);
+    if (selected) addMeta(key, selected);
+  });
+  Object.entries(C?.normalizedChoices?.feats?.byKey || {}).forEach(([key, value]) => {
+    addMeta(key, value);
+  });
+  Object.keys(choices).forEach((key) => {
     const slotKey = _extractChoiceSpellSlotKey(key);
     if (!slotKey || !_isFeatLikeSlotKey(C, slotKey)) return;
-    if (map.has(slotKey)) return;
-    let name = _findFeatName(C, slotKey);
-    let ability = null;
-    const abilityKey = `${slotKey}_spell_ability`;
-    if (abilityKey in choices) {
-      ability = _normalizeAbility(_choiceValue(choices[abilityKey]));
-    }
-    if (name) map.set(slotKey, { name, ability });
+    addMeta(slotKey, _findFeatName(C, slotKey));
+  });
+
+  const mappedNames = new Set([...map.values()].map((meta) => norm(meta.name)));
+  snapshots.forEach((snapshot, index) => {
+    if (!snapshot?.name || mappedNames.has(norm(snapshot.name))) return;
+    map.set(`feat_snapshot_${index}`, { name: snapshot.name, ability: null, snapshot });
   });
   return map;
+}
+
+function collectFixedFeatSpells(C) {
+  const out = [];
+  _buildFeatMetaMap(C).forEach((meta, slotKey) => {
+    const grants = enumerateFixedAdditionalSpells(meta.snapshot?.additionalSpells, {
+      entryIndex: C?.choices?.[`${slotKey}_entry`],
+      chosenAbility: meta.ability,
+      spellOverrides: meta.snapshot?.spellGrantOverrides,
+      defaultCanAlsoUseSlots: true,
+    });
+    grants.forEach((grant) => {
+      if (Number(C?.level || 1) < Number(grant.minLevel || 1)) return;
+      const freeCasts = grant.freeCast
+        ? [normalizeFreeCast(grant.freeCast, {
+            character: C,
+            sourceType: 'feat',
+            source: meta.name,
+            spellName: grant.name,
+          })].filter(Boolean)
+        : [];
+      out.push({
+        name: grant.name,
+        source: {
+          label: meta.name,
+          color: featSlotTone(slotKey),
+          originType: 'feat',
+          originLabel: meta.name,
+        },
+        ownerClassName: _ownerClassFromChoiceKey(C, slotKey),
+        spellcastingAbility: _normalizeAbility(grant.ability || meta.ability),
+        freeCasts,
+        spellOverrides: grant.spellOverrides,
+        modifiers: grant.modifiers,
+      });
+    });
+  });
+  return out;
+}
+
+function applySpellGrantOverrides(spell, overrides) {
+  if (!overrides || typeof overrides !== 'object') return spell;
+  const next = { ...spell };
+  if (overrides.components === 'none') {
+    next.components = {};
+    next.componentsLabel = 'None';
+    next.materialLabel = null;
+  } else if (Array.isArray(overrides.removeComponents) && next.components) {
+    const removed = new Set(overrides.removeComponents.map((value) => String(value).toLowerCase()));
+    next.components = Object.fromEntries(
+      Object.entries(next.components).filter(([key]) => !removed.has(key.toLowerCase())),
+    );
+    next.componentsLabel = null;
+    if (removed.has('m')) next.materialLabel = null;
+  }
+  if (overrides.rangeLabel) next.rangeLabel = overrides.rangeLabel;
+  return next;
 }
 
 function _getSlotKey(C, key) {
@@ -494,6 +598,8 @@ function collectAutoGrantedSpells(C) {
         ownerClassName: null,
         spellcastingAbility: r.ability,
         freeCasts: collectFreeCastsForGrant(r.entry, { character: C, source: srcLabel, sourceType, spellName: r.name }),
+        spellOverrides: r.entry?.spellOverrides || null,
+        modifiers: r.entry?.modifiers || [],
       };
     }
     const srcLabel = grantSourceLabel(r);
@@ -503,7 +609,11 @@ function collectAutoGrantedSpells(C) {
       level: Number(r.level ?? 0),
       source: { label: srcLabel, color: SRC_COLOR[sourceType] || SRC_COLOR.granted, originType: sourceType, originLabel: srcLabel },
       ownerClassName: r.ownerClassName,
+      ownerSubclassShortName: r.subclassShortName,
+      spellcastingAbility: r.ability,
       freeCasts: collectFreeCastsForGrant(r.entry, { character: C, source: srcLabel, sourceType, spellName: r.name }),
+      spellOverrides: r.entry?.spellOverrides || null,
+      modifiers: r.entry?.modifiers || [],
     };
   });
 
@@ -520,6 +630,9 @@ function collectAutoGrantedSpells(C) {
       if (entry.freeCasts?.length) existing.freeCasts = mergeFreeCastsById(existing.freeCasts || [], entry.freeCasts);
       existing.spellcastingAbility = existing.spellcastingAbility || entry.spellcastingAbility;
       existing.ownerClassName = existing.ownerClassName || entry.ownerClassName;
+      existing.ownerSubclassShortName = existing.ownerSubclassShortName || entry.ownerSubclassShortName;
+      existing.spellOverrides = { ...(existing.spellOverrides || {}), ...(entry.spellOverrides || {}) };
+      existing.modifiers = [...(existing.modifiers || []), ...(entry.modifiers || [])];
     } else {
       runtimeByName.set(key, { ...entry, sources: [entry.source] });
     }

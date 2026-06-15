@@ -14,6 +14,7 @@ import {
   getWeaponMasteryChoiceNames,
   WEAPON_MASTERY_RULES,
 } from '../shared/character/weaponMastery.js';
+import { backgroundOriginFeat } from '../shared/character/backgroundFeatOptions.js';
 
 export function splitClassSubclass(rawKey) {
   const value = String(rawKey || '');
@@ -241,25 +242,29 @@ function getGenericBackgroundChoiceSpecs(background) {
     if (spec) specs.push(spec);
   });
   const origin = getGenericBackgroundOriginFeat(background);
-  if (origin?.fixed) specs.push({ key: 'bg_origin_feat', label: 'Origin Feat', type: 'feat_fixed', fixed: origin.fixed, level: 1 });
+  if (origin?.fixed) specs.push({ key: 'feat_origin', label: 'Origin Feat', type: 'feat_fixed', fixed: origin.fixed, level: 1 });
+  else if (origin?.fixedOptions?.length || origin?.categories?.length) {
+    specs.push({
+      key: 'feat_origin',
+      label: 'Origin Feat',
+      type: 'feat_cat',
+      fixedOptions: origin.fixedOptions || [],
+      categories: origin.categories || [],
+      count: 1,
+      level: 1,
+    });
+  }
   return specs;
 }
 
 function getGenericBackgroundOriginFeat(background) {
-  const feats = asArray(background?.feats);
-  const first = feats[0];
-  if (!first) return null;
-  if (typeof first === 'string') return { fixed: first.split('|')[0] };
-  const fixedKey = Object.keys(first).find((key) => key !== 'choose' && first[key]);
-  if (fixedKey) return { fixed: fixedKey.split('|')[0] };
-  if (first.choose) return { categories: first.choose.from || first.choose.category || ['O'] };
-  return null;
+  return backgroundOriginFeat(background);
 }
 
 function getGenericBackgroundChoiceMeta() {
   return {
     sectionTitle: 'Background Choices',
-    isChoiceKey: (key) => /^bg_/i.test(String(key || '')),
+    isChoiceKey: (key) => key === 'feat_origin' || /^bg_/i.test(String(key || '')),
     getLabel: (key) => String(key || '').replace(/^bg_/i, '').replace(/_/g, ' '),
     normalizeChoiceValue: (value) => String(value || '').split('|')[0],
   };

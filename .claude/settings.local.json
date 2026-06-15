@@ -136,7 +136,9 @@
       "Bash(rg -rn \"reconcileInventoryWithItemsDb\" -g '*.js' -g '*.jsx' -g '!dataLoaders.js')",
       "Bash(npm test *)",
       "PowerShell(npm run *)",
-      "PowerShell($j = Invoke-RestMethod 'https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/class/class-paladin.json'; $glory = $j.subclass | Where-Object { $_.shortName -eq 'Glory' -and $_.source -eq 'XPHB' }; $glory | Select-Object name, shortName, source | Format-List; $j.subclassFeature | Where-Object { $_.subclassShortName -eq 'Glory' -and $_.source -eq 'XPHB' } | Select-Object -First 6 name, level, subclassShortName | Format-Table)"
+      "PowerShell($j = Invoke-RestMethod 'https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/class/class-paladin.json'; $glory = $j.subclass | Where-Object { $_.shortName -eq 'Glory' -and $_.source -eq 'XPHB' }; $glory | Select-Object name, shortName, source | Format-List; $j.subclassFeature | Where-Object { $_.subclassShortName -eq 'Glory' -and $_.source -eq 'XPHB' } | Select-Object -First 6 name, level, subclassShortName | Format-Table)",
+      "Bash(curl --version)",
+      "Bash(npm --prefix react-app run build)"
     ]
   }
 }

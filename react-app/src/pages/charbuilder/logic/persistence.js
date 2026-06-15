@@ -15,6 +15,7 @@ import {
   splitTypedProficiencies,
   uniqueProficiencyLabels,
 } from '../../../shared/character/typedProficiencies.js';
+import { enumerateFixedAdditionalSpells } from '../../../shared/character/additionalSpellGrants.js';
 
 const FEAT_SNAPSHOT_FIELDS = [
   'name',
@@ -38,6 +39,7 @@ const FEAT_SNAPSHOT_FIELDS = [
   'senses',
   'additionalSpells',
   'choiceUi',
+  'spellGrantOverrides',
 ];
 
 function pickFields(source, fields) {
@@ -155,6 +157,28 @@ export function makeSheetPayload(character, data) {
   character = normalizeProficiencyChoicesForPersistence(character);
   const primaryClassLevel = getPrimaryClassLevel(character);
   const ownedFeatNames = collectOwnedFeatNames(character);
+  const ownedFeatSnapshots = (data.feats || [])
+    .filter((feat) => ownedFeatNames.includes(feat.name))
+    .map((feat) => {
+      const adapter = installedRegistry.getFeatAdapter
+        ? installedRegistry.getFeatAdapter(feat.name)
+        : null;
+      const adapted = typeof adapter === 'function' ? (adapter(feat) || {}) : {};
+      return {
+        ...pickFields(feat, FEAT_SNAPSHOT_FIELDS),
+        ...pickFields(adapted, FEAT_SNAPSHOT_FIELDS),
+        hpBonusPerLevel: Number(adapted.hpBonusPerLevel || feat.hpBonusPerLevel || 0),
+      };
+    });
+  const fixedFeatSpellNames = ownedFeatSnapshots.flatMap((feat) => {
+    const slotKey = Object.entries(character.choices || {}).find(([, value]) => (
+      typeof value === 'string' && value.toLowerCase() === feat.name.toLowerCase()
+    ))?.[0];
+    return enumerateFixedAdditionalSpells(feat.additionalSpells, {
+      entryIndex: slotKey ? character.choices?.[`${slotKey}_entry`] : null,
+      spellOverrides: feat.spellGrantOverrides,
+    }).map((grant) => grant.name);
+  });
   const selectedSpellLevels = new Map();
   (character.selectedCantrips || []).forEach((name) => selectedSpellLevels.set(name, 0));
   Object.entries(character.selectedSpells || {}).forEach(([level, names]) => {
@@ -202,12 +226,15 @@ export function makeSheetPayload(character, data) {
       ...Object.values(extra.selectedSpells || {}).flat(),
     ]),
     ...choiceSpellNames,
+    ...fixedFeatSpellNames,
     ...wizardSpellbookNames,
     ...autoGrantedSpells.map((spell) => spell.name),
   ];
   const spellSnapshots = [...new Set(spellNames)]
     .map((name) => {
-      const spell = data.spells.find((entry) => entry.name === name);
+      const spell = data.spells.find((entry) => (
+        String(entry.name || '').toLowerCase() === String(name || '').toLowerCase()
+      ));
       if (spell) return spell;
       return { name, level: selectedSpellLevels.get(name) ?? autoGrantedSpells.find((entry) => entry.name === name)?.level ?? 0 };
     })
@@ -336,18 +363,7 @@ export function makeSheetPayload(character, data) {
       startingEquipment: character.backgroundObj?.startingEquipment || null,
       entries: character.backgroundObj?.entries || [],
     },
-    allFeatSnapshots: (data.feats || [])
-      .filter((feat) => ownedFeatNames.includes(feat.name))
-      .map((feat) => {
-        const adapter = installedRegistry.getFeatAdapter
-          ? installedRegistry.getFeatAdapter(feat.name)
-          : null;
-        const adapted = typeof adapter === 'function' ? (adapter(feat) || {}) : {};
-        return {
-          ...pickFields(feat, FEAT_SNAPSHOT_FIELDS),
-          hpBonusPerLevel: Number(adapted.hpBonusPerLevel || feat.hpBonusPerLevel || 0),
-        };
-      }),
+    allFeatSnapshots: ownedFeatSnapshots,
     allClassFeatures: character.allFeatures || [],
     allSubFeatures: character.allSubFeatures || [],
     adapterRuntime: {

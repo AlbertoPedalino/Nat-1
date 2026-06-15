@@ -109,6 +109,7 @@ function FreeCastsInline({ freeCasts, freeCastUses, onToggleFreeCast, sx }) {
 
 function normalizeModifierDetails(cantripData) {
   const raw = [
+    ...(Array.isArray(cantripData?.grantModifiers) ? cantripData.grantModifiers : []),
     ...(Array.isArray(cantripData?.modifiers) ? cantripData.modifiers : []),
     ...(Array.isArray(cantripData?.cantripModifiers) ? cantripData.cantripModifiers : []),
     ...(Array.isArray(cantripData?.extraDetails) ? cantripData.extraDetails : []),
@@ -153,7 +154,9 @@ export default function SpellEntry({ entry, spellAttackBonus = 0, C, exhaustionL
   const rawDamages = extractDamageDice(entry.entries || []);
   const hasAttack = !!entry.spellAttack;
   const spellData = installedRegistry.getSpellData(entry.name);
-  const hasConcentrationTag = isConcentrationSpell(entry) || isConcentrationSpell(spellData);
+  const hasConcentrationTag = entry?.spellOverrides?.concentration === false
+    ? false
+    : (isConcentrationSpell(entry) || isConcentrationSpell(spellData));
   const hasRitualTag = isRitualSpell(entry) || isRitualSpell(spellData);
   const ritualOnly = !!entry.ritualOnly || entry.sourceInfo?.kind === 'ritualBook';
   const hasHeal = !!spellData?.heal;
@@ -198,7 +201,10 @@ export default function SpellEntry({ entry, spellAttackBonus = 0, C, exhaustionL
   const entryData = cantripData || spellData;
   const utilityDie = entryData?.utilityDie || null;
   const utilityLabel = entryData?.utilityLabel || 'Roll';
-  const modifierDetails = normalizeModifierDetails(cantripData);
+  const modifierDetails = normalizeModifierDetails({
+    ...(cantripData || {}),
+    grantModifiers: entry.grantModifiers || [],
+  });
   const modifierDetailGroups = groupModifierDetails(modifierDetails);
   const detailTagLabels = modifierDetails.map((item) => item.tagLabel).filter(Boolean);
   const modifierTags = Array.from(new Set([...(cantripData?.modifierTags || []), ...detailTagLabels]));

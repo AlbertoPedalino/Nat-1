@@ -9,6 +9,7 @@ import { getBackgroundPattern, getBackgroundPool } from '../logic/calculations.j
 import { backgroundChoiceSpecs, fixedKeysFromBlocks } from '../logic/choiceSpecs.js';
 import { NEUTRAL_TONE } from '../../../shared/entityColors.js';
 import { backgroundOriginFeat } from '../../../shared/character/selectedFeats.js';
+import { backgroundFeatOptionLabel } from '../../../shared/character/backgroundFeatOptions.js';
 import { strip5eMarkup } from '../../../shared/character/spellEntries.js';
 
 
@@ -82,7 +83,7 @@ function BackgroundDetailCard({ background }) {
   const fixedSkills = fixedKeysFromBlocks(background.skillProficiencies || []);
   const fixedTools = fixedKeysFromBlocks(background.toolProficiencies || [], ['choose', 'any', 'anyTool', 'anyArtisansTool', 'anyMusicalInstrument', 'anyGamingSet']);
   const fixedLangs = fixedKeysFromBlocks(background.languageProficiencies || [], ['choose', 'any', 'anyStandard', 'anyExotic']);
-  const originFeat = backgroundOriginFeat(background)?.fixed;
+  const originFeat = backgroundFeatOptionLabel(background);
   const lore = extractBackgroundLore(background);
   const facts = extractBackgroundFacts(background);
 
@@ -138,7 +139,7 @@ export default function BackgroundStep({ state, dispatch }) {
             dispatch({ type: 'background/select', name: item.name, source: item.source, feat: origin?.fixed || null, classHint: origin?.classHint || null, backgroundObj: item });
           }}
           meta={(item) => {
-            const featLabel = backgroundOriginFeat(item)?.fixed;
+            const featLabel = backgroundFeatOptionLabel(item);
             return (
               <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap sx={{ mt: 1.5 }}>
                 {(item.abilities || getBackgroundPool(item)).map((ability) => (

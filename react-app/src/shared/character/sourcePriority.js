@@ -11,7 +11,7 @@ function frozenList(values) {
 // ADD A NEW MANUAL HERE (in priority order) and every content whitelist below
 // that derives from it picks it up automatically. Whitelisting a book that
 // lacks a given content type is harmless — no phantom data appears.
-export const CORE_2024_SOURCE_PRIORITY = frozenList(['XPHB', 'XDMG', 'EFA', 'FRAiF', 'FRHoF']);
+export const CORE_2024_SOURCE_PRIORITY = frozenList(['XPHB', 'XDMG', 'EFA', 'FRAiF', 'FRHoF', 'RHW']);
 
 // Content available across all 2024 manuals → membership derived from the
 // master set. (These feed isAllowedSource; order is irrelevant for them.)

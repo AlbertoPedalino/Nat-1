@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Button, Chip, Paper, Stack, Typography } from '@mui/material';
 import { Lock } from 'lucide-react';
 import ChoiceBlock from './ChoiceBlock.jsx';
@@ -7,18 +8,12 @@ import { EntryAccordion, partitionNamedEntries } from '../../../shared/character
 import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
 import { findSpellListEntryIndexByClass } from '../../../shared/character/featSpellLists.js';
 import { featChoiceSpecs } from '../logic/choiceSpecs.js';
+import { buildFeatPrerequisiteContext, meetsFeatPrerequisites } from '../logic/featPrerequisites.js';
 
-function featMinLevel(feat) {
-  const prereq = Array.isArray(feat?.prerequisite) ? feat.prerequisite : [];
-  const levels = prereq
-    .map((entry) => entry?.level?.level || entry?.level || null)
-    .map((value) => Number(value))
-    .filter((value) => Number.isFinite(value));
-  return levels.length ? Math.min(...levels) : 0;
-}
-
-function featMatchesCategory(feat, wanted) {
-  if (!wanted?.length) return true;
+function featMatchesCategory(feat, wanted, fixedOptions = []) {
+  const norm = (value) => String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (fixedOptions.some((name) => norm(name) === norm(feat?.name))) return true;
+  if (!wanted?.length) return fixedOptions.length === 0;
   const cats = (feat.categories?.length ? feat.categories : [feat.category]).filter(Boolean).map((value) => String(value));
   const exact = wanted.some((cat) => String(cat || '').startsWith('FS'));
   return wanted.some((cat) => cats.some((featCat) => exact ? featCat === cat : featCat === cat || featCat.startsWith(cat)));
@@ -179,7 +174,6 @@ export function FeatFixedSlot({ spec, feats, character, state, dispatch }) {
 // rows) and selectable choices render exactly like the fixed slot, so both feat
 // surfaces look the same.
 export function FeatCategorySlot({ spec, feats, character, state, dispatch }) {
-  const effectiveLevel = Number(character.level || 1);
   const taken = new Set(Object.entries(character.choices || {})
     .filter(([key]) => key !== spec.key)
     .map(([, value]) => Array.isArray(value) ? value : [value])
@@ -192,17 +186,36 @@ export function FeatCategorySlot({ spec, feats, character, state, dispatch }) {
     .filter(Boolean));
   const isFs = (spec.categories || []).some((cat) => String(cat).startsWith('FS'));
   const disallowDuplicates = isFs || !!spec.disallowDuplicates;
+  const prerequisiteContext = buildFeatPrerequisiteContext({
+    character,
+    feats,
+    items: state.data.items,
+    slotKey: spec.key,
+    slotCategories: spec.categories,
+  });
+  const isAvailable = (feat) => (
+    meetsFeatPrerequisites(feat, prerequisiteContext)
+    && featMatchesCategory(feat, spec.categories, spec.fixedOptions)
+    && (!disallowDuplicates || !taken.has(feat.name))
+  );
   const pool = feats
-    .filter((feat) => {
-      const min = featMinLevel(feat);
-      if (Number.isFinite(min) && min > effectiveLevel) return false;
-      if (!featMatchesCategory(feat, spec.categories)) return false;
-      if (disallowDuplicates && taken.has(feat.name)) return false;
-      return true;
-    })
+    .filter(isAvailable)
     .slice(0, 80);
   const selected = character.choices[spec.key] || null;
-  const selectedFeat = feats.find((feat) => feat.name === selected);
+  const selectedFeatCandidate = feats.find((feat) => feat.name === selected);
+  const selectedEligible = !selected
+    || !feats.length
+    || (selectedFeatCandidate && isAvailable(selectedFeatCandidate));
+  const selectedFeat = selectedEligible ? selectedFeatCandidate : null;
+  useEffect(() => {
+    if (!selected || selectedEligible) return;
+    dispatch({
+      type: 'choice/set',
+      key: spec.key,
+      value: null,
+      clearPrefix: `${spec.key}_`,
+    });
+  }, [dispatch, selected, selectedEligible, spec.key]);
   const options = pool.map((feat) => ({
     key: `${spec.key}-${feat.name}-${feat.source}`,
     value: feat.name,
