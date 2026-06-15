@@ -531,7 +531,7 @@ function pushWeaponExtraAttacks(out, mainAction, item, C, overrides) {
   });
 }
 
-export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSets) {
+export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSets, ruleEntries = {}) {
   if (!equipmentSets) {
     throw new Error('makeWeaponActions requires equipmentSets from collectEquipmentProficiencySets(character)');
   }
@@ -645,7 +645,7 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
   const tavernBrawlerDie = hasFeat(C, 'Tavern Brawler') ? 4 : 0;
   const dieFace = Math.max(monkDie, unarmedFightingDie, tavernBrawlerDie, 1);
   const die = dieFace > 1 ? `1d${dieFace}` : '1';
-  const unarmedSaveDc = 8 + getPB(C) + mod;
+  const unarmedDamageFormula = die + (unarmedDmgMod !== 0 ? (unarmedDmgMod >= 0 ? '+' : '') + unarmedDmgMod : '');
   weaponActions.push({
     name: 'Unarmed Strike',
     cat: 'action',
@@ -655,15 +655,10 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
     attackBonus: getPB(C) + mod,
     rollers: [{
       kind: 'damage',
-      formula: die + (unarmedDmgMod !== 0 ? (unarmedDmgMod >= 0 ? '+' : '') + unarmedDmgMod : ''),
-      label: `Damage ${die}${unarmedDmgMod !== 0 ? (unarmedDmgMod >= 0 ? '+' : '') + unarmedDmgMod : ''} bludgeoning`,
+      formula: unarmedDamageFormula,
     }],
     rollLabelPrefix: 'Unarmed Strike',
-    noDescription: true,
-    detailType: 'unarmedStrike',
-    unarmedStrikeSaveDc: unarmedSaveDc,
-    unarmedStrikeAbility: ability,
-    unarmedStrikeMod: mod,
+    entries: ruleEntries.unarmedStrike || null,
   });
   return weaponActions;
 }

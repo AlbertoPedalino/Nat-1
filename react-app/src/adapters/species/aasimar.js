@@ -158,34 +158,6 @@ registerSpeciesSheetActions("Aasimar_XPHB", [
     uses: '1 / LR',
     resKey: 'aasimar_revelation',
     minLevel: 3,
-    detailType: 'panel',
-    detail: ({ character }) => {
-      const lv = Number(character?.level || 1);
-      const pb = Math.floor((lv - 1) / 4) + 2;
-      const chaScore = character?.finalScores?.cha ?? 10;
-      const chaMod = Math.floor((chaScore - 10) / 2);
-      const saveDc = 8 + pb + chaMod;
-      return {
-        sections: [
-          {
-            title: 'Heavenly Wings',
-            accent: '#70b7e6',
-            body: `<b>Movement.</b> Gain a Fly Speed equal to your Speed for 1 minute.<br><b>Extra Damage.</b> Once on each of your turns, when you damage a target with an attack or spell, deal +${pb} Radiant damage to one target.`,
-          },
-          {
-            title: 'Inner Radiance',
-            accent: '#edd48a',
-            body: `<b>Light.</b> Shed Bright Light in a 10-foot radius and Dim Light for an additional 10 feet for 1 minute.<br><b>Area Damage.</b> At the end of each of your turns, each creature within 10 feet of you takes ${pb} Radiant damage.<br><b>Extra Damage.</b> Once on each of your turns, when you damage a target with an attack or spell, deal +${pb} Radiant damage to one target.`,
-          },
-          {
-            title: 'Necrotic Shroud',
-            accent: '#b58fd9',
-            body: `<b>Save DC.</b> Nearby creatures make a Charisma save, DC ${saveDc}. On a failed save, a creature has the Frightened condition until the end of your next turn.<br><b>Extra Damage.</b> Once on each of your turns, when you damage a target with an attack or spell, deal +${pb} Necrotic damage to one target.`,
-          },
-        ],
-      };
-    },
-    desc: 'Bonus Action at character level 3: transform for 1 minute, ending early with no action. Choose the option each time you transform: Heavenly Wings grants Fly Speed equal to Speed; Inner Radiance sheds light and damages nearby creatures at the end of your turns; Necrotic Shroud can Frighten nearby enemies. Once on each of your turns during the transformation, deal extra damage equal to PB to one target you damage with an attack or spell. Damage is Necrotic for Necrotic Shroud, Radiant for Heavenly Wings or Inner Radiance. Recharge: Long Rest.',
   },
 ]);
 registerSpeciesSheetResources("Aasimar_XPHB", [

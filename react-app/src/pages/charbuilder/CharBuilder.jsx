@@ -326,7 +326,6 @@ export default function CharBuilder() {
               character={state.character}
               items={state.data.items}
               feats={state.data.feats}
-              adaptersVersion={state.adaptersVersion}
             />
           </Box>
         </Box>

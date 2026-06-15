@@ -145,6 +145,15 @@ export async function loadConditions() {
   return out;
 }
 
+export async function loadVariantRules() {
+  const data = await getJson('variantrules.json');
+  return (data.variantrule || []).filter((rule) => (
+    rule?.name
+    && rule?.source
+    && Array.isArray(rule.entries)
+  ));
+}
+
 export async function loadOptionalFeatures() {
   const data = await getJson('optionalfeatures.json');
   return (data.optionalfeature || [])

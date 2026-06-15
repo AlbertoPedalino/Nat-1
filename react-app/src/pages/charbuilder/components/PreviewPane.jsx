@@ -3,7 +3,6 @@ import { Box, Card, CardContent, Chip, Divider, Grid, Paper, Stack, Typography }
 import { Feather, Languages, Layers, Shield, Sparkles, Sword } from 'lucide-react';
 import { STAT_LABELS, STATS } from '../constants.js';
 import { calcMaxHp, formatMod, getAllFinalScores, getPrimaryClassLevel } from '../logic/calculations.js';
-import { installedRegistry } from '../../../adapters/index.js';
 import { collectAllProficiencies, collectEquipmentProficiencySets } from '../../charsheet/logic/proficiencies.js';
 import { collectPreviewDefenseSections, collectPreviewEffectProficiencySections } from '../../charsheet/logic/sheetEffects.js';
 import { collapseWeaponProficiencies, uniqueDisplayLabels } from '../../../shared/character/proficiencyDisplay.js';
@@ -232,25 +231,15 @@ function getFeatureBody(feature) {
   return null;
 }
 
-// Preview-pane feature row: compact (dense) accordion with a tone-colored title
-// plus optional sublabel/runtime chips above the body. Reuses the shared
-// EntryAccordion shell; the chip stack + compact body live here as `children`.
-function FeatureWithChips({ entry, source, extraSublabel, children }) {
-  const { feature, runtimeChips } = entry;
+// Preview-pane feature row: compact accordion backed solely by canonical
+// feature entries. Runtime action/resource metadata belongs to the sheet.
+function FeatureAccordion({ feature, source, children }) {
   const tone = SOURCE_COLOR[source] || SOURCE_COLOR.class;
   const body = getFeatureBody(feature);
   const hasDefaultBody = Array.isArray(body) ? body.length > 0 : body != null && body !== '';
   return (
     <EntryAccordion title={feature.name} tone={tone} titleColor={tone} dense>
       <Stack spacing={0.75} sx={{ minWidth: 0 }}>
-        {extraSublabel ? <Chip size="small" variant="outlined" label={extraSublabel} sx={{ ...outlinedChipSx(tone), alignSelf: 'flex-start', height: 20, fontSize: '0.62rem' }} /> : null}
-        {runtimeChips?.length ? (
-          <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
-            {runtimeChips.map((chip, idx) => (
-              <Chip key={`rt-${idx}`} size="small" label={chip} sx={{ ...outlinedChipSx(NEUTRAL_TONE), height: 20, fontSize: '0.62rem', bgcolor: 'rgba(215, 173, 82, 0.12)' }} />
-            ))}
-          </Stack>
-        ) : null}
         {children != null ? children : hasDefaultBody ? <PreviewEntryText entries={body} /> : (
           <Typography variant="caption" component="div" color="text.secondary" sx={{ lineHeight: 1.45, wordBreak: 'break-word' }}>
             No description.
@@ -265,7 +254,7 @@ function FeatureWithChips({ entry, source, extraSublabel, children }) {
 // expand); unnamed intro text is grouped under a leading "Description" row.
 function EntryAccordions({ source, entries }) {
   return splitNamedEntries(entries).map((feature, index) => (
-    <FeatureWithChips key={`${feature.name}-${index}`} entry={{ feature }} source={source} />
+    <FeatureAccordion key={`${feature.name}-${index}`} feature={feature} source={source} />
   ));
 }
 
@@ -293,11 +282,11 @@ function LevelGroup({ level, classFeatures, subFeatures }) {
         <Divider sx={{ flex: 1, borderColor: 'rgba(237,212,138,0.22)' }} />
       </Box>
       <Stack spacing={0.5} sx={{ minWidth: 0 }}>
-        {classFeatures.map((entry) => (
-          <FeatureWithChips key={`c-${entry.feature.name}-${entry.feature.level}`} entry={entry} source="class" />
+        {classFeatures.map((feature) => (
+          <FeatureAccordion key={`c-${feature.name}-${feature.level}`} feature={feature} source="class" />
         ))}
-        {subFeatures.map((entry) => (
-          <FeatureWithChips key={`s-${entry.feature.name}-${entry.feature.level}`} entry={entry} source="subclass" extraSublabel="sub" />
+        {subFeatures.map((feature) => (
+          <FeatureAccordion key={`s-${feature.name}-${feature.level}`} feature={feature} source="subclass" />
         ))}
       </Stack>
     </Stack>
@@ -465,55 +454,20 @@ function WeaponMasterySection({ items }) {
   );
 }
 
-function normName(value) {
-  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-}
-
-function abilityModsFromScores(scores) {
-  const out = {};
-  ['str', 'dex', 'con', 'int', 'wis', 'cha'].forEach((stat) => {
-    out[stat] = Math.floor((Number(scores?.[stat] ?? 10) - 10) / 2);
-  });
-  return out;
-}
-
-function ClassSection({ icon: Icon, title, subtitle, classFeatures, subFeatures, subclassName, level, runtimeActions, runtimeResources, scores }) {
+function ClassSection({ icon: Icon, title, subtitle, classFeatures, subFeatures, subclassName, level }) {
   const valid = classFeatures.filter((feature) => !feature?.isReprinted && (feature.level || 0) <= level);
   const validSub = subFeatures.filter((feature) => !feature?.isReprinted && (feature.level || 0) <= level && feature.subclassShortName === subclassName);
-  const runtimeByName = new Map();
-  (runtimeActions || []).forEach((action) => runtimeByName.set(normName(action.name), { ...action, kind: 'action' }));
-  (runtimeResources || []).forEach((resource) => {
-    const key = normName(resource.name);
-    const existing = runtimeByName.get(key);
-    runtimeByName.set(key, { ...(existing || {}), name: resource.name, max: resource.max, recharge: resource.recharge, kind: existing ? existing.kind : 'resource' });
-  });
-
-  const enrich = (feature) => {
-    const rt = runtimeByName.get(normName(feature.name));
-    if (!rt) return null;
-    runtimeByName.delete(normName(feature.name));
-    // Mirror the sheet's resource-max signature (level, abilityMods, { pb }) so
-    // resources whose max scales off an ability modifier preview correctly.
-    const maxValue = typeof rt.max === 'function'
-      ? rt.max(level, abilityModsFromScores(scores), { pb: Math.floor((level - 1) / 4) + 2 })
-      : rt.max;
-    const chips = [];
-    if (rt.uses) chips.push(rt.uses);
-    if (rt.recharge) chips.push(rt.recharge);
-    if (maxValue != null) chips.push(`Max ${maxValue}`);
-    return chips;
-  };
 
   const byLevel = {};
   valid.forEach((feature) => {
     const lv = feature.level || 1;
     if (!byLevel[lv]) byLevel[lv] = { c: [], s: [] };
-    byLevel[lv].c.push({ feature, runtimeChips: enrich(feature) });
+    byLevel[lv].c.push(feature);
   });
   validSub.forEach((feature) => {
     const lv = feature.level || 1;
     if (!byLevel[lv]) byLevel[lv] = { c: [], s: [] };
-    byLevel[lv].s.push({ feature, runtimeChips: enrich(feature) });
+    byLevel[lv].s.push(feature);
   });
   const levels = Object.keys(byLevel).map(Number).sort((a, b) => a - b);
 
@@ -576,22 +530,22 @@ function PreviewFeat({ feat }) {
   const { introEntries, namedEntries } = partitionNamedEntries(feat.entries);
 
   return (
-    <FeatureWithChips entry={{ feature: feat }} source="feat">
+    <FeatureAccordion feature={feat} source="feat">
       <Stack spacing={0.5} sx={{ minWidth: 0 }}>
         {introEntries.length ? <PreviewEntryText entries={introEntries} /> : null}
         {namedEntries.map((row, index) => (
-          <FeatureWithChips
+          <FeatureAccordion
             key={`${row.name}-${index}`}
-            entry={{ feature: row }}
+            feature={row}
             source="feat"
           />
         ))}
       </Stack>
-    </FeatureWithChips>
+    </FeatureAccordion>
   );
 }
 
-function PreviewPaneImpl({ character, items = [], feats = [], adaptersVersion = 0 }) {
+function PreviewPaneImpl({ character, items = [], feats = [] }) {
   const scores = getAllFinalScores(character);
   const hp = calcMaxHp(character);
   const primaryLv = getPrimaryClassLevel(character);
@@ -600,22 +554,6 @@ function PreviewPaneImpl({ character, items = [], feats = [], adaptersVersion = 
   const previewFeats = collectPreviewFeats(character, feats);
   const species = character.speciesObj || character.speciesSnapshot;
   const background = character.backgroundObj || character.backgroundSnapshot;
-
-  const classActions = installedRegistry
-    .getClassSheetActions(character.className)
-    .filter((action) => !action.minLevel || primaryLv >= Number(action.minLevel));
-  const classResources = installedRegistry
-    .getClassSheetResources(character.className)
-    .filter((resource) => !resource.minLevel || primaryLv >= Number(resource.minLevel));
-  const subclassActions = character.subclassShortName
-    ? installedRegistry.getSubclassSheetActions(character.className, character.subclassShortName)
-      .filter((action) => !action.minLevel || primaryLv >= Number(action.minLevel))
-      .map((action) => ({ ...action, fromSubclass: true }))
-    : [];
-  const subclassResources = character.subclassShortName
-    ? installedRegistry.getSubclassSheetResources(character.className, character.subclassShortName)
-      .filter((resource) => !resource.minLevel || primaryLv >= Number(resource.minLevel))
-    : [];
 
   return (
     <Paper variant="outlined" sx={PANEL_SX}>
@@ -637,25 +575,11 @@ function PreviewPaneImpl({ character, items = [], feats = [], adaptersVersion = 
             subFeatures={character.allSubFeatures || []}
             subclassName={character.subclassShortName}
             level={primaryLv}
-            runtimeActions={[...classActions, ...subclassActions]}
-            runtimeResources={[...classResources, ...subclassResources]}
-            scores={scores}
           />
         ) : null}
 
         {(character.extraClasses || []).map((extra, index) => {
           const ecLv = extra.level || 1;
-          const ecActions = installedRegistry.getClassSheetActions(extra.name).filter((action) => !action.minLevel || ecLv >= Number(action.minLevel));
-          const ecResources = installedRegistry.getClassSheetResources(extra.name).filter((resource) => !resource.minLevel || ecLv >= Number(resource.minLevel));
-          const ecSubActions = extra.subclassShortName
-            ? installedRegistry.getSubclassSheetActions(extra.name, extra.subclassShortName)
-              .filter((action) => !action.minLevel || ecLv >= Number(action.minLevel))
-              .map((action) => ({ ...action, fromSubclass: true }))
-            : [];
-          const ecSubResources = extra.subclassShortName
-            ? installedRegistry.getSubclassSheetResources(extra.name, extra.subclassShortName)
-              .filter((resource) => !resource.minLevel || ecLv >= Number(resource.minLevel))
-            : [];
           return (
             <Box key={`${extra.name}-${index}`} sx={{ minWidth: 0 }}>
               <ClassSection
@@ -666,9 +590,6 @@ function PreviewPaneImpl({ character, items = [], feats = [], adaptersVersion = 
                 subFeatures={extra.allSubFeatures || []}
                 subclassName={extra.subclassShortName}
                 level={ecLv}
-                runtimeActions={[...ecActions, ...ecSubActions]}
-                runtimeResources={[...ecResources, ...ecSubResources]}
-                scores={scores}
               />
             </Box>
           );
@@ -721,5 +642,4 @@ export default memo(PreviewPaneImpl, (prev, next) => (
   prev.character === next.character
   && prev.items === next.items
   && prev.feats === next.feats
-  && prev.adaptersVersion === next.adaptersVersion
 ));

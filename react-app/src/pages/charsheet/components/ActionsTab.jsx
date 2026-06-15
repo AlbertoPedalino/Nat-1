@@ -19,7 +19,7 @@ import {
   buildActionTags,
 } from '../logic/actionsTabLogic.js';
 import { getSheetSlots } from '../logic/spellsTabLogic.js';
-import { loadItems } from '../../charbuilder/logic/dataLoaders.js';
+import { loadItems, loadVariantRules } from '../../charbuilder/logic/dataLoaders.js';
 import { loadMasteryEntries } from '../../../shared/character/weaponMastery.js';
 import { WeaponMasteryBlock } from '../../../shared/character/WeaponMasteryBlock.jsx';
 import {
@@ -36,7 +36,6 @@ import { Empty } from './SpellsUiParts.jsx';
 import ActionDetailPanel from './ActionDetailPanel.jsx';
 import CreatedItemsPanel from './CreatedItemsPanel.jsx';
 import AttackRollButton from './AttackRollButton.jsx';
-import UnarmedStrikeOptionsPanel from './UnarmedStrikeOptionsPanel.jsx';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 import { useSheetActions } from '../context/SheetActionsContext.jsx';
 import ResourceBar from './ResourceBar.jsx';
@@ -52,7 +51,6 @@ import { CHIP_TONES, chipToneStyle } from '../../../shared/entityColors.js';
 
 const ACTION_DETAIL_RENDERERS = {
   panel: ActionDetailPanel,
-  unarmedStrike: UnarmedStrikeOptionsPanel,
   createdItems: CreatedItemsPanel,
 };
 
@@ -76,6 +74,7 @@ export default function ActionsTab({ C, sheet, resources }) {
   const { onRoll, setResources, onShowToast, onUpdateSheet, onUpdateCharacter } = useSheetActions();
   const [filter, setFilter] = useState('all');
   const [itemsDb, setItemsDb] = useState([]);
+  const [variantRules, setVariantRules] = useState([]);
   const [, setMasteriesLoaded] = useState(false);
   const [slotRecovery, setSlotRecovery] = useState(null);
   const [slotRecoverySelection, setSlotRecoverySelection] = useState({});
@@ -102,6 +101,9 @@ export default function ActionsTab({ C, sheet, resources }) {
     loadItems()
       .then((items) => { if (alive) setItemsDb(items || []); })
       .catch(() => { if (alive) setItemsDb([]); });
+    loadVariantRules()
+      .then((rules) => { if (alive) setVariantRules(rules || []); })
+      .catch(() => { if (alive) setVariantRules([]); });
     loadMasteryEntries()
       .then(() => { if (alive) setMasteriesLoaded(true); })
       .catch(() => {});
@@ -112,8 +114,13 @@ export default function ActionsTab({ C, sheet, resources }) {
   const attacks = inv.filter(i => i.equipped && ['M', 'R'].includes(String(i.type || '').toUpperCase()));
   const masteryItems = itemsDb.length ? itemsDb : inv;
   const profSets = useProficiencySets();
+  const unarmedStrikeEntries = variantRules.find((rule) => (
+    rule.name === 'Unarmed Strike' && rule.source === 'XPHB'
+  ))?.entries || null;
   const adapterActions = [
-    ...makeWeaponActions(C, attacks, inv, masteryItems, profSets),
+    ...makeWeaponActions(C, attacks, inv, masteryItems, profSets, {
+      unarmedStrike: unarmedStrikeEntries,
+    }),
     ...collectAdapterActions(C, sheet),
   ].map((action) => resolveActionFormulas(action, C))
    .map((action) => buildActionTags(action, C));
