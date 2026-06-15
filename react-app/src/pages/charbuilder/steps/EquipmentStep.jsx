@@ -377,6 +377,15 @@ export default function EquipmentStep({ state, dispatch }) {
   const addItemWithQty = (item, qty) => dispatch({ type: 'inventory/add', item: { ...item, qty } });
   const totalWeight = totalCarriedWeight(character.inventory, character.currency);
 
+  // Search over the carried items. Keep each row's original index so dispatch
+  // actions (remove/qty) still target the right inventory entry after filtering.
+  const [currentQuery, setCurrentQuery] = useState('');
+  const currentInventory = useMemo(() => {
+    const q = currentQuery.trim().toLowerCase();
+    const rows = character.inventory.map((item, index) => ({ item, index }));
+    return q ? rows.filter(({ item }) => itemSearchText(item).includes(q)) : rows;
+  }, [character.inventory, currentQuery]);
+
   return (
     <Stack spacing={2}>
       <BuilderPanel id="panel-equip" title="Starting Equipment" icon={PackagePlus} note="Class/background packs add items and coins to inventory.">
@@ -436,11 +445,25 @@ export default function EquipmentStep({ state, dispatch }) {
 
           <Divider />
           <Typography variant="h2">Current Inventory</Typography>
+          {character.inventory.length ? (
+            <SearchField
+              value={currentQuery}
+              onChange={setCurrentQuery}
+              placeholder="Search current inventory"
+              size="medium"
+              iconSize={18}
+            />
+          ) : null}
           <Paper variant="outlined" sx={{ maxHeight: 430, overflow: 'auto' }}>
             <List dense disablePadding>
-              {character.inventory.map((item, index) => (
+              {currentInventory.map(({ item, index }) => (
                 <CurrentInventoryRow key={`${item.name}-${index}`} item={item} index={index} dispatch={dispatch} />
               ))}
+              {character.inventory.length && !currentInventory.length ? (
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', px: 2, py: 1 }}>
+                  No matches.
+                </Typography>
+              ) : null}
             </List>
           </Paper>
         </Stack>

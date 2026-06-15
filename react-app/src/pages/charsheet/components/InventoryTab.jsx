@@ -684,7 +684,6 @@ export default function InventoryTab({ C, sheet }) {
               placeholder="Search 2024 items by name, source, type, property..."
               value={search}
               onChange={setSearch}
-              showSearchIcon={false}
               iconSize={14}
               sx={{ ...compactInputSx, mb: 0.5 }}
             />
@@ -726,7 +725,6 @@ export default function InventoryTab({ C, sheet }) {
           placeholder="Search inventory by name, source, type, property..."
           value={inventorySearch}
           onChange={setInventorySearch}
-          showSearchIcon={false}
           iconSize={14}
           sx={{ ...compactInputSx, mb: 0.5 }}
         />
