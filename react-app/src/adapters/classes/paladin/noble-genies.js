@@ -154,7 +154,7 @@ registerSubclassSheetActions("Paladin_Noble Genies", [
     "subOptions": [
       { "name": "Dao's Crush", "icon": "hand", "desc": "The target is Grappled (escape DC = spell save DC) and Restrained while Grappled." },
       { "name": "Djinni's Escape", "icon": "move", "desc": "Teleport up to 30 ft to an unoccupied space you can see. Until end of your next turn you are semi-incorporeal (Resistance to Bludgeoning/Piercing/Slashing; immune to Grappled/Prone/Restrained)." },
-      { "name": "Efreeti's Fury", "icon": "flame", "desc": "Deal an extra 2d4 Fire damage to the target, and deal 2d4 Fire damage to one creature of your choice within 30 ft of the target.", "rollFormula": "2d4", "rollButtonLabel": "2d4 fire" },
+      { "name": "Efreeti's Fury", "icon": "flame", "desc": "Deal an extra 2d4 Fire damage to the target, and deal 2d4 Fire damage to one creature of your choice within 30 ft of the target.", "rollers": [{ kind: 'damage', formula: "2d4", label: "2d4 fire" }] },
       { "name": "Marid's Surge", "icon": "waves", "desc": "Each creature within a 10-ft Emanation of the target must succeed on a STR saving throw (spell save DC) or be pushed up to 15 ft from the target and knocked Prone." }
     ]
   },
@@ -174,9 +174,7 @@ registerSubclassSheetActions("Paladin_Noble Genies", [
     "uses": "CHA mod / LR",
     "resKey": "noble_genies_rebuke",
     "minLevel": 15,
-    "rollFormula": "2d10",
-    "rollButtonLabel": ({ formula }) => `${formula} + CHA elemental`,
-    "rollKind": "damage",
+    rollers: [{ kind: 'damage', formula: "2d10", label: ({ formula }) => `${formula} + CHA elemental` }],
     "desc": "Reaction when you are hit by an attack: halve the damage you take (round down). The attacker must then make a DEX saving throw (spell save DC). On a failed save, the attacker takes 2d10 + CHA modifier elemental damage (Acid, Cold, Fire, Lightning, or Thunder — your choice); on a success, it takes half that damage. Uses: CHA modifier (min 1) per Long Rest."
   },
   {

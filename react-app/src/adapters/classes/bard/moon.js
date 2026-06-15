@@ -39,7 +39,7 @@ export default function install(registry, context = {}) {
     passive: true,
       desc: "You learn Druidic, gain one Druid cantrip, and gain proficiency in one listed skill. Select choices in the builder." },
     { name: "Blessing of Moonlight", icon: "", cat: "action", uses: "1 / LR", resKey: "moon_blessing", minLevel: 6,
-      healFormula: "2d4",
+      rollers: [{ kind: 'heal', formula: "2d4" }],
       desc: "Moonbeam is always prepared. When you cast Moonbeam, you can modify it: the Moonbeam sheds dim light in a 5-ft radius, and when a creature fails its save against Moonbeam, one creature of your choice within 60 ft regains 2d4 HP. 1/Long Rest." },
     { name: "Eventide's Splendor", icon: "", cat: "action", uses: "Passive", minLevel: 14,
     passive: true,

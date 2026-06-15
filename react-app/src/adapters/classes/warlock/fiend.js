@@ -151,9 +151,7 @@ registerSubclassSheetActions("Warlock_Fiend", [
     inlinePills: ({ character }) => [{ icon: "shield", label: "Resistance", value: String(fiendChoice(character, "fiend_resilience_damage_type") || "Choose") }],
     desc: "You have Resistance to the chosen damage type. At the end of a Short or Long Rest, you can change the type. Select the type in the builder (or adjust manually if the builder choice doesn't support rest-based updates)." },
   { name: "Hurl Through Hell", icon: "flame", cat: "action", uses: "1 / LR or Pact Magic slot", resKey: "fiend_hurl", minLevel: 14,
-    rollFormula: "8d10",
-    rollButtonLabel: "Hurl Through Hell 8d10 Psychic",
-    rollKind: "damage",
+    rollers: [{ kind: 'damage', formula: "8d10", label: "Hurl Through Hell 8d10 Psychic" }],
     desc: "When you hit a creature with an attack, banish it to the Lower Planes until the end of your next turn. When it returns, if it isn't a Fiend, it makes a CHA save or takes 8d10 Psychic damage and is Incapacitated until the end of its next turn; on success, half damage and no Incapacitated. Recharge: Long Rest, or expend a Pact Magic slot." },
 ]);
 registerSubclassSheetEffects("Warlock_Fiend", [

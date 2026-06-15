@@ -141,12 +141,10 @@ registerSubclassSheetActions("Druid_Land", [
     "uses": "Wild Shape charge",
     "resKey": "wild_shape",
     "minLevel": 3,
-    "rollFormula": ({ ownerLevel }) => {
+    rollers: [{ kind: 'damage', formula: ({ ownerLevel }) => {
       const lv = Number(ownerLevel || 1);
       return lv >= 14 ? "4d6" : lv >= 10 ? "3d6" : "2d6";
-    },
-    "rollButtonLabel": ({ formula }) => `${formula} necrotic`,
-    "rollKind": "damage",
+    }, label: ({ formula }) => `${formula} necrotic` }],
     "desc": "Magic action: expend a use of Wild Shape and choose a point within 60 ft. Vitality-giving flowers and life-draining thorns appear in a 10-ft Sphere centered on that point. Each creature of your choice in the Sphere must make a CON saving throw (spell save DC), taking 2d6 Necrotic damage on a failed save or half on a success (increases to 3d6 at lv.10, 4d6 at lv.14). One creature of your choice in that area regains 2d6 HP (3d6 at lv.10, 4d6 at lv.14)."
   },
   {

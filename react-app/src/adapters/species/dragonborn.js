@@ -164,11 +164,11 @@ registerSpeciesSheetActions("Dragonborn_XPHB", [
     cat: 'action',
     uses: 'PB / LR',
     resKey: 'dragonborn_breath',
-    rollFormula: ({ character }) => {
+    rollers: [{ kind: 'damage', formula: ({ character }) => {
       const lv = Number(character?.level || 1);
       const dice = lv >= 17 ? 4 : lv >= 11 ? 3 : lv >= 5 ? 2 : 1;
       return `${dice}d10`;
-    },
+    } }],
     inlinePills: ({ character }) => {
       const pb = Math.floor((Number(character?.level || 1) - 1) / 4) + 2;
       const conScore = character?.finalScores?.con ?? 10;

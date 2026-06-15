@@ -16,6 +16,7 @@ import {
   uniqueProficiencyLabels,
 } from '../../../shared/character/typedProficiencies.js';
 import { enumerateFixedAdditionalSpells } from '../../../shared/character/additionalSpellGrants.js';
+import { resolveActionRollers } from '../../../shared/character/rollers.js';
 
 const FEAT_SNAPSHOT_FIELDS = [
   'name',
@@ -264,25 +265,11 @@ export function makeSheetPayload(character, data) {
     }));
 
   const annotateActions = (actions, ownerName, ownerLevel, ownerType) => (
-    (actions || []).map((action) => {
-      const rollFormula = typeof action.rollFormula === 'function'
-        ? action.rollFormula({ character, ownerLevel })
-        : action.rollFormula;
-      return {
-        ...action,
-        ownerName, ownerLevel, ownerType,
-        healFormula: typeof action.healFormula === 'function'
-          ? action.healFormula({ character, ownerLevel })
-          : action.healFormula,
-        rollFormula,
-        // Resolve the curated label with the rolled formula in scope so values
-        // like "2d6 thunder" / "Smite 5d8 Force" serialize correctly (functions
-        // can't be persisted). Must come after rollFormula is resolved.
-        rollButtonLabel: typeof action.rollButtonLabel === 'function'
-          ? action.rollButtonLabel({ character, ownerLevel, formula: rollFormula })
-          : action.rollButtonLabel,
-      };
-    })
+    (actions || []).map((action) => ({
+      ...action,
+      ownerName, ownerLevel, ownerType,
+      rollers: resolveActionRollers(action, { character, ownerLevel }),
+    }))
   );
   const characterMods = {};
   ['str','dex','con','int','wis','cha'].forEach(stat => {
@@ -379,10 +366,20 @@ export function makeSheetPayload(character, data) {
       subclassActions: runtimeSubclassActions,
       subclassResources: runtimeSubclassResources,
       subclassEffects: installedRegistry.getSubclassSheetEffects(character.className, character.subclassShortName),
-      speciesActions: installedRegistry.getSpeciesSheetActions(character.speciesName, character.speciesSource),
+      speciesActions: annotateActions(
+        installedRegistry.getSpeciesSheetActions(character.speciesName, character.speciesSource),
+        character.speciesName,
+        Number(character.level || 1),
+        'species',
+      ),
       speciesResources: (installedRegistry.getSpeciesSheetResources(character.speciesName, character.speciesSource) || []).map(r => ({ ...r, maxComputed: typeof r.max === 'function' ? r.max(character.level, characterMods) : r.max })),
       speciesEffects: installedRegistry.getSpeciesSheetEffects(character.speciesName, character.speciesSource),
-      featActions: ownedFeatNames.flatMap((feat) => installedRegistry.getFeatSheetActions(feat)),
+      featActions: ownedFeatNames.flatMap((feat) => annotateActions(
+        installedRegistry.getFeatSheetActions(feat),
+        feat,
+        Number(character.level || 1),
+        'feat',
+      )),
       featResources: ownedFeatNames.flatMap((feat) => (installedRegistry.getFeatSheetResources(feat) || []).map(r => ({ ...r, maxComputed: typeof r.max === 'function' ? r.max(character.level, characterMods) : r.max }))),
       featEffects: ownedFeatNames.flatMap((feat) => installedRegistry.getFeatSheetEffects(feat)),
     },

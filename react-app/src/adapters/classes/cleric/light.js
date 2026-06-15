@@ -134,11 +134,10 @@ registerSubclassSheetActions("Cleric_Light", [
   { name: "Improved Warding Flare", icon: "", cat: "reaction", uses: "WIS mod / SR+LR", resKey: "warding_flare", minLevel: 6,
     desc: "Warding Flare now recharges on Short or Long Rest. Additionally, you can now use Warding Flare when a creature within 30 ft that you can see attacks a creature other than you." },
   { name: "Channel: Radiance of the Dawn", icon: "", cat: "action", uses: "1 Channel", resKey: "channel_div",
-    rollFormula: ({ ownerLevel }) => {
+    rollers: [{ kind: 'damage', formula: ({ ownerLevel }) => {
       const lv = Number(ownerLevel || 1);
       return `2d10+${lv}`;
-    },
-    rollButtonLabel: ({ formula }) => `${formula} radiant`,
+    }, label: ({ formula }) => `${formula} radiant` }],
     desc: "Magic action: emit a flash of light in a 30-ft Emanation from yourself. Any magical Darkness in the area is dispelled. Each creature of your choice in the area must make a CON save or take 2d10 + Cleric level Radiant damage (half on success)." },
   { name: "Corona of Light", icon: "", cat: "action", uses: "WIS mod / LR", resKey: "corona_light", minLevel: 17,
     desc: "Activate an aura of sunlight for 1 minute or until you dismiss it using another action. Emit Bright Light in a 60-ft radius and Dim Light for an additional 30 ft. Enemies in the Bright Light have Disadvantage on saving throws against any spell that deals Fire or Radiant damage." },

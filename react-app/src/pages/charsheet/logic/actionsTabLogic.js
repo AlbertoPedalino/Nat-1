@@ -24,6 +24,12 @@ import { isItemEffectActive } from '../../../shared/character/itemAttunement.js'
 import { itemDisplayName, matchesItemReference } from '../../../shared/character/itemIdentity.js';
 import { getMeleeStrDamageBonus, getWeaponEffectBonuses } from './sheetEffects.js';
 import { ACTION_COLORS, CHIP_TONES, chipToneStyle } from '../../../shared/entityColors.js';
+import {
+  getActionRollers,
+  resolveActionRollers,
+} from '../../../shared/character/rollers.js';
+
+export { getActionRollers } from '../../../shared/character/rollers.js';
 
 export const FILTERS = ['all', 'action', 'bonus', 'reaction'];
 // Weapon/unarmed attacks get a red left-bar so attacks stand apart from other
@@ -131,7 +137,7 @@ function actionSpecificityScore(item) {
   let score = 0;
   if (!item?._runtimeFallback) score += 100;
   if (item?.desc) score += 10;
-  if (item?.rollFormula || item?.damageFormula || item?.healFormula || item?.attackBonus != null) score += 5;
+  if (getActionRollers(item).length || item?.attackBonus != null) score += 5;
   if (item?.ownerName && !/^(runtime|feat)$/i.test(String(item.ownerName))) score += 1;
   return score;
 }
@@ -170,10 +176,10 @@ export function resolveActionFormulas(action, C) {
   const ctx = { character: C, ownerLevel: ownerLv };
   const patch = {};
 
-  if (typeof action.healFormula === 'function') patch.healFormula = action.healFormula(ctx);
-  if (typeof action.rollFormula === 'function') patch.rollFormula = action.rollFormula(ctx);
-  // rollButtonLabel is resolved at render time (where the rolled formula is in
-  // scope and can be passed to the label function) — see resolveButtonLabel.
+  const rollers = getActionRollers(action);
+  if (rollers.length) {
+    patch.rollers = resolveActionRollers(action, ctx);
+  }
   if (typeof action.attackBonus === 'function') {
     const resolved = action.attackBonus(ctx);
     if (Number.isFinite(resolved)) patch.attackBonus = resolved;
@@ -487,8 +493,7 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
     uses: opts.uses || 'Equipped',
     _source: 'Weapon',
     attackBonus: (profInfo.proficient ? getPB(C) + mod : mod) + enhancement.attack + fsBonus.attack,
-    rollFormula: damageFormula,
-    rollButtonLabel: damageFormula ? `Damage ${damageFormula}${dtype ? ` ${dtype}` : ''}` : 'Damage',
+    rollers: [{ kind: 'damage', formula: damageFormula, label: damageFormula ? `Damage ${damageFormula}${dtype ? ` ${dtype}` : ''}` : 'Damage' }],
     rollLabelPrefix: opts.rollLabelPrefix || itemDisplayName(item, 'Weapon'),
     noDescription: true,
     _item: item,
@@ -611,8 +616,7 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
       _source: 'Weapon',
       _colorBarCat: 'attack',
       attackBonus: (ohProfInfo.proficient ? getPB(C) + ohMod : ohMod) + ohEnhancement.attack + ohFsBonus.attack,
-      rollFormula: ohDamageFormula,
-      rollButtonLabel: ohDamageFormula ? `Damage ${ohDamageFormula}${ohDtype ? ` ${ohDtype}` : ''}` : 'Damage',
+      rollers: [{ kind: 'damage', formula: ohDamageFormula, label: ohDamageFormula ? `Damage ${ohDamageFormula}${ohDtype ? ` ${ohDtype}` : ''}` : 'Damage' }],
       rollLabelPrefix: `Off-hand ${itemDisplayName(offHandItem, 'Weapon')}`,
       noDescription: true,
       _item: offHandItem,
@@ -649,8 +653,11 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
     uses: monkLevel ? 'Martial Arts' : 'Attack',
     _source: 'Basic',
     attackBonus: getPB(C) + mod,
-    rollFormula: die + (unarmedDmgMod !== 0 ? (unarmedDmgMod >= 0 ? '+' : '') + unarmedDmgMod : ''),
-    rollButtonLabel: `Damage ${die}${unarmedDmgMod !== 0 ? (unarmedDmgMod >= 0 ? '+' : '') + unarmedDmgMod : ''} bludgeoning`,
+    rollers: [{
+      kind: 'damage',
+      formula: die + (unarmedDmgMod !== 0 ? (unarmedDmgMod >= 0 ? '+' : '') + unarmedDmgMod : ''),
+      label: `Damage ${die}${unarmedDmgMod !== 0 ? (unarmedDmgMod >= 0 ? '+' : '') + unarmedDmgMod : ''} bludgeoning`,
+    }],
     rollLabelPrefix: 'Unarmed Strike',
     noDescription: true,
     detailType: 'unarmedStrike',
@@ -673,15 +680,4 @@ export function makeWeaponMasteryReminderActions(C, items = []) {
       noDescription: true,
     };
   });
-}
-
-export function resolveFormula(formula, action, C) {
-  if (!formula) return '';
-  if (typeof formula === 'function') return String(formula({ character: C, ownerLevel: action.ownerLevel ?? C?.classLevel ?? C?.level ?? 1 }) || '');
-  return String(formula);
-}
-
-export function resolveButtonLabel(label, formula, action, C, fallback) {
-  if (typeof label === 'function') return label({ formula, character: C, ownerLevel: action.ownerLevel ?? C?.classLevel ?? C?.level ?? 1 });
-  return label || fallback;
 }

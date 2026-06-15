@@ -20,8 +20,7 @@ export default function install(registry, context = {}) {
       resKey: 'undead_form_of_dread',
       minLevel: 3,
       // Facsimile of Life: 1d10 + Warlock level Temp HP, as a clickable roller.
-      rollFormula: ({ ownerLevel }) => `1d10+${ownerLevel}`,
-      rollKind: 'tempHp',
+      rollers: [{ kind: 'tempHp', formula: ({ ownerLevel }) => `1d10+${ownerLevel}` }],
       desc: 'Bonus Action: transform into an avatar of dread for 1 minute (ends if Incapacitated or you end it). Facsimile of Life: gain {@dice 1d10} plus your Warlock level Temporary Hit Points. Fearless Form: Immunity to the Frightened condition (ending it if already Frightened). Frightful Avatar: once per turn, when you hit a creature, it makes a Wisdom save or is Frightened until the end of your next turn. Uses equal to your Charisma modifier (minimum 1), regained on a Long Rest.',
     },
     {
@@ -31,9 +30,7 @@ export default function install(registry, context = {}) {
       uses: '1 / SR-LR',
       resKey: 'undead_resuscitation',
       minLevel: 10,
-      rollFormula: '2d10',
-      rollButtonLabel: ({ formula }) => `${formula} + CHA necrotic`,
-      rollKind: 'damage',
+      rollers: [{ kind: 'damage', formula: '2d10', label: ({ formula }) => `${formula} + CHA necrotic` }],
       desc: 'If you drop to 0 Hit Points and don\'t die outright, each creature of your choice in a 30-ft Emanation makes a Constitution save against your spell save DC, taking {@dice 2d10} plus your Charisma modifier Necrotic damage (half on a success). Your Hit Points then change to twice your Warlock level and you gain 1 Exhaustion level. Once per Short or Long Rest.',
     },
   ]);

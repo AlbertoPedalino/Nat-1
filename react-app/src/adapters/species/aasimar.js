@@ -143,11 +143,11 @@ registerSpeciesSheetActions("Aasimar_XPHB", [
     cat: 'action',
     uses: '1 / LR',
     resKey: 'aasimar_healing_hands',
-    healFormula: ({ character }) => {
+    rollers: [{ kind: 'heal', formula: ({ character }) => {
       const lv = Number(character?.level || 1);
       const pb = Math.floor((lv - 1) / 4) + 2;
       return `${pb}d4`;
-    },
+    } }],
     minLevel: 1,
     desc: "As a {@b Magic} action, you touch a creature and roll a number of d4s equal to your Proficiency Bonus. The creature regains a number of Hit Points equal to the roll's total. Once you use this trait, you can't do so again until you finish a Long Rest.",
   },

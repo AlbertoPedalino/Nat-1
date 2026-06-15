@@ -166,13 +166,11 @@ registerClassAdapter("Bard", function (cls, lv, specs, ctx = {}) {
 // [SheetRuntime] START
 registerClassSheetActions("Bard", [
   { name: "Bardic Inspiration", icon: "", cat: "bonus",  uses: "CHA mod / SR", resKey: "bardic_insp",
-    rollFormula: ({ ownerLevel }) => {
+    rollers: [{ kind: 'utility', formula: ({ ownerLevel }) => {
       const lv = Number(ownerLevel || 1);
       const die = lv >= 15 ? 12 : lv >= 10 ? 10 : lv >= 5 ? 8 : 6;
       return `1d${die}`;
-    },
-    rollKind: "utility",
-    rollButtonLabel: ({ formula }) => String(formula || ""),
+    }, label: ({ formula }) => String(formula || "") }],
     rollLabelPrefix: "Bardic Inspiration",    desc: "Bonus Action: give one Bardic Inspiration die to a creature within 60 ft (not yourself). Die size: d6 (lv.1–4), d8 (lv.5–9), d10 (lv.10–14), d12 (lv.15–20). Recipient adds the die to one attack roll, ability check, or saving throw within 10 minutes. Recharge: Short Rest (lv.5+) or Long Rest." },
   { name: "Jack of All Trades", icon: "", cat: "action", uses: "Passive", minLevel: 2,
   passive: true,

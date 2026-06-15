@@ -124,13 +124,10 @@ registerSubclassAdapter("Warlock_Archfey", function (cls, lv, specs) {});
 // [SheetRuntime] START
 registerSubclassSheetActions("Warlock_Archfey", [
   { name: "Steps of the Fey", icon: "sparkles", cat: "bonus", uses: "CHA mod / LR", resKey: "archfey_steps", minLevel: 3,
-    rollFormula: "1d10",
-    rollKind: "tempHp",
+    rollers: [{ kind: 'tempHp', formula: "1d10" }],
     desc: "Bonus Action: cast Misty Step without expending a spell slot. When you teleport, choose one effect: Refreshing Step gives you 1d10 Temporary HP; Taunting Step forces creatures of your choice within 5 ft of your destination to make a WIS save or have Disadvantage on attacks against creatures other than you until the start of your next turn." },
   { name: "Misty Escape", icon: "sparkles", cat: "reaction", uses: "Pact Magic slot", minLevel: 6,
-    rollFormula: "2d10",
-    rollButtonLabel: "Fey Curse 2d10 Psychic",
-    rollKind: "damage",
+    rollers: [{ kind: 'damage', formula: "2d10", label: "Fey Curse 2d10 Psychic" }],
     desc: "Reaction when you take damage: expend one Pact Magic slot to cast Misty Step. After teleporting, choose Fey Refuge to become Invisible until the start of your next turn, or Fey Curse to force creatures within 5 ft of your origin or destination to make a WIS save or take 2d10 Psychic damage." },
   { name: "Beguiling Defenses", icon: "shield", cat: "reaction", uses: "1 / LR or Pact Magic slot", resKey: "archfey_beguiling", minLevel: 10,
     desc: "You are immune to Charmed. Reaction when hit by an attack: halve the damage, and the attacker must make a WIS save or take Psychic damage equal to the damage you took after halving. Recharge: Long Rest, or expend a Pact Magic slot." },

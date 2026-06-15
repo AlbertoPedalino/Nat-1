@@ -171,15 +171,13 @@ registerSubclassSheetActions("Artificer_Armorer", [
       if (typeof getPB !== 'function' || typeof getMod !== 'function' || typeof getFinal !== 'function') return 0;
       try { return getPB(character) + getMod(getFinal(character, 'int')); } catch { return 0; }
     },
-    "rollFormula": ({ character }) => {
+    rollers: [{ kind: 'damage', formula: ({ character }) => {
       if (typeof getMod !== 'function' || typeof getFinal !== 'function') return '1d8';
       try {
         const intMod = getMod(getFinal(character, 'int'));
         return intMod > 0 ? `1d8+${intMod}` : intMod < 0 ? `1d8${intMod}` : '1d8';
       } catch { return '1d8'; }
-    },
-    "rollButtonLabel": ({ formula }) => `${formula} thunder`,
-    "rollKind": "damage",
+    }, label: ({ formula }) => `${formula} thunder` }],
     "desc": "Guardian model Simple Melee weapon (INT to attack/damage). On a hit, the target has Disadvantage on attack rolls against targets other than you until the start of your next turn."
   },
   {
@@ -204,15 +202,13 @@ registerSubclassSheetActions("Artificer_Armorer", [
       if (typeof getPB !== 'function' || typeof getMod !== 'function' || typeof getFinal !== 'function') return 0;
       try { return getPB(character) + getMod(getFinal(character, 'int')); } catch { return 0; }
     },
-    "rollFormula": ({ character }) => {
+    rollers: [{ kind: 'damage', formula: ({ character }) => {
       if (typeof getMod !== 'function' || typeof getFinal !== 'function') return '1d6';
       try {
         const intMod = getMod(getFinal(character, 'int'));
         return intMod > 0 ? `1d6+${intMod}` : intMod < 0 ? `1d6${intMod}` : '1d6';
       } catch { return '1d6'; }
-    },
-    "rollButtonLabel": ({ formula }) => `${formula} lightning`,
-    "rollKind": "damage",
+    }, label: ({ formula }) => `${formula} lightning` }],
     "desc": "Infiltrator model Simple Ranged weapon (range 90/300, INT to attack/damage). Once per turn, one creature you hit also takes an extra 1d6 Lightning damage."
   },
   {
@@ -249,15 +245,13 @@ registerSubclassSheetActions("Artificer_Armorer", [
       if (typeof getPB !== 'function' || typeof getMod !== 'function' || typeof getFinal !== 'function') return 0;
       try { return getPB(character) + getMod(getFinal(character, 'int')); } catch { return 0; }
     },
-    "rollFormula": ({ character }) => {
+    rollers: [{ kind: 'damage', formula: ({ character }) => {
       if (typeof getMod !== 'function' || typeof getFinal !== 'function') return '1d10';
       try {
         const intMod = getMod(getFinal(character, 'int'));
         return intMod > 0 ? `1d10+${intMod}` : intMod < 0 ? `1d10${intMod}` : '1d10';
       } catch { return '1d10'; }
-    },
-    "rollButtonLabel": ({ formula }) => `${formula} force`,
-    "rollKind": "damage",
+    }, label: ({ formula }) => `${formula} force` }],
     "desc": "Dreadnaught model Simple Melee weapon with Reach (INT to attack/damage). On a hit, if the target is at least one size smaller than you: push it up to 10 ft away or pull it up to 10 ft toward you."
   },
   {

@@ -313,25 +313,31 @@ registerClassSheetActions("Cleric", [
     "uses": "1+ Channel",
     "resKey": "channel_div",
     "minLevel": 2,
-    "healFormula": ({ character, ownerLevel }) => {
-      const wis = typeof getMod === "function" && typeof getFinal === "function"
-        ? Number(getMod(getFinal(character, "wis")) || 0)
-        : 0;
-      const lv = Number(ownerLevel || 1);
-      const dice = lv >= 18 ? 4 : lv >= 13 ? 3 : lv >= 7 ? 2 : 1;
-      return `${dice}d8${wis >= 0 ? "+" : ""}${wis}`;
-    },
-    "rollFormula": ({ character, ownerLevel }) => {
-      const wis = typeof getMod === "function" && typeof getFinal === "function"
-        ? Number(getMod(getFinal(character, "wis")) || 0)
-        : 0;
-      const lv = Number(ownerLevel || 1);
-      const dice = lv >= 18 ? 4 : lv >= 13 ? 3 : lv >= 7 ? 2 : 1;
-      return `${dice}d8${wis >= 0 ? "+" : ""}${wis}`;
-    },
-    "rollKind": "damage",
-    "healButtonLabel": ({ formula }) => `Heal ${String(formula || "")}`,
-    "rollButtonLabel": ({ formula }) => `${String(formula || "")} radiant/necrotic`,
+    "rollers": [
+      {
+        kind: "damage",
+        formula: ({ character, ownerLevel }) => {
+          const wis = typeof getMod === "function" && typeof getFinal === "function"
+            ? Number(getMod(getFinal(character, "wis")) || 0)
+            : 0;
+          const lv = Number(ownerLevel || 1);
+          const dice = lv >= 18 ? 4 : lv >= 13 ? 3 : lv >= 7 ? 2 : 1;
+          return `${dice}d8${wis >= 0 ? "+" : ""}${wis}`;
+        },
+        label: ({ formula }) => `${String(formula || "")} radiant/necrotic`,
+      },
+      {
+        kind: "heal",
+        formula: ({ character, ownerLevel }) => {
+          const wis = typeof getMod === "function" && typeof getFinal === "function"
+            ? Number(getMod(getFinal(character, "wis")) || 0)
+            : 0;
+          const lv = Number(ownerLevel || 1);
+          const dice = lv >= 18 ? 4 : lv >= 13 ? 3 : lv >= 7 ? 2 : 1;
+          return `${dice}d8${wis >= 0 ? "+" : ""}${wis}`;
+        },
+      },
+    ],
     "rollLabelPrefix": "Divine Spark",
     "desc": "Channel Divinity option. As a Magic action, point your Holy Symbol at a creature within 30 ft. Roll 1d8 + WIS modifier (scales by level: 2d8 at lv.7, 3d8 at lv.13, 4d8 at lv.18). Either restore that many HP, or force the creature to make a CON save — on failure it takes Radiant or Necrotic damage (your choice) equal to that total; on success it takes half."
   },
@@ -342,14 +348,12 @@ registerClassSheetActions("Cleric", [
     "uses": "With Turn Undead",
     "resKey": "channel_div",
     "minLevel": 5,
-    "rollFormula": ({ character }) => {
+    rollers: [{ kind: 'damage', formula: ({ character }) => {
       const wis = typeof getMod === 'function' && typeof getFinal === 'function'
         ? Number(getMod(getFinal(character, 'wis')) || 1)
         : 1;
       return `${Math.max(1, wis)}d8`;
-    },
-    "rollButtonLabel": ({ formula }) => `${formula} radiant`,
-    "rollKind": "damage",
+    }, label: ({ formula }) => `${formula} radiant` }],
     "desc": "When you use Turn Undead, each Undead that fails its WIS save also takes Radiant damage equal to a number of d8s equal to your WIS modifier (minimum 1d8). This damage doesn't end the turn effect."
   },
   {
@@ -368,15 +372,14 @@ registerClassSheetActions("Cleric", [
     "uses": "Once/turn",
     "minLevel": 7,
     "condition": (character) => hasCharacterChoice(character, "cleric_blessed_strikes", "Divine Strike"),
-    "rollFormula": ({ ownerLevel }) => {
+    rollers: [{ kind: 'damage', formula: ({ ownerLevel }) => {
       const lv = Number(ownerLevel || 1);
       return lv >= 14 ? "2d8" : "1d8";
-    },
-    "rollButtonLabel": ({ character, ownerLevel }) => {
+    }, label: ({ character, ownerLevel }) => {
       const lv = Number(ownerLevel || 1);
       const dice = lv >= 14 ? "2d8" : "1d8";
       return `+${dice} ${divineStrikeDamageType(character).toLowerCase()}`;
-    },
+    } }],
     "desc": "Once per turn when you hit a creature with a weapon attack, deal additional Radiant or Necrotic damage of the type chosen for Divine Strike. The damage is 1d8, increasing to 2d8 at Cleric level 14."
   },
   {

@@ -1,5 +1,4 @@
-import { alpha, Box, Button, Stack, Tooltip, Typography } from '@mui/material';
-import { Cross, Dices, Sword } from 'lucide-react';
+import { alpha, Box, Stack, Tooltip, Typography } from '@mui/material';
 import { SPELL_LEVEL_LABELS } from '../../charbuilder/constants.js';
 import { SpellNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 import { RichInline } from '../../../shared/character/RichText.jsx';
@@ -8,7 +7,7 @@ import { SpellMetaGrid, HigherLevelBlock } from '../../../shared/character/Spell
 import MiniBadge from '../../../shared/character/MiniBadge.jsx';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import PipButton from '../../../shared/character/PipButton.jsx';
-import { formatRollTitle, rollFormula as rollFormulaDice } from '../../../shared/character/dice.js';
+import { formatRollTitle } from '../../../shared/character/dice.js';
 import { getFinal, getMod, getPB, hasConditionEffect, getConditionalConditionEffects } from '../logic/calculations.js';
 import { getSpellAttackAdvantage } from '../logic/sheetEffects.js';
 import { entriesToTextBlocks } from '../../../shared/character/spellEntries.js';
@@ -28,6 +27,7 @@ import AttackRollButton from './AttackRollButton.jsx';
 import { isConcentrationSpell, isRitualSpell } from '../../../shared/spellTags.js';
 import { ENTITY_COLORS, RICH_TEXT_ACCENT, SPELL_TAG_COLORS } from '../../../shared/entityColors.js';
 import { useSheetActions } from '../context/SheetActionsContext.jsx';
+import RollerButtons from '../../../shared/character/RollerButtons.jsx';
 
 function applyFlatToFormula(formula, flat) {
   if (!formula) return formula;
@@ -262,22 +262,27 @@ export default function SpellEntry({ entry, spellAttackBonus = 0, C, exhaustionL
 
   const levelLabel = castLevel > baseLevel ? ` (Lv.${castLevel})` : '';
   const hasFreeCasts = Array.isArray(entry.freeCasts) && entry.freeCasts.length > 0;
-
-  const rollDmg = (e, formula, label) => {
-    e.stopPropagation();
-    const title = formatRollTitle(entry.name, `${label}${levelLabel}`);
-    if (!formula) { onShowToast(title, '', 0, []); return; }
-    const { total, rolls } = rollFormulaDice(formula);
-    onShowToast(title, formula, total, rolls);
-  };
-
-  const rollHeal = (e, formula) => {
-    e.stopPropagation();
-    const title = formatRollTitle(entry.name, `Heal${levelLabel}`);
-    if (!formula) { onShowToast(title, '', 0, []); return; }
-    const { total, rolls } = rollFormulaDice(formula);
-    onShowToast(title, formula, total, rolls);
-  };
+  const spellRollers = [
+    ...scaledDamages.map((damage, index) => ({
+      key: `damage-${index}`,
+      kind: 'damage',
+      formula: damage.formula,
+      label: beamCount > 1 ? `Beam ${index + 1} ${damage.formula}` : undefined,
+      title: damage.label || `Damage ${index + 1}`,
+    })),
+    ...(hasHeal && healDisplayFormula
+      ? [{ key: 'heal', kind: 'heal', formula: healDisplayFormula }]
+      : []),
+    ...(utilityDie && !hasDamage && !hasHeal
+      ? [{
+          key: 'utility',
+          kind: 'utility',
+          formula: utilityDie,
+          label: `${utilityLabel} ${utilityDie}`,
+          title: utilityLabel,
+        }]
+      : []),
+  ];
 
   return (
     <ExpandableCard
@@ -291,7 +296,7 @@ export default function SpellEntry({ entry, spellAttackBonus = 0, C, exhaustionL
           <Typography noWrap sx={{ overflow: 'hidden', minWidth: 0, fontSize: '0.875rem', color: 'text.primary', textOverflow: 'ellipsis' }}>{entry.name}</Typography>
           {castLevel > baseLevel ? <MiniBadge label={`Lv.${castLevel}`} color={ENTITY_COLORS.class} bg={alpha(ENTITY_COLORS.class, 0.14)} /> : null}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', ml: 'auto', flexShrink: 0 }}>
-            {(hasAttack || hasDamage || hasHeal || utilityDie) ? (
+            {(hasAttack || spellRollers.length > 0) ? (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                 {hasAttack ? (
                   <AttackRollButton
@@ -305,27 +310,13 @@ export default function SpellEntry({ entry, spellAttackBonus = 0, C, exhaustionL
                     sx={{ borderColor: 'rgba(77,149,214,0.4)', color: '#4d95d6' }}
                   />
                 ) : null}
-                {scaledDamages.map((dmg, i) => (
-                  <Button key={i} size="small" variant="outlined"
-                    onClick={(e) => rollDmg(e, dmg.formula, dmg.label || `Damage ${i + 1}`)}
-                    sx={{ ...inlineButtonSx, borderColor: 'rgba(255,107,53,0.4)', color: '#ff6b35' }}>
-                    <Sword size={12} style={{ marginRight: 2 }} /> {beamCount > 1 ? `Beam ${i + 1} ${dmg.formula}` : `Dmg ${dmg.formula}`}
-                  </Button>
-                ))}
-                {hasHeal ? (
-                  <Button size="small" variant="outlined"
-                    onClick={(e) => rollHeal(e, healDisplayFormula)}
-                    sx={{ ...inlineButtonSx, borderColor: 'rgba(88,184,121,0.4)', color: '#58b879' }}>
-                    <Cross size={12} style={{ marginRight: 2 }} /> Heal {healDisplayFormula}
-                  </Button>
-                ) : null}
-                {utilityDie && !hasDamage && !hasHeal ? (
-                  <Button size="small" variant="outlined"
-                    onClick={(e) => rollDmg(e, utilityDie, utilityLabel)}
-                    sx={{ ...inlineButtonSx, borderColor: 'rgba(77,149,214,0.4)', color: '#4d95d6' }}>
-                    <Dices size={12} style={{ marginRight: 2 }} /> {utilityLabel} {utilityDie}
-                  </Button>
-                ) : null}
+                <RollerButtons
+                  rollers={spellRollers}
+                  subject={entry.name}
+                  titleSuffix={levelLabel}
+                  onShowToast={onShowToast}
+                  buttonSx={inlineButtonSx}
+                />
               </Box>
             ) : null}
           </Box>

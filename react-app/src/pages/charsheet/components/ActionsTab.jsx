@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Box, Button, Chip, Typography, alpha } from '@mui/material';
-import { Cross, Dices, Shield, Sword } from 'lucide-react';
 import { getMod, getFinal, fbonus, hasConditionEffect, getConditionalConditionEffects } from '../logic/calculations.js';
 import { installedRegistry, loadCoreAdapters, loadClassAdapters } from '../../../adapters/index.js';
 import { PACT_SLOTS, SPELL_LEVEL_LABELS } from '../../charbuilder/constants.js';
@@ -16,8 +15,7 @@ import {
   resolveActionFormulas,
   collectAdapterActions,
   makeWeaponActions,
-  resolveFormula,
-  resolveButtonLabel,
+  getActionRollers,
   buildActionTags,
 } from '../logic/actionsTabLogic.js';
 import { getSheetSlots } from '../logic/spellsTabLogic.js';
@@ -48,22 +46,9 @@ import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import PipButton from '../../../shared/character/PipButton.jsx';
 import SheetDialog from '../../../shared/character/SheetDialog.jsx';
 import { ItemPropertyTable } from '../../../shared/character/ItemPropertyTable.jsx';
-import { formatRollTitle, rollFormula as rollFormulaDice } from '../../../shared/character/dice.js';
+import { formatRollTitle } from '../../../shared/character/dice.js';
+import RollerButtons from '../../../shared/character/RollerButtons.jsx';
 import { CHIP_TONES, chipToneStyle } from '../../../shared/entityColors.js';
-
-// Per roll-kind presentation for an action's roller button: button verb, toast
-// title, icon, and colour tone. Adding a new roll kind is a single entry here —
-// no scattered ternaries across verb/icon/tone/title.
-const ROLL_KINDS = {
-  damage:  { verb: 'Dmg',     title: 'Damage',  Icon: Sword,  tone: { borderColor: 'rgba(255,107,53,0.4)',  color: '#ff6b35' } },
-  heal:    { verb: 'Heal',    title: 'Heal',    Icon: Cross,  tone: { borderColor: 'rgba(88,184,121,0.4)',  color: '#58b879' } },
-  utility: { verb: 'Roll',    title: 'Roll',    Icon: Dices,  tone: { borderColor: 'rgba(77,149,214,0.4)',  color: '#4d95d6' } },
-  temphp:  { verb: 'Temp HP', title: 'Temp HP', Icon: Shield, tone: { borderColor: 'rgba(62,142,90,0.45)', color: '#3e8e5a' } },
-};
-// Read an action's roll fields, accepting the legacy `damage*` names that older
-// persisted snapshots still carry (live adapters now emit `roll*`).
-const getRollKind = (action) => String(action?.rollKind ?? action?.damageKind ?? 'damage').toLowerCase();
-const getRollFormula = (action) => action?.rollFormula ?? action?.damageFormula;
 
 const ACTION_DETAIL_RENDERERS = {
   panel: ActionDetailPanel,
@@ -917,23 +902,8 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
     bgcolor,
   });
 
-  const rollFormula = getRollFormula(action);
-  const rollKindPres = ROLL_KINDS[getRollKind(action)] || ROLL_KINDS.damage;
-  const RollKindIcon = rollKindPres.Icon;
-  const rolledFormula = resolveFormula(rollFormula, action, C);
-  // Curated adapter label (e.g. "2d10 + CHA necrotic", "Smite 5d8 Force") shown on
-  // the roller button when present, else the generic verb + formula. Resolved here
-  // with the rolled formula in scope — older `damageButtonLabel` is intentionally
-  // not read (it was serialized without a formula, so its values are unusable).
-  const rollLabel = resolveButtonLabel(action.rollButtonLabel, rolledFormula, action, C, null);
-  const rollFormulaButton = (kind) => {
-    const formula = resolveFormula(kind === 'heal' ? action.healFormula : rollFormula, action, C);
-    if (!formula || !onShowToast) return;
-    const { total, rolls } = rollFormulaDice(formula);
-    const titleLabel = kind === 'heal' ? 'Heal' : rollKindPres.title;
-    onShowToast(formatRollTitle(action.rollLabelPrefix || action.name, titleLabel), formula, total, rolls);
-  };
-  const hasRollers = Number.isFinite(action.attackBonus) || rollFormula || action.healFormula;
+  const rollers = getActionRollers(action);
+  const hasRollers = Number.isFinite(action.attackBonus) || rollers.length > 0;
 
   // Attack-roll advantage/disadvantage from active conditions, combined with the
   // weapon-level disadvantage (heavy/untrained). XPHB 2024: any advantage + any
@@ -990,28 +960,12 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
                         sx={{ borderColor: attackRollerBorder, color: attackRollerColor }}
                       />
                     ) : null}
-                    {rollFormula ? (
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        onClick={(e) => { e.stopPropagation(); rollFormulaButton('damage'); }}
-                        sx={{ ...inlineButtonSx, ...rollKindPres.tone }}
-                      >
-                        <RollKindIcon size={12} style={{ marginRight: 2 }} />
-                        {rollLabel || `${rollKindPres.verb} ${rolledFormula}`}
-                      </Button>
-                    ) : null}
-                    {action.healFormula ? (
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        color="success"
-                        onClick={(e) => { e.stopPropagation(); rollFormulaButton('heal'); }}
-                        sx={{ ...inlineButtonSx, borderColor: 'rgba(88,184,121,0.4)', color: '#58b879' }}
-                      >
-                        <Cross size={12} style={{ marginRight: 2 }} /> Heal {resolveFormula(action.healFormula, action, C)}
-                      </Button>
-                    ) : null}
+                    <RollerButtons
+                      rollers={rollers}
+                      subject={action.rollLabelPrefix || action.name}
+                      onShowToast={onShowToast}
+                      buttonSx={inlineButtonSx}
+                    />
                   </Box>
                 ) : null}
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 0.4, flexWrap: 'wrap' }}>

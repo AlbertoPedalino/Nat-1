@@ -255,8 +255,7 @@ registerClassSheetActions("Barbarian", [
     "cat": "attack",
     "uses": "While Raging",
     "minLevel": 9,
-    "rollFormula": "1d10",
-    "rollButtonLabel": "+1d10",
+    rollers: [{ kind: 'damage', formula: "1d10", label: "+1d10" }],
     "desc": "When you use Reckless Attack and have advantage, forgo the advantage on one attack to deal +1d10 damage and trigger a Brutal Strike effect: Forceful Blow (push 15 ft or knock Prone) or Hamstring Blow (target's Speed halved until start of your next turn)."
   },
   {
@@ -265,8 +264,7 @@ registerClassSheetActions("Barbarian", [
     "cat": "attack",
     "uses": "While Raging",
     "minLevel": 13,
-    "rollFormula": "1d10",
-    "rollButtonLabel": "+1d10",
+    rollers: [{ kind: 'damage', formula: "1d10", label: "+1d10" }],
     "desc": "Brutal Strike gains two new effects: Staggering Blow (target has Disadvantage on the next attack roll it makes before the start of your next turn) and Sundering Blow (another creature within 5 ft of the target takes 1d10 Force damage, no attack roll). Still forgo Reckless Attack advantage on one attack."
   },
   {
@@ -275,8 +273,7 @@ registerClassSheetActions("Barbarian", [
     "cat": "attack",
     "uses": "While Raging",
     "minLevel": 17,
-    "rollFormula": "2d10",
-    "rollButtonLabel": "+2d10",
+    rollers: [{ kind: 'damage', formula: "2d10", label: "+2d10" }],
     "desc": "Brutal Strike extra damage increases to 2d10 (from 1d10). You can also apply TWO Brutal Strike effects to the same attack instead of one."
   },
   {

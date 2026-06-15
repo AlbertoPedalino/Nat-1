@@ -229,8 +229,7 @@ registerClassSheetActions("Paladin", [
     "uses": "Passive",
     "passive": true,
     "minLevel": 11,
-    "rollFormula": "1d8",
-    "rollButtonLabel": "+1d8 radiant",
+    rollers: [{ kind: 'damage', formula: "1d8", label: "+1d8 radiant" }],
     "desc": "Your weapon and Unarmed Strike attacks deal an extra 1d8 Radiant damage."
   }
 ]);

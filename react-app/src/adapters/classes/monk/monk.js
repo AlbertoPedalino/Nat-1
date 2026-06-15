@@ -158,11 +158,11 @@ registerClassSheetActions("Monk", [
     cat: 'attack',
     uses: 'Passive',
     passive: true,
-    rollFormula: ({ ownerLevel }) => {
+    rollers: [{ kind: 'damage', formula: ({ ownerLevel }) => {
       const lv = Number(ownerLevel || 1);
       const die = lv >= 17 ? 12 : lv >= 11 ? 10 : lv >= 5 ? 8 : 6;
       return `1d${die}`;
-    },
+    } }],
     desc: 'With Simple weapons, Monk weapons, or Unarmed Strikes: use DEX instead of STR for attack and damage. Unarmed Strike die: d6 (lv.1-4), d8 (lv.5-10), d10 (lv.11-16), d12 (lv.17-20). After the Attack action: make one Unarmed Strike as a Bonus Action (free, no Focus Point cost).'
   },
   {
@@ -190,11 +190,11 @@ registerClassSheetActions("Monk", [
     uses: '1 Focus Point',
     resKey: 'ki',
     minLevel: 2,
-    rollFormula: ({ ownerLevel }) => {
+    rollers: [{ kind: 'damage', formula: ({ ownerLevel }) => {
       const lv = Number(ownerLevel || 1);
       const die = lv >= 17 ? 12 : lv >= 11 ? 10 : lv >= 5 ? 8 : 6;
       return `2d${die}`;
-    },
+    } }],
     desc: 'After the Attack action, spend 1 Focus Point to make 2 Unarmed Strikes as a Bonus Action. At lv.10 (Heightened Focus): make 3 Unarmed Strikes instead.'
   },
   {
@@ -222,16 +222,14 @@ registerClassSheetActions("Monk", [
     uses: 'Free / 1 FP redirect',
     resKey: 'ki',
     minLevel: 3,
-    rollFormula: ({ ownerLevel, character }) => {
+    rollers: [{ kind: 'utility', formula: ({ ownerLevel, character }) => {
       const lv = Number(ownerLevel || 1);
       const dex = typeof getMod === 'function' && typeof getFinal === 'function'
         ? Number(getMod(getFinal(character, 'dex')) || 0)
         : 0;
       const total = dex + lv;
       return `1d10${total >= 0 ? '+' : ''}${total}`;
-    },
-    rollKind: 'utility',
-    rollButtonLabel: ({ formula }) => `${String(formula || '')} reduce`,
+    }, label: ({ formula }) => `${String(formula || '')} reduce` }],
     rollLabelPrefix: 'Deflect Attacks',
     desc: 'Reaction when you take B/P/S damage (lv.3) or any damage type (lv.13 Deflect Energy). Reduce the damage by 1d10 + DEX modifier + Monk level. If reduced to 0: spend 1 Focus Point to redirect as a ranged attack (20/60 ft, Martial Arts die + DEX).'
   },

@@ -156,9 +156,7 @@ registerSubclassSheetActions("Druid_Moon", [
     "cat": "attack",
     "uses": "1 / turn",
     "minLevel": 14,
-    "rollFormula": "2d10",
-    "rollButtonLabel": ({ formula }) => `+${formula} radiant`,
-    "rollKind": "damage",
+    rollers: [{ kind: 'damage', formula: "2d10", label: ({ formula }) => `+${formula} radiant` }],
     "desc": "Once per turn, you can deal an extra 2d10 Radiant damage to a target you hit with a Wild Shape form's attack. Additionally, whenever you use Moonlight Step, you can also teleport one willing creature within 10 ft of you to an unoccupied space you can see within 10 ft of your destination space."
   }
 ]);

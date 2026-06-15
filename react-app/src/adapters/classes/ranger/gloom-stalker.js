@@ -130,9 +130,7 @@ registerSubclassSheetActions("Ranger_Gloom Stalker", [
     "uses": "WIS mod / LR",
     "resKey": "dread_ambusher",
     "minLevel": 3,
-    "rollFormula": ({ ownerLevel }) => Number(ownerLevel || 1) >= 11 ? "2d8" : "2d6",
-    "rollButtonLabel": ({ formula }) => `+${formula} psychic`,
-    "rollKind": "damage",
+    rollers: [{ kind: 'damage', formula: ({ ownerLevel }) => Number(ownerLevel || 1) >= 11 ? "2d8" : "2d6", label: ({ formula }) => `+${formula} psychic` }],
     "desc": "At the start of your first turn of each combat, your Speed increases by 10 ft until the end of that turn. When you add your WIS modifier to Initiative rolls. When you attack a creature and hit it with a weapon, you can deal an extra 2d6 Psychic damage (once per turn). Uses: WIS modifier (min 1) per Long Rest. The damage increases to 2d8 at lv.11 (Stalker's Flurry)."
   },
   {
