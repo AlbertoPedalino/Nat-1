@@ -104,6 +104,14 @@ export async function loadBackgrounds() {
   ]);
   const backgrounds = (data.status === 'fulfilled' ? (data.value.background || []) : [])
     .filter((background) => isAllowedSource(background.source, BACKGROUND_ALLOWED_SOURCES));
+  // Upstream data bug: Genie Touched (FRHoF) omits the structured `feats` field;
+  // its origin feat lives only in prose `entries`. Restore the machine-readable
+  // grant so the builder/sheet resolve Magic Initiate (Wizard) like other bgs.
+  backgrounds.forEach((bg) => {
+    if (bg.name === 'Genie Touched' && bg.source === 'FRHoF' && !bg.feat && !bg.feats) {
+      bg.feats = [{ 'magic initiate; wizard|xphb': true }];
+    }
+  });
   if (fluffData.status === 'fulfilled') {
     const fluffIndex = {};
     (fluffData.value.backgroundFluff || []).forEach((entry) => {
