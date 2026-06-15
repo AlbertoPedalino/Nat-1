@@ -1,3 +1,41 @@
+import { strip5eMarkup } from './spellEntries.js';
+
+const ARMOR_LABELS = { light: 'Light armor', medium: 'Medium armor', heavy: 'Heavy armor', shield: 'Shields', shields: 'Shields' };
+const WEAPON_LABELS = { simple: 'Simple weapons', martial: 'Martial weapons' };
+
+function labelFrom(map, value) {
+  return map[String(value).toLowerCase()] || String(value);
+}
+
+// Coerce a 5etools `proficienciesGained` field to an array (some are objects).
+function toList(value) {
+  if (Array.isArray(value)) return value;
+  return value == null ? [] : [value];
+}
+
+// One proficiency entry → display string, stripping 5etools inline markup
+// (e.g. "{@item thieves' tools|PHB}" → "thieves' tools").
+function toText(value) {
+  if (value && typeof value === 'object') return strip5eMarkup(String(value.name || value.tool || '')).trim();
+  return strip5eMarkup(String(value)).trim();
+}
+
+// Maps a `proficienciesGained` object to ordered, human-readable rows for display:
+// [{ label: 'Armor', values: ['Light armor', ...] }, ...]. Empty array means the
+// class grants no multiclass proficiencies. Pure data → presentation; no JSX.
+export function describeMulticlassProficiencies(className, profs) {
+  const skills = toList(profs?.skills).map((block) => {
+    const count = Number(block?.choose?.count || block?.count || 1);
+    return `Choose ${count} skill${count > 1 ? 's' : ''} from the ${className} list`;
+  });
+  return [
+    ['Armor', toList(profs?.armor).map((value) => labelFrom(ARMOR_LABELS, toText(value) || value))],
+    ['Weapons', toList(profs?.weapons).map((value) => labelFrom(WEAPON_LABELS, toText(value) || value))],
+    ['Tools', toList(profs?.tools).map(toText).filter(Boolean)],
+    ['Skills', skills],
+  ].filter(([, values]) => values.length).map(([label, values]) => ({ label, values }));
+}
+
 const XPHB_MULTICLASS_FALLBACK = {
   Barbarian: {
     armor: ['shield'],

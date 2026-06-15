@@ -1,6 +1,5 @@
 import { installedRegistry } from '../../../adapters/index.js';
 import { getFinalScore, getCasterProgression, getCasterContribution } from './calculations.js';
-import { getMulticlassProficiencies } from '../../../shared/character/multiclassProficiencies.js';
 
 /**
  * Multiclass rules validator for 5e 2024
@@ -43,9 +42,15 @@ export function checkMulticlassPrerequisite(character, className) {
   };
 }
 
-export function getMulticlassProficienciesGained(className) {
+export function getMulticlassProficienciesGained(className, cls = null) {
   const cfg = installedRegistry.getClassRuntimeConfig(className);
-  return cfg?.multiclassProficienciesGained || getMulticlassProficiencies(className);
+  // Live only: adapter runtime config, then the class JSON
+  // (`cls.multiclassing.proficienciesGained`). No hardcoded fallback — returns
+  // null when the data source carries nothing.
+  return cfg?.multiclassProficienciesGained
+    || cls?.multiclassing?.proficienciesGained
+    || cls?.multiclassProficienciesGained
+    || null;
 }
 
 /**

@@ -1,9 +1,11 @@
-import { Box, Button, Chip, List, ListItemButton, ListItemText, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
-import { AlertCircle, Axe, BookOpen, Compass, Cross, Dumbbell, Eye, Feather, Flame, Hammer, Music, Plus, Shield, Sparkles, Sword, Trash2, Wand2 } from 'lucide-react';
+import { Box, Button, Chip, IconButton, List, ListItemButton, ListItemText, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { Axe, BookOpen, ChevronDown, ChevronUp, Compass, Cross, Dumbbell, Eye, Feather, Flame, Hammer, Music, Plus, Shield, Sparkles, Sword, Trash2, Wand2 } from 'lucide-react';
 import BuilderPanel from './BuilderPanel.jsx';
 import { SearchField } from './SearchList.jsx';
+import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
+import { describeMulticlassProficiencies } from '../../../shared/character/multiclassProficiencies.js';
 import { getPrimaryClassLevel } from '../logic/calculations.js';
-import { checkMulticlassPrerequisite, checkSpellcastingMulticlass, getMulticlassProficienciesGained } from '../logic/multiclassRules.js';
+import { checkMulticlassPrerequisite, getMulticlassProficienciesGained } from '../logic/multiclassRules.js';
 
 const CLASS_ICONS = {
   Artificer: Hammer,
@@ -25,48 +27,85 @@ function classIcon(className) {
   return CLASS_ICONS[className] || Wand2;
 }
 
-function ClassRow({ cls, selected, onSelect, prereqMet = true, prereqReason = '', warningMsg = '' }) {
+// Renders the multiclass proficiency summary (data shaped by
+// describeMulticlassProficiencies). Pure view: a "grants nothing" note when the
+// live class JSON carries no proficiency data, else a labelled list.
+function MulticlassProfDetails({ className, profs }) {
+  const rows = describeMulticlassProficiencies(className, profs);
+  if (!rows.length) {
+    return (
+      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+        This class grants no multiclass proficiencies.
+      </Typography>
+    );
+  }
+  return (
+    <Stack spacing={0.4}>
+      <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary' }}>
+        Multiclass proficiencies gained
+      </Typography>
+      {rows.map(({ label, values }) => (
+        <Typography key={label} variant="caption" sx={{ color: 'text.secondary' }}>
+          <Box component="span" sx={{ fontWeight: 700 }}>{label}:</Box> {values.join(', ')}
+        </Typography>
+      ))}
+    </Stack>
+  );
+}
+
+function ClassRow({ cls, selected, onSelect, prereqMet = true, prereqReason = '', details = null }) {
   const Icon = classIcon(cls.name);
   const hitDie = cls.hitDie || `d${cls.hd?.faces || '?'}`;
   const saves = (cls.proficiency || []).map((save) => save.toUpperCase()).join(', ');
   return (
-    <ListItemButton
-      selected={selected}
-      divider
-      disabled={!prereqMet}
-      onClick={onSelect}
-      sx={{ alignItems: 'flex-start', gap: 0.55, opacity: prereqMet ? 1 : 0.45, flexDirection: 'column' }}
-    >
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75, width: '100%' }}>
-        <Box sx={{ pt: 0.35 }}>
-          <Icon size={15} />
-        </Box>
-        <ListItemText
-          primary={<Typography fontWeight={500} sx={{ fontSize: '0.76rem' }}>{cls.name}</Typography>}
-          secondary={(
-            <Stack direction="row" spacing={0.45} flexWrap="wrap" useFlexGap sx={{ mt: 0.35 }}>
-              <Chip size="small" label={`Hit Die ${hitDie}`} />
-              {cls.primary ? <Chip size="small" label={`Primary ${cls.primary}`} /> : null}
-              {saves ? <Chip size="small" label={`Saves ${saves}`} /> : null}
-              {!prereqMet ? <Chip size="small" color="warning" label="Prereq NO" /> : null}
-            </Stack>
-          )}
-          secondaryTypographyProps={{ component: 'div' }}
-        />
-        <Chip size="small" label={cls.source} />
-      </Box>
-      {prereqReason && (
-        <Typography variant="caption" sx={{ color: 'warning.main', ml: 3, mb: 0.5 }}>
-          {prereqReason}
-        </Typography>
-      )}
-      {warningMsg && (
-        <Stack direction="row" spacing={0.5} sx={{ ml: 3, alignItems: 'flex-start', color: 'info.main', fontSize: '0.75rem' }}>
-          <AlertCircle size={14} style={{ flexShrink: 0, marginTop: '2px' }} />
-          <Typography variant="caption" sx={{ color: 'info.main' }}>{warningMsg}</Typography>
+    <ExpandableCard
+      details={details}
+      containerSx={{ borderBottom: 1, borderColor: 'divider' }}
+      detailsSx={{ px: 2, pt: 0.25, pb: 1.25, bgcolor: 'background.paper' }}
+      summary={({ open, toggle, disabled: caretDisabled }) => (
+        <Stack direction="row" alignItems="stretch" sx={{ minWidth: 0 }}>
+          <ListItemButton
+            selected={selected}
+            disabled={!prereqMet}
+            onClick={onSelect}
+            sx={{ alignItems: 'flex-start', gap: 0.55, opacity: prereqMet ? 1 : 0.45, flexDirection: 'column', flex: 1, minWidth: 0 }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75, width: '100%' }}>
+              <Box sx={{ pt: 0.35 }}>
+                <Icon size={15} />
+              </Box>
+              <ListItemText
+                primary={<Typography fontWeight={500} sx={{ fontSize: '0.76rem' }}>{cls.name}</Typography>}
+                secondary={(
+                  <Stack direction="row" spacing={0.45} flexWrap="wrap" useFlexGap sx={{ mt: 0.35 }}>
+                    <Chip size="small" label={`Hit Die ${hitDie}`} />
+                    {cls.primary ? <Chip size="small" label={`Primary ${cls.primary}`} /> : null}
+                    {saves ? <Chip size="small" label={`Saves ${saves}`} /> : null}
+                  </Stack>
+                )}
+                secondaryTypographyProps={{ component: 'div' }}
+              />
+              <Chip size="small" label={cls.source} />
+            </Box>
+            {prereqReason && (
+              <Typography variant="caption" sx={{ color: 'warning.main', ml: 3, mb: 0.5 }}>
+                {prereqReason}
+              </Typography>
+            )}
+          </ListItemButton>
+          {!caretDisabled ? (
+            <IconButton
+              size="small"
+              aria-label={open ? `Collapse ${cls.name}` : `Expand ${cls.name}`}
+              onClick={toggle}
+              sx={{ borderRadius: 0, px: 1, color: 'text.secondary', alignSelf: 'stretch' }}
+            >
+              {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </IconButton>
+          ) : null}
         </Stack>
       )}
-    </ListItemButton>
+    />
   );
 }
 
@@ -141,13 +180,8 @@ export default function ClassPanel({ state, character, dispatch }) {
                     ? checkMcPrereq(character, cls.name)
                     : { met: false, reason: 'Class already taken' }
                 : { met: true, reason: '' };
-              const spellWarning = isExtraTab && !selected && prereqMet
-                ? checkSpellcastingMulticlass(character, cls.name)
-                : { warning: false, message: '' };
-              const profGained = isExtraTab && !selected ? getMulticlassProficienciesGained(cls.name) : null;
-              const profText = profGained && (profGained.armor?.length || profGained.weapons?.length)
-                ? `Gains: ${[...((profGained.armor || []).slice(0, 2).join(', ') ? [profGained.armor.slice(0, 2).join(', ')] : []), ...((profGained.weapons || []).slice(0, 2).join(', ') ? [profGained.weapons.slice(0, 2).join(', ')] : [])].join(' + ')}`
-                : '';
+              const profGained = isExtraTab ? getMulticlassProficienciesGained(cls.name, cls) : null;
+              const details = isExtraTab ? <MulticlassProfDetails className={cls.name} profs={profGained} /> : null;
               return (
                 <ClassRow
                   key={`${cls.name}-${cls.source}`}
@@ -155,7 +189,7 @@ export default function ClassPanel({ state, character, dispatch }) {
                   selected={selected}
                   prereqMet={prereqMet}
                   prereqReason={prereqReason}
-                  warningMsg={spellWarning.message || (profText ? `MC Profs: ${profText}` : '')}
+                  details={details}
                   onSelect={() => dispatch(activeExtra
                     ? { type: 'extra-class/select', index: character.activeClassTab - 1, className: cls.name, source: cls.source, classObject: cls }
                     : { type: 'class/select', className: cls.name, source: cls.source, classObject: cls })}
