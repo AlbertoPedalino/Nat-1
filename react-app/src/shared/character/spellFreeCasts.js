@@ -14,11 +14,11 @@ import { getProficiencyBonus } from './proficiency.js';
 import { resolveScalingFormula } from './scalingFormula.js';
 import { normalizeRecharge, rechargeLabel, rechargesOnRest } from './rechargeRules.js';
 
-function resolveMaxUses(raw, character) {
+function resolveMaxUses(raw, character, context = {}) {
   const formula = raw?.usesFormula;
   if (typeof formula === 'function') {
     try {
-      const value = formula({ character, pb: getProficiencyBonus(character) });
+      const value = formula({ ...context, character, pb: getProficiencyBonus(character) });
       const n = Number(value);
       if (Number.isFinite(n)) return Math.max(1, Math.floor(n));
     } catch { /* ignore */ }
@@ -52,7 +52,7 @@ export function normalizeFreeCast(rawDef, ctx = {}) {
   if (!spellName) return null;
 
   const recharge = normalizeRecharge(rawDef.recharge);
-  const max = resolveMaxUses(rawDef, character);
+  const max = resolveMaxUses(rawDef, character, ctx);
   const label = rawDef.label || source;
   const id = rawDef.id || makeFreeCastId({ sourceType, source, spellName });
 

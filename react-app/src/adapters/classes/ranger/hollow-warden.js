@@ -9,7 +9,7 @@ export default function install(registry, context = {}) {
   } = createAdapterBindings(registry, context);
 
   // Hollow Warden Spells come from the subclass additionalSpells data. Wrath of the
-  // Wild is fueled by Favored Enemy (a class resource).
+  // Wild shares the Favored Enemy uses tracked on the Hunter's Mark spell.
   registerSubclassAdapter('Ranger_Hollow Warden', function () {});
 
   registerSubclassSheetActions('Ranger_Hollow Warden', [

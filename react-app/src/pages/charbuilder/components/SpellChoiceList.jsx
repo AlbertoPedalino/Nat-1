@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Chip, List, ListItemButton, Paper, Stack, Typography } from '@mui/material';
 import { spellMatchesAnyClass } from '../spells/spells.js';
-import { SpellReferenceBody, SpellRowLabel, SpellSelectButton } from '../../../shared/character/SpellReference.jsx';
+import { SpellMiniTags, SpellReferenceBody, SpellRowLabel, SpellSelectButton } from '../../../shared/character/SpellReference.jsx';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 
 function _knownCantripNames(character) {
@@ -88,6 +88,7 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
                     onClick={toggle}
                   >
                     <SpellRowLabel spell={spell} selected={active} showIcon={false} />
+                    <SpellMiniTags spell={spell} sx={{ ml: 1 }} />
                   </ListItemButton>
                 );
               }
@@ -100,6 +101,7 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
                   header={({ open, toggle: toggleOpen }) => (
                     <ListItemButton selected={active} aria-expanded={open} sx={{ alignItems: 'center', gap: 0.5 }} onClick={toggleOpen}>
                       <SpellRowLabel spell={spell} selected={active} />
+                      <SpellMiniTags spell={spell} sx={{ mx: 1 }} />
                       <SpellSelectButton selected={active} disabled={full} onToggle={toggle} />
                     </ListItemButton>
                   )}

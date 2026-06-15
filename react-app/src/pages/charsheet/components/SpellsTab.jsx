@@ -47,7 +47,7 @@ import {
 import SpellEntry, { SourceBadge } from './SpellEntry.jsx';
 import { Empty, SlotPanel, SpellSection, StatBox } from './SpellsUiParts.jsx';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
-import { SpellReferenceBody, SpellRowLabel, SpellSelectButton } from '../../../shared/character/SpellReference.jsx';
+import { SpellMiniTags, SpellReferenceBody, SpellRowLabel, SpellSelectButton } from '../../../shared/character/SpellReference.jsx';
 import { useSheetActions } from '../context/SheetActionsContext.jsx';
 
 export default function SpellsTab({ C, sheet, freeCastUses }) {
@@ -159,10 +159,12 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
         for (let lv = baseLevel + 1; lv <= maxSlotLv; lv++) {
           const hasRegularSlot = slots.regular?.[lv - 1] > 0;
           const hasPactSlot = slots.pact?.level === lv && slots.pact.count > 0;
+          // The allowance belongs to the granted spell, not to every upcast row.
+          const upcastEntry = { ...entry, freeCasts: undefined, castLevel: lv };
           if (castMode.mode === 'pact_magic') {
-            if (hasRegularSlot) addLeveledEntry(lv, { ...entry, castLevel: lv, castMode: 'regular' });
+            if (hasRegularSlot) addLeveledEntry(lv, { ...upcastEntry, castMode: 'regular' });
           } else if (hasRegularSlot || hasPactSlot) {
-            addLeveledEntry(lv, { ...entry, castLevel: lv, castMode: castMode.mode || 'regular' });
+            addLeveledEntry(lv, { ...upcastEntry, castMode: castMode.mode || 'regular' });
           }
         }
       });
@@ -538,6 +540,7 @@ function PickerSpellRow({ spell, selected, disabled, atLimit, autoGranted, locke
           sx={{ display: 'flex', alignItems: 'center', gap: 0.5, px: '9px', py: '6px', cursor: 'pointer', bgcolor: selected ? 'rgba(39,174,96,0.08)' : 'transparent', '&:hover': { bgcolor: selected ? 'rgba(39,174,96,0.08)' : 'rgba(35,32,26,1)' } }}
         >
           <SpellRowLabel spell={spell} selected={selected} nameSx={{ fontSize: '0.875rem' }} sx={{ gap: 0.4 }} />
+          <SpellMiniTags spell={spell} sx={{ mx: 1 }} />
           {autoGranted ? (
             sourceInfo
               ? <SourceBadge sourceInfo={sourceInfo} sources={sources} />

@@ -108,12 +108,12 @@ export const SPECIES_SUMMARIES = [
 ];
 
 export const BACKGROUND_SUMMARIES = [
-  { name: 'Acolyte', source: 'XPHB', abilities: ['int', 'wis', 'cha'], feat: 'Magic Initiate' },
+  { name: 'Acolyte', source: 'XPHB', abilities: ['int', 'wis', 'cha'], feat: 'Magic Initiate; Cleric|XPHB' },
   { name: 'Artisan', source: 'XPHB', abilities: ['str', 'dex', 'int'], feat: 'Crafter' },
   { name: 'Charlatan', source: 'XPHB', abilities: ['dex', 'con', 'cha'], feat: 'Skilled' },
   { name: 'Criminal', source: 'XPHB', abilities: ['dex', 'con', 'int'], feat: 'Alert' },
-  { name: 'Guide', source: 'XPHB', abilities: ['dex', 'con', 'wis'], feat: 'Magic Initiate' },
-  { name: 'Sage', source: 'XPHB', abilities: ['con', 'int', 'wis'], feat: 'Magic Initiate' },
+  { name: 'Guide', source: 'XPHB', abilities: ['dex', 'con', 'wis'], feat: 'Magic Initiate; Druid|XPHB' },
+  { name: 'Sage', source: 'XPHB', abilities: ['con', 'int', 'wis'], feat: 'Magic Initiate; Wizard|XPHB' },
   { name: 'Soldier', source: 'XPHB', abilities: ['str', 'dex', 'con'], feat: 'Savage Attacker' },
 ];
 

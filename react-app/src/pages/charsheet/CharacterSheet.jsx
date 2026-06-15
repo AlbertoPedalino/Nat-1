@@ -164,11 +164,6 @@ export default function CharacterSheet() {
     persist({ resources: next });
   }, [persist]);
 
-  const saveFreeCastState = useCallback((next) => {
-    setFreeCastUses(next);
-    persist({ freeCastUses: next });
-  }, [persist]);
-
   const showDiceToast = useCallback((label, detail, total, rolls, meta) => {
     const entry = { label, detail, total, rolls, meta, timestamp: Date.now() };
     setDiceToast(entry);

@@ -17,7 +17,8 @@ import { isGrantUnlocked } from './spellGrants.js';
  *   {
  *     name, minLevel, level, mode,           // grant identity
  *     origin: 'class' | 'species',           // class also covers subclass cfg
- *     ownerClassName, subclassShortName,      // provenance (subclass fields only
+ *     ownerClassName, ownerLevel,              // granting class provenance
+ *     subclassShortName,                       // subclass fields only
  *     subclassName,                           //  when granted BY the subclass)
  *     explicitSource, sourceType, ability,    // raw adapter hints (may be null)
  *     entry,                                  // original adapter entry (free casts, …)
@@ -62,6 +63,7 @@ export function enumerateClassGrants(entity, character) {
         mode: entry.mode,
         origin: 'class',
         ownerClassName: entity?.className || null,
+        ownerLevel: level,
         subclassShortName: fromSubclass ? (entity?.subclassShortName || null) : null,
         subclassName: fromSubclass ? subclassName : null,
         explicitSource: entry.source || null,
@@ -99,6 +101,7 @@ export function enumerateSpeciesGrants(character) {
     mode: entry.mode,
     origin: 'species',
     ownerClassName: null,
+    ownerLevel: level,
     subclassShortName: null,
     explicitSource: entry.source || null,
     sourceType: entry.sourceType || null,

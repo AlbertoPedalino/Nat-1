@@ -887,9 +887,11 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
   const resCur = hasRes ? (resources[action.resKey] ?? 0) : 0;
   const safeMax = resMax === Infinity ? Infinity : Math.max(0, Number(resMax ?? 1) || 1);
   const hasEntries = Array.isArray(action.entries) ? action.entries.length > 0 : Boolean(action.entries);
+  const hasDescription = Boolean(String(action.desc || '').trim());
   const hasActionDetails = Boolean(
     action._item
     || hasEntries
+    || hasDescription
     || (action.choiceKey && onUpdateCharacter)
     || action._weaponMastery
     || DetailRenderer
@@ -1078,6 +1080,7 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
         <>
           {action._item ? <ItemPropertyTable item={action._item} sx={{ mb: '6px' }} /> : null}
           {hasEntries ? <EntryBlocks entries={action.entries} emptyText="" /> : null}
+          {!hasEntries && hasDescription ? <RichText text={action.desc} /> : null}
           {action.choiceKey && onUpdateCharacter ? (
             <ChoicePicker action={action} C={C} onUpdateCharacter={onUpdateCharacter} onShowToast={onShowToast} />
           ) : null}

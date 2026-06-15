@@ -4,7 +4,7 @@ import { BookOpen, Search } from 'lucide-react';
 import BuilderPanel from './BuilderPanel.jsx';
 import { SPELL_LEVEL_LABELS } from '../constants.js';
 import { collectAutoGrantedSpells, getSpellCounts, maxSpellLevel, spellMatchesAnyClass } from '../spells/spells.js';
-import { SpellReferenceBody, SpellRowLabel, SpellSelectButton } from '../../../shared/character/SpellReference.jsx';
+import { SpellMiniTags, SpellReferenceBody, SpellRowLabel, SpellSelectButton } from '../../../shared/character/SpellReference.jsx';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import { entityChipSx } from '../../../shared/entityColors.js';
 
@@ -183,6 +183,7 @@ function SpellRow({ spell, selected, disabled, autoSelected, autoLabel, autoKind
       header={({ open, toggle }) => (
         <ListItemButton selected={selected} aria-expanded={open} sx={{ alignItems: 'center', gap: 0.5 }} onClick={toggle}>
           <SpellRowLabel spell={spell} selected={selected} />
+          <SpellMiniTags spell={spell} sx={{ mx: 1 }} />
           {autoSelected ? (
             <Chip size="small" label={autoLabel} sx={{ ...entityChipSx(autoKind), flexShrink: 0 }} />
           ) : (

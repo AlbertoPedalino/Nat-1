@@ -191,15 +191,6 @@ registerClassSheetActions("Ranger", [
     "desc": "You always have Hunter's Mark prepared (doesn't count against spells known). You can cast it without expending a spell slot: 2 free casts per LR at lv.1, scaling to 3 (lv.5), 4 (lv.9), 5 (lv.13), 6 (lv.17)."
   },
   {
-    "name": "Hunter's Mark",
-    "icon": "",
-    "cat": "bonus",
-    "uses": "2 free / LR",
-    "resKey": "hunters_mark_free",
-    rollers: [{ kind: 'damage', formula: "1d6", label: "+1d6" }],
-    "desc": "Bonus Action (Concentration): mark a creature you can see within 90 ft. +1d6 damage on every hit against it. Advantage on PER/Survival checks to find it. Move the mark (Bonus Action) when the marked creature dies. At lv.17: no longer requires Concentration."
-  },
-  {
     "name": "Deft Explorer",
     "icon": "",
     "cat": "action",
@@ -282,13 +273,6 @@ registerClassSheetActions("Ranger", [
   }
 ]);
 registerClassSheetResources("Ranger", [
-  {
-    "key": "hunters_mark_free",
-    "name": "Hunter's Mark (free)",
-    "icon": "crosshair",
-    "recharge": "LR",
-    "max": (lv) => lv >= 17 ? 6 : lv >= 13 ? 5 : lv >= 9 ? 4 : lv >= 5 ? 3 : 2
-  },
   {
     "key": "ranger_tireless",
     "name": "Tireless",

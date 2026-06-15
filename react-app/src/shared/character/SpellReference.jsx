@@ -75,14 +75,14 @@ export function HigherLevelBlock({ entries, fontSize, sx }) {
 
 // Concentration (C) / Ritual (R) mini badges shown next to a spell name.
 // Shared by every spell row (builder list + sheet picker dialog).
-export function SpellMiniTags({ spell }) {
+export function SpellMiniTags({ spell, sx }) {
   const tags = [
     isConcentrationSpell(spell) ? { label: 'C', color: SPELL_TAG_COLORS.concentration, bg: alpha(SPELL_TAG_COLORS.concentration, 0.16), title: 'Concentration' } : null,
     isRitualSpell(spell) ? { label: 'R', color: SPELL_TAG_COLORS.ritual, bg: alpha(SPELL_TAG_COLORS.ritual, 0.16), title: 'Ritual' } : null,
   ].filter(Boolean);
   if (!tags.length) return null;
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', flexShrink: 0 }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', flexShrink: 0, ...sx }}>
       {tags.map((tag) => (
         <MiniBadge key={tag.label} label={tag.label} color={tag.color} bg={tag.bg} title={tag.title} />
       ))}
@@ -90,10 +90,8 @@ export function SpellMiniTags({ spell }) {
   );
 }
 
-// Icon + name + concentration/ritual tags cluster shared by every spell row
-// (builder choice panels, builder selection panel, sheet picker dialog). Callers
-// supply their own row container and trailing control (select button, source chip).
-// `showIcon=false` hides the 5e.tools link (compact rows); `nameSx` themes the name.
+// Icon + name cluster shared by every spell row. Callers place concentration
+// and ritual tags in their trailing-controls area.
 export function SpellRowLabel({ spell, selected = false, showIcon = true, nameSx, sx }) {
   return (
     <Box sx={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 0.5, ...sx }}>
@@ -101,7 +99,6 @@ export function SpellRowLabel({ spell, selected = false, showIcon = true, nameSx
       <Typography noWrap sx={{ minWidth: 0, fontWeight: selected ? 700 : 500, color: 'text.primary', ...nameSx }}>
         {spell.name}
       </Typography>
-      <SpellMiniTags spell={spell} />
     </Box>
   );
 }

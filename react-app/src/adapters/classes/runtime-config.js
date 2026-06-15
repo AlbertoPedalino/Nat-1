@@ -245,7 +245,29 @@ export default function install(registry, context = {}) {
       preparedMode: "prepared",
       preparedSpellsProgression: _PREP_HALF,
       alwaysPreparedSpells: [
-        { name: "Hunter's Mark", minLevel: 1, level: 1 },
+        {
+          name: "Hunter's Mark",
+          minLevel: 1,
+          level: 1,
+          source: "Favored Enemy",
+          sourceType: "class",
+          freeCast: {
+            id: "ranger-favored-enemy-hunters-mark",
+            label: "Favored Enemy",
+            source: "Favored Enemy",
+            sourceType: "class",
+            usesFormula: ({ ownerLevel = 1 }) => {
+              if (ownerLevel >= 17) return 6;
+              if (ownerLevel >= 13) return 5;
+              if (ownerLevel >= 9) return 4;
+              if (ownerLevel >= 5) return 3;
+              return 2;
+            },
+            recharge: "longRest",
+            consumesSlot: false,
+            canAlsoUseSlots: true,
+          },
+        },
       ],
     },
   });

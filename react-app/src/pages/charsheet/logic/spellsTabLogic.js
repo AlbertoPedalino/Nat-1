@@ -268,6 +268,7 @@ export function getFreeCastDefsForCharacter(C) {
     if (Number(C?.level || 1) < Number(entry.minLevel || 1)) return;
     defs.push(...collectFreeCastsForGrant(entry, {
       character: C,
+      ownerLevel: Number(C?.level || 1),
       source: entry.source || C?.speciesName,
       sourceType: entry.sourceType || 'species',
       spellName: entry.name,
@@ -286,6 +287,7 @@ export function getFreeCastDefsForCharacter(C) {
         if (Number(level || 1) < Number(entry?.minLevel || 1)) return;
         defs.push(...collectFreeCastsForGrant(entry, {
           character: C,
+          ownerLevel: Number(level || 1),
           source: entry.source || label,
           sourceType: entry.sourceType || type,
           spellName: entry.name,
@@ -597,7 +599,7 @@ function collectAutoGrantedSpells(C) {
         source: { label: srcLabel, color: SRC_COLOR.species, originType: 'species', originLabel: C?.speciesName || 'Species' },
         ownerClassName: null,
         spellcastingAbility: r.ability,
-        freeCasts: collectFreeCastsForGrant(r.entry, { character: C, source: srcLabel, sourceType, spellName: r.name }),
+        freeCasts: collectFreeCastsForGrant(r.entry, { character: C, ownerLevel: r.ownerLevel, source: srcLabel, sourceType, spellName: r.name }),
         spellOverrides: r.entry?.spellOverrides || null,
         modifiers: r.entry?.modifiers || [],
       };
@@ -611,7 +613,7 @@ function collectAutoGrantedSpells(C) {
       ownerClassName: r.ownerClassName,
       ownerSubclassShortName: r.subclassShortName,
       spellcastingAbility: r.ability,
-      freeCasts: collectFreeCastsForGrant(r.entry, { character: C, source: srcLabel, sourceType, spellName: r.name }),
+      freeCasts: collectFreeCastsForGrant(r.entry, { character: C, ownerLevel: r.ownerLevel, source: srcLabel, sourceType, spellName: r.name }),
       spellOverrides: r.entry?.spellOverrides || null,
       modifiers: r.entry?.modifiers || [],
     };
