@@ -50,6 +50,7 @@ import { ItemPropertyTable } from '../../../shared/character/ItemPropertyTable.j
 import { formatRollTitle } from '../../../shared/character/dice.js';
 import RollerButtons from '../../../shared/character/RollerButtons.jsx';
 import { CHIP_TONES, chipToneStyle } from '../../../shared/entityColors.js';
+import { getPactSlotUsed, getPactSlotUsedKey, getRegularSlotUsed } from '../../../shared/character/spellSlots.js';
 
 const ACTION_DETAIL_RENDERERS = {
   panel: ActionDetailPanel,
@@ -69,6 +70,7 @@ function warnDanglingResKey(action, resMaxMap) {
 
 function actionLabel(value) {
   if (value === 'all') return 'All';
+  if (value === 'bonus') return 'Bonus Action';
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
@@ -222,7 +224,7 @@ export default function ActionsTab({ C, sheet, resources }) {
     for (let level = 1; level <= regularSlots.length; level++) {
       const total = Number(regularSlots[level - 1] || 0);
       if (!total) continue;
-      const usedCount = Number(used[level] || used[String(level)] || 0);
+      const usedCount = getRegularSlotUsed(used, level);
       const createdCount = Number(created[level] || 0);
       const available = total - usedCount + createdCount;
       if (available <= 0) continue;
@@ -303,7 +305,7 @@ export default function ActionsTab({ C, sheet, resources }) {
       for (let lv = 1; lv <= regularSlots.length; lv++) {
         const total = Number(regularSlots[lv - 1] || 0);
         if (!total) continue;
-        const avail = total - Number(used[lv] || used[String(lv)] || 0) + Number(created[lv] || 0);
+        const avail = total - getRegularSlotUsed(used, lv) + Number(created[lv] || 0);
         if (avail <= 0) continue;
         if ((created[lv] || 0) > 0) {
           const next = { ...created };
@@ -342,7 +344,7 @@ export default function ActionsTab({ C, sheet, resources }) {
     for (let lv = 1; lv <= regularSlots.length; lv++) {
       const total = Number(regularSlots[lv - 1] || 0);
       if (!total) continue;
-      const usedCount = Number(used[lv] || used[String(lv)] || 0);
+      const usedCount = getRegularSlotUsed(used, lv);
       const createdCount = Number(created[lv] || 0);
       const available = total - usedCount + createdCount;
       if (available <= 0) continue;
@@ -416,7 +418,7 @@ export default function ActionsTab({ C, sheet, resources }) {
     const pactLevel = Number(slots.pact.level);
     const pactCount = Number(slots.pact.count || 0);
     const used = sheet?.spellSlotUsed || {};
-    const expended = Number(used[pactLevel] || used[String(pactLevel)] || 0);
+    const expended = getPactSlotUsed(used, pactLevel);
     const available = pactCount - expended;
     if (available <= 0) {
       onShowToast?.(result?.label || 'Spend Pact Slot', 'No Pact Magic slots available. Take a Short Rest to recover them.', 0, []);
@@ -437,9 +439,10 @@ export default function ActionsTab({ C, sheet, resources }) {
     const pactMax = consumePactSlotDialog.pactMax;
     const amount = Math.max(1, Math.min(consumeCount || 1, consumePactSlotDialog.maxConsume));
     const used = { ...(sheet?.spellSlotUsed || {}) };
-    used[String(level)] = Math.min(
+    const key = getPactSlotUsedKey(level);
+    used[key] = Math.min(
       pactMax,
-      (Number(used[String(level)] || 0) + amount)
+      (getPactSlotUsed(used, level) + amount)
     );
     onUpdateSheet?.({ spellSlotUsed: used });
     onUpdateCharacter?.((prev) => ({ ...prev, spellSlotsUsed: used }));
@@ -451,10 +454,11 @@ export default function ActionsTab({ C, sheet, resources }) {
     if (!(result?.recover > 0)) return;
     const level = Number(result.slotLevel || 1);
     const used = { ...(sheet?.spellSlotUsed || {}) };
-    const before = Number(used[level] || 0);
+    const key = getPactSlotUsedKey(level);
+    const before = getPactSlotUsed(used, level);
     const after = Math.max(0, before - Number(result.recover || 0));
     const recovered = before - after;
-    used[level] = after;
+    used[key] = after;
     onUpdateSheet?.({ spellSlotUsed: used });
     onUpdateCharacter?.((prev) => ({ ...prev, spellSlotsUsed: used }));
     if (recovered > 0) {
@@ -476,7 +480,7 @@ export default function ActionsTab({ C, sheet, resources }) {
     for (let level = 1; level <= topLevel; level++) {
       const total = Number(regularSlots[level - 1] || 0);
       if (!total) continue;
-      const expended = Math.max(0, Math.min(total, Number(used[level] || used[String(level)] || 0)));
+      const expended = Math.max(0, Math.min(total, getRegularSlotUsed(used, level)));
       if (!expended) continue;
       levels.push({ level, total, expended });
     }
@@ -602,9 +606,6 @@ export default function ActionsTab({ C, sheet, resources }) {
   return (
     <Box sx={panelRootSx}>
       <Box sx={panelToolbarSx}>
-        <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.66rem', fontWeight: 700, letterSpacing: '0.12em', color: '#edd48a', textTransform: 'uppercase', mr: 0.25 }}>
-          Filter
-        </Typography>
         {FILTERS.map(f => (
           <Chip
             key={f}

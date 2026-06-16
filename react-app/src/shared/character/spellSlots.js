@@ -2,11 +2,25 @@ export function getCreatedSpellSlots(sheet) {
   return (sheet?.createdSpellSlots) || {};
 }
 
+export function getPactSlotUsedKey(level) {
+  return `pact:${Number(level || 0)}`;
+}
+
+export function getRegularSlotUsed(used, level) {
+  return Number((used || {})[String(level)] || 0);
+}
+
+export function getPactSlotUsed(used, level) {
+  const source = used || {};
+  const key = getPactSlotUsedKey(level);
+  return Number(source[key] || 0);
+}
+
 export function getAvailableRegularSlots(regularSlots, sheet, level) {
   const idx = Number(level) - 1;
   if (idx < 0 || idx >= regularSlots.length) return 0;
   const max = Number(regularSlots[idx] || 0);
-  const used = Number(sheet?.spellSlotUsed?.[level] ?? 0);
+  const used = getRegularSlotUsed(sheet?.spellSlotUsed, level);
   const created = Number((sheet?.createdSpellSlots?.[level]) || 0);
   return Math.max(0, max - used + created);
 }
@@ -20,7 +34,7 @@ export function consumeSlot(regularSlots, sheet, level, onUpdateSheet, onUpdateC
   const idx = Number(level) - 1;
   if (idx < 0 || idx >= regularSlots.length) return false;
   const max = Number(regularSlots[idx] || 0);
-  const used = Number(sheet?.spellSlotUsed?.[level] ?? 0);
+  const used = getRegularSlotUsed(sheet?.spellSlotUsed, level);
   const created = Number((sheet?.createdSpellSlots?.[level]) || 0);
   const available = max - used + created;
   if (available <= 0) return false;

@@ -42,19 +42,45 @@ import { getPactMagicInfo, getSpellCastMode } from '../../../shared/character/pa
 import {
   addButtonSx,
   compactInputSx,
+  filterChipSx,
   levelToggleSx,
+  panelRootSx,
+  panelToolbarSx,
 } from './spellsTabStyles.js';
 import SpellEntry, { SourceBadge } from './SpellEntry.jsx';
 import { Empty, SlotPanel, SpellSection, StatBox } from './SpellsUiParts.jsx';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import { SpellMiniTags, SpellReferenceBody, SpellRowLabel, SpellSelectButton } from '../../../shared/character/SpellReference.jsx';
 import { useSheetActions } from '../context/SheetActionsContext.jsx';
+import { getPactSlotUsed, getPactSlotUsedKey, getRegularSlotUsed } from '../../../shared/character/spellSlots.js';
+
+const SPELL_ACTION_FILTERS = [
+  { key: 'all', label: 'All' },
+  { key: 'action', label: 'Action' },
+  { key: 'bonus', label: 'Bonus Action' },
+  { key: 'reaction', label: 'Reaction' },
+];
+
+function getSpellActionFilter(entry) {
+  const unit = String(entry?.time?.[0]?.unit || '').toLowerCase();
+  if (unit === 'bonus') return 'bonus';
+  if (unit === 'reaction') return 'reaction';
+  if (unit === 'action') return 'action';
+  if (unit) return 'other';
+
+  const castingTime = String(entry?.castingTimeLabel || entry?.castingTime || '').toLowerCase();
+  if (/\breaction\b/.test(castingTime)) return 'reaction';
+  if (/\bbonus\b/.test(castingTime)) return 'bonus';
+  if (/\baction\b/.test(castingTime)) return 'action';
+  return 'action';
+}
 
 export default function SpellsTab({ C, sheet, freeCastUses }) {
   const { onRoll, onUpdateSpells, onShowToast, onUpdateSheet, onToggleFreeCast, onUpdateCharacter } = useSheetActions();
   const [spellDb, setSpellDb] = useState([]);
   const [classSpellIndex, setClassSpellIndex] = useState({});
   const [spellSearch, setSpellSearch] = useState('');
+  const [spellFilter, setSpellFilter] = useState('all');
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerSearch, setPickerSearch] = useState('');
   const [pickerLevel, setPickerLevel] = useState(0);
@@ -251,8 +277,19 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
     ...Object.values(activePicker?.bucket?.selectedSpells || {}).flat(),
   ]);
 
-  const toggleSlot = (level, total, index, createdCount) => {
-    const used = slotUsed[level] || 0;
+  const toggleSlot = (level, total, index, createdCount, kind = 'regular') => {
+    const key = kind === 'pact' ? getPactSlotUsedKey(level) : String(level);
+    const used = kind === 'pact'
+      ? getPactSlotUsed(slotUsed, level)
+      : getRegularSlotUsed(slotUsed, level);
+    if (kind === 'pact') {
+      const nextUsed = index < used ? Math.max(0, index) : index + 1;
+      const next = { ...slotUsed, [key]: Math.max(0, Math.min(total, nextUsed)) };
+      setSlotUsed(next);
+      onUpdateSheet?.({ spellSlotUsed: next });
+      onUpdateCharacter?.((prev) => ({ ...prev, spellSlotsUsed: next }));
+      return;
+    }
     if (index >= total) {
       const created = createdCount || createdSlots[level] || 0;
       if (created <= 0) return;
@@ -265,7 +302,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
       return;
     }
     const nextUsed = index < used ? Math.max(0, index) : index + 1;
-    const next = { ...slotUsed, [level]: nextUsed };
+    const next = { ...slotUsed, [key]: nextUsed };
     setSlotUsed(next);
     onUpdateSheet?.({ spellSlotUsed: next });
     onUpdateCharacter?.((prev) => ({ ...prev, spellSlotsUsed: next }));
@@ -360,29 +397,49 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
   };
 
   const sq = spellSearch.trim().toLowerCase();
-  const matchSpell = (entry) => !sq || String(entry?.name || '').toLowerCase().includes(sq);
+  const matchSpell = (entry) => (
+    (spellFilter === 'all' || getSpellActionFilter(entry) === spellFilter)
+    && (!sq || String(entry?.name || '').toLowerCase().includes(sq))
+  );
   const visibleCantrips = spellInfo.cantrips.filter(matchSpell);
   const visibleAtWill = spellInfo.atWill.filter(matchSpell);
   const visibleLeveled = Object.entries(expandedSpellInfo.leveled)
     .map(([level, entries]) => [level, entries.filter(matchSpell)])
     .filter(([, entries]) => entries.length > 0);
   const hasVisibleSpells = visibleCantrips.length || visibleAtWill.length || visibleLeveled.length;
+  const showEmptyCantrips = spellFilter === 'all' && !sq;
+  const emptySpellText = sq
+    ? 'No spells match your search.'
+    : spellFilter === 'all' ? 'No spells selected.' : 'No spells match this filter.';
 
   return (
-    <Box>
+    <Box sx={panelRootSx}>
       <Box sx={{ display: 'flex', gap: 1, mb: 0.75, flexWrap: 'wrap' }}>
         <StatBox value={dc} label="Spell DC" />
         <StatBox value={formatBonus(effectiveD20Modifier(atk, sheet?.exhaustionLevel))} label="Spell Attack" />
         <StatBox value={SLBL[ability] || ability.toUpperCase()} label="Spell Ability" />
       </Box>
 
-      <SearchField
-        placeholder="Search spells..."
-        value={spellSearch}
-        onChange={setSpellSearch}
-        iconSize={14}
-        sx={{ ...compactInputSx, mb: 0.75 }}
-      />
+      <Box sx={panelToolbarSx}>
+        {SPELL_ACTION_FILTERS.map((option) => (
+          <Chip
+            key={option.key}
+            size="small"
+            label={option.label}
+            variant={spellFilter === option.key ? 'filled' : 'outlined'}
+            color={spellFilter === option.key ? 'primary' : 'default'}
+            onClick={() => setSpellFilter(option.key)}
+            sx={filterChipSx}
+          />
+        ))}
+        <SearchField
+          placeholder="Search spells..."
+          value={spellSearch}
+          onChange={setSpellSearch}
+          iconSize={14}
+          sx={{ ...compactInputSx, flex: 1, minWidth: 140 }}
+        />
+      </Box>
 
       {armorPenalties.cannotCastSpells ? (
         <Alert severity="warning" sx={{ mb: 0.75, py: 0.25, '& .MuiAlert-message': { fontSize: '0.75rem' } }}>
@@ -392,7 +449,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
 
       <SlotPanel slots={slots} used={slotUsed} created={createdSlots} onToggle={toggleSlot} />
 
-      {visibleCantrips.length || !sq ? (
+      {visibleCantrips.length || showEmptyCantrips ? (
         <SpellSection title="Cantrip">
           {visibleCantrips.map((entry) => <SpellEntry key={entry.name} entry={entry} spellAttackBonus={spellItemBonuses.spellAttack} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} />)}
           {!visibleCantrips.length ? <Empty text="None" /> : null}
@@ -411,7 +468,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
         </SpellSection>
       ))}
 
-      {!hasVisibleSpells ? <Empty text={sq ? 'No spells match your search.' : 'No spells selected.'} /> : null}
+      {!hasVisibleSpells ? <Empty text={emptySpellText} /> : null}
 
       {canManageSpellList ? (
         <Box sx={{ mt: 0.75 }}>
