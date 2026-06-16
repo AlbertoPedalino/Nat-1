@@ -13,7 +13,7 @@ import { markForeignEdit, unmarkForeignEdit } from '../../shared/cloud/cloudFore
 import { summarizeCharacter } from './sheetSummary.js';
 
 export default function CampaignsPage() {
-  const { cloudEnabled, status, user } = useAuth();
+  const { cloudEnabled, status, user, isGm } = useAuth();
   const navigate = useNavigate();
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('sm'));
