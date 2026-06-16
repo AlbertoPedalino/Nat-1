@@ -144,7 +144,9 @@ export default function CampaignsPage() {
               const isGm = c.gm === myId;
               const chars = charsByCampaign[c.id] || [];
               const members = membersByCampaign[c.id] || [];
-              const assignable = myChars.filter((mc) => mc.campaign_id !== c.id);
+              // Only MY own characters can be added (a global GM's listMyCharacters
+              // returns everyone's sheets via RLS — never offer those).
+              const assignable = myChars.filter((mc) => mc.owner === myId && mc.campaign_id !== c.id);
               return (
                 <Box key={c.id} sx={cardSx}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
