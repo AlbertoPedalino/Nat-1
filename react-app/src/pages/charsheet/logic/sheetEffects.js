@@ -3,6 +3,7 @@ import { canonicalDisplayLabel, cleanProficiencyText } from '../../../shared/cha
 import { matchesRequiredChoice } from '../../../shared/character/lineageMatch.js';
 import { inventoryHasFlag } from '../../../shared/character/choiceUtils.js';
 import { weaponFilterMatches } from '../../../shared/character/weaponFilters.js';
+import { isFeatKey, isFeatDetailKey } from '../../../shared/featChoiceKeys.js';
 
 function asArray(value) {
   if (value == null) return [];
@@ -55,9 +56,13 @@ export function selectedFeatNames(character) {
     if (feat) out.add(cleanText(feat).split('|')[0]);
   });
 
+  // Choice-granted feats: free/ASI feat slots, epic boons, AND fighting styles.
+  // `isFeatKey` recognizes 'fightingstyle' keys (e.g. fighter_fighting_style),
+  // which a plain 'feat'/'boon' substring test misses — so the Defense style's
+  // acBonus would silently vanish whenever allFeatSnapshots is incomplete.
+  // Detail keys (e.g. *_skill, *_asi) carry non-feat values; skip them.
   Object.entries(character?.choices || {}).forEach(([key, value]) => {
-    const lk = String(key || '').toLowerCase();
-    if (!lk.includes('feat') && !lk.includes('boon')) return;
+    if (!isFeatKey(key) || isFeatDetailKey(key)) return;
     asArray(value).forEach((item) => {
       const text = cleanText(item).split('|')[0];
       if (text) out.add(text);
