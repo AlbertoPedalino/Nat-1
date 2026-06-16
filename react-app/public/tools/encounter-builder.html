@@ -521,6 +521,109 @@
       margin-bottom: 7px
     }
 
+    .campaign-party {
+      background: var(--bg3);
+      border: 1px solid var(--bdr);
+      border-radius: var(--r);
+      padding: 8px;
+      margin-bottom: .85rem
+    }
+
+    .campaign-party[hidden] {
+      display: none !important
+    }
+
+    .campaign-party-head {
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--gold2);
+      margin-bottom: 7px
+    }
+
+    .campaign-party-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 7px;
+      align-items: center
+    }
+
+    .campaign-party-select {
+      min-width: 0;
+      width: 100%;
+      background: var(--bg2);
+      color: var(--text);
+      border: 1px solid var(--bdr);
+      border-radius: 4px;
+      padding: 5px 7px;
+      font-family: 'EB Garamond', Georgia, serif;
+      font-size: 13px;
+      outline: none
+    }
+
+    .campaign-party-select:focus {
+      border-color: var(--gold)
+    }
+
+    .campaign-party-btn {
+      background: var(--gdim);
+      color: var(--gold2);
+      border: 1px solid var(--bdr2);
+      border-radius: 4px;
+      padding: 5px 9px;
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      white-space: nowrap
+    }
+
+    .campaign-party-btn:hover:not(:disabled) {
+      border-color: var(--gold);
+      color: var(--gold)
+    }
+
+    .campaign-party-btn:disabled {
+      opacity: .45;
+      cursor: not-allowed
+    }
+
+    .campaign-party-msg,
+    .campaign-party-meta {
+      color: var(--text3);
+      font-size: 12px;
+      font-style: italic;
+      line-height: 1.35
+    }
+
+    .campaign-party-meta {
+      margin-top: 6px
+    }
+
+    .campaign-party-roster {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 7px
+    }
+
+    .campaign-party-pill {
+      max-width: 100%;
+      border: 1px solid var(--bdr);
+      border-radius: 999px;
+      padding: 2px 7px;
+      color: var(--text2);
+      background: var(--bg2);
+      font-size: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
     .plist {
       display: flex;
       flex-direction: column;
@@ -2047,6 +2150,12 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
           <div class="panel">
             <div class="ph"><span class="pt">Adventuring Party</span></div>
             <div class="pb">
+              <div class="campaign-party" id="campaign-party" hidden>
+                <div class="campaign-party-head">Campaign Players</div>
+                <div id="campaign-party-body">
+                  <div class="campaign-party-msg">Loading campaign access...</div>
+                </div>
+              </div>
               <div class="party-top">
                 <div class="cnt">
                   <div class="clbl">Players</div>
@@ -2351,6 +2460,223 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
 
     const esc = s => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     const escAttr = s => esc(s).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    const CAMPAIGN_PLAYERS_MESSAGE = 'gb:campaign-players';
+    const ENCOUNTER_READY_MESSAGE = 'gb:encounter-builder-ready';
+    let campaignPlayerBridge = {
+      cloudEnabled: false,
+      signedIn: false,
+      loading: false,
+      error: null,
+      campaigns: [],
+      selectedCampaignId: '',
+      notice: ''
+    };
+
+    function intInRange(value, min, max, fallback) {
+      const n = Number(value);
+      const v = Number.isFinite(n) ? Math.round(n) : fallback;
+      return Math.max(min, Math.min(max, v));
+    }
+
+    function normalizeCampaignPlayer(player) {
+      if (!player || typeof player !== 'object') return null;
+      const sourceId = String(player.sourceId || player.id || '').trim();
+      if (!sourceId) return null;
+      return {
+        id: sourceId,
+        sourceId,
+        campaignId: String(player.campaignId || ''),
+        name: String(player.name || 'Character').trim() || 'Character',
+        ownerUsername: player.ownerUsername ? String(player.ownerUsername) : '',
+        level: intInRange(player.level, 1, 20, 1),
+        ac: intInRange(player.ac, 1, 99, 10),
+        hpMax: intInRange(player.hpMax, 1, 999, 10),
+        initMod: intInRange(player.initMod, -20, 30, 0)
+      };
+    }
+
+    function normalizeCampaignPayload(payload) {
+      const incoming = payload && typeof payload === 'object' ? payload : {};
+      const campaigns = Array.isArray(incoming.campaigns)
+        ? incoming.campaigns.map(campaign => {
+            const id = String(campaign?.id || '').trim();
+            if (!id) return null;
+            return {
+              id,
+              name: String(campaign?.name || 'Campaign').trim() || 'Campaign',
+              players: (Array.isArray(campaign?.players) ? campaign.players : [])
+                .map(normalizeCampaignPlayer)
+                .filter(Boolean)
+            };
+          }).filter(Boolean)
+        : [];
+      const selectedCampaignId = campaigns.some(campaign => campaign.id === campaignPlayerBridge.selectedCampaignId)
+        ? campaignPlayerBridge.selectedCampaignId
+        : (campaigns[0]?.id || '');
+
+      return {
+        cloudEnabled: !!incoming.cloudEnabled,
+        signedIn: !!incoming.signedIn,
+        loading: !!incoming.loading,
+        error: incoming.error ? String(incoming.error) : null,
+        campaigns,
+        selectedCampaignId,
+        notice: campaignPlayerBridge.notice || ''
+      };
+    }
+
+    function selectedCampaignPlayers() {
+      return campaignPlayerBridge.campaigns.find(campaign => campaign.id === campaignPlayerBridge.selectedCampaignId)
+        || campaignPlayerBridge.campaigns[0]
+        || null;
+    }
+
+    function campaignAvgLevel(playersList) {
+      if (!playersList?.length) return 1;
+      const total = playersList.reduce((sum, player) => sum + intInRange(player.level, 1, 20, 1), 0);
+      return intInRange(total / playersList.length, 1, 20, 1);
+    }
+
+    function renderCampaignImport() {
+      const root = document.getElementById('campaign-party');
+      const body = document.getElementById('campaign-party-body');
+      if (!root || !body) return;
+
+      if (!campaignPlayerBridge.cloudEnabled) {
+        root.hidden = true;
+        return;
+      }
+
+      root.hidden = false;
+      if (campaignPlayerBridge.loading) {
+        body.innerHTML = '<div class="campaign-party-msg">Loading campaign players...</div>';
+        return;
+      }
+      if (!campaignPlayerBridge.signedIn) {
+        body.innerHTML = '<div class="campaign-party-msg">Log in to import players from your GM campaigns.</div>';
+        return;
+      }
+      if (campaignPlayerBridge.error) {
+        body.innerHTML = `<div class="campaign-party-msg">${esc(campaignPlayerBridge.error)}</div>`;
+        return;
+      }
+      if (!campaignPlayerBridge.campaigns.length) {
+        body.innerHTML = '<div class="campaign-party-msg">No campaigns where you are GM.</div>';
+        return;
+      }
+
+      const selected = selectedCampaignPlayers();
+      const campaignPlayers = selected?.players || [];
+      const count = campaignPlayers.length;
+      const avgLevel = campaignAvgLevel(campaignPlayers);
+      const options = campaignPlayerBridge.campaigns.map(campaign =>
+        `<option value="${escAttr(campaign.id)}" ${campaign.id === selected?.id ? 'selected' : ''}>${esc(campaign.name)} (${campaign.players.length})</option>`
+      ).join('');
+      const roster = campaignPlayers.slice(0, 10).map(player => {
+        const owner = player.ownerUsername ? ` - ${esc(player.ownerUsername)}` : '';
+        return `<span class="campaign-party-pill">${esc(player.name)} Lv ${player.level}${owner}</span>`;
+      }).join('');
+      const more = campaignPlayers.length > 10
+        ? `<span class="campaign-party-pill">+${campaignPlayers.length - 10} more</span>`
+        : '';
+      const notice = campaignPlayerBridge.notice
+        ? `<div class="campaign-party-meta">${esc(campaignPlayerBridge.notice)}</div>`
+        : '';
+
+      body.innerHTML = `
+        <div class="campaign-party-row">
+          <select class="campaign-party-select" onchange="selectCampaignPlayers(this.value)">${options}</select>
+          <button class="campaign-party-btn" onclick="addCampaignPlayers()" ${count ? '' : 'disabled'}>Add</button>
+        </div>
+        <div class="campaign-party-meta">${count ? `${count} sheet${count === 1 ? '' : 's'} - avg Lv ${avgLevel}` : 'No sheets attached to this campaign.'}</div>
+        ${roster || more ? `<div class="campaign-party-roster">${roster}${more}</div>` : ''}
+        ${notice}`;
+    }
+
+    function selectCampaignPlayers(campaignId) {
+      campaignPlayerBridge.selectedCampaignId = String(campaignId || '');
+      campaignPlayerBridge.notice = '';
+      renderCampaignImport();
+    }
+
+    function isDefaultPlaceholderParty() {
+      if (!players.length) return true;
+      return players.every((player, index) =>
+        !player.sourceId
+        && /^Giocatore \d+$/i.test(String(player.name || ''))
+        && (player.id == null || Number(player.id) === index)
+      );
+    }
+
+    function toPartyPlayer(player, index) {
+      return {
+        id: `cloud:${player.sourceId}`,
+        sourceId: player.sourceId,
+        campaignId: player.campaignId,
+        name: player.name,
+        level: player.level,
+        initMod: player.initMod,
+        ac: player.ac,
+        hpMax: player.hpMax,
+        color: PLAYER_COLORS[index % PLAYER_COLORS.length]
+      };
+    }
+
+    function addCampaignPlayers() {
+      const selected = selectedCampaignPlayers();
+      const campaignPlayers = selected?.players || [];
+      if (!campaignPlayers.length) return;
+
+      if (isDefaultPlaceholderParty()) players = [];
+
+      let added = 0;
+      let updated = 0;
+      let skipped = 0;
+      campaignPlayers.forEach((campaignPlayer) => {
+        const next = toPartyPlayer(campaignPlayer, players.length);
+        const existingIndex = players.findIndex(player => player.sourceId === next.sourceId);
+        if (existingIndex >= 0) {
+          players[existingIndex] = { ...players[existingIndex], ...next, color: players[existingIndex].color || next.color };
+          updated++;
+          return;
+        }
+        if (players.length >= 10) {
+          skipped++;
+          return;
+        }
+        players.push(next);
+        added++;
+      });
+
+      party.count = Math.max(1, Math.min(10, players.length));
+      party.level = campaignAvgLevel(campaignPlayers);
+      saveParty();
+      renderPlayers();
+      if (encounter.length) calcDiff();
+
+      const parts = [];
+      if (added) parts.push(`${added} added`);
+      if (updated) parts.push(`${updated} updated`);
+      if (skipped) parts.push(`${skipped} skipped (party limit 10)`);
+      campaignPlayerBridge.notice = parts.length ? parts.join(', ') + '.' : 'Campaign players already in party.';
+      renderCampaignImport();
+    }
+
+    function notifyEncounterBuilderReady() {
+      try {
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({ type: ENCOUNTER_READY_MESSAGE }, window.location.origin);
+        }
+      } catch (_) {}
+    }
+
+    window.addEventListener('message', event => {
+      if (event.origin !== window.location.origin) return;
+      if (event.data?.type !== CAMPAIGN_PLAYERS_MESSAGE) return;
+      campaignPlayerBridge = normalizeCampaignPayload(event.data.payload);
+      renderCampaignImport();
+    });
+
     const fmt = n => Number(n).toLocaleString('it-IT');
     const mstr = v => { const m = Math.floor((v - 10) / 2); return (m >= 0 ? '+' : '') + m; };
     const multXP = n => n <= 1 ? 1 : n === 2 ? 1.5 : n <= 6 ? 2 : n <= 10 ? 2.5 : n <= 14 ? 3 : 4;
@@ -3385,6 +3711,7 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
 
     _buildCrOptions('crf', 'applyF()');
     renderPlayers();
+    notifyEncounterBuilderReady();
     loadIndex().then(() => {
       loadAllManuals();
     });
