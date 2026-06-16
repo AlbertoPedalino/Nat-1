@@ -34,6 +34,12 @@ jobs:
 
       - name: Build
         working-directory: react-app
+        env:
+          # Publishable (anon) key is browser-safe: it ships in the bundle and is
+          # guarded by Row Level Security. Override via repo Secrets if you rotate it.
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || 'https://wvqyaloblllrlieoruuu.supabase.co' }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY || 'sb_publishable_e6gdwjtA2jSCiiPzEJU_4A_dl6iJvXe' }}
+          VITE_AUTH_EMAIL_DOMAIN: ${{ secrets.VITE_AUTH_EMAIL_DOMAIN || 'players.gmboard.local' }}
         run: npm run build
 
       - name: Add SPA fallback for GitHub Pages
