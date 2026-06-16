@@ -9,6 +9,7 @@ import {
   listCampaignCharacters, listCampaignMembers, setCharacterCampaign, leaveCampaign, deleteCampaign,
 } from '../../shared/cloud/campaigns.js';
 import { listMyCharacters } from '../../shared/cloud/cloudCharacters.js';
+import { summarizeCharacter } from './sheetSummary.js';
 
 export default function CampaignsPage() {
   const { cloudEnabled, status, user } = useAuth();
@@ -176,12 +177,21 @@ export default function CampaignsPage() {
                     <Stack spacing={0.75}>
                       {chars.map((ch) => {
                         const mine = ch.owner === myId;
+                        const s = summarizeCharacter(ch.data);
                         return (
                           <Box key={ch.id} sx={rowSx}>
-                            <ScrollText size={15} color={mine ? '#2ecc71' : '#7a9bd6'} style={{ flexShrink: 0 }} />
+                            <ScrollText size={15} color={mine ? '#2ecc71' : '#7a9bd6'} style={{ flexShrink: 0, alignSelf: 'flex-start', marginTop: 3 }} />
                             <Box sx={{ flex: 1, minWidth: 0 }}>
                               <Typography sx={rowNameSx}>{ch.name || ch.id}</Typography>
                               <Typography sx={metaSx}>{ch.owner_username || '—'}{mine ? ' · you' : ''}</Typography>
+                              {s ? (
+                                <Box sx={statsRowSx}>
+                                  <Box component="span" sx={statSx}>HP <b style={{ color: '#e07a7a' }}>{s.currentHP}</b>/{s.maxHP}</Box>
+                                  <Box component="span" sx={statSx}>AC <b style={{ color: '#edd48a' }}>{s.ac}</b></Box>
+                                  <Box component="span" sx={statSx}>PP <b style={{ color: '#9cc79c' }}>{s.passivePerception}</b></Box>
+                                  <Box component="span" sx={statSx}>Init <b style={{ color: '#9ec5e6' }}>{s.initiative >= 0 ? `+${s.initiative}` : s.initiative}</b></Box>
+                                </Box>
+                              ) : null}
                             </Box>
                             {mine ? (
                               <>
@@ -239,6 +249,8 @@ const boxTitleSx = { fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.72rem'
 const cardSx = { p: 1.5, border: '1px solid rgba(180,150,90,0.3)', borderRadius: '12px', bgcolor: '#1a1815' };
 const campNameSx = { fontFamily: '"Cinzel", Georgia, serif', fontSize: '1rem', fontWeight: 700, color: '#edd48a' };
 const chipSx = { height: 20, fontSize: '0.6rem', bgcolor: 'rgba(202,165,80,0.12)', borderColor: 'rgba(202,165,80,0.35)', color: '#e8c96a' };
-const rowSx = { display: 'flex', alignItems: 'center', gap: 1, p: 0.75, border: '1px solid rgba(180,150,90,0.15)', borderRadius: '8px', bgcolor: '#232019' };
+const rowSx = { display: 'flex', alignItems: 'flex-start', gap: 1, p: 0.75, border: '1px solid rgba(180,150,90,0.15)', borderRadius: '8px', bgcolor: '#232019' };
 const rowNameSx = { fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.85rem', color: '#edd48a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
 const metaSx = { fontSize: '0.7rem', color: '#7a6a4a' };
+const statsRowSx = { display: 'flex', flexWrap: 'wrap', gap: '0.15rem 0.7rem', mt: 0.4 };
+const statSx = { fontSize: '0.68rem', color: '#9a8a66', fontFamily: '"JetBrains Mono", monospace', whiteSpace: 'nowrap' };
