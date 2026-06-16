@@ -58,6 +58,19 @@ export async function fetchCloudMeta(charId) {
   return data || null;
 }
 
+// Update someone else's cloud sheet (as a GM): writes data/name only, leaving
+// `owner` and `campaign_id` untouched so RLS and ownership stay intact.
+export async function updateForeignCharacter(charId) {
+  const supabase = requireClient();
+  const local = storeLoadCharacter(charId);
+  if (!local) throw new Error('Character not found locally.');
+  const { error } = await supabase
+    .from(TABLE)
+    .update({ name: local.name || 'Character', data: local, updated_at: new Date().toISOString() })
+    .eq('id', charId);
+  if (error) throw error;
+}
+
 // Pull a cloud character back into local storage (so existing screens can open it).
 export async function pullCharacter(charId) {
   const supabase = requireClient();

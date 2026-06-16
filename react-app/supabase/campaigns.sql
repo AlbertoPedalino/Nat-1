@@ -125,10 +125,18 @@ create policy characters_select on public.characters
     or (campaign_id is not null and campaign_id in (select public.user_campaign_ids()))
   );
 
--- Edit stays owner-only. (No campaign_id constraint here: attaching only ever
--- exposes your OWN sheet, and a constraint would break auto-sync after you leave
--- a campaign. The UI only offers campaigns you belong to anyway.)
+-- Edit: the owner, a global GM (profiles.role='gm'), or the GM of the sheet's
+-- campaign. Clients editing someone else's sheet update data/name only (never
+-- owner/campaign_id), so the WITH CHECK keeps passing on the unchanged row.
 drop policy if exists characters_update_own on public.characters;
 create policy characters_update_own on public.characters
-  for update using (owner = auth.uid())
-  with check (owner = auth.uid());
+  for update using (
+    owner = auth.uid()
+    or public.is_gm()
+    or (campaign_id is not null and campaign_id in (select id from public.campaigns where gm = auth.uid()))
+  )
+  with check (
+    owner = auth.uid()
+    or public.is_gm()
+    or (campaign_id is not null and campaign_id in (select id from public.campaigns where gm = auth.uid()))
+  );

@@ -5,6 +5,7 @@ import { Home, RefreshCw, ScrollText, Download, LogIn, Trash2 } from 'lucide-rea
 import { useAuth } from '../../shared/cloud/AuthProvider.jsx';
 import AuthDialog from '../../shared/cloud/AuthDialog.jsx';
 import { listAllCharacters, pullCharacter, deleteCloudCharacter } from '../../shared/cloud/cloudCharacters.js';
+import { markForeignEdit, unmarkForeignEdit } from '../../shared/cloud/cloudForeign.js';
 import { supabase } from '../../shared/cloud/supabaseClient.js';
 
 function fmt(ts) {
@@ -36,14 +37,16 @@ export default function GmSheetsPage() {
   useEffect(() => { refresh(); }, [refresh]);
 
   const openSheet = async (row) => {
-    // Own sheet -> editable. Someone else's -> read-only view (no local write,
-    // no push, no 403).
-    if (row.owner && row.owner !== myId) {
+    // A global GM can edit everyone's sheets; otherwise only your own. Anything
+    // you can't edit opens in the read-only view.
+    const canEdit = row.owner === myId || isGm;
+    if (!canEdit) {
       navigate(`/campaign-sheet?id=${encodeURIComponent(row.id)}`);
       return;
     }
     try {
       await pullCharacter(row.id);
+      if (row.owner !== myId) markForeignEdit(row.id); else unmarkForeignEdit(row.id);
       navigate(`/charsheet?char=${encodeURIComponent(row.id)}`);
     } catch (e) {
       setError(e?.message || 'Failed to open sheet.');
@@ -121,7 +124,7 @@ export default function GmSheetsPage() {
                     <Typography sx={metaSx}>{row.owner_username || '—'} · {fmt(row.updated_at)}</Typography>
                   </Box>
                   <Button size="small" variant="outlined" onClick={() => openSheet(row)} sx={navBtnSx}>
-                    {row.owner && row.owner !== myId ? 'View' : 'Open'}
+                    {row.owner === myId || isGm ? 'Open' : 'View'}
                   </Button>
                   <Button size="small" variant="outlined" startIcon={<Download size={13} />} onClick={() => downloadJson(row)} sx={navBtnSx}>
                     JSON

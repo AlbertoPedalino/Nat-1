@@ -8,7 +8,8 @@ import {
   createCampaign, joinCampaign, listMyCampaigns,
   listCampaignCharacters, listCampaignMembers, setCharacterCampaign, leaveCampaign, deleteCampaign,
 } from '../../shared/cloud/campaigns.js';
-import { listMyCharacters } from '../../shared/cloud/cloudCharacters.js';
+import { listMyCharacters, pullCharacter } from '../../shared/cloud/cloudCharacters.js';
+import { markForeignEdit, unmarkForeignEdit } from '../../shared/cloud/cloudForeign.js';
 import { summarizeCharacter } from './sheetSummary.js';
 
 export default function CampaignsPage() {
@@ -69,6 +70,21 @@ export default function CampaignsPage() {
       notify('success', `Joined "${c.name}".`);
       await load();
     } catch (e) { notify('error', e?.message || 'Invalid code.'); }
+    finally { setBusy(false); }
+  };
+
+  // Open a campaign sheet: editable for the owner, a global GM, or the GM of this
+  // campaign; read-only otherwise. Editing a sheet that isn't mine syncs data only.
+  const openCampaignChar = async (ch, campaign) => {
+    const mine = ch.owner === myId;
+    const canEdit = mine || isGm || campaign.gm === myId;
+    if (!canEdit) { navigate(`/campaign-sheet?id=${encodeURIComponent(ch.id)}`); return; }
+    setBusy(true);
+    try {
+      await pullCharacter(ch.id);
+      if (mine) unmarkForeignEdit(ch.id); else markForeignEdit(ch.id);
+      navigate(`/charsheet?char=${encodeURIComponent(ch.id)}`);
+    } catch (e) { notify('error', e?.message || 'Failed to open.'); }
     finally { setBusy(false); }
   };
 
@@ -177,6 +193,7 @@ export default function CampaignsPage() {
                     <Stack spacing={0.75}>
                       {chars.map((ch) => {
                         const mine = ch.owner === myId;
+                        const canEditChar = mine || isGm || c.gm === myId;
                         const s = summarizeCharacter(ch.data);
                         return (
                           <Box key={ch.id} sx={rowSx}>
@@ -193,16 +210,16 @@ export default function CampaignsPage() {
                                 </Box>
                               ) : null}
                             </Box>
-                            {mine ? (
-                              <>
-                                <Button size="small" variant="outlined" onClick={() => navigate(`/charsheet?char=${encodeURIComponent(ch.id)}`)} sx={navBtnSx}>Open</Button>
-                                <IconButton size="small" onClick={() => assignChar(ch.id, null)} title="Remove from campaign" sx={{ color: '#de675f' }}>
-                                  <X size={14} />
-                                </IconButton>
-                              </>
+                            {canEditChar ? (
+                              <Button size="small" variant="outlined" onClick={() => openCampaignChar(ch, c)} disabled={busy} sx={navBtnSx}>Open</Button>
                             ) : (
                               <Button size="small" variant="outlined" startIcon={<Eye size={13} />} onClick={() => navigate(`/campaign-sheet?id=${encodeURIComponent(ch.id)}`)} sx={navBtnSx}>View</Button>
                             )}
+                            {mine ? (
+                              <IconButton size="small" onClick={() => assignChar(ch.id, null)} title="Remove from campaign" sx={{ color: '#de675f' }}>
+                                <X size={14} />
+                              </IconButton>
+                            ) : null}
                           </Box>
                         );
                       })}

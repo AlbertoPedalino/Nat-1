@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { useAuth } from './AuthProvider.jsx';
-import { pushCharacter, deleteOwnCloudCharacter } from './cloudCharacters.js';
+import { pushCharacter, updateForeignCharacter, deleteOwnCloudCharacter } from './cloudCharacters.js';
 import { isSyncExcluded } from './cloudSyncExclude.js';
+import { isForeignEdit } from './cloudForeign.js';
 
 const DEBOUNCE_MS = 1200;
 
@@ -29,7 +30,10 @@ export default function CloudAutoSync() {
       timers.current[id] = setTimeout(async () => {
         emit(id, 'syncing');
         try {
-          await pushCharacter(id);
+          // Foreign sheets (a GM editing someone else's) update data only; own
+          // sheets upsert the full row.
+          if (isForeignEdit(id)) await updateForeignCharacter(id);
+          else await pushCharacter(id);
           emit(id, 'synced');
         } catch (err) {
           const msg = String(err?.message || err);
