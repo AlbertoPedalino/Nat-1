@@ -76,8 +76,10 @@ export default function CharacterSheet({ externalChar = null, readOnly = false }
     const context = { getMod, getFinal, getPB };
 
     Promise.all([
-      loadCoreAdapters(context),
-      loadClassAdapters(classNames, context),
+      // A failed adapter chunk (e.g. a stale-deploy 404) must not blank the whole
+      // sheet — fall back to base values and still render the character.
+      loadCoreAdapters(context).catch(() => {}),
+      loadClassAdapters(classNames, context).catch(() => {}),
       loadItems().catch(() => []),
       loadOptionalFeatures().catch(() => []),
       loadConditions().catch(() => ({})),
