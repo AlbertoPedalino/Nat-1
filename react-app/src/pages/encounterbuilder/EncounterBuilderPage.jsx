@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import StandaloneHtmlFrame from '../../components/StandaloneHtmlFrame.jsx';
+import { loadClassAdapters, loadCoreAdapters } from '../../adapters/index.js';
 import { useAuth } from '../../shared/cloud/AuthProvider.jsx';
 import { listCampaignCharacters, listMyCampaigns } from '../../shared/cloud/campaigns.js';
 import { summarizeCharacter } from '../campaigns/sheetSummary.js';
@@ -33,6 +34,13 @@ function getCharacterLevel(character) {
 function normalizeIconColor(value) {
   const color = typeof value === 'string' ? value.trim() : '';
   return HEX_COLOR_RE.test(color) ? color.toLowerCase() : null;
+}
+
+function characterClassNames(character) {
+  return [
+    character?.className,
+    ...(Array.isArray(character?.extraClasses) ? character.extraClasses.map((entry) => entry?.name) : []),
+  ].filter(Boolean);
 }
 
 function toEncounterPlayer(row, campaign) {
@@ -91,15 +99,25 @@ export default function EncounterBuilderPage() {
       setPayload((prev) => ({ ...prev, cloudEnabled: true, status: 'authed', signedIn: true, loading: true, error: null }));
       try {
         const campaigns = (await listMyCampaigns()).filter((campaign) => campaign.gm === user.id);
-        const withPlayers = await Promise.all(campaigns.map(async (campaign) => {
-          const rows = await listCampaignCharacters(campaign.id);
+        const rowsByCampaign = await Promise.all(campaigns.map(async (campaign) => ({
+          campaign,
+          rows: await listCampaignCharacters(campaign.id),
+        })));
+        const classNames = [
+          ...new Set(rowsByCampaign.flatMap(({ rows }) => rows.flatMap((row) => characterClassNames(row?.data)))),
+        ];
+        await Promise.all([
+          loadCoreAdapters().catch(() => {}),
+          loadClassAdapters(classNames).catch(() => {}),
+        ]);
+        const withPlayers = rowsByCampaign.map(({ campaign, rows }) => {
           return {
             id: campaign.id,
             name: campaign.name || 'Campaign',
             joinCode: campaign.join_code || null,
             players: rows.map((row) => toEncounterPlayer(row, campaign)),
           };
-        }));
+        });
         if (!cancelled) {
           setPayload({ cloudEnabled: true, status: 'authed', signedIn: true, loading: false, campaigns: withPlayers, error: null });
         }

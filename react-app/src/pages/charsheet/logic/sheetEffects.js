@@ -3,6 +3,7 @@ import { canonicalDisplayLabel, cleanProficiencyText } from '../../../shared/cha
 import { matchesRequiredChoice } from '../../../shared/character/lineageMatch.js';
 import { inventoryHasFlag } from '../../../shared/character/choiceUtils.js';
 import { weaponFilterMatches } from '../../../shared/character/weaponFilters.js';
+import { collectOwnedFeatNames } from '../../../shared/character/selectedFeats.js';
 import { isFeatKey, isFeatDetailKey } from '../../../shared/featChoiceKeys.js';
 
 function asArray(value) {
@@ -12,6 +13,9 @@ function asArray(value) {
 
 function cleanText(value) {
   if (value == null) return '';
+  if (typeof value === 'object') {
+    return cleanText(value.name ?? value.label ?? value.value ?? value.key ?? value.id);
+  }
   return cleanProficiencyText(value);
 }
 
@@ -47,6 +51,11 @@ function ownerLevelOf(character, className, isPrimary) {
 
 export function selectedFeatNames(character) {
   const out = new Set();
+
+  collectOwnedFeatNames(character).forEach((feat) => {
+    const text = cleanText(feat).split('|')[0];
+    if (text) out.add(text);
+  });
 
   asArray(character?.allFeatSnapshots).forEach((feat) => {
     if (feat?.name) out.add(feat.name);

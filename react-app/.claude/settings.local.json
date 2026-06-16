@@ -78,7 +78,12 @@
       "PowerShell(node -e \"console.log\\(require\\('./node_modules/@supabase/supabase-js/package.json'\\).version\\)\")",
       "Bash(grep -E '\\(^|/\\)\\\\.env$|^dist/|node_modules/')",
       "Bash(gh auth *)",
-      "Bash(gh api *)"
+      "Bash(gh api *)",
+      "PowerShell(npm test *)",
+      "PowerShell(git push *)",
+      "Bash(gh run *)",
+      "PowerShell(gh run *)",
+      "PowerShell($ProgressPreference='SilentlyContinue'; try { $r = Invoke-WebRequest -Uri \"https://albertopedalino.github.io/GM-Board/\" -UseBasicParsing -TimeoutSec 20; \"STATUS $\\($r.StatusCode\\)\"; \\($r.Content | Select-String -Pattern 'assets/index-[A-Za-z0-9_-]+\\\\.js' -AllMatches\\).Matches.Value } catch { \"ERR $\\($_.Exception.Message\\)\" })"
     ]
   }
 }
