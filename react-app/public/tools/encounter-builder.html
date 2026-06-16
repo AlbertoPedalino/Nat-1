@@ -1118,7 +1118,7 @@
 
     .crow {
       display: grid;
-      grid-template-columns: 20px 56px minmax(0, 1fr) 46px minmax(120px, 200px) minmax(120px, 160px);
+      grid-template-columns: 20px 56px minmax(0, 1fr) minmax(120px, 200px) minmax(120px, 160px);
       gap: 8px;
       align-items: center;
       padding: 8px 14px;
@@ -1139,7 +1139,7 @@
 
     @media(max-width:900px) {
       .crow {
-        grid-template-columns: 20px 50px 1fr 40px
+        grid-template-columns: 20px 50px 1fr
       }
 
       .crow-hp,
@@ -1235,6 +1235,12 @@
     }
 
     .c-ac-col {
+      flex: 0 0 auto;
+      min-width: 34px;
+      padding: 2px 4px;
+      background: var(--bg3);
+      border: 1px solid var(--bdr);
+      border-radius: 4px;
       font-family: 'Cinzel', Georgia, serif;
       font-size: 13px;
       color: var(--text2);
@@ -1278,7 +1284,8 @@
     }
 
     .hp-nums input {
-      width: 38px;
+      width: 50px;
+      box-sizing: border-box;
       background: var(--bg3);
       border: 1px solid var(--bdr);
       border-radius: 4px;
@@ -1354,14 +1361,14 @@
       position: fixed;
       inset: 0;
       z-index: 1000;
-      background: rgba(0, 0, 0, .4);
+      background: transparent;
       display: flex;
       align-items: stretch;
       justify-content: flex-end;
       padding: 0;
       opacity: 0;
       pointer-events: none;
-      transition: opacity .3s ease;
+      transition: none;
     }
 
     .overlay.open {
@@ -2233,6 +2240,7 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
           <div class="round-sub" id="rsub">Turn: —</div>
         </div>
         <div class="cbtnrow">
+          <button class="btn-sec" onclick="prevTurn()">← Previous Turn</button>
           <button class="btn-sec danger" onclick="nextTurn()">Next Turn →</button>
           <button class="btn-sec" onclick="rollAll()">↺ Reroll Initiative</button>
           <button class="btn-sec danger" onclick="endCombat()">End Encounter</button>
@@ -3343,7 +3351,19 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
       combatants.sort((a, b) => b.initiative - a.initiative);
       currentTurn = 0; renderCombat();
     }
+    function prevTurn() {
+      if (!combatants.length) return;
+      let safety = 0;
+      do {
+        currentTurn = (currentTurn - 1 + combatants.length) % combatants.length;
+        if (currentTurn === combatants.length - 1) round = Math.max(1, round - 1);
+        safety++;
+      }
+      while (combatants[currentTurn].isDead && combatants.some(c => !c.isDead) && safety < combatants.length);
+      renderCombat();
+    }
     function nextTurn() {
+      if (!combatants.length) return;
       let safety = 0;
       do { currentTurn = (currentTurn + 1) % combatants.length; if (currentTurn === 0) round++; safety++; }
       while (combatants[currentTurn].isDead && combatants.some(c => !c.isDead) && safety < combatants.length);
@@ -3481,10 +3501,10 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
         <div class="c-init-col"><input type="number" value="${c.initiative}" onchange="setInit(${c.id},this.value)"></div>
         <div class="c-name-col">
           ${mon && c.monsterData ? `<img ${getMonIconAttrs(c.monsterData)} class="mon-icon">` : `<div class="mon-icon" style="display:flex;align-items:center;justify-content:center;font-size:9px;color:#111;background:${c.color||'#a0a0ff'};border-radius:50%;font-weight:700">PG</div>`}
+          <div class="c-ac-col">${c.ac}<small>AC</small></div>
           ${c.shape ? `<span class="combat-label" style="color:${c.shapeClr}" title="${esc(c.name)} ${c.label}"><span class="lbl-shape">${c.shape}</span><span class="lbl-letter">${c.label}</span></span>` : ''}
           <span class="c-nm${mon && c.monsterData ? ' click' : ''}" ${mon && c.monsterData ? `onclick="showStatCombat(${c.id})"` : ''}>${esc(c.name)}</span>
         </div>
-        <div class="c-ac-col">${c.ac}<small>AC</small></div>
         <div class="crow-hp">
           <div class="hp-bar"><div class="hp-fill" style="width:${pct}%;background:${hpClr}"></div></div>
           <div class="hp-nums"><input type="number" value="${c.hpCurrent}" onchange="setHP(${c.id},this.value)"><span class="hp-max">/${c.hpMax}</span></div>
