@@ -7,6 +7,7 @@ import { summarizeCharacter } from '../campaigns/sheetSummary.js';
 
 const MESSAGE_TYPE = 'gb:campaign-players';
 const READY_TYPE = 'gb:encounter-builder-ready';
+const HEX_COLOR_RE = /^#[0-9a-f]{6}$/i;
 
 function numberOr(value, fallback) {
   const n = Number(value);
@@ -29,6 +30,11 @@ function getCharacterLevel(character) {
   return clampInt(total || 1, 1, 20, 1);
 }
 
+function normalizeIconColor(value) {
+  const color = typeof value === 'string' ? value.trim() : '';
+  return HEX_COLOR_RE.test(color) ? color.toLowerCase() : null;
+}
+
 function toEncounterPlayer(row, campaign) {
   const sheet = row?.data || {};
   const summary = summarizeCharacter(sheet) || {};
@@ -45,6 +51,7 @@ function toEncounterPlayer(row, campaign) {
     ac: clampInt(summary.ac, 1, 99, 10),
     hpMax: clampInt(hpMax, 1, 999, 10),
     initMod: clampInt(summary.initiative, -20, 30, 0),
+    iconColor: normalizeIconColor(sheet.classIconColor),
     updatedAt: row.updated_at || null,
   };
 }

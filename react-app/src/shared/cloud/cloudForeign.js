@@ -17,6 +17,12 @@ function write(map) {
   try { localStorage.setItem(KEY, JSON.stringify(map)); } catch (_) {}
 }
 
+function notify(id, foreign) {
+  try {
+    window.dispatchEvent(new CustomEvent('gb:cloud-foreign-changed', { detail: { id, foreign } }));
+  } catch (_) {}
+}
+
 export function isForeignEdit(id) {
   if (!id) return false;
   return Boolean(read()[id]);
@@ -27,6 +33,7 @@ export function markForeignEdit(id) {
   const map = read();
   map[id] = true;
   write(map);
+  notify(id, true);
 }
 
 export function unmarkForeignEdit(id) {
@@ -34,4 +41,5 @@ export function unmarkForeignEdit(id) {
   const map = read();
   delete map[id];
   write(map);
+  notify(id, false);
 }

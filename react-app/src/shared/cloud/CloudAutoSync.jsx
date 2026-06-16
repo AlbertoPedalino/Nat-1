@@ -58,9 +58,15 @@ export default function CloudAutoSync() {
     const timersSnapshot = timers.current;
     window.addEventListener('gb:char-saved', onSaved);
     window.addEventListener('gb:char-deleted', onDeleted);
+    const onForeignChanged = (e) => {
+      const id = e?.detail?.id;
+      if (id && e?.detail?.foreign) blocked.current.delete(id);
+    };
+    window.addEventListener('gb:cloud-foreign-changed', onForeignChanged);
     return () => {
       window.removeEventListener('gb:char-saved', onSaved);
       window.removeEventListener('gb:char-deleted', onDeleted);
+      window.removeEventListener('gb:cloud-foreign-changed', onForeignChanged);
       Object.values(timersSnapshot).forEach(clearTimeout);
     };
   }, [cloudEnabled]);

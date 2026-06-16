@@ -1,8 +1,9 @@
 -- ============================================================================
 -- GM Board — Campaigns add-on. Run this AFTER schema.sql.
 -- SQL Editor > New query > paste all > Run.
--- Players in the same campaign can VIEW each other's sheets (read-only);
--- only the owner can edit. Join is via an invite code.
+-- Players in the same campaign can VIEW each other's sheets.
+-- Editing is allowed to the owner, a global GM (profiles.role='gm'), or the GM
+-- of the sheet's campaign. Join is via an invite code.
 -- ============================================================================
 
 -- 1) TABLES -------------------------------------------------------------------

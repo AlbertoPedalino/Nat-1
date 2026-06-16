@@ -69,7 +69,8 @@ drop policy if exists profiles_update_own on public.profiles;
 create policy profiles_update_own on public.profiles
   for update using (id = auth.uid());
 
--- characters: a player reads/writes own rows; a GM can read everything
+-- characters: a player reads/writes own rows; a global GM can read/edit/delete
+-- everything. Client-side foreign edits update data/name only and never owner.
 drop policy if exists characters_select on public.characters;
 create policy characters_select on public.characters
   for select using (owner = auth.uid() or public.is_gm());
@@ -80,7 +81,8 @@ create policy characters_insert_own on public.characters
 
 drop policy if exists characters_update_own on public.characters;
 create policy characters_update_own on public.characters
-  for update using (owner = auth.uid()) with check (owner = auth.uid());
+  for update using (owner = auth.uid() or public.is_gm())
+  with check (owner = auth.uid() or public.is_gm());
 
 drop policy if exists characters_delete on public.characters;
 create policy characters_delete on public.characters

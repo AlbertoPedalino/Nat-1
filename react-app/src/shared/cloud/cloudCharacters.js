@@ -12,6 +12,16 @@ async function currentUser() {
   return user;
 }
 
+async function getCloudOwner(supabase, charId) {
+  const { data, error } = await supabase
+    .from(TABLE)
+    .select('owner')
+    .eq('id', charId)
+    .maybeSingle();
+  if (error) throw error;
+  return data?.owner || null;
+}
+
 // Push the LOCAL copy of a character to the cloud (insert or overwrite).
 // We mirror exactly what store.js holds so a pull round-trips perfectly.
 export async function pushCharacter(charId) {
@@ -19,6 +29,11 @@ export async function pushCharacter(charId) {
   const user = await currentUser();
   const local = storeLoadCharacter(charId);
   if (!local) throw new Error('Character not found locally.');
+
+  const owner = await getCloudOwner(supabase, charId);
+  if (owner && owner !== user.id) {
+    return updateForeignCharacter(charId);
+  }
 
   const username = user.user_metadata?.username || null;
   const row = {
@@ -64,11 +79,15 @@ export async function updateForeignCharacter(charId) {
   const supabase = requireClient();
   const local = storeLoadCharacter(charId);
   if (!local) throw new Error('Character not found locally.');
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from(TABLE)
     .update({ name: local.name || 'Character', data: local, updated_at: new Date().toISOString() })
-    .eq('id', charId);
+    .eq('id', charId)
+    .select('id')
+    .maybeSingle();
   if (error) throw error;
+  if (!data?.id) throw new Error('No permission to update this character.');
+  return data;
 }
 
 // Pull a cloud character back into local storage (so existing screens can open it).

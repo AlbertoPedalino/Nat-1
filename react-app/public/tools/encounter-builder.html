@@ -2423,7 +2423,11 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
     if (savedData) {
       party = savedData.party || party;
       players = savedData.players || [];
-      players.forEach((p, i) => { if (!p.hpMax) p.hpMax = 30; if (!p.color) p.color = PLAYER_COLORS[i % PLAYER_COLORS.length]; });
+      players.forEach((p, i) => {
+        if (!p.hpMax) p.hpMax = 30;
+        p.iconColor = sanitizePlayerColor(p.iconColor);
+        p.color = playerColor(sanitizePlayerColor(p.color) || p.iconColor, i);
+      });
     } else {
       players = [
         { id: 0, name: 'Giocatore 1', initMod: 2, ac: 15, hpMax: 30, color: PLAYER_COLORS[0] },
@@ -2437,14 +2441,14 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
     function updatePName(i, val) { players[i].name = val; saveParty(); }
     function updatePAC(i, val) { let v = parseInt(val); players[i].ac = isNaN(v) ? 10 : v; saveParty(); }
     function updatePHP(i, val) { let v = parseInt(val); players[i].hpMax = isNaN(v) ? 10 : v; saveParty(); }
-    function updatePColor(i, val) { players[i].color = val; saveParty(); }
+    function updatePColor(i, val) { players[i].color = playerColor(val, i); saveParty(); }
 
     function renderPlayers() {
       document.getElementById('pv').textContent = party.count;
       document.getElementById('lv').textContent = party.level;
       document.getElementById('plist').innerHTML = players.map((p, i) =>
         `<div class="prow-item">
-      <div class="p-color"><input type="color" value="${p.color || PLAYER_COLORS[i % PLAYER_COLORS.length]}" oninput="updatePColor(${i}, this.value)"/></div>
+      <div class="p-color"><input type="color" value="${playerColor(sanitizePlayerColor(p.color) || p.iconColor, i)}" oninput="updatePColor(${i}, this.value)"/></div>
       <div class="p-name"><input type="text" value="${esc(p.name)}" placeholder="Giocatore ${i + 1}" oninput="updatePName(${i}, this.value)"/></div>
       <div class="p-hp"><span>HP Max</span><input type="number" value="${p.hpMax}" onchange="updatePHP(${i}, this.value)"/></div>
       <div class="p-ac"><span>CA</span><input type="number" value="${p.ac}" onchange="updatePAC(${i}, this.value)"/></div>
@@ -2478,10 +2482,20 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
       return Math.max(min, Math.min(max, v));
     }
 
+    function sanitizePlayerColor(value) {
+      const color = String(value || '').trim();
+      return /^#[0-9a-f]{6}$/i.test(color) ? color.toLowerCase() : '';
+    }
+
+    function playerColor(value, index) {
+      return sanitizePlayerColor(value) || PLAYER_COLORS[index % PLAYER_COLORS.length];
+    }
+
     function normalizeCampaignPlayer(player) {
       if (!player || typeof player !== 'object') return null;
       const sourceId = String(player.sourceId || player.id || '').trim();
       if (!sourceId) return null;
+      const iconColor = sanitizePlayerColor(player.iconColor || player.classIconColor || player.color);
       return {
         id: sourceId,
         sourceId,
@@ -2491,7 +2505,8 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
         level: intInRange(player.level, 1, 20, 1),
         ac: intInRange(player.ac, 1, 99, 10),
         hpMax: intInRange(player.hpMax, 1, 999, 10),
-        initMod: intInRange(player.initMod, -20, 30, 0)
+        initMod: intInRange(player.initMod, -20, 30, 0),
+        iconColor,
       };
     }
 
@@ -2609,6 +2624,7 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
     }
 
     function toPartyPlayer(player, index) {
+      const iconColor = sanitizePlayerColor(player.iconColor);
       return {
         id: `cloud:${player.sourceId}`,
         sourceId: player.sourceId,
@@ -2618,7 +2634,8 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
         initMod: player.initMod,
         ac: player.ac,
         hpMax: player.hpMax,
-        color: PLAYER_COLORS[index % PLAYER_COLORS.length]
+        iconColor,
+        color: iconColor || PLAYER_COLORS[index % PLAYER_COLORS.length]
       };
     }
 
@@ -2636,7 +2653,11 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
         const next = toPartyPlayer(campaignPlayer, players.length);
         const existingIndex = players.findIndex(player => player.sourceId === next.sourceId);
         if (existingIndex >= 0) {
-          players[existingIndex] = { ...players[existingIndex], ...next, color: players[existingIndex].color || next.color };
+          players[existingIndex] = {
+            ...players[existingIndex],
+            ...next,
+            color: next.iconColor || sanitizePlayerColor(players[existingIndex].color) || next.color
+          };
           updated++;
           return;
         }
