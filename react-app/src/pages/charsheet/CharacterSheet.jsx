@@ -50,7 +50,7 @@ function longRestExhaustionPatch(sheet) {
   return { exhaustionLevel, activeConditions };
 }
 
-export default function CharacterSheet() {
+export default function CharacterSheet({ externalChar = null, readOnly = false } = {}) {
   const [C, setC] = useState(null);
   const [sheet, setSheet] = useState(null);
   const [charId, setCharId] = useState(null);
@@ -66,8 +66,10 @@ export default function CharacterSheet() {
 
   useEffect(() => {
     let alive = true;
-    const id = getCharIdFromUrl();
-    const ch = id ? storeLoadCharacter(id) : null;
+    // Read-only view feeds the character directly (from the cloud); skip local
+    // store entirely so nothing is written and auto-sync stays silent.
+    const id = externalChar ? null : getCharIdFromUrl();
+    const ch = externalChar || (id ? storeLoadCharacter(id) : null);
     if (id && ch) setActiveCharId(id);
 
     const classNames = [ch?.className, ...(ch?.extraClasses || []).map((extra) => extra.name)].filter(Boolean);
@@ -508,6 +510,8 @@ export default function CharacterSheet() {
     });
   }, [persist]);
 
+  const noop = useCallback(() => {}, []);
+
   // Stable, cross-cutting handlers shared with the deep tab/card tree via context.
   const sheetActions = useMemo(() => ({
     onRoll: rollD20,
@@ -524,6 +528,24 @@ export default function CharacterSheet() {
     rollD20, showDiceToast, saveResourcesState, updateInventory, updateCurrency,
     updateSpells, syncSheet, updateNotes, updateCurrentCharacter, toggleFreeCast,
   ]);
+
+  // Read-only keeps navigation + dice rolls, but every data mutation becomes a
+  // no-op (no spending slots, no adding items/spells, no HP/condition changes).
+  const effectiveActions = useMemo(() => (
+    readOnly
+      ? {
+          ...sheetActions,
+          setResources: noop,
+          onUpdateInventory: noop,
+          onUpdateCurrency: noop,
+          onUpdateSpells: noop,
+          onUpdateSheet: noop,
+          onUpdateNotes: noop,
+          onUpdateCharacter: noop,
+          onToggleFreeCast: noop,
+        }
+      : sheetActions
+  ), [readOnly, sheetActions, noop]);
 
   const downloadSheet = useCallback(() => {
     if (!C) return;
@@ -552,18 +574,20 @@ export default function CharacterSheet() {
 
   return (
     <ProficiencySetsProvider character={C}>
-    <SheetActionsProvider value={sheetActions}>
+    <SheetActionsProvider value={effectiveActions}>
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pb: 4, width: '100%' }}>
-      <TopBar C={C} sheet={sheet} onShortRest={openShortRest} onLongRest={openLongRest} onDownload={downloadSheet} onUpdateXp={updateXp} onUpdateCharacter={updateCurrentCharacter}
-        rollLog={rollLog} onClearRollLog={() => setRollLog([])} onShowToast={showDiceToast} />
+      {!readOnly && (
+        <TopBar C={C} sheet={sheet} onShortRest={openShortRest} onLongRest={openLongRest} onDownload={downloadSheet} onUpdateXp={updateXp} onUpdateCharacter={updateCurrentCharacter}
+          rollLog={rollLog} onClearRollLog={() => setRollLog([])} onShowToast={showDiceToast} />
+      )}
       <Box sx={{ maxWidth: 1280, mx: { md: 'auto' }, px: { xs: '0.6rem', md: '1.1rem' }, overflow: 'hidden' }}>
         <Box sx={{ bgcolor: 'rgba(35,32,26,1)', borderBottom: 1, borderColor: 'divider', py: '0.55rem', px: { xs: '0.45rem', md: '0.6rem' } }}>
           <Stack direction={{ xs: 'column', md: 'row-reverse' }} spacing={0.6} alignItems={{ md: 'stretch' }}>
             <HPBlock sheet={sheet}
-              onHeal={(amt) => adjustHP(1, amt)} onDamage={(amt) => adjustHP(-1, amt)}
-              onTempHP={adjustTempHP} onMaxHPBonus={adjustMaxHpBonus}
-              onSetHP={setCurrentHP} onSetTempHP={setTempHP} onSetMaxHPBonus={setMaxHpBonus}
-              onDeathSave={rollDeathSave} onDeathSaveSet={setDeathSave} />
+              onHeal={readOnly ? noop : (amt) => adjustHP(1, amt)} onDamage={readOnly ? noop : (amt) => adjustHP(-1, amt)}
+              onTempHP={readOnly ? noop : adjustTempHP} onMaxHPBonus={readOnly ? noop : adjustMaxHpBonus}
+              onSetHP={readOnly ? noop : setCurrentHP} onSetTempHP={readOnly ? noop : setTempHP} onSetMaxHPBonus={readOnly ? noop : setMaxHpBonus}
+              onDeathSave={readOnly ? noop : rollDeathSave} onDeathSaveSet={readOnly ? noop : setDeathSave} />
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <AbilityScores C={C} sheet={sheet} onRoll={rollD20} />
             </Box>
@@ -606,11 +630,11 @@ export default function CharacterSheet() {
           </Box>
           <Stack spacing={0.55} sx={{ ...SHEET_GRID_ITEM_SX, gridArea: SHEET_AREAS.right }}>
             <RightTop C={C} sheet={sheet} onRoll={rollD20}
-              onToggleCondition={toggleCondition} onClearConditions={clearConditions}
-              onSetExhaustion={setExhaustion}
+              onToggleCondition={readOnly ? noop : toggleCondition} onClearConditions={readOnly ? noop : clearConditions}
+              onSetExhaustion={readOnly ? noop : setExhaustion}
               conditionEntries={conditionEntries}
-              onToggleInspiration={toggleInspiration}
-              resources={resources} setResources={saveResourcesState} onShowToast={showDiceToast} />
+              onToggleInspiration={readOnly ? noop : toggleInspiration}
+              resources={resources} setResources={readOnly ? noop : saveResourcesState} onShowToast={showDiceToast} />
             <TabsPanel C={C} sheet={sheet} tab={tab} setTab={setTab}
               resources={resources} freeCastUses={freeCastUses} />
           </Stack>

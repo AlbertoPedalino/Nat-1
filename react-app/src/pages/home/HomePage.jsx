@@ -1,12 +1,15 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Link } from 'react-router-dom';
-import { Box, Button, Typography, Card, CardContent } from '@mui/material';
+import { Link, useNavigate } from 'react-router-dom';
+import { Box, Button, Typography, Card, CardContent, CircularProgress } from '@mui/material';
 import { ScrollText, UserPen, LayoutDashboard, Swords, Pencil, Trash2 } from 'lucide-react';
 import {
   readRegistry, deleteRegistryEntry, renameRegistryEntry,
   REGISTRY_META,
 } from '../../shared/localStorageRegistries.js';
 import { clearAppLocalStorage, listAppLocalStorageKeys } from '../../shared/storage.js';
+import CloudMenu from '../../shared/cloud/CloudMenu.jsx';
+import { useAuth } from '../../shared/cloud/AuthProvider.jsx';
+import { fetchCloudMeta, pullCharacter } from '../../shared/cloud/cloudCharacters.js';
 
 const TOOLS = [
   { path: '/charsheet', label: 'Character Sheet', desc: 'View and manage your character in play', icon: ScrollText, color: '#2ecc71', borderColor: 'rgba(46,204,113,0.3)' },
@@ -21,17 +24,28 @@ function fmt(ts) {
   return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString();
 }
 
-function RecentRow({ entry, meta, onDelete, onRename }) {
+function RecentRow({ entry, meta, onDelete, onRename, onOpen, opening }) {
+  const isOpening = opening === entry.id;
+  const innerSx = { flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none', color: 'inherit', cursor: 'pointer', background: 'none', border: 0, textAlign: 'left', font: 'inherit' };
+  const inner = (
+    <>
+      <Typography sx={recentNameSx}>{entry.name || entry.id}</Typography>
+      {isOpening
+        ? <CircularProgress size={12} sx={{ color: '#c8a84b', flexShrink: 0 }} />
+        : <Typography sx={recentMetaSx}>{fmt(entry.updatedAt)}</Typography>}
+    </>
+  );
   return (
     <Box sx={recentLinkSx}>
-      <Box
-        component={Link}
-        to={meta.route(entry.id)}
-        sx={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none', color: 'inherit' }}
-      >
-        <Typography sx={recentNameSx}>{entry.name || entry.id}</Typography>
-        <Typography sx={recentMetaSx}>{fmt(entry.updatedAt)}</Typography>
-      </Box>
+      {onOpen ? (
+        <Box component="button" type="button" onClick={() => onOpen(entry)} disabled={isOpening} sx={innerSx}>
+          {inner}
+        </Box>
+      ) : (
+        <Box component={Link} to={meta.route(entry.id)} sx={innerSx}>
+          {inner}
+        </Box>
+      )}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flexShrink: 0 }}>
         {onRename && (
           <Box
@@ -56,14 +70,14 @@ function RecentRow({ entry, meta, onDelete, onRename }) {
   );
 }
 
-function RecentPanel({ registryKey, entries, onDelete, onRename }) {
+function RecentPanel({ registryKey, entries, onDelete, onRename, onOpen, opening }) {
   const meta = REGISTRY_META[registryKey];
   if (!entries.length) return null;
   return (
     <Box sx={recentPanelSx}>
       <Typography sx={recentTitleSx}>{meta.label}</Typography>
       {entries.map((entry) => (
-        <RecentRow key={entry.id} entry={entry} meta={meta} onDelete={onDelete} onRename={onRename} />
+        <RecentRow key={entry.id} entry={entry} meta={meta} onDelete={onDelete} onRename={onRename} onOpen={onOpen} opening={opening} />
       ))}
     </Box>
   );
@@ -71,6 +85,9 @@ function RecentPanel({ registryKey, entries, onDelete, onRename }) {
 
 function ContinueSection({ refreshKey, onStorageChange }) {
   const [registries, setRegistries] = useState({ boards: [], chars: [], encounters: [] });
+  const [opening, setOpening] = useState(null);
+  const { cloudEnabled, status } = useAuth();
+  const navigate = useNavigate();
 
   const refresh = useCallback(() => {
     setRegistries({
@@ -81,6 +98,25 @@ function ContinueSection({ refreshKey, onStorageChange }) {
   }, []);
 
   useEffect(() => { refresh(); }, [refresh, refreshKey]);
+
+  // Opening a character: if logged in, grab a fresher cloud copy first, then open.
+  const handleOpenChar = useCallback(async (entry) => {
+    const id = entry.id;
+    const route = REGISTRY_META.gb_char_registry.route(id);
+    if (cloudEnabled && status === 'authed') {
+      setOpening(id);
+      try {
+        const meta = await fetchCloudMeta(id);
+        if (meta) {
+          const localUpdated = entry.updatedAt || 0;
+          const cloudUpdated = Date.parse(meta.updated_at) || 0;
+          if (cloudUpdated > localUpdated) await pullCharacter(id);
+        }
+      } catch (_) { /* offline / not found -> just open local */ }
+      setOpening(null);
+    }
+    navigate(route);
+  }, [cloudEnabled, status, navigate]);
 
   const handleDelete = useCallback((registryKey, id) => {
     if (deleteRegistryEntry(registryKey, id)) {
@@ -105,6 +141,8 @@ function ContinueSection({ refreshKey, onStorageChange }) {
           registryKey="gb_char_registry"
           entries={chars}
           onDelete={(id) => handleDelete('gb_char_registry', id)}
+          onOpen={handleOpenChar}
+          opening={opening}
         />
         <RecentPanel
           registryKey="gb_board_registry"
@@ -150,6 +188,9 @@ export default function HomePage() {
 
   return (
     <Box sx={homeRootSx}>
+      <Box sx={homeTopBarSx}>
+        <CloudMenu />
+      </Box>
       <Box sx={heroSx}>
         <Typography sx={heroTitleSx}>D&D 5e GM Board</Typography>
         <Typography sx={heroSubSx}>2024 Player's Handbook</Typography>
@@ -207,6 +248,23 @@ const homeRootSx = {
   alignItems: 'center',
   justifyContent: 'center',
   p: '2rem 1rem',
+  pt: 'calc(2rem + 48px)', // clear the fixed top bar
+};
+
+const homeTopBarSx = {
+  position: 'fixed',
+  top: 0,
+  left: 0,
+  right: 0,
+  zIndex: 1300,
+  display: 'flex',
+  justifyContent: 'flex-end',
+  alignItems: 'center',
+  px: { xs: '0.75rem', md: '1rem' },
+  py: '0.5rem',
+  bgcolor: 'rgba(15,14,13,0.95)',
+  borderBottom: '1px solid rgba(180,150,90,0.22)',
+  backdropFilter: 'blur(6px)',
 };
 
 const heroSx = { textAlign: 'center', mb: '3rem' };

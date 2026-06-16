@@ -20,6 +20,8 @@ import { ChevronLeft, ChevronRight, Home, Wand2 } from 'lucide-react';
 import { theme } from '../../theme.js';
 import ChoiceDescriptionDialog from './components/ChoiceDescriptionDialog.jsx';
 import ImportSheetFab from './components/ImportSheetFab.jsx';
+import CloudMenu from '../../shared/cloud/CloudMenu.jsx';
+import { excludeFromSync } from '../../shared/cloud/cloudSyncExclude.js';
 import PreviewPane from './components/PreviewPane.jsx';
 import { STEPS } from './constants.js';
 import { adapterRegistry, loadClassAdapters, loadCoreAdapters } from '../../adapters/index.js';
@@ -120,6 +122,8 @@ export default function CharBuilder() {
       const result = importSheetPayload(payload, () => window.confirm('Esiste gia un personaggio in questo slot. Sovrascrivere?'));
       const activeCharId = localStorage.getItem('gb:active_char');
       if (activeCharId) {
+        // Imported sheets stay local — never auto-pushed to the cloud account.
+        excludeFromSync(activeCharId);
         window.history.replaceState(null, '', `${window.location.pathname}?char=${activeCharId}`);
       }
       const importedCount = typeof result === 'number' ? result : (result?.imported ? 1 : 0);
@@ -246,11 +250,12 @@ export default function CharBuilder() {
             >
               HOME
             </Button>
+            <CloudMenu sx={{ ml: 'auto' }} buttonSx={appNavButtonSx} />
             <ImportSheetFab
               message={state.importMessage}
               onMessage={(message) => dispatch({ type: 'import/message', message })}
               onFile={handleImportSheetFile}
-              sx={{ ml: 'auto' }}
+              sx={{ ml: 0.5 }}
               buttonSx={appNavButtonSx}
             />
           </Box>

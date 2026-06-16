@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import App from './App.jsx';
 import { theme } from './theme.js';
+import { AuthProvider } from './shared/cloud/AuthProvider.jsx';
 
 const basename = import.meta.env.BASE_URL.replace(/\/+$/, '');
 
@@ -12,7 +13,9 @@ createRoot(document.getElementById('root')).render(
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <BrowserRouter basename={basename}>
-        <App />
+        <AuthProvider>
+          <App />
+        </AuthProvider>
       </BrowserRouter>
     </ThemeProvider>
   </React.StrictMode>,

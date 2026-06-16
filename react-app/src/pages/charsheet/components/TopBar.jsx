@@ -7,6 +7,7 @@ import { rollFormula as rollFormulaDice, formatRollTitle } from '../../../shared
 import IconColorPicker from '../../../shared/character/IconColorPicker.jsx';
 import SheetDialog from '../../../shared/character/SheetDialog.jsx';
 import XpDeltaControl from '../../../shared/character/XpDeltaControl.jsx';
+import CloudMenu from '../../../shared/cloud/CloudMenu.jsx';
 
 const CLASS_ICONS = {
   Artificer: Hammer,
@@ -143,10 +144,17 @@ export default function TopBar({ C, sheet, onShortRest, onLongRest, onDownload, 
             Builder
           </Button>
         </Box>
-        <Button size="small" variant="outlined" color="secondary" startIcon={<Download size={14} />}
-          onClick={onDownload} sx={appNavButtonSx}>
-          DOWNLOAD
-        </Button>
+        <Box sx={{
+          display: 'flex', gap: '0.35rem', flexShrink: 0,
+          flexDirection: { xs: 'column', md: 'row' },
+          alignItems: { xs: 'flex-end', md: 'center' },
+        }}>
+          <CloudMenu buttonSx={appNavButtonSx} />
+          <Button size="small" variant="outlined" color="secondary" startIcon={<Download size={14} />}
+            onClick={onDownload} sx={appNavButtonSx}>
+            DOWNLOAD
+          </Button>
+        </Box>
       </Box>
       <Box sx={{
         display: 'flex', alignItems: 'center', gap: { xs: '0.4rem', md: '1rem' },
