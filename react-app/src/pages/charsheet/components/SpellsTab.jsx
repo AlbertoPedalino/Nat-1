@@ -54,6 +54,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
   const { onRoll, onUpdateSpells, onShowToast, onUpdateSheet, onToggleFreeCast, onUpdateCharacter } = useSheetActions();
   const [spellDb, setSpellDb] = useState([]);
   const [classSpellIndex, setClassSpellIndex] = useState({});
+  const [spellSearch, setSpellSearch] = useState('');
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerSearch, setPickerSearch] = useState('');
   const [pickerLevel, setPickerLevel] = useState(0);
@@ -358,6 +359,15 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
     onUpdateSpells?.({ extraClasses: nextExtraClasses, spellSnapshots: nextSnapshots });
   };
 
+  const sq = spellSearch.trim().toLowerCase();
+  const matchSpell = (entry) => !sq || String(entry?.name || '').toLowerCase().includes(sq);
+  const visibleCantrips = spellInfo.cantrips.filter(matchSpell);
+  const visibleAtWill = spellInfo.atWill.filter(matchSpell);
+  const visibleLeveled = Object.entries(expandedSpellInfo.leveled)
+    .map(([level, entries]) => [level, entries.filter(matchSpell)])
+    .filter(([, entries]) => entries.length > 0);
+  const hasVisibleSpells = visibleCantrips.length || visibleAtWill.length || visibleLeveled.length;
+
   return (
     <Box>
       <Box sx={{ display: 'flex', gap: 1, mb: 0.75, flexWrap: 'wrap' }}>
@@ -365,6 +375,14 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
         <StatBox value={formatBonus(effectiveD20Modifier(atk, sheet?.exhaustionLevel))} label="Spell Attack" />
         <StatBox value={SLBL[ability] || ability.toUpperCase()} label="Spell Ability" />
       </Box>
+
+      <SearchField
+        placeholder="Search spells..."
+        value={spellSearch}
+        onChange={setSpellSearch}
+        iconSize={14}
+        sx={{ ...compactInputSx, mb: 0.75 }}
+      />
 
       {armorPenalties.cannotCastSpells ? (
         <Alert severity="warning" sx={{ mb: 0.75, py: 0.25, '& .MuiAlert-message': { fontSize: '0.75rem' } }}>
@@ -374,24 +392,26 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
 
       <SlotPanel slots={slots} used={slotUsed} created={createdSlots} onToggle={toggleSlot} />
 
-      <SpellSection title="Cantrip">
-        {spellInfo.cantrips.map((entry) => <SpellEntry key={entry.name} entry={entry} spellAttackBonus={spellItemBonuses.spellAttack} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} />)}
-        {!spellInfo.cantrips.length ? <Empty text="None" /> : null}
-      </SpellSection>
-
-      {spellInfo.atWill.length ? (
-        <SpellSection title="At Will">
-          {spellInfo.atWill.map((entry) => <SpellEntry key={`at-will-${entry.name}`} entry={entry} spellAttackBonus={spellItemBonuses.spellAttack} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} />)}
+      {visibleCantrips.length || !sq ? (
+        <SpellSection title="Cantrip">
+          {visibleCantrips.map((entry) => <SpellEntry key={entry.name} entry={entry} spellAttackBonus={spellItemBonuses.spellAttack} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} />)}
+          {!visibleCantrips.length ? <Empty text="None" /> : null}
         </SpellSection>
       ) : null}
 
-      {Object.entries(expandedSpellInfo.leveled).map(([level, entries]) => (
+      {visibleAtWill.length ? (
+        <SpellSection title="At Will">
+          {visibleAtWill.map((entry) => <SpellEntry key={`at-will-${entry.name}`} entry={entry} spellAttackBonus={spellItemBonuses.spellAttack} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} />)}
+        </SpellSection>
+      ) : null}
+
+      {visibleLeveled.map(([level, entries]) => (
         <SpellSection key={level} title={SPELL_LEVEL_LABELS[level] || `Level ${level}`}>
           {entries.map((entry) => <SpellEntry key={`${level}-${entry.name}-${entry.castLevel || 'base'}`} entry={entry} spellAttackBonus={spellItemBonuses.spellAttack} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} />)}
         </SpellSection>
       ))}
 
-      {!spellInfo.cantrips.length && !Object.keys(spellInfo.leveled).length && !spellInfo.atWill.length ? <Empty text="No spells selected." /> : null}
+      {!hasVisibleSpells ? <Empty text={sq ? 'No spells match your search.' : 'No spells selected.'} /> : null}
 
       {canManageSpellList ? (
         <Box sx={{ mt: 0.75 }}>

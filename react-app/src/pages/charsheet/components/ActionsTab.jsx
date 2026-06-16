@@ -23,6 +23,7 @@ import { loadItems, loadVariantRules } from '../../charbuilder/logic/dataLoaders
 import { loadMasteryEntries } from '../../../shared/character/weaponMastery.js';
 import { WeaponMasteryBlock } from '../../../shared/character/WeaponMasteryBlock.jsx';
 import {
+  compactInputSx,
   filterChipSx,
   inlineButtonSx,
   levelHeaderSx,
@@ -33,6 +34,7 @@ import {
   tinyMetaChipSx,
 } from './spellsTabStyles.js';
 import { Empty } from './SpellsUiParts.jsx';
+import SearchField from '../../../shared/character/SearchField.jsx';
 import ActionDetailPanel from './ActionDetailPanel.jsx';
 import CreatedItemsPanel from './CreatedItemsPanel.jsx';
 import AttackRollButton from './AttackRollButton.jsx';
@@ -73,6 +75,7 @@ function actionLabel(value) {
 export default function ActionsTab({ C, sheet, resources }) {
   const { onRoll, setResources, onShowToast, onUpdateSheet, onUpdateCharacter } = useSheetActions();
   const [filter, setFilter] = useState('all');
+  const [search, setSearch] = useState('');
   const [itemsDb, setItemsDb] = useState([]);
   const [variantRules, setVariantRules] = useState([]);
   const [, setMasteriesLoaded] = useState(false);
@@ -125,11 +128,17 @@ export default function ActionsTab({ C, sheet, resources }) {
   ].map((action) => resolveActionFormulas(action, C))
    .map((action) => buildActionTags(action, C));
   const showAttacks = false;
+  const q = search.trim().toLowerCase();
+  const matchesSearch = (action) => {
+    if (!q) return true;
+    return String(action.name || '').toLowerCase().includes(q)
+      || String(action.desc || '').toLowerCase().includes(q);
+  };
   const actionSections = SECTION_DEFS
     .filter(section => filter === 'all' || filter === section.key)
     .map(section => ({
       ...section,
-      actions: adapterActions.filter(action => section.cats.includes(action.cat)),
+      actions: adapterActions.filter(action => section.cats.includes(action.cat) && matchesSearch(action)),
     }))
     .filter(section => section.actions.length > 0);
 
@@ -607,6 +616,13 @@ export default function ActionsTab({ C, sheet, resources }) {
             sx={filterChipSx}
           />
         ))}
+        <SearchField
+          placeholder="Search actions..."
+          value={search}
+          onChange={setSearch}
+          iconSize={14}
+          sx={{ ...compactInputSx, flex: 1, minWidth: 140 }}
+        />
       </Box>
 
       {showAttacks && (
