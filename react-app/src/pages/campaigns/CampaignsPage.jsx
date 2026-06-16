@@ -197,7 +197,7 @@ export default function CampaignsPage() {
                         const s = summarizeCharacter(ch.data);
                         return (
                           <Box key={ch.id} sx={rowSx}>
-                            <ScrollText size={15} color={mine ? '#2ecc71' : '#7a9bd6'} style={{ flexShrink: 0, alignSelf: 'flex-start', marginTop: 3 }} />
+                            <ScrollText size={15} color={canEditChar ? '#2ecc71' : '#7a9bd6'} style={{ flexShrink: 0, alignSelf: 'flex-start', marginTop: 3 }} />
                             <Box sx={{ flex: 1, minWidth: 0 }}>
                               <Typography sx={rowNameSx}>{ch.name || ch.id}</Typography>
                               <Typography sx={metaSx}>{ch.owner_username || '—'}{mine ? ' · you' : ''}</Typography>
