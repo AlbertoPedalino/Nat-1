@@ -21,12 +21,13 @@ import { SheetActionsProvider } from './context/SheetActionsContext.jsx';
 import { clearCraftedByFlag, VANISH_ON_LONG_REST_FLAGS } from '../../shared/character/craftedItems.js';
 import { buildD20Meta, formatD20Detail, rollD20 as rollD20Dice } from '../../shared/character/dice.js';
 import { aggregateSavingThrowBonus } from '../../shared/character/itemBonus.js';
-import { calcMaxHP, getMod, getFinal, getPB, getSaveBonus, CONDITION_IMPLIES, clampExhaustion, exhaustionD20Penalty, EXHAUSTION_MAX } from './logic/calculations.js';
+import { calcMaxHP, getMod, getFinal, getSaveBonus, CONDITION_IMPLIES, clampExhaustion, exhaustionD20Penalty, EXHAUSTION_MAX } from './logic/calculations.js';
 import { normalizeCharacterAttunement } from './logic/attunement.js';
 import { applyResourceRest, getAllResourceDefs, getHitDicePools, getUsedHitDiceTotal, normalizeResourceMax, resourceFullValue } from './logic/restResources.js';
 import { clearedToggles } from './logic/toggleState.js';
 import { applyFreeCastRest, getFreeCastDefsForCharacter } from './logic/spellsTabLogic.js';
-import { loadCoreAdapters, loadClassAdapters, installedRegistry } from '../../adapters/index.js';
+import { installedRegistry } from '../../adapters/index.js';
+import { ensureSheetRuntimeAdapters } from './logic/sheetRuntimeAdapters.js';
 import { loadItems, loadOptionalFeatures, loadConditions, reconcileInventoryWithItemsDb } from '../charbuilder/logic/dataLoaders.js';
 import { createCharacterExport } from '../charbuilder/logic/characterExport.js';
 import {
@@ -72,18 +73,14 @@ export default function CharacterSheet({ externalChar = null, readOnly = false }
     const ch = externalChar || (id ? storeLoadCharacter(id) : null);
     if (id && ch) setActiveCharId(id);
 
-    const classNames = [ch?.className, ...(ch?.extraClasses || []).map((extra) => extra.name)].filter(Boolean);
-    const context = { getMod, getFinal, getPB };
-
     Promise.all([
       // A failed adapter chunk (e.g. a stale-deploy 404) must not blank the whole
       // sheet — fall back to base values and still render the character.
-      loadCoreAdapters(context).catch(() => {}),
-      loadClassAdapters(classNames, context).catch(() => {}),
+      ensureSheetRuntimeAdapters(ch),
       loadItems().catch(() => []),
       loadOptionalFeatures().catch(() => []),
       loadConditions().catch(() => ({})),
-    ]).then(([, , itemsDb, optFeatures, condEntries]) => {
+    ]).then(([, itemsDb, optFeatures, condEntries]) => {
       if (!alive) return;
       setConditionEntries(condEntries || {});
 

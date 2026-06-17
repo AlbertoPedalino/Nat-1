@@ -19,12 +19,20 @@ function featMatchesCategory(feat, wanted, fixedOptions = []) {
   return wanted.some((cat) => cats.some((featCat) => exact ? featCat === cat : featCat === cat || featCat.startsWith(cat)));
 }
 
+function featChoiceName(value) {
+  if (value && typeof value === 'object') return featChoiceName(value.name || value.label || value.value);
+  return String(value || '').split('|')[0].split(';')[0].trim();
+}
+
+function featChoiceKey(value) {
+  return featChoiceName(value).toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
 function findFeat(feats, name) {
   if (!name) return null;
-  const norm = (value) => String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-  const target = norm(name);
-  return feats.find((entry) => norm(entry.name) === target)
-    || feats.find((entry) => norm(entry.name).startsWith(target));
+  const target = featChoiceKey(name);
+  return feats.find((entry) => featChoiceKey(entry.name) === target)
+    || feats.find((entry) => featChoiceKey(entry.name).startsWith(target));
 }
 
 function renderGrantSpec({ grant, character, state, dispatch }) {
@@ -178,11 +186,7 @@ export function FeatCategorySlot({ spec, feats, character, state, dispatch }) {
     .filter(([key]) => key !== spec.key)
     .map(([, value]) => Array.isArray(value) ? value : [value])
     .flat()
-    .map((value) => {
-      if (typeof value === 'string') return value;
-      if (value && typeof value === 'object') return value.name || value.label || value.value || null;
-      return null;
-    })
+    .map(featChoiceKey)
     .filter(Boolean));
   const isFs = (spec.categories || []).some((cat) => String(cat).startsWith('FS'));
   const disallowDuplicates = isFs || !!spec.disallowDuplicates;
@@ -196,16 +200,19 @@ export function FeatCategorySlot({ spec, feats, character, state, dispatch }) {
   const isAvailable = (feat) => (
     meetsFeatPrerequisites(feat, prerequisiteContext)
     && featMatchesCategory(feat, spec.categories, spec.fixedOptions)
-    && (!disallowDuplicates || !taken.has(feat.name))
+    && (!disallowDuplicates || !taken.has(featChoiceKey(feat.name)))
   );
   const pool = feats
     .filter(isAvailable)
     .slice(0, 80);
   const selected = character.choices[spec.key] || null;
-  const selectedFeatCandidate = feats.find((feat) => feat.name === selected);
+  const selectedKey = featChoiceKey(selected);
+  const selectedFeatCandidate = findFeat(feats, selected);
+  const canValidateSelection = !state?.loading?.feats && state?.dataAdapted;
   const selectedEligible = !selected
-    || !feats.length
-    || (selectedFeatCandidate && isAvailable(selectedFeatCandidate));
+    || !canValidateSelection
+    || !selectedFeatCandidate
+    || isAvailable(selectedFeatCandidate);
   const selectedFeat = selectedEligible ? selectedFeatCandidate : null;
   useEffect(() => {
     if (!selected || selectedEligible) return;
@@ -220,7 +227,7 @@ export function FeatCategorySlot({ spec, feats, character, state, dispatch }) {
     key: `${spec.key}-${feat.name}-${feat.source}`,
     value: feat.name,
     label: feat.name,
-    selected: selected === feat.name,
+    selected: selectedKey === featChoiceKey(feat.name),
     details: <FeatDescriptionRows feat={feat} />,
   }));
 

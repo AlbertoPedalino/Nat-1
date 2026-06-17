@@ -11,6 +11,7 @@ import {
 import { listMyCharacters, pullCharacter } from '../../shared/cloud/cloudCharacters.js';
 import { markForeignEdit, unmarkForeignEdit } from '../../shared/cloud/cloudForeign.js';
 import { summarizeCharacter } from './sheetSummary.js';
+import { ensureSheetRuntimeAdapters } from '../charsheet/logic/sheetRuntimeAdapters.js';
 
 export default function CampaignsPage() {
   const { cloudEnabled, status, user, isGm } = useAuth();
@@ -36,10 +37,13 @@ export default function CampaignsPage() {
     setLoading(true);
     try {
       const [camps, chars] = await Promise.all([listMyCampaigns(), listMyCharacters()]);
-      setCampaigns(camps);
-      setMyChars(chars);
       const charEntries = await Promise.all(camps.map(async (c) => [c.id, await listCampaignCharacters(c.id)]));
       const memEntries = await Promise.all(camps.map(async (c) => [c.id, await listCampaignMembers(c.id)]));
+      await ensureSheetRuntimeAdapters(charEntries.flatMap(([, campaignChars]) => (
+        (campaignChars || []).map((ch) => ch.data)
+      )));
+      setCampaigns(camps);
+      setMyChars(chars);
       setCharsByCampaign(Object.fromEntries(charEntries));
       setMembersByCampaign(Object.fromEntries(memEntries));
     } catch (e) {
