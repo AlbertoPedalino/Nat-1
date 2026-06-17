@@ -213,7 +213,18 @@ export default function CharBuilder() {
 
   useEffect(() => {
     if (!hasFinishedLoading(state.loading)) return;
-    const handle = setTimeout(() => saveCharacter(state.character, state.data, { createIfMissing: false }), 300);
+    const handle = setTimeout(() => {
+      const hadId = getActiveCharId();
+      // Create the cloud-synced instance on open (no need to "Open sheet" first):
+      // the first autosave creates the character, which fires gb:char-saved and
+      // CloudAutoSync pushes it to the server. Every later edit then syncs too.
+      const saved = saveCharacter(state.character, state.data, { createIfMissing: true });
+      // Point the URL at the new id so a reload/edit targets the same character
+      // instead of spawning a duplicate from ?char=new (mirrors the import flow).
+      if (saved?.id && !hadId) {
+        window.history.replaceState(null, '', `${window.location.pathname}?char=${saved.id}`);
+      }
+    }, 300);
     return () => clearTimeout(handle);
   }, [state.character, state.loading, state.data]);
 
