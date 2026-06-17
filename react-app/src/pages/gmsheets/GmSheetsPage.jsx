@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Box, Button, Typography, Stack, CircularProgress } from '@mui/material';
 import { Home, RefreshCw, ScrollText, Download, Trash2, Save } from 'lucide-react';
@@ -25,17 +25,26 @@ export default function GmSheetsPage() {
   const [error, setError] = useState('');
   const [dialogRow, setDialogRow] = useState(null);
   const [feedback, setFeedback] = useState(null);
+  // On reload `refresh` fires twice: once when the session restores (isGm still
+  // false → listMyCharacters) and again when the profile loads (isGm true →
+  // listAllCharacters). Without this token guard the earlier, owner-only result
+  // can resolve last and clobber the full list — leaving a GM stuck on "No sheets yet".
+  const reqRef = useRef(0);
 
   const refresh = useCallback(async () => {
     if (status !== 'authed') return;
+    const token = ++reqRef.current;
     setLoading(true); setError('');
     try {
       // Only a global GM sees every sheet here. Everyone else (incl. a campaign
       // GM) sees just their own — campaign sheets live on the Campaigns page.
-      setRows(await (isGm ? listAllCharacters() : listMyCharacters()));
+      const data = await (isGm ? listAllCharacters() : listMyCharacters());
+      if (token === reqRef.current) setRows(data);
     } catch (e) {
-      setError(e?.message || 'Failed to load.');
-    } finally { setLoading(false); }
+      if (token === reqRef.current) setError(e?.message || 'Failed to load.');
+    } finally {
+      if (token === reqRef.current) setLoading(false);
+    }
   }, [status, isGm]);
 
   useEffect(() => { refresh(); }, [refresh]);

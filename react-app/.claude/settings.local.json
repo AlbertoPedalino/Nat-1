@@ -83,7 +83,9 @@
       "PowerShell(git push *)",
       "Bash(gh run *)",
       "PowerShell(gh run *)",
-      "PowerShell($ProgressPreference='SilentlyContinue'; try { $r = Invoke-WebRequest -Uri \"https://albertopedalino.github.io/GM-Board/\" -UseBasicParsing -TimeoutSec 20; \"STATUS $\\($r.StatusCode\\)\"; \\($r.Content | Select-String -Pattern 'assets/index-[A-Za-z0-9_-]+\\\\.js' -AllMatches\\).Matches.Value } catch { \"ERR $\\($_.Exception.Message\\)\" })"
+      "PowerShell($ProgressPreference='SilentlyContinue'; try { $r = Invoke-WebRequest -Uri \"https://albertopedalino.github.io/GM-Board/\" -UseBasicParsing -TimeoutSec 20; \"STATUS $\\($r.StatusCode\\)\"; \\($r.Content | Select-String -Pattern 'assets/index-[A-Za-z0-9_-]+\\\\.js' -AllMatches\\).Matches.Value } catch { \"ERR $\\($_.Exception.Message\\)\" })",
+      "Bash(ls -la react-app/dist)",
+      "Bash(ls -la .github/workflows)"
     ]
   }
 }
