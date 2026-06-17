@@ -3177,7 +3177,7 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
       });
       const scHtml = key => scByDisplay[key].map(renderSC).join('');
 
-      if ((m.trait && m.trait.length) || scByDisplay.trait.length) { h += `<div class="sbdiv" style="margin-top:8px"></div>${blk(m.trait || [])}${scHtml('trait')}`; }
+      if ((m.trait && m.trait.length) || scByDisplay.trait.length) { h += `<div class="sbsec">Traits</div>${blk(m.trait || [])}${scHtml('trait')}`; }
       if ((m.action && m.action.length) || scByDisplay.action.length) { h += `<div class="sbsec">Actions</div>${blk(m.action || [])}${scHtml('action')}`; }
       if ((m.bonus && m.bonus.length) || scByDisplay.bonus.length) { h += `<div class="sbsec">Bonus Actions</div>${blk(m.bonus || [])}${scHtml('bonus')}`; }
       if ((m.reaction && m.reaction.length) || scByDisplay.reaction.length) { h += `<div class="sbsec">Reactions</div>${blk(m.reaction || [])}${scHtml('reaction')}`; }

@@ -7,7 +7,7 @@ import {
   REGISTRY_META,
 } from '../../shared/localStorageRegistries.js';
 import { clearAppLocalStorage, listAppLocalStorageKeys } from '../../shared/storage.js';
-import CloudMenu from '../../shared/cloud/CloudMenu.jsx';
+import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../components/AppTopBar.jsx';
 import { useAuth } from '../../shared/cloud/AuthProvider.jsx';
 import { fetchCloudMeta, pullCharacter } from '../../shared/cloud/cloudCharacters.js';
 
@@ -188,9 +188,7 @@ export default function HomePage() {
 
   return (
     <Box sx={homeRootSx}>
-      <Box sx={homeTopBarSx}>
-        <CloudMenu />
-      </Box>
+      <AppTopBar />
       <Box sx={heroSx}>
         <Typography sx={heroTitleSx}>D&D 5e GM Board</Typography>
         <Typography sx={heroSubSx}>2024 Player's Handbook</Typography>
@@ -248,23 +246,7 @@ const homeRootSx = {
   alignItems: 'center',
   justifyContent: 'center',
   p: '2rem 1rem',
-  pt: 'calc(2rem + 48px)', // clear the fixed top bar
-};
-
-const homeTopBarSx = {
-  position: 'fixed',
-  top: 0,
-  left: 0,
-  right: 0,
-  zIndex: 1300,
-  display: 'flex',
-  justifyContent: 'flex-end',
-  alignItems: 'center',
-  px: { xs: '0.75rem', md: '1rem' },
-  py: '0.5rem',
-  bgcolor: 'rgba(15,14,13,0.95)',
-  borderBottom: '1px solid rgba(180,150,90,0.22)',
-  backdropFilter: 'blur(6px)',
+  pt: `calc(2rem + ${APP_TOP_BAR_HEIGHT})`,
 };
 
 const heroSx = { textAlign: 'center', mb: '3rem' };

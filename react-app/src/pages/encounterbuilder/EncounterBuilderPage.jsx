@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { Box } from '@mui/material';
+import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../components/AppTopBar.jsx';
 import StandaloneHtmlFrame from '../../components/StandaloneHtmlFrame.jsx';
 import { loadClassAdapters, loadCoreAdapters } from '../../adapters/index.js';
 import { useAuth } from '../../shared/cloud/AuthProvider.jsx';
@@ -159,11 +161,25 @@ export default function EncounterBuilderPage() {
   }, [postPayload]);
 
   return (
-    <StandaloneHtmlFrame
-      title="Encounter Builder"
-      src={src}
-      iframeRef={iframeRef}
-      onLoad={() => setFrameLoads((value) => value + 1)}
-    />
+    <Box sx={encounterPageSx}>
+      <AppTopBar />
+      <StandaloneHtmlFrame
+        title="Encounter Builder"
+        src={src}
+        iframeRef={iframeRef}
+        onLoad={() => setFrameLoads((value) => value + 1)}
+        rootSx={encounterFrameSx}
+      />
+    </Box>
   );
 }
+
+const encounterPageSx = {
+  minHeight: '100vh',
+  bgcolor: '#0f0e0d',
+  pt: APP_TOP_BAR_HEIGHT,
+};
+
+const encounterFrameSx = {
+  height: `calc(100vh - ${APP_TOP_BAR_HEIGHT})`,
+};

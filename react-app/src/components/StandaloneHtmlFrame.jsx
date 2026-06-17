@@ -1,15 +1,15 @@
 import { Box } from '@mui/material';
 
-export default function StandaloneHtmlFrame({ title, src, iframeRef, onLoad }) {
+export default function StandaloneHtmlFrame({ title, src, iframeRef, onLoad, rootSx, iframeSx }) {
   return (
-    <Box sx={frameRootSx}>
+    <Box sx={{ ...frameRootSx, ...rootSx }}>
       <Box
         component="iframe"
         ref={iframeRef}
         title={title}
         src={src}
         onLoad={onLoad}
-        sx={frameSx}
+        sx={{ ...frameSx, ...iframeSx }}
         allow="storage-access"
       />
     </Box>
