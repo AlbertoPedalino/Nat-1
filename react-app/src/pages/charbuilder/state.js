@@ -193,7 +193,6 @@ export const initialBuilderState = {
   },
   inventoryFilter: 'all',
   choiceDialog: null,
-  importMessage: '',
   adaptersLoaded: false,
   adaptersVersion: 0,
   loadedAdapterClasses: [],
@@ -687,14 +686,15 @@ export function builderReducer(state, action) {
     case 'character/restore': {
       const restored = { ...initialCharacter, ...normalizeCharacterLevels(action.character) };
       restored.normalizedChoices = normalizeCharacterChoices(restored);
-      return { ...state, character: restored };
+      // Force a re-adapt so cls/speciesObj/extraClasses are re-derived from the
+      // restored snapshots. Matters when restoring AFTER data already adapted
+      // (e.g. importing a JSON at runtime, not just the initial cloud hydration).
+      return { ...state, character: restored, dataAdapted: false };
     }
     case 'choice/open':
       return { ...state, choiceDialog: { title: action.title, body: action.body } };
     case 'choice/close':
       return { ...state, choiceDialog: null };
-    case 'import/message':
-      return { ...state, importMessage: action.message };
     default:
       return state;
   }

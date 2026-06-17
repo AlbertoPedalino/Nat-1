@@ -556,6 +556,7 @@ export default function CharacterSheet({ externalChar = null, externalCharId = n
     readOnly
       ? {
           ...sheetActions,
+          readOnly: true,
           setResources: noop,
           onUpdateInventory: noop,
           onUpdateCurrency: noop,
@@ -565,7 +566,7 @@ export default function CharacterSheet({ externalChar = null, externalCharId = n
           onUpdateCharacter: noop,
           onToggleFreeCast: noop,
         }
-      : sheetActions
+      : { ...sheetActions, readOnly: false }
   ), [readOnly, sheetActions, noop]);
 
   if (!C || !sheet) {
@@ -585,10 +586,8 @@ export default function CharacterSheet({ externalChar = null, externalCharId = n
     <ProficiencySetsProvider character={C}>
     <SheetActionsProvider value={effectiveActions}>
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pb: 4, width: '100%' }}>
-      {!readOnly && (
-        <TopBar C={C} sheet={sheet} onShortRest={openShortRest} onLongRest={openLongRest} onUpdateXp={updateXp} onUpdateCharacter={updateCurrentCharacter}
-          rollLog={rollLog} onClearRollLog={() => setRollLog([])} onShowToast={showDiceToast} />
-      )}
+      <TopBar C={C} sheet={sheet} charId={charId} readOnly={readOnly} onShortRest={openShortRest} onLongRest={openLongRest} onUpdateXp={updateXp} onUpdateCharacter={updateCurrentCharacter}
+        rollLog={rollLog} onClearRollLog={() => setRollLog([])} onShowToast={showDiceToast} />
       <Box sx={{ maxWidth: 1280, mx: { md: 'auto' }, px: { xs: '0.6rem', md: '1.1rem' }, overflow: 'hidden' }}>
         <Box sx={{ bgcolor: 'rgba(35,32,26,1)', borderBottom: 1, borderColor: 'divider', py: '0.55rem', px: { xs: '0.45rem', md: '0.6rem' } }}>
           <Stack direction={{ xs: 'column', md: 'row-reverse' }} spacing={0.6} alignItems={{ md: 'stretch' }}>

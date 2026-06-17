@@ -550,6 +550,21 @@ function buildBuilderStateFromSheetPayload(data) {
   return normalizeProficiencyChoicesForPersistence(builderState);
 }
 
+// Validate an imported payload and build the unified character object from it,
+// WITHOUT writing to any store (local or cloud). Throws on an unrecognized
+// format. Callers decide where (and whether) to persist the result.
+export function buildImportedCharacter(payload) {
+  const data = unwrapStructuredSheetPayload(payload);
+
+  if (!isStructuredSheetPayload(data)) {
+    throw new Error('Formato file non riconosciuto: carica un JSON scheda GM-Board strutturato.');
+  }
+
+  const normalizedData = normalizeProficiencyChoicesForPersistence(data);
+  const builderState = buildBuilderStateFromSheetPayload(normalizedData);
+  return stripHeavyFields({ ...builderState, ...normalizedData });
+}
+
 export function importSheetPayload(payload, confirmOverwrite = () => true) {
   const data = unwrapStructuredSheetPayload(payload);
 
@@ -561,9 +576,7 @@ export function importSheetPayload(payload, confirmOverwrite = () => true) {
   const hasExisting = activeId && storeLoadCharacter(activeId) != null;
   if (hasExisting && !confirmOverwrite()) return 0;
 
-  const normalizedData = normalizeProficiencyChoicesForPersistence(data);
-  const builderState = buildBuilderStateFromSheetPayload(normalizedData);
-  const unified = stripHeavyFields({ ...builderState, ...normalizedData });
+  const unified = buildImportedCharacter(payload);
 
   if (activeId) storeSaveCharacter(activeId, unified);
   else {

@@ -1,16 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Menu, MenuItem, Divider, Typography, Snackbar, Alert, Box, Tooltip, useMediaQuery, useTheme } from '@mui/material';
+import { Button, Menu, MenuItem, Divider, Typography, Box, Tooltip } from '@mui/material';
 import { LogIn, LogOut, Users, User, Swords, CloudUpload } from 'lucide-react';
 import { useAuth } from './AuthProvider.jsx';
 import AuthDialog from './AuthDialog.jsx';
 import { pushCharacter } from './cloudCharacters.js';
 import { isSyncExcluded, includeInSync } from './cloudSyncExclude.js';
+import AppToast from '../AppToast.jsx';
 
+// The "active sheet" for the cloud menu is the one in the URL (builder/charsheet
+// ?char=…). We deliberately do NOT fall back to localStorage's gb:active_char:
+// that id is stale on pages with no sheet (e.g. Home), which made the upload
+// option wrongly appear there.
 function resolveActiveCharId() {
   const fromUrl = new URLSearchParams(window.location.search).get('char');
-  if (fromUrl && fromUrl !== 'new') return fromUrl;
-  return localStorage.getItem('gb:active_char') || null;
+  return (fromUrl && fromUrl !== 'new') ? fromUrl : null;
 }
 
 const loginBtnSx = {
@@ -26,11 +30,9 @@ const SYNC_TEXT = {
   idle: 'Auto-sync on',
 };
 
-export default function CloudMenu({ sx, buttonSx }) {
+export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUploadDraft }) {
   const { cloudEnabled, status, username, role, isGm, signOut } = useAuth();
   const navigate = useNavigate();
-  const theme = useTheme();
-  const isDesktop = useMediaQuery(theme.breakpoints.up('sm'));
   const [anchor, setAnchor] = useState(null);
   const [authOpen, setAuthOpen] = useState(false);
   const [toast, setToast] = useState(null); // { severity, msg }
@@ -112,9 +114,15 @@ export default function CloudMenu({ sx, buttonSx }) {
             </Typography>
           </Box>,
           <Divider key="d1" />,
-          ...(excluded ? [
+          ...(canUploadDraft ? [
+            <MenuItem key="uploaddraft" onClick={() => { close(); onUploadDraft?.(); }}>
+              <CloudUpload size={15} style={{ marginRight: 8 }} /> Upload to cloud
+            </MenuItem>,
+            <Divider key="ddraft" />,
+          ] : []),
+          ...((excluded && !canUploadDraft) ? [
             <MenuItem key="savecloud" onClick={saveExcludedToCloud}>
-              <CloudUpload size={15} style={{ marginRight: 8 }} /> Save this sheet to cloud
+              <CloudUpload size={15} style={{ marginRight: 8 }} /> Upload to cloud
             </MenuItem>,
             <Divider key="dsave" />,
           ] : []),
@@ -137,22 +145,7 @@ export default function CloudMenu({ sx, buttonSx }) {
 
       <AuthDialog open={authOpen} onClose={() => setAuthOpen(false)} />
 
-      <Snackbar
-        open={Boolean(toast)}
-        autoHideDuration={3500}
-        onClose={(_, reason) => { if (reason !== 'clickaway') setToast(null); }}
-        disableWindowBlurListener
-        anchorOrigin={isDesktop
-          ? { vertical: 'top', horizontal: 'right' }
-          : { vertical: 'bottom', horizontal: 'center' }}
-        sx={{ top: isDesktop ? 104 : undefined }}
-      >
-        {toast ? (
-          <Alert severity={toast.severity} variant="filled" onClose={() => setToast(null)} sx={{ fontSize: '0.78rem' }}>
-            {toast.msg}
-          </Alert>
-        ) : undefined}
-      </Snackbar>
+      <AppToast toast={toast} onClose={() => setToast(null)} />
     </Box>
   );
 }

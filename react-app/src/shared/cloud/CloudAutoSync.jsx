@@ -28,6 +28,11 @@ export default function CloudAutoSync() {
       if (!id || !activeRef.current || blocked.current.has(id) || isSyncExcluded(id)) return;
       clearTimeout(timers.current[id]);
       timers.current[id] = setTimeout(async () => {
+        // Re-check at fire time: the id may have been excluded (e.g. "Save local"
+        // of an imported draft excludes it right after the save event) or blocked
+        // between scheduling and now. Without this, an exclude-after-save still
+        // leaks the row to the cloud.
+        if (!activeRef.current || blocked.current.has(id) || isSyncExcluded(id)) return;
         emit(id, 'syncing');
         try {
           // Foreign sheets (a GM editing someone else's) update data only; own

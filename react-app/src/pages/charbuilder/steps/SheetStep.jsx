@@ -1,5 +1,5 @@
 import { Alert, Box, Button, Stack, Typography } from '@mui/material';
-import { ClipboardList, Download, FileText, Save } from 'lucide-react';
+import { ClipboardList, CloudUpload, Download, FileText, Save } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import BuilderPanel from '../components/BuilderPanel.jsx';
 import { makeSheetPayload, saveCharacter } from '../logic/persistence.js';
@@ -23,7 +23,7 @@ function downloadBuilderSheet(character, data) {
   URL.revokeObjectURL(url);
 }
 
-export default function SheetStep({ state, dispatch }) {
+export default function SheetStep({ state, dispatch, importDraft = false, onUploadToCloud, onDraftLocalSaved, onNotify }) {
   const navigate = useNavigate();
   const { cloudEnabled, status } = useAuth();
   const cloudActive = cloudEnabled && status === 'authed';
@@ -82,27 +82,41 @@ export default function SheetStep({ state, dispatch }) {
               disabled={!ready}
               startIcon={<Save size={16} />}
               onClick={() => {
-                // Explicit local copy. In cloud mode pin it to the server id so
-                // it stays the same character (no duplicate row).
-                const saved = saveCharacter(character, state.data, cloudActive ? { id: charIdFromUrl() } : {});
-                if (saved?.id) dispatch({ type: 'import/message', message: 'Saved locally.' });
+                // Explicit local copy. For a normal cloud-backed char pin it to the
+                // server id; for an imported draft save a fresh local row and keep
+                // it local-only (the parent excludes it from cloud sync).
+                const saved = saveCharacter(character, state.data, (cloudActive && !importDraft) ? { id: charIdFromUrl() } : {});
+                if (saved?.id) {
+                  if (importDraft) onDraftLocalSaved?.(saved.id);
+                  onNotify?.('success', 'Saved locally.');
+                }
               }}
             >
               Save local
             </Button>
             <Button
+              variant="outlined"
+              disabled={!ready || !cloudActive}
+              startIcon={<CloudUpload size={16} />}
+              onClick={() => onUploadToCloud?.()}
+            >
+              Upload to cloud
+            </Button>
+            <Button
               variant="contained"
               disabled={!ready}
               startIcon={<FileText size={16} />}
-              onClick={() => {
+              onClick={async () => {
                 if (cloudActive) {
-                  // Already saved to the server by the builder autosave — open the
-                  // cloud-backed sheet (the char has no local copy to open).
-                  const id = charIdFromUrl();
+                  // Open the cloud-backed sheet. A draft (or any not-yet-saved char)
+                  // is uploaded first so there is a server row to open.
+                  let id = importDraft ? null : charIdFromUrl();
+                  if (!id) id = await onUploadToCloud?.();
                   if (id) navigate(`/campaign-sheet?id=${encodeURIComponent(id)}&edit=1`);
                   return;
                 }
                 const saved = saveCharacter(character, state.data);
+                if (saved?.id && importDraft) onDraftLocalSaved?.(saved.id);
                 const charId = saved?.id || getActiveCharId();
                 navigate(charId ? `/charsheet?char=${encodeURIComponent(charId)}` : '/charsheet');
               }}

@@ -1,8 +1,8 @@
-import { Button, Stack, Typography } from '@mui/material';
+import { Button, Stack } from '@mui/material';
 import { Upload } from 'lucide-react';
 import { useRef } from 'react';
 
-export default function ImportSheetFab({ message, onMessage, onFile, sx, buttonSx }) {
+export default function ImportSheetFab({ onNotify, onFile, sx, buttonSx }) {
   const inputRef = useRef(null);
 
   return (
@@ -12,14 +12,6 @@ export default function ImportSheetFab({ message, onMessage, onFile, sx, buttonS
       alignItems="center"
       sx={sx}
     >
-      {message ? (
-        <Typography
-          variant="caption"
-          sx={{ px: 1, py: 0.5, borderRadius: 1, bgcolor: 'rgba(12,16,26,.78)', maxWidth: { xs: 160, sm: 260 }, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-        >
-          {message}
-        </Typography>
-      ) : null}
       <input
         ref={inputRef}
         type="file"
@@ -27,14 +19,11 @@ export default function ImportSheetFab({ message, onMessage, onFile, sx, buttonS
         hidden
         onChange={(event) => {
           const file = event.target.files?.[0];
-          if (!file) {
-            onMessage('');
-            return;
-          }
+          if (!file) return;
 
           const isJson = file.type === 'application/json' || file.name.toLowerCase().endsWith('.json');
           if (!isJson) {
-            onMessage('Carica un file JSON scheda GM-Board.');
+            onNotify?.('error', 'Carica un file JSON scheda GM-Board.');
             event.target.value = '';
             return;
           }

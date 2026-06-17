@@ -163,7 +163,7 @@ registerClassSheetActions("Paladin", [
   {
     "name": "Lay on Hands",
     "icon": "",
-    "cat": "action",
+    "cat": "bonus",
     "uses": "Pool / LR",
     "resKey": "lay_on_hands",
     "desc": "Touch a creature to restore HP from your pool (1 HP per point spent), or spend 5 points to remove the Poisoned condition. Pool = 5 × Paladin level. Recharge: Long Rest."

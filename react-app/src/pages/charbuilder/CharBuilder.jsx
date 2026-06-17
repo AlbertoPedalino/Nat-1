@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useRef } from 'react';
+import { useEffect, useReducer, useRef, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import {
   AppBar,
@@ -21,17 +21,19 @@ import { theme } from '../../theme.js';
 import ChoiceDescriptionDialog from './components/ChoiceDescriptionDialog.jsx';
 import ImportSheetFab from './components/ImportSheetFab.jsx';
 import CloudMenu from '../../shared/cloud/CloudMenu.jsx';
-import { excludeFromSync, isSyncExcluded } from '../../shared/cloud/cloudSyncExclude.js';
+import { excludeFromSync, includeInSync, isSyncExcluded } from '../../shared/cloud/cloudSyncExclude.js';
 import PreviewPane from './components/PreviewPane.jsx';
 import { STEPS } from './constants.js';
 import { adapterRegistry, loadClassAdapters, loadCoreAdapters } from '../../adapters/index.js';
 import { getMod, getFinal } from '../charsheet/logic/calculations.js';
 import { adaptBuilderData } from '../../adapters/adapterPipeline.js';
-import { loadBackgrounds, loadClassIndex, loadFeats, loadItems, loadSpecies, loadSpells, loadOptionalFeatures, extractSheetData, importSheetPayload, saveCharacter, buildSheetCharacter } from './logic/index.js';
+import { loadBackgrounds, loadClassIndex, loadFeats, loadItems, loadSpecies, loadSpells, loadOptionalFeatures, extractSheetData, buildImportedCharacter, saveCharacter, buildSheetCharacter } from './logic/index.js';
 import { builderReducer, initialBuilderState, normalizeCharacterLevels } from './state.js';
 import { BackgroundStep, ClassStep, EquipmentStep, ScoresStep, SheetStep, SpeciesStep } from './steps/index.js';
 import { useAuth } from '../../shared/cloud/AuthProvider.jsx';
-import { getCloudCharacter, pushCharacterData, updateCloudCharacterData } from '../../shared/cloud/cloudCharacters.js';
+import AppToast from '../../shared/AppToast.jsx';
+import { useToast } from '../../shared/useToast.js';
+import { getCloudCharacter, pushCharacterData, updateCloudCharacterData, deleteOwnCloudCharacter } from '../../shared/cloud/cloudCharacters.js';
 import {
   generateCharId,
   getActiveCharId,
@@ -50,7 +52,7 @@ function StepLabel({ step, index }) {
   );
 }
 
-function ActiveStep({ state, dispatch }) {
+function ActiveStep({ state, dispatch, sheetProps }) {
   const props = { state, dispatch };
   switch (STEPS[state.tab].id) {
     case 'class':
@@ -64,7 +66,7 @@ function ActiveStep({ state, dispatch }) {
     case 'equipment':
       return <EquipmentStep {...props} />;
     case 'sheet':
-      return <SheetStep {...props} />;
+      return <SheetStep {...props} {...sheetProps} />;
     default:
       return null;
   }
@@ -118,6 +120,7 @@ function hasFinishedLoading(loading) {
 
 export default function CharBuilder() {
   const [state, dispatch] = useReducer(builderReducer, undefined, createInitialBuilderState);
+  const { toast, notify, clearToast } = useToast();
   const activeStep = STEPS[state.tab];
   const ActiveIcon = activeStep.icon;
   const { cloudEnabled, status } = useAuth();
@@ -130,21 +133,77 @@ export default function CharBuilder() {
   const builderIdRef = useRef(null);   // cloud character id for this session
   const cloudCreatedRef = useRef(false); // cloud row already inserted
   const cloudPrevRef = useRef(null);   // last persisted cloud object (merge base)
+  // An imported JSON is a DRAFT: held in builder state, persisted NOWHERE (no
+  // localStorage, no cloud) until the user explicitly saves it from the Sheet
+  // step. While true the autosave effect is suppressed. Applies on/offline.
+  const [importDraft, setImportDraft] = useState(false);
+
+  // Explicit "Upload to cloud" (SheetStep button). Pushes the current builder
+  // character to the server and resumes normal cloud autosave. Reuses the session
+  // cloud id so it upserts in place instead of spawning a duplicate row. Returns
+  // the cloud id (for callers that then open the cloud sheet).
+  const handleUploadToCloud = async () => {
+    const id = builderIdRef.current || generateCharId();
+    const unified = buildSheetCharacter(state.character, state.data, cloudPrevRef.current || {});
+    const withId = { ...unified, id };
+    try {
+      await pushCharacterData(id, withId);
+      builderIdRef.current = id;
+      cloudCreatedRef.current = true;
+      cloudPrevRef.current = withId;
+      includeInSync(id);
+      setImportDraft(false);
+      window.history.replaceState(null, '', `${window.location.pathname}?char=${id}`);
+      notify('success', 'Uploaded to cloud.');
+      return id;
+    } catch (error) {
+      notify('error', `Upload error: ${error?.message || error}`);
+      return null;
+    }
+  };
+
+  // After an explicit "Save local" of an imported draft: keep it local-only
+  // (excluded from cloud sync) and resume autosave, which now targets the store.
+  const handleDraftLocalSaved = (id) => {
+    if (!id) return;
+    excludeFromSync(id);
+    builderIdRef.current = id;
+    cloudCreatedRef.current = false;
+    cloudPrevRef.current = null;
+    setImportDraft(false);
+    window.history.replaceState(null, '', `${window.location.pathname}?char=${id}`);
+  };
+
   const handleImportSheetFile = async (file) => {
     try {
       const payload = extractSheetData(await file.text());
-      const result = importSheetPayload(payload, () => window.confirm('Esiste gia un personaggio in questo slot. Sovrascrivere?'));
-      const activeCharId = localStorage.getItem('gb:active_char');
-      if (activeCharId) {
-        // Imported sheets stay local — never auto-pushed to the cloud account.
-        excludeFromSync(activeCharId);
-        window.history.replaceState(null, '', `${window.location.pathname}?char=${activeCharId}`);
+      // Importing a JSON NEVER persists by itself — online or offline. It loads the
+      // sheet into the builder as a DRAFT; the user persists it explicitly from the
+      // Sheet step ("Save local" or "Upload to cloud"). So nothing is written to
+      // localStorage and nothing is pushed to the cloud here.
+      const character = buildImportedCharacter(payload);
+      const cur = state.character;
+      const hasExisting = cur && (cur.className || (cur.name || '').trim());
+      if (hasExisting && !window.confirm('Esiste gia un personaggio nel builder. Sovrascrivere con la scheda importata?')) {
+        notify('info', 'Import annullato.');
+        return;
       }
-      const importedCount = typeof result === 'number' ? result : (result?.imported ? 1 : 0);
-      dispatch({ type: 'import/message', message: `Imported ${importedCount} character. Reloading...` });
-      window.setTimeout(() => window.location.reload(), 350);
+      // Drop the blank cloud placeholder auto-created on open so it never lingers
+      // as an empty orphan in the account.
+      if (cloudActive && builderIdRef.current && cloudCreatedRef.current) {
+        const prev = cloudPrevRef.current;
+        const isEmptyPlaceholder = !prev || (!prev.className && !(prev.name || '').trim());
+        if (isEmptyPlaceholder) { try { await deleteOwnCloudCharacter(builderIdRef.current); } catch (_) {} }
+      }
+      builderIdRef.current = null;
+      cloudCreatedRef.current = false;
+      cloudPrevRef.current = null;
+      setImportDraft(true);
+      dispatch({ type: 'character/restore', character });
+      window.history.replaceState(null, '', `${window.location.pathname}?char=new`);
+      notify('success', 'Imported. Save local or upload to cloud from the Sheet step.');
     } catch (error) {
-      dispatch({ type: 'import/message', message: `Error: ${error?.message || error}` });
+      notify('error', `Import error: ${error?.message || error}`);
     }
   };
 
@@ -220,7 +279,7 @@ export default function CharBuilder() {
         if (!cancelled) dispatch({ type: 'adapters/loaded' });
       })
       .catch((error) => {
-        if (!cancelled) dispatch({ type: 'import/message', message: `Adapter load error: ${error?.message || error}` });
+        if (!cancelled) notify('error', `Adapter load error: ${error?.message || error}`);
       });
     return () => {
       cancelled = true;
@@ -240,7 +299,7 @@ export default function CharBuilder() {
         }
       })
       .catch((error) => {
-        if (!cancelled) dispatch({ type: 'import/message', message: `Adapter load error: ${error?.message || error}` });
+        if (!cancelled) notify('error', `Adapter load error: ${error?.message || error}`);
       });
     return () => { cancelled = true; };
   }, [state.adaptersLoaded, state.character.className, state.character.extraClasses, state.data.items]);
@@ -256,6 +315,8 @@ export default function CharBuilder() {
     // Cloud mode must wait for the initial pull, or a blank builder state would
     // overwrite the real server character before it loads.
     if (cloudActive && !hydratedRef.current) return;
+    // A pending online import draft is persisted nowhere until the user uploads it.
+    if (importDraft) return;
 
     const handle = setTimeout(() => {
       const activeId = builderIdRef.current || getActiveCharId();
@@ -281,7 +342,7 @@ export default function CharBuilder() {
           : pushCharacterData(id, withId);
         op
           .then(() => { cloudCreatedRef.current = true; cloudPrevRef.current = withId; })
-          .catch((error) => dispatch({ type: 'import/message', message: `Cloud save error: ${error?.message || error}` }));
+          .catch((error) => notify('error', `Cloud save error: ${error?.message || error}`));
         return;
       }
 
@@ -293,7 +354,7 @@ export default function CharBuilder() {
       }
     }, cloudActive ? 1200 : 300);
     return () => clearTimeout(handle);
-  }, [state.character, state.loading, state.data, authResolved, cloudActive]);
+  }, [state.character, state.loading, state.data, authResolved, cloudActive, importDraft]);
 
   useEffect(() => {
     // Re-hydrate the PRIMARY class object only. class/select is tab-aware: on an
@@ -330,10 +391,14 @@ export default function CharBuilder() {
             >
               HOME
             </Button>
-            <CloudMenu sx={{ ml: 'auto' }} buttonSx={appNavButtonSx} />
+            <CloudMenu
+              sx={{ ml: 'auto' }}
+              buttonSx={appNavButtonSx}
+              canUploadDraft={importDraft && cloudActive}
+              onUploadDraft={handleUploadToCloud}
+            />
             <ImportSheetFab
-              message={state.importMessage}
-              onMessage={(message) => dispatch({ type: 'import/message', message })}
+              onNotify={notify}
               onFile={handleImportSheetFile}
               sx={{ ml: 0.5 }}
               buttonSx={appNavButtonSx}
@@ -384,7 +449,11 @@ export default function CharBuilder() {
               <Chip size="small" label={`${state.tab + 1} / ${STEPS.length}`} sx={{ height: 18, fontSize: '0.54rem' }} />
             </Stack>
 
-            <ActiveStep state={state} dispatch={dispatch} />
+            <ActiveStep
+              state={state}
+              dispatch={dispatch}
+              sheetProps={{ importDraft, onUploadToCloud: handleUploadToCloud, onDraftLocalSaved: handleDraftLocalSaved, onNotify: notify }}
+            />
 
             <Divider sx={{ my: 1 }} />
             <Stack direction="row" justifyContent="space-between">
@@ -421,6 +490,7 @@ export default function CharBuilder() {
       </Box>
 
       <ChoiceDescriptionDialog value={state.choiceDialog} onClose={() => dispatch({ type: 'choice/close' })} />
+      <AppToast toast={toast} onClose={clearToast} />
     </Box>
     </ThemeProvider>
   );

@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Box, Button, Typography, Stack, TextField, MenuItem, Chip, CircularProgress, Snackbar, Alert, IconButton, Divider, useMediaQuery, useTheme } from '@mui/material';
-import { Home, Users, Plus, LogIn, ScrollText, Copy, LogOut, X, Trash2 } from 'lucide-react';
+import { Box, Button, Typography, Stack, TextField, MenuItem, Chip, CircularProgress, IconButton, Divider } from '@mui/material';
+import { Home, Users, Plus, ScrollText, Copy, LogOut, X, Trash2, Eye } from 'lucide-react';
 import { useAuth } from '../../shared/cloud/AuthProvider.jsx';
-import AuthDialog from '../../shared/cloud/AuthDialog.jsx';
+import CloudMenu from '../../shared/cloud/CloudMenu.jsx';
+import AppToast from '../../shared/AppToast.jsx';
 import {
   createCampaign, joinCampaign, listMyCampaigns,
   listCampaignCharacters, listCampaignMembers, setCharacterCampaign, leaveCampaign, deleteCampaign,
@@ -15,8 +16,6 @@ import { ensureSheetRuntimeAdapters } from '../charsheet/logic/sheetRuntimeAdapt
 export default function CampaignsPage() {
   const { cloudEnabled, status, user, isGm } = useAuth();
   const navigate = useNavigate();
-  const theme = useTheme();
-  const isDesktop = useMediaQuery(theme.breakpoints.up('sm'));
   const myId = user?.id;
   const [campaigns, setCampaigns] = useState([]);
   const [charsByCampaign, setCharsByCampaign] = useState({});
@@ -26,7 +25,6 @@ export default function CampaignsPage() {
   const [newName, setNewName] = useState('');
   const [joinCode, setJoinCode] = useState('');
   const [busy, setBusy] = useState(false);
-  const [authOpen, setAuthOpen] = useState(false);
   const [toast, setToast] = useState(null);
 
   const notify = (severity, msg) => setToast({ severity, msg });
@@ -117,6 +115,7 @@ export default function CampaignsPage() {
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
         <Button component={Link} to="/" size="small" variant="outlined" startIcon={<Home size={14} />} sx={navBtnSx}>HOME</Button>
         <Typography sx={titleSx}>Campaigns</Typography>
+        <CloudMenu sx={{ ml: 'auto' }} buttonSx={navBtnSx} />
       </Box>
 
       {!cloudEnabled ? (
@@ -124,10 +123,7 @@ export default function CampaignsPage() {
       ) : status === 'loading' ? (
         <CircularProgress size={22} />
       ) : status !== 'authed' ? (
-        <Box>
-          <Typography sx={msgSx}>Log in to manage campaigns.</Typography>
-          <Button variant="contained" size="small" startIcon={<LogIn size={14} />} onClick={() => setAuthOpen(true)}>Log in</Button>
-        </Box>
+        <Typography sx={msgSx}>Log in to manage campaigns.</Typography>
       ) : (
         <>
           {/* Create + Join */}
@@ -155,7 +151,7 @@ export default function CampaignsPage() {
 
           <Stack spacing={2}>
             {campaigns.map((c) => {
-              const isGm = c.gm === myId;
+              const isCampaignGm = c.gm === myId;
               const chars = charsByCampaign[c.id] || [];
               const members = membersByCampaign[c.id] || [];
               // Only MY own characters can be added (a global GM's listMyCharacters
@@ -165,13 +161,13 @@ export default function CampaignsPage() {
                 <Box key={c.id} sx={cardSx}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                     <Typography sx={campNameSx}>{c.name}</Typography>
-                    {isGm ? <Chip size="small" label="GM" sx={chipSx} /> : null}
-                    {isGm ? (
+                    {isCampaignGm ? <Chip size="small" label="GM" sx={chipSx} /> : null}
+                    {isCampaignGm ? (
                       <Chip size="small" label={`Code: ${c.join_code}`} onClick={() => copyCode(c.join_code)}
                         icon={<Copy size={12} />} sx={{ ...chipSx, cursor: 'pointer' }} />
                     ) : null}
                     <Typography sx={{ ...metaSx, ml: 'auto' }}>{members.length} member{members.length === 1 ? '' : 's'}</Typography>
-                    {isGm ? (
+                    {isCampaignGm ? (
                       <IconButton size="small" onClick={() => handleDeleteCampaign(c)} title="Delete campaign" sx={{ color: '#de675f' }}>
                         <Trash2 size={14} />
                       </IconButton>
@@ -190,13 +186,21 @@ export default function CampaignsPage() {
                     <Stack spacing={0.75}>
                       {chars.map((ch) => {
                         const mine = ch.owner === myId;
-                        const canEditChar = mine || isGm || c.gm === myId;
+                        // Mirror openCampaignChar: editable by owner, a global GM
+                        // (useAuth isGm), or the GM of this campaign.
+                        const canEditChar = mine || isGm || isCampaignGm;
                         const s = summarizeCharacter(ch.data);
                         return (
                           <Box key={ch.id} sx={rowSx} onClick={() => openCampaignChar(ch, c)}>
                             <ScrollText size={15} color={canEditChar ? '#2ecc71' : '#7a9bd6'} style={{ flexShrink: 0, alignSelf: 'flex-start', marginTop: 3 }} />
                             <Box sx={{ flex: 1, minWidth: 0 }}>
-                              <Typography sx={rowNameSx}>{ch.name || ch.id}</Typography>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
+                                <Typography sx={rowNameSx}>{ch.name || ch.id}</Typography>
+                                {!canEditChar ? (
+                                  <Chip size="small" icon={<Eye size={10} />} label="READ ONLY"
+                                    sx={readOnlyChipSx} variant="outlined" />
+                                ) : null}
+                              </Box>
                               <Typography sx={metaSx}>{ch.owner_username || '—'}{mine ? ' · you' : ''}</Typography>
                               {s ? (
                                 <Box sx={statsRowSx}>
@@ -237,14 +241,7 @@ export default function CampaignsPage() {
         </>
       )}
 
-      <AuthDialog open={authOpen} onClose={() => setAuthOpen(false)} />
-      <Snackbar open={Boolean(toast)} autoHideDuration={4000}
-        onClose={(_, reason) => { if (reason !== 'clickaway') setToast(null); }}
-        disableWindowBlurListener
-        anchorOrigin={isDesktop ? { vertical: 'top', horizontal: 'right' } : { vertical: 'bottom', horizontal: 'center' }}
-        sx={{ top: isDesktop ? 104 : undefined }}>
-        {toast ? <Alert severity={toast.severity} variant="filled" onClose={() => setToast(null)} sx={{ fontSize: '0.78rem' }}>{toast.msg}</Alert> : undefined}
-      </Snackbar>
+      <AppToast toast={toast} onClose={() => setToast(null)} autoHideDuration={4000} />
     </Box>
   );
 }
@@ -261,5 +258,6 @@ const chipSx = { height: 20, fontSize: '0.6rem', bgcolor: 'rgba(202,165,80,0.12)
 const rowSx = { display: 'flex', alignItems: 'flex-start', gap: 1, p: 0.75, border: '1px solid rgba(180,150,90,0.15)', borderRadius: '8px', bgcolor: '#232019', cursor: 'pointer', transition: 'border-color 0.15s, background-color 0.15s', '&:hover': { borderColor: 'rgba(180,150,90,0.45)', bgcolor: '#2a2620' } };
 const rowNameSx = { fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.85rem', color: '#edd48a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
 const metaSx = { fontSize: '0.7rem', color: '#7a6a4a' };
+const readOnlyChipSx = { flexShrink: 0, height: 16, fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.5rem', letterSpacing: '0.08em', color: '#9ec5e6', borderColor: 'rgba(158,197,230,0.45)', bgcolor: 'rgba(158,197,230,0.08)', '& .MuiChip-icon': { color: '#9ec5e6', ml: '3px' }, '& .MuiChip-label': { px: '5px' } };
 const statsRowSx = { display: 'flex', flexWrap: 'wrap', gap: '0.15rem 0.7rem', mt: 0.4 };
 const statSx = { fontSize: '0.68rem', color: '#9a8a66', fontFamily: '"JetBrains Mono", monospace', whiteSpace: 'nowrap' };

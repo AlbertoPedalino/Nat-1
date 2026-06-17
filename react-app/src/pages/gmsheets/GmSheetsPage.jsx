@@ -1,11 +1,12 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Box, Button, Typography, Stack, CircularProgress, Snackbar, Alert } from '@mui/material';
-import { Home, RefreshCw, ScrollText, Download, LogIn, Trash2, Save } from 'lucide-react';
+import { Box, Button, Typography, Stack, CircularProgress } from '@mui/material';
+import { Home, RefreshCw, ScrollText, Download, Trash2, Save } from 'lucide-react';
 import { useAuth } from '../../shared/cloud/AuthProvider.jsx';
-import AuthDialog from '../../shared/cloud/AuthDialog.jsx';
+import CloudMenu from '../../shared/cloud/CloudMenu.jsx';
+import AppToast from '../../shared/AppToast.jsx';
 import SheetDialog from '../../shared/character/SheetDialog.jsx';
-import { listAllCharacters, deleteCloudCharacter, pullCharacter } from '../../shared/cloud/cloudCharacters.js';
+import { listAllCharacters, listMyCharacters, deleteCloudCharacter, pullCharacter } from '../../shared/cloud/cloudCharacters.js';
 import { createCharacterExport } from '../charbuilder/logic/characterExport.js';
 import { supabase } from '../../shared/cloud/supabaseClient.js';
 
@@ -22,7 +23,6 @@ export default function GmSheetsPage() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [authOpen, setAuthOpen] = useState(false);
   const [dialogRow, setDialogRow] = useState(null);
   const [feedback, setFeedback] = useState(null);
 
@@ -30,12 +30,13 @@ export default function GmSheetsPage() {
     if (status !== 'authed') return;
     setLoading(true); setError('');
     try {
-      // RLS scopes this: a player gets only their own rows, a GM gets all.
-      setRows(await listAllCharacters());
+      // Only a global GM sees every sheet here. Everyone else (incl. a campaign
+      // GM) sees just their own — campaign sheets live on the Campaigns page.
+      setRows(await (isGm ? listAllCharacters() : listMyCharacters()));
     } catch (e) {
       setError(e?.message || 'Failed to load.');
     } finally { setLoading(false); }
-  }, [status]);
+  }, [status, isGm]);
 
   useEffect(() => { refresh(); }, [refresh]);
 
@@ -92,11 +93,14 @@ export default function GmSheetsPage() {
           HOME
         </Button>
         <Typography sx={titleSx}>{isGm ? 'Players sheets' : 'My sheets'}</Typography>
-        {status === 'authed' ? (
-          <Button size="small" variant="outlined" startIcon={<RefreshCw size={14} />} onClick={refresh} sx={{ ...navBtnSx, ml: 'auto' }}>
-            Refresh
-          </Button>
-        ) : null}
+        <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1 }}>
+          {status === 'authed' ? (
+            <Button size="small" variant="outlined" startIcon={<RefreshCw size={14} />} onClick={refresh} sx={navBtnSx}>
+              Refresh
+            </Button>
+          ) : null}
+          <CloudMenu buttonSx={navBtnSx} />
+        </Box>
       </Box>
 
       {!cloudEnabled ? (
@@ -104,12 +108,7 @@ export default function GmSheetsPage() {
       ) : status === 'loading' ? (
         <CircularProgress size={22} />
       ) : status !== 'authed' ? (
-        <Box>
-          <Typography sx={msgSx}>Log in as GM to see the sheets.</Typography>
-          <Button variant="contained" size="small" startIcon={<LogIn size={14} />} onClick={() => setAuthOpen(true)}>
-            Log in
-          </Button>
-        </Box>
+        <Typography sx={msgSx}>Log in to see your sheets.</Typography>
       ) : (
         <>
           {error ? <Typography sx={{ ...msgSx, color: '#de675f' }}>{error}</Typography> : null}
@@ -142,8 +141,6 @@ export default function GmSheetsPage() {
         </>
       )}
 
-      <AuthDialog open={authOpen} onClose={() => setAuthOpen(false)} />
-
       <SheetDialog
         open={Boolean(dialogRow)}
         onClose={() => setDialogRow(null)}
@@ -168,18 +165,7 @@ export default function GmSheetsPage() {
         </Box>
       </SheetDialog>
 
-      <Snackbar
-        open={Boolean(feedback)}
-        autoHideDuration={3500}
-        onClose={(_, reason) => { if (reason !== 'clickaway') setFeedback(null); }}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        {feedback ? (
-          <Alert severity={feedback.severity} variant="filled" onClose={() => setFeedback(null)} sx={{ fontSize: '0.78rem' }}>
-            {feedback.msg}
-          </Alert>
-        ) : undefined}
-      </Snackbar>
+      <AppToast toast={feedback} onClose={() => setFeedback(null)} />
     </Box>
   );
 }

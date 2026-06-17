@@ -142,8 +142,25 @@ export async function pullCharacter(charId) {
   return data.data;
 }
 
-// Characters owned by the logged-in player (RLS already scopes the query).
+// Characters OWNED by the logged-in user only. The select RLS is intentionally
+// broad (it also exposes campaign sheets so the Campaigns page works), so we must
+// scope by owner here: "My sheets" must never leak sheets shared via a campaign.
 export async function listMyCharacters() {
+  const supabase = requireClient();
+  const user = await currentUser();
+  const { data, error } = await supabase
+    .from(TABLE)
+    .select('id, name, owner, owner_username, campaign_id, updated_at')
+    .eq('owner', user.id)
+    .order('updated_at', { ascending: false });
+  if (error) throw error;
+  return data || [];
+}
+
+// Every character the caller may see. For a global GM (profiles.role='gm') RLS
+// returns all rows; for anyone else it also returns campaign sheets — so only the
+// GM Sheets page should call this, and only when the user is a global GM.
+export async function listAllCharacters() {
   const supabase = requireClient();
   const { data, error } = await supabase
     .from(TABLE)
@@ -151,11 +168,6 @@ export async function listMyCharacters() {
     .order('updated_at', { ascending: false });
   if (error) throw error;
   return data || [];
-}
-
-// Every character — only returns rows for a GM (RLS enforces it server-side).
-export async function listAllCharacters() {
-  return listMyCharacters();
 }
 
 // GM (or owner) delete: RLS allows owner OR gm to remove any matching row.

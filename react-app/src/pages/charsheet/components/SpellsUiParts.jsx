@@ -28,7 +28,7 @@ export function SpellSection({ title, children }) {
   );
 }
 
-export function SlotPanel({ slots, used, created, onToggle }) {
+export function SlotPanel({ slots, used, created, onToggle, readOnly = false }) {
   const hasRegular = (slots.regular || []).some(Boolean);
   const hasPact = slots.pact && slots.pact.count > 0;
   if (!hasRegular && !hasPact) return null;
@@ -41,7 +41,7 @@ export function SlotPanel({ slots, used, created, onToggle }) {
             {slots.regular.map((total, idx) => {
               const lv = idx + 1;
               const createdCount = Number((created || {})[lv] || 0);
-              return total ? <SlotGroup key={lv} level={lv} total={total} used={getRegularSlotUsed(used, lv)} created={createdCount} onToggle={onToggle} /> : null;
+              return total ? <SlotGroup key={lv} level={lv} total={total} used={getRegularSlotUsed(used, lv)} created={createdCount} onToggle={onToggle} readOnly={readOnly} /> : null;
             })}
           </Box>
         </>
@@ -56,6 +56,7 @@ export function SlotPanel({ slots, used, created, onToggle }) {
             created={0}
             kind="pact"
             onToggle={onToggle}
+            readOnly={readOnly}
           />
         </Box>
       ) : null}
@@ -63,7 +64,9 @@ export function SlotPanel({ slots, used, created, onToggle }) {
   );
 }
 
-function SlotGroup({ level, total, used, created = 0, kind = 'regular', onToggle }) {
+function SlotGroup({ level, total, used, created = 0, kind = 'regular', onToggle, readOnly = false }) {
+  const dotCursor = readOnly ? 'default' : 'pointer';
+  const dotHover = readOnly ? {} : { '&:hover': { borderColor: '#edd48a' } };
   return (
     <Box sx={{ minWidth: 42 }}>
       <Box sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.56rem', color: 'text.secondary', textAlign: 'center', mb: '3px', letterSpacing: '0.08em' }}>{level}</Box>
@@ -71,7 +74,7 @@ function SlotGroup({ level, total, used, created = 0, kind = 'regular', onToggle
         {Array.from({ length: total }, (_, index) => (
           <Box
             key={index}
-            onClick={() => onToggle(level, total, index, created, kind)}
+            onClick={readOnly ? undefined : () => onToggle(level, total, index, created, kind)}
             sx={{
               width: 14,
               height: 14,
@@ -79,20 +82,20 @@ function SlotGroup({ level, total, used, created = 0, kind = 'regular', onToggle
               border: '1.5px solid',
               borderColor: index < used ? '#4d95d6' : 'rgba(196,179,147,0.28)',
               bgcolor: index < used ? '#4d95d6' : 'transparent',
-              cursor: 'pointer',
-              '&:hover': { borderColor: '#edd48a' },
+              cursor: dotCursor,
+              ...dotHover,
             }}
           />
         ))}
         {created > 0 ? (
           <Box
-            onClick={() => onToggle(level, total, total, created, kind)}
+            onClick={readOnly ? undefined : () => onToggle(level, total, total, created, kind)}
             sx={{
-              width: 14, height: 14, borderRadius: '50%', cursor: 'pointer',
+              width: 14, height: 14, borderRadius: '50%', cursor: dotCursor,
               border: '1.5px dashed', borderColor: '#58b879',
               bgcolor: 'rgba(88,184,121,0.12)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              '&:hover': { borderColor: '#edd48a' },
+              ...dotHover,
             }}
             title={`Temporary slot${created > 1 ? 's' : ''}: ${created}`}
           />

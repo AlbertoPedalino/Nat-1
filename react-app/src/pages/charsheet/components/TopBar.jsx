@@ -85,7 +85,7 @@ const appNavButtonSx = {
   letterSpacing: '0.08em',
 };
 
-export default function TopBar({ C, sheet, onShortRest, onLongRest, onUpdateXp, onUpdateCharacter, rollLog, onClearRollLog, onShowToast }) {
+export default function TopBar({ C, sheet, charId, readOnly = false, onShortRest, onLongRest, onUpdateXp, onUpdateCharacter, rollLog, onClearRollLog, onShowToast }) {
   const [colorAnchor, setColorAnchor] = useState(null);
   const [rollLogOpen, setRollLogOpen] = useState(false);
   const [customRollOpen, setCustomRollOpen] = useState(false);
@@ -134,15 +134,23 @@ export default function TopBar({ C, sheet, onShortRest, onLongRest, onUpdateXp, 
             onClick={() => navigate('/')} sx={appNavButtonSx}>
             HOME
           </Button>
-          <Button size="small" variant="outlined" color="primary" startIcon={<ArrowLeft size={14} />}
-            onClick={() => {
-              const params = new URLSearchParams(window.location.search);
-              const charId = params.get('char') || localStorage.getItem('gb:active_char') || 'new';
-              navigate(`/charbuilder?char=${encodeURIComponent(charId)}`);
-            }}
-            sx={appNavButtonSx}>
-            Builder
-          </Button>
+          {!readOnly && (
+            <Button size="small" variant="outlined" color="primary" startIcon={<ArrowLeft size={14} />}
+              onClick={() => {
+                const params = new URLSearchParams(window.location.search);
+                // Use the sheet's own id first: the online sheet route is
+                // /campaign-sheet?id=…, so params.get('char') is null there and we
+                // must not fall back to a stale gb:active_char (would open a blank
+                // or wrong builder). C.id covers chars whose id lives in the data.
+                const targetId = charId || C?.id
+                  || params.get('char') || params.get('id')
+                  || localStorage.getItem('gb:active_char') || 'new';
+                navigate(`/charbuilder?char=${encodeURIComponent(targetId)}`);
+              }}
+              sx={appNavButtonSx}>
+              Builder
+            </Button>
+          )}
         </Box>
         <Box sx={{
           display: 'flex', gap: '0.35rem', flexShrink: 0,
@@ -160,14 +168,14 @@ export default function TopBar({ C, sheet, onShortRest, onLongRest, onUpdateXp, 
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '0.4rem', width: { xs: '100%', md: 'auto' } }}>
           <Box
-            onClick={(e) => setColorAnchor(e.currentTarget)}
+            onClick={readOnly ? undefined : (e) => setColorAnchor(e.currentTarget)}
             sx={{
               width: { xs: 36, md: 52 }, height: { xs: 36, md: 52 },
-              borderRadius: '50%', border: 2, borderColor: 'divider', cursor: 'pointer',
+              borderRadius: '50%', border: 2, borderColor: 'divider', cursor: readOnly ? 'default' : 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
               bgcolor: C.classIconColor || 'rgba(46,42,34,1)', fontSize: { xs: '1rem', md: '1.4rem' },
               transition: 'border-color 0.15s',
-              '&:hover': { borderColor: '#caa550' },
+              ...(readOnly ? {} : { '&:hover': { borderColor: '#caa550' } }),
             }}
           >
             <Icon size={25} />
@@ -179,9 +187,16 @@ export default function TopBar({ C, sheet, onShortRest, onLongRest, onUpdateXp, 
             onSelect={(color) => onUpdateCharacter?.(prev => ({ ...prev, classIconColor: color }))}
           />
           <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: { xs: '0.85rem', md: '1.1rem' }, fontWeight: 700, color: '#edd48a', letterSpacing: '0.04em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {C.name || 'Unnamed Character'}
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, minWidth: 0 }}>
+              <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: { xs: '0.85rem', md: '1.1rem' }, fontWeight: 700, color: '#edd48a', letterSpacing: '0.04em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {C.name || 'Unnamed Character'}
+              </Typography>
+              {readOnly && (
+                <Chip size="small" icon={<Eye size={11} />} label="READ ONLY"
+                  sx={{ flexShrink: 0, height: 18, fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.52rem', letterSpacing: '0.08em', color: '#9ec5e6', borderColor: 'rgba(158,197,230,0.45)', bgcolor: 'rgba(158,197,230,0.08)', '& .MuiChip-icon': { color: '#9ec5e6', ml: '4px' } }}
+                  variant="outlined" />
+              )}
+            </Box>
             <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {[race, clsDisplay, bg].filter(Boolean).join(' · ')}
             </Typography>
@@ -200,23 +215,29 @@ export default function TopBar({ C, sheet, onShortRest, onLongRest, onUpdateXp, 
           <Box sx={{ width: '100%', height: 8, bgcolor: 'rgba(46,42,34,1)', borderRadius: 1, border: '1px solid', borderColor: 'divider', overflow: 'hidden' }}>
             <Box sx={{ height: '100%', bgcolor: 'primary.main', borderRadius: 1, transition: 'width 0.4s', width: `${Math.min(100, xpProgress)}%` }} />
           </Box>
-          <XpDeltaControl
-            currentXp={currentXp}
-            onApply={(total) => onUpdateXp(String(total))}
-            variant="compact"
-            sx={{ width: { xs: '100%', md: 180 } }}
-          />
+          {!readOnly && (
+            <XpDeltaControl
+              currentXp={currentXp}
+              onApply={(total) => onUpdateXp(String(total))}
+              variant="compact"
+              sx={{ width: { xs: '100%', md: 180 } }}
+            />
+          )}
         </Box>
 
         <Box sx={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap', width: { xs: '100%', md: 'auto' }, justifyContent: { xs: 'center', md: 'flex-start' } }}>
-          <Button size="small" variant="outlined" color="warning" startIcon={<Sun size={14} />}
-            onClick={onShortRest} sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', letterSpacing: '0.08em' }}>
-            SHORT REST
-          </Button>
-          <Button size="small" variant="outlined" color="info" startIcon={<Moon size={14} />}
-            onClick={onLongRest} sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', letterSpacing: '0.08em' }}>
-            LONG REST
-          </Button>
+          {!readOnly && (
+            <>
+              <Button size="small" variant="outlined" color="warning" startIcon={<Sun size={14} />}
+                onClick={onShortRest} sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', letterSpacing: '0.08em' }}>
+                SHORT REST
+              </Button>
+              <Button size="small" variant="outlined" color="info" startIcon={<Moon size={14} />}
+                onClick={onLongRest} sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', letterSpacing: '0.08em' }}>
+                LONG REST
+              </Button>
+            </>
+          )}
           <Button size="small" variant="outlined" startIcon={<Dices size={14} />}
             onClick={() => setCustomRollOpen(true)}
             sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', letterSpacing: '0.08em', color: '#edd48a', borderColor: 'rgba(237,212,138,0.4)' }}>

@@ -76,7 +76,7 @@ function getSpellActionFilter(entry) {
 }
 
 export default function SpellsTab({ C, sheet, freeCastUses }) {
-  const { onRoll, onUpdateSpells, onShowToast, onUpdateSheet, onToggleFreeCast, onUpdateCharacter } = useSheetActions();
+  const { onRoll, onUpdateSpells, onShowToast, onUpdateSheet, onToggleFreeCast, onUpdateCharacter, readOnly } = useSheetActions();
   const [spellDb, setSpellDb] = useState([]);
   const [classSpellIndex, setClassSpellIndex] = useState({});
   const [spellSearch, setSpellSearch] = useState('');
@@ -278,6 +278,9 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
   ]);
 
   const toggleSlot = (level, total, index, createdCount, kind = 'regular') => {
+    // Read-only sheets must not mutate the local slotUsed/createdSlots mirror:
+    // the change never reaches the server, so showing a consumed slot would lie.
+    if (readOnly) return;
     const key = kind === 'pact' ? getPactSlotUsedKey(level) : String(level);
     const used = kind === 'pact'
       ? getPactSlotUsed(slotUsed, level)
@@ -447,7 +450,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
         </Alert>
       ) : null}
 
-      <SlotPanel slots={slots} used={slotUsed} created={createdSlots} onToggle={toggleSlot} />
+      <SlotPanel slots={slots} used={slotUsed} created={createdSlots} onToggle={toggleSlot} readOnly={readOnly} />
 
       {visibleCantrips.length || showEmptyCantrips ? (
         <SpellSection title="Cantrip">
