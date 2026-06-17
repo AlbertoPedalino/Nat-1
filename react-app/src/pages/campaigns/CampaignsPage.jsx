@@ -8,8 +8,7 @@ import {
   createCampaign, joinCampaign, listMyCampaigns,
   listCampaignCharacters, listCampaignMembers, setCharacterCampaign, leaveCampaign, deleteCampaign,
 } from '../../shared/cloud/campaigns.js';
-import { listMyCharacters, pullCharacter } from '../../shared/cloud/cloudCharacters.js';
-import { markForeignEdit, unmarkForeignEdit } from '../../shared/cloud/cloudForeign.js';
+import { listMyCharacters } from '../../shared/cloud/cloudCharacters.js';
 import { summarizeCharacter } from './sheetSummary.js';
 import { ensureSheetRuntimeAdapters } from '../charsheet/logic/sheetRuntimeAdapters.js';
 
@@ -77,19 +76,13 @@ export default function CampaignsPage() {
     finally { setBusy(false); }
   };
 
-  // Open a campaign sheet: editable for the owner, a global GM, or the GM of this
-  // campaign; read-only otherwise. Editing a sheet that isn't mine syncs data only.
+  // Open campaign rows online. A local copy is created only through "Save local"
+  // inside the sheet, so browsing online sheets never fills local storage.
   const openCampaignChar = async (ch, campaign) => {
     const mine = ch.owner === myId;
     const canEdit = mine || isGm || campaign.gm === myId;
     if (!canEdit) { navigate(`/campaign-sheet?id=${encodeURIComponent(ch.id)}`); return; }
-    setBusy(true);
-    try {
-      await pullCharacter(ch.id);
-      if (mine) unmarkForeignEdit(ch.id); else markForeignEdit(ch.id);
-      navigate(`/charsheet?char=${encodeURIComponent(ch.id)}`);
-    } catch (e) { notify('error', e?.message || 'Failed to open.'); }
-    finally { setBusy(false); }
+    navigate(`/campaign-sheet?id=${encodeURIComponent(ch.id)}&edit=1`);
   };
 
   const assignChar = async (charId, campaignId) => {

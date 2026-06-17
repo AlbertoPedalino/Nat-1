@@ -10,25 +10,67 @@
   const rawGet = Storage.prototype.getItem;
   const rawSet = Storage.prototype.setItem;
   const rawRemove = Storage.prototype.removeItem;
+  const rawKey = Storage.prototype.key;
+  const REGISTRY_KEY = 'gb_board_registry';
+  const ACTIVE_KEY = 'gb_active_board_id';
+  const LEGACY_KEYS = ['gm_state', 'gm_wea', 'gm_ev', 'gm_lo', 'gm_co', 'gm_env',
+    'gm_enc0', 'gm_enc1', 'gm_enc2', 'gm_enc3', 'gm_trap0', 'gm_trap1', 'gm_trap2', 'gm_trap3'];
   const params = new URLSearchParams(location.search);
   const clean = v => String(v || '').toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 48);
+  const makeId = () => `gm_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,7)}`;
+  const readRegistry = () => {
+    try { return JSON.parse(rawGet.call(localStorage, REGISTRY_KEY) || '[]').filter(x => x && x.id); }
+    catch(_) { return []; }
+  };
+  const hasScopedData = candidateId => {
+    if(!candidateId) return false;
+    const candidatePrefix = `gb:board:${candidateId}:`;
+    for(let i = 0; i < localStorage.length; i++){
+      const key = rawKey.call(localStorage, i);
+      if(String(key || '').startsWith(candidatePrefix)) return true;
+    }
+    return false;
+  };
+  const hasLegacyData = () => LEGACY_KEYS.some(key => rawGet.call(localStorage, key) != null);
+  const isKnown = candidateId => readRegistry().some(x => x.id === candidateId) || hasScopedData(candidateId);
   let id = clean(params.get('board'));
+  let saved = false;
   if(id === 'new'){
-    id = `gm_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,7)}`;
+    id = makeId();
     history.replaceState(null, '', `${location.pathname}?board=${encodeURIComponent(id)}`);
+  } else if(id) {
+    saved = isKnown(id) || (id === 'default' && hasLegacyData());
+  } else {
+    const activeId = clean(rawGet.call(localStorage, ACTIVE_KEY));
+    if(activeId && isKnown(activeId)){
+      id = activeId;
+      saved = true;
+    } else if(hasLegacyData()) {
+      id = 'default';
+      saved = true;
+      history.replaceState(null, '', `${location.pathname}?board=default`);
+    } else {
+      id = makeId();
+      history.replaceState(null, '', `${location.pathname}?board=${encodeURIComponent(id)}`);
+    }
   }
-  if(!id) id = clean(rawGet.call(localStorage, 'gb_active_board_id')) || 'default';
-  rawSet.call(localStorage, 'gb_active_board_id', id);
   window.GB_BOARD_ID = id;
+  window.gbIsBoardSaved = () => saved;
+  window.gbNotifyInstanceState = function(){
+    if(window.parent && window.parent !== window){
+      window.parent.postMessage({ type: 'gb:instance-state', kind: 'gmboard', id, saved }, location.origin);
+    }
+  };
   window.gbRegisterBoardScope = function(label){
-    const raw = rawGet.call(localStorage, 'gb_board_registry') || '[]';
-    let list = [];
-    try { list = JSON.parse(raw); } catch(_){}
+    saved = true;
+    rawSet.call(localStorage, ACTIVE_KEY, id);
+    let list = readRegistry();
     const now = Date.now();
     const existing = list.find(x => x && x.id === id);
     const name = (existing && existing.name) || String(label || '').trim() || id;
     list = [{id, name, updatedAt: now}, ...list.filter(x => x && x.id !== id)].slice(0, 20);
-    rawSet.call(localStorage, 'gb_board_registry', JSON.stringify(list));
+    rawSet.call(localStorage, REGISTRY_KEY, JSON.stringify(list));
+    window.gbNotifyInstanceState();
   };
   const prefix = `gb:board:${id}:`;
   const scoped = key => {
@@ -37,8 +79,39 @@
       /^gm_(enc|trap)\d+$/.test(k) ? prefix + k : key;
   };
   Storage.prototype.getItem = function(key){ return rawGet.call(this, scoped(key)); };
-  Storage.prototype.setItem = function(key, val){ return rawSet.call(this, scoped(key), val); };
-  Storage.prototype.removeItem = function(key){ return rawRemove.call(this, scoped(key)); };
+  Storage.prototype.setItem = function(key, val){
+    const outKey = scoped(key);
+    if(outKey !== key && !saved) return;
+    return rawSet.call(this, outKey, val);
+  };
+  Storage.prototype.removeItem = function(key){
+    const outKey = scoped(key);
+    if(outKey !== key && !saved) return;
+    return rawRemove.call(this, outKey);
+  };
+  if(saved && id === 'default' && !rawGet.call(localStorage, 'gb_board_migrated_v1')){
+    try {
+      LEGACY_KEYS.forEach(key => {
+        const legacy = rawGet.call(localStorage, key);
+        const scopedKey = `gb:board:default:${key}`;
+        if(legacy != null && rawGet.call(localStorage, scopedKey) == null) rawSet.call(localStorage, scopedKey, legacy);
+      });
+      rawSet.call(localStorage, 'gb_board_migrated_v1', '1');
+    } catch(_){}
+  }
+  window.gbSaveBoardInstance = function(){
+    if (typeof gbRegisterBoardScope === 'function') gbRegisterBoardScope('GM Board ' + (window.GB_BOARD_ID || 'default'));
+    try { if (typeof saveTables === 'function') saveTables(false); } catch(_){}
+    try { if (typeof saveState === 'function') saveState(); } catch(_){}
+    try { if (typeof showToast === 'function') showToast(luci('save') + ' Instance saved'); } catch(_){}
+    window.gbNotifyInstanceState();
+  };
+  window.addEventListener('message', function(event){
+    if(event.origin !== location.origin || !event.data) return;
+    if(event.data.type === 'gb:save-instance') window.gbSaveBoardInstance();
+    if(event.data.type === 'gb:request-instance-state') window.gbNotifyInstanceState();
+  });
+  window.addEventListener('DOMContentLoaded', window.gbNotifyInstanceState);
 })();
 </script>
 <style>
@@ -294,7 +367,7 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
 </head>
 <body>
 <script>
-  if (typeof gbRegisterBoardScope === 'function') gbRegisterBoardScope('GM Board ' + (window.GB_BOARD_ID || 'default'));
+  if (typeof gbNotifyInstanceState === 'function') gbNotifyInstanceState();
 </script>
 <div class="container">
 
@@ -860,15 +933,19 @@ function loadTables(){
   }
   try{T.env=JSON.parse(localStorage.getItem('gm_env'))||cp(DEF_ENV);}catch(e){T.env=cp(DEF_ENV);}
 }
-function saveTables(){
+function saveTables(showMessage=true){
   readEditor();
+  if(typeof gbIsBoardSaved === 'function' && !gbIsBoardSaved()){
+    if(showMessage) showToast(luci('save') + ' Save instance first');
+    return;
+  }
   localStorage.setItem('gm_wea',JSON.stringify(T.weather));
   localStorage.setItem('gm_ev',JSON.stringify(T.events));
   localStorage.setItem('gm_lo',JSON.stringify(T.loot));
   localStorage.setItem('gm_co',JSON.stringify(T.compl));
   localStorage.setItem('gm_env',JSON.stringify(T.env));
   for(let i=0;i<4;i++){localStorage.setItem('gm_enc'+i,JSON.stringify(T.enc[i]));localStorage.setItem('gm_trap'+i,JSON.stringify(T.trap[i]));}
-  showToast(luci('check') + ' Tables saved');
+  if(showMessage) showToast(luci('check') + ' Tables saved');
 }
 async function resetTables(){
   if(!await uiConfirm('Restore original tables?'))return;

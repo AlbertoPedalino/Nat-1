@@ -1,11 +1,17 @@
+import { useCallback } from 'react';
 import { Box } from '@mui/material';
 
 export default function StandaloneHtmlFrame({ title, src, iframeRef, onLoad, rootSx, iframeSx }) {
+  const setIframeRef = useCallback((node) => {
+    if (typeof iframeRef === 'function') iframeRef(node);
+    else if (iframeRef) iframeRef.current = node;
+  }, [iframeRef]);
+
   return (
     <Box sx={{ ...frameRootSx, ...rootSx }}>
       <Box
         component="iframe"
-        ref={iframeRef}
+        ref={setIframeRef}
         title={title}
         src={src}
         onLoad={onLoad}

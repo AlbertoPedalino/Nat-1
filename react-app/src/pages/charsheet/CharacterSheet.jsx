@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Box, Stack, Button, Typography } from '@mui/material';
 import { Hourglass, Moon } from 'lucide-react';
 import { SHEET_AREAS, SHEET_GRID, SHEET_GRID_ITEM_SX } from './layout.js';
@@ -30,10 +30,13 @@ import { installedRegistry } from '../../adapters/index.js';
 import { ensureSheetRuntimeAdapters } from './logic/sheetRuntimeAdapters.js';
 import { loadItems, loadOptionalFeatures, loadConditions, reconcileInventoryWithItemsDb } from '../charbuilder/logic/dataLoaders.js';
 import { createCharacterExport } from '../charbuilder/logic/characterExport.js';
+import { updateCloudCharacterData } from '../../shared/cloud/cloudCharacters.js';
 import {
+  createCharacter as storeCreateCharacter,
   getActiveCharId,
   loadCharacter as storeLoadCharacter,
   patchCharacter as storePatchCharacter,
+  saveCharacter as storeSaveCharacter,
   setActiveCharId,
 } from '../../shared/character/store.js';
 
@@ -51,7 +54,7 @@ function longRestExhaustionPatch(sheet) {
   return { exhaustionLevel, activeConditions };
 }
 
-export default function CharacterSheet({ externalChar = null, readOnly = false } = {}) {
+export default function CharacterSheet({ externalChar = null, externalCharId = null, readOnly = false } = {}) {
   const [C, setC] = useState(null);
   const [sheet, setSheet] = useState(null);
   const [charId, setCharId] = useState(null);
@@ -64,14 +67,17 @@ export default function CharacterSheet({ externalChar = null, readOnly = false }
   const [longRestOpen, setLongRestOpen] = useState(false);
   const [hdToSpend, setHdToSpend] = useState({});
   const [conditionEntries, setConditionEntries] = useState({});
+  const cloudSaveReadyRef = useRef(false);
+  const usesExternalChar = Boolean(externalChar);
 
   useEffect(() => {
     let alive = true;
+    cloudSaveReadyRef.current = false;
     // Read-only view feeds the character directly (from the cloud); skip local
     // store entirely so nothing is written and auto-sync stays silent.
-    const id = externalChar ? null : getCharIdFromUrl();
+    const id = externalChar ? externalCharId : getCharIdFromUrl();
     const ch = externalChar || (id ? storeLoadCharacter(id) : null);
-    if (id && ch) setActiveCharId(id);
+    if (!externalChar && id && ch) setActiveCharId(id);
 
     Promise.all([
       // A failed adapter chunk (e.g. a stale-deploy 404) must not blank the whole
@@ -93,7 +99,7 @@ export default function CharacterSheet({ externalChar = null, readOnly = false }
         const reconciled = normalizeCharacterAttunement({ ...ch, inventory: refreshed }, refreshed);
         if (reconciled !== ch.inventory) {
           nextChar = { ...ch, inventory: reconciled };
-          if (id) storePatchCharacter(id, { inventory: reconciled });
+          if (!externalChar && id) storePatchCharacter(id, { inventory: reconciled });
         }
       }
 
@@ -118,19 +124,24 @@ export default function CharacterSheet({ externalChar = null, readOnly = false }
           merged[def.key] = cur == null ? initial : Math.min(Math.max(0, Number(cur) || 0), max);
         });
         setResources(merged);
-        if (id) storePatchCharacter(id, { resources: merged });
+        if (!externalChar && id) storePatchCharacter(id, { resources: merged });
         setFreeCastUses(nextChar.freeCastUses && typeof nextChar.freeCastUses === 'object' ? nextChar.freeCastUses : {});
       }
     });
 
     return () => { alive = false; };
-  }, []);
+  }, [externalChar, externalCharId]);
 
   const persist = useCallback((patch) => {
     if (!charId || !patch) return;
+    if (usesExternalChar) {
+      setC((prev) => prev ? { ...prev, ...patch } : prev);
+      return;
+    }
     const next = storePatchCharacter(charId, patch);
     if (next) setC(next);
-  }, [charId]);
+    else setC((prev) => prev ? { ...prev, ...patch } : prev);
+  }, [charId, usesExternalChar]);
 
   const syncSheet = useCallback((updates) => {
     setSheet((prev) => ({ ...prev, ...updates }));
@@ -140,10 +151,10 @@ export default function CharacterSheet({ externalChar = null, readOnly = false }
     setC((prev) => {
       if (!prev) return prev;
       const next = typeof updater === 'function' ? updater(prev) : updater;
-      if (charId) storePatchCharacter(charId, next);
+      if (!usesExternalChar && charId) storePatchCharacter(charId, next);
       return next;
     });
-  }, [charId]);
+  }, [charId, usesExternalChar]);
 
   const updateInventory = useCallback((inventory) => {
     const normalized = normalizeCharacterAttunement(C, inventory);
@@ -176,6 +187,30 @@ export default function CharacterSheet({ externalChar = null, readOnly = false }
   const showNotice = useCallback((label, message) => {
     showDiceToast(label, message, null, []);
   }, [showDiceToast]);
+
+  const saveLocalCopy = useCallback(() => {
+    if (!C) return;
+    const targetId = charId || C.id;
+    const saved = targetId ? storeSaveCharacter(targetId, C, { emit: !usesExternalChar }) : storeCreateCharacter(C);
+    if (!saved?.id) return;
+    setCharId(saved.id);
+    setActiveCharId(saved.id);
+    showNotice('Local Save', 'Saved locally.');
+  }, [C, charId, showNotice, usesExternalChar]);
+
+  useEffect(() => {
+    if (!usesExternalChar || readOnly || !charId || !C) return undefined;
+    if (!cloudSaveReadyRef.current) {
+      cloudSaveReadyRef.current = true;
+      return undefined;
+    }
+    const handle = setTimeout(() => {
+      updateCloudCharacterData(charId, C).catch((error) => {
+        showNotice('Cloud Save', error?.message || 'Failed to save online sheet.');
+      });
+    }, 1200);
+    return () => clearTimeout(handle);
+  }, [usesExternalChar, readOnly, charId, C, showNotice]);
 
   const openShortRest = useCallback(() => {
     setHdToSpend({});
@@ -577,7 +612,7 @@ export default function CharacterSheet({ externalChar = null, readOnly = false }
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pb: 4, width: '100%' }}>
       {!readOnly && (
         <TopBar C={C} sheet={sheet} onShortRest={openShortRest} onLongRest={openLongRest} onDownload={downloadSheet} onUpdateXp={updateXp} onUpdateCharacter={updateCurrentCharacter}
-          rollLog={rollLog} onClearRollLog={() => setRollLog([])} onShowToast={showDiceToast} />
+          onSaveLocal={saveLocalCopy} rollLog={rollLog} onClearRollLog={() => setRollLog([])} onShowToast={showDiceToast} />
       )}
       <Box sx={{ maxWidth: 1280, mx: { md: 'auto' }, px: { xs: '0.6rem', md: '1.1rem' }, overflow: 'hidden' }}>
         <Box sx={{ bgcolor: 'rgba(35,32,26,1)', borderBottom: 1, borderColor: 'divider', py: '0.55rem', px: { xs: '0.45rem', md: '0.6rem' } }}>

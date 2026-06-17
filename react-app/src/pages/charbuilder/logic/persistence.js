@@ -447,12 +447,16 @@ function stripHeavyFields(character) {
   return out;
 }
 
-export function saveCharacter(character, data) {
+export function saveCharacter(character, data, options = {}) {
+  const { createIfMissing = true } = options;
   const builderCharacter = normalizeProficiencyChoicesForPersistence(character);
   const payload = makeSheetPayload(builderCharacter, data);
-  const existing = storeLoadCharacter(getActiveCharId()) || {};
-  const unified = stripHeavyFields({ ...existing, ...builderCharacter, ...payload });
   let id = getActiveCharId();
+  const existing = id ? storeLoadCharacter(id) : null;
+  if (!id && !createIfMissing) return null;
+  if (id && !existing && !createIfMissing) return null;
+  const previous = existing || {};
+  const unified = stripHeavyFields({ ...previous, ...builderCharacter, ...payload });
   if (!id) {
     const created = storeCreateCharacter(unified);
     id = created.id;

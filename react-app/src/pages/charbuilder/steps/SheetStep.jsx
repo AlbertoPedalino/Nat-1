@@ -1,9 +1,21 @@
 import { Alert, Box, Button, Stack, Typography } from '@mui/material';
-import { ClipboardList, FileText } from 'lucide-react';
+import { ClipboardList, Download, FileText, Save } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import BuilderPanel from '../components/BuilderPanel.jsx';
-import { saveCharacter } from '../logic/persistence.js';
+import { makeSheetPayload, saveCharacter } from '../logic/persistence.js';
+import { createCharacterExport } from '../logic/characterExport.js';
 import { getActiveCharId } from '../../../shared/character/store.js';
+
+function downloadBuilderSheet(character, data) {
+  const payload = createCharacterExport(makeSheetPayload(character, data));
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${character?.name || 'character'}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 export default function SheetStep({ state, dispatch }) {
   const navigate = useNavigate();
@@ -43,22 +55,44 @@ export default function SheetStep({ state, dispatch }) {
               {ready ? 'Character sheet ready' : 'Character sheet not ready'}
             </Typography>
             <Typography color="text.secondary" sx={{ fontSize: '0.72rem', mt: 0.35 }}>
-              {ready ? 'Save the character and open the sheet.' : 'The character is missing minimum data.'}
+              {ready
+                ? 'Download JSON without local storage, save a local copy, or open the local sheet.'
+                : 'The character is missing minimum data.'}
             </Typography>
           </Box>
-          <Button
-            variant="contained"
-            disabled={!ready}
-            startIcon={<FileText size={16} />}
-            onClick={() => {
-              const saved = saveCharacter(character, state.data);
-              const charId = saved?.id || getActiveCharId();
-              navigate(charId ? `/charsheet?char=${encodeURIComponent(charId)}` : '/charsheet');
-            }}
-            sx={{ alignSelf: { xs: 'stretch', sm: 'center' } }}
-          >
-            Open sheet
-          </Button>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.65} sx={{ alignSelf: { xs: 'stretch', sm: 'center' } }}>
+            <Button
+              variant="outlined"
+              disabled={!ready}
+              startIcon={<Download size={16} />}
+              onClick={() => downloadBuilderSheet(character, state.data)}
+            >
+              Download JSON
+            </Button>
+            <Button
+              variant="outlined"
+              disabled={!ready}
+              startIcon={<Save size={16} />}
+              onClick={() => {
+                const saved = saveCharacter(character, state.data);
+                if (saved?.id) dispatch({ type: 'import/message', message: 'Saved locally.' });
+              }}
+            >
+              Save local
+            </Button>
+            <Button
+              variant="contained"
+              disabled={!ready}
+              startIcon={<FileText size={16} />}
+              onClick={() => {
+                const saved = saveCharacter(character, state.data);
+                const charId = saved?.id || getActiveCharId();
+                navigate(charId ? `/charsheet?char=${encodeURIComponent(charId)}` : '/charsheet');
+              }}
+            >
+              Open sheet
+            </Button>
+          </Stack>
         </Box>
       </Stack>
     </BuilderPanel>

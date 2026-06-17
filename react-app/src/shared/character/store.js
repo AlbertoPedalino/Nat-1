@@ -50,8 +50,9 @@ export function loadCharacter(id) {
   }
 }
 
-export function saveCharacter(id, character) {
+export function saveCharacter(id, character, options = {}) {
   if (!id || !character) return null;
+  const { emit = true } = options;
   const now = Date.now();
   const next = {
     ...character,
@@ -62,9 +63,11 @@ export function saveCharacter(id, character) {
   localStorage.setItem(CHAR_KEY(id), JSON.stringify(next));
   upsertIndex(id, next.name);
   // Notify any cloud auto-sync listener that this character changed locally.
-  try {
-    window.dispatchEvent(new CustomEvent('gb:char-saved', { detail: { id } }));
-  } catch (_) {}
+  if (emit) {
+    try {
+      window.dispatchEvent(new CustomEvent('gb:char-saved', { detail: { id } }));
+    } catch (_) {}
+  }
   return next;
 }
 

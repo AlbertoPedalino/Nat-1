@@ -14,45 +14,110 @@
       const rawGet = Storage.prototype.getItem;
       const rawSet = Storage.prototype.setItem;
       const rawRemove = Storage.prototype.removeItem;
+      const rawKey = Storage.prototype.key;
+      const REGISTRY_KEY = 'gb_encounter_registry';
+      const ACTIVE_KEY = 'gb_active_encounter_id';
+      const LEGACY_KEYS = Array.from(scopedKeys);
       const params = new URLSearchParams(location.search);
       const clean = v => String(v || '').toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 48);
+      const makeId = () => `enc_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
+      const readRegistry = () => {
+        try { return JSON.parse(rawGet.call(localStorage, REGISTRY_KEY) || '[]').filter(x => x && x.id); }
+        catch (_) { return []; }
+      };
+      const hasScopedData = candidateId => {
+        if (!candidateId) return false;
+        const candidatePrefix = `gb:enc:${candidateId}:`;
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = rawKey.call(localStorage, i);
+          if (String(key || '').startsWith(candidatePrefix)) return true;
+        }
+        return false;
+      };
+      const hasLegacyData = () => LEGACY_KEYS.some(key => rawGet.call(localStorage, key) != null);
+      const isKnown = candidateId => readRegistry().some(x => x.id === candidateId) || hasScopedData(candidateId);
       let id = clean(params.get('enc'));
+      let saved = false;
       if (id === 'new') {
-        id = `enc_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
+        id = makeId();
         history.replaceState(null, '', `${location.pathname}?enc=${encodeURIComponent(id)}`);
+      } else if (id) {
+        saved = isKnown(id) || (id === 'default' && hasLegacyData());
+      } else {
+        const activeId = clean(rawGet.call(localStorage, ACTIVE_KEY));
+        if (activeId && isKnown(activeId)) {
+          id = activeId;
+          saved = true;
+        } else if (hasLegacyData()) {
+          id = 'default';
+          saved = true;
+          history.replaceState(null, '', `${location.pathname}?enc=default`);
+        } else {
+          id = makeId();
+          history.replaceState(null, '', `${location.pathname}?enc=${encodeURIComponent(id)}`);
+        }
       }
-      if (!id) id = clean(rawGet.call(localStorage, 'gb_active_encounter_id')) || 'default';
-      rawSet.call(localStorage, 'gb_active_encounter_id', id);
       window.GB_ENCOUNTER_ID = id;
+      window.gbIsEncounterSaved = () => saved;
+      window.gbNotifyInstanceState = function () {
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({ type: 'gb:instance-state', kind: 'encounter', id, saved }, location.origin);
+        }
+      };
       window.gbRegisterEncounterScope = function (label, opts) {
-        const raw = rawGet.call(localStorage, 'gb_encounter_registry') || '[]';
-        let list = [];
-        try { list = JSON.parse(raw); } catch (_) {}
+        saved = true;
+        rawSet.call(localStorage, ACTIVE_KEY, id);
+        let list = readRegistry();
         const now = Date.now();
         const existing = list.find(x => x && x.id === id);
         const force = !!(opts && opts.force);
         const name = (!force && existing && existing.name) ? existing.name : (String(label || '').trim() || id);
         list = [{ id, name, updatedAt: now }, ...list.filter(x => x && x.id !== id)].slice(0, 20);
-        rawSet.call(localStorage, 'gb_encounter_registry', JSON.stringify(list));
+        rawSet.call(localStorage, REGISTRY_KEY, JSON.stringify(list));
+        window.gbNotifyInstanceState();
       };
       const prefix = `gb:enc:${id}:`;
       const scoped = key => scopedKeys.has(String(key || '')) ? prefix + key : key;
       Storage.prototype.getItem = function (key) { return rawGet.call(this, scoped(key)); };
-      Storage.prototype.setItem = function (key, val) { return rawSet.call(this, scoped(key), val); };
-      Storage.prototype.removeItem = function (key) { return rawRemove.call(this, scoped(key)); };
-      // One-time migration: copy legacy unscoped keys to the "default" instance
-      try {
-        const migFlag = 'gb_enc_migrated_v1';
-        if (!rawGet.call(localStorage, migFlag)) {
+      Storage.prototype.setItem = function (key, val) {
+        const outKey = scoped(key);
+        if (outKey !== key && !saved) return;
+        return rawSet.call(this, outKey, val);
+      };
+      Storage.prototype.removeItem = function (key) {
+        const outKey = scoped(key);
+        if (outKey !== key && !saved) return;
+        return rawRemove.call(this, outKey);
+      };
+      window.gbSaveEncounterInstance = function () {
+        if (typeof gbRegisterEncounterScope === 'function') gbRegisterEncounterScope('Encounter ' + (window.GB_ENCOUNTER_ID || 'default'));
+        try { if (typeof saveParty === 'function') saveParty(); } catch (_) {}
+        try { if (typeof saveCombatState === 'function') saveCombatState(); } catch (_) {}
+        const confirm = document.getElementById('save-confirm');
+        if (confirm) {
+          confirm.innerHTML = `${luci('save')} Instance saved`;
+          refreshIcons();
+          setTimeout(() => { confirm.textContent = ''; }, 3000);
+        }
+        window.gbNotifyInstanceState();
+      };
+      window.addEventListener('message', function (event) {
+        if (event.origin !== location.origin || !event.data) return;
+        if (event.data.type === 'gb:save-instance') window.gbSaveEncounterInstance();
+        if (event.data.type === 'gb:request-instance-state') window.gbNotifyInstanceState();
+      });
+      if (saved && id === 'default' && !rawGet.call(localStorage, 'gb_enc_migrated_v1')) {
+        try {
           const defPrefix = 'gb:enc:default:';
           scopedKeys.forEach(k => {
             const legacy = rawGet.call(localStorage, k);
             const already = rawGet.call(localStorage, defPrefix + k);
             if (legacy != null && already == null) rawSet.call(localStorage, defPrefix + k, legacy);
           });
-          rawSet.call(localStorage, migFlag, '1');
-        }
-      } catch (_) {}
+          rawSet.call(localStorage, 'gb_enc_migrated_v1', '1');
+        } catch (_) {}
+      }
+      window.addEventListener('DOMContentLoaded', window.gbNotifyInstanceState);
     })();
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -2098,7 +2163,7 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
 
 <body>
   <script>
-    if (typeof gbRegisterEncounterScope === 'function') gbRegisterEncounterScope('Encounter ' + (window.GB_ENCOUNTER_ID || 'default'));
+    if (typeof gbNotifyInstanceState === 'function') gbNotifyInstanceState();
   </script>
   <div class="app">
 
@@ -3977,6 +4042,14 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
 
     function saveEncounter() {
       if (!encounter.length) return;
+      if (typeof gbIsEncounterSaved === 'function' && !gbIsEncounterSaved()) {
+        const confirm = document.getElementById('save-confirm');
+        if (confirm) {
+          confirm.innerHTML = `${luci('save')} Save instance first`; refreshIcons();
+          setTimeout(() => { confirm.textContent = ''; }, 3000);
+        }
+        return;
+      }
 
       const nameInput = document.getElementById('enc-name');
       const name = nameInput.value.trim() ||

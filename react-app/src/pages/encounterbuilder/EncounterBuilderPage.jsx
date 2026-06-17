@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Box } from '@mui/material';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../components/AppTopBar.jsx';
+import SaveInstanceButton from '../../components/SaveInstanceButton.jsx';
 import StandaloneHtmlFrame from '../../components/StandaloneHtmlFrame.jsx';
 import { loadClassAdapters, loadCoreAdapters } from '../../adapters/index.js';
 import { useAuth } from '../../shared/cloud/AuthProvider.jsx';
@@ -71,6 +72,7 @@ export default function EncounterBuilderPage() {
   const { cloudEnabled, status, user } = useAuth();
   const iframeRef = useRef(null);
   const [frameLoads, setFrameLoads] = useState(0);
+  const [instanceSaved, setInstanceSaved] = useState(false);
   const [payload, setPayload] = useState({
     cloudEnabled,
     status: cloudEnabled ? 'loading' : 'disabled',
@@ -147,6 +149,10 @@ export default function EncounterBuilderPage() {
     target.postMessage({ type: MESSAGE_TYPE, payload }, window.location.origin);
   }, [payload]);
 
+  const postToFrame = useCallback((type) => {
+    iframeRef.current?.contentWindow?.postMessage({ type }, window.location.origin);
+  }, []);
+
   useEffect(() => {
     postPayload();
   }, [postPayload, frameLoads]);
@@ -155,6 +161,9 @@ export default function EncounterBuilderPage() {
     const handleMessage = (event) => {
       if (event.origin !== window.location.origin) return;
       if (event.data?.type === READY_TYPE) postPayload();
+      if (event.data?.type === 'gb:instance-state' && event.data?.kind === 'encounter') {
+        setInstanceSaved(Boolean(event.data.saved));
+      }
     };
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
@@ -162,12 +171,17 @@ export default function EncounterBuilderPage() {
 
   return (
     <Box sx={encounterPageSx}>
-      <AppTopBar />
+      <AppTopBar>
+        <SaveInstanceButton saved={instanceSaved} onClick={() => postToFrame('gb:save-instance')} />
+      </AppTopBar>
       <StandaloneHtmlFrame
         title="Encounter Builder"
         src={src}
         iframeRef={iframeRef}
-        onLoad={() => setFrameLoads((value) => value + 1)}
+        onLoad={() => {
+          setFrameLoads((value) => value + 1);
+          postToFrame('gb:request-instance-state');
+        }}
         rootSx={encounterFrameSx}
       />
     </Box>

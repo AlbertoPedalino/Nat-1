@@ -4,8 +4,7 @@ import { Box, Button, Typography, Stack, CircularProgress } from '@mui/material'
 import { Home, RefreshCw, ScrollText, Download, LogIn, Trash2 } from 'lucide-react';
 import { useAuth } from '../../shared/cloud/AuthProvider.jsx';
 import AuthDialog from '../../shared/cloud/AuthDialog.jsx';
-import { listAllCharacters, pullCharacter, deleteCloudCharacter } from '../../shared/cloud/cloudCharacters.js';
-import { markForeignEdit, unmarkForeignEdit } from '../../shared/cloud/cloudForeign.js';
+import { listAllCharacters, deleteCloudCharacter } from '../../shared/cloud/cloudCharacters.js';
 import { supabase } from '../../shared/cloud/supabaseClient.js';
 
 function fmt(ts) {
@@ -44,13 +43,7 @@ export default function GmSheetsPage() {
       navigate(`/campaign-sheet?id=${encodeURIComponent(row.id)}`);
       return;
     }
-    try {
-      await pullCharacter(row.id);
-      if (row.owner !== myId) markForeignEdit(row.id); else unmarkForeignEdit(row.id);
-      navigate(`/charsheet?char=${encodeURIComponent(row.id)}`);
-    } catch (e) {
-      setError(e?.message || 'Failed to open sheet.');
-    }
+    navigate(`/campaign-sheet?id=${encodeURIComponent(row.id)}&edit=1`);
   };
 
   const deleteRow = async (row) => {

@@ -90,6 +90,22 @@ export async function updateForeignCharacter(charId) {
   return data;
 }
 
+// Direct cloud edit path used when local storage persistence is disabled.
+// Updates only the sheet payload/name, preserving owner and campaign links.
+export async function updateCloudCharacterData(charId, character) {
+  if (!charId || !character) throw new Error('Character data missing.');
+  const supabase = requireClient();
+  const { data, error } = await supabase
+    .from(TABLE)
+    .update({ name: character.name || 'Character', data: character, updated_at: new Date().toISOString() })
+    .eq('id', charId)
+    .select('id')
+    .maybeSingle();
+  if (error) throw error;
+  if (!data?.id) throw new Error('No permission to update this character.');
+  return data;
+}
+
 // Pull a cloud character back into local storage (so existing screens can open it).
 export async function pullCharacter(charId) {
   const supabase = requireClient();

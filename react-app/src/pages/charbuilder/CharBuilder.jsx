@@ -31,7 +31,6 @@ import { loadBackgrounds, loadClassIndex, loadFeats, loadItems, loadSpecies, loa
 import { builderReducer, initialBuilderState, normalizeCharacterLevels } from './state.js';
 import { BackgroundStep, ClassStep, EquipmentStep, ScoresStep, SheetStep, SpeciesStep } from './steps/index.js';
 import {
-  createCharacter as storeCreateCharacter,
   getActiveCharId,
   loadCharacter as storeLoadCharacter,
   setActiveCharId,
@@ -86,6 +85,11 @@ function ensureActiveCharacter() {
   const params = new URLSearchParams(window.location.search);
   const charParam = params.get('char');
 
+  if (charParam === 'new') {
+    setActiveCharId(null);
+    return;
+  }
+
   if (charParam && charParam !== 'new') {
     const stored = storeLoadCharacter(charParam);
     if (stored) {
@@ -102,9 +106,7 @@ function ensureActiveCharacter() {
     }
   }
 
-  const created = storeCreateCharacter({ name: 'New Character' });
-  setActiveCharId(created.id);
-  window.history.replaceState(null, '', `${window.location.pathname}?char=${created.id}`);
+  setActiveCharId(null);
 }
 
 function hasFinishedLoading(loading) {
@@ -211,7 +213,7 @@ export default function CharBuilder() {
 
   useEffect(() => {
     if (!hasFinishedLoading(state.loading)) return;
-    const handle = setTimeout(() => saveCharacter(state.character, state.data), 300);
+    const handle = setTimeout(() => saveCharacter(state.character, state.data, { createIfMissing: false }), 300);
     return () => clearTimeout(handle);
   }, [state.character, state.loading, state.data]);
 
