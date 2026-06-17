@@ -11,6 +11,7 @@ import { summarizeCharacter } from '../campaigns/sheetSummary.js';
 
 const MESSAGE_TYPE = 'gb:campaign-players';
 const READY_TYPE = 'gb:encounter-builder-ready';
+const OPEN_SHEET_TYPE = 'gb:open-sheet';
 const HEX_COLOR_RE = /^#[0-9a-f]{6}$/i;
 
 function numberOr(value, fallback) {
@@ -163,6 +164,14 @@ export default function EncounterBuilderPage() {
       if (event.data?.type === READY_TYPE) postPayload();
       if (event.data?.type === 'gb:instance-state' && event.data?.kind === 'encounter') {
         setInstanceSaved(Boolean(event.data.saved));
+      }
+      if (event.data?.type === OPEN_SHEET_TYPE && event.data?.id) {
+        // Open the player's cloud sheet in a new tab. The encounter builder only
+        // surfaces players from campaigns where the user is GM, so edit access is
+        // expected; RLS still enforces it server-side.
+        const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
+        const url = `${base}/campaign-sheet?id=${encodeURIComponent(event.data.id)}&edit=1`;
+        window.open(url, '_blank', 'noopener');
       }
     };
     window.addEventListener('message', handleMessage);

@@ -727,6 +727,23 @@
       outline: none
     }
 
+    .p-name-link {
+      display: inline-block;
+      max-width: 100%;
+      padding: 2px 4px;
+      font-size: 13px;
+      color: var(--text);
+      cursor: pointer;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+    .p-name-link:hover {
+      color: var(--gold2);
+      text-decoration: underline dotted
+    }
+
     .p-color input[type=color] {
       width: 22px;
       height: 22px;
@@ -2402,6 +2419,7 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
       return {
         combatants: combatants.map(c => ({
           id: c.id, name: c.name, initiative: c.initiative, initMod: c.initMod || 0,
+          sourceId: c.sourceId || null,
           hpCurrent: c.hpCurrent, hpMax: c.hpMax, ac: c.ac, type: c.type,
           deathSaves: c.deathSaves, isDead: c.isDead,
           label: c.label, shape: c.shape, shapeClr: c.shapeClr, color: c.color || null,
@@ -2522,7 +2540,9 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
       document.getElementById('plist').innerHTML = players.map((p, i) =>
         `<div class="prow-item">
       <div class="p-color"><input type="color" value="${playerColor(sanitizePlayerColor(p.color) || p.iconColor, i)}" oninput="updatePColor(${i}, this.value)"/></div>
-      <div class="p-name"><input type="text" value="${esc(p.name)}" placeholder="Giocatore ${i + 1}" oninput="updatePName(${i}, this.value)"/></div>
+      <div class="p-name">${p.sourceId
+        ? `<span class="p-name-link" title="Apri scheda" onclick="openPlayerSheet('${escAttr(p.sourceId)}')">${esc(p.name)}</span>`
+        : `<input type="text" value="${esc(p.name)}" placeholder="Giocatore ${i + 1}" oninput="updatePName(${i}, this.value)"/>`}</div>
       <div class="p-hp"><span>HP Max</span><input type="number" value="${p.hpMax}" onchange="updatePHP(${i}, this.value)"/></div>
       <div class="p-ac"><span>CA</span><input type="number" value="${p.ac}" onchange="updatePAC(${i}, this.value)"/></div>
       <span class="pmlab">Init</span>
@@ -2760,6 +2780,18 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
       try {
         if (window.parent && window.parent !== window) {
           window.parent.postMessage({ type: ENCOUNTER_READY_MESSAGE }, window.location.origin);
+        }
+      } catch (_) {}
+    }
+
+    // Ask the parent app to open this character's cloud sheet in a new page.
+    // Only campaign players carry a sourceId; the parent enforces access (RLS).
+    function openPlayerSheet(sourceId) {
+      const id = String(sourceId || '').trim();
+      if (!id) return;
+      try {
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({ type: 'gb:open-sheet', id }, window.location.origin);
         }
       } catch (_) {}
     }
@@ -3402,6 +3434,7 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
       players.forEach(p => {
         combatants.push({
           id: cid++, name: p.name || 'PG', type: 'player',
+          sourceId: p.sourceId || null,
           initiative: d20() + p.initMod, initMod: p.initMod, ac: p.ac || 10,
           hpMax: p.hpMax || 10, hpCurrent: p.hpMax || 10, deathSaves: { s: 0, f: 0 },
           monsterData: null, isDead: false, label: null, shape: null, shapeClr: null,
@@ -3568,7 +3601,12 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
           ${mon && c.monsterData ? `<img ${getMonIconAttrs(c.monsterData)} class="mon-icon">` : `<div class="mon-icon" style="display:flex;align-items:center;justify-content:center;font-size:9px;color:#111;background:${c.color||'#a0a0ff'};border-radius:50%;font-weight:700">PG</div>`}
           <div class="c-ac-col">${c.ac}<small>AC</small></div>
           ${c.shape ? `<span class="combat-label" style="color:${c.shapeClr}" title="${esc(c.name)} ${c.label}"><span class="lbl-shape">${c.shape}</span><span class="lbl-letter">${c.label}</span></span>` : ''}
-          <span class="c-nm${mon && c.monsterData ? ' click' : ''}" ${mon && c.monsterData ? `onclick="showStatCombat(${c.id})"` : ''}>${esc(c.name)}</span>
+          ${(() => {
+            const sheetClick = c.type === 'player' && c.sourceId;
+            const statClick = mon && c.monsterData;
+            const onclick = statClick ? `onclick="showStatCombat(${c.id})"` : (sheetClick ? `onclick="openPlayerSheet('${escAttr(c.sourceId)}')"` : '');
+            return `<span class="c-nm${statClick || sheetClick ? ' click' : ''}" title="${sheetClick ? 'Apri scheda' : ''}" ${onclick}>${esc(c.name)}</span>`;
+          })()}
         </div>
         <div class="crow-hp">
           <div class="hp-bar"><div class="hp-fill" style="width:${pct}%;background:${hpClr}"></div></div>
