@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Box, Typography, Button, Chip } from '@mui/material';
-import { ArrowLeft, Home, Sun, Moon, Download, Save, Wand2, Hammer, Axe, Music, Cross, Feather, Sword, Dumbbell, Shield, Compass, Eye, Sparkles, Flame, BookOpen, Dices, Trash2 } from 'lucide-react';
+import { ArrowLeft, Home, Sun, Moon, Wand2, Hammer, Axe, Music, Cross, Feather, Sword, Dumbbell, Shield, Compass, Eye, Sparkles, Flame, BookOpen, Dices, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { levelFromXp, xpForLevel, xpProgressPct, MAX_LEVEL } from '../../../shared/character/xp.js';
 import { rollFormula as rollFormulaDice, formatRollTitle } from '../../../shared/character/dice.js';
@@ -85,11 +85,10 @@ const appNavButtonSx = {
   letterSpacing: '0.08em',
 };
 
-export default function TopBar({ C, sheet, onShortRest, onLongRest, onDownload, onSaveLocal, onUpdateXp, onUpdateCharacter, rollLog, onClearRollLog, onShowToast }) {
+export default function TopBar({ C, sheet, onShortRest, onLongRest, onUpdateXp, onUpdateCharacter, rollLog, onClearRollLog, onShowToast }) {
   const [colorAnchor, setColorAnchor] = useState(null);
   const [rollLogOpen, setRollLogOpen] = useState(false);
   const [customRollOpen, setCustomRollOpen] = useState(false);
-  const [saveOpen, setSaveOpen] = useState(false);
   const navigate = useNavigate();
   const extra = C.extraClasses || [];
   const pLv = C.classLevel || C.level;
@@ -151,10 +150,6 @@ export default function TopBar({ C, sheet, onShortRest, onLongRest, onDownload, 
           alignItems: { xs: 'flex-end', md: 'center' },
         }}>
           <CloudMenu buttonSx={appNavButtonSx} />
-          <Button size="small" variant="contained" color="primary" startIcon={<Save size={14} />}
-            onClick={() => setSaveOpen(true)} sx={appNavButtonSx}>
-            SAVE / EXPORT
-          </Button>
         </Box>
       </Box>
       <Box sx={{
@@ -315,32 +310,6 @@ export default function TopBar({ C, sheet, onShortRest, onLongRest, onDownload, 
               );
             })
           )}
-      </SheetDialog>
-
-      <SheetDialog
-        open={saveOpen}
-        onClose={() => setSaveOpen(false)}
-        maxWidth="xs"
-        title="Save Character"
-        icon={<Save size={20} />}
-        actions={(
-          <Button onClick={() => setSaveOpen(false)} variant="outlined" size="small" sx={{ color: 'text.secondary' }}>
-            Cancel
-          </Button>
-        )}
-      >
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, py: 0.5 }}>
-          <Button fullWidth variant="outlined" color="secondary" startIcon={<Download size={16} />}
-            onClick={() => { setSaveOpen(false); onDownload?.(); }} sx={{ justifyContent: 'flex-start', py: 1 }}>
-            Download JSON
-          </Button>
-          {onSaveLocal ? (
-            <Button fullWidth variant="contained" color="primary" startIcon={<Save size={16} />}
-              onClick={() => { setSaveOpen(false); onSaveLocal(); }} sx={{ justifyContent: 'flex-start', py: 1 }}>
-              Save local
-            </Button>
-          ) : null}
-        </Box>
       </SheetDialog>
 
       <CustomRollDialog open={customRollOpen} onClose={() => setCustomRollOpen(false)} onShowToast={onShowToast} />

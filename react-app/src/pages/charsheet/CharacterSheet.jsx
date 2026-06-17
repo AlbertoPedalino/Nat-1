@@ -29,14 +29,11 @@ import { applyFreeCastRest, getFreeCastDefsForCharacter } from './logic/spellsTa
 import { installedRegistry } from '../../adapters/index.js';
 import { ensureSheetRuntimeAdapters } from './logic/sheetRuntimeAdapters.js';
 import { loadItems, loadOptionalFeatures, loadConditions, reconcileInventoryWithItemsDb } from '../charbuilder/logic/dataLoaders.js';
-import { createCharacterExport } from '../charbuilder/logic/characterExport.js';
 import { updateCloudCharacterData } from '../../shared/cloud/cloudCharacters.js';
 import {
-  createCharacter as storeCreateCharacter,
   getActiveCharId,
   loadCharacter as storeLoadCharacter,
   patchCharacter as storePatchCharacter,
-  saveCharacter as storeSaveCharacter,
   setActiveCharId,
 } from '../../shared/character/store.js';
 
@@ -187,16 +184,6 @@ export default function CharacterSheet({ externalChar = null, externalCharId = n
   const showNotice = useCallback((label, message) => {
     showDiceToast(label, message, null, []);
   }, [showDiceToast]);
-
-  const saveLocalCopy = useCallback(() => {
-    if (!C) return;
-    const targetId = charId || C.id;
-    const saved = targetId ? storeSaveCharacter(targetId, C, { emit: !usesExternalChar }) : storeCreateCharacter(C);
-    if (!saved?.id) return;
-    setCharId(saved.id);
-    setActiveCharId(saved.id);
-    showNotice('Local Save', 'Saved locally.');
-  }, [C, charId, showNotice, usesExternalChar]);
 
   useEffect(() => {
     if (!usesExternalChar || readOnly || !charId || !C) return undefined;
@@ -581,18 +568,6 @@ export default function CharacterSheet({ externalChar = null, externalCharId = n
       : sheetActions
   ), [readOnly, sheetActions, noop]);
 
-  const downloadSheet = useCallback(() => {
-    if (!C) return;
-    const data = JSON.stringify(createCharacterExport(C), null, 2);
-    const blob = new Blob([data], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${C.name || 'character'}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }, [C]);
-
   if (!C || !sheet) {
     return (
       <Box sx={{ p: 4, textAlign: 'center', color: 'text.secondary', fontSize: '1.1rem' }}>
@@ -611,8 +586,8 @@ export default function CharacterSheet({ externalChar = null, externalCharId = n
     <SheetActionsProvider value={effectiveActions}>
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pb: 4, width: '100%' }}>
       {!readOnly && (
-        <TopBar C={C} sheet={sheet} onShortRest={openShortRest} onLongRest={openLongRest} onDownload={downloadSheet} onUpdateXp={updateXp} onUpdateCharacter={updateCurrentCharacter}
-          onSaveLocal={saveLocalCopy} rollLog={rollLog} onClearRollLog={() => setRollLog([])} onShowToast={showDiceToast} />
+        <TopBar C={C} sheet={sheet} onShortRest={openShortRest} onLongRest={openLongRest} onUpdateXp={updateXp} onUpdateCharacter={updateCurrentCharacter}
+          rollLog={rollLog} onClearRollLog={() => setRollLog([])} onShowToast={showDiceToast} />
       )}
       <Box sx={{ maxWidth: 1280, mx: { md: 'auto' }, px: { xs: '0.6rem', md: '1.1rem' }, overflow: 'hidden' }}>
         <Box sx={{ bgcolor: 'rgba(35,32,26,1)', borderBottom: 1, borderColor: 'divider', py: '0.55rem', px: { xs: '0.45rem', md: '0.6rem' } }}>

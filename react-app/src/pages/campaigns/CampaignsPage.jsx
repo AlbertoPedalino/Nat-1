@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Box, Button, Typography, Stack, TextField, MenuItem, Chip, CircularProgress, Snackbar, Alert, IconButton, Divider, useMediaQuery, useTheme } from '@mui/material';
-import { Home, Users, Plus, LogIn, Eye, ScrollText, Copy, LogOut, X, Trash2 } from 'lucide-react';
+import { Home, Users, Plus, LogIn, ScrollText, Copy, LogOut, X, Trash2 } from 'lucide-react';
 import { useAuth } from '../../shared/cloud/AuthProvider.jsx';
 import AuthDialog from '../../shared/cloud/AuthDialog.jsx';
 import {
@@ -193,7 +193,7 @@ export default function CampaignsPage() {
                         const canEditChar = mine || isGm || c.gm === myId;
                         const s = summarizeCharacter(ch.data);
                         return (
-                          <Box key={ch.id} sx={rowSx}>
+                          <Box key={ch.id} sx={rowSx} onClick={() => openCampaignChar(ch, c)}>
                             <ScrollText size={15} color={canEditChar ? '#2ecc71' : '#7a9bd6'} style={{ flexShrink: 0, alignSelf: 'flex-start', marginTop: 3 }} />
                             <Box sx={{ flex: 1, minWidth: 0 }}>
                               <Typography sx={rowNameSx}>{ch.name || ch.id}</Typography>
@@ -207,13 +207,8 @@ export default function CampaignsPage() {
                                 </Box>
                               ) : null}
                             </Box>
-                            {canEditChar ? (
-                              <Button size="small" variant="outlined" onClick={() => openCampaignChar(ch, c)} disabled={busy} sx={navBtnSx}>Open</Button>
-                            ) : (
-                              <Button size="small" variant="outlined" startIcon={<Eye size={13} />} onClick={() => navigate(`/campaign-sheet?id=${encodeURIComponent(ch.id)}`)} sx={navBtnSx}>View</Button>
-                            )}
                             {mine ? (
-                              <IconButton size="small" onClick={() => assignChar(ch.id, null)} title="Remove from campaign" sx={{ color: '#de675f' }}>
+                              <IconButton size="small" onClick={(e) => { e.stopPropagation(); assignChar(ch.id, null); }} title="Remove from campaign" sx={{ color: '#de675f' }}>
                                 <X size={14} />
                               </IconButton>
                             ) : null}
@@ -263,7 +258,7 @@ const boxTitleSx = { fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.72rem'
 const cardSx = { p: 1.5, border: '1px solid rgba(180,150,90,0.3)', borderRadius: '12px', bgcolor: '#1a1815' };
 const campNameSx = { fontFamily: '"Cinzel", Georgia, serif', fontSize: '1rem', fontWeight: 700, color: '#edd48a' };
 const chipSx = { height: 20, fontSize: '0.6rem', bgcolor: 'rgba(202,165,80,0.12)', borderColor: 'rgba(202,165,80,0.35)', color: '#e8c96a' };
-const rowSx = { display: 'flex', alignItems: 'flex-start', gap: 1, p: 0.75, border: '1px solid rgba(180,150,90,0.15)', borderRadius: '8px', bgcolor: '#232019' };
+const rowSx = { display: 'flex', alignItems: 'flex-start', gap: 1, p: 0.75, border: '1px solid rgba(180,150,90,0.15)', borderRadius: '8px', bgcolor: '#232019', cursor: 'pointer', transition: 'border-color 0.15s, background-color 0.15s', '&:hover': { borderColor: 'rgba(180,150,90,0.45)', bgcolor: '#2a2620' } };
 const rowNameSx = { fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.85rem', color: '#edd48a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
 const metaSx = { fontSize: '0.7rem', color: '#7a6a4a' };
 const statsRowSx = { display: 'flex', flexWrap: 'wrap', gap: '0.15rem 0.7rem', mt: 0.4 };
