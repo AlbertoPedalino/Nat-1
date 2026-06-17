@@ -83,8 +83,9 @@ export function deleteCharacter(id) {
   localStorage.removeItem(CHAR_KEY(id));
   writeIndex(listCharacters().filter((e) => e.id !== id));
   if (getActiveCharId() === id) setActiveCharId(null);
-  // Let cloud sync remove the owner's copy too (owner-scoped, so it only ever
-  // deletes the deleter's own row).
+  // Local delete only — the cloud copy is NOT removed (server deletion is an
+  // explicit action in "My sheets"). Auto-sync uses this event just to cancel
+  // any pending push for the removed id.
   try {
     window.dispatchEvent(new CustomEvent('gb:char-deleted', { detail: { id } }));
   } catch (_) {}

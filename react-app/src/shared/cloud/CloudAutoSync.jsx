@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useAuth } from './AuthProvider.jsx';
-import { pushCharacter, updateForeignCharacter, deleteOwnCloudCharacter } from './cloudCharacters.js';
+import { pushCharacter, updateForeignCharacter } from './cloudCharacters.js';
 import { isSyncExcluded } from './cloudSyncExclude.js';
 import { isForeignEdit } from './cloudForeign.js';
 
@@ -49,10 +49,11 @@ export default function CloudAutoSync() {
 
     const onDeleted = (e) => {
       const id = e?.detail?.id;
-      if (!id || !activeRef.current) return;
+      if (!id) return;
+      // Local delete only — never cascade to the server. The cloud copy is removed
+      // explicitly from the "My sheets" page. Still cancel any pending push so a
+      // queued save can't re-upload a sheet the user just deleted locally.
       clearTimeout(timers.current[id]);
-      // Owner-scoped: removing locally also removes the player's own cloud copy.
-      deleteOwnCloudCharacter(id).catch(() => {});
     };
 
     const timersSnapshot = timers.current;

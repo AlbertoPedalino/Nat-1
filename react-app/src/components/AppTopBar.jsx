@@ -1,16 +1,39 @@
-import { Box } from '@mui/material';
+import { Box, Button } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom';
+import { Home } from 'lucide-react';
 import CloudMenu from '../shared/cloud/CloudMenu.jsx';
 
 export const APP_TOP_BAR_HEIGHT = '48px';
 
-export default function AppTopBar({ sx, children }) {
+export default function AppTopBar({ sx, children, home = false }) {
   return (
     <Box sx={{ ...appTopBarSx, ...sx }}>
+      {home ? (
+        <Button
+          component={RouterLink}
+          to="/"
+          size="small"
+          variant="outlined"
+          color="primary"
+          startIcon={<Home size={14} />}
+          sx={homeBtnSx}
+        >
+          HOME
+        </Button>
+      ) : null}
       {children}
       <CloudMenu />
     </Box>
   );
 }
+
+const homeBtnSx = {
+  // Sticks the Home button to the left edge; children + CloudMenu stay right.
+  mr: 'auto',
+  fontFamily: '"Cinzel", Georgia, serif',
+  fontSize: '0.625rem',
+  letterSpacing: '0.08em',
+};
 
 const appTopBarSx = {
   position: 'fixed',

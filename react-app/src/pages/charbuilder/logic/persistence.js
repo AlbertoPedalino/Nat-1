@@ -447,16 +447,22 @@ function stripHeavyFields(character) {
   return out;
 }
 
-export function saveCharacter(character, data, options = {}) {
-  const { createIfMissing = true } = options;
+// Build the unified character object persisted to the store/cloud, WITHOUT
+// writing anywhere. `previous` is merged first so sheet-only fields (HP,
+// resources, roll log, ...) added outside the builder survive a builder re-save.
+export function buildSheetCharacter(character, data, previous = {}) {
   const builderCharacter = normalizeProficiencyChoicesForPersistence(character);
   const payload = makeSheetPayload(builderCharacter, data);
-  let id = getActiveCharId();
+  return stripHeavyFields({ ...(previous || {}), ...builderCharacter, ...payload });
+}
+
+export function saveCharacter(character, data, options = {}) {
+  const { createIfMissing = true } = options;
+  let id = options.id || getActiveCharId();
   const existing = id ? storeLoadCharacter(id) : null;
   if (!id && !createIfMissing) return null;
   if (id && !existing && !createIfMissing) return null;
-  const previous = existing || {};
-  const unified = stripHeavyFields({ ...previous, ...builderCharacter, ...payload });
+  const unified = buildSheetCharacter(character, data, existing || {});
   if (!id) {
     const created = storeCreateCharacter(unified);
     id = created.id;

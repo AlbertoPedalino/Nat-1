@@ -21,16 +21,19 @@ import { theme } from '../../theme.js';
 import ChoiceDescriptionDialog from './components/ChoiceDescriptionDialog.jsx';
 import ImportSheetFab from './components/ImportSheetFab.jsx';
 import CloudMenu from '../../shared/cloud/CloudMenu.jsx';
-import { excludeFromSync } from '../../shared/cloud/cloudSyncExclude.js';
+import { excludeFromSync, isSyncExcluded } from '../../shared/cloud/cloudSyncExclude.js';
 import PreviewPane from './components/PreviewPane.jsx';
 import { STEPS } from './constants.js';
 import { adapterRegistry, loadClassAdapters, loadCoreAdapters } from '../../adapters/index.js';
 import { getMod, getFinal } from '../charsheet/logic/calculations.js';
 import { adaptBuilderData } from '../../adapters/adapterPipeline.js';
-import { loadBackgrounds, loadClassIndex, loadFeats, loadItems, loadSpecies, loadSpells, loadOptionalFeatures, extractSheetData, importSheetPayload, saveCharacter } from './logic/index.js';
+import { loadBackgrounds, loadClassIndex, loadFeats, loadItems, loadSpecies, loadSpells, loadOptionalFeatures, extractSheetData, importSheetPayload, saveCharacter, buildSheetCharacter } from './logic/index.js';
 import { builderReducer, initialBuilderState, normalizeCharacterLevels } from './state.js';
 import { BackgroundStep, ClassStep, EquipmentStep, ScoresStep, SheetStep, SpeciesStep } from './steps/index.js';
+import { useAuth } from '../../shared/cloud/AuthProvider.jsx';
+import { getCloudCharacter, pushCharacterData, updateCloudCharacterData } from '../../shared/cloud/cloudCharacters.js';
 import {
+  generateCharId,
   getActiveCharId,
   loadCharacter as storeLoadCharacter,
   setActiveCharId,
@@ -117,7 +120,16 @@ export default function CharBuilder() {
   const [state, dispatch] = useReducer(builderReducer, undefined, createInitialBuilderState);
   const activeStep = STEPS[state.tab];
   const ActiveIcon = activeStep.icon;
-  const ensuredRef = useRef(false);
+  const { cloudEnabled, status } = useAuth();
+  // When logged into the cloud the builder is cloud-backed: the character is
+  // created/saved on the server and never written to localStorage. Logged out,
+  // it falls back to the local store. 'loading' = auth not resolved yet — wait.
+  const authResolved = !cloudEnabled || status !== 'loading';
+  const cloudActive = cloudEnabled && status === 'authed';
+  const hydratedRef = useRef(false);   // initial load (cloud pull / local) done
+  const builderIdRef = useRef(null);   // cloud character id for this session
+  const cloudCreatedRef = useRef(false); // cloud row already inserted
+  const cloudPrevRef = useRef(null);   // last persisted cloud object (merge base)
   const handleImportSheetFile = async (file) => {
     try {
       const payload = extractSheetData(await file.text());
@@ -137,10 +149,38 @@ export default function CharBuilder() {
   };
 
   useEffect(() => {
-    if (ensuredRef.current) return;
-    ensuredRef.current = true;
-    ensureActiveCharacter();
-  }, []);
+    if (!authResolved || hydratedRef.current) return;
+    const charParam = new URLSearchParams(window.location.search).get('char');
+    const excluded = charParam && charParam !== 'new' && isSyncExcluded(charParam);
+
+    if (!cloudActive || excluded) {
+      // Logged out, or an imported sheet flagged local-only: keep the local-store
+      // flow (the reducer already loaded any local copy; point the active id at it).
+      ensureActiveCharacter();
+      hydratedRef.current = true;
+      return;
+    }
+
+    // Cloud-backed: an existing ?char=id is pulled from the server into builder
+    // state (nothing is read from localStorage). A new builder creates its cloud
+    // row on the first autosave below.
+    if (charParam && charParam !== 'new') {
+      getCloudCharacter(charParam)
+        .then((row) => {
+          builderIdRef.current = charParam;
+          if (row?.data) {
+            cloudCreatedRef.current = true;
+            cloudPrevRef.current = row.data;
+            dispatch({ type: 'character/restore', character: row.data });
+          }
+        })
+        .catch(() => { builderIdRef.current = charParam; })
+        .finally(() => { hydratedRef.current = true; });
+    } else {
+      builderIdRef.current = null;
+      hydratedRef.current = true;
+    }
+  }, [authResolved, cloudActive]);
 
   useEffect(() => {
     const run = async (scope, loader, mapResult) => {
@@ -212,21 +252,48 @@ export default function CharBuilder() {
   }, [state.adaptersLoaded, state.dataAdapted, state.loading, state.data]);
 
   useEffect(() => {
-    if (!hasFinishedLoading(state.loading)) return;
+    if (!hasFinishedLoading(state.loading) || !authResolved) return;
+    // Cloud mode must wait for the initial pull, or a blank builder state would
+    // overwrite the real server character before it loads.
+    if (cloudActive && !hydratedRef.current) return;
+
     const handle = setTimeout(() => {
+      const activeId = builderIdRef.current || getActiveCharId();
+      // Imported sheets stay local even when logged in; everything else goes to
+      // the server only.
+      const useCloud = cloudActive && !(activeId && isSyncExcluded(activeId));
+
+      if (useCloud) {
+        // Save straight to the server on open (no need to "Open sheet" first) and
+        // on every edit — never touching localStorage. The first save inserts the
+        // row; later saves update it in place.
+        const unified = buildSheetCharacter(state.character, state.data, cloudPrevRef.current || {});
+        let id = builderIdRef.current;
+        if (!id) {
+          id = generateCharId();
+          builderIdRef.current = id;
+          // Point the URL at the new id so a reload/edit targets the same character.
+          window.history.replaceState(null, '', `${window.location.pathname}?char=${id}`);
+        }
+        const withId = { ...unified, id };
+        const op = cloudCreatedRef.current
+          ? updateCloudCharacterData(id, withId)
+          : pushCharacterData(id, withId);
+        op
+          .then(() => { cloudCreatedRef.current = true; cloudPrevRef.current = withId; })
+          .catch((error) => dispatch({ type: 'import/message', message: `Cloud save error: ${error?.message || error}` }));
+        return;
+      }
+
+      // Logged out: persist to the local store as before.
       const hadId = getActiveCharId();
-      // Create the cloud-synced instance on open (no need to "Open sheet" first):
-      // the first autosave creates the character, which fires gb:char-saved and
-      // CloudAutoSync pushes it to the server. Every later edit then syncs too.
       const saved = saveCharacter(state.character, state.data, { createIfMissing: true });
-      // Point the URL at the new id so a reload/edit targets the same character
-      // instead of spawning a duplicate from ?char=new (mirrors the import flow).
       if (saved?.id && !hadId) {
         window.history.replaceState(null, '', `${window.location.pathname}?char=${saved.id}`);
       }
-    }, 300);
+    }, cloudActive ? 1200 : 300);
     return () => clearTimeout(handle);
-  }, [state.character, state.loading, state.data]);
+  }, [state.character, state.loading, state.data, authResolved, cloudActive]);
 
   useEffect(() => {
     // Re-hydrate the PRIMARY class object only. class/select is tab-aware: on an

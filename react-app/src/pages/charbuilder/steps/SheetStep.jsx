@@ -5,6 +5,12 @@ import BuilderPanel from '../components/BuilderPanel.jsx';
 import { makeSheetPayload, saveCharacter } from '../logic/persistence.js';
 import { createCharacterExport } from '../logic/characterExport.js';
 import { getActiveCharId } from '../../../shared/character/store.js';
+import { useAuth } from '../../../shared/cloud/AuthProvider.jsx';
+
+function charIdFromUrl() {
+  const id = new URLSearchParams(window.location.search).get('char');
+  return id && id !== 'new' ? id : null;
+}
 
 function downloadBuilderSheet(character, data) {
   const payload = createCharacterExport(makeSheetPayload(character, data));
@@ -19,6 +25,8 @@ function downloadBuilderSheet(character, data) {
 
 export default function SheetStep({ state, dispatch }) {
   const navigate = useNavigate();
+  const { cloudEnabled, status } = useAuth();
+  const cloudActive = cloudEnabled && status === 'authed';
   const { character } = state;
   const required = [
     ['name', 'Name'],
@@ -74,7 +82,9 @@ export default function SheetStep({ state, dispatch }) {
               disabled={!ready}
               startIcon={<Save size={16} />}
               onClick={() => {
-                const saved = saveCharacter(character, state.data);
+                // Explicit local copy. In cloud mode pin it to the server id so
+                // it stays the same character (no duplicate row).
+                const saved = saveCharacter(character, state.data, cloudActive ? { id: charIdFromUrl() } : {});
                 if (saved?.id) dispatch({ type: 'import/message', message: 'Saved locally.' });
               }}
             >
@@ -85,6 +95,13 @@ export default function SheetStep({ state, dispatch }) {
               disabled={!ready}
               startIcon={<FileText size={16} />}
               onClick={() => {
+                if (cloudActive) {
+                  // Already saved to the server by the builder autosave — open the
+                  // cloud-backed sheet (the char has no local copy to open).
+                  const id = charIdFromUrl();
+                  if (id) navigate(`/campaign-sheet?id=${encodeURIComponent(id)}&edit=1`);
+                  return;
+                }
                 const saved = saveCharacter(character, state.data);
                 const charId = saved?.id || getActiveCharId();
                 navigate(charId ? `/charsheet?char=${encodeURIComponent(charId)}` : '/charsheet');

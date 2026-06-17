@@ -171,7 +171,7 @@ export default function EncounterBuilderPage() {
 
   return (
     <Box sx={encounterPageSx}>
-      <AppTopBar>
+      <AppTopBar home>
         <SaveInstanceButton saved={instanceSaved} onClick={() => postToFrame('gb:save-instance')} />
       </AppTopBar>
       <StandaloneHtmlFrame

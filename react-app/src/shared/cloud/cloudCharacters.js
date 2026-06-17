@@ -106,6 +106,32 @@ export async function updateCloudCharacterData(charId, character) {
   return data;
 }
 
+// Upsert a character to the cloud straight from an in-memory object — no local
+// store dependency. The builder's cloud-only autosave never writes localStorage,
+// so there's nothing for pushCharacter() (which reads the store) to read.
+export async function pushCharacterData(charId, character) {
+  if (!charId || !character) throw new Error('Character data missing.');
+  const supabase = requireClient();
+  const user = await currentUser();
+  const owner = await getCloudOwner(supabase, charId);
+  if (owner && owner !== user.id) {
+    // Not our row (e.g. a GM building on a player's id): data/name only.
+    return updateCloudCharacterData(charId, character);
+  }
+  const username = user.user_metadata?.username || null;
+  const row = {
+    id: charId,
+    owner: user.id,
+    owner_username: username,
+    name: character.name || 'Character',
+    data: character,
+    updated_at: new Date().toISOString(),
+  };
+  const { error } = await supabase.from(TABLE).upsert(row, { onConflict: 'id' });
+  if (error) throw error;
+  return row;
+}
+
 // Pull a cloud character back into local storage (so existing screens can open it).
 export async function pullCharacter(charId) {
   const supabase = requireClient();

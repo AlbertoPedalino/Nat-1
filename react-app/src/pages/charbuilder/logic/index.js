@@ -6,5 +6,5 @@ export {
   getProficiencyBonus, getPrimaryClassLevel, getSelectedFeatNames,
 } from './calculations.js';
 export { loadClassIndex, loadSpecies, loadBackgrounds, loadFeats, loadSpells, loadItems, loadOptionalFeatures } from './dataLoaders.js';
-export { extractSheetData, makeSheetPayload, saveCharacter, importSheetPayload } from './persistence.js';
+export { extractSheetData, makeSheetPayload, saveCharacter, buildSheetCharacter, importSheetPayload } from './persistence.js';
 export { buildPreviewSheetCharacter } from './previewSheet.js';

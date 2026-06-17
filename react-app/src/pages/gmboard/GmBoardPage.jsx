@@ -27,7 +27,7 @@ export default function GmBoardPage() {
 
   return (
     <Box sx={gmBoardPageSx}>
-      <AppTopBar>
+      <AppTopBar home>
         <SaveInstanceButton saved={instanceSaved} onClick={() => postToFrame('gb:save-instance')} />
       </AppTopBar>
       <StandaloneHtmlFrame
