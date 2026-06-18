@@ -31,8 +31,7 @@ import { loadBackgrounds, loadClassIndex, loadFeats, loadItems, loadSpecies, loa
 import { builderReducer, initialBuilderState, normalizeCharacterLevels } from './state.js';
 import { BackgroundStep, ClassStep, EquipmentStep, ScoresStep, SheetStep, SpeciesStep } from './steps/index.js';
 import { useAuth } from '../../shared/cloud/AuthProvider.jsx';
-import AppToast from '../../shared/AppToast.jsx';
-import { useToast } from '../../shared/useToast.js';
+import { useToast } from '../../shared/ToastProvider.jsx';
 import { getCloudCharacter, pushCharacterData, updateCloudCharacterData, deleteOwnCloudCharacter } from '../../shared/cloud/cloudCharacters.js';
 import {
   generateCharId,
@@ -120,7 +119,7 @@ function hasFinishedLoading(loading) {
 
 export default function CharBuilder() {
   const [state, dispatch] = useReducer(builderReducer, undefined, createInitialBuilderState);
-  const { toast, notify, clearToast } = useToast();
+  const { notify } = useToast();
   const activeStep = STEPS[state.tab];
   const ActiveIcon = activeStep.icon;
   const { cloudEnabled, status } = useAuth();
@@ -490,7 +489,6 @@ export default function CharBuilder() {
       </Box>
 
       <ChoiceDescriptionDialog value={state.choiceDialog} onClose={() => dispatch({ type: 'choice/close' })} />
-      <AppToast toast={toast} onClose={clearToast} />
     </Box>
     </ThemeProvider>
   );

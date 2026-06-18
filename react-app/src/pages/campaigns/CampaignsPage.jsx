@@ -4,7 +4,7 @@ import { Box, Button, Typography, Stack, TextField, MenuItem, Chip, CircularProg
 import { Home, Users, Plus, ScrollText, Copy, LogOut, X, Trash2, Eye } from 'lucide-react';
 import { useAuth } from '../../shared/cloud/AuthProvider.jsx';
 import CloudMenu from '../../shared/cloud/CloudMenu.jsx';
-import AppToast from '../../shared/AppToast.jsx';
+import { useToast } from '../../shared/ToastProvider.jsx';
 import {
   createCampaign, joinCampaign, listMyCampaigns,
   listCampaignCharacters, listCampaignMembers, setCharacterCampaign, leaveCampaign, deleteCampaign,
@@ -25,9 +25,7 @@ export default function CampaignsPage() {
   const [newName, setNewName] = useState('');
   const [joinCode, setJoinCode] = useState('');
   const [busy, setBusy] = useState(false);
-  const [toast, setToast] = useState(null);
-
-  const notify = (severity, msg) => setToast({ severity, msg });
+  const { notify } = useToast();
 
   const load = useCallback(async () => {
     if (status !== 'authed') return;
@@ -241,7 +239,6 @@ export default function CampaignsPage() {
         </>
       )}
 
-      <AppToast toast={toast} onClose={() => setToast(null)} autoHideDuration={4000} />
     </Box>
   );
 }

@@ -1,10 +1,10 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Box, Button, Typography, Stack, CircularProgress } from '@mui/material';
-import { Home, RefreshCw, ScrollText, Download, Trash2, Save } from 'lucide-react';
+import { Home, ScrollText, Download, Trash2, Save } from 'lucide-react';
 import { useAuth } from '../../shared/cloud/AuthProvider.jsx';
 import CloudMenu from '../../shared/cloud/CloudMenu.jsx';
-import AppToast from '../../shared/AppToast.jsx';
+import { useToast } from '../../shared/ToastProvider.jsx';
 import SheetDialog from '../../shared/character/SheetDialog.jsx';
 import { listAllCharacters, listMyCharacters, deleteCloudCharacter, pullCharacter } from '../../shared/cloud/cloudCharacters.js';
 import { createCharacterExport } from '../charbuilder/logic/characterExport.js';
@@ -24,7 +24,7 @@ export default function GmSheetsPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [dialogRow, setDialogRow] = useState(null);
-  const [feedback, setFeedback] = useState(null);
+  const { notify } = useToast();
   // On reload `refresh` fires twice: once when the session restores (isGm still
   // false → listMyCharacters) and again when the profile loads (isGm true →
   // listAllCharacters). Without this token guard the earlier, owner-only result
@@ -89,9 +89,9 @@ export default function GmSheetsPage() {
   const saveLocal = async (row) => {
     try {
       await pullCharacter(row.id);
-      setFeedback({ severity: 'success', msg: `"${row.name || row.id}" saved locally.` });
+      notify('success', `"${row.name || row.id}" saved locally.`);
     } catch (e) {
-      setFeedback({ severity: 'error', msg: e?.message || 'Failed to save locally.' });
+      notify('error', e?.message || 'Failed to save locally.');
     }
   };
 
@@ -103,11 +103,6 @@ export default function GmSheetsPage() {
         </Button>
         <Typography sx={titleSx}>{isGm ? 'Players sheets' : 'My sheets'}</Typography>
         <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1 }}>
-          {status === 'authed' ? (
-            <Button size="small" variant="outlined" startIcon={<RefreshCw size={14} />} onClick={refresh} sx={navBtnSx}>
-              Refresh
-            </Button>
-          ) : null}
           <CloudMenu buttonSx={navBtnSx} />
         </Box>
       </Box>
@@ -173,8 +168,6 @@ export default function GmSheetsPage() {
           </Button>
         </Box>
       </SheetDialog>
-
-      <AppToast toast={feedback} onClose={() => setFeedback(null)} />
     </Box>
   );
 }

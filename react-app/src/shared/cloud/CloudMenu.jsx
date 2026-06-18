@@ -6,7 +6,7 @@ import { useAuth } from './AuthProvider.jsx';
 import AuthDialog from './AuthDialog.jsx';
 import { pushCharacter } from './cloudCharacters.js';
 import { isSyncExcluded, includeInSync } from './cloudSyncExclude.js';
-import AppToast from '../AppToast.jsx';
+import { useToast } from '../ToastProvider.jsx';
 
 // The "active sheet" for the cloud menu is the one in the URL (builder/charsheet
 // ?char=…). We deliberately do NOT fall back to localStorage's gb:active_char:
@@ -35,11 +35,10 @@ export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUplo
   const navigate = useNavigate();
   const [anchor, setAnchor] = useState(null);
   const [authOpen, setAuthOpen] = useState(false);
-  const [toast, setToast] = useState(null); // { severity, msg }
   const [syncState, setSyncState] = useState('idle');
   const [excluded, setExcluded] = useState(false);
 
-  const notify = (severity, msg) => setToast({ severity, msg });
+  const { notify } = useToast();
   const close = () => setAnchor(null);
 
   // When opening the menu, check if the active sheet is excluded from sync
@@ -144,8 +143,6 @@ export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUplo
       </Menu>
 
       <AuthDialog open={authOpen} onClose={() => setAuthOpen(false)} />
-
-      <AppToast toast={toast} onClose={() => setToast(null)} />
     </Box>
   );
 }
