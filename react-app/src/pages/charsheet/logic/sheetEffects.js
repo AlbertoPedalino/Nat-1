@@ -776,6 +776,20 @@ export function getConcentrationBonus(character = {}) {
   return total;
 }
 
+// Active `d20-floor` effects (e.g. Stars Druid Dragon constellation: treat a
+// d20 roll at or below minRoll-1 as minRoll on INT/WIS checks and Concentration
+// saves). Only active effects survive collectSheetEffects, so a gated effect
+// appears only when its requiredChoice matches. Surfaced as a reminder.
+export function getD20FloorReminders(character = {}) {
+  return collectSheetEffects(character)
+    .filter((effect) => norm(effect?.type) === 'd20floor')
+    .map((effect) => ({
+      minRoll: Number(effect.minRoll || 10),
+      note: cleanText(effect.note) || '',
+      source: cleanText(effect.ownerName) || '',
+    }));
+}
+
 // Additive bonus to spell save DC from active effects (e.g. Sorcerer Innate
 // Sorcery while toggled on). Only active effects survive collectSheetEffects.
 export function getSpellSaveDcBonus(character = {}) {

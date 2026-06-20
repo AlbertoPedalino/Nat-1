@@ -114,6 +114,10 @@ export function createAdapterRegistry() {
     classSpellModifiers: new Map(),
     subclassSpellModifiers: new Map(),
     speciesSpellModifiers: new Map(),
+    classSpellRiders: new Map(),
+    subclassSpellRiders: new Map(),
+    speciesSpellRiders: new Map(),
+    featSpellRiders: new Map(),
     classChoiceKeyFilters: new Map(),
     classChoiceLabelProviders: new Map(),
     speciesHpBonus: new Map(),
@@ -334,6 +338,33 @@ export function createAdapterRegistry() {
     },
     getSpeciesSheetSpellModifiers(speciesName, speciesSource) {
       return stores.speciesSpellModifiers.get(speciesKey(speciesName, speciesSource)) || [];
+    },
+    // Spell riders: factories `(ctx) => rider | null` that attach an extra
+    // roller / tag / description to a spell row at render time (e.g. Stars Druid
+    // Chalice). Mirrors the spell-modifier surface across class/subclass/species/feat.
+    registerClassSpellRiders(name, riders) {
+      setStore(stores.classSpellRiders, name, Array.isArray(riders) ? riders : []);
+    },
+    getClassSpellRiders(name) {
+      return getStore(stores.classSpellRiders, name) || [];
+    },
+    registerSubclassSpellRiders(className, subclassShortName, riders) {
+      stores.subclassSpellRiders.set(subclassKey(className, subclassShortName), Array.isArray(riders) ? riders : []);
+    },
+    getSubclassSpellRiders(className, subclassShortName) {
+      return getSubclassStore(stores.subclassSpellRiders, className, subclassShortName) || [];
+    },
+    registerSpeciesSpellRiders(speciesName, speciesSource, riders) {
+      stores.speciesSpellRiders.set(speciesKey(speciesName, speciesSource), Array.isArray(riders) ? riders : []);
+    },
+    getSpeciesSpellRiders(speciesName, speciesSource) {
+      return stores.speciesSpellRiders.get(speciesKey(speciesName, speciesSource)) || [];
+    },
+    registerFeatSpellRiders(name, riders) {
+      setStore(stores.featSpellRiders, name, Array.isArray(riders) ? riders : []);
+    },
+    getFeatSpellRiders(name) {
+      return getStore(stores.featSpellRiders, name) || [];
     },
     registerClassChoiceKeyFilter(name, fn) {
       if (typeof fn === 'function') setStore(stores.classChoiceKeyFilters, name, fn);

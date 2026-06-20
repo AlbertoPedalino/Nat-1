@@ -1129,13 +1129,25 @@ function ChoicePicker({ action, C, onUpdateCharacter, onShowToast }) {
   const activeValue = match ? match.value : '';
 
   const handleChange = (_, next) => {
-    if (!next || next === activeValue) return;
+    if (next === activeValue) return;
+    // Exclusive ToggleButtonGroup yields null when the active button is clicked
+    // again: clear the choice when the action opts in, otherwise ignore.
+    if (!next) {
+      if (!action.choiceAllowClear) return;
+      onUpdateCharacter((prev) => {
+        const choices = { ...(prev.choices || {}) };
+        delete choices[choiceKey];
+        return { ...prev, choices };
+      });
+      if (!action.choiceNoToast) onShowToast?.('Choice Cleared', `${action.choiceLabel || 'Choice'} cleared`, 0, []);
+      return;
+    }
     onUpdateCharacter((prev) => {
       const choices = { ...(prev.choices || {}) };
       choices[choiceKey] = next;
       return { ...prev, choices };
     });
-    onShowToast?.('Choice Updated', `${action.choiceLabel || 'Choice'}: ${next}`, 0, []);
+    if (!action.choiceNoToast) onShowToast?.('Choice Updated', `${action.choiceLabel || 'Choice'}: ${next}`, 0, []);
   };
 
   return (

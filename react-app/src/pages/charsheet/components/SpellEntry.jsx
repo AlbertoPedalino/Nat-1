@@ -19,6 +19,7 @@ import {
   getResolvedCantripData,
   getSpellAbilityForEntry,
   getSpellStatusChips,
+  collectSpellRiders,
   getUpcastStep,
   resolveDmgBonusValue,
 } from '../logic/spellsTabLogic.js';
@@ -197,13 +198,21 @@ export default function SpellEntry({ entry, spellAttackBonus = 0, C, exhaustionL
     ? damages.map(d => ({ ...d, formula: computeScaledFormula(d.formula, upcastStepDie, steps) }))
     : damages;
 
+  // Conditional, character-driven extras (e.g. Stars Druid Chalice): each rider
+  // contributes an optional roller, tag, and description. Generic — the logic
+  // lives in collectSpellRiders, this component just renders the parts.
+  const spellRiders = collectSpellRiders(C, { hasHeal, hasDamage, entry });
+
   const cantripData = baseLevel === 0 ? getResolvedCantripData(C, entry.name) : null;
   const entryData = cantripData || spellData;
   const utilityDie = entryData?.utilityDie || null;
   const utilityLabel = entryData?.utilityLabel || 'Roll';
   const modifierDetails = normalizeModifierDetails({
     ...(cantripData || {}),
-    grantModifiers: entry.grantModifiers || [],
+    grantModifiers: [
+      ...(entry.grantModifiers || []),
+      ...spellRiders.flatMap((rider) => rider.modifierDetails || []),
+    ],
   });
   const modifierDetailGroups = groupModifierDetails(modifierDetails);
   const detailTagLabels = modifierDetails.map((item) => item.tagLabel).filter(Boolean);
@@ -273,6 +282,7 @@ export default function SpellEntry({ entry, spellAttackBonus = 0, C, exhaustionL
     ...(hasHeal && healDisplayFormula
       ? [{ key: 'heal', kind: 'heal', formula: healDisplayFormula }]
       : []),
+    ...spellRiders.flatMap((rider) => rider.rollers || []),
     ...(utilityDie && !hasDamage && !hasHeal
       ? [{
           key: 'utility',
@@ -325,6 +335,9 @@ export default function SpellEntry({ entry, spellAttackBonus = 0, C, exhaustionL
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', flexWrap: 'wrap' }}>
             <SourceBadge sourceInfo={entry.sourceInfo} sources={entry.sources} suffix={beamBonus ? ` ${beamBonus >= 0 ? '+' : ''}${beamBonus}` : ''} />
             {modifierTags.map(function (tag) { return <MiniBadge key={tag} label={tag} color="#9d7fb8" bg="rgba(157,127,184,0.16)" />; })}
+            {spellRiders.filter((rider) => rider.tag).map((rider) => (
+              <MiniBadge key={rider.id} label={rider.tag.label} color={rider.tag.color} bg={alpha(rider.tag.color, 0.16)} />
+            ))}
             {getSpellStatusChips(entry).map((chip) => <MiniBadge key={chip.key} label={chip.label} color={chip.color} bg={chip.bg} />)}
             {ritualOnly ? <MiniBadge label="Ritual only" color={SPELL_TAG_COLORS.ritual} bg={alpha(SPELL_TAG_COLORS.ritual, 0.16)} /> : null}
           </Box>
@@ -381,7 +394,7 @@ export default function SpellEntry({ entry, spellAttackBonus = 0, C, exhaustionL
                   <Stack spacing={0.55} sx={{ mt: 0.45 }}>
                     {group.items.map((modifier) => (
                       <Box key={modifier.key || modifier.label}>
-                        <Typography variant="body2" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
+                        <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, lineHeight: 1.2 }}>
                           {modifier.detailTitle || modifier.tagLabel || modifier.label}
                         </Typography>
                         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', lineHeight: 1.3, mt: 0.1 }}>

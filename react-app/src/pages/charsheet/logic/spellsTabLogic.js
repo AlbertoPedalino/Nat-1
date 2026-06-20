@@ -13,6 +13,61 @@ import { isWarlockModifierCantripChoiceKey } from '../../../shared/character/war
 import { enumerateFixedAdditionalSpells } from '../../../shared/character/additionalSpellGrants.js';
 import { ENTITY_COLORS, ITEM_ATTUNEMENT, ACTION_COLORS } from '../../../shared/entityColors.js';
 
+/**
+ * Spell riders — conditional, character-driven extras attached to a spell row
+ * that aren't part of the spell's own data: an extra roller button, a coloured
+ * tag, and a description block (e.g. Stars Druid Chalice extra healing).
+ *
+ * Riders are registered by adapters (class/subclass/species/feat) as factories
+ * `(ctx) => rider | null`, so the feature logic lives in the adapter layer and
+ * adding a new rider never touches this collector or `SpellEntry`. The ctx
+ * carries the character, the spell-shape flags, and the granting entity's level.
+ *
+ * @param {object} C    character
+ * @param {object} opts { hasHeal, hasDamage, entry } spell-shape context
+ * @returns {Array<{ id, tag?: {label,color}, rollers?: Array, modifierDetails?: Array }>}
+ */
+export function collectSpellRiders(C, { hasHeal = false, hasDamage = false, entry = null } = {}) {
+  if (!C) return [];
+  const out = [];
+  const seen = new Set();
+
+  const run = (factories, ctx) => {
+    (factories || []).forEach((factory) => {
+      if (typeof factory !== 'function') return;
+      let rider = null;
+      try { rider = factory(ctx); } catch { rider = null; }
+      if (!rider || !rider.id || seen.has(rider.id)) return;
+      seen.add(rider.id);
+      out.push(rider);
+    });
+  };
+
+  spellModifierEntities(C).forEach((entity) => {
+    const ctx = {
+      character: C,
+      hasHeal,
+      hasDamage,
+      entry,
+      ownerLevel: entity.level,
+      ownerClassName: entity.className,
+      ownerSubclassShortName: entity.subclassShortName,
+    };
+    run(installedRegistry.getClassSpellRiders(entity.className), ctx);
+    if (entity.subclassShortName) {
+      run(installedRegistry.getSubclassSpellRiders(entity.className, entity.subclassShortName), ctx);
+    }
+  });
+
+  const baseCtx = { character: C, hasHeal, hasDamage, entry, ownerLevel: Number(C?.level || 1) };
+  run(installedRegistry.getSpeciesSpellRiders(C?.speciesName, C?.speciesSource), baseCtx);
+  (C?.allFeatSnapshots || []).forEach((feat) => {
+    if (feat?.name) run(installedRegistry.getFeatSpellRiders(feat.name), baseCtx);
+  });
+
+  return out;
+}
+
 // Display colors for spell-source tags. Entity-linked tags follow the canonical
 // entity palette (shared/entityColors.js); the rest are spell-domain-only tags.
 const SRC_COLOR = {

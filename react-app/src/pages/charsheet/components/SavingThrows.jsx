@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Box, Paper, Typography, Tooltip, Menu, MenuItem } from '@mui/material';
 import { Dice5, Sparkles, ChevronDown } from 'lucide-react';
 import { STATS, SLBL, FULL_LBL, hasSaveProficiency, getSaveBonus, fbonus, effectiveD20Modifier } from '../logic/calculations.js';
-import { getConcentrationBonus } from '../logic/sheetEffects.js';
+import { getConcentrationBonus, getD20FloorReminders } from '../logic/sheetEffects.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 import { aggregateSavingThrowBonus } from '../../../shared/character/itemBonus.js';
 import { collectItemEffects } from '../../../shared/character/itemEffects.js';
@@ -24,6 +24,9 @@ export default function SavingThrows({ C, sheet, onRoll }) {
   // not every CON save, so it's surfaced as a situational reminder rather than
   // an icon on the CON stat row.
   const concentrationBonus = getConcentrationBonus(C);
+  // Active d20-floor reminders (e.g. Stars Druid Dragon constellation) — shown
+  // here because they cover Concentration saves.
+  const d20FloorReminders = getD20FloorReminders(C);
 
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [menuStat, setMenuStat] = useState(null);
@@ -96,8 +99,28 @@ export default function SavingThrows({ C, sheet, onRoll }) {
         })}
       </Box>
 
-      {(modifierRows.length > 0 || concentrationBonus > 0) && (
+      {(modifierRows.length > 0 || concentrationBonus > 0 || d20FloorReminders.length > 0) && (
         <Box sx={{ borderTop: 1, borderColor: 'divider', px: '0.8rem', py: '0.5rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {d20FloorReminders.map((r, i) => (
+            <Box key={`d20floor-${i}`} sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75 }}>
+              <Dice5 size={13} style={{ color: '#c9a86a', flexShrink: 0, marginTop: 2 }} />
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
+                  <Typography component="span" sx={{ fontSize: '0.7rem', color: '#c9a86a', fontWeight: 700, flexShrink: 0 }}>
+                    Min {r.minRoll}
+                  </Typography>
+                  <Typography component="span" sx={{ fontSize: '0.7rem', color: 'text.primary' }}>
+                    Concentration saves (treat d20 of {r.minRoll - 1} or lower as {r.minRoll})
+                  </Typography>
+                </Box>
+                {r.note && (
+                  <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary', fontStyle: 'italic', mt: '1px' }}>
+                    {r.note}
+                  </Typography>
+                )}
+              </Box>
+            </Box>
+          ))}
           {concentrationBonus > 0 && (
             <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75 }}>
               <Sparkles size={13} style={{ color: '#70b7a6', flexShrink: 0, marginTop: 2 }} />
