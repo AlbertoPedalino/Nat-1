@@ -154,6 +154,14 @@ registerClassAdapter("Druid", function (cls, lv, specs, ctx = {}) {
       });
     }
   }
+  if (lv >= 2) {
+    specs.push({
+      key: 'druid_wild_shape_forms',
+      label: 'Wild Shape — Known Beast Forms',
+      type: 'beast_choice',
+      level: 2
+    });
+  }
   if (lv >= 7) {
     specs.push({
       key: 'druid_elemental_fury',
@@ -196,7 +204,8 @@ registerClassSheetActions("Druid", [
     "uses": "2 / SR+LR",
     "resKey": "wild_shape",
     "minLevel": 2,
-    "desc": "Bonus Action. Transform into a Beast you have seen. Max CR: 1/4 (lv.2), 1/2 (lv.4), 1 (lv.8). Gain temporary HP equal to your Druid level. Retain INT/WIS/CHA scores and class features. Gain the beast's HP, attacks, and physical traits. Lasts until reduced to 0 HP, you end it (Bonus Action), or you fall unconscious. Recover 1 use on Short Rest, all on Long Rest."
+    detailType: 'wildShape',
+    "desc": "Bonus Action. Transform into a Beast form you know. Max CR: 1/4 (lv.2), 1/2 (lv.4), 1 (lv.8); no Fly Speed before lv.8; no swarms. Keep your own Hit Points and gain Temporary HP equal to your Druid level. Retain INT/WIS/CHA scores, class features, and your proficiencies (use the higher of your save/skill or the form's). Gain the beast's STR/DEX/CON, AC, attacks, and physical traits. Lasts hours equal to half your Druid level, or until you use Wild Shape again, are Incapacitated, or die. Recover 1 use on Short Rest, all on Long Rest."
   },
   {
     "name": "Wild Companion",

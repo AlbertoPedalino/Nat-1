@@ -182,6 +182,7 @@ export const initialBuilderState = {
     classSpellIndex: {},
     items: ITEM_SUMMARIES,
     optionalFeatures: [],
+    beasts: [],
   },
   search: {
     classes: '',

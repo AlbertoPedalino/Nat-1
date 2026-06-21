@@ -6,6 +6,7 @@ import { collectMovementEffects, effectSummary, effectTitle, getSpeedBonus } fro
 import { collectItemEffects } from '../../../shared/character/itemEffects.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 import { carryCapacity, formatWeight, totalCarriedWeight } from '../../../shared/character/weight.js';
+import { getActiveWildShape } from '../../../shared/character/wildShapeForm.js';
 
 function normalizeSpeed(speed) {
   if (typeof speed === 'number') return { walk: speed };
@@ -25,12 +26,15 @@ function speedLabel(key) {
 export default function Movement({ C, sheet }) {
   const inventory = sheet?.sheetInventory || C?.inventory || [];
   const profSets = useProficiencySets();
+  // Wild Shape: the beast's speeds replace yours; worn-armor / carry penalties
+  // don't apply to the beast form.
+  const activeForm = getActiveWildShape(C);
   const penalties = getEquippedArmorPenalties(C, inventory, profSets);
-  const baseSpeeds = normalizeSpeed(C?.speciesSnapshot?.speed);
-  const speedPenalty = penalties.speedPenalty || 0;
+  const baseSpeeds = normalizeSpeed(activeForm ? activeForm.beast.speed : C?.speciesSnapshot?.speed);
+  const speedPenalty = activeForm ? 0 : (penalties.speedPenalty || 0);
   const maxCarry = carryCapacity(getFinal(C, 'str'));
   const carriedWeight = totalCarriedWeight(inventory, sheet?.sheetCurrency);
-  const overloaded = carriedWeight > maxCarry;
+  const overloaded = !activeForm && carriedWeight > maxCarry;
   const speedZeroConditions = getSpeedZeroConditions(sheet?.activeConditions || []);
   const speedZero = speedZeroConditions.length > 0;
   const exhaustionLevel = sheet?.exhaustionLevel || 0;

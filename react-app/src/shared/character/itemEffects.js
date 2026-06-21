@@ -8,6 +8,7 @@
 import { parseSignedBonus } from './itemBonus.js';
 import { isItemEffectActive } from './itemAttunement.js';
 import { getItemNarrativeEffects } from './itemNarrativeEffects.js';
+import { isWildShaped } from './wildShapeForm.js';
 
 const ABILITY_KEYS = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
 const SENSE_TYPES = ['darkvision', 'blindsight', 'truesight', 'tremorsense'];
@@ -278,10 +279,16 @@ function consumedBonusFor(C, key) {
     .reduce((sum, entry) => sum + (Number(entry?.value) || 0), 0);
 }
 
-export function getFinalAbilityScore(C, stat, baseScore) {
-  const effects = collectItemEffects(C?.inventory);
+export function getFinalAbilityScore(C, stat, baseScore, { ignoreWildShape = false } = {}) {
   const key = String(stat || '').toLowerCase();
   const consumed = consumedBonusFor(C, key);
+  // Wild Shape (RAW 2024): worn/held equipment merges into the form and has no
+  // effect, so item ability bonuses/overrides don't apply. Permanently consumed
+  // boosts (Tome/Manual) are part of your scores, not equipment, so they remain.
+  // `ignoreWildShape` reconstructs your normal score (e.g. for retained Hit Points,
+  // which are computed from your own Constitution as if untransformed).
+  if (!ignoreWildShape && isWildShaped(C)) return baseScore + consumed;
+  const effects = collectItemEffects(C?.inventory);
   const withBonus = baseScore + (effects.abilityBonuses[key] || 0) + consumed;
   const override = effects.abilityOverrides[key];
   return override != null ? Math.max(withBonus, override.value) : withBonus;

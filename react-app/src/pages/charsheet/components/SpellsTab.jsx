@@ -18,6 +18,7 @@ import { installedRegistry, loadClassAdapters, loadCoreAdapters, loadSpellsAdapt
 import { getEquippedArmorPenalties } from '../logic/armorPenalties.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 import { aggregateSpellBonuses } from '../../../shared/character/itemBonus.js';
+import { itemEffectInventory } from '../../../shared/character/wildShapeForm.js';
 import { getSpellSaveDcBonus } from '../logic/sheetEffects.js';
 import SheetDialog from '../../../shared/character/SheetDialog.jsx';
 import {
@@ -237,7 +238,8 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
   const ability = getSpellAbility(C);
   const spellMod = getMod(getFinal(C, ability));
   const inventoryForBonuses = sheet?.sheetInventory || C?.inventory || [];
-  const spellItemBonuses = aggregateSpellBonuses(inventoryForBonuses);
+  // Wild Shape: merged equipment grants no spellcasting bonuses.
+  const spellItemBonuses = aggregateSpellBonuses(itemEffectInventory(C, inventoryForBonuses));
   const dc = 8 + getPB(C) + spellMod + spellItemBonuses.spellSaveDc + getSpellSaveDcBonus(C);
   const atk = getPB(C) + spellMod + spellItemBonuses.spellAttack;
 

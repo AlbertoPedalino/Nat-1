@@ -6,6 +6,7 @@ import ChoiceBlock from '../components/ChoiceBlock.jsx';
 import { FeatCategorySlot, FeatFixedSlot } from '../components/FeatSlots.jsx';
 import SpellChoiceList from '../components/SpellChoiceList.jsx';
 import ReplicateMagicItemChoice from '../components/ReplicateMagicItemChoice.jsx';
+import BeastChoice from '../components/BeastChoice.jsx';
 import { classChoiceSpecs } from '../logic/choiceSpecs.js';
 import { buildOptionalFeatureEntryLookup } from '../../../shared/character/optionalFeatures.js';
 import NamePanel from '../components/NamePanel.jsx';
@@ -61,6 +62,9 @@ export default function ClassStep({ state, dispatch }) {
     }
     if (spec.key.replace(/^mc\d+_/, '') === 'artificer_replicate_magic_item_plans') {
       return <ReplicateMagicItemChoice key={spec.key} spec={spec} character={character} dispatch={dispatch} items={state.data.items} />;
+    }
+    if (spec.type === 'beast_choice') {
+      return <BeastChoice key={spec.key} spec={spec} character={character} dispatch={dispatch} beasts={state.data.beasts} />;
     }
     return (
       <ChoiceBlock

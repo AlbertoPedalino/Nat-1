@@ -6,6 +6,7 @@ import { getSkillAdvantageFromEffects } from '../logic/sheetEffects.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 import { aggregateAbilityCheckBonus } from '../../../shared/character/itemBonus.js';
 import { getItemAdvantageOnSkill } from '../../../shared/character/itemEffects.js';
+import { isWildShaped, itemEffectInventory } from '../../../shared/character/wildShapeForm.js';
 
 function SkillProficiencyDot({ training }) {
   const dotColor = training === 'exp' ? 'secondary.main' : training ? 'primary.main' : 'divider';
@@ -31,9 +32,10 @@ function SkillProficiencyDot({ training }) {
 // already gated by minLevel/condition/requiredChoice/requiredItemFlag) and
 // magic items. Adding a source = register a `{ type:'advantage', target:'skill',
 // skill }` sheet effect in its adapter; nothing here changes.
-function getSkillAdvantage(C, skillName) {
+function getSkillAdvantage(C, skillName, shaped = false) {
   const fromEffects = getSkillAdvantageFromEffects(C, skillName);
   if (fromEffects) return fromEffects;
+  if (shaped) return null; // item-granted advantages merge away while Wild Shaped
   const fromItem = getItemAdvantageOnSkill(C, skillName);
   if (fromItem && fromItem.length) return { source: fromItem[0] };
   return null;
@@ -42,8 +44,13 @@ function getSkillAdvantage(C, skillName) {
 export default function Skills({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
   const inventory = sheet?.sheetInventory || C?.inventory || [];
-  const armorPenalties = getEquippedArmorPenalties(C, inventory, profSets);
-  const itemCheckBonus = aggregateAbilityCheckBonus(inventory);
+  // Wild Shape: equipment merges into the form (no effect), so item check bonuses
+  // and armor penalties (you're not wearing the armor) are suppressed; `shaped`
+  // also drops item-granted skill advantages below.
+  const shaped = isWildShaped(C);
+  const effectInventory = itemEffectInventory(C, inventory);
+  const armorPenalties = getEquippedArmorPenalties(C, effectInventory, profSets);
+  const itemCheckBonus = aggregateAbilityCheckBonus(effectInventory);
   const activeConditions = sheet?.activeConditions || [];
 
   return (
@@ -71,7 +78,7 @@ export default function Skills({ C, sheet, onRoll }) {
         const { has: hasDisadv, reason: disadvReason, conditional } = describeCheckDisadvantage(activeConditions, armorDisadv);
         const condNotes = conditional.map((c) => `${c.source} (${c.note})`);
         const situational = condNotes.length ? ` • Situational: ${condNotes.join('; ')}` : '';
-        const hasAdv = getSkillAdvantage(C, sk.n);
+        const hasAdv = getSkillAdvantage(C, sk.n, shaped);
         const hasBoth = hasAdv && hasDisadv;
         // Solid adv/disadv drive the roll; a purely situational disadvantage is a hint only.
         const visual = (hasAdv || hasDisadv)

@@ -20,6 +20,8 @@ import {
   isWeapon,
 } from './equipmentSlots.js';
 import { weaponEnhancement } from '../../../shared/character/itemBonus.js';
+import { parseBeastActions } from '../../../shared/character/beasts.js';
+import { getActiveWildShape } from '../../../shared/character/wildShapeForm.js';
 import { isItemEffectActive } from '../../../shared/character/itemAttunement.js';
 import { itemDisplayName, matchesItemReference } from '../../../shared/character/itemIdentity.js';
 import { getMeleeStrDamageBonus, getWeaponEffectBonuses } from './sheetEffects.js';
@@ -661,6 +663,35 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
     entries: ruleEntries.unarmedStrike || null,
   });
   return weaponActions;
+}
+
+// Beast attacks/actions while Wild Shaped → action cards. Reads the active form
+// snapshot on the character (no beast DB needed here): attacks become rollable
+// attack cards (beast's own to-hit + damage), other actions become info cards.
+export function makeWildShapeActions(C) {
+  const active = getActiveWildShape(C);
+  if (!active?.beast) return [];
+  const beastName = active.beast.name;
+  return parseBeastActions(active.beast.actions).map((a) => {
+    const rollers = (a.damage || []).map((formula, i) => ({
+      kind: 'damage',
+      formula,
+      label: `Damage ${formula}`,
+      key: `wildshape-dmg-${i}`,
+    }));
+    return {
+      name: a.name,
+      cat: a.isAttack ? 'attack' : 'action',
+      uses: 'Wild Shape',
+      _source: `Wild Shape (${beastName})`,
+      _colorBarCat: a.isAttack ? 'attack' : undefined,
+      ...(a.attackBonus != null ? { attackBonus: a.attackBonus } : {}),
+      ...(rollers.length ? { rollers } : {}),
+      rollLabelPrefix: `${beastName}: ${a.name}`,
+      entries: a.text ? [a.text] : null,
+      noDescription: !a.text,
+    };
+  });
 }
 
 export function makeWeaponMasteryReminderActions(C, items = []) {

@@ -3,6 +3,7 @@ import { getFeatAsiBonus } from '../../../shared/character/abilityBonuses.js';
 import { installedRegistry } from '../../../adapters/index.js';
 import { extractFixedProficiencyLabels } from '../../../shared/character/typedProficiencies.js';
 import { getFinalAbilityScore } from '../../../shared/character/itemEffects.js';
+import { wildShapeAbilityScore, wildShapeSaveBonus, wildShapeSaveProficient, wildShapeSkillBonus } from '../../../shared/character/wildShapeForm.js';
 import { getProficiencyBonus } from '../../../shared/character/proficiency.js';
 import { XP_THRESHOLDS } from '../../../shared/character/xp.js';
 import { collectSheetEffects } from './sheetEffects.js';
@@ -199,6 +200,11 @@ export function getAsiFeatBonus(C, stat) {
 }
 
 export function getFinal(C, stat) {
+  // Wild Shape replaces physical scores (STR/DEX/CON) with the beast's; mental
+  // scores stay the character's. Replacement, not a floor — so it short-circuits
+  // before background/ASI/item layers.
+  const formScore = wildShapeAbilityScore(C, stat);
+  if (formScore != null) return formScore;
   const base = getBase(C, stat) + bgBonus(C, stat) + getAsiFeatBonus(C, stat);
   return getFinalAbilityScore(C, stat, base);
 }
@@ -211,13 +217,26 @@ export function fmod(v) { const m = getMod(v); return (m >= 0 ? '+' : '') + m; }
 
 export function fbonus(n) { return (n >= 0 ? '+' : '') + n; }
 
+// Whether YOUR class grants a save proficiency for `stat` (your own, computed
+// with your Proficiency Bonus). Wild Shape keeps these (RAW 2024).
+function hasOwnSaveProficiency(C, stat) {
+  return Boolean(C && (C.clsSnapshot?.proficiency || []).includes(stat));
+}
+
 export function hasSaveProficiency(C, stat) {
-  return C && (C.clsSnapshot?.proficiency || []).includes(stat);
+  // RAW 2024: while transformed you retain your own save proficiencies AND gain
+  // the form's, so the marker shows for either.
+  if (hasOwnSaveProficiency(C, stat)) return true;
+  return wildShapeSaveProficient(C, stat);
 }
 
 export function getSaveBonus(C, stat) {
-  const m = getMod(getFinal(C, stat));
-  return m + (hasSaveProficiency(C, stat) ? getPB(C) : 0);
+  // Your own save bonus uses your scores (already swapped to the beast's physical
+  // scores while transformed) + your PB if class-proficient.
+  const own = getMod(getFinal(C, stat)) + (hasOwnSaveProficiency(C, stat) ? getPB(C) : 0);
+  // RAW 2024: if the form's listed save modifier is higher than yours, use it.
+  const formSave = wildShapeSaveBonus(C, stat);
+  return formSave != null ? Math.max(own, formSave) : own;
 }
 
 function initEffectType(t) {
@@ -387,13 +406,22 @@ export function getSkillTraining(C, skillName) {
 export function getSkillBonus(C, sk) {
   const m = getMod(getFinal(C, sk.a));
   const training = getSkillTraining(C, sk.n);
-  if (training === 'exp') return m + getPB(C) * 2;
-  if (training === 'prof') return m + getPB(C);
-  if (training === 'half') return m + Math.floor(getPB(C) / 2);
-  return m;
+  let own = m;
+  if (training === 'exp') own = m + getPB(C) * 2;
+  else if (training === 'prof') own = m + getPB(C);
+  else if (training === 'half') own = m + Math.floor(getPB(C) / 2);
+  // RAW 2024 Wild Shape: keep your own skill proficiencies, but if the form's
+  // listed skill modifier is higher than yours, use it.
+  const formSkill = wildShapeSkillBonus(C, sk.n);
+  return formSkill != null ? Math.max(own, formSkill) : own;
 }
 
 export function calcMaxHP(C) {
   if (!C) return 10;
-  return sharedComputeMaxHp(C, getMod(getFinal(C, 'con')));
+  // Hit Points are retained while Wild Shaped (RAW 2024), so max HP always uses
+  // your OWN Constitution — never the beast's. Bypass the form's score
+  // replacement (don't use getFinal) so transforming never changes max HP.
+  const conBase = getBase(C, 'con') + bgBonus(C, 'con') + getAsiFeatBonus(C, 'con');
+  const conScore = getFinalAbilityScore(C, 'con', conBase, { ignoreWildShape: true });
+  return sharedComputeMaxHp(C, getMod(conScore));
 }

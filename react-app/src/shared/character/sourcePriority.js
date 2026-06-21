@@ -26,6 +26,12 @@ export const INVENTORY_SOURCE_PRIORITY = frozenList([...CORE_2024_SOURCE_PRIORIT
 // Classes ship only in the 2024 core PHB and Eberron — kept deliberately narrow.
 export const CLASS_ALLOWED_SOURCES = frozenList(['XPHB', 'EFA']);
 
+// Wild Shape beast forms. The 2024 Monster Manual (XMM) is the canonical beast
+// roster; the supported 2024 manuals add a few beasts of their own. XMM is not in
+// CORE_2024_SOURCE_PRIORITY (it's a bestiary, not a player-content book), so it's
+// listed explicitly here.
+export const BEAST_ALLOWED_SOURCES = frozenList(['XMM', ...CORE_2024_SOURCE_PRIORITY]);
+
 // Order-sensitive dedup priorities (a source appearing in several books): the
 // ordering is intentional and independent of the membership lists above.
 export const SPELL_SOURCE_PRIORITY = frozenList(['XPHB', 'FRAiF', 'FRHoF', 'EFA', 'XDMG']);

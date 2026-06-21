@@ -27,7 +27,7 @@ import { STEPS } from './constants.js';
 import { adapterRegistry, loadClassAdapters, loadCoreAdapters } from '../../adapters/index.js';
 import { getMod, getFinal } from '../charsheet/logic/calculations.js';
 import { adaptBuilderData } from '../../adapters/adapterPipeline.js';
-import { loadBackgrounds, loadClassIndex, loadFeats, loadItems, loadSpecies, loadSpells, loadOptionalFeatures, extractSheetData, buildImportedCharacter, saveCharacter, buildSheetCharacter } from './logic/index.js';
+import { loadBackgrounds, loadClassIndex, loadFeats, loadItems, loadSpecies, loadSpells, loadOptionalFeatures, loadBeasts, extractSheetData, buildImportedCharacter, saveCharacter, buildSheetCharacter } from './logic/index.js';
 import { builderReducer, initialBuilderState, normalizeCharacterLevels } from './state.js';
 import { BackgroundStep, ClassStep, EquipmentStep, ScoresStep, SheetStep, SpeciesStep } from './steps/index.js';
 import { useAuth } from '../../shared/cloud/AuthProvider.jsx';
@@ -264,6 +264,7 @@ export default function CharBuilder() {
     run('spells', loadSpells, (result) => ({ spells: result.spells, classSpellIndex: result.classSpellIndex }));
     run('items', loadItems, (items) => ({ items }));
     run('optionalFeatures', loadOptionalFeatures, (optionalFeatures) => ({ optionalFeatures }));
+    run('beasts', loadBeasts, (beasts) => ({ beasts }));
   }, []);
 
   useEffect(() => {

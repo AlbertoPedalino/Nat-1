@@ -21,6 +21,7 @@ import { SheetActionsProvider } from './context/SheetActionsContext.jsx';
 import { clearCraftedByFlag, VANISH_ON_LONG_REST_FLAGS } from '../../shared/character/craftedItems.js';
 import { buildD20Meta, formatD20Detail, rollD20 as rollD20Dice } from '../../shared/character/dice.js';
 import { aggregateSavingThrowBonus } from '../../shared/character/itemBonus.js';
+import { itemEffectInventory } from '../../shared/character/wildShapeForm.js';
 import { calcMaxHP, getMod, getFinal, getSaveBonus, CONDITION_IMPLIES, clampExhaustion, exhaustionD20Penalty, EXHAUSTION_MAX } from './logic/calculations.js';
 import { normalizeCharacterAttunement } from './logic/attunement.js';
 import { applyResourceRest, getAllResourceDefs, getHitDicePools, getUsedHitDiceTotal, normalizeResourceMax, resourceFullValue } from './logic/restResources.js';
@@ -499,7 +500,8 @@ export default function CharacterSheet({ externalChar = null, externalCharId = n
   const rollSave = useCallback((stat, options = {}) => {
     if (!C) return;
     const inventory = sheet?.sheetInventory || C?.inventory || [];
-    const bonus = getSaveBonus(C, stat) + aggregateSavingThrowBonus(inventory);
+    // Wild Shape: merged equipment grants no save bonus (see SavingThrows panel).
+    const bonus = getSaveBonus(C, stat) + aggregateSavingThrowBonus(itemEffectInventory(C, inventory));
     const lbl = stat.charAt(0).toUpperCase() + stat.slice(1) + ' Save';
     rollD20(bonus, lbl, options.disadvantage ? false : (options.advantage || undefined));
   }, [C, sheet, rollD20]);

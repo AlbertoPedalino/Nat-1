@@ -50,6 +50,19 @@ export const CLASS_FILES = [
 
 export const SPELL_FILES = ['spells-xphb.json', 'spells-fraif.json', 'spells-frhof.json', 'spells-efa.json'];
 
+// Bestiary files for Wild Shape beast forms. The 2024 Monster Manual (XMM) is the
+// main roster; the other supported 2024 manuals contribute a handful of beasts.
+// (FRHoF ships no bestiary file.) loadBeasts still source-filters to
+// BEAST_ALLOWED_SOURCES, so adding a file can never leak disallowed creatures.
+export const BEAST_FILES = [
+  'bestiary/bestiary-xmm.json',
+  'bestiary/bestiary-xphb.json',
+  'bestiary/bestiary-xdmg.json',
+  'bestiary/bestiary-fraif.json',
+  'bestiary/bestiary-rhw.json',
+  'bestiary/bestiary-efa.json',
+];
+
 export const FULL_SLOTS = {
   1: [2], 2: [3], 3: [4, 2], 4: [4, 3], 5: [4, 3, 2], 6: [4, 3, 3], 7: [4, 3, 3, 1],
   8: [4, 3, 3, 2], 9: [4, 3, 3, 3, 1], 10: [4, 3, 3, 3, 2], 11: [4, 3, 3, 3, 2, 1],

@@ -15,6 +15,7 @@ import {
   resolveActionFormulas,
   collectAdapterActions,
   makeWeaponActions,
+  makeWildShapeActions,
   getActionRollers,
   buildActionTags,
 } from '../logic/actionsTabLogic.js';
@@ -37,6 +38,7 @@ import { Empty } from './SpellsUiParts.jsx';
 import SearchField from '../../../shared/character/SearchField.jsx';
 import ActionDetailPanel from './ActionDetailPanel.jsx';
 import CreatedItemsPanel from './CreatedItemsPanel.jsx';
+import WildShapePanel from './WildShapePanel.jsx';
 import AttackRollButton from './AttackRollButton.jsx';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 import { useSheetActions } from '../context/SheetActionsContext.jsx';
@@ -55,6 +57,7 @@ import { getPactSlotUsed, getPactSlotUsedKey, getRegularSlotUsed } from '../../.
 const ACTION_DETAIL_RENDERERS = {
   panel: ActionDetailPanel,
   createdItems: CreatedItemsPanel,
+  wildShape: WildShapePanel,
 };
 
 const _danglingResKeyWarned = typeof Set === 'function' ? new Set() : null;
@@ -127,6 +130,7 @@ export default function ActionsTab({ C, sheet, resources }) {
       unarmedStrike: unarmedStrikeEntries,
     }),
     ...collectAdapterActions(C, sheet),
+    ...makeWildShapeActions(C),
   ].map((action) => resolveActionFormulas(action, C))
    .map((action) => buildActionTags(action, C));
   const showAttacks = false;
@@ -1096,14 +1100,25 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
       details={hasActionDetails ? (
         <>
           {action._item ? <ItemPropertyTable item={action._item} sx={{ mb: '6px' }} /> : null}
-          {hasEntries ? <EntryBlocks entries={action.entries} emptyText="" /> : null}
-          {!hasEntries && hasDescription ? <RichText text={action.desc} /> : null}
+          {/* Wild Shape's full rules live in the Features tab; its card shows only
+              the transform panel, so suppress the prose (entries + desc) here. */}
+          {hasEntries && action.detailType !== 'wildShape'
+            ? <EntryBlocks entries={action.entries} emptyText="" /> : null}
+          {!hasEntries && hasDescription && action.detailType !== 'wildShape'
+            ? <RichText text={action.desc} /> : null}
           {action.choiceKey && onUpdateCharacter ? (
             <ChoicePicker action={action} C={C} onUpdateCharacter={onUpdateCharacter} onShowToast={onShowToast} />
           ) : null}
           <WeaponMasteryBlock mastery={action._weaponMastery} />
           {DetailRenderer ? (
-            <DetailRenderer action={action} character={C} sheet={sheet} />
+            <DetailRenderer
+              action={action}
+              character={C}
+              sheet={sheet}
+              resources={resources}
+              onResChange={onResChange}
+              resMax={resMax}
+            />
           ) : null}
         </>
       ) : null}

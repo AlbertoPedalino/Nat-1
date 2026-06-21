@@ -4,6 +4,8 @@ import { normalizeCurrency } from '../../shared/character/currency.js';
 export function deriveSheetState(C) {
   const baseMax = Math.max(1, calcMaxHP(C));
   const maxHPBonus = Number(C?.maxHPBonus || 0);
+  // RAW 2024: Wild Shape keeps your own Hit Points (no beast HP pool), so maxHP
+  // is always your class-based max — transforming only adds Temporary HP.
   const maxHP = Math.max(1, baseMax + maxHPBonus);
   const storedCurrent = C?.currentHP;
   const currentHP = Math.max(0, Math.min(maxHP, typeof storedCurrent === 'number' ? storedCurrent : maxHP));

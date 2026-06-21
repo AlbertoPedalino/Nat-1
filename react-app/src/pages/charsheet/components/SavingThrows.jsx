@@ -6,16 +6,21 @@ import { getConcentrationBonus, getD20FloorReminders } from '../logic/sheetEffec
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 import { aggregateSavingThrowBonus } from '../../../shared/character/itemBonus.js';
 import { collectItemEffects } from '../../../shared/character/itemEffects.js';
+import { itemEffectInventory } from '../../../shared/character/wildShapeForm.js';
 import { collectSaveModifiers, fixedModifiersForAbility, summarizeSaveModifiers } from '../logic/saveModifiers.js';
 import { advantageVisual, autoFailVisual } from './advantageMark.jsx';
 
 export default function SavingThrows({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
+  // Wild Shape: equipment merges into the form, so item-sourced save bonuses,
+  // advantages and modifiers are suppressed (itemEffectInventory → [] while
+  // shaped). Feature/condition modifiers (via C / activeConditions) are retained.
   const inventory = sheet?.sheetInventory || C?.inventory || [];
-  const itemSaveBonus = aggregateSavingThrowBonus(inventory);
-  const itemEffects = collectItemEffects(C?.inventory);
+  const effectInventory = itemEffectInventory(C, inventory);
+  const itemSaveBonus = aggregateSavingThrowBonus(effectInventory);
+  const itemEffects = collectItemEffects(itemEffectInventory(C, C?.inventory));
   const saveContexts = [...itemEffects.advantageOnSaveAgainst.entries()];
-  const saveModifiers = collectSaveModifiers(C, inventory, profSets, sheet?.activeConditions || []);
+  const saveModifiers = collectSaveModifiers(C, effectInventory, profSets, sheet?.activeConditions || []);
   // Reminder list shows only situational modifiers (e.g. "vs Frightened").
   // Fixed ones (e.g. Gnomish Cunning on INT/WIS/CHA, armor) are already
   // surfaced per-stat (icon + auto-roll), so they're excluded here.
