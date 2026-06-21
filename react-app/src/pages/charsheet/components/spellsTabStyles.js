@@ -125,14 +125,6 @@ export const filterChipSx = {
   borderRadius: 1,
 };
 
-export const tinyMetaChipSx = {
-  height: 18,
-  fontSize: '0.48rem',
-  textTransform: 'uppercase',
-  letterSpacing: '0.06em',
-  borderRadius: 1,
-};
-
 export const statBoxSx = {
   minWidth: 92,
   bgcolor: 'rgba(20,18,15,0.72)',

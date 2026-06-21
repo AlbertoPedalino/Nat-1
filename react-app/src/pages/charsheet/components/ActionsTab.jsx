@@ -32,7 +32,6 @@ import {
   panelToolbarSx,
   spellBodySx,
   spellRowSx,
-  tinyMetaChipSx,
 } from './spellsTabStyles.js';
 import { Empty } from './SpellsUiParts.jsx';
 import SearchField from '../../../shared/character/SearchField.jsx';
@@ -47,6 +46,7 @@ import { RichInline, RichText } from '../../../shared/character/RichText.jsx';
 import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import PipButton from '../../../shared/character/PipButton.jsx';
+import MiniBadge from '../../../shared/character/MiniBadge.jsx';
 import SheetDialog from '../../../shared/character/SheetDialog.jsx';
 import { ItemPropertyTable } from '../../../shared/character/ItemPropertyTable.jsx';
 import { formatRollTitle } from '../../../shared/character/dice.js';
@@ -971,13 +971,13 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
               <Box sx={{ width: 6, height: 28, borderRadius: 1, bgcolor: CAT_COLORS[action._colorBarCat || action.cat], flexShrink: 0, opacity: 0.95 }} />
             )}
 
-            <Box sx={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Typography sx={{ flex: 1, fontSize: '0.78rem', fontWeight: 700, color: 'text.primary', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {action.name}
-              </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'center', gap: '2px', flexShrink: 0 }}>
+            <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '3px' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+                <Typography sx={{ flex: 1, fontSize: '0.78rem', fontWeight: 700, color: 'text.primary', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {action.name}
+                </Typography>
                 {hasRollers ? (
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px', flexWrap: 'wrap' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px', flexWrap: 'wrap', flexShrink: 0 }}>
                     {Number.isFinite(action.attackBonus) ? (
                       <AttackRollButton
                         rawBonus={action.attackBonus}
@@ -998,18 +998,14 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
                     />
                   </Box>
                 ) : null}
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 0.4, flexWrap: 'wrap' }}>
-                  {(action.tags || []).map((tag) => (
-                    <Chip
-                      key={tag.key}
-                      size="small"
-                      variant="outlined"
-                      label={tag.label}
-                      sx={{ ...tinyMetaChipSx, ...tag.style }}
-                    />
+              </Box>
+              {(action.tags || []).length ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.4, flexWrap: 'wrap' }}>
+                  {action.tags.map((tag) => (
+                    <MiniBadge key={tag.key} label={tag.label} color={tag.color} bg={tag.bg} />
                   ))}
                 </Box>
-              </Box>
+              ) : null}
             </Box>
           </Box>
       )}

@@ -25,7 +25,8 @@ import { getActiveWildShape } from '../../../shared/character/wildShapeForm.js';
 import { isItemEffectActive } from '../../../shared/character/itemAttunement.js';
 import { itemDisplayName, matchesItemReference } from '../../../shared/character/itemIdentity.js';
 import { getMeleeStrDamageBonus, getWeaponEffectBonuses } from './sheetEffects.js';
-import { ACTION_COLORS, CHIP_TONES, chipToneStyle, entityChipSx } from '../../../shared/entityColors.js';
+import { alpha } from '@mui/material';
+import { ACTION_COLORS, CHIP_TONES, ENTITY_COLORS } from '../../../shared/entityColors.js';
 import {
   getActionRollers,
   resolveActionRollers,
@@ -44,33 +45,39 @@ export const SECTION_DEFS = [
   { key: 'reaction', title: 'Reactions', cats: ['reaction'] },
 ];
 
-// Tag chip styles. Status/fact tags use the muted chipToneStyle recipe (a
-// CHIP_TONES value); source tags reuse an entity-kind tint so they read as that
-// kind (Wild Shape = class colour). Each style object spreads straight into the
-// Chip sx.
-export const TAG_PRESETS = {
-  mastery:    chipToneStyle(CHIP_TONES.mastery),   // active weapon mastery
-  noprof:     chipToneStyle(CHIP_TONES.negative),  // warning: non-proficient
-  slot:       chipToneStyle(CHIP_TONES.info),      // neutral fact: weapon hand
-  inlinePill: chipToneStyle(CHIP_TONES.info),      // neutral fact: range/DC/etc.
-  wildShape:  entityChipSx('class'),               // form-granted (class colour)
+// Action-tab tags render as MiniBadges — the same primitive the spell tab uses —
+// so a tag reads identically across both tabs. Each is keyed by a semantic tone:
+// status/fact tones from CHIP_TONES, source tones from an entity-kind colour
+// (Wild Shape = class). bg follows the spell-tab convention of a 0.16 tint.
+const TAG_TONES = {
+  mastery:    CHIP_TONES.mastery,    // active weapon mastery
+  noprof:     CHIP_TONES.negative,   // warning: non-proficient
+  slot:       CHIP_TONES.info,       // neutral fact: weapon hand
+  inlinePill: CHIP_TONES.info,       // neutral fact: range/DC/etc.
+  wildShape:  ENTITY_COLORS.class,   // source: form-granted (class colour)
 };
+
+// A MiniBadge descriptor ({ key, label, color, bg }) for a semantic tone.
+function tagBadge(key, tone, label) {
+  const color = TAG_TONES[tone];
+  return { key, label, color, bg: alpha(color, 0.16) };
+}
 
 export function buildActionTags(action, C) {
   const tags = [];
   const ownerLevel = action.ownerLevel ?? C?.classLevel ?? C?.level ?? 1;
 
   if (action._wildShapeTag) {
-    tags.push({ key: 'wildshape', label: 'Wild Shape', style: TAG_PRESETS.wildShape });
+    tags.push(tagBadge('wildshape', 'wildShape', 'Wild Shape'));
   }
   if (action._weaponMastery) {
-    tags.push({ key: 'mastery', label: action._weaponMastery, style: TAG_PRESETS.mastery });
+    tags.push(tagBadge('mastery', 'mastery', action._weaponMastery));
   }
   if (action._notProficient) {
-    tags.push({ key: 'noprof', label: 'NO PROF', style: TAG_PRESETS.noprof });
+    tags.push(tagBadge('noprof', 'noprof', 'No Prof'));
   }
   if (action._weaponSlot) {
-    tags.push({ key: 'slot', label: action._weaponSlot, style: TAG_PRESETS.slot });
+    tags.push(tagBadge('slot', 'slot', action._weaponSlot));
   }
 
   // Convention: an adapter's `inlinePills` are for facts the action's resource
@@ -84,7 +91,7 @@ export function buildActionTags(action, C) {
   pills.forEach((pill, idx) => {
     const label = `${pill.label || ''}${pill.value != null ? ` ${pill.value}` : ''}`.trim();
     if (label) {
-      tags.push({ key: `pill-${idx}`, label, style: TAG_PRESETS.inlinePill });
+      tags.push(tagBadge(`pill-${idx}`, 'inlinePill', label));
     }
   });
 
