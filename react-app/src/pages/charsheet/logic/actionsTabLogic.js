@@ -25,7 +25,7 @@ import { getActiveWildShape } from '../../../shared/character/wildShapeForm.js';
 import { isItemEffectActive } from '../../../shared/character/itemAttunement.js';
 import { itemDisplayName, matchesItemReference } from '../../../shared/character/itemIdentity.js';
 import { getMeleeStrDamageBonus, getWeaponEffectBonuses } from './sheetEffects.js';
-import { ACTION_COLORS, CHIP_TONES, chipToneStyle } from '../../../shared/entityColors.js';
+import { ACTION_COLORS, CHIP_TONES, chipToneStyle, entityChipSx } from '../../../shared/entityColors.js';
 import {
   getActionRollers,
   resolveActionRollers,
@@ -44,19 +44,25 @@ export const SECTION_DEFS = [
   { key: 'reaction', title: 'Reactions', cats: ['reaction'] },
 ];
 
-// Each tag's chip style comes from the shared chipToneStyle recipe, keyed by a
-// semantic CHIP_TONES value. The style object spreads straight into the Chip sx.
+// Tag chip styles. Status/fact tags use the muted chipToneStyle recipe (a
+// CHIP_TONES value); source tags reuse an entity-kind tint so they read as that
+// kind (Wild Shape = class colour). Each style object spreads straight into the
+// Chip sx.
 export const TAG_PRESETS = {
   mastery:    chipToneStyle(CHIP_TONES.mastery),   // active weapon mastery
   noprof:     chipToneStyle(CHIP_TONES.negative),  // warning: non-proficient
   slot:       chipToneStyle(CHIP_TONES.info),      // neutral fact: weapon hand
   inlinePill: chipToneStyle(CHIP_TONES.info),      // neutral fact: range/DC/etc.
+  wildShape:  entityChipSx('class'),               // form-granted (class colour)
 };
 
 export function buildActionTags(action, C) {
   const tags = [];
   const ownerLevel = action.ownerLevel ?? C?.classLevel ?? C?.level ?? 1;
 
+  if (action._wildShapeTag) {
+    tags.push({ key: 'wildshape', label: 'Wild Shape', style: TAG_PRESETS.wildShape });
+  }
   if (action._weaponMastery) {
     tags.push({ key: 'mastery', label: action._weaponMastery, style: TAG_PRESETS.mastery });
   }
@@ -671,8 +677,11 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
 export function makeWildShapeActions(C) {
   const active = getActiveWildShape(C);
   if (!active?.beast) return [];
-  const beastName = active.beast.name;
-  return parseBeastActions(active.beast.actions).map((a) => {
+  const beast = active.beast;
+  const beastName = beast.name;
+  // Every form-granted action/attack/bonus/reaction shares the section list with
+  // the Druid's own, so each carries a "Wild Shape" tag to mark its source.
+  const toCard = (a, cat) => {
     const rollers = (a.damage || []).map((formula, i) => ({
       kind: 'damage',
       formula,
@@ -681,17 +690,23 @@ export function makeWildShapeActions(C) {
     }));
     return {
       name: a.name,
-      cat: a.isAttack ? 'attack' : 'action',
+      cat,
       uses: 'Wild Shape',
       _source: `Wild Shape (${beastName})`,
       _colorBarCat: a.isAttack ? 'attack' : undefined,
+      _wildShapeTag: true,
       ...(a.attackBonus != null ? { attackBonus: a.attackBonus } : {}),
       ...(rollers.length ? { rollers } : {}),
       rollLabelPrefix: `${beastName}: ${a.name}`,
       entries: a.text ? [a.text] : null,
       noDescription: !a.text,
     };
-  });
+  };
+  return [
+    ...parseBeastActions(beast.actions).map((a) => toCard(a, a.isAttack ? 'attack' : 'action')),
+    ...parseBeastActions(beast.bonusActions).map((a) => toCard(a, 'bonus')),
+    ...parseBeastActions(beast.reactions).map((a) => toCard(a, 'reaction')),
+  ];
 }
 
 export function makeWeaponMasteryReminderActions(C, items = []) {

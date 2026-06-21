@@ -158,6 +158,8 @@ export function normalizeBeast(raw) {
     senses: Array.isArray(raw.senses) ? raw.senses.map(norm) : [],
     passivePerception: Number(raw.passive) || null,
     actions: Array.isArray(raw.action) ? raw.action : [],
+    bonusActions: Array.isArray(raw.bonus) ? raw.bonus : [],
+    reactions: Array.isArray(raw.reaction) ? raw.reaction : [],
     traits: Array.isArray(raw.trait) ? raw.trait : [],
   };
 }
