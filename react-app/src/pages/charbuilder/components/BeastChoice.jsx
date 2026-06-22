@@ -10,7 +10,8 @@ import {
   Typography,
 } from '@mui/material';
 import { Check } from 'lucide-react';
-import SelectionSearch, { useOptionSearch } from './SelectionSearch.jsx';
+import SelectionSearch from './SelectionSearch.jsx';
+import { useOptionSearch } from '../../../shared/character/searchText.js';
 import {
   eligibleBeasts,
   beastRefValue,

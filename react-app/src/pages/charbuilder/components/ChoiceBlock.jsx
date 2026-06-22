@@ -5,7 +5,8 @@ import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
 import { findWeaponItemByName } from '../../../shared/character/weaponMastery.js';
 import { WeaponMasteryBlock } from '../../../shared/character/WeaponMasteryBlock.jsx';
 import ExpandableSelectionList from './ExpandableSelectionList.jsx';
-import SelectionSearch, { useOptionSearch } from './SelectionSearch.jsx';
+import SelectionSearch from './SelectionSearch.jsx';
+import { useOptionSearch } from '../../../shared/character/searchText.js';
 import {
   parseTypedProficiencyValue,
   isChoicePlaceholderValue,

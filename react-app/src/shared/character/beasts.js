@@ -215,6 +215,16 @@ export function eligibleBeasts(beastsDb, druidLevel) {
     .sort((a, b) => (a.crNum - b.crNum) || a.name.localeCompare(b.name));
 }
 
+// Find Familiar (XPHB 2024) eligible forms — used by the Druid's Wild Companion.
+// The spell's familiar takes the form of "another Beast that has a Challenge
+// Rating of 0" (the named Bat/Cat/Owl/… are all CR 0). Swarms are already
+// excluded at normalize time. Sorted by name.
+export function findFamiliarBeasts(beastsDb) {
+  return (beastsDb || [])
+    .filter((b) => b.crNum === 0)
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
 // ── Beast actions → rollable attack cards ────────────────────────────────────
 // 5etools action prose carries inline tags: {@hit 5}, {@damage 1d8 + 3},
 // {@atkr m}, {@h}, … `parseBeastActions` extracts the attack bonus + damage

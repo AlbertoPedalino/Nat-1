@@ -22,6 +22,7 @@ import { clearCraftedByFlag, VANISH_ON_LONG_REST_FLAGS } from '../../shared/char
 import { buildD20Meta, formatD20Detail, rollD20 as rollD20Dice } from '../../shared/character/dice.js';
 import { aggregateSavingThrowBonus } from '../../shared/character/itemBonus.js';
 import { itemEffectInventory } from '../../shared/character/wildShapeForm.js';
+import { longRestCharacterPatch } from '../../shared/character/longRest.js';
 import { calcMaxHP, getMod, getFinal, getSaveBonus, CONDITION_IMPLIES, clampExhaustion, exhaustionD20Penalty, EXHAUSTION_MAX } from './logic/calculations.js';
 import { normalizeCharacterAttunement } from './logic/attunement.js';
 import { applyResourceRest, getAllResourceDefs, getHitDicePools, getUsedHitDiceTotal, normalizeResourceMax, resourceFullValue } from './logic/restResources.js';
@@ -301,6 +302,7 @@ export default function CharacterSheet({ externalChar = null, externalCharId = n
       setFreeCastUses(nextFC);
       patch.freeCastUses = nextFC;
       Object.assign(patch, clearedToggles(C));
+      Object.assign(patch, longRestCharacterPatch(C));
     }
 
     if (C?.speciesName) {

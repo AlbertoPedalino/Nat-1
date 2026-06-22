@@ -3,7 +3,8 @@ import { Chip, List, ListItemButton, Paper, Stack, Typography } from '@mui/mater
 import { spellMatchesAnyClass } from '../spells/spells.js';
 import { SpellMiniTags, SpellReferenceBody, SpellRowLabel, SpellSelectButton } from '../../../shared/character/SpellReference.jsx';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
-import SelectionSearch, { filterOptions, SEARCH_MIN_OPTIONS } from './SelectionSearch.jsx';
+import SelectionSearch from './SelectionSearch.jsx';
+import { filterOptions, SEARCH_MIN_OPTIONS } from '../../../shared/character/searchText.js';
 
 function _knownCantripNames(character) {
   const names = new Set();

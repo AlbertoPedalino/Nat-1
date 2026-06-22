@@ -11,7 +11,8 @@ import {
   Typography,
 } from '@mui/material';
 import { Check, ChevronDown, ChevronUp } from 'lucide-react';
-import SelectionSearch, { useOptionSearch } from './SelectionSearch.jsx';
+import SelectionSearch from './SelectionSearch.jsx';
+import { useOptionSearch } from '../../../shared/character/searchText.js';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import { ItemReferenceBody } from '../../../shared/character/ItemReference.jsx';
 import { ItemNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';

@@ -12,6 +12,11 @@
 // NOT a separate pool. Assuming a form only grants Temporary HP equal to the
 // Druid's level, so HP/maxHP are untouched here.
 
+// Sheet-resource key for Wild Shape uses (registered in the Druid adapter). Both
+// Wild Shape and Wild Companion spend from this single pool, so consumers import
+// the key from here instead of hardcoding the string.
+export const WILD_SHAPE_RESOURCE_KEY = 'wild_shape';
+
 const PHYSICAL_ABILITIES = new Set(['str', 'dex', 'con']);
 
 export function getActiveWildShape(C) {

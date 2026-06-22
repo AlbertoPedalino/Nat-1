@@ -38,6 +38,7 @@ import SearchField from '../../../shared/character/SearchField.jsx';
 import ActionDetailPanel from './ActionDetailPanel.jsx';
 import CreatedItemsPanel from './CreatedItemsPanel.jsx';
 import WildShapePanel from './WildShapePanel.jsx';
+import WildCompanionPanel from './WildCompanionPanel.jsx';
 import AttackRollButton from './AttackRollButton.jsx';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 import { useSheetActions } from '../context/SheetActionsContext.jsx';
@@ -58,6 +59,7 @@ const ACTION_DETAIL_RENDERERS = {
   panel: ActionDetailPanel,
   createdItems: CreatedItemsPanel,
   wildShape: WildShapePanel,
+  wildCompanion: WildCompanionPanel,
 };
 
 const _danglingResKeyWarned = typeof Set === 'function' ? new Set() : null;

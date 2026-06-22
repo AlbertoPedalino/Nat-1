@@ -90,7 +90,12 @@
       "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/bestiary/index.json\")",
       "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/bestiary/bestiary-xmm.json\")",
       "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); ms=d.get\\('monster',[]\\); print\\('total monsters:',len\\(ms\\)\\); beasts=[m for m in ms if \\(m.get\\('type'\\) if isinstance\\(m.get\\('type'\\),str\\) else \\(m.get\\('type'\\) or {}\\).get\\('type'\\)\\)=='beast']; print\\('beasts:',len\\(beasts\\)\\); b=beasts[0] if beasts else {}; print\\({k:b.get\\(k\\) for k in ['name','source','type','cr','ac','hp','str','dex','con','speed','size']}\\)\")",
-      "Bash(echo \"eslint exit $?\")"
+      "Bash(echo \"eslint exit $?\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/spells/spells-xphb.json\" -o /tmp/spells-xphb.json)",
+      "Bash(echo \"exit=$?\")",
+      "Read(//tmp/**)",
+      "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/class/class-druid.json\" -o class-druid.json)",
+      "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/bestiary/bestiary-xmm.json\" -o b-xmm.json)"
     ]
   }
 }

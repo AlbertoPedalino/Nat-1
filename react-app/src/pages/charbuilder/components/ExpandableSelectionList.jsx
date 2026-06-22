@@ -1,7 +1,8 @@
 import { Box, IconButton, List, ListItemButton, ListItemText, Paper, Stack, Typography } from '@mui/material';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
-import SelectionSearch, { useOptionSearch } from './SelectionSearch.jsx';
+import SelectionSearch from './SelectionSearch.jsx';
+import { useOptionSearch } from '../../../shared/character/searchText.js';
 
 function selectionStatus(selectedCount, max) {
   if (!Number.isFinite(max) || max <= 0) return null;

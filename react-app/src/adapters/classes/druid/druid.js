@@ -213,7 +213,8 @@ registerClassSheetActions("Druid", [
     "cat": "action",
     "uses": "Spell slot or Wild Shape",
     "minLevel": 2,
-    "desc": "Spend one Wild Shape use or a spell slot to cast Find Familiar. The familiar is a Fey creature and vanishes when you finish a Long Rest."
+    detailType: 'wildCompanion',
+    "desc": "Magic action. Spend one Wild Shape use (or a spell slot) to cast Find Familiar without Material components. The familiar takes the form of any Beast of CR 0, is a Fey creature, and vanishes when you finish a Long Rest."
   },
   {
     "name": "Wild Resurgence",
