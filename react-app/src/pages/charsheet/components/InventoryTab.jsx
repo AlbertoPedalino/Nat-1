@@ -34,7 +34,7 @@ import { ItemReferenceBody, QuantityAdder } from '../../../shared/character/Item
 import { itemDisplayName } from '../../../shared/character/itemIdentity.js';
 import { carryCapacity, formatWeight, itemQty as qty, totalCarriedWeight } from '../../../shared/character/weight.js';
 import { useSheetActions } from '../context/SheetActionsContext.jsx';
-import { craftedFlagOf, craftedTagColor } from '../../../shared/character/craftedItems.js';
+import { buildItemTags } from '../../../shared/character/craftedItems.js';
 
 const FILTERS = [
   { key: 'all', label: 'All', icon: null },
@@ -837,6 +837,20 @@ const getPenaltyMessage = (() => {
   };
 })();
 
+// Provenance tags ([custom] + crafted badges) on their own row beneath the item
+// name so a long name truncates cleanly instead of being shoved by trailing tags
+// (notably on mobile). `[custom]` stays plain text — it's a flag, not a tone pill.
+function ItemTagsRow({ item, character }) {
+  const tags = buildItemTags(item, character);
+  if (!item.custom && tags.length === 0) return null;
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap', mt: '3px' }}>
+      {item.custom ? <Box component="span" sx={{ fontSize: '0.56rem', color: 'text.secondary' }}>[custom]</Box> : null}
+      {tags.map((tag) => <MiniBadge key={tag.key} label={tag.label} color={tag.color} bg={tag.bg} />)}
+    </Box>
+  );
+}
+
 const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, onEquip, onEquipSlot, penaltyMsg, canPactWeapon, onPactWeapon, isArmorer, hasArcaneArmor, onArcaneArmor, onAttune, attunementFull, character, attunementContext, attunementLimit, onSetAbilityChoice, onConsumeTome }) {
   const type = String(item.type || '').toUpperCase();
   const canEquip = ['M', 'R', 'LA', 'MA', 'HA', 'S', 'SCF', 'WD', 'RD', 'ST', 'WI', 'WEAPON', 'ARMOR'].includes(type);
@@ -867,17 +881,11 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, 
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px', px: '10px', py: '6px', bgcolor: item.equipped ? 'rgba(26,188,156,0.06)' : 'rgba(35,32,26,1)', border: 1, borderColor: rowBorderColor, borderRadius: open ? '8px 8px 0 0' : 1, mb: 0, '&:hover': { borderColor: 'rgba(202,165,80,0.34)' } }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
           <Box onClick={toggle} sx={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', flexWrap: 'wrap' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', minWidth: 0 }}>
               <ItemNameIcon item={item} />
-              <Typography noWrap sx={{ fontSize: '0.875rem', color: 'text.primary' }}>{itemDisplayName(item)}</Typography>
-              {item.custom ? <Box component="span" sx={{ fontSize: '0.56rem', color: 'text.secondary' }}>[custom]</Box> : null}
-              {(() => {
-                const flag = craftedFlagOf(item);
-                if (!flag || !item.craftedLabel) return null;
-                const tone = craftedTagColor(flag, character);
-                return <MiniBadge label={item.craftedLabel} color={tone} bg={alpha(tone, 0.16)} sx={{ ml: 0.5 }} />;
-              })()}
+              <Typography noWrap sx={{ fontSize: '0.875rem', color: 'text.primary', minWidth: 0 }}>{itemDisplayName(item)}</Typography>
             </Box>
+            <ItemTagsRow item={item} character={character} />
             {penaltyMsg && (
               <Typography sx={{ fontSize: '0.6rem', color: 'warning.main', mt: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <AlertTriangle size={10} /> {penaltyMsg}

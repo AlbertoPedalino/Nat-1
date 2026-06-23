@@ -1,0 +1,28 @@
+backend: cli
+use_worktree: false
+plan_only: true
+
+task: |
+  Inspect the current Character Builder structure in GM-Board.
+
+  Goal:
+  Understand how the Character Builder is organized and produce a clear architectural report.
+
+  Identify:
+  - main entry points;
+  - character builder components;
+  - state and storage flow;
+  - data loading flow;
+  - source filtering logic;
+  - action tab structure;
+  - character sheet rendering;
+  - where D&D 2024 source filtering rules are applied;
+  - which files are most important for future feature work.
+
+  Constraints:
+  - Do not modify application files.
+  - Do not refactor code.
+  - Do not add new runtime behavior.
+  - Do not vendor or copy external 5etools data.
+  - Use the project rules from .agent-loop/config.yaml.
+  - Produce a clear report with relevant files and their responsibilities.
