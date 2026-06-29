@@ -14,8 +14,13 @@ git:
   delete_worktree_on_failure: false
 
 limits:
-  max_fix_attempts: 2
-  max_changed_files: 12
+  # Effectively uncapped. A full, clean feature port creates many modules, takes
+  # many fix iterations, and runs long; do not cut the agent off mid-build.
+  max_fix_attempts: 6
+  max_changed_files: 1000
+  phase_timeout_seconds: 36000
+  # NOTE: subagent `max_turns` in configs/subagents.default.yaml is parsed but NOT
+  # enforced by the runner, so the agent already runs each phase to completion.
   # No max_budget_usd: Claude subscription (Plus) has no per-dollar billing, so a
   # cap only stops phases early at a phantom API cost. The real limit is the
   # plan's usage window. (max_turns_* keys are ignored by the orchestrator; the

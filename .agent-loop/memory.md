@@ -1,84 +1,147 @@
-# Project Memory — GM-Board
+# Project Memory - GM-Board
 
-Accumulated by the agent loop. Curated, advisory (verify against code, not authoritative).
-App = React 19 + Vite + MUI + Supabase SPA in `react-app/`. D&D data fetched live from a
-5etools mirror, never vendored. Builder and Sheet are two halves of one unified character pipeline.
+Accumulated by agent-loop runs. Curated, advisory; verify against code before editing.
+App = React 19 + Vite + MUI + Supabase SPA in `react-app/`. D&D data fetched live from
+5etools mirrors and must not be vendored. Builder and Sheet share one unified character object.
 
-## Entry points
-- `react-app/src/main.jsx` — root mount: ThemeProvider → ToastProvider → BrowserRouter → AuthProvider → App.
-- `src/App.jsx` — router (`/charbuilder`, `/charsheet`, gmboard/campaigns/encounter); mounts `CloudAutoSync` globally.
-- `src/pages/charbuilder/CharBuilder.jsx` — builder shell + orchestration brain (most important single file).
-- `src/pages/charsheet/CharacterSheet.jsx` — live play sheet.
-- Standalone `public/tools/*.html` are separate, not part of the React builder.
+## Project Rules
 
-## Builder components
-Shell drives 6 tabs (`constants.js → STEPS`): Class, Species, Background, Ability Scores, Equipment, Sheet.
-- `steps/` — one container per tab (`ClassStep`, `SpeciesStep`, …, `SheetStep`).
-- `components/` — panels (`ClassPanel`, `SubclassPanel`, `LevelPanel`, `SpellSelectionPanel`, `PreviewPane` right-rail live preview, …).
-- `logic/` — `calculations.js`, `choiceSpecs.js`, `featPrerequisites*.js`, `multiclassRules.js`, `dataLoaders.js`, `persistence.js`, `previewSheet.js`, `characterExport.js`.
-- `src/shared/character/*` (~90 files) — logic shared builder+sheet (proficiencies, spells, items, currency, AC, HP, rest, weaponMastery…).
+- Data repo: `https://github.com/5etools-mirror-3/5etools-src/tree/main/data`
+- Image repo (app): `https://github.com/5etools-mirror-2/5etools-img`
+- Runtime fetch only; do not copy/commit 5etools JSON or image assets.
+- Allowed source codes (config): `XPHB`, `XMM`, `XDMG`, `FRAIF`, `FRHOF`, `EFA`, `RWH`.
+- Ignore/reject non-whitelisted sources; no homebrew; no legacy `PHB/DMG/MM` unless mapped to 2024.
+- `.agent-loop/config.yaml` verify cmd: `git diff --check`; base branch `feature/unified-character-storage`; clean repo not required.
 
-## State + storage
-- State = single `useReducer` in `CharBuilder.jsx`; reducer = `state.js → builderReducer`.
-- `updateCharacter` rebuilds `normalizedChoices` (`shared/choiceNormalization.js`) on `NORMALIZE_SOURCE_FIELDS` change — single source of truth for derived profs/spells.
-- Level = primary classLevel + sum(extraClasses levels); XP is an independent tracker, does NOT drive level.
-- Persistence (`logic/persistence.js`): `buildSheetCharacter` → `makeSheetPayload` builds the unified object (snapshots + `adapterRuntime`), then `stripHeavyFields` before save.
-- Storage branches on auth (autosave effect in `CharBuilder.jsx`): logged out → `shared/character/store.js` localStorage (`gb:char:<id>`, debounce 300ms); logged in → Supabase `shared/cloud/cloudCharacters.js` (debounce 1200ms). Import draft persisted only on explicit save/upload.
-- Sheet loads same unified object, derives via `charsheet/state.js → deriveSheetState`, patches back (`storePatchCharacter` / `updateCloudCharacterData`).
+## Entry Points
 
-## Data loading
-- `CharBuilder.jsx` mount fires ~8 parallel loaders → `dispatch data/load-*`.
-- `logic/dataLoaders.js` fetches from `DATA_BASE` (`constants.js`, 5etools-mirror-3 raw GitHub); `getJson` memoizes per path. Each loader source-filters at load, dedupes by source priority, sorts.
-- File lists in `constants.js`: `CLASS_FILES`, `SPELL_FILES`, `BEAST_FILES`. Tiny summary fallbacks seed state until fetch lands.
+- `src/main.jsx`: ThemeProvider -> ToastProvider -> BrowserRouter -> AuthProvider -> App.
+- `src/App.jsx`: routes `/`, `/charbuilder`, `/charsheet`, `/gmboard`, `/gmsheets`, `/campaigns`, `/campaign-sheet`, `/encounter-builder`; mounts `CloudAutoSync` globally.
+- `pages/charbuilder/CharBuilder.jsx`: builder shell/orchestration brain.
+- `pages/charsheet/CharacterSheet.jsx`: live play sheet.
+- `pages/campaignsheet/CampaignSheetView.jsx`: cloud/campaign sheet wrapper; passes `externalChar` into `CharacterSheet`.
+- `pages/encounterbuilder/EncounterBuilderPage.jsx`: thin iframe host for the standalone encounter builder.
+- Standalone `public/tools/*.html` (`encounter-builder.html`, `gmboard.html`) are separate vanilla-JS apps, NOT bundled by Vite.
 
-## Source filtering (D&D 2024 whitelist) — single source of truth
-- `src/shared/character/sourcePriority.js`: `CORE_2024_SOURCE_PRIORITY` master list; content whitelists derive from it (`SPECIES_/BACKGROUND_/FEAT_/OPTIONAL_FEATURE_ALLOWED_SOURCES`, `ITEM_SOURCE_PRIORITY`). Narrow: `CLASS_ALLOWED_SOURCES`, `BEAST_ALLOWED_SOURCES`. Helpers: `isAllowedSource`, `sourceRank`, `compareBySourcePriority`, `isSupportedEdition`.
-- `src/shared/character/sourceFiltering.js` — subclass gates (`isSupportedSubclassRecord/Feature`).
-- Applied per loader in `dataLoaders.js` (classes/species/backgrounds/feats/optionalFeatures/items/beasts).
-- ⚠️ GOTCHA: config whitelist `RWH` vs code `CORE_2024_SOURCE_PRIORITY` `RHW`; config casing `FRAIF/FRHOF` vs code `FRAiF/FRHoF`. `isAllowedSource` matches exact string → mismatch can silently drop a source. Confirm intended spelling before any source-list work.
+## Builder Components
 
-## Adapter system (behavior layer)
-Content = data-driven from 5etools; behavior = adapters in `src/adapters/`.
-- `registry.js` — `createAdapterRegistry()`: ~50 keyed Maps; singleton `adapterRegistry`.
-- `index.js` — lazy loader via `import.meta.glob`: `loadCoreAdapters`, `loadClassAdapters(classNames)` (active classes only).
-- `adapterBindings.js` — `createAdapterBindings(registry, ctx)`: API each adapter file destructures.
-- `adapterPipeline.js` — `adaptBuilderData`: raw → normalized class/subclass/species/feat/spell/item.
-- Adapter files: `classes/<class>/<subclass>.js`, `feats/`, `species/`, `items/`, `spells/`. Sheet behavior between `[SheetRuntime]` markers (`registerClassSheetActions/Resources`).
+Builder shell drives 6 tabs (`constants.js -> STEPS`): Class, Species, Background, Ability Scores, Equipment, Sheet.
+- `pages/charbuilder/steps/`: tab containers (`ClassStep`...`SheetStep`).
+- `pages/charbuilder/components/`: panels (`ClassPanel`, `SubclassPanel`, `LevelPanel`, `SpellSelectionPanel`, `PreviewPane`...).
+- `pages/charbuilder/logic/`: `calculations.js`, `choiceSpecs.js`, `featPrerequisites*.js`, `multiclassRules.js`, `dataLoaders.js`, `persistence.js`, `previewSheet.js`, `characterExport.js`.
+- `src/shared/character/*`: shared builder+sheet logic (choices, proficiencies, spells, items, currency, AC, HP, rest, weapon mastery, wild shape...).
 
-## Action tab
-- `src/pages/charsheet/logic/actionsTabLogic.js` builds action cards; rendered by `components/ActionsTab.jsx` + `ActionDetailPanel.jsx`.
-- `collectAdapterActions` pulls from live `installedRegistry` (preferred) or serialized `adapterRuntime` fallback; filters by level/condition/executability.
-- `makeWeaponActions`, `makeWildShapeActions`, `buildActionTags`, `resolveActionFormulas`; dedup via `uniqBySignature`.
+## Builder State + Storage
 
-## Character sheet
-- `CharacterSheet.jsx` loads unified char, calls `ensureSheetRuntimeAdapters` (re-installs adapters from snapshot class names — best-effort), reconciles inventory, derives `sheet` via `deriveSheetState`.
-- Layout `layout.js`; components in `charsheet/components/`; `TabsPanel` → Actions/Spells/Features/Inventory/Background/Notes.
-- Read-only mode (cloud foreign sheets): mutations become no-ops, dice still roll.
+- Builder state = one `useReducer` in `CharBuilder.jsx`; reducer `pages/charbuilder/state.js`.
+- `updateCharacter` rebuilds `normalizedChoices` (`shared/choiceNormalization.js`) when normalized fields change.
+- Level = `classLevel` + `extraClasses` levels; XP independent, does not drive level.
+- `logic/persistence.js`: `buildSheetCharacter` -> `makeSheetPayload` builds unified object, then `stripHeavyFields`. `buildSheetCharacter(character,data,previous)` merges `previous` first, preserving sheet-only fields (HP, resources, notes, slot usage, conditions).
+- Local: `shared/character/store.js` writes `gb:char:<id>`, `gb:chars`, `gb:active_char`.
+- Cloud: `shared/cloud/cloudCharacters.js` writes Supabase `characters.data`.
+- Autosave: local ~300 ms, cloud ~1200 ms; imported drafts not persisted until explicit save/upload.
 
-## Key files for future work
+## Data Loading (builder/sheet)
+
+- `pages/charbuilder/logic/dataLoaders.js` fetches from `DATA_BASE` in `constants.js` (`raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/`). `getJson` memoizes.
+- Loaders source-filter, dedupe by source priority, sort. Sheet loaders: `loadItems`, `loadOptionalFeatures`, `loadConditions`, `loadSpells`, `loadVariantRules`, `loadBeasts`.
+- `loadConditions()` -> `conditionsdiseases.json`, keeps `source==='XPHB'`, lowercase keys.
+- `reconcileInventoryWithItemsDb()` refreshes item/effect fields, preserves user state.
+
+## Source Filtering (builder/sheet)
+
+- `shared/character/sourcePriority.js`: `isAllowedSource`, `sourceRank`, `compareBySourcePriority`, `isSupportedEdition`.
+- `shared/character/sourceFiltering.js`: subclass/class-feature gates.
+- `isAllowedSource` is exact-string sensitive; confirm spelling before edits.
+
+## Adapter System
+
+- Content data-driven from 5etools; behavior in `src/adapters/`.
+- `adapters/registry.js`: singleton maps/register/get for classes, subclasses, species, feats, items, spells, sheet actions/resources/effects, etc.
+- `adapters/index.js`: lazy `import.meta.glob('./{classes,feats,species,spells,items}/**/*.js')`; `installedRegistry`, `loadCoreAdapters`, `loadClassAdapters`, `loadSpellsAdapters`, `loadConvertedAdapters`, `reinstallAdapters`.
+- `adapterBindings.js` author API; `adapterPipeline.js` normalizes records. Serialized `adapterRuntime` is fallback only (functions lost in JSON); live registry rebinding is real path.
+
+## Character Sheet (entry/layout/flow)
+
+- Normal: `/charsheet?char=<id>` -> `storeLoadCharacter(id)` / `getActiveCharId()`.
+- Cloud: `/campaign-sheet?id=<id>` -> `getCloudCharacter` -> `<CharacterSheet externalChar=... readOnly=...>`.
+- `CharacterSheet.jsx` owns orchestration, state, persistence, rests, HP/death saves, conditions, resources, dice log, providers.
+- `layout.js` grid areas; render tree `ProficiencySetsProvider` -> `SheetActionsProvider` -> TopBar + grid.
+- Load effect: resolve id -> load char -> `Promise.all(ensureSheetRuntimeAdapters, loadItems, loadOptionalFeatures, loadConditions)` -> reconcile inventory -> `setC` -> `setSheet(deriveSheetState)` -> init resources/freeCastUses.
+- `pages/charsheet/state.js -> deriveSheetState(C)` computes/clamps maxHP, currentHP, tempHP, deathSaves, usedHD(Pools), spellSlotUsed, createdSpellSlots, sheetInventory, sheetCurrency, inspiration, activeConditions, exhaustionLevel(0-6), xpStored, notes.
+
+## Sheet Tabs
+
+- `components/TabsPanel.jsx`: 5 visible tabs Actions/Spells/Inventory/Features/Notes. `BackgroundTab.jsx` exists but unused (background folded into FeaturesTab).
+- Actions: `ActionsTab.jsx` + `logic/actionsTabLogic.js`; builds cards from weapons, adapter actions, Wild Shape, mastery; `collectAdapterActions` prefers live registry. Handles resources/toggles/created slots/Pact/Wild Resurgence.
+- Spells: `SpellsTab.jsx` + `logic/spellsTabLogic.js`; `buildSpellInfo` merges all sources; slots via `getSheetSlots`, limits `getSpellLimits`.
+- Inventory: `InventoryTab.jsx`; live items, equip/attune/currency, reconciled effects.
+- Features: `FeaturesTab.jsx`; class/subclass/feat/species/background buckets + Warlock invocations; level/identity/choice gates.
+- Notes: `NotesTab.jsx`; `normalizePages` JSON or legacy string.
+
+## Sheet Resources / Rest / Conditions
+
+- `logic/restResources.js` = resource source of truth. `getAllResourceDefs` from `installedRegistry`; `normalizeResourceMax`; `resourceFullValue` (`track:'used'` full at 0); `applyResourceRest`.
+- Rest: short (HD by pool, heal roll+CON, SR resources, free-cast recovery); long (HP/HD/death saves/slots/created slots, exhaustion-1, prune crafted, resource/free-cast recovery, clear toggles, `longRestCharacterPatch`). `shared/character/longRest.js` transient resets (Wild Companion dismiss).
+- Conditions: `logic/calculations.js` (`CONDITIONS`, `CONDITION_IMPLIES`, `CONDITION_EFFECTS`, exhaustion). `ConditionsBlock.jsx` pills + exhaustion stepper. `rollD20` applies exhaustion penalty; `Movement.jsx` speed penalties. Exhaustion lvl6 -> HP 0.
+
+## Sheet Runtime Adapters / Read-Only / Persistence
+
+- `logic/sheetRuntimeAdapters.js`: `collectSheetRuntimeClassNames`, `ensureSheetRuntimeAdapters` (loadCore+loadClass, `Promise.allSettled`, best-effort degrade).
+- Read-only external sheets: no local store writes; mutators replaced with no-ops; rolls still work; `TopBar` READ ONLY chip. Editable external -> 1200 ms `updateCloudCharacterData`.
+- Local mutations: `storePatchCharacter(id,patch)` (shallow merge, dispatches `gb:char-saved`). Cloud autosync pushes local chars unless foreign. `pushCharacterData` builder upsert; `pullCharacter` cloud->local.
+
+## Encounter Builder (`public/tools/encounter-builder.html`)
+
+- **Self-contained vanilla-JS single file (~4259 lines): UI + state + data + combat + persistence.** No shared/adapter imports inside iframe. Served from `public/` (NOT Vite-bundled; `npm run build` does not typecheck it). Heavy Italian identifiers/UI.
+- Host `pages/encounterbuilder/EncounterBuilderPage.jsx` loads it in `StandaloneHtmlFrame` iframe; chrome = `AppTopBar` + `SaveInstanceButton`.
+- **postMessage bridge** (origin-checked): parent->iframe `gb:campaign-players`(payload), `gb:save-instance`, `gb:request-instance-state`; iframe->parent `gb:encounter-builder-ready`, `gb:instance-state{kind:'encounter',id,saved}`, `gb:open-sheet{id}` (host opens `/campaign-sheet?id=...&edit=1`).
+- Host cloud import: `listMyCampaigns()` (GM only) + `listCampaignCharacters` (`shared/cloud/campaigns.js`); loads core+class adapters; `campaigns/sheetSummary.js summarizeCharacter` (deriveSheetState+AC+initiative) -> `toEncounterPlayer` flat `{level,ac,hpMax,initMod,iconColor}`.
+- 3 views (tabs): Builder / Library / Encounter(combat). State = module-global vars (no React/reducer): `fullMonsterDb/allM/filtM`, `encounter[]`, `combatants[]/currentTurn/round`, `party{count,level}/players[]`, `sources/legendaryGroups/activeSrcs`, `monsterLabelMap`.
+- Data: `BASE`=mirror-3 bestiary dir; **`IMG_BASE`=mirror-3 5etools-img (diverges from app's mirror-2 — flag)**. `loadIndex()` (index.json + legendarygroups.json, `_copy` resolve), `loadAllManuals()` iterates own whitelist `PREF=['XMM','XDMG','XPHB','FRAiF','FRHoF','EFA','RHW']` (lowercase i/o, RHW — differs from React `FRAIF/FRHOF/RWH`; matches raw 5etools codes), merges `d.monster` -> dedupe name+source. Chips = `PREF ∩ index keys`; empty `activeSrcs`=all.
+- Persistence = **localStorage only, no Supabase for encounters**. Storage-scoping IIFE wraps `Storage.prototype`; scoped keys `5e_saved_fights`/`5e_party_data`/`5e_saved_encounters` prefixed `gb:enc:<id>:`; unsaved instances drop scoped writes. Registry `gb_encounter_registry`+`gb_active_encounter_id` (see `shared/localStorageRegistries.js`). `?enc=new|<id>|default`; legacy->`gb:enc:default:` migration `gb_enc_migrated_v1`. Saved encounters lightweight (name/source/cr/xp/qty, no monsterData); fights = combat snapshots (HP/init/deathSaves/round + monsterRef).
+- Combat: `buildCombat` rolls d20+mod, sort desc; `nextTurn/prevTurn` skip dead+round bump; monsters die at 0 HP, players->death saves (3 fail=dead); reinforcements panel + manual add; `saveCombatState` auto-persists every render.
+- Difficulty (2024 RAW): `calcDiff` sums raw monster XP (NO encounter multiplier), budget `XT[level-1]`×count, bands Low/Moderate/High/Deadly else Trivial.
+- Dice: `rollDice`/`rollDiceFormula` clickable; `clean()` converts `{@...}` tags to rollables/spell links; `rollLog` max 60 + toast.
+- `shared/character/beasts.js` = Wild Shape (sheet) only — unrelated to encounter builder.
+
+## Key Files
+
 | Concern | File |
 |---|---|
-| Builder orchestration / autosave / cloud-vs-local | `pages/charbuilder/CharBuilder.jsx` |
-| Builder state machine | `pages/charbuilder/state.js` |
-| Unified char build/import/export | `pages/charbuilder/logic/persistence.js` |
-| Runtime data fetch + filtering | `pages/charbuilder/logic/dataLoaders.js` |
-| Source whitelist (single SoT) | `shared/character/sourcePriority.js` (+ `sourceFiltering.js`) |
-| Data file lists + DATA_BASE | `pages/charbuilder/constants.js` |
+| Sheet shell/load/persistence/read-only/rest | `pages/charsheet/CharacterSheet.jsx` |
+| Sheet derived state | `pages/charsheet/state.js` |
+| Sheet tabs | `pages/charsheet/components/TabsPanel.jsx` |
+| Mutation context | `pages/charsheet/context/SheetActionsContext.jsx` |
+| Actions/Spells logic | `pages/charsheet/logic/{actionsTabLogic,spellsTabLogic}.js` |
+| Resources/rest | `pages/charsheet/logic/restResources.js`, `shared/character/longRest.js` |
+| Conditions/calc | `pages/charsheet/logic/calculations.js`, `components/ConditionsBlock.jsx` |
+| Runtime adapter rebinding | `pages/charsheet/logic/sheetRuntimeAdapters.js` |
+| Builder orchestration/state/payload/loaders | `pages/charbuilder/{CharBuilder.jsx,state.js,logic/persistence.js,logic/dataLoaders.js}` |
+| Source whitelist | `shared/character/{sourcePriority,sourceFiltering}.js` |
 | Adapter registry/API/loader/pipeline | `adapters/{registry,adapterBindings,index,adapterPipeline}.js` |
-| Add class/subclass/species/feat behavior | `adapters/{classes,species,feats,items}/...` |
-| Sheet shell + persistence-back | `pages/charsheet/CharacterSheet.jsx` |
-| Action cards | `pages/charsheet/logic/actionsTabLogic.js` |
-| Local storage primitives | `shared/character/store.js` |
-| Cloud sync | `shared/cloud/{cloudCharacters,CloudAutoSync,AuthProvider}.js` |
+| Local/cloud storage | `shared/character/store.js`, `shared/cloud/{cloudCharacters,CloudAutoSync,AuthProvider}.js` |
+| **Encounter builder (all-in-one)** | `public/tools/encounter-builder.html` |
+| Encounter host bridge | `pages/encounterbuilder/EncounterBuilderPage.jsx` |
+| Iframe chrome | `components/{StandaloneHtmlFrame,SaveInstanceButton,AppTopBar}.jsx` |
+| Instance registries (Home listing) | `shared/localStorageRegistries.js` |
+| Player summary / cloud campaigns | `pages/campaigns/{sheetSummary.js,campaigns.js}` |
 
-## Gotchas / risks
-- No project unit tests: only `*.test.js` match is in `node_modules`; `package.json` test = `node --test` finds nothing in `src/`. Verification leans on `npm run build` + manual.
-- Builder + Sheet share one serialized schema; any field change must round-trip `makeSheetPayload` (write) ↔ `deriveSheetState` / `buildBuilderStateFromSheetPayload` (read). Easy to break silently.
-- Serialized `adapterRuntime` loses function props; live registry re-derivation (`ensureSheetRuntimeAdapters`) is the real path, serialized = stale fallback.
-- Source-spelling mismatch (see Source filtering) — verify before touching whitelists.
-- Data is runtime-fetched only; never vendor/commit 5etools JSON or images; preserve fetch behavior.
+## Gotchas / Risks
+
+- No source tests under `react-app/src`; `package.json` test = no-op `node --test`. Verify via `npm run build`, `git diff --check`, manual flows.
+- `public/tools/*.html` NOT covered by Vite build/typecheck; test by loading the page.
+- Encounter builder `IMG_BASE` uses mirror-3 img (app elsewhere uses mirror-2) — divergence.
+- Encounter builder has its own source whitelist `PREF`/`FULL_NAMES` (`FRAiF/FRHoF/RHW` casing) separate from React `sourcePriority.js`.
+- Encounters are local-only; campaign player import is a one-time numeric snapshot, not live/cloud-synced.
+- Builder/Sheet share one serialized schema; field changes must round-trip `makeSheetPayload`/`buildSheetCharacter` and `deriveSheetState`. Shallow merges — nested patches need care.
+- Serialized `adapterRuntime` loses functions; ensure live adapters loaded.
+- Data must stay runtime-fetched; never vendor 5etools JSON/images.
 
 ## Verification
-- `npm run build` (vite) — primary smoke check (no unit suite).
-- `git diff --check` — config-mandated.
-- Manual builder→sheet round-trip (create, reload, open sheet) since no automated coverage.
+
+- `cd react-app && npm run build`
+- `cd react-app && npm test` (no-op)
+- `git diff --check`
+- Manual sheet: create/save builder char, open `/charsheet?char=<id>`, reload, verify persistence; cloud `/campaign-sheet?id=<id>` read-only + editable; rest/resource checks.
+- Manual encounter: `/encounter-builder?enc=new` add monsters, difficulty, Launch combat, turns, Save instance, reload, Library launch/resume; signed-in GM campaign import + open-sheet relay.

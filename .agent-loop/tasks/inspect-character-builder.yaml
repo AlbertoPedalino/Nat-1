@@ -1,3 +1,4 @@
+agent: codex
 backend: cli
 use_worktree: false
 plan_only: true

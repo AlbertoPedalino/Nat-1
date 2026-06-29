@@ -1,0 +1,143 @@
+agent: claude
+backend: cli
+
+# Write-capable build on an isolated in-place branch (never the base branch).
+plan_only: false
+branch_mode: in_place
+create_branch: always
+base_branch: feature/unified-character-storage
+agent_branch: feat/encounter-builder-react
+allow_dirty: true
+
+task: |
+  Build a fully native React Encounter Builder that REPLACES the current
+  standalone vanilla-JS iframe app, with full feature parity.
+
+  Project memory (.agent-loop/memory.md) already documents the existing encounter
+  builder, the character sheet, the builder, and the adapter/cloud layers. USE IT
+  as the parity spec. Re-read `react-app/public/tools/encounter-builder.html` only
+  where you need exact behavior; do not re-explore the rest of the app from scratch.
+
+  ## Goal
+
+  Port `react-app/public/tools/encounter-builder.html` (~4259 lines vanilla JS) to
+  an idiomatic React feature living under `react-app/src/pages/encounterbuilder/`.
+  Route `/encounter-builder` must mount the native React page directly — no iframe,
+  no `StandaloneHtmlFrame`, no `postMessage` bridge. The host file
+  `pages/encounterbuilder/EncounterBuilderPage.jsx` becomes (or wraps) the real
+  React feature instead of an iframe host.
+
+  ## Feature parity (must all work)
+
+  Three views with the same tab toggling (Builder / Library / Encounter-combat):
+
+  1. Builder view
+     - Load the monster database at runtime from the 5etools data repo bestiary
+       (`index.json` source->file map + `legendarygroups.json` with `_copy`
+       inheritance for lair/regional/mythic). Memoize fetches (mirror the app's
+       `getJson` caching style).
+     - Source whitelist + chips, search, CR filter, type filter (`applyF` parity).
+       Use the raw 5etools source codes the bestiary files actually use.
+     - Plan an encounter list (add/remove monsters, quantities).
+     - Difficulty calc with 2024 RAW parity: sum of RAW monster XP (NO encounter
+       multiplier), budget = XT[level-1] * party.count, bands Trivial/Low/
+       Moderate/High/Deadly. Keep the CR_XP and XT tables.
+     - Party config (count + level).
+
+  2. Library view
+     - Saved encounters list (lightweight: name/source/cr/xp/qty, no full monster
+       data) — save/load/delete/launch/resume.
+
+  3. Encounter / combat view (enabled after Launch)
+     - Build initiative: monsters d20+dexMod, players d20+initMod, sort desc, round=1.
+     - next/prev turn skipping dead, round bump on wrap; reroll-all.
+     - HP modify/set; monsters die at 0; players go to death saves (3 fail = dead).
+     - Reinforcements: search global DB / manual quick-add.
+     - Auto-persist combat state.
+
+  Cross-cutting parity:
+  - Dice: clickable roll buttons from statblocks; port `clean()` so `{@hit}`,
+    `{@damage}`, `{@spell}` etc. become rollable buttons / links; roll log capped
+    at 60 entries + toast (use the app's existing ToastProvider, not a custom one).
+  - Cloud campaign player import (GM only): reuse the existing shared layers
+    directly in React instead of postMessage — `shared/cloud/campaigns.js`
+    (`listMyCampaigns` filtered to gm===user.id, `listCampaignCharacters`), adapter
+    loading, and `pages/campaigns/sheetSummary.js` `summarizeCharacter`
+    (deriveSheetState + AC + initiative) projected to the flat encounter-player
+    shape {level, ac, hpMax, initMod, iconColor}.
+  - "Open sheet" action: navigate to `/campaign-sheet?id=<id>&edit=1` (parity:
+    opens in a new tab) via react-router, replacing the old `gb:open-sheet` relay.
+
+  ## Architecture requirements — clean, scalable, maintainable (top priority)
+
+  Code quality matters as much as parity. The result must be a clean, scalable,
+  maintainable React feature, NOT a literal line-by-line transliteration of the
+  4259-line file.
+
+  - Idiomatic React: a context + reducer (or focused hooks) for encounter/combat/
+    party/monster-db state. NO module-global mutable vars, NO direct DOM string
+    building, NO innerHTML.
+  - Strict separation of concerns: pure logic (data loading, source filter,
+    difficulty, initiative/turns, dice + tag cleaning) lives in plain,
+    side-effect-free modules that are independently unit-testable; React
+    components stay thin (render + wire callbacks); persistence behind hooks.
+  - Single source of truth for shared constants/tables (CR_XP, XT, source
+    whitelist) — no duplicated literals scattered across files.
+  - Small, focused, composable modules with clear names and clear boundaries, so a
+    new monster source, view, or combat rule can be added without touching
+    unrelated code. Suggested layout (adapt as needed):
+      pages/encounterbuilder/EncounterBuilderPage.jsx (shell + view routing)
+      pages/encounterbuilder/components/*  (BuilderView, LibraryView, CombatView,
+        MonsterList, EncounterList, CombatantCard, DifficultyBar, Reinforcements,
+        CampaignImport, RollLog, ...)
+      pages/encounterbuilder/logic/*  (bestiary loading, source filter, difficulty,
+        initiative/turns, dice + tag cleaning)
+      pages/encounterbuilder/state/*  (reducer/context)
+      pages/encounterbuilder/hooks/*  (persistence, monster db)
+  - Styling: match the rest of the app (MUI), consistent with existing pages. Reuse
+    existing app utilities/components where they already exist instead of
+    reimplementing them.
+  - No dead code, no commented-out blocks, no leftover console noise. Document
+    non-obvious logic with brief comments. Naming consistent with the codebase.
+  - COMPLETE the parity feature set: implement everything, no stubs, no TODO
+    placeholders, no "left as an exercise". Keep the app building (npm run build)
+    at every step.
+
+  ## Persistence (CLEAN REWRITE, NEW KEYS)
+
+  - Use a fresh, well-structured localStorage schema with NEW keys for encounter
+    contents (planned encounters, fights, party). Do NOT try to read the old
+    `5e_*` / `gb:enc:<id>:*` scoped keys; a migration is out of scope.
+  - BUT keep the app integrated: still register encounter instances in
+    `shared/localStorageRegistries.js` (the instance registry the Home page lists)
+    so encounters still appear in the app's instance listing, and keep the
+    save-instance UX working natively (replace the iframe `SaveInstanceButton`
+    relay with a direct React save action; preserve the same registry contract).
+
+  ## Retiring the old implementation
+
+  - Remove the iframe wiring for the encounter builder and stop referencing
+    `public/tools/encounter-builder.html`. You may delete that HTML file.
+  - DO NOT remove or break `StandaloneHtmlFrame.jsx` or the GM board
+    (`public/tools/gmboard.html`) route — those stay.
+
+  ## Constraints
+
+  - Runtime fetch only: never vendor/copy/commit 5etools JSON or image assets.
+  - Use only whitelisted 2024 sources per .agent-loop/config.yaml; reject others.
+  - For images/tokens, use the app's configured image repository (fix the old
+    file's mirror divergence — align to the app standard, do not introduce a
+    second image source).
+  - Do not modify the character builder, sheet, adapters, or cloud layers beyond
+    the thin glue needed to call them from React. Prefer minimal, focused changes.
+  - Do not commit, push, or switch the base/protected branch.
+
+  ## Verification
+
+  - cd react-app && npm run build   (must pass; this is the real gate)
+  - cd react-app && npm test        (currently a no-op node --test)
+  - git diff --check
+  - Manual: /encounter-builder -> load monsters, filter, add, difficulty, Launch,
+    initiative/turn/HP/death-saves, reinforcements, Save instance, reload (new
+    keys persist + appears in Home instance list), Library load/resume; signed-in
+    GM campaign player import + open-sheet to /campaign-sheet.
