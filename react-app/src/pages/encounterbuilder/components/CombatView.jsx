@@ -33,7 +33,9 @@ export default function CombatView() {
             <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} sx={{ alignItems: { xs: 'stretch', md: 'center' }, justifyContent: 'space-between' }}>
               <Box>
                 <Typography variant="h2">Round {combat.round}</Typography>
-                <Typography color="text.secondary">Turn: {current?.name || '—'}</Typography>
+                <Typography color="text.secondary">
+                  Turn: <Box component="span" sx={{ color: 'primary.main', fontWeight: 800 }}>{current?.name || '—'}</Box>
+                </Typography>
               </Box>
               <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
                 <Button variant="outlined" startIcon={<ArrowLeft size={15} />} onClick={() => dispatch({ type: 'prevTurn' })}>

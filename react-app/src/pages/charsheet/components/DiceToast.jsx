@@ -42,8 +42,10 @@ function resolveToastLayout(toast) {
   const mode = toast.meta?.mode;
   const bonus = toast.meta?.bonus;
   const hasBonus = Number.isFinite(bonus);
+  // Damage/non-d20 mathStr spaces out the flat modifier ("2d6 [4, 5] + 3"),
+  // so strip whitespace before matching the trailing "+N" / "-N".
   const formulaMod = d20s.length === 0 && rolls.length > 0
-    ? String(toast.detail || '').match(/([+-]\d+)$/)?.[1] || null
+    ? String(toast.detail || '').replace(/\s+/g, '').match(/([+-]\d+)$/)?.[1] || null
     : null;
 
   const modifier = hasBonus ? formatBonus(bonus) : formulaMod;

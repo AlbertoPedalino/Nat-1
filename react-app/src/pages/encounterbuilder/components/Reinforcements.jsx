@@ -6,11 +6,13 @@ import {
   Box,
   Button,
   FormControl,
+  IconButton,
   InputLabel,
   MenuItem,
   Select,
   Stack,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import { ChevronDown, Plus, Search } from 'lucide-react';
@@ -81,13 +83,25 @@ export default function Reinforcements() {
             </Stack>
             <Stack spacing={0.75} sx={{ maxHeight: 280, overflow: 'auto' }}>
               {quickMonsters.length ? quickMonsters.map((monster) => (
-                <Box key={`${monster.name}-${monster.source}`} sx={monsterRowSx} onClick={() => dispatch({ type: 'addMonsterCombatant', monster })}>
+                <Box key={`${monster.name}-${monster.source}`} sx={monsterRowSx} onClick={() => dispatch({ type: 'selectStatblock', payload: { monster } })}>
                   <MonsterToken monster={monster} size={28} fallbackText={monster.name?.[0]} />
                   <Box sx={{ minWidth: 0, flex: 1 }}>
                     <Typography fontWeight={700} noWrap>{monster.name}</Typography>
                     <Typography variant="caption" color="text.secondary">{monster.source} · {getType(monster.type)}</Typography>
                   </Box>
                   <Typography variant="caption" color="primary.main">CR {getCR(monster.cr)}</Typography>
+                  <Tooltip title="Add to combat">
+                    <IconButton
+                      size="small"
+                      color="primary"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        dispatch({ type: 'addMonsterCombatant', monster });
+                      }}
+                    >
+                      <Plus size={16} />
+                    </IconButton>
+                  </Tooltip>
                 </Box>
               )) : <Typography color="text.secondary">No monsters found.</Typography>}
             </Stack>

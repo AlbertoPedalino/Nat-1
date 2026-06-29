@@ -29,6 +29,8 @@ export const theme = createTheme({
       secondary: '#bda98a',
     },
     divider: 'rgba(215, 173, 82, 0.22)',
+    // Default token color for player-character combatants without a custom color.
+    pcToken: '#5c8fe0',
   },
   shape: {
     borderRadius: 8,
