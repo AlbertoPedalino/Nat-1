@@ -56,7 +56,7 @@ export function encounterReducer(state, action) {
     case 'hydrateStorage':
       return hydrateState(state, action.payload, action.monsters);
     case 'setView':
-      return { ...state, view: action.view };
+      return { ...state, view: action.view, selectedStatblock: null };
     case 'setFilter':
       return { ...state, filters: { ...state.filters, [action.key]: action.value } };
     case 'toggleSource':

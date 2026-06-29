@@ -37,7 +37,7 @@ export default function Reinforcements() {
   return (
     <Accordion disableGutters sx={{ bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', '&:before': { display: 'none' } }}>
       <AccordionSummary expandIcon={<ChevronDown size={18} />}>
-        <Stack direction="row" spacing={1} alignItems="center">
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
           <Plus size={17} />
           <Typography variant="h2">Reinforcements</Typography>
         </Stack>
@@ -45,7 +45,7 @@ export default function Reinforcements() {
       <AccordionDetails>
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'minmax(0,1.2fr) minmax(260px,0.8fr)' }, gap: 2 }}>
           <Stack spacing={1.25}>
-            <Stack direction="row" spacing={1} alignItems="center">
+            <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
               <Search size={16} />
               <Typography fontWeight={700}>Search global database</Typography>
             </Stack>

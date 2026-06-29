@@ -18,7 +18,7 @@ export default function CampaignImport() {
   return (
     <Paper sx={{ p: 2, bgcolor: 'background.paper' }}>
       <Stack spacing={1.5}>
-        <Stack direction="row" alignItems="center" spacing={1}>
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
           <Users size={17} />
           <Typography variant="h2">Campaign Players</Typography>
         </Stack>

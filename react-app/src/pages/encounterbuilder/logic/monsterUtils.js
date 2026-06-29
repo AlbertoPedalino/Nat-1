@@ -28,7 +28,13 @@ export function crXP(cr) {
 export function getType(type) {
   if (!type) return '';
   if (typeof type === 'string') return type;
-  if (typeof type === 'object') return type.type || Object.keys(type)[0] || '';
+  if (Array.isArray(type)) return type.map(getType).filter(Boolean).join(' or ');
+  if (typeof type === 'object') {
+    if (type.type) return getType(type.type);
+    if (type.choose) return getType(type.choose);
+    if (type.from) return getType(type.from);
+    return '';
+  }
   return '';
 }
 

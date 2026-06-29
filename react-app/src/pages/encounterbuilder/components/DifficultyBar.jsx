@@ -7,9 +7,9 @@ export default function DifficultyBar({ encounter, party }) {
   const difficulty = calculateDifficulty(encounter, party);
   return (
     <Stack spacing={1}>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" gap={1}>
+      <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
         <Typography variant="body2" color="text.secondary">Total XP</Typography>
-        <Stack direction="row" alignItems="center" spacing={1}>
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
           <Typography fontWeight={700}>{formatNumber(difficulty.totalXp)} XP</Typography>
           <Chip size="small" label={difficulty.label} sx={{ bgcolor: difficulty.color, color: '#17120d' }} />
         </Stack>

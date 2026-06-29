@@ -56,6 +56,11 @@ App = React 19 + Vite + MUI + Supabase SPA in `react-app/`. D&D data fetched liv
   - Monsters die at 0 HP; players at 0 show death saves; 3 failed saves sets dead.
   - Reinforcements include global DB search and manual quick-add.
   - Fight snapshots store HP/init/death saves/round plus `monsterRef`.
+  - Right column shows selected monster statblock via `StatBlockPanel`; `StatBlockDialog` still handles Builder/Library.
+  - Roll log is opened from bottom-left `RollLogLauncher`, not kept as the combat right rail.
+  - Changing tabs clears `selectedStatblock` so monster sheets do not stay open across views.
+  - Combatant rows keep HP bar, HP field, heal/damage controls, death saves, and remove action in one HP/action row.
+  - Combat HP and delta inputs select their full value on focus/click for fast overwrite.
 
 ## Encounter Persistence
 
@@ -74,7 +79,8 @@ App = React 19 + Vite + MUI + Supabase SPA in `react-app/`. D&D data fetched liv
 ## Encounter Dice / Markup
 
 - `logic/dice.js`: dice formulas, d20 modifiers, result classing, roll log cap `LOG_MAX=60`.
-- Uses app `ToastProvider` for roll toasts.
+- Encounter roll toasts reuse the character sheet `DiceToast` style through `EncounterDiceToast`, shown bottom-right.
+- `EncounterBuilderContext.roll()` returns roll result plus actor so toast labels can include the selected/current combatant.
 - `logic/markup.js` parses 5etools tags into safe React tokens.
 - Supported key tags include `{@hit}`, `{@damage}`, `{@d20}`, `{@spell}`, `{@dc}`, `{@h}`, `{@atk}`, `{@recharge}`, `{@i}`, `{@b}`, `{@filter}`, action save tags.
 - `StatBlockDialog` renders statblocks with clickable abilities, saves, skills, HP formula, action text rolls, spell links, lair/regional/mythic sections.
@@ -109,6 +115,7 @@ App = React 19 + Vite + MUI + Supabase SPA in `react-app/`. D&D data fetched liv
 ## Gotchas
 
 - `public/tools/*.html` are not Vite-bundled; only GM board remains there.
+- MUI 9/React 19 can leak `Stack` layout props to DOM; put `alignItems`, `justifyContent`, `flexWrap`, `minHeight`, `gap` in `sx`.
 - `npm test` used to be no-op but now discovers encounter logic tests.
 - Build was not run in read-only review because Vite writes `dist`.
 - Registry deletion in `shared/localStorageRegistries.js` removes keys by `gb:enc:<id>:` prefix, compatible with new encounter keys.

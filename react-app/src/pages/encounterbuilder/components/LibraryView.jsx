@@ -19,7 +19,7 @@ export default function LibraryView() {
   return (
     <Stack spacing={2}>
       <Paper sx={{ p: 2, bgcolor: 'background.paper' }}>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ xs: 'stretch', sm: 'center' }} justifyContent="space-between">
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ alignItems: { xs: 'stretch', sm: 'center' }, justifyContent: 'space-between' }}>
           <Box>
             <Typography variant="h2">Library</Typography>
             <Typography variant="body2" color="text.secondary">Saved encounters and resumable fights for this instance.</Typography>
@@ -61,7 +61,7 @@ function LibraryCard({ item, monsters, dispatch, notify }) {
     <Stack spacing={1.5}>
       <Stack spacing={0.75}>
         <Typography variant="h2" noWrap>{name}</Typography>
-        <Stack direction="row" flexWrap="wrap" gap={0.75}>
+        <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 0.75 }}>
           {enc ? (
             <>
               <Chip size="small" color="primary" label={enc.diffLabel || 'Trivial'} />
@@ -81,7 +81,7 @@ function LibraryCard({ item, monsters, dispatch, notify }) {
       <Typography variant="body2" color="text.secondary" sx={{ minHeight: 42 }}>
         {monsterText || 'No combatants'}
       </Typography>
-      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+      <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
         {enc ? (
           <>
             <Button

@@ -40,7 +40,7 @@ export default function MonsterList() {
   if (monsterDb.status === 'loading' || monsterDb.status === 'idle') {
     return (
       <Paper sx={panelSx}>
-        <Stack alignItems="center" justifyContent="center" minHeight={220} spacing={2}>
+        <Stack spacing={2} sx={{ alignItems: 'center', justifyContent: 'center', minHeight: 220 }}>
           <CircularProgress size={28} />
           <Typography color="text.secondary">Loading 2024 bestiary...</Typography>
         </Stack>
@@ -61,7 +61,7 @@ export default function MonsterList() {
   return (
     <Paper sx={panelSx}>
       <Stack spacing={2}>
-        <Stack direction="row" flexWrap="wrap" gap={1}>
+        <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }}>
           {monsterDb.sourceOptions.map((source) => {
             const active = allSourcesActive || state.filters.sources.includes(source.source);
             return (

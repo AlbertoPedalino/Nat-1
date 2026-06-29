@@ -38,8 +38,9 @@ export function EncounterBuilderProvider({ instanceId, instanceSaved, onInstance
   const roll = useCallback((notation, type) => {
     const result = rollDice(notation, type);
     if (!result) return null;
-    dispatch({ type: 'addRoll', roll: result, actor: getRollActor() });
-    return result;
+    const actor = getRollActor();
+    dispatch({ type: 'addRoll', roll: result, actor });
+    return { ...result, actor };
   }, [getRollActor]);
 
   const saveEncounterToLibrary = useCallback((name) => {

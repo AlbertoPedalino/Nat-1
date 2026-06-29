@@ -28,7 +28,7 @@ export default function EncounterList() {
   return (
     <Paper sx={{ p: 2, bgcolor: 'background.paper' }}>
       <Stack spacing={2}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" gap={1}>
+        <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
           <Typography variant="h2">Encounter</Typography>
           <Typography variant="body2" color="text.secondary">{formatNumber(difficulty.totalXp)} XP</Typography>
         </Stack>
@@ -51,7 +51,7 @@ export default function EncounterList() {
               <Typography variant="body2" color="primary.main" sx={{ minWidth: 90, textAlign: 'right' }}>
                 {formatNumber(item.xp * item.qty)} XP
               </Typography>
-              <Stack direction="row" alignItems="center" spacing={0.5}>
+              <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
                 <Tooltip title="Decrease quantity">
                   <IconButton size="small" onClick={() => dispatch({ type: 'changeMonsterQty', id: item.id, delta: -1 })}>
                     <Minus size={15} />

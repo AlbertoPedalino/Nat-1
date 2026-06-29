@@ -1,3 +1,4 @@
+import { useCallback, useState } from 'react';
 import {
   Box,
   Button,
@@ -8,11 +9,11 @@ import {
   Divider,
   IconButton,
   Link,
+  Paper,
   Stack,
   Typography,
 } from '@mui/material';
 import { Plus, X } from 'lucide-react';
-import { useToast } from '../../../shared/ToastProvider.jsx';
 import { getLegendaryGroup } from '../logic/bestiary.js';
 import {
   abilityModString,
@@ -33,6 +34,7 @@ import {
 } from '../logic/monsterUtils.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import EntryRenderer from './EntryRenderer.jsx';
+import EncounterDiceToast, { buildEncounterDiceToast } from './EncounterDiceToast.jsx';
 import InlineText from './InlineText.jsx';
 import MonsterToken from './MonsterToken.jsx';
 
@@ -46,116 +48,163 @@ const ABILITIES = [
 ];
 
 export default function StatBlockDialog() {
-  const { state, dispatch, monsterDb, roll } = useEncounterBuilder();
-  const { notify } = useToast();
+  const { state, dispatch } = useEncounterBuilder();
   const monster = state.selectedStatblock?.monster;
-  const open = Boolean(monster);
-  const legendaryGroup = getLegendaryGroup(monster, monsterDb.legendaryGroups);
+  if (state.view === 'combat' || !monster) return null;
 
-  const handleRoll = (notation, type) => {
-    const result = roll(notation, type);
-    if (result) notify('info', `${type}: ${result.result} (${result.mathStr})`, { autoHideDuration: 3500 });
-  };
+  return (
+    <Dialog open onClose={() => dispatch({ type: 'closeStatblock' })} maxWidth="md" fullWidth>
+      <DialogTitle sx={{ pr: 7, position: 'relative' }}>
+        <StatBlockHeader monster={monster} onClose={() => dispatch({ type: 'closeStatblock' })} />
+      </DialogTitle>
+      <DialogContent dividers>
+        <StatBlockBody monster={monster} allowAdd />
+      </DialogContent>
+    </Dialog>
+  );
+}
 
-  if (!monster) return null;
+export function StatBlockPanel() {
+  const { state, dispatch } = useEncounterBuilder();
+  const monster = state.selectedStatblock?.monster;
 
+  if (!monster) {
+    return (
+      <Paper sx={statPanelSx}>
+        <Stack spacing={1} sx={{ p: 2, minHeight: 220, alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+          <Typography variant="h2">Statblock</Typography>
+          <Typography color="text.secondary">Click a monster token or name to inspect it here.</Typography>
+        </Stack>
+      </Paper>
+    );
+  }
+
+  return (
+    <Paper sx={statPanelSx}>
+      <Box sx={statPanelHeaderSx}>
+        <StatBlockHeader monster={monster} onClose={() => dispatch({ type: 'closeStatblock' })} />
+      </Box>
+      <Divider />
+      <Box sx={statPanelBodySx}>
+        <StatBlockBody monster={monster} allowAdd={false} />
+      </Box>
+    </Paper>
+  );
+}
+
+function StatBlockHeader({ monster, onClose }) {
   const url = monster5eUrl(monster);
+  return (
+    <>
+      <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', minWidth: 0, pr: onClose ? 4 : 0 }}>
+        <MonsterToken monster={monster} size={58} fallbackText={monster.name?.[0]} />
+        <Box sx={{ minWidth: 0 }}>
+          <Typography variant="h2" component="div" noWrap>
+            {url ? <Link href={url} target="_blank" rel="noopener" color="inherit" underline="hover">{monster.name}</Link> : monster.name}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {[getSizeLabel(monster), getType(monster.type)].filter(Boolean).join(' ')}
+            {getTypeTags(monster.type)}
+            {formatAlignment(monster.alignment) ? `, ${formatAlignment(monster.alignment)}` : ''}
+          </Typography>
+          <Chip size="small" label={monster.source} color="primary" sx={{ mt: 0.75 }} />
+        </Box>
+      </Stack>
+      {onClose ? (
+        <IconButton onClick={onClose} sx={{ position: 'absolute', top: 8, right: 8 }} aria-label="Close statblock">
+          <X size={18} />
+        </IconButton>
+      ) : null}
+    </>
+  );
+}
+
+function StatBlockBody({ monster, allowAdd = false }) {
+  const { state, dispatch, monsterDb, roll } = useEncounterBuilder();
+  const [diceToast, setDiceToast] = useState(null);
+  const legendaryGroup = getLegendaryGroup(monster, monsterDb.legendaryGroups);
   const cr = getCR(monster.cr);
   const hpFormula = monster.hp?.formula;
   const spellcasting = groupSpellcasting(monster.spellcasting);
 
+  const handleRoll = useCallback((notation, type) => {
+    const result = roll(notation, type);
+    const toast = buildEncounterDiceToast(result);
+    if (toast) setDiceToast(toast);
+  }, [roll]);
+
   return (
-    <Dialog open={open} onClose={() => dispatch({ type: 'closeStatblock' })} maxWidth="md" fullWidth>
-      <DialogTitle sx={{ pr: 7 }}>
-        <Stack direction="row" alignItems="center" spacing={1.5}>
-          <MonsterToken monster={monster} size={58} fallbackText={monster.name?.[0]} />
-          <Box sx={{ minWidth: 0 }}>
-            <Typography variant="h2" component="div">
-              {url ? <Link href={url} target="_blank" rel="noopener" color="inherit" underline="hover">{monster.name}</Link> : monster.name}
-            </Typography>
+    <>
+      <Stack spacing={1.5}>
+        <Prop label="Armor Class">{getAC(monster.ac)}{getACDesc(monster.ac)}</Prop>
+        <Prop label="Hit Points">
+          {getHP(monster.hp)} {hpFormula ? (
+            <>
+              (
+              <RollText notation={hpFormula} type="HP" onRoll={handleRoll}>{hpFormula}</RollText>
+              )
+            </>
+          ) : null}
+        </Prop>
+        <Prop label="Speed">{formatSpeed(monster.speed)}</Prop>
+        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(6,minmax(0,1fr))', gap: 1 }}>
+          {ABILITIES.map(([key, label]) => {
+            const mod = abilityModString(monster[key]);
+            return (
+              <Button key={key} variant="outlined" color="secondary" onClick={() => handleRoll(mod, `${label} Check`)} sx={{ minWidth: 0, p: 1 }}>
+                <Stack spacing={0} sx={{ alignItems: 'center' }}>
+                  <Typography variant="caption">{label}</Typography>
+                  <Typography fontWeight={700}>{monster[key] ?? 10} ({mod})</Typography>
+                </Stack>
+              </Button>
+            );
+          })}
+        </Box>
+        <OptionalProp label="Saving Throws" value={monster.save} render={(save) => renderRollMap(save, 'Save', handleRoll)} />
+        <OptionalProp label="Skills" value={monster.skill} render={(skills) => renderRollMap(skills, '', handleRoll)} />
+        <OptionalProp label="Damage Vulnerabilities" value={formatDamageList(monster.vulnerable, 'vulnerable')} />
+        <OptionalProp label="Damage Resistances" value={formatDamageList(monster.resist, 'resist')} />
+        <OptionalProp label="Damage Immunities" value={formatDamageList(monster.immune, 'immune')} />
+        <OptionalProp label="Condition Immunities" value={formatDamageList(monster.conditionImmune, 'conditionImmune')} />
+        <OptionalProp label="Senses" value={[...(monster.senses || []), monster.passive != null ? `passive Perception ${monster.passive}` : ''].filter(Boolean).join(', ')} />
+        <Prop label="Languages">{Array.isArray(monster.languages) ? monster.languages.join(', ') : monster.languages || '—'}</Prop>
+        <Prop label="Challenge">{cr} ({formatNumber(crXP(cr))} XP)</Prop>
+        <Divider />
+        <Section title="Traits" entries={monster.trait} extra={spellcasting.trait} onRoll={handleRoll} />
+        <Section title="Actions" entries={monster.action} extra={spellcasting.action} onRoll={handleRoll} />
+        <Section title="Bonus Actions" entries={monster.bonus} extra={spellcasting.bonus} onRoll={handleRoll} />
+        <Section title="Reactions" entries={monster.reaction} extra={spellcasting.reaction} onRoll={handleRoll} />
+        {(monster.legendary?.length || spellcasting.legendary.length) ? (
+          <Stack spacing={1}>
+            <Typography variant="h2">Legendary Actions</Typography>
             <Typography variant="body2" color="text.secondary">
-              {[getSizeLabel(monster), getType(monster)].filter(Boolean).join(' ')}
-              {getTypeTags(monster)}
-              {formatAlignment(monster.alignment) ? `, ${formatAlignment(monster.alignment)}` : ''}
+              {monster.legendaryHeader
+                ? <EntryRenderer entries={monster.legendaryHeader} onRoll={handleRoll} />
+                : defaultLegendaryIntro(monster)}
             </Typography>
-            <Chip size="small" label={monster.source} color="primary" sx={{ mt: 0.75 }} />
-          </Box>
-        </Stack>
-        <IconButton onClick={() => dispatch({ type: 'closeStatblock' })} sx={{ position: 'absolute', top: 8, right: 8 }}>
-          <X size={18} />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent dividers>
-        <Stack spacing={1.5}>
-          <Prop label="Armor Class">{getAC(monster.ac)}{getACDesc(monster.ac)}</Prop>
-          <Prop label="Hit Points">
-            {getHP(monster.hp)} {hpFormula ? (
-              <>
-                (
-                <RollText notation={hpFormula} type="HP" onRoll={handleRoll}>{hpFormula}</RollText>
-                )
-              </>
-            ) : null}
-          </Prop>
-          <Prop label="Speed">{formatSpeed(monster.speed)}</Prop>
-          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(6,minmax(0,1fr))', gap: 1 }}>
-            {ABILITIES.map(([key, label]) => {
-              const mod = abilityModString(monster[key]);
-              return (
-                <Button key={key} variant="outlined" color="secondary" onClick={() => handleRoll(mod, `${label} Check`)} sx={{ minWidth: 0, p: 1 }}>
-                  <Stack spacing={0} alignItems="center">
-                    <Typography variant="caption">{label}</Typography>
-                    <Typography fontWeight={700}>{monster[key] ?? 10} ({mod})</Typography>
-                  </Stack>
-                </Button>
-              );
-            })}
-          </Box>
-          <OptionalProp label="Saving Throws" value={monster.save} render={(save) => renderRollMap(save, 'Save', handleRoll)} />
-          <OptionalProp label="Skills" value={monster.skill} render={(skills) => renderRollMap(skills, '', handleRoll)} />
-          <OptionalProp label="Damage Vulnerabilities" value={formatDamageList(monster.vulnerable, 'vulnerable')} />
-          <OptionalProp label="Damage Resistances" value={formatDamageList(monster.resist, 'resist')} />
-          <OptionalProp label="Damage Immunities" value={formatDamageList(monster.immune, 'immune')} />
-          <OptionalProp label="Condition Immunities" value={formatDamageList(monster.conditionImmune, 'conditionImmune')} />
-          <OptionalProp label="Senses" value={[...(monster.senses || []), monster.passive != null ? `passive Perception ${monster.passive}` : ''].filter(Boolean).join(', ')} />
-          <Prop label="Languages">{Array.isArray(monster.languages) ? monster.languages.join(', ') : monster.languages || '—'}</Prop>
-          <Prop label="Challenge">{cr} ({formatNumber(crXP(cr))} XP)</Prop>
-          <Divider />
-          <Section title="Traits" entries={monster.trait} extra={spellcasting.trait} onRoll={handleRoll} />
-          <Section title="Actions" entries={monster.action} extra={spellcasting.action} onRoll={handleRoll} />
-          <Section title="Bonus Actions" entries={monster.bonus} extra={spellcasting.bonus} onRoll={handleRoll} />
-          <Section title="Reactions" entries={monster.reaction} extra={spellcasting.reaction} onRoll={handleRoll} />
-          {(monster.legendary?.length || spellcasting.legendary.length) ? (
-            <Stack spacing={1}>
-              <Typography variant="h2">Legendary Actions</Typography>
-              <Typography variant="body2" color="text.secondary">
-                {monster.legendaryHeader
-                  ? <EntryRenderer entries={monster.legendaryHeader} onRoll={handleRoll} />
-                  : defaultLegendaryIntro(monster)}
-              </Typography>
-              <ActionList entries={monster.legendary} onRoll={handleRoll} />
-              {spellcasting.legendary.map((entry, index) => <SpellcastingBlock key={index} entry={entry} onRoll={handleRoll} />)}
-            </Stack>
-          ) : null}
-          <Section title="Mythic Actions" entries={monster.mythic} onRoll={handleRoll} />
-          {legendaryGroup?.lairActions?.length ? <Section title="Lair Actions" entries={legendaryGroup.lairActions} onRoll={handleRoll} force /> : null}
-          {legendaryGroup?.regionalEffects?.length ? <Section title="Regional Effects" entries={legendaryGroup.regionalEffects} onRoll={handleRoll} force /> : null}
-          {legendaryGroup?.mythicEncounter?.length ? <Section title={`${monster.name} as a Mythic Encounter`} entries={legendaryGroup.mythicEncounter} onRoll={handleRoll} force /> : null}
-          {state.selectedStatblock?.combatantId == null ? (
-            <Button
-              variant="contained"
-              startIcon={<Plus size={16} />}
-              onClick={() => {
-                dispatch({ type: 'addMonster', monster });
-                dispatch({ type: 'closeStatblock' });
-              }}
-            >
-              Add to Encounter
-            </Button>
-          ) : null}
-        </Stack>
-      </DialogContent>
-    </Dialog>
+            <ActionList entries={monster.legendary} onRoll={handleRoll} />
+            {spellcasting.legendary.map((entry, index) => <SpellcastingBlock key={index} entry={entry} onRoll={handleRoll} />)}
+          </Stack>
+        ) : null}
+        <Section title="Mythic Actions" entries={monster.mythic} onRoll={handleRoll} />
+        {legendaryGroup?.lairActions?.length ? <Section title="Lair Actions" entries={legendaryGroup.lairActions} onRoll={handleRoll} force /> : null}
+        {legendaryGroup?.regionalEffects?.length ? <Section title="Regional Effects" entries={legendaryGroup.regionalEffects} onRoll={handleRoll} force /> : null}
+        {legendaryGroup?.mythicEncounter?.length ? <Section title={`${monster.name} as a Mythic Encounter`} entries={legendaryGroup.mythicEncounter} onRoll={handleRoll} force /> : null}
+        {allowAdd && state.selectedStatblock?.combatantId == null ? (
+          <Button
+            variant="contained"
+            startIcon={<Plus size={16} />}
+            onClick={() => {
+              dispatch({ type: 'addMonster', monster });
+              dispatch({ type: 'closeStatblock' });
+            }}
+          >
+            Add to Encounter
+          </Button>
+        ) : null}
+      </Stack>
+      {diceToast ? <EncounterDiceToast toast={diceToast} onClose={() => setDiceToast(null)} /> : null}
+    </>
   );
 }
 
@@ -303,4 +352,24 @@ const rollableSx = {
   '&:hover': {
     bgcolor: 'rgba(112,183,166,0.22)',
   },
+};
+
+const statPanelSx = {
+  bgcolor: 'background.paper',
+  overflow: 'hidden',
+  alignSelf: 'start',
+  position: { xl: 'sticky' },
+  top: { xl: 82 },
+  maxHeight: { xl: 'calc(100vh - 104px)' },
+};
+
+const statPanelHeaderSx = {
+  p: 2,
+  position: 'relative',
+};
+
+const statPanelBodySx = {
+  p: 2,
+  overflow: 'auto',
+  maxHeight: { xs: 520, xl: 'calc(100vh - 218px)' },
 };

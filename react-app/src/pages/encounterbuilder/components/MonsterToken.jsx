@@ -8,9 +8,11 @@ export default function MonsterToken({ monster, size = 32, fallbackText = '?' })
   return (
     <Avatar
       src={urls[index]}
-      imgProps={{
-        onError: () => {
-          setIndex((value) => Math.min(value + 1, urls.length - 1));
+      slotProps={{
+        img: {
+          onError: () => {
+            setIndex((value) => Math.min(value + 1, urls.length - 1));
+          },
         },
       }}
       sx={{

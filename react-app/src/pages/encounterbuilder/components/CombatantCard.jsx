@@ -23,7 +23,7 @@ export default function CombatantCard({ combatant, active }) {
 
   return (
     <Paper sx={{ ...cardSx, ...(active ? activeSx : null), ...(combatant.isDead ? deadSx : null) }}>
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '70px minmax(0,1.2fr) minmax(220px,0.8fr) minmax(210px,0.8fr)' }, gap: 1.25, alignItems: 'center' }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '58px minmax(0,0.8fr) minmax(400px,1.35fr)' }, gap: 0.9, alignItems: 'center' }}>
         <TextField
           size="small"
           label="Init"
@@ -31,16 +31,16 @@ export default function CombatantCard({ combatant, active }) {
           value={combatant.initiative}
           onChange={(event) => dispatch({ type: 'setInitiative', id: combatant.id, value: event.target.value })}
         />
-        <Stack direction="row" spacing={1} alignItems="center" sx={{ minWidth: 0 }}>
+        <Stack direction="row" spacing={1} sx={{ minWidth: 0, alignItems: 'center' }}>
           {isMonster && combatant.monsterData ? (
             <Box onClick={openMonster} sx={{ cursor: 'pointer' }}>
-              <MonsterToken monster={combatant.monsterData} size={38} fallbackText={combatant.name?.[0]} />
+              <MonsterToken monster={combatant.monsterData} size={34} fallbackText={combatant.name?.[0]} />
             </Box>
           ) : (
-            <Avatar sx={{ width: 38, height: 38, bgcolor: combatant.color || '#5c8fe0', color: '#101010', fontSize: 12, fontWeight: 800 }}>PC</Avatar>
+            <Avatar sx={{ width: 34, height: 34, bgcolor: combatant.color || '#5c8fe0', color: '#101010', fontSize: 11, fontWeight: 800 }}>PC</Avatar>
           )}
           <Box sx={{ minWidth: 0, flex: 1 }}>
-            <Stack direction="row" spacing={0.75} alignItems="center" sx={{ minWidth: 0 }}>
+            <Stack direction="row" spacing={0.75} sx={{ minWidth: 0, alignItems: 'center' }}>
               {combatant.shape ? (
                 <Typography sx={{ color: combatant.shapeClr, fontWeight: 900, flexShrink: 0 }}>
                   {combatant.shape}{combatant.label}
@@ -66,62 +66,61 @@ export default function CombatantCard({ combatant, active }) {
                 <Typography fontWeight={800} noWrap>{combatant.name}</Typography>
               )}
             </Stack>
-            <Typography variant="caption" color="text.secondary">AC {combatant.ac} · Init {combatant.initMod >= 0 ? '+' : ''}{combatant.initMod}</Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.68rem' }}>AC {combatant.ac} · Init {combatant.initMod >= 0 ? '+' : ''}{combatant.initMod}</Typography>
           </Box>
         </Stack>
-        <Stack spacing={0.75}>
+        <Box sx={hpRowSx}>
           <LinearProgress
             variant="determinate"
             value={hpPct}
             sx={{
-              height: 8,
+              flex: '1 1 120px',
+              minWidth: 90,
+              height: 6,
               borderRadius: 1,
               bgcolor: 'rgba(255,255,255,0.08)',
               '& .MuiLinearProgress-bar': { bgcolor: hpColor(hpPct) },
             }}
           />
-          <Stack direction="row" spacing={1} alignItems="center">
-            <TextField
-              size="small"
-              label="HP"
-              type="number"
-              value={combatant.hpCurrent}
-              onChange={(event) => dispatch({ type: 'setHp', id: combatant.id, value: event.target.value })}
-              sx={{ width: 90 }}
-            />
-            <Typography color="text.secondary">/ {combatant.hpMax}</Typography>
-          </Stack>
-        </Stack>
-        <Stack direction="row" spacing={0.75} justifyContent={{ xs: 'flex-start', md: 'flex-end' }} alignItems="center" flexWrap="wrap" useFlexGap>
-          {!isMonster && combatant.hpCurrent === 0 && combatant.deathSaves ? (
-            <DeathSaves combatant={combatant} />
-          ) : (
-            <>
-              <Tooltip title="Heal">
-                <IconButton color="success" onClick={() => dispatch({ type: 'modifyHp', id: combatant.id, delta: Number(delta) || 1 })}>
-                  <Plus size={16} />
-                </IconButton>
-              </Tooltip>
-              <TextField
-                size="small"
-                type="number"
-                value={delta}
-                onChange={(event) => setDelta(event.target.value)}
-                sx={{ width: 72 }}
-              />
-              <Tooltip title="Damage">
-                <IconButton color="error" onClick={() => dispatch({ type: 'modifyHp', id: combatant.id, delta: -(Number(delta) || 1) })}>
-                  <Minus size={16} />
-                </IconButton>
-              </Tooltip>
-            </>
-          )}
+          <TextField
+            size="small"
+            label="HP"
+            type="number"
+            value={combatant.hpCurrent}
+            onChange={(event) => dispatch({ type: 'setHp', id: combatant.id, value: event.target.value })}
+            onFocus={selectInputText}
+            onClick={selectInputText}
+            onMouseUp={keepInputSelection}
+            sx={{ width: 64, flex: '0 0 auto' }}
+          />
+          <Typography color="text.secondary" sx={{ whiteSpace: 'nowrap', fontSize: '0.82rem' }}>/ {combatant.hpMax}</Typography>
+          <Tooltip title="Heal">
+            <IconButton color="success" onClick={() => dispatch({ type: 'modifyHp', id: combatant.id, delta: Number(delta) || 1 })}>
+              <Plus size={16} />
+            </IconButton>
+          </Tooltip>
+          <TextField
+            size="small"
+            type="number"
+            value={delta}
+            onChange={(event) => setDelta(event.target.value)}
+            onFocus={selectInputText}
+            onClick={selectInputText}
+            onMouseUp={keepInputSelection}
+            sx={{ width: 52, flex: '0 0 auto' }}
+          />
+          <Tooltip title="Damage">
+            <IconButton color="error" onClick={() => dispatch({ type: 'modifyHp', id: combatant.id, delta: -(Number(delta) || 1) })}>
+              <Minus size={16} />
+            </IconButton>
+          </Tooltip>
+          {!isMonster && combatant.hpCurrent === 0 && combatant.deathSaves ? <DeathSaves combatant={combatant} /> : null}
           <Tooltip title="Remove">
             <IconButton color="error" onClick={remove}>
               <Trash2 size={16} />
             </IconButton>
           </Tooltip>
-        </Stack>
+        </Box>
       </Box>
     </Paper>
   );
@@ -130,7 +129,7 @@ export default function CombatantCard({ combatant, active }) {
 function DeathSaves({ combatant }) {
   const { dispatch } = useEncounterBuilder();
   return (
-    <Stack direction="row" spacing={0.75} alignItems="center">
+    <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center' }}>
       <Typography variant="caption" color="success.main">S</Typography>
       {[1, 2, 3].map((value) => (
         <Dot
@@ -178,14 +177,44 @@ function hpColor(percent) {
   return 'error.main';
 }
 
+function selectInputText(event) {
+  event.target.select();
+}
+
+function keepInputSelection(event) {
+  event.preventDefault();
+}
+
 function campaignSheetUrl(id) {
   const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
   return `${base}/campaign-sheet?id=${encodeURIComponent(id)}&edit=1`;
 }
 
 const cardSx = {
-  p: 1.25,
+  p: 0.9,
   bgcolor: 'background.paper',
+};
+
+const hpRowSx = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: { xs: 'flex-start', md: 'flex-end' },
+  flexWrap: 'nowrap',
+  gap: 0.4,
+  minWidth: 0,
+  overflowX: 'auto',
+  '& .MuiInputBase-input': {
+    py: 0.55,
+    fontSize: '0.82rem',
+  },
+  '& .MuiInputLabel-root': {
+    fontSize: '0.76rem',
+  },
+  '& .MuiIconButton-root': {
+    width: 28,
+    height: 28,
+    flex: '0 0 auto',
+  },
 };
 
 const activeSx = {

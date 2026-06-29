@@ -53,7 +53,7 @@ function EncounterBuilderShell({ instance }) {
       </AppTopBar>
       <Box sx={contentSx}>
         <Stack spacing={2}>
-          <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} alignItems={{ xs: 'stretch', md: 'center' }} justifyContent="space-between">
+          <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} sx={{ alignItems: { xs: 'stretch', md: 'center' }, justifyContent: 'space-between' }}>
             <Box>
               <Typography variant="h1">Encounter Builder</Typography>
               <Typography variant="body2" color="text.secondary">Instance {instance.id}</Typography>

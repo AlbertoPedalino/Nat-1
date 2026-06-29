@@ -3,7 +3,8 @@ import { ArrowLeft, ArrowRight, RotateCcw, Swords } from 'lucide-react';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import CombatantCard from './CombatantCard.jsx';
 import Reinforcements from './Reinforcements.jsx';
-import RollLog from './RollLog.jsx';
+import RollLogLauncher from './RollLogLauncher.jsx';
+import { StatBlockPanel } from './StatBlockDialog.jsx';
 
 export default function CombatView() {
   const { state, dispatch } = useEncounterBuilder();
@@ -12,7 +13,7 @@ export default function CombatView() {
   if (!combat?.combatants?.length) {
     return (
       <Paper sx={{ p: 4, bgcolor: 'background.paper', textAlign: 'center' }}>
-        <Stack spacing={1.5} alignItems="center">
+        <Stack spacing={1.5} sx={{ alignItems: 'center' }}>
           <Swords size={28} />
           <Typography variant="h2">No active encounter</Typography>
           <Typography color="text.secondary">Launch an encounter from Builder or resume a saved fight from Library.</Typography>
@@ -25,38 +26,41 @@ export default function CombatView() {
   const current = combat.combatants[combat.currentTurn] || null;
 
   return (
-    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', xl: 'minmax(0,1fr) 340px' }, gap: 2 }}>
-      <Stack spacing={2}>
-        <Paper sx={{ p: 2, bgcolor: 'background.paper' }}>
-          <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} alignItems={{ xs: 'stretch', md: 'center' }} justifyContent="space-between">
-            <Box>
-              <Typography variant="h2">Round {combat.round}</Typography>
-              <Typography color="text.secondary">Turn: {current?.name || '—'}</Typography>
-            </Box>
-            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-              <Button variant="outlined" startIcon={<ArrowLeft size={15} />} onClick={() => dispatch({ type: 'prevTurn' })}>
-                Previous
-              </Button>
-              <Button variant="contained" color="error" endIcon={<ArrowRight size={15} />} onClick={() => dispatch({ type: 'nextTurn' })}>
-                Next
-              </Button>
-              <Button variant="outlined" startIcon={<RotateCcw size={15} />} onClick={() => dispatch({ type: 'rerollInitiative' })}>
-                Reroll All
-              </Button>
-              <Button variant="outlined" onClick={() => dispatch({ type: 'setView', view: 'builder' })}>
-                Builder
-              </Button>
+    <>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', xl: 'minmax(0,1fr) minmax(360px,0.8fr)' }, gap: 2 }}>
+        <Stack spacing={2}>
+          <Paper sx={{ p: 2, bgcolor: 'background.paper' }}>
+            <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} sx={{ alignItems: { xs: 'stretch', md: 'center' }, justifyContent: 'space-between' }}>
+              <Box>
+                <Typography variant="h2">Round {combat.round}</Typography>
+                <Typography color="text.secondary">Turn: {current?.name || '—'}</Typography>
+              </Box>
+              <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
+                <Button variant="outlined" startIcon={<ArrowLeft size={15} />} onClick={() => dispatch({ type: 'prevTurn' })}>
+                  Previous
+                </Button>
+                <Button variant="contained" color="error" endIcon={<ArrowRight size={15} />} onClick={() => dispatch({ type: 'nextTurn' })}>
+                  Next
+                </Button>
+                <Button variant="outlined" startIcon={<RotateCcw size={15} />} onClick={() => dispatch({ type: 'rerollInitiative' })}>
+                  Reroll All
+                </Button>
+                <Button variant="outlined" onClick={() => dispatch({ type: 'setView', view: 'builder' })}>
+                  Builder
+                </Button>
+              </Stack>
             </Stack>
+          </Paper>
+          <Reinforcements />
+          <Stack spacing={1}>
+            {combat.combatants.map((combatant, index) => (
+              <CombatantCard key={combatant.id} combatant={combatant} active={index === combat.currentTurn} />
+            ))}
           </Stack>
-        </Paper>
-        <Reinforcements />
-        <Stack spacing={1}>
-          {combat.combatants.map((combatant, index) => (
-            <CombatantCard key={combatant.id} combatant={combatant} active={index === combat.currentTurn} />
-          ))}
         </Stack>
-      </Stack>
-      <RollLog />
-    </Box>
+        <StatBlockPanel />
+      </Box>
+      <RollLogLauncher />
+    </>
   );
 }

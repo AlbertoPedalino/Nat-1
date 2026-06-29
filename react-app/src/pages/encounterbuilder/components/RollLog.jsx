@@ -1,19 +1,26 @@
-import { Box, Button, Paper, Stack, Typography } from '@mui/material';
-import { Trash2 } from 'lucide-react';
+import { Box, Button, IconButton, Paper, Stack, Typography } from '@mui/material';
+import { Trash2, X } from 'lucide-react';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 
-export default function RollLog() {
+export default function RollLog({ maxHeight = 320, onClose, sx }) {
   const { state, dispatch } = useEncounterBuilder();
   return (
-    <Paper sx={{ p: 2, bgcolor: 'background.paper' }}>
+    <Paper sx={{ p: 2, bgcolor: 'background.paper', ...sx }}>
       <Stack spacing={1.5}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" gap={1}>
+        <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
           <Typography variant="h2">Roll Log</Typography>
-          <Button size="small" variant="outlined" color="error" startIcon={<Trash2 size={14} />} onClick={() => dispatch({ type: 'clearRollLog' })} disabled={!state.rollLog.length}>
-            Clear
-          </Button>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Button size="small" variant="outlined" color="error" startIcon={<Trash2 size={14} />} onClick={() => dispatch({ type: 'clearRollLog' })} disabled={!state.rollLog.length}>
+              Clear
+            </Button>
+            {onClose ? (
+              <IconButton size="small" onClick={onClose} aria-label="Close roll log">
+                <X size={16} />
+              </IconButton>
+            ) : null}
+          </Box>
         </Stack>
-        <Stack spacing={0.75} sx={{ maxHeight: 320, overflow: 'auto' }}>
+        <Stack spacing={0.75} sx={{ maxHeight, overflow: 'auto' }}>
           {state.rollLog.length ? state.rollLog.map((entry, index) => (
             <Box key={`${entry.timeStr}-${index}`} sx={entrySx}>
               <Box sx={{ ...resultSx, ...resultColor(entry.cls) }}>{entry.result}</Box>
