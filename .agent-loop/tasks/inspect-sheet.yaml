@@ -1,0 +1,26 @@
+backend: cli
+use_worktree: false
+plan_only: true
+
+task: |
+  Inspect the Character Sheet (charsheet) structure in GM-Board.
+
+  Project memory already covers the Character Builder — do NOT re-explore it.
+  Verify only what is needed and focus the deep read on the sheet.
+
+  Identify and document:
+  - sheet entry point and layout;
+  - how the unified character object is loaded and derived into sheet state;
+  - deriveSheetState flow and what it computes;
+  - tabs (Actions, Spells, Features, Inventory, Background, Notes) and their logic files;
+  - resources / rest / conditions handling;
+  - sheet runtime adapter rebinding (ensureSheetRuntimeAdapters);
+  - read-only (foreign cloud sheet) behavior;
+  - persistence-back to store/cloud;
+  - which files matter most for future sheet feature work.
+
+  Constraints:
+  - Do not modify application files. Do not refactor. Do not add runtime behavior.
+  - Do not vendor or copy external 5etools data.
+  - Use the project rules from .agent-loop/config.yaml.
+  - Merge findings into the existing project memory; preserve correct builder memory.

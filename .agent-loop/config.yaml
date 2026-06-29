@@ -16,11 +16,10 @@ git:
 limits:
   max_fix_attempts: 2
   max_changed_files: 12
-  max_turns_plan: 16
-  max_turns_implement: 12
-  max_turns_fix: 8
-  max_turns_review: 6
-  max_budget_usd: 2.0
+  # No max_budget_usd: Claude subscription (Plus) has no per-dollar billing, so a
+  # cap only stops phases early at a phantom API cost. The real limit is the
+  # plan's usage window. (max_turns_* keys are ignored by the orchestrator; the
+  # CLI has no turn flag — per-phase turns live in subagents.default.yaml.)
 
 verification:
   timeout_seconds: 120

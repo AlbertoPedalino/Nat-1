@@ -1,0 +1,25 @@
+backend: cli
+use_worktree: false
+plan_only: true
+
+task: |
+  Inspect the Encounter Builder structure in GM-Board.
+
+  Project memory already covers the Character Builder (and Sheet, if inspected) —
+  do NOT re-explore those. Focus the deep read on the encounter builder.
+
+  Identify and document:
+  - encounter builder entry point(s) and route;
+  - main components and their responsibilities;
+  - state model and where it lives (reducer/context/store);
+  - data sources (monsters/beasts) and how they are loaded and source-filtered;
+  - relationship to the shared character/adapter layers, if any;
+  - persistence (local vs Supabase cloud) for encounters;
+  - initiative / turn / combat logic, if present;
+  - which files matter most for future encounter feature work.
+
+  Constraints:
+  - Do not modify application files. Do not refactor. Do not add runtime behavior.
+  - Do not vendor or copy external 5etools data.
+  - Use the project rules from .agent-loop/config.yaml.
+  - Merge findings into the existing project memory; preserve correct existing memory.
