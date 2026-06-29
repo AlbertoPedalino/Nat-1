@@ -1,4 +1,4 @@
-agent: claude
+agent: codex
 backend: cli
 
 # Write-capable build on an isolated in-place branch (never the base branch).
