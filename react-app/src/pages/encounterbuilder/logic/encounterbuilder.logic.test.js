@@ -1,10 +1,25 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { calculateDifficulty } from './difficulty.js';
-import { buildCombat, modifyHp, nextTurn, setDeathSave } from './combat.js';
+import {
+  applySheetVitals,
+  buildCombat,
+  modifyHp,
+  nextTurn,
+  restoreFight,
+  setDeathSave,
+  setTempHp,
+  snapshotFight,
+} from './combat.js';
 import { rollDice, rollDiceFormula } from './dice.js';
 import { cleanToText, parseCleanTokens } from './markup.js';
 import { resolveLegendaryGroups } from './bestiary.js';
+import {
+  combatantToSheetPatch,
+  sheetPatchKey,
+  sheetVitalsToCombat,
+  sheetVitalsToSheetPatch,
+} from './sheetSync.js';
 
 test('difficulty uses raw monster XP without encounter multiplier', () => {
   const result = calculateDifficulty([{ xp: 200, qty: 2 }], { count: 4, level: 1 });
@@ -24,6 +39,151 @@ test('combat initiative builds monsters and players then skips dead on next turn
   const deadCombat = { ...combat, combatants: combat.combatants.map((c) => (c.id === current.id ? { ...c, isDead: true } : c)) };
   const advanced = nextTurn(deadCombat);
   assert.notEqual(advanced.combatants[advanced.currentTurn].id, current.id);
+});
+
+test('sheet sync mappers clamp and keep the sheet patch shallow', () => {
+  assert.deepEqual(sheetVitalsToCombat({
+    currentHP: 99,
+    maxHP: 12,
+    tempHP: '7',
+    deathSaves: { success: 5, fail: -2 },
+  }), {
+    hpMax: 12,
+    hpCurrent: 12,
+    tempHP: 7,
+    deathSaves: { s: 3, f: 0 },
+  });
+
+  const patch = combatantToSheetPatch({
+    hpCurrent: -4,
+    hpMax: 22,
+    tempHP: 3,
+    deathSaves: { s: 2, f: 9 },
+  });
+  assert.deepEqual(patch, {
+    currentHP: 0,
+    tempHP: 3,
+    deathSaves: { success: 2, fail: 3 },
+  });
+  assert.equal(Object.hasOwn(patch, 'maxHP'), false);
+  assert.deepEqual(sheetVitalsToSheetPatch({
+    currentHP: 40,
+    maxHP: 18,
+    tempHP: '2',
+    deathSaves: { success: 1, fail: 9 },
+  }), {
+    currentHP: 18,
+    tempHP: 2,
+    deathSaves: { success: 1, fail: 3 },
+  });
+  assert.equal(sheetPatchKey(patch), sheetPatchKey({
+    deathSaves: { fail: 3, success: 2 },
+    tempHP: 3,
+    currentHP: 0,
+  }));
+});
+
+test('combat launch seeds linked players from sheet current HP and death saves', () => {
+  const combat = buildCombat([], [{
+    name: 'Aria',
+    sourceId: 'char-1',
+    campaignId: 'camp-1',
+    initMod: 1,
+    ac: 15,
+    hpMax: 22,
+    currentHP: 7,
+    tempHP: 4,
+    deathSaves: { success: 2, fail: 1 },
+  }], 123, () => 0);
+
+  assert.equal(combat.combatants.length, 1);
+  assert.equal(combat.combatants[0].hpCurrent, 7);
+  assert.equal(combat.combatants[0].tempHP, 4);
+  assert.deepEqual(combat.combatants[0].deathSaves, { s: 2, f: 1 });
+});
+
+test('temp HP mutator clamps and fight snapshots preserve temp HP', () => {
+  const combat = {
+    fightId: 42,
+    combatants: [{
+      id: 1,
+      name: 'Aria',
+      type: 'player',
+      sourceId: 'char-1',
+      initiative: 10,
+      initMod: 1,
+      hpCurrent: 8,
+      hpMax: 12,
+      tempHP: 5,
+      ac: 15,
+      deathSaves: { s: 0, f: 0 },
+      isDead: false,
+    }],
+    currentTurn: 0,
+    round: 1,
+  };
+  const clamped = setTempHp(combat, 1, -12);
+  assert.equal(clamped.combatants[0].tempHP, 0);
+
+  const restored = restoreFight({ id: 42, fight: snapshotFight(setTempHp(combat, 1, 9)) }, []);
+  assert.equal(restored.combatants[0].tempHP, 9);
+});
+
+test('applySheetVitals syncs linked PCs with max HP reclamp and idempotence', () => {
+  const combat = {
+    combatants: [
+      {
+        id: 1,
+        type: 'player',
+        sourceId: 'char-1',
+        hpCurrent: 18,
+        hpMax: 20,
+        tempHP: 3,
+        deathSaves: { s: 0, f: 0 },
+        isDead: false,
+      },
+      {
+        id: 2,
+        type: 'player',
+        sourceId: null,
+        hpCurrent: 6,
+        hpMax: 6,
+        tempHP: 0,
+        deathSaves: { s: 0, f: 0 },
+        isDead: false,
+      },
+    ],
+    currentTurn: 0,
+    round: 1,
+  };
+
+  const synced = applySheetVitals(combat, 'char-1', {
+    currentHP: 99,
+    maxHP: 12,
+    tempHP: -4,
+    deathSaves: { success: 2, fail: 4 },
+  });
+  assert.equal(synced.combatants[0].hpMax, 12);
+  assert.equal(synced.combatants[0].hpCurrent, 12);
+  assert.equal(synced.combatants[0].tempHP, 0);
+  assert.deepEqual(synced.combatants[0].deathSaves, { s: 2, f: 3 });
+  assert.equal(synced.combatants[0].isDead, false);
+  assert.equal(synced.combatants[1], combat.combatants[1]);
+
+  const failed = applySheetVitals(synced, 'char-1', {
+    currentHP: 0,
+    maxHP: 12,
+    tempHP: 5,
+    deathSaves: { fail: 3 },
+  });
+  assert.equal(failed.combatants[0].isDead, true);
+  assert.equal(applySheetVitals(failed, 'char-1', {
+    currentHP: 0,
+    maxHP: 12,
+    tempHP: 5,
+    deathSaves: { fail: 3 },
+  }), failed);
+  assert.equal(applySheetVitals(failed, 'missing', { currentHP: 7, maxHP: 7 }), failed);
 });
 
 test('hp and death saves preserve player death-save flow', () => {

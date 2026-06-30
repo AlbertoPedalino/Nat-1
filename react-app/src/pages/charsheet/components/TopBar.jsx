@@ -85,7 +85,7 @@ const appNavButtonSx = {
   letterSpacing: '0.08em',
 };
 
-export default function TopBar({ C, sheet, charId, readOnly = false, onShortRest, onLongRest, onUpdateXp, onUpdateCharacter, rollLog, onClearRollLog, onShowToast }) {
+export default function TopBar({ C, sheet, charId, readOnly = false, embedded = false, onShortRest, onLongRest, onUpdateXp, onUpdateCharacter, rollLog, onClearRollLog, onShowToast }) {
   const [colorAnchor, setColorAnchor] = useState(null);
   const [rollLogOpen, setRollLogOpen] = useState(false);
   const [customRollOpen, setCustomRollOpen] = useState(false);
@@ -119,61 +119,63 @@ export default function TopBar({ C, sheet, charId, readOnly = false, onShortRest
     <Box sx={{
       bgcolor: 'background.paper', borderBottom: 2, borderColor: 'divider',
     }}>
-      <Box sx={{ maxWidth: 1280, mx: { md: 'auto' }, px: { xs: '0.6rem', md: '1.1rem' } }}>
-      <Box sx={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        gap: '0.35rem',
-        py: '0.35rem',
-        borderBottom: 1,
-        borderColor: 'rgba(237,212,138,0.14)',
-      }}>
-        <Box sx={{ display: 'flex', gap: '0.35rem' }}>
-          <Button size="small" variant="outlined" color="primary" startIcon={<Home size={14} />}
-            onClick={() => navigate('/')} sx={appNavButtonSx}>
-            HOME
-          </Button>
-          {!readOnly && (
-            <Button size="small" variant="outlined" color="primary" startIcon={<ArrowLeft size={14} />}
-              onClick={() => {
-                const params = new URLSearchParams(window.location.search);
-                // Use the sheet's own id first: the online sheet route is
-                // /campaign-sheet?id=…, so params.get('char') is null there and we
-                // must not fall back to a stale gb:active_char (would open a blank
-                // or wrong builder). C.id covers chars whose id lives in the data.
-                const targetId = charId || C?.id
-                  || params.get('char') || params.get('id')
-                  || localStorage.getItem('gb:active_char') || 'new';
-                navigate(`/charbuilder?char=${encodeURIComponent(targetId)}`);
-              }}
-              sx={appNavButtonSx}>
-              Builder
-            </Button>
-          )}
-        </Box>
+      <Box sx={{ maxWidth: embedded ? 'none' : 1280, mx: embedded ? 0 : { md: 'auto' }, px: embedded ? '0.45rem' : { xs: '0.6rem', md: '1.1rem' } }}>
+      {!embedded ? (
         <Box sx={{
-          display: 'flex', gap: '0.35rem', flexShrink: 0,
-          flexDirection: { xs: 'column', md: 'row' },
-          alignItems: { xs: 'flex-end', md: 'center' },
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: '0.35rem',
+          py: '0.35rem',
+          borderBottom: 1,
+          borderColor: 'rgba(237,212,138,0.14)',
         }}>
-          <CloudMenu buttonSx={appNavButtonSx} />
+          <Box sx={{ display: 'flex', gap: '0.35rem' }}>
+            <Button size="small" variant="outlined" color="primary" startIcon={<Home size={14} />}
+              onClick={() => navigate('/')} sx={appNavButtonSx}>
+              HOME
+            </Button>
+            {!readOnly && (
+              <Button size="small" variant="outlined" color="primary" startIcon={<ArrowLeft size={14} />}
+                onClick={() => {
+                  const params = new URLSearchParams(window.location.search);
+                  // Use the sheet's own id first: the online sheet route is
+                  // /campaign-sheet?id=…, so params.get('char') is null there and we
+                  // must not fall back to a stale gb:active_char (would open a blank
+                  // or wrong builder). C.id covers chars whose id lives in the data.
+                  const targetId = charId || C?.id
+                    || params.get('char') || params.get('id')
+                    || localStorage.getItem('gb:active_char') || 'new';
+                  navigate(`/charbuilder?char=${encodeURIComponent(targetId)}`);
+                }}
+                sx={appNavButtonSx}>
+                Builder
+              </Button>
+            )}
+          </Box>
+          <Box sx={{
+            display: 'flex', gap: '0.35rem', flexShrink: 0,
+            flexDirection: { xs: 'column', md: 'row' },
+            alignItems: { xs: 'flex-end', md: 'center' },
+          }}>
+            <CloudMenu buttonSx={appNavButtonSx} />
+          </Box>
         </Box>
-      </Box>
+      ) : null}
       <Box sx={{
-        display: 'flex', alignItems: 'center', gap: { xs: '0.4rem', md: '1rem' },
-        flexDirection: { xs: 'column', md: 'row' },
-        justifyContent: { md: 'space-between' },
-        py: { xs: '0.35rem', md: '0.6rem' },
+        display: 'flex', alignItems: 'center', gap: embedded ? '0.4rem' : { xs: '0.4rem', md: '1rem' },
+        flexDirection: embedded ? 'column' : { xs: 'column', md: 'row' },
+        justifyContent: embedded ? 'flex-start' : { md: 'space-between' },
+        py: embedded ? '0.35rem' : { xs: '0.35rem', md: '0.6rem' },
       }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: '0.4rem', width: { xs: '100%', md: 'auto' } }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: '0.4rem', width: embedded ? '100%' : { xs: '100%', md: 'auto' } }}>
           <Box
             onClick={readOnly ? undefined : (e) => setColorAnchor(e.currentTarget)}
             sx={{
-              width: { xs: 36, md: 52 }, height: { xs: 36, md: 52 },
+              width: embedded ? 36 : { xs: 36, md: 52 }, height: embedded ? 36 : { xs: 36, md: 52 },
               borderRadius: '50%', border: 2, borderColor: 'divider', cursor: readOnly ? 'default' : 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-              bgcolor: C.classIconColor || 'rgba(46,42,34,1)', fontSize: { xs: '1rem', md: '1.4rem' },
+              bgcolor: C.classIconColor || 'rgba(46,42,34,1)', fontSize: embedded ? '1rem' : { xs: '1rem', md: '1.4rem' },
               transition: 'border-color 0.15s',
               ...(readOnly ? {} : { '&:hover': { borderColor: '#caa550' } }),
             }}
@@ -188,7 +190,7 @@ export default function TopBar({ C, sheet, charId, readOnly = false, onShortRest
           />
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, minWidth: 0 }}>
-              <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: { xs: '0.85rem', md: '1.1rem' }, fontWeight: 700, color: '#edd48a', letterSpacing: '0.04em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: embedded ? '0.85rem' : { xs: '0.85rem', md: '1.1rem' }, fontWeight: 700, color: '#edd48a', letterSpacing: '0.04em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {C.name || 'Unnamed Character'}
               </Typography>
               {readOnly && (
@@ -203,7 +205,7 @@ export default function TopBar({ C, sheet, charId, readOnly = false, onShortRest
           </Box>
         </Box>
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.35, width: { xs: '100%', md: 280, lg: 340 }, flexShrink: 0, alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.35, width: embedded ? '100%' : { xs: '100%', md: 280, lg: 340 }, flexShrink: 0, alignItems: 'center' }}>
           <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', width: '100%', gap: 1 }}>
             <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.62rem', color: '#edd48a', letterSpacing: '0.08em', fontWeight: 700 }}>
               XP · Level {level}
@@ -220,12 +222,12 @@ export default function TopBar({ C, sheet, charId, readOnly = false, onShortRest
               currentXp={currentXp}
               onApply={(total) => onUpdateXp(String(total))}
               variant="compact"
-              sx={{ width: { xs: '100%', md: 180 } }}
+              sx={{ width: embedded ? '100%' : { xs: '100%', md: 180 } }}
             />
           )}
         </Box>
 
-        <Box sx={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap', width: { xs: '100%', md: 'auto' }, justifyContent: { xs: 'center', md: 'flex-start' } }}>
+        <Box sx={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap', width: embedded ? '100%' : { xs: '100%', md: 'auto' }, justifyContent: embedded ? 'center' : { xs: 'center', md: 'flex-start' } }}>
           {!readOnly && (
             <>
               <Button size="small" variant="outlined" color="warning" startIcon={<Sun size={14} />}

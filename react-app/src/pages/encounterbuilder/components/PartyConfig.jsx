@@ -1,5 +1,6 @@
 import { Box, Button, IconButton, Paper, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import { ExternalLink, Minus, Plus } from 'lucide-react';
+import { campaignSheetUrl } from '../logic/campaignSheetUrl.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 
 export default function PartyConfig() {
@@ -142,11 +143,6 @@ function ColorSwatch({ value, onChange, label }) {
       sx={colorSwatchSx}
     />
   );
-}
-
-function campaignSheetUrl(id) {
-  const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
-  return `${base}/campaign-sheet?id=${encodeURIComponent(id)}&edit=1`;
 }
 
 const playerRowSx = {

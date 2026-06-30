@@ -1,0 +1,90 @@
+agent: codex
+backend: cli
+
+# Write-capable build on an isolated in-place branch (never the base branch).
+plan_only: false
+branch_mode: in_place
+create_branch: always
+base_branch: feature/unified-character-storage
+agent_branch: feat/pc-sheet-in-statblock
+allow_dirty: true
+
+task: |
+  Show a player character's sheet in the Stat Block side panel of the Encounter
+  Builder. Today that panel only renders monster statblocks; clicking a player
+  combatant does nothing.
+
+  Project memory (.agent-loop/memory.md) documents the encounter builder, the
+  character sheet, and the adapter/cloud layers. USE IT; do not re-explore the
+  whole app from scratch. Only read the files below in depth.
+
+  ## Current state (verified)
+
+  - Side panel: `react-app/src/pages/encounterbuilder/components/StatBlockDialog.jsx`
+    -> `StatBlockPanel()` (mounted in `components/CombatView.jsx`). It renders only
+    `state.selectedStatblock?.monster` (see `StatBlockHeader` / `StatBlockBody`).
+  - Combatant click: `components/CombatantCard.jsx` -> `openMonster()` dispatches
+    `selectStatblock` ONLY when `combatant.monsterData` exists. Player combatants
+    have `monsterData: null`, so clicking a PC does nothing.
+  - Action/state: `state/reducer.js` `selectStatblock` stores `action.payload` in
+    `state.selectedStatblock`; `state/EncounterBuilderContext.jsx` already reads
+    `selected.combatantId` for the roll actor.
+  - Player combatants carry `sourceId` and `campaignId` in the fight snapshot
+    (`logic/combat.js` `snapshotFight` / `buildCombat`). `sourceId` links the
+    campaign character sheet.
+  - Campaign sheet component: `react-app/src/pages/campaignsheet/CampaignSheetView.jsx`
+    (loads by id). Existing deep-link helper pattern: `campaignSheetUrl(sourceId)`
+    in `components/PartyConfig.jsx` and `components/CombatantCard.jsx`, producing
+    `/campaign-sheet?id=<sourceId>&edit=1` (opened in a new tab).
+
+  ## Goal
+
+  Clicking a player combatant in the combat view shows that PC's character sheet
+  (or a clean compact PC panel) in the Stat Block section, mirroring how clicking
+  a monster shows its statblock. Monster behavior must stay identical.
+
+  ## Steps
+
+  1. CombatantCard: allow selecting players too. For a PC with `sourceId`, dispatch
+     `selectStatblock` with a payload that identifies the character, e.g.
+     `{ playerSourceId: combatant.sourceId, combatantId: combatant.id }`. Keep the
+     monster path (`{ monster, combatantId }`) unchanged.
+  2. StatBlockPanel / StatBlockDialog: when `selectedStatblock` refers to a player
+     (`playerSourceId` set, no `monster`), render the character sheet. In order of
+     preference:
+     a. Reuse `CampaignSheetView` embedded in read-only mode, passing the id.
+     b. If embedding is impractical, fall back to a compact MUI panel built from the
+        data already on the combatant (name, AC, current/max HP, init) plus an
+        "Open sheet" button linking to `campaignSheetUrl(sourceId)` in a new tab
+        (same pattern already in CombatantCard).
+  3. Edge cases: manual PCs without `sourceId` -> minimal panel, no sheet link. Keep
+     the existing empty state ("Click a monster token or name...") working.
+  4. Do not break: monster flow, `allowAdd` (Add to Encounter), and the
+     `combatantId` roll-actor wiring in `EncounterBuilderContext.getRollActor`.
+
+  ## Architecture requirements (clean, scalable, maintainable)
+
+  - Idiomatic React + MUI, consistent with the rest of the encounter builder.
+  - Keep StatBlockDialog readable: branch monster-vs-player via small focused
+    components (e.g. a `PlayerSheetPanel`), not sprawling ternaries.
+  - Reuse existing helpers/components (campaignSheetUrl, CampaignSheetView, shared
+    cloud/adapter layers) instead of reimplementing. No duplicated literals.
+  - No dead code, no commented-out blocks, no console noise. Brief comments only for
+    non-obvious logic. Naming consistent with the codebase.
+
+  ## Constraints
+
+  - Runtime fetch only: never vendor/copy/commit 5etools JSON or image assets.
+  - Only whitelisted 2024 sources per .agent-loop/config.yaml.
+  - Do not modify the character builder, sheet internals, adapters, or cloud layers
+    beyond the thin glue needed to render a PC sheet in the panel. Prefer minimal,
+    focused changes.
+  - Do not commit, push, or switch the base/protected branch.
+
+  ## Verification
+
+  - cd react-app && npm run build   (must pass; real gate)
+  - git diff --check
+  - Manual: launch an encounter with imported campaign players -> click a PC
+    combatant -> its sheet/info shows in the Stat Block panel; click a monster ->
+    statblock unchanged; manual PC without sourceId -> minimal panel, no broken link.

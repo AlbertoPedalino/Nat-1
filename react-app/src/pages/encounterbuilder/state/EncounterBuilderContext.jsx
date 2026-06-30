@@ -5,6 +5,8 @@ import { encounterReducer, createInitialState } from './reducer.js';
 import { useEncounterPersistence } from '../hooks/useEncounterPersistence.js';
 import { useMonsterDb } from '../hooks/useMonsterDb.js';
 import { useCampaignPlayers } from '../hooks/useCampaignPlayers.js';
+import { useFightSheetSync } from '../hooks/useFightSheetSync.js';
+import { useSheetRealtime } from '../hooks/useSheetRealtime.js';
 
 const EncounterBuilderContext = createContext(null);
 
@@ -12,6 +14,8 @@ export function EncounterBuilderProvider({ instanceId, instanceSaved, onInstance
   const [state, dispatch] = useReducer(encounterReducer, undefined, createInitialState);
   const monsterDb = useMonsterDb();
   const campaignPlayers = useCampaignPlayers();
+  const sheetSync = useFightSheetSync(state.combat);
+  useSheetRealtime({ view: state.view, combat: state.combat, dispatch, sheetSync });
   const { saveInstance } = useEncounterPersistence({
     instanceId,
     instanceSaved,

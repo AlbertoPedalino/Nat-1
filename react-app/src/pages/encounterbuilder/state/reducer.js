@@ -1,6 +1,7 @@
 import {
   addManualCombatant,
   addMonsterCombatant,
+  applySheetVitals,
   buildCombat,
   modifyHp,
   nextTurn,
@@ -11,6 +12,7 @@ import {
   setDeathSave,
   setHp,
   setInitiative,
+  setTempHp,
   snapshotFight,
   autoFightName,
 } from '../logic/combat.js';
@@ -18,6 +20,7 @@ import { addRollLogEntry } from '../logic/dice.js';
 import { PLAYER_COLORS } from '../logic/constants.js';
 import { makeSavedEncounter } from '../logic/storage.js';
 import { clampInt, hydrateEncounterItems, monsterKey, toEncounterMonster } from '../logic/monsterUtils.js';
+import { sheetVitalsToCombat } from '../logic/sheetSync.js';
 
 export const DEFAULT_PARTY = Object.freeze({ count: 4, level: 5 });
 
@@ -117,8 +120,12 @@ export function encounterReducer(state, action) {
       return state.combat ? withCombat(state, modifyHp(state.combat, action.id, action.delta)) : state;
     case 'setHp':
       return state.combat ? withCombat(state, setHp(state.combat, action.id, action.value)) : state;
+    case 'setTempHp':
+      return state.combat ? withCombat(state, setTempHp(state.combat, action.id, action.value)) : state;
     case 'setDeathSave':
       return state.combat ? withCombat(state, setDeathSave(state.combat, action.id, action.saveType, action.value)) : state;
+    case 'syncCombatantVitals':
+      return syncCombatantVitals(state, action.sourceId, action.vitals);
     case 'removeCombatant':
       return state.combat ? withCombat(state, removeCombatant(state.combat, action.id)) : state;
     case 'addMonsterCombatant':
@@ -138,6 +145,12 @@ export function encounterReducer(state, action) {
     default:
       return state;
   }
+}
+
+function syncCombatantVitals(state, sourceId, vitals) {
+  if (!state.combat) return state;
+  const combat = applySheetVitals(state.combat, sourceId, vitals);
+  return combat === state.combat ? state : withCombat(state, combat);
 }
 
 function hydrateState(state, payload, monsters) {
@@ -238,6 +251,9 @@ function importCampaignPlayers(state, campaignPlayers) {
       initMod: player.initMod,
       ac: player.ac,
       hpMax: player.hpMax,
+      currentHP: player.currentHP,
+      tempHP: player.tempHP,
+      deathSaves: player.deathSaves,
       iconColor: player.iconColor,
       color: player.iconColor || PLAYER_COLORS[players.length % PLAYER_COLORS.length],
     }, players.length);
@@ -269,15 +285,27 @@ function importCampaignPlayers(state, campaignPlayers) {
 }
 
 function normalizePlayer(player, index) {
-  return {
+  const hpMax = clampInt(player.hpMax, 1, 999, 10);
+  const vitals = sheetVitalsToCombat({ ...player, hpMax });
+  const normalized = {
     ...player,
     name: String(player.name || `Giocatore ${index + 1}`),
     initMod: clampInt(player.initMod, -20, 30, 0),
     ac: clampInt(player.ac, 1, 99, 10),
-    hpMax: clampInt(player.hpMax, 1, 999, 10),
+    hpMax,
     color: sanitizePlayerColor(player.color) || sanitizePlayerColor(player.iconColor) || PLAYER_COLORS[index % PLAYER_COLORS.length],
     iconColor: sanitizePlayerColor(player.iconColor) || null,
   };
+  if (player.currentHP != null || player.hpCurrent != null) {
+    normalized.currentHP = vitals.hpCurrent ?? hpMax;
+  }
+  if (player.tempHP != null) {
+    normalized.tempHP = vitals.tempHP;
+  }
+  if (player.deathSaves != null) {
+    normalized.deathSaves = { success: vitals.deathSaves.s, fail: vitals.deathSaves.f };
+  }
+  return normalized;
 }
 
 function sanitizePlayerColor(value) {

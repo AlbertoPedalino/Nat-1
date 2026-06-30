@@ -37,6 +37,7 @@ import EntryRenderer from './EntryRenderer.jsx';
 import EncounterDiceToast, { buildEncounterDiceToast } from './EncounterDiceToast.jsx';
 import InlineText from './InlineText.jsx';
 import MonsterToken from './MonsterToken.jsx';
+import PlayerSheetPanel from './PlayerSheetPanel.jsx';
 
 const ABILITIES = [
   ['str', 'STR'],
@@ -66,14 +67,35 @@ export default function StatBlockDialog() {
 
 export function StatBlockPanel() {
   const { state, dispatch } = useEncounterBuilder();
-  const monster = state.selectedStatblock?.monster;
+  const selection = state.selectedStatblock;
+  const monster = selection?.monster;
+  const isPlayerSelection = selection && !monster && selection.combatantId != null;
+
+  if (!selection) {
+    return (
+      <Paper sx={statPanelSx}>
+        <Stack spacing={1} sx={{ p: 2, minHeight: 220, alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+          <Typography variant="h2">Statblock</Typography>
+          <Typography color="text.secondary">Click a monster or player combatant to inspect it here.</Typography>
+        </Stack>
+      </Paper>
+    );
+  }
+
+  if (isPlayerSelection) {
+    return (
+      <Paper sx={statPanelSx}>
+        <PlayerSheetPanel selection={selection} onClose={() => dispatch({ type: 'closeStatblock' })} />
+      </Paper>
+    );
+  }
 
   if (!monster) {
     return (
       <Paper sx={statPanelSx}>
         <Stack spacing={1} sx={{ p: 2, minHeight: 220, alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
           <Typography variant="h2">Statblock</Typography>
-          <Typography color="text.secondary">Click a monster token or name to inspect it here.</Typography>
+          <Typography color="text.secondary">Click a monster or player combatant to inspect it here.</Typography>
         </Stack>
       </Paper>
     );

@@ -4,6 +4,7 @@ import { useAuth } from '../../../shared/cloud/AuthProvider.jsx';
 import { listCampaignCharacters, listMyCampaigns } from '../../../shared/cloud/campaigns.js';
 import { summarizeCharacter } from '../../campaigns/sheetSummary.js';
 import { clampInt, numberOr } from '../logic/monsterUtils.js';
+import { sheetVitalsToCombat } from '../logic/sheetSync.js';
 
 const HEX_COLOR_RE = /^#[0-9a-f]{6}$/i;
 
@@ -34,6 +35,7 @@ function toEncounterPlayer(row, campaign) {
   const sheet = row?.data || {};
   const summary = summarizeCharacter(sheet) || {};
   const hpMax = summary.maxHP ?? summary.currentHP ?? sheet.maxHP ?? 10;
+  const vitals = sheetVitalsToCombat({ ...summary, hpMax });
   return {
     id: row.id,
     sourceId: row.id,
@@ -44,6 +46,9 @@ function toEncounterPlayer(row, campaign) {
     level: getCharacterLevel(sheet),
     ac: clampInt(summary.ac, 1, 99, 10),
     hpMax: clampInt(hpMax, 1, 999, 10),
+    currentHP: vitals.hpCurrent ?? clampInt(hpMax, 1, 999, 10),
+    tempHP: vitals.tempHP,
+    deathSaves: { success: vitals.deathSaves.s, fail: vitals.deathSaves.f },
     initMod: clampInt(summary.initiative, -20, 30, 0),
     iconColor: normalizeIconColor(sheet.classIconColor),
     updatedAt: row.updated_at || null,

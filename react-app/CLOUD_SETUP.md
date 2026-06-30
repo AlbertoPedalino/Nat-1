@@ -12,6 +12,9 @@ the env vars the app runs 100% local (localStorage), exactly like before.
 1. Open **SQL Editor** → **New query**.
 2. Paste the entire contents of [`supabase/schema.sql`](supabase/schema.sql) → **Run**.
 3. For the campaigns feature, run [`supabase/campaigns.sql`](supabase/campaigns.sql) too (a second query).
+4. For Encounter Builder combat-to-sheet HP sync, run [`supabase/combat_sync.sql`](supabase/combat_sync.sql) too.
+   Re-run this file once on existing projects to enable live Supabase Realtime
+   updates for open combats.
 
 ## 3. Turn OFF email confirmation
 Players log in with username only (mapped to a synthetic email), so there is no inbox.
@@ -55,3 +58,7 @@ repository **secrets** and pass them as env to `npm run build`.
 - **Campaigns** (login menu → *Campaigns*): create a campaign (you get an invite code) or
   join one with a code. Attach your characters to a campaign; everyone in that campaign can
   **view** each other's sheets read-only (only the owner can edit).
+- **Encounter combat sync** uses `patch_character_data` from `supabase/combat_sync.sql`.
+  It applies a shallow, allowlisted top-level JSON patch; object fields such as
+  `deathSaves` must be sent as complete sub-objects. The same SQL also adds
+  `public.characters` to the Supabase Realtime publication for live sheet updates.

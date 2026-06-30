@@ -14,7 +14,15 @@ export function summarizeCharacter(C) {
     const ac = computeBestArmorClass(C, inv, true)?.value ?? 10;
     const initiative = getInitiative(C, sheet);
     const passivePerception = 10 + getSkillBonus(C, PERCEPTION);
-    return { currentHP: sheet.currentHP, maxHP: sheet.maxHP, ac, passivePerception, initiative };
+    return {
+      currentHP: sheet.currentHP,
+      maxHP: sheet.maxHP,
+      tempHP: sheet.tempHP,
+      deathSaves: sheet.deathSaves,
+      ac,
+      passivePerception,
+      initiative,
+    };
   } catch (_) {
     return null;
   }

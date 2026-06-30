@@ -1,10 +1,15 @@
 import { COMBAT_LABEL_COLORS, COMBAT_LABEL_SHAPES, PLAYER_COLORS } from './constants.js';
 import { abilityMod, clampInt, getAC, getHP, numberOr } from './monsterUtils.js';
+import { sheetVitalsToCombat } from './sheetSync.js';
 
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 export function d20(rng = Math.random) {
   return Math.floor(rng() * 20) + 1;
+}
+
+function clampTempHp(value) {
+  return Math.max(0, Math.round(numberOr(value, 0)));
 }
 
 function createLabeler(existing = []) {
@@ -61,6 +66,7 @@ export function buildCombat(encounter, players, encounterId = null, rng = Math.r
         ac,
         hpMax: hp,
         hpCurrent: hp,
+        tempHP: 0,
         monsterData: monster,
         isDead: false,
         ...assignLabel(monster.name),
@@ -70,6 +76,9 @@ export function buildCombat(encounter, players, encounterId = null, rng = Math.r
   (Array.isArray(players) ? players : []).forEach((player, index) => {
     const initMod = clampInt(player.initMod, -20, 30, 0);
     const hpMax = clampInt(player.hpMax, 1, 999, 10);
+    const vitals = sheetVitalsToCombat({ ...player, hpMax });
+    const sheetHpMax = vitals.hpMax ?? hpMax;
+    const hpCurrent = vitals.hpCurrent ?? sheetHpMax;
     combatants.push({
       id: id++,
       name: player.name || 'PC',
@@ -79,11 +88,12 @@ export function buildCombat(encounter, players, encounterId = null, rng = Math.r
       initiative: d20(rng) + initMod,
       initMod,
       ac: clampInt(player.ac, 1, 99, 10),
-      hpMax,
-      hpCurrent: hpMax,
-      deathSaves: { s: 0, f: 0 },
+      hpMax: sheetHpMax,
+      hpCurrent,
+      tempHP: vitals.tempHP,
+      deathSaves: vitals.deathSaves,
       monsterData: null,
-      isDead: false,
+      isDead: hpCurrent === 0 && vitals.deathSaves.f >= 3,
       label: null,
       shape: null,
       shapeClr: null,
@@ -182,6 +192,45 @@ export function setHp(combat, id, value) {
   return updateCombatant(combat, id, (combatant) => applyHp(combatant, numberOr(value, combatant.hpCurrent)));
 }
 
+export function setTempHp(combat, id, value) {
+  return updateCombatant(combat, id, (combatant) => {
+    const tempHP = clampTempHp(value);
+    return tempHP === clampTempHp(combatant.tempHP) ? combatant : { ...combatant, tempHP };
+  });
+}
+
+export function applySheetVitals(combat, sourceId, vitals) {
+  const charId = String(sourceId || '');
+  if (!combat || !charId) return combat;
+  const mapped = sheetVitalsToCombat(vitals || {});
+  let changed = false;
+  const combatants = (combat.combatants || []).map((combatant) => {
+    if (combatant?.type !== 'player' || String(combatant.sourceId || '') !== charId) return combatant;
+    const hpMax = mapped.hpMax ?? clampInt(combatant.hpMax, 1, 999, 10);
+    const hpCurrentRaw = mapped.hpCurrent ?? numberOr(combatant.hpCurrent, hpMax);
+    const hpCurrent = Math.max(0, Math.min(hpMax, Math.round(hpCurrentRaw)));
+    const tempHP = clampTempHp(mapped.tempHP);
+    const deathSaves = {
+      s: clampInt(mapped.deathSaves?.s, 0, 3, 0),
+      f: clampInt(mapped.deathSaves?.f, 0, 3, 0),
+    };
+    const isDead = hpCurrent === 0 && deathSaves.f >= 3;
+    if (
+      combatant.hpMax === hpMax
+      && combatant.hpCurrent === hpCurrent
+      && clampTempHp(combatant.tempHP) === tempHP
+      && combatant.deathSaves?.s === deathSaves.s
+      && combatant.deathSaves?.f === deathSaves.f
+      && Boolean(combatant.isDead) === isDead
+    ) {
+      return combatant;
+    }
+    changed = true;
+    return { ...combatant, hpMax, hpCurrent, tempHP, deathSaves, isDead };
+  });
+  return changed ? { ...combat, combatants } : combat;
+}
+
 function applyHp(combatant, value) {
   const hpCurrent = Math.max(0, Math.min(numberOr(combatant.hpMax, 1), Math.round(value)));
   const isMonster = combatant.type === 'monster';
@@ -216,6 +265,7 @@ export function addMonsterCombatant(combat, monster, rng = Math.random) {
     initMod,
     hpCurrent: hp,
     hpMax: hp,
+    tempHP: 0,
     ac: getAC(monster.ac),
     deathSaves: { s: 0, f: 0 },
     isDead: false,
@@ -245,6 +295,7 @@ export function addManualCombatant(combat, payload, rng = Math.random) {
     initMod,
     hpCurrent: hp,
     hpMax: hp,
+    tempHP: clampTempHp(payload.tempHP),
     ac: clampInt(payload.ac, 0, 99, 10),
     deathSaves: { s: 0, f: 0 },
     isDead: false,
@@ -280,6 +331,7 @@ export function snapshotFight(combat) {
       campaignId: combatant.campaignId || null,
       hpCurrent: combatant.hpCurrent,
       hpMax: combatant.hpMax,
+      tempHP: clampTempHp(combatant.tempHP),
       ac: combatant.ac,
       type: combatant.type,
       deathSaves: combatant.deathSaves,
@@ -305,6 +357,7 @@ export function restoreFight(entry, monsters) {
     encounterId: entry?.encounterId || null,
     combatants: (fight?.combatants || []).map((combatant) => ({
       ...combatant,
+      tempHP: clampTempHp(combatant.tempHP),
       monsterData: combatant.monsterRef
         ? db.find((monster) => monster.name === combatant.monsterRef.name && monster.source === combatant.monsterRef.source) || null
         : null,

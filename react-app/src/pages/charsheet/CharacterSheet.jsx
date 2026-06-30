@@ -32,6 +32,7 @@ import { installedRegistry } from '../../adapters/index.js';
 import { ensureSheetRuntimeAdapters } from './logic/sheetRuntimeAdapters.js';
 import { loadItems, loadOptionalFeatures, loadConditions, reconcileInventoryWithItemsDb } from '../charbuilder/logic/dataLoaders.js';
 import { updateCloudCharacterData } from '../../shared/cloud/cloudCharacters.js';
+import { clampCharacterVitals } from '../../shared/character/vitals.js';
 import {
   getActiveCharId,
   loadCharacter as storeLoadCharacter,
@@ -53,9 +54,23 @@ function longRestExhaustionPatch(sheet) {
   return { exhaustionLevel, activeConditions };
 }
 
-export default function CharacterSheet({ externalChar = null, externalCharId = null, readOnly = false } = {}) {
+const EMBEDDED_SHEET_GRID = {
+  gridTemplateColumns: '1fr',
+  gridTemplateAreas: `
+    "${SHEET_AREAS.saves}"
+    "${SHEET_AREAS.skills}"
+    "${SHEET_AREAS.senses}"
+    "${SHEET_AREAS.movement}"
+    "${SHEET_AREAS.profs}"
+    "${SHEET_AREAS.right}"
+  `,
+  gap: '0.55rem',
+};
+
+export default function CharacterSheet({ externalChar = null, externalCharId = null, readOnly = false, embedded = false, liveVitals = null } = {}) {
   const [C, setC] = useState(null);
   const [sheet, setSheet] = useState(null);
+  const sheetRef = useRef(null);
   const [charId, setCharId] = useState(null);
   const [tab, setTab] = useState(0);
   const [diceToast, setDiceToast] = useState(null);
@@ -68,6 +83,7 @@ export default function CharacterSheet({ externalChar = null, externalCharId = n
   const [conditionEntries, setConditionEntries] = useState({});
   const cloudSaveReadyRef = useRef(false);
   const usesExternalChar = Boolean(externalChar);
+  sheetRef.current = sheet;
 
   useEffect(() => {
     let alive = true;
@@ -145,6 +161,26 @@ export default function CharacterSheet({ externalChar = null, externalCharId = n
   const syncSheet = useCallback((updates) => {
     setSheet((prev) => ({ ...prev, ...updates }));
   }, []);
+
+  // Vitals pushed live from the linked encounter combat (cloud Realtime). Merge
+  // ONLY hp / temp hp / death saves so an editable sheet stays in sync without
+  // discarding the user's in-progress edits to other fields. Runs only when a new
+  // liveVitals object arrives (not on local sheet edits); last-writer-wins on
+  // these three fields. The idempotent guard makes our own save echoes no-ops.
+  useEffect(() => {
+    if (!liveVitals || !usesExternalChar || readOnly) return;
+    const s = sheetRef.current;
+    if (!s) return;
+    const { currentHP, tempHP, deathSaves } = clampCharacterVitals(liveVitals, { maxHP: s.maxHP, fallback: s });
+    if (
+      currentHP === s.currentHP
+      && tempHP === s.tempHP
+      && deathSaves.success === (s.deathSaves?.success || 0)
+      && deathSaves.fail === (s.deathSaves?.fail || 0)
+    ) return;
+    setSheet((prev) => (prev ? { ...prev, currentHP, tempHP, deathSaves } : prev));
+    persist({ currentHP, tempHP, deathSaves });
+  }, [liveVitals, usesExternalChar, readOnly, persist]);
 
   const updateCurrentCharacter = useCallback((updater) => {
     setC((prev) => {
@@ -585,16 +621,17 @@ export default function CharacterSheet({ externalChar = null, externalCharId = n
   const totalHitDiceRemaining = hitDicePools.reduce((sum, pool) => sum + pool.remaining, 0);
   const totalHitDiceToSpend = getUsedHitDiceTotal(hdToSpend);
   const conMod = getMod(getFinal(C, 'con'));
+  const sheetGridSx = embedded ? EMBEDDED_SHEET_GRID : SHEET_GRID;
 
   return (
     <ProficiencySetsProvider character={C}>
     <SheetActionsProvider value={effectiveActions}>
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pb: 4, width: '100%' }}>
-      <TopBar C={C} sheet={sheet} charId={charId} readOnly={readOnly} onShortRest={openShortRest} onLongRest={openLongRest} onUpdateXp={updateXp} onUpdateCharacter={updateCurrentCharacter}
+    <Box sx={{ minHeight: embedded ? 'auto' : '100vh', bgcolor: 'background.default', pb: embedded ? 1 : 4, width: '100%' }}>
+      <TopBar C={C} sheet={sheet} charId={charId} readOnly={readOnly} embedded={embedded} onShortRest={openShortRest} onLongRest={openLongRest} onUpdateXp={updateXp} onUpdateCharacter={updateCurrentCharacter}
         rollLog={rollLog} onClearRollLog={() => setRollLog([])} onShowToast={showDiceToast} />
-      <Box sx={{ maxWidth: 1280, mx: { md: 'auto' }, px: { xs: '0.6rem', md: '1.1rem' }, overflow: 'hidden' }}>
-        <Box sx={{ bgcolor: 'rgba(35,32,26,1)', borderBottom: 1, borderColor: 'divider', py: '0.55rem', px: { xs: '0.45rem', md: '0.6rem' } }}>
-          <Stack direction={{ xs: 'column', md: 'row-reverse' }} spacing={0.6} alignItems={{ md: 'stretch' }}>
+      <Box sx={{ maxWidth: embedded ? 'none' : 1280, mx: embedded ? 0 : { md: 'auto' }, px: embedded ? 0 : { xs: '0.6rem', md: '1.1rem' }, overflow: 'hidden' }}>
+        <Box sx={{ bgcolor: 'rgba(35,32,26,1)', borderBottom: 1, borderColor: 'divider', py: '0.55rem', px: embedded ? '0.45rem' : { xs: '0.45rem', md: '0.6rem' } }}>
+          <Stack direction={embedded ? 'column' : { xs: 'column', md: 'row-reverse' }} spacing={0.6} sx={{ alignItems: embedded ? 'stretch' : { md: 'stretch' } }}>
             <HPBlock sheet={sheet}
               onHeal={readOnly ? noop : (amt) => adjustHP(1, amt)} onDamage={readOnly ? noop : (amt) => adjustHP(-1, amt)}
               onTempHP={readOnly ? noop : adjustTempHP} onMaxHPBonus={readOnly ? noop : adjustMaxHpBonus}
@@ -608,7 +645,7 @@ export default function CharacterSheet({ externalChar = null, externalCharId = n
         <Box sx={{
           display: 'grid',
           width: '100%',
-          ...SHEET_GRID,
+          ...sheetGridSx,
           pt: '0.55rem',
           alignItems: 'start',
           minWidth: 0,
@@ -618,10 +655,10 @@ export default function CharacterSheet({ externalChar = null, externalCharId = n
               `leftCol` grid cell containing the panels as flex children, decoupling
               their row heights from the right column. */}
           <Box sx={{
-            display: { xs: 'contents', md: 'flex' },
-            flexDirection: { md: 'column' },
-            gap: { md: '0.55rem' },
-            gridArea: { md: SHEET_AREAS.leftCol },
+            display: embedded ? 'contents' : { xs: 'contents', md: 'flex' },
+            flexDirection: embedded ? undefined : { md: 'column' },
+            gap: embedded ? undefined : { md: '0.55rem' },
+            gridArea: embedded ? undefined : { md: SHEET_AREAS.leftCol },
             ...SHEET_GRID_ITEM_SX,
           }}>
             <Box sx={{ gridArea: { xs: SHEET_AREAS.saves } }}>
