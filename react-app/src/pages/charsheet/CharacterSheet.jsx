@@ -171,15 +171,23 @@ export default function CharacterSheet({ externalChar = null, externalCharId = n
     if (!liveVitals || !usesExternalChar || readOnly) return;
     const s = sheetRef.current;
     if (!s) return;
-    const { currentHP, tempHP, deathSaves } = clampCharacterVitals(liveVitals, { maxHP: s.maxHP, fallback: s });
+    const vitals = clampCharacterVitals(liveVitals, { fallback: s });
+    // Max HP is derived (base + bonus); apply the synced bonus and re-clamp current.
+    const baseMax = Math.max(1, (Number(s.maxHP) || 1) - (Number(s.maxHPBonus) || 0));
+    const maxHPBonus = vitals.maxHPBonus;
+    const maxHP = Math.max(1, baseMax + maxHPBonus);
+    const currentHP = Math.max(0, Math.min(maxHP, vitals.currentHP));
+    const { tempHP, deathSaves } = vitals;
     if (
       currentHP === s.currentHP
       && tempHP === s.tempHP
+      && maxHP === s.maxHP
+      && maxHPBonus === (s.maxHPBonus || 0)
       && deathSaves.success === (s.deathSaves?.success || 0)
       && deathSaves.fail === (s.deathSaves?.fail || 0)
     ) return;
-    setSheet((prev) => (prev ? { ...prev, currentHP, tempHP, deathSaves } : prev));
-    persist({ currentHP, tempHP, deathSaves });
+    setSheet((prev) => (prev ? { ...prev, currentHP, tempHP, maxHP, maxHPBonus, deathSaves } : prev));
+    persist({ currentHP, tempHP, maxHPBonus, deathSaves });
   }, [liveVitals, usesExternalChar, readOnly, persist]);
 
   const updateCurrentCharacter = useCallback((updater) => {

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Avatar, Box, Button, IconButton, LinearProgress, Paper, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import { alpha } from '@mui/material/styles';
-import { ExternalLink, Minus, Plus, Trash2 } from 'lucide-react';
+import { ExternalLink, Minus, Plus, X } from 'lucide-react';
 import { campaignSheetUrl } from '../logic/campaignSheetUrl.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import MonsterToken from './MonsterToken.jsx';
@@ -11,6 +11,7 @@ export default function CombatantCard({ combatant, active }) {
   const [delta, setDelta] = useState(5);
   const isMonster = combatant.type === 'monster';
   const hpPct = combatant.hpMax ? Math.max(0, Math.round((combatant.hpCurrent / combatant.hpMax) * 100)) : 100;
+  const isDown = !isMonster && combatant.hpCurrent === 0 && Boolean(combatant.deathSaves);
 
   const openDetails = () => {
     if (combatant.monsterData) {
@@ -39,6 +40,11 @@ export default function CombatantCard({ combatant, active }) {
         ...(combatant.isDead ? deadSx : null),
       })}
     >
+      <Tooltip title="Remove">
+        <IconButton color="error" onClick={remove} size="small" sx={removeButtonSx} aria-label="Remove combatant">
+          <X size={15} />
+        </IconButton>
+      </Tooltip>
       <Box sx={rowSx}>
         {/* Identity cluster: initiative + token + name + AC */}
         <Box sx={identityClusterSx}>
@@ -102,37 +108,40 @@ export default function CombatantCard({ combatant, active }) {
           </Stack>
         </Box>
 
-        {/* HP cluster: current/max + bar, heal/damage controls, death saves, remove */}
+        {/* HP cluster: current/max + bar (or death saves when down), heal/damage controls */}
         <Box sx={hpRowSx}>
           <Box sx={hpColumnSx}>
             <Box sx={hpValueRowSx}>
-              <TextField
-                size="small"
-                label="HP"
-                type="number"
-                value={combatant.hpCurrent}
-                onChange={(event) => dispatch({ type: 'setHp', id: combatant.id, value: event.target.value })}
-                onFocus={selectInputText}
-                sx={{ width: 72, flex: '0 0 auto' }}
-              />
-              <Typography color="text.secondary" sx={hpMaxSx}>/ {combatant.hpMax}</Typography>
-              {!isMonster ? (
-                <TextField
-                  size="small"
-                  label="Temp"
-                  type="number"
-                  value={combatant.tempHP ?? 0}
-                  onChange={(event) => dispatch({ type: 'setTempHp', id: combatant.id, value: event.target.value })}
-                  onFocus={selectInputText}
-                  sx={{ width: 72, flex: '0 0 auto' }}
-                />
-              ) : null}
+              {isDown ? (
+                <DeathSaves combatant={combatant} />
+              ) : (
+                <>
+                  <HpField
+                    label="HP"
+                    value={combatant.hpCurrent}
+                    onChange={(value) => dispatch({ type: 'setHp', id: combatant.id, value })}
+                  />
+                  <Typography color="text.secondary" sx={hpMaxSx}>/</Typography>
+                  <HpField
+                    label="Max"
+                    value={combatant.hpMax}
+                    onChange={(value) => dispatch({ type: 'setMaxHp', id: combatant.id, value })}
+                  />
+                  <HpField
+                    label="Temp"
+                    value={combatant.tempHP ?? 0}
+                    onChange={(value) => dispatch({ type: 'setTempHp', id: combatant.id, value })}
+                  />
+                </>
+              )}
             </Box>
-            <LinearProgress
-              variant="determinate"
-              value={hpPct}
-              sx={{ ...hpBarSx, '& .MuiLinearProgress-bar': { bgcolor: hpColor(hpPct) } }}
-            />
+            {!isDown ? (
+              <LinearProgress
+                variant="determinate"
+                value={hpPct}
+                sx={{ ...hpBarSx, '& .MuiLinearProgress-bar': { bgcolor: hpColor(hpPct) } }}
+              />
+            ) : null}
           </Box>
           <Box sx={hpControlsSx}>
             <Tooltip title="Heal">
@@ -154,15 +163,23 @@ export default function CombatantCard({ combatant, active }) {
               </IconButton>
             </Tooltip>
           </Box>
-          {!isMonster && combatant.hpCurrent === 0 && combatant.deathSaves ? <DeathSaves combatant={combatant} /> : null}
-          <Tooltip title="Remove">
-            <IconButton color="error" onClick={remove}>
-              <Trash2 size={16} />
-            </IconButton>
-          </Tooltip>
         </Box>
       </Box>
     </Paper>
+  );
+}
+
+function HpField({ label, value, onChange }) {
+  return (
+    <TextField
+      size="small"
+      label={label}
+      type="number"
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      onFocus={selectInputText}
+      sx={hpFieldSx}
+    />
   );
 }
 
@@ -229,6 +246,16 @@ const rowSx = {
   alignItems: 'center',
   columnGap: { xs: 1.5, sm: 3 },
   rowGap: 1.2,
+  pr: 3,
+};
+
+const removeButtonSx = {
+  position: 'absolute',
+  top: 4,
+  right: 4,
+  zIndex: 1,
+  color: 'text.secondary',
+  '&:hover': { color: 'error.main' },
 };
 
 const identityClusterSx = {
@@ -255,6 +282,8 @@ const metaLineSx = { fontSize: '0.72rem' };
 const hpColumnSx = { display: 'flex', flexDirection: 'column', gap: 0.4, flex: '0 0 auto' };
 
 const hpValueRowSx = { display: 'flex', alignItems: 'center', gap: 0.5 };
+
+const hpFieldSx = { width: 72, flex: '0 0 auto' };
 
 const hpMaxSx = { whiteSpace: 'nowrap', fontSize: '0.82rem' };
 

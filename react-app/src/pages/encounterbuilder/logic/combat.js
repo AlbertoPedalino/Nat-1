@@ -1,6 +1,6 @@
 import { COMBAT_LABEL_COLORS, COMBAT_LABEL_SHAPES, PLAYER_COLORS } from './constants.js';
 import { abilityMod, clampInt, getAC, getHP, numberOr } from './monsterUtils.js';
-import { sheetVitalsToCombat } from './sheetSync.js';
+import { resolveCombatVitals, combatVitalsMatch } from './sheetSync.js';
 
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
@@ -76,9 +76,7 @@ export function buildCombat(encounter, players, encounterId = null, rng = Math.r
   (Array.isArray(players) ? players : []).forEach((player, index) => {
     const initMod = clampInt(player.initMod, -20, 30, 0);
     const hpMax = clampInt(player.hpMax, 1, 999, 10);
-    const vitals = sheetVitalsToCombat({ ...player, hpMax });
-    const sheetHpMax = vitals.hpMax ?? hpMax;
-    const hpCurrent = vitals.hpCurrent ?? sheetHpMax;
+    const vitals = resolveCombatVitals(player, { ...player, hpMax });
     combatants.push({
       id: id++,
       name: player.name || 'PC',
@@ -88,12 +86,8 @@ export function buildCombat(encounter, players, encounterId = null, rng = Math.r
       initiative: d20(rng) + initMod,
       initMod,
       ac: clampInt(player.ac, 1, 99, 10),
-      hpMax: sheetHpMax,
-      hpCurrent,
-      tempHP: vitals.tempHP,
-      deathSaves: vitals.deathSaves,
+      ...vitals,
       monsterData: null,
-      isDead: hpCurrent === 0 && vitals.deathSaves.f >= 3,
       label: null,
       shape: null,
       shapeClr: null,
@@ -185,11 +179,45 @@ export function setDeathSave(combat, id, type, value) {
 }
 
 export function modifyHp(combat, id, delta) {
-  return updateCombatant(combat, id, (combatant) => applyHp(combatant, numberOr(combatant.hpCurrent, 0) + numberOr(delta, 0)));
+  const amount = numberOr(delta, 0);
+  return updateCombatant(combat, id, (combatant) => {
+    if (amount >= 0) {
+      // Healing goes straight to current HP; temporary HP is unaffected.
+      return applyHp(combatant, numberOr(combatant.hpCurrent, 0) + amount);
+    }
+    // Damage depletes temporary HP first (D&D RAW), then current HP.
+    const temp = clampTempHp(combatant.tempHP);
+    const absorbed = Math.min(temp, -amount);
+    const next = applyHp(combatant, numberOr(combatant.hpCurrent, 0) - (-amount - absorbed));
+    return absorbed ? { ...next, tempHP: temp - absorbed } : next;
+  });
 }
 
 export function setHp(combat, id, value) {
   return updateCombatant(combat, id, (combatant) => applyHp(combatant, numberOr(value, combatant.hpCurrent)));
+}
+
+export function setMaxHp(combat, id, value) {
+  return updateCombatant(combat, id, (combatant) => {
+    const hpMax = clampInt(value, 1, 999, combatant.hpMax);
+    if (hpMax === combatant.hpMax) return combatant;
+    // Lowering max can't leave current above it; raising max never auto-heals.
+    const hpCurrent = Math.min(numberOr(combatant.hpCurrent, hpMax), hpMax);
+    const isMonster = combatant.type === 'monster';
+    const next = {
+      ...combatant,
+      hpMax,
+      hpCurrent,
+      isDead: isMonster ? hpCurrent === 0 : combatant.isDead && hpCurrent === 0,
+    };
+    // Linked PC: max HP is sheet-derived, so persist the change as a maxHPBonus
+    // delta (base max is constant, so ΔmaxHP === ΔmaxHPBonus). Outbound sync then
+    // writes maxHPBonus and the sheet re-derives the same max.
+    if (combatant.type === 'player' && combatant.sourceId) {
+      next.maxHPBonus = numberOr(combatant.maxHPBonus, 0) + (hpMax - numberOr(combatant.hpMax, hpMax));
+    }
+    return next;
+  });
 }
 
 export function setTempHp(combat, id, value) {
@@ -202,31 +230,13 @@ export function setTempHp(combat, id, value) {
 export function applySheetVitals(combat, sourceId, vitals) {
   const charId = String(sourceId || '');
   if (!combat || !charId) return combat;
-  const mapped = sheetVitalsToCombat(vitals || {});
   let changed = false;
   const combatants = (combat.combatants || []).map((combatant) => {
     if (combatant?.type !== 'player' || String(combatant.sourceId || '') !== charId) return combatant;
-    const hpMax = mapped.hpMax ?? clampInt(combatant.hpMax, 1, 999, 10);
-    const hpCurrentRaw = mapped.hpCurrent ?? numberOr(combatant.hpCurrent, hpMax);
-    const hpCurrent = Math.max(0, Math.min(hpMax, Math.round(hpCurrentRaw)));
-    const tempHP = clampTempHp(mapped.tempHP);
-    const deathSaves = {
-      s: clampInt(mapped.deathSaves?.s, 0, 3, 0),
-      f: clampInt(mapped.deathSaves?.f, 0, 3, 0),
-    };
-    const isDead = hpCurrent === 0 && deathSaves.f >= 3;
-    if (
-      combatant.hpMax === hpMax
-      && combatant.hpCurrent === hpCurrent
-      && clampTempHp(combatant.tempHP) === tempHP
-      && combatant.deathSaves?.s === deathSaves.s
-      && combatant.deathSaves?.f === deathSaves.f
-      && Boolean(combatant.isDead) === isDead
-    ) {
-      return combatant;
-    }
+    const v = resolveCombatVitals(combatant, vitals || {});
+    if (combatVitalsMatch(combatant, v)) return combatant;
     changed = true;
-    return { ...combatant, hpMax, hpCurrent, tempHP, deathSaves, isDead };
+    return { ...combatant, ...v };
   });
   return changed ? { ...combat, combatants } : combat;
 }
@@ -331,6 +341,7 @@ export function snapshotFight(combat) {
       campaignId: combatant.campaignId || null,
       hpCurrent: combatant.hpCurrent,
       hpMax: combatant.hpMax,
+      maxHPBonus: combatant.maxHPBonus ?? null,
       tempHP: clampTempHp(combatant.tempHP),
       ac: combatant.ac,
       type: combatant.type,

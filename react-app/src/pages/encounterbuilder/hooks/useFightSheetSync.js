@@ -65,9 +65,14 @@ export function useFightSheetSync(combat) {
     if (!pending) return;
     pendingRef.current.delete(key);
     inFlightRef.current.add(key);
-    // Realtime sends our own RPC write back to us; keep the written value so
-    // the websocket handler can ignore that echo without suppressing max HP.
-    lastWrittenRef.current.set(key, pending.key);
+    // Realtime sends our own RPC writes back to us, possibly out of order and
+    // lagged. Remember EVERY recent written value (not just the last) so the
+    // websocket handler recognizes a delayed echo of an earlier write and does
+    // not bounce the local HP back to a stale value.
+    const writtenKeys = lastWrittenRef.current.get(key) || new Set();
+    writtenKeys.add(pending.key);
+    while (writtenKeys.size > 12) writtenKeys.delete(writtenKeys.values().next().value);
+    lastWrittenRef.current.set(key, writtenKeys);
     try {
       await patchCharacterData(key, pending.patch);
       if (getVersion(key) === pending.version) {
@@ -95,7 +100,8 @@ export function useFightSheetSync(combat) {
 
   const isOutboundEcho = useCallback((charId, patch) => {
     if (!charId || !patch) return false;
-    return lastWrittenRef.current.get(String(charId)) === sheetPatchKey(patch);
+    const writtenKeys = lastWrittenRef.current.get(String(charId));
+    return writtenKeys ? writtenKeys.has(sheetPatchKey(patch)) : false;
   }, []);
 
   useEffect(() => {

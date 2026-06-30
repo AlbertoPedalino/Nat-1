@@ -48,6 +48,7 @@ function toEncounterPlayer(row, campaign) {
     hpMax: clampInt(hpMax, 1, 999, 10),
     currentHP: vitals.hpCurrent ?? clampInt(hpMax, 1, 999, 10),
     tempHP: vitals.tempHP,
+    maxHPBonus: vitals.maxHPBonus ?? 0,
     deathSaves: { success: vitals.deathSaves.s, fail: vitals.deathSaves.f },
     initMod: clampInt(summary.initiative, -20, 30, 0),
     iconColor: normalizeIconColor(sheet.classIconColor),

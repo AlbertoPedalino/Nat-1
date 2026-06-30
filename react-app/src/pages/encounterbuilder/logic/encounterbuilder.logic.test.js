@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { calculateDifficulty } from './difficulty.js';
 import {
   applySheetVitals,
@@ -15,11 +16,20 @@ import { rollDice, rollDiceFormula } from './dice.js';
 import { cleanToText, parseCleanTokens } from './markup.js';
 import { resolveLegendaryGroups } from './bestiary.js';
 import {
+  SYNCED_DATA_KEYS,
   combatantToSheetPatch,
   sheetPatchKey,
   sheetVitalsToCombat,
   sheetVitalsToSheetPatch,
 } from './sheetSync.js';
+
+test('synced field set matches the patch_character_data SQL allowlist', () => {
+  const sql = readFileSync(new URL('../../../../supabase/combat_sync.sql', import.meta.url), 'utf8');
+  const match = sql.match(/allowed\s+text\[\]\s*:=\s*array\[([^\]]+)\]/);
+  assert.ok(match, 'could not find the allowed[] array in combat_sync.sql');
+  const sqlKeys = match[1].split(',').map((part) => part.trim().replace(/^'|'$/g, ''));
+  assert.deepEqual([...sqlKeys].sort(), [...SYNCED_DATA_KEYS].sort());
+});
 
 test('difficulty uses raw monster XP without encounter multiplier', () => {
   const result = calculateDifficulty([{ xp: 200, qty: 2 }], { count: 4, level: 1 });
@@ -51,6 +61,7 @@ test('sheet sync mappers clamp and keep the sheet patch shallow', () => {
     hpMax: 12,
     hpCurrent: 12,
     tempHP: 7,
+    maxHPBonus: 0,
     deathSaves: { s: 3, f: 0 },
   });
 
@@ -63,6 +74,7 @@ test('sheet sync mappers clamp and keep the sheet patch shallow', () => {
   assert.deepEqual(patch, {
     currentHP: 0,
     tempHP: 3,
+    maxHPBonus: 0,
     deathSaves: { success: 2, fail: 3 },
   });
   assert.equal(Object.hasOwn(patch, 'maxHP'), false);
@@ -74,11 +86,13 @@ test('sheet sync mappers clamp and keep the sheet patch shallow', () => {
   }), {
     currentHP: 18,
     tempHP: 2,
+    maxHPBonus: 0,
     deathSaves: { success: 1, fail: 3 },
   });
   assert.equal(sheetPatchKey(patch), sheetPatchKey({
     deathSaves: { fail: 3, success: 2 },
     tempHP: 3,
+    maxHPBonus: 0,
     currentHP: 0,
   }));
 });

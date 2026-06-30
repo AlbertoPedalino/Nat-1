@@ -27,7 +27,7 @@ export default function CombatView() {
 
   return (
     <>
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', xl: 'minmax(0,1fr) minmax(360px,0.8fr)' }, gap: 2 }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: 'minmax(0,1fr) minmax(340px,0.8fr)' }, gap: 2 }}>
         <Stack spacing={2}>
           <Paper sx={{ p: 2, bgcolor: 'background.paper' }}>
             <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} sx={{ alignItems: { xs: 'stretch', md: 'center' }, justifyContent: 'space-between' }}>

@@ -71,12 +71,13 @@ export default function PartyConfig() {
                 onChange={(event) => dispatch({ type: 'updatePlayer', index, patch: { ac: event.target.value } })}
                 sx={{ width: 78 }}
               />
-              <CompactStepper
+              <TextField
+                size="small"
                 label="Init"
+                type="number"
                 value={player.initMod}
-                min={-20}
-                max={30}
-                onChange={(value) => dispatch({ type: 'updatePlayer', index, patch: { initMod: value } })}
+                onChange={(event) => dispatch({ type: 'updatePlayer', index, patch: { initMod: event.target.value } })}
+                sx={{ width: 78 }}
               />
             </Box>
           ))}
@@ -87,7 +88,7 @@ export default function PartyConfig() {
 }
 
 // Shared −/value/+ controls. Renders 3 grid cells; parent owns the grid + label.
-function StepperControls({ label, value, min, max, onChange, signed = false }) {
+function StepperControls({ label, value, min, max, onChange }) {
   return (
     <>
       <Tooltip title={`Decrease ${label}`}>
@@ -97,8 +98,8 @@ function StepperControls({ label, value, min, max, onChange, signed = false }) {
           </IconButton>
         </span>
       </Tooltip>
-      <Typography fontWeight={700} sx={{ minWidth: 28, textAlign: 'center' }}>
-        {signed && value >= 0 ? `+${value}` : value}
+      <Typography fontWeight={700} sx={{ width: 34, textAlign: 'center' }}>
+        {value}
       </Typography>
       <Tooltip title={`Increase ${label}`}>
         <span>
@@ -117,16 +118,6 @@ function Stepper(props) {
     <Box sx={{ ...stepperGroupSx, display: 'grid', gridTemplateColumns: 'auto auto auto auto', gap: 0.5, alignItems: 'center' }}>
       <Typography variant="caption" sx={stepperLabelSx}>{props.label}</Typography>
       <StepperControls {...props} />
-    </Box>
-  );
-}
-
-// Inline, label stacked on top, signed value. For per-row knobs (Init).
-function CompactStepper(props) {
-  return (
-    <Box sx={{ display: 'grid', gridTemplateColumns: 'auto auto auto', gap: 0.5, alignItems: 'center', minWidth: 112 }}>
-      <Typography variant="caption" color="text.secondary" sx={{ gridColumn: '1 / -1' }}>{props.label}</Typography>
-      <StepperControls {...props} signed />
     </Box>
   );
 }

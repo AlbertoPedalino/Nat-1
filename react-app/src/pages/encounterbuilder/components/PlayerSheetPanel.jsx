@@ -61,7 +61,7 @@ export default function PlayerSheetPanel({ selection, onClose }) {
         <PlayerCombatSummary combatant={combatant} />
         {sourceId ? (
           <Box sx={sheetFrameSx}>
-            <CampaignSheetView sheetId={sourceId} editable={false} embedded />
+            <CampaignSheetView sheetId={sourceId} editable embedded />
           </Box>
         ) : (
           <Box sx={fallbackSx}>
@@ -109,7 +109,7 @@ const playerHeaderSx = {
 const playerBodySx = {
   p: 2,
   overflow: 'auto',
-  maxHeight: { xs: 520, xl: 'calc(100vh - 218px)' },
+  maxHeight: { xs: 520, lg: 'calc(100vh - 218px)' },
 };
 
 const avatarSx = {

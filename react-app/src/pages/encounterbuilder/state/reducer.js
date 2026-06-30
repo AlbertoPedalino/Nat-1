@@ -11,6 +11,7 @@ import {
   restoreFight,
   setDeathSave,
   setHp,
+  setMaxHp,
   setInitiative,
   setTempHp,
   snapshotFight,
@@ -120,6 +121,8 @@ export function encounterReducer(state, action) {
       return state.combat ? withCombat(state, modifyHp(state.combat, action.id, action.delta)) : state;
     case 'setHp':
       return state.combat ? withCombat(state, setHp(state.combat, action.id, action.value)) : state;
+    case 'setMaxHp':
+      return state.combat ? withCombat(state, setMaxHp(state.combat, action.id, action.value)) : state;
     case 'setTempHp':
       return state.combat ? withCombat(state, setTempHp(state.combat, action.id, action.value)) : state;
     case 'setDeathSave':
@@ -253,6 +256,7 @@ function importCampaignPlayers(state, campaignPlayers) {
       hpMax: player.hpMax,
       currentHP: player.currentHP,
       tempHP: player.tempHP,
+      maxHPBonus: player.maxHPBonus,
       deathSaves: player.deathSaves,
       iconColor: player.iconColor,
       color: player.iconColor || PLAYER_COLORS[players.length % PLAYER_COLORS.length],
@@ -301,6 +305,9 @@ function normalizePlayer(player, index) {
   }
   if (player.tempHP != null) {
     normalized.tempHP = vitals.tempHP;
+  }
+  if (player.maxHPBonus != null) {
+    normalized.maxHPBonus = vitals.maxHPBonus;
   }
   if (player.deathSaves != null) {
     normalized.deathSaves = { success: vitals.deathSaves.s, fail: vitals.deathSaves.f };

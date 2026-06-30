@@ -406,9 +406,9 @@ const statPanelSx = {
   bgcolor: 'background.paper',
   overflow: 'hidden',
   alignSelf: 'start',
-  position: { xl: 'sticky' },
-  top: { xl: 82 },
-  maxHeight: { xl: 'calc(100vh - 104px)' },
+  position: { lg: 'sticky' },
+  top: { lg: 82 },
+  maxHeight: { lg: 'calc(100vh - 104px)' },
 };
 
 const statPanelHeaderSx = {
@@ -419,5 +419,5 @@ const statPanelHeaderSx = {
 const statPanelBodySx = {
   p: 2,
   overflow: 'auto',
-  maxHeight: { xs: 520, xl: 'calc(100vh - 218px)' },
+  maxHeight: { xs: 520, lg: 'calc(100vh - 218px)' },
 };

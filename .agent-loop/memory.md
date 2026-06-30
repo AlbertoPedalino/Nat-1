@@ -45,30 +45,33 @@ App = React 19 + Vite + MUI + Supabase SPA in `react-app/`. D&D data is fetched 
 - Library view stores lightweight saved encounters, supports load/delete/launch/resume, and keeps one fight per encounter.
 - Combat view handles initiative, turn wrapping, monster death at 0 HP, PC death saves, reinforcements, roll log, and selected monster/PC statblock panel.
 - Selecting a linked player combatant renders `PlayerSheetPanel`; manual PCs without `sourceId` show a compact fallback.
-- Combatant rows keep HP bar, HP/temp HP fields, heal/damage controls, death saves, and remove action in one HP/action row.
+- Combatant rows keep HP bar, HP/Max/Temp fields (Max is editable; on a linked PC it round-trips as a `maxHPBonus` delta), heal/damage controls, death saves, and remove action in one HP/action row.
+- `modifyHp` damage depletes temporary HP first (D&D RAW), then current HP; healing only raises current HP. `setHp`/`setTempHp`/`setMaxHp` are direct field overrides.
 
 ## Combat Sheet Sync
 
-- Character cloud `data` stores top-level `currentHP`, `tempHP`, and `deathSaves: { success, fail }`; `maxHP` is derived by `calcMaxHP`, not stored.
-- Encounter combatants use `hpCurrent`, `hpMax`, `tempHP`, `deathSaves: { s, f }`, plus `sourceId` / `campaignId` for imported campaign PCs.
-- `logic/sheetSync.js` is the mapper source of truth:
-  - sheet -> combat maps `currentHP`, derived `maxHP`, `tempHP`, and death saves with clamps.
-  - combat -> sheet patches `currentHP`, `tempHP`, and complete `deathSaves`; it never writes `maxHP`.
-  - `sheetPatchKey` normalizes sync values for echo suppression.
-- Campaign import uses `summarizeCharacter` and `sheetVitalsToCombat` to carry current HP, max HP, temp HP, death saves, AC, and initiative into encounter players.
+- Character cloud `data` stores top-level `currentHP`, `tempHP`, `maxHPBonus`, and `deathSaves: { success, fail }`; `maxHP` is derived (`calcMaxHP` + `maxHPBonus`), not stored — so max HP round-trips as a `maxHPBonus` delta (combat `setMaxHp` on a linked PC applies the delta to `maxHPBonus`).
+- Encounter combatants use `hpCurrent`, `hpMax`, `tempHP`, `maxHPBonus`, `deathSaves: { s, f }`, plus `sourceId` / `campaignId` for imported campaign PCs.
+- The synced-field contract is the declarative `SYNCED_VITALS` registry in `shared/character/vitals.js` (single source of truth). Each descriptor owns its `data`/`combat` key names + clamps (`toCombat`/`toData`/`clampData`/`normalize`), so every consumer stays generic:
+  - sheet side: `pickCharacterVitals` / `clampCharacterVitals` (in `vitals.js`) iterate the registry.
+  - encounter side: `logic/sheetSync.js` imports the registry for the combat mappers (`sheetVitalsToCombat`, `resolveCombatVitals`, `combatantToSheetPatch`, `sheetPatchKey`, `combatVitalsMatch`). Layering is encounter -> shared (no inversion).
+  - Synced fields (all bidirectional): `currentHP`, `tempHP`, `maxHPBonus`, `deathSaves`. `maxHP` is never written directly.
+  - `resolveCombatVitals(combatant, vitals)` is the one place that derives a combatant's synced fields (used by both `buildCombat` seeding and `applySheetVitals`); `combatVitalsMatch` derives the idempotence guard from it.
+  - Adding a synced field = one descriptor in `SYNCED_VITALS` + its key in the `patch_character_data` SQL allowlist. `SYNCED_DATA_KEYS` (derived) and a test assert the JS set and the SQL allowlist never drift.
+- Campaign import uses `summarizeCharacter` and `sheetVitalsToCombat` to carry current HP, max HP, max HP bonus, temp HP, death saves, AC, and initiative into encounter players.
 - `buildCombat` seeds linked players from imported sheet vitals rather than always max HP.
 - `applySheetVitals(combat, sourceId, vitals)` updates linked PCs by `sourceId`, clamps values, and is idempotent when values match.
 - Outbound cloud writes live in `hooks/useFightSheetSync.js`, not the reducer:
-  - debounced per character;
+  - debounced per character (coalesces rapid HP taps into one write);
   - skips monsters and manual PCs with no `sourceId`;
   - writes only through `patchCharacterData()` / RPC;
-  - tracks last synced and last written value for echo suppression.
+  - echo suppression tracks a SET of recently written values per character (not just the last), so a lagged/out-of-order realtime echo of an earlier write is recognized and does NOT bounce local HP back to a stale value.
 - Inbound realtime for combat lives in `hooks/useSheetRealtime.js`:
   - opens only in combat view for linked PCs in the active fight;
   - subscribes to Supabase `postgres_changes` UPDATE on `public.characters`, filtered by character id;
   - derives vitals from incoming row `data` through `summarizeCharacter` + `sheetSync`;
   - dispatches `syncCombatantVitals`;
-  - ignores value-matching outbound echoes while still allowing max HP changes through;
+  - ignores self-originated echoes (set membership) while applying genuine external changes;
   - fail-soft on bad payloads/socket cleanup.
 - Manual PCs and monsters keep temp/max HP local and do not use cloud I/O.
 
@@ -80,8 +83,8 @@ App = React 19 + Vite + MUI + Supabase SPA in `react-app/`. D&D data is fetched 
   - read-only: applies the whole live `UPDATE` row to `state.char` (full refresh).
   - editable (`edit=1`): extracts only vitals with `pickCharacterVitals(row.data)` and passes them as the `liveVitals` prop, leaving `state.char` (the initial load) untouched so in-progress edits to other fields survive.
 - `useCloudCharacterLive` is a reusable shared hook gated by `useAuth` (`cloudEnabled`, `status === 'authed'`, user id) and the shared Supabase client; it subscribes to `public.characters` updates filtered by `id=eq.<charId>` and removes the channel on unmount/char change.
-- `shared/character/vitals.js` is the cross-subsystem synced-vitals contract: `pickCharacterVitals(data)` (field set) + `clampCharacterVitals(raw, { maxHP, fallback })`. Adding a synced field = edit here, plus the encounter combat mapper and the `patch_character_data` allowlist.
-- `CharacterSheet` accepts a `liveVitals` prop: an effect merges ONLY `currentHP`/`tempHP`/`deathSaves` into `sheet` + `C` (via `clampCharacterVitals`), runs only on a new `liveVitals` (reads `sheet` through a ref, not on local edits), is idempotent (equality guard) so save echoes are no-ops, and is last-writer-wins on those three fields. The resulting autosave re-writes whole `data` once per change (the sheet's pre-existing autosave path); the echo is idempotent so it does not loop.
+- `shared/character/vitals.js` is the cross-subsystem synced-vitals contract (the `SYNCED_VITALS` registry above): `pickCharacterVitals(data)` and `clampCharacterVitals(raw, { maxHP, fallback })` both derive from it.
+- `CharacterSheet` accepts a `liveVitals` prop: an effect merges ONLY the synced vitals (`currentHP`, `tempHP`, `maxHPBonus`, `deathSaves`) into `sheet` + `C` (via `clampCharacterVitals`); applying `maxHPBonus` recomputes `maxHP` from base + bonus and re-clamps current HP. It runs only on a new `liveVitals` (reads `sheet` through a ref, not on local edits), is idempotent (equality guard) so save echoes are no-ops, and is last-writer-wins on the synced fields; other in-progress edits are preserved. The resulting autosave re-writes whole `data` once per change (the sheet's pre-existing autosave path); the echo is idempotent so it does not loop.
 - `CharacterSheet` must re-derive when the `externalChar` prop changes so read-only realtime updates are visible.
 - `CharacterSheet` supports `embedded` layout and read-only no-op mutation handlers.
 
@@ -104,7 +107,7 @@ App = React 19 + Vite + MUI + Supabase SPA in `react-app/`. D&D data is fetched 
 - `public.characters`: `id text` PK, `owner uuid`, `data jsonb not null`, `updated_at`, plus campaign columns from campaign SQL.
 - Character RLS update policy allows `owner = auth.uid()` or `public.is_gm()`.
 - `patch_character_data(p_id text, p_patch jsonb)` is the generic partial patch RPC for syncable top-level sheet fields.
-- RPC is `security invoker` so RLS still governs rows; allowlist is `currentHP`, `tempHP`, `deathSaves`.
+- RPC is `security invoker` so RLS still governs rows; allowlist is `currentHP`, `tempHP`, `deathSaves`, `maxHPBonus`. This allowlist must stay equal to `SYNCED_DATA_KEYS` (a test reads the SQL and asserts it); after editing it, re-run `combat_sync.sql` on Supabase.
 - RPC uses shallow `jsonb ||` merge; object-valued keys like `deathSaves` must be sent as complete sub-objects.
 - `combat_sync.sql` idempotently adds `public.characters` to `supabase_realtime`; run/re-run it once on Supabase to enable live sheet updates.
 - Cloud full-data write paths still exist for character autosave/import flows; combat sync must use the RPC helper only.
@@ -137,8 +140,7 @@ App = React 19 + Vite + MUI + Supabase SPA in `react-app/`. D&D data is fetched 
 
 - `cd react-app && npm run build` is the real build gate, but it writes `dist`.
 - `cd react-app && npm test` runs encounter logic tests under `src/pages/encounterbuilder/logic/*.test.js`.
-- `git diff --check` should pass; note it does not cover untracked files.
-- `git status --short` matters before review/commit because new sync files can be untracked and omitted from `git diff`.
+- `git diff --check` should pass; note it does not cover untracked files (check `git status --short` for new files before review/commit).
 - Manual encounter checks: `/encounter-builder?enc=new`, load monsters, filter/add, difficulty, launch, turns, HP/death saves/temp HP, reinforcements, save instance, reload persistence, Home listing, Library load/resume, GM campaign import/open sheet, click PC in combat panel, click monster statblock.
 - Combat sync manual checks:
   - import campaign players, launch, verify current HP/temp HP/death saves/max HP seed from sheet;
@@ -157,7 +159,6 @@ App = React 19 + Vite + MUI + Supabase SPA in `react-app/`. D&D data is fetched 
 - `public/tools/*.html` are not Vite-bundled; only GM board remains there.
 - MUI 9/React 19 can leak `Stack` layout props to DOM; put `alignItems`, `justifyContent`, `flexWrap`, `minHeight`, `gap` in `sx`.
 - Build may not be runnable in read-only review because Vite writes `dist`; tests may also need writable caches depending on environment.
-- `git diff --check` ignores untracked files; verify `git status --short` before review/commit.
-- New shared hooks/files must be tracked before final diff/commit, especially `shared/cloud/useCloudCharacterLive.js`.
+- New shared hooks/files (e.g. under `shared/cloud/`, `shared/character/`) start untracked; track them before a final diff/commit so they aren't omitted.
 - Registry deletion in `shared/localStorageRegistries.js` removes keys by `gb:enc:<id>:` prefix, compatible with encounter keys.
 - Keep encounter data runtime-fetched; never vendor 5etools JSON/images.

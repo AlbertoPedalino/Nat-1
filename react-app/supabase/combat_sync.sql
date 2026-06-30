@@ -13,7 +13,7 @@ security invoker
 set search_path = public
 as $$
 declare
-  allowed text[] := array['currentHP','tempHP','deathSaves'];
+  allowed text[] := array['currentHP','tempHP','deathSaves','maxHPBonus'];
   clean jsonb;
 begin
   select coalesce(jsonb_object_agg(key, value), '{}'::jsonb) into clean

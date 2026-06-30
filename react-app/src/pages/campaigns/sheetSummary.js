@@ -17,6 +17,7 @@ export function summarizeCharacter(C) {
     return {
       currentHP: sheet.currentHP,
       maxHP: sheet.maxHP,
+      maxHPBonus: sheet.maxHPBonus,
       tempHP: sheet.tempHP,
       deathSaves: sheet.deathSaves,
       ac,
