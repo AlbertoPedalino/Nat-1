@@ -54,7 +54,7 @@ export async function getCloudCharacter(charId) {
   const supabase = requireClient();
   const { data, error } = await supabase
     .from(TABLE)
-    .select('name, owner_username, data')
+    .select('id, name, owner, owner_username, updated_at, data')
     .eq('id', charId)
     .single();
   if (error) throw error;
@@ -104,6 +104,16 @@ export async function updateCloudCharacterData(charId, character) {
   if (error) throw error;
   if (!data?.id) throw new Error('No permission to update this character.');
   return data;
+}
+
+// Generic shallow patch for syncable top-level sheet fields. Object-valued
+// fields must be sent as complete sub-objects; the SQL RPC allowlist drops
+// non-syncable keys and RLS still decides which rows the caller may update.
+export async function patchCharacterData(charId, patch) {
+  if (!charId || !patch) return;
+  const { error } = await requireClient()
+    .rpc('patch_character_data', { p_id: charId, p_patch: patch });
+  if (error) throw error;
 }
 
 // Upsert a character to the cloud straight from an in-memory object — no local

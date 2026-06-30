@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Avatar, Box, Button, IconButton, LinearProgress, Paper, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import { ExternalLink, Minus, Plus, Trash2 } from 'lucide-react';
+import { campaignSheetUrl } from '../logic/campaignSheetUrl.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import MonsterToken from './MonsterToken.jsx';
 
@@ -11,9 +12,16 @@ export default function CombatantCard({ combatant, active }) {
   const isMonster = combatant.type === 'monster';
   const hpPct = combatant.hpMax ? Math.max(0, Math.round((combatant.hpCurrent / combatant.hpMax) * 100)) : 100;
 
-  const openMonster = () => {
+  const openDetails = () => {
     if (combatant.monsterData) {
       dispatch({ type: 'selectStatblock', payload: { monster: combatant.monsterData, combatantId: combatant.id } });
+      return;
+    }
+    if (!isMonster) {
+      dispatch({
+        type: 'selectStatblock',
+        payload: { playerSourceId: combatant.sourceId || null, combatantId: combatant.id },
+      });
     }
   };
 
@@ -44,11 +52,16 @@ export default function CombatantCard({ combatant, active }) {
           />
           <Stack direction="row" spacing={1} sx={{ minWidth: 0, alignItems: 'center', flex: 1 }}>
             {isMonster && combatant.monsterData ? (
-              <Box onClick={openMonster} sx={{ cursor: 'pointer' }}>
+              <Box onClick={openDetails} sx={{ cursor: 'pointer' }}>
                 <MonsterToken monster={combatant.monsterData} size={34} fallbackText={combatant.name?.[0]} />
               </Box>
             ) : (
-              <Avatar sx={(theme) => ({ ...avatarBaseSx, bgcolor: combatant.color || theme.palette.pcToken })}>PC</Avatar>
+              <Avatar
+                onClick={openDetails}
+                sx={(theme) => ({ ...avatarBaseSx, bgcolor: combatant.color || theme.palette.pcToken, cursor: 'pointer' })}
+              >
+                PC
+              </Avatar>
             )}
             <Box sx={{ minWidth: 0, flex: 1 }}>
               <Stack direction="row" spacing={0.75} sx={{ minWidth: 0, alignItems: 'center' }}>
@@ -58,24 +71,31 @@ export default function CombatantCard({ combatant, active }) {
                   </Typography>
                 ) : null}
                 {isMonster && combatant.monsterData ? (
-                  <Button size="small" onClick={openMonster} sx={nameButtonSx}>
+                  <Button size="small" onClick={openDetails} sx={nameButtonSx}>
                     <span style={nameSpanStyle}>{combatant.name}</span>
                   </Button>
-                ) : combatant.sourceId ? (
-                  <Button
-                    component="a"
-                    href={campaignSheetUrl(combatant.sourceId)}
-                    target="_blank"
-                    rel="noopener"
-                    size="small"
-                    endIcon={<ExternalLink size={13} />}
-                    sx={nameButtonSx}
-                  >
+                ) : !isMonster ? (
+                  <Button size="small" onClick={openDetails} sx={nameButtonSx}>
                     <span style={nameSpanStyle}>{combatant.name}</span>
                   </Button>
                 ) : (
                   <Typography fontWeight={800} noWrap>{combatant.name}</Typography>
                 )}
+                {!isMonster && combatant.sourceId ? (
+                  <Tooltip title="Open sheet">
+                    <IconButton
+                      component="a"
+                      href={campaignSheetUrl(combatant.sourceId)}
+                      target="_blank"
+                      rel="noopener"
+                      size="small"
+                      sx={sheetLinkButtonSx}
+                      aria-label={`Open ${combatant.name} sheet`}
+                    >
+                      <ExternalLink size={13} />
+                    </IconButton>
+                  </Tooltip>
+                ) : null}
               </Stack>
               <Typography variant="caption" color="text.secondary" sx={metaLineSx}>AC {combatant.ac} · Init {combatant.initMod >= 0 ? '+' : ''}{combatant.initMod}</Typography>
             </Box>
@@ -96,6 +116,17 @@ export default function CombatantCard({ combatant, active }) {
                 sx={{ width: 72, flex: '0 0 auto' }}
               />
               <Typography color="text.secondary" sx={hpMaxSx}>/ {combatant.hpMax}</Typography>
+              {!isMonster ? (
+                <TextField
+                  size="small"
+                  label="Temp"
+                  type="number"
+                  value={combatant.tempHP ?? 0}
+                  onChange={(event) => dispatch({ type: 'setTempHp', id: combatant.id, value: event.target.value })}
+                  onFocus={selectInputText}
+                  sx={{ width: 72, flex: '0 0 auto' }}
+                />
+              ) : null}
             </Box>
             <LinearProgress
               variant="determinate"
@@ -190,11 +221,6 @@ function selectInputText(event) {
   event.target.select();
 }
 
-function campaignSheetUrl(id) {
-  const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
-  return `${base}/campaign-sheet?id=${encodeURIComponent(id)}&edit=1`;
-}
-
 const nameSpanStyle = { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
 
 const rowSx = {
@@ -216,6 +242,13 @@ const identityClusterSx = {
 const avatarBaseSx = { width: 34, height: 34, color: '#101010', fontSize: 11, fontWeight: 800 };
 
 const nameButtonSx = { justifyContent: 'flex-start', minWidth: 0, px: 0.5 };
+
+const sheetLinkButtonSx = {
+  width: 24,
+  height: 24,
+  flex: '0 0 auto',
+  color: 'text.secondary',
+};
 
 const metaLineSx = { fontSize: '0.72rem' };
 
