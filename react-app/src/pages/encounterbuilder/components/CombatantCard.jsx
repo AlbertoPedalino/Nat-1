@@ -114,7 +114,19 @@ export default function CombatantCard({ combatant, active }) {
         {/* HP panel: value + [amount] − stepper per row (mirrors the sheet HP block) */}
         <Box sx={hpRowSx}>
           {isDown ? (
-            <DeathSaves combatant={combatant} />
+            <Box sx={hpPanelRowSx}>
+              <DeathSaves combatant={combatant} />
+              <HpStepper
+                amount={hpAmt}
+                onAmount={setHpAmt}
+                onPlus={(n) => dispatch({ type: 'modifyHp', id: combatant.id, delta: n })}
+                onMinus={(n) => dispatch({ type: 'modifyHp', id: combatant.id, delta: -n })}
+                plusColor="success.main"
+                minusColor="error.main"
+                plusLabel="Heal"
+                minusLabel="Damage"
+              />
+            </Box>
           ) : (
             <>
               {/* Current / Max + heal / damage */}
