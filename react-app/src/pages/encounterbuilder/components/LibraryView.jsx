@@ -32,7 +32,7 @@ export default function LibraryView() {
       {items.length ? (
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2,minmax(0,1fr))', xl: 'repeat(3,minmax(0,1fr))' }, gap: 2 }}>
           {items.map((item) => (
-            <Paper key={`${item.type}-${item.enc?.id || item.fight?.id}`} sx={{ p: 2, bgcolor: 'background.paper' }}>
+            <Paper key={item.enc.id} sx={{ p: 2, bgcolor: 'background.paper' }}>
               <LibraryCard item={item} monsters={monsterDb.monsters} dispatch={dispatch} notify={notify} />
             </Paper>
           ))}
@@ -49,26 +49,22 @@ export default function LibraryView() {
 function LibraryCard({ item, monsters, dispatch, notify }) {
   const enc = item.enc;
   const fight = item.fight;
-  const name = enc?.name || fight?.name || 'Fight';
-  const date = fight?.savedAt || enc?.createdAt;
-  const monsterText = enc
-    ? enc.encounter.map((monster) => `${monster.name}${monster.qty > 1 ? ` x${monster.qty}` : ''}`).join(', ')
-    : fight?.fight?.combatants?.map((combatant) => `${combatant.name} ${combatant.hpCurrent}/${combatant.hpMax}HP`).join(', ');
+  const date = fight?.savedAt || enc.createdAt;
+  const monsterText = (enc.encounter || [])
+    .map((monster) => `${monster.name}${monster.qty > 1 ? ` x${monster.qty}` : ''}`)
+    .join(', ');
   const alive = fight?.fight?.combatants?.filter((combatant) => !combatant.isDead).length || 0;
   const dead = fight?.fight?.combatants?.filter((combatant) => combatant.isDead).length || 0;
+  const missingMonster = enc.encounter.some((entry) => !monsters.find((monster) => monster.name === entry.name && (!entry.source || monster.source === entry.source)));
 
   return (
     <Stack spacing={1.5}>
       <Stack spacing={0.75}>
-        <Typography variant="h2" noWrap>{name}</Typography>
+        <Typography variant="h2" noWrap>{enc.name}</Typography>
         <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 0.75 }}>
-          {enc ? (
-            <>
-              <Chip size="small" color="primary" label={enc.diffLabel || 'Trivial'} />
-              <Chip size="small" label={`${formatNumber(enc.totalXp)} XP`} />
-              <Chip size="small" label={`Lv ${enc.partyLevel} · ${enc.partyCount} PC`} />
-            </>
-          ) : null}
+          <Chip size="small" color="primary" label={enc.diffLabel || 'Trivial'} />
+          <Chip size="small" label={`${formatNumber(enc.totalXp)} XP`} />
+          <Chip size="small" label={`Lv ${enc.partyLevel} · ${enc.partyCount} PC`} />
           {fight ? (
             <Chip
               size="small"
@@ -82,30 +78,26 @@ function LibraryCard({ item, monsters, dispatch, notify }) {
         {monsterText || 'No combatants'}
       </Typography>
       <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
-        {enc ? (
-          <>
-            <Button
-              size="small"
-              variant="outlined"
-              startIcon={<Upload size={14} />}
-              onClick={() => {
-                dispatch({ type: 'loadLibraryEncounter', entry: enc, monsters });
-                notify('success', `"${enc.name}" loaded in Builder.`);
-              }}
-            >
-              Load
-            </Button>
-            <Button
-              size="small"
-              variant="contained"
-              startIcon={<Play size={14} />}
-              onClick={() => dispatch({ type: 'launchLibraryEncounter', entry: enc, monsters })}
-              disabled={enc.encounter.some((entry) => !monsters.find((monster) => monster.name === entry.name && (!entry.source || monster.source === entry.source)))}
-            >
-              Launch
-            </Button>
-          </>
-        ) : null}
+        <Button
+          size="small"
+          variant="outlined"
+          startIcon={<Upload size={14} />}
+          onClick={() => {
+            dispatch({ type: 'loadLibraryEncounter', entry: enc, monsters });
+            notify('success', `"${enc.name}" loaded in Builder.`);
+          }}
+        >
+          Load
+        </Button>
+        <Button
+          size="small"
+          variant="contained"
+          startIcon={<Play size={14} />}
+          onClick={() => dispatch({ type: 'launchLibraryEncounter', entry: enc, monsters })}
+          disabled={missingMonster}
+        >
+          Launch
+        </Button>
         {fight ? (
           <Button
             size="small"
@@ -123,9 +115,8 @@ function LibraryCard({ item, monsters, dispatch, notify }) {
           variant="outlined"
           startIcon={<Trash2 size={14} />}
           onClick={() => {
-            const ok = window.confirm(enc ? 'Delete this entry from the library?' : 'Delete this saved fight?');
-            if (!ok) return;
-            dispatch(enc ? { type: 'deleteLibraryEncounter', id: enc.id } : { type: 'deleteFight', id: fight.id });
+            if (!window.confirm('Delete this entry from the library?')) return;
+            dispatch({ type: 'deleteLibraryEncounter', id: enc.id });
           }}
         >
           Delete
@@ -136,19 +127,15 @@ function LibraryCard({ item, monsters, dispatch, notify }) {
   );
 }
 
+// Each library encounter is one card, optionally carrying its in-progress fight.
+// Every launch backs an encounter, so there are no standalone (unsaved) fights.
 function mergeLibrary(encounters, fights) {
-  const items = [];
-  const usedFightIds = new Set();
-  (encounters || []).forEach((enc) => {
-    const linkedFight = (fights || []).find((fight) => fight.encounterId === enc.id)
-      || (fights || []).find((fight) => !fight.encounterId && fight.name === enc.name);
-    if (linkedFight) usedFightIds.add(linkedFight.id);
-    items.push({ type: 'enc', enc, fight: linkedFight || null, sortKey: Math.max(toTime(enc.createdAt), linkedFight?.savedAt || 0) });
-  });
-  (fights || []).filter((fight) => !usedFightIds.has(fight.id)).forEach((fight) => {
-    items.push({ type: 'fight', enc: null, fight, sortKey: fight.savedAt || 0 });
-  });
-  return items.sort((a, b) => b.sortKey - a.sortKey);
+  return (encounters || [])
+    .map((enc) => {
+      const linkedFight = (fights || []).find((fight) => fight.encounterId === enc.id) || null;
+      return { enc, fight: linkedFight, sortKey: Math.max(toTime(enc.createdAt), linkedFight?.savedAt || 0) };
+    })
+    .sort((a, b) => b.sortKey - a.sortKey);
 }
 
 function toTime(value) {

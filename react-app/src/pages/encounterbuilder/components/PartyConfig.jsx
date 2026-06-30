@@ -28,13 +28,10 @@ export default function PartyConfig() {
         <Stack spacing={1}>
           {state.players.map((player, index) => (
             <Box key={player.id ?? index} sx={playerRowSx}>
-              <Box
-                component="input"
-                type="color"
+              <ColorSwatch
                 value={player.color || '#5c8fe0'}
-                onChange={(event) => dispatch({ type: 'updatePlayer', index, patch: { color: event.target.value } })}
-                sx={colorInputSx}
-                aria-label={`${player.name} color`}
+                onChange={(value) => dispatch({ type: 'updatePlayer', index, patch: { color: value } })}
+                label={`${player.name} color`}
               />
               {player.sourceId ? (
                 <Button
@@ -133,6 +130,20 @@ function CompactStepper(props) {
   );
 }
 
+// Circular swatch wrapping the native color input (MUI ships no color picker).
+function ColorSwatch({ value, onChange, label }) {
+  return (
+    <Box
+      component="input"
+      type="color"
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      aria-label={label}
+      sx={colorSwatchSx}
+    />
+  );
+}
+
 function campaignSheetUrl(id) {
   const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
   return `${base}/campaign-sheet?id=${encodeURIComponent(id)}&edit=1`;
@@ -167,11 +178,19 @@ const stepperLabelSx = {
   letterSpacing: 0.5,
 };
 
-const colorInputSx = {
-  width: 30,
-  height: 30,
-  border: '1px solid rgba(255,255,255,0.2)',
-  borderRadius: 1,
-  bgcolor: 'transparent',
+const colorSwatchSx = (theme) => ({
+  width: 28,
+  height: 28,
+  flexShrink: 0,
   p: 0,
-};
+  bgcolor: 'transparent',
+  border: 'none',
+  borderRadius: '50%',
+  cursor: 'pointer',
+  appearance: 'none',
+  WebkitAppearance: 'none',
+  boxShadow: `0 0 0 1px ${theme.palette.divider}, inset 0 0 0 2px ${theme.palette.background.paper}`,
+  '&::-webkit-color-swatch-wrapper': { p: 0 },
+  '&::-webkit-color-swatch': { border: 'none', borderRadius: '50%' },
+  '&::-moz-color-swatch': { border: 'none', borderRadius: '50%' },
+});

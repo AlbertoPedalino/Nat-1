@@ -16,6 +16,7 @@ import {
 } from '../logic/combat.js';
 import { addRollLogEntry } from '../logic/dice.js';
 import { PLAYER_COLORS } from '../logic/constants.js';
+import { makeSavedEncounter } from '../logic/storage.js';
 import { clampInt, hydrateEncounterItems, monsterKey, toEncounterMonster } from '../logic/monsterUtils.js';
 
 export const DEFAULT_PARTY = Object.freeze({ count: 4, level: 5 });
@@ -99,9 +100,9 @@ export function encounterReducer(state, action) {
         encounterName: action.entry?.name || '',
       };
     case 'launchCurrentEncounter':
-      return launchCombat(state, state.encounter, action.encounterId ?? state.currentEncounterId);
+      return launchCombat(state, state.encounter, action.encounterId ?? state.currentEncounterId, state.encounterName);
     case 'launchLibraryEncounter':
-      return launchCombat(state, hydrateEncounterItems(action.entry?.encounter, action.monsters), action.entry?.id || null);
+      return launchCombat(state, hydrateEncounterItems(action.entry?.encounter, action.monsters), action.entry?.id || null, action.entry?.name);
     case 'resumeFight':
       return withCombat(state, restoreFight(action.entry, action.monsters), { view: 'combat' });
     case 'nextTurn':
@@ -299,24 +300,41 @@ function campaignAverageLevel(players) {
   return clampInt(total / players.length, 1, 20, 1);
 }
 
-function launchCombat(state, encounter, encounterId) {
-  const combat = buildCombat(encounter, state.players, encounterId || null);
+// Every launch is backed by a library encounter, so its card always exposes the
+// full Load/Launch/Resume/Delete actions. An unsaved draft is snapshotted here.
+function launchCombat(state, encounter, encounterId, name) {
+  let library = state.library;
+  let id = encounterId || null;
+  if (id == null && encounter.length) {
+    const entry = makeSavedEncounter(name, encounter, state.party);
+    library = [entry, ...library];
+    id = entry.id;
+  }
+  const combat = buildCombat(encounter, state.players, id);
+  combat.name = library.find((entry) => entry.id === id)?.name || autoFightName(combat.combatants);
   return withCombat({
     ...state,
+    library,
     encounter,
-    currentEncounterId: encounterId || null,
+    currentEncounterId: id,
+    encounterName: '',
   }, combat, { view: 'combat' });
 }
 
 function withCombat(state, combat, patch = {}) {
+  const existing = (state.fights || []).find((fight) => fight.id === combat.fightId);
   const fightEntry = {
     id: combat.fightId,
-    name: existingFightName(state.fights, combat.fightId) || autoFightName(combat.combatants),
+    name: existing?.name || combat.name || autoFightName(combat.combatants),
     savedAt: Date.now(),
     encounterId: combat.encounterId || null,
     fight: snapshotFight(combat),
   };
-  const fights = [fightEntry, ...state.fights.filter((fight) => fight.id !== fightEntry.id)];
+  // Keep one fight per encounter: a fresh launch supersedes the previous fight.
+  const fights = [fightEntry, ...state.fights.filter((fight) => (
+    fight.id !== fightEntry.id
+    && !(fightEntry.encounterId != null && fight.encounterId === fightEntry.encounterId)
+  ))];
   return {
     ...state,
     ...patch,
@@ -326,20 +344,16 @@ function withCombat(state, combat, patch = {}) {
   };
 }
 
-function existingFightName(fights, id) {
-  return (fights || []).find((fight) => fight.id === id)?.name || '';
-}
-
 function deleteLibraryEncounter(state, id) {
-  const encounter = state.library.find((entry) => entry.id === id);
-  const fights = state.fights.filter((fight) => (
-    fight.encounterId !== id && !(fight.encounterId == null && encounter && fight.name === encounter.name)
-  ));
+  const fights = state.fights.filter((fight) => fight.encounterId !== id);
+  const activeAlive = fights.some((fight) => fight.id === state.activeFightId);
   return {
     ...state,
     library: state.library.filter((entry) => entry.id !== id),
     fights,
-    activeFightId: fights.some((fight) => fight.id === state.activeFightId) ? state.activeFightId : null,
+    activeFightId: activeAlive ? state.activeFightId : null,
+    combat: activeAlive ? state.combat : null,
+    view: activeAlive ? state.view : 'builder',
   };
 }
 
