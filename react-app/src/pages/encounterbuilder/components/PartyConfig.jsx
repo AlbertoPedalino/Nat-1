@@ -73,8 +73,7 @@ export default function PartyConfig() {
                 onChange={(event) => dispatch({ type: 'updatePlayer', index, patch: { ac: event.target.value } })}
                 sx={{ width: 78 }}
               />
-              <Stepper
-                compact
+              <CompactStepper
                 label="Init"
                 value={player.initMod}
                 min={-20}
@@ -89,10 +88,10 @@ export default function PartyConfig() {
   );
 }
 
-function Stepper({ label, value, min, max, onChange, compact = false }) {
+// Shared −/value/+ controls. Renders 3 grid cells; parent owns the grid + label.
+function StepperControls({ label, value, min, max, onChange, signed = false }) {
   return (
-    <Box sx={{ display: 'grid', gridTemplateColumns: compact ? 'auto auto auto' : '1fr auto auto', gap: 0.5, alignItems: 'center', minWidth: compact ? 112 : 120 }}>
-      <Typography variant="caption" color="text.secondary" sx={{ gridColumn: compact ? '1 / -1' : 'auto' }}>{label}</Typography>
+    <>
       <Tooltip title={`Decrease ${label}`}>
         <span>
           <IconButton size="small" disabled={value <= min} onClick={() => onChange(value - 1)}>
@@ -100,7 +99,9 @@ function Stepper({ label, value, min, max, onChange, compact = false }) {
           </IconButton>
         </span>
       </Tooltip>
-      <Typography fontWeight={700} sx={{ minWidth: 28, textAlign: 'center' }}>{value >= 0 && compact ? `+${value}` : value}</Typography>
+      <Typography fontWeight={700} sx={{ minWidth: 28, textAlign: 'center' }}>
+        {signed && value >= 0 ? `+${value}` : value}
+      </Typography>
       <Tooltip title={`Increase ${label}`}>
         <span>
           <IconButton size="small" disabled={value >= max} onClick={() => onChange(value + 1)}>
@@ -108,6 +109,26 @@ function Stepper({ label, value, min, max, onChange, compact = false }) {
           </IconButton>
         </span>
       </Tooltip>
+    </>
+  );
+}
+
+// Boxed pill, uppercase label inline left. For top-level party knobs (PCs, Level).
+function Stepper(props) {
+  return (
+    <Box sx={{ ...stepperGroupSx, display: 'grid', gridTemplateColumns: 'auto auto auto auto', gap: 0.5, alignItems: 'center' }}>
+      <Typography variant="caption" sx={stepperLabelSx}>{props.label}</Typography>
+      <StepperControls {...props} />
+    </Box>
+  );
+}
+
+// Inline, label stacked on top, signed value. For per-row knobs (Init).
+function CompactStepper(props) {
+  return (
+    <Box sx={{ display: 'grid', gridTemplateColumns: 'auto auto auto', gap: 0.5, alignItems: 'center', minWidth: 112 }}>
+      <Typography variant="caption" color="text.secondary" sx={{ gridColumn: '1 / -1' }}>{props.label}</Typography>
+      <StepperControls {...props} signed />
     </Box>
   );
 }
@@ -127,6 +148,23 @@ const playerRowSx = {
   borderColor: 'divider',
   borderRadius: 1,
   bgcolor: 'rgba(255,255,255,0.025)',
+};
+
+const stepperGroupSx = {
+  px: 1,
+  py: 0.5,
+  border: '1px solid',
+  borderColor: 'divider',
+  borderRadius: 1,
+  bgcolor: 'rgba(255,255,255,0.025)',
+};
+
+const stepperLabelSx = {
+  mr: 0.75,
+  fontWeight: 700,
+  color: 'text.primary',
+  textTransform: 'uppercase',
+  letterSpacing: 0.5,
 };
 
 const colorInputSx = {

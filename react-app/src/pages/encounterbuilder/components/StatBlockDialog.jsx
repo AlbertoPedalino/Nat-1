@@ -176,7 +176,7 @@ function StatBlockBody({ monster, allowAdd = false }) {
         <Section title="Reactions" entries={monster.reaction} extra={spellcasting.reaction} onRoll={handleRoll} />
         {(monster.legendary?.length || spellcasting.legendary.length) ? (
           <Stack spacing={1}>
-            <Typography variant="h2">Legendary Actions</Typography>
+            <SectionHeading>Legendary Actions</SectionHeading>
             <Typography variant="body2" color="text.secondary">
               {monster.legendaryHeader
                 ? <EntryRenderer entries={monster.legendaryHeader} onRoll={handleRoll} />
@@ -249,7 +249,7 @@ function Section({ title, entries, extra = [], onRoll, force = false }) {
   if (force) {
     return (
       <Stack spacing={1}>
-        <Typography variant="h2">{title}</Typography>
+        <SectionHeading>{title}</SectionHeading>
         <Typography component="div" variant="body2">
           <EntryRenderer entries={entries} onRoll={onRoll} />
         </Typography>
@@ -258,10 +258,36 @@ function Section({ title, entries, extra = [], onRoll, force = false }) {
   }
   return (
     <Stack spacing={1}>
-      <Typography variant="h2">{title}</Typography>
+      <SectionHeading>{title}</SectionHeading>
       <ActionList entries={entries} onRoll={onRoll} />
       {extra.map((entry, index) => <SpellcastingBlock key={index} entry={entry} onRoll={onRoll} />)}
     </Stack>
+  );
+}
+
+function SectionHeading({ children }) {
+  return (
+    <Typography
+      variant="h2"
+      sx={{
+        color: 'primary.main',
+        borderBottom: '2px solid',
+        borderColor: 'primary.main',
+        pb: 0.5,
+        mb: 0.25,
+      }}
+    >
+      {children}
+    </Typography>
+  );
+}
+
+function EntryName({ name, onRoll }) {
+  if (!name) return null;
+  return (
+    <Box component="span" sx={{ color: 'secondary.main', fontWeight: 700 }}>
+      <InlineText value={`${name}.`} onRoll={onRoll} />{' '}
+    </Box>
   );
 }
 
@@ -269,8 +295,8 @@ function ActionList({ entries, onRoll }) {
   return (
     <>
       {(entries || []).map((entry, index) => (
-        <Typography component="div" variant="body2" key={index} sx={{ mb: 0.75 }}>
-          {entry.name ? <Box component="b"><Box component="i"><InlineText value={`${entry.name}. `} onRoll={onRoll} /></Box></Box> : null}
+        <Typography component="div" variant="body2" key={index} sx={{ mb: 1.25 }}>
+          <EntryName name={entry.name} onRoll={onRoll} />
           <EntryRenderer entries={entry.entries} onRoll={onRoll} />
         </Typography>
       ))}
@@ -305,7 +331,7 @@ function SpellcastingBlock({ entry, onRoll }) {
   }
   return (
     <Typography component="div" variant="body2">
-      <Box component="b"><Box component="i"><InlineText value={`${entry.name}. `} onRoll={onRoll} /></Box></Box>
+      <EntryName name={entry.name} onRoll={onRoll} />
       {entry.headerEntries ? <EntryRenderer entries={entry.headerEntries} onRoll={onRoll} /> : null}
       {rows.length ? (
         <Box sx={{ ml: 2, mt: 0.5 }}>
