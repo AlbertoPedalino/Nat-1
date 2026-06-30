@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Box, Button, Paper, Stack, Typography } from '@mui/material';
 import { ArrowLeft, ArrowRight, RotateCcw, Swords } from 'lucide-react';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
@@ -9,6 +10,23 @@ import { StatBlockPanel } from './StatBlockDialog.jsx';
 export default function CombatView() {
   const { state, dispatch } = useEncounterBuilder();
   const combat = state.combat;
+  const listRef = useRef(null);
+  const activeRef = useRef(null);
+  const currentTurn = combat?.currentTurn;
+  const round = combat?.round;
+
+  // Keep the active combatant roughly centered in the scrollable roster as turns
+  // advance, so its card never hides behind the scroll edges. Scoped to the list
+  // container (not the page) so the turn controls above it stay put.
+  useEffect(() => {
+    const container = listRef.current;
+    const active = activeRef.current;
+    if (!container || !active) return;
+    const top = active.offsetTop - (container.clientHeight - active.clientHeight) / 2;
+    // Honor the OS "reduce motion" setting: jump instantly instead of animating.
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    container.scrollTo({ top: Math.max(0, top), behavior: reduceMotion ? 'auto' : 'smooth' });
+  }, [currentTurn, round]);
 
   if (!combat?.combatants?.length) {
     return (
@@ -54,11 +72,20 @@ export default function CombatView() {
             </Stack>
           </Paper>
           <Reinforcements />
-          <Stack spacing={1}>
-            {combat.combatants.map((combatant, index) => (
-              <CombatantCard key={combatant.id} combatant={combatant} active={index === combat.currentTurn} />
-            ))}
-          </Stack>
+          {/* Cap the roster height so it scrolls internally instead of pushing the
+              turn controls (Previous/Next/Reroll) off-screen on big encounters. */}
+          <Box ref={listRef} sx={combatantListSx}>
+            <Stack spacing={1}>
+              {combat.combatants.map((combatant, index) => {
+                const isActive = index === combat.currentTurn;
+                return (
+                  <Box key={combatant.id} ref={isActive ? activeRef : null}>
+                    <CombatantCard combatant={combatant} active={isActive} />
+                  </Box>
+                );
+              })}
+            </Stack>
+          </Box>
         </Stack>
         <StatBlockPanel />
       </Box>
@@ -66,3 +93,13 @@ export default function CombatView() {
     </>
   );
 }
+
+const combatantListSx = {
+  // position:relative so the active card's offsetTop is measured against this
+  // container, which the centering scroll math in the effect above relies on.
+  position: 'relative',
+  maxHeight: { xs: '60vh', lg: 'calc(100vh - 240px)' },
+  overflowY: 'auto',
+  // Room for the scrollbar so it never overlaps a card's active-turn border.
+  pr: 0.5,
+};

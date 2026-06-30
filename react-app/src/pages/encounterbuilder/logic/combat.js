@@ -210,12 +210,12 @@ export function setMaxHp(combat, id, value) {
       hpCurrent,
       isDead: isMonster ? hpCurrent === 0 : combatant.isDead && hpCurrent === 0,
     };
-    // Linked PC: max HP is sheet-derived, so persist the change as a maxHPBonus
-    // delta (base max is constant, so ΔmaxHP === ΔmaxHPBonus). Outbound sync then
-    // writes maxHPBonus and the sheet re-derives the same max.
-    if (combatant.type === 'player' && combatant.sourceId) {
-      next.maxHPBonus = numberOr(combatant.maxHPBonus, 0) + (hpMax - numberOr(combatant.hpMax, hpMax));
-    }
+    // Track the change as a maxHPBonus delta so base max (hpMax - maxHPBonus)
+    // stays recoverable for the "Max+" control. Base max is constant, so
+    // ΔmaxHP === ΔmaxHPBonus. For linked PCs this also drives outbound sync,
+    // which writes maxHPBonus so the sheet re-derives the same max; for monsters
+    // it's inert bookkeeping (they never sync).
+    next.maxHPBonus = numberOr(combatant.maxHPBonus, 0) + (hpMax - numberOr(combatant.hpMax, hpMax));
     return next;
   });
 }

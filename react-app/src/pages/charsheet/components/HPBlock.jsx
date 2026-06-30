@@ -1,61 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
-import { Box, Typography, IconButton, TextField, Button, Tooltip } from '@mui/material';
-import { HeartPulse, Plus, Minus, Sparkles, Skull } from 'lucide-react';
+import { Box, Typography, TextField, Button, Tooltip } from '@mui/material';
+import { HeartPulse, Sparkles, Skull } from 'lucide-react';
+import HpStepper from '../../../shared/character/HpStepper.jsx';
 import { EXHAUSTION_MAX } from '../logic/calculations.js';
 
 const CINZEL = '"Cinzel", Georgia, serif';
-
-const amt = (str) => Math.max(1, parseInt(str, 10) || 1);
-
-// Small +/− button used by every stepper row.
-function StepBtn({ onClick, color, label, children }) {
-  return (
-    <IconButton
-      size="small"
-      onClick={onClick}
-      aria-label={label}
-      sx={{ width: 22, height: 22, border: 1, borderColor: color || 'divider', color: color || 'text.secondary', borderRadius: 1 }}
-    >
-      {children}
-    </IconButton>
-  );
-}
-
-// Centered integer step-amount field. Selects all on focus so you can type
-// immediately without clearing the previous value first.
-function AmountField({ value, onChange }) {
-  return (
-    <TextField
-      size="small"
-      value={value}
-      onChange={(e) => {
-        const v = e.target.value;
-        if (v === '' || /^\d*$/.test(v)) onChange(v);
-      }}
-      onFocus={(e) => e.target.select()}
-      slotProps={{ htmlInput: { inputMode: 'numeric', 'aria-label': 'Step amount', style: { textAlign: 'center' } } }}
-      sx={{
-        width: 46,
-        '& input': { py: 0.25, fontSize: '0.72rem', fontFamily: CINZEL, fontWeight: 600 },
-      }}
-    />
-  );
-}
-
-// Stepper group: + [amount] − (order requested by the design).
-function Stepper({ amount, onAmount, onPlus, onMinus, plusColor, minusColor, plusLabel, minusLabel }) {
-  return (
-    <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.3 }}>
-      <StepBtn onClick={() => onPlus(amt(amount))} color={plusColor} label={plusLabel}>
-        <Plus size={12} />
-      </StepBtn>
-      <AmountField value={amount} onChange={onAmount} />
-      <StepBtn onClick={() => onMinus(amt(amount))} color={minusColor} label={minusLabel}>
-        <Minus size={12} />
-      </StepBtn>
-    </Box>
-  );
-}
 
 const chipSx = {
   border: 1,
@@ -174,7 +123,8 @@ export default function HPBlock({
             {sheet.maxHP}
           </Typography>
         </Box>
-        <Stepper
+        <HpStepper
+          variant="sheet"
           amount={hpAmt}
           onAmount={setHpAmt}
           onPlus={(n) => onHeal(n)}
@@ -202,7 +152,8 @@ export default function HPBlock({
             </Box>
           )}
         </Box>
-        <Stepper
+        <HpStepper
+          variant="sheet"
           amount={tempAmt}
           onAmount={setTempAmt}
           onPlus={(n) => onTempHP(n)}
@@ -228,7 +179,8 @@ export default function HPBlock({
             </Box>
           )}
         </Box>
-        <Stepper
+        <HpStepper
+          variant="sheet"
           amount={modAmt}
           onAmount={setModAmt}
           onPlus={(n) => onMaxHPBonus(n)}

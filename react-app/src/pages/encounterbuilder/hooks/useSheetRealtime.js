@@ -55,7 +55,15 @@ export function useSheetRealtime({ view, combat, dispatch, sheetSync }) {
         const patch = sheetVitalsToSheetPatch(vitals);
         const combatant = findLinkedCombatant(combatRef.current, charId);
         if (!combatant) return;
-        if (sheetSyncRef.current?.isOutboundEcho?.(charId, patch) && sameHpMax(combatant, vitals)) {
+        // Echo handling for max HP. `isOutboundEcho` means these vitals reflect a
+        // write of ours. Normally suppress it. The one exception is a base-max
+        // change on the sheet (level-up / CON change): same maxHPBonus but a
+        // different derived maxHP — that we must adopt. A *stale* echo of an older
+        // maxHPBonus (local already clicked ahead) has a DIFFERENT bonus and must
+        // stay suppressed, or the modifier bounces back to the old value.
+        const sameBonus = Number(combatant.maxHPBonus || 0) === Number(vitals.maxHPBonus || 0);
+        const baseMaxChanged = sameBonus && !sameHpMax(combatant, vitals);
+        if (sheetSyncRef.current?.isOutboundEcho?.(charId, patch) && !baseMaxChanged) {
           return;
         }
         sheetSyncRef.current?.markCharacterSynced?.(charId, patch);

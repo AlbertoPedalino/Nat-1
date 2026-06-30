@@ -1,14 +1,17 @@
 import { useState } from 'react';
 import { Avatar, Box, Button, IconButton, LinearProgress, Paper, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import { alpha } from '@mui/material/styles';
-import { ExternalLink, Minus, Plus, X } from 'lucide-react';
+import { ExternalLink, X } from 'lucide-react';
+import HpStepper from '../../../shared/character/HpStepper.jsx';
 import { campaignSheetUrl } from '../logic/campaignSheetUrl.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import MonsterToken from './MonsterToken.jsx';
 
 export default function CombatantCard({ combatant, active }) {
   const { dispatch } = useEncounterBuilder();
-  const [delta, setDelta] = useState(5);
+  const [hpAmt, setHpAmt] = useState('5');
+  const [tempAmt, setTempAmt] = useState('5');
+  const [modAmt, setModAmt] = useState('5');
   const isMonster = combatant.type === 'monster';
   const hpPct = combatant.hpMax ? Math.max(0, Math.round((combatant.hpCurrent / combatant.hpMax) * 100)) : 100;
   const isDown = !isMonster && combatant.hpCurrent === 0 && Boolean(combatant.deathSaves);
@@ -108,14 +111,15 @@ export default function CombatantCard({ combatant, active }) {
           </Stack>
         </Box>
 
-        {/* HP cluster: current/max + bar (or death saves when down), heal/damage controls */}
+        {/* HP panel: value + [amount] − stepper per row (mirrors the sheet HP block) */}
         <Box sx={hpRowSx}>
-          <Box sx={hpColumnSx}>
-            <Box sx={hpValueRowSx}>
-              {isDown ? (
-                <DeathSaves combatant={combatant} />
-              ) : (
-                <>
+          {isDown ? (
+            <DeathSaves combatant={combatant} />
+          ) : (
+            <>
+              {/* Current / Max + heal / damage */}
+              <Box sx={hpPanelRowSx}>
+                <Box sx={hpValueRowSx}>
                   <HpField
                     label="HP"
                     value={combatant.hpCurrent}
@@ -127,42 +131,63 @@ export default function CombatantCard({ combatant, active }) {
                     value={combatant.hpMax}
                     onChange={(value) => dispatch({ type: 'setMaxHp', id: combatant.id, value })}
                   />
-                  <HpField
-                    label="Temp"
-                    value={combatant.tempHP ?? 0}
-                    onChange={(value) => dispatch({ type: 'setTempHp', id: combatant.id, value })}
-                  />
-                </>
-              )}
-            </Box>
-            {!isDown ? (
+                </Box>
+                <HpStepper
+                  amount={hpAmt}
+                  onAmount={setHpAmt}
+                  onPlus={(n) => dispatch({ type: 'modifyHp', id: combatant.id, delta: n })}
+                  onMinus={(n) => dispatch({ type: 'modifyHp', id: combatant.id, delta: -n })}
+                  plusColor="success.main"
+                  minusColor="error.main"
+                  plusLabel="Heal"
+                  minusLabel="Damage"
+                />
+              </Box>
+
+              {/* Temp HP */}
+              <Box sx={hpPanelRowSx}>
+                <HpField
+                  label="Temp"
+                  value={combatant.tempHP ?? 0}
+                  onChange={(value) => dispatch({ type: 'setTempHp', id: combatant.id, value })}
+                />
+                <HpStepper
+                  amount={tempAmt}
+                  onAmount={setTempAmt}
+                  onPlus={(n) => dispatch({ type: 'setTempHp', id: combatant.id, value: (Number(combatant.tempHP) || 0) + n })}
+                  onMinus={(n) => dispatch({ type: 'setTempHp', id: combatant.id, value: (Number(combatant.tempHP) || 0) - n })}
+                  plusLabel="Add temp HP"
+                  minusLabel="Remove temp HP"
+                />
+              </Box>
+
+              {/* Max HP modifier (delta over base max; works for PCs and monsters) */}
+              <Box sx={hpPanelRowSx}>
+                <HpField
+                  label="Max mod"
+                  value={combatant.maxHPBonus ?? 0}
+                  onChange={(value) => {
+                    const base = (Number(combatant.hpMax) || 0) - (Number(combatant.maxHPBonus) || 0);
+                    dispatch({ type: 'setMaxHp', id: combatant.id, value: base + (Number(value) || 0) });
+                  }}
+                />
+                <HpStepper
+                  amount={modAmt}
+                  onAmount={setModAmt}
+                  onPlus={(n) => dispatch({ type: 'setMaxHp', id: combatant.id, value: (Number(combatant.hpMax) || 0) + n })}
+                  onMinus={(n) => dispatch({ type: 'setMaxHp', id: combatant.id, value: (Number(combatant.hpMax) || 0) - n })}
+                  plusLabel="Increase max HP"
+                  minusLabel="Decrease max HP"
+                />
+              </Box>
+
               <LinearProgress
                 variant="determinate"
                 value={hpPct}
                 sx={{ ...hpBarSx, '& .MuiLinearProgress-bar': { bgcolor: hpColor(hpPct) } }}
               />
-            ) : null}
-          </Box>
-          <Box sx={hpControlsSx}>
-            <Tooltip title="Heal">
-              <IconButton color="success" onClick={() => dispatch({ type: 'modifyHp', id: combatant.id, delta: Number(delta) || 1 })}>
-                <Plus size={16} />
-              </IconButton>
-            </Tooltip>
-            <TextField
-              size="small"
-              type="number"
-              value={delta}
-              onChange={(event) => setDelta(event.target.value)}
-              onFocus={selectInputText}
-              sx={{ width: 70, flex: '0 0 auto' }}
-            />
-            <Tooltip title="Damage">
-              <IconButton color="error" onClick={() => dispatch({ type: 'modifyHp', id: combatant.id, delta: -(Number(delta) || 1) })}>
-                <Minus size={16} />
-              </IconButton>
-            </Tooltip>
-          </Box>
+            </>
+          )}
         </Box>
       </Box>
     </Paper>
@@ -279,7 +304,14 @@ const sheetLinkButtonSx = {
 
 const metaLineSx = { fontSize: '0.72rem' };
 
-const hpColumnSx = { display: 'flex', flexDirection: 'column', gap: 0.4, flex: '0 0 auto' };
+const hpPanelRowSx = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: 1,
+  flexWrap: 'wrap',
+  rowGap: 0.6,
+};
 
 const hpValueRowSx = { display: 'flex', alignItems: 'center', gap: 0.5 };
 
@@ -294,8 +326,6 @@ const hpBarSx = {
   bgcolor: 'rgba(255,255,255,0.08)',
 };
 
-const hpControlsSx = { display: 'flex', alignItems: 'center', gap: 0.25, flex: '0 0 auto' };
-
 const cardSx = {
   position: 'relative',
   p: 0.9,
@@ -307,12 +337,9 @@ const cardSx = {
 
 const hpRowSx = {
   display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  flexWrap: 'wrap',
-  rowGap: 0.8,
-  columnGap: 1.5,
-  flex: '1 1 360px',
+  flexDirection: 'column',
+  gap: 0.7,
+  flex: '1 1 300px',
   minWidth: 0,
   '& .MuiInputBase-input': {
     py: 0.6,
@@ -320,11 +347,6 @@ const hpRowSx = {
   },
   '& .MuiInputLabel-root': {
     fontSize: '0.78rem',
-  },
-  '& .MuiIconButton-root': {
-    width: 30,
-    height: 30,
-    flex: '0 0 auto',
   },
 };
 
