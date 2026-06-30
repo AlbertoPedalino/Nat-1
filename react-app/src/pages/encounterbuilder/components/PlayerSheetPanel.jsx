@@ -58,7 +58,6 @@ export default function PlayerSheetPanel({ selection, onClose }) {
       </Box>
       <Divider />
       <Box sx={playerBodySx}>
-        <PlayerCombatSummary combatant={combatant} />
         {sourceId ? (
           <Box sx={sheetFrameSx}>
             <CampaignSheetView sheetId={sourceId} editable embedded />
@@ -74,31 +73,6 @@ export default function PlayerSheetPanel({ selection, onClose }) {
       </Box>
     </>
   );
-}
-
-function PlayerCombatSummary({ combatant }) {
-  return (
-    <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
-      <SummaryItem label="AC" value={combatant.ac ?? '-'} />
-      <SummaryItem label="HP" value={`${combatant.hpCurrent ?? 0} / ${combatant.hpMax ?? 0}`} />
-      <SummaryItem label="Init" value={formatSigned(combatant.initMod)} />
-      <SummaryItem label="Rolled" value={combatant.initiative ?? '-'} />
-    </Stack>
-  );
-}
-
-function SummaryItem({ label, value }) {
-  return (
-    <Box sx={summaryItemSx}>
-      <Typography variant="caption" color="text.secondary">{label}</Typography>
-      <Typography fontWeight={800}>{value}</Typography>
-    </Box>
-  );
-}
-
-function formatSigned(value) {
-  const number = Number(value) || 0;
-  return number >= 0 ? `+${number}` : String(number);
 }
 
 const playerHeaderSx = {
@@ -125,16 +99,6 @@ const closeButtonSx = {
   position: 'absolute',
   top: 8,
   right: 8,
-};
-
-const summaryItemSx = {
-  px: 1.25,
-  py: 0.75,
-  minWidth: 84,
-  border: '1px solid',
-  borderColor: 'divider',
-  borderRadius: 1,
-  bgcolor: 'rgba(255,255,255,0.025)',
 };
 
 const sheetFrameSx = {
