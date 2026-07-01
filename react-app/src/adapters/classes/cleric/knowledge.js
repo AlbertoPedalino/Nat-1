@@ -143,7 +143,7 @@ registerSubclassAdapter("Cleric_Knowledge", function (cls, lv, specs) {
 // [SheetRuntime] START
 registerSubclassSheetActions("Cleric_Knowledge", [
   {
-    "name": "Channel: Mind Magic",
+    "name": "Mind Magic",
     "icon": "",
     "cat": "action",
     "uses": "1 Channel",

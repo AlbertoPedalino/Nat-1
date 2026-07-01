@@ -133,7 +133,7 @@ registerSubclassSheetActions("Cleric_Light", [
     desc: "Reaction when you are attacked by a creature within 30 ft that you can see: impose Disadvantage on that attack roll, causing light to flare. A creature that can't be Blinded is immune. Uses = WIS modifier (min 1) per Long Rest." },
   { name: "Improved Warding Flare", icon: "", cat: "reaction", uses: "WIS mod / SR+LR", resKey: "warding_flare", minLevel: 6,
     desc: "Warding Flare now recharges on Short or Long Rest. Additionally, you can now use Warding Flare when a creature within 30 ft that you can see attacks a creature other than you." },
-  { name: "Channel: Radiance of the Dawn", icon: "", cat: "action", uses: "1 Channel", resKey: "channel_div",
+  { name: "Radiance of the Dawn", icon: "", cat: "action", uses: "1 Channel", resKey: "channel_div",
     rollers: [{ kind: 'damage', formula: ({ ownerLevel }) => {
       const lv = Number(ownerLevel || 1);
       return `2d10+${lv}`;

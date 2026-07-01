@@ -289,15 +289,6 @@ registerClassSheetActions("Cleric", [
     "desc": "Choose at lv.1 — Protector: proficiency with Martial weapons and Heavy armor; or Thaumaturge: learn one extra Cleric cantrip and gain a bonus equal to your WIS modifier (min +1) to Intelligence (Arcana or Religion) checks."
   },
   {
-    "name": "Channel Divinity",
-    "icon": "",
-    "cat": "action",
-    "uses": "2-4 / SR",
-    "resKey": "channel_div",
-    "minLevel": 2,
-    "desc": "Channel your deity's power. Uses: 2 (lv.2–5), 3 (lv.6–17), 4 (lv.18+). Recharge: Short Rest. Options include Turn Undead and your Domain's feature (see subclass)."
-  },
-  {
     "name": "Turn Undead",
     "icon": "",
     "cat": "action",
@@ -450,6 +441,7 @@ registerClassSheetResources("Cleric", [
   {
     "key": "channel_div",
     "name": "Channel Divinity",
+    "actionGroup": "Channel Divinity",
     "icon": "sun",
     "recharge": "SR",
     "max": (lv)=>lv>=18?4:lv>=6?3:2

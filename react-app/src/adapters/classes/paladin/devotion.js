@@ -125,7 +125,7 @@ registerSubclassAdapter("Paladin_Devotion", function (cls, lv, specs) {});
 
 // [SheetRuntime] START
 registerSubclassSheetActions("Paladin_Devotion", [
-  { name: "Channel: Sacred Weapon", icon: "", cat: "action", uses: "1 Channel", resKey: "paladin_channel_div",
+  { name: "Sacred Weapon", icon: "", cat: "action", uses: "1 Channel", resKey: "paladin_channel_div",
     desc: "When you take the Attack action, expend one use of Channel Divinity to imbue one melee weapon you're holding. For 10 minutes or until you use this feature again: add your CHA modifier (min +1) to attack rolls with that weapon; each hit deals its normal damage type or Radiant damage (your choice per hit); emits Bright Light 20 ft and Dim Light 20 ft beyond. You can end this early (no action). Ends if you aren't carrying the weapon." },
   { name: "Aura of Devotion", icon: "", cat: "action", uses: "Passive", minLevel: 7,
   passive: true,

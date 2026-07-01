@@ -144,7 +144,7 @@ registerSubclassSheetActions("Paladin_Noble Genies", [
     "desc": "Passive: while you aren't wearing armor, your AC equals 10 + DEX modifier + CHA modifier (shield still applies). You gain proficiency in one skill of your choice from Acrobatics, Intimidation, Performance, or Persuasion."
   },
   {
-    "name": "Channel: Elemental Smite",
+    "name": "Elemental Smite",
     "icon": "flame",
     "cat": "action",
     "uses": "1 Channel",

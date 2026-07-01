@@ -180,7 +180,7 @@ registerSubclassSheetActions("Cleric_Life", [
   { name: "Disciple of Life", icon: "", cat: "action", uses: "Passive", minLevel: 3,
   passive: true,
     desc: "When you cast a spell with a spell slot that restores HP to a creature, that creature regains additional HP equal to 2 + the spell slot's level." },
-  { name: "Channel: Preserve Life", icon: "", cat: "action", uses: "1 Channel", resKey: "channel_div",
+  { name: "Preserve Life", icon: "", cat: "action", uses: "1 Channel", resKey: "channel_div",
     inlinePills: ({ ownerLevel }) => [
       { icon: "heart", label: "Pool", value: `${Math.max(1, Number(ownerLevel || 1) * 5)} HP` }
     ],

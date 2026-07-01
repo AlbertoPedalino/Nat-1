@@ -123,9 +123,9 @@ registerSubclassAdapter("Paladin_Glory", function (cls, lv, specs) {});
 
 // [SheetRuntime] START
 registerSubclassSheetActions("Paladin_Glory", [
-  { name: "Channel: Inspiring Smite", icon: "", cat: "bonus", uses: "1 Channel", resKey: "paladin_channel_div",
+  { name: "Inspiring Smite", icon: "", cat: "bonus", uses: "1 Channel", resKey: "paladin_channel_div",
     desc: "Immediately after you cast Divine Smite, expend one use of Channel Divinity (Bonus Action) to distribute Temporary HP equal to 2d8 + your Paladin level among yourself and creatures of your choice within 30 ft." },
-  { name: "Channel: Peerless Athlete", icon: "", cat: "bonus", uses: "1 Channel", resKey: "paladin_channel_div",
+  { name: "Peerless Athlete", icon: "", cat: "bonus", uses: "1 Channel", resKey: "paladin_channel_div",
     desc: "Bonus Action: expend one use of Channel Divinity. For 1 hour, gain Advantage on STR (Athletics) and DEX (Acrobatics) checks, and your Long and High Jump distances increase by 10 ft (costs movement as normal)." },
   { name: "Aura of Alacrity", icon: "", cat: "action", uses: "Passive", minLevel: 7,
   passive: true,

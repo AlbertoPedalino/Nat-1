@@ -123,7 +123,7 @@ registerSubclassAdapter("Paladin_Ancients", function (cls, lv, specs) {});
 
 // [SheetRuntime] START
 registerSubclassSheetActions("Paladin_Ancients", [
-  { name: "Channel: Nature's Wrath", icon: "", cat: "action", uses: "1 Channel", resKey: "paladin_channel_div",
+  { name: "Nature's Wrath", icon: "", cat: "action", uses: "1 Channel", resKey: "paladin_channel_div",
     desc: "Magic action: expend one use of Channel Divinity to conjure spectral vines. Each creature of your choice you can see within 15 ft must succeed on a STR saving throw (spell save DC) or have the Restrained condition for 1 minute. A Restrained creature repeats the save at the end of each of its turns, ending the effect on a success." },
   { name: "Aura of Warding", icon: "", cat: "action", uses: "Passive", minLevel: 7,
   passive: true,

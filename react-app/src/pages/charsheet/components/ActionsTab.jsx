@@ -175,13 +175,24 @@ export default function ActionsTab({ C, sheet, resources }) {
   const resNameMap = {};
   const resPoolMap = {};
   const resTrackMap = {};
+  const resGroupMap = {};
   getAllResourceDefs(C).forEach(def => {
     if (!def.key) return;
     resMaxMap[def.key] = normalizeResourceMax(def, C);
     resNameMap[def.key] = def.name || def.key;
     resTrackMap[def.key] = def.track || 'remaining';
     if (def.pool) resPoolMap[def.key] = true;
+    // Resources that group their consuming actions under one label (e.g. Channel
+    // Divinity) prefix each option's card name "<group>: <option>"; the generic
+    // holder card is dropped from the adapter data (its rules stay in Features).
+    if (def.actionGroup) resGroupMap[def.key] = def.actionGroup;
   });
+
+  const actionDisplayName = (action) => {
+    const group = resGroupMap[action.resKey];
+    if (!group) return action.name;
+    return String(action.name || '').startsWith(group) ? action.name : `${group}: ${action.name}`;
+  };
   adapterActions.forEach((a) => warnDanglingResKey(a, resMaxMap));
 
   const slotRecoverySpent = slotRecovery
@@ -700,6 +711,7 @@ export default function ActionsTab({ C, sheet, resources }) {
                 resMax={resMaxMap[action.resKey]}
                 isPool={resPoolMap[action.resKey]}
                 resTrack={resTrackMap[action.resKey]}
+                displayName={actionDisplayName(action)}
                 colorBarCat={section.cats.includes(action.cat)
                   ? (action._colorBarCat || action.cat)
                   : section.key}
@@ -927,7 +939,7 @@ export default function ActionsTab({ C, sheet, resources }) {
   );
 }
 
-function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, onShowToast, resMax, isPool, resTrack, colorBarCat }) {
+function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, onShowToast, resMax, isPool, resTrack, colorBarCat, displayName }) {
   const barCat = colorBarCat || action._colorBarCat || action.cat;
   const { onUpdateCharacter } = useSheetActions();
   const DetailRenderer = action.detailType ? ACTION_DETAIL_RENDERERS[action.detailType] : null;
@@ -1001,7 +1013,7 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
             <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '3px' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
                 <Typography sx={{ flex: 1, fontSize: '0.78rem', fontWeight: 700, color: 'text.primary', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {action.name}
+                  {displayName || action.name}
                 </Typography>
                 {hasRollers ? (
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px', flexWrap: 'wrap', flexShrink: 0 }}>

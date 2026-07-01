@@ -137,9 +137,9 @@ registerSubclassAdapter("Cleric_War", function (cls, lv, specs) {
 registerSubclassSheetActions("Cleric_War", [
   { name: "War Priest", icon: "", cat: "bonus", uses: "WIS mod / SR+LR", resKey: "war_priest", minLevel: 3,
     desc: "Bonus Action: make one attack with a weapon or Unarmed Strike. Uses = WIS modifier (min 1) per Short or Long Rest." },
-  { name: "Channel: Guided Strike", icon: "", cat: "reaction", uses: "1 Channel", resKey: "channel_div", minLevel: 3,
+  { name: "Guided Strike", icon: "", cat: "reaction", uses: "1 Channel", resKey: "channel_div", minLevel: 3,
     desc: "When you or a creature within 30 ft misses with an attack roll, expend one use of Channel Divinity to add +10 to that roll, potentially causing it to hit. Benefiting another creature's attack roll requires your Reaction." },
-  { name: "Channel: War God's Blessing", icon: "", cat: "reaction", uses: "1 Channel", resKey: "channel_div", minLevel: 6,
+  { name: "War God's Blessing", icon: "", cat: "reaction", uses: "1 Channel", resKey: "channel_div", minLevel: 6,
     desc: "Reaction: when a creature within 30 ft of you makes an attack roll, expend one use of Channel Divinity to grant that creature a +10 bonus to the roll. You make this choice after you see the roll, but before the DM says whether it hits or misses." },
   { name: "Avatar of Battle", icon: "", cat: "action", uses: "Passive", minLevel: 17,
   passive: true,

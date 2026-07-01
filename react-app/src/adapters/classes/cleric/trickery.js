@@ -131,9 +131,9 @@ registerSubclassAdapter("Cleric_Trickery", function (cls, lv, specs) {
 registerSubclassSheetActions("Cleric_Trickery", [
   { name: "Blessing of the Trickster", icon: "", cat: "action", uses: "1 hour or reuse", minLevel: 3,
     desc: "Touch a willing creature other than yourself to give it Advantage on DEX (Stealth) checks. Lasts 1 hour or until you use this feature again." },
-  { name: "Channel: Invoke Duplicity", icon: "", cat: "bonus", uses: "1 Channel / 1 min (C)", resKey: "channel_div",
+  { name: "Invoke Duplicity", icon: "", cat: "bonus", uses: "1 Channel / 1 min (C)", resKey: "channel_div",
     desc: "Bonus Action: expend one use of Channel Divinity to create a perfect visual illusion of yourself in an unoccupied space within 30 ft. Requires Concentration (as if concentrating on a spell). Lasts 1 minute or until dismissed or Incapacitated. Benefits while active — Cast Spells: cast spells as if in the illusion's space (use your own senses); Distract: when both you and the illusion are within 5 ft of a creature that can see the illusion, you have Advantage on attack rolls against it; Move: Bonus Action to move the illusion up to 30 ft (within 120 ft of you)." },
-  { name: "Channel: Cloak of Shadows", icon: "", cat: "action", uses: "1 Channel", resKey: "channel_div", minLevel: 6,
+  { name: "Cloak of Shadows", icon: "", cat: "action", uses: "1 Channel", resKey: "channel_div", minLevel: 6,
     desc: "As an action, expend one use of Channel Divinity to become Invisible until the end of your next turn. You become visible if you make an attack roll or cast a spell." },
   { name: "Improved Duplicity", icon: "", cat: "action", uses: "Passive", minLevel: 17,
   passive: true,

@@ -169,15 +169,6 @@ registerClassSheetActions("Paladin", [
     "desc": "Touch a creature to restore HP from your pool (1 HP per point spent), or spend 5 points to remove the Poisoned condition. Pool = 5 × Paladin level. Recharge: Long Rest."
   },
   {
-    "name": "Channel Divinity",
-    "icon": "",
-    "cat": "action",
-    "uses": "2-3 / SR",
-    "resKey": "paladin_channel_div",
-    "minLevel": 3,
-    "desc": "Subclass-specific option (see your Oath). Uses: 2 (lv.3–10), 3 (lv.11+). Recharge: Short Rest."
-  },
-  {
     "name": "Aura of Protection",
     "icon": "",
     "cat": "action",
@@ -246,6 +237,7 @@ registerClassSheetResources("Paladin", [
   {
     "key": "paladin_channel_div",
     "name": "Channel Divinity",
+    "actionGroup": "Channel Divinity",
     "icon": "sparkles",
     "recharge": "SR",
     "max": (lv)=>lv>=11?3:lv>=3?2:0
