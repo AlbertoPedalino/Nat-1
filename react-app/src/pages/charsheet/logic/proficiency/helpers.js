@@ -1,5 +1,6 @@
 import { installedRegistry } from '../../../../adapters/index.js';
 import { canonicalProficiencyLabel } from '../../../../shared/character/proficiencyDisplay.js';
+import { primaryClassLevel } from '../../../../shared/character/classLevel.js';
 import { isChoicePlaceholderValue } from '../../../../shared/character/typedProficiencies.js';
 import { normKey } from './weaponRules.js';
 
@@ -86,7 +87,7 @@ export function collectAdapterProfGrants(character) {
   collectEntity(
     character?.className || '',
     character?.subclassShortName || '',
-    character?.classLevel || character?.level || 1,
+    primaryClassLevel(character),
     '',
   );
   (character?.extraClasses || []).forEach((extra, index) => {

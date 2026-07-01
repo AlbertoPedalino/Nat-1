@@ -4,6 +4,7 @@ import { Backpack, Check, ChevronDown, ChevronRight, Minus, Package, Plus, Shiel
 import SearchField from '../../../shared/character/SearchField.jsx';
 import { loadItems } from '../../charbuilder/logic/dataLoaders.js';
 import { getFinal } from '../logic/calculations.js';
+import { primaryClassLevel } from '../../../shared/character/classLevel.js';
 import {
   isWeapon,
   canOneHand,
@@ -532,7 +533,7 @@ export default function InventoryTab({ C, sheet }) {
     if (!C) return false;
     const cls = String(C.className || '').toLowerCase();
     const sub = String(C.subclassShortName || '').toLowerCase();
-    const lv = Number(C.classLevel || C.level || 1);
+    const lv = primaryClassLevel(C);
     if (cls === 'artificer' && sub === 'armorer' && lv >= 3) return true;
     return (C.extraClasses || []).some((ec) => String(ec.name || '').toLowerCase() === 'artificer' && String(ec.subclassShortName || '').toLowerCase() === 'armorer' && (ec.level || 1) >= 3);
   }, [C]);

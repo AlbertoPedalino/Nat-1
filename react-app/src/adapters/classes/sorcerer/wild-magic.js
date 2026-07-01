@@ -1,4 +1,5 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
+import { classLevel } from '../../../shared/character/classLevel.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -106,12 +107,7 @@ registerSubclassSheetEffects("Sorcerer_Wild Magic", [
 ]);
 
 function getSorcererLevel(C) {
-  let lv = 0;
-  if (String(C?.className || '').toLowerCase() === 'sorcerer') lv += C?.classLevel || C?.level || 0;
-  (C?.extraClasses || []).forEach(function (ec) {
-    if (String(ec?.name || '').toLowerCase() === 'sorcerer') lv += ec.level || 0;
-  });
-  return lv;
+  return classLevel(C, 'Sorcerer');
 }
 
 if (typeof registerResourceSideEffect === 'function') {

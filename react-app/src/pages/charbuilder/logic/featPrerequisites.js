@@ -1,4 +1,5 @@
 import { collectOwnedFeatNames } from '../../../shared/character/selectedFeats.js';
+import { primaryClassLevel } from '../../../shared/character/classLevel.js';
 import { collectEquipmentProficiencySets } from '../../charsheet/logic/proficiency/index.js';
 import { ARMOR_KIND_KEYS, armorSetTrainsKind } from '../../charsheet/logic/proficiency/armorRules.js';
 import { getWeaponCategory, weaponMatchesRule } from '../../charsheet/logic/proficiency/weaponRules.js';
@@ -48,7 +49,7 @@ function collectFeatureNames(character, slotCategories) {
     });
   };
 
-  const primaryLevel = Number(character?.classLevel || character?.level || 1);
+  const primaryLevel = primaryClassLevel(character);
   addAvailable(character?.allFeatures, primaryLevel);
   addAvailable(character?.allSubFeatures, primaryLevel);
   (character?.extraClasses || []).forEach((extra) => {

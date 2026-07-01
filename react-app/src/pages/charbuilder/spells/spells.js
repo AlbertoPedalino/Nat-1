@@ -81,7 +81,7 @@ export function getSpellcastingProfile(character) {
 }
 
 function getClassSpellLevel(character) {
-  return Math.max(1, Math.min(20, Number(character.classLevel || getPrimaryClassLevel(character) || character.level || 1)));
+  return Math.max(1, Math.min(20, getPrimaryClassLevel(character)));
 }
 
 export function collectAutoGrantedSpells(character) {

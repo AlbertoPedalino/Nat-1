@@ -1,3 +1,5 @@
+import { classLevel } from './classLevel.js';
+
 function norm(value) {
   return String(value || '').split('|')[0].trim().toLowerCase().replace(/[^a-z0-9]/g, '');
 }
@@ -51,13 +53,7 @@ export function warlockHasInvocationInChoices(choices, invocationName) {
 }
 
 export function warlockLevel(character) {
-  if (!character) return 0;
-  var out = 0;
-  if (String(character.className || '').toLowerCase() === 'warlock') out += Number(character.classLevel || character.level || 0);
-  (character.extraClasses || []).forEach(function (ec) {
-    if (String(ec?.name || '').toLowerCase() === 'warlock') out += Number(ec.level || 0);
-  });
-  return out;
+  return classLevel(character, 'Warlock');
 }
 
 export function warlockKnownInvocations(character) {

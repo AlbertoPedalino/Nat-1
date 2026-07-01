@@ -5,6 +5,7 @@ import { extractFixedProficiencyLabels } from '../../../shared/character/typedPr
 import { getFinalAbilityScore } from '../../../shared/character/itemEffects.js';
 import { wildShapeAbilityScore, wildShapeSaveBonus, wildShapeSaveProficient, wildShapeSkillBonus } from '../../../shared/character/wildShapeForm.js';
 import { getProficiencyBonus } from '../../../shared/character/proficiency.js';
+import { primaryClassLevel } from '../../../shared/character/classLevel.js';
 import { XP_THRESHOLDS } from '../../../shared/character/xp.js';
 import { collectSheetEffects } from './sheetEffects.js';
 import { getNormalizedChoices } from '../../../shared/choiceNormalization.js';
@@ -331,7 +332,7 @@ function characterClassEntities(C) {
     out.push({
       className: C.className,
       subclassShortName: C.subclassShortName || '',
-      level: Number(C.classLevel || C.level || 1),
+      level: primaryClassLevel(C),
     });
   }
   (C.extraClasses || []).forEach((extra) => {
@@ -365,7 +366,7 @@ function collectRuntimeEffects(C) {
     ...(serialized.speciesEffects || []),
     ...(serialized.featEffects || []),
   ].forEach((effect) => {
-    const ownerLevel = Number(effect?.ownerLevel || C?.classLevel || C?.level || 1);
+    const ownerLevel = Number(effect?.ownerLevel || primaryClassLevel(C));
     if (ownerLevel >= Number(effect?.minLevel || 1)) effects.push(effect);
   });
 

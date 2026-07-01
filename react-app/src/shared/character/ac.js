@@ -1,6 +1,7 @@
 import { installedRegistry } from '../../adapters/index.js';
 import { getAcBonusEffects } from '../../pages/charsheet/logic/sheetEffects.js';
 import { getActiveWildShape } from './wildShapeForm.js';
+import { primaryClassLevel } from './classLevel.js';
 
 function asArray(value) {
   return Array.isArray(value) ? value : (value == null ? [] : [value]);
@@ -21,7 +22,7 @@ function getAbilityMod(character, ability) {
 }
 
 function ownerLevelOf(character, className, isPrimary) {
-  if (isPrimary) return Number(character?.classLevel || character?.level || 1);
+  if (isPrimary) return primaryClassLevel(character);
   const found = (character?.extraClasses || []).find((e) => norm(e?.name) === norm(className));
   return Number(found?.level || 1);
 }

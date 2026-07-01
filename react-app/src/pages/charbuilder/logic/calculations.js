@@ -10,6 +10,7 @@ import {
 import { computeMaxHp as sharedComputeMaxHp } from '../../../shared/character/hp.js';
 import { getFeatAsiBonus } from '../../../shared/character/abilityBonuses.js';
 import { collectOwnedFeatNames } from '../../../shared/character/selectedFeats.js';
+import { primaryClassLevel } from '../../../shared/character/classLevel.js';
 
 export function formatMod(value) {
   const mod = Math.floor((Number(value || 0) - 10) / 2);
@@ -163,15 +164,9 @@ export function getProficiencyBonus(level) {
   return PROFICIENCY_BONUS[level] || 2;
 }
 
-export function getPrimaryClassLevel(character) {
-  const explicit = Number(character?.classLevel);
-  if (Number.isFinite(explicit) && explicit > 0) return explicit;
-  const total = Number(character?.level || 0) || 1;
-  const extras = (character?.extraClasses || [])
-    .filter((extra) => extra?.name)
-    .reduce((sum, extra) => sum + (Number(extra.level) || 1), 0);
-  return Math.max(1, total - extras);
-}
+// Re-exported from the shared canonical accessor so the builder and sheet share
+// one derivation. Kept as a named export for existing importers.
+export const getPrimaryClassLevel = primaryClassLevel;
 
 export function getSelectedFeatNames(character) {
   return collectOwnedFeatNames(character);

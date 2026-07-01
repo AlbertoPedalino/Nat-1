@@ -10,17 +10,14 @@ import {
   enterWildShapePatch,
   exitWildShapePatch,
 } from '../../../shared/character/wildShapeForm.js';
+import { classLevel } from '../../../shared/character/classLevel.js';
 
 // Sheet panel for the Wild Shape action. Lists the player's known beast forms
 // (chosen in the builder), and transforms into / reverts from one. Transform
 // resolves the beast snapshot, writes it to C.wildShape, swaps in the beast HP
 // pool and Temporary HP — every stat/AC/HP override flows from that one field.
 
-function druidLevel(C) {
-  if (String(C?.className || '').toLowerCase() === 'druid') return Number(C?.classLevel || C?.level || 1);
-  const extra = (C?.extraClasses || []).find((ec) => String(ec?.name || '').toLowerCase() === 'druid');
-  return Number(extra?.level || 0);
-}
+const druidLevel = (C) => classLevel(C, 'Druid');
 
 function knownFormRefs(C) {
   const choices = C?.choices || {};

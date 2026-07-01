@@ -1,4 +1,5 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
+import { classLevel } from '../../../shared/character/classLevel.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -282,11 +283,7 @@ registerClassSheetResources("Sorcerer", [
 if (typeof registerResourceSideEffect === 'function') {
   registerResourceSideEffect('sorc_restoration', function (ctx = {}) {
     const C = ctx.character || ctx.C;
-    let sorcLv = 0;
-    if (String(C?.className || '').toLowerCase() === 'sorcerer') sorcLv += C?.classLevel || C?.level || 0;
-    (C?.extraClasses || []).forEach(function (ec) {
-      if (String(ec?.name || '').toLowerCase() === 'sorcerer') sorcLv += ec.level || 0;
-    });
+    const sorcLv = classLevel(C, 'Sorcerer');
     if (!sorcLv) return null;
     return {
       type: 'recover_resource',
@@ -301,14 +298,7 @@ if (typeof registerResourceSideEffect === 'function') {
     const res = ctx.resources || {};
     const currentSP = Number(res.sorc_pts || 0);
     if (currentSP < 2) return null;
-    const sorcLv = (() => {
-      let lv = 0;
-      if (String(C?.className || '').toLowerCase() === 'sorcerer') lv += C?.classLevel || C?.level || 0;
-      (C?.extraClasses || []).forEach(function (ec) {
-        if (String(ec?.name || '').toLowerCase() === 'sorcerer') lv += ec.level || 0;
-      });
-      return lv;
-    })();
+    const sorcLv = classLevel(C, 'Sorcerer');
     return {
       type: 'create_spell_slot_from_points',
       sourceResourceKey: 'sorc_pts',

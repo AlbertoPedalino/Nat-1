@@ -1,5 +1,6 @@
 import { installedRegistry } from '../../adapters/index.js';
 import { isGrantUnlocked } from './spellGrants.js';
+import { primaryClassLevel } from './classLevel.js';
 
 /**
  * Shared enumeration of auto-granted spells from class/subclass/species runtime
@@ -206,7 +207,7 @@ function classEntities(character) {
     {
       className: character?.className,
       subclassShortName: character?.subclassShortName,
-      level: character?.classLevel || character?.level || 1,
+      level: primaryClassLevel(character),
       allSubFeatures: character?.allSubFeatures || [],
     },
     ...((character?.extraClasses || []).map((ec) => ({

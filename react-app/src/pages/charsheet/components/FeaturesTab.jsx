@@ -7,6 +7,7 @@ import CollapsibleBody from '../../../shared/character/CollapsibleBody.jsx';
 import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
 import { entriesToTextBlocks } from '../../../shared/character/spellEntries.js';
 import { backgroundFeatNames } from '../../../shared/character/selectedFeats.js';
+import { primaryClassLevel } from '../../../shared/character/classLevel.js';
 
 import { ENTITY_COLORS as SOURCE_COLOR } from '../../../shared/entityColors.js';
 
@@ -161,7 +162,7 @@ function collectWarlockInvocationFeatures(C) {
     });
   };
 
-  if (norm(C?.className) === 'warlock') pushForPrefix('', Number(C?.classLevel || C?.level || 1));
+  if (norm(C?.className) === 'warlock') pushForPrefix('', primaryClassLevel(C));
   (C?.extraClasses || []).forEach((extra, index) => {
     if (norm(extra?.name) !== 'warlock') return;
     pushForPrefix(`mc${index}_`, Number(extra?.level || 1));
@@ -252,12 +253,7 @@ function collectValidSubclassFeatures({ features, className, subclassName, level
     .filter((feature) => featurePassesChoiceGates(feature, character, choicePrefix));
 }
 
-function getPrimaryClassLevel(C) {
-  if (Number(C?.classLevel)) return Number(C.classLevel);
-  const total = Number(C?.level || 1);
-  const extraTotal = (C?.extraClasses || []).reduce((sum, extra) => sum + Number(extra?.level || 0), 0);
-  return Math.max(1, total - extraTotal);
-}
+const getPrimaryClassLevel = primaryClassLevel;
 
 function featureIsAvailable(feature, level) {
   if (!feature || feature.isReprinted) return false;

@@ -1,10 +1,11 @@
 import { installedRegistry } from '../../../adapters/index.js';
 import { getFinal, getMod, getPB } from './calculations.js';
+import { primaryClassLevel } from '../../../shared/character/classLevel.js';
 import { resolveScalingFormula } from '../../../shared/character/scalingFormula.js';
 import { rechargesOnRest, isKnownRecharge } from '../../../shared/character/rechargeRules.js';
 import { hasActionRequirement } from '../../../shared/character/choiceUtils.js';
 function resourceOwnerLevel(def, character) {
-  return Number(def?.ownerLevel ?? character?.classLevel ?? character?.level ?? 1);
+  return Number(def?.ownerLevel ?? primaryClassLevel(character));
 }
 
 function resourceAbilityMods(character) {
@@ -51,7 +52,7 @@ function getClassEntities(character) {
     out.push({
       className: character.className,
       subclassShortName: character.subclassShortName || '',
-      level: Number(character.classLevel || character.level || 1),
+      level: primaryClassLevel(character),
       ownerName: character.className,
     });
   }
@@ -117,7 +118,7 @@ function uniqResources(resources) {
 
 function srBlockedByLevel(def, character) {
   if (!def?.srMinLevel) return false;
-  const ownerLevel = Number(def?.ownerLevel ?? character?.classLevel ?? character?.level ?? 1);
+  const ownerLevel = Number(def?.ownerLevel ?? primaryClassLevel(character));
   return ownerLevel < Number(def.srMinLevel);
 }
 
@@ -147,7 +148,7 @@ export function getAllResourceDefs(character) {
 }
 
 export function getTotalHitDice(character) {
-  return (character.classLevel || character.level) + (character.extraClasses || []).reduce((sum, ec) => sum + (ec.level || 1), 0);
+  return primaryClassLevel(character) + (character.extraClasses || []).reduce((sum, ec) => sum + (ec.level || 1), 0);
 }
 
 export function getHitDicePools(character, usedPools = {}, legacyUsed = 0) {
@@ -157,7 +158,7 @@ export function getHitDicePools(character, usedPools = {}, legacyUsed = 0) {
     key: 'primary',
     label: character.className || 'Class',
     faces: getHitDieFaces(character.clsSnapshot?.hd),
-    total: Math.max(0, Number(character.classLevel || character.level || 1)),
+    total: Math.max(0, primaryClassLevel(character)),
   });
   (character.extraClasses || []).forEach((ec, index) => {
     pools.push({

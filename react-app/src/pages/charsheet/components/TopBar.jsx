@@ -8,6 +8,7 @@ import IconColorPicker from '../../../shared/character/IconColorPicker.jsx';
 import SheetDialog from '../../../shared/character/SheetDialog.jsx';
 import XpDeltaControl from '../../../shared/character/XpDeltaControl.jsx';
 import CloudMenu from '../../../shared/cloud/CloudMenu.jsx';
+import { primaryClassLevel } from '../../../shared/character/classLevel.js';
 
 const CLASS_ICONS = {
   Artificer: Hammer,
@@ -91,7 +92,7 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
   const [customRollOpen, setCustomRollOpen] = useState(false);
   const navigate = useNavigate();
   const extra = C.extraClasses || [];
-  const pLv = C.classLevel || C.level;
+  const pLv = primaryClassLevel(C);
   const sc = C.subclassShortName ? ` (${C.subclassShortName})` : '';
   const race = C.speciesName || '';
   const bg = C.backgroundName || '';

@@ -1,4 +1,5 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
+import { classLevel } from '../../../shared/character/classLevel.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -267,11 +268,7 @@ registerClassSheetResources("Wizard", [
 if (typeof registerResourceSideEffect === 'function') {
   registerResourceSideEffect('arc_recovery', function (ctx = {}) {
     const C = ctx.character || ctx.C;
-    let wizLv = 0;
-    if (String(C?.className || '').toLowerCase() === 'wizard') wizLv += C?.classLevel || C?.level || 0;
-    (C?.extraClasses || []).forEach(function (ec) {
-      if (String(ec?.name || '').toLowerCase() === 'wizard') wizLv += ec.level || 0;
-    });
+    const wizLv = classLevel(C, 'Wizard');
     if (!wizLv) return null;
     const budget = Math.ceil(wizLv / 2);
     return {

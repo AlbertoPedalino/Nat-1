@@ -21,6 +21,7 @@ import {
   parseBeastRef,
   wildShapeKnownFormsLimit,
 } from '../../../shared/character/beasts.js';
+import { classLevel } from '../../../shared/character/classLevel.js';
 
 // Wild Shape known-forms picker. Mirrors the Replicate Magic Item flow: the
 // player builds a personal list of beasts (filtered to the Wild Shape CR cap for
@@ -28,11 +29,7 @@ import {
 // the sheet resolves the active form from the same list.
 
 function druidLevel(character) {
-  if (String(character?.className || '').toLowerCase() === 'druid') {
-    return Number(character?.classLevel || character?.level || 1);
-  }
-  const extra = (character?.extraClasses || []).find((ec) => String(ec?.name || '').toLowerCase() === 'druid');
-  return Number(extra?.level || 0);
+  return classLevel(character, 'Druid');
 }
 
 export default function BeastChoice({ spec, character, dispatch, beasts }) {

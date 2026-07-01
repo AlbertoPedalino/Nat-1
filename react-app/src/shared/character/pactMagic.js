@@ -1,4 +1,5 @@
 import { PACT_SLOTS } from '../../pages/charbuilder/constants.js';
+import { classLevel } from './classLevel.js';
 
 function getPactSlotsForLevel(level) {
   const row = PACT_SLOTS[Math.min(level, 20)] || {};
@@ -6,13 +7,7 @@ function getPactSlotsForLevel(level) {
 }
 
 export function getWarlockLevel(C) {
-  if (!C) return 0;
-  let total = 0;
-  if (String(C.className || '').toLowerCase() === 'warlock') total += Number(C.classLevel || C.level || 0);
-  (C.extraClasses || []).forEach((ec) => {
-    if (String(ec?.name || '').toLowerCase() === 'warlock') total += Number(ec.level || 0);
-  });
-  return total;
+  return classLevel(C, 'Warlock');
 }
 
 export function getPactMagicInfo(C) {

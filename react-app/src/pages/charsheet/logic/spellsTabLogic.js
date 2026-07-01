@@ -12,6 +12,7 @@ import { collectItemAttachedSpells } from '../../../shared/character/itemAttache
 import { isWarlockModifierCantripChoiceKey } from '../../../shared/character/warlockUtils.js';
 import { enumerateFixedAdditionalSpells } from '../../../shared/character/additionalSpellGrants.js';
 import { ENTITY_COLORS, ITEM_ATTUNEMENT, ACTION_COLORS } from '../../../shared/entityColors.js';
+import { primaryClassLevel } from '../../../shared/character/classLevel.js';
 
 /**
  * Spell riders — conditional, character-driven extras attached to a spell row
@@ -721,7 +722,7 @@ function collectAutoGrantedSpells(C) {
 
 function collectAtWillSpells(C) {
   const out = [];
-  const entities = [{ name: C?.className, level: C?.classLevel || C?.level || 1 }, ...(C?.extraClasses || []).map((ec) => ({ name: ec.name, level: ec.level || 1 }))];
+  const entities = [{ name: C?.className, level: primaryClassLevel(C) }, ...(C?.extraClasses || []).map((ec) => ({ name: ec.name, level: ec.level || 1 }))];
   entities.forEach((entity) => {
     (installedRegistry.getClassAtWillSpells(entity.name) || []).forEach((entry) => {
       if (entity.level < Number(entry.minLevel || 1)) return;
@@ -849,7 +850,7 @@ export function resolveDmgBonusValue(C, dmgBonus, getModFn, getFinalFn) {
 
 function spellModifierEntities(C) {
   if (!C) return [];
-  const out = [{ className: C.className, subclassShortName: C.subclassShortName, level: C.classLevel || C.level || 1 }];
+  const out = [{ className: C.className, subclassShortName: C.subclassShortName, level: primaryClassLevel(C) }];
   (C.extraClasses || []).forEach((ec) => out.push({ className: ec.name, subclassShortName: ec.subclassShortName, level: ec.level || 1 }));
   return out.filter((entry) => entry.className);
 }
@@ -1078,7 +1079,7 @@ export function getSpellEntities(C) {
     {
       className: C.className,
       subclassShortName: C.subclassShortName,
-      level: C.classLevel || C.level || 1,
+      level: primaryClassLevel(C),
       snapshot: C.clsSnapshot,
     },
     ...(C.extraClasses || []).map((extra) => ({

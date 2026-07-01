@@ -20,18 +20,14 @@
 // Cannon HP is tracked locally on the character (like the Wild Shape form); it
 // is NOT a synced combat vital — it never touches the player's own HP.
 
+import { classLevel } from './classLevel.js';
+
 export const CANNON_SIZE_LABEL = { S: 'Small', T: 'Tiny' };
 
 // Artificer level (single-class or multiclass) — drives HP, damage scaling and
 // how many cannons may be active.
 export function artificerLevel(C) {
-  if (String(C?.className || '').toLowerCase() === 'artificer') {
-    return Number(C?.classLevel || C?.level || 1);
-  }
-  const extra = (C?.extraClasses || []).find(
-    (ec) => String(ec?.name || '').toLowerCase() === 'artificer',
-  );
-  return Number(extra?.level || 0);
+  return classLevel(C, 'Artificer');
 }
 
 // AC 18 is fixed by the stat block; expose it as a constant for the panel.

@@ -1,4 +1,5 @@
 import { getMod, getFinal, getPB } from './calculations.js';
+import { classLevel, primaryClassLevel } from '../../../shared/character/classLevel.js';
 import { installedRegistry } from '../../../adapters/index.js';
 import { hasActionRequirement } from '../../../shared/character/choiceUtils.js';
 import { getWeaponProficiencyInfo, hasNonProficientArmor } from './proficiencies.js';
@@ -65,7 +66,7 @@ function tagBadge(key, tone, label) {
 
 export function buildActionTags(action, C) {
   const tags = [];
-  const ownerLevel = action.ownerLevel ?? C?.classLevel ?? C?.level ?? 1;
+  const ownerLevel = action.ownerLevel ?? primaryClassLevel(C);
 
   if (action._wildShapeTag) {
     tags.push(tagBadge('wildshape', 'wildShape', 'Wild Shape'));
@@ -115,7 +116,7 @@ function getClassEntities(C) {
     out.push({
       className: C.className,
       subclassShortName: C.subclassShortName || '',
-      level: Number(C.classLevel || C.level || 1),
+      level: primaryClassLevel(C),
       ownerName: C.className,
     });
   }
@@ -187,7 +188,7 @@ function isExecutableAction(action) {
 
 export function resolveActionFormulas(action, C) {
   if (!action) return action;
-  const ownerLv = action.ownerLevel ?? C?.classLevel ?? C?.level ?? 1;
+  const ownerLv = action.ownerLevel ?? primaryClassLevel(C);
   const ctx = { character: C, ownerLevel: ownerLv };
   const patch = {};
 
@@ -405,8 +406,8 @@ export function collectAdapterActions(C, sheet) {
   // only if the live registry produced nothing.
   if (!out.length) {
     const runtime = C?.adapterRuntime || {};
-    pushFiltered((runtime.classActions || []).map((a) => ({ ...a, _runtimeFallback: true })), C?.className || '', C?.classLevel || C?.level || 1);
-    pushFiltered((runtime.subclassActions || []).map((a) => ({ ...a, _runtimeFallback: true })), C?.subclassShortName ? `${C.subclassShortName} (${C.className})` : '', C?.classLevel || C?.level || 1);
+    pushFiltered((runtime.classActions || []).map((a) => ({ ...a, _runtimeFallback: true })), C?.className || '', primaryClassLevel(C));
+    pushFiltered((runtime.subclassActions || []).map((a) => ({ ...a, _runtimeFallback: true })), C?.subclassShortName ? `${C.subclassShortName} (${C.className})` : '', primaryClassLevel(C));
     pushFiltered((runtime.speciesActions || []).map((a) => ({ ...a, _runtimeFallback: true })), C?.speciesName || '', C?.level || 1);
     pushFiltered((runtime.featActions || []).map((a) => ({ ...a, _runtimeFallback: true })), 'Feat', C?.level || 1);
   }
@@ -414,12 +415,6 @@ export function collectAdapterActions(C, sheet) {
   return uniqBySignature(out);
 }
 
-
-function classLevel(C, className) {
-  if (String(C?.className || '').toLowerCase() === String(className).toLowerCase()) return Number(C?.classLevel || C?.level || 1);
-  const extra = (C?.extraClasses || []).find(ec => String(ec?.name || '').toLowerCase() === String(className).toLowerCase());
-  return Number(extra?.level || 0);
-}
 
 function hasFeat(C, name) {
   return (C?.allFeatSnapshots || []).some(f => String(f?.name || '').toLowerCase() === String(name).toLowerCase());

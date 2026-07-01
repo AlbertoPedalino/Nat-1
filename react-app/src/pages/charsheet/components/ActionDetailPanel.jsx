@@ -2,16 +2,14 @@ import { Fragment, useState } from 'react';
 import { Box, Button, Stack, Typography } from '@mui/material';
 import { getRollTable, rollTable } from '../../../shared/character/rollTables.js';
 import { useSheetActions } from '../context/SheetActionsContext.jsx';
+import { classLevel } from '../../../shared/character/classLevel.js';
 
+// Lenient variant: falls back to the TOTAL character level when the character
+// has no levels in `className` (used by generic feature panels that still want a
+// number to scale with). The class lookup itself is the shared one.
 function getClassLevel(C, className) {
   if (!C || !className) return Number(C?.level || 0);
-  const target = String(className).toLowerCase();
-  let lv = 0;
-  if (String(C?.className || '').toLowerCase() === target) lv += Number(C?.classLevel || C?.level || 0);
-  (C?.extraClasses || []).forEach((ec) => {
-    if (String(ec?.name || '').toLowerCase() === target) lv += Number(ec?.level || 0);
-  });
-  return lv || Number(C?.level || 0);
+  return classLevel(C, className) || Number(C?.level || 0);
 }
 
 function FeatureBox({ title, accent, children }) {

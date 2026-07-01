@@ -5,6 +5,7 @@ import { inventoryHasFlag } from '../../../shared/character/choiceUtils.js';
 import { weaponFilterMatches } from '../../../shared/character/weaponFilters.js';
 import { collectOwnedFeatNames } from '../../../shared/character/selectedFeats.js';
 import { isFeatKey, isFeatDetailKey } from '../../../shared/featChoiceKeys.js';
+import { primaryClassLevel } from '../../../shared/character/classLevel.js';
 
 function asArray(value) {
   if (value == null) return [];
@@ -44,7 +45,7 @@ function displayLabel(value) {
 }
 
 function ownerLevelOf(character, className, isPrimary) {
-  if (isPrimary) return Number(character?.classLevel || character?.level || 1);
+  if (isPrimary) return primaryClassLevel(character);
   const found = (character?.extraClasses || []).find((entry) => norm(entry?.name) === norm(className));
   return Number(found?.level || 1);
 }

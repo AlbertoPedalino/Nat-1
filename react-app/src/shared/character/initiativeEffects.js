@@ -1,5 +1,6 @@
 import { collectSheetEffects } from '../../pages/charsheet/logic/sheetEffects.js';
 import { getAllResourceDefs } from '../../pages/charsheet/logic/restResources.js';
+import { primaryClassLevel } from './classLevel.js';
 
 function norm(value) {
   return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -24,7 +25,7 @@ export function resolveInitiativeTriggeredResourceRecoveries(character, resource
 
   effects.forEach((effect) => {
     if (norm(effect.type) !== 'initiativerecovery') return;
-    if (Number(character?.classLevel || character?.level || 1) < Number(effect.minLevel || 1)) return;
+    if (primaryClassLevel(character) < Number(effect.minLevel || 1)) return;
     const resourceKey = effect.resourceKey;
     if (!resourceKey) return;
     if (!modified) next = { ...resources };
@@ -62,7 +63,7 @@ export function collectInitiativeRecoveryEffects(character) {
   if (!character) return [];
   return collectSheetEffects(character).filter((effect) => {
     if (norm(effect.type) !== 'initiativerecovery') return false;
-    if (Number(character?.classLevel || character?.level || 1) < Number(effect.minLevel || 1)) return false;
+    if (primaryClassLevel(character) < Number(effect.minLevel || 1)) return false;
     return true;
   });
 }

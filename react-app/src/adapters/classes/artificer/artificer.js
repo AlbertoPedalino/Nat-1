@@ -4,6 +4,7 @@ import {
   replicateChoiceLabel,
   resolveReplicateChoice,
 } from '../../../shared/character/replicateMagicItem.js';
+import { primaryClassLevel } from '../../../shared/character/classLevel.js';
 
 const _REPLICATE_BUCKET_LABEL = Object.fromEntries(REPLICATE_BUCKETS.map((b) => [b.id, b.label]));
 
@@ -331,7 +332,7 @@ registerClassSheetActions("Artificer", [
     "noDescription": true,
     detailType: 'createdItems',
     detail: ({ action, character }) => {
-      const lv = Number(action?.ownerLevel || character?.classLevel || character?.level || 1);
+      const lv = Number(action?.ownerLevel || primaryClassLevel(character));
       const choices = character?.choices || {};
       let plans = [];
       for (const [k, v] of Object.entries(choices)) {

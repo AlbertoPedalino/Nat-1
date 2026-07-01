@@ -54,6 +54,7 @@ import { ItemPropertyTable } from '../../../shared/character/ItemPropertyTable.j
 import { formatRollTitle } from '../../../shared/character/dice.js';
 import RollerButtons from '../../../shared/character/RollerButtons.jsx';
 import { CHIP_TONES, chipToneStyle } from '../../../shared/entityColors.js';
+import { classLevel } from '../../../shared/character/classLevel.js';
 import { getPactSlotUsed, getPactSlotUsedKey, getRegularSlotUsed } from '../../../shared/character/spellSlots.js';
 
 const ACTION_DETAIL_RENDERERS = {
@@ -352,7 +353,7 @@ export default function ActionsTab({ C, sheet, resources }) {
       const res = { ...resources };
       const beforeWS = Number(res.wild_shape || 0);
       const slotsData = getSheetSlots(C);
-      const druidLv = (() => { let lv=0; if (String(C?.className||'').toLowerCase()==='druid') lv+=C?.classLevel||C?.level||0; (C?.extraClasses||[]).forEach(e=>{if(String(e?.name||'').toLowerCase()==='druid') lv+=e.level||0;}); return lv; })();
+      const druidLv = classLevel(C, 'Druid');
       const maxWS = druidLv >= 17 ? 4 : druidLv >= 6 ? 3 : 2;
       res.wild_shape = Math.min(maxWS, beforeWS + 1);
       setResources(res);

@@ -1,4 +1,5 @@
 import { weaponMatchesRule } from './proficiencies.js';
+import { classLevel } from '../../../shared/character/classLevel.js';
 
 export const BLADESONG_ELIGIBILITY_RULE = {
   type: "M",
@@ -8,15 +9,6 @@ export const BLADESONG_ELIGIBILITY_RULE = {
 
 function bladesingerSubclasses() {
   return new Set(['bladesinger', 'bladesinging']);
-}
-
-function classLevel(C, className) {
-  if (String(C?.className || '').toLowerCase() === String(className).toLowerCase())
-    return Number(C?.classLevel || C?.level || 1);
-  const extra = (C?.extraClasses || []).find(ec =>
-    String(ec?.name || '').toLowerCase() === String(className).toLowerCase()
-  );
-  return Number(extra?.level || 0);
 }
 
 function isWizardBladesingerAtLevel(C, level) {
