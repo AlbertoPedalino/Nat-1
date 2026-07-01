@@ -1,5 +1,6 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
 import { getArtificerConditionalBonusToolCount } from './artificerTools.js';
+import { getActiveCannons } from '../../../shared/character/eldritchCannonForm.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -143,6 +144,11 @@ registerSubclassSheetActions("Artificer_Artillerist", [
     "uses": "1 / LR",
     "resKey": "eldritch_cannon",
     "minLevel": 3,
+    detailType: 'eldritchCannon',
+    _alsoFilters: ['bonus', { key: 'reaction', minLevel: 9 }],
+    // Creating the cannon costs an Action, so the card always lives under
+    // Actions; its Bonus/Reaction options only exist while a cannon is active.
+    _alsoFiltersCondition: (C) => getActiveCannons(C).length > 0,
     "desc": "Action: conjure a Small or Tiny Eldritch Cannon within 5 ft (or in your hand if Tiny). Choose type: Flamethrower (15 ft cone, DEX save = spell DC, 2d8 fire, half on success), Force Ballista (ranged spell attack, 2d8 force, pushed 5 ft), Protector (you + allies within 10 ft gain THP = 1d8 + INT mod). Bonus Action each turn to activate. Lasts 1 hour or until destroyed (AC 18, HP = 5 × Artificer level). 1/LR or expend a spell slot. At lv.15 (Fortified Position): can have 2 active simultaneously."
   },
   {

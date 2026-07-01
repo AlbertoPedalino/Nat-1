@@ -1,4 +1,5 @@
 import { dismissWildCompanionPatch } from './wildCompanionForm.js';
+import { dismissAllCannonsPatch, getActiveCannons } from './eldritchCannonForm.js';
 
 // Character-level fields reset when a Long Rest is finished.
 //
@@ -11,5 +12,7 @@ export function longRestCharacterPatch(C) {
   const patch = {};
   // Druid Wild Companion familiar (XPHB 2024) vanishes on a Long Rest.
   if (C?.wildCompanion) Object.assign(patch, dismissWildCompanionPatch());
+  // Artillerist Eldritch Cannons (EFA) last at most 1 hour — none survive a rest.
+  if (getActiveCannons(C).length) Object.assign(patch, dismissAllCannonsPatch());
   return patch;
 }

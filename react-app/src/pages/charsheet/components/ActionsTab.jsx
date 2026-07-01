@@ -39,6 +39,7 @@ import ActionDetailPanel from './ActionDetailPanel.jsx';
 import CreatedItemsPanel from './CreatedItemsPanel.jsx';
 import WildShapePanel from './WildShapePanel.jsx';
 import WildCompanionPanel from './WildCompanionPanel.jsx';
+import EldritchCannonPanel from './EldritchCannonPanel.jsx';
 import AttackRollButton from './AttackRollButton.jsx';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 import { useSheetActions } from '../context/SheetActionsContext.jsx';
@@ -60,6 +61,7 @@ const ACTION_DETAIL_RENDERERS = {
   createdItems: CreatedItemsPanel,
   wildShape: WildShapePanel,
   wildCompanion: WildCompanionPanel,
+  eldritchCannon: EldritchCannonPanel,
 };
 
 const _danglingResKeyWarned = typeof Set === 'function' ? new Set() : null;
@@ -146,7 +148,25 @@ export default function ActionsTab({ C, sheet, resources }) {
     .filter(section => filter === 'all' || filter === section.key)
     .map(section => ({
       ...section,
-      actions: adapterActions.filter(action => section.cats.includes(action.cat) && matchesSearch(action)),
+      actions: adapterActions.filter(action => {
+        const inPrimary = section.cats.includes(action.cat);
+        // A card whose panel hosts other action types (e.g. Eldritch Cannon's
+        // bonus-action firing + reaction Detonate) surfaces under those filters
+        // too, but only when that filter is active so it isn't duplicated in All.
+        // Entries may be a bare section key or { key, minLevel } to gate a type
+        // that unlocks later (Detonate is a Reaction only from level 9). An
+        // optional _alsoFiltersCondition(C, sheet) gates the whole card by
+        // runtime state (Eldritch Cannon only hosts bonus/reaction while active).
+        const extraAllowed = filter !== 'all'
+          && (typeof action._alsoFiltersCondition !== 'function' || action._alsoFiltersCondition(C, sheet));
+        const inExtra = extraAllowed && (action._alsoFilters || []).some((f) => {
+          const key = typeof f === 'string' ? f : f.key;
+          if (key !== section.key) return false;
+          const min = typeof f === 'string' ? 0 : Number(f.minLevel || 0);
+          return Number(action.ownerLevel || 0) >= min;
+        });
+        return (inPrimary || inExtra) && matchesSearch(action);
+      }),
     }))
     .filter(section => section.actions.length > 0);
 
@@ -679,6 +699,9 @@ export default function ActionsTab({ C, sheet, resources }) {
                 resMax={resMaxMap[action.resKey]}
                 isPool={resPoolMap[action.resKey]}
                 resTrack={resTrackMap[action.resKey]}
+                colorBarCat={section.cats.includes(action.cat)
+                  ? (action._colorBarCat || action.cat)
+                  : section.key}
               />
             ))}
           </Box>
@@ -903,7 +926,8 @@ export default function ActionsTab({ C, sheet, resources }) {
   );
 }
 
-function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, onShowToast, resMax, isPool, resTrack }) {
+function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, onShowToast, resMax, isPool, resTrack, colorBarCat }) {
+  const barCat = colorBarCat || action._colorBarCat || action.cat;
   const { onUpdateCharacter } = useSheetActions();
   const DetailRenderer = action.detailType ? ACTION_DETAIL_RENDERERS[action.detailType] : null;
   const hasRes = action.resKey && resources && resources[action.resKey] != null;
@@ -969,8 +993,8 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
       disabled={!hasActionDetails}
       summary={({ toggle, disabled, open }) => (
           <Box onClick={disabled ? undefined : toggle} sx={{ ...spellRowSx, mb: 0, py: '7px', borderRadius: open || hasPersistentRows ? '8px 8px 0 0' : 1, cursor: disabled ? 'default' : 'pointer' }}>
-            {action.cat && CAT_COLORS[action.cat] && (
-              <Box sx={{ width: 6, height: 28, borderRadius: 1, bgcolor: CAT_COLORS[action._colorBarCat || action.cat], flexShrink: 0, opacity: 0.95 }} />
+            {barCat && CAT_COLORS[barCat] && (
+              <Box sx={{ width: 6, height: 28, borderRadius: 1, bgcolor: CAT_COLORS[barCat], flexShrink: 0, opacity: 0.95 }} />
             )}
 
             <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '3px' }}>
@@ -1100,9 +1124,9 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
           {action._item ? <ItemPropertyTable item={action._item} sx={{ mb: '6px' }} /> : null}
           {/* Wild Shape's full rules live in the Features tab; its card shows only
               the transform panel, so suppress the prose (entries + desc) here. */}
-          {hasEntries && action.detailType !== 'wildShape'
+          {hasEntries && action.detailType !== 'wildShape' && action.detailType !== 'eldritchCannon'
             ? <EntryBlocks entries={action.entries} emptyText="" /> : null}
-          {!hasEntries && hasDescription && action.detailType !== 'wildShape'
+          {!hasEntries && hasDescription && action.detailType !== 'wildShape' && action.detailType !== 'eldritchCannon'
             ? <RichText text={action.desc} /> : null}
           {action.choiceKey && onUpdateCharacter ? (
             <ChoicePicker action={action} C={C} onUpdateCharacter={onUpdateCharacter} onShowToast={onShowToast} />

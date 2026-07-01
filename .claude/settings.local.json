@@ -142,7 +142,9 @@
       "Bash(cat README.md)",
       "Bash(cat package.json)",
       "Bash(ls -la .agents)",
-      "Bash(npm ls *)"
+      "Bash(npm ls *)",
+      "Bash(curl -s -o art.json \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/class/class-artificer.json\")",
+      "Bash(curl -s -o obj.json \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/objects.json\")"
     ]
   }
 }
