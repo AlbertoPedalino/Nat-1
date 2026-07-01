@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, Button, Stack, Tab, Tabs, Typography } from '@mui/material';
-import { BookOpen, Library, Swords } from 'lucide-react';
+import { BookOpen, Library, Swords, Dices } from 'lucide-react';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../components/AppTopBar.jsx';
 import SaveInstanceButton from '../../components/SaveInstanceButton.jsx';
+import CustomRollDialog from '../../shared/character/CustomRollDialog.jsx';
 import { useToast } from '../../shared/ToastProvider.jsx';
 import BuilderView from './components/BuilderView.jsx';
 import CombatView from './components/CombatView.jsx';
 import LibraryView from './components/LibraryView.jsx';
 import StatBlockDialog from './components/StatBlockDialog.jsx';
+import EncounterDiceToast, { buildEncounterDiceToast } from './components/EncounterDiceToast.jsx';
 import { resolveInstance } from './logic/storage.js';
 import { EncounterBuilderProvider, useEncounterBuilder } from './state/EncounterBuilderContext.jsx';
 
@@ -38,12 +40,20 @@ export default function EncounterBuilderPage() {
 }
 
 function EncounterBuilderShell({ instance }) {
-  const { state, dispatch, saveInstance, instanceSaved } = useEncounterBuilder();
+  const { state, dispatch, saveInstance, instanceSaved, roll } = useEncounterBuilder();
   const { notify } = useToast();
+  const [customRollOpen, setCustomRollOpen] = useState(false);
+  const [diceToast, setDiceToast] = useState(null);
 
   const handleSaveInstance = () => {
     const entry = saveInstance();
     if (entry) notify('success', 'Encounter instance saved locally.');
+  };
+
+  const handleCustomRoll = (formula) => {
+    // GM roll — generic, no actor attribution.
+    const result = roll(formula, 'Custom Roll', null);
+    if (result) setDiceToast(buildEncounterDiceToast(result));
   };
 
   return (
@@ -58,16 +68,27 @@ function EncounterBuilderShell({ instance }) {
               <Typography variant="h1">Encounter Builder</Typography>
               <Typography variant="body2" color="text.secondary">Instance {instance.id}</Typography>
             </Box>
-            <Tabs
-              value={state.view}
-              onChange={(_, value) => dispatch({ type: 'setView', view: value })}
-              variant="scrollable"
-              allowScrollButtonsMobile
-            >
-              <Tab icon={<BookOpen size={15} />} iconPosition="start" value="builder" label="Builder" />
-              <Tab icon={<Library size={15} />} iconPosition="start" value="library" label="Library" />
-              <Tab icon={<Swords size={15} />} iconPosition="start" value="combat" label="Encounter" disabled={!state.combat} />
-            </Tabs>
+            <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<Dices size={14} />}
+                onClick={() => setCustomRollOpen(true)}
+                sx={{ flexShrink: 0, fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', letterSpacing: '0.08em', color: '#edd48a', borderColor: 'rgba(237,212,138,0.4)' }}
+              >
+                ROLL
+              </Button>
+              <Tabs
+                value={state.view}
+                onChange={(_, value) => dispatch({ type: 'setView', view: value })}
+                variant="scrollable"
+                allowScrollButtonsMobile
+              >
+                <Tab icon={<BookOpen size={15} />} iconPosition="start" value="builder" label="Builder" />
+                <Tab icon={<Library size={15} />} iconPosition="start" value="library" label="Library" />
+                <Tab icon={<Swords size={15} />} iconPosition="start" value="combat" label="Encounter" disabled={!state.combat} />
+              </Tabs>
+            </Stack>
           </Stack>
           {state.view === 'builder' ? <BuilderView /> : null}
           {state.view === 'library' ? <LibraryView /> : null}
@@ -80,6 +101,12 @@ function EncounterBuilderShell({ instance }) {
         </Stack>
       </Box>
       <StatBlockDialog />
+      <CustomRollDialog
+        open={customRollOpen}
+        onClose={() => setCustomRollOpen(false)}
+        onRoll={handleCustomRoll}
+      />
+      {diceToast ? <EncounterDiceToast toast={diceToast} onClose={() => setDiceToast(null)} /> : null}
     </Box>
   );
 }

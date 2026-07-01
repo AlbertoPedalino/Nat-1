@@ -39,10 +39,13 @@ export function EncounterBuilderProvider({ instanceId, instanceSaved, onInstance
     return current.shape ? `${current.name} ${current.shape}${current.label}` : current.name;
   }, [state.combat, state.selectedStatblock]);
 
-  const roll = useCallback((notation, type) => {
+  // `actorOverride` lets a caller force the attribution (pass `null` for a
+  // generic GM roll with no actor). Omit it to default to the selected/current
+  // combatant via getRollActor().
+  const roll = useCallback((notation, type, actorOverride) => {
     const result = rollDice(notation, type);
     if (!result) return null;
-    const actor = getRollActor();
+    const actor = actorOverride !== undefined ? actorOverride : getRollActor();
     dispatch({ type: 'addRoll', roll: result, actor });
     return { ...result, actor };
   }, [getRollActor]);
