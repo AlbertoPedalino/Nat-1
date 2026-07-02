@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Box, Button, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
-import { Sparkles, X } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { useSheetActions } from '../context/SheetActionsContext.jsx';
+import HpPoolBar from '../../../shared/character/HpPoolBar.jsx';
 import SearchField from '../../../shared/character/SearchField.jsx';
 import { filterOptions } from '../../../shared/character/searchText.js';
 import { findFamiliarBeasts } from '../../../shared/character/beasts.js';
@@ -9,10 +10,12 @@ import { WILD_SHAPE_RESOURCE_KEY } from '../../../shared/character/wildShapeForm
 import { getSheetSlots } from '../logic/spellsTabLogic.js';
 import { consumeSlot, getRegularSlotUsed } from '../../../shared/character/spellSlots.js';
 import { rollD20, rollFormula, formatD20Detail, buildD20Meta } from '../../../shared/character/dice.js';
-import { BeastNameLink, BeastStatBlock, BeastPickerRow, panelSx, headerSx, subSx } from './BeastStatBlock.jsx';
+import { BeastNameLink, BeastStatBlock, BeastPickerRow, panelSx, headerSx, subSx, dismissButtonSx } from './BeastStatBlock.jsx';
 import { useBeastsDb } from '../hooks/useBeastsDb.js';
 import {
   getActiveWildCompanion,
+  getWildCompanionHp,
+  setWildCompanionHpPatch,
   summonWildCompanionPatch,
   dismissWildCompanionPatch,
 } from '../../../shared/character/wildCompanionForm.js';
@@ -41,6 +44,7 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
   const beastsDb = useBeastsDb();
   const [query, setQuery] = useState('');
   const [costMode, setCostMode] = useState('ws'); // 'ws' | 'slot'
+  const [hpStep, setHpStep] = useState('1'); // persistent heal/damage step for the familiar HP tracker
 
   const usesLeft = Number(resources?.[WILD_SHAPE_RESOURCE_KEY] ?? 0);
   const regularSlots = useMemo(() => getSheetSlots(character)?.regular || [], [character]);
@@ -92,28 +96,44 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
     onShowToast(label, `${formula} = ${total}`, total, rolls);
   };
 
+  // Apply a signed HP delta to the familiar, resolving/clamping against the latest
+  // state so rapid clicks never race off a stale current value.
+  const applyHpDelta = (delta) => onUpdateCharacter?.((prev) => {
+    const cur = getWildCompanionHp(prev)?.current ?? 0;
+    return { ...prev, ...setWildCompanionHpPatch(prev, cur + delta) };
+  });
+
   if (active) {
     const b = active.beast;
+    const hp = getWildCompanionHp(character);
     return (
       <Box onClick={(e) => e.stopPropagation()} sx={panelSx}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, mb: 0.5 }}>
           <Sparkles size={14} color="#edd48a" />
           <Typography sx={headerSx} component="span">Familiar —</Typography>
           <BeastNameLink name={b.name} source={b.source} sx={headerSx} />
+          <Button size="small" onClick={dismiss} sx={{ ...dismissButtonSx, ml: 'auto' }}>
+            Dismiss familiar
+          </Button>
         </Box>
+        {hp ? (
+          <Box sx={{ mb: 0.6 }}>
+            <HpPoolBar
+              current={hp.current}
+              max={hp.max}
+              onDelta={applyHpDelta}
+              amount={hpStep}
+              onAmount={setHpStep}
+              plusLabel="Heal familiar"
+              minusLabel="Damage familiar"
+              stateLabel="down"
+            />
+          </Box>
+        ) : null}
         <BeastStatBlock b={b} typeLabel="Fey" hpLabel="HP" onRoll={rollCheck} onRollFormula={rollFormulaToast} />
         <Typography sx={{ ...subSx, fontStyle: 'italic', mt: 0.6 }}>
           A Fey spirit; rolls its own Initiative and acts on its own turn. It can't attack, but takes other actions normally. Vanishes when you finish a Long Rest.
         </Typography>
-        <Button
-          size="small"
-          variant="outlined"
-          startIcon={<X size={13} />}
-          onClick={dismiss}
-          sx={{ mt: 0.8, fontSize: '0.7rem', borderColor: 'rgba(202,165,80,0.5)', color: '#edd48a' }}
-        >
-          Dismiss familiar
-        </Button>
       </Box>
     );
   }

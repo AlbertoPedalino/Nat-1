@@ -9,9 +9,9 @@ import { consumeSlot, getRegularSlotUsed } from '../../../shared/character/spell
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import { RichText } from '../../../shared/character/RichText.jsx';
 import RollerButtons from '../../../shared/character/RollerButtons.jsx';
-import HpStepper from '../../../shared/character/HpStepper.jsx';
+import HpPoolBar from '../../../shared/character/HpPoolBar.jsx';
 import AttackRollButton from './AttackRollButton.jsx';
-import { panelSx, headerSx, subSx, rowSx } from './BeastStatBlock.jsx';
+import { panelSx, headerSx, subSx, rowSx, dismissButtonSx } from './BeastStatBlock.jsx';
 import { inlineButtonSx } from './spellsTabStyles.js';
 import { ACTION_COLORS } from '../../../shared/entityColors.js';
 import {
@@ -160,8 +160,6 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
       <Stack spacing={0.8}>
         {cannons.map((cannon, index) => {
           const cur = Math.min(Number(cannon?.hpCurrent ?? maxHp), maxHp);
-          const destroyed = cur <= 0;
-          const hpColor = cur > maxHp / 2 ? '#58b879' : cur > 0 ? '#d69245' : '#c54a3f';
           return (
             <Box key={index} sx={{ ...rowSx, flexDirection: 'column', alignItems: 'stretch', gap: 0.6, p: 0.8 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
@@ -172,33 +170,23 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
                 <Button
                   size="small"
                   onClick={() => dismiss(index)}
-                  sx={{ ml: 'auto', minWidth: 0, px: 0.8, py: 0.1, fontSize: '0.58rem', fontFamily: CINZEL, letterSpacing: '0.04em', color: '#c98a8a' }}
+                  sx={{ ...dismissButtonSx, ml: 'auto' }}
                 >
                   Dismiss
                 </Button>
               </Box>
 
-              {/* HP editor — sheet HP-block style: cur / max + stepper */}
-              <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto', alignItems: 'center', gap: '0.4rem' }}>
-                <Box sx={{ display: 'flex', alignItems: 'baseline', gap: '0.25rem', whiteSpace: 'nowrap', minWidth: 0 }}>
-                  <Typography component="span" sx={{ fontFamily: CINZEL, fontSize: '0.5rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'text.secondary', mr: 0.4 }}>HP</Typography>
-                  <Typography component="span" sx={{ fontFamily: CINZEL, fontSize: '1.25rem', fontWeight: 700, color: hpColor, lineHeight: 1 }}>{cur}</Typography>
-                  <Typography component="span" sx={{ fontFamily: CINZEL, fontSize: '0.85rem', color: 'text.secondary' }}>/</Typography>
-                  <Typography component="span" sx={{ fontFamily: CINZEL, fontSize: '0.85rem', fontWeight: 600, color: 'text.secondary' }}>{maxHp}</Typography>
-                  {destroyed ? <Typography component="span" sx={{ ...subSx, color: '#c98a8a', ml: 0.5 }}>destroyed</Typography> : null}
-                </Box>
-                <HpStepper
-                  variant="sheet"
-                  amount={hpAmt[index] ?? '1'}
-                  onAmount={(v) => setHpAmt((prev) => ({ ...prev, [index]: v }))}
-                  onPlus={(n) => applyHp(index, n)}
-                  onMinus={(n) => applyHp(index, -n)}
-                  plusColor="#58b879"
-                  minusColor="#de675f"
-                  plusLabel="Repair cannon"
-                  minusLabel="Damage cannon"
-                />
-              </Box>
+              {/* HP editor — shared creature HP pool (readout + heal/damage stepper) */}
+              <HpPoolBar
+                current={cur}
+                max={maxHp}
+                onDelta={(d) => applyHp(index, d)}
+                amount={hpAmt[index] ?? '1'}
+                onAmount={(v) => setHpAmt((prev) => ({ ...prev, [index]: v }))}
+                plusLabel="Repair cannon"
+                minusLabel="Damage cannon"
+                stateLabel="destroyed"
+              />
 
               {/* Firing options grouped by action economy */}
               {['bonus', 'reaction'].map((cat) => {

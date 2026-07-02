@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import { Box, Button, Stack, Typography } from '@mui/material';
-import { PawPrint, RotateCcw } from 'lucide-react';
+import { PawPrint } from 'lucide-react';
 import { useSheetActions } from '../context/SheetActionsContext.jsx';
 import { findBeast, parseBeastRef } from '../../../shared/character/beasts.js';
-import { BeastNameLink, BeastStatBlock, BeastPickerRow, panelSx, headerSx, subSx } from './BeastStatBlock.jsx';
+import { BeastNameLink, BeastStatBlock, BeastPickerRow, panelSx, headerSx, subSx, dismissButtonSx } from './BeastStatBlock.jsx';
 import { useBeastsDb } from '../hooks/useBeastsDb.js';
 import {
   getActiveWildShape,
@@ -70,20 +70,14 @@ export default function WildShapePanel({ action, character, sheet, resources, on
           <PawPrint size={14} color="#edd48a" />
           <Typography sx={headerSx} component="span">Transformed —</Typography>
           <BeastNameLink name={b.name} source={b.source} sx={headerSx} />
+          <Button size="small" onClick={revert} sx={{ ...dismissButtonSx, ml: 'auto' }}>
+            Revert to normal form
+          </Button>
         </Box>
         <BeastStatBlock b={b} typeLabel="Beast" hpLabel="Form HP" tempHP={lv} />
         <Typography sx={{ ...subSx, fontStyle: 'italic', mt: 0.6 }}>
           Your own HP, INT/WIS/CHA, features and proficiencies are kept; saves &amp; skills use the higher of your bonus or the form's.
         </Typography>
-        <Button
-          size="small"
-          variant="outlined"
-          startIcon={<RotateCcw size={13} />}
-          onClick={revert}
-          sx={{ mt: 0.8, fontSize: '0.7rem', borderColor: 'rgba(202,165,80,0.5)', color: '#edd48a' }}
-        >
-          Revert to normal form
-        </Button>
       </Box>
     );
   }

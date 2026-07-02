@@ -294,6 +294,24 @@ export const headerSx = {
 
 export const subSx = { fontSize: '0.62rem', color: 'text.secondary' };
 
+// Muted text button for "dismiss / revert" actions on summon-style panels
+// (Wild Companion, Wild Shape, Eldritch Cannon). No outline/icon — a small
+// low-emphasis control so it never competes with the roll/HP controls above it.
+export const dismissButtonSx = {
+  minWidth: 0,
+  flexShrink: 0,
+  px: 0.8,
+  py: 0.1,
+  fontSize: '0.58rem',
+  fontFamily: '"Cinzel", Georgia, serif',
+  letterSpacing: '0.04em',
+  color: '#c98a8a',
+  border: 1,
+  borderColor: 'rgba(201,138,138,0.45)',
+  borderRadius: 1,
+  '&:hover': { borderColor: '#c98a8a', bgcolor: 'rgba(201,138,138,0.1)' },
+};
+
 export const rowSx = {
   display: 'flex',
   alignItems: 'center',
