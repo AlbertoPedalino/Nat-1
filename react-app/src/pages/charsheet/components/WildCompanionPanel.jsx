@@ -9,7 +9,7 @@ import { WILD_SHAPE_RESOURCE_KEY } from '../../../shared/character/wildShapeForm
 import { getSheetSlots } from '../logic/spellsTabLogic.js';
 import { consumeSlot, getRegularSlotUsed } from '../../../shared/character/spellSlots.js';
 import { rollD20, rollFormula, formatD20Detail, buildD20Meta } from '../../../shared/character/dice.js';
-import { BeastNameLink, BeastStatBlock, panelSx, headerSx, subSx, rowSx } from './BeastStatBlock.jsx';
+import { BeastNameLink, BeastStatBlock, BeastPickerRow, panelSx, headerSx, subSx } from './BeastStatBlock.jsx';
 import { useBeastsDb } from '../hooks/useBeastsDb.js';
 import {
   getActiveWildCompanion,
@@ -150,21 +150,17 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
       ) : (
         <Stack spacing={0.5} sx={{ maxHeight: 260, overflow: 'auto' }}>
           {visible.map((beast) => (
-            <Box key={`${beast.name}|${beast.source}`} sx={rowSx}>
-              <Box sx={{ flex: 1, minWidth: 0 }}>
-                <BeastNameLink name={beast.name} source={beast.source} sx={{ fontSize: '0.8rem' }} />
-                <Typography noWrap sx={subSx}>{`CR ${beast.cr} · ${beast.size} · AC ${beast.ac ?? '—'} · HP ${beast.hp.average}`}</Typography>
-              </Box>
-              <Button
-                size="small"
-                variant="outlined"
-                disabled={!canSummon}
-                onClick={() => summon(beast)}
-                sx={{ fontSize: '0.68rem', flexShrink: 0, borderColor: 'rgba(202,165,80,0.5)', color: '#edd48a' }}
-              >
-                Summon
-              </Button>
-            </Box>
+            <BeastPickerRow
+              key={`${beast.name}|${beast.source}`}
+              beast={beast}
+              name={beast.name}
+              source={beast.source}
+              summary={`CR ${beast.cr} · ${beast.size} · AC ${beast.ac ?? '—'} · HP ${beast.hp.average}`}
+              actionLabel="Summon"
+              onAction={() => summon(beast)}
+              actionDisabled={!canSummon}
+              typeLabel="Fey"
+            />
           ))}
           {!visible.length ? <Typography sx={{ ...subSx, fontStyle: 'italic' }}>No matches.</Typography> : null}
         </Stack>

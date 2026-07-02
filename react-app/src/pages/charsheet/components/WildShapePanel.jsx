@@ -3,7 +3,7 @@ import { Box, Button, Stack, Typography } from '@mui/material';
 import { PawPrint, RotateCcw } from 'lucide-react';
 import { useSheetActions } from '../context/SheetActionsContext.jsx';
 import { findBeast, parseBeastRef } from '../../../shared/character/beasts.js';
-import { BeastNameLink, BeastStatBlock, panelSx, headerSx, subSx, rowSx } from './BeastStatBlock.jsx';
+import { BeastNameLink, BeastStatBlock, BeastPickerRow, panelSx, headerSx, subSx } from './BeastStatBlock.jsx';
 import { useBeastsDb } from '../hooks/useBeastsDb.js';
 import {
   getActiveWildShape,
@@ -101,25 +101,21 @@ export default function WildShapePanel({ action, character, sheet, resources, on
       ) : (
         <Stack spacing={0.5}>
           {forms.map(({ ref, beast, parsed }) => (
-            <Box key={ref} sx={rowSx}>
-              <Box sx={{ flex: 1, minWidth: 0 }}>
-                <BeastNameLink name={parsed.name} source={beast?.source || parsed.source} sx={{ fontSize: '0.8rem' }} />
-                {beast ? (
-                  <Typography noWrap sx={subSx}>{`CR ${beast.cr} · ${beast.size} · AC ${beast.ac ?? '—'} · HP ${beast.hp.average}`}</Typography>
-                ) : (
-                  <Typography noWrap sx={{ ...subSx, color: '#c98a8a' }}>Beast data unavailable</Typography>
-                )}
-              </Box>
-              <Button
-                size="small"
-                variant="outlined"
-                disabled={!beast || usesLeft <= 0}
-                onClick={() => transform(beast)}
-                sx={{ fontSize: '0.68rem', flexShrink: 0, borderColor: 'rgba(202,165,80,0.5)', color: '#edd48a' }}
-              >
-                Transform
-              </Button>
-            </Box>
+            <BeastPickerRow
+              key={ref}
+              beast={beast}
+              name={parsed.name}
+              source={beast?.source || parsed.source}
+              summary={beast
+                ? `CR ${beast.cr} · ${beast.size} · AC ${beast.ac ?? '—'} · HP ${beast.hp.average}`
+                : 'Beast data unavailable'}
+              summaryColor={beast ? undefined : '#c98a8a'}
+              actionLabel="Transform"
+              onAction={() => transform(beast)}
+              actionDisabled={!beast || usesLeft <= 0}
+              typeLabel="Beast"
+              hpLabel="Form HP"
+            />
           ))}
         </Stack>
       )}

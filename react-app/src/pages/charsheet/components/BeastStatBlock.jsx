@@ -1,5 +1,6 @@
-import { Box, Link, Typography } from '@mui/material';
-import { ExternalLink } from 'lucide-react';
+import { useState } from 'react';
+import { Box, Button, Collapse, Link, Typography } from '@mui/material';
+import { ChevronDown, ChevronRight, ExternalLink } from 'lucide-react';
 import { SKILLS, getMod } from '../logic/calculations.js';
 import { beast5eToolsUrl, parseBeastActions, parseBeastActionsRich } from '../../../shared/character/beasts.js';
 import { formatRollTitle } from '../../../shared/character/dice.js';
@@ -124,6 +125,58 @@ export function BeastStatBlock({ b, typeLabel = 'Beast', hpLabel = 'HP', tempHP 
       {senses ? <StatLine label="Senses" value={senses} /> : null}
       {traits.length ? <StatSection title="Traits" items={traits} onRoll={onRoll} onRollFormula={onRollFormula} beastName={b.name} /> : null}
       {actions.length ? <StatSection title="Actions" items={actions} onRoll={onRoll} onRollFormula={onRollFormula} beastName={b.name} /> : null}
+    </Box>
+  );
+}
+
+// A beast picker row shared by the Wild Shape and Wild Companion panels: a compact
+// summary line with an action button, that expands on click to preview the full
+// stat block (the same BeastStatBlock shown once the form is active) — letting the
+// player read a form before committing to it. The action button stops propagation
+// so choosing never gets swallowed by the expand toggle. Rows with no resolved
+// `beast` (missing data) aren't expandable.
+export function BeastPickerRow({
+  beast, name, source, summary, summaryColor,
+  actionLabel, onAction, actionDisabled,
+  typeLabel = 'Beast', hpLabel = 'HP',
+}) {
+  const [open, setOpen] = useState(false);
+  const expandable = !!beast;
+  const Chevron = open ? ChevronDown : ChevronRight;
+  return (
+    <Box sx={{ ...rowSx, display: 'block', p: 0, overflow: 'hidden', flexShrink: 0 }}>
+      <Box
+        onClick={expandable ? () => setOpen((o) => !o) : undefined}
+        sx={{
+          display: 'flex', alignItems: 'center', gap: '8px', px: '8px', py: '5px',
+          cursor: expandable ? 'pointer' : 'default',
+          '&:hover': expandable ? { bgcolor: 'rgba(202,165,80,0.06)' } : undefined,
+        }}
+      >
+        {expandable
+          ? <Chevron size={14} color="#9a8f7a" style={{ flexShrink: 0 }} />
+          : <Box sx={{ width: 14, flexShrink: 0 }} />}
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <BeastNameLink name={name} source={source} sx={{ fontSize: '0.8rem' }} />
+          <Typography noWrap sx={summaryColor ? { ...subSx, color: summaryColor } : subSx}>{summary}</Typography>
+        </Box>
+        <Button
+          size="small"
+          variant="outlined"
+          disabled={actionDisabled}
+          onClick={(e) => { e.stopPropagation(); onAction(); }}
+          sx={{ fontSize: '0.68rem', flexShrink: 0, borderColor: 'rgba(202,165,80,0.5)', color: '#edd48a' }}
+        >
+          {actionLabel}
+        </Button>
+      </Box>
+      {expandable ? (
+        <Collapse in={open} unmountOnExit>
+          <Box sx={{ px: '8px', pb: '8px', pt: '2px' }}>
+            <BeastStatBlock b={beast} typeLabel={typeLabel} hpLabel={hpLabel} />
+          </Box>
+        </Collapse>
+      ) : null}
     </Box>
   );
 }
