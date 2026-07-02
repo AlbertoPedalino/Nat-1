@@ -242,25 +242,46 @@ function formatAtkRoll(code) {
   return `${words.join(' or ')} Attack Roll:`;
 }
 
-function stripTags(text) {
-  return String(text || '')
-    // Attack-roll tags first, so they read as prose instead of bare "m 4".
-    .replace(/\{@atkr?\s+([^}]*)\}/gi, (_m, p) => formatAtkRoll(p))
-    .replace(/\{@hit\s+(-?\d+)\}/gi, (_m, n) => (Number(n) >= 0 ? `+${n}` : String(n)))
-    .replace(/\{@h\}/gi, 'Hit: ')
-    // Generic tags: keep the display text, drop any pipe-delimited metadata.
-    .replace(/\{@\w+\s+([^}|]+)(?:\|[^}]*)?\}/g, '$1')
-    .replace(/\{@\w+\}/g, '')
-    .replace(/\s+/g, ' ')
-    .replace(/\s+([,.;:])/g, '$1')
-    .trim();
+const textToken = (text) => ({ type: 'text', text });
+
+// The single source of truth for beast-prose tag semantics: map one inline
+// 5etools tag to display/roll tokens. {@hit N} → a d20 attack-roll pill;
+// {@damage X}/{@dice X} → a dice-formula pill; {@atk(r) …}/{@h} → prose; any
+// other tag → its display text (pipe-delimited metadata dropped). Both the flat
+// stripTags projection and the rich renderer read from here, so they can't drift.
+function beastTagToTokens(tag, arg) {
+  const t = tag.toLowerCase();
+  if (t === 'atk' || t === 'atkr') return [textToken(formatAtkRoll(arg))];
+  if (t === 'h') return [textToken('Hit: ')];
+  if (t === 'hit') {
+    const bonus = Number(arg);
+    return [{ type: 'roll', kind: 'd20', bonus, text: bonus >= 0 ? `+${bonus}` : String(bonus), rollType: 'Attack Roll' }];
+  }
+  if (t === 'damage' || t === 'dice') {
+    const formula = arg.replace(/\s+/g, '');
+    return [{ type: 'roll', kind: 'formula', formula, text: formula, rollType: 'Damage' }];
+  }
+  const display = arg.split('|')[0];
+  return display ? [textToken(display)] : [];
 }
+
+// Prose whitespace tidy: collapse runs and drop any space left before punctuation.
+const tidyProse = (s) => s.replace(/\s+/g, ' ').replace(/\s+([,.;:])/g, '$1');
+
+// Flat, tag-free prose (roll pills flattened to their display text). Derived from
+// the tokenizer so it can never disagree with the interactive rendering.
+function stripTags(rawText) {
+  return tokenizeBeastEntry(rawText).map((tok) => tok.text).join('');
+}
+
+// Flatten an action/trait record's prose entries into one raw (tag-bearing) string.
+const actionEntryText = (action) => (Array.isArray(action?.entries)
+  ? action.entries.filter((e) => typeof e === 'string').join(' ')
+  : '');
 
 export function parseBeastActions(actions) {
   return (actions || []).map((action) => {
-    const text = Array.isArray(action?.entries)
-      ? action.entries.filter((e) => typeof e === 'string').join(' ')
-      : '';
+    const text = actionEntryText(action);
     const hit = text.match(HIT_RE);
     const damage = [...text.matchAll(DAMAGE_RE)].map((m) => m[1].replace(/\s+/g, ''));
     return {
@@ -271,4 +292,46 @@ export function parseBeastActions(actions) {
       isAttack: !!hit,
     };
   });
+}
+
+// Tokenize raw 5etools action/trait prose into a merged, tidied stream of text
+// and inline roll tokens (see beastTagToTokens for the tag mapping). Adjacent text
+// is coalesced and whitespace-tidied so the stream reads as clean prose with the
+// rolls in place. This is the single parser: stripTags is its text projection and
+// parseBeastActionsRich renders the tokens as pills.
+export function tokenizeBeastEntry(rawText) {
+  const src = String(rawText || '');
+  const tagRe = /\{@([^}]+)\}/g;
+  const out = [];
+  const pushText = (text) => {
+    const last = out[out.length - 1];
+    if (last?.type === 'text') last.text += text;
+    else out.push(textToken(text));
+  };
+  let cursor = 0;
+  let m;
+  while ((m = tagRe.exec(src))) {
+    if (m.index > cursor) pushText(src.slice(cursor, m.index));
+    const inner = m[1];
+    const sp = inner.indexOf(' ');
+    const tag = sp === -1 ? inner : inner.slice(0, sp);
+    const arg = sp === -1 ? '' : inner.slice(sp + 1);
+    beastTagToTokens(tag, arg).forEach((tok) => (tok.type === 'text' ? pushText(tok.text) : out.push(tok)));
+    cursor = tagRe.lastIndex;
+  }
+  if (cursor < src.length) pushText(src.slice(cursor));
+
+  // Tidy each text run, then trim the outer edges of the whole stream.
+  out.forEach((tok) => { if (tok.type === 'text') tok.text = tidyProse(tok.text); });
+  if (out[0]?.type === 'text') out[0].text = out[0].text.replace(/^\s+/, '');
+  const last = out[out.length - 1];
+  if (last?.type === 'text') last.text = last.text.replace(/\s+$/, '');
+  return out.filter((tok) => tok.type !== 'text' || tok.text);
+}
+
+export function parseBeastActionsRich(actions) {
+  return (actions || []).map((action) => ({
+    name: String(action?.name || 'Attack'),
+    tokens: tokenizeBeastEntry(actionEntryText(action)),
+  }));
 }

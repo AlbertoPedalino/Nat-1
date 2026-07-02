@@ -8,6 +8,7 @@ import { findFamiliarBeasts } from '../../../shared/character/beasts.js';
 import { WILD_SHAPE_RESOURCE_KEY } from '../../../shared/character/wildShapeForm.js';
 import { getSheetSlots } from '../logic/spellsTabLogic.js';
 import { consumeSlot, getRegularSlotUsed } from '../../../shared/character/spellSlots.js';
+import { rollD20, rollFormula, formatD20Detail, buildD20Meta } from '../../../shared/character/dice.js';
 import { BeastNameLink, BeastStatBlock, panelSx, headerSx, subSx, rowSx } from './BeastStatBlock.jsx';
 import { useBeastsDb } from '../hooks/useBeastsDb.js';
 import {
@@ -36,7 +37,7 @@ function lowestAvailableSlotLevel(regularSlots, sheet) {
 }
 
 export default function WildCompanionPanel({ character, sheet, resources, onResChange }) {
-  const { onUpdateCharacter, onUpdateSheet } = useSheetActions();
+  const { onUpdateCharacter, onUpdateSheet, onShowToast } = useSheetActions();
   const beastsDb = useBeastsDb();
   const [query, setQuery] = useState('');
   const [costMode, setCostMode] = useState('ws'); // 'ws' | 'slot'
@@ -76,6 +77,21 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
     onUpdateCharacter((prev) => ({ ...prev, ...dismissWildCompanionPatch() }));
   };
 
+  // The familiar is its own creature: roll pure d20/dice and surface the result
+  // in the shared dice toast. Deliberately NOT the character's rollD20, so the
+  // druid's exhaustion penalty never applies to the summoned Fey.
+  const rollCheck = (bonus, label) => {
+    if (!onShowToast) return;
+    const r = rollD20(bonus);
+    onShowToast(label, formatD20Detail(r), r.total, r.rolls, buildD20Meta(r));
+  };
+  // Generic dice-formula roll (HP hit dice + attack damage).
+  const rollFormulaToast = (formula, label) => {
+    if (!onShowToast) return;
+    const { total, rolls } = rollFormula(formula);
+    onShowToast(label, `${formula} = ${total}`, total, rolls);
+  };
+
   if (active) {
     const b = active.beast;
     return (
@@ -85,7 +101,7 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
           <Typography sx={headerSx} component="span">Familiar —</Typography>
           <BeastNameLink name={b.name} source={b.source} sx={headerSx} />
         </Box>
-        <BeastStatBlock b={b} typeLabel="Fey" hpLabel="HP" />
+        <BeastStatBlock b={b} typeLabel="Fey" hpLabel="HP" onRoll={rollCheck} onRollFormula={rollFormulaToast} />
         <Typography sx={{ ...subSx, fontStyle: 'italic', mt: 0.6 }}>
           A Fey spirit; rolls its own Initiative and acts on its own turn. It can't attack, but takes other actions normally. Vanishes when you finish a Long Rest.
         </Typography>
