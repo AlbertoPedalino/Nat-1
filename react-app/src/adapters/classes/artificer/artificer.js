@@ -304,10 +304,8 @@ registerClassSheetActions("Artificer", [
     "cat": "action",
     "uses": "INT mod / LR",
     "minLevel": 1,
-    // Description (incl. Mending cantrip) lives in the Features tab; the card
-    // only drives the interactive create panel.
-    "entries": [],
-    "noDescription": true,
+    // Description resolves from the official EFA feature entries (auto-lookup by
+    // name) and renders in the card's collapsible disclosure above the create panel.
     detailType: 'createdItems',
     detail: () => ({
       flag: 'tinker',
@@ -326,10 +324,8 @@ registerClassSheetActions("Artificer", [
     "cat": "action",
     "uses": "After Long Rest",
     "minLevel": 2,
-    // Description lives in the Features tab — the Action card only drives the
-    // interactive create/remove panel, so no rich-text entries here.
-    "entries": [],
-    "noDescription": true,
+    // Description resolves from the official EFA feature entries (auto-lookup by
+    // name) and shows in the card's collapsible disclosure above the create panel.
     detailType: 'createdItems',
     detail: ({ action, character }) => {
       const lv = Number(action?.ownerLevel || primaryClassLevel(character));

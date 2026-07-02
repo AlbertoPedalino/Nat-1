@@ -47,6 +47,7 @@ import ResourceBar from './ResourceBar.jsx';
 import { RichInline, RichText } from '../../../shared/character/RichText.jsx';
 import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
+import CollapsibleNote from '../../../shared/character/CollapsibleNote.jsx';
 import PipButton from '../../../shared/character/PipButton.jsx';
 import MiniBadge from '../../../shared/character/MiniBadge.jsx';
 import SheetDialog from '../../../shared/character/SheetDialog.jsx';
@@ -948,6 +949,13 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
   const safeMax = resMax === Infinity ? Infinity : Math.max(0, Number(resMax ?? 1) || 1);
   const hasEntries = Array.isArray(action.entries) ? action.entries.length > 0 : Boolean(action.entries);
   const hasDescription = Boolean(String(action.desc || '').trim());
+  // Interactive card = its expanded body carries its own controls (a DetailRenderer
+  // panel or an inline choice picker); its description is tucked into a collapsible
+  // disclosure so the controls stay the focus. Plain cards show the description inline.
+  const cardInteractive = Boolean(DetailRenderer) || Boolean(action.choiceKey && onUpdateCharacter);
+  const descriptionNode = (hasEntries || hasDescription)
+    ? (hasEntries ? <EntryBlocks entries={action.entries} emptyText="" /> : <RichText text={action.desc} />)
+    : null;
   const hasActionDetails = Boolean(
     action._item
     || hasEntries
@@ -1135,12 +1143,9 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
       details={hasActionDetails ? (
         <>
           {action._item ? <ItemPropertyTable item={action._item} sx={{ mb: '6px' }} /> : null}
-          {/* Wild Shape's full rules live in the Features tab; its card shows only
-              the transform panel, so suppress the prose (entries + desc) here. */}
-          {hasEntries && action.detailType !== 'wildShape' && action.detailType !== 'eldritchCannon'
-            ? <EntryBlocks entries={action.entries} emptyText="" /> : null}
-          {!hasEntries && hasDescription && action.detailType !== 'wildShape' && action.detailType !== 'eldritchCannon'
-            ? <RichText text={action.desc} /> : null}
+          {descriptionNode
+            ? (cardInteractive ? <CollapsibleNote>{descriptionNode}</CollapsibleNote> : descriptionNode)
+            : null}
           {action.choiceKey && onUpdateCharacter ? (
             <ChoicePicker action={action} C={C} onUpdateCharacter={onUpdateCharacter} onShowToast={onShowToast} />
           ) : null}
