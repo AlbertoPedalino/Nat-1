@@ -22,6 +22,7 @@ import {
   sheetVitalsToCombat,
   sheetVitalsToSheetPatch,
 } from './sheetSync.js';
+import { createInitialState, encounterReducer } from '../state/reducer.js';
 
 test('synced field set matches the patch_character_data SQL allowlist', () => {
   const sql = readFileSync(new URL('../../../../supabase/combat_sync.sql', import.meta.url), 'utf8');
@@ -114,6 +115,23 @@ test('combat launch seeds linked players from sheet current HP and death saves',
   assert.equal(combat.combatants[0].hpCurrent, 7);
   assert.equal(combat.combatants[0].tempHP, 4);
   assert.deepEqual(combat.combatants[0].deathSaves, { s: 2, f: 1 });
+});
+
+test('campaign-imported players can be removed from the encounter party', () => {
+  let state = createInitialState();
+  state = encounterReducer(state, {
+    type: 'importCampaignPlayers',
+    players: [
+      { sourceId: 'char-1', campaignId: 'camp-1', name: 'Aria', level: 5, initMod: 2, ac: 15, hpMax: 30 },
+      { sourceId: 'char-2', campaignId: 'camp-1', name: 'Borin', level: 5, initMod: 0, ac: 18, hpMax: 42 },
+    ],
+  });
+
+  state = encounterReducer(state, { type: 'removePlayer', index: 0 });
+
+  assert.deepEqual(state.players.map((player) => player.sourceId), ['char-2']);
+  assert.equal(state.party.count, 1);
+  assert.match(state.campaignNotice, /Aria removed from encounter/);
 });
 
 test('temp HP mutator clamps and fight snapshots preserve temp HP', () => {

@@ -82,6 +82,8 @@ export function encounterReducer(state, action) {
       return { ...state, party: { ...state.party, level: clampInt(action.value, 1, 20, state.party.level) } };
     case 'updatePlayer':
       return updatePlayer(state, action.index, action.patch);
+    case 'removePlayer':
+      return removePlayer(state, action.index);
     case 'importCampaignPlayers':
       return importCampaignPlayers(state, action.players);
     case 'saveEncounterToLibrary':
@@ -233,6 +235,28 @@ function updatePlayer(state, index, patch) {
   return {
     ...state,
     players: state.players.map((player, i) => (i === index ? normalizePlayer({ ...player, ...patch }, i) : player)),
+  };
+}
+
+function removePlayer(state, index) {
+  if (!Number.isInteger(index) || index < 0 || index >= state.players.length) return state;
+  const removed = state.players[index];
+  let players = state.players
+    .filter((_, i) => i !== index)
+    .map((player, i) => normalizePlayer(player.sourceId ? player : { ...player, id: i }, i));
+
+  if (!players.length) {
+    players = createDefaultPlayers(1);
+  }
+
+  return {
+    ...state,
+    players,
+    party: {
+      ...state.party,
+      count: Math.max(1, Math.min(10, players.length)),
+    },
+    campaignNotice: `${removed?.name || 'Player'} removed from encounter.`,
   };
 }
 

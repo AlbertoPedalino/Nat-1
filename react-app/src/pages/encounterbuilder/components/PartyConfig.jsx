@@ -1,5 +1,5 @@
 import { Box, Button, IconButton, Paper, Stack, TextField, Tooltip, Typography } from '@mui/material';
-import { ExternalLink, Minus, Plus } from 'lucide-react';
+import { ExternalLink, Minus, Plus, Trash2 } from 'lucide-react';
 import { campaignSheetUrl } from '../logic/campaignSheetUrl.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 
@@ -79,6 +79,11 @@ export default function PartyConfig() {
                 onChange={(event) => dispatch({ type: 'updatePlayer', index, patch: { initMod: event.target.value } })}
                 sx={{ width: 78 }}
               />
+              <Tooltip title="Remove from encounter">
+                <IconButton size="small" color="error" onClick={() => dispatch({ type: 'removePlayer', index })}>
+                  <Trash2 size={15} />
+                </IconButton>
+              </Tooltip>
             </Box>
           ))}
         </Stack>
