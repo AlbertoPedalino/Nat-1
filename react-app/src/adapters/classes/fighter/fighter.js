@@ -185,8 +185,8 @@ registerClassSheetActions("Fighter", [
     cat: 'reaction',
     uses: 'Second Wind',
     minLevel: 2,
-    rollers: [{ kind: 'utility', formula: '1d10', label: '+1d10' }],
-    rollLabelPrefix: 'Roll',
+    rollers: [{ kind: 'utility', formula: '1d10', label: '1d10', title: 'Bonus' }],
+    rollLabelPrefix: 'Tactical Mind',
     desc: 'When you fail an ability check, you can expend a use of Second Wind (as a Reaction) to add 1d10 to the check result, possibly changing the outcome.'
   },
   {

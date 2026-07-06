@@ -229,7 +229,7 @@ registerClassSheetActions("Monk", [
         : 0;
       const total = dex + lv;
       return `1d10${total >= 0 ? '+' : ''}${total}`;
-    }, label: ({ formula }) => `${String(formula || '')} reduce` }],
+    }, label: ({ formula }) => `${String(formula || '')} reduce`, title: 'Reduction' }],
     rollLabelPrefix: 'Deflect Attacks',
     desc: 'Reaction when you take B/P/S damage (lv.3) or any damage type (lv.13 Deflect Energy). Reduce the damage by 1d10 + DEX modifier + Monk level. If reduced to 0: spend 1 Focus Point to redirect as a ranged attack (20/60 ft, Martial Arts die + DEX).'
   },

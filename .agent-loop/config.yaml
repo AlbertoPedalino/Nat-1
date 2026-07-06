@@ -27,9 +27,11 @@ limits:
   # CLI has no turn flag — per-phase turns live in subagents.default.yaml.)
 
 verification:
-  timeout_seconds: 120
+  timeout_seconds: 600
   commands:
     - git diff --check
+    - npm --prefix react-app test
+    - npm --prefix react-app run build
 
 blocked_commands:
   - git push
@@ -56,6 +58,7 @@ project_context:
     - EFA
     - RWH
   rules:
+    - "Prefer minimal changes."
     - "GM-Board fetches D&D data at runtime from the configured 5etools data repository."
     - "GM-Board resolves images/assets from the configured 5etools image repository."
     - "Only D&D 5.5e / 2024 source codes are allowed: XPHB, XMM, XDMG, FRAIF, FRHOF, EFA, RWH."
@@ -64,10 +67,3 @@ project_context:
     - "Do not use homebrew, unofficial sources, or non-whitelisted sources."
     - "Do not copy, vendor, or commit 5etools JSON files or image assets into GM-Board."
     - "Preserve runtime fetching behavior; do not replace it with local vendored copies."
-
-rules:
-  - Do not push.
-  - Do not commit.
-  - Do not modify protected branches.
-  - Prefer minimal changes.
-  - Preserve runtime fetching from configured external data and image repositories.
