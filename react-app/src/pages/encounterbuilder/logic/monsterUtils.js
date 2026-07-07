@@ -144,11 +144,11 @@ export function spell5eUrl(value) {
 }
 
 export function getMonsterTokenUrls(monster) {
-  if (!monster?.name || !monster?.source) return [`${IMAGE_BASE}${FALLBACK_MONSTER_TOKEN}`];
+  if (!monster?.name || !monster?.source) return [FALLBACK_MONSTER_TOKEN];
   const encodedName = encodeURIComponent(String(monster.name).replace(/[’]/g, "'"));
   return [
     `${IMAGE_BASE}bestiary/tokens/${monster.source}/${encodedName}.webp`,
-    `${IMAGE_BASE}${FALLBACK_MONSTER_TOKEN}`,
+    FALLBACK_MONSTER_TOKEN,
   ];
 }
 

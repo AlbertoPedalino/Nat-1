@@ -1,7 +1,7 @@
 export const DATA_BASE = 'https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/';
 export const BESTIARY_BASE = `${DATA_BASE}bestiary/`;
 export const IMAGE_BASE = 'https://raw.githubusercontent.com/5etools-mirror-2/5etools-img/main/';
-export const FALLBACK_MONSTER_TOKEN = 'bestiary/tokens/MM/Skeleton.webp';
+export const FALLBACK_MONSTER_TOKEN = 'https://raw.githubusercontent.com/5etools-mirror-3/5etools-img/main/bestiary/tokens/XMM/Skeleton.webp';
 
 export const PROJECT_ALLOWED_SOURCES = Object.freeze(['XPHB', 'XMM', 'XDMG', 'FRAIF', 'FRHOF', 'EFA', 'RWH']);
 export const PROJECT_TO_RAW_SOURCE = Object.freeze({
