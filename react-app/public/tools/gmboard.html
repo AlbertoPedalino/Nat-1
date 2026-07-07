@@ -374,7 +374,7 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
 <div class="page-header">
   <span class="hex-icon"><i data-lucide="hexagon" class="lucide-emoji" aria-hidden="true"></i></span>
   <h1>GM Board</h1>
-  <div class="subtitle">HEXcrawl · Dungeon · Tables · Guide</div>
+  <div class="subtitle">HEXcrawl · Dungeon · Quest · Tables · Guide</div>
 </div>
 
 <div class="nav-tabs">
@@ -393,10 +393,10 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
       <div class="meteo-left">
         <div class="section-label">Season</div>
         <div class="btn-group" id="season-group" style="margin-bottom:12px;">
-          <button class="sel-btn no-select" onclick="selSeason(this,'Spring')"><i data-lucide="flower" class="lucide-emoji" aria-hidden="true"></i> Spring</button>
-          <button class="sel-btn no-select" onclick="selSeason(this,'Summer')"><i data-lucide="sun" class="lucide-emoji" aria-hidden="true"></i> Summer</button>
-          <button class="sel-btn no-select" onclick="selSeason(this,'Autumn')"><i data-lucide="leafy-green" class="lucide-emoji" aria-hidden="true"></i> Autumn</button>
-          <button class="sel-btn no-select" onclick="selSeason(this,'Winter')"><i data-lucide="snowflake" class="lucide-emoji" aria-hidden="true"></i> Winter</button>
+          <button class="sel-btn no-select" data-season="Spring" onclick="selSeason(this,'Spring')"><i data-lucide="flower" class="lucide-emoji" aria-hidden="true"></i> Spring</button>
+          <button class="sel-btn no-select" data-season="Summer" onclick="selSeason(this,'Summer')"><i data-lucide="sun" class="lucide-emoji" aria-hidden="true"></i> Summer</button>
+          <button class="sel-btn no-select" data-season="Autumn" onclick="selSeason(this,'Autumn')"><i data-lucide="leafy-green" class="lucide-emoji" aria-hidden="true"></i> Autumn</button>
+          <button class="sel-btn no-select" data-season="Winter" onclick="selSeason(this,'Winter')"><i data-lucide="snowflake" class="lucide-emoji" aria-hidden="true"></i> Winter</button>
         </div>
         <div class="meteo-display" id="meteo-display">
           <div class="meteo-icon" id="meteo-icon"><i data-lucide="sun" class="lucide-emoji" aria-hidden="true"></i></div>
@@ -437,18 +437,18 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
       <div>
         <div class="section-label">Population</div>
         <div class="btn-group" id="pop-group">
-          <button class="sel-btn no-select" data-thr="1" onclick="selPop(this,'unexplored',1)">Unexplored<span class="sub-lbl">trigger: 1 only</span></button>
-          <button class="sel-btn no-select" data-thr="2" onclick="selPop(this,'frontier',2)">Frontier<span class="sub-lbl">trigger: 1–2</span></button>
-          <button class="sel-btn no-select" data-thr="3" onclick="selPop(this,'settled',3)">Settled<span class="sub-lbl">trigger: 1–3</span></button>
+          <button class="sel-btn no-select" data-pop="unexplored" data-thr="1" onclick="selPop(this,'unexplored',1)">Unexplored<span class="sub-lbl">trigger: 1 only</span></button>
+          <button class="sel-btn no-select" data-pop="frontier" data-thr="2" onclick="selPop(this,'frontier',2)">Frontier<span class="sub-lbl">trigger: 1–2</span></button>
+          <button class="sel-btn no-select" data-pop="settled" data-thr="3" onclick="selPop(this,'settled',3)">Settled<span class="sub-lbl">trigger: 1–3</span></button>
         </div>
       </div>
       <div>
         <div class="section-label">Terrain</div>
         <div class="btn-group" id="terrain-group">
-          <button class="sel-btn no-select" onclick="selTerrain(this,'road',1)">Road<span class="sub-lbl">+1h</span></button>
-          <button class="sel-btn no-select" onclick="selTerrain(this,'plains',2)">Plains<span class="sub-lbl">+2h</span></button>
-          <button class="sel-btn no-select" onclick="selTerrain(this,'forest',4)">Forest<span class="sub-lbl">+4h</span></button>
-          <button class="sel-btn no-select" onclick="selTerrain(this,'mountain',8)">Mountain<span class="sub-lbl">+8h</span></button>
+          <button class="sel-btn no-select" data-terrain="road" data-hours="1" onclick="selTerrain(this,'road',1)">Road<span class="sub-lbl">+1h</span></button>
+          <button class="sel-btn no-select" data-terrain="plains" data-hours="2" onclick="selTerrain(this,'plains',2)">Plains<span class="sub-lbl">+2h</span></button>
+          <button class="sel-btn no-select" data-terrain="forest" data-hours="4" onclick="selTerrain(this,'forest',4)">Forest<span class="sub-lbl">+4h</span></button>
+          <button class="sel-btn no-select" data-terrain="mountain" data-hours="8" onclick="selTerrain(this,'mountain',8)">Mountain<span class="sub-lbl">+8h</span></button>
         </div>
       </div>
     </div>
@@ -456,10 +456,10 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
     <div>
       <div class="section-label">Encounter Tier</div>
       <div class="btn-group" id="hex-tier-group">
-        <button class="sel-btn tier-btn t1 no-select" onclick="selHexTier(this,1)"><i data-lucide="circle" class="lucide-emoji" aria-hidden="true"></i> Tier 1<span class="sub-lbl">Levels 1–4</span></button>
-        <button class="sel-btn tier-btn t2 no-select" onclick="selHexTier(this,2)"><i data-lucide="circle" class="lucide-emoji" aria-hidden="true"></i> Tier 2<span class="sub-lbl">Levels 5–10</span></button>
-        <button class="sel-btn tier-btn t3 no-select" onclick="selHexTier(this,3)"><i data-lucide="circle" class="lucide-emoji" aria-hidden="true"></i> Tier 3<span class="sub-lbl">Levels 11–16</span></button>
-        <button class="sel-btn tier-btn t4 no-select" onclick="selHexTier(this,4)"><i data-lucide="circle" class="lucide-emoji" aria-hidden="true"></i> Tier 4<span class="sub-lbl">Levels 17–20</span></button>
+        <button class="sel-btn tier-btn t1 no-select" data-tier="1" onclick="selHexTier(this,1)"><i data-lucide="circle" class="lucide-emoji" aria-hidden="true"></i> Tier 1<span class="sub-lbl">Levels 1–4</span></button>
+        <button class="sel-btn tier-btn t2 no-select" data-tier="2" onclick="selHexTier(this,2)"><i data-lucide="circle" class="lucide-emoji" aria-hidden="true"></i> Tier 2<span class="sub-lbl">Levels 5–10</span></button>
+        <button class="sel-btn tier-btn t3 no-select" data-tier="3" onclick="selHexTier(this,3)"><i data-lucide="circle" class="lucide-emoji" aria-hidden="true"></i> Tier 3<span class="sub-lbl">Levels 11–16</span></button>
+        <button class="sel-btn tier-btn t4 no-select" data-tier="4" onclick="selHexTier(this,4)"><i data-lucide="circle" class="lucide-emoji" aria-hidden="true"></i> Tier 4<span class="sub-lbl">Levels 17–20</span></button>
       </div>
     </div>
   </div>
@@ -524,19 +524,19 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
       <div>
         <div class="section-label">Population (rolls/room)</div>
         <div class="btn-group" id="d-pop-group">
-          <button class="sel-btn no-select" onclick="selDPop(this,'random',0)">Random<span class="sub-lbl">1–3 random</span></button>
-          <button class="sel-btn no-select" onclick="selDPop(this,'unexplored',1)">Unexplored<span class="sub-lbl">×1 roll</span></button>
-          <button class="sel-btn no-select" onclick="selDPop(this,'frontier',2)">Frontier<span class="sub-lbl">×2 rolls</span></button>
-          <button class="sel-btn no-select" onclick="selDPop(this,'settled',3)">Settled<span class="sub-lbl">×3 rolls</span></button>
+          <button class="sel-btn no-select" data-pop="random" data-thr="0" onclick="selDPop(this,'random',0)">Random<span class="sub-lbl">1–3 random</span></button>
+          <button class="sel-btn no-select" data-pop="unexplored" data-thr="1" onclick="selDPop(this,'unexplored',1)">Unexplored<span class="sub-lbl">×1 roll</span></button>
+          <button class="sel-btn no-select" data-pop="frontier" data-thr="2" onclick="selDPop(this,'frontier',2)">Frontier<span class="sub-lbl">×2 rolls</span></button>
+          <button class="sel-btn no-select" data-pop="settled" data-thr="3" onclick="selDPop(this,'settled',3)">Settled<span class="sub-lbl">×3 rolls</span></button>
         </div>
       </div>
       <div>
         <div class="section-label">Tier Encounter</div>
         <div class="btn-group" id="d-tier-group">
-          <button class="sel-btn tier-btn t1 no-select" onclick="selDTier(this,1)"><i data-lucide="circle" class="lucide-emoji" aria-hidden="true"></i> T1<span class="sub-lbl">Lv 1–4</span></button>
-          <button class="sel-btn tier-btn t2 no-select" onclick="selDTier(this,2)"><i data-lucide="circle" class="lucide-emoji" aria-hidden="true"></i> T2<span class="sub-lbl">Lv 5–10</span></button>
-          <button class="sel-btn tier-btn t3 no-select" onclick="selDTier(this,3)"><i data-lucide="circle" class="lucide-emoji" aria-hidden="true"></i> T3<span class="sub-lbl">Lv 11–16</span></button>
-          <button class="sel-btn tier-btn t4 no-select" onclick="selDTier(this,4)"><i data-lucide="circle" class="lucide-emoji" aria-hidden="true"></i> T4<span class="sub-lbl">Lv 17–20</span></button>
+          <button class="sel-btn tier-btn t1 no-select" data-tier="1" onclick="selDTier(this,1)"><i data-lucide="circle" class="lucide-emoji" aria-hidden="true"></i> T1<span class="sub-lbl">Lv 1–4</span></button>
+          <button class="sel-btn tier-btn t2 no-select" data-tier="2" onclick="selDTier(this,2)"><i data-lucide="circle" class="lucide-emoji" aria-hidden="true"></i> T2<span class="sub-lbl">Lv 5–10</span></button>
+          <button class="sel-btn tier-btn t3 no-select" data-tier="3" onclick="selDTier(this,3)"><i data-lucide="circle" class="lucide-emoji" aria-hidden="true"></i> T3<span class="sub-lbl">Lv 11–16</span></button>
+          <button class="sel-btn tier-btn t4 no-select" data-tier="4" onclick="selDTier(this,4)"><i data-lucide="circle" class="lucide-emoji" aria-hidden="true"></i> T4<span class="sub-lbl">Lv 17–20</span></button>
         </div>
       </div>
     </div>
@@ -558,19 +558,19 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
       <div>
         <div class="section-label">Quest Scope (d8 rolled)</div>
         <div class="btn-group" id="q-pop-group">
-          <button class="sel-btn no-select" onclick="selQPop(this,'random',0)">Random<span class="sub-lbl">1–3 d8 random</span></button>
-          <button class="sel-btn no-select" onclick="selQPop(this,'small',1)">Small<span class="sub-lbl">1d8</span></button>
-          <button class="sel-btn no-select" onclick="selQPop(this,'medium',2)">Medium<span class="sub-lbl">2d8 max</span></button>
-          <button class="sel-btn no-select" onclick="selQPop(this,'large',3)">Large<span class="sub-lbl">3d8 max</span></button>
+          <button class="sel-btn no-select" data-pop="random" data-thr="0" onclick="selQPop(this,'random',0)">Random<span class="sub-lbl">1–3 d8 random</span></button>
+          <button class="sel-btn no-select" data-pop="small" data-thr="1" onclick="selQPop(this,'small',1)">Small<span class="sub-lbl">1d8</span></button>
+          <button class="sel-btn no-select" data-pop="medium" data-thr="2" onclick="selQPop(this,'medium',2)">Medium<span class="sub-lbl">2d8 max</span></button>
+          <button class="sel-btn no-select" data-pop="large" data-thr="3" onclick="selQPop(this,'large',3)">Large<span class="sub-lbl">3d8 max</span></button>
         </div>
       </div>
       <div>
         <div class="section-label">Tier Encounter</div>
         <div class="btn-group" id="q-tier-group">
-          <button class="sel-btn tier-btn t1 no-select" onclick="selQTier(this,1)"><i data-lucide="circle" class="lucide-emoji" aria-hidden="true"></i> T1<span class="sub-lbl">Lv 1–4</span></button>
-          <button class="sel-btn tier-btn t2 no-select" onclick="selQTier(this,2)"><i data-lucide="circle" class="lucide-emoji" aria-hidden="true"></i> T2<span class="sub-lbl">Lv 5–10</span></button>
-          <button class="sel-btn tier-btn t3 no-select" onclick="selQTier(this,3)"><i data-lucide="circle" class="lucide-emoji" aria-hidden="true"></i> T3<span class="sub-lbl">Lv 11–16</span></button>
-          <button class="sel-btn tier-btn t4 no-select" onclick="selQTier(this,4)"><i data-lucide="circle" class="lucide-emoji" aria-hidden="true"></i> T4<span class="sub-lbl">Lv 17–20</span></button>
+          <button class="sel-btn tier-btn t1 no-select" data-tier="1" onclick="selQTier(this,1)"><i data-lucide="circle" class="lucide-emoji" aria-hidden="true"></i> T1<span class="sub-lbl">Lv 1–4</span></button>
+          <button class="sel-btn tier-btn t2 no-select" data-tier="2" onclick="selQTier(this,2)"><i data-lucide="circle" class="lucide-emoji" aria-hidden="true"></i> T2<span class="sub-lbl">Lv 5–10</span></button>
+          <button class="sel-btn tier-btn t3 no-select" data-tier="3" onclick="selQTier(this,3)"><i data-lucide="circle" class="lucide-emoji" aria-hidden="true"></i> T3<span class="sub-lbl">Lv 11–16</span></button>
+          <button class="sel-btn tier-btn t4 no-select" data-tier="4" onclick="selQTier(this,4)"><i data-lucide="circle" class="lucide-emoji" aria-hidden="true"></i> T4<span class="sub-lbl">Lv 17–20</span></button>
         </div>
       </div>
       <button class="action-btn no-select" onclick="generateQuests()"><i data-lucide="scroll-text" class="lucide-emoji" aria-hidden="true"></i> Generate Quests</button>
@@ -582,11 +582,11 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
 </div>
 
 <div id="tab-editor" class="tab-panel">
-  <div class="section-header"><h2><i data-lucide="clipboard-list" class="lucide-emoji" aria-hidden="true"></i> Table Editor</h2><div class="sub">Changes saved in browser</div></div>
+  <div class="section-header"><h2><i data-lucide="clipboard-list" class="lucide-emoji" aria-hidden="true"></i> Table Editor</h2><div class="sub">Manual save per board</div></div>
 
   <div class="card" style="margin-bottom:8px;">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
-      <div style="font-size:.88rem;color:var(--text-dim);">Edit values directly. Saved in localStorage.</div>
+      <div style="font-size:.88rem;color:var(--text-dim);">Edit values directly, then press Save. New boards persist after Save instance.</div>
       <div style="display:flex;gap:7px;">
         <button class="small-btn no-select" onclick="saveTables()"><i data-lucide="save" class="lucide-emoji" aria-hidden="true"></i> Save</button>
         <button class="small-btn no-select" onclick="resetTables()"><i data-lucide="rotate-ccw" class="lucide-emoji" aria-hidden="true"></i> Reset</button>
@@ -801,7 +801,7 @@ document.addEventListener('DOMContentLoaded', refreshIcons);
   <!-- Editor note -->
   <div class="card">
     <div class="ref-section-title"><i data-lucide="clipboard-list" class="lucide-emoji" aria-hidden="true"></i> Table Editor</div>
-    <p style="font-size:.9rem;color:var(--text);line-height:1.65;margin-bottom:6px;">All tables are editable from the <strong>Tables</strong> section. Changes are saved automatically to localStorage and take effect immediately. The <strong>↺ Restore</strong> button resets everything to original values.</p>
+    <p style="font-size:.9rem;color:var(--text);line-height:1.65;margin-bottom:6px;">All tables are editable from the <strong>Tables</strong> section. Press <strong>Save</strong> to persist changes to this board. Unsaved edits affect generated rolls immediately. The <strong>Reset</strong> button restores original values.</p>
     <p style="font-size:.9rem;color:var(--text);line-height:1.65;margin-bottom:6px;">The <strong>type</strong> field in the Event Table uses fixed keywords: <code>encounter</code> · <code>loot</code> · <code>camp_nemico</code> · <code>other</code> · <code>nothing</code>.</p>
     <p style="font-size:.9rem;color:var(--text);line-height:1.65;">The <strong>type</strong> field in the Complication Table uses: <code>Encounter</code> · <code>Environment Damage</code> · <code>Environment</code> · <code>None</code> (case sensitive).</p>
   </div>
@@ -922,6 +922,48 @@ const DEF_ENV=[
 // ══════════════ TABLES ══════════════
 let T={weather:null,events:null,loot:null,compl:null,enc:[null,null,null,null],trap:[null,null,null,null],env:null};
 function cp(o){return JSON.parse(JSON.stringify(o));}
+function escHtml(v){
+  return String(v ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+function escAttr(v){ return escHtml(v).replace(/`/g,'&#96;'); }
+function fmtNum(v){
+  const n=Number(v);
+  return Number.isFinite(n) ? n.toLocaleString() : escHtml(v);
+}
+function setGroupActive(groupId, selector){
+  const group=document.getElementById(groupId);
+  if(!group)return null;
+  group.querySelectorAll('.sel-btn').forEach(b=>b.classList.remove('active'));
+  let btn=null;
+  try{btn=group.querySelector(selector);}catch(_){}
+  if(btn)btn.classList.add('active');
+  return btn;
+}
+function rarityCls(r){return {'Legendary':'rleg','Very Rare':'rvr','Rare':'rr','Uncommon':'ruc'}[String(r||'')]||'rc';}
+function eventBadgeCls(type){
+  const t=String(type||'');
+  if(t==='encounter')return'b-enc';
+  if(t==='loot')return'b-loot';
+  if(t==='camp_nemico')return'b-camp';
+  if(t&&t!=='nothing')return'b-mat';
+  return'b-none';
+}
+function renderEncounterSummary(enc){
+  const e=enc||{};
+  const diff=String(e.diff||'Low');
+  return `${diffIcon(diff)} <span class="${diffCls(diff)}">${escHtml(diff)}</span> · Level <strong>${escHtml(e.lv ?? '?')}</strong> · <span style="color:var(--amber)">${fmtNum(e.xp)} XP/PC</span>`;
+}
+function renderTrapSummary(trap){
+  const t=trap||{};
+  const tipo=String(t.tipo||'Nuisance');
+  const tCls=tipo==='Deadly'?'diff-high':'diff-mod';
+  return `<span class="${tCls}">${escHtml(tipo)}</span> · Lv ${escHtml(t.lv ?? '?')} · DC <strong>${escHtml(t.dc ?? '?')}</strong> · Damage <strong>${escHtml(t.danno ?? '?')}</strong>`;
+}
+function renderLootSummary(lo){
+  const l=lo||{};
+  const rc=rarityCls(l.rarita);
+  return `<strong>${escHtml(l.tipo || 'Nothing found')}</strong> <span class="${rc}">· ${escHtml(l.rarita || '—')}</span> <span class="det">· ${escHtml(l.qualita || '—')} · ${escHtml(l.valore || '—')} ${escHtml(l.extra || '')}</span>`;
+}
 function loadTables(){
   try{T.weather=JSON.parse(localStorage.getItem('gm_wea'))||cp(DEF_WEATHER);}catch(e){T.weather=cp(DEF_WEATHER);}
   try{T.events=JSON.parse(localStorage.getItem('gm_ev'))||cp(DEF_EVENTS);}catch(e){T.events=cp(DEF_EVENTS);}
@@ -948,12 +990,12 @@ function saveTables(showMessage=true){
   if(showMessage) showToast(luci('check') + ' Tables saved');
 }
 async function resetTables(){
-  if(!await uiConfirm('Restore original tables?'))return;
+  if(!await uiConfirm('Reset tables to original values?'))return;
   T.weather=cp(DEF_WEATHER);T.events=cp(DEF_EVENTS);T.loot=cp(DEF_LOOT);T.compl=cp(DEF_COMPL);T.env=cp(DEF_ENV);
   for(let i=0;i<4;i++){T.enc[i]=cp(DEF_ENC[i]);T.trap[i]=cp(DEF_TRAP[i]);}
   ['gm_wea','gm_ev','gm_lo','gm_co','gm_env'].forEach(k=>localStorage.removeItem(k));
   for(let i=0;i<4;i++){localStorage.removeItem('gm_enc'+i);localStorage.removeItem('gm_trap'+i);}
-  buildEditor();showToast(luci('rotate-ccw')+' Restored');
+  buildEditor();showToast(luci('rotate-ccw')+' Tables reset');
 }
 function showToast(m=luci('check')){const t=document.getElementById('toast');if(!t)return;t.innerHTML=m;t.style.display='block';refreshIcons();setTimeout(()=>t.style.display='none',2000);}
 function uiConfirm(message){
@@ -1017,33 +1059,47 @@ let S={
   pop:null,popThr:0,terrain:null,terrainH:0,hexTier:null,
   season:null, meteo:'Clear', intensita:'', hoursSinceWeather:0, nextWeatherIn:8,
   min:0,day:1,month:1,year:1000,rolling:false,log:[],
-  dPop:null,dThr:0,dTier:null
+  dPop:null,dThr:0,dTier:null,dRooms:5,dungeon:null,
+  qPop:null,qThr:0,qTier:null,quest:null
 };
 function saveState(){
+  const dRoomsEl=document.getElementById('d-rooms');
+  const dRooms=dRoomsEl?Number(dRoomsEl.value):S.dRooms;
+  if(Number.isFinite(dRooms))S.dRooms=dRooms;
   localStorage.setItem('gm_state',JSON.stringify({
     min:S.min,day:S.day,month:S.month,year:S.year,log:S.log,
-    season:S.season,meteo:S.meteo,intensita:S.intensita,hoursSinceWeather:S.hoursSinceWeather,nextWeatherIn:S.nextWeatherIn
+    season:S.season,meteo:S.meteo,intensita:S.intensita,hoursSinceWeather:S.hoursSinceWeather,nextWeatherIn:S.nextWeatherIn,
+    pop:S.pop,popThr:S.popThr,terrain:S.terrain,terrainH:S.terrainH,hexTier:S.hexTier,
+    dPop:S.dPop,dThr:S.dThr,dTier:S.dTier,dRooms:S.dRooms,dungeon:S.dungeon,
+    qPop:S.qPop,qThr:S.qThr,qTier:S.qTier,quest:S.quest
   }));
 }
 function loadState(){
   try{
     const sv=JSON.parse(localStorage.getItem('gm_state'));
     if(sv){
-      S.min=sv.min||0;S.day=sv.day||1;S.month=sv.month||1;S.year=sv.year||1000;S.log=sv.log||[];
+      S.min=Number.isFinite(Number(sv.min))?Number(sv.min):0;S.day=Number(sv.day)||1;S.month=Number(sv.month)||1;S.year=Number(sv.year)||1000;S.log=Array.isArray(sv.log)?sv.log.slice(0,50).map(String):[];
       S.season=sv.season||null;S.meteo=sv.meteo||'Clear';S.intensita=sv.intensita||'';S.hoursSinceWeather=sv.hoursSinceWeather||0;S.nextWeatherIn=sv.nextWeatherIn||8;
+      S.pop=sv.pop||null;S.popThr=Number(sv.popThr)||0;S.terrain=sv.terrain||null;S.terrainH=Number(sv.terrainH)||0;S.hexTier=Number(sv.hexTier)||null;
+      S.dPop=sv.dPop||null;S.dThr=Number(sv.dThr)||0;S.dTier=Number(sv.dTier)||null;S.dRooms=Number(sv.dRooms)||5;S.dungeon=sv.dungeon||null;
+      S.qPop=sv.qPop||null;S.qThr=Number(sv.qThr)||0;S.qTier=Number(sv.qTier)||null;S.quest=sv.quest||null;
       
       document.getElementById('s-day').value=S.day;document.getElementById('s-month').value=S.month;
       document.getElementById('s-year').value=S.year;document.getElementById('s-time').value=fHM(S.min);
-      
-      if(S.season){
-        document.querySelectorAll('#season-group .sel-btn').forEach(b=>{
-          if(b.textContent.includes(S.season)) { b.classList.add('active'); }
-        });
-      }
-      selMeteo(null, S.meteo, S.intensita); 
+      const dRoomsEl=document.getElementById('d-rooms');if(dRoomsEl)dRoomsEl.value=S.dRooms;
+
+      if(S.season)setGroupActive('season-group',`[data-season="${escAttr(S.season)}"]`);
+      if(S.pop)setGroupActive('pop-group',`[data-pop="${escAttr(S.pop)}"]`);
+      if(S.terrain)setGroupActive('terrain-group',`[data-terrain="${escAttr(S.terrain)}"]`);
+      if(S.hexTier)setGroupActive('hex-tier-group',`[data-tier="${S.hexTier}"]`);
+      if(S.dPop)setGroupActive('d-pop-group',`[data-pop="${escAttr(S.dPop)}"]`);
+      if(S.dTier)setGroupActive('d-tier-group',`[data-tier="${S.dTier}"]`);
+      if(S.qPop)setGroupActive('q-pop-group',`[data-pop="${escAttr(S.qPop)}"]`);
+      if(S.qTier)setGroupActive('q-tier-group',`[data-tier="${S.qTier}"]`);
+      selMeteo(null, S.meteo, S.intensita, false);
       if(S.terrain) updTerrainLabel();
       updMeteoDisplay();
-      updDisp();renderLog();
+      updDisp();renderLog();renderDungeon();renderQuests();
     }
   }catch(e){}
 }
@@ -1163,7 +1219,7 @@ function updMeteoDisplay(){
   if(timerEl) timerEl.textContent=timerTxt;
 }
 
-function selMeteo(btn, m, int = '') {
+function selMeteo(btn, m, int = '', persist = true) {
   S.meteo = m;
   S.intensita = int;
   document.querySelectorAll('#meteo-group .sel-btn').forEach(b => b.classList.remove('active'));
@@ -1176,6 +1232,7 @@ function selMeteo(btn, m, int = '') {
   }
   updMeteoDisplay();
   updTerrainLabel();
+  if(persist)saveState();
 }
 
 function checkWeatherRoll(rsContainer) {
@@ -1207,7 +1264,7 @@ function checkWeatherRoll(rsContainer) {
       intText = ` (${intType})`;
     }
 
-    selMeteo(null, m, intType);
+    selMeteo(null, m, intType, false);
     logChanges.push(`${m}${intText} [d20=${d20}]`);
 
     const icon = m === 'Clear' ? luci('sun') : m === 'Rain' ? luci('cloud-rain') : luci('snowflake');
@@ -1224,18 +1281,19 @@ function checkWeatherRoll(rsContainer) {
   return logChanges.length > 0 ? ` · [Weather: ${logChanges.join(' → ')}]` : '';
 }
 
-function selPop(btn,name,thr){document.querySelectorAll('#pop-group .sel-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');S.pop=name;S.popThr=thr;}
+function selPop(btn,name,thr){document.querySelectorAll('#pop-group .sel-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');S.pop=name;S.popThr=thr;saveState();}
 
 function selTerrain(btn,name,h){
   document.querySelectorAll('#terrain-group .sel-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   S.terrain=name; S.terrainH=h;
   updTerrainLabel();
+  saveState();
 }
 
-function selHexTier(btn,t){document.querySelectorAll('#hex-tier-group .sel-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');S.hexTier=t;}
-function selDPop(btn,name,thr){document.querySelectorAll('#d-pop-group .sel-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');S.dPop=name;S.dThr=thr;}
-function selDTier(btn,t){document.querySelectorAll('#d-tier-group .sel-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');S.dTier=t;}
+function selHexTier(btn,t){document.querySelectorAll('#hex-tier-group .sel-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');S.hexTier=t;saveState();}
+function selDPop(btn,name,thr){document.querySelectorAll('#d-pop-group .sel-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');S.dPop=name;S.dThr=thr;saveState();}
+function selDTier(btn,t){document.querySelectorAll('#d-tier-group .sel-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');S.dTier=t;saveState();}
 
 function advTimeManual(hours){
   advTime(hours);
@@ -1276,7 +1334,7 @@ function setStart(){
 // ══════════════ STEP BUILDER ══════════════
 function addStep(con,icon,label,html,delay=0){
   const s=document.createElement('div');s.className='result-step';s.style.animationDelay=delay+'ms';
-  s.innerHTML=`<div class="step-icon">${icon}</div><div class="step-content"><div class="step-label">${label}</div><div class="step-main">${html}</div></div>`;
+  s.innerHTML=`<div class="step-icon">${icon}</div><div class="step-content"><div class="step-label">${escHtml(label)}</div><div class="step-main">${html}</div></div>`;
   con.appendChild(s);return s.querySelector('.step-main');
 }
 function diffCls(d){return d==='High'?'diff-high':d==='Moderate'?'diff-mod':'diff-low';}
@@ -1289,9 +1347,7 @@ async function resolveEncounter(con, tier, label='Encounter Table'){
   const res=await rollD20D20('a'+ids,'b'+ids,'c'+ids);
   const enc=getEnc(tier,res.sum);
   s.insertAdjacentHTML('beforeend',`<div style="margin-top:4px">
-    ${diffIcon(enc.diff)} <span class="${diffCls(enc.diff)}">${enc.diff}</span>
-    · Level <strong>${enc.lv}</strong>
-    · <span style="color:var(--amber)">${Number(enc.xp).toLocaleString()} XP/PC</span>
+    ${renderEncounterSummary(enc)}
     <span class="det"> · d20(${res.d1})+d20(${res.d2})=${res.sum}</span>
   </div>`);
   return res;
@@ -1379,12 +1435,8 @@ async function procedi(){
   const evRes=await rollEventDice('a'+ids,'b'+ids,'c'+ids);
   const ev=getEvent(evRes.sum);
 
-  let eBadge='b-none';
-  if(ev.type==='encounter')eBadge='b-enc';
-  else if(ev.type==='loot')eBadge='b-loot';
-  else if(ev.type==='camp_nemico')eBadge='b-camp';
-  else if(ev.type!=='nothing')eBadge='b-mat';
-  s2.insertAdjacentHTML('beforeend',`<div style="margin-top:4px">Evento: <strong>${ev.name}</strong> <span class="badge ${eBadge}">${ev.type.toUpperCase()}</span></div>`);
+  const eBadge=eventBadgeCls(ev.type);
+  s2.insertAdjacentHTML('beforeend',`<div style="margin-top:4px">Event: <strong>${escHtml(ev.name)}</strong> <span class="badge ${eBadge}">${escHtml(String(ev.type||'').toUpperCase())}</span></div>`);
 
   await sleep(320);
   logTxt+=` → ${ev.name}`;
@@ -1398,9 +1450,7 @@ async function procedi(){
     const r2=await rollD8D12('a'+ids2,'b'+ids2,'c'+ids2);
     const lo=getLoot(r2.sum);
     if(lo.tipo!=='Nothing found'){
-      const rCls={'Legendary':'rleg','Very Rare':'rvr','Rare':'rr','Uncommon':'ruc'};
-      const rc=rCls[lo.rarita]||'rc';
-      s3.insertAdjacentHTML('beforeend',`<div style="margin-top:4px"><strong>${lo.tipo}</strong> <span class="${rc}">· ${lo.rarita}</span> <span class="det">· ${lo.qualita} · ${lo.valore} ${lo.extra}</span></div>`);
+      s3.insertAdjacentHTML('beforeend',`<div style="margin-top:4px">${renderLootSummary(lo)}</div>`);
       await sleep(300);
       const ids3=uid();
       const s4=addStep(rs,luci('lock'),'DC to find (1d8+1d12)',dHTML('a'+ids3,'b'+ids3,'c'+ids3),0);
@@ -1425,9 +1475,7 @@ async function procedi(){
     const r3=await rollD8D12('a'+ids3,'b'+ids3,'c'+ids3);
     const lo=getLoot(r3.sum);
     if(lo.tipo!=='Nothing found'){
-      const rCls={'Legendary':'rleg','Very Rare':'rvr','Rare':'rr','Uncommon':'ruc'};
-      const rc=rCls[lo.rarita]||'rc';
-      s4.insertAdjacentHTML('beforeend',`<div style="margin-top:4px"><strong>${lo.tipo}</strong> <span class="${rc}">· ${lo.rarita}</span> <span class="det">· ${lo.qualita} · ${lo.valore} ${lo.extra}</span></div>`);
+      s4.insertAdjacentHTML('beforeend',`<div style="margin-top:4px">${renderLootSummary(lo)}</div>`);
       await sleep(300);
       const ids4=uid();
       const s5=addStep(rs,luci('lock'),'DC to find loot (1d8+1d12)',dHTML('a'+ids4,'b'+ids4,'c'+ids4),0);
@@ -1452,12 +1500,8 @@ async function procedi(){
         const s4=addStep(rs,luci('flame'),'Trap Table (1d8+1d12)',dHTML('a'+ids3,'b'+ids3,'c'+ids3),0);
         const r3=await rollD8D12('a'+ids3,'b'+ids3,'c'+ids3);
         const trap=getTrap(S.hexTier,r3.sum);
-        const tCls=trap.tipo==='Deadly'?'diff-high':'diff-mod';
         s4.insertAdjacentHTML('beforeend',`<div style="margin-top:4px">
-          <span class="${tCls}">${trap.tipo}</span>
-          · Level <strong>${trap.lv}</strong>
-          · DC <strong>${trap.dc}</strong>
-          · Damage <strong>${trap.danno}</strong>
+          ${renderTrapSummary(trap)}
           <span class="det"> · d8(${r3.d8})+d12(${r3.d12})=${r3.sum}</span>
         </div>`);
         logTxt+=` · DC=${r2.sum} · Trap:${trap.tipo} DC${trap.dc} ${trap.danno}`;
@@ -1479,17 +1523,17 @@ function generateDungeon(){
   if(isNaN(n)||n<1||n>40){const el=document.getElementById('d-rooms');el.style.borderColor='var(--red)';setTimeout(()=>el.style.borderColor='',1200);showToast('⚠ Enter a room count between 1 and 40');return;}
   if(!S.dPop){flashGroup('d-pop-group','⚠ Select Population (rolls per room)');return;}
   if(!S.dTier){flashGroup('d-tier-group','⚠ Select Tier for Encounter and Trap tables');return;}
-  const con=document.getElementById('dungeon-results');con.innerHTML='';
-  for(let i=1;i<=n;i++) con.appendChild(buildRoom(i));
-  refreshIcons();
-  con.scrollIntoView({behavior:'smooth',block:'start'});
+  S.dRooms=n;
+  S.dungeon={rooms:Array.from({length:n},(_,i)=>createRoom(i+1))};
+  renderDungeon(true);
+  saveState();
 }
 
-function buildRoom(idx){
+function createRoom(idx){
   const thr=S.dPop==='random'?Math.floor(Math.random()*3)+1:S.dThr;
   const popLabel=thr===1?'Unexplored':thr===2?'Peripheral':'Populated';
 
-  // N tiri Complication Table
+  // N Complication Table rolls
   const slots=[];
   for(let s=0;s<thr;s++){
     const d8c=roll(8),d12c=roll(12),sumC=d8c+d12c;
@@ -1517,61 +1561,73 @@ function buildRoom(idx){
   let lootCD=null;
   if(lootData.tipo!=='Nothing found'){const a=roll(8),b=roll(12);lootCD={d8:a,d12:b,sum:a+b};}
 
-  const anyComp=slots.some(s=>s.type!=='None');
+  return {idx,thr,popLabel,slots,loot:{d8:d8l,d12:d12l,sum:sumL,data:lootData,dc:lootCD}};
+}
+
+function buildRoom(idx){
+  return renderRoom(createRoom(idx),idx);
+}
+
+function renderRoom(room,idxFallback){
+  const idx=Number(room?.idx)||idxFallback||1;
+  const slots=Array.isArray(room?.slots)?room.slots:[];
+  const thr=Number(room?.thr)||slots.length||0;
+  const popLabel=room?.popLabel || (thr===1?'Unexplored':thr===2?'Peripheral':'Populated');
+  const anyComp=slots.some(s=>String(s.type||'None')!=='None');
   const div=document.createElement('div');
   div.className='room-card';
   div.style.animation=`fadeIn .28s ease ${idx*30}ms both`;
 
-  let hdr=`<div class="room-hdr"><span class="room-num">ROOM ${idx}</span>
-    <span class="badge b-env" style="font-size:.6rem">${popLabel} · ${thr} ${thr>1 ? 'rolls' : 'roll'}</span>`;
+  let hdr=`<div class="room-hdr"><span class="room-num">ROOM ${escHtml(idx)}</span>
+    <span class="badge b-env" style="font-size:.6rem">${escHtml(popLabel)} · ${escHtml(thr)} ${thr>1 ? 'rolls' : 'roll'}</span>`;
   if(!anyComp) hdr+=`<span class="badge b-ok">${luci('check')} Safe room</span>`;
   hdr+=`</div>`;
 
   // Slots
   let slotsHTML='';
   slots.forEach(sl=>{
+    const type=String(sl.type||'None');
     let typeBadge='b-none',slotCls='';
-    if(sl.type==='Encounter'){typeBadge='b-enc';slotCls='s-enc';}
-    else if(sl.type==='Environment Damage'){typeBadge='b-envd';slotCls='s-envd';}
-    else if(sl.type==='Environment'){typeBadge='b-env';slotCls='s-env';}
+    if(type==='Encounter'){typeBadge='b-enc';slotCls='s-enc';}
+    else if(type==='Environment Damage'){typeBadge='b-envd';slotCls='s-envd';}
+    else if(type==='Environment'){typeBadge='b-env';slotCls='s-env';}
 
     let innerHTML='';
-    if(sl.type!=='None'&&sl.extra){
+    if(type!=='None'&&sl.extra){
       if(sl.extra.kind==='enc'){
         const enc=sl.extra.data;
-        innerHTML=`<div style="margin-bottom:3px">${diffIcon(enc.diff)} <span class="${diffCls(enc.diff)}">${enc.diff}</span> · Level <strong>${enc.lv}</strong> · <span style="color:var(--amber)">${Number(enc.xp).toLocaleString()} XP/PC</span></div>
-          <div class="det">Encounter: d20(${sl.extra.d1})+d20(${sl.extra.d2})=${sl.extra.sum}</div>`;
+        innerHTML=`<div style="margin-bottom:3px">${renderEncounterSummary(enc)}</div>
+          <div class="det">Encounter: d20(${escHtml(sl.extra.d1 ?? '?')})+d20(${escHtml(sl.extra.d2 ?? '?')})=${escHtml(sl.extra.sum ?? '?')}</div>`;
       } else if(sl.extra.kind==='trap'){
         const trap=sl.extra.data;
-        const tCls=trap.tipo==='Deadly'?'diff-high':'diff-mod';
-        innerHTML=`<div style="margin-bottom:3px"><span class="${tCls}">${trap.tipo}</span> · Lv ${trap.lv} · DC <strong>${trap.dc}</strong> · Damage <strong>${trap.danno}</strong></div>
-          <div class="det">Trap: d8(${sl.extra.d8})+d12(${sl.extra.d12})=${sl.extra.sum}</div>`;
+        innerHTML=`<div style="margin-bottom:3px">${renderTrapSummary(trap)}</div>
+          <div class="det">Trap: d8(${escHtml(sl.extra.d8 ?? '?')})+d12(${escHtml(sl.extra.d12 ?? '?')})=${escHtml(sl.extra.sum ?? '?')}</div>`;
       } else if(sl.extra.kind==='env'){
-        const rCls2={'Legendary':'rleg','Very Rare':'rvr','Rare':'rr','Uncommon':'ruc'};
-        const rc=rCls2[sl.extra.data.gravita]||'rc';
-        innerHTML=`<div style="margin-bottom:3px">Severity: <span class="${rc}">${sl.extra.data.gravita}</span></div>
-          <div class="det">Environment: d8(${sl.extra.d8})+d12(${sl.extra.d12})=${sl.extra.sum}</div>`;
+        const env=sl.extra.data||{};
+        const rc=rarityCls(env.gravita);
+        innerHTML=`<div style="margin-bottom:3px">Severity: <span class="${rc}">${escHtml(env.gravita || 'Common')}</span></div>
+          <div class="det">Environment: d8(${escHtml(sl.extra.d8 ?? '?')})+d12(${escHtml(sl.extra.d12 ?? '?')})=${escHtml(sl.extra.sum ?? '?')}</div>`;
       }
     }
 
     slotsHTML+=`<div class="slot ${slotCls}">
       <div class="slot-hdr">
-        <span class="slot-title">Roll ${sl.n}/${sl.thr}</span>
-        <span class="badge ${typeBadge}">${sl.type}</span>
-        <span class="det" style="font-size:.72rem">Compl: d8(${sl.d8})+d12(${sl.d12})=${sl.sum}</span>
+        <span class="slot-title">Roll ${escHtml(sl.n ?? '?')}/${escHtml(sl.thr ?? thr)}</span>
+        <span class="badge ${typeBadge}">${escHtml(type)}</span>
+        <span class="det" style="font-size:.72rem">Compl: d8(${escHtml(sl.d8 ?? '?')})+d12(${escHtml(sl.d12 ?? '?')})=${escHtml(sl.sum ?? '?')}</span>
       </div>
-      <div class="slot-body">${sl.type!=='None'?innerHTML:'<span class="na">No complication.</span>'}</div>
+      <div class="slot-body">${type!=='None'?innerHTML:'<span class="na">No complication.</span>'}</div>
     </div>`;
   });
 
-  const rCls={'Legendary':'rleg','Very Rare':'rvr','Rare':'rr','Uncommon':'ruc'};
-  const rc=rCls[lootData.rarita]||'rc';
+  const loot=room?.loot||{};
+  const lootData=loot.data||{tipo:'Nothing found',rarita:'—',qualita:'—',valore:'—',extra:''};
   let lootHTML=`<div class="slot s-loot">
-    <div class="slot-hdr"><span class="slot-title">Loot</span><span class="badge b-loot">LOOT TABLE</span><span class="det" style="font-size:.72rem">d8(${d8l})+d12(${d12l})=${sumL}</span></div>
+    <div class="slot-hdr"><span class="slot-title">Loot</span><span class="badge b-loot">LOOT TABLE</span><span class="det" style="font-size:.72rem">d8(${escHtml(loot.d8 ?? '?')})+d12(${escHtml(loot.d12 ?? '?')})=${escHtml(loot.sum ?? '?')}</span></div>
     <div class="slot-body">`;
   if(lootData.tipo!=='Nothing found'){
-    lootHTML+=`<strong>${lootData.tipo}</strong> <span class="${rc}">· ${lootData.rarita}</span> <span class="det">· ${lootData.qualita} · ${lootData.valore} ${lootData.extra}</span>`;
-    if(lootCD) lootHTML+=`<div class="cd-block"><span class="cd-lbl">DC TO FIND IT</span><span class="cd-val">DC ${lootCD.sum}</span> <span class="det">· d8(${lootCD.d8})+d12(${lootCD.d12})</span></div>`;
+    lootHTML+=renderLootSummary(lootData);
+    if(loot.dc) lootHTML+=`<div class="cd-block"><span class="cd-lbl">DC TO FIND IT</span><span class="cd-val">DC ${escHtml(loot.dc.sum ?? '?')}</span> <span class="det">· d8(${escHtml(loot.dc.d8 ?? '?')})+d12(${escHtml(loot.dc.d12 ?? '?')})</span></div>`;
   } else {
     lootHTML+=`<span class="na">Nothing found.</span>`;
   }
@@ -1581,79 +1637,95 @@ function buildRoom(idx){
   return div;
 }
 
-function clearDungeon(){document.getElementById('dungeon-results').innerHTML='';}
+function renderDungeon(scroll=false){
+  const con=document.getElementById('dungeon-results');
+  if(!con)return;
+  con.innerHTML='';
+  const rooms=Array.isArray(S.dungeon?.rooms)?S.dungeon.rooms:[];
+  rooms.forEach((room,i)=>con.appendChild(renderRoom(room,i+1)));
+  if(rooms.length){
+    refreshIcons();
+    if(scroll)con.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+}
+
+function clearDungeon(){
+  S.dungeon=null;
+  const con=document.getElementById('dungeon-results');
+  if(con)con.innerHTML='';
+  saveState();
+}
 
 // ══════════════ LOG ══════════════
 function renderLog(){
   const a=document.getElementById('log-area');
   if(!S.log.length){a.innerHTML='<div class="log-empty">No hex explored yet.</div>';return;}
-  a.innerHTML=S.log.slice(0,30).map(e=>{const p=e.split(' · ');return`<div class="log-entry"><span class="log-t">${p[0]||''}</span><span>${p.slice(1).join(' · ')}</span></div>`;}).join('');
+  a.innerHTML=S.log.slice(0,30).map(e=>{const p=String(e).split(' · ');return`<div class="log-entry"><span class="log-t">${escHtml(p[0]||'')}</span><span>${escHtml(p.slice(1).join(' · '))}</span></div>`;}).join('');
 }
 function clearLog(){S.log=[];renderLog();saveState();}
 
 // ══════════════ QUEST ══════════════
-S.qPop=null; S.qThr=0; S.qTier=null;
-
 function selQPop(btn,name,thr){
   document.querySelectorAll('#q-pop-group .sel-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active'); S.qPop=name; S.qThr=thr;
+  saveState();
 }
 function selQTier(btn,t){
   document.querySelectorAll('#q-tier-group .sel-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active'); S.qTier=t;
+  saveState();
 }
 
 function generateQuests(){
   if(!S.qPop){flashGroup('q-pop-group','⚠ Select Scope (how many d8 to roll for quest count)');return;}
   if(!S.qTier){flashGroup('q-tier-group','⚠ Select Tier for Encounter and Loot tables');return;}
 
-  // Quanti d8 tirare
   let numDice = S.qThr;
   if(S.qPop==='random') numDice = Math.floor(Math.random()*3)+1;
 
-  // Tira numDice d8 e prendi il massimo
   const rolls = Array.from({length:numDice},()=>roll(8));
   const numQuests = Math.max(...rolls);
+  const popLabel = S.qPop==='random'?`Random (${numDice}d8)`:S.qPop.charAt(0).toUpperCase()+S.qPop.slice(1);
 
-  const con = document.getElementById('quest-results');
-  con.innerHTML='';
+  S.quest={
+    numDice,
+    rolls,
+    numQuests,
+    popLabel,
+    quests:Array.from({length:numQuests},(_,i)=>createQuestCard(i+1))
+  };
+  renderQuests(true);
+  saveState();
+}
 
-  // Header risultato dadi
-  const diceDiv = document.createElement('div');
+function renderQuestHeader(data){
+  const diceDiv=document.createElement('div');
   diceDiv.className='card';
   diceDiv.style.marginBottom='12px';
-  const popLabel = S.qPop==='random'?`Random (${numDice}d8)`:S.qPop.charAt(0).toUpperCase()+S.qPop.slice(1);
+  const rolls=Array.isArray(data?.rolls)?data.rolls:[];
+  const numQuests=Number(data?.numQuests)||Math.max(0,...rolls.map(Number));
   diceDiv.innerHTML=`
     <div class="section-label">Quest Count</div>
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-      <span style="font-size:.88rem;color:var(--text-dim)">${popLabel} → tiri: </span>
-      ${rolls.map((r,i)=>`<span class="die" style="${r===numQuests?'border-color:var(--gold-light);color:var(--gold-light)':''}">${r}</span>`).join('')}
+      <span style="font-size:.88rem;color:var(--text-dim)">${escHtml(data?.popLabel || 'Quest')} → rolls: </span>
+      ${rolls.map(r=>`<span class="die" style="${Number(r)===numQuests?'border-color:var(--gold-light);color:var(--gold-light)':''}">${escHtml(r)}</span>`).join('')}
       <span style="color:var(--text-dim)">→ max =</span>
-      <span style="font-family:Cinzel;font-size:1.3rem;font-weight:900;color:var(--gold-light)">${numQuests}</span>
+      <span style="font-family:Cinzel;font-size:1.3rem;font-weight:900;color:var(--gold-light)">${escHtml(numQuests)}</span>
       <span style="color:var(--text-dim);font-size:.88rem">quest</span>
     </div>`;
-  con.appendChild(diceDiv);
-
-  // Genera ogni quest
-  for(let i=1;i<=numQuests;i++){
-    con.appendChild(buildQuestCard(i));
-  }
-  con.scrollIntoView({behavior:'smooth',block:'start'});
+  return diceDiv;
 }
 
-function buildQuestCard(idx){
-  // 1. Tiro Event Table (2d20)
+function createQuestCard(idx){
   const d1=roll(20),d2=roll(20),evSum=d1+d2;
   const ev=getEvent(evSum);
 
-  // 2. Se encounter o camp_nemico → tiro Encounter Table
   let encData=null;
   if(ev.type==='encounter'||ev.type==='camp_nemico'){
     const e1=roll(20),e2=roll(20),eSum=e1+e2;
     encData={d1:e1,d2:e2,sum:eSum,data:getEnc(S.qTier,eSum)};
   }
 
-  // 3. Tiro Loot (1d8+1d12) — se niente trovato → ricompensa minima
   const ld8=roll(8),ld12=roll(12),lSum=ld8+ld12;
   let lootData=getLoot(lSum);
   let isMinima=false;
@@ -1662,57 +1734,58 @@ function buildQuestCard(idx){
     isMinima=true;
   }
 
+  return {idx,eventRoll:{d1,d2,sum:evSum},event:ev,encounter:encData,reward:{d8:ld8,d12:ld12,sum:lSum,data:lootData,isMinimum:isMinima}};
+}
 
-  // Build HTML
+function buildQuestCard(idx){
+  return renderQuestCard(createQuestCard(idx),idx);
+}
+
+function renderQuestCard(quest,idxFallback){
+  const idx=Number(quest?.idx)||idxFallback||1;
+  const ev=quest?.event||{name:'Unknown',type:'nothing'};
+  const evType=String(ev.type||'nothing');
+  const evRoll=quest?.eventRoll||{};
+  const encData=quest?.encounter||null;
+  const reward=quest?.reward||{};
+  const lootData=reward.data||{tipo:'Nothing found',rarita:'—',qualita:'—',valore:'—',extra:''};
+  const isMinima=!!reward.isMinimum;
   const div=document.createElement('div');
   div.className='room-card';
   div.style.animation=`fadeIn .28s ease ${idx*40}ms both`;
 
-  // Header
-  let eBadge='b-none';
-  if(ev.type==='encounter')eBadge='b-enc';
-  else if(ev.type==='loot')eBadge='b-loot';
-  else if(ev.type==='camp_nemico')eBadge='b-camp';
-  else if(ev.type!=='nothing')eBadge='b-mat';
+  const eBadge=eventBadgeCls(evType);
 
   let html=`<div class="room-hdr">
-    <span class="room-num">QUEST ${idx}</span>
-    <span class="badge ${eBadge}">${ev.name}</span>
-    <span class="det" style="font-size:.7rem">2d20: d20(${d1})+d20(${d2})=${evSum}</span>
+    <span class="room-num">QUEST ${escHtml(idx)}</span>
+    <span class="badge ${eBadge}">${escHtml(ev.name)}</span>
+    <span class="det" style="font-size:.7rem">2d20: d20(${escHtml(evRoll.d1 ?? '?')})+d20(${escHtml(evRoll.d2 ?? '?')})=${escHtml(evRoll.sum ?? '?')}</span>
   </div>
   <div class="room-body">`;
 
-  // Slot evento
-  html+=`<div class="slot${ev.type==='encounter'||ev.type==='camp_nemico'?' s-enc':''}">
-    <div class="slot-hdr"><span class="slot-title">Event Type</span><span class="badge ${eBadge}">${ev.type.toUpperCase()}</span></div>
-    <div class="slot-body"><strong>${ev.name}</strong></div>
+  html+=`<div class="slot${evType==='encounter'||evType==='camp_nemico'?' s-enc':''}">
+    <div class="slot-hdr"><span class="slot-title">Event Type</span><span class="badge ${eBadge}">${escHtml(evType.toUpperCase())}</span></div>
+    <div class="slot-body"><strong>${escHtml(ev.name)}</strong></div>
   </div>`;
 
-  // Slot encounter se necessario
   if(encData){
     const enc=encData.data;
     html+=`<div class="slot s-enc">
-      <div class="slot-hdr"><span class="slot-title">Encounter</span><span class="badge b-enc">2d20</span><span class="det" style="font-size:.7rem">d20(${encData.d1})+d20(${encData.d2})=${encData.sum}</span></div>
+      <div class="slot-hdr"><span class="slot-title">Encounter</span><span class="badge b-enc">2d20</span><span class="det" style="font-size:.7rem">d20(${escHtml(encData.d1 ?? '?')})+d20(${escHtml(encData.d2 ?? '?')})=${escHtml(encData.sum ?? '?')}</span></div>
       <div class="slot-body">
-        ${diffIcon(enc.diff)} <span class="${diffCls(enc.diff)}">${enc.diff}</span>
-        · Level <strong>${enc.lv}</strong>
-        · <span style="color:var(--amber)">${Number(enc.xp).toLocaleString()} XP/PC</span>
+        ${renderEncounterSummary(enc)}
       </div>
     </div>`;
   }
 
-  // Slot ricompensa loot
-  const rCls={'Legendary':'rleg','Very Rare':'rvr','Rare':'rr','Uncommon':'ruc'};
-  const rc=rCls[lootData.rarita]||'rc';
   html+=`<div class="slot s-loot">
     <div class="slot-hdr">
       <span class="slot-title">Reward</span>
       <span class="badge b-loot">${isMinima?'MINIMUM':'LOOT'}</span>
-      <span class="det" style="font-size:.7rem">${isMinima?`d8(${ld8})+d12(${ld12})=${lSum} → nothing, base guaranteed`:'d8('+ld8+')+d12('+ld12+')='+lSum}</span>
+      <span class="det" style="font-size:.7rem">${isMinima?`d8(${escHtml(reward.d8 ?? '?')})+d12(${escHtml(reward.d12 ?? '?')})=${escHtml(reward.sum ?? '?')} → nothing, base guaranteed`:'d8('+escHtml(reward.d8 ?? '?')+')+d12('+escHtml(reward.d12 ?? '?')+')='+escHtml(reward.sum ?? '?')}</span>
     </div>
     <div class="slot-body">
-      <strong>${lootData.tipo}</strong> <span class="${rc}">· ${lootData.rarita}</span>
-      <span class="det">· ${lootData.qualita} · ${lootData.valore} ${lootData.extra}</span>
+      ${renderLootSummary(lootData)}
     </div>
   </div>`;
 
@@ -1721,7 +1794,25 @@ function buildQuestCard(idx){
   return div;
 }
 
-function clearQuests(){ document.getElementById('quest-results').innerHTML=''; }
+function renderQuests(scroll=false){
+  const con=document.getElementById('quest-results');
+  if(!con)return;
+  con.innerHTML='';
+  const data=S.quest;
+  const quests=Array.isArray(data?.quests)?data.quests:[];
+  if(!data||!quests.length)return;
+  con.appendChild(renderQuestHeader(data));
+  quests.forEach((quest,i)=>con.appendChild(renderQuestCard(quest,i+1)));
+  refreshIcons();
+  if(scroll)con.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function clearQuests(){
+  S.quest=null;
+  const con=document.getElementById('quest-results');
+  if(con)con.innerHTML='';
+  saveState();
+}
 
 // ══════════════ TABS ══════════════
 const TABS=['hex','dungeon','quest','editor','guide'];
@@ -1741,20 +1832,20 @@ function switchEdTab(id){
 // ══════════════ EDITOR ══════════════
 function buildEditor(){
   // Weather
-  document.getElementById('tbl-weather').innerHTML=`<thead><tr><th>Season</th><th>Clear (≤ d20)</th><th>Rain (≤ d20)</th><th>Snow</th></tr></thead><tbody>`+T.weather.map(e=>`<tr><td>${e.s}</td><td><input class="ed-input" data-tbl="weather" data-s="${e.s}" data-f="sole" value="${e.sole}" style="width:60px;text-align:center;"></td><td><input class="ed-input" data-tbl="weather" data-s="${e.s}" data-f="pioggia" value="${e.pioggia}" style="width:60px;text-align:center;"></td><td style="color:var(--text-dim);font-size:.8rem;padding-left:10px;">remaining numbers up to 20</td></tr>`).join('')+`</tbody>`;
+  document.getElementById('tbl-weather').innerHTML=`<thead><tr><th>Season</th><th>Clear (≤ d20)</th><th>Rain (≤ d20)</th><th>Snow</th></tr></thead><tbody>`+T.weather.map(e=>`<tr><td>${escHtml(e.s)}</td><td><input class="ed-input" data-tbl="weather" data-s="${escAttr(e.s)}" data-f="sole" value="${escAttr(e.sole)}" style="width:60px;text-align:center;"></td><td><input class="ed-input" data-tbl="weather" data-s="${escAttr(e.s)}" data-f="pioggia" value="${escAttr(e.pioggia)}" style="width:60px;text-align:center;"></td><td style="color:var(--text-dim);font-size:.8rem;padding-left:10px;">remaining numbers up to 20</td></tr>`).join('')+`</tbody>`;
   // Event
-  document.getElementById('tbl-event').innerHTML=`<thead><tr><th>R</th><th>Nome</th><th>Tipo</th></tr></thead><tbody>`+T.events.map(e=>`<tr><td class="rn">${e.r}</td><td><input class="ed-input" data-tbl="events" data-r="${e.r}" data-f="name" value="${e.name}"></td><td><input class="ed-input" data-tbl="events" data-r="${e.r}" data-f="type" value="${e.type}" style="width:110px"></td></tr>`).join('')+`</tbody>`;
+  document.getElementById('tbl-event').innerHTML=`<thead><tr><th>R</th><th>Name</th><th>Type</th></tr></thead><tbody>`+T.events.map(e=>`<tr><td class="rn">${escHtml(e.r)}</td><td><input class="ed-input" data-tbl="events" data-r="${escAttr(e.r)}" data-f="name" value="${escAttr(e.name)}"></td><td><input class="ed-input" data-tbl="events" data-r="${escAttr(e.r)}" data-f="type" value="${escAttr(e.type)}" style="width:110px"></td></tr>`).join('')+`</tbody>`;
   // Loot
-  document.getElementById('tbl-loot').innerHTML=`<thead><tr><th>R</th><th>Type</th><th>Rarity</th><th>Quality</th><th>Value</th></tr></thead><tbody>`+T.loot.map(e=>`<tr><td class="rn">${e.r}</td><td><input class="ed-input" data-tbl="loot" data-r="${e.r}" data-f="tipo" value="${e.tipo}"></td><td><input class="ed-input" data-tbl="loot" data-r="${e.r}" data-f="rarita" value="${e.rarita}" style="width:95px"></td><td><input class="ed-input" data-tbl="loot" data-r="${e.r}" data-f="qualita" value="${e.qualita}" style="width:85px"></td><td><input class="ed-input" data-tbl="loot" data-r="${e.r}" data-f="valore" value="${e.valore}" style="width:80px"></td></tr>`).join('')+`</tbody>`;
+  document.getElementById('tbl-loot').innerHTML=`<thead><tr><th>R</th><th>Type</th><th>Rarity</th><th>Quality</th><th>Value</th></tr></thead><tbody>`+T.loot.map(e=>`<tr><td class="rn">${escHtml(e.r)}</td><td><input class="ed-input" data-tbl="loot" data-r="${escAttr(e.r)}" data-f="tipo" value="${escAttr(e.tipo)}"></td><td><input class="ed-input" data-tbl="loot" data-r="${escAttr(e.r)}" data-f="rarita" value="${escAttr(e.rarita)}" style="width:95px"></td><td><input class="ed-input" data-tbl="loot" data-r="${escAttr(e.r)}" data-f="qualita" value="${escAttr(e.qualita)}" style="width:85px"></td><td><input class="ed-input" data-tbl="loot" data-r="${escAttr(e.r)}" data-f="valore" value="${escAttr(e.valore)}" style="width:80px"></td></tr>`).join('')+`</tbody>`;
   // Complication
-  document.getElementById('tbl-compl').innerHTML=`<thead><tr><th>R</th><th>Tipo</th></tr></thead><tbody>`+T.compl.map(e=>`<tr><td class="rn">${e.r}</td><td><input class="ed-input" data-tbl="compl" data-r="${e.r}" data-f="type" value="${e.type}"></td></tr>`).join('')+`</tbody>`;
+  document.getElementById('tbl-compl').innerHTML=`<thead><tr><th>R</th><th>Type</th></tr></thead><tbody>`+T.compl.map(e=>`<tr><td class="rn">${escHtml(e.r)}</td><td><input class="ed-input" data-tbl="compl" data-r="${escAttr(e.r)}" data-f="type" value="${escAttr(e.type)}"></td></tr>`).join('')+`</tbody>`;
   // Encounter tiers
   for(let t=0;t<4;t++){
-    document.getElementById('tbl-enc'+(t+1)).innerHTML=`<thead><tr><th>R</th><th>Difficulty</th><th>Level</th><th>XP/PC</th></tr></thead><tbody>`+T.enc[t].map(e=>`<tr><td class="rn">${e.r}</td><td><input class="ed-input" data-tbl="enc${t}" data-r="${e.r}" data-f="diff" value="${e.diff}" style="width:85px"></td><td><input class="ed-input" data-tbl="enc${t}" data-r="${e.r}" data-f="lv" value="${e.lv}" style="width:55px"></td><td><input class="ed-input" data-tbl="enc${t}" data-r="${e.r}" data-f="xp" value="${e.xp}" style="width:70px"></td></tr>`).join('')+`</tbody>`;
-    document.getElementById('tbl-trap'+(t+1)).innerHTML=`<thead><tr><th>R</th><th>Type</th><th>Level</th><th>DC</th><th>Damage</th></tr></thead><tbody>`+T.trap[t].map(e=>`<tr><td class="rn">${e.r}</td><td><input class="ed-input" data-tbl="trap${t}" data-r="${e.r}" data-f="tipo" value="${e.tipo}" style="width:75px"></td><td><input class="ed-input" data-tbl="trap${t}" data-r="${e.r}" data-f="lv" value="${e.lv}" style="width:55px"></td><td><input class="ed-input" data-tbl="trap${t}" data-r="${e.r}" data-f="dc" value="${e.dc}" style="width:45px"></td><td><input class="ed-input" data-tbl="trap${t}" data-r="${e.r}" data-f="danno" value="${e.danno}" style="width:90px"></td></tr>`).join('')+`</tbody>`;
+    document.getElementById('tbl-enc'+(t+1)).innerHTML=`<thead><tr><th>R</th><th>Difficulty</th><th>Level</th><th>XP/PC</th></tr></thead><tbody>`+T.enc[t].map(e=>`<tr><td class="rn">${escHtml(e.r)}</td><td><input class="ed-input" data-tbl="enc${t}" data-r="${escAttr(e.r)}" data-f="diff" value="${escAttr(e.diff)}" style="width:85px"></td><td><input class="ed-input" data-tbl="enc${t}" data-r="${escAttr(e.r)}" data-f="lv" value="${escAttr(e.lv)}" style="width:55px"></td><td><input class="ed-input" data-tbl="enc${t}" data-r="${escAttr(e.r)}" data-f="xp" value="${escAttr(e.xp)}" style="width:70px"></td></tr>`).join('')+`</tbody>`;
+    document.getElementById('tbl-trap'+(t+1)).innerHTML=`<thead><tr><th>R</th><th>Type</th><th>Level</th><th>DC</th><th>Damage</th></tr></thead><tbody>`+T.trap[t].map(e=>`<tr><td class="rn">${escHtml(e.r)}</td><td><input class="ed-input" data-tbl="trap${t}" data-r="${escAttr(e.r)}" data-f="tipo" value="${escAttr(e.tipo)}" style="width:75px"></td><td><input class="ed-input" data-tbl="trap${t}" data-r="${escAttr(e.r)}" data-f="lv" value="${escAttr(e.lv)}" style="width:55px"></td><td><input class="ed-input" data-tbl="trap${t}" data-r="${escAttr(e.r)}" data-f="dc" value="${escAttr(e.dc)}" style="width:45px"></td><td><input class="ed-input" data-tbl="trap${t}" data-r="${escAttr(e.r)}" data-f="danno" value="${escAttr(e.danno)}" style="width:90px"></td></tr>`).join('')+`</tbody>`;
   }
   // Environment
-  document.getElementById('tbl-env').innerHTML=`<thead><tr><th>R</th><th>Severity</th></tr></thead><tbody>`+T.env.map(e=>`<tr><td class="rn">${e.r}</td><td><input class="ed-input" data-tbl="env" data-r="${e.r}" data-f="gravita" value="${e.gravita}"></td></tr>`).join('')+`</tbody>`;
+  document.getElementById('tbl-env').innerHTML=`<thead><tr><th>R</th><th>Severity</th></tr></thead><tbody>`+T.env.map(e=>`<tr><td class="rn">${escHtml(e.r)}</td><td><input class="ed-input" data-tbl="env" data-r="${escAttr(e.r)}" data-f="gravita" value="${escAttr(e.gravita)}"></td></tr>`).join('')+`</tbody>`;
 }
 
 function readEditor(){

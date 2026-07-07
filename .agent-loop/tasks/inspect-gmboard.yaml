@@ -1,0 +1,41 @@
+agent: codex
+backend: cli
+use_worktree: false
+plan_only: true
+
+task: |
+  Inspect the GM Board structure in GM-Board.
+
+  The main GM Board implementation is the standalone vanilla HTML/CSS/JS file:
+  `react-app/public/tools/gmboard.html`.
+
+  Project memory already covers the Character Builder, Sheet, and Encounter
+  Builder where relevant. Do NOT re-explore those from scratch. Focus the deep
+  read on the GM Board standalone tool and its thin React iframe shell.
+
+  Identify and document:
+  - GM Board entry point(s), route, iframe shell, and save-instance wiring;
+  - main UI views and their responsibilities: HEXcrawl, Dungeon, Quest, Tables,
+    and Guide;
+  - state model and where it lives inside `gmboard.html`;
+  - table data model, editable table behavior, reset behavior, and migrations;
+  - data sources and whether GM Board fetches any external 5etools data;
+  - relationship to shared app layers, especially `GmBoardPage.jsx`,
+    `StandaloneHtmlFrame.jsx`, `SaveInstanceButton.jsx`,
+    `shared/localStorageRegistries.js`, and `shared/storage.js`;
+  - persistence model: board ids, scoped localStorage keys, registry keys,
+    active-board key, unsaved board behavior, and legacy default migration;
+  - postMessage contract between the iframe and React host;
+  - HEXcrawl, dungeon, quest, weather, dice, log, and table-editor mechanics;
+  - whether initiative / turn / combat logic exists in GM Board, and how it
+    differs from the React Encounter Builder;
+  - which files matter most for future GM Board feature work.
+
+  Constraints:
+  - Do not modify application files except `.agent-loop/memory.md`.
+  - Do not refactor. Do not add runtime behavior.
+  - Do not vendor or copy external 5etools data.
+  - Use the project rules from `.agent-loop/config.yaml`.
+  - Merge findings into the existing project memory; preserve correct existing
+    memory and remove/replace stale GM Board notes if the inspection proves them
+    wrong.
