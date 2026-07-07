@@ -1,0 +1,31 @@
+# Smoke test for the skills pipeline: gmboard-ui (implementer/fixer/reviewer)
+# + caveman:caveman wenyan-ultra (planner/reviewer) from .agent-loop/subagents.yaml.
+# UI conventions are deliberately NOT spelled out here — the gmboard-ui skill
+# must supply them.
+agent: codex
+backend: cli
+
+plan_only: false
+branch_mode: in_place
+create_branch: always
+base_branch: feature/unified-character-storage
+agent_branch: feat/not-found-page
+allow_dirty: true
+
+task: |
+  Replace the silent unknown-route redirect with a themed "not found" page.
+
+  Today `react-app/src/App.jsx` maps `*` to `<Navigate to="/" replace />`, so a
+  mistyped URL silently lands on the home page with no explanation.
+
+  Requirements:
+  - Add a NotFoundPage under `react-app/src/pages/` following the existing page
+    folder structure, and route `*` to it in `App.jsx`.
+  - The page shows a short flavor message that fits the app's D&D tone (e.g.
+    "You wandered off the map"), the path that was not found, and a button that
+    navigates back to the home page.
+  - Keep the existing `/builder` and `/sheet` redirects working unchanged.
+  - Small scope: the new page, the route change, nothing else.
+
+  Verification:
+  - cd react-app && npm run build   (must pass)

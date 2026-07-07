@@ -7,6 +7,7 @@ import GmSheetsPage from './pages/gmsheets/GmSheetsPage.jsx';
 import CampaignsPage from './pages/campaigns/CampaignsPage.jsx';
 import CampaignSheetView from './pages/campaignsheet/CampaignSheetView.jsx';
 import HomePage from './pages/home/HomePage.jsx';
+import NotFoundPage from './pages/notfound/NotFoundPage.jsx';
 import CloudAutoSync from './shared/cloud/CloudAutoSync.jsx';
 
 export default function App() {
@@ -24,7 +25,7 @@ export default function App() {
       <Route path="/encounter-builder" element={<EncounterBuilderPage />} />
       <Route path="/builder" element={<Navigate to="/charbuilder" replace />} />
       <Route path="/sheet" element={<Navigate to="/charsheet" replace />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </>
   );
