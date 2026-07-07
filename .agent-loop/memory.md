@@ -37,7 +37,6 @@ App is React 19 + Vite + MUI + Supabase SPA in `react-app/`. D&D data is fetched
 - Feature root: `src/pages/encounterbuilder/`.
 - Shell: `EncounterBuilderPage.jsx` resolves `?enc=`, registers save-instance UX, renders Builder / Library / Encounter tabs.
 - State: `state/EncounterBuilderContext.jsx` + `state/reducer.js`.
-- Hooks: `hooks/useMonsterDb.js`, `hooks/useEncounterPersistence.js`, `hooks/useCampaignPlayers.js`, `hooks/useFightSheetSync.js`, `hooks/useSheetRealtime.js`.
 - Logic: `logic/bestiary.js`, `constants.js`, `combat.js`, `dice.js`, `difficulty.js`, `filters.js`, `markup.js`, `monsterUtils.js`, `storage.js`, `sheetSync.js`.
 - Data loading uses `DATA_BASE` / `IMAGE_BASE`; allowed raw source files are loaded from the bestiary index and filtered to `RAW_ALLOWED_SOURCES`.
 - Tokens use the image repo mirror at runtime. Missing-token fallback is `https://raw.githubusercontent.com/5etools-mirror-3/5etools-img/main/bestiary/tokens/XMM/Skeleton.webp`; never restore `bestiary/tokens/MM/...`.
