@@ -1,10 +1,12 @@
 // Artillerist Artificer — Eldritch Cannon active state (EFA 2024).
 //
-// Eldritch Cannon (lv.3): as a Magic action you create a Small or Tiny cannon
-// (AC 18, HP = 5 × Artificer level, immune poison/psychic). It lasts 1 hour or
-// until reduced to 0 HP; you can dismiss it early. You get one free creation per
-// Long Rest, or you may expend a spell slot to create another. On each of your
-// turns you can take a Bonus Action (within 60 ft) to have it use any of three
+// Eldritch Cannon (lv.3): as a Magic Action you create a Small or Tiny cannon
+// within 5 ft. It can be carried, or have legs/wheels. It has AC 18, HP = 5 ×
+// Artificer level, immunity to Poison/Psychic damage, and Mending restores 2d6
+// HP. It lasts 1 hour, until reduced to 0 HP, or until dismissed with a Magic
+// Action. You get one free creation per Long Rest, or you may expend a spell
+// slot to create another. On each of your turns you can take a Bonus Action
+// (within 60 ft) to have it move up to 15 ft before or after using any of three
 // options — Flamethrower, Force Ballista, or Protector — so the type is NOT
 // fixed at creation.
 //
@@ -23,15 +25,48 @@
 import { classLevel } from './classLevel.js';
 
 export const CANNON_SIZE_LABEL = { S: 'Small', T: 'Tiny' };
+// AC 18 is fixed by the stat block; expose it as a constant for the panel.
+export const CANNON_AC = 18;
+export const CANNON_CREATE_RANGE_FT = 5;
+export const CANNON_COMMAND_RANGE_FT = 60;
+export const CANNON_MOVE_FT = 15;
+export const CANNON_MENDING_HEAL = '2d6';
+export const CANNON_DAMAGE_IMMUNITIES = Object.freeze(['Poison', 'Psychic']);
+
+export function eldritchCannonRuleGroups(maxHp) {
+  return [
+    {
+      title: 'Create',
+      rows: [
+        ['Action', `Magic Action within ${CANNON_CREATE_RANGE_FT} ft`],
+        ['Size/Form', 'Small or Tiny; carried, legs, or wheels'],
+        ['Cost', '1/Long Rest or expend a spell slot'],
+      ],
+    },
+    {
+      title: 'Operate',
+      rows: [
+        ['Command', `Bonus Action while within ${CANNON_COMMAND_RANGE_FT} ft`],
+        ['Move', `Up to ${CANNON_MOVE_FT} ft before or after the option`],
+        ['Mode', 'Choose Flamethrower, Force Ballista, or Protector each activation'],
+      ],
+    },
+    {
+      title: 'Object',
+      rows: [
+        ['Defenses', `AC ${CANNON_AC}; HP ${maxHp}; immune ${CANNON_DAMAGE_IMMUNITIES.join('/')}`],
+        ['Repair', `Mending restores ${CANNON_MENDING_HEAL} HP`],
+        ['Ends', 'After 1 hour, at 0 HP, or dismissed with a Magic Action'],
+      ],
+    },
+  ];
+}
 
 // Artificer level (single-class or multiclass) — drives HP, damage scaling and
 // how many cannons may be active.
 export function artificerLevel(C) {
   return classLevel(C, 'Artificer');
 }
-
-// AC 18 is fixed by the stat block; expose it as a constant for the panel.
-export const CANNON_AC = 18;
 
 // HP = 5 × Artificer level (minimum 5 so a freshly-created cannon is never 0).
 export function cannonMaxHp(level) {

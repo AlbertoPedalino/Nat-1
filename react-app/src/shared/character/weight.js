@@ -22,12 +22,18 @@ export function itemWeight(item) {
   return Number(item?.weight ?? 0) || 0;
 }
 
+export function isItemCarried(item) {
+  return item?.carried !== false;
+}
+
 export function roundWeight(value) {
   return Math.round(((Number(value) || 0) + Number.EPSILON) * WEIGHT_PRECISION) / WEIGHT_PRECISION;
 }
 
 export function totalInventoryWeight(inventory) {
-  const total = (inventory || []).reduce((sum, item) => sum + itemWeight(item) * itemQty(item), 0);
+  const total = (inventory || []).reduce((sum, item) => (
+    isItemCarried(item) ? sum + itemWeight(item) * itemQty(item) : sum
+  ), 0);
   return roundWeight(total);
 }
 

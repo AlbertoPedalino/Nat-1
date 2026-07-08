@@ -1,6 +1,6 @@
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { Box, Button, IconButton, TextField, Tooltip, Typography, Alert, alpha } from '@mui/material';
-import { Backpack, Check, ChevronDown, ChevronRight, Minus, Package, Plus, Shield, Sparkles, Swords, Trash2, AlertTriangle } from 'lucide-react';
+import { Backpack, Check, ChevronDown, ChevronRight, Minus, Package, Plus, Shield, Sparkles, Swords, Trash2, AlertTriangle, Archive } from 'lucide-react';
 import SearchField from '../../../shared/character/SearchField.jsx';
 import { loadItems } from '../../charbuilder/logic/dataLoaders.js';
 import { getFinal } from '../logic/calculations.js';
@@ -16,7 +16,7 @@ import {
 import { ItemNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 import MiniBadge from '../../../shared/character/MiniBadge.jsx';
 import { INVENTORY_SOURCE_PRIORITY, sourceRank } from '../../../shared/character/sourcePriority.js';
-import { addInventoryEntries } from '../../../shared/character/itemContainers.js';
+import { addInventoryEntries, setOneInventoryUnitCarried } from '../../../shared/character/itemContainers.js';
 import { ITEM_ATTUNEMENT } from '../../../shared/entityColors.js';
 import {
   attunementRequirementText,
@@ -33,7 +33,13 @@ import { setCoinAmount, updateCustomCurrency } from '../../../shared/character/c
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import { ItemReferenceBody, QuantityAdder } from '../../../shared/character/ItemReference.jsx';
 import { itemDisplayName } from '../../../shared/character/itemIdentity.js';
-import { carryCapacity, formatWeight, itemQty as qty, totalCarriedWeight } from '../../../shared/character/weight.js';
+import {
+  carryCapacity,
+  formatWeight,
+  isItemCarried,
+  itemQty as qty,
+  totalCarriedWeight,
+} from '../../../shared/character/weight.js';
 import { useSheetActions } from '../context/SheetActionsContext.jsx';
 import { buildItemTags } from '../../../shared/character/craftedItems.js';
 
@@ -152,8 +158,13 @@ function normalizeStoredItem(item) {
     _rarityPriority,
     quantity: _sourceQuantity,
     weightLb: _sourceWeightLb,
+    carried: _sourceCarried,
+    equipped: _sourceEquipped,
+    equippedSlot: _sourceEquippedSlot,
+    attuned: _sourceAttuned,
     ...baseItem
   } = item || {};
+  const carried = _sourceCarried !== false;
   return {
     ...baseItem,
     name: baseItem.name,
@@ -163,8 +174,11 @@ function normalizeStoredItem(item) {
     weight: Number(baseItem.weight ?? 0),
     value: Number(baseItem.value || 0),
     qty: Math.max(1, Number(baseItem.qty ?? 1) || 1),
-    equipped: !!baseItem.equipped,
+    equipped: carried && !!_sourceEquipped,
     custom: !!baseItem.custom,
+    ...(carried && _sourceEquippedSlot ? { equippedSlot: _sourceEquippedSlot } : {}),
+    ...(carried && _sourceAttuned ? { attuned: true } : {}),
+    ...(!carried ? { carried: false } : {}),
   };
 }
 
@@ -498,7 +512,7 @@ export default function InventoryTab({ C, sheet }) {
   const toggleEquipped = useCallback((index) => {
     const current = invRef.current || [];
     const target = current[index];
-    if (!target) return;
+    if (!target || !isItemCarried(target)) return;
     const targetType = String(target.type || '').toUpperCase();
     const next = current.map((item, idx) => {
       if (idx === index) return { ...item, equipped: !item.equipped };
@@ -512,8 +526,16 @@ export default function InventoryTab({ C, sheet }) {
 
   const equipToSlot = useCallback((index, slot) => {
     const current = invRef.current || [];
+    if (!isItemCarried(current[index])) return;
     const next = equipToSlotHelper(current, index, slot);
     updateInv(next);
+  }, [updateInv]);
+
+  const toggleCarried = useCallback((index) => {
+    const current = invRef.current || [];
+    const target = current[index];
+    if (!target) return;
+    updateInv(setOneInventoryUnitCarried(current, index, !isItemCarried(target)));
   }, [updateInv]);
 
   const togglePactWeapon = useCallback((index) => {
@@ -587,6 +609,10 @@ export default function InventoryTab({ C, sheet }) {
     }
     if (result.status === 'cursed') {
       onShowToast?.('Cursed item', 'Attunement cannot be ended voluntarily. Break the curse first.', 0, []);
+      return;
+    }
+    if (result.status === 'not-carried') {
+      onShowToast?.('Attunement unavailable', 'Carry the item before attuning to it.', 0, []);
       return;
     }
     if (result.status === 'updated') updateInv(result.inventory);
@@ -753,6 +779,7 @@ export default function InventoryTab({ C, sheet }) {
                     onRemove={removeItem}
                     onEquip={toggleEquipped}
                     onEquipSlot={equipToSlot}
+                    onCarried={toggleCarried}
                     penaltyMsg={getPenaltyMessage(C, item, profSets)}
                     canPactWeapon={canUsePactWeaponFlag(C, item)}
                     onPactWeapon={togglePactWeapon}
@@ -852,13 +879,14 @@ function ItemTagsRow({ item, character }) {
   );
 }
 
-const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, onEquip, onEquipSlot, penaltyMsg, canPactWeapon, onPactWeapon, isArmorer, hasArcaneArmor, onArcaneArmor, onAttune, attunementFull, character, attunementContext, attunementLimit, onSetAbilityChoice, onConsumeTome }) {
+const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, onEquip, onEquipSlot, onCarried, penaltyMsg, canPactWeapon, onPactWeapon, isArmorer, hasArcaneArmor, onArcaneArmor, onAttune, attunementFull, character, attunementContext, attunementLimit, onSetAbilityChoice, onConsumeTome }) {
   const type = String(item.type || '').toUpperCase();
   const canEquip = ['M', 'R', 'LA', 'MA', 'HA', 'S', 'SCF', 'WD', 'RD', 'ST', 'WI', 'WEAPON', 'ARMOR'].includes(type);
+  const carried = isItemCarried(item);
 
   const showAbilityChoice = hasAbilityChoice(item);
   const showTomeConsume = isConsumableTome(item);
-  const rowBorderColor = penaltyMsg ? 'warning.main' : (item.equipped ? '#2ca797' : 'divider');
+  const rowBorderColor = penaltyMsg ? 'warning.main' : (item.equipped ? '#2ca797' : (!carried ? '#8a7d66' : 'divider'));
 
   return (
     <ExpandableCard
@@ -879,7 +907,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, 
         </>
       )}
       summary={({ toggle, open }) => (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px', px: '10px', py: '6px', bgcolor: item.equipped ? 'rgba(26,188,156,0.06)' : 'rgba(35,32,26,1)', border: 1, borderColor: rowBorderColor, borderRadius: open ? '8px 8px 0 0' : 1, mb: 0, '&:hover': { borderColor: 'rgba(202,165,80,0.34)' } }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px', px: '10px', py: '6px', bgcolor: item.equipped ? 'rgba(26,188,156,0.06)' : (!carried ? 'rgba(35,32,26,0.55)' : 'rgba(35,32,26,1)'), border: 1, borderColor: rowBorderColor, borderRadius: open ? '8px 8px 0 0' : 1, mb: 0, opacity: carried ? 1 : 0.82, '&:hover': { borderColor: 'rgba(202,165,80,0.34)' } }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
           <Box onClick={toggle} sx={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', minWidth: 0 }}>
@@ -887,6 +915,11 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, 
               <Typography noWrap sx={{ fontSize: '0.875rem', color: 'text.primary', minWidth: 0 }}>{itemDisplayName(item)}</Typography>
             </Box>
             <ItemTagsRow item={item} character={character} />
+            {!carried ? (
+              <Typography sx={{ fontSize: '0.56rem', color: '#9a8f7a', mt: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Archive size={10} /> Owned, not carried
+              </Typography>
+            ) : null}
             {penaltyMsg && (
               <Typography sx={{ fontSize: '0.6rem', color: 'warning.main', mt: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <AlertTriangle size={10} /> {penaltyMsg}
@@ -895,7 +928,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, 
           </Box>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', flexWrap: 'wrap' }}>
-          {isWeapon(item) ? (
+          {carried && isWeapon(item) ? (
             <Box sx={{ display: 'flex', gap: '2px' }}>
               {canOneHand(item) ? (
                 <SlotBtn active={item.equippedSlot === 'mainHand'} onClick={() => onEquipSlot(index, 'mainHand')} label="MH" />
@@ -907,27 +940,31 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, 
                 <SlotBtn active={item.equippedSlot === 'twoHands'} onClick={() => onEquipSlot(index, 'twoHands')} label="2H" />
               ) : null}
             </Box>
-          ) : canEquip ? (
+          ) : carried && canEquip ? (
             <Button size="small" onClick={() => onEquip(index)} startIcon={item.equipped ? <Check size={11} /> : null}
               sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: item.equipped ? '#2ca797' : 'divider', borderRadius: '3px', color: item.equipped ? '#2ca797' : 'text.secondary', bgcolor: item.equipped ? 'rgba(26,188,156,0.12)' : 'transparent', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem' }}>
               {item.equipped ? 'Equip.' : 'Equip'}
             </Button>
           ) : null}
-          {canPactWeapon ? (
+          {carried && canPactWeapon ? (
             <Button size="small" onClick={() => onPactWeapon(index)} startIcon={hasItemFlag(item, 'pactWeapon') ? <Check size={11} /> : null}
               sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: hasItemFlag(item, 'pactWeapon') ? '#9d7fb8' : 'divider', borderRadius: '3px', color: hasItemFlag(item, 'pactWeapon') ? '#9d7fb8' : 'text.secondary', bgcolor: hasItemFlag(item, 'pactWeapon') ? 'rgba(157,127,184,0.14)' : 'transparent', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem' }}>
               {hasItemFlag(item, 'pactWeapon') ? 'Pact' : 'Pact Weapon'}
             </Button>
           ) : null}
-          {isArmorer && (() => { const t = String(item.type || '').toUpperCase(); const n = String(item.name || '').toLowerCase(); return ['LA', 'MA', 'HA'].includes(t) && !['S', 'SHIELD'].includes(t) && n !== 'shield' && !n.endsWith(' shield'); })() ? (
+          {carried && isArmorer && (() => { const t = String(item.type || '').toUpperCase(); const n = String(item.name || '').toLowerCase(); return ['LA', 'MA', 'HA'].includes(t) && !['S', 'SHIELD'].includes(t) && n !== 'shield' && !n.endsWith(' shield'); })() ? (
             <Button size="small" onClick={() => onArcaneArmor(index)} startIcon={hasArcaneArmor ? <Check size={11} /> : null}
               sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: hasArcaneArmor ? '#58b879' : 'divider', borderRadius: '3px', color: hasArcaneArmor ? '#58b879' : 'text.secondary', bgcolor: hasArcaneArmor ? 'rgba(88,184,121,0.14)' : 'transparent', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem' }}>
               {hasArcaneArmor ? 'Arcane' : 'Arcane Armor'}
             </Button>
           ) : null}
-          {item.reqAttune ? (
+          {carried && item.reqAttune ? (
             <AttuneButton item={item} index={index} attunementFull={attunementFull} character={character} attunementContext={attunementContext} attunementLimit={attunementLimit} onAttune={onAttune} />
           ) : null}
+          <Button size="small" onClick={() => onCarried(index)} startIcon={!carried ? <Archive size={11} /> : null}
+            sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: carried ? 'divider' : '#8a7d66', borderRadius: '3px', color: carried ? 'text.secondary' : '#c7b690', bgcolor: carried ? 'transparent' : 'rgba(138,125,102,0.14)', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem' }}>
+            {carried ? 'Stash' : 'Carry'}
+          </Button>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, ml: 'auto' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
               <QtyButton onClick={() => onQty(index, -1)}><Minus size={12} /></QtyButton>

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import {
   Box, Button, Stack, ToggleButton, ToggleButtonGroup, Typography,
 } from '@mui/material';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useSheetActions } from '../context/SheetActionsContext.jsx';
 import { getMod, getFinal, getPB } from '../logic/calculations.js';
 import { getSheetSlots } from '../logic/spellsTabLogic.js';
@@ -16,6 +17,7 @@ import { inlineButtonSx } from './spellsTabStyles.js';
 import { ACTION_COLORS } from '../../../shared/entityColors.js';
 import {
   CANNON_AC,
+  CANNON_DAMAGE_IMMUNITIES,
   CANNON_SIZE_LABEL,
   artificerLevel,
   cannonMaxHp,
@@ -26,6 +28,7 @@ import {
   addCannonPatch,
   removeCannonPatch,
   updateCannonHpPatch,
+  eldritchCannonRuleGroups,
 } from '../../../shared/character/eldritchCannonForm.js';
 
 const CINZEL = '"Cinzel", Georgia, serif';
@@ -156,6 +159,8 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
         <Typography sx={{ ...subSx, ml: 'auto' }}>{cannons.length}/{capacity} active</Typography>
       </Box>
 
+      <CannonRulesSummary maxHp={maxHp} />
+
       {/* Active cannon boards */}
       <Stack spacing={0.8}>
         {cannons.map((cannon, index) => {
@@ -166,7 +171,6 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
                 <Typography sx={{ ...headerSx, fontSize: '0.62rem' }}>
                   {CANNON_SIZE_LABEL[cannon?.size] || 'Small'} Cannon {capacity > 1 ? `#${index + 1}` : ''}
                 </Typography>
-                <Typography sx={{ ...subSx, ml: 0.4 }}>AC {CANNON_AC} · immune poison/psychic</Typography>
                 <Button
                   size="small"
                   onClick={() => dismiss(index)}
@@ -174,6 +178,15 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
                 >
                   Dismiss
                 </Button>
+              </Box>
+              <Box sx={cannonDefenseSx}>
+                <Box sx={defenseBadgeSx}>
+                  <Typography component="span" sx={defenseLabelSx}>AC</Typography>
+                  <Typography component="span" sx={defenseValueSx}>{CANNON_AC}</Typography>
+                </Box>
+                <Typography sx={defenseTextSx}>
+                  Immune to {CANNON_DAMAGE_IMMUNITIES.join(' and ')} damage
+                </Typography>
               </Box>
 
               {/* HP editor — shared creature HP pool (readout + heal/damage stepper) */}
@@ -251,7 +264,7 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
           <Typography sx={{ ...subSx, fontStyle: 'italic', mt: 0.5, color: canCreate ? 'text.secondary' : '#c98a8a' }}>
             {!canCreate
               ? 'No Long Rest use left and no spell slot to expend — finish a rest.'
-              : `Creating spends ${effectiveCost === 'slot' ? `a level ${slotLevel} spell slot` : 'the 1/Long Rest use'}. AC ${CANNON_AC}, HP ${maxHp}, lasts 1 hour.`}
+              : `Creating spends ${effectiveCost === 'slot' ? `a level ${slotLevel} spell slot` : 'the 1/Long Rest use'}.`}
           </Typography>
         </Box>
       ) : (
@@ -260,6 +273,42 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
         </Typography>
       )}
     </Box>
+  );
+}
+
+function CannonRulesSummary({ maxHp }) {
+  const groups = eldritchCannonRuleGroups(maxHp);
+
+  return (
+    <ExpandableCard
+      containerSx={rulesPanelSx}
+      summary={({ toggle, open }) => {
+        const Chevron = open ? ChevronDown : ChevronRight;
+        return (
+          <Box onClick={toggle} sx={rulesToggleSx}>
+            <Chevron size={13} color="#9a8f7a" style={{ flexShrink: 0 }} />
+            <Typography sx={rulesToggleTitleSx}>Cannon Rules</Typography>
+            <Typography sx={rulesToggleMetaSx}>Create / Operate / Object</Typography>
+          </Box>
+        );
+      }}
+      detailsSx={{ pt: 0.6 }}
+      details={(
+        <Box sx={rulesSummarySx}>
+          {groups.map((group) => (
+            <Box key={group.title} sx={rulesGroupSx}>
+              <Typography sx={rulesGroupTitleSx}>{group.title}</Typography>
+              {group.rows.map(([label, value]) => (
+                <Box key={label} sx={rulesRowSx}>
+                  <Typography component="span" sx={rulesLabelSx}>{label}</Typography>
+                  <Typography component="span" sx={rulesValueSx}>{value}</Typography>
+                </Box>
+              ))}
+            </Box>
+          ))}
+        </Box>
+      )}
+    />
   );
 }
 
@@ -318,4 +367,129 @@ const toggleSx = {
   borderColor: 'rgba(202,165,80,0.4)',
   '&.Mui-selected': { bgcolor: 'rgba(237,212,138,0.18)', color: '#edd48a' },
   '&.Mui-selected:hover': { bgcolor: 'rgba(237,212,138,0.24)' },
+};
+
+const rulesPanelSx = {
+  mb: 0.8,
+};
+
+const rulesToggleSx = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
+  px: '8px',
+  py: '5px',
+  border: 1,
+  borderColor: 'rgba(202,165,80,0.25)',
+  borderRadius: 1,
+  bgcolor: 'rgba(35,32,26,0.58)',
+  cursor: 'pointer',
+  '&:hover': {
+    borderColor: 'rgba(202,165,80,0.45)',
+    bgcolor: 'rgba(202,165,80,0.07)',
+  },
+};
+
+const rulesToggleTitleSx = {
+  fontFamily: CINZEL,
+  fontSize: '0.58rem',
+  fontWeight: 700,
+  letterSpacing: '0.08em',
+  color: '#edd48a',
+  textTransform: 'uppercase',
+};
+
+const rulesToggleMetaSx = {
+  ml: 'auto',
+  minWidth: 0,
+  fontSize: '0.58rem',
+  color: 'text.secondary',
+};
+
+const rulesSummarySx = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+  gap: '6px',
+};
+
+const rulesGroupSx = {
+  minWidth: 0,
+  px: '8px',
+  py: '6px',
+  border: 1,
+  borderColor: 'rgba(255,255,255,0.08)',
+  borderRadius: 1,
+  bgcolor: 'rgba(35,32,26,0.42)',
+};
+
+const rulesGroupTitleSx = {
+  fontFamily: CINZEL,
+  fontSize: '0.54rem',
+  fontWeight: 700,
+  letterSpacing: '0.12em',
+  color: '#edd48a',
+  textTransform: 'uppercase',
+  mb: 0.25,
+};
+
+const rulesRowSx = {
+  display: 'grid',
+  gridTemplateColumns: '58px minmax(0, 1fr)',
+  gap: '6px',
+  alignItems: 'baseline',
+  py: '3px',
+  borderTop: '1px solid rgba(255,255,255,0.045)',
+  '&:first-of-type': { borderTop: 0 },
+};
+
+const rulesLabelSx = {
+  minWidth: 0,
+  fontSize: '0.55rem',
+  fontWeight: 700,
+  color: '#9a8f7a',
+  textTransform: 'uppercase',
+  letterSpacing: '0.04em',
+};
+
+const rulesValueSx = {
+  minWidth: 0,
+  fontSize: '0.62rem',
+  lineHeight: 1.35,
+  color: 'text.secondary',
+};
+
+const cannonDefenseSx = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  flexWrap: 'wrap',
+};
+
+const defenseBadgeSx = {
+  display: 'inline-flex',
+  alignItems: 'baseline',
+  gap: '4px',
+  px: '7px',
+  py: '2px',
+  border: '1px solid rgba(202,165,80,0.45)',
+  borderRadius: '5px',
+  bgcolor: 'rgba(202,165,80,0.12)',
+  color: '#edd48a',
+};
+
+const defenseLabelSx = {
+  fontSize: '0.52rem',
+  fontWeight: 700,
+  letterSpacing: '0.08em',
+};
+
+const defenseValueSx = {
+  fontSize: '0.72rem',
+  fontWeight: 800,
+  lineHeight: 1,
+};
+
+const defenseTextSx = {
+  fontSize: '0.62rem',
+  color: 'text.secondary',
 };

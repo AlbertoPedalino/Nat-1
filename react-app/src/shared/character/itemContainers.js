@@ -1,4 +1,5 @@
 import { canStackInventoryItems } from './itemIdentity.js';
+import { isItemCarried } from './weight.js';
 
 export function parseInventoryItemRef(ref) {
   const [name, source] = String(ref || '').split('|');
@@ -119,4 +120,37 @@ export function addInventoryEntries(inventory, entries, itemDb = null, normalize
     else next[idx] = { ...next[idx], qty: inventoryQty(next[idx]) + qty };
   });
   return next;
+}
+
+export function setInventoryItemCarried(item, carried) {
+  const wasCarried = isItemCarried(item);
+  const next = {
+    ...item,
+    equipped: carried && wasCarried ? item.equipped : false,
+    attuned: carried && wasCarried ? item.attuned : false,
+  };
+  if (carried) delete next.carried;
+  else next.carried = false;
+  if (!carried) delete next.equippedSlot;
+  if (!next.attuned) delete next.attuned;
+  return next;
+}
+
+export function setOneInventoryUnitCarried(inventory, index, carried) {
+  const current = Array.isArray(inventory) ? inventory : [];
+  const target = current[index];
+  if (!target || isItemCarried(target) === carried) return current;
+
+  const count = inventoryQty(target);
+  if (count <= 1) {
+    return addInventoryEntries(
+      current.filter((_, idx) => idx !== index),
+      [setInventoryItemCarried(target, carried)],
+    );
+  }
+
+  const remaining = { ...target, qty: count - 1 };
+  const moved = setInventoryItemCarried({ ...target, qty: 1 }, carried);
+  const base = current.map((item, idx) => (idx === index ? remaining : item));
+  return addInventoryEntries(base, [moved]);
 }

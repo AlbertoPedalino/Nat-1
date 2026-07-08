@@ -1,4 +1,5 @@
 import { itemIdentityKey } from './itemIdentity.js';
+import { isItemCarried } from './weight.js';
 
 export const BASE_ATTUNEMENT_LIMIT = 3;
 
@@ -17,12 +18,13 @@ export function requiresEquipmentForEffect(item) {
 
 export function isItemEffectActive(item) {
   if (!item) return false;
+  if (!isItemCarried(item)) return false;
   if (requiresAttunement(item) && !item.attuned) return false;
   return requiresEquipmentForEffect(item) ? Boolean(item.equipped) : true;
 }
 
 export function countAttunedItems(inventory) {
-  return (inventory || []).filter((item) => requiresAttunement(item) && item?.attuned).length;
+  return (inventory || []).filter((item) => isItemCarried(item) && requiresAttunement(item) && item?.attuned).length;
 }
 
 export function resolveAttunementLimit(effects, baseLimit = BASE_ATTUNEMENT_LIMIT) {
@@ -127,7 +129,8 @@ export function enforceAttunementRules(
 
     const identity = item?.name && item?.source ? itemIdentityKey(item) : '';
     const eligibility = getAttunementEligibility(item, character, context);
-    const invalid = !requiresAttunement(item)
+    const invalid = !isItemCarried(item)
+      || !requiresAttunement(item)
       || eligibility.status === 'ineligible'
       || occupied >= limit
       || (identity && identities.has(identity));
@@ -159,6 +162,7 @@ export function toggleItemAttunement(
   const target = current[index];
   if (!target) return { inventory: current, status: 'not-found' };
   if (!requiresAttunement(target)) return { inventory: current, status: 'not-required' };
+  if (!isItemCarried(target)) return { inventory: current, status: 'not-carried' };
   if (target.attuned && target.curse && !curseBroken) {
     return { inventory: current, status: 'cursed' };
   }
@@ -174,7 +178,7 @@ export function toggleItemAttunement(
 
     const identity = target?.name && target?.source ? itemIdentityKey(target) : '';
     if (identity && current.some((item, itemIndex) => (
-      itemIndex !== index && item?.attuned && itemIdentityKey(item) === identity
+      itemIndex !== index && isItemCarried(item) && item?.attuned && itemIdentityKey(item) === identity
     ))) {
       return { inventory: current, status: 'duplicate' };
     }

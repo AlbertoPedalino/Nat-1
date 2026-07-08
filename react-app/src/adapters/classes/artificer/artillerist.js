@@ -1,6 +1,14 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
 import { getArtificerConditionalBonusToolCount } from './artificerTools.js';
-import { getActiveCannons } from '../../../shared/character/eldritchCannonForm.js';
+import {
+  CANNON_AC,
+  CANNON_COMMAND_RANGE_FT,
+  CANNON_CREATE_RANGE_FT,
+  CANNON_DAMAGE_IMMUNITIES,
+  CANNON_MENDING_HEAL,
+  CANNON_MOVE_FT,
+  getActiveCannons,
+} from '../../../shared/character/eldritchCannonForm.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -149,7 +157,7 @@ registerSubclassSheetActions("Artificer_Artillerist", [
     // Creating the cannon costs an Action, so the card always lives under
     // Actions; its Bonus/Reaction options only exist while a cannon is active.
     _alsoFiltersCondition: (C) => getActiveCannons(C).length > 0,
-    "desc": "Action: conjure a Small or Tiny Eldritch Cannon within 5 ft (or in your hand if Tiny). Choose type: Flamethrower (15 ft cone, DEX save = spell DC, 2d8 fire, half on success), Force Ballista (ranged spell attack, 2d8 force, pushed 5 ft), Protector (you + allies within 10 ft gain THP = 1d8 + INT mod). Bonus Action each turn to activate. Lasts 1 hour or until destroyed (AC 18, HP = 5 × Artificer level). 1/LR or expend a spell slot. At lv.15 (Fortified Position): can have 2 active simultaneously."
+    "desc": `Magic Action: create a Small or Tiny Eldritch Cannon within ${CANNON_CREATE_RANGE_FT} ft. It can be carried, or have legs/wheels. AC ${CANNON_AC}, HP = 5 × Artificer level, immune to ${CANNON_DAMAGE_IMMUNITIES.join('/')} damage; Mending restores ${CANNON_MENDING_HEAL} HP. Lasts 1 hour, until 0 HP, or until dismissed with a Magic Action. 1/LR or expend a spell slot. Bonus Action within ${CANNON_COMMAND_RANGE_FT} ft: activate Flamethrower (15 ft cone, DEX save = spell DC, 2d8 fire, half on success), Force Ballista (ranged spell attack, 2d8 force, pushed 5 ft), or Protector (you + allies within 10 ft gain THP = 1d8 + INT mod), and move it up to ${CANNON_MOVE_FT} ft before or after the option. At lv.15: can have 2 active simultaneously.`
   },
   {
     "name": "Arcane Firearm",

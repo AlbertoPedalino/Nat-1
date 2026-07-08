@@ -510,8 +510,8 @@ export async function loadBeasts() {
 }
 
 // Fields refreshed from the items DB on inventory reconciliation. Keeping the
-// list explicit avoids stomping on user-managed state (qty, equipped, attuned,
-// equippedSlot, flags, custom).
+// list explicit avoids stomping on user-managed state (qty, equipped, carried,
+// attuned, equippedSlot, flags, custom).
 const RECONCILED_ITEM_FIELDS = [
   'ability', 'modifySpeed', 'senses',
   'resist', 'immune', 'vulnerable', 'conditionImmune',
@@ -527,7 +527,7 @@ const RECONCILED_ITEM_FIELDS = [
 
 // Refresh structured effect fields on persisted inventory items by re-merging
 // from the live items database. Preserves user-managed flags (qty, equipped,
-// attuned, equippedSlot, custom flags).
+// carried, attuned, equippedSlot, custom flags).
 export function reconcileInventoryWithItemsDb(inventory, itemsDb) {
   const current = Array.isArray(inventory) ? inventory : [];
   if (!Array.isArray(itemsDb) || itemsDb.length === 0) return current;
