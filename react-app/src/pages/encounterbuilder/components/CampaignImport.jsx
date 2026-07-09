@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Box, Button, Chip, FormControl, InputLabel, MenuItem, Paper, Select, Stack, Typography } from '@mui/material';
 import { Users } from 'lucide-react';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
@@ -7,11 +7,29 @@ import { clampInt } from '../logic/monsterUtils.js';
 export default function CampaignImport() {
   const { campaignPlayers, state, dispatch } = useEncounterBuilder();
   const [selectedId, setSelectedId] = useState('');
+  const [importing, setImporting] = useState(false);
   const selected = useMemo(() => (
     campaignPlayers.campaigns.find((campaign) => campaign.id === selectedId)
     || campaignPlayers.campaigns[0]
     || null
   ), [campaignPlayers.campaigns, selectedId]);
+
+  // Sheets are fetched once on page load, so re-fetch the selected campaign's
+  // right before importing: ones edited since then (HP, wild shape, level up)
+  // would otherwise come in stale. Falls back to the cached list on failure.
+  const handleAdd = useCallback(async () => {
+    if (!selected || importing) return;
+    setImporting(true);
+    try {
+      const fresh = await campaignPlayers.refreshCampaign?.(selected.id);
+      const players = fresh || selected.players;
+      if (players.length) {
+        dispatch({ type: 'importCampaignPlayers', players });
+      }
+    } finally {
+      setImporting(false);
+    }
+  }, [campaignPlayers, dispatch, importing, selected]);
 
   if (!campaignPlayers.cloudEnabled) return null;
 
@@ -50,10 +68,10 @@ export default function CampaignImport() {
               <Button
                 variant="outlined"
                 startIcon={<Users size={15} />}
-                disabled={!selected.players.length}
-                onClick={() => dispatch({ type: 'importCampaignPlayers', players: selected.players })}
+                disabled={!selected.players.length || importing}
+                onClick={handleAdd}
               >
-                Add
+                {importing ? 'Adding...' : 'Add'}
               </Button>
             </Stack>
             <Typography variant="caption" color="text.secondary">

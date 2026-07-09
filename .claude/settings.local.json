@@ -147,7 +147,8 @@
       "Bash(curl -s -o obj.json \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/objects.json\")",
       "PowerShell($b = [System.IO.File]::ReadAllBytes\\(\"react-app/src/shared/character/beasts.js\"\\); \"len=$\\($b.Length\\)\"; $nul = for \\($i=0; $i -lt $b.Length; $i++\\) { if \\($b[$i] -eq 0\\) { $i } }; \"NUL offsets: $nul\")",
       "PowerShell($p=\"C:\\\\Users\\\\alber\\\\Documents\\\\DND\\\\GM-Board\\\\react-app\\\\src\\\\shared\\\\character\\\\beasts.js\"; $b=[System.IO.File]::ReadAllBytes\\($p\\); \"len=$\\($b.Length\\)\"; $nul=for\\($i=0;$i -lt $b.Length;$i++\\){if\\($b[$i] -eq 0\\){$i}}; \"NUL offsets: $nul\")",
-      "PowerShell($p=\"C:\\\\Users\\\\alber\\\\Documents\\\\DND\\\\GM-Board\\\\react-app\\\\src\\\\shared\\\\character\\\\beasts.js\"; $b=[System.IO.File]::ReadAllBytes\\($p\\); $seg=$b[11820..12290]; $s=[System.Text.Encoding]::ASCII.GetString\\($seg\\) -replace \"`0\",\"<NUL>\"; $s)"
+      "PowerShell($p=\"C:\\\\Users\\\\alber\\\\Documents\\\\DND\\\\GM-Board\\\\react-app\\\\src\\\\shared\\\\character\\\\beasts.js\"; $b=[System.IO.File]::ReadAllBytes\\($p\\); $seg=$b[11820..12290]; $s=[System.Text.Encoding]::ASCII.GetString\\($seg\\) -replace \"`0\",\"<NUL>\"; $s)",
+      "PowerShell(npm test *)"
     ]
   }
 }
