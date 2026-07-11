@@ -8,10 +8,15 @@ backend:
 git:
   remote: origin
   base_branch: feature/unified-character-storage
+  allow_dirty: false
   worktree_root: ../agent-worktrees
-  require_clean_repo: false
+  require_clean_repo: true
   delete_worktree_on_success: false
   delete_worktree_on_failure: false
+  # Each implementation run file supplies its own branch mode and agent_branch.
+  # The orchestrator commits only after the full suite passes and the reviewer
+  # explicitly approves; plan-only tasks remain branchless.
+  commit_on_success: true
 
 limits:
   # Effectively uncapped. A full, clean feature port creates many modules, takes
@@ -19,12 +24,20 @@ limits:
   max_fix_attempts: 6
   max_changed_files: 1000
   phase_timeout_seconds: 36000
-  # NOTE: subagent `max_turns` in configs/subagents.default.yaml is parsed but NOT
-  # enforced by the runner, so the agent already runs each phase to completion.
   # No max_budget_usd: Claude subscription (Plus) has no per-dollar billing, so a
   # cap only stops phases early at a phantom API cost. The real limit is the
-  # plan's usage window. (max_turns_* keys are ignored by the orchestrator; the
-  # CLI has no turn flag — per-phase turns live in subagents.default.yaml.)
+  # plan's usage window. Each phase is bounded by phase_timeout_seconds.
+
+testing:
+  policy: required
+  paths:
+    - react-app/src/*.test.js
+    - react-app/src/**/*.test.js
+    - react-app/src/*.spec.js
+    - react-app/src/**/*.spec.js
+    - react-app/test/**
+    - react-app/tests/**
+  forbid_test_deletion: true
 
 verification:
   timeout_seconds: 600
@@ -35,7 +48,7 @@ verification:
 
 blocked_commands:
   - git push
-  - git commit
+  - git commit  # Blocked for agents; the orchestrator owns approved checkpoints.
   - rm -rf
   - npm publish
   - pnpm publish
