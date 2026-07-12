@@ -1,6 +1,6 @@
 # Target-local subagent overlay for GM-Board.
 # Merged field-by-field over the orchestrator defaults; may only set
-# description, prompt_template, max_turns, and skills.
+# description, prompt_template, and skills.
 # gmboard-ui is repo-local (.claude/skills/gmboard-ui/SKILL.md).
 # caveman:caveman resolves to the installed caveman plugin: loaded natively by
 # the claude backend, inlined from the plugin install for the codex backend.
@@ -14,7 +14,7 @@ subagents:
     skills:
       - gmboard-ui
       - name: caveman:caveman
-      - args: wenyan-ultra
+        args: wenyan-ultra
 
   fixer:
     skills:
