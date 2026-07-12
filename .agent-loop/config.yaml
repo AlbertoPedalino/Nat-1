@@ -10,7 +10,9 @@ git:
   base_branch: feature/unified-character-storage
   allow_dirty: false
   worktree_root: ../agent-worktrees
-  require_clean_repo: true
+  # The source repository owns managed memory/history files that may change
+  # during worktree runs. Checkpoint safety is enforced on the agent worktree.
+  require_clean_repo: false
   delete_worktree_on_success: false
   delete_worktree_on_failure: false
   # Each implementation run file supplies its own branch mode and agent_branch.
