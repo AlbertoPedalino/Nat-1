@@ -13,10 +13,14 @@ subagents:
   implementer:
     skills:
       - gmboard-ui
+      - name: caveman:caveman
+      - args: wenyan-ultra
 
   fixer:
     skills:
       - gmboard-ui
+      - name: caveman:caveman
+        args: wenyan-ultra
 
   reviewer:
     skills:
