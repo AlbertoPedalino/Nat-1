@@ -24,3 +24,27 @@ test('preserves long and encoded paths without normalization', () => {
     `${pathname}?map=deep%20wilds#dead-end`,
   );
 });
+
+test('handles omitted search and hash fields', () => {
+  assert.equal(composeMissingPath({ pathname: '/lost-road' }), '/lost-road');
+});
+
+test('falls back to the root path for a missing or incomplete location', () => {
+  assert.equal(composeMissingPath(), '/');
+  assert.equal(composeMissingPath(null), '/');
+  assert.equal(composeMissingPath({}), '/');
+});
+
+test('preserves query and hash when pathname is missing', () => {
+  assert.equal(
+    composeMissingPath({ search: '?from=keep', hash: '#camp' }),
+    '/?from=keep#camp',
+  );
+});
+
+test('does not render nullish location fields', () => {
+  assert.equal(
+    composeMissingPath({ pathname: null, search: undefined, hash: null }),
+    '/',
+  );
+});
