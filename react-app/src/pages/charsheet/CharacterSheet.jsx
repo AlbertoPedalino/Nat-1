@@ -19,6 +19,8 @@ import { deriveSheetState } from './state.js';
 import { ProficiencySetsProvider } from './context/ProficiencySetsContext.jsx';
 import { SheetActionsProvider } from './context/SheetActionsContext.jsx';
 import { clearCraftedByFlag, VANISH_ON_LONG_REST_FLAGS } from '../../shared/character/craftedItems.js';
+import { collectReplicatePlanChoices } from '../../shared/character/replicateMagicItem.js';
+import { pruneReplicatedItemsForPlans } from '../../shared/character/magicItemTinker.js';
 import { buildD20Meta, formatD20Detail, rollD20 as rollD20Dice } from '../../shared/character/dice.js';
 import { aggregateSavingThrowBonus } from '../../shared/character/itemBonus.js';
 import { itemEffectInventory } from '../../shared/character/wildShapeForm.js';
@@ -110,7 +112,12 @@ export default function CharacterSheet({ externalChar = null, externalCharId = n
       // records while preserving user-managed inventory state.
       let nextChar = ch;
       if (ch && Array.isArray(ch.inventory)) {
-        const refreshed = reconcileInventoryWithItemsDb(ch.inventory, itemsDb);
+        // Replacing a Replicate Magic Item plan immediately ends every item
+        // made from that plan. Apply this before DB reconciliation so a stale
+        // crafted item cannot survive by resolving against its old plan value.
+        const currentPlans = collectReplicatePlanChoices(ch);
+        const validInventory = pruneReplicatedItemsForPlans(ch.inventory, currentPlans);
+        const refreshed = reconcileInventoryWithItemsDb(validInventory, itemsDb);
         const reconciled = normalizeCharacterAttunement({ ...ch, inventory: refreshed }, refreshed);
         if (reconciled !== ch.inventory) {
           nextChar = { ...ch, inventory: reconciled };

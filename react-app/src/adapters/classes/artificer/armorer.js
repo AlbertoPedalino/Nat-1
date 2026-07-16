@@ -1,5 +1,10 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
 import { getArtificerConditionalBonusToolCount } from './artificerTools.js';
+import {
+  REPLICATE_ARMORER_CHOICE_KEY,
+  REPLICATE_GENERAL_CHOICE_KEY,
+  isReplicateArmorItem,
+} from '../../../shared/character/replicateMagicItem.js';
 
 export default function install(registry, context = {}) {
   const getPB = context?.getPB;
@@ -134,6 +139,23 @@ registerSubclassAdapter("Artificer_Armorer", function (cls, lv, specs, ctx = {})
     count: 1,
     level: 3
   });
+
+  if (lv >= 9) {
+    const generalPlanSpec = specs.find((spec) => (
+      String(spec?.key || '').replace(/^mc\d+_/, '') === REPLICATE_GENERAL_CHOICE_KEY
+    ));
+    if (generalPlanSpec) {
+      specs.push({
+        key: REPLICATE_ARMORER_CHOICE_KEY,
+        label: 'Armorer - Additional Armor Replication Plan',
+        type: 'replicate_magic_item',
+        from: generalPlanSpec.from || [],
+        count: 1,
+        itemFilter: isReplicateArmorItem,
+        level: 9,
+      });
+    }
+  }
 
   const bonusCount = getArtificerConditionalBonusToolCount(ctx, ["Smith's Tools"], cls);
   if (!bonusCount) return;

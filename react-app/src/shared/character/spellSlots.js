@@ -16,6 +16,13 @@ export function getPactSlotUsed(used, level) {
   return Number(source[key] || 0);
 }
 
+export function getAvailablePactSlots(pactSlots, sheet) {
+  const level = Number(pactSlots?.level || 0);
+  const total = Math.max(0, Number(pactSlots?.count || 0));
+  if (!level || !total) return 0;
+  return Math.max(0, total - getPactSlotUsed(sheet?.spellSlotUsed, level));
+}
+
 export function getAvailableRegularSlots(regularSlots, sheet, level) {
   const idx = Number(level) - 1;
   if (idx < 0 || idx >= regularSlots.length) return 0;
@@ -49,6 +56,21 @@ export function consumeSlot(regularSlots, sheet, level, onUpdateSheet, onUpdateC
     next[level] = used + 1;
     if (typeof onUpdateSheet === 'function') onUpdateSheet({ spellSlotUsed: next });
     if (typeof onUpdateCharacter === 'function') onUpdateCharacter((prev) => ({ ...prev, spellSlotsUsed: next }));
+  }
+  return true;
+}
+
+export function consumePactSlot(pactSlots, sheet, onUpdateSheet, onUpdateCharacter) {
+  const level = Number(pactSlots?.level || 0);
+  const total = Math.max(0, Number(pactSlots?.count || 0));
+  if (!level || !total || getAvailablePactSlots(pactSlots, sheet) <= 0) return false;
+
+  const next = { ...(sheet?.spellSlotUsed || {}) };
+  const key = getPactSlotUsedKey(level);
+  next[key] = Math.min(total, getPactSlotUsed(next, level) + 1);
+  if (typeof onUpdateSheet === 'function') onUpdateSheet({ spellSlotUsed: next });
+  if (typeof onUpdateCharacter === 'function') {
+    onUpdateCharacter((prev) => ({ ...prev, spellSlotsUsed: next }));
   }
   return true;
 }

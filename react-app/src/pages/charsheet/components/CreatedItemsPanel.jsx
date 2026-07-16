@@ -138,11 +138,27 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
   const total = craftedCount(inv, flag);
   const remaining = Math.max(0, max - total);
 
+  const canAddItem = useCallback((value, resolvedItem = resolveItem(value)) => {
+    if (typeof detail.canAddItem !== 'function') return true;
+    try {
+      return detail.canAddItem({
+        value,
+        resolvedItem,
+        inventory: inv,
+        flag,
+        max,
+      }) !== false;
+    } catch {
+      return false;
+    }
+  }, [detail.canAddItem, flag, inv, max, resolveItem]);
+
   const handleAdd = (value) => {
     if (remaining <= 0 || !onUpdateInventory) return;
     if (craftedCountFor(inv, flag, value) >= maxPerItem) return;
     const resolvedItem = resolveItem(value);
     if (requireResolvedItem && !resolvedItem) return;
+    if (!canAddItem(value, resolvedItem)) return;
     const label = itemLabel(value);
     const itemData = prepareCreatedItemData(resolvedItem, label);
     onUpdateInventory(addCraftedItem(inv, itemData, flag, value, max, action?.name));
@@ -167,6 +183,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
     || items.every((value) => (
       craftedCountFor(inv, flag, value) >= maxPerItem
       || (requireResolvedItem && !resolveItem(value))
+      || !canAddItem(value)
     ));
 
   if (!items.length) {
@@ -214,7 +231,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
           const count = craftedCountFor(inv, flag, value);
           const dbItem = resolveItem(value);
           const unavailable = requireResolvedItem && !dbItem;
-          const addDisabled = remaining <= 0 || count >= maxPerItem || unavailable;
+          const addDisabled = remaining <= 0 || count >= maxPerItem || unavailable || !canAddItem(value, dbItem);
           const removeDisabled = count <= 0;
           const stepper = (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>

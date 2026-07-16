@@ -23,6 +23,7 @@
 // built from a helper or a bespoke predicate.
 
 import { itemIdentityKey } from './itemIdentity.js';
+import { primaryClassLevel } from './classLevel.js';
 
 const norm = (value) => String(value || '').split('|')[0];
 const lc = (value) => String(value || '').toLowerCase();
@@ -36,6 +37,16 @@ const isWeapon = (item) => ['M', 'R'].includes(typeOf(item)); // Melee / Ranged
 // Body armor (Light / Medium / Heavy). Excludes shields (S): a shield is a
 // single base item, so "Shield +N" stays a concrete plan with no choice.
 const isBodyArmor = (item) => ['LA', 'MA', 'HA'].includes(typeOf(item));
+// The Armorer's level-9 Armor Replication benefit uses the broad magic-item
+// Armor category, which includes shields as well as worn body armor.
+export const isReplicateArmorItem = (item) => {
+  const type = typeOf(item);
+  if (['LA', 'MA', 'HA', 'S'].includes(type)) return true;
+  // 5etools models a handful of concrete Armor plans (notably Armor of
+  // Resistance) as generic-variant group records. They still belong to the
+  // rules' Armor category even though their storage type is GV.
+  return type === 'GV' && /^(?:\+\d+\s+)?armor\b/i.test(String(item?.name || ''));
+};
 // Standard fantasy weapon: drop modern/futuristic firearms (5etools tags them
 // with `age` = "modern"/"futuristic"; renaissance Musket/Pistol carry none).
 const isMundaneWeapon = (item) => isWeapon(item) && !item.age;
@@ -109,6 +120,7 @@ export const REPLICATE_BUCKETS = [
         bonusWeaponAttack: '+1',
         bonusWeaponDamage: '+1',
         reqAttune: true,
+        rarity: 'uncommon',
       },
       entries: [{
         type: 'entries',
@@ -131,6 +143,7 @@ export const REPLICATE_BUCKETS = [
       patch: {
         bonusWeaponAttack: '+1',
         bonusWeaponDamage: '+1',
+        rarity: 'uncommon',
       },
       entries: [{
         type: 'entries',
@@ -167,6 +180,44 @@ const BY_ID = new Map(REPLICATE_BUCKETS.map((b) => [b.id, b]));
 const CHOICE_PREFIX = 'replicate-choice:v1:';
 
 export const REPLICATE_BUCKET_LABELS = REPLICATE_BUCKETS.map((b) => b.label);
+
+export const REPLICATE_GENERAL_CHOICE_KEY = 'artificer_replicate_magic_item_plans';
+export const REPLICATE_ARMORER_CHOICE_KEY = 'armorer_replicate_magic_item_armor_plan';
+
+export function hasImprovedArmorer(character) {
+  if (
+    String(character?.className || '').toLowerCase() === 'artificer'
+    && String(character?.subclassShortName || '').toLowerCase() === 'armorer'
+    && primaryClassLevel(character) >= 9
+  ) return true;
+  return (character?.extraClasses || []).some((entry) => (
+    String(entry?.name || '').toLowerCase() === 'artificer'
+    && String(entry?.subclassShortName || '').toLowerCase() === 'armorer'
+    && Number(entry?.level || 0) >= 9
+  ));
+}
+
+export function isReplicatePlanChoiceKey(key, character = null) {
+  const base = String(key || '').replace(/^mc\d+_/, '');
+  if (base === REPLICATE_GENERAL_CHOICE_KEY) return true;
+  if (base !== REPLICATE_ARMORER_CHOICE_KEY) return false;
+  return character ? hasImprovedArmorer(character) : true;
+}
+
+// Gather every plan owned by the active Artificer, including the Armorer's
+// additional Armor plan and multiclass-prefixed choice keys.
+export function collectReplicatePlanChoices(character) {
+  const out = [];
+  Object.entries(character?.choices || {}).forEach(([key, raw]) => {
+    if (!isReplicatePlanChoiceKey(key, character)) return;
+    const values = Array.isArray(raw) ? raw : raw ? [raw] : [];
+    values.forEach((value) => {
+      const normalized = String(value || '');
+      if (normalized && !out.includes(normalized)) out.push(normalized);
+    });
+  });
+  return out;
+}
 
 // Resolve a pool entry to its bucket descriptor, or null for a concrete item.
 export function replicateBucketFromLabel(label) {

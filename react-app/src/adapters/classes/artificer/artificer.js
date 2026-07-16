@@ -1,10 +1,17 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
 import {
   REPLICATE_BUCKETS,
+  collectReplicatePlanChoices,
+  hasImprovedArmorer,
+  isReplicateArmorItem,
   replicateChoiceLabel,
   resolveReplicateChoice,
 } from '../../../shared/character/replicateMagicItem.js';
 import { primaryClassLevel } from '../../../shared/character/classLevel.js';
+import {
+  MAGIC_ITEM_TINKER_DRAIN_RESOURCE,
+  MAGIC_ITEM_TINKER_TRANSMUTE_RESOURCE,
+} from '../../../shared/character/magicItemTinker.js';
 
 const _REPLICATE_BUCKET_LABEL = Object.fromEntries(REPLICATE_BUCKETS.map((b) => [b.id, b.label]));
 
@@ -329,14 +336,9 @@ registerClassSheetActions("Artificer", [
     detailType: 'createdItems',
     detail: ({ action, character }) => {
       const lv = Number(action?.ownerLevel || primaryClassLevel(character));
-      const choices = character?.choices || {};
-      let plans = [];
-      for (const [k, v] of Object.entries(choices)) {
-        if (k.replace(/^mc\d+_/, '') === 'artificer_replicate_magic_item_plans') {
-          plans = Array.isArray(v) ? v : (v ? [v] : []);
-          break;
-        }
-      }
+      const plans = collectReplicatePlanChoices(character);
+      const baseMax = _artificerActiveItemsAtLevel(lv);
+      const improvedArmorer = hasImprovedArmorer(character);
       return {
         flag: 'replicated',
         tagLabel: 'Replicated Items',
@@ -344,11 +346,32 @@ registerClassSheetActions("Artificer", [
         itemLabel: replicateChoiceLabel,
         resolveItem: (plan, itemsDb) => resolveReplicateChoice(plan, itemsDb)?.item || null,
         requireResolvedItem: true,
-        max: _artificerActiveItemsAtLevel(lv),
+        max: baseMax + (improvedArmorer ? 1 : 0),
         maxPerItem: 1,
+        canAddItem: improvedArmorer
+          ? ({ resolvedItem, inventory }) => {
+              if (isReplicateArmorItem(resolvedItem)) return true;
+              const activeNonArmor = (inventory || []).reduce((sum, item) => (
+                Array.isArray(item?.flags)
+                && item.flags.includes('replicated')
+                && !isReplicateArmorItem(item)
+                  ? sum + Math.max(1, Number(item.qty || 1))
+                  : sum
+              ), 0);
+              return activeNonArmor < baseMax;
+            }
+          : null,
         emptyHint: 'No plans chosen yet — pick them in the character builder.',
       };
     }
+  },
+  {
+    "name": "Magic Item Tinker",
+    "icon": "",
+    "cat": "action",
+    "uses": "Charge / Drain 1/LR / Transmute 1/LR",
+    "minLevel": 6,
+    detailType: 'magicItemTinker',
   },
   {
     "name": "Flash of Genius",
@@ -378,6 +401,20 @@ registerClassSheetActions("Artificer", [
   }
 ]);
 registerClassSheetResources("Artificer", [
+  {
+    key: MAGIC_ITEM_TINKER_DRAIN_RESOURCE,
+    name: "Drain Magic Item",
+    recharge: "LR",
+    max: 1,
+    minLevel: 6,
+  },
+  {
+    key: MAGIC_ITEM_TINKER_TRANSMUTE_RESOURCE,
+    name: "Transmute Magic Item",
+    recharge: "LR",
+    max: 1,
+    minLevel: 6,
+  },
   {
     "key": "flash_genius",
     "name": "Flash of Genius",

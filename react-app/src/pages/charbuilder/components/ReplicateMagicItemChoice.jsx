@@ -18,6 +18,7 @@ import { ItemReferenceBody } from '../../../shared/character/ItemReference.jsx';
 import { ItemNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 import {
   applyReplicateItemPlan,
+  isReplicatePlanChoiceKey,
   parseReplicateChoice,
   replicateBucketFromLabel,
   replicateBucketChoiceValue,
@@ -144,10 +145,19 @@ function ItemPlanPanel({
 export default function ReplicateMagicItemChoice({ spec, character, dispatch, items }) {
   const pool = useMemo(() => spec.from || [], [spec.from]);
   const max = spec.count || 1;
+  const itemAllowed = typeof spec.itemFilter === 'function' ? spec.itemFilter : () => true;
   const selected = useMemo(() => {
     const raw = character?.choices?.[spec.key];
     const values = Array.isArray(raw) ? raw : raw ? [raw] : [];
     return values.filter((value) => parseReplicateChoice(value));
+  }, [character?.choices, spec.key]);
+  const selectedByOtherPlanSlots = useMemo(() => {
+    const values = new Set();
+    Object.entries(character?.choices || {}).forEach(([key, raw]) => {
+      if (key === spec.key || !isReplicatePlanChoiceKey(key, character)) return;
+      (Array.isArray(raw) ? raw : raw ? [raw] : []).forEach((value) => values.add(String(value)));
+    });
+    return values;
   }, [character?.choices, spec.key]);
 
   // Pool split: concrete named plans vs generic filter buckets (pool order).
@@ -163,16 +173,21 @@ export default function ReplicateMagicItemChoice({ spec, character, dispatch, it
   }, [pool]);
 
   const specificOptions = useMemo(() => specifics.flatMap((name) => {
-    const matches = (items || []).filter((item) => lc(item?.name) === lc(name));
-    if (!matches.length) return [{ value: name, name, source: '', item: null }];
+    const matches = (items || []).filter((item) => lc(item?.name) === lc(name) && itemAllowed(item));
+    // A constrained picker (Armorer's bonus Armor plan) deliberately hides
+    // named plans from other item categories instead of rendering them as
+    // unresolved rows.
+    if (!matches.length) return spec.itemFilter ? [] : [{ value: name, name, source: '', item: null }];
     const seen = new Set();
     return matches.flatMap((item) => {
       const value = replicateItemChoiceValue(item);
       if (seen.has(value)) return [];
       seen.add(value);
-      return [{ value, name: item.name, source: item.source, item }];
+      return selectedByOtherPlanSlots.has(value) && !selected.includes(value)
+        ? []
+        : [{ value, name: item.name, source: item.source, item }];
     });
-  }), [specifics, items]);
+  }), [specifics, items, selected, selectedByOtherPlanSlots, spec.itemFilter]);
   const specificNames = useMemo(() => new Set(specifics.map(lc)), [specifics]);
 
   const total = selected.length;
@@ -223,12 +238,14 @@ export default function ReplicateMagicItemChoice({ spec, character, dispatch, it
 
         {buckets.map((bucket) => {
           const options = replicateBucketItems(items, bucket, specificNames)
+            .filter(itemAllowed)
             .map((item) => ({
               value: replicateBucketChoiceValue(bucket, item),
               name: item.name,
               source: item.source,
               item: applyReplicateItemPlan(item, bucket),
-            }));
+            }))
+            .filter((option) => !selectedByOtherPlanSlots.has(option.value) || selected.includes(option.value));
           return (
             <ItemPlanPanel
               key={`${spec.key}-bucket-${bucket.id}`}

@@ -520,6 +520,7 @@ const RECONCILED_ITEM_FIELDS = [
   'bonusWeapon', 'bonusWeaponAttack', 'bonusWeaponDamage',
   'bonusProficiencyBonus', 'attachedSpells',
   'reqAttune', 'reqAttuneAlt', 'reqAttuneTags', 'property', 'mastery', 'miscTags', 'entries',
+  'charges', 'recharge', 'rechargeAmount',
   'rarity', 'weight', 'value', 'type', 'weaponCategory', 'sourceAlias', 'curse',
   'dmg1', 'dmg2', 'dmgType', 'ac', 'strength', 'stealth',
   'scfType', 'focus', 'items', 'group',
@@ -651,6 +652,9 @@ function normalizeItem(item) {
     reqAttuneTags: item.reqAttuneTags
       ? (Array.isArray(item.reqAttuneTags) ? item.reqAttuneTags.map((tag) => ({ ...tag })) : [{ ...item.reqAttuneTags }])
       : null,
+    charges: item.charges ?? null,
+    recharge: item.recharge || null,
+    rechargeAmount: item.rechargeAmount || null,
     property: Array.isArray(item.property) ? item.property.map((p) => String(p).split('|')[0]) : [],
     entries: Array.isArray(item.entries) ? stripTemplatedEntries(item.entries) : (item.entries || []),
     packContents: item.packContents || null,

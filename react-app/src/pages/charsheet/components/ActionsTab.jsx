@@ -40,6 +40,7 @@ import CreatedItemsPanel from './CreatedItemsPanel.jsx';
 import WildShapePanel from './WildShapePanel.jsx';
 import WildCompanionPanel from './WildCompanionPanel.jsx';
 import EldritchCannonPanel from './EldritchCannonPanel.jsx';
+import MagicItemTinkerPanel from './MagicItemTinkerPanel.jsx';
 import AttackRollButton from './AttackRollButton.jsx';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 import { useSheetActions } from '../context/SheetActionsContext.jsx';
@@ -64,6 +65,7 @@ const ACTION_DETAIL_RENDERERS = {
   wildShape: WildShapePanel,
   wildCompanion: WildCompanionPanel,
   eldritchCannon: EldritchCannonPanel,
+  magicItemTinker: MagicItemTinkerPanel,
 };
 
 const _danglingResKeyWarned = typeof Set === 'function' ? new Set() : null;
