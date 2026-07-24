@@ -13,6 +13,19 @@ import {
   snapshotFight,
 } from './combat.js';
 import { rollDice, rollDiceFormula } from './dice.js';
+import {
+  buildFumbleFormula,
+  createDefaultFumbleTables,
+  fumbleResultValues,
+  getFumbleRange,
+  normalizeFumbleTables,
+} from './fumbles.js';
+import {
+  createDefaultNegotiation,
+  negotiationStatus,
+  normalizeNegotiation,
+  resolveNegotiation,
+} from './negotiation.js';
 import { cleanToText, parseCleanTokens } from './markup.js';
 import { resolveLegendaryGroups } from './bestiary.js';
 import {
@@ -115,6 +128,142 @@ test('combat launch seeds linked players from sheet current HP and death saves',
   assert.equal(combat.combatants[0].hpCurrent, 7);
   assert.equal(combat.combatants[0].tempHP, 4);
   assert.deepEqual(combat.combatants[0].deathSaves, { s: 2, f: 1 });
+});
+
+test('fumble tables start as editable 1d6 categories with the supplied entries', () => {
+  const tables = createDefaultFumbleTables();
+  assert.deepEqual(Object.keys(tables), ['melee', 'spell', 'social', 'skillExploration']);
+  assert.deepEqual(tables.melee.dice, { 6: 1 });
+  assert.deepEqual(fumbleResultValues(tables.spell.dice), [1, 2, 3, 4, 5, 6]);
+  assert.equal(tables.spell.entries[3], 'Wrong target.');
+  assert.equal(tables.spell.entries[4], 'Half effect.');
+  assert.equal(tables.skillExploration.entries[6], "You're stuck for 1 round.");
+});
+
+test('fumble dice combinations derive the correct minimum, maximum, and formula', () => {
+  const dice = { 6: 2, 8: 1 };
+  assert.equal(buildFumbleFormula(dice), '2d6+1d8');
+  assert.deepEqual(getFumbleRange(dice), { min: 3, max: 20, count: 18 });
+  assert.deepEqual(fumbleResultValues({ 4: 3 }), [3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+});
+
+test('normalizing saved fumbles preserves hidden and deliberately blank entries', () => {
+  const tables = normalizeFumbleTables({
+    melee: {
+      dice: { 6: 2 },
+      entries: { 1: 'Hidden but preserved', 2: '', 12: 'Maximum' },
+    },
+  });
+  assert.deepEqual(tables.melee.dice, { 6: 2 });
+  assert.equal(tables.melee.entries[1], 'Hidden but preserved');
+  assert.equal(tables.melee.entries[2], '');
+  assert.equal(tables.melee.entries[12], 'Maximum');
+  assert.equal(tables.spell.entries[1], 'The spell hits a random creature in range.');
+});
+
+test('fumble reducer edits dice and entries and can reset one category', () => {
+  let state = createInitialState();
+  state = encounterReducer(state, {
+    type: 'setFumbleDice',
+    categoryId: 'social',
+    dice: { 6: 2, 8: 1 },
+  });
+  state = encounterReducer(state, {
+    type: 'setFumbleEntry',
+    categoryId: 'social',
+    result: 20,
+    value: 'A custom consequence.',
+  });
+  assert.equal(buildFumbleFormula(state.fumbleTables.social.dice), '2d6+1d8');
+  assert.equal(state.fumbleTables.social.entries[20], 'A custom consequence.');
+
+  state = encounterReducer(state, { type: 'resetFumbleCategory', categoryId: 'social' });
+  assert.deepEqual(state.fumbleTables.social.dice, { 6: 1 });
+  assert.equal(state.fumbleTables.social.entries[6], 'The worst possible person overhears.');
+  assert.equal(state.fumbleTables.social.entries[20], undefined);
+});
+
+test('negotiation attitudes use the configured initial patience and interest', () => {
+  assert.deepEqual(createDefaultNegotiation('hostile'), {
+    attitude: 'hostile',
+    threshold: null,
+    patience: 2,
+    interest: 1,
+  });
+  assert.deepEqual(createDefaultNegotiation('neutral'), {
+    attitude: 'neutral',
+    threshold: null,
+    patience: 3,
+    interest: 2,
+  });
+  assert.deepEqual(createDefaultNegotiation('friendly'), {
+    attitude: 'friendly',
+    threshold: null,
+    patience: 4,
+    interest: 3,
+  });
+});
+
+test('negotiation checks apply standard and critical deltas with bounded meters', () => {
+  const neutral = createDefaultNegotiation('neutral', 15);
+  assert.deepEqual(resolveNegotiation(neutral, 'passed'), {
+    ...neutral,
+    interest: 3,
+  });
+  assert.deepEqual(resolveNegotiation(neutral, 'failed'), {
+    ...neutral,
+    patience: 2,
+    interest: 1,
+  });
+  assert.deepEqual(resolveNegotiation(neutral, 'criticalSuccess'), {
+    ...neutral,
+    interest: 5,
+  });
+  assert.deepEqual(resolveNegotiation(neutral, 'criticalFailure'), {
+    ...neutral,
+    patience: 1,
+    interest: 1,
+  });
+});
+
+test('negotiation concludes at zero patience or five interest and then stops changing', () => {
+  const noPatience = resolveNegotiation(createDefaultNegotiation('hostile'), 'criticalFailure');
+  assert.deepEqual(negotiationStatus(noPatience), {
+    ended: true,
+    reason: 'Patience exhausted.',
+    result: 'No, with negative consequences.',
+  });
+  assert.deepEqual(resolveNegotiation(noPatience, 'criticalSuccess'), noPatience);
+
+  const maxInterest = resolveNegotiation(createDefaultNegotiation('friendly'), 'criticalSuccess');
+  assert.equal(maxInterest.interest, 5);
+  assert.deepEqual(negotiationStatus(maxInterest), {
+    ended: true,
+    reason: 'Maximum interest reached.',
+    result: 'Yes, with positive consequences.',
+  });
+});
+
+test('negotiation reducer preserves threshold across attitude changes and reset', () => {
+  let state = createInitialState();
+  state = encounterReducer(state, { type: 'setNegotiationThreshold', value: 17 });
+  state = encounterReducer(state, { type: 'setNegotiationAttitude', attitude: 'hostile' });
+  assert.deepEqual(state.negotiation, {
+    attitude: 'hostile',
+    threshold: 17,
+    patience: 2,
+    interest: 1,
+  });
+  state = encounterReducer(state, { type: 'resolveNegotiation', outcome: 'passed' });
+  assert.equal(state.negotiation.interest, 2);
+  state = encounterReducer(state, { type: 'resetNegotiation' });
+  assert.deepEqual(state.negotiation, {
+    attitude: 'hostile',
+    threshold: 17,
+    patience: 2,
+    interest: 1,
+  });
+  assert.equal(normalizeNegotiation({ attitude: 'friendly', threshold: 500 }).threshold, 99);
 });
 
 test('campaign-imported players can be removed from the encounter party', () => {

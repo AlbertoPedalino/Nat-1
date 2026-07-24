@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, Button, Stack, Tab, Tabs, Typography } from '@mui/material';
-import { BookOpen, Library, Swords, Dices } from 'lucide-react';
+import { BookOpen, Library, Swords, Dices, Handshake, Skull } from 'lucide-react';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../components/AppTopBar.jsx';
 import SaveInstanceButton from '../../components/SaveInstanceButton.jsx';
 import CustomRollDialog from '../../shared/character/CustomRollDialog.jsx';
@@ -11,6 +11,8 @@ import CombatView from './components/CombatView.jsx';
 import LibraryView from './components/LibraryView.jsx';
 import StatBlockDialog from './components/StatBlockDialog.jsx';
 import EncounterDiceToast, { buildEncounterDiceToast } from './components/EncounterDiceToast.jsx';
+import CriticalFumblesDialog from './components/CriticalFumblesDialog.jsx';
+import NegotiationDialog from './components/NegotiationDialog.jsx';
 import { resolveInstance } from './logic/storage.js';
 import { EncounterBuilderProvider, useEncounterBuilder } from './state/EncounterBuilderContext.jsx';
 
@@ -43,6 +45,8 @@ function EncounterBuilderShell({ instance }) {
   const { state, dispatch, saveInstance, instanceSaved, roll } = useEncounterBuilder();
   const { notify } = useToast();
   const [customRollOpen, setCustomRollOpen] = useState(false);
+  const [fumblesOpen, setFumblesOpen] = useState(false);
+  const [negotiationOpen, setNegotiationOpen] = useState(false);
   const [diceToast, setDiceToast] = useState(null);
 
   const handleSaveInstance = () => {
@@ -68,16 +72,36 @@ function EncounterBuilderShell({ instance }) {
               <Typography variant="h1">Encounter Builder</Typography>
               <Typography variant="body2" color="text.secondary">Instance {instance.id}</Typography>
             </Box>
-            <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-              <Button
-                size="small"
-                variant="outlined"
-                startIcon={<Dices size={14} />}
-                onClick={() => setCustomRollOpen(true)}
-                sx={{ flexShrink: 0, fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', letterSpacing: '0.08em', color: '#edd48a', borderColor: 'rgba(237,212,138,0.4)' }}
-              >
-                ROLL
-              </Button>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ alignItems: { xs: 'stretch', sm: 'center' }, minWidth: 0 }}>
+              <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: 'wrap' }}>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  startIcon={<Dices size={14} />}
+                  onClick={() => setCustomRollOpen(true)}
+                  sx={utilityButtonSx}
+                >
+                  Roll
+                </Button>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  startIcon={<Skull size={14} />}
+                  onClick={() => setFumblesOpen(true)}
+                  sx={utilityButtonSx}
+                >
+                  Fumbles
+                </Button>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  startIcon={<Handshake size={14} />}
+                  onClick={() => setNegotiationOpen(true)}
+                  sx={utilityButtonSx}
+                >
+                  Negotiate
+                </Button>
+              </Stack>
               <Tabs
                 value={state.view}
                 onChange={(_, value) => dispatch({ type: 'setView', view: value })}
@@ -106,6 +130,8 @@ function EncounterBuilderShell({ instance }) {
         onClose={() => setCustomRollOpen(false)}
         onRoll={handleCustomRoll}
       />
+      <CriticalFumblesDialog open={fumblesOpen} onClose={() => setFumblesOpen(false)} />
+      <NegotiationDialog open={negotiationOpen} onClose={() => setNegotiationOpen(false)} />
       {diceToast ? <EncounterDiceToast toast={diceToast} onClose={() => setDiceToast(null)} /> : null}
     </Box>
   );
@@ -122,4 +148,13 @@ const contentSx = {
   mx: 'auto',
   px: { xs: 1.25, md: 2 },
   py: 2,
+};
+
+const utilityButtonSx = {
+  flexShrink: 0,
+  fontFamily: '"Cinzel", Georgia, serif',
+  fontSize: '0.625rem',
+  letterSpacing: '0.08em',
+  color: '#edd48a',
+  borderColor: 'rgba(237,212,138,0.4)',
 };

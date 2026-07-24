@@ -27,6 +27,11 @@ export default function RollLog({ maxHeight = 320, onClose, sx }) {
               <Box sx={{ minWidth: 0 }}>
                 {entry.actor ? <Typography variant="caption" color="primary.main" noWrap>{entry.actor}</Typography> : null}
                 <Typography fontWeight={700} noWrap>{entry.type}</Typography>
+                {entry.note ? (
+                  <Typography variant="caption" sx={{ display: 'block', color: '#edd48a', whiteSpace: 'normal', lineHeight: 1.35 }}>
+                    {entry.note}
+                  </Typography>
+                ) : null}
                 <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block' }}>{entry.mathStr}</Typography>
                 <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>{entry.timeStr}</Typography>
               </Box>

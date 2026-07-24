@@ -18,6 +18,18 @@ import {
   autoFightName,
 } from '../logic/combat.js';
 import { addRollLogEntry } from '../logic/dice.js';
+import {
+  createDefaultFumbleCategory,
+  createDefaultFumbleTables,
+  normalizeFumbleDice,
+  normalizeFumbleTables,
+} from '../logic/fumbles.js';
+import {
+  createDefaultNegotiation,
+  normalizeNegotiation,
+  normalizeNegotiationThreshold,
+  resolveNegotiation,
+} from '../logic/negotiation.js';
 import { PLAYER_COLORS } from '../logic/constants.js';
 import { makeSavedEncounter } from '../logic/storage.js';
 import { clampInt, hydrateEncounterItems, monsterKey, toEncounterMonster } from '../logic/monsterUtils.js';
@@ -51,6 +63,8 @@ export function createInitialState() {
     activeFightId: null,
     combat: null,
     rollLog: [],
+    fumbleTables: createDefaultFumbleTables(),
+    negotiation: createDefaultNegotiation(),
     selectedStatblock: null,
     campaignNotice: '',
   };
@@ -145,6 +159,53 @@ export function encounterReducer(state, action) {
       return { ...state, rollLog: addRollLogEntry(state.rollLog, action.roll, action.actor) };
     case 'clearRollLog':
       return { ...state, rollLog: [] };
+    case 'setFumbleDice':
+      return updateFumbleCategory(state, action.categoryId, (category) => ({
+        ...category,
+        dice: normalizeFumbleDice(action.dice),
+      }));
+    case 'setFumbleEntry':
+      return updateFumbleCategory(state, action.categoryId, (category) => ({
+        ...category,
+        entries: {
+          ...category.entries,
+          [String(action.result)]: String(action.value ?? ''),
+        },
+      }));
+    case 'resetFumbleCategory':
+      return {
+        ...state,
+        fumbleTables: {
+          ...state.fumbleTables,
+          [action.categoryId]: createDefaultFumbleCategory(action.categoryId),
+        },
+      };
+    case 'setNegotiationAttitude':
+      return {
+        ...state,
+        negotiation: createDefaultNegotiation(action.attitude, state.negotiation?.threshold),
+      };
+    case 'setNegotiationThreshold':
+      return {
+        ...state,
+        negotiation: {
+          ...state.negotiation,
+          threshold: normalizeNegotiationThreshold(action.value),
+        },
+      };
+    case 'resolveNegotiation':
+      return {
+        ...state,
+        negotiation: resolveNegotiation(state.negotiation, action.outcome),
+      };
+    case 'resetNegotiation':
+      return {
+        ...state,
+        negotiation: createDefaultNegotiation(
+          state.negotiation?.attitude,
+          state.negotiation?.threshold,
+        ),
+      };
     case 'deleteFight':
       return deleteFight(state, action.id);
     default:
@@ -177,6 +238,20 @@ function hydrateState(state, payload, monsters) {
     activeFightId: fightsData.activeFightId || null,
     combat: activeFight ? restoreFight(activeFight, monsters) : state.combat,
     view: activeFight ? 'combat' : state.view,
+    fumbleTables: normalizeFumbleTables(payload?.fumbleTables),
+    negotiation: normalizeNegotiation(payload?.negotiation),
+  };
+}
+
+function updateFumbleCategory(state, categoryId, updater) {
+  const current = state.fumbleTables?.[categoryId];
+  if (!current) return state;
+  return {
+    ...state,
+    fumbleTables: {
+      ...state.fumbleTables,
+      [categoryId]: updater(current),
+    },
   };
 }
 

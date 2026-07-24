@@ -89,7 +89,15 @@ export function addRollLogEntry(log, roll, actor, now = new Date()) {
   if (!roll) return Array.isArray(log) ? log : [];
   const timeStr = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   return [
-    { actor: actor || null, type: roll.type, result: roll.result, mathStr: roll.mathStr, timeStr, cls: roll.cls },
+    {
+      actor: actor || null,
+      type: roll.type,
+      result: roll.result,
+      mathStr: roll.mathStr,
+      note: String(roll.note || ''),
+      timeStr,
+      cls: roll.cls,
+    },
     ...(Array.isArray(log) ? log : []),
   ].slice(0, LOG_MAX);
 }

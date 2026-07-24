@@ -2,7 +2,9 @@ import { useCallback, useEffect, useRef } from 'react';
 import {
   persistDraft,
   persistFights,
+  persistFumbles,
   persistLibrary,
+  persistNegotiation,
   persistParty,
   readPersistedInstance,
   registerEncounterInstance,
@@ -34,7 +36,9 @@ export function useEncounterPersistence({ instanceId, instanceSaved, monsters, m
     persistDraft(instanceId, state.encounter, state.currentEncounterId, state.encounterName);
     persistLibrary(instanceId, state.library);
     persistFights(instanceId, state.activeFightId, state.fights);
-  }, [instanceId, state.activeFightId, state.currentEncounterId, state.encounter, state.encounterName, state.fights, state.library, state.party, state.players]);
+    persistFumbles(instanceId, state.fumbleTables);
+    persistNegotiation(instanceId, state.negotiation);
+  }, [instanceId, state.activeFightId, state.currentEncounterId, state.encounter, state.encounterName, state.fights, state.fumbleTables, state.library, state.negotiation, state.party, state.players]);
 
   useEffect(() => {
     if (!instanceSaved || !hydratedRef.current) return;

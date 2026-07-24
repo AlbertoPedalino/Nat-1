@@ -1,4 +1,6 @@
 import { calculateDifficulty } from './difficulty.js';
+import { normalizeFumbleTables } from './fumbles.js';
+import { normalizeNegotiation } from './negotiation.js';
 import { hydrateEncounterItems, serializeEncounterItem } from './monsterUtils.js';
 
 export const REGISTRY_KEY = 'gb_encounter_registry';
@@ -9,6 +11,8 @@ export const STORAGE_KEYS = Object.freeze({
   draft: 'draft:v1',
   library: 'library:v1',
   fights: 'fights:v1',
+  fumbles: 'fumbles:v1',
+  negotiation: 'negotiation:v1',
 });
 
 export function sanitizeEncounterId(value) {
@@ -105,6 +109,8 @@ export function readPersistedInstance(id, monsters = []) {
   const draftData = readJson(id, STORAGE_KEYS.draft, null);
   const library = readJson(id, STORAGE_KEYS.library, []);
   const fightsData = readJson(id, STORAGE_KEYS.fights, { activeFightId: null, items: [] });
+  const fumbleTables = normalizeFumbleTables(readJson(id, STORAGE_KEYS.fumbles, null));
+  const negotiation = normalizeNegotiation(readJson(id, STORAGE_KEYS.negotiation, null));
   return {
     partyData,
     draftData: draftData ? {
@@ -113,6 +119,8 @@ export function readPersistedInstance(id, monsters = []) {
     } : null,
     library: Array.isArray(library) ? library : [],
     fightsData: normalizeFightsData(fightsData),
+    fumbleTables,
+    negotiation,
   };
 }
 
@@ -140,6 +148,14 @@ export function persistFights(id, activeFightId, fights) {
     activeFightId: activeFightId || null,
     items: Array.isArray(fights) ? fights : [],
   });
+}
+
+export function persistFumbles(id, fumbleTables) {
+  writeJson(id, STORAGE_KEYS.fumbles, normalizeFumbleTables(fumbleTables));
+}
+
+export function persistNegotiation(id, negotiation) {
+  writeJson(id, STORAGE_KEYS.negotiation, normalizeNegotiation(negotiation));
 }
 
 export function normalizeFightsData(value) {
