@@ -13,6 +13,10 @@ import { isWarlockModifierCantripChoiceKey } from '../../../shared/character/war
 import { enumerateFixedAdditionalSpells } from '../../../shared/character/additionalSpellGrants.js';
 import { ENTITY_COLORS, ITEM_ATTUNEMENT, ACTION_COLORS } from '../../../shared/entityColors.js';
 import { primaryClassLevel } from '../../../shared/character/classLevel.js';
+import {
+  isGenericSpellSourceLabel,
+  mergeSpellSourceDisplay,
+} from './spellSourceDisplay.js';
 
 /**
  * Spell riders — conditional, character-driven extras attached to a spell row
@@ -91,19 +95,10 @@ function featSlotTone(slotOrChoiceKey) {
   return SRC_COLOR[featSlotOrigin(slotOrChoiceKey)];
 }
 
-const _GENERIC_LABELS = new Set([
-  'class', 'subclass', 'species', 'feat', 'feature', 'granted', 'auto',
-  'auto granted', 'always prepared', 'unknown', 'choice',
-]);
-
-function _isGenericLabel(label) {
-  return _GENERIC_LABELS.has(String(label || '').trim().toLowerCase());
-}
-
 const _PREP_RANK = {
-  at_will: 0, mystic_arcanum: 1, ritual_spellbook: 2, always_prepared: 3,
-  free_cast: 4, prepared: 5, known: 6, granted: 7, spellbook: 8, cantrip: 9,
-  unknown: 10,
+  at_will: 0, mystic_arcanum: 1, item_cast: 2, ritual_spellbook: 3, always_prepared: 4,
+  free_cast: 5, prepared: 6, known: 7, granted: 8, spellbook: 9, cantrip: 10,
+  unknown: 11,
 };
 
 const _SPECIAL_ORIGIN = new Set(['at_will', 'invocation', 'mystic_arcanum', 'spellbook']);
@@ -133,13 +128,7 @@ function _mergeRow(existing, incoming, incomingLocked) {
     const srcB = b.sourceInfo || {};
     const mergedSource = {};
 
-    if (!srcA.label && !srcB.label) mergedSource.label = undefined;
-    else if (!srcA.label) mergedSource.label = srcB.label;
-    else if (!srcB.label) mergedSource.label = srcA.label;
-    else if (_isGenericLabel(srcA.label) && !_isGenericLabel(srcB.label)) mergedSource.label = srcB.label;
-    else mergedSource.label = srcA.label;
-
-    mergedSource.color = srcB.color || srcA.color || SRC_COLOR.choice;
+    Object.assign(mergedSource, mergeSpellSourceDisplay(srcA, srcB, SRC_COLOR.choice));
 
     mergedSource.kind = srcA.kind || srcB.kind || undefined;
 
@@ -147,7 +136,7 @@ function _mergeRow(existing, incoming, incomingLocked) {
     const oLabelB = srcB.originLabel || srcB.label || '';
     if (!oLabelA) mergedSource.originLabel = oLabelB || undefined;
     else if (!oLabelB) mergedSource.originLabel = oLabelA || undefined;
-    else if (_isGenericLabel(oLabelA) && !_isGenericLabel(oLabelB)) mergedSource.originLabel = oLabelB;
+    else if (isGenericSpellSourceLabel(oLabelA) && !isGenericSpellSourceLabel(oLabelB)) mergedSource.originLabel = oLabelB;
     else mergedSource.originLabel = oLabelA;
 
     const oTypeA = srcA.originType;
@@ -1218,6 +1207,10 @@ function resolveSpellMeta(entry, C) {
     isFreeCast = true;
     consumesSlot = false;
     preparationState = 'mystic_arcanum';
+  } else if (originType === 'item') {
+    isGranted = true;
+    consumesSlot = false;
+    preparationState = 'item_cast';
   } else if (entry.level === 0) {
     consumesSlot = false;
     preparationState = 'cantrip';
@@ -1263,6 +1256,7 @@ const _STATUS_CHIP_CONFIG = {
 
 export function getSpellStatusChips(entry) {
   const chips = [];
+  if (entry.originType === 'item') return chips;
   const state = entry.preparationState;
   if (!state || !_STATUS_CHIP_CONFIG[state]) return chips;
   if (entry.sourceInfo?.kind === 'ritualBook') return chips;

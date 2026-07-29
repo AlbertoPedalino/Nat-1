@@ -42,6 +42,12 @@ import {
 } from '../../../shared/character/weight.js';
 import { useSheetActions } from '../context/SheetActionsContext.jsx';
 import { buildItemTags } from '../../../shared/character/craftedItems.js';
+import {
+  itemChargeCurrent,
+  itemChargeMaximum,
+  setInventoryItemCharges,
+  shouldShowItemCharges,
+} from '../../../shared/character/itemCharges.js';
 
 const FILTERS = [
   { key: 'all', label: 'All', icon: null },
@@ -117,6 +123,20 @@ const inventorySectionTitleSx = {
   letterSpacing: '0.12em',
   textTransform: 'uppercase',
   color: 'text.secondary',
+};
+
+const itemStateChipBaseSx = {
+  minWidth: 0,
+  px: '7px',
+  py: '2px',
+  border: 1,
+  borderRadius: '3px',
+  fontFamily: '"Cinzel", Georgia, serif',
+  fontSize: '0.58rem',
+  fontWeight: 700,
+  lineHeight: 1.75,
+  letterSpacing: 0,
+  textTransform: 'none',
 };
 
 const addPanelToggleSx = (open) => ({
@@ -490,9 +510,13 @@ export default function InventoryTab({ C, sheet }) {
     const current = invRef.current || [];
     const target = current[index];
     if (!target) return;
-    if (delta > 0 && (target.equipped || target.equippedSlot)) {
+    if (delta > 0 && (target.equipped || target.equippedSlot || itemChargeMaximum(target) > 0)) {
       const unequippedCopy = { ...target, qty: delta, equipped: false };
       delete unequippedCopy.equippedSlot;
+      if (itemChargeMaximum(target) > 0) {
+        delete unequippedCopy.attuned;
+        delete unequippedCopy.chargesCurrent;
+      }
       updateInv(addInventoryEntries(current, [unequippedCopy]));
       return;
     }
@@ -529,6 +553,13 @@ export default function InventoryTab({ C, sheet }) {
     if (!isItemCarried(current[index])) return;
     const next = equipToSlotHelper(current, index, slot);
     updateInv(next);
+  }, [updateInv]);
+
+  const adjustCharges = useCallback((index, delta) => {
+    const current = invRef.current || [];
+    const target = current[index];
+    if (!target) return;
+    updateInv(setInventoryItemCharges(current, index, itemChargeCurrent(target) + delta));
   }, [updateInv]);
 
   const toggleCarried = useCallback((index) => {
@@ -776,6 +807,7 @@ export default function InventoryTab({ C, sheet }) {
                     item={item}
                     index={index}
                     onQty={adjustQty}
+                    onCharges={adjustCharges}
                     onRemove={removeItem}
                     onEquip={toggleEquipped}
                     onEquipSlot={equipToSlot}
@@ -879,10 +911,12 @@ function ItemTagsRow({ item, character }) {
   );
 }
 
-const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, onEquip, onEquipSlot, onCarried, penaltyMsg, canPactWeapon, onPactWeapon, isArmorer, hasArcaneArmor, onArcaneArmor, onAttune, attunementFull, character, attunementContext, attunementLimit, onSetAbilityChoice, onConsumeTome }) {
+const InventoryRow = memo(function InventoryRow({ item, index, onQty, onCharges, onRemove, onEquip, onEquipSlot, onCarried, penaltyMsg, canPactWeapon, onPactWeapon, isArmorer, hasArcaneArmor, onArcaneArmor, onAttune, attunementFull, character, attunementContext, attunementLimit, onSetAbilityChoice, onConsumeTome }) {
   const type = String(item.type || '').toUpperCase();
   const canEquip = ['M', 'R', 'LA', 'MA', 'HA', 'S', 'SCF', 'WD', 'RD', 'ST', 'WI', 'WEAPON', 'ARMOR'].includes(type);
   const carried = isItemCarried(item);
+  const chargeMaximum = itemChargeMaximum(item);
+  const chargeCurrent = itemChargeCurrent(item);
 
   const showAbilityChoice = hasAbilityChoice(item);
   const showTomeConsume = isConsumableTome(item);
@@ -960,6 +994,33 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onRemove, 
           ) : null}
           {carried && item.reqAttune ? (
             <AttuneButton item={item} index={index} attunementFull={attunementFull} character={character} attunementContext={attunementContext} attunementLimit={attunementLimit} onAttune={onAttune} />
+          ) : null}
+          {shouldShowItemCharges(item) ? (
+            <Box
+              aria-label={`${item.name} charges`}
+              sx={{
+                ...itemStateChipBaseSx,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                borderColor: ITEM_ATTUNEMENT,
+                color: ITEM_ATTUNEMENT,
+                bgcolor: alpha(ITEM_ATTUNEMENT, 0.14),
+              }}
+            >
+              <Box component="span">
+                Charges
+              </Box>
+              <ChargeStepButton ariaLabel={`Spend one ${item.name} charge`} disabled={chargeCurrent <= 0} onClick={() => onCharges?.(index, -1)}>
+                <Minus size={10} />
+              </ChargeStepButton>
+              <Box component="span" sx={{ minWidth: 28, textAlign: 'center' }}>
+                {chargeCurrent}/{chargeMaximum}
+              </Box>
+              <ChargeStepButton ariaLabel={`Restore one ${item.name} charge`} disabled={chargeCurrent >= chargeMaximum} onClick={() => onCharges?.(index, 1)}>
+                <Plus size={10} />
+              </ChargeStepButton>
+            </Box>
           ) : null}
           <Button size="small" onClick={() => onCarried(index)} startIcon={!carried ? <Archive size={11} /> : null}
             sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: carried ? 'divider' : '#8a7d66', borderRadius: '3px', color: carried ? 'text.secondary' : '#c7b690', bgcolor: carried ? 'transparent' : 'rgba(138,125,102,0.14)', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem' }}>
@@ -1051,10 +1112,32 @@ function AbilityChoicePanel({ item, onPick }) {
   );
 }
 
-function QtyButton({ children, danger = false, onClick }) {
+function QtyButton({ children, danger = false, disabled = false, ariaLabel, onClick }) {
   return (
-    <IconButton size="small" onClick={onClick}
+    <IconButton size="small" disabled={disabled} aria-label={ariaLabel} onClick={onClick}
       sx={{ width: 20, height: 20, border: 1, borderColor: 'divider', borderRadius: '3px', color: 'text.secondary', '&:hover': { borderColor: danger ? '#de675f' : '#caa550', color: danger ? '#de675f' : '#caa550' } }}>
+      {children}
+    </IconButton>
+  );
+}
+
+function ChargeStepButton({ children, disabled = false, ariaLabel, onClick }) {
+  return (
+    <IconButton
+      size="small"
+      disabled={disabled}
+      aria-label={ariaLabel}
+      onClick={onClick}
+      sx={{
+        width: 16,
+        height: 16,
+        p: 0,
+        color: 'inherit',
+        borderRadius: '3px',
+        '&:hover': { color: 'inherit', bgcolor: alpha(ITEM_ATTUNEMENT, 0.16) },
+        '&.Mui-disabled': { color: 'inherit', opacity: 0.35 },
+      }}
+    >
       {children}
     </IconButton>
   );
@@ -1101,13 +1184,13 @@ function AttuneButton({ item, index, attunementFull, character, attunementContex
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
       <Tooltip title={tip} arrow>
-        <span>
+        <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center' }}>
           <Button size="small" disabled={blocked} onClick={() => onAttune?.(index)}
             startIcon={cursedAttuned ? <AlertTriangle size={11} /> : (item.attuned ? <Check size={11} /> : (hasRequirementWarning ? <AlertTriangle size={11} /> : null))}
-            sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: accent || 'divider', borderRadius: '3px', color: accent || 'text.secondary', bgcolor: item.attuned ? alpha(ITEM_ATTUNEMENT, 0.14) : 'transparent', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem', '&.Mui-disabled': { opacity: 0.4 } }}>
+            sx={{ ...itemStateChipBaseSx, borderColor: accent || 'divider', color: accent || 'text.secondary', bgcolor: item.attuned ? alpha(ITEM_ATTUNEMENT, 0.14) : 'transparent', '&.Mui-disabled': { opacity: 0.4 } }}>
             {cursedAttuned ? 'Cursed' : (item.attuned ? 'Attuned' : 'Attune')}
           </Button>
-        </span>
+        </Box>
       </Tooltip>
       {cursedAttuned ? (
         <Tooltip title="Use Remove Curse or equivalent magic, then end attunement" arrow>

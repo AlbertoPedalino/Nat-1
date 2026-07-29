@@ -1,3 +1,5 @@
+import { itemChargeMaximum } from './itemCharges.js';
+
 export function normalizeItemIdentityName(value) {
   return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 }
@@ -22,7 +24,10 @@ function stableValue(value) {
 }
 
 export function isInventoryItemStackable(item) {
-  return !!item && !item.equipped && !item.equippedSlot;
+  return !!item
+    && !item.equipped
+    && !item.equippedSlot
+    && !itemChargeMaximum(item);
 }
 
 export function inventoryStackKey(item) {

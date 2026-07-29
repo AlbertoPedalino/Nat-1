@@ -163,6 +163,14 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
     Object.entries(spellInfo.leveled).forEach(([level, entries]) => {
       entries.forEach((entry) => {
         if (entry.level <= 0) return;
+        if (entry.originType === 'item' && entry.consumesSlot === false) {
+          addLeveledEntry(Number(level), {
+            ...entry,
+            castLevel: Number(level),
+            castMode: entry.originType === 'item' ? 'item' : (entry.castMode || 'regular'),
+          });
+          return;
+        }
         const baseLevel = Number(level);
         const castMode = getSpellCastMode(C, entry, pactInfo);
         if (castMode.mode === 'pact_magic') {
@@ -180,6 +188,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
     Object.entries(spellInfo.leveled).forEach(([level, entries]) => {
       entries.forEach((entry) => {
         if (entry.level <= 0) return;
+        if (entry.originType === 'item' && entry.consumesSlot === false) return;
         if (entry.ritualOnly) return;
         if (!entry.entriesHigherLevel) return;
         const baseLevel = Number(level);

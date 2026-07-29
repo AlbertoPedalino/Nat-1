@@ -1,4 +1,9 @@
 import { isReplicateArmorItem } from './replicateMagicItem.js';
+import {
+  itemChargeCurrent,
+  itemChargeMaximum,
+  withItemCharges,
+} from './itemCharges.js';
 
 export const MAGIC_ITEM_TINKER_DRAIN_RESOURCE = 'artificer_magic_item_tinker_drain';
 export const MAGIC_ITEM_TINKER_TRANSMUTE_RESOURCE = 'artificer_magic_item_tinker_transmute';
@@ -26,25 +31,11 @@ export function replicatedNonArmorCount(inventory) {
   ), 0);
 }
 
-export function itemChargeMaximum(item) {
-  const max = Number(item?.charges);
-  return Number.isFinite(max) && max > 0 ? Math.floor(max) : 0;
-}
-
-export function itemChargeCurrent(item) {
-  const max = itemChargeMaximum(item);
-  if (!max) return 0;
-  const current = item?.chargesCurrent == null ? max : Number(item.chargesCurrent);
-  return Math.max(0, Math.min(max, Number.isFinite(current) ? Math.floor(current) : max));
-}
-
 export function setReplicatedItemCharges(inventory, craftedFrom, value) {
   const source = String(craftedFrom || '');
   return (inventory || []).map((item) => {
     if (!isReplicatedItem(item) || String(item.craftedFrom || '') !== source) return item;
-    const max = itemChargeMaximum(item);
-    if (!max) return item;
-    return { ...item, chargesCurrent: Math.max(0, Math.min(max, Math.floor(Number(value) || 0))) };
+    return withItemCharges(item, value);
   });
 }
 

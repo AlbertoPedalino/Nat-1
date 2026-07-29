@@ -9,6 +9,7 @@
 //   {will: ["spell|src", ...]}               → at-will
 //   {daily: {"1": [...]}, "1e": [...]}}      → N per long rest; "Ne" = each
 //   {limited: {"N": [...]}}                  → N total uses (treated as LR)
+//   {charges: {"N": [...]}}                  → costs N charges from the item pool
 //   {ritual: [...]}                          → ritual only (display flag)
 //   {other: [...]}                           → context-specific (at-will UI)
 //
@@ -29,7 +30,7 @@ function stripSpellRef(raw) {
   };
 }
 
-function pushGrants(out, list, usage, max, perEach, ritual) {
+function pushGrants(out, list, usage, max, perEach, ritual, extra = {}) {
   if (!Array.isArray(list)) return;
   list.forEach((raw) => {
     const { name, source: spellSource } = stripSpellRef(raw);
@@ -41,6 +42,7 @@ function pushGrants(out, list, usage, max, perEach, ritual) {
       max,
       perEach,
       ritual: !!ritual,
+      ...extra,
     });
   });
 }
@@ -87,6 +89,13 @@ export function parseAttachedSpells(attachedSpells) {
       pushGrants(out, list, 'limited', parsed.count, parsed.perEach, false);
     });
   }
+  if (attachedSpells.charges && typeof attachedSpells.charges === 'object') {
+    Object.entries(attachedSpells.charges).forEach(([key, list]) => {
+      const chargeCost = Number(key);
+      if (!Number.isInteger(chargeCost) || chargeCost <= 0) return;
+      pushGrants(out, list, 'charges', null, false, false, { chargeCost });
+    });
+  }
 
   return out;
 }
@@ -95,7 +104,7 @@ export function parseAttachedSpells(attachedSpells) {
 //   - at-will (`will`, `other`, `ritual`): no free-cast slot (Infinity uses)
 //   - daily / limited: long-rest-recharging free cast with max=count
 function toFreeCastTemplate(grant) {
-  if (grant.usage === 'will' || grant.usage === 'other' || grant.usage === 'ritual') return null;
+  if (grant.usage === 'will' || grant.usage === 'other' || grant.usage === 'ritual' || grant.usage === 'charges') return null;
   if (!Number.isFinite(grant.max) || grant.max <= 0) return null;
   return {
     maxUses: grant.max,

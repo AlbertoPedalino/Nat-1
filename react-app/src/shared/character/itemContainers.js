@@ -1,4 +1,5 @@
 import { canStackInventoryItems } from './itemIdentity.js';
+import { itemChargeMaximum } from './itemCharges.js';
 import { isItemCarried } from './weight.js';
 
 export function parseInventoryItemRef(ref) {
@@ -110,7 +111,14 @@ export function addInventoryEntries(inventory, entries, itemDb = null, normalize
     if (!item?.name) return [];
     const qty = inventoryQty(item);
     const expanded = itemDb ? expandInventoryItem(item, itemDb, qty) : [{ ...item, qty }];
-    return expanded.map(normalize).filter((entry) => entry?.name);
+    return expanded
+      .map(normalize)
+      .filter((entry) => entry?.name)
+      .flatMap((entry) => {
+        const entryQty = inventoryQty(entry);
+        if (!itemChargeMaximum(entry) || entryQty <= 1) return [entry];
+        return Array.from({ length: entryQty }, () => ({ ...entry, qty: 1 }));
+      });
   });
 
   additions.forEach((item) => {

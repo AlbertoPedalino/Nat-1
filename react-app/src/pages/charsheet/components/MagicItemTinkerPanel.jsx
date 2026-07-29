@@ -12,6 +12,10 @@ import {
 import { classLevel } from '../../../shared/character/classLevel.js';
 import { removeOneCrafted } from '../../../shared/character/craftedItemState.js';
 import {
+  itemChargeCurrent,
+  itemChargeMaximum,
+} from '../../../shared/character/itemCharges.js';
+import {
   collectReplicatePlanChoices,
   hasImprovedArmorer,
   replicateChoiceLabel,
@@ -22,8 +26,6 @@ import {
   MAGIC_ITEM_TINKER_TRANSMUTE_RESOURCE,
   drainSpellSlotLevel,
   isReplicatedItem,
-  itemChargeCurrent,
-  itemChargeMaximum,
   rechargeReplicatedItem,
   replaceReplicatedItem,
   replicatedNonArmorCount,

@@ -2,13 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   drainSpellSlotLevel,
-  itemChargeCurrent,
   pruneReplicatedItemsForPlans,
   rechargeReplicatedItem,
   replaceReplicatedItem,
   replicatedNonArmorCount,
   setReplicatedItemCharges,
 } from './magicItemTinker.js';
+import { itemChargeCurrent } from './itemCharges.js';
 
 const replicated = (craftedFrom, extra = {}) => ({
   name: craftedFrom,
