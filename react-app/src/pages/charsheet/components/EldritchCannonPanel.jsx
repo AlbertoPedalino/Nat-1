@@ -336,7 +336,6 @@ function CannonActionRow({ mode, exhaustionLevel, onRoll, onShowToast }) {
                 exhaustionLevel={exhaustionLevel}
                 label={`Cannon: ${mode.name} (Attack)`}
                 onRoll={onRoll}
-                sx={{ borderColor: 'rgba(77,149,214,0.4)', color: '#4d95d6' }}
               />
             ) : null}
             <RollerButtons

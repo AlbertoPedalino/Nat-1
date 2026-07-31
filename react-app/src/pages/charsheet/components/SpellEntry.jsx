@@ -8,7 +8,8 @@ import MiniBadge from '../../../shared/character/MiniBadge.jsx';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import PipButton from '../../../shared/character/PipButton.jsx';
 import { formatRollTitle } from '../../../shared/character/dice.js';
-import { getFinal, getMod, getPB, hasConditionEffect, getConditionalConditionEffects } from '../logic/calculations.js';
+import { getFinal, getMod, getPB } from '../logic/calculations.js';
+import { describeAttackRoll } from '../../../shared/character/conditions.js';
 import { getSpellAttackAdvantage } from '../logic/sheetEffects.js';
 import { entriesToTextBlocks } from '../../../shared/character/spellEntries.js';
 import {
@@ -175,22 +176,10 @@ export default function SpellEntry({ entry, spellAttackBonus = 0, C, exhaustionL
   // Spell-attack advantage/disadvantage. Sources: effect-based advantage scoped
   // to this spell's owning class (e.g. Sorcerer Innate Sorcery) + condition-based
   // adv/disadv that applies to any attack roll (Frightened, Invisible, Prone, …).
-  // XPHB 2024: any advantage + any disadvantage cancel to a straight roll. Mirrors
-  // the weapon-attack logic in ActionsTab so spell and weapon attacks stay aligned.
+  // Same resolver as the weapon attacks in ActionsTab, so spell and weapon
+  // attacks stay aligned.
   const innateSpellAdv = hasAttack ? getSpellAttackAdvantage(C, { ownerClassName: entry.ownerClassName }) : null;
-  const spellAttackHasAdv = !!innateSpellAdv || hasConditionEffect(activeConditions, 'yourAttacksAdv');
-  const spellAttackHasDisadv = hasConditionEffect(activeConditions, 'yourAttacksDisadv');
-  const spellAttackAdv = spellAttackHasAdv && !spellAttackHasDisadv;
-  const spellAttackDisadv = spellAttackHasDisadv && !spellAttackHasAdv;
-  const spellAttackAdvArg = spellAttackDisadv ? false : spellAttackAdv ? true : undefined;
-  const spellAttackCondNotes = getConditionalConditionEffects(activeConditions, 'yourAttacksDisadv')
-    .map((c) => `${c.source} (${c.note})`);
-  const spellAttackSituational = !spellAttackDisadv && !spellAttackAdv && spellAttackCondNotes.length > 0;
-  const spellAttackTag = spellAttackDisadv ? ' DIS' : spellAttackAdv ? ' ADV' : spellAttackSituational ? ' DIS?' : '';
-  const spellAttackTooltip = [
-    innateSpellAdv && spellAttackAdv ? `Advantage: ${innateSpellAdv.source}` : '',
-    spellAttackCondNotes.length ? `Situational disadvantage: ${spellAttackCondNotes.join('; ')}` : '',
-  ].filter(Boolean).join(' • ');
+  const spellAttackRoll = describeAttackRoll(activeConditions, { extraAdv: innateSpellAdv?.source || null });
 
 
   const upcastStepDie = (steps > 0) ? (spellData?.upcastDie || getUpcastStep(entry.entriesHigherLevel)?.stepDie) : null;
@@ -313,11 +302,11 @@ export default function SpellEntry({ entry, spellAttackBonus = 0, C, exhaustionL
                     rawBonus={atk}
                     exhaustionLevel={exhaustionLevel}
                     label={formatRollTitle(entry.name, `Spell Attack${levelLabel}`)}
-                    advArg={spellAttackAdvArg}
-                    tag={spellAttackTag}
-                    tooltip={spellAttackTooltip}
+                    advArg={spellAttackRoll.advArg}
+                    tag={spellAttackRoll.tag}
+                    tooltip={spellAttackRoll.tooltip}
+                    disadv={spellAttackRoll.disadv}
                     onRoll={onRoll}
-                    sx={{ borderColor: 'rgba(77,149,214,0.4)', color: '#4d95d6' }}
                   />
                 ) : null}
                 <RollerButtons

@@ -56,6 +56,34 @@ export const CHIP_TONES = {
   mastery: '#D7C37A',
 };
 
+// Tones for the inline roll buttons on the sheet (attack, damage, heal, …).
+// `attack` blue is the neutral default; `attackNotProficient` red flags a malus
+// baked into the bonus; `attackDisadvantage` reuses CHIP_TONES.negative so a
+// penalized roll reads like a negative status chip.
+export const ROLL_TONES = {
+  attack: '#4d95d6',
+  attackNotProficient: '#de675f',
+  attackDisadvantage: CHIP_TONES.negative,
+  damage: '#ff6b35',
+  heal: '#58b879',
+  utility: '#4d95d6',
+  tempHp: '#3e8e5a',
+};
+
+// The one roll-button recipe: solid text color over a translucent border of the
+// same hue, so every roll button on the sheet reads as one family. Pass a
+// ROLL_TONES value.
+export function rollerToneSx(tone) {
+  return { color: tone, borderColor: alpha(tone, 0.4) };
+}
+
+// Tint for an attack-roll button. Disadvantage outranks not-proficient: it
+// changes how the die is rolled, the red only annotates the bonus.
+export function attackRollerToneSx({ disadv = false, notProficient = false } = {}) {
+  if (disadv) return rollerToneSx(ROLL_TONES.attackDisadvantage);
+  return rollerToneSx(notProficient ? ROLL_TONES.attackNotProficient : ROLL_TONES.attack);
+}
+
 // Single recipe for the translucent tint+border chip look. Both the theme's
 // MuiChip color overrides and entityChipSx derive from this, so the visual
 // language stays in one place.

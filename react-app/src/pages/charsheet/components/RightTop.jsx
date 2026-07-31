@@ -1,7 +1,8 @@
 import { useState, useCallback } from 'react';
 import { Box, Typography, Chip, Tooltip } from '@mui/material';
 import { Swords, Shield, Sparkles, AlertCircle } from 'lucide-react';
-import { getInitiative, getConditionsWithEffect } from '../logic/calculations.js';
+import { getInitiative } from '../logic/calculations.js';
+import { getConditionsWithEffect } from '../../../shared/character/conditions.js';
 import { getArmorTrainingInfo } from '../logic/proficiencies.js';
 import { collectResolvedResistanceItems, collectResolvedImmunityItems, getInitiativeAdvantageFromEffects } from '../logic/sheetEffects.js';
 import { advantageVisual } from './advantageMark.jsx';

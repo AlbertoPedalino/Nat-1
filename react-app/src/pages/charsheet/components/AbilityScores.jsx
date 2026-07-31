@@ -1,6 +1,7 @@
 import { Box, Typography, Tooltip } from '@mui/material';
 import { getEquippedArmorPenalties } from '../logic/armorPenalties.js';
-import { STATS, SLBL, FULL_LBL, getFinal, getMod, getPB, fbonus, describeCheckDisadvantage, effectiveD20Modifier } from '../logic/calculations.js';
+import { STATS, SLBL, FULL_LBL, getFinal, getMod, getPB, fbonus, effectiveD20Modifier } from '../logic/calculations.js';
+import { describeCheckDisadvantage } from '../../../shared/character/conditions.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 import { advantageVisual, conditionalDisadvantageVisual } from './advantageMark.jsx';
 
