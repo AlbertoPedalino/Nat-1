@@ -2,7 +2,7 @@ name: Deploy React app to Pages
 
 on:
   push:
-    branches: ["feature/unified-character-storage"]
+    branches: ["main"]
   workflow_dispatch:
 
 permissions:
