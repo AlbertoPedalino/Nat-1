@@ -14,7 +14,7 @@ import { fetchCloudMeta, pullCharacter } from '../../shared/cloud/cloudCharacter
 const TOOLS = [
   { path: '/charsheet', label: 'Character Sheet', desc: 'View and manage your character in play', icon: ScrollText, color: '#2ecc71', borderColor: 'rgba(46,204,113,0.3)' },
   { path: REGISTRY_META.gb_char_registry.newRoute, label: 'Char Builder', desc: 'Create or level up your character', icon: UserPen, color: '#9b59b6', borderColor: 'rgba(155,89,182,0.3)' },
-  { path: REGISTRY_META.gb_board_registry.newRoute, label: 'GM Board', desc: 'Initiative tracker, conditions, notes', icon: LayoutDashboard, color: '#e67e22', borderColor: 'rgba(230,126,34,0.3)' },
+  { path: REGISTRY_META.gb_board_registry.newRoute, label: 'GM Board', desc: 'Hexcrawl, dungeon, and quest generators', icon: LayoutDashboard, color: '#e67e22', borderColor: 'rgba(230,126,34,0.3)' },
   { path: REGISTRY_META.gb_encounter_registry.newRoute, label: 'Encounter Builder', desc: 'Build and balance combat encounters', icon: Swords, color: '#e74c3c', borderColor: 'rgba(231,76,60,0.3)' },
 ];
 
