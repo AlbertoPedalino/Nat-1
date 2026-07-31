@@ -329,7 +329,8 @@ function itemMatchesPreparedSearch(item, query) {
 }
 
 // The result list renders in pages instead of hard-capping: a broad filter can
-// legitimately match most of the ~860-item DB, and truncating at a fixed count
+// legitimately match most of the item DB (~2500 entries once magic variants are
+// expanded, so most searches overflow any fixed cap), and truncating
 // made it look like the filter had only searched the first alphabetical slice.
 const SEARCH_PAGE = 60;
 const INVENTORY_PAGE = 50;

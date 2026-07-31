@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 // Incremental rendering for long item lists: show a page, grow on scroll or on
-// demand. A hard cap was the alternative and it lied — a filter matching 700 of
-// 860 items looked identical to no filter at all, because both showed the same
-// first 120 alphabetical rows.
+// demand. A hard cap was the alternative and it lied — against a DB of ~2500
+// items, a filter that matched two thousand of them looked identical to no
+// filter at all, because both showed the same first 120 alphabetical rows.
 //
 // `resetKey` — not the array identity — decides when to go back to page one.
 // The inventory array is rebuilt on every quantity tick; resetting on that would
