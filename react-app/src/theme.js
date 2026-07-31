@@ -31,6 +31,48 @@ export const theme = createTheme({
     divider: 'rgba(215, 173, 82, 0.22)',
     // Default token color for player-character combatants without a custom color.
     pcToken: '#5c8fe0',
+    // GM Board semantic tokens: tier/difficulty/rarity distinctions and panel
+    // overlay tints, kept here so components consume theme.sx tokens instead
+    // of scattering literal hex/rgba values.
+    gmboard: {
+      tier: {
+        1: { border: '#c04040', color: '#ff8080', dim: '#8b3030' },
+        2: { border: '#c07030', color: '#ffb060', dim: '#7a5530' },
+        3: { border: '#b0a030', color: '#ffe060', dim: '#7a7030' },
+        4: { border: '#40a0a0', color: '#a0ffff', dim: '#507878' },
+      },
+      difficulty: {
+        High: '#e06050',
+        Moderate: '#e0b060',
+        Low: '#7ab870',
+      },
+      rarity: {
+        Legendary: '#e8a030',
+        'Very Rare': '#a070d0',
+        Rare: '#4080c0',
+        Uncommon: '#50a850',
+        Common: '#7a6040',
+        '—': '#7a6040',
+      },
+      panelOverlay: 'rgba(0,0,0,0.2)',
+      headerOverlay: 'rgba(0,0,0,0.3)',
+      rowDivider: 'rgba(180,150,90,0.12)',
+      weather: {
+        Clear: '#d7ad52',
+        Rain: '#70a0ff',
+        Snow: '#a0ffff',
+      },
+      result: {
+        encounter: '#e06050',
+        loot: '#e8a030',
+        camp: '#7ab870',
+        environment: '#d69245',
+        trap: '#c04040',
+        none: '#7a6040',
+        trigger: '#d7ad52',
+        safe: '#58b879',
+      },
+    },
   },
   shape: {
     borderRadius: 8,
