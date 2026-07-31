@@ -1,8 +1,8 @@
 // Conditions (XPHB 2024): the table, its mechanical effects, and the resolvers
-// that turn a character's active conditions into roll decisions. Kept free of
-// React and of the adapter registry so it stays a pure, unit-testable module —
-// calculations.js pulls in the Vite-only adapter glob, which is why this lives
-// on its own.
+// that turn a character's active conditions into roll decisions. Deliberately
+// dependency-free — it sits beside calculations.js rather than inside it
+// because calculations.js reaches the Vite-only adapter glob, which no test
+// runner can import.
 
 export const CONDITIONS = [
   { key: 'blinded', label: 'Blinded', icon: 'EyeOff' }, { key: 'charmed', label: 'Charmed', icon: 'Heart' },

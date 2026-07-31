@@ -26,7 +26,7 @@ import { aggregateSavingThrowBonus } from '../../shared/character/itemBonus.js';
 import { itemEffectInventory } from '../../shared/character/wildShapeForm.js';
 import { longRestCharacterPatch } from '../../shared/character/longRest.js';
 import { calcMaxHP, getMod, getFinal, getSaveBonus, clampExhaustion, exhaustionD20Penalty, EXHAUSTION_MAX } from './logic/calculations.js';
-import { CONDITION_IMPLIES } from '../../shared/character/conditions.js';
+import { CONDITION_IMPLIES } from './logic/conditions.js';
 import { normalizeCharacterAttunement } from './logic/attunement.js';
 import { applyResourceRest, getAllResourceDefs, getHitDicePools, getUsedHitDiceTotal, normalizeResourceMax, resourceFullValue } from './logic/restResources.js';
 import { clearedToggles } from './logic/toggleState.js';

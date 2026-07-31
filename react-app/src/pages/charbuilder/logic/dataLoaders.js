@@ -144,7 +144,7 @@ export async function loadSenses() {
 }
 
 // XPHB (2024) condition descriptions, keyed by lowercased name to match the
-// CONDITIONS table keys in shared/character/conditions.js (e.g. "blinded"). Returns a map of
+// CONDITIONS table keys in charsheet/logic/conditions.js (e.g. "blinded"). Returns a map of
 // key -> 5etools entries[] for rendering via entriesToTextBlocks/EntryBlocks.
 export async function loadConditions() {
   const data = await getJson('conditionsdiseases.json');

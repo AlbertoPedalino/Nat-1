@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Box, Typography, Chip, Button, alpha } from '@mui/material';
 import { ChevronDown, ListChecks, X, Minus, Plus } from 'lucide-react';
 import { EXHAUSTION_MAX } from '../logic/calculations.js';
-import { CONDITIONS } from '../../../shared/character/conditions.js';
+import { CONDITIONS } from '../logic/conditions.js';
 import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
 
 const COND_ACCENT = '#d69245';

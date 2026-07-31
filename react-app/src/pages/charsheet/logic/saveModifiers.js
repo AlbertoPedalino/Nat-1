@@ -24,7 +24,7 @@ import { collectItemEffects } from '../../../shared/character/itemEffects.js';
 import { getEquippedArmorPenalties } from './armorPenalties.js';
 import { collectSheetEffects } from './sheetEffects.js';
 import { SLBL, STATS } from './calculations.js';
-import { getConditionsWithEffect } from '../../../shared/character/conditions.js';
+import { getConditionsWithEffect } from './conditions.js';
 
 function titleCase(value) {
   return String(value || '').replace(/\b\w/g, (c) => c.toUpperCase());
