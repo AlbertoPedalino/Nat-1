@@ -1,8 +1,11 @@
 // Conditions (XPHB 2024): the table, its mechanical effects, and the resolvers
 // that turn a character's active conditions into roll decisions. Deliberately
-// dependency-free — it sits beside calculations.js rather than inside it
-// because calculations.js reaches the Vite-only adapter glob, which no test
-// runner can import.
+// dependency-free — it must not reach the Vite-only adapter glob that
+// calculations.js pulls in, or no test runner could import it.
+//
+// Shared rather than sheet-local: the encounter builder assigns the same
+// conditions to combatants, and the two surfaces must agree on the table and on
+// which conditions imply which.
 
 export const CONDITIONS = [
   { key: 'blinded', label: 'Blinded', icon: 'EyeOff' }, { key: 'charmed', label: 'Charmed', icon: 'Heart' },
@@ -75,6 +78,41 @@ export const CONDITION_EFFECTS = {
 };
 
 const CONDITION_LABELS = Object.fromEntries(CONDITIONS.map((c) => [c.key, c.label]));
+
+export const CONDITION_KEYS = CONDITIONS.map((c) => c.key);
+
+// Exhaustion is graded 0–6 and that level lives outside the condition list
+// (`exhaustionLevel`), so a surface that does not own the level must not offer
+// it as a toggle: switching it off there would leave a level with no condition.
+export const EXHAUSTION_KEY = 'exhaustion';
+export const ASSIGNABLE_CONDITIONS = CONDITIONS.filter((c) => c.key !== EXHAUSTION_KEY);
+
+export function conditionLabel(key) {
+  return CONDITION_LABELS[key] || key;
+}
+
+// Drop unknown keys and duplicates, and order deterministically. Anything
+// crossing the wire between a sheet and a combat goes through here, so an
+// echo-suppression key built from it stays stable regardless of click order.
+export function normalizeConditions(value) {
+  if (!Array.isArray(value)) return [];
+  const known = new Set(CONDITION_KEYS);
+  return [...new Set(value.filter((key) => known.has(key)))].sort();
+}
+
+// Add or remove one condition. Adding also applies the conditions this one
+// inherently imposes (Unconscious grants Incapacitated + Prone). Removal is
+// deliberately not cascaded — an implied condition can also stand on its own,
+// and guessing which to drop would silently undo the GM's other calls.
+export function toggleCondition(activeConditions, key) {
+  const list = Array.isArray(activeConditions) ? activeConditions : [];
+  if (list.includes(key)) return list.filter((active) => active !== key);
+  const next = [...list, key];
+  (CONDITION_IMPLIES[key] || []).forEach((implied) => {
+    if (!next.includes(implied)) next.push(implied);
+  });
+  return next;
+}
 
 // Active conditions that ALWAYS impose `flag` (value === true), as labels.
 // Conditional (string-valued) effects are excluded — fetch those separately.

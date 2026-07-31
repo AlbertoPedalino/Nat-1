@@ -1,14 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  ASSIGNABLE_CONDITIONS,
   CONDITIONS,
   CONDITION_EFFECTS,
+  EXHAUSTION_KEY,
+  conditionLabel,
   describeAttackRoll,
   describeCheckDisadvantage,
   getConditionalConditionEffects,
   getConditionsWithEffect,
   getSpeedZeroConditions,
   hasConditionEffect,
+  normalizeConditions,
+  toggleCondition,
 } from './conditions.js';
 
 test('every CONDITION_EFFECTS row matches a condition in the CONDITIONS table', () => {
@@ -103,4 +108,57 @@ test('check disadvantage: armor and conditions are reported as one reason list',
   assert.deepEqual(situational.conditional, [
     { source: 'Frightened', note: 'while the source of fear is in sight' },
   ]);
+});
+
+test('adding a condition also applies the ones it inherently imposes', () => {
+  assert.deepEqual(toggleCondition([], 'unconscious').sort(), ['incapacitated', 'prone', 'unconscious']);
+  assert.deepEqual(toggleCondition([], 'stunned').sort(), ['incapacitated', 'stunned']);
+  assert.deepEqual(toggleCondition([], 'prone'), ['prone']);
+});
+
+test('an implied condition already present is not duplicated', () => {
+  const next = toggleCondition(['prone'], 'unconscious');
+  assert.equal(next.filter((k) => k === 'prone').length, 1);
+});
+
+// Removal is deliberately not cascaded: an implied condition can stand on its
+// own, so dropping it would silently undo a separate call the GM made.
+test('removing a condition leaves the ones it implied in place', () => {
+  const applied = toggleCondition([], 'unconscious');
+  const removed = toggleCondition(applied, 'unconscious');
+  assert.deepEqual(removed.sort(), ['incapacitated', 'prone']);
+});
+
+test('toggling never mutates the list it was given', () => {
+  const before = ['prone'];
+  toggleCondition(before, 'unconscious');
+  assert.deepEqual(before, ['prone']);
+});
+
+test('normalizeConditions drops unknown keys, duplicates and junk input', () => {
+  assert.deepEqual(normalizeConditions(['prone', 'prone']), ['prone']);
+  assert.deepEqual(normalizeConditions(['prone', 'not-a-condition']), ['prone']);
+  assert.deepEqual(normalizeConditions(null), []);
+  assert.deepEqual(normalizeConditions('prone'), []);
+  assert.deepEqual(normalizeConditions([null, undefined, 42]), []);
+});
+
+// The sync layer builds echo-suppression keys from this, so two lists holding
+// the same conditions must normalize identically whatever the click order.
+test('normalizeConditions is order-independent', () => {
+  assert.deepEqual(normalizeConditions(['prone', 'blinded']), normalizeConditions(['blinded', 'prone']));
+});
+
+test('exhaustion is listed but never offered as an assignable toggle', () => {
+  assert.ok(CONDITIONS.some((c) => c.key === EXHAUSTION_KEY));
+  assert.equal(ASSIGNABLE_CONDITIONS.some((c) => c.key === EXHAUSTION_KEY), false);
+  assert.equal(ASSIGNABLE_CONDITIONS.length, CONDITIONS.length - 1);
+  // It still survives normalization: a sheet's exhaustion must round-trip
+  // through a combat that cannot set it.
+  assert.deepEqual(normalizeConditions([EXHAUSTION_KEY]), [EXHAUSTION_KEY]);
+});
+
+test('conditionLabel falls back to the raw key', () => {
+  assert.equal(conditionLabel('prone'), 'Prone');
+  assert.equal(conditionLabel('mystery'), 'mystery');
 });

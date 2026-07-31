@@ -2,7 +2,7 @@ import { Box, Chip, Paper, Tooltip, Typography } from '@mui/material';
 import { Footprints, AlertCircle } from 'lucide-react';
 import { getEquippedArmorPenalties } from '../logic/armorPenalties.js';
 import { getFinal, exhaustionSpeedPenalty } from '../logic/calculations.js';
-import { getSpeedZeroConditions } from '../logic/conditions.js';
+import { getSpeedZeroConditions } from '../../../shared/character/conditions.js';
 import { collectMovementEffects, effectSummary, effectTitle, getSpeedBonus } from '../logic/sheetEffects.js';
 import { collectItemEffects } from '../../../shared/character/itemEffects.js';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';

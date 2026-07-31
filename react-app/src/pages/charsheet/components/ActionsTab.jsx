@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Box, Button, Chip, Typography } from '@mui/material';
 import { getMod, getFinal, fbonus } from '../logic/calculations.js';
-import { describeAttackRoll } from '../logic/conditions.js';
+import { describeAttackRoll } from '../../../shared/character/conditions.js';
 import { installedRegistry, loadCoreAdapters, loadClassAdapters } from '../../../adapters/index.js';
 import { PACT_SLOTS, SPELL_LEVEL_LABELS } from '../../charbuilder/constants.js';
 import { ToggleButton, ToggleButtonGroup } from '@mui/material';

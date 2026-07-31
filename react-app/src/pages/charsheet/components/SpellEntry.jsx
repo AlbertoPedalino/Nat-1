@@ -9,7 +9,7 @@ import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import PipButton from '../../../shared/character/PipButton.jsx';
 import { formatRollTitle } from '../../../shared/character/dice.js';
 import { getFinal, getMod, getPB } from '../logic/calculations.js';
-import { describeAttackRoll } from '../logic/conditions.js';
+import { describeAttackRoll } from '../../../shared/character/conditions.js';
 import { getSpellAttackAdvantage } from '../logic/sheetEffects.js';
 import { entriesToTextBlocks } from '../../../shared/character/spellEntries.js';
 import {
