@@ -37,7 +37,12 @@ export function resolveCombatVitals(combatant = {}, vitals = {}) {
     out[field.combat] = fromVitals == null ? field.toCombat(combatant, { hpMax }) : fromVitals;
   }
   // Current HP is the only field whose clamp depends on the resolved hpMax.
-  out.hpCurrent = Math.max(0, Math.min(hpMax, Math.round(numberOr(out.hpCurrent, hpMax))));
+  // `toCombat` returns null when no current HP is known anywhere (a party
+  // member typed straight into the encounter only carries hpMax); that means
+  // "undamaged", so it resolves to full. The `?? hpMax` has to happen before
+  // numberOr, because Number(null) is 0 — a finite value that would silently
+  // win over the fallback and drop the combatant to 0 HP.
+  out.hpCurrent = Math.max(0, Math.min(hpMax, Math.round(numberOr(out.hpCurrent ?? hpMax, hpMax))));
   out.isDead = out.hpCurrent === 0 && out.deathSaves.f >= 3;
   return out;
 }

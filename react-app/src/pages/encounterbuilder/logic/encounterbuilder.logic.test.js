@@ -31,6 +31,7 @@ import { resolveLegendaryGroups } from './bestiary.js';
 import {
   SYNCED_DATA_KEYS,
   combatantToSheetPatch,
+  resolveCombatVitals,
   sheetPatchKey,
   sheetVitalsToCombat,
   sheetVitalsToSheetPatch,
@@ -59,10 +60,28 @@ test('combat initiative builds monsters and players then skips dead on next turn
   const combat = buildCombat([{ qty: 2, monsterData: monster }], [{ name: 'Aria', initMod: 1, ac: 15, hpMax: 22 }], 123, rng);
   assert.equal(combat.combatants.length, 3);
   assert.equal(combat.round, 1);
+  // A party member typed into the encounter carries hpMax and nothing else:
+  // launching the fight must start them undamaged, not at 0 HP.
+  const aria = combat.combatants.find((c) => c.name === 'Aria');
+  assert.equal(aria.hpCurrent, 22);
+  assert.equal(aria.hpMax, 22);
+  assert.equal(aria.isDead, false);
   const current = combat.combatants[combat.currentTurn];
   const deadCombat = { ...combat, combatants: combat.combatants.map((c) => (c.id === current.id ? { ...c, isDead: true } : c)) };
   const advanced = nextTurn(deadCombat);
   assert.notEqual(advanced.combatants[advanced.currentTurn].id, current.id);
+});
+
+test('vitals resolve to full HP when no current HP is known anywhere', () => {
+  // Number(null) === 0, so an absent current HP used to survive the clamp as a
+  // finite 0 and beat the hpMax fallback.
+  assert.equal(resolveCombatVitals({ hpMax: 30 }, { hpMax: 30 }).hpCurrent, 30);
+  assert.equal(resolveCombatVitals({}, {}).hpCurrent, 10); // no hpMax anywhere -> default 10
+  // A known current HP still wins, including a legitimate 0.
+  assert.equal(resolveCombatVitals({ hpMax: 30 }, { hpMax: 30, currentHP: 4 }).hpCurrent, 4);
+  assert.equal(resolveCombatVitals({ hpMax: 30 }, { hpMax: 30, currentHP: 0 }).hpCurrent, 0);
+  // Combatant-side value is the fallback when inbound vitals omit it.
+  assert.equal(resolveCombatVitals({ hpMax: 30, hpCurrent: 12 }, {}).hpCurrent, 12);
 });
 
 test('sheet sync mappers clamp and keep the sheet patch shallow', () => {
