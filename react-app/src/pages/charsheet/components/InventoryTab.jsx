@@ -332,7 +332,11 @@ function itemMatchesPreparedSearch(item, query) {
 // legitimately match most of the item DB (~2500 entries once magic variants are
 // expanded, so most searches overflow any fixed cap), and truncating
 // made it look like the filter had only searched the first alphabetical slice.
-const SEARCH_PAGE = 60;
+// 120 rows a page: the old hard cap rendered that many at once, so the DOM cost
+// is known to be fine, and it takes fewer scrolls to cross a ~2500-item DB.
+const SEARCH_PAGE = 120;
+// The owned inventory is a different scale — dozens of rows, not thousands — so
+// a smaller page keeps the first paint light and "Show more" rarely appears.
 const INVENTORY_PAGE = 50;
 
 // Entries keep their original inventory index, so qty/equip/remove keep

@@ -37,7 +37,7 @@ const EQUIP_TYPE_LABELS = {
 // Both lists render a page at a time and grow on scroll. A hard cap used to hide
 // the tail of the DB, which made a broad filter look like it had only searched
 // the first alphabetical slice.
-const ADD_LIST_PAGE = 60;
+const ADD_LIST_PAGE = 120;
 const CURRENT_LIST_PAGE = 50;
 
 // Search text lives in the reducer so it survives leaving the step, but every
