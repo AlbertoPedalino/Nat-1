@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Avatar, Box, Button, IconButton, LinearProgress, Paper, Stack, TextField, Tooltip, Typography } from '@mui/material';
+import { Avatar, Box, Button, Collapse, IconButton, LinearProgress, Paper, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import { alpha } from '@mui/material/styles';
-import { ExternalLink, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, ExternalLink, HeartPulse, Shield, Sparkles, X } from 'lucide-react';
 import HpStepper from '../../../shared/character/HpStepper.jsx';
 import { campaignSheetUrl } from '../logic/campaignSheetUrl.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
@@ -12,9 +12,16 @@ export default function CombatantCard({ combatant, active }) {
   const [hpAmt, setHpAmt] = useState('5');
   const [tempAmt, setTempAmt] = useState('5');
   const [modAmt, setModAmt] = useState('5');
+  // Temp HP / max-HP-modifier rows are secondary: collapsed by default to keep
+  // the initiative list scannable. When collapsed, an active value still shows
+  // as a flag next to the HP fields so nothing goes silently missing.
+  const [hpDetailsOpen, setHpDetailsOpen] = useState(false);
   const isMonster = combatant.type === 'monster';
   const hpPct = combatant.hpMax ? Math.max(0, Math.round((combatant.hpCurrent / combatant.hpMax) * 100)) : 100;
   const isDown = !isMonster && combatant.hpCurrent === 0 && Boolean(combatant.deathSaves);
+  const tempHp = Number(combatant.tempHP) || 0;
+  const maxHpBonus = Number(combatant.maxHPBonus) || 0;
+  const maxHpBonusText = `${maxHpBonus > 0 ? '+' : ''}${maxHpBonus}`;
 
   const openDetails = () => {
     if (combatant.monsterData) {
@@ -106,7 +113,16 @@ export default function CombatantCard({ combatant, active }) {
                   </Tooltip>
                 ) : null}
               </Stack>
-              <Typography variant="caption" color="text.secondary" sx={metaLineSx}>AC {combatant.ac} · Init {combatant.initMod >= 0 ? '+' : ''}{combatant.initMod}</Typography>
+              {/* AC only: the initiative modifier lived here too, but the rolled
+                  initiative is already the field on the left, so the modifier
+                  was noise competing with the one stat read every turn. */}
+              <Tooltip title="Armor Class">
+                <Box sx={acBadgeSx}>
+                  <Shield size={13} />
+                  <Box component="span" sx={acLabelSx}>AC</Box>
+                  <Box component="span" sx={acValueSx}>{combatant.ac}</Box>
+                </Box>
+              </Tooltip>
             </Box>
           </Stack>
         </Box>
@@ -156,42 +172,68 @@ export default function CombatantCard({ combatant, active }) {
                 />
               </Box>
 
-              {/* Temp HP */}
-              <Box sx={hpPanelRowSx}>
-                <HpField
-                  label="Temp"
-                  value={combatant.tempHP ?? 0}
-                  onChange={(value) => dispatch({ type: 'setTempHp', id: combatant.id, value })}
-                />
-                <HpStepper
-                  amount={tempAmt}
-                  onAmount={setTempAmt}
-                  onPlus={(n) => dispatch({ type: 'setTempHp', id: combatant.id, value: (Number(combatant.tempHP) || 0) + n })}
-                  onMinus={(n) => dispatch({ type: 'setTempHp', id: combatant.id, value: (Number(combatant.tempHP) || 0) - n })}
-                  plusLabel="Add temp HP"
-                  minusLabel="Remove temp HP"
-                />
+              {/* Disclosure row: the toggle stays put and the collapsed flags
+                  sit exactly where their full rows expand, so opening the
+                  section reads as the flags unfolding rather than as new
+                  content appearing elsewhere. */}
+              <Box sx={hpSummaryRowSx}>
+                <Button
+                  size="small"
+                  onClick={() => setHpDetailsOpen((open) => !open)}
+                  aria-expanded={hpDetailsOpen}
+                  startIcon={hpDetailsOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                  sx={hpToggleSx}
+                >
+                  HP modifiers
+                </Button>
+                {!hpDetailsOpen && tempHp !== 0 ? (
+                  <HpFlag Icon={Sparkles} title={`Temp HP: ${tempHp}`} text={tempHp} />
+                ) : null}
+                {!hpDetailsOpen && maxHpBonus !== 0 ? (
+                  <HpFlag Icon={HeartPulse} title={`Max HP modifier: ${maxHpBonusText}`} text={maxHpBonusText} />
+                ) : null}
               </Box>
 
-              {/* Max HP modifier (delta over base max; works for PCs and monsters) */}
-              <Box sx={hpPanelRowSx}>
-                <HpField
-                  label="Max mod"
-                  value={combatant.maxHPBonus ?? 0}
-                  onChange={(value) => {
-                    const base = (Number(combatant.hpMax) || 0) - (Number(combatant.maxHPBonus) || 0);
-                    dispatch({ type: 'setMaxHp', id: combatant.id, value: base + (Number(value) || 0) });
-                  }}
-                />
-                <HpStepper
-                  amount={modAmt}
-                  onAmount={setModAmt}
-                  onPlus={(n) => dispatch({ type: 'setMaxHp', id: combatant.id, value: (Number(combatant.hpMax) || 0) + n })}
-                  onMinus={(n) => dispatch({ type: 'setMaxHp', id: combatant.id, value: (Number(combatant.hpMax) || 0) - n })}
-                  plusLabel="Increase max HP"
-                  minusLabel="Decrease max HP"
-                />
-              </Box>
+              <Collapse in={hpDetailsOpen} unmountOnExit sx={collapseSx}>
+                <Box sx={hpDetailsSx}>
+                  {/* Temp HP */}
+                  <Box sx={hpPanelRowSx}>
+                    <HpField
+                      label="Temp"
+                      value={combatant.tempHP ?? 0}
+                      onChange={(value) => dispatch({ type: 'setTempHp', id: combatant.id, value })}
+                    />
+                    <HpStepper
+                      amount={tempAmt}
+                      onAmount={setTempAmt}
+                      onPlus={(n) => dispatch({ type: 'setTempHp', id: combatant.id, value: (Number(combatant.tempHP) || 0) + n })}
+                      onMinus={(n) => dispatch({ type: 'setTempHp', id: combatant.id, value: (Number(combatant.tempHP) || 0) - n })}
+                      plusLabel="Add temp HP"
+                      minusLabel="Remove temp HP"
+                    />
+                  </Box>
+
+                  {/* Max HP modifier (delta over base max; works for PCs and monsters) */}
+                  <Box sx={hpPanelRowSx}>
+                    <HpField
+                      label="Max mod"
+                      value={combatant.maxHPBonus ?? 0}
+                      onChange={(value) => {
+                        const base = (Number(combatant.hpMax) || 0) - (Number(combatant.maxHPBonus) || 0);
+                        dispatch({ type: 'setMaxHp', id: combatant.id, value: base + (Number(value) || 0) });
+                      }}
+                    />
+                    <HpStepper
+                      amount={modAmt}
+                      onAmount={setModAmt}
+                      onPlus={(n) => dispatch({ type: 'setMaxHp', id: combatant.id, value: (Number(combatant.hpMax) || 0) + n })}
+                      onMinus={(n) => dispatch({ type: 'setMaxHp', id: combatant.id, value: (Number(combatant.hpMax) || 0) - n })}
+                      plusLabel="Increase max HP"
+                      minusLabel="Decrease max HP"
+                    />
+                  </Box>
+                </Box>
+              </Collapse>
 
               <LinearProgress
                 variant="determinate"
@@ -217,6 +259,19 @@ function HpField({ label, value, onChange }) {
       onFocus={selectInputText}
       sx={hpFieldSx}
     />
+  );
+}
+
+// Collapsed-state marker for a value hidden inside the HP details: same icons
+// the sheet's HP block uses for Temp / Max mod, so the two surfaces read alike.
+function HpFlag({ Icon, title, text }) {
+  return (
+    <Tooltip title={title}>
+      <Box sx={hpFlagSx}>
+        <Icon size={11} />
+        <Box component="b">{text}</Box>
+      </Box>
+    </Tooltip>
   );
 }
 
@@ -314,7 +369,74 @@ const sheetLinkButtonSx = {
   color: 'text.secondary',
 };
 
-const metaLineSx = { fontSize: '0.72rem' };
+// AC is the number a GM reads on every attack roll, so it gets a bordered
+// badge instead of a caption: prominence comes from size and framing, not from
+// a new accent color that would fight the gold active-turn highlight.
+const acBadgeSx = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 0.4,
+  mt: 0.3,
+  px: 0.7,
+  py: '1px',
+  border: 1,
+  borderColor: 'divider',
+  borderRadius: 1,
+  bgcolor: 'rgba(255,255,255,0.04)',
+  color: 'text.secondary',
+  lineHeight: 1,
+};
+
+const acLabelSx = { fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.1em' };
+
+const acValueSx = { fontSize: '1rem', fontWeight: 800, color: 'text.primary' };
+
+const hpSummaryRowSx = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 0.5,
+  flexWrap: 'wrap',
+  minHeight: 22,
+};
+
+// Labelled disclosure: the row must say what it hides, otherwise a bare chevron
+// on a combatant with no temp HP and no max-HP modifier means nothing.
+const hpToggleSx = {
+  flex: '0 0 auto',
+  minWidth: 0,
+  px: 0.5,
+  py: 0,
+  color: 'text.secondary',
+  fontSize: '0.62rem',
+  fontWeight: 700,
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase',
+  '& .MuiButton-startIcon': { mr: 0.4 },
+  '&:hover': { color: 'text.primary' },
+};
+
+const hpFlagSx = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 0.3,
+  px: 0.5,
+  py: '1px',
+  border: 1,
+  borderColor: 'divider',
+  borderRadius: 1,
+  color: 'primary.main',
+  fontSize: '0.7rem',
+  lineHeight: 1,
+  flex: '0 0 auto',
+};
+
+const hpDetailsSx = { display: 'flex', flexDirection: 'column', gap: 0.7 };
+
+// A fully collapsed Collapse still renders a zero-height box, which keeps
+// earning a slot in the parent's flex gap. MUI tags that state with
+// .MuiCollapse-hidden once the exit transition ends, so dropping the box out of
+// layout there removes the phantom gap without costing the animation.
+const collapseSx = { '&.MuiCollapse-hidden': { display: 'none' } };
 
 const hpPanelRowSx = {
   display: 'flex',
