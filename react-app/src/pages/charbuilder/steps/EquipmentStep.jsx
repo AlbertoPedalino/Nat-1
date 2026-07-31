@@ -3,7 +3,6 @@ import { Box, Button, Chip, Divider, IconButton, List, ListItemButton, ListItemT
 import { Backpack, Coins, PackagePlus, Trash2 } from 'lucide-react';
 import SearchField from '../../../shared/character/SearchField.jsx';
 import BuilderPanel from '../components/BuilderPanel.jsx';
-import { ITEM_FILTERS } from '../constants.js';
 import { ItemNameIcon } from '../../../shared/character/FiveEToolsLink.jsx';
 import { equipmentTypeCandidates } from '../logic/dataLoaders.js';
 import { CurrencyRow } from '../../../shared/character/CurrencyCoinBox.jsx';
@@ -12,6 +11,11 @@ import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import { ItemReferenceBody, QuantityAdder } from '../../../shared/character/ItemReference.jsx';
 import { strip5eMarkup } from '../../../shared/character/spellEntries.js';
 import { formatWeight, totalCarriedWeight } from '../../../shared/character/weight.js';
+import ItemFilterPanel from '../../../shared/character/ItemFilterPanel.jsx';
+import { itemMatchesFilters } from '../../../shared/character/itemFilters.js';
+import { useItemFilters } from '../../../shared/character/useItemFilters.js';
+import { ITEM_GROUP_CHIPS, OWNED_ITEM_CHIPS, matchesItemGroupChip } from '../../../shared/character/itemGroups.js';
+import { usePagedList } from '../../../shared/character/usePagedList.js';
 
 const CHOICE_KEYS = ['A', 'B', 'C', 'D', 'E', 'a', 'b', 'c', 'd', 'e'];
 
@@ -30,9 +34,50 @@ const EQUIP_TYPE_LABELS = {
   weaponMartialMelee: 'Martial Melee Weapon',
 };
 
-// Cap the non-virtualized add list. Rows are search-driven, so a small cap keeps
-// the DOM light; beyond it we show a "refine search" hint.
-const ADD_LIST_CAP = 120;
+// Both lists render a page at a time and grow on scroll. A hard cap used to hide
+// the tail of the DB, which made a broad filter look like it had only searched
+// the first alphabetical slice.
+const ADD_LIST_PAGE = 60;
+const CURRENT_LIST_PAGE = 50;
+
+// Search text lives in the reducer so it survives leaving the step, but every
+// dispatch re-runs the whole builder reducer — so mirror it locally to keep
+// typing instant and commit on a pause.
+function useDebouncedSearch(value, commit) {
+  const [local, setLocal] = useState(value || '');
+  useEffect(() => { setLocal(value || ''); }, [value]);
+  useEffect(() => {
+    if (local === (value || '')) return;
+    const handle = setTimeout(() => commit(local), 200);
+    return () => clearTimeout(handle);
+  }, [local]);
+  return [local, setLocal];
+}
+
+function FilterChips({ filters, value, onChange }) {
+  return (
+    <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
+      {filters.map((filter) => (
+        <Chip
+          key={filter.key}
+          label={filter.label}
+          color={value === filter.key ? 'primary' : 'default'}
+          onClick={() => onChange(filter.key)}
+        />
+      ))}
+    </Stack>
+  );
+}
+
+function ShowMoreRow({ remaining, onClick }) {
+  return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', py: 1 }}>
+      <Button size="small" variant="outlined" onClick={onClick}>
+        Show more ({remaining})
+      </Button>
+    </Box>
+  );
+}
 
 function cpToCoins(cpValue) {
   let cp = Number(cpValue || 0);
@@ -342,49 +387,77 @@ function StartingEquipmentBlock({ title, eq, prefix, character, items, dispatch 
 }
 
 export default function EquipmentStep({ state, dispatch }) {
-  const { character, search, inventoryFilter } = state;
-  const [localQuery, setLocalQuery] = useState(search.inventory || '');
-  useEffect(() => { setLocalQuery(search.inventory || ''); }, [search.inventory]);
-  useEffect(() => {
-    if (localQuery === search.inventory) return;
-    const handle = setTimeout(() => dispatch({ type: 'search/set', scope: 'inventory', value: localQuery }), 200);
-    return () => clearTimeout(handle);
-  }, [localQuery]);
+  const { character, search, inventoryFilter, currentInventoryFilter } = state;
+  const [localQuery, setLocalQuery] = useDebouncedSearch(
+    search.inventory,
+    (value) => dispatch({ type: 'search/set', scope: 'inventory', value }),
+  );
   const deferredQuery = useDeferredValue(localQuery);
   const query = deferredQuery.toLowerCase();
 
-  const sortedItems = useMemo(() => {
-    const groupOf = (item) => {
-      const type = String(item.type || '').toLowerCase();
-      if (type.includes('weapon') || ['m', 'r'].includes(type)) return 'weapon';
-      if (type.includes('armor') || ['la', 'ma', 'ha', 's'].includes(type)) return 'armor';
-      if (item.rarity && item.rarity !== 'none') return 'magic';
-      return 'gear';
-    };
-    const filtered = state.data.items.filter((item) => {
-      const matchesFilter = inventoryFilter === 'all' || groupOf(item) === inventoryFilter;
-      const matchesQuery = !query || itemSearchText(item).includes(query);
-      return matchesFilter && matchesQuery;
-    });
-    return filtered.sort((a, b) => {
+  // The pool each panel builds its dropdowns from: narrowed by the chip and the
+  // search box, but not by the panel's own choices. Otherwise chip "Armor" would
+  // keep offering "Martial Melee Weapon", which can only ever return nothing.
+  const addPool = useMemo(() => state.data.items.filter((item) => (
+    matchesItemGroupChip(item, inventoryFilter)
+    && (!query || itemSearchText(item).includes(query))
+  )), [state.data.items, inventoryFilter, query]);
+
+  // Two independent advanced-filter sets: narrowing the item DB above must not
+  // silently hide rows in the carried list below. Both live in the reducer, like
+  // the chips and the search boxes, so leaving the step and coming back does not
+  // silently drop half the query.
+  const addList = useItemFilters(addPool, [
+    state.inventoryFilters,
+    (filters) => dispatch({ type: 'inventory/filters', filters }),
+  ]);
+
+  const sortedItems = useMemo(() => addPool
+    .filter((item) => itemMatchesFilters(item, addList.filters))
+    .sort((a, b) => {
       const aBase = !a.rarity || a.rarity === 'none' ? 0 : 1;
       const bBase = !b.rarity || b.rarity === 'none' ? 0 : 1;
       if (aBase !== bBase) return aBase - bBase;
       return a.name.localeCompare(b.name);
-    });
-  }, [state.data.items, inventoryFilter, query]);
-  const visibleItems = useMemo(() => sortedItems.slice(0, ADD_LIST_CAP), [sortedItems]);
+    }), [addPool, addList.filters]);
+
+  const addPage = usePagedList(sortedItems, {
+    pageSize: ADD_LIST_PAGE,
+    resetKey: `${query}|${inventoryFilter}|${addList.key}`,
+  });
+
   const addItemWithQty = (item, qty) => dispatch({ type: 'inventory/add', item: { ...item, qty } });
   const totalWeight = totalCarriedWeight(character.inventory, character.currency);
 
-  // Search over the carried items. Keep each row's original index so dispatch
-  // actions (remove/qty) still target the right inventory entry after filtering.
-  const [currentQuery, setCurrentQuery] = useState('');
-  const currentInventory = useMemo(() => {
-    const q = currentQuery.trim().toLowerCase();
-    const rows = character.inventory.map((item, index) => ({ item, index }));
-    return q ? rows.filter(({ item }) => itemSearchText(item).includes(q)) : rows;
-  }, [character.inventory, currentQuery]);
+  // Search + filter over the carried items. Keep each row's original index so
+  // dispatch actions (remove/qty) still target the right inventory entry.
+  const [currentQuery, setCurrentQuery] = useDebouncedSearch(
+    search.currentInventory,
+    (value) => dispatch({ type: 'search/set', scope: 'currentInventory', value }),
+  );
+  const currentSearch = currentQuery.trim().toLowerCase();
+  const currentPool = useMemo(() => character.inventory
+    .map((item, index) => ({ item, index }))
+    .filter(({ item }) => (
+      matchesItemGroupChip(item, currentInventoryFilter)
+      && (!currentSearch || itemSearchText(item).includes(currentSearch))
+    )), [character.inventory, currentSearch, currentInventoryFilter]);
+  const currentPoolItems = useMemo(() => currentPool.map((entry) => entry.item), [currentPool]);
+
+  const currentList = useItemFilters(currentPoolItems, [
+    state.currentInventoryFilters,
+    (filters) => dispatch({ type: 'inventory/current-filters', filters }),
+  ]);
+
+  const currentInventory = useMemo(
+    () => currentPool.filter(({ item }) => itemMatchesFilters(item, currentList.filters)),
+    [currentPool, currentList.filters],
+  );
+
+  const currentPage = usePagedList(currentInventory, {
+    pageSize: CURRENT_LIST_PAGE,
+    resetKey: `${currentSearch}|${currentInventoryFilter}|${currentList.key}`,
+  });
 
   return (
     <Stack spacing={2}>
@@ -419,44 +492,49 @@ export default function EquipmentStep({ state, dispatch }) {
             size="medium"
             iconSize={18}
           />
-          <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
-            {ITEM_FILTERS.map((filter) => (
-              <Chip
-                key={filter.key}
-                label={filter.label}
-                color={inventoryFilter === filter.key ? 'primary' : 'default'}
-                onClick={() => dispatch({ type: 'inventory/filter', filter: filter.key })}
-              />
-            ))}
-          </Stack>
+          <FilterChips
+            filters={ITEM_GROUP_CHIPS}
+            value={inventoryFilter}
+            onChange={(key) => dispatch({ type: 'inventory/filter', filter: key })}
+          />
 
-          <Paper variant="outlined" sx={{ maxHeight: 430, overflow: 'auto' }}>
+          <ItemFilterPanel {...addList.panelProps} />
+
+          <Typography variant="caption" color="text.secondary">
+            {sortedItems.length} of {state.data.items.length} items
+          </Typography>
+
+          <Paper variant="outlined" {...addPage.listProps} sx={{ maxHeight: 430, overflow: 'auto' }}>
             <List dense disablePadding>
-              {visibleItems.map((item) => (
+              {addPage.visible.map((item) => (
                 <AddItemRow key={`${item.name}-${item.source}`} item={item} onAdd={addItemWithQty} />
               ))}
             </List>
+            {addPage.remaining > 0 ? <ShowMoreRow remaining={addPage.remaining} onClick={addPage.showMore} /> : null}
           </Paper>
-          {sortedItems.length > visibleItems.length ? (
-            <Typography variant="caption" color="text.secondary">
-              {sortedItems.length - visibleItems.length} altri risultati. Affina ricerca.
-            </Typography>
-          ) : null}
 
           <Divider />
           <Typography variant="h2">Current Inventory</Typography>
           {character.inventory.length ? (
-            <SearchField
-              value={currentQuery}
-              onChange={setCurrentQuery}
-              placeholder="Search current inventory"
-              size="medium"
-              iconSize={18}
-            />
+            <>
+              <SearchField
+                value={currentQuery}
+                onChange={setCurrentQuery}
+                placeholder="Search current inventory"
+                size="medium"
+                iconSize={18}
+              />
+              <FilterChips
+                filters={OWNED_ITEM_CHIPS}
+                value={currentInventoryFilter}
+                onChange={(filter) => dispatch({ type: 'inventory/current-filter', filter })}
+              />
+              <ItemFilterPanel {...currentList.panelProps} />
+            </>
           ) : null}
-          <Paper variant="outlined" sx={{ maxHeight: 430, overflow: 'auto' }}>
+          <Paper variant="outlined" {...currentPage.listProps} sx={{ maxHeight: 430, overflow: 'auto' }}>
             <List dense disablePadding>
-              {currentInventory.map(({ item, index }) => (
+              {currentPage.visible.map(({ item, index }) => (
                 <CurrentInventoryRow key={`${item.name}-${index}`} item={item} index={index} dispatch={dispatch} />
               ))}
               {character.inventory.length && !currentInventory.length ? (
@@ -465,6 +543,7 @@ export default function EquipmentStep({ state, dispatch }) {
                 </Typography>
               ) : null}
             </List>
+            {currentPage.remaining > 0 ? <ShowMoreRow remaining={currentPage.remaining} onClick={currentPage.showMore} /> : null}
           </Paper>
         </Stack>
       </BuilderPanel>

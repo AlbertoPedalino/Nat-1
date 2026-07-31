@@ -19,6 +19,7 @@ import {
   reorderCurrency,
 } from '../../shared/character/currency.js';
 import { addInventoryEntries } from '../../shared/character/itemContainers.js';
+import { emptyItemFilters } from '../../shared/character/itemFilters.js';
 import { isFeatKey, isFeatDetailKey } from '../../shared/featChoiceKeys.js';
 import { normalizeCharacterChoices } from '../../shared/choiceNormalization.js';
 
@@ -189,10 +190,18 @@ export const initialBuilderState = {
     species: '',
     background: '',
     inventory: '',
+    currentInventory: '',
     feats: '',
     spells: '',
   },
+  // Equipment step list state. UI only — `saveCharacter` persists
+  // `state.character`, so none of this reaches storage. It lives here rather
+  // than in the step so it survives navigating away and back, the same way the
+  // search boxes above already do.
   inventoryFilter: 'all',
+  inventoryFilters: emptyItemFilters(),
+  currentInventoryFilter: 'all',
+  currentInventoryFilters: emptyItemFilters(),
   choiceDialog: null,
   adaptersLoaded: false,
   adaptersVersion: 0,
@@ -605,6 +614,12 @@ export function builderReducer(state, action) {
       return updateCharacter(state, { currency: reorderCurrency(state.character.currency, action.key, action.dir) });
     case 'inventory/filter':
       return { ...state, inventoryFilter: action.filter };
+    case 'inventory/filters':
+      return { ...state, inventoryFilters: action.filters };
+    case 'inventory/current-filter':
+      return { ...state, currentInventoryFilter: action.filter };
+    case 'inventory/current-filters':
+      return { ...state, currentInventoryFilters: action.filters };
     case 'inventory/add': {
       const inventory = addInventoryEntries(state.character.inventory, [action.item], state.data.items);
       return updateCharacter(state, { inventory });

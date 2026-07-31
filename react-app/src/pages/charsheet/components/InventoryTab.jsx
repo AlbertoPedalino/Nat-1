@@ -48,21 +48,31 @@ import {
   setInventoryItemCharges,
   shouldShowItemCharges,
 } from '../../../shared/character/itemCharges.js';
+import ItemFilterPanel from '../../../shared/character/ItemFilterPanel.jsx';
+import { hasActiveItemFilters, itemMatchesFilters } from '../../../shared/character/itemFilters.js';
+import { useItemFilters } from '../../../shared/character/useItemFilters.js';
+import { usePagedList } from '../../../shared/character/usePagedList.js';
+import {
+  ITEM_GROUP_CHIPS,
+  ITEM_GROUP_KEYS,
+  OWNED_ITEM_CHIPS,
+  itemGroupKey as itemType,
+  matchesItemGroupChip,
+} from '../../../shared/character/itemGroups.js';
 
-const FILTERS = [
-  { key: 'all', label: 'All', icon: null },
-  { key: 'weapon', label: 'Weapons', icon: Swords },
-  { key: 'armor', label: 'Armor', icon: Shield },
-  { key: 'gear', label: 'Gear', icon: Backpack },
-  { key: 'magic', label: 'Magic', icon: Sparkles },
-];
+// Keys and labels come from the shared chip taxonomy; the sheet only adds the
+// icons, which are its own presentation. The add-item search gets the plain set
+// (no "Equipped" — database items are not owned), the inventory the owned set.
+const CHIP_ICONS = { weapon: Swords, armor: Shield, gear: Backpack, magic: Sparkles, equipped: Check };
+const withIcons = (chips) => chips.map((chip) => ({ ...chip, icon: CHIP_ICONS[chip.key] || null }));
 
-const GROUPS = [
-  { key: 'weapon', label: 'Weapons', icon: Swords },
-  { key: 'armor', label: 'Armor', icon: Shield },
-  { key: 'magic', label: 'Magic', icon: Sparkles },
-  { key: 'gear', label: 'Gear', icon: Backpack },
-];
+const FILTERS = withIcons(ITEM_GROUP_CHIPS);
+const INVENTORY_FILTERS = withIcons(OWNED_ITEM_CHIPS);
+
+// The inventory section headers, in shelf order. Derived from the same keys, so
+// a new group cannot end up filterable but unrenderable.
+const GROUP_LABELS = Object.fromEntries(ITEM_GROUP_CHIPS.map((chip) => [chip.key, chip.label]));
+const GROUPS = ITEM_GROUP_KEYS.map((key) => ({ key, label: GROUP_LABELS[key], icon: CHIP_ICONS[key] }));
 
 
 const compactInputSx = {
@@ -161,13 +171,6 @@ const addPanelToggleSx = (open) => ({
   },
 });
 
-function itemType(item) {
-  const type = String(item?.type || '').toUpperCase();
-  if (['M', 'R'].includes(type) || type === 'WEAPON') return 'weapon';
-  if (['LA', 'MA', 'HA', 'S'].includes(type) || type === 'ARMOR') return 'armor';
-  if (type === 'RG' || (item?.rarity && item.rarity !== 'none')) return 'magic';
-  return 'gear';
-}
 
 function normalizeStoredItem(item) {
   const {
@@ -325,7 +328,25 @@ function itemMatchesPreparedSearch(item, query) {
   return q.split(' ').every((part) => haystack.includes(part));
 }
 
-const SEARCH_CAP = 120;
+// The result list renders in pages instead of hard-capping: a broad filter can
+// legitimately match most of the ~860-item DB, and truncating at a fixed count
+// made it look like the filter had only searched the first alphabetical slice.
+const SEARCH_PAGE = 60;
+const INVENTORY_PAGE = 50;
+
+// Entries keep their original inventory index, so qty/equip/remove keep
+// targeting the right item no matter how the list is grouped or sliced.
+function byItemName(a, b) {
+  return String(a.item?.name || '').localeCompare(String(b.item?.name || ''), undefined, { sensitivity: 'base' });
+}
+
+function groupEntriesByType(entries) {
+  const groups = Object.fromEntries(GROUPS.map((group) => [group.key, []]));
+  entries.forEach((entry) => {
+    if (groups[entry.type]) groups[entry.type].push(entry);
+  });
+  return groups;
+}
 
 let itemsCachePromise = null;
 
@@ -356,18 +377,27 @@ function AddResultRow({ item, onAdd }) {
   );
 }
 
-const SearchResultsList = memo(function SearchResultsList({ items, itemsDbCount, onAddItem }) {
-  const visibleItems = items.slice(0, SEARCH_CAP);
+function ShowMoreButton({ remaining, onClick }) {
   return (
-    <Box sx={{ maxHeight: 320, overflowY: 'auto', mb: 0.75, border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: 'rgba(18,16,14,0.65)', p: '2px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-      {visibleItems.map((item) => (
+    <Button
+      size="small"
+      onClick={onClick}
+      sx={{ alignSelf: 'center', my: 0.5, px: '12px', py: '2px', border: 1, borderColor: 'divider', borderRadius: 1, color: 'text.secondary', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.6rem', letterSpacing: '0.06em', textTransform: 'uppercase', '&:hover': { borderColor: '#caa550', color: '#caa550' } }}
+    >
+      Show more ({remaining})
+    </Button>
+  );
+}
+
+const SearchResultsList = memo(function SearchResultsList({ items, itemsDbCount, onAddItem, resetKey }) {
+  const { visible, remaining, showMore, listProps } = usePagedList(items, { pageSize: SEARCH_PAGE, resetKey });
+
+  return (
+    <Box {...listProps} sx={{ maxHeight: 320, overflowY: 'auto', mb: 0.75, border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: 'rgba(18,16,14,0.65)', p: '2px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+      {visible.map((item) => (
         <AddResultRow key={`${item.name}-${item.source}`} item={item} onAdd={onAddItem} />
       ))}
-      {items.length > SEARCH_CAP ? (
-        <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', fontStyle: 'italic', px: 1, py: 0.5 }}>
-          {items.length - SEARCH_CAP} more. Refine your search.
-        </Typography>
-      ) : null}
+      {remaining > 0 ? <ShowMoreButton remaining={remaining} onClick={showMore} /> : null}
       {!items.length && (
         <Typography sx={{ fontSize: '0.8125rem', color: 'text.secondary', fontStyle: 'italic', py: 0.75, px: 1 }}>
           {itemsDbCount ? 'No items found.' : 'Loading items.'}
@@ -377,10 +407,10 @@ const SearchResultsList = memo(function SearchResultsList({ items, itemsDbCount,
   );
 });
 
-function InventoryFilterButtons({ value, onChange }) {
+function InventoryFilterButtons({ value, onChange, filters = FILTERS }) {
   return (
     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: '4px', mb: 0.6 }}>
-      {FILTERS.map((filterDef) => {
+      {filters.map((filterDef) => {
         const Icon = filterDef.icon;
         const active = value === filterDef.key;
         return (
@@ -430,25 +460,44 @@ export default function InventoryTab({ C, sheet }) {
     return () => { alive = false; };
   }, []);
 
+  // The pool each filter panel builds its dropdowns from: narrowed by the chip
+  // and the search box, but *not* by the panel's own choices. Otherwise the
+  // chips and the Type dropdown contradict each other — chip "Armor" would keep
+  // offering "Martial Melee Weapon", which can only ever return nothing.
+  // Excluding the panel's own choices keeps a picked value from collapsing its
+  // own dropdown to that single entry.
   const resolvedInv = useMemo(() => inv.map((item, index) => ({ item, index, type: itemType(item) })), [inv]);
-  const visibleInventory = useMemo(() => {
+  const inventoryPool = useMemo(() => {
     const q = deferredInventorySearch.trim();
-    return resolvedInv.filter((entry) => {
-      if (inventoryFilter !== 'all' && entry.type !== inventoryFilter) return false;
-      return itemMatchesSearch(entry.item, q);
-    });
+    return resolvedInv.filter((entry) => (
+      matchesItemGroupChip(entry.item, inventoryFilter) && itemMatchesSearch(entry.item, q)
+    ));
   }, [deferredInventorySearch, inventoryFilter, resolvedInv]);
-  const groupedInventory = useMemo(() => {
-    const groups = Object.fromEntries(GROUPS.map((group) => [group.key, []]));
-    visibleInventory.forEach((entry) => {
-      if (groups[entry.type]) groups[entry.type].push(entry);
-    });
-    // Sort each group alphabetically by name; the original inventory index stays
-    // attached to each entry, so qty/equip/remove keep targeting the right item.
-    Object.values(groups).forEach((entries) => {
-      entries.sort((a, b) => String(a.item?.name || '').localeCompare(String(b.item?.name || ''), undefined, { sensitivity: 'base' }));
-    });
-    return groups;
+  const inventoryPoolItems = useMemo(() => inventoryPool.map((entry) => entry.item), [inventoryPool]);
+
+  // Two independent filter sets: narrowing the item DB search must not silently
+  // hide rows in the inventory list below it.
+  const searchPool = useMemo(() => {
+    const q = deferredSearch.trim();
+    let items = itemsDb;
+    if (filter !== 'all') items = items.filter((item) => item._itemType === filter);
+    if (q) items = items.filter((item) => itemMatchesPreparedSearch(item, q));
+    return items;
+  }, [itemsDb, deferredSearch, filter]);
+
+  const addList = useItemFilters(searchPool);
+  const inventoryList = useItemFilters(inventoryPoolItems);
+
+  const visibleInventory = useMemo(
+    () => inventoryPool.filter((entry) => itemMatchesFilters(entry.item, inventoryList.filters)),
+    [inventoryPool, inventoryList.filters],
+  );
+  // Flattened in display order (group by group, alphabetical inside each) so a
+  // page boundary falls where the reader expects, then regrouped for rendering.
+  const orderedInventory = useMemo(() => {
+    const groups = groupEntriesByType(visibleInventory);
+    Object.values(groups).forEach((entries) => entries.sort(byItemName));
+    return GROUPS.flatMap((group) => groups[group.key]);
   }, [visibleInventory]);
   const slotWarnings = useMemo(() => getSlotConflictWarnings(inv), [inv]);
   const inventoryStats = useMemo(() => {
@@ -459,7 +508,17 @@ export default function InventoryTab({ C, sheet }) {
   }, [inv, currency]);
   const { totalItems, totalWeight, totalGp } = inventoryStats;
   const visibleTotalItems = useMemo(() => visibleInventory.reduce((sum, entry) => sum + qty(entry.item), 0), [visibleInventory]);
-  const inventoryFiltered = inventoryFilter !== 'all' || deferredInventorySearch.trim().length > 0;
+  const inventoryFiltered = inventoryFilter !== 'all'
+    || deferredInventorySearch.trim().length > 0
+    || hasActiveItemFilters(inventoryList.filters);
+
+  // Paging resets on a changed *query*, not on a changed array: the inventory
+  // is rebuilt on every quantity tick, and resetting there would scroll the
+  // list back to the top under the user's cursor.
+  const searchResetKey = `${deferredSearch.trim()}|${filter}|${addList.key}`;
+  const inventoryResetKey = `${deferredInventorySearch.trim()}|${inventoryFilter}|${inventoryList.key}`;
+  const inventoryPage = usePagedList(orderedInventory, { pageSize: INVENTORY_PAGE, resetKey: inventoryResetKey });
+  const groupedInventory = groupEntriesByType(inventoryPage.visible);
   const maxCarry = useMemo(() => carryCapacity(getFinal(C, 'str')), [C]);
   const carryPct = Math.min(100, (totalWeight / maxCarry) * 100);
   const overloaded = totalWeight > maxCarry;
@@ -472,14 +531,11 @@ export default function InventoryTab({ C, sheet }) {
 
   const searchResults = useMemo(() => {
     const q = deferredSearch.trim();
-    let items = itemsDb;
-    if (filter !== 'all') items = items.filter((item) => item._itemType === filter);
-    if (q) {
-      items = items.filter((item) => itemMatchesPreparedSearch(item, q));
-      return [...items].sort(compareItemsBySearch(q));
-    }
-    return items;
-  }, [itemsDb, deferredSearch, filter]);
+    const items = hasActiveItemFilters(addList.filters)
+      ? searchPool.filter((item) => itemMatchesFilters(item, addList.filters))
+      : searchPool;
+    return q ? [...items].sort(compareItemsBySearch(q)) : items;
+  }, [searchPool, deferredSearch, addList.filters]);
 
   const updateInv = useCallback((next) => onUpdateInventory?.(next), [onUpdateInventory]);
 
@@ -748,12 +804,14 @@ export default function InventoryTab({ C, sheet }) {
 
             <InventoryFilterButtons value={filter} onChange={setFilter} />
 
-            {deferredSearch !== search ? (
-              <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', fontStyle: 'italic', mb: 0.3 }}>
-                Updating results...
-              </Typography>
-            ) : null}
-            <SearchResultsList items={searchResults} itemsDbCount={itemsDb.length} onAddItem={addItem} />
+            <ItemFilterPanel {...addList.panelProps} sx={{ mb: 0.6 }} />
+
+            <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', fontStyle: 'italic', mb: 0.3 }}>
+              {deferredSearch !== search
+                ? 'Updating results...'
+                : `${searchResults.length} of ${itemsDb.length} items`}
+            </Typography>
+            <SearchResultsList items={searchResults} itemsDbCount={itemsDb.length} onAddItem={addItem} resetKey={searchResetKey} />
 
             <Box sx={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
               <TextField size="small" value={customName} placeholder="Add custom item..." onChange={(event) => setCustomName(event.target.value)}
@@ -787,9 +845,11 @@ export default function InventoryTab({ C, sheet }) {
           sx={{ ...compactInputSx, mb: 0.5 }}
         />
 
-        <InventoryFilterButtons value={inventoryFilter} onChange={setInventoryFilter} />
+        <InventoryFilterButtons value={inventoryFilter} onChange={setInventoryFilter} filters={INVENTORY_FILTERS} />
 
-        <Box sx={inventoryListSx}>
+        <ItemFilterPanel {...inventoryList.panelProps} sx={{ mb: 0.6 }} />
+
+        <Box {...inventoryPage.listProps} sx={inventoryListSx}>
           {GROUPS.map((group) => {
             const inGroup = groupedInventory[group.key] || [];
             if (!inGroup.length) return null;
@@ -830,6 +890,11 @@ export default function InventoryTab({ C, sheet }) {
               </Box>
             );
           })}
+          {inventoryPage.remaining > 0 ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+              <ShowMoreButton remaining={inventoryPage.remaining} onClick={inventoryPage.showMore} />
+            </Box>
+          ) : null}
           {!inv.length && <Typography sx={{ fontSize: '0.8125rem', color: 'text.secondary', fontStyle: 'italic', py: 0.5 }}>Inventory empty.</Typography>}
           {inv.length > 0 && !visibleInventory.length && (
             <Typography sx={{ fontSize: '0.8125rem', color: 'text.secondary', fontStyle: 'italic', py: 0.5 }}>
@@ -1033,9 +1098,9 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onCharges,
               <QtyButton onClick={() => onQty(index, 1)}><Plus size={12} /></QtyButton>
             </Box>
             <Tooltip title="Remove">
-              <span>
+              <Box component="span" sx={{ display: 'inline-flex' }}>
                 <QtyButton danger onClick={() => onRemove(index)}><Trash2 size={12} /></QtyButton>
-              </span>
+              </Box>
             </Tooltip>
           </Box>
         </Box>

@@ -143,14 +143,6 @@ export const FEAT_SUMMARIES = [
   { name: 'Resilient', category: 'General' },
 ];
 
-export const ITEM_FILTERS = [
-  { key: 'all', label: 'All' },
-  { key: 'weapon', label: 'Weapons' },
-  { key: 'armor', label: 'Armor' },
-  { key: 'gear', label: 'Gear' },
-  { key: 'magic', label: 'Magic' },
-];
-
 export const ITEM_SUMMARIES = [
   { name: 'Longsword', type: 'weapon', source: 'XPHB', weight: 3, value: 1500 },
   { name: 'Shield', type: 'armor', source: 'XPHB', weight: 6, value: 1000 },

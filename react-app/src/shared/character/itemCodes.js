@@ -127,6 +127,28 @@ export function decodeProperty(rawCode, item) {
   return { code, label, description: WEAPON_PROPERTY_DESCRIPTIONS[code] || '' };
 }
 
+// Base property labels with no contextual suffix — `decodeProperty` returns
+// "Thrown (20/60)", which is right for display but useless as a filter value.
+// These are the plain, comparable labels ("Thrown", "Light", "Versatile").
+export function itemPropertyLabels(item) {
+  const seen = new Set();
+  collectRawProperties(item).forEach((code) => {
+    const label = WEAPON_PROPERTY_LABELS[rawPropertyCode(code)];
+    if (label) seen.add(label);
+  });
+  return [...seen];
+}
+
+export function itemMasteryLabels(item) {
+  const arr = Array.isArray(item?.mastery) ? item.mastery : [];
+  const seen = new Set();
+  arr.forEach((entry) => {
+    const label = masteryDisplayName(entry);
+    if (label) seen.add(label);
+  });
+  return [...seen];
+}
+
 const CHIP_BUILDERS = {
   prop: function buildPropertyChipsFromCodes(item) {
     return collectRawProperties(item)
