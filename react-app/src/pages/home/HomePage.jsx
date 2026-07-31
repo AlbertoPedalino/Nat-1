@@ -177,7 +177,7 @@ export default function HomePage() {
   }, [refreshAppDataCount]);
 
   const handleClearAppData = useCallback(() => {
-    const confirmed = window.confirm('Eliminare tutti i dati locali di GM Board in questo browser? Personaggi, board, encounter e dati legacy verranno rimossi.');
+    const confirmed = window.confirm('Eliminare tutti i dati locali di Nat-1 in questo browser? Personaggi, board, encounter e dati legacy verranno rimossi.');
     if (!confirmed) return;
 
     const removed = clearAppLocalStorage();
@@ -190,8 +190,8 @@ export default function HomePage() {
     <Box sx={homeRootSx}>
       <AppTopBar />
       <Box sx={heroSx}>
-        <Typography sx={heroTitleSx}>D&D 5e GM Board</Typography>
-        <Typography sx={heroSubSx}>2024 Player's Handbook</Typography>
+        <Box component="img" src={`${import.meta.env.BASE_URL}favicon.png`} alt="" sx={heroLogoSx} />
+        <Typography sx={heroTitleSx}>Nat-1 D&D 5.5e</Typography>
         <Box sx={dividerSx} />
       </Box>
 
@@ -261,13 +261,12 @@ const heroTitleSx = {
   lineHeight: 1.1,
 };
 
-const heroSubSx = {
-  fontSize: '1.1rem',
-  color: '#7a6a4a',
-  mt: '0.6rem',
-  letterSpacing: '0.08em',
-  fontStyle: 'italic',
-  fontFamily: '"EB Garamond", Georgia, serif',
+const heroLogoSx = {
+  display: 'block',
+  width: 'clamp(76px, 15vw, 112px)',
+  height: 'auto',
+  margin: '0 auto 1rem',
+  filter: 'drop-shadow(0 0 22px rgba(110,175,95,0.35))',
 };
 
 const dividerSx = {
