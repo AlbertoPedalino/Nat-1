@@ -3,7 +3,13 @@
 -- SQL Editor > New query > paste all > Run.
 --
 -- Contract: p_patch is a shallow top-level JSON patch. For object-valued keys
--- such as deathSaves, callers must send the complete sub-object.
+-- such as deathSaves, and array-valued ones such as activeConditions, callers
+-- must send the complete value — it replaces, it does not merge.
+--
+-- The allowed[] list below must match SYNCED_DATA_KEYS in
+-- src/shared/character/vitals.js; an encounter test asserts the two never
+-- drift. Re-run this file after adding a key there, or writes of the new field
+-- are silently dropped.
 -- ============================================================================
 
 create or replace function public.patch_character_data(p_id text, p_patch jsonb)
@@ -13,7 +19,7 @@ security invoker
 set search_path = public
 as $$
 declare
-  allowed text[] := array['currentHP','tempHP','deathSaves','maxHPBonus'];
+  allowed text[] := array['currentHP','tempHP','deathSaves','maxHPBonus','activeConditions'];
   clean jsonb;
 begin
   select coalesce(jsonb_object_agg(key, value), '{}'::jsonb) into clean

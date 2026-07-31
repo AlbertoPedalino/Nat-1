@@ -2,40 +2,18 @@ import { useState } from 'react';
 import { Box, Typography, Chip, Button, alpha } from '@mui/material';
 import { ChevronDown, ListChecks, X, Minus, Plus } from 'lucide-react';
 import { EXHAUSTION_MAX } from '../logic/calculations.js';
-import { CONDITIONS } from '../logic/conditions.js';
-import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
+import { CONDITIONS } from '../../../shared/character/conditions.js';
+import {
+  CONDITION_ACCENT as COND_ACCENT,
+  ConditionCard,
+  ConditionPill,
+} from '../../../shared/character/ConditionChips.jsx';
 
-const COND_ACCENT = '#d69245';
-const COND_BODY = '#cabd9f';
 const DEAD_ACCENT = '#e5484d';
 
-// Active-condition pill. Body click toggles its detail card (chevron hints the
-// expandable affordance + rotates when open, bright fill shows which card is
-// open). The X deletes the condition itself — kept visually distinct from the
-// expand action.
-function ConditionPill({ c, hasDesc, isOpen, onToggle, onRemove }) {
-  return (
-    <Chip
-      size="small"
-      label={c.label}
-      icon={hasDesc ? (
-        <ChevronDown size={11} style={{ color: COND_ACCENT, transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }} />
-      ) : undefined}
-      onClick={hasDesc ? onToggle : undefined}
-      onDelete={onRemove}
-      deleteIcon={<X size={12} />}
-      sx={{
-        fontSize: '0.5rem',
-        cursor: hasDesc ? 'pointer' : 'default',
-        color: COND_ACCENT,
-        borderColor: COND_ACCENT,
-        bgcolor: alpha(COND_ACCENT, isOpen ? 0.3 : 0.14),
-        boxShadow: isOpen ? `0 0 0 1px ${COND_ACCENT}` : 'none',
-        '&:hover': hasDesc ? { bgcolor: alpha(COND_ACCENT, 0.24) } : undefined,
-      }}
-    />
-  );
-}
+// The sheet's pills sit in a panel rather than an initiative row, so they run
+// smaller than the encounter's.
+const pillSx = { fontSize: '0.5rem' };
 
 // Exhaustion is graded 1–6: a stepper pill instead of a plain toggle. − at level
 // 1 removes it (level 0); + caps at 6 (death, shown red). The label still expands
@@ -62,39 +40,6 @@ function ExhaustionPill({ level, onSet, hasDesc, isOpen, onToggle }) {
         <ChevronDown size={10} style={{ color: accent, transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform .15s', cursor: 'pointer' }}
           onClick={(e) => { e.stopPropagation(); onToggle(); }} />
       ) : null}
-    </Box>
-  );
-}
-
-// Detail card for one expanded condition: FeatureBox-style header (accent title
-// + close X) over the XPHB description. The shared EntryBlocks renderer is tuned
-// with accent effect names over warm body text so each effect reads distinctly.
-function ConditionCard({ c, entries, onClose }) {
-  return (
-    <Box sx={{ border: 1, borderColor: alpha(COND_ACCENT, 0.4), borderRadius: 1, p: '6px 8px', bgcolor: alpha(COND_ACCENT, 0.05) }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.4 }}>
-        <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.06em', color: COND_ACCENT }}>
-          {c.label}
-        </Typography>
-        <Box
-          component="button"
-          type="button"
-          onClick={onClose}
-          aria-label={`Close ${c.label}`}
-          sx={{ display: 'inline-flex', p: '1px', border: 0, bgcolor: 'transparent', cursor: 'pointer', color: 'text.secondary', borderRadius: '3px', '&:hover': { color: COND_ACCENT } }}
-        >
-          <X size={12} />
-        </Box>
-      </Box>
-      <EntryBlocks
-        entries={entries}
-        spacing={0.4}
-        fontSize="0.62rem"
-        headingColor={COND_ACCENT}
-        bodyColor={COND_BODY}
-        markerColor={COND_ACCENT}
-        emptyText={null}
-      />
     </Box>
   );
 }
@@ -129,11 +74,12 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
             ) : (
               <ConditionPill
                 key={c.key}
-                c={c}
+                label={c.label}
                 hasDesc={!!conditionEntries?.[c.key]?.length}
                 isOpen={expanded.includes(c.key)}
                 onToggle={() => toggleCard(c.key)}
                 onRemove={() => onToggle(c.key)}
+                sx={pillSx}
               />
             )
           ))}
@@ -142,7 +88,7 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
         {openCards.length > 0 && (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.4 }}>
             {openCards.map((c) => (
-              <ConditionCard key={c.key} c={c} entries={conditionEntries[c.key]} onClose={() => toggleCard(c.key)} />
+              <ConditionCard key={c.key} label={c.label} entries={conditionEntries[c.key]} onClose={() => toggleCard(c.key)} />
             ))}
           </Box>
         )}

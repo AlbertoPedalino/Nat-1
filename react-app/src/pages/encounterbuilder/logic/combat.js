@@ -1,6 +1,11 @@
 import { COMBAT_LABEL_COLORS, COMBAT_LABEL_SHAPES, PLAYER_COLORS } from './constants.js';
 import { abilityMod, clampInt, getAC, getHP, numberOr } from './monsterUtils.js';
 import { resolveCombatVitals, combatVitalsMatch } from './sheetSync.js';
+import {
+  normalizeConditions,
+  toggleCondition as toggleConditionKey,
+  EXHAUSTION_KEY,
+} from '../../../shared/character/conditions.js';
 
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
@@ -67,6 +72,7 @@ export function buildCombat(encounter, players, encounterId = null, rng = Math.r
         hpMax: hp,
         hpCurrent: hp,
         tempHP: 0,
+        activeConditions: [],
         monsterData: monster,
         isDead: false,
         ...assignLabel(monster.name),
@@ -166,6 +172,26 @@ export function setInitiative(combat, id, value) {
     combatants: sorted,
     currentTurn: current ? Math.max(0, sorted.findIndex((combatant) => combatant.id === current.id)) : 0,
   };
+}
+
+// Conditions are per-combatant; for a player linked to a sheet they ride the
+// vitals sync, so a GM's call lands on the player's own sheet.
+export function toggleCombatantCondition(combat, id, key) {
+  if (key === EXHAUSTION_KEY) return combat; // graded, and its level is not ours to set
+  return updateCombatant(combat, id, (combatant) => ({
+    ...combatant,
+    activeConditions: normalizeConditions(toggleConditionKey(combatant.activeConditions, key)),
+  }));
+}
+
+// Clears what this surface can set. Exhaustion survives: the encounter never
+// owns `exhaustionLevel`, so dropping the key here would leave a player's sheet
+// with a level and no condition to show for it.
+export function clearCombatantConditions(combat, id) {
+  return updateCombatant(combat, id, (combatant) => ({
+    ...combatant,
+    activeConditions: normalizeConditions(combatant.activeConditions).filter((c) => c === EXHAUSTION_KEY),
+  }));
 }
 
 export function setDeathSave(combat, id, type, value) {
@@ -276,6 +302,7 @@ export function addMonsterCombatant(combat, monster, rng = Math.random) {
     hpCurrent: hp,
     hpMax: hp,
     tempHP: 0,
+    activeConditions: [],
     ac: getAC(monster.ac),
     deathSaves: { s: 0, f: 0 },
     isDead: false,
@@ -306,6 +333,7 @@ export function addManualCombatant(combat, payload, rng = Math.random) {
     hpCurrent: hp,
     hpMax: hp,
     tempHP: clampTempHp(payload.tempHP),
+    activeConditions: [],
     ac: clampInt(payload.ac, 0, 99, 10),
     deathSaves: { s: 0, f: 0 },
     isDead: false,
@@ -339,14 +367,18 @@ export function snapshotFight(combat) {
       initMod: combatant.initMod || 0,
       sourceId: combatant.sourceId || null,
       campaignId: combatant.campaignId || null,
-      hpCurrent: combatant.hpCurrent,
-      hpMax: combatant.hpMax,
-      maxHPBonus: combatant.maxHPBonus ?? null,
-      tempHP: clampTempHp(combatant.tempHP),
+      // Every synced vital at once, from the registry. Listing them by hand is
+      // what silently dropped conditions from every saved fight: the field was
+      // declared, mapped and allowed through the database, and still vanished
+      // here. A field added to SYNCED_VITALS is now persisted without touching
+      // this function.
+      ...resolveCombatVitals(combatant, combatant),
+      // Deliberately not taken from the line above: resolveCombatVitals infers
+      // death from failed death saves, which is right for a player and wrong for
+      // a monster — monsters die at 0 HP and have no death saves to fail.
+      isDead: combatant.isDead,
       ac: combatant.ac,
       type: combatant.type,
-      deathSaves: combatant.deathSaves,
-      isDead: combatant.isDead,
       label: combatant.label,
       shape: combatant.shape,
       shapeClr: combatant.shapeClr,
@@ -369,6 +401,8 @@ export function restoreFight(entry, monsters) {
     combatants: (fight?.combatants || []).map((combatant) => ({
       ...combatant,
       tempHP: clampTempHp(combatant.tempHP),
+      // Fights snapshotted before conditions existed have no list at all.
+      activeConditions: normalizeConditions(combatant.activeConditions),
       monsterData: combatant.monsterRef
         ? db.find((monster) => monster.name === combatant.monsterRef.name && monster.source === combatant.monsterRef.source) || null
         : null,

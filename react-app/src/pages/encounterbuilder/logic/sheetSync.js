@@ -34,7 +34,15 @@ export function resolveCombatVitals(combatant = {}, vitals = {}) {
   const out = { hpMax };
   for (const field of SYNCED_VITALS) {
     const fromVitals = mapped[field.combat];
-    out[field.combat] = fromVitals == null ? field.toCombat(combatant, { hpMax }) : fromVitals;
+    if (fromVitals != null) {
+      out[field.combat] = fromVitals;
+      continue;
+    }
+    // The payload says nothing about this field, so keep what the combatant
+    // already has; only when neither side knows does the descriptor's default
+    // apply.
+    const own = field.toCombat(combatant, { hpMax });
+    out[field.combat] = own == null && field.defaultCombat ? field.defaultCombat() : own;
   }
   // Current HP is the only field whose clamp depends on the resolved hpMax.
   // `toCombat` returns null when no current HP is known anywhere (a party

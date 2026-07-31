@@ -5,6 +5,7 @@ import { ChevronDown, ChevronUp, ExternalLink, HeartPulse, Shield, Sparkles, X }
 import HpStepper from '../../../shared/character/HpStepper.jsx';
 import { campaignSheetUrl } from '../logic/campaignSheetUrl.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
+import CombatantConditions from './CombatantConditions.jsx';
 import MonsterToken from './MonsterToken.jsx';
 
 export default function CombatantCard({ combatant, active }) {
@@ -243,6 +244,13 @@ export default function CombatantCard({ combatant, active }) {
             </>
           )}
         </Box>
+
+        {/* Full width under both columns: condition pills are read while
+            scanning the initiative order, so they must not compete with the
+            identity or HP clusters for horizontal space. */}
+        <Box sx={conditionsRowSx}>
+          <CombatantConditions combatant={combatant} />
+        </Box>
       </Box>
     </Paper>
   );
@@ -390,6 +398,14 @@ const acBadgeSx = {
 const acLabelSx = { fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.1em' };
 
 const acValueSx = { fontSize: '1rem', fontWeight: 800, color: 'text.primary' };
+
+const conditionsRowSx = {
+  flex: '1 1 100%',
+  minWidth: 0,
+  pt: 0.4,
+  borderTop: 1,
+  borderColor: 'divider',
+};
 
 const hpSummaryRowSx = {
   display: 'flex',

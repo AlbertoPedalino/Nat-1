@@ -3,6 +3,7 @@ import {
   addMonsterCombatant,
   applySheetVitals,
   buildCombat,
+  clearCombatantConditions,
   modifyHp,
   nextTurn,
   prevTurn,
@@ -15,6 +16,7 @@ import {
   setInitiative,
   setTempHp,
   snapshotFight,
+  toggleCombatantCondition,
   autoFightName,
 } from '../logic/combat.js';
 import { addRollLogEntry } from '../logic/dice.js';
@@ -143,6 +145,10 @@ export function encounterReducer(state, action) {
       return state.combat ? withCombat(state, setTempHp(state.combat, action.id, action.value)) : state;
     case 'setDeathSave':
       return state.combat ? withCombat(state, setDeathSave(state.combat, action.id, action.saveType, action.value)) : state;
+    case 'toggleCombatantCondition':
+      return state.combat ? withCombat(state, toggleCombatantCondition(state.combat, action.id, action.key)) : state;
+    case 'clearCombatantConditions':
+      return state.combat ? withCombat(state, clearCombatantConditions(state.combat, action.id)) : state;
     case 'syncCombatantVitals':
       return syncCombatantVitals(state, action.sourceId, action.vitals);
     case 'removeCombatant':

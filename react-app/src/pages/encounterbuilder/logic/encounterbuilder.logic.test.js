@@ -5,12 +5,14 @@ import { calculateDifficulty } from './difficulty.js';
 import {
   applySheetVitals,
   buildCombat,
+  clearCombatantConditions,
   modifyHp,
   nextTurn,
   restoreFight,
   setDeathSave,
   setTempHp,
   snapshotFight,
+  toggleCombatantCondition,
 } from './combat.js';
 import { rollDice, rollDiceFormula } from './dice.js';
 import {
@@ -37,6 +39,7 @@ import {
   sheetVitalsToSheetPatch,
 } from './sheetSync.js';
 import { createInitialState, encounterReducer } from '../state/reducer.js';
+import { SYNCED_VITALS } from '../../../shared/character/vitals.js';
 
 test('synced field set matches the patch_character_data SQL allowlist', () => {
   const sql = readFileSync(new URL('../../../../supabase/combat_sync.sql', import.meta.url), 'utf8');
@@ -95,6 +98,9 @@ test('sheet sync mappers clamp and keep the sheet patch shallow', () => {
     hpCurrent: 12,
     tempHP: 7,
     maxHPBonus: 0,
+    // null, not []: this payload carries no opinion about conditions, and the
+    // difference is what stops it from wiping the combat's own.
+    activeConditions: null,
     deathSaves: { s: 3, f: 0 },
   });
 
@@ -108,6 +114,7 @@ test('sheet sync mappers clamp and keep the sheet patch shallow', () => {
     currentHP: 0,
     tempHP: 3,
     maxHPBonus: 0,
+    activeConditions: [],
     deathSaves: { success: 2, fail: 3 },
   });
   assert.equal(Object.hasOwn(patch, 'maxHP'), false);
@@ -120,6 +127,7 @@ test('sheet sync mappers clamp and keep the sheet patch shallow', () => {
     currentHP: 18,
     tempHP: 2,
     maxHPBonus: 0,
+    activeConditions: [],
     deathSaves: { success: 1, fail: 3 },
   });
   assert.equal(sheetPatchKey(patch), sheetPatchKey({
@@ -441,4 +449,150 @@ test('legendary group copy inheritance applies array mods', () => {
   });
   assert.deepEqual(groups.get('XMM__Child').lairActions, ['a', 'c']);
   assert.deepEqual(groups.get('XMM__Child').regionalEffects, ['b']);
+});
+
+function combatWithOneCombatant(activeConditions = []) {
+  const combat = buildCombat([], [{ name: 'Aria', initMod: 1, ac: 15, hpMax: 22 }], 1, () => 0.5);
+  return {
+    ...combat,
+    combatants: combat.combatants.map((c) => ({ ...c, activeConditions })),
+  };
+}
+
+test('combatants start a fight with no conditions', () => {
+  const monster = { name: 'Goblin', cr: '1/4', hp: { average: 7 }, ac: 15, dex: 14 };
+  const combat = buildCombat([{ qty: 1, monsterData: monster }], [{ name: 'Aria', hpMax: 22 }], 1, () => 0.5);
+  for (const combatant of combat.combatants) {
+    assert.deepEqual(combatant.activeConditions, [], `${combatant.name} started with conditions`);
+  }
+});
+
+test('assigning a condition to a combatant applies its implied conditions', () => {
+  const combat = combatWithOneCombatant();
+  const id = combat.combatants[0].id;
+  const next = toggleCombatantCondition(combat, id, 'unconscious');
+  assert.deepEqual(next.combatants[0].activeConditions, ['incapacitated', 'prone', 'unconscious']);
+});
+
+test('toggling a condition twice removes it and leaves the rest of the fight alone', () => {
+  const combat = combatWithOneCombatant();
+  const id = combat.combatants[0].id;
+  const on = toggleCombatantCondition(combat, id, 'poisoned');
+  const off = toggleCombatantCondition(on, id, 'poisoned');
+  assert.deepEqual(off.combatants[0].activeConditions, []);
+  assert.equal(off.round, combat.round);
+  assert.equal(off.currentTurn, combat.currentTurn);
+});
+
+// Exhaustion is graded and its level lives on the sheet, which the encounter
+// does not sync. If a combat could drop the key, a round-trip would leave a
+// player with an exhaustion level and nothing showing it.
+test('a combat can neither set nor clear a synced exhaustion', () => {
+  const combat = combatWithOneCombatant(['exhaustion', 'poisoned']);
+  const id = combat.combatants[0].id;
+
+  assert.equal(toggleCombatantCondition(combat, id, 'exhaustion'), combat);
+  assert.deepEqual(clearCombatantConditions(combat, id).combatants[0].activeConditions, ['exhaustion']);
+});
+
+test('clearing conditions drops everything the encounter can set', () => {
+  const combat = combatWithOneCombatant(['poisoned', 'prone', 'blinded']);
+  const id = combat.combatants[0].id;
+  assert.deepEqual(clearCombatantConditions(combat, id).combatants[0].activeConditions, []);
+});
+
+test('conditions ride the sheet sync so a GM call lands on the player sheet', () => {
+  const patch = combatantToSheetPatch({ hpCurrent: 5, hpMax: 22, activeConditions: ['prone', 'prone', 'bogus'] });
+  assert.deepEqual(patch.activeConditions, ['prone']);
+  assert.deepEqual(sheetVitalsToCombat({ maxHP: 22, activeConditions: ['blinded'] }).activeConditions, ['blinded']);
+});
+
+test('a condition change is not mistaken for an echo of our own save', () => {
+  const base = { currentHP: 5, tempHP: 0, maxHPBonus: 0, deathSaves: { success: 0, fail: 0 }, activeConditions: ['prone'] };
+  assert.equal(sheetPatchKey(base), sheetPatchKey({ ...base, activeConditions: ['prone'] }));
+  assert.notEqual(sheetPatchKey(base), sheetPatchKey({ ...base, activeConditions: ['prone', 'blinded'] }));
+});
+
+// A live sheet payload that says nothing about conditions must not be read as
+// "no conditions". This wiped a GM's call the moment their own write echoed
+// back through realtime.
+test('vitals that omit conditions leave the combatant\'s own in place', () => {
+  const combatant = { hpMax: 22, hpCurrent: 22, activeConditions: ['prone'] };
+  assert.deepEqual(resolveCombatVitals(combatant, { hpMax: 22 }).activeConditions, ['prone']);
+  assert.deepEqual(resolveCombatVitals(combatant, { hpMax: 22, currentHP: 10 }).activeConditions, ['prone']);
+});
+
+// An empty array is a real value: clearing every condition on the sheet has to
+// reach the combat.
+test('vitals carrying an empty condition list do clear the combatant', () => {
+  const combatant = { hpMax: 22, hpCurrent: 22, activeConditions: ['prone'] };
+  assert.deepEqual(resolveCombatVitals(combatant, { hpMax: 22, activeConditions: [] }).activeConditions, []);
+});
+
+test('inbound sheet conditions reach a linked player combatant', () => {
+  const combat = buildCombat([], [{ name: 'Aria', sourceId: 'char-1', hpMax: 22 }], 1, () => 0.5);
+  const synced = applySheetVitals(combat, 'char-1', { hpMax: 22, currentHP: 22, activeConditions: ['blinded'] });
+  assert.deepEqual(synced.combatants[0].activeConditions, ['blinded']);
+
+  // ...and an unrelated later update does not undo them.
+  const afterHp = applySheetVitals(synced, 'char-1', { hpMax: 22, currentHP: 9 });
+  assert.deepEqual(afterHp.combatants[0].activeConditions, ['blinded']);
+  assert.equal(afterHp.combatants[0].hpCurrent, 9);
+});
+
+// The fight is snapshotted and restored on every persist cycle, so a field the
+// snapshot forgets is a field the combat silently loses moments after it is set.
+test('conditions survive a fight snapshot and restore', () => {
+  const combat = buildCombat([], [{ name: 'Aria', sourceId: 'char-1', hpMax: 22 }], 1, () => 0.5);
+  const id = combat.combatants[0].id;
+  const withCondition = toggleCombatantCondition(combat, id, 'restrained');
+
+  const restored = restoreFight({ id: 1, fight: snapshotFight(withCondition) }, []);
+  assert.deepEqual(restored.combatants[0].activeConditions, ['restrained']);
+});
+
+test('a fight saved before conditions existed restores with an empty list', () => {
+  const legacy = { id: 1, fight: { combatants: [{ id: 0, name: 'Aria', type: 'player', hpCurrent: 5, hpMax: 22 }], currentTurn: 0, round: 1 } };
+  assert.deepEqual(restoreFight(legacy, []).combatants[0].activeConditions, []);
+});
+
+// The guard the sync chain was missing. Three separate surfaces each enumerated
+// the synced fields by hand, and each silently dropped `activeConditions` — the
+// field was declared, mapped, allowed through the database, and still lost.
+// This fails on the next field that any of them forgets.
+test('a fight snapshot persists and restores every synced vital', () => {
+  const combatant = {
+    id: 0,
+    type: 'player',
+    name: 'Aria',
+    sourceId: 'char-1',
+    initiative: 12,
+    ac: 15,
+    hpMax: 22,
+    hpCurrent: 9,
+    tempHP: 3,
+    maxHPBonus: 2,
+    deathSaves: { s: 1, f: 2 },
+    activeConditions: ['prone', 'poisoned'],
+  };
+
+  const saved = snapshotFight({ combatants: [combatant], currentTurn: 0, round: 2 }).combatants[0];
+  const restored = restoreFight({ id: 1, fight: { combatants: [saved], currentTurn: 0, round: 2 } }, []).combatants[0];
+
+  for (const field of SYNCED_VITALS) {
+    assert.ok(field.combat in saved, `${field.combat} is missing from the fight snapshot`);
+    assert.ok(field.combat in restored, `${field.combat} is missing after restore`);
+  }
+  assert.equal(restored.hpCurrent, 9);
+  assert.equal(restored.tempHP, 3);
+  assert.equal(restored.maxHPBonus, 2);
+  assert.deepEqual(restored.deathSaves, { s: 1, f: 2 });
+  assert.deepEqual(restored.activeConditions, ['poisoned', 'prone']);
+});
+
+// A monster is dead at 0 HP and has no death saves to fail, so the snapshot must
+// keep its own flag rather than re-deriving it from the vitals.
+test('a snapshot keeps a dead monster dead', () => {
+  const monster = { id: 1, type: 'monster', name: 'Goblin', hpMax: 7, hpCurrent: 0, isDead: true };
+  assert.equal(snapshotFight({ combatants: [monster] }).combatants[0].isDead, true);
 });

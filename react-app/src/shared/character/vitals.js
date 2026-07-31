@@ -1,5 +1,8 @@
+import { normalizeConditions } from './conditions.js';
+
 // Vitals are the character `data` fields kept in sync between the sheet and the
-// encounter combat: current HP, temp HP, max-HP bonus, and death saves.
+// encounter combat: current HP, temp HP, max-HP bonus, death saves, and active
+// conditions.
 //
 // SYNCED_VITALS is the single declarative source of truth. Each descriptor owns
 // its own mapping + clamps, so heterogeneous shapes (scalars, nested objects,
@@ -17,6 +20,7 @@
 //   toData    - read a combatant + clamp into the cloud `data` value
 //   clampData - clamp a raw `data` value (with a fallback) for the sheet
 //   normalize - stable form used to build echo-suppression keys
+//   defaultCombat - optional; value when neither payload nor combatant has one
 
 function numberOr(value, fallback) {
   const n = Number(value);
@@ -73,6 +77,26 @@ export const SYNCED_VITALS = [
     toData: (c) => Math.round(numberOr(c.maxHPBonus, 0)),
     clampData: (value, fallback) => clampInt(value ?? fallback, -999, 999, 0),
     normalize: (v) => (v == null ? null : Math.round(numberOr(v, 0))),
+  },
+  {
+    // The whole list travels, including `exhaustion`. The encounter cannot set
+    // exhaustion (its level lives outside this list and is not synced), so
+    // carrying the key through untouched is what stops a combat round-trip from
+    // wiping a player's exhaustion off their sheet.
+    data: 'activeConditions',
+    combat: 'activeConditions',
+    // Absent means "this payload says nothing about conditions", so the caller
+    // falls back to what the combatant already has. An empty ARRAY is a real
+    // value meaning "none left" and still propagates. Without that distinction
+    // a partial payload silently wipes conditions, exactly as an absent
+    // currentHP used to resolve to 0 rather than to full.
+    toCombat: (src) => (src.activeConditions == null ? null : normalizeConditions(src.activeConditions)),
+    // Used when neither the payload nor the combatant knows anything: a fresh
+    // combatant starts with no conditions rather than with a null.
+    defaultCombat: () => [],
+    toData: (c) => normalizeConditions(c.activeConditions),
+    clampData: (value, fallback) => normalizeConditions(value ?? fallback),
+    normalize: (v) => normalizeConditions(v),
   },
   {
     data: 'deathSaves',

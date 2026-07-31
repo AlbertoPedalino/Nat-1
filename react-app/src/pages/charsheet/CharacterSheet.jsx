@@ -26,16 +26,16 @@ import { aggregateSavingThrowBonus } from '../../shared/character/itemBonus.js';
 import { itemEffectInventory } from '../../shared/character/wildShapeForm.js';
 import { longRestCharacterPatch } from '../../shared/character/longRest.js';
 import { calcMaxHP, getMod, getFinal, getSaveBonus, clampExhaustion, exhaustionD20Penalty, EXHAUSTION_MAX } from './logic/calculations.js';
-import { CONDITION_IMPLIES } from './logic/conditions.js';
+import { toggleCondition as toggleConditionKey } from '../../shared/character/conditions.js';
 import { normalizeCharacterAttunement } from './logic/attunement.js';
 import { applyResourceRest, getAllResourceDefs, getHitDicePools, getUsedHitDiceTotal, normalizeResourceMax, resourceFullValue } from './logic/restResources.js';
 import { clearedToggles } from './logic/toggleState.js';
 import { applyFreeCastRest, getFreeCastDefsForCharacter } from './logic/spellsTabLogic.js';
-import { installedRegistry } from '../../adapters/index.js';
+import { adapterRegistry as installedRegistry } from '../../adapters/registry.js';
 import { ensureSheetRuntimeAdapters } from './logic/sheetRuntimeAdapters.js';
 import { loadItems, loadOptionalFeatures, loadConditions, reconcileInventoryWithItemsDb } from '../charbuilder/logic/dataLoaders.js';
 import { updateCloudCharacterData } from '../../shared/cloud/cloudCharacters.js';
-import { clampCharacterVitals } from '../../shared/character/vitals.js';
+import { SYNCED_VITALS, clampCharacterVitals } from '../../shared/character/vitals.js';
 import {
   getActiveCharId,
   loadCharacter as storeLoadCharacter,
@@ -182,20 +182,18 @@ export default function CharacterSheet({ externalChar = null, externalCharId = n
     const vitals = clampCharacterVitals(liveVitals, { fallback: s });
     // Max HP is derived (base + bonus); apply the synced bonus and re-clamp current.
     const baseMax = Math.max(1, (Number(s.maxHP) || 1) - (Number(s.maxHPBonus) || 0));
-    const maxHPBonus = vitals.maxHPBonus;
-    const maxHP = Math.max(1, baseMax + maxHPBonus);
-    const currentHP = Math.max(0, Math.min(maxHP, vitals.currentHP));
-    const { tempHP, deathSaves } = vitals;
-    if (
-      currentHP === s.currentHP
-      && tempHP === s.tempHP
-      && maxHP === s.maxHP
-      && maxHPBonus === (s.maxHPBonus || 0)
-      && deathSaves.success === (s.deathSaves?.success || 0)
-      && deathSaves.fail === (s.deathSaves?.fail || 0)
-    ) return;
-    setSheet((prev) => (prev ? { ...prev, currentHP, tempHP, maxHP, maxHPBonus, deathSaves } : prev));
-    persist({ currentHP, tempHP, maxHPBonus, deathSaves });
+    const maxHP = Math.max(1, baseMax + vitals.maxHPBonus);
+    const next = { ...vitals, currentHP: Math.max(0, Math.min(maxHP, vitals.currentHP)) };
+    // Compared field by field through the registry's own normalizer, so a newly
+    // synced field is covered the moment it is declared instead of needing a
+    // clause here — the omission that let combat conditions arrive and be
+    // dismissed as an unchanged echo.
+    const unchanged = maxHP === s.maxHP && SYNCED_VITALS.every((field) => (
+      JSON.stringify(field.normalize(next[field.data])) === JSON.stringify(field.normalize(s[field.data]))
+    ));
+    if (unchanged) return;
+    setSheet((prev) => (prev ? { ...prev, ...next, maxHP } : prev));
+    persist(next);
   }, [liveVitals, usesExternalChar, readOnly, persist]);
 
   const updateCurrentCharacter = useCallback((updater) => {
@@ -510,18 +508,9 @@ export default function CharacterSheet({ externalChar = null, externalCharId = n
       setExhaustion(sheet.activeConditions.includes('exhaustion') ? 0 : 1);
       return;
     }
-    const idx = sheet.activeConditions.indexOf(key);
-    const next = [...sheet.activeConditions];
-    if (idx >= 0) {
-      next.splice(idx, 1);
-    } else {
-      next.push(key);
-      // Apply conditions inherently imposed by this one (e.g. Unconscious also
-      // grants Incapacitated + Prone), without duplicating already-active ones.
-      (CONDITION_IMPLIES[key] || []).forEach((implied) => {
-        if (!next.includes(implied)) next.push(implied);
-      });
-    }
+    // Shared with the encounter builder so both surfaces apply the same
+    // implied-condition cascade (Unconscious also grants Incapacitated + Prone).
+    const next = toggleConditionKey(sheet.activeConditions, key);
     setSheet({ ...sheet, activeConditions: next });
     persist({ activeConditions: next });
   }, [sheet, persist, setExhaustion]);

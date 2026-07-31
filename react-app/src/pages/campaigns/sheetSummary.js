@@ -1,11 +1,18 @@
 import { deriveSheetState } from '../charsheet/state.js';
 import { getInitiative, getSkillBonus } from '../charsheet/logic/calculations.js';
 import { computeBestArmorClass } from '../../shared/character/ac.js';
+import { pickCharacterVitals } from '../../shared/character/vitals.js';
 
 const PERCEPTION = { a: 'wis', n: 'Perception' };
 
 // Quick combat-relevant summary from a stored character object. Best-effort:
 // wrapped in try/catch so a malformed sheet never breaks the campaign list.
+//
+// This is what the encounter builder feeds into a combat, both when launching a
+// fight and on every live sheet update, so the synced vitals come straight from
+// the registry rather than being listed again here. Hand-listing them meant a
+// field added to SYNCED_VITALS was dropped in transit — and worse, arrived as an
+// empty value that overwrote the combat's own.
 export function summarizeCharacter(C) {
   if (!C) return null;
   try {
@@ -15,11 +22,8 @@ export function summarizeCharacter(C) {
     const initiative = getInitiative(C, sheet);
     const passivePerception = 10 + getSkillBonus(C, PERCEPTION);
     return {
-      currentHP: sheet.currentHP,
+      ...pickCharacterVitals(sheet),
       maxHP: sheet.maxHP,
-      maxHPBonus: sheet.maxHPBonus,
-      tempHP: sheet.tempHP,
-      deathSaves: sheet.deathSaves,
       ac,
       passivePerception,
       initiative,
