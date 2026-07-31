@@ -2,59 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { loadClassAdapters, loadCoreAdapters } from '../../../adapters/index.js';
 import { useAuth } from '../../../shared/cloud/AuthProvider.jsx';
 import { listCampaignCharacters, listMyCampaigns } from '../../../shared/cloud/campaigns.js';
-import { summarizeCharacter } from '../../campaigns/sheetSummary.js';
-import { clampInt, numberOr } from '../logic/monsterUtils.js';
-import { sheetVitalsToCombat } from '../logic/sheetSync.js';
-
-const HEX_COLOR_RE = /^#[0-9a-f]{6}$/i;
-
-function getCharacterLevel(character) {
-  const explicit = Number(character?.level);
-  if (Number.isFinite(explicit) && explicit > 0) return clampInt(explicit, 1, 20, 1);
-  const primary = Number(character?.classLevel);
-  const extras = Array.isArray(character?.extraClasses)
-    ? character.extraClasses.reduce((sum, item) => sum + numberOr(item?.level, 0), 0)
-    : 0;
-  const total = (Number.isFinite(primary) && primary > 0 ? primary : 0) + extras;
-  return clampInt(total || 1, 1, 20, 1);
-}
-
-function normalizeIconColor(value) {
-  const color = typeof value === 'string' ? value.trim() : '';
-  return HEX_COLOR_RE.test(color) ? color.toLowerCase() : null;
-}
-
-function characterClassNames(character) {
-  return [
-    character?.className,
-    ...(Array.isArray(character?.extraClasses) ? character.extraClasses.map((entry) => entry?.name) : []),
-  ].filter(Boolean);
-}
-
-function toEncounterPlayer(row, campaign) {
-  const sheet = row?.data || {};
-  const summary = summarizeCharacter(sheet) || {};
-  const hpMax = summary.maxHP ?? summary.currentHP ?? sheet.maxHP ?? 10;
-  const vitals = sheetVitalsToCombat({ ...summary, hpMax });
-  return {
-    id: row.id,
-    sourceId: row.id,
-    campaignId: campaign.id,
-    campaignName: campaign.name || 'Campaign',
-    name: sheet.name || row.name || 'Character',
-    ownerUsername: row.owner_username || null,
-    level: getCharacterLevel(sheet),
-    ac: clampInt(summary.ac, 1, 99, 10),
-    hpMax: clampInt(hpMax, 1, 999, 10),
-    currentHP: vitals.hpCurrent ?? clampInt(hpMax, 1, 999, 10),
-    tempHP: vitals.tempHP,
-    maxHPBonus: vitals.maxHPBonus ?? 0,
-    deathSaves: { success: vitals.deathSaves.s, fail: vitals.deathSaves.f },
-    initMod: clampInt(summary.initiative, -20, 30, 0),
-    iconColor: normalizeIconColor(sheet.classIconColor),
-    updatedAt: row.updated_at || null,
-  };
-}
+import { characterClassNames, toEncounterPlayer } from '../logic/campaignPlayer.js';
 
 // Summaries (initiative, AC…) need the class/subclass adapters registered
 // before summarizeCharacter runs, so every fetch path loads them first.

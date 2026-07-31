@@ -40,6 +40,7 @@ import {
 } from './sheetSync.js';
 import { createInitialState, encounterReducer } from '../state/reducer.js';
 import { SYNCED_VITALS } from '../../../shared/character/vitals.js';
+import { toEncounterPlayer } from './campaignPlayer.js';
 
 test('synced field set matches the patch_character_data SQL allowlist', () => {
   const sql = readFileSync(new URL('../../../../supabase/combat_sync.sql', import.meta.url), 'utf8');
@@ -595,4 +596,40 @@ test('a fight snapshot persists and restores every synced vital', () => {
 test('a snapshot keeps a dead monster dead', () => {
   const monster = { id: 1, type: 'monster', name: 'Goblin', hpMax: 7, hpCurrent: 0, isDead: true };
   assert.equal(snapshotFight({ combatants: [monster] }).combatants[0].isDead, true);
+});
+
+// Importing a campaign roster is a sixth surface that used to hand-list the
+// synced fields, so a player arrived in the fight without the conditions their
+// sheet already showed.
+const CAMPAIGN_ROW = {
+  id: 'char-1',
+  name: 'Aria',
+  updated_at: '2026-01-01',
+  data: {
+    name: 'Aria',
+    maxHP: 22,
+    currentHP: 9,
+    tempHP: 3,
+    deathSaves: { success: 1, fail: 2 },
+    activeConditions: ['prone', 'blinded'],
+  },
+};
+
+test('an imported campaign player carries every synced vital', () => {
+  const player = toEncounterPlayer(CAMPAIGN_ROW, { id: 'camp-1', name: 'Camp' });
+
+  for (const key of SYNCED_DATA_KEYS) {
+    assert.ok(key in player, `${key} is missing from an imported campaign player`);
+  }
+  assert.deepEqual(player.activeConditions, ['blinded', 'prone']);
+  assert.equal(player.tempHP, 3);
+  assert.deepEqual(player.deathSaves, { success: 1, fail: 2 });
+  assert.equal(player.sourceId, 'char-1');
+});
+
+test('launching a fight keeps an imported player conditions', () => {
+  const player = toEncounterPlayer(CAMPAIGN_ROW, { id: 'camp-1', name: 'Camp' });
+  const combat = buildCombat([], [player], 1, () => 0.5);
+
+  assert.deepEqual(combat.combatants[0].activeConditions, ['blinded', 'prone']);
 });
