@@ -102,4 +102,8 @@ const combatantListSx = {
   overflowY: 'auto',
   // Room for the scrollbar so it never overlaps a card's active-turn border.
   pr: 0.5,
+  // The Roll Log launcher is fixed over the bottom-left corner and sits above
+  // this list, so the roster needs to scroll far enough for the last card to
+  // clear it. Sized to the button's height plus its viewport offset.
+  pb: { xs: '58px', sm: '66px' },
 };
