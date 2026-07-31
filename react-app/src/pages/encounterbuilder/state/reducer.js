@@ -35,7 +35,8 @@ import {
 import { PLAYER_COLORS } from '../logic/constants.js';
 import { makeSavedEncounter } from '../logic/storage.js';
 import { clampInt, hydrateEncounterItems, monsterKey, toEncounterMonster } from '../logic/monsterUtils.js';
-import { sheetVitalsToCombat } from '../logic/sheetSync.js';
+import { combatantToSheetPatch, resolveCombatVitals } from '../logic/sheetSync.js';
+import { SYNCED_VITALS, pickCharacterVitals } from '../../../shared/character/vitals.js';
 
 export const DEFAULT_PARTY = Object.freeze({ count: 4, level: 5 });
 
@@ -359,10 +360,9 @@ function importCampaignPlayers(state, campaignPlayers) {
       initMod: player.initMod,
       ac: player.ac,
       hpMax: player.hpMax,
-      currentHP: player.currentHP,
-      tempHP: player.tempHP,
-      maxHPBonus: player.maxHPBonus,
-      deathSaves: player.deathSaves,
+      // From the registry, not listed here: naming the fields is what left an
+      // imported character's conditions behind on their sheet.
+      ...pickCharacterVitals(player),
       iconColor: player.iconColor,
       color: player.iconColor || PLAYER_COLORS[players.length % PLAYER_COLORS.length],
     }, players.length);
@@ -395,7 +395,9 @@ function importCampaignPlayers(state, campaignPlayers) {
 
 function normalizePlayer(player, index) {
   const hpMax = clampInt(player.hpMax, 1, 999, 10);
-  const vitals = sheetVitalsToCombat({ ...player, hpMax });
+  // resolveCombatVitals rather than the raw mapper: it is the one that reads an
+  // absent current HP as "undamaged" instead of 0.
+  const vitals = combatantToSheetPatch(resolveCombatVitals({ hpMax }, { ...player, hpMax }));
   const normalized = {
     ...player,
     name: String(player.name || `Giocatore ${index + 1}`),
@@ -405,17 +407,11 @@ function normalizePlayer(player, index) {
     color: sanitizePlayerColor(player.color) || sanitizePlayerColor(player.iconColor) || PLAYER_COLORS[index % PLAYER_COLORS.length],
     iconColor: sanitizePlayerColor(player.iconColor) || null,
   };
-  if (player.currentHP != null || player.hpCurrent != null) {
-    normalized.currentHP = vitals.hpCurrent ?? hpMax;
-  }
-  if (player.tempHP != null) {
-    normalized.tempHP = vitals.tempHP;
-  }
-  if (player.maxHPBonus != null) {
-    normalized.maxHPBonus = vitals.maxHPBonus;
-  }
-  if (player.deathSaves != null) {
-    normalized.deathSaves = { success: vitals.deathSaves.s, fail: vitals.deathSaves.f };
+  // Only clamp what the player actually carries: a party member typed straight
+  // into the encounter has no current HP and must not be given one.
+  for (const field of SYNCED_VITALS) {
+    if (player[field.data] == null && player[field.combat] == null) continue;
+    normalized[field.data] = vitals[field.data];
   }
   return normalized;
 }

@@ -633,3 +633,26 @@ test('launching a fight keeps an imported player conditions', () => {
 
   assert.deepEqual(combat.combatants[0].activeConditions, ['blinded', 'prone']);
 });
+
+// The import reducer rebuilt the party member field by field, so conditions
+// were dropped between the campaign row and the party list.
+test('importing a campaign player keeps their conditions in the party', () => {
+  const player = toEncounterPlayer(CAMPAIGN_ROW, { id: 'camp-1', name: 'Camp' });
+  const state = encounterReducer(createInitialState(), { type: 'importCampaignPlayers', players: [player] });
+  const imported = state.players.find((p) => p.sourceId === 'char-1');
+
+  assert.ok(imported, 'the campaign player was not imported');
+  for (const key of SYNCED_DATA_KEYS) {
+    assert.ok(key in imported, `${key} is missing from the imported party member`);
+  }
+  assert.deepEqual(imported.activeConditions, ['blinded', 'prone']);
+});
+
+// The whole path a GM actually walks: campaign row -> import -> launch fight.
+test('a fight launched from an imported party starts with the sheet conditions', () => {
+  const player = toEncounterPlayer(CAMPAIGN_ROW, { id: 'camp-1', name: 'Camp' });
+  const state = encounterReducer(createInitialState(), { type: 'importCampaignPlayers', players: [player] });
+  const combat = buildCombat([], state.players.filter((p) => p.sourceId), 1, () => 0.5);
+
+  assert.deepEqual(combat.combatants[0].activeConditions, ['blinded', 'prone']);
+});
