@@ -1,5 +1,5 @@
 import { isFeatDetailKey, featSlotOrigin } from '../featChoiceKeys.js';
-import { installedRegistry } from '../../adapters/index.js';
+import { adapterRegistry as installedRegistry } from '../../adapters/registry.js';
 import {
   backgroundGuaranteedFeatNames,
   backgroundOriginFeat as normalizeBackgroundOriginFeat,

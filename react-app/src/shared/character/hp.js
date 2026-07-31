@@ -1,4 +1,4 @@
-import { installedRegistry } from '../../adapters/index.js';
+import { adapterRegistry as installedRegistry } from '../../adapters/registry.js';
 
 function statModFromScore(score) {
   return Math.floor((Number(score || 0) - 10) / 2);

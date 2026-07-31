@@ -1,5 +1,5 @@
 import { STATS, STAT_LABELS } from '../constants.js';
-import { installedRegistry } from '../../../adapters/index.js';
+import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
 import { getPrimaryClassLevel } from '../logic/calculations.js';
 import { backgroundOriginFeat } from '../../../shared/character/selectedFeats.js';
 import { getMulticlassChoiceSpecs } from '../../../shared/character/multiclassProficiencies.js';

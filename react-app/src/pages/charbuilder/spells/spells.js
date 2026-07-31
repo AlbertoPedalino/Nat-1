@@ -1,4 +1,4 @@
-import { installedRegistry } from '../../../adapters/index.js';
+import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
 import { FULL_SLOTS, HALF_SLOTS, PACT_SLOTS, THIRD_SLOTS } from '../constants.js';
 import { getPrimaryClassLevel } from '../logic/calculations.js';
 import { getClassSpellLimits } from '../../../shared/character/spellProgression.js';

@@ -1,4 +1,4 @@
-import { installedRegistry } from '../../adapters/index.js';
+import { adapterRegistry as installedRegistry } from '../../adapters/registry.js';
 import { isGrantUnlocked } from './spellGrants.js';
 import { primaryClassLevel } from './classLevel.js';
 

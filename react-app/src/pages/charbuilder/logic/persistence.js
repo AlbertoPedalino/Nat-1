@@ -1,7 +1,7 @@
 import { calcMaxHp, getAllFinalScores, getPrimaryClassLevel } from './calculations.js';
 import { collectOwnedFeatNames } from '../../../shared/character/selectedFeats.js';
 import { getMod, getFinal } from '../../charsheet/logic/calculations.js';
-import { installedRegistry } from '../../../adapters/index.js';
+import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
 import {
   createCharacter as storeCreateCharacter,
   getActiveCharId,
