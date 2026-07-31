@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Box, Button, Chip, Typography, alpha } from '@mui/material';
-import { getMod, getFinal, fbonus, hasConditionEffect, getConditionalConditionEffects } from '../logic/calculations.js';
+import { Box, Button, Chip, Typography } from '@mui/material';
+import { getMod, getFinal, fbonus } from '../logic/calculations.js';
+import { describeAttackRoll } from '../../../shared/character/conditions.js';
 import { installedRegistry, loadCoreAdapters, loadClassAdapters } from '../../../adapters/index.js';
 import { PACT_SLOTS, SPELL_LEVEL_LABELS } from '../../charbuilder/constants.js';
 import { ToggleButton, ToggleButtonGroup } from '@mui/material';
@@ -985,30 +986,9 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
   const hasRollers = Number.isFinite(action.attackBonus) || rollers.length > 0;
 
   // Attack-roll advantage/disadvantage from active conditions, combined with the
-  // weapon-level disadvantage (heavy/untrained). XPHB 2024: any advantage + any
-  // disadvantage cancel to a straight roll.
+  // weapon-level disadvantage (heavy/untrained).
   const activeConditions = sheet?.activeConditions || [];
-  const attackHasDisadv = !!action._disadvantage || hasConditionEffect(activeConditions, 'yourAttacksDisadv');
-  const attackHasAdv = hasConditionEffect(activeConditions, 'yourAttacksAdv');
-  const attackAdv = attackHasAdv && !attackHasDisadv;
-  const attackDisadv = attackHasDisadv && !attackHasAdv;
-  const attackAdvArg = attackDisadv ? false : attackAdv ? true : undefined;
-  // Situational disadvantage (Frightened in sight, Grappled vs non-grappler):
-  // a reminder only — never forced onto the roll.
-  const attackCondNotes = getConditionalConditionEffects(activeConditions, 'yourAttacksDisadv')
-    .map((c) => `${c.source} (${c.note})`);
-  const attackSituational = !attackDisadv && !attackAdv && attackCondNotes.length > 0;
-  const attackTag = attackDisadv ? ' DIS' : attackAdv ? ' ADV' : attackSituational ? ' DIS?' : '';
-  const attackTooltip = attackCondNotes.length ? `Situational disadvantage: ${attackCondNotes.join('; ')}` : '';
-  // When the roll carries disadvantage (DIS), tint the roller with the malus tone
-  // (CHIP_TONES.negative) so the penalty reads at a glance. Otherwise keep the
-  // not-proficient red / default blue.
-  const attackRollerColor = attackDisadv
-    ? CHIP_TONES.negative
-    : action._notProficient ? '#de675f' : '#4d95d6';
-  const attackRollerBorder = attackDisadv
-    ? alpha(CHIP_TONES.negative, 0.4)
-    : action._notProficient ? 'rgba(222,103,95,0.4)' : 'rgba(77,149,214,0.4)';
+  const attackRoll = describeAttackRoll(activeConditions, { extraDisadv: !!action._disadvantage });
 
   return (
     <ExpandableCard
@@ -1032,11 +1012,12 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
                         rawBonus={action.attackBonus}
                         exhaustionLevel={sheet?.exhaustionLevel}
                         label={formatRollTitle(action.name, 'Attack')}
-                        advArg={attackAdvArg}
-                        tag={attackTag}
-                        tooltip={attackTooltip}
+                        advArg={attackRoll.advArg}
+                        tag={attackRoll.tag}
+                        tooltip={attackRoll.tooltip}
+                        disadv={attackRoll.disadv}
+                        notProficient={!!action._notProficient}
                         onRoll={onRoll}
-                        sx={{ borderColor: attackRollerBorder, color: attackRollerColor }}
                       />
                     ) : null}
                     <RollerButtons
