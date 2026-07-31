@@ -1,0 +1,160 @@
+import { createAdapterBindings } from '../adapterBindings.js';
+
+export default function install(registry, context = {}) {
+  const {
+    SKILLS,
+    _ARTISAN_TOOLS,
+    _MUSICAL_INSTRUMENTS,
+    _GAMING_SETS,
+    _VEHICLE_TOOLS,
+    _STD_LANGS,
+    _EXOTIC_LANGS,
+    _ALL_LANGS,
+    _ALL_TOOLS,
+    allItemsDb,
+    registerClassAdapter,
+    getClassAdapter,
+    registerSubclassAdapter,
+    getSubclassAdapter,
+    registerSpeciesAdapter,
+    getSpeciesAdapter,
+    registerFeatAdapter,
+    getFeatAdapter,
+    registerClassSheetActions,
+    getClassSheetActions,
+    registerSubclassSheetActions,
+    getSubclassSheetActions,
+    registerSpeciesSheetActions,
+    getSpeciesSheetActions,
+    registerFeatSheetActions,
+    getFeatSheetActions,
+    registerClassSheetResources,
+    getClassSheetResources,
+    registerSubclassSheetResources,
+    getSubclassSheetResources,
+    registerSpeciesSheetResources,
+    getSpeciesSheetResources,
+    registerFeatSheetResources,
+    getFeatSheetResources,
+    registerClassSheetEffects,
+    getClassSheetEffects,
+    registerSubclassSheetEffects,
+    getSubclassSheetEffects,
+    registerSpeciesSheetEffects,
+    getSpeciesSheetEffects,
+    registerFeatSheetEffects,
+    getFeatSheetEffects,
+    registerClassRuntimeConfig,
+    getClassRuntimeConfig,
+    registerSubclassRuntimeConfig,
+    getSubclassRuntimeConfig,
+    registerSpeciesRuntimeConfig,
+    getSpeciesRuntimeConfig,
+    registerClassSheetChoiceMeta,
+    getClassSheetChoiceMeta,
+    registerSubclassSheetChoiceMeta,
+    getSubclassSheetChoiceMeta,
+    registerSpeciesSheetChoiceMeta,
+    getSpeciesSheetChoiceMeta,
+    registerClassSheetCommonChoiceMeta,
+    registerSubclassSheetCommonChoiceMeta,
+    registerSpeciesSheetCommonChoiceMeta,
+    registerItemFlagDef,
+    getItemFlagDef,
+    getAllItemFlagDefs,
+    registerWeaponAbilityOverride,
+    getWeaponAbilityOverrides,
+    registerClassSheetFeatureFilter,
+    getClassSheetFeatureFilters,
+    registerSubclassSheetFeatureFilter,
+    getSubclassSheetFeatureFilters,
+    registerSpeciesSheetFeatureFilter,
+    getSpeciesSheetFeatureFilters,
+    registerClassSheetProficiencies,
+    getClassSheetProficiencies,
+    registerSubclassSheetProficiencies,
+    getSubclassSheetProficiencies,
+    registerSpeciesSheetProficiencies,
+    getSpeciesSheetProficiencies,
+    registerClassSheetSpellModifiers,
+    getClassSheetSpellModifiers,
+    registerSubclassSheetSpellModifiers,
+    getSubclassSheetSpellModifiers,
+    registerSpeciesSheetSpellModifiers,
+    getSpeciesSheetSpellModifiers,
+    registerClassChoiceKeyFilter,
+    getClassChoiceKeyFilter,
+    registerClassChoiceLabelProvider,
+    getClassChoiceLabelProvider,
+    registerSpeciesSheetHpBonus,
+    getSpeciesSheetHpBonus,
+    registerClassAtWillSpells,
+    getClassAtWillSpells,
+    registerSpeciesLongRestGrants,
+    getSpeciesLongRestGrants,
+    registerResourceSideEffect,
+    getResourceSideEffect,
+    registerSubclassChoiceDetailDataProvider,
+    getSubclassChoiceDetailDataProvider,
+    registerGlobalClassAdapter,
+    getGlobalClassAdapters,
+    registerGlobalSubclassAdapter,
+    getGlobalSubclassAdapters,
+    registerGlobalSpeciesAdapter,
+    getGlobalSpeciesAdapters,
+    registerGlobalFeatAdapter,
+    getGlobalFeatAdapters,
+    registerGlobalSpellAdapter,
+    getGlobalSpellAdapters,
+    registerGlobalItemAdapter,
+    getGlobalItemAdapters,
+    registerCantripData,
+    getCantripData,
+    registerCantripDataModifier,
+    getCantripDataModifiers,
+    registerSpellData,
+    getSpellData,
+    getGenericSpeciesChoiceSpecs,
+    getGenericBackgroundChoiceSpecs,
+    getGenericBackgroundChoiceMeta,
+    getGenericBackgroundOriginFeat,
+  } = createAdapterBindings(registry, context);
+
+
+  if (typeof registerFeatAdapter === "function") {
+    registerFeatAdapter("Elemental Adept", function (feat) {
+      return {
+        ...feat,
+        choiceUi: {
+          ...(feat.choiceUi && typeof feat.choiceUi === "object" ? feat.choiceUi : {}),
+          damageType: {
+            keySuffix: "damage_type",
+            label: "Energy Mastery",
+            options: [
+              { value: "acid",      label: "Acid" },
+              { value: "cold",      label: "Cold" },
+              { value: "fire",      label: "Fire" },
+              { value: "lightning", label: "Lightning" },
+              { value: "thunder",   label: "Thunder" }
+            ]
+          }
+        }
+      };
+    });
+  }
+
+  if (typeof registerFeatSheetActions === "function") {
+    registerFeatSheetActions("Elemental Adept", [
+      {
+        name: "Energy Mastery",
+        icon: "zap",
+        cat: "action",
+        uses: "Passive",
+        passive: true,
+        desc: "Your spells ignore Resistance to your chosen damage type (Acid, Cold, Fire, Lightning, or Thunder). When you roll damage for a spell of that type, treat any 1 on a die as a 2. Can be taken multiple times for different types."
+      }
+    ]);
+  }
+
+}
+

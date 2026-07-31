@@ -1,0 +1,61 @@
+// Wild Magic Surge table (XPHB 2024)
+const SURGE_TABLE = [
+  [1, 2, 'Regain 5 Sorcery Points.'],
+  [3, 4, "Cast a 3rd-level spell (any class) at a random target. If no targets are in range, the spell fails."],
+  [5, 6, 'Roll on this table again at the start of each of your turns for the next minute, ignoring this result on subsequent rolls.'],
+  [7, 8, 'You are immune to all damage for 1 minute.'],
+  [9, 10, 'You and your possessions become ethereal for 1 minute.'],
+  [11, 12, 'You learn and can cast one cantrip of your choice from any class for 1 minute. The cantrip vanishes when the time is up.'],
+  [13, 14, 'You cannot speak for 1 minute. Whenever you try, you make a loud retching sound.'],
+  [15, 16, 'You become invisible for 1 minute.'],
+  [17, 18, 'You regain all expended Sorcery Points.'],
+  [19, 20, 'You grow 1d4 inches taller.'],
+  [21, 22, 'You become 1d4 years younger (minimum 1 year old).'],
+  [23, 24, 'For 1 minute, you are surrounded by flumphs who protect you. They are immune to all damage.'],
+  [25, 26, 'You regain 2d10 Hit Points.'],
+  [27, 28, 'Until your turn ends, you turn into a potted plant. While a plant, you are Incapacitated and have Vulnerability to all damage.'],
+  [29, 30, 'For 1 minute, you have a Flying speed equal to your Speed.'],
+  [31, 32, 'You are Frightened of the creature nearest to you until the end of your next turn.'],
+  [33, 34, "For 1 minute, you can't stop laughing. While laughing, you are Incapacitated."],
+  [35, 36, 'You are immune to the Frightened condition for 1 minute.'],
+  [37, 38, 'Blind beyond a radius of 30 feet for 1 minute (you can see normally within that radius).'],
+  [39, 40, 'You become the target of a 5th-level Invisibility spell (no concentration required).'],
+  [41, 42, 'You grow a beard of feathers that remains until you sneeze, at which point the feathers explode and vanish.'],
+  [43, 44, 'You take 1d10 Psychic damage.'],
+  [45, 46, 'A random creature within 60 feet of you is Poisoned for 1d4 hours.'],
+  [47, 48, 'You cast Levitate on yourself (no concentration required).'],
+  [49, 50, 'You regain one expended spell slot of level 3 or lower.'],
+  [51, 52, 'You cannot move until the end of your next turn.'],
+  [53, 54, 'For 1 minute, you and everything within 30 feet of you sheds Bright Light in a 30-foot radius.'],
+  [55, 56, 'For 1 minute, harmless spectral animals surround you. They are immune to all damage.'],
+  [57, 58, 'You must shout when you speak for 1 minute.'],
+  [59, 60, 'You cast Fog Cloud centered on yourself (no concentration required).'],
+  [61, 62, 'Up to 3 creatures of your choice within 30 feet take 4d10 Psychic damage.'],
+  [63, 64, 'You are Frightened of the creature nearest to you until the end of your next turn.'],
+  [65, 66, 'Each creature within 30 feet of you becomes Invisible (no concentration required). When any of those creatures attacks or casts a spell, the invisibility ends for that creature.'],
+  [67, 68, 'You have Resistance to all damage for 1 minute.'],
+  [69, 70, 'A random creature within 60 feet of you is Poisoned for 1d4 hours.'],
+  [71, 72, 'You are Deafened for 1 minute.'],
+  [73, 74, 'You cast Mirror Image (no concentration required).'],
+  [75, 76, 'Spectral dancing lights surround you for 1 minute. They are immune to all damage.'],
+  [77, 78, 'For 1 minute, harmless sparks of multicolored light fill a 30-foot Emanation originating from you.'],
+  [79, 80, 'You cast a random cantrip (any class) at the nearest target (if no targets, the cantrip fails).'],
+  [81, 82, 'You can take one additional action immediately.'],
+  [83, 84, 'Each creature within 30 feet of you takes 1d10 Necrotic damage, and you regain Hit Points equal to the damage dealt.'],
+  [85, 86, 'You cast Fly on yourself (no concentration required).'],
+  [87, 88, 'You become Invisible for 1 minute.'],
+  [89, 90, 'If you die within the next minute, you immediately come back to life as if by the Reincarnate spell.'],
+  [91, 92, 'Your size increases by one size category for 1 minute (no concentration required).'],
+  [93, 94, 'You and each creature within 30 feet gain Vulnerability to Piercing damage for 1 minute.'],
+  [95, 96, 'You are surrounded by faint, ethereal music for 1 minute.'],
+  [97, 98, 'You regain one expended use of Tides of Chaos.'],
+  [99, 100, 'Roll twice on this table, applying both effects. If you roll this result again, roll again.'],
+];
+
+export function getSurgeEffect(d100) {
+  const roll = Math.max(1, Math.min(100, Math.floor(Number(d100) || 1)));
+  for (const [lo, hi, desc] of SURGE_TABLE) {
+    if (roll >= lo && roll <= hi) return { range: `${lo}–${hi}`, effect: desc };
+  }
+  return { range: `${roll}`, effect: 'Unknown effect.' };
+}

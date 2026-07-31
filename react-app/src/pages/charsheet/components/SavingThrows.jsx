@@ -1,0 +1,189 @@
+import { useState } from 'react';
+import { Box, Paper, Typography, Tooltip, Menu, MenuItem } from '@mui/material';
+import { Dice5, Sparkles, ChevronDown } from 'lucide-react';
+import { STATS, SLBL, FULL_LBL, hasSaveProficiency, getSaveBonus, fbonus, effectiveD20Modifier } from '../logic/calculations.js';
+import { getConcentrationBonus, getD20FloorReminders } from '../logic/sheetEffects.js';
+import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
+import { aggregateSavingThrowBonus } from '../../../shared/character/itemBonus.js';
+import { collectItemEffects } from '../../../shared/character/itemEffects.js';
+import { itemEffectInventory } from '../../../shared/character/wildShapeForm.js';
+import { collectSaveModifiers, fixedModifiersForAbility, summarizeSaveModifiers } from '../logic/saveModifiers.js';
+import { advantageVisual, autoFailVisual } from './advantageMark.jsx';
+
+export default function SavingThrows({ C, sheet, onRoll }) {
+  const profSets = useProficiencySets();
+  // Wild Shape: equipment merges into the form, so item-sourced save bonuses,
+  // advantages and modifiers are suppressed (itemEffectInventory → [] while
+  // shaped). Feature/condition modifiers (via C / activeConditions) are retained.
+  const inventory = sheet?.sheetInventory || C?.inventory || [];
+  const effectInventory = itemEffectInventory(C, inventory);
+  const itemSaveBonus = aggregateSavingThrowBonus(effectInventory);
+  const itemEffects = collectItemEffects(itemEffectInventory(C, C?.inventory));
+  const saveContexts = [...itemEffects.advantageOnSaveAgainst.entries()];
+  const saveModifiers = collectSaveModifiers(C, effectInventory, profSets, sheet?.activeConditions || []);
+  // Reminder list shows only situational modifiers (e.g. "vs Frightened").
+  // Fixed ones (e.g. Gnomish Cunning on INT/WIS/CHA, armor) are already
+  // surfaced per-stat (icon + auto-roll), so they're excluded here.
+  const modifierRows = summarizeSaveModifiers(saveModifiers.filter((m) => m.mode === 'conditional'));
+  // Concentration bonus (e.g. Bladesong) applies only to Concentration saves,
+  // not every CON save, so it's surfaced as a situational reminder rather than
+  // an icon on the CON stat row.
+  const concentrationBonus = getConcentrationBonus(C);
+  // Active d20-floor reminders (e.g. Stars Druid Dragon constellation) — shown
+  // here because they cover Concentration saves.
+  const d20FloorReminders = getD20FloorReminders(C);
+
+  const [menuAnchor, setMenuAnchor] = useState(null);
+  const [menuStat, setMenuStat] = useState(null);
+  const [menuOptions, setMenuOptions] = useState({ hasDisadv: false, baseAdv: false });
+
+  const handleSaveClick = (event, st, hasDisadv, baseAdv) => {
+    if (saveContexts.length === 0) {
+      onRoll(st, { disadvantage: hasDisadv || undefined, advantage: baseAdv && !hasDisadv || undefined });
+      return;
+    }
+    setMenuAnchor(event.currentTarget);
+    setMenuStat(st);
+    setMenuOptions({ hasDisadv, baseAdv });
+  };
+
+  const handleMenuPick = (context) => {
+    if (!menuStat) { setMenuAnchor(null); return; }
+    const advFromContext = context && context !== 'none';
+    const adv = (advFromContext || menuOptions.baseAdv) && !menuOptions.hasDisadv;
+    onRoll(menuStat, { disadvantage: menuOptions.hasDisadv || undefined, advantage: adv || undefined });
+    setMenuAnchor(null);
+    setMenuStat(null);
+  };
+
+  return (
+    <Paper variant="outlined" sx={{ mb: '0.6rem', overflow: 'hidden' }}>
+      <Box sx={{ bgcolor: 'rgba(35,32,26,1)', borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1, px: '0.8rem', py: '0.48rem', borderLeft: 3, borderLeftColor: 'primary.main' }}>
+        <Dice5 size={14} />
+        <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'primary.main' }}>
+          Saving Throws
+        </Typography>
+      </Box>
+      <Box sx={{ p: '0.55rem 0.8rem' }}>
+        {STATS.map(st => {
+          const bonus = getSaveBonus(C, st) + itemSaveBonus;
+          const shownBonus = effectiveD20Modifier(bonus, sheet?.exhaustionLevel);
+          const prof = hasSaveProficiency(C, st);
+          const fixedMods = fixedModifiersForAbility(saveModifiers, st);
+          const hasDisadv = fixedMods.some((m) => m.kind === 'disadvantage');
+          const hasAdv = fixedMods.some((m) => m.kind === 'advantage');
+          const tooltipText = fixedMods.map((m) => `${m.kind === 'advantage' ? 'Advantage' : 'Disadvantage'}: ${m.source}`).join(' • ');
+          const visual = advantageVisual(hasAdv, hasDisadv);
+          const hasContextMenu = saveContexts.length > 0;
+
+          return (
+            <Box key={st} onClick={(e) => handleSaveClick(e, st, hasDisadv, hasAdv)}
+              sx={{ display: 'flex', alignItems: 'center', gap: 1, py: '3px', cursor: 'pointer', borderRadius: 1, '&:hover': { bgcolor: 'rgba(202,165,80,0.04)' } }}>
+              <Box sx={{ width: 10, height: 10, borderRadius: '50%', flexShrink: 0, transition: 'all 0.1s', border: 1, borderColor: 'divider', bgcolor: prof ? 'primary.main' : 'transparent' }} />
+              <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', fontWeight: 600, color: 'text.secondary', letterSpacing: '0.08em', width: 28, flexShrink: 0 }}>
+                {SLBL[st]}
+              </Typography>
+              <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
+                {FULL_LBL[st]}
+              </Typography>
+              <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.75rem', fontWeight: 600, color: 'text.primary', ml: 'auto' }}>
+                {fbonus(shownBonus)}
+              </Typography>
+              {visual && (
+                <Tooltip title={tooltipText}>
+                  <visual.Icon size={12} style={{ color: visual.color, flexShrink: 0 }} />
+                </Tooltip>
+              )}
+              {hasContextMenu ? (
+                <Tooltip title="Click to pick save context (vs spell / vs poison / etc.)">
+                  <ChevronDown size={12} style={{ color: '#edd48a', flexShrink: 0, opacity: 0.6 }} />
+                </Tooltip>
+              ) : null}
+            </Box>
+          );
+        })}
+      </Box>
+
+      {(modifierRows.length > 0 || concentrationBonus > 0 || d20FloorReminders.length > 0) && (
+        <Box sx={{ borderTop: 1, borderColor: 'divider', px: '0.8rem', py: '0.5rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {d20FloorReminders.map((r, i) => (
+            <Box key={`d20floor-${i}`} sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75 }}>
+              <Dice5 size={13} style={{ color: '#c9a86a', flexShrink: 0, marginTop: 2 }} />
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
+                  <Typography component="span" sx={{ fontSize: '0.7rem', color: '#c9a86a', fontWeight: 700, flexShrink: 0 }}>
+                    Min {r.minRoll}
+                  </Typography>
+                  <Typography component="span" sx={{ fontSize: '0.7rem', color: 'text.primary' }}>
+                    Concentration saves (treat d20 of {r.minRoll - 1} or lower as {r.minRoll})
+                  </Typography>
+                </Box>
+                {r.note && (
+                  <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary', fontStyle: 'italic', mt: '1px' }}>
+                    {r.note}
+                  </Typography>
+                )}
+              </Box>
+            </Box>
+          ))}
+          {concentrationBonus > 0 && (
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75 }}>
+              <Sparkles size={13} style={{ color: '#70b7a6', flexShrink: 0, marginTop: 2 }} />
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
+                  <Typography component="span" sx={{ fontSize: '0.7rem', color: '#70b7a6', fontWeight: 700, flexShrink: 0 }}>
+                    +{concentrationBonus}
+                  </Typography>
+                  <Typography component="span" sx={{ fontSize: '0.7rem', color: 'text.primary' }}>
+                    Concentration saves
+                  </Typography>
+                </Box>
+                <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary', fontStyle: 'italic', mt: '1px' }}>
+                  Bladesong
+                </Typography>
+              </Box>
+            </Box>
+          )}
+          {modifierRows.map((mod, i) => {
+            const adv = mod.kind === 'advantage';
+            const visual = mod.kind === 'autofail' ? autoFailVisual() : advantageVisual(adv, !adv);
+            const { Icon, color, label: kindLabel } = visual;
+            return (
+              <Box key={`${mod.label}-${mod.source}-${i}`} sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75 }}>
+                <Icon size={13} style={{ color, flexShrink: 0, marginTop: 2 }} />
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
+                    <Typography component="span" sx={{ fontSize: '0.7rem', color, fontWeight: 700, flexShrink: 0 }}>
+                      {kindLabel}
+                    </Typography>
+                    <Typography component="span" sx={{ fontSize: '0.7rem', color: 'text.primary' }}>
+                      {mod.label}
+                    </Typography>
+                  </Box>
+                  <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary', fontStyle: 'italic', mt: '1px' }}>
+                    {mod.source}
+                  </Typography>
+                </Box>
+              </Box>
+            );
+          })}
+        </Box>
+      )}
+
+      <Menu anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={() => setMenuAnchor(null)}
+        slotProps={{ paper: { sx: { bgcolor: 'rgba(26,23,19,0.98)', border: 1, borderColor: 'divider' } } }}>
+        <MenuItem onClick={() => handleMenuPick('none')} sx={{ fontSize: '0.75rem' }}>
+          Normal save
+        </MenuItem>
+        {saveContexts.map(([target, sources]) => (
+          <MenuItem key={target} onClick={() => handleMenuPick(target)} sx={{ fontSize: '0.75rem', color: '#70b7a6' }}>
+            vs {target} — Advantage
+            <Typography sx={{ ml: 1, fontSize: '0.6rem', color: 'text.secondary', fontStyle: 'italic' }}>
+              ({sources.join(', ')})
+            </Typography>
+          </MenuItem>
+        ))}
+      </Menu>
+    </Paper>
+  );
+}
