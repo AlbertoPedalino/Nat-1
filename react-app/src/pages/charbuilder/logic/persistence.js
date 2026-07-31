@@ -557,7 +557,7 @@ export function buildImportedCharacter(payload) {
   const data = unwrapStructuredSheetPayload(payload);
 
   if (!isStructuredSheetPayload(data)) {
-    throw new Error('Formato file non riconosciuto: carica un JSON scheda GM-Board strutturato.');
+    throw new Error('Formato file non riconosciuto: carica un JSON scheda Nat 1 strutturato.');
   }
 
   const normalizedData = normalizeProficiencyChoicesForPersistence(data);
@@ -569,7 +569,7 @@ export function importSheetPayload(payload, confirmOverwrite = () => true) {
   const data = unwrapStructuredSheetPayload(payload);
 
   if (!isStructuredSheetPayload(data)) {
-    throw new Error('Formato file non riconosciuto: carica un JSON scheda GM-Board strutturato.');
+    throw new Error('Formato file non riconosciuto: carica un JSON scheda Nat 1 strutturato.');
   }
 
   const activeId = getActiveCharId();
