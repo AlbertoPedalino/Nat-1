@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Box, Typography, Chip } from '@mui/material';
-import { installedRegistry } from '../../../adapters/index.js';
+import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
 import { warlockInvocationSelections } from '../../../shared/character/warlockUtils.js';
 import { buildOptionalFeatureEntryLookup } from '../../../shared/character/optionalFeatures.js';
 import CollapsibleBody from '../../../shared/character/CollapsibleBody.jsx';

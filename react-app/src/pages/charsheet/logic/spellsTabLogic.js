@@ -1,5 +1,5 @@
 import { FULL_SLOTS, HALF_SLOTS, PACT_SLOTS, THIRD_SLOTS } from '../../charbuilder/constants.js';
-import { installedRegistry } from '../../../adapters/index.js';
+import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
 import { getFinal as getFinalScore, getMod as getAbilityMod } from './calculations.js';
 import { isRitualSpell } from '../../../shared/spellTags.js';
 import { getClassSpellLimits } from '../../../shared/character/spellProgression.js';

@@ -1,4 +1,4 @@
-import { installedRegistry } from '../../../adapters/index.js';
+import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
 import { getFinal, getMod, getPB } from './calculations.js';
 import { primaryClassLevel } from '../../../shared/character/classLevel.js';
 import { resolveScalingFormula } from '../../../shared/character/scalingFormula.js';

@@ -1,6 +1,6 @@
 import { computeMaxHp as sharedComputeMaxHp } from '../../../shared/character/hp.js';
 import { getFeatAsiBonus } from '../../../shared/character/abilityBonuses.js';
-import { installedRegistry } from '../../../adapters/index.js';
+import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
 import { extractFixedProficiencyLabels } from '../../../shared/character/typedProficiencies.js';
 import { getFinalAbilityScore } from '../../../shared/character/itemEffects.js';
 import { wildShapeAbilityScore, wildShapeSaveBonus, wildShapeSaveProficient, wildShapeSkillBonus } from '../../../shared/character/wildShapeForm.js';

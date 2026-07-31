@@ -1,4 +1,4 @@
-import { installedRegistry } from '../../../../adapters/index.js';
+import { adapterRegistry as installedRegistry } from '../../../../adapters/registry.js';
 import { canonicalProficiencyLabel } from '../../../../shared/character/proficiencyDisplay.js';
 import { primaryClassLevel } from '../../../../shared/character/classLevel.js';
 import { isChoicePlaceholderValue } from '../../../../shared/character/typedProficiencies.js';

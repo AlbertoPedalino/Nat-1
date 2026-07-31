@@ -8,7 +8,7 @@
 // Both the toggle UI (ActionsTab) and the Long Rest reset (CharacterSheet) read
 // the convention from here, so adding a toggle never touches either of them.
 
-import { installedRegistry } from '../../../adapters/index.js';
+import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
 import { selectedFeatNames } from './sheetEffects.js';
 
 export function toggleActiveField(toggleKey) {

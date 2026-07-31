@@ -1,6 +1,6 @@
 import { getMod, getFinal, getPB } from './calculations.js';
 import { classLevel, primaryClassLevel } from '../../../shared/character/classLevel.js';
-import { installedRegistry } from '../../../adapters/index.js';
+import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
 import { hasActionRequirement } from '../../../shared/character/choiceUtils.js';
 import { getWeaponProficiencyInfo, hasNonProficientArmor } from './proficiencies.js';
 import {

@@ -1,4 +1,4 @@
-import { installedRegistry } from '../../../adapters/index.js';
+import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
 import { canonicalDisplayLabel, cleanProficiencyText } from '../../../shared/character/proficiencyDisplay.js';
 import { matchesRequiredChoice } from '../../../shared/character/lineageMatch.js';
 import { inventoryHasFlag } from '../../../shared/character/choiceUtils.js';
