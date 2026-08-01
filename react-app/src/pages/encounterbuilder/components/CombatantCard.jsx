@@ -6,6 +6,7 @@ import HpStepper from '../../../shared/character/HpStepper.jsx';
 import { campaignSheetUrl } from '../logic/campaignSheetUrl.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import CombatantConditions from './CombatantConditions.jsx';
+import CombatantEffects from './CombatantEffects.jsx';
 import MonsterToken from './MonsterToken.jsx';
 
 export default function CombatantCard({ combatant, active }) {
@@ -245,11 +246,16 @@ export default function CombatantCard({ combatant, active }) {
           )}
         </Box>
 
-        {/* Full width under both columns: condition pills are read while
-            scanning the initiative order, so they must not compete with the
-            identity or HP clusters for horizontal space. */}
+        {/* Full width under both columns: condition and effect pills are read
+            while scanning the initiative order, so they must not compete with
+            the identity or HP clusters for horizontal space. Effects sit below
+            conditions rather than beside them — they are the shorter-lived and
+            more numerous of the two, and only they carry ADV/DIS colouring. */}
         <Box sx={conditionsRowSx}>
           <CombatantConditions combatant={combatant} />
+        </Box>
+        <Box sx={effectsRowSx}>
+          <CombatantEffects combatant={combatant} />
         </Box>
       </Box>
     </Paper>
@@ -405,6 +411,13 @@ const conditionsRowSx = {
   pt: 0.4,
   borderTop: 1,
   borderColor: 'divider',
+};
+
+// No divider of its own: conditions and effects read as one block of markers,
+// and a second rule inside it would split the card three ways.
+const effectsRowSx = {
+  flex: '1 1 100%',
+  minWidth: 0,
 };
 
 const hpSummaryRowSx = {

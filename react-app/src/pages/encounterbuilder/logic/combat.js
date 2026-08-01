@@ -6,6 +6,13 @@ import {
   toggleCondition as toggleConditionKey,
   EXHAUSTION_KEY,
 } from '../../../shared/character/conditions.js';
+import {
+  addCustomEffect,
+  normalizeEffects,
+  removeEffect,
+  setEffectDuration,
+  toggleEffect,
+} from '../../../shared/character/combatEffects.js';
 
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
@@ -73,6 +80,7 @@ export function buildCombat(encounter, players, encounterId = null, rng = Math.r
         hpCurrent: hp,
         tempHP: 0,
         activeConditions: [],
+        activeEffects: [],
         monsterData: monster,
         isDead: false,
         ...assignLabel(monster.name),
@@ -93,6 +101,9 @@ export function buildCombat(encounter, players, encounterId = null, rng = Math.r
       initMod,
       ac: clampInt(player.ac, 1, 99, 10),
       ...vitals,
+      // Not part of `vitals`: effects are encounter-local and never sync to a
+      // player's sheet, so they are not in the SYNCED_VITALS registry.
+      activeEffects: [],
       monsterData: null,
       label: null,
       shape: null,
@@ -192,6 +203,43 @@ export function clearCombatantConditions(combat, id) {
     ...combatant,
     activeConditions: normalizeConditions(combatant.activeConditions).filter((c) => c === EXHAUSTION_KEY),
   }));
+}
+
+// Ad-hoc effects ("disadvantage on its next attack"). Unlike conditions these
+// stay in the encounter: they carry no meaning on a character sheet, so nothing
+// here touches the vitals sync.
+export function toggleCombatantEffect(combat, id, key) {
+  return updateCombatant(combat, id, (combatant) => ({
+    ...combatant,
+    activeEffects: toggleEffect(combatant.activeEffects, key),
+  }));
+}
+
+export function addCombatantEffect(combat, id, { text, polarity } = {}) {
+  return updateCombatant(combat, id, (combatant) => ({
+    ...combatant,
+    activeEffects: addCustomEffect(combatant.activeEffects, text, polarity),
+  }));
+}
+
+export function setCombatantEffectDuration(combat, id, effectId, duration) {
+  return updateCombatant(combat, id, (combatant) => ({
+    ...combatant,
+    activeEffects: setEffectDuration(combatant.activeEffects, effectId, duration),
+  }));
+}
+
+export function removeCombatantEffect(combat, id, effectId) {
+  return updateCombatant(combat, id, (combatant) => ({
+    ...combatant,
+    activeEffects: removeEffect(combatant.activeEffects, effectId),
+  }));
+}
+
+export function clearCombatantEffects(combat, id) {
+  return updateCombatant(combat, id, (combatant) => (
+    normalizeEffects(combatant.activeEffects).length ? { ...combatant, activeEffects: [] } : combatant
+  ));
 }
 
 export function setDeathSave(combat, id, type, value) {
@@ -303,6 +351,7 @@ export function addMonsterCombatant(combat, monster, rng = Math.random) {
     hpMax: hp,
     tempHP: 0,
     activeConditions: [],
+    activeEffects: [],
     ac: getAC(monster.ac),
     deathSaves: { s: 0, f: 0 },
     isDead: false,
@@ -334,6 +383,7 @@ export function addManualCombatant(combat, payload, rng = Math.random) {
     hpMax: hp,
     tempHP: clampTempHp(payload.tempHP),
     activeConditions: [],
+    activeEffects: [],
     ac: clampInt(payload.ac, 0, 99, 10),
     deathSaves: { s: 0, f: 0 },
     isDead: false,
@@ -373,6 +423,10 @@ export function snapshotFight(combat) {
       // here. A field added to SYNCED_VITALS is now persisted without touching
       // this function.
       ...resolveCombatVitals(combatant, combatant),
+      // Listed by hand because effects are deliberately outside SYNCED_VITALS
+      // (they never reach a sheet). Normalized on the way out so a fight saved
+      // now restores clean even if the catalog loses an effect later.
+      activeEffects: normalizeEffects(combatant.activeEffects),
       // Deliberately not taken from the line above: resolveCombatVitals infers
       // death from failed death saves, which is right for a player and wrong for
       // a monster — monsters die at 0 HP and have no death saves to fail.
@@ -403,6 +457,7 @@ export function restoreFight(entry, monsters) {
       tempHP: clampTempHp(combatant.tempHP),
       // Fights snapshotted before conditions existed have no list at all.
       activeConditions: normalizeConditions(combatant.activeConditions),
+      activeEffects: normalizeEffects(combatant.activeEffects),
       monsterData: combatant.monsterRef
         ? db.find((monster) => monster.name === combatant.monsterRef.name && monster.source === combatant.monsterRef.source) || null
         : null,

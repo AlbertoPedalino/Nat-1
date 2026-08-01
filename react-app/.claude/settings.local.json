@@ -95,7 +95,25 @@
       "Bash(echo \"exit=$?\")",
       "Read(//tmp/**)",
       "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/class/class-druid.json\" -o class-druid.json)",
-      "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/bestiary/bestiary-xmm.json\" -o b-xmm.json)"
+      "Bash(curl -s \"https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/bestiary/bestiary-xmm.json\" -o b-xmm.json)",
+      "PowerShell(npx eslint src/pages/charsheet/components/InventoryTab.jsx src/shared/character/ItemFilterPanel.jsx src/shared/character/itemFilters.js src/shared/character/itemCodes.js 2>&1 | Select-Object -Last 30)",
+      "PowerShell(node -e \"const p=require\\('./package.json'\\); console.log\\(JSON.stringify\\(p.scripts,null,2\\)\\)\")",
+      "PowerShell(node --test src/shared/character/itemFilters.test.js 2>&1 | Select-Object -Last 40)",
+      "PowerShell(node --test src/shared/character/itemFilters.test.js src/pages/charsheet/logic/equipmentSlots.test.js 2>&1 | Select-Object -Last 25)",
+      "PowerShell(node -e \"const p=require\\('./package.json'\\); console.log\\('react', p.dependencies.react, '| mui', p.dependencies['@mui/material']\\)\")",
+      "PowerShell(node --test src/pages/charbuilder/state.test.js 2>&1 | Select-Object -Last 20)",
+      "Bash(sed -i \"s#import { installedRegistry } from '../../../adapters/index.js';#import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';#\" src/pages/charbuilder/spells/spells.js)",
+      "Bash(sed -i \"s#import { installedRegistry } from '../../adapters/index.js';#import { adapterRegistry as installedRegistry } from '../../adapters/registry.js';#\" src/shared/character/ac.js src/shared/character/autoGrantedSpells.js src/shared/character/hp.js src/shared/character/selectedFeats.js)",
+      "PowerShell(node --test src/pages/charbuilder/state.test.js 2>&1 | Select-Object -Last 12)",
+      "Bash(sed -i \"s#from '\\\\.\\\\./logic/conditions\\\\.js'#from '../../../shared/character/conditions.js'#\" src/pages/charsheet/components/*.jsx)",
+      "Bash(sed -i \"s#from '\\\\./logic/conditions\\\\.js'#from '../../shared/character/conditions.js'#\" src/pages/charsheet/CharacterSheet.jsx)",
+      "Bash(sed -i \"s#from '\\\\./conditions\\\\.js'#from '../../../shared/character/conditions.js'#\" src/pages/charsheet/logic/saveModifiers.js)",
+      "Bash(sed -i \"s#from '\\\\./conditions\\\\.js'#from './conditions.js'#\" src/shared/character/conditions.test.js)",
+      "Bash(perl -0pi -e \"s/\\(    tempHP: 0,\\\\n    ac: getAC\\\\\\(monster\\\\.ac\\\\\\),\\\\n    deathSaves: \\\\{ s: 0, f: 0 \\\\},\\)/    tempHP: 0,\\\\n    activeConditions: [],\\\\n    ac: getAC\\(monster.ac\\),\\\\n    deathSaves: { s: 0, f: 0 },/\" src/pages/encounterbuilder/logic/combat.js)",
+      "Bash(perl -0pi -e \"s/\\(    tempHP: clampTempHp\\\\\\(payload\\\\.tempHP\\\\\\),\\\\n    ac: clampInt\\\\\\(payload\\\\.ac, 0, 99, 10\\\\\\),\\)/    tempHP: clampTempHp\\(payload.tempHP\\),\\\\n    activeConditions: [],\\\\n    ac: clampInt\\(payload.ac, 0, 99, 10\\),/\" src/pages/encounterbuilder/logic/combat.js)",
+      "Bash(npm install *)",
+      "Bash(npx vitest *)",
+      "PowerShell(node --test src/pages/encounterbuilder/logic/encounterbuilder.logic.test.js 2>&1 | Select-Object -Last 8)"
     ]
   }
 }

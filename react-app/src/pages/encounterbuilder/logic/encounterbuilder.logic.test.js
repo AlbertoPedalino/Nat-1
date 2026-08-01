@@ -3,17 +3,23 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { calculateDifficulty } from './difficulty.js';
 import {
+  addCombatantEffect,
   applySheetVitals,
   buildCombat,
   clearCombatantConditions,
+  clearCombatantEffects,
   modifyHp,
   nextTurn,
+  removeCombatantEffect,
   restoreFight,
+  setCombatantEffectDuration,
   setDeathSave,
   setTempHp,
   snapshotFight,
   toggleCombatantCondition,
+  toggleCombatantEffect,
 } from './combat.js';
+import { effectId } from '../../../shared/character/combatEffects.js';
 import { rollDice, rollDiceFormula } from './dice.js';
 import {
   buildFumbleFormula,
@@ -555,6 +561,115 @@ test('conditions survive a fight snapshot and restore', () => {
 test('a fight saved before conditions existed restores with an empty list', () => {
   const legacy = { id: 1, fight: { combatants: [{ id: 0, name: 'Aria', type: 'player', hpCurrent: 5, hpMax: 22 }], currentTurn: 0, round: 1 } };
   assert.deepEqual(restoreFight(legacy, []).combatants[0].activeConditions, []);
+  assert.deepEqual(restoreFight(legacy, []).combatants[0].activeEffects, []);
+});
+
+test('combatants start a fight with no effects', () => {
+  const monster = { name: 'Goblin', cr: '1/4', hp: { average: 7 }, ac: 15, dex: 14 };
+  const combat = buildCombat([{ qty: 1, monsterData: monster }], [{ name: 'Aria', hpMax: 22 }], 1, () => 0.5);
+  for (const combatant of combat.combatants) {
+    assert.deepEqual(combatant.activeEffects, [], `${combatant.name} started with effects`);
+  }
+});
+
+test('an effect lands on one combatant and leaves the rest of the fight alone', () => {
+  const combat = buildCombat([], [{ name: 'Aria', hpMax: 22 }, { name: 'Bran', hpMax: 20 }], 1, () => 0.5);
+  const id = combat.combatants[0].id;
+  const next = toggleCombatantEffect(combat, id, 'selfAttackDisadv');
+  assert.deepEqual(next.combatants[0].activeEffects, [{ key: 'selfAttackDisadv', duration: 'next' }]);
+  assert.deepEqual(next.combatants[1].activeEffects, []);
+  assert.equal(next.round, combat.round);
+  assert.equal(next.currentTurn, combat.currentTurn);
+});
+
+// Durations are per effect, so one combatant routinely holds two at once.
+test('re-timing one effect on a combatant leaves its other effects alone', () => {
+  const combat = buildCombat([], [{ name: 'Aria', hpMax: 22 }], 1, () => 0.5);
+  const id = combat.combatants[0].id;
+  const both = toggleCombatantEffect(toggleCombatantEffect(combat, id, 'selfAttackDisadv'), id, 'selfSaveDisadv');
+  const retimed = setCombatantEffectDuration(both, id, 'selfSaveDisadv|next|', 'manual');
+  assert.deepEqual(retimed.combatants[0].activeEffects, [
+    { key: 'selfAttackDisadv', duration: 'next' },
+    { key: 'selfSaveDisadv', duration: 'manual' },
+  ]);
+});
+
+test('a custom effect is added, removed by id, and cleared wholesale', () => {
+  const combat = buildCombat([], [{ name: 'Aria', hpMax: 22 }], 1, () => 0.5);
+  const id = combat.combatants[0].id;
+  const withEffects = addCombatantEffect(
+    toggleCombatantEffect(combat, id, 'incomingAttackAdv'),
+    id,
+    { text: 'bleeding 1d4' },
+  );
+  assert.equal(withEffects.combatants[0].activeEffects.length, 2);
+
+  const custom = withEffects.combatants[0].activeEffects[1];
+  const removed = removeCombatantEffect(withEffects, id, effectId(custom));
+  assert.deepEqual(removed.combatants[0].activeEffects, [{ key: 'incomingAttackAdv', duration: 'next' }]);
+  assert.deepEqual(clearCombatantEffects(removed, id).combatants[0].activeEffects, []);
+});
+
+// Effects are outside SYNCED_VITALS, so the snapshot has to name them by hand —
+// exactly the omission that lost conditions from every saved fight.
+test('effects survive a fight snapshot and restore', () => {
+  const combat = buildCombat([], [{ name: 'Aria', sourceId: 'char-1', hpMax: 22 }], 1, () => 0.5);
+  const id = combat.combatants[0].id;
+  const withEffect = setCombatantEffectDuration(
+    addCombatantEffect(toggleCombatantEffect(combat, id, 'selfSaveDisadv'), id, { text: 'marked' }),
+    id,
+    'selfSaveDisadv|next|',
+    'turn',
+  );
+
+  const restored = restoreFight({ id: 1, fight: snapshotFight(withEffect) }, []);
+  assert.deepEqual(restored.combatants[0].activeEffects, [
+    { key: 'selfSaveDisadv', duration: 'turn' },
+    { key: 'custom', duration: 'next', text: 'marked', polarity: 'note' },
+  ]);
+});
+
+// The reason effects are not a synced vital: they mean nothing on a character
+// sheet, so they must never widen the patch or the SQL allowlist.
+test('effects stay in the encounter and never reach the sheet patch', () => {
+  const patch = combatantToSheetPatch({
+    hpCurrent: 5,
+    hpMax: 22,
+    activeConditions: ['prone'],
+    activeEffects: [{ key: 'selfAttackDisadv', duration: 'next' }],
+  });
+  assert.equal('activeEffects' in patch, false);
+  assert.equal(SYNCED_DATA_KEYS.includes('activeEffects'), false);
+});
+
+// A live sheet payload knows nothing about effects; resolving vitals from one
+// must not be read as "this combatant has no effects".
+test('a sheet sync leaves a combatant\'s effects untouched', () => {
+  const combat = buildCombat([], [{ name: 'Aria', sourceId: 'char-1', hpMax: 22 }], 1, () => 0.5);
+  const id = combat.combatants[0].id;
+  const withEffect = toggleCombatantEffect(combat, id, 'selfAttackDisadv');
+  const synced = applySheetVitals(withEffect, 'char-1', { hpMax: 22, currentHP: 9, activeConditions: ['blinded'] });
+  assert.equal(synced.combatants[0].hpCurrent, 9);
+  assert.deepEqual(synced.combatants[0].activeEffects, [{ key: 'selfAttackDisadv', duration: 'next' }]);
+});
+
+test('the reducer routes every effect action through the fight snapshot', () => {
+  let state = encounterReducer(createInitialState(), { type: 'launchCurrentEncounter' });
+  state = { ...state, combat: buildCombat([], [{ name: 'Aria', hpMax: 22 }], null, () => 0.5) };
+  const id = state.combat.combatants[0].id;
+
+  state = encounterReducer(state, { type: 'toggleCombatantEffect', id, key: 'selfCheckDisadv' });
+  assert.deepEqual(state.combat.combatants[0].activeEffects, [{ key: 'selfCheckDisadv', duration: 'next' }]);
+
+  state = encounterReducer(state, {
+    type: 'setCombatantEffectDuration', id, effectId: 'selfCheckDisadv|next|', duration: 'round',
+  });
+  assert.deepEqual(state.combat.combatants[0].activeEffects, [{ key: 'selfCheckDisadv', duration: 'round' }]);
+  assert.deepEqual(state.fights[0].fight.combatants[0].activeEffects, [{ key: 'selfCheckDisadv', duration: 'round' }]);
+
+  state = encounterReducer(state, { type: 'clearCombatantEffects', id });
+  assert.deepEqual(state.combat.combatants[0].activeEffects, []);
+  assert.deepEqual(state.fights[0].fight.combatants[0].activeEffects, []);
 });
 
 // The guard the sync chain was missing. Three separate surfaces each enumerated
