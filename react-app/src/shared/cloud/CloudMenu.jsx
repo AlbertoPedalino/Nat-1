@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button, Menu, MenuItem, Divider, Typography, Box, Tooltip } from '@mui/material';
-import { LogIn, LogOut, Users, User, Swords, CloudUpload } from 'lucide-react';
+import { LogIn, LogOut, User, CloudUpload } from 'lucide-react';
 import { useAuth } from './AuthProvider.jsx';
 import AuthDialog from './AuthDialog.jsx';
 import { pushCharacter } from './cloudCharacters.js';
@@ -31,8 +30,7 @@ const SYNC_TEXT = {
 };
 
 export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUploadDraft }) {
-  const { cloudEnabled, status, username, role, isGm, signOut } = useAuth();
-  const navigate = useNavigate();
+  const { cloudEnabled, status, username, role, signOut } = useAuth();
   const [anchor, setAnchor] = useState(null);
   const [authOpen, setAuthOpen] = useState(false);
   const [syncState, setSyncState] = useState('idle');
@@ -125,13 +123,6 @@ export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUplo
             </MenuItem>,
             <Divider key="dsave" />,
           ] : []),
-          <MenuItem key="sheets" onClick={() => { close(); navigate('/library/characters'); }}>
-            <Users size={15} style={{ marginRight: 8 }} /> {isGm ? 'Players sheets' : 'My sheets'}
-          </MenuItem>,
-          <MenuItem key="campaigns" onClick={() => { close(); navigate('/campaigns'); }}>
-            <Swords size={15} style={{ marginRight: 8 }} /> Campaigns
-          </MenuItem>,
-          <Divider key="d2" />,
           <MenuItem key="out" onClick={async () => { close(); await signOut(); notify('info', 'Logged out.'); }}>
             <LogOut size={15} style={{ marginRight: 8 }} /> Log out
           </MenuItem>,

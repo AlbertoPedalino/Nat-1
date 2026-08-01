@@ -1,17 +1,18 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { alpha, Box, Button, Typography, Card, CardContent } from '@mui/material';
-import { ScrollText, UserPen, LayoutDashboard, Swords, StickyNote, Trash2 } from 'lucide-react';
+import { ScrollText, UserPen, LayoutDashboard, Swords, StickyNote, Flag, Trash2 } from 'lucide-react';
 import { REGISTRY_META } from '../../shared/localStorageRegistries.js';
 import { clearAppLocalStorage, listAppLocalStorageKeys } from '../../shared/storage.js';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../components/AppTopBar.jsx';
 
-const TOOLS = [
+export const TOOLS = [
   { path: '/library/characters', label: 'Character Sheet', desc: 'View and manage your character in play', icon: ScrollText, color: 'success.main' },
   { path: REGISTRY_META.gb_char_registry.newRoute, label: 'Char Builder', desc: 'Create or level up your character', icon: UserPen, color: 'gmboard.rarity.Very Rare' },
   { path: '/library/gmboard', label: 'GM Board', desc: 'Hexcrawl, dungeon, and quest generators', icon: LayoutDashboard, color: 'warning.main' },
   { path: '/library/encounters', label: 'Encounter Builder', desc: 'Build and balance combat encounters', icon: Swords, color: 'error.main' },
   { path: '/library/dmscreen', label: 'DM Screen', desc: 'Keep notes and reminders close during play', icon: StickyNote, color: 'secondary.main' },
+  { path: '/campaigns', label: 'Campaigns', desc: 'Create, join, and manage online campaigns', icon: Flag, color: 'primary.main' },
 ];
 
 export default function HomePage() {
