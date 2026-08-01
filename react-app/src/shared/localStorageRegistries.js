@@ -15,6 +15,13 @@ export const REGISTRY_META = {
     route: (id) => `/encounter-builder?enc=${encodeURIComponent(id)}`,
     newRoute: '/encounter-builder?enc=new',
   },
+  gb_dmscreen_registry: {
+    label: 'DM Screen',
+    prefix: (id) => `gb:dmscreen:${id}:`,
+    activeKey: 'gb_active_dmscreen_id',
+    route: (id) => `/dm-screen?screen=${encodeURIComponent(id)}`,
+    newRoute: '/dm-screen?screen=new',
+  },
   gb_char_registry: {
     label: 'Personaggio',
     route: (id) => `/charsheet?char=${encodeURIComponent(id)}`,

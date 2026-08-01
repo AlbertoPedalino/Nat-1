@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import CharBuilder from './pages/charbuilder/CharBuilder.jsx';
 import CharacterSheet from './pages/charsheet/CharacterSheet.jsx';
 import GmBoardPage from './pages/gmboard/GmBoardPage.jsx';
+import DmScreenPage from './pages/dmscreen/DmScreenPage.jsx';
 import EncounterBuilderPage from './pages/encounterbuilder/EncounterBuilderPage.jsx';
 import GmSheetsPage from './pages/gmsheets/GmSheetsPage.jsx';
 import CampaignsPage from './pages/campaigns/CampaignsPage.jsx';
@@ -19,6 +20,7 @@ export default function App() {
       <Route path="/charbuilder" element={<CharBuilder />} />
       <Route path="/charsheet" element={<CharacterSheet />} />
       <Route path="/gmboard" element={<GmBoardPage />} />
+      <Route path="/dm-screen" element={<DmScreenPage />} />
       <Route path="/gmsheets" element={<GmSheetsPage />} />
       <Route path="/campaigns" element={<CampaignsPage />} />
       <Route path="/campaign-sheet" element={<CampaignSheetView />} />

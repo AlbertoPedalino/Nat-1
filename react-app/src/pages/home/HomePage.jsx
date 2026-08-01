@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Box, Button, Typography, Card, CardContent, CircularProgress } from '@mui/material';
-import { ScrollText, UserPen, LayoutDashboard, Swords, Pencil, Trash2 } from 'lucide-react';
+import { alpha, Box, Button, Typography, Card, CardContent, CircularProgress } from '@mui/material';
+import { ScrollText, UserPen, LayoutDashboard, Swords, StickyNote, Pencil, Trash2 } from 'lucide-react';
 import {
   readRegistry, deleteRegistryEntry, renameRegistryEntry,
   REGISTRY_META,
@@ -12,10 +12,11 @@ import { useAuth } from '../../shared/cloud/AuthProvider.jsx';
 import { fetchCloudMeta, pullCharacter } from '../../shared/cloud/cloudCharacters.js';
 
 const TOOLS = [
-  { path: '/charsheet', label: 'Character Sheet', desc: 'View and manage your character in play', icon: ScrollText, color: '#2ecc71', borderColor: 'rgba(46,204,113,0.3)' },
-  { path: REGISTRY_META.gb_char_registry.newRoute, label: 'Char Builder', desc: 'Create or level up your character', icon: UserPen, color: '#9b59b6', borderColor: 'rgba(155,89,182,0.3)' },
-  { path: REGISTRY_META.gb_board_registry.newRoute, label: 'GM Board', desc: 'Hexcrawl, dungeon, and quest generators', icon: LayoutDashboard, color: '#e67e22', borderColor: 'rgba(230,126,34,0.3)' },
-  { path: REGISTRY_META.gb_encounter_registry.newRoute, label: 'Encounter Builder', desc: 'Build and balance combat encounters', icon: Swords, color: '#e74c3c', borderColor: 'rgba(231,76,60,0.3)' },
+  { path: '/charsheet', label: 'Character Sheet', desc: 'View and manage your character in play', icon: ScrollText, color: 'success.main' },
+  { path: REGISTRY_META.gb_char_registry.newRoute, label: 'Char Builder', desc: 'Create or level up your character', icon: UserPen, color: 'gmboard.rarity.Very Rare' },
+  { path: REGISTRY_META.gb_board_registry.newRoute, label: 'GM Board', desc: 'Hexcrawl, dungeon, and quest generators', icon: LayoutDashboard, color: 'warning.main' },
+  { path: REGISTRY_META.gb_encounter_registry.newRoute, label: 'Encounter Builder', desc: 'Build and balance combat encounters', icon: Swords, color: 'error.main' },
+  { path: REGISTRY_META.gb_dmscreen_registry.newRoute, label: 'DM Screen', desc: 'Keep notes and reminders close during play', icon: StickyNote, color: 'secondary.main' },
 ];
 
 function fmt(ts) {
@@ -84,7 +85,7 @@ function RecentPanel({ registryKey, entries, onDelete, onRename, onOpen, opening
 }
 
 function ContinueSection({ refreshKey, onStorageChange }) {
-  const [registries, setRegistries] = useState({ boards: [], chars: [], encounters: [] });
+  const [registries, setRegistries] = useState({ boards: [], chars: [], encounters: [], screens: [] });
   const [opening, setOpening] = useState(null);
   const { cloudEnabled, status } = useAuth();
   const navigate = useNavigate();
@@ -94,6 +95,7 @@ function ContinueSection({ refreshKey, onStorageChange }) {
       boards: readRegistry('gb_board_registry'),
       chars: readRegistry('gb_char_registry'),
       encounters: readRegistry('gb_encounter_registry'),
+      screens: readRegistry('gb_dmscreen_registry'),
     });
   }, []);
 
@@ -129,8 +131,8 @@ function ContinueSection({ refreshKey, onStorageChange }) {
     if (renameRegistryEntry(registryKey, id)) refresh();
   }, [refresh]);
 
-  const { boards, chars, encounters } = registries;
-  const hasAny = boards.length > 0 || chars.length > 0 || encounters.length > 0;
+  const { boards, chars, encounters, screens } = registries;
+  const hasAny = boards.length > 0 || chars.length > 0 || encounters.length > 0 || screens.length > 0;
   if (!hasAny) return null;
 
   return (
@@ -155,6 +157,12 @@ function ContinueSection({ refreshKey, onStorageChange }) {
           entries={encounters}
           onDelete={(id) => handleDelete('gb_encounter_registry', id)}
           onRename={(id) => handleRename('gb_encounter_registry', id)}
+        />
+        <RecentPanel
+          registryKey="gb_dmscreen_registry"
+          entries={screens}
+          onDelete={(id) => handleDelete('gb_dmscreen_registry', id)}
+          onRename={(id) => handleRename('gb_dmscreen_registry', id)}
         />
       </Box>
     </Box>
@@ -202,10 +210,12 @@ export default function HomePage() {
             component={Link}
             to={tool.path}
             variant="outlined"
-            sx={getCardSx(tool.borderColor)}
+            sx={getCardSx(tool.color)}
           >
             <CardContent sx={cardContentSx}>
-              <tool.icon size={38} strokeWidth={1.5} color={tool.color} />
+              <Box sx={{ color: tool.color, display: 'flex' }}>
+                <tool.icon size={38} strokeWidth={1.5} />
+              </Box>
               <Typography sx={cardLabelSx}>{tool.label}</Typography>
               <Typography sx={cardDescSx}>{tool.desc}</Typography>
             </CardContent>
@@ -288,20 +298,26 @@ const gridSx = {
   },
 };
 
-function getCardSx(borderColor) {
+function paletteValue(theme, token) {
+  return token.split('.').reduce((value, part) => value?.[part], theme.palette) || theme.palette.primary.main;
+}
+
+function getCardSx(color) {
   return {
     textDecoration: 'none',
-    border: `1px solid ${borderColor}`,
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: (theme) => alpha(paletteValue(theme, color), 0.3),
     borderRadius: '12px',
     bgcolor: '#1a1815',
     backgroundImage: 'none',
     transition: 'border-color 0.15s, box-shadow 0.15s, transform 0.12s',
     '&:hover': {
-      borderColor: borderColor.replace('0.3', '1'),
-      boxShadow: `0 0 24px ${borderColor.replace('0.3', '0.15')}`,
+      borderColor: color,
+      boxShadow: (theme) => `0 0 24px ${alpha(paletteValue(theme, color), 0.15)}`,
       transform: 'translateY(-2px)',
     },
-    '&:hover .card-label': { color: borderColor },
+    '&:hover .card-label': { color },
   };
 }
 
