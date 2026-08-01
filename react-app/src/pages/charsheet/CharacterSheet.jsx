@@ -89,6 +89,12 @@ export default function CharacterSheet({ externalChar = null, externalCharId = n
   sheetRef.current = sheet;
 
   useEffect(() => {
+    if (embedded) return;
+    const characterName = String(C?.name || '').trim();
+    if (characterName) document.title = characterName;
+  }, [C?.name, embedded]);
+
+  useEffect(() => {
     let alive = true;
     cloudSaveReadyRef.current = false;
     // Read-only view feeds the character directly (from the cloud); skip local
