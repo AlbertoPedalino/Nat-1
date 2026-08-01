@@ -17,6 +17,7 @@ export const LIBRARY_TOOLS = {
   },
   gmboard: {
     slug: 'gmboard',
+    sectionKey: 'gmboard',
     registryKey: 'gb_board_registry',
     label: 'GM Board',
     description: 'Hexcrawl, dungeon, and quest generators',
@@ -27,6 +28,7 @@ export const LIBRARY_TOOLS = {
   },
   encounters: {
     slug: 'encounters',
+    sectionKey: 'encounters',
     registryKey: 'gb_encounter_registry',
     label: 'Encounter Builder',
     description: 'Build and balance combat encounters',
@@ -37,6 +39,7 @@ export const LIBRARY_TOOLS = {
   },
   dmscreen: {
     slug: 'dmscreen',
+    sectionKey: 'dmscreen',
     registryKey: 'gb_dmscreen_registry',
     label: 'DM Screen',
     description: 'Keep notes and reminders close during play',

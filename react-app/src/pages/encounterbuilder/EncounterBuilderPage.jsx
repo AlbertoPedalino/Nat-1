@@ -62,7 +62,7 @@ function EncounterBuilderShell({ instance }) {
 
   return (
     <Box sx={pageSx}>
-      <AppTopBar home>
+      <AppTopBar home backTo="/library/encounters" backLabel="Encounters">
         <SaveInstanceButton saved={instanceSaved} onClick={handleSaveInstance} />
       </AppTopBar>
       <Box sx={contentSx}>

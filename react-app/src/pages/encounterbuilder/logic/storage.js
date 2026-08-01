@@ -2,9 +2,17 @@ import { calculateDifficulty } from './difficulty.js';
 import { normalizeFumbleTables } from './fumbles.js';
 import { normalizeNegotiation } from './negotiation.js';
 import { hydrateEncounterItems, serializeEncounterItem } from './monsterUtils.js';
+import {
+  emitStorageEvent,
+  restoreScopedPayload,
+  snapshotScopedPayload,
+  touchRegistryEntry,
+} from '../../../shared/scopedStoragePayload.js';
+import { SECTION_REGISTRY } from '../../../shared/sectionRegistry.js';
 
-export const REGISTRY_KEY = 'gb_encounter_registry';
-export const ACTIVE_KEY = 'gb_active_encounter_id';
+const SECTION = SECTION_REGISTRY.encounters;
+export const REGISTRY_KEY = SECTION.registryKey;
+export const ACTIVE_KEY = SECTION.activeKey;
 export const STORAGE_VERSION = 1;
 export const STORAGE_KEYS = Object.freeze({
   party: 'party:v1',
@@ -14,6 +22,7 @@ export const STORAGE_KEYS = Object.freeze({
   fumbles: 'fumbles:v1',
   negotiation: 'negotiation:v1',
 });
+const SAVE_EVENT = SECTION.saveEvent;
 
 export function sanitizeEncounterId(value) {
   return String(value || '').toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 48);
@@ -25,6 +34,10 @@ export function makeEncounterId(now = Date.now()) {
 
 export function scopeKey(id, key) {
   return `gb:enc:${id}:${key}`;
+}
+
+export function scopedPrefix(id) {
+  return SECTION.scopedPrefix(id);
 }
 
 export function readRegistry() {
@@ -102,6 +115,21 @@ function readJson(id, key, fallback) {
 
 function writeJson(id, key, value) {
   localStorage.setItem(scopeKey(id, key), JSON.stringify(value));
+  markEncounterPersisted(id);
+}
+
+export function readScopedPayload(id) {
+  return snapshotScopedPayload(scopedPrefix(id));
+}
+
+export function writeScopedPayload(id, payload, { name, updatedAt } = {}) {
+  restoreScopedPayload(scopedPrefix(id), payload);
+  return touchRegistryEntry(REGISTRY_KEY, id, { name, updatedAt });
+}
+
+function markEncounterPersisted(id) {
+  if (!touchRegistryEntry(REGISTRY_KEY, id)) return;
+  emitStorageEvent(SAVE_EVENT, id);
 }
 
 export function readPersistedInstance(id, monsters = []) {
