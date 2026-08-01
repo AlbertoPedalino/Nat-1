@@ -54,6 +54,10 @@ export const theme = createTheme({
         Common: '#7a6040',
         '—': '#7a6040',
       },
+      // Origin badges in the instance picker (cloud vs local-only sheets).
+      badge: {
+        cloud: '#7ec8e3',
+      },
       panelOverlay: 'rgba(0,0,0,0.2)',
       headerOverlay: 'rgba(0,0,0,0.3)',
       rowDivider: 'rgba(180,150,90,0.12)',

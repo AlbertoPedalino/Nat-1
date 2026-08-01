@@ -45,13 +45,13 @@ repository **secrets** and pass them as env to `npm run build`.
    ```sql
    update public.profiles set role = 'gm' where username = 'YOUR_NAME';
    ```
-3. Reload. The cloud menu now shows **Schede giocatori** → `/gmsheets`.
+3. Reload. The cloud menu now shows **Schede giocatori** → `/library/characters`.
 
 ## How it works
 - **Players**: press **Cloud** → *Accedi / Registrati* once. After that sync is **always on**:
   every edit (builder or sheet) is pushed to the cloud automatically (debounced ~1s). The Cloud
   button shows a green dot when everything is saved. No buttons to press.
-- **GM**: cloud menu → *Schede giocatori* (`/gmsheets`) lists every player's latest sheet.
+- **GM**: cloud menu → *Schede giocatori* (`/library/characters`) lists every player's latest sheet.
   *Apri* opens it in the normal sheet view; *JSON* downloads the raw data.
 - Logged out = pure local, nothing leaves the browser. The cloud stores only: users
   (login + role) and the full sheet JSON. Local save always works offline and is never removed.
