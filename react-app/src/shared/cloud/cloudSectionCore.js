@@ -1,3 +1,5 @@
+import { normalizeLinkGroupId } from '../linkGroupId.js';
+
 async function requireUser(client) {
   const { data, error } = await client.auth.getUser();
   if (error) throw error;
@@ -26,6 +28,7 @@ export function createSectionCloudApi(descriptor, { getClient }) {
       owner: user.id,
       owner_username: user.user_metadata?.username || null,
       name: entry.name || descriptor.defaultName(cleanId),
+      link_group_id: normalizeLinkGroupId(entry.linkGroupId),
       data: payload,
       updated_at: new Date().toISOString(),
     };
@@ -40,13 +43,14 @@ export function createSectionCloudApi(descriptor, { getClient }) {
     const client = getClient();
     const { data, error } = await client
       .from(descriptor.table)
-      .select('id, name, data, updated_at')
+      .select('id, name, link_group_id, data, updated_at')
       .eq('id', cleanId)
       .single();
     if (error) throw error;
     if (!data?.data) throw new Error('No cloud data for this instance.');
     descriptor.writePayload(cleanId, data.data, {
       name: data.name || descriptor.defaultName(cleanId),
+      linkGroupId: normalizeLinkGroupId(data.link_group_id),
       updatedAt: Date.parse(data.updated_at) || 0,
     });
     localStorage.setItem(descriptor.activeKey, cleanId);
@@ -58,7 +62,7 @@ export function createSectionCloudApi(descriptor, { getClient }) {
     if (!cleanId || cleanId === 'new') return null;
     const { data, error } = await getClient()
       .from(descriptor.table)
-      .select('id, updated_at')
+      .select('id, name, link_group_id, updated_at')
       .eq('id', cleanId)
       .maybeSingle();
     if (error) throw error;
@@ -70,7 +74,7 @@ export function createSectionCloudApi(descriptor, { getClient }) {
     const user = await requireUser(client);
     const { data, error } = await client
       .from(descriptor.table)
-      .select('id, name, owner, owner_username, updated_at')
+      .select('id, name, link_group_id, owner, owner_username, updated_at')
       .eq('owner', user.id)
       .order('updated_at', { ascending: false });
     if (error) throw error;
@@ -94,6 +98,23 @@ export function createSectionCloudApi(descriptor, { getClient }) {
     return name;
   }
 
+  async function setLinkGroup(id, nextLinkGroupId) {
+    const cleanId = descriptor.sanitizeId(id);
+    const linkGroupId = normalizeLinkGroupId(nextLinkGroupId);
+    if (!cleanId || cleanId === 'new') throw new Error('Invalid section instance id.');
+    if (nextLinkGroupId != null && !linkGroupId) throw new Error('Invalid linked-tools group id.');
+
+    const client = getClient();
+    const user = await requireUser(client);
+    const { error } = await client
+      .from(descriptor.table)
+      .update({ link_group_id: linkGroupId, updated_at: new Date().toISOString() })
+      .eq('id', cleanId)
+      .eq('owner', user.id);
+    if (error) throw error;
+    return linkGroupId;
+  }
+
   async function deleteCloudInstance(id) {
     const cleanId = descriptor.sanitizeId(id);
     if (!cleanId || cleanId === 'new') return;
@@ -113,6 +134,7 @@ export function createSectionCloudApi(descriptor, { getClient }) {
     fetchInstanceMeta,
     listInstances,
     renameCloudInstance,
+    setLinkGroup,
     deleteCloudInstance,
   });
 }

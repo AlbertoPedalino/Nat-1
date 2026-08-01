@@ -4,6 +4,7 @@ import { Box, Button, Stack, Tab, Tabs, Typography } from '@mui/material';
 import { BookOpen, Library, Swords, Dices, Handshake, Skull } from 'lucide-react';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../components/AppTopBar.jsx';
 import SaveInstanceButton from '../../components/SaveInstanceButton.jsx';
+import LinkedToolsMenu from '../../components/LinkedToolsMenu.jsx';
 import CustomRollDialog from '../../shared/character/CustomRollDialog.jsx';
 import { useToast } from '../../shared/ToastProvider.jsx';
 import BuilderView from './components/BuilderView.jsx';
@@ -34,6 +35,7 @@ export default function EncounterBuilderPage() {
       key={instance.id}
       instanceId={instance.id}
       instanceSaved={instance.saved}
+      linkGroupId={instance.linkGroupId}
       onInstanceSaved={() => setInstance((prev) => ({ ...prev, saved: true }))}
     >
       <EncounterBuilderShell instance={instance} />
@@ -63,6 +65,7 @@ function EncounterBuilderShell({ instance }) {
   return (
     <Box sx={pageSx}>
       <AppTopBar home backTo="/library/encounters" backLabel="Encounters">
+        <LinkedToolsMenu sectionKey="encounters" instanceId={instance.id} instanceSaved={instanceSaved} initialLinkGroupId={instance.linkGroupId} />
         <SaveInstanceButton saved={instanceSaved} onClick={handleSaveInstance} />
       </AppTopBar>
       <Box sx={contentSx}>

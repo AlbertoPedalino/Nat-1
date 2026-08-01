@@ -5,7 +5,7 @@ import {
   saveInstanceWithNotes,
 } from '../storage.js';
 
-export function useDmScreenPersistence({ instanceId, instanceSaved, notes, dispatch, onSaved }) {
+export function useDmScreenPersistence({ instanceId, instanceSaved, linkGroupId, notes, dispatch, onSaved }) {
   const hydratedRef = useRef(false);
   const hydratedForRef = useRef('');
   const awaitingHydrationRef = useRef(false);
@@ -43,12 +43,14 @@ export function useDmScreenPersistence({ instanceId, instanceSaved, notes, dispa
   }, [instanceId, instanceSaved, notes, serializedNotes]);
 
   const saveInstance = useCallback(() => {
-    const entry = saveInstanceWithNotes(instanceId, `DM Screen ${instanceId}`, notes);
+    const entry = saveInstanceWithNotes(instanceId, `DM Screen ${instanceId}`, notes, {
+      linkGroupId: instanceSaved ? undefined : linkGroupId,
+    });
     if (!entry) return null;
     lastPersistedRef.current = JSON.stringify(notes);
     onSaved?.(entry);
     return entry;
-  }, [instanceId, notes, onSaved]);
+  }, [instanceId, instanceSaved, linkGroupId, notes, onSaved]);
 
   return { saveInstance };
 }

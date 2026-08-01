@@ -9,7 +9,7 @@ import {
 import { extractCoreState } from '../state/reducer.js';
 import { createDefaultTables } from '../logic/defaultTables.js';
 
-export function useGmBoardPersistence({ instanceId, instanceSaved, state, dispatch, onSaved }) {
+export function useGmBoardPersistence({ instanceId, instanceSaved, linkGroupId, state, dispatch, onSaved }) {
   const hydratedRef = useRef(false);
   const hydratedForRef = useRef('');
   const skipCorePersistRef = useRef(false);
@@ -56,14 +56,16 @@ export function useGmBoardPersistence({ instanceId, instanceSaved, state, dispat
   }, [instanceId, instanceSaved, state.results]);
 
   const saveInstance = useCallback(() => {
-    const entry = registerBoardInstance(instanceId, `GM Board ${instanceId}`);
+    const entry = registerBoardInstance(instanceId, `GM Board ${instanceId}`, {
+      linkGroupId: instanceSaved ? undefined : linkGroupId,
+    });
     persistBoardState(instanceId, extractCoreState(state));
     persistBoardTables(instanceId, state.tables);
     persistBoardResults(instanceId, state.results);
     onSaved?.(entry);
     return entry;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [instanceId, onSaved, state]);
+  }, [instanceId, instanceSaved, linkGroupId, onSaved, state]);
 
   const saveTables = useCallback(() => {
     if (!instanceSaved) return false;

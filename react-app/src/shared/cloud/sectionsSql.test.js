@@ -2,13 +2,15 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-const sql = readFileSync(new URL('./sections.sql', import.meta.url), 'utf8').toLowerCase();
+const sql = readFileSync(new URL('../../../supabase/sections.sql', import.meta.url), 'utf8').toLowerCase();
 
 test('sections SQL creates all tables, indexes, and enables RLS', () => {
   for (const table of ['boards', 'encounters', 'dm_screens']) {
     assert.match(sql, new RegExp(`create table if not exists public\\.${table}\\s*\\(`));
     assert.match(sql, new RegExp(`create index if not exists ${table}_owner_idx on public\\.${table}\\(owner\\)`));
     assert.match(sql, new RegExp(`alter table public\\.${table} enable row level security`));
+    assert.match(sql, new RegExp(`alter table public\\.${table} add column if not exists link_group_id text`));
+    assert.match(sql, new RegExp(`create index if not exists ${table}_owner_link_group_idx on public\\.${table}\\(owner, link_group_id\\)`));
   }
 });
 

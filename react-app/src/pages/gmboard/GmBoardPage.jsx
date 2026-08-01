@@ -4,6 +4,7 @@ import { Box, Stack, Tab, Tabs, Typography } from '@mui/material';
 import { Map, Castle, ScrollText, Table, BookOpen } from 'lucide-react';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../components/AppTopBar.jsx';
 import SaveInstanceButton from '../../components/SaveInstanceButton.jsx';
+import LinkedToolsMenu from '../../components/LinkedToolsMenu.jsx';
 import { useToast } from '../../shared/ToastProvider.jsx';
 import { resolveInstance } from './storage.js';
 import { GmBoardProvider, useGmBoard } from './state/GmBoardContext.jsx';
@@ -39,6 +40,7 @@ export default function GmBoardPage() {
       key={instance.id}
       instanceId={instance.id}
       instanceSaved={instance.saved}
+      linkGroupId={instance.linkGroupId}
       onInstanceSaved={() => setInstance((prev) => ({ ...prev, saved: true }))}
     >
       <GmBoardShell instance={instance} />
@@ -58,6 +60,7 @@ function GmBoardShell({ instance }) {
   return (
     <Box sx={pageSx}>
       <AppTopBar home backTo="/library/gmboard" backLabel="GM Boards">
+        <LinkedToolsMenu sectionKey="gmboard" instanceId={instance.id} instanceSaved={instanceSaved} initialLinkGroupId={instance.linkGroupId} />
         <SaveInstanceButton saved={instanceSaved} onClick={handleSaveInstance} />
       </AppTopBar>
       <Box sx={contentSx}>

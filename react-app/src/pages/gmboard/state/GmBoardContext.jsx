@@ -7,11 +7,12 @@ import { createQuests } from '../logic/quest.js';
 
 const GmBoardContext = createContext(null);
 
-export function GmBoardProvider({ instanceId, instanceSaved, onInstanceSaved, children }) {
+export function GmBoardProvider({ instanceId, instanceSaved, linkGroupId, onInstanceSaved, children }) {
   const [state, dispatch] = useReducer(gmBoardReducer, undefined, createInitialState);
   const { saveInstance, saveTables, resetTables } = useGmBoardPersistence({
     instanceId,
     instanceSaved,
+    linkGroupId,
     state,
     dispatch,
     onSaved: onInstanceSaved,

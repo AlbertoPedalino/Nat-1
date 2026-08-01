@@ -38,6 +38,12 @@ export function renameCloudInstance(section, id, name) {
   return api.renameCloudInstance(id, name);
 }
 
+export function setLinkGroup(section, id, linkGroupId) {
+  const api = getCloudSection(section);
+  if (!api) return Promise.reject(new Error('Unknown cloud section.'));
+  return api.setLinkGroup(id, linkGroupId);
+}
+
 export function deleteCloudInstance(section, id) {
   return getCloudSection(section)?.deleteCloudInstance(id) ?? Promise.resolve();
 }

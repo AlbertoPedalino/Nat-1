@@ -10,7 +10,7 @@ import {
   registerEncounterInstance,
 } from '../logic/storage.js';
 
-export function useEncounterPersistence({ instanceId, instanceSaved, monsters, monsterStatus, state, dispatch, onSaved }) {
+export function useEncounterPersistence({ instanceId, instanceSaved, linkGroupId, monsters, monsterStatus, state, dispatch, onSaved }) {
   const hydratedRef = useRef(false);
   const hydrateKeyRef = useRef('');
   const skipNextPersistRef = useRef(false);
@@ -50,11 +50,13 @@ export function useEncounterPersistence({ instanceId, instanceSaved, monsters, m
   }, [instanceSaved, persistAll]);
 
   const saveInstance = useCallback(() => {
-    const entry = registerEncounterInstance(instanceId, `Encounter ${instanceId}`);
+    const entry = registerEncounterInstance(instanceId, `Encounter ${instanceId}`, {
+      linkGroupId: instanceSaved ? undefined : linkGroupId,
+    });
     persistAll();
     onSaved?.(entry);
     return entry;
-  }, [instanceId, onSaved, persistAll]);
+  }, [instanceId, instanceSaved, linkGroupId, onSaved, persistAll]);
 
   return { saveInstance };
 }

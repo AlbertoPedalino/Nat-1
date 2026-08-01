@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, Stack, Typography } from '@mui/material';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../components/AppTopBar.jsx';
 import SaveInstanceButton from '../../components/SaveInstanceButton.jsx';
+import LinkedToolsMenu from '../../components/LinkedToolsMenu.jsx';
 import { useToast } from '../../shared/ToastProvider.jsx';
 import NoteBoard from './components/NoteBoard.jsx';
 import { DmScreenProvider, useDmScreen } from './state/DmScreenContext.jsx';
@@ -41,6 +42,7 @@ export default function DmScreenPage() {
       key={instance.id}
       instanceId={instance.id}
       instanceSaved={instance.saved}
+      linkGroupId={instance.linkGroupId}
       onInstanceSaved={handleInstanceSaved}
     >
       <DmScreenShell instance={instance} />
@@ -63,6 +65,7 @@ function DmScreenShell({ instance }) {
   return (
     <Box sx={pageSx}>
       <AppTopBar home backTo="/library/dmscreen" backLabel="DM Screens">
+        <LinkedToolsMenu sectionKey="dmscreen" instanceId={instance.id} instanceSaved={instanceSaved} initialLinkGroupId={instance.linkGroupId} />
         <SaveInstanceButton saved={instanceSaved} onClick={handleSave} />
       </AppTopBar>
       <Box component="main" sx={contentSx}>

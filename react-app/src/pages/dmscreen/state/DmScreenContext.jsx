@@ -6,11 +6,12 @@ import { createInitialState, dmScreenReducer } from './reducer.js';
 
 const DmScreenContext = createContext(null);
 
-export function DmScreenProvider({ instanceId, instanceSaved, onInstanceSaved, children }) {
+export function DmScreenProvider({ instanceId, instanceSaved, linkGroupId, onInstanceSaved, children }) {
   const [state, dispatch] = useReducer(dmScreenReducer, undefined, createInitialState);
   const { saveInstance } = useDmScreenPersistence({
     instanceId,
     instanceSaved,
+    linkGroupId,
     notes: state.notes,
     dispatch,
     onSaved: onInstanceSaved,

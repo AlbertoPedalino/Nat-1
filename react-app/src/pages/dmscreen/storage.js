@@ -6,6 +6,7 @@ import {
   touchRegistryEntry,
 } from '../../shared/scopedStoragePayload.js';
 import { SECTION_REGISTRY } from '../../shared/sectionRegistry.js';
+import { normalizeLinkGroupId } from '../../shared/linkGroupId.js';
 
 const SECTION = SECTION_REGISTRY.dmscreen;
 export const REGISTRY_KEY = SECTION.registryKey;
@@ -69,7 +70,7 @@ export function isKnownInstance(id) {
   return readRegistry().some((entry) => entry.id === id) || hasScopedData(id);
 }
 
-export function registerInstance(id, label, { force = false } = {}) {
+export function registerInstance(id, label, { force = false, linkGroupId } = {}) {
   const cleanId = sanitizeId(id);
   if (!cleanId) return null;
   const now = Date.now();
@@ -78,7 +79,13 @@ export function registerInstance(id, label, { force = false } = {}) {
   const name = !force && existing?.name
     ? existing.name
     : (String(label || '').trim() || cleanId);
-  const entry = { id: cleanId, name, updatedAt: now };
+  const entry = {
+    ...existing,
+    id: cleanId,
+    name,
+    updatedAt: now,
+    ...(linkGroupId ? { linkGroupId: normalizeLinkGroupId(linkGroupId) } : {}),
+  };
   const next = [entry, ...list.filter((item) => item.id !== cleanId)].slice(0, 20);
   let previousRegistry = null;
   try {
@@ -106,13 +113,16 @@ function restoreRegistry(raw) {
 export function resolveInstance(search, idFactory = makeId) {
   const params = new URLSearchParams(search || '');
   const requested = sanitizeId(params.get('screen'));
+  let linkGroupId = normalizeLinkGroupId(params.get('linkGroup'));
 
   if (requested === 'new') {
-    return { id: idFactory(), saved: false, replaceSearch: '' };
+    return { id: idFactory(), saved: false, replaceSearch: '', ...(linkGroupId ? { linkGroupId } : {}) };
   }
 
   if (requested) {
-    return { id: requested, saved: isKnownInstance(requested), replaceSearch: '' };
+    linkGroupId = readRegistry().find((entry) => entry.id === requested)?.linkGroupId || linkGroupId;
+    const group = normalizeLinkGroupId(linkGroupId);
+    return { id: requested, saved: isKnownInstance(requested), replaceSearch: '', ...(group ? { linkGroupId: group } : {}) };
   }
 
   let activeId = '';
@@ -120,15 +130,17 @@ export function resolveInstance(search, idFactory = makeId) {
     activeId = sanitizeId(localStorage.getItem(ACTIVE_KEY));
   } catch {}
   if (activeId && isKnownInstance(activeId)) {
+    const group = normalizeLinkGroupId(readRegistry().find((entry) => entry.id === activeId)?.linkGroupId);
     return {
       id: activeId,
       saved: true,
       replaceSearch: `?screen=${encodeURIComponent(activeId)}`,
+      ...(group ? { linkGroupId: group } : {}),
     };
   }
 
   const id = idFactory();
-  return { id, saved: false, replaceSearch: `?screen=${encodeURIComponent(id)}` };
+  return { id, saved: false, replaceSearch: `?screen=${encodeURIComponent(id)}`, ...(linkGroupId ? { linkGroupId } : {}) };
 }
 
 function isValidNotesPayload(value, version) {
@@ -229,9 +241,9 @@ export function readScopedPayload(id) {
   return snapshotScopedPayload(scopedPrefix(id));
 }
 
-export function writeScopedPayload(id, payload, { name, updatedAt } = {}) {
+export function writeScopedPayload(id, payload, { name, updatedAt, linkGroupId } = {}) {
   restoreScopedPayload(scopedPrefix(id), payload);
-  return touchRegistryEntry(REGISTRY_KEY, id, { name, updatedAt });
+  return touchRegistryEntry(REGISTRY_KEY, id, { name, updatedAt, linkGroupId });
 }
 
 function markScreenPersisted(id) {

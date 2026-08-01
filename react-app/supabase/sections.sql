@@ -30,9 +30,18 @@ create table if not exists public.dm_screens (
   updated_at     timestamptz not null default now()
 );
 
+-- Explicit cross-tool groups. The value is only an opaque grouping key; RLS
+-- still limits every member row to its owner.
+alter table public.boards add column if not exists link_group_id text;
+alter table public.encounters add column if not exists link_group_id text;
+alter table public.dm_screens add column if not exists link_group_id text;
+
 create index if not exists boards_owner_idx on public.boards(owner);
 create index if not exists encounters_owner_idx on public.encounters(owner);
 create index if not exists dm_screens_owner_idx on public.dm_screens(owner);
+create index if not exists boards_owner_link_group_idx on public.boards(owner, link_group_id);
+create index if not exists encounters_owner_link_group_idx on public.encounters(owner, link_group_id);
+create index if not exists dm_screens_owner_link_group_idx on public.dm_screens(owner, link_group_id);
 
 alter table public.boards enable row level security;
 alter table public.encounters enable row level security;

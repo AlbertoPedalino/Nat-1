@@ -8,6 +8,7 @@ import {
   touchRegistryEntry,
 } from '../../shared/scopedStoragePayload.js';
 import { SECTION_REGISTRY } from '../../shared/sectionRegistry.js';
+import { normalizeLinkGroupId } from '../../shared/linkGroupId.js';
 
 const SECTION = SECTION_REGISTRY.gmboard;
 export const REGISTRY_KEY = SECTION.registryKey;
@@ -60,14 +61,20 @@ export function isKnownBoardInstance(id) {
   return readRegistry().some((entry) => entry.id === id) || hasScopedData(id);
 }
 
-export function registerBoardInstance(id, label, { force = false } = {}) {
+export function registerBoardInstance(id, label, { force = false, linkGroupId } = {}) {
   const cleanId = sanitizeBoardId(id);
   if (!cleanId) return null;
   const now = Date.now();
   const list = readRegistry();
   const existing = list.find((entry) => entry.id === cleanId);
   const name = !force && existing?.name ? existing.name : (String(label || '').trim() || cleanId);
-  const next = [{ id: cleanId, name, updatedAt: now }, ...list.filter((entry) => entry.id !== cleanId)].slice(0, 20);
+  const next = [{
+    ...existing,
+    id: cleanId,
+    name,
+    updatedAt: now,
+    ...(linkGroupId ? { linkGroupId: normalizeLinkGroupId(linkGroupId) } : {}),
+  }, ...list.filter((entry) => entry.id !== cleanId)].slice(0, 20);
   localStorage.setItem(ACTIVE_KEY, cleanId);
   writeRegistry(next);
   return next[0];
@@ -76,19 +83,22 @@ export function registerBoardInstance(id, label, { force = false } = {}) {
 export function resolveInstance(search) {
   const params = new URLSearchParams(search || '');
   let id = sanitizeBoardId(params.get('board'));
+  let linkGroupId = normalizeLinkGroupId(params.get('linkGroup'));
   let saved = false;
   let replaceSearch = '';
 
   if (id === 'new') {
     id = makeBoardId();
-    replaceSearch = `?board=${encodeURIComponent(id)}`;
+    replaceSearch = `?board=${encodeURIComponent(id)}${linkGroupId ? `&linkGroup=${encodeURIComponent(linkGroupId)}` : ''}`;
   } else if (id) {
     saved = isKnownBoardInstance(id);
+    linkGroupId = readRegistry().find((entry) => entry.id === id)?.linkGroupId || linkGroupId;
   } else {
     const activeId = sanitizeBoardId(localStorage.getItem(ACTIVE_KEY));
     if (activeId && isKnownBoardInstance(activeId)) {
       id = activeId;
       saved = true;
+      linkGroupId = readRegistry().find((entry) => entry.id === id)?.linkGroupId || linkGroupId;
       replaceSearch = `?board=${encodeURIComponent(id)}`;
     } else {
       id = makeBoardId();
@@ -96,7 +106,8 @@ export function resolveInstance(search) {
     }
   }
 
-  return { id, saved, replaceSearch };
+  const group = normalizeLinkGroupId(linkGroupId);
+  return { id, saved, replaceSearch, ...(group ? { linkGroupId: group } : {}) };
 }
 
 function readRaw(key) {
@@ -170,9 +181,9 @@ export function readScopedPayload(id) {
   return snapshotScopedPayload(scopedPrefix(id));
 }
 
-export function writeScopedPayload(id, payload, { name, updatedAt } = {}) {
+export function writeScopedPayload(id, payload, { name, updatedAt, linkGroupId } = {}) {
   restoreScopedPayload(scopedPrefix(id), payload);
-  return touchRegistryEntry(REGISTRY_KEY, id, { name, updatedAt });
+  return touchRegistryEntry(REGISTRY_KEY, id, { name, updatedAt, linkGroupId });
 }
 
 function markBoardPersisted(id) {

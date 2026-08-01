@@ -83,6 +83,7 @@ test('mocked cloud pull restores byte-identical scoped payload for every section
           data: {
             id: sample.id,
             name: 'Cloud Name',
+            link_group_id: 'link_cloud',
             data: serialized,
             updated_at: '2026-08-01T10:00:00.000Z',
           },
@@ -102,6 +103,8 @@ test('mocked cloud pull restores byte-identical scoped payload for every section
       assert.equal(localStorage.getItem(storageKey), raw);
     }
     assert.equal(localStorage.getItem(`${sample.prefix}stale:v1`), null);
+    const registryEntry = JSON.parse(localStorage.getItem(sample.registryKey)).find((entry) => entry.id === sample.id);
+    assert.equal(registryEntry.linkGroupId, 'link_cloud');
   }
 });
 
@@ -119,6 +122,26 @@ test('unsaved new section produces no cloud call or write', async () => {
   assert.equal(await api.pushInstance('generated-but-unsaved'), null);
   assert.equal(clientCalls, 0);
   assert.equal(writes, 0);
+});
+
+test('cloud push includes the local linked-tools group', async () => {
+  localStorage.clear();
+  localStorage.setItem('gb_board_registry', JSON.stringify([{
+    id: 'board-linked', name: 'Linked Board', linkGroupId: 'link_party', updatedAt: 1,
+  }]));
+  localStorage.setItem('gb:board:board-linked:state:v1', '{}');
+  let written = null;
+  const client = {
+    auth: { getUser: async () => ({ data: { user: { id: 'user-1', user_metadata: {} } }, error: null }) },
+    from: () => ({
+      upsert: async (row) => { written = row; return { error: null }; },
+    }),
+  };
+  const api = createSectionCloudApi(SECTION_DESCRIPTORS.gmboard, { getClient: () => client });
+
+  await api.pushInstance('board-linked');
+
+  assert.equal(written.link_group_id, 'link_party');
 });
 
 test('cloud rename updates only the signed-in owner row', async () => {
@@ -164,4 +187,27 @@ test('cloud rename rejects empty names before making a cloud call', async () => 
 
   await assert.rejects(() => api.renameCloudInstance('board-a', '   '), /cannot be empty/);
   assert.equal(clientCalls, 0);
+});
+
+test('cloud linking updates only the owner row and accepts unlinking', async () => {
+  const updates = [];
+  const filters = [];
+  const query = {
+    update(value) { updates.push(value); return this; },
+    eq(field, value) { filters.push([field, value]); return this; },
+  };
+  const client = {
+    auth: { getUser: async () => ({ data: { user: { id: 'user-1' } }, error: null }) },
+    from: () => query,
+  };
+  const api = createSectionCloudApi(SECTION_DESCRIPTORS.dmscreen, { getClient: () => client });
+
+  assert.equal(await api.setLinkGroup('screen-a', 'link_party'), 'link_party');
+  assert.equal(await api.setLinkGroup('screen-a', null), null);
+  assert.equal(updates[0].link_group_id, 'link_party');
+  assert.equal(updates[1].link_group_id, null);
+  assert.deepEqual(filters, [
+    ['id', 'screen-a'], ['owner', 'user-1'],
+    ['id', 'screen-a'], ['owner', 'user-1'],
+  ]);
 });

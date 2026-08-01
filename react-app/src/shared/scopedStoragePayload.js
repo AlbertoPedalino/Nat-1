@@ -29,7 +29,8 @@ export function restoreScopedPayload(prefix, payload, storage = localStorage) {
   return payload;
 }
 
-export function touchRegistryEntry(registryKey, id, { name, updatedAt = Date.now(), limit = 20 } = {}) {
+export function touchRegistryEntry(registryKey, id, options = {}) {
+  const { name, updatedAt = Date.now(), limit = 20 } = options;
   let list;
   try {
     const parsed = JSON.parse(localStorage.getItem(registryKey) || '[]');
@@ -45,6 +46,9 @@ export function touchRegistryEntry(registryKey, id, { name, updatedAt = Date.now
     name: String(name ?? existing?.name ?? id),
     updatedAt: Number(updatedAt) || 0,
   };
+  if (Object.prototype.hasOwnProperty.call(options, 'linkGroupId')) {
+    entry.linkGroupId = options.linkGroupId || null;
+  }
   const next = [entry, ...list.filter((item) => item.id !== id)].slice(0, limit);
   localStorage.setItem(registryKey, JSON.stringify(next));
   return entry;

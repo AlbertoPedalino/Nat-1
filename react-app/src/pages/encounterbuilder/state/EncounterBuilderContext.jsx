@@ -10,7 +10,7 @@ import { useSheetRealtime } from '../hooks/useSheetRealtime.js';
 
 const EncounterBuilderContext = createContext(null);
 
-export function EncounterBuilderProvider({ instanceId, instanceSaved, onInstanceSaved, children }) {
+export function EncounterBuilderProvider({ instanceId, instanceSaved, linkGroupId, onInstanceSaved, children }) {
   const [state, dispatch] = useReducer(encounterReducer, undefined, createInitialState);
   const monsterDb = useMonsterDb();
   const campaignPlayers = useCampaignPlayers();
@@ -19,6 +19,7 @@ export function EncounterBuilderProvider({ instanceId, instanceSaved, onInstance
   const { saveInstance } = useEncounterPersistence({
     instanceId,
     instanceSaved,
+    linkGroupId,
     monsters: monsterDb.monsters,
     monsterStatus: monsterDb.status,
     state,
