@@ -30,11 +30,21 @@ export const REGISTRY_META = {
   },
 };
 
-export function readRegistry(key) {
-  if (key === 'gb_char_registry') return listCharacters().slice(0, 10);
-  try {
-    return JSON.parse(localStorage.getItem(key) || '[]').filter((x) => x && x.id).slice(0, 10);
-  } catch { return []; }
+// `limit` is opt-in: omit it to read the full registry (the picker page and
+// the rename/delete write-back path both need the whole list, else editing
+// a registry beyond `limit` entries would silently drop the rest).
+export function readRegistry(key, { limit } = {}) {
+  let list;
+  if (key === 'gb_char_registry') {
+    list = listCharacters();
+  } else {
+    try {
+      list = JSON.parse(localStorage.getItem(key) || '[]').filter((x) => x && x.id);
+    } catch {
+      list = [];
+    }
+  }
+  return typeof limit === 'number' ? list.slice(0, limit) : list;
 }
 
 export function writeRegistry(key, list) {

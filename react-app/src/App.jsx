@@ -12,7 +12,7 @@ const CharacterSheet = lazy(() => import('./pages/charsheet/CharacterSheet.jsx')
 const GmBoardPage = lazy(() => import('./pages/gmboard/GmBoardPage.jsx'));
 const DmScreenPage = lazy(() => import('./pages/dmscreen/DmScreenPage.jsx'));
 const EncounterBuilderPage = lazy(() => import('./pages/encounterbuilder/EncounterBuilderPage.jsx'));
-const GmSheetsPage = lazy(() => import('./pages/gmsheets/GmSheetsPage.jsx'));
+const InstancePickerPage = lazy(() => import('./pages/library/InstancePickerPage.jsx'));
 const CampaignsPage = lazy(() => import('./pages/campaigns/CampaignsPage.jsx'));
 const CampaignSheetView = lazy(() => import('./pages/campaignsheet/CampaignSheetView.jsx'));
 const NotFoundPage = lazy(() => import('./pages/notfound/NotFoundPage.jsx'));
@@ -28,7 +28,8 @@ export default function App() {
           <Route path="/charsheet" element={<CharacterSheet />} />
           <Route path="/gmboard" element={<GmBoardPage />} />
           <Route path="/dm-screen" element={<DmScreenPage />} />
-          <Route path="/gmsheets" element={<GmSheetsPage />} />
+          <Route path="/library/:tool" element={<InstancePickerPage />} />
+          <Route path="/gmsheets" element={<Navigate to="/library/characters" replace />} />
           <Route path="/campaigns" element={<CampaignsPage />} />
           <Route path="/campaign-sheet" element={<CampaignSheetView />} />
           <Route path="/encounter-builder" element={<EncounterBuilderPage />} />

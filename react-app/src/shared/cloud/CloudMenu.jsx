@@ -125,7 +125,7 @@ export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUplo
             </MenuItem>,
             <Divider key="dsave" />,
           ] : []),
-          <MenuItem key="sheets" onClick={() => { close(); navigate('/gmsheets'); }}>
+          <MenuItem key="sheets" onClick={() => { close(); navigate('/library/characters'); }}>
             <Users size={15} style={{ marginRight: 8 }} /> {isGm ? 'Players sheets' : 'My sheets'}
           </MenuItem>,
           <MenuItem key="campaigns" onClick={() => { close(); navigate('/campaigns'); }}>
