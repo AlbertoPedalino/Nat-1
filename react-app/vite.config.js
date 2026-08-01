@@ -1,6 +1,17 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
+// Only the React runtime itself belongs in the react chunk; packages that merely
+// start with "react-" (react-markdown, react-window) are ordinary vendor code.
+const REACT_PACKAGES = new Set([
+  'react',
+  'react-dom',
+  'react-is',
+  'scheduler',
+  'react-router',
+  'react-router-dom',
+]);
+
 export default defineConfig({
   base: '/Nat-1/',
   plugins: [react()],
@@ -21,9 +32,15 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (!id.includes('node_modules')) return undefined;
-          if (id.includes('@mui') || id.includes('@emotion')) return 'mui';
-          if (id.includes('react')) return 'react';
+          const marker = id.lastIndexOf('node_modules/');
+          if (marker < 0) return undefined;
+          // Match the package name, not the whole path: the project lives in
+          // `react-app/`, so a plain `id.includes('react')` swept every
+          // dependency into the react chunk and `vendor` was never emitted.
+          const [scope, scoped] = id.slice(marker + 'node_modules/'.length).split('/');
+          const pkg = scope.startsWith('@') ? `${scope}/${scoped}` : scope;
+          if (pkg.startsWith('@mui/') || pkg.startsWith('@emotion/')) return 'mui';
+          if (REACT_PACKAGES.has(pkg)) return 'react';
           return 'vendor';
         },
       },
