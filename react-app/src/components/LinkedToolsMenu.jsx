@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -43,6 +43,25 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, instanceSaved,
   const [working, setWorking] = useState(false);
   const [rows, setRows] = useState([]);
   const [error, setError] = useState('');
+  const [cloudMeta, setCloudMeta] = useState(null);
+  const [checkingCloud, setCheckingCloud] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    if (instanceSaved || !cloudEnabled || status !== 'authed') {
+      setCloudMeta(null);
+      setCheckingCloud(false);
+      return () => { active = false; };
+    }
+    setCheckingCloud(true);
+    getCloudSection(sectionKey).fetchInstanceMeta(instanceId)
+      .then((meta) => { if (active) setCloudMeta(meta?.id ? meta : null); })
+      .catch(() => { if (active) setCloudMeta(null); })
+      .finally(() => { if (active) setCheckingCloud(false); });
+    return () => { active = false; };
+  }, [cloudEnabled, instanceId, instanceSaved, sectionKey, status]);
+
+  const persistent = instanceSaved || Boolean(cloudMeta);
 
   const loadRows = useCallback(async () => {
     const localRows = readLocalToolInstances();
@@ -67,7 +86,7 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, instanceSaved,
   }, [cloudEnabled, status]);
 
   const handleOpenDialog = async () => {
-    if (!instanceSaved) return;
+    if (!persistent) return;
     setOpen(true);
     setLoading(true);
     try {
@@ -78,7 +97,9 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, instanceSaved,
   };
 
   const current = rows.find((row) => row.sectionKey === sectionKey && row.id === instanceId) || null;
-  const groupId = normalizeLinkGroupId(current ? current.linkGroupId : initialLinkGroupId);
+  const groupId = normalizeLinkGroupId(
+    current ? current.linkGroupId : (initialLinkGroupId || cloudMeta?.link_group_id),
+  );
   const linkedRows = useMemo(() => rows.filter((row) => (
     groupId
     && normalizeLinkGroupId(row.linkGroupId) === groupId
@@ -155,7 +176,7 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, instanceSaved,
       variant={groupId ? 'contained' : 'outlined'}
       color="primary"
       startIcon={<Network size={14} />}
-      disabled={!instanceSaved}
+      disabled={!persistent || checkingCloud}
       onClick={handleOpenDialog}
       aria-label="Linked tools"
       sx={topButtonSx}
@@ -166,8 +187,8 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, instanceSaved,
 
   return (
     <>
-      {instanceSaved ? button : (
-        <Tooltip title="Save this instance before linking it to other tools.">
+      {persistent && !checkingCloud ? button : (
+        <Tooltip title={checkingCloud ? 'Checking cloud save…' : 'Save this draft before linking it to other tools.'}>
           <span style={{ display: 'inline-flex' }}>{button}</span>
         </Tooltip>
       )}
