@@ -1,8 +1,9 @@
-import { Suspense, lazy } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Suspense, lazy, useEffect } from 'react';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { Box, CircularProgress } from '@mui/material';
 import HomePage from './pages/home/HomePage.jsx';
 import CloudAutoSync from './shared/cloud/CloudAutoSync.jsx';
+import { pageTitleForPath } from './shared/pageTitle.js';
 
 // Home is the landing route and ships in the entry chunk. Every other page is
 // loaded on demand: the tool pages carry the bulk of the app, and nobody opens
@@ -21,6 +22,7 @@ export default function App() {
   return (
     <>
       <CloudAutoSync />
+      <PageTitle />
       <Suspense fallback={<RouteFallback />}>
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -40,6 +42,14 @@ export default function App() {
       </Suspense>
     </>
   );
+}
+
+function PageTitle() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    document.title = pageTitleForPath(pathname);
+  }, [pathname]);
+  return null;
 }
 
 function RouteFallback() {
