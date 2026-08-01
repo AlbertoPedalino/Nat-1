@@ -57,7 +57,7 @@ function GmBoardShell({ instance }) {
 
   return (
     <Box sx={pageSx}>
-      <AppTopBar home>
+      <AppTopBar home backTo="/library/gmboard" backLabel="GM Boards">
         <SaveInstanceButton saved={instanceSaved} onClick={handleSaveInstance} />
       </AppTopBar>
       <Box sx={contentSx}>

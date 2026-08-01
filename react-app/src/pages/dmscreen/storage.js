@@ -1,12 +1,21 @@
 import { normalizeNoteSize } from './logic/notes.js';
+import {
+  emitStorageEvent,
+  restoreScopedPayload,
+  snapshotScopedPayload,
+  touchRegistryEntry,
+} from '../../shared/scopedStoragePayload.js';
+import { SECTION_REGISTRY } from '../../shared/sectionRegistry.js';
 
-export const REGISTRY_KEY = 'gb_dmscreen_registry';
-export const ACTIVE_KEY = 'gb_active_dmscreen_id';
+const SECTION = SECTION_REGISTRY.dmscreen;
+export const REGISTRY_KEY = SECTION.registryKey;
+export const ACTIVE_KEY = SECTION.activeKey;
 export const NOTES_STORAGE_KEY = 'notes:v2';
 // v1 had no per-note size; it is read once and rewritten as v2 on the next save.
 export const LEGACY_NOTES_STORAGE_KEY = 'notes:v1';
 export const NOTES_VERSION = 2;
 export const LEGACY_NOTES_VERSION = 1;
+const SAVE_EVENT = SECTION.saveEvent;
 
 export function sanitizeId(value) {
   return String(value || '').toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 48);
@@ -22,6 +31,10 @@ export function makeNoteId(now = Date.now(), random = Math.random) {
 
 export function scopeKey(id, key = NOTES_STORAGE_KEY) {
   return `gb:dmscreen:${id}:${key}`;
+}
+
+export function scopedPrefix(id) {
+  return SECTION.scopedPrefix(id);
 }
 
 export function readRegistry() {
@@ -172,6 +185,7 @@ export function persistNotes(id, notes) {
     // The v1 key is deliberately left in place: deleting it here would make a
     // rolled-back save destroy the only copy of the notes. Reads always prefer
     // v2, and deleting the screen wipes the whole `gb:dmscreen:<id>:` prefix.
+    markScreenPersisted(id);
     return true;
   } catch {
     return false;
@@ -207,7 +221,22 @@ export function saveInstanceWithNotes(id, label, notes, options) {
     if (!hadNotes) clearPersistedNotes(cleanId);
     return null;
   }
+  emitStorageEvent(SAVE_EVENT, cleanId);
   return entry;
+}
+
+export function readScopedPayload(id) {
+  return snapshotScopedPayload(scopedPrefix(id));
+}
+
+export function writeScopedPayload(id, payload, { name, updatedAt } = {}) {
+  restoreScopedPayload(scopedPrefix(id), payload);
+  return touchRegistryEntry(REGISTRY_KEY, id, { name, updatedAt });
+}
+
+function markScreenPersisted(id) {
+  if (!touchRegistryEntry(REGISTRY_KEY, id)) return;
+  emitStorageEvent(SAVE_EVENT, id);
 }
 
 function localStorageHasKey(key) {

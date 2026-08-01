@@ -25,6 +25,7 @@ globalThis.prompt = (_message, defaultValue) => defaultValue;
 const { REGISTRY_META, readRegistry, deleteRegistryEntry, renameRegistryEntry } = await import('../../../shared/localStorageRegistries.js');
 const { resolveTool, LIBRARY_TOOLS } = await import('./tools.js');
 const { mergeCharacterRows, canDeleteRow, deletePlanFor, loadCharacterRows } = await import('./characterRows.js');
+const { mergeInstanceRows, loadInstanceRows, sectionDeletePlan, shouldPullCloudCopy } = await import('./instanceRows.js');
 
 test('resolveTool resolves every supported tool slug to a valid table entry', () => {
   for (const slug of ['characters', 'gmboard', 'encounters', 'dmscreen']) {
@@ -204,4 +205,49 @@ test('canDeleteRow denies a non-GM acting on a sheet they do not own', () => {
   assert.equal(canDeleteRow(foreignRow, { myId: 'me', isGm: false }), false);
   assert.equal(canDeleteRow(foreignRow, { myId: 'me', isGm: true }), true);
   assert.equal(canDeleteRow({ id: 'l1', origin: 'local' }, { myId: 'me', isGm: false }), true);
+});
+
+test('freshness pulls only when valid cloud metadata is strictly newer', () => {
+  const local = Date.parse('2026-08-01T10:00:00.000Z');
+  assert.equal(shouldPullCloudCopy(local, { updated_at: '2026-08-01T10:00:00.001Z' }), true);
+  assert.equal(shouldPullCloudCopy(local, { updated_at: '2026-08-01T09:59:59.999Z' }), false);
+  assert.equal(shouldPullCloudCopy(local, { updated_at: '2026-08-01T10:00:00.000Z' }), false);
+  assert.equal(shouldPullCloudCopy(local, null), false);
+  assert.equal(shouldPullCloudCopy(local, {}), false);
+  assert.equal(shouldPullCloudCopy(local, { updated_at: 'invalid' }), false);
+});
+
+test('section picker merge covers local-only, cloud-only, and collision with cloud winning', () => {
+  const rows = mergeInstanceRows(
+    [
+      { id: 'cloud', name: 'Cloud only', updated_at: '2026-01-01T00:00:00Z' },
+      { id: 'both', name: 'Cloud wins', updated_at: '2026-01-02T00:00:00Z' },
+    ],
+    [
+      { id: 'local', name: 'Local only', updatedAt: 1 },
+      { id: 'both', name: 'Local loses', updatedAt: 2 },
+    ],
+  );
+  assert.equal(rows.length, 3);
+  assert.equal(rows.find((row) => row.id === 'local').origin, 'local');
+  assert.equal(rows.find((row) => row.id === 'cloud').origin, 'cloud');
+  assert.equal(rows.find((row) => row.id === 'both').name, 'Cloud wins');
+  assert.equal(rows.filter((row) => row.id === 'both').length, 1);
+});
+
+test('failing section cloud list keeps full local list and returns notice', async () => {
+  const local = [{ id: 'one', updatedAt: 1 }, { id: 'two', updatedAt: 2 }];
+  const result = await loadInstanceRows({
+    listLocal: () => local,
+    listCloud: async () => { throw new Error('offline'); },
+  });
+  assert.deepEqual(result.rows.map((row) => row.id).sort(), ['one', 'two']);
+  assert.equal(result.error, 'offline');
+});
+
+test('section delete plan never sends local-only deletion to cloud', () => {
+  const local = sectionDeletePlan({ id: 'l1', name: 'Local', origin: 'local' });
+  const cloud = sectionDeletePlan({ id: 'c1', name: 'Cloud', origin: 'cloud' });
+  assert.deepEqual({ cloud: local.cloud, local: local.local }, { cloud: false, local: true });
+  assert.deepEqual({ cloud: cloud.cloud, local: cloud.local }, { cloud: true, local: true });
 });

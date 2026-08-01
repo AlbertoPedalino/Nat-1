@@ -1,14 +1,23 @@
 import { createDefaultCoreState, createDefaultResults } from './logic/defaultState.js';
 import { createDefaultTables } from './logic/defaultTables.js';
 import { LEGACY_KEYS, migrateLegacyBoard } from './logic/migration.js';
+import {
+  emitStorageEvent,
+  restoreScopedPayload,
+  snapshotScopedPayload,
+  touchRegistryEntry,
+} from '../../shared/scopedStoragePayload.js';
+import { SECTION_REGISTRY } from '../../shared/sectionRegistry.js';
 
-export const REGISTRY_KEY = 'gb_board_registry';
-export const ACTIVE_KEY = 'gb_active_board_id';
+const SECTION = SECTION_REGISTRY.gmboard;
+export const REGISTRY_KEY = SECTION.registryKey;
+export const ACTIVE_KEY = SECTION.activeKey;
 export const STORAGE_KEYS = Object.freeze({
   state: 'state:v1',
   tables: 'tables:v1',
   results: 'results:v1',
 });
+const SAVE_EVENT = SECTION.saveEvent;
 
 export function sanitizeBoardId(value) {
   return String(value || '').toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 48);
@@ -20,6 +29,10 @@ export function makeBoardId(now = Date.now()) {
 
 export function scopeKey(id, key) {
   return `gb:board:${id}:${key}`;
+}
+
+export function scopedPrefix(id) {
+  return SECTION.scopedPrefix(id);
 }
 
 export function readRegistry() {
@@ -140,12 +153,29 @@ export function readPersistedBoard(id) {
 
 export function persistBoardState(id, state) {
   localStorage.setItem(scopeKey(id, STORAGE_KEYS.state), JSON.stringify(state));
+  markBoardPersisted(id);
 }
 
 export function persistBoardTables(id, tables) {
   localStorage.setItem(scopeKey(id, STORAGE_KEYS.tables), JSON.stringify(tables));
+  markBoardPersisted(id);
 }
 
 export function persistBoardResults(id, results) {
   localStorage.setItem(scopeKey(id, STORAGE_KEYS.results), JSON.stringify(results));
+  markBoardPersisted(id);
+}
+
+export function readScopedPayload(id) {
+  return snapshotScopedPayload(scopedPrefix(id));
+}
+
+export function writeScopedPayload(id, payload, { name, updatedAt } = {}) {
+  restoreScopedPayload(scopedPrefix(id), payload);
+  return touchRegistryEntry(REGISTRY_KEY, id, { name, updatedAt });
+}
+
+function markBoardPersisted(id) {
+  if (!touchRegistryEntry(REGISTRY_KEY, id)) return;
+  emitStorageEvent(SAVE_EVENT, id);
 }

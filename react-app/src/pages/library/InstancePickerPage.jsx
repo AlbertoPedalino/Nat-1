@@ -1,13 +1,11 @@
-import { useCallback, useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Box, Button, Typography } from '@mui/material';
 import { Plus } from 'lucide-react';
 import AppTopBar from '../../components/AppTopBar.jsx';
 import NotFoundPage from '../notfound/NotFoundPage.jsx';
-import { resolveTool, formatUpdatedAt } from './logic/tools.js';
-import { readRegistry, renameRegistryEntry, deleteRegistryEntry } from '../../shared/localStorageRegistries.js';
-import InstanceRow from './components/InstanceRow.jsx';
+import { resolveTool } from './logic/tools.js';
 import CharacterPicker from './CharacterPicker.jsx';
+import SectionPicker from './SectionPicker.jsx';
 import * as s from './styles.js';
 
 export default function InstancePickerPage() {
@@ -29,50 +27,7 @@ export default function InstancePickerPage() {
         </Button>
       </Box>
 
-      {meta.slug === 'characters' ? <CharacterPicker /> : <GenericInstanceList meta={meta} />}
-    </Box>
-  );
-}
-
-function GenericInstanceList({ meta }) {
-  // Lazy initialiser: the registry read is synchronous localStorage, so
-  // seeding via a mount effect would flash the empty state for one commit.
-  const [entries, setEntries] = useState(() => readRegistry(meta.registryKey));
-
-  const refresh = useCallback(() => {
-    setEntries(readRegistry(meta.registryKey));
-  }, [meta.registryKey]);
-
-  useEffect(() => { refresh(); }, [refresh]);
-
-  const handleRename = (id) => {
-    if (renameRegistryEntry(meta.registryKey, id)) refresh();
-  };
-
-  const handleDelete = (id) => {
-    if (deleteRegistryEntry(meta.registryKey, id)) refresh();
-  };
-
-  if (!entries.length) {
-    return (
-      <Box sx={s.emptyBoxSx}>
-        <Typography sx={s.emptyTextSx}>No saved {meta.label.toLowerCase()} sessions yet.</Typography>
-      </Box>
-    );
-  }
-
-  return (
-    <Box sx={s.listSx}>
-      {entries.map((entry) => (
-        <InstanceRow
-          key={entry.id}
-          name={entry.name || entry.id}
-          updatedAtLabel={formatUpdatedAt(entry.updatedAt)}
-          to={meta.route(entry.id)}
-          onRename={() => handleRename(entry.id)}
-          onDelete={() => handleDelete(entry.id)}
-        />
-      ))}
+      {meta.slug === 'characters' ? <CharacterPicker /> : <SectionPicker meta={meta} />}
     </Box>
   );
 }

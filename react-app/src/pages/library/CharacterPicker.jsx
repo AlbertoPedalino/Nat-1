@@ -14,6 +14,7 @@ import { readRegistry, renameRegistryEntry, REGISTRY_META } from '../../shared/l
 import { createCharacterExport } from '../charbuilder/logic/characterExport.js';
 import { supabase } from '../../shared/cloud/supabaseClient.js';
 import { loadCharacterRows, canDeleteRow, deletePlanFor } from './logic/characterRows.js';
+import { shouldPullCloudCopy } from './logic/instanceRows.js';
 import { formatUpdatedAt } from './logic/tools.js';
 import InstanceRow from './components/InstanceRow.jsx';
 import * as s from './styles.js';
@@ -68,10 +69,9 @@ export default function CharacterPicker() {
       try {
         const meta = await fetchCloudMeta(row.id);
         if (meta) {
-          const cloudUpdated = Date.parse(meta.updated_at) || 0;
           // No local copy at all -> always pull, else the sheet route finds
           // nothing locally and renders blank.
-          if (!row.hasLocal || cloudUpdated > row.localUpdatedAt) {
+          if (!row.hasLocal || shouldPullCloudCopy(row.localUpdatedAt, meta)) {
             await pullCharacter(row.id);
             pulled = true;
           }

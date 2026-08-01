@@ -1,25 +1,44 @@
 import { Box, Button } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
-import { Home } from 'lucide-react';
+import { ArrowLeft, Home } from 'lucide-react';
 import CloudMenu from '../shared/cloud/CloudMenu.jsx';
 
 export const APP_TOP_BAR_HEIGHT = '48px';
 
-export default function AppTopBar({ sx, children, home = false }) {
+export default function AppTopBar({ sx, children, home = false, backTo, backLabel = 'Back' }) {
   return (
     <Box sx={{ ...appTopBarSx, ...sx }}>
-      {home ? (
-        <Button
-          component={RouterLink}
-          to="/"
-          size="small"
-          variant="outlined"
-          color="primary"
-          startIcon={<Home size={14} />}
-          sx={homeBtnSx}
-        >
-          HOME
-        </Button>
+      {home || backTo ? (
+        <Box sx={leftActionsSx}>
+          {home ? (
+            <Button
+              component={RouterLink}
+              to="/"
+              size="small"
+              variant="outlined"
+              color="primary"
+              aria-label="Home"
+              startIcon={<Home size={14} />}
+              sx={navBtnSx}
+            >
+              <Box component="span" sx={navTextSx}>HOME</Box>
+            </Button>
+          ) : null}
+          {backTo ? (
+            <Button
+              component={RouterLink}
+              to={backTo}
+              size="small"
+              variant="outlined"
+              color="primary"
+              aria-label={`Back to ${backLabel}`}
+              startIcon={<ArrowLeft size={14} />}
+              sx={navBtnSx}
+            >
+              <Box component="span" sx={navTextSx}>{backLabel}</Box>
+            </Button>
+          ) : null}
+        </Box>
       ) : null}
       {children}
       <CloudMenu />
@@ -27,12 +46,28 @@ export default function AppTopBar({ sx, children, home = false }) {
   );
 }
 
-const homeBtnSx = {
-  // Sticks the Home button to the left edge; children + CloudMenu stay right.
+const leftActionsSx = {
   mr: 'auto',
+  display: 'flex',
+  gap: '0.5rem',
+  minWidth: 0,
+};
+
+const navBtnSx = {
   fontFamily: '"Cinzel", Georgia, serif',
   fontSize: '0.625rem',
   letterSpacing: '0.08em',
+  whiteSpace: 'nowrap',
+  minWidth: { xs: 32, sm: 64 },
+  px: { xs: 0.75, sm: 1.25 },
+  '& .MuiButton-startIcon': {
+    mr: { xs: 0, sm: 1 },
+    ml: 0,
+  },
+};
+
+const navTextSx = {
+  display: { xs: 'none', sm: 'inline' },
 };
 
 const appTopBarSx = {

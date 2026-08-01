@@ -62,7 +62,7 @@ function DmScreenShell({ instance }) {
 
   return (
     <Box sx={pageSx}>
-      <AppTopBar home>
+      <AppTopBar home backTo="/library/dmscreen" backLabel="DM Screens">
         <SaveInstanceButton saved={instanceSaved} onClick={handleSave} />
       </AppTopBar>
       <Box component="main" sx={contentSx}>

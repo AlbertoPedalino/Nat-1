@@ -11,8 +11,9 @@ the env vars the app runs 100% local (localStorage), exactly like before.
 ## 2. Create the tables
 1. Open **SQL Editor** → **New query**.
 2. Paste the entire contents of [`supabase/schema.sql`](supabase/schema.sql) → **Run**.
-3. For the campaigns feature, run [`supabase/campaigns.sql`](supabase/campaigns.sql) too (a second query).
-4. For Encounter Builder combat-to-sheet HP sync, run [`supabase/combat_sync.sql`](supabase/combat_sync.sql) too.
+3. For GM Board, Encounter Builder, and DM Screen saves, run [`supabase/sections.sql`](supabase/sections.sql) too (a second query).
+4. For the campaigns feature, run [`supabase/campaigns.sql`](supabase/campaigns.sql) too.
+5. For Encounter Builder combat-to-sheet HP sync, run [`supabase/combat_sync.sql`](supabase/combat_sync.sql) too.
    Re-run this file once on existing projects to enable live Supabase Realtime
    updates for open combats.
 
