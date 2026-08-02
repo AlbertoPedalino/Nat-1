@@ -6,10 +6,12 @@ import {
   Stack,
   Switch,
   TextField,
+  ToggleButton,
+  ToggleButtonGroup,
   Tooltip,
   Typography,
 } from '@mui/material';
-import { Grid3x3, Image, Trash2 } from 'lucide-react';
+import { Cloud, Eye, EyeOff, Grid3x3, Image, MousePointer2, Trash2 } from 'lucide-react';
 
 // Grid calibration is the fiddly part of any battlemap: the cell size almost
 // never matches the image exactly, so size and both offsets are editable and
@@ -18,9 +20,15 @@ export default function SceneToolbar({
   scene,
   busy,
   selectedToken,
+  paintMode,
+  brushSize,
   onUploadMap,
   onGridChange,
   onDeleteToken,
+  onEnableFog,
+  onPaintModeChange,
+  onBrushSizeChange,
+  onFogAll,
 }) {
   const fileRef = useRef(null);
 
@@ -88,6 +96,52 @@ export default function SceneToolbar({
           )}
           label={<Typography variant="body2">Grid</Typography>}
         />
+      </Stack>
+
+      <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', flexWrap: 'wrap' }} useFlexGap>
+        {!scene.fog ? (
+          <Button size="small" variant="outlined" startIcon={<Cloud size={15} />} disabled={busy} onClick={onEnableFog}>
+            Enable fog
+          </Button>
+        ) : (
+          <>
+            <ToggleButtonGroup
+              size="small"
+              exclusive
+              value={paintMode}
+              onChange={(_, value) => onPaintModeChange(value || 'select')}
+              aria-label="Fog tool"
+            >
+              <ToggleButton value="select" aria-label="Move tokens">
+                <MousePointer2 size={14} />
+              </ToggleButton>
+              <ToggleButton value="reveal" aria-label="Reveal fog">
+                <Eye size={14} />
+              </ToggleButton>
+              <ToggleButton value="hide" aria-label="Cover with fog">
+                <EyeOff size={14} />
+              </ToggleButton>
+            </ToggleButtonGroup>
+            <TextField
+              label="Brush"
+              size="small"
+              type="number"
+              value={brushSize}
+              onChange={(event) => onBrushSizeChange(Number(event.target.value))}
+              sx={{ width: 80 }}
+            />
+            <Tooltip title="Reveal the whole map">
+              <span>
+                <Button size="small" onClick={() => onFogAll(true)} disabled={busy}>All</Button>
+              </span>
+            </Tooltip>
+            <Tooltip title="Cover the whole map again">
+              <span>
+                <Button size="small" onClick={() => onFogAll(false)} disabled={busy}>None</Button>
+              </span>
+            </Tooltip>
+          </>
+        )}
       </Stack>
 
       <Box sx={{ flex: 1 }} />

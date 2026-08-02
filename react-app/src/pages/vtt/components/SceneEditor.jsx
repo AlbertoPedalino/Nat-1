@@ -21,6 +21,7 @@ import {
   putGhost,
   resolveTokens,
 } from '../../../shared/vtt/liveScene.js';
+import { createFog, hideAll, normalizeFog, revealAll, setCells } from '../../../shared/vtt/fog.js';
 import { toScene } from '../../../shared/vtt/scene.js';
 import { useSceneLive } from '../../../shared/vtt/useSceneLive.js';
 import { useSceneRole } from '../../../shared/vtt/useSceneRole.js';
@@ -30,6 +31,12 @@ import SceneViewport from './SceneViewport.jsx';
 
 const GRID_SAVE_DELAY = 600;
 const GHOST_SWEEP_MS = 2000;
+const FOG_BROADCAST_MS = 80;
+// The GM needs to see what is still hidden from the party without being blind
+// to the map underneath; a player gets the real thing.
+const GM_FOG_OPACITY = 0.55;
+const PLAYER_FOG_OPACITY = 1;
+const DEFAULT_FOG_SIZE = { cols: 60, rows: 40 };
 
 export default function SceneEditor({ scene, onSceneChange }) {
   const { notify } = useToast();
@@ -44,6 +51,10 @@ export default function SceneEditor({ scene, onSceneChange }) {
   const gridTimerRef = useRef(null);
   const draggingRef = useRef(null);
   const gridEditRef = useRef(false);
+  const paintingRef = useRef(false);
+  const fogBroadcastRef = useRef(0);
+  const [paintMode, setPaintMode] = useState('select');
+  const [brushSize, setBrushSize] = useState(3);
 
   useEffect(() => {
     let cancelled = false;
@@ -88,15 +99,21 @@ export default function SceneEditor({ scene, onSceneChange }) {
 
   const handleSceneEvent = useCallback((payload) => {
     const next = toScene(payload?.new);
-    // Ignore remote grid changes while this client is editing the fields, or
-    // the debounced echo overwrites what is being typed.
-    if (next && !gridEditRef.current) onSceneChange(next);
+    // Ignore remote scene changes while this client is editing the grid fields
+    // or painting: the echo of our own debounced write would overwrite the
+    // stroke still in progress.
+    if (next && !gridEditRef.current && !paintingRef.current) onSceneChange(next);
   }, [onSceneChange]);
 
   const handleRemoteDrag = useCallback((payload) => {
     if (!payload?.id) return;
+    // Fog strokes ride the same channel: they carry a bitset, not a position.
+    if (payload.fog) {
+      if (!paintingRef.current) onSceneChange((current) => ({ ...current, fog: normalizeFog(payload.fog) }));
+      return;
+    }
     setGhosts((current) => putGhost(current, payload));
-  }, []);
+  }, [onSceneChange]);
 
   const { sendDrag } = useSceneLive({
     sceneId: scene.id,
@@ -148,6 +165,53 @@ export default function SceneEditor({ scene, onSceneChange }) {
         .finally(() => { gridEditRef.current = false; });
     }, GRID_SAVE_DELAY);
   }, [notify, onSceneChange, scene]);
+
+  // Painting mirrors the token drag: every stroke frame goes out on broadcast,
+  // and the database sees one write when the brush lifts.
+  const handlePaint = useCallback((cells, revealed) => {
+    paintingRef.current = true;
+    onSceneChange((current) => {
+      const fog = setCells(current.fog, cells, revealed);
+      if (!fog) return current;
+      const now = Date.now();
+      if (now - fogBroadcastRef.current >= FOG_BROADCAST_MS) {
+        fogBroadcastRef.current = now;
+        sendDrag({ fog });
+      }
+      return { ...current, fog };
+    });
+  }, [onSceneChange, sendDrag]);
+
+  const commitFog = useCallback((fog) => {
+    paintingRef.current = false;
+    sendDrag({ fog });
+    updateScene(scene.id, { fog }).catch((cause) => {
+      notify('error', cause?.message || 'Could not save the fog.');
+    });
+  }, [notify, scene.id, sendDrag]);
+
+  const handlePaintEnd = useCallback(() => {
+    onSceneChange((current) => {
+      commitFog(current.fog);
+      return current;
+    });
+  }, [commitFog, onSceneChange]);
+
+  const handleEnableFog = useCallback(() => {
+    const fog = createFog(DEFAULT_FOG_SIZE.cols, DEFAULT_FOG_SIZE.rows);
+    onSceneChange({ ...scene, fog });
+    setPaintMode('reveal');
+    commitFog(fog);
+  }, [commitFog, onSceneChange, scene]);
+
+  const handleFogAll = useCallback((revealed) => {
+    onSceneChange((current) => {
+      const fog = revealed ? revealAll(current.fog) : hideAll(current.fog);
+      if (!fog) return current;
+      commitFog(fog);
+      return { ...current, fog };
+    });
+  }, [commitFog, onSceneChange]);
 
   const handleUploadMap = useCallback(async (file) => {
     setBusy(true);
@@ -248,9 +312,15 @@ export default function SceneEditor({ scene, onSceneChange }) {
           scene={scene}
           busy={busy}
           selectedToken={selectedToken}
+          paintMode={paintMode}
+          brushSize={brushSize}
           onUploadMap={handleUploadMap}
           onGridChange={handleGridChange}
           onDeleteToken={handleDeleteToken}
+          onEnableFog={handleEnableFog}
+          onPaintModeChange={setPaintMode}
+          onBrushSizeChange={setBrushSize}
+          onFogAll={handleFogAll}
         />
       ) : null}
 
@@ -262,9 +332,15 @@ export default function SceneEditor({ scene, onSceneChange }) {
           selectedId={selectedId}
           snap
           canMove={canMove}
+          fog={scene.fog}
+          fogOpacity={role.isGm ? GM_FOG_OPACITY : PLAYER_FOG_OPACITY}
+          paintMode={role.isGm ? paintMode : 'select'}
+          brushSize={brushSize}
           onSelect={setSelectedId}
           onDragToken={handleDragToken}
           onMoveToken={handleMoveToken}
+          onPaint={handlePaint}
+          onPaintEnd={handlePaintEnd}
         />
         {role.isGm ? (
           <RosterPanel

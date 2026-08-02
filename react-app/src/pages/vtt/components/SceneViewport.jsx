@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Box, Typography } from '@mui/material';
+import { brushCells } from '../../../shared/vtt/fog.js';
 import {
   DEFAULT_VIEW,
   cellSize,
@@ -8,9 +9,12 @@ import {
   panBy,
   screenToWorld,
   tokenWorldRect,
+  worldToCell,
   worldToScreen,
   zoomAt,
 } from '../../../shared/vtt/geometry.js';
+import { movementLabel } from '../../../shared/vtt/measure.js';
+import FogCanvas from './FogCanvas.jsx';
 
 const WHEEL_STEP = 1.12;
 const DRAG_BROADCAST_MS = 40;
@@ -26,9 +30,16 @@ export default function SceneViewport({
   selectedId,
   snap,
   canMove,
+  fog,
+  fogOpacity = 1,
+  paintMode = 'select',
+  brushSize = 3,
+  feetPerCell,
   onSelect,
   onDragToken,
   onMoveToken,
+  onPaint,
+  onPaintEnd,
 }) {
   const hostRef = useRef(null);
   const dragRef = useRef(null);
@@ -68,10 +79,25 @@ export default function SceneViewport({
     return () => host.removeEventListener('wheel', handleWheel);
   }, [handleWheel]);
 
+  const paintAt = useCallback((point) => {
+    const cell = worldToCell(screenToWorld(point, view), scene.grid);
+    onPaint?.(brushCells(cell.col, cell.row, brushSize), paintMode === 'reveal');
+  }, [brushSize, onPaint, paintMode, scene.grid, view]);
+
   const beginPan = (event) => {
     if (event.button !== 0 && event.button !== 1) return;
-    dragRef.current = { kind: 'pan', last: screenPoint(event) };
+    const point = screenPoint(event);
     event.currentTarget.setPointerCapture?.(event.pointerId);
+
+    // With a fog brush selected, the left button paints and panning moves to the
+    // middle button: swapping tools every time you need to scroll the map is
+    // the fastest way to make the feature annoying.
+    if (paintMode !== 'select' && event.button === 0) {
+      dragRef.current = { kind: 'paint' };
+      paintAt(point);
+      return;
+    }
+    dragRef.current = { kind: 'pan', last: point };
     onSelect?.(null);
   };
 
@@ -94,6 +120,11 @@ export default function SceneViewport({
     const state = dragRef.current;
     if (!state) return;
     const point = screenPoint(event);
+
+    if (state.kind === 'paint') {
+      paintAt(point);
+      return;
+    }
 
     if (state.kind === 'pan') {
       const dx = point.x - state.last.x;
@@ -127,6 +158,12 @@ export default function SceneViewport({
     const state = dragRef.current;
     dragRef.current = null;
     event.currentTarget.releasePointerCapture?.(event.pointerId);
+
+    // One write at the end of the stroke, same discipline as a token drag.
+    if (state?.kind === 'paint') {
+      onPaintEnd?.();
+      return;
+    }
     if (!state || state.kind !== 'token') return;
 
     const landing = dropPosition({
@@ -149,6 +186,7 @@ export default function SceneViewport({
   const size = cellSize(scene.grid) * view.zoom;
   const origin = worldToScreen({ x: 0, y: 0 }, view);
   const gridVisible = scene.grid.visible && size > 4;
+  const measured = measurementBadge(tokens, drag, scene.grid, view, feetPerCell);
 
   return (
     <Box
@@ -199,6 +237,8 @@ export default function SceneViewport({
         />
       ) : null}
 
+      <FogCanvas fog={fog} grid={scene.grid} view={view} opacity={fogOpacity} />
+
       {tokens.map((token) => {
         const live = drag?.id === token.id ? { ...token, x: drag.x, y: drag.y } : token;
         const rect = tokenWorldRect(live, scene.grid);
@@ -238,8 +278,35 @@ export default function SceneViewport({
           </Box>
         );
       })}
+
+      {/* Outside the token nodes: they clip to a circle, and the badge has to
+          sit clear of the piece to stay readable. */}
+      {measured ? (
+        <Box sx={{ ...distanceSx, transform: `translate(${measured.x}px, ${measured.y}px)` }}>
+          {measured.label}
+        </Box>
+      ) : null}
     </Box>
   );
+}
+
+// How far the piece under the pointer has travelled, and where to show it.
+// Measured against the square it will land on, so the number matches what the
+// drop will actually cost.
+function measurementBadge(tokens, drag, grid, view, feetPerCell) {
+  if (!drag) return null;
+  const token = (tokens || []).find((item) => item.id === drag.id);
+  if (!token) return null;
+  const landing = { x: Math.round(drag.x), y: Math.round(drag.y) };
+  const label = movementLabel(token, landing, { feetPerCell });
+  if (!label) return null;
+  const rect = tokenWorldRect({ ...token, ...drag }, grid);
+  const at = worldToScreen(rect, view);
+  return {
+    label,
+    x: at.x + (rect.width * view.zoom) / 2,
+    y: at.y + rect.height * view.zoom + 4,
+  };
 }
 
 function initials(label) {
@@ -280,5 +347,20 @@ const labelSx = {
   fontSize: '0.7rem',
   fontWeight: 800,
   color: 'rgba(0,0,0,0.75)',
+  pointerEvents: 'none',
+};
+
+const distanceSx = {
+  position: 'absolute',
+  left: 0,
+  top: 0,
+  marginLeft: '-1.5rem',
+  px: 0.75,
+  borderRadius: 1,
+  bgcolor: 'rgba(15,14,13,0.9)',
+  color: '#e8c96a',
+  fontFamily: '"Cinzel", Georgia, serif',
+  fontSize: '0.65rem',
+  whiteSpace: 'nowrap',
   pointerEvents: 'none',
 };
