@@ -71,14 +71,6 @@ export function mergeLinkedInstanceRows(sectionKey, cloudRows = [], localRows = 
   return rows;
 }
 
-export function linkedNewRoute(sectionKey, linkGroupId) {
-  const section = SECTION_REGISTRY[sectionKey];
-  const group = normalizeLinkGroupId(linkGroupId);
-  if (!section || !group) return section?.newRoute || '/';
-  const separator = section.newRoute.includes('?') ? '&' : '?';
-  return `${section.newRoute}${separator}linkGroup=${encodeURIComponent(group)}`;
-}
-
 export function resolveGroupMerge(current, target, rows, idFactory = makeLinkGroupId) {
   const currentGroup = normalizeLinkGroupId(current?.linkGroupId);
   const targetGroup = normalizeLinkGroupId(target?.linkGroupId);

@@ -34,6 +34,7 @@ import {
   normalizeNegotiation,
   resolveNegotiation,
 } from './negotiation.js';
+import { isFightResumable, mergeLibrary } from './library.js';
 import { cleanToText, parseCleanTokens } from './markup.js';
 import { resolveLegendaryGroups } from './bestiary.js';
 import {
@@ -651,6 +652,48 @@ test('a sheet sync leaves a combatant\'s effects untouched', () => {
   const synced = applySheetVitals(withEffect, 'char-1', { hpMax: 22, currentHP: 9, activeConditions: ['blinded'] });
   assert.equal(synced.combatants[0].hpCurrent, 9);
   assert.deepEqual(synced.combatants[0].activeEffects, [{ key: 'selfAttackDisadv', duration: 'next' }]);
+});
+
+test('a fight is only reachable through the library card of its encounter', () => {
+  const library = [{ id: 'enc-1', name: 'Ambush', createdAt: 10 }];
+  const linked = { id: 'f1', encounterId: 'enc-1', savedAt: 20 };
+  const orphan = { id: 'f2', encounterId: null, savedAt: 30 };
+
+  assert.equal(isFightResumable(library, linked), true);
+  assert.equal(isFightResumable(library, orphan), false);
+  assert.equal(isFightResumable(library, { id: 'f3', encounterId: 'gone' }), false);
+  assert.equal(isFightResumable(library, null), false);
+
+  const merged = mergeLibrary(library, [linked, orphan]);
+  assert.equal(merged.length, 1, 'an orphan fight has no card of its own');
+  assert.equal(merged[0].fight.id, 'f1');
+});
+
+// Closing is the only way out of an active encounter now that the panel has no
+// "Builder" button, so it must leave the fight recoverable rather than drop it.
+test('closing an encounter deactivates it but keeps the fight resumable', () => {
+  let state = encounterReducer(createInitialState(), { type: 'launchCurrentEncounter' });
+  state = { ...state, combat: buildCombat([], [{ name: 'Aria', hpMax: 22 }], null, () => 0.5) };
+  state = encounterReducer(state, { type: 'nextTurn' });
+  const fightId = state.activeFightId;
+  assert.ok(fightId, 'expected an active fight to close');
+
+  const closed = encounterReducer(state, { type: 'closeCombat' });
+  assert.equal(closed.combat, null);
+  assert.equal(closed.activeFightId, null);
+  assert.equal(closed.view, 'builder');
+  const saved = closed.fights.find((fight) => fight.id === fightId);
+  assert.ok(saved, 'closing must not delete the fight snapshot');
+
+  const resumed = encounterReducer(closed, { type: 'resumeFight', entry: saved, monsters: [] });
+  assert.equal(resumed.view, 'combat');
+  assert.equal(resumed.activeFightId, fightId);
+  assert.equal(resumed.combat.combatants[0].name, 'Aria');
+});
+
+test('closing with no active encounter changes nothing', () => {
+  const state = createInitialState();
+  assert.equal(encounterReducer(state, { type: 'closeCombat' }), state);
 });
 
 test('the reducer routes every effect action through the fight snapshot', () => {

@@ -1,11 +1,13 @@
 import { normalizeNoteSize } from './logic/notes.js';
 import {
   emitStorageEvent,
+  hasScopedPayload,
   restoreScopedPayload,
   snapshotScopedPayload,
   touchRegistryEntry,
 } from '../../shared/scopedStoragePayload.js';
 import { SECTION_REGISTRY } from '../../shared/sectionRegistry.js';
+import { makeSectionInstanceId } from '../../shared/sectionInstances.js';
 import { normalizeLinkGroupId } from '../../shared/linkGroupId.js';
 
 const SECTION = SECTION_REGISTRY.dmscreen;
@@ -23,7 +25,7 @@ export function sanitizeId(value) {
 }
 
 export function makeId(now = Date.now(), random = Math.random) {
-  return `screen_${now.toString(36)}_${random().toString(36).slice(2, 7)}`;
+  return makeSectionInstanceId(SECTION.key, now, random);
 }
 
 export function makeNoteId(now = Date.now(), random = Math.random) {
@@ -57,13 +59,7 @@ export function writeRegistry(list) {
 }
 
 export function hasScopedData(id) {
-  const prefix = `gb:dmscreen:${id}:`;
-  try {
-    for (let index = 0; index < localStorage.length; index += 1) {
-      if (String(localStorage.key(index) || '').startsWith(prefix)) return true;
-    }
-  } catch {}
-  return false;
+  return hasScopedPayload(scopedPrefix(id));
 }
 
 export function isKnownInstance(id) {

@@ -17,7 +17,6 @@ import { LayoutDashboard, Link2, Network, Plus, StickyNote, Swords, Unlink } fro
 import { useAuth } from '../shared/cloud/AuthProvider.jsx';
 import { getCloudSection } from '../shared/cloud/cloudSections.js';
 import {
-  linkedNewRoute,
   makeLinkGroupId,
   mergeLinkedInstanceRows,
   normalizeLinkGroupId,
@@ -25,6 +24,7 @@ import {
   resolveGroupMerge,
   setLocalInstanceLink,
 } from '../shared/instanceLinks.js';
+import { createSectionInstance } from '../shared/sectionInstances.js';
 import { SECTION_KEYS, SECTION_REGISTRY } from '../shared/sectionRegistry.js';
 import { useToast } from '../shared/ToastProvider.jsx';
 
@@ -166,8 +166,16 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, instanceSaved,
       };
       if (!await applyGroup([active], nextGroupId)) return;
     }
+    // Same creation path as the picker: the instance is registered with its
+    // group before we navigate, so the target tool opens an already-saved
+    // instance instead of a draft carrying the group in its querystring.
+    const entry = createSectionInstance(targetSectionKey, { linkGroupId: nextGroupId });
+    if (!entry) {
+      setError('Could not create the linked instance on this device.');
+      return;
+    }
     setOpen(false);
-    navigate(linkedNewRoute(targetSectionKey, nextGroupId));
+    navigate(SECTION_REGISTRY[targetSectionKey].route(entry.id));
   };
 
   const button = (

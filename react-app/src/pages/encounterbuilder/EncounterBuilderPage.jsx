@@ -3,10 +3,9 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, Button, Stack, Tab, Tabs, Typography } from '@mui/material';
 import { BookOpen, Library, Swords, Dices, Handshake, Skull } from 'lucide-react';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../components/AppTopBar.jsx';
-import SaveInstanceButton from '../../components/SaveInstanceButton.jsx';
 import LinkedToolsMenu from '../../components/LinkedToolsMenu.jsx';
 import CustomRollDialog from '../../shared/character/CustomRollDialog.jsx';
-import { useToast } from '../../shared/ToastProvider.jsx';
+import { useSeedInstance } from '../../shared/useSeedInstance.js';
 import BuilderView from './components/BuilderView.jsx';
 import CombatView from './components/CombatView.jsx';
 import LibraryView from './components/LibraryView.jsx';
@@ -45,16 +44,12 @@ export default function EncounterBuilderPage() {
 
 function EncounterBuilderShell({ instance }) {
   const { state, dispatch, saveInstance, instanceSaved, roll } = useEncounterBuilder();
-  const { notify } = useToast();
   const [customRollOpen, setCustomRollOpen] = useState(false);
   const [fumblesOpen, setFumblesOpen] = useState(false);
   const [negotiationOpen, setNegotiationOpen] = useState(false);
   const [diceToast, setDiceToast] = useState(null);
 
-  const handleSaveInstance = () => {
-    const entry = saveInstance();
-    if (entry) notify('success', 'Encounter instance saved locally.');
-  };
+  useSeedInstance('encounters', { instanceId: instance.id, instanceSaved, saveInstance });
 
   const handleCustomRoll = (formula) => {
     // GM roll — generic, no actor attribution.
@@ -66,7 +61,6 @@ function EncounterBuilderShell({ instance }) {
     <Box sx={pageSx}>
       <AppTopBar home backTo="/library/encounters" backLabel="Encounters">
         <LinkedToolsMenu sectionKey="encounters" instanceId={instance.id} instanceSaved={instanceSaved} initialLinkGroupId={instance.linkGroupId} />
-        <SaveInstanceButton saved={instanceSaved} onClick={handleSaveInstance} />
       </AppTopBar>
       <Box sx={contentSx}>
         <Stack spacing={2}>

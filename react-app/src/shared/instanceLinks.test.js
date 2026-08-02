@@ -13,12 +13,12 @@ class MemoryStorage {
 Object.defineProperty(globalThis, 'localStorage', { value: new MemoryStorage(), configurable: true });
 
 const {
-  linkedNewRoute,
   mergeLinkedInstanceRows,
   normalizeLinkGroupId,
   resolveGroupMerge,
   setLocalInstanceLink,
 } = await import('./instanceLinks.js');
+const { createSectionInstance } = await import('./sectionInstances.js');
 const gmBoardStorage = await import('../pages/gmboard/storage.js');
 const encounterStorage = await import('../pages/encounterbuilder/logic/storage.js');
 const dmScreenStorage = await import('../pages/dmscreen/storage.js');
@@ -65,11 +65,16 @@ test('merging different groups moves every member of both groups', () => {
   assert.deepEqual(plan.members.map((row) => row.id).sort(), ['b', 'd', 'e']);
 });
 
-test('new linked routes retain the generated group', () => {
-  assert.equal(linkedNewRoute('dmscreen', 'link_party'), '/dm-screen?screen=new&linkGroup=link_party');
-  assert.equal(linkedNewRoute('encounters', 'invalid group'), '/encounter-builder?enc=new');
+test('a linked instance is created already registered with its group', () => {
+  localStorage.clear();
+  const entry = createSectionInstance('dmscreen', { linkGroupId: 'link_party' });
+  assert.equal(entry.linkGroupId, 'link_party');
+  assert.equal(dmScreenStorage.resolveInstance(`?screen=${entry.id}`).linkGroupId, 'link_party');
 });
 
+// Legacy `?x=new&linkGroup=` URLs (bookmarks, older links) still have to carry
+// the group through: creation now happens before navigation, but the tool pages
+// remain the fallback that saves whatever arrives unregistered.
 test('every tool carries a linked group through creation routing', () => {
   localStorage.clear();
   const board = gmBoardStorage.resolveInstance('?board=new&linkGroup=link_party');

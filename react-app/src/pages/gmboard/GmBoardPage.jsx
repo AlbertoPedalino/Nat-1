@@ -3,9 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, Stack, Tab, Tabs, Typography } from '@mui/material';
 import { Map, Castle, ScrollText, Table, BookOpen } from 'lucide-react';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../components/AppTopBar.jsx';
-import SaveInstanceButton from '../../components/SaveInstanceButton.jsx';
 import LinkedToolsMenu from '../../components/LinkedToolsMenu.jsx';
-import { useToast } from '../../shared/ToastProvider.jsx';
+import { useSeedInstance } from '../../shared/useSeedInstance.js';
 import { resolveInstance } from './storage.js';
 import { GmBoardProvider, useGmBoard } from './state/GmBoardContext.jsx';
 import HexcrawlView from './components/HexcrawlView.jsx';
@@ -50,18 +49,13 @@ export default function GmBoardPage() {
 
 function GmBoardShell({ instance }) {
   const { state, dispatch, saveInstance, instanceSaved } = useGmBoard();
-  const { notify } = useToast();
 
-  const handleSaveInstance = () => {
-    const entry = saveInstance();
-    if (entry) notify('success', 'GM Board instance saved locally.');
-  };
+  useSeedInstance('gmboard', { instanceId: instance.id, instanceSaved, saveInstance });
 
   return (
     <Box sx={pageSx}>
       <AppTopBar home backTo="/library/gmboard" backLabel="GM Boards">
         <LinkedToolsMenu sectionKey="gmboard" instanceId={instance.id} instanceSaved={instanceSaved} initialLinkGroupId={instance.linkGroupId} />
-        <SaveInstanceButton saved={instanceSaved} onClick={handleSaveInstance} />
       </AppTopBar>
       <Box sx={contentSx}>
         <Stack spacing={2}>

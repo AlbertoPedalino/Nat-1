@@ -133,6 +133,8 @@ export function encounterReducer(state, action) {
       return launchCombat(state, hydrateEncounterItems(action.entry?.encounter, action.monsters), action.entry?.id || null, action.entry?.name);
     case 'resumeFight':
       return withCombat(state, restoreFight(action.entry, action.monsters), { view: 'combat' });
+    case 'closeCombat':
+      return closeCombat(state);
     case 'nextTurn':
       return state.combat ? withCombat(state, nextTurn(state.combat)) : state;
     case 'prevTurn':
@@ -492,6 +494,20 @@ function withCombat(state, combat, patch = {}) {
     combat,
     fights,
     activeFightId: fightEntry.id,
+  };
+}
+
+// Closing only drops the fight as the active one: its snapshot stays in
+// `fights`, so a fight whose encounter is in the library can still be resumed
+// from there. Nothing is deleted here.
+function closeCombat(state) {
+  if (!state.combat) return state;
+  return {
+    ...state,
+    combat: null,
+    activeFightId: null,
+    view: 'builder',
+    selectedStatblock: null,
   };
 }
 

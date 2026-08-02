@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Box, Button, Paper, Stack, Typography } from '@mui/material';
-import { ArrowLeft, ArrowRight, RotateCcw, Swords } from 'lucide-react';
+import { ArrowLeft, ArrowRight, RotateCcw, Swords, X } from 'lucide-react';
+import { isFightResumable } from '../logic/library.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import CombatantCard from './CombatantCard.jsx';
 import Reinforcements from './Reinforcements.jsx';
@@ -43,6 +44,17 @@ export default function CombatView() {
 
   const current = combat.combatants[combat.currentTurn] || null;
 
+  // Closing is reversible only through the Library, and a fight launched from an
+  // unsaved encounter never gets a card there — say so before it goes.
+  const handleClose = () => {
+    const activeFight = state.fights.find((fight) => fight.id === state.activeFightId) || null;
+    const message = isFightResumable(state.library, activeFight)
+      ? 'Close this encounter? It stops being active; resume it from the Library.'
+      : 'Close this encounter? It is not saved in the Library, so its progress cannot be resumed.';
+    if (!window.confirm(message)) return;
+    dispatch({ type: 'closeCombat' });
+  };
+
   return (
     <>
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: 'minmax(0,1fr) minmax(340px,0.8fr)' }, gap: 2 }}>
@@ -65,8 +77,8 @@ export default function CombatView() {
                 <Button variant="outlined" startIcon={<RotateCcw size={15} />} onClick={() => dispatch({ type: 'rerollInitiative' })}>
                   Reroll All
                 </Button>
-                <Button variant="outlined" onClick={() => dispatch({ type: 'setView', view: 'builder' })}>
-                  Builder
+                <Button variant="outlined" startIcon={<X size={15} />} onClick={handleClose}>
+                  Close Encounter
                 </Button>
               </Stack>
             </Stack>

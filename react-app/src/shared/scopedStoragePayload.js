@@ -7,6 +7,19 @@ function scopedKeys(prefix, storage = localStorage) {
   return keys;
 }
 
+// Whether an instance has any data of its own. A registry entry alone is not
+// enough: an instance with no scoped keys has an empty payload, which cloud
+// pushes skip.
+export function hasScopedPayload(prefix, storage = localStorage) {
+  if (!prefix) return false;
+  try {
+    for (let index = 0; index < storage.length; index += 1) {
+      if (String(storage.key(index) || '').startsWith(prefix)) return true;
+    }
+  } catch {}
+  return false;
+}
+
 export function snapshotScopedPayload(prefix, storage = localStorage) {
   const payload = {};
   for (const key of scopedKeys(prefix, storage)) {

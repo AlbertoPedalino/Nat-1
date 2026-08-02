@@ -1,6 +1,7 @@
 import { Box, Button, Chip, Paper, Stack, Typography } from '@mui/material';
 import { Play, RotateCcw, Trash2, Upload } from 'lucide-react';
 import { useToast } from '../../../shared/ToastProvider.jsx';
+import { mergeLibrary, toTime } from '../logic/library.js';
 import { formatNumber } from '../logic/monsterUtils.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 
@@ -125,23 +126,6 @@ function LibraryCard({ item, monsters, dispatch, notify }) {
       <Typography variant="caption" color="text.secondary">{formatDate(date)}</Typography>
     </Stack>
   );
-}
-
-// Each library encounter is one card, optionally carrying its in-progress fight.
-// Every launch backs an encounter, so there are no standalone (unsaved) fights.
-function mergeLibrary(encounters, fights) {
-  return (encounters || [])
-    .map((enc) => {
-      const linkedFight = (fights || []).find((fight) => fight.encounterId === enc.id) || null;
-      return { enc, fight: linkedFight, sortKey: Math.max(toTime(enc.createdAt), linkedFight?.savedAt || 0) };
-    })
-    .sort((a, b) => b.sortKey - a.sortKey);
-}
-
-function toTime(value) {
-  if (typeof value === 'number') return value;
-  const time = Date.parse(value);
-  return Number.isFinite(time) ? time : 0;
 }
 
 function formatDate(value) {

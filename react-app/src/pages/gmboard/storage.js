@@ -3,11 +3,13 @@ import { createDefaultTables } from './logic/defaultTables.js';
 import { LEGACY_KEYS, migrateLegacyBoard } from './logic/migration.js';
 import {
   emitStorageEvent,
+  hasScopedPayload,
   restoreScopedPayload,
   snapshotScopedPayload,
   touchRegistryEntry,
 } from '../../shared/scopedStoragePayload.js';
 import { SECTION_REGISTRY } from '../../shared/sectionRegistry.js';
+import { makeSectionInstanceId } from '../../shared/sectionInstances.js';
 import { normalizeLinkGroupId } from '../../shared/linkGroupId.js';
 
 const SECTION = SECTION_REGISTRY.gmboard;
@@ -24,8 +26,8 @@ export function sanitizeBoardId(value) {
   return String(value || '').toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 48);
 }
 
-export function makeBoardId(now = Date.now()) {
-  return `gm_${now.toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
+export function makeBoardId(now = Date.now(), random = Math.random) {
+  return makeSectionInstanceId(SECTION.key, now, random);
 }
 
 export function scopeKey(id, key) {
@@ -49,12 +51,7 @@ export function writeRegistry(list) {
 }
 
 export function hasScopedData(id) {
-  const prefix = `gb:board:${id}:`;
-  for (let i = 0; i < localStorage.length; i += 1) {
-    const key = localStorage.key(i);
-    if (String(key || '').startsWith(prefix)) return true;
-  }
-  return false;
+  return hasScopedPayload(scopedPrefix(id));
 }
 
 export function isKnownBoardInstance(id) {

@@ -71,6 +71,28 @@ test('an unsaved instance cannot open link management', () => {
   expect(screen.getByRole('button', { name: 'Linked tools' })).toBeDisabled();
 });
 
+test('creating a linked tool registers it with the group before navigating', async () => {
+  localStorage.clear();
+  render(
+    <LinkedToolsMenu
+      sectionKey="gmboard"
+      instanceId="board-a"
+      instanceSaved
+      initialLinkGroupId="link_party"
+    />,
+  );
+
+  fireEvent.click(screen.getByRole('button', { name: 'Linked tools' }));
+  fireEvent.click(await screen.findByRole('button', { name: 'New DM Screen' }));
+
+  await waitFor(() => expect(mocks.navigate).toHaveBeenCalled());
+  const registry = JSON.parse(localStorage.getItem('gb_dmscreen_registry') || '[]');
+  expect(registry).toHaveLength(1);
+  expect(registry[0].linkGroupId).toBe('link_party');
+  // Navigation targets the created id, never the `?screen=new` draft route.
+  expect(mocks.navigate).toHaveBeenCalledWith(`/dm-screen?screen=${registry[0].id}`);
+});
+
 test('a cloud-only instance can manage links without a local copy', async () => {
   mocks.auth.cloudEnabled = true;
   mocks.auth.status = 'authed';

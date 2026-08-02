@@ -2,9 +2,8 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, Stack, Typography } from '@mui/material';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../components/AppTopBar.jsx';
-import SaveInstanceButton from '../../components/SaveInstanceButton.jsx';
 import LinkedToolsMenu from '../../components/LinkedToolsMenu.jsx';
-import { useToast } from '../../shared/ToastProvider.jsx';
+import { useSeedInstance } from '../../shared/useSeedInstance.js';
 import NoteBoard from './components/NoteBoard.jsx';
 import { DmScreenProvider, useDmScreen } from './state/DmScreenContext.jsx';
 import { resolveInstance } from './storage.js';
@@ -52,28 +51,20 @@ export default function DmScreenPage() {
 
 function DmScreenShell({ instance }) {
   const { instanceSaved, saveInstance } = useDmScreen();
-  const { notify } = useToast();
 
-  const handleSave = () => {
-    const entry = saveInstance();
-    notify(
-      entry ? 'success' : 'error',
-      entry ? 'DM Screen saved locally.' : 'DM Screen could not be saved.',
-    );
-  };
+  useSeedInstance('dmscreen', { instanceId: instance.id, instanceSaved, saveInstance });
 
   return (
     <Box sx={pageSx}>
       <AppTopBar home backTo="/library/dmscreen" backLabel="DM Screens">
         <LinkedToolsMenu sectionKey="dmscreen" instanceId={instance.id} instanceSaved={instanceSaved} initialLinkGroupId={instance.linkGroupId} />
-        <SaveInstanceButton saved={instanceSaved} onClick={handleSave} />
       </AppTopBar>
       <Box component="main" sx={contentSx}>
         <Stack spacing={2}>
           <Box>
             <Typography variant="h1">DM Screen</Typography>
             <Typography variant="body2" color="text.secondary">
-              {instanceSaved ? `Saved screen ${instance.id}` : 'Unsaved screen'}
+              Screen {instance.id}
             </Typography>
           </Box>
           <NoteBoard />
