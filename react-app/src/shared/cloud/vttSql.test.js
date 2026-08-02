@@ -30,6 +30,21 @@ test('the layer column is constrained to the three known layers', () => {
   assert.match(sql, /check \(layer in \('map', 'tokens', 'gm'\)\)/);
 });
 
+// Fog lives on the scene, not in its own table: only the GM writes it, so there
+// is no concurrent writer to lose. It is also added defensively for databases
+// created before it existed.
+test('fog is a scene column and re-runs add it in place', () => {
+  assert.match(sql, /fog\s+jsonb/);
+  assert.match(sql, /alter table public\.map_scenes add column if not exists fog jsonb/);
+  assert.doesNotMatch(sql, /create table if not exists public\.map_fog/);
+});
+
+// Fog is drawn client-side over an image every member downloads. Saying so in
+// the file is the point: a future reader must not mistake it for a boundary.
+test('the file states that fog is presentation and not security', () => {
+  assert.match(sql, /fog of war is not a security boundary/);
+});
+
 test('every policy is dropped before being created, so the file re-runs clean', () => {
   const created = [...sql.matchAll(/create policy (\w+) on/g)].map((match) => match[1]);
   assert.ok(created.length >= 12, `expected the full policy set, found ${created.length}`);

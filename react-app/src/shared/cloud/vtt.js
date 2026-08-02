@@ -1,4 +1,5 @@
 import { requireClient } from './supabaseClient.js';
+import { normalizeFog } from '../vtt/fog.js';
 import {
   mapImagePath,
   normalizeGrid,
@@ -15,12 +16,14 @@ import {
 
 const MAP_BUCKET = 'map-images';
 const SIGNED_URL_TTL = 60 * 60;
+const SCENE_COLUMNS = 'id, campaign_id, name, image_path, grid, fog, updated_at';
+const TOKEN_COLUMNS = 'id, scene_id, layer, x, y, w, h, z, character_id, label, color, image_path, updated_at';
 
 export async function listScenes(campaignId) {
   const supabase = requireClient();
   const { data, error } = await supabase
     .from('map_scenes')
-    .select('id, campaign_id, name, image_path, grid, updated_at')
+    .select(SCENE_COLUMNS)
     .eq('campaign_id', campaignId)
     .order('updated_at', { ascending: false });
   if (error) throw error;
@@ -31,7 +34,7 @@ export async function fetchScene(sceneId) {
   const supabase = requireClient();
   const { data, error } = await supabase
     .from('map_scenes')
-    .select('id, campaign_id, name, image_path, grid, updated_at')
+    .select(SCENE_COLUMNS)
     .eq('id', sceneId)
     .maybeSingle();
   if (error) throw error;
@@ -43,25 +46,29 @@ export async function createScene(campaignId, name) {
   const { data, error } = await supabase
     .from('map_scenes')
     .insert({ campaign_id: campaignId, name: sanitizeName(name), grid: normalizeGrid(null) })
-    .select('id, campaign_id, name, image_path, grid, updated_at')
+    .select(SCENE_COLUMNS)
     .single();
   if (error) throw error;
   return toScene(data);
 }
 
-export async function updateScene(sceneId, { name, grid, imagePath } = {}) {
+export async function updateScene(sceneId, { name, grid, imagePath, fog } = {}) {
   const supabase = requireClient();
   const patch = {};
   if (name !== undefined) patch.name = sanitizeName(name);
   if (grid !== undefined) patch.grid = normalizeGrid(grid);
   if (imagePath !== undefined) patch.image_path = imagePath || null;
+  // Only the GM writes fog, so the whole blob can be replaced without the
+  // conflict problem that made tokens one row each. Paint strokes go over
+  // broadcast; this is the single write at the end of the stroke.
+  if (fog !== undefined) patch.fog = normalizeFog(fog);
   if (!Object.keys(patch).length) return null;
 
   const { data, error } = await supabase
     .from('map_scenes')
     .update(patch)
     .eq('id', sceneId)
-    .select('id, campaign_id, name, image_path, grid, updated_at')
+    .select(SCENE_COLUMNS)
     .single();
   if (error) throw error;
   return toScene(data);
@@ -79,7 +86,7 @@ export async function listTokens(sceneId) {
   const supabase = requireClient();
   const { data, error } = await supabase
     .from('map_tokens')
-    .select('id, scene_id, layer, x, y, w, h, z, character_id, label, color, image_path, updated_at')
+    .select(TOKEN_COLUMNS)
     .eq('scene_id', sceneId)
     .order('z', { ascending: true });
   if (error) throw error;
@@ -97,7 +104,7 @@ export async function createToken(sceneId, token = {}) {
   const { data, error } = await supabase
     .from('map_tokens')
     .insert(row)
-    .select('id, scene_id, layer, x, y, w, h, z, character_id, label, color, image_path, updated_at')
+    .select(TOKEN_COLUMNS)
     .single();
   if (error) throw error;
   return toToken(data);
@@ -114,7 +121,7 @@ export async function updateToken(tokenId, patch) {
     .from('map_tokens')
     .update(row)
     .eq('id', tokenId)
-    .select('id, scene_id, layer, x, y, w, h, z, character_id, label, color, image_path, updated_at')
+    .select(TOKEN_COLUMNS)
     .single();
   if (error) throw error;
   return toToken(data);

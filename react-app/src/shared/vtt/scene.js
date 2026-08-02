@@ -2,6 +2,8 @@
 // No Supabase import here on purpose: this is the part that stays testable with
 // plain `node --test`.
 
+import { normalizeFog } from './fog.js';
+
 export const LAYERS = Object.freeze(['map', 'tokens', 'gm']);
 export const DEFAULT_GRID = Object.freeze({ size: 70, offsetX: 0, offsetY: 0, visible: true });
 
@@ -62,6 +64,8 @@ export function toScene(row) {
     name: sanitizeName(row.name),
     imagePath: row.image_path || null,
     grid: normalizeGrid(row.grid),
+    // null is "this scene has no fog", not "everything is hidden".
+    fog: normalizeFog(row.fog),
     updatedAt: Date.parse(row.updated_at) || 0,
   };
 }

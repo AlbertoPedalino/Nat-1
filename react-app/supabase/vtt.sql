@@ -11,6 +11,11 @@
 -- The GM-only layer is enforced here, not in the client: secret tokens are rows
 -- with layer='gm' that RLS never returns to a player. Hiding them in the UI
 -- would leave them readable in the network response.
+--
+-- Fog of war is NOT a security boundary: the map image is delivered whole to
+-- every member and the fog is drawn client-side, so a determined player can
+-- read the image out of the network tab. Hiding map content for real would take
+-- server-side tiling. Secret *tokens* are the thing that is genuinely hidden.
 -- ============================================================================
 
 -- 1) HELPERS ------------------------------------------------------------------
@@ -73,9 +78,19 @@ create table if not exists public.map_scenes (
   image_path  text,
   -- { size, offsetX, offsetY, visible } — grid calibration is client-side.
   grid        jsonb not null default '{"size":70,"offsetX":0,"offsetY":0,"visible":true}'::jsonb,
+  -- Fog of war: { cols, rows, cells } where cells is a base64 bitset, one bit
+  -- per grid cell, set = revealed. NULL means the scene has no fog.
+  --
+  -- A blob is safe here precisely where it was not for tokens: only the GM ever
+  -- writes fog, so there is no concurrent writer to overwrite. Per-cell rows
+  -- would mean thousands of them per scene for no gain.
+  fog         jsonb,
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
 );
+
+-- Re-runs on a database created before fog existed.
+alter table public.map_scenes add column if not exists fog jsonb;
 
 create table if not exists public.map_tokens (
   id           uuid primary key default gen_random_uuid(),
