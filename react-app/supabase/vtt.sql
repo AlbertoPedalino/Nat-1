@@ -18,8 +18,12 @@
 -- server-side tiling. Secret *tokens* are the thing that is genuinely hidden.
 -- ============================================================================
 
--- 1) HELPERS ------------------------------------------------------------------
+-- 1) HELPERS THAT DO NOT TOUCH THE NEW TABLES ---------------------------------
 -- SECURITY DEFINER so policies can look past RLS without recursing.
+--
+-- Order matters in this file: a `language sql` body is parsed when the function
+-- is created, so anything selecting from map_scenes has to come after the table
+-- exists. That helper lives in section 3.
 
 create or replace function public.is_campaign_gm(p_campaign uuid)
 returns boolean
@@ -28,13 +32,6 @@ as $$
   select exists (
     select 1 from public.campaigns where id = p_campaign and gm = auth.uid()
   );
-$$;
-
-create or replace function public.map_scene_campaign(p_scene uuid)
-returns uuid
-language sql security definer stable set search_path = public
-as $$
-  select campaign_id from public.map_scenes where id = p_scene;
 $$;
 
 create or replace function public.owns_character(p_character text)
@@ -125,7 +122,18 @@ drop trigger if exists map_tokens_touch on public.map_tokens;
 create trigger map_tokens_touch before update on public.map_tokens
   for each row execute function public.touch_updated_at();
 
--- 3) ROW LEVEL SECURITY -------------------------------------------------------
+-- 3) HELPERS THAT READ THE NEW TABLES -----------------------------------------
+-- Defined here, after the tables: a `language sql` body referencing a missing
+-- relation fails at creation time.
+
+create or replace function public.map_scene_campaign(p_scene uuid)
+returns uuid
+language sql security definer stable set search_path = public
+as $$
+  select campaign_id from public.map_scenes where id = p_scene;
+$$;
+
+-- 4) ROW LEVEL SECURITY -------------------------------------------------------
 
 alter table public.map_scenes enable row level security;
 alter table public.map_tokens enable row level security;
@@ -191,7 +199,7 @@ create policy map_tokens_update on public.map_tokens
     )
   );
 
--- 4) REALTIME -----------------------------------------------------------------
+-- 5) REALTIME -----------------------------------------------------------------
 -- Token rows are streamed to open scenes. RLS still applies to realtime, so a
 -- player never receives GM-layer changes.
 do $$
@@ -212,7 +220,7 @@ begin
 end
 $$;
 
--- 5) STORAGE ------------------------------------------------------------------
+-- 6) STORAGE ------------------------------------------------------------------
 -- Private bucket; images are read through signed URLs. Object paths are
 -- `<campaign_id>/<scene_id>/<file>`, which is what the policies key off.
 

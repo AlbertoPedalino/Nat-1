@@ -64,10 +64,10 @@ test('the GM layer is filtered by RLS on select, not by the client', () => {
 });
 
 test('a player can only update a non-GM token that stands for their own character', () => {
-  const updatePolicy = sql.slice(
-    sql.indexOf('create policy map_tokens_update on'),
-    sql.indexOf('-- 4) realtime'),
-  );
+  const start = sql.indexOf('create policy map_tokens_update on');
+  // Bounded by the end of the statement rather than by a section heading, so
+  // renumbering the file cannot quietly widen this slice.
+  const updatePolicy = sql.slice(start, sql.indexOf(';', start));
   // Both halves matter: USING gates the row read, WITH CHECK gates the row
   // written. Without the second, a player could promote a token to layer='gm'
   // or reassign it to another sheet.
@@ -109,6 +109,24 @@ test('token and scene changes are published to realtime idempotently', () => {
     assert.match(sql, new RegExp(`alter publication supabase_realtime add table public\\.${table}`));
   }
   assert.match(sql, /if not exists \(\s*select 1 from pg_publication_tables/);
+});
+
+// This file is pasted into the SQL editor top to bottom, and a `language sql`
+// body is parsed when the function is created. Defining map_scene_campaign
+// before its table failed with 'relation "public.map_scenes" does not exist',
+// which no amount of shape-checking would have caught.
+test('functions that read the new tables are declared after them', () => {
+  const table = sql.indexOf('create table if not exists public.map_scenes');
+  const helper = sql.indexOf('create or replace function public.map_scene_campaign');
+  assert.ok(table > -1 && helper > -1);
+  assert.ok(helper > table, 'map_scene_campaign must come after the table it selects from');
+
+  // Triggers need their function to exist first, for the same reason.
+  assert.ok(
+    sql.indexOf('create or replace function public.touch_updated_at')
+      < sql.indexOf('create trigger map_scenes_touch'),
+    'touch_updated_at must be defined before the triggers that call it',
+  );
 });
 
 test('policy helpers are security definer and search_path pinned', () => {
