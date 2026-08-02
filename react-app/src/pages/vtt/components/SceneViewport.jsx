@@ -19,6 +19,8 @@ import { measureLabel, movementLabel } from '../../../shared/vtt/measure.js';
 import { isTokenInPlay } from '../../../shared/vtt/scene.js';
 import DrawingCanvas from './DrawingCanvas.jsx';
 import FogCanvas from './FogCanvas.jsx';
+import RollBubble from './RollBubble.jsx';
+import DiceTray from './DiceTray.jsx';
 import TokenSprite from './TokenSprite.jsx';
 
 const WHEEL_STEP = 1.12;
@@ -90,6 +92,8 @@ export default function SceneViewport({
   onWriteNote,
   onLaser,
   lasers,
+  rollBubbles,
+  diceThrows,
   measureShape,
   feetPerCellForRuler,
   onMeasure,
@@ -97,6 +101,7 @@ export default function SceneViewport({
   controls,
   layerSwitch,
   imageSwitch,
+  toast,
 }) {
   const hostRef = useRef(null);
   const dragRef = useRef(null);
@@ -205,7 +210,12 @@ export default function SceneViewport({
     // Controls sitting on top of the map are not the map. Without this the host
     // captures the pointer on the way down and the click never reaches the
     // button — which is exactly why fullscreen appeared to do nothing.
-    if (event.target.closest?.('[data-viewport-control]')) return;
+    //
+    // `.MuiModal-root` for the same reason: in fullscreen every dialog has to
+    // be mounted inside the map — a dialog on the document body is not painted
+    // at all — so its buttons are inside this host and would lose their clicks
+    // to the same capture. That is what made the custom roller do nothing.
+    if (event.target.closest?.('[data-viewport-control], .MuiModal-root')) return;
     const point = screenPoint(event);
     event.currentTarget.setPointerCapture?.(event.pointerId);
 
@@ -608,6 +618,37 @@ export default function SceneViewport({
         </IconButton>
       </Tooltip>
 
+      {/* Over the piece that rolled: the position is recomputed here rather than
+          stored, so a bubble follows its creature while the map is panned. */}
+      {/* Screen space, over everything: the dice are on the table, not on the
+          map. A throw with no piece to land next to lands in the middle. */}
+      <DiceTray
+        throws={(diceThrows || []).map(({ roll, token }) => {
+          const rect = token ? tokenWorldRect(token, scene.grid) : null;
+          const at = rect ? worldToScreen(rect, view) : null;
+          return {
+            roll,
+            dice: roll.rolls || [],
+            x: at ? at.x + (rect.width * view.zoom) / 2 : (hostRef.current?.clientWidth || 0) / 2,
+            // Below the piece, where the bubble is not.
+            y: at ? at.y + rect.height * view.zoom + 18 : (hostRef.current?.clientHeight || 0) / 2,
+          };
+        })}
+      />
+
+      {(rollBubbles || []).map(({ roll, token }) => {
+        const rect = tokenWorldRect(token, scene.grid);
+        const at = worldToScreen(rect, view);
+        return (
+          <RollBubble
+            key={roll.id}
+            roll={roll}
+            x={at.x + (rect.width * view.zoom) / 2}
+            y={at.y - 6}
+          />
+        );
+      })}
+
       {/* Conversation, not annotation: the stroke still under the pointer, the
           ruler and everyone's laser, drawn above the fog and above the pieces so
           pointing at something in the dark still means something. */}
@@ -617,7 +658,7 @@ export default function SceneViewport({
           ? { points: strokeRef.current, color: drawColor, width: drawWidth, tick: strokeTick }
           : null}
         lasers={lasers}
-        measure={measure || remoteMeasure}
+        measure={measure || remoteMeasure || measured?.trail}
         grid={scene.grid}
         view={view}
       />
@@ -646,6 +687,10 @@ export default function SceneViewport({
 
       {/* Outside the token nodes: they clip to a circle, and the badge has to
           sit clear of the piece to stay readable. */}
+      {/* Marked as a control: without it the host captures the pointer on the
+          way down and the close button never receives the click. */}
+      <Box data-viewport-control>{toast}</Box>
+
       {measured ? (
         <Box sx={{ ...distanceSx, transform: `translate(${measured.x}px, ${measured.y}px)` }}>
           {measured.label}
@@ -667,11 +712,23 @@ function measurementBadge(tokens, drag, grid, view, feetPerCell) {
   if (!label) return null;
   const rect = tokenWorldRect({ ...token, ...drag }, grid);
   const at = worldToScreen(rect, view);
+
+  // Where the piece is being carried from, in cells and from its centre rather
+  // than its corner, so the line runs between the two squares and not between
+  // their top-left corners.
+  const half = { x: Math.max(0.1, token.w || 1) / 2, y: Math.max(0.1, token.h || 1) / 2 };
   return {
     label,
     x: at.x + (rect.width * view.zoom) / 2,
     // Above the piece: below it belongs to the hit point bars and the name.
     y: at.y - 20,
+    // Drawn by the same code as the ruler, because it is the same thing: a
+    // measured line from here to there.
+    trail: {
+      shape: 'line',
+      from: { x: (token.x || 0) + half.x, y: (token.y || 0) + half.y },
+      to: { x: drag.x + half.x, y: drag.y + half.y },
+    },
   };
 }
 

@@ -11,7 +11,13 @@ import SheetDialog from './SheetDialog.jsx';
 
 const DICE_TYPES = [2, 4, 6, 8, 10, 12, 20, 100];
 
-export default function CustomRollDialog({ open, onClose, onRoll }) {
+// A two-sided die is a coin, and calling it one is clearer than "d2" — it is
+// also what gets thrown on the battle map. The formula it builds is still
+// `Nd2`, which is what every roller in the app understands.
+const DIE_LABELS = { 2: 'Coin' };
+const dieLabel = (faces) => DIE_LABELS[faces] || `d${faces}`;
+
+export default function CustomRollDialog({ open, onClose, onRoll, ...dialogProps }) {
   const [counts, setCounts] = useState(() => Object.fromEntries(DICE_TYPES.map((d) => [d, 0])));
   const [modifier, setModifier] = useState(0);
 
@@ -57,10 +63,11 @@ export default function CustomRollDialog({ open, onClose, onRoll }) {
           </Button>
         </>
       )}
+      {...dialogProps}
     >
       {DICE_TYPES.map((faces) => (
         <Box key={faces} sx={CUSTOM_ROLL_SX.diceRow}>
-          <Typography sx={CUSTOM_ROLL_SX.diceLabel}>d{faces}</Typography>
+          <Typography sx={CUSTOM_ROLL_SX.diceLabel}>{dieLabel(faces)}</Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.4 }}>
             <Button size="small" variant="outlined" onClick={() => adjustDie(faces, -1)} disabled={!counts[faces]} sx={CUSTOM_ROLL_SX.stepBtn}>−</Button>
             <Typography sx={CUSTOM_ROLL_SX.countLabel}>{counts[faces] || 0}</Typography>

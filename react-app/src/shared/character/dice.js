@@ -58,25 +58,37 @@ export function buildD20Meta(result) {
   return meta;
 }
 
-export function rollFormula(formula) {
+// What a formula asks for, without rolling it: one entry per die, plus the flat
+// modifier. Split out from rollFormula because dice thrown on the battle map are
+// rolled by the throw itself — the formula has to say which dice to throw before
+// anything decides what they show.
+export function parseFormula(formula) {
   const clean = String(formula || '').replace(/\s+/g, '');
   const diceRe = /([+-]?)(\d*)d(\d+)|([+-]?\d+)/gi;
-  let total = 0;
-  const rolls = [];
+  const dice = [];
+  let modifier = 0;
   let match;
   while ((match = diceRe.exec(clean))) {
     if (match[3]) {
       const sign = match[1] === '-' ? -1 : 1;
       const count = Number(match[2] || 1);
       const faces = Number(match[3]);
-      for (let i = 0; i < count; i++) {
-        const v = rollDie(faces);
-        rolls.push({ v, faces });
-        total += sign * v;
-      }
+      for (let i = 0; i < count; i++) dice.push({ faces, sign });
     } else if (match[4]) {
-      total += Number(match[4]);
+      modifier += Number(match[4]);
     }
+  }
+  return { dice, modifier };
+}
+
+export function rollFormula(formula) {
+  const { dice, modifier } = parseFormula(formula);
+  let total = modifier;
+  const rolls = [];
+  for (const die of dice) {
+    const v = rollDie(die.faces);
+    rolls.push({ v, faces: die.faces });
+    total += die.sign * v;
   }
   return { total, rolls };
 }

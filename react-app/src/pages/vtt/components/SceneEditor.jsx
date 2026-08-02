@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Box, Chip, CircularProgress, Stack, Typography } from '@mui/material';
-import { Cloud, Eye, Pencil, Pointer, Radio, Ruler, Shield, Users } from 'lucide-react';
+import { Cloud, Dices, Eye, Pencil, Pointer, Radio, Ruler, Shield, Users } from 'lucide-react';
 import { useToast } from '../../../shared/ToastProvider.jsx';
 import { useAuth } from '../../../shared/cloud/AuthProvider.jsx';
 import { mergeVitals, readCampaignVitals } from '../../../shared/campaign/characterVitals.js';
@@ -53,6 +53,10 @@ import {
   setCells,
 } from '../../../shared/vtt/fog.js';
 import { canMarkToken, normalizePlayArea, toScene } from '../../../shared/vtt/scene.js';
+import { addRoll, currentBubbles, currentThrows, rollAuthor } from '../../../shared/vtt/rollFeed.js';
+import { formatRollTitle } from '../../../shared/character/dice.js';
+import { throwFormula } from '../../../shared/vtt/throwRoll.js';
+import { useRollChannel } from '../../../shared/cloud/useRollChannel.js';
 import { sanitizeNoteText } from '../../../shared/vtt/drawing.js';
 import { FEET_PER_CELL } from '../../../shared/vtt/measure.js';
 import { useSceneLive } from '../../../shared/vtt/useSceneLive.js';
@@ -60,6 +64,8 @@ import { useSceneRole } from '../../../shared/vtt/useSceneRole.js';
 import { useEncounterBridge } from '../hooks/useEncounterBridge.js';
 import EncounterImportDialog from './EncounterImportDialog.jsx';
 import MonsterPickerDialog from './MonsterPickerDialog.jsx';
+import DiceToast from '../../../shared/character/DiceToast.jsx';
+import RollLogPanel from './RollLogPanel.jsx';
 import PlayerPanel from './PlayerPanel.jsx';
 import RosterPanel from './RosterPanel.jsx';
 import SceneToolRail from './SceneToolRail.jsx';
@@ -116,6 +122,20 @@ export default function SceneEditor({ scene, onSceneChange }) {
   const [drawColor, setDrawColor] = useState('#e8c96a');
   const [drawWidth, setDrawWidth] = useState(3);
   const [lasers, setLasers] = useState({});
+  // Rolls said at the table. In memory only: a roll is an event, not a record.
+  const [rollFeed, setRollFeed] = useState([]);
+  // Your own roll, in the same panel the character sheet shows it in. Only your
+  // own: everyone else's arrives as a bubble over their piece and a line in the
+  // log, which is what the table needs to see.
+  const [rollToast, setRollToast] = useState(null);
+  // Stable, because the toast dismisses itself on a timer keyed to this
+  // callback: a new function every render restarted the timer every render, and
+  // the toast sat there for good.
+  const dismissRollToast = useCallback(() => setRollToast(null), []);
+  // Yours to clear, and only yours: the log was never anywhere but this page's
+  // memory, so there is nothing to tell anybody else about.
+  const clearRollFeed = useCallback(() => setRollFeed([]), []);
+  const [rollTick, setRollTick] = useState(0);
   const [measureShape, setMeasureShape] = useState('line');
   const [feetPerCell, setFeetPerCell] = useState(FEET_PER_CELL);
   const [remoteMeasure, setRemoteMeasure] = useState(null);
@@ -863,11 +883,90 @@ export default function SceneEditor({ scene, onSceneChange }) {
   const nameForRef = useRef(nameForActor);
   nameForRef.current = nameForActor;
 
+  const { publish: publishRoll } = useRollChannel({
+    campaignId: scene.campaignId,
+    onRoll: (roll) => setRollFeed((current) => addRoll(current, roll)),
+  });
+
+  // A roll made from the map itself. The channel does not echo your own
+  // broadcast back to you, so the feed is fed here as well as published.
+  const handleCustomRoll = useCallback((formula) => {
+    // One id for everyone, and the seed the throw is simulated from: the roll is
+    // the same event, with the same dice landing the same way, on every screen.
+    const id = `custom:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
+    // Thrown, not generated: the dice come down on the map and the faces they
+    // land on are the result.
+    const thrown = throwFormula(formula, id);
+    if (!thrown) return;
+
+    const entry = {
+      id,
+      label: formatRollTitle('Custom Roll', formula),
+      detail: thrown.detail,
+      total: thrown.total,
+      rolls: thrown.rolls,
+      // Only when there is one: a bare "+0" under a damage roll is noise.
+      ...(thrown.modifier ? { meta: { bonus: thrown.modifier } } : {}),
+      thrown: true,
+      timestamp: Date.now(),
+      ...rollAuthor({
+        isGm: role.isGm,
+        ownedCharacterIds: role.ownedCharacterIds,
+        tokens,
+        roster,
+      }),
+    };
+    setRollFeed((current) => addRoll(current, entry));
+    setRollToast(entry);
+    publishRoll(entry);
+  }, [publishRoll, role.isGm, role.ownedCharacterIds, roster, tokens]);
+
+  // A bubble expires on its own, and nothing else on the page changes when it
+  // does — so the clock has to nudge the render.
+  useEffect(() => {
+    if (!rollFeed.length) return undefined;
+    const timer = setInterval(() => setRollTick((tick) => tick + 1), 1000);
+    return () => clearInterval(timer);
+  }, [rollFeed.length]);
+
+  const tokenByCharacter = useMemo(() => new Map(
+    tokens.filter((token) => token.characterId).map((token) => [token.characterId, token]),
+  ), [tokens]);
+
+  const rollBubbles = useMemo(() => (
+    currentBubbles(rollFeed)
+      .map((roll) => ({ roll, token: tokenByCharacter.get(roll.characterId) }))
+      .filter((entry) => entry.token)
+    // `rollTick` is what retires a bubble whose time is up.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  ), [rollFeed, rollTick, tokenByCharacter]);
+
+  // The dice themselves, which land next to the roller's piece — or in the
+  // middle of the board when the roller has none, as the GM does.
+  const diceThrows = useMemo(() => (
+    currentThrows(rollFeed)
+      .map((roll) => ({ roll, token: tokenByCharacter.get(roll.characterId) || null }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  ), [rollFeed, rollTick, tokenByCharacter]);
+
   const laserDots = useMemo(() => Object.values(lasers), [lasers]);
 
   // What the rail offers, in the order a session needs it. A player gets the two
   // groups that are theirs; the rest would only be buttons the database refuses.
   const toolGroups = useMemo(() => {
+    const rollsGroup = {
+      id: 'rolls',
+      label: 'Rolls',
+      icon: Dices,
+      content: (
+        <RollLogPanel
+          feed={rollFeed}
+          onCustomRoll={handleCustomRoll}
+          onClear={clearRollFeed}
+        />
+      ),
+    };
+
     const drawGroup = {
       id: 'draw',
       label: 'Draw',
@@ -905,6 +1004,7 @@ export default function SceneEditor({ scene, onSceneChange }) {
           ),
         },
         drawGroup,
+        rollsGroup,
         {
           id: 'laser',
           label: 'Laser',
@@ -918,7 +1018,9 @@ export default function SceneEditor({ scene, onSceneChange }) {
           content: (
             <MeasurePanel
               paintMode={paintMode}
-              measureShape={measureShape}
+              rollBubbles={rollBubbles}
+        diceThrows={diceThrows}
+        measureShape={measureShape}
               feetPerCell={feetPerCell}
               onPaintModeChange={setPaintMode}
               onShapeChange={setMeasureShape}
@@ -948,6 +1050,7 @@ export default function SceneEditor({ scene, onSceneChange }) {
         ),
       },
       drawGroup,
+      rollsGroup,
       {
         id: 'laser',
         label: 'Laser',
@@ -961,7 +1064,9 @@ export default function SceneEditor({ scene, onSceneChange }) {
         content: (
           <MeasurePanel
             paintMode={paintMode}
-            measureShape={measureShape}
+            rollBubbles={rollBubbles}
+        diceThrows={diceThrows}
+        measureShape={measureShape}
             feetPerCell={feetPerCell}
             onPaintModeChange={setPaintMode}
             onShapeChange={setMeasureShape}
@@ -993,6 +1098,7 @@ export default function SceneEditor({ scene, onSceneChange }) {
     handlePlaceCharacter, handlePlayAreaChange, handleUndoDrawing, handleUploadMap,
     handleUploadBackground, handleShownImageChange, handleAddImage, paintMode,
     role.isGm, role.ownedCharacterIds, roster, scene, tokens, measureShape, feetPerCell,
+    rollFeed, handleCustomRoll, clearRollFeed,
   ]);
 
   const menuToken = useMemo(
@@ -1100,12 +1206,17 @@ export default function SceneEditor({ scene, onSceneChange }) {
         onWriteNote={handleWriteNote}
         onLaser={handleLaser}
         lasers={laserDots}
+        rollBubbles={rollBubbles}
+        diceThrows={diceThrows}
         measureShape={measureShape}
         feetPerCellForRuler={feetPerCell}
         onMeasure={handleMeasure}
         remoteMeasure={remoteMeasure}
         feetPerCell={feetPerCell}
         controls={<SceneToolRail groups={toolGroups} />}
+        // Inside the viewport, not beside it: a fullscreen map paints nothing
+        // that is not one of its own descendants.
+        toast={<DiceToast toast={rollToast} onClose={dismissRollToast} />}
         // Bottom left, opposite the fullscreen button: the layer you are editing
         // is a constant piece of state, not a setting you go and find.
         layerSwitch={role.isGm

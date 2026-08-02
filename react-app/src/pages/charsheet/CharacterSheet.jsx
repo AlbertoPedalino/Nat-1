@@ -14,7 +14,7 @@ import Skills from './components/Skills.jsx';
 import Movement from './components/Movement.jsx';
 import RightTop from './components/RightTop.jsx';
 import TabsPanel from './components/TabsPanel.jsx';
-import DiceToast from './components/DiceToast.jsx';
+import DiceToast from '../../shared/character/DiceToast.jsx';
 import { deriveSheetState } from './state.js';
 import { ProficiencySetsProvider } from './context/ProficiencySetsContext.jsx';
 import { SheetActionsProvider } from './context/SheetActionsContext.jsx';
@@ -34,7 +34,9 @@ import { applyFreeCastRest, getFreeCastDefsForCharacter } from './logic/spellsTa
 import { adapterRegistry as installedRegistry } from '../../adapters/registry.js';
 import { ensureSheetRuntimeAdapters } from './logic/sheetRuntimeAdapters.js';
 import { loadItems, loadOptionalFeatures, loadConditions, reconcileInventoryWithItemsDb } from '../charbuilder/logic/dataLoaders.js';
-import { updateCloudCharacterData } from '../../shared/cloud/cloudCharacters.js';
+import { fetchCloudMeta, updateCloudCharacterData } from '../../shared/cloud/cloudCharacters.js';
+import { isCloudConfigured } from '../../shared/cloud/supabaseClient.js';
+import { useRollChannel } from '../../shared/cloud/useRollChannel.js';
 import { SYNCED_VITALS, clampCharacterVitals } from '../../shared/character/vitals.js';
 import {
   getActiveCharId,
@@ -77,6 +79,10 @@ export default function CharacterSheet({ externalChar = null, externalCharId = n
   const [charId, setCharId] = useState(null);
   const [tab, setTab] = useState(0);
   const [diceToast, setDiceToast] = useState(null);
+  const [campaignId, setCampaignId] = useState(null);
+  // Rolls are shared with the campaign, not with a scene: this sheet has no idea
+  // which map is up and does not need to learn.
+  const { publish: publishRoll } = useRollChannel({ campaignId });
   const [rollLog, setRollLog] = useState([]);
   const [resources, setResources] = useState({});
   const [freeCastUses, setFreeCastUses] = useState({});
@@ -231,11 +237,27 @@ export default function CharacterSheet({ externalChar = null, externalCharId = n
     persist({ resources: next });
   }, [persist]);
 
+  useEffect(() => {
+    let cancelled = false;
+    if (!charId || !isCloudConfigured()) {
+      setCampaignId(null);
+      return () => { cancelled = true; };
+    }
+    fetchCloudMeta(charId)
+      .then((meta) => { if (!cancelled) setCampaignId(meta?.campaign_id || null); })
+      .catch(() => { if (!cancelled) setCampaignId(null); });
+    return () => { cancelled = true; };
+  }, [charId]);
+
   const showDiceToast = useCallback((label, detail, total, rolls, meta) => {
     const entry = { label, detail, total, rolls, meta, timestamp: Date.now() };
     setDiceToast(entry);
     setRollLog((prev) => [entry, ...prev].slice(0, 50));
-  }, []);
+    // Said out loud at the table: the same entry the toast shows, so a roll
+    // reads on the battle map exactly as it read here. Every roll on this sheet
+    // goes through this one function, custom rolls included.
+    publishRoll({ ...entry, characterId: charId, actorName: C?.name || '' });
+  }, [C?.name, charId, publishRoll]);
 
   // Non-dice events (rests, death-save guards): no roll, no numeric total — just a
   // labelled message. Routes through the same toast so DiceToast renders the detail.

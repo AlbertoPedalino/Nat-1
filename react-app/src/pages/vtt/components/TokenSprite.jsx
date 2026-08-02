@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Box, Typography } from '@mui/material';
 import { describeEffect, effectId, effectPolarity } from '../../../shared/character/combatEffects.js';
 import { conditionLabel } from '../../../shared/character/conditions.js';
@@ -18,6 +18,13 @@ export default function TokenSprite({
   onContextMenu,
 }) {
   const [hovered, setHovered] = useState(false);
+  // Bestiary artwork is a circular token on a transparent background, so a
+  // coloured disc behind it shows through as a ring in the group's colour. The
+  // colour is still the fallback for a piece with no art, or whose art fails to
+  // load, so the two are tracked rather than assumed.
+  const [artworkFailed, setArtworkFailed] = useState(false);
+  useEffect(() => { setArtworkFailed(false); }, [token.imageUrl]);
+  const showArtwork = Boolean(token.imageUrl) && !artworkFailed;
   // Scenery is a rectangle: a rug or a door forced into a circle is unusable,
   // and it wants none of the creature furniture either.
   const isScenery = token.layer === 'map';
@@ -67,9 +74,11 @@ export default function TokenSprite({
           height: '100%',
           borderRadius: isScenery ? 0 : '50%',
           boxSizing: 'border-box',
-          border: isScenery && !selected ? 0 : '2px solid',
+          // Artwork stands on its own: no disc under it and no ring round it,
+          // only the selection highlight when it is picked.
+          border: (isScenery || showArtwork) && !selected ? 0 : '2px solid',
           borderColor: selected ? 'primary.main' : (token.color || 'rgba(0,0,0,0.6)'),
-          bgcolor: isScenery ? 'transparent' : (token.color || 'secondary.main'),
+          bgcolor: isScenery || showArtwork ? 'transparent' : (token.color || 'secondary.main'),
           outline: token.layer === 'gm' ? '2px dashed rgba(232,201,106,0.9)' : 'none',
           outlineOffset: '-4px',
           overflow: 'hidden',
@@ -78,15 +87,15 @@ export default function TokenSprite({
           justifyContent: 'center',
         }}
       >
-        {token.imageUrl ? (
+        {showArtwork ? (
           <Box
             component="img"
             src={token.imageUrl}
             alt=""
             draggable={false}
-            // A missing bestiary image leaves the coloured disc and initials,
-            // which is why the colour is kept even when there is artwork.
-            onError={(event) => { event.currentTarget.style.display = 'none'; }}
+            // Art that will not load hands the piece back to its colour and
+            // initials, rather than leaving a hole on the board.
+            onError={() => setArtworkFailed(true)}
             sx={{
               width: '100%',
               height: '100%',

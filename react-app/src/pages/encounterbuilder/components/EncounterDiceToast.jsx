@@ -1,4 +1,4 @@
-import DiceToast from '../../charsheet/components/DiceToast.jsx';
+import DiceToast from '../../../shared/character/DiceToast.jsx';
 
 export default function EncounterDiceToast({ toast, onClose }) {
   return <DiceToast toast={toast} onClose={onClose} />;

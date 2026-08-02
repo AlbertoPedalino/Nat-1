@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef } from 'react';
 import { Box } from '@mui/material';
+import { useResizeTick } from '../hooks/useResizeTick.js';
 import { decodeCells } from '../../../shared/vtt/fog.js';
 import { cellSize, worldToScreen } from '../../../shared/vtt/geometry.js';
 
@@ -9,6 +10,8 @@ import { cellSize, worldToScreen } from '../../../shared/vtt/geometry.js';
 // costs a few thousand byte writes and one drawImage.
 export default function FogCanvas({ fog, grid, view, opacity }) {
   const canvasRef = useRef(null);
+  // Redraw when the box changes: the canvas is measured in its own pixels.
+  const resizeTick = useResizeTick(canvasRef);
   const bufferRef = useRef(null);
 
   // Layout effect, not effect: the map image moves by CSS transform, which the
@@ -73,7 +76,7 @@ export default function FogCanvas({ fog, grid, view, opacity }) {
       cols * size * view.zoom,
       rows * size * view.zoom,
     );
-  }, [fog, grid, opacity, view]);
+  }, [fog, grid, opacity, view, resizeTick]);
 
   return <Box component="canvas" ref={canvasRef} aria-hidden sx={canvasSx} />;
 }

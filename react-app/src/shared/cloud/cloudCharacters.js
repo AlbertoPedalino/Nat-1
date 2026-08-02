@@ -66,7 +66,7 @@ export async function fetchCloudMeta(charId) {
   const supabase = requireClient();
   const { data, error } = await supabase
     .from(TABLE)
-    .select('updated_at')
+    .select('updated_at, campaign_id, name')
     .eq('id', charId)
     .maybeSingle();
   if (error) throw error;

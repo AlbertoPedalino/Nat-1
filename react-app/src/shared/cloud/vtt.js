@@ -24,7 +24,13 @@ import {
 // cloudSectionCore/sectionDescriptors — there is nothing to snapshot or push.
 
 const MAP_BUCKET = 'map-images';
-const SIGNED_URL_TTL = 60 * 60;
+// Long enough to cover a session. The URL is the cache key in the browser, so a
+// short life meant a fresh signature — and a fresh download of the same
+// megabytes — on every reload.
+const SIGNED_URL_TTL = 8 * 60 * 60;
+// Re-signed a little early, so a link never expires in the middle of a scene.
+const SIGNED_URL_MARGIN_MS = 15 * 60 * 1000;
+const SIGNED_URL_KEY = 'gb:vtt:signed-url:';
 const SCENE_COLUMNS = 'id, campaign_id, name, image_path, background_path, shown_image, grid, fog, is_live, play_area, updated_at';
 const TOKEN_COLUMNS = 'id, scene_id, layer, x, y, w, h, z, character_id, label, color, image_path, image_url, hp_current, hp_max, conditions, effects, source_ref, show_hp, created_by, updated_at';
 const DRAWING_COLUMNS = 'id, scene_id, layer, points, color, width, text, created_by, created_at';
@@ -276,19 +282,52 @@ export async function uploadMapImage(campaignId, sceneId, file) {
 
   const { error } = await supabase.storage
     .from(MAP_BUCKET)
-    .upload(path, file, { cacheControl: '3600', upsert: false });
+    // A path is never reused — every upload mints a new one — so the bytes at a
+    // given address never change and can be cached for as long as the browser
+    // likes.
+    .upload(path, file, { cacheControl: '2592000', upsert: false });
   if (error) throw error;
   return path;
 }
 
-// The bucket is private, so the editor renders through a signed URL that has to
-// be refreshed; callers keep the path, never the URL.
+// The bucket is private, so the editor renders through a signed URL. Callers
+// keep the path and never the URL — but the URL is remembered here, because the
+// browser caches an image by its address: signing afresh on every mount produced
+// a new address for the same bytes and downloaded a whole battlemap again on
+// each reload.
+function readCachedUrl(path) {
+  try {
+    const raw = localStorage.getItem(SIGNED_URL_KEY + path);
+    if (!raw) return null;
+    const entry = JSON.parse(raw);
+    return entry?.url && entry.expiresAt - SIGNED_URL_MARGIN_MS > Date.now() ? entry.url : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedUrl(path, url, expiresIn) {
+  try {
+    localStorage.setItem(SIGNED_URL_KEY + path, JSON.stringify({
+      url,
+      expiresAt: Date.now() + expiresIn * 1000,
+    }));
+  } catch {
+    // A full or denied storage only costs the caching, not the picture.
+  }
+}
+
 export async function signMapImage(path, expiresIn = SIGNED_URL_TTL) {
   if (!path) return null;
+  const cached = readCachedUrl(path);
+  if (cached) return cached;
+
   const supabase = requireClient();
   const { data, error } = await supabase.storage.from(MAP_BUCKET).createSignedUrl(path, expiresIn);
   if (error) throw error;
-  return data?.signedUrl || null;
+  const url = data?.signedUrl || null;
+  if (url) writeCachedUrl(path, url, expiresIn);
+  return url;
 }
 
 export async function deleteMapImage(path) {
@@ -296,4 +335,7 @@ export async function deleteMapImage(path) {
   const supabase = requireClient();
   const { error } = await supabase.storage.from(MAP_BUCKET).remove([path]);
   if (error) throw error;
+  try {
+    localStorage.removeItem(SIGNED_URL_KEY + path);
+  } catch {}
 }

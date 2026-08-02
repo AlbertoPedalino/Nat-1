@@ -1,18 +1,19 @@
 import { useEffect } from 'react';
 import { Box, Chip, Typography, IconButton } from '@mui/material';
 import { X } from 'lucide-react';
+import { resolveToastLayout } from './rollToastLayout.js';
+import DiceRow from './DiceRow.jsx';
 
 const FONT = '"Cinzel", Georgia, serif';
 
-const MODE_CHIP = {
-  advantage:    { label: 'ADV', color: '#58b879', borderColor: 'rgba(88,184,121,0.55)', bgColor: 'rgba(88,184,121,0.14)' },
-  disadvantage: { label: 'DIS', color: '#d69245', borderColor: 'rgba(214,146,69,0.55)', bgColor: 'rgba(214,146,69,0.14)' },
-};
+// Shared, not the character sheet's own: the sheet, the encounter builder and
+// the battle map all show a roll the same way, and the layout behind it is
+// shared too so they cannot drift apart.
 
 const toastRootSx = {
   position: 'fixed', bottom: '1.2rem', right: '1.2rem', zIndex: 999,
   bgcolor: 'rgba(26,23,19,0.97)', border: 2, borderColor: 'divider', borderRadius: 2,
-  p: '1rem 1.2rem', minWidth: 240, maxWidth: 340,
+  p: '1rem 1.2rem', minWidth: 260, maxWidth: 360,
   boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
   backdropFilter: 'blur(8px)',
 };
@@ -22,57 +23,6 @@ const modeChipSx = (chip) => ({
   borderRadius: 1, mb: 0.3, color: chip.color, borderColor: chip.borderColor,
   bgcolor: chip.bgColor, '& .MuiChip-label': { px: 0.5 },
 });
-
-function diceColor(value, faces) {
-  if (value >= (faces || 20)) return '#edd48a';
-  if (value <= 1) return '#de675f';
-  return 'text.primary';
-}
-
-function formatBonus(n) {
-  const b = Number(n) || 0;
-  return b >= 0 ? `+${b}` : `${b}`;
-}
-
-function resolveToastLayout(toast) {
-  const rolls = toast.rolls || [];
-  const d20s = rolls.filter((r) => r.faces === 20);
-  const keptD20 = d20s.find((r) => r.kept) || d20s[0];
-
-  const mode = toast.meta?.mode;
-  const bonus = toast.meta?.bonus;
-  const hasBonus = Number.isFinite(bonus);
-  // Damage/non-d20 mathStr spaces out the flat modifier ("2d6 [4, 5] + 3"),
-  // so strip whitespace before matching the trailing "+N" / "-N".
-  const formulaMod = d20s.length === 0 && rolls.length > 0
-    ? String(toast.detail || '').replace(/\s+/g, '').match(/([+-]\d+)$/)?.[1] || null
-    : null;
-
-  const modifier = hasBonus ? formatBonus(bonus) : formulaMod;
-
-  const isCrit = keptD20?.v >= 20;
-  const isFail = keptD20?.v <= 1;
-  let totalColor = 'text.primary';
-  if (isCrit) totalColor = '#edd48a';
-  else if (isFail) totalColor = '#de675f';
-
-  return {
-    label: toast.label,
-    detail: toast.detail || null,
-    modeChip: MODE_CHIP[mode] || null,
-    isCrit,
-    isFail,
-    dice: rolls.map((r) => ({
-      value: r.v,
-      faces: r.faces,
-      color: diceColor(r.v, r.faces),
-      dimmed: r.kept === false,
-    })),
-    modifier,
-    total: toast.total != null && toast.total !== '' ? toast.total : null,
-    totalColor,
-  };
-}
 
 export default function DiceToast({ toast, onClose }) {
   useEffect(() => {
@@ -84,6 +34,9 @@ export default function DiceToast({ toast, onClose }) {
   if (!toast) return null;
 
   const layout = resolveToastLayout(toast);
+  // The moment of the throw: two rolls a second apart are two throws, and the
+  // same throw re-rendered is still one.
+  const seed = `${toast.timestamp || 0}:${layout.label}`;
 
   return (
     <Box sx={{
@@ -114,26 +67,21 @@ export default function DiceToast({ toast, onClose }) {
         <Chip size="small" label={layout.modeChip.label} variant="outlined" sx={modeChipSx(layout.modeChip)} />
       )}
 
-      {(layout.dice.length > 0 || layout.modifier) && (
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.3, my: 0.4, alignItems: 'center' }}>
-          {layout.dice.map((d, i) => (
-            <Box key={i} sx={{
-              bgcolor: d.dimmed ? 'rgba(46,42,34,1)' : 'rgba(202,165,80,0.16)',
-              border: 1, borderColor: d.dimmed ? 'divider' : 'primary.main', borderRadius: 1,
-              width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontFamily: FONT, fontSize: '0.875rem', fontWeight: 700,
-              opacity: d.dimmed ? 0.35 : 1, color: d.color,
-            }}>
-              {d.value}
-            </Box>
-          ))}
-          {layout.modifier && (
-            <Typography sx={{ fontSize: '0.875rem', color: 'text.secondary', fontFamily: FONT, fontWeight: 700, ml: 0.3 }}>
-              {layout.modifier}
-            </Typography>
-          )}
-        </Box>
-      )}
+      <DiceRow
+        // Keyed by the throw, not just seeded by it: rolling again while the
+        // toast is still up replaces its contents rather than remounting them,
+        // and a CSS animation that never remounts never plays again.
+        key={seed}
+        dice={layout.dice}
+        modifier={layout.modifier}
+        size={58}
+        seed={seed}
+        // The whole solid, however many faces it has: a toast shows one roll at
+        // a time, and this is where you actually look at what came up. A fistful
+        // of hundred-sided dice is thousands of separately composited planes, so
+        // a big handful still falls back to the face they landed on.
+        solid={layout.dice.length <= 3}
+      />
 
       {layout.total != null && (
         <Typography sx={{

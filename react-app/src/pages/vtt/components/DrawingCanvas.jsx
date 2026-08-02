@@ -1,11 +1,14 @@
 import { useLayoutEffect, useRef } from 'react';
 import { Box } from '@mui/material';
+import { useResizeTick } from '../hooks/useResizeTick.js';
 import { cellSize, worldToScreen } from '../../../shared/vtt/geometry.js';
 
 // Committed strokes plus the one still under the pointer, on the same canvas so
 // the live stroke lines up exactly with where it will land.
 export default function DrawingCanvas({ drawings, live, lasers, measure, grid, view, onTop = false }) {
   const canvasRef = useRef(null);
+  // Redraw when the box changes: the canvas is measured in its own pixels.
+  const resizeTick = useResizeTick(canvasRef);
 
   // Layout effect, not effect: the map image moves by CSS transform, which the
   // browser applies in the same paint as this commit. Drawing in a plain effect
@@ -159,7 +162,7 @@ export default function DrawingCanvas({ drawings, live, lasers, measure, grid, v
         context.fillText(laser.label, at.x, at.y + radius * 2.4);
       }
     }
-  }, [drawings, grid, lasers, live, measure, view]);
+  }, [drawings, grid, lasers, live, measure, view, resizeTick]);
 
   return <Box component="canvas" ref={canvasRef} aria-hidden sx={{ ...canvasSx, ...(onTop ? topSx : null) }} />;
 }
