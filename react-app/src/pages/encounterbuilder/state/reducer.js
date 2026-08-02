@@ -381,6 +381,7 @@ function importCampaignPlayers(state, campaignPlayers) {
       // imported character's conditions behind on their sheet.
       ...pickCharacterVitals(player),
       iconColor: player.iconColor,
+      portraitPath: player.portraitPath || null,
       color: player.iconColor || PLAYER_COLORS[players.length % PLAYER_COLORS.length],
     }, players.length);
     const existingIndex = players.findIndex((item) => item.sourceId === next.sourceId);

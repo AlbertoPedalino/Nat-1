@@ -5,6 +5,7 @@ import { useToast } from '../../../shared/ToastProvider.jsx';
 import { useAuth } from '../../../shared/cloud/AuthProvider.jsx';
 import { mergeVitals, readCampaignVitals } from '../../../shared/campaign/characterVitals.js';
 import { toRoster, toRosterEntry, withSheetVitals } from '../../../shared/campaign/roster.js';
+import { usePortraits } from '../../../shared/character/usePortraits.js';
 import { listCampaignCharacters } from '../../../shared/cloud/campaigns.js';
 import { patchCharacterData } from '../../../shared/cloud/cloudCharacters.js';
 import {
@@ -34,8 +35,10 @@ import {
 } from '../../../shared/vtt/liveScene.js';
 import {
   canEraseDrawing,
+  canMoveDrawing,
   drawingAtPoint,
   lastDrawing,
+  movedPoints,
   toDrawing,
 } from '../../../shared/vtt/drawing.js';
 import {
@@ -119,6 +122,7 @@ export default function SceneEditor({ scene, onSceneChange }) {
   const [imageSize, setImageSize] = useState(null);
   const [tokenImageUrls, setTokenImageUrls] = useState({});
   const [drawings, setDrawings] = useState([]);
+  const [selectedDrawingId, setSelectedDrawingId] = useState(null);
   const [drawColor, setDrawColor] = useState('#e8c96a');
   const [drawWidth, setDrawWidth] = useState(3);
   const [lasers, setLasers] = useState({});
@@ -305,8 +309,13 @@ export default function SceneEditor({ scene, onSceneChange }) {
     }
     const drawing = toDrawing(payload?.new);
     if (!drawing) return;
+    // Insert or update, the same either way: a mark that was moved keeps its id,
+    // so it has to replace the copy already held rather than be ignored as one
+    // that is already there.
     setDrawings((current) => (
-      current.some((item) => item.id === drawing.id) ? current : [...current, drawing]
+      current.some((item) => item.id === drawing.id)
+        ? current.map((item) => (item.id === drawing.id ? drawing : item))
+        : [...current, drawing]
     ));
   }, []);
 
@@ -493,6 +502,31 @@ export default function SceneEditor({ scene, onSceneChange }) {
   const handleErase = useCallback((point) => {
     removeDrawing(drawingAtPoint(erasable, point));
   }, [erasable, removeDrawing]);
+
+  // What is under the pointer and yours to pick up. The same rule as the
+  // eraser's, so nothing offers itself to be dragged and then refuses to move.
+  const movableDrawing = useCallback((point) => (
+    drawingAtPoint(
+      drawings.filter((drawing) => canMoveDrawing(drawing, { isGm: role.isGm, userId: user?.id })),
+      point,
+    )
+  ), [drawings, role.isGm, user?.id]);
+
+  const handleMoveDrawing = useCallback(async (drawing, offset) => {
+    const points = movedPoints(drawing, offset.x, offset.y);
+    // Shown where it was dropped straight away; the row catches up.
+    setDrawings((current) => current.map((item) => (
+      item.id === drawing.id ? { ...item, points } : item
+    )));
+    try {
+      await moveDrawing(drawing.id, points);
+    } catch (cause) {
+      setDrawings((current) => current.map((item) => (
+        item.id === drawing.id ? drawing : item
+      )));
+      notify('error', cause?.message || 'Could not move that mark.');
+    }
+  }, [notify]);
 
   // A note is a stroke with words on it, so it takes the same path: same table,
   // same visibility rules, same undo and eraser.
@@ -1117,14 +1151,26 @@ export default function SceneEditor({ scene, onSceneChange }) {
       : drawings
   ), [activeLayer, drawings, role.isGm]);
 
+  // The party's faces. Held by the browser after the first load, so a scene with
+  // six characters in it does not go back to the bucket on every visit.
+  const portraits = usePortraits(useMemo(
+    () => roster.map((entry) => entry.portraitPath),
+    [roster],
+  ));
+
   const visibleTokens = useMemo(
     // Sheet hit points are overlaid at render, never copied onto the row: the
     // character sheet stays the one place a character's HP lives.
     () => withSheetVitals(resolveTokens(tokens, ghosts, draggingRef.current), roster)
-      .map((token) => (token.imagePath && tokenImageUrls[token.imagePath]
-        ? { ...token, imageUrl: tokenImageUrls[token.imagePath] }
-        : token)),
-    [ghosts, roster, tokenImageUrls, tokens],
+      .map((token) => {
+        // A monster's artwork is a file on the scene; a character's is their
+        // portrait, which belongs to the sheet and follows it everywhere.
+        const url = (token.portraitPath && portraits[token.portraitPath])
+          || (token.imagePath && tokenImageUrls[token.imagePath])
+          || null;
+        return url ? { ...token, imageUrl: url } : token;
+      }),
+    [ghosts, portraits, roster, tokenImageUrls, tokens],
   );
 
   if (loading || role.loading) return <CircularProgress size={24} />;
@@ -1199,6 +1245,10 @@ export default function SceneEditor({ scene, onSceneChange }) {
         onContextMenu={(token, at) => setMenu({ tokenId: token.id, at })}
         onDropCharacter={handleDropCharacter}
         drawings={visibleDrawings}
+        movableDrawing={movableDrawing}
+        selectedDrawingId={selectedDrawingId}
+        onSelectDrawing={setSelectedDrawingId}
+        onMoveDrawing={handleMoveDrawing}
         drawColor={drawColor}
         drawWidth={drawWidth}
         onDrawEnd={handleDrawEnd}

@@ -126,6 +126,22 @@ export function canEraseDrawing(drawing, { isGm = false, userId = null } = {}) {
   return drawing.layer !== 'gm' && Boolean(userId) && drawing.createdBy === userId;
 }
 
+// Moving a mark is editing it, and the same people may do it: the GM anything,
+// a player only what they drew. Kept as its own name because the interface asks
+// a different question even when the answer is the same one.
+export const canMoveDrawing = canEraseDrawing;
+
+// The same mark, somewhere else. Points are in cells and fractional, so a mark
+// dragged across the board keeps its shape at any zoom and stays where it was
+// put if the grid is later recalibrated.
+export function movedPoints(drawing, dx, dy) {
+  const shift = { x: numberOr(dx, 0), y: numberOr(dy, 0) };
+  return normalizePoints((drawing?.points || []).map((point) => ({
+    x: point.x + shift.x,
+    y: point.y + shift.y,
+  })));
+}
+
 export function lastDrawing(drawings) {
   return (drawings || []).reduce(
     (latest, drawing) => (!latest || (drawing.createdAt || 0) >= (latest.createdAt || 0) ? drawing : latest),

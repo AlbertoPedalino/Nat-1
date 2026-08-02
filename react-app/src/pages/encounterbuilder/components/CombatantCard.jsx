@@ -8,6 +8,7 @@ import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import CombatantConditions from './CombatantConditions.jsx';
 import CombatantEffects from './CombatantEffects.jsx';
 import MonsterToken from './MonsterToken.jsx';
+import PortraitBadge from '../../../shared/character/PortraitBadge.jsx';
 
 export default function CombatantCard({ combatant, active }) {
   const { dispatch } = useEncounterBuilder();
@@ -74,12 +75,15 @@ export default function CombatantCard({ combatant, active }) {
                 <MonsterToken monster={combatant.monsterData} size={34} fallbackText={combatant.name?.[0]} />
               </Box>
             ) : (
-              <Avatar
+              <PortraitBadge
+                path={combatant.portraitPath}
+                color={combatant.color}
+                size={34}
                 onClick={openDetails}
-                sx={(theme) => ({ ...avatarBaseSx, bgcolor: combatant.color || theme.palette.pcToken, cursor: 'pointer' })}
+                sx={{ ...avatarBaseSx, cursor: 'pointer' }}
               >
-                PC
-              </Avatar>
+                <Avatar sx={{ ...avatarBaseSx, bgcolor: 'transparent' }}>PC</Avatar>
+              </PortraitBadge>
             )}
             <Box sx={{ minWidth: 0, flex: 1 }}>
               <Stack direction="row" spacing={0.75} sx={{ minWidth: 0, alignItems: 'center' }}>

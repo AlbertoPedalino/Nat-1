@@ -338,12 +338,10 @@ export function DrawPanel({
       </ToggleButtonGroup>
 
       <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-        <Box
-          component="input"
-          type="color"
+        <ColorField
           value={drawColor}
-          onChange={(event) => onDrawColorChange(event.target.value)}
-          aria-label="Ink colour"
+          onChange={onDrawColorChange}
+          label="Ink colour"
           sx={colorInputSx}
         />
         <TextField

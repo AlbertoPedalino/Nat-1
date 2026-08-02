@@ -1,10 +1,12 @@
-import { useState } from 'react';
-import { Box, Typography, Button, Chip } from '@mui/material';
-import { ArrowLeft, Home, Sun, Moon, Wand2, Hammer, Axe, Music, Cross, Feather, Sword, Dumbbell, Shield, Compass, Eye, Sparkles, Flame, BookOpen, Dices, Trash2 } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Box, Typography, Button, Chip, Menu, MenuItem } from '@mui/material';
+import { ArrowLeft, Home, Sun, Moon, Wand2, Hammer, Axe, Music, Cross, Feather, Sword, Dumbbell, Shield, Compass, Eye, Sparkles, Flame, BookOpen, Dices, Trash2, ImagePlus, Palette } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { levelFromXp, xpForLevel, xpProgressPct, MAX_LEVEL } from '../../../shared/character/xp.js';
 import { rollFormula as rollFormulaDice, formatRollTitle } from '../../../shared/character/dice.js';
 import IconColorPicker from '../../../shared/character/IconColorPicker.jsx';
+import PortraitBadge from '../../../shared/character/PortraitBadge.jsx';
+import { deletePortrait, uploadPortrait } from '../../../shared/cloud/characterArt.js';
 import SheetDialog from '../../../shared/character/SheetDialog.jsx';
 import XpDeltaControl from '../../../shared/character/XpDeltaControl.jsx';
 import CloudMenu from '../../../shared/cloud/CloudMenu.jsx';
@@ -89,6 +91,33 @@ const appNavButtonSx = {
 
 export default function TopBar({ C, sheet, charId, readOnly = false, embedded = false, onShortRest, onLongRest, onUpdateXp, onUpdateCharacter, rollLog, onClearRollLog, onShowToast }) {
   const [colorAnchor, setColorAnchor] = useState(null);
+  const [badgeAnchor, setBadgeAnchor] = useState(null);
+  const portraitInputRef = useRef(null);
+
+  // The path goes into the character like any other field, so it travels with
+  // the sheet and is what every other screen reads. The picture itself is in the
+  // bucket, and a copy of it stays in this browser.
+  const handlePortraitPicked = async (event) => {
+    const file = event.target.files?.[0];
+    // Cleared straight away, or picking the same file twice in a row is silent.
+    event.target.value = '';
+    if (!file) return;
+    try {
+      const path = await uploadPortrait(charId, file);
+      const previous = C.portraitPath;
+      onUpdateCharacter?.((prev) => ({ ...prev, portraitPath: path }));
+      if (previous) deletePortrait(previous);
+    } catch (cause) {
+      onShowToast?.('Portrait', cause?.message || 'Could not use that image.', null, null);
+    }
+  };
+
+  const handleRemovePortrait = () => {
+    setBadgeAnchor(null);
+    const previous = C.portraitPath;
+    onUpdateCharacter?.((prev) => ({ ...prev, portraitPath: null }));
+    if (previous) deletePortrait(previous);
+  };
   const [rollLogOpen, setRollLogOpen] = useState(false);
   const [customRollOpen, setCustomRollOpen] = useState(false);
   const navigate = useNavigate();
@@ -171,19 +200,53 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
         py: embedded ? '0.35rem' : { xs: '0.35rem', md: '0.6rem' },
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '0.4rem', width: embedded ? '100%' : { xs: '100%', md: 'auto' } }}>
-          <Box
-            onClick={readOnly ? undefined : (e) => setColorAnchor(e.currentTarget)}
+          <PortraitBadge
+            path={C.portraitPath}
+            color={C.classIconColor}
+            size={embedded ? 36 : { xs: 36, md: 52 }}
             sx={{
-              width: embedded ? 36 : { xs: 36, md: 52 }, height: embedded ? 36 : { xs: 36, md: 52 },
-              borderRadius: '50%', border: 2, borderColor: 'divider', cursor: readOnly ? 'default' : 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-              bgcolor: C.classIconColor || 'rgba(46,42,34,1)', fontSize: embedded ? '1rem' : { xs: '1rem', md: '1.4rem' },
+              cursor: readOnly ? 'default' : 'pointer',
+              fontSize: embedded ? '1rem' : { xs: '1rem', md: '1.4rem' },
               transition: 'border-color 0.15s',
               ...(readOnly ? {} : { '&:hover': { borderColor: '#caa550' } }),
             }}
+            onClick={readOnly ? undefined : (event) => setBadgeAnchor(event.currentTarget)}
           >
             <Icon size={25} />
-          </Box>
+          </PortraitBadge>
+
+          {/* The badge used to open the colour picker straight away. It now asks
+              which of the two you meant, because a portrait replaces the icon
+              the colour is for. */}
+          <Menu
+            anchorEl={badgeAnchor}
+            open={Boolean(badgeAnchor)}
+            onClose={() => setBadgeAnchor(null)}
+          >
+            <MenuItem onClick={() => { setBadgeAnchor(null); portraitInputRef.current?.click(); }}>
+              <ImagePlus size={14} style={{ marginRight: 8 }} />
+              {C.portraitPath ? 'Change portrait' : 'Add portrait'}
+            </MenuItem>
+            {C.portraitPath ? (
+              <MenuItem onClick={handleRemovePortrait}>
+                <Trash2 size={14} style={{ marginRight: 8 }} />
+                Remove portrait
+              </MenuItem>
+            ) : null}
+            <MenuItem onClick={(event) => { setColorAnchor(event.currentTarget); setBadgeAnchor(null); }}>
+              <Palette size={14} style={{ marginRight: 8 }} />
+              Icon colour
+            </MenuItem>
+          </Menu>
+
+          <Box
+            component="input"
+            type="file"
+            accept="image/*"
+            ref={portraitInputRef}
+            onChange={handlePortraitPicked}
+            sx={{ display: 'none' }}
+          />
           <IconColorPicker
             anchorEl={colorAnchor}
             onClose={() => setColorAnchor(null)}

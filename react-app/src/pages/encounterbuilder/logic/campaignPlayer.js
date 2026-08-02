@@ -54,6 +54,9 @@ export function toEncounterPlayer(row, campaign) {
     ...combatantToSheetPatch(vitals),
     initMod: clampInt(summary.initiative, -20, 30, 0),
     iconColor: normalizeIconColor(sheet.classIconColor),
+    // The face the sheet chose. A path, not a picture: the bytes are in the
+    // bucket and every screen that shows this character reads the same one.
+    portraitPath: typeof sheet.portraitPath === 'string' ? sheet.portraitPath : null,
     updatedAt: row.updated_at || null,
   };
 }

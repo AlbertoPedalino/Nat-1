@@ -2,9 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   canEraseDrawing,
+  canMoveDrawing,
   drawingAtPoint,
   isDrawable,
   lastDrawing,
+  movedPoints,
   normalizePoints,
   simplifyStroke,
   toDrawing,
@@ -111,4 +113,29 @@ test('the newest stroke wins under the eraser and under undo', () => {
   assert.equal(drawingAtPoint([older, newer], { x: 2, y: 0 })?.id, 'new');
   assert.equal(lastDrawing([older, newer])?.id, 'new');
   assert.equal(lastDrawing([]), null);
+});
+
+// A mark can be picked up and put down somewhere else. Its points are in cells
+// and fractional, so it keeps its shape at any zoom.
+test('a mark moved keeps its shape', () => {
+  const drawing = { points: [{ x: 1, y: 1 }, { x: 3, y: 2 }] };
+  assert.deepEqual(movedPoints(drawing, 2, -0.5), [{ x: 3, y: 0.5 }, { x: 5, y: 1.5 }]);
+});
+
+test('a mark moved nowhere is where it was', () => {
+  const drawing = { points: [{ x: 1.25, y: 1 }] };
+  assert.deepEqual(movedPoints(drawing, 0, 0), [{ x: 1.25, y: 1 }]);
+  assert.deepEqual(movedPoints(null, 1, 1), []);
+});
+
+// Moving is editing, so it answers to the same rule as rubbing out: the GM
+// anything, a player only what they drew.
+test('who may move a mark is who may erase it', () => {
+  const mine = { layer: 'tokens', createdBy: 'me' };
+  const theirs = { layer: 'tokens', createdBy: 'them' };
+  const secret = { layer: 'gm', createdBy: 'me' };
+  assert.equal(canMoveDrawing(mine, { userId: 'me' }), true);
+  assert.equal(canMoveDrawing(theirs, { userId: 'me' }), false);
+  assert.equal(canMoveDrawing(secret, { userId: 'me' }), false);
+  assert.equal(canMoveDrawing(theirs, { isGm: true }), true);
 });

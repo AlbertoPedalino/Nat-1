@@ -28,6 +28,10 @@ export default function TokenSprite({
   // Scenery is a rectangle: a rug or a door forced into a circle is unusable,
   // and it wants none of the creature furniture either.
   const isScenery = token.layer === 'map';
+  // A piece standing for somebody's character, as opposed to a creature the GM
+  // put down. Only these wear a colour: the party is who you need to pick out
+  // of a crowded board, and giving every goblin a bright ring buries them.
+  const isCharacter = Boolean(token.characterId);
   const conditions = token.conditions || [];
   const effects = token.effects || [];
   // One badge for everything the GM has flagged on this creature: two counters
@@ -42,6 +46,14 @@ export default function TokenSprite({
   // The label the GM typed in secret replaces the public one for them only; a
   // player never receives it in the first place.
   const name = token.secretLabel || token.label || '';
+
+  const ringWidth = () => {
+    if (isScenery) return selected ? 3 : 0;
+    // Thick enough to read as the player's colour from across the table, at the
+    // size a piece actually is on a zoomed-out board.
+    if (isCharacter || selected) return 5;
+    return showArtwork ? 0 : 2;
+  };
 
   return (
     <Box
@@ -74,10 +86,16 @@ export default function TokenSprite({
           height: '100%',
           borderRadius: isScenery ? 0 : '50%',
           boxSizing: 'border-box',
-          // Artwork stands on its own: no disc under it and no ring round it,
-          // only the selection highlight when it is picked.
-          border: (isScenery || showArtwork) && !selected ? 0 : '2px solid',
-          borderColor: selected ? 'primary.main' : (token.color || 'rgba(0,0,0,0.6)'),
+          // Artwork stands on its own: no disc behind it, which would show
+          // through the transparent corners of a bestiary token as a coloured
+          // circle. A character keeps a thick ring in their own colour; a
+          // creature gets only the thin dark edge that separates it from the
+          // map, and none at all once it has its own artwork.
+          borderStyle: 'solid',
+          borderWidth: ringWidth(),
+          borderColor: selected
+            ? 'primary.main'
+            : (isCharacter ? (token.color || 'rgba(0,0,0,0.6)') : 'rgba(0,0,0,0.6)'),
           bgcolor: isScenery || showArtwork ? 'transparent' : (token.color || 'secondary.main'),
           outline: token.layer === 'gm' ? '2px dashed rgba(232,201,106,0.9)' : 'none',
           outlineOffset: '-4px',

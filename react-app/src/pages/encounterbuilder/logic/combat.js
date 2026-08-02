@@ -109,6 +109,7 @@ export function buildCombat(encounter, players, encounterId = null, rng = Math.r
       shape: null,
       shapeClr: null,
       color: player.color || player.iconColor || PLAYER_COLORS[index % PLAYER_COLORS.length],
+      portraitPath: player.portraitPath || null,
     });
   });
   return {

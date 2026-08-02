@@ -306,6 +306,17 @@ create policy map_drawings_insert on public.map_drawings
     )
   );
 
+-- Marks can be picked up and moved, which is an update rather than a new row:
+-- a stroke keeps its identity, so everyone watching sees the same one move
+-- instead of one vanishing and another appearing. Same rule as rubbing out —
+-- the GM anything, a player only their own.
+drop policy if exists map_drawings_update on public.map_drawings;
+create policy map_drawings_update on public.map_drawings
+  for update using (
+    public.is_campaign_gm(public.map_scene_campaign(scene_id))
+    or (layer <> 'gm' and created_by = auth.uid())
+  );
+
 -- The GM can clear anything; a player rubs out only their own strokes, or the
 -- undo button would become a way to wipe the GM's annotations.
 drop policy if exists map_drawings_delete on public.map_drawings;

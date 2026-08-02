@@ -5,7 +5,7 @@ import { cellSize, worldToScreen } from '../../../shared/vtt/geometry.js';
 
 // Committed strokes plus the one still under the pointer, on the same canvas so
 // the live stroke lines up exactly with where it will land.
-export default function DrawingCanvas({ drawings, live, lasers, measure, grid, view, onTop = false }) {
+export default function DrawingCanvas({ drawings, selectedId, live, lasers, measure, grid, view, onTop = false }) {
   const canvasRef = useRef(null);
   // Redraw when the box changes: the canvas is measured in its own pixels.
   const resizeTick = useResizeTick(canvasRef);
@@ -46,44 +46,18 @@ export default function DrawingCanvas({ drawings, live, lasers, measure, grid, v
       const points = stroke?.points || [];
       if (!points.length) continue;
 
-      // A note is anchored by one point and drawn as text, not as a mark.
-      if (stroke.text) {
-        const at = toScreen(points[0]);
-        const fontSize = Math.max(10, ((stroke.width || 3) / 3) * cell * view.zoom * 0.4);
-        context.font = `700 ${fontSize}px "EB Garamond", Georgia, serif`;
-        context.textAlign = 'center';
-        context.textBaseline = 'middle';
-        // Outlined rather than boxed: a plate would hide the map under every
-        // label, and text over a busy battlemap is unreadable without one.
-        context.lineWidth = Math.max(2, fontSize / 6);
-        context.strokeStyle = 'rgba(0,0,0,0.85)';
-        context.strokeText(stroke.text, at.x, at.y);
-        context.fillStyle = stroke.color || '#e8c96a';
-        context.fillText(stroke.text, at.x, at.y);
-        continue;
-      }
-      context.strokeStyle = stroke.color || '#e8c96a';
-      // Width is in cells so a stroke keeps its thickness relative to the map
-      // as you zoom, rather than turning into a hairline.
-      context.lineWidth = Math.max(1, ((stroke.width || 3) / 10) * cell * view.zoom);
-
-      const first = toScreen(points[0]);
-      if (points.length === 1) {
-        // A tap is a dot, and a zero-length path draws nothing at all.
-        context.beginPath();
-        context.arc(first.x, first.y, context.lineWidth / 2, 0, Math.PI * 2);
-        context.fillStyle = stroke.color || '#e8c96a';
-        context.fill();
-        continue;
+      // The one in hand, marked out by a halo under it rather than by an
+      // outline around it: a stroke has no outline to draw, and text would lose
+      // the dark edge that makes it readable over a busy map.
+      if (selectedId && stroke.id === selectedId) {
+        context.save();
+        context.shadowColor = 'rgba(111,209,232,0.95)';
+        context.shadowBlur = Math.max(6, cell * view.zoom * 0.25);
+        drawStroke(context, stroke, points, toScreen, cell, view);
+        context.restore();
       }
 
-      context.beginPath();
-      context.moveTo(first.x, first.y);
-      for (const point of points.slice(1)) {
-        const at = toScreen(point);
-        context.lineTo(at.x, at.y);
-      }
-      context.stroke();
+      drawStroke(context, stroke, points, toScreen, cell, view);
     }
 
     // The ruler, above the marks and below the laser: a template you are still
@@ -162,7 +136,7 @@ export default function DrawingCanvas({ drawings, live, lasers, measure, grid, v
         context.fillText(laser.label, at.x, at.y + radius * 2.4);
       }
     }
-  }, [drawings, grid, lasers, live, measure, view, resizeTick]);
+  }, [drawings, grid, lasers, live, measure, selectedId, view, resizeTick]);
 
   return <Box component="canvas" ref={canvasRef} aria-hidden sx={{ ...canvasSx, ...(onTop ? topSx : null) }} />;
 }
@@ -170,6 +144,49 @@ export default function DrawingCanvas({ drawings, live, lasers, measure, grid, v
 // Above the fog and above the pieces. A laser pointing at a creature standing in
 // an unexplored room has to be visible on both, or the gesture means nothing.
 const topSx = { zIndex: 4 };
+
+// One mark, whether it is a line, a dot or a word.
+function drawStroke(context, stroke, points, toScreen, cell, view) {
+  // A note is anchored by one point and drawn as text, not as a mark.
+  if (stroke.text) {
+    const at = toScreen(points[0]);
+    const fontSize = Math.max(10, ((stroke.width || 3) / 3) * cell * view.zoom * 0.4);
+    context.font = `700 ${fontSize}px "EB Garamond", Georgia, serif`;
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    // Outlined rather than boxed: a plate would hide the map under every label,
+    // and text over a busy battlemap is unreadable without one.
+    context.lineWidth = Math.max(2, fontSize / 6);
+    context.strokeStyle = 'rgba(0,0,0,0.85)';
+    context.strokeText(stroke.text, at.x, at.y);
+    context.fillStyle = stroke.color || '#e8c96a';
+    context.fillText(stroke.text, at.x, at.y);
+    return;
+  }
+
+  context.strokeStyle = stroke.color || '#e8c96a';
+  // Width is in cells so a stroke keeps its thickness relative to the map as you
+  // zoom, rather than turning into a hairline.
+  context.lineWidth = Math.max(1, ((stroke.width || 3) / 10) * cell * view.zoom);
+
+  const first = toScreen(points[0]);
+  if (points.length === 1) {
+    // A tap is a dot, and a zero-length path draws nothing at all.
+    context.beginPath();
+    context.arc(first.x, first.y, context.lineWidth / 2, 0, Math.PI * 2);
+    context.fillStyle = stroke.color || '#e8c96a';
+    context.fill();
+    return;
+  }
+
+  context.beginPath();
+  context.moveTo(first.x, first.y);
+  for (const point of points.slice(1)) {
+    const at = toScreen(point);
+    context.lineTo(at.x, at.y);
+  }
+  context.stroke();
+}
 
 const canvasSx = {
   position: 'absolute',

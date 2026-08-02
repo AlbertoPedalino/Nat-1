@@ -21,6 +21,9 @@ export function toRosterEntry(row) {
     ownerId: row.owner || null,
     ownerUsername: row.owner_username || null,
     color: normalizeIconColor(sheet.classIconColor),
+    // The portrait belongs to the sheet, exactly as hit points and conditions
+    // do: the piece on the map shows what the sheet says and never the reverse.
+    portraitPath: typeof sheet.portraitPath === 'string' ? sheet.portraitPath : null,
     // Hit points are deliberately absent here. Current HP is stored on the
     // sheet but max HP is derived — from hit dice, Constitution and class
     // features — so reading `data.maxHP` yields undefined for almost every
@@ -45,6 +48,7 @@ export function rosterVitals(roster) {
       hpMax: entry.hpMax,
       tempHp: entry.tempHp || 0,
       conditions: entry.conditions || [],
+      portraitPath: entry.portraitPath || null,
     });
   }
   return vitals;
@@ -61,9 +65,19 @@ export function withSheetVitals(tokens, roster) {
     // Conditions come from the sheet even when the hit points cannot be derived
     // yet: they are two independent reads, and gating one on the other left a
     // character looking unafflicted until the adapters had loaded.
-    if (sheet.hpMax == null) return { ...token, conditions: sheet.conditions, fromSheet: true };
+    if (sheet.hpMax == null) {
+      return {
+        ...token,
+        conditions: sheet.conditions,
+        portraitPath: sheet.portraitPath,
+        fromSheet: true,
+      };
+    }
     return {
       ...token,
+      // A character's face comes from their sheet too, so changing it on the
+      // sheet changes the piece without anybody touching the map.
+      portraitPath: sheet.portraitPath,
       hpCurrent: sheet.hpCurrent,
       hpMax: sheet.hpMax,
       tempHp: sheet.tempHp,

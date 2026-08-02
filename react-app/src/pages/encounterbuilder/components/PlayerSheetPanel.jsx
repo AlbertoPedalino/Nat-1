@@ -1,5 +1,6 @@
 import { Avatar, Box, Button, Divider, IconButton, Stack, Typography } from '@mui/material';
 import { ExternalLink, X } from 'lucide-react';
+import PortraitBadge from '../../../shared/character/PortraitBadge.jsx';
 import CampaignSheetView from '../../campaignsheet/CampaignSheetView.jsx';
 import { campaignSheetUrl } from '../logic/campaignSheetUrl.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
@@ -30,7 +31,9 @@ export default function PlayerSheetPanel({ selection, onClose }) {
     <>
       <Box sx={playerHeaderSx}>
         <Stack direction="row" spacing={1.5} useFlexGap sx={{ alignItems: 'center', minWidth: 0, pr: 4, flexWrap: 'wrap' }}>
-          <Avatar sx={(theme) => ({ ...avatarSx, bgcolor: combatant.color || theme.palette.pcToken })}>PC</Avatar>
+          <PortraitBadge path={combatant.portraitPath} color={combatant.color} size={avatarSx.width}>
+            <Avatar sx={{ ...avatarSx, bgcolor: 'transparent' }}>PC</Avatar>
+          </PortraitBadge>
           <Box sx={{ minWidth: 0, flex: '1 1 180px' }}>
             <Typography variant="h2" component="div" noWrap>{combatant.name}</Typography>
             <Typography variant="body2" color="text.secondary">

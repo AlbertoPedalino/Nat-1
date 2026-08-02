@@ -3,7 +3,9 @@ import { loadCharacter as storeLoadCharacter, saveCharacter as storeSaveCharacte
 
 const TABLE = 'characters';
 
-async function currentUser() {
+// Exported because a portrait's address begins with the owner's id, which is
+// what the storage policies key on.
+export async function currentUser() {
   const supabase = requireClient();
   const { data, error } = await supabase.auth.getUser();
   if (error) throw error;

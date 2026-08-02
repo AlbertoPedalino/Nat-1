@@ -233,6 +233,22 @@ export async function createDrawing(sceneId, { points, color, width, layer, text
   return toDrawing(data);
 }
 
+// Moving a mark rewrites its points and nothing else: it stays the same row, so
+// everyone watching sees the same stroke move rather than one disappearing and
+// another taking its place.
+export async function moveDrawing(drawingId, points) {
+  if (!drawingId) return null;
+  const supabase = requireClient();
+  const { data, error } = await supabase
+    .from('map_drawings')
+    .update({ points: normalizePoints(points) })
+    .eq('id', drawingId)
+    .select(DRAWING_COLUMNS)
+    .single();
+  if (error) throw error;
+  return toDrawing(data);
+}
+
 export async function deleteDrawing(drawingId) {
   const supabase = requireClient();
   const { error } = await supabase.from('map_drawings').delete().eq('id', drawingId);

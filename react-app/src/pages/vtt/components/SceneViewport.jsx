@@ -16,6 +16,7 @@ import {
   zoomAt,
 } from '../../../shared/vtt/geometry.js';
 import { measureLabel, movementLabel } from '../../../shared/vtt/measure.js';
+import { movedPoints } from '../../../shared/vtt/drawing.js';
 import { isTokenInPlay } from '../../../shared/vtt/scene.js';
 import DrawingCanvas from './DrawingCanvas.jsx';
 import FogCanvas from './FogCanvas.jsx';
@@ -24,6 +25,10 @@ import DiceTray from './DiceTray.jsx';
 import TokenSprite from './TokenSprite.jsx';
 
 const WHEEL_STEP = 1.12;
+// A press has to be still to be a press, and long enough not to be a tap. Both
+// numbers are what a phone's own long-press feels like.
+const LONG_PRESS_MS = 480;
+const LONG_PRESS_SLOP = 12;
 const DRAG_BROADCAST_MS = 40;
 const LASER_BROADCAST_MS = 50;
 
@@ -85,6 +90,10 @@ export default function SceneViewport({
   onContextMenu,
   onDropCharacter,
   drawings,
+  movableDrawing,
+  selectedDrawingId,
+  onSelectDrawing,
+  onMoveDrawing,
   drawColor,
   drawWidth,
   onDrawEnd,
@@ -106,6 +115,12 @@ export default function SceneViewport({
   const hostRef = useRef(null);
   const dragRef = useRef(null);
   const lastLaserRef = useRef(0);
+  // Every finger currently on the map, recorded in the capture phase so a
+  // pinch works even when one of them landed on a piece — a token stops the
+  // event from reaching the host, and the second finger would go unseen.
+  const pointersRef = useRef(new Map());
+  const pinchRef = useRef(null);
+  const longPressRef = useRef(null);
   const [view, setView] = useState(DEFAULT_VIEW);
   const [drag, setDrag] = useState(null);
   // The stroke in progress lives in a ref, not in state. Accumulating it in
@@ -116,6 +131,9 @@ export default function SceneViewport({
   const [strokeTick, setStrokeTick] = useState(0);
   const [imageSize, setImageSize] = useState(null);
   const [fullscreen, setFullscreen] = useState(false);
+  // The stand-in for fullscreen where the browser will not give us the real
+  // thing.
+  const [covering, setCovering] = useState(false);
   // The controls live inside the viewport rather than around it, which is the
   // only way they survive fullscreen — a fullscreen element hides its siblings.
   const [controlsOpen, setControlsOpen] = useState(false);
@@ -124,6 +142,9 @@ export default function SceneViewport({
   // only while a brush is in hand: a state update per mouse move is not worth
   // paying for while merely moving pieces around.
   const [hover, setHover] = useState(null);
+  // The mark being dragged, as an offset in cells: applied at render so the
+  // stroke follows the pointer without a write per frame.
+  const [markDrag, setMarkDrag] = useState(null);
 
   // Fit once per picture: refitting on every render would fight the user's pan,
   // but switching between the battlemap and the background has to reframe — the
@@ -139,26 +160,43 @@ export default function SceneViewport({
     }));
   }, [imageSize, imageUrl]);
 
-  // Real fullscreen rather than a CSS overlay: the map is the whole point of the
-  // page, and the browser chrome is worth the pixels at the table.
+  // Real fullscreen where the browser has it: the map is the whole point of the
+  // page, and the browser's own chrome is worth the pixels at the table.
+  //
+  // iOS has no Fullscreen API for anything but a video, which is why the button
+  // did nothing on a phone — exactly where the screen is smallest and it matters
+  // most. There the map covers the window instead, which is as close as a page
+  // is allowed to get.
   const toggleFullscreen = useCallback(() => {
     const host = hostRef.current;
     if (!host) return;
+    const request = host.requestFullscreen || host.webkitRequestFullscreen;
+    const exit = document.exitFullscreen || document.webkitExitFullscreen;
+    if (!request) {
+      setCovering((current) => !current);
+      return;
+    }
     try {
-      if (document.fullscreenElement) document.exitFullscreen();
-      else host.requestFullscreen?.();
+      if (document.fullscreenElement || document.webkitFullscreenElement) exit.call(document);
+      else request.call(host);
     } catch (_) {
-      // Denied or unsupported: the button simply does nothing rather than
-      // breaking the scene.
+      setCovering((current) => !current);
     }
   }, []);
 
   // Escape and the browser's own control leave fullscreen without telling us,
   // so the icon follows the document rather than our last click.
   useEffect(() => {
-    const sync = () => setFullscreen(document.fullscreenElement === hostRef.current);
+    const sync = () => setFullscreen(
+      document.fullscreenElement === hostRef.current
+      || document.webkitFullscreenElement === hostRef.current,
+    );
     document.addEventListener('fullscreenchange', sync);
-    return () => document.removeEventListener('fullscreenchange', sync);
+    document.addEventListener('webkitfullscreenchange', sync);
+    return () => {
+      document.removeEventListener('fullscreenchange', sync);
+      document.removeEventListener('webkitfullscreenchange', sync);
+    };
   }, []);
 
   const screenPoint = useCallback((event) => {
@@ -205,7 +243,88 @@ export default function SceneViewport({
     };
   }, [scene.grid, view]);
 
+  const cancelLongPress = () => {
+    if (!longPressRef.current) return;
+    clearTimeout(longPressRef.current.timer);
+    longPressRef.current = null;
+  };
+
+  // A finger has no right button, so holding still on a piece is how the menu
+  // is asked for. Armed before the "can this be moved" check: marking somebody
+  // else's monster is exactly what a player needs the menu for.
+  const armLongPress = (event, token) => {
+    if (event.pointerType === 'mouse' || !onContextMenu) return;
+    const at = { x: event.clientX, y: event.clientY };
+    cancelLongPress();
+    longPressRef.current = {
+      from: at,
+      timer: setTimeout(() => {
+        longPressRef.current = null;
+        // What became a menu was never a drag.
+        dragRef.current = null;
+        setDrag(null);
+        onSelect?.(token.id);
+        onContextMenu(token, at);
+      }, LONG_PRESS_MS),
+    };
+  };
+
+  useEffect(() => cancelLongPress, []);
+
+  // Two fingers are a pinch, whatever they landed on: whatever was being drawn,
+  // painted or dragged is abandoned rather than continued with one of them.
+  const trackPointer = (event) => {
+    pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if (pointersRef.current.size !== 2) return;
+
+    cancelLongPress();
+    dragRef.current = null;
+    setDrag(null);
+    strokeRef.current = [];
+    setStrokeTick((tick) => tick + 1);
+    pinchRef.current = readPinch();
+  };
+
+  const readPinch = () => {
+    const [a, b] = [...pointersRef.current.values()];
+    if (!a || !b) return null;
+    const box = hostRef.current?.getBoundingClientRect();
+    return {
+      distance: Math.max(1, Math.hypot(b.x - a.x, b.y - a.y)),
+      centre: {
+        x: (a.x + b.x) / 2 - (box?.left || 0),
+        y: (a.y + b.y) / 2 - (box?.top || 0),
+      },
+    };
+  };
+
+  const trackPointerMove = (event) => {
+    if (!pointersRef.current.has(event.pointerId)) return;
+    pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+    const previous = pinchRef.current;
+    if (pointersRef.current.size !== 2 || !previous) return;
+    const next = readPinch();
+    if (!next) return;
+    pinchRef.current = next;
+
+    // Zoom about the point between the fingers, and follow that point as it
+    // moves: on a phone, spreading and sliding are one gesture.
+    setView((current) => panBy(
+      zoomAt(current, next.distance / previous.distance, next.centre),
+      next.centre.x - previous.centre.x,
+      next.centre.y - previous.centre.y,
+    ));
+  };
+
+  const forgetPointer = (event) => {
+    pointersRef.current.delete(event.pointerId);
+    if (pointersRef.current.size < 2) pinchRef.current = null;
+  };
+
   const beginPan = (event) => {
+    // One finger of a pinch must not also pan the map.
+    if (pointersRef.current.size > 1) return;
     if (event.button !== 0 && event.button !== 1) return;
     // Controls sitting on top of the map are not the map. Without this the host
     // captures the pointer on the way down and the click never reaches the
@@ -241,6 +360,20 @@ export default function SceneViewport({
       return;
     }
 
+    // In hand rather than in a tool: a mark is picked up the way a piece is, by
+    // taking hold of it. The board still pans from anywhere it is not covered.
+    if (event.button === 0 && paintMode === 'select' && movableDrawing) {
+      const at = cellPoint(point);
+      const mark = movableDrawing(at);
+      if (mark) {
+        onSelectDrawing?.(mark.id);
+        dragRef.current = { kind: 'mark', mark, from: at, offset: { x: 0, y: 0 } };
+        setMarkDrag({ id: mark.id, x: 0, y: 0 });
+        return;
+      }
+      onSelectDrawing?.(null);
+    }
+
     if (event.button === 0 && paintMode === 'measure') {
       const at = cellPoint(point);
       dragRef.current = { kind: 'measure', from: at };
@@ -265,6 +398,7 @@ export default function SceneViewport({
 
   const beginTokenDrag = (event, token) => {
     event.stopPropagation();
+    armLongPress(event, token);
     onSelect?.(token.id);
     if (!canMove(token)) return;
     const pointer = screenToWorld(screenPoint(event), view);
@@ -279,6 +413,11 @@ export default function SceneViewport({
   };
 
   const handlePointerMove = (event) => {
+    const held = longPressRef.current;
+    if (held && Math.hypot(event.clientX - held.from.x, event.clientY - held.from.y) > LONG_PRESS_SLOP) {
+      cancelLongPress();
+    }
+
     const state = dragRef.current;
     const point = screenPoint(event);
     if (BRUSH_MODES.includes(paintMode)) setHover(point);
@@ -296,6 +435,14 @@ export default function SceneViewport({
     }
 
     if (!state) return;
+
+    if (state.kind === 'mark') {
+      const at = cellPoint(point);
+      const offset = { x: at.x - state.from.x, y: at.y - state.from.y };
+      state.offset = offset;
+      setMarkDrag({ id: state.mark.id, ...offset });
+      return;
+    }
 
     if (state.kind === 'paint') {
       paintAt(point);
@@ -364,9 +511,20 @@ export default function SceneViewport({
   };
 
   const handlePointerUp = (event) => {
+    cancelLongPress();
     const state = dragRef.current;
     dragRef.current = null;
     event.currentTarget.releasePointerCapture?.(event.pointerId);
+
+    if (state?.kind === 'mark') {
+      setMarkDrag(null);
+      // One write at the end, as with a piece: a stroke dragged across the board
+      // would otherwise be a row update per frame.
+      if (state.offset.x || state.offset.y) {
+        onMoveDrawing?.(state.mark, state.offset);
+      }
+      return;
+    }
 
     // One write at the end of the stroke, same discipline as a token drag.
     if (state?.kind === 'paint') {
@@ -415,6 +573,14 @@ export default function SceneViewport({
     }
   };
 
+  // The mark under the pointer is drawn where it is being taken, not where it
+  // still is in the database.
+  const shownDrawings = markDrag
+    ? (drawings || []).map((drawing) => (drawing.id === markDrag.id
+      ? { ...drawing, points: movedPoints(drawing, markDrag.x, markDrag.y) }
+      : drawing))
+    : drawings;
+
   const size = cellSize(scene.grid) * view.zoom;
   const origin = worldToScreen({ x: 0, y: 0 }, view);
   const gridVisible = !backgroundOnly && scene.grid.visible && size > 4;
@@ -424,6 +590,10 @@ export default function SceneViewport({
   return (
     <Box
       ref={hostRef}
+      onPointerDownCapture={trackPointer}
+      onPointerMoveCapture={trackPointerMove}
+      onPointerUpCapture={forgetPointer}
+      onPointerCancelCapture={forgetPointer}
       onPointerDown={beginPan}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
@@ -445,7 +615,7 @@ export default function SceneViewport({
         const cell = worldToCell(world, scene.grid);
         onDropCharacter(characterId, { x: cell.col, y: cell.row });
       }}
-      sx={{ ...hostSx, cursor: cursorFor(paintMode) }}
+      sx={{ ...hostSx, ...(covering ? coveringSx : null), cursor: cursorFor(paintMode) }}
     >
       {imageUrl ? (
         <Box
@@ -526,7 +696,8 @@ export default function SceneViewport({
           party has not reached is the GM's business until they get there. The
           live stroke, the ruler and the laser go over everything — see below. */}
       <DrawingCanvas
-        drawings={backgroundOnly ? null : drawings}
+        drawings={backgroundOnly ? null : shownDrawings}
+        selectedId={backgroundOnly ? null : selectedDrawingId}
         grid={scene.grid}
         view={view}
       />
@@ -606,15 +777,15 @@ export default function SceneViewport({
         <Box data-viewport-control sx={layerSwitchSx}>{layerSwitch}</Box>
       ) : null}
 
-      <Tooltip title={fullscreen ? 'Leave fullscreen' : 'Fullscreen map'}>
+      <Tooltip title={fullscreen || covering ? 'Leave fullscreen' : 'Fullscreen map'}>
         <IconButton
           size="small"
           data-viewport-control
-          aria-label={fullscreen ? 'Leave fullscreen' : 'Fullscreen map'}
+          aria-label={fullscreen || covering ? 'Leave fullscreen' : 'Fullscreen map'}
           onClick={toggleFullscreen}
           sx={fullscreenBtnSx}
         >
-          {fullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+          {fullscreen || covering ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
         </IconButton>
       </Tooltip>
 
@@ -731,6 +902,18 @@ function measurementBadge(tokens, drag, grid, view, feetPerCell) {
     },
   };
 }
+
+// Where the browser refuses real fullscreen, the map takes the window instead.
+// Below MUI's modal layer on purpose: a dialog opened from the map still has to
+// come out on top of it.
+const coveringSx = {
+  position: 'fixed',
+  inset: 0,
+  zIndex: 1200,
+  height: '100%',
+  maxHeight: 'none',
+  borderRadius: 0,
+};
 
 const hostSx = {
   position: 'relative',

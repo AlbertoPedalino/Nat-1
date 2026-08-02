@@ -1,5 +1,7 @@
 import { Box, Button, IconButton, Paper, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import { ExternalLink, Minus, Plus, Trash2 } from 'lucide-react';
+import PortraitBadge from '../../../shared/character/PortraitBadge.jsx';
+import ColorField from '../../../components/ColorField.jsx';
 import { campaignSheetUrl } from '../logic/campaignSheetUrl.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 
@@ -29,11 +31,20 @@ export default function PartyConfig() {
         <Stack spacing={1}>
           {state.players.map((player, index) => (
             <Box key={player.id ?? index} sx={playerRowSx}>
-              <ColorSwatch
-                value={player.color || '#5c8fe0'}
-                onChange={(value) => dispatch({ type: 'updatePlayer', index, patch: { color: value } })}
-                label={`${player.name} color`}
-              />
+              {/* A character imported from a campaign wears the colour their
+                  own sheet chose, so there is nothing to pick here: the badge
+                  shows it, and the sheet is where it is changed. Somebody typed
+                  straight into the encounter has no sheet, and keeps the well. */}
+              {player.sourceId ? (
+                <PortraitBadge path={player.portraitPath} color={player.color} size={30} />
+              ) : (
+                <ColorField
+                  value={player.color || '#5c8fe0'}
+                  onChange={(value) => dispatch({ type: 'updatePlayer', index, patch: { color: value } })}
+                  label={`${player.name} color`}
+                  sx={colorSwatchSx}
+                />
+              )}
               {player.sourceId ? (
                 <Button
                   component="a"
@@ -128,19 +139,6 @@ function Stepper(props) {
 }
 
 // Circular swatch wrapping the native color input (MUI ships no color picker).
-function ColorSwatch({ value, onChange, label }) {
-  return (
-    <Box
-      component="input"
-      type="color"
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
-      aria-label={label}
-      sx={colorSwatchSx}
-    />
-  );
-}
-
 const playerRowSx = {
   display: 'flex',
   alignItems: 'center',
