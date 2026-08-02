@@ -7,6 +7,7 @@ import { useMonsterDb } from '../hooks/useMonsterDb.js';
 import { useCampaignPlayers } from '../hooks/useCampaignPlayers.js';
 import { useFightSheetSync } from '../hooks/useFightSheetSync.js';
 import { useSheetRealtime } from '../hooks/useSheetRealtime.js';
+import { useExternalFightSync } from '../hooks/useExternalFightSync.js';
 
 const EncounterBuilderContext = createContext(null);
 
@@ -25,6 +26,17 @@ export function EncounterBuilderProvider({ instanceId, instanceSaved, linkGroupI
     state,
     dispatch,
     onSaved: onInstanceSaved,
+  });
+
+  // The battle map writes back into this instance's saved fights. Without this
+  // the builder read them only at mount, so a condition or an advantage set on a
+  // piece sat in storage until the page was reloaded.
+  useExternalFightSync({
+    instanceId,
+    instanceSaved,
+    activeFightId: state.activeFightId,
+    monsters: monsterDb.monsters,
+    dispatch,
   });
 
   const getRollActor = useCallback(() => {

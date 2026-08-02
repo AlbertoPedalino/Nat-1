@@ -1,29 +1,50 @@
 import { Box, Button, Paper, Stack, Typography } from '@mui/material';
-import { EyeOff, UserPlus } from 'lucide-react';
+import { Plus, Skull, Swords } from 'lucide-react';
 import { placedCharacterIds } from '../../../shared/campaign/roster.js';
 
-// Player pieces come from the campaign roster, so the GM never types a party
-// member's name by hand. Characters already on the map are shown as placed
-// rather than hidden, otherwise the panel looks broken once everyone is down.
-export default function RosterPanel({ roster, tokens, busy, onPlaceCharacter, onAddHiddenToken }) {
+const LAYER_NAMES = { map: 'map', tokens: 'token', gm: 'GM' };
+
+// Party pieces come from the campaign roster, so the GM never types a member's
+// name by hand. Drag one onto the map to place it exactly, or use the button to
+// drop it on the first free square.
+export default function RosterPanel({
+  roster,
+  tokens,
+  busy,
+  activeLayer,
+  onPlaceCharacter,
+  onAddToken,
+  onImportEncounter,
+  onPlaceMonster,
+}) {
   const placed = placedCharacterIds(tokens);
 
   return (
-    <Paper sx={{ p: 1.5, bgcolor: 'background.paper' }}>
+    <Paper sx={{ p: 0, bgcolor: 'transparent', boxShadow: 'none' }}>
       <Stack spacing={1.25}>
-        <Typography variant="h2" sx={{ fontSize: '0.95rem' }}>Party</Typography>
-
         {!roster.length ? (
           <Typography variant="body2" color="text.secondary">
             No characters in this campaign yet.
           </Typography>
-        ) : null}
+        ) : (
+          <Typography variant="caption" color="text.secondary">
+            Drag onto the map, or click to place.
+          </Typography>
+        )}
 
         <Stack spacing={0.5}>
           {roster.map((entry) => {
             const isPlaced = placed.has(entry.characterId);
             return (
-              <Box key={entry.characterId} sx={rowSx}>
+              <Box
+                key={entry.characterId}
+                draggable={!isPlaced && !busy}
+                onDragStart={(event) => {
+                  event.dataTransfer.setData('application/x-gb-character', entry.characterId);
+                  event.dataTransfer.effectAllowed = 'copy';
+                }}
+                sx={{ ...rowSx, cursor: isPlaced ? 'default' : 'grab' }}
+              >
                 <Box sx={{ ...dotSx, bgcolor: entry.color || 'secondary.main' }} />
                 <Typography sx={nameSx}>{entry.name}</Typography>
                 <Button
@@ -39,27 +60,41 @@ export default function RosterPanel({ roster, tokens, busy, onPlaceCharacter, on
           })}
         </Stack>
 
+        {/* New pieces land on the layer being edited: there is no separate
+            "hidden token" button, because the GM layer is a layer. */}
         <Button
           size="small"
           variant="outlined"
-          startIcon={<UserPlus size={15} />}
+          startIcon={<Plus size={15} />}
           disabled={busy}
-          onClick={() => onAddHiddenToken('tokens')}
+          onClick={onAddToken}
         >
-          Add blank token
+          Add {LAYER_NAMES[activeLayer] || 'token'} piece
+        </Button>
+        {/* Two ways in, because they answer different questions: a prepared
+            fight, or the creature nobody planned for. */}
+        <Button
+          size="small"
+          variant="outlined"
+          startIcon={<Skull size={15} />}
+          disabled={busy}
+          onClick={onPlaceMonster}
+        >
+          Place a creature
         </Button>
         <Button
           size="small"
           variant="outlined"
-          color="warning"
-          startIcon={<EyeOff size={15} />}
+          startIcon={<Swords size={15} />}
           disabled={busy}
-          onClick={() => onAddHiddenToken('gm')}
+          onClick={onImportEncounter}
         >
-          Add GM-only token
+          Import encounter
         </Button>
         <Typography variant="caption" color="text.secondary">
-          GM-only pieces are filtered out by the database, not just hidden in the view.
+          {activeLayer === 'gm'
+            ? 'GM pieces are filtered out by the database, not just hidden in the view.'
+            : 'Right-click a piece for its label and conditions.'}
         </Typography>
       </Stack>
     </Paper>

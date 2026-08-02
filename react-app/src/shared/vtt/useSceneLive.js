@@ -11,11 +11,19 @@ import { supabase } from '../cloud/supabaseClient.js';
 
 const DRAG_EVENT = 'token-drag';
 
-export function useSceneLive({ sceneId, onTokenEvent, onSceneEvent, onRemoteDrag }) {
+export function useSceneLive({
+  sceneId,
+  campaignId,
+  onTokenEvent,
+  onSceneEvent,
+  onRemoteDrag,
+  onDrawingEvent,
+  onCharacterEvent,
+}) {
   const { cloudEnabled, status, user } = useAuth();
   const channelRef = useRef(null);
   const handlers = useRef({});
-  handlers.current = { onTokenEvent, onSceneEvent, onRemoteDrag };
+  handlers.current = { onTokenEvent, onSceneEvent, onRemoteDrag, onDrawingEvent, onCharacterEvent };
 
   useEffect(() => {
     if (!sceneId || !cloudEnabled || status !== 'authed' || !supabase) return undefined;
@@ -50,6 +58,31 @@ export function useSceneLive({ sceneId, onTokenEvent, onSceneEvent, onRemoteDrag
         },
       );
 
+      channel.on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'map_drawings', filter: `scene_id=eq.${sceneId}` },
+        (payload) => {
+          try {
+            handlers.current.onDrawingEvent?.(payload);
+          } catch (_) {}
+        },
+      );
+
+      // Character sheets, scoped to the campaign rather than the scene: damage
+      // taken on a sheet has to show on the piece without a reload, and the
+      // sheet stays the one place those hit points live.
+      if (campaignId) {
+        channel.on(
+          'postgres_changes',
+          { event: 'UPDATE', schema: 'public', table: 'characters', filter: `campaign_id=eq.${campaignId}` },
+          (payload) => {
+            try {
+              handlers.current.onCharacterEvent?.(payload);
+            } catch (_) {}
+          },
+        );
+      }
+
       channel.on('broadcast', { event: DRAG_EVENT }, (message) => {
         try {
           handlers.current.onRemoteDrag?.(message?.payload || null);
@@ -71,7 +104,7 @@ export function useSceneLive({ sceneId, onTokenEvent, onSceneEvent, onRemoteDrag
         // Already closed.
       }
     };
-  }, [cloudEnabled, sceneId, status]);
+  }, [campaignId, cloudEnabled, sceneId, status]);
 
   // Fire-and-forget: a lost drag frame is a cosmetic glitch, and the committed
   // position arrives on drop regardless.

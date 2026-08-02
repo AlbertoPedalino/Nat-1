@@ -31,6 +31,32 @@ export function formatFeet(feet) {
   return `${Math.round(value)} ft`;
 }
 
+// The shapes a ruler can take, following the 5e templates the table already
+// argues about. `line` is plain point-to-point; the rest read the drag as
+// origin -> extent.
+export const MEASURE_SHAPES = Object.freeze(['line', 'radius', 'cone', 'square']);
+
+export function normalizeShape(shape) {
+  return MEASURE_SHAPES.includes(shape) ? shape : 'line';
+}
+
+// What the ruler says, in feet, for the shape being dragged. Radius, cone and
+// square are all "how far from the origin", which is why they share a number
+// and differ only in what gets drawn.
+export function measureFeet(shape, from, to, options) {
+  return feetBetween(from, to, options);
+}
+
+export function measureLabel(shape, from, to, options) {
+  const feet = measureFeet(shape, from, to, options);
+  if (feet <= 0) return '';
+  const kind = normalizeShape(shape);
+  if (kind === 'radius') return `${formatFeet(feet)} radius`;
+  if (kind === 'cone') return `${formatFeet(feet)} cone`;
+  if (kind === 'square') return `${formatFeet(feet)} square`;
+  return formatFeet(feet);
+}
+
 // The badge is noise on a piece that has not left its square yet.
 export function movementLabel(from, to, options) {
   const feet = feetBetween(from, to, options);

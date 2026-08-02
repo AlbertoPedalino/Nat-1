@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import {
   Box,
   Button,
+  Chip,
   CircularProgress,
   IconButton,
   Paper,
@@ -9,11 +10,18 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { Map, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Map, Pencil, Plus, Radio, RadioTower, Trash2 } from 'lucide-react';
 import { useToast } from '../../../shared/ToastProvider.jsx';
 import { toRoster } from '../../../shared/campaign/roster.js';
 import { useGmCampaigns } from '../../../shared/campaign/useGmCampaigns.js';
-import { createScene, deleteScene, listScenes, updateScene } from '../../../shared/cloud/vtt.js';
+import {
+  clearLiveScene,
+  createScene,
+  deleteScene,
+  listScenes,
+  setLiveScene,
+  updateScene,
+} from '../../../shared/cloud/vtt.js';
 
 // Scenes belong to a campaign, so the picker is grouped by campaign rather than
 // being a flat list like the local tools' Library.
@@ -50,6 +58,19 @@ export default function ScenePicker({ onOpen }) {
       notify('error', cause?.message || 'Could not create the scene.');
     } finally {
       setBusy(false);
+    }
+  };
+
+  // Toggling off ends the session view: the players are left with nothing
+  // rather than with whatever scene happened to be open.
+  const handleLive = async (scene) => {
+    try {
+      if (scene.isLive) await clearLiveScene(scene.campaignId);
+      else await setLiveScene(scene.id);
+      await refresh(campaigns.map((campaign) => campaign.id));
+      notify('success', scene.isLive ? 'Players see nothing now.' : `Players are now on "${scene.name}".`);
+    } catch (cause) {
+      notify('error', cause?.message || 'Could not change the live scene.');
     }
   };
 
@@ -121,10 +142,20 @@ export default function ScenePicker({ onOpen }) {
                       <Typography sx={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {scene.name}
                       </Typography>
+                      {scene.isLive ? <Chip size="small" color="primary" label="Live" sx={liveChipSx} /> : null}
                       {!scene.imagePath ? (
                         <Typography variant="caption" color="text.secondary">no map yet</Typography>
                       ) : null}
                     </Box>
+                    <Tooltip title={scene.isLive ? 'The players are seeing this scene' : 'Show this scene to the players'}>
+                      <IconButton
+                        size="small"
+                        color={scene.isLive ? 'primary' : 'default'}
+                        onClick={() => handleLive(scene)}
+                      >
+                        {scene.isLive ? <Radio size={15} /> : <RadioTower size={15} />}
+                      </IconButton>
+                    </Tooltip>
                     <Tooltip title="Rename">
                       <IconButton size="small" onClick={() => handleRename(scene)}><Pencil size={15} /></IconButton>
                     </Tooltip>
@@ -150,6 +181,14 @@ const emptySx = {
   p: 4,
   bgcolor: 'background.paper',
   textAlign: 'center',
+};
+
+const liveChipSx = {
+  height: 18,
+  fontSize: '0.6rem',
+  fontFamily: '"Cinzel", Georgia, serif',
+  letterSpacing: '0.06em',
+  flexShrink: 0,
 };
 
 const rowSx = {

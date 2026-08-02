@@ -2,6 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   FEET_PER_CELL,
+  MEASURE_SHAPES,
+  measureFeet,
+  measureLabel,
+  normalizeShape,
   cellDistance,
   feetBetween,
   formatFeet,
@@ -46,6 +50,25 @@ test('a piece that has not left its square shows no badge', () => {
   assert.equal(movementLabel({ x: 2, y: 2 }, { x: 2, y: 2 }), '');
   assert.equal(movementLabel({ x: 2, y: 2 }, { x: 2.2, y: 2 }), '');
   assert.equal(movementLabel({ x: 2, y: 2 }, { x: 4, y: 2 }), '10 ft');
+});
+
+// The shapes differ in what is drawn, not in how far it reaches: all of them
+// answer "how far from the origin".
+test('every ruler shape reports the same distance, labelled for its template', () => {
+  const from = { x: 0, y: 0 };
+  const to = { x: 4, y: 0 };
+  assert.equal(measureLabel('line', from, to), '20 ft');
+  assert.equal(measureLabel('radius', from, to), '20 ft radius');
+  assert.equal(measureLabel('cone', from, to), '20 ft cone');
+  assert.equal(measureLabel('square', from, to), '20 ft square');
+  assert.equal(measureFeet('cone', from, to), 20);
+
+  // An unknown shape is a line rather than an error.
+  assert.equal(normalizeShape('nonsense'), 'line');
+  assert.deepEqual([...MEASURE_SHAPES], ['line', 'radius', 'cone', 'square']);
+
+  // Nothing to say before the drag leaves the square it started in.
+  assert.equal(measureLabel('radius', from, from), '');
 });
 
 test('a custom cell scale is honoured, and nonsense falls back to five feet', () => {

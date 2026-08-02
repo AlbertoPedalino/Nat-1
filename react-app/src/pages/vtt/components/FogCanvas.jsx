@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import { Box } from '@mui/material';
 import { decodeCells } from '../../../shared/vtt/fog.js';
 import { cellSize, worldToScreen } from '../../../shared/vtt/geometry.js';
@@ -11,7 +11,11 @@ export default function FogCanvas({ fog, grid, view, opacity }) {
   const canvasRef = useRef(null);
   const bufferRef = useRef(null);
 
-  useEffect(() => {
+  // Layout effect, not effect: the map image moves by CSS transform, which the
+  // browser applies in the same paint as this commit. Drawing in a plain effect
+  // lands one frame later, so during a drag the fog trailed the map and let the
+  // edge of the board show through.
+  useLayoutEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const host = canvas.parentElement;
@@ -53,9 +57,15 @@ export default function FogCanvas({ fog, grid, view, opacity }) {
     }
     bufferContext.putImageData(image, 0, 0);
 
-    const size = cellSize(grid);
+    // A fog cell is a fraction of a grid square, so the buffer is scaled by the
+    // cell size divided by that fraction.
+    const size = cellSize(grid) / Math.max(1, fog.scale || 1);
     const origin = worldToScreen({ x: grid.offsetX, y: grid.offsetY }, view);
-    context.imageSmoothingEnabled = false;
+    // Smoothing on: at four fog cells to a square the edge is fine enough that
+    // interpolating reads as a soft edge of light, while nearest-neighbour would
+    // show the staircase a round brush is meant to avoid.
+    context.imageSmoothingEnabled = true;
+    context.imageSmoothingQuality = 'high';
     context.drawImage(
       buffer,
       origin.x,

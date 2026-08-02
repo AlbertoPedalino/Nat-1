@@ -1,14 +1,22 @@
-// Fog of war state: one bit per grid cell, set = revealed.
+// Fog of war state: one bit per fog cell, set = revealed.
 //
-// A bitset instead of an array of booleans because a 100x100 scene is 10k cells:
-// as JSON that is ~50 KB on every sync, as a base64 bitset it is ~1.7 KB. Only
-// the GM writes fog, so unlike tokens there is no concurrent writer and a single
-// blob on the scene row is the right shape.
+// A bitset instead of an array of booleans because the counts are large: a 60x40
+// square map at four fog cells to a side is 38k bits — ~4.8 KB base64, against
+// ~190 KB as a JSON array. Only the GM writes fog, so unlike tokens there is no
+// concurrent writer and a single blob on the scene row is the right shape.
 //
 // This is presentation, not security — the map image itself still reaches every
 // client. See the header of supabase/vtt.sql.
 
-const MAX_SIDE = 400;
+const MAX_SIDE = 1200;
+
+// Fog cells are SMALLER than grid squares: four to a side, sixteen to a square.
+// One bit per grid square could only ever reveal a whole square at a time, which
+// makes a doorway or the lit half of a room impossible to show. Four is enough
+// for the brush to read as round and for a partial square to look deliberate,
+// without the payload turning into a bitmap.
+export const DEFAULT_FOG_SCALE = 4;
+const MAX_SCALE = 8;
 
 function clampSide(value) {
   const parsed = Math.round(Number(value));
@@ -42,12 +50,20 @@ export function decodeCells(encoded, expectedLength) {
   return bytes;
 }
 
-export function createFog(cols, rows) {
+export function normalizeScale(scale) {
+  const parsed = Math.round(Number(scale));
+  if (!Number.isFinite(parsed) || parsed < 1) return DEFAULT_FOG_SCALE;
+  return Math.min(MAX_SCALE, parsed);
+}
+
+// `cols`/`rows` are counted in fog cells, not in grid squares.
+export function createFog(cols, rows, scale = DEFAULT_FOG_SCALE) {
   const width = clampSide(cols);
   const height = clampSide(rows);
   return {
     cols: width,
     rows: height,
+    scale: normalizeScale(scale),
     cells: encodeCells(new Uint8Array(byteLength(width, height))),
   };
 }
@@ -59,7 +75,8 @@ export function normalizeFog(value) {
   const cols = clampSide(value.cols);
   const rows = clampSide(value.rows);
   const bytes = decodeCells(value.cells, byteLength(cols, rows));
-  return { cols, rows, cells: encodeCells(bytes) };
+  // Fog written before the sub-cell resolution existed had one cell per square.
+  return { cols, rows, scale: normalizeScale(value.scale ?? 1), cells: encodeCells(bytes) };
 }
 
 export function isRevealed(fog, col, row) {
@@ -85,40 +102,50 @@ export function setCells(fog, cells, revealed) {
     if (revealed) bytes[index >> 3] |= mask;
     else bytes[index >> 3] &= ~mask;
   }
-  return { cols: fog.cols, rows: fog.rows, cells: encodeCells(bytes) };
+  return { cols: fog.cols, rows: fog.rows, scale: fog.scale, cells: encodeCells(bytes) };
 }
 
 export function revealAll(fog) {
   if (!fog) return null;
   const bytes = new Uint8Array(byteLength(fog.cols, fog.rows)).fill(0xff);
-  return { cols: fog.cols, rows: fog.rows, cells: encodeCells(bytes) };
+  return { cols: fog.cols, rows: fog.rows, scale: fog.scale, cells: encodeCells(bytes) };
 }
 
 export function hideAll(fog) {
   if (!fog) return null;
-  return createFog(fog.cols, fog.rows);
+  return createFog(fog.cols, fog.rows, fog.scale);
 }
 
-// Square brush centred on a cell. `size` is the side in cells, so 1 paints one
-// square and 3 paints the 3x3 around it.
+// Round brush centred on a cell. `size` is the diameter in cells, so 1 paints
+// one square and 3 paints a plus-shaped disc rather than a full 3x3 block.
+//
+// Round because a square brush leaves stepped corners along every wall it
+// follows: revealing a corridor with it looks like pixel art, and correcting the
+// corners by hand is most of the work.
 export function brushCells(col, row, size = 1) {
-  const side = Math.max(1, Math.round(Number(size) || 1));
-  const half = Math.floor(side / 2);
-  const startCol = Math.round(col) - half;
-  const startRow = Math.round(row) - half;
+  const diameter = Math.max(1, Math.round(Number(size) || 1));
+  const centreCol = Math.round(col);
+  const centreRow = Math.round(row);
+  if (diameter === 1) return [{ col: centreCol, row: centreRow }];
+
+  const radius = diameter / 2;
+  const reach = Math.ceil(radius);
   const cells = [];
-  for (let dy = 0; dy < side; dy += 1) {
-    for (let dx = 0; dx < side; dx += 1) {
-      cells.push({ col: startCol + dx, row: startRow + dy });
+  for (let dy = -reach; dy <= reach; dy += 1) {
+    for (let dx = -reach; dx <= reach; dx += 1) {
+      // Measured centre to centre, so an even diameter stays symmetric around
+      // the cell the pointer is actually on.
+      if (Math.sqrt(dx * dx + dy * dy) > radius - 0.5) continue;
+      cells.push({ col: centreCol + dx, row: centreRow + dy });
     }
   }
-  return cells;
+  return cells.length ? cells : [{ col: centreCol, row: centreRow }];
 }
 
-// How many cells cover an image at the scene's calibration. The offset shifts
-// the first line, so a partially covered cell at the edge still counts.
-export function fogSizeForImage({ width, height }, grid) {
-  const size = Math.max(1, Number(grid?.size) || 1);
+// How many fog cells cover an image at the scene's calibration. The offset
+// shifts the first line, so a partially covered square at the edge still counts.
+export function fogSizeForImage({ width, height }, grid, scale = DEFAULT_FOG_SCALE) {
+  const size = Math.max(1, Number(grid?.size) || 1) / normalizeScale(scale);
   return {
     cols: clampSide(Math.ceil(((Number(width) || 0) + (Number(grid?.offsetX) || 0)) / size)),
     rows: clampSide(Math.ceil(((Number(height) || 0) + (Number(grid?.offsetY) || 0)) / size)),

@@ -30,6 +30,24 @@ test('the layer column is constrained to the three known layers', () => {
   assert.match(sql, /check \(layer in \('map', 'tokens', 'gm'\)\)/);
 });
 
+// A GM-only label is a secret, and RLS filters rows rather than columns: kept on
+// the token row it would be delivered to the player and merely hidden by the
+// client, exactly the mistake the hidden layer avoids.
+test('secret labels live in their own GM-only table', () => {
+  assert.match(sql, /create table if not exists public\.map_token_secrets\s*\(/);
+  assert.match(sql, /token_id\s+uuid primary key references public\.map_tokens\(id\) on delete cascade/);
+  assert.match(sql, /alter table public\.map_token_secrets enable row level security/);
+
+  const start = sql.indexOf('create policy map_token_secrets_all on');
+  assert.ok(start > -1, 'the secrets policy is missing');
+  const body = sql.slice(start, start + 400);
+  assert.ok(body.includes('for all using'), 'reads and writes are gated together');
+  assert.equal((body.match(/is_campaign_gm/g) || []).length, 2, 'USING and WITH CHECK both gate on the GM');
+
+  // Conditions are the opposite call: the party can see who is prone.
+  assert.match(sql, /conditions\s+text\[\] not null default '\{\}'/);
+});
+
 // Fog lives on the scene, not in its own table: only the GM writes it, so there
 // is no concurrent writer to lose. It is also added defensively for databases
 // created before it existed.
@@ -51,6 +69,154 @@ test('every policy is dropped before being created, so the file re-runs clean', 
   for (const policy of created) {
     assert.match(sql, new RegExp(`drop policy if exists ${policy} on`), `${policy} is never dropped first`);
   }
+});
+
+// Scenes the GM is still preparing must not reach the players at all, which is
+// the same rule as the hidden layer applied one level up.
+test('a player only ever sees the live scene', () => {
+  assert.match(sql, /is_live\s+boolean not null default false/);
+  assert.match(sql, /alter table public\.map_scenes add column if not exists is_live boolean not null default false/);
+
+  const start = sql.indexOf('create policy map_scenes_select on');
+  const policy = sql.slice(start, sql.indexOf(';', start));
+  assert.ok(policy.includes('is_campaign_gm'), 'the GM sees the whole campaign');
+  assert.ok(policy.includes('is_live'), 'everyone else is limited to the live scene');
+
+  const tokenStart = sql.indexOf('create policy map_tokens_select on');
+  const tokenPolicy = sql.slice(tokenStart, sql.indexOf(';', tokenStart));
+  assert.ok(tokenPolicy.includes('map_scene_is_live'), 'tokens of a non-live scene stay hidden too');
+});
+
+// Two updates from the client would race: between clearing the old live scene
+// and setting the new one, the unique index rejects the second write.
+test('going live is one transactional RPC, guarded by a unique index', () => {
+  assert.match(sql, /create unique index if not exists map_scenes_one_live_idx\s*\n?\s*on public\.map_scenes\(campaign_id\) where is_live/);
+  assert.match(sql, /create or replace function public\.set_live_scene\(p_scene uuid\)/);
+  assert.match(sql, /create or replace function public\.clear_live_scene\(p_campaign uuid\)/);
+
+  // SECURITY DEFINER bypasses RLS, so the function has to check the caller
+  // itself or any member could take over the projector.
+  const start = sql.indexOf('create or replace function public.set_live_scene');
+  const body = sql.slice(start, sql.indexOf('$$;', start));
+  assert.ok(body.includes('security definer'));
+  assert.ok(body.includes('is_campaign_gm'), 'set_live_scene must verify the caller is the GM');
+  assert.ok(body.includes('raise exception'));
+
+  const clearBody = sql.slice(
+    sql.indexOf('create or replace function public.clear_live_scene'),
+    sql.indexOf('-- 5) realtime'),
+  );
+  assert.ok(clearBody.includes('is_campaign_gm'), 'clear_live_scene must verify it too');
+});
+
+// Pieces staged off the edge of the map are as much a secret as the hidden
+// layer, and are kept one the same way: by not sending them.
+test('tokens outside the play area never reach a player', () => {
+  assert.match(sql, /play_area\s+jsonb/);
+  assert.match(sql, /alter table public\.map_scenes add column if not exists play_area jsonb/);
+  assert.match(sql, /create or replace function public\.map_token_in_play\(/);
+
+  const start = sql.indexOf('create policy map_tokens_select on');
+  const policy = sql.slice(start, sql.indexOf(';', start));
+  assert.ok(policy.includes('map_token_in_play'), 'the select policy must apply the play area');
+
+  // No area means the whole scene is in play; reading null as "outside" would
+  // blank every scene that never set one.
+  const helper = sql.slice(
+    sql.indexOf('create or replace function public.map_token_in_play'),
+    sql.indexOf('create or replace function public.map_token_campaign'),
+  );
+  assert.ok(helper.includes('when area is null then true'));
+});
+
+// Two pictures per scene, one shown at a time: a session flips between the
+// battlemap and an establishing shot repeatedly, and re-uploading each time is
+// not a workflow.
+test('a scene holds a battlemap and a background, and remembers which is shown', () => {
+  assert.match(sql, /background_path\s+text/);
+  assert.match(sql, /shown_image\s+text not null default 'map' check \(shown_image in \('map', 'background'\)\)/);
+  assert.match(sql, /alter table public\.map_scenes add column if not exists background_path text/);
+  assert.match(sql, /alter table public\.map_scenes add column if not exists shown_image text not null default 'map'/);
+});
+
+// One row per stroke, and the reason is the opposite of fog's: undo is a delete,
+// realtime carries only the new stroke, and nothing rewrites a payload that
+// grows all session.
+test('drawings are rows, and follow the same visibility rules as tokens', () => {
+  assert.match(sql, /create table if not exists public\.map_drawings\s*\(/);
+  assert.match(sql, /scene_id\s+uuid not null references public\.map_scenes\(id\) on delete cascade/);
+  assert.doesNotMatch(sql, /drawings\s+jsonb/, 'strokes must not be a blob on the scene');
+  assert.match(sql, /create index if not exists map_drawings_scene_idx/);
+
+  const start = sql.indexOf('create policy map_drawings_select on');
+  const policy = sql.slice(start, sql.indexOf(';', start));
+  assert.ok(policy.includes("layer <> 'gm'"), 'a GM-layer stroke is not sent to players');
+  assert.ok(policy.includes('map_scene_is_live'), 'nor is anything on a scene that is not live');
+
+  // Everyone at the table draws, but only onto the live scene and stamped as
+  // their own; the eraser is bounded the same way, or undo would become a way to
+  // wipe the GM's annotations.
+  const insert = sql.indexOf('create policy map_drawings_insert on');
+  const insertBody = sql.slice(insert, sql.indexOf(';', insert));
+  assert.ok(insertBody.includes('created_by = auth.uid()'));
+  assert.ok(insertBody.includes("layer <> 'gm'"));
+  assert.ok(insertBody.includes('map_scene_is_live'));
+
+  const del = sql.indexOf('create policy map_drawings_delete on');
+  const deleteBody = sql.slice(del, sql.indexOf(';', del));
+  assert.ok(deleteBody.includes('created_by = auth.uid()'));
+  assert.ok(deleteBody.includes('is_campaign_gm'), 'the GM can still clear anything');
+
+  assert.match(sql, /tablename = 'map_drawings'/);
+
+  // A note is a stroke with words on it, in the same table: it inherits the
+  // visibility rules, the realtime feed, undo and the eraser rather than
+  // growing a second copy of all four.
+  assert.match(sql, /alter table public\.map_drawings add column if not exists text text/);
+});
+
+// Conditions are the one write a player may make on a piece that is not theirs.
+// It is a function and not a policy on purpose: RLS grants whole rows, so a
+// policy permissive enough to mark an enemy would also let them drag it away.
+test('marking a token is an RPC that writes one column', () => {
+  const start = sql.indexOf('create or replace function public.set_token_conditions');
+  assert.ok(start > -1, 'set_token_conditions is missing');
+  const body = sql.slice(start, sql.indexOf('$$;', start));
+  assert.ok(body.includes('security definer'));
+  assert.ok(body.includes('set conditions ='), 'it must write conditions');
+  assert.doesNotMatch(body, /set (x|y|layer|character_id|hp_current) =/, 'and nothing else');
+  assert.ok(body.includes('is_campaign_gm'), 'the GM may mark anywhere in their campaign');
+  assert.ok(body.includes("token.layer <> 'gm'"), 'a player never marks a piece they cannot see');
+  assert.ok(body.includes('scene.is_live'));
+  assert.ok(body.includes('raise exception'));
+});
+
+// A player places their own character and plain markers, and may move or remove
+// what they placed. `created_by` is what makes that possible without handing
+// them the board.
+test('players may place and reclaim their own pieces, and nothing else', () => {
+  assert.match(sql, /created_by\s+uuid default auth\.uid\(\)/);
+
+  const insert = sql.slice(
+    sql.indexOf('create policy map_tokens_insert on'),
+    sql.indexOf('create policy map_tokens_delete on'),
+  );
+  assert.ok(insert.includes('created_by = auth.uid()'), 'a player can only stamp a piece as their own');
+  assert.ok(insert.includes("layer <> 'gm'"), 'and never onto the GM layer');
+  assert.ok(insert.includes('owns_character'), 'nor standing for somebody else’s sheet');
+  assert.ok(insert.includes('map_scene_is_live'), 'and only on the scene actually in play');
+
+  const del = sql.slice(
+    sql.indexOf('create policy map_tokens_delete on'),
+    sql.indexOf('create policy map_tokens_update on'),
+  );
+  assert.ok(del.includes('created_by = auth.uid()'));
+
+  const update = sql.slice(
+    sql.indexOf('create policy map_tokens_update on'),
+    sql.indexOf('-- 4a) marking conditions'),
+  );
+  assert.equal((update.match(/created_by = auth\.uid\(\)/g) || []).length, 2, 'USING and WITH CHECK both');
 });
 
 test('the GM layer is filtered by RLS on select, not by the client', () => {
@@ -103,6 +269,14 @@ test('map images are a private bucket keyed by the campaign folder', () => {
   assert.ok(insertBody.includes('is_campaign_gm'), 'only the GM uploads maps');
 });
 
+// Without FULL, Realtime has only the primary key of a deleted row, cannot
+// evaluate RLS against it, and therefore delivers the delete to nobody: the
+// piece disappeared for whoever removed it and stayed put for everyone else.
+test('tables whose rows are deleted replicate the whole old row', () => {
+  assert.match(sql, /alter table public\.map_tokens replica identity full/);
+  assert.match(sql, /alter table public\.map_drawings replica identity full/);
+});
+
 test('token and scene changes are published to realtime idempotently', () => {
   for (const table of ['map_tokens', 'map_scenes']) {
     assert.match(sql, new RegExp(`tablename = '${table}'`));
@@ -120,6 +294,11 @@ test('functions that read the new tables are declared after them', () => {
   const helper = sql.indexOf('create or replace function public.map_scene_campaign');
   assert.ok(table > -1 && helper > -1);
   assert.ok(helper > table, 'map_scene_campaign must come after the table it selects from');
+  assert.ok(
+    sql.indexOf('create or replace function public.map_token_campaign')
+      > sql.indexOf('create table if not exists public.map_tokens'),
+    'map_token_campaign must come after the tables it joins',
+  );
 
   // Triggers need their function to exist first, for the same reason.
   assert.ok(

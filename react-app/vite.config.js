@@ -27,6 +27,11 @@ export default defineConfig({
     include: ['src/**/*.test.jsx'],
     setupFiles: ['./vitest.setup.js'],
     restoreMocks: true,
+    // The component suites drive real interactions through user-event, which
+    // types a character at a time and waits for each render. NoteBoard alone
+    // takes ~18s, so under a loaded parallel run the 5s default expires on
+    // machine speed rather than on anything being wrong.
+    testTimeout: 20000,
   },
   build: {
     rollupOptions: {

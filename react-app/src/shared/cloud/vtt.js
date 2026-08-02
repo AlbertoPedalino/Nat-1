@@ -1,9 +1,18 @@
 import { requireClient } from './supabaseClient.js';
+import { normalizeConditions } from '../character/conditions.js';
+import {
+  isDrawable,
+  normalizePoints,
+  sanitizeNoteText,
+  simplifyStroke,
+  toDrawing,
+} from '../vtt/drawing.js';
 import { normalizeFog } from '../vtt/fog.js';
 import {
   mapImagePath,
   normalizeGrid,
   normalizeLayer,
+  normalizePlayArea,
   sanitizeName,
   toScene,
   toToken,
@@ -16,8 +25,9 @@ import {
 
 const MAP_BUCKET = 'map-images';
 const SIGNED_URL_TTL = 60 * 60;
-const SCENE_COLUMNS = 'id, campaign_id, name, image_path, grid, fog, updated_at';
-const TOKEN_COLUMNS = 'id, scene_id, layer, x, y, w, h, z, character_id, label, color, image_path, updated_at';
+const SCENE_COLUMNS = 'id, campaign_id, name, image_path, background_path, shown_image, grid, fog, is_live, play_area, updated_at';
+const TOKEN_COLUMNS = 'id, scene_id, layer, x, y, w, h, z, character_id, label, color, image_path, image_url, hp_current, hp_max, conditions, effects, source_ref, show_hp, created_by, updated_at';
+const DRAWING_COLUMNS = 'id, scene_id, layer, points, color, width, text, created_by, created_at';
 
 export async function listScenes(campaignId) {
   const supabase = requireClient();
@@ -25,6 +35,19 @@ export async function listScenes(campaignId) {
     .from('map_scenes')
     .select(SCENE_COLUMNS)
     .eq('campaign_id', campaignId)
+    .order('updated_at', { ascending: false });
+  if (error) throw error;
+  return (data || []).map(toScene).filter(Boolean);
+}
+
+// Every live scene the caller may see. For a player this is how they find the
+// table at all: they cannot list a campaign's scenes, only the one being shown.
+export async function listLiveScenes() {
+  const supabase = requireClient();
+  const { data, error } = await supabase
+    .from('map_scenes')
+    .select(SCENE_COLUMNS)
+    .eq('is_live', true)
     .order('updated_at', { ascending: false });
   if (error) throw error;
   return (data || []).map(toScene).filter(Boolean);
@@ -52,12 +75,18 @@ export async function createScene(campaignId, name) {
   return toScene(data);
 }
 
-export async function updateScene(sceneId, { name, grid, imagePath, fog } = {}) {
+export async function updateScene(sceneId, {
+  name, grid, imagePath, backgroundPath, shownImage, fog, playArea,
+} = {}) {
   const supabase = requireClient();
   const patch = {};
   if (name !== undefined) patch.name = sanitizeName(name);
   if (grid !== undefined) patch.grid = normalizeGrid(grid);
   if (imagePath !== undefined) patch.image_path = imagePath || null;
+  if (backgroundPath !== undefined) patch.background_path = backgroundPath || null;
+  if (shownImage !== undefined) patch.shown_image = shownImage === 'background' ? 'background' : 'map';
+  // Null clears it, which puts the whole scene back in play.
+  if (playArea !== undefined) patch.play_area = normalizePlayArea(playArea);
   // Only the GM writes fog, so the whole blob can be replaced without the
   // conflict problem that made tokens one row each. Paint strokes go over
   // broadcast; this is the single write at the end of the stroke.
@@ -72,6 +101,22 @@ export async function updateScene(sceneId, { name, grid, imagePath, fog } = {}) 
     .single();
   if (error) throw error;
   return toScene(data);
+}
+
+// Through an RPC, not two updates: the "one live scene per campaign" index
+// rejects a second live row, so clearing and setting have to share a
+// transaction.
+export async function setLiveScene(sceneId) {
+  const supabase = requireClient();
+  const { data, error } = await supabase.rpc('set_live_scene', { p_scene: sceneId });
+  if (error) throw error;
+  return toScene(Array.isArray(data) ? data[0] : data);
+}
+
+export async function clearLiveScene(campaignId) {
+  const supabase = requireClient();
+  const { error } = await supabase.rpc('clear_live_scene', { p_campaign: campaignId });
+  if (error) throw error;
 }
 
 export async function deleteScene(sceneId) {
@@ -127,10 +172,101 @@ export async function updateToken(tokenId, patch) {
   return toToken(data);
 }
 
+// Conditions go through an RPC so a player can mark an enemy without being
+// given the row: RLS grants whole rows, and a policy wide enough for this would
+// also let them drag the creature away.
+export async function setTokenConditions(tokenId, conditions) {
+  const supabase = requireClient();
+  const { data, error } = await supabase.rpc('set_token_conditions', {
+    p_token: tokenId,
+    p_conditions: normalizeConditions(conditions),
+  });
+  if (error) throw error;
+  return toToken(Array.isArray(data) ? data[0] : data);
+}
+
 export async function deleteToken(tokenId) {
   const supabase = requireClient();
   const { error } = await supabase.from('map_tokens').delete().eq('id', tokenId);
   if (error) throw error;
+}
+
+// One row per stroke: undo deletes the last, realtime carries only the new one,
+// and nothing rewrites a payload that grows all session.
+export async function listDrawings(sceneId) {
+  const supabase = requireClient();
+  const { data, error } = await supabase
+    .from('map_drawings')
+    .select(DRAWING_COLUMNS)
+    .eq('scene_id', sceneId)
+    .order('created_at', { ascending: true });
+  if (error) throw error;
+  return (data || []).map(toDrawing).filter(Boolean);
+}
+
+export async function createDrawing(sceneId, { points, color, width, layer, text } = {}) {
+  const supabase = requireClient();
+  const note = sanitizeNoteText(text);
+  // A note is anchored by a single point and needs no simplification; a stroke
+  // is worth storing only if it went somewhere.
+  const simplified = note ? normalizePoints(points).slice(0, 1) : simplifyStroke(points);
+  if (!isDrawable(simplified)) return null;
+  const { data, error } = await supabase
+    .from('map_drawings')
+    .insert({
+      scene_id: sceneId,
+      layer: normalizeLayer(layer),
+      points: simplified,
+      color: color || null,
+      width: Number(width) > 0 ? Number(width) : 3,
+      text: note || null,
+    })
+    .select(DRAWING_COLUMNS)
+    .single();
+  if (error) throw error;
+  return toDrawing(data);
+}
+
+export async function deleteDrawing(drawingId) {
+  const supabase = requireClient();
+  const { error } = await supabase.from('map_drawings').delete().eq('id', drawingId);
+  if (error) throw error;
+}
+
+export async function clearDrawings(sceneId) {
+  const supabase = requireClient();
+  const { error } = await supabase.from('map_drawings').delete().eq('scene_id', sceneId);
+  if (error) throw error;
+}
+
+// GM-only labels live in their own table because RLS filters rows, not columns:
+// a secret kept on the token row would be delivered to the player and merely
+// hidden by the client. A player calling this gets nothing back, by policy.
+export async function listTokenSecrets(sceneId) {
+  const supabase = requireClient();
+  const { data, error } = await supabase
+    .from('map_token_secrets')
+    .select('token_id, label, map_tokens!inner(scene_id)')
+    .eq('map_tokens.scene_id', sceneId);
+  // A player is not refused, they simply see no rows; a real failure still
+  // throws rather than silently reading as "no secrets".
+  if (error) throw error;
+  return Object.fromEntries((data || []).map((row) => [row.token_id, row.label || '']));
+}
+
+export async function setTokenSecret(tokenId, label) {
+  const supabase = requireClient();
+  const text = String(label || '').trim();
+  if (!text) {
+    const { error } = await supabase.from('map_token_secrets').delete().eq('token_id', tokenId);
+    if (error) throw error;
+    return '';
+  }
+  const { error } = await supabase
+    .from('map_token_secrets')
+    .upsert({ token_id: tokenId, label: text, updated_at: new Date().toISOString() }, { onConflict: 'token_id' });
+  if (error) throw error;
+  return text;
 }
 
 export async function uploadMapImage(campaignId, sceneId, file) {

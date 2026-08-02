@@ -19,7 +19,7 @@ export function applyTokenEvent(tokens, event, { draggingId = null } = {}) {
   const type = String(event?.eventType || event?.type || '').toUpperCase();
 
   if (type === 'DELETE') {
-    const removedId = event?.old?.id || event?.oldRecord?.id;
+    const removedId = event?.old?.id || event?.oldRecord?.id || event?.old_record?.id;
     if (!removedId) return list;
     return list.filter((token) => token.id !== removedId);
   }

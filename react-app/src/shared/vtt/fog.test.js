@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   brushCells,
+  normalizeScale,
   createFog,
   decodeCells,
   encodeCells,
@@ -77,13 +78,27 @@ test('reveal all and hide all flip every cell', () => {
   }
 });
 
-test('a square brush covers its whole side, centred', () => {
+// Round, not square: a square brush leaves stepped corners along every wall it
+// follows, and straightening those by hand is most of the work.
+test('the brush is a disc centred on the cell under the pointer', () => {
   assert.deepEqual(brushCells(5, 5, 1), [{ col: 5, row: 5 }]);
+
   const three = brushCells(5, 5, 3);
-  assert.equal(three.length, 9);
-  assert.deepEqual(three[0], { col: 4, row: 4 });
-  assert.deepEqual(three[8], { col: 6, row: 6 });
+  const keys = new Set(three.map((cell) => `${cell.col}:${cell.row}`));
+  assert.ok(keys.has('5:5'), 'the centre is painted');
+  assert.ok(keys.has('4:5') && keys.has('6:5') && keys.has('5:4') && keys.has('5:6'), 'the sides are painted');
+  assert.equal(keys.has('4:4'), false, 'the corners of the 3x3 are not');
+  assert.equal(three.length, 5);
+
+  // Every cell of a larger brush is within the radius of the centre.
+  const seven = brushCells(0, 0, 7);
+  for (const cell of seven) {
+    assert.ok(Math.sqrt(cell.col ** 2 + cell.row ** 2) <= 3.5, `${cell.col},${cell.row} is outside the disc`);
+  }
+  assert.ok(seven.length > brushCells(0, 0, 5).length, 'a wider brush paints more');
+
   assert.equal(brushCells(0, 0, 0).length, 1, 'a zero brush still paints one cell');
+  assert.equal(brushCells(0, 0, 2).length > 0, true, 'an even diameter still paints something');
 });
 
 test('fog survives a round trip through the database shape', () => {
@@ -110,13 +125,33 @@ test('a corrupt payload degrades to covered instead of throwing', () => {
   assert.deepEqual([...decodeCells('%%%', 2)], [0, 0]);
 });
 
+// Fog cells are smaller than grid squares, so a square map covers `scale` times
+// as many of them per side. Without that, revealing half a doorway is impossible.
+test('the image is measured in fog cells, not in grid squares', () => {
+  assert.deepEqual(fogSizeForImage({ width: 1400, height: 700 }, { size: 70 }, 1), { cols: 20, rows: 10 });
+  assert.deepEqual(fogSizeForImage({ width: 1400, height: 700 }, { size: 70 }, 4), { cols: 80, rows: 40 });
+  assert.deepEqual(fogSizeForImage({ width: 1400, height: 700 }, { size: 70 }), { cols: 80, rows: 40 });
+});
+
 test('scene size is clamped so a bad grid cannot allocate unbounded memory', () => {
-  assert.deepEqual(fogSizeForImage({ width: 1400, height: 700 }, { size: 70 }), { cols: 20, rows: 10 });
-  assert.deepEqual(fogSizeForImage({ width: 100, height: 100 }, { size: 0 }), { cols: 100, rows: 100 });
+  assert.deepEqual(fogSizeForImage({ width: 100, height: 100 }, { size: 0 }, 1), { cols: 100, rows: 100 });
   const huge = fogSizeForImage({ width: 999999, height: 999999 }, { size: 1 });
-  assert.equal(huge.cols, 400);
-  assert.equal(huge.rows, 400);
-  assert.equal(createFog(1e9, 1e9).cols, 400);
+  assert.equal(huge.cols, 1200);
+  assert.equal(huge.rows, 1200);
+  assert.equal(createFog(1e9, 1e9).cols, 1200);
+});
+
+// Fog saved before the sub-cell resolution existed had one cell per square, and
+// must keep reading as such or every old scene would be revealed in the wrong
+// places.
+test('fog without a scale is read as one cell per square', () => {
+  const legacy = normalizeFog({ cols: 4, rows: 4, cells: createFog(4, 4, 1).cells });
+  assert.equal(legacy.scale, 1);
+  assert.equal(createFog(8, 8).scale, 4);
+  assert.equal(normalizeScale(0), 4);
+  assert.equal(normalizeScale(99), 8);
+  assert.equal(hideAll(createFog(8, 8, 2)).scale, 2, 'covering again keeps the resolution');
+  assert.equal(revealAll(createFog(8, 8, 2)).scale, 2);
 });
 
 test('the encoded form is compact enough to sync on every stroke', () => {
