@@ -17,6 +17,7 @@ import {
   listDrawings,
   listTokenSecrets,
   listTokens,
+  moveDrawing,
   setLiveScene,
   setTokenConditions,
   setTokenEffects,
