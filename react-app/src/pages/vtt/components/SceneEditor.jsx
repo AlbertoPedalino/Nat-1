@@ -19,6 +19,7 @@ import {
   listTokens,
   setLiveScene,
   setTokenConditions,
+  setTokenEffects,
   setTokenSecret,
   signMapImage,
   updateScene,
@@ -104,7 +105,6 @@ export default function SceneEditor({ scene, onSceneChange }) {
   // What is actually on screen: the URL and the mode it belongs to, updated
   // together once the picture has loaded.
   const [displayed, setDisplayed] = useState({ url: null, shownImage: 'map' });
-  const [selectedId, setSelectedId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const gridTimerRef = useRef(null);
@@ -645,7 +645,6 @@ export default function SceneEditor({ scene, onSceneChange }) {
       setTokens((current) => (
         current.some((item) => item.id === created.id) ? current : [...current, created]
       ));
-      setSelectedId(created.id);
     } catch (cause) {
       notify('error', cause?.message || 'Could not add that token.');
     } finally {
@@ -823,13 +822,15 @@ export default function SceneEditor({ scene, onSceneChange }) {
     // point bar — that is an ordinary update the row policy already allows.
     const owned = canMove(token);
     setTokens((current) => current.map((item) => (
-      item.id === token.id ? { ...item, conditions, ...(owned ? { showHp, effects } : {}) } : item
+      item.id === token.id ? { ...item, conditions, effects, ...(owned ? { showHp } : {}) } : item
     )));
     try {
       await writeConditions(token, conditions);
-      // Effects are an ordinary column, so a player may set them only on a piece
-      // the row policy already lets them write.
-      if (owned) await updateToken(token.id, { show_hp: showHp, effects });
+      // Both marks go through their own function, which writes one column and
+      // checks the table rather than the row: calling out that the ogre has
+      // advantage is not the same as being handed the ogre.
+      await setTokenEffects(token.id, effects);
+      if (owned) await updateToken(token.id, { show_hp: showHp });
       pushToEncounter({ ...token, conditions, effects });
     } catch (cause) {
       setTokens((current) => current.map((item) => (item.id === token.id ? token : item)));
@@ -882,7 +883,6 @@ export default function SceneEditor({ scene, onSceneChange }) {
     try {
       await deleteToken(token.id);
       setTokens((current) => current.filter((item) => item.id !== token.id));
-      setSelectedId(null);
     } catch (cause) {
       notify('error', cause?.message || 'Could not remove that token.');
     } finally {
@@ -1207,7 +1207,6 @@ export default function SceneEditor({ scene, onSceneChange }) {
         scene={scene}
         imageUrl={displayed.url}
         tokens={visibleTokens}
-        selectedId={selectedId}
         snap
         canMove={canMove}
         fog={scene.fog}
@@ -1237,7 +1236,6 @@ export default function SceneEditor({ scene, onSceneChange }) {
           )
           : null}
         onImageSize={setImageSize}
-        onSelect={setSelectedId}
         onDragToken={handleDragToken}
         onMoveToken={handleMoveToken}
         onPaint={handlePaint}
@@ -1297,10 +1295,13 @@ export default function SceneEditor({ scene, onSceneChange }) {
           ownedCharacterIds: role.ownedCharacterIds,
         })}
         canShowHp={role.isGm || canMove(menuToken)}
-        // Effects are an ordinary column on the piece, so they follow the row
-        // policy: a player may set them on what they may already move. Offering
-        // the chips on a monster would be a click that silently does nothing.
-        canSetEffects={role.isGm || canMove(menuToken)}
+        // Advantage and the rest are marks like conditions, and answer to the
+        // same question: anyone at the table may put one on a creature, nobody
+        // may put one on somebody else's character.
+        canSetEffects={canMarkToken(menuToken, {
+          isGm: role.isGm,
+          ownedCharacterIds: role.ownedCharacterIds,
+        })}
         canRemove={role.isGm || canMove(menuToken)}
         onClose={() => setMenu(null)}
         onSave={role.isGm ? handleSaveToken : handleMarkToken}

@@ -229,7 +229,7 @@ export default function TokenMenu({
             "advantage or disadvantage on X", not "which of twelve flags". */}
         <Typography variant="caption" color="text.secondary">
           Advantage / disadvantage
-          {canSetEffects ? null : ' — the GM sets these'}
+          {canSetEffects ? null : ' — this character’s own player or the GM sets these'}
         </Typography>
         {EFFECT_GROUPS.map((group) => (
           <Stack key={group.target} spacing={0.5}>

@@ -469,6 +469,43 @@ begin
 end;
 $$;
 
+-- Advantage, disadvantage and the rest are marks too, and they follow the same
+-- reasoning: a player calls out that the ogre is at disadvantage as readily as
+-- that it is prone, and neither should hand them the ogre to drag around. One
+-- column, the same guard.
+create or replace function public.set_token_effects(p_token uuid, p_effects jsonb)
+returns public.map_tokens
+language plpgsql security definer set search_path = public
+as $$
+declare
+  token public.map_tokens;
+  scene public.map_scenes;
+begin
+  select * into token from public.map_tokens where id = p_token;
+  if token.id is null then
+    raise exception 'Token not found';
+  end if;
+  select * into scene from public.map_scenes where id = token.scene_id;
+
+  if not (
+    public.is_campaign_gm(scene.campaign_id)
+    or (
+      token.layer <> 'gm'
+      and scene.is_live
+      and scene.campaign_id in (select public.user_campaign_ids())
+    )
+  ) then
+    raise exception 'Not allowed to mark this token';
+  end if;
+
+  update public.map_tokens
+    set effects = coalesce(p_effects, '[]'::jsonb)
+    where id = p_token
+    returning * into token;
+  return token;
+end;
+$$;
+
 -- 4b) GOING LIVE ---------------------------------------------------------------
 -- Clearing the old live scene and setting the new one has to happen in one
 -- statement pair inside a transaction: done as two client calls, the unique

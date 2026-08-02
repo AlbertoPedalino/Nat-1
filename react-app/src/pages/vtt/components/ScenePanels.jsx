@@ -30,6 +30,7 @@ import {
   Undo2,
   Users,
 } from 'lucide-react';
+import ColorField from '../../../components/ColorField.jsx';
 
 // The scene's settings, split by the question they answer. Each one is a panel
 // behind its own icon on the rail rather than a strip across the top: the map is

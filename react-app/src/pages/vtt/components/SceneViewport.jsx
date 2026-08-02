@@ -68,7 +68,6 @@ export default function SceneViewport({
   scene,
   imageUrl,
   tokens,
-  selectedId,
   snap,
   canMove,
   fog,
@@ -82,7 +81,6 @@ export default function SceneViewport({
   // look at it, not play on it.
   backgroundOnly = false,
   onImageSize,
-  onSelect,
   onDragToken,
   onMoveToken,
   onPaint,
@@ -263,7 +261,6 @@ export default function SceneViewport({
         // What became a menu was never a drag.
         dragRef.current = null;
         setDrag(null);
-        onSelect?.(token.id);
         onContextMenu(token, at);
       }, LONG_PRESS_MS),
     };
@@ -393,13 +390,11 @@ export default function SceneViewport({
       return;
     }
     dragRef.current = { kind: 'pan', last: point };
-    onSelect?.(null);
   };
 
   const beginTokenDrag = (event, token) => {
     event.stopPropagation();
     armLongPress(event, token);
-    onSelect?.(token.id);
     if (!canMove(token)) return;
     const pointer = screenToWorld(screenPoint(event), view);
     const rect = tokenWorldRect(token, scene.grid);
@@ -729,7 +724,6 @@ export default function SceneViewport({
             <TokenSprite
               token={live}
               size="100%"
-              selected={selectedId === token.id}
               dimmed={!onActiveLayer}
               staged={staged}
               interactive={onActiveLayer}
@@ -739,7 +733,6 @@ export default function SceneViewport({
                 if (!onActiveLayer || !onContextMenu) return;
                 event.preventDefault();
                 event.stopPropagation();
-                onSelect?.(token.id);
                 onContextMenu(token, { x: event.clientX, y: event.clientY });
               }}
             />

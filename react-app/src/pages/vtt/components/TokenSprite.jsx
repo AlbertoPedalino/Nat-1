@@ -9,7 +9,6 @@ import { conditionLabel } from '../../../shared/character/conditions.js';
 export default function TokenSprite({
   token,
   size,
-  selected,
   dimmed,
   staged,
   interactive,
@@ -47,11 +46,14 @@ export default function TokenSprite({
   // player never receives it in the first place.
   const name = token.secretLabel || token.label || '';
 
+  // Selection is not drawn at all. What is picked is already obvious from what
+  // you just touched, and the menu that opens on it says so plainly; a ring on
+  // top of that only competed with the colour that means something.
   const ringWidth = () => {
-    if (isScenery) return selected ? 3 : 0;
     // Thick enough to read as the player's colour from across the table, at the
     // size a piece actually is on a zoomed-out board.
-    if (isCharacter || selected) return 5;
+    if (isCharacter) return 5;
+    if (isScenery) return 0;
     return showArtwork ? 0 : 2;
   };
 
@@ -93,9 +95,7 @@ export default function TokenSprite({
           // map, and none at all once it has its own artwork.
           borderStyle: 'solid',
           borderWidth: ringWidth(),
-          borderColor: selected
-            ? 'primary.main'
-            : (isCharacter ? (token.color || 'rgba(0,0,0,0.6)') : 'rgba(0,0,0,0.6)'),
+          borderColor: isCharacter ? (token.color || 'rgba(0,0,0,0.6)') : 'rgba(0,0,0,0.6)',
           bgcolor: isScenery || showArtwork ? 'transparent' : (token.color || 'secondary.main'),
           outline: token.layer === 'gm' ? '2px dashed rgba(232,201,106,0.9)' : 'none',
           outlineOffset: '-4px',

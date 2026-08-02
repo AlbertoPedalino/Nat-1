@@ -181,6 +181,18 @@ export async function updateToken(tokenId, patch) {
 // Conditions go through an RPC so a player can mark an enemy without being
 // given the row: RLS grants whole rows, and a policy wide enough for this would
 // also let them drag the creature away.
+// Effects go the same way conditions do, and for the same reason: a player may
+// mark a monster without being handed the monster.
+export async function setTokenEffects(tokenId, effects) {
+  const supabase = requireClient();
+  const { data, error } = await supabase.rpc('set_token_effects', {
+    p_token: tokenId,
+    p_effects: effects || [],
+  });
+  if (error) throw error;
+  return toToken(Array.isArray(data) ? data[0] : data);
+}
+
 export async function setTokenConditions(tokenId, conditions) {
   const supabase = requireClient();
   const { data, error } = await supabase.rpc('set_token_conditions', {
