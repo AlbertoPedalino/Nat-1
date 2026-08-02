@@ -15,6 +15,7 @@ const DmScreenPage = lazy(() => import('./pages/dmscreen/DmScreenPage.jsx'));
 const EncounterBuilderPage = lazy(() => import('./pages/encounterbuilder/EncounterBuilderPage.jsx'));
 const InstancePickerPage = lazy(() => import('./pages/library/InstancePickerPage.jsx'));
 const CampaignsPage = lazy(() => import('./pages/campaigns/CampaignsPage.jsx'));
+const VttPage = lazy(() => import('./pages/vtt/VttPage.jsx'));
 const CampaignSheetView = lazy(() => import('./pages/campaignsheet/CampaignSheetView.jsx'));
 const NotFoundPage = lazy(() => import('./pages/notfound/NotFoundPage.jsx'));
 
@@ -34,6 +35,7 @@ export default function App() {
           <Route path="/gmsheets" element={<Navigate to="/library/characters" replace />} />
           <Route path="/campaigns" element={<CampaignsPage />} />
           <Route path="/campaign-sheet" element={<CampaignSheetView />} />
+          <Route path="/vtt" element={<VttPage />} />
           <Route path="/encounter-builder" element={<EncounterBuilderPage />} />
           <Route path="/builder" element={<Navigate to="/charbuilder" replace />} />
           <Route path="/sheet" element={<Navigate to="/charsheet" replace />} />

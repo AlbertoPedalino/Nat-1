@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { alpha, Box, Button, Typography, Card, CardContent } from '@mui/material';
-import { ScrollText, UserPen, LayoutDashboard, Swords, StickyNote, Flag, Trash2 } from 'lucide-react';
+import { ScrollText, UserPen, LayoutDashboard, Swords, StickyNote, Flag, Map, Trash2 } from 'lucide-react';
 import { REGISTRY_META } from '../../shared/localStorageRegistries.js';
 import { clearAppLocalStorage, listAppLocalStorageKeys } from '../../shared/storage.js';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../components/AppTopBar.jsx';
@@ -13,6 +13,7 @@ export const TOOLS = [
   { path: '/library/encounters', label: 'Encounter Builder', desc: 'Build and balance combat encounters', icon: Swords, color: 'error.main' },
   { path: '/library/dmscreen', label: 'DM Screen', desc: 'Keep notes and reminders close during play', icon: StickyNote, color: 'secondary.main' },
   { path: '/campaigns', label: 'Campaigns', desc: 'Create, join, and manage online campaigns', icon: Flag, color: 'primary.main' },
+  { path: '/vtt', label: 'Battle Map', desc: 'Maps and tokens for the campaigns you run', icon: Map, color: 'info.main' },
 ];
 
 export default function HomePage() {
