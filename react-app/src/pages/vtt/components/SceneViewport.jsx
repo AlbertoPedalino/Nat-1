@@ -13,6 +13,7 @@ import {
 } from '../../../shared/vtt/geometry.js';
 
 const WHEEL_STEP = 1.12;
+const DRAG_BROADCAST_MS = 40;
 
 // Rendering is hybrid by design: the map is an <img>, tokens are DOM nodes moved
 // with `transform`, and only the fog (phase 4) will need a canvas. With the
@@ -26,6 +27,7 @@ export default function SceneViewport({
   snap,
   canMove,
   onSelect,
+  onDragToken,
   onMoveToken,
 }) {
   const hostRef = useRef(null);
@@ -110,6 +112,15 @@ export default function SceneViewport({
       snap: false,
     });
     setDrag({ id: state.token.id, x: next.x, y: next.y });
+
+    // Tell the other viewers where the piece is right now. Throttled to one
+    // frame's worth: this is a broadcast, not a write, but flooding the socket
+    // buys nothing the eye can see.
+    const now = Date.now();
+    if (now - (state.lastBroadcast || 0) >= DRAG_BROADCAST_MS) {
+      state.lastBroadcast = now;
+      onDragToken?.(state.token, next);
+    }
   };
 
   const handlePointerUp = (event) => {
@@ -126,8 +137,12 @@ export default function SceneViewport({
     });
     setDrag(null);
     // One write per gesture, and only when the piece actually changed square.
+    // A drag that ends where it started still needs the final broadcast undone,
+    // which the committed-position handler does for the other viewers.
     if (landing.x !== state.token.x || landing.y !== state.token.y) {
       onMoveToken?.(state.token, landing);
+    } else {
+      onDragToken?.(state.token, { x: state.token.x, y: state.token.y });
     }
   };
 

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Box, CircularProgress, Stack, Typography } from '@mui/material';
+import { Box, Chip, CircularProgress, Stack, Typography } from '@mui/material';
+import { Eye, Shield } from 'lucide-react';
 import { useToast } from '../../../shared/ToastProvider.jsx';
 import { toRoster } from '../../../shared/campaign/roster.js';
 import { listCampaignCharacters } from '../../../shared/cloud/campaigns.js';
@@ -12,29 +13,45 @@ import {
   updateToken,
   uploadMapImage,
 } from '../../../shared/cloud/vtt.js';
-import { canMoveToken } from '../../../shared/vtt/scene.js';
+import {
+  applyTokenEvent,
+  dropGhost,
+  movableFilter,
+  pruneGhosts,
+  putGhost,
+  resolveTokens,
+} from '../../../shared/vtt/liveScene.js';
+import { toScene } from '../../../shared/vtt/scene.js';
+import { useSceneLive } from '../../../shared/vtt/useSceneLive.js';
+import { useSceneRole } from '../../../shared/vtt/useSceneRole.js';
 import RosterPanel from './RosterPanel.jsx';
 import SceneToolbar from './SceneToolbar.jsx';
 import SceneViewport from './SceneViewport.jsx';
 
 const GRID_SAVE_DELAY = 600;
+const GHOST_SWEEP_MS = 2000;
 
 export default function SceneEditor({ scene, onSceneChange }) {
   const { notify } = useToast();
+  const role = useSceneRole(scene.campaignId);
   const [tokens, setTokens] = useState([]);
+  const [ghosts, setGhosts] = useState({});
   const [roster, setRoster] = useState([]);
   const [imageUrl, setImageUrl] = useState(null);
   const [selectedId, setSelectedId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const gridTimerRef = useRef(null);
+  const draggingRef = useRef(null);
+  const gridEditRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     Promise.all([
       listTokens(scene.id),
-      scene.campaignId ? listCampaignCharacters(scene.campaignId) : Promise.resolve([]),
+      // Only the GM places pieces, so only the GM needs the roster.
+      role.isGm && scene.campaignId ? listCampaignCharacters(scene.campaignId) : Promise.resolve([]),
     ])
       .then(([sceneTokens, characterRows]) => {
         if (cancelled) return;
@@ -46,10 +63,8 @@ export default function SceneEditor({ scene, onSceneChange }) {
       })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [notify, scene.campaignId, scene.id]);
+  }, [notify, role.isGm, scene.campaignId, scene.id]);
 
-  // The bucket is private, so the <img> needs a fresh signed URL whenever the
-  // map changes. The path is what we store; the URL is disposable.
   useEffect(() => {
     let cancelled = false;
     if (!scene.imagePath) {
@@ -64,13 +79,50 @@ export default function SceneEditor({ scene, onSceneChange }) {
 
   useEffect(() => () => clearTimeout(gridTimerRef.current), []);
 
-  // This is the GM's own editor, so every piece is movable here. The same check
-  // exists in the database; phase 3 passes the real role for the player view.
-  const canMove = useCallback((token) => canMoveToken(token, { isGm: true }), []);
+  const handleTokenEvent = useCallback((payload) => {
+    setTokens((current) => applyTokenEvent(current, payload, { draggingId: draggingRef.current }));
+    const id = payload?.new?.id || payload?.old?.id;
+    // The committed row supersedes whatever the drag preview was showing.
+    if (id) setGhosts((current) => dropGhost(current, id));
+  }, []);
+
+  const handleSceneEvent = useCallback((payload) => {
+    const next = toScene(payload?.new);
+    // Ignore remote grid changes while this client is editing the fields, or
+    // the debounced echo overwrites what is being typed.
+    if (next && !gridEditRef.current) onSceneChange(next);
+  }, [onSceneChange]);
+
+  const handleRemoteDrag = useCallback((payload) => {
+    if (!payload?.id) return;
+    setGhosts((current) => putGhost(current, payload));
+  }, []);
+
+  const { sendDrag } = useSceneLive({
+    sceneId: scene.id,
+    onTokenEvent: handleTokenEvent,
+    onSceneEvent: handleSceneEvent,
+    onRemoteDrag: handleRemoteDrag,
+  });
+
+  // A client that vanishes mid-drag never sends its release; sweeping keeps its
+  // piece from being pinned at the ghost position forever.
+  useEffect(() => {
+    const timer = setInterval(() => setGhosts((current) => pruneGhosts(current)), GHOST_SWEEP_MS);
+    return () => clearInterval(timer);
+  }, []);
+
+  const canMove = useMemo(
+    () => movableFilter({ isGm: role.isGm, ownedCharacterIds: role.ownedCharacterIds }),
+    [role.isGm, role.ownedCharacterIds],
+  );
+
+  const handleDragToken = useCallback((token, position) => {
+    draggingRef.current = token.id;
+    sendDrag({ id: token.id, x: position.x, y: position.y });
+  }, [sendDrag]);
 
   const handleMoveToken = useCallback(async (token, position) => {
-    // Optimistic: the piece stays where it was dropped and rolls back only if
-    // the write is refused.
     setTokens((current) => current.map((item) => (
       item.id === token.id ? { ...item, ...position } : item
     )));
@@ -79,17 +131,21 @@ export default function SceneEditor({ scene, onSceneChange }) {
     } catch (cause) {
       setTokens((current) => current.map((item) => (item.id === token.id ? token : item)));
       notify('error', cause?.message || 'Could not move that token.');
+    } finally {
+      // Released only after the write settles: until then a remote echo would
+      // still be our own move coming back.
+      draggingRef.current = null;
     }
   }, [notify]);
 
-  // Typing in the grid fields fires per keystroke; the scene row should not.
   const handleGridChange = useCallback((grid) => {
+    gridEditRef.current = true;
     onSceneChange({ ...scene, grid });
     clearTimeout(gridTimerRef.current);
     gridTimerRef.current = setTimeout(() => {
-      updateScene(scene.id, { grid }).catch((cause) => {
-        notify('error', cause?.message || 'Could not save the grid.');
-      });
+      updateScene(scene.id, { grid })
+        .catch((cause) => notify('error', cause?.message || 'Could not save the grid.'))
+        .finally(() => { gridEditRef.current = false; });
     }, GRID_SAVE_DELAY);
   }, [notify, onSceneChange, scene]);
 
@@ -97,8 +153,7 @@ export default function SceneEditor({ scene, onSceneChange }) {
     setBusy(true);
     try {
       const path = await uploadMapImage(scene.campaignId, scene.id, file);
-      const updated = await updateScene(scene.id, { imagePath: path });
-      onSceneChange(updated);
+      onSceneChange(await updateScene(scene.id, { imagePath: path }));
     } catch (cause) {
       notify('error', cause?.message || 'Could not upload that map.');
     } finally {
@@ -110,7 +165,9 @@ export default function SceneEditor({ scene, onSceneChange }) {
     setBusy(true);
     try {
       const created = await createToken(scene.id, token);
-      setTokens((current) => [...current, created]);
+      setTokens((current) => (
+        current.some((item) => item.id === created.id) ? current : [...current, created]
+      ));
       setSelectedId(created.id);
     } catch (cause) {
       notify('error', cause?.message || 'Could not add that token.');
@@ -119,8 +176,6 @@ export default function SceneEditor({ scene, onSceneChange }) {
     }
   }, [notify, scene.id]);
 
-  // New pieces land on the first free square of the top-left area rather than
-  // stacking on each other.
   const nextFreeCell = useCallback(() => {
     const taken = new Set(tokens.map((token) => `${Math.round(token.x)}:${Math.round(token.y)}`));
     for (let row = 0; row < 20; row += 1) {
@@ -163,45 +218,70 @@ export default function SceneEditor({ scene, onSceneChange }) {
     [selectedId, tokens],
   );
 
-  if (loading) return <CircularProgress size={24} />;
+  const visibleTokens = useMemo(
+    () => resolveTokens(tokens, ghosts, draggingRef.current),
+    [ghosts, tokens],
+  );
+
+  if (loading || role.loading) return <CircularProgress size={24} />;
 
   return (
     <Stack spacing={1.5}>
-      <Box>
-        <Typography variant="h1">{scene.name}</Typography>
-        <Typography variant="body2" color="text.secondary">
-          {tokens.length} token{tokens.length === 1 ? '' : 's'} · cell {scene.grid.size}px
-        </Typography>
-      </Box>
+      <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', flexWrap: 'wrap' }} useFlexGap>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography variant="h1">{scene.name}</Typography>
+          <Typography variant="body2" color="text.secondary">
+            {tokens.length} token{tokens.length === 1 ? '' : 's'} · cell {scene.grid.size}px
+          </Typography>
+        </Box>
+        <Chip
+          size="small"
+          icon={role.isGm ? <Shield size={13} /> : <Eye size={13} />}
+          label={role.isGm ? 'GM' : 'Player view'}
+          color={role.isGm ? 'primary' : 'default'}
+          variant="outlined"
+        />
+      </Stack>
 
-      <SceneToolbar
-        scene={scene}
-        busy={busy}
-        selectedToken={selectedToken}
-        onUploadMap={handleUploadMap}
-        onGridChange={handleGridChange}
-        onDeleteToken={handleDeleteToken}
-      />
+      {role.isGm ? (
+        <SceneToolbar
+          scene={scene}
+          busy={busy}
+          selectedToken={selectedToken}
+          onUploadMap={handleUploadMap}
+          onGridChange={handleGridChange}
+          onDeleteToken={handleDeleteToken}
+        />
+      ) : null}
 
-      <Box sx={layoutSx}>
+      <Box sx={role.isGm ? layoutSx : singleColumnSx}>
         <SceneViewport
           scene={scene}
           imageUrl={imageUrl}
-          tokens={tokens}
+          tokens={visibleTokens}
           selectedId={selectedId}
           snap
           canMove={canMove}
           onSelect={setSelectedId}
+          onDragToken={handleDragToken}
           onMoveToken={handleMoveToken}
         />
-        <RosterPanel
-          roster={roster}
-          tokens={tokens}
-          busy={busy}
-          onPlaceCharacter={handlePlaceCharacter}
-          onAddHiddenToken={handleAddToken}
-        />
+        {role.isGm ? (
+          <RosterPanel
+            roster={roster}
+            tokens={tokens}
+            busy={busy}
+            onPlaceCharacter={handlePlaceCharacter}
+            onAddHiddenToken={handleAddToken}
+          />
+        ) : null}
       </Box>
+
+      {!role.isGm ? (
+        <Typography variant="caption" color="text.secondary">
+          You can move the pieces standing for your own characters.
+        </Typography>
+      ) : null}
     </Stack>
   );
 }
@@ -212,3 +292,5 @@ const layoutSx = {
   gap: 1.5,
   alignItems: 'start',
 };
+
+const singleColumnSx = { display: 'grid', gap: 1.5 };
