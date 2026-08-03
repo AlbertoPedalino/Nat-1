@@ -773,7 +773,7 @@ export default function SceneEditor({
       }
       // No label on your own: you know where your own hand is, and a name stuck
       // to your cursor is only in the way.
-      return { ...current, [id]: { x: point.x, y: point.y, at: Date.now(), label: null } };
+      return { ...current, [id]: { x: point.x, y: point.y, at: Date.now(), label: null, local: true } };
     });
   }, [sendDrag, user?.id]);
 
@@ -1331,7 +1331,9 @@ export default function SceneEditor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   ), [rollFeed, rollTick, tokenByCharacter]);
 
-  const laserDots = useMemo(() => Object.values(lasers), [lasers]);
+  const laserDots = useMemo(() => (
+    Object.entries(lasers).map(([id, dot]) => ({ ...dot, id }))
+  ), [lasers]);
 
   // What the rail offers, in the order a session needs it. A player gets the two
   // groups that are theirs; the rest would only be buttons the database refuses.

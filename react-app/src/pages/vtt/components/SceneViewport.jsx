@@ -26,6 +26,7 @@ import FogCanvas from './FogCanvas.jsx';
 import RollBubble from './RollBubble.jsx';
 import DiceTray from './DiceTray.jsx';
 import FloatingSheetPanel from './FloatingSheetPanel.jsx';
+import LaserOverlay from './LaserOverlay.jsx';
 import TokenSprite from './TokenSprite.jsx';
 
 const WHEEL_STEP = 1.12;
@@ -586,11 +587,13 @@ export default function SceneViewport({
     // button to be held made it look broken to everyone else: you point at
     // something, nobody sees a dot, and there is nothing on screen to say why.
     if (paintMode === 'laser' && !state) {
+      const at = cellPoint(point);
+      // Local rendering reads this ref on the next animation frame. Broadcasting
+      // stays throttled, but no longer limits what the person pointing sees.
+      laserPointRef.current = at;
       const now = Date.now();
       if (now - lastLaserRef.current >= LASER_BROADCAST_MS) {
         lastLaserRef.current = now;
-        const at = cellPoint(point);
-        laserPointRef.current = at;
         onLaser?.(at);
       }
       return;
@@ -1136,8 +1139,14 @@ export default function SceneViewport({
         live={strokeRef.current.length
           ? { points: strokeRef.current, color: drawColor, width: drawWidth, tick: strokeTick }
           : null}
-        lasers={lasers}
         measure={measure || remoteMeasure || measured?.trail}
+        grid={scene.grid}
+        view={view}
+      />
+      <LaserOverlay
+        lasers={lasers}
+        localPointRef={laserPointRef}
+        localActive={paintMode === 'laser'}
         grid={scene.grid}
         view={view}
       />

@@ -5,7 +5,7 @@ import { cellSize, worldToScreen } from '../../../shared/vtt/geometry.js';
 
 // Committed strokes plus the one still under the pointer, on the same canvas so
 // the live stroke lines up exactly with where it will land.
-export default function DrawingCanvas({ drawings, selectedId, live, lasers, measure, grid, view, onTop = false }) {
+export default function DrawingCanvas({ drawings, selectedId, live, measure, grid, view, onTop = false }) {
   const canvasRef = useRef(null);
   // Redraw when the box changes: the canvas is measured in its own pixels.
   const resizeTick = useResizeTick(canvasRef);
@@ -60,8 +60,8 @@ export default function DrawingCanvas({ drawings, selectedId, live, lasers, meas
       drawStroke(context, stroke, points, toScreen, cell, view);
     }
 
-    // The ruler, above the marks and below the laser: a template you are still
-    // dragging has to be readable over whatever it covers.
+    // The ruler above the marks: a template you are still dragging has to be
+    // readable over whatever it covers. The laser has its own animated overlay.
     if (measure?.from && measure?.to) {
       const from = toScreen(measure.from);
       const to = toScreen(measure.to);
@@ -106,37 +106,7 @@ export default function DrawingCanvas({ drawings, selectedId, live, lasers, meas
       }
     }
 
-    // Laser dots last, on top of everything: they are a finger pointing at the
-    // map, and they are never stored — see useSceneLive.
-    for (const laser of lasers || []) {
-      const at = toScreen(laser);
-      const radius = Math.max(4, cell * view.zoom * 0.12);
-      const glow = context.createRadialGradient(at.x, at.y, 0, at.x, at.y, radius * 2.2);
-      glow.addColorStop(0, 'rgba(255,80,70,0.95)');
-      glow.addColorStop(1, 'rgba(255,80,70,0)');
-      context.fillStyle = glow;
-      context.beginPath();
-      context.arc(at.x, at.y, radius * 2.2, 0, Math.PI * 2);
-      context.fill();
-      context.fillStyle = 'rgba(255,235,230,0.95)';
-      context.beginPath();
-      context.arc(at.x, at.y, radius * 0.45, 0, Math.PI * 2);
-      context.fill();
-
-      // Whose pointer it is. Your own carries no label: you know where your own
-      // hand is, and a name stuck to your cursor is just something in the way.
-      if (laser.label) {
-        context.font = '700 11px "Cinzel", Georgia, serif';
-        context.textAlign = 'center';
-        context.textBaseline = 'top';
-        context.lineWidth = 3;
-        context.strokeStyle = 'rgba(0,0,0,0.9)';
-        context.strokeText(laser.label, at.x, at.y + radius * 2.4);
-        context.fillStyle = '#ffd9d4';
-        context.fillText(laser.label, at.x, at.y + radius * 2.4);
-      }
-    }
-  }, [drawings, grid, lasers, live, measure, selectedId, view, resizeTick]);
+  }, [drawings, grid, live, measure, selectedId, view, resizeTick]);
 
   return <Box component="canvas" ref={canvasRef} aria-hidden sx={{ ...canvasSx, ...(onTop ? topSx : null) }} />;
 }

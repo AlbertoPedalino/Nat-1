@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeAll, vi } from 'vitest';
 import SceneViewport from './SceneViewport.jsx';
 
@@ -40,6 +40,25 @@ test('the selected laser follows pointer movement without a click', () => {
 
   expect(onLaser).toHaveBeenCalledOnce();
   expect(onLaser).toHaveBeenCalledWith(expect.objectContaining({ x: expect.any(Number), y: expect.any(Number) }));
+});
+
+test('the local laser keeps following pointer frames between throttled broadcasts', async () => {
+  vi.spyOn(Date, 'now').mockReturnValue(1000);
+  const onLaser = vi.fn();
+  const { container, viewport } = renderLaserViewport(onLaser);
+  const dot = container.querySelector('[data-local-laser="true"]');
+
+  fireEvent.pointerMove(viewport, { clientX: 80, clientY: 60, pointerId: 1 });
+  await waitFor(() => expect(dot.style.transform).not.toBe(''));
+  const firstTransform = dot.style.transform;
+
+  onLaser.mockClear();
+  fireEvent.pointerMove(viewport, { clientX: 120, clientY: 60, pointerId: 1 });
+
+  // The second event is inside the 50 ms network window, but the local ref is
+  // still consumed by the overlay on its next animation frame.
+  expect(onLaser).not.toHaveBeenCalled();
+  await waitFor(() => expect(dot.style.transform).not.toBe(firstTransform));
 });
 
 test('clicking and releasing does not switch off a selected laser', () => {
