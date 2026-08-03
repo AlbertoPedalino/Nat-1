@@ -5,6 +5,7 @@ import TimePanel from './TimePanel.jsx';
 import SelectorGroup from './SelectorGroup.jsx';
 import TierSelector from './TierSelector.jsx';
 import HexResultSteps from './HexResultSteps.jsx';
+import CampaignLinkPanel from './CampaignLinkPanel.jsx';
 import SessionLog from './SessionLog.jsx';
 import { SELECTOR_CONTRACTS } from '../logic/selectorContracts.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
@@ -30,6 +31,7 @@ export default function HexcrawlView() {
 
   return (
     <Stack spacing={2}>
+      <CampaignLinkPanel />
       <WeatherPanel />
       <TimePanel />
 

@@ -62,6 +62,24 @@ export function gmBoardReducer(state, action) {
       };
     case 'setTab':
       return { ...state, tab: action.tab };
+    case 'setCampaign':
+      return { ...state, campaignId: action.campaignId || null };
+    // The shared clock arriving from the campaign row: time and sky only. The
+    // log is not touched — the cloud log is its own append-only table, and
+    // merging the two would double every entry the GM can see.
+    case 'applyClock':
+      return {
+        ...state,
+        min: action.clock.min,
+        day: action.clock.day,
+        month: action.clock.month,
+        year: action.clock.year,
+        season: action.clock.season ?? state.season,
+        meteo: action.clock.meteo ?? state.meteo,
+        intensity: action.clock.intensity ?? state.intensity,
+        hoursSinceWeather: action.clock.hoursSinceWeather,
+        nextWeatherIn: action.clock.nextWeatherIn,
+      };
     case 'setSeason':
       return { ...state, season: action.season };
     case 'setWeatherOverride':

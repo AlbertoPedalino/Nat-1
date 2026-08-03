@@ -5,8 +5,8 @@ import {
   Box, Button, CircularProgress, IconButton, Stack, Tooltip, Typography,
 } from '@mui/material';
 import {
-  Cloud, Dices, Lock, LockOpen, MonitorOff, MonitorPlay, Pencil, Pointer, Radio, Ruler, Shapes,
-  Users,
+  Cloud, Dices, Lock, LockOpen, MonitorOff, MonitorPlay, Pencil, Pointer, Radio, Ruler,
+  Shapes, Users,
 } from 'lucide-react';
 import { useToast } from '../../../shared/ToastProvider.jsx';
 import { useAuth } from '../../../shared/cloud/AuthProvider.jsx';
@@ -95,6 +95,9 @@ import {
   writeSheetSplit,
 } from '../../../shared/vtt/sheetLayout.js';
 import { useEncounterBridge } from '../hooks/useEncounterBridge.js';
+import { useSceneHexcrawl } from '../hooks/useSceneHexcrawl.js';
+import HexcrawlCorner from './HexcrawlCorner.jsx';
+import HexResultDialog from './HexResultDialog.jsx';
 import { useConditionEntries } from '../../encounterbuilder/hooks/useConditionEntries.js';
 import EncounterImportDialog from './EncounterImportDialog.jsx';
 import MonsterPickerDialog from './MonsterPickerDialog.jsx';
@@ -174,6 +177,9 @@ export default function SceneEditor({
   const { notify } = useToast();
   const { user } = useAuth();
   const role = useSceneRole(scene.campaignId);
+  // Dormant on a square map and for a player: it asks the database for nothing
+  // until the scene is actually a hexcrawl being run by its GM.
+  const hexcrawl = useSceneHexcrawl({ scene, isGm: role.isGm });
   const [tokens, setTokens] = useState([]);
   const [ghosts, setGhosts] = useState({});
   const [roster, setRoster] = useState([]);
@@ -1558,7 +1564,7 @@ export default function SceneEditor({
     handlePlaceCharacter, handlePlaceObject, handlePlayAreaChange, handleUndoDrawing, handleUploadMap,
     handleUploadBackground, handleShownImageChange, handleAddImage, paintMode,
     role.isGm, role.ownedCharacterIds, roster, scene, tokens, measureShape, feetPerCell,
-    rollFeed, handleCustomRoll, clearRollFeed,
+    rollFeed, handleCustomRoll, clearRollFeed, hexcrawl,
   ]);
 
   // While editing one layer, strokes on the others fade back rather than
@@ -1839,19 +1845,40 @@ export default function SceneEditor({
         // opposite corner, and switching it is a move you make mid-scene.
         imageSwitch={role.isGm
           ? (
-            <MapCorner
-              scene={scene}
-              busy={busy}
-              onShownImageChange={handleShownImageChange}
-              onUploadMap={handleUploadMap}
-              onUploadBackground={handleUploadBackground}
-              onAddImage={handleAddImage}
-              onGridChange={handleGridChange}
-              onPlayAreaChange={handlePlayAreaChange}
-              onFitPlayArea={handleFitPlayArea}
-            />
+            <Stack direction="row" spacing={0.75} sx={{ alignItems: 'flex-start' }}>
+              <MapCorner
+                scene={scene}
+                busy={busy}
+                onShownImageChange={handleShownImageChange}
+                onUploadMap={handleUploadMap}
+                onUploadBackground={handleUploadBackground}
+                onAddImage={handleAddImage}
+                onGridChange={handleGridChange}
+                onPlayAreaChange={handlePlayAreaChange}
+                onFitPlayArea={handleFitPlayArea}
+              />
+              {hexcrawl.enabled ? (
+                <HexcrawlCorner
+                  board={hexcrawl.board}
+                  clock={hexcrawl.clock}
+                  clockLinked={hexcrawl.clockLinked}
+                  defaults={hexcrawl.defaults}
+                  armed={hexcrawl.armed}
+                  busy={hexcrawl.busy}
+                  error={hexcrawl.error}
+                  onDefaultsChange={hexcrawl.setDefaults}
+                  onSeasonChange={hexcrawl.setSeason}
+                  onArmedChange={hexcrawl.setArmed}
+                />
+              ) : null}
+            </Stack>
           )
           : null}
+        hexCells={hexcrawl.enabled ? hexcrawl.cellsByKey : null}
+        selectedHex={hexcrawl.selected}
+        onHexClick={hexcrawl.enabled ? hexcrawl.clickHex : undefined}
+        hexBubble={hexcrawl.enabled ? hexcrawl.bubble : null}
+        onHexBubbleOpen={hexcrawl.openResult}
         onImageSize={setImageSize}
         onDragToken={handleDragToken}
         onMoveToken={handleMoveToken}
@@ -1936,6 +1963,10 @@ export default function SceneEditor({
           </>
         ) : null}
       </Box>
+
+      {/* What the party walked into, as the answer to the click that took them
+          there. */}
+      <HexResultDialog result={hexcrawl.result} onClose={hexcrawl.dismissResult} />
 
       <MonsterPickerDialog
         open={monsterOpen}

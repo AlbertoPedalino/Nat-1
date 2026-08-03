@@ -9,8 +9,10 @@ import { normalizeMapObjectKey, normalizeMapObjectStroke } from './mapObjects.js
 
 export const LAYERS = Object.freeze(['map', 'tokens', 'gm']);
 export const DEFAULT_GRID = Object.freeze({
-  size: 70, offsetX: 0, offsetY: 0, visible: true, snapObjects: true,
+  size: 70, offsetX: 0, offsetY: 0, visible: true, snapObjects: true, shape: 'square',
 });
+
+export const GRID_SHAPES = Object.freeze(['square', 'hex']);
 
 const MIN_CELL = 8;
 const MAX_CELL = 512;
@@ -50,6 +52,10 @@ export function normalizeGrid(grid) {
     // built, not a property of the rug. Scenes written before the switch existed
     // have no key at all, and snapping is the behaviour they were built with.
     snapObjects: source.snapObjects !== false,
+    // Squares or hexes. Token x/y mean cell col/row on one and axial q/r on the
+    // other, so this single key decides how every stored coordinate is read —
+    // which is why a scene is one or the other and never carries both.
+    shape: source.shape === 'hex' ? 'hex' : 'square',
   };
 }
 

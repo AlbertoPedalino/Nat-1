@@ -5,6 +5,8 @@
 // the DMG alternates the cost of diagonals, so it is offered but not the
 // default.
 
+import { hexDistance } from './hexGeometry.js';
+
 export const FEET_PER_CELL = 5;
 export const DIAGONAL_RULES = Object.freeze(['chebyshev', 'alternating']);
 
@@ -21,9 +23,22 @@ export function cellDistance(from, to, rule = 'chebyshev') {
   return straights + diagonals + Math.floor(diagonals / 2);
 }
 
-export function feetBetween(from, to, { feetPerCell = FEET_PER_CELL, rule = 'chebyshev' } = {}) {
+// On hexes there is no diagonal to rule on — every neighbour is one step, which
+// is most of why a wilderness map uses them. The coordinates are axial, so the
+// count comes from the hex module rather than from dx/dy.
+function hexSteps(from, to) {
+  return hexDistance(
+    { q: Math.round(Number(from?.x) || 0), r: Math.round(Number(from?.y) || 0) },
+    { q: Math.round(Number(to?.x) || 0), r: Math.round(Number(to?.y) || 0) },
+  );
+}
+
+export function feetBetween(from, to, {
+  feetPerCell = FEET_PER_CELL, rule = 'chebyshev', shape = 'square',
+} = {}) {
   const perCell = Number(feetPerCell) > 0 ? Number(feetPerCell) : FEET_PER_CELL;
-  return cellDistance(from, to, rule) * perCell;
+  const cells = shape === 'hex' ? hexSteps(from, to) : cellDistance(from, to, rule);
+  return cells * perCell;
 }
 
 export function formatFeet(feet) {

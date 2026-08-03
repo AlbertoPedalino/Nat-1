@@ -364,6 +364,76 @@ test('with snapping off objects land between squares while creatures keep theirs
   );
 });
 
+const HEX_SCENE = {
+  grid: {
+    size: 50, offsetX: 0, offsetY: 0, visible: true, shape: 'hex',
+  },
+  playArea: null,
+};
+
+test('a piece dragged on a hex map lands on the hex under it', () => {
+  const onMoveToken = vi.fn();
+  render(
+    <SceneViewport
+      scene={HEX_SCENE}
+      imageUrl={null}
+      tokens={[{ id: 'party-1', label: 'Party', layer: 'tokens', x: 0, y: 0, w: 1, h: 1 }]}
+      snap
+      canMove={() => true}
+      fog={null}
+      onMoveToken={onMoveToken}
+      drawings={[]}
+      lasers={[]}
+      rollBubbles={[]}
+      diceThrows={[]}
+    />,
+  );
+  const viewport = screen.getByText('Upload a map image to start building this scene.').parentElement;
+
+  // Grabbed at its centre and carried one hex to the right: on axial
+  // coordinates that is q + 1, and the row is untouched.
+  fireEvent.pointerDown(screen.getByRole('button', { name: 'Party' }), {
+    button: 0, clientX: 0, clientY: 0, pointerId: 50,
+  });
+  fireEvent.pointerUp(viewport, { button: 0, clientX: 50, clientY: 0, pointerId: 50 });
+
+  expect(onMoveToken).toHaveBeenCalledWith(
+    expect.objectContaining({ id: 'party-1' }),
+    { x: 1, y: 0 },
+  );
+});
+
+test('clicking the board of a hex map picks a hex, dragging it still pans', () => {
+  const onHexClick = vi.fn();
+  render(
+    <SceneViewport
+      scene={HEX_SCENE}
+      imageUrl={null}
+      tokens={[]}
+      snap
+      canMove={() => false}
+      fog={null}
+      onHexClick={onHexClick}
+      drawings={[]}
+      lasers={[]}
+      rollBubbles={[]}
+      diceThrows={[]}
+    />,
+  );
+  const viewport = screen.getByText('Upload a map image to start building this scene.').parentElement;
+
+  fireEvent.pointerDown(viewport, { button: 0, clientX: 50, clientY: 0, pointerId: 51 });
+  fireEvent.pointerUp(viewport, { button: 0, clientX: 50, clientY: 0, pointerId: 51 });
+  expect(onHexClick).toHaveBeenCalledWith({ q: 1, r: 0 });
+
+  // A pan is a drag, and a drag is not a pick.
+  onHexClick.mockClear();
+  fireEvent.pointerDown(viewport, { button: 0, clientX: 50, clientY: 0, pointerId: 52 });
+  fireEvent.pointerMove(viewport, { clientX: 160, clientY: 90, pointerId: 52 });
+  fireEvent.pointerUp(viewport, { button: 0, clientX: 160, clientY: 90, pointerId: 52 });
+  expect(onHexClick).not.toHaveBeenCalled();
+});
+
 test('a selected ruler starts on top of a token instead of dragging it', () => {
   const onMeasure = vi.fn();
   const onMoveToken = vi.fn();

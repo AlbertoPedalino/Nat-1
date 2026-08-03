@@ -9,6 +9,10 @@
 // Tokens are stored in CELL units so that recalibrating the grid keeps a piece
 // on the same square instead of drifting by whatever the pixel offset changed.
 
+import {
+  axialRound, hexToWorld, hexWidth, isHexGrid, worldToAxial,
+} from './hexGeometry.js';
+
 export const ZOOM_MIN = 0.15;
 export const ZOOM_MAX = 6;
 export const DEFAULT_VIEW = Object.freeze({ x: 0, y: 0, zoom: 1 });
@@ -96,13 +100,28 @@ export function cellToWorld(cell, grid) {
 // A token's on-screen box. Position and span are both in cells, so this is the
 // single place that multiplies by the cell size.
 export function tokenWorldRect(token, grid) {
+  const w = Math.max(0.1, numberOr(token?.w, 1));
+  const h = Math.max(0.1, numberOr(token?.h, 1));
+  // On hexes x/y are axial q/r and they name the hex a piece stands ON, so the
+  // box is centred rather than hung off a corner: a square grid has a corner to
+  // hang it from, a hex does not.
+  if (isHexGrid(grid)) {
+    const width = hexWidth(grid);
+    const centre = hexToWorld({ q: numberOr(token?.x, 0), r: numberOr(token?.y, 0) }, grid);
+    return {
+      x: centre.x - (width * w) / 2,
+      y: centre.y - (width * h) / 2,
+      width: width * w,
+      height: width * h,
+    };
+  }
   const size = cellSize(grid);
   const origin = cellToWorld({ col: numberOr(token?.x, 0), row: numberOr(token?.y, 0) }, grid);
   return {
     x: origin.x,
     y: origin.y,
-    width: Math.max(0.1, numberOr(token?.w, 1)) * size,
-    height: Math.max(0.1, numberOr(token?.h, 1)) * size,
+    width: w * size,
+    height: h * size,
   };
 }
 
@@ -116,12 +135,29 @@ export function snapCell(x, y, { snap = true } = {}) {
 
 // Where a token should land when dropped: the pointer holds the same spot on the
 // piece it was grabbed by, then the result snaps.
-export function dropPosition({ pointerWorld, grabOffset, grid, snap = true }) {
+export function dropPosition({
+  pointerWorld, grabOffset, grid, snap = true, span = null,
+}) {
+  const worldX = numberOr(pointerWorld?.x, 0) - numberOr(grabOffset?.x, 0);
+  const worldY = numberOr(pointerWorld?.y, 0) - numberOr(grabOffset?.y, 0);
+
+  // A hex piece is placed by its centre, so the box has to be walked back to one
+  // before the world point means anything. `span` is what the piece covers, in
+  // cells; without it a piece wider than one hex lands a hex or two off.
+  if (isHexGrid(grid)) {
+    const width = hexWidth(grid);
+    const centre = {
+      x: worldX + (width * Math.max(0.1, numberOr(span?.w, 1))) / 2,
+      y: worldY + (width * Math.max(0.1, numberOr(span?.h, 1))) / 2,
+    };
+    const axial = worldToAxial(centre, grid);
+    const cell = snap ? axialRound(axial) : axial;
+    return { x: cell.q, y: cell.r };
+  }
+
   const size = cellSize(grid);
   const offsetX = numberOr(grid?.offsetX, 0);
   const offsetY = numberOr(grid?.offsetY, 0);
-  const worldX = numberOr(pointerWorld?.x, 0) - numberOr(grabOffset?.x, 0);
-  const worldY = numberOr(pointerWorld?.y, 0) - numberOr(grabOffset?.y, 0);
   return snapCell((worldX - offsetX) / size, (worldY - offsetY) / size, { snap });
 }
 

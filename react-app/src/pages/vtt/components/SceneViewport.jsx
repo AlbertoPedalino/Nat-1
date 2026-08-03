@@ -20,6 +20,11 @@ import { movedPoints } from '../../../shared/vtt/drawing.js';
 import { isTokenInPlay } from '../../../shared/vtt/scene.js';
 import { isMapPiece } from '../../../shared/vtt/mapObjects.js';
 import {
+  axialRound, hexHeight, hexToWorld, isHexGrid, worldToAxial, worldToHex,
+} from '../../../shared/vtt/hexGeometry.js';
+import HexGrid from './HexGrid.jsx';
+import HexBubble from './HexBubble.jsx';
+import {
   cameraPoseToView, viewToCameraPose,
 } from '../../../shared/vtt/cameraSync.js';
 import DrawingCanvas from './DrawingCanvas.jsx';
@@ -103,6 +108,14 @@ export default function SceneViewport({
   onDropCharacter,
   placementDrag,
   onDropPlacement,
+  // Hexcrawl. A Map keyed by `hexKey`, so painting a hex is a lookup rather than
+  // a scan of every cell the campaign has ever recorded.
+  hexCells = null,
+  selectedHex = null,
+  onHexClick,
+  // What the last entered hex answered, spoken over that hex until it fades.
+  hexBubble = null,
+  onHexBubbleOpen,
   drawings,
   movableDrawing,
   selectedDrawingId,
@@ -380,7 +393,17 @@ export default function SceneViewport({
     const world = screenToWorld(screenPoint(event), view);
     const w = Math.max(1, Number(placementDrag?.token?.w) || 1);
     const h = Math.max(1, Number(placementDrag?.token?.h) || 1);
-    if (placementDrag?.kind === 'object' && !snapObjects) {
+    const free = placementDrag?.kind === 'object' && !snapObjects;
+
+    // A hex piece stands on a hex, so the pointer is already its centre: none of
+    // the half-span shifting a square grid needs to centre a 2x2.
+    if (isHexGrid(scene.grid)) {
+      const axial = worldToAxial(world, scene.grid);
+      const cell = free ? axial : axialRound(axial);
+      return { x: cell.q, y: cell.r };
+    }
+
+    if (free) {
       const at = cellPoint(screenPoint(event));
       return { x: at.x - w / 2, y: at.y - h / 2 };
     }
@@ -546,7 +569,17 @@ export default function SceneViewport({
       onErase?.(cellPoint(point));
       return;
     }
-    dragRef.current = { kind: 'pan', last: point };
+    // On a hex map the empty board is not empty: every hex is a thing the GM can
+    // pick. Recorded as the start of a pan and settled on release, so dragging
+    // the map still pans instead of selecting whatever it started over.
+    dragRef.current = {
+      kind: 'pan',
+      last: point,
+      from: point,
+      hex: event.button === 0 && onHexClick && isHexGrid(scene.grid) && paintMode === 'select'
+        ? worldToHex(screenToWorld(point, view), scene.grid)
+        : null,
+    };
   };
 
   const beginTokenDrag = (event, token) => {
@@ -716,6 +749,7 @@ export default function SceneViewport({
       grabOffset: state.grabOffset,
       grid: scene.grid,
       snap: false,
+      span: state.token,
     });
     setDrag({ id: state.token.id, x: next.x, y: next.y });
 
@@ -759,6 +793,15 @@ export default function SceneViewport({
       return;
     }
 
+    if (state?.kind === 'pan' && state.hex) {
+      // A pan that went nowhere was a click on a hex. Same slop as a long press:
+      // a hand on a trackpad never releases on the exact pixel it pressed.
+      const at = screenPoint(event);
+      const moved = Math.hypot(at.x - state.from.x, at.y - state.from.y);
+      if (moved <= LONG_PRESS_SLOP) onHexClick(state.hex);
+      return;
+    }
+
     if (state?.kind === 'erase' || state?.kind === 'note') return;
 
     // The ruler disappears on release; nothing is written down.
@@ -791,6 +834,7 @@ export default function SceneViewport({
       grabOffset: state.grabOffset,
       grid: scene.grid,
       snap: snapFor(state.token),
+      span: state.token,
     });
     setDrag(null);
     // One write per gesture, and only when the piece actually changed square.
@@ -905,7 +949,17 @@ export default function SceneViewport({
         <Typography sx={placeholderSx}>Upload a map image to start building this scene.</Typography>
       )}
 
-      {gridVisible ? (
+      {gridVisible && isHexGrid(scene.grid) ? (
+        <HexGrid
+          grid={scene.grid}
+          view={view}
+          viewportSize={viewportSize}
+          cells={hexCells}
+          selected={selectedHex}
+        />
+      ) : null}
+
+      {gridVisible && !isHexGrid(scene.grid) ? (
         <Box
           aria-hidden
           sx={{
@@ -1141,6 +1195,19 @@ export default function SceneViewport({
         })}
       />
 
+      {hexBubble ? (() => {
+        const centre = worldToScreen(hexToWorld(hexBubble.hex, scene.grid), view);
+        return (
+          <HexBubble
+            bubble={hexBubble}
+            x={centre.x}
+            // Clear of the hex itself: half its height, plus the tail.
+            y={centre.y - (hexHeight(scene.grid) * view.zoom) / 2 - 4}
+            onOpen={onHexBubbleOpen}
+          />
+        );
+      })() : null}
+
       {(rollBubbles || []).map(({ roll, token }) => {
         const rect = tokenWorldRect(token, scene.grid);
         const at = worldToScreen(rect, view);
@@ -1227,8 +1294,16 @@ function measurementBadge(tokens, drag, grid, view, feetPerCell) {
   const token = (tokens || []).find((item) => item.id === drag.id);
   // Scenery does not walk anywhere: a distance badge over a rug is noise.
   if (!token || isMapPiece(token)) return null;
-  const landing = { x: Math.round(drag.x), y: Math.round(drag.y) };
-  const label = movementLabel(token, landing, { feetPerCell });
+  // On hexes the landing is a hex, and the count is in steps rather than in
+  // squares with a diagonal rule attached.
+  const shape = isHexGrid(grid) ? 'hex' : 'square';
+  const landing = shape === 'hex'
+    ? (() => {
+      const cell = axialRound({ q: drag.x, r: drag.y });
+      return { x: cell.q, y: cell.r };
+    })()
+    : { x: Math.round(drag.x), y: Math.round(drag.y) };
+  const label = movementLabel(token, landing, { feetPerCell, shape });
   if (!label) return null;
   const rect = tokenWorldRect({ ...token, ...drag }, grid);
   const at = worldToScreen(rect, view);
@@ -1237,6 +1312,20 @@ function measurementBadge(tokens, drag, grid, view, feetPerCell) {
   // than its corner, so the line runs between the two squares and not between
   // their top-left corners.
   const half = { x: Math.max(0.1, token.w || 1) / 2, y: Math.max(0.1, token.h || 1) / 2 };
+  // The trail is drawn by the ruler, which works in the same units as a drawing:
+  // world pixels over the cell size. A hex piece has to be converted, because
+  // its stored q/r are not that.
+  const trailPoint = (position) => {
+    if (shape !== 'hex') {
+      return { x: (position.x || 0) + half.x, y: (position.y || 0) + half.y };
+    }
+    const centre = hexToWorld({ q: position.x, r: position.y }, grid);
+    const size = cellSize(grid);
+    return {
+      x: (centre.x - (grid.offsetX || 0)) / size,
+      y: (centre.y - (grid.offsetY || 0)) / size,
+    };
+  };
   return {
     label,
     x: at.x + (rect.width * view.zoom) / 2,
@@ -1246,8 +1335,8 @@ function measurementBadge(tokens, drag, grid, view, feetPerCell) {
     // measured line from here to there.
     trail: {
       shape: 'line',
-      from: { x: (token.x || 0) + half.x, y: (token.y || 0) + half.y },
-      to: { x: drag.x + half.x, y: drag.y + half.y },
+      from: trailPoint(token),
+      to: trailPoint({ x: drag.x, y: drag.y }),
     },
   };
 }
