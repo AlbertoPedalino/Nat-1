@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Box } from '@mui/material';
 import Die3D from '../../../shared/character/Die3D.jsx';
+import D100Orb from '../../../shared/character/D100Orb.jsx';
 import { faceNumbering } from '../../../shared/character/dice3d.js';
 import { dieGeometry } from '../../../shared/character/polyhedra.js';
 import {
@@ -83,6 +84,7 @@ function DiceThrow({ roll, at, table, startedAt, onSettled }) {
   const bodyRefs = useRef([]);
   const solidRefs = useRef([]);
   const shadowRefs = useRef([]);
+  const resultRefs = useRef([]);
   const settledNotifiedRef = useRef(false);
   const settledScheduledRef = useRef(false);
 
@@ -97,6 +99,12 @@ function DiceThrow({ roll, at, table, startedAt, onSettled }) {
       frames,
       frameMs,
       dice: dice.map((die, index) => {
+        // The physical d100 uses a lightweight textured sphere and reveals its
+        // already-published value separately, so it needs neither a hundred
+        // rendered labels nor a numbered landing face.
+        if (Number(die.faces) === 100) {
+          return { ...die, numbering: null, landed: results[index] ?? 0 };
+        }
         const geometry = dieGeometry(die.faces);
         const numbering = faceNumbering(geometry.faces.length, die.faces, `${roll.id}:${index}`);
         const landed = results[index] ?? geometry.landing;
@@ -126,7 +134,15 @@ function DiceThrow({ roll, at, table, startedAt, onSettled }) {
           + ` scale(${(1 + die.z * GROWTH).toFixed(3)})`;
       }
       if (solid) {
-        solid.style.transform = `matrix3d(${orientationMatrix(die.q).join(',')})`;
+        if (solid.dataset.d100Orb === 'true') {
+          // A real 3D matrix would turn a single circular plane edge-on. Keep
+          // the sphere round and move its oversized faceted texture instead.
+          const [w, qx, qy, qz] = die.q;
+          const turn = Math.atan2(2 * (w * qz + qx * qy), 1 - 2 * (qy * qy + qz * qz));
+          solid.style.transform = `translate3d(${(qx * 10).toFixed(2)}px, ${(qy * 10).toFixed(2)}px, 0) rotate(${turn.toFixed(4)}rad)`;
+        } else {
+          solid.style.transform = `matrix3d(${orientationMatrix(die.q).join(',')})`;
+        }
       }
       if (shadow) {
         // The shadow stays on the table while the die is above it: smaller and
@@ -135,6 +151,12 @@ function DiceThrow({ roll, at, table, startedAt, onSettled }) {
         shadow.style.opacity = `${(0.62 - 0.5 * height).toFixed(2)}`;
         shadow.style.transform = `translate(${die.z * LIFT}px, 0) scale(${(1 - 0.45 * height).toFixed(3)})`;
       }
+    });
+  };
+
+  const revealD100Results = () => {
+    resultRefs.current.forEach((element) => {
+      if (element) element.dataset.visible = 'true';
     });
   };
 
@@ -188,11 +210,13 @@ function DiceThrow({ roll, at, table, startedAt, onSettled }) {
     };
 
     if (!frames.length) {
+      revealD100Results();
       notifySettled();
       return undefined;
     }
     if (frameAt(Date.now()) >= frames.length - 1) {
       paint(frames[frames.length - 1]);
+      revealD100Results();
       notifyAfterFinalPaint();
       return cleanup;
     }
@@ -201,6 +225,7 @@ function DiceThrow({ roll, at, table, startedAt, onSettled }) {
       && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     if (reduced) {
       paint(frames[frames.length - 1]);
+      revealD100Results();
       notifySettled();
       return undefined;
     }
@@ -211,7 +236,10 @@ function DiceThrow({ roll, at, table, startedAt, onSettled }) {
       // A slow frame skips ahead rather than stretching the throw, and the loop
       // only ends once the dice are down.
       if (index < frames.length - 1) animationRaf = requestAnimationFrame(tick);
-      else notifyAfterFinalPaint();
+      else {
+        revealD100Results();
+        notifyAfterFinalPaint();
+      }
     };
     animationRaf = requestAnimationFrame(tick);
     return cleanup;
@@ -227,21 +255,29 @@ function DiceThrow({ roll, at, table, startedAt, onSettled }) {
           sx={bodySx}
         >
           <Box ref={(element) => { shadowRefs.current[index] = element; }} sx={shadowSx} />
-          <Die3D
-            value={die.v}
-            faces={die.faces}
-            color="#edd48a"
-            size={DIE_SIZE}
-            seed={`${roll.id}:${index}`}
-            numbering={die.numbering}
-            landing={die.landed}
-            // The full polyhedron, however many faces it has — this is where a
-            // die is worth drawing properly. A handful at a time: a fistful of
-            // hundred-sided dice is a few thousand composited planes at once.
-            solid={thrown.dice.length <= 3}
-            spin={false}
-            solidRef={(element) => { solidRefs.current[index] = element; }}
-          />
+          {Number(die.faces) === 100 ? (
+            <D100Orb
+              value={die.v}
+              color="#edd48a"
+              size={DIE_SIZE}
+              revealed={false}
+              textureRef={(element) => { solidRefs.current[index] = element; }}
+              resultRef={(element) => { resultRefs.current[index] = element; }}
+            />
+          ) : (
+            <Die3D
+              value={die.v}
+              faces={die.faces}
+              color="#edd48a"
+              size={DIE_SIZE}
+              seed={`${roll.id}:${index}`}
+              numbering={die.numbering}
+              landing={die.landed}
+              solid={thrown.dice.length <= 3}
+              spin={false}
+              solidRef={(element) => { solidRefs.current[index] = element; }}
+            />
+          )}
         </Box>
       ))}
     </Box>

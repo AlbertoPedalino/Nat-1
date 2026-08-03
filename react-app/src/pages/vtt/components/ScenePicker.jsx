@@ -88,8 +88,11 @@ export default function ScenePicker({ onOpen }) {
   const handleDelete = async (scene) => {
     if (!window.confirm(`Delete "${scene.name}"? Its tokens and fog go with it.`)) return;
     try {
-      await deleteScene(scene.id);
+      const { cleanupError } = await deleteScene(scene.id, scene.campaignId);
       await refresh(campaigns.map((campaign) => campaign.id));
+      if (cleanupError) {
+        notify('warning', 'Scene deleted, but some uploaded images could not be cleaned up.');
+      }
     } catch (cause) {
       notify('error', cause?.message || 'Could not delete the scene.');
     }

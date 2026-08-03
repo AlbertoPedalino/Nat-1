@@ -1,4 +1,5 @@
 import { Box, Typography } from '@mui/material';
+import D100Orb from './D100Orb.jsx';
 import Die3D from './Die3D.jsx';
 
 // The dice a roll landed on, then whatever was added to them. Shared so a roll
@@ -13,16 +14,26 @@ export default function DiceRow({ dice, modifier, seed, size, solid = false, jus
   return (
     <Box sx={{ ...rowSx, justifyContent: justify }}>
       {(dice || []).map((die, index) => (
-        <Die3D
-          key={index}
-          value={die.value}
-          faces={die.faces}
-          color={die.color}
-          dimmed={die.dimmed}
-          size={size}
-          solid={solid}
-          seed={`${seed}:${index}`}
-        />
+        Number(die.faces) === 100 ? (
+          <D100Orb
+            key={index}
+            value={die.value}
+            color={die.color}
+            dimmed={die.dimmed}
+            size={size}
+          />
+        ) : (
+          <Die3D
+            key={index}
+            value={die.value}
+            faces={die.faces}
+            color={die.color}
+            dimmed={die.dimmed}
+            size={size}
+            solid={solid}
+            seed={`${seed}:${index}`}
+          />
+        )
       ))}
       {modifier ? <Typography sx={modifierSx}>{modifier}</Typography> : null}
     </Box>

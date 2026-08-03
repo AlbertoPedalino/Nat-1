@@ -9,6 +9,7 @@ import {
 } from '../vtt/drawing.js';
 import { normalizeFog } from '../vtt/fog.js';
 import {
+  mapImageFolder,
   mapImagePath,
   normalizeGrid,
   normalizeLayer,
@@ -125,10 +126,21 @@ export async function clearLiveScene(campaignId) {
   if (error) throw error;
 }
 
-export async function deleteScene(sceneId) {
+export async function deleteScene(sceneId, campaignId) {
   const supabase = requireClient();
   const { error } = await supabase.from('map_scenes').delete().eq('id', sceneId);
   if (error) throw error;
+
+  // Postgres cascades tokens/drawings, but Storage is a different service and
+  // has no foreign key. Delete the whole scene folder after the authoritative
+  // row is gone; this also collects images orphaned by older app versions.
+  let cleanupError = null;
+  try {
+    await deleteSceneMapImages(campaignId, sceneId);
+  } catch (cause) {
+    cleanupError = cause;
+  }
+  return { cleanupError };
 }
 
 // RLS decides what comes back: a player never receives the GM layer, so this is
@@ -207,10 +219,22 @@ export async function setTokenConditions(tokenId, conditions) {
   return toToken(Array.isArray(data) ? data[0] : data);
 }
 
-export async function deleteToken(tokenId) {
+export async function deleteToken(tokenId, imagePath = null) {
   const supabase = requireClient();
   const { error } = await supabase.from('map_tokens').delete().eq('id', tokenId);
   if (error) throw error;
+
+  // Only uploaded free-standing pictures have imagePath. Character portraits
+  // and bestiary art belong elsewhere and are therefore never touched here.
+  let cleanupError = null;
+  if (imagePath) {
+    try {
+      await deleteMapImage(imagePath);
+    } catch (cause) {
+      cleanupError = cause;
+    }
+  }
+  return { cleanupError };
 }
 
 // One row per stroke: undo deletes the last, realtime carries only the new one,
@@ -362,12 +386,55 @@ export async function signMapImage(path, expiresIn = SIGNED_URL_TTL) {
   return url;
 }
 
-export async function deleteMapImage(path) {
-  if (!path) return;
-  const supabase = requireClient();
-  const { error } = await supabase.storage.from(MAP_BUCKET).remove([path]);
-  if (error) throw error;
+function forgetSignedMapUrl(path) {
   try {
     localStorage.removeItem(SIGNED_URL_KEY + path);
   } catch {}
+}
+
+export async function deleteMapImages(paths) {
+  const unique = [...new Set((paths || []).filter(Boolean))];
+  if (!unique.length) return;
+  const supabase = requireClient();
+  const bucket = supabase.storage.from(MAP_BUCKET);
+  // Keep requests modest: Storage accepts arrays, but a scene can have many
+  // handouts and no single oversized cleanup request should fail them all.
+  for (let index = 0; index < unique.length; index += 100) {
+    const batch = unique.slice(index, index + 100);
+    const { error } = await bucket.remove(batch);
+    if (error) throw error;
+    batch.forEach(forgetSignedMapUrl);
+  }
+}
+
+export async function deleteMapImage(path) {
+  await deleteMapImages(path ? [path] : []);
+}
+
+export async function deleteSceneMapImages(campaignId, sceneId) {
+  const folder = mapImageFolder(campaignId, sceneId);
+  if (!folder) throw new Error('Missing campaign or scene for image cleanup.');
+
+  const supabase = requireClient();
+  const bucket = supabase.storage.from(MAP_BUCKET);
+  const paths = [];
+  const limit = 100;
+  let offset = 0;
+  while (true) {
+    const { data, error } = await bucket.list(folder, {
+      limit,
+      offset,
+      sortBy: { column: 'name', order: 'asc' },
+    });
+    if (error) throw error;
+    const entries = data || [];
+    // Files have an id/metadata; folders do not. Uploads made by this app are
+    // direct children, so never recurse into an unexpected path.
+    paths.push(...entries
+      .filter((entry) => entry?.name && (entry.id || entry.metadata))
+      .map((entry) => `${folder}/${entry.name}`));
+    if (entries.length < limit) break;
+    offset += entries.length;
+  }
+  await deleteMapImages(paths);
 }

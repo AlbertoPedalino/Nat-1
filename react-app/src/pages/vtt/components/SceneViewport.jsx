@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Box, IconButton, Tooltip, Typography } from '@mui/material';
-import { Maximize2, Minimize2, Settings2, X } from 'lucide-react';
+import { Box, Button, IconButton, Tooltip, Typography } from '@mui/material';
+import { Maximize2, Minimize2, ScrollText, Settings2, X } from 'lucide-react';
 import { brushCells } from '../../../shared/vtt/fog.js';
 import {
   DEFAULT_VIEW,
@@ -22,9 +22,11 @@ import DrawingCanvas from './DrawingCanvas.jsx';
 import FogCanvas from './FogCanvas.jsx';
 import RollBubble from './RollBubble.jsx';
 import DiceTray from './DiceTray.jsx';
+import FloatingSheetPanel from './FloatingSheetPanel.jsx';
 import TokenSprite from './TokenSprite.jsx';
 
 const WHEEL_STEP = 1.12;
+const VIEWPORT_CONTROL_SELECTOR = '[data-viewport-control], .MuiModal-root, .MuiPopover-root, .MuiPopper-root';
 // A press has to be still to be a press, and long enough not to be a tap. Both
 // numbers are what a phone's own long-press feels like.
 const LONG_PRESS_MS = 480;
@@ -117,6 +119,8 @@ export default function SceneViewport({
   layerSwitch,
   imageSwitch,
   toast,
+  fullscreenSheet,
+  onFullscreenChange,
 }) {
   const hostRef = useRef(null);
   const dragRef = useRef(null);
@@ -147,6 +151,7 @@ export default function SceneViewport({
   // The controls live inside the viewport rather than around it, which is the
   // only way they survive fullscreen — a fullscreen element hides its siblings.
   const [controlsOpen, setControlsOpen] = useState(false);
+  const [floatingSheetOpen, setFloatingSheetOpen] = useState(false);
   const [measure, setMeasure] = useState(null);
   // Where the cursor is, so a brush can show what it is about to cover. Tracked
   // only while a brush is in hand: a state update per mouse move is not worth
@@ -199,6 +204,13 @@ export default function SceneViewport({
     }
   }, []);
 
+  const fullscreenActive = fullscreen || covering;
+
+  useEffect(() => {
+    onFullscreenChange?.(fullscreenActive);
+    if (!fullscreenActive) setFloatingSheetOpen(false);
+  }, [fullscreenActive, onFullscreenChange]);
+
   // Escape and the browser's own control leave fullscreen without telling us,
   // so the icon follows the document rather than our last click.
   useEffect(() => {
@@ -220,6 +232,11 @@ export default function SceneViewport({
   }, []);
 
   const handleWheel = useCallback((event) => {
+    // Fullscreen dialogs and the floating sheet live inside the fullscreen map
+    // element (portals outside it are not painted by the browser). They are
+    // still UI surfaces, not map canvas: let their own scroll container receive
+    // the wheel instead of swallowing it here as map zoom.
+    if (event.target.closest?.(VIEWPORT_CONTROL_SELECTOR)) return;
     event.preventDefault();
     const factor = event.deltaY < 0 ? WHEEL_STEP : 1 / WHEEL_STEP;
     setView((current) => zoomAt(current, factor, screenPoint(event)));
@@ -306,6 +323,7 @@ export default function SceneViewport({
   // Two fingers are a pinch, whatever they landed on: whatever was being drawn,
   // painted or dragged is abandoned rather than continued with one of them.
   const trackPointer = (event) => {
+    if (event.target.closest?.('[data-viewport-control], .MuiModal-root')) return;
     pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
     if (pointersRef.current.size !== 2) return;
 
@@ -945,6 +963,33 @@ export default function SceneViewport({
         </>
       ) : null}
 
+      {fullscreenActive && fullscreenSheet ? (
+        <>
+          <Button
+            size="small"
+            variant={floatingSheetOpen ? 'contained' : 'outlined'}
+            startIcon={<ScrollText size={14} />}
+            data-viewport-control
+            aria-label={floatingSheetOpen ? 'Hide floating character sheet' : 'Show floating character sheet'}
+            onClick={() => setFloatingSheetOpen((open) => !open)}
+            sx={fullscreenSheetButtonSx}
+          >
+            Sheet
+          </Button>
+          {floatingSheetOpen ? (
+            <FloatingSheetPanel
+              choices={fullscreenSheet.choices}
+              selectedId={fullscreenSheet.selectedId}
+              onSelectionChange={fullscreenSheet.onSelectionChange}
+              onClose={() => setFloatingSheetOpen(false)}
+              containerRef={hostRef}
+            >
+              {fullscreenSheet.content}
+            </FloatingSheetPanel>
+          ) : null}
+        </>
+      ) : null}
+
       {imageSwitch ? (
         <Box data-viewport-control sx={imageSwitchSx}>{imageSwitch}</Box>
       ) : null}
@@ -953,15 +998,15 @@ export default function SceneViewport({
         <Box data-viewport-control sx={layerSwitchSx}>{layerSwitch}</Box>
       ) : null}
 
-      <Tooltip title={fullscreen || covering ? 'Leave fullscreen' : 'Fullscreen map'}>
+      <Tooltip title={fullscreenActive ? 'Leave fullscreen' : 'Fullscreen map'}>
         <IconButton
           size="small"
           data-viewport-control
-          aria-label={fullscreen || covering ? 'Leave fullscreen' : 'Fullscreen map'}
+          aria-label={fullscreenActive ? 'Leave fullscreen' : 'Fullscreen map'}
           onClick={toggleFullscreen}
           sx={fullscreenBtnSx}
         >
-          {fullscreen || covering ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+          {fullscreenActive ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
         </IconButton>
       </Tooltip>
 
@@ -1139,6 +1184,21 @@ const roundBtnSx = {
   bgcolor: 'rgba(15,14,13,0.8)',
   border: '1px solid rgba(232,201,106,0.35)',
   '&:hover': { bgcolor: 'rgba(15,14,13,0.95)' },
+};
+
+const fullscreenSheetButtonSx = {
+  position: 'absolute',
+  right: 46,
+  top: 8,
+  zIndex: 7,
+  height: 32,
+  minWidth: 88,
+  borderColor: 'rgba(232,201,106,0.42)',
+  bgcolor: 'rgba(15,14,13,0.82)',
+  fontFamily: '"Cinzel", Georgia, serif',
+  fontSize: '0.62rem',
+  letterSpacing: '0.07em',
+  '&:hover': { bgcolor: 'rgba(15,14,13,0.96)' },
 };
 
 // Bottom right, above everything, and out of the way of the pieces.

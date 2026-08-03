@@ -1,4 +1,6 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  lazy, memo, Suspense, useCallback, useEffect, useMemo, useRef, useState, useTransition,
+} from 'react';
 import { Box, Chip, CircularProgress, Stack, Typography } from '@mui/material';
 import {
   Cloud, Dices, Eye, Pencil, Pointer, Radio, Ruler, Shapes, Shield, Users,
@@ -16,6 +18,7 @@ import {
   createDrawing,
   createToken,
   deleteDrawing,
+  deleteMapImage,
   deleteToken,
   listDrawings,
   listTokenSecrets,
@@ -158,7 +161,9 @@ export default function SceneEditor({ scene, onSceneChange }) {
   const [drawColor, setDrawColor] = useState('#e8c96a');
   const [drawWidth, setDrawWidth] = useState(3);
   const [contentView, setContentView] = useState('map');
+  const [mapFullscreen, setMapFullscreen] = useState(false);
   const [sheetCharacterId, setSheetCharacterId] = useState(null);
+  const [, startSheetTransition] = useTransition();
   const [sheetSplit, setSheetSplit] = useState(DEFAULT_SHEET_SPLIT);
   const contentLayoutRef = useRef(null);
   const sheetSplitStorageKey = `gb:vtt:sheet-split:${user?.id || 'local'}`;
@@ -694,18 +699,33 @@ export default function SceneEditor({ scene, onSceneChange }) {
   // lands in, and which picture the table then sees.
   const uploadSceneImage = useCallback(async (file, slot) => {
     setBusy(true);
+    let uploadedPath = null;
+    const previousPath = slot === 'background' ? scene.backgroundPath : scene.imagePath;
     try {
-      const path = await uploadMapImage(scene.campaignId, scene.id, file);
-      onSceneChange(await updateScene(scene.id, {
-        [slot === 'background' ? 'backgroundPath' : 'imagePath']: path,
+      uploadedPath = await uploadMapImage(scene.campaignId, scene.id, file);
+      const updated = await updateScene(scene.id, {
+        [slot === 'background' ? 'backgroundPath' : 'imagePath']: uploadedPath,
         shownImage: slot,
-      }));
+      });
+      onSceneChange(updated);
+      if (previousPath && previousPath !== uploadedPath) {
+        try {
+          await deleteMapImage(previousPath);
+        } catch {
+          notify('warning', 'The new image was saved, but the previous file could not be cleaned up.');
+        }
+      }
     } catch (cause) {
+      // Upload and row update are separate Supabase services. If the row write
+      // fails, undo the successful upload so it cannot become an orphan.
+      if (uploadedPath) {
+        try { await deleteMapImage(uploadedPath); } catch {}
+      }
       notify('error', cause?.message || 'Could not upload that image.');
     } finally {
       setBusy(false);
     }
-  }, [notify, onSceneChange, scene.campaignId, scene.id]);
+  }, [notify, onSceneChange, scene.backgroundPath, scene.campaignId, scene.id, scene.imagePath]);
 
   const handleUploadMap = useCallback((file) => uploadSceneImage(file, 'map'), [uploadSceneImage]);
   const handleUploadBackground = useCallback(
@@ -759,18 +779,22 @@ export default function SceneEditor({ scene, onSceneChange }) {
   // see yet on the GM layer.
   const handleAddImage = useCallback(async (file) => {
     setBusy(true);
+    let uploadedPath = null;
     try {
-      const path = await uploadMapImage(scene.campaignId, scene.id, file);
+      uploadedPath = await uploadMapImage(scene.campaignId, scene.id, file);
       const created = await createToken(scene.id, {
         ...nextFreeCell(),
         layer: activeLayer,
         w: 4,
         h: 4,
         label: '',
-        image_path: path,
+        image_path: uploadedPath,
       });
       setTokens((current) => [...current, created]);
     } catch (cause) {
+      if (uploadedPath) {
+        try { await deleteMapImage(uploadedPath); } catch {}
+      }
       notify('error', cause?.message || 'Could not add that image.');
     } finally {
       setBusy(false);
@@ -1083,8 +1107,11 @@ export default function SceneEditor({ scene, onSceneChange }) {
   const handleDeleteToken = useCallback(async (token) => {
     setBusy(true);
     try {
-      await deleteToken(token.id);
+      const { cleanupError } = await deleteToken(token.id, token.imagePath);
       setTokens((current) => current.filter((item) => item.id !== token.id));
+      if (cleanupError) {
+        notify('warning', 'The piece was removed, but its uploaded image could not be cleaned up.');
+      }
     } catch (cause) {
       notify('error', cause?.message || 'Could not remove that token.');
     } finally {
@@ -1434,6 +1461,14 @@ export default function SceneEditor({ scene, onSceneChange }) {
     }
   }, [sheetCharacterId, sheetChoices]);
 
+  // In fullscreen the viewport is the only subtree the browser paints. The
+  // same sheet therefore moves into its draggable viewport window instead of
+  // remaining mounted a second time in the hidden side column.
+  const sideSheetOpen = contentView === 'sheet' && !mapFullscreen;
+  const selectSheetCharacter = useCallback((characterId) => {
+    startSheetTransition(() => setSheetCharacterId(characterId));
+  }, []);
+
   if (loading || role.loading) return <CircularProgress size={24} />;
 
   return (
@@ -1467,14 +1502,14 @@ export default function SceneEditor({ scene, onSceneChange }) {
           choices={sheetChoices}
           selectedId={sheetCharacterId}
           onViewChange={setContentView}
-          onSelectionChange={setSheetCharacterId}
+          onSelectionChange={selectSheetCharacter}
         />
       </Stack>
 
       <Box
         ref={contentLayoutRef}
-        style={contentView === 'sheet' ? { '--sheet-grid-columns': sheetGridColumns(sheetSplit) } : undefined}
-        sx={[contentLayoutSx, contentView === 'sheet' && contentLayoutOpenSx]}
+        style={sideSheetOpen ? { '--sheet-grid-columns': sheetGridColumns(sheetSplit) } : undefined}
+        sx={[contentLayoutSx, sideSheetOpen && contentLayoutOpenSx]}
       >
         <Box sx={viewportCellSx}>
           <SceneViewport
@@ -1553,6 +1588,19 @@ export default function SceneEditor({ scene, onSceneChange }) {
         // Inside the viewport, not beside it: a fullscreen map paints nothing
         // that is not one of its own descendants.
         toast={<DiceToast toast={rollToast} onClose={dismissRollToast} />}
+        onFullscreenChange={setMapFullscreen}
+        fullscreenSheet={sheetChoices.length ? {
+          choices: sheetChoices,
+          selectedId: sheetCharacterId,
+          onSelectionChange: selectSheetCharacter,
+          content: sheetCharacterId ? (
+            <EmbeddedBattleMapSheet
+              key={`floating:${sheetCharacterId}`}
+              characterId={sheetCharacterId}
+              onRoll={handleSheetRoll}
+            />
+          ) : null,
+        } : null}
         // Bottom left, opposite the fullscreen button: the layer you are editing
         // is a constant piece of state, not a setting you go and find.
         layerSwitch={role.isGm
@@ -1560,7 +1608,7 @@ export default function SceneEditor({ scene, onSceneChange }) {
           : null}
           />
         </Box>
-        {contentView === 'sheet' ? (
+        {sideSheetOpen ? (
           <>
             <BattleMapSheetResizeHandle
               containerRef={contentLayoutRef}
@@ -1568,18 +1616,13 @@ export default function SceneEditor({ scene, onSceneChange }) {
               onCommit={commitSheetSplit}
             />
             <Box sx={sheetViewSx}>
-              <Suspense fallback={<Box sx={sheetLoadingSx}><CircularProgress size={26} /></Box>}>
-                {sheetCharacterId ? (
-                  <CampaignSheetView
-                    key={sheetCharacterId}
-                    sheetId={sheetCharacterId}
-                    editable
-                    embedded
-                    onRoll={handleSheetRoll}
-                    showOwnRollToast={false}
-                  />
-                ) : null}
-              </Suspense>
+              {sheetCharacterId ? (
+                <EmbeddedBattleMapSheet
+                  key={`side:${sheetCharacterId}`}
+                  characterId={sheetCharacterId}
+                  onRoll={handleSheetRoll}
+                />
+              ) : null}
             </Box>
           </>
         ) : null}
@@ -1637,6 +1680,20 @@ export default function SceneEditor({ scene, onSceneChange }) {
   );
 }
 
+const EmbeddedBattleMapSheet = memo(function EmbeddedBattleMapSheet({ characterId, onRoll }) {
+  return (
+    <Suspense fallback={<Box sx={sheetLoadingSx}><CircularProgress size={26} /></Box>}>
+      <CampaignSheetView
+        sheetId={characterId}
+        editable
+        embedded
+        onRoll={onRoll}
+        showOwnRollToast={false}
+      />
+    </Suspense>
+  );
+});
+
 const contentLayoutSx = {
   display: 'grid',
   gridTemplateColumns: 'minmax(0, 1fr)',
@@ -1667,6 +1724,8 @@ const sheetViewSx = {
   bgcolor: 'rgba(5, 5, 7, 0.88)',
   backgroundImage: 'linear-gradient(145deg, rgba(255,255,255,0.025), transparent 42%)',
   boxShadow: '0 18px 52px rgba(0, 0, 0, 0.46)',
+  contain: 'layout paint',
+  isolation: 'isolate',
   '& > *': {
     width: '100%',
     maxWidth: 760,

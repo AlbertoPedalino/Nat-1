@@ -8,6 +8,7 @@ import {
   canMarkToken,
   canMoveToken,
   isTokenInPlay,
+  mapImageFolder,
   mapImagePath,
   normalizePlayArea,
   normalizeGrid,
@@ -201,6 +202,9 @@ test('map image paths lead with the campaign id and sanitize the file name', () 
   assert.equal(campaignIdFromImagePath(path), 'c1');
   assert.equal(mapImagePath(null, 's1', 'a.png'), null);
   assert.equal(mapImagePath('c1', null, 'a.png'), null);
+  assert.equal(mapImageFolder('c1', 's1'), 'c1/s1');
+  assert.equal(mapImageFolder('c1/../../other', 's1'), null);
+  assert.equal(mapImageFolder('c1', ''), null);
   assert.equal(campaignIdFromImagePath(''), null);
 });
 

@@ -171,3 +171,53 @@ test('a Lucide map object persists rotation around its centre on release', () =>
     { rotation: 90 },
   );
 });
+
+test('fullscreen exposes a sheet button and opens the sheet inside the viewport', () => {
+  const onFullscreenChange = vi.fn();
+  const onSelectionChange = vi.fn();
+  render(
+    <SceneViewport
+      scene={{ grid: { size: 50, offsetX: 0, offsetY: 0, visible: false }, playArea: null }}
+      imageUrl={null}
+      tokens={[]}
+      snap
+      canMove={() => false}
+      fog={null}
+      drawings={[]}
+      lasers={[]}
+      rollBubbles={[]}
+      diceThrows={[]}
+      onFullscreenChange={onFullscreenChange}
+      fullscreenSheet={{
+        choices: [
+          { characterId: 'aria', name: 'Aria' },
+          { characterId: 'borin', name: 'Borin' },
+        ],
+        selectedId: 'aria',
+        onSelectionChange,
+        content: <div>Aria character sheet</div>,
+      }}
+    />,
+  );
+
+  expect(screen.queryByRole('button', { name: 'Show floating character sheet' })).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Fullscreen map' }));
+  expect(onFullscreenChange).toHaveBeenLastCalledWith(true);
+
+  fireEvent.click(screen.getByRole('button', { name: 'Show floating character sheet' }));
+  const sheetContent = screen.getByText('Aria character sheet');
+  expect(sheetContent).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Close floating sheet' })).toBeInTheDocument();
+
+  const sheetWheel = new WheelEvent('wheel', { bubbles: true, cancelable: true, deltaY: 100 });
+  fireEvent(sheetContent, sheetWheel);
+  expect(sheetWheel.defaultPrevented).toBe(false);
+
+  const viewport = screen.getByText('Upload a map image to start building this scene.').parentElement;
+  const mapWheel = new WheelEvent('wheel', { bubbles: true, cancelable: true, deltaY: 100 });
+  fireEvent(viewport, mapWheel);
+  expect(mapWheel.defaultPrevented).toBe(true);
+
+  fireEvent.change(screen.getByRole('combobox', { name: 'Character sheet' }), { target: { value: 'borin' } });
+  expect(onSelectionChange).toHaveBeenCalledWith('borin');
+});

@@ -1,4 +1,12 @@
 import { createTheme } from '@mui/material';
+
+// Portalled controls must remain descendants of the browser's fullscreen
+// element or they are not painted at all. Outside fullscreen this is exactly
+// MUI's normal document.body destination.
+function activePortalContainer() {
+  if (typeof document === 'undefined') return null;
+  return document.fullscreenElement || document.webkitFullscreenElement || document.body;
+}
 import { chipTintStyle } from './shared/entityColors.js';
 
 export const theme = createTheme({
@@ -100,6 +108,15 @@ export const theme = createTheme({
     },
   },
   components: {
+    MuiModal: {
+      defaultProps: { container: activePortalContainer },
+    },
+    MuiPopover: {
+      defaultProps: { container: activePortalContainer },
+    },
+    MuiPopper: {
+      defaultProps: { container: activePortalContainer },
+    },
     MuiButton: {
       defaultProps: {
         disableElevation: true,

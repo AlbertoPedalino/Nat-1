@@ -1,4 +1,4 @@
-import { act, render } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, vi } from 'vitest';
 import DiceTray, { RESULT_REVEAL_HOLD_MS } from './DiceTray.jsx';
 
@@ -67,4 +67,26 @@ test('a coin result waits for the final pose to be painted and visibly settled',
   act(() => vi.advanceTimersByTime(1));
   expect(onSettled).toHaveBeenCalledOnce();
   expect(onSettled).toHaveBeenCalledWith('coin-roll');
+});
+
+test('a d100 uses one lightweight orb and reveals its value only after landing', () => {
+  render(
+    <DiceTray
+      throws={[{
+        roll: { id: 'd100-roll', rolls: [{ faces: 100, v: 73 }] },
+        x: 300,
+        y: 200,
+      }]}
+    />,
+  );
+
+  const orb = screen.getByRole('img', { name: 'd100 result 73' });
+  const result = orb.querySelector('[data-d100-result="true"]');
+  expect(orb).toHaveAttribute('data-die-shape', 'd100-orb');
+  expect(orb.querySelector('[data-d100-orb="true"]')).toBeInTheDocument();
+  expect(screen.queryByTestId('die')).not.toBeInTheDocument();
+  expect(result).not.toHaveAttribute('data-visible');
+
+  act(() => vi.advanceTimersByTime(100));
+  expect(result).toHaveAttribute('data-visible', 'true');
 });

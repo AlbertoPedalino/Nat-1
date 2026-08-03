@@ -76,6 +76,40 @@ const EMBEDDED_SHEET_GRID = {
   gap: '0.55rem',
 };
 
+// The JSON fetcher caches raw files, but turning the full items/optional-feature
+// datasets into sheet-ready records is also expensive. Share that processed
+// work between every sheet mounted in this tab; a failed load is evicted so a
+// later character can still retry it.
+let itemsDbPromise = null;
+let optionalFeaturesPromise = null;
+let conditionsPromise = null;
+
+function cachedReferenceLoad(current, load, clear) {
+  if (current) return current;
+  const pending = load();
+  pending.catch(() => clear());
+  return pending;
+}
+
+function loadCachedItems() {
+  itemsDbPromise = cachedReferenceLoad(itemsDbPromise, loadItems, () => { itemsDbPromise = null; });
+  return itemsDbPromise;
+}
+
+function loadCachedOptionalFeatures() {
+  optionalFeaturesPromise = cachedReferenceLoad(
+    optionalFeaturesPromise,
+    loadOptionalFeatures,
+    () => { optionalFeaturesPromise = null; },
+  );
+  return optionalFeaturesPromise;
+}
+
+function loadCachedConditions() {
+  conditionsPromise = cachedReferenceLoad(conditionsPromise, loadConditions, () => { conditionsPromise = null; });
+  return conditionsPromise;
+}
+
 export default function CharacterSheet({
   externalChar = null,
   externalCharId = null,
@@ -125,9 +159,9 @@ export default function CharacterSheet({
       // A failed adapter chunk (e.g. a stale-deploy 404) must not blank the whole
       // sheet — fall back to base values and still render the character.
       ensureSheetRuntimeAdapters(ch),
-      loadItems().catch(() => []),
-      loadOptionalFeatures().catch(() => []),
-      loadConditions().catch(() => ({})),
+      loadCachedItems().catch(() => []),
+      loadCachedOptionalFeatures().catch(() => []),
+      loadCachedConditions().catch(() => ({})),
     ]).then(([, itemsDb, optFeatures, condEntries]) => {
       if (!alive) return;
       setConditionEntries(condEntries || {});

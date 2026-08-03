@@ -215,13 +215,25 @@ export function canMarkToken(token, { isGm = false, ownedCharacterIds = [] } = {
 // Storage paths are `<campaign_id>/<scene_id>/<file>`: the policies read the
 // first folder to decide who may write, so the campaign id must lead.
 export function mapImagePath(campaignId, sceneId, fileName, now = Date.now()) {
-  if (!campaignId || !sceneId) return null;
+  const folder = mapImageFolder(campaignId, sceneId);
+  if (!folder) return null;
   const clean = String(fileName || '')
     .toLowerCase()
     .replace(/[^a-z0-9._-]/g, '-')
     .replace(/-+/g, '-')
     .slice(-60) || 'map';
-  return `${campaignId}/${sceneId}/${now.toString(36)}-${clean}`;
+  return `${folder}/${now.toString(36)}-${clean}`;
+}
+
+// Deleting a scene removes this exact folder from Storage. Keep the validation
+// deliberately strict: a malformed id must never turn cleanup into a broad
+// bucket deletion.
+export function mapImageFolder(campaignId, sceneId) {
+  const campaign = String(campaignId || '').trim();
+  const scene = String(sceneId || '').trim();
+  const safeId = /^[a-z0-9_-]+$/i;
+  if (!safeId.test(campaign) || !safeId.test(scene)) return null;
+  return `${campaign}/${scene}`;
 }
 
 export function campaignIdFromImagePath(path) {
