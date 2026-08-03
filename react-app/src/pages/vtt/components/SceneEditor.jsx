@@ -1730,7 +1730,12 @@ export default function SceneEditor({
   }
 
   return (
-    <Stack spacing={1}>
+    // Fills whatever the page gives it and passes the remainder down: the title
+    // row takes the height it needs — one line or three, when a long campaign
+    // name and the projector buttons wrap — and the map gets the rest. Nothing
+    // here counts pixels, which is what stops the board being cut off or
+    // floating above a strip of empty background.
+    <Stack spacing={1} sx={editorRootSx}>
       <Box sx={sceneTopbarSx}>
         {role.isGm && onOpenScene ? <SceneSwitcher scene={scene} onOpenScene={onOpenScene} /> : null}
         <Box sx={sceneIdentitySx}>
@@ -2075,11 +2080,22 @@ const spectatorRootSx = {
   bgcolor: '#000',
 };
 
+const editorRootSx = {
+  flex: 1,
+  // Without this a flex child refuses to shrink below its content, and the map
+  // would push the page taller instead of fitting inside it.
+  minHeight: 0,
+};
+
 const contentLayoutSx = {
   display: 'grid',
   gridTemplateColumns: 'minmax(0, 1fr)',
   gap: 1,
-  alignItems: 'start',
+  flex: 1,
+  minHeight: 0,
+  // Stretched, not top-aligned: the cell has to be as tall as the row for the
+  // map inside it to have a height to fill.
+  alignItems: 'stretch',
 };
 
 const contentLayoutOpenSx = {
@@ -2089,16 +2105,25 @@ const contentLayoutOpenSx = {
   },
   columnGap: { xs: 1, lg: 0 },
   rowGap: 1,
+  // One column means map above sheet, which cannot both fit a phone: that stack
+  // scrolls. Side by side there is nothing to scroll — each half handles its
+  // own.
+  overflowY: { xs: 'auto', lg: 'visible' },
 };
 
 const viewportCellSx = {
   minWidth: 0,
+  minHeight: 0,
+  display: 'flex',
 };
 
 const sheetViewSx = {
   minWidth: 0,
-  minHeight: { xs: 560, lg: '72vh' },
-  maxHeight: { lg: 'calc(100vh - 150px)' },
+  // Beside the map it is exactly as tall as the map and scrolls inside itself.
+  // Stacked under it on a narrow screen it keeps a readable floor, and the
+  // column that holds both is what scrolls.
+  minHeight: { xs: 480, lg: 0 },
+  height: { lg: '100%' },
   overflow: 'auto',
   border: '1px solid rgba(232, 201, 106, 0.3)',
   borderRadius: 1.5,

@@ -20,7 +20,7 @@ export default function MapCorner({
   const [open, setOpen] = useState(false);
 
   return (
-    <Stack spacing={0.75} sx={{ alignItems: 'flex-start' }}>
+    <Stack spacing={0.75} sx={stackSx}>
       {/* Only the icon sits on the map: the switch lives with the rest of the
           picture settings, one click away, instead of taking a permanent strip
           of the board. */}
@@ -59,17 +59,32 @@ export default function MapCorner({
 }
 
 const buttonSx = {
+  // The strip around it is click-through; the icon and the panel are not.
+  pointerEvents: 'auto',
   color: '#e8c96a',
   bgcolor: 'rgba(15,14,13,0.85)',
   border: '1px solid rgba(232,201,106,0.35)',
   '&:hover': { bgcolor: 'rgba(15,14,13,0.95)' },
 };
 
+// Full height of the strip it sits in, so the panel below has something
+// definite to shrink against; `alignItems` keeps the icon from stretching with
+// it.
+const stackSx = {
+  alignItems: 'flex-start',
+  height: '100%',
+  minHeight: 0,
+};
+
 // Scrollable rather than tall: in fullscreen a panel that runs past the bottom
-// of the map has no page to scroll behind it.
+// of the map has no page to scroll behind it. Bounded by the map rather than by
+// the window — the map is a cell in the page and is usually much shorter, which
+// is what let this panel grow until its own edge cut it off.
 const panelSx = {
-  width: { xs: 260, sm: 320 },
-  maxHeight: 'calc(100vh - 160px)',
+  pointerEvents: 'auto',
+  width: { xs: 240, sm: 290 },
+  minHeight: 0,
+  flexShrink: 1,
   overflowY: 'auto',
   p: 1.25,
   borderRadius: 1,

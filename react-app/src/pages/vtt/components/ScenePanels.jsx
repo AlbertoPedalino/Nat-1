@@ -18,6 +18,7 @@ import {
   EyeOff,
   Grid3x3,
   Image as ImageIcon,
+  Info,
   ImagePlus,
   MousePointer2,
   Pencil,
@@ -35,6 +36,33 @@ import ColorField from '../../../components/ColorField.jsx';
 // The scene's settings, split by the question they answer. Each one is a panel
 // behind its own icon on the rail rather than a strip across the top: the map is
 // the page, and controls laid over it have to be summoned, not endured.
+
+// The explanations used to sit under the controls as captions. Over a map they
+// are the wrong trade: the panel lives inside the board, so every line of prose
+// is a line of map, and the text is read once and then in the way forever.
+// Behind an icon it is still one hover away for whoever has not met the control
+// yet.
+//
+// Focusable on purpose: a tooltip only reachable by hover is not reachable at
+// all on a touch screen or from the keyboard.
+function InfoHint({ text, label }) {
+  return (
+    <Tooltip title={text} enterTouchDelay={0} leaveTouchDelay={6000}>
+      <Box component="span" role="button" tabIndex={0} aria-label={label} sx={infoHintSx}>
+        <Info size={13} />
+      </Box>
+    </Tooltip>
+  );
+}
+
+function SectionLabel({ label, hint }) {
+  return (
+    <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
+      <Typography variant="caption" color="text.secondary">{label}</Typography>
+      <InfoHint label={`About the ${label.toLowerCase()}`} text={hint} />
+    </Stack>
+  );
+}
 
 export function MapPanel({
   scene, busy, onUploadMap, onUploadBackground, onShownImageChange, onAddImage,
@@ -69,28 +97,31 @@ export function MapPanel({
       {/* Anything else that belongs on the map — a rug, a door, a handout — is a
           piece on the map layer, so it can be moved, resized and removed like
           everything else instead of being a third special slot. */}
-      <Button
-        size="small"
-        variant="outlined"
-        startIcon={<ImagePlus size={15} />}
-        disabled={busy}
-        onClick={() => extraRef.current?.click()}
-      >
-        Add an image to the map
-      </Button>
-      <Typography variant="caption" color="text.secondary">
-        It lands on the layer you are editing. Click it to get its corner
-        handles: drag to scale, hold Shift to stretch it out of shape, and the
-        top handle turns it.
-      </Typography>
+      <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
+        <Button
+          size="small"
+          variant="outlined"
+          fullWidth
+          startIcon={<ImagePlus size={15} />}
+          disabled={busy}
+          onClick={() => extraRef.current?.click()}
+        >
+          Add an image to the map
+        </Button>
+        <InfoHint
+          label="About images on the map"
+          text="It lands on the layer you are editing. Click it to get its corner handles: drag to scale, hold Shift to stretch it out of shape, and the top handle turns it."
+        />
+      </Stack>
 
       <HiddenFileInput inputRef={mapRef} onPick={onUploadMap} />
       <HiddenFileInput inputRef={backgroundRef} onPick={onUploadBackground} />
       <HiddenFileInput inputRef={extraRef} onPick={onAddImage} />
 
-      {/* Grid calibration is the fiddly part of any battlemap: the cell size
-          almost never matches the image, so all three numbers are editable. */}
-      <Typography variant="caption" color="text.secondary">Grid</Typography>
+      <SectionLabel
+        label="Grid"
+        hint="The cell size almost never matches the image, so all three numbers are editable: set Cell to the width of one square on the picture, then nudge the offsets until the lines sit on it."
+      />
       <Stack direction="row" spacing={0.75}>
         <TextField
           label="Cell"
@@ -130,24 +161,27 @@ export function MapPanel({
       {/* Creatures always take a square — that is what a battlemap is for. This
           is about the scenery: a door across a wall, a rug at an angle, a
           handout dropped between two squares. */}
-      <FormControlLabel
-        control={(
-          <Switch
-            size="small"
-            checked={scene.grid.snapObjects !== false}
-            onChange={(event) => setGrid({ snapObjects: event.target.checked })}
-          />
-        )}
-        label={<Typography variant="body2">Objects snap to the grid</Typography>}
-      />
-      <Typography variant="caption" color="text.secondary">
-        Off, objects and pictures are placed and dragged freely. Creature pieces
-        keep their square either way.
-      </Typography>
+      <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
+        <FormControlLabel
+          control={(
+            <Switch
+              size="small"
+              checked={scene.grid.snapObjects !== false}
+              onChange={(event) => setGrid({ snapObjects: event.target.checked })}
+            />
+          )}
+          label={<Typography variant="body2">Objects snap to the grid</Typography>}
+        />
+        <InfoHint
+          label="About snapping"
+          text="Off, objects and pictures are placed and dragged freely. Creature pieces keep their square either way."
+        />
+      </Stack>
 
-      {/* Anything outside this rectangle is staging: the players never receive
-          it, so an ambush can be arranged off the edge in plain sight. */}
-      <Typography variant="caption" color="text.secondary">Play area</Typography>
+      <SectionLabel
+        label="Play area"
+        hint="Anything outside this rectangle is staging: the players never receive it, so an ambush can be arranged off the edge of the board in plain sight."
+      />
       {scene.playArea ? (
         <>
           <Stack direction="row" spacing={0.75}>
@@ -168,24 +202,27 @@ export function MapPanel({
           </Button>
         </>
       ) : (
-        <>
-          <Button
-            size="small"
-            variant="outlined"
-            // Sized from the picture on screen, so it has to be the battlemap:
-            // fitted while the background is up it would take that one's shape.
-            disabled={busy || scene.shownImage !== 'map'}
-            onClick={onFitPlayArea}
-          >
-            Limit to the map
-          </Button>
-          {scene.shownImage !== 'map' ? (
-            <Typography variant="caption" color="text.secondary">
-              Switch to the battlemap to set the play area — it is measured from
-              the picture on screen.
-            </Typography>
-          ) : null}
-        </>
+        // Sized from the picture on screen, so it has to be the battlemap:
+        // fitted while the background is up it would take that one's shape.
+        // Said on the disabled button itself rather than under it — a line of
+        // explanation that only appears sometimes moves everything below it.
+        <Tooltip
+          title={scene.shownImage !== 'map'
+            ? 'Switch to the battlemap first — the play area is measured from the picture on screen.'
+            : ''}
+        >
+          <span>
+            <Button
+              size="small"
+              variant="outlined"
+              fullWidth
+              disabled={busy || scene.shownImage !== 'map'}
+              onClick={onFitPlayArea}
+            >
+              Limit to the map
+            </Button>
+          </span>
+        </Tooltip>
       )}
     </Stack>
   );
@@ -469,6 +506,16 @@ export function LaserPanel({ paintMode, onPaintModeChange }) {
 }
 
 const numberSx = { width: 92 };
+
+const infoHintSx = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  flexShrink: 0,
+  color: 'text.secondary',
+  cursor: 'help',
+  borderRadius: '50%',
+  '&:hover, &:focus-visible': { color: 'primary.main' },
+};
 
 const pillLabelSx = {
   ml: 0.5,

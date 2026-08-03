@@ -1267,11 +1267,16 @@ const coveringSx = {
 const hostSx = {
   position: 'relative',
   overflow: 'hidden',
-  // Sized to what is actually above it — the app bar, the page padding and the
-  // scene's title row — rather than to a round number with room to spare. The
-  // map is the page; leaving a strip of empty background under it was waste.
-  height: { xs: '70vh', md: 'calc(100vh - 164px)' },
-  minHeight: 360,
+  // Takes what the page has left rather than subtracting a hand-counted number
+  // of pixels from the window. The old `calc(100vh - 164px)` was the app bar
+  // plus the padding plus the title row added up by hand: it broke whenever the
+  // title wrapped, and on a phone `100vh` includes the strip behind the address
+  // bar, so the bottom of the board sat under the browser's own chrome.
+  flex: 1,
+  height: '100%',
+  // Small screens keep a floor so the map cannot be squeezed to nothing by a
+  // sheet opened beneath it; on a desktop the flex row is the only limit.
+  minHeight: { xs: 320, md: 0 },
   border: '1px solid',
   borderColor: 'divider',
   borderRadius: 1,
@@ -1339,7 +1344,19 @@ const imageSwitchSx = {
   position: 'absolute',
   left: 8,
   top: 8,
+  // Bounded at the bottom as well, so the panel it holds has a height to measure
+  // itself against. Sized against the window instead, the panel grew past the
+  // map it lives in and the map's own edge cut it off — the page has no scroll
+  // to reach the rest with, and in fullscreen there is no page at all.
+  bottom: 8,
+  display: 'flex',
+  // Stretched rather than top-aligned: a child with `height: 100%` needs a
+  // parent whose height is definite, and that is the whole trick here.
+  alignItems: 'stretch',
   zIndex: 6,
+  // Now that it runs the height of the map, the strip must not take the clicks
+  // along it: it is a place to stand, not a control. What it holds opts back in.
+  pointerEvents: 'none',
   cursor: 'default',
 };
 

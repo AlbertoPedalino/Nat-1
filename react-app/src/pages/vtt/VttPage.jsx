@@ -133,12 +133,21 @@ export default function VttPage() {
     : sessionBusy || loadingCampaigns;
   const atRoot = !requestedScene && !joinedCampaign;
 
+  // With a scene open the page stops being a document and becomes a screen: it
+  // takes exactly the window's height and hands what is left to the map, so the
+  // board reaches the bottom edge whatever is stacked above it. At the root it
+  // is a list of scenes and tables again, and lists scroll.
+  const mapMode = Boolean(!gate && !busy && scene && !spectator.requested);
+
   return (
-    <Box sx={spectator.requested ? spectatorPageSx : pageSx}>
+    <Box sx={spectator.requested ? spectatorPageSx : [pageSx, mapMode && pageMapSx]}>
       {!spectator.requested ? (
         <AppTopBar home backTo={atRoot ? '/campaigns' : '/vtt'} backLabel={atRoot ? 'Campaigns' : 'Tables'} />
       ) : null}
-      <Box component="main" sx={spectator.requested ? spectatorContentSx : contentSx}>
+      <Box
+        component="main"
+        sx={spectator.requested ? spectatorContentSx : [contentSx, mapMode && contentMapSx]}
+      >
         {gate ? <Typography sx={s.noticeSx}>{gate}</Typography> : null}
         {!gate && busy ? <CircularProgress size={24} /> : null}
         {!gate && !busy && error && (requestedScene || joinedCampaign) ? (
@@ -191,6 +200,25 @@ const contentSx = {
   // Tighter than the other tools on purpose: every pixel here is map.
   py: 1,
   boxSizing: 'border-box',
+};
+
+// `dvh` rather than `vh`: on a phone `100vh` counts the strip behind the address
+// bar, so the bottom of the map was under the browser's own chrome. `dvh`
+// follows the bar as it hides and shows.
+const pageMapSx = {
+  height: '100dvh',
+  minHeight: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  overflow: 'hidden',
+};
+
+const contentMapSx = {
+  flex: 1,
+  minHeight: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  width: '100%',
 };
 
 const spectatorPageSx = {
