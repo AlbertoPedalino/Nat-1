@@ -87,6 +87,22 @@ export function sanitizeName(value, fallback = 'Scene') {
   return name ? name.slice(0, 80) : fallback;
 }
 
+// The scene name is the GM's own note for the map ("Ambush at the ford", "Lair
+// of the dead king"), so putting it above the players' board gives away what
+// they are walking into: they are told which table they are at, and nothing
+// about the map itself. RLS filters rows and not columns, so the name still
+// travels with a live scene — this is the same kind of table etiquette as a
+// screen the players are not meant to lean over, not a secret the way a
+// GM-layer token is.
+export const PLAYER_SCENE_TITLE = 'Battle map';
+
+export function sceneTitleFor(scene, { isGm = false, campaignName = '' } = {}) {
+  const campaign = String(campaignName || '').trim().replace(/\s+/g, ' ');
+  if (!isGm) return campaign || PLAYER_SCENE_TITLE;
+  const name = sanitizeName(scene?.name);
+  return campaign ? `${campaign} · ${name}` : name;
+}
+
 // Database row -> the shape the editor works with (camelCase, no nulls where a
 // number is expected).
 export function toScene(row) {

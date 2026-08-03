@@ -33,6 +33,7 @@ export default function VttPage() {
   const requestedScene = params.get('scene') || '';
   const joinedCampaign = params.get('campaign') || '';
   const spectator = spectatorRoute(location.search);
+  const spectatorRequested = spectator.requested;
   // Owned by the VTT page rather than a scene editor, so navigating between
   // scenes does not sever an already-open projector from this GM window.
   const presenterSourceRef = useRef(sessionCameraSource());
@@ -82,6 +83,31 @@ export default function VttPage() {
   const targetId = joinedCampaign ? (liveScene?.id || '') : requestedScene;
 
   useEffect(() => { loadScene(targetId); }, [loadScene, targetId]);
+
+  // The projector opens in front of the GM, which is not where the GM wants to
+  // be: it belongs on the television while they keep running the game. It is a
+  // separate window rather than a tab precisely so this is possible — browsers
+  // refuse to move the focus between tabs from script, but a popup may step
+  // aside and raise the window that opened it.
+  //
+  // Twice: the first attempt lands while this window is still being handed the
+  // focus, and some browsers only settle it after load.
+  useEffect(() => {
+    if (!spectatorRequested) return undefined;
+    const handBack = () => {
+      try {
+        const opener = window.opener;
+        if (!opener || opener.closed) return;
+        window.blur();
+        opener.focus();
+      } catch (_) {
+        // A projector reached by a pasted link has no opener to return to.
+      }
+    };
+    handBack();
+    const retry = setTimeout(handBack, 400);
+    return () => clearTimeout(retry);
+  }, [spectatorRequested]);
 
   const openScene = useCallback((id) => {
     navigate(id ? `/vtt?scene=${encodeURIComponent(id)}` : '/vtt');
@@ -138,6 +164,9 @@ export default function VttPage() {
           <SceneEditor
             scene={scene}
             onSceneChange={setScene}
+            // A player is carried by the live scene and never navigates: the
+            // editor only offers this to the GM.
+            onOpenScene={openScene}
             spectator={spectator.requested}
             spectatorSource={spectator.source}
             cameraSourceId={presenterSourceRef.current}

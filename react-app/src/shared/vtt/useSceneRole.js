@@ -10,7 +10,12 @@ import { listMyCharacters } from '../cloud/cloudCharacters.js';
 // refuses the rest. Getting it wrong here shows a cursor that lies, not a
 // security hole.
 
-const IDLE = Object.freeze({ loading: true, isGm: false, gmId: null, ownedCharacterIds: [] });
+const IDLE = Object.freeze({
+  loading: true, isGm: false, gmId: null, campaignName: '', ownedCharacterIds: [],
+});
+const NOBODY = Object.freeze({
+  loading: false, isGm: false, gmId: null, campaignName: '', ownedCharacterIds: [],
+});
 
 export function useSceneRole(campaignId) {
   const { cloudEnabled, status, user } = useAuth();
@@ -22,7 +27,7 @@ export function useSceneRole(campaignId) {
 
     async function load() {
       if (!campaignId || !cloudEnabled || status !== 'authed' || !userId) {
-        setRole({ loading: false, isGm: false, gmId: null, ownedCharacterIds: [] });
+        setRole(NOBODY);
         return;
       }
       try {
@@ -37,6 +42,9 @@ export function useSceneRole(campaignId) {
           isGm: Boolean(campaign && campaign.gm === userId),
           // Needed to put a name on somebody else's laser pointer.
           gmId: campaign?.gm || null,
+          // The heading over the board: the table everyone is at, which is the
+          // one thing about the session that is not a spoiler.
+          campaignName: campaign?.name || '',
           // Only sheets attached to this campaign can hold a token in it.
           ownedCharacterIds: characters
             .filter((character) => character.campaign_id === campaignId)
@@ -45,7 +53,7 @@ export function useSceneRole(campaignId) {
       } catch (_) {
         // Falling back to "player with no pieces" keeps the scene readable
         // instead of blank, and the database still refuses anything else.
-        if (!cancelled) setRole({ loading: false, isGm: false, gmId: null, ownedCharacterIds: [] });
+        if (!cancelled) setRole(NOBODY);
       }
     }
 

@@ -2,11 +2,11 @@ import {
   lazy, memo, Suspense, useCallback, useEffect, useMemo, useRef, useState, useTransition,
 } from 'react';
 import {
-  Box, Button, Chip, CircularProgress, IconButton, Menu, MenuItem, Stack, Typography,
+  Box, Button, CircularProgress, IconButton, Stack, Tooltip, Typography,
 } from '@mui/material';
 import {
-  Cloud, Dices, Eye, Lock, LockOpen, MonitorPlay, MoreVertical, Pencil, Pointer, Radio, Ruler, Shapes,
-  Shield, Users,
+  Cloud, Dices, Lock, LockOpen, MonitorOff, MonitorPlay, Pencil, Pointer, Radio, Ruler, Shapes,
+  Users,
 } from 'lucide-react';
 import { useToast } from '../../../shared/ToastProvider.jsx';
 import { useAuth } from '../../../shared/cloud/AuthProvider.jsx';
@@ -67,7 +67,7 @@ import {
   setCells,
 } from '../../../shared/vtt/fog.js';
 import {
-  canMarkToken, normalizePlayArea, toScene,
+  canMarkToken, normalizePlayArea, sceneTitleFor, toScene,
 } from '../../../shared/vtt/scene.js';
 import {
   addRoll,
@@ -103,6 +103,7 @@ import RollLogPanel from './RollLogPanel.jsx';
 import PlayerPanel from './PlayerPanel.jsx';
 import RosterPanel from './RosterPanel.jsx';
 import MapObjectsPanel from './MapObjectsPanel.jsx';
+import SceneSwitcher from './SceneSwitcher.jsx';
 import SceneToolRail from './SceneToolRail.jsx';
 import MapCorner from './MapCorner.jsx';
 import BattleMapViewSwitch from './BattleMapViewSwitch.jsx';
@@ -142,6 +143,7 @@ function paintToolGroup(mode) {
 export default function SceneEditor({
   scene,
   onSceneChange,
+  onOpenScene = null,
   spectator = false,
   spectatorSource = null,
   cameraSourceId = null,
@@ -190,15 +192,12 @@ export default function SceneEditor({
   const localProjectorFollowingRef = useRef(true);
   const projectorFollowingRef = presenterFollowingRef || localProjectorFollowingRef;
   const [projectorFollowing, setProjectorFollowing] = useState(projectorFollowingRef.current);
-  const projectorControlsStorageKey = `gb:vtt:projector-controls:${scene.campaignId}`;
-  const [projectorControlsOpen, setProjectorControlsOpen] = useState(() => {
-    try {
-      return globalThis.sessionStorage?.getItem(projectorControlsStorageKey) === '1';
-    } catch (_) {
-      return false;
-    }
-  });
-  const [sceneActionsAnchor, setSceneActionsAnchor] = useState(null);
+  // The open projector window is the state; the flag only mirrors it for render.
+  // Nothing is persisted: after a reload the controls are gone, and pressing
+  // Projector mode again lands on the same named window rather than opening a
+  // second one, which hands the handle straight back.
+  const projectorWindowRef = useRef(null);
+  const [projectorControlsOpen, setProjectorControlsOpen] = useState(false);
   const hasPresenterFrameRef = useRef(false);
   const [projectorShownImage, setProjectorShownImage] = useState(scene.shownImage);
   const sceneShownImageRef = useRef(scene.shownImage);
@@ -241,18 +240,24 @@ export default function SceneEditor({
   const conditionEntries = useConditionEntries();
 
   useEffect(() => {
-    try {
-      if (projectorControlsOpen) {
-        globalThis.sessionStorage?.setItem(projectorControlsStorageKey, '1');
-      } else {
-        globalThis.sessionStorage?.removeItem(projectorControlsStorageKey);
-      }
-    } catch (_) {}
-  }, [projectorControlsOpen, projectorControlsStorageKey]);
-
-  useEffect(() => {
     if (!scene.isLive) setProjectorControlsOpen(false);
   }, [scene.isLive]);
+
+  // A projector closed by hand must not leave "Stop projector mode" offering to
+  // close a window that is already gone. Checked when this window comes back to
+  // the front, which is exactly when closing the other one happened.
+  useEffect(() => {
+    if (!projectorControlsOpen) return undefined;
+    const check = () => {
+      if (projectorWindowRef.current?.closed !== false) {
+        projectorWindowRef.current = null;
+        setProjectorControlsOpen(false);
+      }
+    };
+    window.addEventListener('focus', check);
+    return () => window.removeEventListener('focus', check);
+  }, [projectorControlsOpen]);
+
 
   useEffect(() => {
     // A live-scene switch always wins over a paused camera: enter the new scene
@@ -793,6 +798,19 @@ export default function SceneEditor({
       notify('error', cause?.message || 'Could not change the live scene.');
     }
   }, [notify, onSceneChange, scene]);
+
+  // Scenes get named while they are being played ("the tavern" turns out to be
+  // "the ambush"), so the name is editable here and not only from the scene
+  // list. Nothing to hide from the players: they never see it.
+  const handleRename = useCallback(async () => {
+    const next = window.prompt('Scene name', scene.name);
+    if (next === null) return;
+    try {
+      onSceneChange(await updateScene(scene.id, { name: next }));
+    } catch (cause) {
+      notify('error', cause?.message || 'Could not rename the scene.');
+    }
+  }, [notify, onSceneChange, scene.id, scene.name]);
 
   // Debounced like the grid: dragging a number field should not write a row per
   // keystroke, and this one changes what the players can see.
@@ -1620,16 +1638,41 @@ export default function SceneEditor({
     startSheetTransition(() => setSheetCharacterId(characterId));
   }, []);
 
+  // The GM sets the projector up once, drags it onto the television, and goes
+  // back to running the game: being thrown into it every time is the wrong way
+  // round.
+  //
+  // A window, not a tab, and that is the whole trick. Browsers refuse to move
+  // the focus between tabs from script — the opener cannot keep it, the new tab
+  // cannot hand it back, and a synthesized modifier-click is not honoured
+  // either. Between windows they still allow it, so the projector raises the
+  // GM's window again on arrival (see VttPage). A separate window is also what
+  // the second screen wants: it can be dragged there and left fullscreen.
+  //
+  // Opening by script — and therefore without `noopener` — is also what makes
+  // the handle available, which is what lets "Stop" close it again.
   const openSpectator = useCallback(() => {
-    setProjectorControlsOpen(true);
-    setSceneActionsAnchor(null);
     const url = spectatorUrl(window.location.href, scene.campaignId, presenterCameraSource);
-    window.open(url, '_blank', 'noopener,noreferrer');
-  }, [presenterCameraSource, scene.campaignId]);
+    const width = Math.min(1280, Math.max(640, window.screen?.availWidth || 1280));
+    const height = Math.min(800, Math.max(480, window.screen?.availHeight || 800));
+    const projector = window.open(
+      url,
+      'gmboard-projector',
+      `popup=yes,width=${Math.round(width * 0.8)},height=${Math.round(height * 0.8)}`,
+    );
+    if (!projector) {
+      notify('warning', 'The projector window was blocked. Allow pop-ups for this site.');
+      return;
+    }
+    projectorWindowRef.current = projector;
+    setProjectorControlsOpen(true);
+  }, [notify, presenterCameraSource, scene.campaignId]);
 
-  const hideProjectorControls = useCallback(() => {
+  const stopProjector = useCallback(() => {
     setProjectorControlsOpen(false);
-    setSceneActionsAnchor(null);
+    const projector = projectorWindowRef.current;
+    projectorWindowRef.current = null;
+    try { projector?.close(); } catch (_) {}
   }, []);
 
   if (loading || role.loading) return <CircularProgress size={24} />;
@@ -1667,21 +1710,18 @@ export default function SceneEditor({
   return (
     <Stack spacing={1}>
       <Box sx={sceneTopbarSx}>
+        {role.isGm && onOpenScene ? <SceneSwitcher scene={scene} onOpenScene={onOpenScene} /> : null}
         <Box sx={sceneIdentitySx}>
-          <Typography variant="h1" sx={sceneTitleSx}>{scene.name}</Typography>
-          <Stack direction="row" spacing={0.75} useFlexGap sx={sceneMetaSx}>
-            <Typography variant="body2" sx={sceneStatsSx}>
-              {tokens.length} token{tokens.length === 1 ? '' : 's'} · {scene.grid.size}px cells
-            </Typography>
-            <Chip
-              size="small"
-              icon={role.isGm ? <Shield size={12} /> : <Eye size={12} />}
-              label={role.isGm ? 'GM view' : 'Player view'}
-              color={role.isGm ? 'primary' : 'default'}
-              variant="outlined"
-              sx={sceneRoleChipSx}
-            />
-          </Stack>
+          <Typography variant="h1" sx={sceneTitleSx}>
+            {sceneTitleFor(scene, { isGm: role.isGm, campaignName: role.campaignName })}
+          </Typography>
+          {role.isGm ? (
+            <Tooltip title="Rename scene">
+              <IconButton size="small" aria-label="Rename scene" onClick={handleRename} sx={sceneRenameButtonSx}>
+                <Pencil size={11} />
+              </IconButton>
+            </Tooltip>
+          ) : null}
         </Box>
         {role.isGm ? (
           <Stack direction="row" spacing={0.75} useFlexGap sx={scenePresenterActionsSx}>
@@ -1695,51 +1735,50 @@ export default function SceneEditor({
             >
               {scene.isLive ? 'Live' : 'Go live'}
             </Button>
+            {/* A scene that is not live has no projector to point anywhere, and
+                a projector already running only needs stopping and freezing. */}
+            {scene.isLive && !projectorControlsOpen ? (
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<MonitorPlay size={14} />}
+                onClick={openSpectator}
+              >
+                Projector mode
+              </Button>
+            ) : null}
             {scene.isLive && projectorControlsOpen ? (
               <>
-                <Button
-                  size="small"
-                  variant="outlined"
-                  startIcon={<MonitorPlay size={14} />}
-                  onClick={openSpectator}
+                <Tooltip title="Closes the projector tab">
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    startIcon={<MonitorOff size={14} />}
+                    onClick={stopProjector}
+                  >
+                    Stop projector mode
+                  </Button>
+                </Tooltip>
+                {/* Never about pausing the table: the projector keeps showing
+                    everything that moves, it just stops being dragged around by
+                    the GM's own panning and zooming. */}
+                <Tooltip
+                  title={projectorFollowing
+                    ? 'The projector follows your view — lock it where it is'
+                    : 'The projector is locked — let it follow your view again'}
                 >
-                  Spectator
-                </Button>
-                <Button
-                  size="small"
-                  variant={projectorFollowing ? 'outlined' : 'contained'}
-                  startIcon={projectorFollowing ? <Lock size={14} /> : <LockOpen size={14} />}
-                  aria-pressed={!projectorFollowing}
-                  onClick={handleToggleProjectorFollow}
-                >
-                  {projectorFollowing ? 'Freeze projector' : 'Resume projector'}
-                </Button>
+                  <Button
+                    size="small"
+                    variant={projectorFollowing ? 'outlined' : 'contained'}
+                    startIcon={projectorFollowing ? <Lock size={14} /> : <LockOpen size={14} />}
+                    aria-pressed={!projectorFollowing}
+                    onClick={handleToggleProjectorFollow}
+                  >
+                    {projectorFollowing ? 'Lock camera' : 'Follow my view'}
+                  </Button>
+                </Tooltip>
               </>
             ) : null}
-            <IconButton
-              size="small"
-              aria-label="More scene actions"
-              aria-controls={sceneActionsAnchor ? 'scene-actions-menu' : undefined}
-              aria-haspopup="menu"
-              aria-expanded={sceneActionsAnchor ? 'true' : undefined}
-              onClick={(event) => setSceneActionsAnchor(event.currentTarget)}
-              sx={sceneActionsButtonSx}
-            >
-              <MoreVertical size={17} />
-            </IconButton>
-            <Menu
-              id="scene-actions-menu"
-              anchorEl={sceneActionsAnchor}
-              open={Boolean(sceneActionsAnchor)}
-              onClose={() => setSceneActionsAnchor(null)}
-            >
-              <MenuItem disabled={!scene.isLive} onClick={openSpectator}>
-                {projectorControlsOpen ? 'Open another projector' : 'Start projector mode'}
-              </MenuItem>
-              {projectorControlsOpen ? (
-                <MenuItem onClick={hideProjectorControls}>Hide projector controls</MenuItem>
-              ) : null}
-            </Menu>
           </Stack>
         ) : null}
         <Box sx={sceneViewSwitchSx}>
@@ -1954,8 +1993,13 @@ const sceneTopbarSx = {
   boxShadow: '0 8px 24px rgba(0,0,0,0.22)',
 };
 
+// Shrinks rather than grows: the presenter controls belong next to the name the
+// GM is reading, not pushed against the far edge of the bar.
 const sceneIdentitySx = {
-  flex: '1 1 250px',
+  display: 'flex',
+  alignItems: 'center',
+  gap: 0.25,
+  flex: '0 1 auto',
   minWidth: 0,
 };
 
@@ -1966,24 +2010,6 @@ const sceneTitleSx = {
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-};
-
-const sceneMetaSx = {
-  alignItems: 'center',
-  flexWrap: 'wrap',
-  mt: 0.35,
-};
-
-const sceneStatsSx = {
-  color: 'rgba(255,255,255,0.58)',
-  fontSize: '0.68rem',
-  letterSpacing: '0.025em',
-};
-
-const sceneRoleChipSx = {
-  height: 20,
-  fontSize: '0.62rem',
-  '& .MuiChip-icon': { ml: 0.55 },
 };
 
 const scenePresenterActionsSx = {
@@ -1998,22 +2024,24 @@ const scenePresenterActionsSx = {
   },
 };
 
-const sceneActionsButtonSx = {
-  width: 30,
-  height: 30,
-  color: 'rgba(255,255,255,0.68)',
-  border: '1px solid rgba(255,255,255,0.16)',
-  borderRadius: 1,
+// A footnote on the title rather than a control of its own: small, riding the
+// top of the text, and only fully lit once it is pointed at.
+const sceneRenameButtonSx = {
+  width: 18,
+  height: 18,
+  p: 0,
+  alignSelf: 'flex-start',
+  mt: -0.25,
+  color: 'rgba(255,255,255,0.42)',
   '&:hover': {
     color: '#e8c96a',
-    borderColor: 'rgba(232,201,106,0.42)',
     bgcolor: 'rgba(232,201,106,0.08)',
   },
 };
 
 const sceneViewSwitchSx = {
-  ml: { xs: 0, lg: 'auto' },
-  pl: { xs: 0, lg: 0.5 },
+  ml: { xs: 0, md: 'auto' },
+  pl: { xs: 0, md: 0.5 },
 };
 
 const spectatorRootSx = {

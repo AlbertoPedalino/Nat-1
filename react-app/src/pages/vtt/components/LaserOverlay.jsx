@@ -2,10 +2,12 @@ import { useLayoutEffect, useRef } from 'react';
 import { Box } from '@mui/material';
 import { cellSize, worldToScreen } from '../../../shared/vtt/geometry.js';
 
-// Remote positions arrive as snapshots. Taking slightly longer than one normal
-// broadcast interval to reach each target hides network jitter without making
-// the pointer feel detached from the person moving it.
-const REMOTE_LASER_TWEEN_MS = 70;
+// Remote positions arrive as snapshots, one every LASER_BROADCAST_MS at most.
+// Reaching each target in exactly that interval keeps the motion continuous —
+// the tween ends as the next position lands — while the dot stays as close as
+// the network allows to the finger that is moving it. Going longer smooths
+// jitter further but makes the pointer trail the person holding it.
+const REMOTE_LASER_TWEEN_MS = 50;
 
 export default function LaserOverlay({ lasers, localPointRef, localActive, grid, view }) {
   return (

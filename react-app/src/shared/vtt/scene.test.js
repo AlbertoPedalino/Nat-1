@@ -14,6 +14,7 @@ import {
   normalizeGrid,
   normalizeLayer,
   sanitizeName,
+  sceneTitleFor,
   toScene,
   toToken,
   toTokenPatch,
@@ -35,6 +36,17 @@ test('an unknown layer falls back to tokens, never to gm', () => {
   assert.equal(normalizeLayer('gm'), 'gm');
   assert.equal(normalizeLayer('secret'), 'tokens');
   assert.equal(normalizeLayer(undefined), 'tokens');
+});
+
+test('the scene name is a GM heading, never a player one', () => {
+  const scene = { name: 'Ambush at the ford' };
+  const campaignName = 'Curse of Strahd';
+  assert.equal(sceneTitleFor(scene, { isGm: true, campaignName }), 'Curse of Strahd · Ambush at the ford');
+  assert.equal(sceneTitleFor(scene, { isGm: false, campaignName }), 'Curse of Strahd');
+  assert.equal(sceneTitleFor(scene, { campaignName }), 'Curse of Strahd', 'an unknown role is a player');
+  assert.equal(sceneTitleFor(scene), 'Battle map', 'a campaign still loading says nothing about the map');
+  assert.equal(sceneTitleFor(scene, { isGm: true }), 'Ambush at the ford');
+  assert.equal(sceneTitleFor(null, { isGm: true, campaignName }), 'Curse of Strahd · Scene');
 });
 
 test('rows become editor shapes with usable numbers', () => {
