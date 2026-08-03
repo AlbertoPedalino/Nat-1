@@ -9,11 +9,11 @@ import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../components/AppTopBar.jsx';
 export const TOOLS = [
   { path: '/library/characters', label: 'Character Sheet', desc: 'View and manage your character in play', icon: ScrollText, color: 'success.main' },
   { path: REGISTRY_META.gb_char_registry.newRoute, label: 'Char Builder', desc: 'Create or level up your character', icon: UserPen, color: 'gmboard.rarity.Very Rare' },
-  { path: '/library/gmboard', label: 'GM Board', desc: 'Hexcrawl, dungeon, and quest generators', icon: LayoutDashboard, color: 'warning.main' },
-  { path: '/library/encounters', label: 'Encounter Builder', desc: 'Build and balance combat encounters', icon: Swords, color: 'error.main' },
-  { path: '/library/dmscreen', label: 'DM Screen', desc: 'Keep notes and reminders close during play', icon: StickyNote, color: 'secondary.main' },
   { path: '/campaigns', label: 'Campaigns', desc: 'Create, join, and manage online campaigns', icon: Flag, color: 'primary.main' },
+  { path: '/library/gmboard', label: 'GM Board', desc: 'Hexcrawl, dungeon, and quest generators', icon: LayoutDashboard, color: 'warning.main' },
+  { path: '/library/dmscreen', label: 'DM Screen', desc: 'Keep notes and reminders close during play', icon: StickyNote, color: 'secondary.main' },
   { path: '/vtt', label: 'Battle Map', desc: 'Maps and tokens for the campaigns you run', icon: Map, color: 'info.main' },
+  { path: '/library/encounters', label: 'Encounter Builder', desc: 'Build and balance combat encounters', icon: Swords, color: 'error.main' },
 ];
 
 export default function HomePage() {
@@ -131,13 +131,14 @@ const dividerSx = {
 
 const gridSx = {
   display: 'grid',
-  gridTemplateColumns: 'repeat(2, 1fr)',
+  gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
   gap: '1.25rem',
   width: '100%',
-  maxWidth: '560px',
-  '@media (max-width: 420px)': {
-    gridTemplateColumns: '1fr',
-    maxWidth: '320px',
+  maxWidth: '860px',
+  '@media (max-width: 600px)': {
+    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    maxWidth: '560px',
+    gap: '0.75rem',
   },
 };
 
@@ -171,6 +172,11 @@ const cardContentSx = {
   gap: '0.75rem',
   p: '2rem 1.5rem 1.75rem',
   '&:last-child': { pb: '1.75rem' },
+  '@media (max-width: 600px)': {
+    gap: '0.6rem',
+    p: '1.4rem 0.75rem 1.25rem',
+    '&:last-child': { pb: '1.25rem' },
+  },
 };
 
 const cardLabelSx = {

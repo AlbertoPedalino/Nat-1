@@ -6,11 +6,11 @@ describe('Home tool table', () => {
     expect(TOOLS.map((tool) => tool.path)).toEqual([
       '/library/characters',
       '/charbuilder?char=new',
-      '/library/gmboard',
-      '/library/encounters',
-      '/library/dmscreen',
       '/campaigns',
+      '/library/gmboard',
+      '/library/dmscreen',
       '/vtt',
+      '/library/encounters',
     ]);
 
     const campaigns = TOOLS.find((tool) => tool.label === 'Campaigns');
