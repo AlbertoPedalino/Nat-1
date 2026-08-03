@@ -11,9 +11,8 @@
 // stepped live, so a slow frame cannot change where a die lands.
 //
 // Orientation is a quaternion, not three angles. Reading a result means asking
-// which face points at the camera and then turning the die the short way to put
-// it there exactly; both are ordinary questions to ask of a quaternion and both
-// are a mess to ask of an Euler triple.
+// which face points at the camera once the die stops. The orientation is never
+// replaced afterwards just to make that face or its label look straighter.
 
 import { seededRandom } from '../character/dice3d.js';
 import { dieGeometry } from '../character/polyhedra.js';
@@ -30,8 +29,6 @@ export const TRAY = { width: 460, height: 300 };
 const FPS = 60;
 const DT = 1 / FPS;
 const MAX_FRAMES = 300;
-// Long enough for the slerp below to finish from any angle.
-const SETTLE_FRAMES = 60;
 
 const GRAVITY = 2600;      // px/s², tuned to look like a die and not a feather
 const RESTITUTION = 0.46;  // how much of a bounce survives the table
@@ -49,9 +46,10 @@ const REST_SPEED = 28;
 // is still sliding, the way a real one does, instead of stopping dead and then
 // turning itself over.
 const SETTLE_SPEED = 360;
-const SETTLE_RATE = 0.36;
-const SNAP_RATE = 0.42;    // how fast the last of that turn finishes
-const SNAP_DONE = 0.99995; // quaternion dot product: near enough to aligned
+const SETTLE_RATE = 0.12;
+// Close enough to lie naturally on the table, but deliberately not an exact
+// target pose. The simulation ends on the frame it reaches this tolerance.
+const REST_ALIGNMENT = 0.9995;
 
 export function simulateThrow(dice, seed, options = {}) {
   const size = options.size || 42;
@@ -89,13 +87,12 @@ export function simulateThrow(dice, seed, options = {}) {
     if (bodies.every(settled)) break;
   }
 
-  // A throw has to end with every die down and readable. Dice jostling each
-  // other in a corner can keep waking one another past the frame limit, and a
-  // die left in mid-air at the last frame simply hangs there for the rest of
-  // the roll — which is what "stuck in the air" looked like.
-  for (let frame = 0; frame < SETTLE_FRAMES && !bodies.every(settled); frame += 1) {
+  // A pathological pile-up can run into the safety limit. Put it on the table
+  // without changing its orientation: forcing a final face here is the visible
+  // "snap to result" that a physical throw must never have.
+  if (!bodies.every(settled)) {
     for (const body of bodies) {
-      if (!body.resting || !body.target) {
+      if (!body.resting) {
         body.vx = 0;
         body.vy = 0;
         body.vz = 0;
@@ -103,17 +100,9 @@ export function simulateThrow(dice, seed, options = {}) {
         body.resting = true;
         comeToRest(body);
       }
-      body.q = slerp(body.q, body.target, SNAP_RATE);
     }
     frames.push(bodies.map(snapshot));
   }
-
-  // Exactly, rather than nearly: the last thing the table sees is a die square
-  // on its face.
-  for (const body of bodies) {
-    if (body.target) body.q = body.target;
-  }
-  frames.push(bodies.map(snapshot));
 
   return {
     frames,
@@ -125,10 +114,7 @@ export function simulateThrow(dice, seed, options = {}) {
 }
 
 function step(body, radius, bounds) {
-  if (body.resting) {
-    if (body.target) body.q = slerp(body.q, body.target, SNAP_RATE);
-    return;
-  }
+  if (body.resting) return;
 
   body.vz -= GRAVITY * DT;
   body.x += body.vx * DT;
@@ -163,30 +149,31 @@ function step(body, radius, bounds) {
   const speed = Math.hypot(body.vx, body.vy);
   if (body.z > 0 || body.vz !== 0) return;
 
-  if (speed < REST_SPEED) {
-    body.vx = 0;
-    body.vy = 0;
-    body.resting = true;
-    comeToRest(body);
-    return;
-  }
-
   if (speed < SETTLE_SPEED) {
     // Down and slowing: bed onto the nearest face, harder the slower it goes,
-    // so that by the time it stops it is already lying on one. The face is not
-    // committed to yet — a knock from another die can still turn it over.
+    // so that by the time it stops it is already lying on one. This remains
+    // part of the physical motion: there is no corrective animation after the
+    // die has been declared at rest. A knock can still turn it over.
     comeToRest(body);
     body.q = slerp(body.q, body.target, SETTLE_RATE * (1 - speed / SETTLE_SPEED));
     body.wx *= 0.6;
     body.wy *= 0.6;
     body.wz *= 0.6;
-    body.resting = false;
+    if (speed < REST_SPEED && dotQuaternion(body.q, body.target) > REST_ALIGNMENT) {
+      body.vx = 0;
+      body.vy = 0;
+      body.resting = true;
+    } else {
+      body.resting = false;
+    }
   }
 }
 
-// The die has stopped. Whichever face is nearest to looking at the camera is
-// the one it landed on; turn it the short way so it looks at the camera
-// exactly, and stand the number on it upright while we are there.
+// Whichever face is nearest to looking at the camera is the one the die is
+// coming down on. `target` is used only while it is still sliding, so gravity
+// can visibly bed it onto that face. Once it stops, its current quaternion is
+// preserved exactly: no last-frame levelling and no rotation to stand the
+// printed number upright.
 function comeToRest(body) {
   const orientation = body.q;
   let landed = 0;
@@ -201,12 +188,9 @@ function comeToRest(body) {
 
   const face = body.faces[landed];
   const facingCamera = align(rotate(orientation, face.normal), [0, 0, 1]);
-  const levelled = multiply(facingCamera, orientation);
-  const up = rotate(levelled, face.up);
-  const upright = fromAxisAngle([0, 0, 1], -Math.atan2(up[1], up[0]));
 
   body.landed = landed;
-  body.target = normalizeQuaternion(multiply(upright, levelled));
+  body.target = normalizeQuaternion(multiply(facingCamera, orientation));
 }
 
 // The edge of the tray. A die that skids out of it is a die nobody can read.
@@ -276,7 +260,7 @@ function collide(bodies, radius) {
 }
 
 function settled(body) {
-  return body.resting && body.target !== null && dotQuaternion(body.q, body.target) > SNAP_DONE;
+  return body.resting;
 }
 
 function snapshot(body) {

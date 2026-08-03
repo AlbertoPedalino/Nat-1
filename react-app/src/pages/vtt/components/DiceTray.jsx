@@ -11,6 +11,11 @@ import {
 } from '../../../shared/vtt/dicePhysics.js';
 
 const DIE_SIZE = 76;
+// Keep the final pose visible for a moment before revealing the result. The
+// extra animation frame guarantees that the browser has painted the last
+// physics frame; the hold makes a coin visibly finish falling instead of being
+// covered by the result at the exact instant it touches the table.
+export const RESULT_REVEAL_HOLD_MS = 160;
 // How far a die is lifted and enlarged per pixel of height over the table. Only
 // enough to read as "off the board" — the view is from above, so a die that
 // climbed the screen as it rose would look like it was flying away.
@@ -24,7 +29,7 @@ const GROWTH = 0.0018;
 // painted on the map, so it keeps its size when the board is zoomed and does not
 // slide when the board is panned. It never takes a pointer event: the map
 // underneath stays usable while dice are still rolling.
-export default function DiceTray({ throws }) {
+export default function DiceTray({ throws, onThrowSettled }) {
   const hostRef = useRef(null);
   const [table, setTable] = useState(null);
   // When each throw was first seen here, on this machine's clock.
@@ -67,16 +72,19 @@ export default function DiceTray({ throws }) {
           at={{ x: entry.x, y: entry.y }}
           table={table}
           startedAt={startedAt.current.get(entry.roll.id)}
+          onSettled={onThrowSettled}
         />
       )) : null}
     </Box>
   );
 }
 
-function DiceThrow({ roll, at, table, startedAt }) {
+function DiceThrow({ roll, at, table, startedAt, onSettled }) {
   const bodyRefs = useRef([]);
   const solidRefs = useRef([]);
   const shadowRefs = useRef([]);
+  const settledNotifiedRef = useRef(false);
+  const settledScheduledRef = useRef(false);
 
   // Everything about a throw comes from the roll's id, and a roll never changes
   // once it exists. Depending on anything else — the dice array's identity, the
@@ -154,27 +162,61 @@ function DiceThrow({ roll, at, table, startedAt }) {
 
   useEffect(() => {
     const { frames, frameMs } = thrown;
-    if (!frames.length || frameAt(Date.now()) >= frames.length - 1) return undefined;
+    let animationRaf = 0;
+    let revealRaf = 0;
+    let revealTimer = 0;
+
+    const notifySettled = () => {
+      if (settledNotifiedRef.current) return;
+      settledNotifiedRef.current = true;
+      onSettled?.(roll.id);
+    };
+    const notifyAfterFinalPaint = () => {
+      if (settledScheduledRef.current || settledNotifiedRef.current) return;
+      settledScheduledRef.current = true;
+      // A callback queued from inside the frame that applied the final pose
+      // runs on the following frame, after that pose has actually been drawn.
+      revealRaf = requestAnimationFrame(() => {
+        revealTimer = window.setTimeout(notifySettled, RESULT_REVEAL_HOLD_MS);
+      });
+    };
+    const cleanup = () => {
+      cancelAnimationFrame(animationRaf);
+      cancelAnimationFrame(revealRaf);
+      window.clearTimeout(revealTimer);
+      if (!settledNotifiedRef.current) settledScheduledRef.current = false;
+    };
+
+    if (!frames.length) {
+      notifySettled();
+      return undefined;
+    }
+    if (frameAt(Date.now()) >= frames.length - 1) {
+      paint(frames[frames.length - 1]);
+      notifyAfterFinalPaint();
+      return cleanup;
+    }
 
     const reduced = typeof window !== 'undefined'
       && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     if (reduced) {
       paint(frames[frames.length - 1]);
+      notifySettled();
       return undefined;
     }
 
-    let raf = 0;
     const tick = () => {
       const index = frameAt(Date.now());
       paint(frames[Math.min(index, frames.length - 1)]);
       // A slow frame skips ahead rather than stretching the throw, and the loop
       // only ends once the dice are down.
-      if (index < frames.length - 1) raf = requestAnimationFrame(tick);
+      if (index < frames.length - 1) animationRaf = requestAnimationFrame(tick);
+      else notifyAfterFinalPaint();
     };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    animationRaf = requestAnimationFrame(tick);
+    return cleanup;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [thrown, startedAt]);
+  }, [onSettled, roll.id, thrown, startedAt]);
 
   return (
     <Box sx={{ ...anchorSx, left: x, top: y }}>

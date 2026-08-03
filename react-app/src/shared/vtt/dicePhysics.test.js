@@ -12,6 +12,11 @@ function lastFrame(result) {
   return result.frames[result.frames.length - 1];
 }
 
+function orientationChange(a, b) {
+  const dot = Math.abs(a.reduce((sum, value, index) => sum + value * b[index], 0));
+  return (2 * Math.acos(Math.min(1, dot)) * 180) / Math.PI;
+}
+
 test('the dice come down and stop', () => {
   const result = simulateThrow(dice(6), 'roll-1', { size: SIZE });
   assert.ok(result.frames.length > 30, 'a throw that lasts no time is not a throw');
@@ -22,9 +27,7 @@ test('the dice come down and stop', () => {
 });
 
 // The whole point: the die is not showing a number that was decided elsewhere.
-// Whatever face the throw left looking at the camera is the result, so that
-// face has to be looking at the camera exactly, and the reported result has to
-// be that face.
+// Whatever face the throw left looking most towards the camera is the result.
 test('the result is the face the throw left facing the camera', () => {
   const result = simulateThrow(dice(8), 'roll-2', { size: SIZE });
   const geometry = dieGeometry(20);
@@ -35,17 +38,17 @@ test('the result is the face the throw left facing the camera', () => {
     const facing = geometry.faces.map((face) => rotate(orientation, face.normal)[2]);
     const highest = facing.indexOf(Math.max(...facing));
     assert.equal(landed, highest, 'the reported face is not the one on top');
-    assert.ok(facing[landed] > 0.9999, `it rests ${facing[landed]} off square`);
   });
 });
 
-test('the number on the resting face stands upright', () => {
-  const result = simulateThrow(dice(4), 'roll-3', { size: SIZE });
+test('the final pose is not straightened to make the result upright', () => {
+  const result = simulateThrow(dice(12), 'roll-3', { size: SIZE });
   const geometry = dieGeometry(20);
-  lastFrame(result).forEach((die, index) => {
+  const naturalTurns = lastFrame(result).filter((die, index) => {
     const up = rotate(die.q, geometry.faces[result.results[index]].up);
-    assert.ok(Math.abs(up[0] - 1) < 1e-3, `the face is turned ${up[0]} on its side`);
+    return Math.abs(up[1]) > 0.05;
   });
+  assert.ok(naturalTurns.length > 0, 'every result was artificially turned upright');
 });
 
 // Twenty faces, and over many throws they should not all be the same one.
@@ -115,14 +118,18 @@ test('one throw is one result, whoever is watching', () => {
 // Dice jostling in a corner can keep waking each other up. Whatever happens,
 // the throw has to end with every die down and readable — one left hanging
 // stays hanging for the rest of the roll.
-test('no throw ever ends with a die in the air or off square', () => {
+test('no throw ever ends with a die in the air or reports a different face', () => {
   const geometry = dieGeometry(20);
   for (let index = 0; index < 60; index += 1) {
     const result = simulateThrow(dice(6), `settle-${index}`, { size: SIZE });
     lastFrame(result).forEach((die, seat) => {
       assert.equal(die.z, 0, `throw ${index}: a die stopped ${die.z}px up`);
-      const facing = rotate(die.q, geometry.faces[result.results[seat]].normal)[2];
-      assert.ok(facing > 0.99999, `throw ${index}: it rests ${facing} off square`);
+      const facing = geometry.faces.map((face) => rotate(die.q, face.normal)[2]);
+      assert.equal(
+        result.results[seat],
+        facing.indexOf(Math.max(...facing)),
+        `throw ${index}: the reported face is not the visible one`,
+      );
     });
   }
 });
@@ -132,32 +139,40 @@ test('no throw ever ends with a die in the air or off square', () => {
 // face as it slides to a halt, the way a real one does. A die that stops
 // abruptly — off a wall, or off another die — has no sliding left to do it in,
 // so this is about the throw in general rather than every last one.
-test('a die is lying on its face by the time it stops, and stops when it stops', () => {
+test('a die keeps its natural final angle instead of snapping perfectly square', () => {
   const geometry = dieGeometry(20);
-  let tilt = 0;
+  let naturallyAngled = 0;
   const throws = 60;
 
   for (let index = 0; index < throws; index += 1) {
     const { frames, results } = simulateThrow(dice(1), `bed-${index}`, { size: SIZE });
 
-    let lastMoved = 0;
-    for (let frame = 1; frame < frames.length; frame += 1) {
-      const now = frames[frame][0];
-      const before = frames[frame - 1][0];
-      if (now.z > 0.01 || Math.hypot(now.x - before.x, now.y - before.y) > 0.4) lastMoved = frame;
-    }
-
-    const facing = rotate(frames[lastMoved][0].q, geometry.faces[results[0]].normal)[2];
-    tilt += (Math.acos(Math.min(1, facing)) * 180) / Math.PI;
-
-    // Once it has stopped, the throw is over: no sitting there turning.
-    assert.ok(
-      frames.length - 1 - lastMoved < 18,
-      `throw ${index}: ${frames.length - 1 - lastMoved} frames of nothing at the end`,
-    );
+    const facing = rotate(lastFrame({ frames })[0].q, geometry.faces[results[0]].normal)[2];
+    if (facing < 0.99999) naturallyAngled += 1;
   }
 
-  assert.ok(tilt / throws < 12, `dice stop an average of ${(tilt / throws).toFixed(1)}° off their face`);
+  assert.ok(naturallyAngled > throws / 2, 'the simulation still forces a perfect final pose');
+});
+
+test('a coin falls flat progressively without a final correction', () => {
+  const geometry = dieGeometry(2);
+  let naturallyAngled = 0;
+
+  for (let index = 0; index < 30; index += 1) {
+    const result = simulateThrow(dice(1, 2), `coin-settle-${index}`, { size: 76 });
+    const final = lastFrame(result)[0];
+    const before = result.frames[result.frames.length - 2][0];
+    const facing = rotate(final.q, geometry.faces[result.results[0]].normal)[2];
+
+    assert.ok(facing > 0.995, `coin ${index} stopped on its edge (${facing})`);
+    assert.ok(
+      orientationChange(before.q, final.q) < 2,
+      `coin ${index} snapped ${orientationChange(before.q, final.q).toFixed(2)}° on its last frame`,
+    );
+    if (facing < 0.99999) naturallyAngled += 1;
+  }
+
+  assert.ok(naturallyAngled > 20, 'coins are still being replaced with a perfect result pose');
 });
 
 test('a throw lasts about as long as a throw', () => {

@@ -67,6 +67,7 @@ import { FEET_PER_CELL } from '../../../shared/vtt/measure.js';
 import { useSceneLive } from '../../../shared/vtt/useSceneLive.js';
 import { useSceneRole } from '../../../shared/vtt/useSceneRole.js';
 import { useEncounterBridge } from '../hooks/useEncounterBridge.js';
+import { useConditionEntries } from '../../encounterbuilder/hooks/useConditionEntries.js';
 import EncounterImportDialog from './EncounterImportDialog.jsx';
 import MonsterPickerDialog from './MonsterPickerDialog.jsx';
 import DiceToast from '../../../shared/character/DiceToast.jsx';
@@ -95,6 +96,14 @@ const GM_FOG_OPACITY = 0.55;
 const PLAYER_FOG_OPACITY = 1;
 // Only used before the map image has loaded, or when the scene has none yet.
 const DEFAULT_MAP_CELLS = { cols: 40, rows: 30 };
+
+function paintToolGroup(mode) {
+  if (['draw', 'erase', 'text'].includes(mode)) return 'draw';
+  if (mode === 'laser') return 'laser';
+  if (mode === 'measure') return 'ruler';
+  if (mode === 'reveal' || mode === 'hide') return 'fog';
+  return 'cursor';
+}
 
 export default function SceneEditor({ scene, onSceneChange }) {
   const { notify } = useToast();
@@ -129,6 +138,9 @@ export default function SceneEditor({ scene, onSceneChange }) {
   const [lasers, setLasers] = useState({});
   // Rolls said at the table. In memory only: a roll is an event, not a record.
   const [rollFeed, setRollFeed] = useState([]);
+  // A custom roll enters the feed immediately to start its physical throw, but
+  // the result stays pending until DiceTray paints the final settled frame.
+  const pendingRollToastsRef = useRef(new Map());
   // Your own roll, in the same panel the character sheet shows it in. Only your
   // own: everyone else's arrives as a bubble over their piece and a line in the
   // log, which is what the table needs to see.
@@ -137,6 +149,12 @@ export default function SceneEditor({ scene, onSceneChange }) {
   // callback: a new function every render restarted the timer every render, and
   // the toast sat there for good.
   const dismissRollToast = useCallback(() => setRollToast(null), []);
+  const showSettledRollToast = useCallback((rollId) => {
+    const entry = pendingRollToastsRef.current.get(rollId);
+    if (!entry) return;
+    pendingRollToastsRef.current.delete(rollId);
+    setRollToast(entry);
+  }, []);
   // Yours to clear, and only yours: the log was never anywhere but this page's
   // memory, so there is nothing to tell anybody else about.
   const clearRollFeed = useCallback(() => setRollFeed([]), []);
@@ -144,6 +162,7 @@ export default function SceneEditor({ scene, onSceneChange }) {
   const [measureShape, setMeasureShape] = useState('line');
   const [feetPerCell, setFeetPerCell] = useState(FEET_PER_CELL);
   const [remoteMeasure, setRemoteMeasure] = useState(null);
+  const conditionEntries = useConditionEntries();
 
   // How many cells the map image covers at the current calibration. Everything
   // sized "to the map" — fog, play area — comes from here.
@@ -951,8 +970,8 @@ export default function SceneEditor({ scene, onSceneChange }) {
         roster,
       }),
     };
+    pendingRollToastsRef.current.set(entry.id, entry);
     setRollFeed((current) => addRoll(current, entry));
-    setRollToast(entry);
     publishRoll(entry);
   }, [publishRoll, role.isGm, role.ownedCharacterIds, roster, tokens]);
 
@@ -993,10 +1012,13 @@ export default function SceneEditor({ scene, onSceneChange }) {
       id: 'rolls',
       label: 'Rolls',
       icon: Dices,
-      content: (
+      content: ({ closePanel }) => (
         <RollLogPanel
           feed={rollFeed}
-          onCustomRoll={handleCustomRoll}
+          onCustomRoll={(formula) => {
+            handleCustomRoll(formula);
+            closePanel();
+          }}
           onClear={clearRollFeed}
         />
       ),
@@ -1006,6 +1028,7 @@ export default function SceneEditor({ scene, onSceneChange }) {
       id: 'draw',
       label: 'Draw',
       icon: Pencil,
+      onActivate: () => setPaintMode('draw'),
       content: (
         <DrawPanel
           busy={busy}
@@ -1044,12 +1067,14 @@ export default function SceneEditor({ scene, onSceneChange }) {
           id: 'laser',
           label: 'Laser',
           icon: Pointer,
+          onActivate: () => setPaintMode('laser'),
           content: <LaserPanel paintMode={paintMode} onPaintModeChange={setPaintMode} />,
         },
         {
           id: 'ruler',
           label: 'Measure',
           icon: Ruler,
+          onActivate: () => setPaintMode('measure'),
           content: (
             <MeasurePanel
               paintMode={paintMode}
@@ -1090,12 +1115,14 @@ export default function SceneEditor({ scene, onSceneChange }) {
         id: 'laser',
         label: 'Laser',
         icon: Pointer,
+        onActivate: () => setPaintMode('laser'),
         content: <LaserPanel paintMode={paintMode} onPaintModeChange={setPaintMode} />,
       },
       {
         id: 'ruler',
         label: 'Measure',
         icon: Ruler,
+        onActivate: () => setPaintMode('measure'),
         content: (
           <MeasurePanel
             paintMode={paintMode}
@@ -1113,6 +1140,7 @@ export default function SceneEditor({ scene, onSceneChange }) {
         id: 'fog',
         label: 'Fog',
         icon: Cloud,
+        onActivate: scene.fog ? () => setPaintMode('reveal') : undefined,
         content: (
           <FogPanel
             scene={scene}
@@ -1257,12 +1285,20 @@ export default function SceneEditor({ scene, onSceneChange }) {
         lasers={laserDots}
         rollBubbles={rollBubbles}
         diceThrows={diceThrows}
+        onDiceSettled={showSettledRollToast}
         measureShape={measureShape}
         feetPerCellForRuler={feetPerCell}
+        conditionEntries={conditionEntries}
         onMeasure={handleMeasure}
         remoteMeasure={remoteMeasure}
         feetPerCell={feetPerCell}
-        controls={<SceneToolRail groups={toolGroups} />}
+        controls={(
+          <SceneToolRail
+            groups={toolGroups}
+            activeId={paintToolGroup(allowedPaintMode)}
+            onCursor={() => setPaintMode('select')}
+          />
+        )}
         // Inside the viewport, not beside it: a fullscreen map paints nothing
         // that is not one of its own descendants.
         toast={<DiceToast toast={rollToast} onClose={dismissRollToast} />}
@@ -1323,4 +1359,3 @@ function fade(color) {
   const hex = typeof color === 'string' && /^#[0-9a-f]{6}$/i.test(color) ? color : '#e8c96a';
   return `${hex}55`;
 }
-

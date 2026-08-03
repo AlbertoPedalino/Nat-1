@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
-import { Box, Typography } from '@mui/material';
+import { useEffect, useRef, useState } from 'react';
+import { Box, Tooltip, Typography } from '@mui/material';
 import { describeEffect, effectId, effectPolarity } from '../../../shared/character/combatEffects.js';
 import { conditionLabel } from '../../../shared/character/conditions.js';
+import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
+import { fullscreenContainer } from '../logic/fullscreenContainer.js';
 
 // One piece on the map: the artwork, its name plate underneath, a hit point bar
 // and the conditions badge. Kept apart from the viewport because the viewport is
@@ -13,10 +15,25 @@ export default function TokenSprite({
   staged,
   interactive,
   movable,
+  conditionEntries = {},
   onPointerDown,
   onContextMenu,
 }) {
   const [hovered, setHovered] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const hoverCloseTimerRef = useRef(null);
+  const keepMarksOpen = () => {
+    clearTimeout(hoverCloseTimerRef.current);
+    hoverCloseTimerRef.current = null;
+    if (!dragging) setHovered(true);
+  };
+  const scheduleMarksClose = () => {
+    clearTimeout(hoverCloseTimerRef.current);
+    // The pills sit just outside the token. Keep them mounted while the pointer
+    // crosses that tiny gap, otherwise they vanish before they can be hovered.
+    hoverCloseTimerRef.current = setTimeout(() => setHovered(false), 180);
+  };
+  useEffect(() => () => clearTimeout(hoverCloseTimerRef.current), []);
   // Bestiary artwork is a circular token on a transparent background, so a
   // coloured disc behind it shows through as a ring in the group's colour. The
   // colour is still the fallback for a piece with no art, or whose art fails to
@@ -59,10 +76,18 @@ export default function TokenSprite({
 
   return (
     <Box
-      onPointerDown={onPointerDown}
+      onPointerDown={(event) => {
+        clearTimeout(hoverCloseTimerRef.current);
+        hoverCloseTimerRef.current = null;
+        setHovered(false);
+        setDragging(Boolean(movable));
+        onPointerDown?.(event);
+      }}
+      onPointerUp={() => setDragging(false)}
+      onPointerCancel={() => setDragging(false)}
       onContextMenu={onContextMenu}
-      onPointerEnter={() => setHovered(true)}
-      onPointerLeave={() => setHovered(false)}
+      onPointerEnter={keepMarksOpen}
+      onPointerLeave={scheduleMarksClose}
       role="button"
       tabIndex={interactive ? 0 : -1}
       aria-label={name || 'Token'}
@@ -158,14 +183,14 @@ export default function TokenSprite({
         </Box>
       ) : null}
 
-      {marks && !hovered ? <Box sx={badgeSx}>{marks}</Box> : null}
+      {marks && (!hovered || dragging) ? <Box sx={badgeSx}>{marks}</Box> : null}
 
       {/* One pill each, wrapped: a run-on sentence of six states is read as a
           wall, while pills are counted at a glance and colour-coded by kind. */}
-      {marks && hovered ? (
-        <Box sx={pillsSx}>
+      {marks && hovered && !dragging ? (
+        <Box sx={pillsSx} onPointerEnter={keepMarksOpen} onPointerLeave={scheduleMarksClose}>
           {conditions.map((key) => (
-            <Box key={key} sx={{ ...pillSx, ...conditionPillSx }}>{conditionLabel(key)}</Box>
+            <ConditionTokenPill key={key} conditionKey={key} entries={conditionEntries[key]} />
           ))}
           {effects.map((effect) => (
             <Box
@@ -178,6 +203,50 @@ export default function TokenSprite({
         </Box>
       ) : null}
     </Box>
+  );
+}
+
+function ConditionTokenPill({ conditionKey, entries }) {
+  const label = conditionLabel(conditionKey);
+  const pill = (
+    <Box
+      component="span"
+      tabIndex={0}
+      onPointerDown={(event) => event.stopPropagation()}
+      sx={{ ...pillSx, ...conditionPillSx }}
+    >
+      {label}
+    </Box>
+  );
+
+  if (!entries?.length) return pill;
+
+  return (
+    <Tooltip
+      arrow
+      placement="top"
+      title={(
+        <Box sx={conditionTooltipBodySx}>
+          <Typography sx={conditionTooltipTitleSx}>{label}</Typography>
+          <EntryBlocks
+            entries={entries}
+            spacing={0.45}
+            fontSize="0.68rem"
+            headingColor="#edc36f"
+            bodyColor="#f3ead6"
+            markerColor="#edc36f"
+            strongColor="#edc36f"
+            emptyText={null}
+          />
+        </Box>
+      )}
+      slotProps={{
+        popper: { container: fullscreenContainer },
+        tooltip: { sx: conditionTooltipSx },
+      }}
+    >
+      {pill}
+    </Tooltip>
   );
 }
 
@@ -314,7 +383,16 @@ const pillsSx = {
   gap: '3px',
   width: 'max-content',
   maxWidth: 230,
-  pointerEvents: 'none',
+  pointerEvents: 'auto',
+  // Invisible hover bridge across the visual gap between disc and pills.
+  '&::after': {
+    content: '""',
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    width: '100%',
+    height: 6,
+  },
 };
 
 const pillSx = {
@@ -329,6 +407,23 @@ const pillSx = {
 };
 
 const conditionPillSx = { bgcolor: '#d69245', color: '#0f0e0d' };
+const conditionTooltipSx = {
+  maxWidth: 360,
+  p: 0,
+  bgcolor: 'rgba(15,14,13,0.98)',
+  border: '1px solid rgba(214,146,69,0.55)',
+  boxShadow: 8,
+  '& .MuiTooltip-arrow': { color: 'rgba(15,14,13,0.98)' },
+};
+const conditionTooltipBodySx = { p: 1 };
+const conditionTooltipTitleSx = {
+  mb: 0.55,
+  fontFamily: '"Cinzel", Georgia, serif',
+  fontSize: '0.72rem',
+  fontWeight: 800,
+  letterSpacing: '0.06em',
+  color: '#d69245',
+};
 // The same two colours the encounter builder tints its effect pills with.
 const advPillSx = { bgcolor: '#4f8a5b', color: '#f3ead6' };
 const disPillSx = { bgcolor: '#b3423a', color: '#f3ead6' };

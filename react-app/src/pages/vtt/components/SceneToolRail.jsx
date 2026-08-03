@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Box, IconButton, Stack, Typography } from '@mui/material';
-import { X } from 'lucide-react';
+import { MousePointer2, X } from 'lucide-react';
 
 // A vertical rail of icons down the right edge of the map; clicking one opens
 // its settings in a panel immediately to the left.
@@ -9,23 +9,43 @@ import { X } from 'lucide-react';
 // controls over a battlemap covered the board it was meant to adjust. Only one
 // group is open at a time, and the panel is anchored rather than modal so the
 // map stays visible and usable behind it.
-export default function SceneToolRail({ groups }) {
+export default function SceneToolRail({ groups, activeId = 'cursor', onCursor }) {
   const [openId, setOpenId] = useState(null);
   const open = groups.find((group) => group.id === openId) || null;
+  const closePanel = () => setOpenId(null);
 
   return (
     <>
       <Stack data-viewport-control spacing={0.5} sx={railSx}>
+        <Box
+          component="button"
+          type="button"
+          aria-label="Normal cursor"
+          aria-pressed={activeId === 'cursor'}
+          onClick={() => {
+            onCursor?.();
+            closePanel();
+          }}
+          sx={{ ...railButtonSx, ...(activeId === 'cursor' ? railButtonActiveSx : null) }}
+        >
+          <MousePointer2 size={17} />
+          <Typography component="span" sx={railLabelSx}>Cursor</Typography>
+        </Box>
+
         {groups.map((group) => {
           const Icon = group.icon;
-          const active = openId === group.id;
+          const panelOpen = openId === group.id;
+          const active = activeId === group.id || (!group.onActivate && panelOpen);
           return (
             <Box
               key={group.id}
               component="button"
               type="button"
               aria-pressed={active}
-              onClick={() => setOpenId(active ? null : group.id)}
+              onClick={() => {
+                group.onActivate?.();
+                setOpenId(panelOpen ? null : group.id);
+              }}
               sx={{ ...railButtonSx, ...(active ? railButtonActiveSx : null) }}
             >
               <Icon size={17} />
@@ -44,11 +64,11 @@ export default function SceneToolRail({ groups }) {
           <Stack direction="row" sx={{ alignItems: 'center', mb: 1 }}>
             <Typography sx={panelTitleSx}>{open.label}</Typography>
             <Box sx={{ flex: 1 }} />
-            <IconButton size="small" aria-label="Close" onClick={() => setOpenId(null)} sx={{ color: '#b8a87a' }}>
+            <IconButton size="small" aria-label="Close" onClick={closePanel} sx={{ color: '#b8a87a' }}>
               <X size={14} />
             </IconButton>
           </Stack>
-          {open.content}
+          {typeof open.content === 'function' ? open.content({ closePanel }) : open.content}
         </Box>
       ) : null}
     </>

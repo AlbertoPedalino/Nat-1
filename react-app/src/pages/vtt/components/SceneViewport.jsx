@@ -101,6 +101,8 @@ export default function SceneViewport({
   lasers,
   rollBubbles,
   diceThrows,
+  onDiceSettled,
+  conditionEntries,
   measureShape,
   feetPerCellForRuler,
   onMeasure,
@@ -113,6 +115,8 @@ export default function SceneViewport({
   const hostRef = useRef(null);
   const dragRef = useRef(null);
   const lastLaserRef = useRef(0);
+  const laserPointRef = useRef(null);
+  const laserSelectedRef = useRef(false);
   // Every finger currently on the map, recorded in the capture phase so a
   // pinch works even when one of them landed on a piece — a token stops the
   // event from reaching the host, and the second finger would go unseen.
@@ -216,6 +220,24 @@ export default function SceneViewport({
     host.addEventListener('wheel', handleWheel, { passive: false });
     return () => host.removeEventListener('wheel', handleWheel);
   }, [handleWheel]);
+
+  // A stationary pointer is still pointing. Refresh the broadcast while the
+  // laser remains selected so its safety TTL only removes abandoned dots, not
+  // a dot deliberately held over one square. Switching tools clears it at once.
+  useEffect(() => {
+    if (paintMode !== 'laser') {
+      if (laserSelectedRef.current) onLaser?.(null);
+      laserSelectedRef.current = false;
+      laserPointRef.current = null;
+      return undefined;
+    }
+
+    laserSelectedRef.current = true;
+    const timer = setInterval(() => {
+      if (laserPointRef.current) onLaser?.(laserPointRef.current);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [onLaser, paintMode]);
 
   // The brush works in fog cells, which are finer than grid squares: that is
   // what makes half a doorway possible, and what makes a round brush look round.
@@ -379,8 +401,12 @@ export default function SceneViewport({
     }
 
     if (event.button === 0 && paintMode === 'laser') {
-      dragRef.current = { kind: 'laser' };
-      onLaser?.(cellPoint(point));
+      // The laser is already live because the tool is selected. A click merely
+      // updates its position; it must not turn into a held gesture that clears
+      // the dot again on pointer-up.
+      const at = cellPoint(point);
+      laserPointRef.current = at;
+      onLaser?.(at);
       return;
     }
 
@@ -424,7 +450,9 @@ export default function SceneViewport({
       const now = Date.now();
       if (now - lastLaserRef.current >= LASER_BROADCAST_MS) {
         lastLaserRef.current = now;
-        onLaser?.(cellPoint(point));
+        const at = cellPoint(point);
+        laserPointRef.current = at;
+        onLaser?.(at);
       }
       return;
     }
@@ -452,11 +480,6 @@ export default function SceneViewport({
 
     if (state.kind === 'erase') {
       onErase?.(cellPoint(point));
-      return;
-    }
-
-    if (state.kind === 'laser') {
-      onLaser?.(cellPoint(point));
       return;
     }
 
@@ -544,11 +567,6 @@ export default function SceneViewport({
       return;
     }
 
-    // The dot fades on its own at the far end; nothing is written down.
-    if (state?.kind === 'laser') {
-      onLaser?.(null);
-      return;
-    }
     if (!state || state.kind !== 'token') return;
 
     const landing = dropPosition({
@@ -595,7 +613,10 @@ export default function SceneViewport({
       onPointerCancel={handlePointerUp}
       onPointerLeave={() => {
         setHover(null);
-        if (paintMode === 'laser') onLaser?.(null);
+        if (paintMode === 'laser') {
+          laserPointRef.current = null;
+          onLaser?.(null);
+        }
       }}
       onContextMenu={(event) => event.preventDefault()}
       onDragOver={(event) => { if (onDropCharacter) event.preventDefault(); }}
@@ -728,6 +749,7 @@ export default function SceneViewport({
               staged={staged}
               interactive={onActiveLayer}
               movable={canMove(token)}
+              conditionEntries={conditionEntries}
               onPointerDown={(event) => (onActiveLayer ? beginTokenDrag(event, token) : undefined)}
               onContextMenu={(event) => {
                 if (!onActiveLayer || !onContextMenu) return;
@@ -787,6 +809,7 @@ export default function SceneViewport({
       {/* Screen space, over everything: the dice are on the table, not on the
           map. A throw with no piece to land next to lands in the middle. */}
       <DiceTray
+        onThrowSettled={onDiceSettled}
         throws={(diceThrows || []).map(({ roll, token }) => {
           const rect = token ? tokenWorldRect(token, scene.grid) : null;
           const at = rect ? worldToScreen(rect, view) : null;
@@ -856,7 +879,15 @@ export default function SceneViewport({
       <Box data-viewport-control>{toast}</Box>
 
       {measured ? (
-        <Box sx={{ ...distanceSx, transform: `translate(${measured.x}px, ${measured.y}px)` }}>
+        <Box
+          sx={{
+            ...distanceSx,
+            // `measured.x` is the token centre. Offset by half the badge's own
+            // width, not by a fixed rem value: "5 ft" and "120 ft" must both
+            // remain centred over the piece.
+            transform: `translate(${measured.x}px, ${measured.y}px) translateX(-50%)`,
+          }}
+        >
           {measured.label}
         </Box>
       ) : null}
@@ -989,7 +1020,6 @@ const distanceSx = {
   position: 'absolute',
   left: 0,
   top: 0,
-  marginLeft: '-1.5rem',
   px: 0.75,
   borderRadius: 1,
   bgcolor: 'rgba(15,14,13,0.9)',

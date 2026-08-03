@@ -438,8 +438,8 @@ export function LaserPanel({ paintMode, onPaintModeChange }) {
         {active ? 'Put the pointer down' : 'Take the pointer'}
       </Button>
       <Typography variant="caption" color="text.secondary">
-        Hold the left button and the whole table sees the dot follow your cursor.
-        It is never saved, and it fades on its own if you disconnect.
+        Once selected, the whole table sees the dot follow your cursor. Choose
+        Cursor or another tool to put it away. It is never saved.
       </Typography>
     </Stack>
   );
