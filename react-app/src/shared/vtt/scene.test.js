@@ -51,12 +51,17 @@ test('rows become editor shapes with usable numbers', () => {
   assert.equal(scene.updatedAt, Date.parse('2026-08-02T10:00:00.000Z'));
   assert.equal(toScene(null), null);
 
-  const token = toToken({ id: 't1', scene_id: 's1', layer: 'bogus', x: '3.5', w: 999, color: '#AABBCC' });
+  const token = toToken({
+    id: 't1', scene_id: 's1', layer: 'bogus', x: '3.5', w: 999, color: '#AABBCC', icon_key: 'door-open', icon_stroke_width: 3.2, rotation: -45,
+  });
   assert.equal(token.layer, 'tokens');
   assert.equal(token.x, 3.5);
   assert.equal(token.w, 40, 'span is clamped');
   assert.equal(token.color, '#aabbcc');
   assert.equal(token.label, '');
+  assert.equal(token.iconKey, 'door-open');
+  assert.equal(token.iconStrokeWidth, 3.2);
+  assert.equal(token.rotation, 315);
 });
 
 // The patch allowlist is the guard that keeps the client from sending columns
@@ -84,6 +89,14 @@ test('a token patch drops everything outside the allowlist', () => {
 test('an empty patch stays empty so no pointless update is sent', () => {
   assert.deepEqual(toTokenPatch({}), {});
   assert.deepEqual(toTokenPatch(null), {});
+});
+
+test('map object patches store only safe Lucide-style keys and normalized rotation', () => {
+  assert.deepEqual(toTokenPatch({ icon_key: 'door-open' }), { icon_key: 'door-open' });
+  assert.deepEqual(toTokenPatch({ icon_stroke_width: 9 }), { icon_stroke_width: 4 });
+  assert.deepEqual(toTokenPatch({ icon_stroke_width: 0 }), { icon_stroke_width: 0.5 });
+  assert.deepEqual(toTokenPatch({ icon_key: '<svg onload=alert(1)>' }), { icon_key: null });
+  assert.deepEqual(toTokenPatch({ rotation: 450 }), { rotation: 90 });
 });
 
 // Mirrors the RLS update policy in supabase/vtt.sql. If one changes, this test

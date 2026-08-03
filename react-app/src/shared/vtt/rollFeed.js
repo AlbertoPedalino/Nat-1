@@ -39,8 +39,8 @@ export function normalizeRoll(entry) {
     // Carried so the bubble can lay the roll out exactly as the sheet's toast
     // did — dice, then the flat modifier, then the total.
     bonus: Number.isFinite(entry.meta?.bonus) ? entry.meta.bonus : null,
-    // Thrown on the map, rather than rolled on a sheet somewhere and reported
-    // here. Only a thrown roll has dice to put on the table.
+    // Requests physical playback on an open map. Both the map roller and a
+    // synced sheet roll set it; notices without dice never do.
     thrown: Boolean(entry.thrown),
     at: Number(entry.timestamp) || Date.now(),
   };
@@ -48,11 +48,27 @@ export function normalizeRoll(entry) {
 
 // Newest first, capped. The cap is what keeps a long session from growing the
 // list without bound while nobody is looking at it.
-export function addRoll(feed, entry) {
+export function addRoll(feed, entry, { local = false } = {}) {
   const roll = normalizeRoll(entry);
   if (!roll) return feed || [];
   if ((feed || []).some((item) => item.id === roll.id)) return feed;
-  return [roll, ...(feed || [])].slice(0, MAX_FEED);
+  // Local is render-only metadata. It is deliberately supplied by the
+  // receiving screen rather than accepted from the broadcast payload, so the
+  // screen that made the roll can hide only its own speech bubble while still
+  // keeping the roll in its log and physical-dice queue.
+  return [{ ...roll, localOrigin: Boolean(local) }, ...(feed || [])].slice(0, MAX_FEED);
+}
+
+// One result surface for every local roll. Physical dice defer their toast
+// until DiceTray reports the final painted frame; notices have nothing to wait
+// for and are returned for immediate display.
+export function queueRollToast(entry, pending) {
+  if (!entry) return null;
+  if (entry.id && entry.thrown && entry.rolls?.length) {
+    pending?.set(entry.id, entry);
+    return null;
+  }
+  return entry;
 }
 
 // Who a roll made from the map itself belongs to.
@@ -92,13 +108,17 @@ function latestPerRoller(feed, now, ttl, keyOf) {
 
 // A bubble belongs over a piece, so a roll with no character has nowhere to go.
 export function currentBubbles(feed, now = Date.now(), ttl = ROLL_TTL_MS) {
-  return latestPerRoller(feed, now, ttl, (roll) => roll.characterId || null);
+  return latestPerRoller(
+    feed,
+    now,
+    ttl,
+    (roll) => (!roll.localOrigin && roll.characterId ? roll.characterId : null),
+  );
 }
 
-// Dice land on the table only when they were thrown onto it. A roll made on a
-// character sheet has already happened somewhere else — it belongs in the log
-// and in a bubble over its piece, but there is nothing left to throw, and dice
-// that appear already at rest look like a bug rather than a roll.
+// Dice land on the table when the producer requested physical playback. A
+// character sheet publishes its chosen faces and the tray replays the movement
+// while keeping those values on the faces that naturally land.
 //
 // Whoever threw them, including the GM, who has no piece for a bubble.
 export function currentThrows(feed, now = Date.now(), ttl = ROLL_TTL_MS) {

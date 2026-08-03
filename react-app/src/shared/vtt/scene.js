@@ -5,6 +5,7 @@
 import { normalizeEffects } from '../character/combatEffects.js';
 import { normalizeConditions } from '../character/conditions.js';
 import { normalizeFog } from './fog.js';
+import { normalizeMapObjectKey, normalizeMapObjectStroke } from './mapObjects.js';
 
 export const LAYERS = Object.freeze(['map', 'tokens', 'gm']);
 export const DEFAULT_GRID = Object.freeze({ size: 70, offsetX: 0, offsetY: 0, visible: true });
@@ -20,7 +21,7 @@ const HEX_COLOR_RE = /^#[0-9a-f]{6}$/i;
 // violation into a confusing runtime error.
 export const TOKEN_PATCH_KEYS = Object.freeze([
   'x', 'y', 'w', 'h', 'z', 'label', 'color', 'image_path', 'image_url', 'conditions',
-  'hp_current', 'hp_max', 'source_ref', 'show_hp', 'effects',
+  'hp_current', 'hp_max', 'source_ref', 'show_hp', 'effects', 'icon_key', 'icon_stroke_width', 'rotation',
 ]);
 
 function numberOr(value, fallback) {
@@ -124,6 +125,10 @@ export function toToken(row) {
     color: normalizeColor(row.color),
     imagePath: row.image_path || null,
     imageUrl: row.image_url || null,
+    // A Lucide catalog key, never an SVG or image payload.
+    iconKey: normalizeMapObjectKey(row.icon_key),
+    iconStrokeWidth: normalizeMapObjectStroke(row.icon_stroke_width),
+    rotation: ((numberOr(row.rotation, 0) % 360) + 360) % 360,
     // "<instance>:<fight>:<combatant>" for an imported piece, so the GM's own
     // browser can match it back to the encounter it came from.
     sourceRef: row.source_ref || null,
@@ -156,6 +161,9 @@ export function toTokenPatch(patch) {
     else if (key === 'label') row.label = String(source.label ?? '').slice(0, 60);
     else if (key === 'image_path') row.image_path = source.image_path || null;
     else if (key === 'image_url') row.image_url = source.image_url || null;
+    else if (key === 'icon_key') row.icon_key = normalizeMapObjectKey(source.icon_key);
+    else if (key === 'icon_stroke_width') row.icon_stroke_width = normalizeMapObjectStroke(source.icon_stroke_width);
+    else if (key === 'rotation') row.rotation = ((numberOr(source.rotation, 0) % 360) + 360) % 360;
     else if (key === 'source_ref') row.source_ref = source.source_ref || null;
     else if (key === 'show_hp') row.show_hp = Boolean(source.show_hp);
     else if (key === 'hp_current' || key === 'hp_max') {

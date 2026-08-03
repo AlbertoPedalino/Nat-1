@@ -46,6 +46,14 @@ export default defineConfig({
           const pkg = scope.startsWith('@') ? `${scope}/${scoped}` : scope;
           if (pkg.startsWith('@mui/') || pkg.startsWith('@emotion/')) return 'mui';
           if (REACT_PACKAGES.has(pkg)) return 'react';
+          // DynamicIcon exposes the complete Lucide catalog. Keeping every icon
+          // in `vendor` defeats those dynamic imports and adds about a megabyte
+          // to first load. Alphabet buckets keep the request count bounded
+          // while loading only the part of the catalog a visible page uses.
+          if (pkg === 'lucide-react') {
+            const icon = id.replace(/\\/g, '/').match(/\/dist\/esm\/icons\/([^/]+)\.mjs$/)?.[1];
+            if (icon) return `lucide-icons-${icon[0].toLowerCase()}`;
+          }
           return 'vendor';
         },
       },

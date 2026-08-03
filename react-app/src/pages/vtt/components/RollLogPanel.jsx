@@ -2,9 +2,15 @@ import { useState } from 'react';
 import { Box, Button, Stack, Typography } from '@mui/material';
 import { Dices, Trash2 } from 'lucide-react';
 import CustomRollDialog from '../../../shared/character/CustomRollDialog.jsx';
-import DiceRow from '../../../shared/character/DiceRow.jsx';
+import DieFace2D from '../../../shared/character/DieFace2D.jsx';
 import { resolveToastLayout } from '../../../shared/character/rollToastLayout.js';
 import { fullscreenContainer } from '../logic/fullscreenContainer.js';
+import {
+  battleMapDialogActionsSx,
+  battleMapDialogContentSx,
+  battleMapDialogPaperSx,
+  battleMapDialogTitleSx,
+} from './battleMapSurface.js';
 
 // Everything the table has rolled since this page was opened, newest first,
 // plus the same custom-dice picker the character sheets use — so the GM, who
@@ -50,7 +56,7 @@ export default function RollLogPanel({ feed, onCustomRoll, onClear }) {
           Nothing rolled yet. Rolls made on a character sheet in this campaign show up here.
         </Typography>
       ) : (
-        feed.map((roll, index) => <RollRow key={roll.id} roll={roll} solid={index < SOLID_ROWS} />)
+        feed.map((roll) => <RollRow key={roll.id} roll={roll} />)
       )}
 
       {feed?.length ? (
@@ -66,17 +72,16 @@ export default function RollLogPanel({ feed, onCustomRoll, onClear }) {
         // The map is often fullscreen, and a dialog on the body is not painted
         // at all when it is.
         container={fullscreenContainer}
+        slotProps={{ paper: { sx: battleMapDialogPaperSx } }}
+        titleSx={battleMapDialogTitleSx}
+        contentSx={battleMapDialogContentSx}
+        actionsSx={battleMapDialogActionsSx}
       />
     </Stack>
   );
 }
 
-// How many of the newest rolls draw their dice as full solids. A hundred-sided
-// die is a hundred separately composited planes, and a log holding forty of
-// them is what the page cannot afford — the rest keep the face they landed on.
-const SOLID_ROWS = 6;
-
-function RollRow({ roll, solid }) {
+function RollRow({ roll }) {
   const layout = resolveToastLayout({
     label: roll.label,
     detail: roll.detail,
@@ -98,10 +103,27 @@ function RollRow({ roll, solid }) {
           <Typography sx={{ ...totalSx, color: layout.totalColor }}>{layout.total}</Typography>
         )}
       </Stack>
-      {/* Only a row that has just arrived mounts its dice, so the throw plays
-          once here and old entries sit still. */}
-      <DiceRow dice={layout.dice} modifier={layout.modifier} size={36} seed={roll.id} solid={solid} />
+      <StaticDiceRow dice={layout.dice} modifier={layout.modifier} />
       {roll.detail ? <Typography sx={detailSx}>{roll.detail}</Typography> : null}
+    </Box>
+  );
+}
+
+function StaticDiceRow({ dice, modifier }) {
+  if (!dice?.length && !modifier) return null;
+  return (
+    <Box sx={diceRowSx}>
+      {(dice || []).map((die, index) => (
+        <DieFace2D
+          key={`${die.faces}:${index}`}
+          value={die.value}
+          faces={die.faces}
+          color={die.color}
+          dimmed={die.dimmed}
+          size={34}
+        />
+      ))}
+      {modifier ? <Typography sx={modifierSx}>{modifier}</Typography> : null}
     </Box>
   );
 }
@@ -132,3 +154,19 @@ const totalSx = {
 };
 
 const detailSx = { fontSize: '0.6rem', color: '#8a7a5a', lineHeight: 1.35 };
+
+const diceRowSx = {
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: 0.4,
+  my: 0.4,
+  alignItems: 'center',
+};
+
+const modifierSx = {
+  fontFamily: '"Cinzel", Georgia, serif',
+  fontSize: '0.8rem',
+  fontWeight: 700,
+  color: 'text.secondary',
+  ml: 0.3,
+};

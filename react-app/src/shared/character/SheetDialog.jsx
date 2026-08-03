@@ -79,16 +79,32 @@ export default function SheetDialog({
   maxWidth = 'xs',
   fullWidth = true,
   topPad = 3,
+  titleSx: titleSxOverride,
   contentSx: contentSxOverride,
+  actionsSx: actionsSxOverride,
+  slotProps,
   ...props
 }) {
   const right = showClose
     ? <>{headerRight}<IconButton size="small" onClick={onClose} sx={{ color: 'text.secondary' }}><X size={16} /></IconButton></>
     : headerRight;
   return (
-    <Dialog open={open} onClose={onClose} maxWidth={maxWidth} fullWidth={fullWidth} slotProps={{ paper: { sx: paperSx } }} {...props}>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth={maxWidth}
+      fullWidth={fullWidth}
+      slotProps={{
+        ...slotProps,
+        paper: {
+          ...slotProps?.paper,
+          sx: { ...paperSx, ...slotProps?.paper?.sx },
+        },
+      }}
+      {...props}
+    >
       {title != null ? (
-        <DialogTitle sx={titleSx}>
+        <DialogTitle sx={{ ...titleSx, ...titleSxOverride }}>
           <Stack direction="row" spacing={1} alignItems="center" sx={{ width: '100%' }}>
             {icon}
             <Typography component="span" sx={titleTextSx}>{title}</Typography>
@@ -97,7 +113,7 @@ export default function SheetDialog({
         </DialogTitle>
       ) : null}
       <DialogContent sx={{ ...contentSx, '&.MuiDialogContent-root': { pt: topPad }, ...contentSxOverride }}>{children}</DialogContent>
-      {actions != null ? <DialogActions sx={actionsSx}>{actions}</DialogActions> : null}
+      {actions != null ? <DialogActions sx={{ ...actionsSx, ...actionsSxOverride }}>{actions}</DialogActions> : null}
     </Dialog>
   );
 }

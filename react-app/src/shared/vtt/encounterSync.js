@@ -10,7 +10,11 @@
 // Everything here is pure: the callers own the storage reads and the writes.
 
 import { effectId, normalizeEffects } from '../character/combatEffects.js';
-import { normalizeConditions } from '../character/conditions.js';
+import {
+  DEAD_CONDITION_KEY,
+  normalizeConditions,
+  setConditionActive,
+} from '../character/conditions.js';
 
 const SEPARATOR = ':';
 
@@ -28,15 +32,29 @@ export function parseSourceRef(ref) {
   return { instanceId: parts[0], fightId: parts[1], combatantId: parts[2] };
 }
 
+function deathSavesOf(value) {
+  const raw = value?.deathSaves || value || {};
+  const clamp = (entry) => Math.max(0, Math.min(3, Math.round(Number(entry) || 0)));
+  return { success: clamp(raw.success ?? raw.s), fail: clamp(raw.fail ?? raw.f) };
+}
+
 function vitalsOf(combatant) {
+  const hpCurrent = Number.isFinite(Number(combatant?.hpCurrent)) ? Math.round(Number(combatant.hpCurrent)) : null;
+  const player = combatant?.type === 'player' || Boolean(combatant?.sourceId);
+  const deathSaves = player ? deathSavesOf(combatant) : null;
+  const dead = player
+    ? hpCurrent === 0 && (deathSaves.fail >= 3 || Boolean(combatant?.isDead)
+      || normalizeConditions(combatant?.activeConditions).includes(DEAD_CONDITION_KEY))
+    : hpCurrent === 0 || Boolean(combatant?.isDead);
   return {
-    hpCurrent: Number.isFinite(Number(combatant?.hpCurrent)) ? Math.round(Number(combatant.hpCurrent)) : null,
+    hpCurrent,
     hpMax: Number.isFinite(Number(combatant?.hpMax)) ? Math.round(Number(combatant.hpMax)) : null,
     // Conditions and effects travel too: marking a creature prone in one tool
     // and finding it upright in the other is exactly the kind of drift that
     // makes two views of a fight worse than one.
-    conditions: normalizeConditions(combatant?.activeConditions),
+    conditions: setConditionActive(combatant?.activeConditions, DEAD_CONDITION_KEY, dead),
     effects: normalizeEffects(combatant?.activeEffects),
+    ...(player ? { deathSaves: dead ? { ...deathSaves, fail: 3 } : deathSaves } : {}),
   };
 }
 
@@ -46,7 +64,8 @@ function sameState(vitals, token) {
   return vitals.hpCurrent === token.hpCurrent
     && vitals.hpMax === token.hpMax
     && conditionsKey(vitals.conditions) === conditionsKey(token.conditions)
-    && effectsKey(vitals.effects) === effectsKey(token.effects);
+    && effectsKey(vitals.effects) === effectsKey(token.effects)
+    && deathSavesKey(vitals.deathSaves) === deathSavesKey(token.deathSaves);
 }
 
 function conditionsKey(list) {
@@ -55,6 +74,12 @@ function conditionsKey(list) {
 
 function effectsKey(list) {
   return normalizeEffects(list).map((effect) => effectId(effect)).join('|');
+}
+
+function deathSavesKey(value) {
+  if (value == null) return '';
+  const saves = deathSavesOf(value);
+  return `${saves.success}|${saves.fail}`;
 }
 
 // Which combatant a piece stands for. Two ways in, because pieces arrive by two
@@ -88,9 +113,22 @@ export function tokenUpdatesFromFight(tokens, { instanceId, fightId, combatants 
     // builder already syncs directly. Writing them onto the piece too would put
     // a second copy in play.
     if (token.characterId) {
-      if (conditionsKey(vitals.conditions) === conditionsKey(token.conditions)
-        && effectsKey(vitals.effects) === effectsKey(token.effects)) continue;
-      updates.push({ id: token.id, conditions: vitals.conditions, effects: vitals.effects });
+      if (vitals.hpCurrent === token.hpCurrent
+        && conditionsKey(vitals.conditions) === conditionsKey(token.conditions)
+        && effectsKey(vitals.effects) === effectsKey(token.effects)
+        && deathSavesKey(vitals.deathSaves) === deathSavesKey(token.deathSaves)) continue;
+      updates.push({
+        id: token.id,
+        characterId: token.characterId,
+        characterVitals: {
+          currentHP: vitals.hpCurrent,
+          deathSaves: vitals.deathSaves,
+          activeConditions: vitals.conditions,
+        },
+        conditions: vitals.conditions,
+        effects: vitals.effects,
+        deathSaves: vitals.deathSaves,
+      });
       continue;
     }
     if (sameState(vitals, token)) continue;
@@ -114,18 +152,32 @@ export function fightWithTokenVitals(combatants, token) {
       : combatant?.sourceId === token.characterId;
     if (!mine) return combatant;
 
-    const conditions = normalizeConditions(token.conditions);
+    let conditions = normalizeConditions(token.conditions);
     const effects = normalizeEffects(token.effects);
     // Hit points are optional here: a piece can be marked prone without anyone
     // touching its health, and refusing the whole write in that case is what
     // would leave the two tools disagreeing.
-    const hpCurrent = token.hpCurrent == null ? combatant.hpCurrent : Math.round(Number(token.hpCurrent));
+    let hpCurrent = token.hpCurrent == null ? combatant.hpCurrent : Math.round(Number(token.hpCurrent));
     const hpMax = token.hpMax == null ? combatant.hpMax : Math.round(Number(token.hpMax));
+    const player = combatant.type === 'player' || Boolean(combatant.sourceId);
+    let deathSaves = player ? deathSavesOf(token.deathSaves ?? combatant.deathSaves) : combatant.deathSaves;
+    const explicitlyDead = conditions.includes(DEAD_CONDITION_KEY);
+    if (explicitlyDead) {
+      hpCurrent = 0;
+      if (player) deathSaves = { success: 0, fail: 3 };
+    }
+    if (hpCurrent > 0 && player) deathSaves = { success: 0, fail: 0 };
+    const isDead = player
+      ? hpCurrent === 0 && (explicitlyDead || deathSaves.fail >= 3)
+      : hpCurrent <= 0;
+    conditions = setConditionActive(conditions, DEAD_CONDITION_KEY, isDead);
 
     if (combatant.hpCurrent === hpCurrent
       && combatant.hpMax === hpMax
       && conditionsKey(combatant.activeConditions) === conditionsKey(conditions)
-      && effectsKey(combatant.activeEffects) === effectsKey(effects)) {
+      && effectsKey(combatant.activeEffects) === effectsKey(effects)
+      && deathSavesKey(player ? combatant.deathSaves : null) === deathSavesKey(player ? deathSaves : null)
+      && Boolean(combatant.isDead) === isDead) {
       return combatant;
     }
 
@@ -136,10 +188,11 @@ export function fightWithTokenVitals(combatants, token) {
       hpMax,
       activeConditions: conditions,
       activeEffects: effects,
+      ...(player ? { deathSaves: { s: deathSaves.success, f: deathSaves.fail } } : {}),
       // isDead is the encounter builder's own flag and has to keep agreeing
       // with the hit points, or a creature killed on the map comes back alive
       // there.
-      isDead: Number.isFinite(hpCurrent) ? hpCurrent <= 0 : Boolean(combatant.isDead),
+      isDead,
     };
   });
 

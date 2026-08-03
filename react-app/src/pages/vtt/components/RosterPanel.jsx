@@ -1,6 +1,8 @@
-import { Box, Button, Paper, Stack, Typography } from '@mui/material';
+import { Box, Button, Stack, Typography } from '@mui/material';
 import { Plus, Skull, Swords } from 'lucide-react';
 import { placedCharacterIds } from '../../../shared/campaign/roster.js';
+import { usePortraits } from '../../../shared/character/usePortraits.js';
+import PiecePreview, { beginPieceDrag } from './PiecePreview.jsx';
 
 const LAYER_NAMES = { map: 'map', tokens: 'token', gm: 'GM' };
 
@@ -16,11 +18,14 @@ export default function RosterPanel({
   onAddToken,
   onImportEncounter,
   onPlaceMonster,
+  onPlacementDragStart,
+  onPlacementDragEnd,
 }) {
   const placed = placedCharacterIds(tokens);
+  const portraits = usePortraits((roster || []).map((entry) => entry.portraitPath));
 
   return (
-    <Paper sx={{ p: 0, bgcolor: 'transparent', boxShadow: 'none' }}>
+    <Box sx={panelInnerSx}>
       <Stack spacing={1.25}>
         {!roster.length ? (
           <Typography variant="body2" color="text.secondary">
@@ -41,11 +46,33 @@ export default function RosterPanel({
                 draggable={!isPlaced && !busy}
                 onDragStart={(event) => {
                   event.dataTransfer.setData('application/x-gb-character', entry.characterId);
-                  event.dataTransfer.effectAllowed = 'copy';
+                  beginPieceDrag(event);
+                  onPlacementDragStart?.({
+                    kind: 'character',
+                    characterId: entry.characterId,
+                    token: {
+                      characterId: entry.characterId,
+                      label: entry.name,
+                      color: entry.color,
+                      className: entry.className,
+                      deathSaves: entry.deathSaves,
+                      imageUrl: portraits[entry.portraitPath] || null,
+                      layer: 'tokens',
+                      w: 1,
+                      h: 1,
+                    },
+                  });
                 }}
+                onDragEnd={onPlacementDragEnd}
                 sx={{ ...rowSx, cursor: isPlaced ? 'default' : 'grab' }}
               >
-                <Box sx={{ ...dotSx, bgcolor: entry.color || 'secondary.main' }} />
+                <PiecePreview token={{
+                  characterId: entry.characterId,
+                  label: entry.name,
+                  color: entry.color,
+                  className: entry.className,
+                  imageUrl: portraits[entry.portraitPath] || null,
+                }} />
                 <Typography sx={nameSx}>{entry.name}</Typography>
                 <Button
                   size="small"
@@ -97,7 +124,7 @@ export default function RosterPanel({
             : 'Right-click a piece for its label and conditions.'}
         </Typography>
       </Stack>
-    </Paper>
+    </Box>
   );
 }
 
@@ -108,13 +135,7 @@ const rowSx = {
   py: 0.25,
 };
 
-const dotSx = {
-  width: 14,
-  height: 14,
-  borderRadius: '50%',
-  border: '1px solid rgba(0,0,0,0.5)',
-  flexShrink: 0,
-};
+const panelInnerSx = { p: 0, bgcolor: 'transparent', backgroundImage: 'none' };
 
 const nameSx = {
   flex: 1,

@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Box, Chip, CircularProgress, Stack, Typography } from '@mui/material';
-import { Cloud, Dices, Eye, Pencil, Pointer, Radio, Ruler, Shield, Users } from 'lucide-react';
+import {
+  Cloud, Dices, Eye, Pencil, Pointer, Radio, Ruler, Shapes, Shield, Users,
+} from 'lucide-react';
 import { useToast } from '../../../shared/ToastProvider.jsx';
 import { useAuth } from '../../../shared/cloud/AuthProvider.jsx';
 import { mergeVitals, readCampaignVitals } from '../../../shared/campaign/characterVitals.js';
@@ -8,6 +10,7 @@ import { toRoster, toRosterEntry, withSheetVitals } from '../../../shared/campai
 import { usePortraits } from '../../../shared/character/usePortraits.js';
 import { listCampaignCharacters } from '../../../shared/cloud/campaigns.js';
 import { patchCharacterData } from '../../../shared/cloud/cloudCharacters.js';
+import { DEAD_CONDITION_KEY, setConditionActive } from '../../../shared/character/conditions.js';
 import {
   clearLiveScene,
   createDrawing,
@@ -58,7 +61,13 @@ import {
   setCells,
 } from '../../../shared/vtt/fog.js';
 import { canMarkToken, normalizePlayArea, toScene } from '../../../shared/vtt/scene.js';
-import { addRoll, currentBubbles, currentThrows, rollAuthor } from '../../../shared/vtt/rollFeed.js';
+import {
+  addRoll,
+  currentBubbles,
+  currentThrows,
+  queueRollToast,
+  rollAuthor,
+} from '../../../shared/vtt/rollFeed.js';
 import { formatRollTitle } from '../../../shared/character/dice.js';
 import { throwFormula } from '../../../shared/vtt/throwRoll.js';
 import { useRollChannel } from '../../../shared/cloud/useRollChannel.js';
@@ -66,6 +75,13 @@ import { sanitizeNoteText } from '../../../shared/vtt/drawing.js';
 import { FEET_PER_CELL } from '../../../shared/vtt/measure.js';
 import { useSceneLive } from '../../../shared/vtt/useSceneLive.js';
 import { useSceneRole } from '../../../shared/vtt/useSceneRole.js';
+import { sheetChoicesForRole } from '../../../shared/vtt/sheetView.js';
+import {
+  DEFAULT_SHEET_SPLIT,
+  readSheetSplit,
+  sheetGridColumns,
+  writeSheetSplit,
+} from '../../../shared/vtt/sheetLayout.js';
 import { useEncounterBridge } from '../hooks/useEncounterBridge.js';
 import { useConditionEntries } from '../../encounterbuilder/hooks/useConditionEntries.js';
 import EncounterImportDialog from './EncounterImportDialog.jsx';
@@ -74,8 +90,11 @@ import DiceToast from '../../../shared/character/DiceToast.jsx';
 import RollLogPanel from './RollLogPanel.jsx';
 import PlayerPanel from './PlayerPanel.jsx';
 import RosterPanel from './RosterPanel.jsx';
+import MapObjectsPanel from './MapObjectsPanel.jsx';
 import SceneToolRail from './SceneToolRail.jsx';
 import MapCorner from './MapCorner.jsx';
+import BattleMapViewSwitch from './BattleMapViewSwitch.jsx';
+import BattleMapSheetResizeHandle from './BattleMapSheetResizeHandle.jsx';
 import {
   DrawPanel,
   FogPanel,
@@ -85,6 +104,8 @@ import {
 } from './ScenePanels.jsx';
 import SceneViewport from './SceneViewport.jsx';
 import TokenMenu from './TokenMenu.jsx';
+
+const CampaignSheetView = lazy(() => import('../../campaignsheet/CampaignSheetView.jsx'));
 
 const GRID_SAVE_DELAY = 600;
 const GHOST_SWEEP_MS = 2000;
@@ -129,12 +150,18 @@ export default function SceneEditor({ scene, onSceneChange }) {
   const [menu, setMenu] = useState(null);
   const [importOpen, setImportOpen] = useState(false);
   const [monsterOpen, setMonsterOpen] = useState(false);
+  const [placementDrag, setPlacementDrag] = useState(null);
   const [imageSize, setImageSize] = useState(null);
   const [tokenImageUrls, setTokenImageUrls] = useState({});
   const [drawings, setDrawings] = useState([]);
   const [selectedDrawingId, setSelectedDrawingId] = useState(null);
   const [drawColor, setDrawColor] = useState('#e8c96a');
   const [drawWidth, setDrawWidth] = useState(3);
+  const [contentView, setContentView] = useState('map');
+  const [sheetCharacterId, setSheetCharacterId] = useState(null);
+  const [sheetSplit, setSheetSplit] = useState(DEFAULT_SHEET_SPLIT);
+  const contentLayoutRef = useRef(null);
+  const sheetSplitStorageKey = `gb:vtt:sheet-split:${user?.id || 'local'}`;
   const [lasers, setLasers] = useState({});
   // Rolls said at the table. In memory only: a roll is an event, not a record.
   const [rollFeed, setRollFeed] = useState([]);
@@ -158,11 +185,28 @@ export default function SceneEditor({ scene, onSceneChange }) {
   // Yours to clear, and only yours: the log was never anywhere but this page's
   // memory, so there is nothing to tell anybody else about.
   const clearRollFeed = useCallback(() => setRollFeed([]), []);
+  const handleSheetRoll = useCallback((roll) => {
+    const immediateToast = queueRollToast(roll, pendingRollToastsRef.current);
+    if (immediateToast) setRollToast(immediateToast);
+    // The sheet lives on this screen: retain its log/toast/physical throw, but
+    // do not repeat the same result as a speech bubble over the acting token.
+    setRollFeed((current) => addRoll(current, roll, { local: true }));
+  }, []);
   const [rollTick, setRollTick] = useState(0);
   const [measureShape, setMeasureShape] = useState('line');
   const [feetPerCell, setFeetPerCell] = useState(FEET_PER_CELL);
   const [remoteMeasure, setRemoteMeasure] = useState(null);
   const conditionEntries = useConditionEntries();
+
+  useEffect(() => {
+    const storage = typeof window === 'undefined' ? null : window.localStorage;
+    setSheetSplit(readSheetSplit(storage, sheetSplitStorageKey));
+  }, [sheetSplitStorageKey]);
+
+  const commitSheetSplit = useCallback((value) => {
+    const storage = typeof window === 'undefined' ? null : window.localStorage;
+    setSheetSplit(writeSheetSplit(storage, sheetSplitStorageKey, value));
+  }, [sheetSplitStorageKey]);
 
   // How many cells the map image covers at the current calibration. Everything
   // sized "to the map" — fog, play area — comes from here.
@@ -414,6 +458,26 @@ export default function SceneEditor({ scene, onSceneChange }) {
       // Released only after the write settles: until then a remote echo would
       // still be our own move coming back.
       draggingRef.current = null;
+    }
+  }, [notify]);
+
+  const handleObjectStyle = useCallback(async (token, patch) => {
+    const localPatch = {};
+    const rowPatch = {};
+    if (Object.hasOwn(patch, 'color')) {
+      localPatch.color = patch.color;
+      rowPatch.color = patch.color;
+    }
+    if (!Object.keys(rowPatch).length) return;
+
+    setTokens((current) => current.map((item) => (
+      item.id === token.id ? { ...item, ...localPatch } : item
+    )));
+    try {
+      await updateToken(token.id, rowPatch);
+    } catch (cause) {
+      setTokens((current) => current.map((item) => (item.id === token.id ? token : item)));
+      notify('error', cause?.message || 'Could not update that object.');
     }
   }, [notify]);
 
@@ -674,13 +738,20 @@ export default function SceneEditor({ scene, onSceneChange }) {
 
   const nextFreeCell = useCallback(() => {
     const taken = new Set(tokens.map((token) => `${Math.round(token.x)}:${Math.round(token.y)}`));
-    for (let row = 0; row < 20; row += 1) {
-      for (let col = 0; col < 20; col += 1) {
+    // A player's click-placement must land inside the play area they are
+    // allowed to receive. Putting it at absolute 0,0 could create a row which
+    // RLS immediately hides from the player who just created it.
+    const startX = scene.playArea?.x || 0;
+    const startY = scene.playArea?.y || 0;
+    const cols = Math.min(20, scene.playArea?.w || 20);
+    const rows = Math.min(20, scene.playArea?.h || 20);
+    for (let row = startY; row < startY + rows; row += 1) {
+      for (let col = startX; col < startX + cols; col += 1) {
         if (!taken.has(`${col}:${row}`)) return { x: col, y: row };
       }
     }
-    return { x: 0, y: 0 };
-  }, [tokens]);
+    return { x: startX, y: startY };
+  }, [scene.playArea, tokens]);
 
   // An extra picture is a piece, not a third slot: it can be moved, resized and
   // removed like everything else. It lands on the layer being edited — scenery
@@ -714,6 +785,8 @@ export default function SceneEditor({ scene, onSceneChange }) {
     characterId: entry.characterId,
     label: entry.name,
     color: entry.color,
+    className: entry.className,
+    deathSaves: entry.deathSaves,
   }), []);
 
   const handlePlaceCharacter = useCallback(
@@ -730,10 +803,14 @@ export default function SceneEditor({ scene, onSceneChange }) {
 
   // Same placement path as an encounter import, minus the fight: a creature
   // dropped on the map has nothing to stay in step with.
-  const handlePlaceMonster = useCallback(async (monster, count, { layer }) => {
+  const handlePlaceMonster = useCallback(async (monster, count, { layer, position } = {}) => {
     setBusy(true);
     try {
-      const laid = layoutTokens(monsterGroupTokens(monster, count, { layer }), tokens);
+      const laid = layoutTokens(
+        monsterGroupTokens(monster, count, { layer }),
+        tokens,
+        position ? { origin: position } : undefined,
+      );
       for (const token of laid) {
         // eslint-disable-next-line no-await-in-loop
         const created = await createToken(scene.id, token);
@@ -763,13 +840,31 @@ export default function SceneEditor({ scene, onSceneChange }) {
     label: 'Marker',
   }), [addToken, nextFreeCell]);
 
-  const handleImportEncounter = useCallback(async (combatants, { layer, instanceId, fightId }) => {
+  const handlePlaceObject = useCallback((object, position) => {
+    if (!object?.key) return;
+    addToken({
+      ...(position || nextFreeCell()),
+      layer: object.layer || (role.isGm ? activeLayer : 'tokens'),
+      label: object.label,
+      color: object.color || '#e8c96a',
+      iconKey: object.key,
+      iconStrokeWidth: object.strokeWidth,
+      rotation: 0,
+      w: 1,
+      h: 1,
+    });
+  }, [activeLayer, addToken, nextFreeCell, role.isGm]);
+
+  const handleImportEncounter = useCallback(async (
+    combatants, { layer, instanceId, fightId, position } = {},
+  ) => {
     setBusy(true);
     setImportOpen(false);
     try {
       const laid = layoutTokens(
         combatants.map((combatant) => combatantToToken(combatant, { layer, instanceId, fightId })),
         tokens,
+        position ? { origin: position } : undefined,
       );
       // Sequential rather than parallel: a burst of inserts on one scene is the
       // easiest way to hit a rate limit, and the order they land in is the order
@@ -788,6 +883,28 @@ export default function SceneEditor({ scene, onSceneChange }) {
     }
   }, [notify, scene.id, tokens]);
 
+  const handleDropPlacement = useCallback((placement, position) => {
+    if (!placement) return;
+    setPlacementDrag(null);
+    if (placement.kind === 'character') {
+      handleDropCharacter(placement.characterId, position);
+    } else if (placement.kind === 'monster') {
+      handlePlaceMonster(placement.monster, placement.count, {
+        layer: placement.layer,
+        position,
+      });
+    } else if (placement.kind === 'encounter') {
+      handleImportEncounter(placement.combatants, {
+        layer: placement.layer,
+        instanceId: placement.instanceId,
+        fightId: placement.fightId,
+        position,
+      });
+    } else if (placement.kind === 'object') {
+      handlePlaceObject(placement.object, position);
+    }
+  }, [handleDropCharacter, handleImportEncounter, handlePlaceMonster, handlePlaceObject]);
+
   // Label and conditions in one write. A GM-only label goes to its own table:
   // keeping it on the token row would deliver it to the players.
   // A player's only write on a piece that is not theirs. It goes through the
@@ -800,14 +917,26 @@ export default function SceneEditor({ scene, onSceneChange }) {
       return update
         ? {
           ...token,
-          hpCurrent: update.hpCurrent,
-          hpMax: update.hpMax,
-          conditions: update.conditions,
-          effects: update.effects,
+          ...(Object.hasOwn(update, 'hpCurrent') ? { hpCurrent: update.hpCurrent } : {}),
+          ...(Object.hasOwn(update, 'hpMax') ? { hpMax: update.hpMax } : {}),
+          ...(Object.hasOwn(update, 'conditions') ? { conditions: update.conditions } : {}),
+          ...(Object.hasOwn(update, 'effects') ? { effects: update.effects } : {}),
+          ...(Object.hasOwn(update, 'deathSaves') ? { deathSaves: update.deathSaves } : {}),
         }
         : token;
     }));
     for (const update of updates) {
+      if (update.characterId) {
+        const characterVitals = update.characterVitals || {};
+        patchCharacterData(update.characterId, {
+          currentHP: characterVitals.currentHP,
+          activeConditions: characterVitals.activeConditions,
+          deathSaves: characterVitals.deathSaves,
+        }).catch(() => {
+          // The encounter remains authoritative and its next save retries.
+        });
+        continue;
+      }
       updateToken(update.id, {
         hp_current: update.hpCurrent,
         hp_max: update.hpMax,
@@ -837,21 +966,38 @@ export default function SceneEditor({ scene, onSceneChange }) {
     await setTokenConditions(token.id, conditions);
   }, []);
 
-  const handleMarkToken = useCallback(async (token, { conditions, showHp, effects }) => {
+  const handleMarkToken = useCallback(async (token, {
+    conditions, showHp, effects, hpCurrent, deathSaves,
+  }) => {
     // On a piece of their own, a player may also decide whether it wears a hit
     // point bar — that is an ordinary update the row policy already allows.
     const owned = canMove(token);
     setTokens((current) => current.map((item) => (
-      item.id === token.id ? { ...item, conditions, effects, ...(owned ? { showHp } : {}) } : item
+      item.id === token.id
+        ? {
+          ...item,
+          conditions,
+          effects,
+          ...(owned ? { showHp, hpCurrent, deathSaves } : {}),
+        }
+        : item
     )));
     try {
-      await writeConditions(token, conditions);
+      if (token.characterId && owned) {
+        await patchCharacterData(token.characterId, {
+          activeConditions: conditions,
+          currentHP: hpCurrent,
+          deathSaves,
+        });
+      } else {
+        await writeConditions(token, conditions);
+      }
       // Both marks go through their own function, which writes one column and
       // checks the table rather than the row: calling out that the ogre has
       // advantage is not the same as being handed the ogre.
       await setTokenEffects(token.id, effects);
       if (owned) await updateToken(token.id, { show_hp: showHp });
-      pushToEncounter({ ...token, conditions, effects });
+      pushToEncounter({ ...token, conditions, effects, hpCurrent, deathSaves });
     } catch (cause) {
       setTokens((current) => current.map((item) => (item.id === token.id ? token : item)));
       notify('error', cause?.message || 'Could not mark that token.');
@@ -859,7 +1005,7 @@ export default function SceneEditor({ scene, onSceneChange }) {
   }, [canMove, notify, pushToEncounter, writeConditions]);
 
   const handleSaveToken = useCallback(async (token, {
-    label, gmOnly, conditions, hpCurrent, hpMax, showHp, effects,
+    label, gmOnly, conditions, hpCurrent, hpMax, showHp, effects, deathSaves,
   }) => {
     const publicLabel = gmOnly ? '' : label;
     const secret = gmOnly ? label : '';
@@ -876,14 +1022,24 @@ export default function SceneEditor({ scene, onSceneChange }) {
           conditions,
           effects,
           showHp,
-          ...(token.characterId ? {} : { hpCurrent, hpMax }),
+          hpCurrent,
+          deathSaves,
+          ...(token.characterId ? {} : { hpMax }),
         }
         : item
     )));
     try {
       // Conditions take the route that suits the piece: a character's go to the
       // sheet, a monster's to its own row.
-      await writeConditions(token, conditions);
+      if (token.characterId) {
+        await patchCharacterData(token.characterId, {
+          activeConditions: conditions,
+          currentHP: hpCurrent,
+          deathSaves,
+        });
+      } else {
+        await writeConditions(token, conditions);
+      }
       await updateToken(token.id, {
         label: publicLabel, effects, show_hp: showHp, ...vitals,
       });
@@ -891,12 +1047,38 @@ export default function SceneEditor({ scene, onSceneChange }) {
       // Back to the encounter builder, if its tab is around to hear it. A
       // character's piece is matched to its combatant by the sheet it stands
       // for, so this is not limited to imported monsters.
-      pushToEncounter({ ...token, hpCurrent, hpMax, conditions, effects });
+      pushToEncounter({ ...token, hpCurrent, hpMax, conditions, effects, deathSaves });
     } catch (cause) {
       setTokens((current) => current.map((item) => (item.id === token.id ? token : item)));
       notify('error', cause?.message || 'Could not update that token.');
     }
   }, [notify]);
+
+  const handleDeathSaveChange = useCallback((token, type, value) => {
+    if (!token?.characterId || !['success', 'fail'].includes(type)) return;
+    const deathSaves = {
+      success: Math.max(0, Math.min(3, Number(token.deathSaves?.success) || 0)),
+      fail: Math.max(0, Math.min(3, Number(token.deathSaves?.fail) || 0)),
+      [type]: Math.max(0, Math.min(3, Number(value) || 0)),
+    };
+    const conditions = setConditionActive(
+      token.conditions || [],
+      DEAD_CONDITION_KEY,
+      deathSaves.fail >= 3,
+    );
+    const patch = {
+      label: token.secretLabel || token.label || '',
+      gmOnly: Boolean(token.secretLabel),
+      conditions,
+      hpCurrent: 0,
+      hpMax: token.hpMax,
+      showHp: token.showHp,
+      effects: token.effects || [],
+      deathSaves,
+    };
+    if (role.isGm) handleSaveToken(token, patch);
+    else handleMarkToken(token, patch);
+  }, [handleMarkToken, handleSaveToken, role.isGm]);
 
   const handleDeleteToken = useCallback(async (token) => {
     setBusy(true);
@@ -970,8 +1152,8 @@ export default function SceneEditor({ scene, onSceneChange }) {
         roster,
       }),
     };
-    pendingRollToastsRef.current.set(entry.id, entry);
-    setRollFeed((current) => addRoll(current, entry));
+    queueRollToast(entry, pendingRollToastsRef.current);
+    setRollFeed((current) => addRoll(current, entry, { local: true }));
     publishRoll(entry);
   }, [publishRoll, role.isGm, role.ownedCharacterIds, roster, tokens]);
 
@@ -1044,6 +1226,27 @@ export default function SceneEditor({ scene, onSceneChange }) {
       ),
     };
 
+    const objectsGroup = {
+      id: 'objects',
+      label: 'Objects',
+      icon: Shapes,
+      content: (
+        <MapObjectsPanel
+          busy={busy}
+          layer={role.isGm ? activeLayer : 'tokens'}
+          onPlace={(object) => {
+            setPaintMode('select');
+            handlePlaceObject(object);
+          }}
+          onPlacementDragStart={(placement) => {
+            setPaintMode('select');
+            setPlacementDrag(placement);
+          }}
+          onPlacementDragEnd={() => setPlacementDrag(null)}
+        />
+      ),
+    };
+
     if (!role.isGm) {
       return [
         {
@@ -1058,9 +1261,12 @@ export default function SceneEditor({ scene, onSceneChange }) {
               busy={busy}
               onPlaceCharacter={handlePlaceCharacter}
               onAddMarker={handleAddMarker}
+              onPlacementDragStart={setPlacementDrag}
+              onPlacementDragEnd={() => setPlacementDrag(null)}
             />
           ),
         },
+        objectsGroup,
         drawGroup,
         rollsGroup,
         {
@@ -1106,9 +1312,12 @@ export default function SceneEditor({ scene, onSceneChange }) {
             onAddToken={handleAddToken}
             onImportEncounter={() => setImportOpen(true)}
             onPlaceMonster={() => setMonsterOpen(true)}
+            onPlacementDragStart={setPlacementDrag}
+            onPlacementDragEnd={() => setPlacementDrag(null)}
           />
         ),
       },
+      objectsGroup,
       drawGroup,
       rollsGroup,
       {
@@ -1158,16 +1367,11 @@ export default function SceneEditor({ scene, onSceneChange }) {
   }, [
     activeLayer, brushSize, busy, drawColor, drawWidth, erasable.length, handleAddMarker,
     handleAddToken, handleEnableFog, handleFitPlayArea, handleFogAll, handleGridChange,
-    handlePlaceCharacter, handlePlayAreaChange, handleUndoDrawing, handleUploadMap,
+    handlePlaceCharacter, handlePlaceObject, handlePlayAreaChange, handleUndoDrawing, handleUploadMap,
     handleUploadBackground, handleShownImageChange, handleAddImage, paintMode,
     role.isGm, role.ownedCharacterIds, roster, scene, tokens, measureShape, feetPerCell,
     rollFeed, handleCustomRoll, clearRollFeed,
   ]);
-
-  const menuToken = useMemo(
-    () => tokens.find((token) => token.id === menu?.tokenId) || null,
-    [menu, tokens],
-  );
 
   // While editing one layer, strokes on the others fade back rather than
   // disappear: they are context, and losing them would make the map unreadable
@@ -1202,6 +1406,34 @@ export default function SceneEditor({ scene, onSceneChange }) {
     [ghosts, portraits, roster, tokenImageUrls, tokens],
   );
 
+  // The menu must edit the same character state the piece displays. The raw
+  // map row deliberately has no sheet-owned HP or death saves, so using it here
+  // made a dead character look like 0/0 and an innocent blur could write that
+  // stale value back to the sheet.
+  const menuToken = useMemo(
+    () => visibleTokens.find((token) => token.id === menu?.tokenId) || null,
+    [menu, visibleTokens],
+  );
+
+  const sheetChoices = useMemo(
+    () => sheetChoicesForRole(roster, {
+      isGm: role.isGm,
+      ownedCharacterIds: role.ownedCharacterIds,
+    }),
+    [role.isGm, role.ownedCharacterIds, roster],
+  );
+
+  useEffect(() => {
+    if (!sheetChoices.length) {
+      setSheetCharacterId(null);
+      setContentView('map');
+      return;
+    }
+    if (!sheetChoices.some((entry) => entry.characterId === sheetCharacterId)) {
+      setSheetCharacterId(sheetChoices[0].characterId);
+    }
+  }, [sheetCharacterId, sheetChoices]);
+
   if (loading || role.loading) return <CircularProgress size={24} />;
 
   return (
@@ -1230,9 +1462,22 @@ export default function SceneEditor({ scene, onSceneChange }) {
             onClick={handleToggleLive}
           />
         ) : null}
+        <BattleMapViewSwitch
+          view={contentView}
+          choices={sheetChoices}
+          selectedId={sheetCharacterId}
+          onViewChange={setContentView}
+          onSelectionChange={setSheetCharacterId}
+        />
       </Stack>
 
-      <SceneViewport
+      <Box
+        ref={contentLayoutRef}
+        style={contentView === 'sheet' ? { '--sheet-grid-columns': sheetGridColumns(sheetSplit) } : undefined}
+        sx={[contentLayoutSx, contentView === 'sheet' && contentLayoutOpenSx]}
+      >
+        <Box sx={viewportCellSx}>
+          <SceneViewport
         scene={scene}
         imageUrl={displayed.url}
         tokens={visibleTokens}
@@ -1267,10 +1512,16 @@ export default function SceneEditor({ scene, onSceneChange }) {
         onImageSize={setImageSize}
         onDragToken={handleDragToken}
         onMoveToken={handleMoveToken}
+        onResizeToken={handleMoveToken}
+        onRotateToken={handleMoveToken}
+        canSetDeathSaves={(token) => role.isGm || canMove(token)}
+        onDeathSaveChange={handleDeathSaveChange}
         onPaint={handlePaint}
         onPaintEnd={handlePaintEnd}
         onContextMenu={(token, at) => setMenu({ tokenId: token.id, at })}
         onDropCharacter={handleDropCharacter}
+        placementDrag={placementDrag}
+        onDropPlacement={handleDropPlacement}
         drawings={visibleDrawings}
         movableDrawing={movableDrawing}
         selectedDrawingId={selectedDrawingId}
@@ -1307,13 +1558,40 @@ export default function SceneEditor({ scene, onSceneChange }) {
         layerSwitch={role.isGm
           ? <LayerPanel compact activeLayer={activeLayer} onActiveLayerChange={setActiveLayer} />
           : null}
-      />
+          />
+        </Box>
+        {contentView === 'sheet' ? (
+          <>
+            <BattleMapSheetResizeHandle
+              containerRef={contentLayoutRef}
+              value={sheetSplit}
+              onCommit={commitSheetSplit}
+            />
+            <Box sx={sheetViewSx}>
+              <Suspense fallback={<Box sx={sheetLoadingSx}><CircularProgress size={26} /></Box>}>
+                {sheetCharacterId ? (
+                  <CampaignSheetView
+                    key={sheetCharacterId}
+                    sheetId={sheetCharacterId}
+                    editable
+                    embedded
+                    onRoll={handleSheetRoll}
+                    showOwnRollToast={false}
+                  />
+                ) : null}
+              </Suspense>
+            </Box>
+          </>
+        ) : null}
+      </Box>
 
       <MonsterPickerDialog
         open={monsterOpen}
         busy={busy}
         onClose={() => setMonsterOpen(false)}
         onPlace={handlePlaceMonster}
+        onPlacementDragStart={setPlacementDrag}
+        onPlacementDragEnd={() => setPlacementDrag(null)}
       />
 
       <EncounterImportDialog
@@ -1321,6 +1599,8 @@ export default function SceneEditor({ scene, onSceneChange }) {
         busy={busy}
         onClose={() => setImportOpen(false)}
         onImport={handleImportEncounter}
+        onPlacementDragStart={setPlacementDrag}
+        onPlacementDragEnd={() => setPlacementDrag(null)}
       />
 
       <TokenMenu
@@ -1339,9 +1619,12 @@ export default function SceneEditor({ scene, onSceneChange }) {
           isGm: role.isGm,
           ownedCharacterIds: role.ownedCharacterIds,
         })}
+        canSetDeathSaves={role.isGm || canMove(menuToken)}
+        canStyleObject={Boolean(menuToken?.iconKey) && (role.isGm || canMove(menuToken))}
         canRemove={role.isGm || canMove(menuToken)}
         onClose={() => setMenu(null)}
         onSave={role.isGm ? handleSaveToken : handleMarkToken}
+        onObjectStyle={handleObjectStyle}
         onDelete={handleDeleteToken}
       />
 
@@ -1353,6 +1636,49 @@ export default function SceneEditor({ scene, onSceneChange }) {
     </Stack>
   );
 }
+
+const contentLayoutSx = {
+  display: 'grid',
+  gridTemplateColumns: 'minmax(0, 1fr)',
+  gap: 1,
+  alignItems: 'start',
+};
+
+const contentLayoutOpenSx = {
+  gridTemplateColumns: {
+    xs: 'minmax(0, 1fr)',
+    lg: 'var(--sheet-grid-columns)',
+  },
+  columnGap: { xs: 1, lg: 0 },
+  rowGap: 1,
+};
+
+const viewportCellSx = {
+  minWidth: 0,
+};
+
+const sheetViewSx = {
+  minWidth: 0,
+  minHeight: { xs: 560, lg: '72vh' },
+  maxHeight: { lg: 'calc(100vh - 150px)' },
+  overflow: 'auto',
+  border: '1px solid rgba(232, 201, 106, 0.3)',
+  borderRadius: 1.5,
+  bgcolor: 'rgba(5, 5, 7, 0.88)',
+  backgroundImage: 'linear-gradient(145deg, rgba(255,255,255,0.025), transparent 42%)',
+  boxShadow: '0 18px 52px rgba(0, 0, 0, 0.46)',
+  '& > *': {
+    width: '100%',
+    maxWidth: 760,
+    mx: 'auto',
+  },
+};
+
+const sheetLoadingSx = {
+  minHeight: 420,
+  display: 'grid',
+  placeItems: 'center',
+};
 
 // Half-transparent version of a stroke colour, for the layers not being edited.
 function fade(color) {

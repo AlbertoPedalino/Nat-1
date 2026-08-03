@@ -103,6 +103,39 @@ test('a character piece is matched to its combatant by the sheet it stands for',
   assert.equal('hpCurrent' in updates[0], false);
 });
 
+test('player death saves and Dead travel from a fight to the character piece', () => {
+  const tokens = [{
+    id: 't1',
+    characterId: 'char-1',
+    hpCurrent: 0,
+    conditions: [],
+    effects: [],
+    deathSaves: { success: 1, fail: 2 },
+  }];
+  const updates = tokenUpdatesFromFight(tokens, {
+    instanceId: 'enc_1',
+    fightId: 'f1',
+    combatants: [{
+      id: 0,
+      type: 'player',
+      sourceId: 'char-1',
+      hpCurrent: 0,
+      hpMax: 22,
+      deathSaves: { s: 1, f: 3 },
+      activeConditions: [],
+      isDead: true,
+    }],
+  });
+
+  assert.deepEqual(updates[0].deathSaves, { success: 1, fail: 3 });
+  assert.deepEqual(updates[0].conditions, ['dead']);
+  assert.deepEqual(updates[0].characterVitals, {
+    currentHP: 0,
+    deathSaves: { success: 1, fail: 3 },
+    activeConditions: ['dead'],
+  });
+});
+
 test('a condition set on a character piece reaches its combatant', () => {
   const combatants = [{ id: 0, sourceId: 'char-1', hpCurrent: 9, hpMax: 22, isDead: false }];
   const next = fightWithTokenVitals(combatants, {
@@ -148,6 +181,37 @@ test('editing a piece writes back into the fight and keeps isDead honest', () =>
 
   const revived = fightWithTokenVitals(next, { sourceRef: 'enc_1:f1:0', hpCurrent: 4, hpMax: 7 });
   assert.equal(revived[0].isDead, false);
+});
+
+test('Dead set on the map kills creatures and completes a player death track', () => {
+  const creature = fightWithTokenVitals(
+    [{ id: 0, type: 'monster', hpCurrent: 7, hpMax: 7, activeConditions: [], isDead: false }],
+    { sourceRef: 'enc_1:f1:0', hpCurrent: 0, hpMax: 7, conditions: ['dead'] },
+  );
+  assert.equal(creature[0].hpCurrent, 0);
+  assert.equal(creature[0].isDead, true);
+  assert.deepEqual(creature[0].activeConditions, ['dead']);
+
+  const player = fightWithTokenVitals(
+    [{
+      id: 1,
+      type: 'player',
+      sourceId: 'char-1',
+      hpCurrent: 8,
+      hpMax: 20,
+      deathSaves: { s: 0, f: 0 },
+      activeConditions: [],
+      isDead: false,
+    }],
+    {
+      characterId: 'char-1',
+      hpCurrent: 0,
+      conditions: ['dead'],
+      deathSaves: { success: 0, fail: 3 },
+    },
+  );
+  assert.equal(player[0].isDead, true);
+  assert.deepEqual(player[0].deathSaves, { s: 0, f: 3 });
 });
 
 // Returning null lets the caller skip the write and the event it would emit,

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Box, IconButton, Stack, Typography } from '@mui/material';
 import { MousePointer2, X } from 'lucide-react';
+import { battleMapSurfaceSx } from './battleMapSurface.js';
 
 // A vertical rail of icons down the right edge of the map; clicking one opens
 // its settings in a panel immediately to the left.
@@ -76,14 +77,13 @@ export default function SceneToolRail({ groups, activeId = 'cursor', onCursor })
 }
 
 const railSx = {
+  ...battleMapSurfaceSx,
   position: 'absolute',
   top: 48,
   right: 8,
   zIndex: 6,
   p: 0.5,
   borderRadius: 1,
-  bgcolor: 'rgba(15,14,13,0.9)',
-  border: '1px solid rgba(232,201,106,0.25)',
   maxHeight: 'calc(100% - 96px)',
   overflowY: 'auto',
 };
@@ -121,6 +121,7 @@ const railLabelSx = {
 // Immediately to the left of the rail, and scrollable rather than tall: a panel
 // that runs past the bottom of the map would be unreachable in fullscreen.
 const panelSx = {
+  ...battleMapSurfaceSx,
   position: 'absolute',
   top: 48,
   right: 80,
@@ -130,8 +131,6 @@ const panelSx = {
   overflowY: 'auto',
   p: 1.25,
   borderRadius: 1,
-  bgcolor: 'rgba(15,14,13,0.97)',
-  border: '1px solid rgba(232,201,106,0.3)',
   boxShadow: 6,
   cursor: 'default',
 };

@@ -83,10 +83,16 @@ export default function SceneViewport({
   onImageSize,
   onDragToken,
   onMoveToken,
+  onResizeToken,
+  onRotateToken,
+  canSetDeathSaves,
+  onDeathSaveChange,
   onPaint,
   onPaintEnd,
   onContextMenu,
   onDropCharacter,
+  placementDrag,
+  onDropPlacement,
   drawings,
   movableDrawing,
   selectedDrawingId,
@@ -125,6 +131,8 @@ export default function SceneViewport({
   const longPressRef = useRef(null);
   const [view, setView] = useState(DEFAULT_VIEW);
   const [drag, setDrag] = useState(null);
+  const [resize, setResize] = useState(null);
+  const [rotate, setRotate] = useState(null);
   // The stroke in progress lives in a ref, not in state. Accumulating it in
   // state meant the commit ran inside a state updater — a side effect in a
   // function React may call more than once or defer, which is why the second
@@ -144,9 +152,14 @@ export default function SceneViewport({
   // only while a brush is in hand: a state update per mouse move is not worth
   // paying for while merely moving pieces around.
   const [hover, setHover] = useState(null);
+  const [placementHover, setPlacementHover] = useState(null);
   // The mark being dragged, as an offset in cells: applied at render so the
   // stroke follows the pointer without a write per frame.
   const [markDrag, setMarkDrag] = useState(null);
+
+  useEffect(() => {
+    if (!placementDrag) setPlacementHover(null);
+  }, [placementDrag]);
 
   // Fit once per picture: refitting on every render would fight the user's pan,
   // but switching between the battlemap and the background has to reframe — the
@@ -299,6 +312,8 @@ export default function SceneViewport({
     cancelLongPress();
     dragRef.current = null;
     setDrag(null);
+    setResize(null);
+    setRotate(null);
     strokeRef.current = [];
     setStrokeTick((tick) => tick + 1);
     pinchRef.current = readPinch();
@@ -433,6 +448,37 @@ export default function SceneViewport({
     event.currentTarget.setPointerCapture?.(event.pointerId);
   };
 
+  const beginTokenResize = (event, token) => {
+    event.stopPropagation();
+    if (!canMove(token)) return;
+    dragRef.current = {
+      kind: 'resize',
+      token,
+      from: screenToWorld(screenPoint(event), view),
+      width: Math.max(0.5, Number(token.w) || 1),
+      height: Math.max(0.5, Number(token.h) || 1),
+    };
+    setResize({ id: token.id, w: token.w || 1, h: token.h || 1 });
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+  };
+
+  const beginTokenRotate = (event, token) => {
+    event.stopPropagation();
+    if (!canMove(token)) return;
+    const rect = tokenWorldRect(token, scene.grid);
+    const centre = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
+    const pointer = screenToWorld(screenPoint(event), view);
+    dragRef.current = {
+      kind: 'rotate',
+      token,
+      centre,
+      fromAngle: Math.atan2(pointer.y - centre.y, pointer.x - centre.x),
+      rotation: Number(token.rotation) || 0,
+    };
+    setRotate({ id: token.id, rotation: Number(token.rotation) || 0 });
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+  };
+
   const handlePointerMove = (event) => {
     const held = longPressRef.current;
     if (held && Math.hypot(event.clientX - held.from.x, event.clientY - held.from.y) > LONG_PRESS_SLOP) {
@@ -508,6 +554,28 @@ export default function SceneViewport({
       return;
     }
 
+    if (state.kind === 'resize') {
+      const at = screenToWorld(point, view);
+      const cell = cellSize(scene.grid);
+      const next = {
+        w: Math.max(0.5, Math.round((state.width + (at.x - state.from.x) / cell) * 10) / 10),
+        h: Math.max(0.5, Math.round((state.height + (at.y - state.from.y) / cell) * 10) / 10),
+      };
+      state.next = next;
+      setResize({ id: state.token.id, ...next });
+      return;
+    }
+
+    if (state.kind === 'rotate') {
+      const at = screenToWorld(point, view);
+      const angle = Math.atan2(at.y - state.centre.y, at.x - state.centre.x);
+      const degrees = state.rotation + ((angle - state.fromAngle) * 180) / Math.PI;
+      const next = Math.round(((degrees % 360) + 360) % 360);
+      state.next = next;
+      setRotate({ id: state.token.id, rotation: next });
+      return;
+    }
+
     // Follow the pointer unsnapped so the piece does not stutter between cells;
     // the snap happens once, on drop.
     const next = dropPosition({
@@ -567,6 +635,22 @@ export default function SceneViewport({
       return;
     }
 
+
+    if (state?.kind === 'resize') {
+      const next = state.next || { w: state.width, h: state.height };
+      setResize(null);
+      if (next.w !== state.token.w || next.h !== state.token.h) onResizeToken?.(state.token, next);
+      return;
+    }
+
+
+    if (state?.kind === 'rotate') {
+      const next = state.next ?? state.rotation;
+      setRotate(null);
+      if (next !== state.token.rotation) onRotateToken?.(state.token, { rotation: next });
+      return;
+    }
+
     if (!state || state.kind !== 'token') return;
 
     const landing = dropPosition({
@@ -619,10 +703,43 @@ export default function SceneViewport({
         }
       }}
       onContextMenu={(event) => event.preventDefault()}
-      onDragOver={(event) => { if (onDropCharacter) event.preventDefault(); }}
-      onDrop={(event) => {
-        if (!onDropCharacter) return;
+      onDragOver={(event) => {
+        if (!placementDrag && !onDropCharacter) return;
         event.preventDefault();
+        event.dataTransfer.dropEffect = 'copy';
+        if (!placementDrag) return;
+        const world = screenToWorld(screenPoint(event), view);
+        const cell = worldToCell(world, scene.grid);
+        const w = Math.max(1, Number(placementDrag.token?.w) || 1);
+        const h = Math.max(1, Number(placementDrag.token?.h) || 1);
+        const next = {
+          x: cell.col - Math.floor(w / 2),
+          y: cell.row - Math.floor(h / 2),
+        };
+        setPlacementHover((current) => (
+          current?.x === next.x && current?.y === next.y ? current : next
+        ));
+      }}
+      onDragLeave={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setPlacementHover(null);
+      }}
+      onDrop={(event) => {
+        if (!onDropPlacement && !onDropCharacter) return;
+        event.preventDefault();
+        if (placementDrag && onDropPlacement) {
+          const world = screenToWorld(screenPoint(event), view);
+          const cell = worldToCell(world, scene.grid);
+          const w = Math.max(1, Number(placementDrag.token?.w) || 1);
+          const h = Math.max(1, Number(placementDrag.token?.h) || 1);
+          const position = placementHover || {
+            x: cell.col - Math.floor(w / 2),
+            y: cell.row - Math.floor(h / 2),
+          };
+          setPlacementHover(null);
+          onDropPlacement(placementDrag, position);
+          return;
+        }
+        if (!onDropCharacter) return;
         const characterId = event.dataTransfer.getData('application/x-gb-character');
         if (!characterId) return;
         // Drop where the pointer is, centred on the piece rather than hanging
@@ -721,7 +838,9 @@ export default function SceneViewport({
       <FogCanvas fog={backgroundOnly ? null : fog} grid={scene.grid} view={view} opacity={fogOpacity} />
 
       {(backgroundOnly ? [] : tokens).map((token) => {
-        const live = drag?.id === token.id ? { ...token, x: drag.x, y: drag.y } : token;
+        const moved = drag?.id === token.id ? { ...token, x: drag.x, y: drag.y } : token;
+        const sized = resize?.id === token.id ? { ...moved, w: resize.w, h: resize.h } : moved;
+        const live = rotate?.id === token.id ? { ...sized, rotation: rotate.rotation } : sized;
         const rect = tokenWorldRect(live, scene.grid);
         const at = worldToScreen(rect, view);
         // A piece on another layer is visible but inert: no cursor, no drag, no
@@ -749,8 +868,18 @@ export default function SceneViewport({
               staged={staged}
               interactive={onActiveLayer}
               movable={canMove(token)}
+              resizable={Boolean(token.iconKey) && canMove(token)}
+              rotatable={Boolean(token.iconKey) && canMove(token)}
+              canSetDeathSaves={Boolean(onActiveLayer && canSetDeathSaves?.(token))}
               conditionEntries={conditionEntries}
               onPointerDown={(event) => (onActiveLayer ? beginTokenDrag(event, token) : undefined)}
+              onResizePointerDown={(event) => (
+                onActiveLayer ? beginTokenResize(event, token) : undefined
+              )}
+              onRotatePointerDown={(event) => (
+                onActiveLayer ? beginTokenRotate(event, token) : undefined
+              )}
+              onDeathSaveChange={(type, value) => onDeathSaveChange?.(token, type, value)}
               onContextMenu={(event) => {
                 if (!onActiveLayer || !onContextMenu) return;
                 event.preventDefault();
@@ -761,6 +890,38 @@ export default function SceneViewport({
           </Box>
         );
       })}
+
+      {placementDrag && placementHover && !backgroundOnly ? (() => {
+        const token = { ...placementDrag.token, ...placementHover };
+        const rect = tokenWorldRect(token, scene.grid);
+        const at = worldToScreen(rect, view);
+        return (
+          <Box
+            data-placement-preview
+            sx={{
+              position: 'absolute',
+              left: 0,
+              top: 0,
+              width: rect.width * view.zoom,
+              height: rect.height * view.zoom,
+              transform: `translate(${at.x}px, ${at.y}px)`,
+              opacity: 0.88,
+              pointerEvents: 'none',
+              zIndex: 5,
+              filter: 'drop-shadow(0 5px 8px rgba(0,0,0,0.75))',
+            }}
+          >
+            <TokenSprite
+              token={token}
+              size="100%"
+              interactive={false}
+              movable={false}
+              conditionEntries={conditionEntries}
+            />
+            {placementDrag.count > 1 ? <Box sx={placementCountSx}>×{placementDrag.count}</Box> : null}
+          </Box>
+        );
+      })() : null}
 
       {controls ? (
         <>
@@ -901,7 +1062,7 @@ export default function SceneViewport({
 function measurementBadge(tokens, drag, grid, view, feetPerCell) {
   if (!drag) return null;
   const token = (tokens || []).find((item) => item.id === drag.id);
-  if (!token) return null;
+  if (!token || token.iconKey) return null;
   const landing = { x: Math.round(drag.x), y: Math.round(drag.y) };
   const label = movementLabel(token, landing, { feetPerCell });
   if (!label) return null;
@@ -1028,4 +1189,21 @@ const distanceSx = {
   fontSize: '0.65rem',
   whiteSpace: 'nowrap',
   pointerEvents: 'none',
+};
+
+const placementCountSx = {
+  position: 'absolute',
+  right: -8,
+  bottom: -8,
+  minWidth: 24,
+  height: 24,
+  px: 0.5,
+  borderRadius: 12,
+  bgcolor: '#e8c96a',
+  color: '#0f0e0d',
+  border: '1px solid #0f0e0d',
+  fontSize: '0.7rem',
+  fontWeight: 900,
+  lineHeight: '22px',
+  textAlign: 'center',
 };

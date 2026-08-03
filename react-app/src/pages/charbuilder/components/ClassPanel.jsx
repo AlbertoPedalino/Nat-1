@@ -1,31 +1,12 @@
 import { Box, Button, Chip, IconButton, List, ListItemButton, ListItemText, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
-import { Axe, BookOpen, ChevronDown, ChevronUp, Compass, Cross, Dumbbell, Eye, Feather, Flame, Hammer, Music, Plus, Shield, Sparkles, Sword, Trash2, Wand2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
 import BuilderPanel from './BuilderPanel.jsx';
 import { SearchField } from './SearchList.jsx';
 import { ExpandableCard } from '../../../shared/character/ExpandableCard.jsx';
 import { describeMulticlassProficiencies } from '../../../shared/character/multiclassProficiencies.js';
 import { getPrimaryClassLevel } from '../logic/calculations.js';
 import { checkMulticlassPrerequisite, getMulticlassProficienciesGained } from '../logic/multiclassRules.js';
-
-const CLASS_ICONS = {
-  Artificer: Hammer,
-  Barbarian: Axe,
-  Bard: Music,
-  Cleric: Cross,
-  Druid: Feather,
-  Fighter: Sword,
-  Monk: Dumbbell,
-  Paladin: Shield,
-  Ranger: Compass,
-  Rogue: Eye,
-  Sorcerer: Sparkles,
-  Warlock: Flame,
-  Wizard: BookOpen,
-};
-
-function classIcon(className) {
-  return CLASS_ICONS[className] || Wand2;
-}
+import { classIcon } from '../../../shared/character/classIcon.js';
 
 // Renders the multiclass proficiency summary (data shaped by
 // describeMulticlassProficiencies). Pure view: a "grants nothing" note when the

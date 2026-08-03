@@ -3,7 +3,9 @@ import { abilityMod, clampInt, getAC, getHP, numberOr } from './monsterUtils.js'
 import { resolveCombatVitals, combatVitalsMatch } from './sheetSync.js';
 import {
   normalizeConditions,
+  setConditionActive,
   toggleCondition as toggleConditionKey,
+  DEAD_CONDITION_KEY,
   EXHAUSTION_KEY,
 } from '../../../shared/character/conditions.js';
 import {
@@ -190,6 +192,13 @@ export function setInitiative(combat, id, value) {
 // vitals sync, so a GM's call lands on the player's own sheet.
 export function toggleCombatantCondition(combat, id, key) {
   if (key === EXHAUSTION_KEY) return combat; // graded, and its level is not ours to set
+  if (key === DEAD_CONDITION_KEY) {
+    return updateCombatant(combat, id, (combatant) => (
+      normalizeConditions(combatant.activeConditions).includes(DEAD_CONDITION_KEY)
+        ? reviveCombatant(combatant)
+        : killCombatant(combatant)
+    ));
+  }
   return updateCombatant(combat, id, (combatant) => ({
     ...combatant,
     activeConditions: normalizeConditions(toggleConditionKey(combatant.activeConditions, key)),
@@ -200,10 +209,14 @@ export function toggleCombatantCondition(combat, id, key) {
 // owns `exhaustionLevel`, so dropping the key here would leave a player's sheet
 // with a level and no condition to show for it.
 export function clearCombatantConditions(combat, id) {
-  return updateCombatant(combat, id, (combatant) => ({
-    ...combatant,
-    activeConditions: normalizeConditions(combatant.activeConditions).filter((c) => c === EXHAUSTION_KEY),
-  }));
+  return updateCombatant(combat, id, (combatant) => {
+    const active = normalizeConditions(combatant.activeConditions);
+    const alive = active.includes(DEAD_CONDITION_KEY) ? reviveCombatant(combatant) : combatant;
+    return {
+      ...alive,
+      activeConditions: active.filter((condition) => condition === EXHAUSTION_KEY),
+    };
+  });
 }
 
 // Ad-hoc effects ("disadvantage on its next attack"). Unlike conditions these
@@ -249,7 +262,14 @@ export function setDeathSave(combat, id, type, value) {
     if (!combatant.deathSaves) return combatant;
     const nextValue = combatant.deathSaves[type] === value ? value - 1 : value;
     const deathSaves = { ...combatant.deathSaves, [type]: clampInt(nextValue, 0, 3, 0) };
-    return { ...combatant, deathSaves, isDead: deathSaves.f >= 3 };
+    const isDead = deathSaves.f >= 3;
+    return {
+      ...combatant,
+      hpCurrent: isDead ? 0 : combatant.hpCurrent,
+      deathSaves,
+      isDead,
+      activeConditions: setConditionActive(combatant.activeConditions, DEAD_CONDITION_KEY, isDead),
+    };
   });
 }
 
@@ -278,13 +298,10 @@ export function setMaxHp(combat, id, value) {
     if (hpMax === combatant.hpMax) return combatant;
     // Lowering max can't leave current above it; raising max never auto-heals.
     const hpCurrent = Math.min(numberOr(combatant.hpCurrent, hpMax), hpMax);
-    const isMonster = combatant.type === 'monster';
-    const next = {
+    const next = applyHp({
       ...combatant,
       hpMax,
-      hpCurrent,
-      isDead: isMonster ? hpCurrent === 0 : combatant.isDead && hpCurrent === 0,
-    };
+    }, hpCurrent);
     // Track the change as a maxHPBonus delta so base max (hpMax - maxHPBonus)
     // stays recoverable for the "Max+" control. Base max is constant, so
     // ΔmaxHP === ΔmaxHPBonus. For linked PCs this also drives outbound sync,
@@ -319,11 +336,61 @@ export function applySheetVitals(combat, sourceId, vitals) {
 function applyHp(combatant, value) {
   const hpCurrent = Math.max(0, Math.min(numberOr(combatant.hpMax, 1), Math.round(value)));
   const isMonster = combatant.type === 'monster';
+  const dead = isMonster
+    ? hpCurrent === 0
+    : hpCurrent === 0 && (
+      Number(combatant.deathSaves?.f || 0) >= 3
+      || normalizeConditions(combatant.activeConditions).includes(DEAD_CONDITION_KEY)
+    );
   return {
     ...combatant,
     hpCurrent,
-    isDead: isMonster ? hpCurrent === 0 : combatant.isDead && hpCurrent === 0,
+    isDead: dead,
+    activeConditions: setConditionActive(combatant.activeConditions, DEAD_CONDITION_KEY, dead),
     deathSaves: hpCurrent > 0 && combatant.deathSaves ? { s: 0, f: 0 } : combatant.deathSaves,
+  };
+}
+
+function killCombatant(combatant) {
+  const player = combatant.type === 'player';
+  return {
+    ...combatant,
+    hpCurrent: 0,
+    isDead: true,
+    activeConditions: setConditionActive(combatant.activeConditions, DEAD_CONDITION_KEY, true),
+    deathSaves: player ? { s: 0, f: 3 } : combatant.deathSaves,
+  };
+}
+
+function reviveCombatant(combatant) {
+  const player = combatant.type === 'player';
+  return {
+    ...combatant,
+    hpCurrent: 1,
+    isDead: false,
+    activeConditions: setConditionActive(combatant.activeConditions, DEAD_CONDITION_KEY, false),
+    deathSaves: player ? { s: 0, f: 0 } : combatant.deathSaves,
+  };
+}
+
+function restoreCombatantMortality(combatant) {
+  const hpCurrent = Math.max(0, Math.min(
+    numberOr(combatant.hpMax, 1),
+    Math.round(numberOr(combatant.hpCurrent, combatant.hpMax)),
+  ));
+  const player = combatant.type === 'player';
+  const dead = player
+    ? hpCurrent === 0 && (
+      Number(combatant.deathSaves?.f || 0) >= 3
+      || normalizeConditions(combatant.activeConditions).includes(DEAD_CONDITION_KEY)
+    )
+    : hpCurrent === 0;
+  return {
+    ...combatant,
+    hpCurrent,
+    isDead: dead,
+    activeConditions: setConditionActive(combatant.activeConditions, DEAD_CONDITION_KEY, dead),
+    ...(dead && player ? { deathSaves: { ...combatant.deathSaves, f: 3 } } : {}),
   };
 }
 
@@ -453,7 +520,7 @@ export function restoreFight(entry, monsters) {
   return {
     fightId: entry?.id || Date.now(),
     encounterId: entry?.encounterId || null,
-    combatants: (fight?.combatants || []).map((combatant) => ({
+    combatants: (fight?.combatants || []).map((combatant) => restoreCombatantMortality({
       ...combatant,
       tempHP: clampTempHp(combatant.tempHP),
       // Fights snapshotted before conditions existed have no list at all.

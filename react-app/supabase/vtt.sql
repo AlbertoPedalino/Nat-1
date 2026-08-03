@@ -131,6 +131,10 @@ create table if not exists public.map_tokens (
   -- guessing which kind a value is on every render.
   image_path   text,
   image_url    text,
+  -- Lucide catalog key only. Vector markup and image bytes never enter storage.
+  icon_key     text,
+  icon_stroke_width double precision not null default 1.8,
+  rotation     double precision not null default 0,
   -- Hit points shown on the piece. For a player's piece the character sheet
   -- remains the source of truth and these stay null; for a monster they are the
   -- piece's own state, seeded when it is imported.
@@ -168,6 +172,9 @@ alter table public.map_tokens add column if not exists source_ref text;
 alter table public.map_tokens add column if not exists show_hp boolean not null default false;
 alter table public.map_tokens add column if not exists created_by uuid default auth.uid();
 alter table public.map_tokens add column if not exists effects jsonb not null default '[]';
+alter table public.map_tokens add column if not exists icon_key text;
+alter table public.map_tokens add column if not exists icon_stroke_width double precision not null default 1.8;
+alter table public.map_tokens add column if not exists rotation double precision not null default 0;
 
 -- A GM-only note on a visible piece. It is a separate table for the same reason
 -- the hidden layer is a separate row: RLS filters rows, not columns, so a secret

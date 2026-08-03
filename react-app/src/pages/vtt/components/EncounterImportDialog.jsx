@@ -15,14 +15,25 @@ import {
 } from '@mui/material';
 import { readRegistry, readPersistedInstance } from '../../../pages/encounterbuilder/logic/storage.js';
 import { restoreFight } from '../../../pages/encounterbuilder/logic/combat.js';
-import { importableCombatants } from '../../../shared/vtt/encounterImport.js';
+import { combatantToToken, importableCombatants } from '../../../shared/vtt/encounterImport.js';
 import { useMonsterDb } from '../../encounterbuilder/hooks/useMonsterDb.js';
 import { fullscreenContainer } from '../logic/fullscreenContainer.js';
+import PiecePreview, { beginPieceDrag } from './PiecePreview.jsx';
+import {
+  battleMapDialogActionsSx,
+  battleMapDialogContentSx,
+  battleMapDialogPaperSx,
+  battleMapDialogTitleSx,
+  battleMapDropBackdropSx,
+  battleMapDropDialogSx,
+} from './battleMapSurface.js';
 
 // Encounters are local-first and scenes are cloud-only, so there is no query
 // that joins them: the GM's own browser holds the encounter data, and the GM is
 // the one importing. Reading localStorage here is the honest way round.
-export default function EncounterImportDialog({ open, onClose, onImport, busy }) {
+export default function EncounterImportDialog({
+  open, onClose, onImport, busy, onPlacementDragStart, onPlacementDragEnd,
+}) {
   const monsterDb = useMonsterDb();
   const [instanceId, setInstanceId] = useState('');
   const [fightId, setFightId] = useState('');
@@ -58,11 +69,28 @@ export default function EncounterImportDialog({ open, onClose, onImport, busy })
     () => (selected ? importableCombatants(restoreFight(selected, monsterDb.monsters)) : []),
     [monsterDb.monsters, selected],
   );
+  const layer = hidden ? 'gm' : 'tokens';
+  const previewToken = useMemo(() => {
+    if (!combatants.length) return null;
+    const draft = combatantToToken(combatants[0], { layer, instanceId, fightId });
+    return { ...draft, imageUrl: draft.image_url || null };
+  }, [combatants, fightId, instanceId, layer]);
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs" container={fullscreenContainer}>
-      <DialogTitle>Import from an encounter</DialogTitle>
-      <DialogContent dividers>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="xs"
+      container={fullscreenContainer}
+      sx={battleMapDropDialogSx}
+      slotProps={{
+        paper: { sx: battleMapDialogPaperSx },
+        backdrop: { sx: battleMapDropBackdropSx },
+      }}
+    >
+      <DialogTitle sx={battleMapDialogTitleSx}>Import from an encounter</DialogTitle>
+      <DialogContent dividers sx={battleMapDialogContentSx}>
         <Stack spacing={2} sx={{ pt: 0.5 }}>
           {!instances.length ? (
             <Typography color="text.secondary" variant="body2">
@@ -107,29 +135,50 @@ export default function EncounterImportDialog({ open, onClose, onImport, busy })
                   : 'The party sees these pieces as soon as they land.'}
               </Typography>
 
-              <Box>
-                <Typography variant="body2">
+              <Box
+                draggable={Boolean(previewToken) && !busy}
+                onDragStart={previewToken ? (event) => {
+                  beginPieceDrag(event);
+                  onPlacementDragStart?.({
+                    kind: 'encounter',
+                    combatants,
+                    layer,
+                    instanceId,
+                    fightId,
+                    token: previewToken,
+                    count: combatants.length,
+                  });
+                } : undefined}
+                onDragEnd={onPlacementDragEnd}
+                sx={{ ...placementCardSx, cursor: previewToken && !busy ? 'grab' : 'default' }}
+              >
+                {previewToken ? <PiecePreview token={previewToken} count={combatants.length} size={44} /> : null}
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography variant="body2">
                   {monsterDb.status === 'loading'
                     ? 'Loading the bestiary…'
                     : (combatants.length
                       ? `${combatants.length} creature${combatants.length === 1 ? '' : 's'} to place`
                       : 'Nothing to import from this fight.')}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Player characters are skipped: they are already on the map as their own pieces.
-                </Typography>
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {combatants.length
+                      ? 'Drag this group onto the map, or use Place them.'
+                      : 'Player characters are skipped: they are already on the map.'}
+                  </Typography>
+                </Box>
               </Box>
             </>
           )}
         </Stack>
       </DialogContent>
-      <DialogActions>
+      <DialogActions sx={battleMapDialogActionsSx}>
         <Button onClick={onClose} disabled={busy}>Cancel</Button>
         <Button
           variant="contained"
           disabled={busy || !combatants.length}
           onClick={() => onImport(combatants, {
-            layer: hidden ? 'gm' : 'tokens',
+            layer,
             instanceId,
             fightId,
           })}
@@ -140,3 +189,15 @@ export default function EncounterImportDialog({ open, onClose, onImport, busy })
     </Dialog>
   );
 }
+
+const placementCardSx = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 1.25,
+  p: 1,
+  borderRadius: 1,
+  border: '1px solid rgba(232,201,106,0.25)',
+  bgcolor: 'rgba(0,0,0,0.22)',
+  userSelect: 'none',
+  '&:hover': { borderColor: 'rgba(232,201,106,0.6)', bgcolor: 'rgba(232,201,106,0.06)' },
+};

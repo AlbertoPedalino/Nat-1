@@ -418,6 +418,36 @@ test('hp and death saves preserve player death-save flow', () => {
   assert.equal(healed.combatants[0].isDead, false);
 });
 
+test('Dead follows monster HP and player death saves in both directions', () => {
+  const monsterCombat = {
+    combatants: [{ id: 1, type: 'monster', hpCurrent: 7, hpMax: 7, activeConditions: [], isDead: false }],
+  };
+  const killedMonster = modifyHp(monsterCombat, 1, -7);
+  assert.equal(killedMonster.combatants[0].isDead, true);
+  assert.deepEqual(killedMonster.combatants[0].activeConditions, ['dead']);
+  const revivedMonster = toggleCombatantCondition(killedMonster, 1, 'dead');
+  assert.equal(revivedMonster.combatants[0].hpCurrent, 1);
+  assert.equal(revivedMonster.combatants[0].isDead, false);
+
+  const playerCombat = {
+    combatants: [{
+      id: 2,
+      type: 'player',
+      hpCurrent: 0,
+      hpMax: 20,
+      deathSaves: { s: 0, f: 2 },
+      activeConditions: [],
+      isDead: false,
+    }],
+  };
+  const deadPlayer = setDeathSave(playerCombat, 2, 'f', 3);
+  assert.equal(deadPlayer.combatants[0].isDead, true);
+  assert.deepEqual(deadPlayer.combatants[0].activeConditions, ['dead']);
+  const revivedPlayer = toggleCombatantCondition(deadPlayer, 2, 'dead');
+  assert.equal(revivedPlayer.combatants[0].hpCurrent, 1);
+  assert.deepEqual(revivedPlayer.combatants[0].deathSaves, { s: 0, f: 0 });
+});
+
 test('dice parses formulas and d20 modifiers', () => {
   const rng = () => 0;
   assert.deepEqual(rollDiceFormula('2d6+3', rng), {

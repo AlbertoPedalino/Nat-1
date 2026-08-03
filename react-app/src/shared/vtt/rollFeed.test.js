@@ -6,6 +6,7 @@ import {
   addRoll,
   currentBubbles,
   currentThrows,
+  queueRollToast,
   rollAuthor,
   normalizeRoll,
 } from './rollFeed.js';
@@ -87,6 +88,22 @@ test('a roll from nobody in particular never floats over a piece', () => {
   assert.deepEqual(currentBubbles(feed, 1000), []);
 });
 
+test('the screen that made a roll does not show its own bubble', () => {
+  const localFeed = addRoll([], roll(), { local: true });
+  const remoteFeed = addRoll([], roll());
+
+  assert.equal(currentBubbles(localFeed, 1000).length, 0);
+  assert.equal(currentThrows(localFeed, 1000).length, 0, 'only the bubble is suppressed');
+  assert.equal(localFeed.length, 1, 'the local roll remains in the log');
+  assert.equal(currentBubbles(remoteFeed, 1000).length, 1, 'other screens still show it');
+});
+
+test('a local physical roll still throws its dice without a bubble', () => {
+  const feed = addRoll([], roll({ thrown: true }), { local: true });
+  assert.equal(currentBubbles(feed, 1000).length, 0);
+  assert.equal(currentThrows(feed, 1000).length, 1);
+});
+
 // A roll made from the map's own roller has to be attributed to somebody before
 // it can float over a piece.
 test('a player rolling from the map rolls as their piece', () => {
@@ -132,6 +149,22 @@ test('a roll made on a sheet reaches the log but not the table', () => {
   const feed = [normalizeRoll(roll({ timestamp: Date.now() }))];
   assert.equal(currentThrows(feed).length, 0);
   assert.equal(currentBubbles(feed).length, 1, 'it still gets a bubble');
+});
+
+test('a synced sheet roll can request physical dice on the map', () => {
+  const feed = [normalizeRoll(roll({ thrown: true, timestamp: Date.now() }))];
+  assert.equal(currentThrows(feed).length, 1);
+  assert.equal(currentBubbles(feed).length, 1);
+});
+
+test('the shared toast waits for dice but shows notices immediately', () => {
+  const pending = new Map();
+  const dice = roll({ id: 'sheet-roll', thrown: true });
+  assert.equal(queueRollToast(dice, pending), null);
+  assert.equal(pending.get('sheet-roll'), dice);
+
+  const notice = roll({ id: 'notice', rolls: [], total: null });
+  assert.equal(queueRollToast(notice, pending), notice);
 });
 
 test('dice are cleared once the roll is history', () => {

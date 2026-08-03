@@ -37,7 +37,13 @@ function sheetStateFromRow(row, prev = {}) {
   };
 }
 
-export default function CampaignSheetView({ sheetId = null, editable = null, embedded = false } = {}) {
+export default function CampaignSheetView({
+  sheetId = null,
+  editable = null,
+  embedded = false,
+  onRoll = null,
+  showOwnRollToast = true,
+} = {}) {
   const [state, setState] = useState({ loading: true, error: '', char: null, owner: null, name: null, updatedAt: null });
   const [liveVitals, setLiveVitals] = useState(null);
   const charId = sheetId || charIdFromUrl();
@@ -92,13 +98,21 @@ export default function CampaignSheetView({ sheetId = null, editable = null, emb
   }, [charId]);
 
   return (
-    <Box sx={{ minHeight: embedded ? 'auto' : '100vh', bgcolor: 'background.default' }}>
+    <Box sx={{ minHeight: embedded ? 'auto' : '100vh', bgcolor: embedded ? 'transparent' : 'background.default' }}>
       {state.loading ? (
         <Box sx={{ p: 4, textAlign: 'center' }}><CircularProgress size={24} /></Box>
       ) : state.error ? (
         <Typography sx={{ p: 4, color: '#de675f', textAlign: 'center' }}>{state.error}</Typography>
       ) : (
-        <CharacterSheet externalChar={state.char} externalCharId={charId} readOnly={!canEdit} embedded={embedded} liveVitals={canEdit ? liveVitals : null} />
+        <CharacterSheet
+          externalChar={state.char}
+          externalCharId={charId}
+          readOnly={!canEdit}
+          embedded={embedded}
+          liveVitals={canEdit ? liveVitals : null}
+          onRoll={onRoll}
+          showOwnRollToast={showOwnRollToast}
+        />
       )}
     </Box>
   );

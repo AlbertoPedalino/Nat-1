@@ -7,6 +7,7 @@ export default function MonsterToken({ monster, size = 32, fallbackText = '?' })
   const [index, setIndex] = useState(0);
   return (
     <Avatar
+      data-piece-preview
       src={urls[index]}
       slotProps={{
         img: {

@@ -112,6 +112,29 @@ GM-Board is React 19 + Vite + MUI 9 + Supabase SPA under `react-app/`. D&D data 
 - Events: `gb:encounter-saved`, `gb:encounter-deleted`.
 - Tests: `pages/encounterbuilder/logic/encounterbuilder.logic.test.js` plus component tests.
 
+## Battle Map / VTT
+
+- Root: `src/pages/vtt/`; scene orchestration is `components/SceneEditor.jsx` and rendering is `SceneViewport.jsx` / `TokenSprite.jsx`.
+- The right tool rail has an explicit cursor tool. Selecting draw, erase, text, fog, ruler, or laser activates that behavior immediately; laser stays active until another tool is selected.
+- Starting a custom roll closes the custom-roll panel so only the physical dice and final toast remain visible.
+- Dice results wait for the physical settle/paint hold; dice and coins are never snapped or forcibly straightened to the chosen face after motion. The d100 uses its original full geometry; the rejected lightweight/triangular variant is not present.
+- Token condition pills stay mounted across the hover gap and expose rules tooltips. Expanded pills collapse while dragging; the movement-distance badge is centred over the token.
+- Battle-map dialogs share the translucent black/gold surface from `components/battleMapSurface.js`, including Pieces, encounter import, monster placement, token menu, roll log, and embedded sheet dialogs.
+- Pieces has a transparent inner surface. Character previews use the sheet portrait, the same 5px player-colour ring as the map, and the shared primary-class icon fallback from `shared/character/classIcon.js` instead of initials.
+- Pieces, monster placement, and encounter import support native drag placement. The viewport shows the actual token preview at grid scale under the pointer and drops at the hovered cell.
+- The token context menu is a compact 360px surface: reduced typography/controls, 19–20px pills, and side-by-side Conditions and Advantage/Disadvantage columns.
+- `Dead` is a shared assignable condition. Dead tokens are dimmed/grayscaled and wear a skull badge; `Dead` is not also counted in the numbered conditions badge.
+- Death saves for linked characters are shown and editable in the battle-map token menu at 0 HP and sync with the character sheet and active Encounter Builder fight. The menu receives the same sheet-enriched token as the viewport (never the raw `map_tokens` row); defensively, `Dead` always opens/saves as three failed death saves so merely opening or blurring the menu cannot revive a character.
+- At 0 HP a character token replaces its HP bar with two clickable three-dot tracks: green successes and red failures. Clicking a dot sets/unsets that count through the same sheet/encounter synchronization; the third failure activates the synchronized Dead skull and removes the dot tracks from the token.
+- The right rail has an Objects panel for GM and players. It exposes Lucide's complete dynamic outline-icon catalog with text search, 32-item pagination, a smooth color picker, and a `0.5–4.0` stroke-width slider; an icon can be clicked or dragged onto the currently selected layer (`map`, `tokens`, or GM-only `gm`; players use `tokens`). Lucide has no official filled variant, so do not fake one by filling the SVG paths.
+- Map objects render as dynamic SVG, move like owned markers, resize from the bottom-right handle in 0.1-cell increments, and rotate around their centre from the top-right handle. The Vite build buckets dynamic Lucide modules by initial so the whole catalog is not added to the initial vendor chunk.
+- Map objects show their label below the icon and reuse `map_tokens` geometry, persisting only `icon_key`, `icon_stroke_width`, label, colour, position, dimensions, and normalized `rotation`. No SVG or image bytes are uploaded. `shared/vtt/mapObjects.js` sanitizes names/clamps stroke width and `MapObjectGlyph.jsx` resolves Lucide dynamically. Color inputs stay uncontrolled while the native palette moves; Draw and the placed-object menu debounce propagation to avoid palette stutter and write bursts.
+- Mortality invariant: monsters at 0 HP are `Dead`; setting `Dead` puts them at 0 HP; removing it restores 1 HP. Characters at 0 HP are only dying, become `Dead` at three failed death saves or by explicit assignment, and explicit removal restores 1 HP plus resets death saves.
+- The top-right `Sheet` button opens an external side panel without unmounting or covering the battle map. Players can open only campaign sheets they own; the GM can choose any campaign PC from a compact selector. The embedded sheet remains editable/live-synced, uses an independent scroll area, and stacks below the map only on narrower screens. On desktop a keyboard-accessible draggable divider resizes map/sheet within useful bounds; double-click or Home resets 60/40 and the per-user preference is local-only. Dice rolled from the side sheet are handed directly to the local map (realtime broadcasts suppress self-echo) and published with a stable roll ID plus physical-playback flag, so local and remote maps animate the same reported result. The embedded sheet suppresses its own roll toast; both map and side-sheet rolls use the map's single toast, revealed after physical settling.
+- The map/sheet divider previews its grid ratio through a CSS custom property at most once per animation frame and commits React state only on release, avoiding full SceneEditor rerenders during drag. Roll Log history never remounts animated 3D dice: each saved result is a static accessible 2D die silhouette with its landed value; only the live map throw uses physics/3D. Rolls originated on the current battle-map screen remain in its log/toast/physical-dice queue but suppress their token speech bubble; remote screens still show that bubble, based on local event origin rather than character ownership (so GM rolls from a PC sheet are also suppressed for the GM).
+- Encounter↔map bridge supports imported monster `sourceRef`s and roster character `sourceId`s in both directions. Character HP/death-save/condition writes go through the sheet source of truth; monster values remain on the token/fight.
+- Relevant tests: `shared/vtt/encounterSync.test.js`, `rollFeed.test.js`, `sheetLayout.test.js`, `components/TokenMenu.test.jsx`, `TokenSprite.test.jsx`, `RosterPanel.test.jsx`, `SceneViewport.test.jsx`, `SceneToolRail.test.jsx`, `DiceTray.test.jsx`, `RollLogPanel.test.jsx`, and `BattleMapSheetResizeHandle.test.jsx`.
+
 ## Combat Sheet Sync
 
 - Synced fields: `currentHP`, `tempHP`, `maxHPBonus`, `deathSaves`, `activeConditions`.
@@ -120,6 +143,7 @@ GM-Board is React 19 + Vite + MUI 9 + Supabase SPA under `react-app/`. D&D data 
 - Manual PCs/monsters retain local vitals.
 - `activeEffects` never sync.
 - `patch_character_data` shallow-merges allowlisted fields only.
+- `Dead` travels inside `activeConditions` and is kept consistent with HP/death saves by sheet, encounter, and VTT handlers. A player at 0 HP with fewer than three failures is not automatically dead.
 
 ## Campaigns
 
@@ -176,6 +200,7 @@ GM-Board is React 19 + Vite + MUI 9 + Supabase SPA under `react-app/`. D&D data 
 - `git diff --check` without `HEAD` omits staged changes; use `git diff --check HEAD`.
 - Always inspect status because new files may be staged or untracked.
 - SQL success does not deploy schema; apply `sections.sql` manually to Supabase.
+- Battle-map Lucide objects require reapplying `supabase/vtt.sql` so existing databases receive `map_tokens.icon_key`, `map_tokens.icon_stroke_width`, and `map_tokens.rotation`.
 - Live smoke needs configured Supabase: signed-out local behavior, cross-device pull, debounce, freshness, explicit delete, owner isolation, offline fallback, and character/campaign regression checks.
 
 ## Gotchas

@@ -26,7 +26,11 @@ import { aggregateSavingThrowBonus } from '../../shared/character/itemBonus.js';
 import { itemEffectInventory } from '../../shared/character/wildShapeForm.js';
 import { longRestCharacterPatch } from '../../shared/character/longRest.js';
 import { calcMaxHP, getMod, getFinal, getSaveBonus, clampExhaustion, exhaustionD20Penalty, EXHAUSTION_MAX } from './logic/calculations.js';
-import { toggleCondition as toggleConditionKey } from '../../shared/character/conditions.js';
+import {
+  DEAD_CONDITION_KEY,
+  setConditionActive,
+  toggleCondition as toggleConditionKey,
+} from '../../shared/character/conditions.js';
 import { normalizeCharacterAttunement } from './logic/attunement.js';
 import { applyResourceRest, getAllResourceDefs, getHitDicePools, getUsedHitDiceTotal, normalizeResourceMax, resourceFullValue } from './logic/restResources.js';
 import { clearedToggles } from './logic/toggleState.js';
@@ -72,7 +76,15 @@ const EMBEDDED_SHEET_GRID = {
   gap: '0.55rem',
 };
 
-export default function CharacterSheet({ externalChar = null, externalCharId = null, readOnly = false, embedded = false, liveVitals = null } = {}) {
+export default function CharacterSheet({
+  externalChar = null,
+  externalCharId = null,
+  readOnly = false,
+  embedded = false,
+  liveVitals = null,
+  onRoll = null,
+  showOwnRollToast = true,
+} = {}) {
   const [C, setC] = useState(null);
   const [sheet, setSheet] = useState(null);
   const sheetRef = useRef(null);
@@ -250,14 +262,32 @@ export default function CharacterSheet({ externalChar = null, externalCharId = n
   }, [charId]);
 
   const showDiceToast = useCallback((label, detail, total, rolls, meta) => {
-    const entry = { label, detail, total, rolls, meta, timestamp: Date.now() };
-    setDiceToast(entry);
+    const timestamp = Date.now();
+    const entry = {
+      id: `sheet:${charId || 'anon'}:${timestamp}:${Math.random().toString(36).slice(2, 8)}`,
+      label,
+      detail,
+      total,
+      rolls,
+      meta,
+      // A map that is currently open should replay these dice physically. The
+      // published values stay authoritative; DiceTray paints them onto the
+      // faces that naturally land, so there is no final snap or contradiction.
+      thrown: Boolean(rolls?.length),
+      timestamp,
+    };
+    if (showOwnRollToast) setDiceToast(entry);
     setRollLog((prev) => [entry, ...prev].slice(0, 50));
     // Said out loud at the table: the same entry the toast shows, so a roll
     // reads on the battle map exactly as it read here. Every roll on this sheet
     // goes through this one function, custom rolls included.
-    publishRoll({ ...entry, characterId: charId, actorName: C?.name || '' });
-  }, [C?.name, charId, publishRoll]);
+    const sharedEntry = { ...entry, characterId: charId, actorName: C?.name || '' };
+    publishRoll(sharedEntry);
+    // Broadcast deliberately has `self: false`. An embedded sheet and its map
+    // share this browser, so hand the same event to the map directly instead of
+    // waiting for an echo that will never arrive.
+    onRoll?.(sharedEntry);
+  }, [C?.name, charId, onRoll, publishRoll, showOwnRollToast]);
 
   // Non-dice events (rests, death-save guards): no roll, no numeric total — just a
   // labelled message. Routes through the same toast so DiceToast renders the detail.
@@ -355,7 +385,7 @@ export default function CharacterSheet({ externalChar = null, externalCharId = n
     s.createdSpellSlots = {};
     const exRest = longRestExhaustionPatch(s);
     s.exhaustionLevel = exRest.exhaustionLevel;
-    s.activeConditions = exRest.activeConditions;
+    s.activeConditions = setConditionActive(exRest.activeConditions, DEAD_CONDITION_KEY, false);
 
     // Crafted items that last only until a Long Rest (Tinker's Magic, Fast
     // Crafting) vanish now. Replicate Magic Item items persist and are untouched.
@@ -368,7 +398,7 @@ export default function CharacterSheet({ externalChar = null, externalCharId = n
       usedHD: 0, usedHDPools: {},
       deathSaves: s.deathSaves,
       spellSlotsUsed: {}, createdSpellSlots: {},
-      exhaustionLevel: exRest.exhaustionLevel, activeConditions: exRest.activeConditions,
+      exhaustionLevel: exRest.exhaustionLevel, activeConditions: s.activeConditions,
     };
     if (inventoryVanished) patch.inventory = prunedInv;
 
@@ -416,6 +446,8 @@ export default function CharacterSheet({ externalChar = null, externalCharId = n
     if (s.currentHP > 0) {
       s.deathSaves = { success: 0, fail: 0 };
       patch.deathSaves = s.deathSaves;
+      s.activeConditions = setConditionActive(s.activeConditions, DEAD_CONDITION_KEY, false);
+      patch.activeConditions = s.activeConditions;
     }
     setSheet(s);
     persist(patch);
@@ -445,6 +477,8 @@ export default function CharacterSheet({ externalChar = null, externalCharId = n
     if (s.currentHP > 0) {
       s.deathSaves = { success: 0, fail: 0 };
       patch.deathSaves = s.deathSaves;
+      s.activeConditions = setConditionActive(s.activeConditions, DEAD_CONDITION_KEY, false);
+      patch.activeConditions = s.activeConditions;
     }
     setSheet(s);
     persist(patch);
@@ -471,8 +505,11 @@ export default function CharacterSheet({ externalChar = null, externalCharId = n
     if (!sheet) return;
     const value = Math.max(0, Math.min(3, count));
     const ds = { ...sheet.deathSaves, [type]: value };
-    setSheet({ ...sheet, deathSaves: ds });
-    persist({ deathSaves: ds });
+    const dead = ds.fail >= 3;
+    const activeConditions = setConditionActive(sheet.activeConditions, DEAD_CONDITION_KEY, dead);
+    const patch = { deathSaves: ds, activeConditions, ...(dead ? { currentHP: 0 } : {}) };
+    setSheet({ ...sheet, ...patch });
+    persist(patch);
   }, [sheet, persist]);
 
   const rollDeathSave = useCallback(() => {
@@ -497,9 +534,20 @@ export default function CharacterSheet({ externalChar = null, externalCharId = n
     if (roll === 1) { ds.fail = Math.min(3, ds.fail + 2); }
     else if (roll === 20) {
       ds.success = 0; ds.fail = 0;
-      const s = { ...sheet, deathSaves: ds, currentHP: Math.min(sheet.maxHP, 1) };
+      const s = {
+        ...sheet,
+        deathSaves: ds,
+        currentHP: Math.min(sheet.maxHP, 1),
+        activeConditions: setConditionActive(sheet.activeConditions, DEAD_CONDITION_KEY, false),
+      };
       setSheet(s);
-      persist({ currentHP: s.currentHP, tempHP: s.tempHP, maxHPBonus: s.maxHPBonus, deathSaves: ds });
+      persist({
+        currentHP: s.currentHP,
+        tempHP: s.tempHP,
+        maxHPBonus: s.maxHPBonus,
+        deathSaves: ds,
+        activeConditions: s.activeConditions,
+      });
       showDiceToast('Death Save', 'Critical success: regain 1 HP', roll, [{ v: roll, faces: 20 }]);
       return;
     } else if (total >= 10) { ds.success = Math.min(3, ds.success + 1); }
@@ -508,8 +556,10 @@ export default function CharacterSheet({ externalChar = null, externalCharId = n
     if (ds.success >= 3) extra = 'Stable (0 HP).';
     else if (ds.fail >= 3) extra = 'Dead.';
     else extra = `${ds.success} success / ${ds.fail} fail`;
-    setSheet({ ...sheet, deathSaves: ds });
-    persist({ deathSaves: ds });
+    const activeConditions = setConditionActive(sheet.activeConditions, DEAD_CONDITION_KEY, ds.fail >= 3);
+    const patch = { deathSaves: ds, activeConditions };
+    setSheet({ ...sheet, ...patch });
+    persist(patch);
     showDiceToast('Death Save', extra + penaltyNote, total, [{ v: roll, faces: 20 }]);
   }, [sheet, persist, showDiceToast, showNotice]);
 
@@ -524,7 +574,10 @@ export default function CharacterSheet({ externalChar = null, externalCharId = n
     else if (lvl === 0 && present) next = sheet.activeConditions.filter((k) => k !== 'exhaustion');
     const patch = { activeConditions: next, exhaustionLevel: lvl };
     // Level 6 = death (XPHB 2024): drop to 0 HP so the HP panel reflects it.
-    if (lvl >= EXHAUSTION_MAX) patch.currentHP = 0;
+    if (lvl >= EXHAUSTION_MAX) {
+      patch.currentHP = 0;
+      patch.activeConditions = setConditionActive(next, DEAD_CONDITION_KEY, true);
+    }
     setSheet({ ...sheet, ...patch });
     persist(patch);
   }, [sheet, persist]);
@@ -536,6 +589,23 @@ export default function CharacterSheet({ externalChar = null, externalCharId = n
       setExhaustion(sheet.activeConditions.includes('exhaustion') ? 0 : 1);
       return;
     }
+    if (key === DEAD_CONDITION_KEY) {
+      const dead = !sheet.activeConditions.includes(DEAD_CONDITION_KEY);
+      const patch = dead
+        ? {
+          currentHP: 0,
+          deathSaves: { success: 0, fail: 3 },
+          activeConditions: setConditionActive(sheet.activeConditions, DEAD_CONDITION_KEY, true),
+        }
+        : {
+          currentHP: Math.min(sheet.maxHP, 1),
+          deathSaves: { success: 0, fail: 0 },
+          activeConditions: setConditionActive(sheet.activeConditions, DEAD_CONDITION_KEY, false),
+        };
+      setSheet({ ...sheet, ...patch });
+      persist(patch);
+      return;
+    }
     // Shared with the encounter builder so both surfaces apply the same
     // implied-condition cascade (Unconscious also grants Incapacitated + Prone).
     const next = toggleConditionKey(sheet.activeConditions, key);
@@ -545,8 +615,14 @@ export default function CharacterSheet({ externalChar = null, externalCharId = n
 
   const clearConditions = useCallback(() => {
     if (!sheet) return;
-    setSheet({ ...sheet, activeConditions: [], exhaustionLevel: 0 });
-    persist({ activeConditions: [], exhaustionLevel: 0 });
+    const wasDead = sheet.activeConditions.includes(DEAD_CONDITION_KEY);
+    const patch = {
+      activeConditions: [],
+      exhaustionLevel: 0,
+      ...(wasDead ? { currentHP: Math.min(sheet.maxHP, 1), deathSaves: { success: 0, fail: 0 } } : {}),
+    };
+    setSheet({ ...sheet, ...patch });
+    persist(patch);
   }, [sheet, persist]);
 
   const toggleInspiration = useCallback(() => {
@@ -722,7 +798,7 @@ export default function CharacterSheet({ externalChar = null, externalCharId = n
           </Stack>
         </Box>
       </Box>
-      {diceToast && <DiceToast toast={diceToast} onClose={() => setDiceToast(null)} />}
+      {showOwnRollToast && diceToast ? <DiceToast toast={diceToast} onClose={() => setDiceToast(null)} /> : null}
 
       <SheetDialog
         open={shortRestOpen}

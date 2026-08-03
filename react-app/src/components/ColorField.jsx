@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { Box } from '@mui/material';
 
 // A native colour well that does not fight the picker it opens.
@@ -9,25 +9,33 @@ import { Box } from '@mui/material';
 // holds its own value while it is being used, and takes one from outside again
 // only once it is done — which is also the only time an outside change can mean
 // anything.
-export default function ColorField({ value, onChange, label, sx }) {
-  const [shown, setShown] = useState(value);
+export default function ColorField({ value, onChange, label, sx, deferMs = 0 }) {
+  const inputRef = useRef(null);
   const editing = useRef(false);
+  const changeTimerRef = useRef(null);
 
   useEffect(() => {
-    if (!editing.current) setShown(value);
+    if (!editing.current && inputRef.current) inputRef.current.value = value || '#000000';
   }, [value]);
+
+  const emitChange = (next) => {
+    if (!deferMs) {
+      onChange?.(next);
+      return;
+    }
+    clearTimeout(changeTimerRef.current);
+    changeTimerRef.current = setTimeout(() => onChange?.(next), deferMs);
+  };
 
   return (
     <Box
+      ref={inputRef}
       component="input"
       type="color"
-      value={shown || '#000000'}
+      defaultValue={value || '#000000'}
       aria-label={label}
       onPointerDown={() => { editing.current = true; }}
-      onChange={(event) => {
-        setShown(event.target.value);
-        onChange?.(event.target.value);
-      }}
+      onInput={(event) => emitChange(event.currentTarget.value)}
       // The picker is a window of its own: it is done with when focus comes
       // back, not when the pointer goes up somewhere over the page.
       onBlur={() => { editing.current = false; }}

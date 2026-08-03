@@ -7,6 +7,12 @@ import { normalizeConditions } from '../character/conditions.js';
 
 const HEX_COLOR_RE = /^#[0-9a-f]{6}$/i;
 
+function deathSavesOf(value) {
+  const raw = value || {};
+  const clamp = (entry) => Math.max(0, Math.min(3, Math.round(Number(entry) || 0)));
+  return { success: clamp(raw.success ?? raw.s), fail: clamp(raw.fail ?? raw.f) };
+}
+
 export function normalizeIconColor(value) {
   const color = typeof value === 'string' ? value.trim() : '';
   return HEX_COLOR_RE.test(color) ? color.toLowerCase() : null;
@@ -21,6 +27,8 @@ export function toRosterEntry(row) {
     ownerId: row.owner || null,
     ownerUsername: row.owner_username || null,
     color: normalizeIconColor(sheet.classIconColor),
+    className: typeof sheet.className === 'string' ? sheet.className : null,
+    deathSaves: deathSavesOf(sheet.deathSaves),
     // The portrait belongs to the sheet, exactly as hit points and conditions
     // do: the piece on the map shows what the sheet says and never the reverse.
     portraitPath: typeof sheet.portraitPath === 'string' ? sheet.portraitPath : null,
@@ -49,6 +57,8 @@ export function rosterVitals(roster) {
       tempHp: entry.tempHp || 0,
       conditions: entry.conditions || [],
       portraitPath: entry.portraitPath || null,
+      className: entry.className || null,
+      deathSaves: deathSavesOf(entry.deathSaves),
     });
   }
   return vitals;
@@ -70,6 +80,8 @@ export function withSheetVitals(tokens, roster) {
         ...token,
         conditions: sheet.conditions,
         portraitPath: sheet.portraitPath,
+        className: sheet.className,
+        deathSaves: sheet.deathSaves,
         fromSheet: true,
       };
     }
@@ -78,6 +90,8 @@ export function withSheetVitals(tokens, roster) {
       // A character's face comes from their sheet too, so changing it on the
       // sheet changes the piece without anybody touching the map.
       portraitPath: sheet.portraitPath,
+      className: sheet.className,
+      deathSaves: sheet.deathSaves,
       hpCurrent: sheet.hpCurrent,
       hpMax: sheet.hpMax,
       tempHp: sheet.tempHp,

@@ -3,6 +3,129 @@ import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 import TokenSprite from './TokenSprite.jsx';
 
+test('a character without a portrait uses the primary class icon', () => {
+  const { container } = render(
+    <TokenSprite
+      token={{
+        id: 'hero-1',
+        characterId: 'character-1',
+        label: 'Aria',
+        className: 'Wizard',
+        layer: 'tokens',
+      }}
+      size={64}
+      interactive
+      movable={false}
+    />,
+  );
+
+  expect(container.querySelector('[data-class-icon="Wizard"]')).toBeTruthy();
+  expect(screen.queryByText('A')).not.toBeInTheDocument();
+});
+
+test('a dead token shows a skull instead of counting Dead as a numbered mark', () => {
+  render(
+    <TokenSprite
+      token={{
+        id: 'goblin-dead',
+        label: 'Goblin',
+        layer: 'tokens',
+        conditions: ['dead'],
+        effects: [],
+      }}
+      size={64}
+      interactive
+      movable={false}
+    />,
+  );
+
+  expect(screen.getByLabelText('Dead')).toBeInTheDocument();
+  expect(screen.queryByText('1')).not.toBeInTheDocument();
+});
+
+test('a character at zero hp replaces the hp bar with death save progress', () => {
+  const onDeathSaveChange = vi.fn();
+  const { container } = render(
+    <TokenSprite
+      token={{
+        id: 'hero-dying',
+        characterId: 'character-1',
+        label: 'Aria',
+        layer: 'tokens',
+        hpCurrent: 0,
+        hpMax: 24,
+        showHp: true,
+        deathSaves: { success: 2, fail: 1 },
+      }}
+      size={64}
+      interactive
+      movable={false}
+      canSetDeathSaves
+      onDeathSaveChange={onDeathSaveChange}
+    />,
+  );
+
+  expect(screen.getByLabelText('2 death save successes, 1 failures')).toBeInTheDocument();
+  expect(screen.queryByText('0/24')).not.toBeInTheDocument();
+  expect(container.querySelectorAll('[data-death-save="success"]')).toHaveLength(3);
+  expect(container.querySelectorAll('[data-death-save="failure"]')).toHaveLength(3);
+  expect(container.querySelectorAll('[data-death-save="success"][data-active="true"]')).toHaveLength(2);
+  expect(container.querySelectorAll('[data-death-save="failure"][data-active="true"]')).toHaveLength(1);
+  fireEvent.click(screen.getByRole('button', { name: 'Death save failure 3' }));
+  expect(onDeathSaveChange).toHaveBeenCalledWith('fail', 3);
+});
+
+test('the third death save failure leaves only the Dead marker', () => {
+  const { container } = render(
+    <TokenSprite
+      token={{
+        id: 'hero-dead',
+        characterId: 'character-1',
+        label: 'Aria',
+        layer: 'tokens',
+        hpCurrent: 0,
+        hpMax: 24,
+        showHp: true,
+        deathSaves: { success: 1, fail: 3 },
+        conditions: ['dead'],
+      }}
+      size={64}
+      interactive
+      movable={false}
+    />,
+  );
+
+  expect(screen.getByLabelText('Dead')).toBeInTheDocument();
+  expect(container.querySelector('[data-death-save]')).toBeNull();
+  expect(screen.queryByLabelText('1 death save successes, 3 failures')).not.toBeInTheDocument();
+});
+
+test('a Lucide map object renders as a vector and exposes its resize handle', () => {
+  const onResizePointerDown = vi.fn();
+  const onRotatePointerDown = vi.fn();
+  const { container } = render(
+    <TokenSprite
+      token={{
+        id: 'door-1', iconKey: 'door-open', iconStrokeWidth: 3.2, label: 'Open door', layer: 'map',
+      }}
+      size={64}
+      interactive
+      movable
+      resizable
+      rotatable
+      onResizePointerDown={onResizePointerDown}
+      onRotatePointerDown={onRotatePointerDown}
+    />,
+  );
+
+  expect(container.querySelector('svg')).toBeTruthy();
+  expect(screen.getByText('Open door')).toBeInTheDocument();
+  fireEvent.pointerDown(screen.getByRole('button', { name: 'Resize Open door' }));
+  expect(onResizePointerDown).toHaveBeenCalledOnce();
+  fireEvent.pointerDown(screen.getByRole('button', { name: 'Rotate Open door' }));
+  expect(onRotatePointerDown).toHaveBeenCalledOnce();
+});
+
 test('hovering a token condition pill shows its rules text', async () => {
   const user = userEvent.setup();
   render(

@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { Box, Tooltip, Typography } from '@mui/material';
+import { RotateCw, Skull } from 'lucide-react';
 import { describeEffect, effectId, effectPolarity } from '../../../shared/character/combatEffects.js';
-import { conditionLabel } from '../../../shared/character/conditions.js';
+import { DEAD_CONDITION_KEY, conditionLabel } from '../../../shared/character/conditions.js';
 import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
+import { classIcon } from '../../../shared/character/classIcon.js';
 import { fullscreenContainer } from '../logic/fullscreenContainer.js';
+import MapObjectGlyph from './MapObjectGlyph.jsx';
 
 // One piece on the map: the artwork, its name plate underneath, a hit point bar
 // and the conditions badge. Kept apart from the viewport because the viewport is
@@ -15,8 +18,14 @@ export default function TokenSprite({
   staged,
   interactive,
   movable,
+  resizable = false,
+  rotatable = false,
+  canSetDeathSaves = false,
   conditionEntries = {},
   onPointerDown,
+  onResizePointerDown,
+  onRotatePointerDown,
+  onDeathSaveChange,
   onContextMenu,
 }) {
   const [hovered, setHovered] = useState(false);
@@ -43,20 +52,27 @@ export default function TokenSprite({
   const showArtwork = Boolean(token.imageUrl) && !artworkFailed;
   // Scenery is a rectangle: a rug or a door forced into a circle is unusable,
   // and it wants none of the creature furniture either.
-  const isScenery = token.layer === 'map';
+  const isMapObject = Boolean(token.iconKey);
+  const isScenery = token.layer === 'map' && !isMapObject;
   // A piece standing for somebody's character, as opposed to a creature the GM
   // put down. Only these wear a colour: the party is who you need to pick out
   // of a crowded board, and giving every goblin a bright ring buries them.
   const isCharacter = Boolean(token.characterId);
+  const ClassIcon = isCharacter ? classIcon(token.className) : null;
   const conditions = token.conditions || [];
+  const dead = conditions.includes(DEAD_CONDITION_KEY);
+  const visibleConditions = conditions.filter((condition) => condition !== DEAD_CONDITION_KEY);
   const effects = token.effects || [];
   // One badge for everything the GM has flagged on this creature: two counters
   // side by side would be read as one number anyway.
-  const marks = conditions.length + effects.length;
+  const marks = visibleConditions.length + effects.length;
   // Opt-in per piece. A scene where every creature wears a bar is unreadable,
   // and which ones do is a call the GM makes at the table, not a default.
   const hasHp = Boolean(token.showHp) && token.hpMax != null && token.hpMax > 0;
   const current = token.hpCurrent ?? token.hpMax;
+  const showDeathSaves = isCharacter && Number(current) === 0 && !dead;
+  const deathSuccesses = Math.max(0, Math.min(3, Number(token.deathSaves?.success) || 0));
+  const deathFailures = Math.max(0, Math.min(3, Number(token.deathSaves?.fail) || 0));
   const ratio = hasHp ? Math.max(0, Math.min(1, current / token.hpMax)) : 0;
   const tempRatio = hasHp ? Math.max(0, Math.min(1, (token.tempHp || 0) / token.hpMax)) : 0;
   // The label the GM typed in secret replaces the public one for them only; a
@@ -70,6 +86,7 @@ export default function TokenSprite({
     // Thick enough to read as the player's colour from across the table, at the
     // size a piece actually is on a zoomed-out board.
     if (isCharacter) return 5;
+    if (isMapObject) return 0;
     if (isScenery) return 0;
     return showArtwork ? 0 : 2;
   };
@@ -91,6 +108,7 @@ export default function TokenSprite({
       role="button"
       tabIndex={interactive ? 0 : -1}
       aria-label={name || 'Token'}
+      title={isMapObject ? name : undefined}
       sx={{
         position: 'absolute',
         left: 0,
@@ -111,7 +129,7 @@ export default function TokenSprite({
         sx={{
           width: '100%',
           height: '100%',
-          borderRadius: isScenery ? 0 : '50%',
+          borderRadius: isScenery || isMapObject ? 0 : '50%',
           boxSizing: 'border-box',
           // Artwork stands on its own: no disc behind it, which would show
           // through the transparent corners of a bestiary token as a coloured
@@ -121,16 +139,26 @@ export default function TokenSprite({
           borderStyle: 'solid',
           borderWidth: ringWidth(),
           borderColor: isCharacter ? (token.color || 'rgba(0,0,0,0.6)') : 'rgba(0,0,0,0.6)',
-          bgcolor: isScenery || showArtwork ? 'transparent' : (token.color || 'secondary.main'),
+          bgcolor: isScenery || isMapObject || showArtwork ? 'transparent' : (token.color || 'secondary.main'),
           outline: token.layer === 'gm' ? '2px dashed rgba(232,201,106,0.9)' : 'none',
           outlineOffset: '-4px',
-          overflow: 'hidden',
+          overflow: isMapObject ? 'visible' : 'hidden',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          opacity: dead ? 0.58 : 1,
+          filter: dead ? 'grayscale(0.75)' : 'none',
         }}
       >
-        {showArtwork ? (
+        {isMapObject ? (
+          <Box sx={{
+            ...mapObjectSx,
+            color: token.color || '#e8c96a',
+            transform: `rotate(${Number(token.rotation) || 0}deg)`,
+          }}>
+            <MapObjectGlyph iconKey={token.iconKey} strokeWidth={token.iconStrokeWidth} />
+          </Box>
+        ) : showArtwork ? (
           <Box
             component="img"
             src={token.imageUrl}
@@ -148,22 +176,108 @@ export default function TokenSprite({
               pointerEvents: 'none',
             }}
           />
+        ) : ClassIcon ? (
+          <Box data-class-icon={token.className || 'unknown'} sx={classIconSx}>
+            <ClassIcon size={Math.max(16, Math.min(32, (Number(size) || 48) * 0.46))} />
+          </Box>
         ) : (
           <Typography sx={initialsSx}>{initials(name)}</Typography>
         )}
       </Box>
 
+      {dead ? (
+        <Box aria-label="Dead" title="Dead" sx={deadBadgeSx}>
+          <Skull size={14} strokeWidth={2.4} />
+        </Box>
+      ) : null}
+
+      {isMapObject && resizable ? (
+        <Box
+          component="button"
+          type="button"
+          aria-label={`Resize ${name || 'object'}`}
+          onPointerDown={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            onResizePointerDown?.(event);
+          }}
+          sx={resizeHandleSx}
+        />
+      ) : null}
+
+      {isMapObject && rotatable ? (
+        <Box
+          component="button"
+          type="button"
+          aria-label={`Rotate ${name || 'object'}`}
+          onPointerDown={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            onRotatePointerDown?.(event);
+          }}
+          sx={rotateHandleSx}
+        >
+          <RotateCw size={10} strokeWidth={2.8} />
+        </Box>
+      ) : null}
+
       {/* Bars and plate stack under the piece. The numbers ride inside the bar
           rather than beside it: one strip to read instead of two things to
           line up, and it stays legible over any map. */}
-      {!isScenery && (hasHp || name) ? (
+      {!isScenery && (hasHp || showDeathSaves || name) ? (
         <Box sx={stackSx}>
           {/* The whole name, not an abbreviation: two goblins are only told
               apart by their letter. First in the stack, so the eye reads who it
               is before how hurt they are. */}
           {name ? <Box sx={plateSx}>{name}</Box> : null}
 
-          {hasHp ? (
+          {showDeathSaves ? (
+            <Box
+              aria-label={`${deathSuccesses} death save successes, ${deathFailures} failures`}
+              title={`${deathSuccesses}/3 successes · ${deathFailures}/3 failures`}
+              sx={{ ...deathTrackSx, pointerEvents: canSetDeathSaves ? 'auto' : 'none' }}
+            >
+              <Box sx={deathDotsSx}>
+                {[0, 1, 2].map((index) => (
+                  <Box
+                    component="button"
+                    type="button"
+                    key={`success-${index}`}
+                    aria-label={`Death save success ${index + 1}`}
+                    disabled={!canSetDeathSaves}
+                    data-death-save="success"
+                    data-active={index < deathSuccesses ? 'true' : 'false'}
+                    onPointerDown={(event) => event.stopPropagation()}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onDeathSaveChange?.('success', deathSuccesses === index + 1 ? index : index + 1);
+                    }}
+                    sx={{ ...deathDotSx, ...(index < deathSuccesses ? deathSuccessSx : null) }}
+                  />
+                ))}
+              </Box>
+              <Box sx={deathDividerSx} />
+              <Box sx={deathDotsSx}>
+                {[0, 1, 2].map((index) => (
+                  <Box
+                    component="button"
+                    type="button"
+                    key={`failure-${index}`}
+                    aria-label={`Death save failure ${index + 1}`}
+                    disabled={!canSetDeathSaves}
+                    data-death-save="failure"
+                    data-active={index < deathFailures ? 'true' : 'false'}
+                    onPointerDown={(event) => event.stopPropagation()}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onDeathSaveChange?.('fail', deathFailures === index + 1 ? index : index + 1);
+                    }}
+                    sx={{ ...deathDotSx, ...(index < deathFailures ? deathFailureSx : null) }}
+                  />
+                ))}
+              </Box>
+            </Box>
+          ) : hasHp ? (
             <Box sx={hpBarSx} title={`${current} / ${token.hpMax}`}>
               <Box sx={{ ...hpFillSx, width: `${ratio * 100}%`, bgcolor: hpColor(ratio) }} />
               <Box component="span" sx={hpTextSx}>{current}/{token.hpMax}</Box>
@@ -174,7 +288,7 @@ export default function TokenSprite({
               the maximum, so folding them into the same strip would show a
               character healthier than they can be. Scaled against max HP just to
               give the cushion a size — it has no maximum of its own. */}
-          {hasHp && token.tempHp > 0 ? (
+          {hasHp && !showDeathSaves && token.tempHp > 0 ? (
             <Box sx={tempBarSx} title={`${token.tempHp} temporary hit points`}>
               <Box sx={{ ...tempFillSx, width: `${tempRatio * 100}%` }} />
               <Box component="span" sx={tempTextSx}>+{token.tempHp}</Box>
@@ -189,7 +303,7 @@ export default function TokenSprite({
           wall, while pills are counted at a glance and colour-coded by kind. */}
       {marks && hovered && !dragging ? (
         <Box sx={pillsSx} onPointerEnter={keepMarksOpen} onPointerLeave={scheduleMarksClose}>
-          {conditions.map((key) => (
+          {visibleConditions.map((key) => (
             <ConditionTokenPill key={key} conditionKey={key} entries={conditionEntries[key]} />
           ))}
           {effects.map((effect) => (
@@ -273,6 +387,61 @@ const initialsSx = {
   pointerEvents: 'none',
 };
 
+const classIconSx = {
+  display: 'flex',
+  color: '#f3ead6',
+  filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.9))',
+  pointerEvents: 'none',
+};
+
+const mapObjectSx = {
+  width: '100%',
+  height: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.95))',
+  pointerEvents: 'none',
+};
+
+const resizeHandleSx = {
+  position: 'absolute',
+  right: -5,
+  bottom: -5,
+  zIndex: 5,
+  width: 14,
+  height: 14,
+  p: 0,
+  borderRadius: '3px',
+  border: '2px solid rgba(15,14,13,0.95)',
+  bgcolor: '#e8c96a',
+  boxShadow: '0 1px 4px rgba(0,0,0,0.85)',
+  cursor: 'nwse-resize',
+  touchAction: 'none',
+  '&:hover': { bgcolor: '#f4dda0' },
+};
+
+const rotateHandleSx = {
+  position: 'absolute',
+  right: -5,
+  top: -5,
+  zIndex: 5,
+  width: 16,
+  height: 16,
+  p: 0,
+  borderRadius: '50%',
+  border: '2px solid rgba(15,14,13,0.95)',
+  bgcolor: '#e8c96a',
+  color: '#0f0e0d',
+  boxShadow: '0 1px 4px rgba(0,0,0,0.85)',
+  cursor: 'grab',
+  touchAction: 'none',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  '&:hover': { bgcolor: '#f4dda0' },
+};
+
 // Everything under the piece, in one column so the bars and the plate stay
 // centred on it however wide the name is.
 const stackSx = {
@@ -302,6 +471,47 @@ const barBaseSx = {
 };
 
 const hpBarSx = { ...barBaseSx, height: 13 };
+
+const deathTrackSx = {
+  height: 18,
+  px: 0.55,
+  borderRadius: 3,
+  bgcolor: 'rgba(0,0,0,0.82)',
+  border: '1px solid rgba(0,0,0,0.65)',
+  display: 'flex',
+  alignItems: 'center',
+  gap: 0.45,
+  boxSizing: 'border-box',
+};
+
+const deathDotsSx = { display: 'flex', alignItems: 'center', gap: '3px' };
+
+const deathDotSx = {
+  minWidth: 0,
+  width: 10,
+  height: 10,
+  p: 0,
+  borderRadius: '50%',
+  bgcolor: 'rgba(226,218,198,0.12)',
+  border: '1px solid rgba(226,218,198,0.44)',
+  boxSizing: 'border-box',
+  cursor: 'pointer',
+  '&:disabled': { cursor: 'default' },
+};
+
+const deathSuccessSx = {
+  bgcolor: '#4f9c62',
+  borderColor: '#7bc78a',
+  boxShadow: '0 0 4px rgba(79,156,98,0.8)',
+};
+
+const deathFailureSx = {
+  bgcolor: '#b3423a',
+  borderColor: '#df6b62',
+  boxShadow: '0 0 4px rgba(179,66,58,0.8)',
+};
+
+const deathDividerSx = { width: 1, height: 9, bgcolor: 'rgba(232,201,106,0.34)' };
 
 const hpFillSx = {
   position: 'absolute',
@@ -367,6 +577,25 @@ const badgeSx = {
   whiteSpace: 'nowrap',
   pointerEvents: 'none',
   transition: 'all 120ms ease',
+};
+
+const deadBadgeSx = {
+  position: 'absolute',
+  top: '-7px',
+  left: '-7px',
+  width: 20,
+  height: 20,
+  borderRadius: '50%',
+  bgcolor: '#8f2f34',
+  color: '#f7e9dc',
+  border: '2px solid rgba(15,14,13,0.92)',
+  boxShadow: '0 2px 5px rgba(0,0,0,0.75)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  boxSizing: 'border-box',
+  pointerEvents: 'none',
+  zIndex: 2,
 };
 
 // Above the piece and growing upwards, so a long list never covers the creature

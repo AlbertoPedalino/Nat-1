@@ -13,14 +13,26 @@ import {
 } from '@mui/material';
 import { useMonsterDb } from '../../encounterbuilder/hooks/useMonsterDb.js';
 import MonsterBrowser from '../../encounterbuilder/components/MonsterBrowser.jsx';
+import { monsterToToken } from '../../../shared/vtt/encounterImport.js';
 import { fullscreenContainer } from '../logic/fullscreenContainer.js';
+import { beginPieceDrag } from './PiecePreview.jsx';
+import {
+  battleMapDialogActionsSx,
+  battleMapDialogContentSx,
+  battleMapDialogPaperSx,
+  battleMapDialogTitleSx,
+  battleMapDropBackdropSx,
+  battleMapDropDialogSx,
+} from './battleMapSurface.js';
 
 const EMPTY_FILTERS = { search: '', cr: '', type: '', sources: [] };
 
 // The encounter builder's own bestiary panel, in a dialog. Same filters, same
 // rows — it is the same component, wired to local state instead of that page's
 // reducer, so the two never drift apart.
-export default function MonsterPickerDialog({ open, busy, onClose, onPlace }) {
+export default function MonsterPickerDialog({
+  open, busy, onClose, onPlace, onPlacementDragStart, onPlacementDragEnd,
+}) {
   const monsterDb = useMonsterDb();
   const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [count, setCount] = useState(1);
@@ -34,9 +46,20 @@ export default function MonsterPickerDialog({ open, busy, onClose, onPlace }) {
   }));
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="md" container={fullscreenContainer}>
-      <DialogTitle>Place a creature</DialogTitle>
-      <DialogContent dividers>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="md"
+      container={fullscreenContainer}
+      sx={battleMapDropDialogSx}
+      slotProps={{
+        paper: { sx: battleMapDialogPaperSx },
+        backdrop: { sx: battleMapDropBackdropSx },
+      }}
+    >
+      <DialogTitle sx={battleMapDialogTitleSx}>Place a creature</DialogTitle>
+      <DialogContent dividers sx={battleMapDialogContentSx}>
         <Stack spacing={1.5} sx={{ pt: 0.5 }}>
           {/* Placement options above the list: they apply to whichever creature
               you then pick, and hunting for them afterwards is worse. */}
@@ -64,16 +87,29 @@ export default function MonsterPickerDialog({ open, busy, onClose, onPlace }) {
             onFilterChange={(key, value) => setFilters((current) => ({ ...current, [key]: value }))}
             onToggleSource={toggleSource}
             onPick={(monster) => onPlace(monster, count, { layer: hidden ? 'gm' : 'tokens' })}
+            onDragStart={(event, monster) => {
+              const layer = hidden ? 'gm' : 'tokens';
+              const draft = monsterToToken(monster, { layer });
+              beginPieceDrag(event);
+              onPlacementDragStart?.({
+                kind: 'monster',
+                monster,
+                count,
+                layer,
+                token: { ...draft, imageUrl: draft.image_url || null },
+              });
+            }}
+            onDragEnd={onPlacementDragEnd}
             pickLabel="Place on the map"
             listSx={{ maxHeight: { xs: 300, md: 420 } }}
           />
         </Stack>
       </DialogContent>
-      <DialogActions>
+      <DialogActions sx={battleMapDialogActionsSx}>
         {/* The dialog stays open after a pick: placing a pack one creature at a
             time is the normal case, and reopening it each time is not. */}
         <Typography variant="caption" color="text.secondary" sx={{ mr: 'auto', pl: 1 }}>
-          Place with the + button — you can pick several.
+          Drag a token onto the map, or use + to place it automatically.
         </Typography>
         <Button onClick={onClose} disabled={busy}>Done</Button>
       </DialogActions>

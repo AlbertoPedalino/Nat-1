@@ -1,5 +1,10 @@
 import { clampInt, numberOr } from './monsterUtils.js';
 import { SYNCED_VITALS } from '../../../shared/character/vitals.js';
+import {
+  DEAD_CONDITION_KEY,
+  normalizeConditions,
+  setConditionActive,
+} from '../../../shared/character/conditions.js';
 
 // The synced-field contract (which fields, how they map/clamp) lives in
 // shared/character/vitals.js. These functions are the encounter-side combat
@@ -51,7 +56,13 @@ export function resolveCombatVitals(combatant = {}, vitals = {}) {
   // numberOr, because Number(null) is 0 — a finite value that would silently
   // win over the fallback and drop the combatant to 0 HP.
   out.hpCurrent = Math.max(0, Math.min(hpMax, Math.round(numberOr(out.hpCurrent ?? hpMax, hpMax))));
-  out.isDead = out.hpCurrent === 0 && out.deathSaves.f >= 3;
+  const dead = out.hpCurrent === 0 && (
+    out.deathSaves.f >= 3
+    || normalizeConditions(out.activeConditions).includes(DEAD_CONDITION_KEY)
+  );
+  out.isDead = dead;
+  out.activeConditions = setConditionActive(out.activeConditions, DEAD_CONDITION_KEY, dead);
+  if (dead) out.deathSaves = { ...out.deathSaves, f: 3 };
   return out;
 }
 

@@ -9,11 +9,15 @@ import {
 
 const row = (id, data) => ({ id, name: 'Row name', owner: 'u1', data });
 
-test('a roster entry prefers the sheet name and keeps a valid colour', () => {
-  const entry = toRosterEntry(row('c1', { name: 'Aria', classIconColor: '#AABBCC' }));
+test('a roster entry prefers the sheet name and keeps its class and valid colour', () => {
+  const entry = toRosterEntry(row('c1', {
+    name: 'Aria', className: 'Wizard', classIconColor: '#AABBCC', deathSaves: { success: 2, fail: 1 },
+  }));
   assert.equal(entry.characterId, 'c1');
   assert.equal(entry.name, 'Aria');
   assert.equal(entry.color, '#aabbcc');
+  assert.equal(entry.className, 'Wizard');
+  assert.deepEqual(entry.deathSaves, { success: 2, fail: 1 });
   assert.equal(toRosterEntry(row('c2', {})).name, 'Row name');
   assert.equal(toRosterEntry(row('c3', { classIconColor: 'red' })).color, null);
   assert.equal(toRosterEntry(null), null);

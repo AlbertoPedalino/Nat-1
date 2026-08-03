@@ -342,6 +342,7 @@ export function DrawPanel({
         <ColorField
           value={drawColor}
           onChange={onDrawColorChange}
+          deferMs={180}
           label="Ink colour"
           sx={colorInputSx}
         />

@@ -1,6 +1,8 @@
-import { Box, Button, Paper, Stack, Typography } from '@mui/material';
+import { Box, Button, Stack, Typography } from '@mui/material';
 import { MapPin, Plus } from 'lucide-react';
 import { placedCharacterIds } from '../../../shared/campaign/roster.js';
+import { usePortraits } from '../../../shared/character/usePortraits.js';
+import PiecePreview, { beginPieceDrag } from './PiecePreview.jsx';
 
 // What a player can do to the board. Deliberately short: place their own
 // character, drop a plain marker, and move or pick up either. Everything else on
@@ -13,12 +15,15 @@ export default function PlayerPanel({
   busy,
   onPlaceCharacter,
   onAddMarker,
+  onPlacementDragStart,
+  onPlacementDragEnd,
 }) {
   const placed = placedCharacterIds(tokens);
   const mine = (roster || []).filter((entry) => ownedCharacterIds.includes(entry.characterId));
+  const portraits = usePortraits(mine.map((entry) => entry.portraitPath));
 
   return (
-    <Paper sx={{ p: 0, bgcolor: 'transparent', boxShadow: 'none' }}>
+    <Box sx={panelInnerSx}>
       <Stack spacing={1.25}>
         {mine.length ? (
           <Stack spacing={0.5}>
@@ -30,11 +35,33 @@ export default function PlayerPanel({
                   draggable={!isPlaced && !busy}
                   onDragStart={(event) => {
                     event.dataTransfer.setData('application/x-gb-character', entry.characterId);
-                    event.dataTransfer.effectAllowed = 'copy';
+                    beginPieceDrag(event);
+                    onPlacementDragStart?.({
+                      kind: 'character',
+                      characterId: entry.characterId,
+                      token: {
+                        characterId: entry.characterId,
+                        label: entry.name,
+                        color: entry.color,
+                        className: entry.className,
+                        deathSaves: entry.deathSaves,
+                        imageUrl: portraits[entry.portraitPath] || null,
+                        layer: 'tokens',
+                        w: 1,
+                        h: 1,
+                      },
+                    });
                   }}
+                  onDragEnd={onPlacementDragEnd}
                   sx={{ ...rowSx, cursor: isPlaced ? 'default' : 'grab' }}
                 >
-                  <Box sx={{ ...dotSx, bgcolor: entry.color || 'secondary.main' }} />
+                  <PiecePreview token={{
+                    characterId: entry.characterId,
+                    label: entry.name,
+                    color: entry.color,
+                    className: entry.className,
+                    imageUrl: portraits[entry.portraitPath] || null,
+                  }} />
                   <Typography sx={nameSx}>{entry.name}</Typography>
                   <Button
                     size="small"
@@ -71,7 +98,7 @@ export default function PlayerPanel({
           </Typography>
         </Stack>
       </Stack>
-    </Paper>
+    </Box>
   );
 }
 
@@ -82,13 +109,7 @@ const rowSx = {
   py: 0.25,
 };
 
-const dotSx = {
-  width: 14,
-  height: 14,
-  borderRadius: '50%',
-  border: '1px solid rgba(0,0,0,0.5)',
-  flexShrink: 0,
-};
+const panelInnerSx = { p: 0, bgcolor: 'transparent', backgroundImage: 'none' };
 
 const nameSx = {
   flex: 1,

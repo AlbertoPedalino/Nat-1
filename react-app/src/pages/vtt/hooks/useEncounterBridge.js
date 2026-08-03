@@ -88,21 +88,36 @@ export function useEncounterBridge({ tokens, onTokenVitals }) {
   // Map -> encounter. Called after the GM edits a piece's hit points.
   const push = useCallback((token) => {
     const ref = parseSourceRef(token?.sourceRef);
-    if (!ref) return;
-    const found = readFight(ref.instanceId, ref.fightId);
-    if (!found) return;
+    const targets = ref ? [ref] : [];
+    // Character pieces are placed from the roster and therefore have no fight
+    // reference. Send them to every active fight that can match their sourceId;
+    // fightWithTokenVitals is the guard that ignores unrelated encounters.
+    if (!ref && token?.characterId) {
+      for (const instance of readRegistry()) {
+        const persisted = readPersistedInstance(instance.id, []);
+        if (!persisted?.fightsData?.activeFightId) continue;
+        targets.push({
+          instanceId: instance.id,
+          fightId: String(persisted.fightsData.activeFightId),
+        });
+      }
+    }
 
-    const combatants = fightWithTokenVitals(found.entry.fight?.combatants, token);
-    if (!combatants) return;
+    for (const target of targets) {
+      const found = readFight(target.instanceId, target.fightId);
+      if (!found) continue;
+      const combatants = fightWithTokenVitals(found.entry.fight?.combatants, token);
+      if (!combatants) continue;
 
-    const fights = found.fights.map((fight) => (
-      String(fight.id) === String(ref.fightId)
-        ? { ...fight, fight: { ...fight.fight, combatants }, savedAt: Date.now() }
-        : fight
-    ));
-    // Writing through the encounter builder's own persist keeps its event and
-    // its shape, so an open builder tab reacts exactly as if it had saved.
-    persistFights(ref.instanceId, found.activeFightId, fights);
+      const fights = found.fights.map((fight) => (
+        String(fight.id) === String(target.fightId)
+          ? { ...fight, fight: { ...fight.fight, combatants }, savedAt: Date.now() }
+          : fight
+      ));
+      // Writing through the encounter builder's own persist keeps its event and
+      // its shape, so an open builder tab reacts exactly as if it had saved.
+      persistFights(target.instanceId, found.activeFightId, fights);
+    }
   }, []);
 
   return { push, pull };

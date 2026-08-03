@@ -30,6 +30,14 @@ test('the layer column is constrained to the three known layers', () => {
   assert.match(sql, /check \(layer in \('map', 'tokens', 'gm'\)\)/);
 });
 
+test('vector map objects store a Lucide key and no image payload', () => {
+  assert.match(sql, /icon_key\s+text/);
+  assert.match(sql, /alter table public\.map_tokens add column if not exists icon_key text/);
+  assert.match(sql, /icon_stroke_width\s+double precision not null default 1\.8/);
+  assert.match(sql, /alter table public\.map_tokens add column if not exists icon_stroke_width double precision not null default 1\.8/);
+  assert.match(sql, /rotation\s+double precision not null default 0/);
+});
+
 // A GM-only label is a secret, and RLS filters rows rather than columns: kept on
 // the token row it would be delivered to the player and merely hidden by the
 // client, exactly the mistake the hidden layer avoids.

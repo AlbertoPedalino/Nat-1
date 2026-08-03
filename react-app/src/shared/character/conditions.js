@@ -15,6 +15,7 @@ export const CONDITIONS = [
   { key: 'petrified', label: 'Petrified', icon: 'Mountain' }, { key: 'poisoned', label: 'Poisoned', icon: 'FlaskConical' },
   { key: 'prone', label: 'Prone', icon: 'ArrowDown' }, { key: 'restrained', label: 'Restrained', icon: 'Link' },
   { key: 'stunned', label: 'Stunned', icon: 'Zap' }, { key: 'unconscious', label: 'Unconscious', icon: 'Moon' },
+  { key: 'dead', label: 'Dead', icon: 'Skull' },
   { key: 'exhaustion', label: 'Exhaustion', icon: 'BatteryLow' },
 ];
 
@@ -85,7 +86,15 @@ export const CONDITION_KEYS = CONDITIONS.map((c) => c.key);
 // (`exhaustionLevel`), so a surface that does not own the level must not offer
 // it as a toggle: switching it off there would leave a level with no condition.
 export const EXHAUSTION_KEY = 'exhaustion';
+export const DEAD_CONDITION_KEY = 'dead';
 export const ASSIGNABLE_CONDITIONS = CONDITIONS.filter((c) => c.key !== EXHAUSTION_KEY);
+
+export function setConditionActive(activeConditions, key, active) {
+  const list = normalizeConditions(activeConditions);
+  const present = list.includes(key);
+  if (active === present) return list;
+  return active ? normalizeConditions([...list, key]) : list.filter((item) => item !== key);
+}
 
 export function conditionLabel(key) {
   return CONDITION_LABELS[key] || key;

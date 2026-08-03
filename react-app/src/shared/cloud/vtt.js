@@ -32,7 +32,7 @@ const SIGNED_URL_TTL = 8 * 60 * 60;
 const SIGNED_URL_MARGIN_MS = 15 * 60 * 1000;
 const SIGNED_URL_KEY = 'gb:vtt:signed-url:';
 const SCENE_COLUMNS = 'id, campaign_id, name, image_path, background_path, shown_image, grid, fog, is_live, play_area, updated_at';
-const TOKEN_COLUMNS = 'id, scene_id, layer, x, y, w, h, z, character_id, label, color, image_path, image_url, hp_current, hp_max, conditions, effects, source_ref, show_hp, created_by, updated_at';
+const TOKEN_COLUMNS = 'id, scene_id, layer, x, y, w, h, z, character_id, label, color, image_path, image_url, icon_key, icon_stroke_width, rotation, hp_current, hp_max, conditions, effects, source_ref, show_hp, created_by, updated_at';
 const DRAWING_COLUMNS = 'id, scene_id, layer, points, color, width, text, created_by, created_at';
 
 export async function listScenes(campaignId) {
@@ -150,7 +150,11 @@ export async function createToken(sceneId, token = {}) {
     scene_id: sceneId,
     layer: normalizeLayer(token.layer),
     character_id: token.characterId || null,
-    ...toTokenPatch(token),
+    ...toTokenPatch({
+      ...token,
+      icon_key: token.iconKey ?? token.icon_key,
+      icon_stroke_width: token.iconStrokeWidth ?? token.icon_stroke_width,
+    }),
   };
   const { data, error } = await supabase
     .from('map_tokens')

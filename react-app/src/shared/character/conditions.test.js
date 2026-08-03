@@ -4,6 +4,7 @@ import {
   ASSIGNABLE_CONDITIONS,
   CONDITIONS,
   CONDITION_EFFECTS,
+  DEAD_CONDITION_KEY,
   EXHAUSTION_KEY,
   conditionLabel,
   describeAttackRoll,
@@ -21,6 +22,12 @@ test('every CONDITION_EFFECTS row matches a condition in the CONDITIONS table', 
   for (const key of Object.keys(CONDITION_EFFECTS)) {
     assert.ok(keys.has(key), `${key} has effects but is not a listed condition`);
   }
+});
+
+test('Dead is a shared assignable condition', () => {
+  assert.equal(CONDITIONS.some((condition) => condition.key === DEAD_CONDITION_KEY), true);
+  assert.equal(ASSIGNABLE_CONDITIONS.some((condition) => condition.key === DEAD_CONDITION_KEY), true);
+  assert.deepEqual(normalizeConditions(['dead', 'dead']), ['dead']);
 });
 
 test('condition effect lookups split always-on from situational', () => {

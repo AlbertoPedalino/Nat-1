@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { Box, Typography, Button, Chip, Menu, MenuItem } from '@mui/material';
-import { ArrowLeft, Home, Sun, Moon, Wand2, Hammer, Axe, Music, Cross, Feather, Sword, Dumbbell, Shield, Compass, Eye, Sparkles, Flame, BookOpen, Dices, Trash2, ImagePlus, Palette } from 'lucide-react';
+import { ArrowLeft, Home, Sun, Moon, Dices, Trash2, ImagePlus, Palette } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { levelFromXp, xpForLevel, xpProgressPct, MAX_LEVEL } from '../../../shared/character/xp.js';
 import { rollFormula as rollFormulaDice, formatRollTitle } from '../../../shared/character/dice.js';
@@ -11,27 +11,8 @@ import SheetDialog from '../../../shared/character/SheetDialog.jsx';
 import XpDeltaControl from '../../../shared/character/XpDeltaControl.jsx';
 import CloudMenu from '../../../shared/cloud/CloudMenu.jsx';
 import { primaryClassLevel } from '../../../shared/character/classLevel.js';
+import { classIcon } from '../../../shared/character/classIcon.js';
 import CustomRollDialog from '../../../shared/character/CustomRollDialog.jsx';
-
-const CLASS_ICONS = {
-  Artificer: Hammer,
-  Barbarian: Axe,
-  Bard: Music,
-  Cleric: Cross,
-  Druid: Feather,
-  Fighter: Sword,
-  Monk: Dumbbell,
-  Paladin: Shield,
-  Ranger: Compass,
-  Rogue: Eye,
-  Sorcerer: Sparkles,
-  Warlock: Flame,
-  Wizard: BookOpen,
-};
-
-function classIcon(className) {
-  return CLASS_ICONS[className] || Wand2;
-}
 
 function formatRollValues(rolls) {
   if (!rolls?.length) return '';
@@ -411,4 +392,3 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
     </Box>
   );
 }
-
