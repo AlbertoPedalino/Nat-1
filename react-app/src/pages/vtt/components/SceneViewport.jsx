@@ -18,6 +18,7 @@ import {
 import { measureLabel, movementLabel } from '../../../shared/vtt/measure.js';
 import { movedPoints } from '../../../shared/vtt/drawing.js';
 import { isTokenInPlay } from '../../../shared/vtt/scene.js';
+import { isMapPiece } from '../../../shared/vtt/mapObjects.js';
 import {
   cameraPoseToView, viewToCameraPose,
 } from '../../../shared/vtt/cameraSync.js';
@@ -36,6 +37,9 @@ const VIEWPORT_CONTROL_SELECTOR = '[data-viewport-control], .MuiModal-root, .Mui
 const LONG_PRESS_MS = 480;
 const LONG_PRESS_SLOP = 12;
 const DRAG_BROADCAST_MS = 40;
+// Spans are kept to a tenth of a square: fine enough for a door that is half a
+// cell deep, coarse enough that the number stays readable in the menu.
+const roundSpan = (span) => Math.max(0.5, Math.round(span * 10) / 10);
 const LASER_BROADCAST_MS = 50;
 
 // Inline SVG cursors so the pointer says which tool is in hand. Hotspot at the
@@ -169,6 +173,10 @@ export default function SceneViewport({
   // paying for while merely moving pieces around.
   const [hover, setHover] = useState(null);
   const [placementHover, setPlacementHover] = useState(null);
+  // Scenery follows the scene's own switch; a creature keeps its square whatever
+  // that switch says, which is the whole reason the setting is not global.
+  const snapObjects = scene.grid?.snapObjects !== false;
+  const snapFor = (token) => (isMapPiece(token) ? snap && snapObjects : snap);
   // The mark being dragged, as an offset in cells: applied at render so the
   // stroke follows the pointer without a write per frame.
   const [markDrag, setMarkDrag] = useState(null);
@@ -226,12 +234,12 @@ export default function SceneViewport({
     if (!placementDrag) setPlacementHover(null);
   }, [placementDrag]);
 
-  // Resize and rotation furniture belongs only to the map object the user has
-  // picked. Drop the selection if that object is removed or stops being an
-  // icon (for example after a realtime scene update).
+  // Resize and rotation furniture belongs only to the piece of scenery the user
+  // has picked. Drop the selection if that piece is removed or stops being
+  // scenery (for example after a realtime scene update).
   useEffect(() => {
     setSelectedMapObjectId((selectedId) => (
-      selectedId && tokens.some((token) => token.id === selectedId && token.iconKey)
+      selectedId && tokens.some((token) => token.id === selectedId && isMapPiece(token))
         ? selectedId
         : null
     ));
@@ -364,6 +372,21 @@ export default function SceneViewport({
       y: (world.y - (scene.grid.offsetY || 0)) / size,
     };
   }, [scene.grid, view]);
+
+  // Where a dragged-in piece would land, centred under the pointer. Only an
+  // object may come to rest between squares: a creature, an imported fight and a
+  // character are laid out in whole cells by the code that receives them.
+  const placementPosition = (event) => {
+    const world = screenToWorld(screenPoint(event), view);
+    const w = Math.max(1, Number(placementDrag?.token?.w) || 1);
+    const h = Math.max(1, Number(placementDrag?.token?.h) || 1);
+    if (placementDrag?.kind === 'object' && !snapObjects) {
+      const at = cellPoint(screenPoint(event));
+      return { x: at.x - w / 2, y: at.y - h / 2 };
+    }
+    const cell = worldToCell(world, scene.grid);
+    return { x: cell.col - Math.floor(w / 2), y: cell.row - Math.floor(h / 2) };
+  };
 
   const cancelLongPress = () => {
     if (!longPressRef.current) return;
@@ -528,7 +551,7 @@ export default function SceneViewport({
 
   const beginTokenDrag = (event, token) => {
     event.stopPropagation();
-    setSelectedMapObjectId(token.iconKey ? token.id : null);
+    setSelectedMapObjectId(isMapPiece(token) ? token.id : null);
     armLongPress(event, token);
     if (!canMove(token)) return;
     const pointer = screenToWorld(screenPoint(event), view);
@@ -545,12 +568,19 @@ export default function SceneViewport({
   const beginTokenResize = (event, token) => {
     event.stopPropagation();
     if (!canMove(token)) return;
+    const width = Math.max(0.5, Number(token.w) || 1);
+    const height = Math.max(0.5, Number(token.h) || 1);
     dragRef.current = {
       kind: 'resize',
       token,
       from: screenToWorld(screenPoint(event), view),
-      width: Math.max(0.5, Number(token.w) || 1),
-      height: Math.max(0.5, Number(token.h) || 1),
+      width,
+      height,
+      // A picture is stretched to fill its box, so letting the corner pull the
+      // sides apart squashes the artwork. It scales instead, and Shift is the
+      // way out when the shape itself is the point — a rug fitted to a room.
+      // An icon has no shape to keep: its box is the whole of what it is.
+      ratio: token.iconKey ? null : width / height,
     };
     setResize({ id: token.id, w: token.w || 1, h: token.h || 1 });
     event.currentTarget.setPointerCapture?.(event.pointerId);
@@ -653,10 +683,17 @@ export default function SceneViewport({
     if (state.kind === 'resize') {
       const at = screenToWorld(point, view);
       const cell = cellSize(scene.grid);
-      const next = {
-        w: Math.max(0.5, Math.round((state.width + (at.x - state.from.x) / cell) * 10) / 10),
-        h: Math.max(0.5, Math.round((state.height + (at.y - state.from.y) / cell) * 10) / 10),
-      };
+      const dx = (at.x - state.from.x) / cell;
+      const dy = (at.y - state.from.y) / cell;
+      let width = state.width + dx;
+      let height = state.height + dy;
+      if (state.ratio && !event.shiftKey) {
+        // Whichever way the corner was pulled furthest leads, so the drag goes
+        // where the hand went instead of fighting it on the other axis.
+        width = Math.abs(dx) >= Math.abs(dy) ? width : height * state.ratio;
+        height = width / state.ratio;
+      }
+      const next = { w: roundSpan(width), h: roundSpan(height) };
       state.next = next;
       setResize({ id: state.token.id, ...next });
       return;
@@ -753,7 +790,7 @@ export default function SceneViewport({
       pointerWorld: screenToWorld(screenPoint(event), view),
       grabOffset: state.grabOffset,
       grid: scene.grid,
-      snap,
+      snap: snapFor(state.token),
     });
     setDrag(null);
     // One write per gesture, and only when the piece actually changed square.
@@ -804,14 +841,7 @@ export default function SceneViewport({
         event.preventDefault();
         event.dataTransfer.dropEffect = 'copy';
         if (!placementDrag) return;
-        const world = screenToWorld(screenPoint(event), view);
-        const cell = worldToCell(world, scene.grid);
-        const w = Math.max(1, Number(placementDrag.token?.w) || 1);
-        const h = Math.max(1, Number(placementDrag.token?.h) || 1);
-        const next = {
-          x: cell.col - Math.floor(w / 2),
-          y: cell.row - Math.floor(h / 2),
-        };
+        const next = placementPosition(event);
         setPlacementHover((current) => (
           current?.x === next.x && current?.y === next.y ? current : next
         ));
@@ -823,14 +853,7 @@ export default function SceneViewport({
         if (!onDropPlacement && !onDropCharacter) return;
         event.preventDefault();
         if (placementDrag && onDropPlacement) {
-          const world = screenToWorld(screenPoint(event), view);
-          const cell = worldToCell(world, scene.grid);
-          const w = Math.max(1, Number(placementDrag.token?.w) || 1);
-          const h = Math.max(1, Number(placementDrag.token?.h) || 1);
-          const position = placementHover || {
-            x: cell.col - Math.floor(w / 2),
-            y: cell.row - Math.floor(h / 2),
-          };
+          const position = placementHover || placementPosition(event);
           setPlacementHover(null);
           onDropPlacement(placementDrag, position);
           return;
@@ -1202,7 +1225,8 @@ export default function SceneViewport({
 function measurementBadge(tokens, drag, grid, view, feetPerCell) {
   if (!drag) return null;
   const token = (tokens || []).find((item) => item.id === drag.id);
-  if (!token || token.iconKey) return null;
+  // Scenery does not walk anywhere: a distance badge over a rug is noise.
+  if (!token || isMapPiece(token)) return null;
   const landing = { x: Math.round(drag.x), y: Math.round(drag.y) };
   const label = movementLabel(token, landing, { feetPerCell });
   if (!label) return null;

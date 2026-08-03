@@ -132,6 +132,28 @@ const PLAYER_FOG_OPACITY = 1;
 // Only used before the map image has loaded, or when the scene has none yet.
 const DEFAULT_MAP_CELLS = { cols: 40, rows: 30 };
 
+// A picture arrives at its own shape rather than as a square: a banner dropped
+// as 4x4 has to be un-squashed by hand every single time, and the corner handle
+// then keeps whatever ratio it landed with. Four cells on the long side is about
+// a rug — big enough to see, small enough not to bury the map.
+async function imageSpan(file, longSide = 4) {
+  try {
+    const bitmap = await createImageBitmap(file);
+    const { width, height } = bitmap;
+    bitmap.close?.();
+    if (!width || !height) return { w: longSide, h: longSide };
+    const scale = longSide / Math.max(width, height);
+    return {
+      w: Math.max(0.5, Math.round(width * scale * 10) / 10),
+      h: Math.max(0.5, Math.round(height * scale * 10) / 10),
+    };
+  } catch {
+    // A browser without createImageBitmap, or a file it cannot decode: the
+    // upload still goes through and the GM sizes it themselves.
+    return { w: longSide, h: longSide };
+  }
+}
+
 function paintToolGroup(mode) {
   if (['draw', 'erase', 'text'].includes(mode)) return 'draw';
   if (mode === 'laser') return 'laser';
@@ -918,12 +940,12 @@ export default function SceneEditor({
     setBusy(true);
     let uploadedPath = null;
     try {
+      const span = await imageSpan(file);
       uploadedPath = await uploadMapImage(scene.campaignId, scene.id, file);
       const created = await createToken(scene.id, {
         ...nextFreeCell(),
         layer: activeLayer,
-        w: 4,
-        h: 4,
+        ...span,
         label: '',
         image_path: uploadedPath,
       });

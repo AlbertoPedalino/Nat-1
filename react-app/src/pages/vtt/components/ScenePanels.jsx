@@ -78,6 +78,11 @@ export function MapPanel({
       >
         Add an image to the map
       </Button>
+      <Typography variant="caption" color="text.secondary">
+        It lands on the layer you are editing. Click it to get its corner
+        handles: drag to scale, hold Shift to stretch it out of shape, and the
+        top handle turns it.
+      </Typography>
 
       <HiddenFileInput inputRef={mapRef} onPick={onUploadMap} />
       <HiddenFileInput inputRef={backgroundRef} onPick={onUploadBackground} />
@@ -122,6 +127,23 @@ export function MapPanel({
         )}
         label={<Typography variant="body2">Show the grid</Typography>}
       />
+      {/* Creatures always take a square — that is what a battlemap is for. This
+          is about the scenery: a door across a wall, a rug at an angle, a
+          handout dropped between two squares. */}
+      <FormControlLabel
+        control={(
+          <Switch
+            size="small"
+            checked={scene.grid.snapObjects !== false}
+            onChange={(event) => setGrid({ snapObjects: event.target.checked })}
+          />
+        )}
+        label={<Typography variant="body2">Objects snap to the grid</Typography>}
+      />
+      <Typography variant="caption" color="text.secondary">
+        Off, objects and pictures are placed and dragged freely. Creature pieces
+        keep their square either way.
+      </Typography>
 
       {/* Anything outside this rectangle is staging: the players never receive
           it, so an ambush can be arranged off the edge in plain sight. */}

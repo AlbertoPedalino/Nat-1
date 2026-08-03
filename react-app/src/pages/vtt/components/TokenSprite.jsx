@@ -7,6 +7,7 @@ import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
 import { classIcon } from '../../../shared/character/classIcon.js';
 import { fullscreenContainer } from '../logic/fullscreenContainer.js';
 import MapObjectGlyph from './MapObjectGlyph.jsx';
+import { isMapPiece } from '../../../shared/vtt/mapObjects.js';
 
 // One piece on the map: the artwork, its name plate underneath, a hit point bar
 // and the conditions badge. Kept apart from the viewport because the viewport is
@@ -43,6 +44,17 @@ export default function TokenSprite({
     hoverCloseTimerRef.current = setTimeout(() => setHovered(false), 180);
   };
   useEffect(() => () => clearTimeout(hoverCloseTimerRef.current), []);
+  // The resize hint is controlled rather than left to MUI's own hover, so it can
+  // be dismissed the moment the drag starts: a label sitting over the piece
+  // being sized is exactly what you need to see past. It stays down until the
+  // button is released, or re-entering the handle mid-drag would summon it back.
+  const [resizeHintOpen, setResizeHintOpen] = useState(false);
+  const resizingRef = useRef(false);
+  const dismissResizeHint = () => {
+    resizingRef.current = true;
+    setResizeHintOpen(false);
+    window.addEventListener('pointerup', () => { resizingRef.current = false; }, { once: true });
+  };
   // Bestiary artwork is a circular token on a transparent background, so a
   // coloured disc behind it shows through as a ring in the group's colour. The
   // colour is still the fallback for a piece with no art, or whose art fails to
@@ -54,6 +66,9 @@ export default function TokenSprite({
   // and it wants none of the creature furniture either.
   const isMapObject = Boolean(token.iconKey);
   const isScenery = token.layer === 'map' && !isMapObject;
+  // An uploaded picture gets the same corner handles as an icon: it is placed at
+  // the size it should cover, and that size is never right on the first drop.
+  const hasHandles = isMapPiece(token);
   // A piece standing for somebody's character, as opposed to a creature the GM
   // put down. Only these wear a colour: the party is who you need to pick out
   // of a crowded board, and giving every goblin a bright ring buries them.
@@ -146,7 +161,9 @@ export default function TokenSprite({
           bgcolor: isScenery || isMapObject || showArtwork ? 'transparent' : (token.color || 'secondary.main'),
           outline: token.layer === 'gm' ? '2px dashed rgba(232,201,106,0.9)' : 'none',
           outlineOffset: '-4px',
-          overflow: isMapObject ? 'visible' : 'hidden',
+          // A turned piece must not be cut off at the corners of its own box; a
+          // creature still needs the clip that crops its art into the circle.
+          overflow: hasHandles ? 'visible' : 'hidden',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -175,8 +192,10 @@ export default function TokenSprite({
               width: '100%',
               height: '100%',
               // Scenery is placed at the size it should cover, so it stretches;
-              // a creature's art is cropped into its circle.
-              objectFit: isScenery ? 'fill' : 'cover',
+              // a picture dropped on the token layer is scenery too. A
+              // creature's art is cropped into its circle instead.
+              objectFit: isScenery || hasHandles ? 'fill' : 'cover',
+              transform: hasHandles ? `rotate(${Number(token.rotation) || 0}deg)` : 'none',
               pointerEvents: 'none',
             }}
           />
@@ -195,21 +214,32 @@ export default function TokenSprite({
         </Box>
       ) : null}
 
-      {isMapObject && resizable ? (
-        <Box
-          component="button"
-          type="button"
-          aria-label={`Resize ${name || 'object'}`}
-          onPointerDown={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            onResizePointerDown?.(event);
-          }}
-          sx={resizeHandleSx}
-        />
+      {hasHandles && resizable ? (
+        // A picture scales by default, and the way out of that has to be said
+        // somewhere: a modifier nobody is told about is a modifier nobody uses.
+        <Tooltip
+          title={isMapObject ? 'Drag to resize' : 'Drag to resize · hold Shift to stretch it out of shape'}
+          placement="right"
+          open={resizeHintOpen}
+          onOpen={() => { if (!resizingRef.current) setResizeHintOpen(true); }}
+          onClose={() => setResizeHintOpen(false)}
+        >
+          <Box
+            component="button"
+            type="button"
+            aria-label={`Resize ${name || 'object'}`}
+            onPointerDown={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              dismissResizeHint();
+              onResizePointerDown?.(event);
+            }}
+            sx={resizeHandleSx}
+          />
+        </Tooltip>
       ) : null}
 
-      {isMapObject && rotatable ? (
+      {hasHandles && rotatable ? (
         <Box
           component="button"
           type="button"

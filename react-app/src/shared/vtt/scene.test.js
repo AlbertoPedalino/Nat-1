@@ -29,6 +29,10 @@ test('grid calibration is clamped and folded into a single cell', () => {
   assert.equal(normalizeGrid({ size: 50, offsetY: -10 }).offsetY, 40);
   assert.equal(normalizeGrid({ visible: false }).visible, false);
   assert.equal(normalizeGrid({ size: 'nonsense' }).size, DEFAULT_GRID.size);
+  // A scene saved before the switch existed was built with snapping on, so a
+  // missing key must not silently free every rug on it.
+  assert.equal(normalizeGrid({ size: 50 }).snapObjects, true);
+  assert.equal(normalizeGrid({ snapObjects: false }).snapObjects, false);
 });
 
 test('an unknown layer falls back to tokens, never to gm', () => {

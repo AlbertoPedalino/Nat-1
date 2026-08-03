@@ -17,6 +17,16 @@ export function normalizeMapObjectKey(value) {
   return key.length <= 80 && LUCIDE_KEY_RE.test(key) ? key : null;
 }
 
+// Furniture rather than a creature: a Lucide object, or a picture the GM
+// uploaded onto the map. Both are rectangles that get the resize and rotate
+// handles, and both are what the grid-snap switch governs — a character or a
+// bestiary piece keeps its square whatever that switch says, because a creature
+// off-grid is a ruling argument nobody wants mid-fight.
+export function isMapPiece(token) {
+  if (!token || token.characterId) return false;
+  return Boolean(token.iconKey) || Boolean(token.imagePath);
+}
+
 export function mapObjectLabel(key) {
   return String(normalizeMapObjectKey(key) || '')
     .split('-')

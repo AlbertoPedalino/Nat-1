@@ -79,8 +79,11 @@ create table if not exists public.map_scenes (
   background_path  text,
   -- Which of the two the table is looking at.
   shown_image      text not null default 'map' check (shown_image in ('map', 'background')),
-  -- { size, offsetX, offsetY, visible } — grid calibration is client-side.
-  grid        jsonb not null default '{"size":70,"offsetX":0,"offsetY":0,"visible":true}'::jsonb,
+  -- { size, offsetX, offsetY, visible, snapObjects } — grid calibration is
+  -- client-side. `snapObjects` may be absent on scenes made before it existed,
+  -- and the client reads a missing key as true: that is what they were built
+  -- with. No migration for the same reason.
+  grid        jsonb not null default '{"size":70,"offsetX":0,"offsetY":0,"visible":true,"snapObjects":true}'::jsonb,
   -- Fog of war: { cols, rows, cells } where cells is a base64 bitset, one bit
   -- per grid cell, set = revealed. NULL means the scene has no fog.
   --

@@ -8,7 +8,9 @@ import { normalizeFog } from './fog.js';
 import { normalizeMapObjectKey, normalizeMapObjectStroke } from './mapObjects.js';
 
 export const LAYERS = Object.freeze(['map', 'tokens', 'gm']);
-export const DEFAULT_GRID = Object.freeze({ size: 70, offsetX: 0, offsetY: 0, visible: true });
+export const DEFAULT_GRID = Object.freeze({
+  size: 70, offsetX: 0, offsetY: 0, visible: true, snapObjects: true,
+});
 
 const MIN_CELL = 8;
 const MAX_CELL = 512;
@@ -43,6 +45,11 @@ export function normalizeGrid(grid) {
     offsetX: ((numberOr(source.offsetX, 0) % size) + size) % size,
     offsetY: ((numberOr(source.offsetY, 0) % size) + size) % size,
     visible: source.visible !== false,
+    // Whether scenery and uploaded pictures land on whole squares. Kept beside
+    // the calibration rather than on each piece: it is how this map is being
+    // built, not a property of the rug. Scenes written before the switch existed
+    // have no key at all, and snapping is the behaviour they were built with.
+    snapObjects: source.snapObjects !== false,
   };
 }
 

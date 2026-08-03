@@ -247,6 +247,123 @@ test('map object resize and rotation controls only appear on the selected icon',
   expect(screen.queryByRole('button', { name: 'Rotate Window' })).toBeNull();
 });
 
+function renderPicture({ onResizeToken, grid }) {
+  render(
+    <SceneViewport
+      scene={{ grid: { size: 50, offsetX: 0, offsetY: 0, visible: false, ...grid }, playArea: null }}
+      imageUrl={null}
+      tokens={[{
+        id: 'banner-1',
+        label: 'Banner',
+        layer: 'map',
+        imagePath: 'camp/scene/banner.png',
+        imageUrl: 'blob:banner',
+        x: 0,
+        y: 0,
+        w: 4,
+        h: 2,
+      }]}
+      snap
+      canMove={() => true}
+      fog={null}
+      onResizeToken={onResizeToken}
+      drawings={[]}
+      lasers={[]}
+      rollBubbles={[]}
+      diceThrows={[]}
+    />,
+  );
+  const viewport = screen.getByText('Upload a map image to start building this scene.').parentElement;
+
+  // Selecting it is what puts the handles on it, exactly as for an icon.
+  fireEvent.pointerDown(screen.getByRole('button', { name: 'Banner' }), {
+    button: 0, clientX: 20, clientY: 20, pointerId: 40,
+  });
+  fireEvent.pointerUp(viewport, { button: 0, clientX: 20, clientY: 20, pointerId: 40 });
+  return { viewport, handle: screen.getByRole('button', { name: 'Resize Banner' }) };
+}
+
+test('an uploaded picture is resizable and keeps the shape it was uploaded with', () => {
+  const onResizeToken = vi.fn();
+  const { viewport, handle } = renderPicture({ onResizeToken });
+
+  // Pulled a cell to the right and not at all downwards: the height follows
+  // anyway, because a 4x2 banner stays a 4x2 banner.
+  fireEvent.pointerDown(handle, { button: 0, clientX: 200, clientY: 100, pointerId: 41 });
+  fireEvent.pointerMove(viewport, { clientX: 250, clientY: 100, pointerId: 41 });
+  fireEvent.pointerUp(viewport, { clientX: 250, clientY: 100, pointerId: 41 });
+
+  expect(onResizeToken).toHaveBeenCalledWith(
+    expect.objectContaining({ id: 'banner-1' }),
+    { w: 5, h: 2.5 },
+  );
+});
+
+test('Shift lets a picture be stretched out of its own proportions', () => {
+  const onResizeToken = vi.fn();
+  const { viewport, handle } = renderPicture({ onResizeToken });
+
+  fireEvent.pointerDown(handle, { button: 0, clientX: 200, clientY: 100, pointerId: 42 });
+  fireEvent.pointerMove(viewport, { clientX: 250, clientY: 100, pointerId: 42, shiftKey: true });
+  fireEvent.pointerUp(viewport, { clientX: 250, clientY: 100, pointerId: 42, shiftKey: true });
+
+  expect(onResizeToken).toHaveBeenCalledWith(
+    expect.objectContaining({ id: 'banner-1' }),
+    { w: 5, h: 2 },
+  );
+});
+
+test('with snapping off objects land between squares while creatures keep theirs', () => {
+  const onMoveToken = vi.fn();
+  render(
+    <SceneViewport
+      scene={{
+        grid: {
+          size: 50, offsetX: 0, offsetY: 0, visible: false, snapObjects: false,
+        },
+        playArea: null,
+      }}
+      imageUrl={null}
+      tokens={[
+        { id: 'door-1', iconKey: 'door-open', label: 'Open door', layer: 'tokens', x: 0, y: 0, w: 1, h: 1 },
+        { id: 'ogre-1', label: 'Ogre', layer: 'tokens', x: 4, y: 0, w: 1, h: 1 },
+      ]}
+      snap
+      canMove={() => true}
+      fog={null}
+      onMoveToken={onMoveToken}
+      drawings={[]}
+      lasers={[]}
+      rollBubbles={[]}
+      diceThrows={[]}
+    />,
+  );
+  const viewport = screen.getByText('Upload a map image to start building this scene.').parentElement;
+
+  fireEvent.pointerDown(screen.getByRole('button', { name: 'Open door' }), {
+    button: 0, clientX: 25, clientY: 25, pointerId: 43,
+  });
+  fireEvent.pointerUp(viewport, { button: 0, clientX: 60, clientY: 25, pointerId: 43 });
+
+  expect(onMoveToken).toHaveBeenCalledWith(
+    expect.objectContaining({ id: 'door-1' }),
+    { x: 0.7, y: 0 },
+  );
+
+  onMoveToken.mockClear();
+  fireEvent.pointerDown(screen.getByRole('button', { name: 'Ogre' }), {
+    button: 0, clientX: 225, clientY: 25, pointerId: 44,
+  });
+  fireEvent.pointerUp(viewport, { button: 0, clientX: 260, clientY: 25, pointerId: 44 });
+
+  // The switch is about scenery. A creature nudged by two thirds of a square
+  // still lands on one.
+  expect(onMoveToken).toHaveBeenCalledWith(
+    expect.objectContaining({ id: 'ogre-1' }),
+    { x: 5, y: 0 },
+  );
+});
+
 test('a selected ruler starts on top of a token instead of dragging it', () => {
   const onMeasure = vi.fn();
   const onMoveToken = vi.fn();
