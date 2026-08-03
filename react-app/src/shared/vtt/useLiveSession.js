@@ -17,20 +17,24 @@ export function useLiveSession({ campaignId, enabled = true } = {}) {
   const { cloudEnabled, status } = useAuth();
   const [session, setSession] = useState({ loading: true, scene: null });
   const sceneIdRef = useRef(null);
+  const refreshRequestRef = useRef(0);
 
   const refresh = useCallback(async () => {
+    const request = ++refreshRequestRef.current;
     try {
       const scenes = await listLiveScenes();
+      if (request !== refreshRequestRef.current) return;
       const scene = scenes.find((entry) => entry.campaignId === campaignId) || null;
       sceneIdRef.current = scene?.id || null;
       setSession({ loading: false, scene });
     } catch (_) {
-      setSession({ loading: false, scene: null });
+      if (request === refreshRequestRef.current) setSession({ loading: false, scene: null });
     }
   }, [campaignId]);
 
   useEffect(() => {
     if (!enabled || !campaignId || !cloudEnabled || status !== 'authed') {
+      refreshRequestRef.current += 1;
       setSession({ loading: false, scene: null });
       return undefined;
     }
@@ -55,6 +59,7 @@ export function useLiveSession({ campaignId, enabled = true } = {}) {
     }
 
     return () => {
+      refreshRequestRef.current += 1;
       try {
         supabase.removeChannel(channel);
       } catch (_) {}

@@ -1,9 +1,12 @@
 import {
   lazy, memo, Suspense, useCallback, useEffect, useMemo, useRef, useState, useTransition,
 } from 'react';
-import { Box, Chip, CircularProgress, Stack, Typography } from '@mui/material';
 import {
-  Cloud, Dices, Eye, Pencil, Pointer, Radio, Ruler, Shapes, Shield, Users,
+  Box, Button, Chip, CircularProgress, IconButton, Menu, MenuItem, Stack, Typography,
+} from '@mui/material';
+import {
+  Cloud, Dices, Eye, Lock, LockOpen, MonitorPlay, MoreVertical, Pencil, Pointer, Radio, Ruler, Shapes,
+  Shield, Users,
 } from 'lucide-react';
 import { useToast } from '../../../shared/ToastProvider.jsx';
 import { useAuth } from '../../../shared/cloud/AuthProvider.jsx';
@@ -63,7 +66,9 @@ import {
   revealAll,
   setCells,
 } from '../../../shared/vtt/fog.js';
-import { canMarkToken, normalizePlayArea, toScene } from '../../../shared/vtt/scene.js';
+import {
+  canMarkToken, normalizePlayArea, toScene,
+} from '../../../shared/vtt/scene.js';
 import {
   addRoll,
   currentBubbles,
@@ -78,6 +83,10 @@ import { sanitizeNoteText } from '../../../shared/vtt/drawing.js';
 import { FEET_PER_CELL } from '../../../shared/vtt/measure.js';
 import { useSceneLive } from '../../../shared/vtt/useSceneLive.js';
 import { useSceneRole } from '../../../shared/vtt/useSceneRole.js';
+import { createCameraSourceId } from '../../../shared/vtt/cameraSync.js';
+import {
+  projectPlayerTokens, shouldApplyPresenterFrame, spectatorUrl,
+} from '../../../shared/vtt/spectator.js';
 import { sheetChoicesForRole } from '../../../shared/vtt/sheetView.js';
 import {
   DEFAULT_SHEET_SPLIT,
@@ -98,6 +107,7 @@ import SceneToolRail from './SceneToolRail.jsx';
 import MapCorner from './MapCorner.jsx';
 import BattleMapViewSwitch from './BattleMapViewSwitch.jsx';
 import BattleMapSheetResizeHandle from './BattleMapSheetResizeHandle.jsx';
+import { battleMapSurfaceSx } from './battleMapSurface.js';
 import {
   DrawPanel,
   FogPanel,
@@ -129,7 +139,14 @@ function paintToolGroup(mode) {
   return 'cursor';
 }
 
-export default function SceneEditor({ scene, onSceneChange }) {
+export default function SceneEditor({
+  scene,
+  onSceneChange,
+  spectator = false,
+  spectatorSource = null,
+  cameraSourceId = null,
+  presenterFollowingRef = null,
+}) {
   const { notify } = useToast();
   const { user } = useAuth();
   const role = useSceneRole(scene.campaignId);
@@ -166,6 +183,26 @@ export default function SceneEditor({ scene, onSceneChange }) {
   const [, startSheetTransition] = useTransition();
   const [sheetSplit, setSheetSplit] = useState(DEFAULT_SHEET_SPLIT);
   const contentLayoutRef = useRef(null);
+  const fallbackCameraSourceRef = useRef(createCameraSourceId());
+  const presenterCameraSource = cameraSourceId || fallbackCameraSourceRef.current;
+  const cameraPoseRef = useRef(null);
+  const [followCameraPose, setFollowCameraPose] = useState(null);
+  const localProjectorFollowingRef = useRef(true);
+  const projectorFollowingRef = presenterFollowingRef || localProjectorFollowingRef;
+  const [projectorFollowing, setProjectorFollowing] = useState(projectorFollowingRef.current);
+  const projectorControlsStorageKey = `gb:vtt:projector-controls:${scene.campaignId}`;
+  const [projectorControlsOpen, setProjectorControlsOpen] = useState(() => {
+    try {
+      return globalThis.sessionStorage?.getItem(projectorControlsStorageKey) === '1';
+    } catch (_) {
+      return false;
+    }
+  });
+  const [sceneActionsAnchor, setSceneActionsAnchor] = useState(null);
+  const hasPresenterFrameRef = useRef(false);
+  const [projectorShownImage, setProjectorShownImage] = useState(scene.shownImage);
+  const sceneShownImageRef = useRef(scene.shownImage);
+  sceneShownImageRef.current = scene.shownImage;
   const sheetSplitStorageKey = `gb:vtt:sheet-split:${user?.id || 'local'}`;
   const [lasers, setLasers] = useState({});
   // Rolls said at the table. In memory only: a roll is an event, not a record.
@@ -204,6 +241,33 @@ export default function SceneEditor({ scene, onSceneChange }) {
   const conditionEntries = useConditionEntries();
 
   useEffect(() => {
+    try {
+      if (projectorControlsOpen) {
+        globalThis.sessionStorage?.setItem(projectorControlsStorageKey, '1');
+      } else {
+        globalThis.sessionStorage?.removeItem(projectorControlsStorageKey);
+      }
+    } catch (_) {}
+  }, [projectorControlsOpen, projectorControlsStorageKey]);
+
+  useEffect(() => {
+    if (!scene.isLive) setProjectorControlsOpen(false);
+  }, [scene.isLive]);
+
+  useEffect(() => {
+    // A live-scene switch always wins over a paused camera: enter the new scene
+    // on its current picture, accept one fresh presenter snapshot, then remain
+    // paused if that is still the GM's chosen mode.
+    setProjectorShownImage(scene.shownImage);
+    setFollowCameraPose(null);
+    hasPresenterFrameRef.current = false;
+  }, [scene.id]);
+
+  useEffect(() => {
+    if (spectator && projectorFollowing) setProjectorShownImage(scene.shownImage);
+  }, [projectorFollowing, scene.shownImage, spectator]);
+
+  useEffect(() => {
     const storage = typeof window === 'undefined' ? null : window.localStorage;
     setSheetSplit(readSheetSplit(storage, sheetSplitStorageKey));
   }, [sheetSplitStorageKey]);
@@ -239,7 +303,7 @@ export default function SceneEditor({ scene, onSceneChange }) {
       // it is where the party's hit points come from. Only the GM has secret
       // labels to read; for a player that call comes back empty anyway.
       scene.campaignId ? listCampaignCharacters(scene.campaignId) : Promise.resolve([]),
-      role.isGm ? listTokenSecrets(scene.id) : Promise.resolve({}),
+      role.isGm && !spectator ? listTokenSecrets(scene.id) : Promise.resolve({}),
       listDrawings(scene.id),
     ])
       .then(([sceneTokens, characterRows, secrets, sceneDrawings]) => {
@@ -260,11 +324,12 @@ export default function SceneEditor({ scene, onSceneChange }) {
       })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [notify, role.isGm, scene.campaignId, scene.id]);
+  }, [notify, role.isGm, scene.campaignId, scene.id, spectator]);
 
   // Whichever of the two pictures the table is looking at. The other stays
   // uploaded and one click away.
-  const shownPath = scene.shownImage === 'background' ? scene.backgroundPath : scene.imagePath;
+  const shownImageForViewport = spectator ? projectorShownImage : scene.shownImage;
+  const shownPath = shownImageForViewport === 'background' ? scene.backgroundPath : scene.imagePath;
 
   // The picture and everything that belongs to it change together. Flipping the
   // mode as soon as the row changed showed the switch in three steps: fog off,
@@ -273,7 +338,7 @@ export default function SceneEditor({ scene, onSceneChange }) {
   useEffect(() => {
     let cancelled = false;
     if (!shownPath) {
-      setDisplayed({ url: null, shownImage: scene.shownImage });
+      setDisplayed({ url: null, shownImage: shownImageForViewport });
       return () => { cancelled = true; };
     }
 
@@ -285,11 +350,11 @@ export default function SceneEditor({ scene, onSceneChange }) {
         const image = new Image();
         image.src = url;
         return (image.decode ? image.decode().catch(() => {}) : Promise.resolve())
-          .then(() => { if (!cancelled) setDisplayed({ url, shownImage: scene.shownImage }); });
+          .then(() => { if (!cancelled) setDisplayed({ url, shownImage: shownImageForViewport }); });
       })
-      .catch(() => { if (!cancelled) setDisplayed({ url: null, shownImage: scene.shownImage }); });
+      .catch(() => { if (!cancelled) setDisplayed({ url: null, shownImage: shownImageForViewport }); });
     return () => { cancelled = true; };
-  }, [scene.shownImage, shownPath]);
+  }, [shownImageForViewport, shownPath]);
 
   // Pieces carrying an uploaded picture need a signed URL each; bestiary art is
   // an ordinary external URL and needs none.
@@ -407,7 +472,28 @@ export default function SceneEditor({ scene, onSceneChange }) {
       .catch(() => {});
   }, []);
 
-  const { sendDrag } = useSceneLive({
+  const getCameraPose = useCallback(() => cameraPoseRef.current, []);
+  const getPresenterState = useCallback(() => ({
+    following: projectorFollowingRef.current,
+    shownImage: sceneShownImageRef.current,
+    pose: cameraPoseRef.current,
+  }), []);
+  const handleRemoteCameraPose = useCallback((pose) => {
+    if (projectorFollowingRef.current) setFollowCameraPose(pose);
+  }, []);
+  const handleRemotePresenterState = useCallback((next) => {
+    const wasFollowing = projectorFollowingRef.current;
+    // The first paused frame is the snapshot to freeze. Further paused frames
+    // are deliberately ignored until the presenter reconnects the projector.
+    if (!hasPresenterFrameRef.current || shouldApplyPresenterFrame(wasFollowing, next.following)) {
+      if (next.pose) setFollowCameraPose(next.pose);
+      setProjectorShownImage(next.shownImage);
+    }
+    hasPresenterFrameRef.current = true;
+    projectorFollowingRef.current = next.following;
+    setProjectorFollowing(next.following);
+  }, []);
+  const { sendDrag, sendCamera, sendPresenterState } = useSceneLive({
     sceneId: scene.id,
     campaignId: scene.campaignId,
     onTokenEvent: handleTokenEvent,
@@ -415,7 +501,40 @@ export default function SceneEditor({ scene, onSceneChange }) {
     onRemoteDrag: handleRemoteDrag,
     onDrawingEvent: handleDrawingEvent,
     onCharacterEvent: handleCharacterEvent,
+    cameraSourceId: role.isGm && !spectator ? presenterCameraSource : null,
+    followCameraSource: spectator ? spectatorSource : null,
+    getCameraPose,
+    onCameraPose: spectator ? handleRemoteCameraPose : undefined,
+    getPresenterState,
+    onPresenterState: spectator ? handleRemotePresenterState : undefined,
   });
+
+  const handleCameraViewChange = useCallback((pose) => {
+    cameraPoseRef.current = pose;
+    sendCamera(pose);
+  }, [sendCamera]);
+
+  const handleToggleProjectorFollow = useCallback(() => {
+    const following = !projectorFollowingRef.current;
+    projectorFollowingRef.current = following;
+    setProjectorFollowing(following);
+    sendPresenterState({
+      following,
+      shownImage: scene.shownImage,
+      pose: cameraPoseRef.current,
+    });
+  }, [scene.shownImage, sendPresenterState]);
+
+  // Switching Map/Background is presenter state as well as persisted scene
+  // state. Broadcasting it keeps ordering deterministic relative to a freeze.
+  useEffect(() => {
+    if (!role.isGm || spectator) return;
+    sendPresenterState({
+      following: projectorFollowingRef.current,
+      shownImage: scene.shownImage,
+      pose: cameraPoseRef.current,
+    });
+  }, [role.isGm, scene.shownImage, sendPresenterState, spectator]);
 
   // A client that vanishes mid-drag never sends its release; sweeping keeps its
   // piece from being pinned at the ghost position forever.
@@ -975,7 +1094,7 @@ export default function SceneEditor({ scene, onSceneChange }) {
   }, []);
 
   const { push: pushToEncounter } = useEncounterBridge({
-    tokens: role.isGm ? tokens : [],
+    tokens: role.isGm && !spectator ? tokens : [],
     onTokenVitals: applyTokenVitals,
   });
 
@@ -1404,12 +1523,14 @@ export default function SceneEditor({ scene, onSceneChange }) {
   // disappear: they are context, and losing them would make the map unreadable
   // the moment you switch tools.
   const visibleDrawings = useMemo(() => (
-    role.isGm
+    spectator
+      ? drawings.filter((drawing) => drawing.layer !== 'gm')
+      : role.isGm
       ? drawings.map((drawing) => (
         drawing.layer === activeLayer ? drawing : { ...drawing, color: fade(drawing.color) }
       ))
       : drawings
-  ), [activeLayer, drawings, role.isGm]);
+  ), [activeLayer, drawings, role.isGm, spectator]);
 
   // The party's faces. Held by the browser after the first load, so a scene with
   // six characters in it does not go back to the bucket on every visit.
@@ -1432,6 +1553,34 @@ export default function SceneEditor({ scene, onSceneChange }) {
       }),
     [ghosts, portraits, roster, tokenImageUrls, tokens],
   );
+
+  // A projector opened from a GM browser still has GM database permissions.
+  // Recreate the player boundary explicitly before anything reaches the DOM:
+  // no hidden layer, no staging area, and no secret label.
+  const projectedTokens = useMemo(() => {
+    if (!spectator) return visibleTokens;
+    return projectPlayerTokens(visibleTokens, scene.playArea);
+  }, [scene.playArea, spectator, visibleTokens]);
+
+  const projectedTokenById = useMemo(
+    () => new Map(projectedTokens.map((token) => [token.id, token])),
+    [projectedTokens],
+  );
+  const projectedRollBubbles = useMemo(() => (
+    spectator
+      ? rollBubbles
+        .map((entry) => ({ ...entry, token: projectedTokenById.get(entry.token?.id) || null }))
+        .filter((entry) => entry.token)
+      : rollBubbles
+  ), [projectedTokenById, rollBubbles, spectator]);
+  const projectedDiceThrows = useMemo(() => (
+    spectator
+      ? diceThrows.map((entry) => ({
+        ...entry,
+        token: entry.token ? (projectedTokenById.get(entry.token.id) || null) : null,
+      }))
+      : diceThrows
+  ), [diceThrows, projectedTokenById, spectator]);
 
   // The menu must edit the same character state the piece displays. The raw
   // map row deliberately has no sheet-owned HP or death saves, so using it here
@@ -1469,42 +1618,138 @@ export default function SceneEditor({ scene, onSceneChange }) {
     startSheetTransition(() => setSheetCharacterId(characterId));
   }, []);
 
+  const openSpectator = useCallback(() => {
+    setProjectorControlsOpen(true);
+    setSceneActionsAnchor(null);
+    const url = spectatorUrl(window.location.href, scene.campaignId, presenterCameraSource);
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }, [presenterCameraSource, scene.campaignId]);
+
+  const hideProjectorControls = useCallback(() => {
+    setProjectorControlsOpen(false);
+    setSceneActionsAnchor(null);
+  }, []);
+
   if (loading || role.loading) return <CircularProgress size={24} />;
+
+  if (spectator) {
+    return (
+      <Box data-spectator-view sx={spectatorRootSx}>
+        <SceneViewport
+          scene={scene}
+          imageUrl={displayed.url}
+          tokens={projectedTokens}
+          snap
+          canMove={() => false}
+          fog={scene.fog}
+          fogOpacity={PLAYER_FOG_OPACITY}
+          paintMode="select"
+          backgroundOnly={displayed.shownImage === 'background'}
+          onImageSize={setImageSize}
+          drawings={visibleDrawings}
+          lasers={laserDots}
+          rollBubbles={projectedRollBubbles}
+          diceThrows={projectedDiceThrows}
+          onDiceSettled={showSettledRollToast}
+          conditionEntries={conditionEntries}
+          remoteMeasure={remoteMeasure}
+          feetPerCell={feetPerCell}
+          followView={followCameraPose}
+          cameraLocked
+          fillViewport
+        />
+      </Box>
+    );
+  }
 
   return (
     <Stack spacing={1}>
-      <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', flexWrap: 'wrap' }} useFlexGap>
-        <Box sx={{ minWidth: 0 }}>
-          <Typography variant="h1">{scene.name}</Typography>
-          <Typography variant="body2" color="text.secondary">
-            {tokens.length} token{tokens.length === 1 ? '' : 's'} · cell {scene.grid.size}px
-          </Typography>
+      <Box sx={sceneTopbarSx}>
+        <Box sx={sceneIdentitySx}>
+          <Typography variant="h1" sx={sceneTitleSx}>{scene.name}</Typography>
+          <Stack direction="row" spacing={0.75} useFlexGap sx={sceneMetaSx}>
+            <Typography variant="body2" sx={sceneStatsSx}>
+              {tokens.length} token{tokens.length === 1 ? '' : 's'} · {scene.grid.size}px cells
+            </Typography>
+            <Chip
+              size="small"
+              icon={role.isGm ? <Shield size={12} /> : <Eye size={12} />}
+              label={role.isGm ? 'GM view' : 'Player view'}
+              color={role.isGm ? 'primary' : 'default'}
+              variant="outlined"
+              sx={sceneRoleChipSx}
+            />
+          </Stack>
         </Box>
-        <Chip
-          size="small"
-          icon={role.isGm ? <Shield size={13} /> : <Eye size={13} />}
-          label={role.isGm ? 'GM' : 'Player view'}
-          color={role.isGm ? 'primary' : 'default'}
-          variant="outlined"
-        />
         {role.isGm ? (
-          <Chip
-            size="small"
-            icon={<Radio size={13} />}
-            label={scene.isLive ? 'Live to players' : 'Not shown to players'}
-            color={scene.isLive ? 'success' : 'default'}
-            variant={scene.isLive ? 'filled' : 'outlined'}
-            onClick={handleToggleLive}
-          />
+          <Stack direction="row" spacing={0.75} useFlexGap sx={scenePresenterActionsSx}>
+            <Button
+              size="small"
+              color={scene.isLive ? 'success' : 'inherit'}
+              variant={scene.isLive ? 'contained' : 'outlined'}
+              startIcon={<Radio size={14} />}
+              aria-pressed={scene.isLive}
+              onClick={handleToggleLive}
+            >
+              {scene.isLive ? 'Live' : 'Go live'}
+            </Button>
+            {scene.isLive && projectorControlsOpen ? (
+              <>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  startIcon={<MonitorPlay size={14} />}
+                  onClick={openSpectator}
+                >
+                  Spectator
+                </Button>
+                <Button
+                  size="small"
+                  variant={projectorFollowing ? 'outlined' : 'contained'}
+                  startIcon={projectorFollowing ? <Lock size={14} /> : <LockOpen size={14} />}
+                  aria-pressed={!projectorFollowing}
+                  onClick={handleToggleProjectorFollow}
+                >
+                  {projectorFollowing ? 'Freeze projector' : 'Resume projector'}
+                </Button>
+              </>
+            ) : null}
+            <IconButton
+              size="small"
+              aria-label="More scene actions"
+              aria-controls={sceneActionsAnchor ? 'scene-actions-menu' : undefined}
+              aria-haspopup="menu"
+              aria-expanded={sceneActionsAnchor ? 'true' : undefined}
+              onClick={(event) => setSceneActionsAnchor(event.currentTarget)}
+              sx={sceneActionsButtonSx}
+            >
+              <MoreVertical size={17} />
+            </IconButton>
+            <Menu
+              id="scene-actions-menu"
+              anchorEl={sceneActionsAnchor}
+              open={Boolean(sceneActionsAnchor)}
+              onClose={() => setSceneActionsAnchor(null)}
+            >
+              <MenuItem disabled={!scene.isLive} onClick={openSpectator}>
+                {projectorControlsOpen ? 'Open another projector' : 'Start projector mode'}
+              </MenuItem>
+              {projectorControlsOpen ? (
+                <MenuItem onClick={hideProjectorControls}>Hide projector controls</MenuItem>
+              ) : null}
+            </Menu>
+          </Stack>
         ) : null}
-        <BattleMapViewSwitch
-          view={contentView}
-          choices={sheetChoices}
-          selectedId={sheetCharacterId}
-          onViewChange={setContentView}
-          onSelectionChange={selectSheetCharacter}
-        />
-      </Stack>
+        <Box sx={sceneViewSwitchSx}>
+          <BattleMapViewSwitch
+            view={contentView}
+            choices={sheetChoices}
+            selectedId={sheetCharacterId}
+            onViewChange={setContentView}
+            onSelectionChange={selectSheetCharacter}
+          />
+        </Box>
+      </Box>
 
       <Box
         ref={contentLayoutRef}
@@ -1589,6 +1834,7 @@ export default function SceneEditor({ scene, onSceneChange }) {
         // that is not one of its own descendants.
         toast={<DiceToast toast={rollToast} onClose={dismissRollToast} />}
         onFullscreenChange={setMapFullscreen}
+        onViewChange={role.isGm ? handleCameraViewChange : undefined}
         fullscreenSheet={sheetChoices.length ? {
           choices: sheetChoices,
           selectedId: sheetCharacterId,
@@ -1693,6 +1939,89 @@ const EmbeddedBattleMapSheet = memo(function EmbeddedBattleMapSheet({ characterI
     </Suspense>
   );
 });
+
+const sceneTopbarSx = {
+  ...battleMapSurfaceSx,
+  display: 'flex',
+  alignItems: 'center',
+  flexWrap: 'wrap',
+  gap: 1,
+  px: { xs: 1, md: 1.25 },
+  py: 0.85,
+  borderRadius: 1,
+  boxShadow: '0 8px 24px rgba(0,0,0,0.22)',
+};
+
+const sceneIdentitySx = {
+  flex: '1 1 250px',
+  minWidth: 0,
+};
+
+const sceneTitleSx = {
+  color: 'primary.main',
+  fontSize: { xs: '0.98rem', md: '1.08rem' },
+  lineHeight: 1.2,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+};
+
+const sceneMetaSx = {
+  alignItems: 'center',
+  flexWrap: 'wrap',
+  mt: 0.35,
+};
+
+const sceneStatsSx = {
+  color: 'rgba(255,255,255,0.58)',
+  fontSize: '0.68rem',
+  letterSpacing: '0.025em',
+};
+
+const sceneRoleChipSx = {
+  height: 20,
+  fontSize: '0.62rem',
+  '& .MuiChip-icon': { ml: 0.55 },
+};
+
+const scenePresenterActionsSx = {
+  alignItems: 'center',
+  flexWrap: 'wrap',
+  pl: { xs: 0, md: 1.25 },
+  borderLeft: { xs: 0, md: '1px solid rgba(232,201,106,0.16)' },
+  '& .MuiButton-root': {
+    minHeight: 30,
+    fontSize: '0.67rem',
+    whiteSpace: 'nowrap',
+  },
+};
+
+const sceneActionsButtonSx = {
+  width: 30,
+  height: 30,
+  color: 'rgba(255,255,255,0.68)',
+  border: '1px solid rgba(255,255,255,0.16)',
+  borderRadius: 1,
+  '&:hover': {
+    color: '#e8c96a',
+    borderColor: 'rgba(232,201,106,0.42)',
+    bgcolor: 'rgba(232,201,106,0.08)',
+  },
+};
+
+const sceneViewSwitchSx = {
+  ml: { xs: 0, lg: 'auto' },
+  pl: { xs: 0, lg: 0.5 },
+};
+
+const spectatorRootSx = {
+  position: 'fixed',
+  inset: 0,
+  width: '100vw',
+  height: '100vh',
+  overflow: 'hidden',
+  bgcolor: '#000',
+};
 
 const contentLayoutSx = {
   display: 'grid',

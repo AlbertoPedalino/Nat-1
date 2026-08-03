@@ -127,6 +127,10 @@ test('a Lucide map object persists its resized cell dimensions on release', () =
     />,
   );
   const viewport = screen.getByText('Upload a map image to start building this scene.').parentElement;
+  const object = screen.getByRole('button', { name: 'Open door' });
+
+  fireEvent.pointerDown(object, { button: 0, clientX: 25, clientY: 25, pointerId: 6 });
+  fireEvent.pointerUp(viewport, { button: 0, clientX: 25, clientY: 25, pointerId: 6 });
   const handle = screen.getByRole('button', { name: 'Resize Open door' });
 
   fireEvent.pointerDown(handle, { button: 0, clientX: 50, clientY: 50, pointerId: 7 });
@@ -160,6 +164,10 @@ test('a Lucide map object persists rotation around its centre on release', () =>
     />,
   );
   const viewport = screen.getByText('Upload a map image to start building this scene.').parentElement;
+  const object = screen.getByRole('button', { name: 'Open door' });
+
+  fireEvent.pointerDown(object, { button: 0, clientX: 25, clientY: 25, pointerId: 7 });
+  fireEvent.pointerUp(viewport, { button: 0, clientX: 25, clientY: 25, pointerId: 7 });
   const handle = screen.getByRole('button', { name: 'Rotate Open door' });
 
   fireEvent.pointerDown(handle, { button: 0, clientX: 50, clientY: 25, pointerId: 8 });
@@ -170,6 +178,119 @@ test('a Lucide map object persists rotation around its centre on release', () =>
     expect.objectContaining({ id: 'door-rotate' }),
     { rotation: 90 },
   );
+});
+
+test('map object resize and rotation controls only appear on the selected icon', () => {
+  render(
+    <SceneViewport
+      scene={{ grid: { size: 50, offsetX: 0, offsetY: 0, visible: false }, playArea: null }}
+      imageUrl={null}
+      tokens={[
+        { id: 'door-1', iconKey: 'door-open', label: 'Open door', layer: 'map', x: 0, y: 0, w: 1, h: 1 },
+        { id: 'window-1', iconKey: 'panels-top-left', label: 'Window', layer: 'map', x: 2, y: 0, w: 1, h: 1 },
+      ]}
+      snap
+      canMove={() => true}
+      fog={null}
+      drawings={[]}
+      lasers={[]}
+      rollBubbles={[]}
+      diceThrows={[]}
+    />,
+  );
+  const viewport = screen.getByText('Upload a map image to start building this scene.').parentElement;
+
+  expect(screen.queryByRole('button', { name: 'Resize Open door' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Rotate Window' })).toBeNull();
+
+  fireEvent.pointerDown(screen.getByRole('button', { name: 'Open door' }), {
+    button: 0, clientX: 25, clientY: 25, pointerId: 20,
+  });
+  fireEvent.pointerUp(viewport, { button: 0, clientX: 25, clientY: 25, pointerId: 20 });
+
+  expect(screen.getByRole('button', { name: 'Resize Open door' })).toBeTruthy();
+  expect(screen.getByRole('button', { name: 'Rotate Open door' })).toBeTruthy();
+  expect(screen.queryByRole('button', { name: 'Resize Window' })).toBeNull();
+
+  fireEvent.pointerDown(screen.getByRole('button', { name: 'Window' }), {
+    button: 0, clientX: 125, clientY: 25, pointerId: 21,
+  });
+  fireEvent.pointerUp(viewport, { button: 0, clientX: 125, clientY: 25, pointerId: 21 });
+
+  expect(screen.queryByRole('button', { name: 'Resize Open door' })).toBeNull();
+  expect(screen.getByRole('button', { name: 'Resize Window' })).toBeTruthy();
+  expect(screen.getByRole('button', { name: 'Rotate Window' })).toBeTruthy();
+
+  fireEvent.pointerDown(viewport, { button: 0, clientX: 300, clientY: 200, pointerId: 22 });
+  fireEvent.pointerUp(viewport, { button: 0, clientX: 300, clientY: 200, pointerId: 22 });
+
+  expect(screen.queryByRole('button', { name: 'Resize Window' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Rotate Window' })).toBeNull();
+});
+
+test('a selected ruler starts on top of a token instead of dragging it', () => {
+  const onMeasure = vi.fn();
+  const onMoveToken = vi.fn();
+  render(
+    <SceneViewport
+      scene={{ grid: { size: 50, offsetX: 0, offsetY: 0, visible: false }, playArea: null }}
+      imageUrl={null}
+      tokens={[{ id: 'ogre-1', label: 'Ogre', layer: 'tokens', x: 1, y: 1, w: 1, h: 1 }]}
+      snap
+      canMove={() => true}
+      fog={null}
+      paintMode="measure"
+      measureShape="line"
+      feetPerCellForRuler={5}
+      onMeasure={onMeasure}
+      onMoveToken={onMoveToken}
+      drawings={[]}
+      lasers={[]}
+      rollBubbles={[]}
+      diceThrows={[]}
+    />,
+  );
+  const token = screen.getByRole('button', { name: 'Ogre' });
+  const viewport = screen.getByText('Upload a map image to start building this scene.').parentElement;
+
+  fireEvent.pointerDown(token, { button: 0, clientX: 60, clientY: 60, pointerId: 12 });
+  fireEvent.pointerMove(viewport, { clientX: 120, clientY: 60, pointerId: 12 });
+
+  expect(token).toHaveStyle({ pointerEvents: 'none' });
+  expect(onMeasure).toHaveBeenCalledWith(expect.objectContaining({
+    shape: 'line',
+    from: expect.any(Object),
+    to: expect.any(Object),
+  }));
+  expect(onMoveToken).not.toHaveBeenCalled();
+});
+
+test('a spectator viewport leaves its pieces inert but keeps the fullscreen control', () => {
+  const onMoveToken = vi.fn();
+  render(
+    <SceneViewport
+      scene={{ grid: { size: 50, offsetX: 0, offsetY: 0, visible: false }, playArea: null }}
+      imageUrl={null}
+      tokens={[{ id: 'hero-1', label: 'Hero', layer: 'tokens', x: 1, y: 1, w: 1, h: 1 }]}
+      snap
+      canMove={() => true}
+      fog={null}
+      paintMode="select"
+      onMoveToken={onMoveToken}
+      drawings={[]}
+      lasers={[]}
+      rollBubbles={[]}
+      diceThrows={[]}
+      cameraLocked
+    />,
+  );
+
+  const token = screen.getByRole('button', { name: 'Hero' });
+  fireEvent.pointerDown(token, { button: 0, clientX: 60, clientY: 60, pointerId: 30 });
+
+  expect(token).toHaveStyle({ pointerEvents: 'none' });
+  expect(screen.getByRole('button', { name: 'Fullscreen map' })).toBeTruthy();
+  expect(onMoveToken).not.toHaveBeenCalled();
 });
 
 test('fullscreen exposes a sheet button and opens the sheet inside the viewport', () => {

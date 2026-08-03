@@ -116,6 +116,10 @@ export default function TokenSprite({
         width: size,
         height: size,
         pointerEvents: interactive ? 'auto' : 'none',
+        // Some descendants (death-save dots and condition pills) intentionally
+        // opt back into pointer events. Disable the whole subtree when another
+        // map tool owns the pointer so it truly falls through to the viewport.
+        ...(!interactive ? { '&, & *': { pointerEvents: 'none !important' } } : null),
         cursor: movable ? 'grab' : 'default',
         opacity: dimmed ? 0.3 : (token.layer === 'gm' || staged ? 0.6 : 1),
         filter: staged ? 'grayscale(0.7)' : 'none',

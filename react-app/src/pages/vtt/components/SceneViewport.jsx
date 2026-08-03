@@ -18,6 +18,9 @@ import {
 import { measureLabel, movementLabel } from '../../../shared/vtt/measure.js';
 import { movedPoints } from '../../../shared/vtt/drawing.js';
 import { isTokenInPlay } from '../../../shared/vtt/scene.js';
+import {
+  cameraPoseToView, viewToCameraPose,
+} from '../../../shared/vtt/cameraSync.js';
 import DrawingCanvas from './DrawingCanvas.jsx';
 import FogCanvas from './FogCanvas.jsx';
 import RollBubble from './RollBubble.jsx';
@@ -121,6 +124,11 @@ export default function SceneViewport({
   toast,
   fullscreenSheet,
   onFullscreenChange,
+  followView,
+  onViewChange,
+  cameraLocked = false,
+  fillViewport = false,
+  showFullscreenControl = true,
 }) {
   const hostRef = useRef(null);
   const dragRef = useRef(null);
@@ -137,6 +145,8 @@ export default function SceneViewport({
   const [drag, setDrag] = useState(null);
   const [resize, setResize] = useState(null);
   const [rotate, setRotate] = useState(null);
+  const [selectedMapObjectId, setSelectedMapObjectId] = useState(null);
+  const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
   // The stroke in progress lives in a ref, not in state. Accumulating it in
   // state meant the commit ran inside a state updater — a side effect in a
   // function React may call more than once or defer, which is why the second
@@ -163,8 +173,68 @@ export default function SceneViewport({
   const [markDrag, setMarkDrag] = useState(null);
 
   useEffect(() => {
+    const host = hostRef.current;
+    if (!host) return undefined;
+    const measure = () => {
+      const box = host.getBoundingClientRect();
+      setViewportSize((current) => (
+        current.width === box.width && current.height === box.height
+          ? current
+          : { width: box.width, height: box.height }
+      ));
+    };
+    measure();
+    if (typeof ResizeObserver !== 'function') return undefined;
+    const observer = new ResizeObserver(measure);
+    observer.observe(host);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const pose = viewToCameraPose(view, viewportSize);
+    if (pose) onViewChange?.(pose);
+  }, [onViewChange, view, viewportSize]);
+
+  // Projectors follow rather than jump. Each realtime target starts a short
+  // interpolation from the frame already on screen; a newer target cancels it
+  // and continues from that exact point, which stays smooth during a long pan.
+  useEffect(() => {
+    const target = cameraPoseToView(followView, viewportSize);
+    if (!target) return undefined;
+    let frame = 0;
+    let settled = false;
+    const step = () => {
+      setView((current) => {
+        const next = {
+          x: current.x + (target.x - current.x) * 0.34,
+          y: current.y + (target.y - current.y) * 0.34,
+          zoom: current.zoom + (target.zoom - current.zoom) * 0.34,
+        };
+        settled = Math.abs(next.x - target.x) < 0.15
+          && Math.abs(next.y - target.y) < 0.15
+          && Math.abs(next.zoom - target.zoom) < 0.001;
+        return settled ? target : next;
+      });
+      if (!settled) frame = requestAnimationFrame(step);
+    };
+    frame = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(frame);
+  }, [followView, viewportSize]);
+
+  useEffect(() => {
     if (!placementDrag) setPlacementHover(null);
   }, [placementDrag]);
+
+  // Resize and rotation furniture belongs only to the map object the user has
+  // picked. Drop the selection if that object is removed or stops being an
+  // icon (for example after a realtime scene update).
+  useEffect(() => {
+    setSelectedMapObjectId((selectedId) => (
+      selectedId && tokens.some((token) => token.id === selectedId && token.iconKey)
+        ? selectedId
+        : null
+    ));
+  }, [tokens]);
 
   // Fit once per picture: refitting on every render would fight the user's pan,
   // but switching between the battlemap and the background has to reframe — the
@@ -232,6 +302,7 @@ export default function SceneViewport({
   }, []);
 
   const handleWheel = useCallback((event) => {
+    if (cameraLocked) return;
     // Fullscreen dialogs and the floating sheet live inside the fullscreen map
     // element (portals outside it are not painted by the browser). They are
     // still UI surfaces, not map canvas: let their own scroll container receive
@@ -240,7 +311,7 @@ export default function SceneViewport({
     event.preventDefault();
     const factor = event.deltaY < 0 ? WHEEL_STEP : 1 / WHEEL_STEP;
     setView((current) => zoomAt(current, factor, screenPoint(event)));
-  }, [screenPoint]);
+  }, [cameraLocked, screenPoint]);
 
   // Wheel has to be a non-passive native listener: React's onWheel is passive,
   // and preventDefault there is ignored, so the page scrolls while zooming.
@@ -323,6 +394,7 @@ export default function SceneViewport({
   // Two fingers are a pinch, whatever they landed on: whatever was being drawn,
   // painted or dragged is abandoned rather than continued with one of them.
   const trackPointer = (event) => {
+    if (cameraLocked) return;
     if (event.target.closest?.('[data-viewport-control], .MuiModal-root')) return;
     pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
     if (pointersRef.current.size !== 2) return;
@@ -375,6 +447,7 @@ export default function SceneViewport({
   };
 
   const beginPan = (event) => {
+    if (cameraLocked) return;
     // One finger of a pinch must not also pan the map.
     if (pointersRef.current.size > 1) return;
     if (event.button !== 0 && event.button !== 1) return;
@@ -387,6 +460,7 @@ export default function SceneViewport({
     // at all — so its buttons are inside this host and would lose their clicks
     // to the same capture. That is what made the custom roller do nothing.
     if (event.target.closest?.('[data-viewport-control], .MuiModal-root')) return;
+    if (event.button === 0) setSelectedMapObjectId(null);
     const point = screenPoint(event);
     event.currentTarget.setPointerCapture?.(event.pointerId);
 
@@ -453,6 +527,7 @@ export default function SceneViewport({
 
   const beginTokenDrag = (event, token) => {
     event.stopPropagation();
+    setSelectedMapObjectId(token.iconKey ? token.id : null);
     armLongPress(event, token);
     if (!canMove(token)) return;
     const pointer = screenToWorld(screenPoint(event), view);
@@ -766,7 +841,12 @@ export default function SceneViewport({
         const cell = worldToCell(world, scene.grid);
         onDropCharacter(characterId, { x: cell.col, y: cell.row });
       }}
-      sx={{ ...hostSx, ...(covering ? coveringSx : null), cursor: cursorFor(paintMode) }}
+      sx={{
+        ...hostSx,
+        ...(fillViewport ? fillViewportSx : null),
+        ...(covering ? coveringSx : null),
+        cursor: cameraLocked ? 'default' : cursorFor(paintMode),
+      }}
     >
       {imageUrl ? (
         <Box
@@ -864,6 +944,10 @@ export default function SceneViewport({
         // A piece on another layer is visible but inert: no cursor, no drag, no
         // menu. That is what "editing a layer" means here.
         const onActiveLayer = !activeLayer || token.layer === activeLayer;
+        // A selected map tool owns the pointer, even when the gesture starts on
+        // top of a piece. Token interaction returns only with the cursor tool;
+        // otherwise rulers, brushes, notes and lasers could not start there.
+        const tokenInteractive = !cameraLocked && onActiveLayer && paintMode === 'select';
         // Staged outside the play area: the GM sees it faintly, the players do
         // not receive it at all.
         const staged = showPlayArea && !isTokenInPlay(live, scene.playArea);
@@ -884,22 +968,22 @@ export default function SceneViewport({
               size="100%"
               dimmed={!onActiveLayer}
               staged={staged}
-              interactive={onActiveLayer}
-              movable={canMove(token)}
-              resizable={Boolean(token.iconKey) && canMove(token)}
-              rotatable={Boolean(token.iconKey) && canMove(token)}
-              canSetDeathSaves={Boolean(onActiveLayer && canSetDeathSaves?.(token))}
+              interactive={tokenInteractive}
+              movable={tokenInteractive && canMove(token)}
+              resizable={tokenInteractive && selectedMapObjectId === token.id && canMove(token)}
+              rotatable={tokenInteractive && selectedMapObjectId === token.id && canMove(token)}
+              canSetDeathSaves={Boolean(tokenInteractive && canSetDeathSaves?.(token))}
               conditionEntries={conditionEntries}
-              onPointerDown={(event) => (onActiveLayer ? beginTokenDrag(event, token) : undefined)}
+              onPointerDown={tokenInteractive ? (event) => beginTokenDrag(event, token) : undefined}
               onResizePointerDown={(event) => (
-                onActiveLayer ? beginTokenResize(event, token) : undefined
+                tokenInteractive ? beginTokenResize(event, token) : undefined
               )}
               onRotatePointerDown={(event) => (
-                onActiveLayer ? beginTokenRotate(event, token) : undefined
+                tokenInteractive ? beginTokenRotate(event, token) : undefined
               )}
               onDeathSaveChange={(type, value) => onDeathSaveChange?.(token, type, value)}
               onContextMenu={(event) => {
-                if (!onActiveLayer || !onContextMenu) return;
+                if (!tokenInteractive || !onContextMenu) return;
                 event.preventDefault();
                 event.stopPropagation();
                 onContextMenu(token, { x: event.clientX, y: event.clientY });
@@ -998,17 +1082,19 @@ export default function SceneViewport({
         <Box data-viewport-control sx={layerSwitchSx}>{layerSwitch}</Box>
       ) : null}
 
-      <Tooltip title={fullscreenActive ? 'Leave fullscreen' : 'Fullscreen map'}>
-        <IconButton
-          size="small"
-          data-viewport-control
-          aria-label={fullscreenActive ? 'Leave fullscreen' : 'Fullscreen map'}
-          onClick={toggleFullscreen}
-          sx={fullscreenBtnSx}
-        >
-          {fullscreenActive ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-        </IconButton>
-      </Tooltip>
+      {showFullscreenControl ? (
+        <Tooltip title={fullscreenActive ? 'Leave fullscreen' : 'Fullscreen map'}>
+          <IconButton
+            size="small"
+            data-viewport-control
+            aria-label={fullscreenActive ? 'Leave fullscreen' : 'Fullscreen map'}
+            onClick={toggleFullscreen}
+            sx={fullscreenBtnSx}
+          >
+            {fullscreenActive ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+          </IconButton>
+        </Tooltip>
+      ) : null}
 
       {/* Over the piece that rolled: the position is recomputed here rather than
           stored, so a bubble follows its creature while the map is panned. */}
@@ -1163,6 +1249,15 @@ const hostSx = {
   // still what Safari matches.
   '&:fullscreen': { width: '100vw', height: '100vh', maxHeight: 'none', borderRadius: 0 },
   '&:-webkit-full-screen': { width: '100vw', height: '100vh', maxHeight: 'none', borderRadius: 0 },
+};
+
+const fillViewportSx = {
+  width: '100vw',
+  height: '100vh',
+  minHeight: 0,
+  maxHeight: 'none',
+  border: 0,
+  borderRadius: 0,
 };
 
 // Where the play area sits on screen, in viewport pixels.
