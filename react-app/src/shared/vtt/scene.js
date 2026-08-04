@@ -10,10 +10,15 @@ import { normalizeMapObjectKey, normalizeMapObjectStroke } from './mapObjects.js
 export const LAYERS = Object.freeze(['map', 'tokens', 'gm']);
 export const DEFAULT_GRID = Object.freeze({
   size: 70, offsetX: 0, offsetY: 0, visible: true, snapObjects: true,
+  color: '#e8c96a', lineWidth: 1,
 });
 
 const MIN_CELL = 8;
 const MAX_CELL = 512;
+// Half a pixel is the thinnest line a screen will still hint at; past a few the
+// squares stop being lines and start being walls.
+const MIN_GRID_LINE = 0.5;
+const MAX_GRID_LINE = 6;
 const MAX_SPAN = 40;
 const HEX_COLOR_RE = /^#[0-9a-f]{6}$/i;
 
@@ -50,7 +55,30 @@ export function normalizeGrid(grid) {
     // built, not a property of the rug. Scenes written before the switch existed
     // have no key at all, and snapping is the behaviour they were built with.
     snapObjects: source.snapObjects !== false,
+    // How the lines are drawn. A printed battlemap already has squares on it and
+    // a dark ink over a dark cave is unreadable, so the pair travels with the
+    // scene rather than being one look for every map anyone uploads.
+    color: HEX_COLOR_RE.test(source.color) ? String(source.color).toLowerCase() : DEFAULT_GRID.color,
+    lineWidth: normalizeGridLineWidth(source.lineWidth),
   };
+}
+
+// Also used when drawing, not only when saving: a number typed into the panel is
+// on the scene long before it reaches the database, and a line five hundred
+// pixels thick is a black screen.
+export function normalizeGridLineWidth(value) {
+  return clamp(
+    Math.round(numberOr(value, DEFAULT_GRID.lineWidth) * 2) / 2,
+    MIN_GRID_LINE,
+    MAX_GRID_LINE,
+  );
+}
+
+// The grid is a hint over the picture, never a lid on it: whatever colour it is
+// given, it is drawn at a quarter strength so the map underneath keeps reading.
+export function gridLineColor(grid) {
+  const color = HEX_COLOR_RE.test(grid?.color) ? String(grid.color).toLowerCase() : DEFAULT_GRID.color;
+  return `${color}40`;
 }
 
 // The part of the scene that is in play, in cells. Anything outside it is the

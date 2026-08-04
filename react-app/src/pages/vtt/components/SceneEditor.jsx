@@ -166,6 +166,7 @@ export default function SceneEditor({
   scene,
   onSceneChange,
   onOpenScene = null,
+  onMapFullscreenChange = null,
   spectator = false,
   spectatorSource = null,
   cameraSourceId = null,
@@ -1660,6 +1661,23 @@ export default function SceneEditor({
     startSheetTransition(() => setSheetCharacterId(characterId));
   }, []);
 
+  // The page is told as well, because its own top bar is fixed and painted above
+  // the map. Where the browser has no Fullscreen API — a phone — "fullscreen" is
+  // the map covering the window, and the bar stayed on top of it, over exactly
+  // the corner controls that live at the top of the board.
+  const handleMapFullscreenChange = useCallback((active) => {
+    setMapFullscreen(active);
+    onMapFullscreenChange?.(active);
+  }, [onMapFullscreenChange]);
+
+  // Leaving the scene while covering the window must give the bar back, or the
+  // page returns to a list with no way out of it. Through a ref, so a caller
+  // passing a fresh function every render does not have the cleanup run — and
+  // the bar come back mid-fullscreen — on every one of them.
+  const mapFullscreenNoticeRef = useRef(onMapFullscreenChange);
+  mapFullscreenNoticeRef.current = onMapFullscreenChange;
+  useEffect(() => () => mapFullscreenNoticeRef.current?.(false), []);
+
   // The GM sets the projector up once, drags it onto the television, and goes
   // back to running the game: being thrown into it every time is the wrong way
   // round.
@@ -1824,7 +1842,7 @@ export default function SceneEditor({
         style={sideSheetOpen ? { '--sheet-grid-columns': sheetGridColumns(sheetSplit) } : undefined}
         sx={[contentLayoutSx, sideSheetOpen && contentLayoutOpenSx]}
       >
-        <Box sx={viewportCellSx}>
+        <Box sx={[viewportCellSx, sideSheetOpen && viewportCellStackedSx]}>
           <SceneViewport
         scene={scene}
         imageUrl={displayed.url}
@@ -1901,7 +1919,7 @@ export default function SceneEditor({
         // Inside the viewport, not beside it: a fullscreen map paints nothing
         // that is not one of its own descendants.
         toast={<DiceToast toast={rollToast} onClose={dismissRollToast} />}
-        onFullscreenChange={setMapFullscreen}
+        onFullscreenChange={handleMapFullscreenChange}
         onViewChange={role.isGm ? handleCameraViewChange : undefined}
         fullscreenSheet={sheetChoices.length ? {
           choices: sheetChoices,
@@ -2109,6 +2127,11 @@ const contentLayoutOpenSx = {
   // scrolls. Side by side there is nothing to scroll — each half handles its
   // own.
   overflowY: { xs: 'auto', lg: 'visible' },
+  // Two rows sized by what they hold rather than stretched to share the height
+  // of a screen they do not fit in. Stretched, both halves were given the full
+  // row and the sheet was drawn over the board.
+  gridTemplateRows: { xs: 'auto auto', lg: 'auto' },
+  alignContent: { xs: 'start', lg: 'stretch' },
 };
 
 const viewportCellSx = {
@@ -2117,20 +2140,32 @@ const viewportCellSx = {
   display: 'flex',
 };
 
+// Stacked, the map takes a slice of the screen instead of all of it: with the
+// sheet below, a board that keeps the whole window leaves the sheet somewhere
+// past the bottom edge with nothing but the map — which swallows the touch to
+// pan — between the reader and it.
+const viewportCellStackedSx = {
+  height: { xs: 'clamp(320px, 52dvh, 520px)', lg: 'auto' },
+};
+
 const sheetViewSx = {
   minWidth: 0,
   // Beside the map it is exactly as tall as the map and scrolls inside itself.
-  // Stacked under it on a narrow screen it keeps a readable floor, and the
-  // column that holds both is what scrolls.
-  minHeight: { xs: 480, lg: 0 },
+  // Stacked under it on a narrow screen it is as tall as the sheet and does not
+  // scroll at all: the column that holds both does. Two scrollers inside each
+  // other on a phone means a finger on the sheet moves the sheet, so the top of
+  // it never comes into view.
+  minHeight: 0,
   height: { lg: '100%' },
-  overflow: 'auto',
+  overflow: { xs: 'visible', lg: 'auto' },
   border: '1px solid rgba(232, 201, 106, 0.3)',
   borderRadius: 1.5,
   bgcolor: 'rgba(5, 5, 7, 0.88)',
   backgroundImage: 'linear-gradient(145deg, rgba(255,255,255,0.025), transparent 42%)',
   boxShadow: '0 18px 52px rgba(0, 0, 0, 0.46)',
-  contain: 'layout paint',
+  // Paint containment belongs to the half that scrolls. On a phone the box grows
+  // with the sheet and clipping it can only cut something off.
+  contain: { xs: 'none', lg: 'layout paint' },
   isolation: 'isolate',
   '& > *': {
     width: '100%',

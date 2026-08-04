@@ -215,10 +215,11 @@ export default function TokenSprite({
       ) : null}
 
       {hasHandles && resizable ? (
-        // A picture scales by default, and the way out of that has to be said
-        // somewhere: a modifier nobody is told about is a modifier nobody uses.
+        // Each side follows the corner on its own axis, so the two gestures have
+        // to be named: nobody discovers a stretch by accident. No modifier is
+        // mentioned because none is used — a tablet has no key to hold.
         <Tooltip
-          title={isMapObject ? 'Drag to resize' : 'Drag to resize · hold Shift to stretch it out of shape'}
+          title={isMapObject ? 'Drag to resize' : 'Drag across to scale · one way only to stretch'}
           placement="right"
           open={resizeHintOpen}
           onOpen={() => { if (!resizingRef.current) setResizeHintOpen(true); }}

@@ -32,6 +32,7 @@ import {
   Users,
 } from 'lucide-react';
 import ColorField from '../../../components/ColorField.jsx';
+import { DEFAULT_GRID } from '../../../shared/vtt/scene.js';
 
 // The scene's settings, split by the question they answer. Each one is a panel
 // behind its own icon on the rail rather than a strip across the top: the map is
@@ -110,7 +111,7 @@ export function MapPanel({
         </Button>
         <InfoHint
           label="About images on the map"
-          text="It lands on the layer you are editing. Click it to get its corner handles: drag to scale, hold Shift to stretch it out of shape, and the top handle turns it."
+          text="It lands on the layer you are editing. Click it to get its corner handles: the corner moves each side on its own — drag it diagonally to scale, sideways or downwards to stretch — and the top handle turns it."
         />
       </Stack>
 
@@ -146,6 +147,31 @@ export function MapPanel({
           value={scene.grid.offsetY}
           onChange={(event) => setGrid({ offsetY: Number(event.target.value) })}
           sx={numberSx}
+        />
+      </Stack>
+      {/* How the lines look, beside the numbers that place them: a printed
+          battlemap already has squares of its own, and gold over a snowfield is
+          not the same read as gold over a cave. */}
+      <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+        <ColorField
+          value={scene.grid.color || DEFAULT_GRID.color}
+          onChange={(color) => setGrid({ color })}
+          deferMs={180}
+          label="Grid colour"
+          sx={colorInputSx}
+        />
+        <TextField
+          label="Line"
+          size="small"
+          type="number"
+          value={scene.grid.lineWidth ?? DEFAULT_GRID.lineWidth}
+          onChange={(event) => setGrid({ lineWidth: Number(event.target.value) })}
+          slotProps={{ htmlInput: { min: 0.5, max: 6, step: 0.5 } }}
+          sx={numberSx}
+        />
+        <InfoHint
+          label="About the grid lines"
+          text="Half a pixel to six, in screen pixels, so a line stays as fine at one zoom as at another. Whatever colour you pick is drawn faint enough to read the map through."
         />
       </Stack>
       <FormControlLabel

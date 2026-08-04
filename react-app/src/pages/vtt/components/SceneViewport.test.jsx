@@ -32,6 +32,37 @@ function renderLaserViewport(onLaser) {
   };
 }
 
+test('the grid is drawn in the colour and thickness the scene carries', () => {
+  const { container } = render(
+    <SceneViewport
+      scene={{
+        grid: {
+          size: 50, offsetX: 0, offsetY: 0, visible: true, color: '#3aa0ff', lineWidth: 3,
+        },
+        playArea: null,
+      }}
+      imageUrl="/map.png"
+      tokens={[]}
+      snap
+      canMove={() => false}
+      fog={null}
+      drawings={[]}
+      lasers={[]}
+      rollBubbles={[]}
+      diceThrows={[]}
+    />,
+  );
+
+  // The style is an emotion class rather than an inline one, so it is read back
+  // the way the browser sees it.
+  const painted = [...container.querySelectorAll('[aria-hidden]')]
+    .map((node) => window.getComputedStyle(node).backgroundImage)
+    .filter((image) => image.includes('linear-gradient'));
+
+  expect(painted.join(' ')).toContain('#3aa0ff40');
+  expect(painted.join(' ')).toContain('3px');
+});
+
 test('the selected laser follows pointer movement without a click', () => {
   const onLaser = vi.fn();
   const { viewport } = renderLaserViewport(onLaser);
@@ -283,33 +314,33 @@ function renderPicture({ onResizeToken, grid }) {
   return { viewport, handle: screen.getByRole('button', { name: 'Resize Banner' }) };
 }
 
-test('an uploaded picture is resizable and keeps the shape it was uploaded with', () => {
+test('a picture is stretched on the axis the corner was pulled along', () => {
   const onResizeToken = vi.fn();
   const { viewport, handle } = renderPicture({ onResizeToken });
 
-  // Pulled a cell to the right and not at all downwards: the height follows
-  // anyway, because a 4x2 banner stays a 4x2 banner.
+  // A cell to the right and nothing downwards: only the width moves. No
+  // modifier is involved, because a tablet has no key to hold.
   fireEvent.pointerDown(handle, { button: 0, clientX: 200, clientY: 100, pointerId: 41 });
   fireEvent.pointerMove(viewport, { clientX: 250, clientY: 100, pointerId: 41 });
   fireEvent.pointerUp(viewport, { clientX: 250, clientY: 100, pointerId: 41 });
 
   expect(onResizeToken).toHaveBeenCalledWith(
     expect.objectContaining({ id: 'banner-1' }),
-    { w: 5, h: 2.5 },
+    { w: 5, h: 2 },
   );
 });
 
-test('Shift lets a picture be stretched out of its own proportions', () => {
+test('a picture pulled diagonally grows on both axes at once', () => {
   const onResizeToken = vi.fn();
   const { viewport, handle } = renderPicture({ onResizeToken });
 
   fireEvent.pointerDown(handle, { button: 0, clientX: 200, clientY: 100, pointerId: 42 });
-  fireEvent.pointerMove(viewport, { clientX: 250, clientY: 100, pointerId: 42, shiftKey: true });
-  fireEvent.pointerUp(viewport, { clientX: 250, clientY: 100, pointerId: 42, shiftKey: true });
+  fireEvent.pointerMove(viewport, { clientX: 250, clientY: 150, pointerId: 42 });
+  fireEvent.pointerUp(viewport, { clientX: 250, clientY: 150, pointerId: 42 });
 
   expect(onResizeToken).toHaveBeenCalledWith(
     expect.objectContaining({ id: 'banner-1' }),
-    { w: 5, h: 2 },
+    { w: 5, h: 3 },
   );
 });
 

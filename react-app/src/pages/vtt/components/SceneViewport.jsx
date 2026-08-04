@@ -17,7 +17,7 @@ import {
 } from '../../../shared/vtt/geometry.js';
 import { measureLabel, movementLabel } from '../../../shared/vtt/measure.js';
 import { movedPoints } from '../../../shared/vtt/drawing.js';
-import { isTokenInPlay } from '../../../shared/vtt/scene.js';
+import { gridLineColor, isTokenInPlay, normalizeGridLineWidth } from '../../../shared/vtt/scene.js';
 import { isMapPiece } from '../../../shared/vtt/mapObjects.js';
 import {
   cameraPoseToView, viewToCameraPose,
@@ -576,11 +576,6 @@ export default function SceneViewport({
       from: screenToWorld(screenPoint(event), view),
       width,
       height,
-      // A picture is stretched to fill its box, so letting the corner pull the
-      // sides apart squashes the artwork. It scales instead, and Shift is the
-      // way out when the shape itself is the point — a rug fitted to a room.
-      // An icon has no shape to keep: its box is the whole of what it is.
-      ratio: token.iconKey ? null : width / height,
     };
     setResize({ id: token.id, w: token.w || 1, h: token.h || 1 });
     event.currentTarget.setPointerCapture?.(event.pointerId);
@@ -683,17 +678,15 @@ export default function SceneViewport({
     if (state.kind === 'resize') {
       const at = screenToWorld(point, view);
       const cell = cellSize(scene.grid);
-      const dx = (at.x - state.from.x) / cell;
-      const dy = (at.y - state.from.y) / cell;
-      let width = state.width + dx;
-      let height = state.height + dy;
-      if (state.ratio && !event.shiftKey) {
-        // Whichever way the corner was pulled furthest leads, so the drag goes
-        // where the hand went instead of fighting it on the other axis.
-        width = Math.abs(dx) >= Math.abs(dy) ? width : height * state.ratio;
-        height = width / state.ratio;
-      }
-      const next = { w: roundSpan(width), h: roundSpan(height) };
+      // Each side follows its own axis, always. Keeping the shape unless Shift
+      // was held made the corner useless on a tablet, where there is no Shift to
+      // hold: pulling it sideways only ever scaled the whole picture up, and a
+      // rug could never be fitted to the room it lies in. Dragging one way only
+      // is how a picture is now scaled on one axis; both ways scale both.
+      const next = {
+        w: roundSpan(state.width + (at.x - state.from.x) / cell),
+        h: roundSpan(state.height + (at.y - state.from.y) / cell),
+      };
       state.next = next;
       setResize({ id: state.token.id, ...next });
       return;
@@ -814,6 +807,8 @@ export default function SceneViewport({
   const size = cellSize(scene.grid) * view.zoom;
   const origin = worldToScreen({ x: 0, y: 0 }, view);
   const gridVisible = !backgroundOnly && scene.grid.visible && size > 4;
+  const gridColor = gridLineColor(scene.grid);
+  const gridLine = normalizeGridLineWidth(scene.grid.lineWidth);
   const measured = measurementBadge(tokens, drag, scene.grid, view, feetPerCell);
   const brushRadius = brushRadiusFor(paintMode, { brushSize, drawWidth, cell: size });
 
@@ -914,8 +909,10 @@ export default function SceneViewport({
             // staging space suggest it is part of the board, which it is not.
             ...(scene.playArea ? playAreaBox(scene, view) : { inset: 0 }),
             pointerEvents: 'none',
-            backgroundImage: 'linear-gradient(to right, rgba(232,201,106,0.25) 1px, transparent 1px),'
-              + 'linear-gradient(to bottom, rgba(232,201,106,0.25) 1px, transparent 1px)',
+            // Screen pixels, not world units: a line thin enough to read at one
+            // zoom and thick enough at another is not a line anybody asked for.
+            backgroundImage: `linear-gradient(to right, ${gridColor} ${gridLine}px, transparent ${gridLine}px),`
+              + `linear-gradient(to bottom, ${gridColor} ${gridLine}px, transparent ${gridLine}px)`,
             backgroundSize: `${size}px ${size}px`,
             // Clipped, the box already starts on a grid line — the play area is
             // measured in whole cells — so the pattern begins at its corner.
@@ -1259,7 +1256,11 @@ const coveringSx = {
   position: 'fixed',
   inset: 0,
   zIndex: 1200,
-  height: '100%',
+  // `dvh`, not `%`: a fixed box measured against the initial containing block is
+  // as tall as the page believes the window to be, which on a phone includes the
+  // strip behind the browser's own bars — and the controls along the bottom of
+  // the map went under them.
+  height: '100dvh',
   maxHeight: 'none',
   borderRadius: 0,
 };

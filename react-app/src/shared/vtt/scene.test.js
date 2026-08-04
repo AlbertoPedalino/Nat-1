@@ -7,6 +7,7 @@ import {
   campaignIdFromImagePath,
   canMarkToken,
   canMoveToken,
+  gridLineColor,
   isTokenInPlay,
   mapImageFolder,
   mapImagePath,
@@ -33,6 +34,23 @@ test('grid calibration is clamped and folded into a single cell', () => {
   // missing key must not silently free every rug on it.
   assert.equal(normalizeGrid({ size: 50 }).snapObjects, true);
   assert.equal(normalizeGrid({ snapObjects: false }).snapObjects, false);
+});
+
+test('the grid keeps a colour and a line width, and refuses nonsense for either', () => {
+  assert.equal(normalizeGrid({ color: '#FF0000' }).color, '#ff0000');
+  assert.equal(normalizeGrid({ color: 'red' }).color, DEFAULT_GRID.color);
+  assert.equal(normalizeGrid({ color: '#fff' }).color, DEFAULT_GRID.color);
+  assert.equal(normalizeGrid({ lineWidth: 2.5 }).lineWidth, 2.5);
+  // Half a pixel apart, so a half-step drag is kept and a thousandth is not.
+  assert.equal(normalizeGrid({ lineWidth: 2.3 }).lineWidth, 2.5);
+  assert.equal(normalizeGrid({ lineWidth: 0 }).lineWidth, 0.5);
+  assert.equal(normalizeGrid({ lineWidth: 99 }).lineWidth, 6);
+  assert.equal(normalizeGrid({ lineWidth: 'thick' }).lineWidth, DEFAULT_GRID.lineWidth);
+});
+
+test('a grid line is drawn faint whatever colour it is given', () => {
+  assert.equal(gridLineColor({ color: '#FFFFFF' }), '#ffffff40');
+  assert.equal(gridLineColor(null), `${DEFAULT_GRID.color}40`);
 });
 
 test('an unknown layer falls back to tokens, never to gm', () => {

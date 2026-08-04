@@ -48,6 +48,11 @@ export default function VttPage() {
   });
 
   const [scene, setScene] = useState(null);
+  // A real fullscreen element is painted alone, so the bar is gone whatever we
+  // do. Where the browser has no Fullscreen API — every iPhone — the map merely
+  // covers the window, and this bar is fixed and above it: it has to be taken
+  // away by hand, or it sits over the map's own controls along the top edge.
+  const [mapFullscreen, setMapFullscreen] = useState(false);
   const [loading, setLoading] = useState(Boolean(requestedScene));
   const [error, setError] = useState('');
   const loadRequestRef = useRef(0);
@@ -140,8 +145,12 @@ export default function VttPage() {
   const mapMode = Boolean(!gate && !busy && scene && !spectator.requested);
 
   return (
-    <Box sx={spectator.requested ? spectatorPageSx : [pageSx, mapMode && pageMapSx]}>
-      {!spectator.requested ? (
+    <Box
+      sx={spectator.requested
+        ? spectatorPageSx
+        : [pageSx, mapMode && pageMapSx, mapFullscreen && pageCoveredSx]}
+    >
+      {!spectator.requested && !mapFullscreen ? (
         <AppTopBar home backTo={atRoot ? '/campaigns' : '/vtt'} backLabel={atRoot ? 'Campaigns' : 'Tables'} />
       ) : null}
       <Box
@@ -176,6 +185,7 @@ export default function VttPage() {
             // A player is carried by the live scene and never navigates: the
             // editor only offers this to the GM.
             onOpenScene={openScene}
+            onMapFullscreenChange={setMapFullscreen}
             spectator={spectator.requested}
             spectatorSource={spectator.source}
             cameraSourceId={presenterSourceRef.current}
@@ -211,6 +221,13 @@ const pageMapSx = {
   display: 'flex',
   flexDirection: 'column',
   overflow: 'hidden',
+};
+
+// Nothing is left to make room for once the bar is gone: the padding that held
+// its place would otherwise show as a strip of background under a map that is
+// supposed to be the whole screen.
+const pageCoveredSx = {
+  pt: 0,
 };
 
 const contentMapSx = {
