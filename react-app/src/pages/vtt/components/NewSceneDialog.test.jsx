@@ -4,10 +4,15 @@ import { vi } from 'vitest';
 import { theme } from '../../../theme.js';
 import NewSceneDialog from './NewSceneDialog.jsx';
 import { stitchImages } from '../logic/stitch.js';
+import { fitPlanToPicture } from '../logic/planImage.js';
 
 // jsdom has no canvas to draw floors onto, and the drawing is not what this
 // file is about: the layout maths has its own tests next to it.
 vi.mock('../logic/stitch.js', () => ({ stitchImages: vi.fn() }));
+
+// The fit needs a canvas, which jsdom has not got. Its own arithmetic is tested
+// next to it; what matters here is what the dialog does with the answer.
+vi.mock('../logic/planImage.js', () => ({ fitPlanToPicture: vi.fn() }));
 
 const renderDialog = (props = {}) => render(
   <ThemeProvider theme={theme}>
@@ -111,6 +116,64 @@ test('floors can be joined into a single map instead of a scene each', async () 
   expect(entries).toHaveLength(1);
   expect(entries[0].file).toBe(joined);
   expect(entries[0].name).toBe('Dwelling — 2 floors');
+});
+
+const planFile = (rooms = 6) => new File([JSON.stringify({
+  version: '1.2.7',
+  title: 'Frozen Den',
+  rects: Array.from({ length: rooms }, (_, i) => ({ x: i * 6, y: 0, w: 4, h: 4 })),
+  doors: [],
+  notes: [],
+})], 'frozen_den.json', { type: 'application/json' });
+
+// The picture says what the rooms look like; only the plan says where they are.
+test('a plan exported beside the map calibrates the grid', async () => {
+  const onImport = vi.fn(async () => [{ id: 'scene-1', name: 'Dungeon' }]);
+  fitPlanToPicture.mockResolvedValueOnce({
+    grid: { size: 70, offsetX: 12, offsetY: 34 }, confident: true, fill: 0.97,
+  });
+  renderDialog({ onImport });
+
+  fireEvent.click(screen.getByText('Dungeon'));
+  fireEvent.change(inDialog('input[type="file"]'), {
+    target: { files: [pngFile('dungeon.png'), planFile(6)] },
+  });
+
+  await waitFor(() => expect(onImport).toHaveBeenCalled());
+  const entries = onImport.mock.calls[0][1];
+  // The JSON is not a scene of its own — it is what the scene is measured with.
+  expect(entries).toHaveLength(1);
+  expect(entries[0].grid).toEqual({ size: 70, offsetX: 12, offsetY: 34 });
+  expect(fitPlanToPicture.mock.calls[0][1].rooms).toHaveLength(6);
+});
+
+// The other export turns the map to fit the page, and no scaling recovers that.
+test('a plan that does not line up leaves the grid alone and says so', async () => {
+  const onImport = vi.fn(async () => [{ id: 'scene-1' }]);
+  fitPlanToPicture.mockResolvedValueOnce({ confident: false, fill: 0.6 });
+  renderDialog({ onImport });
+
+  fireEvent.click(screen.getByText('Dungeon'));
+  fireEvent.change(inDialog('input[type="file"]'), {
+    target: { files: [pngFile('dungeon.png'), planFile()] },
+  });
+
+  await waitFor(() => expect(onImport).toHaveBeenCalled());
+  expect(onImport.mock.calls[0][1][0].grid).toBeUndefined();
+});
+
+test('a JSON that is not a plan costs the map nothing', async () => {
+  const onImport = vi.fn(async () => [{ id: 'scene-1' }]);
+  renderDialog({ onImport });
+
+  fireEvent.click(screen.getByText('Dungeon'));
+  fireEvent.change(inDialog('input[type="file"]'), {
+    target: { files: [pngFile('dungeon.png'), new File(['{"nope":1}'], 'notes.json', { type: 'application/json' })] },
+  });
+
+  await waitFor(() => expect(onImport).toHaveBeenCalled());
+  expect(onImport.mock.calls[0][1]).toHaveLength(1);
+  expect(fitPlanToPicture).not.toHaveBeenCalled();
 });
 
 test('a drop with no picture in it is refused rather than half-imported', async () => {

@@ -83,7 +83,14 @@ export default function ScenePicker({ onOpen }) {
       try {
         scene = await createScene(campaignId, entry.name);
         const imagePath = await uploadMapImage(campaignId, scene.id, entry.file);
-        const updated = await updateScene(scene.id, { imagePath, shownImage: 'map' });
+        // The grid comes with the entry when the generator's own plan was
+        // brought along and lined up with the picture; otherwise the scene keeps
+        // the default and the GM calibrates it as before.
+        const updated = await updateScene(scene.id, {
+          imagePath,
+          shownImage: 'map',
+          ...(entry.grid ? { grid: { ...scene.grid, ...entry.grid } } : null),
+        });
         created.push(updated || scene);
       } catch (cause) {
         failed.push(entry.name);
