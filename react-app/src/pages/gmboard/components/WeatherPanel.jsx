@@ -1,12 +1,9 @@
 import { Box, Stack, Typography, useTheme } from '@mui/material';
-import { CloudRain, CloudSun, Flower2, LeafyGreen, Snowflake, Sun } from 'lucide-react';
 import SelectorGroup from './SelectorGroup.jsx';
+import { FALLBACK_WEATHER_ICON, SEASON_ICONS, WEATHER_ICONS } from './hexIcons.js';
 import { SELECTOR_CONTRACTS } from '../logic/selectorContracts.js';
 import { weatherEffectLabel, weatherTimerLabel } from '../logic/weather.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
-
-const SEASON_ICONS = { Spring: Flower2, Summer: Sun, Autumn: LeafyGreen, Winter: Snowflake };
-const WEATHER_ICONS = { Clear: Sun, Rain: CloudRain, Snow: Snowflake };
 
 export default function WeatherPanel() {
   const { state, dispatch } = useGmBoard();
@@ -14,7 +11,7 @@ export default function WeatherPanel() {
   const seasonContract = SELECTOR_CONTRACTS.season;
   const weatherContract = SELECTOR_CONTRACTS.weatherOverride;
 
-  const WeatherIcon = WEATHER_ICONS[state.meteo] || CloudSun;
+  const WeatherIcon = WEATHER_ICONS[state.meteo] || FALLBACK_WEATHER_ICON;
   const weatherTone = theme.palette.gmboard.weather[state.meteo] || theme.palette.gmboard.weather.Clear;
   const timerLabel = weatherTimerLabel(state.season, state.nextWeatherIn, state.hoursSinceWeather);
 

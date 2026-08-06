@@ -1,5 +1,6 @@
 import { Box, Button, Stack, Typography, useTheme } from '@mui/material';
-import { FastForward, Footprints, Map, Mountain } from 'lucide-react';
+import { FastForward, Footprints, Map } from 'lucide-react';
+import { POPULATION_ICONS, TERRAIN_ICONS } from './hexIcons.js';
 import WeatherPanel from './WeatherPanel.jsx';
 import TimePanel from './TimePanel.jsx';
 import SelectorGroup from './SelectorGroup.jsx';
@@ -47,6 +48,7 @@ export default function HexcrawlView() {
             getId={popContract.getId}
             value={popContract.deriveValue(state)}
             onChange={(o) => dispatch(popContract.action(o))}
+            getIcon={(o) => POPULATION_ICONS[o.id]}
           />
           <SelectorGroup
             label="Terrain"
@@ -54,7 +56,7 @@ export default function HexcrawlView() {
             getId={terrainContract.getId}
             value={terrainContract.deriveValue(state)}
             onChange={(o) => dispatch(terrainContract.action(o))}
-            getIcon={() => Mountain}
+            getIcon={(o) => TERRAIN_ICONS[o.id]}
           />
         </Box>
         <Box sx={dividerSx} />

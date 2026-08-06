@@ -70,6 +70,26 @@ test('the defaults are what an untouched hex is assumed to be', () => {
   expect(onDefaultsChange).toHaveBeenCalledWith({ terrain: 'Mountain' });
 });
 
+// The tier keeps the GM Board's colours and its one-click row rather than
+// hiding behind a fifth dropdown.
+test('the tier is picked from the coloured row, and clicking it again clears it', () => {
+  const onDefaultsChange = vi.fn();
+  const { rerender } = render(panel({ onDefaultsChange }));
+  const tiers = screen.getByRole('group', { name: 'Encounter tier' });
+
+  fireEvent.click(within(tiers).getByRole('button', { name: /T3/ }));
+  expect(onDefaultsChange).toHaveBeenCalledWith({ tier: 3 });
+
+  rerender(panel({ onDefaultsChange, defaults: { ...DEFAULTS, tier: 3 } }));
+  fireEvent.click(within(screen.getByRole('group', { name: 'Encounter tier' })).getByRole('button', { name: /T3/ }));
+  expect(onDefaultsChange).toHaveBeenLastCalledWith({ tier: null });
+});
+
+test('the weather card says what the weather costs, not only what it is', () => {
+  render(panel());
+  expect(screen.getByText('×2 travel · Disadvantage')).toBeInTheDocument();
+});
+
 test('arming can be turned off so laying out a map costs the party no time', () => {
   const onArmedChange = vi.fn();
   render(panel({ onArmedChange }));
@@ -117,12 +137,58 @@ test('the result dialog reports the hex, the time, the weather and the rolls', (
   expect(onClose).toHaveBeenCalled();
 });
 
+// The panel is what a GM who looked away reads: the bubble has faded by then.
+test('the panel keeps the last hex the party walked into', () => {
+  const onOpenResult = vi.fn();
+  render(panel({
+    hasResult: true,
+    onOpenResult,
+    lastHex: {
+      hex: { q: 4, r: 2, terrain: 'Forest' },
+      headline: 'Wandering Monster',
+      lines: ['d6 1 vs 2', 'Encounter Table: Hard'],
+      clock: CLOCK,
+      fromThisSession: true,
+      onThisScene: true,
+    },
+  }));
+
+  expect(screen.getByText('Last hex visited')).toBeInTheDocument();
+  expect(screen.getByText('Hex 4, 2 · Forest (4h)')).toBeInTheDocument();
+  expect(screen.getByText('Encounter Table: Hard')).toBeInTheDocument();
+
+  fireEvent.click(screen.getByRole('button', { name: /see the rolls/i }));
+  expect(onOpenResult).toHaveBeenCalled();
+});
+
+// A hex the campaign row remembers, entered from the GM Board or before this tab
+// was opened: the coordinates are still worth having, the rolls are not ours.
+test('a hex entered elsewhere is shown without pretending we rolled it', () => {
+  render(panel({
+    hasResult: false,
+    lastHex: {
+      hex: { q: 1, r: 1, terrain: null },
+      headline: null,
+      lines: [],
+      clock: CLOCK,
+      fromThisSession: false,
+      onThisScene: true,
+    },
+  }));
+
+  expect(screen.getByText('Entered before this session.')).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: /see the rolls/i })).toBeNull();
+});
+
 test('the bubble answers over the hex, and opens the rolls when clicked', () => {
   const onOpen = vi.fn();
   render(
     <HexBubble
       bubble={{
-        hex: { q: 4, r: 2 }, headline: 'Wandering Monster', lines: ['d6 1 vs 2', 'Encounter: Hard'],
+        hex: { q: 4, r: 2, terrain: 'Forest' },
+        headline: 'Wandering Monster',
+        lines: ['d6 1 vs 2', 'Encounter: Hard'],
+        clock: CLOCK,
       }}
       x={120}
       y={80}
@@ -130,9 +196,12 @@ test('the bubble answers over the hex, and opens the rolls when clicked', () => 
     />,
   );
 
-  expect(screen.getByText('Hex 4, 2')).toBeInTheDocument();
+  // Where, what, and under which sky — the whole answer, so the dialog stays
+  // optional rather than the only place the loot is written down.
+  expect(screen.getByText('Hex 4, 2 · Forest (4h)')).toBeInTheDocument();
   expect(screen.getByText('Wandering Monster')).toBeInTheDocument();
   expect(screen.getByText('Encounter: Hard')).toBeInTheDocument();
+  expect(screen.getByText(/rain · heavy · dis/i)).toBeInTheDocument();
 
   fireEvent.click(screen.getByRole('button', { name: /wandering monster — see every roll/i }));
   expect(onOpen).toHaveBeenCalled();

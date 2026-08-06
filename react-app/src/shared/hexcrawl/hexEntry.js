@@ -124,9 +124,11 @@ export function clockFromState(state) {
   };
 }
 
-// The one-breath version of a hex entry, for the bubble that appears over the
-// hex the moment it is clicked. The dialog still holds every roll; this is what
-// the GM says out loud before reading it.
+// The spoken version of a hex entry, for the bubble that appears over the hex
+// the moment it is clicked. The dialog still holds every die — this is the
+// answer without the arithmetic, and it says all of it: a bubble that stopped at
+// three lines hid the loot behind the encounter and made the GM open the dialog
+// to find out whether there was any.
 export function hexEntrySummary(result) {
   const steps = result?.steps || [];
   const step = (kind) => steps.find((item) => item.kind === kind);
@@ -143,16 +145,35 @@ export function hexEntrySummary(result) {
   const encounter = step('encounter');
   const loot = step('loot') || step('campLoot');
   const trap = step('trap');
-  if (encounter?.data?.diff) lines.push(`${encounter.label || 'Encounter'}: ${encounter.data.diff}`);
-  if (loot?.data?.tipo) lines.push(`Loot: ${loot.data.tipo}`);
-  if (trap?.data?.tipo) lines.push(`Trap: ${trap.data.tipo}${trap.data.dc ? ` DC${trap.data.dc}` : ''}`);
-  const dc = step('lootDc') || step('campSpotDc') || step('trapDetectDc') || step('genericDc');
-  if (dc?.sum != null) lines.push(`DC ${dc.sum}${dc.disadvantage ? ' (disadvantage)' : ''}`);
+  if (encounter?.data?.diff) {
+    // Difficulty alone sends the GM to the dialog for the level and the XP,
+    // which are the two numbers the fight is actually run on.
+    const detail = [
+      encounter.data.lv != null ? `Lv ${encounter.data.lv}` : null,
+      encounter.data.xp != null ? `${Number(encounter.data.xp).toLocaleString()} XP/PC` : null,
+    ].filter(Boolean).join(' · ');
+    lines.push(`${encounter.label || 'Encounter'}: ${encounter.data.diff}${detail ? ` · ${detail}` : ''}`);
+  }
+  if (loot?.data?.tipo) {
+    const rarity = loot.data.rarita && loot.data.rarita !== '—' ? ` · ${loot.data.rarita}` : '';
+    lines.push(`Loot: ${loot.data.tipo}${rarity}`);
+  }
+  if (trap?.data?.tipo) {
+    const damage = trap.data.danno ? ` · ${trap.data.danno}` : '';
+    lines.push(`Trap: ${trap.data.tipo}${trap.data.dc ? ` DC${trap.data.dc}` : ''}${damage}`);
+  }
+  const spot = step('campSpotDc') || step('trapDetectDc');
+  if (spot?.sum != null) lines.push(`Spot DC ${spot.sum}${spot.disadvantage ? ' (disadvantage)' : ''}`);
+  const dc = step('lootDc') || step('campLootDc') || step('genericDc');
+  if (dc?.sum != null) {
+    const label = dc.kind === 'genericDc' ? 'DC' : 'Loot DC';
+    lines.push(`${label} ${dc.sum}${dc.disadvantage ? ' (disadvantage)' : ''}`);
+  }
 
   return {
     // No event is a result, not an absence: the party spent the hours either way.
     headline: event?.name || (steps.some((item) => item.kind === 'none') ? 'No event' : 'Travelled'),
-    lines: lines.slice(0, 3),
+    lines,
   };
 }
 

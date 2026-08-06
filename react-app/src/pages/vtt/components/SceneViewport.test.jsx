@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeAll, vi } from 'vitest';
 import SceneViewport from './SceneViewport.jsx';
+import HexGrid from './HexGrid.jsx';
 
 beforeAll(() => {
   // jsdom does not ship PointerEvent, while the real browser does. Using its
@@ -401,6 +402,45 @@ test('a piece dragged on a hex map lands on the hex under it', () => {
     expect.objectContaining({ id: 'party-1' }),
     { x: 1, y: 0 },
   );
+});
+
+// The marker is the map everyone reads, so the viewport draws it from props
+// alone — a player's window and the projector pass the same one the GM's does.
+test('a hex map marks where the party stands', () => {
+  const { container } = render(
+    <SceneViewport
+      scene={HEX_SCENE}
+      imageUrl={null}
+      tokens={[]}
+      snap
+      canMove={() => false}
+      fog={null}
+      partyHex={{ q: 1, r: 0 }}
+      drawings={[]}
+      lasers={[]}
+      rollBubbles={[]}
+      diceThrows={[]}
+    />,
+  );
+
+  expect(container.querySelector('[data-party-hex="1,0"]')).not.toBeNull();
+});
+
+test('the hex overlay paints a coloured cell under its outline', () => {
+  const { container } = render(
+    <HexGrid
+      grid={HEX_SCENE.grid}
+      view={{ x: 0, y: 0, zoom: 1 }}
+      viewportSize={{ width: 400, height: 300 }}
+      cells={new Map([['1:0', { q: 1, r: 0, status: 'travelled', color: '#6f8f5a' }]])}
+    />,
+  );
+
+  // One path per colour, not one element per hex: a travelled country is
+  // hundreds of hexes in the same green.
+  const painted = container.querySelector('path[fill="#6f8f5a"]');
+  expect(painted).not.toBeNull();
+  expect(painted.getAttribute('d')).toMatch(/^M[-\d.,LM]+Z$/);
 });
 
 test('clicking the board of a hex map picks a hex, dragging it still pans', () => {

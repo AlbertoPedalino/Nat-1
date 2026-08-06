@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Box, Button, IconButton, Tooltip, Typography } from '@mui/material';
-import { Maximize2, Minimize2, ScrollText, Settings2, X } from 'lucide-react';
+import { MapPin, Maximize2, Minimize2, ScrollText, Settings2, X } from 'lucide-react';
 import { brushCells } from '../../../shared/vtt/fog.js';
 import {
   DEFAULT_VIEW,
@@ -20,7 +20,7 @@ import { movedPoints } from '../../../shared/vtt/drawing.js';
 import { isTokenInPlay } from '../../../shared/vtt/scene.js';
 import { isMapPiece } from '../../../shared/vtt/mapObjects.js';
 import {
-  axialRound, hexHeight, hexToWorld, isHexGrid, worldToAxial, worldToHex,
+  axialRound, hexHeight, hexToWorld, hexWidth, isHexGrid, worldToAxial, worldToHex,
 } from '../../../shared/vtt/hexGeometry.js';
 import HexGrid from './HexGrid.jsx';
 import HexBubble from './HexBubble.jsx';
@@ -112,6 +112,7 @@ export default function SceneViewport({
   // a scan of every cell the campaign has ever recorded.
   hexCells = null,
   selectedHex = null,
+  partyHex = null,
   onHexClick,
   // What the last entered hex answered, spoken over that hex until it fades.
   hexBubble = null,
@@ -1194,6 +1195,36 @@ export default function SceneViewport({
           };
         })}
       />
+
+      {/* Where the party stands. Drawn for everyone looking at the map — the
+          players and the projector included — because a hexcrawl with no marker
+          is a coloured map nobody can point at. */}
+      {partyHex && isHexGrid(scene.grid) ? (() => {
+        const centre = worldToScreen(hexToWorld(partyHex, scene.grid), view);
+        // Two thirds of the hex it stands in: the marker is read from across the
+        // table, and a pin the size of a token label is not.
+        const glyph = Math.min(96, Math.max(20, hexWidth(scene.grid) * view.zoom * 0.66));
+        return (
+          <Box
+            aria-hidden
+            data-party-hex={`${partyHex.q},${partyHex.r}`}
+            sx={{
+              position: 'absolute',
+              left: 0,
+              top: 0,
+              // The pin points at the hex, so it hangs above the centre rather
+              // than sitting on it.
+              transform: `translate(${centre.x}px, ${centre.y}px) translate(-50%, -78%)`,
+              pointerEvents: 'none',
+              color: '#e8c96a',
+              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.85))',
+              zIndex: 5,
+            }}
+          >
+            <MapPin size={glyph} fill="rgba(26,23,19,0.85)" strokeWidth={2} />
+          </Box>
+        );
+      })() : null}
 
       {hexBubble ? (() => {
         const centre = worldToScreen(hexToWorld(hexBubble.hex, scene.grid), view);

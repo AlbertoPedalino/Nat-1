@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import { Images, X } from 'lucide-react';
 import { MapPanel } from './ScenePanels.jsx';
@@ -9,6 +8,8 @@ import { MapPanel } from './ScenePanels.jsx';
 export default function MapCorner({
   scene,
   busy,
+  open = false,
+  onOpenChange,
   onShownImageChange,
   onUploadMap,
   onUploadBackground,
@@ -17,10 +18,8 @@ export default function MapCorner({
   onPlayAreaChange,
   onFitPlayArea,
 }) {
-  const [open, setOpen] = useState(false);
-
   return (
-    <Stack spacing={0.75} sx={{ alignItems: 'flex-start' }}>
+    <Box sx={cornerSx}>
       {/* Only the icon sits on the map: the switch lives with the rest of the
           picture settings, one click away, instead of taking a permanent strip
           of the board. */}
@@ -30,7 +29,7 @@ export default function MapCorner({
             size="small"
             aria-label="Picture settings"
             aria-expanded={open}
-            onClick={() => setOpen((current) => !current)}
+            onClick={() => onOpenChange?.(!open)}
             sx={buttonSx}
           >
             {open ? <X size={16} /> : <Images size={16} />}
@@ -54,9 +53,13 @@ export default function MapCorner({
           />
         </Box>
       ) : null}
-    </Stack>
+    </Box>
   );
 }
+
+// The corner is only as wide as its icon: the panel floats under it so opening
+// the pictures never shoves the hexcrawl button along the top of the map.
+const cornerSx = { position: 'relative' };
 
 const buttonSx = {
   color: '#e8c96a',
@@ -68,6 +71,10 @@ const buttonSx = {
 // Scrollable rather than tall: in fullscreen a panel that runs past the bottom
 // of the map has no page to scroll behind it.
 const panelSx = {
+  position: 'absolute',
+  top: 'calc(100% + 6px)',
+  left: 0,
+  zIndex: 2,
   width: { xs: 260, sm: 320 },
   maxHeight: 'calc(100vh - 160px)',
   overflowY: 'auto',

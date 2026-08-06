@@ -100,18 +100,26 @@ test('the bubble says the outcome in one breath, and the dialog keeps the rest',
   assert.equal(fight.headline, 'Wandering Monster');
   assert.deepEqual(fight.lines, ['d6 1 vs 2', 'Encounter Table: Hard']);
 
-  // Never more than three lines: past that it is a dialog, not a bubble.
+  // A busy hex says all of it: stopping at three lines hid the loot behind the
+  // encounter, and the GM had to open the dialog to learn there was any.
   const busy = hexEntrySummary({
     steps: [
       { kind: 'weatherChange', meteo: 'Snow', intensity: 'Heavy' },
       { kind: 'popRoll', d6: 1, threshold: 3 },
       { kind: 'event', name: 'Enemy Camp', type: 'camp_nemico' },
-      { kind: 'encounter', label: 'Camp Difficulty', data: { diff: 'Deadly' } },
-      { kind: 'campLoot', data: { tipo: 'Coins' } },
+      { kind: 'encounter', label: 'Camp Difficulty', data: { diff: 'Deadly', lv: 7, xp: 1200 } },
+      { kind: 'campLoot', data: { tipo: 'Coins', rarita: 'Rare' } },
       { kind: 'campSpotDc', sum: 14, disadvantage: true },
     ],
   });
-  assert.equal(busy.lines.length, 3);
+  assert.deepEqual(busy.lines, [
+    'Weather: Snow (Heavy)',
+    'd6 1 vs 3',
+    // Grouped the way the dialog groups it, which is the reader's locale.
+    `Camp Difficulty: Deadly · Lv 7 · ${(1200).toLocaleString()} XP/PC`,
+    'Loot: Coins · Rare',
+    'Spot DC 14 (disadvantage)',
+  ]);
   assert.equal(hexEntrySummary(null).headline, 'Travelled');
 });
 

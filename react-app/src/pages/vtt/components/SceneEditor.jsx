@@ -177,9 +177,12 @@ export default function SceneEditor({
   const { notify } = useToast();
   const { user } = useAuth();
   const role = useSceneRole(scene.campaignId);
-  // Dormant on a square map and for a player: it asks the database for nothing
-  // until the scene is actually a hexcrawl being run by its GM.
-  const hexcrawl = useSceneHexcrawl({ scene, isGm: role.isGm });
+  // Dormant on a square map: it asks the database for nothing until the scene
+  // is actually a hexcrawl. A player and the projector read it — the colours and
+  // the party marker are the map everyone is looking at — but only the GM's own
+  // window may run it, which is why the projector tab is not one even when it is
+  // the GM who opened it.
+  const hexcrawl = useSceneHexcrawl({ scene, isGm: role.isGm && !spectator });
   const [tokens, setTokens] = useState([]);
   const [ghosts, setGhosts] = useState({});
   const [roster, setRoster] = useState([]);
@@ -197,6 +200,9 @@ export default function SceneEditor({
   const [paintMode, setPaintMode] = useState('select');
   const [brushSize, setBrushSize] = useState(3);
   const [activeLayer, setActiveLayer] = useState('tokens');
+  // Both top-left panels open in the same spot, so only one of them is out at a
+  // time: 'pictures', 'hexcrawl' or nothing.
+  const [openCorner, setOpenCorner] = useState(null);
   const [menu, setMenu] = useState(null);
   const [importOpen, setImportOpen] = useState(false);
   const [monsterOpen, setMonsterOpen] = useState(false);
@@ -1718,6 +1724,10 @@ export default function SceneEditor({
           fogOpacity={PLAYER_FOG_OPACITY}
           paintMode="select"
           backgroundOnly={displayed.shownImage === 'background'}
+          // The projector shows the crawl as the table sees it: the country
+          // they have been through, and the hex they are standing in.
+          hexCells={hexcrawl.visible ? hexcrawl.cellsByKey : null}
+          partyHex={hexcrawl.partyHex}
           onImageSize={setImageSize}
           drawings={visibleDrawings}
           lasers={laserDots}
@@ -1849,6 +1859,8 @@ export default function SceneEditor({
               <MapCorner
                 scene={scene}
                 busy={busy}
+                open={openCorner === 'pictures'}
+                onOpenChange={(next) => setOpenCorner(next ? 'pictures' : null)}
                 onShownImageChange={handleShownImageChange}
                 onUploadMap={handleUploadMap}
                 onUploadBackground={handleUploadBackground}
@@ -1859,6 +1871,8 @@ export default function SceneEditor({
               />
               {hexcrawl.enabled ? (
                 <HexcrawlCorner
+                  open={openCorner === 'hexcrawl'}
+                  onOpenChange={(next) => setOpenCorner(next ? 'hexcrawl' : null)}
                   board={hexcrawl.board}
                   clock={hexcrawl.clock}
                   clockLinked={hexcrawl.clockLinked}
@@ -1866,6 +1880,9 @@ export default function SceneEditor({
                   armed={hexcrawl.armed}
                   busy={hexcrawl.busy}
                   error={hexcrawl.error}
+                  lastHex={hexcrawl.lastHex}
+                  hasResult={hexcrawl.hasResult}
+                  onOpenResult={hexcrawl.openResult}
                   onDefaultsChange={hexcrawl.setDefaults}
                   onSeasonChange={hexcrawl.setSeason}
                   onArmedChange={hexcrawl.setArmed}
@@ -1874,7 +1891,9 @@ export default function SceneEditor({
             </Stack>
           )
           : null}
-        hexCells={hexcrawl.enabled ? hexcrawl.cellsByKey : null}
+        // Painted for everyone at the table; only the GM may click one.
+        hexCells={hexcrawl.visible ? hexcrawl.cellsByKey : null}
+        partyHex={hexcrawl.partyHex}
         selectedHex={hexcrawl.selected}
         onHexClick={hexcrawl.enabled ? hexcrawl.clickHex : undefined}
         hexBubble={hexcrawl.enabled ? hexcrawl.bubble : null}
