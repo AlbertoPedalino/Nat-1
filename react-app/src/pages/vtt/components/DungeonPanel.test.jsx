@@ -57,6 +57,7 @@ const renderPanel = (props = {}) => render(
       onPopulate={() => {}}
       onPlaceRoom={() => {}}
       monstersForRoom={() => null}
+      markersForRoom={() => []}
       {...props}
     />
   </ThemeProvider>,
@@ -102,14 +103,47 @@ test('a room with an encounter offers the creatures it buys', () => {
   renderPanel({ onPlaceRoom, monstersForRoom });
 
   expect(screen.getByText(/4 × Ogre/)).toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: 'Place them' }));
+  fireEvent.click(screen.getByRole('button', { name: /put 4 creatures on the map/i }));
   expect(onPlaceRoom).toHaveBeenCalledWith(1);
+});
+
+// A room with no fight in it still has a trap to put out, and the button has to
+// exist for it — the trap is the reason that room is on the map.
+test('a room with only a trap can still be put on the board', () => {
+  const onPlaceRoom = vi.fn();
+  renderPanel({
+    onPlaceRoom,
+    monstersForRoom: () => null,
+    markersForRoom: (number) => (number === 2
+      ? [{ kind: 'trap', iconKey: 'chevrons-down', label: 'Pit · DC 13 · 2d6' }]
+      : []),
+  });
+
+  fireEvent.click(screen.getByRole('button', { name: /put a trap on the map/i }));
+  expect(onPlaceRoom).toHaveBeenCalledWith(2);
+});
+
+test('creatures and markers are counted together on the button', () => {
+  renderPanel({
+    monstersForRoom: (number) => (number === 1
+      ? { budget: 900, groups: [{ monster: { name: 'Ogre' }, count: 2, xp: 900 }] }
+      : null),
+    markersForRoom: (number) => (number === 1
+      ? [
+        { kind: 'trap', label: 'Pit · DC 13 · 2d6' },
+        { kind: 'loot', label: 'Coins · Rare' },
+      ]
+      : []),
+  });
+
+  expect(screen.getByRole('button', { name: /put 2 creatures, a trap and a loot on the map/i }))
+    .toBeInTheDocument();
 });
 
 test('a room already filled says so rather than pretending it is empty', () => {
   const monstersForRoom = () => ({ budget: 100, groups: [{ monster: { name: 'Rat' }, count: 2, xp: 20 }] });
   renderPanel({ monstersForRoom, placed: { room_1: ['a', 'b'] } });
 
-  const rooms = screen.getAllByRole('button', { name: /place/i });
-  expect(within(rooms[0]).getByText('Place again (2 out)')).toBeInTheDocument();
+  const rooms = screen.getAllByRole('button', { name: /put it out again/i });
+  expect(within(rooms[0]).getByText('Put it out again (2 on the map)')).toBeInTheDocument();
 });

@@ -1585,6 +1585,7 @@ export default function SceneEditor({
             onPopulate={dungeon.populate}
             onPlaceRoom={dungeon.placeRoom}
             monstersForRoom={dungeon.monstersForRoom}
+            markersForRoom={dungeon.markersForRoom}
           />
         ),
       }] : []),

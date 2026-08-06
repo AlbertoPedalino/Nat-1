@@ -17,7 +17,7 @@ import InfoHint from '../../../components/InfoHint.jsx';
 // in the room they were rolled for.
 export default function DungeonPanel({
   plan, dungeonKey, placed, busy, error, partySize,
-  onPopulate, onPlaceRoom, monstersForRoom,
+  onPopulate, onPlaceRoom, monstersForRoom, markersForRoom,
 }) {
   const theme = useTheme();
   const [popMode, setPopMode] = useState('random');
@@ -97,7 +97,9 @@ export default function DungeonPanel({
         const room = rooms[index];
         if (!room) return null;
         const chosen = monstersForRoom?.(room.number) || null;
+        const markers = markersForRoom?.(room.number) || [];
         const already = placed?.[room.id]?.length || 0;
+        const anything = Boolean(chosen?.groups?.length || markers.length);
         return (
           <Box key={room.id} sx={roomSx}>
             <Stack direction="row" spacing={0.75} sx={{ alignItems: 'baseline' }}>
@@ -130,18 +132,23 @@ export default function DungeonPanel({
             ) : null}
 
             {chosen?.groups?.length ? (
-              <Stack direction="row" spacing={0.6} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
+              <Stack direction="row" spacing={0.6} sx={{ alignItems: 'center' }}>
                 <Users size={13} color={theme.palette.gmboard.result.encounter} />
                 <Typography sx={lineSx}>{describeGroups(chosen.groups, chosen.budget)}</Typography>
-                <Button
-                  size="small"
-                  sx={placeSx}
-                  disabled={busy}
-                  onClick={() => onPlaceRoom(room.number)}
-                >
-                  {already ? `Place again (${already} out)` : 'Place them'}
-                </Button>
               </Stack>
+            ) : null}
+
+            {anything ? (
+              <Button
+                size="small"
+                sx={placeSx}
+                disabled={busy}
+                onClick={() => onPlaceRoom(room.number)}
+              >
+                {already
+                  ? `Put it out again (${already} on the map)`
+                  : `Put ${placeSummary(chosen, markers)} on the map`}
+              </Button>
             ) : null}
           </Box>
         );
@@ -149,12 +156,28 @@ export default function DungeonPanel({
 
       {dungeonKey ? (
         <Typography sx={hintSx}>
-          Creatures land on the GM layer, in their own room, sized for a party of {partySize}.
-          Drag them onto the token layer when the party walks in.
+          Everything lands on the GM layer, in its own room, with the encounters sized for a
+          party of {partySize}. A trap the players can see on the board is not a trap — drag a
+          piece down to the token layer when the table is meant to meet it.
         </Typography>
       ) : null}
     </Stack>
   );
+}
+
+// "2 creatures and a trap" reads better on a button than a count of tokens.
+function placeSummary(chosen, markers) {
+  const parts = [];
+  const creatures = (chosen?.groups || []).reduce((total, group) => total + group.count, 0);
+  if (creatures) parts.push(`${creatures} creature${creatures === 1 ? '' : 's'}`);
+  const kinds = markers.map((marker) => marker.kind);
+  for (const kind of ['trap', 'hazard', 'loot']) {
+    const count = kinds.filter((item) => item === kind).length;
+    if (count) parts.push(count === 1 ? `a ${kind}` : `${count} ${kind}s`);
+  }
+  if (!parts.length) return 'it';
+  if (parts.length === 1) return parts[0];
+  return `${parts.slice(0, -1).join(', ')} and ${parts.at(-1)}`;
 }
 
 function SlotLine({ slot, tones }) {

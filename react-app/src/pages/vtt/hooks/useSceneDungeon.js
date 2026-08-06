@@ -7,6 +7,8 @@ import { createDungeon } from '../../gmboard/logic/dungeon.js';
 import { encounterBudget, fillBudget } from '../../../shared/dungeon/roomBudget.js';
 import { crXP, getCR } from '../../encounterbuilder/logic/monsterUtils.js';
 import { layoutTokens, monsterGroupTokens } from '../../../shared/vtt/encounterImport.js';
+import { roomMarkers } from '../../../shared/dungeon/roomMarkers.js';
+import { seededRandom } from '../../../shared/dungeon/seededRandom.js';
 import { createToken } from '../../../shared/cloud/vtt.js';
 
 // The imported dungeon of a scene: its plan, what its rooms hold, and putting
@@ -20,6 +22,13 @@ import { createToken } from '../../../shared/cloud/vtt.js';
 // buys.
 
 const EMPTY = Object.freeze({ plan: null, key: null, placed: {} });
+
+// Told apart at a glance on a board that is otherwise creatures.
+const MARKER_COLORS = Object.freeze({
+  trap: '#c04040',
+  hazard: '#d69245',
+  loot: '#e8a030',
+});
 
 export function useSceneDungeon({ scene, isGm, monsters, partySize }) {
   const sceneId = scene?.id || null;
@@ -50,8 +59,13 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize }) {
 
   // Priced once for the whole bestiary rather than per room: a dungeon is
   // twenty rooms and the table is three thousand creatures.
+  //
+  // The experience is added to the creature rather than wrapped around it. A
+  // wrapper reached the token builder once and produced an ogre with one hit
+  // point, a skeleton's portrait and a one-square footprint — every field it
+  // read was on the monster inside.
   const priced = useMemo(() => (monsters || [])
-    .map((monster) => ({ monster, name: monster.name, xp: crXP(getCR(monster.cr)) }))
+    .map((monster) => ({ ...monster, xp: crXP(getCR(monster.cr)) }))
     .filter((entry) => entry.xp > 0), [monsters]);
 
   // The tables belong to the board this campaign was linked to, exactly as the
@@ -86,9 +100,14 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize }) {
     }
   }, [campaignId, enabled, sceneId, state.plan]);
 
-  // What a room's encounter is worth, and what that buys. Answered before
-  // anything is placed so the GM can see it and roll again if they hate it.
-  const monstersForRoom = useCallback((roomNumber, rng = Math.random) => {
+  // What a room's encounter is worth, and what that buys.
+  //
+  // Seeded from the roll itself, so the answer is the same every time it is
+  // asked. Drawn from Math.random it changed on every render — the panel showed
+  // one set of creatures, the button placed another, and touching anything at
+  // all shuffled both. The same key always buys the same monsters; rolling the
+  // rooms again is what changes them.
+  const monstersForRoom = useCallback((roomNumber) => {
     const keyRoom = state.key?.rooms?.[roomNumber - 1];
     if (!keyRoom) return null;
     const encounters = (keyRoom.slots || [])
@@ -99,28 +118,44 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize }) {
       (total, extra) => total + encounterBudget(extra.data, partySize),
       0,
     );
-    const groups = fillBudget(priced, budget, rng);
+    const groups = fillBudget(priced, budget, seededRandom(`${state.key.id}:${roomNumber}`));
     return { budget, groups };
   }, [partySize, priced, state.key]);
 
   // Onto the board, in the room they were rolled for. The plan is in its own
   // cells and the map is in the scene's, so the two are joined by the origin
   // the import worked out when it laid the plan over the picture.
-  const placeRoom = useCallback(async (roomNumber, { layer = 'gm' } = {}) => {
+  const placeRoom = useCallback(async (roomNumber) => {
     if (!enabled) return null;
     const room = state.plan?.rooms?.find((item) => item.number === roomNumber);
+    const keyRoom = state.key?.rooms?.[roomNumber - 1];
+    if (!room || !keyRoom) return null;
     const chosen = monstersForRoom(roomNumber);
-    if (!room || !chosen?.groups?.length) return null;
+    const markers = roomMarkers(keyRoom);
+    if (!chosen?.groups?.length && !markers.length) return null;
 
     setBusy(true);
     try {
       const origin = state.origin || { col: 0, row: 0 };
-      const tokens = chosen.groups.flatMap(({ monster, count }) => (
-        monsterGroupTokens(monster, count, { layer })
+      // Everything goes on the GM's own layer. A room is rolled long before the
+      // party reaches it, and a trap the players can see on the board is not a
+      // trap — the GM drags a creature down to the token layer when it is time
+      // for the table to meet it.
+      const creatures = (chosen?.groups || []).flatMap(({ monster, count }) => (
+        monsterGroupTokens(monster, count, { layer: 'gm' })
       ));
-      // Laid out from the room's own corner, one cell in, so a wide creature
-      // does not hang through a wall.
-      const laid = layoutTokens(tokens, [], {
+      // Markers are map pieces, not creatures: a Lucide glyph with the numbers
+      // the GM needs at that moment written on it.
+      const props = markers.map((marker) => ({
+        layer: 'gm',
+        iconKey: marker.iconKey,
+        label: marker.label,
+        color: MARKER_COLORS[marker.kind] || MARKER_COLORS.trap,
+        w: 1,
+        h: 1,
+      }));
+
+      const laid = layoutTokens([...creatures, ...props], [], {
         columns: Math.max(1, room.w - 1),
         origin: { x: origin.col + room.x, y: origin.row + room.y },
       });
@@ -134,12 +169,18 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize }) {
       setError('');
       return created;
     } catch (cause) {
-      setError(cause?.message || 'Could not put those creatures on the map.');
+      setError(cause?.message || 'Could not put that room on the map.');
       return null;
     } finally {
       setBusy(false);
     }
-  }, [enabled, monstersForRoom, sceneId, state.origin, state.placed, state.plan]);
+  }, [enabled, monstersForRoom, sceneId, state.key, state.origin, state.placed, state.plan]);
+
+  // What a room would put on the board, for the panel to offer before it does.
+  const markersForRoom = useCallback(
+    (roomNumber) => roomMarkers(state.key?.rooms?.[roomNumber - 1]),
+    [state.key],
+  );
 
   return {
     enabled: enabled && Boolean(state.plan),
@@ -151,6 +192,7 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize }) {
     placed: state.placed,
     populate,
     monstersForRoom,
+    markersForRoom,
     placeRoom,
   };
 }
