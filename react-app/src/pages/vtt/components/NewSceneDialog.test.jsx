@@ -3,6 +3,11 @@ import { ThemeProvider } from '@mui/material';
 import { vi } from 'vitest';
 import { theme } from '../../../theme.js';
 import NewSceneDialog from './NewSceneDialog.jsx';
+import { stitchImages } from '../logic/stitch.js';
+
+// jsdom has no canvas to draw floors onto, and the drawing is not what this
+// file is about: the layout maths has its own tests next to it.
+vi.mock('../logic/stitch.js', () => ({ stitchImages: vi.fn() }));
 
 const renderDialog = (props = {}) => render(
   <ThemeProvider theme={theme}>
@@ -80,6 +85,32 @@ test('a building exported floor by floor becomes a scene per floor, in order', a
   expect(entries.map((entry) => entry.file.name)).toEqual([
     'house-1.png', 'house-2.png', 'house-10.png',
   ]);
+});
+
+// Two storeys are sometimes two boards and sometimes one board with a stair you
+// can point at. Joined, the floors are drawn together before anything is
+// uploaded, so the scene never knows it was several files.
+test('floors can be joined into a single map instead of a scene each', async () => {
+  const onImport = vi.fn(async () => [{ id: 'a', name: 'Dwelling — 3 floors' }]);
+  const joined = new File(['joined'], 'dwelling-floors.png', { type: 'image/png' });
+  stitchImages.mockResolvedValueOnce(joined);
+  renderDialog({ onImport });
+
+  fireEvent.click(screen.getByText('Dwelling'));
+  fireEvent.click(screen.getByRole('button', { name: 'One map, side by side' }));
+  fireEvent.change(inDialog('input[type="file"]'), {
+    target: { files: [pngFile('house-2.png'), pngFile('house-1.png')] },
+  });
+
+  await waitFor(() => expect(onImport).toHaveBeenCalled());
+  // Ordered before they are drawn, so the ground floor is on the left.
+  expect(stitchImages.mock.calls[0][0].map((file) => file.name)).toEqual([
+    'house-1.png', 'house-2.png',
+  ]);
+  const entries = onImport.mock.calls[0][1];
+  expect(entries).toHaveLength(1);
+  expect(entries[0].file).toBe(joined);
+  expect(entries[0].name).toBe('Dwelling — 2 floors');
 });
 
 test('a drop with no picture in it is refused rather than half-imported', async () => {

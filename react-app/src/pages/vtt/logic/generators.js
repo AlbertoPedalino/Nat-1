@@ -86,6 +86,17 @@ export function sceneNamesFor(generator, files) {
   return Array.from({ length: count }, (_, index) => `${label} ${index + 1}`);
 }
 
+// What several files mean. Two floors are sometimes two boards and sometimes
+// one board with both on it — the second reads better when the party splits, or
+// when the stair is something to point at rather than a scene to switch to.
+export const MULTI_FILE_MODES = Object.freeze(['scenes', 'joined']);
+
+export function joinedSceneName(generator, count) {
+  const label = generator?.label || 'Scene';
+  if (!(count > 1)) return label;
+  return generator?.floors ? `${label} — ${count} floors` : `${label} — ${count} maps`;
+}
+
 // Dropped files arrive in whatever order the picker felt like. A building's
 // storeys are numbered in their own names — "…-1.png", "floor 2", "level3" —
 // so the numbers decide, and anything without one keeps its place at the end.

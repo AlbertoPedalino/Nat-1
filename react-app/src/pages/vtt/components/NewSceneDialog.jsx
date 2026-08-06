@@ -10,14 +10,17 @@ import {
   LinearProgress,
   Link,
   Stack,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography,
 } from '@mui/material';
 import {
-  ArrowLeft, Castle, Home, Landmark, Map as MapIcon, Mountain, Trees, Upload,
+  ArrowLeft, Castle, Columns2, Home, Landmark, Layers, Map as MapIcon, Mountain, Trees, Upload,
 } from 'lucide-react';
 import {
-  GENERATORS, GENERATOR_CREDIT, isMapImage, orderForFloors, sceneNamesFor,
+  GENERATORS, GENERATOR_CREDIT, isMapImage, joinedSceneName, orderForFloors, sceneNamesFor,
 } from '../logic/generators.js';
+import { stitchImages } from '../logic/stitch.js';
 
 const GENERATOR_ICONS = {
   dungeon: Castle,
@@ -38,6 +41,9 @@ const GENERATOR_ICONS = {
 // storey is a map you walk onto, not a layer of one.
 export default function NewSceneDialog({ open, campaignId, onClose, onCreate, onImport }) {
   const [generator, setGenerator] = useState(null);
+  // What several pictures mean: a scene each, or one board with all of them on
+  // it. Asked before the files arrive, because it decides what the button says.
+  const [mode, setMode] = useState('scenes');
   const [progress, setProgress] = useState(null);
   const [error, setError] = useState('');
   const filesRef = useRef(null);
@@ -45,6 +51,7 @@ export default function NewSceneDialog({ open, campaignId, onClose, onCreate, on
   const close = () => {
     if (progress) return;
     setGenerator(null);
+    setMode('scenes');
     setProgress(null);
     setError('');
     onClose();
@@ -56,14 +63,25 @@ export default function NewSceneDialog({ open, campaignId, onClose, onCreate, on
       setError('None of those look like map images. Export the map as PNG or SVG first.');
       return;
     }
-    const ordered = generator.floors ? orderForFloors(files) : files;
-    const names = sceneNamesFor(generator, ordered);
+    const ordered = orderForFloors(files);
+    const joining = mode === 'joined' && ordered.length > 1;
     setError('');
-    setProgress({ done: 0, total: ordered.length });
+    setProgress({ done: 0, total: joining ? 1 : ordered.length });
     try {
-      const created = await onImport(campaignId, ordered.map((file, index) => ({
-        file, name: names[index],
-      })), (done) => setProgress({ done, total: ordered.length }));
+      // Joined, the floors are drawn side by side into one picture here and go
+      // up as a single map: the scene has no idea it was ever several files.
+      const entries = joining
+        ? [{
+          file: await stitchImages(ordered, { name: `${generator.id}-floors.png` }),
+          name: joinedSceneName(generator, ordered.length),
+        }]
+        : ordered.map((file, index) => ({ file, name: sceneNamesFor(generator, ordered)[index] }));
+
+      const created = await onImport(
+        campaignId,
+        entries,
+        (done) => setProgress({ done, total: entries.length }),
+      );
       setProgress(null);
       if (created?.length) close();
     } catch (cause) {
@@ -142,6 +160,27 @@ export default function NewSceneDialog({ open, campaignId, onClose, onCreate, on
 
             <Box component="iframe" src={generator.url} title={`${generator.label} generator`} sx={frameSx} />
 
+            {/* Several pictures are two different things, and which one is a
+                decision about the table rather than about the files: a stair
+                you point at, or a scene you switch to. */}
+            <ToggleButtonGroup
+              size="small"
+              exclusive
+              value={mode}
+              disabled={Boolean(progress)}
+              onChange={(_, value) => value && setMode(value)}
+              aria-label="What several pictures make"
+            >
+              <ToggleButton value="scenes" aria-label="A scene each">
+                <Layers size={14} />
+                <Box component="span" sx={pillSx}>A scene each</Box>
+              </ToggleButton>
+              <ToggleButton value="joined" aria-label="One map, side by side">
+                <Columns2 size={14} />
+                <Box component="span" sx={pillSx}>One map, side by side</Box>
+              </ToggleButton>
+            </ToggleButtonGroup>
+
             <Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
               <Button
                 variant="contained"
@@ -150,7 +189,7 @@ export default function NewSceneDialog({ open, campaignId, onClose, onCreate, on
                 disabled={Boolean(progress)}
                 onClick={() => filesRef.current?.click()}
               >
-                {generator.floors ? 'Add the exported floors' : 'Add the exported map'}
+                {generator.floors ? 'Add the exported floors' : 'Add the exported maps'}
               </Button>
               <Link href={generator.url} target="_blank" rel="noreferrer" sx={openSx}>
                 Open it in a tab instead
@@ -172,18 +211,18 @@ export default function NewSceneDialog({ open, campaignId, onClose, onCreate, on
               />
             ) : null}
 
-            {generator.floors ? (
-              <Typography sx={stepsSx}>
-                Several files become several scenes, ordered by the numbers in their names.
-              </Typography>
-            ) : null}
+            <Typography sx={stepsSx}>
+              {mode === 'joined'
+                ? 'Several pictures are drawn onto one board, left to right, in the order their names number them.'
+                : 'Several pictures become several scenes, in the order their names number them.'}
+            </Typography>
 
             <Box
               ref={filesRef}
               component="input"
               type="file"
               accept="image/*"
-              multiple={generator.floors}
+              multiple
               onChange={(event) => {
                 handleFiles(event.target.files);
                 event.target.value = '';
@@ -249,6 +288,13 @@ const creditSx = { fontSize: '0.7rem', color: 'text.secondary' };
 const stepsSx = { fontSize: '0.75rem', color: 'text.secondary' };
 
 const openSx = { fontSize: '0.72rem' };
+
+const pillSx = {
+  ml: 0.5,
+  fontFamily: '"Cinzel", Georgia, serif',
+  fontSize: '0.6rem',
+  letterSpacing: '0.04em',
+};
 
 const frameSx = {
   width: '100%',
