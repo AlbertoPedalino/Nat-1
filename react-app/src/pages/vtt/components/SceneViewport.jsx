@@ -56,6 +56,13 @@ const ERASER_CURSOR = "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.o
 // The tools that paint an area rather than acting on one point.
 const BRUSH_MODES = ['reveal', 'hide', 'draw', 'erase'];
 
+// The map's mile scale, or nothing at all when it is being read in feet. The
+// scene keeps both numbers so switching back and forth loses neither, and this
+// is the one place that decides which of them the ruler is speaking.
+function overlandMiles(grid) {
+  return grid?.measureUnit === 'miles' ? grid.milesPerCell : 0;
+}
+
 // On-screen radius of what the tool will affect, in the same units the tool
 // itself uses: fog brushes are measured in squares, ink in tenths of one, and
 // the eraser reaches half a square around the pointer.
@@ -696,7 +703,7 @@ export default function SceneViewport({
         // step, and a scene with a mile scale answers in miles.
         label: measureLabel(measureShape, state.from, at, {
           feetPerCell: feetPerCellForRuler,
-          milesPerCell: scene.grid.milesPerCell,
+          milesPerCell: overlandMiles(scene.grid),
           shape: isHexGrid(scene.grid) ? 'hex' : 'square',
         }),
       };
@@ -1346,7 +1353,7 @@ function measurementBadge(tokens, drag, grid, view, feetPerCell) {
     })()
     : { x: Math.round(drag.x), y: Math.round(drag.y) };
   const label = movementLabel(token, landing, {
-    feetPerCell, milesPerCell: grid?.milesPerCell, shape,
+    feetPerCell, milesPerCell: overlandMiles(grid), shape,
   });
   if (!label) return null;
   const rect = tokenWorldRect({ ...token, ...drag }, grid);

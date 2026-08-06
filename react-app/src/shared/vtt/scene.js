@@ -10,8 +10,14 @@ import { normalizeMapObjectKey, normalizeMapObjectStroke } from './mapObjects.js
 export const LAYERS = Object.freeze(['map', 'tokens', 'gm']);
 export const DEFAULT_GRID = Object.freeze({
   size: 70, offsetX: 0, offsetY: 0, visible: true, snapObjects: true, shape: 'square',
-  color: '#e8c96a', lineWidth: 1, hexColor: '#6f8f5a', milesPerCell: 0,
+  color: '#e8c96a', lineWidth: 1, hexColor: '#6f8f5a',
+  measureUnit: 'feet', milesPerCell: 6,
 });
+
+// What the ruler counts in. A dungeon is feet across a square; a wilderness map
+// is miles across a hex. Which one it is, is the map's own answer — asking it as
+// "how many miles is a cell, and zero means feet" was a riddle.
+export const MEASURE_UNITS = Object.freeze(['feet', 'miles']);
 
 export const GRID_SHAPES = Object.freeze(['square', 'hex']);
 
@@ -72,10 +78,11 @@ export function normalizeGrid(grid) {
     hexColor: HEX_COLOR_RE.test(source.hexColor)
       ? String(source.hexColor).toLowerCase()
       : DEFAULT_GRID.hexColor,
-    // How far one cell is across the country, for maps where a square is a day
-    // of walking rather than five feet of dungeon. Zero means the scene has no
-    // scale of that kind and the ruler stays in feet.
-    milesPerCell: normalizeMilesPerCell(source.milesPerCell),
+    // Which scale the ruler answers in, and how far one cell is on the
+    // wilderness one. The two are kept apart so switching back to feet does not
+    // throw away the miles this map was set up with.
+    measureUnit: source.measureUnit === 'miles' ? 'miles' : 'feet',
+    milesPerCell: normalizeMilesPerCell(source.milesPerCell) || DEFAULT_GRID.milesPerCell,
   };
 }
 

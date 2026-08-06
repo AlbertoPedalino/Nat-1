@@ -1490,6 +1490,7 @@ export default function SceneEditor({
         measureShape={measureShape}
               feetPerCell={feetPerCell}
               gridShape={scene.grid.shape}
+              measureUnit={scene.grid.measureUnit}
               milesPerCell={scene.grid.milesPerCell}
               onPaintModeChange={setPaintMode}
               onShapeChange={setMeasureShape}
@@ -1543,12 +1544,15 @@ export default function SceneEditor({
         measureShape={measureShape}
             feetPerCell={feetPerCell}
             gridShape={scene.grid.shape}
+            measureUnit={scene.grid.measureUnit}
             milesPerCell={scene.grid.milesPerCell}
             onPaintModeChange={setPaintMode}
             onShapeChange={setMeasureShape}
             onFeetPerCellChange={setFeetPerCell}
             // The scale of the map is the GM's to set: it travels with the
-            // scene, so a player typing one would be writing everyone's ruler.
+            // scene, so a player switching it would be switching everyone's
+            // ruler.
+            onMeasureUnitChange={(unit) => handleGridChange({ ...scene.grid, measureUnit: unit })}
             onMilesPerCellChange={(miles) => handleGridChange({ ...scene.grid, milesPerCell: miles })}
           />
         ),

@@ -48,6 +48,29 @@ test('the grid keeps a colour and a line width, and refuses nonsense for either'
   assert.equal(normalizeGrid({ lineWidth: 'thick' }).lineWidth, DEFAULT_GRID.lineWidth);
 });
 
+// The two scales live side by side and the unit says which one is being read,
+// so a GM who switches to feet for a fight still has the map's miles when the
+// party walks out of it.
+test('the scene says which scale it is read at, and keeps both', () => {
+  assert.equal(normalizeGrid({}).measureUnit, 'feet');
+  assert.equal(normalizeGrid({ measureUnit: 'miles' }).measureUnit, 'miles');
+  assert.equal(normalizeGrid({ measureUnit: 'leagues' }).measureUnit, 'feet');
+  assert.equal(normalizeGrid({ milesPerCell: 24 }).milesPerCell, 24);
+  assert.equal(normalizeGrid({ milesPerCell: 0.24 }).milesPerCell, 0.2);
+  assert.equal(normalizeGrid({ milesPerCell: 500 }).milesPerCell, 100);
+  // A scene saved before any of this has the default rather than a zero that
+  // would leave the miles ruler saying nothing at all.
+  assert.equal(normalizeGrid({}).milesPerCell, DEFAULT_GRID.milesPerCell);
+  assert.equal(normalizeGrid({ milesPerCell: 'far' }).milesPerCell, DEFAULT_GRID.milesPerCell);
+});
+
+// The explored tint travels with the scene, so every window paints the same
+// country.
+test('the grid carries the colour a walked hex is tinted with', () => {
+  assert.equal(normalizeGrid({ hexColor: '#2266AA' }).hexColor, '#2266aa');
+  assert.equal(normalizeGrid({ hexColor: 'green' }).hexColor, DEFAULT_GRID.hexColor);
+});
+
 test('a grid line is drawn faint whatever colour it is given', () => {
   assert.equal(gridLineColor({ color: '#FFFFFF' }), '#ffffff40');
   assert.equal(gridLineColor(null), `${DEFAULT_GRID.color}40`);

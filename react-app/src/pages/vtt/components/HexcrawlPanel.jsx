@@ -2,6 +2,7 @@ import {
   Box, Button, FormControlLabel, MenuItem, Stack, Switch, TextField, Typography, alpha, useTheme,
 } from '@mui/material';
 import { Dices, Footprints } from 'lucide-react';
+import ColorField from '../../../components/ColorField.jsx';
 import { formatDateTime } from '../../gmboard/logic/time.js';
 import { hasWeatherDisadvantage, weatherEffectLabel, weatherTimerLabel } from '../../gmboard/logic/weather.js';
 import {
@@ -116,13 +117,14 @@ export default function HexcrawlPanel({
         <Box>
           <Typography sx={sectionSx}>Explored hex colour</Typography>
           <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center' }}>
-            <Box
-              component="input"
-              type="color"
-              aria-label="Explored hex colour"
+            {/* The same deferred well the grid's own colour uses: a controlled
+                colour input re-renders on every move inside the picker and
+                snaps the widget away from the pointer. */}
+            <ColorField
               value={hexColor || DEFAULT_HEX_COLOR}
-              disabled={busy}
-              onChange={(event) => onHexColorChange(event.target.value)}
+              onChange={onHexColorChange}
+              deferMs={180}
+              label="Explored hex colour"
               sx={swatchSx}
             />
             <Typography sx={hintSx}>{hexColor || DEFAULT_HEX_COLOR}</Typography>
@@ -336,7 +338,7 @@ const swatchSx = {
   borderRadius: 1,
   bgcolor: 'transparent',
   cursor: 'pointer',
-  '&:disabled': { cursor: 'default', opacity: 0.5 },
+  flexShrink: 0,
 };
 
 const lastCardSx = {
