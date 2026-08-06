@@ -163,10 +163,14 @@ export function useSceneHexcrawl({ scene, isGm }) {
   // A player sees the country the party has been through, and nothing else: an
   // unrevealed hex the GM has already coloured in is the map they are making,
   // not the map the table is looking at.
+  const travelledColor = scene?.grid?.hexColor || null;
   const cellsByKey = useMemo(() => {
     if (!visible) return EMPTY_CELLS;
-    return hexCellsByKey(isGm ? cells : cells.filter((cell) => cell?.revealed));
-  }, [cells, isGm, visible]);
+    return hexCellsByKey(
+      isGm ? cells : cells.filter((cell) => cell?.revealed),
+      { travelledColor },
+    );
+  }, [cells, isGm, travelledColor, visible]);
 
   const storeCell = useCallback((saved) => {
     if (!saved) return;

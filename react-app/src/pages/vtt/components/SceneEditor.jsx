@@ -1489,6 +1489,8 @@ export default function SceneEditor({
         diceThrows={diceThrows}
         measureShape={measureShape}
               feetPerCell={feetPerCell}
+              gridShape={scene.grid.shape}
+              milesPerCell={scene.grid.milesPerCell}
               onPaintModeChange={setPaintMode}
               onShapeChange={setMeasureShape}
               onFeetPerCellChange={setFeetPerCell}
@@ -1540,9 +1542,14 @@ export default function SceneEditor({
         diceThrows={diceThrows}
         measureShape={measureShape}
             feetPerCell={feetPerCell}
+            gridShape={scene.grid.shape}
+            milesPerCell={scene.grid.milesPerCell}
             onPaintModeChange={setPaintMode}
             onShapeChange={setMeasureShape}
             onFeetPerCellChange={setFeetPerCell}
+            // The scale of the map is the GM's to set: it travels with the
+            // scene, so a player typing one would be writing everyone's ruler.
+            onMilesPerCellChange={(miles) => handleGridChange({ ...scene.grid, milesPerCell: miles })}
           />
         ),
       },
@@ -1906,6 +1913,8 @@ export default function SceneEditor({
                   lastHex={hexcrawl.lastHex}
                   hasResult={hexcrawl.hasResult}
                   onOpenResult={hexcrawl.openResult}
+                  hexColor={scene.grid.hexColor}
+                  onHexColorChange={(hexColor) => handleGridChange({ ...scene.grid, hexColor })}
                   onDefaultsChange={hexcrawl.setDefaults}
                   onSeasonChange={hexcrawl.setSeason}
                   onArmedChange={hexcrawl.setArmed}

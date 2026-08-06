@@ -484,7 +484,11 @@ export function DrawPanel({
 // The 5e templates, the way Roll20 offers them: pick a shape, then drag from
 // the origin. The number is the same for all of them — how far it reaches —
 // which is why the panel is a shape picker and not four separate tools.
-export function MeasurePanel({ paintMode, measureShape, feetPerCell, onPaintModeChange, onShapeChange, onFeetPerCellChange }) {
+export function MeasurePanel({
+  paintMode, measureShape, feetPerCell, gridShape = 'square', milesPerCell = 0,
+  onPaintModeChange, onShapeChange, onFeetPerCellChange, onMilesPerCellChange,
+}) {
+  const cellWord = gridShape === 'hex' ? 'hex' : 'square';
   return (
     <Stack spacing={1}>
       <ToggleButtonGroup
@@ -506,12 +510,30 @@ export function MeasurePanel({ paintMode, measureShape, feetPerCell, onPaintMode
       </ToggleButtonGroup>
 
       <TextField
-        label="Feet per square"
+        label={`Feet per ${cellWord}`}
         size="small"
         type="number"
         value={feetPerCell}
         onChange={(event) => onFeetPerCellChange(Number(event.target.value))}
       />
+
+      {/* A wilderness map is measured in country, not in corridors. Set this and
+          the ruler — and the badge under a piece being carried — answers in
+          miles and cells instead of feet. Zero leaves it in feet. */}
+      {onMilesPerCellChange ? (
+        <TextField
+          label={`Miles per ${cellWord}`}
+          size="small"
+          type="number"
+          value={milesPerCell || ''}
+          placeholder="0"
+          helperText={milesPerCell > 0
+            ? `The ruler answers in miles across this map.`
+            : 'Leave empty for a dungeon: the ruler stays in feet.'}
+          onChange={(event) => onMilesPerCellChange(Number(event.target.value))}
+          slotProps={{ htmlInput: { min: 0, step: 0.5 } }}
+        />
+      ) : null}
 
       <Typography variant="caption" color="text.secondary">
         Drag from the origin. A 5e cone is as wide at the far end as it is long,

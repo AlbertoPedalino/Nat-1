@@ -33,17 +33,42 @@ function hexSteps(from, to) {
   );
 }
 
+// How many cells apart, whatever a cell is on this map. Shared by the two
+// scales: feet for a dungeon, miles for a country.
+export function stepsBetween(from, to, { rule = 'chebyshev', shape = 'square' } = {}) {
+  return shape === 'hex' ? hexSteps(from, to) : cellDistance(from, to, rule);
+}
+
 export function feetBetween(from, to, {
   feetPerCell = FEET_PER_CELL, rule = 'chebyshev', shape = 'square',
 } = {}) {
   const perCell = Number(feetPerCell) > 0 ? Number(feetPerCell) : FEET_PER_CELL;
-  const cells = shape === 'hex' ? hexSteps(from, to) : cellDistance(from, to, rule);
-  return cells * perCell;
+  return stepsBetween(from, to, { rule, shape }) * perCell;
 }
 
 export function formatFeet(feet) {
   const value = Number(feet) || 0;
   return `${Math.round(value)} ft`;
+}
+
+// Tenths, because half a hex of travel is a real answer and 6.3 miles is not
+// worth the third decimal anybody would have to read.
+export function formatMiles(miles) {
+  const value = Math.round((Number(miles) || 0) * 10) / 10;
+  return `${value} mi`;
+}
+
+// What the ruler says on a map measured in country rather than in corridors: the
+// distance first, and the count of cells after it, since a hexcrawl's travel
+// time is per hex and not per mile.
+export function overlandLabel(from, to, { milesPerCell, rule, shape } = {}) {
+  const perCell = Number(milesPerCell) || 0;
+  if (!(perCell > 0)) return '';
+  const steps = stepsBetween(from, to, { rule, shape });
+  if (steps <= 0) return '';
+  const unit = shape === 'hex' ? 'hex' : 'square';
+  const plural = shape === 'hex' ? 'hexes' : 'squares';
+  return `${formatMiles(steps * perCell)} · ${steps} ${steps === 1 ? unit : plural}`;
 }
 
 // The shapes a ruler can take, following the 5e templates the table already
@@ -63,9 +88,14 @@ export function measureFeet(shape, from, to, options) {
 }
 
 export function measureLabel(shape, from, to, options) {
+  // A map with a mile scale is being read as country: a spell radius in feet is
+  // not what anybody is dragging a ruler across it for.
+  const overland = overlandLabel(from, to, options);
+  const kind = normalizeShape(shape);
+  if (overland) return kind === 'line' ? overland : `${overland} ${kind}`;
+
   const feet = measureFeet(shape, from, to, options);
   if (feet <= 0) return '';
-  const kind = normalizeShape(shape);
   if (kind === 'radius') return `${formatFeet(feet)} radius`;
   if (kind === 'cone') return `${formatFeet(feet)} cone`;
   if (kind === 'square') return `${formatFeet(feet)} square`;
@@ -74,6 +104,8 @@ export function measureLabel(shape, from, to, options) {
 
 // The badge is noise on a piece that has not left its square yet.
 export function movementLabel(from, to, options) {
+  const overland = overlandLabel(from, to, options);
+  if (overland) return overland;
   const feet = feetBetween(from, to, options);
   return feet > 0 ? formatFeet(feet) : '';
 }

@@ -10,7 +10,7 @@ import { normalizeMapObjectKey, normalizeMapObjectStroke } from './mapObjects.js
 export const LAYERS = Object.freeze(['map', 'tokens', 'gm']);
 export const DEFAULT_GRID = Object.freeze({
   size: 70, offsetX: 0, offsetY: 0, visible: true, snapObjects: true, shape: 'square',
-  color: '#e8c96a', lineWidth: 1,
+  color: '#e8c96a', lineWidth: 1, hexColor: '#6f8f5a', milesPerCell: 0,
 });
 
 export const GRID_SHAPES = Object.freeze(['square', 'hex']);
@@ -66,7 +66,25 @@ export function normalizeGrid(grid) {
     // other, so this single key decides how every stored coordinate is read —
     // which is why a scene is one or the other and never carries both.
     shape: source.shape === 'hex' ? 'hex' : 'square',
+    // What a hex the party has walked is tinted with. On the scene rather than
+    // in the GM's browser, because the players and the projector are looking at
+    // the same country and it cannot be green on one screen and blue on another.
+    hexColor: HEX_COLOR_RE.test(source.hexColor)
+      ? String(source.hexColor).toLowerCase()
+      : DEFAULT_GRID.hexColor,
+    // How far one cell is across the country, for maps where a square is a day
+    // of walking rather than five feet of dungeon. Zero means the scene has no
+    // scale of that kind and the ruler stays in feet.
+    milesPerCell: normalizeMilesPerCell(source.milesPerCell),
   };
+}
+
+// Tenths of a mile are as fine as a wilderness scale ever needs, and a hundred
+// miles a hex is already a hex the size of a kingdom.
+export function normalizeMilesPerCell(value) {
+  const miles = numberOr(value, 0);
+  if (!(miles > 0)) return 0;
+  return clamp(Math.round(miles * 10) / 10, 0.1, 100);
 }
 
 // Also used when drawing, not only when saving: a number typed into the panel is

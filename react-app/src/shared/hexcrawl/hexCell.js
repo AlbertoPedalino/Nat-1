@@ -42,8 +42,13 @@ export function normalizeHexStatus(value) {
   return HEX_STATUSES.includes(status) ? status : 'unexplored';
 }
 
-export function hexStatusColor(status) {
-  return HEX_STATUS_TONES[normalizeHexStatus(status)] || null;
+// `travelled` is the one a campaign actually accumulates, so it is the one the
+// GM can re-colour: a green wash reads as forest on some maps and as nothing at
+// all on others. The rest keep their tones — they are marks, not the country.
+export function hexStatusColor(status, travelledColor = null) {
+  const normalized = normalizeHexStatus(status);
+  if (normalized === 'travelled' && travelledColor) return travelledColor;
+  return HEX_STATUS_TONES[normalized] || null;
 }
 
 export function toHexCell(row) {
@@ -84,11 +89,11 @@ export function toHexCellPatch(patch) {
 
 // What the overlay needs: a lookup by hex, with the colour already resolved.
 // A Map rather than a list because painting asks per hex, once per frame.
-export function hexCellsByKey(cells) {
+export function hexCellsByKey(cells, { travelledColor = null } = {}) {
   const map = new Map();
   for (const cell of cells || []) {
     if (!cell) continue;
-    const color = hexStatusColor(cell.status);
+    const color = hexStatusColor(cell.status, travelledColor);
     map.set(hexKey({ q: cell.q, r: cell.r }), { ...cell, color });
   }
   return map;

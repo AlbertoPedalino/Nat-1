@@ -9,8 +9,38 @@ import {
   cellDistance,
   feetBetween,
   formatFeet,
+  formatMiles,
   movementLabel,
+  overlandLabel,
+  stepsBetween,
 } from './measure.js';
+
+// A wilderness map is read in country, not in corridors: given a mile scale the
+// ruler and the carry badge answer in miles, and say how many cells that was —
+// travel time on a hexcrawl is per hex, not per mile.
+test('a scene with a mile scale is measured in miles and cells', () => {
+  assert.equal(stepsBetween({ x: 0, y: 0 }, { x: 3, y: 0 }, { shape: 'hex' }), 3);
+  assert.equal(formatMiles(18.04), '18 mi');
+  assert.equal(
+    overlandLabel({ x: 0, y: 0 }, { x: 3, y: 0 }, { milesPerCell: 6, shape: 'hex' }),
+    '18 mi · 3 hexes',
+  );
+  assert.equal(
+    overlandLabel({ x: 0, y: 0 }, { x: 1, y: 0 }, { milesPerCell: 6, shape: 'hex' }),
+    '6 mi · 1 hex',
+  );
+  assert.equal(
+    measureLabel('radius', { x: 0, y: 0 }, { x: 2, y: 0 }, { milesPerCell: 2.5 }),
+    '5 mi · 2 squares radius',
+  );
+  assert.equal(
+    movementLabel({ x: 0, y: 0 }, { x: 2, y: 0 }, { milesPerCell: 6, shape: 'hex' }),
+    '12 mi · 2 hexes',
+  );
+  // Without one it is a dungeon, and a dungeon is measured in feet.
+  assert.equal(overlandLabel({ x: 0, y: 0 }, { x: 3, y: 0 }, { milesPerCell: 0 }), '');
+  assert.equal(measureLabel('line', { x: 0, y: 0 }, { x: 3, y: 0 }, {}), '15 ft');
+});
 
 test('a straight move is one square per cell crossed', () => {
   assert.equal(cellDistance({ x: 0, y: 0 }, { x: 3, y: 0 }), 3);

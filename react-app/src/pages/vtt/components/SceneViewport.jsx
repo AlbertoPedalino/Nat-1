@@ -692,7 +692,13 @@ export default function SceneViewport({
         shape: measureShape,
         from: state.from,
         to: at,
-        label: measureLabel(measureShape, state.from, at, { feetPerCell: feetPerCellForRuler }),
+        // The ruler is told what it is measuring across: on hexes a step is a
+        // step, and a scene with a mile scale answers in miles.
+        label: measureLabel(measureShape, state.from, at, {
+          feetPerCell: feetPerCellForRuler,
+          milesPerCell: scene.grid.milesPerCell,
+          shape: isHexGrid(scene.grid) ? 'hex' : 'square',
+        }),
       };
       setMeasure(next);
       // Shown to the table as it is dragged, like the laser: measuring out loud
@@ -1339,7 +1345,9 @@ function measurementBadge(tokens, drag, grid, view, feetPerCell) {
       return { x: cell.q, y: cell.r };
     })()
     : { x: Math.round(drag.x), y: Math.round(drag.y) };
-  const label = movementLabel(token, landing, { feetPerCell, shape });
+  const label = movementLabel(token, landing, {
+    feetPerCell, milesPerCell: grid?.milesPerCell, shape,
+  });
   if (!label) return null;
   const rect = tokenWorldRect({ ...token, ...drag }, grid);
   const at = worldToScreen(rect, view);

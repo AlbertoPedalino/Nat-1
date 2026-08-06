@@ -71,3 +71,17 @@ test('the overlay gets a lookup by hex with the colour already resolved', () => 
   assert.equal(map.get('0:0').color, hexStatusColor('danger'));
   assert.equal(map.get('1:-1').color, null);
 });
+
+// The country the party has walked is the one tint a campaign accumulates, so
+// it is the one the GM can re-colour. The marks keep their own tones.
+test('the travelled tint can be re-coloured, the other marks cannot', () => {
+  assert.equal(hexStatusColor('travelled', '#2266aa'), '#2266aa');
+  assert.equal(hexStatusColor('danger', '#2266aa'), hexStatusColor('danger'));
+  assert.equal(hexStatusColor('unexplored', '#2266aa'), null);
+
+  const map = hexCellsByKey(
+    [{ q: 0, r: 0, status: 'travelled' }],
+    { travelledColor: '#2266aa' },
+  );
+  assert.equal(map.get('0:0').color, '#2266aa');
+});

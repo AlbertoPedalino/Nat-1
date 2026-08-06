@@ -11,6 +11,9 @@ import {
   FALLBACK_WEATHER_ICON, POPULATION_ICONS, SEASON_ICONS, TERRAIN_ICONS, WEATHER_ICONS,
 } from '../../gmboard/components/hexIcons.js';
 import { mergeBoardClock, missingHexSetup, terrainOption } from '../../../shared/hexcrawl/hexEntry.js';
+import { DEFAULT_GRID } from '../../../shared/vtt/scene.js';
+
+const DEFAULT_HEX_COLOR = DEFAULT_GRID.hexColor;
 
 // The hexcrawl's settings, in the corner where the map's other settings live.
 //
@@ -24,6 +27,7 @@ import { mergeBoardClock, missingHexSetup, terrainOption } from '../../../shared
 // moves between the two screens in the middle of a leg.
 export default function HexcrawlPanel({
   board, clock, clockLinked, defaults, armed, busy, error, lastHex, hasResult,
+  hexColor, onHexColorChange,
   onDefaultsChange, onSeasonChange, onArmedChange, onOpenResult,
 }) {
   const theme = useTheme();
@@ -103,6 +107,37 @@ export default function HexcrawlPanel({
         tones={theme.palette.gmboard.tier}
         onChange={(tier) => onDefaultsChange({ tier })}
       />
+
+      {/* The colour of the country the party has walked. A green wash reads as
+          forest on one map and as nothing at all on another, so it is the GM's
+          to pick — and it is kept on the scene, where the players and the
+          projector read it too. */}
+      {onHexColorChange ? (
+        <Box>
+          <Typography sx={sectionSx}>Explored hex colour</Typography>
+          <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center' }}>
+            <Box
+              component="input"
+              type="color"
+              aria-label="Explored hex colour"
+              value={hexColor || DEFAULT_HEX_COLOR}
+              disabled={busy}
+              onChange={(event) => onHexColorChange(event.target.value)}
+              sx={swatchSx}
+            />
+            <Typography sx={hintSx}>{hexColor || DEFAULT_HEX_COLOR}</Typography>
+            {(hexColor || DEFAULT_HEX_COLOR) !== DEFAULT_HEX_COLOR ? (
+              <Button
+                size="small"
+                sx={lastButtonSx}
+                onClick={() => onHexColorChange(DEFAULT_HEX_COLOR)}
+              >
+                Reset
+              </Button>
+            ) : null}
+          </Stack>
+        </Box>
+      ) : null}
 
       {/* Off while a map is being drawn up: laying out terrain would otherwise
           cost the party a day of travel per click. */}
@@ -292,6 +327,17 @@ const weatherNameSx = { fontSize: '0.8rem', fontWeight: 700, lineHeight: 1.2 };
 const effectSx = { color: 'text.secondary', fontSize: '0.66rem' };
 
 const tierRowSx = { display: 'flex', flexWrap: 'wrap', gap: 0.6 };
+
+const swatchSx = {
+  width: 34,
+  height: 26,
+  p: 0,
+  border: '1px solid rgba(232,201,106,0.35)',
+  borderRadius: 1,
+  bgcolor: 'transparent',
+  cursor: 'pointer',
+  '&:disabled': { cursor: 'default', opacity: 0.5 },
+};
 
 const lastCardSx = {
   p: 0.9,

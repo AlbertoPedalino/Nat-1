@@ -474,20 +474,27 @@ test('the hex overlay paints a coloured cell under its outline', () => {
   expect(painted.getAttribute('d')).toMatch(/^M[-\d.,LM]+Z$/);
 });
 
-// Zoomed out to the whole continent the mesh is more hexes than a frame can
-// draw and finer than an eye can split, so it goes — but what the party has
-// walked is the map's content and stays at any zoom.
-test('the hex mesh drops out when zoomed past reading, the painted hexes do not', () => {
+// The mesh is one repeating tile, so zooming out to the whole map costs the
+// same as zooming in on one fight — and the grid is still there at the bottom
+// of the range, which is where it used to give up.
+test('the hex mesh survives being zoomed all the way out', () => {
   const { container } = render(
     <HexGrid
       grid={HEX_SCENE.grid}
-      view={{ x: 0, y: 0, zoom: 0.05 }}
+      view={{ x: 0, y: 0, zoom: 0.15 }}
       viewportSize={{ width: 1200, height: 800 }}
       cells={new Map([['1:0', { q: 1, r: 0, status: 'travelled', color: '#6f8f5a' }]])}
     />,
   );
 
-  expect(container.querySelector('path[stroke]')).toBeNull();
+  const pattern = container.querySelector('pattern');
+  expect(pattern).not.toBeNull();
+  // The rect has to be able to name the pattern: React's own ids carry colons,
+  // which a url(#…) reference cannot.
+  expect(pattern.id).toMatch(/^[a-zA-Z0-9_-]+$/);
+  expect(container.querySelector('rect').getAttribute('fill')).toBe(`url(#${pattern.id})`);
+  // One hex width across, two rows down: the period of the lattice.
+  expect(Number(pattern.getAttribute('width'))).toBeCloseTo(50 * 0.15, 5);
   expect(container.querySelector('path[fill="#6f8f5a"]')).not.toBeNull();
 });
 

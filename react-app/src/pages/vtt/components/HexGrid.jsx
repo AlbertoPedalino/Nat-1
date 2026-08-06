@@ -1,29 +1,24 @@
-import { memo, useMemo } from 'react';
+import { memo, useId, useMemo } from 'react';
 import { Box } from '@mui/material';
 import { hexHeight, hexRowStep, hexWidth } from '../../../shared/vtt/hexGeometry.js';
-import { screenToWorld } from '../../../shared/vtt/geometry.js';
 
-// The hex overlay. An SVG rather than the CSS gradient the square grid uses:
-// hexes interlock, so there is no repeating tile that draws them.
+// The hex overlay.
 //
-// Only the hexes the viewport covers are built, and only while they are big
-// enough to see — a wilderness map zoomed out to the whole continent would
-// otherwise ask for tens of thousands of paths nobody can make out.
+// The mesh is one repeating tile rather than a path per hex. A hex lattice is
+// periodic — every hex width across, every two rows down — so the browser can
+// tile it, and drawing it costs the same whether four hexes are on screen or
+// forty thousand. Building it hex by hex meant a budget, and a budget meant the
+// grid vanished the moment a GM zoomed out to look at the whole map, which is
+// exactly when they were looking at the country rather than at one fight.
 //
-// The geometry is built in one pass of plain arithmetic and cached until the
-// view actually moves. It used to be six trig calls, a dozen allocations and a
-// regex per hex per frame, and a map with a few hundred hexes on screen spent
-// long enough on that to be felt in every pan.
-// A hex narrower than this is thinner than the line drawing it, and the mesh
-// turns into a smear. Between here and READABLE_WIDTH it is faded out instead of
-// being switched off, so zooming out to the whole continent dims the grid rather
-// than dropping it in one frame.
-const MIN_VISIBLE_WIDTH = 6;
+// The painted hexes and the picked one are still drawn individually: those come
+// from what the campaign has recorded, which is hundreds of rows at most, and
+// they must survive any zoom because they are the map's content.
+//
+// Below this width a hex is thinner than the line drawing it. The mesh fades
+// towards it rather than switching off at some threshold.
+const MIN_TILE = 2;
 const READABLE_WIDTH = 16;
-// What one frame can afford to build. Half-edges brought the cost of a hex down
-// far enough to roughly double this: ~4 ms at the ceiling, and the result is
-// cached until the view moves again.
-const MAX_HEXES = 9000;
 const DEFAULT_FILL_OPACITY = 0.42;
 
 // The six corners of a pointy-top hex on the unit circle, clockwise from the
@@ -33,41 +28,54 @@ const UNIT_CORNERS = Array.from({ length: 6 }, (_, index) => {
   return { cos: Math.cos(angle), sin: Math.sin(angle) };
 });
 
-// Half a pixel is finer than any of this can be seen at, and short numbers keep
-// the path string — which is one attribute the browser re-parses on every pan —
-// a fraction of the size.
-const snap = (value) => Math.round(value * 2) / 2;
+// Two decimals: fine enough that a tile seam never shows, short enough to keep
+// the path strings small.
+const round = (value) => Math.round(value * 100) / 100;
 
 function hexPath(cx, cy, radius) {
   let d = '';
   for (let index = 0; index < 6; index += 1) {
     const corner = UNIT_CORNERS[index];
-    d += `${index === 0 ? 'M' : 'L'}${snap(cx + radius * corner.cos)},${snap(cy + radius * corner.sin)}`;
+    d += `${index === 0 ? 'M' : 'L'}${round(cx + radius * corner.cos)},${round(cy + radius * corner.sin)}`;
   }
   return `${d}Z`;
 }
 
-// Only the right-hand half of the hex: top, upper right, lower right, bottom.
-// Every edge of the lattice is the right-hand edge of exactly one hex, so the
-// mesh still comes out whole while the path string is little over half as long
-// — which is what decides how far out the grid can be drawn before it costs
-// more than it says.
+// Only the right-hand half of a hex: top, upper right, lower right, bottom.
+// Every edge of the lattice is the right-hand edge of exactly one hex, so
+// repeating this draws the mesh whole and draws no edge twice.
 function hexHalfPath(cx, cy, radius) {
   let d = '';
   for (let index = 0; index < 4; index += 1) {
     const corner = UNIT_CORNERS[index];
-    d += `${index === 0 ? 'M' : 'L'}${snap(cx + radius * corner.cos)},${snap(cy + radius * corner.sin)}`;
+    d += `${index === 0 ? 'M' : 'L'}${round(cx + radius * corner.cos)},${round(cy + radius * corner.sin)}`;
+  }
+  return d;
+}
+
+// One period of the lattice: a hex at the tile's corner and its neighbour half a
+// width along and one row down. Both are repeated into the eight tiles around
+// this one, because a pattern clips its contents and the halves that hang over
+// the edge have to be drawn by the tile they hang into.
+function tilePath(tileWidth, tileHeight, radius) {
+  const rowStep = tileHeight / 2;
+  let d = '';
+  for (let dx = -1; dx <= 1; dx += 1) {
+    for (let dy = -1; dy <= 1; dy += 1) {
+      const x = dx * tileWidth;
+      const y = dy * tileHeight;
+      d += hexHalfPath(x, y, radius);
+      d += hexHalfPath(x + tileWidth / 2, y + rowStep, radius);
+    }
   }
   return d;
 }
 
 function buildGeometry({ grid, view, width, height, cells, selected, outlined }) {
   const zoom = Number(view?.zoom) || 1;
-  const worldWidth = hexWidth(grid);
   if (!width || !height) return null;
 
-  const topLeft = screenToWorld({ x: 0, y: 0 }, view);
-  const bottomRight = screenToWorld({ x: width, y: height }, view);
+  const worldWidth = hexWidth(grid);
   const offsetX = Number(grid?.offsetX) || 0;
   const offsetY = Number(grid?.offsetY) || 0;
   const rowStep = hexRowStep(grid);
@@ -75,28 +83,6 @@ function buildGeometry({ grid, view, width, height, cells, selected, outlined })
   const viewX = Number(view?.x) || 0;
   const viewY = Number(view?.y) || 0;
 
-  const left = topLeft.x - offsetX;
-  const top = topLeft.y - offsetY;
-  const right = bottomRight.x - offsetX;
-  const bottom = bottomRight.y - offsetY;
-
-  const firstRow = Math.floor(top / rowStep) - 1;
-  const lastRow = Math.ceil(bottom / rowStep) + 1;
-  const rows = lastRow - firstRow + 1;
-  const columns = Math.ceil(right / worldWidth) - Math.floor(left / worldWidth) + 3;
-  // Zoomed far enough out, the mesh is more hexes than the browser can draw in a
-  // frame and finer than an eye can separate. It stops being drawn — but only
-  // it: the country the party has walked and the hex under the cursor are the
-  // map's content, and they are painted at any zoom. Losing those on the way out
-  // to "the whole continent" is losing the point of the view.
-  const screenWidth = worldWidth * zoom;
-  const meshWorthDrawing = Boolean(outlined)
-    && screenWidth >= MIN_VISIBLE_WIDTH
-    && rows * columns <= MAX_HEXES;
-
-  // Painted hexes are looked up from what the campaign has recorded rather than
-  // by walking the viewport: there are hundreds of those at most, against tens
-  // of thousands of hexes on screen at continent zoom.
   const centre = (q, r) => ({
     x: (worldWidth * (q + r / 2) + offsetX) * zoom + viewX,
     y: (rowStep * r + offsetY) * zoom + viewY,
@@ -121,44 +107,45 @@ function buildGeometry({ grid, view, width, height, cells, selected, outlined })
     });
   }
 
-  let selectedPath = null;
-  if (selected) {
-    const at = centre(Math.round(selected.q), Math.round(selected.r));
-    selectedPath = hexPath(at.x, at.y, radius);
+  const selectedPath = selected
+    ? (() => {
+      const at = centre(Math.round(selected.q), Math.round(selected.r));
+      return hexPath(at.x, at.y, radius);
+    })()
+    : null;
+
+  const tileWidth = worldWidth * zoom;
+  const tileHeight = rowStep * 2 * zoom;
+  let mesh = null;
+  if (outlined && tileWidth >= MIN_TILE) {
+    // Where hex (0, 0) lands, folded back into the first tile: the pattern
+    // repeats from there, so the lattice stays nailed to the map through every
+    // pan instead of sliding against it.
+    const origin = centre(0, 0);
+    mesh = {
+      tileWidth,
+      tileHeight,
+      x: ((origin.x % tileWidth) + tileWidth) % tileWidth,
+      y: ((origin.y % tileHeight) + tileHeight) % tileHeight,
+      d: tilePath(tileWidth, tileHeight, radius),
+      // Full strength while a hex is big enough to read, then down to a third as
+      // it approaches the width of its own line.
+      opacity: Math.min(1, Math.max(0.33, tileWidth / READABLE_WIDTH)),
+    };
   }
 
-  let outlines = '';
-  if (meshWorthDrawing) {
-    for (let r = firstRow; r <= lastRow; r += 1) {
-      const shift = r / 2;
-      const firstCol = Math.floor(left / worldWidth - shift) - 1;
-      const lastCol = Math.ceil(right / worldWidth - shift) + 1;
-      const cy = (rowStep * r + offsetY) * zoom + viewY;
-      // Rows scrolled past the top or bottom edge contribute nothing but string.
-      if (cy < -radius || cy > height + radius) continue;
-
-      for (let q = firstCol; q <= lastCol; q += 1) {
-        const cx = (worldWidth * (q + shift) + offsetX) * zoom + viewX;
-        if (cx < -radius || cx > width + radius) continue;
-        outlines += hexHalfPath(cx, cy, radius);
-      }
-    }
-  }
-
-  if (!outlines && !fills.size && !selectedPath) return null;
-  // Full strength while a hex is big enough to read, then down to a quarter as
-  // it approaches the width of its own line.
-  const fade = Math.min(1, Math.max(0.25, (screenWidth - MIN_VISIBLE_WIDTH)
-    / (READABLE_WIDTH - MIN_VISIBLE_WIDTH)));
-  return {
-    outlines, meshOpacity: fade, fills: [...fills.entries()], selectedPath,
-  };
+  if (!mesh && !fills.size && !selectedPath) return null;
+  return { mesh, fills: [...fills.entries()], selectedPath };
 }
 
 function HexGrid({
   grid, view, viewportSize, cells = null, selected = null, opacity = 1,
   outlined = true, lineColor = 'rgba(232,201,106,0.28)', lineWidth = 1,
 }) {
+  // React's ids carry colons, which a `url(#…)` reference cannot: the paint
+  // server would silently resolve to nothing and the mesh would be invisible in
+  // the browser while every test still passed.
+  const patternId = `hexgrid-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
   const width = Math.max(0, Number(viewportSize?.width) || 0);
   const height = Math.max(0, Number(viewportSize?.height) || 0);
   const geometry = useMemo(
@@ -167,6 +154,7 @@ function HexGrid({
   );
 
   if (!geometry) return null;
+  const { mesh } = geometry;
 
   return (
     <Box
@@ -181,21 +169,34 @@ function HexGrid({
         opacity,
       }}
     >
-      {/* Painted hexes go under the outlines, so the border of a coloured hex is
-          still the same line as its neighbour's. */}
+      {mesh ? (
+        <defs>
+          <pattern
+            id={patternId}
+            patternUnits="userSpaceOnUse"
+            width={mesh.tileWidth}
+            height={mesh.tileHeight}
+            x={mesh.x}
+            y={mesh.y}
+          >
+            <path
+              d={mesh.d}
+              fill="none"
+              stroke={lineColor}
+              strokeWidth={lineWidth}
+              strokeOpacity={mesh.opacity}
+            />
+          </pattern>
+        </defs>
+      ) : null}
+
+      {/* Painted hexes go over the mesh's tile but under its lines is not worth
+          the layering: the fill is translucent, so the grid reads through it. */}
       {geometry.fills.map(([key, fill]) => (
         <path key={key} d={fill.d} fill={fill.color} fillOpacity={fill.opacity} />
       ))}
 
-      {geometry.outlines ? (
-        <path
-          d={geometry.outlines}
-          fill="none"
-          stroke={lineColor}
-          strokeWidth={lineWidth}
-          strokeOpacity={geometry.meshOpacity}
-        />
-      ) : null}
+      {mesh ? <rect width={width} height={height} fill={`url(#${patternId})`} /> : null}
 
       {geometry.selectedPath ? (
         <path
