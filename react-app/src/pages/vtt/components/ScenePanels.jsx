@@ -19,7 +19,6 @@ import {
   Grid3x3,
   Hexagon,
   Image as ImageIcon,
-  Info,
   ImagePlus,
   MousePointer2,
   Pencil,
@@ -33,6 +32,7 @@ import {
   Users,
 } from 'lucide-react';
 import ColorField from '../../../components/ColorField.jsx';
+import InfoHint from '../../../components/InfoHint.jsx';
 import { DEFAULT_GRID } from '../../../shared/vtt/scene.js';
 
 // The scene's settings, split by the question they answer. Each one is a panel
@@ -47,16 +47,6 @@ import { DEFAULT_GRID } from '../../../shared/vtt/scene.js';
 //
 // Focusable on purpose: a tooltip only reachable by hover is not reachable at
 // all on a touch screen or from the keyboard.
-function InfoHint({ text, label }) {
-  return (
-    <Tooltip title={text} enterTouchDelay={0} leaveTouchDelay={6000}>
-      <Box component="span" role="button" tabIndex={0} aria-label={label} sx={infoHintSx}>
-        <Info size={13} />
-      </Box>
-    </Tooltip>
-  );
-}
-
 function SectionLabel({ label, hint }) {
   return (
     <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
@@ -592,16 +582,6 @@ export function LaserPanel({ paintMode, onPaintModeChange }) {
 }
 
 const numberSx = { width: 92 };
-
-const infoHintSx = {
-  display: 'inline-flex',
-  alignItems: 'center',
-  flexShrink: 0,
-  color: 'text.secondary',
-  cursor: 'help',
-  borderRadius: '50%',
-  '&:hover, &:focus-visible': { color: 'primary.main' },
-};
 
 const pillLabelSx = {
   ml: 0.5,

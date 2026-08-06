@@ -48,7 +48,8 @@ const panel = (overrides = {}) => (
 test('the panel shows the campaign clock and its weather before anything is picked', () => {
   render(panel());
   expect(screen.getByText(/rain · heavy/i)).toBeInTheDocument();
-  expect(screen.getByText(/click a hex to walk the party into it/i)).toBeInTheDocument();
+  // What a click does is behind an icon: over a map, prose costs board.
+  expect(screen.getByRole('button', { name: 'About clicking a hex' })).toBeInTheDocument();
   // Heavy rain costs the party advantage, and the panel says so rather than
   // leaving the GM to remember the table.
   expect(screen.getByText(/disadvantage/i)).toBeInTheDocument();

@@ -4,6 +4,7 @@ import {
 import { Dices, Footprints } from 'lucide-react';
 import ColorField from '../../../components/ColorField.jsx';
 import MountSelector from '../../gmboard/components/MountSelector.jsx';
+import InfoHint from '../../../components/InfoHint.jsx';
 import { formatDateTime } from '../../gmboard/logic/time.js';
 import { hasWeatherDisadvantage, weatherEffectLabel, weatherTimerLabel } from '../../gmboard/logic/weather.js';
 import {
@@ -103,6 +104,56 @@ export default function HexcrawlPanel({
         onChange={(tier) => onDefaultsChange({ tier })}
       />
 
+      {/* The party's own speed rather than the hex's: it crosses every hex the
+          same amount faster. Set here it is this map's, and the board's answer
+          is used until it is. */}
+      <MountSelector
+        dense
+        label="Mount"
+        disabled={busy}
+        value={defaults?.mountSpeed ?? boardState?.mountSpeed ?? 1}
+        onChange={(mountSpeed) => onDefaultsChange({ mountSpeed })}
+      />
+
+      {/* Off while a map is being drawn up: laying out terrain would otherwise
+          cost the party a day of travel per click. What a click does is behind
+          the icon rather than spelled out under it: the panel sits on the map,
+          so every line of prose is a line of map, and this one is read once. */}
+      <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
+        <FormControlLabel
+          sx={{ mr: 0 }}
+          control={(
+            <Switch
+              size="small"
+              checked={Boolean(armed)}
+              onChange={(event) => onArmedChange(event.target.checked)}
+            />
+          )}
+          label={<Typography variant="body2">Clicking a hex enters it and rolls</Typography>}
+        />
+        <InfoHint
+          label="About clicking a hex"
+          text="Click a hex to walk the party into it. Click a visited one to take the visit back — its terrain stays, the hours already played do not come back."
+        />
+      </Stack>
+
+      {!board ? (
+        <Typography sx={warnSx}>
+          No hexcrawl board is linked to this campaign. Open the GM Board, save it, and pick this
+          campaign under Campaign.
+        </Typography>
+      ) : null}
+      {board && !clockLinked ? (
+        <Typography sx={warnSx}>
+          The campaign clock is not readable from here, so time will not be saved.
+        </Typography>
+      ) : null}
+      {error ? <Typography sx={warnSx}>{error}</Typography> : null}
+
+      {missing?.length && board ? (
+        <Typography sx={hintSx}>Set {missing.join(', ')} before walking into a hex.</Typography>
+      ) : null}
+
       {/* The colour of the country the party has walked. A green wash reads as
           forest on one map and as nothing at all on another, so it is the GM's
           to pick — and it is kept on the scene, where the players and the
@@ -134,52 +185,6 @@ export default function HexcrawlPanel({
           </Stack>
         </Box>
       ) : null}
-
-      {/* The party's own speed rather than the hex's: it crosses every hex the
-          same amount faster. Set here it is this map's, and the board's answer
-          is used until it is. */}
-      <MountSelector
-        dense
-        label="Mount"
-        disabled={busy}
-        value={defaults?.mountSpeed ?? boardState?.mountSpeed ?? 1}
-        onChange={(mountSpeed) => onDefaultsChange({ mountSpeed })}
-      />
-
-      {/* Off while a map is being drawn up: laying out terrain would otherwise
-          cost the party a day of travel per click. */}
-      <FormControlLabel
-        control={(
-          <Switch
-            size="small"
-            checked={Boolean(armed)}
-            onChange={(event) => onArmedChange(event.target.checked)}
-          />
-        )}
-        label={<Typography variant="body2">Clicking a hex enters it and rolls</Typography>}
-      />
-
-      {!board ? (
-        <Typography sx={warnSx}>
-          No hexcrawl board is linked to this campaign. Open the GM Board, save it, and pick this
-          campaign under Campaign.
-        </Typography>
-      ) : null}
-      {board && !clockLinked ? (
-        <Typography sx={warnSx}>
-          The campaign clock is not readable from here, so time will not be saved.
-        </Typography>
-      ) : null}
-      {error ? <Typography sx={warnSx}>{error}</Typography> : null}
-
-      {missing?.length && board ? (
-        <Typography sx={hintSx}>Set {missing.join(', ')} before walking into a hex.</Typography>
-      ) : (
-        <Typography sx={hintSx}>
-          Click a hex to walk the party into it. Click a visited one to take the visit back — its
-          terrain stays, the hours already played do not come back.
-        </Typography>
-      )}
 
       {/* Last, under the settings: it is the answer to what has already been
           done, and the setup above it is what the next click will use. */}
