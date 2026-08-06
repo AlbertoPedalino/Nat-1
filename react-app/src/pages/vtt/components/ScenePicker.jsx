@@ -23,6 +23,7 @@ import {
   updateScene,
   uploadMapImage,
 } from '../../../shared/cloud/vtt.js';
+import { saveSceneDungeon } from '../../../shared/cloud/dungeon.js';
 import NewSceneDialog from './NewSceneDialog.jsx';
 
 // Scenes belong to a campaign, so the picker is grouped by campaign rather than
@@ -91,6 +92,14 @@ export default function ScenePicker({ onOpen }) {
           shownImage: 'map',
           ...(entry.grid ? { grid: { ...scene.grid, ...entry.grid } } : null),
         });
+        // The plan travels with the scene when the two lined up, so the rooms
+        // can be rolled and filled later without the file being kept anywhere.
+        if (entry.dungeon?.plan) {
+          await saveSceneDungeon(scene.id, {
+            plan: entry.dungeon.plan,
+            origin: entry.dungeon.origin || { col: 0, row: 0 },
+          });
+        }
         created.push(updated || scene);
       } catch (cause) {
         failed.push(entry.name);

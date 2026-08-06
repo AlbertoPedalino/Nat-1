@@ -5,7 +5,7 @@ import {
   Box, Button, CircularProgress, IconButton, Stack, Tooltip, Typography,
 } from '@mui/material';
 import {
-  Cloud, Dices, Lock, LockOpen, MonitorOff, MonitorPlay, Pencil, Pointer, Radio, Ruler,
+  Cloud, Dices, DoorOpen, Lock, LockOpen, MonitorOff, MonitorPlay, Pencil, Pointer, Radio, Ruler,
   Shapes, Users,
 } from 'lucide-react';
 import { useToast } from '../../../shared/ToastProvider.jsx';
@@ -96,6 +96,9 @@ import {
 } from '../../../shared/vtt/sheetLayout.js';
 import { useEncounterBridge } from '../hooks/useEncounterBridge.js';
 import { useSceneHexcrawl } from '../hooks/useSceneHexcrawl.js';
+import { useSceneDungeon } from '../hooks/useSceneDungeon.js';
+import DungeonPanel from './DungeonPanel.jsx';
+import { useMonsterDb } from '../../encounterbuilder/hooks/useMonsterDb.js';
 import HexcrawlCorner from './HexcrawlCorner.jsx';
 import HexResultDialog from './HexResultDialog.jsx';
 import { useConditionEntries } from '../../encounterbuilder/hooks/useConditionEntries.js';
@@ -184,6 +187,15 @@ export default function SceneEditor({
   // window may run it, which is why the projector tab is not one even when it is
   // the GM who opened it.
   const hexcrawl = useSceneHexcrawl({ scene, isGm: role.isGm && !spectator });
+  // The bestiary is already loaded for the monster picker; the dungeon uses it
+  // to turn a rolled XP budget into creatures.
+  const monsterDb = useMonsterDb();
+  const dungeon = useSceneDungeon({
+    scene,
+    isGm: role.isGm && !spectator,
+    monsters: monsterDb.monsters,
+    partySize: Math.max(1, roster.length || 4),
+  });
   const [tokens, setTokens] = useState([]);
   const [ghosts, setGhosts] = useState({});
   const [roster, setRoster] = useState([]);
@@ -1557,6 +1569,24 @@ export default function SceneEditor({
           />
         ),
       },
+      ...(dungeon.enabled ? [{
+        id: 'dungeon',
+        label: 'Dungeon',
+        icon: DoorOpen,
+        content: (
+          <DungeonPanel
+            plan={dungeon.plan}
+            dungeonKey={dungeon.key}
+            placed={dungeon.placed}
+            busy={dungeon.busy}
+            error={dungeon.error}
+            partySize={Math.max(1, roster.length || 4)}
+            onPopulate={dungeon.populate}
+            onPlaceRoom={dungeon.placeRoom}
+            monstersForRoom={dungeon.monstersForRoom}
+          />
+        ),
+      }] : []),
       {
         id: 'fog',
         label: 'Fog',
@@ -1582,7 +1612,7 @@ export default function SceneEditor({
     handlePlaceCharacter, handlePlaceObject, handlePlayAreaChange, handleUndoDrawing, handleUploadMap,
     handleUploadBackground, handleShownImageChange, handleAddImage, paintMode,
     role.isGm, role.ownedCharacterIds, roster, scene, tokens, measureShape, feetPerCell,
-    rollFeed, handleCustomRoll, clearRollFeed, hexcrawl,
+    rollFeed, handleCustomRoll, clearRollFeed, hexcrawl, dungeon,
   ]);
 
   // While editing one layer, strokes on the others fade back rather than

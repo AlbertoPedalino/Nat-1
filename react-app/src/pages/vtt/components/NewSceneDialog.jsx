@@ -96,7 +96,10 @@ export default function NewSceneDialog({ open, campaignId, onClose, onCreate, on
         const fitted = await fitPlanToPicture(entries[0].file, plan).catch(() => null);
         if (fitted?.confident) {
           entries[0].grid = fitted.grid;
-          setNotice(`Grid set from the plan: ${fitted.grid.size}px squares, ${plan.rooms.length} rooms.`);
+          // Kept with the scene so its rooms can be filled later: the plan is
+          // the only thing that knows which square of the map room seven is.
+          entries[0].dungeon = { plan, origin: fitted.planOrigin };
+          setNotice(`Grid set from the plan: ${fitted.grid.size}px squares, ${plan.rooms.length} rooms. Roll their contents from the Dungeon panel.`);
         } else {
           setNotice('The plan did not line up with this picture, so the grid is left for you to set. That export turns the map to fit the page.');
         }
