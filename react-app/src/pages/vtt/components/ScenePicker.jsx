@@ -21,7 +21,9 @@ import {
   listScenes,
   setLiveScene,
   updateScene,
+  uploadMapImage,
 } from '../../../shared/cloud/vtt.js';
+import NewSceneDialog from './NewSceneDialog.jsx';
 
 // Scenes belong to a campaign, so the picker is grouped by campaign rather than
 // being a flat list like the local tools' Library.
@@ -33,6 +35,10 @@ export default function ScenePicker({ onOpen }) {
   const [scenesByCampaign, setScenesByCampaign] = useState({});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  // Which campaign is having a scene made for it, or null. New scene is a
+  // choice now — empty board, or one generated — so it opens a dialog rather
+  // than making the empty one on the spot.
+  const [creatingFor, setCreatingFor] = useState(null);
 
   const refresh = useCallback(async (ids) => {
     if (!ids.length) return;
@@ -59,6 +65,50 @@ export default function ScenePicker({ onOpen }) {
     } finally {
       setBusy(false);
     }
+  };
+
+  // One scene per picture. A floor plan is a map you walk onto, not a layer of
+  // one, so a building exported storey by storey becomes a scene per storey and
+  // the GM switches between them the way the party climbs.
+  //
+  // A file that fails takes only its own scene down: the row is removed again so
+  // the campaign is not left with an empty "Floor 3" nobody asked for, and the
+  // floors that did land stay.
+  const handleImport = async (campaignId, entries, onProgress) => {
+    const created = [];
+    const failed = [];
+    let reason = '';
+    for (const [index, entry] of entries.entries()) {
+      let scene = null;
+      try {
+        scene = await createScene(campaignId, entry.name);
+        const imagePath = await uploadMapImage(campaignId, scene.id, entry.file);
+        const updated = await updateScene(scene.id, { imagePath, shownImage: 'map' });
+        created.push(updated || scene);
+      } catch (cause) {
+        failed.push(entry.name);
+        // The first one says why; the rest are usually the same story, and a
+        // toast per floor is a wall of toast.
+        reason = reason || cause?.message || '';
+        if (scene) {
+          try { await deleteScene(scene.id, campaignId); } catch { /* nothing to undo */ }
+        }
+      }
+      onProgress?.(index + 1);
+    }
+
+    await refresh(campaigns.map((campaign) => campaign.id));
+    if (failed.length) {
+      notify('warning', `Could not import ${failed.join(', ')}.${reason ? ` ${reason}` : ''}`);
+    }
+    if (created.length) {
+      notify('success', created.length === 1
+        ? `"${created[0].name}" is ready.`
+        : `${created.length} scenes are ready.`);
+    } else if (!failed.length) {
+      notify('error', 'Nothing was imported.');
+    }
+    return created;
   };
 
   // Toggling off ends the session view: the players are left with nothing
@@ -130,7 +180,7 @@ export default function ScenePicker({ onOpen }) {
                 size="small"
                 startIcon={<Plus size={15} />}
                 disabled={busy}
-                onClick={() => handleCreate(campaign.id)}
+                onClick={() => setCreatingFor(campaign.id)}
               >
                 New scene
               </Button>
@@ -176,6 +226,14 @@ export default function ScenePicker({ onOpen }) {
           </Paper>
         );
       })}
+
+      <NewSceneDialog
+        open={Boolean(creatingFor)}
+        campaignId={creatingFor}
+        onClose={() => setCreatingFor(null)}
+        onCreate={(campaignId) => { setCreatingFor(null); handleCreate(campaignId); }}
+        onImport={handleImport}
+      />
     </Stack>
   );
 }
