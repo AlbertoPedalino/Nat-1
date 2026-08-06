@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { readSceneDungeon, saveSceneDungeon } from '../../../shared/cloud/dungeon.js';
+import { readSceneDungeon, updateSceneDungeon } from '../../../shared/cloud/dungeon.js';
 import {
   readCampaignHexcrawlBoard, readHexcrawlBoard,
 } from '../../../shared/cloud/hexcrawl.js';
@@ -72,7 +72,9 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize }) {
       );
       // The engine numbers its rooms from one, in order, which is how the plan
       // numbers its own: room three of the key is room three of the map.
-      const saved = await saveSceneDungeon(sceneId, { key: rolled, placed: {} });
+      // An update rather than a write of the whole row: the plan is already
+      // there and does not travel back and forth for every roll.
+      const saved = await updateSceneDungeon(sceneId, { key: rolled, placed: {} });
       setState((current) => ({ ...current, key: saved.key, placed: saved.placed }));
       setError('');
       return saved.key;
@@ -127,7 +129,7 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize }) {
         created.push(await createToken(sceneId, token));
       }
       const placed = { ...state.placed, [room.id]: created.map((token) => token.id) };
-      await saveSceneDungeon(sceneId, { placed });
+      await updateSceneDungeon(sceneId, { placed });
       setState((current) => ({ ...current, placed }));
       setError('');
       return created;

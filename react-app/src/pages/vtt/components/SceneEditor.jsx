@@ -187,8 +187,12 @@ export default function SceneEditor({
   // window may run it, which is why the projector tab is not one even when it is
   // the GM who opened it.
   const hexcrawl = useSceneHexcrawl({ scene, isGm: role.isGm && !spectator });
-  // The bestiary is already loaded for the monster picker; the dungeon uses it
-  // to turn a rolled XP budget into creatures.
+  const [tokens, setTokens] = useState([]);
+  const [ghosts, setGhosts] = useState({});
+  const [roster, setRoster] = useState([]);
+  // After the roster, which sizes the encounters it buys. The bestiary is
+  // already loaded for the monster picker; the dungeon uses it to turn a rolled
+  // budget in experience into creatures.
   const monsterDb = useMonsterDb();
   const dungeon = useSceneDungeon({
     scene,
@@ -196,9 +200,6 @@ export default function SceneEditor({
     monsters: monsterDb.monsters,
     partySize: Math.max(1, roster.length || 4),
   });
-  const [tokens, setTokens] = useState([]);
-  const [ghosts, setGhosts] = useState({});
-  const [roster, setRoster] = useState([]);
   // What is actually on screen: the URL and the mode it belongs to, updated
   // together once the picture has loaded.
   const [displayed, setDisplayed] = useState({ url: null, shownImage: 'map' });
