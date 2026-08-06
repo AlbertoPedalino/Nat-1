@@ -474,6 +474,23 @@ test('the hex overlay paints a coloured cell under its outline', () => {
   expect(painted.getAttribute('d')).toMatch(/^M[-\d.,LM]+Z$/);
 });
 
+// Zoomed out to the whole continent the mesh is more hexes than a frame can
+// draw and finer than an eye can split, so it goes — but what the party has
+// walked is the map's content and stays at any zoom.
+test('the hex mesh drops out when zoomed past reading, the painted hexes do not', () => {
+  const { container } = render(
+    <HexGrid
+      grid={HEX_SCENE.grid}
+      view={{ x: 0, y: 0, zoom: 0.05 }}
+      viewportSize={{ width: 1200, height: 800 }}
+      cells={new Map([['1:0', { q: 1, r: 0, status: 'travelled', color: '#6f8f5a' }]])}
+    />,
+  );
+
+  expect(container.querySelector('path[stroke]')).toBeNull();
+  expect(container.querySelector('path[fill="#6f8f5a"]')).not.toBeNull();
+});
+
 test('clicking the board of a hex map picks a hex, dragging it still pans', () => {
   const onHexClick = vi.fn();
   render(

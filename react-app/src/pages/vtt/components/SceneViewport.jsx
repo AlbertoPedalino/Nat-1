@@ -945,8 +945,12 @@ export default function SceneViewport({
         <Typography sx={placeholderSx}>Upload a map image to start building this scene.</Typography>
       )}
 
-      {gridVisible && isHexGrid(scene.grid) ? (
+      {/* Rendered whenever the map is a hexcrawl, not only while its mesh is
+          on: the painted country and the picked hex are content, and the grid
+          being off — or zoomed past reading — is no reason to lose them. */}
+      {!backgroundOnly && isHexGrid(scene.grid) ? (
         <HexGrid
+          outlined={gridVisible}
           grid={scene.grid}
           view={view}
           viewportSize={viewportSize}
