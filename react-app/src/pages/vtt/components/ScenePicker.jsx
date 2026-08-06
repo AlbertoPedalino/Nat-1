@@ -77,6 +77,7 @@ export default function ScenePicker({ onOpen }) {
   const handleImport = async (campaignId, entries, onProgress) => {
     const created = [];
     const failed = [];
+    let reason = '';
     for (const [index, entry] of entries.entries()) {
       let scene = null;
       try {
@@ -86,6 +87,9 @@ export default function ScenePicker({ onOpen }) {
         created.push(updated || scene);
       } catch (cause) {
         failed.push(entry.name);
+        // The first one says why; the rest are usually the same story, and a
+        // toast per floor is a wall of toast.
+        reason = reason || cause?.message || '';
         if (scene) {
           try { await deleteScene(scene.id, campaignId); } catch { /* nothing to undo */ }
         }
@@ -95,7 +99,7 @@ export default function ScenePicker({ onOpen }) {
 
     await refresh(campaigns.map((campaign) => campaign.id));
     if (failed.length) {
-      notify('warning', `Could not import ${failed.join(', ')}.`);
+      notify('warning', `Could not import ${failed.join(', ')}.${reason ? ` ${reason}` : ''}`);
     }
     if (created.length) {
       notify('success', created.length === 1

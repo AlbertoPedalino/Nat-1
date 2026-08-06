@@ -83,7 +83,11 @@ export default function NewSceneDialog({ open, campaignId, onClose, onCreate, on
         (done) => setProgress({ done, total: entries.length }),
       );
       setProgress(null);
+      // Every file failing is reported by the importer as a warning, which is a
+      // toast the dialog is sitting on top of: say it here too, and stay open so
+      // the same files can be tried again.
       if (created?.length) close();
+      else setError('None of those could be imported. The scenes were not created.');
     } catch (cause) {
       setProgress(null);
       setError(cause?.message || 'Could not create the scenes.');
@@ -198,7 +202,9 @@ export default function NewSceneDialog({ open, campaignId, onClose, onCreate, on
                 <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center' }}>
                   <CircularProgress size={14} />
                   <Typography sx={stepsSx}>
-                    Creating scene {progress.done + 1} of {progress.total}…
+                    {/* Clamped: the last file reports itself done, and "3 of 2"
+                        is a progress line that has stopped making sense. */}
+                    Creating scene {Math.min(progress.done + 1, progress.total)} of {progress.total}…
                   </Typography>
                 </Stack>
               ) : null}

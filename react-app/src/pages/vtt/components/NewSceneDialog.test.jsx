@@ -126,6 +126,21 @@ test('a drop with no picture in it is refused rather than half-imported', async 
   expect(onImport).not.toHaveBeenCalled();
 });
 
+// The importer reports a per-file failure as a toast, which the dialog is
+// sitting on top of, so it says it here too rather than looking like it worked.
+test('an import that creates nothing keeps the dialog open and says so', async () => {
+  const onClose = vi.fn();
+  renderDialog({ onImport: async () => [], onClose });
+
+  fireEvent.click(screen.getByText('Dungeon'));
+  fireEvent.change(inDialog('input[type="file"]'), {
+    target: { files: [pngFile('dungeon.png')] },
+  });
+
+  expect(await screen.findByText(/none of those could be imported/i)).toBeInTheDocument();
+  expect(onClose).not.toHaveBeenCalled();
+});
+
 test('a failed import says so and leaves the dialog open to try again', async () => {
   const onImport = vi.fn(async () => { throw new Error('Storage said no.'); });
   const onClose = vi.fn();
