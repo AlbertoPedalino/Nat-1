@@ -1,10 +1,12 @@
 import { Box, Button, Stack, Typography, useTheme } from '@mui/material';
-import { FastForward, Footprints, Map, Mountain } from 'lucide-react';
+import { FastForward, Footprints, Map } from 'lucide-react';
+import { POPULATION_ICONS, TERRAIN_ICONS } from './hexIcons.js';
 import WeatherPanel from './WeatherPanel.jsx';
 import TimePanel from './TimePanel.jsx';
 import SelectorGroup from './SelectorGroup.jsx';
 import TierSelector from './TierSelector.jsx';
 import HexResultSteps from './HexResultSteps.jsx';
+import CampaignLinkPanel from './CampaignLinkPanel.jsx';
 import SessionLog from './SessionLog.jsx';
 import { SELECTOR_CONTRACTS } from '../logic/selectorContracts.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
@@ -30,6 +32,7 @@ export default function HexcrawlView() {
 
   return (
     <Stack spacing={2}>
+      <CampaignLinkPanel />
       <WeatherPanel />
       <TimePanel />
 
@@ -45,6 +48,7 @@ export default function HexcrawlView() {
             getId={popContract.getId}
             value={popContract.deriveValue(state)}
             onChange={(o) => dispatch(popContract.action(o))}
+            getIcon={(o) => POPULATION_ICONS[o.id]}
           />
           <SelectorGroup
             label="Terrain"
@@ -52,7 +56,7 @@ export default function HexcrawlView() {
             getId={terrainContract.getId}
             value={terrainContract.deriveValue(state)}
             onChange={(o) => dispatch(terrainContract.action(o))}
-            getIcon={() => Mountain}
+            getIcon={(o) => TERRAIN_ICONS[o.id]}
           />
         </Box>
         <Box sx={dividerSx} />

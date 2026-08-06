@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeAll, vi } from 'vitest';
 import SceneViewport from './SceneViewport.jsx';
+import HexGrid from './HexGrid.jsx';
 
 beforeAll(() => {
   // jsdom does not ship PointerEvent, while the real browser does. Using its
@@ -393,6 +394,115 @@ test('with snapping off objects land between squares while creatures keep theirs
     expect.objectContaining({ id: 'ogre-1' }),
     { x: 5, y: 0 },
   );
+});
+
+const HEX_SCENE = {
+  grid: {
+    size: 50, offsetX: 0, offsetY: 0, visible: true, shape: 'hex',
+  },
+  playArea: null,
+};
+
+test('a piece dragged on a hex map lands on the hex under it', () => {
+  const onMoveToken = vi.fn();
+  render(
+    <SceneViewport
+      scene={HEX_SCENE}
+      imageUrl={null}
+      tokens={[{ id: 'party-1', label: 'Party', layer: 'tokens', x: 0, y: 0, w: 1, h: 1 }]}
+      snap
+      canMove={() => true}
+      fog={null}
+      onMoveToken={onMoveToken}
+      drawings={[]}
+      lasers={[]}
+      rollBubbles={[]}
+      diceThrows={[]}
+    />,
+  );
+  const viewport = screen.getByText('Upload a map image to start building this scene.').parentElement;
+
+  // Grabbed at its centre and carried one hex to the right: on axial
+  // coordinates that is q + 1, and the row is untouched.
+  fireEvent.pointerDown(screen.getByRole('button', { name: 'Party' }), {
+    button: 0, clientX: 0, clientY: 0, pointerId: 50,
+  });
+  fireEvent.pointerUp(viewport, { button: 0, clientX: 50, clientY: 0, pointerId: 50 });
+
+  expect(onMoveToken).toHaveBeenCalledWith(
+    expect.objectContaining({ id: 'party-1' }),
+    { x: 1, y: 0 },
+  );
+});
+
+// The marker is the map everyone reads, so the viewport draws it from props
+// alone — a player's window and the projector pass the same one the GM's does.
+test('a hex map marks where the party stands', () => {
+  const { container } = render(
+    <SceneViewport
+      scene={HEX_SCENE}
+      imageUrl={null}
+      tokens={[]}
+      snap
+      canMove={() => false}
+      fog={null}
+      partyHex={{ q: 1, r: 0 }}
+      drawings={[]}
+      lasers={[]}
+      rollBubbles={[]}
+      diceThrows={[]}
+    />,
+  );
+
+  expect(container.querySelector('[data-party-hex="1,0"]')).not.toBeNull();
+});
+
+test('the hex overlay paints a coloured cell under its outline', () => {
+  const { container } = render(
+    <HexGrid
+      grid={HEX_SCENE.grid}
+      view={{ x: 0, y: 0, zoom: 1 }}
+      viewportSize={{ width: 400, height: 300 }}
+      cells={new Map([['1:0', { q: 1, r: 0, status: 'travelled', color: '#6f8f5a' }]])}
+    />,
+  );
+
+  // One path per colour, not one element per hex: a travelled country is
+  // hundreds of hexes in the same green.
+  const painted = container.querySelector('path[fill="#6f8f5a"]');
+  expect(painted).not.toBeNull();
+  expect(painted.getAttribute('d')).toMatch(/^M[-\d.,LM]+Z$/);
+});
+
+test('clicking the board of a hex map picks a hex, dragging it still pans', () => {
+  const onHexClick = vi.fn();
+  render(
+    <SceneViewport
+      scene={HEX_SCENE}
+      imageUrl={null}
+      tokens={[]}
+      snap
+      canMove={() => false}
+      fog={null}
+      onHexClick={onHexClick}
+      drawings={[]}
+      lasers={[]}
+      rollBubbles={[]}
+      diceThrows={[]}
+    />,
+  );
+  const viewport = screen.getByText('Upload a map image to start building this scene.').parentElement;
+
+  fireEvent.pointerDown(viewport, { button: 0, clientX: 50, clientY: 0, pointerId: 51 });
+  fireEvent.pointerUp(viewport, { button: 0, clientX: 50, clientY: 0, pointerId: 51 });
+  expect(onHexClick).toHaveBeenCalledWith({ q: 1, r: 0 });
+
+  // A pan is a drag, and a drag is not a pick.
+  onHexClick.mockClear();
+  fireEvent.pointerDown(viewport, { button: 0, clientX: 50, clientY: 0, pointerId: 52 });
+  fireEvent.pointerMove(viewport, { clientX: 160, clientY: 90, pointerId: 52 });
+  fireEvent.pointerUp(viewport, { button: 0, clientX: 160, clientY: 90, pointerId: 52 });
+  expect(onHexClick).not.toHaveBeenCalled();
 });
 
 test('a selected ruler starts on top of a token instead of dragging it', () => {

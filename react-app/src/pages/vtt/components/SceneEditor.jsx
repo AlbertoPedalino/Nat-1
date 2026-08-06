@@ -5,8 +5,8 @@ import {
   Box, Button, CircularProgress, IconButton, Stack, Tooltip, Typography,
 } from '@mui/material';
 import {
-  Cloud, Dices, Lock, LockOpen, MonitorOff, MonitorPlay, Pencil, Pointer, Radio, Ruler, Shapes,
-  Users,
+  Cloud, Dices, Lock, LockOpen, MonitorOff, MonitorPlay, Pencil, Pointer, Radio, Ruler,
+  Shapes, Users,
 } from 'lucide-react';
 import { useToast } from '../../../shared/ToastProvider.jsx';
 import { useAuth } from '../../../shared/cloud/AuthProvider.jsx';
@@ -95,6 +95,9 @@ import {
   writeSheetSplit,
 } from '../../../shared/vtt/sheetLayout.js';
 import { useEncounterBridge } from '../hooks/useEncounterBridge.js';
+import { useSceneHexcrawl } from '../hooks/useSceneHexcrawl.js';
+import HexcrawlCorner from './HexcrawlCorner.jsx';
+import HexResultDialog from './HexResultDialog.jsx';
 import { useConditionEntries } from '../../encounterbuilder/hooks/useConditionEntries.js';
 import EncounterImportDialog from './EncounterImportDialog.jsx';
 import MonsterPickerDialog from './MonsterPickerDialog.jsx';
@@ -175,6 +178,12 @@ export default function SceneEditor({
   const { notify } = useToast();
   const { user } = useAuth();
   const role = useSceneRole(scene.campaignId);
+  // Dormant on a square map: it asks the database for nothing until the scene
+  // is actually a hexcrawl. A player and the projector read it — the colours and
+  // the party marker are the map everyone is looking at — but only the GM's own
+  // window may run it, which is why the projector tab is not one even when it is
+  // the GM who opened it.
+  const hexcrawl = useSceneHexcrawl({ scene, isGm: role.isGm && !spectator });
   const [tokens, setTokens] = useState([]);
   const [ghosts, setGhosts] = useState({});
   const [roster, setRoster] = useState([]);
@@ -192,6 +201,9 @@ export default function SceneEditor({
   const [paintMode, setPaintMode] = useState('select');
   const [brushSize, setBrushSize] = useState(3);
   const [activeLayer, setActiveLayer] = useState('tokens');
+  // Both top-left panels open in the same spot, so only one of them is out at a
+  // time: 'pictures', 'hexcrawl' or nothing.
+  const [openCorner, setOpenCorner] = useState(null);
   const [menu, setMenu] = useState(null);
   const [importOpen, setImportOpen] = useState(false);
   const [monsterOpen, setMonsterOpen] = useState(false);
@@ -1559,7 +1571,7 @@ export default function SceneEditor({
     handlePlaceCharacter, handlePlaceObject, handlePlayAreaChange, handleUndoDrawing, handleUploadMap,
     handleUploadBackground, handleShownImageChange, handleAddImage, paintMode,
     role.isGm, role.ownedCharacterIds, roster, scene, tokens, measureShape, feetPerCell,
-    rollFeed, handleCustomRoll, clearRollFeed,
+    rollFeed, handleCustomRoll, clearRollFeed, hexcrawl,
   ]);
 
   // While editing one layer, strokes on the others fade back rather than
@@ -1730,6 +1742,10 @@ export default function SceneEditor({
           fogOpacity={PLAYER_FOG_OPACITY}
           paintMode="select"
           backgroundOnly={displayed.shownImage === 'background'}
+          // The projector shows the crawl as the table sees it: the country
+          // they have been through, and the hex they are standing in.
+          hexCells={hexcrawl.visible ? hexcrawl.cellsByKey : null}
+          partyHex={hexcrawl.partyHex}
           onImageSize={setImageSize}
           drawings={visibleDrawings}
           lasers={laserDots}
@@ -1862,19 +1878,49 @@ export default function SceneEditor({
         // opposite corner, and switching it is a move you make mid-scene.
         imageSwitch={role.isGm
           ? (
-            <MapCorner
-              scene={scene}
-              busy={busy}
-              onShownImageChange={handleShownImageChange}
-              onUploadMap={handleUploadMap}
-              onUploadBackground={handleUploadBackground}
-              onAddImage={handleAddImage}
-              onGridChange={handleGridChange}
-              onPlayAreaChange={handlePlayAreaChange}
-              onFitPlayArea={handleFitPlayArea}
-            />
+            <Stack direction="row" spacing={0.75} sx={{ alignItems: 'flex-start' }}>
+              <MapCorner
+                scene={scene}
+                busy={busy}
+                open={openCorner === 'pictures'}
+                onOpenChange={(next) => setOpenCorner(next ? 'pictures' : null)}
+                onShownImageChange={handleShownImageChange}
+                onUploadMap={handleUploadMap}
+                onUploadBackground={handleUploadBackground}
+                onAddImage={handleAddImage}
+                onGridChange={handleGridChange}
+                onPlayAreaChange={handlePlayAreaChange}
+                onFitPlayArea={handleFitPlayArea}
+              />
+              {hexcrawl.enabled ? (
+                <HexcrawlCorner
+                  open={openCorner === 'hexcrawl'}
+                  onOpenChange={(next) => setOpenCorner(next ? 'hexcrawl' : null)}
+                  board={hexcrawl.board}
+                  clock={hexcrawl.clock}
+                  clockLinked={hexcrawl.clockLinked}
+                  defaults={hexcrawl.defaults}
+                  armed={hexcrawl.armed}
+                  busy={hexcrawl.busy}
+                  error={hexcrawl.error}
+                  lastHex={hexcrawl.lastHex}
+                  hasResult={hexcrawl.hasResult}
+                  onOpenResult={hexcrawl.openResult}
+                  onDefaultsChange={hexcrawl.setDefaults}
+                  onSeasonChange={hexcrawl.setSeason}
+                  onArmedChange={hexcrawl.setArmed}
+                />
+              ) : null}
+            </Stack>
           )
           : null}
+        // Painted for everyone at the table; only the GM may click one.
+        hexCells={hexcrawl.visible ? hexcrawl.cellsByKey : null}
+        partyHex={hexcrawl.partyHex}
+        selectedHex={hexcrawl.selected}
+        onHexClick={hexcrawl.enabled ? hexcrawl.clickHex : undefined}
+        hexBubble={hexcrawl.enabled ? hexcrawl.bubble : null}
+        onHexBubbleOpen={hexcrawl.openResult}
         onImageSize={setImageSize}
         onDragToken={handleDragToken}
         onMoveToken={handleMoveToken}
@@ -1959,6 +2005,10 @@ export default function SceneEditor({
           </>
         ) : null}
       </Box>
+
+      {/* What the party walked into, as the answer to the click that took them
+          there. */}
+      <HexResultDialog result={hexcrawl.result} onClose={hexcrawl.dismissResult} />
 
       <MonsterPickerDialog
         open={monsterOpen}

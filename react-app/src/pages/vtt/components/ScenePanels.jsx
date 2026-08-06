@@ -17,6 +17,7 @@ import {
   Eye,
   EyeOff,
   Grid3x3,
+  Hexagon,
   Image as ImageIcon,
   Info,
   ImagePlus,
@@ -123,6 +124,26 @@ export function MapPanel({
         label="Grid"
         hint="The cell size almost never matches the image, so all three numbers are editable: set Cell to the width of one square on the picture, then nudge the offsets until the lines sit on it."
       />
+      {/* Squares for a dungeon, hexes for the wilderness. Changing it changes
+          what a piece's stored position means, so it is asked once, up here with
+          the calibration, rather than offered as a view option. */}
+      <ToggleButtonGroup
+        size="small"
+        exclusive
+        fullWidth
+        value={scene.grid.shape === 'hex' ? 'hex' : 'square'}
+        onChange={(_, value) => value && setGrid({ shape: value })}
+        aria-label="Grid shape"
+      >
+        <ToggleButton value="square" aria-label="Square grid">
+          <Grid3x3 size={14} />
+          <Box component="span" sx={pillLabelSx}>Squares</Box>
+        </ToggleButton>
+        <ToggleButton value="hex" aria-label="Hex grid">
+          <Hexagon size={14} />
+          <Box component="span" sx={pillLabelSx}>Hexes</Box>
+        </ToggleButton>
+      </ToggleButtonGroup>
       <Stack direction="row" spacing={0.75}>
         <TextField
           label="Cell"
