@@ -113,7 +113,21 @@
       "Bash(perl -0pi -e \"s/\\(    tempHP: clampTempHp\\\\\\(payload\\\\.tempHP\\\\\\),\\\\n    ac: clampInt\\\\\\(payload\\\\.ac, 0, 99, 10\\\\\\),\\)/    tempHP: clampTempHp\\(payload.tempHP\\),\\\\n    activeConditions: [],\\\\n    ac: clampInt\\(payload.ac, 0, 99, 10\\),/\" src/pages/encounterbuilder/logic/combat.js)",
       "Bash(npm install *)",
       "Bash(npx vitest *)",
-      "PowerShell(node --test src/pages/encounterbuilder/logic/encounterbuilder.logic.test.js 2>&1 | Select-Object -Last 8)"
+      "PowerShell(node --test src/pages/encounterbuilder/logic/encounterbuilder.logic.test.js 2>&1 | Select-Object -Last 8)",
+      "PowerShell(npx vitest run src/pages/vtt/components/HexcrawlPanel.test.jsx 2>&1 | Select-Object -Last 15)",
+      "PowerShell(npx vitest run src/pages/vtt/components/HexcrawlPanel.test.jsx 2>&1 | Select-Object -Last 30)",
+      "PowerShell(npx vitest run src/pages/vtt/components/HexcrawlPanel.test.jsx 2>&1 | Select-Object -Last 20)",
+      "PowerShell(npx vitest run src/pages/vtt src/pages/gmboard 2>&1 | Select-Object -Last 25)",
+      "PowerShell(npx vitest run 2>&1 | Select-Object -Last 8; npx eslint src/pages/vtt/components/HexcrawlPanel.jsx src/pages/vtt/components/MapCorner.jsx src/pages/vtt/components/HexcrawlCorner.jsx src/pages/gmboard/components 2>&1 | Select-Object -Last 15)",
+      "PowerShell(npx vitest run src/pages/vtt/components/HexcrawlPanel.test.jsx src/shared/hexcrawl 2>&1 | Select-Object -Last 35)",
+      "PowerShell(npx vitest run src/pages/vtt 2>&1 | Select-Object -Last 25)",
+      "PowerShell(npx vitest run src/pages/vtt/components/SceneViewport.test.jsx 2>&1 | Select-Object -Last 20)",
+      "PowerShell(node \"C:\\\\Users\\\\alber\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-alber-Documents-DND-GM-Board-react-app\\\\5a781ef2-a24a-4e92-858d-279c71c265ac\\\\scratchpad\\\\hexbench.mjs\")",
+      "Bash(echo \"conflicts left: $?\")",
+      "PowerShell(npx vitest run src/pages/vtt/components/SceneViewport.test.jsx 2>&1 | Select-Object -Last 18)",
+      "Bash(python -)",
+      "PowerShell(npx vitest run src/pages/vtt/components/HexcrawlPanel.test.jsx 2>&1 | Select-Object -Last 22)",
+      "WebFetch(domain:watabou.github.io)"
     ]
   }
 }
