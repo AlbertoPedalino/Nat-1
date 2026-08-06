@@ -5,6 +5,7 @@ import WeatherPanel from './WeatherPanel.jsx';
 import TimePanel from './TimePanel.jsx';
 import SelectorGroup from './SelectorGroup.jsx';
 import TierSelector from './TierSelector.jsx';
+import MountSelector from './MountSelector.jsx';
 import HexResultSteps from './HexResultSteps.jsx';
 import CampaignLinkPanel from './CampaignLinkPanel.jsx';
 import SessionLog from './SessionLog.jsx';
@@ -59,6 +60,13 @@ export default function HexcrawlView() {
             getIcon={(o) => TERRAIN_ICONS[o.id]}
           />
         </Box>
+        <Box sx={dividerSx} />
+        {/* The mount belongs with the travel, not with the hex: it is the same
+            forest either way, and the party crosses it faster. */}
+        <MountSelector
+          value={state.mountSpeed}
+          onChange={(mountSpeed) => dispatch({ type: 'setMountSpeed', mountSpeed })}
+        />
         <Box sx={dividerSx} />
         <TierSelector value={state.hexTier} onChange={(tier) => dispatch({ type: 'setHexTier', hexTier: tier })} />
 

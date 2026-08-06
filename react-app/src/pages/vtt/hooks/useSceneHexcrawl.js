@@ -30,7 +30,12 @@ const DEFAULTS_KEY = 'gb:hexcrawl:defaults:';
 // Long enough to read three lines and decide whether to open the rolls, short
 // enough that a bubble is never still sitting on the map two hexes later.
 const BUBBLE_MS = 12000;
-const EMPTY_DEFAULTS = Object.freeze({ terrain: null, pop: null, tier: null });
+// `mountSpeed` is null rather than 1 on purpose: null means "whatever the board
+// says the party is riding", and a 1 would silently put them back on foot the
+// first time this map was opened.
+const EMPTY_DEFAULTS = Object.freeze({
+  terrain: null, pop: null, tier: null, mountSpeed: null,
+});
 
 function readDefaults(sceneId) {
   if (!sceneId) return { ...EMPTY_DEFAULTS };
@@ -202,7 +207,14 @@ export function useSceneHexcrawl({ scene, isGm }) {
         pop: hex.pop || defaults.pop,
         tier: hex.tier ?? defaults.tier,
       };
-      const boardState = mergeBoardClock(board.state, clock.clock);
+      const merged = mergeBoardClock(board.state, clock.clock);
+      // The mount is the map's when this map has been given one, and the
+      // board's otherwise: a party can ride out of a city on one screen and the
+      // GM should not have to go back to the board to say so.
+      const boardState = {
+        ...merged,
+        mountSpeed: defaults.mountSpeed ?? merged.mountSpeed ?? 1,
+      };
       const entry = runHexEntry({
         board: boardState, hex: filled, tables: board.tables, mode,
       });
@@ -211,6 +223,9 @@ export function useSceneHexcrawl({ scene, isGm }) {
       const spoken = {
         id: `${filled.q}:${filled.r}:${Date.now()}`,
         hex: filled,
+        // The hours the leg cost, so the bubble is not still quoting the
+        // terrain's own while the party rides.
+        travelHours: entry.result.travelHours,
         // The clock as it is *after* the leg: the bubble reports the hour the
         // party arrived and the sky they arrived under, not the ones they left.
         clock: { ...entry.clock, season: boardState.season || null },

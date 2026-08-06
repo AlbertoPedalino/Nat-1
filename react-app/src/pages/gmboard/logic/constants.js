@@ -10,6 +10,31 @@ export const WEATHER_OVERRIDE_OPTIONS = Object.freeze([
   { meteo: 'Snow', intensity: 'Heavy', label: 'Heavy', sub: '×4 + Dis' },
 ]);
 
+// What the party is travelling on. A mount does not change what a hex is, only
+// how long it takes to cross: at ×2 a four-hour forest is two hours of forest.
+// The presets are the ones a table reaches for; the multiplier is free, because
+// every setting has its own beasts and somebody will want ×6.
+export const MOUNT_OPTIONS = Object.freeze([
+  { id: 'foot', label: 'On foot', speed: 1, sub: 'full time' },
+  { id: 'riding', label: 'Riding', speed: 2, sub: 'half' },
+  { id: 'fast', label: 'Fast mount', speed: 3, sub: 'a third' },
+  { id: 'flying', label: 'Flying', speed: 4, sub: 'a quarter' },
+]);
+
+// A cart is slower than walking and a phoenix is faster than anything, so the
+// range is generous — but never zero, which would be a hex that takes no time
+// and a party that crosses a continent for free.
+export const MIN_MOUNT_SPEED = 0.25;
+export const MAX_MOUNT_SPEED = 20;
+
+export function normalizeMountSpeed(value) {
+  const speed = Number(value);
+  if (!Number.isFinite(speed) || speed <= 0) return 1;
+  // Quarters: ×1.5 is a real answer, ×1.37 is a spreadsheet.
+  const quartered = Math.round(speed * 4) / 4;
+  return Math.min(MAX_MOUNT_SPEED, Math.max(MIN_MOUNT_SPEED, quartered));
+}
+
 export const TERRAIN_OPTIONS = Object.freeze([
   { id: 'road', label: 'Road', hours: 1, sub: '+1h' },
   { id: 'plains', label: 'Plains', hours: 2, sub: '+2h' },

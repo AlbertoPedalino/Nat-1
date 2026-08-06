@@ -3,6 +3,7 @@ import {
 } from '@mui/material';
 import { Dices, Footprints } from 'lucide-react';
 import ColorField from '../../../components/ColorField.jsx';
+import MountSelector from '../../gmboard/components/MountSelector.jsx';
 import { formatDateTime } from '../../gmboard/logic/time.js';
 import { hasWeatherDisadvantage, weatherEffectLabel, weatherTimerLabel } from '../../gmboard/logic/weather.js';
 import {
@@ -42,13 +43,6 @@ export default function HexcrawlPanel({
   return (
     <Stack spacing={1.1}>
       {clock ? <WeatherCard clock={clock} /> : null}
-
-      {lastHex ? (
-        <LastHexCard
-          last={lastHex}
-          onOpenResult={hasResult && lastHex.fromThisSession ? onOpenResult : null}
-        />
-      ) : null}
 
       <TextField
         select
@@ -141,6 +135,17 @@ export default function HexcrawlPanel({
         </Box>
       ) : null}
 
+      {/* The party's own speed rather than the hex's: it crosses every hex the
+          same amount faster. Set here it is this map's, and the board's answer
+          is used until it is. */}
+      <MountSelector
+        dense
+        label="Mount"
+        disabled={busy}
+        value={defaults?.mountSpeed ?? boardState?.mountSpeed ?? 1}
+        onChange={(mountSpeed) => onDefaultsChange({ mountSpeed })}
+      />
+
       {/* Off while a map is being drawn up: laying out terrain would otherwise
           cost the party a day of travel per click. */}
       <FormControlLabel
@@ -175,6 +180,15 @@ export default function HexcrawlPanel({
           terrain stays, the hours already played do not come back.
         </Typography>
       )}
+
+      {/* Last, under the settings: it is the answer to what has already been
+          done, and the setup above it is what the next click will use. */}
+      {lastHex ? (
+        <LastHexCard
+          last={lastHex}
+          onOpenResult={hasResult && lastHex.fromThisSession ? onOpenResult : null}
+        />
+      ) : null}
     </Stack>
   );
 }
@@ -234,7 +248,7 @@ function LastHexCard({ last, onOpenResult }) {
         <Box sx={{ minWidth: 0, flex: 1 }}>
           <Typography sx={lastHexSx}>
             Hex {last.hex.q}, {last.hex.r}
-            {terrain ? ` · ${terrain.label} (${terrain.hours}h)` : ''}
+            {terrain ? ` · ${terrain.label} (${last.travelHours ?? terrain.hours}h)` : ''}
           </Typography>
           {last.headline ? <Typography sx={lastHeadlineSx}>{last.headline}</Typography> : null}
           {(last.lines || []).map((line) => (

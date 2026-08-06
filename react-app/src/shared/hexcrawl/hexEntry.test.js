@@ -79,6 +79,25 @@ test('entering a hex advances the clock and returns the engine steps', () => {
   assert.ok(result.steps.some((step) => step.kind === 'popRoll'), 'the population roll is the gate');
 });
 
+// The mount is the party's and rides with the board, so a hex entered from the
+// map costs the same hours as one entered from the GM Board.
+test('a mounted party crosses a hex in a fraction of the time', () => {
+  const tables = createDefaultTables();
+  const rng = () => 0.99;
+  const walked = runHexEntry({ board: BOARD, hex: HEX, tables, rng });
+  const ridden = runHexEntry({
+    board: { ...BOARD, mountSpeed: 2 }, hex: HEX, tables, rng,
+  });
+
+  assert.equal(walked.result.travelHours, 4);
+  assert.equal(ridden.result.travelHours, 2);
+  assert.equal(ridden.clock.min, 2 * 60);
+  // A board saved before mounts existed is a party on foot, not a party that
+  // takes no time at all.
+  const { mountSpeed: _ignored, ...noMount } = BOARD;
+  assert.equal(runHexEntry({ board: noMount, hex: HEX, tables, rng }).result.travelHours, 4);
+});
+
 test('the bubble says the outcome in one breath, and the dialog keeps the rest', () => {
   const quiet = hexEntrySummary({
     steps: [

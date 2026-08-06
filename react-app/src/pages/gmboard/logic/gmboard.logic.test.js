@@ -23,6 +23,7 @@ const { effectiveHours, hasWeatherDisadvantage, weatherEffectLabel, weatherTimer
 const { getEvent, getLoot, getEnc, getTrap, getCompl, getEnvSev } = await import('./tables.js');
 const { rollDie, rollD8D12, rollD20D20 } = await import('./rng.js');
 const { resolveProceed, resolveAdvanceOnly, resolveManualAdvance } = await import('./hex.js');
+const { normalizeMountSpeed } = await import('./constants.js');
 const { createDungeon, isValidRoomCount, roomCountInputFrom } = await import('./dungeon.js');
 const { resolveCellCommit } = await import('./tableEdit.js');
 const { createQuests } = await import('./quest.js');
@@ -85,6 +86,26 @@ test('effectiveHours applies rain/snow multipliers', () => {
   assert.equal(effectiveHours(4, 'Rain', 'Moderate'), 8);
   assert.equal(effectiveHours(4, 'Snow', 'Heavy'), 16);
   assert.equal(effectiveHours(0, 'Snow', 'Heavy'), 0);
+});
+
+// A mount is a rate, so it divides: it helps most exactly where the going is
+// worst, and it never makes a hex free.
+test('a mount divides the hours a hex costs', () => {
+  assert.equal(effectiveHours(4, 'Clear', '', 2), 2);
+  assert.equal(effectiveHours(4, 'Clear', '', 3), 1.25, 'rounded to the quarter hour');
+  assert.equal(effectiveHours(4, 'Snow', 'Heavy', 4), 4, 'heavy snow quadruples what the mount quarters');
+  assert.equal(effectiveHours(1, 'Clear', '', 20), 0.25, 'never free');
+  assert.equal(effectiveHours(4, 'Clear', '', 1), 4);
+  assert.equal(effectiveHours(4, 'Clear', '', 0), 4, 'nonsense is a party on foot');
+  assert.equal(effectiveHours(0, 'Clear', '', 4), 0);
+
+  assert.equal(normalizeMountSpeed(2), 2);
+  assert.equal(normalizeMountSpeed('3'), 3);
+  assert.equal(normalizeMountSpeed(1.37), 1.25);
+  assert.equal(normalizeMountSpeed(0), 1);
+  assert.equal(normalizeMountSpeed(-4), 1);
+  assert.equal(normalizeMountSpeed('a horse'), 1);
+  assert.equal(normalizeMountSpeed(999), 20);
 });
 
 test('hasWeatherDisadvantage matches heavy rain and moderate/heavy snow only', () => {

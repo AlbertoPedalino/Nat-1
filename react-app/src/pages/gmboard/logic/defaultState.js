@@ -8,6 +8,9 @@ export function createDefaultCoreState() {
     // and the one the map trusts.
     campaignId: null,
     pop: null, popThr: 0, terrain: null, terrainH: 0, hexTier: null,
+    // What the party is travelling on, as a multiplier on its speed. One is on
+    // foot, which is what every board saved before this had.
+    mountSpeed: 1,
     dPop: null, dThr: 0, dTier: null,
     qPop: null, qThr: 0, qTier: null,
   };

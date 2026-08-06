@@ -85,6 +85,17 @@ test('the tier is picked from the coloured row, and clicking it again clears it'
   expect(onDefaultsChange).toHaveBeenLastCalledWith({ tier: null });
 });
 
+// The mount is the party's, and the map can say so without going back to the
+// board — a party rides out of a city on the screen the GM is looking at.
+test('the mount is picked on the map as well as on the board', () => {
+  const onDefaultsChange = vi.fn();
+  render(panel({ onDefaultsChange }));
+  const mounts = screen.getByRole('group', { name: 'Mount' });
+
+  fireEvent.click(within(mounts).getByRole('button', { name: /×3/ }));
+  expect(onDefaultsChange).toHaveBeenCalledWith({ mountSpeed: 3 });
+});
+
 test('the weather card says what the weather costs, not only what it is', () => {
   render(panel());
   expect(screen.getByText('×2 travel · Disadvantage')).toBeInTheDocument();

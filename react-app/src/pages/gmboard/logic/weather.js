@@ -1,6 +1,12 @@
 import { rollDie } from './rng.js';
 
-export function effectiveHours(terrainHours, meteo, intensity) {
+// How long a hex takes: the terrain, what the sky is doing to it, and what the
+// party is riding. The mount divides rather than subtracts — a mount is a rate,
+// so it helps most exactly where the going is worst.
+//
+// Rounded to the quarter hour: the clock is read to the minute, and a third of
+// a four-hour forest is not worth carrying to seven decimal places.
+export function effectiveHours(terrainHours, meteo, intensity, mountSpeed = 1) {
   if (!terrainHours) return 0;
   let hours = terrainHours;
   if (meteo === 'Rain') {
@@ -9,7 +15,10 @@ export function effectiveHours(terrainHours, meteo, intensity) {
     if (intensity === 'Light' || intensity === 'Moderate') hours *= 2;
     if (intensity === 'Heavy') hours *= 4;
   }
-  return hours;
+  const speed = Number(mountSpeed) > 0 ? Number(mountSpeed) : 1;
+  if (speed === 1) return hours;
+  // Never free: a hex crossed at speed is still a quarter hour of the day.
+  return Math.max(0.25, Math.round((hours / speed) * 4) / 4);
 }
 
 export function weatherEffectLabel(meteo, intensity) {

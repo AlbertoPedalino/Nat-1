@@ -13,6 +13,7 @@ import {
   HEX_POPULATION_OPTIONS,
   TERRAIN_OPTIONS,
   TIER_OPTIONS,
+  normalizeMountSpeed,
 } from '../../pages/gmboard/logic/constants.js';
 import { resolveAdvanceOnly, resolveProceed } from '../../pages/gmboard/logic/hex.js';
 
@@ -66,6 +67,9 @@ export function hexTravelState(board, hex) {
     pop: population ? population.id : null,
     popThr: population ? population.thr : 0,
     hexTier: tier ? tier.tier : null,
+    // What the party is riding is theirs, not the hex's: it crosses every hex
+    // the same amount faster, and a board saved before mounts existed walks.
+    mountSpeed: normalizeMountSpeed(board?.mountSpeed),
   };
 }
 

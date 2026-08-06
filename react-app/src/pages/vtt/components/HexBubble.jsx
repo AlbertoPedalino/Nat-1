@@ -38,7 +38,9 @@ export default function HexBubble({ bubble, x, y, onOpen }) {
           {TerrainIcon ? <TerrainIcon size={12} color={theme.palette.text.secondary} /> : null}
           <Typography sx={coordSx}>
             Hex {bubble.hex.q}, {bubble.hex.r}
-            {terrain ? ` · ${terrain.label} (${terrain.hours}h)` : ''}
+            {/* What the leg cost, weather and mount included, rather than what
+                the terrain costs a party on foot in the sun. */}
+            {terrain ? ` · ${terrain.label} (${bubble.travelHours ?? terrain.hours}h)` : ''}
           </Typography>
         </Stack>
 

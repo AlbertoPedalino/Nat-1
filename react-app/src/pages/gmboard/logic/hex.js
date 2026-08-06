@@ -87,7 +87,7 @@ function resolveEventOutcome({ ev, hexTier, tables, disadvantage, rng }) {
 }
 
 export function resolveProceed(state, tables, rng = Math.random) {
-  const travelHours = effectiveHours(state.terrainH, state.meteo, state.intensity);
+  const travelHours = effectiveHours(state.terrainH, state.meteo, state.intensity, state.mountSpeed);
   const time = advanceMinutes({ min: state.min, day: state.day, month: state.month, year: state.year }, travelHours);
   const hoursSinceWeather = state.hoursSinceWeather + travelHours;
 
@@ -110,7 +110,7 @@ export function resolveProceed(state, tables, rng = Math.random) {
     logEntry += ' → No event';
     return {
       time, hoursSinceWeather: weatherPhase.result.hoursSinceWeather, nextWeatherIn: weatherPhase.result.nextWeatherIn,
-      meteo, intensity, steps, logEntry,
+      meteo, intensity, steps, logEntry, travelHours,
     };
   }
 
@@ -125,12 +125,12 @@ export function resolveProceed(state, tables, rng = Math.random) {
 
   return {
     time, hoursSinceWeather: weatherPhase.result.hoursSinceWeather, nextWeatherIn: weatherPhase.result.nextWeatherIn,
-    meteo, intensity, steps, logEntry,
+    meteo, intensity, steps, logEntry, travelHours,
   };
 }
 
 export function resolveAdvanceOnly(state, tables, rng = Math.random) {
-  const travelHours = effectiveHours(state.terrainH, state.meteo, state.intensity);
+  const travelHours = effectiveHours(state.terrainH, state.meteo, state.intensity, state.mountSpeed);
   const time = advanceMinutes({ min: state.min, day: state.day, month: state.month, year: state.year }, travelHours);
   const hoursSinceWeather = state.hoursSinceWeather + travelHours;
 
@@ -143,7 +143,7 @@ export function resolveAdvanceOnly(state, tables, rng = Math.random) {
 
   return {
     time, hoursSinceWeather: weatherPhase.result.hoursSinceWeather, nextWeatherIn: weatherPhase.result.nextWeatherIn,
-    meteo, intensity, steps: weatherPhase.steps, logEntry,
+    meteo, intensity, steps: weatherPhase.steps, logEntry, travelHours,
   };
 }
 

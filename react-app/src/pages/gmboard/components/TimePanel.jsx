@@ -51,12 +51,20 @@ export default function TimePanel() {
     advanceManual(manualHours);
   };
 
-  const effH = state.terrain ? effectiveHours(state.terrainH, state.meteo, state.intensity) : 0;
+  const effH = state.terrain
+    ? effectiveHours(state.terrainH, state.meteo, state.intensity, state.mountSpeed)
+    : 0;
+  // Says which of the two moved the number, because they pull opposite ways: a
+  // mount in heavy snow can land back on the terrain's own hours.
+  const reasons = [
+    effectiveHours(state.terrainH, state.meteo, state.intensity) !== state.terrainH ? 'weather' : null,
+    Number(state.mountSpeed) > 1 ? `×${state.mountSpeed} mount` : null,
+  ].filter(Boolean);
   const terrainLabel = !state.terrain
     ? '— no terrain —'
     : effH === state.terrainH
       ? `${state.terrain} (${effH}h)`
-      : `${state.terrain} (${state.terrainH}h → ${effH}h due to weather)`;
+      : `${state.terrain} (${state.terrainH}h → ${effH}h due to ${reasons.join(' and ')})`;
 
   return (
     <Stack spacing={1.5} sx={panelSx}>

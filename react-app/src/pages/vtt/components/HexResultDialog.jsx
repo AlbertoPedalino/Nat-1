@@ -35,7 +35,9 @@ export default function HexResultDialog({ result, onClose }) {
       <DialogTitle sx={titleRowSx}>
         <Box component="span" sx={titleSx}>
           {hex ? `Hex ${hex.q}, ${hex.r}` : 'Hex'}
-          {terrain ? ` · ${terrain.label} (${terrain.hours}h)` : ''}
+          {/* The hours the leg actually cost, which is the terrain's own only
+              when the party is walking it in fair weather. */}
+          {terrain ? ` · ${terrain.label} (${result?.travelHours ?? terrain.hours}h)` : ''}
         </Box>
         {clock ? (
           <Box sx={{ ...weatherBadgeSx, ...(disadvantage ? weatherWarnSx : null) }}>

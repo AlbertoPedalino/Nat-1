@@ -1,6 +1,6 @@
 import { createDefaultCoreState, createDefaultResults } from '../logic/defaultState.js';
 import { createDefaultTables } from '../logic/defaultTables.js';
-import { LOG_STORE_LIMIT } from '../logic/constants.js';
+import { LOG_STORE_LIMIT, normalizeMountSpeed } from '../logic/constants.js';
 
 export const CORE_FIELD_KEYS = Object.freeze(Object.keys(createDefaultCoreState()));
 
@@ -90,6 +90,8 @@ export function gmBoardReducer(state, action) {
       return { ...state, terrain: action.terrain, terrainH: action.terrainH };
     case 'setHexTier':
       return { ...state, hexTier: action.hexTier };
+    case 'setMountSpeed':
+      return { ...state, mountSpeed: normalizeMountSpeed(action.mountSpeed) };
     case 'setDPop':
       return { ...state, dPop: action.dPop, dThr: action.dThr };
     case 'setDTier':
