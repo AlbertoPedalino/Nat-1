@@ -156,9 +156,9 @@ export default function DungeonPanel({
 
       {dungeonKey ? (
         <Typography sx={hintSx}>
-          Everything lands on the GM layer, in its own room, with the encounters sized for a
-          party of {partySize}. A trap the players can see on the board is not a trap — drag a
-          piece down to the token layer when the table is meant to meet it.
+          Creatures land on the piece layer, sized for a party of {partySize}; traps, hazards
+          and hoards land on the GM layer, where the table cannot read them. Both go in the room
+          they were rolled for — the fog is what keeps the creatures unseen until the door opens.
         </Typography>
       ) : null}
     </Stack>

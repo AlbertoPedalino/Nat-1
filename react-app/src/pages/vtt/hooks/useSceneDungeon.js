@@ -6,7 +6,7 @@ import {
 import { createDungeon } from '../../gmboard/logic/dungeon.js';
 import { encounterBudget, fillBudget } from '../../../shared/dungeon/roomBudget.js';
 import { crXP, getCR } from '../../encounterbuilder/logic/monsterUtils.js';
-import { layoutTokens, monsterGroupTokens } from '../../../shared/vtt/encounterImport.js';
+import { roomTokens } from '../../../shared/dungeon/roomPlacement.js';
 import { roomMarkers } from '../../../shared/dungeon/roomMarkers.js';
 import { seededRandom } from '../../../shared/dungeon/seededRandom.js';
 import { createToken } from '../../../shared/cloud/vtt.js';
@@ -22,13 +22,6 @@ import { createToken } from '../../../shared/cloud/vtt.js';
 // buys.
 
 const EMPTY = Object.freeze({ plan: null, key: null, placed: {} });
-
-// Told apart at a glance on a board that is otherwise creatures.
-const MARKER_COLORS = Object.freeze({
-  trap: '#c04040',
-  hazard: '#d69245',
-  loot: '#e8a030',
-});
 
 export function useSceneDungeon({ scene, isGm, monsters, partySize }) {
   const sceneId = scene?.id || null;
@@ -136,28 +129,11 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize }) {
 
     setBusy(true);
     try {
-      const origin = state.origin || { col: 0, row: 0 };
-      // Everything goes on the GM's own layer. A room is rolled long before the
-      // party reaches it, and a trap the players can see on the board is not a
-      // trap — the GM drags a creature down to the token layer when it is time
-      // for the table to meet it.
-      const creatures = (chosen?.groups || []).flatMap(({ monster, count }) => (
-        monsterGroupTokens(monster, count, { layer: 'gm' })
-      ));
-      // Markers are map pieces, not creatures: a Lucide glyph with the numbers
-      // the GM needs at that moment written on it.
-      const props = markers.map((marker) => ({
-        layer: 'gm',
-        iconKey: marker.iconKey,
-        label: marker.label,
-        color: MARKER_COLORS[marker.kind] || MARKER_COLORS.trap,
-        w: 1,
-        h: 1,
-      }));
-
-      const laid = layoutTokens([...creatures, ...props], [], {
-        columns: Math.max(1, room.w - 1),
-        origin: { x: origin.col + room.x, y: origin.row + room.y },
+      const laid = roomTokens({
+        room,
+        groups: chosen?.groups || [],
+        markers,
+        origin: state.origin || { col: 0, row: 0 },
       });
       const created = [];
       for (const token of laid) {
