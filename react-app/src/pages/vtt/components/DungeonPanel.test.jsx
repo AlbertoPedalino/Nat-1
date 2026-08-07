@@ -142,9 +142,15 @@ test('a trap is dragged out as a GM-layer marker with its numbers on it', () => 
 
   drag(screen.getAllByText('Pit · DC 13 · 2d6').at(-1));
 
+  // `key` is the field the map's object placement reads; called `iconKey` it
+  // dragged fine and landed nowhere.
   expect(onPlacementDragStart).toHaveBeenCalledWith(expect.objectContaining({
     kind: 'object',
-    object: { iconKey: 'chevrons-down', label: 'Pit · DC 13 · 2d6', layer: 'gm' },
+    object: expect.objectContaining({
+      key: 'chevrons-down',
+      label: 'Pit · DC 13 · 2d6',
+      layer: 'gm',
+    }),
   }));
 });
 

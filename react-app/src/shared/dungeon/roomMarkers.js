@@ -5,6 +5,13 @@
 // three numbers the GM needs at the moment the party walks in, and a marker
 // that only says "trap" sends them back to the panel to look them up.
 
+// Told apart at a glance on a board that is otherwise creatures.
+export const MARKER_COLORS = Object.freeze({
+  trap: '#c04040',
+  hazard: '#d69245',
+  loot: '#e8a030',
+});
+
 const numberOr = (value, fallback = null) => (Number.isFinite(Number(value)) ? Number(value) : fallback);
 
 // Lucide's own names, which is what the map's object layer draws by.

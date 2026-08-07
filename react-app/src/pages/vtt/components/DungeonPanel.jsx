@@ -8,6 +8,7 @@ import {
 import { DUNGEON_POPULATION_OPTIONS, TIER_OPTIONS } from '../../gmboard/logic/constants.js';
 import { MAX_ROOM_COUNT, MIN_ROOM_COUNT, isValidRoomCount } from '../../gmboard/logic/dungeon.js';
 import { describeGroups } from '../../../shared/dungeon/roomBudget.js';
+import { MARKER_COLORS } from '../../../shared/dungeon/roomMarkers.js';
 import InfoHint from '../../../components/InfoHint.jsx';
 import PiecePreview, { beginPieceDrag } from './PiecePreview.jsx';
 
@@ -193,8 +194,23 @@ export default function DungeonPanel({
                       beginPieceDrag(event);
                       onPlacementDragStart?.({
                         kind: 'object',
-                        object: { iconKey: marker.iconKey, label: marker.label, layer: 'gm' },
-                        token: { iconKey: marker.iconKey, label: marker.label, w: 1, h: 1 },
+                        // `key`, not `iconKey`: the map's own object placement
+                        // reads that field and returns without a word when it
+                        // is missing, so a marker dragged with the wrong name
+                        // simply never arrived.
+                        object: {
+                          key: marker.iconKey,
+                          label: marker.label,
+                          layer: 'gm',
+                          color: MARKER_COLORS[marker.kind],
+                        },
+                        token: {
+                          iconKey: marker.iconKey,
+                          label: marker.label,
+                          color: MARKER_COLORS[marker.kind],
+                          w: 1,
+                          h: 1,
+                        },
                       });
                     }}
                     onDragEnd={onPlacementDragEnd}
