@@ -11,6 +11,7 @@
 // touching its keys, so a change to how it stores things changes this too.
 
 import { buildCombat, snapshotFight } from './combat.js';
+import { importableCombatants } from '../../../shared/vtt/encounterImport.js';
 import {
   makeSavedEncounter, persistFights, persistLibrary, readPersistedInstance,
 } from './storage.js';
@@ -74,6 +75,10 @@ export function sendEncounterToBuilder(instanceId, { name, groups, monsters = []
     encounterId: entry.id,
     fightId: combat.fightId,
     name: entry.name,
-    combatants: combat.combatants,
+    // The fight keeps the party — it is a combat, and initiative without the
+    // characters is not one. What goes onto the map is the creatures only: the
+    // players already have their own pieces there, and a second set of them
+    // standing in the room they are about to walk into is nobody's intention.
+    combatants: importableCombatants(combat),
   };
 }
