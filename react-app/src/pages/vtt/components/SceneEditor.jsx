@@ -194,11 +194,18 @@ export default function SceneEditor({
   // already loaded for the monster picker; the dungeon uses it to turn a rolled
   // budget in experience into creatures.
   const monsterDb = useMonsterDb();
+  // The fog is the scene's own, and its handler is defined further down this
+  // body — reading it directly here would be the temporal dead zone that took
+  // the map out once already. A ref is the seam: stable to hand over, and
+  // filled in once the handler exists.
+  const enableFogRef = useRef(null);
+  const requestFog = useCallback(() => { enableFogRef.current?.(); }, []);
   const dungeon = useSceneDungeon({
     scene,
     isGm: role.isGm && !spectator,
     monsters: monsterDb.monsters,
     partySize: Math.max(1, roster.length || 4),
+    onPrepared: requestFog,
   });
   // What is actually on screen: the URL and the mode it belongs to, updated
   // together once the picture has loaded.
@@ -709,6 +716,12 @@ export default function SceneEditor({
     setPaintMode('reveal');
     commitFog(fog);
   }, [commitFog, fogCells, onSceneChange, scene]);
+
+  // A freshly imported dungeon covers itself. Only when the scene has no fog at
+  // all: a map the GM has already been revealing is not one to hide again.
+  useEffect(() => {
+    enableFogRef.current = () => { if (!scene.fog) handleEnableFog(); };
+  }, [handleEnableFog, scene.fog]);
 
   const handleFogAll = useCallback((revealed) => {
     onSceneChange((current) => {
@@ -1580,6 +1593,7 @@ export default function SceneEditor({
             dungeonKey={dungeon.key}
             placed={dungeon.placed}
             busy={dungeon.busy}
+            preparing={dungeon.preparing}
             error={dungeon.error}
             partySize={Math.max(1, roster.length || 4)}
             onPopulate={dungeon.populate}

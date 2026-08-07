@@ -16,7 +16,7 @@ import InfoHint from '../../../components/InfoHint.jsx';
 // worth 1,100 XP a head becomes four creatures that come to about that, placed
 // in the room they were rolled for.
 export default function DungeonPanel({
-  plan, dungeonKey, placed, busy, error, partySize,
+  plan, dungeonKey, placed, busy, preparing, error, partySize,
   onPopulate, onPlaceRoom, monstersForRoom, markersForRoom,
 }) {
   const theme = useTheme();
@@ -87,7 +87,16 @@ export default function DungeonPanel({
 
       {error ? <Typography sx={warnSx}>{error}</Typography> : null}
 
-      {!dungeonKey ? (
+      {preparing ? (
+        <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center' }}>
+          <CircularProgress size={13} />
+          <Typography sx={hintSx}>
+            Filling the rooms and covering the map…
+          </Typography>
+        </Stack>
+      ) : null}
+
+      {!dungeonKey && !preparing ? (
         <Typography sx={hintSx}>
           Nothing rolled yet. The plan came in with the map; this fills it.
         </Typography>

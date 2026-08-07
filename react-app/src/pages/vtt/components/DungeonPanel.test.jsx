@@ -63,6 +63,15 @@ const renderPanel = (props = {}) => render(
   </ThemeProvider>,
 );
 
+// The map fills itself the first time it is opened, so the panel's job at that
+// moment is to say what is happening rather than to offer a button.
+test('a map preparing itself says so', () => {
+  renderPanel({ dungeonKey: null, preparing: true });
+
+  expect(screen.getByText(/filling the rooms and covering the map/i)).toBeInTheDocument();
+  expect(screen.queryByText(/nothing rolled yet/i)).toBeNull();
+});
+
 test('an imported plan is listed room by room, before anything is rolled', () => {
   renderPanel({ dungeonKey: null });
 

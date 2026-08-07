@@ -1,4 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  useCallback, useEffect, useMemo, useRef, useState,
+} from 'react';
 import { readSceneDungeon, updateSceneDungeon } from '../../../shared/cloud/dungeon.js';
 import {
   readCampaignHexcrawlBoard, readHexcrawlBoard,
@@ -20,10 +22,24 @@ import { createToken } from '../../../shared/cloud/vtt.js';
 // typed into a box. What this hook adds is the two things the board cannot know:
 // which room is which square of the map, and which creatures a rolled budget
 // buys.
+//
+// A map opened for the first time prepares itself: rolled, filled and fogged
+// before the GM has looked at it. An empty dungeon is nobody's intention, and
+// the panel is right there to roll it again if the first answer is not the one
+// they wanted.
 
-const EMPTY = Object.freeze({ plan: null, key: null, placed: {} });
+const EMPTY = Object.freeze({
+  plan: null, key: null, placed: {}, origin: { col: 0, row: 0 },
+});
 
-export function useSceneDungeon({ scene, isGm, monsters, partySize }) {
+// What a map fills itself with when nobody has said otherwise. Random rooms put
+// something in some of them rather than in all; the tier is the mildest,
+// because guessing a party's level from a scene is guessing.
+const FIRST_ROLL = Object.freeze({ popMode: 'random', thr: 0, tier: 1 });
+
+export function useSceneDungeon({
+  scene, isGm, monsters, partySize, onPrepared,
+}) {
   const sceneId = scene?.id || null;
   const campaignId = scene?.campaignId || null;
   const enabled = Boolean(isGm && sceneId);
@@ -31,7 +47,11 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize }) {
   const [state, setState] = useState(EMPTY);
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [preparing, setPreparing] = useState(false);
   const [error, setError] = useState('');
+  // Which scene has already had its first fill attempted, so a re-render cannot
+  // start a second one and double every room.
+  const preparedRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -43,7 +63,9 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize }) {
     readSceneDungeon(sceneId)
       .then((row) => {
         if (cancelled) return;
-        setState(row ? { plan: row.plan, key: row.key, placed: row.placed, origin: row.origin } : EMPTY);
+        setState(row ? {
+          plan: row.plan, key: row.key, placed: row.placed, origin: row.origin,
+        } : EMPTY);
       })
       .catch((cause) => { if (!cancelled) setError(cause?.message || 'Could not read this map\'s dungeon.'); })
       .finally(() => { if (!cancelled) setLoading(false); });
@@ -61,26 +83,76 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize }) {
     .map((monster) => ({ ...monster, xp: crXP(getCR(monster.cr)) }))
     .filter((entry) => entry.xp > 0), [monsters]);
 
+  // What a room's encounter is worth, and what that buys.
+  //
+  // Seeded from the roll itself, so the answer is the same every time it is
+  // asked. Drawn from Math.random it changed on every render — the panel showed
+  // one set of creatures, the button placed another, and touching anything at
+  // all shuffled both. The same key always buys the same monsters; rolling the
+  // rooms again is what changes them.
+  const chooseFor = useCallback((key, roomNumber) => {
+    const keyRoom = key?.rooms?.[roomNumber - 1];
+    if (!keyRoom) return null;
+    const encounters = (keyRoom.slots || [])
+      .map((slot) => slot.extra)
+      .filter((extra) => extra?.kind === 'enc' && extra.data);
+    if (!encounters.length) return null;
+    const budget = encounters.reduce(
+      (total, extra) => total + encounterBudget(extra.data, partySize),
+      0,
+    );
+    return { budget, groups: fillBudget(priced, budget, seededRandom(`${key.id}:${roomNumber}`)) };
+  }, [partySize, priced]);
+
+  const monstersForRoom = useCallback(
+    (roomNumber) => chooseFor(state.key, roomNumber),
+    [chooseFor, state.key],
+  );
+
+  const markersForRoom = useCallback(
+    (roomNumber) => roomMarkers(state.key?.rooms?.[roomNumber - 1]),
+    [state.key],
+  );
+
   // The tables belong to the board this campaign was linked to, exactly as the
   // hexcrawl's do: the dungeon a GM rolls on the map and the one they roll on
   // the board come off the same page.
-  const populate = useCallback(async ({ popMode = 'random', thr = 0, tier = 1 } = {}) => {
+  const rollKey = useCallback(async (config) => {
+    const boardId = campaignId ? await readCampaignHexcrawlBoard(campaignId) : null;
+    const board = boardId ? await readHexcrawlBoard(boardId) : null;
+    if (!board?.tables) {
+      throw new Error('This campaign has no hexcrawl board linked, and the tables come from it.');
+    }
+    // The engine numbers its rooms from one, in order, which is how the plan
+    // numbers its own: room three of the key is room three of the map.
+    return createDungeon({ roomCount: state.plan.rooms.length, ...config }, board.tables);
+  }, [campaignId, state.plan]);
+
+  // One room onto the board. Takes the key rather than reading it from state,
+  // so filling twenty rooms in a row does not depend on twenty renders landing
+  // in between.
+  const putRoomOut = useCallback(async (key, roomNumber, origin) => {
+    const room = state.plan?.rooms?.find((item) => item.number === roomNumber);
+    const keyRoom = key?.rooms?.[roomNumber - 1];
+    if (!room || !keyRoom) return [];
+    const tokens = roomTokens({
+      room,
+      groups: chooseFor(key, roomNumber)?.groups || [],
+      markers: roomMarkers(keyRoom),
+      origin,
+    });
+    const created = [];
+    for (const token of tokens) {
+      created.push(await createToken(sceneId, token));
+    }
+    return created;
+  }, [chooseFor, sceneId, state.plan]);
+
+  const populate = useCallback(async (config = FIRST_ROLL) => {
     if (!enabled || !state.plan?.rooms?.length) return null;
     setBusy(true);
     try {
-      const boardId = campaignId ? await readCampaignHexcrawlBoard(campaignId) : null;
-      const board = boardId ? await readHexcrawlBoard(boardId) : null;
-      if (!board?.tables) {
-        throw new Error('This campaign has no hexcrawl board linked, and the tables come from it.');
-      }
-      const rolled = createDungeon(
-        { roomCount: state.plan.rooms.length, popMode, thr, tier },
-        board.tables,
-      );
-      // The engine numbers its rooms from one, in order, which is how the plan
-      // numbers its own: room three of the key is room three of the map.
-      // An update rather than a write of the whole row: the plan is already
-      // there and does not travel back and forth for every roll.
+      const rolled = await rollKey(config);
       const saved = await updateSceneDungeon(sceneId, { key: rolled, placed: {} });
       setState((current) => ({ ...current, key: saved.key, placed: saved.placed }));
       setError('');
@@ -91,54 +163,15 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize }) {
     } finally {
       setBusy(false);
     }
-  }, [campaignId, enabled, sceneId, state.plan]);
+  }, [enabled, rollKey, sceneId, state.plan]);
 
-  // What a room's encounter is worth, and what that buys.
-  //
-  // Seeded from the roll itself, so the answer is the same every time it is
-  // asked. Drawn from Math.random it changed on every render — the panel showed
-  // one set of creatures, the button placed another, and touching anything at
-  // all shuffled both. The same key always buys the same monsters; rolling the
-  // rooms again is what changes them.
-  const monstersForRoom = useCallback((roomNumber) => {
-    const keyRoom = state.key?.rooms?.[roomNumber - 1];
-    if (!keyRoom) return null;
-    const encounters = (keyRoom.slots || [])
-      .map((slot) => slot.extra)
-      .filter((extra) => extra?.kind === 'enc' && extra.data);
-    if (!encounters.length) return null;
-    const budget = encounters.reduce(
-      (total, extra) => total + encounterBudget(extra.data, partySize),
-      0,
-    );
-    const groups = fillBudget(priced, budget, seededRandom(`${state.key.id}:${roomNumber}`));
-    return { budget, groups };
-  }, [partySize, priced, state.key]);
-
-  // Onto the board, in the room they were rolled for. The plan is in its own
-  // cells and the map is in the scene's, so the two are joined by the origin
-  // the import worked out when it laid the plan over the picture.
   const placeRoom = useCallback(async (roomNumber) => {
-    if (!enabled) return null;
-    const room = state.plan?.rooms?.find((item) => item.number === roomNumber);
-    const keyRoom = state.key?.rooms?.[roomNumber - 1];
-    if (!room || !keyRoom) return null;
-    const chosen = monstersForRoom(roomNumber);
-    const markers = roomMarkers(keyRoom);
-    if (!chosen?.groups?.length && !markers.length) return null;
-
+    if (!enabled || !state.key) return null;
     setBusy(true);
     try {
-      const laid = roomTokens({
-        room,
-        groups: chosen?.groups || [],
-        markers,
-        origin: state.origin || { col: 0, row: 0 },
-      });
-      const created = [];
-      for (const token of laid) {
-        created.push(await createToken(sceneId, token));
-      }
+      const created = await putRoomOut(state.key, roomNumber, state.origin);
+      if (!created.length) return null;
+      const room = state.plan.rooms.find((item) => item.number === roomNumber);
       const placed = { ...state.placed, [room.id]: created.map((token) => token.id) };
       await updateSceneDungeon(sceneId, { placed });
       setState((current) => ({ ...current, placed }));
@@ -150,18 +183,56 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize }) {
     } finally {
       setBusy(false);
     }
-  }, [enabled, monstersForRoom, sceneId, state.key, state.origin, state.placed, state.plan]);
+  }, [enabled, putRoomOut, sceneId, state.key, state.origin, state.placed, state.plan]);
 
-  // What a room would put on the board, for the panel to offer before it does.
-  const markersForRoom = useCallback(
-    (roomNumber) => roomMarkers(state.key?.rooms?.[roomNumber - 1]),
-    [state.key],
-  );
+  // Opening an imported map for the first time: roll it, put every room out,
+  // and let the scene cover itself in fog. The row is written once at the end
+  // rather than room by room, so a fill cut short by a lost connection leaves a
+  // map with no key — which is the state that tries again next time.
+  useEffect(() => {
+    if (!enabled || loading || preparing) return;
+    if (!state.plan?.rooms?.length || state.key) return;
+    // The bestiary decides what an encounter buys and loads on its own
+    // schedule: filling before it arrives would put out empty rooms.
+    if (!priced.length) return;
+    if (preparedRef.current === sceneId) return;
+    preparedRef.current = sceneId;
+
+    let cancelled = false;
+    (async () => {
+      setPreparing(true);
+      try {
+        const key = await rollKey(FIRST_ROLL);
+        const placed = {};
+        for (const room of state.plan.rooms) {
+          if (cancelled) return;
+          const created = await putRoomOut(key, room.number, state.origin);
+          if (created.length) placed[room.id] = created.map((token) => token.id);
+        }
+        if (cancelled) return;
+        const saved = await updateSceneDungeon(sceneId, { key, placed });
+        setState((current) => ({ ...current, key: saved.key, placed: saved.placed }));
+        // A dungeon nobody has walked into yet is unexplored, so the map arrives
+        // covered. The fog itself belongs to the scene, which owns it.
+        onPrepared?.();
+        setError('');
+      } catch (cause) {
+        if (!cancelled) setError(cause?.message || 'Could not prepare the dungeon.');
+      } finally {
+        if (!cancelled) setPreparing(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [
+    enabled, loading, onPrepared, preparing, priced.length, putRoomOut, rollKey,
+    sceneId, state.key, state.origin, state.plan,
+  ]);
 
   return {
     enabled: enabled && Boolean(state.plan),
     loading,
-    busy,
+    busy: busy || preparing,
+    preparing,
     error,
     plan: state.plan,
     key: state.key,
