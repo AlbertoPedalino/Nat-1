@@ -819,6 +819,43 @@ test('a saved fight keeps the party’s faces as well as their colours', () => {
   assert.equal(restored.combatants[0].portraitPath, 'faces/adhara.png');
 });
 
+// Tidying the library is not leaving it. Asking whether the active fight
+// survived, when there was no active fight, answered "no" and closed the page
+// the GM was reading.
+test('deleting a library entry leaves the view where the GM was', () => {
+  const state = {
+    ...createInitialState(),
+    view: 'library',
+    library: [{ id: 1 }, { id: 2 }],
+    fights: [{ id: 900, encounterId: 1, fight: { combatants: [] } }],
+  };
+
+  const after = encounterReducer(state, { type: 'deleteLibraryEncounter', id: 1 });
+  assert.deepEqual(after.library.map((entry) => entry.id), [2]);
+  assert.deepEqual(after.fights, [], 'a fight without its encounter has no card to live on');
+  assert.equal(after.view, 'library');
+  assert.equal(after.activeFightId, null);
+
+  // Deleting the encounter of the fight actually being run does close it: there
+  // is nothing left on screen to show.
+  const running = {
+    ...state,
+    view: 'combat',
+    activeFightId: 900,
+    combat: { fightId: 900, combatants: [] },
+  };
+  const closed = encounterReducer(running, { type: 'deleteLibraryEncounter', id: 1 });
+  assert.equal(closed.view, 'builder');
+  assert.equal(closed.combat, null);
+  assert.equal(closed.activeFightId, null);
+
+  // Another encounter's card, while a fight runs, leaves that fight alone.
+  const elsewhere = encounterReducer(running, { type: 'deleteLibraryEncounter', id: 2 });
+  assert.equal(elsewhere.view, 'combat');
+  assert.equal(elsewhere.activeFightId, 900);
+  assert.ok(elsewhere.combat);
+});
+
 test('closing with no active encounter changes nothing', () => {
   const state = createInitialState();
   assert.equal(encounterReducer(state, { type: 'closeCombat' }), state);

@@ -135,8 +135,37 @@ export function writeScopedPayload(id, payload, { name, updatedAt, linkGroupId }
   return touchRegistryEntry(REGISTRY_KEY, id, { name, updatedAt, linkGroupId });
 }
 
+// An instance is six keys, and saving it writes all six. Announcing each one
+// separately meant the first announcement went out while the other five were
+// still the previous save — and anything that reacts by reading storage read a
+// version that never existed. That is how a deleted encounter came back: the
+// party was written, the event fired, and the listener found the library key
+// still holding the entry the GM had just removed.
+//
+// So a save is one announcement, made once everything is on disk.
+let batchDepth = 0;
+const batched = new Set();
+
+export function batchPersist(run) {
+  batchDepth += 1;
+  try {
+    return run();
+  } finally {
+    batchDepth -= 1;
+    if (!batchDepth) {
+      const ids = [...batched];
+      batched.clear();
+      for (const id of ids) emitStorageEvent(SAVE_EVENT, id);
+    }
+  }
+}
+
 function markEncounterPersisted(id) {
   if (!touchRegistryEntry(REGISTRY_KEY, id)) return;
+  if (batchDepth) {
+    batched.add(id);
+    return;
+  }
   emitStorageEvent(SAVE_EVENT, id);
 }
 

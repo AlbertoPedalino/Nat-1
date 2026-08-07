@@ -566,14 +566,26 @@ function closeCombat(state) {
 
 function deleteLibraryEncounter(state, id) {
   const fights = state.fights.filter((fight) => fight.encounterId !== id);
-  const activeAlive = fights.some((fight) => fight.id === state.activeFightId);
+  // Only the fight that was running matters here. Asking whether the active one
+  // survived, when there was no active one, answered "no" and sent the GM to the
+  // builder every time they tidied up the library — a page they were reading,
+  // closed for them because something they were not running was deleted.
+  const lostTheRunningFight = state.activeFightId != null
+    && !fights.some((fight) => fight.id === state.activeFightId);
+  if (!lostTheRunningFight) {
+    return {
+      ...state,
+      library: state.library.filter((entry) => entry.id !== id),
+      fights,
+    };
+  }
   return {
     ...state,
     library: state.library.filter((entry) => entry.id !== id),
     fights,
-    activeFightId: activeAlive ? state.activeFightId : null,
-    combat: activeAlive ? state.combat : null,
-    view: activeAlive ? state.view : 'builder',
+    activeFightId: null,
+    combat: null,
+    view: 'builder',
   };
 }
 
