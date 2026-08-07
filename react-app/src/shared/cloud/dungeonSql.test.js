@@ -28,16 +28,17 @@ test('a dungeon key is the GM\'s alone, in the policy rather than in the client'
   assert.equal(sql.match(/create policy map_dungeons/g).length, 1);
 });
 
-// Postgres evaluates an upsert's insert before it finds the conflict, so a
-// patch without the plan is refused by this constraint even when the row
-// already exists. The client has to update instead, and did not at first.
-test('the plan is required, and the client only ever upserts with one', () => {
-  assert.match(sql, /plan\s+jsonb not null/);
+// The plan column is gone, and with it the reason writing a key had to be an
+// update: nothing in this table is required any more, so one patch of one field
+// is one patch of one field.
+test('the table keeps only what a rolled dungeon needs', () => {
+  assert.match(sql, /key\s+jsonb/);
+  assert.match(sql, /fights\s+jsonb not null default/);
+  assert.ok(!/plan\s+jsonb not null/.test(sql), 'no plan is stored');
+  // The earlier shape is dropped for anyone who ran it, rather than left to sit
+  // there requiring a value nothing writes.
+  assert.match(sql, /alter table public\.map_dungeons drop column if exists plan/);
 
-  const upsert = client.slice(client.indexOf('export async function saveSceneDungeon'));
-  assert.match(upsert.slice(0, upsert.indexOf('export async function updateSceneDungeon')), /if \(!plan\) throw/);
-
-  const update = client.slice(client.indexOf('export async function updateSceneDungeon'));
-  assert.ok(!update.includes('.upsert('), 'rolling the rooms must not upsert');
-  assert.match(update, /\.update\(patch\)/);
+  assert.ok(!client.includes('readSceneDungeon(sceneId, { plan'), 'the client stores no plan');
+  assert.match(client, /\.upsert\(patch, \{ onConflict: 'scene_id' \}\)/);
 });

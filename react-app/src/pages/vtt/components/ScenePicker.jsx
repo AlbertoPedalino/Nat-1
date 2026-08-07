@@ -23,7 +23,6 @@ import {
   updateScene,
   uploadMapImage,
 } from '../../../shared/cloud/vtt.js';
-import { saveSceneDungeon } from '../../../shared/cloud/dungeon.js';
 import NewSceneDialog from './NewSceneDialog.jsx';
 
 // Scenes belong to a campaign, so the picker is grouped by campaign rather than
@@ -84,22 +83,7 @@ export default function ScenePicker({ onOpen }) {
       try {
         scene = await createScene(campaignId, entry.name);
         const imagePath = await uploadMapImage(campaignId, scene.id, entry.file);
-        // The grid comes with the entry when the generator's own plan was
-        // brought along and lined up with the picture; otherwise the scene keeps
-        // the default and the GM calibrates it as before.
-        const updated = await updateScene(scene.id, {
-          imagePath,
-          shownImage: 'map',
-          ...(entry.grid ? { grid: { ...scene.grid, ...entry.grid } } : null),
-        });
-        // The plan travels with the scene when the two lined up, so the rooms
-        // can be rolled and filled later without the file being kept anywhere.
-        if (entry.dungeon?.plan) {
-          await saveSceneDungeon(scene.id, {
-            plan: entry.dungeon.plan,
-            origin: entry.dungeon.origin || { col: 0, row: 0 },
-          });
-        }
+        const updated = await updateScene(scene.id, { imagePath, shownImage: 'map' });
         created.push(updated || scene);
       } catch (cause) {
         failed.push(entry.name);

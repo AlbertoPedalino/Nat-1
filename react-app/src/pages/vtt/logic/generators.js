@@ -71,14 +71,6 @@ export function isMapImage(file) {
   return /^image\//.test(file?.type || '') || /\.(png|jpe?g|webp|svg)$/.test(name);
 }
 
-// The plan the generator exports beside the picture. Worth having: it is the
-// only thing that says where the rooms are, and the picture only says what they
-// look like.
-export function isPlanJson(file) {
-  const name = String(file?.name || '').toLowerCase();
-  return file?.type === 'application/json' || name.endsWith('.json');
-}
-
 // Watabou names its exports after the seed, which is meaningless in a scene
 // list, so the name comes from the generator and the file's place in the drop.
 // A building is the exception worth handling: several files from a floor-plan
@@ -103,18 +95,6 @@ export function joinedSceneName(generator, count) {
   const label = generator?.label || 'Scene';
   if (!(count > 1)) return label;
   return generator?.floors ? `${label} — ${count} floors` : `${label} — ${count} maps`;
-}
-
-// Read as text through a FileReader rather than `file.text()`. The shorter one
-// is real in every browser this runs in and absent from the one the tests run
-// in, and an import path that cannot be exercised is one that breaks quietly.
-export function readTextFile(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result || ''));
-    reader.onerror = () => reject(new Error(`"${file?.name || 'That file'}" could not be read.`));
-    reader.readAsText(file);
-  });
 }
 
 // Dropped files arrive in whatever order the picker felt like. A building's

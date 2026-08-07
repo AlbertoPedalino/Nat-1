@@ -18,12 +18,9 @@ import {
   ArrowLeft, Castle, Columns2, Home, Landmark, Layers, Map as MapIcon, Mountain, Trees, Upload,
 } from 'lucide-react';
 import {
-  GENERATORS, GENERATOR_CREDIT, isMapImage, isPlanJson, joinedSceneName, orderForFloors,
-  readTextFile, sceneNamesFor,
+  GENERATORS, GENERATOR_CREDIT, isMapImage, joinedSceneName, orderForFloors, sceneNamesFor,
 } from '../logic/generators.js';
 import { stitchImages } from '../logic/stitch.js';
-import { fitPlanToPicture } from '../logic/planImage.js';
-import { parseWatabouDungeon } from '../../../shared/dungeon/watabouDungeon.js';
 
 const GENERATOR_ICONS = {
   dungeon: Castle,
@@ -49,9 +46,6 @@ export default function NewSceneDialog({ open, campaignId, onClose, onCreate, on
   const [mode, setMode] = useState('scenes');
   const [progress, setProgress] = useState(null);
   const [error, setError] = useState('');
-  // What was done with the plan, if one came: worth saying, since a grid set
-  // for you is a thing you would otherwise go looking for.
-  const [notice, setNotice] = useState('');
   const filesRef = useRef(null);
 
   const close = () => {
@@ -60,13 +54,11 @@ export default function NewSceneDialog({ open, campaignId, onClose, onCreate, on
     setMode('scenes');
     setProgress(null);
     setError('');
-    setNotice('');
     onClose();
   };
 
   const handleFiles = async (picked) => {
-    const all = [...(picked || [])];
-    const files = all.filter(isMapImage);
+    const files = [...(picked || [])].filter(isMapImage);
     if (!files.length) {
       setError('None of those look like map images. Export the map as PNG or SVG first.');
       return;
@@ -76,11 +68,6 @@ export default function NewSceneDialog({ open, campaignId, onClose, onCreate, on
     setError('');
     setProgress({ done: 0, total: joining ? 1 : ordered.length });
     try {
-      // The plan exported beside the picture, if it came along. It is the only
-      // thing that knows where the rooms are, so it is what calibrates the
-      // grid — and later what fills the dungeon.
-      const plan = await readPlan(all.find(isPlanJson));
-
       // Joined, the floors are drawn side by side into one picture here and go
       // up as a single map: the scene has no idea it was ever several files.
       const entries = joining
@@ -90,27 +77,15 @@ export default function NewSceneDialog({ open, campaignId, onClose, onCreate, on
         }]
         : ordered.map((file, index) => ({ file, name: sceneNamesFor(generator, ordered)[index] }));
 
-      // A plan describes one floor plan on one picture. Joined into a strip, or
-      // spread over several storeys, there is no single grid it could calibrate.
-      if (plan && entries.length === 1 && !joining) {
-        const fitted = await fitPlanToPicture(entries[0].file, plan).catch(() => null);
-        if (fitted?.confident) {
-          entries[0].grid = fitted.grid;
-          // Kept with the scene so its rooms can be filled later: the plan is
-          // the only thing that knows which square of the map room seven is.
-          entries[0].dungeon = { plan, origin: fitted.planOrigin };
-          setNotice(`Grid set from the plan: ${fitted.grid.size}px squares, ${plan.rooms.length} rooms. Roll their contents from the Dungeon panel.`);
-        } else {
-          setNotice('The plan did not line up with this picture, so the grid is left for you to set. That export turns the map to fit the page.');
-        }
-      }
-
       const created = await onImport(
         campaignId,
         entries,
         (done) => setProgress({ done, total: entries.length }),
       );
       setProgress(null);
+      // Every file failing is reported by the importer as a warning, which is a
+      // toast the dialog is sitting on top of: say it here too, and stay open so
+      // the same files can be tried again.
       if (created?.length) close();
       else setError('None of those could be imported. The scenes were not created.');
     } catch (cause) {
@@ -118,17 +93,6 @@ export default function NewSceneDialog({ open, campaignId, onClose, onCreate, on
       setError(cause?.message || 'Could not create the scenes.');
     }
   };
-
-  async function readPlan(file) {
-    if (!file) return null;
-    try {
-      return parseWatabouDungeon(await readTextFile(file));
-    } catch {
-      // A file that is not a plan is not a reason to lose the map that is.
-      setNotice('That JSON is not a One Page Dungeon export, so the grid is left for you to set.');
-      return null;
-    }
-  }
 
   const Icon = generator ? GENERATOR_ICONS[generator.id] || MapIcon : null;
 
@@ -254,11 +218,6 @@ export default function NewSceneDialog({ open, campaignId, onClose, onCreate, on
             ) : null}
 
             <Typography sx={stepsSx}>
-              Bring the JSON export too, if the generator offers one: the grid then
-              calibrates itself against the picture.
-            </Typography>
-
-            <Typography sx={stepsSx}>
               {mode === 'joined'
                 ? 'Several pictures are drawn onto one board, left to right, in the order their names number them.'
                 : 'Several pictures become several scenes, in the order their names number them.'}
@@ -268,7 +227,7 @@ export default function NewSceneDialog({ open, campaignId, onClose, onCreate, on
               ref={filesRef}
               component="input"
               type="file"
-              accept="image/*,application/json,.json"
+              accept="image/*"
               multiple
               onChange={(event) => {
                 handleFiles(event.target.files);
@@ -279,7 +238,6 @@ export default function NewSceneDialog({ open, campaignId, onClose, onCreate, on
           </Stack>
         )}
 
-        {notice ? <Typography sx={noticeSx}>{notice}</Typography> : null}
         {error ? <Typography sx={errorSx}>{error}</Typography> : null}
       </DialogContent>
 
@@ -355,4 +313,3 @@ const frameSx = {
 
 const errorSx = { mt: 1, fontSize: '0.75rem', color: 'error.main' };
 
-const noticeSx = { mt: 1, fontSize: '0.75rem', color: 'primary.main' };

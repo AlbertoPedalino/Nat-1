@@ -1,42 +1,50 @@
 import { useState } from 'react';
 import {
-  Box, Button, CircularProgress, MenuItem, Stack, TextField, Typography, alpha, useTheme,
+  Box, Button, CircularProgress, MenuItem, Stack, TextField, Typography, useTheme,
 } from '@mui/material';
 import {
-  Coins, Dices, Flame, Leaf, Swords, Users,
+  Coins, Dices, Flame, Leaf, Swords, Trash2, Users,
 } from 'lucide-react';
 import { DUNGEON_POPULATION_OPTIONS, TIER_OPTIONS } from '../../gmboard/logic/constants.js';
+import { MAX_ROOM_COUNT, MIN_ROOM_COUNT, isValidRoomCount } from '../../gmboard/logic/dungeon.js';
 import { describeGroups } from '../../../shared/dungeon/roomBudget.js';
 import InfoHint from '../../../components/InfoHint.jsx';
+import PiecePreview, { beginPieceDrag } from './PiecePreview.jsx';
 
-// What is in each room of an imported dungeon, and putting it on the board.
+// The dungeon this map is being played as.
 //
-// The rolling is the GM Board's own, fed the room count the plan actually has.
-// What this panel adds is the step nobody wants to do by hand: an encounter
-// worth 1,100 XP a head becomes four creatures that come to about that, placed
-// in the room they were rolled for.
+// No floor plan is read and none is needed: the GM says how many rooms, and the
+// GM Board's own engine rolls them. That is the same panel for a generated
+// dungeon, a cave, a dwelling and a map drawn on paper — the alternative worked
+// for one export of one generator and for nothing else.
+//
+// Nothing is placed automatically either. What a room holds is dragged onto the
+// map where the GM wants it, which is the one thing they can see and the panel
+// cannot: which part of the picture is room three.
 export default function DungeonPanel({
-  plan, dungeonKey, placed, busy, preparing, error, partySize,
-  onPopulate, onPlaceRoom, monstersForRoom, markersForRoom,
+  dungeonKey, fights, busy, error, partySize, linkHint, title,
+  onRoll, onClear, onSendRoom, monstersForRoom, markersForRoom,
+  onPlacementDragStart, onPlacementDragEnd,
 }) {
   const theme = useTheme();
+  const [rooms, setRooms] = useState('8');
   const [popMode, setPopMode] = useState('random');
   const [tier, setTier] = useState(1);
-
-  if (!plan) return null;
-  const rooms = plan.rooms || [];
+  const roomCount = Number(rooms);
 
   return (
     <Stack spacing={1.1}>
-      <Box>
-        <Typography sx={titleSx}>{plan.title || 'Dungeon'}</Typography>
-        <Typography sx={metaSx}>
-          {rooms.length} rooms{plan.corridors?.length ? `, ${plan.corridors.length} corridors` : ''}
-        </Typography>
-      </Box>
-      {plan.story ? <Typography sx={storySx}>{plan.story}</Typography> : null}
-
       <Stack direction="row" spacing={0.75}>
+        <TextField
+          label="Rooms"
+          size="small"
+          type="number"
+          value={rooms}
+          disabled={busy}
+          onChange={(event) => setRooms(event.target.value)}
+          slotProps={{ htmlInput: { min: MIN_ROOM_COUNT, max: MAX_ROOM_COUNT } }}
+          sx={{ width: 90 }}
+        />
         <TextField
           select
           size="small"
@@ -57,7 +65,7 @@ export default function DungeonPanel({
           value={tier}
           disabled={busy}
           onChange={(event) => setTier(Number(event.target.value))}
-          sx={{ width: 110 }}
+          sx={{ width: 92 }}
         >
           {TIER_OPTIONS.map((option) => (
             <MenuItem key={option.tier} value={option.tier}>{option.shortLabel}</MenuItem>
@@ -70,63 +78,50 @@ export default function DungeonPanel({
           size="small"
           variant="contained"
           startIcon={busy ? <CircularProgress size={13} /> : <Dices size={15} />}
-          disabled={busy}
-          onClick={() => onPopulate({
+          disabled={busy || !isValidRoomCount(roomCount)}
+          onClick={() => onRoll({
+            roomCount,
             popMode,
             thr: DUNGEON_POPULATION_OPTIONS.find((option) => option.id === popMode)?.thr ?? 0,
             tier,
           })}
         >
-          {dungeonKey ? 'Roll it again' : 'Roll the rooms'}
+          {dungeonKey ? 'Roll it again' : 'Roll the dungeon'}
         </Button>
+        {dungeonKey ? (
+          <Button size="small" startIcon={<Trash2 size={14} />} disabled={busy} onClick={onClear}>
+            Clear
+          </Button>
+        ) : null}
         <InfoHint
-          label="About rolling the rooms"
-          text="Every room is rolled on the GM Board's own dungeon tables: complications, and from those encounters, traps and hazards, plus loot with a recovery DC. Rolling again replaces the lot — nothing already placed on the map is removed."
+          label="About rolling a dungeon"
+          text="Every room is rolled on the GM Board's own dungeon tables: complications, and from those encounters, traps and hazards, plus loot with a recovery DC. Rolling again replaces the lot — nothing already on the map is removed."
         />
       </Stack>
 
       {error ? <Typography sx={warnSx}>{error}</Typography> : null}
 
-      {preparing ? (
-        <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center' }}>
-          <CircularProgress size={13} />
-          <Typography sx={hintSx}>
-            Filling the rooms and covering the map…
-          </Typography>
-        </Stack>
-      ) : null}
-
-      {!dungeonKey && !preparing ? (
+      {!dungeonKey ? (
         <Typography sx={hintSx}>
-          Nothing rolled yet. The plan came in with the map; this fills it.
+          Say how many rooms the map has and roll them. Nothing is read from the picture, so this
+          works the same for a cave, a dwelling or a map you drew yourself.
         </Typography>
       ) : null}
 
       {(dungeonKey?.rooms || []).map((keyRoom, index) => {
-        const room = rooms[index];
-        if (!room) return null;
-        const chosen = monstersForRoom?.(room.number) || null;
-        const markers = markersForRoom?.(room.number) || [];
-        const already = placed?.[room.id]?.length || 0;
-        const anything = Boolean(chosen?.groups?.length || markers.length);
+        const number = index + 1;
+        const chosen = monstersForRoom?.(number) || null;
+        const markers = markersForRoom?.(number) || [];
+        const sent = fights?.[keyRoom.id] || null;
         return (
-          <Box key={room.id} sx={roomSx}>
+          <Box key={keyRoom.id} sx={roomSx}>
             <Stack direction="row" spacing={0.75} sx={{ alignItems: 'baseline' }}>
-              <Typography sx={numberSx}>{room.number}</Typography>
-              <Typography sx={roomMetaSx}>
-                {room.w}×{room.h}
-                {room.rotunda ? ' · round' : ''}
-                {room.ending ? ' · dead end' : ''}
-                {` · ${keyRoom.popLabel}`}
-              </Typography>
+              <Typography sx={numberSx}>{number}</Typography>
+              <Typography sx={roomMetaSx}>{keyRoom.popLabel}</Typography>
             </Stack>
 
-            {(room.notes || []).map((note) => (
-              <Typography key={note.text} sx={noteSx}>“{note.text}”</Typography>
-            ))}
-
             {(keyRoom.slots || []).map((slot) => (
-              <SlotLine key={`${room.id}-${slot.n}`} slot={slot} tones={theme.palette.gmboard} />
+              <SlotLine key={`${keyRoom.id}-${slot.n}`} slot={slot} tones={theme.palette.gmboard} />
             ))}
 
             {keyRoom.loot?.data?.tipo && keyRoom.loot.data.tipo !== 'Nothing found' ? (
@@ -141,59 +136,104 @@ export default function DungeonPanel({
             ) : null}
 
             {chosen?.groups?.length ? (
-              <Stack direction="row" spacing={0.6} sx={{ alignItems: 'center' }}>
-                <Users size={13} color={theme.palette.gmboard.result.encounter} />
-                <Typography sx={lineSx}>{describeGroups(chosen.groups, chosen.budget)}</Typography>
-              </Stack>
+              <>
+                <Stack direction="row" spacing={0.6} sx={{ alignItems: 'center' }}>
+                  <Users size={13} color={theme.palette.gmboard.result.encounter} />
+                  <Typography sx={lineSx}>{describeGroups(chosen.groups, chosen.budget)}</Typography>
+                </Stack>
+
+                {/* Sent to the builder first, dragged onto the map second. The
+                    order matters: a piece dropped from a fight carries that
+                    fight's own reference, so the creature on the board and the
+                    one being tracked are the same creature from round one. */}
+                {sent ? (
+                  <Stack
+                    direction="row"
+                    spacing={0.6}
+                    sx={dragSx}
+                    draggable
+                    onDragStart={(event) => {
+                      beginPieceDrag(event);
+                      onPlacementDragStart?.({
+                        kind: 'encounter',
+                        layer: 'tokens',
+                        instanceId: sent.instanceId,
+                        fightId: sent.fightId,
+                        combatants: sent.combatants,
+                        token: previewToken(chosen.groups),
+                      });
+                    }}
+                    onDragEnd={onPlacementDragEnd}
+                  >
+                    <PiecePreview token={previewToken(chosen.groups)} size={26} />
+                    <Typography sx={lineSx}>Drag onto the map — “{sent.name}”</Typography>
+                  </Stack>
+                ) : (
+                  <Button
+                    size="small"
+                    sx={actionSx}
+                    startIcon={<Swords size={13} />}
+                    disabled={busy}
+                    onClick={() => onSendRoom(number, { title })}
+                  >
+                    Send to the Encounter Builder
+                  </Button>
+                )}
+              </>
             ) : null}
 
-            {anything ? (
-              <Button
-                size="small"
-                sx={placeSx}
-                disabled={busy}
-                onClick={() => onPlaceRoom(room.number)}
-              >
-                {already
-                  ? `Put it out again (${already} on the map)`
-                  : `Put ${placeSummary(chosen, markers)} on the map`}
-              </Button>
+            {markers.length ? (
+              <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 0.5 }}>
+                {markers.map((marker) => (
+                  <Box
+                    key={`${keyRoom.id}-${marker.label}`}
+                    sx={markerSx}
+                    draggable
+                    onDragStart={(event) => {
+                      beginPieceDrag(event);
+                      onPlacementDragStart?.({
+                        kind: 'object',
+                        object: { iconKey: marker.iconKey, label: marker.label, layer: 'gm' },
+                        token: { iconKey: marker.iconKey, label: marker.label, w: 1, h: 1 },
+                      });
+                    }}
+                    onDragEnd={onPlacementDragEnd}
+                  >
+                    {marker.label}
+                  </Box>
+                ))}
+              </Stack>
             ) : null}
           </Box>
         );
       })}
 
+      {dungeonKey && linkHint ? <Typography sx={warnSx}>{linkHint}</Typography> : null}
+
       {dungeonKey ? (
         <Typography sx={hintSx}>
-          Creatures land on the piece layer, sized for a party of {partySize}; traps, hazards
-          and hoards land on the GM layer, where the table cannot read them. Both go in the room
-          they were rolled for — the fog is what keeps the creatures unseen until the door opens.
+          Encounters are sized for a party of {partySize}. Creatures land on the piece layer;
+          traps and hoards on the GM layer, where the table cannot read them.
         </Typography>
       ) : null}
     </Stack>
   );
 }
 
-// "2 creatures and a trap" reads better on a button than a count of tokens.
-function placeSummary(chosen, markers) {
-  const parts = [];
-  const creatures = (chosen?.groups || []).reduce((total, group) => total + group.count, 0);
-  if (creatures) parts.push(`${creatures} creature${creatures === 1 ? '' : 's'}`);
-  const kinds = markers.map((marker) => marker.kind);
-  for (const kind of ['trap', 'hazard', 'loot']) {
-    const count = kinds.filter((item) => item === kind).length;
-    if (count) parts.push(count === 1 ? `a ${kind}` : `${count} ${kind}s`);
-  }
-  if (!parts.length) return 'it';
-  if (parts.length === 1) return parts[0];
-  return `${parts.slice(0, -1).join(', ')} and ${parts.at(-1)}`;
+// The first creature of the room stands in for the group while it is dragged.
+function previewToken(groups) {
+  const first = groups?.[0]?.monster;
+  return {
+    label: first?.name || 'Creature',
+    color: '#7a5aa8',
+    w: 1,
+    h: 1,
+  };
 }
 
 function SlotLine({ slot, tones }) {
   const extra = slot.extra;
-  if (!extra) {
-    return <Typography sx={lineSx}>{slot.type}</Typography>;
-  }
+  if (!extra) return <Typography sx={lineSx}>{slot.type}</Typography>;
   if (extra.kind === 'enc') {
     return (
       <Stack direction="row" spacing={0.6} sx={{ alignItems: 'center' }}>
@@ -217,23 +257,16 @@ function SlotLine({ slot, tones }) {
   return (
     <Stack direction="row" spacing={0.6} sx={{ alignItems: 'center' }}>
       <Leaf size={13} color={tones.result.none} />
-      <Typography sx={lineSx}>{slot.type}{extra.data?.gravita ? ` · ${extra.data.gravita}` : ''}</Typography>
+      <Typography sx={lineSx}>
+        {slot.type}{extra.data?.gravita ? ` · ${extra.data.gravita}` : ''}
+      </Typography>
     </Stack>
   );
 }
 
-const titleSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
-  fontSize: '0.85rem',
-  color: 'primary.main',
-};
-
-const metaSx = { fontSize: '0.68rem', color: 'text.secondary' };
-const storySx = { fontSize: '0.72rem', color: 'text.secondary', lineHeight: 1.45 };
 const hintSx = { fontSize: '0.7rem', color: 'text.secondary', lineHeight: 1.45 };
 const warnSx = { fontSize: '0.7rem', color: 'warning.main', lineHeight: 1.4 };
 const lineSx = { fontSize: '0.72rem', color: 'text.primary' };
-const noteSx = { fontSize: '0.7rem', color: 'text.secondary', fontStyle: 'italic' };
 
 const roomSx = {
   p: 0.9,
@@ -254,9 +287,23 @@ const numberSx = {
 
 const roomMetaSx = { fontSize: '0.66rem', color: 'text.secondary' };
 
-const placeSx = {
-  px: 0.75,
-  minWidth: 0,
+const actionSx = { px: 0.75, minWidth: 0, fontSize: '0.66rem', textTransform: 'none' };
+
+const dragSx = {
+  alignItems: 'center',
+  p: 0.4,
+  borderRadius: 1,
+  border: '1px dashed',
+  borderColor: 'primary.main',
+  cursor: 'grab',
+};
+
+const markerSx = {
+  px: 0.6,
+  py: 0.25,
+  borderRadius: 1,
+  border: '1px dashed',
+  borderColor: 'divider',
   fontSize: '0.66rem',
-  textTransform: 'none',
+  cursor: 'grab',
 };
