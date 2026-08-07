@@ -34,7 +34,12 @@ export function applyTokenEvent(tokens, event, { draggingId = null } = {}) {
   const index = list.findIndex((item) => item.id === token.id);
   if (index < 0) return [...list, token];
   const next = list.slice();
-  next[index] = token;
+  // A GM-only label lives in its own table and is never part of this row, so a
+  // row event carries no news about it. Taking the normalized token whole would
+  // read that silence as "the label was cleared" — and the encounter builder
+  // writing hit points into a piece would quietly strip the name off it.
+  const held = list[index];
+  next[index] = held.secretLabel ? { ...token, secretLabel: held.secretLabel } : token;
   return next;
 }
 

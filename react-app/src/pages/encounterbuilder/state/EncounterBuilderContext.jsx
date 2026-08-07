@@ -8,6 +8,8 @@ import { useCampaignPlayers } from '../hooks/useCampaignPlayers.js';
 import { useFightSheetSync } from '../hooks/useFightSheetSync.js';
 import { useSheetRealtime } from '../hooks/useSheetRealtime.js';
 import { useExternalFightSync } from '../hooks/useExternalFightSync.js';
+import { useMapTokenBridge } from '../hooks/useMapTokenBridge.js';
+import { useCloudFights } from '../hooks/useCloudFights.js';
 
 const EncounterBuilderContext = createContext(null);
 
@@ -28,14 +30,37 @@ export function EncounterBuilderProvider({ instanceId, instanceSaved, linkGroupI
     onSaved: onInstanceSaved,
   });
 
-  // The battle map writes back into this instance's saved fights. Without this
-  // the builder read them only at mount, so a condition or an advantage set on a
-  // piece sat in storage until the page was reloaded.
+  // The battle map writes back into this instance's saved fights, and sends
+  // whole ones over when a dungeon room is handed across. Without this the
+  // builder read storage only at mount — so a condition set on a piece sat there
+  // until a reload, and a room arriving into an open tab was deleted by the very
+  // next save this one made.
   useExternalFightSync({
     instanceId,
     instanceSaved,
     activeFightId: state.activeFightId,
+    fights: state.fights,
+    library: state.library,
     monsters: monsterDb.monsters,
+    dispatch,
+  });
+
+  // The creatures of this fight and their pieces on the battle map, through the
+  // token row — the same arrangement the party already has through the sheet.
+  // Unlike the bridge above it crosses devices, and does not need the map to be
+  // open: a creature wounded here is wounded on the board whenever it is opened.
+  useMapTokenBridge({ instanceId, combat: state.combat, dispatch });
+
+  // Fights have a row each, and the row is the record. The blob beside them —
+  // party, library — is still pushed on a timer, which suits what only this page
+  // edits; a fight is written by the battle map too, and a blob cannot hold
+  // something two writers touch without one of them losing.
+  useCloudFights({
+    instanceId,
+    instanceSaved,
+    fights: state.fights,
+    library: state.library,
+    activeFightId: state.activeFightId,
     dispatch,
   });
 

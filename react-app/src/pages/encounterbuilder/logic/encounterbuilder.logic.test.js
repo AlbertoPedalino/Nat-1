@@ -721,6 +721,104 @@ test('closing an encounter deactivates it but keeps the fight resumable', () => 
   assert.equal(resumed.combat.combatants[0].name, 'Aria');
 });
 
+// A room sent from the battle map is written straight into storage. A builder
+// tab that was already open has to take it on board, or the arrays it persists
+// whole will delete it and leave the pieces on the map pointing at nothing.
+test('a fight written from outside is merged instead of being persisted away', () => {
+  const state = {
+    ...createInitialState(),
+    fights: [{ id: 'f1', name: 'Ambush', savedAt: 10, fight: { combatants: [] } }],
+    library: [{ id: 'e1', name: 'Ambush' }],
+    activeFightId: 'f1',
+  };
+
+  const room = { id: 'f2', name: 'Ebonscar — room 3', savedAt: 20, encounterId: 'e2', fight: { combatants: [] } };
+  const merged = encounterReducer(state, {
+    type: 'absorbExternal',
+    fights: [room],
+    library: [{ id: 'e2', name: 'Ebonscar — room 3' }],
+  });
+  assert.deepEqual(merged.fights.map((fight) => fight.id), ['f2', 'f1']);
+  assert.deepEqual(merged.library.map((entry) => entry.id), ['e2', 'e1']);
+
+  // A fight already held is replaced, not duplicated: the map writes hit points
+  // into fights that are not the one on screen.
+  const wounded = { id: 'f1', name: 'Ambush', savedAt: 30, fight: { combatants: [{ id: 0, hpCurrent: 3 }] } };
+  const applied = encounterReducer(merged, { type: 'absorbExternal', fights: [wounded], library: [] });
+  assert.equal(applied.fights.length, 2);
+  assert.equal(applied.fights.find((fight) => fight.id === 'f1').fight.combatants[0].hpCurrent, 3);
+
+  // Nothing new means the same state object, so absorbing cannot trigger a save
+  // that absorbs again.
+  assert.equal(encounterReducer(applied, { type: 'absorbExternal', fights: [], library: [] }), applied);
+});
+
+// A creature wounded on the battle map, arriving over realtime. The same
+// reconciliation the localStorage bridge uses, so it does not matter which road
+// the news took.
+test('a piece wounded on the map wounds the creature in the fight', () => {
+  let state = encounterReducer(createInitialState(), { type: 'launchCurrentEncounter' });
+  const combat = {
+    ...buildCombat([], [], null, () => 0.5),
+    fightId: 77,
+    combatants: [{
+      id: 0,
+      name: 'Ogre',
+      type: 'monster',
+      initiative: 12,
+      hpCurrent: 59,
+      hpMax: 59,
+      activeConditions: [],
+      activeEffects: [],
+      isDead: false,
+    }],
+  };
+  state = { ...state, combat, activeFightId: 77 };
+
+  const token = { sourceRef: 'enc_a:77:0', hpCurrent: 12, hpMax: 59, conditions: ['prone'], effects: [] };
+  const hit = encounterReducer(state, { type: 'syncFromMapToken', token });
+  assert.equal(hit.combat.combatants[0].hpCurrent, 12);
+  assert.deepEqual(hit.combat.combatants[0].activeConditions, ['prone']);
+  // Snapshotted like every other change, so the fight on disk agrees too.
+  assert.equal(hit.fights.find((fight) => fight.id === 77).fight.combatants[0].hpCurrent, 12);
+
+  // Our own write coming back changes nothing, which is what stops the two
+  // sides answering each other forever.
+  assert.equal(encounterReducer(hit, { type: 'syncFromMapToken', token }), hit);
+
+  // Zero hit points is death here as well as on the board.
+  const killed = encounterReducer(hit, {
+    type: 'syncFromMapToken',
+    token: { ...token, hpCurrent: 0 },
+  });
+  assert.equal(killed.combat.combatants[0].isDead, true);
+
+  // A piece of somebody else's fight is not ours to apply.
+  const other = encounterReducer(hit, {
+    type: 'syncFromMapToken',
+    token: { ...token, sourceRef: 'enc_a:78:0' },
+  });
+  assert.equal(other.combat.combatants[0].hpCurrent, 12);
+});
+
+// A fight is kept as its snapshot and rebuilt from it, so anything the snapshot
+// forgets the GM loses on the next save. The face was being forgotten.
+test('a saved fight keeps the party’s faces as well as their colours', () => {
+  const combat = buildCombat([], [{
+    name: 'Adhara',
+    sourceId: 'char-adhara',
+    hpMax: 24,
+    initMod: 2,
+    color: '#5c8fe0',
+    portraitPath: 'faces/adhara.png',
+  }], null, () => 0.5);
+
+  const entry = { id: combat.fightId, fight: snapshotFight(combat) };
+  const restored = restoreFight(entry, []);
+  assert.equal(restored.combatants[0].color, '#5c8fe0');
+  assert.equal(restored.combatants[0].portraitPath, 'faces/adhara.png');
+});
+
 test('closing with no active encounter changes nothing', () => {
   const state = createInitialState();
   assert.equal(encounterReducer(state, { type: 'closeCombat' }), state);

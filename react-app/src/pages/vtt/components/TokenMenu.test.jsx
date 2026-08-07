@@ -129,6 +129,66 @@ test('toggling Dead on a creature sends it to zero hit points', () => {
   );
 });
 
+test('a piece on the GM layer opens already ticked as hidden, and clearing it reveals it', () => {
+  const onVisibility = vi.fn();
+  const { rerender } = render(
+    <TokenMenu
+      token={{
+        id: 'trap-1',
+        label: '',
+        secretLabel: 'Pit · DC 13 · 2d6',
+        layer: 'gm',
+        iconKey: 'chevrons-down',
+      }}
+      anchor={{ x: 20, y: 20 }}
+      onClose={vi.fn()}
+      onSave={vi.fn()}
+      onVisibility={onVisibility}
+      onDelete={vi.fn()}
+    />,
+  );
+
+  const hidden = screen.getByRole('checkbox', { name: 'Hidden from the players' });
+  expect(hidden.checked).toBe(true);
+  fireEvent.click(hidden);
+  expect(onVisibility).toHaveBeenCalledWith(expect.objectContaining({ id: 'trap-1' }), false);
+
+  // The tick follows the piece, not a local copy: a write that never landed
+  // must not leave the menu claiming the trap is sprung.
+  rerender(
+    <TokenMenu
+      token={{
+        id: 'trap-1',
+        label: '',
+        secretLabel: 'Pit · DC 13 · 2d6',
+        layer: 'tokens',
+        iconKey: 'chevrons-down',
+      }}
+      anchor={{ x: 20, y: 20 }}
+      onClose={vi.fn()}
+      onSave={vi.fn()}
+      onVisibility={onVisibility}
+      onDelete={vi.fn()}
+    />,
+  );
+  expect(screen.getByRole('checkbox', { name: 'Hidden from the players' }).checked).toBe(false);
+});
+
+test('a player never gets the visibility tick', () => {
+  render(
+    <TokenMenu
+      token={{ id: 'trap-1', label: '', layer: 'gm', iconKey: 'chevrons-down' }}
+      anchor={{ x: 20, y: 20 }}
+      canEdit={false}
+      onClose={vi.fn()}
+      onSave={vi.fn()}
+      onDelete={vi.fn()}
+    />,
+  );
+
+  expect(screen.queryByRole('checkbox', { name: 'Hidden from the players' })).toBe(null);
+});
+
 test('a placed map object debounces color updates while the picker moves', () => {
   vi.useFakeTimers();
   const onObjectStyle = vi.fn();

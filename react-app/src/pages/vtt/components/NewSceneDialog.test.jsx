@@ -9,6 +9,7 @@ import { stitchImages } from '../logic/stitch.js';
 // file is about: the layout maths has its own tests next to it.
 vi.mock('../logic/stitch.js', () => ({ stitchImages: vi.fn() }));
 
+
 const renderDialog = (props = {}) => render(
   <ThemeProvider theme={theme}>
     <NewSceneDialog

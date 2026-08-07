@@ -505,6 +505,12 @@ export function snapshotFight(combat) {
       shape: combatant.shape,
       shapeClr: combatant.shapeClr,
       color: combatant.color || null,
+      // The face travels with the colour, and for the same reason: a fight is
+      // stored as this snapshot and restored from it, so a field missing here is
+      // a field the GM loses the moment they save. Leaving it out is why every
+      // resumed fight — and every room handed over by the battle map, which is a
+      // snapshot from the first moment — showed the party as coloured initials.
+      portraitPath: combatant.portraitPath || null,
       monsterRef: combatant.monsterData
         ? { name: combatant.monsterData.name, source: combatant.monsterData.source }
         : null,
