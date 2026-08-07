@@ -30,7 +30,7 @@ if (!globalThis.CustomEvent) {
   Object.defineProperty(globalThis, 'CustomEvent', { value: class {}, configurable: true });
 }
 
-const { sendEncounterToBuilder, encounterFromGroups } = await import('./handoff.js');
+const { sendEncounterToBuilder, encounterFromGroups, withSheetIdentity } = await import('./handoff.js');
 const { readPersistedInstance, persistParty } = await import('./storage.js');
 
 const OGRE = { name: 'Ogre', source: 'MM', cr: '2', xp: 450, hp: { average: 59 } };
@@ -80,6 +80,51 @@ test('only the creatures are offered to the map, though the fight keeps the part
   const persisted = readPersistedInstance(instanceId, [OGRE]);
   const names = persisted.fightsData.items[0].fight.combatants.map((item) => item.name);
   assert.deepEqual(names.sort(), ['Alba', 'Bruno', 'Ogre']);
+});
+
+// The reported symptom: a character with a blue icon and an uploaded portrait
+// arrived in the fight as the first colour of the palette, with no face.
+test('the party arrives wearing what its sheets say, not the palette', () => {
+  localStorage.clear();
+  const instanceId = 'enc-test-4';
+  persistParty(instanceId, { count: 2, level: 3 }, [
+    // Linked to a sheet, but holding the copy made the day it was imported.
+    { name: 'Adhara', sourceId: 'char-adhara', hpMax: 24, initMod: 2, color: '#e05c5c' },
+    // Typed in by hand: nothing to look up, and nothing to overwrite.
+    { name: 'Bruno', hpMax: 31, initMod: 0, color: '#5ce07a' },
+  ]);
+
+  const link = sendEncounterToBuilder(instanceId, {
+    name: 'Room 1',
+    groups: [{ monster: OGRE, count: 1 }],
+    roster: [{ characterId: 'char-adhara', color: '#5c8fe0', portraitPath: 'faces/adhara.png' }],
+  });
+
+  const persisted = readPersistedInstance(instanceId, [OGRE]);
+  const stored = persisted.fightsData.items[0].fight.combatants;
+  const adhara = stored.find((combatant) => combatant.name === 'Adhara');
+  assert.equal(adhara.color, '#5c8fe0');
+  // Stored, not merely built: the fight is kept as this snapshot and restored
+  // from it, so a face that survives buildCombat and dies here is a face lost.
+  assert.equal(adhara.portraitPath, 'faces/adhara.png');
+  assert.equal(stored.find((combatant) => combatant.name === 'Bruno').color, '#5ce07a');
+  // The party is in the fight; only the creatures go to the map.
+  assert.deepEqual(link.combatants.map((combatant) => combatant.name), ['Ogre']);
+});
+
+test('a sheet that says nothing overwrites nothing', () => {
+  const players = [
+    { name: 'Adhara', sourceId: 'char-adhara', color: '#e05c5c', portraitPath: 'old.png' },
+    { name: 'Bruno' },
+  ];
+  // No colour picked on the sheet and no portrait uploaded: the party keeps what
+  // it has rather than being handed a pair of nulls.
+  assert.deepEqual(
+    withSheetIdentity(players, [{ characterId: 'char-adhara', color: null, portraitPath: null }]),
+    players,
+  );
+  assert.equal(withSheetIdentity(players, []), players);
+  assert.deepEqual(withSheetIdentity(null, [{ characterId: 'x', color: '#ffffff' }]), []);
 });
 
 test('a room with nothing in it is refused rather than written as an empty fight', () => {

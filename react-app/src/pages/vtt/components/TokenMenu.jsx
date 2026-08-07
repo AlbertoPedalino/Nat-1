@@ -32,7 +32,7 @@ import { battleMapDialogPaperSx } from './battleMapSurface.js';
 export default function TokenMenu({
   token, anchor, canEdit = true, canShowHp = true, canRemove = true, canMark = true,
   canSetEffects = true, canSetDeathSaves = true, canStyleObject = true,
-  onClose, onSave, onObjectStyle, onDelete,
+  onClose, onSave, onObjectStyle, onVisibility, onDelete,
 }) {
   const [label, setLabel] = useState('');
   const [gmOnly, setGmOnly] = useState(false);
@@ -96,6 +96,10 @@ export default function TokenMenu({
 
   if (!token) return null;
   const isMapObject = Boolean(token.iconKey);
+  // Read off the piece rather than kept in state: the layer is written
+  // optimistically and rolled back if the database refuses, and a local copy
+  // would keep showing the tick that never took.
+  const hiddenFromPlayers = token.layer === 'gm';
 
 
   return (
@@ -118,6 +122,33 @@ export default function TokenMenu({
       }}
     >
       <Stack spacing={0.65} sx={{ px: 1, py: 0.75 }}>
+        {/* Whether the table sees the piece at all. A trap, a hoard or anything
+            else dragged onto the GM layer arrives with this already ticked,
+            because that is where it landed — clearing it is how the GM springs
+            the trap. First in the menu: mid-scene this is the control being
+            reached for, not the label. */}
+        {onVisibility ? (
+          <>
+            <FormControlLabel
+              control={(
+                <Checkbox
+                  size="small"
+                  checked={hiddenFromPlayers}
+                  onChange={(event) => onVisibility(token, event.target.checked)}
+                />
+              )}
+              label={<Typography sx={controlLabelSx}>Hidden from the players</Typography>}
+              sx={formControlSx}
+            />
+            <Typography sx={helperSx}>
+              {hiddenFromPlayers
+                ? 'On the GM layer: the players are never sent this piece at all.'
+                : 'On the token layer: everyone at the table can see it.'}
+            </Typography>
+            <Divider />
+          </>
+        ) : null}
+
         {canEdit ? (
           <>
           <TextField
@@ -146,13 +177,13 @@ export default function TokenMenu({
                 onChange={(event) => { setGmOnly(event.target.checked); save({ gmOnly: event.target.checked }); }}
               />
             )}
-            label={<Typography sx={controlLabelSx}>Visible to the GM only</Typography>}
+            label={<Typography sx={controlLabelSx}>Label visible to the GM only</Typography>}
             sx={formControlSx}
           />
           <Typography sx={helperSx}>
             {gmOnly
-              ? 'Stored apart from the token: the players never receive it.'
-              : 'Shown to everyone who can see this piece.'}
+              ? 'The name is stored apart from the piece: the players never receive it.'
+              : 'The name is shown to everyone who can see this piece.'}
           </Typography>
 
           {!isMapObject ? <>

@@ -187,7 +187,7 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, instanceSaved,
       disabled={!persistent || checkingCloud}
       onClick={handleOpenDialog}
       aria-label="Linked tools"
-      sx={topButtonSx}
+      sx={LINKED_TOOLS_BUTTON_SX}
     >
       <Box component="span" sx={{ display: { xs: 'none', md: 'inline' } }}>LINKS</Box>
     </Button>
@@ -301,7 +301,9 @@ function InstanceButton({ row, onClick, disabled, icon = 'link', to }) {
   );
 }
 
-const topButtonSx = {
+// Exported so a page that has to offer the same button while it works out which
+// instance the menu belongs to draws one button, not two that nearly match.
+export const LINKED_TOOLS_BUTTON_SX = {
   minWidth: { xs: 32, md: 64 },
   px: { xs: 0.75, md: 1.25 },
   fontFamily: '"Cinzel", Georgia, serif',

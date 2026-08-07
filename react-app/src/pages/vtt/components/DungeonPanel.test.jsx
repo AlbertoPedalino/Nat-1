@@ -150,6 +150,9 @@ test('a trap is dragged out as a GM-layer marker with its numbers on it', () => 
       key: 'chevrons-down',
       label: 'Pit · DC 13 · 2d6',
       layer: 'gm',
+      // The DC travels as a secret, so showing the trap to the party later
+      // shows them the icon and not what they are rolling against.
+      secretLabel: true,
     }),
   }));
 });

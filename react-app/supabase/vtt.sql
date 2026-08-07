@@ -220,6 +220,11 @@ create index if not exists map_drawings_scene_created_idx on public.map_drawings
 create index if not exists map_tokens_scene_idx on public.map_tokens(scene_id);
 create index if not exists map_tokens_scene_layer_idx on public.map_tokens(scene_id, layer);
 create index if not exists map_tokens_character_idx on public.map_tokens(character_id);
+-- The encounter builder writes a creature's hit points into its piece by
+-- reference: it knows which combatant changed and has never seen the map, so
+-- source_ref is the only handle it has. Partial, because most pieces have none.
+create index if not exists map_tokens_source_ref_idx on public.map_tokens(source_ref)
+  where source_ref is not null;
 
 drop trigger if exists map_scenes_touch on public.map_scenes;
 create trigger map_scenes_touch before update on public.map_scenes

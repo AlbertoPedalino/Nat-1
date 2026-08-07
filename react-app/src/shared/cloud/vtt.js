@@ -194,6 +194,45 @@ export async function updateToken(tokenId, patch) {
   return toToken(data);
 }
 
+// The encounter builder writing into the piece a combatant stands for.
+//
+// By reference rather than by id, because the builder has never seen the map: it
+// knows which combatant it changed, and `source_ref` is what says which piece
+// that is. RLS decides the rest — only the campaign's GM can write these rows,
+// which is exactly who is running the fight.
+//
+// Answers with how many pieces it reached, so a fight whose creatures were never
+// dropped on a board is silence rather than an error.
+export async function updateTokensBySourceRef(sourceRef, patch) {
+  const row = toTokenPatch(patch);
+  if (!sourceRef || !Object.keys(row).length) return 0;
+  const supabase = requireClient();
+  const { data, error } = await supabase
+    .from('map_tokens')
+    .update(row)
+    .eq('source_ref', sourceRef)
+    .select('id');
+  if (error) throw error;
+  return (data || []).length;
+}
+
+// Moving a piece between the GM layer and the players' own is its own call
+// rather than a key on the ordinary patch: `layer` is what the read policy keys
+// off, and leaving it out of TOKEN_PATCH_KEYS is what stops a stray field in an
+// editor patch from quietly publishing a secret. RLS still has the last word —
+// a player who tries this is refused.
+export async function setTokenLayer(tokenId, layer) {
+  const supabase = requireClient();
+  const { data, error } = await supabase
+    .from('map_tokens')
+    .update({ layer: normalizeLayer(layer) })
+    .eq('id', tokenId)
+    .select(TOKEN_COLUMNS)
+    .single();
+  if (error) throw error;
+  return toToken(data);
+}
+
 // Conditions go through an RPC so a player can mark an enemy without being
 // given the row: RLS grants whole rows, and a policy wide enough for this would
 // also let them drag the creature away.

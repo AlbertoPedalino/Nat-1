@@ -42,6 +42,7 @@ import { makeSavedEncounter } from '../logic/storage.js';
 import { clampInt, hydrateEncounterItems, monsterKey, toEncounterMonster } from '../logic/monsterUtils.js';
 import { combatantToSheetPatch, resolveCombatVitals } from '../logic/sheetSync.js';
 import { SYNCED_VITALS, pickCharacterVitals } from '../../../shared/character/vitals.js';
+import { fightWithTokenVitals } from '../../../shared/vtt/encounterSync.js';
 
 export const DEFAULT_PARTY = Object.freeze({ count: 4, level: 5 });
 
@@ -232,15 +233,61 @@ export function encounterReducer(state, action) {
       };
     case 'deleteFight':
       return deleteFight(state, action.id);
+    case 'absorbExternal':
+      return absorbExternal(state, action);
+    case 'syncFromMapToken':
+      return syncFromMapToken(state, action.token);
     default:
       return state;
   }
+}
+
+// Fights and saved encounters written into this instance's storage by something
+// other than this tab: the battle map sending a dungeon room, or the map writing
+// hit points back into a fight that is not the one on screen.
+//
+// This tab's arrays are the whole record when it persists, so anything it has
+// not heard about is not merely missing from the screen — the next save deletes
+// it. That is what made a room sent from the map look unsynced: its fight was
+// written, then quietly removed by the builder that was already open, and the
+// pieces on the board were left pointing at a fight that no longer existed.
+//
+// The caller decides what is new or newer; this only merges, and answers with
+// the same state when there is nothing to merge so a save cannot loop.
+function absorbExternal(state, { fights = [], library = [] }) {
+  const currentFights = state.fights || [];
+  const currentLibrary = state.library || [];
+  const known = new Set(currentFights.map((fight) => String(fight.id)));
+  const knownEncounters = new Set(currentLibrary.map((entry) => String(entry.id)));
+  const addedFights = fights.filter((fight) => !known.has(String(fight.id)));
+  const addedEncounters = library.filter((entry) => !knownEncounters.has(String(entry.id)));
+  const incoming = new Map(fights.map((fight) => [String(fight.id), fight]));
+  if (!fights.length && !addedEncounters.length) return state;
+  return {
+    ...state,
+    fights: [
+      ...addedFights,
+      ...currentFights.map((fight) => incoming.get(String(fight.id)) || fight),
+    ],
+    library: [...addedEncounters, ...currentLibrary],
+  };
 }
 
 function syncCombatantVitals(state, sourceId, vitals) {
   if (!state.combat) return state;
   const combat = applySheetVitals(state.combat, sourceId, vitals);
   return combat === state.combat ? state : withCombat(state, combat);
+}
+
+// A creature's piece on the battle map, changed there. The same reconciliation
+// the localStorage bridge uses, so a monster killed on the board is dead here
+// however the news arrived — and unchanged vitals answer with the same state,
+// which is what stops our own write coming back as a second one.
+function syncFromMapToken(state, token) {
+  if (!state.combat) return state;
+  const combatants = fightWithTokenVitals(state.combat.combatants, token);
+  if (!combatants) return state;
+  return withCombat(state, { ...state.combat, combatants });
 }
 
 function hydrateState(state, payload, monsters) {
@@ -482,6 +529,11 @@ function withCombat(state, combat, patch = {}) {
     name: existing?.name || combat.name || autoFightName(combat.combatants),
     savedAt: Date.now(),
     encounterId: combat.encounterId || null,
+    // The library card a fight sent from the battle map carries with it, so a
+    // device that never wrote the library blob still has something to open it
+    // from. Kept across a launch: dropping it here would clear the column on the
+    // next save, and the fight would go dark on every other screen.
+    ...(existing?.encounter ? { encounter: existing.encounter } : {}),
     fight: snapshotFight(combat),
   };
   // Keep one fight per encounter: a fresh launch supersedes the previous fight.

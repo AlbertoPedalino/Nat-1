@@ -2,6 +2,7 @@ import {
   useCallback, useEffect, useMemo, useState,
 } from 'react';
 import { readSceneDungeon, saveSceneDungeon } from '../../../shared/cloud/dungeon.js';
+import { saveInstanceFight } from '../../../shared/cloud/encounterFights.js';
 import {
   readCampaignHexcrawlBoard, readHexcrawlBoard,
 } from '../../../shared/cloud/hexcrawl.js';
@@ -11,8 +12,9 @@ import { crXP, getCR } from '../../encounterbuilder/logic/monsterUtils.js';
 import { roomMarkers } from '../../../shared/dungeon/roomMarkers.js';
 import { seededRandom } from '../../../shared/dungeon/seededRandom.js';
 import {
-  encounterInstanceForBoard, missingLinkReason,
+  encounterInstanceForBoard, missingLinkReason, pickEncounterInstance,
 } from '../../../shared/dungeon/linkedEncounters.js';
+import { getCloudSection } from '../../../shared/cloud/cloudSections.js';
 import { sendEncounterToBuilder } from '../../encounterbuilder/logic/handoff.js';
 
 // The dungeon a map is being played as: how many rooms, what is in them, and
@@ -30,7 +32,7 @@ import { sendEncounterToBuilder } from '../../encounterbuilder/logic/handoff.js'
 
 const EMPTY = Object.freeze({ key: null, fights: {} });
 
-export function useSceneDungeon({ scene, isGm, monsters, partySize }) {
+export function useSceneDungeon({ scene, isGm, monsters, partySize, roster }) {
   const sceneId = scene?.id || null;
   const campaignId = scene?.campaignId || null;
   const enabled = Boolean(isGm && sceneId);
@@ -55,10 +57,40 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize }) {
     return () => { cancelled = true; };
   }, [campaignId, enabled]);
 
-  const encounterInstance = useMemo(
+  // Which Encounter Builder this map's fights belong in. The local registry
+  // first, because it needs no network and is the usual answer. Then the cloud:
+  // a GM who prepared on one machine and runs the game on another has no
+  // registry there, and the link is real either way — it is simply written in
+  // the database rather than in this browser.
+  const [cloudInstance, setCloudInstance] = useState(null);
+  // Until the cloud has answered, saying "nothing is linked" would send the GM
+  // off to fix a link that is already there.
+  const [resolvingLink, setResolvingLink] = useState(false);
+  const localInstance = useMemo(
     () => (boardId ? encounterInstanceForBoard(boardId) : null),
     [boardId],
   );
+  const encounterInstance = localInstance || cloudInstance;
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!enabled || !boardId || localInstance) {
+      setCloudInstance(null);
+      setResolvingLink(false);
+      return () => { cancelled = true; };
+    }
+    setResolvingLink(true);
+    Promise.all([
+      getCloudSection('gmboard').listInstances(),
+      getCloudSection('encounters').listInstances(),
+    ])
+      .then(([boards, encounters]) => {
+        if (!cancelled) setCloudInstance(pickEncounterInstance(boards, encounters, boardId));
+      })
+      .catch(() => { if (!cancelled) setCloudInstance(null); })
+      .finally(() => { if (!cancelled) setResolvingLink(false); });
+    return () => { cancelled = true; };
+  }, [boardId, enabled, localInstance]);
 
   useEffect(() => {
     let cancelled = false;
@@ -177,20 +209,40 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize }) {
         name: `${title || 'Dungeon'} — room ${roomNumber}`,
         groups: chosen.groups,
         monsters: priced,
+        // The party's own colours and faces. The builder keeps a copy of them
+        // from the day each character was imported, and the sheet is where they
+        // are actually edited — the map is holding the current answer, so it
+        // hands it over rather than letting the fight be built from a stale one.
+        roster,
       });
+      // The fight itself goes to its own row, which is what makes it a fight and
+      // not a note in this browser: the builder reads it from there, on this
+      // screen or on another. The snapshot is deliberately kept out of what the
+      // dungeon stores — that record only needs to say which fight a room is.
+      const { entry, ...roomLink } = link;
+      // Its own attempt, and not a fatal one: the fight is already written in
+      // this browser and the room can be run from here whatever the database
+      // says. What fails is only the part that would let another screen see it,
+      // and that is worth a sentence rather than losing the send.
+      let reach = '';
+      try {
+        await saveInstanceFight(encounterInstance.id, entry);
+      } catch (cause) {
+        reach = `The room was sent, but only to this browser: ${cause?.message || 'the fight could not be saved online.'}`;
+      }
       const roomId = state.key.rooms[roomNumber - 1]?.id || `room_${roomNumber}`;
-      const fights = { ...state.fights, [roomId]: link };
+      const fights = { ...state.fights, [roomId]: roomLink };
       setState((current) => ({ ...current, fights }));
       await saveSceneDungeon(sceneId, { fights });
-      setError('');
-      return link;
+      setError(reach);
+      return roomLink;
     } catch (cause) {
       setError(cause?.message || 'Could not send that room to the Encounter Builder.');
       return null;
     } finally {
       setBusy(false);
     }
-  }, [boardId, chooseFor, enabled, encounterInstance, priced, sceneId, state.fights, state.key]);
+  }, [boardId, chooseFor, enabled, encounterInstance, priced, roster, sceneId, state.fights, state.key]);
 
   return {
     enabled,
@@ -205,6 +257,6 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize }) {
     markersForRoom,
     sendRoomToBuilder,
     encounterInstance,
-    linkHint: encounterInstance ? '' : missingLinkReason(boardId),
+    linkHint: encounterInstance || resolvingLink ? '' : missingLinkReason(boardId),
   };
 }

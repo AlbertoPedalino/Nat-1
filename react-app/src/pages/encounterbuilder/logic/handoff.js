@@ -35,17 +35,48 @@ export function encounterFromGroups(groups) {
     .map((group) => encounterItem(group.monster, group.count));
 }
 
+// A party member linked to a sheet wears what the sheet says.
+//
+// The builder's party keeps a copy of the colour and the portrait, taken the day
+// the character was imported. The sheet is where either is actually edited, so
+// that copy goes stale — and a party typed in by hand never had them at all,
+// which is how a character with a blue icon and a portrait arrived in the fight
+// as the first colour of the palette with no face.
+//
+// The map has the campaign's roster in hand when it sends a room, so it is the
+// one that can say. Only what the sheet actually carries is applied: a character
+// who never picked a colour must not have the one the GM gave them overwritten
+// with nothing.
+export function withSheetIdentity(players, roster) {
+  const bySheet = new Map((roster || [])
+    .filter((entry) => entry?.characterId)
+    .map((entry) => [String(entry.characterId), entry]));
+  if (!bySheet.size) return players || [];
+
+  return (players || []).map((player) => {
+    const entry = player?.sourceId ? bySheet.get(String(player.sourceId)) : null;
+    if (!entry) return player;
+    return {
+      ...player,
+      ...(entry.color ? { iconColor: entry.color, color: entry.color } : {}),
+      ...(entry.portraitPath ? { portraitPath: entry.portraitPath } : {}),
+    };
+  });
+}
+
 // Writes the encounter and the fight, and answers with what to point at them
 // with. The players come from the instance's own party, so a fight rolled from
 // the map has the same initiative order the builder would have given it.
-export function sendEncounterToBuilder(instanceId, { name, groups, monsters = [] } = {}) {
+export function sendEncounterToBuilder(instanceId, {
+  name, groups, monsters = [], roster = [],
+} = {}) {
   if (!instanceId) throw new Error('There is no Encounter Builder linked to this map.');
   const encounter = encounterFromGroups(groups);
   if (!encounter.length) throw new Error('That room has no creatures to send.');
 
   const persisted = readPersistedInstance(instanceId, monsters);
   const party = persisted.partyData?.party || { count: 4, level: 1 };
-  const players = persisted.partyData?.players || [];
+  const players = withSheetIdentity(persisted.partyData?.players || [], roster);
 
   const entry = makeSavedEncounter(name, encounter, party);
   const library = [entry, ...(persisted.library || [])];
@@ -57,6 +88,11 @@ export function sendEncounterToBuilder(instanceId, { name, groups, monsters = []
     name: entry.name,
     savedAt: Date.now(),
     encounterId: entry.id,
+    // The library card travels with the fight. A fight is only reachable
+    // through the card of the encounter it was launched from, and the library
+    // is still a blob in one browser — without this, a room sent from here
+    // would arrive on another device as a fight nothing can open.
+    encounter: entry,
     // The builder's own snapshot, so a fight sent from the map is stored
     // exactly as one launched by hand — including the vitals that were once
     // dropped here by listing fields out by name.
@@ -75,6 +111,10 @@ export function sendEncounterToBuilder(instanceId, { name, groups, monsters = []
     encounterId: entry.id,
     fightId: combat.fightId,
     name: entry.name,
+    // The record the caller is expected to put in the database. Written here
+    // too, because a browser with no account is still a browser running a game
+    // — but the row is what a second device will read.
+    entry: fightEntry,
     // The fight keeps the party — it is a combat, and initiative without the
     // characters is not one. What goes onto the map is the creatures only: the
     // players already have their own pieces there, and a second set of them

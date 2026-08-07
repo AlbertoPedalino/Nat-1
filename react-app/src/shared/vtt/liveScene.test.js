@@ -24,6 +24,26 @@ test('a remote insert adds the token, an update replaces it in place', () => {
   assert.equal(tokens[0].y, 5);
 });
 
+// The secret label is a row in another table, which no token event carries. It
+// has to survive one, or the encounter builder writing hit points into a piece
+// would strip the name the GM gave it.
+test('a remote update keeps the GM-only label the row cannot carry', () => {
+  const tokens = [{
+    id: 't1', sceneId: 's1', layer: 'gm', x: 0, y: 0, label: '', secretLabel: 'Pit · DC 13',
+  }];
+  const after = applyTokenEvent(tokens, { eventType: 'UPDATE', new: row('t1', { hp_current: 4 }) });
+  assert.equal(after[0].secretLabel, 'Pit · DC 13');
+  assert.equal(after[0].hpCurrent, 4);
+
+  // A piece that never had one is left exactly as the row describes it.
+  const plain = applyTokenEvent(
+    [{ id: 't2', sceneId: 's1', layer: 'tokens', x: 0, y: 0, label: 'Ogre' }],
+    { eventType: 'UPDATE', new: row('t2', { label: 'Ogre A' }) },
+  );
+  assert.equal(plain[0].secretLabel, '');
+  assert.equal(plain[0].label, 'Ogre A');
+});
+
 test('a remote delete removes only its own row', () => {
   const tokens = [row('t1'), row('t2')].map((item) => applyTokenEvent([], { eventType: 'INSERT', new: item })[0]);
   const after = applyTokenEvent(tokens, { eventType: 'DELETE', old: { id: 't1' } });

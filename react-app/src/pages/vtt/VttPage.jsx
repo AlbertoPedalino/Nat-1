@@ -11,6 +11,7 @@ import { fetchScene } from '../../shared/cloud/vtt.js';
 import { useLiveSession } from '../../shared/vtt/useLiveSession.js';
 import { sessionCameraSource } from '../../shared/vtt/cameraSync.js';
 import { spectatorRoute } from '../../shared/vtt/spectator.js';
+import CampaignLinksMenu from './components/CampaignLinksMenu.jsx';
 import CampaignSessionPicker from './components/CampaignSessionPicker.jsx';
 import SceneEditor from './components/SceneEditor.jsx';
 import ScenePicker from './components/ScenePicker.jsx';
@@ -144,6 +145,14 @@ export default function VttPage() {
   // is a list of scenes and tables again, and lists scroll.
   const mapMode = Boolean(!gate && !busy && scene && !spectator.requested);
 
+  // The campaign this window is looking at, but only when the signed-in user is
+  // the one running it: the top bar's LINKS button manages that table's tools,
+  // and a player at the table has none of them.
+  const ownCampaignId = useMemo(() => {
+    const id = scene?.campaignId || joinedCampaign || '';
+    return campaigns.some((campaign) => campaign.id === id) ? id : '';
+  }, [campaigns, joinedCampaign, scene]);
+
   return (
     <Box
       sx={spectator.requested
@@ -151,7 +160,9 @@ export default function VttPage() {
         : [pageSx, mapMode && pageMapSx, mapFullscreen && pageCoveredSx]}
     >
       {!spectator.requested && !mapFullscreen ? (
-        <AppTopBar home backTo={atRoot ? '/campaigns' : '/vtt'} backLabel={atRoot ? 'Campaigns' : 'Tables'} />
+        <AppTopBar home backTo={atRoot ? '/campaigns' : '/vtt'} backLabel={atRoot ? 'Campaigns' : 'Tables'}>
+          {ownCampaignId ? <CampaignLinksMenu campaignId={ownCampaignId} /> : null}
+        </AppTopBar>
       ) : null}
       <Box
         component="main"

@@ -30,6 +30,7 @@ import {
   setLiveScene,
   setTokenConditions,
   setTokenEffects,
+  setTokenLayer,
   setTokenSecret,
   signMapImage,
   updateScene,
@@ -199,6 +200,9 @@ export default function SceneEditor({
     isGm: role.isGm && !spectator,
     monsters: monsterDb.monsters,
     partySize: Math.max(1, roster.length || 4),
+    // Not only to size the encounter: a fight sent to the builder takes the
+    // party's colours and portraits from these sheets.
+    roster,
   });
   // What is actually on screen: the URL and the mode it belongs to, updated
   // together once the picture has loaded.
@@ -658,6 +662,24 @@ export default function SceneEditor({
     }
   }, [notify]);
 
+  // Showing a piece to the table, or taking it back. The GM layer is the only
+  // thing that hides a piece — RLS never sends those rows — so revealing a trap
+  // or a hoard is a move to the token layer and nothing else. The GM keeps the
+  // layer they are editing: the piece changes, the panel does not.
+  const handleTokenVisibility = useCallback(async (token, gmOnly) => {
+    const layer = gmOnly ? 'gm' : 'tokens';
+    if (!token || token.layer === layer) return;
+    setTokens((current) => current.map((item) => (
+      item.id === token.id ? { ...item, layer } : item
+    )));
+    try {
+      await setTokenLayer(token.id, layer);
+    } catch (cause) {
+      setTokens((current) => current.map((item) => (item.id === token.id ? token : item)));
+      notify('error', cause?.message || 'Could not change who can see that piece.');
+    }
+  }, [notify]);
+
   const handleGridChange = useCallback((grid) => {
     gridEditRef.current = true;
     onSceneChange({ ...scene, grid });
@@ -934,8 +956,10 @@ export default function SceneEditor({
       setTokens((current) => (
         current.some((item) => item.id === created.id) ? current : [...current, created]
       ));
+      return created;
     } catch (cause) {
       notify('error', cause?.message || 'Could not add that token.');
+      return null;
     } finally {
       setBusy(false);
     }
@@ -1049,12 +1073,18 @@ export default function SceneEditor({
     label: 'Marker',
   }), [addToken, nextFreeCell]);
 
-  const handlePlaceObject = useCallback((object, position) => {
+  const handlePlaceObject = useCallback(async (object, position) => {
     if (!object?.key) return;
-    addToken({
+    // A dungeon marker's label is the GM's own note — "Pit · DC 13 · 2d6". It is
+    // kept in the secret table rather than on the row, so springing the trap
+    // later shows the party an icon and not the numbers they are about to roll
+    // against. The GM still reads it on the piece: a secret label replaces the
+    // public one for them.
+    const secret = object.secretLabel ? String(object.label || '') : '';
+    const created = await addToken({
       ...(position || nextFreeCell()),
       layer: object.layer || (role.isGm ? activeLayer : 'tokens'),
-      label: object.label,
+      label: secret ? '' : object.label,
       color: object.color || '#e8c96a',
       iconKey: object.key,
       iconStrokeWidth: object.strokeWidth,
@@ -1062,7 +1092,16 @@ export default function SceneEditor({
       w: 1,
       h: 1,
     });
-  }, [activeLayer, addToken, nextFreeCell, role.isGm]);
+    if (!created || !secret) return;
+    try {
+      await setTokenSecret(created.id, secret);
+      setTokens((current) => current.map((item) => (
+        item.id === created.id ? { ...item, secretLabel: secret } : item
+      )));
+    } catch (cause) {
+      notify('error', cause?.message || 'The marker was placed, but its note could not be kept secret.');
+    }
+  }, [activeLayer, addToken, nextFreeCell, notify, role.isGm]);
 
   const handleImportEncounter = useCallback(async (
     combatants, { layer, instanceId, fightId, position } = {},
@@ -2099,6 +2138,7 @@ export default function SceneEditor({
         onClose={() => setMenu(null)}
         onSave={role.isGm ? handleSaveToken : handleMarkToken}
         onObjectStyle={handleObjectStyle}
+        onVisibility={role.isGm ? handleTokenVisibility : undefined}
         onDelete={handleDeleteToken}
       />
 

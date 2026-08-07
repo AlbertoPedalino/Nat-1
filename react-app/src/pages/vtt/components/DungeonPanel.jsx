@@ -201,6 +201,10 @@ export default function DungeonPanel({
                         object: {
                           key: marker.iconKey,
                           label: marker.label,
+                          // The DC and the damage are the GM's note. Kept off the
+                          // row so that showing the trap to the party later shows
+                          // them the icon and not the numbers.
+                          secretLabel: true,
                           layer: 'gm',
                           color: MARKER_COLORS[marker.kind],
                         },
@@ -229,7 +233,8 @@ export default function DungeonPanel({
       {dungeonKey ? (
         <Typography sx={hintSx}>
           Encounters are sized for a party of {partySize}. Creatures land on the piece layer;
-          traps and hoards on the GM layer, where the table cannot read them.
+          traps and hoards on the GM layer, where the table cannot read them. Right-click one and
+          clear “Hidden from the players” to spring it.
         </Typography>
       ) : null}
     </Stack>
