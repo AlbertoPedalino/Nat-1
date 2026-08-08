@@ -12,6 +12,34 @@ const REACT_PACKAGES = new Set([
   'react-router-dom',
 ]);
 
+// Markdown is used only by the lazily loaded DM Screen. Keep its unified/
+// remark dependency graph out of the entry vendor chunk, otherwise Rollup's
+// shared `vendor` bucket makes the browser preload it on every route.
+const MARKDOWN_PACKAGES = new Set([
+  'bail',
+  'ccount',
+  'character-entities',
+  'comma-separated-tokens',
+  'decode-named-character-reference',
+  'devlop',
+  'escape-string-regexp',
+  'html-url-attributes',
+  'longest-streak',
+  'markdown-table',
+  'property-information',
+  'react-markdown',
+  'space-separated-tokens',
+  'stringify-entities',
+  'trough',
+  'unified',
+  'zwitch',
+]);
+
+function isMarkdownPackage(pkg) {
+  return MARKDOWN_PACKAGES.has(pkg)
+    || /^(?:hast|mdast|micromark|rehype|remark|unist|vfile)(?:-|$)/.test(pkg);
+}
+
 export default defineConfig({
   base: '/Nat-1/',
   plugins: [react()],
@@ -46,6 +74,11 @@ export default defineConfig({
           const pkg = scope.startsWith('@') ? `${scope}/${scoped}` : scope;
           if (pkg.startsWith('@mui/') || pkg.startsWith('@emotion/')) return 'mui';
           if (REACT_PACKAGES.has(pkg)) return 'react';
+          // Auth is part of the app shell, so Supabase is still fetched at
+          // startup, but keeping it independent prevents unrelated lazy-only
+          // packages from being pulled into the same oversized chunk.
+          if (pkg.startsWith('@supabase/')) return 'supabase';
+          if (isMarkdownPackage(pkg)) return 'markdown';
           // DynamicIcon exposes the complete Lucide catalog. Keeping every icon
           // in `vendor` defeats those dynamic imports and adds about a megabyte
           // to first load. Alphabet buckets keep the request count bounded
