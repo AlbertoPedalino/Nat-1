@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import { Dices } from 'lucide-react';
+import { DICE_LIMITS } from './dice.js';
 import SheetDialog from './SheetDialog.jsx';
 
 // Shared custom-roll dialog: a dice-count picker (d4…d100) plus a flat modifier
@@ -32,7 +33,11 @@ export default function CustomRollDialog({ open, onClose, onRoll, ...dialogProps
   };
 
   const adjustDie = (faces, delta) => {
-    setCounts((prev) => ({ ...prev, [faces]: Math.max(0, (prev[faces] || 0) + delta) }));
+    setCounts((prev) => {
+      const total = Object.values(prev).reduce((sum, count) => sum + count, 0);
+      if (delta > 0 && total >= DICE_LIMITS.maxDice) return prev;
+      return { ...prev, [faces]: Math.max(0, (prev[faces] || 0) + delta) };
+    });
   };
 
   const formula = DICE_TYPES
@@ -41,6 +46,7 @@ export default function CustomRollDialog({ open, onClose, onRoll, ...dialogProps
     .join('+') + (modifier !== 0 ? (modifier > 0 ? `+${modifier}` : `${modifier}`) : '');
 
   const hasSelection = DICE_TYPES.some((d) => counts[d] > 0);
+  const totalDice = Object.values(counts).reduce((sum, count) => sum + count, 0);
 
   const handleRoll = () => {
     if (!formula || !hasSelection) return;
@@ -71,7 +77,15 @@ export default function CustomRollDialog({ open, onClose, onRoll, ...dialogProps
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.4 }}>
             <Button size="small" variant="outlined" onClick={() => adjustDie(faces, -1)} disabled={!counts[faces]} sx={CUSTOM_ROLL_SX.stepBtn}>−</Button>
             <Typography sx={CUSTOM_ROLL_SX.countLabel}>{counts[faces] || 0}</Typography>
-            <Button size="small" variant="outlined" onClick={() => adjustDie(faces, 1)} sx={CUSTOM_ROLL_SX.stepBtn}>+</Button>
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={() => adjustDie(faces, 1)}
+              disabled={totalDice >= DICE_LIMITS.maxDice}
+              sx={CUSTOM_ROLL_SX.stepBtn}
+            >
+              +
+            </Button>
           </Box>
         </Box>
       ))}
@@ -84,6 +98,11 @@ export default function CustomRollDialog({ open, onClose, onRoll, ...dialogProps
       {hasSelection && (
         <Typography sx={CUSTOM_ROLL_SX.formula}>{formula}</Typography>
       )}
+      {totalDice >= DICE_LIMITS.maxDice ? (
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center' }}>
+          Maximum {DICE_LIMITS.maxDice} dice per roll.
+        </Typography>
+      ) : null}
     </SheetDialog>
   );
 }

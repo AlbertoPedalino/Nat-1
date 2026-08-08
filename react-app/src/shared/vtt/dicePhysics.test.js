@@ -1,7 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { dieGeometry } from '../character/polyhedra.js';
-import { orientationMatrix, rotate, simulateThrow } from './dicePhysics.js';
+import {
+  THROWN_DIE_SIZE,
+  orientationMatrix,
+  rotate,
+  simulateThrow,
+  thrownDieSize,
+} from './dicePhysics.js';
 
 const dice = (count, faces = 20) => Array.from({ length: count }, () => ({ faces }));
 const SIZE = 42;
@@ -194,6 +200,24 @@ test('a large roll simulates every die', () => {
   const result = simulateThrow(dice(40), 'roll-big', { size: SIZE });
   assert.equal(lastFrame(result).length, 40);
   assert.equal(result.results.length, 40);
+});
+
+test('crowded pools shrink predictably and come to rest without overlaps', () => {
+  assert.equal(thrownDieSize(1), THROWN_DIE_SIZE);
+  assert.equal(thrownDieSize(12), THROWN_DIE_SIZE);
+  assert.ok(thrownDieSize(40) < THROWN_DIE_SIZE);
+  assert.equal(thrownDieSize(100), 26);
+
+  for (const count of [20, 40, 100]) {
+    const size = thrownDieSize(count);
+    const settled = lastFrame(simulateThrow(dice(count), `crowded-${count}`, { size }));
+    for (let i = 0; i < settled.length; i += 1) {
+      for (let j = i + 1; j < settled.length; j += 1) {
+        const gap = Math.hypot(settled[i].x - settled[j].x, settled[i].y - settled[j].y);
+        assert.ok(gap > size - 1, `${count} dice ended ${gap.toFixed(1)}px apart at size ${size}`);
+      }
+    }
+  }
 });
 
 test('a roll with no dice simulates nothing', () => {

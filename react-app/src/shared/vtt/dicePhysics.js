@@ -24,6 +24,20 @@ export const THROWN_DIE_SIZE = 76;
 // window would come to rest on a different face for each of them.
 export const TRAY = { width: 460, height: 300 };
 
+// Keep ordinary pools large and readable, then shrink crowded pools using
+// only their dice count. The same function is used when deciding the result
+// and when drawing it, so collisions cannot change between the two passes.
+// At the formula limit (100 dice) this yields 26px: small, but still readable
+// and able to fit in the deterministic tray without a pile of overlaps.
+export function thrownDieSize(count) {
+  const dice = Math.max(1, Math.floor(Number(count) || 1));
+  const packingArea = TRAY.width * TRAY.height * 0.503;
+  return Math.max(26, Math.min(
+    THROWN_DIE_SIZE,
+    Math.floor(Math.sqrt(packingArea / Math.max(dice, 12))),
+  ));
+}
+
 const FPS = 60;
 const DT = 1 / FPS;
 const MAX_FRAMES = 300;

@@ -33,9 +33,11 @@ test('unsupported or partial notation fails as a whole instead of being scanned 
   }
 });
 
-test('formula validation does not impose a dice-count limit', () => {
+test('formula validation bounds dice count, faces, modifiers, and source length', () => {
   const cases = [
     ['0d6', 'INVALID_DIE_COUNT'],
+    [`${DICE_LIMITS.maxDice + 1}d6`, 'DICE_COUNT_OUT_OF_RANGE'],
+    [`${DICE_LIMITS.maxDice}d6+1d4`, 'DICE_COUNT_OUT_OF_RANGE'],
     [`1d${DICE_LIMITS.minFaces - 1}`, 'INVALID_DIE_FACES'],
     [`1d${DICE_LIMITS.maxFaces + 1}`, 'INVALID_DIE_FACES'],
     [`1d6+${DICE_LIMITS.modifierAbs + 1}`, 'MODIFIER_OUT_OF_RANGE'],
@@ -49,7 +51,7 @@ test('formula validation does not impose a dice-count limit', () => {
     assert.deepEqual(parsed.dice, [], formula);
   }
 
-  assert.equal(parseFormula('125d6').dice.length, 125);
+  assert.equal(parseFormula(`${DICE_LIMITS.maxDice}d6`).dice.length, DICE_LIMITS.maxDice);
 });
 
 test('an invalid roll returns a structured non-result', () => {

@@ -6,6 +6,7 @@ export const DICE_LIMITS = Object.freeze({
   formulaLength: 120,
   minFaces: 2,
   maxFaces: 100,
+  maxDice: 100,
   modifierAbs: 10000,
 });
 
@@ -98,6 +99,7 @@ export function parseFormula(formula) {
   }
 
   const terms = [];
+  let diceCount = 0;
   let modifier = 0;
   let match;
   FORMULA_TERM_RE.lastIndex = 0;
@@ -108,6 +110,13 @@ export function parseFormula(formula) {
       const faces = Number(match[3]);
       if (!Number.isSafeInteger(count) || count < 1) {
         return invalidFormula('INVALID_DIE_COUNT', 'Every dice term must contain at least one die.');
+      }
+      diceCount += count;
+      if (!Number.isSafeInteger(diceCount) || diceCount > DICE_LIMITS.maxDice) {
+        return invalidFormula(
+          'DICE_COUNT_OUT_OF_RANGE',
+          `A formula can contain at most ${DICE_LIMITS.maxDice} dice.`,
+        );
       }
       if (!Number.isSafeInteger(faces)
           || faces < DICE_LIMITS.minFaces

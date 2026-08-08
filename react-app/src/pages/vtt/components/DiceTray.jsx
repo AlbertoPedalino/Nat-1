@@ -6,10 +6,10 @@ import { faceNumbering } from '../../../shared/character/dice3d.js';
 import { dieGeometry } from '../../../shared/character/polyhedra.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import {
-  THROWN_DIE_SIZE,
   TRAY,
   orientationMatrix,
   simulateThrow,
+  thrownDieSize,
 } from '../../../shared/vtt/dicePhysics.js';
 
 // Keep the final pose visible for a moment before revealing the result. The
@@ -94,10 +94,12 @@ function DiceThrow({ roll, at, table, startedAt, onSettled }) {
   // scene around it re-rendered.
   const thrown = useMemo(() => {
     const dice = roll.rolls || [];
-    const { frames, frameMs, results } = simulateThrow(dice, roll.id, { size: THROWN_DIE_SIZE });
+    const size = thrownDieSize(dice.length);
+    const { frames, frameMs, results } = simulateThrow(dice, roll.id, { size });
     return {
       frames,
       frameMs,
+      size,
       dice: dice.map((die, index) => {
         // The physical d100 uses a lightweight textured sphere and reveals its
         // already-published value separately, so it needs neither a hundred
@@ -252,14 +254,18 @@ function DiceThrow({ roll, at, table, startedAt, onSettled }) {
         <Box
           key={index}
           ref={(element) => { bodyRefs.current[index] = element; }}
-          sx={bodySx}
+          sx={{
+            ...bodySx,
+            marginLeft: `${-thrown.size / 2}px`,
+            marginTop: `${-thrown.size / 2}px`,
+          }}
         >
           <Box ref={(element) => { shadowRefs.current[index] = element; }} sx={shadowSx} />
           {Number(die.faces) === 100 ? (
             <D100Orb
               value={die.v}
               color={VTT_COLORS.goldRoll}
-              size={THROWN_DIE_SIZE}
+              size={thrown.size}
               revealed={false}
               textureRef={(element) => { solidRefs.current[index] = element; }}
               resultRef={(element) => { resultRefs.current[index] = element; }}
@@ -269,7 +275,7 @@ function DiceThrow({ roll, at, table, startedAt, onSettled }) {
               value={die.v}
               faces={die.faces}
               color={VTT_COLORS.goldRoll}
-              size={THROWN_DIE_SIZE}
+              size={thrown.size}
               seed={`${roll.id}:${index}`}
               numbering={die.numbering}
               landing={die.landed}
@@ -304,9 +310,6 @@ const anchorSx = {
 
 const bodySx = {
   position: 'absolute',
-  // The simulation's coordinates are where the die is, not where its corner is.
-  marginLeft: `${-THROWN_DIE_SIZE / 2}px`,
-  marginTop: `${-THROWN_DIE_SIZE / 2}px`,
   willChange: 'transform',
 };
 

@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { DICE_LIMITS } from '../character/dice.js';
 import {
   MAX_FEED,
   MAX_ROLL_ID_LENGTH,
@@ -210,13 +211,17 @@ test('shared roll payloads bound identifiers and discard impossible dice and num
   assert.ok(entry.at >= before && entry.at <= Date.now());
 });
 
-test('a shared roll preserves every valid die and never throws an invalid set', () => {
-  const many = Array.from({ length: 125 }, () => ({ faces: 6, v: 3 }));
+test('a shared roll preserves a bounded valid pool and never throws an unsafe set', () => {
+  const many = Array.from({ length: DICE_LIMITS.maxDice }, () => ({ faces: 6, v: 3 }));
+  const oversized = [...many, { faces: 6, v: 3 }];
   const normalized = normalizeRoll(roll({ rolls: many, thrown: true }));
+  const rejected = normalizeRoll(roll({ rolls: oversized, thrown: true }));
   const invalid = normalizeRoll(roll({ rolls: [{ faces: 6, v: 7 }], thrown: true }));
 
   assert.equal(normalized.rolls.length, many.length);
   assert.equal(normalized.thrown, true);
+  assert.deepEqual(rejected.rolls, []);
+  assert.equal(rejected.thrown, false);
   assert.deepEqual(invalid.rolls, []);
   assert.equal(invalid.thrown, false);
 });

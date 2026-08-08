@@ -1,6 +1,6 @@
 import { act, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, vi } from 'vitest';
-import { THROWN_DIE_SIZE } from '../../../shared/vtt/dicePhysics.js';
+import { THROWN_DIE_SIZE, thrownDieSize } from '../../../shared/vtt/dicePhysics.js';
 import DiceTray, { RESULT_REVEAL_HOLD_MS } from './DiceTray.jsx';
 
 const mocks = vi.hoisted(() => ({ simulateThrow: vi.fn() }));
@@ -95,4 +95,24 @@ test('a d100 uses one lightweight orb and reveals its value only after landing',
 
   act(() => vi.advanceTimersByTime(100));
   expect(result).toHaveAttribute('data-visible', 'true');
+});
+
+test('a crowded pool uses the same smaller dice size as the result simulation', () => {
+  const rolls = Array.from({ length: 40 }, () => ({ faces: 6, v: 3 }));
+  render(
+    <DiceTray
+      throws={[{
+        roll: { id: 'large-pool', rolls },
+        x: 300,
+        y: 200,
+      }]}
+    />,
+  );
+
+  expect(mocks.simulateThrow).toHaveBeenCalledWith(
+    rolls,
+    'large-pool',
+    { size: thrownDieSize(rolls.length) },
+  );
+  expect(thrownDieSize(rolls.length)).toBeLessThan(THROWN_DIE_SIZE);
 });

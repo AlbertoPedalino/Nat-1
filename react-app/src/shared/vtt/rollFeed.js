@@ -64,9 +64,13 @@ export function normalizeRoll(entry) {
   const characterId = boundedText(entry.characterId, MAX_CHARACTER_ID_LENGTH) || null;
   const actorName = boundedText(entry.actorName, 40);
   const suppliedId = boundedText(entry.id, MAX_ROLL_ID_LENGTH);
-  const rolls = (Array.isArray(entry.rolls) ? entry.rolls : [])
-    .map(normalizeSharedDie)
-    .filter(Boolean);
+  const suppliedRolls = Array.isArray(entry.rolls) ? entry.rolls : [];
+  // Reject an oversized shared pool before mapping it. Besides protecting the
+  // renderer, keeping it whole-or-nothing avoids displaying a truncated set of
+  // dice next to the producer's untruncated total.
+  const rolls = suppliedRolls.length <= DICE_LIMITS.maxDice
+    ? suppliedRolls.map(normalizeSharedDie).filter(Boolean)
+    : [];
   const requestedMode = entry.meta?.mode ?? entry.mode;
   const requestedBonus = entry.meta?.bonus ?? entry.bonus;
   const at = normalizeTimestamp(entry.timestamp ?? entry.at);

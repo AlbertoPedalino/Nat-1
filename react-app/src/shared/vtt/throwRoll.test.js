@@ -1,5 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { DICE_LIMITS } from '../character/dice.js';
+import { faceNumbering } from '../character/dice3d.js';
+import { dieGeometry } from '../character/polyhedra.js';
+import { simulateThrow, thrownDieSize } from './dicePhysics.js';
 import { throwFormula } from './throwRoll.js';
 
 test('a formula becomes the dice it asks for', () => {
@@ -59,6 +63,37 @@ test('a large pool throws and counts every die', () => {
   assert.equal(result.detail, '40d6');
 });
 
+test('the result uses the same physical size as the visible battle-map throw', () => {
+  const formula = '6d20';
+  const seed = 'same-physics-pass';
+  const result = throwFormula(formula, seed);
+  const dice = Array.from({ length: 6 }, () => ({ faces: 20 }));
+  const landed = simulateThrow(dice, seed, { size: thrownDieSize(dice.length) }).results;
+  const visibleValues = landed.map((face, index) => (
+    faceNumbering(dieGeometry(20).faces.length, 20, `${seed}:${index}`)[face]
+  ));
+
+  assert.deepEqual(result.rolls.map((die) => die.v), visibleValues);
+});
+
+test('non-standard physical dice do not structurally favour their first values', () => {
+  for (const faces of [3, 5, 7]) {
+    const counts = Array(faces).fill(0);
+    const samples = faces * 300;
+    for (let index = 0; index < samples; index += 1) {
+      const value = throwFormula(`1d${faces}`, `fair-d${faces}-${index}`).rolls[0].v;
+      counts[value - 1] += 1;
+    }
+    const expected = samples / faces;
+    for (const count of counts) {
+      assert.ok(
+        Math.abs(count - expected) < expected * 0.2,
+        `d${faces} distribution was ${counts.join(', ')}`,
+      );
+    }
+  }
+});
+
 // A coin that came up 1 came up heads. The number still has to add up, but the
 // line under the roll is for people to read.
 test('a coin comes up heads or tails, not one or two', () => {
@@ -76,5 +111,5 @@ test('a formula with no dice is not a throw', () => {
   assert.equal(throwFormula('+3', 'roll-8'), null);
   assert.equal(throwFormula('', 'roll-8'), null);
   assert.equal(throwFormula('2d6garbage999', 'roll-8'), null);
-  assert.equal(throwFormula('101d6', 'roll-8').rolls.length, 101);
+  assert.equal(throwFormula(`${DICE_LIMITS.maxDice + 1}d6`, 'roll-8'), null);
 });

@@ -67,28 +67,40 @@ export function faceValues(faceCount, value, sides, seed, landing = 0) {
 }
 
 // The numbers painted around a solid, one per face, as a real die is numbered:
-// every result appears once. Which one comes up is then the throw's business,
-// not a random number's.
+// every result appears evenly. Which one comes up is then the throw's business,
+// not a separate random result.
 //
 // A die with more faces on its solid than numbers of its own repeats them.
 export function faceNumbering(faceCount, sides, seed) {
   const total = Math.max(1, Math.floor(Number(faceCount) || 1));
   const range = Math.max(1, Math.floor(Number(sides) || total));
-  const step = range % total === 0 ? range / total : 0;
+  const next = seededRandom(`${seed}:numbering`);
 
   const numbers = [];
-  for (let index = 0; index < total; index += 1) {
-    numbers.push(step ? (index + 1) * step : (index % range) + 1);
+  const completeSets = Math.floor(total / range);
+  for (let set = 0; set < completeSets; set += 1) {
+    for (let value = 1; value <= range; value += 1) numbers.push(value);
   }
 
-  const next = seededRandom(`${seed}:numbering`);
-  for (let index = numbers.length - 1; index > 0; index -= 1) {
-    const other = Math.floor(next() * (index + 1));
-    const held = numbers[index];
-    numbers[index] = numbers[other];
-    numbers[other] = held;
-  }
+  // A d3 drawn on four faces, for example, must duplicate one value. Rotate
+  // which value gets the extra face from throw to throw instead of always
+  // duplicating 1; every requested result then has the same long-run chance.
+  const remainder = total - numbers.length;
+  const extras = Array.from({ length: range }, (_, index) => index + 1);
+  shuffle(extras, next);
+  numbers.push(...extras.slice(0, remainder));
+
+  shuffle(numbers, next);
   return numbers;
+}
+
+function shuffle(values, next) {
+  for (let index = values.length - 1; index > 0; index -= 1) {
+    const other = Math.floor(next() * (index + 1));
+    const held = values[index];
+    values[index] = values[other];
+    values[other] = held;
+  }
 }
 
 // What a face says. Numbers, everywhere except a coin: a coin that came up 1

@@ -1,6 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { faceLabel, faceValues, seededRandom, tumbleTurns } from './dice3d.js';
+import {
+  faceLabel,
+  faceNumbering,
+  faceValues,
+  seededRandom,
+  tumbleTurns,
+} from './dice3d.js';
 
 test('the face that lands is the value that was rolled', () => {
   assert.equal(faceValues(20, 17, 20, 'seed', 3)[3], 17);
@@ -22,6 +28,21 @@ test('a die with fewer numbers than faces repeats rather than hangs', () => {
   const values = faceValues(6, 2, 4, 'seed');
   assert.equal(values.length, 6);
   assert.ok(values.every((value) => value >= 1 && value <= 4));
+});
+
+test('a non-standard die rotates which values get duplicate physical faces', () => {
+  const duplicateCounts = [0, 0, 0];
+  for (let index = 0; index < 600; index += 1) {
+    const numbering = faceNumbering(4, 3, `d3-${index}`);
+    assert.equal(numbering.length, 4);
+    for (let value = 1; value <= 3; value += 1) {
+      if (numbering.filter((face) => face === value).length === 2) duplicateCounts[value - 1] += 1;
+    }
+  }
+
+  for (const count of duplicateCounts) {
+    assert.ok(count > 160 && count < 240, `duplicate distribution was ${duplicateCounts.join(', ')}`);
+  }
 });
 
 test('a re-render throws the same die, not a new one', () => {

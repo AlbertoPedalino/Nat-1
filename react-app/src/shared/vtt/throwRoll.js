@@ -12,7 +12,7 @@
 import { faceLabel, faceNumbering } from '../character/dice3d.js';
 import { parseFormula } from '../character/dice.js';
 import { dieGeometry } from '../character/polyhedra.js';
-import { simulateThrow } from './dicePhysics.js';
+import { simulateThrow, thrownDieSize } from './dicePhysics.js';
 
 export function throwFormula(formula, seed, options = {}) {
   const parsed = parseFormula(formula);
@@ -20,7 +20,11 @@ export function throwFormula(formula, seed, options = {}) {
   const { dice, modifier } = parsed;
   if (!dice.length) return null;
 
-  const { results } = simulateThrow(dice, seed, options);
+  const physicsOptions = {
+    ...options,
+    size: options.size ?? thrownDieSize(dice.length),
+  };
+  const { results } = simulateThrow(dice, seed, physicsOptions);
 
   let total = modifier;
   const rolls = dice.map((die, index) => {
