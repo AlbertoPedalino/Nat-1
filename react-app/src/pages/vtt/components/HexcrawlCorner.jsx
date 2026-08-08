@@ -2,6 +2,7 @@ import {
   Box, IconButton, Tooltip, Typography,
 } from '@mui/material';
 import { Hexagon, X } from 'lucide-react';
+import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import HexcrawlPanel from './HexcrawlPanel.jsx';
 import { ICON_STRIP } from './MapCorner.jsx';
 
@@ -46,10 +47,10 @@ const cornerSx = {
 const buttonSx = {
   // The strip around it is click-through; the icon and the panel are not.
   pointerEvents: 'auto',
-  color: '#e8c96a',
-  bgcolor: 'rgba(15,14,13,0.85)',
-  border: '1px solid rgba(232,201,106,0.35)',
-  '&:hover': { bgcolor: 'rgba(15,14,13,0.95)' },
+  color: VTT_COLORS.gold,
+  bgcolor: vttAlpha(VTT_COLORS.ink, 0.85),
+  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.35)}`,
+  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.ink, 0.95) },
 };
 
 // Scrollable rather than tall, for the same reason as the picture panel: in
@@ -67,8 +68,8 @@ const panelSx = {
   overflowY: 'auto',
   p: 1.25,
   borderRadius: 1,
-  bgcolor: 'rgba(15,14,13,0.97)',
-  border: '1px solid rgba(232,201,106,0.3)',
+  bgcolor: vttAlpha(VTT_COLORS.ink, 0.97),
+  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.3)}`,
   boxShadow: 6,
 };
 

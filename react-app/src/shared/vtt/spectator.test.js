@@ -19,6 +19,7 @@ test('projector tokens reproduce the player boundary even for a GM session', () 
     { id: 'party', layer: 'tokens', x: 1, y: 1, secretLabel: 'Secret Aria', label: 'Aria' },
     { id: 'ambush', layer: 'tokens', x: 12, y: 1, secretLabel: 'Ambusher' },
     { id: 'gm-note', layer: 'gm', x: 1, y: 1 },
+    { id: 'hidden-map-prop', layer: 'map', hiddenFromPlayers: true, x: 1, y: 1 },
   ], { x: 0, y: 0, w: 10, h: 10 });
 
   assert.deepEqual(projected.map((token) => token.id), ['party']);

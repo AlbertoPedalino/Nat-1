@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Box, IconButton, Stack, Typography } from '@mui/material';
 import { MousePointer2, X } from 'lucide-react';
+import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { battleMapSurfaceSx } from './battleMapSurface.js';
 
 // A vertical rail of icons down the right edge of the map; clicking one opens
@@ -65,7 +66,7 @@ export default function SceneToolRail({ groups, activeId = 'cursor', onCursor })
           <Stack direction="row" sx={{ alignItems: 'center', mb: 1 }}>
             <Typography sx={panelTitleSx}>{open.label}</Typography>
             <Box sx={{ flex: 1 }} />
-            <IconButton size="small" aria-label="Close" onClick={closePanel} sx={{ color: '#b8a87a' }}>
+            <IconButton size="small" aria-label="Close" onClick={closePanel} sx={{ color: VTT_COLORS.railText }}>
               <X size={14} />
             </IconButton>
           </Stack>
@@ -99,15 +100,15 @@ const railButtonSx = {
   border: 0,
   borderRadius: 1,
   background: 'none',
-  color: '#b8a87a',
+  color: VTT_COLORS.railText,
   cursor: 'pointer',
-  '&:hover': { color: '#e8c96a', bgcolor: 'rgba(232,201,106,0.08)' },
+  '&:hover': { color: VTT_COLORS.gold, bgcolor: vttAlpha(VTT_COLORS.gold, 0.08) },
 };
 
 const railButtonActiveSx = {
-  color: '#0f0e0d',
-  bgcolor: '#e8c96a',
-  '&:hover': { color: '#0f0e0d', bgcolor: '#e8c96a' },
+  color: VTT_COLORS.ink,
+  bgcolor: VTT_COLORS.gold,
+  '&:hover': { color: VTT_COLORS.ink, bgcolor: VTT_COLORS.gold },
 };
 
 const railLabelSx = {

@@ -12,17 +12,18 @@
 import { faceLabel, faceNumbering } from '../character/dice3d.js';
 import { parseFormula } from '../character/dice.js';
 import { dieGeometry } from '../character/polyhedra.js';
-import { MAX_THROWN_DICE, simulateThrow } from './dicePhysics.js';
+import { simulateThrow } from './dicePhysics.js';
 
 export function throwFormula(formula, seed, options = {}) {
-  const { dice, modifier } = parseFormula(formula);
+  const parsed = parseFormula(formula);
+  if (!parsed.valid) return null;
+  const { dice, modifier } = parsed;
   if (!dice.length) return null;
 
-  const thrown = dice.slice(0, MAX_THROWN_DICE);
-  const { results } = simulateThrow(thrown, seed, options);
+  const { results } = simulateThrow(dice, seed, options);
 
   let total = modifier;
-  const rolls = thrown.map((die, index) => {
+  const rolls = dice.map((die, index) => {
     const faces = dieGeometry(die.faces).faces.length;
     const numbering = faceNumbering(faces, die.faces, `${seed}:${index}`);
     const value = numbering[results[index]];
@@ -30,15 +31,11 @@ export function throwFormula(formula, seed, options = {}) {
     return { v: value, faces: die.faces };
   });
 
-  // Dice past the cap are not thrown, so they cannot count. Saying so in the
-  // detail line is better than quietly rolling fewer dice than were asked for.
-  const dropped = dice.length - thrown.length;
   const notes = [];
   // A coin that came up 1 came up heads, and the line under the roll should say
   // so — the number is only there to be added up.
   const coins = rolls.filter((die) => die.faces === 2).map((die) => faceLabel(2, die.v));
   if (coins.length) notes.push(coins.join(', '));
-  if (dropped) notes.push(`first ${MAX_THROWN_DICE} dice thrown`);
 
   return {
     total,

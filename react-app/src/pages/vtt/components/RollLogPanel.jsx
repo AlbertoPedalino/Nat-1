@@ -4,6 +4,7 @@ import { Dices, Trash2 } from 'lucide-react';
 import CustomRollDialog from '../../../shared/character/CustomRollDialog.jsx';
 import DieFace2D from '../../../shared/character/DieFace2D.jsx';
 import { resolveToastLayout } from '../../../shared/character/rollToastLayout.js';
+import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { fullscreenContainer } from '../logic/fullscreenContainer.js';
 import {
   battleMapDialogActionsSx,
@@ -134,13 +135,13 @@ const rowSx = {
   borderRadius: 1,
   border: '1px solid',
   borderColor: 'divider',
-  bgcolor: 'rgba(255,255,255,0.02)',
+  bgcolor: vttAlpha(VTT_COLORS.white, 0.02),
 };
 
 const actorSx = {
   fontSize: '0.66rem',
   fontWeight: 700,
-  color: '#e8c96a',
+  color: VTT_COLORS.gold,
   whiteSpace: 'nowrap',
 };
 
@@ -153,7 +154,7 @@ const totalSx = {
   fontVariantNumeric: 'tabular-nums',
 };
 
-const detailSx = { fontSize: '0.6rem', color: '#8a7a5a', lineHeight: 1.35 };
+const detailSx = { fontSize: '0.6rem', color: VTT_COLORS.rollDetail, lineHeight: 1.35 };
 
 const diceRowSx = {
   display: 'flex',

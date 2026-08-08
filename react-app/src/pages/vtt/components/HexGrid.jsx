@@ -1,5 +1,6 @@
 import { memo, useId, useMemo } from 'react';
 import { Box } from '@mui/material';
+import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { hexHeight, hexRowStep, hexWidth } from '../../../shared/vtt/hexGeometry.js';
 
 // The hex overlay.
@@ -140,7 +141,7 @@ function buildGeometry({ grid, view, width, height, cells, selected, outlined })
 
 function HexGrid({
   grid, view, viewportSize, cells = null, selected = null, opacity = 1,
-  outlined = true, lineColor = 'rgba(232,201,106,0.28)', lineWidth = 1,
+  outlined = true, lineColor = vttAlpha(VTT_COLORS.gold, 0.28), lineWidth = 1,
 }) {
   // React's ids carry colons, which a `url(#…)` reference cannot: the paint
   // server would silently resolve to nothing and the mesh would be invisible in
@@ -202,7 +203,7 @@ function HexGrid({
         <path
           d={geometry.selectedPath}
           fill="none"
-          stroke="rgba(232,201,106,0.95)"
+          stroke={vttAlpha(VTT_COLORS.gold, 0.95)}
           strokeWidth={2.5}
         />
       ) : null}

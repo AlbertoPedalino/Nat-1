@@ -10,6 +10,7 @@ import { useAuth } from '../../shared/cloud/AuthProvider.jsx';
 import { fetchScene } from '../../shared/cloud/vtt.js';
 import { useLiveSession } from '../../shared/vtt/useLiveSession.js';
 import { sessionCameraSource } from '../../shared/vtt/cameraSync.js';
+import { VTT_COLORS, vttAlpha } from '../../shared/vtt/colors.js';
 import { spectatorRoute } from '../../shared/vtt/spectator.js';
 import CampaignLinksMenu from './components/CampaignLinksMenu.jsx';
 import CampaignSessionPicker from './components/CampaignSessionPicker.jsx';
@@ -40,7 +41,12 @@ export default function VttPage() {
   const presenterSourceRef = useRef(sessionCameraSource());
   const presenterFollowingRef = useRef(true);
 
-  const { campaigns, loading: loadingCampaigns } = useGmCampaigns({ mapRows: async (rows) => toRoster(rows) });
+  const {
+    allCampaigns,
+    campaigns,
+    error: campaignError,
+    loading: loadingCampaigns,
+  } = useGmCampaigns({ mapRows: async (rows) => toRoster(rows) });
   const runsCampaigns = campaigns.length > 0;
 
   const { scene: liveScene, loading: loadingSession } = useLiveSession({
@@ -179,8 +185,19 @@ export default function VttPage() {
             player in another. */}
         {!gate && !busy && atRoot ? (
           <Box sx={s.rootStackSx}>
-            {runsCampaigns ? <ScenePicker onOpen={openScene} /> : null}
-            <CampaignSessionPicker onJoin={joinCampaign} showEmpty={!runsCampaigns} />
+            {runsCampaigns ? (
+              <ScenePicker
+                campaigns={campaigns}
+                loadingCampaigns={loadingCampaigns}
+                campaignError={campaignError}
+                onOpen={openScene}
+              />
+            ) : null}
+            <CampaignSessionPicker
+              campaigns={allCampaigns}
+              onJoin={joinCampaign}
+              showEmpty={!runsCampaigns}
+            />
           </Box>
         ) : null}
 
@@ -253,7 +270,7 @@ const spectatorPageSx = {
   width: '100vw',
   height: '100vh',
   overflow: 'hidden',
-  bgcolor: '#000',
+  bgcolor: VTT_COLORS.black,
 };
 
 const spectatorContentSx = {
@@ -267,7 +284,7 @@ const spectatorWaitingSx = {
   inset: 0,
   display: 'grid',
   placeItems: 'center',
-  color: 'rgba(255,255,255,0.58)',
+  color: vttAlpha(VTT_COLORS.white, 0.58),
   fontFamily: '"Cinzel", Georgia, serif',
   letterSpacing: '0.08em',
 };

@@ -6,6 +6,7 @@ import HexResultSteps from '../../gmboard/components/HexResultSteps.jsx';
 import { formatDateTime } from '../../gmboard/logic/time.js';
 import { hasWeatherDisadvantage } from '../../gmboard/logic/weather.js';
 import { terrainOption } from '../../../shared/hexcrawl/hexEntry.js';
+import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { fullscreenContainer } from '../logic/fullscreenContainer.js';
 
 // What the party walked into. A dialog rather than a panel because it is the
@@ -94,7 +95,7 @@ const weatherBadgeSx = {
   borderRadius: 1,
   border: '1px solid',
   borderColor: 'divider',
-  bgcolor: 'rgba(0,0,0,0.25)',
+  bgcolor: vttAlpha(VTT_COLORS.black, 0.25),
   color: 'text.secondary',
 };
 

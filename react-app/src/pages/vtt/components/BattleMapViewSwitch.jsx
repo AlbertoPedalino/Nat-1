@@ -1,5 +1,6 @@
 import { Button, MenuItem, Stack, TextField } from '@mui/material';
 import { PanelRightClose, ScrollText } from 'lucide-react';
+import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 
 export default function BattleMapViewSwitch({
   view,
@@ -56,7 +57,7 @@ const selectSx = {
   width: { xs: 148, sm: 210 },
   '& .MuiInputBase-root': {
     height: 32,
-    bgcolor: 'rgba(5, 5, 7, 0.72)',
+    bgcolor: vttAlpha(VTT_COLORS.overlaySurface, 0.72),
     fontSize: '0.73rem',
   },
 };

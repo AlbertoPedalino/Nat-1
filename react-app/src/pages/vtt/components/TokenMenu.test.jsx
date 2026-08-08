@@ -1,6 +1,16 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render as baseRender, screen } from '@testing-library/react';
+import { ThemeProvider } from '@mui/material';
 import { vi } from 'vitest';
+import { theme } from '../../../theme.js';
 import TokenMenu from './TokenMenu.jsx';
+
+function render(ui) {
+  const rendered = baseRender(<ThemeProvider theme={theme}>{ui}</ThemeProvider>);
+  return {
+    ...rendered,
+    rerender: (next) => rendered.rerender(<ThemeProvider theme={theme}>{next}</ThemeProvider>),
+  };
+}
 
 test('the token menu uses compact controls and still saves condition changes', () => {
   const onSave = vi.fn();

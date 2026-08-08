@@ -61,7 +61,9 @@ export default function RollerButtons({
         onClick={(event) => {
           event.stopPropagation();
           if (typeof onShowToast !== 'function') return;
-          const { total, rolls } = rollFormula(roller.formula);
+          const result = rollFormula(roller.formula);
+          if (!result.valid) return;
+          const { total, rolls } = result;
           onShowToast(formatRollTitle(subject, title), roller.formula, total, rolls);
         }}
         sx={{ ...buttonSx, ...presentation.tone }}

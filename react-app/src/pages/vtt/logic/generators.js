@@ -60,10 +60,6 @@ export const GENERATORS = Object.freeze([
   },
 ]);
 
-export function generatorById(id) {
-  return GENERATORS.find((generator) => generator.id === id) || null;
-}
-
 // Which files are a map, and which is the data beside it. A GM exporting a
 // building drops the whole download folder in as often as not.
 export function isMapImage(file) {
@@ -89,8 +85,6 @@ export function sceneNamesFor(generator, files) {
 // What several files mean. Two floors are sometimes two boards and sometimes
 // one board with both on it — the second reads better when the party splits, or
 // when the stair is something to point at rather than a scene to switch to.
-export const MULTI_FILE_MODES = Object.freeze(['scenes', 'joined']);
-
 export function joinedSceneName(generator, count) {
   const label = generator?.label || 'Scene';
   if (!(count > 1)) return label;

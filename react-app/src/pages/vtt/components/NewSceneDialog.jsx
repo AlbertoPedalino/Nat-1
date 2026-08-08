@@ -17,6 +17,7 @@ import {
 import {
   ArrowLeft, Castle, Columns2, Home, Landmark, Layers, Map as MapIcon, Mountain, Trees, Upload,
 } from 'lucide-react';
+import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import {
   GENERATORS, GENERATOR_CREDIT, isMapImage, joinedSceneName, orderForFloors, sceneNamesFor,
 } from '../logic/generators.js';
@@ -308,7 +309,7 @@ const frameSx = {
   border: '1px solid',
   borderColor: 'divider',
   borderRadius: 1,
-  bgcolor: '#fff',
+  bgcolor: VTT_COLORS.white,
 };
 
 const errorSx = { mt: 1, fontSize: '0.75rem', color: 'error.main' };

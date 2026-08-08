@@ -2,20 +2,19 @@ import { useEffect, useState } from 'react';
 import { Box, Chip, CircularProgress, Paper, Stack, Typography } from '@mui/material';
 import { Flag, Radio } from 'lucide-react';
 import { useAuth } from '../../../shared/cloud/AuthProvider.jsx';
-import { listMyCampaigns } from '../../../shared/cloud/campaigns.js';
 import { listLiveScenes } from '../../../shared/cloud/vtt.js';
 
 // Several campaigns can be running at the same time, so a player picks the table
 // first. They never pick a scene: once inside, the GM decides what is on it and
 // the view follows along.
-export default function CampaignSessionPicker({ onJoin, showEmpty = true }) {
+export default function CampaignSessionPicker({ campaigns = [], onJoin, showEmpty = true }) {
   const { user } = useAuth();
   const [state, setState] = useState({ loading: true, campaigns: [] });
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([listMyCampaigns(), listLiveScenes().catch(() => [])])
-      .then(([campaigns, live]) => {
+    listLiveScenes().catch(() => [])
+      .then((live) => {
         if (cancelled) return;
         const liveByCampaign = new Set(live.map((scene) => scene.campaignId));
         setState({
@@ -33,7 +32,7 @@ export default function CampaignSessionPicker({ onJoin, showEmpty = true }) {
       })
       .catch(() => { if (!cancelled) setState({ loading: false, campaigns: [] }); });
     return () => { cancelled = true; };
-  }, [user?.id]);
+  }, [campaigns, user?.id]);
 
   if (state.loading) return <CircularProgress size={24} />;
 

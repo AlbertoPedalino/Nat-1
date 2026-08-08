@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Box } from '@mui/material';
 import { GripVertical } from 'lucide-react';
+import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import {
   DEFAULT_SHEET_SPLIT,
   MAX_MAP_SPLIT,
@@ -113,16 +114,16 @@ const handleSx = {
   minHeight: 120,
   alignItems: 'center',
   justifyContent: 'center',
-  color: 'rgba(232, 201, 106, 0.62)',
+  color: vttAlpha(VTT_COLORS.gold, 0.62),
   cursor: 'col-resize',
   touchAction: 'none',
   userSelect: 'none',
   borderRadius: 1,
-  background: 'linear-gradient(90deg, transparent 42%, rgba(232,201,106,0.3) 43%, rgba(232,201,106,0.3) 57%, transparent 58%)',
+  background: `linear-gradient(90deg, transparent 42%, ${vttAlpha(VTT_COLORS.gold, 0.3)} 43%, ${vttAlpha(VTT_COLORS.gold, 0.3)} 57%, transparent 58%)`,
   transition: 'color 120ms ease, background-color 120ms ease',
   '&:hover, &:focus-visible': {
-    color: '#f1d77d',
-    bgcolor: 'rgba(232, 201, 106, 0.08)',
-    outline: '1px solid rgba(232, 201, 106, 0.42)',
+    color: VTT_COLORS.goldHandle,
+    bgcolor: vttAlpha(VTT_COLORS.gold, 0.08),
+    outline: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.42)}`,
   },
 };

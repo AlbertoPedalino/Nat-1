@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef } from 'react';
 import { Box } from '@mui/material';
 import { useResizeTick } from '../hooks/useResizeTick.js';
+import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { cellSize, worldToScreen } from '../../../shared/vtt/geometry.js';
 
 // Committed strokes plus the one still under the pointer, on the same canvas so
@@ -51,7 +52,7 @@ export default function DrawingCanvas({ drawings, selectedId, live, measure, gri
       // the dark edge that makes it readable over a busy map.
       if (selectedId && stroke.id === selectedId) {
         context.save();
-        context.shadowColor = 'rgba(111,209,232,0.95)';
+        context.shadowColor = vttAlpha(VTT_COLORS.drawingGuide, 0.95);
         context.shadowBlur = Math.max(6, cell * view.zoom * 0.25);
         drawStroke(context, stroke, points, toScreen, cell, view);
         context.restore();
@@ -66,8 +67,8 @@ export default function DrawingCanvas({ drawings, selectedId, live, measure, gri
       const from = toScreen(measure.from);
       const to = toScreen(measure.to);
       const reach = Math.hypot(to.x - from.x, to.y - from.y);
-      context.strokeStyle = '#6fd1e8';
-      context.fillStyle = 'rgba(111,209,232,0.18)';
+      context.strokeStyle = VTT_COLORS.drawingGuide;
+      context.fillStyle = vttAlpha(VTT_COLORS.drawingGuide, 0.18);
       context.lineWidth = 2;
       context.setLineDash([6, 4]);
 
@@ -99,9 +100,9 @@ export default function DrawingCanvas({ drawings, selectedId, live, measure, gri
         context.textAlign = 'center';
         context.textBaseline = 'bottom';
         context.lineWidth = 3;
-        context.strokeStyle = 'rgba(0,0,0,0.9)';
+        context.strokeStyle = vttAlpha(VTT_COLORS.black, 0.9);
         context.strokeText(measure.label, to.x, to.y - 8);
-        context.fillStyle = '#dff4fb';
+        context.fillStyle = VTT_COLORS.drawingText;
         context.fillText(measure.label, to.x, to.y - 8);
       }
     }
@@ -127,14 +128,14 @@ function drawStroke(context, stroke, points, toScreen, cell, view) {
     // Outlined rather than boxed: a plate would hide the map under every label,
     // and text over a busy battlemap is unreadable without one.
     context.lineWidth = Math.max(2, fontSize / 6);
-    context.strokeStyle = 'rgba(0,0,0,0.85)';
+    context.strokeStyle = vttAlpha(VTT_COLORS.black, 0.85);
     context.strokeText(stroke.text, at.x, at.y);
-    context.fillStyle = stroke.color || '#e8c96a';
+    context.fillStyle = stroke.color || VTT_COLORS.gold;
     context.fillText(stroke.text, at.x, at.y);
     return;
   }
 
-  context.strokeStyle = stroke.color || '#e8c96a';
+  context.strokeStyle = stroke.color || VTT_COLORS.gold;
   // Width is in cells so a stroke keeps its thickness relative to the map as you
   // zoom, rather than turning into a hairline.
   context.lineWidth = Math.max(1, ((stroke.width || 3) / 10) * cell * view.zoom);
@@ -144,7 +145,7 @@ function drawStroke(context, stroke, points, toScreen, cell, view) {
     // A tap is a dot, and a zero-length path draws nothing at all.
     context.beginPath();
     context.arc(first.x, first.y, context.lineWidth / 2, 0, Math.PI * 2);
-    context.fillStyle = stroke.color || '#e8c96a';
+    context.fillStyle = stroke.color || VTT_COLORS.gold;
     context.fill();
     return;
   }

@@ -13,6 +13,7 @@ const IDLE = Object.freeze({
   status: 'disabled',
   signedIn: false,
   loading: false,
+  allCampaigns: [],
   campaigns: [],
   error: null,
 });
@@ -46,13 +47,22 @@ export function useGmCampaigns({ mapRows, errorMessage = 'Failed to load campaig
 
       setPayload((prev) => ({ ...prev, cloudEnabled: true, status: 'authed', signedIn: true, loading: true, error: null }));
       try {
-        const mine = (await listMyCampaigns()).filter((campaign) => campaign.gm === userId);
+        const allCampaigns = await listMyCampaigns();
+        const mine = allCampaigns.filter((campaign) => campaign.gm === userId);
         const campaigns = await Promise.all(mine.map(async (campaign) => {
           const meta = { id: campaign.id, name: campaign.name || 'Campaign', joinCode: campaign.join_code || null };
           return { ...meta, members: await mapRows(await listCampaignCharacters(campaign.id), meta) };
         }));
         if (!cancelled) {
-          setPayload({ cloudEnabled: true, status: 'authed', signedIn: true, loading: false, campaigns, error: null });
+          setPayload({
+            cloudEnabled: true,
+            status: 'authed',
+            signedIn: true,
+            loading: false,
+            allCampaigns,
+            campaigns,
+            error: null,
+          });
         }
       } catch (error) {
         if (!cancelled) {
@@ -61,6 +71,7 @@ export function useGmCampaigns({ mapRows, errorMessage = 'Failed to load campaig
             status: 'authed',
             signedIn: true,
             loading: false,
+            allCampaigns: [],
             campaigns: [],
             error: error?.message || errorMessage,
           });

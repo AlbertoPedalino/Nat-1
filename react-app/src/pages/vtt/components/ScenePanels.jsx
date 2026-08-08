@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import {
   Box,
   Button,
@@ -293,10 +294,10 @@ export function ShownImageSwitch({ scene, compact = false, onShownImageChange })
 }
 
 const compactSwitchSx = {
-  bgcolor: 'rgba(15,14,13,0.85)',
-  border: '1px solid rgba(232,201,106,0.35)',
-  '& .MuiToggleButton-root': { color: '#b8a87a', border: 0, px: 1, py: 0.4 },
-  '& .Mui-selected': { color: '#0f0e0d', bgcolor: '#e8c96a' },
+  bgcolor: vttAlpha(VTT_COLORS.ink, 0.85),
+  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.35)}`,
+  '& .MuiToggleButton-root': { color: VTT_COLORS.railText, border: 0, px: 1, py: 0.4 },
+  '& .Mui-selected': { color: VTT_COLORS.ink, bgcolor: VTT_COLORS.gold },
 };
 
 function HiddenFileInput({ inputRef, onPick }) {
@@ -355,10 +356,10 @@ export function LayerPanel({ activeLayer, compact = false, onActiveLayerChange }
 }
 
 const compactLayerSx = {
-  bgcolor: 'rgba(15,14,13,0.85)',
-  border: '1px solid rgba(232,201,106,0.35)',
-  '& .MuiToggleButton-root': { color: '#b8a87a', border: 0, px: 1 },
-  '& .Mui-selected': { color: '#0f0e0d', bgcolor: '#e8c96a' },
+  bgcolor: vttAlpha(VTT_COLORS.ink, 0.85),
+  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.35)}`,
+  '& .MuiToggleButton-root': { color: VTT_COLORS.railText, border: 0, px: 1 },
+  '& .Mui-selected': { color: VTT_COLORS.ink, bgcolor: VTT_COLORS.gold },
 };
 
 export function FogPanel({ scene, busy, paintMode, brushSize, onEnableFog, onPaintModeChange, onBrushSizeChange, onFogAll }) {

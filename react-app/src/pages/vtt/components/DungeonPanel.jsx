@@ -8,6 +8,7 @@ import {
 import { DUNGEON_POPULATION_OPTIONS, TIER_OPTIONS } from '../../gmboard/logic/constants.js';
 import { MAX_ROOM_COUNT, MIN_ROOM_COUNT, isValidRoomCount } from '../../gmboard/logic/dungeon.js';
 import { describeGroups } from '../../../shared/dungeon/roomBudget.js';
+import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { MARKER_COLORS } from '../../../shared/dungeon/roomMarkers.js';
 import InfoHint from '../../../components/InfoHint.jsx';
 import PiecePreview, { beginPieceDrag } from './PiecePreview.jsx';
@@ -246,7 +247,7 @@ function previewToken(groups) {
   const first = groups?.[0]?.monster;
   return {
     label: first?.name || 'Creature',
-    color: '#7a5aa8',
+    color: VTT_COLORS.dungeon,
     w: 1,
     h: 1,
   };

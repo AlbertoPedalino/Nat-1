@@ -2,6 +2,13 @@
 // Single source of truth for d20 tests and damage/heal/utility rolls so that
 // spell, action, and ability roll popups stay consistent.
 
+export const DICE_LIMITS = Object.freeze({
+  formulaLength: 120,
+  minFaces: 2,
+  maxFaces: 100,
+  modifierAbs: 10000,
+});
+
 export function rollDie(faces) {
   return Math.floor(Math.random() * Math.max(1, Number(faces) || 1)) + 1;
 }
@@ -59,30 +66,87 @@ export function buildD20Meta(result) {
 }
 
 // What a formula asks for, without rolling it: one entry per die, plus the flat
-// modifier. Split out from rollFormula because dice thrown on the battle map are
-// rolled by the throw itself — the formula has to say which dice to throw before
-// anything decides what they show.
+// modifier. The grammar is intentionally small and strict:
+//   term ((+|-) term)*, where a term is an integer or [count]d<faces>.
+//
+// Strictness matters because some formulas arrive from imported bestiary data.
+// The old scanning regex silently turned `2d6garbage999` into `2d6+999`.
+// Invalid input now fails as one structured result and allocates no dice, while
+// a valid pool is kept whole instead of being shortened for display purposes.
+const FORMULA_RE = /^[+-]?(?:\d*d\d+|\d+)(?:[+-](?:\d*d\d+|\d+))*$/i;
+const FORMULA_TERM_RE = /([+-]?)(?:(\d*)d(\d+)|(\d+))/gi;
+
+function invalidFormula(code, message) {
+  return {
+    valid: false,
+    error: { code, message },
+    dice: [],
+    modifier: 0,
+  };
+}
+
 export function parseFormula(formula) {
-  const clean = String(formula || '').replace(/\s+/g, '');
-  const diceRe = /([+-]?)(\d*)d(\d+)|([+-]?\d+)/gi;
-  const dice = [];
+  const source = String(formula ?? '');
+  if (source.length > DICE_LIMITS.formulaLength) {
+    return invalidFormula('FORMULA_TOO_LONG', `Formula exceeds ${DICE_LIMITS.formulaLength} characters.`);
+  }
+
+  const clean = source.replace(/\s+/g, '');
+  if (!clean) return invalidFormula('EMPTY_FORMULA', 'Formula is empty.');
+  if (!FORMULA_RE.test(clean)) {
+    return invalidFormula('INVALID_SYNTAX', 'Formula contains unsupported or incomplete notation.');
+  }
+
+  const terms = [];
   let modifier = 0;
   let match;
-  while ((match = diceRe.exec(clean))) {
+  FORMULA_TERM_RE.lastIndex = 0;
+  while ((match = FORMULA_TERM_RE.exec(clean))) {
+    const sign = match[1] === '-' ? -1 : 1;
     if (match[3]) {
-      const sign = match[1] === '-' ? -1 : 1;
       const count = Number(match[2] || 1);
       const faces = Number(match[3]);
-      for (let i = 0; i < count; i++) dice.push({ faces, sign });
-    } else if (match[4]) {
-      modifier += Number(match[4]);
+      if (!Number.isSafeInteger(count) || count < 1) {
+        return invalidFormula('INVALID_DIE_COUNT', 'Every dice term must contain at least one die.');
+      }
+      if (!Number.isSafeInteger(faces)
+          || faces < DICE_LIMITS.minFaces
+          || faces > DICE_LIMITS.maxFaces) {
+        return invalidFormula(
+          'INVALID_DIE_FACES',
+          `Dice must have between ${DICE_LIMITS.minFaces} and ${DICE_LIMITS.maxFaces} faces.`,
+        );
+      }
+      terms.push({ count, faces, sign });
+    } else {
+      const value = Number(match[4]);
+      if (!Number.isSafeInteger(value)) {
+        return invalidFormula('INVALID_MODIFIER', 'Formula modifier must be a safe integer.');
+      }
+      modifier += sign * value;
+      if (!Number.isSafeInteger(modifier) || Math.abs(modifier) > DICE_LIMITS.modifierAbs) {
+        return invalidFormula(
+          'MODIFIER_OUT_OF_RANGE',
+          `Formula modifier must stay between -${DICE_LIMITS.modifierAbs} and ${DICE_LIMITS.modifierAbs}.`,
+        );
+      }
     }
   }
-  return { dice, modifier };
+
+  const dice = [];
+  for (const term of terms) {
+    for (let index = 0; index < term.count; index += 1) {
+      dice.push({ faces: term.faces, sign: term.sign });
+    }
+  }
+  return { valid: true, error: null, dice, modifier };
 }
 
 export function rollFormula(formula) {
-  const { dice, modifier } = parseFormula(formula);
+  const parsed = parseFormula(formula);
+  if (!parsed.valid) return { valid: false, error: parsed.error, total: null, rolls: [] };
+
+  const { dice, modifier } = parsed;
   let total = modifier;
   const rolls = [];
   for (const die of dice) {
@@ -90,7 +154,7 @@ export function rollFormula(formula) {
     rolls.push({ v, faces: die.faces });
     total += die.sign * v;
   }
-  return { total, rolls };
+  return { valid: true, error: null, total, rolls };
 }
 
 // Standard toast title separator used by all roll popups.

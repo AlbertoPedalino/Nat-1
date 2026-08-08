@@ -12,8 +12,6 @@ import {
 } from '@mui/material';
 import { Map, Pencil, Plus, Radio, RadioTower, Trash2 } from 'lucide-react';
 import { useToast } from '../../../shared/ToastProvider.jsx';
-import { toRoster } from '../../../shared/campaign/roster.js';
-import { useGmCampaigns } from '../../../shared/campaign/useGmCampaigns.js';
 import {
   clearLiveScene,
   createScene,
@@ -27,11 +25,10 @@ import NewSceneDialog from './NewSceneDialog.jsx';
 
 // Scenes belong to a campaign, so the picker is grouped by campaign rather than
 // being a flat list like the local tools' Library.
-export default function ScenePicker({ onOpen }) {
+export default function ScenePicker({
+  campaigns = [], loadingCampaigns = false, campaignError = null, onOpen,
+}) {
   const { notify } = useToast();
-  const { campaigns, loading: loadingCampaigns, error: campaignError } = useGmCampaigns({
-    mapRows: async (rows) => toRoster(rows),
-  });
   const [scenesByCampaign, setScenesByCampaign] = useState({});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');

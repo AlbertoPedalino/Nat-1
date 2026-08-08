@@ -4,6 +4,7 @@ import {
 } from '@mui/material';
 import { Search } from 'lucide-react';
 import { iconNames } from 'lucide-react/dynamic';
+import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import {
   DEFAULT_MAP_OBJECT_STROKE,
   MAX_MAP_OBJECT_STROKE,
@@ -14,7 +15,7 @@ import { beginPieceDrag } from './PiecePreview.jsx';
 import MapObjectGlyph from './MapObjectGlyph.jsx';
 
 const PAGE_SIZE = 32;
-const DEFAULT_COLOR = '#e8c96a';
+const DEFAULT_COLOR = VTT_COLORS.gold;
 
 export default function MapObjectsPanel({
   busy, layer = 'tokens', onPlace, onPlacementDragStart, onPlacementDragEnd,
@@ -149,9 +150,9 @@ export default function MapObjectsPanel({
   );
 }
 
-const hintSx = { mb: 1, color: '#b9ad91', fontSize: '0.72rem', lineHeight: 1.45 };
+const hintSx = { mb: 1, color: VTT_COLORS.panelTextMuted, fontSize: '0.72rem', lineHeight: 1.45 };
 const filtersSx = { display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.6 };
-const countSx = { mb: 0.7, color: '#9f947d', fontSize: '0.6rem' };
+const countSx = { mb: 0.7, color: VTT_COLORS.panelTextFaint, fontSize: '0.6rem' };
 const strokeControlSx = {
   display: 'grid',
   gridTemplateColumns: '42px minmax(0, 1fr) 26px',
@@ -159,18 +160,18 @@ const strokeControlSx = {
   gap: 0.7,
   mb: 0.55,
 };
-const strokeLabelSx = { color: '#d9cfb8', fontSize: '0.65rem' };
-const strokeSliderSx = { py: 0.6, color: '#e8c96a' };
-const strokeValueSx = { color: '#b9ad91', fontSize: '0.62rem', textAlign: 'right' };
+const strokeLabelSx = { color: VTT_COLORS.panelText, fontSize: '0.65rem' };
+const strokeSliderSx = { py: 0.6, color: VTT_COLORS.gold };
+const strokeValueSx = { color: VTT_COLORS.panelTextMuted, fontSize: '0.62rem', textAlign: 'right' };
 
 const colorInputSx = {
   width: 34,
   height: 34,
   flexShrink: 0,
   p: '2px',
-  border: '1px solid rgba(232,201,106,0.42)',
+  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.42)}`,
   borderRadius: 1,
-  bgcolor: 'rgba(0,0,0,0.3)',
+  bgcolor: vttAlpha(VTT_COLORS.black, 0.3),
   cursor: 'pointer',
 };
 
@@ -184,10 +185,13 @@ const objectButtonSx = {
   minWidth: 0,
   p: 0.55,
   borderRadius: 1,
-  border: '1px solid rgba(232,201,106,0.24)',
-  bgcolor: 'rgba(0,0,0,0.18)',
+  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.24)}`,
+  bgcolor: vttAlpha(VTT_COLORS.black, 0.18),
   cursor: 'grab',
-  '&:hover': { bgcolor: 'rgba(232,201,106,0.1)', borderColor: 'rgba(232,201,106,0.6)' },
+  '&:hover': {
+    bgcolor: vttAlpha(VTT_COLORS.gold, 0.1),
+    borderColor: vttAlpha(VTT_COLORS.gold, 0.6),
+  },
   '&:disabled': { opacity: 0.45, cursor: 'default' },
 };
 
@@ -196,7 +200,7 @@ const previewSx = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.9))',
+  filter: `drop-shadow(0 2px 2px ${vttAlpha(VTT_COLORS.black, 0.9)})`,
 };
 
 const labelSx = {
@@ -204,12 +208,12 @@ const labelSx = {
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-  color: '#d9cfb8',
+  color: VTT_COLORS.panelText,
   fontSize: '0.58rem',
   lineHeight: 1.2,
 };
 
-const emptySx = { py: 3, textAlign: 'center', color: '#9f947d', fontSize: '0.72rem' };
+const emptySx = { py: 3, textAlign: 'center', color: VTT_COLORS.panelTextFaint, fontSize: '0.72rem' };
 const paginationSx = {
   mt: 1,
   display: 'flex',

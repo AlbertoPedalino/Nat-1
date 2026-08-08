@@ -8,41 +8,87 @@
 // The payload is the sheet's own toast entry, so a roll reads on the map exactly
 // as it read to the player who made it.
 
+import { DICE_LIMITS } from '../character/dice.js';
+
 export const ROLL_TTL_MS = 8000;
 export const MAX_FEED = 40;
+export const MAX_ROLL_ID_LENGTH = 120;
 
-function numberOrNull(value) {
+const MAX_CHARACTER_ID_LENGTH = 120;
+const MAX_ROLL_TOTAL_ABS = 1000000;
+const VALID_MODES = new Set(['advantage', 'disadvantage']);
+
+function boundedText(value, maxLength) {
+  if (value === null || value === undefined) return '';
+  return String(value).trim().slice(0, maxLength);
+}
+
+function numberOrNull(value, maxAbs = MAX_ROLL_TOTAL_ABS) {
   // `Number(null)` is 0, which is finite — so a rest or a death-save guard, which
   // has no total at all, would have been shown as a roll of zero.
   if (value === null || value === undefined || value === '') return null;
   const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : null;
+  return Number.isFinite(parsed) && Math.abs(parsed) <= maxAbs ? parsed : null;
+}
+
+function normalizeSharedDie(die) {
+  if (!die || typeof die !== 'object') return null;
+  const faces = Number(die.faces);
+  const value = Number(die.v);
+  if (!Number.isSafeInteger(faces)
+      || faces < DICE_LIMITS.minFaces
+      || faces > DICE_LIMITS.maxFaces
+      || !Number.isSafeInteger(value)
+      || value < 1
+      || value > faces) return null;
+
+  const normalized = { v: value, faces };
+  if (typeof die.kept === 'boolean') normalized.kept = die.kept;
+  return normalized;
+}
+
+function normalizeTimestamp(value) {
+  const now = Date.now();
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) return now;
+  // A remote clock may be slightly ahead, but a forged far-future timestamp
+  // must not keep dice and bubbles alive forever.
+  return Math.min(parsed, now + ROLL_TTL_MS);
 }
 
 export function normalizeRoll(entry) {
   if (!entry) return null;
-  const label = String(entry.label || '').trim().slice(0, 60);
-  const detail = String(entry.detail || '').trim().slice(0, 120);
+  const label = boundedText(entry.label, 60);
+  const detail = boundedText(entry.detail, 120);
   if (!label && !detail) return null;
+  const characterId = boundedText(entry.characterId, MAX_CHARACTER_ID_LENGTH) || null;
+  const actorName = boundedText(entry.actorName, 40);
+  const suppliedId = boundedText(entry.id, MAX_ROLL_ID_LENGTH);
+  const rolls = (Array.isArray(entry.rolls) ? entry.rolls : [])
+    .map(normalizeSharedDie)
+    .filter(Boolean);
+  const requestedMode = entry.meta?.mode ?? entry.mode;
+  const requestedBonus = entry.meta?.bonus ?? entry.bonus;
+  const at = normalizeTimestamp(entry.timestamp ?? entry.at);
   return {
     // Its own id: two identical rolls a second apart are two events, and the
     // feed has to show both.
-    id: entry.id || `${entry.characterId || 'anon'}:${entry.timestamp || Date.now()}:${Math.random().toString(36).slice(2, 7)}`,
-    characterId: entry.characterId || null,
-    actorName: String(entry.actorName || '').slice(0, 40),
+    id: suppliedId || `roll:${at}:${Math.random().toString(36).slice(2, 12)}`,
+    characterId,
+    actorName,
     label,
     detail,
     total: numberOrNull(entry.total),
-    rolls: Array.isArray(entry.rolls) ? entry.rolls.slice(0, 20) : [],
+    rolls,
     // 'advantage' | 'disadvantage' | undefined, as the sheet records it.
-    mode: entry.meta?.mode || null,
+    mode: VALID_MODES.has(requestedMode) ? requestedMode : null,
     // Carried so the bubble can lay the roll out exactly as the sheet's toast
     // did — dice, then the flat modifier, then the total.
-    bonus: Number.isFinite(entry.meta?.bonus) ? entry.meta.bonus : null,
+    bonus: numberOrNull(requestedBonus, DICE_LIMITS.modifierAbs),
     // Requests physical playback on an open map. Both the map roller and a
     // synced sheet roll set it; notices without dice never do.
-    thrown: Boolean(entry.thrown),
-    at: Number(entry.timestamp) || Date.now(),
+    thrown: Boolean(entry.thrown && rolls.length),
+    at,
   };
 }
 
@@ -65,8 +111,22 @@ export function addRoll(feed, entry, { local = false } = {}) {
 export function queueRollToast(entry, pending) {
   if (!entry) return null;
   if (entry.id && entry.thrown && entry.rolls?.length) {
+    // Only the freshest physical throw per roller is played on the map. If a
+    // second roll supersedes the first before its final frame, surface the old
+    // result now instead of leaving its toast stranded in this Map forever.
+    // Returning it also preserves the function's existing "show this now"
+    // contract for the caller.
+    let superseded = null;
+    const rollerKey = entry.characterId || `actor:${entry.actorName || ''}`;
+    for (const [id, queued] of pending || []) {
+      const queuedKey = queued.characterId || `actor:${queued.actorName || ''}`;
+      if (id !== entry.id && queuedKey === rollerKey) {
+        superseded = queued;
+        pending.delete(id);
+      }
+    }
     pending?.set(entry.id, entry);
-    return null;
+    return superseded;
   }
   return entry;
 }

@@ -6,11 +6,12 @@ import { normalizeEffects } from '../character/combatEffects.js';
 import { normalizeConditions } from '../character/conditions.js';
 import { normalizeFog } from './fog.js';
 import { normalizeMapObjectKey, normalizeMapObjectStroke } from './mapObjects.js';
+import { VTT_COLORS } from './colors.js';
 
 export const LAYERS = Object.freeze(['map', 'tokens', 'gm']);
 export const DEFAULT_GRID = Object.freeze({
   size: 70, offsetX: 0, offsetY: 0, visible: true, snapObjects: true, shape: 'square',
-  color: '#e8c96a', lineWidth: 1, hexColor: '#6f8f5a',
+  color: VTT_COLORS.gold, lineWidth: 1, hexColor: VTT_COLORS.exploredHex,
   measureUnit: 'feet', milesPerCell: 6,
 });
 
@@ -138,6 +139,14 @@ export function isTokenInPlay(token, playArea) {
     && x < playArea.x + playArea.w
     && y < playArea.y + playArea.h;
 }
+export function isTokenVisibleToPlayers(token, playArea) {
+  return Boolean(
+    token
+    && token.layer !== 'gm'
+    && !token.hiddenFromPlayers
+    && isTokenInPlay(token, playArea),
+  );
+}
 
 export function normalizeLayer(layer) {
   return LAYERS.includes(layer) ? layer : 'tokens';
@@ -197,6 +206,9 @@ export function toToken(row) {
     id: row.id,
     sceneId: row.scene_id || null,
     layer: normalizeLayer(row.layer),
+    // Visibility is independent from the editing layer. Legacy GM-layer rows
+    // remain private even when they predate the dedicated column.
+    hiddenFromPlayers: Boolean(row.hidden_from_players) || row.layer === 'gm',
     x: numberOr(row.x, 0),
     y: numberOr(row.y, 0),
     w: clamp(numberOr(row.w, 1), 0.1, MAX_SPAN),
@@ -272,7 +284,7 @@ export function canMoveToken(token, {
   if (!token) return false;
   if (activeLayer && token.layer !== activeLayer) return false;
   if (isGm) return true;
-  if (token.layer === 'gm') return false;
+  if (token.layer === 'gm' || token.hiddenFromPlayers) return false;
   // Their own character's piece, or a marker they put down themselves.
   if (token.characterId) return ownedCharacterIds.includes(token.characterId);
   return Boolean(userId) && token.createdBy === userId;
@@ -289,7 +301,7 @@ export function canMoveToken(token, {
 export function canMarkToken(token, { isGm = false, ownedCharacterIds = [] } = {}) {
   if (!token) return false;
   if (isGm) return true;
-  if (token.layer === 'gm') return false;
+  if (token.layer === 'gm' || token.hiddenFromPlayers) return false;
   if (token.characterId) return ownedCharacterIds.includes(token.characterId);
   return true;
 }
@@ -316,9 +328,4 @@ export function mapImageFolder(campaignId, sceneId) {
   const safeId = /^[a-z0-9_-]+$/i;
   if (!safeId.test(campaign) || !safeId.test(scene)) return null;
   return `${campaign}/${scene}`;
-}
-
-export function campaignIdFromImagePath(path) {
-  const [campaignId] = String(path || '').split('/');
-  return campaignId || null;
 }

@@ -19,6 +19,8 @@ import {
 // value actually differs, so a change does not bounce between the two forever.
 
 const ENCOUNTER_SAVED = SECTION_REGISTRY.encounters.saveEvent;
+const ENCOUNTER_REGISTRY_KEY = SECTION_REGISTRY.encounters.registryKey;
+const FIGHTS_STORAGE_KEY = /^gb:enc:[^:]+:fights:v1$/;
 
 function readFight(instanceId, fightId) {
   const persisted = readPersistedInstance(instanceId, []);
@@ -36,6 +38,7 @@ export function useEncounterBridge({ tokens, onTokenVitals }) {
   const pull = useCallback(() => {
     const tokens = tokensRef.current || [];
     const refs = new Map();
+    const fightCache = new Map();
     for (const token of tokens) {
       const ref = parseSourceRef(token.sourceRef);
       if (ref) refs.set(`${ref.instanceId}:${ref.fightId}`, ref);
@@ -50,10 +53,16 @@ export function useEncounterBridge({ tokens, onTokenVitals }) {
         const persisted = readPersistedInstance(instance.id, []);
         const activeFightId = persisted?.fightsData?.activeFightId;
         if (activeFightId) {
-          refs.set(`${instance.id}:${activeFightId}`, {
+          const key = `${instance.id}:${activeFightId}`;
+          refs.set(key, {
             instanceId: instance.id,
             fightId: String(activeFightId),
           });
+          const fights = persisted?.fightsData?.items || [];
+          const entry = fights.find((fight) => String(fight.id) === String(activeFightId));
+          if (entry) {
+            fightCache.set(key, { fights, entry, activeFightId });
+          }
         }
       }
     }
@@ -61,7 +70,8 @@ export function useEncounterBridge({ tokens, onTokenVitals }) {
     if (!refs.size) return;
 
     for (const ref of refs.values()) {
-      const found = readFight(ref.instanceId, ref.fightId);
+      const key = `${ref.instanceId}:${ref.fightId}`;
+      const found = fightCache.get(key) || readFight(ref.instanceId, ref.fightId);
       if (!found) continue;
       const combat = restoreFight(found.entry, []);
       const updates = tokenUpdatesFromFight(tokensRef.current, {
@@ -77,18 +87,21 @@ export function useEncounterBridge({ tokens, onTokenVitals }) {
     // Same tab: the encounter builder dispatches this on every persist.
     window.addEventListener(ENCOUNTER_SAVED, pull);
     // Other tabs of this browser: localStorage writes surface as `storage`.
-    window.addEventListener('storage', pull);
+    const handleStorage = (event) => {
+      if (event.key === ENCOUNTER_REGISTRY_KEY || FIGHTS_STORAGE_KEY.test(event.key || '')) pull();
+    };
+    window.addEventListener('storage', handleStorage);
     pull();
     return () => {
       window.removeEventListener(ENCOUNTER_SAVED, pull);
-      window.removeEventListener('storage', pull);
+      window.removeEventListener('storage', handleStorage);
     };
   }, [pull]);
 
   // Map -> encounter. Called after the GM edits a piece's hit points.
   const push = useCallback((token) => {
     const ref = parseSourceRef(token?.sourceRef);
-    const targets = ref ? [ref] : [];
+    const targets = ref ? [{ ...ref, found: null }] : [];
     // Character pieces are placed from the roster and therefore have no fight
     // reference. Send them to every active fight that can match their sourceId;
     // fightWithTokenVitals is the guard that ignores unrelated encounters.
@@ -96,15 +109,22 @@ export function useEncounterBridge({ tokens, onTokenVitals }) {
       for (const instance of readRegistry()) {
         const persisted = readPersistedInstance(instance.id, []);
         if (!persisted?.fightsData?.activeFightId) continue;
+        const fights = persisted.fightsData.items || [];
+        const entry = fights.find((fight) => String(fight.id) === String(persisted.fightsData.activeFightId));
         targets.push({
           instanceId: instance.id,
           fightId: String(persisted.fightsData.activeFightId),
+          found: entry ? {
+            fights,
+            entry,
+            activeFightId: persisted.fightsData.activeFightId,
+          } : null,
         });
       }
     }
 
     for (const target of targets) {
-      const found = readFight(target.instanceId, target.fightId);
+      const found = target.found || readFight(target.instanceId, target.fightId);
       if (!found) continue;
       const combatants = fightWithTokenVitals(found.entry.fight?.combatants, token);
       if (!combatants) continue;

@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef } from 'react';
 import { Box } from '@mui/material';
+import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { cellSize, worldToScreen } from '../../../shared/vtt/geometry.js';
 
 // Remote positions arrive as snapshots, one every LASER_BROADCAST_MS at most.
@@ -132,7 +133,7 @@ const dotSx = {
   top: 0,
   display: 'none',
   borderRadius: '50%',
-  background: 'radial-gradient(circle, rgba(255,80,70,0.95) 0%, rgba(255,80,70,0) 100%)',
+  background: `radial-gradient(circle, ${vttAlpha(VTT_COLORS.laser, 0.95)} 0%, ${vttAlpha(VTT_COLORS.laser, 0)} 100%)`,
   pointerEvents: 'none',
   willChange: 'transform',
 };
@@ -144,7 +145,7 @@ const coreSx = {
   width: 'var(--laser-core-size)',
   height: 'var(--laser-core-size)',
   borderRadius: '50%',
-  bgcolor: 'rgba(255,235,230,0.95)',
+  bgcolor: vttAlpha(VTT_COLORS.laserCore, 0.95),
   transform: 'translate(-50%, -50%)',
 };
 
@@ -153,11 +154,11 @@ const labelSx = {
   left: '50%',
   top: 'calc(100% + var(--laser-label-gap))',
   transform: 'translateX(-50%)',
-  color: '#ffd9d4',
+  color: VTT_COLORS.laserText,
   fontFamily: '"Cinzel", Georgia, serif',
   fontSize: 11,
   fontWeight: 700,
   lineHeight: 1,
   whiteSpace: 'nowrap',
-  textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000',
+  textShadow: `-1px -1px 0 ${VTT_COLORS.black}, 1px -1px 0 ${VTT_COLORS.black}, -1px 1px 0 ${VTT_COLORS.black}, 1px 1px 0 ${VTT_COLORS.black}`,
 };

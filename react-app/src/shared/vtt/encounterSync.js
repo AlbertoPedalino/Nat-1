@@ -37,7 +37,6 @@ function deathSavesOf(value) {
   const clamp = (entry) => Math.max(0, Math.min(3, Math.round(Number(entry) || 0)));
   return { success: clamp(raw.success ?? raw.s), fail: clamp(raw.fail ?? raw.f) };
 }
-
 function vitalsOf(combatant) {
   const hpCurrent = Number.isFinite(Number(combatant?.hpCurrent)) ? Math.round(Number(combatant.hpCurrent)) : null;
   const player = combatant?.type === 'player' || Boolean(combatant?.sourceId);
@@ -197,9 +196,4 @@ export function fightWithTokenVitals(combatants, token) {
   });
 
   return changed ? next : null;
-}
-
-export function fightRefMatches(token, instanceId, fightId) {
-  const ref = parseSourceRef(token?.sourceRef);
-  return Boolean(ref && ref.instanceId === instanceId && ref.fightId === String(fightId));
 }

@@ -17,6 +17,7 @@ test('VTT SQL creates both tables, their indexes, RLS and updated_at triggers', 
   assert.match(sql, /create index if not exists map_scenes_campaign_idx on public\.map_scenes\(campaign_id\)/);
   assert.match(sql, /create index if not exists map_tokens_scene_idx on public\.map_tokens\(scene_id\)/);
   assert.match(sql, /create index if not exists map_tokens_scene_layer_idx on public\.map_tokens\(scene_id, layer\)/);
+  assert.match(sql, /create index if not exists map_tokens_scene_visibility_idx\s+on public\.map_tokens\(scene_id, hidden_from_players, layer\)/);
 });
 
 test('a token belongs to a scene, a scene to a campaign, and both cascade', () => {
@@ -28,6 +29,8 @@ test('a token belongs to a scene, a scene to a campaign, and both cascade', () =
 
 test('the layer column is constrained to the three known layers', () => {
   assert.match(sql, /check \(layer in \('map', 'tokens', 'gm'\)\)/);
+  assert.match(sql, /hidden_from_players\s+boolean not null default false/);
+  assert.match(sql, /alter table public\.map_tokens add column if not exists hidden_from_players boolean not null default false/);
 });
 
 test('vector map objects store a Lucide key and no image payload', () => {
@@ -127,6 +130,7 @@ test('tokens outside the play area never reach a player', () => {
   const start = sql.indexOf('create policy map_tokens_select on');
   const policy = sql.slice(start, sql.indexOf(';', start));
   assert.ok(policy.includes('map_token_in_play'), 'the select policy must apply the play area');
+  assert.ok(policy.includes('not hidden_from_players'), 'explicitly hidden pieces must be filtered too');
 
   // No area means the whole scene is in play; reading null as "outside" would
   // blank every scene that never set one.
@@ -174,6 +178,13 @@ test('drawings are rows, and follow the same visibility rules as tokens', () => 
   const deleteBody = sql.slice(del, sql.indexOf(';', del));
   assert.ok(deleteBody.includes('created_by = auth.uid()'));
   assert.ok(deleteBody.includes('is_campaign_gm'), 'the GM can still clear anything');
+  assert.ok(deleteBody.includes('map_scene_is_live'), 'players can only erase on the live scene');
+  assert.ok(deleteBody.includes('user_campaign_ids'), 'players must still belong to that campaign');
+
+  const update = sql.indexOf('create policy map_drawings_update on');
+  const updateBody = sql.slice(update, sql.indexOf(';', update));
+  assert.equal((updateBody.match(/map_scene_is_live/g) || []).length, 2, 'USING and WITH CHECK stay live-scene bounded');
+  assert.equal((updateBody.match(/user_campaign_ids/g) || []).length, 2, 'USING and WITH CHECK verify membership');
 
   assert.match(sql, /tablename = 'map_drawings'/);
 
@@ -195,8 +206,22 @@ test('marking a token is an RPC that writes one column', () => {
   assert.doesNotMatch(body, /set (x|y|layer|character_id|hp_current) =/, 'and nothing else');
   assert.ok(body.includes('is_campaign_gm'), 'the GM may mark anywhere in their campaign');
   assert.ok(body.includes("token.layer <> 'gm'"), 'a player never marks a piece they cannot see');
+  assert.ok(body.includes('not token.hidden_from_players'), 'the RPC must reject explicitly hidden pieces');
+  assert.ok(body.includes('map_token_in_play'), 'the RPC must reject staged pieces');
   assert.ok(body.includes('scene.is_live'));
   assert.ok(body.includes('raise exception'));
+});
+
+test('effect marking has the same visibility boundary as conditions', () => {
+  const start = sql.indexOf('create or replace function public.set_token_effects');
+  assert.ok(start > -1, 'set_token_effects is missing');
+  const body = sql.slice(start, sql.indexOf('$$;', start));
+  assert.ok(body.includes('security definer'));
+  assert.ok(body.includes('set effects ='));
+  assert.ok(body.includes("token.layer <> 'gm'"));
+  assert.ok(body.includes('not token.hidden_from_players'));
+  assert.ok(body.includes('map_token_in_play'));
+  assert.ok(body.includes('scene.is_live'));
 });
 
 // A player places their own character and plain markers, and may move or remove
@@ -211,6 +236,7 @@ test('players may place and reclaim their own pieces, and nothing else', () => {
   );
   assert.ok(insert.includes('created_by = auth.uid()'), 'a player can only stamp a piece as their own');
   assert.ok(insert.includes("layer <> 'gm'"), 'and never onto the GM layer');
+  assert.ok(insert.includes('not hidden_from_players'), 'and never as an explicitly hidden piece');
   assert.ok(insert.includes('owns_character'), 'nor standing for somebody else’s sheet');
   assert.ok(insert.includes('map_scene_is_live'), 'and only on the scene actually in play');
 
@@ -219,12 +245,17 @@ test('players may place and reclaim their own pieces, and nothing else', () => {
     sql.indexOf('create policy map_tokens_update on'),
   );
   assert.ok(del.includes('created_by = auth.uid()'));
+  assert.ok(del.includes('not hidden_from_players'));
+  assert.ok(del.includes('map_token_in_play'));
+  assert.ok(del.includes('map_scene_is_live'));
 
   const update = sql.slice(
     sql.indexOf('create policy map_tokens_update on'),
     sql.indexOf('-- 4a) marking conditions'),
   );
   assert.equal((update.match(/created_by = auth\.uid\(\)/g) || []).length, 2, 'USING and WITH CHECK both');
+  assert.equal((update.match(/not hidden_from_players/g) || []).length, 2);
+  assert.equal((update.match(/map_token_in_play/g) || []).length, 2);
 });
 
 test('the GM layer is filtered by RLS on select, not by the client', () => {

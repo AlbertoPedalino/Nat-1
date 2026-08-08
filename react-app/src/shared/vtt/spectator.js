@@ -1,5 +1,5 @@
 import { normalizeCameraSource } from './cameraSync.js';
-import { isTokenInPlay } from './scene.js';
+import { isTokenVisibleToPlayers } from './scene.js';
 
 export function spectatorRoute(search) {
   const params = new URLSearchParams(search || '');
@@ -20,7 +20,7 @@ export function spectatorUrl(currentHref, campaignId, cameraSource) {
 
 export function projectPlayerTokens(tokens, playArea) {
   return (tokens || [])
-    .filter((token) => token?.layer !== 'gm' && isTokenInPlay(token, playArea))
+    .filter((token) => isTokenVisibleToPlayers(token, playArea))
     .map(({ secretLabel: _secretLabel, ...token }) => token);
 }
 

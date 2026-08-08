@@ -2,7 +2,6 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   GENERATORS,
-  generatorById,
   isMapImage,
   orderForFloors,
   sceneNamesFor,
@@ -16,11 +15,11 @@ test('every generator names a real page and says what it makes', () => {
     assert.match(generator.url, /^https:\/\/watabou\.github\.io\//);
     assert.ok(generator.label && generator.blurb);
   }
-  assert.equal(generatorById('dungeon').label, 'Dungeon');
-  assert.equal(generatorById('nowhere'), null);
+  assert.equal(GENERATORS.find((entry) => entry.id === 'dungeon').label, 'Dungeon');
+  assert.equal(GENERATORS.find((entry) => entry.id === 'nowhere'), undefined);
   // The one that stacks: a building is exported a storey at a time.
-  assert.equal(generatorById('dwelling').floors, true);
-  assert.equal(generatorById('city').floors, false);
+  assert.equal(GENERATORS.find((entry) => entry.id === 'dwelling').floors, true);
+  assert.equal(GENERATORS.find((entry) => entry.id === 'city').floors, false);
 });
 
 // A GM exporting a building drops the whole download folder in as often as not,
@@ -35,8 +34,8 @@ test('only the pictures are taken from what is dropped', () => {
 
 // Watabou names its exports after the seed, which says nothing in a scene list.
 test('scenes are named for what made them, and floors are numbered', () => {
-  const dwelling = generatorById('dwelling');
-  const city = generatorById('city');
+  const dwelling = GENERATORS.find((entry) => entry.id === 'dwelling');
+  const city = GENERATORS.find((entry) => entry.id === 'city');
 
   assert.deepEqual(sceneNamesFor(city, [file('a.png')]), ['City']);
   assert.deepEqual(sceneNamesFor(dwelling, [file('a.png'), file('b.png')]), [

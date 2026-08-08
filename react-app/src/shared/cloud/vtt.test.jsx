@@ -16,7 +16,7 @@ vi.mock('./supabaseClient.js', () => ({
   requireClient: () => mocks.client,
 }));
 
-import { deleteScene, deleteToken } from './vtt.js';
+import { deleteScene, deleteToken, setTokenVisibility } from './vtt.js';
 
 describe('VTT Storage cleanup', () => {
   beforeEach(() => {
@@ -55,5 +55,36 @@ describe('VTT Storage cleanup', () => {
     expect(mocks.eq).toHaveBeenCalledWith('id', 'token-1');
     expect(mocks.remove).toHaveBeenCalledWith(['c1/s1/token.png']);
     expect(result.cleanupError).toBe(cleanupFailure);
+  });
+
+  test('visibility is stored separately without changing a normal editing layer', async () => {
+    const row = {
+      id: 'prop-1', scene_id: 's1', layer: 'map', hidden_from_players: true, x: 1, y: 2, w: 1, h: 1,
+    };
+    const single = vi.fn(async () => ({ data: row, error: null }));
+    const select = vi.fn(() => ({ single }));
+    const eq = vi.fn(() => ({ select }));
+    const update = vi.fn(() => ({ eq }));
+    mocks.client.from.mockReturnValueOnce({ update });
+
+    const token = await setTokenVisibility('prop-1', true, 'map');
+
+    expect(update).toHaveBeenCalledWith({ hidden_from_players: true });
+    expect(token).toEqual(expect.objectContaining({ id: 'prop-1', layer: 'map', hiddenFromPlayers: true }));
+  });
+
+  test('revealing a legacy GM-layer row gives it a public editing layer', async () => {
+    const row = {
+      id: 'legacy-1', scene_id: 's1', layer: 'tokens', hidden_from_players: false, x: 1, y: 2, w: 1, h: 1,
+    };
+    const single = vi.fn(async () => ({ data: row, error: null }));
+    const select = vi.fn(() => ({ single }));
+    const eq = vi.fn(() => ({ select }));
+    const update = vi.fn(() => ({ eq }));
+    mocks.client.from.mockReturnValueOnce({ update });
+
+    await setTokenVisibility('legacy-1', false, 'gm');
+
+    expect(update).toHaveBeenCalledWith({ hidden_from_players: false, layer: 'tokens' });
   });
 });

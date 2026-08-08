@@ -6,10 +6,11 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
-    "test": "node --test && vitest run",
+    "test": "node scripts/check-vtt-hygiene.mjs && node --test && vitest run",
     "preview": "vite preview --host 127.0.0.1",
     "test:logic": "node --test",
-    "test:ui": "vitest run"
+    "test:ui": "vitest run",
+    "check:vtt": "node scripts/check-vtt-hygiene.mjs"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",

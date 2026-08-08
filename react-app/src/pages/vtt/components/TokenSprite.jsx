@@ -5,6 +5,7 @@ import { describeEffect, effectId, effectPolarity } from '../../../shared/charac
 import { DEAD_CONDITION_KEY, conditionLabel } from '../../../shared/character/conditions.js';
 import { EntryBlocks } from '../../../shared/character/EntryBlocks.jsx';
 import { classIcon } from '../../../shared/character/classIcon.js';
+import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { fullscreenContainer } from '../logic/fullscreenContainer.js';
 import MapObjectGlyph from './MapObjectGlyph.jsx';
 import { isMapPiece } from '../../../shared/vtt/mapObjects.js';
@@ -136,7 +137,7 @@ export default function TokenSprite({
         // map tool owns the pointer so it truly falls through to the viewport.
         ...(!interactive ? { '&, & *': { pointerEvents: 'none !important' } } : null),
         cursor: movable ? 'grab' : 'default',
-        opacity: dimmed ? 0.3 : (token.layer === 'gm' || staged ? 0.6 : 1),
+        opacity: dimmed ? 0.3 : (token.hiddenFromPlayers || token.layer === 'gm' || staged ? 0.6 : 1),
         filter: staged ? 'grayscale(0.7)' : 'none',
         // Above its neighbours while hovered so the expanded conditions are not
         // covered by the next piece along.
@@ -157,9 +158,13 @@ export default function TokenSprite({
           // map, and none at all once it has its own artwork.
           borderStyle: 'solid',
           borderWidth: ringWidth(),
-          borderColor: isCharacter ? (token.color || 'rgba(0,0,0,0.6)') : 'rgba(0,0,0,0.6)',
+          borderColor: isCharacter
+            ? (token.color || vttAlpha(VTT_COLORS.black, 0.6))
+            : vttAlpha(VTT_COLORS.black, 0.6),
           bgcolor: isScenery || isMapObject || showArtwork ? 'transparent' : (token.color || 'secondary.main'),
-          outline: token.layer === 'gm' ? '2px dashed rgba(232,201,106,0.9)' : 'none',
+          outline: token.hiddenFromPlayers || token.layer === 'gm'
+            ? `2px dashed ${vttAlpha(VTT_COLORS.gold, 0.9)}`
+            : 'none',
           outlineOffset: '-4px',
           // A turned piece must not be cut off at the corners of its own box; a
           // creature still needs the clip that crops its art into the circle.
@@ -174,7 +179,7 @@ export default function TokenSprite({
         {isMapObject ? (
           <Box sx={{
             ...mapObjectSx,
-            color: token.color || '#e8c96a',
+            color: token.color || VTT_COLORS.gold,
             transform: `rotate(${Number(token.rotation) || 0}deg)`,
           }}>
             <MapObjectGlyph iconKey={token.iconKey} strokeWidth={token.iconStrokeWidth} />
@@ -381,10 +386,10 @@ function ConditionTokenPill({ conditionKey, entries }) {
             entries={entries}
             spacing={0.45}
             fontSize="0.68rem"
-            headingColor="#edc36f"
-            bodyColor="#f3ead6"
-            markerColor="#edc36f"
-            strongColor="#edc36f"
+            headingColor={VTT_COLORS.goldSoft}
+            bodyColor={VTT_COLORS.parchment}
+            markerColor={VTT_COLORS.goldSoft}
+            strongColor={VTT_COLORS.goldSoft}
             emptyText={null}
           />
         </Box>
@@ -410,22 +415,22 @@ function initials(label) {
 
 // Green while healthy, amber past half, red when bloodied enough to matter.
 function hpColor(ratio) {
-  if (ratio > 0.5) return '#4f8a5b';
-  if (ratio > 0.25) return '#c8973f';
-  return '#b3423a';
+  if (ratio > 0.5) return VTT_COLORS.hpHealthy;
+  if (ratio > 0.25) return VTT_COLORS.hpWounded;
+  return VTT_COLORS.hpCritical;
 }
 
 const initialsSx = {
   fontSize: '0.7rem',
   fontWeight: 800,
-  color: 'rgba(0,0,0,0.75)',
+  color: vttAlpha(VTT_COLORS.black, 0.75),
   pointerEvents: 'none',
 };
 
 const classIconSx = {
   display: 'flex',
-  color: '#f3ead6',
-  filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.9))',
+  color: VTT_COLORS.parchment,
+  filter: `drop-shadow(0 1px 2px ${vttAlpha(VTT_COLORS.black, 0.9)})`,
   pointerEvents: 'none',
 };
 
@@ -435,7 +440,7 @@ const mapObjectSx = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.95))',
+  filter: `drop-shadow(0 2px 3px ${vttAlpha(VTT_COLORS.black, 0.95)})`,
   pointerEvents: 'none',
 };
 
@@ -448,12 +453,12 @@ const resizeHandleSx = {
   height: 14,
   p: 0,
   borderRadius: '3px',
-  border: '2px solid rgba(15,14,13,0.95)',
-  bgcolor: '#e8c96a',
-  boxShadow: '0 1px 4px rgba(0,0,0,0.85)',
+  border: `2px solid ${vttAlpha(VTT_COLORS.ink, 0.95)}`,
+  bgcolor: VTT_COLORS.gold,
+  boxShadow: `0 1px 4px ${vttAlpha(VTT_COLORS.black, 0.85)}`,
   cursor: 'nwse-resize',
   touchAction: 'none',
-  '&:hover': { bgcolor: '#f4dda0' },
+  '&:hover': { bgcolor: VTT_COLORS.goldBright },
 };
 
 const rotateHandleSx = {
@@ -465,16 +470,16 @@ const rotateHandleSx = {
   height: 16,
   p: 0,
   borderRadius: '50%',
-  border: '2px solid rgba(15,14,13,0.95)',
-  bgcolor: '#e8c96a',
-  color: '#0f0e0d',
-  boxShadow: '0 1px 4px rgba(0,0,0,0.85)',
+  border: `2px solid ${vttAlpha(VTT_COLORS.ink, 0.95)}`,
+  bgcolor: VTT_COLORS.gold,
+  color: VTT_COLORS.ink,
+  boxShadow: `0 1px 4px ${vttAlpha(VTT_COLORS.black, 0.85)}`,
   cursor: 'grab',
   touchAction: 'none',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  '&:hover': { bgcolor: '#f4dda0' },
+  '&:hover': { bgcolor: VTT_COLORS.goldBright },
 };
 
 // Everything under the piece, in one column so the bars and the plate stay
@@ -496,8 +501,8 @@ const barBaseSx = {
   // Wide enough for "100/100" without stretching a small token's footprint.
   width: 56,
   borderRadius: 3,
-  bgcolor: 'rgba(0,0,0,0.75)',
-  border: '1px solid rgba(0,0,0,0.6)',
+  bgcolor: vttAlpha(VTT_COLORS.black, 0.75),
+  border: `1px solid ${vttAlpha(VTT_COLORS.black, 0.6)}`,
   overflow: 'hidden',
   display: 'flex',
   alignItems: 'center',
@@ -511,8 +516,8 @@ const deathTrackSx = {
   height: 18,
   px: 0.55,
   borderRadius: 3,
-  bgcolor: 'rgba(0,0,0,0.82)',
-  border: '1px solid rgba(0,0,0,0.65)',
+  bgcolor: vttAlpha(VTT_COLORS.black, 0.82),
+  border: `1px solid ${vttAlpha(VTT_COLORS.black, 0.65)}`,
   display: 'flex',
   alignItems: 'center',
   gap: 0.45,
@@ -527,26 +532,26 @@ const deathDotSx = {
   height: 10,
   p: 0,
   borderRadius: '50%',
-  bgcolor: 'rgba(226,218,198,0.12)',
-  border: '1px solid rgba(226,218,198,0.44)',
+  bgcolor: vttAlpha(VTT_COLORS.neutralMark, 0.12),
+  border: `1px solid ${vttAlpha(VTT_COLORS.neutralMark, 0.44)}`,
   boxSizing: 'border-box',
   cursor: 'pointer',
   '&:disabled': { cursor: 'default' },
 };
 
 const deathSuccessSx = {
-  bgcolor: '#4f9c62',
-  borderColor: '#7bc78a',
-  boxShadow: '0 0 4px rgba(79,156,98,0.8)',
+  bgcolor: VTT_COLORS.deathSuccess,
+  borderColor: VTT_COLORS.successBright,
+  boxShadow: `0 0 4px ${vttAlpha(VTT_COLORS.deathSuccess, 0.8)}`,
 };
 
 const deathFailureSx = {
-  bgcolor: '#b3423a',
-  borderColor: '#df6b62',
-  boxShadow: '0 0 4px rgba(179,66,58,0.8)',
+  bgcolor: VTT_COLORS.danger,
+  borderColor: VTT_COLORS.dangerBright,
+  boxShadow: `0 0 4px ${vttAlpha(VTT_COLORS.danger, 0.8)}`,
 };
 
-const deathDividerSx = { width: 1, height: 9, bgcolor: 'rgba(232,201,106,0.34)' };
+const deathDividerSx = { width: 1, height: 9, bgcolor: vttAlpha(VTT_COLORS.gold, 0.34) };
 
 const hpFillSx = {
   position: 'absolute',
@@ -564,10 +569,10 @@ const textBaseSx = {
   fontVariantNumeric: 'tabular-nums',
   // A dark outline keeps the figures readable over both the empty track and a
   // bright fill, without dimming the bar itself.
-  textShadow: '0 1px 2px rgba(0,0,0,0.9)',
+  textShadow: `0 1px 2px ${vttAlpha(VTT_COLORS.black, 0.9)}`,
 };
 
-const hpTextSx = { ...textBaseSx, color: '#f3ead6' };
+const hpTextSx = { ...textBaseSx, color: VTT_COLORS.parchment };
 
 const tempBarSx = { ...barBaseSx, height: 10 };
 
@@ -576,18 +581,18 @@ const tempFillSx = {
   left: 0,
   top: 0,
   height: '100%',
-  bgcolor: '#4f7fa8',
+  bgcolor: VTT_COLORS.tempHp,
   transition: 'width 120ms linear',
 };
 
-const tempTextSx = { ...textBaseSx, color: '#dff0fb', fontSize: '0.54rem' };
+const tempTextSx = { ...textBaseSx, color: VTT_COLORS.tempHpText, fontSize: '0.54rem' };
 
 const plateSx = {
   px: 0.6,
   py: '1px',
   borderRadius: 1,
-  bgcolor: 'rgba(15,14,13,0.85)',
-  color: '#e8dcc0',
+  bgcolor: vttAlpha(VTT_COLORS.ink, 0.85),
+  color: VTT_COLORS.parchmentMuted,
   fontSize: '0.62rem',
   lineHeight: 1.3,
   whiteSpace: 'nowrap',
@@ -603,8 +608,8 @@ const badgeSx = {
   height: 16,
   px: 0.4,
   borderRadius: '8px',
-  bgcolor: '#d69245',
-  color: '#0f0e0d',
+  bgcolor: VTT_COLORS.warning,
+  color: VTT_COLORS.ink,
   fontSize: '0.62rem',
   fontWeight: 800,
   lineHeight: '16px',
@@ -621,10 +626,10 @@ const deadBadgeSx = {
   width: 20,
   height: 20,
   borderRadius: '50%',
-  bgcolor: '#8f2f34',
-  color: '#f7e9dc',
-  border: '2px solid rgba(15,14,13,0.92)',
-  boxShadow: '0 2px 5px rgba(0,0,0,0.75)',
+  bgcolor: VTT_COLORS.dangerDeep,
+  color: VTT_COLORS.deathText,
+  border: `2px solid ${vttAlpha(VTT_COLORS.ink, 0.92)}`,
+  boxShadow: `0 2px 5px ${vttAlpha(VTT_COLORS.black, 0.75)}`,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -667,17 +672,17 @@ const pillSx = {
   fontWeight: 700,
   lineHeight: 1.35,
   whiteSpace: 'nowrap',
-  border: '1px solid rgba(0,0,0,0.55)',
+  border: `1px solid ${vttAlpha(VTT_COLORS.black, 0.55)}`,
 };
 
-const conditionPillSx = { bgcolor: '#d69245', color: '#0f0e0d' };
+const conditionPillSx = { bgcolor: VTT_COLORS.warning, color: VTT_COLORS.ink };
 const conditionTooltipSx = {
   maxWidth: 360,
   p: 0,
-  bgcolor: 'rgba(15,14,13,0.98)',
-  border: '1px solid rgba(214,146,69,0.55)',
+  bgcolor: vttAlpha(VTT_COLORS.ink, 0.98),
+  border: `1px solid ${vttAlpha(VTT_COLORS.warning, 0.55)}`,
   boxShadow: 8,
-  '& .MuiTooltip-arrow': { color: 'rgba(15,14,13,0.98)' },
+  '& .MuiTooltip-arrow': { color: vttAlpha(VTT_COLORS.ink, 0.98) },
 };
 const conditionTooltipBodySx = { p: 1 };
 const conditionTooltipTitleSx = {
@@ -686,8 +691,8 @@ const conditionTooltipTitleSx = {
   fontSize: '0.72rem',
   fontWeight: 800,
   letterSpacing: '0.06em',
-  color: '#d69245',
+  color: VTT_COLORS.warning,
 };
 // The same two colours the encounter builder tints its effect pills with.
-const advPillSx = { bgcolor: '#4f8a5b', color: '#f3ead6' };
-const disPillSx = { bgcolor: '#b3423a', color: '#f3ead6' };
+const advPillSx = { bgcolor: VTT_COLORS.success, color: VTT_COLORS.parchment };
+const disPillSx = { bgcolor: VTT_COLORS.danger, color: VTT_COLORS.parchment };

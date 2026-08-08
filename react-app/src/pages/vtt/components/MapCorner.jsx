@@ -1,5 +1,6 @@
 import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import { Images, X } from 'lucide-react';
+import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { MapPanel } from './ScenePanels.jsx';
 
 // How far under the top of the strip a panel starts: the icon button, plus the
@@ -74,10 +75,10 @@ const cornerSx = {
 const buttonSx = {
   // The strip around it is click-through; the icon and the panel are not.
   pointerEvents: 'auto',
-  color: '#e8c96a',
-  bgcolor: 'rgba(15,14,13,0.85)',
-  border: '1px solid rgba(232,201,106,0.35)',
-  '&:hover': { bgcolor: 'rgba(15,14,13,0.95)' },
+  color: VTT_COLORS.gold,
+  bgcolor: vttAlpha(VTT_COLORS.ink, 0.85),
+  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.35)}`,
+  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.ink, 0.95) },
 };
 
 // Scrollable rather than tall: in fullscreen a panel that runs past the bottom
@@ -97,8 +98,8 @@ const panelSx = {
   overflowY: 'auto',
   p: 1.25,
   borderRadius: 1,
-  bgcolor: 'rgba(15,14,13,0.97)',
-  border: '1px solid rgba(232,201,106,0.3)',
+  bgcolor: vttAlpha(VTT_COLORS.ink, 0.97),
+  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.3)}`,
   boxShadow: 6,
 };
 

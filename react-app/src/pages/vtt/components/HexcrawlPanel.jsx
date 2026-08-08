@@ -5,6 +5,7 @@ import { Dices, Footprints } from 'lucide-react';
 import ColorField from '../../../components/ColorField.jsx';
 import MountSelector from '../../gmboard/components/MountSelector.jsx';
 import InfoHint from '../../../components/InfoHint.jsx';
+import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { formatDateTime } from '../../gmboard/logic/time.js';
 import { hasWeatherDisadvantage, weatherEffectLabel, weatherTimerLabel } from '../../gmboard/logic/weather.js';
 import {
@@ -249,7 +250,7 @@ function LastHexCard({ last, onOpenResult }) {
     <Box sx={lastCardSx}>
       <Typography sx={sectionSx}>Last hex visited</Typography>
       <Stack direction="row" spacing={0.8} sx={{ alignItems: 'flex-start' }}>
-        <Box sx={{ pt: 0.2 }}><TerrainIcon size={16} color="#e8c96a" /></Box>
+        <Box sx={{ pt: 0.2 }}><TerrainIcon size={16} color={VTT_COLORS.gold} /></Box>
         <Box sx={{ minWidth: 0, flex: 1 }}>
           <Typography sx={lastHexSx}>
             Hex {last.hex.q}, {last.hex.r}
@@ -332,9 +333,9 @@ function OptionRow({ icon: Icon, label, sub }) {
   );
 }
 
-const hintSx = { color: '#b9ad91', fontSize: '0.72rem', lineHeight: 1.45 };
-const sectionSx = { color: '#9f947d', fontSize: '0.62rem', letterSpacing: '0.04em', mb: 0.5 };
-const clockSx = { color: '#d9cfb8', fontSize: '0.72rem' };
+const hintSx = { color: VTT_COLORS.panelTextMuted, fontSize: '0.72rem', lineHeight: 1.45 };
+const sectionSx = { color: VTT_COLORS.panelTextFaint, fontSize: '0.62rem', letterSpacing: '0.04em', mb: 0.5 };
+const clockSx = { color: VTT_COLORS.panelText, fontSize: '0.72rem' };
 const warnSx = { color: 'warning.main', fontSize: '0.66rem', lineHeight: 1.35 };
 const optionSubSx = { color: 'text.secondary', fontSize: '0.68rem' };
 
@@ -353,7 +354,7 @@ const swatchSx = {
   width: 34,
   height: 26,
   p: 0,
-  border: '1px solid rgba(232,201,106,0.35)',
+  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.35)}`,
   borderRadius: 1,
   bgcolor: 'transparent',
   cursor: 'pointer',
@@ -365,17 +366,17 @@ const lastCardSx = {
   border: '1px solid',
   borderColor: 'divider',
   borderRadius: 1.5,
-  bgcolor: 'rgba(0,0,0,0.25)',
+  bgcolor: vttAlpha(VTT_COLORS.black, 0.25),
 };
 
 const lastHexSx = {
   fontFamily: '"Cinzel", Georgia, serif',
   fontSize: '0.68rem',
   letterSpacing: '0.04em',
-  color: '#d9cfb8',
+  color: VTT_COLORS.panelText,
 };
 
-const lastHeadlineSx = { fontSize: '0.8rem', fontWeight: 700, color: '#e8c96a', lineHeight: 1.3 };
+const lastHeadlineSx = { fontSize: '0.8rem', fontWeight: 700, color: VTT_COLORS.gold, lineHeight: 1.3 };
 const lastLineSx = { fontSize: '0.7rem', color: 'text.primary', lineHeight: 1.4 };
 const lastMetaSx = { fontSize: '0.64rem', color: 'text.secondary', lineHeight: 1.4 };
 

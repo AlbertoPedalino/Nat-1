@@ -1,6 +1,5 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { MAX_THROWN_DICE } from './dicePhysics.js';
 import { throwFormula } from './throwRoll.js';
 
 test('a formula becomes the dice it asks for', () => {
@@ -53,13 +52,11 @@ test('a die uses its whole range', () => {
   assert.deepEqual([...seen].sort((a, b) => a - b), [1, 2, 3, 4, 5, 6]);
 });
 
-// Dice past the cap are never thrown, so they must not be counted either — and
-// the line under the roll has to admit it rather than quietly rolling fewer.
-test('a roll bigger than the tray says so', () => {
+test('a large pool throws and counts every die', () => {
   const result = throwFormula('40d6', 'roll-7');
-  assert.equal(result.rolls.length, MAX_THROWN_DICE);
+  assert.equal(result.rolls.length, 40);
   assert.equal(result.total, result.rolls.reduce((acc, die) => acc + die.v, 0));
-  assert.match(result.detail, /first 12 dice/);
+  assert.equal(result.detail, '40d6');
 });
 
 // A coin that came up 1 came up heads. The number still has to add up, but the
@@ -78,4 +75,6 @@ test('two coins each say which way up they are', () => {
 test('a formula with no dice is not a throw', () => {
   assert.equal(throwFormula('+3', 'roll-8'), null);
   assert.equal(throwFormula('', 'roll-8'), null);
+  assert.equal(throwFormula('2d6garbage999', 'roll-8'), null);
+  assert.equal(throwFormula('101d6', 'roll-8').rolls.length, 101);
 });

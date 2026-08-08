@@ -5,6 +5,7 @@ import {
   FALLBACK_WEATHER_ICON, TERRAIN_ICONS, WEATHER_ICONS,
 } from '../../gmboard/components/hexIcons.js';
 import { terrainOption } from '../../../shared/hexcrawl/hexEntry.js';
+import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 
 const FONT = '"Cinzel", Georgia, serif';
 
@@ -93,10 +94,10 @@ const bubbleSx = {
   maxWidth: 340,
   textAlign: 'left',
   borderRadius: 2,
-  bgcolor: 'rgba(26,23,19,0.97)',
+  bgcolor: vttAlpha(VTT_COLORS.surfaceRaised, 0.97),
   border: '2px solid',
   borderColor: 'divider',
-  boxShadow: '0 8px 26px rgba(0,0,0,0.6)',
+  boxShadow: `0 8px 26px ${vttAlpha(VTT_COLORS.black, 0.6)}`,
   // Grows out of the tail, which sits on the hex, so the answer looks spoken by
   // the ground the party is standing on.
   transformOrigin: 'bottom center',
@@ -111,7 +112,7 @@ const clickableSx = {
   pointerEvents: 'auto',
   cursor: 'pointer',
   font: 'inherit',
-  '&:hover': { borderColor: 'rgba(232,201,106,0.75)' },
+  '&:hover': { borderColor: vttAlpha(VTT_COLORS.gold, 0.75) },
 };
 
 const coordSx = {
@@ -126,7 +127,7 @@ const headlineSx = {
   fontFamily: FONT,
   fontSize: '0.95rem',
   fontWeight: 700,
-  color: '#e8c96a',
+  color: VTT_COLORS.gold,
   lineHeight: 1.25,
 };
 
@@ -157,5 +158,5 @@ const tailSx = {
   height: 0,
   borderLeft: '7px solid transparent',
   borderRight: '7px solid transparent',
-  borderTop: '8px solid rgba(26,23,19,0.97)',
+  borderTop: `8px solid ${vttAlpha(VTT_COLORS.surfaceRaised, 0.97)}`,
 };

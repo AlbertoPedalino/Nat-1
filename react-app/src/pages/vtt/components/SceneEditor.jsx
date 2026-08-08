@@ -10,10 +10,8 @@ import {
 } from 'lucide-react';
 import { useToast } from '../../../shared/ToastProvider.jsx';
 import { useAuth } from '../../../shared/cloud/AuthProvider.jsx';
-import { mergeVitals, readCampaignVitals } from '../../../shared/campaign/characterVitals.js';
-import { toRoster, toRosterEntry, withSheetVitals } from '../../../shared/campaign/roster.js';
+import { withSheetVitals } from '../../../shared/campaign/roster.js';
 import { usePortraits } from '../../../shared/character/usePortraits.js';
-import { listCampaignCharacters } from '../../../shared/cloud/campaigns.js';
 import { patchCharacterData } from '../../../shared/cloud/cloudCharacters.js';
 import { DEAD_CONDITION_KEY, setConditionActive } from '../../../shared/character/conditions.js';
 import {
@@ -23,14 +21,11 @@ import {
   deleteDrawing,
   deleteMapImage,
   deleteToken,
-  listDrawings,
-  listTokenSecrets,
-  listTokens,
   moveDrawing,
   setLiveScene,
   setTokenConditions,
   setTokenEffects,
-  setTokenLayer,
+  setTokenVisibility,
   setTokenSecret,
   signMapImage,
   updateScene,
@@ -51,7 +46,6 @@ import {
   drawingAtPoint,
   lastDrawing,
   movedPoints,
-  toDrawing,
 } from '../../../shared/vtt/drawing.js';
 import {
   combatantToToken,
@@ -68,20 +62,11 @@ import {
   setCells,
 } from '../../../shared/vtt/fog.js';
 import {
-  canMarkToken, normalizePlayArea, sceneTitleFor, toScene,
+  canMarkToken, isTokenVisibleToPlayers, normalizePlayArea, sceneTitleFor, toScene,
 } from '../../../shared/vtt/scene.js';
-import {
-  addRoll,
-  currentBubbles,
-  currentThrows,
-  queueRollToast,
-  rollAuthor,
-} from '../../../shared/vtt/rollFeed.js';
-import { formatRollTitle } from '../../../shared/character/dice.js';
-import { throwFormula } from '../../../shared/vtt/throwRoll.js';
-import { useRollChannel } from '../../../shared/cloud/useRollChannel.js';
 import { sanitizeNoteText } from '../../../shared/vtt/drawing.js';
 import { FEET_PER_CELL } from '../../../shared/vtt/measure.js';
+import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { useSceneLive } from '../../../shared/vtt/useSceneLive.js';
 import { useSceneRole } from '../../../shared/vtt/useSceneRole.js';
 import { createCameraSourceId } from '../../../shared/vtt/cameraSync.js';
@@ -98,6 +83,8 @@ import {
 import { useEncounterBridge } from '../hooks/useEncounterBridge.js';
 import { useSceneHexcrawl } from '../hooks/useSceneHexcrawl.js';
 import { useSceneDungeon } from '../hooks/useSceneDungeon.js';
+import { useSceneContent } from '../hooks/useSceneContent.js';
+import { useVttRolls } from '../hooks/useVttRolls.js';
 import DungeonPanel from './DungeonPanel.jsx';
 import { useMonsterDb } from '../../encounterbuilder/hooks/useMonsterDb.js';
 import HexcrawlCorner from './HexcrawlCorner.jsx';
@@ -115,7 +102,23 @@ import SceneToolRail from './SceneToolRail.jsx';
 import MapCorner from './MapCorner.jsx';
 import BattleMapViewSwitch from './BattleMapViewSwitch.jsx';
 import BattleMapSheetResizeHandle from './BattleMapSheetResizeHandle.jsx';
-import { battleMapSurfaceSx } from './battleMapSurface.js';
+import {
+  contentLayoutOpenSx,
+  contentLayoutSx,
+  editorRootSx,
+  fade,
+  sceneIdentitySx,
+  scenePresenterActionsSx,
+  sceneRenameButtonSx,
+  sceneTitleSx,
+  sceneTopbarSx,
+  sceneViewSwitchSx,
+  sheetLoadingSx,
+  sheetViewSx,
+  spectatorRootSx,
+  viewportCellStackedSx,
+  viewportCellSx,
+} from './sceneEditorStyles.js';
 import {
   DrawPanel,
   FogPanel,
@@ -182,15 +185,26 @@ export default function SceneEditor({
   const { notify } = useToast();
   const { user } = useAuth();
   const role = useSceneRole(scene.campaignId);
+  const {
+    drawings,
+    handleCharacterEvent,
+    handleDrawingEvent,
+    loading,
+    refreshVisibleTokens,
+    roster,
+    setDrawings,
+    setRoster,
+    setTokens,
+    tokenImageUrls,
+    tokens,
+  } = useSceneContent({ scene, isGm: role.isGm, spectator, notify });
   // Dormant on a square map: it asks the database for nothing until the scene
   // is actually a hexcrawl. A player and the projector read it — the colours and
   // the party marker are the map everyone is looking at — but only the GM's own
   // window may run it, which is why the projector tab is not one even when it is
   // the GM who opened it.
   const hexcrawl = useSceneHexcrawl({ scene, isGm: role.isGm && !spectator });
-  const [tokens, setTokens] = useState([]);
   const [ghosts, setGhosts] = useState({});
-  const [roster, setRoster] = useState([]);
   // After the roster, which sizes the encounters it buys. The bestiary is
   // already loaded for the monster picker; the dungeon uses it to turn a rolled
   // budget in experience into creatures.
@@ -207,7 +221,6 @@ export default function SceneEditor({
   // What is actually on screen: the URL and the mode it belongs to, updated
   // together once the picture has loaded.
   const [displayed, setDisplayed] = useState({ url: null, shownImage: 'map' });
-  const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const gridTimerRef = useRef(null);
   const playAreaTimerRef = useRef(null);
@@ -226,10 +239,8 @@ export default function SceneEditor({
   const [monsterOpen, setMonsterOpen] = useState(false);
   const [placementDrag, setPlacementDrag] = useState(null);
   const [imageSize, setImageSize] = useState(null);
-  const [tokenImageUrls, setTokenImageUrls] = useState({});
-  const [drawings, setDrawings] = useState([]);
   const [selectedDrawingId, setSelectedDrawingId] = useState(null);
-  const [drawColor, setDrawColor] = useState('#e8c96a');
+  const [drawColor, setDrawColor] = useState(VTT_COLORS.gold);
   const [drawWidth, setDrawWidth] = useState(3);
   const [contentView, setContentView] = useState('map');
   const [mapFullscreen, setMapFullscreen] = useState(false);
@@ -256,40 +267,21 @@ export default function SceneEditor({
   sceneShownImageRef.current = scene.shownImage;
   const sheetSplitStorageKey = `gb:vtt:sheet-split:${user?.id || 'local'}`;
   const [lasers, setLasers] = useState({});
-  // Rolls said at the table. In memory only: a roll is an event, not a record.
-  const [rollFeed, setRollFeed] = useState([]);
-  // A custom roll enters the feed immediately to start its physical throw, but
-  // the result stays pending until DiceTray paints the final settled frame.
-  const pendingRollToastsRef = useRef(new Map());
-  // Your own roll, in the same panel the character sheet shows it in. Only your
-  // own: everyone else's arrives as a bubble over their piece and a line in the
-  // log, which is what the table needs to see.
-  const [rollToast, setRollToast] = useState(null);
-  // Stable, because the toast dismisses itself on a timer keyed to this
-  // callback: a new function every render restarted the timer every render, and
-  // the toast sat there for good.
-  const dismissRollToast = useCallback(() => setRollToast(null), []);
-  const showSettledRollToast = useCallback((rollId) => {
-    const entry = pendingRollToastsRef.current.get(rollId);
-    if (!entry) return;
-    pendingRollToastsRef.current.delete(rollId);
-    setRollToast(entry);
-  }, []);
-  // Yours to clear, and only yours: the log was never anywhere but this page's
-  // memory, so there is nothing to tell anybody else about.
-  const clearRollFeed = useCallback(() => setRollFeed([]), []);
-  const handleSheetRoll = useCallback((roll) => {
-    const immediateToast = queueRollToast(roll, pendingRollToastsRef.current);
-    if (immediateToast) setRollToast(immediateToast);
-    // The sheet lives on this screen: retain its log/toast/physical throw, but
-    // do not repeat the same result as a speech bubble over the acting token.
-    setRollFeed((current) => addRoll(current, roll, { local: true }));
-  }, []);
-  const [rollTick, setRollTick] = useState(0);
   const [measureShape, setMeasureShape] = useState('line');
   const [feetPerCell, setFeetPerCell] = useState(FEET_PER_CELL);
   const [remoteMeasure, setRemoteMeasure] = useState(null);
   const conditionEntries = useConditionEntries();
+  const {
+    clearFeed: clearRollFeed,
+    diceThrows,
+    dismissToast: dismissRollToast,
+    feed: rollFeed,
+    handleCustomRoll,
+    handleSheetRoll,
+    rollBubbles,
+    showSettledToast: showSettledRollToast,
+    toast: rollToast,
+  } = useVttRolls({ campaignId: scene.campaignId, role, roster, tokens });
 
   useEffect(() => {
     if (!scene.isLive) setProjectorControlsOpen(false);
@@ -351,38 +343,6 @@ export default function SceneEditor({
     [imageSize, scene.grid],
   );
 
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    Promise.all([
-      listTokens(scene.id),
-      // Everyone at the table reads the campaign's sheets — RLS allows it, and
-      // it is where the party's hit points come from. Only the GM has secret
-      // labels to read; for a player that call comes back empty anyway.
-      scene.campaignId ? listCampaignCharacters(scene.campaignId) : Promise.resolve([]),
-      role.isGm && !spectator ? listTokenSecrets(scene.id) : Promise.resolve({}),
-      listDrawings(scene.id),
-    ])
-      .then(([sceneTokens, characterRows, secrets, sceneDrawings]) => {
-        if (cancelled) return;
-        setTokens(sceneTokens.map((token) => (
-          secrets[token.id] ? { ...token, secretLabel: secrets[token.id] } : token
-        )));
-        setRoster(toRoster(characterRows));
-        setDrawings(sceneDrawings);
-        // Deriving max HP needs the class adapters, so it lands a moment after
-        // the names and colours rather than holding the whole scene back.
-        readCampaignVitals(characterRows)
-          .then((vitals) => { if (!cancelled) setRoster((current) => mergeVitals(current, vitals)); })
-          .catch(() => {});
-      })
-      .catch((cause) => {
-        if (!cancelled) notify('error', cause?.message || 'Could not load this scene.');
-      })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
-  }, [notify, role.isGm, scene.campaignId, scene.id, spectator]);
-
   // Whichever of the two pictures the table is looking at. The other stays
   // uploaded and one click away.
   const shownImageForViewport = spectator ? projectorShownImage : scene.shownImage;
@@ -413,21 +373,6 @@ export default function SceneEditor({
     return () => { cancelled = true; };
   }, [shownImageForViewport, shownPath]);
 
-  // Pieces carrying an uploaded picture need a signed URL each; bestiary art is
-  // an ordinary external URL and needs none.
-  useEffect(() => {
-    let cancelled = false;
-    const paths = [...new Set(tokens.map((token) => token.imagePath).filter(Boolean))];
-    if (!paths.length) {
-      setTokenImageUrls((current) => (Object.keys(current).length ? {} : current));
-      return () => { cancelled = true; };
-    }
-    Promise.all(paths.map(async (path) => [path, await signMapImage(path).catch(() => null)]))
-      .then((entries) => { if (!cancelled) setTokenImageUrls(Object.fromEntries(entries)); })
-      .catch(() => {});
-    return () => { cancelled = true; };
-  }, [tokens]);
-
   useEffect(() => () => {
     clearTimeout(gridTimerRef.current);
     clearTimeout(playAreaTimerRef.current);
@@ -454,6 +399,15 @@ export default function SceneEditor({
   // stroke: they worked locally and were never seen by anyone else.
   const handleRemoteDrag = useCallback((payload) => {
     if (!payload) return;
+
+    // Visibility transitions are deliberately broadcast without a token id.
+    // Recipients re-read through RLS after the committed move, so a token that
+    // entered or left the play area appears or disappears without disclosing a
+    // staged piece through the ephemeral channel.
+    if (payload.tokensChanged) {
+      refreshVisibleTokens();
+      return;
+    }
 
     // Fog strokes carry a bitset, not a position.
     if (payload.fog) {
@@ -484,50 +438,7 @@ export default function SceneEditor({
       return;
     }
     setGhosts((current) => putGhost(current, payload));
-  }, [onSceneChange]);
-
-  // A stroke is immutable once written, so there is no reconciliation to do:
-  // it either arrives or is deleted.
-  const handleDrawingEvent = useCallback((payload) => {
-    const type = String(payload?.eventType || '').toUpperCase();
-    if (type === 'DELETE') {
-      // `old_record` is what supabase-js calls it on some payload shapes; both
-      // are read so a rubbed-out stroke disappears everywhere, not only for the
-      // person holding the eraser.
-      const id = payload?.old?.id || payload?.old_record?.id;
-      if (id) setDrawings((current) => current.filter((item) => item.id !== id));
-      return;
-    }
-    const drawing = toDrawing(payload?.new);
-    if (!drawing) return;
-    // Insert or update, the same either way: a mark that was moved keeps its id,
-    // so it has to replace the copy already held rather than be ignored as one
-    // that is already there.
-    setDrawings((current) => (
-      current.some((item) => item.id === drawing.id)
-        ? current.map((item) => (item.id === drawing.id ? drawing : item))
-        : [...current, drawing]
-    ));
-  }, []);
-
-  // Only the roster entry is updated, never the token row: the sheet stays the
-  // one place a character's hit points live, and the map reads them.
-  const handleCharacterEvent = useCallback((payload) => {
-    const row = payload?.new;
-    const entry = toRosterEntry(row);
-    if (!entry) return;
-    setRoster((current) => current.map((item) => (
-      // Conditions come straight off the row, but hit points have to be derived
-      // again — so the old ones are kept until they are. Blanking them in
-      // between made the bar flicker off on every edit to the sheet.
-      item.characterId === entry.characterId
-        ? { ...entry, hpCurrent: item.hpCurrent, hpMax: item.hpMax, tempHp: item.tempHp }
-        : item
-    )));
-    readCampaignVitals([row])
-      .then((vitals) => setRoster((current) => mergeVitals(current, vitals)))
-      .catch(() => {});
-  }, []);
+  }, [onSceneChange, refreshVisibleTokens]);
 
   const getCameraPose = useCallback(() => cameraPoseRef.current, []);
   const getPresenterState = useCallback(() => ({
@@ -623,15 +534,21 @@ export default function SceneEditor({
 
   const handleDragToken = useCallback((token, position) => {
     draggingRef.current = token.id;
-    sendDrag({ id: token.id, x: position.x, y: position.y });
-  }, [sendDrag]);
+    const moving = { ...token, ...position };
+    if (isTokenVisibleToPlayers(moving, scene.playArea)) {
+      sendDrag({ id: token.id, x: position.x, y: position.y });
+    }
+  }, [scene.playArea, sendDrag]);
 
   const handleMoveToken = useCallback(async (token, position) => {
+    const wasVisible = isTokenVisibleToPlayers(token, scene.playArea);
+    const willBeVisible = isTokenVisibleToPlayers({ ...token, ...position }, scene.playArea);
     setTokens((current) => current.map((item) => (
       item.id === token.id ? { ...item, ...position } : item
     )));
     try {
       await updateToken(token.id, position);
+      if (wasVisible !== willBeVisible) sendDrag({ tokensChanged: true });
     } catch (cause) {
       setTokens((current) => current.map((item) => (item.id === token.id ? token : item)));
       notify('error', cause?.message || 'Could not move that token.');
@@ -640,7 +557,7 @@ export default function SceneEditor({
       // still be our own move coming back.
       draggingRef.current = null;
     }
-  }, [notify]);
+  }, [notify, scene.playArea, sendDrag]);
 
   const handleObjectStyle = useCallback(async (token, patch) => {
     const localPatch = {};
@@ -662,23 +579,27 @@ export default function SceneEditor({
     }
   }, [notify]);
 
-  // Showing a piece to the table, or taking it back. The GM layer is the only
-  // thing that hides a piece — RLS never sends those rows — so revealing a trap
-  // or a hoard is a move to the token layer and nothing else. The GM keeps the
-  // layer they are editing: the piece changes, the panel does not.
+  // Showing a piece to the table, or taking it back. Visibility is independent
+  // from the editing layer, so revealing scenery does not silently turn it into
+  // a token. Legacy GM-layer rows fall back to the token layer only because they
+  // predate the separate visibility column and have no public layer to restore.
   const handleTokenVisibility = useCallback(async (token, gmOnly) => {
-    const layer = gmOnly ? 'gm' : 'tokens';
-    if (!token || token.layer === layer) return;
+    if (!token || Boolean(token.hiddenFromPlayers) === Boolean(gmOnly)) return;
+    const nextLayer = !gmOnly && token.layer === 'gm' ? 'tokens' : token.layer;
     setTokens((current) => current.map((item) => (
-      item.id === token.id ? { ...item, layer } : item
+      item.id === token.id
+        ? { ...item, layer: nextLayer, hiddenFromPlayers: Boolean(gmOnly) }
+        : item
     )));
     try {
-      await setTokenLayer(token.id, layer);
+      const updated = await setTokenVisibility(token.id, gmOnly, token.layer);
+      setTokens((current) => current.map((item) => (item.id === token.id ? updated : item)));
+      sendDrag({ tokensChanged: true });
     } catch (cause) {
       setTokens((current) => current.map((item) => (item.id === token.id ? token : item)));
       notify('error', cause?.message || 'Could not change who can see that piece.');
     }
-  }, [notify]);
+  }, [notify, sendDrag]);
 
   const handleGridChange = useCallback((grid) => {
     gridEditRef.current = true;
@@ -891,10 +812,11 @@ export default function SceneEditor({
     clearTimeout(playAreaTimerRef.current);
     playAreaTimerRef.current = setTimeout(() => {
       updateScene(scene.id, { playArea: area })
+        .then(() => sendDrag({ tokensChanged: true }))
         .catch((cause) => notify('error', cause?.message || 'Could not save the play area.'))
         .finally(() => { gridEditRef.current = false; });
     }, GRID_SAVE_DELAY);
-  }, [notify, onSceneChange, scene]);
+  }, [notify, onSceneChange, scene, sendDrag]);
 
   // The map itself is the sensible play area: the GM only ever needs to change
   // it to make room for staging outside the picture.
@@ -1081,11 +1003,13 @@ export default function SceneEditor({
     // against. The GM still reads it on the piece: a secret label replaces the
     // public one for them.
     const secret = object.secretLabel ? String(object.label || '') : '';
+    const targetLayer = object.layer || (role.isGm ? activeLayer : 'tokens');
     const created = await addToken({
       ...(position || nextFreeCell()),
-      layer: object.layer || (role.isGm ? activeLayer : 'tokens'),
+      layer: targetLayer,
+      hiddenFromPlayers: targetLayer === 'gm',
       label: secret ? '' : object.label,
-      color: object.color || '#e8c96a',
+      color: object.color || VTT_COLORS.gold,
       iconKey: object.key,
       iconStrokeWidth: object.strokeWidth,
       rotation: 0,
@@ -1369,72 +1293,6 @@ export default function SceneEditor({
   // over the roster would leave it naming people from an empty list.
   const nameForRef = useRef(nameForActor);
   nameForRef.current = nameForActor;
-
-  const { publish: publishRoll } = useRollChannel({
-    campaignId: scene.campaignId,
-    onRoll: (roll) => setRollFeed((current) => addRoll(current, roll)),
-  });
-
-  // A roll made from the map itself. The channel does not echo your own
-  // broadcast back to you, so the feed is fed here as well as published.
-  const handleCustomRoll = useCallback((formula) => {
-    // One id for everyone, and the seed the throw is simulated from: the roll is
-    // the same event, with the same dice landing the same way, on every screen.
-    const id = `custom:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
-    // Thrown, not generated: the dice come down on the map and the faces they
-    // land on are the result.
-    const thrown = throwFormula(formula, id);
-    if (!thrown) return;
-
-    const entry = {
-      id,
-      label: formatRollTitle('Custom Roll', formula),
-      detail: thrown.detail,
-      total: thrown.total,
-      rolls: thrown.rolls,
-      // Only when there is one: a bare "+0" under a damage roll is noise.
-      ...(thrown.modifier ? { meta: { bonus: thrown.modifier } } : {}),
-      thrown: true,
-      timestamp: Date.now(),
-      ...rollAuthor({
-        isGm: role.isGm,
-        ownedCharacterIds: role.ownedCharacterIds,
-        tokens,
-        roster,
-      }),
-    };
-    queueRollToast(entry, pendingRollToastsRef.current);
-    setRollFeed((current) => addRoll(current, entry, { local: true }));
-    publishRoll(entry);
-  }, [publishRoll, role.isGm, role.ownedCharacterIds, roster, tokens]);
-
-  // A bubble expires on its own, and nothing else on the page changes when it
-  // does — so the clock has to nudge the render.
-  useEffect(() => {
-    if (!rollFeed.length) return undefined;
-    const timer = setInterval(() => setRollTick((tick) => tick + 1), 1000);
-    return () => clearInterval(timer);
-  }, [rollFeed.length]);
-
-  const tokenByCharacter = useMemo(() => new Map(
-    tokens.filter((token) => token.characterId).map((token) => [token.characterId, token]),
-  ), [tokens]);
-
-  const rollBubbles = useMemo(() => (
-    currentBubbles(rollFeed)
-      .map((roll) => ({ roll, token: tokenByCharacter.get(roll.characterId) }))
-      .filter((entry) => entry.token)
-    // `rollTick` is what retires a bubble whose time is up.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  ), [rollFeed, rollTick, tokenByCharacter]);
-
-  // The dice themselves, which land next to the roller's piece — or in the
-  // middle of the board when the roller has none, as the GM does.
-  const diceThrows = useMemo(() => (
-    currentThrows(rollFeed)
-      .map((roll) => ({ roll, token: tokenByCharacter.get(roll.characterId) || null }))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  ), [rollFeed, rollTick, tokenByCharacter]);
 
   const laserDots = useMemo(() => (
     Object.entries(lasers).map(([id, dot]) => ({ ...dot, id }))
@@ -2164,163 +2022,3 @@ const EmbeddedBattleMapSheet = memo(function EmbeddedBattleMapSheet({ characterI
     </Suspense>
   );
 });
-
-const sceneTopbarSx = {
-  ...battleMapSurfaceSx,
-  display: 'flex',
-  alignItems: 'center',
-  flexWrap: 'wrap',
-  gap: 1,
-  px: { xs: 1, md: 1.25 },
-  py: 0.85,
-  borderRadius: 1,
-  boxShadow: '0 8px 24px rgba(0,0,0,0.22)',
-};
-
-// Shrinks rather than grows: the presenter controls belong next to the name the
-// GM is reading, not pushed against the far edge of the bar.
-const sceneIdentitySx = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: 0.25,
-  flex: '0 1 auto',
-  minWidth: 0,
-};
-
-const sceneTitleSx = {
-  color: 'primary.main',
-  fontSize: { xs: '0.98rem', md: '1.08rem' },
-  lineHeight: 1.2,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-};
-
-const scenePresenterActionsSx = {
-  alignItems: 'center',
-  flexWrap: 'wrap',
-  pl: { xs: 0, md: 1.25 },
-  borderLeft: { xs: 0, md: '1px solid rgba(232,201,106,0.16)' },
-  '& .MuiButton-root': {
-    minHeight: 30,
-    fontSize: '0.67rem',
-    whiteSpace: 'nowrap',
-  },
-};
-
-// A footnote on the title rather than a control of its own: small, riding the
-// top of the text, and only fully lit once it is pointed at.
-const sceneRenameButtonSx = {
-  width: 18,
-  height: 18,
-  p: 0,
-  alignSelf: 'flex-start',
-  mt: -0.25,
-  color: 'rgba(255,255,255,0.42)',
-  '&:hover': {
-    color: '#e8c96a',
-    bgcolor: 'rgba(232,201,106,0.08)',
-  },
-};
-
-const sceneViewSwitchSx = {
-  ml: { xs: 0, md: 'auto' },
-  pl: { xs: 0, md: 0.5 },
-};
-
-const spectatorRootSx = {
-  position: 'fixed',
-  inset: 0,
-  width: '100vw',
-  height: '100vh',
-  overflow: 'hidden',
-  bgcolor: '#000',
-};
-
-const editorRootSx = {
-  flex: 1,
-  // Without this a flex child refuses to shrink below its content, and the map
-  // would push the page taller instead of fitting inside it.
-  minHeight: 0,
-};
-
-const contentLayoutSx = {
-  display: 'grid',
-  gridTemplateColumns: 'minmax(0, 1fr)',
-  gap: 1,
-  flex: 1,
-  minHeight: 0,
-  // Stretched, not top-aligned: the cell has to be as tall as the row for the
-  // map inside it to have a height to fill.
-  alignItems: 'stretch',
-};
-
-const contentLayoutOpenSx = {
-  gridTemplateColumns: {
-    xs: 'minmax(0, 1fr)',
-    lg: 'var(--sheet-grid-columns)',
-  },
-  columnGap: { xs: 1, lg: 0 },
-  rowGap: 1,
-  // One column means map above sheet, which cannot both fit a phone: that stack
-  // scrolls. Side by side there is nothing to scroll — each half handles its
-  // own.
-  overflowY: { xs: 'auto', lg: 'visible' },
-  // Two rows sized by what they hold rather than stretched to share the height
-  // of a screen they do not fit in. Stretched, both halves were given the full
-  // row and the sheet was drawn over the board.
-  gridTemplateRows: { xs: 'auto auto', lg: 'auto' },
-  alignContent: { xs: 'start', lg: 'stretch' },
-};
-
-const viewportCellSx = {
-  minWidth: 0,
-  minHeight: 0,
-  display: 'flex',
-};
-
-// Stacked, the map takes a slice of the screen instead of all of it: with the
-// sheet below, a board that keeps the whole window leaves the sheet somewhere
-// past the bottom edge with nothing but the map — which swallows the touch to
-// pan — between the reader and it.
-const viewportCellStackedSx = {
-  height: { xs: 'clamp(320px, 52dvh, 520px)', lg: 'auto' },
-};
-
-const sheetViewSx = {
-  minWidth: 0,
-  // Beside the map it is exactly as tall as the map and scrolls inside itself.
-  // Stacked under it on a narrow screen it is as tall as the sheet and does not
-  // scroll at all: the column that holds both does. Two scrollers inside each
-  // other on a phone means a finger on the sheet moves the sheet, so the top of
-  // it never comes into view.
-  minHeight: 0,
-  height: { lg: '100%' },
-  overflow: { xs: 'visible', lg: 'auto' },
-  border: '1px solid rgba(232, 201, 106, 0.3)',
-  borderRadius: 1.5,
-  bgcolor: 'rgba(5, 5, 7, 0.88)',
-  backgroundImage: 'linear-gradient(145deg, rgba(255,255,255,0.025), transparent 42%)',
-  boxShadow: '0 18px 52px rgba(0, 0, 0, 0.46)',
-  // Paint containment belongs to the half that scrolls. On a phone the box grows
-  // with the sheet and clipping it can only cut something off.
-  contain: { xs: 'none', lg: 'layout paint' },
-  isolation: 'isolate',
-  '& > *': {
-    width: '100%',
-    maxWidth: 760,
-    mx: 'auto',
-  },
-};
-
-const sheetLoadingSx = {
-  minHeight: 420,
-  display: 'grid',
-  placeItems: 'center',
-};
-
-// Half-transparent version of a stroke colour, for the layers not being edited.
-function fade(color) {
-  const hex = typeof color === 'string' && /^#[0-9a-f]{6}$/i.test(color) ? color : '#e8c96a';
-  return `${hex}55`;
-}

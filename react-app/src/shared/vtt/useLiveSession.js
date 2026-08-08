@@ -16,7 +16,6 @@ import { listLiveScenes } from '../cloud/vtt.js';
 export function useLiveSession({ campaignId, enabled = true } = {}) {
   const { cloudEnabled, status } = useAuth();
   const [session, setSession] = useState({ loading: true, scene: null });
-  const sceneIdRef = useRef(null);
   const refreshRequestRef = useRef(0);
 
   const refresh = useCallback(async () => {
@@ -25,7 +24,6 @@ export function useLiveSession({ campaignId, enabled = true } = {}) {
       const scenes = await listLiveScenes();
       if (request !== refreshRequestRef.current) return;
       const scene = scenes.find((entry) => entry.campaignId === campaignId) || null;
-      sceneIdRef.current = scene?.id || null;
       setSession({ loading: false, scene });
     } catch (_) {
       if (request === refreshRequestRef.current) setSession({ loading: false, scene: null });

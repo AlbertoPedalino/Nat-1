@@ -1,7 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  fightRefMatches,
   fightWithTokenVitals,
   makeSourceRef,
   parseSourceRef,
@@ -160,8 +159,6 @@ test('pieces from another fight, or from none, are left alone', () => {
     combatants: [{ id: 0, hpCurrent: 1, hpMax: 7 }],
   });
   assert.deepEqual(updates, []);
-  assert.equal(fightRefMatches(tokens[0], 'enc_1', 'f1'), false);
-  assert.equal(fightRefMatches({ sourceRef: 'enc_1:f1:0' }, 'enc_1', 'f1'), true);
 });
 
 test('a combatant that no longer exists does not produce an update', () => {

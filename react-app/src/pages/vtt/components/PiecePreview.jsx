@@ -1,5 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import { classIcon } from '../../../shared/character/classIcon.js';
+import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 
 export const PIECE_DRAG_TYPE = 'application/x-gb-piece';
 
@@ -31,9 +32,11 @@ export default function PiecePreview({ token, size = 36, count = 1 }) {
         ...rootSx,
         width: size,
         height: size,
-        bgcolor: token?.color || '#6f5b32',
+        bgcolor: token?.color || VTT_COLORS.objectDefault,
         borderWidth: isCharacter ? 5 : 2,
-        borderColor: isCharacter ? (token?.color || 'rgba(0,0,0,0.6)') : 'rgba(232,201,106,0.65)',
+        borderColor: isCharacter
+          ? (token?.color || vttAlpha(VTT_COLORS.black, 0.6))
+          : vttAlpha(VTT_COLORS.gold, 0.65),
       }}
     >
       {imageUrl ? <Box component="img" src={imageUrl} alt="" draggable={false} sx={imageSx} /> : null}
@@ -56,7 +59,7 @@ const rootSx = {
   borderRadius: '50%',
   overflow: 'visible',
   borderStyle: 'solid',
-  boxShadow: '0 3px 10px rgba(0,0,0,0.72)',
+  boxShadow: `0 3px 10px ${vttAlpha(VTT_COLORS.black, 0.72)}`,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -72,7 +75,7 @@ const imageSx = {
 };
 
 const initialsSx = {
-  color: '#f2df9d',
+  color: VTT_COLORS.goldPreview,
   fontFamily: '"Cinzel", Georgia, serif',
   fontSize: '0.68rem',
   fontWeight: 800,
@@ -80,8 +83,8 @@ const initialsSx = {
 
 const classIconSx = {
   display: 'flex',
-  color: '#f3ead6',
-  filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.9))',
+  color: VTT_COLORS.parchment,
+  filter: `drop-shadow(0 1px 2px ${vttAlpha(VTT_COLORS.black, 0.9)})`,
   pointerEvents: 'none',
 };
 
@@ -93,9 +96,9 @@ const countSx = {
   height: 20,
   px: 0.4,
   borderRadius: 10,
-  bgcolor: '#e8c96a',
-  color: '#0f0e0d',
-  border: '1px solid #0f0e0d',
+  bgcolor: VTT_COLORS.gold,
+  color: VTT_COLORS.ink,
+  border: `1px solid ${VTT_COLORS.ink}`,
   fontSize: '0.62rem',
   fontWeight: 900,
   lineHeight: '18px',

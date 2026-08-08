@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { dieGeometry } from '../character/polyhedra.js';
-import { MAX_THROWN_DICE, orientationMatrix, rotate, simulateThrow } from './dicePhysics.js';
+import { orientationMatrix, rotate, simulateThrow } from './dicePhysics.js';
 
 const dice = (count, faces = 20) => Array.from({ length: count }, () => ({ faces }));
 const SIZE = 42;
@@ -190,10 +190,10 @@ test('two throws are not the same throw', () => {
   );
 });
 
-test('a huge roll is capped', () => {
+test('a large roll simulates every die', () => {
   const result = simulateThrow(dice(40), 'roll-big', { size: SIZE });
-  assert.equal(lastFrame(result).length, MAX_THROWN_DICE);
-  assert.equal(result.results.length, MAX_THROWN_DICE);
+  assert.equal(lastFrame(result).length, 40);
+  assert.equal(result.results.length, 40);
 });
 
 test('a roll with no dice simulates nothing', () => {

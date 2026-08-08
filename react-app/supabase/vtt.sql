@@ -116,8 +116,12 @@ create unique index if not exists map_scenes_one_live_idx
 create table if not exists public.map_tokens (
   id           uuid primary key default gen_random_uuid(),
   scene_id     uuid not null references public.map_scenes(id) on delete cascade,
-  -- 'gm' is the hidden layer; RLS keys off this value.
+  -- Layers organise editing. Legacy `gm` rows remain private, while new
+  -- visibility changes use hidden_from_players without losing the map layer.
   layer        text not null default 'tokens' check (layer in ('map', 'tokens', 'gm')),
+  -- Visibility is separate from the editing layer: hiding scenery must not
+  -- turn it into a token when it is revealed again.
+  hidden_from_players boolean not null default false,
   x            double precision not null default 0,
   y            double precision not null default 0,
   w            double precision not null default 1,
@@ -178,6 +182,7 @@ alter table public.map_tokens add column if not exists effects jsonb not null de
 alter table public.map_tokens add column if not exists icon_key text;
 alter table public.map_tokens add column if not exists icon_stroke_width double precision not null default 1.8;
 alter table public.map_tokens add column if not exists rotation double precision not null default 0;
+alter table public.map_tokens add column if not exists hidden_from_players boolean not null default false;
 
 -- A GM-only note on a visible piece. It is a separate table for the same reason
 -- the hidden layer is a separate row: RLS filters rows, not columns, so a secret
@@ -219,6 +224,8 @@ create index if not exists map_drawings_scene_idx on public.map_drawings(scene_i
 create index if not exists map_drawings_scene_created_idx on public.map_drawings(scene_id, created_at);
 create index if not exists map_tokens_scene_idx on public.map_tokens(scene_id);
 create index if not exists map_tokens_scene_layer_idx on public.map_tokens(scene_id, layer);
+create index if not exists map_tokens_scene_visibility_idx
+  on public.map_tokens(scene_id, hidden_from_players, layer);
 create index if not exists map_tokens_character_idx on public.map_tokens(character_id);
 -- The encounter builder writes a creature's hit points into its piece by
 -- reference: it knows which combatant changed and has never seen the map, so
@@ -329,7 +336,21 @@ drop policy if exists map_drawings_update on public.map_drawings;
 create policy map_drawings_update on public.map_drawings
   for update using (
     public.is_campaign_gm(public.map_scene_campaign(scene_id))
-    or (layer <> 'gm' and created_by = auth.uid())
+    or (
+      layer <> 'gm'
+      and created_by = auth.uid()
+      and public.map_scene_is_live(scene_id)
+      and public.map_scene_campaign(scene_id) in (select public.user_campaign_ids())
+    )
+  )
+  with check (
+    public.is_campaign_gm(public.map_scene_campaign(scene_id))
+    or (
+      layer <> 'gm'
+      and created_by = auth.uid()
+      and public.map_scene_is_live(scene_id)
+      and public.map_scene_campaign(scene_id) in (select public.user_campaign_ids())
+    )
   );
 
 -- The GM can clear anything; a player rubs out only their own strokes, or the
@@ -338,7 +359,12 @@ drop policy if exists map_drawings_delete on public.map_drawings;
 create policy map_drawings_delete on public.map_drawings
   for delete using (
     public.is_campaign_gm(public.map_scene_campaign(scene_id))
-    or (layer <> 'gm' and created_by = auth.uid())
+    or (
+      layer <> 'gm'
+      and created_by = auth.uid()
+      and public.map_scene_is_live(scene_id)
+      and public.map_scene_campaign(scene_id) in (select public.user_campaign_ids())
+    )
   );
 
 -- Secret labels: the campaign GM, nobody else, in every direction.
@@ -379,6 +405,7 @@ create policy map_tokens_select on public.map_tokens
     public.is_campaign_gm(public.map_scene_campaign(scene_id))
     or (
       layer <> 'gm'
+      and not hidden_from_players
       and public.map_scene_is_live(scene_id)
       and public.map_token_in_play(scene_id, x, y)
       and public.map_scene_campaign(scene_id) in (select public.user_campaign_ids())
@@ -394,6 +421,7 @@ create policy map_tokens_insert on public.map_tokens
     public.is_campaign_gm(public.map_scene_campaign(scene_id))
     or (
       layer <> 'gm'
+      and not hidden_from_players
       and created_by = auth.uid()
       and public.map_scene_is_live(scene_id)
       and public.map_scene_campaign(scene_id) in (select public.user_campaign_ids())
@@ -407,7 +435,14 @@ drop policy if exists map_tokens_delete on public.map_tokens;
 create policy map_tokens_delete on public.map_tokens
   for delete using (
     public.is_campaign_gm(public.map_scene_campaign(scene_id))
-    or (layer <> 'gm' and created_by = auth.uid())
+    or (
+      layer <> 'gm'
+      and not hidden_from_players
+      and created_by = auth.uid()
+      and public.map_scene_is_live(scene_id)
+      and public.map_token_in_play(scene_id, x, y)
+      and public.map_scene_campaign(scene_id) in (select public.user_campaign_ids())
+    )
   );
 
 -- A player may move a piece that stands for one of their own characters, or one
@@ -425,6 +460,10 @@ create policy map_tokens_update on public.map_tokens
     public.is_campaign_gm(public.map_scene_campaign(scene_id))
     or (
       layer <> 'gm'
+      and not hidden_from_players
+      and public.map_scene_is_live(scene_id)
+      and public.map_token_in_play(scene_id, x, y)
+      and public.map_scene_campaign(scene_id) in (select public.user_campaign_ids())
       and (
         (character_id is not null and public.owns_character(character_id))
         or created_by = auth.uid()
@@ -435,6 +474,10 @@ create policy map_tokens_update on public.map_tokens
     public.is_campaign_gm(public.map_scene_campaign(scene_id))
     or (
       layer <> 'gm'
+      and not hidden_from_players
+      and public.map_scene_is_live(scene_id)
+      and public.map_token_in_play(scene_id, x, y)
+      and public.map_scene_campaign(scene_id) in (select public.user_campaign_ids())
       and (
         (character_id is not null and public.owns_character(character_id))
         or created_by = auth.uid()
@@ -469,8 +512,10 @@ begin
     public.is_campaign_gm(scene.campaign_id)
     or (
       token.layer <> 'gm'
+      and not token.hidden_from_players
       and scene.is_live
       and scene.campaign_id in (select public.user_campaign_ids())
+      and public.map_token_in_play(token.scene_id, token.x, token.y)
     )
   ) then
     raise exception 'Not allowed to mark this token';
@@ -506,8 +551,10 @@ begin
     public.is_campaign_gm(scene.campaign_id)
     or (
       token.layer <> 'gm'
+      and not token.hidden_from_players
       and scene.is_live
       and scene.campaign_id in (select public.user_campaign_ids())
+      and public.map_token_in_play(token.scene_id, token.x, token.y)
     )
   ) then
     raise exception 'Not allowed to mark this token';

@@ -12,6 +12,7 @@ import {
   Typography,
 } from '@mui/material';
 import { Trash2 } from 'lucide-react';
+import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { EFFECT_GROUPS, toggleEffect } from '../../../shared/character/combatEffects.js';
 import {
   ASSIGNABLE_CONDITIONS,
@@ -99,7 +100,7 @@ export default function TokenMenu({
   // Read off the piece rather than kept in state: the layer is written
   // optimistically and rolled back if the database refuses, and a local copy
   // would keep showing the tick that never took.
-  const hiddenFromPlayers = token.layer === 'gm';
+  const hiddenFromPlayers = Boolean(token.hiddenFromPlayers) || token.layer === 'gm';
 
 
   return (
@@ -122,11 +123,10 @@ export default function TokenMenu({
       }}
     >
       <Stack spacing={0.65} sx={{ px: 1, py: 0.75 }}>
-        {/* Whether the table sees the piece at all. A trap, a hoard or anything
-            else dragged onto the GM layer arrives with this already ticked,
-            because that is where it landed — clearing it is how the GM springs
-            the trap. First in the menu: mid-scene this is the control being
-            reached for, not the label. */}
+        {/* Whether the table sees the piece at all. A trap, hoard or hidden map
+            prop arrives with this already ticked; clearing it is how the GM
+            reveals it. Normal map/token layers stay intact, while a legacy GM
+            layer row falls back to tokens. */}
         {onVisibility ? (
           <>
             <FormControlLabel
@@ -142,8 +142,8 @@ export default function TokenMenu({
             />
             <Typography sx={helperSx}>
               {hiddenFromPlayers
-                ? 'On the GM layer: the players are never sent this piece at all.'
-                : 'On the token layer: everyone at the table can see it.'}
+                ? 'The players are never sent this piece at all.'
+                : 'Everyone at the table can see it; its editing layer is unchanged.'}
             </Typography>
             <Divider />
           </>
@@ -263,7 +263,7 @@ export default function TokenMenu({
               aria-label="Object color"
               title="Object color"
               disabled={!canStyleObject}
-              defaultValue={token.color || '#e8c96a'}
+              defaultValue={token.color || VTT_COLORS.gold}
               onInput={(event) => {
                 const color = event.currentTarget.value;
                 clearTimeout(objectStyleTimerRef.current);
@@ -424,7 +424,7 @@ function DeathSaveControls({ deathSaves, disabled, onChange }) {
     <Box sx={deathSavePanelSx}>
       <Typography sx={sectionTitleSx}>Death saves</Typography>
       <Box sx={deathSaveRowsSx}>
-        {[['success', 'Success', '#70b78f'], ['fail', 'Failure', '#d76767']].map(([type, label, color]) => (
+        {[['success', 'Success', 'gmboard.vtt.success'], ['fail', 'Failure', 'gmboard.vtt.danger']].map(([type, label, color]) => (
           <Box key={type} sx={deathSaveRowSx}>
             <Typography sx={deathSaveLabelSx}>{label}</Typography>
             {[1, 2, 3].map((value) => (
@@ -491,16 +491,18 @@ const objectStyleSx = {
   alignItems: 'center',
   gap: 0.6,
   p: 0.6,
-  border: '1px solid rgba(232,201,106,0.16)',
+  border: '1px solid',
+  borderColor: 'gmboard.vtt.goldTint',
   borderRadius: 1,
 };
 const objectColorInputSx = {
   width: 32,
   height: 32,
   p: '2px',
-  border: '1px solid rgba(232,201,106,0.42)',
+  border: '1px solid',
+  borderColor: 'gmboard.vtt.goldBorderStrong',
   borderRadius: 1,
-  bgcolor: 'rgba(0,0,0,0.3)',
+  bgcolor: 'gmboard.vtt.inset',
   cursor: 'pointer',
   '&:disabled': { cursor: 'default', opacity: 0.45 },
 };
@@ -508,7 +510,8 @@ const objectColorInputSx = {
 const markerGridSx = {
   display: 'grid',
   gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.08fr)',
-  border: '1px solid rgba(232,201,106,0.16)',
+  border: '1px solid',
+  borderColor: 'gmboard.vtt.goldTint',
   borderRadius: 1,
   overflow: 'hidden',
 };
@@ -519,7 +522,8 @@ const deathSavePanelSx = {
   gap: 0.8,
   px: 0.6,
   py: 0.4,
-  border: '1px solid rgba(232,201,106,0.16)',
+  border: '1px solid',
+  borderColor: 'gmboard.vtt.goldTint',
   borderRadius: 1,
 };
 const deathSaveRowsSx = { display: 'flex', gap: 1 };
@@ -543,7 +547,10 @@ const markerSectionSx = {
   gap: 0.35,
 };
 
-const effectSectionSx = { borderLeft: '1px solid rgba(232,201,106,0.16)' };
+const effectSectionSx = {
+  borderLeft: '1px solid',
+  borderLeftColor: 'gmboard.vtt.goldTint',
+};
 const sectionTitleSx = {
   color: 'text.secondary',
   fontSize: '0.6rem',

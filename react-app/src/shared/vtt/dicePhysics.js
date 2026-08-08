@@ -17,9 +17,7 @@
 import { seededRandom } from '../character/dice3d.js';
 import { dieGeometry } from '../character/polyhedra.js';
 
-// A handful of dice reads as a throw; a fistful covers the board it is being
-// thrown onto. Past this the count is left to the total in the bubble.
-export const MAX_THROWN_DICE = 12;
+export const THROWN_DIE_SIZE = 76;
 
 // The tray is a fixed size in pixels, not the size of the view. Everyone
 // watching has a different window, and a throw whose walls moved with the
@@ -58,7 +56,7 @@ export function simulateThrow(dice, seed, options = {}) {
   const bounds = { minX: -half.x, maxX: half.x, minY: -half.y, maxY: half.y };
   const next = seededRandom(`${seed}:physics`);
 
-  const bodies = (dice || []).slice(0, MAX_THROWN_DICE).map((die) => ({
+  const bodies = (dice || []).map((die) => ({
     faces: dieGeometry(die?.faces).faces,
     x: (next() - 0.5) * 80,
     y: (next() - 0.5) * 60,

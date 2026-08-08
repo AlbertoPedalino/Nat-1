@@ -92,7 +92,9 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
   // Generic dice-formula roll (HP hit dice + attack damage).
   const rollFormulaToast = (formula, label) => {
     if (!onShowToast) return;
-    const { total, rolls } = rollFormula(formula);
+    const result = rollFormula(formula);
+    if (!result.valid) return;
+    const { total, rolls } = result;
     onShowToast(label, `${formula} = ${total}`, total, rolls);
   };
 

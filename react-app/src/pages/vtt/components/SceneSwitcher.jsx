@@ -4,6 +4,7 @@ import {
 } from '@mui/material';
 import { Layers, Radio } from 'lucide-react';
 import { listScenes } from '../../../shared/cloud/vtt.js';
+import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { battleMapDialogPaperSx } from './battleMapSurface.js';
 
 // Moving the table from the tavern to the crypt without going back to the scene
@@ -91,13 +92,13 @@ const buttonSx = {
   width: 30,
   height: 30,
   flexShrink: 0,
-  color: 'rgba(255,255,255,0.68)',
-  border: '1px solid rgba(255,255,255,0.16)',
+  color: vttAlpha(VTT_COLORS.white, 0.68),
+  border: `1px solid ${vttAlpha(VTT_COLORS.white, 0.16)}`,
   borderRadius: 1,
   '&:hover': {
-    color: '#e8c96a',
-    borderColor: 'rgba(232,201,106,0.42)',
-    bgcolor: 'rgba(232,201,106,0.08)',
+    color: VTT_COLORS.gold,
+    borderColor: vttAlpha(VTT_COLORS.gold, 0.42),
+    bgcolor: vttAlpha(VTT_COLORS.gold, 0.08),
   },
 };
 

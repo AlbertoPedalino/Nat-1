@@ -1,5 +1,6 @@
 import { act, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, vi } from 'vitest';
+import { THROWN_DIE_SIZE } from '../../../shared/vtt/dicePhysics.js';
 import DiceTray, { RESULT_REVEAL_HOLD_MS } from './DiceTray.jsx';
 
 const mocks = vi.hoisted(() => ({ simulateThrow: vi.fn() }));
@@ -67,6 +68,11 @@ test('a coin result waits for the final pose to be painted and visibly settled',
   act(() => vi.advanceTimersByTime(1));
   expect(onSettled).toHaveBeenCalledOnce();
   expect(onSettled).toHaveBeenCalledWith('coin-roll');
+  expect(mocks.simulateThrow).toHaveBeenCalledWith(
+    [{ faces: 2, v: 1 }],
+    'coin-roll',
+    { size: THROWN_DIE_SIZE },
+  );
 });
 
 test('a d100 uses one lightweight orb and reveals its value only after landing', () => {

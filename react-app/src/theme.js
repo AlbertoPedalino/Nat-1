@@ -8,6 +8,7 @@ function activePortalContainer() {
   return document.fullscreenElement || document.webkitFullscreenElement || document.body;
 }
 import { chipTintStyle } from './shared/entityColors.js';
+import { VTT_COLORS, vttAlpha } from './shared/vtt/colors.js';
 
 export const theme = createTheme({
   palette: {
@@ -83,6 +84,23 @@ export const theme = createTheme({
         none: '#7a6040',
         trigger: '#d7ad52',
         safe: '#58b879',
+      },
+      // Battle-map chrome. Canvas drawing colours stay next to the rendering
+      // code because they are pixels, while reusable surfaces and status
+      // colours belong here so every VTT control changes as one theme.
+      vtt: {
+        gold: VTT_COLORS.gold,
+        goldBright: VTT_COLORS.goldBright,
+        goldBorder: vttAlpha(VTT_COLORS.gold, 0.25),
+        goldBorderStrong: vttAlpha(VTT_COLORS.gold, 0.42),
+        goldTint: vttAlpha(VTT_COLORS.gold, 0.16),
+        goldWash: vttAlpha(VTT_COLORS.gold, 0.08),
+        surface: vttAlpha(VTT_COLORS.ink, 0.9),
+        surfaceSolid: VTT_COLORS.ink,
+        backdrop: vttAlpha(VTT_COLORS.black, 0.62),
+        inset: vttAlpha(VTT_COLORS.black, 0.3),
+        success: VTT_COLORS.menuSuccess,
+        danger: VTT_COLORS.menuDanger,
       },
     },
   },

@@ -4,10 +4,10 @@ import {
   DEFAULT_GRID,
   LAYERS,
   TOKEN_PATCH_KEYS,
-  campaignIdFromImagePath,
   canMarkToken,
   canMoveToken,
   gridLineColor,
+  isTokenVisibleToPlayers,
   isTokenInPlay,
   mapImageFolder,
   mapImagePath,
@@ -120,6 +120,9 @@ test('rows become editor shapes with usable numbers', () => {
   assert.equal(token.iconKey, 'door-open');
   assert.equal(token.iconStrokeWidth, 3.2);
   assert.equal(token.rotation, 315);
+  assert.equal(token.hiddenFromPlayers, false);
+  assert.equal(toToken({ id: 'hidden', layer: 'map', hidden_from_players: true }).hiddenFromPlayers, true);
+  assert.equal(toToken({ id: 'legacy', layer: 'gm' }).hiddenFromPlayers, true);
 });
 
 // The patch allowlist is the guard that keeps the client from sending columns
@@ -188,6 +191,15 @@ test('the play area decides by the square a piece stands on', () => {
   assert.equal(isTokenInPlay({ x: 999, y: 999 }, null), true);
 });
 
+test('player visibility combines the explicit flag, legacy layer and play area', () => {
+  const area = { x: 0, y: 0, w: 5, h: 5 };
+  assert.equal(isTokenVisibleToPlayers({ layer: 'map', x: 1, y: 1 }, area), true);
+  assert.equal(isTokenVisibleToPlayers({ layer: 'map', hiddenFromPlayers: true, x: 1, y: 1 }, area), false);
+  assert.equal(isTokenVisibleToPlayers({ layer: 'gm', x: 1, y: 1 }, area), false);
+  assert.equal(isTokenVisibleToPlayers({ layer: 'tokens', x: 8, y: 1 }, area), false);
+  assert.equal(isTokenVisibleToPlayers(null, area), false);
+});
+
 test('a play area with no extent is treated as none at all', () => {
   assert.deepEqual(normalizePlayArea({ x: 1, y: 2, w: 3, h: 4 }), { x: 1, y: 2, w: 3, h: 4 });
   assert.equal(normalizePlayArea({ x: 0, y: 0, w: 0, h: 5 }), null, 'zero width would hide the map');
@@ -232,6 +244,7 @@ test('anyone at the table may set conditions on what they can see', () => {
   assert.equal(canMarkToken({ layer: 'map' }, { isGm: false }), true);
   assert.equal(canMarkToken({ layer: 'gm' }, { isGm: false }), false);
   assert.equal(canMarkToken({ layer: 'gm' }, { isGm: true }), true);
+  assert.equal(canMarkToken({ layer: 'tokens', hiddenFromPlayers: true }, { isGm: false }), false);
   assert.equal(canMarkToken(null, { isGm: true }), false);
 });
 
@@ -256,13 +269,11 @@ test('a character can be marked by its owner or the GM, not by the rest of the p
 test('map image paths lead with the campaign id and sanitize the file name', () => {
   const path = mapImagePath('c1', 's1', 'Cripta Dei Re!!.PNG', 0);
   assert.match(path, /^c1\/s1\/0-cripta-dei-re-\.png$/);
-  assert.equal(campaignIdFromImagePath(path), 'c1');
   assert.equal(mapImagePath(null, 's1', 'a.png'), null);
   assert.equal(mapImagePath('c1', null, 'a.png'), null);
   assert.equal(mapImageFolder('c1', 's1'), 'c1/s1');
   assert.equal(mapImageFolder('c1/../../other', 's1'), null);
   assert.equal(mapImageFolder('c1', ''), null);
-  assert.equal(campaignIdFromImagePath(''), null);
 });
 
 test('scene names are trimmed with a fallback', () => {

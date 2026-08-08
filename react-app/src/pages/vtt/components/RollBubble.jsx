@@ -1,6 +1,7 @@
 import { Box, Chip, Typography } from '@mui/material';
 import { resolveToastLayout } from '../../../shared/character/rollToastLayout.js';
 import DiceRow from '../../../shared/character/DiceRow.jsx';
+import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 
 const FONT = '"Cinzel", Georgia, serif';
 
@@ -32,8 +33,8 @@ export default function RollBubble({ roll, x, y }) {
 
         <Typography sx={labelSx}>{layout.label}</Typography>
 
-        {layout.isCrit && <Typography sx={{ ...natSx, color: '#edd48a' }}>NATURAL 20!</Typography>}
-        {layout.isFail && <Typography sx={{ ...natSx, color: '#de675f' }}>NATURAL 1</Typography>}
+        {layout.isCrit && <Typography sx={{ ...natSx, color: VTT_COLORS.goldRoll }}>NATURAL 20!</Typography>}
+        {layout.isFail && <Typography sx={{ ...natSx, color: VTT_COLORS.error }}>NATURAL 1</Typography>}
 
         {layout.modeChip && (
           <Chip size="small" label={layout.modeChip.label} variant="outlined" sx={modeChipSx(layout.modeChip)} />
@@ -85,10 +86,10 @@ const bubbleSx = {
   maxWidth: 260,
   textAlign: 'center',
   borderRadius: 2,
-  bgcolor: 'rgba(26,23,19,0.97)',
+  bgcolor: vttAlpha(VTT_COLORS.surfaceRaised, 0.97),
   border: '2px solid',
   borderColor: 'divider',
-  boxShadow: '0 8px 26px rgba(0,0,0,0.6)',
+  boxShadow: `0 8px 26px ${vttAlpha(VTT_COLORS.black, 0.6)}`,
   // Grows out of the tail, which sits on the token — so the roll looks spoken by
   // the piece rather than dropped onto the map from somewhere off screen.
   transformOrigin: 'bottom center',
@@ -100,20 +101,20 @@ const bubbleSx = {
 };
 
 const critSx = {
-  borderColor: '#edd48a',
-  boxShadow: '0 8px 26px rgba(0,0,0,0.6), 0 0 18px rgba(237,212,138,0.28)',
+  borderColor: VTT_COLORS.goldRoll,
+  boxShadow: `0 8px 26px ${vttAlpha(VTT_COLORS.black, 0.6)}, 0 0 18px ${vttAlpha(VTT_COLORS.goldRoll, 0.28)}`,
 };
 
 const failSx = {
-  borderColor: '#de675f',
-  boxShadow: '0 8px 26px rgba(0,0,0,0.6), 0 0 18px rgba(222,103,95,0.28)',
+  borderColor: VTT_COLORS.error,
+  boxShadow: `0 8px 26px ${vttAlpha(VTT_COLORS.black, 0.6)}, 0 0 18px ${vttAlpha(VTT_COLORS.error, 0.28)}`,
 };
 
 const actorSx = {
   fontFamily: FONT,
   fontSize: '0.6rem',
   fontWeight: 700,
-  color: '#e8c96a',
+  color: VTT_COLORS.gold,
   lineHeight: 1.2,
 };
 
@@ -173,5 +174,5 @@ const tailSx = {
   height: 0,
   borderLeft: '7px solid transparent',
   borderRight: '7px solid transparent',
-  borderTop: '8px solid rgba(26,23,19,0.97)',
+  borderTop: `8px solid ${vttAlpha(VTT_COLORS.surfaceRaised, 0.97)}`,
 };

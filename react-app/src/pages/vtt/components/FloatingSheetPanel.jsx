@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Box, IconButton, Stack, Typography } from '@mui/material';
 import { GripHorizontal, MoveDiagonal2, X } from 'lucide-react';
+import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { battleMapSurfaceSx } from './battleMapSurface.js';
 
 export default function FloatingSheetPanel({
@@ -176,10 +177,10 @@ const panelSx = {
   display: 'grid',
   gridTemplateRows: 'auto minmax(0, 1fr)',
   borderRadius: 1.25,
-  bgcolor: 'rgba(10,9,9,0.96)',
+  bgcolor: vttAlpha(VTT_COLORS.sheetSurface, 0.96),
   backdropFilter: 'none',
   WebkitBackdropFilter: 'none',
-  boxShadow: '0 18px 52px rgba(0,0,0,0.68)',
+  boxShadow: `0 18px 52px ${vttAlpha(VTT_COLORS.black, 0.68)}`,
   overflow: 'hidden',
   cursor: 'default',
   contain: 'layout paint',
@@ -190,15 +191,15 @@ const headerSx = {
   minHeight: 40,
   px: 1,
   alignItems: 'center',
-  borderBottom: '1px solid rgba(232,201,106,0.22)',
-  color: '#cdbb83',
+  borderBottom: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.22)}`,
+  color: VTT_COLORS.panelTextSoft,
   cursor: 'move',
   touchAction: 'none',
   userSelect: 'none',
 };
 
 const titleSx = {
-  color: '#e8c96a',
+  color: VTT_COLORS.gold,
   fontFamily: '"Cinzel", Georgia, serif',
   fontSize: '0.72rem',
   fontWeight: 700,
@@ -210,21 +211,21 @@ const selectSx = {
   width: { xs: 145, sm: 220 },
   height: 30,
   px: 0.75,
-  border: '1px solid rgba(232,201,106,0.28)',
+  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.28)}`,
   borderRadius: 1,
   outline: 0,
-  bgcolor: '#161411',
-  color: '#eadba9',
+  bgcolor: VTT_COLORS.selectSurface,
+  color: VTT_COLORS.selectText,
   fontFamily: 'inherit',
   fontSize: '0.7rem',
   cursor: 'pointer',
-  '&:focus': { borderColor: 'rgba(232,201,106,0.72)' },
-  '& option': { bgcolor: '#161411', color: '#eadba9' },
+  '&:focus': { borderColor: vttAlpha(VTT_COLORS.gold, 0.72) },
+  '& option': { bgcolor: VTT_COLORS.selectSurface, color: VTT_COLORS.selectText },
 };
 
 const closeSx = {
-  color: '#cdbb83',
-  '&:hover': { color: '#f3df9c', bgcolor: 'rgba(232,201,106,0.08)' },
+  color: VTT_COLORS.panelTextSoft,
+  '&:hover': { color: VTT_COLORS.goldUiBright, bgcolor: vttAlpha(VTT_COLORS.gold, 0.08) },
 };
 
 const contentSx = {
@@ -247,9 +248,9 @@ const resizeHandleSx = {
   width: 28,
   height: 28,
   borderRadius: '8px 0 8px 0',
-  color: '#cdbb83',
-  bgcolor: 'rgba(10,9,9,0.78)',
+  color: VTT_COLORS.panelTextSoft,
+  bgcolor: vttAlpha(VTT_COLORS.sheetSurface, 0.78),
   cursor: 'nwse-resize',
   touchAction: 'none',
-  '&:hover': { color: '#f3df9c', bgcolor: 'rgba(232,201,106,0.1)' },
+  '&:hover': { color: VTT_COLORS.goldUiBright, bgcolor: vttAlpha(VTT_COLORS.gold, 0.1) },
 };

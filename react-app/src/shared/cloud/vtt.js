@@ -33,7 +33,7 @@ const SIGNED_URL_TTL = 8 * 60 * 60;
 const SIGNED_URL_MARGIN_MS = 15 * 60 * 1000;
 const SIGNED_URL_KEY = 'gb:vtt:signed-url:';
 const SCENE_COLUMNS = 'id, campaign_id, name, image_path, background_path, shown_image, grid, fog, is_live, play_area, updated_at';
-const TOKEN_COLUMNS = 'id, scene_id, layer, x, y, w, h, z, character_id, label, color, image_path, image_url, icon_key, icon_stroke_width, rotation, hp_current, hp_max, conditions, effects, source_ref, show_hp, created_by, updated_at';
+const TOKEN_COLUMNS = 'id, scene_id, layer, hidden_from_players, x, y, w, h, z, character_id, label, color, image_path, image_url, icon_key, icon_stroke_width, rotation, hp_current, hp_max, conditions, effects, source_ref, show_hp, created_by, updated_at';
 const DRAWING_COLUMNS = 'id, scene_id, layer, points, color, width, text, created_by, created_at';
 
 export async function listScenes(campaignId) {
@@ -161,6 +161,7 @@ export async function createToken(sceneId, token = {}) {
   const row = {
     scene_id: sceneId,
     layer: normalizeLayer(token.layer),
+    hidden_from_players: token.hiddenFromPlayers === true || token.layer === 'gm',
     character_id: token.characterId || null,
     ...toTokenPatch({
       ...token,
@@ -216,16 +217,19 @@ export async function updateTokensBySourceRef(sourceRef, patch) {
   return (data || []).length;
 }
 
-// Moving a piece between the GM layer and the players' own is its own call
-// rather than a key on the ordinary patch: `layer` is what the read policy keys
-// off, and leaving it out of TOKEN_PATCH_KEYS is what stops a stray field in an
-// editor patch from quietly publishing a secret. RLS still has the last word —
-// a player who tries this is refused.
-export async function setTokenLayer(tokenId, layer) {
+// Visibility is not an editing layer. Keeping it in its own column means a map
+// object can be hidden and later revealed without silently becoming a token.
+// A legacy row whose layer itself is `gm` has no public layer to restore, so
+// revealing that one falls back to the ordinary token layer.
+export async function setTokenVisibility(tokenId, hidden, currentLayer = 'tokens') {
   const supabase = requireClient();
+  const layer = normalizeLayer(currentLayer);
   const { data, error } = await supabase
     .from('map_tokens')
-    .update({ layer: normalizeLayer(layer) })
+    .update({
+      hidden_from_players: Boolean(hidden),
+      ...(!hidden && layer === 'gm' ? { layer: 'tokens' } : {}),
+    })
     .eq('id', tokenId)
     .select(TOKEN_COLUMNS)
     .single();

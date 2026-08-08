@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import {
   Box,
   Button,
@@ -196,8 +197,11 @@ const placementCardSx = {
   gap: 1.25,
   p: 1,
   borderRadius: 1,
-  border: '1px solid rgba(232,201,106,0.25)',
-  bgcolor: 'rgba(0,0,0,0.22)',
+  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.25)}`,
+  bgcolor: vttAlpha(VTT_COLORS.black, 0.22),
   userSelect: 'none',
-  '&:hover': { borderColor: 'rgba(232,201,106,0.6)', bgcolor: 'rgba(232,201,106,0.06)' },
+  '&:hover': {
+    borderColor: vttAlpha(VTT_COLORS.gold, 0.6),
+    bgcolor: vttAlpha(VTT_COLORS.gold, 0.06),
+  },
 };

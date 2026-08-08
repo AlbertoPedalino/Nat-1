@@ -2,9 +2,10 @@
 // the rail and its dialogs on the same tokens prevents ordinary MUI paper from
 // appearing as a solid block beside the translucent toolbar.
 export const battleMapSurfaceSx = {
-  bgcolor: 'rgba(15,14,13,0.9)',
+  bgcolor: 'gmboard.vtt.surface',
   backgroundImage: 'none',
-  border: '1px solid rgba(232,201,106,0.25)',
+  border: '1px solid',
+  borderColor: 'gmboard.vtt.goldBorder',
   backdropFilter: 'blur(10px)',
   WebkitBackdropFilter: 'blur(10px)',
 };
@@ -12,12 +13,13 @@ export const battleMapSurfaceSx = {
 export const battleMapDialogPaperSx = {
   ...battleMapSurfaceSx,
   borderRadius: 1,
-  boxShadow: '0 18px 52px rgba(0,0,0,0.62)',
+  boxShadow: (theme) => `0 18px 52px ${theme.palette.gmboard.vtt.backdrop}`,
 };
 
 export const battleMapDialogTitleSx = {
   bgcolor: 'transparent',
-  borderBottom: '1px solid rgba(232,201,106,0.25)',
+  borderBottom: '1px solid',
+  borderBottomColor: 'gmboard.vtt.goldBorder',
   color: 'primary.main',
   fontFamily: '"Cinzel", Georgia, serif',
   fontSize: '0.8rem',
@@ -27,12 +29,13 @@ export const battleMapDialogTitleSx = {
 
 export const battleMapDialogContentSx = {
   bgcolor: 'transparent',
-  borderColor: 'rgba(232,201,106,0.18)',
+  borderColor: 'gmboard.vtt.goldTint',
 };
 
 export const battleMapDialogActionsSx = {
   bgcolor: 'transparent',
-  borderTop: '1px solid rgba(232,201,106,0.18)',
+  borderTop: '1px solid',
+  borderTopColor: 'gmboard.vtt.goldTint',
 };
 
 // Placement dialogs stay open while a piece is dragged, but only their paper
@@ -44,5 +47,6 @@ export const battleMapDropDialogSx = {
 
 export const battleMapDropBackdropSx = {
   pointerEvents: 'none',
-  bgcolor: 'rgba(0,0,0,0.16)',
+  bgcolor: vttAlpha(VTT_COLORS.black, 0.16),
 };
+import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';

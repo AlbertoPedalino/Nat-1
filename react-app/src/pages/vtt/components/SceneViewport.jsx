@@ -17,7 +17,8 @@ import {
 } from '../../../shared/vtt/geometry.js';
 import { measureLabel, movementLabel } from '../../../shared/vtt/measure.js';
 import { movedPoints } from '../../../shared/vtt/drawing.js';
-import { gridLineColor, isTokenInPlay, normalizeGridLineWidth } from '../../../shared/vtt/scene.js';
+import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
+import { gridLineColor, normalizeGridLineWidth } from '../../../shared/vtt/scene.js';
 import { isMapPiece } from '../../../shared/vtt/mapObjects.js';
 import {
   axialRound, hexHeight, hexToWorld, hexWidth, isHexGrid, worldToAxial, worldToHex,
@@ -34,6 +35,7 @@ import DiceTray from './DiceTray.jsx';
 import FloatingSheetPanel from './FloatingSheetPanel.jsx';
 import LaserOverlay from './LaserOverlay.jsx';
 import TokenSprite from './TokenSprite.jsx';
+import TokenLayer from './TokenLayer.jsx';
 
 const WHEEL_STEP = 1.12;
 const VIEWPORT_CONTROL_SELECTOR = '[data-viewport-control], .MuiModal-root, .MuiPopover-root, .MuiPopper-root';
@@ -419,16 +421,16 @@ export default function SceneViewport({
     return { x: cell.col - Math.floor(w / 2), y: cell.row - Math.floor(h / 2) };
   };
 
-  const cancelLongPress = () => {
+  const cancelLongPress = useCallback(() => {
     if (!longPressRef.current) return;
     clearTimeout(longPressRef.current.timer);
     longPressRef.current = null;
-  };
+  }, []);
 
   // A finger has no right button, so holding still on a piece is how the menu
   // is asked for. Armed before the "can this be moved" check: marking somebody
   // else's monster is exactly what a player needs the menu for.
-  const armLongPress = (event, token) => {
+  const armLongPress = useCallback((event, token) => {
     if (event.pointerType === 'mouse' || !onContextMenu) return;
     const at = { x: event.clientX, y: event.clientY };
     cancelLongPress();
@@ -442,9 +444,9 @@ export default function SceneViewport({
         onContextMenu(token, at);
       }, LONG_PRESS_MS),
     };
-  };
+  }, [cancelLongPress, onContextMenu]);
 
-  useEffect(() => cancelLongPress, []);
+  useEffect(() => cancelLongPress, [cancelLongPress]);
 
   // Two fingers are a pinch, whatever they landed on: whatever was being drawn,
   // painted or dragged is abandoned rather than continued with one of them.
@@ -590,7 +592,7 @@ export default function SceneViewport({
     };
   };
 
-  const beginTokenDrag = (event, token) => {
+  const beginTokenDrag = useCallback((event, token) => {
     event.stopPropagation();
     setSelectedMapObjectId(isMapPiece(token) ? token.id : null);
     armLongPress(event, token);
@@ -604,9 +606,9 @@ export default function SceneViewport({
     };
     setDrag({ id: token.id, x: token.x, y: token.y });
     event.currentTarget.setPointerCapture?.(event.pointerId);
-  };
+  }, [armLongPress, canMove, scene.grid, screenPoint, view]);
 
-  const beginTokenResize = (event, token) => {
+  const beginTokenResize = useCallback((event, token) => {
     event.stopPropagation();
     if (!canMove(token)) return;
     const width = Math.max(0.5, Number(token.w) || 1);
@@ -620,9 +622,9 @@ export default function SceneViewport({
     };
     setResize({ id: token.id, w: token.w || 1, h: token.h || 1 });
     event.currentTarget.setPointerCapture?.(event.pointerId);
-  };
+  }, [canMove, screenPoint, view]);
 
-  const beginTokenRotate = (event, token) => {
+  const beginTokenRotate = useCallback((event, token) => {
     event.stopPropagation();
     if (!canMove(token)) return;
     const rect = tokenWorldRect(token, scene.grid);
@@ -637,7 +639,7 @@ export default function SceneViewport({
     };
     setRotate({ id: token.id, rotation: Number(token.rotation) || 0 });
     event.currentTarget.setPointerCapture?.(event.pointerId);
-  };
+  }, [canMove, scene.grid, screenPoint, view]);
 
   const handlePointerMove = (event) => {
     const held = longPressRef.current;
@@ -1014,7 +1016,7 @@ export default function SceneViewport({
               transform: `translate(${topLeft.x}px, ${topLeft.y}px)`,
               width: scene.playArea.w * cell,
               height: scene.playArea.h * cell,
-              border: '2px dashed rgba(232,201,106,0.7)',
+              border: `2px dashed ${vttAlpha(VTT_COLORS.gold, 0.7)}`,
               boxSizing: 'border-box',
               pointerEvents: 'none',
             }}
@@ -1034,63 +1036,29 @@ export default function SceneViewport({
 
       <FogCanvas fog={backgroundOnly ? null : fog} grid={scene.grid} view={view} opacity={fogOpacity} />
 
-      {(backgroundOnly ? [] : tokens).map((token) => {
-        const moved = drag?.id === token.id ? { ...token, x: drag.x, y: drag.y } : token;
-        const sized = resize?.id === token.id ? { ...moved, w: resize.w, h: resize.h } : moved;
-        const live = rotate?.id === token.id ? { ...sized, rotation: rotate.rotation } : sized;
-        const rect = tokenWorldRect(live, scene.grid);
-        const at = worldToScreen(rect, view);
-        // A piece on another layer is visible but inert: no cursor, no drag, no
-        // menu. That is what "editing a layer" means here.
-        const onActiveLayer = !activeLayer || token.layer === activeLayer;
-        // A selected map tool owns the pointer, even when the gesture starts on
-        // top of a piece. Token interaction returns only with the cursor tool;
-        // otherwise rulers, brushes, notes and lasers could not start there.
-        const tokenInteractive = !cameraLocked && onActiveLayer && paintMode === 'select';
-        // Staged outside the play area: the GM sees it faintly, the players do
-        // not receive it at all.
-        const staged = showPlayArea && !isTokenInPlay(live, scene.playArea);
-        return (
-          <Box
-            key={token.id}
-            sx={{
-              position: 'absolute',
-              left: 0,
-              top: 0,
-              width: rect.width * view.zoom,
-              height: rect.height * view.zoom,
-              transform: `translate(${at.x}px, ${at.y}px)`,
-            }}
-          >
-            <TokenSprite
-              token={live}
-              size="100%"
-              dimmed={!onActiveLayer}
-              staged={staged}
-              interactive={tokenInteractive}
-              movable={tokenInteractive && canMove(token)}
-              resizable={tokenInteractive && selectedMapObjectId === token.id && canMove(token)}
-              rotatable={tokenInteractive && selectedMapObjectId === token.id && canMove(token)}
-              canSetDeathSaves={Boolean(tokenInteractive && canSetDeathSaves?.(token))}
-              conditionEntries={conditionEntries}
-              onPointerDown={tokenInteractive ? (event) => beginTokenDrag(event, token) : undefined}
-              onResizePointerDown={(event) => (
-                tokenInteractive ? beginTokenResize(event, token) : undefined
-              )}
-              onRotatePointerDown={(event) => (
-                tokenInteractive ? beginTokenRotate(event, token) : undefined
-              )}
-              onDeathSaveChange={(type, value) => onDeathSaveChange?.(token, type, value)}
-              onContextMenu={(event) => {
-                if (!tokenInteractive || !onContextMenu) return;
-                event.preventDefault();
-                event.stopPropagation();
-                onContextMenu(token, { x: event.clientX, y: event.clientY });
-              }}
-            />
-          </Box>
-        );
-      })}
+      <TokenLayer
+        tokens={backgroundOnly ? [] : tokens}
+        drag={drag}
+        resize={resize}
+        rotate={rotate}
+        view={view}
+        viewportSize={viewportSize}
+        grid={scene.grid}
+        activeLayer={activeLayer}
+        playArea={scene.playArea}
+        showPlayArea={showPlayArea}
+        cameraLocked={cameraLocked}
+        paintMode={paintMode}
+        canMove={canMove}
+        selectedMapObjectId={selectedMapObjectId}
+        canSetDeathSaves={canSetDeathSaves}
+        conditionEntries={conditionEntries}
+        onBeginDrag={beginTokenDrag}
+        onBeginResize={beginTokenResize}
+        onBeginRotate={beginTokenRotate}
+        onDeathSaveChange={onDeathSaveChange}
+        onContextMenu={onContextMenu}
+      />
 
       {placementDrag && placementHover && !backgroundOnly ? (() => {
         const token = { ...placementDrag.token, ...placementHover };
@@ -1109,7 +1077,7 @@ export default function SceneViewport({
               opacity: 0.88,
               pointerEvents: 'none',
               zIndex: 5,
-              filter: 'drop-shadow(0 5px 8px rgba(0,0,0,0.75))',
+              filter: `drop-shadow(0 5px 8px ${vttAlpha(VTT_COLORS.black, 0.75)})`,
             }}
           >
             <TokenSprite
@@ -1234,12 +1202,12 @@ export default function SceneViewport({
               // than sitting on it.
               transform: `translate(${centre.x}px, ${centre.y}px) translate(-50%, -78%)`,
               pointerEvents: 'none',
-              color: '#e8c96a',
-              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.85))',
+              color: VTT_COLORS.gold,
+              filter: `drop-shadow(0 2px 4px ${vttAlpha(VTT_COLORS.black, 0.85)})`,
               zIndex: 5,
             }}
           >
-            <MapPin size={glyph} fill="rgba(26,23,19,0.85)" strokeWidth={2} />
+            <MapPin size={glyph} fill={vttAlpha(VTT_COLORS.surfaceRaised, 0.85)} strokeWidth={2} />
           </Box>
         );
       })() : null}
@@ -1304,8 +1272,8 @@ export default function SceneViewport({
             height: brushRadius * 2,
             transform: `translate(${hover.x - brushRadius}px, ${hover.y - brushRadius}px)`,
             borderRadius: '50%',
-            border: '1px solid rgba(255,255,255,0.85)',
-            boxShadow: '0 0 0 1px rgba(0,0,0,0.6) inset',
+            border: `1px solid ${vttAlpha(VTT_COLORS.white, 0.85)}`,
+            boxShadow: `0 0 0 1px ${vttAlpha(VTT_COLORS.black, 0.6)} inset`,
             pointerEvents: 'none',
             zIndex: 4,
           }}
@@ -1424,7 +1392,7 @@ const hostSx = {
   border: '1px solid',
   borderColor: 'divider',
   borderRadius: 1,
-  bgcolor: '#0b0a09',
+  bgcolor: VTT_COLORS.viewport,
   touchAction: 'none',
   // The fullscreen element keeps its own height rule, or the map would sit in a
   // letterboxed strip in the middle of a black screen. The webkit spelling is
@@ -1457,10 +1425,10 @@ function playAreaBox(scene, view) {
 const roundBtnSx = {
   position: 'absolute',
   zIndex: 6,
-  color: '#e8c96a',
-  bgcolor: 'rgba(15,14,13,0.8)',
-  border: '1px solid rgba(232,201,106,0.35)',
-  '&:hover': { bgcolor: 'rgba(15,14,13,0.95)' },
+  color: VTT_COLORS.gold,
+  bgcolor: vttAlpha(VTT_COLORS.ink, 0.8),
+  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.35)}`,
+  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.ink, 0.95) },
 };
 
 const fullscreenSheetButtonSx = {
@@ -1470,12 +1438,12 @@ const fullscreenSheetButtonSx = {
   zIndex: 7,
   height: 32,
   minWidth: 88,
-  borderColor: 'rgba(232,201,106,0.42)',
-  bgcolor: 'rgba(15,14,13,0.82)',
+  borderColor: vttAlpha(VTT_COLORS.gold, 0.42),
+  bgcolor: vttAlpha(VTT_COLORS.ink, 0.82),
   fontFamily: '"Cinzel", Georgia, serif',
   fontSize: '0.62rem',
   letterSpacing: '0.07em',
-  '&:hover': { bgcolor: 'rgba(15,14,13,0.96)' },
+  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.ink, 0.96) },
 };
 
 // Bottom right, above everything, and out of the way of the pieces.
@@ -1532,8 +1500,8 @@ const distanceSx = {
   top: 0,
   px: 0.75,
   borderRadius: 1,
-  bgcolor: 'rgba(15,14,13,0.9)',
-  color: '#e8c96a',
+  bgcolor: vttAlpha(VTT_COLORS.ink, 0.9),
+  color: VTT_COLORS.gold,
   fontFamily: '"Cinzel", Georgia, serif',
   fontSize: '0.65rem',
   whiteSpace: 'nowrap',
@@ -1548,9 +1516,9 @@ const placementCountSx = {
   height: 24,
   px: 0.5,
   borderRadius: 12,
-  bgcolor: '#e8c96a',
-  color: '#0f0e0d',
-  border: '1px solid #0f0e0d',
+  bgcolor: VTT_COLORS.gold,
+  color: VTT_COLORS.ink,
+  border: `1px solid ${VTT_COLORS.ink}`,
   fontSize: '0.7rem',
   fontWeight: 900,
   lineHeight: '22px',

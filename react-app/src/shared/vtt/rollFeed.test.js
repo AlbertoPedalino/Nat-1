@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   MAX_FEED,
+  MAX_ROLL_ID_LENGTH,
   ROLL_TTL_MS,
   addRoll,
   currentBubbles,
@@ -30,6 +31,14 @@ test('a roll keeps what the sheet showed', () => {
   assert.equal(entry.mode, 'advantage');
   assert.equal(entry.bonus, 4, 'the flat modifier travels too, so the bubble can lay it out');
   assert.equal(entry.at, 1000);
+});
+
+test('a normalized roll can pass through the feed again without losing its metadata', () => {
+  const normalized = normalizeRoll(roll({ meta: { mode: 'disadvantage', bonus: -2 } }));
+  const again = normalizeRoll(normalized);
+  assert.equal(again.at, 1000);
+  assert.equal(again.mode, 'disadvantage');
+  assert.equal(again.bonus, -2);
 });
 
 // A rest or a death-save guard has no total; it is still worth showing.
@@ -165,6 +174,76 @@ test('the shared toast waits for dice but shows notices immediately', () => {
 
   const notice = roll({ id: 'notice', rolls: [], total: null });
   assert.equal(queueRollToast(notice, pending), notice);
+});
+
+test('shared roll payloads bound identifiers and discard impossible dice and numbers', () => {
+  const before = Date.now();
+  const entry = normalizeRoll({
+    id: 'x'.repeat(MAX_ROLL_ID_LENGTH + 40),
+    characterId: 'c'.repeat(200),
+    actorName: 'Aria',
+    label: 'Hostile payload',
+    detail: 'Still safe to display',
+    total: Infinity,
+    rolls: [
+      { faces: 6, v: 4, kept: true },
+      { faces: 6, v: 900 },
+      { faces: 1, v: 1 },
+      { faces: '8', v: '2', kept: false },
+      null,
+    ],
+    meta: { mode: 'secret', bonus: Infinity },
+    thrown: true,
+    timestamp: Infinity,
+  });
+
+  assert.equal(entry.id.length, MAX_ROLL_ID_LENGTH);
+  assert.equal(entry.characterId.length, 120);
+  assert.equal(entry.total, null);
+  assert.deepEqual(entry.rolls, [
+    { faces: 6, v: 4, kept: true },
+    { faces: 8, v: 2, kept: false },
+  ]);
+  assert.equal(entry.mode, null);
+  assert.equal(entry.bonus, null);
+  assert.equal(entry.thrown, true);
+  assert.ok(entry.at >= before && entry.at <= Date.now());
+});
+
+test('a shared roll preserves every valid die and never throws an invalid set', () => {
+  const many = Array.from({ length: 125 }, () => ({ faces: 6, v: 3 }));
+  const normalized = normalizeRoll(roll({ rolls: many, thrown: true }));
+  const invalid = normalizeRoll(roll({ rolls: [{ faces: 6, v: 7 }], thrown: true }));
+
+  assert.equal(normalized.rolls.length, many.length);
+  assert.equal(normalized.thrown, true);
+  assert.deepEqual(invalid.rolls, []);
+  assert.equal(invalid.thrown, false);
+});
+
+test('a newer physical roll surfaces the superseded toast and replaces its pending slot', () => {
+  const pending = new Map();
+  const first = roll({ id: 'sheet-roll-1', thrown: true });
+  const second = roll({ id: 'sheet-roll-2', thrown: true, timestamp: 1001 });
+
+  assert.equal(queueRollToast(first, pending), null);
+  assert.equal(queueRollToast(second, pending), first);
+  assert.deepEqual([...pending.keys()], ['sheet-roll-2']);
+});
+
+test('physical toast queues stay independent for different rollers', () => {
+  const pending = new Map();
+  const aria = roll({ id: 'aria-roll', thrown: true });
+  const brom = roll({
+    id: 'brom-roll',
+    characterId: 'char-2',
+    actorName: 'Brom',
+    thrown: true,
+  });
+
+  assert.equal(queueRollToast(aria, pending), null);
+  assert.equal(queueRollToast(brom, pending), null);
+  assert.deepEqual([...pending.keys()], ['aria-roll', 'brom-roll']);
 });
 
 test('dice are cleared once the roll is history', () => {

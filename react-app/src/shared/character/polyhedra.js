@@ -373,6 +373,10 @@ export function dieGeometry(sides, radius = 16) {
   return geometry;
 }
 
+// The same solid in a renderer/physics-neutral form. CSS needs one transform
+// per face; WebGL and a rigid-body engine need actual points and polygon
+// indices. Keeping both projections here prevents the visible die and its
+// collider from slowly becoming two different shapes.
 function percent(value, size) {
   return round(50 + (value / size) * 100);
 }
