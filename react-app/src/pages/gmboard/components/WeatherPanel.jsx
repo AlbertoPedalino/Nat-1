@@ -6,7 +6,7 @@ import { weatherEffectLabel, weatherTimerLabel } from '../logic/weather.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 
 export default function WeatherPanel() {
-  const { state, dispatch } = useGmBoard();
+  const { state, setSeason, setWeatherOverride } = useGmBoard();
   const theme = useTheme();
   const seasonContract = SELECTOR_CONTRACTS.season;
   const weatherContract = SELECTOR_CONTRACTS.weatherOverride;
@@ -24,7 +24,7 @@ export default function WeatherPanel() {
           options={seasonContract.options}
           getId={seasonContract.getId}
           value={seasonContract.deriveValue(state)}
-          onChange={(o) => dispatch(seasonContract.action(o))}
+          onChange={(o) => setSeason(o.id)}
           getIcon={(o) => SEASON_ICONS[o.id]}
         />
         <SelectorGroup
@@ -32,7 +32,7 @@ export default function WeatherPanel() {
           options={weatherContract.options}
           getId={weatherContract.getId}
           value={weatherContract.deriveValue(state)}
-          onChange={(o) => dispatch(weatherContract.action(o))}
+          onChange={(o) => setWeatherOverride({ meteo: o.meteo, intensity: o.intensity })}
           getIcon={(o) => WEATHER_ICONS[o.meteo]}
         />
       </Box>

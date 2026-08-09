@@ -5,6 +5,7 @@ import {
   listHexCells,
   readCampaignHexcrawlBoard,
   readHexcrawlBoard,
+  readHexcrawlBoardVersion,
   saveHexCell,
   subscribeHexcrawl,
 } from '../../../shared/cloud/hexcrawl.js';
@@ -30,6 +31,7 @@ const DEFAULTS_KEY = 'gb:hexcrawl:defaults:';
 // Long enough to read three lines and decide whether to open the rolls, short
 // enough that a bubble is never still sitting on the map two hexes later.
 const BUBBLE_MS = 12000;
+const BOARD_REFRESH_MS = 5000;
 // `mountSpeed` is null rather than 1 on purpose: null means "whatever the board
 // says the party is riding", and a 1 would silently put them back on foot the
 // first time this map was opened.
@@ -60,6 +62,9 @@ export function useSceneHexcrawl({ scene, isGm }) {
   const [cells, setCells] = useState([]);
   const [selected, setSelected] = useState(null);
   const [board, setBoard] = useState(null);
+  const boardRef = useRef(null);
+  const boardScopeRef = useRef(enabled && campaignId ? campaignId : null);
+  const boardRefreshQueueRef = useRef(Promise.resolve(null));
   const [result, setResult] = useState(null);
   // The bubble is the answer; the dialog is the working behind it, opened only
   // when the GM asks for it. Walking a party across a map is a dozen small
@@ -137,19 +142,61 @@ export function useSceneHexcrawl({ scene, isGm }) {
 
   // The tables come from the board this campaign was linked to, which is the
   // pointer the database keeps — not from whatever board this browser happens to
-  // have open.
-  useEffect(() => {
-    let cancelled = false;
-    if (!enabled || !campaignId) {
-      setBoard(null);
-      return () => { cancelled = true; };
-    }
-    readCampaignHexcrawlBoard(campaignId)
-      .then((boardId) => (boardId ? readHexcrawlBoard(boardId) : null))
-      .then((loaded) => { if (!cancelled) setBoard(loaded); })
-      .catch(() => { if (!cancelled) setBoard(null); });
-    return () => { cancelled = true; };
+  // have open. A lightweight version check keeps an already-open VTT current
+  // when the board is edited in another tool or on another device. Every roll
+  // also forces one fresh read, so it can never use stale custom tables between
+  // two polling ticks.
+  const refreshBoard = useCallback(({ force = false } = {}) => {
+    const refresh = async () => {
+      const scope = enabled && campaignId ? campaignId : null;
+      if (!scope || scope !== boardScopeRef.current) return null;
+      const boardId = await readCampaignHexcrawlBoard(campaignId);
+      if (scope !== boardScopeRef.current) return boardRef.current;
+      if (!boardId) {
+        boardRef.current = null;
+        setBoard(null);
+        return null;
+      }
+      const current = boardRef.current;
+      if (!force && current?.id === boardId) {
+        const updatedAt = await readHexcrawlBoardVersion(boardId);
+        if (scope !== boardScopeRef.current) return boardRef.current;
+        if (updatedAt <= current.updatedAt) return current;
+      }
+      const loaded = await readHexcrawlBoard(boardId);
+      if (scope !== boardScopeRef.current) return boardRef.current;
+      boardRef.current = loaded;
+      setBoard(loaded);
+      return loaded;
+    };
+    const queued = boardRefreshQueueRef.current.catch(() => null).then(refresh);
+    boardRefreshQueueRef.current = queued;
+    return queued;
   }, [campaignId, enabled]);
+
+  useEffect(() => {
+    const scope = enabled && campaignId ? campaignId : null;
+    boardScopeRef.current = scope;
+    if (!scope) {
+      boardRef.current = null;
+      setBoard(null);
+      return undefined;
+    }
+    let cancelled = false;
+    const refresh = () => refreshBoard().catch(() => {
+      if (!cancelled && !boardRef.current) setBoard(null);
+    });
+    refresh();
+    const timer = setInterval(refresh, BOARD_REFRESH_MS);
+    const onFocus = () => refresh();
+    window.addEventListener('focus', onFocus);
+    return () => {
+      cancelled = true;
+      if (boardScopeRef.current === scope) boardScopeRef.current = null;
+      clearInterval(timer);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [refreshBoard]);
 
   useEffect(() => {
     if (!visible) return undefined;
@@ -193,12 +240,12 @@ export function useSceneHexcrawl({ scene, isGm }) {
   // the hex that was clicked, not for whichever one a render has caught up with.
   const enterHexAt = useCallback(async (hex, mode = 'proceed') => {
     if (!enabled || !hex) return null;
-    if (!board) {
-      setError('This campaign has no hexcrawl board linked. Link one from the GM Board.');
-      return null;
-    }
     setBusy(true);
     try {
+      const activeBoard = await refreshBoard({ force: true });
+      if (!activeBoard) {
+        throw new Error('This campaign has no hexcrawl board linked. Link one from the GM Board.');
+      }
       // An untouched hex takes the map's defaults, and keeps them: after this it
       // is a hex with a terrain, not one that happened to be rolled as forest.
       const filled = {
@@ -207,7 +254,7 @@ export function useSceneHexcrawl({ scene, isGm }) {
         pop: hex.pop || defaults.pop,
         tier: hex.tier ?? defaults.tier,
       };
-      const merged = mergeBoardClock(board.state, clock.clock);
+      const merged = mergeBoardClock(activeBoard.state, clock.clock);
       // The mount is the map's when this map has been given one, and the
       // board's otherwise: a party can ride out of a city on one screen and the
       // GM should not have to go back to the board to say so.
@@ -216,7 +263,7 @@ export function useSceneHexcrawl({ scene, isGm }) {
         mountSpeed: defaults.mountSpeed ?? merged.mountSpeed ?? 1,
       };
       const entry = runHexEntry({
-        board: boardState, hex: filled, tables: board.tables, mode,
+        board: boardState, hex: filled, tables: activeBoard.tables, mode,
       });
       setResult({ ...entry.result, hex: filled, clock: entry.clock });
       const summary = hexEntrySummary(entry.result);
@@ -266,7 +313,7 @@ export function useSceneHexcrawl({ scene, isGm }) {
     } finally {
       setBusy(false);
     }
-  }, [board, clock, defaults, enabled, sceneId, storeCell]);
+  }, [clock, defaults, enabled, refreshBoard, sceneId, storeCell]);
 
   // Taking a hex back. The terrain, population and tier stay — those are what
   // the hex *is*, and re-entering it should not mean setting it up again. What

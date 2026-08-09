@@ -134,4 +134,17 @@ test('date and time also update the shared clock of a linked campaign', async ()
     year: 1234,
     min: 22 * 60 + 5,
   })));
+
+  act(() => board.setSeason('Winter'));
+  await waitFor(() => expect(campaignClock.saveClock).toHaveBeenLastCalledWith(expect.objectContaining({
+    season: 'Winter',
+    min: 22 * 60 + 5,
+  })));
+
+  act(() => board.setWeatherOverride({ meteo: 'Snow', intensity: 'Heavy' }));
+  await waitFor(() => expect(campaignClock.saveClock).toHaveBeenLastCalledWith(expect.objectContaining({
+    season: 'Winter',
+    meteo: 'Snow',
+    intensity: 'Heavy',
+  })));
 });

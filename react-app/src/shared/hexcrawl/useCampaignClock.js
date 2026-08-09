@@ -23,8 +23,15 @@ export function useCampaignClock(campaignId, { withLog = false } = {}) {
   // The last clock this browser wrote. An echo of our own write carries nothing
   // new, and applying it would fight whatever the GM did in the meantime.
   const lastWriteRef = useRef(0);
+  // Date, weather and map movement can be changed within the same render tick.
+  // Preserve the order the GM made those changes instead of racing two upserts.
+  const saveQueueRef = useRef(Promise.resolve(null));
 
   const active = Boolean(cloudEnabled && campaignId && status === 'authed');
+
+  useEffect(() => {
+    lastWriteRef.current = 0;
+  }, [active, campaignId]);
 
   const refresh = useCallback(async () => {
     if (!active) {
@@ -63,18 +70,23 @@ export function useCampaignClock(campaignId, { withLog = false } = {}) {
 
   // Returns the row as saved, so a caller can tell whether the clock it just
   // pushed is the one the table is now on.
-  const saveClock = useCallback(async (next, { logEntry = null } = {}) => {
-    if (!active) return null;
-    const saved = await saveCampaignClock(campaignId, next);
-    lastWriteRef.current = saved?.updatedAt || Date.now();
-    setState((current) => ({ ...current, clock: saved }));
-    if (logEntry) {
-      const entry = await appendCampaignLog(campaignId, logEntry);
-      if (entry && withLog) {
-        setState((current) => ({ ...current, log: [entry, ...current.log].slice(0, 50) }));
+  const saveClock = useCallback((next, { logEntry = null } = {}) => {
+    if (!active) return Promise.resolve(null);
+    const save = async () => {
+      const saved = await saveCampaignClock(campaignId, next);
+      lastWriteRef.current = saved?.updatedAt || Date.now();
+      setState((current) => ({ ...current, clock: saved }));
+      if (logEntry) {
+        const entry = await appendCampaignLog(campaignId, logEntry);
+        if (entry && withLog) {
+          setState((current) => ({ ...current, log: [entry, ...current.log].slice(0, 50) }));
+        }
       }
-    }
-    return saved;
+      return saved;
+    };
+    const queued = saveQueueRef.current.catch(() => null).then(save);
+    saveQueueRef.current = queued;
+    return queued;
   }, [active, campaignId, withLog]);
 
   return {

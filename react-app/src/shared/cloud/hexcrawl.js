@@ -203,6 +203,19 @@ export async function readHexcrawlBoard(boardId) {
   };
 }
 
+export async function readHexcrawlBoardVersion(boardId) {
+  const id = sanitizeBoardId(boardId);
+  if (!id) return 0;
+  const supabase = requireClient();
+  const { data, error } = await supabase
+    .from('boards')
+    .select('updated_at')
+    .eq('id', id)
+    .maybeSingle();
+  if (error) throw error;
+  return Date.parse(data?.updated_at) || 0;
+}
+
 // Realtime, same shape as the scene channels: the GM's map and the GM's board
 // are two browsers as often as they are two tabs.
 export function subscribeHexcrawl({ campaignId, sceneId, onClock, onCell }) {

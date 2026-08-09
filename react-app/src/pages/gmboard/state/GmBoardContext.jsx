@@ -30,6 +30,8 @@ export function GmBoardProvider({ instanceId, instanceSaved, linkGroupId, onInst
   const campaignClock = useCampaignClock(state.campaignId);
   const [clockError, setClockError] = useState(null);
   const appliedClockRef = useRef(null);
+  const clockStateRef = useRef(state);
+  clockStateRef.current = state;
 
   useEffect(() => {
     const clock = campaignClock.clock;
@@ -50,25 +52,44 @@ export function GmBoardProvider({ instanceId, instanceSaved, linkGroupId, onInst
       .catch((cause) => setClockError(cause?.message || 'Could not save the campaign clock.'));
   }, [campaignClock, state.season]);
 
-  const pushClockState = useCallback((nextState) => {
+  const pushClockState = useCallback((nextState, patch) => {
     if (!campaignClock.active) return;
     campaignClock
-      .saveClock(clockFromState(nextState))
+      // Seed every field when the campaign has no clock yet. Afterwards only
+      // write what the GM changed, so a map move in another tab cannot have its
+      // newer weather or date overwritten by an unrelated selector.
+      .saveClock(campaignClock.clock ? patch : clockFromState(nextState))
       .then(() => setClockError(null))
       .catch((cause) => setClockError(cause?.message || 'Could not save the campaign clock.'));
   }, [campaignClock]);
 
   const setStart = useCallback(({ day, month, year, min }) => {
-    const nextState = { ...state, day, month, year, min, log: [] };
+    const nextState = { ...clockStateRef.current, day, month, year, min, log: [] };
+    clockStateRef.current = nextState;
     dispatch({ type: 'setStart', day, month, year, min });
-    pushClockState(nextState);
-  }, [pushClockState, state]);
+    pushClockState(nextState, { day, month, year, min });
+  }, [pushClockState]);
 
   const setTime = useCallback((min) => {
-    const nextState = { ...state, min };
+    const nextState = { ...clockStateRef.current, min };
+    clockStateRef.current = nextState;
     dispatch({ type: 'setTimeOnly', min });
-    pushClockState(nextState);
-  }, [pushClockState, state]);
+    pushClockState(nextState, { min });
+  }, [pushClockState]);
+
+  const setSeason = useCallback((season) => {
+    const nextState = { ...clockStateRef.current, season };
+    clockStateRef.current = nextState;
+    dispatch({ type: 'setSeason', season });
+    pushClockState(nextState, { season: season || null });
+  }, [pushClockState]);
+
+  const setWeatherOverride = useCallback(({ meteo, intensity }) => {
+    const nextState = { ...clockStateRef.current, meteo, intensity };
+    clockStateRef.current = nextState;
+    dispatch({ type: 'setWeatherOverride', meteo, intensity });
+    pushClockState(nextState, { meteo, intensity });
+  }, [pushClockState]);
 
   const proceed = useCallback(() => {
     const result = resolveProceed(state, state.tables, Math.random);
@@ -129,6 +150,8 @@ export function GmBoardProvider({ instanceId, instanceSaved, linkGroupId, onInst
     resetTables,
     setStart,
     setTime,
+    setSeason,
+    setWeatherOverride,
     proceed,
     advanceOnly,
     advanceManual,
@@ -137,7 +160,7 @@ export function GmBoardProvider({ instanceId, instanceSaved, linkGroupId, onInst
     bindCampaign,
     campaignLinked: campaignClock.active,
     clockError: clockError || campaignClock.error,
-  }), [state, instanceId, instanceSaved, saveInstance, resetTables, setStart, setTime, proceed, advanceOnly, advanceManual, generateDungeon, generateQuests, bindCampaign, campaignClock.active, campaignClock.error, clockError]);
+  }), [state, instanceId, instanceSaved, saveInstance, resetTables, setStart, setTime, setSeason, setWeatherOverride, proceed, advanceOnly, advanceManual, generateDungeon, generateQuests, bindCampaign, campaignClock.active, campaignClock.error, clockError]);
 
   return (
     <GmBoardContext.Provider value={value}>
