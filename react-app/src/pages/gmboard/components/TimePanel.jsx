@@ -6,7 +6,7 @@ import { formatDate, formatHM, parseHM, validateStart } from '../logic/time.js';
 import { effectiveHours } from '../logic/weather.js';
 
 export default function TimePanel() {
-  const { state, dispatch, advanceManual } = useGmBoard();
+  const { state, setStart, setTime, advanceManual } = useGmBoard();
   const theme = useTheme();
   const [day, setDay] = useState(String(state.day));
   const [month, setMonth] = useState(String(state.month));
@@ -34,7 +34,7 @@ export default function TimePanel() {
       return;
     }
     setStartError('');
-    dispatch({ type: 'setStart', day: parsed.day, month: parsed.month, year: parsed.year, min: parsed.min });
+    setStart(parsed);
   };
 
   const handleSetTime = () => {
@@ -44,7 +44,7 @@ export default function TimePanel() {
       return;
     }
     setTimeError('');
-    dispatch({ type: 'setTimeOnly', min });
+    setTime(min);
   };
 
   const handleManualAdvance = () => {

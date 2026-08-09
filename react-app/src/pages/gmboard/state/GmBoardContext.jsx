@@ -4,7 +4,7 @@ import {
 import { gmBoardReducer, createInitialState } from './reducer.js';
 import { useGmBoardPersistence } from '../hooks/useGmBoardPersistence.js';
 import { resolveProceed, resolveAdvanceOnly, resolveManualAdvance } from '../logic/hex.js';
-import { clockFromResult } from '../../../shared/hexcrawl/hexEntry.js';
+import { clockFromResult, clockFromState } from '../../../shared/hexcrawl/hexEntry.js';
 import { useCampaignClock } from '../../../shared/hexcrawl/useCampaignClock.js';
 import { setCampaignHexcrawlBoard } from '../../../shared/cloud/hexcrawl.js';
 import { createDungeon, isValidRoomCount } from '../logic/dungeon.js';
@@ -49,6 +49,26 @@ export function GmBoardProvider({ instanceId, instanceSaved, linkGroupId, onInst
       .then(() => setClockError(null))
       .catch((cause) => setClockError(cause?.message || 'Could not save the campaign clock.'));
   }, [campaignClock, state.season]);
+
+  const pushClockState = useCallback((nextState) => {
+    if (!campaignClock.active) return;
+    campaignClock
+      .saveClock(clockFromState(nextState))
+      .then(() => setClockError(null))
+      .catch((cause) => setClockError(cause?.message || 'Could not save the campaign clock.'));
+  }, [campaignClock]);
+
+  const setStart = useCallback(({ day, month, year, min }) => {
+    const nextState = { ...state, day, month, year, min, log: [] };
+    dispatch({ type: 'setStart', day, month, year, min });
+    pushClockState(nextState);
+  }, [pushClockState, state]);
+
+  const setTime = useCallback((min) => {
+    const nextState = { ...state, min };
+    dispatch({ type: 'setTimeOnly', min });
+    pushClockState(nextState);
+  }, [pushClockState, state]);
 
   const proceed = useCallback(() => {
     const result = resolveProceed(state, state.tables, Math.random);
@@ -107,6 +127,8 @@ export function GmBoardProvider({ instanceId, instanceSaved, linkGroupId, onInst
     instanceSaved,
     saveInstance,
     resetTables,
+    setStart,
+    setTime,
     proceed,
     advanceOnly,
     advanceManual,
@@ -115,7 +137,7 @@ export function GmBoardProvider({ instanceId, instanceSaved, linkGroupId, onInst
     bindCampaign,
     campaignLinked: campaignClock.active,
     clockError: clockError || campaignClock.error,
-  }), [state, instanceId, instanceSaved, saveInstance, resetTables, proceed, advanceOnly, advanceManual, generateDungeon, generateQuests, bindCampaign, campaignClock.active, campaignClock.error, clockError]);
+  }), [state, instanceId, instanceSaved, saveInstance, resetTables, setStart, setTime, proceed, advanceOnly, advanceManual, generateDungeon, generateQuests, bindCampaign, campaignClock.active, campaignClock.error, clockError]);
 
   return (
     <GmBoardContext.Provider value={value}>
