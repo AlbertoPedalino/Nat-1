@@ -1,6 +1,6 @@
-import { useId, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Box, Button, Stack, Tab, Tabs, Typography, useTheme } from '@mui/material';
-import { AlertTriangle, CloudRain, Coins, Flame, Leaf, Map, RotateCcw, Save, Swords, Table as TableIcon } from 'lucide-react';
+import { AlertTriangle, CloudRain, Coins, Flame, Leaf, Map, RotateCcw, Swords, Table as TableIcon } from 'lucide-react';
 import TableEditorGrid from './TableEditorGrid.jsx';
 import { EDITOR_TABS } from '../logic/constants.js';
 import { confirmDiscard } from '../logic/confirmDiscard.js';
@@ -78,11 +78,10 @@ function editorIcon(tab) {
 }
 
 export default function TablesView() {
-  const { state, dispatch, saveTables, resetTables, instanceSaved } = useGmBoard();
+  const { state, dispatch, resetTables } = useGmBoard();
   const { notify } = useToast();
   const theme = useTheme();
   const [editorId, setEditorId] = useState(EDITOR_TABS[0].id);
-  const saveHintId = useId();
 
   const activeTab = EDITOR_TABS.find((tab) => tab.id === editorId) || EDITOR_TABS[0];
   const ActiveIcon = editorIcon(activeTab);
@@ -90,11 +89,6 @@ export default function TablesView() {
 
   const handleEdit = (matchValue, field, value) => {
     dispatch({ type: 'editTableCell', tableKey: source.tableKey, matchField: source.matchField, matchValue, field, value });
-  };
-
-  const handleSave = () => {
-    const saved = saveTables();
-    notify(saved ? 'success' : 'error', saved ? 'Tables saved.' : 'Save the board instance first.');
   };
 
   const handleReset = () => {
@@ -106,24 +100,10 @@ export default function TablesView() {
   return (
     <Stack spacing={2}>
       <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" rowGap={0.5}>
-        <Button
-          size="small"
-          variant="contained"
-          startIcon={<Save size={14} />}
-          onClick={handleSave}
-          disabled={!instanceSaved}
-          aria-describedby={!instanceSaved ? saveHintId : undefined}
-        >
-          Save tables
-        </Button>
         <Button size="small" variant="outlined" color="error" startIcon={<RotateCcw size={14} />} onClick={handleReset}>
           Reset to defaults
         </Button>
-        {!instanceSaved ? (
-          <Typography id={saveHintId} sx={saveHintSx}>
-            Save the board instance first — table edits apply immediately but only persist after that.
-          </Typography>
-        ) : null}
+        <Typography sx={saveHintSx}>Table edits save automatically.</Typography>
       </Stack>
 
       <Tabs

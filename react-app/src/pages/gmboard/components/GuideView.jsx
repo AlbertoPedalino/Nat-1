@@ -84,9 +84,8 @@ export default function GuideView() {
 
       <GuideCard title="Table Editor" icon={TableIcon}>
         <GuideRow>All tables are editable from the <strong>Tables</strong> tab. Edits apply immediately to
-          generation, but are only written to storage when you press <strong>Save tables</strong> — reloading
-          the board without saving restores the last saved values. <strong>Reset to defaults</strong> restores
-          the original tables after confirmation.</GuideRow>
+          generation and are saved automatically, locally and to the cloud when signed in. <strong>Reset to
+          defaults</strong> restores the original tables after confirmation and saves that reset.</GuideRow>
         <GuideRow>The <strong>type</strong> field on the Event Table uses fixed keywords: <Kw>encounter</Kw>
           {' '}· <Kw>loot</Kw> · <Kw>camp_nemico</Kw> · <Kw>other</Kw> · <Kw>nothing</Kw>.</GuideRow>
         <GuideRow>The <strong>type</strong> field on the Complication Table uses (case sensitive):{' '}

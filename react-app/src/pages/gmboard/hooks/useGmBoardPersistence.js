@@ -7,12 +7,12 @@ import {
   registerBoardInstance,
 } from '../storage.js';
 import { extractCoreState } from '../state/reducer.js';
-import { createDefaultTables } from '../logic/defaultTables.js';
 
 export function useGmBoardPersistence({ instanceId, instanceSaved, linkGroupId, state, dispatch, onSaved }) {
   const hydratedRef = useRef(false);
   const hydratedForRef = useRef('');
   const skipCorePersistRef = useRef(false);
+  const skipTablesPersistRef = useRef(false);
   const skipResultsPersistRef = useRef(false);
 
   useEffect(() => {
@@ -28,6 +28,7 @@ export function useGmBoardPersistence({ instanceId, instanceSaved, linkGroupId, 
     }
     const persisted = readPersistedBoard(instanceId);
     skipCorePersistRef.current = true;
+    skipTablesPersistRef.current = true;
     skipResultsPersistRef.current = true;
     dispatch({ type: 'hydrate', payload: persisted });
     hydratedRef.current = true;
@@ -44,6 +45,15 @@ export function useGmBoardPersistence({ instanceId, instanceSaved, linkGroupId, 
     persistBoardState(instanceId, coreState);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [instanceId, instanceSaved, JSON.stringify(coreState)]);
+
+  useEffect(() => {
+    if (!instanceSaved || !hydratedRef.current) return;
+    if (skipTablesPersistRef.current) {
+      skipTablesPersistRef.current = false;
+      return;
+    }
+    persistBoardTables(instanceId, state.tables);
+  }, [instanceId, instanceSaved, state.tables]);
 
   useEffect(() => {
     if (!instanceSaved || !hydratedRef.current) return;
@@ -67,17 +77,9 @@ export function useGmBoardPersistence({ instanceId, instanceSaved, linkGroupId, 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [instanceId, instanceSaved, linkGroupId, onSaved, state]);
 
-  const saveTables = useCallback(() => {
-    if (!instanceSaved) return false;
-    persistBoardTables(instanceId, state.tables);
-    return true;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [instanceId, instanceSaved, state.tables]);
-
   const resetTables = useCallback(() => {
     dispatch({ type: 'resetTables' });
-    if (instanceSaved) persistBoardTables(instanceId, createDefaultTables());
-  }, [dispatch, instanceId, instanceSaved]);
+  }, [dispatch]);
 
-  return { saveInstance, saveTables, resetTables };
+  return { saveInstance, resetTables };
 }

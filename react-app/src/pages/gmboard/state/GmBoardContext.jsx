@@ -14,7 +14,7 @@ const GmBoardContext = createContext(null);
 
 export function GmBoardProvider({ instanceId, instanceSaved, linkGroupId, onInstanceSaved, children }) {
   const [state, dispatch] = useReducer(gmBoardReducer, undefined, createInitialState);
-  const { saveInstance, saveTables, resetTables } = useGmBoardPersistence({
+  const { saveInstance, resetTables } = useGmBoardPersistence({
     instanceId,
     instanceSaved,
     linkGroupId,
@@ -106,7 +106,6 @@ export function GmBoardProvider({ instanceId, instanceSaved, linkGroupId, onInst
     instanceId,
     instanceSaved,
     saveInstance,
-    saveTables,
     resetTables,
     proceed,
     advanceOnly,
@@ -116,7 +115,7 @@ export function GmBoardProvider({ instanceId, instanceSaved, linkGroupId, onInst
     bindCampaign,
     campaignLinked: campaignClock.active,
     clockError: clockError || campaignClock.error,
-  }), [state, instanceId, instanceSaved, saveInstance, saveTables, resetTables, proceed, advanceOnly, advanceManual, generateDungeon, generateQuests, bindCampaign, campaignClock.active, campaignClock.error, clockError]);
+  }), [state, instanceId, instanceSaved, saveInstance, resetTables, proceed, advanceOnly, advanceManual, generateDungeon, generateQuests, bindCampaign, campaignClock.active, campaignClock.error, clockError]);
 
   return (
     <GmBoardContext.Provider value={value}>
