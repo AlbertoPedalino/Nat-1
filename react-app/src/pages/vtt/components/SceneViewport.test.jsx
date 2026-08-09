@@ -529,6 +529,36 @@ test('clicking the board of a hex map picks a hex, dragging it still pans', () =
   expect(onHexClick).not.toHaveBeenCalled();
 });
 
+test('a hex outside the play area cannot be selected or rolled', () => {
+  const onHexClick = vi.fn();
+  render(
+    <SceneViewport
+      scene={{ ...HEX_SCENE, playArea: { x: 1, y: 1, w: 2, h: 2 } }}
+      imageUrl={null}
+      tokens={[]}
+      snap
+      canMove={() => false}
+      fog={null}
+      onHexClick={onHexClick}
+      drawings={[]}
+      lasers={[]}
+      rollBubbles={[]}
+      diceThrows={[]}
+    />,
+  );
+  const viewport = screen.getByText('Upload a map image to start building this scene.').parentElement;
+
+  // The play area begins at screen point 50,50. The infinite hex lattice still
+  // has a cell at 25,25, but that staging-space cell must not trigger a crawl.
+  fireEvent.pointerDown(viewport, { button: 0, clientX: 25, clientY: 25, pointerId: 53 });
+  fireEvent.pointerUp(viewport, { button: 0, clientX: 25, clientY: 25, pointerId: 53 });
+  expect(onHexClick).not.toHaveBeenCalled();
+
+  fireEvent.pointerDown(viewport, { button: 0, clientX: 75, clientY: 75, pointerId: 54 });
+  fireEvent.pointerUp(viewport, { button: 0, clientX: 75, clientY: 75, pointerId: 54 });
+  expect(onHexClick).toHaveBeenCalledOnce();
+});
+
 test('a selected ruler starts on top of a token instead of dragging it', () => {
   const onMeasure = vi.fn();
   const onMoveToken = vi.fn();

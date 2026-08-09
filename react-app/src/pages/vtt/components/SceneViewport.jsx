@@ -582,11 +582,17 @@ export default function SceneViewport({
     // On a hex map the empty board is not empty: every hex is a thing the GM can
     // pick. Recorded as the start of a pan and settled on release, so dragging
     // the map still pans instead of selecting whatever it started over.
+    const playBox = scene.playArea ? playAreaBox(scene, view) : null;
+    const canPickHex = event.button === 0
+      && onHexClick
+      && isHexGrid(scene.grid)
+      && paintMode === 'select'
+      && (!playBox || pointInBox(point, playBox));
     dragRef.current = {
       kind: 'pan',
       last: point,
       from: point,
-      hex: event.button === 0 && onHexClick && isHexGrid(scene.grid) && paintMode === 'select'
+      hex: canPickHex
         ? worldToHex(screenToWorld(point, view), scene.grid)
         : null,
     };
@@ -1421,6 +1427,13 @@ function playAreaBox(scene, view) {
     width: scene.playArea.w * cell,
     height: scene.playArea.h * cell,
   };
+}
+
+function pointInBox(point, box) {
+  return point.x >= box.left
+    && point.y >= box.top
+    && point.x < box.left + box.width
+    && point.y < box.top + box.height;
 }
 
 const roundBtnSx = {
