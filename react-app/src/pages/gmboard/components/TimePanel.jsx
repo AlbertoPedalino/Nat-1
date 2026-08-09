@@ -73,8 +73,16 @@ export default function TimePanel() {
         <Typography sx={titleSx}>Date &amp; Time</Typography>
       </Box>
       <Box>
-        <Typography sx={dateSx}>{formatDate(state)}</Typography>
-        <Typography sx={bigTimeSx}>{formatHM(state.min)}</Typography>
+        <Box sx={clockDisplaySx}>
+          <Box sx={dateBlockSx}>
+            <Typography sx={clockLabelSx}>Current date</Typography>
+            <Typography sx={dateSx}>{formatDate(state)}</Typography>
+          </Box>
+          <Box sx={timeBlockSx}>
+            <Typography sx={clockLabelSx}>Current time</Typography>
+            <Typography sx={bigTimeSx}>{formatHM(state.min)}</Typography>
+          </Box>
+        </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.4 }}>
           <Compass size={12} />
           <Typography sx={terrainSx}>{terrainLabel}</Typography>
@@ -128,7 +136,47 @@ const titleSx = {
 };
 
 const dateSx = {
-  fontSize: '0.78rem',
+  fontFamily: '"Cinzel", Georgia, serif',
+  fontSize: { xs: '1.12rem', sm: '1.35rem' },
+  fontWeight: 700,
+  lineHeight: 1.25,
+  color: 'primary.main',
+};
+
+const clockDisplaySx = {
+  display: 'flex',
+  flexDirection: { xs: 'column', sm: 'row' },
+  alignItems: { xs: 'stretch', sm: 'center' },
+  gap: { xs: 1, sm: 2 },
+  mb: 0.75,
+  p: 1.25,
+  border: '1px solid',
+  borderColor: 'divider',
+  borderRadius: 2,
+  bgcolor: 'rgba(237, 212, 138, 0.045)',
+};
+
+const dateBlockSx = {
+  flex: 1,
+  minWidth: 0,
+};
+
+const timeBlockSx = {
+  flexShrink: 0,
+  minWidth: { sm: 140 },
+  pt: { xs: 1, sm: 0 },
+  pl: { xs: 0, sm: 2 },
+  borderTop: { xs: '1px solid', sm: 0 },
+  borderLeft: { xs: 0, sm: '1px solid' },
+  borderColor: 'divider',
+};
+
+const clockLabelSx = {
+  mb: 0.25,
+  fontSize: '0.58rem',
+  fontWeight: 700,
+  letterSpacing: '0.12em',
+  textTransform: 'uppercase',
   color: 'text.secondary',
 };
 
