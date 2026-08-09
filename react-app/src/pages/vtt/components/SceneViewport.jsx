@@ -971,6 +971,7 @@ export default function SceneViewport({
           viewportSize={viewportSize}
           cells={hexCells}
           selected={selectedHex}
+          clipRect={scene.playArea ? playAreaBox(scene, view) : null}
           // A hexcrawl map is styled like any other: the colour and the weight
           // the scene carries are the grid's, whichever shape it is.
           lineColor={gridColor}

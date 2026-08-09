@@ -142,11 +142,13 @@ function buildGeometry({ grid, view, width, height, cells, selected, outlined })
 function HexGrid({
   grid, view, viewportSize, cells = null, selected = null, opacity = 1,
   outlined = true, lineColor = vttAlpha(VTT_COLORS.gold, 0.28), lineWidth = 1,
+  clipRect = null,
 }) {
   // React's ids carry colons, which a `url(#…)` reference cannot: the paint
   // server would silently resolve to nothing and the mesh would be invisible in
   // the browser while every test still passed.
   const patternId = `hexgrid-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
+  const clipId = `${patternId}-clip`;
   const width = Math.max(0, Number(viewportSize?.width) || 0);
   const height = Math.max(0, Number(viewportSize?.height) || 0);
   const geometry = useMemo(
@@ -170,43 +172,57 @@ function HexGrid({
         opacity,
       }}
     >
-      {mesh ? (
+      {mesh || clipRect ? (
         <defs>
-          <pattern
-            id={patternId}
-            patternUnits="userSpaceOnUse"
-            width={mesh.tileWidth}
-            height={mesh.tileHeight}
-            x={mesh.x}
-            y={mesh.y}
-          >
-            <path
-              d={mesh.d}
-              fill="none"
-              stroke={lineColor}
-              strokeWidth={lineWidth}
-              strokeOpacity={mesh.opacity}
-            />
-          </pattern>
+          {mesh ? (
+            <pattern
+              id={patternId}
+              patternUnits="userSpaceOnUse"
+              width={mesh.tileWidth}
+              height={mesh.tileHeight}
+              x={mesh.x}
+              y={mesh.y}
+            >
+              <path
+                d={mesh.d}
+                fill="none"
+                stroke={lineColor}
+                strokeWidth={lineWidth}
+                strokeOpacity={mesh.opacity}
+              />
+            </pattern>
+          ) : null}
+          {clipRect ? (
+            <clipPath id={clipId}>
+              <rect
+                x={clipRect.left}
+                y={clipRect.top}
+                width={Math.max(0, clipRect.width)}
+                height={Math.max(0, clipRect.height)}
+              />
+            </clipPath>
+          ) : null}
         </defs>
       ) : null}
 
-      {/* Painted hexes go over the mesh's tile but under its lines is not worth
-          the layering: the fill is translucent, so the grid reads through it. */}
-      {geometry.fills.map(([key, fill]) => (
-        <path key={key} d={fill.d} fill={fill.color} fillOpacity={fill.opacity} />
-      ))}
+      <g clipPath={clipRect ? `url(#${clipId})` : undefined}>
+        {/* Painted hexes go over the mesh's tile but under its lines is not worth
+            the layering: the fill is translucent, so the grid reads through it. */}
+        {geometry.fills.map(([key, fill]) => (
+          <path key={key} d={fill.d} fill={fill.color} fillOpacity={fill.opacity} />
+        ))}
 
-      {mesh ? <rect width={width} height={height} fill={`url(#${patternId})`} /> : null}
+        {mesh ? <rect width={width} height={height} fill={`url(#${patternId})`} /> : null}
 
-      {geometry.selectedPath ? (
-        <path
-          d={geometry.selectedPath}
-          fill="none"
-          stroke={vttAlpha(VTT_COLORS.gold, 0.95)}
-          strokeWidth={2.5}
-        />
-      ) : null}
+        {geometry.selectedPath ? (
+          <path
+            d={geometry.selectedPath}
+            fill="none"
+            stroke={vttAlpha(VTT_COLORS.gold, 0.95)}
+            strokeWidth={2.5}
+          />
+        ) : null}
+      </g>
     </Box>
   );
 }
