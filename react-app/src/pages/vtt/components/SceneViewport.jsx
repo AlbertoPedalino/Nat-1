@@ -24,6 +24,7 @@ import {
   axialRound, hexHeight, hexToWorld, hexWidth, isHexGrid, worldToAxial, worldToHex,
 } from '../../../shared/vtt/hexGeometry.js';
 import HexGrid from './HexGrid.jsx';
+import SquareGrid from './SquareGrid.jsx';
 import HexBubble from './HexBubble.jsx';
 import {
   cameraPoseToView, viewToCameraPose,
@@ -871,7 +872,6 @@ export default function SceneViewport({
     : drawings;
 
   const size = cellSize(scene.grid) * view.zoom;
-  const origin = worldToScreen({ x: 0, y: 0 }, view);
   const gridVisible = !backgroundOnly && scene.grid.visible && size > 4;
   const gridColor = gridLineColor(scene.grid);
   const gridLine = normalizeGridLineWidth(scene.grid.lineWidth);
@@ -986,25 +986,14 @@ export default function SceneViewport({
       ) : null}
 
       {gridVisible && !isHexGrid(scene.grid) ? (
-        <Box
-          aria-hidden
-          sx={{
-            position: 'absolute',
-            // Clipped to the play area when there is one: squares drawn over the
-            // staging space suggest it is part of the board, which it is not.
-            ...(scene.playArea ? playAreaBox(scene, view) : { inset: 0 }),
-            pointerEvents: 'none',
-            // Screen pixels, not world units: a line thin enough to read at one
-            // zoom and thick enough at another is not a line anybody asked for.
-            backgroundImage: `linear-gradient(to right, ${gridColor} ${gridLine}px, transparent ${gridLine}px),`
-              + `linear-gradient(to bottom, ${gridColor} ${gridLine}px, transparent ${gridLine}px)`,
-            backgroundSize: `${size}px ${size}px`,
-            // Clipped, the box already starts on a grid line — the play area is
-            // measured in whole cells — so the pattern begins at its corner.
-            backgroundPosition: scene.playArea
-              ? '0 0'
-              : `${origin.x + scene.grid.offsetX * view.zoom}px ${origin.y + scene.grid.offsetY * view.zoom}px`,
-          }}
+        <SquareGrid
+          grid={scene.grid}
+          view={view}
+          viewportSize={viewportSize}
+          lineColor={gridColor}
+          lineWidth={gridLine}
+          // Squares outside the play area are staging space, not board space.
+          clipRect={scene.playArea ? playAreaBox(scene, view) : null}
         />
       ) : null}
 

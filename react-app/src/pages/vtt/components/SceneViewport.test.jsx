@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { beforeAll, vi } from 'vitest';
 import SceneViewport from './SceneViewport.jsx';
 import HexGrid from './HexGrid.jsx';
+import SquareGrid from './SquareGrid.jsx';
 
 beforeAll(() => {
   // jsdom does not ship PointerEvent, while the real browser does. Using its
@@ -33,35 +34,25 @@ function renderLaserViewport(onLaser) {
   };
 }
 
-test('the grid is drawn in the colour and thickness the scene carries', () => {
+test('the square grid stays aligned to cell coordinates at fractional zoom', () => {
   const { container } = render(
-    <SceneViewport
-      scene={{
-        grid: {
-          size: 50, offsetX: 0, offsetY: 0, visible: true, color: '#3aa0ff', lineWidth: 3,
-        },
-        playArea: null,
-      }}
-      imageUrl="/map.png"
-      tokens={[]}
-      snap
-      canMove={() => false}
-      fog={null}
-      drawings={[]}
-      lasers={[]}
-      rollBubbles={[]}
-      diceThrows={[]}
+    <SquareGrid
+      grid={{ size: 50, offsetX: 10, offsetY: 20 }}
+      view={{ x: 3, y: 4, zoom: 1.125 }}
+      viewportSize={{ width: 400, height: 300 }}
+      lineColor="#3aa0ff40"
+      lineWidth={3}
     />,
   );
 
-  // The style is an emotion class rather than an inline one, so it is read back
-  // the way the browser sees it.
-  const painted = [...container.querySelectorAll('[aria-hidden]')]
-    .map((node) => window.getComputedStyle(node).backgroundImage)
-    .filter((image) => image.includes('linear-gradient'));
-
-  expect(painted.join(' ')).toContain('#3aa0ff40');
-  expect(painted.join(' ')).toContain('3px');
+  const path = container.querySelector('[data-square-grid] path');
+  // Origin: offset * zoom + pan. The next lines use exactly the same scaled
+  // cell step as a token at column/row 1, including a non-integer zoom.
+  expect(path.getAttribute('d')).toContain('M14.25 0V300');
+  expect(path.getAttribute('d')).toContain('M70.5 0V300');
+  expect(path.getAttribute('d')).toContain('M0 26.5H400');
+  expect(path).toHaveAttribute('stroke', '#3aa0ff40');
+  expect(path).toHaveAttribute('stroke-width', '3');
 });
 
 test('the selected laser follows pointer movement without a click', () => {
