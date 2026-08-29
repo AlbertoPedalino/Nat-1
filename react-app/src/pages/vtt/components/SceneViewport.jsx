@@ -39,6 +39,7 @@ import FloatingSheetPanel from './FloatingSheetPanel.jsx';
 import LaserOverlay from './LaserOverlay.jsx';
 import TokenSprite from './TokenSprite.jsx';
 import TokenLayer from './TokenLayer.jsx';
+import AtmosphereOverlay from './AtmosphereOverlay.jsx';
 
 const WHEEL_STEP = 1.12;
 const VIEWPORT_CONTROL_SELECTOR = '[data-viewport-control], .MuiModal-root, .MuiPopover-root, .MuiPopper-root';
@@ -98,6 +99,7 @@ export default function SceneViewport({
   snap,
   canMove,
   fog,
+  atmosphere,
   fogOpacity = 1,
   paintMode = 'select',
   brushSize = 3,
@@ -1109,6 +1111,11 @@ export default function SceneViewport({
         onDeathSaveChange={onDeathSaveChange}
         onContextMenu={onContextMenu}
       />
+
+      {/* Atmosphere belongs in front of the world — including its pieces — but
+          behind rulers, lasers and controls. A single viewport-sized shader is
+          shared by battlemap and establishing-shot modes. */}
+      <AtmosphereOverlay atmosphere={atmosphere} />
 
       {placementDrag && placementHover && !backgroundOnly ? (() => {
         const token = { ...placementDrag.token, ...placementHover };

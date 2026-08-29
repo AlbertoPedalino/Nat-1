@@ -4,6 +4,8 @@ import {
   Box,
   Button,
   FormControlLabel,
+  MenuItem,
+  Slider,
   Stack,
   Switch,
   TextField,
@@ -35,6 +37,7 @@ import {
 import ColorField from '../../../components/ColorField.jsx';
 import InfoHint from '../../../components/InfoHint.jsx';
 import { DEFAULT_GRID } from '../../../shared/vtt/scene.js';
+import { ATMOSPHERE_PRESETS, normalizeAtmosphere } from '../../../shared/vtt/atmosphere.js';
 
 // The scene's settings, split by the question they answer. Each one is a panel
 // behind its own icon on the rail rather than a strip across the top: the map is
@@ -59,7 +62,7 @@ function SectionLabel({ label, hint }) {
 
 export function MapPanel({
   scene, busy, onUploadMap, onUploadBackground, onShownImageChange, onAddImage,
-  onGridChange, onPlayAreaChange, onFitPlayArea,
+  onGridChange, onAtmosphereChange, onPlayAreaChange, onFitPlayArea,
   // The switch has its own place on the map when this panel sits under it.
   hideSwitch = false,
 }) {
@@ -67,6 +70,8 @@ export function MapPanel({
   const backgroundRef = useRef(null);
   const extraRef = useRef(null);
   const setGrid = (patch) => onGridChange({ ...scene.grid, ...patch });
+  const atmosphere = normalizeAtmosphere(scene.atmosphere);
+  const setAtmosphere = (patch) => onAtmosphereChange?.({ ...atmosphere, ...patch });
 
   return (
     <Stack spacing={1.25}>
@@ -110,6 +115,68 @@ export function MapPanel({
       <HiddenFileInput inputRef={mapRef} onPick={onUploadMap} />
       <HiddenFileInput inputRef={backgroundRef} onPick={onUploadBackground} />
       <HiddenFileInput inputRef={extraRef} onPick={onAddImage} />
+
+      <SectionLabel
+        label="Atmosphere"
+        hint="A procedural atmospheric layer shared by the battlemap and background. It is rendered locally as a continuous field, so denser rain or fog does not create more particles."
+      />
+      <TextField
+        select
+        fullWidth
+        size="small"
+        label="Atmosphere"
+        value={atmosphere.type}
+        onChange={(event) => setAtmosphere({
+          type: event.target.value,
+          seed: event.target.value === atmosphere.type
+            ? atmosphere.seed
+            : (Date.now() % 999999) + 1,
+        })}
+      >
+        {ATMOSPHERE_PRESETS.map((preset) => (
+          <MenuItem key={preset.value} value={preset.value}>{preset.label}</MenuItem>
+        ))}
+      </TextField>
+      {atmosphere.type === 'none' ? null : (
+        <Stack spacing={0.5}>
+          <SectionLabel label="Intensity" hint="Controls opacity and density without changing the amount of work done by the renderer." />
+          <Slider
+            size="small"
+            min={0.1}
+            max={1}
+            step={0.05}
+            value={atmosphere.intensity}
+            valueLabelDisplay="auto"
+            aria-label="Atmosphere intensity"
+            onChange={(_, value) => setAtmosphere({ intensity: value })}
+          />
+          <SectionLabel label="Wind" hint="Direction is measured clockwise; movement changes how quickly the atmospheric field crosses the view." />
+          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+            <TextField
+              size="small"
+              label="Direction"
+              type="number"
+              value={atmosphere.direction}
+              onChange={(event) => setAtmosphere({ direction: Number(event.target.value) })}
+              slotProps={{ htmlInput: { min: 0, max: 359, step: 1 } }}
+              sx={numberSx}
+            />
+            <TextField
+              select
+              size="small"
+              label="Movement"
+              value={atmosphere.speed}
+              onChange={(event) => setAtmosphere({ speed: Number(event.target.value) })}
+              sx={{ flex: 1 }}
+            >
+              <MenuItem value={0.5}>Slow</MenuItem>
+              <MenuItem value={1}>Normal</MenuItem>
+              <MenuItem value={1.5}>Fast</MenuItem>
+              <MenuItem value={2}>Violent</MenuItem>
+            </TextField>
+          </Stack>
+        </Stack>
+      )}
 
       <SectionLabel
         label="Grid"

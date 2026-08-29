@@ -7,6 +7,7 @@ import { normalizeConditions } from '../character/conditions.js';
 import { normalizeFog } from './fog.js';
 import { normalizeMapObjectKey, normalizeMapObjectStroke } from './mapObjects.js';
 import { VTT_COLORS } from './colors.js';
+import { normalizeAtmosphere } from './atmosphere.js';
 
 export const LAYERS = Object.freeze(['map', 'tokens', 'gm']);
 export const DEFAULT_GRID = Object.freeze({
@@ -191,6 +192,7 @@ export function toScene(row) {
     // Which picture the table is looking at. The other one stays uploaded.
     shownImage: row.shown_image === 'background' ? 'background' : 'map',
     grid: normalizeGrid(row.grid),
+    atmosphere: normalizeAtmosphere(row.atmosphere),
     // null is "this scene has no fog", not "everything is hidden".
     fog: normalizeFog(row.fog),
     // The scene the players are currently shown. Only one per campaign.

@@ -7,6 +7,7 @@ import { readFileSync } from 'node:fs';
 // guarantees the client assumes — above all that the GM layer is filtered by the
 // database, not by the UI.
 const sql = readFileSync(new URL('../../../supabase/vtt.sql', import.meta.url), 'utf8').toLowerCase();
+const atmosphereSql = readFileSync(new URL('../../../supabase/atmosphere.sql', import.meta.url), 'utf8').toLowerCase();
 
 test('VTT SQL creates both tables, their indexes, RLS and updated_at triggers', () => {
   for (const table of ['map_scenes', 'map_tokens']) {
@@ -210,6 +211,20 @@ test('marking a token is an RPC that writes one column', () => {
   assert.ok(body.includes('map_token_in_play'), 'the RPC must reject staged pieces');
   assert.ok(body.includes('scene.is_live'));
   assert.ok(body.includes('raise exception'));
+});
+
+test('a scene stores one seeded atmosphere description', () => {
+  assert.match(sql, /atmosphere\s+jsonb not null default/);
+  assert.match(sql, /alter table public\.map_scenes add column if not exists atmosphere jsonb not null default/);
+});
+
+test('the one-time atmosphere script discards rather than migrates legacy weather', () => {
+  const addAtmosphere = atmosphereSql.indexOf('add column if not exists atmosphere');
+  const dropWeather = atmosphereSql.indexOf('drop column if exists weather');
+  assert.ok(addAtmosphere > -1, 'the replacement column must be created');
+  assert.ok(dropWeather > addAtmosphere, 'legacy weather is dropped only after atmosphere exists');
+  assert.doesNotMatch(atmosphereSql, /rename column weather/);
+  assert.match(atmosphereSql, /notify pgrst, 'reload schema'/);
 });
 
 test('effect marking has the same visibility boundary as conditions', () => {

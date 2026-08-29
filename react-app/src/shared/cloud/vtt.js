@@ -8,6 +8,7 @@ import {
   toDrawing,
 } from '../vtt/drawing.js';
 import { normalizeFog } from '../vtt/fog.js';
+import { normalizeAtmosphere } from '../vtt/atmosphere.js';
 import {
   mapImageFolder,
   mapImagePath,
@@ -32,7 +33,7 @@ const SIGNED_URL_TTL = 8 * 60 * 60;
 // Re-signed a little early, so a link never expires in the middle of a scene.
 const SIGNED_URL_MARGIN_MS = 15 * 60 * 1000;
 const SIGNED_URL_KEY = 'gb:vtt:signed-url:';
-const SCENE_COLUMNS = 'id, campaign_id, name, image_path, background_path, shown_image, grid, fog, is_live, play_area, updated_at';
+const SCENE_COLUMNS = 'id, campaign_id, name, image_path, background_path, shown_image, grid, atmosphere, fog, is_live, play_area, updated_at';
 const TOKEN_COLUMNS = 'id, scene_id, layer, hidden_from_players, x, y, w, h, z, character_id, label, color, image_path, image_url, icon_key, icon_stroke_width, rotation, hp_current, hp_max, conditions, effects, source_ref, show_hp, created_by, updated_at';
 const DRAWING_COLUMNS = 'id, scene_id, layer, points, color, width, text, created_by, created_at';
 
@@ -83,12 +84,13 @@ export async function createScene(campaignId, name) {
 }
 
 export async function updateScene(sceneId, {
-  name, grid, imagePath, backgroundPath, shownImage, fog, playArea,
+  name, grid, atmosphere, imagePath, backgroundPath, shownImage, fog, playArea,
 } = {}) {
   const supabase = requireClient();
   const patch = {};
   if (name !== undefined) patch.name = sanitizeName(name);
   if (grid !== undefined) patch.grid = normalizeGrid(grid);
+  if (atmosphere !== undefined) patch.atmosphere = normalizeAtmosphere(atmosphere);
   if (imagePath !== undefined) patch.image_path = imagePath || null;
   if (backgroundPath !== undefined) patch.background_path = backgroundPath || null;
   if (shownImage !== undefined) patch.shown_image = shownImage === 'background' ? 'background' : 'map';

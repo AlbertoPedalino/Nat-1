@@ -65,6 +65,7 @@ import {
   canMarkToken, isTokenVisibleToPlayers, normalizePlayArea, sceneTitleFor, toScene,
 } from '../../../shared/vtt/scene.js';
 import { sanitizeNoteText } from '../../../shared/vtt/drawing.js';
+import { normalizeAtmosphere } from '../../../shared/vtt/atmosphere.js';
 import { FEET_PER_CELL } from '../../../shared/vtt/measure.js';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { useSceneLive } from '../../../shared/vtt/useSceneLive.js';
@@ -132,6 +133,7 @@ import TokenMenu from './TokenMenu.jsx';
 const CampaignSheetView = lazy(() => import('../../campaignsheet/CampaignSheetView.jsx'));
 
 const GRID_SAVE_DELAY = 600;
+const ATMOSPHERE_SAVE_DELAY = 400;
 const GHOST_SWEEP_MS = 2000;
 const LASER_TTL_MS = 2500;
 const FOG_BROADCAST_MS = 80;
@@ -223,6 +225,7 @@ export default function SceneEditor({
   const [displayed, setDisplayed] = useState({ url: null, shownImage: 'map' });
   const [busy, setBusy] = useState(false);
   const gridTimerRef = useRef(null);
+  const atmosphereTimerRef = useRef(null);
   const playAreaTimerRef = useRef(null);
   const draggingRef = useRef(null);
   const gridEditRef = useRef(false);
@@ -379,6 +382,7 @@ export default function SceneEditor({
 
   useEffect(() => () => {
     clearTimeout(gridTimerRef.current);
+    clearTimeout(atmosphereTimerRef.current);
     clearTimeout(playAreaTimerRef.current);
   }, []);
 
@@ -627,6 +631,18 @@ export default function SceneEditor({
         .catch((cause) => notify('error', cause?.message || 'Could not save the grid.'))
         .finally(() => { gridEditRef.current = false; });
     }, GRID_SAVE_DELAY);
+  }, [notify, onSceneChange, scene]);
+
+  const handleAtmosphereChange = useCallback((atmosphere) => {
+    const next = normalizeAtmosphere(atmosphere);
+    gridEditRef.current = true;
+    onSceneChange({ ...scene, atmosphere: next });
+    clearTimeout(atmosphereTimerRef.current);
+    atmosphereTimerRef.current = setTimeout(() => {
+      updateScene(scene.id, { atmosphere: next })
+        .catch((cause) => notify('error', cause?.message || 'Could not save the atmosphere.'))
+        .finally(() => { gridEditRef.current = false; });
+    }, ATMOSPHERE_SAVE_DELAY);
   }, [notify, onSceneChange, scene]);
 
   // Painting mirrors the token drag: every stroke frame goes out on broadcast,
@@ -1727,6 +1743,7 @@ export default function SceneEditor({
           snap
           canMove={() => false}
           fog={scene.fog}
+          atmosphere={scene.atmosphere}
           fogOpacity={PLAYER_FOG_OPACITY}
           paintMode="select"
           backgroundOnly={displayed.shownImage === 'background'}
@@ -1855,6 +1872,7 @@ export default function SceneEditor({
         snap
         canMove={canMove}
         fog={scene.fog}
+        atmosphere={scene.atmosphere}
         fogOpacity={role.isGm ? GM_FOG_OPACITY : PLAYER_FOG_OPACITY}
         // Fog brushes are the GM's; drawing is everyone's, so a player keeps
         // the pencil and the eraser and loses only reveal/hide.
@@ -1878,6 +1896,7 @@ export default function SceneEditor({
                 onUploadBackground={handleUploadBackground}
                 onAddImage={handleAddImage}
                 onGridChange={handleGridChange}
+                onAtmosphereChange={handleAtmosphereChange}
                 onPlayAreaChange={handlePlayAreaChange}
                 onFitPlayArea={handleFitPlayArea}
               />

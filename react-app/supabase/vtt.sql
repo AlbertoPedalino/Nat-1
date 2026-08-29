@@ -84,6 +84,9 @@ create table if not exists public.map_scenes (
   -- and the client reads a missing key as true: that is what they were built
   -- with. No migration for the same reason.
   grid        jsonb not null default '{"size":70,"offsetX":0,"offsetY":0,"visible":true,"snapObjects":true}'::jsonb,
+  -- A tiny seeded description rendered locally by every client. Animation
+  -- frames never touch Realtime.
+  atmosphere  jsonb not null default '{"type":"none","intensity":0.65,"direction":12,"speed":1,"seed":1}'::jsonb,
   -- Fog of war: { cols, rows, cells } where cells is a base64 bitset, one bit
   -- per grid cell, set = revealed. NULL means the scene has no fog.
   --
@@ -107,6 +110,7 @@ alter table public.map_scenes add column if not exists is_live boolean not null 
 alter table public.map_scenes add column if not exists play_area jsonb;
 alter table public.map_scenes add column if not exists background_path text;
 alter table public.map_scenes add column if not exists shown_image text not null default 'map';
+alter table public.map_scenes add column if not exists atmosphere jsonb not null default '{"type":"none","intensity":0.65,"direction":12,"speed":1,"seed":1}'::jsonb;
 
 -- One live scene per campaign, enforced here rather than by the client: two
 -- browsers flipping the switch at once would otherwise both win.

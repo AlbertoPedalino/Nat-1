@@ -7,9 +7,9 @@ import { MapPanel } from './ScenePanels.jsx';
 // gap that keeps it from touching one.
 export const ICON_STRIP = 38;
 
-// Everything about the pictures behind one icon: which one is up, and the panel
-// that uploads, replaces and adds them. They were split across two corners for a
-// while and finishing a single thought meant crossing the map.
+// Everything about the scene behind one icon: its pictures, atmosphere, grid
+// and playable edge. They were split across two corners for a while and
+// finishing a single thought meant crossing the map.
 export default function MapCorner({
   scene,
   busy,
@@ -20,6 +20,7 @@ export default function MapCorner({
   onUploadBackground,
   onAddImage,
   onGridChange,
+  onAtmosphereChange,
   onPlayAreaChange,
   onFitPlayArea,
 }) {
@@ -29,7 +30,7 @@ export default function MapCorner({
           picture settings, one click away, instead of taking a permanent strip
           of the board. */}
       <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-        <Tooltip title={open ? 'Hide the picture settings' : 'Pictures, grid and play area'}>
+        <Tooltip title={open ? 'Hide the scene settings' : 'Pictures, atmosphere, grid and play area'}>
           <IconButton
             size="small"
             aria-label="Picture settings"
@@ -44,7 +45,7 @@ export default function MapCorner({
 
       {open ? (
         <Box sx={panelSx}>
-          <Typography sx={titleSx}>Pictures</Typography>
+          <Typography sx={titleSx}>Scene</Typography>
           <MapPanel
             scene={scene}
             busy={busy}
@@ -52,6 +53,7 @@ export default function MapCorner({
             onUploadBackground={onUploadBackground}
             onAddImage={onAddImage}
             onGridChange={onGridChange}
+            onAtmosphereChange={onAtmosphereChange}
             onPlayAreaChange={onPlayAreaChange}
             onFitPlayArea={onFitPlayArea}
             onShownImageChange={onShownImageChange}
