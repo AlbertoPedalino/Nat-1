@@ -205,3 +205,28 @@ export function fillView({ imageWidth, imageHeight, viewportWidth, viewportHeigh
     y: (vh - ih * zoom) / 2,
   };
 }
+
+// Keep a cover-framed picture covering its viewport while it is zoomed or
+// panned. The cover zoom is the floor: backgrounds may be enlarged, never
+// reduced into letterboxing. Pan is bounded so an edge cannot expose empty
+// space either.
+export function constrainCoverView(view, {
+  imageWidth, imageHeight, viewportWidth, viewportHeight,
+}) {
+  const iw = Math.max(1, numberOr(imageWidth, 1));
+  const ih = Math.max(1, numberOr(imageHeight, 1));
+  const vw = Math.max(1, numberOr(viewportWidth, 1));
+  const vh = Math.max(1, numberOr(viewportHeight, 1));
+  const cover = fillView({
+    imageWidth: iw, imageHeight: ih, viewportWidth: vw, viewportHeight: vh,
+  });
+  const safe = normalizeView(view);
+  const zoom = Math.max(cover.zoom, safe.zoom);
+  const width = iw * zoom;
+  const height = ih * zoom;
+  return {
+    zoom,
+    x: Math.min(0, Math.max(vw - width, safe.x)),
+    y: Math.min(0, Math.max(vh - height, safe.y)),
+  };
+}

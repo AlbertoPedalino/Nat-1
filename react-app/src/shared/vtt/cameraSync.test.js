@@ -92,3 +92,19 @@ test('camera poses preserve the same world centre across different screens', () 
   );
   assert.equal(cameraPoseToView(pose, { width: 0, height: 1080 }), null);
 });
+
+test('background camera zoom stays relative to each screen cover', () => {
+  const pose = viewToCameraPose(
+    { x: -500, y: -200, zoom: 1.6 },
+    { width: 600, height: 400 },
+    { zoomBase: 0.8 },
+  );
+  assert.deepEqual(cameraMessage('camera-1234', pose), {
+    source: 'camera-1234',
+    pose: { centerX: 500, centerY: 250, zoom: 1.6, zoomScale: 2 },
+  });
+  assert.deepEqual(
+    cameraPoseToView(pose, { width: 1200, height: 600 }, { zoomBase: 1.2 }),
+    { x: -600, y: -300, zoom: 2.4 },
+  );
+});

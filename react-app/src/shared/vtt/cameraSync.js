@@ -31,35 +31,49 @@ export function normalizeCameraPose(value) {
   const coordinates = value ? [value.centerX, value.centerY, value.zoom] : [];
   if (coordinates.length !== 3
     || coordinates.some((entry) => entry === null || entry === '' || !Number.isFinite(Number(entry)))) return null;
-  return {
+  const pose = {
     centerX: Number(value.centerX),
     centerY: Number(value.centerY),
     zoom: clampZoom(value.zoom),
   };
+  const zoomScale = Number(value.zoomScale);
+  if (Number.isFinite(zoomScale) && zoomScale >= 1) {
+    pose.zoomScale = Math.min(100, zoomScale);
+  }
+  return pose;
 }
 
-export function viewToCameraPose(view, viewport) {
+export function viewToCameraPose(view, viewport, { zoomBase } = {}) {
   const safeView = normalizeView(view);
   const width = Number(viewport?.width);
   const height = Number(viewport?.height);
   if (!Number.isFinite(width) || width <= 0 || !Number.isFinite(height) || height <= 0) return null;
-  return {
+  const pose = {
     centerX: (width / 2 - safeView.x) / safeView.zoom,
     centerY: (height / 2 - safeView.y) / safeView.zoom,
     zoom: safeView.zoom,
   };
+  const base = Number(zoomBase);
+  if (Number.isFinite(base) && base > 0) {
+    pose.zoomScale = Math.max(1, safeView.zoom / base);
+  }
+  return pose;
 }
 
-export function cameraPoseToView(pose, viewport) {
+export function cameraPoseToView(pose, viewport, { zoomBase } = {}) {
   const safePose = normalizeCameraPose(pose);
   const width = Number(viewport?.width);
   const height = Number(viewport?.height);
   if (!safePose || !Number.isFinite(width) || width <= 0
     || !Number.isFinite(height) || height <= 0) return null;
+  const base = Number(zoomBase);
+  const zoom = Number.isFinite(base) && base > 0 && safePose.zoomScale
+    ? clampZoom(base * safePose.zoomScale)
+    : safePose.zoom;
   return {
-    x: width / 2 - safePose.centerX * safePose.zoom,
-    y: height / 2 - safePose.centerY * safePose.zoom,
-    zoom: safePose.zoom,
+    x: width / 2 - safePose.centerX * zoom,
+    y: height / 2 - safePose.centerY * zoom,
+    zoom,
   };
 }
 

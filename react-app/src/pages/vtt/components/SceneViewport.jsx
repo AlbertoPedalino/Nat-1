@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Box, Button, IconButton, Tooltip, Typography } from '@mui/material';
 import { MapPin, Maximize2, Minimize2, ScrollText, Settings2, X } from 'lucide-react';
 import { brushCells } from '../../../shared/vtt/fog.js';
@@ -6,6 +6,7 @@ import {
   DEFAULT_VIEW,
   cellSize,
   cellToWorld,
+  constrainCoverView,
   dropPosition,
   fillView,
   fitView,
@@ -208,6 +209,26 @@ export default function SceneViewport({
   // stroke follows the pointer without a write per frame.
   const [markDrag, setMarkDrag] = useState(null);
 
+  const backgroundFrame = useMemo(() => (
+    backgroundOnly && imageSize && viewportSize.width > 0 && viewportSize.height > 0
+      ? {
+        imageWidth: imageSize.width,
+        imageHeight: imageSize.height,
+        viewportWidth: viewportSize.width,
+        viewportHeight: viewportSize.height,
+      }
+      : null
+  ), [backgroundOnly, imageSize, viewportSize]);
+  const backgroundCover = useMemo(
+    () => (backgroundFrame ? fillView(backgroundFrame) : null),
+    [backgroundFrame],
+  );
+
+  const constrainView = useCallback((next) => {
+    if (!backgroundFrame) return next;
+    return constrainCoverView(next, backgroundFrame);
+  }, [backgroundFrame]);
+
   useEffect(() => {
     const host = hostRef.current;
     if (!host) return undefined;
@@ -227,25 +248,28 @@ export default function SceneViewport({
   }, []);
 
   useEffect(() => {
-    const pose = viewToCameraPose(view, viewportSize);
+    const pose = viewToCameraPose(view, viewportSize, { zoomBase: backgroundCover?.zoom });
     if (pose) onViewChange?.(pose);
-  }, [onViewChange, view, viewportSize]);
+  }, [backgroundCover, onViewChange, view, viewportSize]);
 
   // Projectors follow rather than jump. Each realtime target starts a short
   // interpolation from the frame already on screen; a newer target cancels it
   // and continues from that exact point, which stays smooth during a long pan.
   useEffect(() => {
-    const target = cameraPoseToView(followView, viewportSize);
+    const converted = cameraPoseToView(followView, viewportSize, {
+      zoomBase: backgroundCover?.zoom,
+    });
+    const target = converted ? constrainView(converted) : null;
     if (!target) return undefined;
     let frame = 0;
     let settled = false;
     const step = () => {
       setView((current) => {
-        const next = {
+        const next = constrainView({
           x: current.x + (target.x - current.x) * 0.34,
           y: current.y + (target.y - current.y) * 0.34,
           zoom: current.zoom + (target.zoom - current.zoom) * 0.34,
-        };
+        });
         settled = Math.abs(next.x - target.x) < 0.15
           && Math.abs(next.y - target.y) < 0.15
           && Math.abs(next.zoom - target.zoom) < 0.001;
@@ -255,7 +279,7 @@ export default function SceneViewport({
     };
     frame = requestAnimationFrame(step);
     return () => cancelAnimationFrame(frame);
-  }, [followView, viewportSize]);
+  }, [backgroundCover, constrainView, followView, viewportSize]);
 
   useEffect(() => {
     if (!placementDrag || backgroundOnly) setPlacementHover(null);
@@ -356,8 +380,8 @@ export default function SceneViewport({
     if (event.target.closest?.(VIEWPORT_CONTROL_SELECTOR)) return;
     event.preventDefault();
     const factor = event.deltaY < 0 ? WHEEL_STEP : 1 / WHEEL_STEP;
-    setView((current) => zoomAt(current, factor, screenPoint(event)));
-  }, [cameraLocked, screenPoint]);
+    setView((current) => constrainView(zoomAt(current, factor, screenPoint(event))));
+  }, [cameraLocked, constrainView, screenPoint]);
 
   // Wheel has to be a non-passive native listener: React's onWheel is passive,
   // and preventDefault there is ignored, so the page scrolls while zooming.
@@ -505,11 +529,11 @@ export default function SceneViewport({
 
     // Zoom about the point between the fingers, and follow that point as it
     // moves: on a phone, spreading and sliding are one gesture.
-    setView((current) => panBy(
+    setView((current) => constrainView(panBy(
       zoomAt(current, next.distance / previous.distance, next.centre),
       next.centre.x - previous.centre.x,
       next.centre.y - previous.centre.y,
-    ));
+    )));
   };
 
   const forgetPointer = (event) => {
@@ -740,7 +764,7 @@ export default function SceneViewport({
       const dx = point.x - state.last.x;
       const dy = point.y - state.last.y;
       state.last = point;
-      setView((current) => panBy(current, dx, dy));
+      setView((current) => constrainView(panBy(current, dx, dy)));
       return;
     }
 

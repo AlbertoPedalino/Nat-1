@@ -5,6 +5,7 @@ import {
   ZOOM_MIN,
   cellToWorld,
   clampZoom,
+  constrainCoverView,
   dropPosition,
   fillView,
   fitView,
@@ -131,4 +132,16 @@ test('fill centres the image and crops it to cover the whole viewport', () => {
   assert.equal(view.x, -100, 'the wider image is cropped equally on both sides');
   assert.equal(view.y, 0, 'there is no empty space above or below');
   assert.deepEqual(worldToScreen({ x: 500, y: 250 }, view), { x: 300, y: 200 });
+});
+
+test('a covered background can zoom in but never expose empty space', () => {
+  const frame = {
+    imageWidth: 1000, imageHeight: 500, viewportWidth: 600, viewportHeight: 400,
+  };
+  assert.deepEqual(constrainCoverView({ x: 100, y: 100, zoom: 0.4 }, frame), {
+    x: 0, y: 0, zoom: 0.8,
+  });
+  assert.deepEqual(constrainCoverView({ x: -900, y: -500, zoom: 1.2 }, frame), {
+    x: -600, y: -200, zoom: 1.2,
+  });
 });
