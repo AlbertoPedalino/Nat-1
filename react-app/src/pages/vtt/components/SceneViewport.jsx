@@ -555,6 +555,12 @@ export default function SceneViewport({
     // at all — so its buttons are inside this host and would lose their clicks
     // to the same capture. That is what made the custom roller do nothing.
     if (event.target.closest?.('[data-viewport-control], .MuiModal-root')) return;
+    // Holding a map tool is an application gesture, not a browser drag. Without
+    // cancelling the native pointer action, dragging beyond the viewport starts
+    // selecting the surrounding page text and the next stroke can inherit that
+    // selection instead of reaching the tool cleanly.
+    event.preventDefault();
+    globalThis.getSelection?.()?.removeAllRanges?.();
     if (event.button === 0) setSelectedMapObjectId(null);
     const point = screenPoint(event);
     event.currentTarget.setPointerCapture?.(event.pointerId);

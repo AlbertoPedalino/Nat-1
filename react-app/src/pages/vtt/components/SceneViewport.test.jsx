@@ -622,6 +622,42 @@ test('a selected ruler starts on top of a token instead of dragging it', () => {
   expect(onMoveToken).not.toHaveBeenCalled();
 });
 
+test('a held map tool prevents the browser from selecting page text', () => {
+  render(
+    <SceneViewport
+      scene={{ grid: { size: 50, offsetX: 0, offsetY: 0, visible: false }, playArea: null }}
+      imageUrl={null}
+      tokens={[]}
+      snap
+      canMove={() => true}
+      fog={null}
+      paintMode="measure"
+      measureShape="line"
+      drawings={[]}
+      lasers={[]}
+      rollBubbles={[]}
+      diceThrows={[]}
+    />,
+  );
+  const viewport = screen.getByText('Upload a map image to start building this scene.').parentElement;
+  const selection = globalThis.getSelection();
+  const range = document.createRange();
+  range.selectNodeContents(viewport);
+  selection.addRange(range);
+  const pointerDown = new Event('pointerdown', { bubbles: true, cancelable: true });
+  Object.defineProperties(pointerDown, {
+    button: { value: 0 },
+    clientX: { value: 60 },
+    clientY: { value: 60 },
+    pointerId: { value: 18 },
+  });
+
+  fireEvent(viewport, pointerDown);
+
+  expect(pointerDown.defaultPrevented).toBe(true);
+  expect(selection.rangeCount).toBe(0);
+});
+
 test('a spectator viewport leaves its pieces inert but keeps the fullscreen control', () => {
   const onMoveToken = vi.fn();
   render(
