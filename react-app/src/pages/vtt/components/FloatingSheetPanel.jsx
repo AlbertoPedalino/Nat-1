@@ -1,8 +1,24 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import { Box, IconButton, Stack, Typography } from '@mui/material';
 import { GripHorizontal, MoveDiagonal2, X } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
+import {
+  MAX_SHEET_HEIGHT_RATIO,
+  MAX_SHEET_WIDTH_RATIO,
+  MIN_SHEET_HEIGHT,
+  MIN_SHEET_WIDTH,
+  SHEET_VISIBLE_GRIP,
+  SHEET_VISIBLE_HEADER,
+  clampSheetFrame,
+  readSheetFrame,
+  writeSheetFrame,
+} from '../../../shared/vtt/sheetFrame.js';
 import { battleMapSurfaceSx } from './battleMapSurface.js';
+
+// One key for the window itself, not one per character: the player is arranging
+// a place on their screen to read a sheet, and it should not move because they
+// switched which sheet is in it.
+const SHEET_FRAME_KEY = 'gb-vtt-sheet-frame';
 
 export default function FloatingSheetPanel({
   choices,
@@ -16,6 +32,11 @@ export default function FloatingSheetPanel({
   const dragRef = useRef(null);
   const resizeRef = useRef(null);
   const frameRef = useRef(0);
+  // The geometry the gestures have decided on, kept here rather than read back
+  // off the element afterwards. Measuring the panel at pointer-up would depend
+  // on whether its queued style write had run yet, and would fold in the
+  // container's border on every cycle.
+  const placementRef = useRef(null);
 
   useEffect(() => () => cancelAnimationFrame(frameRef.current), []);
 
@@ -24,19 +45,103 @@ export default function FloatingSheetPanel({
     frameRef.current = requestAnimationFrame(write);
   };
 
-  const beginDrag = (event) => {
-    if (event.button !== 0 || event.target.closest?.('button, input, select, [role="button"]')) return;
-    const panel = panelRef.current;
-    const container = containerRef.current;
-    if (!panel || !container) return;
+  // Absolute children are positioned against the padding box, while
+  // `getBoundingClientRect` reports the border box. The map host has a 1px
+  // border, so skipping this drifts the panel by that border on every
+  // open-and-close.
+  const panelOffset = (panel, container) => {
     const panelBox = panel.getBoundingClientRect();
     const containerBox = container.getBoundingClientRect();
+    return {
+      left: panelBox.left - containerBox.left - container.clientLeft,
+      top: panelBox.top - containerBox.top - container.clientTop,
+      width: panelBox.width,
+      height: panelBox.height,
+    };
+  };
+
+  const applyFrame = (frame) => {
+    const panel = panelRef.current;
+    if (!panel || !frame) return;
+    // `right` has to go: the panel is anchored to the right edge by default, and
+    // leaving it set fights the left the drag worked out.
+    panel.style.right = 'auto';
+    panel.style.left = `${frame.left}px`;
+    panel.style.top = `${frame.top}px`;
+    // A frame with no size is a panel that was only ever moved. Writing pixels
+    // here would replace the responsive default with a fixed width for good.
+    if (frame.width !== null && frame.height !== null) {
+      panel.style.width = `${frame.width}px`;
+      panel.style.height = `${frame.height}px`;
+    }
+  };
+
+  const rememberFrame = () => {
+    writeSheetFrame(globalThis.sessionStorage, SHEET_FRAME_KEY, placementRef.current);
+  };
+
+  // Everything the gestures need before they start: where the panel is now, and
+  // — only if it already carries one — the size it was given.
+  const seedPlacement = () => {
+    const panel = panelRef.current;
+    const container = containerRef.current;
+    if (!panel || !container) return null;
+    const offset = panelOffset(panel, container);
+    placementRef.current = {
+      left: offset.left,
+      top: offset.top,
+      width: placementRef.current?.width ?? null,
+      height: placementRef.current?.height ?? null,
+    };
+    return offset;
+  };
+
+  const fitToContainer = () => {
+    const panel = panelRef.current;
+    const container = containerRef.current;
+    if (!panel || !container || !placementRef.current) return;
+    const fitted = clampSheetFrame(
+      placementRef.current,
+      container.getBoundingClientRect(),
+      panel.getBoundingClientRect(),
+    );
+    if (!fitted) return;
+    placementRef.current = fitted;
+    applyFrame(fitted);
+  };
+
+  // Before paint, so a reopened sheet does not appear at its default corner and
+  // then jump.
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    if (!container) return undefined;
+    const stored = readSheetFrame(globalThis.sessionStorage, SHEET_FRAME_KEY);
+    if (stored) {
+      placementRef.current = stored;
+      fitToContainer();
+    }
+
+    // The map keeps changing size under an open sheet — the window is resized,
+    // a tablet is rotated, fullscreen is toggled. Without this the panel keeps
+    // a frame that fitted a container which no longer exists, and can end up
+    // almost entirely off the right edge. It also covers the case where the
+    // host had not been measured yet when this effect first ran.
+    if (typeof ResizeObserver !== 'function') return undefined;
+    const observer = new ResizeObserver(() => fitToContainer());
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
+
+  const beginDrag = (event) => {
+    if (event.button !== 0 || event.target.closest?.('button, input, select, [role="button"]')) return;
+    const offset = seedPlacement();
+    if (!offset) return;
     dragRef.current = {
       pointerId: event.pointerId,
       startX: event.clientX,
       startY: event.clientY,
-      left: panelBox.left - containerBox.left,
-      top: panelBox.top - containerBox.top,
+      left: offset.left,
+      top: offset.top,
     };
     event.currentTarget.setPointerCapture?.(event.pointerId);
   };
@@ -49,14 +154,22 @@ export default function FloatingSheetPanel({
     const bounds = container.getBoundingClientRect();
     const panelBox = panel.getBoundingClientRect();
     // Leave enough of the title bar reachable, but allow the rest to move off
-    // either side or below the viewport when the GM wants the map back.
-    const visibleGrip = 96;
+    // either side or below the viewport when the GM wants the map back. The
+    // limits are shared with the restore, so a frame cannot come back somewhere
+    // the drag would not have allowed it to go.
     const left = clamp(
       drag.left + event.clientX - drag.startX,
-      -panelBox.width + visibleGrip,
-      bounds.width - visibleGrip,
+      -panelBox.width + SHEET_VISIBLE_GRIP,
+      bounds.width - SHEET_VISIBLE_GRIP,
     );
-    const top = clamp(drag.top + event.clientY - drag.startY, 0, Math.max(0, bounds.height - 40));
+    const top = clamp(
+      drag.top + event.clientY - drag.startY,
+      0,
+      Math.max(0, bounds.height - SHEET_VISIBLE_HEADER),
+    );
+    // Recorded as the gesture decides it, so what gets stored never depends on
+    // whether the queued style write has run.
+    placementRef.current = { ...placementRef.current, left: Math.round(left), top: Math.round(top) };
     scheduleStyle(() => {
       panel.style.right = 'auto';
       panel.style.left = `${left}px`;
@@ -68,19 +181,21 @@ export default function FloatingSheetPanel({
     if (dragRef.current?.pointerId !== event.pointerId) return;
     dragRef.current = null;
     event.currentTarget.releasePointerCapture?.(event.pointerId);
+    rememberFrame();
   };
 
   const beginResize = (event) => {
     if (event.button !== 0) return;
-    const panel = panelRef.current;
-    if (!panel) return;
-    const box = panel.getBoundingClientRect();
+    // Seeded here too: a player may resize before ever moving the panel, and
+    // the stored frame still has to carry where it sits.
+    const offset = seedPlacement();
+    if (!offset) return;
     resizeRef.current = {
       pointerId: event.pointerId,
       startX: event.clientX,
       startY: event.clientY,
-      width: box.width,
-      height: box.height,
+      width: offset.width,
+      height: offset.height,
     };
     event.currentTarget.setPointerCapture?.(event.pointerId);
     event.preventDefault();
@@ -93,8 +208,22 @@ export default function FloatingSheetPanel({
     const container = containerRef.current;
     if (!resize || resize.pointerId !== event.pointerId || !panel || !container) return;
     const bounds = container.getBoundingClientRect();
-    const width = clamp(resize.width + event.clientX - resize.startX, 340, Math.max(340, bounds.width * 0.94));
-    const height = clamp(resize.height + event.clientY - resize.startY, 260, Math.max(260, bounds.height * 0.92));
+    const width = clamp(
+      resize.width + event.clientX - resize.startX,
+      MIN_SHEET_WIDTH,
+      Math.max(MIN_SHEET_WIDTH, bounds.width * MAX_SHEET_WIDTH_RATIO),
+    );
+    const height = clamp(
+      resize.height + event.clientY - resize.startY,
+      MIN_SHEET_HEIGHT,
+      Math.max(MIN_SHEET_HEIGHT, bounds.height * MAX_SHEET_HEIGHT_RATIO),
+    );
+    // This is the gesture that gives the frame a size at all.
+    placementRef.current = {
+      ...placementRef.current,
+      width: Math.round(width),
+      height: Math.round(height),
+    };
     scheduleStyle(() => {
       panel.style.width = `${Math.round(width)}px`;
       panel.style.height = `${Math.round(height)}px`;
@@ -105,6 +234,7 @@ export default function FloatingSheetPanel({
     if (resizeRef.current?.pointerId !== event.pointerId) return;
     resizeRef.current = null;
     event.currentTarget.releasePointerCapture?.(event.pointerId);
+    rememberFrame();
   };
 
   return (
@@ -173,7 +303,10 @@ const panelSx = {
   zIndex: 10,
   width: 'min(620px, calc(100% - 24px))',
   height: 'min(70vh, calc(100% - 68px))',
-  minHeight: 280,
+  // The same floor the resize handle and the restore clamp use. A CSS minimum
+  // above theirs would silently overrule the height they worked out.
+  minHeight: MIN_SHEET_HEIGHT,
+  minWidth: MIN_SHEET_WIDTH,
   display: 'grid',
   gridTemplateRows: 'auto minmax(0, 1fr)',
   borderRadius: 1.25,
@@ -188,7 +321,8 @@ const panelSx = {
 };
 
 const headerSx = {
-  minHeight: 40,
+  // What the drag clamp promises to leave on screen, so the two cannot drift.
+  minHeight: SHEET_VISIBLE_HEADER,
   px: 1,
   alignItems: 'center',
   borderBottom: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.22)}`,
