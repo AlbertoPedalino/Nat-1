@@ -70,7 +70,9 @@ export default function AtmosphereOverlay({ atmosphere }) {
       const host = canvas.parentElement;
       const width = host?.clientWidth || canvas.clientWidth || 1;
       const height = host?.clientHeight || canvas.clientHeight || 1;
-      const detailScale = ['swamp', 'haunted'].includes(configRef.current.type) ? 0.72 : 0.55;
+      // Tiny radial motes need enough samples to remain circular instead of
+      // collapsing into square pixels on the reduced-resolution canvas.
+      const detailScale = ['sunrays', 'swamp', 'haunted'].includes(configRef.current.type) ? 0.82 : 0.55;
       const scale = Math.min(globalThis.devicePixelRatio || 1, 1.25) * detailScale;
       const nextWidth = Math.max(1, Math.round(width * scale));
       const nextHeight = Math.max(1, Math.round(height * scale));

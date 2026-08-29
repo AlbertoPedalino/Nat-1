@@ -7,15 +7,20 @@ float horizontalWindLines(
   float time,
   float velocity,
   float direction,
+  float verticalVelocity,
   float salt
 ) {
-  float rowPosition = p.y * rows;
+  // The whole sparse row field drifts vertically. Opposing layers eventually
+  // sweep every height without filling the viewport at the same instant.
+  float rowPosition = (p.y + 0.5 + time * verticalVelocity) * rows;
   float row = floor(rowPosition);
   float identity = hash(vec2(row, salt));
   float verticalWave = sin(p.x * 3.2 + time * direction * 0.7 + identity * 6.2831853) * 0.16;
   verticalWave += sin(p.x * 7.1 - time * direction * 0.42 + salt) * 0.055;
   float across = abs(fract(rowPosition + verticalWave) - 0.5);
-  float core = 1.0 - smoothstep(0.045, 0.235, across);
+  float thickness = mix(0.045, 0.19, hash(vec2(row + 7.0, salt + 13.0)));
+  float feather = mix(0.13, 0.22, identity);
+  float core = 1.0 - smoothstep(thickness * 0.42, thickness + feather, across);
 
   float along = fract(p.x * 0.54 - time * velocity * direction + identity);
   float head = smoothstep(0.0, 0.075, along);
@@ -41,12 +46,17 @@ float carriedFragment(
   vec2 local = fract(q) - 0.5;
   float identity = hash(cell + vec2(salt, salt * 0.43));
   float phase = identity * 6.2831853;
+  vec2 randomCenter = vec2(
+    hash(cell + vec2(salt + 7.3, 29.1)),
+    hash(cell + vec2(41.7, salt + 12.4))
+  ) - 0.5;
+  local -= randomCenter * 0.54;
   local.y -= sin(time * (1.7 + identity) + phase) * 0.16;
   local.x -= cos(time * 0.83 + phase) * 0.055;
   local = rotate2d(phase + time * direction * (1.9 + identity * 2.4)) * local;
   float silhouette = 1.0 - smoothstep(
-    0.14,
-    0.235,
+    0.12,
+    0.28,
     length(local * stretch)
   );
   float exists = step(threshold, hash(cell + vec2(salt + 31.0, 17.6)));
@@ -58,8 +68,8 @@ export default createAtmosphereFragmentShader({
   body: `
   // Counter-flowing horizontal sheets enter from both sides. Different row
   // density, speed and phase keep them from reading as a uniform line pattern.
-  float fromLeft = horizontalWindLines(p, 5.0, time, 0.42, 1.0, 3.0);
-  float fromRight = horizontalWindLines(p + vec2(1.7, 0.17), 7.0, time, 0.55, -1.0, 11.0);
+  float fromLeft = horizontalWindLines(p, 4.0, time, 0.42, 1.0, 0.052, 3.0);
+  float fromRight = horizontalWindLines(p + vec2(1.7, 0.17), 6.0, time, 0.55, -1.0, -0.041, 11.0);
   float lines = fromLeft + fromRight * 0.9;
 
   // Broader translucent lanes make the strong airflow readable between the
@@ -75,14 +85,26 @@ export default createAtmosphereFragmentShader({
 
   float gustNoise = fbm(vec2(time * 0.14 + u_seed * 0.01, u_seed * 0.004 + 5.0));
   float gust = 0.82 + smoothstep(0.47, 0.72, gustNoise) * 0.58;
-  float leaves = carriedFragment(p, time, 1.0, 37.0, vec2(1.25, 3.1), 0.975);
-  float debris = carriedFragment(p + vec2(2.9, 0.21), time, -1.0, 61.0, vec2(2.5, 1.45), 0.983);
+  // Separate grids, phases and directions prevent leaves from travelling as a
+  // recognisable fixed cluster. The smaller ochre shards read as debris.
+  float leavesLeft = carriedFragment(p, time, 1.0, 37.0, vec2(1.25, 3.1), 0.964);
+  float leavesRight = carriedFragment(
+    p + vec2(1.73, 0.38), time * 1.08, -1.0, 83.0, vec2(1.45, 3.5), 0.972
+  );
+  float leaves = max(leavesLeft, leavesRight);
+  float debrisLeft = carriedFragment(
+    p + vec2(2.9, 0.21), time * 1.14, 1.0, 61.0, vec2(3.7, 1.85), 0.952
+  );
+  float debrisRight = carriedFragment(
+    p + vec2(0.63, 1.47), time * 0.91, -1.0, 109.0, vec2(4.3, 2.15), 0.962
+  );
+  float debris = max(debrisLeft, debrisRight);
   float bright = clamp(lines * 0.82 + pressure * 0.3, 0.0, 1.0);
   float shadow = clamp(broadRight * 0.38 + (1.0 - leftFlow) * 0.08, 0.0, 1.0);
   color = mix(vec3(0.1, 0.16, 0.2), vec3(0.82, 0.91, 0.93), bright);
   color = mix(color, vec3(0.055, 0.08, 0.11), shadow);
-  color = mix(color, vec3(0.24, 0.34, 0.08), leaves * 0.92);
-  color = mix(color, vec3(0.3, 0.17, 0.065), debris * 0.94);
+  color = mix(color, vec3(0.42, 0.57, 0.07), leaves);
+  color = mix(color, vec3(0.72, 0.42, 0.12), debris);
   alpha = (lines * 0.72 + broadLeft * 0.16 + broadRight * 0.13 + pressure * 0.12) * gust;
-  alpha += leaves * 0.78 + debris * 0.72;`,
+  alpha += leaves * 0.94 + debris * 0.94;`,
 });

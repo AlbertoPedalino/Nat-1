@@ -64,7 +64,7 @@ export function atmosphereFallbackSx(config) {
   if (config.type === 'goldvault') {
     return {
       ...common,
-      background: `radial-gradient(ellipse at 50% 108%, ${vttAlpha(VTT_COLORS.goldBright, 0.74)}, transparent 58%), radial-gradient(circle at 18% 72%, ${vttAlpha(VTT_COLORS.white, 0.46)} 0 1px, transparent 3px), radial-gradient(circle at 81% 36%, ${vttAlpha(VTT_COLORS.goldRoll, 0.62)} 0 2px, transparent 4px)`,
+      background: `radial-gradient(ellipse at 50% 108%, ${vttAlpha(VTT_COLORS.goldBright, 0.92)}, transparent 62%), radial-gradient(circle at 18% 72%, ${vttAlpha(VTT_COLORS.white, 0.58)} 0 1px, transparent 3px), radial-gradient(circle at 81% 36%, ${vttAlpha(VTT_COLORS.goldRoll, 0.78)} 0 2px, transparent 4px), ${vttAlpha(VTT_COLORS.gold, 0.08)}`,
       backgroundSize: 'auto, 83px 71px, 127px 109px',
     };
   }

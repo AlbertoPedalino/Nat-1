@@ -30,8 +30,16 @@ float boilingBubbleLayer(vec2 uv, float columns, float time, float salt) {
   return ((rim + glint * 0.72) * alive + pop * 0.92) * exists;
 }
 
-float swampSporeLayer(vec2 uv, float scale, float time, float salt) {
-  vec2 grid = uv * scale;
+float swampSporeLayer(
+  vec2 uv,
+  float scale,
+  float time,
+  float salt,
+  float radius,
+  float threshold
+) {
+  vec2 driftDirection = normalize(vec2(sin(salt * 1.17), cos(salt * 0.83)));
+  vec2 grid = (uv + driftDirection * time * 0.0038) * scale;
   vec2 cell = floor(grid);
   vec2 local = fract(grid) - 0.5;
   float identity = hash(cell + vec2(salt, salt * 0.41));
@@ -45,8 +53,8 @@ float swampSporeLayer(vec2 uv, float scale, float time, float salt) {
     sin(time * (0.42 + identity * 0.28) + phase * 1.4) * 0.18,
     sin(time * (0.35 + identity * 0.24) + phase) * 0.24
   );
-  float spore = 1.0 - smoothstep(0.054, 0.074, length(local - center));
-  float exists = step(0.91, hash(cell + vec2(salt + 47.0, 5.0)));
+  float spore = 1.0 - smoothstep(radius * 0.28, radius, length(local - center));
+  float exists = step(threshold, hash(cell + vec2(salt + 47.0, 5.0)));
   return spore * exists;
 }
 
@@ -92,8 +100,16 @@ export default createAtmosphereFragmentShader({
     fbm(p * vec2(5.8, 3.1) + vec2(warp.x * 1.7, -time * 0.42)));
   boilingBody *= 1.0 - smoothstep(0.04, 0.42, v_uv.y);
   float bubbles = boilingBubbleLayer(v_uv, 5.0, time, 13.0);
-  float spores = swampSporeLayer(v_uv, 19.0, time, 23.0) * 0.78
-    + swampSporeLayer(v_uv + vec2(0.23, 0.11), 11.0, time * 0.86, 59.0) * 1.08;
+  float sporesFar = swampSporeLayer(
+    p, 27.0, time * 0.5, 23.0, 0.042, 0.94
+  );
+  float sporesMid = swampSporeLayer(
+    p + vec2(0.23, 0.11), 18.0, time * 0.86, 59.0, 0.052, 0.925
+  );
+  float sporesNear = swampSporeLayer(
+    p + vec2(0.08, 0.37), 12.0, time * 1.25, 97.0, 0.062, 0.92
+  );
+  float spores = sporesFar * 0.46 + sporesMid * 0.72 + sporesNear;
   float flies = swampFlyLayer(v_uv, 5.0, time, 31.0)
     + swampFlyLayer(v_uv + vec2(0.12, 0.29), 7.0, time * 1.07, 73.0) * 0.72;
   float sicklyGlow = smoothstep(0.7, 0.94, fbm(p * 3.1 + vec2(time * 0.045, 23.0)));

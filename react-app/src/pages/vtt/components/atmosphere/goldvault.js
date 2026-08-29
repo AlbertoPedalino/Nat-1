@@ -28,7 +28,7 @@ export default createAtmosphereFragmentShader({
   );
   float lowerBounce = 1.0 - smoothstep(0.04, 0.92, v_uv.y);
   float sideBounce = 1.0 - smoothstep(0.08, 0.72, min(v_uv.x, 1.0 - v_uv.x));
-  float broadGlow = lowerBounce * 0.52 + sideBounce * lowerBounce * 0.36;
+  float broadGlow = lowerBounce * 0.68 + sideBounce * lowerBounce * 0.48;
   float causticA = pow(max(0.0, sin((p.x + warp.x * 0.48) * 19.0
     + v_uv.y * 7.0 - time * 0.9)), 10.0);
   float causticB = pow(max(0.0, sin((p.x - warp.y * 0.4) * 27.0
@@ -39,8 +39,8 @@ export default createAtmosphereFragmentShader({
     + vaultGlintLayer(v_uv + vec2(0.17, 0.29), 12.0, time * 0.86, 53.0) * 0.62;
   float dustGlow = smoothstep(0.72, 0.94, fbm(p * 3.4 + vec2(time * 0.025, 31.0)));
   dustGlow *= 0.35 + broadGlow;
-  color = mix(vec3(0.32, 0.12, 0.015), vec3(0.96, 0.54, 0.07),
+  color = mix(vec3(0.5, 0.16, 0.006), vec3(1.0, 0.63, 0.025),
     clamp(broadGlow + reflectedLight, 0.0, 1.0));
-  color = mix(color, vec3(1.0, 0.94, 0.54), clamp(glints + reflectedLight * 0.52, 0.0, 1.0));
-  alpha = broadGlow * 0.23 + reflectedLight * 0.38 + glints * 0.82 + dustGlow * 0.12;`,
+  color = mix(color, vec3(1.0, 0.96, 0.46), clamp(glints + reflectedLight * 0.58, 0.0, 1.0));
+  alpha = 0.075 + broadGlow * 0.34 + reflectedLight * 0.52 + glints * 0.9 + dustGlow * 0.18;`,
 });

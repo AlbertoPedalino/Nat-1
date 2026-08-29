@@ -1,10 +1,11 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import {
   Box,
   Button,
   FormControlLabel,
   MenuItem,
+  Popover,
   Slider,
   Stack,
   Switch,
@@ -15,12 +16,21 @@ import {
   Typography,
 } from '@mui/material';
 import {
+  Ban,
   Cloud,
+  CloudFog,
+  CloudLightning,
+  CloudRain,
+  CloudSnow,
+  ChevronDown,
+  Coins,
   Eraser,
   Eye,
   EyeOff,
+  Flame,
   Grid3x3,
   Hexagon,
+  House,
   Image as ImageIcon,
   ImagePlus,
   MousePointer2,
@@ -28,11 +38,15 @@ import {
   Circle,
   Pointer,
   Ruler,
+  Snowflake,
   Square,
+  SunMedium,
   Triangle,
+  Trees,
   Type,
   Undo2,
   Users,
+  Wind,
 } from 'lucide-react';
 import ColorField from '../../../components/ColorField.jsx';
 import InfoHint from '../../../components/InfoHint.jsx';
@@ -60,6 +74,109 @@ function SectionLabel({ label, hint }) {
   );
 }
 
+const ATMOSPHERE_ICONS = Object.freeze({
+  none: Ban,
+  rain: CloudRain,
+  storm: CloudLightning,
+  wind: Wind,
+  fog: CloudFog,
+  snow: Snowflake,
+  blizzard: CloudSnow,
+  sandstorm: Cloud,
+  fire: Flame,
+  sunrays: SunMedium,
+  swamp: Trees,
+  haunted: House,
+  goldvault: Coins,
+});
+
+const atmospherePresetsByType = new Map(
+  ATMOSPHERE_PRESETS.map((preset) => [preset.value, preset]),
+);
+
+function AtmosphereOption({ type, selected, onSelect }) {
+  const preset = atmospherePresetsByType.get(type);
+  const Icon = ATMOSPHERE_ICONS[type] || Cloud;
+  return (
+    <ToggleButton
+      value={type}
+      selected={selected}
+      onClick={() => onSelect(type)}
+      aria-label={preset.label}
+      sx={{
+        minWidth: 0,
+        justifyContent: 'flex-start',
+        gap: 0.75,
+        px: 1,
+        py: 0.7,
+        border: `1px solid ${vttAlpha(VTT_COLORS.railText, 0.2)}`,
+        borderRadius: '7px !important',
+        color: VTT_COLORS.panelTextMuted,
+        textTransform: 'none',
+        '&:hover': {
+          borderColor: vttAlpha(VTT_COLORS.gold, 0.5),
+          bgcolor: vttAlpha(VTT_COLORS.gold, 0.06),
+        },
+        '&.Mui-selected': {
+          borderColor: vttAlpha(VTT_COLORS.goldBright, 0.78),
+          bgcolor: vttAlpha(VTT_COLORS.gold, 0.16),
+          color: VTT_COLORS.goldBright,
+        },
+        '&.Mui-selected:hover': { bgcolor: vttAlpha(VTT_COLORS.gold, 0.21) },
+      }}
+    >
+      <Icon size={15} strokeWidth={1.8} />
+      <Typography
+        component="span"
+        variant="caption"
+        noWrap
+        sx={{ minWidth: 0, fontWeight: selected ? 700 : 500 }}
+      >
+        {preset.label}
+      </Typography>
+    </ToggleButton>
+  );
+}
+
+function AtmospherePicker({ value, onSelect }) {
+  const [query, setQuery] = useState('');
+  const normalizedQuery = query.trim().toLocaleLowerCase();
+  const visiblePresets = ATMOSPHERE_PRESETS.filter((preset) => (
+    !normalizedQuery
+    || preset.label.toLocaleLowerCase().includes(normalizedQuery)
+    || preset.value.toLocaleLowerCase().includes(normalizedQuery)
+  ));
+
+  return (
+    <Stack spacing={0.85} role="group" aria-label="Atmosphere">
+      <TextField
+        size="small"
+        type="search"
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+        placeholder="Search atmospheres…"
+        slotProps={{ htmlInput: { 'aria-label': 'Search atmospheres' } }}
+        autoFocus
+      />
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 0.55 }}>
+        {visiblePresets.map((preset) => (
+          <AtmosphereOption
+            key={preset.value}
+            type={preset.value}
+            selected={value === preset.value}
+            onSelect={onSelect}
+          />
+        ))}
+      </Box>
+      {visiblePresets.length === 0 ? (
+        <Typography variant="caption" color="text.secondary" sx={{ py: 1, textAlign: 'center' }}>
+          No atmospheres found
+        </Typography>
+      ) : null}
+    </Stack>
+  );
+}
+
 export function MapPanel({
   scene, busy, onUploadMap, onUploadBackground, onShownImageChange, onAddImage,
   onGridChange, onAtmosphereChange, onPlayAreaChange, onFitPlayArea,
@@ -69,9 +186,16 @@ export function MapPanel({
   const mapRef = useRef(null);
   const backgroundRef = useRef(null);
   const extraRef = useRef(null);
+  const [atmosphereAnchor, setAtmosphereAnchor] = useState(null);
   const setGrid = (patch) => onGridChange({ ...scene.grid, ...patch });
   const atmosphere = normalizeAtmosphere(scene.atmosphere);
   const setAtmosphere = (patch) => onAtmosphereChange?.({ ...atmosphere, ...patch });
+  const selectAtmosphere = (type) => setAtmosphere({
+    type,
+    seed: type === atmosphere.type ? atmosphere.seed : (Date.now() % 999999) + 1,
+  });
+  const selectedAtmosphere = atmospherePresetsByType.get(atmosphere.type);
+  const SelectedAtmosphereIcon = ATMOSPHERE_ICONS[atmosphere.type] || Cloud;
 
   return (
     <Stack spacing={1.25}>
@@ -120,36 +244,81 @@ export function MapPanel({
         label="Atmosphere"
         hint="A procedural atmospheric layer shared by the battlemap and background. It is rendered locally as a continuous field, so denser rain or fog does not create more particles."
       />
-      <TextField
-        select
+      <Button
         fullWidth
         size="small"
-        label="Atmosphere"
-        value={atmosphere.type}
-        onChange={(event) => setAtmosphere({
-          type: event.target.value,
-          seed: event.target.value === atmosphere.type
-            ? atmosphere.seed
-            : (Date.now() % 999999) + 1,
-        })}
+        variant="outlined"
+        startIcon={<SelectedAtmosphereIcon size={16} strokeWidth={1.8} />}
+        endIcon={<ChevronDown size={15} />}
+        aria-label={`Choose atmosphere. Current: ${selectedAtmosphere.label}`}
+        aria-haspopup="dialog"
+        aria-expanded={Boolean(atmosphereAnchor)}
+        onClick={(event) => setAtmosphereAnchor(event.currentTarget)}
+        sx={{
+          justifyContent: 'flex-start',
+          color: atmosphere.type === 'none' ? VTT_COLORS.panelTextMuted : VTT_COLORS.goldBright,
+          borderColor: vttAlpha(VTT_COLORS.railText, 0.28),
+          textTransform: 'none',
+          '& .MuiButton-endIcon': { ml: 'auto' },
+        }}
       >
-        {ATMOSPHERE_PRESETS.map((preset) => (
-          <MenuItem key={preset.value} value={preset.value}>{preset.label}</MenuItem>
-        ))}
-      </TextField>
+        {selectedAtmosphere.label}
+      </Button>
+      <Popover
+        open={Boolean(atmosphereAnchor)}
+        anchorEl={atmosphereAnchor}
+        onClose={() => setAtmosphereAnchor(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+        container={() => (
+          atmosphereAnchor?.ownerDocument?.fullscreenElement
+          || atmosphereAnchor?.ownerDocument?.body
+        )}
+        slotProps={{
+          paper: {
+            sx: {
+              width: 320,
+              maxWidth: 'calc(100vw - 24px)',
+              mt: 0.5,
+              p: 1.25,
+              bgcolor: vttAlpha(VTT_COLORS.surfaceRaised, 0.98),
+              backgroundImage: 'none',
+              border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.24)}`,
+              boxShadow: `0 14px 38px ${vttAlpha(VTT_COLORS.black, 0.72)}`,
+            },
+          },
+        }}
+      >
+        <AtmospherePicker value={atmosphere.type} onSelect={selectAtmosphere} />
+        {atmosphere.type === 'none' ? null : (
+          <Stack
+            spacing={0.35}
+            sx={{
+              mt: 1,
+              pt: 0.9,
+              borderTop: `1px solid ${vttAlpha(VTT_COLORS.railText, 0.16)}`,
+            }}
+          >
+            <SectionLabel
+              label="Intensity"
+              hint="Controls opacity and density without changing the amount of work done by the renderer."
+            />
+            <Slider
+              size="small"
+              min={0.1}
+              max={1}
+              step={0.05}
+              value={atmosphere.intensity}
+              valueLabelDisplay="auto"
+              aria-label="Atmosphere intensity"
+              onChange={(_, value) => setAtmosphere({ intensity: value })}
+              sx={{ mx: 0.5, width: 'calc(100% - 8px)' }}
+            />
+          </Stack>
+        )}
+      </Popover>
       {atmosphere.type === 'none' ? null : (
         <Stack spacing={0.5}>
-          <SectionLabel label="Intensity" hint="Controls opacity and density without changing the amount of work done by the renderer." />
-          <Slider
-            size="small"
-            min={0.1}
-            max={1}
-            step={0.05}
-            value={atmosphere.intensity}
-            valueLabelDisplay="auto"
-            aria-label="Atmosphere intensity"
-            onChange={(_, value) => setAtmosphere({ intensity: value })}
-          />
           <SectionLabel label="Wind" hint="Direction is measured clockwise; movement changes how quickly the atmospheric field crosses the view." />
           <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
             <TextField
