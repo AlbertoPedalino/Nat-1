@@ -101,13 +101,13 @@ export default createAtmosphereFragmentShader({
   boilingBody *= 1.0 - smoothstep(0.04, 0.42, v_uv.y);
   float bubbles = boilingBubbleLayer(v_uv, 5.0, time, 13.0);
   float sporesFar = swampSporeLayer(
-    p, 27.0, time * 0.5, 23.0, 0.042, 0.94
+    p, 27.0, time * 0.5, 23.0, 0.052, 0.94
   );
   float sporesMid = swampSporeLayer(
-    p + vec2(0.23, 0.11), 18.0, time * 0.86, 59.0, 0.052, 0.925
+    p + vec2(0.23, 0.11), 18.0, time * 0.86, 59.0, 0.065, 0.925
   );
   float sporesNear = swampSporeLayer(
-    p + vec2(0.08, 0.37), 12.0, time * 1.25, 97.0, 0.062, 0.92
+    p + vec2(0.08, 0.37), 12.0, time * 1.25, 97.0, 0.077, 0.92
   );
   float spores = sporesFar * 0.46 + sporesMid * 0.72 + sporesNear;
   float flies = swampFlyLayer(v_uv, 5.0, time, 31.0)

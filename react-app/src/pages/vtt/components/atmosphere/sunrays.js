@@ -50,12 +50,12 @@ export default createAtmosphereFragmentShader({
   float airA = 0.72 + fbm(vec2(v_uv.y * 1.8, time * 0.055 + 4.0)) * 0.36;
   float airB = 0.72 + fbm(vec2(v_uv.y * 1.5, time * 0.047 + 11.0)) * 0.36;
   float shafts = clamp(beamA * openA * airA + beamB * openB * airB, 0.0, 1.0);
-  float dustFar = dustMoteLayer(p, 29.0, time * 0.48, 31.0, 0.05, 0.965);
+  float dustFar = dustMoteLayer(p, 29.0, time * 0.48, 31.0, 0.062, 0.965);
   float dustMid = dustMoteLayer(
-    p + 7.3, 19.0, time * 0.86, 57.0, 0.06, 0.96
+    p + 7.3, 19.0, time * 0.86, 57.0, 0.074, 0.96
   );
   float dustNear = dustMoteLayer(
-    p + vec2(3.7, 11.2), 11.0, time * 1.28, 89.0, 0.07, 0.955
+    p + vec2(3.7, 11.2), 11.0, time * 1.28, 89.0, 0.086, 0.955
   );
   float dust = dustFar * 0.38 + dustMid * 0.64 + dustNear * 0.88;
   float illumination = smoothstep(0.06, 0.62, shafts);

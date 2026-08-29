@@ -100,13 +100,13 @@ export default createAtmosphereFragmentShader({
   // Three independently drifting depth planes keep the motes small and stop
   // the field from reading as one fixed texture over the map.
   float dustFar = hauntedDustLayer(
-    p, 30.0, time * 0.52, 17.0, 0.93, 0.042
+    p, 30.0, time * 0.52, 17.0, 0.93, 0.052
   );
   float dustMid = hauntedDustLayer(
-    p + vec2(0.19, 0.27), 20.0, time * 0.86, 47.0, 0.92, 0.05
+    p + vec2(0.19, 0.27), 20.0, time * 0.86, 47.0, 0.92, 0.063
   );
   float dustNear = hauntedDustLayer(
-    p + vec2(0.07, 0.16), 13.0, time * 1.24, 79.0, 0.93, 0.06
+    p + vec2(0.07, 0.16), 13.0, time * 1.24, 79.0, 0.93, 0.075
   );
   float dust = dustFar * 0.42 + dustMid * 0.68 + dustNear * 0.92;
   float ambientDust = dust;

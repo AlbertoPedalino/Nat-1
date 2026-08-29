@@ -87,16 +87,16 @@ export default createAtmosphereFragmentShader({
   float gust = 0.82 + smoothstep(0.47, 0.72, gustNoise) * 0.58;
   // Separate grids, phases and directions prevent leaves from travelling as a
   // recognisable fixed cluster. The smaller ochre shards read as debris.
-  float leavesLeft = carriedFragment(p, time, 1.0, 37.0, vec2(1.25, 3.1), 0.964);
+  float leavesLeft = carriedFragment(p, time, 1.0, 37.0, vec2(1.25, 3.1), 0.982);
   float leavesRight = carriedFragment(
-    p + vec2(1.73, 0.38), time * 1.08, -1.0, 83.0, vec2(1.45, 3.5), 0.972
+    p + vec2(1.73, 0.38), time * 1.08, -1.0, 83.0, vec2(1.45, 3.5), 0.988
   );
   float leaves = max(leavesLeft, leavesRight);
   float debrisLeft = carriedFragment(
-    p + vec2(2.9, 0.21), time * 1.14, 1.0, 61.0, vec2(3.7, 1.85), 0.952
+    p + vec2(2.9, 0.21), time * 1.14, 1.0, 61.0, vec2(3.7, 1.85), 0.978
   );
   float debrisRight = carriedFragment(
-    p + vec2(0.63, 1.47), time * 0.91, -1.0, 109.0, vec2(4.3, 2.15), 0.962
+    p + vec2(0.63, 1.47), time * 0.91, -1.0, 109.0, vec2(4.3, 2.15), 0.986
   );
   float debris = max(debrisLeft, debrisRight);
   float bright = clamp(lines * 0.82 + pressure * 0.3, 0.0, 1.0);

@@ -109,20 +109,26 @@ function AtmosphereOption({ type, selected, onSelect }) {
         gap: 0.75,
         px: 1,
         py: 0.7,
-        border: `1px solid ${vttAlpha(VTT_COLORS.railText, 0.2)}`,
+        border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.35)}`,
         borderRadius: '7px !important',
-        color: VTT_COLORS.panelTextMuted,
+        bgcolor: vttAlpha(VTT_COLORS.ink, 0.85),
+        color: VTT_COLORS.railText,
         textTransform: 'none',
         '&:hover': {
-          borderColor: vttAlpha(VTT_COLORS.gold, 0.5),
-          bgcolor: vttAlpha(VTT_COLORS.gold, 0.06),
+          borderColor: vttAlpha(VTT_COLORS.gold, 0.68),
+          bgcolor: vttAlpha(VTT_COLORS.gold, 0.12),
+          color: VTT_COLORS.panelText,
         },
         '&.Mui-selected': {
-          borderColor: vttAlpha(VTT_COLORS.goldBright, 0.78),
-          bgcolor: vttAlpha(VTT_COLORS.gold, 0.16),
-          color: VTT_COLORS.goldBright,
+          borderColor: VTT_COLORS.gold,
+          bgcolor: VTT_COLORS.gold,
+          color: VTT_COLORS.ink,
         },
-        '&.Mui-selected:hover': { bgcolor: vttAlpha(VTT_COLORS.gold, 0.21) },
+        '&.Mui-selected:hover': {
+          borderColor: VTT_COLORS.goldBright,
+          bgcolor: VTT_COLORS.goldBright,
+          color: VTT_COLORS.ink,
+        },
       }}
     >
       <Icon size={15} strokeWidth={1.8} />
