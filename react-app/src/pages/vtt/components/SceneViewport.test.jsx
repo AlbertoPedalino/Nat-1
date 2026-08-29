@@ -149,6 +149,41 @@ test('an external piece is shown at map scale and dropped on the hovered cell', 
   );
 });
 
+test('the background refuses piece placement', () => {
+  const placementDrag = {
+    kind: 'character',
+    characterId: 'hero-1',
+    token: { label: 'Aria', w: 1, h: 1, layer: 'tokens' },
+  };
+  const onDropPlacement = vi.fn();
+  const { container } = render(
+    <SceneViewport
+      scene={{ grid: { size: 50, offsetX: 0, offsetY: 0, visible: false }, playArea: null }}
+      imageUrl={null}
+      tokens={[]}
+      snap
+      canMove={() => false}
+      fog={null}
+      backgroundOnly
+      placementDrag={placementDrag}
+      onDropPlacement={onDropPlacement}
+      drawings={[]}
+      lasers={[]}
+      rollBubbles={[]}
+      diceThrows={[]}
+    />,
+  );
+  const viewport = screen.getByText('Upload a map image to start building this scene.').parentElement;
+  const dataTransfer = { dropEffect: '' };
+
+  fireEvent.dragOver(viewport, { clientX: 150, clientY: 120, dataTransfer });
+  fireEvent.drop(viewport, { clientX: 150, clientY: 120, dataTransfer });
+
+  expect(dataTransfer.dropEffect).toBe('none');
+  expect(container.querySelector('[data-placement-preview]')).toBeNull();
+  expect(onDropPlacement).not.toHaveBeenCalled();
+});
+
 test('a Lucide map object persists its resized cell dimensions on release', () => {
   const onResizeToken = vi.fn();
   render(

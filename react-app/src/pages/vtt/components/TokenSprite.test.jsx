@@ -208,3 +208,48 @@ test('condition pills collapse while their token is being dragged', () => {
   expect(screen.queryByText('Prone')).not.toBeInTheDocument();
   expect(screen.getByText('1')).toBeInTheDocument();
 });
+
+test('a projector inspection expands the token and opens the matching condition rules', async () => {
+  render(
+    <TokenSprite
+      token={{
+        id: 'goblin-1',
+        label: 'Goblin',
+        layer: 'tokens',
+        conditions: ['prone'],
+        effects: [],
+      }}
+      size={64}
+      interactive={false}
+      movable={false}
+      conditionEntries={{ prone: ['Prone rules for the projector'] }}
+      presentedInspection={{ tokenId: 'goblin-1', conditionKey: 'prone' }}
+    />,
+  );
+
+  expect(screen.getAllByText('Prone')).toHaveLength(2);
+  expect(await screen.findByText('Prone rules for the projector')).toBeInTheDocument();
+  expect(screen.queryByText('1')).not.toBeInTheDocument();
+});
+
+test('token and condition hover changes are reported to the presenter', () => {
+  const onInspectionChange = vi.fn();
+  render(
+    <TokenSprite
+      token={{
+        id: 'goblin-1', label: 'Goblin', layer: 'tokens', conditions: ['prone'], effects: [],
+      }}
+      size={64}
+      interactive
+      movable={false}
+      conditionEntries={{ prone: ['Prone rules'] }}
+      onInspectionChange={onInspectionChange}
+    />,
+  );
+
+  fireEvent.pointerEnter(screen.getByRole('button', { name: 'Goblin' }));
+  fireEvent.pointerEnter(screen.getByText('Prone'));
+
+  expect(onInspectionChange).toHaveBeenCalledWith({ tokenId: 'goblin-1', conditionKey: null });
+  expect(onInspectionChange).toHaveBeenCalledWith({ tokenId: 'goblin-1', conditionKey: 'prone' });
+});

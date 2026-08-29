@@ -270,6 +270,8 @@ export default function SceneEditor({
   const [measureShape, setMeasureShape] = useState('line');
   const [feetPerCell, setFeetPerCell] = useState(FEET_PER_CELL);
   const [remoteMeasure, setRemoteMeasure] = useState(null);
+  const presenterInspectionRef = useRef(null);
+  const [projectorInspection, setProjectorInspection] = useState(null);
   const conditionEntries = useConditionEntries();
   const {
     clearFeed: clearRollFeed,
@@ -310,6 +312,8 @@ export default function SceneEditor({
     setProjectorShownImage(scene.shownImage);
     setFollowCameraPose(null);
     hasPresenterFrameRef.current = false;
+    presenterInspectionRef.current = null;
+    setProjectorInspection(null);
   }, [scene.id]);
 
   useEffect(() => {
@@ -446,6 +450,7 @@ export default function SceneEditor({
     shownImage: sceneShownImageRef.current,
     pose: cameraPoseRef.current,
   }), []);
+  const getPresenterInspection = useCallback(() => presenterInspectionRef.current, []);
   const handleRemoteCameraPose = useCallback((pose) => {
     if (projectorFollowingRef.current) setFollowCameraPose(pose);
   }, []);
@@ -461,7 +466,12 @@ export default function SceneEditor({
     projectorFollowingRef.current = next.following;
     setProjectorFollowing(next.following);
   }, []);
-  const { sendDrag, sendCamera, sendPresenterState } = useSceneLive({
+  const handleRemotePresenterInspection = useCallback((inspection) => {
+    setProjectorInspection(inspection);
+  }, []);
+  const {
+    sendDrag, sendCamera, sendPresenterState, sendPresenterInspection,
+  } = useSceneLive({
     sceneId: scene.id,
     campaignId: scene.campaignId,
     onTokenEvent: handleTokenEvent,
@@ -475,7 +485,14 @@ export default function SceneEditor({
     onCameraPose: spectator ? handleRemoteCameraPose : undefined,
     getPresenterState,
     onPresenterState: spectator ? handleRemotePresenterState : undefined,
+    getPresenterInspection,
+    onPresenterInspection: spectator ? handleRemotePresenterInspection : undefined,
   });
+
+  const handleTokenInspection = useCallback((inspection) => {
+    presenterInspectionRef.current = inspection;
+    sendPresenterInspection(inspection);
+  }, [sendPresenterInspection]);
 
   const handleCameraViewChange = useCallback((pose) => {
     cameraPoseRef.current = pose;
@@ -887,6 +904,12 @@ export default function SceneEditor({
     }
   }, [notify, scene.id]);
 
+  const canPlacePiece = useCallback(() => {
+    if (scene.shownImage !== 'background') return true;
+    notify('warning', 'Switch to the battlemap before placing or moving pieces.');
+    return false;
+  }, [notify, scene.shownImage]);
+
   const nextFreeCell = useCallback(() => {
     const taken = new Set(tokens.map((token) => `${Math.round(token.x)}:${Math.round(token.y)}`));
     // A player's click-placement must land inside the play area they are
@@ -944,21 +967,24 @@ export default function SceneEditor({
     deathSaves: entry.deathSaves,
   }), []);
 
-  const handlePlaceCharacter = useCallback(
-    (entry) => addToken(characterToken(entry, nextFreeCell())),
-    [addToken, characterToken, nextFreeCell],
-  );
+  const handlePlaceCharacter = useCallback((entry) => {
+    if (!canPlacePiece()) return;
+    if (tokens.some((token) => token.characterId === entry.characterId)) return;
+    addToken(characterToken(entry, nextFreeCell()));
+  }, [addToken, canPlacePiece, characterToken, nextFreeCell, tokens]);
 
   const handleDropCharacter = useCallback((characterId, position) => {
+    if (!canPlacePiece()) return;
     const entry = roster.find((item) => item.characterId === characterId);
     if (!entry) return;
     if (tokens.some((token) => token.characterId === characterId)) return;
     addToken(characterToken(entry, position));
-  }, [addToken, characterToken, roster, tokens]);
+  }, [addToken, canPlacePiece, characterToken, roster, tokens]);
 
   // Same placement path as an encounter import, minus the fight: a creature
   // dropped on the map has nothing to stay in step with.
   const handlePlaceMonster = useCallback(async (monster, count, { layer, position } = {}) => {
+    if (!canPlacePiece()) return;
     setBusy(true);
     try {
       const laid = layoutTokens(
@@ -978,25 +1004,32 @@ export default function SceneEditor({
     } finally {
       setBusy(false);
     }
-  }, [notify, scene.id, tokens]);
+  }, [canPlacePiece, notify, scene.id, tokens]);
 
-  const handleAddToken = useCallback(() => addToken({
-    ...nextFreeCell(),
-    layer: activeLayer,
-    label: activeLayer === 'gm' ? 'Hidden' : 'Token',
-  }), [activeLayer, addToken, nextFreeCell]);
+  const handleAddToken = useCallback(() => {
+    if (!canPlacePiece()) return;
+    addToken({
+      ...nextFreeCell(),
+      layer: activeLayer,
+      label: activeLayer === 'gm' ? 'Hidden' : 'Token',
+    });
+  }, [activeLayer, addToken, canPlacePiece, nextFreeCell]);
 
   // A player's marker always lands on the token layer: they have no layer
   // selector, and the GM layer is not theirs to write to — the insert policy
   // would refuse it anyway.
-  const handleAddMarker = useCallback(() => addToken({
-    ...nextFreeCell(),
-    layer: 'tokens',
-    label: 'Marker',
-  }), [addToken, nextFreeCell]);
+  const handleAddMarker = useCallback(() => {
+    if (!canPlacePiece()) return;
+    addToken({
+      ...nextFreeCell(),
+      layer: 'tokens',
+      label: 'Marker',
+    });
+  }, [addToken, canPlacePiece, nextFreeCell]);
 
   const handlePlaceObject = useCallback(async (object, position) => {
     if (!object?.key) return;
+    if (!canPlacePiece()) return;
     // A dungeon marker's label is the GM's own note — "Pit · DC 13 · 2d6". It is
     // kept in the secret table rather than on the row, so springing the trap
     // later shows the party an icon and not the numbers they are about to roll
@@ -1025,11 +1058,12 @@ export default function SceneEditor({
     } catch (cause) {
       notify('error', cause?.message || 'The marker was placed, but its note could not be kept secret.');
     }
-  }, [activeLayer, addToken, nextFreeCell, notify, role.isGm]);
+  }, [activeLayer, addToken, canPlacePiece, nextFreeCell, notify, role.isGm]);
 
   const handleImportEncounter = useCallback(async (
     combatants, { layer, instanceId, fightId, position } = {},
   ) => {
+    if (!canPlacePiece()) return;
     setBusy(true);
     setImportOpen(false);
     try {
@@ -1053,7 +1087,7 @@ export default function SceneEditor({
     } finally {
       setBusy(false);
     }
-  }, [notify, scene.id, tokens]);
+  }, [canPlacePiece, notify, scene.id, tokens]);
 
   const handleDropPlacement = useCallback((placement, position) => {
     if (!placement) return;
@@ -1267,6 +1301,11 @@ export default function SceneEditor({
     }
   }, [notify]);
 
+  const handleRemoveCharacter = useCallback((entry) => {
+    const token = tokens.find((item) => item.characterId === entry.characterId);
+    if (token) handleDeleteToken(token);
+  }, [handleDeleteToken, tokens]);
+
   // Only the fog brushes belong to the GM. Listing them, rather than listing
   // what a player may hold, is what stopped the laser and the ruler from being
   // quietly downgraded to 'select' every time a new tool was added.
@@ -1370,7 +1409,9 @@ export default function SceneEditor({
               tokens={tokens}
               ownedCharacterIds={role.ownedCharacterIds}
               busy={busy}
+              placementDisabled={scene.shownImage === 'background'}
               onPlaceCharacter={handlePlaceCharacter}
+              onRemoveCharacter={handleRemoveCharacter}
               onAddMarker={handleAddMarker}
               onPlacementDragStart={setPlacementDrag}
               onPlacementDragEnd={() => setPlacementDrag(null)}
@@ -1421,8 +1462,10 @@ export default function SceneEditor({
             roster={roster}
             tokens={tokens}
             busy={busy}
+            placementDisabled={scene.shownImage === 'background'}
             activeLayer={activeLayer}
             onPlaceCharacter={handlePlaceCharacter}
+            onRemoveCharacter={handleRemoveCharacter}
             onAddToken={handleAddToken}
             onImportEncounter={() => setImportOpen(true)}
             onPlaceMonster={() => setMonsterOpen(true)}
@@ -1512,7 +1555,8 @@ export default function SceneEditor({
   }, [
     activeLayer, brushSize, busy, drawColor, drawWidth, erasable.length, handleAddMarker,
     handleAddToken, handleEnableFog, handleFitPlayArea, handleFogAll, handleGridChange,
-    handlePlaceCharacter, handlePlaceObject, handlePlayAreaChange, handleUndoDrawing, handleUploadMap,
+    handlePlaceCharacter, handlePlaceObject, handlePlayAreaChange, handleRemoveCharacter,
+    handleUndoDrawing, handleUploadMap,
     handleUploadBackground, handleShownImageChange, handleAddImage, paintMode,
     role.isGm, role.ownedCharacterIds, roster, scene, tokens, measureShape, feetPerCell,
     rollFeed, handleCustomRoll, clearRollFeed, hexcrawl, dungeon,
@@ -1697,6 +1741,7 @@ export default function SceneEditor({
           diceThrows={projectedDiceThrows}
           onDiceSettled={showSettledRollToast}
           conditionEntries={conditionEntries}
+          presentedInspection={projectorInspection}
           remoteMeasure={remoteMeasure}
           feetPerCell={feetPerCell}
           followView={followCameraPose}
@@ -1898,6 +1943,7 @@ export default function SceneEditor({
         measureShape={measureShape}
         feetPerCellForRuler={feetPerCell}
         conditionEntries={conditionEntries}
+        onTokenInspection={role.isGm ? handleTokenInspection : undefined}
         onMeasure={handleMeasure}
         remoteMeasure={remoteMeasure}
         feetPerCell={feetPerCell}

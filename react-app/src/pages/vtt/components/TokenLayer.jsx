@@ -29,6 +29,8 @@ const TokenNode = memo(function TokenNode({
   rotatable,
   canSetDeathSaves,
   conditionEntries,
+  presentedInspection,
+  onInspectionChange,
   onBeginDrag,
   onBeginResize,
   onBeginRotate,
@@ -62,6 +64,8 @@ const TokenNode = memo(function TokenNode({
         rotatable={rotatable}
         canSetDeathSaves={canSetDeathSaves}
         conditionEntries={conditionEntries}
+        presentedInspection={presentedInspection}
+        onInspectionChange={onInspectionChange}
         onPointerDown={interactive ? (event) => onBeginDrag(event, token) : undefined}
         onResizePointerDown={(event) => (interactive ? onBeginResize(event, token) : undefined)}
         onRotatePointerDown={(event) => (interactive ? onBeginRotate(event, token) : undefined)}
@@ -94,6 +98,8 @@ export default memo(function TokenLayer({
   selectedMapObjectId,
   canSetDeathSaves,
   conditionEntries,
+  presentedInspection,
+  onInspectionChange,
   onBeginDrag,
   onBeginResize,
   onBeginRotate,
@@ -127,6 +133,8 @@ export default memo(function TokenLayer({
         rotatable={movable && selected}
         canSetDeathSaves={Boolean(interactive && canSetDeathSaves?.(token))}
         conditionEntries={conditionEntries}
+        presentedInspection={presentedInspection}
+        onInspectionChange={onInspectionChange}
         onBeginDrag={onBeginDrag}
         onBeginResize={onBeginResize}
         onBeginRotate={onBeginRotate}

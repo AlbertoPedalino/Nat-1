@@ -24,6 +24,8 @@ export default function TokenSprite({
   rotatable = false,
   canSetDeathSaves = false,
   conditionEntries = {},
+  presentedInspection = null,
+  onInspectionChange,
   onPointerDown,
   onResizePointerDown,
   onRotatePointerDown,
@@ -36,13 +38,19 @@ export default function TokenSprite({
   const keepMarksOpen = () => {
     clearTimeout(hoverCloseTimerRef.current);
     hoverCloseTimerRef.current = null;
-    if (!dragging) setHovered(true);
+    if (!dragging) {
+      setHovered(true);
+      onInspectionChange?.({ tokenId: token.id, conditionKey: null });
+    }
   };
   const scheduleMarksClose = () => {
     clearTimeout(hoverCloseTimerRef.current);
     // The pills sit just outside the token. Keep them mounted while the pointer
     // crosses that tiny gap, otherwise they vanish before they can be hovered.
-    hoverCloseTimerRef.current = setTimeout(() => setHovered(false), 180);
+    hoverCloseTimerRef.current = setTimeout(() => {
+      setHovered(false);
+      onInspectionChange?.(null);
+    }, 180);
   };
   useEffect(() => () => clearTimeout(hoverCloseTimerRef.current), []);
   // The resize hint is controlled rather than left to MUI's own hover, so it can
@@ -82,6 +90,8 @@ export default function TokenSprite({
   // One badge for everything the GM has flagged on this creature: two counters
   // side by side would be read as one number anyway.
   const marks = visibleConditions.length + effects.length;
+  const remotelyExpanded = presentedInspection?.tokenId === token.id;
+  const marksExpanded = !dragging && (hovered || remotelyExpanded);
   // Opt-in per piece. A scene where every creature wears a bar is unreadable,
   // and which ones do is a call the GM makes at the table, not a default.
   const hasHp = Boolean(token.showHp) && token.hpMax != null && token.hpMax > 0;
@@ -113,6 +123,7 @@ export default function TokenSprite({
         clearTimeout(hoverCloseTimerRef.current);
         hoverCloseTimerRef.current = null;
         setHovered(false);
+        onInspectionChange?.(null);
         setDragging(Boolean(movable));
         onPointerDown?.(event);
       }}
@@ -141,7 +152,7 @@ export default function TokenSprite({
         filter: staged ? 'grayscale(0.7)' : 'none',
         // Above its neighbours while hovered so the expanded conditions are not
         // covered by the next piece along.
-        zIndex: hovered ? 3 : 1,
+        zIndex: marksExpanded ? 3 : 1,
         touchAction: 'none',
       }}
     >
@@ -337,14 +348,23 @@ export default function TokenSprite({
         </Box>
       ) : null}
 
-      {marks && (!hovered || dragging) ? <Box sx={badgeSx}>{marks}</Box> : null}
+      {marks && !marksExpanded ? <Box sx={badgeSx}>{marks}</Box> : null}
 
       {/* One pill each, wrapped: a run-on sentence of six states is read as a
           wall, while pills are counted at a glance and colour-coded by kind. */}
-      {marks && hovered && !dragging ? (
+      {marks && marksExpanded ? (
         <Box sx={pillsSx} onPointerEnter={keepMarksOpen} onPointerLeave={scheduleMarksClose}>
           {visibleConditions.map((key) => (
-            <ConditionTokenPill key={key} conditionKey={key} entries={conditionEntries[key]} />
+            <ConditionTokenPill
+              key={key}
+              conditionKey={key}
+              entries={conditionEntries[key]}
+              tooltipOpen={remotelyExpanded ? presentedInspection.conditionKey === key : undefined}
+              onInspect={(conditionKey) => onInspectionChange?.({
+                tokenId: token.id,
+                conditionKey,
+              })}
+            />
           ))}
           {effects.map((effect) => (
             <Box
@@ -360,13 +380,17 @@ export default function TokenSprite({
   );
 }
 
-function ConditionTokenPill({ conditionKey, entries }) {
+function ConditionTokenPill({ conditionKey, entries, tooltipOpen, onInspect }) {
   const label = conditionLabel(conditionKey);
   const pill = (
     <Box
       component="span"
       tabIndex={0}
       onPointerDown={(event) => event.stopPropagation()}
+      onPointerEnter={() => onInspect?.(conditionKey)}
+      onPointerLeave={() => onInspect?.(null)}
+      onFocus={() => onInspect?.(conditionKey)}
+      onBlur={() => onInspect?.(null)}
       sx={{ ...pillSx, ...conditionPillSx }}
     >
       {label}
@@ -379,6 +403,7 @@ function ConditionTokenPill({ conditionKey, entries }) {
     <Tooltip
       arrow
       placement="top"
+      {...(tooltipOpen == null ? null : { open: tooltipOpen })}
       title={(
         <Box sx={conditionTooltipBodySx}>
           <Typography sx={conditionTooltipTitleSx}>{label}</Typography>

@@ -81,3 +81,23 @@ export function presenterStateMessage(source, state) {
     pose: normalizeCameraPose(state.pose),
   };
 }
+
+// What the presenter is pointing at is transient, just like the camera. Keeping
+// it out of the scene row means a hover never becomes saved campaign state, but
+// the source id still prevents one GM tab from driving another tab's projector.
+export function presenterInspectionMessage(source, inspection) {
+  const safeSource = normalizeCameraSource(source);
+  if (!safeSource) return null;
+  const isSerializedClear = inspection?.tokenId === null && inspection?.conditionKey === null;
+  if (inspection == null || isSerializedClear) {
+    return { source: safeSource, tokenId: null, conditionKey: null };
+  }
+
+  const tokenId = String(inspection.tokenId || '').trim();
+  const conditionKey = inspection.conditionKey == null
+    ? null
+    : String(inspection.conditionKey).trim().toLowerCase();
+  if (!tokenId || tokenId.length > 128) return null;
+  if (conditionKey !== null && !/^[a-z0-9_-]{1,80}$/.test(conditionKey)) return null;
+  return { source: safeSource, tokenId, conditionKey };
+}

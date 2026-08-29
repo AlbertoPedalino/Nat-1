@@ -190,3 +190,18 @@ export function fitView({ imageWidth, imageHeight, viewportWidth, viewportHeight
     y: (vh - ih * zoom) / 2,
   };
 }
+
+// Fill the viewport edge to edge. Unlike fitView this deliberately crops the
+// longer axis, which is the right framing for an establishing-shot background.
+export function fillView({ imageWidth, imageHeight, viewportWidth, viewportHeight }) {
+  const iw = Math.max(1, numberOr(imageWidth, 1));
+  const ih = Math.max(1, numberOr(imageHeight, 1));
+  const vw = Math.max(1, numberOr(viewportWidth, 1));
+  const vh = Math.max(1, numberOr(viewportHeight, 1));
+  const zoom = clampZoom(Math.max(vw / iw, vh / ih));
+  return {
+    zoom,
+    x: (vw - iw * zoom) / 2,
+    y: (vh - ih * zoom) / 2,
+  };
+}

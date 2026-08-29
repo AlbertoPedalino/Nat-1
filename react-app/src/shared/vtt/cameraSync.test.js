@@ -6,6 +6,7 @@ import {
   normalizeCameraPose,
   normalizeCameraSource,
   presenterStateMessage,
+  presenterInspectionMessage,
   sessionCameraSource,
   viewToCameraPose,
 } from './cameraSync.js';
@@ -22,6 +23,26 @@ test('spectator camera messages accept only bounded poses and safe source ids', 
     source: 'camera-1234',
     pose: { centerX: 1, centerY: 2, zoom: 1.5 },
   });
+});
+
+test('presenter inspection carries a token, an optional condition, or a clear', () => {
+  assert.deepEqual(presenterInspectionMessage('camera-1234', {
+    tokenId: 'token-42', conditionKey: 'Prone',
+  }), {
+    source: 'camera-1234', tokenId: 'token-42', conditionKey: 'prone',
+  });
+  const clear = presenterInspectionMessage('camera-1234', null);
+  assert.deepEqual(clear, {
+    source: 'camera-1234', tokenId: null, conditionKey: null,
+  });
+  assert.deepEqual(
+    presenterInspectionMessage(clear.source, clear),
+    clear,
+    'the serialized clear must survive the same normalization used by the receiver',
+  );
+  assert.equal(presenterInspectionMessage('camera-1234', {
+    tokenId: '', conditionKey: 'prone',
+  }), null);
 });
 
 test('the presenter source survives a refresh in the same browser tab', () => {

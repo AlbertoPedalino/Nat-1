@@ -7,6 +7,7 @@ import {
   cellSize,
   cellToWorld,
   dropPosition,
+  fillView,
   fitView,
   panBy,
   screenToWorld,
@@ -143,6 +144,8 @@ export default function SceneViewport({
   diceThrows,
   onDiceSettled,
   conditionEntries,
+  presentedInspection,
+  onTokenInspection,
   measureShape,
   feetPerCellForRuler,
   onMeasure,
@@ -255,8 +258,8 @@ export default function SceneViewport({
   }, [followView, viewportSize]);
 
   useEffect(() => {
-    if (!placementDrag) setPlacementHover(null);
-  }, [placementDrag]);
+    if (!placementDrag || backgroundOnly) setPlacementHover(null);
+  }, [backgroundOnly, placementDrag]);
 
   // Resize and rotation furniture belongs only to the piece of scenery the user
   // has picked. Drop the selection if that piece is removed or stops being
@@ -269,19 +272,29 @@ export default function SceneViewport({
     ));
   }, [tokens]);
 
-  // Fit once per picture: refitting on every render would fight the user's pan,
-  // but switching between the battlemap and the background has to reframe — the
-  // two are rarely the same shape.
+  // Reframe once per picture. A battlemap stays wholly visible with a little
+  // breathing room; an establishing-shot background fills the screen and may
+  // crop at the edges. Backgrounds also reframe when the viewport itself
+  // changes shape (fullscreen and device rotation) so no letterboxing returns.
+  const backgroundViewportWidth = backgroundOnly ? viewportSize.width : null;
+  const backgroundViewportHeight = backgroundOnly ? viewportSize.height : null;
   useEffect(() => {
     if (!imageSize || !hostRef.current) return;
     const box = hostRef.current.getBoundingClientRect();
-    setView(fitView({
+    const frameView = backgroundOnly ? fillView : fitView;
+    setView(frameView({
       imageWidth: imageSize.width,
       imageHeight: imageSize.height,
       viewportWidth: box.width,
       viewportHeight: box.height,
     }));
-  }, [imageSize, imageUrl]);
+  }, [
+    backgroundOnly,
+    backgroundViewportHeight,
+    backgroundViewportWidth,
+    imageSize,
+    imageUrl,
+  ]);
 
   // Real fullscreen where the browser has it: the map is the whole point of the
   // page, and the browser's own chrome is worth the pixels at the table.
@@ -898,6 +911,10 @@ export default function SceneViewport({
       }}
       onContextMenu={(event) => event.preventDefault()}
       onDragOver={(event) => {
+        if (backgroundOnly) {
+          event.dataTransfer.dropEffect = 'none';
+          return;
+        }
         if (!placementDrag && !onDropCharacter) return;
         event.preventDefault();
         event.dataTransfer.dropEffect = 'copy';
@@ -911,6 +928,11 @@ export default function SceneViewport({
         if (!event.currentTarget.contains(event.relatedTarget)) setPlacementHover(null);
       }}
       onDrop={(event) => {
+        if (backgroundOnly) {
+          event.preventDefault();
+          setPlacementHover(null);
+          return;
+        }
         if (!onDropPlacement && !onDropCharacter) return;
         event.preventDefault();
         if (placementDrag && onDropPlacement) {
@@ -1049,6 +1071,8 @@ export default function SceneViewport({
         selectedMapObjectId={selectedMapObjectId}
         canSetDeathSaves={canSetDeathSaves}
         conditionEntries={conditionEntries}
+        presentedInspection={presentedInspection}
+        onInspectionChange={onTokenInspection}
         onBeginDrag={beginTokenDrag}
         onBeginResize={beginTokenResize}
         onBeginRotate={beginTokenRotate}

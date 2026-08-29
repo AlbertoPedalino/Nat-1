@@ -48,3 +48,33 @@ test('Pieces is transparent and starts dragging the character token preview', ()
     token: expect.objectContaining({ label: 'Aria', className: 'Wizard', w: 1, h: 1 }),
   }));
 });
+
+test('an already placed character can be removed before placing it again', () => {
+  const onPlaceCharacter = vi.fn();
+  const onRemoveCharacter = vi.fn();
+  const entry = {
+    characterId: 'hero-1',
+    name: 'Aria',
+    color: '#7a5aa8',
+    className: 'Wizard',
+    portraitPath: null,
+  };
+  render(
+    <RosterPanel
+      roster={[entry]}
+      tokens={[{ id: 'token-1', characterId: 'hero-1', x: 999, y: 999 }]}
+      activeLayer="tokens"
+      onPlaceCharacter={onPlaceCharacter}
+      onRemoveCharacter={onRemoveCharacter}
+      onAddToken={vi.fn()}
+      onImportEncounter={vi.fn()}
+      onPlaceMonster={vi.fn()}
+      onPlacementDragStart={vi.fn()}
+    />,
+  );
+
+  expect(screen.getByText('Aria').parentElement).toHaveAttribute('draggable', 'false');
+  fireEvent.click(screen.getByRole('button', { name: 'Remove' }));
+  expect(onRemoveCharacter).toHaveBeenCalledWith(entry);
+  expect(onPlaceCharacter).not.toHaveBeenCalled();
+});

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { useAuth } from '../cloud/AuthProvider.jsx';
 import { supabase } from '../cloud/supabaseClient.js';
 import {
-  cameraMessage, normalizeCameraSource, presenterStateMessage,
+  cameraMessage, normalizeCameraSource, presenterInspectionMessage, presenterStateMessage,
 } from './cameraSync.js';
 
 // One channel per scene carries both streams: committed row changes for tokens
@@ -16,6 +16,7 @@ const DRAG_EVENT = 'token-drag';
 const CAMERA_EVENT = 'camera-view';
 const CAMERA_REQUEST_EVENT = 'camera-request';
 const PRESENTER_STATE_EVENT = 'presenter-state';
+const PRESENTER_INSPECTION_EVENT = 'presenter-inspection';
 const CAMERA_SEND_MS = 50;
 
 export function useSceneLive({
@@ -32,6 +33,8 @@ export function useSceneLive({
   onCameraPose,
   getPresenterState,
   onPresenterState,
+  getPresenterInspection,
+  onPresenterInspection,
 }) {
   const { cloudEnabled, status, user } = useAuth();
   const channelRef = useRef(null);
@@ -49,6 +52,8 @@ export function useSceneLive({
     onCameraPose,
     getPresenterState,
     onPresenterState,
+    getPresenterInspection,
+    onPresenterInspection,
   };
 
   useEffect(() => {
@@ -72,6 +77,12 @@ export function useSceneLive({
         const payload = presenterStateMessage(source, state);
         if (!payload) return;
         channel.send({ type: 'broadcast', event: PRESENTER_STATE_EVENT, payload });
+      };
+
+      const emitPresenterInspection = (source, inspection) => {
+        const payload = presenterInspectionMessage(source, inspection);
+        if (!payload) return;
+        channel.send({ type: 'broadcast', event: PRESENTER_INSPECTION_EVENT, payload });
       };
 
       channel.on(
@@ -143,6 +154,18 @@ export function useSceneLive({
         } catch (_) {}
       });
 
+      channel.on('broadcast', { event: PRESENTER_INSPECTION_EVENT }, (message) => {
+        try {
+          const expected = normalizeCameraSource(handlers.current.followCameraSource);
+          const payload = presenterInspectionMessage(message?.payload?.source, message?.payload);
+          if (expected && payload?.source === expected) {
+            handlers.current.onPresenterInspection?.(
+              payload.tokenId ? { tokenId: payload.tokenId, conditionKey: payload.conditionKey } : null,
+            );
+          }
+        } catch (_) {}
+      });
+
       // A late-opening projector should not wait for the GM's next pan. It asks
       // the exact source window named in its URL, which replies with the camera
       // pose it already has in memory; nothing about the camera is persisted.
@@ -153,6 +176,7 @@ export function useSceneLive({
           if (source && requested === source) {
             emitCamera(source, handlers.current.getCameraPose?.());
             emitPresenterState(source, handlers.current.getPresenterState?.());
+            emitPresenterInspection(source, handlers.current.getPresenterInspection?.());
           }
         } catch (_) {}
       });
@@ -170,6 +194,7 @@ export function useSceneLive({
         if (presenterSource) {
           emitCamera(presenterSource, handlers.current.getCameraPose?.());
           emitPresenterState(presenterSource, handlers.current.getPresenterState?.());
+          emitPresenterInspection(presenterSource, handlers.current.getPresenterInspection?.());
         }
       });
       channelRef.current = channel;
@@ -244,5 +269,14 @@ export function useSceneLive({
     } catch (_) {}
   }, [cameraSourceId]);
 
-  return { sendDrag, sendCamera, sendPresenterState };
+  const sendPresenterInspection = useCallback((inspection) => {
+    const payload = presenterInspectionMessage(cameraSourceId, inspection);
+    const channel = channelRef.current;
+    if (!payload || !channel) return;
+    try {
+      channel.send({ type: 'broadcast', event: PRESENTER_INSPECTION_EVENT, payload });
+    } catch (_) {}
+  }, [cameraSourceId]);
+
+  return { sendDrag, sendCamera, sendPresenterState, sendPresenterInspection };
 }

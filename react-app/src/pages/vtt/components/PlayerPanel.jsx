@@ -14,9 +14,11 @@ export default function PlayerPanel({
   ownedCharacterIds,
   busy,
   onPlaceCharacter,
+  onRemoveCharacter,
   onAddMarker,
   onPlacementDragStart,
   onPlacementDragEnd,
+  placementDisabled = false,
 }) {
   const placed = placedCharacterIds(tokens);
   const mine = (roster || []).filter((entry) => ownedCharacterIds.includes(entry.characterId));
@@ -32,7 +34,7 @@ export default function PlayerPanel({
               return (
                 <Box
                   key={entry.characterId}
-                  draggable={!isPlaced && !busy}
+                  draggable={!isPlaced && !placementDisabled && !busy}
                   onDragStart={(event) => {
                     event.dataTransfer.setData('application/x-gb-character', entry.characterId);
                     beginPieceDrag(event);
@@ -53,7 +55,10 @@ export default function PlayerPanel({
                     });
                   }}
                   onDragEnd={onPlacementDragEnd}
-                  sx={{ ...rowSx, cursor: isPlaced ? 'default' : 'grab' }}
+                  sx={{
+                    ...rowSx,
+                    cursor: isPlaced || placementDisabled || busy ? 'default' : 'grab',
+                  }}
                 >
                   <PiecePreview token={{
                     characterId: entry.characterId,
@@ -66,10 +71,12 @@ export default function PlayerPanel({
                   <Button
                     size="small"
                     variant={isPlaced ? 'text' : 'outlined'}
-                    disabled={isPlaced || busy}
-                    onClick={() => onPlaceCharacter(entry)}
+                    disabled={busy || (!isPlaced && placementDisabled)}
+                    onClick={() => (isPlaced
+                      ? onRemoveCharacter?.(entry)
+                      : onPlaceCharacter(entry))}
                   >
-                    {isPlaced ? 'On map' : 'Place'}
+                    {isPlaced ? 'Remove' : 'Place'}
                   </Button>
                 </Box>
               );
@@ -85,7 +92,7 @@ export default function PlayerPanel({
           size="small"
           variant="outlined"
           startIcon={<Plus size={15} />}
-          disabled={busy}
+          disabled={placementDisabled || busy}
           onClick={onAddMarker}
         >
           Drop a marker

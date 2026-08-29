@@ -15,11 +15,13 @@ export default function RosterPanel({
   busy,
   activeLayer,
   onPlaceCharacter,
+  onRemoveCharacter,
   onAddToken,
   onImportEncounter,
   onPlaceMonster,
   onPlacementDragStart,
   onPlacementDragEnd,
+  placementDisabled = false,
 }) {
   const placed = placedCharacterIds(tokens);
   const portraits = usePortraits((roster || []).map((entry) => entry.portraitPath));
@@ -33,7 +35,9 @@ export default function RosterPanel({
           </Typography>
         ) : (
           <Typography variant="caption" color="text.secondary">
-            Drag onto the map, or click to place.
+            {placementDisabled
+              ? 'Switch to the battlemap to place or move pieces.'
+              : 'Drag onto the map, or click to place.'}
           </Typography>
         )}
 
@@ -43,7 +47,7 @@ export default function RosterPanel({
             return (
               <Box
                 key={entry.characterId}
-                draggable={!isPlaced && !busy}
+                draggable={!isPlaced && !placementDisabled && !busy}
                 onDragStart={(event) => {
                   event.dataTransfer.setData('application/x-gb-character', entry.characterId);
                   beginPieceDrag(event);
@@ -64,7 +68,10 @@ export default function RosterPanel({
                   });
                 }}
                 onDragEnd={onPlacementDragEnd}
-                sx={{ ...rowSx, cursor: isPlaced ? 'default' : 'grab' }}
+                sx={{
+                  ...rowSx,
+                  cursor: isPlaced || placementDisabled || busy ? 'default' : 'grab',
+                }}
               >
                 <PiecePreview token={{
                   characterId: entry.characterId,
@@ -77,10 +84,12 @@ export default function RosterPanel({
                 <Button
                   size="small"
                   variant={isPlaced ? 'text' : 'outlined'}
-                  disabled={isPlaced || busy}
-                  onClick={() => onPlaceCharacter(entry)}
+                  disabled={busy || (!isPlaced && placementDisabled)}
+                  onClick={() => (isPlaced
+                    ? onRemoveCharacter?.(entry)
+                    : onPlaceCharacter(entry))}
                 >
-                  {isPlaced ? 'On map' : 'Place'}
+                  {isPlaced ? 'Remove' : 'Place'}
                 </Button>
               </Box>
             );
@@ -93,7 +102,7 @@ export default function RosterPanel({
           size="small"
           variant="outlined"
           startIcon={<Plus size={15} />}
-          disabled={busy}
+          disabled={placementDisabled || busy}
           onClick={onAddToken}
         >
           Add {LAYER_NAMES[activeLayer] || 'token'} piece
@@ -104,7 +113,7 @@ export default function RosterPanel({
           size="small"
           variant="outlined"
           startIcon={<Skull size={15} />}
-          disabled={busy}
+          disabled={placementDisabled || busy}
           onClick={onPlaceMonster}
         >
           Place a creature
@@ -113,7 +122,7 @@ export default function RosterPanel({
           size="small"
           variant="outlined"
           startIcon={<Swords size={15} />}
-          disabled={busy}
+          disabled={placementDisabled || busy}
           onClick={onImportEncounter}
         >
           Import encounter

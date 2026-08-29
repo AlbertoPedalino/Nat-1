@@ -6,6 +6,7 @@ import {
   cellToWorld,
   clampZoom,
   dropPosition,
+  fillView,
   fitView,
   panBy,
   screenToWorld,
@@ -116,4 +117,18 @@ test('fit centres the image and never zooms outside the limits', () => {
 
   const tiny = fitView({ imageWidth: 1, imageHeight: 1, viewportWidth: 4000, viewportHeight: 4000 });
   assert.equal(tiny.zoom, ZOOM_MAX);
+});
+
+test('fill centres the image and crops it to cover the whole viewport', () => {
+  const view = fillView({
+    imageWidth: 1000,
+    imageHeight: 500,
+    viewportWidth: 600,
+    viewportHeight: 400,
+  });
+
+  assert.equal(view.zoom, 0.8, 'height determines the cover scale');
+  assert.equal(view.x, -100, 'the wider image is cropped equally on both sides');
+  assert.equal(view.y, 0, 'there is no empty space above or below');
+  assert.deepEqual(worldToScreen({ x: 500, y: 250 }, view), { x: 300, y: 200 });
 });
