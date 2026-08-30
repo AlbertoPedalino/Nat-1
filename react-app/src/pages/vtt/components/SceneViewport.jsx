@@ -1443,9 +1443,11 @@ const hostSx = {
   // bar, so the bottom of the board sat under the browser's own chrome.
   flex: 1,
   height: '100%',
-  // Small screens keep a floor so the map cannot be squeezed to nothing by a
-  // sheet opened beneath it; on a desktop the flex row is the only limit.
-  minHeight: { xs: 320, md: 0 },
+  // Every ancestor already opts into shrinking. A fixed 320 px floor overflowed
+  // the short height of a phone in landscape, so the viewport was clipped before
+  // its bottom-left and bottom-right controls. The stacked sheet layout gives
+  // its map cell an explicit floor of its own.
+  minHeight: 0,
   border: '1px solid',
   borderColor: 'divider',
   borderRadius: 1,

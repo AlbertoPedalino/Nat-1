@@ -4,6 +4,8 @@ import { vi } from 'vitest';
 import { theme } from '../../../theme.js';
 import SceneEditor from './SceneEditor.jsx';
 
+const sceneViewportMock = vi.hoisted(() => vi.fn());
+
 vi.mock('../../../shared/ToastProvider.jsx', () => ({
   useToast: () => ({ notify: vi.fn() }),
 }));
@@ -67,7 +69,10 @@ vi.mock('../hooks/useSceneContent.js', () => ({
   }),
 }));
 vi.mock('./SceneViewport.jsx', () => ({
-  default: ({ tokens }) => <div data-testid="scene-viewport">{tokens.map((token) => token.id).join(',')}</div>,
+  default: (props) => {
+    sceneViewportMock(props);
+    return <div data-testid="scene-viewport">{props.tokens.map((token) => token.id).join(',')}</div>;
+  },
 }));
 
 test('the spectator composition applies the player boundary before rendering the viewport', () => {
@@ -92,4 +97,30 @@ test('the spectator composition applies the player boundary before rendering the
   expect(screen.getByTestId('scene-viewport')).toHaveTextContent('visible');
   expect(screen.getByTestId('scene-viewport')).not.toHaveTextContent('staged');
   expect(screen.getByTestId('scene-viewport')).not.toHaveTextContent('hidden-map-prop');
+});
+
+test('a background scene never paints a battlemap frame while its image loads', () => {
+  sceneViewportMock.mockClear();
+  const scene = {
+    id: 'scene-background',
+    campaignId: 'campaign-1',
+    shownImage: 'background',
+    imagePath: 'campaign-1/scene-background/map.webp',
+    backgroundPath: null,
+    fog: null,
+    isLive: false,
+    playArea: null,
+    grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
+  };
+
+  render(
+    <ThemeProvider theme={theme}>
+      <SceneEditor scene={scene} onSceneChange={vi.fn()} />
+    </ThemeProvider>,
+  );
+
+  expect(sceneViewportMock.mock.calls[0][0]).toEqual(expect.objectContaining({
+    backgroundOnly: true,
+    imageUrl: null,
+  }));
 });

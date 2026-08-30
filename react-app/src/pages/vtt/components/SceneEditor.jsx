@@ -222,7 +222,11 @@ export default function SceneEditor({
   });
   // What is actually on screen: the URL and the mode it belongs to, updated
   // together once the picture has loaded.
-  const [displayed, setDisplayed] = useState({ url: null, shownImage: 'map' });
+  const [displayed, setDisplayed] = useState(() => ({
+    url: null,
+    path: scene.shownImage === 'background' ? scene.backgroundPath || null : scene.imagePath || null,
+    shownImage: scene.shownImage,
+  }));
   const [busy, setBusy] = useState(false);
   const gridTimerRef = useRef(null);
   const atmosphereTimerRef = useRef(null);
@@ -354,6 +358,14 @@ export default function SceneEditor({
   // uploaded and one click away.
   const shownImageForViewport = spectator ? projectorShownImage : scene.shownImage;
   const shownPath = shownImageForViewport === 'background' ? scene.backgroundPath : scene.imagePath;
+  // Effects run after paint. On the first frame of a background scene (or while
+  // moving between scenes), do not let the previous display mode leak through:
+  // that would render the grid and pieces once before the establishing shot is
+  // signed and decoded. The URL may wait; the mode must already be the target.
+  const viewportDisplay = displayed.shownImage === shownImageForViewport
+    && displayed.path === (shownPath || null)
+    ? displayed
+    : { url: null, shownImage: shownImageForViewport };
 
   // The picture and everything that belongs to it change together. Flipping the
   // mode as soon as the row changed showed the switch in three steps: fog off,
@@ -362,7 +374,7 @@ export default function SceneEditor({
   useEffect(() => {
     let cancelled = false;
     if (!shownPath) {
-      setDisplayed({ url: null, shownImage: shownImageForViewport });
+      setDisplayed({ url: null, path: null, shownImage: shownImageForViewport });
       return () => { cancelled = true; };
     }
 
@@ -374,9 +386,13 @@ export default function SceneEditor({
         const image = new Image();
         image.src = url;
         return (image.decode ? image.decode().catch(() => {}) : Promise.resolve())
-          .then(() => { if (!cancelled) setDisplayed({ url, shownImage: shownImageForViewport }); });
+          .then(() => {
+            if (!cancelled) setDisplayed({ url, path: shownPath, shownImage: shownImageForViewport });
+          });
       })
-      .catch(() => { if (!cancelled) setDisplayed({ url: null, shownImage: shownImageForViewport }); });
+      .catch(() => {
+        if (!cancelled) setDisplayed({ url: null, path: shownPath, shownImage: shownImageForViewport });
+      });
     return () => { cancelled = true; };
   }, [shownImageForViewport, shownPath]);
 
@@ -1738,7 +1754,7 @@ export default function SceneEditor({
       <Box data-spectator-view sx={spectatorRootSx}>
         <SceneViewport
           scene={scene}
-          imageUrl={displayed.url}
+          imageUrl={viewportDisplay.url}
           tokens={projectedTokens}
           snap
           canMove={() => false}
@@ -1746,7 +1762,7 @@ export default function SceneEditor({
           atmosphere={scene.atmosphere}
           fogOpacity={PLAYER_FOG_OPACITY}
           paintMode="select"
-          backgroundOnly={displayed.shownImage === 'background'}
+          backgroundOnly={viewportDisplay.shownImage === 'background'}
           // The projector shows the crawl as the table sees it: the country
           // they have been through, and the hex they are standing in.
           hexCells={hexcrawl.visible ? hexcrawl.cellsByKey : null}
@@ -1867,7 +1883,7 @@ export default function SceneEditor({
         <Box sx={[viewportCellSx, sideSheetOpen && viewportCellStackedSx]}>
           <SceneViewport
         scene={scene}
-        imageUrl={displayed.url}
+        imageUrl={viewportDisplay.url}
         tokens={visibleTokens}
         snap
         canMove={canMove}
@@ -1880,7 +1896,7 @@ export default function SceneEditor({
         brushSize={brushSize}
         activeLayer={role.isGm ? activeLayer : null}
         showPlayArea={role.isGm}
-        backgroundOnly={displayed.shownImage === 'background'}
+        backgroundOnly={viewportDisplay.shownImage === 'background'}
         // Top left: which picture is up is constant state, like the layer in the
         // opposite corner, and switching it is a move you make mid-scene.
         imageSwitch={role.isGm
