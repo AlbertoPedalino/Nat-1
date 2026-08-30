@@ -22,18 +22,21 @@ float dustMoteLayer(vec2 p, float scale, float time, float salt, float radius, f
     hash(cell + vec2(salt + 3.1, 17.4)),
     hash(cell + vec2(29.7, salt + 8.2))
   ) - 0.5;
-  restingOffset *= 0.18;
+  restingOffset *= 0.13;
   vec2 floatingOffset = vec2(
-    sin(time * (0.42 + identity * 0.3) + phase * 1.7) * 0.18,
-    sin(time * (0.36 + identity * 0.38) + phase) * 0.27
+    sin(time * (0.42 + identity * 0.3) + phase * 1.7) * 0.13,
+    sin(time * (0.36 + identity * 0.38) + phase) * 0.18
   );
+  float sizeSeed = hash(cell + vec2(salt + 63.0, 51.9));
+  float sizeVariation = 0.42 + sizeSeed * sizeSeed * 1.75;
+  float moteRadius = min(radius * sizeVariation, 0.2);
   float circle = 1.0 - smoothstep(
-    radius * 0.28,
-    radius,
+    moteRadius * 0.3,
+    moteRadius,
     length(local - restingOffset - floatingOffset)
   );
   float exists = step(threshold, hash(cell + vec2(salt + 41.0, 9.3)));
-  return circle * exists;
+  return circle * exists * (0.6 + sizeVariation * 0.28);
 }`;
 
 export default createAtmosphereFragmentShader({
@@ -50,12 +53,12 @@ export default createAtmosphereFragmentShader({
   float airA = 0.72 + fbm(vec2(v_uv.y * 1.8, time * 0.055 + 4.0)) * 0.36;
   float airB = 0.72 + fbm(vec2(v_uv.y * 1.5, time * 0.047 + 11.0)) * 0.36;
   float shafts = clamp(beamA * openA * airA + beamB * openB * airB, 0.0, 1.0);
-  float dustFar = dustMoteLayer(p, 29.0, time * 0.48, 31.0, 0.062, 0.965);
+  float dustFar = dustMoteLayer(p, 22.0, time * 0.48, 31.0, 0.085, 0.94);
   float dustMid = dustMoteLayer(
-    p + 7.3, 19.0, time * 0.86, 57.0, 0.074, 0.96
+    p + 7.3, 15.5, time * 0.86, 57.0, 0.088, 0.94
   );
   float dustNear = dustMoteLayer(
-    p + vec2(3.7, 11.2), 11.0, time * 1.28, 89.0, 0.086, 0.955
+    p + vec2(3.7, 11.2), 11.0, time * 1.28, 89.0, 0.08, 0.95
   );
   float dust = dustFar * 0.38 + dustMid * 0.64 + dustNear * 0.88;
   float illumination = smoothstep(0.06, 0.62, shafts);
