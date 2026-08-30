@@ -37,9 +37,17 @@ float carriedFragment(
   vec2 stretch,
   float threshold
 ) {
-  float identitySpeed = 0.72 + hash(vec2(salt, 8.3)) * 0.24;
+  // Give each horizontal band its own gust cycle. The dominant motion still
+  // follows the wind, but a fragment can slow, veer and briefly curl back
+  // instead of crossing the whole scene on one mechanically straight path.
+  float band = floor((p.y + 0.5) * 10.5);
+  float bandIdentity = hash(vec2(band + salt, salt * 0.73));
+  float bandPhase = bandIdentity * 6.2831853;
+  float identitySpeed = 0.58 + bandIdentity * 0.42;
+  float shortGust = sin(time * (1.15 + bandIdentity * 0.75) + bandPhase) * 0.46;
+  float longGust = sin(time * (0.34 + bandIdentity * 0.22) + bandPhase * 1.71) * 0.25;
   vec2 q = vec2(
-    p.x * 6.8 - time * identitySpeed * direction,
+    p.x * 6.8 - direction * (time * identitySpeed + shortGust + longGust),
     p.y * 10.5
   );
   vec2 cell = floor(q);
@@ -50,9 +58,14 @@ float carriedFragment(
     hash(cell + vec2(salt + 7.3, 29.1)),
     hash(cell + vec2(41.7, salt + 12.4))
   ) - 0.5;
-  local -= randomCenter * 0.54;
-  local.y -= sin(time * (1.7 + identity) + phase) * 0.16;
-  local.x -= cos(time * 0.83 + phase) * 0.055;
+  // Keep the whole rotating silhouette inside its cell. The wider horizontal
+  // allowance preserves an irregular distribution, while the tighter vertical
+  // margin prevents lifted fragments from being clipped at a row boundary.
+  local -= randomCenter * vec2(0.38, 0.28);
+  float lift = sin(time * (1.35 + bandIdentity) + bandPhase + phase) * 0.07;
+  lift += sin(time * 0.51 + bandPhase * 2.3) * 0.025;
+  local.y -= lift;
+  local.x -= cos(time * (0.76 + identity * 0.38) + phase) * 0.045;
   local = rotate2d(phase + time * direction * (1.9 + identity * 2.4)) * local;
   float silhouette = 1.0 - smoothstep(
     0.12,
@@ -87,16 +100,16 @@ export default createAtmosphereFragmentShader({
   float gust = 0.82 + smoothstep(0.47, 0.72, gustNoise) * 0.58;
   // Separate grids, phases and directions prevent leaves from travelling as a
   // recognisable fixed cluster. The smaller ochre shards read as debris.
-  float leavesLeft = carriedFragment(p, time, 1.0, 37.0, vec2(1.25, 3.1), 0.982);
+  float leavesLeft = carriedFragment(p, time, 1.0, 37.0, vec2(1.25, 3.1), 0.991);
   float leavesRight = carriedFragment(
-    p + vec2(1.73, 0.38), time * 1.08, -1.0, 83.0, vec2(1.45, 3.5), 0.988
+    p + vec2(1.73, 0.38), time * 1.08, -1.0, 83.0, vec2(1.45, 3.5), 0.995
   );
   float leaves = max(leavesLeft, leavesRight);
   float debrisLeft = carriedFragment(
-    p + vec2(2.9, 0.21), time * 1.14, 1.0, 61.0, vec2(3.7, 1.85), 0.978
+    p + vec2(2.9, 0.21), time * 1.14, 1.0, 61.0, vec2(3.7, 1.85), 0.989
   );
   float debrisRight = carriedFragment(
-    p + vec2(0.63, 1.47), time * 0.91, -1.0, 109.0, vec2(4.3, 2.15), 0.986
+    p + vec2(0.63, 1.47), time * 0.91, -1.0, 109.0, vec2(4.3, 2.15), 0.994
   );
   float debris = max(debrisLeft, debrisRight);
   float bright = clamp(lines * 0.82 + pressure * 0.3, 0.0, 1.0);

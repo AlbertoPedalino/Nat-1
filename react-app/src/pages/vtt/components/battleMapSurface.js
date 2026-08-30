@@ -1,3 +1,5 @@
+import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
+
 // Shared glass surface for every control floating over the battle map. Keeping
 // the rail and its dialogs on the same tokens prevents ordinary MUI paper from
 // appearing as a solid block beside the translucent toolbar.
@@ -13,7 +15,7 @@ export const battleMapSurfaceSx = {
 export const battleMapDialogPaperSx = {
   ...battleMapSurfaceSx,
   borderRadius: 1,
-  boxShadow: (theme) => `0 18px 52px ${theme.palette.gmboard.vtt.backdrop}`,
+  boxShadow: `0 18px 52px ${vttAlpha(VTT_COLORS.black, 0.62)}`,
 };
 
 export const battleMapDialogTitleSx = {
@@ -49,4 +51,3 @@ export const battleMapDropBackdropSx = {
   pointerEvents: 'none',
   bgcolor: vttAlpha(VTT_COLORS.black, 0.16),
 };
-import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';

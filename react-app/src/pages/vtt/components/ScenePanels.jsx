@@ -52,6 +52,7 @@ import ColorField from '../../../components/ColorField.jsx';
 import InfoHint from '../../../components/InfoHint.jsx';
 import { DEFAULT_GRID } from '../../../shared/vtt/scene.js';
 import { ATMOSPHERE_PRESETS, normalizeAtmosphere } from '../../../shared/vtt/atmosphere.js';
+import { battleMapDialogPaperSx } from './battleMapSurface.js';
 
 // The scene's settings, split by the question they answer. Each one is a panel
 // behind its own icon on the rail rather than a strip across the top: the map is
@@ -283,14 +284,11 @@ export function MapPanel({
         slotProps={{
           paper: {
             sx: {
+              ...battleMapDialogPaperSx,
               width: 320,
               maxWidth: 'calc(100vw - 24px)',
               mt: 0.5,
               p: 1.25,
-              bgcolor: vttAlpha(VTT_COLORS.surfaceRaised, 0.98),
-              backgroundImage: 'none',
-              border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.24)}`,
-              boxShadow: `0 14px 38px ${vttAlpha(VTT_COLORS.black, 0.72)}`,
             },
           },
         }}
