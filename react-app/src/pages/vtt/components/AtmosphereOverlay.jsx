@@ -70,9 +70,7 @@ export default function AtmosphereOverlay({ atmosphere }) {
       const host = canvas.parentElement;
       const width = host?.clientWidth || canvas.clientWidth || 1;
       const height = host?.clientHeight || canvas.clientHeight || 1;
-      // Tiny radial motes need enough samples to remain circular instead of
-      // collapsing into square pixels on the reduced-resolution canvas.
-      const detailScale = ['sunrays', 'swamp', 'haunted'].includes(configRef.current.type) ? 0.82 : 0.55;
+      const detailScale = HIGH_DETAIL_TYPES.includes(configRef.current.type) ? 0.82 : 0.55;
       const scale = Math.min(globalThis.devicePixelRatio || 1, 1.25) * detailScale;
       const nextWidth = Math.max(1, Math.round(width * scale));
       const nextHeight = Math.max(1, Math.round(height * scale));
@@ -170,7 +168,9 @@ export default function AtmosphereOverlay({ atmosphere }) {
       data-atmosphere-overlay={config.type}
       sx={{
         ...overlaySx,
-        ...(['sunrays', 'goldvault'].includes(config.type) ? { mixBlendMode: 'screen' } : {}),
+        ...(ATMOSPHERE_BLEND_MODES[config.type]
+          ? { mixBlendMode: ATMOSPHERE_BLEND_MODES[config.type] }
+          : {}),
       }}
     />
   );
@@ -202,6 +202,18 @@ function createProgram(gl, vertexSource, fragmentSource) {
   gl.deleteProgram(program);
   return null;
 }
+
+// Tiny radial motes and thin shimmer bands need enough samples to stay round or
+// straight instead of collapsing into square pixels on the reduced canvas.
+const HIGH_DETAIL_TYPES = ['sunrays', 'swamp', 'haunted', 'heatwave'];
+
+// Rays and coins add light on top of the map; heat instead has to lighten and
+// darken it in place, which is the closest an overlay gets to bending it.
+const ATMOSPHERE_BLEND_MODES = Object.freeze({
+  sunrays: 'screen',
+  goldvault: 'screen',
+  heatwave: 'overlay',
+});
 
 const overlaySx = {
   position: 'absolute',

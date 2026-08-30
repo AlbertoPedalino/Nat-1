@@ -3,8 +3,8 @@
 // particle position ever crosses the wire.
 
 export const ATMOSPHERE_TYPES = Object.freeze([
-  'none', 'rain', 'storm', 'wind', 'fog', 'blizzard', 'sandstorm', 'snow', 'fire', 'sunrays',
-  'swamp', 'haunted', 'goldvault',
+  'none', 'rain', 'storm', 'wind', 'fog', 'blizzard', 'sandstorm', 'snow', 'fire', 'heatwave',
+  'sunrays', 'swamp', 'haunted', 'goldvault',
 ]);
 
 export const ATMOSPHERE_PRESETS = Object.freeze([
@@ -17,6 +17,7 @@ export const ATMOSPHERE_PRESETS = Object.freeze([
   { value: 'blizzard', label: 'Blizzard' },
   { value: 'sandstorm', label: 'Sandstorm' },
   { value: 'fire', label: 'Rising flames' },
+  { value: 'heatwave', label: 'Desert heat' },
   { value: 'sunrays', label: 'Sun rays & dust' },
   { value: 'swamp', label: 'Swamp' },
   { value: 'haunted', label: 'Haunted house' },

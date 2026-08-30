@@ -3,6 +3,7 @@ import fire from './fire.js';
 import fog from './fog.js';
 import goldvault from './goldvault.js';
 import haunted from './haunted.js';
+import heatwave from './heatwave.js';
 import rain from './rain.js';
 import sandstorm from './sandstorm.js';
 import snow from './snow.js';
@@ -20,6 +21,7 @@ const ATMOSPHERE_SHADERS = Object.freeze({
   sandstorm,
   snow,
   fire,
+  heatwave,
   sunrays,
   swamp,
   haunted,

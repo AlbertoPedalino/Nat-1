@@ -23,6 +23,7 @@ test('the stored atmosphere catalog is unique and contains every preset', () => 
   assert.equal(new Set(ATMOSPHERE_TYPES).size, ATMOSPHERE_TYPES.length);
   assert.ok(ATMOSPHERE_TYPES.includes('snow'));
   assert.ok(ATMOSPHERE_TYPES.includes('fire'));
+  assert.ok(ATMOSPHERE_TYPES.includes('heatwave'));
   assert.ok(ATMOSPHERE_TYPES.includes('sunrays'));
   assert.ok(ATMOSPHERE_TYPES.includes('wind'));
   assert.ok(ATMOSPHERE_TYPES.includes('swamp'));

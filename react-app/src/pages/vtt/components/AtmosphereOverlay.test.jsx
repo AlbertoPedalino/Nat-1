@@ -22,7 +22,7 @@ test('atmosphere keeps a static fallback without WebGL', async () => {
   });
 });
 
-test.each(['snow', 'fire', 'sunrays', 'swamp', 'haunted', 'goldvault'])('%s has a static fallback without WebGL', async (type) => {
+test.each(['snow', 'fire', 'heatwave', 'sunrays', 'swamp', 'haunted', 'goldvault'])('%s has a static fallback without WebGL', async (type) => {
   vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null);
   const { container } = render(<AtmosphereOverlay atmosphere={{ type, intensity: 0.8 }} />);
 

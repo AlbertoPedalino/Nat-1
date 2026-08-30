@@ -41,6 +41,13 @@ export function atmosphereFallbackSx(config) {
       background: `radial-gradient(ellipse at 18% 108%, ${vttAlpha(VTT_COLORS.warning, 0.9)}, transparent 45%), radial-gradient(ellipse at 62% 112%, ${vttAlpha(VTT_COLORS.objectDefault, 0.8)}, transparent 50%), linear-gradient(to top, ${vttAlpha(VTT_COLORS.warning, 0.42)}, transparent 58%)`,
     };
   }
+  if (config.type === 'heatwave') {
+    return {
+      ...common,
+      mixBlendMode: 'overlay',
+      background: `repeating-linear-gradient(0deg, transparent 0 9px, ${vttAlpha(VTT_COLORS.white, 0.5)} 11px 14px, transparent 16px 26px), linear-gradient(to top, ${vttAlpha(VTT_COLORS.warning, 0.85)}, ${vttAlpha(VTT_COLORS.goldBright, 0.3)} 42%, transparent 74%)`,
+    };
+  }
   if (config.type === 'sunrays') {
     return {
       ...common,
