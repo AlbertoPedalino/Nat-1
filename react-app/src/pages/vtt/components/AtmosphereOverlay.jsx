@@ -70,7 +70,7 @@ export default function AtmosphereOverlay({ atmosphere }) {
       const host = canvas.parentElement;
       const width = host?.clientWidth || canvas.clientWidth || 1;
       const height = host?.clientHeight || canvas.clientHeight || 1;
-      const detailScale = HIGH_DETAIL_TYPES.includes(configRef.current.type) ? 0.82 : 0.55;
+      const detailScale = atmosphereRenderScale(configRef.current.type);
       const scale = Math.min(globalThis.devicePixelRatio || 1, 1.25) * detailScale;
       const nextWidth = Math.max(1, Math.round(width * scale));
       const nextHeight = Math.max(1, Math.round(height * scale));
@@ -205,7 +205,16 @@ function createProgram(gl, vertexSource, fragmentSource) {
 
 // Tiny radial motes and thin shimmer bands need enough samples to stay round or
 // straight instead of collapsing into square pixels on the reduced canvas.
-const HIGH_DETAIL_TYPES = ['sunrays', 'swamp', 'haunted', 'heatwave'];
+const HIGH_DETAIL_TYPES = ['sunrays', 'swamp', 'haunted'];
+
+// Heatwave has substantially more fragment work than the other effects: every
+// visible pixel evaluates several layers of sparse dust as well as the mirage.
+// A dedicated internal scale keeps that shader comfortably below the map UI's
+// frame budget while CSS still stretches the canvas over the full viewport.
+export function atmosphereRenderScale(type) {
+  if (type === 'heatwave') return 0.55;
+  return HIGH_DETAIL_TYPES.includes(type) ? 0.82 : 0.55;
+}
 
 // Rays and coins add light on top of the map; heat instead has to lighten and
 // darken it in place, which is the closest an overlay gets to bending it.
