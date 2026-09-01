@@ -5,8 +5,8 @@ import {
   Box, Button, CircularProgress, IconButton, Stack, Tooltip, Typography,
 } from '@mui/material';
 import {
-  Cloud, Dices, DoorOpen, Lock, LockOpen, MonitorOff, MonitorPlay, Pencil, Pointer, Radio, Ruler,
-  Shapes, Users,
+  Cloud, Dices, DoorOpen, Eye, EyeOff, Lock, LockOpen, MonitorOff, MonitorPlay, Pencil, Pointer,
+  Radio, Ruler, Shapes, Users,
 } from 'lucide-react';
 import { useToast } from '../../../shared/ToastProvider.jsx';
 import { useAuth } from '../../../shared/cloud/AuthProvider.jsx';
@@ -166,6 +166,24 @@ async function imageSpan(file, longSide = 4) {
   }
 }
 
+function waitForImage(image) {
+  if (typeof image.decode === 'function') return image.decode();
+  return new Promise((resolve, reject) => {
+    image.onload = resolve;
+    image.onerror = () => reject(new Error('Image failed to load.'));
+    if (image.complete) {
+      if (image.naturalWidth > 0) resolve();
+      else reject(new Error('Image failed to load.'));
+    }
+  });
+}
+
+function naturalImageSize(image) {
+  const width = Number(image.naturalWidth);
+  const height = Number(image.naturalHeight);
+  return width > 0 && height > 0 ? { width, height } : null;
+}
+
 function paintToolGroup(mode) {
   if (['draw', 'erase', 'text'].includes(mode)) return 'draw';
   if (mode === 'laser') return 'laser';
@@ -223,7 +241,9 @@ export default function SceneEditor({
   // What is actually on screen: the URL and the mode it belongs to, updated
   // together once the picture has loaded.
   const [displayed, setDisplayed] = useState(() => ({
+    sceneId: scene.id,
     url: null,
+    imageSize: null,
     path: scene.shownImage === 'background' ? scene.backgroundPath || null : scene.imagePath || null,
     shownImage: scene.shownImage,
   }));
@@ -251,6 +271,10 @@ export default function SceneEditor({
   const [drawWidth, setDrawWidth] = useState(3);
   const [contentView, setContentView] = useState('map');
   const [mapFullscreen, setMapFullscreen] = useState(false);
+  // A local audit mode for the GM. The account keeps GM permissions, while the
+  // viewport receives only the same player-safe projection as the projector.
+  const [playerPreviewRequested, setGmPlayerPreview] = useState(false);
+  const gmPlayerPreview = role.isGm && playerPreviewRequested;
   const [sheetCharacterId, setSheetCharacterId] = useState(null);
   const [, startSheetTransition] = useTransition();
   const [sheetSplit, setSheetSplit] = useState(DEFAULT_SHEET_SPLIT);
@@ -358,14 +382,27 @@ export default function SceneEditor({
   // uploaded and one click away.
   const shownImageForViewport = spectator ? projectorShownImage : scene.shownImage;
   const shownPath = shownImageForViewport === 'background' ? scene.backgroundPath : scene.imagePath;
-  // Effects run after paint. On the first frame of a background scene (or while
-  // moving between scenes), do not let the previous display mode leak through:
-  // that would render the grid and pieces once before the establishing shot is
-  // signed and decoded. The URL may wait; the mode must already be the target.
-  const viewportDisplay = displayed.shownImage === shownImageForViewport
-    && displayed.path === (shownPath || null)
+  const shownPathOrNull = shownPath || null;
+  const displayIsTarget = displayed.sceneId === scene.id
+    && displayed.shownImage === shownImageForViewport
+    && displayed.path === shownPathOrNull;
+  // Keep the complete previous composition on screen while the next image is
+  // signed and decoded. Switching the mode immediately used to paint a blank
+  // frame between Battlemap and Background, which was the visible flicker. A
+  // different scene is never retained: that could expose the previous table's
+  // image while navigation is already showing the new scene.
+  const canHoldCurrentFrame = displayed.sceneId === scene.id
+    && Boolean(displayed.url)
+    && Boolean(shownPath);
+  const viewportDisplay = displayIsTarget || canHoldCurrentFrame
     ? displayed
-    : { url: null, shownImage: shownImageForViewport };
+    : {
+      sceneId: scene.id,
+      url: null,
+      imageSize: null,
+      path: shownPathOrNull,
+      shownImage: shownImageForViewport,
+    };
 
   // The picture and everything that belongs to it change together. Flipping the
   // mode as soon as the row changed showed the switch in three steps: fog off,
@@ -374,7 +411,13 @@ export default function SceneEditor({
   useEffect(() => {
     let cancelled = false;
     if (!shownPath) {
-      setDisplayed({ url: null, path: null, shownImage: shownImageForViewport });
+      setDisplayed({
+        sceneId: scene.id,
+        url: null,
+        imageSize: null,
+        path: null,
+        shownImage: shownImageForViewport,
+      });
       return () => { cancelled = true; };
     }
 
@@ -385,22 +428,38 @@ export default function SceneEditor({
         // picture already in memory rather than a gap while it downloads.
         const image = new Image();
         image.src = url;
-        return (image.decode ? image.decode().catch(() => {}) : Promise.resolve())
+        return waitForImage(image)
           .then(() => {
-            if (!cancelled) setDisplayed({ url, path: shownPath, shownImage: shownImageForViewport });
+            if (!cancelled) {
+              setDisplayed({
+                sceneId: scene.id,
+                url,
+                imageSize: naturalImageSize(image),
+                path: shownPath,
+                shownImage: shownImageForViewport,
+              });
+            }
           });
       })
       .catch(() => {
-        if (!cancelled) setDisplayed({ url: null, path: shownPath, shownImage: shownImageForViewport });
+        if (!cancelled) {
+          // Do not replace a valid composition with a broken image. Keeping the
+          // previous frame also avoids bringing the transition flicker back.
+          notify('error', 'Could not load the scene image.');
+        }
       });
     return () => { cancelled = true; };
-  }, [shownImageForViewport, shownPath]);
+  }, [scene.id, shownImageForViewport, shownPath]);
 
   useEffect(() => () => {
     clearTimeout(gridTimerRef.current);
     clearTimeout(atmosphereTimerRef.current);
     clearTimeout(playAreaTimerRef.current);
   }, []);
+
+  useEffect(() => {
+    if (!role.isGm) setGmPlayerPreview(false);
+  }, [role.isGm]);
 
   const handleTokenEvent = useCallback((payload) => {
     setTokens((current) => applyTokenEvent(current, payload, { draggingId: draggingRef.current }));
@@ -1598,14 +1657,14 @@ export default function SceneEditor({
   // disappear: they are context, and losing them would make the map unreadable
   // the moment you switch tools.
   const visibleDrawings = useMemo(() => (
-    spectator
+    spectator || gmPlayerPreview
       ? drawings.filter((drawing) => drawing.layer !== 'gm')
       : role.isGm
       ? drawings.map((drawing) => (
         drawing.layer === activeLayer ? drawing : { ...drawing, color: fade(drawing.color) }
       ))
       : drawings
-  ), [activeLayer, drawings, role.isGm, spectator]);
+  ), [activeLayer, drawings, gmPlayerPreview, role.isGm, spectator]);
 
   // The party's faces. Held by the browser after the first load, so a scene with
   // six characters in it does not go back to the bucket on every visit.
@@ -1629,33 +1688,44 @@ export default function SceneEditor({
     [ghosts, portraits, roster, tokenImageUrls, tokens],
   );
 
-  // A projector opened from a GM browser still has GM database permissions.
-  // Recreate the player boundary explicitly before anything reaches the DOM:
-  // no hidden layer, no staging area, and no secret label.
+  // A projector and the inline preview still have GM database permissions.
+  // Recreate the player boundary explicitly before anything reaches their
+  // viewport: no hidden layer, staging area, or secret label.
   const projectedTokens = useMemo(() => {
-    if (!spectator) return visibleTokens;
+    if (!spectator && !gmPlayerPreview) return visibleTokens;
     return projectPlayerTokens(visibleTokens, scene.playArea);
-  }, [scene.playArea, spectator, visibleTokens]);
+  }, [gmPlayerPreview, scene.playArea, spectator, visibleTokens]);
 
   const projectedTokenById = useMemo(
     () => new Map(projectedTokens.map((token) => [token.id, token])),
     [projectedTokens],
   );
   const projectedRollBubbles = useMemo(() => (
-    spectator
+    spectator || gmPlayerPreview
       ? rollBubbles
         .map((entry) => ({ ...entry, token: projectedTokenById.get(entry.token?.id) || null }))
         .filter((entry) => entry.token)
       : rollBubbles
-  ), [projectedTokenById, rollBubbles, spectator]);
+  ), [gmPlayerPreview, projectedTokenById, rollBubbles, spectator]);
   const projectedDiceThrows = useMemo(() => (
-    spectator
+    spectator || gmPlayerPreview
       ? diceThrows.map((entry) => ({
         ...entry,
         token: entry.token ? (projectedTokenById.get(entry.token.id) || null) : null,
       }))
       : diceThrows
-  ), [diceThrows, projectedTokenById, spectator]);
+  ), [diceThrows, gmPlayerPreview, projectedTokenById, spectator]);
+
+  // The GM's hexcrawl hook contains their unrevealed planning cells. The
+  // projector normally gets an RLS-filtered list; the inline preview needs to
+  // reproduce that boundary locally because it keeps using the GM session.
+  const projectedHexCells = useMemo(() => {
+    if (!hexcrawl.visible) return null;
+    if (!spectator && !gmPlayerPreview) return hexcrawl.cellsByKey;
+    return new Map(
+      [...hexcrawl.cellsByKey.entries()].filter(([, cell]) => cell?.revealed),
+    );
+  }, [gmPlayerPreview, hexcrawl.cellsByKey, hexcrawl.visible, spectator]);
 
   // The menu must edit the same character state the piece displays. The raw
   // map row deliberately has no sheet-owned HP or death saves, so using it here
@@ -1688,7 +1758,7 @@ export default function SceneEditor({
   // In fullscreen the viewport is the only subtree the browser paints. The
   // same sheet therefore moves into its draggable viewport window instead of
   // remaining mounted a second time in the hidden side column.
-  const sideSheetOpen = contentView === 'sheet' && !mapFullscreen;
+  const sideSheetOpen = contentView === 'sheet' && !mapFullscreen && !gmPlayerPreview;
   const selectSheetCharacter = useCallback((characterId) => {
     startSheetTransition(() => setSheetCharacterId(characterId));
   }, []);
@@ -1701,6 +1771,22 @@ export default function SceneEditor({
     setMapFullscreen(active);
     onMapFullscreenChange?.(active);
   }, [onMapFullscreenChange]);
+
+  const handleTogglePlayerPreview = useCallback(() => {
+    if (!gmPlayerPreview) {
+      // The preview is deliberately read-only. Reset every editing surface so
+      // elevated GM writes cannot happen behind a player-looking board.
+      setContentView('map');
+      setPaintMode('select');
+      setOpenCorner(null);
+      setMenu(null);
+      setPlacementDrag(null);
+      setSelectedDrawingId(null);
+      setImportOpen(false);
+      setMonsterOpen(false);
+    }
+    setGmPlayerPreview((current) => !current);
+  }, [gmPlayerPreview]);
 
   // Leaving the scene while covering the window must give the bar back, or the
   // page returns to a list with no way out of it. Through a ref, so a caller
@@ -1755,6 +1841,7 @@ export default function SceneEditor({
         <SceneViewport
           scene={scene}
           imageUrl={viewportDisplay.url}
+          preparedImageSize={viewportDisplay.imageSize}
           tokens={projectedTokens}
           snap
           canMove={() => false}
@@ -1765,7 +1852,7 @@ export default function SceneEditor({
           backgroundOnly={viewportDisplay.shownImage === 'background'}
           // The projector shows the crawl as the table sees it: the country
           // they have been through, and the hex they are standing in.
-          hexCells={hexcrawl.visible ? hexcrawl.cellsByKey : null}
+          hexCells={projectedHexCells}
           partyHex={hexcrawl.partyHex}
           onImageSize={setImageSize}
           drawings={visibleDrawings}
@@ -1793,12 +1880,17 @@ export default function SceneEditor({
     // floating above a strip of empty background.
     <Stack spacing={1} sx={editorRootSx}>
       <Box sx={sceneTopbarSx}>
-        {role.isGm && onOpenScene ? <SceneSwitcher scene={scene} onOpenScene={onOpenScene} /> : null}
+        {role.isGm && !gmPlayerPreview && onOpenScene ? (
+          <SceneSwitcher scene={scene} onOpenScene={onOpenScene} />
+        ) : null}
         <Box sx={sceneIdentitySx}>
           <Typography variant="h1" sx={sceneTitleSx}>
-            {sceneTitleFor(scene, { isGm: role.isGm, campaignName: role.campaignName })}
+            {sceneTitleFor(scene, {
+              isGm: role.isGm && !gmPlayerPreview,
+              campaignName: role.campaignName,
+            })}
           </Typography>
-          {role.isGm ? (
+          {role.isGm && !gmPlayerPreview ? (
             <Tooltip title="Rename scene">
               <IconButton size="small" aria-label="Rename scene" onClick={handleRename} sx={sceneRenameButtonSx}>
                 <Pencil size={11} />
@@ -1808,19 +1900,35 @@ export default function SceneEditor({
         </Box>
         {role.isGm ? (
           <Stack direction="row" spacing={0.75} useFlexGap sx={scenePresenterActionsSx}>
-            <Button
-              size="small"
-              color={scene.isLive ? 'success' : 'inherit'}
-              variant={scene.isLive ? 'contained' : 'outlined'}
-              startIcon={<Radio size={14} />}
-              aria-pressed={scene.isLive}
-              onClick={handleToggleLive}
-            >
-              {scene.isLive ? 'Live' : 'Go live'}
-            </Button>
+            <Tooltip title={gmPlayerPreview
+              ? 'Return to the GM controls'
+              : 'Preview exactly what players can see; editing is disabled'}>
+              <Button
+                size="small"
+                variant={gmPlayerPreview ? 'contained' : 'outlined'}
+                startIcon={gmPlayerPreview ? <EyeOff size={14} /> : <Eye size={14} />}
+                aria-label={gmPlayerPreview ? 'Exit player view' : 'Player view'}
+                aria-pressed={gmPlayerPreview}
+                onClick={handleTogglePlayerPreview}
+              >
+                {gmPlayerPreview ? 'Exit player view' : 'Player view'}
+              </Button>
+            </Tooltip>
+            {!gmPlayerPreview ? (
+              <Button
+                size="small"
+                color={scene.isLive ? 'success' : 'inherit'}
+                variant={scene.isLive ? 'contained' : 'outlined'}
+                startIcon={<Radio size={14} />}
+                aria-pressed={scene.isLive}
+                onClick={handleToggleLive}
+              >
+                {scene.isLive ? 'Live' : 'Go live'}
+              </Button>
+            ) : null}
             {/* A scene that is not live has no projector to point anywhere, and
                 a projector already running only needs stopping and freezing. */}
-            {scene.isLive && !projectorControlsOpen ? (
+            {!gmPlayerPreview && scene.isLive && !projectorControlsOpen ? (
               <Button
                 size="small"
                 variant="outlined"
@@ -1830,7 +1938,7 @@ export default function SceneEditor({
                 Projector mode
               </Button>
             ) : null}
-            {scene.isLive && projectorControlsOpen ? (
+            {!gmPlayerPreview && scene.isLive && projectorControlsOpen ? (
               <>
                 <Tooltip title="Closes the projector tab">
                   <Button
@@ -1864,15 +1972,17 @@ export default function SceneEditor({
             ) : null}
           </Stack>
         ) : null}
-        <Box sx={sceneViewSwitchSx}>
-          <BattleMapViewSwitch
-            view={contentView}
-            choices={sheetChoices}
-            selectedId={sheetCharacterId}
-            onViewChange={setContentView}
-            onSelectionChange={selectSheetCharacter}
-          />
-        </Box>
+        {!gmPlayerPreview ? (
+          <Box sx={sceneViewSwitchSx}>
+            <BattleMapViewSwitch
+              view={contentView}
+              choices={sheetChoices}
+              selectedId={sheetCharacterId}
+              onViewChange={setContentView}
+              onSelectionChange={selectSheetCharacter}
+            />
+          </Box>
+        ) : null}
       </Box>
 
       <Box
@@ -1884,22 +1994,23 @@ export default function SceneEditor({
           <SceneViewport
         scene={scene}
         imageUrl={viewportDisplay.url}
-        tokens={visibleTokens}
+        preparedImageSize={viewportDisplay.imageSize}
+        tokens={gmPlayerPreview ? projectedTokens : visibleTokens}
         snap
-        canMove={canMove}
+        canMove={gmPlayerPreview ? () => false : canMove}
         fog={scene.fog}
         atmosphere={scene.atmosphere}
-        fogOpacity={role.isGm ? GM_FOG_OPACITY : PLAYER_FOG_OPACITY}
+        fogOpacity={role.isGm && !gmPlayerPreview ? GM_FOG_OPACITY : PLAYER_FOG_OPACITY}
         // Fog brushes are the GM's; drawing is everyone's, so a player keeps
         // the pencil and the eraser and loses only reveal/hide.
-        paintMode={allowedPaintMode}
+        paintMode={gmPlayerPreview ? 'select' : allowedPaintMode}
         brushSize={brushSize}
-        activeLayer={role.isGm ? activeLayer : null}
-        showPlayArea={role.isGm}
+        activeLayer={role.isGm && !gmPlayerPreview ? activeLayer : null}
+        showPlayArea={role.isGm && !gmPlayerPreview}
         backgroundOnly={viewportDisplay.shownImage === 'background'}
         // Top left: which picture is up is constant state, like the layer in the
         // opposite corner, and switching it is a move you make mid-scene.
-        imageSwitch={role.isGm
+        imageSwitch={role.isGm && !gmPlayerPreview
           ? (
             <Stack direction="row" spacing={0.75} sx={{ alignItems: 'flex-start' }}>
               <MapCorner
@@ -1941,48 +2052,48 @@ export default function SceneEditor({
           )
           : null}
         // Painted for everyone at the table; only the GM may click one.
-        hexCells={hexcrawl.visible ? hexcrawl.cellsByKey : null}
+        hexCells={projectedHexCells}
         partyHex={hexcrawl.partyHex}
-        selectedHex={hexcrawl.selected}
-        onHexClick={hexcrawl.enabled ? hexcrawl.clickHex : undefined}
-        hexBubble={hexcrawl.enabled ? hexcrawl.bubble : null}
-        onHexBubbleOpen={hexcrawl.openResult}
+        selectedHex={gmPlayerPreview ? null : hexcrawl.selected}
+        onHexClick={!gmPlayerPreview && hexcrawl.enabled ? hexcrawl.clickHex : undefined}
+        hexBubble={!gmPlayerPreview && hexcrawl.enabled ? hexcrawl.bubble : null}
+        onHexBubbleOpen={!gmPlayerPreview ? hexcrawl.openResult : undefined}
         onImageSize={setImageSize}
-        onDragToken={handleDragToken}
-        onMoveToken={handleMoveToken}
-        onResizeToken={handleMoveToken}
-        onRotateToken={handleMoveToken}
-        canSetDeathSaves={(token) => role.isGm || canMove(token)}
-        onDeathSaveChange={handleDeathSaveChange}
-        onPaint={handlePaint}
-        onPaintEnd={handlePaintEnd}
-        onContextMenu={(token, at) => setMenu({ tokenId: token.id, at })}
-        onDropCharacter={handleDropCharacter}
-        placementDrag={placementDrag}
-        onDropPlacement={handleDropPlacement}
+        onDragToken={gmPlayerPreview ? undefined : handleDragToken}
+        onMoveToken={gmPlayerPreview ? undefined : handleMoveToken}
+        onResizeToken={gmPlayerPreview ? undefined : handleMoveToken}
+        onRotateToken={gmPlayerPreview ? undefined : handleMoveToken}
+        canSetDeathSaves={gmPlayerPreview ? () => false : (token) => role.isGm || canMove(token)}
+        onDeathSaveChange={gmPlayerPreview ? undefined : handleDeathSaveChange}
+        onPaint={gmPlayerPreview ? undefined : handlePaint}
+        onPaintEnd={gmPlayerPreview ? undefined : handlePaintEnd}
+        onContextMenu={gmPlayerPreview ? undefined : (token, at) => setMenu({ tokenId: token.id, at })}
+        onDropCharacter={gmPlayerPreview ? undefined : handleDropCharacter}
+        placementDrag={gmPlayerPreview ? null : placementDrag}
+        onDropPlacement={gmPlayerPreview ? undefined : handleDropPlacement}
         drawings={visibleDrawings}
-        movableDrawing={movableDrawing}
-        selectedDrawingId={selectedDrawingId}
-        onSelectDrawing={setSelectedDrawingId}
-        onMoveDrawing={handleMoveDrawing}
+        movableDrawing={gmPlayerPreview ? null : movableDrawing}
+        selectedDrawingId={gmPlayerPreview ? null : selectedDrawingId}
+        onSelectDrawing={gmPlayerPreview ? undefined : setSelectedDrawingId}
+        onMoveDrawing={gmPlayerPreview ? undefined : handleMoveDrawing}
         drawColor={drawColor}
         drawWidth={drawWidth}
-        onDrawEnd={handleDrawEnd}
-        onErase={handleErase}
-        onWriteNote={handleWriteNote}
-        onLaser={handleLaser}
+        onDrawEnd={gmPlayerPreview ? undefined : handleDrawEnd}
+        onErase={gmPlayerPreview ? undefined : handleErase}
+        onWriteNote={gmPlayerPreview ? undefined : handleWriteNote}
+        onLaser={gmPlayerPreview ? undefined : handleLaser}
         lasers={laserDots}
-        rollBubbles={rollBubbles}
-        diceThrows={diceThrows}
+        rollBubbles={gmPlayerPreview ? projectedRollBubbles : rollBubbles}
+        diceThrows={gmPlayerPreview ? projectedDiceThrows : diceThrows}
         onDiceSettled={showSettledRollToast}
         measureShape={measureShape}
         feetPerCellForRuler={feetPerCell}
         conditionEntries={conditionEntries}
-        onTokenInspection={role.isGm ? handleTokenInspection : undefined}
-        onMeasure={handleMeasure}
+        onTokenInspection={role.isGm && !gmPlayerPreview ? handleTokenInspection : undefined}
+        onMeasure={gmPlayerPreview ? undefined : handleMeasure}
         remoteMeasure={remoteMeasure}
         feetPerCell={feetPerCell}
-        controls={(
+        controls={gmPlayerPreview ? null : (
           <SceneToolRail
             groups={toolGroups}
             activeId={paintToolGroup(allowedPaintMode)}
@@ -1993,8 +2104,8 @@ export default function SceneEditor({
         // that is not one of its own descendants.
         toast={<DiceToast toast={rollToast} onClose={dismissRollToast} />}
         onFullscreenChange={handleMapFullscreenChange}
-        onViewChange={role.isGm ? handleCameraViewChange : undefined}
-        fullscreenSheet={sheetChoices.length ? {
+        onViewChange={role.isGm && !gmPlayerPreview ? handleCameraViewChange : undefined}
+        fullscreenSheet={!gmPlayerPreview && sheetChoices.length ? {
           choices: sheetChoices,
           selectedId: sheetCharacterId,
           onSelectionChange: selectSheetCharacter,
@@ -2008,7 +2119,7 @@ export default function SceneEditor({
         } : null}
         // Bottom left, opposite the fullscreen button: the layer you are editing
         // is a constant piece of state, not a setting you go and find.
-        layerSwitch={role.isGm
+        layerSwitch={role.isGm && !gmPlayerPreview
           ? <LayerPanel compact activeLayer={activeLayer} onActiveLayerChange={setActiveLayer} />
           : null}
           />
@@ -2035,7 +2146,10 @@ export default function SceneEditor({
 
       {/* What the party walked into, as the answer to the click that took them
           there. */}
-      <HexResultDialog result={hexcrawl.result} onClose={hexcrawl.dismissResult} />
+      <HexResultDialog
+        result={gmPlayerPreview ? null : hexcrawl.result}
+        onClose={hexcrawl.dismissResult}
+      />
 
       <MonsterPickerDialog
         open={monsterOpen}
@@ -2055,7 +2169,7 @@ export default function SceneEditor({
         onPlacementDragEnd={() => setPlacementDrag(null)}
       />
 
-      <TokenMenu
+      {!gmPlayerPreview ? <TokenMenu
         token={menuToken}
         anchor={menu?.at || null}
         canEdit={role.isGm}
@@ -2079,9 +2193,13 @@ export default function SceneEditor({
         onObjectStyle={handleObjectStyle}
         onVisibility={role.isGm ? handleTokenVisibility : undefined}
         onDelete={handleDeleteToken}
-      />
+      /> : null}
 
-      {!role.isGm ? (
+      {gmPlayerPreview ? (
+        <Typography variant="caption" color="text.secondary">
+          Player view is read-only and hides GM-only content, staged pieces, and unrevealed fog.
+        </Typography>
+      ) : !role.isGm ? (
         <Typography variant="caption" color="text.secondary">
           You can move the pieces standing for your own characters.
         </Typography>

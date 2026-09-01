@@ -735,3 +735,59 @@ test('fullscreen exposes a sheet button and opens the sheet inside the viewport'
   fireEvent.change(screen.getByRole('combobox', { name: 'Character sheet' }), { target: { value: 'borin' } });
   expect(onSelectionChange).toHaveBeenCalledWith('borin');
 });
+
+test('a replacement picture is framed from its prepared dimensions before paint', () => {
+  const rectSpy = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
+    bottom: 600,
+    height: 600,
+    left: 0,
+    right: 800,
+    top: 0,
+    width: 800,
+    x: 0,
+    y: 0,
+    toJSON: () => ({}),
+  });
+  const scene = {
+    grid: { size: 50, offsetX: 0, offsetY: 0, visible: false },
+    playArea: null,
+  };
+  const renderViewport = ({ backgroundOnly, imageUrl, preparedImageSize }) => (
+    <SceneViewport
+      scene={scene}
+      imageUrl={imageUrl}
+      preparedImageSize={preparedImageSize}
+      tokens={[]}
+      snap
+      canMove={() => false}
+      fog={null}
+      drawings={[]}
+      lasers={[]}
+      rollBubbles={[]}
+      diceThrows={[]}
+      backgroundOnly={backgroundOnly}
+    />
+  );
+
+  try {
+    const { container, rerender } = render(renderViewport({
+      backgroundOnly: false,
+      imageUrl: 'map.webp',
+      preparedImageSize: { width: 1600, height: 800 },
+    }));
+    expect(container.querySelector('img')).toHaveStyle({
+      transform: 'translate(24px, 112px) scale(0.47)',
+    });
+
+    rerender(renderViewport({
+      backgroundOnly: true,
+      imageUrl: 'background.webp',
+      preparedImageSize: { width: 800, height: 1200 },
+    }));
+    expect(container.querySelector('img')).toHaveStyle({
+      transform: 'translate(0px, -300px) scale(1)',
+    });
+  } finally {
+    rectSpy.mockRestore();
+  }
+});

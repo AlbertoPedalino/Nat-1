@@ -1,4 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
+} from 'react';
 import { Box, Button, IconButton, Tooltip, Typography } from '@mui/material';
 import { MapPin, Maximize2, Minimize2, ScrollText, Settings2, X } from 'lucide-react';
 import { brushCells } from '../../../shared/vtt/fog.js';
@@ -109,6 +111,7 @@ export default function SceneViewport({
   // Background mode is a picture on a screen, not a board: the party is meant to
   // look at it, not play on it.
   backgroundOnly = false,
+  preparedImageSize = null,
   onImageSize,
   onDragToken,
   onMoveToken,
@@ -188,7 +191,11 @@ export default function SceneViewport({
   // stroke onwards came out as a single dot.
   const strokeRef = useRef([]);
   const [strokeTick, setStrokeTick] = useState(0);
-  const [imageSize, setImageSize] = useState(null);
+  const [loadedImageSize, setLoadedImageSize] = useState(null);
+  // SceneEditor decodes each replacement before exposing it and supplies its
+  // dimensions in the same render as the URL. This prevents one paint with the
+  // previous picture's fit while the new <img> waits to emit `load`.
+  const imageSize = preparedImageSize || loadedImageSize;
   const [fullscreen, setFullscreen] = useState(false);
   // The stand-in for fullscreen where the browser will not give us the real
   // thing.
@@ -304,7 +311,7 @@ export default function SceneViewport({
   // changes shape (fullscreen and device rotation) so no letterboxing returns.
   const backgroundViewportWidth = backgroundOnly ? viewportSize.width : null;
   const backgroundViewportHeight = backgroundOnly ? viewportSize.height : null;
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!imageSize || !hostRef.current) return;
     const box = hostRef.current.getBoundingClientRect();
     const frameView = backgroundOnly ? fillView : fitView;
@@ -1000,7 +1007,7 @@ export default function SceneViewport({
               width: event.currentTarget.naturalWidth,
               height: event.currentTarget.naturalHeight,
             };
-            setImageSize(size);
+            setLoadedImageSize(size);
             // The editor needs it too: fog and the play area are both sized from
             // the map, and only the <img> knows how big it really is.
             onImageSize?.(size);
