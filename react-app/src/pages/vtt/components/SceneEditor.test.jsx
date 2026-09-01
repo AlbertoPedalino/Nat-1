@@ -179,11 +179,14 @@ test('a GM can switch the battlemap to a read-only player view', () => {
   );
 
   expect(screen.getByTestId('scene-viewport')).toHaveTextContent('visible,staged,hidden-map-prop');
+  const liveButton = screen.getByRole('button', { name: 'Live' });
+  const playerViewButton = screen.getByRole('button', { name: 'Player view' });
+  expect(liveButton.compareDocumentPosition(playerViewButton) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   act(() => {
     sceneViewportMock.mock.calls.at(-1)[0].onSelectDrawing('public-drawing');
   });
   expect(sceneViewportMock.mock.calls.at(-1)[0].selectedDrawingId).toBe('public-drawing');
-  fireEvent.click(screen.getByRole('button', { name: 'Player view' }));
+  fireEvent.click(playerViewButton);
 
   expect(screen.getByRole('button', { name: 'Exit player view' })).toHaveAttribute('aria-pressed', 'true');
   expect(screen.getByRole('heading', { name: 'The Campaign' })).toBeInTheDocument();

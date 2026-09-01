@@ -1900,6 +1900,18 @@ export default function SceneEditor({
         </Box>
         {role.isGm ? (
           <Stack direction="row" spacing={0.75} useFlexGap sx={scenePresenterActionsSx}>
+            {!gmPlayerPreview ? (
+              <Button
+                size="small"
+                color={scene.isLive ? 'success' : 'inherit'}
+                variant={scene.isLive ? 'contained' : 'outlined'}
+                startIcon={<Radio size={14} />}
+                aria-pressed={scene.isLive}
+                onClick={handleToggleLive}
+              >
+                {scene.isLive ? 'Live' : 'Go live'}
+              </Button>
+            ) : null}
             <Tooltip title={gmPlayerPreview
               ? 'Return to the GM controls'
               : 'Preview exactly what players can see; editing is disabled'}>
@@ -1914,18 +1926,6 @@ export default function SceneEditor({
                 {gmPlayerPreview ? 'Exit player view' : 'Player view'}
               </Button>
             </Tooltip>
-            {!gmPlayerPreview ? (
-              <Button
-                size="small"
-                color={scene.isLive ? 'success' : 'inherit'}
-                variant={scene.isLive ? 'contained' : 'outlined'}
-                startIcon={<Radio size={14} />}
-                aria-pressed={scene.isLive}
-                onClick={handleToggleLive}
-              >
-                {scene.isLive ? 'Live' : 'Go live'}
-              </Button>
-            ) : null}
             {/* A scene that is not live has no projector to point anywhere, and
                 a projector already running only needs stopping and freezing. */}
             {!gmPlayerPreview && scene.isLive && !projectorControlsOpen ? (
