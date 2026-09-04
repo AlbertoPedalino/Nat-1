@@ -274,10 +274,20 @@ function stripTags(rawText) {
   return tokenizeBeastEntry(rawText).map((tok) => tok.text).join('');
 }
 
-// Flatten an action/trait record's prose entries into one raw (tag-bearing) string.
-const actionEntryText = (action) => (Array.isArray(action?.entries)
-  ? action.entries.filter((e) => typeof e === 'string').join(' ')
-  : '');
+// Flatten an action/trait record's prose entries into one raw (tag-bearing)
+// string. Summoned statblocks sometimes nest named sub-actions inside an entry
+// (for example Vestige Companion's Divine Power), so retain those headings and
+// their text instead of discarding every non-string child.
+function flattenActionEntry(node) {
+  if (typeof node === 'string') return node;
+  if (Array.isArray(node)) return node.map(flattenActionEntry).filter(Boolean).join(' ');
+  if (!node || typeof node !== 'object') return '';
+  const heading = node.name ? `${node.name}.` : '';
+  const body = flattenActionEntry(node.entries || node.items || []);
+  return [heading, body].filter(Boolean).join(' ');
+}
+
+const actionEntryText = (action) => flattenActionEntry(action?.entries || []);
 
 export function parseBeastActions(actions) {
   return (actions || []).map((action) => {

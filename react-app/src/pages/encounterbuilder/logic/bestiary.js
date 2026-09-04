@@ -83,7 +83,7 @@ export async function loadMonsterDatabase() {
     const file = index[source];
     const path = String(file || '').startsWith('bestiary/') ? file : `bestiary/${file}`;
     const data = await getJson(path);
-    return (data.monster || []).filter((monster) => RAW_ALLOWED_SOURCES.includes(monster.source));
+    return (data.monster || []).filter(isEncounterMonster);
   }));
   const seen = new Set();
   const monsters = loaded.flat().filter((monster) => {
@@ -101,4 +101,16 @@ export async function loadMonsterDatabase() {
       label: SOURCE_LABELS[source] || source,
     })),
   };
+}
+
+// Summoned-creature templates intentionally have no Challenge Rating. They live
+// in bestiary files because 5etools renders them as statblocks, but they are not
+// independent encounter monsters and must not silently become CR 0 creatures.
+export function isEncounterMonster(monster) {
+  return Boolean(
+    monster
+    && RAW_ALLOWED_SOURCES.includes(monster.source)
+    && monster.cr != null
+    && String(typeof monster.cr === 'object' ? monster.cr.cr : monster.cr).trim(),
+  );
 }

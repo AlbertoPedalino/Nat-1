@@ -54,7 +54,15 @@ export function BeastNameLink({ name, source, sx }) {
 // read-only stat block. Rolls are the creature's own, so callers should route
 // them through pure dice + a toast (not the character's rollD20, whose exhaustion
 // penalty must not bleed onto a separate summoned creature).
-export function BeastStatBlock({ b, typeLabel = 'Beast', hpLabel = 'HP', tempHP = 0, onRoll, onRollFormula }) {
+export function BeastStatBlock({
+  b,
+  typeLabel = 'Beast',
+  hpLabel = 'HP',
+  tempHP = 0,
+  showCr = true,
+  onRoll,
+  onRollFormula,
+}) {
   const rollable = typeof onRoll === 'function';
   const speed = Object.entries(b.speed || {})
     .filter(([k]) => k !== 'hover')
@@ -76,10 +84,14 @@ export function BeastStatBlock({ b, typeLabel = 'Beast', hpLabel = 'HP', tempHP 
   // Rollable: prose becomes inline roll pills ({@hit}/{@damage}); else flat text.
   const traits = rollable ? parseBeastActionsRich(b.traits) : parseBeastActions(b.traits);
   const actions = rollable ? parseBeastActionsRich(b.actions) : parseBeastActions(b.actions);
+  const bonusActions = rollable ? parseBeastActionsRich(b.bonusActions) : parseBeastActions(b.bonusActions);
+  const reactions = rollable ? parseBeastActionsRich(b.reactions) : parseBeastActions(b.reactions);
+  const listText = (value) => (Array.isArray(value) ? value.filter(Boolean).join(', ') : String(value || ''));
+  const meta = [b.size, typeLabel, showCr && b.cr != null ? `CR ${b.cr}` : null].filter(Boolean).join(' · ');
 
   return (
     <Box sx={statBlockSx}>
-      <Typography sx={{ ...metaSx, mb: 0.4 }}>{[b.size, typeLabel, `CR ${b.cr}`].filter(Boolean).join(' · ')}</Typography>
+      <Typography sx={{ ...metaSx, mb: 0.4 }}>{meta}</Typography>
       <StatLine label="AC" value={b.ac ?? '—'} />
       {onRollFormula && b.hp?.formula ? (
         <Typography sx={subSx}>
@@ -123,8 +135,16 @@ export function BeastStatBlock({ b, typeLabel = 'Beast', hpLabel = 'HP', tempHP 
           : <StatLine label="Skills" value={skillItems.map((s) => s.text).join(', ')} />
       ) : null}
       {senses ? <StatLine label="Senses" value={senses} /> : null}
+      {listText(b.vulnerable) ? <StatLine label="Vulnerabilities" value={listText(b.vulnerable)} /> : null}
+      {listText(b.resist) ? <StatLine label="Resistances" value={listText(b.resist)} /> : null}
+      {listText(b.immune) ? <StatLine label="Immunities" value={listText(b.immune)} /> : null}
+      {listText(b.conditionImmune) ? <StatLine label="Condition Immunities" value={listText(b.conditionImmune)} /> : null}
+      {listText(b.languages) ? <StatLine label="Languages" value={listText(b.languages)} /> : null}
+      {b.proficiencyNote ? <StatLine label="Proficiency Bonus" value={b.proficiencyNote} /> : null}
       {traits.length ? <StatSection title="Traits" items={traits} onRoll={onRoll} onRollFormula={onRollFormula} beastName={b.name} /> : null}
       {actions.length ? <StatSection title="Actions" items={actions} onRoll={onRoll} onRollFormula={onRollFormula} beastName={b.name} /> : null}
+      {bonusActions.length ? <StatSection title="Bonus Actions" items={bonusActions} onRoll={onRoll} onRollFormula={onRollFormula} beastName={b.name} /> : null}
+      {reactions.length ? <StatSection title="Reactions" items={reactions} onRoll={onRoll} onRollFormula={onRollFormula} beastName={b.name} /> : null}
     </Box>
   );
 }

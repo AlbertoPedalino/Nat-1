@@ -3,7 +3,9 @@ export const BESTIARY_BASE = `${DATA_BASE}bestiary/`;
 export const IMAGE_BASE = 'https://raw.githubusercontent.com/5etools-mirror-2/5etools-img/main/';
 export const FALLBACK_MONSTER_TOKEN = 'https://raw.githubusercontent.com/5etools-mirror-3/5etools-img/main/bestiary/tokens/XMM/Skeleton.webp';
 
-export const PROJECT_ALLOWED_SOURCES = Object.freeze(['XPHB', 'XMM', 'XDMG', 'FRAIF', 'FRHOF', 'EFA', 'RWH']);
+export const PROJECT_ALLOWED_SOURCES = Object.freeze([
+  'XPHB', 'XMM', 'XDMG', 'FRAIF', 'FRHOF', 'EFA', 'RWH', 'AU', 'AUD',
+]);
 export const PROJECT_TO_RAW_SOURCE = Object.freeze({
   XPHB: 'XPHB',
   XMM: 'XMM',
@@ -12,6 +14,8 @@ export const PROJECT_TO_RAW_SOURCE = Object.freeze({
   FRHOF: 'FRHoF',
   EFA: 'EFA',
   RWH: 'RHW',
+  AU: 'AU',
+  AUD: 'AUD',
 });
 export const RAW_TO_PROJECT_SOURCE = Object.freeze(Object.fromEntries(
   Object.entries(PROJECT_TO_RAW_SOURCE).map(([project, raw]) => [raw, project]),
@@ -25,6 +29,8 @@ export const SOURCE_LABELS = Object.freeze({
   FRHoF: 'Forgotten Realms: Heroes of Faerun',
   EFA: 'Eberron: Forge of the Artificer',
   RHW: 'Ravenloft: The Horrors Within',
+  AU: 'Arcana Unleashed',
+  AUD: 'Arcana Unleashed: Deadfall',
 });
 
 export const CR_XP = Object.freeze({

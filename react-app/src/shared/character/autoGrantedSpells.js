@@ -233,6 +233,11 @@ function normName(value) {
  */
 export function enumerateEntityGrants(entity, character) {
   const configGrants = enumerateClassGrants(entity, character);
+  const subclassSpellcasting = installedRegistry.getSubclassRuntimeConfig(
+    entity?.className,
+    entity?.subclassShortName,
+  )?.spellcasting;
+  if (subclassSpellcasting?.disableFeatureSpellScrape) return configGrants;
   const granted = new Set(configGrants.map((r) => normName(r.name)));
   return [
     ...configGrants,

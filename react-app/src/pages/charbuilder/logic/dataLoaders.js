@@ -16,6 +16,7 @@ import {
   ITEM_SOURCE_PRIORITY,
   OPTIONAL_FEATURE_ALLOWED_SOURCES,
   SPECIES_ALLOWED_SOURCES,
+  SPELL_SOURCE_PRIORITY,
   isAllowedSource,
   sourceRank,
 } from '../../../shared/character/sourcePriority.js';
@@ -24,6 +25,11 @@ import {
   isSupportedSubclassFeature,
   isSupportedSubclassRecord,
 } from '../../../shared/character/sourceFiltering.js';
+import {
+  isExcludedByVariant,
+  matchesItemRequirements,
+  resolveCopyRecords,
+} from './itemVariants.js';
 
 function normalizeName(value) {
   return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -47,7 +53,7 @@ function getJson(path) {
   return promise;
 }
 
-const DEBUG_LOADERS = import.meta.env.DEV;
+const DEBUG_LOADERS = Boolean(import.meta.env?.DEV);
 
 function debugLog(...args) {
   if (DEBUG_LOADERS) console.log(...args);
@@ -213,7 +219,18 @@ export async function loadSpells() {
   };
 }
 
-function buildClassSpellIndexFromSpells(spells) {
+function classVariantSources(entry) {
+  if (!entry || typeof entry !== 'object') return [];
+  if (Array.isArray(entry.definedInSources)) return entry.definedInSources;
+  if (entry.definedInSource) return [entry.definedInSource];
+  return [];
+}
+
+function isSupportedClassVariant(entry) {
+  return classVariantSources(entry).some((source) => SPELL_SOURCE_PRIORITY.includes(String(source || '').trim()));
+}
+
+export function buildClassSpellIndexFromSpells(spells) {
   const out = {};
   const CASTERS = ['artificer', 'bard', 'cleric', 'druid', 'paladin', 'ranger', 'sorcerer', 'warlock', 'wizard', 'monk', 'rogue', 'fighter'];
   
@@ -228,6 +245,21 @@ function buildClassSpellIndexFromSpells(spells) {
       fromClassList.forEach((entry) => {
         const className = normalizeName(entry?.name);
         if (CASTERS.includes(className)) {
+          if (!out[className]) out[className] = new Set();
+          out[className].add(String(spell.name || '').toLowerCase());
+        }
+      });
+    }
+
+    // 5etools stores source-book additions to a class spell list separately
+    // from the core list. Only accept additions defined by one of the manuals
+    // this project actually loads (for example AU), otherwise optional lists
+    // from unsupported books would leak into the builder.
+    const fromClassListVariant = spell.classes.fromClassListVariant || [];
+    if (Array.isArray(fromClassListVariant)) {
+      fromClassListVariant.forEach((entry) => {
+        const className = normalizeName(entry?.name);
+        if (CASTERS.includes(className) && isSupportedClassVariant(entry)) {
           if (!out[className]) out[className] = new Set();
           out[className].add(String(spell.name || '').toLowerCase());
         }
@@ -256,7 +288,7 @@ function buildClassSpellIndexFromSpells(spells) {
   return result;
 }
 
-function buildClassSpellIndex(node) {
+export function buildClassSpellIndex(node) {
   const out = {};
   const CASTERS = ['artificer', 'bard', 'cleric', 'druid', 'paladin', 'ranger', 'sorcerer', 'warlock', 'wizard', 'monk', 'rogue', 'fighter'];
   if (!node || typeof node !== 'object') {
@@ -276,22 +308,29 @@ function buildClassSpellIndex(node) {
   // Track which classes have entries in info.class (core class list)
   const hasClassSpells = new Set();
   
-  // PASS 1: Collect from info.class only
+  const visitClassMap = (classMap, visitor, { variant = false } = {}) => {
+    if (!classMap || typeof classMap !== 'object') return;
+    Object.values(classMap).forEach((bySource) => {
+      if (!bySource || typeof bySource !== 'object') return;
+      Object.entries(bySource).forEach(([className, metadata]) => {
+        if (variant && !isSupportedClassVariant(metadata)) return;
+        visitor(className);
+      });
+    });
+  };
+
+  // PASS 1: Collect core class lists and supported source-book additions.
   Object.values(node).forEach((sourceBlock) => {
     if (!sourceBlock || typeof sourceBlock !== 'object') return;
     Object.entries(sourceBlock).forEach(([spellName, info]) => {
       if (!info || typeof info !== 'object') return;
-      const classMap = info.class;
-      if (classMap && typeof classMap === 'object') {
-        Object.values(classMap).forEach((bySource) => {
-          if (!bySource || typeof bySource !== 'object') return;
-          Object.keys(bySource).forEach((className) => {
-            const key = normalizeName(className);
-            if (CASTERS.includes(key)) hasClassSpells.add(key);
-            collect(className, spellName);
-          });
-        });
-      }
+      const collectClassSpell = (className) => {
+        const key = normalizeName(className);
+        if (CASTERS.includes(key)) hasClassSpells.add(key);
+        collect(className, spellName);
+      };
+      visitClassMap(info.class, collectClassSpell);
+      visitClassMap(info.classVariant, collectClassSpell, { variant: true });
     });
   });
   
@@ -450,8 +489,8 @@ export async function loadItems() {
     getJson('magicvariants.json'),
   ]);
 
-  const rawBaseItems = base.status === 'fulfilled' ? (base.value.baseitem || []) : [];
-  const rawDataItems = magic.status === 'fulfilled' ? (magic.value.item || []) : [];
+  const rawBaseItems = base.status === 'fulfilled' ? resolveCopyRecords(base.value.baseitem || []) : [];
+  const rawDataItems = magic.status === 'fulfilled' ? resolveCopyRecords(magic.value.item || []) : [];
 
   const baseItems = base.status === 'fulfilled'
     ? rawBaseItems
@@ -467,7 +506,7 @@ export async function loadItems() {
 
   const magicVariants = variants.status === 'fulfilled'
     ? expandMagicVariants(
-        (variants.value.magicvariant || []).filter(isAllowedMagicVariant),
+        resolveCopyRecords(variants.value.magicvariant || []).filter(isAllowedMagicVariant),
         baseItems,
       ).map(withCanonicalSource)
     : [];
@@ -524,6 +563,7 @@ const RECONCILED_ITEM_FIELDS = [
   'rarity', 'weight', 'value', 'type', 'weaponCategory', 'sourceAlias', 'curse',
   'dmg1', 'dmg2', 'dmgType', 'ac', 'strength', 'stealth',
   'scfType', 'focus', 'items', 'group',
+  'baseItem', 'variantName', 'variantSource',
 ];
 
 // Refresh structured effect fields on persisted inventory items by re-merging
@@ -587,6 +627,38 @@ function itemRichness(item) {
 }
 
 const TEMPLATE_PLACEHOLDER_RE = /\{=[^}]+\}/;
+
+const DAMAGE_TYPE_LABELS = {
+  A: 'Acid', B: 'Bludgeoning', C: 'Cold', F: 'Fire', O: 'Force', L: 'Lightning',
+  N: 'Necrotic', P: 'Piercing', I: 'Poison', Y: 'Psychic', R: 'Radiant', S: 'Slashing', T: 'Thunder',
+};
+
+function resolveVariantTemplate(node, fields, baseName) {
+  if (node == null) return node;
+  if (typeof node === 'string') {
+    return node.replace(/\{=([^}/]+)(?:\/([^}]+))?\}/g, (match, field, modifier) => {
+      if (field === 'baseName') {
+        const name = String(baseName || 'item');
+        if (modifier === 'l') return name.toLowerCase();
+        if (modifier === 'a' || modifier === 'at') {
+          const article = /^[aeiou]/i.test(name) ? 'an' : 'a';
+          return modifier === 'at' ? article.charAt(0).toUpperCase() + article.slice(1) : article;
+        }
+        return name;
+      }
+      const value = fields?.[field];
+      if (field === 'dmgType') return DAMAGE_TYPE_LABELS[value] || value || match;
+      return value == null ? match : String(value);
+    });
+  }
+  if (Array.isArray(node)) return node.map((entry) => resolveVariantTemplate(entry, fields, baseName));
+  if (typeof node === 'object') {
+    return Object.fromEntries(Object.entries(node).map(([key, value]) => (
+      [key, resolveVariantTemplate(value, fields, baseName)]
+    )));
+  }
+  return node;
+}
 
 function stripTemplatedEntries(node) {
   if (node == null) return node;
@@ -664,6 +736,9 @@ function normalizeItem(item) {
     items: Array.isArray(item.items) ? item.items.slice() : null,
     group: Array.isArray(item.group) ? item.group.slice() : null,
     generatedGroupParent: !!item.generatedGroupParent,
+    baseItem: item.baseItem || null,
+    variantName: item.variantName || null,
+    variantSource: item.variantSource || null,
   };
 }
 
@@ -694,14 +769,20 @@ function expandMagicVariants(variants, baseItems) {
     const bonusVariant = /^\+\d+$/.test(bonusPrefix) ? bonusPrefix : null;
 
     baseItems.forEach((base) => {
-      if (!matchesRequires(base, requires)) return;
-      expanded.push(withCanonicalSource({
+      if (!matchesItemRequirements(base, requires)) return;
+      if (isExcludedByVariant(base, variant.excludes)) return;
+      const concrete = {
         ...base,
         ...inherits,
         name: formatVariantName(base.name, inherits),
         source: variantSource || base.source,
+        baseItem: `${base.name}|${base.source}`,
+        variantName: variant.name || null,
+        variantSource: variantSource,
         ...(bonusVariant ? { bonusVariant } : {}),
-      }));
+      };
+      concrete.entries = resolveVariantTemplate(concrete.entries, concrete, base.name);
+      expanded.push(withCanonicalSource(concrete));
     });
   });
   return expanded;
@@ -712,45 +793,6 @@ function formatVariantName(baseName, inherits) {
   const suffix = String(inherits.nameSuffix || '').trim();
   if (/^\+\d+$/.test(prefix)) return `${baseName} ${prefix}${suffix ? ` ${suffix}` : ''}`.trim();
   return `${prefix ? `${prefix} ` : ''}${baseName}${suffix ? ` ${suffix}` : ''}`.trim();
-}
-
-function normRequireName(value) {
-  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-}
-
-function matchesRequires(item, requires) {
-  if (!requires.length) return true;
-  return requires.some((requirement) => {
-    const type = String(item.type || '').split('|')[0].toUpperCase();
-
-    // Explicit name match (XDMG variants list specific base items by name).
-    if (requirement.name) {
-      if (normRequireName(item.name) !== normRequireName(requirement.name)) return false;
-      if (requirement.source) {
-        const itemSrc = String(item.source || '').toUpperCase();
-        const reqSrc = String(requirement.source || '').toUpperCase();
-        if (itemSrc !== reqSrc) return false;
-      }
-    }
-
-    if (requirement.type) {
-      const reqType = String(requirement.type || '').split('|')[0].toUpperCase();
-      if (reqType === 'WEAPON' && !isWeaponType(type)) return false;
-      else if (reqType === 'ARMOR' && !isArmorType(type)) return false;
-      else if (!['WEAPON', 'ARMOR'].includes(reqType) && reqType !== type) return false;
-    }
-    if (requirement.weapon && !isWeaponType(type)) return false;
-    if (requirement.weaponCategory && requirement.weaponCategory !== item.weaponCategory) return false;
-    if (requirement.armor && !isArmorType(type)) return false;
-
-    // Reject requirements with only unrecognized fields (e.g. classic DMG
-    // `{sword: true}` flags) to avoid applying a variant to every base item.
-    const KNOWN = new Set(['name', 'source', 'type', 'weapon', 'weaponCategory', 'armor']);
-    const hasKnownConstraint = Object.keys(requirement).some((k) => KNOWN.has(k));
-    if (!hasKnownConstraint) return false;
-
-    return true;
-  });
 }
 
 function formatLeadingBonusName(name) {

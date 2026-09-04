@@ -11,7 +11,16 @@ function frozenList(values) {
 // ADD A NEW MANUAL HERE (in priority order) and every content whitelist below
 // that derives from it picks it up automatically. Whitelisting a book that
 // lacks a given content type is harmless — no phantom data appears.
-export const CORE_2024_SOURCE_PRIORITY = frozenList(['XPHB', 'XDMG', 'EFA', 'FRAiF', 'FRHoF', 'RHW']);
+export const CORE_2024_SOURCE_PRIORITY = frozenList([
+  'XPHB',
+  'XDMG',
+  'EFA',
+  'FRAiF',
+  'FRHoF',
+  'RHW',
+  'AU',
+  'AUD',
+]);
 
 // Content available across all 2024 manuals → membership derived from the
 // master set. (These feed isAllowedSource; order is irrelevant for them.)
@@ -30,12 +39,15 @@ export const CLASS_ALLOWED_SOURCES = frozenList(['XPHB', 'EFA']);
 // roster; the supported 2024 manuals add a few beasts of their own. XMM is not in
 // CORE_2024_SOURCE_PRIORITY (it's a bestiary, not a player-content book), so it's
 // listed explicitly here.
-export const BEAST_ALLOWED_SOURCES = frozenList(['XMM', ...CORE_2024_SOURCE_PRIORITY]);
+export const BEAST_ALLOWED_SOURCES = frozenList([
+  'XMM',
+  ...CORE_2024_SOURCE_PRIORITY.filter((source) => source !== 'AU' && source !== 'AUD'),
+]);
 
 // Order-sensitive dedup priorities (a source appearing in several books): the
 // ordering is intentional and independent of the membership lists above.
-export const SPELL_SOURCE_PRIORITY = frozenList(['XPHB', 'FRAiF', 'FRHoF', 'EFA', 'XDMG']);
-export const SUBCLASS_SOURCE_PRIORITY = frozenList(['XPHB', 'FRAiF', 'FRHoF', 'EFA']);
+export const SPELL_SOURCE_PRIORITY = frozenList(['XPHB', 'FRAiF', 'FRHoF', 'EFA', 'AU', 'XDMG']);
+export const SUBCLASS_SOURCE_PRIORITY = frozenList(['XPHB', 'FRAiF', 'FRHoF', 'EFA', 'RHW', 'AU']);
 
 export function normalizeSource(source) {
   return String(source || '').trim();

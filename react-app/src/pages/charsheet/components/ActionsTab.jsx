@@ -42,6 +42,7 @@ import WildShapePanel from './WildShapePanel.jsx';
 import WildCompanionPanel from './WildCompanionPanel.jsx';
 import EldritchCannonPanel from './EldritchCannonPanel.jsx';
 import MagicItemTinkerPanel from './MagicItemTinkerPanel.jsx';
+import SummonedCreaturePanel from './SummonedCreaturePanel.jsx';
 import AttackRollButton from './AttackRollButton.jsx';
 import { useProficiencySets } from '../context/ProficiencySetsContext.jsx';
 import { useSheetActions } from '../context/SheetActionsContext.jsx';
@@ -67,6 +68,7 @@ const ACTION_DETAIL_RENDERERS = {
   wildCompanion: WildCompanionPanel,
   eldritchCannon: EldritchCannonPanel,
   magicItemTinker: MagicItemTinkerPanel,
+  summonedCreature: SummonedCreaturePanel,
 };
 
 const _danglingResKeyWarned = typeof Set === 'function' ? new Set() : null;
@@ -623,6 +625,19 @@ export default function ActionsTab({ C, sheet, resources }) {
           result = sideEffect({ character: C, C, sheet, resources: res, PACT_SLOTS, slots });
         } catch {
           result = null;
+        }
+        if (Array.isArray(result?.recoverResourceKeys) && result.recoverResourceKeys.length) {
+          const recoveredResources = { ...res };
+          let changed = false;
+          result.recoverResourceKeys.forEach((targetKey) => {
+            if (!Object.prototype.hasOwnProperty.call(recoveredResources, targetKey)) return;
+            const targetMax = resMaxMap[targetKey];
+            if (!Number.isFinite(targetMax)) return;
+            if (Number(recoveredResources[targetKey] || 0) >= targetMax) return;
+            recoveredResources[targetKey] = targetMax;
+            changed = true;
+          });
+          if (changed) setResources(recoveredResources);
         }
         if (result?.type === 'recover_pact_slots') {
           applyPactSlotRecovery(result);

@@ -461,10 +461,13 @@ export function backgroundChoiceSpecs(character) {
 }
 
 function parseChooseString(value) {
-  const out = { level: null, classes: [], schools: [] };
+  const out = { level: null, levels: [], classes: [], schools: [] };
   String(value || '').split('|').forEach((part) => {
     const [k, v] = part.split('=');
-    if (k === 'level') out.level = Number(v);
+    if (k === 'level') {
+      out.levels = String(v || '').split(';').map(Number).filter(Number.isFinite);
+      out.level = out.levels.length === 1 ? out.levels[0] : null;
+    }
     if (k === 'class') out.classes = String(v || '').split(';').map((s) => s.trim()).filter(Boolean);
     if (k === 'school') out.schools = String(v || '').split(';').map((s) => s.trim()).filter(Boolean);
   });
@@ -506,7 +509,7 @@ function additionalSpellChoices(feat, slotKey, entryIdx) {
       chooseEntries.forEach((entry) => {
         if (!entry?.choose) return;
         const parsed = parseChooseString(entry.choose);
-        const sigKey = `${parsed.level ?? '?'}|${parsed.classes.join(',')}|${parsed.schools.join(',')}`;
+        const sigKey = `${parsed.levels.join(',') || '?'}|${parsed.classes.join(',')}|${parsed.schools.join(',')}`;
         const current = grouped.get(sigKey) || { ...parsed, count: 0 };
         current.count += entry.count || 1;
         grouped.set(sigKey, current);
@@ -514,11 +517,11 @@ function additionalSpellChoices(feat, slotKey, entryIdx) {
       grouped.forEach((value, key) => {
         out.push({
           key: `${slotKey}_spell_${mode}_${chooseCounter}_${key}`,
-          label: `${feat.name} - ${value.level === 0 ? 'Cantrip' : `Spell Lv.${value.level}`}${value.classes.length ? ` (${value.classes.join('/')})` : ''}`,
+          label: `${feat.name} - ${value.level === 0 ? 'Cantrip' : value.level != null ? `Spell Lv.${value.level}` : `Spell Lv.${value.levels.join('/')}`}${value.classes.length ? ` (${value.classes.join('/')})` : ''}`,
           type: 'spell_choice',
           count: value.count,
           spellFilter: {
-            spellLevels: value.level != null ? [value.level] : undefined,
+            spellLevels: value.levels.length ? value.levels : undefined,
             classes: value.classes,
             schools: value.schools.length ? value.schools : undefined,
           },

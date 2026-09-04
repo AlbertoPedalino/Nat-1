@@ -465,20 +465,20 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
 
       {visibleCantrips.length || showEmptyCantrips ? (
         <SpellSection title="Cantrip">
-          {visibleCantrips.map((entry) => <SpellEntry key={entry.name} entry={entry} spellAttackBonus={spellItemBonuses.spellAttack} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} />)}
+          {visibleCantrips.map((entry) => <SpellEntry key={entry.name} entry={entry} spellAttackBonus={spellItemBonuses.spellAttack} spellSaveDc={dc} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} />)}
           {!visibleCantrips.length ? <Empty text="None" /> : null}
         </SpellSection>
       ) : null}
 
       {visibleAtWill.length ? (
         <SpellSection title="At Will">
-          {visibleAtWill.map((entry) => <SpellEntry key={`at-will-${entry.name}`} entry={entry} spellAttackBonus={spellItemBonuses.spellAttack} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} />)}
+          {visibleAtWill.map((entry) => <SpellEntry key={`at-will-${entry.name}`} entry={entry} spellAttackBonus={spellItemBonuses.spellAttack} spellSaveDc={dc} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} />)}
         </SpellSection>
       ) : null}
 
       {visibleLeveled.map(([level, entries]) => (
         <SpellSection key={level} title={SPELL_LEVEL_LABELS[level] || `Level ${level}`}>
-          {entries.map((entry) => <SpellEntry key={`${level}-${entry.name}-${entry.castLevel || 'base'}`} entry={entry} spellAttackBonus={spellItemBonuses.spellAttack} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} />)}
+          {entries.map((entry) => <SpellEntry key={`${level}-${entry.name}-${entry.castLevel || 'base'}`} entry={entry} spellAttackBonus={spellItemBonuses.spellAttack} spellSaveDc={dc} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} />)}
         </SpellSection>
       ))}
 

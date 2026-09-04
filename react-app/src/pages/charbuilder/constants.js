@@ -48,7 +48,13 @@ export const CLASS_FILES = [
   'class-artificer.json',
 ];
 
-export const SPELL_FILES = ['spells-xphb.json', 'spells-fraif.json', 'spells-frhof.json', 'spells-efa.json'];
+export const SPELL_FILES = [
+  'spells-xphb.json',
+  'spells-fraif.json',
+  'spells-frhof.json',
+  'spells-efa.json',
+  'spells-au.json',
+];
 
 // Bestiary files for Wild Shape beast forms. The 2024 Monster Manual (XMM) is the
 // main roster; the other supported 2024 manuals contribute a handful of beasts.

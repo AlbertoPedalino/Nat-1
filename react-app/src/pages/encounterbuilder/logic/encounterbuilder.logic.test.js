@@ -36,7 +36,7 @@ import {
 } from './negotiation.js';
 import { isFightResumable, mergeLibrary } from './library.js';
 import { cleanToText, parseCleanTokens } from './markup.js';
-import { resolveLegendaryGroups } from './bestiary.js';
+import { isEncounterMonster, resolveLegendaryGroups } from './bestiary.js';
 import {
   SYNCED_DATA_KEYS,
   combatantToSheetPatch,
@@ -487,6 +487,13 @@ test('legendary group copy inheritance applies array mods', () => {
   });
   assert.deepEqual(groups.get('XMM__Child').lairActions, ['a', 'c']);
   assert.deepEqual(groups.get('XMM__Child').regionalEffects, ['b']);
+});
+
+test('encounter bestiary accepts AU and AUD monsters but rejects summon templates without CR', () => {
+  assert.equal(isEncounterMonster({ name: 'Spellguard', source: 'AU', cr: '5' }), true);
+  assert.equal(isEncounterMonster({ name: 'Abveku', source: 'AUD', cr: '14' }), true);
+  assert.equal(isEncounterMonster({ name: 'Battle Familiar', source: 'AU', summonedBySpell: 'Battle Familiar|AU' }), false);
+  assert.equal(isEncounterMonster({ name: 'Legacy Creature', source: 'MM', cr: '1' }), false);
 });
 
 function combatWithOneCombatant(activeConditions = []) {

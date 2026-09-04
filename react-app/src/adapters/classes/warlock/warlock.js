@@ -790,6 +790,9 @@ if (typeof registerResourceSideEffect === 'function') {
       recover,
       slotLevel,
       label: wlv >= 20 ? 'Eldritch Master' : 'Magical Cunning',
+      recoverResourceKeys: Object.prototype.hasOwnProperty.call(ctx.resources || {}, 'vestige_power')
+        ? ['vestige_power']
+        : [],
     };
   });
 }

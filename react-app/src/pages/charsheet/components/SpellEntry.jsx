@@ -30,6 +30,8 @@ import { isConcentrationSpell, isRitualSpell } from '../../../shared/spellTags.j
 import { ENTITY_COLORS, RICH_TEXT_ACCENT, SPELL_TAG_COLORS } from '../../../shared/entityColors.js';
 import { useSheetActions } from '../context/SheetActionsContext.jsx';
 import RollerButtons from '../../../shared/character/RollerButtons.jsx';
+import SummonedCreaturePanel from './SummonedCreaturePanel.jsx';
+import CollapsibleNote from '../../../shared/character/CollapsibleNote.jsx';
 
 function applyFlatToFormula(formula, flat) {
   if (!formula) return formula;
@@ -147,7 +149,16 @@ function groupModifierDetails(details) {
   return Array.from(groups.entries()).map(([label, items]) => ({ label, items }));
 }
 
-export default function SpellEntry({ entry, spellAttackBonus = 0, C, exhaustionLevel = 0, activeConditions = [], installedRegistry, freeCastUses }) {
+export default function SpellEntry({
+  entry,
+  spellAttackBonus = 0,
+  spellSaveDc = null,
+  C,
+  exhaustionLevel = 0,
+  activeConditions = [],
+  installedRegistry,
+  freeCastUses,
+}) {
   const { onRoll, onShowToast, onToggleFreeCast } = useSheetActions();
   const castLevel = entry.castLevel || entry.level || 0;
   const baseLevel = entry.level || 0;
@@ -172,6 +183,7 @@ export default function SpellEntry({ entry, spellAttackBonus = 0, C, exhaustionL
   // Per-entry casting ability + global magic-item spell-attack bonus (matches the
   // SpellsTab header so the button and the summary agree).
   const atk = getPB(C) + spellMod + spellAttackBonus;
+  const resolvedSpellSaveDc = Number.isFinite(Number(spellSaveDc)) ? Number(spellSaveDc) : 8 + atk;
 
   // Spell-attack advantage/disadvantage. Sources: effect-based advantage scoped
   // to this spell's owning class (e.g. Sorcerer Innate Sorcery) + condition-based
@@ -282,6 +294,18 @@ export default function SpellEntry({ entry, spellAttackBonus = 0, C, exhaustionL
         }]
       : []),
   ];
+  const hasInteractiveContent = Boolean(
+    hasAttack
+    || spellRollers.length
+    || hasFreeCasts
+    || spellData?.summonedCreature,
+  );
+  const descriptionNode = (
+    <>
+      <EntryBlocks blocks={bodyBlocks} />
+      <HigherLevelBlock entries={higherEntries} />
+    </>
+  );
 
   return (
     <ExpandableCard
@@ -355,7 +379,17 @@ export default function SpellEntry({ entry, spellAttackBonus = 0, C, exhaustionL
       details={(
         <>
           <SpellMetaGrid spell={entry} sx={{ mb: '6px' }} />
-          <EntryBlocks blocks={bodyBlocks} />
+          {hasInteractiveContent ? <CollapsibleNote>{descriptionNode}</CollapsibleNote> : descriptionNode}
+          {spellData?.summonedCreature ? (
+            <SummonedCreaturePanel
+              descriptor={spellData.summonedCreature}
+              character={C}
+              castLevel={castLevel}
+              abilityMod={spellMod}
+              spellAttackBonus={atk}
+              spellSaveDc={resolvedSpellSaveDc}
+            />
+          ) : null}
           {modifierDetailGroups.length ? (
             <Stack spacing={0.8} sx={{ mt: 1 }}>
               {modifierDetailGroups.map((group) => (
@@ -396,7 +430,6 @@ export default function SpellEntry({ entry, spellAttackBonus = 0, C, exhaustionL
               ))}
             </Stack>
           ) : null}
-          <HigherLevelBlock entries={higherEntries} />
         </>
       )}
     />

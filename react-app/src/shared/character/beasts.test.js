@@ -61,3 +61,17 @@ test('parseBeastActionsRich keeps the action name and yields tokens', () => {
   assert.equal(rich.name, 'Bite');
   assert.equal(rolls(rich.tokens).length, 2);
 });
+
+test('nested summoned-creature sub-actions keep their heading, prose, and dice', () => {
+  const [rich] = parseBeastActionsRich([{
+    name: 'Divine Power',
+    entries: [{
+      type: 'entries',
+      name: 'Healing Touch',
+      entries: ['The target regains {@dice 2d8 + 4} Hit Points.'],
+    }],
+  }]);
+  assert.equal(rich.name, 'Divine Power');
+  assert.match(text(rich.tokens), /^Healing Touch\. The target regains 2d8\+4 Hit Points\.$/);
+  assert.equal(rolls(rich.tokens)[0].formula, '2d8+4');
+});

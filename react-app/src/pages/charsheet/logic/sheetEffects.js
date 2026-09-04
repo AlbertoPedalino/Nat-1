@@ -240,7 +240,13 @@ function lookupMapValue(map, choice) {
 }
 
 function resolveChoiceValue(effect, character) {
-  const choice = firstChoiceText(character, effect?.key);
+  let choice = firstChoiceText(character, effect?.key);
+  if (!choice && effect?.ownerType === 'feat' && effect?.choiceKeySuffix) {
+    const featSlot = Object.entries(character?.choices || {}).find(([, value]) => (
+      asArray(value).some((entry) => norm(entry) === norm(effect.ownerName))
+    ))?.[0];
+    if (featSlot) choice = firstChoiceText(character, `${featSlot}_${effect.choiceKeySuffix}`);
+  }
   if (!choice) return '';
 
   const map = effect?.map || effect?.valueMap;

@@ -3,6 +3,8 @@ import { useAuth } from '../cloud/AuthProvider.jsx';
 import { supabase } from '../cloud/supabaseClient.js';
 import { listLiveScenes } from '../cloud/vtt.js';
 
+const SESSION_RECONCILE_MS = 30_000;
+
 // A player has no scene list — they pick a campaign and join its session, which
 // is wherever that GM has the projector pointed. When the GM switches scenes the
 // player follows automatically; there is nothing for them to pick.
@@ -26,7 +28,11 @@ export function useLiveSession({ campaignId, enabled = true } = {}) {
       const scene = scenes.find((entry) => entry.campaignId === campaignId) || null;
       setSession({ loading: false, scene });
     } catch (_) {
-      if (request === refreshRequestRef.current) setSession({ loading: false, scene: null });
+      // Realtime recovery and the safety poll are best-effort. A momentary
+      // network failure must not throw a player off the map they already have.
+      if (request === refreshRequestRef.current) {
+        setSession((current) => ({ loading: false, scene: current.scene }));
+      }
     }
   }, [campaignId]);
 
@@ -36,6 +42,9 @@ export function useLiveSession({ campaignId, enabled = true } = {}) {
       setSession({ loading: false, scene: null });
       return undefined;
     }
+    // Do not keep a scene from another campaign on screen while this session is
+    // being resolved.
+    setSession({ loading: true, scene: null });
     refresh();
 
     if (!supabase) return undefined;
@@ -51,13 +60,35 @@ export function useLiveSession({ campaignId, enabled = true } = {}) {
         { event: '*', schema: 'public', table: 'map_scenes', filter: `campaign_id=eq.${campaignId}` },
         () => { refresh(); },
       );
-      channel.subscribe();
+      channel.subscribe((state) => {
+        // There is a small gap between the first read and the subscription
+        // becoming active. A live switch in that gap has no event to replay.
+        // SUBSCRIBED is also emitted again after a socket reconnect, so this
+        // read repairs both cases from the authoritative database state.
+        if (state === 'SUBSCRIBED') refresh();
+      });
     } catch (_) {
       return undefined;
     }
 
+    // Realtime transports can occasionally miss a change while a phone sleeps,
+    // changes network, or keeps the tab in the background. These inexpensive
+    // reconciliations make the session self-healing without a page reload.
+    const reconcile = () => { refresh(); };
+    const reconcileWhenVisible = () => {
+      if (document.visibilityState === 'visible') refresh();
+    };
+    const timer = window.setInterval(reconcile, SESSION_RECONCILE_MS);
+    window.addEventListener('online', reconcile);
+    window.addEventListener('focus', reconcile);
+    document.addEventListener('visibilitychange', reconcileWhenVisible);
+
     return () => {
       refreshRequestRef.current += 1;
+      window.clearInterval(timer);
+      window.removeEventListener('online', reconcile);
+      window.removeEventListener('focus', reconcile);
+      document.removeEventListener('visibilitychange', reconcileWhenVisible);
       try {
         supabase.removeChannel(channel);
       } catch (_) {}
