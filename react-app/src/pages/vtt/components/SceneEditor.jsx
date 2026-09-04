@@ -22,6 +22,8 @@ import {
   deleteMapImage,
   deleteToken,
   moveDrawing,
+  removeSceneImage,
+  replaceSceneImage,
   setLiveScene,
   setTokenConditions,
   setTokenEffects,
@@ -955,38 +957,47 @@ export default function SceneEditor({
   // lands in, and which picture the table then sees.
   const uploadSceneImage = useCallback(async (file, slot) => {
     setBusy(true);
-    let uploadedPath = null;
-    const previousPath = slot === 'background' ? scene.backgroundPath : scene.imagePath;
     try {
-      uploadedPath = await uploadMapImage(scene.campaignId, scene.id, file);
-      const updated = await updateScene(scene.id, {
-        [slot === 'background' ? 'backgroundPath' : 'imagePath']: uploadedPath,
-        shownImage: slot,
-      });
+      const { scene: updated, cleanupError } = await replaceSceneImage(scene, slot, file);
       onSceneChange(updated);
-      if (previousPath && previousPath !== uploadedPath) {
-        try {
-          await deleteMapImage(previousPath);
-        } catch {
-          notify('warning', 'The new image was saved, but the previous file could not be cleaned up.');
-        }
+      if (cleanupError) {
+        notify('warning', 'The new image was saved, but the previous file could not be cleaned up.');
       }
     } catch (cause) {
-      // Upload and row update are separate Supabase services. If the row write
-      // fails, undo the successful upload so it cannot become an orphan.
-      if (uploadedPath) {
-        try { await deleteMapImage(uploadedPath); } catch {}
-      }
       notify('error', cause?.message || 'Could not upload that image.');
     } finally {
       setBusy(false);
     }
-  }, [notify, onSceneChange, scene.backgroundPath, scene.campaignId, scene.id, scene.imagePath]);
+  }, [notify, onSceneChange, scene]);
 
   const handleUploadMap = useCallback((file) => uploadSceneImage(file, 'map'), [uploadSceneImage]);
   const handleUploadBackground = useCallback(
     (file) => uploadSceneImage(file, 'background'),
     [uploadSceneImage],
+  );
+
+  const handleRemoveSceneImage = useCallback(async (slot) => {
+    setBusy(true);
+    try {
+      const { scene: updated, cleanupError } = await removeSceneImage(scene, slot);
+      onSceneChange(updated);
+      if (cleanupError) {
+        notify('warning', 'The picture was removed, but its uploaded file could not be cleaned up.');
+      }
+    } catch (cause) {
+      notify('error', cause?.message || 'Could not remove that picture.');
+    } finally {
+      setBusy(false);
+    }
+  }, [notify, onSceneChange, scene]);
+
+  const handleRemoveMap = useCallback(
+    () => handleRemoveSceneImage('map'),
+    [handleRemoveSceneImage],
+  );
+  const handleRemoveBackground = useCallback(
+    () => handleRemoveSceneImage('background'),
+    [handleRemoveSceneImage],
   );
 
   const handleShownImageChange = useCallback(async (shownImage) => {
@@ -2040,6 +2051,8 @@ export default function SceneEditor({
                 onShownImageChange={handleShownImageChange}
                 onUploadMap={handleUploadMap}
                 onUploadBackground={handleUploadBackground}
+                onRemoveMap={handleRemoveMap}
+                onRemoveBackground={handleRemoveBackground}
                 onAddImage={handleAddImage}
                 onGridChange={handleGridChange}
                 onAtmosphereChange={handleAtmosphereChange}

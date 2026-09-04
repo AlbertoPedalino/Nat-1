@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   FormControlLabel,
+  IconButton,
   MenuItem,
   Popover,
   Slider,
@@ -44,6 +45,7 @@ import {
   ThermometerSun,
   Triangle,
   Trees,
+  Trash2,
   Type,
   Undo2,
   Users,
@@ -187,7 +189,8 @@ function AtmospherePicker({ value, onSelect }) {
 }
 
 export function MapPanel({
-  scene, busy, onUploadMap, onUploadBackground, onShownImageChange, onAddImage,
+  scene, busy, onUploadMap, onUploadBackground, onRemoveMap, onRemoveBackground,
+  onShownImageChange, onAddImage,
   onGridChange, onAtmosphereChange, onPlayAreaChange, onFitPlayArea,
   // The switch has its own place on the map when this panel sits under it.
   hideSwitch = false,
@@ -210,19 +213,37 @@ export function MapPanel({
     <Stack spacing={1.25}>
       {hideSwitch ? null : <ShownImageSwitch scene={scene} onShownImageChange={onShownImageChange} />}
 
-      <Stack direction="row" spacing={1}>
-        <Button size="small" variant="outlined" fullWidth disabled={busy} onClick={() => mapRef.current?.click()}>
-          {scene.imagePath ? 'Replace map' : 'Upload map'}
-        </Button>
-        <Button
-          size="small"
-          variant="outlined"
-          fullWidth
-          disabled={busy}
-          onClick={() => backgroundRef.current?.click()}
-        >
-          {scene.backgroundPath ? 'Replace bg' : 'Upload bg'}
-        </Button>
+      <Stack spacing={0.65}>
+        <Stack direction="row" spacing={0.5}>
+          <Button size="small" variant="outlined" fullWidth disabled={busy} onClick={() => mapRef.current?.click()}>
+            {scene.imagePath ? 'Replace map' : 'Upload map'}
+          </Button>
+          {scene.imagePath ? (
+            <Tooltip title="Remove battlemap">
+              <IconButton size="small" color="error" disabled={busy} aria-label="Remove battlemap" onClick={onRemoveMap}>
+                <Trash2 size={15} />
+              </IconButton>
+            </Tooltip>
+          ) : null}
+        </Stack>
+        <Stack direction="row" spacing={0.5}>
+          <Button
+            size="small"
+            variant="outlined"
+            fullWidth
+            disabled={busy}
+            onClick={() => backgroundRef.current?.click()}
+          >
+            {scene.backgroundPath ? 'Replace bg' : 'Upload bg'}
+          </Button>
+          {scene.backgroundPath ? (
+            <Tooltip title="Remove background">
+              <IconButton size="small" color="error" disabled={busy} aria-label="Remove background" onClick={onRemoveBackground}>
+                <Trash2 size={15} />
+              </IconButton>
+            </Tooltip>
+          ) : null}
+        </Stack>
       </Stack>
 
       {/* Anything else that belongs on the map — a rug, a door, a handout — is a

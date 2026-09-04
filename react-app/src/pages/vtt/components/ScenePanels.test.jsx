@@ -73,3 +73,37 @@ test('the atmosphere picker filters presets and selects one immediately', () => 
     type: 'goldvault', intensity: 0.65, direction: 12, speed: 1, seed: 123457,
   });
 });
+
+test('uploaded scene pictures expose their matching remove actions', () => {
+  const onRemoveMap = vi.fn();
+  const onRemoveBackground = vi.fn();
+  render(
+    <MapPanel
+      scene={{
+        imagePath: 'c1/s1/map.webp',
+        backgroundPath: 'c1/s1/background.webp',
+        shownImage: 'map',
+        grid: DEFAULT_GRID,
+        playArea: null,
+        atmosphere: null,
+      }}
+      busy={false}
+      onUploadMap={vi.fn()}
+      onUploadBackground={vi.fn()}
+      onRemoveMap={onRemoveMap}
+      onRemoveBackground={onRemoveBackground}
+      onShownImageChange={vi.fn()}
+      onAddImage={vi.fn()}
+      onGridChange={vi.fn()}
+      onAtmosphereChange={vi.fn()}
+      onPlayAreaChange={vi.fn()}
+      onFitPlayArea={vi.fn()}
+    />,
+  );
+
+  fireEvent.click(screen.getByRole('button', { name: 'Remove battlemap' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Remove background' }));
+
+  expect(onRemoveMap).toHaveBeenCalledOnce();
+  expect(onRemoveBackground).toHaveBeenCalledOnce();
+});

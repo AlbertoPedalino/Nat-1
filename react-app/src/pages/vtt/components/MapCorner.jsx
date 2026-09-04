@@ -18,6 +18,8 @@ export default function MapCorner({
   onShownImageChange,
   onUploadMap,
   onUploadBackground,
+  onRemoveMap,
+  onRemoveBackground,
   onAddImage,
   onGridChange,
   onAtmosphereChange,
@@ -51,6 +53,8 @@ export default function MapCorner({
             busy={busy}
             onUploadMap={onUploadMap}
             onUploadBackground={onUploadBackground}
+            onRemoveMap={onRemoveMap}
+            onRemoveBackground={onRemoveBackground}
             onAddImage={onAddImage}
             onGridChange={onGridChange}
             onAtmosphereChange={onAtmosphereChange}
