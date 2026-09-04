@@ -4,6 +4,7 @@ import {
   consumePactSlot,
   getAvailablePactSlots,
   getPactSlotUsedKey,
+  recoverPactSlots,
 } from './spellSlots.js';
 
 test('Pact Magic slots are counted and consumed from their separate pool', () => {
@@ -30,4 +31,20 @@ test('Pact Magic consumption fails when its pool is empty', () => {
 
   assert.equal(getAvailablePactSlots(pact, sheet), 0);
   assert.equal(consumePactSlot(pact, sheet), false);
+});
+
+test('Pact Magic recovery returns no update when no slot was expended', () => {
+  const used = { 1: 2, 'pact:3': 0 };
+
+  assert.equal(recoverPactSlots(used, 3, 1), null);
+  assert.deepEqual(used, { 1: 2, 'pact:3': 0 });
+});
+
+test('Pact Magic recovery preserves unrelated slot state', () => {
+  const result = recoverPactSlots({ 1: 2, 'pact:3': 2 }, 3, 1);
+
+  assert.deepEqual(result, {
+    used: { 1: 2, 'pact:3': 1 },
+    recovered: 1,
+  });
 });

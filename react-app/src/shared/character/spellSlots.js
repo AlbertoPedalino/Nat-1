@@ -16,6 +16,16 @@ export function getPactSlotUsed(used, level) {
   return Number(source[key] || 0);
 }
 
+export function recoverPactSlots(usedSlots, level, amount) {
+  const before = Math.max(0, getPactSlotUsed(usedSlots, level));
+  const recovered = Math.min(before, Math.max(0, Number(amount) || 0));
+  if (!recovered) return null;
+
+  const used = { ...(usedSlots || {}) };
+  used[getPactSlotUsedKey(level)] = before - recovered;
+  return { used, recovered };
+}
+
 export function getAvailablePactSlots(pactSlots, sheet) {
   const level = Number(pactSlots?.level || 0);
   const total = Math.max(0, Number(pactSlots?.count || 0));
