@@ -116,10 +116,11 @@ function uniqResources(resources) {
   return out;
 }
 
-function srBlockedByLevel(def, character) {
-  if (!def?.srMinLevel) return false;
+function restBlockedByLevel(def, character, type) {
+  const minLevel = type === 'short' ? def?.srMinLevel : def?.lrMinLevel;
+  if (!minLevel) return false;
   const ownerLevel = Number(def?.ownerLevel ?? primaryClassLevel(character));
-  return ownerLevel < Number(def.srMinLevel);
+  return ownerLevel < Number(minLevel);
 }
 
 export function getAllResourceDefs(character) {
@@ -203,15 +204,11 @@ export function applyResourceRest(resources, defs, character, type) {
     if (!def.key) return;
     const max = normalizeResourceMax(def, character);
     const rechargedValue = resourceFullValue(def, max);
-    if (type === 'long') {
+    if (rechargesOnRest(def.recharge, type) && !restBlockedByLevel(def, character, type)) {
       next[def.key] = rechargedValue;
       return;
     }
-    if (rechargesOnRest(def.recharge, 'short') && !srBlockedByLevel(def, character)) {
-      next[def.key] = rechargedValue;
-      return;
-    }
-    if (def.srRecover) {
+    if (type === 'short' && def.srRecover) {
       const gain = Number(def.srRecover) || 0;
       next[def.key] = Math.min((Number(next[def.key]) || 0) + gain, max);
     }

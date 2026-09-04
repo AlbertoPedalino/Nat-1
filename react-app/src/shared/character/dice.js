@@ -153,7 +153,7 @@ export function parseFormula(formula) {
 
 export function rollFormula(formula) {
   const parsed = parseFormula(formula);
-  if (!parsed.valid) return { valid: false, error: parsed.error, total: null, rolls: [] };
+  if (!parsed.valid) return { valid: false, error: parsed.error, total: null, rolls: [], modifier: 0 };
 
   const { dice, modifier } = parsed;
   let total = modifier;
@@ -163,7 +163,7 @@ export function rollFormula(formula) {
     rolls.push({ v, faces: die.faces });
     total += die.sign * v;
   }
-  return { valid: true, error: null, total, rolls };
+  return { valid: true, error: null, total, rolls, modifier };
 }
 
 // Standard toast title separator used by all roll popups.

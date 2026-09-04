@@ -63,8 +63,14 @@ export default function RollerButtons({
           if (typeof onShowToast !== 'function') return;
           const result = rollFormula(roller.formula);
           if (!result.valid) return;
-          const { total, rolls } = result;
-          onShowToast(formatRollTitle(subject, title), roller.formula, total, rolls);
+          const { total, rolls, modifier } = result;
+          onShowToast(
+            formatRollTitle(subject, title),
+            roller.formula,
+            total,
+            rolls,
+            modifier ? { bonus: modifier } : undefined,
+          );
         }}
         sx={{ ...buttonSx, ...presentation.tone }}
       >

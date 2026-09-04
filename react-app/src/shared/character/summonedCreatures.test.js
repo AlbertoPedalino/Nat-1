@@ -53,7 +53,7 @@ test('summoned spell statblocks resolve AC, HP, attack bonus, save DC, and slot 
 });
 
 test('vestige companion scaling uses Warlock level and Charisma modifier', () => {
-  const creature = normalizeSummonedCreature({
+  const record = {
     name: 'Vestige Companion (Celestial)',
     source: 'AU',
     size: ['S'],
@@ -61,11 +61,34 @@ test('vestige companion scaling uses Warlock level and Charisma modifier', () =>
     ac: [{ special: '13 + your Charisma modifier' }],
     hp: { special: '4 + four times your Warlock level (the vestige has Hit Dice)' },
     bonus: [{ name: 'Healing Touch', entries: ['Regains {@dice 2d8} plus your Charisma modifier.'] }],
-  }, { classLevel: 10, abilityMod: 4, spellAttackBonus: 8 });
+  };
+  const creature = normalizeSummonedCreature(record, { classLevel: 10, abilityMod: 4, spellAttackBonus: 8 });
+  const lowCharismaCreature = normalizeSummonedCreature(record, { classLevel: 10, abilityMod: -1, spellAttackBonus: 3 });
 
   assert.equal(creature.ac, 17);
   assert.equal(creature.hp.average, 44);
   assert.match(creature.bonusActions[0].entries[0], /\{@dice 2d8 \+ 4\}/);
+  assert.match(lowCharismaCreature.bonusActions[0].entries[0], /\{@dice 2d8 - 1\}/);
+  assert.doesNotMatch(lowCharismaCreature.bonusActions[0].entries[0], /\+-/);
+});
+
+test('vestige strike combines its fixed and Charisma modifiers', () => {
+  const record = {
+    name: 'Vestige Companion (Celestial)',
+    source: 'AU',
+    action: [{
+      name: "Vestige's Strike",
+      entries: ['{@damage 1d6 + 3} plus your Charisma modifier Radiant damage.'],
+    }],
+  };
+
+  const negative = normalizeSummonedCreature(record, { abilityMod: -1 });
+  const positive = normalizeSummonedCreature(record, { abilityMod: 4 });
+  const cancels = normalizeSummonedCreature(record, { abilityMod: -3 });
+
+  assert.match(negative.actions[0].entries[0], /\{@damage 1d6 \+ 2\}/);
+  assert.match(positive.actions[0].entries[0], /\{@damage 1d6 \+ 7\}/);
+  assert.match(cancels.actions[0].entries[0], /\{@damage 1d6\}/);
 });
 
 test('summoned creature versions expose one concrete record per 5etools version', () => {

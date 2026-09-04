@@ -74,4 +74,26 @@ test('nested summoned-creature sub-actions keep their heading, prose, and dice',
   assert.equal(rich.name, 'Divine Power');
   assert.match(text(rich.tokens), /^Healing Touch\. The target regains 2d8\+4 Hit Points\.$/);
   assert.equal(rolls(rich.tokens)[0].formula, '2d8+4');
+  assert.equal(rolls(rich.tokens)[0].rollType, 'Healing');
+});
+
+test('generic dice are not mislabeled as damage or healing', () => {
+  const [tok] = rolls(tokenizeBeastEntry('The effect lasts for {@dice 1d10} days.'));
+  assert.equal(tok.rollType, 'Roll');
+});
+
+test('healing detection stays inside the current clause', () => {
+  const tokens = rolls(tokenizeBeastEntry(
+    'The target regains 1 Hit Point. The effect lasts for {@dice 1d10} days.',
+  ));
+
+  assert.equal(tokens[0].rollType, 'Roll');
+});
+
+test('healing dice are recognized with Hit Points before or after the formula', () => {
+  const before = rolls(tokenizeBeastEntry('The target regains Hit Points equal to {@dice 2d8}.'))[0];
+  const after = rolls(tokenizeBeastEntry('The target regains {@dice 2d8} Hit Points.'))[0];
+
+  assert.equal(before.rollType, 'Healing');
+  assert.equal(after.rollType, 'Healing');
 });

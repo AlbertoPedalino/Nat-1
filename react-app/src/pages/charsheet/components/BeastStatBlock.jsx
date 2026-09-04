@@ -62,6 +62,7 @@ export function BeastStatBlock({
   showCr = true,
   onRoll,
   onRollFormula,
+  bonusActionAccessory,
 }) {
   const rollable = typeof onRoll === 'function';
   const speed = Object.entries(b.speed || {})
@@ -143,7 +144,7 @@ export function BeastStatBlock({
       {b.proficiencyNote ? <StatLine label="Proficiency Bonus" value={b.proficiencyNote} /> : null}
       {traits.length ? <StatSection title="Traits" items={traits} onRoll={onRoll} onRollFormula={onRollFormula} beastName={b.name} /> : null}
       {actions.length ? <StatSection title="Actions" items={actions} onRoll={onRoll} onRollFormula={onRollFormula} beastName={b.name} /> : null}
-      {bonusActions.length ? <StatSection title="Bonus Actions" items={bonusActions} onRoll={onRoll} onRollFormula={onRollFormula} beastName={b.name} /> : null}
+      {bonusActions.length ? <StatSection title="Bonus Actions" items={bonusActions} onRoll={onRoll} onRollFormula={onRollFormula} beastName={b.name} itemAccessory={bonusActionAccessory} /> : null}
       {reactions.length ? <StatSection title="Reactions" items={reactions} onRoll={onRoll} onRollFormula={onRollFormula} beastName={b.name} /> : null}
     </Box>
   );
@@ -240,13 +241,14 @@ function StatLine({ label, value, accent }) {
   );
 }
 
-function StatSection({ title, items, onRoll, onRollFormula, beastName }) {
+function StatSection({ title, items, onRoll, onRollFormula, beastName, itemAccessory }) {
   return (
     <Box sx={{ mt: 0.5 }}>
       <Typography sx={{ ...headerSx, fontSize: '0.58rem', mb: 0.2 }}>{title}</Typography>
       {items.map((it, i) => (
         <Typography key={`${it.name}-${i}`} sx={{ ...subSx, mb: 0.2 }}>
-          <Box component="span" sx={{ fontStyle: 'italic', fontWeight: 700, color: 'text.primary' }}>{it.name}.</Box>{' '}
+          <Box component="span" sx={{ fontStyle: 'italic', fontWeight: 700, color: 'text.primary' }}>{it.name}.</Box>
+          {typeof itemAccessory === 'function' ? itemAccessory(it) : null}{' '}
           {it.tokens
             ? it.tokens.map((tok, ti) => renderEntryToken(tok, ti, onRoll, onRollFormula, beastName))
             : it.text}

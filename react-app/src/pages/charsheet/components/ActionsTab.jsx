@@ -59,7 +59,12 @@ import { formatRollTitle } from '../../../shared/character/dice.js';
 import RollerButtons from '../../../shared/character/RollerButtons.jsx';
 import { CHIP_TONES, chipToneStyle } from '../../../shared/entityColors.js';
 import { classLevel } from '../../../shared/character/classLevel.js';
-import { getPactSlotUsed, getPactSlotUsedKey, getRegularSlotUsed } from '../../../shared/character/spellSlots.js';
+import {
+  getPactSlotUsed,
+  getPactSlotUsedKey,
+  getRegularSlotUsed,
+  recoverPactSlots,
+} from '../../../shared/character/spellSlots.js';
 
 const ACTION_DETAIL_RENDERERS = {
   panel: ActionDetailPanel,
@@ -497,20 +502,13 @@ export default function ActionsTab({ C, sheet, resources }) {
   const applyPactSlotRecovery = (result) => {
     if (!(result?.recover > 0)) return;
     const level = Number(result.slotLevel || 1);
-    const used = { ...(sheet?.spellSlotUsed || {}) };
-    const key = getPactSlotUsedKey(level);
-    const before = getPactSlotUsed(used, level);
-    const after = Math.max(0, before - Number(result.recover || 0));
-    const recovered = before - after;
-    used[key] = after;
+    const recovery = recoverPactSlots(sheet?.spellSlotUsed, level, result.recover);
+    if (!recovery) return;
+    const { used, recovered } = recovery;
     onUpdateSheet?.({ spellSlotUsed: used });
     onUpdateCharacter?.((prev) => ({ ...prev, spellSlotsUsed: used }));
-    if (recovered > 0) {
-      const label = result.label || 'Spell Recovery';
-      onShowToast?.(label, `Recovered ${recovered} Pact Magic slot${recovered === 1 ? '' : 's'}`, recovered, []);
-    } else {
-      onShowToast?.(result.label || 'Spell Recovery', 'No expended Pact Magic slots to recover.', 0, []);
-    }
+    const label = result.label || 'Spell Recovery';
+    onShowToast?.(label, `Recovered ${recovered} Pact Magic slot${recovered === 1 ? '' : 's'}`, recovered, []);
   };
 
   const openSpellSlotRecovery = (result, key) => {

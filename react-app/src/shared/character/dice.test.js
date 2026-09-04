@@ -60,4 +60,13 @@ test('an invalid roll returns a structured non-result', () => {
   assert.equal(result.total, null);
   assert.deepEqual(result.rolls, []);
   assert.equal(result.error.code, 'INVALID_SYNTAX');
+  assert.equal(result.modifier, 0);
+});
+
+test('a formula roll exposes its combined flat modifier for the result UI', () => {
+  const result = rollFormula('1d6 + 3 + 4');
+
+  assert.equal(result.valid, true);
+  assert.equal(result.modifier, 7);
+  assert.equal(result.total, result.rolls[0].v + 7);
 });

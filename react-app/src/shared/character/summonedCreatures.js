@@ -152,12 +152,27 @@ function flattenDamageList(value, property) {
   });
 }
 
+function formulaWithAbilityModifier(formula, abilityMod) {
+  const modifier = Number(abilityMod) || 0;
+  const base = String(formula || '').trim();
+  if (!modifier) return base;
+  const trailingModifier = base.match(/^(.*?)([+-])\s*(\d+)\s*$/);
+  if (trailingModifier && /\d*d\d+/i.test(trailingModifier[1])) {
+    const existing = Number(trailingModifier[3]) * (trailingModifier[2] === '-' ? -1 : 1);
+    const combined = existing + modifier;
+    const dice = trailingModifier[1].trim();
+    if (!combined) return dice;
+    return `${dice} ${combined > 0 ? '+' : '-'} ${Math.abs(combined)}`;
+  }
+  return `${base} ${modifier > 0 ? '+' : '-'} ${Math.abs(modifier)}`;
+}
+
 function resolveEntryText(node, { spellLevel, spellAttackBonus, spellSaveDc, abilityMod }) {
   if (typeof node === 'string') {
     return node
       .replace(/\{@hitYourSpellAttack Bonus equals your spell attack modifier\}/gi, `{@hit ${spellAttackBonus}}`)
-      .replace(/\{@damage ([^}]+)\}\s+plus your Charisma modifier/gi, `{@damage $1 + ${abilityMod}}`)
-      .replace(/\{@dice ([^}]+)\}\s+plus your Charisma modifier/gi, `{@dice $1 + ${abilityMod}}`)
+      .replace(/\{@damage ([^}]+)\}\s+plus your Charisma modifier/gi, (_, formula) => `{@damage ${formulaWithAbilityModifier(formula, abilityMod)}}`)
+      .replace(/\{@dice ([^}]+)\}\s+plus your Charisma modifier/gi, (_, formula) => `{@dice ${formulaWithAbilityModifier(formula, abilityMod)}}`)
       .replace(/summonSpellLevel/g, String(spellLevel))
       .replace(/your spell save DC/gi, String(spellSaveDc));
   }

@@ -93,9 +93,12 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
   const rollFormulaToast = (formula, label) => {
     if (!onShowToast) return;
     const result = rollFormula(formula);
-    if (!result.valid) return;
-    const { total, rolls } = result;
-    onShowToast(label, `${formula} = ${total}`, total, rolls);
+    if (!result.valid) {
+      onShowToast(label, `Unable to roll ${formula}: ${result.error?.message || 'invalid formula'}`, null, []);
+      return;
+    }
+    const { total, rolls, modifier } = result;
+    onShowToast(label, formula, total, rolls, modifier ? { bonus: modifier } : undefined);
   };
 
   // Apply a signed HP delta to the familiar, resolving/clamping against the latest

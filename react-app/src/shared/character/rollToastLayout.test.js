@@ -27,9 +27,19 @@ test('a discarded 20 does not make a natural 20', () => {
   assert.equal(layout.modeChip.label, 'DIS');
 });
 
-// Damage rolls carry no meta.bonus, so the flat modifier has to be read back out
-// of the line the roller saw.
-test('a damage roll recovers its modifier from the detail line', () => {
+test('a current damage roll uses its combined formula modifier', () => {
+  const layout = resolveToastLayout({
+    label: 'Damage',
+    detail: '1d6+3+4',
+    total: 12,
+    rolls: [{ v: 5, faces: 6 }],
+    meta: { bonus: 7 },
+  });
+  assert.equal(layout.modifier, '+7');
+  assert.equal(layout.modeChip, null);
+});
+
+test('an older damage roll recovers its modifier from the detail line', () => {
   const layout = resolveToastLayout({
     label: 'Damage',
     detail: '2d6 [4, 5] + 3',

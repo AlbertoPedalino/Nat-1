@@ -249,7 +249,7 @@ const textToken = (text) => ({ type: 'text', text });
 // {@damage X}/{@dice X} → a dice-formula pill; {@atk(r) …}/{@h} → prose; any
 // other tag → its display text (pipe-delimited metadata dropped). Both the flat
 // stripTags projection and the rich renderer read from here, so they can't drift.
-function beastTagToTokens(tag, arg) {
+function beastTagToTokens(tag, arg, formulaRollType) {
   const t = tag.toLowerCase();
   if (t === 'atk' || t === 'atkr') return [textToken(formatAtkRoll(arg))];
   if (t === 'h') return [textToken('Hit: ')];
@@ -259,10 +259,29 @@ function beastTagToTokens(tag, arg) {
   }
   if (t === 'damage' || t === 'dice') {
     const formula = arg.replace(/\s+/g, '');
-    return [{ type: 'roll', kind: 'formula', formula, text: formula, rollType: 'Damage' }];
+    return [{
+      type: 'roll',
+      kind: 'formula',
+      formula,
+      text: formula,
+      rollType: t === 'damage' ? 'Damage' : (formulaRollType || 'Roll'),
+    }];
   }
   const display = arg.split('|')[0];
   return display ? [textToken(display)] : [];
+}
+
+function inferDiceRollType(source, tagStart, tagEnd) {
+  const before = source.slice(0, tagStart).match(/[^.!?;:]*$/)?.[0] || '';
+  const after = source.slice(tagEnd).match(/^[^.!?;:]*/)?.[0] || '';
+  const clause = `${before}\u0000${after}`;
+  const rollIndex = before.length;
+  const regainIndex = clause.search(/\bregains?\b/i);
+  const hitPointsIndex = clause.search(/\b(?:hit points?|hp)\b/i);
+
+  return regainIndex >= 0 && regainIndex < rollIndex && hitPointsIndex > regainIndex
+    ? 'Healing'
+    : null;
 }
 
 // Prose whitespace tidy: collapse runs and drop any space left before punctuation.
@@ -326,7 +345,11 @@ export function tokenizeBeastEntry(rawText) {
     const sp = inner.indexOf(' ');
     const tag = sp === -1 ? inner : inner.slice(0, sp);
     const arg = sp === -1 ? '' : inner.slice(sp + 1);
-    beastTagToTokens(tag, arg).forEach((tok) => (tok.type === 'text' ? pushText(tok.text) : out.push(tok)));
+    const formulaRollType = tag.toLowerCase() === 'dice'
+      ? inferDiceRollType(src, m.index, tagRe.lastIndex)
+      : null;
+    beastTagToTokens(tag, arg, formulaRollType)
+      .forEach((tok) => (tok.type === 'text' ? pushText(tok.text) : out.push(tok)));
     cursor = tagRe.lastIndex;
   }
   if (cursor < src.length) pushText(src.slice(cursor));

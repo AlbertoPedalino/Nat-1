@@ -32,8 +32,9 @@ export function resolveToastLayout(toast) {
   const mode = toast?.meta?.mode;
   const bonus = toast?.meta?.bonus;
   const hasBonus = Number.isFinite(bonus);
-  // Damage/non-d20 mathStr spaces out the flat modifier ("2d6 [4, 5] + 3"),
-  // so strip whitespace before matching the trailing "+N" / "-N".
+  // Current formula rolls carry their already-combined flat modifier in
+  // meta.bonus. For older saved/shared rolls, read a trailing modifier from
+  // the formula detail as a fallback.
   const formulaMod = d20s.length === 0 && rolls.length > 0
     ? String(toast?.detail || '').replace(/\s+/g, '').match(/([+-]\d+)$/)?.[1] || null
     : null;

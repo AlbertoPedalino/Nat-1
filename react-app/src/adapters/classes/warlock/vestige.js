@@ -74,7 +74,7 @@ export default function install(registry, context = {}) {
       desc: 'Transform the companion for 1 hour into the spirit form matching its Celestial, Fiend, or Undead type. It follows the summoning spell rules described by the feature.' },
   ]);
   registerSubclassSheetResources('Warlock_Vestige', [
-    { key: 'vestige_power', name: 'Divine Power', icon: 'sparkles', recharge: 'SR+LR', minLevel: 6, max: 1 },
+    { key: 'vestige_power', name: 'Divine Power', icon: 'sparkles', recharge: 'SR+LR', minLevel: 3, srMinLevel: 6, lrMinLevel: 6, max: 1 },
     { key: 'vestige_recovery', name: 'Vestige Recovery', icon: 'heart-pulse', recharge: 'LR', minLevel: 10, max: 1 },
     { key: 'vestige_semblance', name: 'Semblance of Life', icon: 'ghost', recharge: 'LR', minLevel: 14, max: 1 },
   ]);

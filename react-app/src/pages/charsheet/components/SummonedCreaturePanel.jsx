@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   Box,
+  Button,
   CircularProgress,
   FormControl,
   InputLabel,
@@ -13,7 +14,6 @@ import {
 import { PawPrint } from 'lucide-react';
 import { getChoiceValue } from '../../../shared/character/choiceUtils.js';
 import { classLevel } from '../../../shared/character/classLevel.js';
-import PipButton from '../../../shared/character/PipButton.jsx';
 import {
   findSummonedCreature,
   getSummonedCreatureTypeChoices,
@@ -123,10 +123,6 @@ export default function SummonedCreaturePanel({
     spellSaveDc: resolvedDc,
     creatureType: activeCreatureType,
   }), [activeVersion, resolvedSpellLevel, resolvedClassLevel, resolvedAbilityMod, resolvedAttack, resolvedDc, activeCreatureType]);
-  const divinePowerResourceKey = config.divinePowerResourceKey;
-  const showDivinePower = Boolean(divinePowerResourceKey && resolvedClassLevel >= 6);
-  const divinePowerAvailable = Number(resources?.[divinePowerResourceKey] ?? 1) > 0;
-
   const rollCheck = (bonus, label) => {
     if (!onShowToast) return;
     const result = rollD20(bonus);
@@ -135,9 +131,34 @@ export default function SummonedCreaturePanel({
   const rollFormulaToast = (formula, label) => {
     if (!onShowToast) return;
     const result = rollFormula(formula);
-    if (!result.valid) return;
-    onShowToast(label, `${formula} = ${result.total}`, result.total, result.rolls);
+    if (!result.valid) {
+      onShowToast(label, `Unable to roll ${formula}: ${result.error?.message || 'invalid formula'}`, null, []);
+      return;
+    }
+    onShowToast(
+      label,
+      formula,
+      result.total,
+      result.rolls,
+      result.modifier ? { bonus: result.modifier } : undefined,
+    );
   };
+  const divinePowerKey = config.divinePowerResourceKey;
+  const divinePowerAvailable = divinePowerKey
+    ? Number(resources?.[divinePowerKey] ?? 1) > 0
+    : false;
+  const divinePowerAccessory = divinePowerKey
+    ? (item) => (/^Divine Power\b/i.test(item.name)
+      ? (
+        <DivinePowerStatusButton
+          available={divinePowerAvailable}
+          onToggle={typeof onResChange === 'function'
+            ? () => onResChange(divinePowerKey, divinePowerAvailable ? -1 : 1)
+            : null}
+        />
+      )
+      : null)
+    : null;
 
   if (status === 'loading') {
     return (
@@ -212,37 +233,13 @@ export default function SummonedCreaturePanel({
           </Select>
         </FormControl>
       ) : null}
-      {showDivinePower ? (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.65, mb: 0.8, px: '7px', py: '5px', border: 1, borderColor: 'rgba(202,165,80,0.28)', borderRadius: '5px', bgcolor: 'rgba(202,165,80,0.06)' }}>
-          <Typography sx={{ ...subSx, fontWeight: 700, color: 'text.primary' }}>Divine Power</Typography>
-          <PipButton
-            size={10}
-            round
-            title={divinePowerAvailable ? 'Available' : 'Used'}
-            aria-label={`Divine Power: ${divinePowerAvailable ? 'spend use' : 'recover use'}`}
-            onClick={typeof onResChange === 'function'
-              ? (event) => {
-                event.stopPropagation();
-                onResChange(divinePowerResourceKey, divinePowerAvailable ? -1 : 1);
-              }
-              : undefined}
-            sx={{
-              border: '1.5px solid',
-              bgcolor: divinePowerAvailable ? 'transparent' : '#edd48a',
-              borderColor: divinePowerAvailable ? 'rgba(202,165,80,0.35)' : '#edd48a',
-            }}
-          />
-          <Typography sx={{ ...subSx, color: divinePowerAvailable ? 'text.secondary' : '#a04848' }}>
-            1 use · Short/Long Rest or Magical Cunning{divinePowerAvailable ? '' : ' · spent'}
-          </Typography>
-        </Box>
-      ) : null}
       <BeastStatBlock
         b={creature}
         typeLabel={capitalize(creature.type)}
         showCr={false}
         onRoll={rollCheck}
         onRollFormula={rollFormulaToast}
+        bonusActionAccessory={divinePowerAccessory}
       />
       <Typography sx={{ ...subSx, mt: 0.6, fontStyle: 'italic' }}>
         {config.levelClass
@@ -251,6 +248,39 @@ export default function SummonedCreaturePanel({
         {' '}Attack {resolvedAttack >= 0 ? '+' : ''}{resolvedAttack}; save DC {resolvedDc}.
       </Typography>
     </Box>
+  );
+}
+
+export function DivinePowerStatusButton({ available, onToggle }) {
+  const label = available ? 'Available' : 'Used';
+  return (
+    <Button
+      type="button"
+      size="small"
+      variant="outlined"
+      aria-label={available ? 'Mark Divine Power as used' : 'Restore Divine Power'}
+      aria-pressed={!available}
+      onClick={onToggle ? (event) => { event.stopPropagation(); onToggle(); } : undefined}
+      sx={{
+        minWidth: 0,
+        ml: 0.6,
+        px: 0.65,
+        py: 0,
+        verticalAlign: 'baseline',
+        fontSize: '0.54rem',
+        lineHeight: 1.45,
+        textTransform: 'none',
+        color: available ? '#a9d6ae' : '#c98a8a',
+        borderColor: available ? 'rgba(104,170,113,0.55)' : 'rgba(201,138,138,0.55)',
+        bgcolor: available ? 'rgba(104,170,113,0.08)' : 'rgba(201,138,138,0.08)',
+        '&:hover': {
+          borderColor: available ? '#a9d6ae' : '#c98a8a',
+          bgcolor: available ? 'rgba(104,170,113,0.16)' : 'rgba(201,138,138,0.16)',
+        },
+      }}
+    >
+      {label}
+    </Button>
   );
 }
 
