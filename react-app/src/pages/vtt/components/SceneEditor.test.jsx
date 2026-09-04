@@ -10,6 +10,8 @@ const sceneViewportMock = vi.hoisted(() => vi.fn());
 const signMapImageMock = vi.hoisted(() => vi.fn());
 const notifyMock = vi.hoisted(() => vi.fn());
 const sceneRoleMock = vi.hoisted(() => vi.fn());
+const sendPresenterStateMock = vi.hoisted(() => vi.fn());
+const updateSceneMock = vi.hoisted(() => vi.fn());
 
 const GM_ROLE = {
   campaignName: 'The Campaign',
@@ -21,12 +23,16 @@ const GM_ROLE = {
 
 beforeEach(() => {
   notifyMock.mockClear();
+  sendPresenterStateMock.mockClear();
   sceneRoleMock.mockReturnValue(GM_ROLE);
+  updateSceneMock.mockReset();
+  updateSceneMock.mockResolvedValue(null);
 });
 
 vi.mock('../../../shared/cloud/vtt.js', async (importOriginal) => ({
   ...await importOriginal(),
   signMapImage: signMapImageMock,
+  updateScene: updateSceneMock,
 }));
 
 vi.mock('../../../shared/ToastProvider.jsx', () => ({
@@ -39,7 +45,12 @@ vi.mock('../../../shared/vtt/useSceneRole.js', () => ({
   useSceneRole: sceneRoleMock,
 }));
 vi.mock('../../../shared/vtt/useSceneLive.js', () => ({
-  useSceneLive: () => ({ sendCamera: vi.fn(), sendDrag: vi.fn(), sendPresenterState: vi.fn() }),
+  useSceneLive: () => ({
+    sendCamera: vi.fn(),
+    sendDrag: vi.fn(),
+    sendPresenterInspection: vi.fn(),
+    sendPresenterState: sendPresenterStateMock,
+  }),
 }));
 vi.mock('../../../shared/character/usePortraits.js', () => ({ usePortraits: () => ({}) }));
 vi.mock('../../encounterbuilder/hooks/useMonsterDb.js', () => ({
@@ -210,6 +221,59 @@ test('a GM can switch the battlemap to a read-only player view', () => {
     showPlayArea: false,
   }));
   expect(previewProps.canMove(previewProps.tokens[0])).toBe(false);
+});
+
+test('freezing the public view lets the GM prepare a picture before sharing it', async () => {
+  sceneViewportMock.mockClear();
+  const onSceneChange = vi.fn();
+  const scene = {
+    id: 'scene-frozen-view',
+    campaignId: 'campaign-1',
+    name: 'A hidden transition',
+    shownImage: 'map',
+    imagePath: null,
+    backgroundPath: null,
+    fog: null,
+    atmosphere: null,
+    isLive: true,
+    playArea: null,
+    grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
+  };
+
+  render(
+    <ThemeProvider theme={theme}>
+      <SceneEditor scene={scene} onSceneChange={onSceneChange} />
+    </ThemeProvider>,
+  );
+
+  fireEvent.click(screen.getByRole('button', { name: 'Freeze view' }));
+  expect(screen.getByRole('button', { name: 'Unfreeze view' })).toHaveAttribute('aria-pressed', 'true');
+  expect(sendPresenterStateMock).toHaveBeenLastCalledWith(expect.objectContaining({
+    following: false,
+    shownImage: 'map',
+  }));
+
+  sendPresenterStateMock.mockClear();
+  const imageSwitch = sceneViewportMock.mock.calls.at(-1)[0].imageSwitch;
+  const mapCorner = imageSwitch.props.children[0];
+  await act(async () => mapCorner.props.onShownImageChange('background'));
+
+  await waitFor(() => {
+    expect(sceneViewportMock.mock.calls.at(-1)[0].backgroundOnly).toBe(true);
+  });
+  expect(onSceneChange).not.toHaveBeenCalled();
+  expect(updateSceneMock).not.toHaveBeenCalled();
+  expect(sendPresenterStateMock).not.toHaveBeenCalled();
+
+  fireEvent.click(screen.getByRole('button', { name: 'Unfreeze view' }));
+  await waitFor(() => {
+    expect(onSceneChange).toHaveBeenCalledWith(expect.objectContaining({ shownImage: 'background' }));
+    expect(updateSceneMock).toHaveBeenCalledWith(scene.id, { shownImage: 'background' });
+    expect(sendPresenterStateMock).toHaveBeenLastCalledWith(expect.objectContaining({
+      following: true,
+      shownImage: 'background',
+    }));
+  });
 });
 
 test('battlemap and background swap only after the next image is decoded', async () => {

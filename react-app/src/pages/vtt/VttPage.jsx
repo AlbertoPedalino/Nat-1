@@ -264,6 +264,10 @@ const contentMapSx = {
   display: 'flex',
   flexDirection: 'column',
   width: '100%',
+  // A live scene is a screen-sized workspace. The document layout above is
+  // capped for readable lists, but carrying that cap into map mode leaves
+  // battle maps and backgrounds boxed into 1600 px on wider displays.
+  maxWidth: 'none',
 };
 
 const spectatorPageSx = {

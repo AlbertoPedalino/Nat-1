@@ -285,6 +285,7 @@ export default function SceneEditor({
   const fallbackCameraSourceRef = useRef(createCameraSourceId());
   const presenterCameraSource = cameraSourceId || fallbackCameraSourceRef.current;
   const cameraPoseRef = useRef(null);
+  const frozenCameraPoseRef = useRef(null);
   const [followCameraPose, setFollowCameraPose] = useState(null);
   const localProjectorFollowingRef = useRef(true);
   const projectorFollowingRef = presenterFollowingRef || localProjectorFollowingRef;
@@ -297,6 +298,10 @@ export default function SceneEditor({
   const [projectorControlsOpen, setProjectorControlsOpen] = useState(false);
   const hasPresenterFrameRef = useRef(false);
   const [projectorShownImage, setProjectorShownImage] = useState(scene.shownImage);
+  // The database value is the picture published to players. While presentation
+  // is frozen the GM gets a private selection here, so they can prepare the
+  // other picture without moving either players or the projector to it.
+  const [gmShownImage, setGmShownImage] = useState(scene.shownImage);
   const sceneShownImageRef = useRef(scene.shownImage);
   sceneShownImageRef.current = scene.shownImage;
   const sheetSplitStorageKey = `gb:vtt:sheet-split:${user?.id || 'local'}`;
@@ -344,6 +349,7 @@ export default function SceneEditor({
     // on its current picture, accept one fresh presenter snapshot, then remain
     // paused if that is still the GM's chosen mode.
     setProjectorShownImage(scene.shownImage);
+    setGmShownImage(scene.shownImage);
     setFollowCameraPose(null);
     hasPresenterFrameRef.current = false;
     presenterInspectionRef.current = null;
@@ -353,6 +359,10 @@ export default function SceneEditor({
   useEffect(() => {
     if (spectator && projectorFollowing) setProjectorShownImage(scene.shownImage);
   }, [projectorFollowing, scene.shownImage, spectator]);
+
+  useEffect(() => {
+    if (role.isGm && projectorFollowingRef.current) setGmShownImage(scene.shownImage);
+  }, [role.isGm, scene.shownImage]);
 
   useEffect(() => {
     const storage = typeof window === 'undefined' ? null : window.localStorage;
@@ -389,7 +399,9 @@ export default function SceneEditor({
 
   // Whichever of the two pictures the table is looking at. The other stays
   // uploaded and one click away.
-  const shownImageForViewport = spectator ? projectorShownImage : scene.shownImage;
+  const shownImageForViewport = spectator
+    ? projectorShownImage
+    : role.isGm && !gmPlayerPreview ? gmShownImage : scene.shownImage;
   const shownPath = shownImageForViewport === 'background' ? scene.backgroundPath : scene.imagePath;
   const shownPathOrNull = shownPath || null;
   const displayIsTarget = displayed.sceneId === scene.id
@@ -536,7 +548,7 @@ export default function SceneEditor({
   const getPresenterState = useCallback(() => ({
     following: projectorFollowingRef.current,
     shownImage: sceneShownImageRef.current,
-    pose: cameraPoseRef.current,
+    pose: projectorFollowingRef.current ? cameraPoseRef.current : frozenCameraPoseRef.current,
   }), []);
   const getPresenterInspection = useCallback(() => presenterInspectionRef.current, []);
   const handleRemoteCameraPose = useCallback((pose) => {
@@ -587,16 +599,30 @@ export default function SceneEditor({
     sendCamera(pose);
   }, [sendCamera]);
 
-  const handleToggleProjectorFollow = useCallback(() => {
+  const handleToggleProjectorFollow = useCallback(async () => {
     const following = !projectorFollowingRef.current;
+    const shownImage = following ? gmShownImage : scene.shownImage;
+    // Unfreezing publishes the picture the GM prepared. Freezing leaves the
+    // persisted picture untouched, which also gives late-joining players the
+    // same frozen frame as everyone already connected.
+    if (following && shownImage !== scene.shownImage) {
+      try {
+        await updateScene(scene.id, { shownImage });
+        onSceneChange({ ...scene, shownImage });
+      } catch (cause) {
+        notify('error', cause?.message || 'Could not share the prepared view.');
+        return;
+      }
+    }
+    frozenCameraPoseRef.current = following ? null : cameraPoseRef.current;
     projectorFollowingRef.current = following;
     setProjectorFollowing(following);
     sendPresenterState({
       following,
-      shownImage: scene.shownImage,
-      pose: cameraPoseRef.current,
+      shownImage,
+      pose: following ? cameraPoseRef.current : frozenCameraPoseRef.current,
     });
-  }, [scene.shownImage, sendPresenterState]);
+  }, [gmShownImage, notify, onSceneChange, scene, sendPresenterState]);
 
   // Switching Map/Background is presenter state as well as persisted scene
   // state. Broadcasting it keeps ordering deterministic relative to a freeze.
@@ -945,13 +971,13 @@ export default function SceneEditor({
   // rows were square. Upgrade only that exact old auto-fit shape: a deliberately
   // custom boundary is never rewritten behind the GM's back.
   useEffect(() => {
-    if (!role.isGm || spectator || scene.shownImage !== 'map' || !imageSize || !isHexGrid(scene.grid)) return;
+    if (!role.isGm || spectator || shownImageForViewport !== 'map' || !imageSize || !isHexGrid(scene.grid)) return;
     const current = scene.playArea;
     const legacy = { x: 0, y: 0, w: mapCells.cols, h: mapCells.rows };
     const same = (left, right) => left && right
       && left.x === right.x && left.y === right.y && left.w === right.w && left.h === right.h;
     if (same(current, legacy) && !same(current, fittedPlayArea)) handlePlayAreaChange(fittedPlayArea);
-  }, [fittedPlayArea, handlePlayAreaChange, imageSize, mapCells, role.isGm, scene.grid, scene.playArea, scene.shownImage, spectator]);
+  }, [fittedPlayArea, handlePlayAreaChange, imageSize, mapCells, role.isGm, scene.grid, scene.playArea, shownImageForViewport, spectator]);
 
   // One upload path for both slots: the only difference is which column it
   // lands in, and which picture the table then sees.
@@ -1001,13 +1027,17 @@ export default function SceneEditor({
   );
 
   const handleShownImageChange = useCallback(async (shownImage) => {
+    setGmShownImage(shownImage);
+    // A frozen selection is private preparation. The public scene row remains
+    // on its previous picture until the GM explicitly resumes sharing.
+    if (role.isGm && !projectorFollowingRef.current) return;
     onSceneChange({ ...scene, shownImage });
     try {
       await updateScene(scene.id, { shownImage });
     } catch (cause) {
       notify('error', cause?.message || 'Could not switch the picture.');
     }
-  }, [notify, onSceneChange, scene]);
+  }, [notify, onSceneChange, role.isGm, scene]);
 
   const addToken = useCallback(async (token) => {
     setBusy(true);
@@ -1026,10 +1056,10 @@ export default function SceneEditor({
   }, [notify, scene.id]);
 
   const canPlacePiece = useCallback(() => {
-    if (scene.shownImage !== 'background') return true;
+    if (shownImageForViewport !== 'background') return true;
     notify('warning', 'Switch to the battlemap before placing or moving pieces.');
     return false;
-  }, [notify, scene.shownImage]);
+  }, [notify, shownImageForViewport]);
 
   const nextFreeCell = useCallback(() => {
     const taken = new Set(tokens.map((token) => `${Math.round(token.x)}:${Math.round(token.y)}`));
@@ -1434,11 +1464,11 @@ export default function SceneEditor({
     // Nothing to paint on a background: no fog, no board, nothing that would be
     // saved anywhere. The laser and the ruler still work — pointing at a picture
     // is exactly what a background is for.
-    const showingBackground = scene.shownImage === 'background';
+    const showingBackground = shownImageForViewport === 'background';
     if (showingBackground && !['select', 'laser', 'measure'].includes(paintMode)) return 'select';
     const gmOnly = paintMode === 'reveal' || paintMode === 'hide';
     return gmOnly && !role.isGm ? 'select' : paintMode;
-  }, [paintMode, role.isGm, scene.shownImage]);
+  }, [paintMode, role.isGm, shownImageForViewport]);
 
   // Who a broadcast came from, in words. The campaign's sheets carry their
   // owner's username, which is the only name this page ever learns.
@@ -1530,7 +1560,7 @@ export default function SceneEditor({
               tokens={tokens}
               ownedCharacterIds={role.ownedCharacterIds}
               busy={busy}
-              placementDisabled={scene.shownImage === 'background'}
+              placementDisabled={shownImageForViewport === 'background'}
               onPlaceCharacter={handlePlaceCharacter}
               onRemoveCharacter={handleRemoveCharacter}
               onAddMarker={handleAddMarker}
@@ -1583,7 +1613,7 @@ export default function SceneEditor({
             roster={roster}
             tokens={tokens}
             busy={busy}
-            placementDisabled={scene.shownImage === 'background'}
+            placementDisabled={shownImageForViewport === 'background'}
             activeLayer={activeLayer}
             onPlaceCharacter={handlePlaceCharacter}
             onRemoveCharacter={handleRemoveCharacter}
@@ -1679,7 +1709,7 @@ export default function SceneEditor({
     handlePlaceCharacter, handlePlaceObject, handlePlayAreaChange, handleRemoveCharacter,
     handleUndoDrawing, handleUploadMap,
     handleUploadBackground, handleShownImageChange, handleAddImage, paintMode,
-    role.isGm, role.ownedCharacterIds, roster, scene, tokens, measureShape, feetPerCell,
+    role.isGm, role.ownedCharacterIds, roster, scene, shownImageForViewport, tokens, measureShape, feetPerCell,
     rollFeed, handleCustomRoll, clearRollFeed, hexcrawl, dungeon,
   ]);
 
@@ -1969,36 +1999,36 @@ export default function SceneEditor({
               </Button>
             ) : null}
             {!gmPlayerPreview && scene.isLive && projectorControlsOpen ? (
-              <>
-                <Tooltip title="Closes the projector tab">
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    startIcon={<MonitorOff size={14} />}
-                    onClick={stopProjector}
-                  >
-                    Stop projector mode
-                  </Button>
-                </Tooltip>
-                {/* Never about pausing the table: the projector keeps showing
-                    everything that moves, it just stops being dragged around by
-                    the GM's own panning and zooming. */}
-                <Tooltip
-                  title={projectorFollowing
-                    ? 'The projector follows your view — lock it where it is'
-                    : 'The projector is locked — let it follow your view again'}
+              <Tooltip title="Closes the projector tab">
+                <Button
+                  size="small"
+                  variant="outlined"
+                  startIcon={<MonitorOff size={14} />}
+                  onClick={stopProjector}
                 >
-                  <Button
-                    size="small"
-                    variant={projectorFollowing ? 'outlined' : 'contained'}
-                    startIcon={projectorFollowing ? <Lock size={14} /> : <LockOpen size={14} />}
-                    aria-pressed={!projectorFollowing}
-                    onClick={handleToggleProjectorFollow}
-                  >
-                    {projectorFollowing ? 'Lock camera' : 'Follow my view'}
-                  </Button>
-                </Tooltip>
-              </>
+                  Stop projector mode
+                </Button>
+              </Tooltip>
+            ) : null}
+            {/* One public-view lock for the whole table. Players are held on the
+                persisted picture; an open projector also holds its camera. */}
+            {!gmPlayerPreview && scene.isLive ? (
+              <Tooltip
+                title={projectorFollowing
+                  ? 'Freeze the current picture for players and the projector while you prepare another view'
+                  : 'Publish your prepared picture and let the projector follow your camera again'}
+              >
+                <Button
+                  size="small"
+                  variant={projectorFollowing ? 'outlined' : 'contained'}
+                  startIcon={projectorFollowing ? <Lock size={14} /> : <LockOpen size={14} />}
+                  aria-label={projectorFollowing ? 'Freeze view' : 'Unfreeze view'}
+                  aria-pressed={!projectorFollowing}
+                  onClick={handleToggleProjectorFollow}
+                >
+                  {projectorFollowing ? 'Freeze view' : 'Unfreeze view'}
+                </Button>
+              </Tooltip>
             ) : null}
           </Stack>
         ) : null}
@@ -2044,7 +2074,7 @@ export default function SceneEditor({
           ? (
             <Stack direction="row" spacing={0.75} sx={{ alignItems: 'flex-start' }}>
               <MapCorner
-                scene={scene}
+                scene={{ ...scene, shownImage: shownImageForViewport }}
                 busy={busy}
                 open={openCorner === 'pictures'}
                 onOpenChange={(next) => setOpenCorner(next ? 'pictures' : null)}
