@@ -321,13 +321,18 @@ export function mapImagePath(campaignId, sceneId, fileName, now = Date.now()) {
   return `${folder}/${now.toString(36)}-${clean}`;
 }
 
+export function mapImageCampaignFolder(campaignId) {
+  const campaign = String(campaignId || '').trim();
+  return /^[a-z0-9_-]+$/i.test(campaign) ? campaign : null;
+}
+
 // Deleting a scene removes this exact folder from Storage. Keep the validation
 // deliberately strict: a malformed id must never turn cleanup into a broad
 // bucket deletion.
 export function mapImageFolder(campaignId, sceneId) {
-  const campaign = String(campaignId || '').trim();
+  const campaign = mapImageCampaignFolder(campaignId);
   const scene = String(sceneId || '').trim();
   const safeId = /^[a-z0-9_-]+$/i;
-  if (!safeId.test(campaign) || !safeId.test(scene)) return null;
+  if (!campaign || !safeId.test(scene)) return null;
   return `${campaign}/${scene}`;
 }

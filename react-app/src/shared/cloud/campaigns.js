@@ -1,4 +1,5 @@
 import { requireClient } from './supabaseClient.js';
+import { deleteCampaignMapImages } from './vtt.js';
 
 // Create a campaign — caller becomes its GM and gets a unique invite code.
 export async function createCampaign(name) {
@@ -65,6 +66,9 @@ export async function setCharacterCampaign(charId, campaignId) {
 // away, and member characters are detached (campaign_id set to null), not deleted.
 export async function deleteCampaign(campaignId) {
   const supabase = requireClient();
+  // Storage policies depend on the campaign's GM row, so its folder must be
+  // emptied before the Postgres delete cascades through scenes and tokens.
+  await deleteCampaignMapImages(campaignId);
   const { error } = await supabase.from('campaigns').delete().eq('id', campaignId);
   if (error) throw error;
 }

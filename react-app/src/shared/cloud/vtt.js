@@ -10,6 +10,7 @@ import {
 import { normalizeFog } from '../vtt/fog.js';
 import { normalizeAtmosphere } from '../vtt/atmosphere.js';
 import {
+  mapImageCampaignFolder,
   mapImageFolder,
   mapImagePath,
   normalizeGrid,
@@ -391,6 +392,72 @@ export async function uploadMapImage(campaignId, sceneId, file) {
   return path;
 }
 
+function sceneImageSlot(scene, slot) {
+  const background = slot === 'background';
+  return {
+    key: background ? 'backgroundPath' : 'imagePath',
+    path: background ? scene?.backgroundPath : scene?.imagePath,
+    otherPath: background ? scene?.imagePath : scene?.backgroundPath,
+    otherSlot: background ? 'map' : 'background',
+    slot: background ? 'background' : 'map',
+  };
+}
+
+// Replacing either of the scene's two pictures is one operation to callers:
+// persist the fresh path, then remove the path the row no longer references.
+export async function replaceSceneImage(scene, slot, file) {
+  const target = sceneImageSlot(scene, slot);
+  let uploadedPath = null;
+  let updated = null;
+  try {
+    uploadedPath = await uploadMapImage(scene?.campaignId, scene?.id, file);
+    updated = await updateScene(scene?.id, {
+      [target.key]: uploadedPath,
+      shownImage: target.slot,
+    });
+  } catch (cause) {
+    // If the row never took ownership of this upload, do not leave it behind.
+    if (uploadedPath) {
+      try { await deleteMapImage(uploadedPath); } catch {}
+    }
+    throw cause;
+  }
+
+  let cleanupError = null;
+  if (target.path && target.path !== uploadedPath && target.path !== target.otherPath) {
+    try {
+      await deleteMapImage(target.path);
+    } catch (cause) {
+      cleanupError = cause;
+    }
+  }
+  return { scene: updated, cleanupError };
+}
+
+// Clear the database reference before deleting its bytes. A legacy scene may
+// reference the same object from both slots; in that case the remaining slot
+// still owns the file and it must stay in Storage.
+export async function removeSceneImage(scene, slot) {
+  const target = sceneImageSlot(scene, slot);
+  if (!target.path) return { scene: scene || null, cleanupError: null };
+  const shownImage = scene?.shownImage === target.slot
+    ? (target.otherPath ? target.otherSlot : 'map')
+    : scene?.shownImage;
+  const updated = await updateScene(scene?.id, {
+    [target.key]: null,
+    shownImage,
+  });
+  let cleanupError = null;
+  if (target.path !== target.otherPath) {
+    try {
+      await deleteMapImage(target.path);
+    } catch (cause) {
+      cleanupError = cause;
+    }
+  }
+  return { scene: updated, cleanupError };
+}
+
 // The bucket is private, so the editor renders through a signed URL. Callers
 // keep the path and never the URL — but the URL is remembered here, because the
 // browser caches an image by its address: signing afresh on every mount produced
@@ -482,4 +549,42 @@ export async function deleteSceneMapImages(campaignId, sceneId) {
     offset += entries.length;
   }
   await deleteMapImages(paths);
+}
+
+// Campaign deletion cascades through Postgres but not through Storage. Walk
+// every scene folder while the campaign still exists and the GM still satisfies
+// the bucket policies, including folders orphaned by older versions of the app.
+export async function deleteCampaignMapImages(campaignId) {
+  const folder = mapImageCampaignFolder(campaignId);
+  if (!folder) throw new Error('Missing campaign for image cleanup.');
+
+  const supabase = requireClient();
+  const bucket = supabase.storage.from(MAP_BUCKET);
+  const entries = [];
+  const limit = 100;
+  let offset = 0;
+  while (true) {
+    const { data, error } = await bucket.list(folder, {
+      limit,
+      offset,
+      sortBy: { column: 'name', order: 'asc' },
+    });
+    if (error) throw error;
+    const page = data || [];
+    entries.push(...page);
+    if (page.length < limit) break;
+    offset += page.length;
+  }
+
+  const directFiles = entries
+    .filter((entry) => entry?.name && (entry.id || entry.metadata))
+    .map((entry) => `${folder}/${entry.name}`);
+  const sceneFolders = entries
+    .filter((entry) => entry?.name && !(entry.id || entry.metadata))
+    .map((entry) => entry.name);
+
+  await deleteMapImages(directFiles);
+  for (const sceneId of sceneFolders) {
+    await deleteSceneMapImages(folder, sceneId);
+  }
 }
