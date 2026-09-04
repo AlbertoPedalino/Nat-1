@@ -66,6 +66,22 @@ test('linked-tools dialog opens a linked instance from the top bar', async () =>
   expect(link).toHaveAttribute('rel', 'noopener noreferrer');
 });
 
+test('a borrowed links menu can include its own GM Board destination', async () => {
+  render(
+    <LinkedToolsMenu
+      sectionKey="gmboard"
+      instanceId="board-a"
+      instanceSaved
+      initialLinkGroupId="link_party"
+      showCurrentLink
+    />,
+  );
+
+  fireEvent.click(screen.getByRole('button', { name: 'Linked tools' }));
+  const board = await screen.findByRole('link', { name: /Board A/ });
+  expect(board).toHaveAttribute('href', '/gmboard?board=board-a');
+});
+
 test('an unsaved instance cannot open link management', () => {
   render(<LinkedToolsMenu sectionKey="gmboard" instanceId="draft" instanceSaved={false} />);
   expect(screen.getByRole('button', { name: 'Linked tools' })).toBeDisabled();

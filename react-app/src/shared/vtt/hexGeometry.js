@@ -127,6 +127,38 @@ export function hexNeighbours(cell) {
   return HEX_NEIGHBOURS.map((step) => ({ q: q + step.q, r: r + step.r }));
 }
 
+// The smallest rectangular range of axial coordinates that contains every hex
+// whose centre lies on the image. An axial rectangle becomes a parallelogram on
+// screen, and necessarily contains a little staging space at two corners, but
+// it must never cut off a piece that is still over the picture.
+export function hexPlayAreaForImage(image, grid) {
+  const imageWidth = Math.max(1, numberOr(image?.width, 1));
+  const imageHeight = Math.max(1, numberOr(image?.height, 1));
+  const width = hexWidth(grid);
+  const step = hexRowStep(grid);
+  const offsetX = numberOr(grid?.offsetX, 0);
+  const offsetY = numberOr(grid?.offsetY, 0);
+
+  const firstR = Math.ceil(-offsetY / step) + 0;
+  const afterLastR = Math.max(firstR + 1, Math.ceil((imageHeight - offsetY) / step));
+  const lastR = afterLastR - 1;
+
+  // q decreases by half a column per row. Its lowest useful value is therefore
+  // on the last row, while its highest useful value is on the first.
+  const firstQ = Math.ceil(-offsetX / width - lastR / 2) + 0;
+  const afterLastQ = Math.max(
+    firstQ + 1,
+    Math.ceil((imageWidth - offsetX) / width - firstR / 2),
+  );
+
+  return {
+    x: firstQ,
+    y: firstR,
+    w: afterLastQ - firstQ,
+    h: afterLastR - firstR,
+  };
+}
+
 // Every hex whose centre could be on screen, with a ring of slack so the ones
 // straddling the edge are still drawn. Bounded by the rectangle it is given:
 // rendering asks for what the viewport covers, never for the whole plane.

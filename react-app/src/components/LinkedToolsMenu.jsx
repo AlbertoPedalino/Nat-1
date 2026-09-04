@@ -34,7 +34,13 @@ const TOOL_UI = {
   dmscreen: { label: 'DM Screen', icon: StickyNote },
 };
 
-export default function LinkedToolsMenu({ sectionKey, instanceId, instanceSaved, initialLinkGroupId }) {
+export default function LinkedToolsMenu({
+  sectionKey,
+  instanceId,
+  instanceSaved,
+  initialLinkGroupId,
+  showCurrentLink = false,
+}) {
   const navigate = useNavigate();
   const { cloudEnabled, status } = useAuth();
   const { notify } = useToast();
@@ -105,6 +111,12 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, instanceSaved,
     && normalizeLinkGroupId(row.linkGroupId) === groupId
     && !(row.sectionKey === sectionKey && row.id === instanceId)
   )), [groupId, instanceId, rows, sectionKey]);
+  // On a tool's own page the current instance would be a redundant link to
+  // itself. The battlemap borrows its campaign GM Board's menu, though, so that
+  // board is a useful destination and must be shown there explicitly.
+  const displayedLinkedRows = useMemo(() => (
+    showCurrentLink && current ? [current, ...linkedRows] : linkedRows
+  ), [current, linkedRows, showCurrentLink]);
   const candidates = useMemo(() => rows.filter((row) => (
     !(row.sectionKey === sectionKey && row.id === instanceId)
     && (!groupId || normalizeLinkGroupId(row.linkGroupId) !== groupId)
@@ -207,7 +219,7 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, instanceSaved,
             <Stack spacing={2}>
               {error ? <Typography color="error" variant="body2">{error}</Typography> : null}
               <Section title="Linked instances">
-                {linkedRows.length ? linkedRows.map((row) => (
+                {displayedLinkedRows.length ? displayedLinkedRows.map((row) => (
                   <InstanceButton
                     key={`${row.sectionKey}:${row.id}`}
                     row={row}

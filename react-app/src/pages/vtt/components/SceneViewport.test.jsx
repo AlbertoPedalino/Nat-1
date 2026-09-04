@@ -34,6 +34,12 @@ function renderLaserViewport(onLaser) {
   };
 }
 
+test('the space around a battlemap is the same black as covered fog', () => {
+  const { viewport } = renderLaserViewport(vi.fn());
+
+  expect(viewport).toHaveStyle({ backgroundColor: '#000000' });
+});
+
 test('the square grid stays aligned to cell coordinates at fractional zoom', () => {
   const { container } = render(
     <SquareGrid
@@ -483,6 +489,27 @@ test('a hex map marks where the party stands', () => {
   expect(container.querySelector('[data-party-hex="1,0"]')).not.toBeNull();
 });
 
+test('the hexcrawl party marker is hidden with the battlemap overlays on a background', () => {
+  const { container } = render(
+    <SceneViewport
+      scene={HEX_SCENE}
+      imageUrl={null}
+      tokens={[]}
+      snap
+      canMove={() => false}
+      fog={null}
+      backgroundOnly
+      partyHex={{ q: 1, r: 0 }}
+      drawings={[]}
+      lasers={[]}
+      rollBubbles={[]}
+      diceThrows={[]}
+    />,
+  );
+
+  expect(container.querySelector('[data-party-hex]')).toBeNull();
+});
+
 test('the hex overlay paints a coloured cell under its outline', () => {
   const { container } = render(
     <HexGrid
@@ -574,15 +601,63 @@ test('a hex outside the play area cannot be selected or rolled', () => {
   );
   const viewport = screen.getByText('Upload a map image to start building this scene.').parentElement;
 
-  // The play area begins at screen point 50,50. The infinite hex lattice still
-  // has a cell at 25,25, but that staging-space cell must not trigger a crawl.
+  // The axial play area begins at q=1,r=1. The infinite hex lattice still has a
+  // cell at 25,25, but that staging-space cell must not trigger a crawl.
   fireEvent.pointerDown(viewport, { button: 0, clientX: 25, clientY: 25, pointerId: 53 });
   fireEvent.pointerUp(viewport, { button: 0, clientX: 25, clientY: 25, pointerId: 53 });
   expect(onHexClick).not.toHaveBeenCalled();
 
-  fireEvent.pointerDown(viewport, { button: 0, clientX: 75, clientY: 75, pointerId: 54 });
-  fireEvent.pointerUp(viewport, { button: 0, clientX: 75, clientY: 75, pointerId: 54 });
+  // Centre of axial hex q=1,r=1 on a 50 px pointy-top grid.
+  fireEvent.pointerDown(viewport, { button: 0, clientX: 75, clientY: 43.3, pointerId: 54 });
+  fireEvent.pointerUp(viewport, { button: 0, clientX: 75, clientY: 43.3, pointerId: 54 });
   expect(onHexClick).toHaveBeenCalledOnce();
+});
+
+test('a fitted hex area cuts edge hexes at the exact image boundary', async () => {
+  const rectSpy = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
+    bottom: 300,
+    height: 300,
+    left: 0,
+    right: 400,
+    top: 0,
+    width: 400,
+    x: 0,
+    y: 0,
+    toJSON: () => ({}),
+  });
+
+  try {
+    const { container } = render(
+      <SceneViewport
+        scene={{ ...HEX_SCENE, playArea: { x: -1, y: 0, w: 5, h: 3 } }}
+        imageUrl="map.webp"
+        preparedImageSize={{ width: 200, height: 100 }}
+        tokens={[]}
+        snap
+        canMove={() => false}
+        fog={null}
+        showPlayArea
+        drawings={[]}
+        lasers={[]}
+        rollBubbles={[]}
+        diceThrows={[]}
+      />,
+    );
+
+    await waitFor(() => {
+      const gridClip = container.querySelector('clipPath rect');
+      expect(gridClip).toHaveAttribute('x', '24');
+      expect(gridClip).toHaveAttribute('y', '62');
+      expect(gridClip).toHaveAttribute('width', '352');
+      expect(gridClip).toHaveAttribute('height', '176');
+    });
+
+    const guide = container.querySelector('[data-play-area="hex-map"] rect');
+    expect(guide).not.toBeNull();
+    expect(container.querySelector('[data-play-area="hex-map"] polygon')).toBeNull();
+  } finally {
+    rectSpy.mockRestore();
+  }
 });
 
 test('a selected ruler starts on top of a token instead of dragging it', () => {

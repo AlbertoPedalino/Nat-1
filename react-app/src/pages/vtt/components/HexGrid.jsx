@@ -142,13 +142,14 @@ function buildGeometry({ grid, view, width, height, cells, selected, outlined })
 function HexGrid({
   grid, view, viewportSize, cells = null, selected = null, opacity = 1,
   outlined = true, lineColor = vttAlpha(VTT_COLORS.gold, 0.28), lineWidth = 1,
-  clipRect = null,
+  clipRect = null, clipPolygon = null,
 }) {
   // React's ids carry colons, which a `url(#…)` reference cannot: the paint
   // server would silently resolve to nothing and the mesh would be invisible in
   // the browser while every test still passed.
   const patternId = `hexgrid-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
-  const clipId = `${patternId}-clip`;
+  const rectClipId = `${patternId}-rect-clip`;
+  const polygonClipId = `${patternId}-polygon-clip`;
   const width = Math.max(0, Number(viewportSize?.width) || 0);
   const height = Math.max(0, Number(viewportSize?.height) || 0);
   const geometry = useMemo(
@@ -172,7 +173,7 @@ function HexGrid({
         opacity,
       }}
     >
-      {mesh || clipRect ? (
+      {mesh || clipRect || clipPolygon ? (
         <defs>
           {mesh ? (
             <pattern
@@ -193,7 +194,7 @@ function HexGrid({
             </pattern>
           ) : null}
           {clipRect ? (
-            <clipPath id={clipId}>
+            <clipPath id={rectClipId}>
               <rect
                 x={clipRect.left}
                 y={clipRect.top}
@@ -202,26 +203,36 @@ function HexGrid({
               />
             </clipPath>
           ) : null}
+          {clipPolygon ? (
+            <clipPath id={polygonClipId}>
+              <polygon points={clipPolygon} />
+            </clipPath>
+          ) : null}
         </defs>
       ) : null}
 
-      <g clipPath={clipRect ? `url(#${clipId})` : undefined}>
-        {/* Painted hexes go over the mesh's tile but under its lines is not worth
-            the layering: the fill is translucent, so the grid reads through it. */}
-        {geometry.fills.map(([key, fill]) => (
-          <path key={key} d={fill.d} fill={fill.color} fillOpacity={fill.opacity} />
-        ))}
+      {/* The rectangle is the physical image; the polygon is an optional custom
+          axial play area. Nested clips intersect them, cutting edge hexes at
+          the picture instead of letting either boundary win over the other. */}
+      <g clipPath={clipRect ? `url(#${rectClipId})` : undefined}>
+        <g clipPath={clipPolygon ? `url(#${polygonClipId})` : undefined}>
+          {/* Painted hexes go over the mesh's tile but under its lines is not worth
+              the layering: the fill is translucent, so the grid reads through it. */}
+          {geometry.fills.map(([key, fill]) => (
+            <path key={key} d={fill.d} fill={fill.color} fillOpacity={fill.opacity} />
+          ))}
 
-        {mesh ? <rect width={width} height={height} fill={`url(#${patternId})`} /> : null}
+          {mesh ? <rect width={width} height={height} fill={`url(#${patternId})`} /> : null}
 
-        {geometry.selectedPath ? (
-          <path
-            d={geometry.selectedPath}
-            fill="none"
-            stroke={vttAlpha(VTT_COLORS.gold, 0.95)}
-            strokeWidth={2.5}
-          />
-        ) : null}
+          {geometry.selectedPath ? (
+            <path
+              d={geometry.selectedPath}
+              fill="none"
+              stroke={vttAlpha(VTT_COLORS.gold, 0.95)}
+              strokeWidth={2.5}
+            />
+          ) : null}
+        </g>
       </g>
     </Box>
   );

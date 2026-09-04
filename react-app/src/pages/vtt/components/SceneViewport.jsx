@@ -22,10 +22,11 @@ import {
 import { measureLabel, movementLabel } from '../../../shared/vtt/measure.js';
 import { movedPoints } from '../../../shared/vtt/drawing.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { gridLineColor, normalizeGridLineWidth } from '../../../shared/vtt/scene.js';
+import { gridLineColor, isTokenInPlay, normalizeGridLineWidth } from '../../../shared/vtt/scene.js';
 import { isMapPiece } from '../../../shared/vtt/mapObjects.js';
 import {
-  axialRound, hexHeight, hexToWorld, hexWidth, isHexGrid, worldToAxial, worldToHex,
+  axialRound, hexHeight, hexPlayAreaForImage, hexToWorld, hexWidth, isHexGrid,
+  worldToAxial, worldToHex,
 } from '../../../shared/vtt/hexGeometry.js';
 import HexGrid from './HexGrid.jsx';
 import SquareGrid from './SquareGrid.jsx';
@@ -635,11 +636,17 @@ export default function SceneViewport({
     // On a hex map the empty board is not empty: every hex is a thing the GM can
     // pick. Recorded as the start of a pan and settled on release, so dragging
     // the map still pans instead of selecting whatever it started over.
-    const playBox = scene.playArea ? playAreaBox(scene, view) : null;
+    const playBox = scene.playArea && !isHexGrid(scene.grid) ? playAreaBox(scene, view) : null;
+    const pickedHex = isHexGrid(scene.grid)
+      ? worldToHex(screenToWorld(point, view), scene.grid)
+      : null;
+    const hexMapBox = isHexGrid(scene.grid) && imageSize ? imageBox(imageSize, view) : null;
     const canPickHex = event.button === 0
       && onHexClick
       && isHexGrid(scene.grid)
       && paintMode === 'select'
+      && (!scene.playArea || isTokenInPlay({ x: pickedHex.q, y: pickedHex.r }, scene.playArea))
+      && (!hexMapBox || pointInBox(point, hexMapBox))
       && (!playBox || pointInBox(point, playBox));
     dragRef.current = {
       kind: 'pan',
@@ -929,6 +936,15 @@ export default function SceneViewport({
   const gridLine = normalizeGridLineWidth(scene.grid.lineWidth);
   const measured = measurementBadge(tokens, drag, scene.grid, view, feetPerCell);
   const brushRadius = brushRadiusFor(paintMode, { brushSize, drawWidth, cell: size });
+  const hexMapBox = isHexGrid(scene.grid) && imageSize ? imageBox(imageSize, view) : null;
+  const hexPlayAreaMatchesMap = Boolean(
+    hexMapBox
+    && scene.playArea
+    && samePlayArea(scene.playArea, hexPlayAreaForImage(imageSize, scene.grid)),
+  );
+  const hexPlayAreaClip = scene.playArea && !hexPlayAreaMatchesMap
+    ? hexPlayAreaPolygon(scene, view)
+    : null;
 
   return (
     <Box
@@ -1038,7 +1054,10 @@ export default function SceneViewport({
           viewportSize={viewportSize}
           cells={hexCells}
           selected={selectedHex}
-          clipRect={scene.playArea ? playAreaBox(scene, view) : null}
+          // The map itself is the final mask. Edge hexes remain usable, but the
+          // parts of their fill and outline beyond the picture are cut away.
+          clipRect={hexMapBox}
+          clipPolygon={hexPlayAreaClip}
           // A hexcrawl map is styled like any other: the colour and the weight
           // the scene carries are the grid's, whichever shape it is.
           lineColor={gridColor}
@@ -1060,12 +1079,37 @@ export default function SceneViewport({
 
       {/* The edge of what the players receive. Drawn for the GM only — for a
           player it would be a line around everything they can see anyway. */}
-      {scene.playArea && showPlayArea && !backgroundOnly ? (() => {
+      {scene.playArea && showPlayArea && !backgroundOnly ? (isHexGrid(scene.grid) ? (
+        <Box
+          component="svg"
+          aria-hidden
+          data-play-area={hexPlayAreaMatchesMap ? 'hex-map' : 'hex-custom'}
+          width="100%"
+          height="100%"
+          sx={playAreaSvgSx}
+        >
+          {hexPlayAreaMatchesMap ? (
+            <rect
+              x={hexMapBox.left}
+              y={hexMapBox.top}
+              width={hexMapBox.width}
+              height={hexMapBox.height}
+              {...playAreaStrokeProps}
+            />
+          ) : (
+            <polygon
+              points={hexPlayAreaPolygon(scene, view)}
+              {...playAreaStrokeProps}
+            />
+          )}
+        </Box>
+      ) : (() => {
         const topLeft = worldToScreen(cellToWorld({ col: scene.playArea.x, row: scene.playArea.y }, scene.grid), view);
         const cell = cellSize(scene.grid) * view.zoom;
         return (
           <Box
             aria-hidden
+            data-play-area="square"
             sx={{
               position: 'absolute',
               left: 0,
@@ -1079,7 +1123,7 @@ export default function SceneViewport({
             }}
           />
         );
-      })() : null}
+      })()) : null}
 
       {/* Committed strokes go under the fog: a note scribbled on a room the
           party has not reached is the GM's business until they get there. The
@@ -1249,7 +1293,7 @@ export default function SceneViewport({
       {/* Where the party stands. Drawn for everyone looking at the map — the
           players and the projector included — because a hexcrawl with no marker
           is a coloured map nobody can point at. */}
-      {partyHex && isHexGrid(scene.grid) ? (() => {
+      {!backgroundOnly && partyHex && isHexGrid(scene.grid) ? (() => {
         const centre = worldToScreen(hexToWorld(partyHex, scene.grid), view);
         // Two thirds of the hex it stands in: the marker is read from across the
         // table, and a pin the size of a token label is not.
@@ -1458,7 +1502,10 @@ const hostSx = {
   border: '1px solid',
   borderColor: 'divider',
   borderRadius: 1,
-  bgcolor: VTT_COLORS.viewport,
+  // Match the fully covered player fog exactly. When a map ends, the empty
+  // viewport is therefore indistinguishable from unexplored territory and
+  // gives the table no silhouette of the image bounds.
+  bgcolor: VTT_COLORS.black,
   touchAction: 'none',
   // The fullscreen element keeps its own height rule, or the map would sit in a
   // letterboxed strip in the middle of a black screen. The webkit spelling is
@@ -1488,6 +1535,42 @@ function playAreaBox(scene, view) {
   };
 }
 
+// A rectangular range of axial coordinates is a parallelogram on screen. The
+// half-cell inset puts the edge between included and staged hex centres, which
+// makes the line agree with the same x/y test used by the client and SQL.
+function hexPlayAreaPolygon(scene, view) {
+  const area = scene.playArea;
+  const corners = [
+    { q: area.x - 0.5, r: area.y - 0.5 },
+    { q: area.x + area.w - 0.5, r: area.y - 0.5 },
+    { q: area.x + area.w - 0.5, r: area.y + area.h - 0.5 },
+    { q: area.x - 0.5, r: area.y + area.h - 0.5 },
+  ];
+  return corners
+    .map((corner) => worldToScreen(hexToWorld(corner, scene.grid), view))
+    .map((point) => `${point.x},${point.y}`)
+    .join(' ');
+}
+
+// Images always live at world origin. Unlike a cell-derived play area, this
+// box follows the last physical pixel even when an edge cuts through a hex.
+function imageBox(imageSize, view) {
+  const topLeft = worldToScreen({ x: 0, y: 0 }, view);
+  return {
+    left: topLeft.x,
+    top: topLeft.y,
+    width: imageSize.width * view.zoom,
+    height: imageSize.height * view.zoom,
+  };
+}
+
+function samePlayArea(left, right) {
+  return left?.x === right?.x
+    && left?.y === right?.y
+    && left?.w === right?.w
+    && left?.h === right?.h;
+}
+
 function pointInBox(point, box) {
   return point.x >= box.left
     && point.y >= box.top
@@ -1502,6 +1585,20 @@ const roundBtnSx = {
   bgcolor: vttAlpha(VTT_COLORS.ink, 0.8),
   border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.35)}`,
   '&:hover': { bgcolor: vttAlpha(VTT_COLORS.ink, 0.95) },
+};
+
+const playAreaSvgSx = {
+  position: 'absolute',
+  inset: 0,
+  overflow: 'hidden',
+  pointerEvents: 'none',
+};
+
+const playAreaStrokeProps = {
+  fill: 'none',
+  stroke: vttAlpha(VTT_COLORS.gold, 0.7),
+  strokeWidth: 2,
+  strokeDasharray: '7 5',
 };
 
 const fullscreenSheetButtonSx = {

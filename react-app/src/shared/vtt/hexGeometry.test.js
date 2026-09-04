@@ -7,6 +7,7 @@ import {
   hexHeight,
   hexKey,
   hexNeighbours,
+  hexPlayAreaForImage,
   hexRowStep,
   hexToWorld,
   hexWidth,
@@ -82,6 +83,31 @@ test('distance is counted in steps, and every neighbour is one step away', () =>
   for (const neighbour of neighbours) {
     assert.equal(hexDistance({ q: 4, r: -1 }, neighbour), 1);
   }
+});
+
+test('fitting a play area includes every hex centre over the image', () => {
+  const area = hexPlayAreaForImage({ width: 1400, height: 700 }, GRID);
+  assert.deepEqual(area, { x: -5, y: 0, w: 25, h: 12 });
+
+  for (let r = -20; r <= 20; r += 1) {
+    for (let q = -30; q <= 30; q += 1) {
+      const centre = hexToWorld({ q, r }, GRID);
+      const overImage = centre.x >= 0 && centre.x < 1400 && centre.y >= 0 && centre.y < 700;
+      if (!overImage) continue;
+      assert.ok(q >= area.x && q < area.x + area.w, `q ${q}, r ${r} was cut off`);
+      assert.ok(r >= area.y && r < area.y + area.h, `q ${q}, r ${r} was cut off`);
+    }
+  }
+});
+
+test('fitting a hex play area respects grid offsets', () => {
+  assert.deepEqual(
+    hexPlayAreaForImage(
+      { width: 210, height: 180 },
+      { ...GRID, offsetX: 20, offsetY: 10 },
+    ),
+    { x: -1, y: 0, w: 4, h: 3 },
+  );
 });
 
 test('a viewport rectangle asks only for the hexes it covers', () => {

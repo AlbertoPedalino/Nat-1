@@ -68,6 +68,7 @@ import { sanitizeNoteText } from '../../../shared/vtt/drawing.js';
 import { normalizeAtmosphere } from '../../../shared/vtt/atmosphere.js';
 import { FEET_PER_CELL } from '../../../shared/vtt/measure.js';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
+import { hexPlayAreaForImage, isHexGrid } from '../../../shared/vtt/hexGeometry.js';
 import { useSceneLive } from '../../../shared/vtt/useSceneLive.js';
 import { useSceneRole } from '../../../shared/vtt/useSceneRole.js';
 import { createCameraSourceId } from '../../../shared/vtt/cameraSync.js';
@@ -369,6 +370,12 @@ export default function SceneEditor({
     () => (imageSize ? fogSizeForImage(imageSize, scene.grid, 1) : DEFAULT_MAP_CELLS),
     [imageSize, scene.grid],
   );
+
+  const fittedPlayArea = useMemo(() => (
+    imageSize && isHexGrid(scene.grid)
+      ? hexPlayAreaForImage(imageSize, scene.grid)
+      : { x: 0, y: 0, w: mapCells.cols, h: mapCells.rows }
+  ), [imageSize, mapCells, scene.grid]);
 
   const fogCells = useMemo(
     () => (imageSize ? fogSizeForImage(imageSize, scene.grid) : {
@@ -929,8 +936,20 @@ export default function SceneEditor({
   // The map itself is the sensible play area: the GM only ever needs to change
   // it to make room for staging outside the picture.
   const handleFitPlayArea = useCallback(() => {
-    handlePlayAreaChange({ x: 0, y: 0, w: mapCells.cols, h: mapCells.rows });
-  }, [handlePlayAreaChange, mapCells]);
+    handlePlayAreaChange(fittedPlayArea);
+  }, [fittedPlayArea, handlePlayAreaChange]);
+
+  // Before hex maps had their own fit calculation they were saved as if their
+  // rows were square. Upgrade only that exact old auto-fit shape: a deliberately
+  // custom boundary is never rewritten behind the GM's back.
+  useEffect(() => {
+    if (!role.isGm || spectator || scene.shownImage !== 'map' || !imageSize || !isHexGrid(scene.grid)) return;
+    const current = scene.playArea;
+    const legacy = { x: 0, y: 0, w: mapCells.cols, h: mapCells.rows };
+    const same = (left, right) => left && right
+      && left.x === right.x && left.y === right.y && left.w === right.w && left.h === right.h;
+    if (same(current, legacy) && !same(current, fittedPlayArea)) handlePlayAreaChange(fittedPlayArea);
+  }, [fittedPlayArea, handlePlayAreaChange, imageSize, mapCells, role.isGm, scene.grid, scene.playArea, scene.shownImage, spectator]);
 
   // One upload path for both slots: the only difference is which column it
   // lands in, and which picture the table then sees.

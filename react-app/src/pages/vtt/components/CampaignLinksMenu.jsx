@@ -36,7 +36,14 @@ export default function CampaignLinksMenu({ campaignId }) {
   // The board is already saved by definition — the campaign row points at it —
   // so there is no draft check to make here.
   if (boardId) {
-    return <LinkedToolsMenu sectionKey="gmboard" instanceId={boardId} instanceSaved />;
+    return (
+      <LinkedToolsMenu
+        sectionKey="gmboard"
+        instanceId={boardId}
+        instanceSaved
+        showCurrentLink
+      />
+    );
   }
 
   // Nothing to link to yet, said as the thing to go and do rather than as a

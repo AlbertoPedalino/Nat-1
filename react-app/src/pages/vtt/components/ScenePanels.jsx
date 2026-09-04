@@ -477,6 +477,14 @@ export function MapPanel({
               />
             ))}
           </Stack>
+          <Button
+            size="small"
+            variant="outlined"
+            disabled={busy || scene.shownImage !== 'map'}
+            onClick={onFitPlayArea}
+          >
+            Refit to the map
+          </Button>
           <Button size="small" disabled={busy} onClick={() => onPlayAreaChange(null)}>
             Use the whole scene
           </Button>
