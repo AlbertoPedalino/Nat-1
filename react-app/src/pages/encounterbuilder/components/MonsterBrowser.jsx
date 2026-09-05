@@ -117,7 +117,7 @@ export default function MonsterBrowser({
               : undefined}
             onClick={() => onSelect?.(monster)}
             onKeyDown={(event) => { if (event.key === 'Enter') onSelect?.(monster); }}
-            sx={rowSx}
+            sx={[rowSx, onPointerDragStart ? pointerDragRowSx : null]}
           >
             <MonsterToken monster={monster} size={30} fallbackText={monster.name?.[0]} />
             <Box sx={{ minWidth: 0, flex: 1 }}>
@@ -184,3 +184,5 @@ const rowSx = {
     bgcolor: 'rgba(215,173,82,0.08)',
   },
 };
+
+const pointerDragRowSx = { touchAction: 'none' };

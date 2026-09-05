@@ -248,7 +248,7 @@ const rowSx = {
   alignItems: 'center',
   gap: 1,
   py: 0.25,
-  touchAction: 'pan-y',
+  touchAction: 'none',
   userSelect: 'none',
 };
 
@@ -269,7 +269,7 @@ const tokenDraftSx = {
   p: 0.75,
   borderRadius: 1,
   border: `1px dashed ${vttAlpha(VTT_COLORS.gold, 0.55)}`,
-  touchAction: 'pan-y',
+  touchAction: 'none',
   userSelect: 'none',
   cursor: 'grab',
 };

@@ -119,13 +119,18 @@ test('a character row starts and finishes placement with a touch pointer', () =>
   );
 
   const row = screen.getByText('Aria').parentElement;
+  row.setPointerCapture = vi.fn();
+  row.hasPointerCapture = vi.fn(() => true);
+  row.releasePointerCapture = vi.fn();
   fireEvent(row, pointer('pointerdown', { clientX: 260, clientY: 80 }));
+  expect(row.setPointerCapture).toHaveBeenCalledWith(7);
   fireEvent(window, pointer('pointermove', { clientX: 220, clientY: 90 }));
   expect(onPlacementDragStart).toHaveBeenCalledWith(expect.objectContaining({
     kind: 'character', characterId: 'hero-1',
   }));
 
   fireEvent(window, pointer('pointerup', { clientX: 150, clientY: 100 }));
+  expect(row.releasePointerCapture).toHaveBeenCalledWith(7);
   expect(onPlacementDragEnd).toHaveBeenCalledOnce();
 });
 

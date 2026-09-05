@@ -25,6 +25,14 @@ export function beginPiecePointerDrag(event, placement, {
   const source = event.currentTarget;
   let dragging = false;
 
+  // Keep the real mobile pointer bound to its source while the surrounding
+  // panel becomes transparent and stops receiving hit tests.
+  try {
+    source.setPointerCapture?.(pointerId);
+  } catch {
+    // Synthetic test events and older browsers may not expose pointer capture.
+  }
+
   const emit = (phase, pointerEvent) => {
     window.dispatchEvent(new CustomEvent(PIECE_POINTER_DRAG_EVENT, {
       detail: {
@@ -43,6 +51,11 @@ export function beginPiecePointerDrag(event, placement, {
     window.removeEventListener('pointermove', move);
     window.removeEventListener('pointerup', finish);
     window.removeEventListener('pointercancel', cancel);
+    try {
+      if (source.hasPointerCapture?.(pointerId)) source.releasePointerCapture(pointerId);
+    } catch {
+      // The browser may already have released capture on pointerup/cancel.
+    }
   };
   const move = (pointerEvent) => {
     if (pointerEvent.pointerId !== pointerId) return;

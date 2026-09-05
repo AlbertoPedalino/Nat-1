@@ -196,7 +196,7 @@ const placementCardSx = {
   border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.25)}`,
   bgcolor: vttAlpha(VTT_COLORS.black, 0.22),
   userSelect: 'none',
-  touchAction: 'pan-y',
+  touchAction: 'none',
   '&:hover': {
     borderColor: vttAlpha(VTT_COLORS.gold, 0.6),
     bgcolor: vttAlpha(VTT_COLORS.gold, 0.06),
