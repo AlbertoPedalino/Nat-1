@@ -96,6 +96,7 @@ function RollRow({ roll }) {
       <Stack direction="row" spacing={0.75} sx={{ alignItems: 'baseline' }}>
         <Typography sx={actorSx}>{roll.actorName || 'Someone'}</Typography>
         <Typography sx={labelSx}>{roll.label}</Typography>
+        {roll.visibility === 'gm' ? <Typography sx={tagSx}>GM only</Typography> : null}
         {layout.modeChip ? (
           <Typography sx={{ ...tagSx, color: layout.modeChip.color }}>{layout.modeChip.label}</Typography>
         ) : null}
@@ -106,6 +107,7 @@ function RollRow({ roll }) {
       </Stack>
       <StaticDiceRow dice={layout.dice} modifier={layout.modifier} />
       {roll.detail ? <Typography sx={detailSx}>{roll.detail}</Typography> : null}
+      {roll.note ? <Typography sx={detailSx}>{roll.note}</Typography> : null}
     </Box>
   );
 }

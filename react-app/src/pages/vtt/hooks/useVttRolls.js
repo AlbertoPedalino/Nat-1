@@ -43,8 +43,14 @@ export function useVttRolls({ campaignId, role, roster, tokens }) {
 
   const { publish } = useRollChannel({
     campaignId,
+    isGm: role.isGm,
     onRoll: acceptRoll,
   });
+
+  useEffect(() => {
+    setFeed([]);
+    setToast(null);
+  }, [campaignId, role.isGm]);
 
   const handleCustomRoll = useCallback((formula) => {
     const id = `custom:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;

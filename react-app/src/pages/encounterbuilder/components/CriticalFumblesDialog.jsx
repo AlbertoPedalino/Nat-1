@@ -78,6 +78,7 @@ export default function CriticalFumblesDialog({ open, onClose }) {
       `${category.label} Fumble`,
       null,
       (rolled) => table.entries[String(rolled.result)] || 'No consequence set.',
+      { localOnly: true },
     );
     if (!result) return;
     setOutcome({

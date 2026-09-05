@@ -23,10 +23,11 @@ export default function RollLog({ maxHeight = 320, onClose, sx }) {
         <Stack spacing={0.75} sx={{ maxHeight, overflow: 'auto' }}>
           {state.rollLog.length ? state.rollLog.map((entry, index) => (
             <Box key={`${entry.timeStr}-${index}`} sx={entrySx}>
-              <Box sx={{ ...resultSx, ...resultColor(entry.cls) }}>{entry.result}</Box>
+              <Box sx={{ ...resultSx, ...resultColor(entry.cls) }}>{entry.result ?? '—'}</Box>
               <Box sx={{ minWidth: 0 }}>
                 {entry.actor ? <Typography variant="caption" color="primary.main" noWrap>{entry.actor}</Typography> : null}
                 <Typography fontWeight={700} noWrap>{entry.type}</Typography>
+                {entry.visibility === 'gm' ? <Typography variant="caption" color="text.secondary">GM only</Typography> : null}
                 {entry.note ? (
                   <Typography variant="caption" sx={{ display: 'block', color: '#edd48a', whiteSpace: 'normal', lineHeight: 1.35 }}>
                     {entry.note}

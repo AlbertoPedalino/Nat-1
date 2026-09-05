@@ -5,7 +5,6 @@ import { isFightResumable } from '../logic/library.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import CombatantCard from './CombatantCard.jsx';
 import Reinforcements from './Reinforcements.jsx';
-import RollLogLauncher from './RollLogLauncher.jsx';
 import { StatBlockPanel } from './StatBlockDialog.jsx';
 
 export default function CombatView() {
@@ -101,7 +100,6 @@ export default function CombatView() {
         </Stack>
         <StatBlockPanel />
       </Box>
-      <RollLogLauncher />
     </>
   );
 }

@@ -87,9 +87,13 @@ function rollModifier(formula, rng) {
 
 export function addRollLogEntry(log, roll, actor, now = new Date()) {
   if (!roll) return Array.isArray(log) ? log : [];
+  if (roll.id && (log || []).some((entry) => entry.id === roll.id)) return log;
+  if (roll.timestamp) now = new Date(roll.timestamp);
   const timeStr = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   return [
     {
+      id: roll.id,
+      visibility: roll.visibility,
       actor: actor || null,
       type: roll.type,
       result: roll.result,

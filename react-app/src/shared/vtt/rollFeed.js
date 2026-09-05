@@ -80,6 +80,8 @@ export function normalizeRoll(entry) {
     id: suppliedId || `roll:${at}:${Math.random().toString(36).slice(2, 12)}`,
     characterId,
     actorName,
+    visibility: entry.visibility === 'gm' ? 'gm' : 'public',
+    note: boundedText(entry.note, 240),
     label,
     detail,
     total: numberOrNull(entry.total),
@@ -101,7 +103,12 @@ export function normalizeRoll(entry) {
 export function addRoll(feed, entry, { local = false } = {}) {
   const roll = normalizeRoll(entry);
   if (!roll) return feed || [];
-  if ((feed || []).some((item) => item.id === roll.id)) return feed;
+  const existing = (feed || []).find((item) => item.id === roll.id);
+  if (existing) {
+    return local && !existing.localOrigin
+      ? feed.map((item) => item.id === roll.id ? { ...item, localOrigin: true } : item)
+      : feed;
+  }
   // Local is render-only metadata. It is deliberately supplied by the
   // receiving screen rather than accepted from the broadcast payload, so the
   // screen that made the roll can hide only its own speech bubble while still

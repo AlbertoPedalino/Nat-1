@@ -10,6 +10,7 @@ import { useSheetRealtime } from '../hooks/useSheetRealtime.js';
 import { useExternalFightSync } from '../hooks/useExternalFightSync.js';
 import { useMapTokenBridge } from '../hooks/useMapTokenBridge.js';
 import { useCloudFights } from '../hooks/useCloudFights.js';
+import { useEncounterRolls } from '../hooks/useEncounterRolls.js';
 
 const EncounterBuilderContext = createContext(null);
 
@@ -17,6 +18,10 @@ export function EncounterBuilderProvider({ instanceId, instanceSaved, linkGroupI
   const [state, dispatch] = useReducer(encounterReducer, undefined, createInitialState);
   const monsterDb = useMonsterDb();
   const campaignPlayers = useCampaignPlayers();
+  const rollSync = useEncounterRolls({
+    instanceId, players: state.players, campaigns: campaignPlayers.campaigns, dispatch,
+  });
+  const { shareRoll } = rollSync;
   const sheetSync = useFightSheetSync(state.combat);
   useSheetRealtime({ view: state.view, combat: state.combat, dispatch, sheetSync });
   const { saveInstance } = useEncounterPersistence({
@@ -80,15 +85,16 @@ export function EncounterBuilderProvider({ instanceId, instanceSaved, linkGroupI
   // `actorOverride` lets a caller force the attribution (pass `null` for a
   // generic GM roll with no actor). Omit it to default to the selected/current
   // combatant via getRollActor().
-  const roll = useCallback((notation, type, actorOverride, note = '') => {
+  const roll = useCallback((notation, type, actorOverride, note = '', { localOnly = false } = {}) => {
     const result = rollDice(notation, type);
     if (!result) return null;
     const actor = actorOverride !== undefined ? actorOverride : getRollActor();
     const resolvedNote = typeof note === 'function' ? note(result) : note;
     const annotated = { ...result, note: String(resolvedNote || '') };
-    dispatch({ type: 'addRoll', roll: annotated, actor });
+    if (localOnly) dispatch({ type: 'addRoll', roll: annotated, actor });
+    else shareRoll(annotated, actor);
     return { ...annotated, actor };
-  }, [getRollActor]);
+  }, [getRollActor, shareRoll]);
 
   const saveEncounterToLibrary = useCallback((name) => {
     if (!state.encounter.length) return null;
@@ -102,12 +108,13 @@ export function EncounterBuilderProvider({ instanceId, instanceSaved, linkGroupI
     dispatch,
     monsterDb,
     campaignPlayers,
+    rollSync,
     instanceId,
     instanceSaved,
     saveInstance,
     saveEncounterToLibrary,
     roll,
-  }), [campaignPlayers, instanceId, instanceSaved, monsterDb, roll, saveEncounterToLibrary, saveInstance, state]);
+  }), [campaignPlayers, rollSync, instanceId, instanceSaved, monsterDb, roll, saveEncounterToLibrary, saveInstance, state]);
 
   return (
     <EncounterBuilderContext.Provider value={value}>

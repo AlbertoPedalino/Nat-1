@@ -60,3 +60,16 @@ test('a roll received from another device also shows immediately', () => {
   expect(result.current.toast).toMatchObject({ id: 'remote-roll', total: 12 });
   expect(result.current.feed).toHaveLength(1);
 });
+
+test('the embedded-sheet handoff deduplicates a local channel delivery and suppresses its own bubble', () => {
+  const { result } = openRolls();
+  const roll = entry();
+  act(() => {
+    channel.onRoll(roll);
+    result.current.handleSheetRoll(roll);
+  });
+  expect(result.current.feed).toHaveLength(1);
+  expect(result.current.feed[0].localOrigin).toBe(true);
+  expect(result.current.rollBubbles).toHaveLength(0);
+  expect(result.current.diceThrows).toHaveLength(1);
+});

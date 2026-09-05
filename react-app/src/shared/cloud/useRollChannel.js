@@ -2,63 +2,94 @@ import { useCallback, useEffect, useRef } from 'react';
 import { useAuth } from './AuthProvider.jsx';
 import { supabase } from './supabaseClient.js';
 
-// Rolls said out loud at the table.
-//
-// Scoped to the CAMPAIGN, not to a scene: the sheet that makes a roll has no
-// idea which map is up, and should not have to learn. Everyone in the campaign
-// joins the same channel — the sheets to publish, the map to listen.
-//
-// Broadcast only. A roll is an event, not a record: nothing is written, nothing
-// survives a reload, and there is no history for anyone to clean up.
+// Shared by embedded sheets and maps. Events stay in memory;
+// private GM rolls never enter the public campaign channel.
+const transports = new Map();
 
-const ROLL_EVENT = 'roll';
+function acquire(topic, account, privateChannel, online) {
+  const key = `${account}:${topic}:${online}`;
+  if (transports.has(key)) return transports.get(key);
+  const listeners = new Set();
+  const seen = new Set();
+  const receive = (roll, origin) => {
+    if (!roll || (roll.id && seen.has(roll.id))) return;
+    if (roll.id) {
+      seen.add(roll.id);
+      if (seen.size > 200) seen.delete(seen.values().next().value);
+    }
+    listeners.forEach((listener) => {
+      if (listener === origin) return;
+      try { listener(roll); } catch (_) {}
+    });
+  };
+  let local;
+  let channel;
+  try {
+    local = new BroadcastChannel(`gb-local:${account}:${topic}`);
+    local.onmessage = ({ data }) => receive(data);
+  } catch (_) {}
+  if (online) {
+    try {
+      channel = supabase.channel(topic, {
+        config: { private: privateChannel, broadcast: { self: false } },
+      });
+      channel.on('broadcast', { event: 'roll' }, ({ payload }) => receive(payload));
+      channel.subscribe();
+    } catch (_) { channel = null; }
+  }
+  const transport = {
+    listeners,
+    publish(roll, origin) {
+      receive(roll, origin);
+      try { local?.postMessage(roll); } catch (_) {}
+      try {
+        Promise.resolve(channel?.send({ type: 'broadcast', event: 'roll', payload: roll })).catch(() => {});
+      } catch (_) {}
+    },
+    release(listener) {
+      listeners.delete(listener);
+      if (listeners.size) return;
+      local?.close();
+      if (channel) {
+        try { Promise.resolve(supabase.removeChannel(channel)).catch(() => {}); } catch (_) {}
+      }
+      transports.delete(key);
+    },
+  };
+  transports.set(key, transport);
+  return transport;
+}
 
-export function useRollChannel({ campaignId, onRoll }) {
-  const { cloudEnabled, status } = useAuth();
-  const channelRef = useRef(null);
+export function useRollChannel({ campaignId, onRoll, isGm = false }) {
+  const { cloudEnabled, status, user } = useAuth();
+  const channelsRef = useRef(null);
   const handlerRef = useRef(onRoll);
   handlerRef.current = onRoll;
+  const account = user?.id || 'local';
+  const online = Boolean(cloudEnabled && status === 'authed' && supabase);
 
   useEffect(() => {
-    if (!campaignId || !cloudEnabled || status !== 'authed' || !supabase) return undefined;
-
-    let channel;
-    try {
-      channel = supabase.channel(`gb-rolls-${campaignId}`, {
-        // Your own roll is already on your screen in its own toast; echoing it
-        // back would show it twice.
-        config: { broadcast: { self: false } },
-      });
-      channel.on('broadcast', { event: ROLL_EVENT }, (message) => {
-        try {
-          handlerRef.current?.(message?.payload || null);
-        } catch (_) {
-          // A malformed roll must not take the page down with it.
-        }
-      });
-      channel.subscribe();
-      channelRef.current = channel;
-    } catch (_) {
-      channelRef.current = null;
-      return undefined;
-    }
-
+    if (!campaignId) return undefined;
+    const listener = (roll) => handlerRef.current?.(roll);
+    const publicChannel = acquire(`gb-rolls-${campaignId}`, account, false, online);
+    const gmChannel = isGm
+      ? acquire(`gb-gm-rolls-${campaignId}`, account, true, online)
+      : null;
+    publicChannel.listeners.add(listener);
+    gmChannel?.listeners.add(listener);
+    channelsRef.current = { publicChannel, gmChannel, listener };
     return () => {
-      channelRef.current = null;
-      try {
-        supabase.removeChannel(channel);
-      } catch (_) {}
+      channelsRef.current = null;
+      publicChannel.release(listener);
+      gmChannel?.release(listener);
     };
-  }, [campaignId, cloudEnabled, status]);
+  }, [campaignId, account, online, isGm]);
 
-  // Fire and forget: a roll that fails to reach the table is a roll the player
-  // says out loud, not an error worth interrupting them with.
-  const publish = useCallback((roll) => {
-    const channel = channelRef.current;
-    if (!channel || !roll) return;
-    try {
-      channel.send({ type: 'broadcast', event: ROLL_EVENT, payload: roll });
-    } catch (_) {}
+  const publish = useCallback((roll, { visibility = 'public' } = {}) => {
+    const channels = channelsRef.current;
+    if (!channels || !roll) return;
+    const target = visibility === 'gm' ? channels.gmChannel : channels.publicChannel;
+    target?.publish({ ...roll, visibility }, channels.listener);
   }, []);
 
   return { publish };

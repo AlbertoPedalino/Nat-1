@@ -41,6 +41,7 @@ import { loadItems, loadOptionalFeatures, loadConditions, reconcileInventoryWith
 import { fetchCloudMeta, updateCloudCharacterData } from '../../shared/cloud/cloudCharacters.js';
 import { isCloudConfigured } from '../../shared/cloud/supabaseClient.js';
 import { useRollChannel } from '../../shared/cloud/useRollChannel.js';
+import { normalizeRoll } from '../../shared/vtt/rollFeed.js';
 import { SYNCED_VITALS, clampCharacterVitals } from '../../shared/character/vitals.js';
 import {
   getActiveCharId,
@@ -131,8 +132,18 @@ export default function CharacterSheet({
   const [campaignId, setCampaignId] = useState(null);
   // Rolls are shared with the campaign, not with a scene: this sheet has no idea
   // which map is up and does not need to learn.
-  const { publish: publishRoll } = useRollChannel({ campaignId });
   const [rollLog, setRollLog] = useState([]);
+  const receiveRoll = useCallback((entry) => {
+    const roll = normalizeRoll(entry);
+    if (!roll || roll.visibility === 'gm') return;
+    const toastEntry = {
+      ...roll, timestamp: roll.at, meta: { mode: roll.mode, bonus: roll.bonus },
+    };
+    setRollLog((current) => current.some((item) => item.id === roll.id)
+      ? current : [toastEntry, ...current].slice(0, 50));
+  }, []);
+  const { publish: publishRoll } = useRollChannel({ campaignId, onRoll: receiveRoll });
+  useEffect(() => { setRollLog([]); }, [campaignId, charId]);
   const [resources, setResources] = useState({});
   const [freeCastUses, setFreeCastUses] = useState({});
   const [shortRestOpen, setShortRestOpen] = useState(false);
@@ -309,8 +320,8 @@ export default function CharacterSheet({
 
   useEffect(() => {
     let cancelled = false;
+    setCampaignId(null);
     if (!charId || !isCloudConfigured()) {
-      setCampaignId(null);
       return () => { cancelled = true; };
     }
     fetchCloudMeta(charId)
@@ -333,6 +344,8 @@ export default function CharacterSheet({
       // faces that naturally land, so there is no final snap or contradiction.
       thrown: Boolean(rolls?.length),
       timestamp,
+      characterId: charId,
+      actorName: C?.name || '',
     };
     if (showOwnRollToast) setDiceToast(entry);
     setRollLog((prev) => [entry, ...prev].slice(0, 50));
@@ -341,9 +354,8 @@ export default function CharacterSheet({
     // goes through this one function, custom rolls included.
     const sharedEntry = { ...entry, characterId: charId, actorName: C?.name || '' };
     publishRoll(sharedEntry);
-    // Broadcast deliberately has `self: false`. An embedded sheet and its map
-    // share this browser, so hand the same event to the map directly instead of
-    // waiting for an echo that will never arrive.
+    // Also hand off directly while campaign metadata is still loading.
+    // The map deduplicates the shared event by id.
     onRoll?.(sharedEntry);
   }, [C?.name, charId, onRoll, publishRoll, showOwnRollToast]);
 

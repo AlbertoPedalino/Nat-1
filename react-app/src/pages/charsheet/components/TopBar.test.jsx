@@ -9,6 +9,21 @@ const character = {
   extraClasses: [],
 };
 
+test('shared rolls show the monster or player name and note in the player log', () => {
+  render(
+    <MemoryRouter>
+      <TopBar C={character} sheet={{ xpStored: 0 }} embedded rollLog={[{
+        timestamp: 3, actorName: 'Goblin', label: 'Claw', detail: '1d20+5',
+        total: 17, rolls: [{ v: 12, faces: 20 }], meta: { bonus: 5 }, note: 'Hit',
+      }]} />
+    </MemoryRouter>,
+  );
+  fireEvent.click(screen.getByRole('button', { name: 'LOG (1)' }));
+  expect(screen.getByText('Goblin')).toBeInTheDocument();
+  expect(screen.getByText('Claw')).toBeInTheDocument();
+  expect(screen.getByText('Hit')).toBeInTheDocument();
+});
+
 test('the sheet roll log omits a zero stat modifier', () => {
   render(
     <MemoryRouter>

@@ -10,6 +10,8 @@ import BuilderView from './components/BuilderView.jsx';
 import CombatView from './components/CombatView.jsx';
 import LibraryView from './components/LibraryView.jsx';
 import StatBlockDialog from './components/StatBlockDialog.jsx';
+import RollSharingControls from './components/RollSharingControls.jsx';
+import RollLogLauncher from './components/RollLogLauncher.jsx';
 import EncounterDiceToast, { buildEncounterDiceToast } from './components/EncounterDiceToast.jsx';
 import CriticalFumblesDialog from './components/CriticalFumblesDialog.jsx';
 import NegotiationDialog from './components/NegotiationDialog.jsx';
@@ -111,6 +113,7 @@ function EncounterBuilderShell({ instance }) {
               </Tabs>
             </Stack>
           </Stack>
+          <RollSharingControls />
           {state.view === 'builder' ? <BuilderView /> : null}
           {state.view === 'library' ? <LibraryView /> : null}
           {state.view === 'combat' ? <CombatView /> : null}
@@ -122,6 +125,7 @@ function EncounterBuilderShell({ instance }) {
         </Stack>
       </Box>
       <StatBlockDialog />
+      <RollLogLauncher />
       <CustomRollDialog
         open={customRollOpen}
         onClose={() => setCustomRollOpen(false)}

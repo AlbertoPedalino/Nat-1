@@ -348,6 +348,7 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
                 ...(isFail ? { borderColor: '#de675f', bgcolor: 'rgba(222,103,95,0.06)' } : {}),
               }}>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
+                  {entry.actorName ? <Typography sx={{ ...ROLL_LOG_SX.formula, color: 'primary.main' }}>{entry.actorName}</Typography> : null}
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.15 }}>
                     <Typography sx={{ ...ROLL_LOG_SX.label, mb: 0 }}>{labelParts.clean}</Typography>
                     {modeLabel && (
@@ -362,6 +363,7 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
                     </Typography>
                   )}
                   <Typography sx={ROLL_LOG_SX.formula}>{formulaText}{suffixStr}</Typography>
+                  {entry.note ? <Typography sx={ROLL_LOG_SX.formula}>{entry.note}</Typography> : null}
                   {breakdownText ? (
                     <Typography sx={ROLL_LOG_SX.rollBreakdown}>{breakdownText}</Typography>
                   ) : null}
