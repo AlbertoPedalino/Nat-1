@@ -297,7 +297,9 @@ function clamp(value, lower, upper) {
 const rootSx = {
   position: 'absolute',
   inset: 0,
-  zIndex: 8,
+  // Above the fullscreen character sheet (layer 10): a shared roll must stay
+  // visible even when the sheet covers the point where the dice land.
+  zIndex: 11,
   pointerEvents: 'none',
   overflow: 'hidden',
 };

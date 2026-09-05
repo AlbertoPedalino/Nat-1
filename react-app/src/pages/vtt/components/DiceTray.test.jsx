@@ -116,3 +116,14 @@ test('a crowded pool uses the same smaller dice size as the result simulation', 
   );
   expect(thrownDieSize(rolls.length)).toBeLessThan(THROWN_DIE_SIZE);
 });
+
+test('the dice animation is painted above the fullscreen character sheet', () => {
+  const { container } = render(<DiceTray throws={[]} />);
+
+  // FloatingSheetPanel occupies layer 10. The tray remains pointer-transparent,
+  // so painting above it does not prevent the player from using the sheet.
+  expect(container.firstElementChild).toHaveStyle({
+    zIndex: '11',
+    pointerEvents: 'none',
+  });
+});
