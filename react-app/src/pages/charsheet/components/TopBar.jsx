@@ -332,10 +332,7 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
                 : '';
               const suffixStr = extra ? ` ${extra}` : '';
               const breakdownText = diceText && bonus != null
-                // A d20 test always has a modifier, including a real +0. Keep
-                // that explicit zero while leaving modifier-less custom dice
-                // (whose inferred difference also happens to be zero) alone.
-                ? `${diceText}${bonus !== 0 || entry.meta?.bonus != null ? formatMod(bonus) : ''} = ${entry.total}`
+                ? `${diceText}${bonus !== 0 ? formatMod(bonus) : ''} = ${entry.total}`
                 : '';
               const d20s = (entry.rolls || []).filter((r) => r.faces === 20);
               const keptD20 = d20s.find((r) => r.kept) || d20s[0];

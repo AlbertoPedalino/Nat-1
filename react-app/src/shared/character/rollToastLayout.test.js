@@ -76,7 +76,7 @@ test('a bonus always carries its sign', () => {
   assert.equal(formatRollBonus(0), '+0');
 });
 
-test('a zero d20 modifier remains visible in the toast layout', () => {
+test('a zero d20 modifier is omitted from the toast layout', () => {
   const layout = resolveToastLayout({
     label: 'Strength Check',
     total: 12,
@@ -84,5 +84,5 @@ test('a zero d20 modifier remains visible in the toast layout', () => {
     meta: { bonus: 0, kept: 12 },
   });
 
-  assert.equal(layout.modifier, '+0');
+  assert.equal(layout.modifier, null);
 });

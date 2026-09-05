@@ -9,7 +9,7 @@ const character = {
   extraClasses: [],
 };
 
-test('the sheet roll log shows an explicit zero stat modifier', () => {
+test('the sheet roll log omits a zero stat modifier', () => {
   render(
     <MemoryRouter>
       <TopBar
@@ -19,7 +19,7 @@ test('the sheet roll log shows an explicit zero stat modifier', () => {
         rollLog={[{
           timestamp: 1,
           label: 'Strength Check',
-          detail: 'd20 +0 = 12',
+          detail: 'd20 = 12',
           total: 12,
           rolls: [{ v: 12, faces: 20, kept: true }],
           meta: { bonus: 0, kept: 12 },
@@ -30,7 +30,8 @@ test('the sheet roll log shows an explicit zero stat modifier', () => {
 
   fireEvent.click(screen.getByRole('button', { name: 'LOG (1)' }));
 
-  expect(screen.getByText('12 (d20) + 0 = 12')).toBeInTheDocument();
+  expect(screen.getByText('12 (d20) = 12')).toBeInTheDocument();
+  expect(screen.queryByText(/\+\s*0/)).not.toBeInTheDocument();
 });
 
 test('the sheet roll log does not invent a zero modifier for plain custom dice', () => {

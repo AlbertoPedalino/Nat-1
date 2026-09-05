@@ -31,7 +31,7 @@ export function resolveToastLayout(toast) {
 
   const mode = toast?.meta?.mode;
   const bonus = toast?.meta?.bonus;
-  const hasBonus = Number.isFinite(bonus);
+  const hasBonus = Number.isFinite(bonus) && bonus !== 0;
   // Current formula rolls carry their already-combined flat modifier in
   // meta.bonus. For older saved/shared rolls, read a trailing modifier from
   // the formula detail as a fallback.
@@ -39,7 +39,9 @@ export function resolveToastLayout(toast) {
     ? String(toast?.detail || '').replace(/\s+/g, '').match(/([+-]\d+)$/)?.[1] || null
     : null;
 
-  const modifier = hasBonus ? formatRollBonus(bonus) : formulaMod;
+  const modifier = hasBonus
+    ? formatRollBonus(bonus)
+    : (formulaMod && Number(formulaMod) !== 0 ? formulaMod : null);
 
   const isCrit = keptD20?.v >= 20;
   const isFail = keptD20?.v <= 1;

@@ -54,10 +54,11 @@ export function rollD20(bonus, options = {}) {
 }
 
 export function formatD20Detail(result) {
-  const bt = bonusText(result.bonus);
-  if (result.mode === 'advantage') return `Advantage: keep ${result.kept}; d20 ${bt} = ${result.total}`;
-  if (result.mode === 'disadvantage') return `Disadvantage: keep ${result.kept}; d20 ${bt} = ${result.total}`;
-  return `d20 ${bt} = ${result.total}`;
+  const modifier = Number(result.bonus) || 0;
+  const expression = modifier ? `d20 ${bonusText(modifier)}` : 'd20';
+  if (result.mode === 'advantage') return `Advantage: keep ${result.kept}; ${expression} = ${result.total}`;
+  if (result.mode === 'disadvantage') return `Disadvantage: keep ${result.kept}; ${expression} = ${result.total}`;
+  return `${expression} = ${result.total}`;
 }
 
 export function buildD20Meta(result) {

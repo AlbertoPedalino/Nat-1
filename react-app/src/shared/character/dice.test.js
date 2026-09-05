@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { DICE_LIMITS, parseFormula, rollFormula } from './dice.js';
+import {
+  DICE_LIMITS, formatD20Detail, parseFormula, rollFormula,
+} from './dice.js';
 
 test('strict formulas preserve supported whitespace, omitted counts, signs, and modifiers', () => {
   const parsed = parseFormula(' 2d6 + d20 - 3 - 1d4 ');
@@ -69,4 +71,10 @@ test('a formula roll exposes its combined flat modifier for the result UI', () =
   assert.equal(result.valid, true);
   assert.equal(result.modifier, 7);
   assert.equal(result.total, result.rolls[0].v + 7);
+});
+
+test('a d20 detail omits a zero modifier but keeps non-zero modifiers', () => {
+  assert.equal(formatD20Detail({ mode: 'normal', bonus: 0, total: 12 }), 'd20 = 12');
+  assert.equal(formatD20Detail({ mode: 'normal', bonus: 3, total: 15 }), 'd20 +3 = 15');
+  assert.equal(formatD20Detail({ mode: 'normal', bonus: -2, total: 10 }), 'd20 -2 = 10');
 });
