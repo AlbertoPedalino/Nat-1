@@ -67,3 +67,19 @@ test('panel content can close the rail after completing an action', () => {
 
   expect(screen.queryByRole('button', { name: 'Roll now' })).not.toBeInTheDocument();
 });
+
+test('the open panel fades in place while a piece is being positioned', () => {
+  const props = {
+    groups: [{
+      id: 'pieces', label: 'Pieces', icon: Pencil, content: <div>Piece options</div>,
+    }],
+  };
+  const { rerender } = render(<SceneToolRail {...props} />);
+  fireEvent.click(screen.getByRole('button', { name: 'Pieces' }));
+
+  const panel = screen.getByText('Piece options').closest('[data-viewport-control]');
+  rerender(<SceneToolRail {...props} placing />);
+
+  expect(panel).toHaveStyle({ opacity: 0, pointerEvents: 'none' });
+  expect(panel.style.transform).toBe('');
+});

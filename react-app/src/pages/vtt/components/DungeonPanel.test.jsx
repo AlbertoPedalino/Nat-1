@@ -51,9 +51,22 @@ const renderPanel = (props = {}) => render(
   </ThemeProvider>,
 );
 
-const drag = (element) => fireEvent.dragStart(element, {
-  dataTransfer: { setData: () => {}, setDragImage: () => {} },
-});
+const drag = (element) => {
+  const pointer = (type, clientX) => {
+    const event = new MouseEvent(type, {
+      bubbles: true, cancelable: true, button: 0, clientX, clientY: 80,
+    });
+    Object.defineProperties(event, {
+      isPrimary: { value: true },
+      pointerId: { value: 3 },
+      pointerType: { value: 'mouse' },
+    });
+    return event;
+  };
+  fireEvent(element, pointer('pointerdown', 260));
+  fireEvent(window, pointer('pointermove', 220));
+  fireEvent(window, pointer('pointerup', 180));
+};
 
 // Nothing is read from the picture, which is the whole point: the same panel
 // serves a cave, a dwelling and a map drawn on paper.

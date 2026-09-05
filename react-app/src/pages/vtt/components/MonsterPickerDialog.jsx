@@ -15,11 +15,12 @@ import { useMonsterDb } from '../../encounterbuilder/hooks/useMonsterDb.js';
 import MonsterBrowser from '../../encounterbuilder/components/MonsterBrowser.jsx';
 import { monsterToToken } from '../../../shared/vtt/encounterImport.js';
 import { fullscreenContainer } from '../logic/fullscreenContainer.js';
-import { beginPieceDrag } from './PiecePreview.jsx';
+import { beginPiecePointerDrag } from './PiecePreview.jsx';
 import {
   battleMapDialogActionsSx,
   battleMapDialogContentSx,
   battleMapDialogPaperSx,
+  battleMapDialogPlacingPaperSx,
   battleMapDialogTitleSx,
   battleMapDropBackdropSx,
   battleMapDropDialogSx,
@@ -31,7 +32,7 @@ const EMPTY_FILTERS = { search: '', cr: '', type: '', sources: [] };
 // rows — it is the same component, wired to local state instead of that page's
 // reducer, so the two never drift apart.
 export default function MonsterPickerDialog({
-  open, busy, onClose, onPlace, onPlacementDragStart, onPlacementDragEnd,
+  open, busy, placing = false, onClose, onPlace, onPlacementDragStart, onPlacementDragEnd,
 }) {
   const monsterDb = useMonsterDb();
   const [filters, setFilters] = useState(EMPTY_FILTERS);
@@ -54,7 +55,7 @@ export default function MonsterPickerDialog({
       container={fullscreenContainer}
       sx={battleMapDropDialogSx}
       slotProps={{
-        paper: { sx: battleMapDialogPaperSx },
+        paper: { sx: [battleMapDialogPaperSx, placing && battleMapDialogPlacingPaperSx] },
         backdrop: { sx: battleMapDropBackdropSx },
       }}
     >
@@ -87,19 +88,17 @@ export default function MonsterPickerDialog({
             onFilterChange={(key, value) => setFilters((current) => ({ ...current, [key]: value }))}
             onToggleSource={toggleSource}
             onPick={(monster) => onPlace(monster, count, { layer: hidden ? 'gm' : 'tokens' })}
-            onDragStart={(event, monster) => {
+            onPointerDragStart={(event, monster) => {
               const layer = hidden ? 'gm' : 'tokens';
               const draft = monsterToToken(monster, { layer });
-              beginPieceDrag(event);
-              onPlacementDragStart?.({
+              beginPiecePointerDrag(event, {
                 kind: 'monster',
                 monster,
                 count,
                 layer,
                 token: { ...draft, imageUrl: draft.image_url || null },
-              });
+              }, { onPlacementDragStart, onPlacementDragEnd });
             }}
-            onDragEnd={onPlacementDragEnd}
             pickLabel="Place on the map"
             listSx={{ maxHeight: { xs: 300, md: 420 } }}
           />
@@ -109,7 +108,7 @@ export default function MonsterPickerDialog({
         {/* The dialog stays open after a pick: placing a pack one creature at a
             time is the normal case, and reopening it each time is not. */}
         <Typography variant="caption" color="text.secondary" sx={{ mr: 'auto', pl: 1 }}>
-          Drag a token onto the map, or use + to place it automatically.
+          Drag with mouse, touch or pen, or use + to place automatically.
         </Typography>
         <Button onClick={onClose} disabled={busy}>Done</Button>
       </DialogActions>

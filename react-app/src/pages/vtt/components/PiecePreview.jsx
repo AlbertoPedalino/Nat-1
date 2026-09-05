@@ -2,16 +2,82 @@ import { Box, Typography } from '@mui/material';
 import { classIcon } from '../../../shared/character/classIcon.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 
-export const PIECE_DRAG_TYPE = 'application/x-gb-piece';
+export const PIECE_POINTER_DRAG_EVENT = 'gb:vtt-piece-pointer-drag';
+const POINTER_DRAG_THRESHOLD = 7;
 
-export function beginPieceDrag(event) {
-  event.dataTransfer.setData(PIECE_DRAG_TYPE, 'piece');
-  event.dataTransfer.effectAllowed = 'copy';
-  const preview = event.currentTarget.querySelector?.('[data-piece-preview]');
-  if (preview) {
-    const rect = preview.getBoundingClientRect();
-    event.dataTransfer.setDragImage(preview, rect.width / 2, rect.height / 2);
-  }
+// One pointer path for mouse, touch and pen avoids native HTML drag-and-drop
+// losing its source when a floating tool panel fades during placement. A short
+// tap keeps the normal click action, while moving far enough starts a placement
+// that SceneViewport can follow across every overlay.
+export function beginPiecePointerDrag(event, placement, {
+  onPlacementDragStart,
+  onPlacementDragEnd,
+} = {}) {
+  if (!['mouse', 'touch', 'pen'].includes(event.pointerType)
+    || event.isPrimary === false
+    || (event.pointerType === 'mouse' && event.button !== 0)
+    || !placement) return;
+  const nestedControl = event.target.closest?.('button, input, select, textarea, a');
+  if (nestedControl && nestedControl !== event.currentTarget) return;
+
+  const pointerId = event.pointerId;
+  const origin = { x: event.clientX, y: event.clientY };
+  const source = event.currentTarget;
+  let dragging = false;
+
+  const emit = (phase, pointerEvent) => {
+    window.dispatchEvent(new CustomEvent(PIECE_POINTER_DRAG_EVENT, {
+      detail: {
+        phase,
+        placement,
+        clientX: pointerEvent.clientX,
+        clientY: pointerEvent.clientY,
+      },
+    }));
+  };
+  const blockClick = (clickEvent) => {
+    clickEvent.preventDefault();
+    clickEvent.stopPropagation();
+  };
+  const cleanup = () => {
+    window.removeEventListener('pointermove', move);
+    window.removeEventListener('pointerup', finish);
+    window.removeEventListener('pointercancel', cancel);
+  };
+  const move = (pointerEvent) => {
+    if (pointerEvent.pointerId !== pointerId) return;
+    const distance = Math.hypot(pointerEvent.clientX - origin.x, pointerEvent.clientY - origin.y);
+    if (!dragging && distance < POINTER_DRAG_THRESHOLD) return;
+    if (!dragging) {
+      dragging = true;
+      onPlacementDragStart?.(placement);
+    }
+    pointerEvent.preventDefault();
+    emit('move', pointerEvent);
+  };
+  const finish = (pointerEvent) => {
+    if (pointerEvent.pointerId !== pointerId) return;
+    cleanup();
+    if (!dragging) return;
+    pointerEvent.preventDefault();
+    emit('drop', pointerEvent);
+    // A pointer drag otherwise produces a click after pointerup, which would also
+    // run the source's quick-place action and create a duplicate piece.
+    source.addEventListener('click', blockClick, { capture: true, once: true });
+    setTimeout(() => source.removeEventListener('click', blockClick, true), 0);
+    onPlacementDragEnd?.();
+  };
+  const cancel = (pointerEvent) => {
+    if (pointerEvent.pointerId !== pointerId) return;
+    cleanup();
+    if (!dragging) return;
+    emit('cancel', pointerEvent);
+    onPlacementDragEnd?.();
+  };
+
+  window.addEventListener('pointermove', move, { passive: false });
+  window.addEventListener('pointerup', finish, { passive: false });
+  window.addEventListener('pointercancel', cancel);
 }
 
 // The same compact token appears in Pieces, in placement dialogs and as the

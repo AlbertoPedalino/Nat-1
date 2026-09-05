@@ -11,7 +11,7 @@ import {
   MIN_MAP_OBJECT_STROKE,
   mapObjectLabel,
 } from '../../../shared/vtt/mapObjects.js';
-import { beginPieceDrag } from './PiecePreview.jsx';
+import { beginPiecePointerDrag } from './PiecePreview.jsx';
 import MapObjectGlyph from './MapObjectGlyph.jsx';
 
 const PAGE_SIZE = 32;
@@ -59,7 +59,8 @@ export default function MapObjectsPanel({
   return (
     <Box>
       <Typography sx={hintSx}>
-        Click or drag an icon onto the {layer} layer. Placed objects can be moved, resized and rotated.
+        Click to quick-place, or drag with mouse, touch or pen onto the {layer} layer.
+        {' '}Placed objects can be moved, resized and rotated.
       </Typography>
       <Box sx={filtersSx}>
         <TextField
@@ -115,14 +116,12 @@ export default function MapObjectsPanel({
                 type="button"
                 aria-label={`Place ${label}`}
                 title={label}
-                draggable={!busy}
                 disabled={busy}
                 onClick={() => onPlace?.(placement(iconKey).object)}
-                onDragStart={(event) => {
-                  beginPieceDrag(event);
-                  onPlacementDragStart?.(placement(iconKey));
-                }}
-                onDragEnd={onPlacementDragEnd}
+                onPointerDown={(event) => beginPiecePointerDrag(event, placement(iconKey), {
+                  onPlacementDragStart,
+                  onPlacementDragEnd,
+                })}
                 sx={{ ...objectButtonSx, color }}
               >
                 <Box data-piece-preview sx={previewSx}>
@@ -188,6 +187,8 @@ const objectButtonSx = {
   border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.24)}`,
   bgcolor: vttAlpha(VTT_COLORS.black, 0.18),
   cursor: 'grab',
+  touchAction: 'pan-y',
+  userSelect: 'none',
   '&:hover': {
     bgcolor: vttAlpha(VTT_COLORS.gold, 0.1),
     borderColor: vttAlpha(VTT_COLORS.gold, 0.6),

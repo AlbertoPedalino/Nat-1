@@ -1157,14 +1157,34 @@ export default function SceneEditor({
     }
   }, [canPlacePiece, notify, scene.id, tokens]);
 
-  const handleAddToken = useCallback(() => {
+  const handleAddToken = useCallback(async (draft = {}, position) => {
     if (!canPlacePiece()) return;
-    addToken({
-      ...nextFreeCell(),
-      layer: activeLayer,
-      label: activeLayer === 'gm' ? 'Hidden' : 'Token',
-    });
-  }, [activeLayer, addToken, canPlacePiece, nextFreeCell]);
+    const layer = draft.layer || activeLayer;
+    let uploadedPath = null;
+    setBusy(true);
+    try {
+      if (draft.imageFile) {
+        uploadedPath = await uploadMapImage(scene.campaignId, scene.id, draft.imageFile);
+      }
+      const created = await createToken(scene.id, {
+        ...(position || nextFreeCell()),
+        layer,
+        label: String(draft.label || '').trim() || (layer === 'gm' ? 'Hidden' : 'Token'),
+        color: draft.color || null,
+        image_path: uploadedPath,
+      });
+      setTokens((current) => (
+        current.some((item) => item.id === created.id) ? current : [...current, created]
+      ));
+    } catch (cause) {
+      if (uploadedPath) {
+        try { await deleteMapImage(uploadedPath); } catch {}
+      }
+      notify('error', cause?.message || 'Could not add that token.');
+    } finally {
+      setBusy(false);
+    }
+  }, [activeLayer, canPlacePiece, nextFreeCell, notify, scene.campaignId, scene.id, setTokens]);
 
   // A player's marker always lands on the token layer: they have no layer
   // selector, and the GM layer is not theirs to write to — the insert policy
@@ -1257,10 +1277,12 @@ export default function SceneEditor({
         fightId: placement.fightId,
         position,
       });
+    } else if (placement.kind === 'token') {
+      handleAddToken(placement.token, position);
     } else if (placement.kind === 'object') {
       handlePlaceObject(placement.object, position);
     }
-  }, [handleDropCharacter, handleImportEncounter, handlePlaceMonster, handlePlaceObject]);
+  }, [handleAddToken, handleDropCharacter, handleImportEncounter, handlePlaceMonster, handlePlaceObject]);
 
   // Label and conditions in one write. A GM-only label goes to its own table:
   // keeping it on the token row would deliver it to the players.
@@ -1986,6 +2008,26 @@ export default function SceneEditor({
                 {gmPlayerPreview ? 'Exit player view' : 'Player view'}
               </Button>
             </Tooltip>
+            {/* One public-view lock for the whole table. Players are held on the
+                persisted picture; an open projector also holds its camera. */}
+            {!gmPlayerPreview && scene.isLive ? (
+              <Tooltip
+                title={projectorFollowing
+                  ? 'Freeze the current picture for players and the projector while you prepare another view'
+                  : 'Publish your prepared picture and let the projector follow your camera again'}
+              >
+                <Button
+                  size="small"
+                  variant={projectorFollowing ? 'outlined' : 'contained'}
+                  startIcon={projectorFollowing ? <Lock size={14} /> : <LockOpen size={14} />}
+                  aria-label={projectorFollowing ? 'Freeze view' : 'Unfreeze view'}
+                  aria-pressed={!projectorFollowing}
+                  onClick={handleToggleProjectorFollow}
+                >
+                  {projectorFollowing ? 'Freeze view' : 'Unfreeze view'}
+                </Button>
+              </Tooltip>
+            ) : null}
             {/* A scene that is not live has no projector to point anywhere, and
                 a projector already running only needs stopping and freezing. */}
             {!gmPlayerPreview && scene.isLive && !projectorControlsOpen ? (
@@ -2007,26 +2049,6 @@ export default function SceneEditor({
                   onClick={stopProjector}
                 >
                   Stop projector mode
-                </Button>
-              </Tooltip>
-            ) : null}
-            {/* One public-view lock for the whole table. Players are held on the
-                persisted picture; an open projector also holds its camera. */}
-            {!gmPlayerPreview && scene.isLive ? (
-              <Tooltip
-                title={projectorFollowing
-                  ? 'Freeze the current picture for players and the projector while you prepare another view'
-                  : 'Publish your prepared picture and let the projector follow your camera again'}
-              >
-                <Button
-                  size="small"
-                  variant={projectorFollowing ? 'outlined' : 'contained'}
-                  startIcon={projectorFollowing ? <Lock size={14} /> : <LockOpen size={14} />}
-                  aria-label={projectorFollowing ? 'Freeze view' : 'Unfreeze view'}
-                  aria-pressed={!projectorFollowing}
-                  onClick={handleToggleProjectorFollow}
-                >
-                  {projectorFollowing ? 'Freeze view' : 'Unfreeze view'}
                 </Button>
               </Tooltip>
             ) : null}
@@ -2160,6 +2182,7 @@ export default function SceneEditor({
             groups={toolGroups}
             activeId={paintToolGroup(allowedPaintMode)}
             onCursor={() => setPaintMode('select')}
+            placing={Boolean(placementDrag)}
           />
         )}
         // Inside the viewport, not beside it: a fullscreen map paints nothing
@@ -2216,6 +2239,7 @@ export default function SceneEditor({
       <MonsterPickerDialog
         open={monsterOpen}
         busy={busy}
+        placing={Boolean(placementDrag)}
         onClose={() => setMonsterOpen(false)}
         onPlace={handlePlaceMonster}
         onPlacementDragStart={setPlacementDrag}
@@ -2225,6 +2249,7 @@ export default function SceneEditor({
       <EncounterImportDialog
         open={importOpen}
         busy={busy}
+        placing={Boolean(placementDrag)}
         onClose={() => setImportOpen(false)}
         onImport={handleImportEncounter}
         onPlacementDragStart={setPlacementDrag}

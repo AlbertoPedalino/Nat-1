@@ -43,6 +43,7 @@ import LaserOverlay from './LaserOverlay.jsx';
 import TokenSprite from './TokenSprite.jsx';
 import TokenLayer from './TokenLayer.jsx';
 import AtmosphereOverlay from './AtmosphereOverlay.jsx';
+import { PIECE_POINTER_DRAG_EVENT } from './PiecePreview.jsx';
 
 const WHEEL_STEP = 1.12;
 const VIEWPORT_CONTROL_SELECTOR = '[data-viewport-control], .MuiModal-root, .MuiPopover-root, .MuiPopper-root';
@@ -447,11 +448,11 @@ export default function SceneViewport({
   // Where a dragged-in piece would land, centred under the pointer. Only an
   // object may come to rest between squares: a creature, an imported fight and a
   // character are laid out in whole cells by the code that receives them.
-  const placementPosition = (event) => {
+  const placementPosition = useCallback((event, placement = placementDrag) => {
     const world = screenToWorld(screenPoint(event), view);
-    const w = Math.max(1, Number(placementDrag?.token?.w) || 1);
-    const h = Math.max(1, Number(placementDrag?.token?.h) || 1);
-    const free = placementDrag?.kind === 'object' && !snapObjects;
+    const w = Math.max(1, Number(placement?.token?.w) || 1);
+    const h = Math.max(1, Number(placement?.token?.h) || 1);
+    const free = placement?.kind === 'object' && !snapObjects;
 
     // A hex piece stands on a hex, so the pointer is already its centre: none of
     // the half-span shifting a square grid needs to centre a 2x2.
@@ -467,7 +468,45 @@ export default function SceneViewport({
     }
     const cell = worldToCell(world, scene.grid);
     return { x: cell.col - Math.floor(w / 2), y: cell.row - Math.floor(h / 2) };
-  };
+  }, [cellPoint, placementDrag, scene.grid, screenPoint, snapObjects, view]);
+
+  // Placement arrives through pointer events so mouse, touch and pen share the
+  // same reliable path instead of depending on native HTML drag-and-drop.
+  // Listening on the window lets a drag cross the floating tool panel or a
+  // placement dialog before it reaches the map beneath.
+  useEffect(() => {
+    const handlePointerPlacement = (event) => {
+      const detail = event.detail;
+      const host = hostRef.current;
+      if (!detail?.placement || !host) return;
+      if (detail.phase === 'cancel') {
+        setPlacementHover(null);
+        return;
+      }
+
+      const box = host.getBoundingClientRect();
+      const inside = detail.clientX >= box.left && detail.clientX <= box.right
+        && detail.clientY >= box.top && detail.clientY <= box.bottom;
+      if (!inside || backgroundOnly) {
+        setPlacementHover(null);
+        return;
+      }
+
+      const pointer = { clientX: detail.clientX, clientY: detail.clientY };
+      const next = placementPosition(pointer, detail.placement);
+      if (detail.phase === 'drop') {
+        setPlacementHover(null);
+        onDropPlacement?.(detail.placement, next);
+        return;
+      }
+      setPlacementHover((current) => (
+        current?.x === next.x && current?.y === next.y ? current : next
+      ));
+    };
+
+    window.addEventListener(PIECE_POINTER_DRAG_EVENT, handlePointerPlacement);
+    return () => window.removeEventListener(PIECE_POINTER_DRAG_EVENT, handlePointerPlacement);
+  }, [backgroundOnly, onDropPlacement, placementPosition]);
 
   const cancelLongPress = useCallback(() => {
     if (!longPressRef.current) return;
@@ -1009,9 +1048,15 @@ export default function SceneViewport({
         ...hostSx,
         ...(fillViewport ? fillViewportSx : null),
         ...(covering ? coveringSx : null),
+        ...(placementDrag && !backgroundOnly ? placementTargetSx : null),
         cursor: cameraLocked ? 'default' : cursorFor(paintMode),
       }}
     >
+      {placementDrag && !backgroundOnly ? (
+        <Box data-placement-target-hint sx={placementTargetHintSx}>
+          Release on the map to place
+        </Box>
+      ) : null}
       {imageUrl ? (
         <Box
           component="img"
@@ -1585,6 +1630,33 @@ const roundBtnSx = {
   bgcolor: vttAlpha(VTT_COLORS.ink, 0.8),
   border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.35)}`,
   '&:hover': { bgcolor: vttAlpha(VTT_COLORS.ink, 0.95) },
+};
+
+const placementTargetSx = {
+  outline: `2px dashed ${vttAlpha(VTT_COLORS.gold, 0.78)}`,
+  outlineOffset: -5,
+  boxShadow: `inset 0 0 34px ${vttAlpha(VTT_COLORS.gold, 0.12)}`,
+};
+
+const placementTargetHintSx = {
+  position: 'absolute',
+  top: 10,
+  left: '50%',
+  zIndex: 9,
+  transform: 'translateX(-50%)',
+  px: 1.25,
+  py: 0.55,
+  borderRadius: 10,
+  bgcolor: vttAlpha(VTT_COLORS.ink, 0.92),
+  color: VTT_COLORS.gold,
+  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.62)}`,
+  boxShadow: `0 4px 14px ${vttAlpha(VTT_COLORS.black, 0.55)}`,
+  fontFamily: '"Cinzel", Georgia, serif',
+  fontSize: '0.62rem',
+  fontWeight: 700,
+  letterSpacing: '0.05em',
+  whiteSpace: 'nowrap',
+  pointerEvents: 'none',
 };
 
 const playAreaSvgSx = {

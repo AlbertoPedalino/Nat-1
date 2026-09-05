@@ -11,7 +11,7 @@ import { describeGroups } from '../../../shared/dungeon/roomBudget.js';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { MARKER_COLORS } from '../../../shared/dungeon/roomMarkers.js';
 import InfoHint from '../../../components/InfoHint.jsx';
-import PiecePreview, { beginPieceDrag } from './PiecePreview.jsx';
+import PiecePreview, { beginPiecePointerDrag } from './PiecePreview.jsx';
 
 // The dungeon this map is being played as.
 //
@@ -153,19 +153,14 @@ export default function DungeonPanel({
                     direction="row"
                     spacing={0.6}
                     sx={dragSx}
-                    draggable
-                    onDragStart={(event) => {
-                      beginPieceDrag(event);
-                      onPlacementDragStart?.({
-                        kind: 'encounter',
-                        layer: 'tokens',
-                        instanceId: sent.instanceId,
-                        fightId: sent.fightId,
-                        combatants: sent.combatants,
-                        token: previewToken(chosen.groups),
-                      });
-                    }}
-                    onDragEnd={onPlacementDragEnd}
+                    onPointerDown={(event) => beginPiecePointerDrag(event, {
+                      kind: 'encounter',
+                      layer: 'tokens',
+                      instanceId: sent.instanceId,
+                      fightId: sent.fightId,
+                      combatants: sent.combatants,
+                      token: previewToken(chosen.groups),
+                    }, { onPlacementDragStart, onPlacementDragEnd })}
                   >
                     <PiecePreview token={previewToken(chosen.groups)} size={26} />
                     <Typography sx={lineSx}>Drag onto the map — “{sent.name}”</Typography>
@@ -190,35 +185,23 @@ export default function DungeonPanel({
                   <Box
                     key={`${keyRoom.id}-${marker.label}`}
                     sx={markerSx}
-                    draggable
-                    onDragStart={(event) => {
-                      beginPieceDrag(event);
-                      onPlacementDragStart?.({
-                        kind: 'object',
-                        // `key`, not `iconKey`: the map's own object placement
-                        // reads that field and returns without a word when it
-                        // is missing, so a marker dragged with the wrong name
-                        // simply never arrived.
-                        object: {
-                          key: marker.iconKey,
-                          label: marker.label,
-                          // The DC and the damage are the GM's note. Kept off the
-                          // row so that showing the trap to the party later shows
-                          // them the icon and not the numbers.
-                          secretLabel: true,
-                          layer: 'gm',
-                          color: MARKER_COLORS[marker.kind],
-                        },
-                        token: {
-                          iconKey: marker.iconKey,
-                          label: marker.label,
-                          color: MARKER_COLORS[marker.kind],
-                          w: 1,
-                          h: 1,
-                        },
-                      });
-                    }}
-                    onDragEnd={onPlacementDragEnd}
+                    onPointerDown={(event) => beginPiecePointerDrag(event, {
+                      kind: 'object',
+                      object: {
+                        key: marker.iconKey,
+                        label: marker.label,
+                        secretLabel: true,
+                        layer: 'gm',
+                        color: MARKER_COLORS[marker.kind],
+                      },
+                      token: {
+                        iconKey: marker.iconKey,
+                        label: marker.label,
+                        color: MARKER_COLORS[marker.kind],
+                        w: 1,
+                        h: 1,
+                      },
+                    }, { onPlacementDragStart, onPlacementDragEnd })}
                   >
                     {marker.label}
                   </Box>
@@ -318,6 +301,8 @@ const dragSx = {
   border: '1px dashed',
   borderColor: 'primary.main',
   cursor: 'grab',
+  touchAction: 'pan-y',
+  userSelect: 'none',
 };
 
 const markerSx = {
@@ -328,4 +313,6 @@ const markerSx = {
   borderColor: 'divider',
   fontSize: '0.66rem',
   cursor: 'grab',
+  touchAction: 'pan-y',
+  userSelect: 'none',
 };

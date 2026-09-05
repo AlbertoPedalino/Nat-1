@@ -34,8 +34,7 @@ export default function MonsterBrowser({
   onToggleSource,
   onSelect,
   onPick,
-  onDragStart,
-  onDragEnd,
+  onPointerDragStart,
   pickLabel = 'Add',
   listSx,
 }) {
@@ -113,9 +112,9 @@ export default function MonsterBrowser({
             key={`${monster.name}-${monster.source}`}
             role="button"
             tabIndex={0}
-            draggable={Boolean(onDragStart)}
-            onDragStart={onDragStart ? (event) => onDragStart(event, monster) : undefined}
-            onDragEnd={onDragEnd}
+            onPointerDown={onPointerDragStart
+              ? (event) => onPointerDragStart(event, monster)
+              : undefined}
             onClick={() => onSelect?.(monster)}
             onKeyDown={(event) => { if (event.key === 'Enter') onSelect?.(monster); }}
             sx={rowSx}
@@ -179,6 +178,7 @@ const rowSx = {
   cursor: 'pointer',
   minWidth: 0,
   userSelect: 'none',
+  touchAction: 'pan-y',
   '&:hover': {
     borderColor: 'primary.main',
     bgcolor: 'rgba(215,173,82,0.08)',

@@ -19,11 +19,12 @@ import { restoreFight } from '../../../pages/encounterbuilder/logic/combat.js';
 import { combatantToToken, importableCombatants } from '../../../shared/vtt/encounterImport.js';
 import { useMonsterDb } from '../../encounterbuilder/hooks/useMonsterDb.js';
 import { fullscreenContainer } from '../logic/fullscreenContainer.js';
-import PiecePreview, { beginPieceDrag } from './PiecePreview.jsx';
+import PiecePreview, { beginPiecePointerDrag } from './PiecePreview.jsx';
 import {
   battleMapDialogActionsSx,
   battleMapDialogContentSx,
   battleMapDialogPaperSx,
+  battleMapDialogPlacingPaperSx,
   battleMapDialogTitleSx,
   battleMapDropBackdropSx,
   battleMapDropDialogSx,
@@ -33,7 +34,7 @@ import {
 // that joins them: the GM's own browser holds the encounter data, and the GM is
 // the one importing. Reading localStorage here is the honest way round.
 export default function EncounterImportDialog({
-  open, onClose, onImport, busy, onPlacementDragStart, onPlacementDragEnd,
+  open, onClose, onImport, busy, placing = false, onPlacementDragStart, onPlacementDragEnd,
 }) {
   const monsterDb = useMonsterDb();
   const [instanceId, setInstanceId] = useState('');
@@ -86,7 +87,7 @@ export default function EncounterImportDialog({
       container={fullscreenContainer}
       sx={battleMapDropDialogSx}
       slotProps={{
-        paper: { sx: battleMapDialogPaperSx },
+        paper: { sx: [battleMapDialogPaperSx, placing && battleMapDialogPlacingPaperSx] },
         backdrop: { sx: battleMapDropBackdropSx },
       }}
     >
@@ -137,20 +138,15 @@ export default function EncounterImportDialog({
               </Typography>
 
               <Box
-                draggable={Boolean(previewToken) && !busy}
-                onDragStart={previewToken ? (event) => {
-                  beginPieceDrag(event);
-                  onPlacementDragStart?.({
-                    kind: 'encounter',
-                    combatants,
-                    layer,
-                    instanceId,
-                    fightId,
-                    token: previewToken,
-                    count: combatants.length,
-                  });
-                } : undefined}
-                onDragEnd={onPlacementDragEnd}
+                onPointerDown={previewToken && !busy ? (event) => beginPiecePointerDrag(event, {
+                  kind: 'encounter',
+                  combatants,
+                  layer,
+                  instanceId,
+                  fightId,
+                  token: previewToken,
+                  count: combatants.length,
+                }, { onPlacementDragStart, onPlacementDragEnd }) : undefined}
                 sx={{ ...placementCardSx, cursor: previewToken && !busy ? 'grab' : 'default' }}
               >
                 {previewToken ? <PiecePreview token={previewToken} count={combatants.length} size={44} /> : null}
@@ -164,7 +160,7 @@ export default function EncounterImportDialog({
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
                     {combatants.length
-                      ? 'Drag this group onto the map, or use Place them.'
+                      ? 'Drag this group with mouse, touch or pen, or use Place them.'
                       : 'Player characters are skipped: they are already on the map.'}
                   </Typography>
                 </Box>
@@ -200,6 +196,7 @@ const placementCardSx = {
   border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.25)}`,
   bgcolor: vttAlpha(VTT_COLORS.black, 0.22),
   userSelect: 'none',
+  touchAction: 'pan-y',
   '&:hover': {
     borderColor: vttAlpha(VTT_COLORS.gold, 0.6),
     bgcolor: vttAlpha(VTT_COLORS.gold, 0.06),

@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeAll, vi } from 'vitest';
 import SceneViewport from './SceneViewport.jsx';
+import { PIECE_POINTER_DRAG_EVENT } from './PiecePreview.jsx';
 import HexGrid from './HexGrid.jsx';
 import SquareGrid from './SquareGrid.jsx';
 
@@ -151,6 +152,49 @@ test('an external piece is shown at map scale and dropped on the hovered cell', 
   fireEvent.drop(viewport, { clientX: 150, clientY: 120, dataTransfer });
   expect(onDropPlacement).toHaveBeenCalledWith(
     placementDrag,
+    expect.objectContaining({ x: expect.any(Number), y: expect.any(Number) }),
+  );
+});
+
+test('a touch placement crosses tool overlays and drops at the release point', () => {
+  const placement = {
+    kind: 'object',
+    object: { key: 'door-open', label: 'Door' },
+    token: { iconKey: 'door-open', label: 'Door', w: 1, h: 1, layer: 'map' },
+  };
+  const onDropPlacement = vi.fn();
+  const { container } = render(
+    <SceneViewport
+      scene={{ grid: { size: 50, offsetX: 0, offsetY: 0, visible: false }, playArea: null }}
+      imageUrl={null}
+      tokens={[]}
+      snap
+      canMove={() => false}
+      fog={null}
+      placementDrag={placement}
+      onDropPlacement={onDropPlacement}
+      drawings={[]}
+      lasers={[]}
+      rollBubbles={[]}
+      diceThrows={[]}
+    />,
+  );
+  const viewport = screen.getByText('Upload a map image to start building this scene.').parentElement;
+  viewport.getBoundingClientRect = () => ({
+    left: 0, top: 0, right: 320, bottom: 240, width: 320, height: 240,
+  });
+
+  act(() => window.dispatchEvent(new CustomEvent(PIECE_POINTER_DRAG_EVENT, {
+    detail: { phase: 'move', placement, clientX: 140, clientY: 110 },
+  })));
+  expect(container.querySelector('[data-placement-preview]')).toBeTruthy();
+  expect(container.querySelector('[data-placement-target-hint]')).toHaveTextContent('Release on the map to place');
+
+  act(() => window.dispatchEvent(new CustomEvent(PIECE_POINTER_DRAG_EVENT, {
+    detail: { phase: 'drop', placement, clientX: 160, clientY: 130 },
+  })));
+  expect(onDropPlacement).toHaveBeenCalledWith(
+    placement,
     expect.objectContaining({ x: expect.any(Number), y: expect.any(Number) }),
   );
 });

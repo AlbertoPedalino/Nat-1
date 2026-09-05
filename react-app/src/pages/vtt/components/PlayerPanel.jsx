@@ -2,7 +2,7 @@ import { Box, Button, Stack, Typography } from '@mui/material';
 import { MapPin, Plus } from 'lucide-react';
 import { placedCharacterIds } from '../../../shared/campaign/roster.js';
 import { usePortraits } from '../../../shared/character/usePortraits.js';
-import PiecePreview, { beginPieceDrag } from './PiecePreview.jsx';
+import PiecePreview, { beginPiecePointerDrag } from './PiecePreview.jsx';
 
 // What a player can do to the board. Deliberately short: place their own
 // character, drop a plain marker, and move or pick up either. Everything else on
@@ -31,30 +31,31 @@ export default function PlayerPanel({
           <Stack spacing={0.5}>
             {mine.map((entry) => {
               const isPlaced = placed.has(entry.characterId);
+              const placement = {
+                kind: 'character',
+                characterId: entry.characterId,
+                token: {
+                  characterId: entry.characterId,
+                  label: entry.name,
+                  color: entry.color,
+                  className: entry.className,
+                  deathSaves: entry.deathSaves,
+                  imageUrl: portraits[entry.portraitPath] || null,
+                  layer: 'tokens',
+                  w: 1,
+                  h: 1,
+                },
+              };
               return (
                 <Box
                   key={entry.characterId}
-                  draggable={!isPlaced && !placementDisabled && !busy}
-                  onDragStart={(event) => {
-                    event.dataTransfer.setData('application/x-gb-character', entry.characterId);
-                    beginPieceDrag(event);
-                    onPlacementDragStart?.({
-                      kind: 'character',
-                      characterId: entry.characterId,
-                      token: {
-                        characterId: entry.characterId,
-                        label: entry.name,
-                        color: entry.color,
-                        className: entry.className,
-                        deathSaves: entry.deathSaves,
-                        imageUrl: portraits[entry.portraitPath] || null,
-                        layer: 'tokens',
-                        w: 1,
-                        h: 1,
-                      },
+                  onPointerDown={(event) => {
+                    if (isPlaced || placementDisabled || busy) return;
+                    beginPiecePointerDrag(event, placement, {
+                      onPlacementDragStart,
+                      onPlacementDragEnd,
                     });
                   }}
-                  onDragEnd={onPlacementDragEnd}
                   sx={{
                     ...rowSx,
                     cursor: isPlaced || placementDisabled || busy ? 'default' : 'grab',
@@ -114,6 +115,8 @@ const rowSx = {
   alignItems: 'center',
   gap: 1,
   py: 0.25,
+  touchAction: 'pan-y',
+  userSelect: 'none',
 };
 
 const panelInnerSx = { p: 0, bgcolor: 'transparent', backgroundImage: 'none' };

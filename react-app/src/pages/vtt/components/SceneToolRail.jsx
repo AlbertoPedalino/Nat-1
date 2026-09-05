@@ -11,7 +11,7 @@ import { battleMapSurfaceSx } from './battleMapSurface.js';
 // controls over a battlemap covered the board it was meant to adjust. Only one
 // group is open at a time, and the panel is anchored rather than modal so the
 // map stays visible and usable behind it.
-export default function SceneToolRail({ groups, activeId = 'cursor', onCursor }) {
+export default function SceneToolRail({ groups, activeId = 'cursor', onCursor, placing = false }) {
   const [openId, setOpenId] = useState(null);
   const open = groups.find((group) => group.id === openId) || null;
   const closePanel = () => setOpenId(null);
@@ -62,7 +62,7 @@ export default function SceneToolRail({ groups, activeId = 'cursor', onCursor })
           the button underneath, so it never appeared to close at all. It also
           portals to the document root, which a fullscreen element hides. */}
       {open ? (
-        <Box data-viewport-control sx={panelSx}>
+        <Box data-viewport-control sx={[panelSx, placing && panelPlacingSx]}>
           <Stack direction="row" sx={{ alignItems: 'center', mb: 1 }}>
             <Typography sx={panelTitleSx}>{open.label}</Typography>
             <Box sx={{ flex: 1 }} />
@@ -134,6 +134,14 @@ const panelSx = {
   borderRadius: 1,
   boxShadow: 6,
   cursor: 'default',
+  transition: 'opacity 140ms ease',
+};
+
+// Keep the drag source mounted and stationary. A quiet fade reveals the board
+// without the distracting sideways flight, then reverses when the piece lands.
+const panelPlacingSx = {
+  opacity: 0,
+  pointerEvents: 'none',
 };
 
 const panelTitleSx = {

@@ -16,6 +16,14 @@ export const battleMapDialogPaperSx = {
   ...battleMapSurfaceSx,
   borderRadius: 1,
   boxShadow: `0 18px 52px ${vttAlpha(VTT_COLORS.black, 0.62)}`,
+  transition: 'opacity 140ms ease',
+};
+
+// Placement sources stay mounted and stationary while the surface fades out,
+// revealing the board without disturbing the active pointer sequence.
+export const battleMapDialogPlacingPaperSx = {
+  opacity: 0,
+  pointerEvents: 'none',
 };
 
 export const battleMapDialogTitleSx = {
