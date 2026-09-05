@@ -321,7 +321,6 @@ export default function SceneEditor({
     handleCustomRoll,
     handleSheetRoll,
     rollBubbles,
-    showSettledToast: showSettledRollToast,
     toast: rollToast,
   } = useVttRolls({ campaignId: scene.campaignId, role, roster, tokens });
 
@@ -2020,7 +2019,6 @@ export default function SceneEditor({
           lasers={laserDots}
           rollBubbles={projectedRollBubbles}
           diceThrows={projectedDiceThrows}
-          onDiceSettled={showSettledRollToast}
           conditionEntries={conditionEntries}
           presentedInspection={projectorInspection}
           remoteMeasure={remoteMeasure}
@@ -2251,7 +2249,6 @@ export default function SceneEditor({
         lasers={laserDots}
         rollBubbles={gmPlayerPreview ? projectedRollBubbles : rollBubbles}
         diceThrows={gmPlayerPreview ? projectedDiceThrows : diceThrows}
-        onDiceSettled={showSettledRollToast}
         measureShape={measureShape}
         feetPerCellForRuler={feetPerCell}
         conditionEntries={conditionEntries}

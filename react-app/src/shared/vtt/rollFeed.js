@@ -109,32 +109,6 @@ export function addRoll(feed, entry, { local = false } = {}) {
   return [{ ...roll, localOrigin: Boolean(local) }, ...(feed || [])].slice(0, MAX_FEED);
 }
 
-// One result surface for every local roll. Physical dice defer their toast
-// until DiceTray reports the final painted frame; notices have nothing to wait
-// for and are returned for immediate display.
-export function queueRollToast(entry, pending) {
-  if (!entry) return null;
-  if (entry.id && entry.thrown && entry.rolls?.length) {
-    // Only the freshest physical throw per roller is played on the map. If a
-    // second roll supersedes the first before its final frame, surface the old
-    // result now instead of leaving its toast stranded in this Map forever.
-    // Returning it also preserves the function's existing "show this now"
-    // contract for the caller.
-    let superseded = null;
-    const rollerKey = entry.characterId || `actor:${entry.actorName || ''}`;
-    for (const [id, queued] of pending || []) {
-      const queuedKey = queued.characterId || `actor:${queued.actorName || ''}`;
-      if (id !== entry.id && queuedKey === rollerKey) {
-        superseded = queued;
-        pending.delete(id);
-      }
-    }
-    pending?.set(entry.id, entry);
-    return superseded;
-  }
-  return entry;
-}
-
 // Who a roll made from the map itself belongs to.
 //
 // A roll from a character sheet already knows whose it is. One made from the

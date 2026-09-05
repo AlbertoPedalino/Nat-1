@@ -8,7 +8,6 @@ import {
   addRoll,
   currentBubbles,
   currentThrows,
-  queueRollToast,
   rollAuthor,
   normalizeRoll,
 } from './rollFeed.js';
@@ -167,16 +166,6 @@ test('a synced sheet roll can request physical dice on the map', () => {
   assert.equal(currentBubbles(feed).length, 1);
 });
 
-test('the shared toast waits for dice but shows notices immediately', () => {
-  const pending = new Map();
-  const dice = roll({ id: 'sheet-roll', thrown: true });
-  assert.equal(queueRollToast(dice, pending), null);
-  assert.equal(pending.get('sheet-roll'), dice);
-
-  const notice = roll({ id: 'notice', rolls: [], total: null });
-  assert.equal(queueRollToast(notice, pending), notice);
-});
-
 test('shared roll payloads bound identifiers and discard impossible dice and numbers', () => {
   const before = Date.now();
   const entry = normalizeRoll({
@@ -224,31 +213,6 @@ test('a shared roll preserves a bounded valid pool and never throws an unsafe se
   assert.equal(rejected.thrown, false);
   assert.deepEqual(invalid.rolls, []);
   assert.equal(invalid.thrown, false);
-});
-
-test('a newer physical roll surfaces the superseded toast and replaces its pending slot', () => {
-  const pending = new Map();
-  const first = roll({ id: 'sheet-roll-1', thrown: true });
-  const second = roll({ id: 'sheet-roll-2', thrown: true, timestamp: 1001 });
-
-  assert.equal(queueRollToast(first, pending), null);
-  assert.equal(queueRollToast(second, pending), first);
-  assert.deepEqual([...pending.keys()], ['sheet-roll-2']);
-});
-
-test('physical toast queues stay independent for different rollers', () => {
-  const pending = new Map();
-  const aria = roll({ id: 'aria-roll', thrown: true });
-  const brom = roll({
-    id: 'brom-roll',
-    characterId: 'char-2',
-    actorName: 'Brom',
-    thrown: true,
-  });
-
-  assert.equal(queueRollToast(aria, pending), null);
-  assert.equal(queueRollToast(brom, pending), null);
-  assert.deepEqual([...pending.keys()], ['aria-roll', 'brom-roll']);
 });
 
 test('dice are cleared once the roll is history', () => {

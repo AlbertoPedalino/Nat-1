@@ -1,5 +1,5 @@
 import {
-  useCallback, useEffect, useMemo, useRef, useState,
+  useCallback, useEffect, useMemo, useState,
 } from 'react';
 import { formatRollTitle } from '../../../shared/character/dice.js';
 import { useRollChannel } from '../../../shared/cloud/useRollChannel.js';
@@ -7,35 +7,43 @@ import {
   addRoll,
   currentBubbles,
   currentThrows,
-  queueRollToast,
+  normalizeRoll,
   rollAuthor,
 } from '../../../shared/vtt/rollFeed.js';
 import { throwFormula } from '../../../shared/vtt/throwRoll.js';
 
 export function useVttRolls({ campaignId, role, roster, tokens }) {
-  const pendingToastsRef = useRef(new Map());
   const [feed, setFeed] = useState([]);
   const [toast, setToast] = useState(null);
   const [tick, setTick] = useState(0);
 
   const dismissToast = useCallback(() => setToast(null), []);
-  const showSettledToast = useCallback((rollId) => {
-    const entry = pendingToastsRef.current.get(rollId);
-    if (!entry) return;
-    pendingToastsRef.current.delete(rollId);
-    setToast(entry);
-  }, []);
   const clearFeed = useCallback(() => setFeed([]), []);
 
-  const handleSheetRoll = useCallback((roll) => {
-    const immediate = queueRollToast(roll, pendingToastsRef.current);
-    if (immediate) setToast(immediate);
-    setFeed((current) => addRoll(current, roll, { local: true }));
+  // Feedback is immediate and independent from the physical animation. This
+  // matters most on a phone with the sheet covering the map: the dice may be
+  // rolling out of sight, but the tap must still visibly produce a result.
+  const acceptRoll = useCallback((entry, { local = false } = {}) => {
+    const roll = normalizeRoll(entry);
+    if (!roll) return;
+    setToast({
+      ...roll,
+      timestamp: roll.at,
+      meta: {
+        ...(roll.mode ? { mode: roll.mode } : {}),
+        ...(roll.bonus != null ? { bonus: roll.bonus } : {}),
+      },
+    });
+    setFeed((current) => addRoll(current, roll, { local }));
   }, []);
+
+  const handleSheetRoll = useCallback((roll) => {
+    acceptRoll(roll, { local: true });
+  }, [acceptRoll]);
 
   const { publish } = useRollChannel({
     campaignId,
-    onRoll: (roll) => setFeed((current) => addRoll(current, roll)),
+    onRoll: acceptRoll,
   });
 
   const handleCustomRoll = useCallback((formula) => {
@@ -58,11 +66,9 @@ export function useVttRolls({ campaignId, role, roster, tokens }) {
         roster,
       }),
     };
-    const superseded = queueRollToast(entry, pendingToastsRef.current);
-    if (superseded) setToast(superseded);
-    setFeed((current) => addRoll(current, entry, { local: true }));
+    acceptRoll(entry, { local: true });
     publish(entry);
-  }, [publish, role.isGm, role.ownedCharacterIds, roster, tokens]);
+  }, [acceptRoll, publish, role.isGm, role.ownedCharacterIds, roster, tokens]);
 
   useEffect(() => {
     if (!feed.length) return undefined;
@@ -89,7 +95,6 @@ export function useVttRolls({ campaignId, role, roster, tokens }) {
     handleSheetRoll,
     rollBubbles: bubbles,
     diceThrows: throws,
-    showSettledToast,
     toast,
   };
 }

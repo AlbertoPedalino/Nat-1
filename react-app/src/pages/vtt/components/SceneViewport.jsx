@@ -172,7 +172,6 @@ export default function SceneViewport({
   lasers,
   rollBubbles,
   diceThrows,
-  onDiceSettled,
   conditionEntries,
   presentedInspection,
   onTokenInspection,
@@ -1543,7 +1542,6 @@ export default function SceneViewport({
       {/* Screen space, over everything: the dice are on the table, not on the
           map. A throw with no piece to land next to lands in the middle. */}
       <DiceTray
-        onThrowSettled={onDiceSettled}
         throws={(diceThrows || []).map(({ roll, token }) => {
           const rect = token ? tokenWorldRect(token, scene.grid) : null;
           const at = rect ? worldToScreen(rect, view) : null;

@@ -84,7 +84,6 @@ vi.mock('../hooks/useVttRolls.js', () => ({
     handleCustomRoll: vi.fn(),
     handleSheetRoll: vi.fn(),
     rollBubbles: [],
-    showSettledToast: vi.fn(),
     toast: null,
   }),
 }));
