@@ -1,10 +1,32 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { Box } from '@mui/material';
-import { tokenWorldRect, worldToScreen } from '../../../shared/vtt/geometry.js';
+import { cellSize, tokenWorldRect, worldToScreen } from '../../../shared/vtt/geometry.js';
+import { decodeCells } from '../../../shared/vtt/fog.js';
 import { isTokenInPlay } from '../../../shared/vtt/scene.js';
 import TokenSprite from './TokenSprite.jsx';
 
 const VIEWPORT_OVERSCAN = 180;
+
+function touchesRevealedFog(rect, grid, fog, fogBytes) {
+  if (!fog) return true;
+  const size = cellSize(grid) / Math.max(1, fog.scale || 1);
+  const offsetX = Number(grid?.offsetX) || 0;
+  const offsetY = Number(grid?.offsetY) || 0;
+  const firstCol = Math.floor((rect.x - offsetX) / size);
+  const firstRow = Math.floor((rect.y - offsetY) / size);
+  const lastCol = Math.ceil((rect.x + rect.width - offsetX) / size) - 1;
+  const lastRow = Math.ceil((rect.y + rect.height - offsetY) / size) - 1;
+
+  for (let row = firstRow; row <= lastRow; row += 1) {
+    if (row < 0 || row >= fog.rows) continue;
+    for (let col = firstCol; col <= lastCol; col += 1) {
+      if (col < 0 || col >= fog.cols) continue;
+      const index = row * fog.cols + col;
+      if (fogBytes[index >> 3] & (1 << (index & 7))) return true;
+    }
+  }
+  return false;
+}
 
 function outsideViewport(rect, at, zoom, viewport) {
   if (!(viewport?.width > 0) || !(viewport?.height > 0)) return false;
@@ -98,6 +120,8 @@ export default memo(function TokenLayer({
   selectedMapObjectId,
   canSetDeathSaves,
   conditionEntries,
+  fog,
+  hideCovered = false,
   presentedInspection,
   onInspectionChange,
   onBeginDrag,
@@ -106,6 +130,12 @@ export default memo(function TokenLayer({
   onDeathSaveChange,
   onContextMenu,
 }) {
+  const fogBytes = useMemo(() => (
+    hideCovered && fog
+      ? decodeCells(fog.cells, Math.ceil((fog.cols * fog.rows) / 8))
+      : null
+  ), [fog, hideCovered]);
+
   return (tokens || []).map((token) => {
     const moved = drag?.id === token.id ? { ...token, x: drag.x, y: drag.y } : token;
     const sized = resize?.id === token.id ? { ...moved, w: resize.w, h: resize.h } : moved;
@@ -113,6 +143,7 @@ export default memo(function TokenLayer({
     const rect = tokenWorldRect(live, grid);
     const at = worldToScreen(rect, view);
     if (outsideViewport(rect, at, view.zoom, viewportSize)) return null;
+    if (hideCovered && fogBytes && !touchesRevealedFog(rect, grid, fog, fogBytes)) return null;
 
     const onActiveLayer = !activeLayer || token.layer === activeLayer;
     const interactive = !cameraLocked && onActiveLayer && paintMode === 'select';

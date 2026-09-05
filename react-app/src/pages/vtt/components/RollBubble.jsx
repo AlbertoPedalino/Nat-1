@@ -11,7 +11,7 @@ const FONT = '"Cinzel", Georgia, serif';
 //
 // Laid out by the same function as the sheet's toast, so the player who rolled
 // and the table watching the map read the same thing.
-export default function RollBubble({ roll, x, y }) {
+export default function RollBubble({ roll, x, y, underFog = false }) {
   const layout = resolveToastLayout({
     label: roll.label,
     detail: roll.detail,
@@ -23,7 +23,11 @@ export default function RollBubble({ roll, x, y }) {
   return (
     // Outer box owns the position; the transform here must stay untouched, so
     // the entrance animation lives on the inner box instead.
-    <Box sx={{ ...rootSx, transform: `translate(${x}px, ${y}px) translate(-50%, -100%)` }}>
+    <Box sx={{
+      ...rootSx,
+      ...(underFog ? underFogSx : null),
+      transform: `translate(${x}px, ${y}px) translate(-50%, -100%)`,
+    }}>
       <Box sx={{
         ...bubbleSx,
         ...(layout.isCrit ? critSx : {}),
@@ -77,6 +81,8 @@ const rootSx = {
   zIndex: 7,
   pointerEvents: 'none',
 };
+
+const underFogSx = { zIndex: 3 };
 
 const bubbleSx = {
   position: 'relative',

@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
+import { createFog, setCells } from '../../../shared/vtt/fog.js';
 import TokenLayer from './TokenLayer.jsx';
 
 const sprite = vi.hoisted(() => vi.fn(({ token }) => <div data-testid={`token-${token.id}`} />));
@@ -45,4 +46,29 @@ test('a drag rerenders the moving token but not its unchanged neighbours', () =>
 
   expect(sprite).toHaveBeenCalledOnce();
   expect(sprite.mock.calls[0][0].token).toEqual(expect.objectContaining({ id: 'near', x: 1.5 }));
+});
+
+test('public fog omits a fully covered token until its area is revealed', () => {
+  const fog = createFog(6, 5, 1);
+  const { rerender } = render(
+    <TokenLayer {...stable} tokens={[tokens[0]]} fog={fog} hideCovered />,
+  );
+
+  expect(screen.queryByTestId('token-near')).not.toBeInTheDocument();
+
+  rerender(
+    <TokenLayer
+      {...stable}
+      tokens={[tokens[0]]}
+      fog={setCells(fog, [{ col: 1, row: 1 }], true)}
+      hideCovered
+    />,
+  );
+  expect(screen.getByTestId('token-near')).toBeInTheDocument();
+});
+
+test('GM fog never removes covered tokens from the editor', () => {
+  render(<TokenLayer {...stable} tokens={[tokens[0]]} fog={createFog(6, 5, 1)} />);
+
+  expect(screen.getByTestId('token-near')).toBeInTheDocument();
 });

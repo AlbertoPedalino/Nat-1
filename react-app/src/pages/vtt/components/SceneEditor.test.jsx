@@ -139,6 +139,7 @@ test('the spectator composition applies the player boundary before rendering the
   expect(screen.getByTestId('scene-viewport')).toHaveTextContent('visible');
   expect(screen.getByTestId('scene-viewport')).not.toHaveTextContent('staged');
   expect(screen.getByTestId('scene-viewport')).not.toHaveTextContent('hidden-map-prop');
+  expect(sceneViewportMock.mock.calls.at(-1)[0].fogOnTop).toBe(true);
 });
 
 test('a background scene never paints a battlemap frame while its image loads', () => {
@@ -190,6 +191,7 @@ test('a GM can switch the battlemap to a read-only player view', () => {
   );
 
   expect(screen.getByTestId('scene-viewport')).toHaveTextContent('visible,staged,hidden-map-prop');
+  expect(sceneViewportMock.mock.calls.at(-1)[0].fogOnTop).toBe(false);
   const liveButton = screen.getByRole('button', { name: 'Live' });
   const playerViewButton = screen.getByRole('button', { name: 'Player view' });
   const freezeButton = screen.getByRole('button', { name: 'Freeze view' });
@@ -216,6 +218,7 @@ test('a GM can switch the battlemap to a read-only player view', () => {
     activeLayer: null,
     controls: null,
     fogOpacity: 1,
+    fogOnTop: true,
     imageSwitch: null,
     layerSwitch: null,
     onContextMenu: undefined,

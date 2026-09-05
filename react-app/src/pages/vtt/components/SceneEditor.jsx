@@ -1930,6 +1930,7 @@ export default function SceneEditor({
           fog={scene.fog}
           atmosphere={scene.atmosphere}
           fogOpacity={PLAYER_FOG_OPACITY}
+          fogOnTop
           paintMode="select"
           backgroundOnly={viewportDisplay.shownImage === 'background'}
           // The projector shows the crawl as the table sees it: the country
@@ -2083,6 +2084,7 @@ export default function SceneEditor({
         fog={scene.fog}
         atmosphere={scene.atmosphere}
         fogOpacity={role.isGm && !gmPlayerPreview ? GM_FOG_OPACITY : PLAYER_FOG_OPACITY}
+        fogOnTop={!role.isGm || gmPlayerPreview}
         // Fog brushes are the GM's; drawing is everyone's, so a player keeps
         // the pencil and the eraser and loses only reveal/hide.
         paintMode={gmPlayerPreview ? 'select' : allowedPaintMode}

@@ -8,7 +8,7 @@ import { cellSize, worldToScreen } from '../../../shared/vtt/geometry.js';
 // scaled up with smoothing off. Filling ten thousand rectangles on every brush
 // frame is the obvious way to write this and the slow one; this way a stroke
 // costs a few thousand byte writes and one drawImage.
-export default function FogCanvas({ fog, grid, view, opacity }) {
+export default function FogCanvas({ fog, grid, view, opacity, onTop = false }) {
   const canvasRef = useRef(null);
   // Redraw when the box changes: the canvas is measured in its own pixels.
   const resizeTick = useResizeTick(canvasRef);
@@ -78,7 +78,15 @@ export default function FogCanvas({ fog, grid, view, opacity }) {
     );
   }, [fog, grid, opacity, view, resizeTick]);
 
-  return <Box component="canvas" ref={canvasRef} aria-hidden sx={canvasSx} />;
+  return (
+    <Box
+      component="canvas"
+      ref={canvasRef}
+      aria-hidden
+      data-fog-layer={onTop ? 'public' : 'gm'}
+      sx={{ ...canvasSx, ...(onTop ? publicFogSx : null) }}
+    />
+  );
 }
 
 const canvasSx = {
@@ -88,3 +96,7 @@ const canvasSx = {
   width: '100%',
   height: '100%',
 };
+
+// Public fog sits above persistent map content. Interactive overlays and map
+// controls start at the next layer, so the board remains usable.
+const publicFogSx = { zIndex: 4 };

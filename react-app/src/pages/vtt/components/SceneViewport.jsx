@@ -105,6 +105,7 @@ export default function SceneViewport({
   fog,
   atmosphere,
   fogOpacity = 1,
+  fogOnTop = false,
   paintMode = 'select',
   brushSize = 3,
   feetPerCell,
@@ -1180,7 +1181,9 @@ export default function SceneViewport({
         view={view}
       />
 
-      <FogCanvas fog={backgroundOnly ? null : fog} grid={scene.grid} view={view} opacity={fogOpacity} />
+      {!fogOnTop ? (
+        <FogCanvas fog={backgroundOnly ? null : fog} grid={scene.grid} view={view} opacity={fogOpacity} />
+      ) : null}
 
       <TokenLayer
         tokens={backgroundOnly ? [] : tokens}
@@ -1199,6 +1202,8 @@ export default function SceneViewport({
         selectedMapObjectId={selectedMapObjectId}
         canSetDeathSaves={canSetDeathSaves}
         conditionEntries={conditionEntries}
+        fog={fog}
+        hideCovered={fogOnTop}
         presentedInspection={presentedInspection}
         onInspectionChange={onTokenInspection}
         onBeginDrag={beginTokenDrag}
@@ -1212,6 +1217,16 @@ export default function SceneViewport({
           behind rulers, lasers and controls. A single viewport-sized shader is
           shared by battlemap and establishing-shot modes. */}
       <AtmosphereOverlay atmosphere={atmosphere} />
+
+      {fogOnTop ? (
+        <FogCanvas
+          fog={backgroundOnly ? null : fog}
+          grid={scene.grid}
+          view={view}
+          opacity={fogOpacity}
+          onTop
+        />
+      ) : null}
 
       {placementDrag && placementHover && !backgroundOnly ? (() => {
         const token = { ...placementDrag.token, ...placementHover };
@@ -1229,7 +1244,7 @@ export default function SceneViewport({
               transform: `translate(${at.x}px, ${at.y}px)`,
               opacity: 0.88,
               pointerEvents: 'none',
-              zIndex: 5,
+              zIndex: fogOnTop ? 3 : 5,
               filter: `drop-shadow(0 5px 8px ${vttAlpha(VTT_COLORS.black, 0.75)})`,
             }}
           >
@@ -1357,7 +1372,7 @@ export default function SceneViewport({
               pointerEvents: 'none',
               color: VTT_COLORS.gold,
               filter: `drop-shadow(0 2px 4px ${vttAlpha(VTT_COLORS.black, 0.85)})`,
-              zIndex: 5,
+              zIndex: fogOnTop ? 3 : 5,
             }}
           >
             <MapPin size={glyph} fill={vttAlpha(VTT_COLORS.surfaceRaised, 0.85)} strokeWidth={2} />
@@ -1387,6 +1402,7 @@ export default function SceneViewport({
             roll={roll}
             x={at.x + (rect.width * view.zoom) / 2}
             y={at.y - 6}
+            underFog={fogOnTop}
           />
         );
       })}
@@ -1447,6 +1463,7 @@ export default function SceneViewport({
             // width, not by a fixed rem value: "5 ft" and "120 ft" must both
             // remain centred over the piece.
             transform: `translate(${measured.x}px, ${measured.y}px) translateX(-50%)`,
+            zIndex: fogOnTop ? 3 : undefined,
           }}
         >
           {measured.label}
