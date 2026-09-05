@@ -3,6 +3,7 @@ import { Box } from '@mui/material';
 import { cellSize, tokenWorldRect, worldToScreen } from '../../../shared/vtt/geometry.js';
 import { decodeCells } from '../../../shared/vtt/fog.js';
 import { isTokenInPlay } from '../../../shared/vtt/scene.js';
+import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import TokenSprite from './TokenSprite.jsx';
 
 const VIEWPORT_OVERSCAN = 180;
@@ -58,6 +59,7 @@ const TokenNode = memo(function TokenNode({
   onBeginRotate,
   onDeathSaveChange,
   onContextMenu,
+  selected = false,
 }) {
   const rect = tokenWorldRect(token, grid);
   const at = worldToScreen(rect, view);
@@ -66,6 +68,7 @@ const TokenNode = memo(function TokenNode({
 
   return (
     <Box
+      data-token-selected={selected ? 'true' : undefined}
       sx={{
         position: 'absolute',
         left: 0,
@@ -73,6 +76,10 @@ const TokenNode = memo(function TokenNode({
         width: rect.width * view.zoom,
         height: rect.height * view.zoom,
         transform: `translate(${at.x}px, ${at.y}px)`,
+        outline: selected ? `2px solid ${VTT_COLORS.gold}` : 'none',
+        outlineOffset: 3,
+        boxShadow: selected ? `0 0 0 2px ${vttAlpha(VTT_COLORS.black, 0.72)}` : 'none',
+        zIndex: selected ? 2 : undefined,
       }}
     >
       <TokenSprite
@@ -118,6 +125,7 @@ export default memo(function TokenLayer({
   paintMode,
   canMove,
   selectedMapObjectId,
+  selectedTokenIds = [],
   canSetDeathSaves,
   conditionEntries,
   fog,
@@ -129,6 +137,7 @@ export default memo(function TokenLayer({
   onBeginRotate,
   onDeathSaveChange,
   onContextMenu,
+  groupDrag,
 }) {
   const fogBytes = useMemo(() => (
     hideCovered && fog
@@ -137,7 +146,10 @@ export default memo(function TokenLayer({
   ), [fog, hideCovered]);
 
   return (tokens || []).map((token) => {
-    const moved = drag?.id === token.id ? { ...token, x: drag.x, y: drag.y } : token;
+    const groupPosition = groupDrag?.[token.id];
+    const moved = groupPosition
+      ? { ...token, x: groupPosition.x, y: groupPosition.y }
+      : drag?.id === token.id ? { ...token, x: drag.x, y: drag.y } : token;
     const sized = resize?.id === token.id ? { ...moved, w: resize.w, h: resize.h } : moved;
     const live = rotate?.id === token.id ? { ...sized, rotation: rotate.rotation } : sized;
     const rect = tokenWorldRect(live, grid);
@@ -146,7 +158,7 @@ export default memo(function TokenLayer({
     if (hideCovered && fogBytes && !touchesRevealedFog(rect, grid, fog, fogBytes)) return null;
 
     const onActiveLayer = !activeLayer || token.layer === activeLayer;
-    const interactive = !cameraLocked && onActiveLayer && paintMode === 'select';
+    const interactive = !cameraLocked && onActiveLayer && ['select', 'marquee'].includes(paintMode);
     const movable = interactive && canMove(token);
     const selected = selectedMapObjectId === token.id;
     return (
@@ -171,6 +183,7 @@ export default memo(function TokenLayer({
         onBeginRotate={onBeginRotate}
         onDeathSaveChange={onDeathSaveChange}
         onContextMenu={onContextMenu}
+        selected={selectedTokenIds.includes(token.id)}
       />
     );
   });

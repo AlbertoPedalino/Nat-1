@@ -472,6 +472,113 @@ test('with snapping off objects land between squares while creatures keep theirs
   );
 });
 
+test('the marquee selects only movable pieces on the active layer and moves them as a group', () => {
+  const onMoveTokens = vi.fn();
+  const { container } = render(
+    <SceneViewport
+      scene={{ grid: { size: 50, offsetX: 0, offsetY: 0, visible: false }, playArea: null }}
+      imageUrl={null}
+      tokens={[
+        { id: 'hero-1', label: 'Hero', layer: 'tokens', x: 1, y: 1, w: 1, h: 1 },
+        { id: 'ogre-1', label: 'Ogre', layer: 'tokens', x: 2, y: 1, w: 1, h: 1 },
+        { id: 'enemy-1', label: 'Enemy', layer: 'tokens', x: 1, y: 1, w: 1, h: 1 },
+        { id: 'door-1', label: 'Door', iconKey: 'door-open', layer: 'map', x: 1, y: 1, w: 1, h: 1 },
+      ]}
+      snap
+      canMove={(token) => token.id !== 'enemy-1'}
+      fog={null}
+      paintMode="marquee"
+      activeLayer="tokens"
+      onMoveTokens={onMoveTokens}
+      onDeleteTokens={vi.fn()}
+      drawings={[]}
+      lasers={[]}
+      rollBubbles={[]}
+      diceThrows={[]}
+    />,
+  );
+  const viewport = screen.getByText('Upload a map image to start building this scene.').parentElement;
+
+  fireEvent.pointerDown(viewport, { button: 0, clientX: 40, clientY: 40, pointerId: 60 });
+  fireEvent.pointerMove(viewport, { button: 0, clientX: 160, clientY: 110, pointerId: 60 });
+  expect(container.querySelector('[data-selection-marquee]')).not.toBeNull();
+  fireEvent.pointerUp(viewport, { button: 0, clientX: 160, clientY: 110, pointerId: 60 });
+
+  expect(container.querySelectorAll('[data-token-selected="true"]')).toHaveLength(2);
+  expect(screen.getByText('2 selected')).toBeInTheDocument();
+
+  fireEvent.pointerDown(screen.getByRole('button', { name: 'Hero' }), {
+    button: 0, clientX: 75, clientY: 75, pointerId: 61,
+  });
+  fireEvent.pointerMove(viewport, { button: 0, clientX: 125, clientY: 75, pointerId: 61 });
+  fireEvent.pointerUp(viewport, { button: 0, clientX: 125, clientY: 75, pointerId: 61 });
+
+  expect(onMoveTokens).toHaveBeenCalledWith([
+    { token: expect.objectContaining({ id: 'hero-1' }), position: { x: 2, y: 1 } },
+    { token: expect.objectContaining({ id: 'ogre-1' }), position: { x: 3, y: 1 } },
+  ]);
+});
+
+test('Delete removes the current marquee selection and Escape only clears it', async () => {
+  const onDeleteTokens = vi.fn(() => true);
+  const { rerender } = render(
+    <SceneViewport
+      scene={{ grid: { size: 50, offsetX: 0, offsetY: 0, visible: false }, playArea: null }}
+      imageUrl={null}
+      tokens={[{ id: 'hero-1', label: 'Hero', layer: 'tokens', x: 1, y: 1, w: 1, h: 1 }]}
+      snap
+      canMove={() => true}
+      fog={null}
+      paintMode="marquee"
+      activeLayer="tokens"
+      onMoveTokens={vi.fn()}
+      onDeleteTokens={onDeleteTokens}
+      drawings={[]}
+      lasers={[]}
+      rollBubbles={[]}
+      diceThrows={[]}
+    />,
+  );
+  const viewport = screen.getByText('Upload a map image to start building this scene.').parentElement;
+  const selectHero = (pointerId) => {
+    fireEvent.pointerDown(viewport, { button: 0, clientX: 40, clientY: 40, pointerId });
+    fireEvent.pointerMove(viewport, { button: 0, clientX: 110, clientY: 110, pointerId });
+    fireEvent.pointerUp(viewport, { button: 0, clientX: 110, clientY: 110, pointerId });
+  };
+
+  selectHero(62);
+  fireEvent.keyDown(window, { key: 'Escape' });
+  expect(onDeleteTokens).not.toHaveBeenCalled();
+  expect(screen.queryByText('1 selected')).not.toBeInTheDocument();
+
+  selectHero(63);
+  fireEvent.keyDown(window, { key: 'Delete' });
+  expect(onDeleteTokens).toHaveBeenCalledWith([expect.objectContaining({ id: 'hero-1' })]);
+  await waitFor(() => expect(screen.queryByText('1 selected')).not.toBeInTheDocument());
+
+  // Keep the component update path exercised: removed rows must not resurrect
+  // a selection when realtime supplies the next token list.
+  rerender(
+    <SceneViewport
+      scene={{ grid: { size: 50, offsetX: 0, offsetY: 0, visible: false }, playArea: null }}
+      imageUrl={null}
+      tokens={[]}
+      snap
+      canMove={() => true}
+      fog={null}
+      paintMode="marquee"
+      activeLayer="tokens"
+      onMoveTokens={vi.fn()}
+      onDeleteTokens={onDeleteTokens}
+      drawings={[]}
+      lasers={[]}
+      rollBubbles={[]}
+      diceThrows={[]}
+    />,
+  );
+  expect(screen.queryByText('1 selected')).not.toBeInTheDocument();
+});
+
 const HEX_SCENE = {
   grid: {
     size: 50, offsetX: 0, offsetY: 0, visible: true, shape: 'hex',

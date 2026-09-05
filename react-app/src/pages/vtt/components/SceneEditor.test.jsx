@@ -475,3 +475,35 @@ test('player preview cannot remain active after GM permissions are lost', () => 
   rerender(renderEditor());
   expect(screen.getByRole('button', { name: 'Player view' })).toHaveAttribute('aria-pressed', 'false');
 });
+
+test('players receive the group-selection tool with permission-checked batch actions', () => {
+  sceneViewportMock.mockClear();
+  sceneRoleMock.mockReturnValue({
+    ...GM_ROLE,
+    isGm: false,
+    ownedCharacterIds: ['hero-1'],
+  });
+  const scene = {
+    id: 'scene-player-selection',
+    campaignId: 'campaign-1',
+    shownImage: 'map',
+    imagePath: null,
+    backgroundPath: null,
+    fog: null,
+    atmosphere: null,
+    isLive: true,
+    playArea: null,
+    grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
+  };
+
+  render(
+    <ThemeProvider theme={theme}>
+      <SceneEditor scene={scene} onSceneChange={vi.fn()} />
+    </ThemeProvider>,
+  );
+
+  const props = sceneViewportMock.mock.calls.at(-1)[0];
+  expect(props.controls.props.groups.map((group) => group.id)).toContain('select');
+  expect(props.onMoveTokens).toEqual(expect.any(Function));
+  expect(props.onDeleteTokens).toEqual(expect.any(Function));
+});

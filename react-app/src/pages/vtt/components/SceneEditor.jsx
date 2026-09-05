@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import {
   Cloud, Dices, DoorOpen, Eye, EyeOff, Lock, LockOpen, MonitorOff, MonitorPlay, Pencil, Pointer,
-  Radio, Ruler, Shapes, Users,
+  Radio, Ruler, Shapes, SquareDashedMousePointer, Users,
 } from 'lucide-react';
 import { useToast } from '../../../shared/ToastProvider.jsx';
 import { useAuth } from '../../../shared/cloud/AuthProvider.jsx';
@@ -188,6 +188,7 @@ function naturalImageSize(image) {
 }
 
 function paintToolGroup(mode) {
+  if (mode === 'marquee') return 'select';
   if (['draw', 'erase', 'text'].includes(mode)) return 'draw';
   if (mode === 'laser') return 'laser';
   if (mode === 'measure') return 'ruler';
@@ -689,6 +690,39 @@ export default function SceneEditor({
       draggingRef.current = null;
     }
   }, [notify, scene.playArea, sendDrag]);
+
+  const handleMoveTokens = useCallback(async (moves) => {
+    const valid = (moves || []).filter(({ token, position }) => (
+      token?.id && canMove(token) && Number.isFinite(position?.x) && Number.isFinite(position?.y)
+    ));
+    if (!valid.length) return;
+
+    const byId = new Map(valid.map(({ token, position }) => [token.id, { token, position }]));
+    setTokens((current) => current.map((item) => {
+      const move = byId.get(item.id);
+      return move ? { ...item, ...move.position } : item;
+    }));
+
+    const results = await Promise.allSettled(
+      valid.map(({ token, position }) => updateToken(token.id, position)),
+    );
+    const failedIds = new Set(results.flatMap((result, index) => (
+      result.status === 'rejected' ? [valid[index].token.id] : []
+    )));
+    if (failedIds.size) {
+      setTokens((current) => current.map((item) => (
+        failedIds.has(item.id) ? valid.find(({ token }) => token.id === item.id).token : item
+      )));
+      notify('error', `${failedIds.size} selected piece${failedIds.size === 1 ? '' : 's'} could not be moved.`);
+    }
+
+    const crossedVisibilityBoundary = valid.some(({ token, position }, index) => (
+      results[index].status === 'fulfilled'
+      && isTokenVisibleToPlayers(token, scene.playArea)
+        !== isTokenVisibleToPlayers({ ...token, ...position }, scene.playArea)
+    ));
+    if (crossedVisibilityBoundary) sendDrag({ tokensChanged: true });
+  }, [canMove, notify, scene.playArea, sendDrag]);
 
   const handleObjectStyle = useCallback(async (token, patch) => {
     const localPatch = {};
@@ -1474,6 +1508,35 @@ export default function SceneEditor({
     }
   }, [notify]);
 
+  const handleDeleteTokens = useCallback(async (selected) => {
+    const pieces = (selected || []).filter((token) => token?.id && canMove(token));
+    if (!pieces.length) return false;
+    if (!window.confirm(`Delete ${pieces.length} selected piece${pieces.length === 1 ? '' : 's'}?`)) return false;
+
+    setBusy(true);
+    let allRemoved = false;
+    try {
+      const results = await Promise.allSettled(
+        pieces.map((token) => deleteToken(token.id, token.imagePath)),
+      );
+      const removedIds = new Set(results.flatMap((result, index) => (
+        result.status === 'fulfilled' ? [pieces[index].id] : []
+      )));
+      setTokens((current) => current.filter((token) => !removedIds.has(token.id)));
+
+      const cleanupFailures = results.filter((result) => (
+        result.status === 'fulfilled' && result.value.cleanupError
+      )).length;
+      const deleteFailures = results.length - removedIds.size;
+      allRemoved = deleteFailures === 0;
+      if (cleanupFailures) notify('warning', 'The pieces were removed, but some uploaded images could not be cleaned up.');
+      if (deleteFailures) notify('error', `${deleteFailures} selected piece${deleteFailures === 1 ? '' : 's'} could not be removed.`);
+    } finally {
+      setBusy(false);
+    }
+    return allRemoved;
+  }, [canMove, notify]);
+
   const handleRemoveCharacter = useCallback((entry) => {
     const token = tokens.find((item) => item.characterId === entry.characterId);
     if (token) handleDeleteToken(token);
@@ -1570,8 +1633,22 @@ export default function SceneEditor({
       ),
     };
 
+    const selectGroup = {
+      id: 'select',
+      label: 'Select',
+      icon: SquareDashedMousePointer,
+      onActivate: () => setPaintMode('marquee'),
+      content: (
+        <Typography variant="caption" color="text.secondary">
+          Drag a rectangle over pieces you can control. Drag any selected piece to move the group;
+          hold Shift or Ctrl to add another area. Use Delete or Backspace to remove it, and Escape to clear.
+        </Typography>
+      ),
+    };
+
     if (!role.isGm) {
       return [
+        selectGroup,
         {
           id: 'pieces',
           label: 'Pieces',
@@ -1626,6 +1703,7 @@ export default function SceneEditor({
     }
 
     return [
+      selectGroup,
       {
         id: 'pieces',
         label: 'Pieces',
@@ -2147,6 +2225,8 @@ export default function SceneEditor({
         onImageSize={setImageSize}
         onDragToken={gmPlayerPreview ? undefined : handleDragToken}
         onMoveToken={gmPlayerPreview ? undefined : handleMoveToken}
+        onMoveTokens={gmPlayerPreview ? undefined : handleMoveTokens}
+        onDeleteTokens={gmPlayerPreview ? undefined : handleDeleteTokens}
         onResizeToken={gmPlayerPreview ? undefined : handleMoveToken}
         onRotateToken={gmPlayerPreview ? undefined : handleMoveToken}
         canSetDeathSaves={gmPlayerPreview ? () => false : (token) => role.isGm || canMove(token)}

@@ -1,8 +1,8 @@
 import {
   useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
 } from 'react';
-import { Box, Button, IconButton, Tooltip, Typography } from '@mui/material';
-import { MapPin, Maximize2, Minimize2, ScrollText, Settings2, X } from 'lucide-react';
+import { Box, Button, IconButton, Stack, Tooltip, Typography } from '@mui/material';
+import { MapPin, Maximize2, Minimize2, ScrollText, Settings2, Trash2, X } from 'lucide-react';
 import { brushCells } from '../../../shared/vtt/fog.js';
 import {
   DEFAULT_VIEW,
@@ -89,7 +89,26 @@ function cursorFor(paintMode) {
   if (paintMode === 'reveal' || paintMode === 'hide') return 'crosshair';
   if (paintMode === 'text') return 'text';
   if (paintMode === 'laser' || paintMode === 'measure') return 'crosshair';
+  if (paintMode === 'marquee') return 'crosshair';
   return 'grab';
+}
+
+function screenSelectionRect(from, to) {
+  const left = Math.min(from.x, to.x);
+  const top = Math.min(from.y, to.y);
+  return {
+    left,
+    top,
+    width: Math.abs(to.x - from.x),
+    height: Math.abs(to.y - from.y),
+  };
+}
+
+function overlapsSelection(rect, selection) {
+  return rect.left < selection.left + selection.width
+    && rect.left + rect.width > selection.left
+    && rect.top < selection.top + selection.height
+    && rect.top + rect.height > selection.top;
 }
 
 // Rendering is hybrid by design: the map is an <img>, tokens are DOM nodes moved
@@ -118,6 +137,8 @@ export default function SceneViewport({
   onImageSize,
   onDragToken,
   onMoveToken,
+  onMoveTokens,
+  onDeleteTokens,
   onResizeToken,
   onRotateToken,
   canSetDeathSaves,
@@ -187,6 +208,9 @@ export default function SceneViewport({
   const [resize, setResize] = useState(null);
   const [rotate, setRotate] = useState(null);
   const [selectedMapObjectId, setSelectedMapObjectId] = useState(null);
+  const [selectedTokenIds, setSelectedTokenIds] = useState([]);
+  const [selectionBox, setSelectionBox] = useState(null);
+  const [groupDrag, setGroupDrag] = useState(null);
   const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
   // The stroke in progress lives in a ref, not in state. Accumulating it in
   // state meant the commit ran inside a state updater — a side effect in a
@@ -220,6 +244,63 @@ export default function SceneViewport({
   // The mark being dragged, as an offset in cells: applied at render so the
   // stroke follows the pointer without a write per frame.
   const [markDrag, setMarkDrag] = useState(null);
+
+  const selectableTokensIn = useCallback((selection) => (
+    (tokens || []).filter((token) => {
+      if (activeLayer && token.layer !== activeLayer) return false;
+      if (!canMove(token)) return false;
+      const worldRect = tokenWorldRect(token, scene.grid);
+      const at = worldToScreen(worldRect, view);
+      return overlapsSelection({
+        left: at.x,
+        top: at.y,
+        width: worldRect.width * view.zoom,
+        height: worldRect.height * view.zoom,
+      }, selection);
+    })
+  ), [activeLayer, canMove, scene.grid, tokens, view]);
+
+  const clearSelection = useCallback(() => {
+    setSelectedTokenIds([]);
+    setSelectionBox(null);
+    setGroupDrag(null);
+  }, []);
+
+  const deleteSelection = useCallback(() => {
+    if (!onDeleteTokens || !selectedTokenIds.length) return;
+    const selected = (tokens || []).filter((token) => selectedTokenIds.includes(token.id));
+    if (!selected.length) return;
+    Promise.resolve(onDeleteTokens(selected)).then((removed) => {
+      if (removed !== false) clearSelection();
+    });
+  }, [clearSelection, onDeleteTokens, selectedTokenIds, tokens]);
+
+  useEffect(() => {
+    if (paintMode !== 'marquee' || backgroundOnly) clearSelection();
+  }, [backgroundOnly, clearSelection, paintMode]);
+
+  useEffect(() => {
+    setSelectedTokenIds((current) => current.filter((id) => (
+      (tokens || []).some((token) => token.id === id && (!activeLayer || token.layer === activeLayer))
+    )));
+  }, [activeLayer, tokens]);
+
+  useEffect(() => {
+    if (paintMode !== 'marquee' || !selectedTokenIds.length) return undefined;
+    const handleKeyDown = (event) => {
+      const target = event.target;
+      if (target?.closest?.('input, textarea, select, [contenteditable="true"]')) return;
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        clearSelection();
+      } else if (event.key === 'Delete' || event.key === 'Backspace') {
+        event.preventDefault();
+        deleteSelection();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [clearSelection, deleteSelection, paintMode, selectedTokenIds.length]);
 
   const backgroundFrame = useMemo(() => (
     backgroundOnly && imageSize && viewportSize.width > 0 && viewportSize.height > 0
@@ -547,6 +628,8 @@ export default function SceneViewport({
     cancelLongPress();
     dragRef.current = null;
     setDrag(null);
+    setGroupDrag(null);
+    setSelectionBox(null);
     setResize(null);
     setRotate(null);
     strokeRef.current = [];
@@ -673,6 +756,18 @@ export default function SceneViewport({
       onErase?.(cellPoint(point));
       return;
     }
+
+    if (event.button === 0 && paintMode === 'marquee') {
+      const additive = event.shiftKey || event.ctrlKey || event.metaKey;
+      dragRef.current = {
+        kind: 'marquee',
+        from: point,
+        baseIds: additive ? selectedTokenIds : [],
+      };
+      setSelectionBox(screenSelectionRect(point, point));
+      if (!additive) setSelectedTokenIds([]);
+      return;
+    }
     // On a hex map the empty board is not empty: every hex is a thing the GM can
     // pick. Recorded as the start of a pan and settled on release, so dragging
     // the map still pans instead of selecting whatever it started over.
@@ -700,6 +795,24 @@ export default function SceneViewport({
 
   const beginTokenDrag = useCallback((event, token) => {
     event.stopPropagation();
+    if (paintMode === 'marquee') {
+      setSelectedMapObjectId(null);
+      if (!canMove(token)) return;
+      const ids = selectedTokenIds.includes(token.id) ? selectedTokenIds : [token.id];
+      const members = (tokens || []).filter((item) => ids.includes(item.id) && canMove(item));
+      const pointer = screenToWorld(screenPoint(event), view);
+      const rect = tokenWorldRect(token, scene.grid);
+      setSelectedTokenIds(members.map((item) => item.id));
+      dragRef.current = {
+        kind: 'group',
+        anchor: token,
+        members,
+        grabOffset: { x: pointer.x - rect.x, y: pointer.y - rect.y },
+      };
+      setGroupDrag(Object.fromEntries(members.map((item) => [item.id, { x: item.x, y: item.y }])));
+      event.currentTarget.setPointerCapture?.(event.pointerId);
+      return;
+    }
     setSelectedMapObjectId(isMapPiece(token) ? token.id : null);
     armLongPress(event, token);
     if (!canMove(token)) return;
@@ -712,7 +825,7 @@ export default function SceneViewport({
     };
     setDrag({ id: token.id, x: token.x, y: token.y });
     event.currentTarget.setPointerCapture?.(event.pointerId);
-  }, [armLongPress, canMove, scene.grid, screenPoint, view]);
+  }, [armLongPress, canMove, paintMode, scene.grid, screenPoint, selectedTokenIds, tokens, view]);
 
   const beginTokenResize = useCallback((event, token) => {
     event.stopPropagation();
@@ -774,6 +887,34 @@ export default function SceneViewport({
     }
 
     if (!state) return;
+
+    if (state.kind === 'marquee') {
+      const selection = screenSelectionRect(state.from, point);
+      const hits = selectableTokensIn(selection).map((token) => token.id);
+      setSelectionBox(selection);
+      setSelectedTokenIds([...new Set([...state.baseIds, ...hits])]);
+      return;
+    }
+
+    if (state.kind === 'group') {
+      const anchorPosition = dropPosition({
+        pointerWorld: screenToWorld(point, view),
+        grabOffset: state.grabOffset,
+        grid: scene.grid,
+        snap: false,
+        span: state.anchor,
+      });
+      const delta = {
+        x: anchorPosition.x - state.anchor.x,
+        y: anchorPosition.y - state.anchor.y,
+      };
+      state.delta = delta;
+      setGroupDrag(Object.fromEntries(state.members.map((token) => [
+        token.id,
+        { x: token.x + delta.x, y: token.y + delta.y },
+      ])));
+      return;
+    }
 
     if (state.kind === 'mark') {
       const at = cellPoint(point);
@@ -883,6 +1024,33 @@ export default function SceneViewport({
     const state = dragRef.current;
     dragRef.current = null;
     event.currentTarget.releasePointerCapture?.(event.pointerId);
+
+    if (state?.kind === 'marquee') {
+      setSelectionBox(null);
+      return;
+    }
+
+    if (state?.kind === 'group') {
+      const anchorPosition = dropPosition({
+        pointerWorld: screenToWorld(screenPoint(event), view),
+        grabOffset: state.grabOffset,
+        grid: scene.grid,
+        snap: snapFor(state.anchor),
+        span: state.anchor,
+      });
+      const delta = {
+        x: anchorPosition.x - state.anchor.x,
+        y: anchorPosition.y - state.anchor.y,
+      };
+      setGroupDrag(null);
+      if (delta.x || delta.y) {
+        onMoveTokens?.(state.members.map((token) => ({
+          token,
+          position: { x: token.x + delta.x, y: token.y + delta.y },
+        })));
+      }
+      return;
+    }
 
     if (state?.kind === 'mark') {
       setMarkDrag(null);
@@ -1188,6 +1356,7 @@ export default function SceneViewport({
       <TokenLayer
         tokens={backgroundOnly ? [] : tokens}
         drag={drag}
+        groupDrag={groupDrag}
         resize={resize}
         rotate={rotate}
         view={view}
@@ -1200,6 +1369,7 @@ export default function SceneViewport({
         paintMode={paintMode}
         canMove={canMove}
         selectedMapObjectId={selectedMapObjectId}
+        selectedTokenIds={selectedTokenIds}
         canSetDeathSaves={canSetDeathSaves}
         conditionEntries={conditionEntries}
         fog={fog}
@@ -1259,6 +1429,43 @@ export default function SceneViewport({
           </Box>
         );
       })() : null}
+
+      {selectionBox ? (
+        <Box
+          aria-hidden
+          data-selection-marquee
+          sx={{
+            ...selectionMarqueeSx,
+            left: selectionBox.left,
+            top: selectionBox.top,
+            width: selectionBox.width,
+            height: selectionBox.height,
+          }}
+        />
+      ) : null}
+
+      {paintMode === 'marquee' && selectedTokenIds.length ? (
+        <Stack
+          data-viewport-control
+          direction="row"
+          spacing={0.75}
+          sx={selectionToolbarSx}
+        >
+          <Typography sx={selectionCountSx}>{selectedTokenIds.length} selected</Typography>
+          <Button
+            size="small"
+            color="error"
+            startIcon={<Trash2 size={14} />}
+            onClick={deleteSelection}
+            disabled={!onDeleteTokens}
+          >
+            Delete
+          </Button>
+          <IconButton size="small" aria-label="Clear selection" onClick={clearSelection}>
+            <X size={14} />
+          </IconButton>
+        </Stack>
+      ) : null}
 
       {controls ? (
         <>
@@ -1674,6 +1881,39 @@ const placementTargetHintSx = {
   letterSpacing: '0.05em',
   whiteSpace: 'nowrap',
   pointerEvents: 'none',
+};
+
+const selectionMarqueeSx = {
+  position: 'absolute',
+  zIndex: 5,
+  pointerEvents: 'none',
+  boxSizing: 'border-box',
+  border: `1px solid ${VTT_COLORS.gold}`,
+  bgcolor: vttAlpha(VTT_COLORS.gold, 0.16),
+  boxShadow: `0 0 0 1px ${vttAlpha(VTT_COLORS.black, 0.5)}`,
+};
+
+const selectionToolbarSx = {
+  position: 'absolute',
+  left: '50%',
+  top: 8,
+  zIndex: 7,
+  transform: 'translateX(-50%)',
+  alignItems: 'center',
+  px: 1,
+  py: 0.5,
+  borderRadius: 1,
+  bgcolor: vttAlpha(VTT_COLORS.ink, 0.94),
+  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.45)}`,
+  boxShadow: 4,
+};
+
+const selectionCountSx = {
+  color: VTT_COLORS.gold,
+  fontFamily: '"Cinzel", Georgia, serif',
+  fontSize: '0.68rem',
+  fontWeight: 700,
+  whiteSpace: 'nowrap',
 };
 
 const playAreaSvgSx = {
