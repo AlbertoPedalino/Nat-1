@@ -301,7 +301,8 @@ const dragSx = {
   border: '1px dashed',
   borderColor: 'primary.main',
   cursor: 'grab',
-  touchAction: 'none',
+  touchAction: 'pan-y',
+  WebkitTouchCallout: 'none',
   userSelect: 'none',
 };
 
@@ -313,6 +314,7 @@ const markerSx = {
   borderColor: 'divider',
   fontSize: '0.66rem',
   cursor: 'grab',
-  touchAction: 'none',
+  touchAction: 'pan-y',
+  WebkitTouchCallout: 'none',
   userSelect: 'none',
 };

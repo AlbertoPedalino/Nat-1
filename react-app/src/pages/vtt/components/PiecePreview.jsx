@@ -4,6 +4,7 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 
 export const PIECE_POINTER_DRAG_EVENT = 'gb:vtt-piece-pointer-drag';
 const POINTER_DRAG_THRESHOLD = 7;
+export const PIECE_TOUCH_HOLD_MS = 360;
 
 // One pointer path for mouse, touch and pen avoids native HTML drag-and-drop
 // losing its source when a floating tool panel fades during placement. A short
@@ -23,15 +24,9 @@ export function beginPiecePointerDrag(event, placement, {
   const pointerId = event.pointerId;
   const origin = { x: event.clientX, y: event.clientY };
   const source = event.currentTarget;
+  const waitsForHold = event.pointerType === 'touch';
   let dragging = false;
-
-  // Keep the real mobile pointer bound to its source while the surrounding
-  // panel becomes transparent and stops receiving hit tests.
-  try {
-    source.setPointerCapture?.(pointerId);
-  } catch {
-    // Synthetic test events and older browsers may not expose pointer capture.
-  }
+  let holdTimer = null;
 
   const emit = (phase, pointerEvent) => {
     window.dispatchEvent(new CustomEvent(PIECE_POINTER_DRAG_EVENT, {
@@ -47,24 +42,44 @@ export function beginPiecePointerDrag(event, placement, {
     clickEvent.preventDefault();
     clickEvent.stopPropagation();
   };
+  const blockTouchScroll = (touchEvent) => {
+    if (dragging) touchEvent.preventDefault();
+  };
+  const capturePointer = () => {
+    try {
+      source.setPointerCapture?.(pointerId);
+    } catch {
+      // Synthetic test events and older browsers may not expose pointer capture.
+    }
+  };
   const cleanup = () => {
+    if (holdTimer !== null) clearTimeout(holdTimer);
     window.removeEventListener('pointermove', move);
     window.removeEventListener('pointerup', finish);
     window.removeEventListener('pointercancel', cancel);
+    window.removeEventListener('touchmove', blockTouchScroll);
     try {
       if (source.hasPointerCapture?.(pointerId)) source.releasePointerCapture(pointerId);
     } catch {
       // The browser may already have released capture on pointerup/cancel.
     }
   };
+  const activate = (pointerEvent) => {
+    dragging = true;
+    holdTimer = null;
+    capturePointer();
+    onPlacementDragStart?.(placement);
+    emit('move', pointerEvent);
+  };
   const move = (pointerEvent) => {
     if (pointerEvent.pointerId !== pointerId) return;
     const distance = Math.hypot(pointerEvent.clientX - origin.x, pointerEvent.clientY - origin.y);
-    if (!dragging && distance < POINTER_DRAG_THRESHOLD) return;
-    if (!dragging) {
-      dragging = true;
-      onPlacementDragStart?.(placement);
+    if (!dragging && waitsForHold) {
+      if (distance >= POINTER_DRAG_THRESHOLD) cleanup();
+      return;
     }
+    if (!dragging && distance < POINTER_DRAG_THRESHOLD) return;
+    if (!dragging) return activate(pointerEvent);
     pointerEvent.preventDefault();
     emit('move', pointerEvent);
   };
@@ -91,6 +106,16 @@ export function beginPiecePointerDrag(event, placement, {
   window.addEventListener('pointermove', move, { passive: false });
   window.addEventListener('pointerup', finish, { passive: false });
   window.addEventListener('pointercancel', cancel);
+  if (waitsForHold) {
+    // Register this non-passive listener before the gesture begins. It allows
+    // ordinary scrolling until the hold activates, then keeps vertical motion
+    // attached to the piece instead of handing it to the page.
+    window.addEventListener('touchmove', blockTouchScroll, { passive: false });
+    holdTimer = setTimeout(() => activate({
+      clientX: origin.x,
+      clientY: origin.y,
+    }), PIECE_TOUCH_HOLD_MS);
+  }
 }
 
 // The same compact token appears in Pieces, in placement dialogs and as the

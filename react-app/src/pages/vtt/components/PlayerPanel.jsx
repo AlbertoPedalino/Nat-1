@@ -115,7 +115,8 @@ const rowSx = {
   alignItems: 'center',
   gap: 1,
   py: 0.25,
-  touchAction: 'none',
+  touchAction: 'pan-y',
+  WebkitTouchCallout: 'none',
   userSelect: 'none',
 };
 

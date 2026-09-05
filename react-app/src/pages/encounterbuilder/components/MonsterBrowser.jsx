@@ -185,4 +185,4 @@ const rowSx = {
   },
 };
 
-const pointerDragRowSx = { touchAction: 'none' };
+const pointerDragRowSx = { touchAction: 'pan-y', WebkitTouchCallout: 'none' };

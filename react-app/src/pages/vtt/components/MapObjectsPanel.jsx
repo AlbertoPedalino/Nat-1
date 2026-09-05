@@ -187,7 +187,8 @@ const objectButtonSx = {
   border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.24)}`,
   bgcolor: vttAlpha(VTT_COLORS.black, 0.18),
   cursor: 'grab',
-  touchAction: 'none',
+  touchAction: 'pan-y',
+  WebkitTouchCallout: 'none',
   userSelect: 'none',
   '&:hover': {
     bgcolor: vttAlpha(VTT_COLORS.gold, 0.1),

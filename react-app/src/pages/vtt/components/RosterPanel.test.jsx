@@ -1,8 +1,11 @@
 import {
-  fireEvent, render, screen, waitFor,
+  act, fireEvent, render, screen, waitFor,
 } from '@testing-library/react';
-import { vi } from 'vitest';
+import { afterEach, vi } from 'vitest';
 import RosterPanel from './RosterPanel.jsx';
+import { PIECE_TOUCH_HOLD_MS } from './PiecePreview.jsx';
+
+afterEach(() => vi.useRealTimers());
 
 function pointer(type, {
   clientX, clientY, pointerId = 7, pointerType = 'touch', button = 0,
@@ -95,7 +98,8 @@ test('an already placed character can be removed before placing it again', () =>
   expect(onPlaceCharacter).not.toHaveBeenCalled();
 });
 
-test('a character row starts and finishes placement with a touch pointer', () => {
+test('a character row starts placement only after a touch hold', () => {
+  vi.useFakeTimers();
   const onPlacementDragStart = vi.fn();
   const onPlacementDragEnd = vi.fn();
   render(
@@ -123,15 +127,58 @@ test('a character row starts and finishes placement with a touch pointer', () =>
   row.hasPointerCapture = vi.fn(() => true);
   row.releasePointerCapture = vi.fn();
   fireEvent(row, pointer('pointerdown', { clientX: 260, clientY: 80 }));
+  expect(onPlacementDragStart).not.toHaveBeenCalled();
+  expect(row.setPointerCapture).not.toHaveBeenCalled();
+
+  act(() => vi.advanceTimersByTime(PIECE_TOUCH_HOLD_MS));
   expect(row.setPointerCapture).toHaveBeenCalledWith(7);
-  fireEvent(window, pointer('pointermove', { clientX: 220, clientY: 90 }));
   expect(onPlacementDragStart).toHaveBeenCalledWith(expect.objectContaining({
     kind: 'character', characterId: 'hero-1',
   }));
 
+  fireEvent(window, pointer('pointermove', { clientX: 220, clientY: 90 }));
+  const touchMove = new Event('touchmove', { bubbles: true, cancelable: true });
+  fireEvent(window, touchMove);
+  expect(touchMove.defaultPrevented).toBe(true);
+
   fireEvent(window, pointer('pointerup', { clientX: 150, clientY: 100 }));
   expect(row.releasePointerCapture).toHaveBeenCalledWith(7);
   expect(onPlacementDragEnd).toHaveBeenCalledOnce();
+  vi.useRealTimers();
+});
+
+test('moving a touch before the hold keeps normal panel scrolling', () => {
+  vi.useFakeTimers();
+  const onPlacementDragStart = vi.fn();
+  render(
+    <RosterPanel
+      roster={[{
+        characterId: 'hero-1',
+        name: 'Aria',
+        color: '#7a5aa8',
+        className: 'Wizard',
+        portraitPath: null,
+      }]}
+      tokens={[]}
+      activeLayer="tokens"
+      onPlaceCharacter={vi.fn()}
+      onAddToken={vi.fn()}
+      onImportEncounter={vi.fn()}
+      onPlaceMonster={vi.fn()}
+      onPlacementDragStart={onPlacementDragStart}
+    />,
+  );
+
+  const row = screen.getByText('Aria').parentElement;
+  fireEvent(row, pointer('pointerdown', { clientX: 260, clientY: 80 }));
+  fireEvent(window, pointer('pointermove', { clientX: 260, clientY: 100 }));
+  act(() => vi.advanceTimersByTime(PIECE_TOUCH_HOLD_MS));
+
+  expect(onPlacementDragStart).not.toHaveBeenCalled();
+  const touchMove = new Event('touchmove', { bubbles: true, cancelable: true });
+  fireEvent(window, touchMove);
+  expect(touchMove.defaultPrevented).toBe(false);
+  vi.useRealTimers();
 });
 
 test('Add token piece can be dragged to an exact map position', () => {
