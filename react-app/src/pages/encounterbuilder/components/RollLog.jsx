@@ -1,6 +1,8 @@
 import { Box, Button, IconButton, Paper, Stack, Typography } from '@mui/material';
 import { Trash2, X } from 'lucide-react';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
+import RollActorLabel from '../../../shared/character/RollActorLabel.jsx';
+import { rollOutcome } from '../../../shared/character/rollLogPresentation.js';
 
 export default function RollLog({ maxHeight = 320, onClose, sx }) {
   const { state, dispatch } = useEncounterBuilder();
@@ -23,13 +25,13 @@ export default function RollLog({ maxHeight = 320, onClose, sx }) {
         <Stack spacing={0.75} sx={{ maxHeight, overflow: 'auto' }}>
           {state.rollLog.length ? state.rollLog.map((entry, index) => (
             <Box key={`${entry.timeStr}-${index}`} sx={entrySx}>
-              <Box sx={{ ...resultSx, ...resultColor(entry.cls) }}>{entry.result ?? '—'}</Box>
+              <Box sx={{ ...resultSx, color: rollOutcome(entry).color }}>{entry.result ?? '—'}</Box>
               <Box sx={{ minWidth: 0 }}>
-                {entry.actor ? <Typography variant="caption" color="primary.main" noWrap>{entry.actor}</Typography> : null}
+                <RollActorLabel entry={entry} />
                 <Typography fontWeight={700} noWrap>{entry.type}</Typography>
                 {entry.visibility === 'gm' ? <Typography variant="caption" color="text.secondary">GM only</Typography> : null}
                 {entry.note ? (
-                  <Typography variant="caption" sx={{ display: 'block', color: '#edd48a', whiteSpace: 'normal', lineHeight: 1.35 }}>
+                  <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary', whiteSpace: 'normal', lineHeight: 1.35 }}>
                     {entry.note}
                   </Typography>
                 ) : null}
@@ -44,14 +46,6 @@ export default function RollLog({ maxHeight = 320, onClose, sx }) {
       </Stack>
     </Paper>
   );
-}
-
-function resultColor(cls) {
-  if (cls === 'nat20') return { bgcolor: 'success.main', color: '#102015' };
-  if (cls === 'nat1') return { bgcolor: 'error.main', color: '#240d0b' };
-  if (cls === 'high') return { bgcolor: 'primary.main', color: '#17120d' };
-  if (cls === 'mid') return { bgcolor: 'warning.main', color: '#211407' };
-  return { bgcolor: 'rgba(255,255,255,0.12)', color: 'text.primary' };
 }
 
 const entrySx = {
@@ -73,4 +67,5 @@ const resultSx = {
   display: 'grid',
   placeItems: 'center',
   fontWeight: 800,
+  bgcolor: 'rgba(255,255,255,0.04)',
 };

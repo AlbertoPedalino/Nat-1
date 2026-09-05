@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useRollChannel } from '../../../shared/cloud/useRollChannel.js';
 import { normalizeRoll } from '../../../shared/vtt/rollFeed.js';
 import { buildEncounterDiceToast } from '../components/EncounterDiceToast.jsx';
+import { normalizeRollIdentity } from '../../../shared/character/rollLogPresentation.js';
 
 function readSettings(instanceId) {
   try { return JSON.parse(localStorage.getItem(`gb-enc-rolls:${instanceId}`)) || {}; }
@@ -27,6 +28,8 @@ export function useEncounterRolls({ instanceId, players, campaigns, dispatch }) 
       mathStr: roll.detail,
       note: roll.note,
       visibility: roll.visibility,
+      ...normalizeRollIdentity(roll),
+      rolls: roll.rolls,
     } });
   }, [dispatch]);
 
@@ -49,14 +52,15 @@ export function useEncounterRolls({ instanceId, players, campaigns, dispatch }) 
     const timestamp = Date.now();
     const id = `encounter:${timestamp}:${Math.random().toString(36).slice(2, 12)}`;
     const toast = buildEncounterDiceToast(result);
-    const annotated = { ...result, id, timestamp, visibility };
+    const annotated = { ...result, rolls: toast.rolls, id, timestamp, visibility };
     dispatch({ type: 'addRoll', roll: annotated, actor: actor || 'GM' });
     publish({
       ...toast,
       id,
       timestamp,
       actorName: actor || 'GM',
-      characterId: null,
+      characterId: result.characterId || null,
+      ...normalizeRollIdentity(result),
       note: result.note,
       thrown: Boolean(toast.rolls?.length),
     }, { visibility });

@@ -9,6 +9,7 @@
 // as it read to the player who made it.
 
 import { DICE_LIMITS } from '../character/dice.js';
+import { normalizeRollIdentity } from '../character/rollLogPresentation.js';
 
 export const ROLL_TTL_MS = 8000;
 export const MAX_FEED = 40;
@@ -80,6 +81,7 @@ export function normalizeRoll(entry) {
     id: suppliedId || `roll:${at}:${Math.random().toString(36).slice(2, 12)}`,
     characterId,
     actorName,
+    ...normalizeRollIdentity(entry),
     visibility: entry.visibility === 'gm' ? 'gm' : 'public',
     note: boundedText(entry.note, 240),
     label,
@@ -130,7 +132,7 @@ export function rollAuthor({ isGm, ownedCharacterIds = [], tokens = [], roster =
   const characterId = piece?.characterId || ownedCharacterIds[0] || null;
   const entry = (roster || []).find((item) => item.characterId === characterId);
 
-  return { characterId, actorName: entry?.name || 'Player' };
+  return { characterId, actorName: entry?.name || 'Player', actorColor: entry?.color || null };
 }
 
 // The freshest roll from each person, and only while it is fresh. Older ones

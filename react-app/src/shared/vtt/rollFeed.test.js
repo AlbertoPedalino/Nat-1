@@ -120,9 +120,9 @@ test('a player rolling from the map rolls as their piece', () => {
     isGm: false,
     ownedCharacterIds: ['char-1'],
     tokens: [{ characterId: 'char-9' }, { characterId: 'char-1' }],
-    roster: [{ characterId: 'char-1', name: 'Aria' }],
+    roster: [{ characterId: 'char-1', name: 'Aria', color: '#5c8fe0' }],
   });
-  assert.deepEqual(author, { characterId: 'char-1', actorName: 'Aria' });
+  assert.deepEqual(author, { characterId: 'char-1', actorName: 'Aria', actorColor: '#5c8fe0' });
 });
 
 // The GM has no sheet and no piece: the roll belongs in the log, over nobody.

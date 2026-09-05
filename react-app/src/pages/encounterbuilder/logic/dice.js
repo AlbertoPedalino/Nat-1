@@ -1,4 +1,5 @@
 import { LOG_MAX } from './constants.js';
+import { normalizeRollIdentity } from '../../../shared/character/rollLogPresentation.js';
 
 export function rollDie(faces, rng = Math.random) {
   return Math.floor(rng() * faces) + 1;
@@ -95,6 +96,9 @@ export function addRollLogEntry(log, roll, actor, now = new Date()) {
       id: roll.id,
       visibility: roll.visibility,
       actor: actor || null,
+      ...normalizeRollIdentity(roll),
+      rolls: roll.rolls,
+      naturalD20: roll.naturalD20,
       type: roll.type,
       result: roll.result,
       mathStr: roll.mathStr,

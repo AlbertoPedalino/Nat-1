@@ -12,7 +12,7 @@ vi.mock('../../../shared/cloud/useRollChannel.js', () => ({ useRollChannel: (opt
 
 const campaigns = [{ id: 'campaign', name: 'Campaign' }];
 const players = [{ campaignId: 'campaign' }];
-const monsterRoll = { type: 'Claw', result: 17, mathStr: '1d20 (12) +5', naturalD20: 12, note: 'Hit' };
+const monsterRoll = { type: 'Claw', result: 17, mathStr: '1d20 (12) +5', naturalD20: 12, note: 'Hit', actorColor: '#3498db', actorShape: '■', actorLabel: 'B' };
 function openRolls() {
   return renderHook(() => {
     const [state, dispatch] = useReducer(encounterReducer, undefined, createInitialState);
@@ -25,9 +25,10 @@ test('infers the imported party campaign and keeps monster/custom rolls private 
   const { result } = openRolls();
   expect(channel.campaignId).toBe('campaign');
   act(() => result.current.sync.shareRoll(monsterRoll, 'Goblin'));
-  expect(result.current.state.rollLog[0]).toMatchObject({ actor: 'Goblin', result: 17, visibility: 'gm' });
+  expect(result.current.state.rollLog[0]).toMatchObject({ actor: 'Goblin', result: 17, visibility: 'gm', actorColor: '#3498db', actorShape: '■', actorLabel: 'B' });
   expect(channel.publish).toHaveBeenLastCalledWith(expect.objectContaining({
     actorName: 'Goblin', total: 17, rolls: [{ v: 12, faces: 20 }], note: 'Hit',
+    actorColor: '#3498db', actorShape: '■', actorLabel: 'B',
   }), { visibility: 'gm' });
   act(() => result.current.sync.shareRoll({ ...monsterRoll, type: 'Custom Roll' }, null));
   expect(channel.publish).toHaveBeenLastCalledWith(expect.objectContaining({ actorName: 'GM' }), { visibility: 'gm' });
@@ -46,9 +47,9 @@ test('visibility affects only future rolls and persists when the builder reopens
 
 test('receives player and map rolls once, without rebroadcasting them', () => {
   const { result } = openRolls();
-  const roll = { id: 'remote', actorName: 'Wizard', label: 'Arcana', total: 18, detail: '1d20+4' };
+  const roll = { id: 'remote', actorName: 'Wizard', label: 'Arcana', total: 24, detail: '1d20+4', actorColor: '#b05ce0', rolls: [{ faces: 20, v: 20 }] };
   act(() => { channel.onRoll(roll); channel.onRoll(roll); });
   expect(result.current.state.rollLog).toHaveLength(1);
-  expect(result.current.state.rollLog[0]).toMatchObject({ actor: 'Wizard', type: 'Arcana', result: 18 });
+  expect(result.current.state.rollLog[0]).toMatchObject({ actor: 'Wizard', type: 'Arcana', result: 24, actorColor: '#b05ce0', rolls: [{ faces: 20, v: 20 }] });
   expect(channel.publish).not.toHaveBeenCalled();
 });

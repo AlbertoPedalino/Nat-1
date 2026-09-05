@@ -11,6 +11,7 @@ import { useExternalFightSync } from '../hooks/useExternalFightSync.js';
 import { useMapTokenBridge } from '../hooks/useMapTokenBridge.js';
 import { useCloudFights } from '../hooks/useCloudFights.js';
 import { useEncounterRolls } from '../hooks/useEncounterRolls.js';
+import { encounterRollActor } from '../logic/rollActor.js';
 
 const EncounterBuilderContext = createContext(null);
 
@@ -70,16 +71,7 @@ export function EncounterBuilderProvider({ instanceId, instanceSaved, linkGroupI
   });
 
   const getRollActor = useCallback(() => {
-    const selected = state.selectedStatblock;
-    if (selected?.combatantId != null) {
-      const combatant = state.combat?.combatants?.find((item) => item.id === selected.combatantId);
-      if (combatant?.shape) return `${combatant.name} ${combatant.shape}${combatant.label}`;
-      if (combatant) return combatant.name;
-    }
-    if (selected?.monster) return selected.monster.name;
-    const current = state.combat?.combatants?.[state.combat?.currentTurn || 0];
-    if (!current) return null;
-    return current.shape ? `${current.name} ${current.shape}${current.label}` : current.name;
+    return encounterRollActor({ selectedStatblock: state.selectedStatblock, combat: state.combat });
   }, [state.combat, state.selectedStatblock]);
 
   // `actorOverride` lets a caller force the attribution (pass `null` for a
@@ -88,9 +80,10 @@ export function EncounterBuilderProvider({ instanceId, instanceSaved, linkGroupI
   const roll = useCallback((notation, type, actorOverride, note = '', { localOnly = false } = {}) => {
     const result = rollDice(notation, type);
     if (!result) return null;
-    const actor = actorOverride !== undefined ? actorOverride : getRollActor();
+    const identity = actorOverride !== undefined ? { actorName: actorOverride || 'GM' } : getRollActor();
+    const actor = identity.actorName;
     const resolvedNote = typeof note === 'function' ? note(result) : note;
-    const annotated = { ...result, note: String(resolvedNote || '') };
+    const annotated = { ...result, ...identity, note: String(resolvedNote || '') };
     if (localOnly) dispatch({ type: 'addRoll', roll: annotated, actor });
     else shareRoll(annotated, actor);
     return { ...annotated, actor };

@@ -4,6 +4,8 @@ import { Dices, Trash2 } from 'lucide-react';
 import CustomRollDialog from '../../../shared/character/CustomRollDialog.jsx';
 import DieFace2D from '../../../shared/character/DieFace2D.jsx';
 import { resolveToastLayout } from '../../../shared/character/rollToastLayout.js';
+import RollActorLabel from '../../../shared/character/RollActorLabel.jsx';
+import { rollOutcome, rollLogDieColor } from '../../../shared/character/rollLogPresentation.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { fullscreenContainer } from '../logic/fullscreenContainer.js';
 import {
@@ -83,6 +85,7 @@ export default function RollLogPanel({ feed, onCustomRoll, onClear }) {
 }
 
 function RollRow({ roll }) {
+  const outcome = rollOutcome(roll);
   const layout = resolveToastLayout({
     label: roll.label,
     detail: roll.detail,
@@ -94,18 +97,18 @@ function RollRow({ roll }) {
   return (
     <Box sx={rowSx}>
       <Stack direction="row" spacing={0.75} sx={{ alignItems: 'baseline' }}>
-        <Typography sx={actorSx}>{roll.actorName || 'Someone'}</Typography>
+        <RollActorLabel entry={roll} />
         <Typography sx={labelSx}>{roll.label}</Typography>
         {roll.visibility === 'gm' ? <Typography sx={tagSx}>GM only</Typography> : null}
         {layout.modeChip ? (
-          <Typography sx={{ ...tagSx, color: layout.modeChip.color }}>{layout.modeChip.label}</Typography>
+          <Typography sx={{ ...tagSx, color: 'text.secondary' }}>{layout.modeChip.label}</Typography>
         ) : null}
         <Box sx={{ flex: 1 }} />
         {layout.total == null ? null : (
-          <Typography sx={{ ...totalSx, color: layout.totalColor }}>{layout.total}</Typography>
+          <Typography sx={{ ...totalSx, color: outcome.color }}>{layout.total}</Typography>
         )}
       </Stack>
-      <StaticDiceRow dice={layout.dice} modifier={layout.modifier} />
+      <StaticDiceRow dice={layout.dice.map((die, index) => ({ ...die, color: rollLogDieColor(roll.rolls[index]) }))} modifier={layout.modifier} />
       {roll.detail ? <Typography sx={detailSx}>{roll.detail}</Typography> : null}
       {roll.note ? <Typography sx={detailSx}>{roll.note}</Typography> : null}
     </Box>
@@ -140,13 +143,6 @@ const rowSx = {
   bgcolor: vttAlpha(VTT_COLORS.white, 0.02),
 };
 
-const actorSx = {
-  fontSize: '0.66rem',
-  fontWeight: 700,
-  color: VTT_COLORS.gold,
-  whiteSpace: 'nowrap',
-};
-
 const labelSx = { fontSize: '0.66rem', color: 'text.secondary', minWidth: 0 };
 const tagSx = { fontSize: '0.52rem', fontWeight: 800, letterSpacing: '0.06em' };
 
@@ -156,7 +152,7 @@ const totalSx = {
   fontVariantNumeric: 'tabular-nums',
 };
 
-const detailSx = { fontSize: '0.6rem', color: VTT_COLORS.rollDetail, lineHeight: 1.35 };
+const detailSx = { fontSize: '0.6rem', color: 'text.secondary', lineHeight: 1.35 };
 
 const diceRowSx = {
   display: 'flex',

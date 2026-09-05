@@ -346,6 +346,7 @@ export default function CharacterSheet({
       timestamp,
       characterId: charId,
       actorName: C?.name || '',
+      actorColor: C?.classIconColor || null,
     };
     if (showOwnRollToast) setDiceToast(entry);
     setRollLog((prev) => [entry, ...prev].slice(0, 50));
@@ -357,7 +358,7 @@ export default function CharacterSheet({
     // Also hand off directly while campaign metadata is still loading.
     // The map deduplicates the shared event by id.
     onRoll?.(sharedEntry);
-  }, [C?.name, charId, onRoll, publishRoll, showOwnRollToast]);
+  }, [C?.name, C?.classIconColor, charId, onRoll, publishRoll, showOwnRollToast]);
 
   // Non-dice events (rests, death-save guards): no roll, no numeric total — just a
   // labelled message. Routes through the same toast so DiceToast renders the detail.

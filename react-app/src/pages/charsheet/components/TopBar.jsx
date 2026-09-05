@@ -13,6 +13,8 @@ import CloudMenu from '../../../shared/cloud/CloudMenu.jsx';
 import { primaryClassLevel } from '../../../shared/character/classLevel.js';
 import { classIcon } from '../../../shared/character/classIcon.js';
 import CustomRollDialog from '../../../shared/character/CustomRollDialog.jsx';
+import RollActorLabel from '../../../shared/character/RollActorLabel.jsx';
+import { rollOutcome } from '../../../shared/character/rollLogPresentation.js';
 
 function formatRollValues(rolls) {
   if (!rolls?.length) return '';
@@ -57,10 +59,10 @@ const ROLL_LOG_SX = {
     border: 1, borderColor: 'divider', borderRadius: 1, px: 1, py: 0.5, mb: 0.4,
     bgcolor: 'rgba(35,32,26,0.6)',
   },
-  label: { fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.7rem', color: '#edd48a', fontWeight: 700, letterSpacing: '0.04em', mb: 0.15 },
+  label: { fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.7rem', color: 'text.primary', fontWeight: 700, letterSpacing: '0.04em', mb: 0.15 },
   formula: { fontSize: '0.6rem', color: 'text.secondary', fontFamily: '"JetBrains Mono", monospace', lineHeight: 1.2 },
-  rollBreakdown: { fontSize: '0.58rem', color: '#70b7a6', fontFamily: '"JetBrains Mono", monospace', lineHeight: 1.2, my: 0 },
-  total: { fontFamily: '"Cinzel", Georgia, serif', fontSize: '1.1rem', color: 'primary.main', fontWeight: 700, flexShrink: 0, pl: 0.5, lineHeight: 1, my: 0 },
+  rollBreakdown: { fontSize: '0.58rem', color: 'text.secondary', fontFamily: '"JetBrains Mono", monospace', lineHeight: 1.2, my: 0 },
+  total: { fontFamily: '"Cinzel", Georgia, serif', fontSize: '1.1rem', fontWeight: 700, flexShrink: 0, pl: 0.5, lineHeight: 1, my: 0 },
   empty: { fontSize: '0.75rem', color: 'text.secondary', fontStyle: 'italic', textAlign: 'center', py: 3 },
 };
 
@@ -334,21 +336,17 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
               const breakdownText = diceText && bonus != null
                 ? `${diceText}${bonus !== 0 ? formatMod(bonus) : ''} = ${entry.total}`
                 : '';
-              const d20s = (entry.rolls || []).filter((r) => r.faces === 20);
-              const keptD20 = d20s.find((r) => r.kept) || d20s[0];
-              const isCrit = keptD20?.v >= 20;
-              const isFail = keptD20?.v <= 1;
+              const outcome = rollOutcome(entry);
+              const { isCrit, isFail } = outcome;
               const mode = entry.meta?.mode;
               const modeLabel = mode === 'advantage' ? 'ADV' : mode === 'disadvantage' ? 'DIS' : null;
-              const modeColor = mode === 'advantage' ? '#58b879' : mode === 'disadvantage' ? '#d69245' : null;
+              const modeColor = 'text.secondary';
               return (
               <Box key={entry.timestamp + '-' + i} sx={{
                 ...ROLL_LOG_SX.entry, display: 'flex', gap: 0.5,
-                ...(isCrit ? { borderColor: '#edd48a', bgcolor: 'rgba(237,212,138,0.06)' } : {}),
-                ...(isFail ? { borderColor: '#de675f', bgcolor: 'rgba(222,103,95,0.06)' } : {}),
               }}>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
-                  {entry.actorName ? <Typography sx={{ ...ROLL_LOG_SX.formula, color: 'primary.main' }}>{entry.actorName}</Typography> : null}
+                  <RollActorLabel entry={entry} />
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.15 }}>
                     <Typography sx={{ ...ROLL_LOG_SX.label, mb: 0 }}>{labelParts.clean}</Typography>
                     {modeLabel && (
@@ -358,7 +356,7 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
                     )}
                   </Box>
                   {(isCrit || isFail) && (
-                    <Typography sx={{ fontSize: '0.55rem', fontWeight: 900, letterSpacing: '0.08em', color: isCrit ? '#edd48a' : '#de675f', fontFamily: '"Cinzel", Georgia, serif', mb: 0.15 }}>
+                    <Typography sx={{ fontSize: '0.55rem', fontWeight: 900, letterSpacing: '0.08em', color: outcome.color, fontFamily: '"Cinzel", Georgia, serif', mb: 0.15 }}>
                       {isCrit ? 'NATURAL 20!' : 'NATURAL 1'}
                     </Typography>
                   )}
@@ -371,8 +369,8 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 32, pr: 0.5 }}>
                   <Typography sx={{
                     ...ROLL_LOG_SX.total,
-                    ...(isCrit ? { color: '#edd48a', fontSize: '1.3rem' } : {}),
-                    ...(isFail ? { color: '#de675f', fontSize: '1.3rem' } : {}),
+                    color: outcome.color,
+                    ...((isCrit || isFail) ? { fontSize: '1.3rem' } : {}),
                   }}>
                     {entry.total}
                   </Typography>
