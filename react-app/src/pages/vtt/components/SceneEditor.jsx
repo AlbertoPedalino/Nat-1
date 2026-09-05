@@ -21,6 +21,7 @@ import {
   deleteDrawing,
   deleteMapImage,
   deleteToken,
+  fetchScene,
   moveDrawing,
   removeSceneImage,
   replaceSceneImage,
@@ -214,6 +215,7 @@ export default function SceneEditor({
     handleCharacterEvent,
     handleDrawingEvent,
     loading,
+    refreshContent,
     refreshVisibleTokens,
     roster,
     setDrawings,
@@ -569,6 +571,13 @@ export default function SceneEditor({
   const handleRemotePresenterInspection = useCallback((inspection) => {
     setProjectorInspection(inspection);
   }, []);
+  const reconcilePersistentState = useCallback(async () => {
+    const [freshScene] = await Promise.all([
+      fetchScene(scene.id).catch(() => null),
+      refreshContent(),
+    ]);
+    if (freshScene && !gridEditRef.current && !paintingRef.current) onSceneChange(freshScene);
+  }, [onSceneChange, refreshContent, scene.id]);
   const {
     sendDrag, sendCamera, sendPresenterState, sendPresenterInspection,
   } = useSceneLive({
@@ -587,6 +596,7 @@ export default function SceneEditor({
     onPresenterState: spectator ? handleRemotePresenterState : undefined,
     getPresenterInspection,
     onPresenterInspection: spectator ? handleRemotePresenterInspection : undefined,
+    onReconcile: reconcilePersistentState,
   });
 
   const handleTokenInspection = useCallback((inspection) => {

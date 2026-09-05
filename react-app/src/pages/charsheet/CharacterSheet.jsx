@@ -76,6 +76,9 @@ const EMBEDDED_SHEET_GRID = {
   gap: '0.55rem',
 };
 
+const CLOUD_SAVE_DELAY_MS = 1_200;
+const CLOUD_RETRY_MS = 30_000;
+
 // The JSON fetcher caches raw files, but turning the full items/optional-feature
 // datasets into sheet-ready records is also expensive. Share that processed
 // work between every sheet mounted in this tab; a failed load is evicted so a
@@ -137,6 +140,13 @@ export default function CharacterSheet({
   const [hdToSpend, setHdToSpend] = useState({});
   const [conditionEntries, setConditionEntries] = useState({});
   const cloudSaveReadyRef = useRef(false);
+  const pendingCloudSaveRef = useRef(null);
+  const cloudSaveInFlightRef = useRef(false);
+  const cloudSaveTimerRef = useRef(null);
+  const flushCloudSaveRef = useRef(null);
+  const cloudSaveMountedRef = useRef(true);
+  const cloudSaveErrorShownRef = useRef(false);
+  const dirtyVitalKeysRef = useRef(new Set());
   const usesExternalChar = Boolean(externalChar);
   sheetRef.current = sheet;
 
@@ -149,6 +159,11 @@ export default function CharacterSheet({
   useEffect(() => {
     let alive = true;
     cloudSaveReadyRef.current = false;
+    pendingCloudSaveRef.current = null;
+    dirtyVitalKeysRef.current.clear();
+    cloudSaveErrorShownRef.current = false;
+    clearTimeout(cloudSaveTimerRef.current);
+    cloudSaveTimerRef.current = null;
     // Read-only view feeds the character directly (from the cloud); skip local
     // store entirely so nothing is written and auto-sync stays silent.
     const id = externalChar ? externalCharId : getCharIdFromUrl();
@@ -213,9 +228,14 @@ export default function CharacterSheet({
     return () => { alive = false; };
   }, [externalChar, externalCharId]);
 
-  const persist = useCallback((patch) => {
+  const persist = useCallback((patch, { fromCloud = false } = {}) => {
     if (!charId || !patch) return;
     if (usesExternalChar) {
+      if (!fromCloud) {
+        for (const field of SYNCED_VITALS) {
+          if (Object.hasOwn(patch, field.data)) dirtyVitalKeysRef.current.add(field.data);
+        }
+      }
       setC((prev) => prev ? { ...prev, ...patch } : prev);
       return;
     }
@@ -237,7 +257,11 @@ export default function CharacterSheet({
     if (!liveVitals || !usesExternalChar || readOnly) return;
     const s = sheetRef.current;
     if (!s) return;
-    const vitals = clampCharacterVitals(liveVitals, { fallback: s });
+    // A local vital that has not reached the cloud yet wins over an older row
+    // fetched during recovery. Other vital fields still reconcile normally.
+    const incoming = { ...liveVitals };
+    for (const key of dirtyVitalKeysRef.current) incoming[key] = s[key];
+    const vitals = clampCharacterVitals(incoming, { fallback: s });
     // Max HP is derived (base + bonus); apply the synced bonus and re-clamp current.
     const baseMax = Math.max(1, (Number(s.maxHP) || 1) - (Number(s.maxHPBonus) || 0));
     const maxHP = Math.max(1, baseMax + vitals.maxHPBonus);
@@ -251,7 +275,7 @@ export default function CharacterSheet({
     ));
     if (unchanged) return;
     setSheet((prev) => (prev ? { ...prev, ...next, maxHP } : prev));
-    persist(next);
+    persist(next, { fromCloud: true });
   }, [liveVitals, usesExternalChar, readOnly, persist]);
 
   const updateCurrentCharacter = useCallback((updater) => {
@@ -329,19 +353,83 @@ export default function CharacterSheet({
     showDiceToast(label, message, null, []);
   }, [showDiceToast]);
 
+  const scheduleCloudSave = useCallback((delay = CLOUD_SAVE_DELAY_MS) => {
+    clearTimeout(cloudSaveTimerRef.current);
+    cloudSaveTimerRef.current = setTimeout(() => flushCloudSaveRef.current?.(), delay);
+  }, []);
+
+  const flushCloudSave = useCallback(async () => {
+    const attempt = pendingCloudSaveRef.current;
+    if (!attempt || cloudSaveInFlightRef.current) return;
+    cloudSaveInFlightRef.current = true;
+    try {
+      await updateCloudCharacterData(attempt.charId, attempt.character);
+      if (pendingCloudSaveRef.current === attempt) {
+        pendingCloudSaveRef.current = null;
+        for (const key of attempt.dirtyVitalKeys) dirtyVitalKeysRef.current.delete(key);
+      }
+      cloudSaveErrorShownRef.current = false;
+    } catch (error) {
+      if (!cloudSaveErrorShownRef.current) {
+        cloudSaveErrorShownRef.current = true;
+        showNotice('Cloud Save', error?.message || 'Failed to save online sheet.');
+      }
+      // Keep the exact snapshot pending. Online/focus/visibility and the
+      // 30-second safety timer below will retry it.
+    } finally {
+      cloudSaveInFlightRef.current = false;
+      if (
+        cloudSaveMountedRef.current
+        && pendingCloudSaveRef.current
+        && pendingCloudSaveRef.current !== attempt
+      ) {
+        scheduleCloudSave();
+      }
+    }
+  }, [scheduleCloudSave, showNotice]);
+  flushCloudSaveRef.current = flushCloudSave;
+
   useEffect(() => {
     if (!usesExternalChar || readOnly || !charId || !C) return undefined;
     if (!cloudSaveReadyRef.current) {
       cloudSaveReadyRef.current = true;
       return undefined;
     }
-    const handle = setTimeout(() => {
-      updateCloudCharacterData(charId, C).catch((error) => {
-        showNotice('Cloud Save', error?.message || 'Failed to save online sheet.');
-      });
-    }, 1200);
-    return () => clearTimeout(handle);
-  }, [usesExternalChar, readOnly, charId, C, showNotice]);
+    pendingCloudSaveRef.current = {
+      charId,
+      character: C,
+      dirtyVitalKeys: new Set(dirtyVitalKeysRef.current),
+    };
+    cloudSaveErrorShownRef.current = false;
+    scheduleCloudSave();
+    return undefined;
+  }, [usesExternalChar, readOnly, charId, C, scheduleCloudSave]);
+
+  useEffect(() => {
+    if (!usesExternalChar || readOnly) return undefined;
+    const retry = () => flushCloudSaveRef.current?.();
+    const retryWhenVisible = () => {
+      if (document.visibilityState === 'visible') retry();
+    };
+    const timer = window.setInterval(retry, CLOUD_RETRY_MS);
+    window.addEventListener('online', retry);
+    window.addEventListener('focus', retry);
+    document.addEventListener('visibilitychange', retryWhenVisible);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener('online', retry);
+      window.removeEventListener('focus', retry);
+      document.removeEventListener('visibilitychange', retryWhenVisible);
+    };
+  }, [readOnly, usesExternalChar]);
+
+  useEffect(() => {
+    cloudSaveMountedRef.current = true;
+    return () => {
+      cloudSaveMountedRef.current = false;
+      clearTimeout(cloudSaveTimerRef.current);
+    };
+  }, []);
 
   const openShortRest = useCallback(() => {
     setHdToSpend({});

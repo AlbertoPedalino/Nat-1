@@ -18,6 +18,7 @@ const CAMERA_REQUEST_EVENT = 'camera-request';
 const PRESENTER_STATE_EVENT = 'presenter-state';
 const PRESENTER_INSPECTION_EVENT = 'presenter-inspection';
 const CAMERA_SEND_MS = 50;
+const SCENE_RECONCILE_MS = 30_000;
 
 export function useSceneLive({
   sceneId,
@@ -35,6 +36,7 @@ export function useSceneLive({
   onPresenterState,
   getPresenterInspection,
   onPresenterInspection,
+  onReconcile,
 }) {
   const { cloudEnabled, status, user } = useAuth();
   const channelRef = useRef(null);
@@ -54,12 +56,14 @@ export function useSceneLive({
     onPresenterState,
     getPresenterInspection,
     onPresenterInspection,
+    onReconcile,
   };
 
   useEffect(() => {
     if (!sceneId || !cloudEnabled || status !== 'authed' || !supabase) return undefined;
 
     let channel;
+    let cleanupReconcile = () => {};
     try {
       channel = supabase.channel(`gb-vtt-${sceneId}`, {
         // Our own drags are already on screen; echoing them back would fight the
@@ -181,8 +185,17 @@ export function useSceneLive({
         } catch (_) {}
       });
 
+      const requestReconcile = () => {
+        try {
+          Promise.resolve(handlers.current.onReconcile?.()).catch(() => {});
+        } catch (_) {}
+      };
+
       channel.subscribe((state) => {
         if (state !== 'SUBSCRIBED') return;
+        // A reconnect resumes future events but does not replay changes missed
+        // while the socket was down. Pull the persistent scene snapshot now.
+        requestReconcile();
         const followedSource = normalizeCameraSource(handlers.current.followCameraSource);
         if (followedSource) {
           channel.send({ type: 'broadcast', event: CAMERA_REQUEST_EVENT, payload: { source: followedSource } });
@@ -198,12 +211,28 @@ export function useSceneLive({
         }
       });
       channelRef.current = channel;
+
+      const reconcileWhenVisible = () => {
+        if (document.visibilityState === 'visible') requestReconcile();
+      };
+      const timer = window.setInterval(requestReconcile, SCENE_RECONCILE_MS);
+      window.addEventListener('online', requestReconcile);
+      window.addEventListener('focus', requestReconcile);
+      document.addEventListener('visibilitychange', reconcileWhenVisible);
+
+      cleanupReconcile = () => {
+        window.clearInterval(timer);
+        window.removeEventListener('online', requestReconcile);
+        window.removeEventListener('focus', requestReconcile);
+        document.removeEventListener('visibilitychange', reconcileWhenVisible);
+      };
     } catch (_) {
       channelRef.current = null;
       return undefined;
     }
 
     return () => {
+      cleanupReconcile();
       channelRef.current = null;
       const cameraState = cameraSendRef.current;
       clearTimeout(cameraState.timer);

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { mergeVitals, readCampaignVitals } from '../../../shared/campaign/characterVitals.js';
 import { toRoster, toRosterEntry } from '../../../shared/campaign/roster.js';
 import { listCampaignCharacters } from '../../../shared/cloud/campaigns.js';
@@ -23,31 +23,39 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
   const [drawings, setDrawings] = useState([]);
   const [tokenImageUrls, setTokenImageUrls] = useState({});
   const [loading, setLoading] = useState(true);
+  const loadRequestRef = useRef(0);
+
+  const loadContent = useCallback(async ({ initial = false } = {}) => {
+    const request = ++loadRequestRef.current;
+    if (initial) setLoading(true);
+    try {
+      const [sceneTokens, characterRows, secrets, sceneDrawings] = await Promise.all([
+        listTokens(scene.id),
+        scene.campaignId ? listCampaignCharacters(scene.campaignId) : Promise.resolve([]),
+        isGm && !spectator ? listTokenSecrets(scene.id) : Promise.resolve({}),
+        listDrawings(scene.id),
+      ]);
+      if (request !== loadRequestRef.current) return;
+      setTokens((current) => attachSecrets(sceneTokens, secrets, current));
+      setRoster(toRoster(characterRows));
+      setDrawings(sceneDrawings);
+      try {
+        const vitals = await readCampaignVitals(characterRows);
+        if (request === loadRequestRef.current) setRoster((current) => mergeVitals(current, vitals));
+      } catch (_) {}
+    } catch (cause) {
+      if (initial && request === loadRequestRef.current) {
+        notify('error', cause?.message || 'Could not load this scene.');
+      }
+    } finally {
+      if (initial && request === loadRequestRef.current) setLoading(false);
+    }
+  }, [isGm, notify, scene.campaignId, scene.id, spectator]);
 
   useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    Promise.all([
-      listTokens(scene.id),
-      scene.campaignId ? listCampaignCharacters(scene.campaignId) : Promise.resolve([]),
-      isGm && !spectator ? listTokenSecrets(scene.id) : Promise.resolve({}),
-      listDrawings(scene.id),
-    ])
-      .then(([sceneTokens, characterRows, secrets, sceneDrawings]) => {
-        if (cancelled) return;
-        setTokens(attachSecrets(sceneTokens, secrets));
-        setRoster(toRoster(characterRows));
-        setDrawings(sceneDrawings);
-        readCampaignVitals(characterRows)
-          .then((vitals) => { if (!cancelled) setRoster((current) => mergeVitals(current, vitals)); })
-          .catch(() => {});
-      })
-      .catch((cause) => {
-        if (!cancelled) notify('error', cause?.message || 'Could not load this scene.');
-      })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
-  }, [isGm, notify, scene.campaignId, scene.id, spectator]);
+    loadContent({ initial: true });
+    return () => { loadRequestRef.current += 1; };
+  }, [loadContent]);
 
   useEffect(() => {
     let cancelled = false;
@@ -110,6 +118,7 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
     handleCharacterEvent,
     handleDrawingEvent,
     loading,
+    refreshContent: loadContent,
     refreshVisibleTokens,
     roster,
     setDrawings,
