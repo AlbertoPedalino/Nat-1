@@ -1,7 +1,11 @@
-import { Box, Button, IconButton, Paper, Stack, TextField, Tooltip, Typography } from '@mui/material';
+import {
+  Autocomplete, Box, Button, IconButton, Paper, Stack, TextField, Tooltip, Typography,
+} from '@mui/material';
+import { useMemo } from 'react';
 import { Minus, Plus, Save, Swords, Trash2 } from 'lucide-react';
 import { useToast } from '../../../shared/ToastProvider.jsx';
 import { calculateDifficulty } from '../logic/difficulty.js';
+import { listQuestNames } from '../logic/library.js';
 import { formatNumber } from '../logic/monsterUtils.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import DifficultyBar from './DifficultyBar.jsx';
@@ -10,6 +14,7 @@ export default function EncounterList() {
   const { state, dispatch, instanceSaved, saveEncounterToLibrary } = useEncounterBuilder();
   const { notify } = useToast();
   const difficulty = calculateDifficulty(state.encounter, state.party);
+  const questOptions = useMemo(() => listQuestNames(state.library), [state.library]);
 
   const handleSave = () => {
     if (!instanceSaved) {
@@ -38,6 +43,23 @@ export default function EncounterList() {
           value={state.encounterName}
           onChange={(event) => dispatch({ type: 'setEncounterName', value: event.target.value })}
           placeholder="Optional"
+        />
+        <Autocomplete
+          freeSolo
+          size="small"
+          options={questOptions}
+          value={state.encounterQuest || null}
+          inputValue={state.encounterQuest || ''}
+          onChange={(_, value) => dispatch({ type: 'setEncounterQuest', quest: value || '' })}
+          onInputChange={(_, value) => dispatch({ type: 'setEncounterQuest', quest: value })}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Quest category"
+              placeholder="Type a new quest or select an existing one"
+              helperText="Used only to group encounters in this Library."
+            />
+          )}
         />
         <Stack spacing={0.75}>
           {state.encounter.length ? state.encounter.map((item) => (

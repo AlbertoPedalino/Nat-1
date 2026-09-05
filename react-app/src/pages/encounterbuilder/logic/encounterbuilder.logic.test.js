@@ -34,7 +34,9 @@ import {
   normalizeNegotiation,
   resolveNegotiation,
 } from './negotiation.js';
-import { isFightResumable, mergeLibrary } from './library.js';
+import {
+  groupLibraryByQuest, isFightResumable, listQuestNames, mergeLibrary,
+} from './library.js';
 import { cleanToText, parseCleanTokens } from './markup.js';
 import { isEncounterMonster, resolveLegendaryGroups } from './bestiary.js';
 import {
@@ -48,6 +50,69 @@ import {
 import { createInitialState, encounterReducer } from '../state/reducer.js';
 import { SYNCED_VITALS } from '../../../shared/character/vitals.js';
 import { toEncounterPlayer } from './campaignPlayer.js';
+
+test('an encounter keeps its selected quest when saved and loaded', () => {
+  const quest = 'The Missing Caravan';
+  const entry = { id: 7, name: 'Road ambush', encounter: [], quest };
+  let state = encounterReducer(createInitialState(), {
+    type: 'setEncounterQuest',
+    quest: '  The   Missing Caravan  ',
+  });
+
+  state = encounterReducer(state, { type: 'saveEncounterToLibrary', entry });
+  assert.equal(state.library[0].quest, quest);
+  assert.equal(state.encounterQuest, quest);
+
+  state = encounterReducer(state, { type: 'loadLibraryEncounter', entry, monsters: [] });
+  assert.equal(state.encounterQuest, quest);
+});
+
+test('an unassigned library encounter can be assigned to a normalized quest', () => {
+  const unassigned = { id: 7, name: 'Road ambush', encounter: [], quest: null };
+  const other = { id: 8, name: 'Bridge guard', encounter: [], quest: 'Old Road' };
+  const initial = {
+    ...createInitialState(),
+    library: [unassigned, other],
+    currentEncounterId: unassigned.id,
+  };
+
+  const state = encounterReducer(initial, {
+    type: 'assignEncounterQuest',
+    id: unassigned.id,
+    quest: '  The   Missing Caravan  ',
+  });
+
+  assert.equal(state.library[0].quest, 'The Missing Caravan');
+  assert.equal(state.library[1], other);
+  assert.equal(state.encounterQuest, 'The Missing Caravan');
+});
+
+test('library encounters are grouped by quest with unassigned entries last', () => {
+  const questA = { enc: { id: 1, quest: 'Ashes of Winter' } };
+  const questB = { enc: { id: 2, quest: 'Broken Crown' } };
+  const anotherQuestA = { enc: { id: 3, quest: 'Ashes of Winter' } };
+  const unassigned = { enc: { id: 4 } };
+
+  assert.deepEqual(groupLibraryByQuest([
+    questB,
+    unassigned,
+    questA,
+    anotherQuestA,
+  ]), [
+    { quest: 'Ashes of Winter', items: [questA, anotherQuestA] },
+    { quest: 'Broken Crown', items: [questB] },
+    { quest: '', items: [unassigned] },
+  ]);
+});
+
+test('quest choices are unique, trimmed, and alphabetical', () => {
+  assert.deepEqual(listQuestNames([
+    { quest: 'Broken Crown' },
+    { quest: '  Ashes of Winter ' },
+    { quest: null },
+    { quest: 'Broken Crown' },
+  ]), ['Ashes of Winter', 'Broken Crown']);
+});
 
 test('synced field set matches the patch_character_data SQL allowlist', () => {
   const sql = readFileSync(new URL('../../../../supabase/combat_sync.sql', import.meta.url), 'utf8');

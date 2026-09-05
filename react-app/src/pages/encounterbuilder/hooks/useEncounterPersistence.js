@@ -38,13 +38,19 @@ export function useEncounterPersistence({ instanceId, instanceSaved, linkGroupId
     if (!instanceId) return;
     batchPersist(() => {
       persistParty(instanceId, state.party, state.players);
-      persistDraft(instanceId, state.encounter, state.currentEncounterId, state.encounterName);
+      persistDraft(
+        instanceId,
+        state.encounter,
+        state.currentEncounterId,
+        state.encounterName,
+        state.encounterQuest,
+      );
       persistLibrary(instanceId, state.library);
       persistFights(instanceId, state.activeFightId, state.fights);
       persistFumbles(instanceId, state.fumbleTables);
       persistNegotiation(instanceId, state.negotiation);
     });
-  }, [instanceId, state.activeFightId, state.currentEncounterId, state.encounter, state.encounterName, state.fights, state.fumbleTables, state.library, state.negotiation, state.party, state.players]);
+  }, [instanceId, state.activeFightId, state.currentEncounterId, state.encounter, state.encounterName, state.encounterQuest, state.fights, state.fumbleTables, state.library, state.negotiation, state.party, state.players]);
 
   useEffect(() => {
     if (!instanceSaved || !hydratedRef.current) return;

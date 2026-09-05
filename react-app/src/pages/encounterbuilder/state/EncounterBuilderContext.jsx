@@ -92,10 +92,10 @@ export function EncounterBuilderProvider({ instanceId, instanceSaved, linkGroupI
 
   const saveEncounterToLibrary = useCallback((name) => {
     if (!state.encounter.length) return null;
-    const entry = makeSavedEncounter(name, state.encounter, state.party);
+    const entry = makeSavedEncounter(name, state.encounter, state.party, state.encounterQuest);
     dispatch({ type: 'saveEncounterToLibrary', entry });
     return entry;
-  }, [state.encounter, state.party]);
+  }, [state.encounter, state.encounterQuest, state.party]);
 
   const value = useMemo(() => ({
     state,

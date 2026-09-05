@@ -38,7 +38,7 @@ import {
   resolveNegotiation,
 } from '../logic/negotiation.js';
 import { PLAYER_COLORS } from '../logic/constants.js';
-import { makeSavedEncounter } from '../logic/storage.js';
+import { makeSavedEncounter, normalizeEncounterQuest } from '../logic/storage.js';
 import { clampInt, hydrateEncounterItems, monsterKey, toEncounterMonster } from '../logic/monsterUtils.js';
 import { combatantToSheetPatch, resolveCombatVitals } from '../logic/sheetSync.js';
 import { SYNCED_VITALS, pickCharacterVitals } from '../../../shared/character/vitals.js';
@@ -66,6 +66,7 @@ export function createInitialState() {
     players: createDefaultPlayers(),
     encounter: [],
     encounterName: '',
+    encounterQuest: null,
     currentEncounterId: null,
     library: [],
     fights: [],
@@ -99,6 +100,8 @@ export function encounterReducer(state, action) {
       return { ...state, encounter: state.encounter.filter((item) => item.id !== action.id), currentEncounterId: null };
     case 'setEncounterName':
       return { ...state, encounterName: action.value };
+    case 'setEncounterQuest':
+      return { ...state, encounterQuest: String(action.quest || '') };
     case 'setPartyCount':
       return setPartyCount(state, action.value);
     case 'setPartyLevel':
@@ -115,7 +118,10 @@ export function encounterReducer(state, action) {
         library: [action.entry, ...state.library],
         currentEncounterId: action.entry.id,
         encounterName: '',
+        encounterQuest: action.entry.quest || null,
       };
+    case 'assignEncounterQuest':
+      return assignEncounterQuest(state, action.id, action.quest);
     case 'deleteLibraryEncounter':
       return deleteLibraryEncounter(state, action.id);
     case 'clearLibrary':
@@ -127,11 +133,24 @@ export function encounterReducer(state, action) {
         encounter: hydrateEncounterItems(action.entry?.encounter, action.monsters),
         currentEncounterId: action.entry?.id || null,
         encounterName: action.entry?.name || '',
+        encounterQuest: action.entry?.quest || null,
       };
     case 'launchCurrentEncounter':
-      return launchCombat(state, state.encounter, action.encounterId ?? state.currentEncounterId, state.encounterName);
+      return launchCombat(
+        state,
+        state.encounter,
+        action.encounterId ?? state.currentEncounterId,
+        state.encounterName,
+        state.encounterQuest,
+      );
     case 'launchLibraryEncounter':
-      return launchCombat(state, hydrateEncounterItems(action.entry?.encounter, action.monsters), action.entry?.id || null, action.entry?.name);
+      return launchCombat(
+        state,
+        hydrateEncounterItems(action.entry?.encounter, action.monsters),
+        action.entry?.id || null,
+        action.entry?.name,
+        action.entry?.quest,
+      );
     case 'resumeFight':
       return withCombat(state, restoreFight(action.entry, action.monsters), { view: 'combat' });
     case 'closeCombat':
@@ -303,6 +322,7 @@ function hydrateState(state, payload, monsters) {
     players: Array.isArray(partyData?.players) && partyData.players.length ? partyData.players : state.players,
     encounter: draftData?.encounter || state.encounter,
     encounterName: draftData?.encounterName || '',
+    encounterQuest: draftData?.encounterQuest || null,
     currentEncounterId: draftData?.currentEncounterId || null,
     library: Array.isArray(payload?.library) ? payload.library : state.library,
     fights: fightsData.items,
@@ -503,11 +523,11 @@ function campaignAverageLevel(players) {
 
 // Every launch is backed by a library encounter, so its card always exposes the
 // full Load/Launch/Resume/Delete actions. An unsaved draft is snapshotted here.
-function launchCombat(state, encounter, encounterId, name) {
+function launchCombat(state, encounter, encounterId, name, quest = null) {
   let library = state.library;
   let id = encounterId || null;
   if (id == null && encounter.length) {
-    const entry = makeSavedEncounter(name, encounter, state.party);
+    const entry = makeSavedEncounter(name, encounter, state.party, quest);
     library = [entry, ...library];
     id = entry.id;
   }
@@ -519,6 +539,7 @@ function launchCombat(state, encounter, encounterId, name) {
     encounter,
     currentEncounterId: id,
     encounterName: '',
+    encounterQuest: quest || library.find((entry) => entry.id === id)?.quest || null,
   }, combat, { view: 'combat' });
 }
 
@@ -586,6 +607,18 @@ function deleteLibraryEncounter(state, id) {
     activeFightId: null,
     combat: null,
     view: 'builder',
+  };
+}
+
+function assignEncounterQuest(state, id, value) {
+  const quest = normalizeEncounterQuest(value);
+  if (!quest || !state.library.some((entry) => entry.id === id)) return state;
+  return {
+    ...state,
+    library: state.library.map((entry) => (
+      entry.id === id ? { ...entry, quest } : entry
+    )),
+    encounterQuest: state.currentEncounterId === id ? quest : state.encounterQuest,
   };
 }
 

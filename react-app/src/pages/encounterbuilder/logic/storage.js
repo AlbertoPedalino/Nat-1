@@ -193,11 +193,12 @@ export function persistParty(id, party, players) {
   writeJson(id, STORAGE_KEYS.party, { version: STORAGE_VERSION, party, players });
 }
 
-export function persistDraft(id, encounter, currentEncounterId, encounterName) {
+export function persistDraft(id, encounter, currentEncounterId, encounterName, encounterQuest) {
   writeJson(id, STORAGE_KEYS.draft, {
     version: STORAGE_VERSION,
     currentEncounterId: currentEncounterId || null,
     encounterName: encounterName || '',
+    encounterQuest: normalizeEncounterQuest(encounterQuest),
     encounter: (Array.isArray(encounter) ? encounter : []).map(serializeEncounterItem),
     updatedAt: Date.now(),
   });
@@ -231,7 +232,7 @@ export function normalizeFightsData(value) {
   };
 }
 
-export function makeSavedEncounter(name, encounter, party) {
+export function makeSavedEncounter(name, encounter, party, quest = null) {
   const difficulty = calculateDifficulty(encounter, party);
   return {
     id: Date.now(),
@@ -241,8 +242,14 @@ export function makeSavedEncounter(name, encounter, party) {
     partyLevel: party.level,
     totalXp: difficulty.totalXp,
     diffLabel: difficulty.label,
+    quest: normalizeEncounterQuest(quest),
     encounter: (Array.isArray(encounter) ? encounter : []).map(serializeEncounterItem),
   };
+}
+
+export function normalizeEncounterQuest(value) {
+  const quest = String(value || '').trim().replace(/\s+/g, ' ').slice(0, 120);
+  return quest || null;
 }
 
 function defaultEncounterName() {

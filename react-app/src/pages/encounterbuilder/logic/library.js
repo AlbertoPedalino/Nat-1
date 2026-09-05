@@ -29,3 +29,25 @@ export function mergeLibrary(encounters, fights) {
     })
     .sort((a, b) => b.sortKey - a.sortKey);
 }
+
+export function listQuestNames(encounters) {
+  return [...new Set(
+    (encounters || []).map((entry) => String(entry?.quest || '').trim()).filter(Boolean),
+  )].sort((a, b) => a.localeCompare(b));
+}
+
+export function groupLibraryByQuest(items) {
+  const groups = new Map();
+  for (const item of items || []) {
+    const quest = String(item?.enc?.quest || '').trim();
+    if (!groups.has(quest)) groups.set(quest, []);
+    groups.get(quest).push(item);
+  }
+  return [...groups.entries()]
+    .map(([quest, entries]) => ({ quest, items: entries }))
+    .sort((a, b) => {
+      if (!a.quest) return 1;
+      if (!b.quest) return -1;
+      return a.quest.localeCompare(b.quest);
+    });
+}
