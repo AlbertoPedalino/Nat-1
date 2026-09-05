@@ -23,6 +23,33 @@ test('a character without a portrait uses the primary class icon', () => {
   expect(screen.queryByText('A')).not.toBeInTheDocument();
 });
 
+test('an uploaded token portrait stays circular inside its selected color ring', () => {
+  const { container } = render(
+    <TokenSprite
+      token={{
+        id: 'villager-1',
+        label: 'Villager',
+        color: '#336699',
+        imagePath: 'campaign/scene/villager.png',
+        imageUrl: 'signed:villager.png',
+        layer: 'tokens',
+      }}
+      size={64}
+      interactive
+      movable={false}
+    />,
+  );
+
+  const image = container.querySelector('img');
+  const frame = image.parentElement;
+  expect(getComputedStyle(frame).borderRadius).toBe('50%');
+  expect(getComputedStyle(frame).borderWidth).toBe('5px');
+  expect(getComputedStyle(frame).borderColor).toBe('rgb(51, 102, 153)');
+  expect(getComputedStyle(frame).overflow).toBe('hidden');
+  expect(getComputedStyle(image).objectFit).toBe('cover');
+  expect(screen.queryByRole('button', { name: 'Resize Villager' })).not.toBeInTheDocument();
+});
+
 test('a dead token shows a skull instead of counting Dead as a numbered mark', () => {
   render(
     <TokenSprite

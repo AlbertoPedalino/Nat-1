@@ -18,13 +18,13 @@ export function normalizeMapObjectKey(value) {
 }
 
 // Furniture rather than a creature: a Lucide object, or a picture the GM
-// uploaded onto the map. Both are rectangles that get the resize and rotate
-// handles, and both are what the grid-snap switch governs — a character or a
-// bestiary piece keeps its square whatever that switch says, because a creature
-// off-grid is a ruling argument nobody wants mid-fight.
+// uploaded directly onto the map. The token maker also uploads its portrait to
+// image_path, but gives the piece a colour for its ring; that colour is the
+// durable distinction between a framed token and unframed scenery. Furniture
+// gets resize/rotate handles, while a creature keeps its square.
 export function isMapPiece(token) {
   if (!token || token.characterId) return false;
-  return Boolean(token.iconKey) || Boolean(token.imagePath);
+  return Boolean(token.iconKey) || (Boolean(token.imagePath) && !token.color);
 }
 
 export function mapObjectLabel(key) {

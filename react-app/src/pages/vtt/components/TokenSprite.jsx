@@ -64,24 +64,28 @@ export default function TokenSprite({
     setResizeHintOpen(false);
     window.addEventListener('pointerup', () => { resizingRef.current = false; }, { once: true });
   };
-  // Bestiary artwork is a circular token on a transparent background, so a
-  // coloured disc behind it shows through as a ring in the group's colour. The
-  // colour is still the fallback for a piece with no art, or whose art fails to
-  // load, so the two are tracked rather than assumed.
+  // Keep artwork failure separate from the colour fallback so an unavailable
+  // portrait still leaves a usable piece on the board.
   const [artworkFailed, setArtworkFailed] = useState(false);
   useEffect(() => { setArtworkFailed(false); }, [token.imageUrl]);
   const showArtwork = Boolean(token.imageUrl) && !artworkFailed;
   // Scenery is a rectangle: a rug or a door forced into a circle is unusable,
-  // and it wants none of the creature furniture either.
+  // and it wants none of the creature furniture either. This is based on what
+  // the piece is, not its editing layer: token-maker portraits remain tokens
+  // even when the GM happens to create one while arranging the map layer.
   const isMapObject = Boolean(token.iconKey);
-  const isScenery = token.layer === 'map' && !isMapObject;
   // An uploaded picture gets the same corner handles as an icon: it is placed at
   // the size it should cover, and that size is never right on the first drop.
   const hasHandles = isMapPiece(token);
+  const isScenery = hasHandles && !isMapObject;
   // A piece standing for somebody's character, as opposed to a creature the GM
   // put down. Only these wear a colour: the party is who you need to pick out
   // of a crowded board, and giving every goblin a bright ring buries them.
   const isCharacter = Boolean(token.characterId);
+  const hasUploadedArtworkRing = showArtwork
+    && Boolean(token.imagePath)
+    && !hasHandles
+    && Boolean(token.color);
   const ClassIcon = isCharacter ? classIcon(token.className) : null;
   const conditions = token.conditions || [];
   const dead = conditions.includes(DEAD_CONDITION_KEY);
@@ -114,6 +118,7 @@ export default function TokenSprite({
     if (isCharacter) return 5;
     if (isMapObject) return 0;
     if (isScenery) return 0;
+    if (hasUploadedArtworkRing) return 5;
     return showArtwork ? 0 : 2;
   };
 
@@ -169,7 +174,7 @@ export default function TokenSprite({
           // map, and none at all once it has its own artwork.
           borderStyle: 'solid',
           borderWidth: ringWidth(),
-          borderColor: isCharacter
+          borderColor: isCharacter || hasUploadedArtworkRing
             ? (token.color || vttAlpha(VTT_COLORS.black, 0.6))
             : vttAlpha(VTT_COLORS.black, 0.6),
           bgcolor: isScenery || isMapObject || showArtwork ? 'transparent' : (token.color || 'secondary.main'),

@@ -19,6 +19,9 @@ test('the stroke width stays inside the slider it came from', () => {
 test('scenery is an icon or an uploaded picture, never a creature', () => {
   assert.equal(isMapPiece({ iconKey: 'door-open' }), true);
   assert.equal(isMapPiece({ imagePath: 'camp/scene/rug.png' }), true);
+  // A token-maker upload uses the same private image storage, but its selected
+  // colour marks it as a framed circular token rather than scenery.
+  assert.equal(isMapPiece({ imagePath: 'camp/scene/villager.png', color: '#336699' }), false);
   // Bestiary art arrives as a remote URL on a creature's own piece: that is a
   // monster with a portrait, not a picture laid on the map.
   assert.equal(isMapPiece({ imageUrl: 'https://example.test/ogre.png' }), false);

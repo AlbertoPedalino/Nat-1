@@ -125,6 +125,9 @@ export default function PiecePreview({ token, size = 36, count = 1 }) {
   const imageUrl = token?.imageUrl || token?.image_url || null;
   const label = token?.label || 'Piece';
   const isCharacter = Boolean(token?.characterId);
+  const hasUploadedArtworkRing = Boolean(
+    imageUrl && token?.color && (token?.imageFile || token?.imagePath),
+  );
   const ClassIcon = isCharacter ? classIcon(token?.className) : null;
   const initials = label.split(/\s+/).filter(Boolean).slice(0, 2)
     .map((word) => word[0]?.toUpperCase()).join('');
@@ -137,8 +140,8 @@ export default function PiecePreview({ token, size = 36, count = 1 }) {
         width: size,
         height: size,
         bgcolor: token?.color || VTT_COLORS.objectDefault,
-        borderWidth: isCharacter ? 5 : 2,
-        borderColor: isCharacter
+        borderWidth: isCharacter || hasUploadedArtworkRing ? 5 : 2,
+        borderColor: isCharacter || hasUploadedArtworkRing
           ? (token?.color || vttAlpha(VTT_COLORS.black, 0.6))
           : vttAlpha(VTT_COLORS.gold, 0.65),
       }}
