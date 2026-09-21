@@ -38,9 +38,9 @@ import { applyFreeCastRest, getFreeCastDefsForCharacter } from './spells/spellsT
 import { adapterRegistry as installedRegistry } from '../../adapters/registry.js';
 import { ensureSheetRuntimeAdapters } from './state/sheetRuntimeAdapters.js';
 import { loadItems, loadOptionalFeatures, loadConditions, reconcileInventoryWithItemsDb } from '../charbuilder/data/dataLoaders.js';
-import { fetchCloudMeta, updateCloudCharacterData } from '../../shared/cloud/api/cloudCharacters.js';
-import { isCloudConfigured } from '../../shared/cloud/supabaseClient.js';
+import { updateCloudCharacterData } from '../../shared/cloud/api/cloudCharacters.js';
 import { useRollChannel } from '../../shared/cloud/sync/useRollChannel.js';
+import { useCharacterCampaign } from '../../shared/cloud/sync/useCharacterCampaign.js';
 import { normalizeRoll } from '../../shared/vtt/rolls/rollFeed.js';
 import { SYNCED_VITALS, clampCharacterVitals } from '../../shared/character/combat/vitals.js';
 import {
@@ -129,7 +129,7 @@ export default function CharacterSheet({
   const [charId, setCharId] = useState(null);
   const [tab, setTab] = useState(0);
   const [diceToast, setDiceToast] = useState(null);
-  const [campaignId, setCampaignId] = useState(null);
+  const campaignId = useCharacterCampaign(charId);
   // Rolls are shared with the campaign, not with a scene: this sheet has no idea
   // which map is up and does not need to learn.
   const [rollLog, setRollLog] = useState([]);
@@ -317,18 +317,6 @@ export default function CharacterSheet({
     setResources(next);
     persist({ resources: next });
   }, [persist]);
-
-  useEffect(() => {
-    let cancelled = false;
-    setCampaignId(null);
-    if (!charId || !isCloudConfigured()) {
-      return () => { cancelled = true; };
-    }
-    fetchCloudMeta(charId)
-      .then((meta) => { if (!cancelled) setCampaignId(meta?.campaign_id || null); })
-      .catch(() => { if (!cancelled) setCampaignId(null); });
-    return () => { cancelled = true; };
-  }, [charId]);
 
   const showDiceToast = useCallback((label, detail, total, rolls, meta) => {
     const timestamp = Date.now();

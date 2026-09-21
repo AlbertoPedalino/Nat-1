@@ -212,6 +212,7 @@ export default function SceneEditor({
   const { user } = useAuth();
   const role = useSceneRole(scene.campaignId);
   const {
+    beginTokenMove,
     drawings,
     handleCharacterEvent,
     handleDrawingEvent,
@@ -255,6 +256,14 @@ export default function SceneEditor({
     shownImage: scene.shownImage,
   }));
   const [busy, setBusy] = useState(false);
+  // A picture that failed to sign or decode leaves this client on the previous
+  // frame, and the scene row it would re-read is already correct — so nothing
+  // reruns the load on its own. The reconciliation that already repairs the
+  // rest of the scene bumps this instead, which is the one dependency the
+  // loader needs to try again.
+  const [imageAttempt, setImageAttempt] = useState(0);
+  const imageOnScreenRef = useRef(false);
+  const imageLoadingRef = useRef(false);
   const gridTimerRef = useRef(null);
   const atmosphereTimerRef = useRef(null);
   const playAreaTimerRef = useRef(null);
@@ -427,6 +436,10 @@ export default function SceneEditor({
       path: shownPathOrNull,
       shownImage: shownImageForViewport,
     };
+  // Read by the reconciliation below, which runs outside rendering. Matching
+  // path and mode is not enough: the initial state already carries those with
+  // no URL behind them, which is exactly the empty frame to repair.
+  imageOnScreenRef.current = displayIsTarget && (!shownPathOrNull || Boolean(displayed.url));
 
   // The picture and everything that belongs to it change together. Flipping the
   // mode as soon as the row changed showed the switch in three steps: fog off,
@@ -445,6 +458,7 @@ export default function SceneEditor({
       return () => { cancelled = true; };
     }
 
+    imageLoadingRef.current = true;
     signMapImage(shownPath)
       .then((url) => {
         if (cancelled || !url) return null;
@@ -471,9 +485,13 @@ export default function SceneEditor({
           // previous frame also avoids bringing the transition flicker back.
           notify('error', 'Could not load the scene image.');
         }
-      });
-    return () => { cancelled = true; };
-  }, [scene.id, shownImageForViewport, shownPath]);
+      })
+      .finally(() => { if (!cancelled) imageLoadingRef.current = false; });
+    return () => {
+      cancelled = true;
+      imageLoadingRef.current = false;
+    };
+  }, [scene.id, shownImageForViewport, shownPath, imageAttempt]);
 
   useEffect(() => () => {
     clearTimeout(gridTimerRef.current);
@@ -573,6 +591,12 @@ export default function SceneEditor({
     setProjectorInspection(inspection);
   }, []);
   const reconcilePersistentState = useCallback(async () => {
+    // The picture is part of the scene as much as the row is. A load that
+    // failed earlier is not visible in the data, so repair it here too —
+    // unless one is still running, whose download this would only restart.
+    if (!imageOnScreenRef.current && !imageLoadingRef.current) {
+      setImageAttempt((attempt) => attempt + 1);
+    }
     const [freshScene] = await Promise.all([
       fetchScene(scene.id).catch(() => null),
       refreshContent(),
@@ -683,6 +707,7 @@ export default function SceneEditor({
   }, [scene.playArea, sendDrag]);
 
   const handleMoveToken = useCallback(async (token, position) => {
+    const finishMove = beginTokenMove([token.id]);
     const wasVisible = isTokenVisibleToPlayers(token, scene.playArea);
     const willBeVisible = isTokenVisibleToPlayers({ ...token, ...position }, scene.playArea);
     setTokens((current) => current.map((item) => (
@@ -698,8 +723,9 @@ export default function SceneEditor({
       // Released only after the write settles: until then a remote echo would
       // still be our own move coming back.
       draggingRef.current = null;
+      finishMove();
     }
-  }, [notify, scene.playArea, sendDrag]);
+  }, [beginTokenMove, notify, scene.playArea, sendDrag]);
 
   const handleMoveTokens = useCallback(async (moves) => {
     const valid = (moves || []).filter(({ token, position }) => (
@@ -707,6 +733,7 @@ export default function SceneEditor({
     ));
     if (!valid.length) return;
 
+    const finishMove = beginTokenMove(valid.map(({ token }) => token.id));
     const byId = new Map(valid.map(({ token, position }) => [token.id, { token, position }]));
     setTokens((current) => current.map((item) => {
       const move = byId.get(item.id);
@@ -715,7 +742,7 @@ export default function SceneEditor({
 
     const results = await Promise.allSettled(
       valid.map(({ token, position }) => updateToken(token.id, position)),
-    );
+    ).finally(finishMove);
     const failedIds = new Set(results.flatMap((result, index) => (
       result.status === 'rejected' ? [valid[index].token.id] : []
     )));
@@ -732,7 +759,7 @@ export default function SceneEditor({
         !== isTokenVisibleToPlayers({ ...token, ...position }, scene.playArea)
     ));
     if (crossedVisibilityBoundary) sendDrag({ tokensChanged: true });
-  }, [canMove, notify, scene.playArea, sendDrag]);
+  }, [beginTokenMove, canMove, notify, scene.playArea, sendDrag]);
 
   const handleObjectStyle = useCallback(async (token, patch) => {
     const localPatch = {};

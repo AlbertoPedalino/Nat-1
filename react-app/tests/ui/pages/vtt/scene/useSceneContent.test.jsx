@@ -19,7 +19,7 @@ function deferred() {
 }
 beforeEach(() => {
   cloud.listTokens.mockReset().mockResolvedValue([]);
-  cloud.listDrawings.mockResolvedValue([]);
+  cloud.listDrawings.mockReset().mockResolvedValue([]);
   cloud.listTokenSecrets.mockResolvedValue({});
   cloud.listCampaignCharacters.mockResolvedValue([]);
   cloud.readCampaignVitals.mockReset().mockResolvedValue({});
@@ -60,4 +60,105 @@ test('optional character vitals do not block a ready map', async () => {
   cloud.readCampaignVitals.mockReturnValue(new Promise(() => {}));
   const { result } = openScene();
   await waitFor(() => expect(result.current.loading).toBe(false));
+});
+
+test.each(['refreshContent', 'refreshVisibleTokens'])('%s preserves changes made during the read and refreshes untouched tokens', async (method) => {
+  cloud.listTokens.mockResolvedValueOnce([
+    { id: 'moved', x: 0 }, { id: 'deleted', x: 0 }, { id: 'untouched', x: 0 },
+  ]);
+  const { result } = openScene();
+  await waitFor(() => expect(result.current.loading).toBe(false));
+  const snapshot = deferred();
+  cloud.listTokens.mockReturnValueOnce(snapshot.promise);
+  let refreshing;
+  act(() => { refreshing = result.current[method](); });
+  act(() => {
+    result.current.setTokens((current) => [
+      ...current.filter((item) => item.id !== 'deleted')
+        .map((item) => item.id === 'moved' ? { ...item, x: 10 } : item),
+      { id: 'inserted', x: 5 },
+    ]);
+  });
+  await act(async () => {
+    snapshot.resolve([{ id: 'moved', x: 0 }, { id: 'deleted', x: 0 }, { id: 'untouched', x: 7 }]);
+    await refreshing;
+  });
+  expect(result.current.tokens).toHaveLength(3);
+  expect(result.current.tokens).toEqual(expect.arrayContaining([
+    { id: 'moved', x: 10 }, { id: 'inserted', x: 5 }, { id: 'untouched', x: 7 },
+  ]));
+});
+
+test('a snapshot started during a group move cannot undo it even after saving finishes', async () => {
+  cloud.listTokens.mockResolvedValueOnce([{ id: 'a', x: 0 }, { id: 'b', x: 0 }]);
+  const { result } = openScene();
+  await waitFor(() => expect(result.current.loading).toBe(false));
+  const finishMove = result.current.beginTokenMove(['a', 'b']);
+  act(() => result.current.setTokens((current) => current.map((item) => ({ ...item, x: 10 }))));
+  const snapshot = deferred();
+  cloud.listTokens.mockReturnValueOnce(snapshot.promise);
+  let refreshing;
+  act(() => { refreshing = result.current.refreshContent(); });
+  finishMove();
+  await act(async () => {
+    snapshot.resolve([{ id: 'a', x: 0 }, { id: 'b', x: 0 }]);
+    await refreshing;
+  });
+  expect(result.current.tokens.map((item) => item.x)).toEqual([10, 10]);
+  cloud.listTokens.mockResolvedValueOnce([{ id: 'a', x: 20 }, { id: 'b', x: 20 }]);
+  await act(async () => { await result.current.refreshContent(); });
+  expect(result.current.tokens.map((item) => item.x)).toEqual([20, 20]);
+});
+
+test.each([
+  ['refreshContent', 'refreshVisibleTokens'],
+  ['refreshVisibleTokens', 'refreshContent'],
+])('a slow %s cannot replace a newer %s', async (older, newer) => {
+  const { result } = openScene();
+  await waitFor(() => expect(result.current.loading).toBe(false));
+  const snapshot = deferred();
+  cloud.listTokens.mockReturnValueOnce(snapshot.promise).mockResolvedValueOnce([{ id: 'fresh', x: 10 }]);
+  let refreshing;
+  act(() => { refreshing = result.current[older](); });
+  await act(async () => { await result.current[newer](); });
+  await act(async () => {
+    snapshot.resolve([{ id: 'old', x: 0 }]);
+    await refreshing;
+  });
+  expect(result.current.tokens).toEqual([{ id: 'fresh', x: 10 }]);
+});
+
+test('a pending visibility read cannot inject tokens into another scene', async () => {
+  const notify = vi.fn();
+  const { result, rerender } = renderHook(({ id }) => useSceneContent({
+    scene: { id, campaignId: 'campaign' }, isGm: true, spectator: false, notify,
+  }), { initialProps: { id: 'old-scene' } });
+  await waitFor(() => expect(result.current.loading).toBe(false));
+  const snapshot = deferred();
+  cloud.listTokens.mockReturnValueOnce(snapshot.promise).mockResolvedValueOnce([{ id: 'new-scene-token' }]);
+  let refreshing;
+  act(() => { refreshing = result.current.refreshVisibleTokens(); });
+  rerender({ id: 'new-scene' });
+  await waitFor(() => expect(result.current.tokens).toEqual([{ id: 'new-scene-token' }]));
+  await act(async () => {
+    snapshot.resolve([{ id: 'old-scene-token' }]);
+    await refreshing;
+  });
+  expect(result.current.tokens).toEqual([{ id: 'new-scene-token' }]);
+});
+
+test('drawing changes made during a snapshot are preserved too', async () => {
+  cloud.listDrawings.mockResolvedValueOnce([{ id: 'drawing', points: [0, 0] }]);
+  const { result } = openScene();
+  await waitFor(() => expect(result.current.loading).toBe(false));
+  const snapshot = deferred();
+  cloud.listDrawings.mockReturnValueOnce(snapshot.promise);
+  let refreshing;
+  act(() => { refreshing = result.current.refreshContent(); });
+  act(() => result.current.setDrawings([{ id: 'drawing', points: [10, 10] }]));
+  await act(async () => {
+    snapshot.resolve([{ id: 'drawing', points: [0, 0] }]);
+    await refreshing;
+  });
+  expect(result.current.drawings).toEqual([{ id: 'drawing', points: [10, 10] }]);
 });

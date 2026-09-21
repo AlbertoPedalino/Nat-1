@@ -12,6 +12,12 @@ const notifyMock = vi.hoisted(() => vi.fn());
 const sceneRoleMock = vi.hoisted(() => vi.fn());
 const sendPresenterStateMock = vi.hoisted(() => vi.fn());
 const updateSceneMock = vi.hoisted(() => vi.fn());
+const updateTokenMock = vi.hoisted(() => vi.fn());
+const beginTokenMoveMock = vi.hoisted(() => vi.fn());
+const finishTokenMoveMock = vi.hoisted(() => vi.fn());
+const fetchSceneMock = vi.hoisted(() => vi.fn());
+const refreshContentMock = vi.hoisted(() => vi.fn());
+const sceneLiveOptions = vi.hoisted(() => ({ current: null }));
 const sheetRoster = vi.hoisted(() => ({ current: [] }));
 
 const GM_ROLE = {
@@ -29,12 +35,20 @@ beforeEach(() => {
   sceneRoleMock.mockReturnValue(GM_ROLE);
   updateSceneMock.mockReset();
   updateSceneMock.mockResolvedValue(null);
+  updateTokenMock.mockReset().mockResolvedValue(null);
+  finishTokenMoveMock.mockReset();
+  beginTokenMoveMock.mockReset().mockReturnValue(finishTokenMoveMock);
+  fetchSceneMock.mockReset().mockResolvedValue(null);
+  refreshContentMock.mockReset().mockResolvedValue(undefined);
+  sceneLiveOptions.current = null;
 });
 
 vi.mock('../../../../../src/shared/cloud/api/vtt.js', async (importOriginal) => ({
   ...await importOriginal(),
   signMapImage: signMapImageMock,
   updateScene: updateSceneMock,
+  updateToken: updateTokenMock,
+  fetchScene: fetchSceneMock,
 }));
 
 vi.mock('../../../../../src/shared/ui/ToastProvider.jsx', () => ({
@@ -47,12 +61,15 @@ vi.mock('../../../../../src/shared/vtt/session/useSceneRole.js', () => ({
   useSceneRole: sceneRoleMock,
 }));
 vi.mock('../../../../../src/shared/vtt/session/useSceneLive.js', () => ({
-  useSceneLive: () => ({
-    sendCamera: vi.fn(),
-    sendDrag: vi.fn(),
-    sendPresenterInspection: vi.fn(),
-    sendPresenterState: sendPresenterStateMock,
-  }),
+  useSceneLive: (options) => {
+    sceneLiveOptions.current = options;
+    return {
+      sendCamera: vi.fn(),
+      sendDrag: vi.fn(),
+      sendPresenterInspection: vi.fn(),
+      sendPresenterState: sendPresenterStateMock,
+    };
+  },
 }));
 vi.mock('../../../../../src/shared/character/profile/usePortraits.js', () => ({ usePortraits: () => ({}) }));
 vi.mock('../../../../../src/pages/encounterbuilder/bestiary/useMonsterDb.js', () => ({
@@ -91,6 +108,7 @@ vi.mock('../../../../../src/pages/vtt/rolls/useVttRolls.js', () => ({
 }));
 vi.mock('../../../../../src/pages/vtt/scene/useSceneContent.js', () => ({
   useSceneContent: () => ({
+    beginTokenMove: beginTokenMoveMock,
     drawings: [
       { id: 'public-drawing', layer: 'tokens', color: '#ffffff' },
       { id: 'gm-drawing', layer: 'gm', color: '#ffffff' },
@@ -99,6 +117,7 @@ vi.mock('../../../../../src/pages/vtt/scene/useSceneContent.js', () => ({
     handleDrawingEvent: vi.fn(),
     loading: false,
     refreshVisibleTokens: vi.fn(),
+    refreshContent: refreshContentMock,
     roster: sheetRoster.current,
     setDrawings: vi.fn(),
     setRoster: vi.fn(),
@@ -541,4 +560,186 @@ test('players receive the group-selection tool with permission-checked batch act
   expect(props.controls.props.groups.map((group) => group.id)).toContain('select');
   expect(props.onMoveTokens).toEqual(expect.any(Function));
   expect(props.onDeleteTokens).toEqual(expect.any(Function));
+});
+
+test.each([
+  ['single', false], ['single', true], ['group', false], ['group', true],
+])('%s moves protect their tokens until saving settles (failure: %s)', async (kind, fail) => {
+  let settle;
+  updateTokenMock.mockReturnValueOnce(new Promise((resolve, reject) => {
+    settle = () => fail ? reject(new Error('Offline')) : resolve(null);
+  }));
+  const scene = {
+    id: 'scene-moving', campaignId: 'campaign-1', shownImage: 'map',
+    imagePath: null, backgroundPath: null, fog: null, atmosphere: null,
+    isLive: true, playArea: null, grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
+  };
+  render(<ThemeProvider theme={theme}><SceneEditor scene={scene} onSceneChange={vi.fn()} /></ThemeProvider>);
+  const props = sceneViewportMock.mock.calls.at(-1)[0];
+  const token = { id: 'moving', layer: 'tokens', x: 0, y: 0 };
+  let saving;
+  act(() => {
+    saving = kind === 'single'
+      ? props.onMoveToken(token, { x: 10, y: 5 })
+      : props.onMoveTokens([
+        { token, position: { x: 10, y: 5 } },
+        { token: { ...token, id: 'second' }, position: { x: 11, y: 5 } },
+      ]);
+  });
+  expect(beginTokenMoveMock).toHaveBeenCalledWith(kind === 'single' ? ['moving'] : ['moving', 'second']);
+  expect(finishTokenMoveMock).not.toHaveBeenCalled();
+  await act(async () => { settle(); await saving; });
+  expect(finishTokenMoveMock).toHaveBeenCalledTimes(1);
+});
+
+test('an obsolete image load cannot restart the current image during reconciliation', async () => {
+  sceneViewportMock.mockClear();
+  signMapImageMock.mockReset().mockImplementation(async (path) => `signed:${path}`);
+  let finishOld;
+  let finishCurrent;
+  const oldDecode = new Promise((resolve) => { finishOld = resolve; });
+  const currentDecode = new Promise((resolve) => { finishCurrent = resolve; });
+  class ControlledImage {
+    set src(value) { this.currentSrc = value; }
+    get naturalWidth() { return 1600; }
+    get naturalHeight() { return 900; }
+    decode() { return this.currentSrc === 'signed:map.webp' ? oldDecode : currentDecode; }
+  }
+  vi.stubGlobal('Image', ControlledImage);
+  const scene = {
+    id: 'scene-race', campaignId: 'campaign-1', name: 'Changing scene',
+    shownImage: 'map', imagePath: 'map.webp', backgroundPath: 'background.webp',
+    fog: null, atmosphere: null, isLive: true, playArea: null,
+    grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
+  };
+  const renderEditor = (value) => (
+    <ThemeProvider theme={theme}>
+      <SceneEditor scene={value} onSceneChange={vi.fn()} />
+    </ThemeProvider>
+  );
+  try {
+    const { rerender } = render(renderEditor(scene));
+    await act(async () => {});
+    rerender(renderEditor({ ...scene, shownImage: 'background' }));
+    await act(async () => {});
+    expect(signMapImageMock).toHaveBeenCalledTimes(2);
+    await act(async () => { finishOld(); });
+    await act(async () => { await sceneLiveOptions.current.onReconcile(); });
+    expect(signMapImageMock).toHaveBeenCalledTimes(2);
+    await act(async () => { finishCurrent(); });
+    expect(sceneViewportMock.mock.calls.at(-1)[0].imageUrl).toBe('signed:background.webp');
+  } finally {
+    await act(async () => { finishCurrent(); });
+    vi.unstubAllGlobals();
+  }
+});
+
+test('a picture that failed to load is retried by the reconciliation, not left behind', async () => {
+  sceneViewportMock.mockClear();
+  signMapImageMock.mockReset();
+  // The first attempt fails the way a dropped connection does; the scene row
+  // itself stays correct, so nothing in the data tells this client to retry.
+  signMapImageMock
+    .mockRejectedValueOnce(new Error('offline'))
+    .mockImplementation(async (path) => `signed:${path}`);
+
+  class LoadedImage {
+    set src(value) { this.currentSrc = value; }
+
+    get naturalWidth() { return 1600; }
+
+    get naturalHeight() { return 900; }
+
+    decode() { return Promise.resolve(); }
+  }
+  vi.stubGlobal('Image', LoadedImage);
+
+  const scene = {
+    id: 'scene-recovering',
+    campaignId: 'campaign-1',
+    name: 'A scene that failed once',
+    shownImage: 'background',
+    imagePath: 'map.webp',
+    backgroundPath: 'background.webp',
+    fog: null,
+    atmosphere: null,
+    isLive: true,
+    playArea: null,
+    grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
+  };
+
+  try {
+    render(
+      <ThemeProvider theme={theme}>
+        <SceneEditor scene={scene} onSceneChange={vi.fn()} />
+      </ThemeProvider>,
+    );
+    await waitFor(() => {
+      expect(notifyMock).toHaveBeenCalledWith('error', 'Could not load the scene image.');
+    });
+    expect(sceneViewportMock.mock.calls.at(-1)[0].imageUrl).toBe(null);
+
+    // The reconciliation already runs on a timer, on reconnect and when the tab
+    // comes back. It now repairs the picture as well as the row.
+    await act(async () => { await sceneLiveOptions.current.onReconcile(); });
+    await waitFor(() => {
+      expect(sceneViewportMock.mock.calls.at(-1)[0]).toEqual(expect.objectContaining({
+        imageUrl: 'signed:background.webp',
+        preparedImageSize: { width: 1600, height: 900 },
+      }));
+    });
+  } finally {
+    vi.unstubAllGlobals();
+  }
+});
+
+test('the reconciliation leaves a picture that is already on screen alone', async () => {
+  sceneViewportMock.mockClear();
+  signMapImageMock.mockReset();
+  signMapImageMock.mockImplementation(async (path) => `signed:${path}`);
+
+  class LoadedImage {
+    set src(value) { this.currentSrc = value; }
+
+    get naturalWidth() { return 1600; }
+
+    get naturalHeight() { return 900; }
+
+    decode() { return Promise.resolve(); }
+  }
+  vi.stubGlobal('Image', LoadedImage);
+
+  const scene = {
+    id: 'scene-settled',
+    campaignId: 'campaign-1',
+    name: 'A settled scene',
+    shownImage: 'map',
+    imagePath: 'map.webp',
+    backgroundPath: null,
+    fog: null,
+    atmosphere: null,
+    isLive: true,
+    playArea: null,
+    grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
+  };
+
+  try {
+    render(
+      <ThemeProvider theme={theme}>
+        <SceneEditor scene={scene} onSceneChange={vi.fn()} />
+      </ThemeProvider>,
+    );
+    await waitFor(() => {
+      expect(sceneViewportMock.mock.calls.at(-1)[0].imageUrl).toBe('signed:map.webp');
+    });
+    signMapImageMock.mockClear();
+
+    // No wasted download: a battlemap is large, and this runs every 30 seconds
+    // on every device at the table.
+    await act(async () => { await sceneLiveOptions.current.onReconcile(); });
+    await act(async () => { await sceneLiveOptions.current.onReconcile(); });
+    expect(signMapImageMock).not.toHaveBeenCalled();
+  } finally {
+    vi.unstubAllGlobals();
+  }
 });

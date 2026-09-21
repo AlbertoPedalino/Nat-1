@@ -4,6 +4,42 @@ import { vi } from 'vitest';
 import TokenSprite from '../../../../../src/pages/vtt/tokens/TokenSprite.jsx';
 import { combatantToToken } from '../../../../../src/shared/vtt/tokens/encounterImport.js';
 
+test.each(['online', 'focus', 'timer'])('failed artwork retries the same URL on %s', async (trigger) => {
+  vi.useFakeTimers();
+  const token = { id: 'retry', label: 'Retry', layer: 'tokens', imageUrl: 'signed:retry.png' };
+  const { container, unmount } = render(<TokenSprite token={token} size={64} />);
+  try {
+    fireEvent.error(container.querySelector('img'));
+    expect(container.querySelector('img')).toBeNull();
+    await act(async () => {
+      if (trigger === 'timer') await vi.advanceTimersByTimeAsync(5000);
+      else window.dispatchEvent(new Event(trigger));
+    });
+    const recovered = container.querySelector('img');
+    expect(recovered).toHaveAttribute('src', token.imageUrl);
+    await act(async () => { await vi.advanceTimersByTimeAsync(30_000); });
+    expect(container.querySelector('img')).toBe(recovered);
+    expect(vi.getTimerCount()).toBe(0);
+  } finally {
+    unmount();
+    vi.useRealTimers();
+  }
+});
+
+test('unmounting a failed token cancels its retry timer', () => {
+  vi.useFakeTimers();
+  const { container, unmount } = render(
+    <TokenSprite token={{ id: 'retry', imageUrl: 'signed:retry.png' }} size={64} />,
+  );
+  try {
+    fireEvent.error(container.querySelector('img'));
+    unmount();
+    expect(vi.getTimerCount()).toBe(0);
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
 test('a character without a portrait uses the primary class icon', () => {
   const { container } = render(
     <TokenSprite

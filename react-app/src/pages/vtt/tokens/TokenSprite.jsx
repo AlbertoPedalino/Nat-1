@@ -68,6 +68,24 @@ export default function TokenSprite({
   // portrait still leaves a usable piece on the board.
   const [artworkFailed, setArtworkFailed] = useState(false);
   useEffect(() => { setArtworkFailed(false); }, [token.imageUrl]);
+  useEffect(() => {
+    if (!artworkFailed || !token.imageUrl) return undefined;
+    // Remount the failed image even when signing returns the same cached URL.
+    const retry = () => setArtworkFailed(false);
+    const retryWhenVisible = () => {
+      if (document.visibilityState === 'visible') retry();
+    };
+    const timer = window.setTimeout(retry, 5000);
+    window.addEventListener('online', retry);
+    window.addEventListener('focus', retry);
+    document.addEventListener('visibilitychange', retryWhenVisible);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener('online', retry);
+      window.removeEventListener('focus', retry);
+      document.removeEventListener('visibilitychange', retryWhenVisible);
+    };
+  }, [artworkFailed, token.imageUrl]);
   const showArtwork = Boolean(token.imageUrl) && !artworkFailed;
   // Scenery is a rectangle: a rug or a door forced into a circle is unusable,
   // and it wants none of the creature furniture either. This is based on what
