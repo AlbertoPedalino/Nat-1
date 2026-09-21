@@ -1606,8 +1606,9 @@ export default function SceneViewport({
       {/* Screen space, over everything: the dice are on the table, not on the
           map. A throw with no piece to land next to lands in the middle. */}
       <DiceTray
+        centered={backgroundOnly}
         throws={(diceThrows || []).map(({ roll, token }) => {
-          const rect = token ? tokenWorldRect(token, scene.grid) : null;
+          const rect = !backgroundOnly && token ? tokenWorldRect(token, scene.grid) : null;
           const at = rect ? worldToScreen(rect, view) : null;
           return {
             roll,
@@ -1662,7 +1663,7 @@ export default function SceneViewport({
         );
       })() : null}
 
-      {(rollBubbles || []).map(({ roll, token }) => {
+      {!backgroundOnly && (rollBubbles || []).map(({ roll, token }) => {
         const rect = tokenWorldRect(token, scene.grid);
         const at = worldToScreen(rect, view);
         return (

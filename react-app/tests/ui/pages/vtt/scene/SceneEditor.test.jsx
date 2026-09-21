@@ -398,6 +398,7 @@ test('battlemap and background swap only after the next image is decoded', async
       imageUrl: 'signed:map.webp',
       preparedImageSize: { width: 2000, height: 1000 },
     }));
+    expect(sceneViewportMock.mock.calls.at(-1)[0].toast.props.hidden).toBe(false);
 
     await act(async () => { finishBackgroundDecode(); });
     await waitFor(() => {
@@ -407,6 +408,7 @@ test('battlemap and background swap only after the next image is decoded', async
         preparedImageSize: { width: 1600, height: 900 },
       }));
     });
+    expect(sceneViewportMock.mock.calls.at(-1)[0].toast.props.hidden).toBe(true);
 
     rerender(renderEditor(mapScene));
     expect(sceneViewportMock.mock.calls.at(-1)[0]).toEqual(expect.objectContaining({
@@ -414,6 +416,7 @@ test('battlemap and background swap only after the next image is decoded', async
       imageUrl: 'signed:background.webp',
       preparedImageSize: { width: 1600, height: 900 },
     }));
+    expect(sceneViewportMock.mock.calls.at(-1)[0].toast.props.hidden).toBe(true);
 
     await act(async () => { finishMapReturnDecode(); });
     await waitFor(() => {
@@ -423,6 +426,7 @@ test('battlemap and background swap only after the next image is decoded', async
         preparedImageSize: { width: 2000, height: 1000 },
       }));
     });
+    expect(sceneViewportMock.mock.calls.at(-1)[0].toast.props.hidden).toBe(false);
   } finally {
     vi.unstubAllGlobals();
   }

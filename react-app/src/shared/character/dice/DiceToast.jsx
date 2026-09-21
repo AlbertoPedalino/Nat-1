@@ -24,14 +24,16 @@ const modeChipSx = (chip) => ({
   bgcolor: chip.bgColor, '& .MuiChip-label': { px: 0.5 },
 });
 
-export default function DiceToast({ toast, onClose }) {
+export default function DiceToast({ toast, onClose, hidden = false }) {
   useEffect(() => {
     if (!toast) return;
     const timer = setTimeout(onClose, 6000);
     return () => clearTimeout(timer);
   }, [toast, onClose]);
 
-  if (!toast) return null;
+  // Keep the expiry running while hidden so returning to the map cannot revive
+  // an old result that arrived during the background view.
+  if (!toast || hidden) return null;
 
   const layout = resolveToastLayout(toast);
   // The moment of the throw: two rolls a second apart are two throws, and the

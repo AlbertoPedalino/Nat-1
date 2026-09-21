@@ -75,6 +75,29 @@ test('a coin result waits for the final pose to be painted and visibly settled',
   );
 });
 
+test.each([[800, 600], [360, 640]])('background dice stay centered in a %s by %s viewport', (width, height) => {
+  let tableWidth = width;
+  let tableHeight = height;
+  Object.defineProperty(HTMLElement.prototype, 'clientWidth', { configurable: true, get: () => tableWidth });
+  Object.defineProperty(HTMLElement.prototype, 'clientHeight', { configurable: true, get: () => tableHeight });
+  let resize;
+  vi.stubGlobal('ResizeObserver', class {
+    constructor(callback) { resize = callback; }
+    observe() {}
+    disconnect() {}
+  });
+  render(<DiceTray centered throws={[{
+    roll: { id: 'background-roll', rolls: [{ faces: 20, v: 14 }] },
+    x: -1000, y: -1000,
+  }]} />);
+  const anchor = screen.getByTestId('die').parentElement.parentElement;
+  expect(anchor).toHaveStyle({ left: `${width / 2}px`, top: `${height / 2}px` });
+  tableWidth = height;
+  tableHeight = width;
+  act(() => resize());
+  expect(anchor).toHaveStyle({ left: `${height / 2}px`, top: `${width / 2}px` });
+});
+
 test('a d100 uses one lightweight orb and reveals its value only after landing', () => {
   render(
     <DiceTray

@@ -30,7 +30,7 @@ const GROWTH = 0.0018;
 // painted on the map, so it keeps its size when the board is zoomed and does not
 // slide when the board is panned. It never takes a pointer event: the map
 // underneath stays usable while dice are still rolling.
-export default function DiceTray({ throws, onThrowSettled }) {
+export default function DiceTray({ throws, onThrowSettled, centered = false }) {
   const hostRef = useRef(null);
   const [table, setTable] = useState(null);
   // When each throw was first seen here, on this machine's clock.
@@ -72,6 +72,7 @@ export default function DiceTray({ throws, onThrowSettled }) {
           roll={entry.roll}
           at={{ x: entry.x, y: entry.y }}
           table={table}
+          centered={centered}
           startedAt={startedAt.current.get(entry.roll.id)}
           onSettled={onThrowSettled}
         />
@@ -80,7 +81,7 @@ export default function DiceTray({ throws, onThrowSettled }) {
   );
 }
 
-function DiceThrow({ roll, at, table, startedAt, onSettled }) {
+function DiceThrow({ roll, at, table, startedAt, onSettled, centered }) {
   const bodyRefs = useRef([]);
   const solidRefs = useRef([]);
   const shadowRefs = useRef([]);
@@ -123,8 +124,12 @@ function DiceThrow({ roll, at, table, startedAt, onSettled }) {
   // The tray is a fixed size, so keep it on screen whatever the anchor is: a
   // piece can be panned half out of view, and dice that land where nobody can
   // see them are dice that were never thrown.
-  const x = clamp(at.x, TRAY.width / 2, Math.max(TRAY.width / 2, table.width - TRAY.width / 2));
-  const y = clamp(at.y, TRAY.height / 2, Math.max(TRAY.height / 2, table.height - TRAY.height / 2));
+  // Background rolls belong to the visible table, including on phones narrower
+  // than the simulated tray. They never use a hidden piece's map coordinates.
+  const x = centered ? table.width / 2
+    : clamp(at.x, TRAY.width / 2, Math.max(TRAY.width / 2, table.width - TRAY.width / 2));
+  const y = centered ? table.height / 2
+    : clamp(at.y, TRAY.height / 2, Math.max(TRAY.height / 2, table.height - TRAY.height / 2));
 
   const paint = (frame) => {
     frame.forEach((die, index) => {

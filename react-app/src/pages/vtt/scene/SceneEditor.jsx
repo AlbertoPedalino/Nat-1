@@ -2352,7 +2352,11 @@ export default function SceneEditor({
         )}
         // Inside the viewport, not beside it: a fullscreen map paints nothing
         // that is not one of its own descendants.
-        toast={<DiceToast toast={rollToast} onClose={dismissRollToast} />}
+        toast={<DiceToast
+          toast={rollToast}
+          onClose={dismissRollToast}
+          hidden={viewportDisplay.shownImage === 'background'}
+        />}
         onFullscreenChange={handleMapFullscreenChange}
         onViewChange={role.isGm && !gmPlayerPreview ? handleCameraViewChange : undefined}
         fullscreenSheet={!gmPlayerPreview && sheetChoices.length ? {
