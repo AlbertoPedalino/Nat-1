@@ -2451,10 +2451,6 @@ export default function SceneEditor({
         <Typography variant="caption" color="text.secondary">
           Player view is read-only and hides GM-only content, staged pieces, and unrevealed fog.
         </Typography>
-      ) : !role.isGm ? (
-        <Typography variant="caption" color="text.secondary">
-          You can move the pieces standing for your own characters.
-        </Typography>
       ) : null}
     </Stack>
   );
