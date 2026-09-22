@@ -87,22 +87,25 @@ test('a reordered list is not treated as a change', () => {
 
 // A character's piece is placed from the party roster, not imported from a
 // fight, so it has no source reference. Matching it by the sheet it stands for
-// is what lets a condition set in the encounter reach the map at all.
-test('a character piece is matched to its combatant by the sheet it stands for', () => {
+// is what lets encounter-only effects reach the map.
+test('a character piece receives only encounter effects, matched by its sheet', () => {
   const tokens = [{ id: 't1', characterId: 'char-1', conditions: [], effects: [] }];
   const updates = tokenUpdatesFromFight(tokens, {
     instanceId: 'enc_1',
     fightId: 'f1',
-    combatants: [{ id: 0, sourceId: 'char-1', hpCurrent: 4, hpMax: 22, activeConditions: ['prone'] }],
+    combatants: [{ id: 0, sourceId: 'char-1', hpCurrent: 4, hpMax: 22, activeConditions: ['prone'], activeEffects: [{ key: 'selfAttackDisadv', duration: 'next' }] }],
   });
   assert.equal(updates.length, 1);
-  assert.deepEqual(updates[0].conditions, ['prone']);
-  // Hit points are the sheet's, and the encounter builder already syncs those
-  // directly: copying them onto the piece would put a second version in play.
-  assert.equal('hpCurrent' in updates[0], false);
+  assert.deepEqual(updates[0], { id: 't1', characterId: 'char-1', effects: [{ key: 'selfAttackDisadv', duration: 'next' }] });
+  assert.deepEqual(tokenUpdatesFromFight([{ ...tokens[0], effects: updates[0].effects }], {
+    instanceId: 'enc_1', fightId: 'f1', combatants: [{
+      id: 0, sourceId: 'char-1', hpCurrent: 20, hpMax: 22,
+      activeEffects: [{ key: 'selfAttackDisadv', duration: 'next' }],
+    }],
+  }), []);
 });
 
-test('player death saves and Dead travel from a fight to the character piece', () => {
+test('stale death saves and Dead in a cached fight do not overwrite a character sheet', () => {
   const tokens = [{
     id: 't1',
     characterId: 'char-1',
@@ -126,13 +129,17 @@ test('player death saves and Dead travel from a fight to the character piece', (
     }],
   });
 
-  assert.deepEqual(updates[0].deathSaves, { success: 1, fail: 3 });
-  assert.deepEqual(updates[0].conditions, ['dead']);
-  assert.deepEqual(updates[0].characterVitals, {
-    currentHP: 0,
-    deathSaves: { success: 1, fail: 3 },
-    activeConditions: ['dead'],
-  });
+  assert.deepEqual(updates, []);
+});
+
+test('raw character tokens without HP never trigger a replay of cached fight vitals', () => {
+  const tokens = [{ id: 't1', characterId: 'char-1', hpCurrent: null, hpMax: null }];
+  for (const hpCurrent of [30, 18, 17, 0]) {
+    assert.deepEqual(tokenUpdatesFromFight(tokens, {
+      instanceId: 'enc_1', fightId: 'f1',
+      combatants: [{ id: 0, type: 'player', sourceId: 'char-1', hpCurrent, hpMax: 30 }],
+    }), []);
+  }
 });
 
 test('a condition set on a character piece reaches its combatant', () => {

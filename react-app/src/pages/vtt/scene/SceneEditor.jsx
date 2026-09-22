@@ -1414,6 +1414,7 @@ export default function SceneEditor({
   const applyTokenVitals = useCallback((updates) => {
     setTokens((current) => current.map((token) => {
       const update = updates.find((item) => item.id === token.id);
+      if (update && token.characterId) return { ...token, effects: update.effects };
       return update
         ? {
           ...token,
@@ -1427,13 +1428,10 @@ export default function SceneEditor({
     }));
     for (const update of updates) {
       if (update.characterId) {
-        const characterVitals = update.characterVitals || {};
-        patchCharacterData(update.characterId, {
-          currentHP: characterVitals.currentHP,
-          activeConditions: characterVitals.activeConditions,
-          deathSaves: characterVitals.deathSaves,
-        }).catch(() => {
-          // The encounter remains authoritative and its next save retries.
+        // Sheet vitals arrive through character realtime. A cached encounter
+        // may only update the effects owned by this map piece.
+        updateToken(update.id, { effects: update.effects }).catch(() => {
+          // The next encounter save retries map effects.
         });
         continue;
       }

@@ -5,6 +5,7 @@ import { ThemeProvider } from '@mui/material';
 import { beforeEach, vi } from 'vitest';
 import { theme } from '../../../../../src/app/theme.js';
 import SceneEditor from '../../../../../src/pages/vtt/scene/SceneEditor.jsx';
+import { persistFights, registerEncounterInstance } from '../../../../../src/pages/encounterbuilder/state/storage.js';
 
 const sceneViewportMock = vi.hoisted(() => vi.fn());
 const signMapImageMock = vi.hoisted(() => vi.fn());
@@ -19,6 +20,8 @@ const fetchSceneMock = vi.hoisted(() => vi.fn());
 const refreshContentMock = vi.hoisted(() => vi.fn());
 const sceneLiveOptions = vi.hoisted(() => ({ current: null }));
 const sheetRoster = vi.hoisted(() => ({ current: [] }));
+const encounterBridge = vi.hoisted(() => ({ real: false, tokens: null }));
+const patchCharacterMock = vi.hoisted(() => vi.fn());
 
 const GM_ROLE = {
   campaignName: 'The Campaign',
@@ -29,6 +32,10 @@ const GM_ROLE = {
 };
 
 beforeEach(() => {
+  localStorage.clear();
+  encounterBridge.real = false;
+  encounterBridge.tokens = null;
+  patchCharacterMock.mockReset().mockResolvedValue(undefined);
   sheetRoster.current = [];
   notifyMock.mockClear();
   sendPresenterStateMock.mockClear();
@@ -50,6 +57,7 @@ vi.mock('../../../../../src/shared/cloud/api/vtt.js', async (importOriginal) => 
   updateToken: updateTokenMock,
   fetchScene: fetchSceneMock,
 }));
+vi.mock('../../../../../src/shared/cloud/api/cloudCharacters.js', () => ({ patchCharacterData: patchCharacterMock }));
 
 vi.mock('../../../../../src/shared/ui/ToastProvider.jsx', () => ({
   useToast: () => ({ notify: notifyMock }),
@@ -78,9 +86,11 @@ vi.mock('../../../../../src/pages/encounterbuilder/bestiary/useMonsterDb.js', ()
 vi.mock('../../../../../src/pages/encounterbuilder/combat/useConditionEntries.js', () => ({
   useConditionEntries: () => [],
 }));
-vi.mock('../../../../../src/pages/vtt/tokens/useEncounterBridge.js', () => ({
-  useEncounterBridge: () => ({ pull: vi.fn(), push: vi.fn() }),
-}));
+vi.mock('../../../../../src/pages/vtt/tokens/useEncounterBridge.js', async (importOriginal) => {
+  const { useEncounterBridge } = await importOriginal();
+  return { useEncounterBridge: (options) => encounterBridge.real
+    ? useEncounterBridge(options) : { pull: vi.fn(), push: vi.fn() } };
+});
 vi.mock('../../../../../src/pages/vtt/dungeon/useSceneDungeon.js', () => ({
   useSceneDungeon: () => ({ fights: [], monstersForRoom: () => [], markersForRoom: () => [] }),
 }));
@@ -123,7 +133,7 @@ vi.mock('../../../../../src/pages/vtt/scene/useSceneContent.js', () => ({
     setRoster: vi.fn(),
     setTokens: vi.fn(),
     tokenImageUrls: {},
-    tokens: [
+    tokens: encounterBridge.tokens || [
       { id: 'visible', layer: 'tokens', secretLabel: 'Mimic', x: 1, y: 1 },
       { id: 'staged', layer: 'tokens', x: 9, y: 1 },
       { id: 'hidden-map-prop', layer: 'map', hiddenFromPlayers: true, x: 1, y: 1 },
@@ -140,6 +150,29 @@ vi.mock('../../../../../src/pages/vtt/map/SceneViewport.jsx', () => ({
 vi.mock('../../../../../src/pages/campaignsheet/CampaignSheetView.jsx', () => ({
   default: ({ sheetId }) => <div data-testid="campaign-sheet">Sheet {sheetId}</div>,
 }));
+
+test('an open battle map never rewrites sheet HP from cached encounters on mount or saves', () => {
+  encounterBridge.real = true;
+  encounterBridge.tokens = [{ id: 'hero-token', characterId: 'hero', hpCurrent: null, hpMax: null, layer: 'tokens', x: 1, y: 1 }];
+  sheetRoster.current = [{ characterId: 'hero', name: 'Hero', hpCurrent: 18, hpMax: 30 }];
+  const saveFight = (instanceId, hpCurrent) => {
+    registerEncounterInstance(instanceId, instanceId);
+    persistFights(instanceId, 'fight', [{ id: 'fight', fight: { combatants: [{
+      id: 0, type: 'player', sourceId: 'hero', hpCurrent, hpMax: 30, activeConditions: [],
+    }] } }]);
+  };
+  saveFight('old-encounter', 30);
+  saveFight('current-encounter', 18);
+  render(<ThemeProvider theme={theme}><SceneEditor scene={{
+    id: 'scene', campaignId: 'campaign', shownImage: 'map', imagePath: null, backgroundPath: null,
+    fog: null, atmosphere: null, isLive: true, playArea: null,
+    grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
+  }} onSceneChange={vi.fn()} /></ThemeProvider>);
+  expect(patchCharacterMock).not.toHaveBeenCalled();
+  for (let hp = 17; hp >= 15; hp -= 1) act(() => saveFight('current-encounter', hp));
+  expect(patchCharacterMock).not.toHaveBeenCalled();
+  expect(updateTokenMock).not.toHaveBeenCalled();
+});
 
 test('opening the scene sheet keeps the map visible alongside the selected character', async () => {
   sheetRoster.current = [{ characterId: 'aria', name: 'Aria', ownerId: 'gm-1' }];

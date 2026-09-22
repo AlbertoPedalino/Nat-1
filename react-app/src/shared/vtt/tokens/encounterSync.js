@@ -108,25 +108,17 @@ export function tokenUpdatesFromFight(tokens, { instanceId, fightId, combatants 
     const combatant = matchCombatant(token, { instanceId, fightId, byRef, bySheet });
     if (!combatant) continue;
     const vitals = vitalsOf(combatant);
-    // A character's hit points belong to their sheet, which the encounter
-    // builder already syncs directly. Writing them onto the piece too would put
-    // a second copy in play.
+    // Character vitals come from the sheet, already synced by the encounter.
+    // Raw map tokens do not carry those vitals, so comparing them to a saved
+    // fight always reported a difference. Replaying that fight to the sheet on
+    // every storage event made old encounters repeatedly undo player damage.
+    // Only encounter effects belong on the character's map-token row.
     if (token.characterId) {
-      if (vitals.hpCurrent === token.hpCurrent
-        && conditionsKey(vitals.conditions) === conditionsKey(token.conditions)
-        && effectsKey(vitals.effects) === effectsKey(token.effects)
-        && deathSavesKey(vitals.deathSaves) === deathSavesKey(token.deathSaves)) continue;
+      if (effectsKey(vitals.effects) === effectsKey(token.effects)) continue;
       updates.push({
         id: token.id,
         characterId: token.characterId,
-        characterVitals: {
-          currentHP: vitals.hpCurrent,
-          deathSaves: vitals.deathSaves,
-          activeConditions: vitals.conditions,
-        },
-        conditions: vitals.conditions,
         effects: vitals.effects,
-        deathSaves: vitals.deathSaves,
       });
       continue;
     }
