@@ -60,6 +60,7 @@ const TokenNode = memo(function TokenNode({
   onDeathSaveChange,
   onContextMenu,
   selected = false,
+  aboveFog = false,
 }) {
   const rect = tokenWorldRect(token, grid);
   const at = worldToScreen(rect, view);
@@ -79,7 +80,7 @@ const TokenNode = memo(function TokenNode({
         outline: selected ? `2px solid ${VTT_COLORS.gold}` : 'none',
         outlineOffset: 3,
         boxShadow: selected ? `0 0 0 2px ${vttAlpha(VTT_COLORS.black, 0.72)}` : 'none',
-        zIndex: selected ? 2 : undefined,
+        zIndex: aboveFog ? 4 : selected ? 2 : undefined,
       }}
     >
       <TokenSprite
@@ -130,6 +131,7 @@ export default memo(function TokenLayer({
   conditionEntries,
   fog,
   hideCovered = false,
+  canSeeThroughFog,
   presentedInspection,
   onInspectionChange,
   onBeginDrag,
@@ -155,7 +157,8 @@ export default memo(function TokenLayer({
     const rect = tokenWorldRect(live, grid);
     const at = worldToScreen(rect, view);
     if (outsideViewport(rect, at, view.zoom, viewportSize)) return null;
-    if (hideCovered && fogBytes && !touchesRevealedFog(rect, grid, fog, fogBytes)) return null;
+    const aboveFog = Boolean(hideCovered && canSeeThroughFog?.(token));
+    if (hideCovered && !aboveFog && fogBytes && !touchesRevealedFog(rect, grid, fog, fogBytes)) return null;
 
     const onActiveLayer = !activeLayer || token.layer === activeLayer;
     const interactive = !cameraLocked && onActiveLayer && ['select', 'marquee'].includes(paintMode);
@@ -184,6 +187,7 @@ export default memo(function TokenLayer({
         onDeathSaveChange={onDeathSaveChange}
         onContextMenu={onContextMenu}
         selected={selectedTokenIds.includes(token.id)}
+        aboveFog={aboveFog}
       />
     );
   });

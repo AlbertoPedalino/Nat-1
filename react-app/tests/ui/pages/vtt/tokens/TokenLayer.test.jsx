@@ -72,3 +72,18 @@ test('GM fog never removes covered tokens from the editor', () => {
 
   expect(screen.getByTestId('token-near')).toBeInTheDocument();
 });
+
+test.each(['select', 'ruler'])('only owned pieces remain visible under public fog with the %s tool', (paintMode) => {
+  const mine = { ...tokens[0], id: 'mine' };
+  const other = { ...tokens[0], id: 'other', x: 2 };
+  render(<TokenLayer
+    {...stable}
+    tokens={[mine, other]}
+    fog={createFog(6, 5, 1)}
+    hideCovered
+    paintMode={paintMode}
+    canSeeThroughFog={(token) => token.id === 'mine'}
+  />);
+  expect(screen.getByTestId('token-mine')).toBeInTheDocument();
+  expect(screen.queryByTestId('token-other')).not.toBeInTheDocument();
+});

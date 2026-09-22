@@ -44,17 +44,22 @@ export function useSheetRealtime({ view, combat, dispatch, sheetSync }) {
   useEffect(() => {
     if (!canSync || view !== 'combat' || !combat?.fightId || !sourceIds.length) return undefined;
     const sourceIdSet = new Set(sourceIds);
+    const newestRowTimes = new Map();
     const handlePayload = (payload) => {
       try {
         const row = payload?.new;
         const charId = row?.id ? String(row.id) : '';
         if (!charId || !sourceIdSet.has(charId)) return;
+        const rowTime = Date.parse(row.updated_at || '');
+        if (Number.isFinite(rowTime) && rowTime < (newestRowTimes.get(charId) || 0)) return;
         const summary = summarizeCharacter(row.data);
         if (!summary) return;
         const vitals = sheetVitalsToCombat(summary);
         const patch = sheetVitalsToSheetPatch(vitals);
         const combatant = findLinkedCombatant(combatRef.current, charId);
         if (!combatant) return;
+        // Count our echoes too: an older row must never overwrite a newer one.
+        if (Number.isFinite(rowTime)) newestRowTimes.set(charId, rowTime);
         // Echo handling for max HP. `isOutboundEcho` means these vitals reflect a
         // write of ours. Normally suppress it. The one exception is a base-max
         // change on the sheet (level-up / CON change): same maxHPBonus but a

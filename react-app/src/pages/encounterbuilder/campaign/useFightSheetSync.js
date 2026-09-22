@@ -18,7 +18,7 @@ export function useFightSheetSync(combat) {
   const syncVersionRef = useRef(new Map());
   const timersRef = useRef(new Map());
   const pendingRef = useRef(new Map());
-  const inFlightRef = useRef(new Set());
+  const inFlightRef = useRef(new Map());
 
   notifyRef.current = notify;
   canSyncRef.current = canSync;
@@ -64,7 +64,7 @@ export function useFightSheetSync(combat) {
     const pending = pendingRef.current.get(key);
     if (!pending) return;
     pendingRef.current.delete(key);
-    inFlightRef.current.add(key);
+    inFlightRef.current.set(key, pending);
     // Realtime sends our own RPC writes back to us, possibly out of order and
     // lagged. Remember EVERY recent written value (not just the last) so the
     // websocket handler recognizes a delayed echo of an earlier write and does
@@ -153,7 +153,14 @@ export function useFightSheetSync(combat) {
         lastSyncedRef.current.set(charId, key);
         return;
       }
-      if (lastKey === key) return;
+      // A quick edit followed by an undo must also cancel the queued write.
+      // If the earlier edit is already in flight, queue the undo after it.
+      const inFlight = inFlightRef.current.get(charId);
+      if (lastKey === key && (!inFlight || inFlight.key === key)) {
+        pendingRef.current.delete(charId);
+        clearTimer(charId);
+        return;
+      }
       const pending = pendingRef.current.get(charId);
       if (pending?.key === key) return;
       pendingRef.current.set(charId, {

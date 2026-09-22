@@ -127,6 +127,7 @@ export default function SceneViewport({
   atmosphere,
   fogOpacity = 1,
   fogOnTop = false,
+  canSeeThroughFog,
   paintMode = 'select',
   brushSize = 3,
   feetPerCell,
@@ -1402,10 +1403,10 @@ export default function SceneViewport({
         view={view}
       />
 
-      {!fogOnTop ? (
-        <FogCanvas fog={backgroundOnly ? null : fog} grid={scene.grid} view={view} opacity={fogOpacity} />
-      ) : null}
+      <FogCanvas fog={backgroundOnly ? null : fog} grid={scene.grid} view={view} opacity={fogOpacity} onTop={fogOnTop} />
 
+      {/* Owned pieces share the public fog's stacking level and follow it in
+          paint order. Other pieces remain below it; the map stays covered. */}
       <TokenLayer
         tokens={backgroundOnly ? [] : tokens}
         drag={drag}
@@ -1427,6 +1428,7 @@ export default function SceneViewport({
         conditionEntries={conditionEntries}
         fog={fog}
         hideCovered={fogOnTop}
+        canSeeThroughFog={canSeeThroughFog}
         presentedInspection={presentedInspection}
         onInspectionChange={onTokenInspection}
         onBeginDrag={beginTokenDrag}
@@ -1435,16 +1437,6 @@ export default function SceneViewport({
         onDeathSaveChange={onDeathSaveChange}
         onContextMenu={onContextMenu}
       />
-
-      {fogOnTop ? (
-        <FogCanvas
-          fog={backgroundOnly ? null : fog}
-          grid={scene.grid}
-          view={view}
-          opacity={fogOpacity}
-          onTop
-        />
-      ) : null}
 
       {/* Weather stays visible over unexplored fog, while the map and secret
           pieces remain covered. At the same z-index, mount it after public fog

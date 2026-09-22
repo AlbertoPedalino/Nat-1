@@ -152,12 +152,14 @@ export default function CharacterSheet({
   const [conditionEntries, setConditionEntries] = useState({});
   const cloudSaveReadyRef = useRef(false);
   const pendingCloudSaveRef = useRef(null);
-  const cloudSaveInFlightRef = useRef(false);
+  const cloudSaveInFlightRef = useRef(null);
   const cloudSaveTimerRef = useRef(null);
   const flushCloudSaveRef = useRef(null);
   const cloudSaveMountedRef = useRef(true);
   const cloudSaveErrorShownRef = useRef(false);
   const dirtyVitalKeysRef = useRef(new Set());
+  const localEditVersionRef = useRef(0);
+  const queuedEditVersionRef = useRef(0);
   const usesExternalChar = Boolean(externalChar);
   sheetRef.current = sheet;
 
@@ -172,6 +174,8 @@ export default function CharacterSheet({
     cloudSaveReadyRef.current = false;
     pendingCloudSaveRef.current = null;
     dirtyVitalKeysRef.current.clear();
+    localEditVersionRef.current = 0;
+    queuedEditVersionRef.current = 0;
     cloudSaveErrorShownRef.current = false;
     clearTimeout(cloudSaveTimerRef.current);
     cloudSaveTimerRef.current = null;
@@ -243,6 +247,7 @@ export default function CharacterSheet({
     if (!charId || !patch) return;
     if (usesExternalChar) {
       if (!fromCloud) {
+        localEditVersionRef.current += 1;
         for (const field of SYNCED_VITALS) {
           if (Object.hasOwn(patch, field.data)) dirtyVitalKeysRef.current.add(field.data);
         }
@@ -290,6 +295,7 @@ export default function CharacterSheet({
   }, [liveVitals, usesExternalChar, readOnly, persist]);
 
   const updateCurrentCharacter = useCallback((updater) => {
+    if (usesExternalChar) localEditVersionRef.current += 1;
     setC((prev) => {
       if (!prev) return prev;
       const next = typeof updater === 'function' ? updater(prev) : updater;
@@ -362,7 +368,7 @@ export default function CharacterSheet({
   const flushCloudSave = useCallback(async () => {
     const attempt = pendingCloudSaveRef.current;
     if (!attempt || cloudSaveInFlightRef.current) return;
-    cloudSaveInFlightRef.current = true;
+    cloudSaveInFlightRef.current = attempt;
     try {
       await updateCloudCharacterData(attempt.charId, attempt.character);
       if (pendingCloudSaveRef.current === attempt) {
@@ -378,7 +384,7 @@ export default function CharacterSheet({
       // Keep the exact snapshot pending. Online/focus/visibility and the
       // 30-second safety timer below will retry it.
     } finally {
-      cloudSaveInFlightRef.current = false;
+      cloudSaveInFlightRef.current = null;
       if (
         cloudSaveMountedRef.current
         && pendingCloudSaveRef.current
@@ -396,6 +402,16 @@ export default function CharacterSheet({
       cloudSaveReadyRef.current = true;
       return undefined;
     }
+    // Receiving vitals changes C too, but is not a new local edit. Writing it
+    // back creates another realtime event and can bounce old HP between peers.
+    // A queued local edit still needs the merged vitals in its next snapshot.
+    if (localEditVersionRef.current === queuedEditVersionRef.current) {
+      if (pendingCloudSaveRef.current && pendingCloudSaveRef.current !== cloudSaveInFlightRef.current) {
+        pendingCloudSaveRef.current = { ...pendingCloudSaveRef.current, character: C };
+      }
+      return undefined;
+    }
+    queuedEditVersionRef.current = localEditVersionRef.current;
     pendingCloudSaveRef.current = {
       charId,
       character: C,

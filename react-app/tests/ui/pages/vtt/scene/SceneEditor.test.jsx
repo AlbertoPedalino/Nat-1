@@ -281,6 +281,7 @@ test('a GM can switch the battlemap to a read-only player view', () => {
     showPlayArea: false,
   }));
   expect(previewProps.canMove(previewProps.tokens[0])).toBe(false);
+  expect(previewProps.canSeeThroughFog).toBeUndefined();
 });
 
 test('freezing the public view lets the GM prepare a picture before sharing it', async () => {
@@ -564,6 +565,12 @@ test('players receive the group-selection tool with permission-checked batch act
   expect(props.controls.props.groups.map((group) => group.id)).toContain('select');
   expect(props.onMoveTokens).toEqual(expect.any(Function));
   expect(props.onDeleteTokens).toEqual(expect.any(Function));
+  expect(props.canSeeThroughFog({ characterId: 'hero-1', layer: 'tokens' })).toBe(true);
+  expect(props.canSeeThroughFog({ characterId: 'other-hero', layer: 'tokens' })).toBe(false);
+  expect(props.canSeeThroughFog({ createdBy: 'gm-1', layer: 'tokens' })).toBe(true);
+  expect(props.canSeeThroughFog({ createdBy: 'other-player', layer: 'tokens' })).toBe(false);
+  expect(props.canSeeThroughFog({ characterId: 'hero-1', layer: 'gm' })).toBe(false);
+  expect(props.canSeeThroughFog({ characterId: 'hero-1', layer: 'tokens', hiddenFromPlayers: true })).toBe(false);
 });
 
 test.each([

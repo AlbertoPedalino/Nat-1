@@ -2247,6 +2247,7 @@ export default function SceneEditor({
         atmosphere={scene.atmosphere}
         fogOpacity={role.isGm && !gmPlayerPreview ? GM_FOG_OPACITY : PLAYER_FOG_OPACITY}
         fogOnTop={!role.isGm || gmPlayerPreview}
+        canSeeThroughFog={!role.isGm ? canMove : undefined}
         // Fog brushes are the GM's; drawing is everyone's, so a player keeps
         // the pencil and the eraser and loses only reveal/hide.
         paintMode={gmPlayerPreview ? 'select' : allowedPaintMode}
