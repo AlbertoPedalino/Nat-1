@@ -2,7 +2,7 @@ import { memo, useMemo } from 'react';
 import { Box } from '@mui/material';
 import { cellSize, tokenWorldRect, worldToScreen } from '../../../shared/vtt/map/geometry.js';
 import { decodeCells } from '../../../shared/vtt/map/fog.js';
-import { isTokenInPlay } from '../../../shared/vtt/scene/scene.js';
+import { isTokenInPlay, isTokenVisibleToPlayers } from '../../../shared/vtt/scene/scene.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import TokenSprite from './TokenSprite.jsx';
 
@@ -157,7 +157,10 @@ export default memo(function TokenLayer({
     const rect = tokenWorldRect(live, grid);
     const at = worldToScreen(rect, view);
     if (outsideViewport(rect, at, view.zoom, viewportSize)) return null;
-    const aboveFog = Boolean(hideCovered && canSeeThroughFog?.(token));
+    // Party pieces remain visible to everyone, including the read-only
+    // projector. Ownership only grants visibility to additional personal markers.
+    const aboveFog = Boolean(hideCovered && isTokenVisibleToPlayers(token, playArea)
+      && (token.characterId || canSeeThroughFog?.(token)));
     if (hideCovered && !aboveFog && fogBytes && !touchesRevealedFog(rect, grid, fog, fogBytes)) return null;
 
     const onActiveLayer = !activeLayer || token.layer === activeLayer;

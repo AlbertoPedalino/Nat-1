@@ -43,24 +43,28 @@ test('the space around a battlemap is the same black as covered fog', () => {
   expect(viewport).toHaveStyle({ backgroundColor: '#000000' });
 });
 
-test('owned pieces paint above public fog while other covered pieces stay hidden', () => {
+test.each([false, true])('all party pieces paint above fog while monsters stay hidden (projector: %s)', (projector) => {
   const { container } = render(<SceneViewport
     scene={{ grid: { size: 50, offsetX: 0, offsetY: 0, visible: false }, playArea: null }}
     tokens={[
       { id: 'mine', label: 'My hero', characterId: 'hero', layer: 'tokens', x: 1, y: 1, w: 1, h: 1 },
       { id: 'other', label: 'Other hero', characterId: 'other', layer: 'tokens', x: 2, y: 1, w: 1, h: 1 },
+      { id: 'monster', label: 'Goblin', layer: 'tokens', x: 3, y: 1, w: 1, h: 1 },
     ]}
-    canMove={(token) => token.id === 'mine'}
-    canSeeThroughFog={(token) => token.id === 'mine'}
+    canMove={(token) => !projector && token.id === 'mine'}
+    canSeeThroughFog={projector ? undefined : (token) => token.id === 'mine'}
+    cameraLocked={projector}
     fog={createFog(6, 5, 1)}
     fogOnTop
     fogOpacity={1}
   />);
-  const ownPiece = screen.getByRole('button', { name: 'My hero' }).parentElement;
   const fog = container.querySelector('[data-fog-layer="public"]');
-  expect(screen.queryByRole('button', { name: 'Other hero' })).not.toBeInTheDocument();
-  expect(Number(getComputedStyle(ownPiece).zIndex)).toBeGreaterThanOrEqual(Number(getComputedStyle(fog).zIndex));
-  expect(fog.compareDocumentPosition(ownPiece) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  expect(screen.queryByRole('button', { name: 'Goblin' })).not.toBeInTheDocument();
+  for (const name of ['My hero', 'Other hero']) {
+    const piece = screen.getByRole('button', { name }).parentElement;
+    expect(Number(getComputedStyle(piece).zIndex)).toBeGreaterThanOrEqual(Number(getComputedStyle(fog).zIndex));
+    expect(fog.compareDocumentPosition(piece) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  }
 });
 
 test.each([false, true])('public atmosphere stays above fog and below the laser (camera locked: %s)', async (cameraLocked) => {

@@ -1405,7 +1405,7 @@ export default function SceneViewport({
 
       <FogCanvas fog={backgroundOnly ? null : fog} grid={scene.grid} view={view} opacity={fogOpacity} onTop={fogOnTop} />
 
-      {/* Owned pieces share the public fog's stacking level and follow it in
+      {/* Party and owned pieces share the public fog's stacking level and follow it in
           paint order. Other pieces remain below it; the map stays covered. */}
       <TokenLayer
         tokens={backgroundOnly ? [] : tokens}

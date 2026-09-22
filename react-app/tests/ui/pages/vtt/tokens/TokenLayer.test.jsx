@@ -73,7 +73,7 @@ test('GM fog never removes covered tokens from the editor', () => {
   expect(screen.getByTestId('token-near')).toBeInTheDocument();
 });
 
-test.each(['select', 'ruler'])('only owned pieces remain visible under public fog with the %s tool', (paintMode) => {
+test.each(['select', 'ruler'])('owned markers remain visible under public fog with the %s tool', (paintMode) => {
   const mine = { ...tokens[0], id: 'mine' };
   const other = { ...tokens[0], id: 'other', x: 2 };
   render(<TokenLayer
@@ -86,4 +86,21 @@ test.each(['select', 'ruler'])('only owned pieces remain visible under public fo
   />);
   expect(screen.getByTestId('token-mine')).toBeInTheDocument();
   expect(screen.queryByTestId('token-other')).not.toBeInTheDocument();
+});
+
+test('party visibility through fog respects explicit hiding and the play area', () => {
+  render(<TokenLayer {...stable} hideCovered cameraLocked canMove={() => false}
+    fog={createFog(6, 5, 1)} playArea={{ x: 0, y: 0, w: 3, h: 3 }}
+    tokens={[
+      { ...tokens[0], id: 'party', characterId: 'hero' },
+      { ...tokens[0], id: 'hidden', characterId: 'hero', hiddenFromPlayers: true },
+      { ...tokens[0], id: 'gm', characterId: 'hero', layer: 'gm' },
+      { ...tokens[0], id: 'staged', characterId: 'hero', x: 4 },
+      { ...tokens[0], id: 'monster' },
+    ]}
+  />);
+  expect(screen.getByTestId('token-party')).toBeInTheDocument();
+  for (const id of ['hidden', 'gm', 'staged', 'monster']) {
+    expect(screen.queryByTestId(`token-${id}`)).not.toBeInTheDocument();
+  }
 });
