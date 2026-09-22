@@ -2355,7 +2355,6 @@ export default function SceneEditor({
         toast={<DiceToast
           toast={rollToast}
           onClose={dismissRollToast}
-          hidden={viewportDisplay.shownImage === 'background'}
         />}
         onFullscreenChange={handleMapFullscreenChange}
         onViewChange={role.isGm && !gmPlayerPreview ? handleCameraViewChange : undefined}
