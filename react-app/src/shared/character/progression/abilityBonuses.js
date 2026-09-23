@@ -1,5 +1,6 @@
 // Shared helper for collecting ASI (Ability Score Improvement) bonuses from feat choices.
 // Supports multiple formats for retroactive compatibility.
+import { collectOwnedFeatNames } from './selectedFeats.js';
 
 const VALID_STATS = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
 
@@ -25,7 +26,7 @@ function asArray(value) {
  * Returns an object mapping stat → total bonus
  * Example: { str: 1, int: 2, con: 1 }
  */
-export function collectFeatAsiBonuses(character) {
+function collectChosenFeatAsiBonuses(character) {
   const bonuses = {};
   const choices = character?.choices || {};
 
@@ -98,15 +99,46 @@ export function collectFeatAsiBonuses(character) {
   return bonuses;
 }
 
+function fixedFeatAbilityGrants(character) {
+  const owned = new Set(collectOwnedFeatNames(character));
+  const processed = new Set();
+  const grants = [];
+  for (const feat of character?.allFeatSnapshots || []) {
+    if (!owned.has(feat.name) || processed.has(feat.name)) continue;
+    processed.add(feat.name);
+    // Multiple ability entries are alternatives, not cumulative grants.
+    if (!Array.isArray(feat.ability) || feat.ability.length !== 1) continue;
+    const ability = feat.ability[0];
+    for (const stat of VALID_STATS) {
+      const bonus = Number(ability?.[stat]) || 0;
+      if (bonus > 0) grants.push({ source: feat.name, stat, bonus, max: Number(ability.max) || 20 });
+    }
+  }
+  return grants;
+}
+
+export function collectFeatAsiBonuses(character) {
+  const bonuses = collectChosenFeatAsiBonuses(character);
+  for (const { stat, bonus } of fixedFeatAbilityGrants(character)) {
+    bonuses[stat] = (bonuses[stat] || 0) + bonus;
+  }
+  return bonuses;
+}
+
 /**
  * Get ASI bonus for a specific stat.
  * Returns 0 if no bonus, otherwise returns the total bonus (+1, +2, etc).
  */
-export function getFeatAsiBonus(character, stat) {
+export function getFeatAsiBonus(character, stat, scoreBeforeFeats = null) {
   const normalizedStat = normalizeStat(stat);
   if (!normalizedStat) return 0;
-  const bonuses = collectFeatAsiBonuses(character);
-  return bonuses[normalizedStat] || 0;
+  let bonus = collectChosenFeatAsiBonuses(character)[normalizedStat] || 0;
+  const grants = fixedFeatAbilityGrants(character).filter((grant) => grant.stat === normalizedStat).sort((a, b) => a.max - b.max);
+  for (const grant of grants) {
+    bonus += scoreBeforeFeats == null ? grant.bonus
+      : Math.min(grant.bonus, Math.max(0, grant.max - scoreBeforeFeats - bonus));
+  }
+  return bonus;
 }
 
 /**
@@ -115,7 +147,6 @@ export function getFeatAsiBonus(character, stat) {
  */
 export function getAsiBonusBreakdown(character) {
   const choices = character?.choices || {};
-  const bonuses = collectFeatAsiBonuses(character);
   const breakdown = [];
 
   Object.entries(choices).forEach(([key, value]) => {
@@ -171,5 +202,5 @@ export function getAsiBonusBreakdown(character) {
     }
   });
 
-  return breakdown;
+  return [...breakdown, ...fixedFeatAbilityGrants(character).map(({ source, stat, bonus }) => ({ source, stat, bonus }))];
 }

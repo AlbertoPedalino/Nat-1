@@ -1,5 +1,5 @@
 import { calcMaxHp, getAllFinalScores, getPrimaryClassLevel } from '../progression/calculations.js';
-import { collectOwnedFeatNames } from '../../../shared/character/progression/selectedFeats.js';
+import { collectOwnedFeatNames, withOwnedFeatSnapshots } from '../../../shared/character/progression/selectedFeats.js';
 import { getMod, getFinal } from '../../charsheet/state/calculations.js';
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
 import {
@@ -156,10 +156,10 @@ function serializeExtraClass(extra = {}) {
 
 export function makeSheetPayload(character, data) {
   character = normalizeProficiencyChoicesForPersistence(character);
+  character = withOwnedFeatSnapshots(character, data.feats);
   const primaryClassLevel = getPrimaryClassLevel(character);
   const ownedFeatNames = collectOwnedFeatNames(character);
-  const ownedFeatSnapshots = (data.feats || [])
-    .filter((feat) => ownedFeatNames.includes(feat.name))
+  const ownedFeatSnapshots = character.allFeatSnapshots
     .map((feat) => {
       const adapter = installedRegistry.getFeatAdapter
         ? installedRegistry.getFeatAdapter(feat.name)

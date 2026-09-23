@@ -129,6 +129,21 @@ export function getChoiceSelectedFeatNames(character) {
   return [...new Set(fromChoices(character))];
 }
 
+// Keep selected definitions available to shared calculations in both the live
+// builder and the saved sheet. Loading summaries must not replace full records.
+export function withOwnedFeatSnapshots(character, feats = []) {
+  const names = new Set(collectOwnedFeatNames(character));
+  const definitions = new Map((character.allFeatSnapshots || []).map((feat) => [feat.name, feat]));
+  const loaded = new Set();
+  for (const feat of feats) {
+    if (!names.has(feat.name) || loaded.has(feat.name)) continue;
+    if (!Object.hasOwn(feat, 'ability') && !Array.isArray(feat.entries)) continue;
+    definitions.set(feat.name, feat);
+    loaded.add(feat.name);
+  }
+  return { ...character, allFeatSnapshots: [...names].map((name) => definitions.get(name)).filter(Boolean) };
+}
+
 // Which entity granted a named feat to this character: 'background' (origin
 // feat), 'species', or 'feat' (free/ASI slot). Resolves by name against each
 // source, then maps the owning choice-slot key through `featSlotOrigin`. Used

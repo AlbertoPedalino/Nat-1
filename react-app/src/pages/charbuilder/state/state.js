@@ -22,6 +22,7 @@ import { addInventoryEntries } from '../../../shared/character/inventory/itemCon
 import { emptyItemFilters } from '../../../shared/character/inventory/itemFilters.js';
 import { isFeatKey, isFeatDetailKey } from '../../../shared/character/progression/featChoiceKeys.js';
 import { normalizeCharacterChoices } from '../../../shared/character/progression/choiceNormalization.js';
+import { withOwnedFeatSnapshots } from '../../../shared/character/progression/selectedFeats.js';
 
 // Fields whose value feeds normalizeCharacterChoices. When a reducer patch touches
 // any of them, normalizedChoices is rebuilt so it stays the single source of truth
@@ -217,7 +218,7 @@ function updateCharacter(state, patch) {
   if (patchTouchesNormalizeSource(patch)) {
     merged.normalizedChoices = normalizeCharacterChoices(merged);
   }
-  return { ...state, character: merged };
+  return { ...state, character: withOwnedFeatSnapshots(merged, state.data.feats) };
 }
 
 function updateNestedCharacter(state, key, patch) {
@@ -350,14 +351,14 @@ export function builderReducer(state, action) {
         ...state,
         data,
         dataAdapted: true,
-        character: {
+        character: withOwnedFeatSnapshots({
           ...state.character,
           cls: classObject,
           speciesObj,
           backgroundObj,
           extraClasses,
           ...deriveClassData(className, classSource, state.character.subclassSource || ''),
-        },
+        }, data.feats),
       };
     }
     case 'tab/set':

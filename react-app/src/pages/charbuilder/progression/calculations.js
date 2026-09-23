@@ -89,7 +89,7 @@ export function getAbilityScoreBonusBreakdown(character, stat) {
   const backgroundBonus = getBackgroundBonus(character, stat);
   if (backgroundBonus) bonuses.push({ source: 'Background', value: backgroundBonus });
 
-  const asiBonus = getFeatAsiBonus(character, stat);
+  const asiBonus = getFeatAsiBonus(character, stat, getBaseScore(character, stat) + backgroundBonus);
   if (asiBonus) bonuses.push({ source: 'Feat/ASI', value: asiBonus });
 
   return bonuses;

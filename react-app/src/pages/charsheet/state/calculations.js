@@ -85,7 +85,7 @@ export function bgBonus(C, stat) {
 }
 
 export function getAsiFeatBonus(C, stat) {
-  return getFeatAsiBonus(C, stat);
+  return getFeatAsiBonus(C, stat, getBase(C, stat) + bgBonus(C, stat));
 }
 
 export function getFinal(C, stat) {
