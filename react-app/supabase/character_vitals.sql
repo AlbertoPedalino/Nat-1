@@ -3,8 +3,8 @@
 alter table public.characters add column if not exists row_revision bigint not null default 0;
 alter table public.characters add column if not exists vitals_revision bigint not null default 0;
 
--- Every ordinary sheet/upsert save preserves the current combat state, including
--- saves sent by an older tab. Only the health RPC advances vitals_revision.
+-- Every ordinary sheet/upsert save preserves the current combat state.
+-- Only the health RPC advances vitals_revision.
 create or replace function public.protect_character_vitals()
 returns trigger language plpgsql set search_path = public as $$
 declare
@@ -70,12 +70,3 @@ end;
 $$;
 revoke all on function public.commit_character_vitals(text,bigint,uuid,jsonb) from public;
 grant execute on function public.commit_character_vitals(text,bigint,uuid,jsonb) to authenticated;
-
--- Old encounter clients inferred edits from saved snapshots. Reject that path
--- explicitly instead of letting an old open tab silently undo a new command.
-create or replace function public.patch_character_data(p_id text, p_patch jsonb)
-returns void language plpgsql security invoker set search_path = public as $$
-begin
-  raise exception 'Please reload Nat-1 to update character health.';
-end;
-$$;

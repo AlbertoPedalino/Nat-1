@@ -8,9 +8,7 @@ death saves and conditions. Encounter/fight/token snapshots are display caches.
 1. Run `character_vitals.sql` in the project's Supabase SQL Editor, after the
    existing `schema.sql` and `combat_sync.sql`. It is safe to run again and
    retains every character's existing values.
-2. Deploy the matching frontend build. Reload existing browser tabs. The legacy
-   `patch_character_data` RPC deliberately returns a reload error: old encounter
-   clients inferred health edits from snapshots and cannot safely remain writers.
+2. Deploy the matching frontend build.
 3. Open a character in two encounters, an embedded sheet and `/campaign-sheet`.
    Apply damage from both users, then return to Builder and relaunch/resume an
    older fight. All views should converge on the same character HP.
@@ -30,7 +28,7 @@ exists; deleting the character cascades to its ledger. The RPC uses caller RLS
 and fails when the caller cannot update the character.
 
 The database trigger preserves health during ordinary full-sheet updates and
-upserts, including ones from old tabs. It assigns server revisions and timestamps.
+upserts. It assigns server revisions and timestamps.
 Only an intentional health commit advances `vitals_revision`. As with editing
 the sheet itself, authorized clients are trusted to supply legal game actions;
 this is concurrency control, not an anti-cheat boundary.
@@ -42,7 +40,7 @@ Local sheets excluded from cloud synchronization remain local.
 
 ## Validation
 
-`npm test` includes a PostgreSQL/PGlite migration test covering old full saves,
+`npm test` includes a PostgreSQL/PGlite test covering stale full saves,
 upsert defaults, interleaved client revisions, duplicate operation IDs and RLS,
 plus command/API/UI tests for concurrent edits and stale encounter restores.
 PGlite tests exercise PostgreSQL SQL semantics locally; they do not deploy to or

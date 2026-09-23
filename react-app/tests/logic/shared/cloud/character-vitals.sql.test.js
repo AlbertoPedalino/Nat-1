@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { PGlite } from '@electric-sql/pglite';
 import { applyVitalCommand } from '../../../../src/shared/character/combat/vitalCommands.js';
 
-test('character health migration: stale writes, concurrent commands, retry deduplication and RLS', async () => {
+test('character health: stale writes, concurrent commands, retry deduplication and RLS', async () => {
   const db = new PGlite();
   try {
     await db.exec(`
@@ -51,7 +51,6 @@ test('character health migration: stale writes, concurrent commands, retry dedup
     assert.equal(Number(row.vitals_revision), 2);
     assert.equal((await commit(b.row, -2, '00000000-0000-4000-8000-000000000003')).applied, false,
       'structural sheet saves also invalidate a computed health patch');
-    await assert.rejects(db.query("select patch_character_data('pc', '{\"currentHP\":30}')"), /reload/);
     await db.exec("set test.actor = 'reader'");
     await assert.rejects(commit(row, -5, '00000000-0000-4000-8000-000000000004'), /permission|unavailable/i);
     assert.equal((await read()).data.currentHP, 23);
