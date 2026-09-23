@@ -17,13 +17,13 @@ export default function EncounterList() {
   const questOptions = useMemo(() => listQuestNames(state.library), [state.library]);
   const editingExisting = state.library.some((entry) => entry.id === state.currentEncounterId);
 
-  const handleSave = (asNew = false) => {
+  const handleSave = () => {
     if (!instanceSaved) {
       notify('warning', 'Save this encounter-builder instance before saving library entries.');
       return;
     }
-    const entry = saveEncounterToLibrary(state.encounterName, { asNew });
-    if (entry) notify('success', `"${entry.name}" ${editingExisting && !asNew ? 'updated in' : 'saved to'} Library.`);
+    const entry = saveEncounterToLibrary(state.encounterName);
+    if (entry) notify('success', `"${entry.name}" ${editingExisting ? 'updated in' : 'saved to'} Library.`);
   };
 
   const handleLaunch = () => {
@@ -126,11 +126,9 @@ export default function EncounterList() {
             {editingExisting ? 'Update in Library' : 'Save to Library'}
           </Button>
         </Stack>
-        {editingExisting ? (
-          <Button onClick={() => handleSave(true)} disabled={!state.encounter.length}>
-            Save as New
-          </Button>
-        ) : null}
+        <Typography variant="caption" color="text.secondary">
+          Launch saves a new encounter in Library and starts combat.
+        </Typography>
       </Stack>
     </Paper>
   );

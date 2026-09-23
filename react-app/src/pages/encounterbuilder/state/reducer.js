@@ -150,7 +150,7 @@ export function encounterReducer(state, action) {
       return launchCombat(
         state,
         state.encounter,
-        action.encounterId ?? state.currentEncounterId,
+        null,
         state.encounterName,
         state.encounterQuest,
       );
@@ -539,16 +539,20 @@ function campaignAverageLevel(players) {
 }
 
 // Every launch is backed by a library encounter, so its card always exposes the
-// full Load/Launch/Resume/Delete actions. An unsaved draft is snapshotted here.
+// full Load/Launch/Resume/Delete actions. Builder launches always pass a null
+// id to save a new snapshot; Library launches restart the selected saved entry.
 function launchCombat(state, encounter, encounterId, name, quest = null) {
   let library = state.library;
   let id = encounterId || null;
   if (id == null && encounter.length) {
     const entry = makeSavedEncounter(name, encounter, state.party, quest);
+    while (library.some((saved) => saved.id === entry.id)) entry.id += 1;
     library = [entry, ...library];
     id = entry.id;
   }
   const combat = buildCombat(encounter, state.players, id);
+  // Two quick launches must not replace each other through Date.now() ids.
+  while (state.fights.some((fight) => fight.id === combat.fightId)) combat.fightId += 1;
   combat.name = library.find((entry) => entry.id === id)?.name || autoFightName(combat.combatants);
   return withCombat({
     ...state,

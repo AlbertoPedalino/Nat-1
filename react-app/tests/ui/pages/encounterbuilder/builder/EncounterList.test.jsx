@@ -4,11 +4,12 @@ import { vi } from 'vitest';
 import { EncounterBuilderProvider, useEncounterBuilder } from '../../../../../src/pages/encounterbuilder/state/EncounterBuilderContext.jsx';
 import EncounterList from '../../../../../src/pages/encounterbuilder/builder/EncounterList.jsx';
 import LibraryView from '../../../../../src/pages/encounterbuilder/library/LibraryView.jsx';
+import { readPersistedInstance } from '../../../../../src/pages/encounterbuilder/state/storage.js';
 
-vi.mock('../../../../../src/pages/encounterbuilder/state/useEncounterPersistence.js', () => ({ useEncounterPersistence: () => ({}) }));
-vi.mock('../../../../../src/pages/encounterbuilder/bestiary/useMonsterDb.js', () => ({
-  useMonsterDb: () => ({ monsters: [{ name: 'Goblin', source: 'MM', cr: '1/4' }] }),
-}));
+vi.mock('../../../../../src/pages/encounterbuilder/bestiary/useMonsterDb.js', () => {
+  const monsters = [{ name: 'Goblin', source: 'MM', cr: '1/4' }];
+  return { useMonsterDb: () => ({ monsters, status: 'ready' }) };
+});
 vi.mock('../../../../../src/pages/encounterbuilder/campaign/useCampaignPlayers.js', () => ({ useCampaignPlayers: () => ({ campaigns: [] }) }));
 vi.mock('../../../../../src/pages/encounterbuilder/campaign/useFightSheetSync.js', () => ({ useFightSheetSync: () => ({}) }));
 vi.mock('../../../../../src/pages/encounterbuilder/campaign/useSheetRealtime.js', () => ({ useSheetRealtime: () => {} }));
@@ -32,6 +33,7 @@ function Harness() {
         dispatch({ type: 'setView', view: 'library' });
       }}>Open saved library</button>
       <button onClick={() => dispatch({ type: 'setView', view: 'library' })}>Show library</button>
+      <button onClick={() => dispatch({ type: 'setView', view: 'builder' })}>Back to builder</button>
       <button onClick={() => dispatch({ type: 'addMonster', monster: { name: 'Ogre', source: 'MM', cr: '2' } })}>Add Ogre</button>
       <output data-testid="state">{JSON.stringify(state)}</output>
       {state.view === 'library' ? <LibraryView /> : <EncounterList />}
@@ -39,7 +41,9 @@ function Harness() {
   );
 }
 
-test('Library Load edits the same encounter, repeated saves update it, and Save as New copies it', async () => {
+beforeEach(() => localStorage.clear());
+
+test('Library updates stay on the same entry, while Launch saves and starts a new copy each time', async () => {
   const user = userEvent.setup();
   render(<EncounterBuilderProvider instanceId="test" instanceSaved><Harness /></EncounterBuilderProvider>);
   await user.click(screen.getByRole('button', { name: 'Open saved library' }));
@@ -56,13 +60,33 @@ test('Library Load edits the same encounter, repeated saves update it, and Save 
   await user.click(screen.getByRole('button', { name: 'Update in Library' }));
   expect(readState().library).toHaveLength(1);
   expect(readState().library[0].encounter[0].qty).toBe(3);
-  await user.click(screen.getByRole('button', { name: 'Save as New' }));
+  expect(screen.queryByRole('button', { name: 'Save as New' })).not.toBeInTheDocument();
+  await user.click(screen.getByRole('button', { name: 'Increase quantity' }));
+  await user.click(screen.getByRole('button', { name: 'Launch' }));
   const copied = readState();
   expect(copied.library).toHaveLength(2);
   expect(copied.currentEncounterId).not.toBe(7);
   expect(copied.library[1].id).toBe(7);
+  expect(copied.library[1].encounter[0].qty).toBe(3);
+  expect(copied.library[0].encounter[0].qty).toBe(4);
+  expect(copied.view).toBe('combat');
+  expect(copied.combat.encounterId).toBe(copied.currentEncounterId);
+  expect(readPersistedInstance('test').library).toEqual(copied.library);
+
+  await user.click(screen.getByRole('button', { name: 'Back to builder' }));
+  await user.click(screen.getByRole('button', { name: 'Increase quantity' }));
+  await user.click(screen.getByRole('button', { name: 'Launch' }));
+  const relaunched = readState();
+  expect(relaunched.library).toHaveLength(3);
+  expect(relaunched.library[0].encounter[0].qty).toBe(5);
+  expect(relaunched.library.slice(1)).toEqual(copied.library);
+  expect(relaunched.fights).toHaveLength(2);
+  expect(relaunched.combat.encounterId).toBe(relaunched.library[0].id);
+  const persisted = readPersistedInstance('test');
+  expect(persisted.library).toEqual(relaunched.library);
+  expect(persisted.fightsData.items).toEqual(relaunched.fights);
   await user.click(screen.getByRole('button', { name: 'Show library' }));
-  expect(screen.getAllByRole('button', { name: 'Load' })).toHaveLength(2);
+  expect(screen.getAllByRole('button', { name: 'Load' })).toHaveLength(3);
 });
 
 test('New Encounter starts an empty draft after updating and saves it separately', async () => {

@@ -26,30 +26,44 @@ export function useCloudCharacterLive({ charId, enabled = true, onUpdate } = {})
 
     let alive = true;
     let refreshRequest = 0;
-    let newestRowTime = 0;
+    let newestCommitTime = 0;
+    let realtimeRevision = 0;
+
+    const isCharacterRow = (row) => (
+      alive && row && String(row.id || '') === id && row.data && typeof row.data === 'object'
+    );
 
     const deliverRow = (row) => {
       try {
-        if (!row || String(row.id || '') !== id || !row.data || typeof row.data !== 'object') return;
-        const rowTime = Date.parse(row.updated_at || '');
-        if (Number.isFinite(rowTime) && rowTime < newestRowTime) return;
-        if (Number.isFinite(rowTime)) newestRowTime = rowTime;
+        if (!isCharacterRow(row)) return;
         onUpdateRef.current?.(row);
       } catch (_) {
         // Realtime is opportunistic; bad payloads should not break sheet viewing.
       }
     };
 
-    const handlePayload = (payload) => deliverRow(payload?.new);
+    const handlePayload = (payload) => {
+      if (!isCharacterRow(payload?.new)) return;
+      // Sheet saves stamp updated_at in the browser, but encounter patches use
+      // the database clock. Only commit_timestamp can order both reliably.
+      const commitTime = Date.parse(payload.commit_timestamp || '');
+      if (Number.isFinite(commitTime) && commitTime < newestCommitTime) return;
+      if (Number.isFinite(commitTime)) newestCommitTime = commitTime;
+      realtimeRevision += 1;
+      deliverRow(payload.new);
+    };
 
     // Postgres changes are not replayed after a sleeping phone or a brief
     // network loss. Re-read the authoritative row on every recovery boundary,
     // and periodically while the sheet remains open.
     const refresh = async () => {
       const request = ++refreshRequest;
+      const revisionAtStart = realtimeRevision;
       try {
         const row = await getCloudCharacter(id);
-        if (alive && request === refreshRequest) deliverRow(row);
+        // A fresh read is authoritative even when updated_at went backwards.
+        // Discard it if a realtime update arrived while the read was in flight.
+        if (alive && request === refreshRequest && revisionAtStart === realtimeRevision) deliverRow(row);
       } catch (_) {
         // A later reconnect, focus event or safety poll retries silently.
       }

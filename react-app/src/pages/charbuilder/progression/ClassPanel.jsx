@@ -1,9 +1,10 @@
+import { useEffect, useState } from 'react';
 import { Box, Button, Chip, IconButton, List, ListItemButton, ListItemText, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
-import { ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Plus, Trash2, TriangleAlert } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { SearchField } from '../choices/SearchList.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
-import { confirmDiscard } from '../../../shared/ui/confirmDiscard.js';
+import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import { describeMulticlassProficiencies } from '../../../shared/character/progression/multiclassProficiencies.js';
 import { getPrimaryClassLevel } from './calculations.js';
 import { checkMulticlassPrerequisite, getMulticlassProficienciesGained } from './multiclassRules.js';
@@ -97,6 +98,7 @@ function checkMcPrereq(character, className) {
 }
 
 export default function ClassPanel({ state, character, dispatch }) {
+  const [pendingChange, setPendingChange] = useState(null);
   const classes = state.data.classes;
   const search = state.search.classes || '';
   const query = search.trim().toLowerCase();
@@ -111,6 +113,11 @@ export default function ClassPanel({ state, character, dispatch }) {
   const primaryLevel = getPrimaryClassLevel(character);
   const canAddMulticlass = Number(character.level || 1) < 20
     && !character.extraClasses.some((extra) => !extra?.name);
+
+  useEffect(() => {
+    setPendingChange(null);
+  }, [character.activeClassTab, character.className, character.classSource, activeExtra?.name, activeExtra?.source]);
+
   return (
     <BuilderPanel
       title="Class"
@@ -176,12 +183,18 @@ export default function ClassPanel({ state, character, dispatch }) {
                     if (selected) return;
                     const currentName = activeExtra ? activeExtra.name : character.className;
                     const currentSource = activeExtra ? activeExtra.source : character.classSource;
-                    if (currentName && !confirmDiscard(
-                      `Sostituire ${currentName} (${currentSource}) con ${cls.name} (${cls.source})? Le scelte legate alla classe precedente verranno azzerate.`,
-                    )) return;
-                    dispatch(activeExtra
+                    const action = activeExtra
                       ? { type: 'extra-class/select', index: character.activeClassTab - 1, className: cls.name, source: cls.source, classObject: cls }
-                      : { type: 'class/select', className: cls.name, source: cls.source, classObject: cls });
+                      : { type: 'class/select', className: cls.name, source: cls.source, classObject: cls };
+                    if (currentName) {
+                      setPendingChange({
+                        action,
+                        currentLabel: currentSource ? `${currentName} (${currentSource})` : currentName,
+                        nextLabel: cls.source ? `${cls.name} (${cls.source})` : cls.name,
+                      });
+                      return;
+                    }
+                    dispatch(action);
                   }}
                 />
               );
@@ -194,6 +207,33 @@ export default function ClassPanel({ state, character, dispatch }) {
           </List>
         </Paper>
       </Stack>
+      {pendingChange && (
+        <SheetDialog
+          open
+          title="Cambiare classe?"
+          icon={<TriangleAlert size={20} />}
+          onClose={() => setPendingChange(null)}
+          actions={(
+            <>
+              <Button autoFocus variant="outlined" onClick={() => setPendingChange(null)}>Annulla</Button>
+              <Button variant="contained" onClick={() => {
+                dispatch(pendingChange.action);
+                setPendingChange(null);
+              }}>Cambia classe</Button>
+            </>
+          )}
+        >
+          <Stack spacing={1.5}>
+            <Typography>
+              Sostituire <Box component="strong">{pendingChange.currentLabel}</Box> con{' '}
+              <Box component="strong">{pendingChange.nextLabel}</Box>?
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Le scelte legate alla classe precedente verranno azzerate.
+            </Typography>
+          </Stack>
+        </SheetDialog>
+      )}
     </BuilderPanel>
   );
 }

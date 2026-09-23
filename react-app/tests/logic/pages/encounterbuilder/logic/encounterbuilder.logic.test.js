@@ -851,6 +851,46 @@ test('a fight is only reachable through the library card of its encounter', () =
 
 // Closing is the only way out of an active encounter now that the panel has no
 // "Builder" button, so it must leave the fight recoverable rather than drop it.
+test('each builder launch saves a separate encounter and fight even within the same millisecond', (t) => {
+  t.mock.method(Date, 'now', () => 12345);
+  let state = encounterReducer(createInitialState(), {
+    type: 'addMonster', monster: { name: 'Goblin', source: 'MM', cr: '1/4' },
+  });
+  state = encounterReducer(state, { type: 'setEncounterName', value: 'Road ambush' });
+  state = encounterReducer(state, { type: 'setEncounterQuest', quest: 'Old Road' });
+  const first = encounterReducer(state, { type: 'launchCurrentEncounter' });
+  assert.equal(first.library.length, 1);
+  assert.equal(first.library[0].quest, 'Old Road');
+  state = encounterReducer(first, { type: 'setView', view: 'builder' });
+  state = encounterReducer(state, { type: 'changeMonsterQty', id: state.encounter[0].id, delta: 1 });
+  const second = encounterReducer(state, { type: 'launchCurrentEncounter' });
+  assert.equal(second.library.length, 2);
+  assert.equal(second.fights.length, 2);
+  assert.notEqual(second.currentEncounterId, first.currentEncounterId);
+  assert.notEqual(second.activeFightId, first.activeFightId);
+  assert.equal(second.library[0].encounter[0].qty, 2);
+  assert.equal(second.library[0].name, 'Road ambush');
+  assert.equal(second.library[0].quest, 'Old Road');
+  assert.deepEqual(second.library[1], first.library[0]);
+  assert.deepEqual(second.fights[1], first.fights[0]);
+  assert.equal(second.combat.encounterId, second.library[0].id);
+});
+
+test('launching directly from Library still restarts its saved encounter', () => {
+  let state = encounterReducer(createInitialState(), {
+    type: 'addMonster', monster: { name: 'Goblin', source: 'MM', cr: '1/4' },
+  });
+  state = encounterReducer(state, { type: 'launchCurrentEncounter' });
+  const entry = state.library[0];
+  const relaunched = encounterReducer(state, {
+    type: 'launchLibraryEncounter', entry, monsters: [{ name: 'Goblin', source: 'MM', cr: '1/4' }],
+  });
+  assert.deepEqual(relaunched.library, state.library);
+  assert.equal(relaunched.combat.encounterId, entry.id);
+  assert.equal(relaunched.fights.length, 1);
+  assert.notEqual(relaunched.activeFightId, state.activeFightId);
+});
+
 test('closing an encounter deactivates it but keeps the fight resumable', () => {
   let state = encounterReducer(createInitialState(), { type: 'launchCurrentEncounter' });
   state = { ...state, combat: buildCombat([], [{ name: 'Aria', hpMax: 22 }], null, () => 0.5) };

@@ -41,8 +41,10 @@ import { loadItems, loadOptionalFeatures, loadConditions, reconcileInventoryWith
 import { updateCloudCharacterData } from '../../shared/cloud/api/cloudCharacters.js';
 import { useRollChannel } from '../../shared/cloud/sync/useRollChannel.js';
 import { useCharacterCampaign } from '../../shared/cloud/sync/useCharacterCampaign.js';
+import { useCloudCharacterLive } from '../../shared/cloud/sync/useCloudCharacterLive.js';
+import { isSyncExcluded } from '../../shared/cloud/sync/cloudSyncExclude.js';
 import { normalizeRoll } from '../../shared/vtt/rolls/rollFeed.js';
-import { SYNCED_VITALS, clampCharacterVitals } from '../../shared/character/combat/vitals.js';
+import { SYNCED_VITALS, clampCharacterVitals, pickCharacterVitals } from '../../shared/character/combat/vitals.js';
 import {
   getActiveCharId,
   loadCharacter as storeLoadCharacter,
@@ -161,7 +163,37 @@ export default function CharacterSheet({
   const localEditVersionRef = useRef(0);
   const queuedEditVersionRef = useRef(0);
   const usesExternalChar = Boolean(externalChar);
+  const [localLiveVitals, setLocalLiveVitals] = useState(null);
+  const incomingVitals = usesExternalChar ? liveVitals : localLiveVitals;
+  const sheetReady = Boolean(sheet);
   sheetRef.current = sheet;
+
+  useCloudCharacterLive({
+    charId,
+    enabled: !usesExternalChar && !readOnly && !isSyncExcluded(charId),
+    onUpdate: (row) => setLocalLiveVitals(pickCharacterVitals(row.data)),
+  });
+
+  // Local sheets save through CloudAutoSync. Release their pending vitals only
+  // after that save succeeds, and only if no newer local edit superseded it.
+  useEffect(() => {
+    if (usesExternalChar || !charId) return undefined;
+    let savingVersion = null;
+    let savesInFlight = 0;
+    const handleSync = ({ detail }) => {
+      if (detail?.id !== charId) return;
+      if (detail.state === 'syncing') {
+        savesInFlight += 1;
+        savingVersion = localEditVersionRef.current;
+      }
+      if (detail.state === 'synced' || detail.state === 'error') savesInFlight = Math.max(0, savesInFlight - 1);
+      if (detail.state === 'synced' && savesInFlight === 0 && savingVersion === localEditVersionRef.current) {
+        dirtyVitalKeysRef.current.clear();
+      }
+    };
+    window.addEventListener('gb:cloud-sync', handleSync);
+    return () => window.removeEventListener('gb:cloud-sync', handleSync);
+  }, [usesExternalChar, charId]);
 
   useEffect(() => {
     if (embedded) return;
@@ -245,17 +277,17 @@ export default function CharacterSheet({
 
   const persist = useCallback((patch, { fromCloud = false } = {}) => {
     if (!charId || !patch) return;
-    if (usesExternalChar) {
-      if (!fromCloud) {
-        localEditVersionRef.current += 1;
-        for (const field of SYNCED_VITALS) {
-          if (Object.hasOwn(patch, field.data)) dirtyVitalKeysRef.current.add(field.data);
-        }
+    if (!fromCloud) {
+      localEditVersionRef.current += 1;
+      for (const field of SYNCED_VITALS) {
+        if (Object.hasOwn(patch, field.data)) dirtyVitalKeysRef.current.add(field.data);
       }
+    }
+    if (usesExternalChar) {
       setC((prev) => prev ? { ...prev, ...patch } : prev);
       return;
     }
-    const next = storePatchCharacter(charId, patch);
+    const next = storePatchCharacter(charId, patch, { emit: !fromCloud });
     if (next) setC(next);
     else setC((prev) => prev ? { ...prev, ...patch } : prev);
   }, [charId, usesExternalChar]);
@@ -264,18 +296,16 @@ export default function CharacterSheet({
     setSheet((prev) => ({ ...prev, ...updates }));
   }, []);
 
-  // Vitals pushed live from the linked encounter combat (cloud Realtime). Merge
-  // ONLY hp / temp hp / death saves so an editable sheet stays in sync without
-  // discarding the user's in-progress edits to other fields. Runs only when a new
-  // liveVitals object arrives (not on local sheet edits); last-writer-wins on
-  // these three fields. The idempotent guard makes our own save echoes no-ops.
+  // Merge synced vitals without replacing notes, inventory or other local edits.
+  // Also apply updates received while the initial sheet was still loading.
+  // Own save echoes are no-ops and remote changes never schedule a cloud write.
   useEffect(() => {
-    if (!liveVitals || !usesExternalChar || readOnly) return;
+    if (!incomingVitals || !sheetReady || readOnly) return;
     const s = sheetRef.current;
     if (!s) return;
     // A local vital that has not reached the cloud yet wins over an older row
     // fetched during recovery. Other vital fields still reconcile normally.
-    const incoming = { ...liveVitals };
+    const incoming = { ...incomingVitals };
     for (const key of dirtyVitalKeysRef.current) incoming[key] = s[key];
     const vitals = clampCharacterVitals(incoming, { fallback: s });
     // Max HP is derived (base + bonus); apply the synced bonus and re-clamp current.
@@ -292,10 +322,10 @@ export default function CharacterSheet({
     if (unchanged) return;
     setSheet((prev) => (prev ? { ...prev, ...next, maxHP } : prev));
     persist(next, { fromCloud: true });
-  }, [liveVitals, usesExternalChar, readOnly, persist]);
+  }, [incomingVitals, sheetReady, readOnly, persist]);
 
   const updateCurrentCharacter = useCallback((updater) => {
-    if (usesExternalChar) localEditVersionRef.current += 1;
+    localEditVersionRef.current += 1;
     setC((prev) => {
       if (!prev) return prev;
       const next = typeof updater === 'function' ? updater(prev) : updater;

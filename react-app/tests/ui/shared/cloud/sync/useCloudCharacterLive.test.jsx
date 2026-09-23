@@ -77,4 +77,47 @@ describe('useCloudCharacterLive recovery', () => {
     await waitFor(() => expect(mocks.onUpdate).toHaveBeenCalledTimes(1));
     expect(mocks.onUpdate).toHaveBeenLastCalledWith(row(4, '2026-09-05T10:02:00.000Z'));
   });
+
+  test('GM damage follows a player save even when the player clock is ahead', () => {
+    renderHook(() => useCloudCharacterLive({ charId: 'char-1', onUpdate: mocks.onUpdate }));
+    const receive = mocks.channel.on.mock.calls[0][2];
+    act(() => {
+      receive({ new: row(20, '2026-09-05T10:05:00.000Z'), commit_timestamp: '2026-09-05T10:00:00.000Z' });
+      receive({ new: row(15, '2026-09-05T10:00:01.000Z'), commit_timestamp: '2026-09-05T10:00:01.000Z' });
+    });
+    expect(mocks.onUpdate).toHaveBeenCalledTimes(2);
+    expect(mocks.onUpdate).toHaveBeenLastCalledWith(row(15, '2026-09-05T10:00:01.000Z'));
+  });
+
+  test('recovery accepts the current database row even when its updated_at moved backwards', async () => {
+    mocks.getCloudCharacter.mockResolvedValue(row(15, '2026-09-05T10:00:01.000Z'));
+    renderHook(() => useCloudCharacterLive({ charId: 'char-1', onUpdate: mocks.onUpdate }));
+    act(() => mocks.channel.on.mock.calls[0][2]({
+      new: row(20, '2026-09-05T10:05:00.000Z'), commit_timestamp: '2026-09-05T10:00:00.000Z',
+    }));
+    act(() => window.dispatchEvent(new Event('focus')));
+    await waitFor(() => expect(mocks.onUpdate).toHaveBeenLastCalledWith(row(15, '2026-09-05T10:00:01.000Z')));
+  });
+
+  test('a delayed event with a later client date cannot undo a newer database commit', () => {
+    renderHook(() => useCloudCharacterLive({ charId: 'char-1', onUpdate: mocks.onUpdate }));
+    const receive = mocks.channel.on.mock.calls[0][2];
+    act(() => {
+      receive({ new: row(15, '2026-09-05T10:00:01.000Z'), commit_timestamp: '2026-09-05T10:00:01.000Z' });
+      receive({ new: row(20, '2026-09-05T10:05:00.000Z'), commit_timestamp: '2026-09-05T10:00:00.000Z' });
+    });
+    expect(mocks.onUpdate).toHaveBeenCalledOnce();
+    expect(mocks.onUpdate).toHaveBeenLastCalledWith(row(15, '2026-09-05T10:00:01.000Z'));
+  });
+
+  test('initial recovery does not make a client timestamp the realtime ordering baseline', async () => {
+    mocks.getCloudCharacter.mockResolvedValue(row(20, '2026-09-05T10:05:00.000Z'));
+    renderHook(() => useCloudCharacterLive({ charId: 'char-1', onUpdate: mocks.onUpdate }));
+    act(() => mocks.subscriptionState('SUBSCRIBED'));
+    await waitFor(() => expect(mocks.onUpdate).toHaveBeenCalledOnce());
+    act(() => mocks.channel.on.mock.calls[0][2]({
+      new: row(15, '2026-09-05T10:00:01.000Z'), commit_timestamp: '2026-09-05T10:00:01.000Z',
+    }));
+    expect(mocks.onUpdate).toHaveBeenLastCalledWith(row(15, '2026-09-05T10:00:01.000Z'));
+  });
 });

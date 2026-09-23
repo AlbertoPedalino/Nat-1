@@ -71,11 +71,11 @@ export function saveCharacter(id, character, options = {}) {
   return next;
 }
 
-export function patchCharacter(id, patch) {
+export function patchCharacter(id, patch, options = {}) {
   if (!id) return null;
   const current = loadCharacter(id);
   if (!current) return null;
-  return saveCharacter(id, { ...current, ...patch });
+  return saveCharacter(id, { ...current, ...patch }, options);
 }
 
 export function deleteCharacter(id) {

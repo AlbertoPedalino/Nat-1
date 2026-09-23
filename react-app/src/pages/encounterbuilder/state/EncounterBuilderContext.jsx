@@ -89,9 +89,9 @@ export function EncounterBuilderProvider({ instanceId, instanceSaved, linkGroupI
     return { ...annotated, actor };
   }, [getRollActor, shareRoll]);
 
-  const saveEncounterToLibrary = useCallback((name, { asNew = false } = {}) => {
+  const saveEncounterToLibrary = useCallback((name) => {
     if (!state.encounter.length) return null;
-    const existing = asNew ? null : state.library.find((entry) => entry.id === state.currentEncounterId);
+    const existing = state.library.find((entry) => entry.id === state.currentEncounterId);
     const entry = makeSavedEncounter(name, state.encounter, state.party, state.encounterQuest, existing);
     dispatch({ type: 'saveEncounterToLibrary', entry });
     return entry;

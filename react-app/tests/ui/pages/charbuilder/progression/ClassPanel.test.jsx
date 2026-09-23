@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { vi } from 'vitest';
 import ClassPanel from '../../../../../src/pages/charbuilder/progression/ClassPanel.jsx';
 
@@ -28,12 +28,18 @@ function setup(overrides = {}) {
 test.each([0, 1])('changing the class in tab %i requires confirmation and supports cancellation', (activeClassTab) => {
   const { dispatch, confirm } = setup({ activeClassTab });
   fireEvent.click(screen.getByText('Wizard'));
-  expect(confirm).toHaveBeenCalledOnce();
-  expect(confirm).toHaveBeenCalledWith(expect.stringContaining(activeClassTab ? 'Rogue' : 'Fighter'));
+  const dialog = screen.getByRole('dialog', { name: 'Cambiare classe?' });
+  expect(dialog).toHaveTextContent(activeClassTab ? 'Rogue (XPHB)' : 'Fighter (XPHB)');
+  expect(dialog).toHaveTextContent('Wizard (XPHB)');
+  expect(confirm).not.toHaveBeenCalled();
   expect(dispatch).not.toHaveBeenCalled();
 
-  confirm.mockReturnValue(true);
+  fireEvent.click(within(dialog).getByRole('button', { name: 'Annulla' }));
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  expect(dispatch).not.toHaveBeenCalled();
   fireEvent.click(screen.getByText('Wizard'));
+  fireEvent.click(screen.getByRole('button', { name: 'Cambia classe' }));
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   expect(dispatch).toHaveBeenCalledOnce();
   expect(dispatch).toHaveBeenCalledWith({
     type: activeClassTab ? 'extra-class/select' : 'class/select',
@@ -49,6 +55,7 @@ test.each([0, 1])('selecting the first class in empty tab %i needs no confirmati
     ? { activeClassTab, extraClasses: [{ name: '', source: '', level: 1 }] }
     : { className: '', classSource: '', extraClasses: [] });
   fireEvent.click(screen.getByText('Wizard'));
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   expect(confirm).not.toHaveBeenCalled();
   expect(dispatch).toHaveBeenCalledWith(expect.objectContaining({
     type: activeClassTab ? 'extra-class/select' : 'class/select', className: 'Wizard',
@@ -58,6 +65,7 @@ test.each([0, 1])('selecting the first class in empty tab %i needs no confirmati
 test.each([0, 1])('clicking the already selected class in tab %i keeps its choices', (activeClassTab) => {
   const { dispatch, confirm } = setup({ activeClassTab });
   fireEvent.click(screen.getByText(activeClassTab ? 'Rogue' : 'Fighter'));
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   expect(confirm).not.toHaveBeenCalled();
   expect(dispatch).not.toHaveBeenCalled();
 });
@@ -68,5 +76,14 @@ test('adding a multiclass and switching tabs need no confirmation', () => {
   expect(dispatch).toHaveBeenCalledWith({ type: 'multiclass/add' });
   fireEvent.click(screen.getByRole('button', { name: 'Rogue Lv 1' }));
   expect(dispatch).toHaveBeenCalledWith({ type: 'class-tab/set', tab: 1 });
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   expect(confirm).not.toHaveBeenCalled();
+});
+
+test('Escape dismisses the confirmation panel without replacing the class', () => {
+  const { dispatch } = setup();
+  fireEvent.click(screen.getByText('Wizard'));
+  fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape', code: 'Escape' });
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  expect(dispatch).not.toHaveBeenCalled();
 });
