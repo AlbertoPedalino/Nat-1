@@ -7,7 +7,6 @@ import SelectorGroup from '../ui/SelectorGroup.jsx';
 import TierSelector from '../ui/TierSelector.jsx';
 import MountSelector from './MountSelector.jsx';
 import HexResultSteps from './HexResultSteps.jsx';
-import CampaignLinkPanel from '../session/CampaignLinkPanel.jsx';
 import SessionLog from '../session/SessionLog.jsx';
 import { SELECTOR_CONTRACTS } from '../ui/selectorContracts.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
@@ -22,7 +21,7 @@ function missingSelections(state) {
 }
 
 export default function HexcrawlView() {
-  const { state, dispatch, proceed, advanceOnly } = useGmBoard();
+  const { state, dispatch, proceed, advanceOnly, clockError } = useGmBoard();
   const theme = useTheme();
   const popContract = SELECTOR_CONTRACTS.pop;
   const terrainContract = SELECTOR_CONTRACTS.terrain;
@@ -33,7 +32,7 @@ export default function HexcrawlView() {
 
   return (
     <Stack spacing={2}>
-      <CampaignLinkPanel />
+      {clockError ? <Typography color="warning.main" variant="body2">{clockError}</Typography> : null}
       <WeatherPanel />
       <TimePanel />
 

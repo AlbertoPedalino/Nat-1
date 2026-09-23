@@ -184,6 +184,28 @@ export async function readCampaignHexcrawlBoard(campaignId) {
   return data?.hexcrawl_board_id || null;
 }
 
+export async function readHexcrawlBoardCampaign(boardId) {
+  if (!boardId) return null;
+  const { data, error } = await requireClient().from('campaigns')
+    .select('id, name').eq('hexcrawl_board_id', boardId).maybeSingle();
+  if (error) throw error;
+  return data || null;
+}
+
+export async function linkHexcrawlBoardCampaign(boardId, campaignId) {
+  if (!boardId) throw new Error('No GM Board to link.');
+  // Link the destination first. A failed write must not disconnect the current
+  // campaign. Cleanup only touches rows that still point at this board.
+  if (campaignId) await setCampaignHexcrawlBoard(campaignId, boardId);
+  let cleanup = requireClient().from('campaigns').update({ hexcrawl_board_id: null })
+    .eq('hexcrawl_board_id', boardId);
+  if (campaignId) cleanup = cleanup.neq('id', campaignId);
+  const { error } = await cleanup;
+  // Readers refresh even if cleanup failed, since the destination may be saved.
+  window.dispatchEvent(new Event('gb:campaign-board-link-changed'));
+  if (error) throw error;
+}
+
 // The board a campaign takes its tables from, read straight rather than pulled:
 // `pullInstance` restores the blob into this browser's localStorage and makes it
 // the active board, which is right for "open my board here" and wrong for "the

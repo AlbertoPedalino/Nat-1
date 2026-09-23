@@ -27,6 +27,7 @@ import {
 import { createSectionInstance } from '../../shared/instances/sectionInstances.js';
 import { SECTION_KEYS, SECTION_REGISTRY } from '../../shared/instances/sectionRegistry.js';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
+import CampaignLinkPanel from '../../pages/gmboard/session/CampaignLinkPanel.jsx';
 
 const TOOL_UI = {
   gmboard: { label: 'GM Board', icon: LayoutDashboard },
@@ -218,6 +219,7 @@ export default function LinkedToolsMenu({
           {loading ? <Box sx={centerSx}><CircularProgress size={24} /></Box> : (
             <Stack spacing={2}>
               {error ? <Typography color="error" variant="body2">{error}</Typography> : null}
+              {sectionKey === 'gmboard' ? <CampaignLinkPanel boardId={instanceId} /> : null}
               <Section title="Linked instances">
                 {displayedLinkedRows.length ? displayedLinkedRows.map((row) => (
                   <InstanceButton

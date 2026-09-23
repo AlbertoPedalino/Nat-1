@@ -16,16 +16,22 @@ const campaignClock = vi.hoisted(() => ({
   error: null,
   saveClock: vi.fn(),
   writes: vi.fn(),
+  ids: vi.fn(),
+  readLink: vi.fn(),
 }));
 
 vi.mock('../../../../../src/shared/hexcrawl/useCampaignClock.js', () => ({
-  useCampaignClock: () => ({
-    ...campaignClock,
-  }),
+  useCampaignClock: (id) => {
+    campaignClock.ids(id);
+    return { ...campaignClock };
+  },
 }));
 
 vi.mock('../../../../../src/shared/cloud/api/hexcrawl.js', () => ({
-  setCampaignHexcrawlBoard: vi.fn(),
+  readHexcrawlBoardCampaign: campaignClock.readLink,
+}));
+vi.mock('../../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({
+  useAuth: () => ({ cloudEnabled: true, status: 'authed' }),
 }));
 
 let board;
@@ -42,6 +48,8 @@ beforeEach(() => {
   campaignClock.error = null;
   campaignClock.saveClock.mockReset();
   campaignClock.writes.mockReset();
+  campaignClock.ids.mockReset();
+  campaignClock.readLink.mockReset().mockResolvedValue(null);
   campaignClock.saveClock.mockImplementation(async (next) => {
     campaignClock.writes(typeof next === 'function' ? next(campaignClock.clock) : next);
     return null;
@@ -107,10 +115,11 @@ test('date and time persist locally on a standalone board', async () => {
 
 test('date and time also update the shared clock of a linked campaign', async () => {
   campaignClock.active = true;
+  campaignClock.readLink.mockResolvedValue({ id: 'campaign-one', name: 'Campaign One' });
   registerBoardInstance('clock-linked', 'Linked clock');
   persistBoardState('clock-linked', {
     ...readPersistedBoard('missing').state,
-    campaignId: 'campaign-one',
+    campaignId: 'stale-local-campaign',
     season: 'Summer',
   });
 
@@ -119,7 +128,9 @@ test('date and time also update the shared clock of a linked campaign', async ()
       <Probe />
     </GmBoardProvider>,
   );
-  await waitFor(() => expect(board.state.campaignId).toBe('campaign-one'));
+  await waitFor(() => expect(board.campaign?.id).toBe('campaign-one'));
+  expect(campaignClock.ids).toHaveBeenLastCalledWith('campaign-one');
+  expect(campaignClock.ids).not.toHaveBeenCalledWith('stale-local-campaign');
 
   act(() => board.setStart({ day: 3, month: 4, year: 1234, min: 7 * 60 + 30 }));
 
@@ -152,6 +163,10 @@ test('date and time also update the shared clock of a linked campaign', async ()
     meteo: 'Snow',
     intensity: 'Heavy',
   })));
+  campaignClock.readLink.mockResolvedValue(null);
+  act(() => window.dispatchEvent(new Event('gb:campaign-board-link-changed')));
+  await waitFor(() => expect(board.campaign).toBeNull());
+  expect(campaignClock.ids).toHaveBeenLastCalledWith(undefined);
 });
 
 test('travel selectors publish only their changed field and receive map selections', async () => {

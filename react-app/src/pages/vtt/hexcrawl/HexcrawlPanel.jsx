@@ -139,7 +139,7 @@ export default function HexcrawlPanel({
       {!board ? (
         <Typography sx={warnSx}>
           No hexcrawl board is linked to this campaign. Open the GM Board, save it, and pick this
-          campaign under Campaign.
+          campaign under Links.
         </Typography>
       ) : null}
       {board && !clockLinked ? (

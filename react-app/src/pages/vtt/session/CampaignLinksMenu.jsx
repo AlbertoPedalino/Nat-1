@@ -26,11 +26,29 @@ export default function CampaignLinksMenu({ campaignId }) {
       return () => { cancelled = true; };
     }
     setChecking(true);
-    readCampaignHexcrawlBoard(campaignId)
-      .then((id) => { if (!cancelled) setBoardId(id || null); })
-      .catch(() => { if (!cancelled) setBoardId(null); })
-      .finally(() => { if (!cancelled) setChecking(false); });
-    return () => { cancelled = true; };
+    setBoardId(null);
+    let request = 0;
+    const refresh = async () => {
+      const ticket = ++request;
+      try {
+        const id = await readCampaignHexcrawlBoard(campaignId);
+        if (!cancelled && ticket === request) setBoardId(id || null);
+      } catch {
+        if (!cancelled && ticket === request) setBoardId(null);
+      } finally {
+        if (!cancelled && ticket === request) setChecking(false);
+      }
+    };
+    refresh();
+    const timer = setInterval(refresh, 5000);
+    window.addEventListener('focus', refresh);
+    window.addEventListener('gb:campaign-board-link-changed', refresh);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+      window.removeEventListener('focus', refresh);
+      window.removeEventListener('gb:campaign-board-link-changed', refresh);
+    };
   }, [campaignId]);
 
   // The board is already saved by definition — the campaign row points at it —
@@ -51,7 +69,7 @@ export default function CampaignLinksMenu({ campaignId }) {
   return (
     <Tooltip title={checking
       ? 'Looking for this campaign’s GM Board…'
-      : 'This campaign has no GM Board linked. Link one from the campaign page to reach its tools from here.'}
+      : 'This campaign has no GM Board linked. Open Links on the GM Board and choose this campaign.'}
     >
       <span style={{ display: 'inline-flex' }}>
         <Button

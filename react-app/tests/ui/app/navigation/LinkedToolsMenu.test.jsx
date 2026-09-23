@@ -9,6 +9,9 @@ const mocks = vi.hoisted(() => ({
   setLocalInstanceLink: vi.fn(),
   fetchInstanceMeta: vi.fn(),
   listInstances: vi.fn(),
+  listMyCampaigns: vi.fn(),
+  linkCampaign: vi.fn(),
+  pushInstance: vi.fn(),
   auth: { cloudEnabled: false, status: 'anon' },
 }));
 
@@ -23,8 +26,11 @@ vi.mock('../../../../src/shared/cloud/sections/cloudSections.js', () => ({
   getCloudSection: (sectionKey) => ({
     fetchInstanceMeta: (id) => mocks.fetchInstanceMeta(sectionKey, id),
     listInstances: () => mocks.listInstances(sectionKey),
+    pushInstance: mocks.pushInstance,
   }),
 }));
+vi.mock('../../../../src/shared/cloud/api/campaigns.js', () => ({ listMyCampaigns: mocks.listMyCampaigns }));
+vi.mock('../../../../src/shared/cloud/api/hexcrawl.js', () => ({ linkHexcrawlBoardCampaign: mocks.linkCampaign }));
 vi.mock('../../../../src/shared/ui/ToastProvider.jsx', () => ({ useToast: () => ({ notify: mocks.notify }) }));
 vi.mock('../../../../src/shared/instances/instanceLinks.js', async (importOriginal) => ({
   ...await importOriginal(),
@@ -36,6 +42,10 @@ beforeEach(() => {
   vi.clearAllMocks();
   mocks.auth.cloudEnabled = false;
   mocks.auth.status = 'anon';
+  mocks.auth.user = null;
+  mocks.listMyCampaigns.mockResolvedValue([]);
+  mocks.linkCampaign.mockResolvedValue();
+  mocks.pushInstance.mockResolvedValue({ id: 'board-a' });
   mocks.fetchInstanceMeta.mockResolvedValue(null);
   mocks.listInstances.mockResolvedValue([]);
   mocks.readLocalToolInstances.mockReturnValue([
@@ -64,6 +74,25 @@ test('linked-tools dialog opens a linked instance from the top bar', async () =>
   expect(link).toHaveAttribute('href', '/dm-screen?screen=screen-a');
   expect(link).toHaveAttribute('target', '_blank');
   expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+});
+
+test('Links connects the campaign directly, without a separate clock assignment', async () => {
+  mocks.auth.cloudEnabled = true;
+  mocks.auth.status = 'authed';
+  mocks.auth.user = { id: 'gm-one' };
+  const campaign = { id: 'campaign-one', name: 'Campaign One', gm: 'gm-one', hexcrawl_board_id: null };
+  mocks.listMyCampaigns.mockResolvedValue([campaign]);
+  mocks.linkCampaign.mockImplementation(async () => { campaign.hexcrawl_board_id = 'board-a'; });
+  render(<LinkedToolsMenu sectionKey="gmboard" instanceId="board-a" instanceSaved />);
+  fireEvent.click(screen.getByRole('button', { name: 'Linked tools' }));
+  const select = await screen.findByRole('combobox', { name: 'Linked campaign' });
+  await waitFor(() => expect(select).not.toHaveAttribute('aria-disabled', 'true'));
+  fireEvent.mouseDown(select);
+  fireEvent.click(await screen.findByRole('option', { name: 'Campaign One' }));
+  await waitFor(() => expect(mocks.linkCampaign).toHaveBeenCalledWith('board-a', 'campaign-one'));
+  expect(mocks.pushInstance).toHaveBeenCalledWith('board-a');
+  await waitFor(() => expect(select).toHaveTextContent('Campaign One'));
+  expect(screen.queryByLabelText(/keeps.*clock/i)).not.toBeInTheDocument();
 });
 
 test('a borrowed links menu can include its own GM Board destination', async () => {

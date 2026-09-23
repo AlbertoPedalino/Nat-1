@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { ThemeProvider } from '@mui/material';
 import { vi } from 'vitest';
 import { theme } from '../../../../../src/app/theme.js';
@@ -29,6 +29,9 @@ test('the map opens the linked-tools menu of its campaign’s GM Board', async (
   mocks.readCampaignHexcrawlBoard.mockResolvedValue('board-a');
   renderMenu();
   expect(await screen.findByText('links:gmboard:board-a:true')).toBeInTheDocument();
+  mocks.readCampaignHexcrawlBoard.mockResolvedValue('board-b');
+  fireEvent(window, new Event('gb:campaign-board-link-changed'));
+  await waitFor(() => expect(screen.getByText('links:gmboard:board-b:true')).toBeInTheDocument());
 });
 
 test('a campaign with no board linked says so instead of offering a dead button', async () => {

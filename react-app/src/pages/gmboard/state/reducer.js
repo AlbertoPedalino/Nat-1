@@ -63,8 +63,6 @@ export function gmBoardReducer(state, action) {
       };
     case 'setTab':
       return { ...state, tab: action.tab };
-    case 'setCampaign':
-      return { ...state, campaignId: action.campaignId || null };
     // The shared campaign row supplies time, sky and travel selections. The
     // log is not touched — the cloud log is its own append-only table, and
     // merging the two would double every entry the GM can see.

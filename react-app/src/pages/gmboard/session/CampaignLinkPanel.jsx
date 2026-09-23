@@ -5,44 +5,58 @@ import {
 import { Link2 } from 'lucide-react';
 import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
 import { listMyCampaigns } from '../../../shared/cloud/api/campaigns.js';
-import { useGmBoard } from '../state/GmBoardContext.jsx';
+import { linkHexcrawlBoardCampaign } from '../../../shared/cloud/api/hexcrawl.js';
+import { getCloudSection } from '../../../shared/cloud/sections/cloudSections.js';
 
-// Which table this board keeps time for. Bound, the clock and the weather stop
-// being this browser's business: the map writes them too, and both screens read
-// the same row.
-//
-// Only campaigns the signed-in user runs are offered — the board holds the
-// tables the party is not supposed to read.
-export default function CampaignLinkPanel() {
-  const { user, cloudEnabled } = useAuth();
-  const {
-    state, bindCampaign, campaignLinked, clockError, instanceSaved,
-  } = useGmBoard();
+// Campaign linking lives beside the other tool links. There is no separate
+// clock assignment: this relation also selects the map's tables and clock.
+export default function CampaignLinkPanel({ boardId }) {
+  const { user, cloudEnabled, status } = useAuth();
   const [campaigns, setCampaigns] = useState([]);
   const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
-    if (!cloudEnabled || !user?.id) {
+    if (!cloudEnabled || status !== 'authed' || !user?.id) {
       setCampaigns([]);
       return () => { cancelled = true; };
     }
+    setLoading(true);
     listMyCampaigns()
       .then((rows) => {
         if (cancelled) return;
         setCampaigns(rows.filter((row) => row.gm === user.id));
       })
-      .catch(() => { if (!cancelled) setCampaigns([]); });
+      .catch((cause) => { if (!cancelled) setError(cause?.message || 'Could not read campaigns.'); })
+      .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [cloudEnabled, user?.id]);
+  }, [cloudEnabled, status, user?.id, boardId]);
 
   if (!cloudEnabled || !user?.id) return null;
 
   const onChange = async (event) => {
+    const campaignId = event.target.value || null;
     setBusy(true);
-    await bindCampaign(event.target.value || null);
-    setBusy(false);
+    try {
+      // Ensure a locally created board exists before the campaign references it.
+      if (campaignId) {
+        const api = getCloudSection('gmboard');
+        if (!await api.fetchInstanceMeta(boardId)) await api.pushInstance(boardId);
+      }
+      await linkHexcrawlBoardCampaign(boardId, campaignId);
+      const rows = await listMyCampaigns();
+      setCampaigns(rows.filter((row) => row.gm === user.id));
+      setError(null);
+    } catch (cause) {
+      setError(cause?.message || 'Could not link the campaign.');
+    } finally {
+      setBusy(false);
+    }
   };
+
+  const linked = campaigns.find((campaign) => campaign.hexcrawl_board_id === boardId);
 
   return (
     <Stack spacing={1} sx={panelSx}>
@@ -54,31 +68,23 @@ export default function CampaignLinkPanel() {
       <TextField
         select
         size="small"
-        label="Keeps the clock for"
-        value={state.campaignId || ''}
+        label="Linked campaign"
+        value={linked?.id || ''}
         onChange={onChange}
-        disabled={busy || !instanceSaved}
+        disabled={busy || loading || status !== 'authed'}
       >
-        <MenuItem value="">No campaign — this board alone</MenuItem>
+        <MenuItem value="">No campaign</MenuItem>
         {campaigns.map((campaign) => (
           <MenuItem key={campaign.id} value={campaign.id}>{campaign.name || 'Campaign'}</MenuItem>
         ))}
       </TextField>
 
-      {!instanceSaved ? (
-        <Typography variant="caption" color="text.secondary">
-          Save this board first — a campaign has to point at something that exists.
-        </Typography>
-      ) : (
-        <Typography variant="caption" color="text.secondary">
-          {campaignLinked
-            ? 'The date, the weather and the session log are shared with this campaign\'s map. Entering a hex there moves this clock, and Proceed here moves that one.'
-            : 'Unbound: the clock stays in this browser, exactly as before.'}
-        </Typography>
-      )}
+      <Typography variant="caption" color="text.secondary">
+        Linking a campaign automatically synchronizes hexcrawl settings, time and weather with its maps.
+      </Typography>
 
-      {clockError ? (
-        <Typography variant="caption" color="warning.main">{clockError}</Typography>
+      {error ? (
+        <Typography variant="caption" color="warning.main">{error}</Typography>
       ) : null}
     </Stack>
   );

@@ -6,7 +6,7 @@ import { useGmBoardPersistence } from './useGmBoardPersistence.js';
 import { resolveProceed, resolveAdvanceOnly, resolveManualAdvance } from '../hexcrawl/hex.js';
 import { clockFromResult, clockFromState, travelFromState } from '../../../shared/hexcrawl/hexEntry.js';
 import { useCampaignClock } from '../../../shared/hexcrawl/useCampaignClock.js';
-import { setCampaignHexcrawlBoard } from '../../../shared/cloud/api/hexcrawl.js';
+import { useBoardCampaign } from '../../../shared/hexcrawl/useBoardCampaign.js';
 import { createDungeon, isValidRoomCount } from '../dungeon/dungeon.js';
 import { createQuests } from '../quests/quest.js';
 
@@ -27,7 +27,8 @@ export function GmBoardProvider({ instanceId, instanceSaved, linkGroupId, onInst
   // map: both read the same row and write it only when the party actually
   // moves. localStorage stays the mirror it has always been, so an unbound
   // board — or one whose GM is offline — behaves exactly as before.
-  const campaignClock = useCampaignClock(state.campaignId);
+  const campaignLink = useBoardCampaign(instanceId);
+  const campaignClock = useCampaignClock(campaignLink.campaign?.id);
   const [clockError, setClockError] = useState(null);
   const appliedClockRef = useRef(null);
   const clockStateRef = useRef(state);
@@ -128,23 +129,6 @@ export function GmBoardProvider({ instanceId, instanceSaved, linkGroupId, onInst
     pushClock(result);
   }, [pushClock, state]);
 
-  // Both directions in one move: the board remembers its campaign, and the
-  // campaign remembers which board holds its tables — that second pointer is
-  // what the map reads, and it is the one the database enforces as unique.
-  const bindCampaign = useCallback(async (campaignId) => {
-    const previous = state.campaignId;
-    dispatch({ type: 'setCampaign', campaignId });
-    try {
-      if (previous && previous !== campaignId) await setCampaignHexcrawlBoard(previous, null);
-      if (campaignId) await setCampaignHexcrawlBoard(campaignId, instanceId);
-      setClockError(null);
-      return true;
-    } catch (cause) {
-      setClockError(cause?.message || 'Could not link this board to that campaign.');
-      return false;
-    }
-  }, [instanceId, state.campaignId]);
-
   const generateDungeon = useCallback((config) => {
     if (!isValidRoomCount(config.roomCount)) return false;
     const result = createDungeon(config, state.tables, Math.random);
@@ -174,10 +158,10 @@ export function GmBoardProvider({ instanceId, instanceSaved, linkGroupId, onInst
     advanceManual,
     generateDungeon,
     generateQuests,
-    bindCampaign,
+    campaign: campaignLink.campaign,
     campaignLinked: campaignClock.active,
-    clockError: clockError || campaignClock.error,
-  }), [state, dispatchSelection, instanceId, instanceSaved, saveInstance, resetTables, setStart, setTime, setSeason, setWeatherOverride, proceed, advanceOnly, advanceManual, generateDungeon, generateQuests, bindCampaign, campaignClock.active, campaignClock.error, clockError]);
+    clockError: clockError || campaignClock.error || campaignLink.error,
+  }), [state, dispatchSelection, instanceId, instanceSaved, saveInstance, resetTables, setStart, setTime, setSeason, setWeatherOverride, proceed, advanceOnly, advanceManual, generateDungeon, generateQuests, campaignLink.campaign, campaignLink.error, campaignClock.active, campaignClock.error, clockError]);
 
   return (
     <GmBoardContext.Provider value={value}>
