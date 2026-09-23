@@ -273,6 +273,7 @@ test('unlinking the selected builder clears the destination and preserves all ot
   expect(screen.getByRole('link', { name: 'Open Builder two' })).toBeInTheDocument();
   expect(screen.getByRole('link', { name: 'Open Board A' })).toBeInTheDocument();
   expect(screen.getByRole('combobox', { name: 'Dungeon fights' })).toHaveTextContent('Automatic: Builder two');
+  expect(screen.getByRole('combobox', { name: 'Dungeon fights' })).toHaveAttribute('aria-disabled', 'true');
   expect(mocks.setCampaignBoard).not.toHaveBeenCalled();
   expect(mocks.setCampaignGroup).not.toHaveBeenCalled();
 });
@@ -368,4 +369,30 @@ test('automatic selection never takes a board assigned to another campaign', asy
   fireEvent.click(screen.getByRole('button', { name: 'Linked tools' }));
   expect(await screen.findByRole('combobox', { name: /Time, weather & tables/ })).toHaveTextContent('Choose a GM Board');
   expect(mocks.linkBoardCampaign).not.toHaveBeenCalled();
+});
+
+test.each([null, 'enc-one'])('one builder is automatic and locked with stored selection %s', async (selected) => {
+  const campaign = campaignWithTwoBuilders();
+  campaign.dungeon_encounter_id = selected;
+  mocks.readLocalToolInstances.mockReturnValue(mocks.readLocalToolInstances().filter((row) => row.id !== 'enc-two'));
+  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" instanceSaved />);
+  fireEvent.click(screen.getByRole('button', { name: 'Linked tools' }));
+  const select = await screen.findByRole('combobox', { name: 'Dungeon fights' });
+  expect(select).toHaveTextContent('Automatic: Builder one');
+  expect(select).toHaveAttribute('aria-disabled', 'true');
+  expect(mocks.setDungeonEncounter).not.toHaveBeenCalled();
+});
+
+test('multiple builders offer explicit destinations without a redundant Automatic option', async () => {
+  const campaign = campaignWithTwoBuilders();
+  campaign.dungeon_encounter_id = null;
+  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" instanceSaved />);
+  fireEvent.click(screen.getByRole('button', { name: 'Linked tools' }));
+  const select = await screen.findByRole('combobox', { name: 'Dungeon fights' });
+  expect(select).toHaveTextContent('Choose an Encounter Builder');
+  fireEvent.mouseDown(select);
+  expect(screen.queryByRole('option', { name: /Automatic/ })).not.toBeInTheDocument();
+  expect(screen.getByRole('option', { name: 'Choose an Encounter Builder' })).toHaveAttribute('aria-disabled', 'true');
+  await act(async () => { fireEvent.click(screen.getByRole('option', { name: 'Builder two' })); });
+  expect(mocks.setDungeonEncounter).toHaveBeenCalledWith('campaign-one', 'enc-two');
 });

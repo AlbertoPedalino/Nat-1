@@ -247,6 +247,8 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, instanceSaved,
               const dungeonBuilders = row.sectionKey === 'campaign' ? rows.filter((tool) => (
                 tool.sectionKey === 'encounters' && row.linkGroupId && tool.linkGroupId === row.linkGroupId
               )) : [];
+              const dungeonSelection = row.dungeonEncounterId || (dungeonBuilders.length === 1 ? dungeonBuilders[0].id : '');
+              const singleDungeonBuilder = dungeonBuilders.length === 1 && dungeonSelection === dungeonBuilders[0].id;
               return <Stack key={rowKey(row)} direction="row" spacing={1}
                 sx={{ alignItems: 'center', border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 1.25 }}>
                 <Icon size={18} />
@@ -273,14 +275,17 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, instanceSaved,
                   {row.sectionKey === 'campaign' && <TextField select fullWidth size="small"
                     label="Dungeon fights" sx={{ mt: 1 }}
                     slotProps={{ select: { displayEmpty: true }, inputLabel: { shrink: true } }}
-                    value={row.dungeonEncounterId || ''} disabled={disabled}
+                    value={dungeonSelection} disabled={disabled || !dungeonBuilders.length || singleDungeonBuilder}
                     helperText="Destination for new fights. Previously sent fights stay in their original builder."
                     onChange={(event) => handleSelectDungeonEncounter(row, event.target.value)}>
-                    <MenuItem value="">{dungeonBuilders.length === 1
-                      ? `Automatic: ${dungeonBuilders[0].name}` : 'Automatic (only with one linked builder)'}</MenuItem>
+                    {!dungeonSelection && <MenuItem value="" disabled>
+                      {dungeonBuilders.length ? 'Choose an Encounter Builder' : 'Link an Encounter Builder to send dungeon fights'}
+                    </MenuItem>}
                     {row.dungeonEncounterId && !dungeonBuilders.some((tool) => tool.id === row.dungeonEncounterId)
                       && <MenuItem value={row.dungeonEncounterId} disabled>Previously selected builder is no longer linked</MenuItem>}
-                    {dungeonBuilders.map((tool) => <MenuItem key={tool.id} value={tool.id}>{tool.name}</MenuItem>)}
+                    {dungeonBuilders.map((tool) => <MenuItem key={tool.id} value={tool.id}>
+                      {singleDungeonBuilder ? `Automatic: ${tool.name}` : tool.name}
+                    </MenuItem>)}
                   </TextField>}
                 </Box>
                 {!isCurrent && <Button component={RouterLink} to={rowRoute(row)} target="_blank" rel="noopener noreferrer"
