@@ -28,6 +28,22 @@ export function beginPiecePointerDrag(event, placement, {
   let dragging = false;
   let holdTimer = null;
 
+  // A mobile long press can start native selection outside the source row,
+  // especially once the placement panel fades. Protect the whole gesture,
+  // including the hold delay, without cancelling taps or panel scrolling.
+  const selectionGuard = document.createElement('style');
+  selectionGuard.textContent = `
+    :root, :root * {
+      -webkit-user-select: none !important;
+      user-select: none !important;
+      -webkit-touch-callout: none !important;
+    }
+  `;
+  document.head.appendChild(selectionGuard);
+  const blockSelection = (nativeEvent) => nativeEvent.preventDefault();
+  document.addEventListener('selectstart', blockSelection, true);
+  if (waitsForHold) document.addEventListener('contextmenu', blockSelection, true);
+
   const emit = (phase, pointerEvent) => {
     window.dispatchEvent(new CustomEvent(PIECE_POINTER_DRAG_EVENT, {
       detail: {
@@ -54,6 +70,10 @@ export function beginPiecePointerDrag(event, placement, {
   };
   const cleanup = () => {
     if (holdTimer !== null) clearTimeout(holdTimer);
+    selectionGuard.remove();
+    document.removeEventListener('selectstart', blockSelection, true);
+    document.removeEventListener('contextmenu', blockSelection, true);
+    window.removeEventListener('blur', cancelOnBlur);
     window.removeEventListener('pointermove', move);
     window.removeEventListener('pointerup', finish);
     window.removeEventListener('pointercancel', cancel);
@@ -67,6 +87,7 @@ export function beginPiecePointerDrag(event, placement, {
   const activate = (pointerEvent) => {
     dragging = true;
     holdTimer = null;
+    window.getSelection()?.removeAllRanges();
     capturePointer();
     onPlacementDragStart?.(placement);
     emit('move', pointerEvent);
@@ -102,7 +123,11 @@ export function beginPiecePointerDrag(event, placement, {
     emit('cancel', pointerEvent);
     onPlacementDragEnd?.();
   };
+  const cancelOnBlur = () => cancel({
+    pointerId, clientX: origin.x, clientY: origin.y,
+  });
 
+  window.addEventListener('blur', cancelOnBlur);
   window.addEventListener('pointermove', move, { passive: false });
   window.addEventListener('pointerup', finish, { passive: false });
   window.addEventListener('pointercancel', cancel);
