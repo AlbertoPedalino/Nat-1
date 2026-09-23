@@ -209,8 +209,9 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, instanceSaved,
                 <Icon size={18} />
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography variant="body2" sx={{ overflowWrap: 'anywhere' }}>{row.name}{isCurrent ? ' · Current' : ''}</Typography>
-                  <Typography variant="caption" color="text.secondary">{TOOL_UI[row.sectionKey].label}</Typography>
-                  {row.sectionKey === 'gmboard' && clockCampaigns.length > 0 && <Typography variant="caption" color="text.secondary" display="block">
+                  <Typography component="div" variant="caption" color="text.secondary">{TOOL_UI[row.sectionKey].label}</Typography>
+                  {row.sectionKey === 'gmboard' && clockCampaigns.length > 0 && <Typography component="div" variant="caption" color="text.secondary"
+                    sx={{ mt: 0.5, lineHeight: 1.5, overflowWrap: 'anywhere' }}>
                     Provides time, weather and tables for {clockCampaigns.map((campaign) => campaign.name).join(', ')}.
                   </Typography>}
                   {row.sectionKey === 'campaign' && <TextField select fullWidth size="small"
