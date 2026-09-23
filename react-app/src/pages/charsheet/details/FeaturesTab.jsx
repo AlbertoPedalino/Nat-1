@@ -8,6 +8,7 @@ import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import { entriesToTextBlocks } from '../../../shared/character/spells/spellEntries.js';
 import { backgroundFeatNames } from '../../../shared/character/progression/selectedFeats.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
+import { featDescriptionEntries } from '../../../shared/character/progression/featDescription.js';
 
 import { ENTITY_COLORS as SOURCE_COLOR } from '../../../shared/ui/entityColors.js';
 
@@ -119,7 +120,7 @@ export default function FeaturesTab({ C }) {
         features={selectedFeats.map((feat) => ({
           name: feat.name,
           level: null,
-          entries: feat.entries || [],
+          entries: featDescriptionEntries(feat),
           source: 'Feat',
         }))}
       />

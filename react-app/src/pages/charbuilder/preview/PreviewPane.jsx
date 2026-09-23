@@ -15,6 +15,7 @@ import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import { EntryAccordion, partitionNamedEntries, splitNamedEntries } from '../../../shared/content/EntryAccordion.jsx';
 import { collectAcFormulas, getEquippedArmor, getEquippedShield, computeAcFormulaValue } from '../../../shared/character/combat/ac.js';
 import { collectOwnedFeatNames } from '../../../shared/character/progression/selectedFeats.js';
+import { featDescriptionEntries } from '../../../shared/character/progression/featDescription.js';
 import { buildPreviewSheetCharacter } from './previewSheet.js';
 
 import { ENTITY_COLORS as SOURCE_COLOR, NEUTRAL_TONE } from '../../../shared/ui/entityColors.js';
@@ -525,9 +526,10 @@ function collectPreviewFeats(character, feats) {
 }
 
 function PreviewFeat({ feat }) {
-  if (!hasDescriptionEntries(feat.entries)) return <FeatNameCard name={feat.name} />;
+  const entries = featDescriptionEntries(feat);
+  if (!hasDescriptionEntries(entries)) return <FeatNameCard name={feat.name} />;
 
-  const { introEntries, namedEntries } = partitionNamedEntries(feat.entries);
+  const { introEntries, namedEntries } = partitionNamedEntries(entries);
 
   return (
     <FeatureAccordion feature={feat} source="feat">

@@ -9,6 +9,7 @@ import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import { findSpellListEntryIndexByClass } from '../../../shared/character/spells/featSpellLists.js';
 import { featChoiceSpecs } from './choiceSpecs.js';
 import { buildFeatPrerequisiteContext, meetsFeatPrerequisites } from './featPrerequisites.js';
+import { featDescriptionEntries } from '../../../shared/character/progression/featDescription.js';
 
 function featMatchesCategory(feat, wanted, fixedOptions = []) {
   const norm = (value) => String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -115,7 +116,7 @@ function FeatSpellListSelector({ feat, additional, entryIdx, slotKey, dispatch, 
 // sub-entries become accordion rows, avoiding a redundant nested "Description"
 // toggle for feats and Fighting Styles.
 function FeatDescriptionRows({ feat }) {
-  const { introEntries, namedEntries } = partitionNamedEntries(feat?.entries);
+  const { introEntries, namedEntries } = partitionNamedEntries(featDescriptionEntries(feat));
   if (!introEntries.length && !namedEntries.length) {
     return <Typography color="text.secondary">No description available.</Typography>;
   }

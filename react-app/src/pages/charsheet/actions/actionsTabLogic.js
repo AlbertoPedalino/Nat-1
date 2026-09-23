@@ -2,6 +2,7 @@ import { getMod, getFinal, getPB } from '../state/calculations.js';
 import { classLevel, primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
 import { hasActionRequirement } from '../../../shared/character/progression/choiceUtils.js';
+import { featDescriptionEntries } from '../../../shared/character/progression/featDescription.js';
 import { getWeaponProficiencyInfo, hasNonProficientArmor } from '../proficiency/proficiencies.js';
 import {
   collectResolvedWeaponMasteries,
@@ -350,7 +351,10 @@ export function collectAdapterActions(C, sheet) {
     const ownerCandidates = nameKeyCandidates(action.ownerName || source);
     for (const candidate of ownerCandidates) {
       const feat = featSnapshotByName.get(candidate);
-      if (feat?.entries) return feat.entries;
+      if (feat) {
+        const entries = featDescriptionEntries(feat);
+        if (entries.length) return entries;
+      }
     }
     const actionCandidates = nameKeyCandidates(action.name);
     for (const candidate of actionCandidates) {
