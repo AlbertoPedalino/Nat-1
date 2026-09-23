@@ -11,7 +11,7 @@ import {
 } from '../../../shared/cloud/api/hexcrawl.js';
 import { hexCellsByKey } from '../../../shared/hexcrawl/hexCell.js';
 import {
-  clockFromState, hexEntrySummary, mergeBoardClock, runHexEntry,
+  clockFromState, hexEntrySummary, mergeBoardClock, runHexEntry, travelFromState,
 } from '../../../shared/hexcrawl/hexEntry.js';
 import { useCampaignClock } from '../../../shared/hexcrawl/useCampaignClock.js';
 import { hexKey, isHexGrid } from '../../../shared/vtt/map/hexGeometry.js';
@@ -24,30 +24,10 @@ import { hexKey, isHexGrid } from '../../../shared/vtt/map/hexGeometry.js';
 // written: the hex row, the clock row, the log table.
 
 const EMPTY_CELLS = new Map();
-// What a freshly clicked hex is assumed to be. A wilderness map is mostly one
-// kind of country, so setting it once and clicking is the whole point; a hex
-// that already has its own terrain keeps it.
-const DEFAULTS_KEY = 'gb:hexcrawl:defaults:';
 // Long enough to read three lines and decide whether to open the rolls, short
 // enough that a bubble is never still sitting on the map two hexes later.
 const BUBBLE_MS = 12000;
 const BOARD_REFRESH_MS = 5000;
-// `mountSpeed` is null rather than 1 on purpose: null means "whatever the board
-// says the party is riding", and a 1 would silently put them back on foot the
-// first time this map was opened.
-const EMPTY_DEFAULTS = Object.freeze({
-  terrain: null, pop: null, tier: null, mountSpeed: null,
-});
-
-function readDefaults(sceneId) {
-  if (!sceneId) return { ...EMPTY_DEFAULTS };
-  try {
-    const raw = localStorage.getItem(`${DEFAULTS_KEY}${sceneId}`);
-    return raw ? { ...EMPTY_DEFAULTS, ...JSON.parse(raw) } : { ...EMPTY_DEFAULTS };
-  } catch {
-    return { ...EMPTY_DEFAULTS };
-  }
-}
 
 export function useSceneHexcrawl({ scene, isGm }) {
   const campaignId = scene?.campaignId || null;
@@ -76,7 +56,6 @@ export function useSceneHexcrawl({ scene, isGm }) {
   const bubbleTimerRef = useRef(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
-  const [defaults, setDefaultsState] = useState(() => readDefaults(sceneId));
   // Armed, a click walks the party in and rolls. Disarmed it only picks the hex,
   // which is what setting a map up wants — otherwise laying out terrain would
   // burn a day of travel per click.
@@ -86,6 +65,10 @@ export function useSceneHexcrawl({ scene, isGm }) {
   // are one `Promise.all`, so a player loaded no clock at all and stood on a map
   // with no party marker until the GM next moved.
   const clock = useCampaignClock(campaignId, { withLog: isGm });
+  const travel = travelFromState(mergeBoardClock(board?.state || {}, clock.clock));
+  const defaults = {
+    terrain: travel.terrain, pop: travel.pop, tier: travel.hexTier, mountSpeed: travel.mountSpeed,
+  };
   // Cleared whenever the scene changes: a result belongs to the hex it was
   // rolled on, and that hex is not on the next map.
   const sceneRef = useRef(sceneId);
@@ -98,20 +81,9 @@ export function useSceneHexcrawl({ scene, isGm }) {
     setBubble(null);
     setLastVisit(null);
     setResultOpen(false);
-    setDefaultsState(readDefaults(sceneId));
   }, [sceneId]);
 
   useEffect(() => () => clearTimeout(bubbleTimerRef.current), []);
-
-  const setDefaults = useCallback((patch) => {
-    setDefaultsState((current) => {
-      const next = { ...current, ...patch };
-      try {
-        if (sceneId) localStorage.setItem(`${DEFAULTS_KEY}${sceneId}`, JSON.stringify(next));
-      } catch (_) { /* a browser with no storage still gets the session's defaults */ }
-      return next;
-    });
-  }, [sceneId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -174,12 +146,42 @@ export function useSceneHexcrawl({ scene, isGm }) {
     return queued;
   }, [campaignId, enabled]);
 
+  const setDefaults = useCallback(async (patch) => {
+    if (!enabled || !clock.active) return null;
+    setBusy(true);
+    try {
+      const activeBoard = await refreshBoard({ force: true });
+      if (!activeBoard) throw new Error('This campaign has no hexcrawl board linked.');
+      const fields = {};
+      for (const key of ['terrain', 'pop', 'mountSpeed']) {
+        if (patch[key] !== undefined) fields[key] = patch[key];
+      }
+      if (patch.tier !== undefined) fields.hexTier = patch.tier;
+      const saved = await clock.saveClock((current) => {
+        const base = mergeBoardClock(activeBoard.state, current);
+        return {
+          ...(!current ? clockFromState(base) : {}),
+          ...(!current?.travelConfigured
+            ? { ...travelFromState(base), travelConfigured: true, season: base.season || null } : {}),
+          ...fields,
+        };
+      });
+      setError(null);
+      return saved;
+    } catch (cause) {
+      setError(cause?.message || 'Could not save the hexcrawl settings.');
+      return null;
+    } finally {
+      setBusy(false);
+    }
+  }, [clock, enabled, refreshBoard]);
+
   useEffect(() => {
     const scope = enabled && campaignId ? campaignId : null;
     boardScopeRef.current = scope;
+    boardRef.current = null;
+    setBoard(null);
     if (!scope) {
-      boardRef.current = null;
-      setBoard(null);
       return undefined;
     }
     let cancelled = false;
@@ -248,19 +250,18 @@ export function useSceneHexcrawl({ scene, isGm }) {
       }
       // An untouched hex takes the map's defaults, and keeps them: after this it
       // is a hex with a terrain, not one that happened to be rolled as forest.
+      const merged = mergeBoardClock(activeBoard.state, clock.clock);
       const filled = {
         ...hex,
-        terrain: hex.terrain || defaults.terrain,
-        pop: hex.pop || defaults.pop,
-        tier: hex.tier ?? defaults.tier,
+        terrain: hex.terrain || merged.terrain,
+        pop: hex.pop || merged.pop,
+        tier: hex.tier ?? merged.hexTier,
       };
-      const merged = mergeBoardClock(activeBoard.state, clock.clock);
-      // The mount is the map's when this map has been given one, and the
-      // board's otherwise: a party can ride out of a city on one screen and the
-      // GM should not have to go back to the board to say so.
+      // Both screens use the campaign's travel speed, falling back to the
+      // linked board for campaigns that have not configured shared travel yet.
       const boardState = {
         ...merged,
-        mountSpeed: defaults.mountSpeed ?? merged.mountSpeed ?? 1,
+        mountSpeed: merged.mountSpeed ?? 1,
       };
       const entry = runHexEntry({
         board: boardState, hex: filled, tables: activeBoard.tables, mode,
@@ -313,7 +314,7 @@ export function useSceneHexcrawl({ scene, isGm }) {
     } finally {
       setBusy(false);
     }
-  }, [clock, defaults, enabled, refreshBoard, sceneId, storeCell]);
+  }, [clock, enabled, refreshBoard, sceneId, storeCell]);
 
   // Taking a hex back. The terrain, population and tier stay — those are what
   // the hex *is*, and re-entering it should not mean setting it up again. What
@@ -372,17 +373,26 @@ export function useSceneHexcrawl({ scene, isGm }) {
   // from the same row. Written with the rest of the clock so the first save
   // carries the board's own time rather than the schema's defaults.
   const setSeason = useCallback(async (season) => {
-    if (!clock.active) return null;
-    const base = mergeBoardClock(board?.state || {}, clock.clock);
+    if (!enabled || !clock.active) return null;
+    setBusy(true);
     try {
-      const saved = await clock.saveClock({ ...clockFromState(base), season: season || null });
+      const activeBoard = await refreshBoard({ force: true });
+      if (!activeBoard) throw new Error('This campaign has no hexcrawl board linked.');
+      const base = mergeBoardClock(activeBoard.state, clock.clock);
+      const saved = await clock.saveClock((current) => ({
+        ...(!current ? clockFromState(base) : {}),
+        ...(!current?.travelConfigured ? { ...travelFromState(base), travelConfigured: true } : {}),
+        season: season || null,
+      }));
       setError(null);
       return saved;
     } catch (cause) {
       setError(cause?.message || 'Could not set the season.');
       return null;
+    } finally {
+      setBusy(false);
     }
-  }, [board, clock]);
+  }, [clock, enabled, refreshBoard]);
 
   // Where the party stands, said as fully as this browser can say it. A hex
   // entered in this session carries its whole answer; one entered from the GM

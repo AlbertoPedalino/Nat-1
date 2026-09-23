@@ -97,6 +97,11 @@ export function mergeBoardClock(boardState, clock) {
   if (!clock) return { ...boardState };
   return {
     ...boardState,
+    ...(clock.travelConfigured ? travelFromState(clock) : {}),
+    ...(clock.travelConfigured ? {
+      terrainH: terrainOption(clock.terrain)?.hours || 0,
+      popThr: populationOption(clock.pop)?.thr || 0,
+    } : {}),
     min: clock.min ?? boardState.min,
     day: clock.day ?? boardState.day,
     month: clock.month ?? boardState.month,
@@ -104,9 +109,20 @@ export function mergeBoardClock(boardState, clock) {
     hoursSinceWeather: clock.hoursSinceWeather ?? boardState.hoursSinceWeather,
     nextWeatherIn: clock.nextWeatherIn ?? boardState.nextWeatherIn,
     meteo: clock.meteo || boardState.meteo,
-    intensity: clock.intensity || boardState.intensity,
+    intensity: clock.intensity ?? boardState.intensity,
     // The season is the board's until the campaign has one of its own.
-    season: clock.season || boardState.season,
+    season: clock.travelConfigured ? clock.season : (clock.season || boardState.season),
+  };
+}
+
+// A configured campaign owns these selections, including explicit clears.
+// Older campaigns inherit the linked board until their first settings write.
+export function travelFromState(state) {
+  return {
+    terrain: state?.terrain ?? null,
+    pop: state?.pop ?? null,
+    hexTier: state?.hexTier ?? null,
+    mountSpeed: normalizeMountSpeed(state?.mountSpeed),
   };
 }
 

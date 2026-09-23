@@ -27,6 +27,7 @@ export function setLocalInstanceLink(sectionKey, id, linkGroupId, { emit = true 
   const entry = {
     ...existing,
     linkGroupId: normalizeLinkGroupId(linkGroupId),
+    linkGroupPending: true,
     updatedAt: Date.now(),
   };
   writeRegistry(section.registryKey, [entry, ...list.filter((item) => item.id !== id)]);
@@ -51,7 +52,8 @@ export function mergeLinkedInstanceRows(sectionKey, cloudRows = [], localRows = 
       id: cloud.id,
       name: cloud.name || local?.name || cloud.id,
       sectionKey,
-      linkGroupId: normalizeLinkGroupId(cloud.link_group_id ?? local?.linkGroupId),
+      linkGroupId: normalizeLinkGroupId(local?.linkGroupPending || cloud.link_group_id === undefined
+        ? local?.linkGroupId : cloud.link_group_id),
       updatedAt: Date.parse(cloud.updated_at) || local?.updatedAt || 0,
       origin: 'cloud',
       hasLocal: Boolean(local),

@@ -216,6 +216,7 @@ export async function loadSpells() {
   return {
     spells: dedupedSpells.sort((a, b) => (a.level - b.level) || a.name.localeCompare(b.name)),
     classSpellIndex,
+    failedFiles: SPELL_FILES.filter((_, index) => entries[index].status === 'rejected'),
   };
 }
 

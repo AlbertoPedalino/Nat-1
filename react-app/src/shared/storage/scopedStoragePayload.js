@@ -59,9 +59,10 @@ export function touchRegistryEntry(registryKey, id, options = {}) {
     name: String(name ?? existing?.name ?? id),
     updatedAt: Number(updatedAt) || 0,
   };
-  if (Object.prototype.hasOwnProperty.call(options, 'linkGroupId')) {
+  if (options.linkGroupId !== undefined) {
     entry.linkGroupId = options.linkGroupId || null;
   }
+  if (options.linkGroupPending !== undefined) entry.linkGroupPending = options.linkGroupPending;
   const next = [entry, ...list.filter((item) => item.id !== id)].slice(0, limit);
   localStorage.setItem(registryKey, JSON.stringify(next));
   return entry;

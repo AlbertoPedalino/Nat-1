@@ -36,7 +36,7 @@ export default function HexcrawlPanel({
 }) {
   const theme = useTheme();
   const boardState = board?.state ? mergeBoardClock(board.state, clock) : null;
-  const season = clock?.season || boardState?.season || '';
+  const season = boardState?.season || '';
   // Measured against the defaults, because those are what a clicked hex will be
   // rolled with. Said here rather than after the click, where it would be a
   // refusal instead of a setup step.
@@ -52,7 +52,7 @@ export default function HexcrawlPanel({
         label="Season"
         value={season}
         onChange={(event) => onSeasonChange(event.target.value || null)}
-        disabled={busy || !clockLinked}
+        disabled={busy || !clockLinked || !board}
       >
         <MenuItem value="">Not set</MenuItem>
         {SEASONS.map((option) => (
@@ -70,7 +70,7 @@ export default function HexcrawlPanel({
         label="Terrain"
         value={defaults?.terrain || ''}
         onChange={(event) => onDefaultsChange({ terrain: event.target.value || null })}
-        disabled={busy}
+        disabled={busy || !clockLinked || !board}
       >
         <MenuItem value="">Not set</MenuItem>
         {TERRAIN_OPTIONS.map((option) => (
@@ -86,7 +86,7 @@ export default function HexcrawlPanel({
         label="Population"
         value={defaults?.pop || ''}
         onChange={(event) => onDefaultsChange({ pop: event.target.value || null })}
-        disabled={busy}
+        disabled={busy || !clockLinked || !board}
       >
         <MenuItem value="">Not set</MenuItem>
         {HEX_POPULATION_OPTIONS.map((option) => (
@@ -100,18 +100,16 @@ export default function HexcrawlPanel({
           and it keeps it here: it is read at a glance mid-fight, not browsed. */}
       <TierRow
         value={defaults?.tier ?? null}
-        busy={busy}
+        busy={busy || !clockLinked || !board}
         tones={theme.palette.gmboard.tier}
         onChange={(tier) => onDefaultsChange({ tier })}
       />
 
-      {/* The party's own speed rather than the hex's: it crosses every hex the
-          same amount faster. Set here it is this map's, and the board's answer
-          is used until it is. */}
+      {/* The party's speed is shared with the GM Board across every map. */}
       <MountSelector
         dense
         label="Mount"
-        disabled={busy}
+        disabled={busy || !clockLinked || !board}
         value={defaults?.mountSpeed ?? boardState?.mountSpeed ?? 1}
         onChange={(mountSpeed) => onDefaultsChange({ mountSpeed })}
       />

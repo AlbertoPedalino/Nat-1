@@ -80,6 +80,10 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
   const { onRoll, onUpdateSpells, onShowToast, onUpdateSheet, onToggleFreeCast, onUpdateCharacter, readOnly } = useSheetActions();
   const [spellDb, setSpellDb] = useState([]);
   const [classSpellIndex, setClassSpellIndex] = useState({});
+  const [catalogStatus, setCatalogStatus] = useState('loading');
+  const [loadAttempt, setLoadAttempt] = useState(0);
+  const [adapterError, setAdapterError] = useState(false);
+  const [adapterRevision, setAdapterRevision] = useState(0);
   const [spellSearch, setSpellSearch] = useState('');
   const [spellFilter, setSpellFilter] = useState('all');
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -90,25 +94,51 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
   const [slotUsed, setSlotUsed] = useState(sheet?.spellSlotUsed || {});
   const [createdSlots, setCreatedSlots] = useState(sheet?.createdSpellSlots || {});
 
-  const classNames = useMemo(() => [C?.className, ...(C?.extraClasses || []).map((extra) => extra.name)].filter(Boolean), [C]);
+  // Attunement and other character edits must not cancel/restart catalog loads.
+  const classKey = JSON.stringify([C?.className, ...(C?.extraClasses || []).map((extra) => extra.name)].filter(Boolean));
 
   useEffect(() => {
     let alive = true;
     const context = { getMod, getFinal, getPB };
+    setAdapterError(false);
     Promise.all([
       loadCoreAdapters(context),
-      loadClassAdapters(classNames, context),
+      loadClassAdapters(JSON.parse(classKey), context),
       loadSpellsAdapters(context),
-      loadSpells(),
-    ]).then(([, , , result]) => {
+    ]).then(() => {
       if (!alive) return;
-      setSpellDb(result.spells || []);
-      setClassSpellIndex(result.classSpellIndex || {});
+      setAdapterRevision((revision) => revision + 1);
     }).catch(() => {
-      if (alive) setSpellDb([]);
+      if (alive) setAdapterError(true);
     });
     return () => { alive = false; };
-  }, [classNames]);
+  }, [classKey, loadAttempt]);
+
+  useEffect(() => {
+    let alive = true;
+    setCatalogStatus('loading');
+    const load = async () => {
+      // Successful files are cached by the loader; the second attempt retries
+      // only failed requests, without discarding already available spell data.
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        try {
+          const result = await loadSpells();
+          if (!alive) return;
+          setSpellDb(result.spells || []);
+          setClassSpellIndex(result.classSpellIndex || {});
+          if (!result.failedFiles?.length) {
+            setCatalogStatus('ready');
+            return;
+          }
+        } catch {
+          if (!alive) return;
+        }
+      }
+      setCatalogStatus('error');
+    };
+    load();
+    return () => { alive = false; };
+  }, [loadAttempt]);
 
   useEffect(() => {
     setSlotUsed(sheet?.spellSlotUsed || {});
@@ -124,8 +154,8 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
     return map;
   }, [spellDb, C?.spellSnapshots]);
 
-  const spellInfo = useMemo(() => buildSpellInfo(C, spellIndex), [C, spellIndex]);
-  const slots = useMemo(() => getSheetSlots(C), [C]);
+  const spellInfo = useMemo(() => buildSpellInfo(C, spellIndex), [C, spellIndex, adapterRevision]);
+  const slots = useMemo(() => getSheetSlots(C), [C, adapterRevision]);
   const expandedSpellInfo = useMemo(() => {
     if (!spellInfo) return spellInfo;
     const maxRegular = (slots.regular || []).reduce((m, c, i) => c > 0 ? i + 1 : m, 0);
@@ -215,8 +245,8 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
     });
     return map;
   }, [spellInfo]);
-  const maxSpellLevel = useMemo(() => getMaxLearnableSpellLevel(C), [C, classSpellIndex]);
-  const limits = useMemo(() => getSpellLimits(C), [C, classSpellIndex]);
+  const maxSpellLevel = useMemo(() => getMaxLearnableSpellLevel(C), [C, classSpellIndex, adapterRevision]);
+  const limits = useMemo(() => getSpellLimits(C), [C, classSpellIndex, adapterRevision]);
   const canManageSpellList = useMemo(() => canManageSpells(C, limits), [C, limits]);
   const casterPickers = useMemo(() => getSpellEntities(C)
     .map((entity, index) => {
@@ -236,7 +266,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
         note: `Lv ${entity.level}${profile?.preparedMode ? ` · ${profile.preparedMode}` : ''}`,
       };
     })
-    .filter((entity) => entity.bucket && hasSpellcastingProfile(entity.profile)), [C, classSpellIndex]);
+    .filter((entity) => entity.bucket && hasSpellcastingProfile(entity.profile)), [C, classSpellIndex, adapterRevision]);
   const activePicker = casterPickers[Math.min(pickerClassIndex, Math.max(0, casterPickers.length - 1))] || null;
   const activeLimits = useMemo(() => activePicker ? getPickerLimits(C, activePicker) : { cantrips: null, spells: null }, [C, activePicker]);
   const activeCounts = useMemo(() => activePicker ? getBucketCounts(activePicker.bucket) : { cantrips: 0, spells: 0 }, [activePicker]);
@@ -412,7 +442,8 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
 
   const sq = spellSearch.trim().toLowerCase();
   const matchSpell = (entry) => (
-    (spellFilter === 'all' || getSpellActionFilter(entry) === spellFilter)
+    (catalogStatus === 'ready' || spellIndex.has(norm(entry.name)))
+    && (spellFilter === 'all' || getSpellActionFilter(entry) === spellFilter)
     && (!sq || String(entry?.name || '').toLowerCase().includes(sq))
   );
   const visibleCantrips = spellInfo.cantrips.filter(matchSpell);
@@ -421,7 +452,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
     .map(([level, entries]) => [level, entries.filter(matchSpell)])
     .filter(([, entries]) => entries.length > 0);
   const hasVisibleSpells = visibleCantrips.length || visibleAtWill.length || visibleLeveled.length;
-  const showEmptyCantrips = spellFilter === 'all' && !sq;
+  const showEmptyCantrips = catalogStatus === 'ready' && spellFilter === 'all' && !sq;
   const emptySpellText = sq
     ? 'No spells match your search.'
     : spellFilter === 'all' ? 'No spells selected.' : 'No spells match this filter.';
@@ -463,6 +494,13 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
 
       <SlotPanel slots={slots} used={slotUsed} created={createdSlots} onToggle={toggleSlot} readOnly={readOnly} />
 
+      {catalogStatus === 'loading' ? <Typography role="status" sx={{ py: 1, color: 'text.secondary' }}>Loading spell details…</Typography> : null}
+      {catalogStatus === 'error' || adapterError ? (
+        <Alert severity="warning" action={<Button onClick={() => setLoadAttempt((attempt) => attempt + 1)}>Retry</Button>}>
+          Some spell details could not be loaded. Try again without reloading the page.
+        </Alert>
+      ) : null}
+
       {visibleCantrips.length || showEmptyCantrips ? (
         <SpellSection title="Cantrip">
           {visibleCantrips.map((entry) => <SpellEntry key={entry.name} entry={entry} spellAttackBonus={spellItemBonuses.spellAttack} spellSaveDc={dc} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} />)}
@@ -482,7 +520,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
         </SpellSection>
       ))}
 
-      {!hasVisibleSpells ? <Empty text={emptySpellText} /> : null}
+      {!hasVisibleSpells && catalogStatus === 'ready' ? <Empty text={emptySpellText} /> : null}
 
       {canManageSpellList ? (
         <Box sx={{ mt: 0.75 }}>

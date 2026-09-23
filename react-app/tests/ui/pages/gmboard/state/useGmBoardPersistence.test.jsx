@@ -15,6 +15,7 @@ const campaignClock = vi.hoisted(() => ({
   clock: null,
   error: null,
   saveClock: vi.fn(),
+  writes: vi.fn(),
 }));
 
 vi.mock('../../../../../src/shared/hexcrawl/useCampaignClock.js', () => ({
@@ -40,7 +41,11 @@ beforeEach(() => {
   campaignClock.clock = null;
   campaignClock.error = null;
   campaignClock.saveClock.mockReset();
-  campaignClock.saveClock.mockResolvedValue(null);
+  campaignClock.writes.mockReset();
+  campaignClock.saveClock.mockImplementation(async (next) => {
+    campaignClock.writes(typeof next === 'function' ? next(campaignClock.clock) : next);
+    return null;
+  });
 });
 
 test('table edits autosave locally and announce cloud sync', async () => {
@@ -118,7 +123,7 @@ test('date and time also update the shared clock of a linked campaign', async ()
 
   act(() => board.setStart({ day: 3, month: 4, year: 1234, min: 7 * 60 + 30 }));
 
-  await waitFor(() => expect(campaignClock.saveClock).toHaveBeenCalledWith(expect.objectContaining({
+  await waitFor(() => expect(campaignClock.writes).toHaveBeenCalledWith(expect.objectContaining({
     day: 3,
     month: 4,
     year: 1234,
@@ -128,7 +133,7 @@ test('date and time also update the shared clock of a linked campaign', async ()
   await waitFor(() => expect(readPersistedBoard('clock-linked').state.year).toBe(1234));
 
   act(() => board.setTime(22 * 60 + 5));
-  await waitFor(() => expect(campaignClock.saveClock).toHaveBeenLastCalledWith(expect.objectContaining({
+  await waitFor(() => expect(campaignClock.writes).toHaveBeenLastCalledWith(expect.objectContaining({
     day: 3,
     month: 4,
     year: 1234,
@@ -136,15 +141,43 @@ test('date and time also update the shared clock of a linked campaign', async ()
   })));
 
   act(() => board.setSeason('Winter'));
-  await waitFor(() => expect(campaignClock.saveClock).toHaveBeenLastCalledWith(expect.objectContaining({
+  await waitFor(() => expect(campaignClock.writes).toHaveBeenLastCalledWith(expect.objectContaining({
     season: 'Winter',
     min: 22 * 60 + 5,
   })));
 
   act(() => board.setWeatherOverride({ meteo: 'Snow', intensity: 'Heavy' }));
-  await waitFor(() => expect(campaignClock.saveClock).toHaveBeenLastCalledWith(expect.objectContaining({
+  await waitFor(() => expect(campaignClock.writes).toHaveBeenLastCalledWith(expect.objectContaining({
     season: 'Winter',
     meteo: 'Snow',
     intensity: 'Heavy',
   })));
+});
+
+test('travel selectors publish only their changed field and receive map selections', async () => {
+  campaignClock.active = true;
+  campaignClock.clock = {
+    travelConfigured: true, terrain: 'Forest', pop: 'frontier', hexTier: 2,
+    mountSpeed: 2, season: 'Summer', updatedAt: 1,
+  };
+  const view = () => (
+    <GmBoardProvider instanceId="travel-linked" instanceSaved={false}><Probe /></GmBoardProvider>
+  );
+  const { rerender } = render(view());
+  await waitFor(() => expect(board.state).toMatchObject({
+    terrain: 'Forest', terrainH: 4, pop: 'frontier', popThr: 2, hexTier: 2, mountSpeed: 2,
+  }));
+  act(() => board.dispatch({ type: 'setMountSpeed', mountSpeed: 3 }));
+  expect(campaignClock.writes).toHaveBeenLastCalledWith({ mountSpeed: 3 });
+  act(() => board.dispatch({ type: 'setTerrain', terrain: 'Road', terrainH: 1 }));
+  expect(campaignClock.writes).toHaveBeenLastCalledWith({ terrain: 'Road' });
+  act(() => board.dispatch({ type: 'setPop', pop: 'unexplored', popThr: 1 }));
+  expect(campaignClock.writes).toHaveBeenLastCalledWith({ pop: 'unexplored' });
+  act(() => board.dispatch({ type: 'setHexTier', hexTier: null }));
+  expect(campaignClock.writes).toHaveBeenLastCalledWith({ hexTier: null });
+
+  campaignClock.clock = { ...campaignClock.clock, terrain: null, hexTier: null, season: null, updatedAt: 2 };
+  rerender(view());
+  await waitFor(() => expect(board.state).toMatchObject({ terrain: null, terrainH: 0, hexTier: null, season: null }));
+  expect(campaignClock.writes).toHaveBeenCalledTimes(4);
 });

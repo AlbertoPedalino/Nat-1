@@ -14,7 +14,8 @@ import { createDefaultTables } from '../../../pages/gmboard/tables/defaultTables
 // exactly the contention this split exists to avoid.
 
 const CLOCK_COLUMNS = 'campaign_id, min, day, month, year, season, meteo, intensity, '
-  + 'hours_since_weather, next_weather_in, party_q, party_r, scene_id, updated_at';
+  + 'hours_since_weather, next_weather_in, party_q, party_r, scene_id, updated_at, '
+  + 'travel_configured, terrain, pop, hex_tier, mount_speed';
 const CELL_COLUMNS = 'scene_id, q, r, terrain, tier, pop, status, note, revealed, updated_at';
 
 function toClock(row) {
@@ -26,6 +27,11 @@ function toClock(row) {
     month: Number(row.month) || 1,
     year: Number(row.year) || 1,
     season: row.season || null,
+    travelConfigured: Boolean(row.travel_configured),
+    terrain: row.terrain ?? null,
+    pop: row.pop ?? null,
+    hexTier: row.hex_tier ?? null,
+    mountSpeed: row.mount_speed ?? 1,
     meteo: row.meteo || 'Clear',
     intensity: row.intensity || '',
     hoursSinceWeather: Number(row.hours_since_weather) || 0,
@@ -46,6 +52,11 @@ function clockRow(campaignId, clock) {
     month: 'month',
     year: 'year',
     season: 'season',
+    travelConfigured: 'travel_configured',
+    terrain: 'terrain',
+    pop: 'pop',
+    hexTier: 'hex_tier',
+    mountSpeed: 'mount_speed',
     meteo: 'meteo',
     intensity: 'intensity',
     hoursSinceWeather: 'hours_since_weather',

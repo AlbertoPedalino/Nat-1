@@ -50,6 +50,17 @@ test('cloud metadata wins while local availability remains visible', () => {
   assert.equal(rows[0].linkGroupId, 'link_cloud');
   assert.equal(rows[0].hasLocal, true);
   assert.equal(rows[0].origin, 'cloud');
+  const unlinked = mergeLinkedInstanceRows('gmboard', [{ id: 'board-a', link_group_id: null }], rows);
+  assert.equal(unlinked[0].linkGroupId, null, 'an explicit cloud unlink does not inherit the old local group');
+});
+
+test('restoring content without link metadata preserves the existing local group', () => {
+  localStorage.clear();
+  gmBoardStorage.registerBoardInstance('board-a', 'Board', { linkGroupId: 'link_party' });
+  gmBoardStorage.writeScopedPayload('board-a', { 'gb:board:board-a:state:v1': '{}' }, { name: 'Board' });
+  assert.equal(gmBoardStorage.readRegistry()[0].linkGroupId, 'link_party');
+  gmBoardStorage.writeScopedPayload('board-a', {}, { linkGroupId: null });
+  assert.equal(gmBoardStorage.readRegistry()[0].linkGroupId, null);
 });
 
 test('merging different groups moves every member of both groups', () => {

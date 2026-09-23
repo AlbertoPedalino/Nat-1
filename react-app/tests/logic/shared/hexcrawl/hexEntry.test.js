@@ -79,6 +79,20 @@ test('entering a hex advances the clock and returns the engine steps', () => {
   assert.ok(result.steps.some((step) => step.kind === 'popRoll'), 'the population roll is the gate');
 });
 
+test('shared settings preserve cleared selections and cleared weather intensity', () => {
+  const merged = mergeBoardClock({ ...BOARD, terrain: 'Forest', hexTier: 2, intensity: 'Heavy' }, {
+    travelConfigured: true, terrain: null, pop: 'frontier', hexTier: null, mountSpeed: 2,
+    season: null, intensity: '',
+  });
+  assert.equal(merged.terrain, null);
+  assert.equal(merged.terrainH, 0);
+  assert.equal(merged.hexTier, null);
+  assert.equal(merged.popThr, 2);
+  assert.equal(merged.mountSpeed, 2);
+  assert.equal(merged.season, null);
+  assert.equal(merged.intensity, '');
+});
+
 // The mount is the party's and rides with the board, so a hex entered from the
 // map costs the same hours as one entered from the GM Board.
 test('a mounted party crosses a hex in a fraction of the time', () => {

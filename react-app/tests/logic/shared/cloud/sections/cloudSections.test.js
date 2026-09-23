@@ -51,6 +51,35 @@ const CASES = {
   },
 };
 
+function memoryCloud(initial = null) {
+  let stored = initial;
+  return {
+    get row() { return stored; },
+    auth: { getUser: async () => ({ data: { user: { id: 'user-1', user_metadata: {} } }, error: null }) },
+    from: () => {
+      let patch;
+      let insert = false;
+      const query = {
+        update(row) { patch = row; return this; },
+        upsert(row, options) {
+          assert.equal(options.ignoreDuplicates, true);
+          patch = row; insert = true; return this;
+        },
+        eq() { return this; },
+        select() { return this; },
+        async maybeSingle() {
+          if (insert && stored) return { data: null, error: null };
+          if (!insert && !stored) return { data: null, error: null };
+          stored = { ...stored, ...patch };
+          return { data: { ...stored }, error: null };
+        },
+        then(resolve, reject) { return this.maybeSingle().then(resolve, reject); },
+      };
+      return query;
+    },
+  };
+}
+
 test('every section descriptor is complete and maps table, registry, and prefix', () => {
   assert.deepEqual([...SECTION_KEYS].sort(), Object.keys(CASES).sort());
   for (const [key, expected] of Object.entries(CASES)) {
@@ -130,18 +159,36 @@ test('cloud push includes the local linked-tools group', async () => {
     id: 'board-linked', name: 'Linked Board', linkGroupId: 'link_party', updatedAt: 1,
   }]));
   localStorage.setItem('gb:board:board-linked:state:v1', '{}');
-  let written = null;
-  const client = {
-    auth: { getUser: async () => ({ data: { user: { id: 'user-1', user_metadata: {} } }, error: null }) },
-    from: () => ({
-      upsert: async (row) => { written = row; return { error: null }; },
-    }),
-  };
+  const client = memoryCloud();
   const api = createSectionCloudApi(SECTION_DESCRIPTORS.gmboard, { getClient: () => client });
 
   await api.pushInstance('board-linked');
 
-  assert.equal(written.link_group_id, 'link_party');
+  assert.equal(client.row.link_group_id, 'link_party');
+});
+
+test('autosave preserves remote links and unlinks; only an explicit pending edit changes them', async () => {
+  for (const [key, sample] of Object.entries(CASES)) {
+    localStorage.clear();
+    localStorage.setItem(sample.registryKey, JSON.stringify([{
+      id: sample.id, name: 'Old device', linkGroupId: 'link_old', updatedAt: 1,
+    }]));
+    for (const [storageKey, raw] of Object.entries(sample.payload)) localStorage.setItem(storageKey, raw);
+    const client = memoryCloud({ id: sample.id, link_group_id: 'link_new' });
+    const api = createSectionCloudApi(SECTION_DESCRIPTORS[key], { getClient: () => client });
+    await api.pushInstance(sample.id);
+    assert.equal(client.row.link_group_id, 'link_new');
+    assert.equal(SECTION_DESCRIPTORS[key].readRegistry()[0].linkGroupId, 'link_new');
+    await api.setLinkGroup(sample.id, null);
+    await api.pushInstance(sample.id);
+    assert.equal(client.row.link_group_id, null, 'a stale local group must not resurrect an unlink');
+
+    const { setLocalInstanceLink } = await import('../../../../../src/shared/instances/instanceLinks.js');
+    setLocalInstanceLink(key, sample.id, 'link_offline', { emit: false });
+    await api.pushInstance(sample.id);
+    assert.equal(client.row.link_group_id, 'link_offline');
+    assert.equal(SECTION_DESCRIPTORS[key].readRegistry()[0].linkGroupPending, false);
+  }
 });
 
 test('cloud rename updates only the signed-in owner row', async () => {

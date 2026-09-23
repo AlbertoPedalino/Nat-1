@@ -43,7 +43,10 @@ async function loadPaths(paths, context) {
     if (loadedPaths.has(path)) return;
     let promise = inFlightPathPromises.get(path);
     if (!promise) {
-      promise = adapterModules[path]();
+      promise = adapterModules[path]().catch((error) => {
+        inFlightPathPromises.delete(path);
+        throw error;
+      });
       inFlightPathPromises.set(path, promise);
     }
     entries.push({ path, promise });

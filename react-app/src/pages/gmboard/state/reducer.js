@@ -1,6 +1,7 @@
 import { createDefaultCoreState, createDefaultResults } from './defaultState.js';
 import { createDefaultTables } from '../tables/defaultTables.js';
 import { LOG_STORE_LIMIT, normalizeMountSpeed } from './constants.js';
+import { mergeBoardClock } from '../../../shared/hexcrawl/hexEntry.js';
 
 export const CORE_FIELD_KEYS = Object.freeze(Object.keys(createDefaultCoreState()));
 
@@ -64,22 +65,11 @@ export function gmBoardReducer(state, action) {
       return { ...state, tab: action.tab };
     case 'setCampaign':
       return { ...state, campaignId: action.campaignId || null };
-    // The shared clock arriving from the campaign row: time and sky only. The
+    // The shared campaign row supplies time, sky and travel selections. The
     // log is not touched — the cloud log is its own append-only table, and
     // merging the two would double every entry the GM can see.
     case 'applyClock':
-      return {
-        ...state,
-        min: action.clock.min,
-        day: action.clock.day,
-        month: action.clock.month,
-        year: action.clock.year,
-        season: action.clock.season ?? state.season,
-        meteo: action.clock.meteo ?? state.meteo,
-        intensity: action.clock.intensity ?? state.intensity,
-        hoursSinceWeather: action.clock.hoursSinceWeather,
-        nextWeatherIn: action.clock.nextWeatherIn,
-      };
+      return mergeBoardClock(state, action.clock);
     case 'setSeason':
       return { ...state, season: action.season };
     case 'setWeatherOverride':

@@ -4,7 +4,7 @@ import {
 import { gmBoardReducer, createInitialState } from './reducer.js';
 import { useGmBoardPersistence } from './useGmBoardPersistence.js';
 import { resolveProceed, resolveAdvanceOnly, resolveManualAdvance } from '../hexcrawl/hex.js';
-import { clockFromResult, clockFromState } from '../../../shared/hexcrawl/hexEntry.js';
+import { clockFromResult, clockFromState, travelFromState } from '../../../shared/hexcrawl/hexEntry.js';
 import { useCampaignClock } from '../../../shared/hexcrawl/useCampaignClock.js';
 import { setCampaignHexcrawlBoard } from '../../../shared/cloud/api/hexcrawl.js';
 import { createDungeon, isValidRoomCount } from '../dungeon/dungeon.js';
@@ -36,11 +36,10 @@ export function GmBoardProvider({ instanceId, instanceSaved, linkGroupId, onInst
   useEffect(() => {
     const clock = campaignClock.clock;
     if (!clock) return;
-    // Applied once per version. Without this the dispatch would re-run on every
-    // render that produced a new object and stamp over the GM's own edits.
-    const stamp = clock.updatedAt || 0;
-    if (appliedClockRef.current === stamp) return;
-    appliedClockRef.current = stamp;
+    // The clock hook retains the object for unchanged snapshots. Apply each
+    // distinct update, including writes sharing the same millisecond timestamp.
+    if (appliedClockRef.current === clock) return;
+    appliedClockRef.current = clock;
     dispatch({ type: 'applyClock', clock });
   }, [campaignClock.clock]);
 
@@ -58,10 +57,28 @@ export function GmBoardProvider({ instanceId, instanceSaved, linkGroupId, onInst
       // Seed every field when the campaign has no clock yet. Afterwards only
       // write what the GM changed, so a map move in another tab cannot have its
       // newer weather or date overwritten by an unrelated selector.
-      .saveClock(campaignClock.clock ? patch : clockFromState(nextState))
+      .saveClock((current) => ({
+        ...(!current ? clockFromState(nextState) : {}),
+        ...(!current?.travelConfigured ? {
+          ...travelFromState(nextState), travelConfigured: true,
+          season: current?.season || nextState.season,
+        } : {}),
+        ...patch,
+      }))
       .then(() => setClockError(null))
       .catch((cause) => setClockError(cause?.message || 'Could not save the campaign clock.'));
   }, [campaignClock]);
+
+  const dispatchSelection = useCallback((action) => {
+    const field = {
+      setTerrain: 'terrain', setPop: 'pop', setHexTier: 'hexTier', setMountSpeed: 'mountSpeed',
+    }[action.type];
+    dispatch(action);
+    if (!field) return;
+    const nextState = gmBoardReducer(clockStateRef.current, action);
+    clockStateRef.current = nextState;
+    pushClockState(nextState, { [field]: nextState[field] });
+  }, [pushClockState]);
 
   const setStart = useCallback(({ day, month, year, min }) => {
     const nextState = { ...clockStateRef.current, day, month, year, min, log: [] };
@@ -143,7 +160,7 @@ export function GmBoardProvider({ instanceId, instanceSaved, linkGroupId, onInst
 
   const value = useMemo(() => ({
     state,
-    dispatch,
+    dispatch: dispatchSelection,
     instanceId,
     instanceSaved,
     saveInstance,
@@ -160,7 +177,7 @@ export function GmBoardProvider({ instanceId, instanceSaved, linkGroupId, onInst
     bindCampaign,
     campaignLinked: campaignClock.active,
     clockError: clockError || campaignClock.error,
-  }), [state, instanceId, instanceSaved, saveInstance, resetTables, setStart, setTime, setSeason, setWeatherOverride, proceed, advanceOnly, advanceManual, generateDungeon, generateQuests, bindCampaign, campaignClock.active, campaignClock.error, clockError]);
+  }), [state, dispatchSelection, instanceId, instanceSaved, saveInstance, resetTables, setStart, setTime, setSeason, setWeatherOverride, proceed, advanceOnly, advanceManual, generateDungeon, generateQuests, bindCampaign, campaignClock.active, campaignClock.error, clockError]);
 
   return (
     <GmBoardContext.Provider value={value}>

@@ -11,7 +11,8 @@
 --
 --   boards.data          the d20 tables and the board's own settings. Config.
 --                        One writer, whole-payload push, unchanged by this file.
---   campaign_hexcrawl    the clock and the weather. Written every time the party
+--   campaign_hexcrawl    the clock, weather and shared travel selections.
+--                        Written every time the party
 --                        enters a hex, by the board OR by the map, which is
 --                        exactly why it cannot live in the blob: two writers on
 --                        one payload is last-writer-wins, and the loser is
@@ -51,6 +52,11 @@ create table if not exists public.campaign_hexcrawl (
   intensity           text,
   hours_since_weather double precision not null default 0,
   next_weather_in     double precision not null default 0,
+  travel_configured   boolean not null default false,
+  terrain             text,
+  pop                 text,
+  hex_tier            integer,
+  mount_speed         double precision not null default 1,
   -- Where the party stands, in the same axial coordinates a token uses.
   party_q             integer,
   party_r             integer,

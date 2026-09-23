@@ -1,4 +1,5 @@
 import { normalizeLinkGroupId } from '../../instances/linkGroupId.js';
+import { touchRegistryEntry } from '../../storage/scopedStoragePayload.js';
 
 async function requireUser(client) {
   const { data, error } = await client.auth.getUser();
@@ -28,12 +29,37 @@ export function createSectionCloudApi(descriptor, { getClient }) {
       owner: user.id,
       owner_username: user.user_metadata?.username || null,
       name: entry.name || descriptor.defaultName(cleanId),
-      link_group_id: normalizeLinkGroupId(entry.linkGroupId),
       data: payload,
       updated_at: new Date().toISOString(),
     };
-    const { error } = await client.from(descriptor.table).upsert(row, { onConflict: 'id' });
-    if (error) throw error;
+    // Autosaving content must not replay an old device's link metadata. Only a
+    // newly inserted instance inherits its initial local group.
+    const updateContent = () => client.from(descriptor.table)
+      .update(row).eq('id', cleanId).eq('owner', user.id)
+      .select('id, link_group_id').maybeSingle();
+    let saved = await updateContent();
+    if (saved.error) throw saved.error;
+    if (!saved.data) {
+      saved = await client.from(descriptor.table).upsert({
+        ...row, link_group_id: normalizeLinkGroupId(entry.linkGroupId),
+      }, { onConflict: 'id', ignoreDuplicates: true })
+        .select('id, link_group_id').maybeSingle();
+      if (saved.error) throw saved.error;
+      // Another tab may have created it between update and insert. Update only
+      // content in that case, preserving whichever link the row now has.
+      if (!saved.data) saved = await updateContent();
+      if (saved.error) throw saved.error;
+      if (!saved.data) throw new Error('Could not save this tool instance.');
+    }
+    const latest = localEntry(descriptor, cleanId);
+    if (latest?.linkGroupPending) {
+      // An explicit link made offline remains pending until it can be saved.
+      await setLinkGroup(cleanId, latest.linkGroupId);
+    } else if (latest && latest.linkGroupId === entry.linkGroupId) {
+      touchRegistryEntry(descriptor.registryKey, cleanId, {
+        linkGroupId: normalizeLinkGroupId(saved.data.link_group_id), updatedAt: latest.updatedAt,
+      });
+    }
     return row;
   }
 
@@ -48,9 +74,10 @@ export function createSectionCloudApi(descriptor, { getClient }) {
       .single();
     if (error) throw error;
     if (!data?.data) throw new Error('No cloud data for this instance.');
+    const pending = localEntry(descriptor, cleanId);
     descriptor.writePayload(cleanId, data.data, {
       name: data.name || descriptor.defaultName(cleanId),
-      linkGroupId: normalizeLinkGroupId(data.link_group_id),
+      linkGroupId: normalizeLinkGroupId(pending?.linkGroupPending ? pending.linkGroupId : data.link_group_id),
       updatedAt: Date.parse(data.updated_at) || 0,
     });
     localStorage.setItem(descriptor.activeKey, cleanId);
@@ -112,6 +139,12 @@ export function createSectionCloudApi(descriptor, { getClient }) {
       .eq('id', cleanId)
       .eq('owner', user.id);
     if (error) throw error;
+    const entry = localEntry(descriptor, cleanId);
+    if (entry?.linkGroupPending && normalizeLinkGroupId(entry.linkGroupId) === linkGroupId) {
+      touchRegistryEntry(descriptor.registryKey, cleanId, {
+        linkGroupPending: false, updatedAt: entry.updatedAt,
+      });
+    }
     return linkGroupId;
   }
 

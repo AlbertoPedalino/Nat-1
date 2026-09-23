@@ -18,7 +18,8 @@ export function mergeInstanceRows(cloudRows = [], localEntries = []) {
       name: cloud.name || local?.name || cloud.id,
       updatedAt: Date.parse(cloud.updated_at) || local?.updatedAt || 0,
       localUpdatedAt: local?.updatedAt || 0,
-      linkGroupId: cloud.link_group_id ?? local?.linkGroupId ?? null,
+      linkGroupId: local?.linkGroupPending || cloud.link_group_id === undefined
+        ? (local?.linkGroupId ?? null) : cloud.link_group_id,
       origin: 'cloud',
       hasLocal: Boolean(local),
       owner: cloud.owner ?? null,
