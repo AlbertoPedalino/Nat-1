@@ -1,6 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import { classIcon } from '../../../shared/character/profile/classIcon.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
+import { suppressGestureSelection } from '../../../shared/vtt/map/gestureSelection.js';
 
 export const PIECE_POINTER_DRAG_EVENT = 'gb:vtt-piece-pointer-drag';
 const POINTER_DRAG_THRESHOLD = 7;
@@ -31,18 +32,7 @@ export function beginPiecePointerDrag(event, placement, {
   // A mobile long press can start native selection outside the source row,
   // especially once the placement panel fades. Protect the whole gesture,
   // including the hold delay, without cancelling taps or panel scrolling.
-  const selectionGuard = document.createElement('style');
-  selectionGuard.textContent = `
-    :root, :root * {
-      -webkit-user-select: none !important;
-      user-select: none !important;
-      -webkit-touch-callout: none !important;
-    }
-  `;
-  document.head.appendChild(selectionGuard);
-  const blockSelection = (nativeEvent) => nativeEvent.preventDefault();
-  document.addEventListener('selectstart', blockSelection, true);
-  if (waitsForHold) document.addEventListener('contextmenu', blockSelection, true);
+  const releaseSelection = suppressGestureSelection({ touch: waitsForHold });
 
   const emit = (phase, pointerEvent) => {
     window.dispatchEvent(new CustomEvent(PIECE_POINTER_DRAG_EVENT, {
@@ -70,9 +60,7 @@ export function beginPiecePointerDrag(event, placement, {
   };
   const cleanup = () => {
     if (holdTimer !== null) clearTimeout(holdTimer);
-    selectionGuard.remove();
-    document.removeEventListener('selectstart', blockSelection, true);
-    document.removeEventListener('contextmenu', blockSelection, true);
+    releaseSelection();
     window.removeEventListener('blur', cancelOnBlur);
     window.removeEventListener('pointermove', move);
     window.removeEventListener('pointerup', finish);

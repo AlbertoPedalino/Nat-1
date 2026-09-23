@@ -1,7 +1,11 @@
+import { useState } from 'react';
+import { ThemeProvider } from '@mui/material';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeAll, vi } from 'vitest';
 import SceneViewport from '../../../../../src/pages/vtt/map/SceneViewport.jsx';
+import TokenMenu from '../../../../../src/pages/vtt/tokens/TokenMenu.jsx';
+import { theme } from '../../../../../src/app/theme.js';
 import { PIECE_POINTER_DRAG_EVENT } from '../../../../../src/pages/vtt/tokens/PiecePreview.jsx';
 import HexGrid from '../../../../../src/pages/vtt/map/HexGrid.jsx';
 import SquareGrid from '../../../../../src/pages/vtt/map/SquareGrid.jsx';
@@ -396,12 +400,16 @@ test('a Lucide map object persists its resized cell dimensions on release', () =
   const object = screen.getByRole('button', { name: 'Open door' });
 
   fireEvent.pointerDown(object, { button: 0, clientX: 25, clientY: 25, pointerId: 6 });
+  expect(getComputedStyle(document.body).userSelect).toBe('none');
   fireEvent.pointerUp(viewport, { button: 0, clientX: 25, clientY: 25, pointerId: 6 });
+  expect(getComputedStyle(document.body).userSelect).not.toBe('none');
   const handle = screen.getByRole('button', { name: 'Resize Open door' });
 
   fireEvent.pointerDown(handle, { button: 0, clientX: 50, clientY: 50, pointerId: 7 });
+  expect(getComputedStyle(document.body).userSelect).toBe('none');
   fireEvent.pointerMove(viewport, { clientX: 100, clientY: 75, pointerId: 7 });
   fireEvent.pointerUp(viewport, { clientX: 100, clientY: 75, pointerId: 7 });
+  expect(getComputedStyle(document.body).userSelect).not.toBe('none');
 
   expect(onResizeToken).toHaveBeenCalledWith(
     expect.objectContaining({ id: 'door-1' }),
@@ -437,8 +445,10 @@ test('a Lucide map object persists rotation around its centre on release', () =>
   const handle = screen.getByRole('button', { name: 'Rotate Open door' });
 
   fireEvent.pointerDown(handle, { button: 0, clientX: 50, clientY: 25, pointerId: 8 });
+  expect(getComputedStyle(document.body).userSelect).toBe('none');
   fireEvent.pointerMove(viewport, { clientX: 25, clientY: 50, pointerId: 8 });
   fireEvent.pointerUp(viewport, { clientX: 25, clientY: 50, pointerId: 8 });
+  expect(getComputedStyle(document.body).userSelect).not.toBe('none');
 
   expect(onRotateToken).toHaveBeenCalledWith(
     expect.objectContaining({ id: 'door-rotate' }),
@@ -1115,7 +1125,8 @@ test('a selected ruler starts on top of a token instead of dragging it', () => {
   expect(onMoveToken).not.toHaveBeenCalled();
 });
 
-test('a held map tool prevents the browser from selecting page text', () => {
+test.each(['measure', 'select', 'draw', 'erase', 'reveal', 'hide', 'marquee', 'laser', 'text'])(
+  'a held %s tool prevents page selection until release outside the map', (paintMode) => {
   render(
     <SceneViewport
       scene={{ grid: { size: 50, offsetX: 0, offsetY: 0, visible: false }, playArea: null }}
@@ -1124,7 +1135,7 @@ test('a held map tool prevents the browser from selecting page text', () => {
       snap
       canMove={() => true}
       fog={null}
-      paintMode="measure"
+      paintMode={paintMode}
       measureShape="line"
       drawings={[]}
       lasers={[]}
@@ -1149,7 +1160,113 @@ test('a held map tool prevents the browser from selecting page text', () => {
 
   expect(pointerDown.defaultPrevented).toBe(true);
   expect(selection.rangeCount).toBe(0);
+  const selectStart = new Event('selectstart', { bubbles: true, cancelable: true });
+  fireEvent(document.body, selectStart);
+  expect(selectStart.defaultPrevented).toBe(true);
+  expect(getComputedStyle(document.body).userSelect).toBe('none');
+
+  const pointerUp = new Event('pointerup', { bubbles: true });
+  Object.defineProperty(pointerUp, 'pointerId', { value: 18 });
+  fireEvent(document.body, pointerUp);
+  const afterRelease = new Event('selectstart', { bubbles: true, cancelable: true });
+  fireEvent(document.body, afterRelease);
+  expect(afterRelease.defaultPrevented).toBe(false);
+  expect(getComputedStyle(document.body).userSelect).not.toBe('none');
+  },
+);
+
+function touchPointer(target, type, pointerId) {
+  const event = new MouseEvent(type, { bubbles: true, cancelable: true, button: 0, clientX: 60, clientY: 60 });
+  Object.defineProperties(event, {
+    pointerId: { value: pointerId }, pointerType: { value: 'touch' },
+  });
+  fireEvent(target, event);
+}
+
+test.each([true, false])('holding a token opens its menu without native selection (movable: %s)', (movable) => {
+  vi.useFakeTimers();
+  const token = { id: 'goblin', label: 'Goblin', layer: 'tokens', x: 1, y: 1, w: 1, h: 1 };
+  function Board() {
+    const [menu, setMenu] = useState(null);
+    return (
+      <ThemeProvider theme={theme}>
+        <SceneViewport
+          scene={{ grid: { size: 50, offsetX: 0, offsetY: 0, visible: false }, playArea: null }}
+          tokens={[token]}
+          canMove={() => movable}
+          paintMode="select"
+          onContextMenu={(piece, anchor) => setMenu({ token: piece, anchor })}
+        />
+        {menu ? <TokenMenu {...menu} onClose={() => setMenu(null)} onSave={vi.fn()} /> : null}
+      </ThemeProvider>
+    );
+  }
+  const { unmount } = render(<Board />);
+  try {
+    touchPointer(screen.getByRole('button', { name: 'Goblin' }), 'pointerdown', 1);
+    expect(getComputedStyle(document.body).userSelect).toBe('none');
+    expect(screen.queryByRole('textbox', { name: 'Label' })).not.toBeInTheDocument();
+
+    act(() => vi.advanceTimersByTime(600));
+    expect(screen.getByRole('textbox', { name: 'Label' })).toHaveValue('Goblin');
+    expect(getComputedStyle(document.body).userSelect).toBe('none');
+    for (const type of ['selectstart', 'contextmenu']) {
+      const event = new Event(type, { bubbles: true, cancelable: true });
+      fireEvent(document.body, event);
+      expect(event.defaultPrevented).toBe(true);
+    }
+
+    // The menu can cover the original target before the finger is released.
+    touchPointer(document.body, 'pointerup', 1);
+    expect(getComputedStyle(document.body).userSelect).not.toBe('none');
+    const label = screen.getByRole('textbox', { name: 'Label' });
+    const selectStart = new Event('selectstart', { bubbles: true, cancelable: true });
+    fireEvent(label, selectStart);
+    expect(selectStart.defaultPrevented).toBe(false);
+    fireEvent.change(label, { target: { value: 'Goblin scout' } });
+    expect(label).toHaveValue('Goblin scout');
+  } finally {
+    unmount();
+    vi.useRealTimers();
+  }
 });
+
+test('a pinch keeps selection blocked until both fingers finish', () => {
+  const { viewport } = renderLaserViewport(vi.fn());
+  touchPointer(viewport, 'pointerdown', 1);
+  touchPointer(viewport, 'pointerdown', 2);
+  touchPointer(window, 'pointerup', 1);
+  expect(getComputedStyle(document.body).userSelect).toBe('none');
+  touchPointer(window, 'pointercancel', 2);
+  expect(getComputedStyle(document.body).userSelect).not.toBe('none');
+});
+
+test.each(['blur', 'unmount'])('%s restores selection during a map gesture', (ending) => {
+  const { viewport, unmount } = renderLaserViewport(vi.fn());
+  touchPointer(viewport, 'pointerdown', 1);
+  expect(getComputedStyle(document.body).userSelect).toBe('none');
+  if (ending === 'blur') fireEvent(window, new Event('blur'));
+  else unmount();
+  expect(getComputedStyle(document.body).userSelect).not.toBe('none');
+  const event = new Event('selectstart', { bubbles: true, cancelable: true });
+  fireEvent(document.body, event);
+  expect(event.defaultPrevented).toBe(false);
+});
+
+test.each(['data-viewport-control', 'modal', 'input', 'contenteditable'])(
+  '%s inside the viewport keeps normal text selection', (kind) => {
+    const { viewport } = renderLaserViewport(vi.fn());
+    const control = document.createElement(kind === 'input' ? 'input' : 'div');
+    if (kind === 'data-viewport-control') control.setAttribute(kind, '');
+    if (kind === 'modal') control.className = 'MuiModal-root';
+    if (kind === 'contenteditable') control.setAttribute('contenteditable', 'true');
+    // Prevent map actions, as the real editing controls do.
+    control.addEventListener('pointerdown', (event) => event.stopPropagation());
+    viewport.appendChild(control);
+    touchPointer(control, 'pointerdown', 1);
+    expect(getComputedStyle(document.body).userSelect).not.toBe('none');
+  },
+);
 
 test('a spectator viewport leaves its pieces inert but keeps the fullscreen control', () => {
   const onMoveToken = vi.fn();

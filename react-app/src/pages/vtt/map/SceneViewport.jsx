@@ -20,6 +20,7 @@ import {
   zoomAt,
 } from '../../../shared/vtt/map/geometry.js';
 import { measureLabel, movementLabel } from '../../../shared/vtt/map/measure.js';
+import { suppressGestureSelection } from '../../../shared/vtt/map/gestureSelection.js';
 import { movedPoints } from '../../../shared/vtt/map/drawing.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { gridLineColor, isTokenInPlay, normalizeGridLineWidth } from '../../../shared/vtt/scene/scene.js';
@@ -195,6 +196,38 @@ export default function SceneViewport({
   showFullscreenControl = true,
 }) {
   const hostRef = useRef(null);
+  useEffect(() => {
+    const host = hostRef.current;
+    const guards = new Map();
+    const begin = (event) => {
+      if (event.button !== 0 && event.button !== 1) return;
+      if (event.target.closest?.(`${VIEWPORT_CONTROL_SELECTOR}, input, textarea, select, [contenteditable]:not([contenteditable="false"])`)) return;
+      if (guards.has(event.pointerId)) return;
+      guards.set(event.pointerId, suppressGestureSelection({ touch: event.pointerType === 'touch' }));
+      window.getSelection()?.removeAllRanges();
+    };
+    const finish = (event) => {
+      guards.get(event.pointerId)?.();
+      guards.delete(event.pointerId);
+    };
+    const releaseAll = () => {
+      guards.forEach((release) => release());
+      guards.clear();
+    };
+    // Capture also covers token/object handlers that stop propagation. Listen
+    // on window for release outside the map, and retain guards during a pinch.
+    host.addEventListener('pointerdown', begin, true);
+    window.addEventListener('pointerup', finish, true);
+    window.addEventListener('pointercancel', finish, true);
+    window.addEventListener('blur', releaseAll);
+    return () => {
+      releaseAll();
+      host.removeEventListener('pointerdown', begin, true);
+      window.removeEventListener('pointerup', finish, true);
+      window.removeEventListener('pointercancel', finish, true);
+      window.removeEventListener('blur', releaseAll);
+    };
+  }, []);
   const dragRef = useRef(null);
   const lastLaserRef = useRef(0);
   const laserPointRef = useRef(null);
