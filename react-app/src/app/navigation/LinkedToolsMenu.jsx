@@ -82,10 +82,32 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, instanceSaved,
         dungeonEncounterId: row.dungeon_encounter_id,
       })));
     }
-    const failed = results.some((result) => result.status === 'rejected');
+    let failure = results.some((result) => result.status === 'rejected')
+      ? 'Some links could not be loaded. Reopen this panel to retry before changing links.' : '';
+    // Persist the sole available board so the map and the board's own clock
+    // resolve the same assignment, including groups created before auto-selection.
+    if (!failure) {
+      try {
+        for (const campaign of merged.filter((row) => row.sectionKey === 'campaign' && row.linkGroupId && !row.hexcrawlBoardId)) {
+          const boards = merged.filter((row) => row.sectionKey === 'gmboard' && row.linkGroupId === campaign.linkGroupId);
+          if (boards.length !== 1) continue;
+          const board = boards[0];
+          // A board has one campaign clock. Do not silently move it from another campaign.
+          const campaignMembers = merged.filter((row) => row.sectionKey === 'campaign' && row.linkGroupId === campaign.linkGroupId);
+          if (campaignMembers.length !== 1 || merged.some((row) => row.sectionKey === 'campaign' && row.hexcrawlBoardId === board.id)) continue;
+          if (board.origin === 'local' && !await getCloudSection('gmboard').pushInstance(board.id)) {
+            throw new Error('Could not save the GM Board to the cloud.');
+          }
+          await linkHexcrawlBoardCampaign(board.id, campaign.id);
+          campaign.hexcrawlBoardId = board.id;
+        }
+      } catch (cause) {
+        failure = cause?.message || 'Could not select the linked GM Board. Reopen this panel to retry.';
+      }
+    }
     setRows(merged);
-    setIncomplete(failed);
-    setError(failed ? 'Some links could not be loaded. Reopen this panel to retry before changing links.' : '');
+    setIncomplete(Boolean(failure));
+    setError(failure);
   }, [canUseCloud, user?.id]);
 
   const handleOpen = async () => {
@@ -138,13 +160,9 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, instanceSaved,
     await changeLinks(async () => {
       // Save tool instances before any campaign can reference them.
       for (const row of plan.members.filter((member) => member.sectionKey !== 'campaign')) await updateMember(row, plan.groupId);
-      const boards = plan.members.filter((row) => row.sectionKey === 'gmboard');
       const campaigns = plan.members.filter((row) => row.sectionKey === 'campaign');
       for (const campaign of campaigns) {
         await updateMember(campaign, plan.groupId);
-        if (boards.length === 1 && campaigns.length === 1 && !campaign.hexcrawlBoardId) {
-          await linkHexcrawlBoardCampaign(boards[0].id, campaign.id);
-        }
       }
     }, 'Tool linked.');
   };
@@ -178,10 +196,6 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, instanceSaved,
       if (!entry) throw new Error('Could not create the linked tool on this device.');
       if (canUseCloud) {
         if (!await getCloudSection(key).pushInstance(entry.id)) throw new Error('Could not save the new tool to the cloud.');
-        if (key === 'gmboard') {
-          const campaigns = [current, ...linkedRows].filter((row) => row.sectionKey === 'campaign');
-          if (campaigns.length === 1 && !campaigns[0].hexcrawlBoardId) await linkHexcrawlBoardCampaign(entry.id, campaigns[0].id);
-        }
       }
     }, 'Tool created and linked.');
     if (ok) { setOpen(false); navigate(SECTION_REGISTRY[key].route(entry.id)); }
@@ -194,6 +208,15 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, instanceSaved,
     }
     await setCampaignDungeonEncounter(campaign.id, encounterId || null);
   }, 'Dungeon Encounter Builder updated.');
+
+  const handleSelectBoard = (campaign, boardId) => changeLinks(async () => {
+    const target = rows.find((row) => row.sectionKey === 'gmboard' && row.id === boardId);
+    if (!target) throw new Error('This GM Board is no longer available.');
+    if (target.origin === 'local' && !await getCloudSection('gmboard').pushInstance(target.id)) {
+      throw new Error('Could not save the GM Board to the cloud.');
+    }
+    await linkHexcrawlBoardCampaign(target.id, campaign.id);
+  }, 'Campaign settings updated.');
 
   const button = <Button size="small" variant={groupId ? 'contained' : 'outlined'} color="primary"
     startIcon={<Network size={14} />} disabled={!persistent || checkingCloud} onClick={handleOpen}
@@ -218,6 +241,9 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, instanceSaved,
               const isCurrent = rowKey(row) === `${sectionKey}:${instanceId}`;
               const Icon = TOOL_UI[row.sectionKey].icon;
               const clockCampaigns = rows.filter((campaign) => campaign.sectionKey === 'campaign' && campaign.hexcrawlBoardId === row.id);
+              const campaignBoards = row.sectionKey === 'campaign' ? rows.filter((tool) => (
+                tool.sectionKey === 'gmboard' && (tool.id === row.hexcrawlBoardId || (row.linkGroupId && tool.linkGroupId === row.linkGroupId))
+              )) : [];
               const dungeonBuilders = row.sectionKey === 'campaign' ? rows.filter((tool) => (
                 tool.sectionKey === 'encounters' && row.linkGroupId && tool.linkGroupId === row.linkGroupId
               )) : [];
@@ -233,14 +259,16 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, instanceSaved,
                   </Typography>}
                   {row.sectionKey === 'campaign' && <TextField select fullWidth size="small"
                     label={`Time, weather & tables for ${row.name}`} sx={{ mt: 1 }}
-                    value={row.hexcrawlBoardId || ''} disabled={disabled}
-                    onChange={(event) => {
-                      const board = event.target.value;
-                      changeLinks(() => board ? linkHexcrawlBoardCampaign(board, row.id) : setCampaignHexcrawlBoard(row.id, null), 'Campaign settings updated.');
-                    }}>
-                    <MenuItem value="">No GM Board</MenuItem>
-                    {rows.filter((board) => board.sectionKey === 'gmboard' && (board.id === row.hexcrawlBoardId || (groupId && board.linkGroupId === groupId)))
-                      .map((board) => <MenuItem key={board.id} value={board.id}>{board.name}</MenuItem>)}
+                    slotProps={{ select: { displayEmpty: true }, inputLabel: { shrink: true } }}
+                    value={row.hexcrawlBoardId || ''}
+                    disabled={disabled || !campaignBoards.length || (campaignBoards.length === 1 && Boolean(row.hexcrawlBoardId))}
+                    onChange={(event) => handleSelectBoard(row, event.target.value)}>
+                    {!row.hexcrawlBoardId && <MenuItem value="" disabled>
+                      {campaignBoards.length ? 'Choose a GM Board' : 'Link a GM Board to use time, weather and tables'}
+                    </MenuItem>}
+                    {campaignBoards.map((board) => <MenuItem key={board.id} value={board.id}>
+                      {campaignBoards.length === 1 ? `Automatic: ${board.name}` : board.name}
+                    </MenuItem>)}
                   </TextField>}
                   {row.sectionKey === 'campaign' && <TextField select fullWidth size="small"
                     label="Dungeon fights" sx={{ mt: 1 }}

@@ -287,3 +287,85 @@ test('a failed destination change keeps the saved choice visible', async () => {
   expect(screen.getByRole('alert')).toHaveTextContent('Could not save selection');
   expect(screen.getByRole('combobox', { name: 'Dungeon fights' })).toHaveTextContent('Builder one');
 });
+
+test('the sole linked GM Board is selected and saved automatically for an existing campaign', async () => {
+  const campaign = campaignWithTwoBuilders();
+  campaign.hexcrawl_board_id = null;
+  mocks.linkBoardCampaign.mockImplementation(async (boardId, campaignId) => {
+    expect(campaignId).toBe(campaign.id);
+    campaign.hexcrawl_board_id = boardId;
+  });
+  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" instanceSaved />);
+  fireEvent.click(screen.getByRole('button', { name: 'Linked tools' }));
+  const select = await screen.findByRole('combobox', { name: /Time, weather & tables/ });
+  expect(select).toHaveTextContent('Automatic: Board A');
+  expect(select).toHaveAttribute('aria-disabled', 'true');
+  expect(campaign.hexcrawl_board_id).toBe('board-a');
+  expect(mocks.linkBoardCampaign).toHaveBeenCalledWith('board-a', 'campaign-one');
+  expect(mocks.pushInstance).toHaveBeenCalledWith('board-a');
+  expect(screen.queryByText('No GM Board')).not.toBeInTheDocument();
+  expect(mocks.setCampaignGroup).not.toHaveBeenCalled();
+  expect(mocks.setDungeonEncounter).not.toHaveBeenCalled();
+});
+
+test('multiple linked boards require a choice and offer no option to disable their assignment', async () => {
+  const campaign = campaignWithTwoBuilders();
+  campaign.hexcrawl_board_id = null;
+  mocks.readLocalToolInstances().push({
+    id: 'board-b', name: 'Board B', sectionKey: 'gmboard', linkGroupId: 'link_party', origin: 'local', hasLocal: true,
+  });
+  mocks.linkBoardCampaign.mockImplementation(async (boardId) => { campaign.hexcrawl_board_id = boardId; });
+  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" instanceSaved />);
+  fireEvent.click(screen.getByRole('button', { name: 'Linked tools' }));
+  const select = await screen.findByRole('combobox', { name: /Time, weather & tables/ });
+  expect(select).toHaveTextContent('Choose a GM Board');
+  expect(mocks.linkBoardCampaign).not.toHaveBeenCalled();
+  fireEvent.mouseDown(select);
+  expect(screen.getByRole('option', { name: 'Choose a GM Board' })).toHaveAttribute('aria-disabled', 'true');
+  expect(screen.queryByRole('option', { name: 'No GM Board' })).not.toBeInTheDocument();
+  await act(async () => { fireEvent.click(screen.getByRole('option', { name: 'Board B' })); });
+  expect(mocks.linkBoardCampaign).toHaveBeenCalledWith('board-b', 'campaign-one');
+  expect(select).toHaveTextContent('Board B');
+  expect(campaign.dungeon_encounter_id).toBe('enc-one');
+});
+
+test('unlinking the active board automatically assigns the sole remaining board', async () => {
+  const campaign = campaignWithTwoBuilders();
+  mocks.readLocalToolInstances().push({
+    id: 'board-b', name: 'Board B', sectionKey: 'gmboard', linkGroupId: 'link_party', origin: 'local', hasLocal: true,
+  });
+  mocks.setCampaignBoard.mockImplementation(async (_id, boardId) => { campaign.hexcrawl_board_id = boardId; });
+  mocks.linkBoardCampaign.mockImplementation(async (boardId) => { campaign.hexcrawl_board_id = boardId; });
+  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" instanceSaved />);
+  fireEvent.click(screen.getByRole('button', { name: 'Linked tools' }));
+  fireEvent.click(await screen.findByRole('button', { name: 'Unlink Board A' }));
+  await waitFor(() => expect(screen.getByRole('combobox', { name: /Time, weather & tables/ })).toHaveTextContent('Automatic: Board B'));
+  expect(campaign.hexcrawl_board_id).toBe('board-b');
+  expect(mocks.linkBoardCampaign).toHaveBeenCalledWith('board-b', 'campaign-one');
+  expect(screen.getByRole('link', { name: 'Open Builder one' })).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: 'Open Builder two' })).toBeInTheDocument();
+});
+
+test('a group without any board explains what to link instead of offering No GM Board', async () => {
+  const campaign = campaignWithTwoBuilders();
+  campaign.hexcrawl_board_id = null;
+  mocks.readLocalToolInstances.mockReturnValue(mocks.readLocalToolInstances().filter((row) => row.sectionKey !== 'gmboard'));
+  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" instanceSaved />);
+  fireEvent.click(screen.getByRole('button', { name: 'Linked tools' }));
+  const select = await screen.findByRole('combobox', { name: /Time, weather & tables/ });
+  expect(select).toHaveTextContent('Link a GM Board to use time, weather and tables');
+  expect(select).toHaveAttribute('aria-disabled', 'true');
+  expect(mocks.linkBoardCampaign).not.toHaveBeenCalled();
+});
+
+test('automatic selection never takes a board assigned to another campaign', async () => {
+  const campaign = campaignWithTwoBuilders();
+  campaign.hexcrawl_board_id = null;
+  mocks.listMyCampaigns.mockResolvedValue([campaign, {
+    id: 'other', name: 'Other campaign', gm: 'gm-one', link_group_id: 'link_other', hexcrawl_board_id: 'board-a',
+  }]);
+  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" instanceSaved />);
+  fireEvent.click(screen.getByRole('button', { name: 'Linked tools' }));
+  expect(await screen.findByRole('combobox', { name: /Time, weather & tables/ })).toHaveTextContent('Choose a GM Board');
+  expect(mocks.linkBoardCampaign).not.toHaveBeenCalled();
+});
