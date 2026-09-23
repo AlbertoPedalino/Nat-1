@@ -199,35 +199,51 @@ export default function SceneViewport({
   useEffect(() => {
     const host = hostRef.current;
     const guards = new Map();
+    const releaseGuards = () => {
+      guards.forEach((release) => release());
+      guards.clear();
+    };
     const begin = (event) => {
       if (event.button !== 0 && event.button !== 1) return;
       if (event.target.closest?.(`${VIEWPORT_CONTROL_SELECTOR}, input, textarea, select, [contenteditable]:not([contenteditable="false"])`)) return;
+      if (event.pointerType === 'touch' && event.isPrimary) releaseGuards();
       if (guards.has(event.pointerId)) return;
       guards.set(event.pointerId, suppressGestureSelection({ touch: event.pointerType === 'touch' }));
       window.getSelection()?.removeAllRanges();
     };
     const finish = (event) => {
+      // Capture can move from a token to the viewport when a pinch takes over.
+      if (event.type === 'lostpointercapture' && host.hasPointerCapture?.(event.pointerId)) return;
       guards.get(event.pointerId)?.();
       guards.delete(event.pointerId);
+      if (pointersRef.current.delete(event.pointerId)) pinchRef.current = null;
     };
     const releaseAll = () => {
-      guards.forEach((release) => release());
-      guards.clear();
+      releaseGuards();
+      pointersRef.current.clear();
+      pinchRef.current = null;
+    };
+    const visibilityChanged = () => {
+      if (document.visibilityState === 'hidden') releaseAll();
     };
     // Capture also covers token/object handlers that stop propagation. Listen
     // on window for release outside the map, and retain guards during a pinch.
     host.addEventListener('pointerdown', begin, true);
     window.addEventListener('pointerup', finish, true);
     window.addEventListener('pointercancel', finish, true);
+    window.addEventListener('lostpointercapture', finish, true);
     window.addEventListener('blur', releaseAll);
+    document.addEventListener('visibilitychange', visibilityChanged);
     return () => {
       releaseAll();
       host.removeEventListener('pointerdown', begin, true);
       window.removeEventListener('pointerup', finish, true);
       window.removeEventListener('pointercancel', finish, true);
+      window.removeEventListener('lostpointercapture', finish, true);
       window.removeEventListener('blur', releaseAll);
+      document.removeEventListener('visibilitychange', visibilityChanged);
     };
-  }, []);
+  }, [cameraLocked]);
   const dragRef = useRef(null);
   const lastLaserRef = useRef(0);
   const laserPointRef = useRef(null);
@@ -702,10 +718,19 @@ export default function SceneViewport({
   // Two fingers are a pinch, whatever they landed on: whatever was being drawn,
   // painted or dragged is abandoned rather than continued with one of them.
   const trackPointer = (event) => {
-    if (cameraLocked) return;
-    if (event.target.closest?.('[data-viewport-control], .MuiModal-root')) return;
+    if (cameraLocked || event.pointerType !== 'touch') return;
+    if (event.target.closest?.(VIEWPORT_CONTROL_SELECTOR)) return;
+    // A new primary touch starts a fresh contact sequence, even if the browser
+    // never delivered the previous sequence's final pointerup/cancel.
+    if (event.isPrimary) {
+      pointersRef.current.clear();
+      pinchRef.current = null;
+    }
     pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
-    if (pointersRef.current.size !== 2) return;
+    if (pointersRef.current.size < 2) return;
+    // beginPan and the token handlers skip multi-touch, so capture additional
+    // fingers here to keep receiving their events outside the viewport.
+    event.currentTarget.setPointerCapture?.(event.pointerId);
 
     cancelLongPress();
     dragRef.current = null;
@@ -714,12 +739,16 @@ export default function SceneViewport({
     setSelectionBox(null);
     setResize(null);
     setRotate(null);
+    setMarkDrag(null);
+    setMeasure(null);
+    onMeasure?.(null);
     strokeRef.current = [];
     setStrokeTick((tick) => tick + 1);
     pinchRef.current = readPinch();
   };
 
   const readPinch = () => {
+    if (pointersRef.current.size !== 2) return null;
     const [a, b] = [...pointersRef.current.values()];
     if (!a || !b) return null;
     const box = hostRef.current?.getBoundingClientRect();
@@ -733,14 +762,13 @@ export default function SceneViewport({
   };
 
   const trackPointerMove = (event) => {
-    if (!pointersRef.current.has(event.pointerId)) return;
+    if (cameraLocked || !pointersRef.current.has(event.pointerId)) return;
     pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
 
     const previous = pinchRef.current;
-    if (pointersRef.current.size !== 2 || !previous) return;
     const next = readPinch();
-    if (!next) return;
     pinchRef.current = next;
+    if (!next || !previous) return;
 
     // Zoom about the point between the fingers, and follow that point as it
     // moves: on a phone, spreading and sliding are one gesture.
@@ -749,11 +777,6 @@ export default function SceneViewport({
       next.centre.x - previous.centre.x,
       next.centre.y - previous.centre.y,
     )));
-  };
-
-  const forgetPointer = (event) => {
-    pointersRef.current.delete(event.pointerId);
-    if (pointersRef.current.size < 2) pinchRef.current = null;
   };
 
   const beginPan = (event) => {
@@ -880,6 +903,7 @@ export default function SceneViewport({
 
   const beginTokenDrag = useCallback((event, token) => {
     event.stopPropagation();
+    if (pointersRef.current.size > 1) return;
     if (paintMode === 'marquee') {
       hostRef.current?.focus({ preventScroll: true });
       setSelectedMapObjectId(null);
@@ -915,6 +939,7 @@ export default function SceneViewport({
 
   const beginTokenResize = useCallback((event, token) => {
     event.stopPropagation();
+    if (pointersRef.current.size > 1) return;
     if (!canMove(token)) return;
     const width = Math.max(0.5, Number(token.w) || 1);
     const height = Math.max(0.5, Number(token.h) || 1);
@@ -931,6 +956,7 @@ export default function SceneViewport({
 
   const beginTokenRotate = useCallback((event, token) => {
     event.stopPropagation();
+    if (pointersRef.current.size > 1) return;
     if (!canMove(token)) return;
     const rect = tokenWorldRect(token, scene.grid);
     const centre = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
@@ -1246,8 +1272,6 @@ export default function SceneViewport({
       tabIndex={-1}
       onPointerDownCapture={trackPointer}
       onPointerMoveCapture={trackPointerMove}
-      onPointerUpCapture={forgetPointer}
-      onPointerCancelCapture={forgetPointer}
       onPointerDown={beginPan}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}

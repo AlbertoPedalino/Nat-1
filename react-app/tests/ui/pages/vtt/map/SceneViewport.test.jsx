@@ -1175,10 +1175,11 @@ test.each(['measure', 'select', 'draw', 'erase', 'reveal', 'hide', 'marquee', 'l
   },
 );
 
-function touchPointer(target, type, pointerId) {
-  const event = new MouseEvent(type, { bubbles: true, cancelable: true, button: 0, clientX: 60, clientY: 60 });
+function touchPointer(target, type, pointerId, { clientX = 60, clientY = 60, isPrimary = false } = {}) {
+  const event = new MouseEvent(type, { bubbles: true, cancelable: true, button: 0, clientX, clientY });
   Object.defineProperties(event, {
     pointerId: { value: pointerId }, pointerType: { value: 'touch' },
+    isPrimary: { value: isPrimary },
   });
   fireEvent(target, event);
 }
@@ -1239,6 +1240,90 @@ test('a pinch keeps selection blocked until both fingers finish', () => {
   expect(getComputedStyle(document.body).userSelect).toBe('none');
   touchPointer(window, 'pointercancel', 2);
   expect(getComputedStyle(document.body).userSelect).not.toBe('none');
+});
+
+function renderPinchViewport(props = {}) {
+  const rendered = render(<SceneViewport
+    scene={{ grid: { size: 50, offsetX: 0, offsetY: 0, visible: false }, playArea: null }}
+    imageUrl="/map.png"
+    tokens={[]}
+    canMove={() => false}
+    paintMode="select"
+    {...props}
+  />);
+  const image = rendered.container.querySelector('img');
+  return {
+    ...rendered,
+    viewport: image.parentElement,
+    zoom: () => Number(getComputedStyle(image).transform.match(/scale\(([^)]+)\)/)[1]),
+  };
+}
+
+test.each(['pointerup', 'pointercancel', 'lostpointercapture'])(
+  '%s outside the map stops pinch zoom with the remaining finger', (ending) => {
+    const { viewport, zoom } = renderPinchViewport();
+    touchPointer(viewport, 'pointerdown', 1, { isPrimary: true });
+    touchPointer(viewport, 'pointerdown', 2, { clientX: 160 });
+    touchPointer(viewport, 'pointermove', 2, { clientX: 260 });
+    expect(zoom()).toBeCloseTo(2);
+
+    touchPointer(document.body, ending, 2, { clientX: 260 });
+    touchPointer(viewport, 'pointermove', 1, { clientX: 80 });
+    expect(zoom()).toBeCloseTo(2);
+    touchPointer(window, 'pointerup', 1);
+
+    touchPointer(viewport, 'pointerdown', 3, { isPrimary: true });
+    touchPointer(viewport, 'pointermove', 3, { clientX: 100 });
+    expect(zoom()).toBeCloseTo(2);
+    touchPointer(viewport, 'pointerdown', 4, { clientX: 200 });
+    touchPointer(viewport, 'pointermove', 4, { clientX: 300 });
+    expect(zoom()).toBeCloseTo(4);
+  },
+);
+
+test.each(['blur', 'hidden', 'new primary touch'])(
+  '%s clears stale fingers after an interrupted pinch', (ending) => {
+    const { viewport, zoom } = renderPinchViewport();
+    touchPointer(viewport, 'pointerdown', 1, { isPrimary: true });
+    touchPointer(viewport, 'pointerdown', 2, { clientX: 160 });
+    touchPointer(viewport, 'pointermove', 2, { clientX: 260 });
+    expect(zoom()).toBeCloseTo(2);
+
+    if (ending === 'blur') fireEvent(window, new Event('blur'));
+    if (ending === 'hidden') {
+      const visibility = vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden');
+      fireEvent(document, new Event('visibilitychange'));
+      visibility.mockRestore();
+    }
+    if (ending === 'new primary touch') {
+      touchPointer(viewport, 'pointerdown', 1, { isPrimary: true });
+    }
+    touchPointer(viewport, 'pointermove', 1, { clientX: 100 });
+    expect(zoom()).toBeCloseTo(2);
+  },
+);
+
+test('a second finger on a token stays a pinch without opening its menu or moving the token', () => {
+  vi.useFakeTimers();
+  const onContextMenu = vi.fn();
+  const onMoveToken = vi.fn();
+  const { viewport, zoom, unmount } = renderPinchViewport({
+    tokens: [{ id: 'goblin', label: 'Goblin', layer: 'tokens', x: 1, y: 1, w: 1, h: 1 }],
+    canMove: () => true, onContextMenu, onMoveToken,
+  });
+  try {
+    touchPointer(viewport, 'pointerdown', 1, { isPrimary: true });
+    touchPointer(screen.getByRole('button', { name: 'Goblin' }), 'pointerdown', 2, { clientX: 160 });
+    act(() => vi.advanceTimersByTime(600));
+    expect(onContextMenu).not.toHaveBeenCalled();
+    touchPointer(viewport, 'pointermove', 2, { clientX: 260 });
+    expect(zoom()).toBeCloseTo(2);
+    touchPointer(viewport, 'pointerup', 2, { clientX: 260 });
+    expect(onMoveToken).not.toHaveBeenCalled();
+  } finally {
+    unmount();
+    vi.useRealTimers();
+  }
 });
 
 test.each(['blur', 'unmount'])('%s restores selection during a map gesture', (ending) => {
