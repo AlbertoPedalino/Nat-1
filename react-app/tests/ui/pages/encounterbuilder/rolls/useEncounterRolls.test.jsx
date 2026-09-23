@@ -2,6 +2,7 @@ import { act, renderHook } from '@testing-library/react';
 import { useReducer } from 'react';
 import { useEncounterRolls } from '../../../../../src/pages/encounterbuilder/rolls/useEncounterRolls.js';
 import { encounterReducer, createInitialState } from '../../../../../src/pages/encounterbuilder/state/reducer.js';
+import { encounterRollActor } from '../../../../../src/pages/encounterbuilder/rolls/rollActor.js';
 
 const channel = vi.hoisted(() => ({ publish: vi.fn(), onRoll: null, campaignId: null }));
 vi.mock('../../../../../src/shared/cloud/sync/useRollChannel.js', () => ({ useRollChannel: (options) => {
@@ -43,6 +44,25 @@ test('visibility affects only future rolls and persists when the builder reopens
   expect(channel.publish).toHaveBeenLastCalledWith(expect.anything(), { visibility: 'public' });
   unmount();
   expect(openRolls().result.current.sync.showToPlayers).toBe(true);
+});
+
+test('monster rolls carry the selected combatant reference and the builder visibility', () => {
+  const { result } = openRolls();
+  const identity = encounterRollActor({
+    instanceId: 'enc',
+    selectedStatblock: { combatantId: 2 },
+    combat: { fightId: 'fight', currentTurn: 0, combatants: [
+      { id: 1, name: 'Goblin', type: 'monster' },
+      { id: 2, name: 'Goblin', type: 'monster' },
+    ] },
+  });
+  for (const shared of [false, true, false]) {
+    act(() => result.current.sync.updateSettings({ showToPlayers: shared }));
+    act(() => result.current.sync.shareRoll({ ...monsterRoll, ...identity }, identity.actorName));
+    expect(channel.publish).toHaveBeenLastCalledWith(expect.objectContaining({
+      characterId: null, sourceRef: 'enc:fight:2', actorName: 'Goblin', thrown: true,
+    }), { visibility: shared ? 'public' : 'gm' });
+  }
 });
 
 test('receives player and map rolls once, without rebroadcasting them', () => {

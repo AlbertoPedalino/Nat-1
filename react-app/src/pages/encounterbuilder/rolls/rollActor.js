@@ -1,4 +1,6 @@
-export function encounterRollActor({ selectedStatblock, combat }) {
+import { makeSourceRef } from '../../../shared/vtt/tokens/encounterSync.js';
+
+export function encounterRollActor({ selectedStatblock, combat, instanceId }) {
   const selected = selectedStatblock;
   const combatant = selected?.combatantId != null
     ? combat?.combatants?.find((entry) => entry.id === selected.combatantId)
@@ -10,5 +12,6 @@ export function encounterRollActor({ selectedStatblock, combat }) {
     actorShape: combatant.shape || null,
     actorLabel: combatant.label || '',
     characterId: combatant.type === 'player' ? combatant.sourceId || null : null,
+    sourceRef: makeSourceRef(instanceId, combat.fightId, combatant.id),
   };
 }

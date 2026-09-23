@@ -200,6 +200,23 @@ test('shared roll payloads bound identifiers and discard impossible dice and num
   assert.ok(entry.at >= before && entry.at <= Date.now());
 });
 
+test('private rolls stay in the log without bubbles or dice on the map', () => {
+  const feed = addRoll([], roll({ visibility: 'gm', thrown: true, sourceRef: 'enc:fight:1' }));
+  assert.equal(feed.length, 1);
+  assert.deepEqual(currentBubbles(feed, 1000), []);
+  assert.deepEqual(currentThrows(feed, 1000), []);
+});
+
+test('same-name monsters in different encounters have separate bubbles and dice', () => {
+  let feed = [];
+  for (const sourceRef of ['enc:fight:1', 'other:fight:1']) {
+    feed = addRoll(feed, roll({ id: sourceRef, characterId: null, sourceRef, actorName: 'Goblin', thrown: true }));
+  }
+  assert.equal(currentBubbles(feed, 1000).length, 2);
+  assert.equal(currentThrows(feed, 1000).length, 2);
+  assert.equal(normalizeRoll(feed[0]).sourceRef, 'other:fight:1');
+});
+
 test('a shared roll preserves a bounded valid pool and never throws an unsafe set', () => {
   const many = Array.from({ length: DICE_LIMITS.maxDice }, () => ({ faces: 6, v: 3 }));
   const oversized = [...many, { faces: 6, v: 3 }];

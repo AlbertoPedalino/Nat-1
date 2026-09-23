@@ -62,6 +62,7 @@ export function useEncounterRolls({ instanceId, players, campaigns, dispatch }) 
       timestamp,
       actorName: actor || 'GM',
       characterId: result.characterId || null,
+      sourceRef: result.sourceRef || null,
       ...normalizeRollIdentity(result),
       note: result.note,
       thrown: Boolean(toast.rolls?.length),

@@ -26,7 +26,7 @@ export function useVttRolls({ campaignId, role, roster, tokens }) {
   const acceptRoll = useCallback((entry, { local = false } = {}) => {
     const roll = normalizeRoll(entry);
     if (!roll) return;
-    setToast({
+    if (local) setToast({
       ...roll,
       timestamp: roll.at,
       meta: {
@@ -85,13 +85,19 @@ export function useVttRolls({ campaignId, role, roster, tokens }) {
   const tokenByCharacter = useMemo(() => new Map(
     tokens.filter((token) => token.characterId).map((token) => [token.characterId, token]),
   ), [tokens]);
+  const tokenBySource = useMemo(() => new Map(
+    tokens.filter((token) => token.sourceRef).map((token) => [token.sourceRef, token]),
+  ), [tokens]);
+  const tokenForRoll = useCallback((roll) => (
+    tokenByCharacter.get(roll.characterId) || tokenBySource.get(roll.sourceRef) || null
+  ), [tokenByCharacter, tokenBySource]);
 
   const bubbles = useMemo(() => currentBubbles(feed)
-    .map((roll) => ({ roll, token: tokenByCharacter.get(roll.characterId) }))
-    .filter((entry) => entry.token), [feed, tick, tokenByCharacter]);
+    .map((roll) => ({ roll, token: tokenForRoll(roll) }))
+    .filter((entry) => entry.token), [feed, tick, tokenForRoll]);
 
   const throws = useMemo(() => currentThrows(feed)
-    .map((roll) => ({ roll, token: tokenByCharacter.get(roll.characterId) || null })), [feed, tick, tokenByCharacter]);
+    .map((roll) => ({ roll, token: tokenForRoll(roll) })), [feed, tick, tokenForRoll]);
 
   return {
     clearFeed,

@@ -80,6 +80,7 @@ export function normalizeRoll(entry) {
     // feed has to show both.
     id: suppliedId || `roll:${at}:${Math.random().toString(36).slice(2, 12)}`,
     characterId,
+    sourceRef: boundedText(entry.sourceRef, 360) || null,
     actorName,
     ...normalizeRollIdentity(entry),
     visibility: entry.visibility === 'gm' ? 'gm' : 'public',
@@ -144,7 +145,8 @@ function latestPerRoller(feed, now, ttl, keyOf) {
   const seen = new Set();
   const current = [];
   for (const roll of feed || []) {
-    if (now - roll.at > ttl) continue;
+    // Private encounter rolls belong in the GM log, never on the map.
+    if (roll.visibility === 'gm' || now - roll.at > ttl) continue;
     const key = keyOf(roll);
     if (key === null || seen.has(key)) continue;
     seen.add(key);
@@ -153,13 +155,18 @@ function latestPerRoller(feed, now, ttl, keyOf) {
   return current;
 }
 
-// A bubble belongs over a piece, so a roll with no character has nowhere to go.
+function pieceKey(roll) {
+  if (roll.characterId) return `character:${roll.characterId}`;
+  return roll.sourceRef ? `encounter:${roll.sourceRef}` : null;
+}
+
+// A bubble belongs over a character or a linked encounter combatant.
 export function currentBubbles(feed, now = Date.now(), ttl = ROLL_TTL_MS) {
   return latestPerRoller(
     feed,
     now,
     ttl,
-    (roll) => (!roll.localOrigin && roll.characterId ? roll.characterId : null),
+    (roll) => (!roll.localOrigin ? pieceKey(roll) : null),
   );
 }
 
@@ -173,6 +180,6 @@ export function currentThrows(feed, now = Date.now(), ttl = ROLL_TTL_MS) {
     feed,
     now,
     ttl,
-    (roll) => (roll.thrown && roll.rolls?.length ? roll.characterId || `actor:${roll.actorName}` : null),
+    (roll) => (roll.thrown && roll.rolls?.length ? pieceKey(roll) || `actor:${roll.actorName}` : null),
   );
 }

@@ -75,8 +75,8 @@ export function EncounterBuilderProvider({ instanceId, instanceSaved, linkGroupI
   });
 
   const getRollActor = useCallback(() => {
-    return encounterRollActor({ selectedStatblock: state.selectedStatblock, combat: state.combat });
-  }, [state.combat, state.selectedStatblock]);
+    return encounterRollActor({ selectedStatblock: state.selectedStatblock, combat: state.combat, instanceId });
+  }, [state.combat, state.selectedStatblock, instanceId]);
 
   // `actorOverride` lets a caller force the attribution (pass `null` for a
   // generic GM roll with no actor). Omit it to default to the selected/current
