@@ -12,7 +12,8 @@ import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
 import { withSheetVitals } from '../../../shared/campaign/roster.js';
 import { usePortraits } from '../../../shared/character/profile/usePortraits.js';
-import { patchCharacterData } from '../../../shared/cloud/api/cloudCharacters.js';
+import { commandCharacterVitals } from '../../../shared/cloud/api/cloudCharacters.js';
+import { tokenHealthCommand } from '../../../shared/vtt/tokens/characterHealth.js';
 import { DEAD_CONDITION_KEY, setConditionActive } from '../../../shared/character/combat/conditions.js';
 import {
   clearLiveScene,
@@ -1458,14 +1459,14 @@ export default function SceneEditor({
   // create a second copy that the next sheet update silently overwrites.
   const writeConditions = useCallback(async (token, conditions) => {
     if (token.characterId) {
-      await patchCharacterData(token.characterId, { activeConditions: conditions });
+      await commandCharacterVitals(token.characterId, tokenHealthCommand(token, { activeConditions: conditions }));
       return;
     }
     await setTokenConditions(token.id, conditions);
   }, []);
 
   const handleMarkToken = useCallback(async (token, {
-    conditions, showHp, effects, hpCurrent, deathSaves,
+    conditions, showHp, effects, hpCurrent, deathSaves, healthPatch = {},
   }) => {
     // On a piece of their own, a player may also decide whether it wears a hit
     // point bar — that is an ordinary update the row policy already allows.
@@ -1476,17 +1477,13 @@ export default function SceneEditor({
           ...item,
           conditions,
           effects,
-          ...(owned ? { showHp, hpCurrent, deathSaves } : {}),
+          ...(owned ? { showHp, ...(token.characterId ? {} : { hpCurrent, deathSaves }) } : {}),
         }
         : item
     )));
     try {
       if (token.characterId && owned) {
-        await patchCharacterData(token.characterId, {
-          activeConditions: conditions,
-          currentHP: hpCurrent,
-          deathSaves,
-        });
+        if (Object.keys(healthPatch).length) await commandCharacterVitals(token.characterId, tokenHealthCommand(token, healthPatch));
       } else {
         await writeConditions(token, conditions);
       }
@@ -1503,7 +1500,7 @@ export default function SceneEditor({
   }, [canMove, notify, pushToEncounter, writeConditions]);
 
   const handleSaveToken = useCallback(async (token, {
-    label, gmOnly, conditions, hpCurrent, hpMax, showHp, effects, deathSaves,
+    label, gmOnly, conditions, hpCurrent, hpMax, showHp, effects, deathSaves, healthPatch = {},
   }) => {
     const publicLabel = gmOnly ? '' : label;
     const secret = gmOnly ? label : '';
@@ -1520,9 +1517,7 @@ export default function SceneEditor({
           conditions,
           effects,
           showHp,
-          hpCurrent,
-          deathSaves,
-          ...(token.characterId ? {} : { hpMax }),
+          ...(token.characterId ? {} : { hpCurrent, deathSaves, hpMax }),
         }
         : item
     )));
@@ -1530,11 +1525,7 @@ export default function SceneEditor({
       // Conditions take the route that suits the piece: a character's go to the
       // sheet, a monster's to its own row.
       if (token.characterId) {
-        await patchCharacterData(token.characterId, {
-          activeConditions: conditions,
-          currentHP: hpCurrent,
-          deathSaves,
-        });
+        if (Object.keys(healthPatch).length) await commandCharacterVitals(token.characterId, tokenHealthCommand(token, healthPatch));
       } else {
         await writeConditions(token, conditions);
       }
@@ -1573,6 +1564,7 @@ export default function SceneEditor({
       showHp: token.showHp,
       effects: token.effects || [],
       deathSaves,
+      healthPatch: { deathSaves, activeConditions: conditions },
     };
     if (role.isGm) handleSaveToken(token, patch);
     else handleMarkToken(token, patch);

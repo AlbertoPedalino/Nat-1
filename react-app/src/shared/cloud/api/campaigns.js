@@ -45,7 +45,7 @@ export async function listCampaignCharacters(campaignId) {
   const supabase = requireClient();
   const { data, error } = await supabase
     .from('characters')
-    .select('id, name, owner, owner_username, updated_at, data')
+    .select('id, name, owner, owner_username, updated_at, row_revision, data')
     .eq('campaign_id', campaignId)
     .order('updated_at', { ascending: false });
   if (error) throw error;

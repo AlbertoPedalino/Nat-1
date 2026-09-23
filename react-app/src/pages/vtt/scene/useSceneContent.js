@@ -6,6 +6,7 @@ import {
   listDrawings, listTokenSecrets, listTokens, signMapImage,
 } from '../../../shared/cloud/api/vtt.js';
 import { toDrawing } from '../../../shared/vtt/map/drawing.js';
+import { CHARACTER_ROW_EVENT } from '../../../shared/cloud/sync/characterRows.js';
 
 function attachSecrets(tokens, secrets, held = []) {
   const previous = Object.fromEntries(
@@ -50,8 +51,10 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
   const tokensRef = useRef(tokens);
   const drawingsRef = useRef(drawings);
   const tokenMovesRef = useRef(new Map());
+  const characterRowsRef = useRef(new Map());
   tokensRef.current = tokens;
   drawingsRef.current = drawings;
+  useEffect(() => { characterRowsRef.current.clear(); }, [scene.campaignId]);
 
   const beginTokenMove = useCallback((ids) => {
     for (const id of ids) tokenMovesRef.current.set(id, (tokenMovesRef.current.get(id) || 0) + 1);
@@ -85,14 +88,26 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
           current, baselineTokens, attachSecrets(sceneTokens, secrets, current), protectedIds,
         ));
       }
-      setRoster(toRoster(characterRows));
+      const rows = characterRows.map((row) => {
+        const held = characterRowsRef.current.get(row.id);
+        if (held && Number(held.row_revision || 0) > Number(row.row_revision || 0)) return held;
+        characterRowsRef.current.set(row.id, row);
+        return row;
+      });
       setDrawings((current) => mergeSnapshot(current, baselineDrawings, sceneDrawings));
       // A reconnect can supersede the initial request. Whichever request wins
       // must release the loading screen; optional vitals do not hold it open.
       setLoading(false);
       try {
-        const vitals = await readCampaignVitals(characterRows);
-        if (request === loadRequestRef.current) setRoster((current) => mergeVitals(current, vitals));
+        const vitals = await readCampaignVitals(rows);
+        if (request === loadRequestRef.current) setRoster((current) => {
+          const next = mergeVitals(toRoster(rows), vitals);
+          return next.map((entry) => {
+            const readRow = rows.find((row) => row.id === entry.characterId);
+            return characterRowsRef.current.get(entry.characterId) !== readRow
+              ? current.find((item) => item.characterId === entry.characterId) || entry : entry;
+          });
+        });
       } catch (_) {}
     } catch (cause) {
       if (request === loadRequestRef.current) {
@@ -164,15 +179,32 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
     const row = payload?.new;
     const entry = toRosterEntry(row);
     if (!entry) return;
-    setRoster((current) => current.map((item) => (
-      item.characterId === entry.characterId
-        ? { ...entry, hpCurrent: item.hpCurrent, hpMax: item.hpMax, tempHp: item.tempHp }
-        : item
-    )));
+    const held = characterRowsRef.current.get(row.id);
+    if (!held && row.campaign_id !== scene.campaignId) return;
+    if (held && Number(held.row_revision || 0) > Number(row.row_revision || 0)) return;
+    characterRowsRef.current.set(row.id, row);
+    setRoster((current) => {
+      if (!current.some((item) => item.characterId === entry.characterId)) {
+        return held || row.campaign_id === scene.campaignId ? [...current, entry] : current;
+      }
+      return current.map((item) => (
+        item.characterId === entry.characterId
+          ? { ...entry, hpCurrent: item.hpCurrent, hpMax: item.hpMax, tempHp: item.tempHp }
+          : item
+      ));
+    });
     readCampaignVitals([row])
-      .then((vitals) => setRoster((current) => mergeVitals(current, vitals)))
+      .then((vitals) => {
+        if (characterRowsRef.current.get(row.id) === row) setRoster((current) => mergeVitals(current, vitals));
+      })
       .catch(() => {});
-  }, []);
+  }, [scene.campaignId]);
+
+  useEffect(() => {
+    const receive = ({ detail }) => handleCharacterEvent({ new: detail });
+    window.addEventListener(CHARACTER_ROW_EVENT, receive);
+    return () => window.removeEventListener(CHARACTER_ROW_EVENT, receive);
+  }, [handleCharacterEvent]);
 
   return {
     beginTokenMove,

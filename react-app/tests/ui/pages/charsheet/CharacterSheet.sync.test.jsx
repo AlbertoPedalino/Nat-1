@@ -5,10 +5,10 @@ import CloudAutoSync from '../../../../src/shared/cloud/sync/CloudAutoSync.jsx';
 import { loadCharacter, saveCharacter, setActiveCharId } from '../../../../src/shared/character/profile/store.js';
 import { excludeFromSync } from '../../../../src/shared/cloud/sync/cloudSyncExclude.js';
 
-const cloud = vi.hoisted(() => ({ save: vi.fn(), push: vi.fn(), get: vi.fn(), live: null, receive: null }));
+const cloud = vi.hoisted(() => ({ save: vi.fn(), command: vi.fn(), push: vi.fn(), get: vi.fn(), live: null, receive: null }));
 vi.mock('../../../../src/shared/cloud/api/cloudCharacters.js', () => ({
   updateCloudCharacterData: cloud.save, pushCharacter: cloud.push, updateForeignCharacter: cloud.push,
-  getCloudCharacter: cloud.get,
+  getCloudCharacter: cloud.get, commandCharacterVitals: cloud.command,
 }));
 vi.mock('../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({
   useAuth: () => ({ cloudEnabled: true, status: 'authed', user: { id: 'owner' } }),
@@ -73,6 +73,7 @@ beforeEach(() => {
   localStorage.clear();
   vi.useFakeTimers();
   cloud.save.mockReset().mockResolvedValue(undefined);
+  cloud.command.mockReset().mockImplementation(async () => ({ id: 'character', row_revision: 1, data: { ...character, currentHP: 19 } }));
   cloud.push.mockReset().mockResolvedValue(undefined);
   cloud.get.mockReset().mockResolvedValue({ id: 'character', data: character, updated_at: '2026-09-05T10:05:00.000Z' });
   cloud.live = null;
@@ -80,168 +81,136 @@ beforeEach(() => {
 });
 afterEach(() => { vi.useRealTimers(); window.history.replaceState({}, '', '/'); });
 
-test('received encounter HP changes the sheet without scheduling another cloud write', async () => {
-  const view = await openSheet();
-  view.rerender(<CharacterSheet {...props} liveVitals={vitals(15)} />);
-  expect(screen.getByTestId('hp')).toHaveTextContent('15');
-  await flush();
-  expect(cloud.save).not.toHaveBeenCalled();
-  fireEvent.click(screen.getByText('Damage'));
-  await flush();
-  expect(cloud.save).toHaveBeenCalledTimes(1);
-  expect(cloud.save).toHaveBeenLastCalledWith('character', expect.objectContaining({ currentHP: 14 }));
-  view.rerender(<CharacterSheet {...props} liveVitals={vitals(14)} />);
-  await flush();
-  expect(cloud.save).toHaveBeenCalledTimes(1);
-});
-
-test('remote HP is merged into an already queued local notes save', async () => {
-  const view = await openSheet();
-  fireEvent.click(screen.getByText('Edit notes'));
-  view.rerender(<CharacterSheet {...props} liveVitals={vitals(15)} />);
-  await flush();
-  expect(cloud.save).toHaveBeenCalledTimes(1);
-  expect(cloud.save).toHaveBeenLastCalledWith('character', expect.objectContaining({ currentHP: 15, notes: 'Local note' }));
-});
-
-test('unsaved player damage survives an incoming older HP value', async () => {
-  const view = await openSheet();
-  fireEvent.click(screen.getByText('Damage'));
-  view.rerender(<CharacterSheet {...props} liveVitals={vitals(20)} />);
-  await flush();
-  expect(screen.getByTestId('hp')).toHaveTextContent('19');
-  expect(cloud.save).toHaveBeenCalledTimes(1);
-  expect(cloud.save).toHaveBeenLastCalledWith('character', expect.objectContaining({ currentHP: 19 }));
-});
-
-test('incoming HP merges into the next local save while an earlier save is in flight', async () => {
-  let finishSave;
-  cloud.save.mockImplementationOnce(() => new Promise((resolve) => { finishSave = resolve; }));
-  const view = await openSheet();
-  fireEvent.click(screen.getByText('Edit notes'));
-  await flush();
-  fireEvent.click(screen.getByText('Edit notes'));
-  view.rerender(<CharacterSheet {...props} liveVitals={vitals(15)} />);
-  await act(async () => finishSave());
-  await flush();
-  expect(cloud.save).toHaveBeenCalledTimes(2);
-  expect(cloud.save).toHaveBeenLastCalledWith('character', expect.objectContaining({ currentHP: 15, notes: 'Local note' }));
-});
+async function receive(currentHP, revision) {
+  await act(async () => cloud.receive({ new: { id: 'character', row_revision: revision, data: { ...character, currentHP } } }));
+}
 
 async function openLocalSheet() {
   saveCharacter('character', character, { emit: false });
   setActiveCharId('character');
-  const view = render(<><CloudAutoSync /><CharacterSheet /></>);
+  render(<><CloudAutoSync /><CharacterSheet /></>);
   await flush();
   cloud.push.mockClear();
-  expect(screen.getByTestId('hp')).toHaveTextContent('20');
-  return view;
 }
 
-function receiveLocalVitals(currentHP) {
-  act(() => cloud.live.onUpdate({ id: 'character', data: vitals(currentHP) }));
-}
-
-test('a standalone local sheet receives encounter HP and persists it without echoing to the cloud', async () => {
-  await openLocalSheet();
-  expect(cloud.live).toMatchObject({ charId: 'character', enabled: true });
-  receiveLocalVitals(15);
-  expect(screen.getByTestId('hp')).toHaveTextContent('15');
-  expect(loadCharacter('character').currentHP).toBe(15);
+test.each([true, false])('embedded=%s reads authoritative HP and sends damage as an intent', async (embedded) => {
+  render(<CharacterSheet {...props} embedded={embedded} />);
   await flush();
-  expect(cloud.push).not.toHaveBeenCalled();
+  await receive(15, 1);
+  cloud.command.mockResolvedValue({ id: 'character', row_revision: 2, data: { ...character, currentHP: 14 } });
+  fireEvent.click(screen.getByText('Damage'));
+  expect(screen.getByTestId('hp')).toHaveTextContent('15');
+  await flush();
+  expect(cloud.command).toHaveBeenCalledWith('character', { type: 'modifyHp', delta: -1 });
+  expect(screen.getByTestId('hp')).toHaveTextContent('14');
+  await receive(20, 0);
+  expect(screen.getByTestId('hp')).toHaveTextContent('14');
   expect(cloud.save).not.toHaveBeenCalled();
 });
 
-test('a standalone local sheet keeps unsaved player HP and accepts GM changes after saving', async () => {
-  await openLocalSheet();
-  fireEvent.click(screen.getByText('Damage'));
-  receiveLocalVitals(20);
-  expect(screen.getByTestId('hp')).toHaveTextContent('19');
-  await flush();
-  expect(cloud.push).toHaveBeenCalledOnce();
-  expect(loadCharacter('character').currentHP).toBe(19);
-  receiveLocalVitals(15);
-  expect(screen.getByTestId('hp')).toHaveTextContent('15');
-  await flush();
-  expect(cloud.push).toHaveBeenCalledOnce();
-});
-
-test('encounter HP merges with a queued local notes save', async () => {
-  await openLocalSheet();
-  cloud.push.mockImplementation(async (id) => {
-    expect(loadCharacter(id)).toMatchObject({ currentHP: 15, notes: 'Local note' });
-  });
-  fireEvent.click(screen.getByText('Edit notes'));
-  receiveLocalVitals(15);
-  await flush();
-  expect(cloud.push).toHaveBeenCalledOnce();
-});
-
-test('completion of an older local save cannot release HP still being saved', async () => {
-  await openLocalSheet();
-  let finishFirst;
-  let finishSecond;
-  cloud.push
-    .mockImplementationOnce(() => new Promise((resolve) => { finishFirst = resolve; }))
-    .mockImplementationOnce(() => new Promise((resolve) => { finishSecond = resolve; }));
-  fireEvent.click(screen.getByText('Damage'));
-  await flush();
-  fireEvent.click(screen.getByText('Damage'));
-  await flush();
-  await act(async () => finishFirst());
-  receiveLocalVitals(19);
-  expect(screen.getByTestId('hp')).toHaveTextContent('18');
-  await act(async () => finishSecond());
-  receiveLocalVitals(15);
-  expect(screen.getByTestId('hp')).toHaveTextContent('15');
-});
-
-test('characters explicitly excluded from cloud sync do not subscribe', async () => {
-  excludeFromSync('character');
-  await openLocalSheet();
-  expect(cloud.live.enabled).toBe(false);
-});
-
-test('an online standalone sheet also applies vitals received before initialization finishes', async () => {
+test('received vitals before sheet initialization are applied without writing them back', async () => {
   render(<CharacterSheet {...props} embedded={false} liveVitals={vitals(15)} />);
   await flush();
   expect(screen.getByTestId('hp')).toHaveTextContent('15');
   expect(cloud.save).not.toHaveBeenCalled();
-  expect(cloud.live.enabled).toBe(false);
+  expect(cloud.command).not.toHaveBeenCalled();
 });
 
-test('campaign-sheet?edit=1 receives GM damage after a player save with an ahead-of-server clock', async () => {
-  window.history.replaceState({}, '', '/campaign-sheet?id=character&edit=1');
-  render(<CampaignSheetView />);
+test('remote damage and local notes share a sheet without sending a health command', async () => {
+  await openSheet();
+  fireEvent.click(screen.getByText('Edit notes'));
+  await receive(15, 1);
+  await flush();
+  expect(cloud.save).toHaveBeenCalledWith('character', expect.objectContaining({ currentHP: 15, notes: 'Local note' }));
+  expect(cloud.command).not.toHaveBeenCalled();
+});
+
+test('a pending damage command accepts GM updates; an older acknowledgement cannot overwrite them', async () => {
+  let finish;
+  cloud.command.mockImplementationOnce(() => new Promise((resolve) => { finish = resolve; }));
+  await openSheet();
+  fireEvent.click(screen.getByText('Damage'));
+  await receive(12, 3);
+  expect(screen.getByTestId('hp')).toHaveTextContent('12');
+  await act(async () => finish({ id: 'character', row_revision: 2, data: { ...character, currentHP: 19 } }));
+  expect(screen.getByTestId('hp')).toHaveTextContent('12');
+  expect(cloud.save).not.toHaveBeenCalled();
+});
+
+test('a failed command leaves confirmed HP unchanged', async () => {
+  cloud.command.mockRejectedValue(new Error('Offline'));
+  await openSheet();
+  fireEvent.click(screen.getByText('Damage'));
   await flush();
   expect(screen.getByTestId('hp')).toHaveTextContent('20');
-  act(() => cloud.receive({
-    new: { id: 'character', data: character, updated_at: '2026-09-05T10:05:00.000Z' },
-    commit_timestamp: '2026-09-05T10:00:00.000Z',
-  }));
-  act(() => cloud.receive({
-    new: { id: 'character', data: { ...character, currentHP: 15 }, updated_at: '2026-09-05T10:00:01.000Z' },
-    commit_timestamp: '2026-09-05T10:00:01.000Z',
-  }));
-  expect(screen.getByTestId('hp')).toHaveTextContent('15');
-  await flush();
   expect(cloud.save).not.toHaveBeenCalled();
 });
 
-test('returning to the online sheet recovers missed GM damage despite clock differences', async () => {
+test('standalone local sheet applies cloud HP silently and uses commands for damage', async () => {
+  await openLocalSheet();
+  await receive(15, 1);
+  expect(loadCharacter('character').currentHP).toBe(15);
+  cloud.command.mockResolvedValue({ id: 'character', row_revision: 2, data: { ...character, currentHP: 14 } });
+  fireEvent.click(screen.getByText('Damage'));
+  await flush();
+  expect(loadCharacter('character').currentHP).toBe(14);
+  expect(cloud.push).not.toHaveBeenCalled();
+  expect(cloud.command).toHaveBeenCalledOnce();
+});
+
+test('the first local damage click uses a command even before the first realtime row', async () => {
+  await openLocalSheet();
+  fireEvent.click(screen.getByText('Damage'));
+  await flush();
+  expect(cloud.command).toHaveBeenCalledWith('character', { type: 'modifyHp', delta: -1 });
+  expect(cloud.push).not.toHaveBeenCalled();
+});
+
+test('characters excluded from cloud sync keep local HP editing', async () => {
+  excludeFromSync('character');
+  await openLocalSheet();
+  expect(cloud.live.enabled).toBe(false);
+  fireEvent.click(screen.getByText('Damage'));
+  expect(loadCharacter('character').currentHP).toBe(19);
+  expect(cloud.command).not.toHaveBeenCalled();
+});
+
+test('campaign-sheet?edit=1 receives GM damage despite a client clock ahead of the server', async () => {
   window.history.replaceState({}, '', '/campaign-sheet?id=character&edit=1');
   render(<CampaignSheetView />);
   await flush();
-  act(() => cloud.receive({
-    new: { id: 'character', data: character, updated_at: '2026-09-05T10:05:00.000Z' },
-    commit_timestamp: '2026-09-05T10:00:00.000Z',
+  await act(async () => cloud.receive({
+    new: { id: 'character', data: character, updated_at: '2026-09-05T10:05:00Z' },
+    commit_timestamp: '2026-09-05T10:00:00Z',
   }));
-  cloud.get.mockResolvedValue({
-    id: 'character', data: { ...character, currentHP: 15 }, updated_at: '2026-09-05T10:00:01.000Z',
-  });
-  act(() => window.dispatchEvent(new Event('focus')));
-  await flush();
+  await act(async () => cloud.receive({
+    new: { id: 'character', data: { ...character, currentHP: 15 }, updated_at: '2026-09-05T10:00:01Z' },
+    commit_timestamp: '2026-09-05T10:00:01Z',
+  }));
   expect(screen.getByTestId('hp')).toHaveTextContent('15');
   expect(cloud.save).not.toHaveBeenCalled();
+});
+
+test('returning online recovers missed GM damage', async () => {
+  render(<CampaignSheetView sheetId="character" editable />);
+  await flush();
+  cloud.get.mockResolvedValue({ id: 'character', row_revision: 2, data: { ...character, currentHP: 15 } });
+  act(() => window.dispatchEvent(new Event('online')));
+  await flush();
+  expect(screen.getByTestId('hp')).toHaveTextContent('15');
+  expect(cloud.command).not.toHaveBeenCalled();
+});
+
+test.each([true, false])('repeated damage stays stable through delayed echoes (embedded=%s)', async (embedded) => {
+  render(<CampaignSheetView sheetId="character" editable embedded={embedded} />);
+  await flush();
+  for (let hit = 1; hit <= 3; hit += 1) {
+    cloud.command.mockResolvedValue({ id: 'character', row_revision: hit, data: { ...character, currentHP: 20 - hit } });
+    fireEvent.click(screen.getByText('Damage'));
+    await flush();
+    await receive(21 - hit, hit - 1);
+    expect(screen.getByTestId('hp')).toHaveTextContent(String(20 - hit));
+    expect(cloud.command).toHaveBeenCalledTimes(hit);
+    expect(cloud.save).not.toHaveBeenCalled();
+  }
 });

@@ -192,10 +192,10 @@ test('quest choices are unique, trimmed, and alphabetical', () => {
   ]), ['Ashes of Winter', 'Broken Crown']);
 });
 
-test('synced field set matches the patch_character_data SQL allowlist', () => {
-  const sql = readFileSync(new URL('../../../../../supabase/combat_sync.sql', import.meta.url), 'utf8');
+test('synced field set matches the commit_character_vitals SQL allowlist', () => {
+  const sql = readFileSync(new URL('../../../../../supabase/character_vitals.sql', import.meta.url), 'utf8');
   const match = sql.match(/allowed\s+text\[\]\s*:=\s*array\[([^\]]+)\]/);
-  assert.ok(match, 'could not find the allowed[] array in combat_sync.sql');
+  assert.ok(match, 'could not find the allowed[] array in character_vitals.sql');
   const sqlKeys = match[1].split(',').map((part) => part.trim().replace(/^'|'$/g, ''));
   assert.deepEqual([...sqlKeys].sort(), [...SYNCED_DATA_KEYS].sort());
 });
@@ -909,6 +909,32 @@ test('closing an encounter deactivates it but keeps the fight resumable', () => 
   assert.equal(resumed.view, 'combat');
   assert.equal(resumed.activeFightId, fightId);
   assert.equal(resumed.combat.combatants[0].name, 'Aria');
+});
+
+test('external fight refresh keeps linked sheet vitals while updating monsters and encounter effects', () => {
+  const player = {
+    id: 'player', type: 'player', sourceId: 'character', name: 'Aria', hpMax: 30,
+    hpCurrent: 20, tempHP: 4, maxHPBonus: 2, activeConditions: ['prone'], deathSaves: { s: 0, f: 0 },
+  };
+  const monster = { id: 'monster', type: 'monster', name: 'Ogre', hpMax: 50, hpCurrent: 50 };
+  const state = encounterReducer(createInitialState(), {
+    type: 'resumeFight', entry: { id: 'fight', fight: { combatants: [player, monster] } },
+  });
+  const incoming = {
+    id: 'fight', fight: { combatants: [
+      { ...player, hpCurrent: 30, tempHP: 0, maxHPBonus: 0, activeConditions: [], activeEffects: [{ key: 'selfAttackDisadv', duration: 'next' }] },
+      { ...monster, hpCurrent: 12 },
+    ] },
+  };
+  const next = encounterReducer(state, { type: 'syncExternalFight', entry: incoming });
+  const pc = next.combat.combatants.find((item) => item.id === player.id);
+  assert.equal(pc.hpCurrent, 20);
+  assert.equal(pc.tempHP, 4);
+  assert.equal(pc.maxHPBonus, 2);
+  assert.deepEqual(pc.activeConditions, ['prone']);
+  assert.deepEqual(pc.activeEffects, [{ key: 'selfAttackDisadv', duration: 'next' }]);
+  assert.equal(next.combat.combatants.find((item) => item.id === monster.id).hpCurrent, 12);
+  assert.equal(encounterReducer(state, { type: 'syncExternalFight', entry: { ...incoming, id: 'other' } }), state);
 });
 
 // A room sent from the battle map is written straight into storage. A builder

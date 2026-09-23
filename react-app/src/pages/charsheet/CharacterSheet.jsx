@@ -38,10 +38,11 @@ import { applyFreeCastRest, getFreeCastDefsForCharacter } from './spells/spellsT
 import { adapterRegistry as installedRegistry } from '../../adapters/registry.js';
 import { ensureSheetRuntimeAdapters } from './state/sheetRuntimeAdapters.js';
 import { loadItems, loadOptionalFeatures, loadConditions, reconcileInventoryWithItemsDb } from '../charbuilder/data/dataLoaders.js';
-import { updateCloudCharacterData } from '../../shared/cloud/api/cloudCharacters.js';
+import { updateCloudCharacterData, commandCharacterVitals } from '../../shared/cloud/api/cloudCharacters.js';
 import { useRollChannel } from '../../shared/cloud/sync/useRollChannel.js';
 import { useCharacterCampaign } from '../../shared/cloud/sync/useCharacterCampaign.js';
 import { useCloudCharacterLive } from '../../shared/cloud/sync/useCloudCharacterLive.js';
+import { useAuth } from '../../shared/cloud/auth/AuthProvider.jsx';
 import { isSyncExcluded } from '../../shared/cloud/sync/cloudSyncExclude.js';
 import { normalizeRoll } from '../../shared/vtt/rolls/rollFeed.js';
 import { SYNCED_VITALS, clampCharacterVitals, pickCharacterVitals } from '../../shared/character/combat/vitals.js';
@@ -159,41 +160,35 @@ export default function CharacterSheet({
   const flushCloudSaveRef = useRef(null);
   const cloudSaveMountedRef = useRef(true);
   const cloudSaveErrorShownRef = useRef(false);
-  const dirtyVitalKeysRef = useRef(new Set());
   const localEditVersionRef = useRef(0);
   const queuedEditVersionRef = useRef(0);
   const usesExternalChar = Boolean(externalChar);
+  const auth = useAuth();
+  const hasCloudHealth = usesExternalChar || (auth.cloudEnabled && auth.status === 'authed');
   const [localLiveVitals, setLocalLiveVitals] = useState(null);
-  const incomingVitals = usesExternalChar ? liveVitals : localLiveVitals;
+  const incomingVitals = localLiveVitals || liveVitals;
+  const healthRevisionRef = useRef(-1);
+  const healthRowRef = useRef(null);
+  const healthIdRef = useRef(null);
+  healthIdRef.current = usesExternalChar ? externalCharId : charId;
   const sheetReady = Boolean(sheet);
   sheetRef.current = sheet;
 
+  const acceptHealthRow = useCallback(async (row) => {
+    if (!row || String(row.id) !== String(healthIdRef.current) || Number(row.row_revision ?? 0) < healthRevisionRef.current) return;
+    healthRevisionRef.current = Number(row.row_revision ?? 0);
+    healthRowRef.current = row;
+    await ensureSheetRuntimeAdapters(row.data);
+    if (healthRowRef.current !== row || String(row.id) !== String(healthIdRef.current)) return;
+    const maxHP = Math.max(1, Math.max(1, calcMaxHP(row.data)) + (Number(row.data.maxHPBonus) || 0));
+    setLocalLiveVitals({ ...clampCharacterVitals(row.data, { maxHP, fallback: { currentHP: maxHP } }), maxHP });
+  }, []);
+
   useCloudCharacterLive({
     charId,
-    enabled: !usesExternalChar && !readOnly && !isSyncExcluded(charId),
-    onUpdate: (row) => setLocalLiveVitals(pickCharacterVitals(row.data)),
+    enabled: !readOnly && !isSyncExcluded(charId),
+    onUpdate: (row) => { acceptHealthRow(row).catch(() => {}); },
   });
-
-  // Local sheets save through CloudAutoSync. Release their pending vitals only
-  // after that save succeeds, and only if no newer local edit superseded it.
-  useEffect(() => {
-    if (usesExternalChar || !charId) return undefined;
-    let savingVersion = null;
-    let savesInFlight = 0;
-    const handleSync = ({ detail }) => {
-      if (detail?.id !== charId) return;
-      if (detail.state === 'syncing') {
-        savesInFlight += 1;
-        savingVersion = localEditVersionRef.current;
-      }
-      if (detail.state === 'synced' || detail.state === 'error') savesInFlight = Math.max(0, savesInFlight - 1);
-      if (detail.state === 'synced' && savesInFlight === 0 && savingVersion === localEditVersionRef.current) {
-        dirtyVitalKeysRef.current.clear();
-      }
-    };
-    window.addEventListener('gb:cloud-sync', handleSync);
-    return () => window.removeEventListener('gb:cloud-sync', handleSync);
-  }, [usesExternalChar, charId]);
 
   useEffect(() => {
     if (embedded) return;
@@ -205,7 +200,9 @@ export default function CharacterSheet({
     let alive = true;
     cloudSaveReadyRef.current = false;
     pendingCloudSaveRef.current = null;
-    dirtyVitalKeysRef.current.clear();
+    healthRevisionRef.current = -1;
+    healthRowRef.current = null;
+    setLocalLiveVitals(null);
     localEditVersionRef.current = 0;
     queuedEditVersionRef.current = 0;
     cloudSaveErrorShownRef.current = false;
@@ -275,13 +272,21 @@ export default function CharacterSheet({
     return () => { alive = false; };
   }, [externalChar, externalCharId]);
 
-  const persist = useCallback((patch, { fromCloud = false } = {}) => {
+  const persist = useCallback((patch, { fromCloud = false, command } = {}) => {
     if (!charId || !patch) return;
+    const onlineVitals = !fromCloud && !isSyncExcluded(charId) && hasCloudHealth;
+    if (onlineVitals && SYNCED_VITALS.some((field) => Object.hasOwn(patch, field.data))) {
+      const vitalPatch = Object.fromEntries(SYNCED_VITALS.filter((f) => Object.hasOwn(patch, f.data)).map((f) => [f.data, patch[f.data]]));
+      const confirmed = sheetRef.current;
+      setSheet((prev) => ({ ...prev, ...pickCharacterVitals(confirmed), maxHP: confirmed.maxHP }));
+      commandCharacterVitals(charId, command || { type: 'patch', patch: vitalPatch })
+        .then(acceptHealthRow)
+        .catch((error) => setDiceToast({ label: 'Health update failed', detail: error.message, rolls: [], timestamp: Date.now() }));
+      patch = Object.fromEntries(Object.entries(patch).filter(([key]) => !SYNCED_VITALS.some((f) => f.data === key)));
+      if (!Object.keys(patch).length) return;
+    }
     if (!fromCloud) {
       localEditVersionRef.current += 1;
-      for (const field of SYNCED_VITALS) {
-        if (Object.hasOwn(patch, field.data)) dirtyVitalKeysRef.current.add(field.data);
-      }
     }
     if (usesExternalChar) {
       setC((prev) => prev ? { ...prev, ...patch } : prev);
@@ -290,11 +295,14 @@ export default function CharacterSheet({
     const next = storePatchCharacter(charId, patch, { emit: !fromCloud });
     if (next) setC(next);
     else setC((prev) => prev ? { ...prev, ...patch } : prev);
-  }, [charId, usesExternalChar]);
+  }, [charId, usesExternalChar, hasCloudHealth, acceptHealthRow]);
 
   const syncSheet = useCallback((updates) => {
+    if (hasCloudHealth && !isSyncExcluded(charId)) {
+      updates = Object.fromEntries(Object.entries(updates).filter(([key]) => !SYNCED_VITALS.some((field) => field.data === key)));
+    }
     setSheet((prev) => ({ ...prev, ...updates }));
-  }, []);
+  }, [hasCloudHealth, charId]);
 
   // Merge synced vitals without replacing notes, inventory or other local edits.
   // Also apply updates received while the initial sheet was still loading.
@@ -303,14 +311,10 @@ export default function CharacterSheet({
     if (!incomingVitals || !sheetReady || readOnly) return;
     const s = sheetRef.current;
     if (!s) return;
-    // A local vital that has not reached the cloud yet wins over an older row
-    // fetched during recovery. Other vital fields still reconcile normally.
-    const incoming = { ...incomingVitals };
-    for (const key of dirtyVitalKeysRef.current) incoming[key] = s[key];
-    const vitals = clampCharacterVitals(incoming, { fallback: s });
+    const vitals = clampCharacterVitals(incomingVitals, { fallback: s });
     // Max HP is derived (base + bonus); apply the synced bonus and re-clamp current.
     const baseMax = Math.max(1, (Number(s.maxHP) || 1) - (Number(s.maxHPBonus) || 0));
-    const maxHP = Math.max(1, baseMax + vitals.maxHPBonus);
+    const maxHP = incomingVitals.maxHP ?? Math.max(1, baseMax + vitals.maxHPBonus);
     const next = { ...vitals, currentHP: Math.max(0, Math.min(maxHP, vitals.currentHP)) };
     // Compared field by field through the registry's own normalizer, so a newly
     // synced field is covered the moment it is declared instead of needing a
@@ -325,14 +329,11 @@ export default function CharacterSheet({
   }, [incomingVitals, sheetReady, readOnly, persist]);
 
   const updateCurrentCharacter = useCallback((updater) => {
-    localEditVersionRef.current += 1;
-    setC((prev) => {
-      if (!prev) return prev;
-      const next = typeof updater === 'function' ? updater(prev) : updater;
-      if (!usesExternalChar && charId) storePatchCharacter(charId, next);
-      return next;
-    });
-  }, [charId, usesExternalChar]);
+    if (!C) return;
+    const next = typeof updater === 'function' ? updater(C) : updater;
+    const patch = Object.fromEntries(Object.entries(next).filter(([key, value]) => JSON.stringify(value) !== JSON.stringify(C[key])));
+    persist(patch, Object.hasOwn(patch, 'tempHP') ? { command: { type: 'grantTempHp', value: patch.tempHP } } : {});
+  }, [C, persist]);
 
   const updateInventory = useCallback((inventory) => {
     const normalized = normalizeCharacterAttunement(C, inventory);
@@ -403,7 +404,6 @@ export default function CharacterSheet({
       await updateCloudCharacterData(attempt.charId, attempt.character);
       if (pendingCloudSaveRef.current === attempt) {
         pendingCloudSaveRef.current = null;
-        for (const key of attempt.dirtyVitalKeys) dirtyVitalKeysRef.current.delete(key);
       }
       cloudSaveErrorShownRef.current = false;
     } catch (error) {
@@ -445,7 +445,6 @@ export default function CharacterSheet({
     pendingCloudSaveRef.current = {
       charId,
       character: C,
-      dirtyVitalKeys: new Set(dirtyVitalKeysRef.current),
     };
     cloudSaveErrorShownRef.current = false;
     scheduleCloudSave();
@@ -529,7 +528,7 @@ export default function CharacterSheet({
     }
 
     setSheet(s);
-    if (Object.keys(patch).length) persist(patch);
+    if (Object.keys(patch).length) persist(patch, { command: { type: 'modifyHp', delta: Math.max(0, totalHeal) } });
     setShortRestOpen(false);
     if (totalSpent > 0) {
       showDiceToast('Short Rest', `Healed ${totalHeal} HP (${totalSpent} HD spent)`, totalHeal, rolls);
@@ -591,7 +590,7 @@ export default function CharacterSheet({
     }
 
     setSheet(s);
-    persist(patch);
+    persist(patch, { command: { type: 'longRest', exhaustionLevel: exRest.exhaustionLevel } });
     setLongRestOpen(false);
     showNotice('Long Rest', 'Fully restored!');
   }, [sheet, resources, freeCastUses, C, persist, showNotice]);
@@ -619,14 +618,14 @@ export default function CharacterSheet({
       patch.activeConditions = s.activeConditions;
     }
     setSheet(s);
-    persist(patch);
+    persist(patch, { command: { type: 'modifyHp', delta: dir > 0 ? dmg : -dmg } });
   }, [sheet, persist]);
 
   const adjustTempHP = useCallback((dir) => {
     if (!sheet) return;
     const s = { ...sheet, tempHP: Math.max(0, sheet.tempHP + dir) };
     setSheet(s);
-    persist({ tempHP: s.tempHP });
+    persist({ tempHP: s.tempHP }, { command: { type: 'modifyTempHp', delta: dir } });
   }, [sheet, persist]);
 
   const adjustMaxHpBonus = useCallback((dir) => {
@@ -636,7 +635,7 @@ export default function CharacterSheet({
     s.maxHP = Math.max(1, baseMax + s.maxHPBonus);
     if (s.currentHP > s.maxHP) s.currentHP = s.maxHP;
     setSheet(s);
-    persist({ currentHP: s.currentHP, maxHPBonus: s.maxHPBonus });
+    persist({ currentHP: s.currentHP, maxHPBonus: s.maxHPBonus }, { command: { type: 'modifyMaxHp', delta: dir } });
   }, [sheet, C, persist]);
 
   const setCurrentHP = useCallback((next) => {
@@ -650,7 +649,7 @@ export default function CharacterSheet({
       patch.activeConditions = s.activeConditions;
     }
     setSheet(s);
-    persist(patch);
+    persist(patch, { command: { type: 'setHp', value: parseInt(next) || 0 } });
   }, [sheet, persist]);
 
   const setTempHP = useCallback((next) => {
@@ -667,7 +666,7 @@ export default function CharacterSheet({
     const s = { ...sheet, maxHPBonus: bonus, maxHP: Math.max(1, baseMax + bonus) };
     if (s.currentHP > s.maxHP) s.currentHP = s.maxHP;
     setSheet(s);
-    persist({ currentHP: s.currentHP, maxHPBonus: s.maxHPBonus });
+    persist({ currentHP: s.currentHP, maxHPBonus: s.maxHPBonus }, { command: { type: 'setMaxHpBonus', value: bonus } });
   }, [sheet, C, persist]);
 
   const setDeathSave = useCallback((type, count) => {
@@ -678,7 +677,7 @@ export default function CharacterSheet({
     const activeConditions = setConditionActive(sheet.activeConditions, DEAD_CONDITION_KEY, dead);
     const patch = { deathSaves: ds, activeConditions, ...(dead ? { currentHP: 0 } : {}) };
     setSheet({ ...sheet, ...patch });
-    persist(patch);
+    persist(patch, { command: { type: 'setDeathSave', saveType: type, value } });
   }, [sheet, persist]);
 
   const rollDeathSave = useCallback(() => {
@@ -716,7 +715,7 @@ export default function CharacterSheet({
         maxHPBonus: s.maxHPBonus,
         deathSaves: ds,
         activeConditions: s.activeConditions,
-      });
+      }, { command: { type: 'deathSaveRoll', roll, total } });
       showDiceToast('Death Save', 'Critical success: regain 1 HP', roll, [{ v: roll, faces: 20 }]);
       return;
     } else if (total >= 10) { ds.success = Math.min(3, ds.success + 1); }
@@ -728,7 +727,7 @@ export default function CharacterSheet({
     const activeConditions = setConditionActive(sheet.activeConditions, DEAD_CONDITION_KEY, ds.fail >= 3);
     const patch = { deathSaves: ds, activeConditions };
     setSheet({ ...sheet, ...patch });
-    persist(patch);
+    persist(patch, { command: { type: 'deathSaveRoll', roll, total } });
     showDiceToast('Death Save', extra + penaltyNote, total, [{ v: roll, faces: 20 }]);
   }, [sheet, persist, showDiceToast, showNotice]);
 
@@ -748,7 +747,7 @@ export default function CharacterSheet({
       patch.activeConditions = setConditionActive(next, DEAD_CONDITION_KEY, true);
     }
     setSheet({ ...sheet, ...patch });
-    persist(patch);
+    persist(patch, { command: { type: 'setExhaustion', value: lvl } });
   }, [sheet, persist]);
 
   const toggleCondition = useCallback((key) => {
@@ -772,14 +771,14 @@ export default function CharacterSheet({
           activeConditions: setConditionActive(sheet.activeConditions, DEAD_CONDITION_KEY, false),
         };
       setSheet({ ...sheet, ...patch });
-      persist(patch);
+      persist(patch, { command: { type: 'toggleCombatantCondition', key } });
       return;
     }
     // Shared with the encounter builder so both surfaces apply the same
     // implied-condition cascade (Unconscious also grants Incapacitated + Prone).
     const next = toggleConditionKey(sheet.activeConditions, key);
     setSheet({ ...sheet, activeConditions: next });
-    persist({ activeConditions: next });
+    persist({ activeConditions: next }, { command: { type: 'toggleCombatantCondition', key } });
   }, [sheet, persist, setExhaustion]);
 
   const clearConditions = useCallback(() => {
@@ -791,7 +790,7 @@ export default function CharacterSheet({
       ...(wasDead ? { currentHP: Math.min(sheet.maxHP, 1), deathSaves: { success: 0, fail: 0 } } : {}),
     };
     setSheet({ ...sheet, ...patch });
-    persist(patch);
+    persist(patch, { command: { type: 'clearCombatantConditions', clearExhaustion: true } });
   }, [sheet, persist]);
 
   const toggleInspiration = useCallback(() => {

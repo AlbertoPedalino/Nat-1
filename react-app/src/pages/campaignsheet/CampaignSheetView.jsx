@@ -3,7 +3,6 @@ import { Box, Typography, CircularProgress } from '@mui/material';
 import CharacterSheet from '../charsheet/CharacterSheet.jsx';
 import { getCloudCharacter } from '../../shared/cloud/api/cloudCharacters.js';
 import { useCloudCharacterLive } from '../../shared/cloud/sync/useCloudCharacterLive.js';
-import { pickCharacterVitals } from '../../shared/character/combat/vitals.js';
 
 function charIdFromUrl() {
   return new URLSearchParams(window.location.search).get('id');
@@ -19,9 +18,10 @@ function rowTime(updatedAt) {
   return Number.isFinite(time) ? time : null;
 }
 
-function rowIsOlder(row, currentUpdatedAt) {
+function rowIsOlder(row, current) {
+  if (row?.row_revision != null && current?.revision != null) return Number(row.row_revision) < Number(current.revision);
   const nextTime = rowTime(row?.updated_at);
-  const currentTime = rowTime(currentUpdatedAt);
+  const currentTime = rowTime(current?.updatedAt);
   return nextTime != null && currentTime != null && nextTime < currentTime;
 }
 
@@ -34,6 +34,7 @@ function sheetStateFromRow(row, prev = {}) {
     owner: row.owner_username || row.owner || null,
     name: row.name || row.data.name || null,
     updatedAt: row.updated_at || null,
+    revision: row.row_revision ?? null,
   };
 }
 
@@ -45,33 +46,23 @@ export default function CampaignSheetView({
   showOwnRollToast = true,
 } = {}) {
   const [state, setState] = useState({ loading: true, error: '', char: null, owner: null, name: null, updatedAt: null });
-  const [liveVitals, setLiveVitals] = useState(null);
   const charId = sheetId || charIdFromUrl();
   const canEdit = editable ?? editFromUrl();
 
   const applyCloudRow = useCallback((row) => {
     if (row?.id && charId && String(row.id) !== String(charId)) return;
-    if (canEdit) {
-      // Editable sheet keeps local draft state + full-sheet autosave. Push ONLY
-      // the synced vitals; CharacterSheet merges them without touching the user's
-      // in-progress edits to other fields.
-      const data = row?.data;
-      if (!data || typeof data !== 'object') return;
-      setLiveVitals({ ...pickCharacterVitals(data), receivedAt: row.updated_at || Date.now() });
-      return;
-    }
     setState((prev) => {
-      if (rowIsOlder(row, prev.updatedAt)) return prev;
+      if (rowIsOlder(row, prev)) return prev;
       return sheetStateFromRow(row, prev);
     });
-  }, [charId, canEdit]);
+  }, [charId]);
 
-  useCloudCharacterLive({ charId, enabled: true, onUpdate: applyCloudRow });
+  // Editable sheets own their subscription and merge only health into drafts.
+  useCloudCharacterLive({ charId, enabled: !canEdit, onUpdate: applyCloudRow });
 
   useEffect(() => {
     let alive = true;
     const id = charId;
-    setLiveVitals(null);
     if (!id) {
       setState({ loading: false, error: 'No sheet id.', char: null, owner: null, name: null, updatedAt: null });
       return undefined;
@@ -81,7 +72,7 @@ export default function CampaignSheetView({
       .then((row) => {
         if (!alive) return;
         setState((prev) => {
-          if (rowIsOlder(row, prev.updatedAt)) return { ...prev, loading: false, error: '' };
+          if (rowIsOlder(row, prev)) return { ...prev, loading: false, error: '' };
           return sheetStateFromRow(row, prev);
         });
       })
@@ -109,7 +100,6 @@ export default function CampaignSheetView({
           externalCharId={charId}
           readOnly={!canEdit}
           embedded={embedded}
-          liveVitals={canEdit ? liveVitals : null}
           onRoll={onRoll}
           showOwnRollToast={showOwnRollToast}
         />

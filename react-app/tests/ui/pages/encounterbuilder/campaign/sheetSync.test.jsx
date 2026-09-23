@@ -1,141 +1,108 @@
-import { act, renderHook } from '@testing-library/react';
 import { useReducer } from 'react';
-import { useFightSheetSync } from '../../../../../src/pages/encounterbuilder/campaign/useFightSheetSync.js';
-import { useSheetRealtime } from '../../../../../src/pages/encounterbuilder/campaign/useSheetRealtime.js';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { encounterReducer, createInitialState } from '../../../../../src/pages/encounterbuilder/state/reducer.js';
-import { useEncounterPersistence } from '../../../../../src/pages/encounterbuilder/state/useEncounterPersistence.js';
-import { useExternalFightSync } from '../../../../../src/pages/encounterbuilder/sync/useExternalFightSync.js';
-import { persistFights, readPersistedInstance, registerEncounterInstance } from '../../../../../src/pages/encounterbuilder/state/storage.js';
+import CharacterVitalBridge from '../../../../../src/pages/encounterbuilder/campaign/CharacterVitalBridge.jsx';
+import { useCharacterVitalDispatch } from '../../../../../src/pages/encounterbuilder/campaign/useCharacterVitalDispatch.js';
+import { publishCharacterRow } from '../../../../../src/shared/cloud/sync/characterRows.js';
 
-const cloud = vi.hoisted(() => ({ patch: vi.fn(), receive: null }));
-vi.mock('../../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({
-  useAuth: () => ({ cloudEnabled: true, status: 'authed', user: { id: 'gm' } }),
-}));
-vi.mock('../../../../../src/shared/ui/ToastProvider.jsx', () => ({ useToast: () => ({ notify: vi.fn() }) }));
-vi.mock('../../../../../src/shared/cloud/api/cloudCharacters.js', () => ({ patchCharacterData: cloud.patch }));
-vi.mock('../../../../../src/pages/campaigns/sheetSummary.js', () => ({ summarizeCharacter: (data) => data }));
-vi.mock('../../../../../src/shared/cloud/supabaseClient.js', () => ({
-  supabase: {
-    channel: () => ({ on(_event, _filter, receive) { cloud.receive = receive; return this; }, subscribe() {} }),
-    removeChannel: vi.fn(),
-  },
-}));
+const cloud = vi.hoisted(() => ({ command: vi.fn(), get: vi.fn(), notify: vi.fn(), receivers: new Set(), states: {} }));
+vi.mock('../../../../../src/shared/cloud/api/cloudCharacters.js', () => ({ commandCharacterVitals: cloud.command, getCloudCharacter: cloud.get }));
+vi.mock('../../../../../src/shared/ui/ToastProvider.jsx', () => ({ useToast: () => ({ notify: cloud.notify }) }));
+vi.mock('../../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({ useAuth: () => ({ cloudEnabled: true, status: 'authed', user: { id: 'owner' } }) }));
+vi.mock('../../../../../src/shared/cloud/supabaseClient.js', () => ({ supabase: {
+  channel: () => ({
+    on(_type, _filter, fn) { this.receive = fn; cloud.receivers.add(fn); return this; },
+    subscribe(fn) { fn('SUBSCRIBED'); return this; },
+  }),
+  removeChannel(channel) { cloud.receivers.delete(channel.receive); },
+} }));
+vi.mock('../../../../../src/pages/campaigns/sheetSummary.js', () => ({ summarizeCharacter: (data) => ({ ...data, maxHP: 30 }) }));
+vi.mock('../../../../../src/pages/charsheet/state/sheetRuntimeAdapters.js', () => ({ ensureSheetRuntimeAdapters: async () => {} }));
 
-const monsters = [];
-
-function openCombat({ saved = false } = {}) {
-  const initial = encounterReducer(createInitialState(), {
-      type: 'resumeFight',
-      entry: { id: 'fight', fight: { combatants: [{
-        id: 'player', type: 'player', sourceId: 'character', name: 'Player', hpMax: 30,
-        hpCurrent: 30, tempHP: 0, maxHPBonus: 0, activeConditions: [], deathSaves: { s: 0, f: 0 },
-      }] } },
-    });
-  if (saved) {
-    registerEncounterInstance('test', 'Test');
-    persistFights('test', initial.activeFightId, initial.fights);
-  }
-  return renderHook(() => {
-    const [state, dispatch] = useReducer(encounterReducer, initial);
-    const sheetSync = useFightSheetSync(state.combat);
-    useSheetRealtime({ view: state.view, combat: state.combat, dispatch, sheetSync });
-    useEncounterPersistence({
-      instanceId: 'test', instanceSaved: saved, monsters, monsterStatus: 'ready', state, dispatch,
-    });
-    useExternalFightSync({
-      instanceId: 'test', instanceSaved: saved, activeFightId: state.activeFightId,
-      fights: state.fights, library: state.library, monsters, dispatch,
-    });
-    return { state, dispatch };
+const player = { id: 1, type: 'player', sourceId: 'character', name: 'Player', hpCurrent: 30, hpMax: 30, tempHP: 0, deathSaves: { s: 0, f: 0 }, activeConditions: [] };
+const monster = { id: 2, type: 'monster', name: 'Ogre', hpCurrent: 40, hpMax: 40 };
+const fight = { id: 'fight', encounterId: 'encounter', combatants: [player, monster], currentTurn: 0, round: 1 };
+const row = (hp, revision) => ({ id: 'character', row_revision: revision, data: { currentHP: hp, tempHP: 0, maxHPBonus: 0, activeConditions: [], deathSaves: { success: 0, fail: 0 } } });
+function Harness({ id }) {
+  const [state, reduce] = useReducer(encounterReducer, { ...createInitialState(), activeFightId: 'fight',
+    players: [{ sourceId: 'character', hpMax: 30, currentHP: 30 }], fights: [fight, { ...fight, id: 'second' }],
+    combat: { ...fight, fightId: 'fight' },
   });
+  const dispatch = useCharacterVitalDispatch(state.combat, reduce);
+  cloud.states[id] = { state, dispatch };
+  return <>
+    <CharacterVitalBridge charId="character" dispatch={reduce} refreshKey={state.activeFightId} />
+    <output data-testid={id}>{state.combat.combatants[0].hpCurrent}</output>
+    <button onClick={() => dispatch({ type: 'modifyHp', id: 1, delta: -5 })}>{id} damage</button>
+  </>;
 }
-
-function receive(currentHP, seconds = 1) {
-  cloud.receive({ new: {
-    id: 'character', updated_at: `2026-09-22T12:00:${String(seconds).padStart(2, '0')}.000Z`,
-    data: { currentHP, maxHP: 30, maxHPBonus: 0, tempHP: 0, activeConditions: [], deathSaves: { success: 0, fail: 0 } },
-  } });
-}
-async function flush() { await act(async () => { await vi.advanceTimersByTimeAsync(1000); }); }
-beforeEach(() => { localStorage.clear(); vi.useFakeTimers(); cloud.patch.mockReset().mockResolvedValue(undefined); });
-afterEach(() => { vi.useRealTimers(); });
-
-test('player damage updates the encounter without writing it back to the sheet', async () => {
-  const { result } = openCombat();
-  act(() => receive(25));
-  await flush();
-  expect(result.current.state.combat.combatants[0].hpCurrent).toBe(25);
-  expect(cloud.patch).not.toHaveBeenCalled();
+async function receive(hp, revision) { await act(async () => { for (const fn of cloud.receivers) fn({ new: row(hp, revision) }); }); }
+beforeEach(() => {
+  cloud.receivers.clear(); cloud.states = {};
+  cloud.command.mockReset().mockResolvedValue(undefined);
+  cloud.get.mockReset().mockResolvedValue(row(20, 1));
+  cloud.notify.mockReset();
 });
 
-test('returning to the synced HP cancels an older pending damage write', async () => {
-  const { result } = openCombat();
-  act(() => result.current.dispatch({ type: 'setHp', id: 'player', value: 25 }));
-  act(() => result.current.dispatch({ type: 'setHp', id: 'player', value: 30 }));
-  await flush();
-  expect(cloud.patch).not.toHaveBeenCalled();
+test('mount reconciles saved HP and a user damage click sends the intent only', async () => {
+  render(<Harness id="A" />);
+  await waitFor(() => expect(screen.getByTestId('A')).toHaveTextContent('20'));
+  expect(cloud.command).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByText('A damage'));
+  expect(cloud.command).toHaveBeenCalledWith('character', expect.objectContaining({ type: 'modifyHp', delta: -5 }));
+  expect(screen.getByTestId('A')).toHaveTextContent('20');
+  await act(async () => publishCharacterRow(row(15, 2)));
+  expect(screen.getByTestId('A')).toHaveTextContent('15');
 });
 
-test('a delayed older player update cannot undo newer HP', async () => {
-  const { result } = openCombat();
-  act(() => receive(20, 2));
-  act(() => receive(25, 1));
-  await flush();
-  expect(result.current.state.combat.combatants[0].hpCurrent).toBe(20);
-  expect(cloud.patch).not.toHaveBeenCalled();
-});
-
-test('player changes do not make a delayed GM echo authoritative again', async () => {
-  const { result } = openCombat();
-  act(() => result.current.dispatch({ type: 'setHp', id: 'player', value: 25 }));
-  await flush();
-  act(() => receive(20, 2));
-  act(() => receive(25, 1));
-  expect(result.current.state.combat.combatants[0].hpCurrent).toBe(20);
-});
-
-test('an HP undo is sent after an already in-flight damage write', async () => {
-  let finishWrite;
-  cloud.patch.mockImplementationOnce(() => new Promise((resolve) => { finishWrite = resolve; }));
-  const { result } = openCombat();
-  act(() => result.current.dispatch({ type: 'setHp', id: 'player', value: 25 }));
-  await flush();
-  act(() => result.current.dispatch({ type: 'setHp', id: 'player', value: 30 }));
-  await act(async () => finishWrite());
-  await flush();
-  expect(cloud.patch).toHaveBeenCalledTimes(2);
-  expect(cloud.patch).toHaveBeenLastCalledWith('character', expect.objectContaining({ currentHP: 30 }));
-});
-
-test('newer healing to a previous HP value is still accepted', async () => {
-  const { result } = openCombat();
-  act(() => receive(25, 1));
-  act(() => receive(20, 2));
-  act(() => receive(25, 3));
-  await flush();
-  expect(result.current.state.combat.combatants[0].hpCurrent).toBe(25);
-  expect(cloud.patch).not.toHaveBeenCalled();
-});
-
-test('repeated player damage remains stable with encounter persistence and storage listeners active', async () => {
-  const { result } = openCombat({ saved: true });
-  for (let seconds = 1; seconds <= 10; seconds += 1) {
-    const hp = 30 - seconds;
-    act(() => receive(hp, seconds));
-    await flush();
-    expect(result.current.state.combat.combatants[0].hpCurrent).toBe(hp);
-    expect(readPersistedInstance('test').fightsData.items[0].fight.combatants[0].hpCurrent).toBe(hp);
+test('two active builders consume one player row without publishing echoes', async () => {
+  render(<><Harness id="A" /><Harness id="B" /></>);
+  await waitFor(() => expect(screen.getByTestId('B')).toHaveTextContent('20'));
+  await receive(12, 3);
+  await receive(25, 2);
+  for (const id of ['A', 'B']) {
+    expect(screen.getByTestId(id)).toHaveTextContent('12');
+    expect(cloud.states[id].state.fights.every((f) => f.combatants[0].hpCurrent === 12)).toBe(true);
+    expect(cloud.states[id].state.players[0].currentHP).toBe(12);
   }
-  await act(async () => { await vi.advanceTimersByTimeAsync(30_000); });
-  expect(result.current.state.combat.combatants[0].hpCurrent).toBe(20);
-  expect(cloud.patch).not.toHaveBeenCalled();
+  expect(cloud.command).not.toHaveBeenCalled();
 });
 
-test('a player update cancels queued GM damage even when storage restores the saved fight', async () => {
-  const { result } = openCombat({ saved: true });
-  act(() => result.current.dispatch({ type: 'setHp', id: 'player', value: 25 }));
-  act(() => receive(20, 2));
-  await flush();
-  expect(result.current.state.combat.combatants[0].hpCurrent).toBe(20);
-  expect(cloud.patch).not.toHaveBeenCalled();
+test('restoring a stale fight cannot restore player HP, but updates monsters and effects', async () => {
+  render(<Harness id="A" />);
+  await waitFor(() => expect(screen.getByTestId('A')).toHaveTextContent('20'));
+  await receive(12, 2);
+  act(() => cloud.states.A.dispatch({ type: 'syncExternalFight', entry: { ...fight, combatants: [player, { ...monster, hpCurrent: 18 }] }, monsters: [] }));
+  expect(screen.getByTestId('A')).toHaveTextContent('12');
+  expect(cloud.states.A.state.combat.combatants[1].hpCurrent).toBe(18);
+  act(() => cloud.states.A.dispatch({ type: 'resumeFight', entry: fight, monsters: [] }));
+  expect(screen.getByTestId('A')).toHaveTextContent('12');
+  expect(cloud.command).not.toHaveBeenCalled();
+});
+
+test('reconnect refreshes all cached fights while the builder view is open', async () => {
+  render(<Harness id="A" />);
+  await waitFor(() => expect(screen.getByTestId('A')).toHaveTextContent('20'));
+  act(() => cloud.states.A.dispatch({ type: 'setView', view: 'builder' }));
+  cloud.get.mockResolvedValue(row(10, 2));
+  act(() => window.dispatchEvent(new Event('online')));
+  await waitFor(() => expect(screen.getByTestId('A')).toHaveTextContent('10'));
+  expect(cloud.command).not.toHaveBeenCalled();
+});
+
+test('failed character commands leave confirmed health intact and report the error', async () => {
+  cloud.command.mockRejectedValue(new Error('Offline'));
+  render(<Harness id="A" />);
+  await waitFor(() => expect(screen.getByTestId('A')).toHaveTextContent('20'));
+  fireEvent.click(screen.getByText('A damage'));
+  await waitFor(() => expect(cloud.notify).toHaveBeenCalledWith('error', expect.stringContaining('Offline')));
+  expect(screen.getByTestId('A')).toHaveTextContent('20');
+});
+
+test('monsters still use the encounter reducer', async () => {
+  render(<Harness id="A" />);
+  await waitFor(() => expect(screen.getByTestId('A')).toHaveTextContent('20'));
+  act(() => cloud.states.A.dispatch({ type: 'modifyHp', id: 2, delta: -5 }));
+  expect(cloud.states.A.state.combat.combatants[1].hpCurrent).toBe(35);
+  expect(cloud.command).not.toHaveBeenCalled();
 });

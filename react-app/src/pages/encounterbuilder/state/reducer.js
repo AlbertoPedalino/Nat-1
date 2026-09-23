@@ -82,6 +82,15 @@ export function createInitialState() {
 }
 
 export function encounterReducer(state, action) {
+  let next = reduceEncounterState(state, action);
+  if (next === state) return state;
+  for (const [id, vitals] of Object.entries(next.characterVitals || {})) {
+    next = syncCombatantVitals(next, id, vitals);
+  }
+  return next;
+}
+
+function reduceEncounterState(state, action) {
   switch (action.type) {
     case 'hydrateStorage':
       return hydrateState(state, action.payload, action.monsters);
@@ -164,6 +173,19 @@ export function encounterReducer(state, action) {
       );
     case 'resumeFight':
       return withCombat(state, restoreFight(action.entry, action.monsters), { view: 'combat' });
+    case 'syncExternalFight': {
+      if (!state.combat || String(action.entry?.id) !== String(state.activeFightId)) return state;
+      let combat = restoreFight(action.entry, action.monsters);
+      // Saved fights own monster vitals and encounter effects. A linked player's
+      // vitals come from the sheet: replaying a cached fight must never publish
+      // its old HP over the character's confirmed state.
+      for (const player of state.combat.combatants) {
+        if (player.type === 'player' && player.sourceId) {
+          combat = applySheetVitals(combat, player.sourceId, player);
+        }
+      }
+      return withCombat(state, combat);
+    }
     case 'closeCombat':
       return closeCombat(state);
     case 'nextTurn':
@@ -182,6 +204,18 @@ export function encounterReducer(state, action) {
       return state.combat ? withCombat(state, setMaxHp(state.combat, action.id, action.value)) : state;
     case 'setTempHp':
       return state.combat ? withCombat(state, setTempHp(state.combat, action.id, action.value)) : state;
+    case 'modifyTempHp': {
+      const c = state.combat?.combatants.find((item) => item.id === action.id);
+      return c ? withCombat(state, setTempHp(state.combat, action.id, (Number(c.tempHP) || 0) + action.delta)) : state;
+    }
+    case 'modifyMaxHp': {
+      const c = state.combat?.combatants.find((item) => item.id === action.id);
+      return c ? withCombat(state, setMaxHp(state.combat, action.id, c.hpMax + action.delta)) : state;
+    }
+    case 'setMaxHpBonus': {
+      const c = state.combat?.combatants.find((item) => item.id === action.id);
+      return c ? withCombat(state, setMaxHp(state.combat, action.id, c.hpMax - (c.maxHPBonus || 0) + action.value)) : state;
+    }
     case 'setDeathSave':
       return state.combat ? withCombat(state, setDeathSave(state.combat, action.id, action.saveType, action.value)) : state;
     case 'toggleCombatantCondition':
@@ -309,9 +343,27 @@ function absorbExternal(state, { fights = [], library = [] }) {
 }
 
 function syncCombatantVitals(state, sourceId, vitals) {
-  if (!state.combat) return state;
-  const combat = applySheetVitals(state.combat, sourceId, vitals);
-  return combat === state.combat ? state : withCombat(state, combat);
+  const cacheChanged = JSON.stringify(state.characterVitals?.[sourceId]) !== JSON.stringify(vitals);
+  let changed = cacheChanged;
+  const players = state.players.map((player) => {
+    if (String(player.sourceId || '') !== String(sourceId)) return player;
+    const resolved = resolveCombatVitals(player, vitals);
+    const patch = { ...combatantToSheetPatch(resolved), hpMax: resolved.hpMax };
+    if (Object.keys(patch).every((key) => JSON.stringify(player[key]) === JSON.stringify(patch[key]))) return player;
+    changed = true;
+    return { ...player, ...patch };
+  });
+  const fights = state.fights.map((fight) => {
+    const next = applySheetVitals(fight, sourceId, vitals);
+    if (next !== fight) changed = true;
+    return next;
+  });
+  const combat = state.combat ? applySheetVitals(state.combat, sourceId, vitals) : null;
+  if (combat !== state.combat) changed = true;
+  return changed ? {
+    ...state, players, fights, combat,
+    characterVitals: cacheChanged ? { ...state.characterVitals, [sourceId]: vitals } : state.characterVitals,
+  } : state;
 }
 
 // A creature's piece on the battle map, changed there. The same reconciliation

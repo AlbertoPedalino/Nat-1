@@ -11,8 +11,7 @@ vi.mock('../../../../../src/pages/encounterbuilder/bestiary/useMonsterDb.js', ()
   return { useMonsterDb: () => ({ monsters, status: 'ready' }) };
 });
 vi.mock('../../../../../src/pages/encounterbuilder/campaign/useCampaignPlayers.js', () => ({ useCampaignPlayers: () => ({ campaigns: [] }) }));
-vi.mock('../../../../../src/pages/encounterbuilder/campaign/useFightSheetSync.js', () => ({ useFightSheetSync: () => ({}) }));
-vi.mock('../../../../../src/pages/encounterbuilder/campaign/useSheetRealtime.js', () => ({ useSheetRealtime: () => {} }));
+vi.mock('../../../../../src/pages/encounterbuilder/campaign/CharacterVitalBridge.jsx', () => ({ default: () => null }));
 vi.mock('../../../../../src/pages/encounterbuilder/sync/useExternalFightSync.js', () => ({ useExternalFightSync: () => {} }));
 vi.mock('../../../../../src/pages/encounterbuilder/sync/useMapTokenBridge.js', () => ({ useMapTokenBridge: () => {} }));
 vi.mock('../../../../../src/pages/encounterbuilder/sync/useCloudFights.js', () => ({ useCloudFights: () => {} }));

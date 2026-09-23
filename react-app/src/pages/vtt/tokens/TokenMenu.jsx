@@ -45,6 +45,7 @@ export default function TokenMenu({
   const [deathSaves, setDeathSaves] = useState({ success: 0, fail: 0 });
   const syncedIdRef = useRef(null);
   const typingTimerRef = useRef(null);
+  const pendingPatchRef = useRef({});
   const objectStyleTimerRef = useRef(null);
 
   // Loaded once per piece, keyed by id rather than by object identity: a
@@ -53,6 +54,8 @@ export default function TokenMenu({
   useEffect(() => {
     if (!token || syncedIdRef.current === token.id) return;
     syncedIdRef.current = token.id;
+    pendingPatchRef.current = {};
+    clearTimeout(typingTimerRef.current);
     const secret = token.secretLabel || '';
     setGmOnly(Boolean(secret));
     setLabel(secret || token.label || '');
@@ -71,6 +74,9 @@ export default function TokenMenu({
   // loses the change silently.
   const save = useCallback((patch) => {
     if (!token) return;
+    clearTimeout(typingTimerRef.current);
+    patch = { ...pendingPatchRef.current, ...patch };
+    pendingPatchRef.current = {};
     const next = {
       label, gmOnly, conditions, showHp, effects, hpCurrent, hpMax, deathSaves, ...patch,
     };
@@ -85,6 +91,13 @@ export default function TokenMenu({
       hpCurrent: next.hpCurrent === '' ? null : Number(next.hpCurrent),
       hpMax: next.hpMax === '' ? null : Number(next.hpMax),
       deathSaves: deathSavesForToken(next.deathSaves, next.conditions, token.characterId),
+      // Only fields touched by this control are a health edit. Renaming a
+      // token or changing its visibility must never replay cached HP.
+      healthPatch: {
+        ...(Object.hasOwn(patch, 'hpCurrent') ? { currentHP: next.hpCurrent === '' ? 0 : Number(next.hpCurrent) } : {}),
+        ...(Object.hasOwn(patch, 'conditions') ? { activeConditions: next.conditions } : {}),
+        ...(Object.hasOwn(patch, 'deathSaves') ? { deathSaves: next.deathSaves } : {}),
+      },
     });
   }, [conditions, deathSaves, effects, gmOnly, hpCurrent, hpMax, label, onSave, showHp, token]);
 
@@ -92,7 +105,8 @@ export default function TokenMenu({
   // version per character, and a realtime event for each one.
   const saveSoon = useCallback((patch) => {
     clearTimeout(typingTimerRef.current);
-    typingTimerRef.current = setTimeout(() => save(patch), TYPING_DELAY);
+    pendingPatchRef.current = { ...pendingPatchRef.current, ...patch };
+    typingTimerRef.current = setTimeout(() => save({}), TYPING_DELAY);
   }, [save]);
 
   if (!token) return null;

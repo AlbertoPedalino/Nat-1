@@ -212,8 +212,8 @@ export default function CombatantCard({ combatant, active }) {
                     <HpStepper
                       amount={tempAmt}
                       onAmount={setTempAmt}
-                      onPlus={(n) => dispatch({ type: 'setTempHp', id: combatant.id, value: (Number(combatant.tempHP) || 0) + n })}
-                      onMinus={(n) => dispatch({ type: 'setTempHp', id: combatant.id, value: (Number(combatant.tempHP) || 0) - n })}
+                      onPlus={(n) => dispatch({ type: 'modifyTempHp', id: combatant.id, delta: n })}
+                      onMinus={(n) => dispatch({ type: 'modifyTempHp', id: combatant.id, delta: -n })}
                       plusLabel="Add temp HP"
                       minusLabel="Remove temp HP"
                     />
@@ -225,15 +225,14 @@ export default function CombatantCard({ combatant, active }) {
                       label="Max mod"
                       value={combatant.maxHPBonus ?? 0}
                       onChange={(value) => {
-                        const base = (Number(combatant.hpMax) || 0) - (Number(combatant.maxHPBonus) || 0);
-                        dispatch({ type: 'setMaxHp', id: combatant.id, value: base + (Number(value) || 0) });
+                        dispatch({ type: 'setMaxHpBonus', id: combatant.id, value: Number(value) || 0 });
                       }}
                     />
                     <HpStepper
                       amount={modAmt}
                       onAmount={setModAmt}
-                      onPlus={(n) => dispatch({ type: 'setMaxHp', id: combatant.id, value: (Number(combatant.hpMax) || 0) + n })}
-                      onMinus={(n) => dispatch({ type: 'setMaxHp', id: combatant.id, value: (Number(combatant.hpMax) || 0) - n })}
+                      onPlus={(n) => dispatch({ type: 'modifyMaxHp', id: combatant.id, delta: n })}
+                      onMinus={(n) => dispatch({ type: 'modifyMaxHp', id: combatant.id, delta: -n })}
                       plusLabel="Increase max HP"
                       minusLabel="Decrease max HP"
                     />

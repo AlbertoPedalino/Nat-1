@@ -210,26 +210,26 @@ export default function ClassPanel({ state, character, dispatch }) {
       {pendingChange && (
         <SheetDialog
           open
-          title="Cambiare classe?"
+          title="Change class?"
           icon={<TriangleAlert size={20} />}
           onClose={() => setPendingChange(null)}
           actions={(
             <>
-              <Button autoFocus variant="outlined" onClick={() => setPendingChange(null)}>Annulla</Button>
+              <Button autoFocus variant="outlined" onClick={() => setPendingChange(null)}>Cancel</Button>
               <Button variant="contained" onClick={() => {
                 dispatch(pendingChange.action);
                 setPendingChange(null);
-              }}>Cambia classe</Button>
+              }}>Change class</Button>
             </>
           )}
         >
           <Stack spacing={1.5}>
             <Typography>
-              Sostituire <Box component="strong">{pendingChange.currentLabel}</Box> con{' '}
+              Replace <Box component="strong">{pendingChange.currentLabel}</Box> with{' '}
               <Box component="strong">{pendingChange.nextLabel}</Box>?
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Le scelte legate alla classe precedente verranno azzerate.
+              Choices associated with the previous class will be reset.
             </Typography>
           </Stack>
         </SheetDialog>

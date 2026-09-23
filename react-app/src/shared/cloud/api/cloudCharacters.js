@@ -1,5 +1,7 @@
 import { requireClient } from '../supabaseClient.js';
 import { loadCharacter as storeLoadCharacter, saveCharacter as storeSaveCharacter } from '../../character/profile/store.js';
+import { applyVitalCommand } from '../../character/combat/vitalCommands.js';
+import { publishCharacterRow } from '../sync/characterRows.js';
 
 const TABLE = 'characters';
 
@@ -24,8 +26,8 @@ async function getCloudOwner(supabase, charId) {
   return data?.owner || null;
 }
 
-// Push the LOCAL copy of a character to the cloud (insert or overwrite).
-// We mirror exactly what store.js holds so a pull round-trips perfectly.
+// Push the local sheet. The database preserves existing combat vitals; only an
+// explicit health command can edit those on an existing character.
 export async function pushCharacter(charId) {
   const supabase = requireClient();
   const user = await currentUser();
@@ -56,7 +58,7 @@ export async function getCloudCharacter(charId) {
   const supabase = requireClient();
   const { data, error } = await supabase
     .from(TABLE)
-    .select('id, name, owner, owner_username, updated_at, data')
+    .select('id, name, owner, owner_username, updated_at, row_revision, data')
     .eq('id', charId)
     .single();
   if (error) throw error;
@@ -108,14 +110,61 @@ export async function updateCloudCharacterData(charId, character) {
   return data;
 }
 
-// Generic shallow patch for syncable top-level sheet fields. Object-valued
-// fields must be sent as complete sub-objects; the SQL RPC allowlist drops
-// non-syncable keys and RLS still decides which rows the caller may update.
+// Explicit absolute edits only. Damage/healing must use commandCharacterVitals
+// with a delta so concurrent edits are recalculated against the current row.
 export async function patchCharacterData(charId, patch) {
   if (!charId || !patch) return;
-  const { error } = await requireClient()
-    .rpc('patch_character_data', { p_id: charId, p_patch: patch });
-  if (error) throw error;
+  return commandCharacterVitals(charId, { type: 'patch', patch });
+}
+
+const healthQueues = new Map();
+
+export function commandCharacterVitals(charId, command) {
+  const operationId = crypto.randomUUID();
+  // Preserve click order within this tab. Other tabs/devices are serialized by
+  // the database revision check, not by clocks or encounter timestamps.
+  const previous = healthQueues.get(charId) || Promise.resolve();
+  const pending = previous.catch(() => {}).then(async () => {
+    const [{ calcMaxHP }, { ensureSheetRuntimeAdapters }] = await Promise.all([
+      import('../../../pages/charsheet/state/calculations.js'),
+      import('../../../pages/charsheet/state/sheetRuntimeAdapters.js'),
+    ]);
+    let row;
+    try { row = await getCloudCharacter(charId); }
+    catch (error) {
+      const local = error.code === 'PGRST116' ? storeLoadCharacter(charId) : null;
+      if (!local) throw error;
+      // The first command on a newly created local sheet can precede autosave.
+      // Insert its starting state, then apply the intent once via the same RPC.
+      await pushCharacterData(charId, local);
+      row = await getCloudCharacter(charId);
+    }
+    for (let attempt = 0; attempt < 12; attempt += 1) {
+      if (row.row_revision == null) throw new Error('Character health update requires the database migration.');
+      await ensureSheetRuntimeAdapters(row.data);
+      const patch = applyVitalCommand(row.data, command, Math.max(1, calcMaxHP(row.data)));
+      const args = { p_id: charId, p_revision: row.row_revision, p_operation: operationId, p_patch: patch };
+      let result;
+      // Retry transport failures using the SAME id, including lost acknowledgements.
+      for (let retry = 0; retry < 2; retry += 1) {
+        try {
+          result = await requireClient().rpc('commit_character_vitals', args);
+          if (result.error) throw result.error;
+          break;
+        } catch (error) { if (retry === 1) throw error; }
+      }
+      row = result.data.row;
+      if (result.data.applied) {
+        publishCharacterRow(row);
+        return row;
+      }
+    }
+    throw new Error('Character health is being edited elsewhere. Please try again.');
+  });
+  healthQueues.set(charId, pending);
+  const cleanup = () => { if (healthQueues.get(charId) === pending) healthQueues.delete(charId); };
+  pending.then(cleanup, cleanup);
+  return pending;
 }
 
 // Upsert a character to the cloud straight from an in-memory object — no local

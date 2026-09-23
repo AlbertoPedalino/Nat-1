@@ -8,8 +8,8 @@ const cloud = vi.hoisted(() => ({
 }));
 vi.mock('../../../../../src/shared/cloud/api/vtt.js', () => cloud);
 vi.mock('../../../../../src/shared/cloud/api/campaigns.js', () => cloud);
-vi.mock('../../../../../src/shared/campaign/characterVitals.js', () => ({
-  readCampaignVitals: cloud.readCampaignVitals, mergeVitals: (roster) => roster,
+vi.mock('../../../../../src/shared/campaign/characterVitals.js', async (original) => ({
+  ...await original(), readCampaignVitals: cloud.readCampaignVitals,
 }));
 
 function deferred() {
@@ -33,6 +33,38 @@ function openScene() {
     })),
   };
 }
+
+test('late character calculations and older RPC responses cannot undo newer HP on the map', async () => {
+  const row = (hp, revision) => ({ id: 'pc', row_revision: revision, data: { currentHP: hp } });
+  const vitals = (hp) => new Map([['pc', { hpCurrent: hp, hpMax: 30, tempHp: 0 }]]);
+  cloud.listCampaignCharacters.mockResolvedValue([row(30, 0)]);
+  cloud.readCampaignVitals.mockResolvedValue(vitals(30));
+  const { result } = openScene();
+  await waitFor(() => expect(result.current.roster[0]?.hpCurrent).toBe(30));
+  const slow = deferred();
+  cloud.readCampaignVitals.mockReturnValueOnce(slow.promise).mockResolvedValueOnce(vitals(10));
+  act(() => result.current.handleCharacterEvent({ new: row(20, 1) }));
+  await act(async () => result.current.handleCharacterEvent({ new: row(10, 2) }));
+  expect(result.current.roster[0].hpCurrent).toBe(10);
+  await act(async () => slow.resolve(vitals(20)));
+  act(() => window.dispatchEvent(new CustomEvent('gb:character-row', { detail: row(20, 1) })));
+  expect(result.current.roster[0].hpCurrent).toBe(10);
+});
+
+test('a reconnect snapshot uses character updates received while its request was pending', async () => {
+  const row = (hp, revision) => ({ id: 'pc', row_revision: revision, data: { currentHP: hp } });
+  cloud.listCampaignCharacters.mockResolvedValue([row(30, 0)]);
+  cloud.readCampaignVitals.mockImplementation(async (rows) => new Map(rows.map((r) => [r.id, { hpCurrent: r.data.currentHP, hpMax: 30 }])));
+  const { result } = openScene();
+  await waitFor(() => expect(result.current.roster[0]?.hpCurrent).toBe(30));
+  const staleRead = deferred();
+  cloud.listCampaignCharacters.mockReturnValueOnce(staleRead.promise);
+  let refresh;
+  act(() => { refresh = result.current.refreshContent(); });
+  await act(async () => result.current.handleCharacterEvent({ new: row(10, 2) }));
+  await act(async () => { staleRead.resolve([row(20, 1)]); await refresh; });
+  expect(result.current.roster[0].hpCurrent).toBe(10);
+});
 
 test('a reconnect finishing before the initial load releases the spinner and wins', async () => {
   const initial = deferred();

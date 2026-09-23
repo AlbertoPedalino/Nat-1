@@ -11,7 +11,8 @@ import { externalDelta } from './externalSync.js';
 //
 // Two different repairs, because the map writes in two different places:
 //
-//   the fight in play  — applied through `resumeFight`, and only when it really
+//   the fight in play  — applied through `syncExternalFight`, preserving sheet
+//                        vitals for linked players, and only when it really
 //                        differs: re-applying our own write would fight the
 //                        reducer on every keystroke.
 //   everything else    — merged into the arrays this tab holds. It has to be,
@@ -52,7 +53,7 @@ export function useExternalFightSync({
       const signature = fightSignature(entry);
       if (signature === lastRef.current) return;
       lastRef.current = signature;
-      dispatch({ type: 'resumeFight', entry, monsters });
+      dispatch({ type: 'syncExternalFight', entry, monsters });
     };
 
     // Seeded rather than applied: the fight on screen is already this one, and

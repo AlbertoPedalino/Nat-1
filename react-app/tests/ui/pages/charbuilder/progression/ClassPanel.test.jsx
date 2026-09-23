@@ -28,17 +28,17 @@ function setup(overrides = {}) {
 test.each([0, 1])('changing the class in tab %i requires confirmation and supports cancellation', (activeClassTab) => {
   const { dispatch, confirm } = setup({ activeClassTab });
   fireEvent.click(screen.getByText('Wizard'));
-  const dialog = screen.getByRole('dialog', { name: 'Cambiare classe?' });
+  const dialog = screen.getByRole('dialog', { name: 'Change class?' });
   expect(dialog).toHaveTextContent(activeClassTab ? 'Rogue (XPHB)' : 'Fighter (XPHB)');
   expect(dialog).toHaveTextContent('Wizard (XPHB)');
   expect(confirm).not.toHaveBeenCalled();
   expect(dispatch).not.toHaveBeenCalled();
 
-  fireEvent.click(within(dialog).getByRole('button', { name: 'Annulla' }));
+  fireEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }));
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   expect(dispatch).not.toHaveBeenCalled();
   fireEvent.click(screen.getByText('Wizard'));
-  fireEvent.click(screen.getByRole('button', { name: 'Cambia classe' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Change class' }));
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   expect(dispatch).toHaveBeenCalledOnce();
   expect(dispatch).toHaveBeenCalledWith({

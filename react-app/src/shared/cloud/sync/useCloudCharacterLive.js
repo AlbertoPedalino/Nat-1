@@ -2,6 +2,7 @@ import { useEffect, useId, useRef } from 'react';
 import { useAuth } from '../auth/AuthProvider.jsx';
 import { supabase } from '../supabaseClient.js';
 import { getCloudCharacter } from '../api/cloudCharacters.js';
+import { CHARACTER_ROW_EVENT } from './characterRows.js';
 
 const CHARACTER_RECONCILE_MS = 30_000;
 
@@ -11,10 +12,11 @@ function channelSuffix(charId, instanceId) {
     .slice(0, 90);
 }
 
-export function useCloudCharacterLive({ charId, enabled = true, onUpdate } = {}) {
+export function useCloudCharacterLive({ charId, enabled = true, onUpdate, refreshKey } = {}) {
   const { cloudEnabled, status, user } = useAuth();
   const instanceId = useId();
   const onUpdateRef = useRef(onUpdate);
+  const lastRow = useRef({ id: null, revision: -1 });
 
   onUpdateRef.current = onUpdate;
 
@@ -28,6 +30,7 @@ export function useCloudCharacterLive({ charId, enabled = true, onUpdate } = {})
     let refreshRequest = 0;
     let newestCommitTime = 0;
     let realtimeRevision = 0;
+    if (lastRow.current.id !== id) lastRow.current = { id, revision: -1 };
 
     const isCharacterRow = (row) => (
       alive && row && String(row.id || '') === id && row.data && typeof row.data === 'object'
@@ -36,6 +39,10 @@ export function useCloudCharacterLive({ charId, enabled = true, onUpdate } = {})
     const deliverRow = (row) => {
       try {
         if (!isCharacterRow(row)) return;
+        if (row.row_revision != null) {
+          if (Number(row.row_revision) < lastRow.current.revision) return;
+          lastRow.current.revision = Number(row.row_revision);
+        }
         onUpdateRef.current?.(row);
       } catch (_) {
         // Realtime is opportunistic; bad payloads should not break sheet viewing.
@@ -94,6 +101,12 @@ export function useCloudCharacterLive({ charId, enabled = true, onUpdate } = {})
       if (document.visibilityState === 'visible') refresh();
     };
     const timer = window.setInterval(refresh, CHARACTER_RECONCILE_MS);
+    const receiveCommand = ({ detail }) => {
+      if (!isCharacterRow(detail)) return;
+      realtimeRevision += 1;
+      deliverRow(detail);
+    };
+    window.addEventListener(CHARACTER_ROW_EVENT, receiveCommand);
     window.addEventListener('online', refresh);
     window.addEventListener('focus', refresh);
     document.addEventListener('visibilitychange', refreshWhenVisible);
@@ -102,6 +115,7 @@ export function useCloudCharacterLive({ charId, enabled = true, onUpdate } = {})
       alive = false;
       refreshRequest += 1;
       window.clearInterval(timer);
+      window.removeEventListener(CHARACTER_ROW_EVENT, receiveCommand);
       window.removeEventListener('online', refresh);
       window.removeEventListener('focus', refresh);
       document.removeEventListener('visibilitychange', refreshWhenVisible);
@@ -111,5 +125,5 @@ export function useCloudCharacterLive({ charId, enabled = true, onUpdate } = {})
         // Cleanup remains fail-soft if the socket was already closed.
       }
     };
-  }, [charId, enabled, cloudEnabled, status, user?.id, instanceId]);
+  }, [charId, enabled, cloudEnabled, status, user?.id, instanceId, refreshKey]);
 }

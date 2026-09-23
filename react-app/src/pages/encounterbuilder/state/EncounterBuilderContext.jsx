@@ -5,8 +5,8 @@ import { encounterReducer, createInitialState } from './reducer.js';
 import { useEncounterPersistence } from './useEncounterPersistence.js';
 import { useMonsterDb } from '../bestiary/useMonsterDb.js';
 import { useCampaignPlayers } from '../campaign/useCampaignPlayers.js';
-import { useFightSheetSync } from '../campaign/useFightSheetSync.js';
-import { useSheetRealtime } from '../campaign/useSheetRealtime.js';
+import CharacterVitalBridge from '../campaign/CharacterVitalBridge.jsx';
+import { useCharacterVitalDispatch } from '../campaign/useCharacterVitalDispatch.js';
 import { useExternalFightSync } from '../sync/useExternalFightSync.js';
 import { useMapTokenBridge } from '../sync/useMapTokenBridge.js';
 import { useCloudFights } from '../sync/useCloudFights.js';
@@ -16,15 +16,19 @@ import { encounterRollActor } from '../rolls/rollActor.js';
 const EncounterBuilderContext = createContext(null);
 
 export function EncounterBuilderProvider({ instanceId, instanceSaved, linkGroupId, onInstanceSaved, children }) {
-  const [state, dispatch] = useReducer(encounterReducer, undefined, createInitialState);
+  const [state, reduce] = useReducer(encounterReducer, undefined, createInitialState);
+  const dispatch = useCharacterVitalDispatch(state.combat, reduce);
+  const characterIds = [...new Set([
+    ...state.players.map((p) => p.sourceId),
+    ...(state.combat?.combatants || []).filter((p) => p.type === 'player').map((p) => p.sourceId),
+    ...state.fights.flatMap((f) => (f.combatants || []).filter((p) => p.type === 'player').map((p) => p.sourceId)),
+  ].filter(Boolean))];
   const monsterDb = useMonsterDb();
   const campaignPlayers = useCampaignPlayers();
   const rollSync = useEncounterRolls({
     instanceId, players: state.players, campaigns: campaignPlayers.campaigns, dispatch,
   });
   const { shareRoll } = rollSync;
-  const sheetSync = useFightSheetSync(state.combat);
-  useSheetRealtime({ view: state.view, combat: state.combat, dispatch, sheetSync });
   const { saveInstance } = useEncounterPersistence({
     instanceId,
     instanceSaved,
@@ -108,10 +112,11 @@ export function EncounterBuilderProvider({ instanceId, instanceSaved, linkGroupI
     saveInstance,
     saveEncounterToLibrary,
     roll,
-  }), [campaignPlayers, rollSync, instanceId, instanceSaved, monsterDb, roll, saveEncounterToLibrary, saveInstance, state]);
+  }), [campaignPlayers, rollSync, instanceId, instanceSaved, monsterDb, roll, saveEncounterToLibrary, saveInstance, state, dispatch]);
 
   return (
     <EncounterBuilderContext.Provider value={value}>
+      {characterIds.map((id) => <CharacterVitalBridge key={id} charId={id} dispatch={reduce} refreshKey={state.activeFightId} />)}
       {children}
     </EncounterBuilderContext.Provider>
   );

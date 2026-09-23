@@ -12,6 +12,26 @@ function render(ui) {
   };
 }
 
+test('saving a character token label carries no cached health', () => {
+  const onSave = vi.fn();
+  render(<TokenMenu token={{ id: 'pc', characterId: 'character', label: 'Hero', hpCurrent: 20, hpMax: 30, conditions: [], effects: [] }}
+    anchor={{ x: 20, y: 20 }} onClose={vi.fn()} onSave={onSave} onDelete={vi.fn()} />);
+  const label = screen.getByRole('textbox', { name: 'Label' });
+  fireEvent.change(label, { target: { value: 'New label' } });
+  fireEvent.blur(label);
+  expect(onSave).toHaveBeenLastCalledWith(expect.anything(), expect.objectContaining({ healthPatch: {} }));
+});
+
+test('blurring a monster HP field flushes its typed edit', () => {
+  const onSave = vi.fn();
+  render(<TokenMenu token={{ id: 'monster', label: 'Ogre', hpCurrent: 20, hpMax: 30, conditions: [], effects: [] }}
+    anchor={{ x: 20, y: 20 }} onClose={vi.fn()} onSave={onSave} onDelete={vi.fn()} />);
+  const hp = screen.getByRole('spinbutton', { name: 'HP' });
+  fireEvent.change(hp, { target: { value: '12' } });
+  fireEvent.blur(hp);
+  expect(onSave).toHaveBeenLastCalledWith(expect.anything(), expect.objectContaining({ healthPatch: { currentHP: 12, activeConditions: [] } }));
+});
+
 test('the token menu uses compact controls and still saves condition changes', () => {
   const onSave = vi.fn();
   render(
