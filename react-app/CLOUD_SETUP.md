@@ -22,6 +22,8 @@ the env vars the app runs 100% local (localStorage), exactly like before.
    for independent campaign tool links. It migrates existing links through the
    GM Board once; rerunning it preserves later unlink operations. Campaign RLS
    continues to restrict edits to the campaign's GM.
+   Re-run it to add the dungeon Encounter Builder selection: campaigns can keep
+   multiple builders linked and choose where new dungeon fights are sent.
 
 ## 3. Turn OFF email confirmation
 Players log in with username only (mapped to a synthetic email), so there is no inbox.

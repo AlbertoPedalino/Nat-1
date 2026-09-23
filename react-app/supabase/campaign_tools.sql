@@ -20,3 +20,7 @@ end $$;
 
 create index if not exists campaigns_gm_link_group_idx
   on public.campaigns(gm, link_group_id);
+
+-- Optional destination for new dungeon fights when several builders are linked.
+alter table public.campaigns add column if not exists dungeon_encounter_id text
+  references public.encounters(id) on delete set null;

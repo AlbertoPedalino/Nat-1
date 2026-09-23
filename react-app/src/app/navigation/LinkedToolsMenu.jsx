@@ -8,7 +8,7 @@ import { LayoutDashboard, Map, Network, Plus, StickyNote, Swords, Unlink } from 
 import { useAuth } from '../../shared/cloud/auth/AuthProvider.jsx';
 import { getCloudSection } from '../../shared/cloud/sections/cloudSections.js';
 import { listMyCampaigns } from '../../shared/cloud/api/campaigns.js';
-import { setCampaignToolGroup } from '../../shared/cloud/api/campaignTools.js';
+import { setCampaignDungeonEncounter, setCampaignToolGroup } from '../../shared/cloud/api/campaignTools.js';
 import { linkHexcrawlBoardCampaign, setCampaignHexcrawlBoard } from '../../shared/cloud/api/hexcrawl.js';
 import {
   makeLinkGroupId, mergeLinkedInstanceRows, normalizeLinkGroupId,
@@ -79,6 +79,7 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, instanceSaved,
       merged.push(...campaigns.value.filter((row) => row.gm === user?.id).map((row) => ({
         id: row.id, name: row.name, sectionKey: 'campaign', origin: 'cloud',
         linkGroupId: normalizeLinkGroupId(row.link_group_id), hexcrawlBoardId: row.hexcrawl_board_id,
+        dungeonEncounterId: row.dungeon_encounter_id,
       })));
     }
     const failed = results.some((result) => result.status === 'rejected');
@@ -158,6 +159,11 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, instanceSaved,
           await setCampaignHexcrawlBoard(campaign.id, null);
         }
       }
+      if (target.sectionKey === 'encounters' && canUseCloud) {
+        for (const campaign of rows.filter((row) => row.sectionKey === 'campaign' && row.dungeonEncounterId === target.id)) {
+          await setCampaignDungeonEncounter(campaign.id, null);
+        }
+      }
       await updateMember(target, null);
     }, `${target.name} unlinked. Other tools remain connected.`);
   };
@@ -180,6 +186,14 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, instanceSaved,
     }, 'Tool created and linked.');
     if (ok) { setOpen(false); navigate(SECTION_REGISTRY[key].route(entry.id)); }
   };
+
+  const handleSelectDungeonEncounter = (campaign, encounterId) => changeLinks(async () => {
+    const target = rows.find((row) => row.sectionKey === 'encounters' && row.id === encounterId);
+    if (target?.origin === 'local') {
+      if (!await getCloudSection('encounters').pushInstance(target.id)) throw new Error('Could not save the Encounter Builder to the cloud.');
+    }
+    await setCampaignDungeonEncounter(campaign.id, encounterId || null);
+  }, 'Dungeon Encounter Builder updated.');
 
   const button = <Button size="small" variant={groupId ? 'contained' : 'outlined'} color="primary"
     startIcon={<Network size={14} />} disabled={!persistent || checkingCloud} onClick={handleOpen}
@@ -204,6 +218,9 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, instanceSaved,
               const isCurrent = rowKey(row) === `${sectionKey}:${instanceId}`;
               const Icon = TOOL_UI[row.sectionKey].icon;
               const clockCampaigns = rows.filter((campaign) => campaign.sectionKey === 'campaign' && campaign.hexcrawlBoardId === row.id);
+              const dungeonBuilders = row.sectionKey === 'campaign' ? rows.filter((tool) => (
+                tool.sectionKey === 'encounters' && row.linkGroupId && tool.linkGroupId === row.linkGroupId
+              )) : [];
               return <Stack key={rowKey(row)} direction="row" spacing={1}
                 sx={{ alignItems: 'center', border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 1.25 }}>
                 <Icon size={18} />
@@ -224,6 +241,18 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, instanceSaved,
                     <MenuItem value="">No GM Board</MenuItem>
                     {rows.filter((board) => board.sectionKey === 'gmboard' && (board.id === row.hexcrawlBoardId || (groupId && board.linkGroupId === groupId)))
                       .map((board) => <MenuItem key={board.id} value={board.id}>{board.name}</MenuItem>)}
+                  </TextField>}
+                  {row.sectionKey === 'campaign' && <TextField select fullWidth size="small"
+                    label="Dungeon fights" sx={{ mt: 1 }}
+                    slotProps={{ select: { displayEmpty: true }, inputLabel: { shrink: true } }}
+                    value={row.dungeonEncounterId || ''} disabled={disabled}
+                    helperText="Destination for new fights. Previously sent fights stay in their original builder."
+                    onChange={(event) => handleSelectDungeonEncounter(row, event.target.value)}>
+                    <MenuItem value="">{dungeonBuilders.length === 1
+                      ? `Automatic: ${dungeonBuilders[0].name}` : 'Automatic (only with one linked builder)'}</MenuItem>
+                    {row.dungeonEncounterId && !dungeonBuilders.some((tool) => tool.id === row.dungeonEncounterId)
+                      && <MenuItem value={row.dungeonEncounterId} disabled>Previously selected builder is no longer linked</MenuItem>}
+                    {dungeonBuilders.map((tool) => <MenuItem key={tool.id} value={tool.id}>{tool.name}</MenuItem>)}
                   </TextField>}
                 </Box>
                 {!isCurrent && <Button component={RouterLink} to={rowRoute(row)} target="_blank" rel="noopener noreferrer"

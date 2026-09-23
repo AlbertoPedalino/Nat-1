@@ -51,14 +51,16 @@ export function pickEncounterInstance(boards, encounters, boardId) {
 }
 
 // Campaigns keep this group independently of their hexcrawl board.
-export function pickEncounterInstanceInGroup(encounters, linkGroupId) {
+export function pickEncounterInstanceInGroup(encounters, linkGroupId, selectedId = null) {
   const group = normalizeLinkGroupId(linkGroupId);
   if (!group) return null;
   const found = (encounters || []).filter((entry) => (
     normalizeLinkGroupId(entry?.linkGroupId ?? entry?.link_group_id) === group
   ));
-  // Exactly one, for the reason above: choosing between two for the GM is how a
-  // fight ends up in a file they never open.
+  // An explicit choice must still be linked. Never redirect a stale selection
+  // silently to a different builder.
+  if (selectedId) return found.find((entry) => entry.id === selectedId) || null;
+  // Preserve automatic routing for campaigns with only one linked builder.
   return found.length === 1 ? found[0] : null;
 }
 

@@ -6,6 +6,7 @@ import { fightWithTokenVitals } from '../../../../../src/shared/vtt/tokens/encou
 
 const mocks = vi.hoisted(() => ({
   readCampaignToolLinks: vi.fn(),
+  listBuilders: vi.fn(),
   listInstanceFights: vi.fn(), saveInstanceFight: vi.fn(),
   readSceneDungeon: vi.fn(), saveSceneDungeon: vi.fn(),
   localFightPresence: vi.fn(), sendEncounterToBuilder: vi.fn(),
@@ -34,7 +35,7 @@ vi.mock('../../../../../src/shared/cloud/api/campaignTools.js', () => ({
   readCampaignToolLinks: mocks.readCampaignToolLinks,
 }));
 vi.mock('../../../../../src/shared/cloud/sections/cloudSections.js', () => ({
-  getCloudSection: () => ({ listInstances: async () => [{ id: 'enc_a', link_group_id: 'link_party' }] }),
+  getCloudSection: () => ({ listInstances: mocks.listBuilders }),
 }));
 
 const OGRE = { name: 'Ogre', source: 'MM', cr: '2', hp: { average: 59 } };
@@ -46,6 +47,7 @@ const KEY = { id: 'dungeon_1', rooms: [{
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mocks.listBuilders.mockResolvedValue([{ id: 'enc_a', link_group_id: 'link_party' }]);
   mocks.readCampaignToolLinks.mockResolvedValue({ id: 'campaign_1', link_group_id: 'link_party', hexcrawl_board_id: 'board_1' });
   localStorage.setItem('gb_encounter_registry', JSON.stringify([{ id: 'enc_a', linkGroupId: 'link_party' }]));
   mocks.auth = { cloudEnabled: true, status: 'authed' };
@@ -58,14 +60,14 @@ beforeEach(() => {
   mocks.sendEncounterToBuilder.mockReturnValue(CREATED);
 });
 
-async function openDungeon() {
+async function openDungeon(expectedBuilder = 'enc_a') {
   const hook = renderHook(() => useSceneDungeon({
     scene: { id: 'scene_1', campaignId: 'campaign_1' },
     isGm: true, monsters: [OGRE], partySize: 1, roster: [],
   }));
   await waitFor(() => {
     expect(hook.result.current.key).toEqual(KEY);
-    expect(hook.result.current.encounterInstance?.id).toBe('enc_a');
+    expect(hook.result.current.encounterInstance?.id).toBe(expectedBuilder);
   });
   return hook;
 }
@@ -155,4 +157,37 @@ test('removing the campaign board preserves the dungeon Encounter Builder link',
   expect(result.current.linkHint).toBe('');
   await act(async () => { await result.current.sendRoomToBuilder(1); });
   expect(mocks.saveInstanceFight).toHaveBeenCalledWith('enc_a', CREATED.entry);
+});
+
+function selectSecondBuilder() {
+  mocks.listBuilders.mockResolvedValue([
+    { id: 'enc_a', link_group_id: 'link_party' },
+    { id: 'enc_b', link_group_id: 'link_party' },
+  ]);
+  mocks.readCampaignToolLinks.mockResolvedValue({
+    id: 'campaign_1', link_group_id: 'link_party', dungeon_encounter_id: 'enc_b', hexcrawl_board_id: null,
+  });
+}
+
+test('new fights are sent only to the selected builder among multiple linked copies', async () => {
+  selectSecondBuilder();
+  mocks.readSceneDungeon.mockResolvedValue({ key: KEY, fights: {} });
+  mocks.sendEncounterToBuilder.mockReturnValue({ ...CREATED, instanceId: 'enc_b' });
+  const { result } = await openDungeon('enc_b');
+  await act(async () => { await result.current.sendRoomToBuilder(1); });
+  expect(mocks.sendEncounterToBuilder).toHaveBeenCalledWith('enc_b', expect.any(Object));
+  expect(mocks.saveInstanceFight).toHaveBeenCalledWith('enc_b', CREATED.entry);
+  expect(result.current.fights.room_1.instanceId).toBe('enc_b');
+});
+
+test('changing the destination preserves already sent fights in their original builder', async () => {
+  const { result } = await openDungeon();
+  selectSecondBuilder();
+  mocks.listInstanceFights.mockResolvedValue([{ id: '900' }]);
+  await act(async () => { window.dispatchEvent(new Event('gb:instance-links-changed')); });
+  await waitFor(() => expect(result.current.encounterInstance.id).toBe('enc_b'));
+  await act(async () => { expect(await result.current.sendRoomToBuilder(1)).toEqual(EXISTING); });
+  expect(mocks.listInstanceFights).toHaveBeenCalledWith('enc_a');
+  expect(mocks.sendEncounterToBuilder).not.toHaveBeenCalled();
+  expect(mocks.saveInstanceFight).not.toHaveBeenCalled();
 });

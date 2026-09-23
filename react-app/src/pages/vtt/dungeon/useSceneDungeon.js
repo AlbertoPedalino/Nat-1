@@ -77,9 +77,9 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize, roster }) {
           ? await getCloudSection('encounters').listInstances() : [];
         if (cancelled || ticket !== request) return;
         const encounters = mergeLinkedInstanceRows('encounters', cloud, local);
-        const instance = pickEncounterInstanceInGroup(encounters, campaign?.link_group_id);
+        const instance = pickEncounterInstanceInGroup(encounters, campaign?.link_group_id, campaign?.dungeon_encounter_id);
         setEncounterInstance(instance);
-        setLinkHint(instance ? '' : 'Link exactly one Encounter Builder from this map?s Linked tools menu to send fights.');
+        setLinkHint(instance ? '' : 'Choose a linked Encounter Builder for dungeon fights in this map\'s Linked tools menu.');
       } catch (cause) {
         if (!cancelled && ticket === request) {
           setEncounterInstance(null);

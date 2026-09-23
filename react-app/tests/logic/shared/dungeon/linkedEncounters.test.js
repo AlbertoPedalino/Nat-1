@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { pickEncounterInstance } from '../../../../src/shared/dungeon/linkedEncounters.js';
+import { pickEncounterInstance, pickEncounterInstanceInGroup } from '../../../../src/shared/dungeon/linkedEncounters.js';
 
 // Cloud rows spell it `link_group_id`; the local registry spells it
 // `linkGroupId`. The walk is the same either way, so it reads both rather than
@@ -38,4 +38,20 @@ test('a board with no group, or no board at all, links to nothing', () => {
   assert.equal(pickEncounterInstance(CLOUD_BOARDS, CLOUD_ENCOUNTERS, 'gm_missing'), null);
   assert.equal(pickEncounterInstance(CLOUD_BOARDS, CLOUD_ENCOUNTERS, ''), null);
   assert.equal(pickEncounterInstance(null, null, 'gm_1'), null);
+});
+
+test('an explicit destination resolves multiple linked builders without changing membership', () => {
+  const encounters = [
+    { id: 'enc_1', link_group_id: 'link_party' },
+    { id: 'enc_2', linkGroupId: 'link_party' },
+  ];
+  assert.equal(pickEncounterInstanceInGroup(encounters, 'link_party', 'enc_2'), encounters[1]);
+  assert.equal(pickEncounterInstanceInGroup(encounters, 'link_party'), null);
+});
+
+test('stale or unrelated destinations never silently fall back to another builder', () => {
+  assert.equal(pickEncounterInstanceInGroup(CLOUD_ENCOUNTERS, 'link_party', 'enc_2'), null);
+  assert.equal(pickEncounterInstanceInGroup(CLOUD_ENCOUNTERS, 'link_party', 'deleted'), null);
+  assert.equal(pickEncounterInstanceInGroup(CLOUD_ENCOUNTERS, null, 'enc_1'), null);
+  assert.equal(pickEncounterInstanceInGroup(CLOUD_ENCOUNTERS, 'link_party').id, 'enc_1');
 });

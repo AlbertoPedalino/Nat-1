@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => ({
   listMyCampaigns: vi.fn(),
   linkBoardCampaign: vi.fn(),
   setCampaignGroup: vi.fn(),
+  setDungeonEncounter: vi.fn(),
   setCampaignBoard: vi.fn(),
   setLinkGroup: vi.fn(),
   pushInstance: vi.fn(),
@@ -35,7 +36,9 @@ vi.mock('../../../../src/shared/cloud/sections/cloudSections.js', () => ({
 }));
 vi.mock('../../../../src/shared/cloud/api/campaigns.js', () => ({ listMyCampaigns: mocks.listMyCampaigns }));
 vi.mock('../../../../src/shared/cloud/api/hexcrawl.js', () => ({ setCampaignHexcrawlBoard: mocks.setCampaignBoard, linkHexcrawlBoardCampaign: mocks.linkBoardCampaign }));
-vi.mock('../../../../src/shared/cloud/api/campaignTools.js', () => ({ setCampaignToolGroup: mocks.setCampaignGroup }));
+vi.mock('../../../../src/shared/cloud/api/campaignTools.js', () => ({
+  setCampaignToolGroup: mocks.setCampaignGroup, setCampaignDungeonEncounter: mocks.setDungeonEncounter,
+}));
 vi.mock('../../../../src/shared/ui/ToastProvider.jsx', () => ({ useToast: () => ({ notify: mocks.notify }) }));
 vi.mock('../../../../src/shared/instances/instanceLinks.js', async (importOriginal) => ({
   ...await importOriginal(),
@@ -51,6 +54,7 @@ beforeEach(() => {
   mocks.listMyCampaigns.mockResolvedValue([]);
   mocks.linkBoardCampaign.mockResolvedValue();
   mocks.setCampaignGroup.mockResolvedValue();
+  mocks.setDungeonEncounter.mockResolvedValue();
   mocks.setCampaignBoard.mockResolvedValue();
   mocks.setLinkGroup.mockResolvedValue();
   mocks.pushInstance.mockResolvedValue({ id: 'board-a' });
@@ -219,4 +223,67 @@ test('a failed cloud list blocks membership changes while showing available link
   expect(screen.getByRole('button', { name: 'Unlink Board A' })).toBeDisabled();
   expect(screen.getByRole('button', { name: 'Add tool or campaign' })).toBeDisabled();
   expect(screen.getByRole('link', { name: 'Open Session Notes' })).toBeInTheDocument();
+});
+
+function campaignWithTwoBuilders() {
+  mocks.auth.cloudEnabled = true;
+  mocks.auth.status = 'authed';
+  mocks.auth.user = { id: 'gm-one' };
+  const campaign = {
+    id: 'campaign-one', name: 'Campaign One', gm: 'gm-one', link_group_id: 'link_party',
+    hexcrawl_board_id: 'board-a', dungeon_encounter_id: 'enc-one',
+  };
+  mocks.listMyCampaigns.mockResolvedValue([campaign]);
+  const local = mocks.readLocalToolInstances();
+  local.push(...['one', 'two'].map((id) => ({
+    id: `enc-${id}`, name: `Builder ${id}`, sectionKey: 'encounters',
+    linkGroupId: 'link_party', origin: 'local', hasLocal: true,
+  })));
+  mocks.setDungeonEncounter.mockImplementation(async (_id, selected) => { campaign.dungeon_encounter_id = selected; });
+  mocks.setLocalInstanceLink.mockImplementation((section, id, group) => {
+    local.find((row) => row.sectionKey === section && row.id === id).linkGroupId = group;
+  });
+  return campaign;
+}
+
+test('a campaign chooses between linked builders and retains the choice when reopened', async () => {
+  const campaign = campaignWithTwoBuilders();
+  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" instanceSaved />);
+  fireEvent.click(screen.getByRole('button', { name: 'Linked tools' }));
+  fireEvent.mouseDown(await screen.findByRole('combobox', { name: 'Dungeon fights' }));
+  await act(async () => { fireEvent.click(screen.getByRole('option', { name: 'Builder two' })); });
+  expect(mocks.setDungeonEncounter).toHaveBeenCalledWith('campaign-one', 'enc-two');
+  expect(mocks.pushInstance).toHaveBeenCalledWith('enc-two');
+  expect(screen.getByRole('combobox', { name: 'Dungeon fights' })).toHaveTextContent('Builder two');
+  expect(campaign.hexcrawl_board_id).toBe('board-a');
+  expect(mocks.setCampaignGroup).not.toHaveBeenCalled();
+  expect(mocks.setLocalInstanceLink).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+  fireEvent.click(await screen.findByRole('button', { name: 'Linked tools' }));
+  expect(await screen.findByRole('combobox', { name: 'Dungeon fights' })).toHaveTextContent('Builder two');
+});
+
+test('unlinking the selected builder clears the destination and preserves all other links', async () => {
+  campaignWithTwoBuilders();
+  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" instanceSaved />);
+  fireEvent.click(screen.getByRole('button', { name: 'Linked tools' }));
+  fireEvent.click(await screen.findByRole('button', { name: 'Unlink Builder one' }));
+  await waitFor(() => expect(screen.queryByRole('link', { name: 'Open Builder one' })).not.toBeInTheDocument());
+  expect(mocks.setDungeonEncounter.mock.calls).toEqual([['campaign-one', null]]);
+  expect(screen.getByRole('link', { name: 'Open Builder two' })).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: 'Open Board A' })).toBeInTheDocument();
+  expect(screen.getByRole('combobox', { name: 'Dungeon fights' })).toHaveTextContent('Automatic: Builder two');
+  expect(mocks.setCampaignBoard).not.toHaveBeenCalled();
+  expect(mocks.setCampaignGroup).not.toHaveBeenCalled();
+});
+
+test('a failed destination change keeps the saved choice visible', async () => {
+  campaignWithTwoBuilders();
+  mocks.setDungeonEncounter.mockRejectedValue(new Error('Could not save selection'));
+  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" instanceSaved />);
+  fireEvent.click(screen.getByRole('button', { name: 'Linked tools' }));
+  fireEvent.mouseDown(await screen.findByRole('combobox', { name: 'Dungeon fights' }));
+  await act(async () => { fireEvent.click(screen.getByRole('option', { name: 'Builder two' })); });
+  expect(screen.getByRole('alert')).toHaveTextContent('Could not save selection');
+  expect(screen.getByRole('combobox', { name: 'Dungeon fights' })).toHaveTextContent('Builder one');
 });
