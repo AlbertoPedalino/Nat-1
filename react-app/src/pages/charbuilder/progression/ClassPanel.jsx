@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { SearchField } from '../choices/SearchList.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
+import { confirmDiscard } from '../../../shared/ui/confirmDiscard.js';
 import { describeMulticlassProficiencies } from '../../../shared/character/progression/multiclassProficiencies.js';
 import { getPrimaryClassLevel } from './calculations.js';
 import { checkMulticlassPrerequisite, getMulticlassProficienciesGained } from './multiclassRules.js';
@@ -171,9 +172,17 @@ export default function ClassPanel({ state, character, dispatch }) {
                   prereqMet={prereqMet}
                   prereqReason={prereqReason}
                   details={details}
-                  onSelect={() => dispatch(activeExtra
-                    ? { type: 'extra-class/select', index: character.activeClassTab - 1, className: cls.name, source: cls.source, classObject: cls }
-                    : { type: 'class/select', className: cls.name, source: cls.source, classObject: cls })}
+                  onSelect={() => {
+                    if (selected) return;
+                    const currentName = activeExtra ? activeExtra.name : character.className;
+                    const currentSource = activeExtra ? activeExtra.source : character.classSource;
+                    if (currentName && !confirmDiscard(
+                      `Sostituire ${currentName} (${currentSource}) con ${cls.name} (${cls.source})? Le scelte legate alla classe precedente verranno azzerate.`,
+                    )) return;
+                    dispatch(activeExtra
+                      ? { type: 'extra-class/select', index: character.activeClassTab - 1, className: cls.name, source: cls.source, classObject: cls }
+                      : { type: 'class/select', className: cls.name, source: cls.source, classObject: cls });
+                  }}
                 />
               );
             })}
