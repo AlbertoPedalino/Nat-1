@@ -17,6 +17,11 @@ the env vars the app runs 100% local (localStorage), exactly like before.
 5. For Encounter Builder combat-to-sheet HP sync, run [`supabase/combat_sync.sql`](supabase/combat_sync.sql) too.
    Re-run this file once on existing projects to enable live Supabase Realtime
    updates for open combats.
+6. After the VTT and hexcrawl setup (`vtt.sql`, `hexcrawl.sql`), run
+   [`supabase/campaign_tools.sql`](supabase/campaign_tools.sql). This is required
+   for independent campaign tool links. It migrates existing links through the
+   GM Board once; rerunning it preserves later unlink operations. Campaign RLS
+   continues to restrict edits to the campaign's GM.
 
 ## 3. Turn OFF email confirmation
 Players log in with username only (mapped to a synthetic email), so there is no inbox.

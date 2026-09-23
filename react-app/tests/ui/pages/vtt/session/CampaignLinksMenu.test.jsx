@@ -1,47 +1,19 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { ThemeProvider } from '@mui/material';
+import { render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
-import { theme } from '../../../../../src/app/theme.js';
 import CampaignLinksMenu from '../../../../../src/pages/vtt/session/CampaignLinksMenu.jsx';
 
-const mocks = vi.hoisted(() => ({ readCampaignHexcrawlBoard: vi.fn() }));
-
-vi.mock('../../../../../src/shared/cloud/api/hexcrawl.js', () => ({
-  readCampaignHexcrawlBoard: mocks.readCampaignHexcrawlBoard,
-}));
-
-// The menu itself is covered by its own test; what matters here is which
-// instance the map hands it.
 vi.mock('../../../../../src/app/navigation/LinkedToolsMenu.jsx', () => ({
-  default: ({ sectionKey, instanceId, showCurrentLink }) => (
-    <button type="button">{`links:${sectionKey}:${instanceId}:${showCurrentLink}`}</button>
+  default: ({ sectionKey, instanceId, instanceSaved }) => (
+    <button type="button">{`links:${sectionKey}:${instanceId}:${instanceSaved}`}</button>
   ),
-  LINKED_TOOLS_BUTTON_SX: {},
 }));
 
-const renderMenu = () => render(
-  <ThemeProvider theme={theme}>
-    <CampaignLinksMenu campaignId="campaign-1" />
-  </ThemeProvider>,
-);
-
-test('the map opens the linked-tools menu of its campaign’s GM Board', async () => {
-  mocks.readCampaignHexcrawlBoard.mockResolvedValue('board-a');
-  renderMenu();
-  expect(await screen.findByText('links:gmboard:board-a:true')).toBeInTheDocument();
-  mocks.readCampaignHexcrawlBoard.mockResolvedValue('board-b');
-  fireEvent(window, new Event('gb:campaign-board-link-changed'));
-  await waitFor(() => expect(screen.getByText('links:gmboard:board-b:true')).toBeInTheDocument());
+test('a battlemap opens its campaign links without looking up a GM Board', () => {
+  render(<CampaignLinksMenu campaignId="campaign-1" />);
+  expect(screen.getByText('links:campaign:campaign-1:true')).toBeEnabled();
 });
 
-test('a campaign with no board linked says so instead of offering a dead button', async () => {
-  mocks.readCampaignHexcrawlBoard.mockResolvedValue(null);
-  renderMenu();
-
-  const button = screen.getByRole('button', { name: 'Linked tools' });
-  expect(button).toBeDisabled();
-  // The wrapper span is what carries the pointer events: a disabled button
-  // fires none, so without it the reason never appears.
-  fireEvent.mouseOver(button.closest('span'));
-  expect(await screen.findByRole('tooltip')).toHaveTextContent('no GM Board linked');
+test('no menu is shown without a campaign', () => {
+  render(<CampaignLinksMenu />);
+  expect(screen.queryByRole('button')).not.toBeInTheDocument();
 });

@@ -1,13 +1,5 @@
-// Which Encounter Builder a battle map belongs to.
-//
-// Nobody should have to pick it. The chain already exists and every link in it
-// was made on purpose: the scene names its campaign, the campaign names the GM
-// Board that keeps its clock and its tables, and that board sits in a link group
-// with the other tools of the same table. The Encounter Builder in that group is
-// the one whose fights this map's dungeon belongs in.
-//
-// Any link missing is not an error to shout about — a map may simply not be part
-// of a set — so this answers with null and the panel says what to link.
+// Resolve an Encounter Builder from a tool group. Campaigns own their group
+// directly; board-based helpers also serve callers with a local GM Board.
 
 import { readRegistry } from '../storage/localStorageRegistries.js';
 import { SECTION_REGISTRY } from '../instances/sectionRegistry.js';
@@ -55,6 +47,12 @@ export function pickEncounterInstance(boards, encounters, boardId) {
   if (!boardId) return null;
   const board = (boards || []).find((entry) => entry?.id === boardId);
   const group = normalizeLinkGroupId(board?.linkGroupId ?? board?.link_group_id);
+  return pickEncounterInstanceInGroup(encounters, group);
+}
+
+// Campaigns keep this group independently of their hexcrawl board.
+export function pickEncounterInstanceInGroup(encounters, linkGroupId) {
+  const group = normalizeLinkGroupId(linkGroupId);
   if (!group) return null;
   const found = (encounters || []).filter((entry) => (
     normalizeLinkGroupId(entry?.linkGroupId ?? entry?.link_group_id) === group

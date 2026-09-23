@@ -22,7 +22,7 @@ export async function listMyCampaigns() {
   const supabase = requireClient();
   const { data, error } = await supabase
     .from('campaigns')
-    .select('id, name, gm, join_code, created_at, hexcrawl_board_id')
+    .select('id, name, gm, join_code, created_at, hexcrawl_board_id, link_group_id')
     .order('created_at', { ascending: false });
   if (error) throw error;
   return data || [];

@@ -5,6 +5,7 @@ import { combatantToToken } from '../../../../../src/shared/vtt/tokens/encounter
 import { fightWithTokenVitals } from '../../../../../src/shared/vtt/tokens/encounterSync.js';
 
 const mocks = vi.hoisted(() => ({
+  readCampaignToolLinks: vi.fn(),
   listInstanceFights: vi.fn(), saveInstanceFight: vi.fn(),
   readSceneDungeon: vi.fn(), saveSceneDungeon: vi.fn(),
   localFightPresence: vi.fn(), sendEncounterToBuilder: vi.fn(),
@@ -29,13 +30,11 @@ vi.mock('../../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({
 vi.mock('../../../../../src/shared/cloud/api/hexcrawl.js', () => ({
   readCampaignHexcrawlBoard: async () => 'board_1', readHexcrawlBoard: vi.fn(),
 }));
-vi.mock('../../../../../src/shared/dungeon/linkedEncounters.js', () => ({
-  encounterInstanceForBoard: () => null,
-  pickEncounterInstance: (_boards, encounters) => encounters[0],
-  missingLinkReason: () => 'No linked builder',
+vi.mock('../../../../../src/shared/cloud/api/campaignTools.js', () => ({
+  readCampaignToolLinks: mocks.readCampaignToolLinks,
 }));
 vi.mock('../../../../../src/shared/cloud/sections/cloudSections.js', () => ({
-  getCloudSection: () => ({ listInstances: async () => [{ id: 'enc_a' }] }),
+  getCloudSection: () => ({ listInstances: async () => [{ id: 'enc_a', link_group_id: 'link_party' }] }),
 }));
 
 const OGRE = { name: 'Ogre', source: 'MM', cr: '2', hp: { average: 59 } };
@@ -47,6 +46,8 @@ const KEY = { id: 'dungeon_1', rooms: [{
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mocks.readCampaignToolLinks.mockResolvedValue({ id: 'campaign_1', link_group_id: 'link_party', hexcrawl_board_id: 'board_1' });
+  localStorage.setItem('gb_encounter_registry', JSON.stringify([{ id: 'enc_a', linkGroupId: 'link_party' }]));
   mocks.auth = { cloudEnabled: true, status: 'authed' };
   mocks.localFightPresence.mockReturnValue('unknown');
   mocks.readPersistedInstance.mockReturnValue({ fightsData: { items: [] } });
@@ -143,4 +144,15 @@ test('without cloud access an unknown fight is retained conservatively', async (
   await act(async () => { expect(await result.current.sendRoomToBuilder(1)).toEqual(EXISTING); });
   expect(mocks.listInstanceFights).not.toHaveBeenCalled();
   expect(mocks.sendEncounterToBuilder).not.toHaveBeenCalled();
+});
+
+
+test('removing the campaign board preserves the dungeon Encounter Builder link', async () => {
+  const { result } = await openDungeon();
+  mocks.readCampaignToolLinks.mockResolvedValue({ id: 'campaign_1', link_group_id: 'link_party', hexcrawl_board_id: null });
+  await act(async () => { window.dispatchEvent(new Event('gb:campaign-board-link-changed')); });
+  expect(result.current.encounterInstance.id).toBe('enc_a');
+  expect(result.current.linkHint).toBe('');
+  await act(async () => { await result.current.sendRoomToBuilder(1); });
+  expect(mocks.saveInstanceFight).toHaveBeenCalledWith('enc_a', CREATED.entry);
 });

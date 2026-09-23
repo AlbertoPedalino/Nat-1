@@ -4,7 +4,7 @@ import {
 import { readSceneDungeon, saveSceneDungeon } from '../../../shared/cloud/api/dungeon.js';
 import { listInstanceFights, saveInstanceFight } from '../../../shared/cloud/api/encounterFights.js';
 import {
-  readCampaignHexcrawlBoard, readHexcrawlBoard,
+  readHexcrawlBoard,
 } from '../../../shared/cloud/api/hexcrawl.js';
 import { createDungeon } from '../../gmboard/dungeon/dungeon.js';
 import { encounterBudget, fillBudget } from '../../../shared/dungeon/roomBudget.js';
@@ -12,8 +12,10 @@ import { crXP, getCR } from '../../encounterbuilder/bestiary/monsterUtils.js';
 import { roomMarkers } from '../../../shared/dungeon/roomMarkers.js';
 import { seededRandom } from '../../../shared/dungeon/seededRandom.js';
 import {
-  encounterInstanceForBoard, missingLinkReason, pickEncounterInstance,
+  pickEncounterInstanceInGroup,
 } from '../../../shared/dungeon/linkedEncounters.js';
+import { readCampaignToolLinks } from '../../../shared/cloud/api/campaignTools.js';
+import { readLocalToolInstances, mergeLinkedInstanceRows } from '../../../shared/instances/instanceLinks.js';
 import { getCloudSection } from '../../../shared/cloud/sections/cloudSections.js';
 import { localFightPresence, sendEncounterToBuilder } from '../../encounterbuilder/sync/handoff.js';
 import { readPersistedInstance } from '../../encounterbuilder/state/storage.js';
@@ -51,56 +53,57 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize, roster }) {
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  // The GM Board this campaign keeps its clock on, which is also the board whose
-  // link group names the Encounter Builder these fights belong in.
   const [boardId, setBoardId] = useState(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    if (!enabled || !campaignId) {
-      setBoardId(null);
-      return () => { cancelled = true; };
-    }
-    readCampaignHexcrawlBoard(campaignId)
-      .then((id) => { if (!cancelled) setBoardId(id || null); })
-      .catch(() => { if (!cancelled) setBoardId(null); });
-    return () => { cancelled = true; };
-  }, [campaignId, enabled]);
-
-  // Which Encounter Builder this map's fights belong in. The local registry
-  // first, because it needs no network and is the usual answer. Then the cloud:
-  // a GM who prepared on one machine and runs the game on another has no
-  // registry there, and the link is real either way — it is simply written in
-  // the database rather than in this browser.
-  const [cloudInstance, setCloudInstance] = useState(null);
-  // Until the cloud has answered, saying "nothing is linked" would send the GM
-  // off to fix a link that is already there.
+  const [encounterInstance, setEncounterInstance] = useState(null);
   const [resolvingLink, setResolvingLink] = useState(false);
-  const localInstance = useMemo(
-    () => (boardId ? encounterInstanceForBoard(boardId) : null),
-    [boardId],
-  );
-  const encounterInstance = localInstance || cloudInstance;
+  const [linkHint, setLinkHint] = useState('');
 
   useEffect(() => {
     let cancelled = false;
-    if (!enabled || !boardId || localInstance) {
-      setCloudInstance(null);
-      setResolvingLink(false);
-      return () => { cancelled = true; };
-    }
+    let request = 0;
+    setBoardId(null);
+    setEncounterInstance(null);
+    setLinkHint('');
+    if (!enabled || !campaignId) return () => { cancelled = true; };
     setResolvingLink(true);
-    Promise.all([
-      getCloudSection('gmboard').listInstances(),
-      getCloudSection('encounters').listInstances(),
-    ])
-      .then(([boards, encounters]) => {
-        if (!cancelled) setCloudInstance(pickEncounterInstance(boards, encounters, boardId));
-      })
-      .catch(() => { if (!cancelled) setCloudInstance(null); })
-      .finally(() => { if (!cancelled) setResolvingLink(false); });
-    return () => { cancelled = true; };
-  }, [boardId, enabled, localInstance]);
+    const refresh = async () => {
+      const ticket = ++request;
+      try {
+        const campaign = await readCampaignToolLinks(campaignId);
+        if (cancelled || ticket !== request) return;
+        setBoardId(campaign?.hexcrawl_board_id || null);
+        const local = readLocalToolInstances().filter((row) => row.sectionKey === 'encounters');
+        const cloud = cloudEnabled && status === 'authed'
+          ? await getCloudSection('encounters').listInstances() : [];
+        if (cancelled || ticket !== request) return;
+        const encounters = mergeLinkedInstanceRows('encounters', cloud, local);
+        const instance = pickEncounterInstanceInGroup(encounters, campaign?.link_group_id);
+        setEncounterInstance(instance);
+        setLinkHint(instance ? '' : 'Link exactly one Encounter Builder from this map?s Linked tools menu to send fights.');
+      } catch (cause) {
+        if (!cancelled && ticket === request) {
+          setEncounterInstance(null);
+          setLinkHint(cause?.message || 'Could not load campaign links.');
+        }
+      } finally {
+        if (!cancelled && ticket === request) setResolvingLink(false);
+      }
+    };
+    refresh();
+    const timer = setInterval(refresh, 5000);
+    window.addEventListener('focus', refresh);
+    window.addEventListener('gb:campaign-board-link-changed', refresh);
+    window.addEventListener('gb:instance-links-changed', refresh);
+    window.addEventListener('storage', refresh);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+      window.removeEventListener('focus', refresh);
+      window.removeEventListener('gb:campaign-board-link-changed', refresh);
+      window.removeEventListener('gb:instance-links-changed', refresh);
+      window.removeEventListener('storage', refresh);
+    };
+  }, [campaignId, enabled, cloudEnabled, status]);
 
   useEffect(() => {
     let cancelled = false;
@@ -208,7 +211,7 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize, roster }) {
   const sendRoomToBuilder = useCallback(async (roomNumber, { title } = {}) => {
     if (!enabled) return null;
     if (!encounterInstance) {
-      setError(missingLinkReason(boardId));
+      setError(linkHint);
       return null;
     }
     const chosen = chooseFor(state.key, roomNumber);
@@ -285,7 +288,7 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize, roster }) {
       setBusy(false);
     }
   }, [
-    boardId, chooseFor, cloudEnabled, enabled, encounterInstance, priced, roster, sceneId, status,
+    linkHint, chooseFor, cloudEnabled, enabled, encounterInstance, priced, roster, sceneId, status,
     state.fights, state.key,
   ]);
 
@@ -302,6 +305,6 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize, roster }) {
     markersForRoom,
     sendRoomToBuilder,
     encounterInstance,
-    linkHint: encounterInstance || resolvingLink ? '' : missingLinkReason(boardId),
+    linkHint: encounterInstance || resolvingLink ? '' : linkHint,
   };
 }
