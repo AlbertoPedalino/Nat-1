@@ -1,4 +1,4 @@
-import { act, render } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import { ThemeProvider } from '@mui/material';
 import { beforeEach, vi } from 'vitest';
 import { theme } from '../../../../../src/app/theme.js';
@@ -13,13 +13,19 @@ const m = vi.hoisted(() => ({
   refreshVisibleTokens: vi.fn(),
   notify: vi.fn(),
   menu: { current: null },
+  viewport: { current: null },
   realBridge: { current: false },
+  setTokenHp: vi.fn(),
+  secretHp: { current: {} },
+  fightRows: { current: [] },
+  isGm: { current: true },
   tokens: { current: [] },
 }));
 
 vi.mock('../../../../../src/shared/cloud/api/encounterFights.js', () => ({
   FIGHT_UNAVAILABLE: 'FIGHT_UNAVAILABLE',
   commitFightCombatantVitals: (...args) => m.commit(...args),
+  listFightVitals: async () => m.fightRows.current,
   saveInstanceFight: vi.fn(),
 }));
 vi.mock('../../../../../src/shared/cloud/api/vtt.js', async (importOriginal) => ({
@@ -31,6 +37,8 @@ vi.mock('../../../../../src/shared/cloud/api/vtt.js', async (importOriginal) => 
   setTokenConditions: (...args) => m.setTokenConditions(...args),
   setTokenEffects: (...args) => m.setTokenEffects(...args),
   setTokenSecret: vi.fn(async () => null),
+  setTokenHp: (...args) => m.setTokenHp(...args),
+  listTokenSecretHp: async () => m.secretHp.current,
 }));
 vi.mock('../../../../../src/shared/cloud/api/cloudCharacters.js', () => ({
   patchCharacterData: vi.fn(), commandCharacterVitals: vi.fn(),
@@ -38,7 +46,7 @@ vi.mock('../../../../../src/shared/cloud/api/cloudCharacters.js', () => ({
 vi.mock('../../../../../src/shared/ui/ToastProvider.jsx', () => ({ useToast: () => ({ notify: m.notify }) }));
 vi.mock('../../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({ useAuth: () => ({ user: { id: 'gm-1' } }) }));
 vi.mock('../../../../../src/shared/vtt/session/useSceneRole.js', () => ({
-  useSceneRole: () => ({ campaignName: 'C', gmId: 'gm-1', isGm: true, loading: false, ownedCharacterIds: [] }),
+  useSceneRole: () => ({ campaignName: 'C', gmId: 'gm-1', isGm: m.isGm.current, loading: false, ownedCharacterIds: [] }),
 }));
 vi.mock('../../../../../src/shared/vtt/session/useSceneLive.js', () => ({
   useSceneLive: () => ({
@@ -82,7 +90,9 @@ vi.mock('../../../../../src/pages/vtt/scene/useSceneContent.js', () => ({
     tokens: m.tokens.current,
   }),
 }));
-vi.mock('../../../../../src/pages/vtt/map/SceneViewport.jsx', () => ({ default: () => <div data-testid="scene-viewport" /> }));
+vi.mock('../../../../../src/pages/vtt/map/SceneViewport.jsx', () => ({
+  default: (props) => { m.viewport.current = props; return <div data-testid="scene-viewport" />; },
+}));
 vi.mock('../../../../../src/pages/vtt/tokens/TokenMenu.jsx', () => ({
   default: (props) => { m.menu.current = props; return null; },
 }));
@@ -125,6 +135,10 @@ beforeEach(() => {
   m.setTokenEffects.mockReset().mockResolvedValue(null);
   m.refreshVisibleTokens.mockReset();
   m.notify.mockReset();
+  m.setTokenHp.mockReset().mockResolvedValue(undefined);
+  m.secretHp.current = {};
+  m.fightRows.current = [];
+  m.isGm.current = true;
 });
 
 test('a GM editing a linked enemy on the map writes its combatant once, never the piece vitals', async () => {
@@ -167,11 +181,12 @@ test('a conflict is not retried: the map realigns on the fight and stops', async
   expect(hpWrites()).toEqual([]);
 });
 
-test('a piece whose fight has no cloud row keeps its own values as before', async () => {
+test('a piece whose fight has no cloud row keeps its HP in the GM-only source', async () => {
   m.commit.mockRejectedValue(Object.assign(new Error('unavailable'), { code: 'FIGHT_UNAVAILABLE' }));
   mountEditor();
   await saveFromMenu(OGRE, { hpCurrent: 20 });
-  expect(hpWrites()).toEqual([['ogre-piece', expect.objectContaining({ hp_current: 20, hp_max: 59 })]]);
+  expect(m.setTokenHp).toHaveBeenCalledWith('ogre-piece', { hpCurrent: 20, hpMax: 59 });
+  expect(m.updateToken.mock.calls.some(([, patch]) => 'hp_current' in patch || 'hp_max' in patch)).toBe(false);
 });
 
 test('a stale local fight cache never writes enemy vitals, on mount or on later saves', () => {
@@ -187,4 +202,42 @@ test('a stale local fight cache never writes enemy vitals, on mount or on later 
   for (const hp of [58, 57, 12]) act(() => cache(hp));
   expect(m.updateToken).not.toHaveBeenCalled();
   expect(m.commit).not.toHaveBeenCalled();
+});
+
+const MIMIC = {
+  id: 'mimic-piece', layer: 'tokens', x: 2, y: 2, label: 'Chest', sourceRef: null,
+  hpCurrent: null, hpMax: null, conditions: [], effects: [], showHp: false,
+};
+const lastViewportTokens = () => m.viewport.current?.tokens || [];
+
+test('the GM sees real HP from the private sources while the public rows carry none', async () => {
+  m.tokens.current = [{ ...OGRE, hpCurrent: null, hpMax: null, showHp: false }, MIMIC];
+  m.fightRows.current = [{ id: '77', instance_id: 'enc_a', fight: { combatants: [{ id: 0, type: 'monster', hpCurrent: 12, hpMax: 59 }] } }];
+  m.secretHp.current = { 'mimic-piece': { hpCurrent: 40, hpMax: 40 } };
+  mountEditor();
+  await waitFor(() => expect(lastViewportTokens().find((t) => t.id === 'mimic-piece')?.hpCurrent).toBe(40));
+  expect(lastViewportTokens().find((t) => t.id === 'ogre-piece')).toMatchObject({ hpCurrent: 12, hpMax: 59 });
+});
+
+test('a player gets no overlay: hidden HP stay empty', async () => {
+  m.isGm.current = false;
+  m.tokens.current = [{ ...OGRE, hpCurrent: null, hpMax: null, showHp: false }, MIMIC];
+  m.fightRows.current = [{ id: '77', instance_id: 'enc_a', fight: { combatants: [{ id: 0, type: 'monster', hpCurrent: 12, hpMax: 59 }] } }];
+  m.secretHp.current = { 'mimic-piece': { hpCurrent: 40, hpMax: 40 } };
+  mountEditor();
+  await act(async () => {});
+  for (const token of lastViewportTokens()) expect([token.hpCurrent, token.hpMax]).toEqual([null, null]);
+});
+
+test('the GM edits standalone HP in the private source only, and an unchanged save writes nothing', async () => {
+  m.tokens.current = [MIMIC];
+  m.secretHp.current = { 'mimic-piece': { hpCurrent: 40, hpMax: 40 } };
+  mountEditor();
+  const real = { ...MIMIC, hpCurrent: 40, hpMax: 40 };
+  await saveFromMenu(real, { hpCurrent: 33 });
+  expect(m.setTokenHp).toHaveBeenCalledWith('mimic-piece', { hpCurrent: 33, hpMax: 40 });
+  await saveFromMenu(real, { showHp: true });
+  expect(m.setTokenHp).toHaveBeenCalledTimes(1);
+  expect(m.updateToken.mock.calls.some(([, patch]) => 'hp_current' in patch || 'hp_max' in patch)).toBe(false);
+  expect(m.updateToken).toHaveBeenLastCalledWith('mimic-piece', expect.objectContaining({ show_hp: true }));
 });

@@ -5,7 +5,7 @@
 //
 // Everything here is pure: the callers own the requests and the state.
 
-import { fightWithTokenVitals } from './encounterSync.js';
+import { fightWithTokenVitals, parseSourceRef } from './encounterSync.js';
 
 // Must match public.fight_monster_vital_keys() in encounter_fight_vitals.sql.
 export const MONSTER_VITAL_KEYS = Object.freeze([
@@ -62,6 +62,25 @@ export function absorbMonsterVitals(combat, fight) {
     return { ...combatant, ...patch };
   });
   return changed ? { ...combat, combatants } : combat;
+}
+
+// The GM's view of real hit points, overlaid on the public rows at render: a
+// piece linked to a loaded cloud fight takes its combatant's, any other its
+// private values. `fights` maps fight id -> { instance_id, fight }.
+export function withGmTokenVitals(tokens, { byToken = {}, fights = {} } = {}) {
+  return (tokens || []).map((token) => {
+    if (!token || token.characterId) return token;
+    const ref = parseSourceRef(token.sourceRef);
+    const row = ref ? fights[ref.fightId] : null;
+    const combatant = row && String(row.instance_id) === ref.instanceId
+      ? (row.fight?.combatants || []).find((c) => String(c?.id) === ref.combatantId && isMonsterCombatant(c))
+      : null;
+    const real = combatant
+      ? { hpCurrent: combatant.hpCurrent ?? null, hpMax: combatant.hpMax ?? null }
+      : byToken[token.id];
+    if (!real || (real.hpCurrent === token.hpCurrent && real.hpMax === token.hpMax)) return token;
+    return { ...token, hpCurrent: real.hpCurrent, hpMax: real.hpMax };
+  });
 }
 
 // A linked piece's displayed values as the combatant they mirror, and the same

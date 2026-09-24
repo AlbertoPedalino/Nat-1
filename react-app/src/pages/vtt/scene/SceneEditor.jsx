@@ -30,6 +30,7 @@ import {
   setTokenConditions,
   setTokenEffects,
   setTokenVisibility,
+  setTokenHp,
   setTokenSecret,
   signMapImage,
   updateScene,
@@ -87,6 +88,7 @@ import {
   writeSheetSplit,
 } from '../../../shared/vtt/sheets/sheetLayout.js';
 import { useEncounterBridge } from '../tokens/useEncounterBridge.js';
+import { useGmTokenVitals } from '../tokens/useGmTokenVitals.js';
 import { useSceneHexcrawl } from '../hexcrawl/useSceneHexcrawl.js';
 import { useSceneDungeon } from '../dungeon/useSceneDungeon.js';
 import { useSceneContent } from './useSceneContent.js';
@@ -237,6 +239,9 @@ export default function SceneEditor({
     tokenImageUrls,
     tokens,
   } = useSceneContent({ scene, isGm: role.isGm, spectator, notify });
+  // Public rows carry hit points only while a bar is shown; the GM reads the
+  // real ones from the private sources and sees them overlaid at render.
+  const gmVitals = useGmTokenVitals({ sceneId: scene.id, tokens, enabled: role.isGm && !spectator });
   // Dormant on a square map: it asks the database for nothing until the scene
   // is actually a hexcrawl. A player and the projector read it — the colours and
   // the party marker are the map everyone is looking at — but only the GM's own
@@ -611,9 +616,10 @@ export default function SceneEditor({
     const [freshScene] = await Promise.all([
       fetchScene(scene.id).catch(() => null),
       refreshContent(),
+      gmVitals.reload(),
     ]);
     if (freshScene && !gridEditRef.current && !paintingRef.current) onSceneChange(freshScene);
-  }, [onSceneChange, refreshContent, scene.id]);
+  }, [gmVitals, onSceneChange, refreshContent, scene.id]);
   const {
     sendDrag, sendCamera, sendPresenterState, sendPresenterInspection,
   } = useSceneLive({
@@ -1521,10 +1527,9 @@ export default function SceneEditor({
   }) => {
     const publicLabel = gmOnly ? '' : label;
     const secret = gmOnly ? label : '';
-    // A character's piece never writes hit points: the sheet owns them, and this
-    // would be a copy that the next sheet update overwrites. Whether the bar is
-    // shown, though, is the piece's own business either way.
-    const vitals = token.characterId ? {} : { hp_current: hpCurrent, hp_max: hpMax };
+    // No piece writes hit points to its public row: a character's belong to the
+    // sheet, a linked enemy's to its fight, any other piece's to the GM-only
+    // secrets. Whether the bar is shown is the piece's own business.
     setTokens((current) => current.map((item) => (
       item.id === token.id
         ? {
@@ -1546,11 +1551,17 @@ export default function SceneEditor({
         if (Object.keys(healthPatch).length) await commandCharacterVitals(token.characterId, tokenHealthCommand(token, healthPatch));
       } else if (!linked) {
         await writeConditions(token, conditions);
+        // `token` carries the GM's real values (overlaid), so an unchanged
+        // edit writes nothing.
+        if (hpCurrent !== (token.hpCurrent ?? null) || hpMax !== (token.hpMax ?? null)) {
+          await setTokenHp(token.id, { hpCurrent, hpMax });
+          gmVitals.setLocal(token.id, { hpCurrent, hpMax });
+        }
       }
       await updateToken(token.id, {
         label: publicLabel,
         show_hp: showHp,
-        ...(linked ? {} : { effects, ...vitals }),
+        ...(linked ? {} : { effects }),
       });
       if (secret !== (token.secretLabel || '')) await setTokenSecret(token.id, secret);
       // A character's piece is matched to its combatant by the sheet it stands
@@ -1561,7 +1572,7 @@ export default function SceneEditor({
       setTokens((current) => current.map((item) => (item.id === token.id ? token : item)));
       notify('error', cause?.message || 'Could not update that token.');
     }
-  }, [commitLinkedMonster, notify, pushToEncounter, writeConditions]);
+  }, [commitLinkedMonster, gmVitals, notify, pushToEncounter, writeConditions]);
 
   const handleDeathSaveChange = useCallback((token, type, value) => {
     if (!token?.characterId || !['success', 'fail'].includes(type)) return;
@@ -1931,7 +1942,11 @@ export default function SceneEditor({
   const visibleTokens = useMemo(
     // Sheet hit points are overlaid at render, never copied onto the row: the
     // character sheet stays the one place a character's HP lives.
-    () => withSheetVitals(resolveTokens(tokens, ghosts, draggingRef.current), roster)
+    // The GM's real enemy HP are overlaid the same way, except in player view.
+    () => withSheetVitals(
+      (gmPlayerPreview ? (list) => list : gmVitals.overlay)(resolveTokens(tokens, ghosts, draggingRef.current)),
+      roster,
+    )
       .map((token) => {
         // A monster's artwork is a file on the scene; a character's is their
         // portrait, which belongs to the sheet and follows it everywhere.
@@ -1940,7 +1955,7 @@ export default function SceneEditor({
           || null;
         return url ? { ...token, imageUrl: url } : token;
       }),
-    [ghosts, portraits, roster, tokenImageUrls, tokens],
+    [ghosts, gmPlayerPreview, gmVitals.overlay, portraits, roster, tokenImageUrls, tokens],
   );
 
   // A projector and the inline preview still have GM database permissions.

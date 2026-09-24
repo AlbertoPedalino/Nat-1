@@ -56,6 +56,19 @@ export async function getInstanceFight(fightId) {
   return data || null;
 }
 
+// The fights behind the linked pieces of a scene, for the GM's view of their
+// real hit points (RLS: only the owner reads them).
+export async function listFightVitals(fightIds) {
+  const ids = [...new Set((fightIds || []).filter(Boolean).map(String))];
+  if (!ids.length) return [];
+  const { data, error } = await requireClient()
+    .from('encounter_fights')
+    .select('id, instance_id, fight')
+    .in('id', ids);
+  if (error) throw error;
+  return data || [];
+}
+
 export const FIGHT_VITALS_TIMEOUT_MS = 8_000;
 export const FIGHT_UNAVAILABLE = 'FIGHT_UNAVAILABLE';
 export const FIGHT_TIMEOUT = 'FIGHT_TIMEOUT';

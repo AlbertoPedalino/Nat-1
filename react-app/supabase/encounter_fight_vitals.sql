@@ -1,13 +1,16 @@
--- Enemy health: `encounter_fights` is the only authority.
+-- Token health: authoritative sources and the public projection.
 --
 -- Run AFTER vtt.sql and encounter_fights.sql (it replaces the two player mark
 -- RPCs from vtt.sql; re-run this file whenever vtt.sql is re-run). Safe to re-run.
 --
--- A monster combatant's vitals live inside `encounter_fights.fight.combatants`.
--- A map piece linked through `source_ref = <instance>:<fight>:<combatant>` keeps
--- hp_current / hp_max / conditions / effects only as a read-only display copy:
--- players cannot read fights, yet the GM may show them a creature's HP bar.
--- The database maintains that copy; no client write can change it.
+-- Real hit points live only in GM-only tables:
+--   * a monster linked through `source_ref = <instance>:<fight>:<combatant>`
+--     to a cloud fight: the combatant inside `encounter_fights.fight`;
+--   * any other piece: `map_token_secrets.hp_current / hp_max`.
+-- `map_tokens.hp_current / hp_max` are only a public projection, computed by
+-- the database on every write: the real values when `show_hp` is on, NULL
+-- when it is off. Nothing a client writes to those two columns is kept, and
+-- nothing flows back from them into a private source.
 
 alter table public.encounter_fights
   add column if not exists vitals_revision bigint not null default 0;
@@ -62,21 +65,137 @@ drop trigger if exists protect_fight_vitals on public.encounter_fights;
 create trigger protect_fight_vitals before update on public.encounter_fights
 for each row execute function public.protect_fight_vitals();
 
--- 2) Display copy on linked pieces, derived from the fight. Runs as the caller
--- (the fight owner), so map_tokens RLS still decides which pieces it reaches.
--- Unchanged pieces are skipped: no no-op UPDATE, no realtime event.
+-- The linked combatant of a piece, read past RLS (players cannot see fights).
+-- Only a fight owned by the GM of the piece's campaign counts: anyone else
+-- creating a row with a matching id must not gain control of the piece.
+drop function if exists public.linked_fight_combatant(text);
+create or replace function public.linked_fight_combatant(p_source_ref text, p_scene uuid)
+returns jsonb language sql stable security definer set search_path = public as $$
+  select c.value
+    from public.encounter_fights f
+    join public.map_scenes s on s.id = p_scene
+    join public.campaigns g on g.id = s.campaign_id and g.gm = f.owner,
+         jsonb_array_elements(
+           case when jsonb_typeof(f.fight->'combatants') = 'array' then f.fight->'combatants' else '[]'::jsonb end
+         ) as c(value)
+   where p_source_ref is not null
+     and f.id = split_part(p_source_ref, ':', 2)
+     and f.instance_id = split_part(p_source_ref, ':', 1)
+     and c.value->>'id' = split_part(p_source_ref, ':', 3)
+     and public.fight_combatant_is_monster(c.value)
+   limit 1
+$$;
+revoke all on function public.linked_fight_combatant(text, uuid) from public, anon, authenticated;
+
+-- 2) The private source for pieces without a cloud fight. GM-only through the
+-- existing map_token_secrets RLS (and therefore through Realtime as well).
+alter table public.map_token_secrets add column if not exists hp_current integer;
+alter table public.map_token_secrets add column if not exists hp_max integer;
+
+-- Backfill, before the projection below can clear anything: the HP a legacy
+-- piece carries on its public row become its private value. Pieces linked to
+-- a cloud fight are skipped (the fight is their source); an existing private
+-- value is never overwritten.
+insert into public.map_token_secrets (token_id, hp_current, hp_max)
+select t.id, t.hp_current, t.hp_max
+  from public.map_tokens t
+ where (t.hp_current is not null or t.hp_max is not null)
+   and public.linked_fight_combatant(t.source_ref, t.scene_id) is null
+on conflict (token_id) do update
+   set hp_current = excluded.hp_current, hp_max = excluded.hp_max
+ where public.map_token_secrets.hp_current is null and public.map_token_secrets.hp_max is null;
+
+-- A piece's real HP, from whichever private source owns it.
+create or replace function public.token_real_hp(p_token public.map_tokens)
+returns table (hp_current integer, hp_max integer)
+language plpgsql stable security definer set search_path = public as $$
+declare
+  c jsonb := public.linked_fight_combatant(p_token.source_ref, p_token.scene_id);
+begin
+  if c is not null then
+    return query select round((c->>'hpCurrent')::numeric)::integer, round((c->>'hpMax')::numeric)::integer;
+  else
+    return query select s.hp_current, s.hp_max from public.map_token_secrets s where s.token_id = p_token.id;
+  end if;
+end;
+$$;
+revoke all on function public.token_real_hp(public.map_tokens) from public, anon, authenticated;
+
+-- 3) Every insert or update of a piece recomputes its public vitals from the
+-- private sources: HP only while `show_hp` is on, and a linked monster's
+-- conditions/effects from its combatant. Values written by clients (players,
+-- old frontends, stale caches) are discarded.
+create or replace function public.guard_token_public_vitals()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare
+  c jsonb := public.linked_fight_combatant(new.source_ref, new.scene_id);
+  hp record;
+begin
+  if c is not null then
+    new.conditions := coalesce(array(select jsonb_array_elements_text(
+      case when jsonb_typeof(c->'activeConditions') = 'array' then c->'activeConditions' else '[]'::jsonb end)), '{}');
+    new.effects := case when jsonb_typeof(c->'activeEffects') = 'array' then c->'activeEffects' else '[]'::jsonb end;
+  end if;
+  select * into hp from public.token_real_hp(new);
+  if coalesce(new.show_hp, false) then
+    new.hp_current := hp.hp_current;
+    new.hp_max := hp.hp_max;
+  else
+    new.hp_current := null;
+    new.hp_max := null;
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists guard_linked_token_vitals on public.map_tokens;
+drop function if exists public.guard_linked_token_vitals();
+drop trigger if exists guard_token_public_vitals on public.map_tokens;
+create trigger guard_token_public_vitals before insert or update on public.map_tokens
+for each row execute function public.guard_token_public_vitals();
+
+-- The public values a piece should carry right now (used to skip no-op writes).
+create or replace function public.token_public_hp_differs(p_token public.map_tokens)
+returns boolean language plpgsql stable security definer set search_path = public as $$
+declare
+  hp record;
+  want_current integer;
+  want_max integer;
+begin
+  select * into hp from public.token_real_hp(p_token);
+  if coalesce(p_token.show_hp, false) then
+    want_current := hp.hp_current;
+    want_max := hp.hp_max;
+  end if;
+  return (p_token.hp_current, p_token.hp_max) is distinct from (want_current, want_max);
+end;
+$$;
+revoke all on function public.token_public_hp_differs(public.map_tokens) from public, anon, authenticated;
+
+-- 4) A private HP change re-projects its piece (the guard does the work).
+create or replace function public.project_secret_token_hp()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  update public.map_tokens t set hp_current = t.hp_current
+   where t.id = coalesce(new.token_id, old.token_id) and public.token_public_hp_differs(t);
+  return null;
+end;
+$$;
+drop trigger if exists project_secret_token_hp on public.map_token_secrets;
+create trigger project_secret_token_hp after insert or update of hp_current, hp_max or delete
+on public.map_token_secrets
+for each row execute function public.project_secret_token_hp();
+
+-- 5) A fight change re-projects its linked pieces: only pieces whose campaign
+-- GM owns this fight, and only pieces whose public values actually change (no
+-- no-op UPDATE, no realtime event).
 create or replace function public.project_fight_vitals()
-returns trigger language plpgsql set search_path = public as $$
+returns trigger language plpgsql security definer set search_path = public as $$
 begin
   if tg_op = 'UPDATE' and new.fight is not distinct from old.fight then return null; end if;
-  perform set_config('gb.fight_projection', 'on', true);
   update public.map_tokens t
-     set hp_current = v.hp_current, hp_max = v.hp_max,
-         conditions = v.conditions, effects = v.effects
+     set conditions = v.conditions, effects = v.effects
     from (
       select new.instance_id || ':' || new.id || ':' || (c.value->>'id') as ref,
-             round((c.value->>'hpCurrent')::numeric)::integer as hp_current,
-             round((c.value->>'hpMax')::numeric)::integer as hp_max,
              coalesce(array(select jsonb_array_elements_text(
                case when jsonb_typeof(c.value->'activeConditions') = 'array'
                  then c.value->'activeConditions' else '[]'::jsonb end)), '{}') as conditions,
@@ -88,9 +207,9 @@ begin
        where public.fight_combatant_is_monster(c.value) and c.value ? 'id'
     ) as v
    where t.source_ref = v.ref
-     and (t.hp_current, t.hp_max, t.conditions, t.effects)
-         is distinct from (v.hp_current, v.hp_max, v.conditions, v.effects);
-  perform set_config('gb.fight_projection', 'off', true);
+     and public.linked_fight_combatant(t.source_ref, t.scene_id) is not null
+     and ((t.conditions, t.effects) is distinct from (v.conditions, v.effects)
+          or public.token_public_hp_differs(t));
   return null;
 end;
 $$;
@@ -98,49 +217,19 @@ drop trigger if exists project_fight_vitals on public.encounter_fights;
 create trigger project_fight_vitals after insert or update on public.encounter_fights
 for each row execute function public.project_fight_vitals();
 
--- The linked combatant of a piece, read past RLS (players cannot see fights).
-create or replace function public.linked_fight_combatant(p_source_ref text)
-returns jsonb language sql stable security definer set search_path = public as $$
-  select c.value
-    from public.encounter_fights f,
-         jsonb_array_elements(
-           case when jsonb_typeof(f.fight->'combatants') = 'array' then f.fight->'combatants' else '[]'::jsonb end
-         ) as c(value)
-   where p_source_ref is not null
-     and f.id = split_part(p_source_ref, ':', 2)
-     and f.instance_id = split_part(p_source_ref, ':', 1)
-     and c.value->>'id' = split_part(p_source_ref, ':', 3)
-     and public.fight_combatant_is_monster(c.value)
-   limit 1
-$$;
-revoke all on function public.linked_fight_combatant(text) from public, anon, authenticated;
-
--- 3) No client write can change a linked piece's vitals: inserts (imports,
--- dungeon rooms) and updates always carry the fight's current values. Pieces
--- whose fight is not in the cloud keep their own values as before.
-create or replace function public.guard_linked_token_vitals()
-returns trigger language plpgsql security definer set search_path = public as $$
-declare
-  c jsonb;
+-- Realtime for the private source reaches the GM only (RLS); the default
+-- replica identity sends nothing but the key on delete.
+do $$
 begin
-  if new.source_ref is null or current_setting('gb.fight_projection', true) = 'on' then
-    return new;
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'map_token_secrets'
+  ) then
+    alter publication supabase_realtime add table public.map_token_secrets;
   end if;
-  c := public.linked_fight_combatant(new.source_ref);
-  if c is null then return new; end if;
-  new.hp_current := round((c->>'hpCurrent')::numeric)::integer;
-  new.hp_max := round((c->>'hpMax')::numeric)::integer;
-  new.conditions := coalesce(array(select jsonb_array_elements_text(
-    case when jsonb_typeof(c->'activeConditions') = 'array' then c->'activeConditions' else '[]'::jsonb end)), '{}');
-  new.effects := case when jsonb_typeof(c->'activeEffects') = 'array' then c->'activeEffects' else '[]'::jsonb end;
-  return new;
-end;
-$$;
-drop trigger if exists guard_linked_token_vitals on public.map_tokens;
-create trigger guard_linked_token_vitals before insert or update on public.map_tokens
-for each row execute function public.guard_linked_token_vitals();
+end $$;
 
--- 4) The one write path for enemy vitals. Atomic per combatant under a row
+-- 6) The one write path for enemy vitals. Atomic per combatant under a row
 -- lock. `p_base` holds the values the caller computed from; if the stored
 -- combatant no longer matches, nothing is applied and the current row comes
 -- back so the caller realigns. An identical patch writes nothing.
@@ -208,7 +297,7 @@ grant execute on function public.commit_fight_combatant_vitals(text, text, jsonb
 create or replace function public.forward_token_marks(p_token public.map_tokens, p_patch jsonb)
 returns boolean language plpgsql security definer set search_path = public as $$
 declare
-  c jsonb := public.linked_fight_combatant(p_token.source_ref);
+  c jsonb := public.linked_fight_combatant(p_token.source_ref, p_token.scene_id);
   patch jsonb := p_patch;
   was_dead boolean;
   now_dead boolean;
@@ -230,7 +319,7 @@ end;
 $$;
 revoke all on function public.forward_token_marks(public.map_tokens, jsonb) from public, anon, authenticated;
 
--- 5) The player mark RPCs from vtt.sql, same permission checks. On a linked
+-- 7) The player mark RPCs from vtt.sql, same permission checks. On a linked
 -- piece the mark goes to the fight; the display copy follows by projection.
 create or replace function public.set_token_conditions(p_token uuid, p_conditions text[])
 returns public.map_tokens
@@ -310,8 +399,10 @@ begin
 end;
 $$;
 
--- 6) Existing pieces start from their fight's values.
+-- 8) Existing pieces take their projection now: linked monsters from their
+-- fight (stale public HP ignored), others from the backfilled private value,
+-- hidden HP cleared. Pieces already correct are not touched.
 update public.map_tokens t
    set hp_current = t.hp_current
- where t.source_ref is not null
-   and public.linked_fight_combatant(t.source_ref) is not null;
+ where public.token_public_hp_differs(t)
+    or (t.source_ref is not null and public.linked_fight_combatant(t.source_ref, t.scene_id) is not null);

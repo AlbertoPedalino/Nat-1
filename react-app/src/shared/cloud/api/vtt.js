@@ -159,18 +159,22 @@ export async function listTokens(sceneId) {
   return (data || []).map(toToken).filter(Boolean);
 }
 
+// Real hit points never go on the public row: the database projects them there
+// only while the bar is shown. A piece linked to a cloud fight takes them from
+// its combatant; any other piece keeps them in the GM-only map_token_secrets.
 export async function createToken(sceneId, token = {}) {
   const supabase = requireClient();
+  const { hp_current: hpCurrent, hp_max: hpMax, ...publicPatch } = toTokenPatch({
+    ...token,
+    icon_key: token.iconKey ?? token.icon_key,
+    icon_stroke_width: token.iconStrokeWidth ?? token.icon_stroke_width,
+  });
   const row = {
     scene_id: sceneId,
     layer: normalizeLayer(token.layer),
     hidden_from_players: token.hiddenFromPlayers === true || token.layer === 'gm',
     character_id: token.characterId || null,
-    ...toTokenPatch({
-      ...token,
-      icon_key: token.iconKey ?? token.icon_key,
-      icon_stroke_width: token.iconStrokeWidth ?? token.icon_stroke_width,
-    }),
+    ...publicPatch,
   };
   const { data, error } = await supabase
     .from('map_tokens')
@@ -178,7 +182,36 @@ export async function createToken(sceneId, token = {}) {
     .select(TOKEN_COLUMNS)
     .single();
   if (error) throw error;
-  return toToken(data);
+  const created = toToken(data);
+  const hasHp = hpCurrent != null || hpMax != null;
+  if (!hasHp || row.character_id) return created;
+  // Also for a linked piece: its cloud fight takes precedence, and without one
+  // this is its source. The piece exists without HP until this lands; a
+  // failure leaves it so, and the GM can set them from the token menu.
+  await setTokenHp(created.id, { hpCurrent, hpMax }).catch(() => {});
+  return { ...created, hpCurrent: hpCurrent ?? null, hpMax: hpMax ?? null };
+}
+
+// The GM-only hit points of pieces in a scene that are not linked to a fight.
+export async function listTokenSecretHp(sceneId) {
+  const { data, error } = await requireClient()
+    .from('map_token_secrets')
+    .select('token_id, hp_current, hp_max, map_tokens!inner(scene_id)')
+    .eq('map_tokens.scene_id', sceneId);
+  if (error) throw error;
+  return Object.fromEntries((data || []).map((row) => [
+    row.token_id, { hpCurrent: row.hp_current ?? null, hpMax: row.hp_max ?? null },
+  ]));
+}
+
+// The one write for a standalone piece's hit points. RLS keeps it to the GM.
+export async function setTokenHp(tokenId, { hpCurrent = null, hpMax = null } = {}) {
+  const round = (value) => (value == null || value === '' || !Number.isFinite(Number(value))
+    ? null : Math.round(Number(value)));
+  const { error } = await requireClient()
+    .from('map_token_secrets')
+    .upsert({ token_id: tokenId, hp_current: round(hpCurrent), hp_max: round(hpMax) }, { onConflict: 'token_id' });
+  if (error) throw error;
 }
 
 // One write per move, called on drop. Live dragging goes over a broadcast
@@ -344,7 +377,8 @@ export async function setTokenSecret(tokenId, label) {
   const supabase = requireClient();
   const text = String(label || '').trim();
   if (!text) {
-    const { error } = await supabase.from('map_token_secrets').delete().eq('token_id', tokenId);
+    // Clear the label only: the same row holds the piece's private hit points.
+    const { error } = await supabase.from('map_token_secrets').update({ label: null }).eq('token_id', tokenId);
     if (error) throw error;
     return '';
   }
