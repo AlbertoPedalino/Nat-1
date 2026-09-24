@@ -168,12 +168,11 @@ GM-Board is React 19 + Vite + MUI 9 + Supabase SPA under `react-app/`. D&D data 
 
 ## Combat Sheet Sync
 
-- Synced fields: `currentHP`, `tempHP`, `maxHPBonus`, `deathSaves`, `activeConditions`.
-- Shared ownership: `shared/character/combat/vitals.js`.
-- Outbound: `useFightSheetSync`; inbound realtime: `useSheetRealtime`.
-- Manual PCs/monsters retain local vitals.
-- `activeEffects` never sync.
-- `patch_character_data` shallow-merges allowlisted fields only.
+- Synced fields: `currentHP`, `tempHP`, `maxHPBonus`, `deathSaves`, `activeConditions` (`shared/character/combat/vitals.js`; must match the allowlist in `supabase/character_vitals.sql`).
+- Writes: every client sends an intent through `commandCharacterVitals` (`shared/cloud/api/cloudCharacters.js` → RPC `commit_character_vitals`), one call against `row_revision`, 8 s timeout, no retry; conflict/error/timeout realigns on the row. The `protect_character_vitals` trigger keeps ordinary sheet saves from changing health. Builder: `encounterbuilder/campaign/useCharacterVitalDispatch.js`.
+- Reads: `useCloudCharacterLive` (realtime + recovery reads ordered by `row_revision`/`commit_timestamp`); builder via `encounterbuilder/campaign/CharacterVitalBridge.jsx`. Received rows never trigger a write.
+- Manual PCs keep local vitals; enemies follow the Battle Map / VTT enemy-vitals rules.
+- `activeEffects` never sync to sheets.
 - `Dead` travels inside `activeConditions` and is kept consistent with HP/death saves by sheet, encounter, and VTT handlers. A player at 0 HP with fewer than three failures is not automatically dead.
 
 ## Campaigns
@@ -195,7 +194,7 @@ GM-Board is React 19 + Vite + MUI 9 + Supabase SPA under `react-app/`. D&D data 
 
 ## Cloud and Supabase
 
-- Core schemas: `supabase/schema.sql`, `sections.sql`, `campaigns.sql`, `combat_sync.sql`. VTT/encounter integration also uses `supabase/vtt.sql`, `atmosphere.sql`, `encounter_fights.sql`, `encounter_fight_vitals.sql` (after vtt.sql and encounter_fights.sql; re-run it whenever vtt.sql is re-run), `dungeon.sql`, and `hexcrawl.sql`.
+- SQL run order (all re-runnable; full list and purpose in `CLOUD_SETUP.md`): `schema` → `sections` → `campaigns` → `combat_sync` → `character-art` → `vtt` → `atmosphere` → `encounter_fights` → `dungeon` → `hexcrawl` → `campaign_tools` → `rolls` → `character_vitals` → `encounter_fight_vitals`. The player mark RPCs (`set_token_conditions/effects`) are defined once in `vtt.sql` and find `forward_token_marks` at call time, so re-run order is free. `patch_character_data` is retired (dropped by `combat_sync.sql`). `uuid_or_null` is intentionally defined in both `character-art.sql` and `vtt.sql` so each stands alone.
 - `sections.sql` runs after `schema.sql`; `CLOUD_SETUP.md` documents this step.
 - `boards`, `encounters`, and `dm_screens` match the character-row shape.
 - All three section tables use owner-only RLS with no global-GM escape.

@@ -503,6 +503,7 @@ as $$
 declare
   token public.map_tokens;
   scene public.map_scenes;
+  forwarded boolean;
 begin
   select * into token from public.map_tokens where id = p_token;
   if token.id is null then
@@ -525,6 +526,19 @@ begin
     raise exception 'Not allowed to mark this token';
   end if;
 
+  -- On a piece linked to a cloud fight the mark belongs to its combatant
+  -- (encounter_fight_vitals.sql); the piece shows it by projection. Looked up
+  -- at call time, so the order the scripts were run in does not matter.
+  if token.source_ref is not null
+     and to_regprocedure('public.forward_token_marks(public.map_tokens,jsonb)') is not null then
+    execute 'select public.forward_token_marks($1, $2)' into forwarded
+      using token, jsonb_build_object('activeConditions', to_jsonb(coalesce(p_conditions, '{}')));
+    if forwarded then
+      select * into token from public.map_tokens where id = p_token;
+      return token;
+    end if;
+  end if;
+
   update public.map_tokens
     set conditions = coalesce(p_conditions, '{}')
     where id = p_token
@@ -544,6 +558,7 @@ as $$
 declare
   token public.map_tokens;
   scene public.map_scenes;
+  forwarded boolean;
 begin
   select * into token from public.map_tokens where id = p_token;
   if token.id is null then
@@ -562,6 +577,16 @@ begin
     )
   ) then
     raise exception 'Not allowed to mark this token';
+  end if;
+
+  if token.source_ref is not null
+     and to_regprocedure('public.forward_token_marks(public.map_tokens,jsonb)') is not null then
+    execute 'select public.forward_token_marks($1, $2)' into forwarded
+      using token, jsonb_build_object('activeEffects', coalesce(p_effects, '[]'::jsonb));
+    if forwarded then
+      select * into token from public.map_tokens where id = p_token;
+      return token;
+    end if;
   end if;
 
   update public.map_tokens

@@ -7,8 +7,9 @@
 // A condition is a named rules state with published text that the sheet and the
 // encounter must agree on, so it is a synced vital; an effect is one GM's
 // ruling for one fight, with no sheet-side meaning. It therefore lives on the
-// combatant and in the fight snapshot only, and supabase/combat_sync.sql is
-// untouched. Adding one here does NOT mean adding a key to SYNCED_VITALS.
+// combatant and in the fight snapshot only, and the character health allowlist
+// in supabase/character_vitals.sql is untouched. Adding one here does NOT mean
+// adding a key to SYNCED_VITALS.
 //
 // Expiry is manual on purpose. A duration is a label the GM reads, not a timer:
 // initiative here can be stepped backwards (prevTurn), so an effect destroyed by

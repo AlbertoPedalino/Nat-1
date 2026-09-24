@@ -1,44 +1,19 @@
 -- ============================================================================
--- GM Board — Encounter combat sync add-on. Run this AFTER schema.sql.
+-- GM Board — Live character sheets. Run this AFTER schema.sql. Safe to re-run.
 -- SQL Editor > New query > paste all > Run.
 --
--- Contract: p_patch is a shallow top-level JSON patch. For object-valued keys
--- such as deathSaves, and array-valued ones such as activeConditions, callers
--- must send the complete value — it replaces, it does not merge.
+-- Adds `characters` to Supabase Realtime so open sheets, the encounter builder
+-- and the battle map see each other's changes. RLS still decides which rows
+-- each connected client receives.
 --
--- The allowed[] list below must match SYNCED_DATA_KEYS in
--- src/shared/character/combat/vitals.js; an encounter test asserts the two never
--- drift. Re-run this file after adding a key there, or writes of the new field
--- are silently dropped.
+-- Character health (HP, temp HP, death saves, conditions) is written only
+-- through commit_character_vitals in character_vitals.sql. The former
+-- patch_character_data RPC is retired: it is dropped here so existing
+-- databases do not keep an unused write path.
 -- ============================================================================
 
-create or replace function public.patch_character_data(p_id text, p_patch jsonb)
-returns void
-language plpgsql
-security invoker
-set search_path = public
-as $$
-declare
-  allowed text[] := array['currentHP','tempHP','deathSaves','maxHPBonus','activeConditions'];
-  clean jsonb;
-begin
-  select coalesce(jsonb_object_agg(key, value), '{}'::jsonb) into clean
-  from jsonb_each(p_patch)
-  where key = any(allowed);
+drop function if exists public.patch_character_data(text, jsonb);
 
-  if clean = '{}'::jsonb then
-    return;
-  end if;
-
-  update public.characters
-     set data = data || clean,
-         updated_at = now()
-   where id = p_id;
-end;
-$$;
-
--- Enable Supabase Realtime for live sheet -> encounter combat updates.
--- RLS still decides which character rows each connected client can receive.
 do $$
 begin
   if exists (

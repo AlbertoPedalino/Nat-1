@@ -1,5 +1,6 @@
--- Run once in the Supabase SQL editor after deploying the Atmosphere rename.
--- Existing values in the legacy weather column are intentionally discarded.
+-- GM Board — Scene atmosphere. Run AFTER vtt.sql. Safe to re-run.
+-- Replaces the legacy `weather` column; its old values are intentionally
+-- discarded the first time this runs.
 
 begin;
 

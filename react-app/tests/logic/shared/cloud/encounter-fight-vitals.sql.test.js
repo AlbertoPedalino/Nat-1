@@ -86,6 +86,14 @@ async function setup() {
       ('${ORPHAN}', '${SCENE}', 'inst:gone:m9', 7, 10, true);
     insert into map_token_secrets (token_id, label) values ('${LEGACY_HIDDEN}', 'Mimic');
   `);
+  // The player mark RPCs come from vtt.sql, defined here before the migration:
+  // they must find its forwarding function at call time, whatever the order.
+  const vtt = await sql('vtt.sql');
+  for (const name of ['set_token_conditions', 'set_token_effects']) {
+    const start = vtt.indexOf(`create or replace function public.${name}(`);
+    const end = vtt.indexOf('$$;', vtt.indexOf('as $$', start)) + 3;
+    await db.exec(vtt.slice(start, end));
+  }
   const migration = await sql('encounter_fight_vitals.sql');
   await db.exec(migration);
   await db.exec(migration); // safe to rerun: nothing is lost the second time
