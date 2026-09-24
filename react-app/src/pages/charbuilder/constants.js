@@ -50,7 +50,6 @@ export const CLASS_FILES = [
 
 export const SPELL_FILES = [
   'spells-xphb.json',
-  'spells-fraif.json',
   'spells-frhof.json',
   'spells-efa.json',
   'spells-au.json',

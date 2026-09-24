@@ -81,8 +81,6 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
   const [spellDb, setSpellDb] = useState([]);
   const [classSpellIndex, setClassSpellIndex] = useState({});
   const [catalogStatus, setCatalogStatus] = useState('loading');
-  const [loadAttempt, setLoadAttempt] = useState(0);
-  const [adapterError, setAdapterError] = useState(false);
   const [adapterRevision, setAdapterRevision] = useState(0);
   const [spellSearch, setSpellSearch] = useState('');
   const [spellFilter, setSpellFilter] = useState('all');
@@ -100,7 +98,6 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
   useEffect(() => {
     let alive = true;
     const context = { getMod, getFinal, getPB };
-    setAdapterError(false);
     Promise.all([
       loadCoreAdapters(context),
       loadClassAdapters(JSON.parse(classKey), context),
@@ -109,10 +106,10 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
       if (!alive) return;
       setAdapterRevision((revision) => revision + 1);
     }).catch(() => {
-      if (alive) setAdapterError(true);
+      // Keep the available catalog usable if an adapter cannot be loaded.
     });
     return () => { alive = false; };
-  }, [classKey, loadAttempt]);
+  }, [classKey]);
 
   useEffect(() => {
     let alive = true;
@@ -138,7 +135,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
     };
     load();
     return () => { alive = false; };
-  }, [loadAttempt]);
+  }, []);
 
   useEffect(() => {
     setSlotUsed(sheet?.spellSlotUsed || {});
@@ -495,11 +492,6 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
       <SlotPanel slots={slots} used={slotUsed} created={createdSlots} onToggle={toggleSlot} readOnly={readOnly} />
 
       {catalogStatus === 'loading' ? <Typography role="status" sx={{ py: 1, color: 'text.secondary' }}>Loading spell details…</Typography> : null}
-      {catalogStatus === 'error' || adapterError ? (
-        <Alert severity="warning" action={<Button onClick={() => setLoadAttempt((attempt) => attempt + 1)}>Retry</Button>}>
-          Some spell details could not be loaded. Try again without reloading the page.
-        </Alert>
-      ) : null}
 
       {visibleCantrips.length || showEmptyCantrips ? (
         <SpellSection title="Cantrip">

@@ -52,21 +52,21 @@ test('attuning while loading shows canonical spell details without restarting th
   fireEvent.click(await screen.findByText('Levitate', { exact: true }));
   expect(await screen.findByText('The target rises into the air.')).toBeVisible();
   expect(screen.queryByText(/no description/i)).not.toBeInTheDocument();
-  // An adapter failure must not discard the catalog; it can be retried in place.
-  fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
-  await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument());
+  // An adapter failure must not discard the catalog or show an error panel.
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Retry' })).not.toBeInTheDocument();
   expect(screen.getByText('Levitate', { exact: true })).toBeInTheDocument();
 });
 
-test('an incomplete catalog retries and exposes recovery without rendering a descriptionless item spell', async () => {
-  const partial = { spells: [], classSpellIndex: {}, failedFiles: ['spells-xphb.json'] };
-  loaders.loadSpells.mockResolvedValueOnce(partial).mockResolvedValueOnce(partial);
+test('an incomplete catalog retries silently and keeps available spell details visible', async () => {
+  const partial = { ...catalog, failedFiles: ['spells-frhof.json'] };
+  loaders.loadSpells.mockResolvedValue(partial);
   render(view(character(true)));
-  expect(await screen.findByRole('alert')).toHaveTextContent('Some spell details could not be loaded');
+  await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument());
   expect(loaders.loadSpells).toHaveBeenCalledTimes(2);
   expect(screen.queryByText('levitate', { exact: true })).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
   fireEvent.click(await screen.findByText('Levitate', { exact: true }));
   expect(await screen.findByText('The target rises into the air.')).toBeVisible();
   expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Retry' })).not.toBeInTheDocument();
 });
