@@ -7,7 +7,7 @@ const m = vi.hoisted(() => ({ calls: [], result: { data: [], error: null } }));
 vi.mock('../../../../../src/shared/cloud/supabaseClient.js', () => {
   const builder = () => {
     const query = {};
-    for (const method of ['select', 'eq', 'in', 'order']) {
+    for (const method of ['select', 'eq', 'in', 'order', 'not']) {
       query[method] = (...args) => { m.calls.push([method, ...args]); return query; };
     }
     query.maybeSingle = () => { m.calls.push(['maybeSingle']); return Promise.resolve(m.result); };
@@ -19,7 +19,7 @@ vi.mock('../../../../../src/shared/cloud/supabaseClient.js', () => {
 });
 
 import {
-  fetchSceneRevision, listDrawingIds, readLiveSceneId, listDrawingsByIds, listTokenRevisions, listTokensByIds,
+  fetchSceneRevision, listDrawingIds, listLiveCampaignIds, readLiveSceneId, listDrawingsByIds, listTokenRevisions, listTokensByIds,
 } from '../../../../../src/shared/cloud/api/vtt.js';
 import {
   listCharacterDigests, readCharacterSheets,
@@ -100,4 +100,19 @@ test('digests are read by campaign or by exact characters; a sheet is read only 
   m.result = { data: [], error: null };
   await readCharacterSheets(['pc']);
   expect(m.calls).toEqual(expect.arrayContaining([['from', 'characters'], ['select', 'id, data'], ['in', 'id', ['pc']]]));
+});
+
+test('the campaign picker asks the projection which of its campaigns are live', async () => {
+  m.result = { data: [{ campaign_id: 'c2' }], error: null };
+  const live = await listLiveCampaignIds(['c1', 'c2', 'c2', null]);
+  expect([...live]).toEqual(['c2']);
+  expect(m.calls).toEqual([
+    ['from', 'campaign_live_scenes'],
+    ['select', 'campaign_id'],
+    ['in', 'campaign_id', ['c1', 'c2']],
+    ['not', 'scene_id', 'is', null],
+  ]);
+  m.calls = [];
+  expect([...await listLiveCampaignIds([])]).toEqual([]);
+  expect(m.calls).toEqual([]);
 });

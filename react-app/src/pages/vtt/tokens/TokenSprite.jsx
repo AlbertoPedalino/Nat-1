@@ -560,7 +560,7 @@ const barBaseSx = {
   boxSizing: 'border-box',
 };
 
-const hpBarSx = { ...barBaseSx, height: 13 };
+const hpBarSx = { ...barBaseSx, height: 17 };
 
 const deathTrackSx = {
   height: 18,
@@ -613,7 +613,7 @@ const hpFillSx = {
 
 const textBaseSx = {
   position: 'relative',
-  fontSize: '0.58rem',
+  fontSize: '0.76rem',
   fontWeight: 700,
   lineHeight: 1,
   fontVariantNumeric: 'tabular-nums',
@@ -624,7 +624,7 @@ const textBaseSx = {
 
 const hpTextSx = { ...textBaseSx, color: VTT_COLORS.parchment };
 
-const tempBarSx = { ...barBaseSx, height: 10 };
+const tempBarSx = { ...barBaseSx, height: 14 };
 
 const tempFillSx = {
   position: 'absolute',
@@ -635,7 +635,7 @@ const tempFillSx = {
   transition: 'width 120ms linear',
 };
 
-const tempTextSx = { ...textBaseSx, color: VTT_COLORS.tempHpText, fontSize: '0.54rem' };
+const tempTextSx = { ...textBaseSx, color: VTT_COLORS.tempHpText, fontSize: '0.7rem' };
 
 const plateSx = {
   px: 0.6,
@@ -643,7 +643,8 @@ const plateSx = {
   borderRadius: 1,
   bgcolor: vttAlpha(VTT_COLORS.ink, 0.85),
   color: VTT_COLORS.parchmentMuted,
-  fontSize: '0.62rem',
+  // Read from across the table on a projector, not only at a laptop.
+  fontSize: '0.85rem',
   lineHeight: 1.3,
   whiteSpace: 'nowrap',
 };
@@ -717,8 +718,8 @@ const pillsSx = {
 const pillSx = {
   px: 0.6,
   py: '1px',
-  borderRadius: '9px',
-  fontSize: '0.58rem',
+  borderRadius: '10px',
+  fontSize: '0.78rem',
   fontWeight: 700,
   lineHeight: 1.35,
   whiteSpace: 'nowrap',

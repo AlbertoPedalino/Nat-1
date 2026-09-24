@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Box, Chip, CircularProgress, Paper, Stack, Typography } from '@mui/material';
 import { Flag, Radio } from 'lucide-react';
 import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
-import { listLiveScenes } from '../../../shared/cloud/api/vtt.js';
+import { listLiveCampaignIds } from '../../../shared/cloud/api/vtt.js';
 
 // Several campaigns can be running at the same time, so a player picks the table
 // first. They never pick a scene: once inside, the GM decides what is on it and
@@ -13,21 +13,20 @@ export default function CampaignSessionPicker({ campaigns = [], onJoin, showEmpt
 
   useEffect(() => {
     let cancelled = false;
-    listLiveScenes().catch(() => [])
+    // Campaigns the user runs are managed from the GM side of this page; here
+    // they are only a player.
+    const joined = campaigns.filter((campaign) => campaign.gm !== user?.id);
+    // A failed lookup only loses the badges: every table can still be joined.
+    listLiveCampaignIds(joined.map((campaign) => campaign.id)).catch(() => new Set())
       .then((live) => {
         if (cancelled) return;
-        const liveByCampaign = new Set(live.map((scene) => scene.campaignId));
         setState({
           loading: false,
-          // Campaigns the user runs are managed from the GM side of this page;
-          // here they are only a player.
-          campaigns: campaigns
-            .filter((campaign) => campaign.gm !== user?.id)
-            .map((campaign) => ({
-              id: campaign.id,
-              name: campaign.name || 'Campaign',
-              hasLive: liveByCampaign.has(campaign.id),
-            })),
+          campaigns: joined.map((campaign) => ({
+            id: campaign.id,
+            name: campaign.name || 'Campaign',
+            hasLive: live.has(campaign.id),
+          })),
         });
       })
       .catch(() => { if (!cancelled) setState({ loading: false, campaigns: [] }); });

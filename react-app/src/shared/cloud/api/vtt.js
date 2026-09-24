@@ -49,17 +49,20 @@ export async function listScenes(campaignId) {
   return (data || []).map(toScene).filter(Boolean);
 }
 
-// Every live scene the caller may see. For a player this is how they find the
-// table at all: they cannot list a campaign's scenes, only the one being shown.
-export async function listLiveScenes() {
-  const supabase = requireClient();
-  const { data, error } = await supabase
-    .from('map_scenes')
-    .select(SCENE_COLUMNS)
-    .eq('is_live', true)
-    .order('updated_at', { ascending: false });
+// Which of these campaigns have a scene up right now: the campaign picker's
+// "Live" badges. Read from the one-row-per-campaign projection
+// (15_live_scenes.sql), so no scene row — fog and all — is fetched for it. RLS
+// returns only campaigns the caller belongs to or runs.
+export async function listLiveCampaignIds(campaignIds) {
+  const ids = [...new Set((campaignIds || []).filter(Boolean).map(String))];
+  if (!ids.length) return new Set();
+  const { data, error } = await requireClient()
+    .from('campaign_live_scenes')
+    .select('campaign_id')
+    .in('campaign_id', ids)
+    .not('scene_id', 'is', null);
   if (error) throw error;
-  return (data || []).map(toScene).filter(Boolean);
+  return new Set((data || []).map((row) => row.campaign_id));
 }
 
 // The id of the scene a campaign is showing, or null. Read from the
