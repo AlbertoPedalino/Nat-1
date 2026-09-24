@@ -94,7 +94,17 @@ import { useVttRolls } from '../rolls/useVttRolls.js';
 import DungeonPanel from '../dungeon/DungeonPanel.jsx';
 import { useMonsterDb } from '../../encounterbuilder/bestiary/useMonsterDb.js';
 import { launchLibraryEncounter } from '../../encounterbuilder/sync/handoff.js';
-import { saveInstanceFight } from '../../../shared/cloud/api/encounterFights.js';
+import {
+  FIGHT_UNAVAILABLE,
+  commitFightCombatantVitals,
+  saveInstanceFight,
+} from '../../../shared/cloud/api/encounterFights.js';
+import { parseSourceRef } from '../../../shared/vtt/tokens/encounterSync.js';
+import {
+  monsterEditFromToken,
+  monsterVitalsBase,
+  monsterVitalsPatch,
+} from '../../../shared/vtt/tokens/fightVitals.js';
 import HexcrawlCorner from '../hexcrawl/HexcrawlCorner.jsx';
 import HexResultDialog from '../hexcrawl/HexResultDialog.jsx';
 import { useConditionEntries } from '../../encounterbuilder/combat/useConditionEntries.js';
@@ -1410,44 +1420,49 @@ export default function SceneEditor({
   // keeping it on the token row would deliver it to the players.
   // A player's only write on a piece that is not theirs. It goes through the
   // RPC, which touches the conditions column and nothing else.
-  // Hit points arriving from the encounter builder. Written to the rows because
-  // a monster's piece owns them — unlike a character's, which reads its sheet.
+  // Encounter effects on character pieces, from a locally cached fight. Sheet
+  // vitals arrive through character realtime; enemy vitals only ever come from
+  // their fight row, never from this cache.
   const applyTokenVitals = useCallback((updates) => {
     setTokens((current) => current.map((token) => {
       const update = updates.find((item) => item.id === token.id);
-      if (update && token.characterId) return { ...token, effects: update.effects };
-      return update
-        ? {
-          ...token,
-          ...(Object.hasOwn(update, 'hpCurrent') ? { hpCurrent: update.hpCurrent } : {}),
-          ...(Object.hasOwn(update, 'hpMax') ? { hpMax: update.hpMax } : {}),
-          ...(Object.hasOwn(update, 'conditions') ? { conditions: update.conditions } : {}),
-          ...(Object.hasOwn(update, 'effects') ? { effects: update.effects } : {}),
-          ...(Object.hasOwn(update, 'deathSaves') ? { deathSaves: update.deathSaves } : {}),
-        }
-        : token;
+      return update && token.characterId ? { ...token, effects: update.effects } : token;
     }));
     for (const update of updates) {
-      if (update.characterId) {
-        // Sheet vitals arrive through character realtime. A cached encounter
-        // may only update the effects owned by this map piece.
-        updateToken(update.id, { effects: update.effects }).catch(() => {
-          // The next encounter save retries map effects.
-        });
-        continue;
-      }
-      updateToken(update.id, {
-        hp_current: update.hpCurrent,
-        hp_max: update.hpMax,
-        conditions: update.conditions,
-        effects: update.effects,
-      })
-        .catch(() => {
-          // Best-effort: the encounter builder is the authority here, and the
-          // next save will try again.
-        });
+      if (!update.characterId) continue;
+      updateToken(update.id, { effects: update.effects }).catch(() => {
+        // The next encounter save retries map effects.
+      });
     }
   }, []);
+
+  // An enemy piece imported from a cloud fight: its vitals are written to the
+  // combatant in that fight, once, and the piece shows the copy the database
+  // derives from it. Answers false when the fight has no cloud row, so the
+  // piece keeps its own values as before.
+  const commitLinkedMonster = useCallback(async (token, edit) => {
+    const ref = token.characterId ? null : parseSourceRef(token.sourceRef);
+    if (!ref) return false;
+    const { before, after } = monsterEditFromToken(token, edit);
+    const patch = monsterVitalsPatch(before, after);
+    if (!Object.keys(patch).length) return true;
+    try {
+      const { applied } = await commitFightCombatantVitals(ref.fightId, ref.combatantId, {
+        base: { hpCurrent: monsterVitalsBase(before).hpCurrent, hpMax: monsterVitalsBase(before).hpMax },
+        patch,
+      });
+      if (!applied) {
+        notify('warning', 'This creature changed elsewhere. Showing the latest values; try again if needed.');
+        refreshVisibleTokens();
+      }
+      return true;
+    } catch (cause) {
+      if (cause?.code === FIGHT_UNAVAILABLE) return false;
+      notify('error', cause?.message || 'Could not update that creature.');
+      refreshVisibleTokens();
+      return true;
+    }
+  }, [notify, refreshVisibleTokens]);
 
   const { push: pushToEncounter } = useEncounterBridge({
     tokens: role.isGm && !spectator ? tokens : [],
@@ -1490,9 +1505,11 @@ export default function SceneEditor({
       // Both marks go through their own function, which writes one column and
       // checks the table rather than the row: calling out that the ogre has
       // advantage is not the same as being handed the ogre.
+      // On a piece linked to a cloud fight both marks are forwarded to its
+      // combatant by the database.
       await setTokenEffects(token.id, effects);
       if (owned) await updateToken(token.id, { show_hp: showHp });
-      pushToEncounter({ ...token, conditions, effects, hpCurrent, deathSaves });
+      if (token.characterId) pushToEncounter({ ...token, conditions, effects, hpCurrent, deathSaves });
     } catch (cause) {
       setTokens((current) => current.map((item) => (item.id === token.id ? token : item)));
       notify('error', cause?.message || 'Could not mark that token.');
@@ -1522,26 +1539,29 @@ export default function SceneEditor({
         : item
     )));
     try {
-      // Conditions take the route that suits the piece: a character's go to the
-      // sheet, a monster's to its own row.
+      // Vitals take the route that suits the piece: a character's go to the
+      // sheet, a cloud fight's enemy to its combatant, anything else to its row.
+      const linked = await commitLinkedMonster(token, { hpCurrent, hpMax, conditions, effects });
       if (token.characterId) {
         if (Object.keys(healthPatch).length) await commandCharacterVitals(token.characterId, tokenHealthCommand(token, healthPatch));
-      } else {
+      } else if (!linked) {
         await writeConditions(token, conditions);
       }
       await updateToken(token.id, {
-        label: publicLabel, effects, show_hp: showHp, ...vitals,
+        label: publicLabel,
+        show_hp: showHp,
+        ...(linked ? {} : { effects, ...vitals }),
       });
       if (secret !== (token.secretLabel || '')) await setTokenSecret(token.id, secret);
-      // Back to the encounter builder, if its tab is around to hear it. A
-      // character's piece is matched to its combatant by the sheet it stands
-      // for, so this is not limited to imported monsters.
-      pushToEncounter({ ...token, hpCurrent, hpMax, conditions, effects, deathSaves });
+      // A character's piece is matched to its combatant by the sheet it stands
+      // for; a same-browser builder hears its effects through local storage.
+      // Enemy vitals never travel that way.
+      if (token.characterId) pushToEncounter({ ...token, hpCurrent, hpMax, conditions, effects, deathSaves });
     } catch (cause) {
       setTokens((current) => current.map((item) => (item.id === token.id ? token : item)));
       notify('error', cause?.message || 'Could not update that token.');
     }
-  }, [notify]);
+  }, [commitLinkedMonster, notify, pushToEncounter, writeConditions]);
 
   const handleDeathSaveChange = useCallback((token, type, value) => {
     if (!token?.characterId || !['success', 'fail'].includes(type)) return;

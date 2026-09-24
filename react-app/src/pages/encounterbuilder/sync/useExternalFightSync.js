@@ -33,7 +33,7 @@ function fightSignature(entry) {
 }
 
 export function useExternalFightSync({
-  instanceId, instanceSaved, activeFightId, fights, library, monsters, dispatch,
+  instanceId, instanceSaved, activeFightId, fights, library, monsters, dispatch, cloudFights = false,
 }) {
   const lastRef = useRef('');
   // What this tab currently holds, read inside the listeners. Kept in a ref so
@@ -53,7 +53,7 @@ export function useExternalFightSync({
       const signature = fightSignature(entry);
       if (signature === lastRef.current) return;
       lastRef.current = signature;
-      dispatch({ type: 'syncExternalFight', entry, monsters });
+      dispatch({ type: 'syncExternalFight', entry, monsters, preserveMonsterVitals: cloudFights });
     };
 
     // Seeded rather than applied: the fight on screen is already this one, and
@@ -70,7 +70,7 @@ export function useExternalFightSync({
       window.removeEventListener('storage', apply);
       window.removeEventListener(ENCOUNTER_SAVED, apply);
     };
-  }, [activeFightId, dispatch, instanceId, instanceSaved, monsters]);
+  }, [activeFightId, cloudFights, dispatch, instanceId, instanceSaved, monsters]);
 
   useEffect(() => {
     if (!instanceId || !instanceSaved) return undefined;

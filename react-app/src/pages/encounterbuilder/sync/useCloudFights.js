@@ -8,7 +8,7 @@ import {
   subscribeInstanceFights,
 } from '../../../shared/cloud/api/encounterFights.js';
 import { externalDelta } from './externalSync.js';
-import { fightSignature, libraryCardUpdates } from '../library/fightRecord.js';
+import { fightSignature, libraryCardUpdates, toFightEntry } from '../library/fightRecord.js';
 
 // The fights of this instance, with the database as the record.
 //
@@ -26,8 +26,10 @@ const WRITE_DEBOUNCE_MS = 500;
 const DELETE_ATTEMPTS = 3;
 
 export function useCloudFights({
-  instanceId, instanceSaved, fights, library, activeFightId, dispatch,
+  instanceId, instanceSaved, fights, library, activeFightId, dispatch, isVitalsBusy,
 }) {
+  const isVitalsBusyRef = useRef(isVitalsBusy);
+  isVitalsBusyRef.current = isVitalsBusy;
   const { cloudEnabled, status } = useAuth();
   const { notify } = useToast();
   const canSync = Boolean(cloudEnabled && status === 'authed' && instanceId && instanceSaved);
@@ -152,9 +154,48 @@ export function useCloudFights({
     if (delta.fights.length || cards.length) {
       dispatchRef.current({ type: 'absorbExternal', fights: delta.fights, library: cards });
     }
+    // The fight on screen keeps its own turn and roster, but its enemies'
+    // vitals are the row's: that is the one place they are written. While a
+    // local vitals command is still in flight its own answer realigns instead.
+    const activeKey = held.activeFightId == null ? null : String(held.activeFightId);
+    const active = activeKey ? rows.find((entry) => String(entry.id) === activeKey) : null;
+    if (active && !isVitalsBusyRef.current?.(active.id)) {
+      dispatchRef.current({ type: 'absorbFightVitals', fightId: active.id, fight: active.fight });
+    }
   }, [canSync, instanceId]);
 
   verifyRef.current = refresh;
+
+  // A row this tab just received (an RPC answer or a recovery read). Settle it
+  // first, so taking its vitals does not look like a local edit to save.
+  const acceptRemoteFight = useCallback((row) => {
+    const entry = toFightEntry(row);
+    if (!entry) return;
+    settledRef.current.set(String(entry.id), fightSignature(entry));
+    dispatchRef.current({ type: 'absorbFightVitals', fightId: entry.id, fight: entry.fight });
+  }, []);
+
+  // A local edit already sent through its own command: the full save has
+  // nothing to add for it.
+  const markSettled = useCallback((entry) => {
+    if (entry?.id != null) settledRef.current.set(String(entry.id), fightSignature(entry));
+  }, []);
+
+  // The command could not be applied because the fight has no usable row yet:
+  // store the fight the ordinary way, with what is on screen when it fires.
+  const requestSave = useCallback((fightId) => {
+    const key = String(fightId);
+    const find = () => (heldRef.current.fights || []).find((fight) => String(fight.id) === key);
+    if (!canSync || !find()) return;
+    settledRef.current.set(key, fightSignature(find()));
+    const running = timersRef.current.get(key);
+    if (running) clearTimeout(running);
+    timersRef.current.set(key, setTimeout(() => {
+      timersRef.current.delete(key);
+      const entry = find();
+      if (entry) saveInstanceFight(instanceId, entry).catch(() => {});
+    }, WRITE_DEBOUNCE_MS));
+  }, [canSync, instanceId]);
 
   // First read, then every change to this instance's fights from anywhere.
   useEffect(() => {
@@ -207,4 +248,6 @@ export function useCloudFights({
       askAgain(key);
     }
   }, [canSync, fights, instanceId]);
+
+  return { canSync, acceptRemoteFight, markSettled, requestSave };
 }

@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useReducer } from 'react';
+import { createContext, useCallback, useContext, useMemo, useReducer, useRef } from 'react';
 import { rollDice } from '../rolls/dice.js';
 import { makeSavedEncounter } from './storage.js';
 import { encounterReducer, createInitialState } from './reducer.js';
@@ -8,8 +8,8 @@ import { useCampaignPlayers } from '../campaign/useCampaignPlayers.js';
 import CharacterVitalBridge from '../campaign/CharacterVitalBridge.jsx';
 import { useCharacterVitalDispatch } from '../campaign/useCharacterVitalDispatch.js';
 import { useExternalFightSync } from '../sync/useExternalFightSync.js';
-import { useMapTokenBridge } from '../sync/useMapTokenBridge.js';
 import { useCloudFights } from '../sync/useCloudFights.js';
+import { useMonsterVitalDispatch } from '../sync/useMonsterVitalDispatch.js';
 import { useEncounterRolls } from '../rolls/useEncounterRolls.js';
 import { encounterRollActor } from '../rolls/rollActor.js';
 
@@ -17,7 +17,11 @@ const EncounterBuilderContext = createContext(null);
 
 export function EncounterBuilderProvider({ instanceId, instanceSaved, linkGroupId, onInstanceSaved, children }) {
   const [state, reduce] = useReducer(encounterReducer, undefined, createInitialState);
-  const dispatch = useCharacterVitalDispatch(state.combat, reduce);
+  // Enemy vitals go to their fight row; a linked player's to their sheet;
+  // everything else straight to the reducer.
+  const cloudFightsRef = useRef(null);
+  const monsterVitals = useMonsterVitalDispatch({ state, reduce, cloudRef: cloudFightsRef });
+  const dispatch = useCharacterVitalDispatch(state.combat, monsterVitals.dispatch);
   const characterIds = [...new Set([
     ...state.players.map((p) => p.sourceId),
     ...(state.combat?.combatants || []).filter((p) => p.type === 'player').map((p) => p.sourceId),
@@ -40,11 +44,26 @@ export function EncounterBuilderProvider({ instanceId, instanceSaved, linkGroupI
     onSaved: onInstanceSaved,
   });
 
-  // The battle map writes back into this instance's saved fights, and sends
-  // whole ones over when a dungeon room is handed across. Without this the
-  // builder read storage only at mount — so a condition set on a piece sat there
-  // until a reload, and a room arriving into an open tab was deleted by the very
-  // next save this one made.
+  // Fights have a row each, and the row is the record. The blob beside them —
+  // party, library — is still pushed on a timer, which suits what only this page
+  // edits; a fight is written by the battle map too, and a blob cannot hold
+  // something two writers touch without one of them losing. Enemy vitals in
+  // the row are the only authority for them: the battle map writes them there
+  // and its pieces display a copy the database derives.
+  const cloudFights = useCloudFights({
+    instanceId,
+    instanceSaved,
+    fights: state.fights,
+    library: state.library,
+    activeFightId: state.activeFightId,
+    dispatch,
+    isVitalsBusy: monsterVitals.isBusy,
+  });
+  cloudFightsRef.current = cloudFights;
+
+  // Dungeon rooms handed across by the battle map, and other tabs of this
+  // instance, arrive through local storage. With a cloud fight that cache may
+  // bring structure but never enemy vitals.
   useExternalFightSync({
     instanceId,
     instanceSaved,
@@ -53,25 +72,7 @@ export function EncounterBuilderProvider({ instanceId, instanceSaved, linkGroupI
     library: state.library,
     monsters: monsterDb.monsters,
     dispatch,
-  });
-
-  // The creatures of this fight and their pieces on the battle map, through the
-  // token row — the same arrangement the party already has through the sheet.
-  // Unlike the bridge above it crosses devices, and does not need the map to be
-  // open: a creature wounded here is wounded on the board whenever it is opened.
-  useMapTokenBridge({ instanceId, combat: state.combat, dispatch });
-
-  // Fights have a row each, and the row is the record. The blob beside them —
-  // party, library — is still pushed on a timer, which suits what only this page
-  // edits; a fight is written by the battle map too, and a blob cannot hold
-  // something two writers touch without one of them losing.
-  useCloudFights({
-    instanceId,
-    instanceSaved,
-    fights: state.fights,
-    library: state.library,
-    activeFightId: state.activeFightId,
-    dispatch,
+    cloudFights: cloudFights.canSync,
   });
 
   const getRollActor = useCallback(() => {

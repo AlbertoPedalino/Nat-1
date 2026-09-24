@@ -31,56 +31,20 @@ test('the first combatant, whose id is zero, is not lost', () => {
   assert.deepEqual(parseSourceRef('enc_1:fight_1:0').combatantId, '0');
 });
 
-test('a fight pushes its hit points onto the pieces that came from it', () => {
+// Enemy vitals belong to the fight row. A cached fight, however different it
+// is from the pieces, never produces a write for them.
+test('a cached fight never writes enemy vitals onto the pieces that came from it', () => {
   const tokens = [
-    { id: 't1', sourceRef: 'enc_1:f1:0', hpCurrent: 7, hpMax: 7 },
-    { id: 't2', sourceRef: 'enc_1:f1:1', hpCurrent: 5, hpMax: 5 },
+    { id: 't1', sourceRef: 'enc_1:f1:0', hpCurrent: 7, hpMax: 7, conditions: [], effects: [] },
+    { id: 't2', sourceRef: 'enc_1:f1:1', hpCurrent: 5, hpMax: 5, conditions: [], effects: [] },
   ];
   const updates = tokenUpdatesFromFight(tokens, {
     instanceId: 'enc_1',
     fightId: 'f1',
-    combatants: [{ id: 0, hpCurrent: 3, hpMax: 7 }, { id: 1, hpCurrent: 5, hpMax: 5 }],
-  });
-  // Only the one that actually changed: a no-op update is a wasted write and a
-  // realtime event for nothing.
-  assert.deepEqual(updates, [{ id: 't1', hpCurrent: 3, hpMax: 7, conditions: [], effects: [] }]);
-});
-
-// Marking a creature prone in one tool and finding it upright in the other is
-// the drift that makes two views of a fight worse than one view.
-test('conditions and effects travel with the hit points', () => {
-  const tokens = [{ id: 't1', sourceRef: 'enc_1:f1:0', hpCurrent: 7, hpMax: 7, conditions: [], effects: [] }];
-  const updates = tokenUpdatesFromFight(tokens, {
-    instanceId: 'enc_1',
-    fightId: 'f1',
-    combatants: [{
-      id: 0,
-      hpCurrent: 7,
-      hpMax: 7,
-      activeConditions: ['prone'],
-      activeEffects: [{ key: 'selfAttackDisadv', duration: 'next' }],
-    }],
-  });
-  assert.equal(updates.length, 1, 'a condition alone is reason enough to update');
-  assert.deepEqual(updates[0].conditions, ['prone']);
-  assert.deepEqual(updates[0].effects, [{ key: 'selfAttackDisadv', duration: 'next' }]);
-});
-
-// Order is normalized on both sides, so a list that says the same thing in a
-// different order is not a change worth writing.
-test('a reordered list is not treated as a change', () => {
-  const tokens = [{
-    id: 't1',
-    sourceRef: 'enc_1:f1:0',
-    hpCurrent: 7,
-    hpMax: 7,
-    conditions: ['prone', 'blinded'],
-    effects: [],
-  }];
-  const updates = tokenUpdatesFromFight(tokens, {
-    instanceId: 'enc_1',
-    fightId: 'f1',
-    combatants: [{ id: 0, hpCurrent: 7, hpMax: 7, activeConditions: ['blinded', 'prone'] }],
+    combatants: [
+      { id: 0, hpCurrent: 3, hpMax: 7, activeConditions: ['prone'] },
+      { id: 1, hpCurrent: 5, hpMax: 5, activeEffects: [{ key: 'selfAttackDisadv', duration: 'next' }] },
+    ],
   });
   assert.deepEqual(updates, []);
 });

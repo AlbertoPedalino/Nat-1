@@ -45,6 +45,57 @@ export async function saveInstanceFight(instanceId, entry) {
   return row;
 }
 
+export async function getInstanceFight(fightId) {
+  if (!fightId) return null;
+  const { data, error } = await requireClient()
+    .from('encounter_fights')
+    .select(FIGHT_COLUMNS)
+    .eq('id', String(fightId))
+    .maybeSingle();
+  if (error) throw error;
+  return data || null;
+}
+
+export const FIGHT_VITALS_TIMEOUT_MS = 8_000;
+export const FIGHT_UNAVAILABLE = 'FIGHT_UNAVAILABLE';
+export const FIGHT_TIMEOUT = 'FIGHT_TIMEOUT';
+
+// The one write for an enemy's vitals: this combatant, inside its fight row.
+// `base` holds the values the patch was computed from; the database applies
+// nothing if they no longer match and returns the current row instead.
+// Resolves to { applied, row }. FIGHT_UNAVAILABLE means there is no cloud row
+// for this combatant (or the migration is missing): the caller keeps its local
+// behaviour. Nothing here retries.
+export async function commitFightCombatantVitals(fightId, combatantId, { base = null, patch }, {
+  timeoutMs = FIGHT_VITALS_TIMEOUT_MS,
+} = {}) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => {
+      reject(Object.assign(new Error('Enemy health update timed out.'), { code: FIGHT_TIMEOUT }));
+    }, timeoutMs);
+  });
+  const request = Promise.resolve(requireClient().rpc('commit_fight_combatant_vitals', {
+    p_fight_id: String(fightId),
+    p_combatant_id: String(combatantId),
+    p_base: base,
+    p_patch: patch,
+  })).then(({ data, error }) => {
+    if (error) {
+      if (error.code === 'P0002' || error.code === 'PGRST202') {
+        throw Object.assign(new Error(error.message || 'Fight unavailable.'), { code: FIGHT_UNAVAILABLE });
+      }
+      throw error;
+    }
+    return { applied: Boolean(data?.applied), row: data?.row || null };
+  });
+  try {
+    return await Promise.race([request, timeout]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export async function deleteInstanceFight(fightId) {
   if (!fightId) return;
   const client = requireClient();

@@ -42,7 +42,7 @@ import { makeSavedEncounter, normalizeEncounterQuest } from './storage.js';
 import { clampInt, hydrateEncounterItems, monsterKey, toEncounterMonster } from '../bestiary/monsterUtils.js';
 import { combatantToSheetPatch, resolveCombatVitals } from '../campaign/sheetSync.js';
 import { SYNCED_VITALS, pickCharacterVitals } from '../../../shared/character/combat/vitals.js';
-import { fightWithTokenVitals } from '../../../shared/vtt/tokens/encounterSync.js';
+import { absorbMonsterVitals } from '../../../shared/vtt/tokens/fightVitals.js';
 import { dedupeFightsByEncounter, dedupeLibraryById } from '../library/library.js';
 
 export const DEFAULT_PARTY = Object.freeze({ count: 4, level: 5 });
@@ -184,6 +184,9 @@ function reduceEncounterState(state, action) {
           combat = applySheetVitals(combat, player.sourceId, player);
         }
       }
+      // With a cloud fight, enemy vitals come only from its row: a local
+      // cache (another tab, an old map push) must never replay them.
+      if (action.preserveMonsterVitals) combat = absorbMonsterVitals(combat, state.combat);
       return withCombat(state, combat);
     }
     case 'closeCombat':
@@ -299,8 +302,8 @@ function reduceEncounterState(state, action) {
       return deleteFight(state, action.id);
     case 'absorbExternal':
       return absorbExternal(state, action);
-    case 'syncFromMapToken':
-      return syncFromMapToken(state, action.token);
+    case 'absorbFightVitals':
+      return absorbFightVitals(state, action.fightId, action.fight);
     default:
       return state;
   }
@@ -366,15 +369,13 @@ function syncCombatantVitals(state, sourceId, vitals) {
   } : state;
 }
 
-// A creature's piece on the battle map, changed there. The same reconciliation
-// the localStorage bridge uses, so a monster killed on the board is dead here
-// however the news arrived — and unchanged vitals answer with the same state,
-// which is what stops our own write coming back as a second one.
-function syncFromMapToken(state, token) {
-  if (!state.combat) return state;
-  const combatants = fightWithTokenVitals(state.combat.combatants, token);
-  if (!combatants) return state;
-  return withCombat(state, { ...state.combat, combatants });
+// Enemy vitals from the fight's database row, the only authority for them.
+// Unchanged vitals answer with the same state, so absorbing the echo of our
+// own write neither re-renders nor saves.
+function absorbFightVitals(state, fightId, fight) {
+  if (!state.combat || fightId == null || String(state.combat.fightId) !== String(fightId)) return state;
+  const combat = absorbMonsterVitals(state.combat, fight);
+  return combat === state.combat ? state : withCombat(state, combat);
 }
 
 function hydrateState(state, payload, monsters) {

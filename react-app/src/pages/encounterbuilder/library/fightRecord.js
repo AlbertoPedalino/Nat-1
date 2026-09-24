@@ -61,13 +61,23 @@ export function toFightRow(instanceId, ownerId, entry, now = new Date()) {
 
 // Name and snapshot together: renaming a fight is a change worth carrying, and
 // the snapshot is what the map reads. The timestamp is deliberately out — it
-// moves on every save and would make every fight look changed.
+// moves on every save and would make every fight look changed. Keys are
+// sorted because jsonb returns them in its own order: our snapshot read back
+// from the database must compare equal to the one we sent.
 export function fightSignature(entry) {
   try {
-    return JSON.stringify([entry?.name || '', entry?.encounterId ?? null, entry?.fight || null]);
+    return stableStringify([entry?.name || '', entry?.encounterId ?? null, entry?.fight || null]);
   } catch (_) {
     return String(entry?.savedAt || '');
   }
+}
+
+function stableStringify(value) {
+  return JSON.stringify(value, (_key, item) => (
+    item && typeof item === 'object' && !Array.isArray(item)
+      ? Object.fromEntries(Object.keys(item).sort().map((key) => [key, item[key]]))
+      : item
+  ));
 }
 
 // The library cards a set of rows carries that this device has not got, or has

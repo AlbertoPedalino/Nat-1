@@ -57,16 +57,8 @@ function vitalsOf(combatant) {
   };
 }
 
-// Order and shape are normalized on both sides, so this compares meaning rather
+// Order and shape are normalized on both sides, so these compare meaning rather
 // than JSON: a differently ordered list is not a change to write back.
-function sameState(vitals, token) {
-  return vitals.hpCurrent === token.hpCurrent
-    && vitals.hpMax === token.hpMax
-    && conditionsKey(vitals.conditions) === conditionsKey(token.conditions)
-    && effectsKey(vitals.effects) === effectsKey(token.effects)
-    && deathSavesKey(vitals.deathSaves) === deathSavesKey(token.deathSaves);
-}
-
 function conditionsKey(list) {
   return normalizeConditions(list).join('|');
 }
@@ -94,9 +86,9 @@ export function matchCombatant(token, { instanceId, fightId, byRef, bySheet }) {
   return token?.characterId ? bySheet.get(token.characterId) || null : null;
 }
 
-// Encounter -> map. Which tokens of this scene disagree with the fight, and what
-// they should become. Pieces from another fight, or standing for nobody in it,
-// are left alone.
+// Encounter -> map, from a locally cached fight. Only encounter effects on
+// character pieces. Enemy vitals are never taken from a cache: their fight row
+// is the authority and linked pieces display a copy the database derives.
 export function tokenUpdatesFromFight(tokens, { instanceId, fightId, combatants }) {
   const byRef = new Map((combatants || []).map((combatant) => [String(combatant?.id), combatant]));
   const bySheet = new Map(
@@ -105,6 +97,7 @@ export function tokenUpdatesFromFight(tokens, { instanceId, fightId, combatants 
   const updates = [];
 
   for (const token of tokens || []) {
+    if (!token?.characterId) continue;
     const combatant = matchCombatant(token, { instanceId, fightId, byRef, bySheet });
     if (!combatant) continue;
     const vitals = vitalsOf(combatant);
@@ -113,17 +106,12 @@ export function tokenUpdatesFromFight(tokens, { instanceId, fightId, combatants 
     // fight always reported a difference. Replaying that fight to the sheet on
     // every storage event made old encounters repeatedly undo player damage.
     // Only encounter effects belong on the character's map-token row.
-    if (token.characterId) {
-      if (effectsKey(vitals.effects) === effectsKey(token.effects)) continue;
-      updates.push({
-        id: token.id,
-        characterId: token.characterId,
-        effects: vitals.effects,
-      });
-      continue;
-    }
-    if (sameState(vitals, token)) continue;
-    updates.push({ id: token.id, ...vitals });
+    if (effectsKey(vitals.effects) === effectsKey(token.effects)) continue;
+    updates.push({
+      id: token.id,
+      characterId: token.characterId,
+      effects: vitals.effects,
+    });
   }
 
   return updates;

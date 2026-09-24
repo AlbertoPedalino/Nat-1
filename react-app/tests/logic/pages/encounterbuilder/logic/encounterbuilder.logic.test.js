@@ -1004,10 +1004,9 @@ test('a newer version of a saved encounter replaces the one held', () => {
   assert.deepEqual(applied.library, [newer]);
 });
 
-// A creature wounded on the battle map, arriving over realtime. The same
-// reconciliation the localStorage bridge uses, so it does not matter which road
-// the news took.
-test('a piece wounded on the map wounds the creature in the fight', () => {
+// Enemy vitals from the fight row (written by the map or another builder),
+// arriving over realtime or as an RPC answer.
+test('the fight row is the authority for enemy vitals on screen', () => {
   let state = encounterReducer(createInitialState(), { type: 'launchCurrentEncounter' });
   const combat = {
     ...buildCombat([], [], null, () => 0.5),
@@ -1026,30 +1025,44 @@ test('a piece wounded on the map wounds the creature in the fight', () => {
   };
   state = { ...state, combat, activeFightId: 77 };
 
-  const token = { sourceRef: 'enc_a:77:0', hpCurrent: 12, hpMax: 59, conditions: ['prone'], effects: [] };
-  const hit = encounterReducer(state, { type: 'syncFromMapToken', token });
+  const row = {
+    turn: 5, // structure in the row does not replace the fight on screen
+    combatants: [{ id: 0, type: 'monster', hpCurrent: 12, hpMax: 59, activeConditions: ['prone'], activeEffects: [], isDead: false }],
+  };
+  const hit = encounterReducer(state, { type: 'absorbFightVitals', fightId: 77, fight: row });
   assert.equal(hit.combat.combatants[0].hpCurrent, 12);
   assert.deepEqual(hit.combat.combatants[0].activeConditions, ['prone']);
+  assert.equal(hit.combat.combatants[0].name, 'Ogre');
   // Snapshotted like every other change, so the fight on disk agrees too.
   assert.equal(hit.fights.find((fight) => fight.id === 77).fight.combatants[0].hpCurrent, 12);
 
-  // Our own write coming back changes nothing, which is what stops the two
-  // sides answering each other forever.
-  assert.equal(encounterReducer(hit, { type: 'syncFromMapToken', token }), hit);
+  // Our own write coming back changes nothing: same state, so no save.
+  assert.equal(encounterReducer(hit, { type: 'absorbFightVitals', fightId: 77, fight: row }), hit);
 
-  // Zero hit points is death here as well as on the board.
-  const killed = encounterReducer(hit, {
-    type: 'syncFromMapToken',
-    token: { ...token, hpCurrent: 0 },
-  });
-  assert.equal(killed.combat.combatants[0].isDead, true);
-
-  // A piece of somebody else's fight is not ours to apply.
+  // Somebody else's fight is not ours to apply.
   const other = encounterReducer(hit, {
-    type: 'syncFromMapToken',
-    token: { ...token, sourceRef: 'enc_a:78:0' },
+    type: 'absorbFightVitals',
+    fightId: 78,
+    fight: { combatants: [{ ...row.combatants[0], hpCurrent: 1 }] },
   });
-  assert.equal(other.combat.combatants[0].hpCurrent, 12);
+  assert.equal(other, hit);
+});
+
+test('a local fight cache never replays enemy vitals over a cloud fight', () => {
+  let state = encounterReducer(createInitialState(), { type: 'launchCurrentEncounter' });
+  const ogre = {
+    id: 0, name: 'Ogre', type: 'monster', initiative: 12, hpCurrent: 20, hpMax: 59,
+    activeConditions: [], activeEffects: [], isDead: false,
+  };
+  state = { ...state, combat: { ...buildCombat([], [], null, () => 0.5), fightId: 77, combatants: [ogre] }, activeFightId: 77 };
+  const stale = { id: 77, fight: { combatants: [{ ...ogre, hpCurrent: 59 }], currentTurn: 0, round: 3 } };
+
+  const kept = encounterReducer(state, { type: 'syncExternalFight', entry: stale, monsters: [], preserveMonsterVitals: true });
+  assert.equal(kept.combat.combatants[0].hpCurrent, 20, 'the cached HP is ignored');
+  assert.equal(kept.combat.round, 3, 'the cached structure still arrives');
+
+  const local = encounterReducer(state, { type: 'syncExternalFight', entry: stale, monsters: [] });
+  assert.equal(local.combat.combatants[0].hpCurrent, 59, 'without a cloud fight the cache is the record');
 });
 
 // A fight is kept as its snapshot and rebuilt from it, so anything the snapshot

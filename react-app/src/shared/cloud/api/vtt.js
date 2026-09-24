@@ -198,28 +198,6 @@ export async function updateToken(tokenId, patch) {
   return toToken(data);
 }
 
-// The encounter builder writing into the piece a combatant stands for.
-//
-// By reference rather than by id, because the builder has never seen the map: it
-// knows which combatant it changed, and `source_ref` is what says which piece
-// that is. RLS decides the rest — only the campaign's GM can write these rows,
-// which is exactly who is running the fight.
-//
-// Answers with how many pieces it reached, so a fight whose creatures were never
-// dropped on a board is silence rather than an error.
-export async function updateTokensBySourceRef(sourceRef, patch) {
-  const row = toTokenPatch(patch);
-  if (!sourceRef || !Object.keys(row).length) return 0;
-  const supabase = requireClient();
-  const { data, error } = await supabase
-    .from('map_tokens')
-    .update(row)
-    .eq('source_ref', sourceRef)
-    .select('id');
-  if (error) throw error;
-  return (data || []).length;
-}
-
 // Visibility is not an editing layer. Keeping it in its own column means a map
 // object can be hidden and later revealed without silently becoming a token.
 // A legacy row whose layer itself is `gm` has no public layer to restore, so

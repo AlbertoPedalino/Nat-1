@@ -13,8 +13,7 @@ vi.mock('../../../../../src/pages/encounterbuilder/bestiary/useMonsterDb.js', ()
 vi.mock('../../../../../src/pages/encounterbuilder/campaign/useCampaignPlayers.js', () => ({ useCampaignPlayers: () => ({ campaigns: [] }) }));
 vi.mock('../../../../../src/pages/encounterbuilder/campaign/CharacterVitalBridge.jsx', () => ({ default: () => null }));
 vi.mock('../../../../../src/pages/encounterbuilder/sync/useExternalFightSync.js', () => ({ useExternalFightSync: () => {} }));
-vi.mock('../../../../../src/pages/encounterbuilder/sync/useMapTokenBridge.js', () => ({ useMapTokenBridge: () => {} }));
-vi.mock('../../../../../src/pages/encounterbuilder/sync/useCloudFights.js', () => ({ useCloudFights: () => {} }));
+vi.mock('../../../../../src/pages/encounterbuilder/sync/useCloudFights.js', () => ({ useCloudFights: () => ({ canSync: false }) }));
 vi.mock('../../../../../src/pages/encounterbuilder/rolls/useEncounterRolls.js', () => ({ useEncounterRolls: () => ({}) }));
 vi.mock('../../../../../src/shared/ui/ToastProvider.jsx', () => ({ useToast: () => ({ notify: vi.fn() }) }));
 
