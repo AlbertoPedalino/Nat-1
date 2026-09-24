@@ -215,6 +215,8 @@ export async function loadSpells() {
 
   return {
     spells: dedupedSpells.sort((a, b) => (a.level - b.level) || a.name.localeCompare(b.name)),
+    // Item references can explicitly request a lower-priority printing.
+    spellVersions: spells,
     classSpellIndex,
     failedFiles: SPELL_FILES.filter((_, index) => entries[index].status === 'rejected'),
   };
@@ -528,9 +530,19 @@ export async function loadItems() {
     if (shouldReplaceItem(existing, item)) byName.set(key, item);
   });
 
-  return [...byName.values()]
+  const items = [...byName.values()]
     .map(normalizeItem)
     .sort((a, b) => a.name.localeCompare(b.name));
+
+  // Every consumer, including sheet reconciliation, receives adapter-enriched
+  // data. Lazy imports keep the Vite adapter discovery out of pure Node loaders.
+  const [{ loadItemAdapters }, { applyItemAdapters }] = await Promise.all([
+    import('../../../adapters/index.js'),
+    import('../../../adapters/adapterPipeline.js'),
+  ]);
+  const context = { items };
+  const registry = await loadItemAdapters(context);
+  return items.map((item) => applyItemAdapters(item, registry, context));
 }
 
 // Wild Shape beast forms. Loads the configured bestiary files, keeps only beast

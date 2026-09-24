@@ -79,6 +79,7 @@ function getSpellActionFilter(entry) {
 export default function SpellsTab({ C, sheet, freeCastUses }) {
   const { onRoll, onUpdateSpells, onShowToast, onUpdateSheet, onToggleFreeCast, onUpdateCharacter, readOnly } = useSheetActions();
   const [spellDb, setSpellDb] = useState([]);
+  const [spellVersions, setSpellVersions] = useState([]);
   const [classSpellIndex, setClassSpellIndex] = useState({});
   const [catalogStatus, setCatalogStatus] = useState('loading');
   const [adapterRevision, setAdapterRevision] = useState(0);
@@ -122,6 +123,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
           const result = await loadSpells();
           if (!alive) return;
           setSpellDb(result.spells || []);
+          setSpellVersions(result.spellVersions || result.spells || []);
           setClassSpellIndex(result.classSpellIndex || {});
           if (!result.failedFiles?.length) {
             setCatalogStatus('ready');
@@ -145,11 +147,16 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
   const spellIndex = useMemo(() => {
     const map = new Map();
     spellDb.forEach((spell) => { if (spell?.name) map.set(norm(spell.name), spell); });
+    spellVersions.forEach((spell) => {
+      if (spell?.name && spell.source) map.set(`${norm(spell.name)}|${norm(spell.source)}`, spell);
+    });
     (C?.spellSnapshots || []).forEach((spell) => {
       if (spell?.name && !map.has(norm(spell.name))) map.set(norm(spell.name), spell);
+      const key = `${norm(spell?.name)}|${norm(spell?.source)}`;
+      if (spell?.name && spell.source && !map.has(key)) map.set(key, spell);
     });
     return map;
-  }, [spellDb, C?.spellSnapshots]);
+  }, [spellDb, spellVersions, C?.spellSnapshots]);
 
   const spellInfo = useMemo(() => buildSpellInfo(C, spellIndex), [C, spellIndex, adapterRevision]);
   const slots = useMemo(() => getSheetSlots(C), [C, adapterRevision]);
@@ -175,6 +182,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
       const castLv = Number(nextEntry?.castLevel || nextEntry?.level || lv);
       const idx = result.leveled[lv].findIndex((existing) => (
         norm(existing?.name) === norm(nextEntry?.name)
+        && norm(existing?.source) === norm(nextEntry?.source)
         && Number(existing?.castLevel || existing?.level || lv) === castLv
       ));
       if (idx >= 0) {
@@ -235,10 +243,10 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
     });
     return result;
   }, [spellInfo, slots, C]);
-  const lockedSourceByName = useMemo(() => {
+  const lockedSourceBySpell = useMemo(() => {
     const map = new Map();
     (spellInfo?.lockedEntries || []).forEach((entry) => {
-      if (entry?.name) map.set(norm(entry.name), entry);
+      if (entry?.name) map.set(`${norm(entry.name)}|${norm(entry.source)}`, entry);
     });
     return map;
   }, [spellInfo]);
@@ -495,20 +503,20 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
 
       {visibleCantrips.length || showEmptyCantrips ? (
         <SpellSection title="Cantrip">
-          {visibleCantrips.map((entry) => <SpellEntry key={entry.name} entry={entry} spellAttackBonus={spellItemBonuses.spellAttack} spellSaveDc={dc} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} />)}
+          {visibleCantrips.map((entry) => <SpellEntry key={`${entry.name}|${entry.source}`} entry={entry} spellAttackBonus={spellItemBonuses.spellAttack} spellSaveDc={dc} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} />)}
           {!visibleCantrips.length ? <Empty text="None" /> : null}
         </SpellSection>
       ) : null}
 
       {visibleAtWill.length ? (
         <SpellSection title="At Will">
-          {visibleAtWill.map((entry) => <SpellEntry key={`at-will-${entry.name}`} entry={entry} spellAttackBonus={spellItemBonuses.spellAttack} spellSaveDc={dc} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} />)}
+          {visibleAtWill.map((entry) => <SpellEntry key={`at-will-${entry.name}-${entry.source}`} entry={entry} spellAttackBonus={spellItemBonuses.spellAttack} spellSaveDc={dc} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} />)}
         </SpellSection>
       ) : null}
 
       {visibleLeveled.map(([level, entries]) => (
         <SpellSection key={level} title={SPELL_LEVEL_LABELS[level] || `Level ${level}`}>
-          {entries.map((entry) => <SpellEntry key={`${level}-${entry.name}-${entry.castLevel || 'base'}`} entry={entry} spellAttackBonus={spellItemBonuses.spellAttack} spellSaveDc={dc} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} />)}
+          {entries.map((entry) => <SpellEntry key={`${level}-${entry.name}-${entry.source}-${entry.castLevel || 'base'}`} entry={entry} spellAttackBonus={spellItemBonuses.spellAttack} spellSaveDc={dc} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} />)}
         </SpellSection>
       ))}
 
@@ -600,7 +608,8 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
               // so it always carries a source badge. `locked` = not user-editable in the
               // current mode. In Wizard "book" mode the row stays editable (you manage the
               // spellbook), but the badge must still show — hence the two are decoupled.
-              const autoGranted = spellInfo.lockedNames.has(spell.name);
+              const autoEntry = lockedSourceBySpell.get(`${norm(spell.name)}|${norm(spell.source)}`);
+              const autoGranted = !!autoEntry;
               const locked = pickerWizardMode === 'book' ? false : autoGranted;
               const inWizardBook = activeIsWizard && isInWizardBook(activePicker?.bucket, spell.name, Number(spell.level || 0));
               const selected = activeIsWizard && pickerWizardMode === 'book' ? inWizardBook : (manualSelected || locked);
@@ -614,7 +623,6 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
                 if (activeIsWizard) { toggleWizardPreparedSpell(spell); return; }
                 manualSelected ? removeSpell(spell) : addSpell(spell);
               };
-              const autoEntry = autoGranted ? lockedSourceByName.get(norm(spell.name)) : null;
               return (
                 <PickerSpellRow
                   key={`${spell.name}-${spell.source}`}

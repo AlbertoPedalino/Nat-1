@@ -45,5 +45,6 @@ test('Cube of Force grants item-tagged spells only while attuned', () => {
   assert.equal(grants.length, 6);
   assert.equal(grants[0].source.label, 'Cube of Force');
   assert.equal(grants[0].source.originType, 'item');
+  assert.equal(grants[0].spellSource, 'xphb');
   assert.equal(collectItemAttachedSpells({ inventory: [{ ...cube, attuned: false }] }).length, 0);
 });

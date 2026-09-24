@@ -307,6 +307,12 @@ function resolveItemType(raw) {
   return type;
 }
 
+// Shared by the catalog loader and the builder. Keep catalog field shapes
+// intact here; builder-only presentation normalization happens below.
+export function applyItemAdapters(item, registry, context = {}) {
+  return runAdapters(item, registry.getGlobalItemAdapters(), 'ItemAdapter', context);
+}
+
 export function adaptItemRecord(rawItem, registry, context = {}) {
   const raw = rawItem && typeof rawItem === 'object' ? rawItem : {};
   const name = String(raw.name || '').trim();
@@ -336,7 +342,7 @@ export function adaptItemRecord(rawItem, registry, context = {}) {
       isAdapted: true,
     },
   };
-  return runAdapters(item, registry.getGlobalItemAdapters(), 'ItemAdapter', context);
+  return context.itemsAlreadyAdapted ? item : applyItemAdapters(item, registry, context);
 }
 
 export function adaptBuilderData(data, registry, context = {}) {

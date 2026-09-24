@@ -74,11 +74,16 @@ async function loadPaths(paths, context) {
 
 export const installedRegistry = adapterRegistry;
 
+export async function loadItemAdapters(context = {}) {
+  await loadPaths(pathsForItems(), context);
+  return adapterRegistry;
+}
+
 export async function loadCoreAdapters(context = {}) {
   await Promise.all([
     loadPaths(pathsForSpecies(), context),
     loadPaths(pathsForFeats(), context),
-    loadPaths(pathsForItems(), context),
+    loadItemAdapters(context),
     loadPaths(pathsForCoreRuntime(), context),
   ]);
   return adapterRegistry;

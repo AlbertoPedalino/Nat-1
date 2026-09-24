@@ -129,6 +129,7 @@ export function collectItemAttachedSpells(C) {
       const freeCastTpl = toFreeCastTemplate(grant);
       out.push({
         name: grant.name,
+        spellSource: grant.spellSource,
         source: {
           label: item.name || 'Item',
           color: ITEM_ATTUNEMENT,

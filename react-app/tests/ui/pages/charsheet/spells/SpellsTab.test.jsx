@@ -70,3 +70,39 @@ test('an incomplete catalog retries silently and keeps available spell details v
   expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   expect(screen.queryByRole('button', { name: 'Retry' })).not.toBeInTheDocument();
 });
+
+test('item references select their printing and keep same-name class spells separate', async () => {
+  const alternate = { ...catalog.spells[0], source: 'FRHoF', entries: ['The item-specific printing.'] };
+  loaders.loadSpells.mockResolvedValue({ ...catalog, spellVersions: [...catalog.spells, alternate] });
+  const C = character(true);
+  C.selectedSpells = { 2: ['Levitate'] };
+  C.inventory[0].attachedSpells = { daily: { 1: ['levitate|frhof'] } };
+  const { rerender } = render(view(C));
+  await waitFor(() => expect(screen.getAllByText('Levitate', { exact: true })).toHaveLength(2));
+  screen.getAllByText('Levitate', { exact: true }).forEach((row) => fireEvent.click(row));
+  expect(screen.queryByText('Description', { exact: true })).not.toBeInTheDocument();
+  expect(await screen.findByText('The item-specific printing.')).toBeVisible();
+  expect(screen.getByText('The target rises into the air.')).toBeVisible();
+  rerender(view({ ...C, inventory: [{ ...C.inventory[0], attuned: false }] }));
+  expect(screen.getAllByText('Levitate', { exact: true })).toHaveLength(1);
+  expect(screen.queryByText('The item-specific printing.')).not.toBeInTheDocument();
+  expect(loaders.loadSpells).toHaveBeenCalledOnce();
+});
+
+test('a missing explicit printing does not substitute a same-name spell or show an error panel', async () => {
+  const C = character(true);
+  C.inventory[0].attachedSpells = ['levitate|frhof'];
+  render(view(C));
+  await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument());
+  expect(screen.queryByText('Levitate', { exact: true })).not.toBeInTheDocument();
+  expect(screen.queryByText('levitate', { exact: true })).not.toBeInTheDocument();
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+});
+
+test('an item reference without a source uses the preferred catalog printing', async () => {
+  const C = character(true);
+  C.inventory[0].attachedSpells = ['levitate'];
+  render(view(C));
+  fireEvent.click(await screen.findByText('Levitate', { exact: true }));
+  expect(await screen.findByText('The target rises into the air.')).toBeVisible();
+});

@@ -294,12 +294,9 @@ export default function SpellEntry({
         }]
       : []),
   ];
-  const hasInteractiveContent = Boolean(
-    hasAttack
-    || spellRollers.length
-    || hasFreeCasts
-    || spellData?.summonedCreature,
-  );
+  // Only controls inside the expanded body warrant a separate description
+  // disclosure. Header dice buttons and persistent use counters do not.
+  const hasInteractiveContent = Boolean(spellData?.summonedCreature);
   const descriptionNode = (
     <>
       <EntryBlocks blocks={bodyBlocks} />

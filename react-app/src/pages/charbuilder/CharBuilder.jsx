@@ -307,7 +307,7 @@ export default function CharBuilder() {
 
   useEffect(() => {
     if (!state.adaptersLoaded || state.dataAdapted || Object.values(state.loading).some(Boolean)) return;
-    const adaptedData = adaptBuilderData(state.data, adapterRegistry, { items: state.data.items });
+    const adaptedData = adaptBuilderData(state.data, adapterRegistry, { items: state.data.items, itemsAlreadyAdapted: true });
     dispatch({ type: 'data/adapt', payload: adaptedData });
   }, [state.adaptersLoaded, state.dataAdapted, state.loading, state.data]);
 

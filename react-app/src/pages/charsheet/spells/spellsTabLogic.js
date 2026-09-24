@@ -185,14 +185,20 @@ export function buildSpellInfo(C, spellIndex) {
   const rows = new Map();
   const lockedNames = new Set();
   const freeCastsByKey = new Map();
+  const rowKey = (spell, castLevel) => `${norm(spell.name)}|${norm(spell.source)}|${castLevel || spell.level}`;
   const push = (name, source, locked = false, castLevel = null, fallbackLevel = 0, ownerClassName = null, spellcastingAbility = null, freeCasts = null, sources = null, grantMeta = null) => {
-    const full = spellIndex.get(norm(name));
+    const full = grantMeta?.spellSource
+      ? spellIndex.get(`${norm(name)}|${norm(grantMeta.spellSource)}`)
+      : spellIndex.get(norm(name));
+    // Item cards require the referenced record; never substitute another edition
+    // or render an unresolved reference as a level-zero spell.
+    if (source?.originType === 'item' && !full) return;
     const canonicalName = full?.name || name;
     const spell = applySpellGrantOverrides(
       { ...(full || {}), name: canonicalName, level: Number(full?.level ?? fallbackLevel ?? 0) },
       grantMeta?.spellOverrides,
     );
-    const key = `${norm(canonicalName)}|${castLevel || spell.level}`;
+    const key = rowKey(spell, castLevel);
     const row = {
       ...spell,
       sourceInfo: source,
@@ -255,13 +261,13 @@ export function buildSpellInfo(C, spellIndex) {
       });
       if (normalized) freeCasts = [normalized];
     }
-    push(grant.name, grant.source, true, null, 0, null, null, freeCasts);
+    push(grant.name, grant.source, true, null, 0, null, null, freeCasts, null, { spellSource: grant.spellSource });
   });
 
   const all = [...rows.values()];
   all.forEach((entry) => {
     Object.assign(entry, resolveSpellMeta(entry, C));
-    const fcKey = `${norm(entry.name)}|${entry.castLevel || entry.level || 0}`;
+    const fcKey = rowKey(entry, entry.castLevel);
     const fc = freeCastsByKey.get(fcKey);
     if (fc?.length) entry.freeCasts = fc;
   });
@@ -275,13 +281,13 @@ export function buildSpellInfo(C, spellIndex) {
   });
   Object.values(leveled).forEach((entries) => entries.sort(sortByName));
   const freeCastDefs = mergeFreeCastsById(all.flatMap((entry) => entry.freeCasts || []));
-  return { cantrips, atWill, leveled, lockedNames, freeCastDefs, lockedEntries: all.filter((entry) => entry.locked || lockedNames.has(entry.name) || lockedNames.has(norm(entry.name))) };
+  return { cantrips, atWill, leveled, lockedNames, freeCastDefs, lockedEntries: all.filter((entry) => entry.locked) };
 
   function pushKnown(name, level, source, ownerClassName) {
     const full = spellIndex.get(norm(name));
     if (full) push(name, source, false, null, 0, ownerClassName);
     else {
-      const key = `${norm(name)}|${level}`;
+      const key = rowKey({ name, level }, null);
       if (!rows.has(key)) rows.set(key, { name, level: Number(level || 0), sourceInfo: source, sources: source ? [source] : [], ownerClassName });
     }
   }
