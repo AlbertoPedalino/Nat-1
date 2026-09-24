@@ -9,16 +9,20 @@ const mocks = vi.hoisted(() => ({
   saveInstanceFight: vi.fn(),
   deleteInstanceFight: vi.fn(),
   subscribeInstanceFights: vi.fn(),
+  getInstanceFight: vi.fn(),
   notify: vi.fn(),
   fireRemoteChange: null,
+  fireStatus: null,
 }));
 
 vi.mock('../../../../../src/shared/cloud/api/encounterFights.js', () => ({
   listInstanceFights: mocks.listInstanceFights,
   saveInstanceFight: mocks.saveInstanceFight,
   deleteInstanceFight: mocks.deleteInstanceFight,
-  subscribeInstanceFights: (instanceId, onChange) => {
+  getInstanceFight: mocks.getInstanceFight,
+  subscribeInstanceFights: (instanceId, onChange, options) => {
     mocks.fireRemoteChange = onChange;
+    mocks.fireStatus = options?.onStatus || null;
     return mocks.subscribeInstanceFights(instanceId, onChange);
   },
 }));
@@ -212,4 +216,96 @@ test('a fight made again after a delete is written, not buried', async () => {
   mocks.listInstanceFights.mockResolvedValue([FIGHT]);
   await act(async () => { await mocks.fireRemoteChange(); });
   expect(mocks.deleteInstanceFight).toHaveBeenCalledTimes(1);
+});
+
+describe('realtime events without re-reading the instance', () => {
+  const row = (id, at, patch = {}) => ({
+    id: String(id), instance_id: 'enc_a', name: 'Room', encounter_id: '500',
+    encounter: CARD, fight: { combatants: [], currentTurn: 0, round: 1 }, updated_at: at, ...patch,
+  });
+  const fightIds = (dispatch) => dispatch.mock.calls
+    .filter(([action]) => action.type === 'absorbExternal')
+    .flatMap(([action]) => action.fights.map((fight) => fight.id));
+
+  async function mounted() {
+    mocks.listInstanceFights.mockResolvedValue([FIGHT]);
+    const dispatch = vi.fn();
+    render(<Harness fights={[FIGHT]} library={[CARD]} dispatch={dispatch} />);
+    await waitFor(() => expect(mocks.listInstanceFights).toHaveBeenCalledTimes(1));
+    await act(async () => {});
+    dispatch.mockClear();
+    return dispatch;
+  }
+
+  test('a complete UPDATE is applied from the payload alone', async () => {
+    const dispatch = await mounted();
+    await act(async () => {
+      await mocks.fireRemoteChange({ eventType: 'UPDATE', new: row(900, '2026-09-24T10:00:00Z') });
+    });
+    expect(mocks.listInstanceFights).toHaveBeenCalledTimes(1);
+    expect(mocks.getInstanceFight).not.toHaveBeenCalled();
+    expect(fightIds(dispatch)).toEqual([900]);
+  });
+
+  test('a complete INSERT arrives with its card, no full refresh', async () => {
+    const dispatch = await mounted();
+    const card = { ...CARD, id: 501 };
+    await act(async () => {
+      await mocks.fireRemoteChange({
+        eventType: 'INSERT', new: row(901, '2026-09-24T10:00:00Z', { encounter_id: '501', encounter: card }),
+      });
+    });
+    expect(mocks.listInstanceFights).toHaveBeenCalledTimes(1);
+    expect(dispatch).toHaveBeenCalledWith(expect.objectContaining({
+      type: 'absorbExternal', library: [card],
+    }));
+    expect(fightIds(dispatch)).toEqual([901]);
+  });
+
+  test('a DELETE re-reads the list', async () => {
+    await mounted();
+    await act(async () => {
+      await mocks.fireRemoteChange({ eventType: 'DELETE', new: {}, old: { id: '900' } });
+    });
+    expect(mocks.listInstanceFights).toHaveBeenCalledTimes(2);
+  });
+
+  test('a row Realtime had to trim is fetched alone; a vanished one falls back to the list', async () => {
+    const dispatch = await mounted();
+    mocks.getInstanceFight.mockResolvedValueOnce(row(902, '2026-09-24T10:00:00Z'));
+    await act(async () => {
+      await mocks.fireRemoteChange({
+        eventType: 'UPDATE', errors: ['Error 413: Payload Too Large'], new: { id: '902', instance_id: 'enc_a' },
+      });
+    });
+    expect(mocks.getInstanceFight).toHaveBeenCalledWith('902');
+    expect(mocks.listInstanceFights).toHaveBeenCalledTimes(1);
+    expect(fightIds(dispatch)).toEqual([902]);
+
+    mocks.getInstanceFight.mockResolvedValueOnce(null);
+    await act(async () => {
+      await mocks.fireRemoteChange({ eventType: 'UPDATE', new: { id: '903', instance_id: 'enc_a' } });
+    });
+    expect(mocks.listInstanceFights).toHaveBeenCalledTimes(2);
+  });
+
+  test('a reconnect recovers with a full read', async () => {
+    await mounted();
+    await act(async () => { await mocks.fireStatus('SUBSCRIBED'); });
+    expect(mocks.listInstanceFights).toHaveBeenCalledTimes(2);
+    await act(async () => { await mocks.fireStatus('CHANNEL_ERROR'); });
+    expect(mocks.listInstanceFights).toHaveBeenCalledTimes(2);
+  });
+
+  test('an event before the first read lands is answered with the full read', async () => {
+    let finish;
+    mocks.listInstanceFights.mockReturnValueOnce(new Promise((resolve) => { finish = resolve; }))
+      .mockResolvedValue([FIGHT]);
+    render(<Harness fights={[]} library={[]} dispatch={vi.fn()} />);
+    await act(async () => {
+      mocks.fireRemoteChange({ eventType: 'UPDATE', new: row(900, '2026-09-24T10:00:00Z') });
+    });
+    expect(mocks.listInstanceFights).toHaveBeenCalledTimes(2);
+    await act(async () => finish([FIGHT]));
+  });
 });

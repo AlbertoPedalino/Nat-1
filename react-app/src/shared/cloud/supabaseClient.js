@@ -1,4 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
+import {
+  createRealtimeStats, exposeRealtimeDiagnostics, realtimeDebugRequested, realtimeDiagnosticsOptions,
+} from './sync/realtimeStats.js';
 
 // Cloud sync is OPTIONAL. If the env vars are missing the whole feature stays
 // dark and the app keeps working 100% locally (localStorage only).
@@ -10,13 +13,21 @@ export function isCloudConfigured() {
   return Boolean(URL && ANON_KEY);
 }
 
+// Traffic counters, only when explicitly requested (see realtimeStats.js).
+const diagnostics = typeof window !== 'undefined' && isCloudConfigured() && realtimeDebugRequested({
+  storage: window.localStorage, session: window.sessionStorage, search: window.location?.search,
+}) ? createRealtimeStats() : null;
+
 // Single shared client (or null when unconfigured). Persists the session in
 // localStorage so a player stays logged in across reloads.
 export const supabase = isCloudConfigured()
   ? createClient(URL, ANON_KEY, {
       auth: { persistSession: true, autoRefreshToken: true },
+      ...realtimeDiagnosticsOptions(diagnostics, (...args) => fetch(...args)),
     })
   : null;
+
+if (diagnostics) exposeRealtimeDiagnostics(diagnostics, supabase, window);
 
 // Supabase Auth needs an email. Players only type a username, so we map it to a
 // stable synthetic email. Same username always yields the same email.

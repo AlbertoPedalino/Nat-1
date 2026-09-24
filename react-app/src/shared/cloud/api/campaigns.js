@@ -52,6 +52,29 @@ export async function listCampaignCharacters(campaignId) {
   return data || [];
 }
 
+// Id and row_revision only, in listCampaignCharacters order: the battle map's
+// recovery poll re-reads a sheet only when its revision moved.
+export async function listCampaignCharacterRevisions(campaignId) {
+  const { data, error } = await requireClient()
+    .from('characters')
+    .select('id, row_revision')
+    .eq('campaign_id', campaignId)
+    .order('updated_at', { ascending: false });
+  if (error) throw error;
+  return data || [];
+}
+
+export async function listCampaignCharactersByIds(campaignId, ids) {
+  if (!ids?.length) return [];
+  const { data, error } = await requireClient()
+    .from('characters')
+    .select('id, name, owner, owner_username, updated_at, row_revision, data')
+    .eq('campaign_id', campaignId)
+    .in('id', ids);
+  if (error) throw error;
+  return data || [];
+}
+
 // Attach (or detach with null) one of MY characters to a campaign.
 export async function setCharacterCampaign(charId, campaignId) {
   const supabase = requireClient();

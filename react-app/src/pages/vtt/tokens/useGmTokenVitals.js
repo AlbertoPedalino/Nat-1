@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { supabase } from '../../../shared/cloud/supabaseClient.js';
 import { listTokenSecretHp } from '../../../shared/cloud/api/vtt.js';
-import { listFightVitals } from '../../../shared/cloud/api/encounterFights.js';
+import { listFightRevisions, listFightVitals } from '../../../shared/cloud/api/encounterFights.js';
+import { diffRevisions } from '../../../shared/vtt/session/revisionDiff.js';
 import { parseSourceRef } from '../../../shared/vtt/tokens/encounterSync.js';
 import { withGmTokenVitals } from '../../../shared/vtt/tokens/fightVitals.js';
 
@@ -14,6 +15,8 @@ export function useGmTokenVitals({ sceneId, tokens, enabled }) {
   const [byToken, setByToken] = useState({});
   const [fights, setFights] = useState({});
   const requestRef = useRef(0);
+  const fightsRef = useRef(fights);
+  fightsRef.current = fights;
 
   const fightKey = useMemo(() => [...new Set((tokens || [])
     .map((token) => parseSourceRef(token?.sourceRef)?.fightId)
@@ -30,6 +33,33 @@ export function useGmTokenVitals({ sceneId, tokens, enabled }) {
     if (request !== requestRef.current) return;
     if (secretHp) setByToken(secretHp);
     if (fightRows) setFights(Object.fromEntries(fightRows.map((row) => [String(row.id), row])));
+  }, [enabled, fightKey, sceneId]);
+
+  // The scene's recovery poll. Secret HP is a handful of integers and is read
+  // whole; a fight's JSON is fetched only when its updated_at moved. Mount and
+  // this channel's own SUBSCRIBED still use the full `reload`.
+  const reconcile = useCallback(async () => {
+    if (!enabled || !sceneId) return;
+    const request = ++requestRef.current;
+    const ids = fightKey ? fightKey.split(',') : [];
+    const [secretHp, revisions] = await Promise.all([
+      listTokenSecretHp(sceneId).catch(() => null),
+      listFightRevisions(ids).catch(() => null),
+    ]);
+    if (request !== requestRef.current) return;
+    if (secretHp) setByToken(secretHp);
+    if (!revisions) return;
+    const diff = diffRevisions(
+      revisions.map((row) => ({ id: String(row.id), version: Date.parse(row.updated_at) || 0 })),
+      new Map(Object.entries(fightsRef.current).map(([id, row]) => [id, Date.parse(row?.updated_at) || 0])),
+    );
+    if (diff.clean) return;
+    const fresh = diff.changed.length ? await listFightVitals(diff.changed).catch(() => null) : [];
+    if (request !== requestRef.current || !fresh) return;
+    const byId = new Map(fresh.map((row) => [String(row.id), row]));
+    setFights((current) => Object.fromEntries(diff.ids
+      .map((id) => [id, byId.get(id) || (diff.changed.includes(id) ? null : current[id])])
+      .filter(([, row]) => row)));
   }, [enabled, fightKey, sceneId]);
 
   useEffect(() => {
@@ -88,5 +118,5 @@ export function useGmTokenVitals({ sceneId, tokens, enabled }) {
     [byToken, enabled, fights],
   );
 
-  return { overlay, reload, setLocal };
+  return { overlay, reconcile, reload, setLocal };
 }

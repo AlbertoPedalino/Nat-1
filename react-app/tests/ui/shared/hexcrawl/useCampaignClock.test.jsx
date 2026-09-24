@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { vi } from 'vitest';
-import { useCampaignClock } from '../../../../src/shared/hexcrawl/useCampaignClock.js';
+import { afterEach, vi } from 'vitest';
+import { CLOCK_FALLBACK_MS, useCampaignClock } from '../../../../src/shared/hexcrawl/useCampaignClock.js';
 
 const api = vi.hoisted(() => ({
   readCampaignClock: vi.fn(), saveCampaignClock: vi.fn(), subscribeHexcrawl: vi.fn(),
@@ -75,4 +75,75 @@ test('editing before initial loading finishes patches the existing row without s
   })));
   expect(api.saveCampaignClock).toHaveBeenCalledWith('campaign-one', { season: 'Spring' });
   expect(result.current.clock.min).toBe(960);
+});
+
+describe('traffic', () => {
+  afterEach(() => { vi.useRealTimers(); });
+
+  test('the safety poll is slow, reads only the clock, and does not flash loading', async () => {
+    vi.useFakeTimers();
+    api.readCampaignClock.mockResolvedValue({ updatedAt: 1, season: 'Summer' });
+    const { result } = renderHook(() => useCampaignClock('campaign-one', { withLog: true }));
+    await act(async () => { await vi.advanceTimersByTimeAsync(0); });
+    expect(api.readCampaignClock).toHaveBeenCalledTimes(1);
+    expect(api.listCampaignLog).toHaveBeenCalledTimes(1);
+
+    const loadingSeen = [];
+    await act(async () => { await vi.advanceTimersByTimeAsync(5_000); });
+    expect(api.readCampaignClock).toHaveBeenCalledTimes(1);
+    await act(async () => { await vi.advanceTimersByTimeAsync(CLOCK_FALLBACK_MS); });
+    loadingSeen.push(result.current.loading);
+    expect(api.readCampaignClock).toHaveBeenCalledTimes(2);
+    expect(api.listCampaignLog).toHaveBeenCalledTimes(1);
+    expect(loadingSeen).toEqual([false]);
+  });
+
+  test('a clock moved elsewhere re-reads the log; our own echo does not', async () => {
+    api.readCampaignClock.mockResolvedValue({ updatedAt: 1, season: 'Summer' });
+    const { result } = renderHook(() => useCampaignClock('campaign-one', { withLog: true }));
+    await waitFor(() => expect(result.current.clock?.season).toBe('Summer'));
+    const { onClock } = api.subscribeHexcrawl.mock.calls[0][0];
+    const reads = api.listCampaignLog.mock.calls.length;
+
+    act(() => onClock({ updatedAt: 1, season: 'Summer' }));
+    await act(async () => {});
+    expect(api.listCampaignLog).toHaveBeenCalledTimes(reads);
+
+    api.listCampaignLog.mockResolvedValue([{ id: 'e1', entry: { text: 'Rain' } }]);
+    act(() => onClock({ updatedAt: 2, season: 'Autumn' }));
+    await waitFor(() => expect(result.current.log).toHaveLength(1));
+    expect(api.listCampaignLog).toHaveBeenCalledTimes(reads + 1);
+  });
+
+  test('a reconnect re-reads; the first subscription does not repeat the mount read', async () => {
+    api.readCampaignClock.mockResolvedValue({ updatedAt: 1 });
+    renderHook(() => useCampaignClock('campaign-one'));
+    await waitFor(() => expect(api.readCampaignClock).toHaveBeenCalledTimes(1));
+    const { onStatus } = api.subscribeHexcrawl.mock.calls[0][0];
+    act(() => onStatus('SUBSCRIBED'));
+    await act(async () => {});
+    expect(api.readCampaignClock).toHaveBeenCalledTimes(1);
+    act(() => onStatus('SUBSCRIBED'));
+    await waitFor(() => expect(api.readCampaignClock).toHaveBeenCalledTimes(2));
+  });
+
+  test('focus and visibility together read once', async () => {
+    api.readCampaignClock.mockResolvedValue({ updatedAt: 1 });
+    renderHook(() => useCampaignClock('campaign-one'));
+    await waitFor(() => expect(api.readCampaignClock).toHaveBeenCalledTimes(1));
+    act(() => {
+      window.dispatchEvent(new Event('focus'));
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    await waitFor(() => expect(api.readCampaignClock).toHaveBeenCalledTimes(2));
+    await act(async () => {});
+    expect(api.readCampaignClock).toHaveBeenCalledTimes(2);
+  });
+
+  test('no campaign, no poll and no channel', async () => {
+    renderHook(() => useCampaignClock(null));
+    await act(async () => {});
+    expect(api.readCampaignClock).not.toHaveBeenCalled();
+    expect(api.subscribeHexcrawl).not.toHaveBeenCalled();
+  });
 });

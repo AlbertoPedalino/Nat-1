@@ -7,6 +7,7 @@ import {
   subscribeHexcrawl,
 } from '../cloud/api/hexcrawl.js';
 import { useAuth } from '../cloud/auth/AuthProvider.jsx';
+import { coalesceReturns } from '../cloud/sync/returnGate.js';
 
 // The campaign's travelling clock, shared by the GM Board and the map.
 //
@@ -15,6 +16,16 @@ import { useAuth } from '../cloud/auth/AuthProvider.jsx';
 // changing, or the two screens would echo each other's updates forever.
 
 const IDLE = Object.freeze({ clock: null, log: [], loading: false });
+// Realtime is the live path; this is only the safety net for missed events.
+export const CLOCK_FALLBACK_MS = 60_000;
+
+function sameLog(a, b) {
+  if (a === b) return true;
+  if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
+  return a.every((entry, index) => (
+    entry?.id === b[index]?.id && JSON.stringify(entry) === JSON.stringify(b[index])
+  ));
+}
 
 export function useCampaignClock(campaignId, { withLog = false } = {}) {
   const { cloudEnabled, status } = useAuth();
@@ -46,53 +57,90 @@ export function useCampaignClock(campaignId, { withLog = false } = {}) {
     return clock;
   }, []);
 
-  const refresh = useCallback(async () => {
+  const loadedRef = useRef(false);
+
+  const acceptLog = useCallback((log) => {
+    setState((current) => (sameLog(current.log, log) ? current : { ...current, log }));
+  }, []);
+
+  const readLog = useCallback(async () => {
+    if (!active || !withLog) return;
+    try {
+      const log = await listCampaignLog(campaignId);
+      if (scopeRef.current === campaignId) acceptLog(log);
+    } catch (_) {
+      // The next focus, reconnect or clock event reads it again.
+    }
+  }, [acceptLog, active, campaignId, withLog]);
+
+  // `includeLog: false` is the quiet safety poll: the clock row only, and no
+  // loading flag, so an idle table neither re-renders nor re-reads the GM log.
+  const refresh = useCallback(async ({ includeLog = true } = {}) => {
     if (!active) {
       setState(IDLE);
       return null;
     }
-    setState((current) => ({ ...current, loading: true }));
+    const firstLoad = !loadedRef.current;
+    if (firstLoad) setState((current) => (current.loading ? current : { ...current, loading: true }));
     try {
       const [clock, log] = await Promise.all([
         readCampaignClock(campaignId),
-        withLog ? listCampaignLog(campaignId) : Promise.resolve([]),
+        withLog && includeLog ? listCampaignLog(campaignId) : Promise.resolve(null),
       ]);
       if (scopeRef.current !== campaignId) return null;
+      loadedRef.current = true;
       const latest = acceptClock(clock);
-      setState((current) => ({ ...current, log, loading: false }));
+      if (log) acceptLog(log);
+      if (firstLoad) setState((current) => ({ ...current, loading: false }));
       setError(null);
       return latest;
     } catch (cause) {
       if (scopeRef.current !== campaignId) return null;
-      setState((current) => ({ ...current, loading: false }));
+      if (firstLoad) setState((current) => ({ ...current, loading: false }));
       setError(cause?.message || 'Could not read the campaign clock.');
       return null;
     }
-  }, [acceptClock, active, campaignId, withLog]);
+  }, [acceptClock, acceptLog, active, campaignId, withLog]);
 
   useEffect(() => {
+    loadedRef.current = false;
     refresh();
     if (!active) return undefined;
-    // Recover missed Realtime events after sleep, reconnect or a background tab.
-    const onFocus = () => refresh();
-    const timer = setInterval(refresh, 5000);
-    window.addEventListener('focus', onFocus);
+    // Realtime carries changes; this only recovers ones missed while a phone
+    // slept or a tab sat in the background.
+    const onReturn = coalesceReturns(() => refresh());
+    const onVisible = () => { if (document.visibilityState === 'visible') onReturn(); };
+    const timer = setInterval(() => refresh({ includeLog: false }), CLOCK_FALLBACK_MS);
+    window.addEventListener('focus', onReturn);
+    document.addEventListener('visibilitychange', onVisible);
     return () => {
       clearInterval(timer);
-      window.removeEventListener('focus', onFocus);
+      window.removeEventListener('focus', onReturn);
+      document.removeEventListener('visibilitychange', onVisible);
     };
   }, [active, refresh]);
 
   useEffect(() => {
     if (!active) return undefined;
+    let subscribedOnce = false;
     return subscribeHexcrawl({
       campaignId,
       onClock: (clock) => {
         if (!clock || scopeRef.current !== campaignId) return;
-        acceptClock(clock);
+        const before = clockRef.current;
+        // A clock move from elsewhere usually comes with a log entry. Our own
+        // save echoing back changes nothing and costs nothing.
+        if (acceptClock(clock) !== before) readLog();
+      },
+      onStatus: (status) => {
+        if (status !== 'SUBSCRIBED') return;
+        // The first subscription follows the mount read; later ones are
+        // reconnects, which do not replay what was missed.
+        if (subscribedOnce) refresh();
+        subscribedOnce = true;
       },
     });
-  }, [acceptClock, active, campaignId]);
+  }, [acceptClock, active, campaignId, readLog, refresh]);
 
   // Returns the row as saved, so a caller can tell whether the clock it just
   // pushed is the one the table is now on.

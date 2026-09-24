@@ -1,3 +1,4 @@
+import { StrictMode, useState } from 'react';
 import {
   act, fireEvent, render, screen, waitFor,
 } from '@testing-library/react';
@@ -5,6 +6,7 @@ import { ThemeProvider } from '@mui/material';
 import { beforeEach, vi } from 'vitest';
 import { theme } from '../../../../../src/app/theme.js';
 import SceneEditor from '../../../../../src/pages/vtt/scene/SceneEditor.jsx';
+import { createFog, isRevealed, revealAll } from '../../../../../src/shared/vtt/map/fog.js';
 import { persistFights, registerEncounterInstance } from '../../../../../src/pages/encounterbuilder/state/storage.js';
 
 const sceneViewportMock = vi.hoisted(() => vi.fn());
@@ -12,12 +14,14 @@ const signMapImageMock = vi.hoisted(() => vi.fn());
 const notifyMock = vi.hoisted(() => vi.fn());
 const sceneRoleMock = vi.hoisted(() => vi.fn());
 const sendPresenterStateMock = vi.hoisted(() => vi.fn());
+const sendDragMock = vi.hoisted(() => vi.fn());
 const updateSceneMock = vi.hoisted(() => vi.fn());
 const updateTokenMock = vi.hoisted(() => vi.fn());
 const beginTokenMoveMock = vi.hoisted(() => vi.fn());
 const finishTokenMoveMock = vi.hoisted(() => vi.fn());
 const fetchSceneMock = vi.hoisted(() => vi.fn());
 const refreshContentMock = vi.hoisted(() => vi.fn());
+const fetchSceneRevisionMock = vi.hoisted(() => vi.fn());
 const sceneLiveOptions = vi.hoisted(() => ({ current: null }));
 const sheetRoster = vi.hoisted(() => ({ current: [] }));
 const encounterBridge = vi.hoisted(() => ({ real: false, tokens: null }));
@@ -39,6 +43,7 @@ beforeEach(() => {
   sheetRoster.current = [];
   notifyMock.mockClear();
   sendPresenterStateMock.mockClear();
+  sendDragMock.mockReset();
   sceneRoleMock.mockReturnValue(GM_ROLE);
   updateSceneMock.mockReset();
   updateSceneMock.mockResolvedValue(null);
@@ -47,6 +52,7 @@ beforeEach(() => {
   beginTokenMoveMock.mockReset().mockReturnValue(finishTokenMoveMock);
   fetchSceneMock.mockReset().mockResolvedValue(null);
   refreshContentMock.mockReset().mockResolvedValue(undefined);
+  fetchSceneRevisionMock.mockReset().mockResolvedValue(null);
   sceneLiveOptions.current = null;
 });
 
@@ -56,6 +62,7 @@ vi.mock('../../../../../src/shared/cloud/api/vtt.js', async (importOriginal) => 
   updateScene: updateSceneMock,
   updateToken: updateTokenMock,
   fetchScene: fetchSceneMock,
+  fetchSceneRevision: fetchSceneRevisionMock,
 }));
 vi.mock('../../../../../src/shared/cloud/api/cloudCharacters.js', () => ({ patchCharacterData: patchCharacterMock }));
 
@@ -73,7 +80,7 @@ vi.mock('../../../../../src/shared/vtt/session/useSceneLive.js', () => ({
     sceneLiveOptions.current = options;
     return {
       sendCamera: vi.fn(),
-      sendDrag: vi.fn(),
+      sendDrag: sendDragMock,
       sendPresenterInspection: vi.fn(),
       sendPresenterState: sendPresenterStateMock,
     };
@@ -127,7 +134,8 @@ vi.mock('../../../../../src/pages/vtt/scene/useSceneContent.js', () => ({
     handleDrawingEvent: vi.fn(),
     loading: false,
     refreshVisibleTokens: vi.fn(),
-    refreshContent: refreshContentMock,
+    reconcileContent: refreshContentMock,
+    refreshContent: vi.fn(),
     roster: sheetRoster.current,
     setDrawings: vi.fn(),
     setRoster: vi.fn(),
@@ -348,6 +356,7 @@ test('freezing the public view lets the GM prepare a picture before sharing it',
   }));
 
   sendPresenterStateMock.mockClear();
+  sendDragMock.mockReset();
   const imageSwitch = sceneViewportMock.mock.calls.at(-1)[0].imageSwitch;
   const mapCorner = imageSwitch.props.children[0];
   await act(async () => mapCorner.props.onShownImageChange('background'));
@@ -785,5 +794,202 @@ test('the reconciliation leaves a picture that is already on screen alone', asyn
     expect(signMapImageMock).not.toHaveBeenCalled();
   } finally {
     vi.unstubAllGlobals();
+  }
+});
+
+describe('light scene reconciliation', () => {
+  const scene = {
+    id: 'scene-light', campaignId: 'campaign-1', name: 'Quiet table',
+    shownImage: 'map', imagePath: null, backgroundPath: null,
+    fog: null, atmosphere: null, isLive: true, playArea: null, updatedAt: 1000,
+    grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
+  };
+  const renderScene = (onSceneChange = vi.fn()) => {
+    render(
+      <ThemeProvider theme={theme}>
+        <SceneEditor scene={scene} onSceneChange={onSceneChange} />
+      </ThemeProvider>,
+    );
+    return onSceneChange;
+  };
+
+  test('an unchanged scene version skips the row and its fog', async () => {
+    fetchSceneRevisionMock.mockResolvedValue(1000);
+    const onSceneChange = renderScene();
+    await act(async () => { await sceneLiveOptions.current.onReconcile({ reason: 'interval' }); });
+    expect(fetchSceneRevisionMock).toHaveBeenCalledWith('scene-light');
+    expect(fetchSceneMock).not.toHaveBeenCalled();
+    expect(refreshContentMock).toHaveBeenCalledWith({ fullDrawings: false });
+    expect(onSceneChange).not.toHaveBeenCalled();
+  });
+
+  test('a moved scene version reads the row once and applies it', async () => {
+    fetchSceneRevisionMock.mockResolvedValue(2000);
+    const fresh = { ...scene, name: 'Renamed elsewhere', updatedAt: 2000 };
+    fetchSceneMock.mockResolvedValue(fresh);
+    const onSceneChange = renderScene();
+    await act(async () => { await sceneLiveOptions.current.onReconcile({ reason: 'focus' }); });
+    expect(fetchSceneMock).toHaveBeenCalledTimes(1);
+    expect(onSceneChange).toHaveBeenCalledWith(fresh);
+  });
+
+  test('a reconnect also re-reads every stroke', async () => {
+    fetchSceneRevisionMock.mockResolvedValue(1000);
+    renderScene();
+    await act(async () => { await sceneLiveOptions.current.onReconcile({ reason: 'subscribed' }); });
+    expect(refreshContentMock).toHaveBeenCalledWith({ fullDrawings: true });
+  });
+
+  test('a scene the caller can no longer see is left as it is', async () => {
+    fetchSceneRevisionMock.mockResolvedValue(null);
+    const onSceneChange = renderScene();
+    await act(async () => { await sceneLiveOptions.current.onReconcile({ reason: 'interval' }); });
+    expect(fetchSceneMock).not.toHaveBeenCalled();
+    expect(onSceneChange).not.toHaveBeenCalled();
+  });
+});
+
+describe('fog painting', () => {
+  const fogScene = (fog) => ({
+    id: 'scene-fog', campaignId: 'campaign-1', name: 'Fogged',
+    shownImage: 'map', imagePath: null, backgroundPath: null,
+    fog, atmosphere: null, isLive: true, playArea: null,
+    grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
+  });
+  const fogBroadcasts = () => sendDragMock.mock.calls.filter(([payload]) => payload?.fog);
+  const fogFrames = () => sendDragMock.mock.calls.filter(([payload]) => payload?.fogDelta).map(([payload]) => payload.fogDelta);
+  const viewport = () => sceneViewportMock.mock.calls.at(-1)[0];
+
+  function Harness({ initial }) {
+    const [scene, setScene] = useState(initial);
+    return (
+      <ThemeProvider theme={theme}>
+        <SceneEditor scene={scene} onSceneChange={setScene} />
+      </ThemeProvider>
+    );
+  }
+
+  test('a brush over cells already revealed sends and stores nothing', async () => {
+    render(<Harness initial={fogScene(revealAll(createFog(4, 4)))} />);
+    await act(async () => {});
+    act(() => { viewport().onPaint([{ col: 0, row: 0 }, { col: 1, row: 1 }], true); });
+    act(() => { viewport().onPaint([{ col: 2, row: 2 }], true); });
+    act(() => { viewport().onPaintEnd(); });
+    await act(async () => {});
+    expect(fogBroadcasts()).toHaveLength(0);
+    expect(fogFrames()).toHaveLength(0);
+    expect(updateSceneMock).not.toHaveBeenCalled();
+  });
+
+  test('under StrictMode a stroke is stored once, with every painted cell', async () => {
+    render(<StrictMode><Harness initial={fogScene(createFog(4, 4))} /></StrictMode>);
+    await act(async () => {});
+    // Both frames inside one throttle window, whatever the machine's speed.
+    const clock = vi.spyOn(Date, 'now').mockReturnValue(1_000_000);
+    try {
+      act(() => { viewport().onPaint([{ col: 0, row: 0 }], true); });
+      act(() => { viewport().onPaint([{ col: 3, row: 3 }], true); });
+      act(() => { viewport().onPaintEnd(); });
+    } finally {
+      clock.mockRestore();
+    }
+    await act(async () => {});
+    expect(updateSceneMock).toHaveBeenCalledTimes(1);
+    const [sceneId, { fog }] = updateSceneMock.mock.calls[0];
+    expect(sceneId).toBe('scene-fog');
+    expect(isRevealed(fog, 0, 0)).toBe(true);
+    expect(isRevealed(fog, 3, 3)).toBe(true);
+    expect(isRevealed(fog, 1, 1)).toBe(false);
+    // The first frame goes out live as a delta, the second is inside the
+    // throttle window, and the commit carries the one full snapshot.
+    expect(fogFrames()).toEqual([expect.objectContaining({ seq: 0, cols: 4, rows: 4, on: [0, 1], off: [] })]);
+    expect(fogBroadcasts()).toHaveLength(1);
+    expect(fogBroadcasts()[0][0].fog).toEqual(fog);
+    expect(isRevealed(viewport().scene.fog, 3, 3)).toBe(true);
+  });
+
+  test('live frames carry only the flipped cells, numbered within the stroke', async () => {
+    render(<Harness initial={fogScene(createFog(8, 8))} />);
+    await act(async () => {});
+    let now = 5_000_000;
+    const clock = vi.spyOn(Date, 'now').mockImplementation(() => now);
+    try {
+      act(() => { viewport().onPaint([{ col: 0, row: 0 }, { col: 1, row: 0 }], true); });
+      now += 10;
+      act(() => { viewport().onPaint([{ col: 2, row: 0 }], true); });
+      now += 100;
+      act(() => { viewport().onPaint([{ col: 0, row: 1 }], true); });
+      act(() => { viewport().onPaintEnd(); });
+      now += 1_000;
+      act(() => { viewport().onPaint([{ col: 5, row: 5 }], true); });
+    } finally {
+      clock.mockRestore();
+    }
+    const frames = fogFrames();
+    expect(frames.map(({ seq, on }) => [seq, on])).toEqual([[0, [0, 2]], [1, [2, 1, 8, 1]], [0, [45, 1]]]);
+    // A new stroke starts a new numbering.
+    expect(frames[2].stroke).not.toBe(frames[0].stroke);
+    expect(frames.every((frame) => !('cells' in frame))).toBe(true);
+  });
+
+  test('remote frames are applied in order; a gap waits for the snapshot', async () => {
+    render(<Harness initial={fogScene(createFog(4, 4))} />);
+    await act(async () => {});
+    const remote = (fogDelta) => act(() => { sceneLiveOptions.current.onRemoteDrag({ fogDelta, actor: 'gm-2' }); });
+    remote({ stroke: 's1', seq: 0, cols: 4, rows: 4, on: [0, 1], off: [] });
+    expect(isRevealed(viewport().scene.fog, 0, 0)).toBe(true);
+    remote({ stroke: 's1', seq: 2, cols: 4, rows: 4, on: [5, 1], off: [] });
+    expect(isRevealed(viewport().scene.fog, 1, 1)).toBe(false);
+    remote({ stroke: 's1', seq: 3, cols: 4, rows: 4, on: [6, 1], off: [] });
+    expect(isRevealed(viewport().scene.fog, 2, 1)).toBe(false);
+    // A delta for another fog size is ignored rather than guessed at.
+    remote({ stroke: 's2', seq: 0, cols: 9, rows: 9, on: [0, 81], off: [] });
+    expect(isRevealed(viewport().scene.fog, 3, 3)).toBe(false);
+    // The snapshot at the end of the stroke settles it, as before.
+    const settled = revealAll(createFog(4, 4));
+    act(() => { sceneLiveOptions.current.onRemoteDrag({ fog: settled, actor: 'gm-2' }); });
+    expect(isRevealed(viewport().scene.fog, 1, 1)).toBe(true);
+  });
+
+  test('a stroke that only repeats itself is not stored twice', async () => {
+    render(<Harness initial={fogScene(createFog(4, 4))} />);
+    await act(async () => {});
+    act(() => { viewport().onPaint([{ col: 1, row: 1 }], true); });
+    act(() => { viewport().onPaintEnd(); });
+    act(() => { viewport().onPaint([{ col: 1, row: 1 }], true); });
+    act(() => { viewport().onPaintEnd(); });
+    await act(async () => {});
+    expect(updateSceneMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+test('a remote ruler whose owner stopped refreshing it fades out', async () => {
+  vi.useFakeTimers();
+  try {
+    render(
+      <ThemeProvider theme={theme}>
+        <SceneEditor
+          scene={{
+            id: 'scene-ruler', campaignId: 'campaign-1', name: 'Ruler', shownImage: 'map', imagePath: null,
+            backgroundPath: null, fog: null, atmosphere: null, isLive: true, playArea: null,
+            grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
+          }}
+          onSceneChange={vi.fn()}
+        />
+      </ThemeProvider>,
+    );
+    const ruler = { shape: 'line', from: { x: 0, y: 0 }, to: { x: 3, y: 0 }, label: '15 ft' };
+    act(() => { sceneLiveOptions.current.onRemoteDrag({ measure: ruler, actor: 'player-1' }); });
+    expect(sceneViewportMock.mock.calls.at(-1)[0].remoteMeasure).toEqual(expect.objectContaining(ruler));
+    // Refreshed while held: still shown.
+    act(() => { vi.advanceTimersByTime(3_000); });
+    act(() => { sceneLiveOptions.current.onRemoteDrag({ measure: ruler, actor: 'player-1' }); });
+    act(() => { vi.advanceTimersByTime(3_000); });
+    expect(sceneViewportMock.mock.calls.at(-1)[0].remoteMeasure).not.toBeNull();
+    // Then silence: gone within the TTL plus one sweep.
+    act(() => { vi.advanceTimersByTime(7_000); });
+    expect(sceneViewportMock.mock.calls.at(-1)[0].remoteMeasure).toBeNull();
+  } finally {
+    vi.useRealTimers();
   }
 });

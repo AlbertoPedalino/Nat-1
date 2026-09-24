@@ -23,6 +23,10 @@ import { restoreFight } from '../../encounterbuilder/combat/combat.js';
 import { importableCombatants } from '../../../shared/vtt/tokens/encounterImport.js';
 import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
 
+// Links change rarely and every local change announces itself (focus, the
+// gb:* link events, storage); the timer only catches another device's edit.
+const LINK_REFRESH_MS = 30_000;
+
 // The dungeon a map is being played as: how many rooms, what is in them, and
 // what their fights are worth.
 //
@@ -90,7 +94,7 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize, roster }) {
       }
     };
     refresh();
-    const timer = setInterval(refresh, 5000);
+    const timer = setInterval(refresh, LINK_REFRESH_MS);
     window.addEventListener('focus', refresh);
     window.addEventListener('gb:campaign-board-link-changed', refresh);
     window.addEventListener('gb:instance-links-changed', refresh);

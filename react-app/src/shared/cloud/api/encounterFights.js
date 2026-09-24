@@ -63,7 +63,20 @@ export async function listFightVitals(fightIds) {
   if (!ids.length) return [];
   const { data, error } = await requireClient()
     .from('encounter_fights')
-    .select('id, instance_id, fight')
+    .select('id, instance_id, fight, updated_at')
+    .in('id', ids);
+  if (error) throw error;
+  return data || [];
+}
+
+// Versions only, so the battle map's recovery poll fetches a fight's JSON just
+// when it changed.
+export async function listFightRevisions(fightIds) {
+  const ids = [...new Set((fightIds || []).filter(Boolean).map(String))];
+  if (!ids.length) return [];
+  const { data, error } = await requireClient()
+    .from('encounter_fights')
+    .select('id, updated_at')
     .in('id', ids);
   if (error) throw error;
   return data || [];
@@ -116,12 +129,20 @@ export async function deleteInstanceFight(fightId) {
   if (error) throw error;
 }
 
-// Every change to this instance's fights, from anywhere. The caller re-reads
-// rather than trusting the payload: a row arriving out of order is a wrong
-// answer, and the list is small enough that asking again is cheap.
-export function subscribeInstanceFights(instanceId, onChange) {
+// Every change to this instance's fights, from anywhere. The listener gets the
+// realtime payload so a complete row can be applied as it is; it decides when
+// a re-read is still needed. `onStatus` hears SUBSCRIBED, which after a
+// reconnect is the moment to recover what was missed.
+export function subscribeInstanceFights(instanceId, onChange, { onStatus } = {}) {
   if (!instanceId || !supabase) return () => {};
   let channel;
+  const remove = () => {
+    try {
+      if (channel) supabase.removeChannel(channel);
+    } catch (_) {
+      // Cleanup stays fail-soft if the socket was already closed.
+    }
+  };
   try {
     channel = supabase.channel(`gb-encounter-fights-${String(instanceId).replace(/[^a-z0-9_-]/gi, '_').slice(0, 60)}`);
     channel.on('postgres_changes', {
@@ -129,23 +150,21 @@ export function subscribeInstanceFights(instanceId, onChange) {
       schema: 'public',
       table: 'encounter_fights',
       filter: `instance_id=eq.${instanceId}`,
-    }, () => {
+    }, (payload) => {
       try {
-        onChange();
+        onChange(payload);
       } catch (_) {
         // Realtime is opportunistic: a listener that throws must not take the
         // socket down with it.
       }
     });
-    channel.subscribe();
+    channel.subscribe((status) => {
+      try { onStatus?.(status); } catch (_) {}
+    });
   } catch (_) {
+    // A channel that failed half-way through setup must not linger.
+    remove();
     return () => {};
   }
-  return () => {
-    try {
-      supabase.removeChannel(channel);
-    } catch (_) {
-      // Cleanup stays fail-soft if the socket was already closed.
-    }
-  };
+  return remove;
 }

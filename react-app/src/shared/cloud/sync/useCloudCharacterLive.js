@@ -3,6 +3,7 @@ import { useAuth } from '../auth/AuthProvider.jsx';
 import { supabase } from '../supabaseClient.js';
 import { getCloudCharacter } from '../api/cloudCharacters.js';
 import { CHARACTER_ROW_EVENT } from './characterRows.js';
+import { coalesceReturns } from './returnGate.js';
 
 const CHARACTER_RECONCILE_MS = 30_000;
 
@@ -97,8 +98,10 @@ export function useCloudCharacterLive({ charId, enabled = true, onUpdate, refres
       return undefined;
     }
 
+    // Focus and visibilitychange arrive together when a tab comes back.
+    const refreshOnReturn = coalesceReturns(refresh);
     const refreshWhenVisible = () => {
-      if (document.visibilityState === 'visible') refresh();
+      if (document.visibilityState === 'visible') refreshOnReturn();
     };
     const timer = window.setInterval(refresh, CHARACTER_RECONCILE_MS);
     const receiveCommand = ({ detail }) => {
@@ -108,7 +111,7 @@ export function useCloudCharacterLive({ charId, enabled = true, onUpdate, refres
     };
     window.addEventListener(CHARACTER_ROW_EVENT, receiveCommand);
     window.addEventListener('online', refresh);
-    window.addEventListener('focus', refresh);
+    window.addEventListener('focus', refreshOnReturn);
     document.addEventListener('visibilitychange', refreshWhenVisible);
 
     return () => {
@@ -117,7 +120,7 @@ export function useCloudCharacterLive({ charId, enabled = true, onUpdate, refres
       window.clearInterval(timer);
       window.removeEventListener(CHARACTER_ROW_EVENT, receiveCommand);
       window.removeEventListener('online', refresh);
-      window.removeEventListener('focus', refresh);
+      window.removeEventListener('focus', refreshOnReturn);
       document.removeEventListener('visibilitychange', refreshWhenVisible);
       try {
         supabase.removeChannel(channel);

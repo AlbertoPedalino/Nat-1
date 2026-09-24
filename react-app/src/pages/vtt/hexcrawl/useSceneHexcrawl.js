@@ -27,7 +27,9 @@ const EMPTY_CELLS = new Map();
 // Long enough to read three lines and decide whether to open the rolls, short
 // enough that a bubble is never still sitting on the map two hexes later.
 const BUBBLE_MS = 12000;
-const BOARD_REFRESH_MS = 5000;
+// A safety net only: focus re-reads at once, every roll forces a fresh read,
+// and the check itself is a version number before any board download.
+export const BOARD_REFRESH_MS = 30_000;
 
 export function useSceneHexcrawl({ scene, isGm }) {
   const campaignId = scene?.campaignId || null;
@@ -64,7 +66,9 @@ export function useSceneHexcrawl({ scene, isGm }) {
   // is refused, and the refusal used to take the clock down with it — both reads
   // are one `Promise.all`, so a player loaded no clock at all and stood on a map
   // with no party marker until the GM next moved.
-  const clock = useCampaignClock(campaignId, { withLog: isGm });
+  // Only a hex map shows the party or runs travel, so a square scene leaves the
+  // campaign clock alone instead of keeping a poll and a channel open for it.
+  const clock = useCampaignClock(visible ? campaignId : null, { withLog: isGm });
   const travel = travelFromState(mergeBoardClock(board?.state || {}, clock.clock));
   const defaults = {
     terrain: travel.terrain, pop: travel.pop, tier: travel.hexTier, mountSpeed: travel.mountSpeed,

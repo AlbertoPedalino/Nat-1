@@ -3,6 +3,7 @@ import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import {
   deleteInstanceFight,
+  getInstanceFight,
   listInstanceFights,
   saveInstanceFight,
   subscribeInstanceFights,
@@ -107,6 +108,35 @@ export function useCloudFights({
       .then(() => { verifyRef.current?.(); });
   }, []);
 
+  // Rows from the database into the reducer. A partial list is fine:
+  // externalDelta only adds what is new or newer and never infers a delete.
+  const absorbRows = useCallback((rows) => {
+    for (const entry of rows) settledRef.current.set(String(entry.id), fightSignature(entry));
+    // The same merge the localStorage bridge uses, so a fight arriving from the
+    // map is added and one the map has written to is refreshed — while the fight
+    // on screen is left to the reducer that is running it.
+    const held = heldRef.current;
+    const library = held.library || [];
+    const delta = externalDelta({ fightsData: { items: rows }, library: [] }, { ...held, library });
+    // A fight is only reachable through the card of its encounter, and the
+    // library is still a blob this device may never have been given. The card
+    // rides along in the row for exactly this: without it the room would arrive
+    // as a fight with nothing to open it from — and when the card is one this
+    // device already has in an older version, the newer one replaces it.
+    const cards = libraryCardUpdates(rows, library);
+    if (delta.fights.length || cards.length) {
+      dispatchRef.current({ type: 'absorbExternal', fights: delta.fights, library: cards });
+    }
+    // The fight on screen keeps its own turn and roster, but its enemies'
+    // vitals are the row's: that is the one place they are written. While a
+    // local vitals command is still in flight its own answer realigns instead.
+    const activeKey = held.activeFightId == null ? null : String(held.activeFightId);
+    const active = activeKey ? rows.find((entry) => String(entry.id) === activeKey) : null;
+    if (active && !isVitalsBusyRef.current?.(active.id)) {
+      dispatchRef.current({ type: 'absorbFightVitals', fightId: active.id, fight: active.fight });
+    }
+  }, []);
+
   const refresh = useCallback(async () => {
     if (!canSync) return;
     let all;
@@ -138,31 +168,38 @@ export function useCloudFights({
       if (!stillThere.has(key)) removedRef.current.delete(key);
     }
 
-    for (const entry of rows) settledRef.current.set(String(entry.id), fightSignature(entry));
-    // The same merge the localStorage bridge uses, so a fight arriving from the
-    // map is added and one the map has written to is refreshed — while the fight
-    // on screen is left to the reducer that is running it.
-    const held = heldRef.current;
-    const library = held.library || [];
-    const delta = externalDelta({ fightsData: { items: rows }, library: [] }, { ...held, library });
-    // A fight is only reachable through the card of its encounter, and the
-    // library is still a blob this device may never have been given. The card
-    // rides along in the row for exactly this: without it the room would arrive
-    // as a fight with nothing to open it from — and when the card is one this
-    // device already has in an older version, the newer one replaces it.
-    const cards = libraryCardUpdates(rows, library);
-    if (delta.fights.length || cards.length) {
-      dispatchRef.current({ type: 'absorbExternal', fights: delta.fights, library: cards });
+    absorbRows(rows);
+  }, [absorbRows, askAgain, canSync, instanceId]);
+
+  // One realtime event. A complete INSERT/UPDATE row is applied as it came —
+  // no re-read of every fight in the instance. A row Realtime had to trim
+  // (it drops large columns past its size limit) is fetched alone. Everything
+  // else re-reads the whole list: a DELETE, deletes of ours still being
+  // verified, the first load not done yet, or an event we cannot place.
+  const handleChange = useCallback((payload) => {
+    if (!canSync) return undefined;
+    const type = String(payload?.eventType || '').toUpperCase();
+    const row = payload?.new;
+    if (!loadedRef.current || removedRef.current.size || (type !== 'INSERT' && type !== 'UPDATE') || !row?.id) {
+      return refresh();
     }
-    // The fight on screen keeps its own turn and roster, but its enemies'
-    // vitals are the row's: that is the one place they are written. While a
-    // local vitals command is still in flight its own answer realigns instead.
-    const activeKey = held.activeFightId == null ? null : String(held.activeFightId);
-    const active = activeKey ? rows.find((entry) => String(entry.id) === activeKey) : null;
-    if (active && !isVitalsBusyRef.current?.(active.id)) {
-      dispatchRef.current({ type: 'absorbFightVitals', fightId: active.id, fight: active.fight });
+    const complete = !payload.errors?.length && row.fight && typeof row.fight === 'object';
+    if (complete) {
+      const entry = toFightEntry(row);
+      if (!entry) return refresh();
+      absorbRows([entry]);
+      return undefined;
     }
-  }, [canSync, instanceId]);
+    return getInstanceFight(row.id)
+      .then((fresh) => {
+        const entry = toFightEntry(fresh);
+        if (entry) absorbRows([entry]);
+        else return refresh();
+        return undefined;
+      })
+      // Offline: the next event, reconnect or save realigns.
+      .catch(() => {});
+  }, [absorbRows, canSync, refresh]);
 
   verifyRef.current = refresh;
 
@@ -201,8 +238,13 @@ export function useCloudFights({
   useEffect(() => {
     if (!canSync) return undefined;
     refresh();
-    return subscribeInstanceFights(instanceId, refresh);
-  }, [canSync, instanceId, refresh]);
+    // SUBSCRIBED again after a reconnect: events missed while the socket was
+    // down are not replayed, so read the list. The first one also covers the
+    // gap between the read above and the subscription going live.
+    return subscribeInstanceFights(instanceId, handleChange, {
+      onStatus: (state) => { if (state === 'SUBSCRIBED') refresh(); },
+    });
+  }, [canSync, handleChange, instanceId, refresh]);
 
   // Local -> row. One write per fight that actually changed, so running a combat
   // does not rewrite the twenty rooms sitting beside it.

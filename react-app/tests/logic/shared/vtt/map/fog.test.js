@@ -195,3 +195,36 @@ test('the encoded form is compact enough to sync on every stroke', () => {
   assert.ok(fog.cells.length < 2000, `expected a small payload, got ${fog.cells.length} chars`);
   assert.deepEqual([...decodeCells(encodeCells(new Uint8Array([1, 255, 16])), 3)], [1, 255, 16]);
 });
+
+test('applyCells reports only the cells that really flipped', async () => {
+  const { applyCells, createFog, isRevealed, sameFog } = await import('../../../../../src/shared/vtt/map/fog.js');
+  const fog = createFog(4, 4);
+  const first = applyCells(fog, [{ col: 1, row: 1 }, { col: 1, row: 1 }, { col: 9, row: 9 }], true);
+  assert.deepEqual(first.changed, [5]);
+  assert.equal(isRevealed(first.fog, 1, 1), true);
+  const again = applyCells(first.fog, [{ col: 1, row: 1 }], true);
+  assert.deepEqual(again.changed, []);
+  assert.equal(again.fog, first.fog);
+  assert.equal(sameFog(again.fog, first.fog), true);
+  assert.equal(sameFog(first.fog, fog), false);
+  assert.deepEqual(applyCells(null, [{ col: 0, row: 0 }], true), { fog: null, changed: [] });
+});
+
+test('fog deltas are compact runs and apply idempotently to the same fog size only', async () => {
+  const { applyFogDelta, createFog, fogDelta, isRevealed, toRuns } = await import('../../../../../src/shared/vtt/map/fog.js');
+  assert.deepEqual(toRuns([7, 3, 4, 5, 5, 10, -1, 1.5]), [3, 3, 7, 1, 10, 1]);
+  const fog = createFog(4, 4);
+  const delta = fogDelta(fog, [0, 1, 5], []);
+  assert.deepEqual(delta, { cols: 4, rows: 4, on: [0, 2, 5, 1], off: [] });
+  const once = applyFogDelta(fog, delta);
+  assert.equal(isRevealed(once, 1, 1), true);
+  assert.equal(isRevealed(once, 2, 0), false);
+  assert.equal(applyFogDelta(once, delta), once);
+  const hidden = applyFogDelta(once, { cols: 4, rows: 4, on: [], off: [5, 1] });
+  assert.equal(isRevealed(hidden, 1, 1), false);
+  assert.equal(applyFogDelta(fog, { ...delta, cols: 5 }), null);
+  // Runs past the end are clipped, not written out of bounds.
+  const edge = applyFogDelta(fog, { cols: 4, rows: 4, on: [14, 100], off: [] });
+  assert.equal(isRevealed(edge, 3, 3), true);
+  assert.equal(edge.cells.length, fog.cells.length);
+});

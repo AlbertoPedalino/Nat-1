@@ -26,6 +26,7 @@ vi.mock('../../../../../src/shared/cloud/api/encounterFights.js', () => ({
   FIGHT_UNAVAILABLE: 'FIGHT_UNAVAILABLE',
   commitFightCombatantVitals: (...args) => m.commit(...args),
   listFightVitals: async () => m.fightRows.current,
+  listFightRevisions: async () => m.fightRows.current.map((row) => ({ id: row.id, updated_at: row.updated_at })),
   saveInstanceFight: vi.fn(),
 }));
 vi.mock('../../../../../src/shared/cloud/api/vtt.js', async (importOriginal) => ({
@@ -81,6 +82,7 @@ vi.mock('../../../../../src/pages/vtt/scene/useSceneContent.js', () => ({
     handleDrawingEvent: vi.fn(),
     loading: false,
     refreshVisibleTokens: m.refreshVisibleTokens,
+    reconcileContent: vi.fn(async () => {}),
     refreshContent: vi.fn(async () => {}),
     roster: [],
     setDrawings: vi.fn(),

@@ -251,33 +251,43 @@ export async function readHexcrawlBoardVersion(boardId) {
 
 // Realtime, same shape as the scene channels: the GM's map and the GM's board
 // are two browsers as often as they are two tabs.
-export function subscribeHexcrawl({ campaignId, sceneId, onClock, onCell }) {
+// `onStatus` hears the channel state, so a caller can re-read on SUBSCRIBED
+// (a reconnect does not replay what was missed).
+export function subscribeHexcrawl({ campaignId, sceneId, onClock, onCell, onStatus }) {
   const supabase = requireClient();
-  const channel = supabase.channel(`hexcrawl:${campaignId || 'none'}:${sceneId || 'none'}`);
+  let channel;
+  const remove = () => { try { if (channel) supabase.removeChannel(channel); } catch (_) {} };
+  try {
+    channel = supabase.channel(`hexcrawl:${campaignId || 'none'}:${sceneId || 'none'}`);
 
-  if (campaignId && onClock) {
-    channel.on(
-      'postgres_changes',
-      {
-        event: '*', schema: 'public', table: 'campaign_hexcrawl', filter: `campaign_id=eq.${campaignId}`,
-      },
-      (payload) => onClock(toClock(payload.new) || toClock(payload.old)),
-    );
+    if (campaignId && onClock) {
+      channel.on(
+        'postgres_changes',
+        {
+          event: '*', schema: 'public', table: 'campaign_hexcrawl', filter: `campaign_id=eq.${campaignId}`,
+        },
+        (payload) => onClock(toClock(payload.new) || toClock(payload.old)),
+      );
+    }
+
+    if (sceneId && onCell) {
+      channel.on(
+        'postgres_changes',
+        {
+          event: '*', schema: 'public', table: 'map_hex_cells', filter: `scene_id=eq.${sceneId}`,
+        },
+        (payload) => onCell({
+          cell: toHexCell(payload.new) || toHexCell(payload.old),
+          removed: payload.eventType === 'DELETE',
+        }),
+      );
+    }
+
+    channel.subscribe((status) => { try { onStatus?.(status); } catch (_) {} });
+  } catch (_) {
+    // Half-built channels must not linger on the socket.
+    remove();
+    return () => {};
   }
-
-  if (sceneId && onCell) {
-    channel.on(
-      'postgres_changes',
-      {
-        event: '*', schema: 'public', table: 'map_hex_cells', filter: `scene_id=eq.${sceneId}`,
-      },
-      (payload) => onCell({
-        cell: toHexCell(payload.new) || toHexCell(payload.old),
-        removed: payload.eventType === 'DELETE',
-      }),
-    );
-  }
-
-  channel.subscribe();
-  return () => { try { supabase.removeChannel(channel); } catch (_) {} };
+  return remove;
 }

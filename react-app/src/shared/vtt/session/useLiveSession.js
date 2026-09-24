@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../cloud/auth/AuthProvider.jsx';
 import { supabase } from '../../cloud/supabaseClient.js';
-import { listLiveScenes } from '../../cloud/api/vtt.js';
+import { listLiveSceneIds } from '../../cloud/api/vtt.js';
+import { coalesceReturns } from '../../cloud/sync/returnGate.js';
 
 const SESSION_RECONCILE_MS = 30_000;
 
@@ -14,19 +15,25 @@ const SESSION_RECONCILE_MS = 30_000;
 //
 // The subscription is campaign-wide rather than scene-specific: the event that
 // matters is another row becoming live, which a scene channel would never see.
+// The scene itself (fog, grid, tokens) is useSceneLive's business: this hook
+// only answers "which id is live", from a query that carries nothing else.
 
 export function useLiveSession({ campaignId, enabled = true } = {}) {
   const { cloudEnabled, status } = useAuth();
   const [session, setSession] = useState({ loading: true, scene: null });
   const refreshRequestRef = useRef(0);
+  const sceneRef = useRef(null);
+  sceneRef.current = session.scene;
 
   const refresh = useCallback(async () => {
     const request = ++refreshRequestRef.current;
     try {
-      const scenes = await listLiveScenes();
+      const scenes = await listLiveSceneIds(campaignId);
       if (request !== refreshRequestRef.current) return;
       const scene = scenes.find((entry) => entry.campaignId === campaignId) || null;
-      setSession({ loading: false, scene });
+      setSession((current) => (
+        !current.loading && current.scene?.id === scene?.id ? current : { loading: false, scene }
+      ));
     } catch (_) {
       // Realtime recovery and the safety poll are best-effort. A momentary
       // network failure must not throw a player off the map they already have.
@@ -58,7 +65,14 @@ export function useLiveSession({ campaignId, enabled = true } = {}) {
       channel.on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'map_scenes', filter: `campaign_id=eq.${campaignId}` },
-        () => { refresh(); },
+        (payload) => {
+          // The live scene editing itself (a fog stroke, the grid, a rename)
+          // does not move the table: the scene channel already has that row.
+          const row = payload?.new;
+          const live = sceneRef.current;
+          if (row?.id && live?.id === row.id && row.is_live === true) return;
+          refresh();
+        },
       );
       channel.subscribe((state) => {
         // There is a small gap between the first read and the subscription
@@ -68,6 +82,9 @@ export function useLiveSession({ campaignId, enabled = true } = {}) {
         if (state === 'SUBSCRIBED') refresh();
       });
     } catch (_) {
+      try {
+        if (channel) supabase.removeChannel(channel);
+      } catch (__) {}
       return undefined;
     }
 
@@ -75,19 +92,20 @@ export function useLiveSession({ campaignId, enabled = true } = {}) {
     // changes network, or keeps the tab in the background. These inexpensive
     // reconciliations make the session self-healing without a page reload.
     const reconcile = () => { refresh(); };
+    const reconcileOnReturn = coalesceReturns(reconcile);
     const reconcileWhenVisible = () => {
-      if (document.visibilityState === 'visible') refresh();
+      if (document.visibilityState === 'visible') reconcileOnReturn();
     };
     const timer = window.setInterval(reconcile, SESSION_RECONCILE_MS);
     window.addEventListener('online', reconcile);
-    window.addEventListener('focus', reconcile);
+    window.addEventListener('focus', reconcileOnReturn);
     document.addEventListener('visibilitychange', reconcileWhenVisible);
 
     return () => {
       refreshRequestRef.current += 1;
       window.clearInterval(timer);
       window.removeEventListener('online', reconcile);
-      window.removeEventListener('focus', reconcile);
+      window.removeEventListener('focus', reconcileOnReturn);
       document.removeEventListener('visibilitychange', reconcileWhenVisible);
       try {
         supabase.removeChannel(channel);

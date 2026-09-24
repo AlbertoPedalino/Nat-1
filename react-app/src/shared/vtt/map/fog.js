@@ -105,6 +105,89 @@ export function setCells(fog, cells, revealed) {
   return { cols: fog.cols, rows: fog.rows, scale: fog.scale, cells: encodeCells(bytes) };
 }
 
+// setCells, but also says which cells really flipped. A brush dragged over
+// ground already in the wanted state changes nothing, and then the same fog
+// object comes back so the caller can skip rendering, broadcasting and saving.
+export function applyCells(fog, cells, revealed) {
+  if (!fog) return { fog: null, changed: [] };
+  const bytes = decodeCells(fog.cells, byteLength(fog.cols, fog.rows));
+  const changed = [];
+  for (const cell of cells || []) {
+    const col = Math.round(Number(cell?.col));
+    const row = Math.round(Number(cell?.row));
+    if (!Number.isFinite(col) || !Number.isFinite(row)) continue;
+    if (col < 0 || row < 0 || col >= fog.cols || row >= fog.rows) continue;
+    const index = row * fog.cols + col;
+    const mask = 1 << (index & 7);
+    const was = Boolean(bytes[index >> 3] & mask);
+    if (was === Boolean(revealed)) continue;
+    if (revealed) bytes[index >> 3] |= mask;
+    else bytes[index >> 3] &= ~mask;
+    changed.push(index);
+  }
+  if (!changed.length) return { fog, changed };
+  return { fog: { cols: fog.cols, rows: fog.rows, scale: fog.scale, cells: encodeCells(bytes) }, changed };
+}
+
+// Cell indices -> [start, length, start, length, …]. A brush stroke flips
+// cells in short horizontal runs, so this is a fraction of the index list and
+// a tiny fraction of the whole bitset a live stroke used to broadcast.
+export function toRuns(indices) {
+  const sorted = [...new Set(indices || [])]
+    .filter((index) => Number.isInteger(index) && index >= 0)
+    .sort((a, b) => a - b);
+  const runs = [];
+  for (const index of sorted) {
+    const last = runs.length - 2;
+    if (last >= 0 && runs[last] + runs[last + 1] === index) runs[last + 1] += 1;
+    else runs.push(index, 1);
+  }
+  return runs;
+}
+
+// The cells one live-painting frame changed, for a fog of this exact size.
+export function fogDelta(fog, revealedIndices, hiddenIndices) {
+  if (!fog) return null;
+  return { cols: fog.cols, rows: fog.rows, on: toRuns(revealedIndices), off: toRuns(hiddenIndices) };
+}
+
+// Apply a delta. Setting a bit is idempotent, so applying one twice (a React
+// updater run twice) is harmless. A delta made for another fog size is not
+// ours to guess at: null, and the stroke's final snapshot will correct it.
+export function applyFogDelta(fog, delta) {
+  if (!fog || !delta || delta.cols !== fog.cols || delta.rows !== fog.rows) return null;
+  const total = fog.cols * fog.rows;
+  const bytes = decodeCells(fog.cells, byteLength(fog.cols, fog.rows));
+  let changed = false;
+  const paint = (runs, revealed) => {
+    if (!Array.isArray(runs)) return;
+    for (let at = 0; at + 1 < runs.length; at += 2) {
+      const start = Math.max(0, Math.floor(Number(runs[at])));
+      const end = Math.min(total, start + Math.max(0, Math.floor(Number(runs[at + 1]))));
+      if (!Number.isFinite(start) || !Number.isFinite(end)) continue;
+      for (let index = start; index < end; index += 1) {
+        const mask = 1 << (index & 7);
+        const was = Boolean(bytes[index >> 3] & mask);
+        if (was === revealed) continue;
+        if (revealed) bytes[index >> 3] |= mask;
+        else bytes[index >> 3] &= ~mask;
+        changed = true;
+      }
+    }
+  };
+  paint(delta.on, true);
+  paint(delta.off, false);
+  if (!changed) return fog;
+  return { cols: fog.cols, rows: fog.rows, scale: fog.scale, cells: encodeCells(bytes) };
+}
+
+// Same size and the same bits: nothing to show, send or store.
+export function sameFog(a, b) {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  return a.cols === b.cols && a.rows === b.rows && a.scale === b.scale && a.cells === b.cells;
+}
+
 export function revealAll(fog) {
   if (!fog) return null;
   const bytes = new Uint8Array(byteLength(fog.cols, fog.rows)).fill(0xff);

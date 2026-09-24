@@ -1,19 +1,27 @@
 import { act, renderHook } from '@testing-library/react';
 import { useRollChannel } from '../../../../../src/shared/cloud/sync/useRollChannel.js';
 
-const mocks = vi.hoisted(() => ({ channels: [], auth: { cloudEnabled: true, status: 'authed', user: { id: 'gm' } } }));
+const mocks = vi.hoisted(() => ({ channels: [], failSubscribe: false, removeChannel: vi.fn(), auth: { cloudEnabled: true, status: 'authed', user: { id: 'gm' } } }));
 vi.mock('../../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({ useAuth: () => mocks.auth }));
 vi.mock('../../../../../src/shared/cloud/supabaseClient.js', () => ({ supabase: {
   channel: (topic, options) => {
-    const channel = { topic, options, send: vi.fn().mockResolvedValue('ok'), subscribe: vi.fn(),
+    const channel = {
+      topic,
+      options,
+      send: vi.fn().mockResolvedValue('ok'),
+      subscribe: vi.fn(() => { if (mocks.failSubscribe) throw new Error('socket'); }),
       on: vi.fn((type, event, callback) => { channel.receive = callback; }) };
     mocks.channels.push(channel);
     return channel;
   },
-  removeChannel: vi.fn(),
+  removeChannel: (...args) => mocks.removeChannel(...args),
 } }));
 
-beforeEach(() => { mocks.channels = []; });
+beforeEach(() => {
+  mocks.channels = [];
+  mocks.failSubscribe = false;
+  mocks.removeChannel.mockReset();
+});
 
 test('sheet and map share one subscription, with immediate delivery and no network echo duplicate', () => {
   const sheetRoll = vi.fn();
@@ -59,4 +67,17 @@ test('campaign changes stop delivery from the previous campaign', () => {
   rerender({ campaignId: 'two' });
   act(() => result.current.sender.publish({ id: 'old-campaign' }));
   expect(listener).not.toHaveBeenCalled();
+});
+
+test('a channel that fails half-way through setup is taken off the socket, and local delivery still works', () => {
+  mocks.failSubscribe = true;
+  const mapRoll = vi.fn();
+  const { result } = renderHook(() => ({
+    sheet: useRollChannel({ campaignId: 'broken', onRoll: vi.fn() }),
+    map: useRollChannel({ campaignId: 'broken', onRoll: mapRoll }),
+  }));
+  expect(mocks.removeChannel).toHaveBeenCalledWith(mocks.channels[0]);
+  act(() => result.current.sheet.publish({ id: 'local-only' }));
+  expect(mapRoll).toHaveBeenCalledTimes(1);
+  expect(mocks.channels[0].send).not.toHaveBeenCalled();
 });

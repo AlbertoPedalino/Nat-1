@@ -22,7 +22,7 @@ const campaignClock = vi.hoisted(() => ({
     saveClock: vi.fn(),
 }));
 vi.mock('../../../../../src/shared/hexcrawl/useCampaignClock.js', () => ({
-  useCampaignClock: () => campaignClock,
+  useCampaignClock: (...args) => { campaignClock.args = args; return campaignClock; },
 }));
 
 let hexcrawl;
@@ -106,4 +106,22 @@ test('an open VTT refreshes the linked GM Board after it changes', async () => {
 
   await waitFor(() => expect(hexcrawl.board?.tables.revision).toBe(2));
   expect(hexcrawl.board.state.season).toBe('Winter');
+});
+
+test('a square map leaves the campaign clock alone', async () => {
+  function SquareProbe() {
+    hexcrawl = useSceneHexcrawl({
+      scene: { id: 'scene-square', campaignId: 'campaign-one', grid: { shape: 'square' } },
+      isGm: true,
+    });
+    return null;
+  }
+  render(<SquareProbe />);
+  await act(async () => {});
+  expect(campaignClock.args[0]).toBeNull();
+  expect(cloud.readCampaignHexcrawlBoard).not.toHaveBeenCalled();
+
+  render(<Probe />);
+  await act(async () => {});
+  expect(campaignClock.args[0]).toBe('campaign-one');
 });

@@ -62,6 +62,21 @@ export async function listLiveScenes() {
   return (data || []).map(toScene).filter(Boolean);
 }
 
+// Which scene of one campaign is live, and nothing else: following the table
+// needs the id, while the scene itself (fog and all) is loaded once by id.
+export async function listLiveSceneIds(campaignId) {
+  const { data, error } = await requireClient()
+    .from('map_scenes')
+    .select('id, campaign_id, updated_at')
+    .eq('is_live', true)
+    .eq('campaign_id', campaignId)
+    .order('updated_at', { ascending: false });
+  if (error) throw error;
+  return (data || []).map((row) => ({
+    id: row.id, campaignId: row.campaign_id || null, updatedAt: Date.parse(row.updated_at) || 0,
+  }));
+}
+
 export async function fetchScene(sceneId) {
   const supabase = requireClient();
   const { data, error } = await supabase
@@ -71,6 +86,18 @@ export async function fetchScene(sceneId) {
     .maybeSingle();
   if (error) throw error;
   return toScene(data);
+}
+
+// The scene's version alone: the recovery poll reads this and fetches the row
+// (fog included) only when it moved. Null when the caller cannot see the scene.
+export async function fetchSceneRevision(sceneId) {
+  const { data, error } = await requireClient()
+    .from('map_scenes')
+    .select('id, updated_at')
+    .eq('id', sceneId)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? Date.parse(data.updated_at) || 0 : null;
 }
 
 export async function createScene(campaignId, name) {
@@ -155,6 +182,30 @@ export async function listTokens(sceneId) {
     .select(TOKEN_COLUMNS)
     .eq('scene_id', sceneId)
     .order('z', { ascending: true });
+  if (error) throw error;
+  return (data || []).map(toToken).filter(Boolean);
+}
+
+// Id and version of every piece the caller may see, in listTokens order. RLS
+// applies exactly as to listTokens, so a piece leaving the play area is simply
+// missing here too.
+export async function listTokenRevisions(sceneId) {
+  const { data, error } = await requireClient()
+    .from('map_tokens')
+    .select('id, updated_at')
+    .eq('scene_id', sceneId)
+    .order('z', { ascending: true });
+  if (error) throw error;
+  return (data || []).map((row) => ({ id: row.id, updatedAt: Date.parse(row.updated_at) || 0 }));
+}
+
+export async function listTokensByIds(sceneId, ids) {
+  if (!ids?.length) return [];
+  const { data, error } = await requireClient()
+    .from('map_tokens')
+    .select(TOKEN_COLUMNS)
+    .eq('scene_id', sceneId)
+    .in('id', ids);
   if (error) throw error;
   return (data || []).map(toToken).filter(Boolean);
 }
@@ -303,6 +354,30 @@ export async function listDrawings(sceneId) {
     .select(DRAWING_COLUMNS)
     .eq('scene_id', sceneId)
     .order('created_at', { ascending: true });
+  if (error) throw error;
+  return (data || []).map(toDrawing).filter(Boolean);
+}
+
+// Strokes have no version column, so the recovery poll compares ids only: a
+// new or erased stroke shows up here, a moved one is left to realtime and to
+// the full read on reconnect.
+export async function listDrawingIds(sceneId) {
+  const { data, error } = await requireClient()
+    .from('map_drawings')
+    .select('id')
+    .eq('scene_id', sceneId)
+    .order('created_at', { ascending: true });
+  if (error) throw error;
+  return (data || []).map((row) => row.id);
+}
+
+export async function listDrawingsByIds(sceneId, ids) {
+  if (!ids?.length) return [];
+  const { data, error } = await requireClient()
+    .from('map_drawings')
+    .select(DRAWING_COLUMNS)
+    .eq('scene_id', sceneId)
+    .in('id', ids);
   if (error) throw error;
   return (data || []).map(toDrawing).filter(Boolean);
 }

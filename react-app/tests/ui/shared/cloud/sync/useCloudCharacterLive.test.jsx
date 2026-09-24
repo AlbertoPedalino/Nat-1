@@ -121,3 +121,19 @@ describe('useCloudCharacterLive recovery', () => {
     expect(mocks.onUpdate).toHaveBeenLastCalledWith(row(15, '2026-09-05T10:00:01.000Z'));
   });
 });
+
+test('a returning tab re-reads the sheet once, not once per focus and visibility event', async () => {
+  mocks.getCloudCharacter.mockReset().mockResolvedValue(row(8, '2026-09-05T10:00:00.000Z'));
+  mocks.channel = {
+    on: vi.fn(function on() { return this; }),
+    subscribe: vi.fn(function subscribe() { return this; }),
+  };
+  renderHook(() => useCloudCharacterLive({ charId: 'char-1', onUpdate: vi.fn() }));
+  act(() => {
+    window.dispatchEvent(new Event('focus'));
+    document.dispatchEvent(new Event('visibilitychange'));
+    window.dispatchEvent(new Event('focus'));
+  });
+  await act(async () => {});
+  expect(mocks.getCloudCharacter).toHaveBeenCalledTimes(1);
+});

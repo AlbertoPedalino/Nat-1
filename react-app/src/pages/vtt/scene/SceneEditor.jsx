@@ -23,6 +23,7 @@ import {
   deleteMapImage,
   deleteToken,
   fetchScene,
+  fetchSceneRevision,
   moveDrawing,
   removeSceneImage,
   replaceSceneImage,
@@ -59,13 +60,18 @@ import {
 } from '../../../shared/vtt/tokens/encounterImport.js';
 import {
   DEFAULT_FOG_SCALE,
+  applyCells,
+  applyFogDelta,
   createFog,
+  fogDelta,
   fogSizeForImage,
   hideAll,
   normalizeFog,
   revealAll,
-  setCells,
+  sameFog,
 } from '../../../shared/vtt/map/fog.js';
+import { REMOTE_MEASURE_TTL_MS } from '../../../shared/vtt/map/measureSync.js';
+import { acceptFogDelta, newFogStroke } from '../../../shared/vtt/map/fogStream.js';
 import {
   canMarkToken, isTokenVisibleToPlayers, normalizePlayArea, sceneTitleFor, toScene,
 } from '../../../shared/vtt/scene/scene.js';
@@ -230,7 +236,7 @@ export default function SceneEditor({
     handleCharacterEvent,
     handleDrawingEvent,
     loading,
-    refreshContent,
+    reconcileContent,
     refreshVisibleTokens,
     roster,
     setDrawings,
@@ -279,6 +285,10 @@ export default function SceneEditor({
   // loader needs to try again.
   const [imageAttempt, setImageAttempt] = useState(0);
   const imageOnScreenRef = useRef(false);
+  // The version of the scene row last seen from the server; the recovery poll
+  // reads the whole row (fog included) only when the database has moved on.
+  const sceneUpdatedAtRef = useRef(scene.updatedAt);
+  sceneUpdatedAtRef.current = scene.updatedAt;
   const imageLoadingRef = useRef(false);
   const gridTimerRef = useRef(null);
   const atmosphereTimerRef = useRef(null);
@@ -287,6 +297,17 @@ export default function SceneEditor({
   const gridEditRef = useRef(false);
   const paintingRef = useRef(false);
   const fogBroadcastRef = useRef(0);
+  // The fog the brush works on. It follows the scene between strokes; during
+  // one it runs ahead of the render, so consecutive pointer moves build on
+  // each other without reading state inside an updater.
+  const fogRef = useRef(scene.fog);
+  if (!paintingRef.current) fogRef.current = scene.fog;
+  const fogStrokeDirtyRef = useRef(false);
+  // Cells flipped since the last live frame went out, and the numbering of
+  // this stroke's frames (fogStream.js).
+  const fogDeltaRef = useRef({ stroke: null, seq: 0, on: [], off: [] });
+  // Receiving side: where each remote painter's stroke has got to.
+  const remoteFogStreamsRef = useRef(new Map());
   const [paintMode, setPaintMode] = useState('select');
   const [brushSize, setBrushSize] = useState(3);
   const [activeLayer, setActiveLayer] = useState('tokens');
@@ -550,6 +571,18 @@ export default function SceneEditor({
       return;
     }
 
+    // A live painting frame: only the cells it flipped. Applied in order; a
+    // gap waits for the stroke's final snapshot instead of guessing.
+    if (payload.fogDelta) {
+      if (paintingRef.current) return;
+      if (!acceptFogDelta(remoteFogStreamsRef.current, payload.actor, payload.fogDelta)) return;
+      onSceneChange((current) => {
+        const fog = applyFogDelta(current.fog, payload.fogDelta);
+        return fog && fog !== current.fog ? { ...current, fog } : current;
+      });
+      return;
+    }
+
     // Fog strokes carry a bitset, not a position.
     if (payload.fog) {
       if (!paintingRef.current) onSceneChange((current) => ({ ...current, fog: normalizeFog(payload.fog) }));
@@ -559,7 +592,9 @@ export default function SceneEditor({
     // The ruler is shown to the table while it is dragged and stored nowhere,
     // exactly like the laser.
     if (payload.measure !== undefined) {
-      setRemoteMeasure(payload.measure || null);
+      // Stamped on arrival: the sweep below drops a ruler whose owner stopped
+      // refreshing it (a closed tab never sends its release).
+      setRemoteMeasure(payload.measure ? { ...payload.measure, receivedAt: Date.now() } : null);
       return;
     }
 
@@ -606,20 +641,29 @@ export default function SceneEditor({
   const handleRemotePresenterInspection = useCallback((inspection) => {
     setProjectorInspection(inspection);
   }, []);
-  const reconcilePersistentState = useCallback(async () => {
+  // Runs every 30 seconds on every device at the table, so it asks for
+  // versions first and reads a row (the scene with its fog, a sheet, a fight)
+  // only when that version moved. A reconnect also re-reads the strokes, which
+  // have no version to compare.
+  const reconcilePersistentState = useCallback(async ({ reason } = {}) => {
     // The picture is part of the scene as much as the row is. A load that
     // failed earlier is not visible in the data, so repair it here too —
     // unless one is still running, whose download this would only restart.
     if (!imageOnScreenRef.current && !imageLoadingRef.current) {
       setImageAttempt((attempt) => attempt + 1);
     }
+    const readSceneIfMoved = async () => {
+      const revision = await fetchSceneRevision(scene.id).catch(() => null);
+      if (revision === null || revision === sceneUpdatedAtRef.current) return null;
+      return fetchScene(scene.id).catch(() => null);
+    };
     const [freshScene] = await Promise.all([
-      fetchScene(scene.id).catch(() => null),
-      refreshContent(),
-      gmVitals.reload(),
+      readSceneIfMoved(),
+      reconcileContent({ fullDrawings: reason === 'subscribed' }),
+      gmVitals.reconcile(),
     ]);
     if (freshScene && !gridEditRef.current && !paintingRef.current) onSceneChange(freshScene);
-  }, [gmVitals, onSceneChange, refreshContent, scene.id]);
+  }, [gmVitals, onSceneChange, reconcileContent, scene.id]);
   const {
     sendDrag, sendCamera, sendPresenterState, sendPresenterInspection,
   } = useSceneLive({
@@ -631,6 +675,7 @@ export default function SceneEditor({
     onDrawingEvent: handleDrawingEvent,
     onCharacterEvent: handleCharacterEvent,
     cameraSourceId: role.isGm && !spectator ? presenterCameraSource : null,
+    cameraFollowers: projectorControlsOpen,
     followCameraSource: spectator ? spectatorSource : null,
     getCameraPose,
     onCameraPose: spectator ? handleRemoteCameraPose : undefined,
@@ -692,6 +737,9 @@ export default function SceneEditor({
   useEffect(() => {
     const timer = setInterval(() => {
       setGhosts((current) => pruneGhosts(current));
+      setRemoteMeasure((current) => (
+        current && Date.now() - current.receivedAt > REMOTE_MEASURE_TTL_MS ? null : current
+      ));
       // A laser nobody is holding any more: same sweep, shorter patience,
       // because a stale dot reads as a live one.
       setLasers((current) => {
@@ -845,22 +893,40 @@ export default function SceneEditor({
 
   // Painting mirrors the token drag: every stroke frame goes out on broadcast,
   // and the database sees one write when the brush lifts.
+  //
+  // The next fog is worked out from `fogRef` before any state is set: state
+  // updaters stay pure (React may run them twice), and a stroke over cells
+  // already in the wanted state sends and stores nothing at all.
+  //
+  // Live frames carry only the cells flipped since the previous frame, not the
+  // whole bitset; the full fog goes out once, when the brush lifts.
   const handlePaint = useCallback((cells, revealed) => {
+    if (!paintingRef.current) {
+      fogDeltaRef.current = { stroke: newFogStroke(), seq: 0, on: [], off: [] };
+    }
     paintingRef.current = true;
-    onSceneChange((current) => {
-      const fog = setCells(current.fog, cells, revealed);
-      if (!fog) return current;
-      const now = Date.now();
-      if (now - fogBroadcastRef.current >= FOG_BROADCAST_MS) {
-        fogBroadcastRef.current = now;
-        sendDrag({ fog });
-      }
-      return { ...current, fog };
-    });
+    const { fog, changed } = applyCells(fogRef.current, cells, revealed);
+    if (!fog || !changed.length) return;
+    fogRef.current = fog;
+    fogStrokeDirtyRef.current = true;
+    onSceneChange((current) => ({ ...current, fog }));
+    const pending = fogDeltaRef.current;
+    (revealed ? pending.on : pending.off).push(...changed);
+    const now = Date.now();
+    if (now - fogBroadcastRef.current >= FOG_BROADCAST_MS) {
+      fogBroadcastRef.current = now;
+      const fogDeltaFrame = { stroke: pending.stroke, seq: pending.seq, ...fogDelta(fog, pending.on, pending.off) };
+      pending.seq += 1;
+      pending.on = [];
+      pending.off = [];
+      sendDrag({ fogDelta: fogDeltaFrame });
+    }
   }, [onSceneChange, sendDrag]);
 
   const commitFog = useCallback((fog) => {
     paintingRef.current = false;
+    // The snapshot below carries every cell; frames still pending are moot.
+    fogDeltaRef.current = { stroke: null, seq: 0, on: [], off: [] };
     sendDrag({ fog });
     updateScene(scene.id, { fog }).catch((cause) => {
       notify('error', cause?.message || 'Could not save the fog.');
@@ -868,36 +934,37 @@ export default function SceneEditor({
   }, [notify, scene.id, sendDrag]);
 
   const handlePaintEnd = useCallback(() => {
-    onSceneChange((current) => {
-      commitFog(current.fog);
-      return current;
-    });
-  }, [commitFog, onSceneChange]);
+    paintingRef.current = false;
+    if (!fogStrokeDirtyRef.current) return;
+    fogStrokeDirtyRef.current = false;
+    commitFog(fogRef.current);
+  }, [commitFog]);
 
   // Sized from the map, not from a constant: a fixed grid left the far side of
   // a large image permanently uncovered, which is worse than no fog at all.
   const handleEnableFog = useCallback(() => {
     const { cols, rows } = fogCells;
     const fog = createFog(cols, rows);
+    fogRef.current = fog;
     onSceneChange({ ...scene, fog });
     setPaintMode('reveal');
     commitFog(fog);
   }, [commitFog, fogCells, onSceneChange, scene]);
 
   const handleFogAll = useCallback((revealed) => {
-    onSceneChange((current) => {
-      // Covering everything means everything: if the map grew, or the grid was
-      // recalibrated finer, the old fog no longer reaches the edges and is
-      // rebuilt at the current size rather than leaving a bright margin.
-      const tooSmall = current.fog
-        && (current.fog.cols < fogCells.cols || current.fog.rows < fogCells.rows);
-      const fog = revealed
-        ? revealAll(current.fog)
-        : (tooSmall ? createFog(fogCells.cols, fogCells.rows) : hideAll(current.fog));
-      if (!fog) return current;
-      commitFog(fog);
-      return { ...current, fog };
-    });
+    const current = fogRef.current;
+    // Covering everything means everything: if the map grew, or the grid was
+    // recalibrated finer, the old fog no longer reaches the edges and is
+    // rebuilt at the current size rather than leaving a bright margin.
+    const tooSmall = current
+      && (current.cols < fogCells.cols || current.rows < fogCells.rows);
+    const fog = revealed
+      ? revealAll(current)
+      : (tooSmall ? createFog(fogCells.cols, fogCells.rows) : hideAll(current));
+    if (!fog || sameFog(fog, current)) return;
+    fogRef.current = fog;
+    onSceneChange((scene) => ({ ...scene, fog }));
+    commitFog(fog);
   }, [commitFog, fogCells, onSceneChange]);
 
   // The stroke is drawn locally as it happens; this is the single write when the

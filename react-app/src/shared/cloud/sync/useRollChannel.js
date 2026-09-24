@@ -35,7 +35,11 @@ function acquire(topic, account, privateChannel, online) {
       });
       channel.on('broadcast', { event: 'roll' }, ({ payload }) => receive(payload));
       channel.subscribe();
-    } catch (_) { channel = null; }
+    } catch (_) {
+      // Half-built: take it off the socket rather than leave it joined.
+      try { if (channel) Promise.resolve(supabase.removeChannel(channel)).catch(() => {}); } catch (__) {}
+      channel = null;
+    }
   }
   const transport = {
     listeners,

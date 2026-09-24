@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ThemeProvider } from '@mui/material';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeAll, vi } from 'vitest';
+import { afterEach, beforeAll, vi } from 'vitest';
 import SceneViewport from '../../../../../src/pages/vtt/map/SceneViewport.jsx';
 import TokenMenu from '../../../../../src/pages/vtt/tokens/TokenMenu.jsx';
 import { theme } from '../../../../../src/app/theme.js';
@@ -1516,4 +1516,93 @@ test('a replacement picture is framed from its prepared dimensions before paint'
   } finally {
     rectSpy.mockRestore();
   }
+});
+
+describe('shared ruler traffic', () => {
+  const renderRuler = (onMeasure, paintMode = 'measure') => render(
+    <SceneViewport
+      scene={{ grid: { size: 50, offsetX: 0, offsetY: 0, visible: false }, playArea: null }}
+      imageUrl={null}
+      tokens={[]}
+      snap
+      canMove={() => true}
+      fog={null}
+      paintMode={paintMode}
+      measureShape="line"
+      feetPerCellForRuler={5}
+      onMeasure={onMeasure}
+      drawings={[]}
+      lasers={[]}
+      rollBubbles={[]}
+      diceThrows={[]}
+    />,
+  );
+  const surface = () => screen.getByText('Upload a map image to start building this scene.').parentElement;
+
+  afterEach(() => { vi.useRealTimers(); });
+
+  test('a fast drag is throttled, ends on its last position, and release clears it', () => {
+    vi.useFakeTimers();
+    const onMeasure = vi.fn();
+    renderRuler(onMeasure);
+    fireEvent.pointerDown(surface(), { button: 0, clientX: 10, clientY: 10, pointerId: 3 });
+    for (let x = 20; x <= 400; x += 10) {
+      fireEvent.pointerMove(surface(), { clientX: x, clientY: 10, pointerId: 3 });
+      act(() => { vi.advanceTimersByTime(4); });
+    }
+    act(() => { vi.advanceTimersByTime(100); });
+    const shown = onMeasure.mock.calls.map(([value]) => value);
+    // 39 pointer moves in ~160ms: a handful of messages, not 39.
+    expect(shown.length).toBeLessThanOrEqual(5);
+    expect(shown.at(-1).to.x).toBeCloseTo(400 / 50, 1);
+
+    fireEvent.pointerUp(surface(), { clientX: 400, clientY: 10, pointerId: 3 });
+    expect(onMeasure).toHaveBeenLastCalledWith(null);
+  });
+
+  test('a click with the ruler sends nothing, and a pointer cancel still clears a shown ruler', () => {
+    const onMeasure = vi.fn();
+    renderRuler(onMeasure);
+    fireEvent.pointerDown(surface(), { button: 0, clientX: 10, clientY: 10, pointerId: 4 });
+    fireEvent.pointerUp(surface(), { clientX: 10, clientY: 10, pointerId: 4 });
+    expect(onMeasure).not.toHaveBeenCalled();
+
+    fireEvent.pointerDown(surface(), { button: 0, clientX: 10, clientY: 10, pointerId: 5 });
+    fireEvent.pointerMove(surface(), { clientX: 200, clientY: 10, pointerId: 5 });
+    fireEvent.pointerCancel(surface(), { pointerId: 5 });
+    expect(onMeasure).toHaveBeenLastCalledWith(null);
+  });
+
+  test('changing tool or closing the map mid-measure clears it for everyone', async () => {
+    const onMeasure = vi.fn();
+    const { rerender, unmount } = renderRuler(onMeasure);
+    fireEvent.pointerDown(surface(), { button: 0, clientX: 10, clientY: 10, pointerId: 6 });
+    fireEvent.pointerMove(surface(), { clientX: 200, clientY: 10, pointerId: 6 });
+    expect(onMeasure).toHaveBeenLastCalledWith(expect.objectContaining({ shape: 'line' }));
+    rerender(
+      <SceneViewport
+        scene={{ grid: { size: 50, offsetX: 0, offsetY: 0, visible: false }, playArea: null }}
+        imageUrl={null} tokens={[]} snap canMove={() => true} fog={null}
+        paintMode="select" measureShape="line" feetPerCellForRuler={5} onMeasure={onMeasure}
+        drawings={[]} lasers={[]} rollBubbles={[]} diceThrows={[]}
+      />,
+    );
+    expect(onMeasure).toHaveBeenLastCalledWith(null);
+    const calls = onMeasure.mock.calls.length;
+
+    rerender(
+      <SceneViewport
+        scene={{ grid: { size: 50, offsetX: 0, offsetY: 0, visible: false }, playArea: null }}
+        imageUrl={null} tokens={[]} snap canMove={() => true} fog={null}
+        paintMode="measure" measureShape="line" feetPerCellForRuler={5} onMeasure={onMeasure}
+        drawings={[]} lasers={[]} rollBubbles={[]} diceThrows={[]}
+      />,
+    );
+    fireEvent.pointerDown(surface(), { button: 0, clientX: 10, clientY: 10, pointerId: 7 });
+    fireEvent.pointerMove(surface(), { clientX: 300, clientY: 10, pointerId: 7 });
+    // Inside the throttle window of the last send: it goes out as the trailing one.
+    await waitFor(() => expect(onMeasure.mock.calls.length).toBe(calls + 1));
+    unmount();
+    expect(onMeasure).toHaveBeenLastCalledWith(null);
+  });
 });

@@ -4,6 +4,7 @@ import { supabase } from '../../cloud/supabaseClient.js';
 import {
   cameraMessage, normalizeCameraSource, presenterInspectionMessage, presenterStateMessage,
 } from './cameraSync.js';
+import { coalesceReturns } from '../../cloud/sync/returnGate.js';
 
 // One channel per scene carries both streams: committed row changes for tokens
 // and the scene itself, plus ephemeral drag previews.
@@ -17,6 +18,15 @@ const CAMERA_EVENT = 'camera-view';
 const CAMERA_REQUEST_EVENT = 'camera-request';
 const PRESENTER_STATE_EVENT = 'presenter-state';
 const PRESENTER_INSPECTION_EVENT = 'presenter-inspection';
+// A projector following a presenter says so now and then. The presenter only
+// streams its camera (up to 20 frames a second while panning) while someone
+// is listening — otherwise every pan went to every player for nothing.
+const FOLLOWER_EVENT = 'camera-follower';
+// Sent by a presenter whose channel (re)subscribed — a GM refresh — so an
+// already-open projector answers at once instead of at its next heartbeat.
+const FOLLOWER_QUERY_EVENT = 'camera-follower-query';
+export const FOLLOWER_HEARTBEAT_MS = 30_000;
+export const FOLLOWER_TTL_MS = 75_000;
 const CAMERA_SEND_MS = 50;
 const SCENE_RECONCILE_MS = 30_000;
 
@@ -29,6 +39,9 @@ export function useSceneLive({
   onDrawingEvent,
   onCharacterEvent,
   cameraSourceId,
+  // True while this presenter has opened a projector itself: stream the camera
+  // even before that window has announced itself.
+  cameraFollowers = false,
   followCameraSource,
   getCameraPose,
   onCameraPose,
@@ -41,6 +54,7 @@ export function useSceneLive({
   const { cloudEnabled, status, user } = useAuth();
   const channelRef = useRef(null);
   const cameraSendRef = useRef({ last: 0, timer: null, pending: null });
+  const followerSeenRef = useRef(0);
   const handlers = useRef({});
   handlers.current = {
     onTokenEvent,
@@ -49,6 +63,7 @@ export function useSceneLive({
     onDrawingEvent,
     onCharacterEvent,
     cameraSourceId,
+    cameraFollowers,
     followCameraSource,
     getCameraPose,
     onCameraPose,
@@ -178,6 +193,7 @@ export function useSceneLive({
           const source = normalizeCameraSource(handlers.current.cameraSourceId);
           const requested = normalizeCameraSource(message?.payload?.source);
           if (source && requested === source) {
+            followerSeenRef.current = Date.now();
             emitCamera(source, handlers.current.getCameraPose?.());
             emitPresenterState(source, handlers.current.getPresenterState?.());
             emitPresenterInspection(source, handlers.current.getPresenterInspection?.());
@@ -185,9 +201,29 @@ export function useSceneLive({
         } catch (_) {}
       });
 
-      const requestReconcile = () => {
+      // The reason lets the caller decide how thorough to be: a reconnect may
+      // have missed anything, a periodic tick only needs a version check.
+      channel.on('broadcast', { event: FOLLOWER_QUERY_EVENT }, (message) => {
         try {
-          Promise.resolve(handlers.current.onReconcile?.()).catch(() => {});
+          const followed = normalizeCameraSource(handlers.current.followCameraSource);
+          if (followed && normalizeCameraSource(message?.payload?.source) === followed) {
+            channel.send({ type: 'broadcast', event: FOLLOWER_EVENT, payload: { source: followed } });
+          }
+        } catch (_) {}
+      });
+
+      channel.on('broadcast', { event: FOLLOWER_EVENT }, (message) => {
+        try {
+          const source = normalizeCameraSource(handlers.current.cameraSourceId);
+          if (source && normalizeCameraSource(message?.payload?.source) === source) {
+            followerSeenRef.current = Date.now();
+          }
+        } catch (_) {}
+      });
+
+      const requestReconcile = (reason) => {
+        try {
+          Promise.resolve(handlers.current.onReconcile?.({ reason })).catch(() => {});
         } catch (_) {}
       };
 
@@ -195,7 +231,7 @@ export function useSceneLive({
         if (state !== 'SUBSCRIBED') return;
         // A reconnect resumes future events but does not replay changes missed
         // while the socket was down. Pull the persistent scene snapshot now.
-        requestReconcile();
+        requestReconcile('subscribed');
         const followedSource = normalizeCameraSource(handlers.current.followCameraSource);
         if (followedSource) {
           channel.send({ type: 'broadcast', event: CAMERA_REQUEST_EVENT, payload: { source: followedSource } });
@@ -205,6 +241,7 @@ export function useSceneLive({
         // as soon as the replacement channel is ready.
         const presenterSource = normalizeCameraSource(handlers.current.cameraSourceId);
         if (presenterSource) {
+          channel.send({ type: 'broadcast', event: FOLLOWER_QUERY_EVENT, payload: { source: presenterSource } });
           emitCamera(presenterSource, handlers.current.getCameraPose?.());
           emitPresenterState(presenterSource, handlers.current.getPresenterState?.());
           emitPresenterInspection(presenterSource, handlers.current.getPresenterInspection?.());
@@ -212,22 +249,40 @@ export function useSceneLive({
       });
       channelRef.current = channel;
 
+      // Focus and visibilitychange arrive together when a tab comes back: one
+      // recovery, not two.
+      const reconcileOnReturn = coalesceReturns((reason) => requestReconcile(reason));
       const reconcileWhenVisible = () => {
-        if (document.visibilityState === 'visible') requestReconcile();
+        if (document.visibilityState === 'visible') reconcileOnReturn('visible');
       };
-      const timer = window.setInterval(requestReconcile, SCENE_RECONCILE_MS);
-      window.addEventListener('online', requestReconcile);
-      window.addEventListener('focus', requestReconcile);
+      const reconcileOnTimer = () => requestReconcile('interval');
+      const reconcileOnline = () => requestReconcile('online');
+      const reconcileOnFocus = () => reconcileOnReturn('focus');
+      const followerTimer = window.setInterval(() => {
+        try {
+          const followed = normalizeCameraSource(handlers.current.followCameraSource);
+          if (followed) channel.send({ type: 'broadcast', event: FOLLOWER_EVENT, payload: { source: followed } });
+        } catch (_) {}
+      }, FOLLOWER_HEARTBEAT_MS);
+      const timer = window.setInterval(reconcileOnTimer, SCENE_RECONCILE_MS);
+      window.addEventListener('online', reconcileOnline);
+      window.addEventListener('focus', reconcileOnFocus);
       document.addEventListener('visibilitychange', reconcileWhenVisible);
 
       cleanupReconcile = () => {
         window.clearInterval(timer);
-        window.removeEventListener('online', requestReconcile);
-        window.removeEventListener('focus', requestReconcile);
+        window.clearInterval(followerTimer);
+        window.removeEventListener('online', reconcileOnline);
+        window.removeEventListener('focus', reconcileOnFocus);
         document.removeEventListener('visibilitychange', reconcileWhenVisible);
       };
     } catch (_) {
       channelRef.current = null;
+      cleanupReconcile();
+      // A channel that failed half-way through setup must not linger.
+      try {
+        if (channel) supabase.removeChannel(channel);
+      } catch (__) {}
       return undefined;
     }
 
@@ -262,6 +317,9 @@ export function useSceneLive({
   }, [user?.id]);
 
   const sendCamera = useCallback((pose) => {
+    const listened = handlers.current.cameraFollowers
+      || Date.now() - followerSeenRef.current < FOLLOWER_TTL_MS;
+    if (!listened) return;
     const payload = cameraMessage(cameraSourceId, pose);
     if (!payload) return;
     const state = cameraSendRef.current;

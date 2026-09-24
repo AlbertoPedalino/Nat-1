@@ -20,6 +20,7 @@ import {
   zoomAt,
 } from '../../../shared/vtt/map/geometry.js';
 import { measureLabel, movementLabel } from '../../../shared/vtt/map/measure.js';
+import { createMeasurePublisher } from '../../../shared/vtt/map/measureSync.js';
 import { suppressGestureSelection } from '../../../shared/vtt/map/gestureSelection.js';
 import { movedPoints } from '../../../shared/vtt/map/drawing.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
@@ -288,6 +289,12 @@ export default function SceneViewport({
   const [controlsOpen, setControlsOpen] = useState(false);
   const [floatingSheetOpen, setFloatingSheetOpen] = useState(false);
   const [measure, setMeasure] = useState(null);
+  const onMeasureRef = useRef(onMeasure);
+  onMeasureRef.current = onMeasure;
+  const measurePublisherRef = useRef(null);
+  if (!measurePublisherRef.current) {
+    measurePublisherRef.current = createMeasurePublisher({ send: (value) => onMeasureRef.current?.(value) });
+  }
   // Where the cursor is, so a brush can show what it is about to cover. Tracked
   // only while a brush is in hand: a state update per mouse move is not worth
   // paying for while merely moving pieces around.
@@ -578,6 +585,18 @@ export default function SceneViewport({
     return () => host.removeEventListener('wheel', handleWheel);
   }, [handleWheel]);
 
+  // Putting the ruler down — another tool, or the map closing — takes it off
+  // everyone else's screen too.
+  useEffect(() => {
+    if (paintMode === 'measure') return;
+    if (dragRef.current?.kind === 'measure') {
+      dragRef.current = null;
+      setMeasure(null);
+    }
+    measurePublisherRef.current.finish();
+  }, [paintMode]);
+  useEffect(() => () => measurePublisherRef.current.finish(), []);
+
   // A stationary pointer is still pointing. Refresh the broadcast while the
   // laser remains selected so its safety TTL only removes abandoned dots, not
   // a dot deliberately held over one square. Switching tools clears it at once.
@@ -741,7 +760,7 @@ export default function SceneViewport({
     setRotate(null);
     setMarkDrag(null);
     setMeasure(null);
-    onMeasure?.(null);
+    measurePublisherRef.current.finish();
     strokeRef.current = [];
     setStrokeTick((tick) => tick + 1);
     pinchRef.current = readPinch();
@@ -1070,8 +1089,9 @@ export default function SceneViewport({
       };
       setMeasure(next);
       // Shown to the table as it is dragged, like the laser: measuring out loud
-      // is half the point of measuring.
-      onMeasure?.(next);
+      // is half the point of measuring. Locally every move redraws; the table
+      // gets a throttled, de-duplicated stream (measureSync.js).
+      measurePublisherRef.current.update(next);
       return;
     }
 
@@ -1202,7 +1222,7 @@ export default function SceneViewport({
     // The ruler disappears on release; nothing is written down.
     if (state?.kind === 'measure') {
       setMeasure(null);
-      onMeasure?.(null);
+      measurePublisherRef.current.finish();
       return;
     }
 
