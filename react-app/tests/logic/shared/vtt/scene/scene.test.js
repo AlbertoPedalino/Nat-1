@@ -161,7 +161,7 @@ test('map object patches store only safe Lucide-style keys and normalized rotati
   assert.deepEqual(toTokenPatch({ rotation: 450 }), { rotation: 90 });
 });
 
-// Mirrors the RLS update policy in supabase/vtt.sql. If one changes, this test
+// Mirrors the RLS update policy in supabase/06_vtt.sql. If one changes, this test
 // is the reminder that the other has to follow.
 test('only the GM moves anything; a player moves their own character token', () => {
   const mine = { id: 't1', layer: 'tokens', characterId: 'char-mine' };

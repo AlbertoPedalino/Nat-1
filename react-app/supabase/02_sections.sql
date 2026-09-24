@@ -1,5 +1,5 @@
 -- ============================================================================
--- GM Board — personal cloud sections (run after schema.sql)
+-- GM Board — personal cloud sections (run after 01_schema.sql)
 -- Safe to re-run. These documents are owner-only; global GM access is excluded.
 -- ============================================================================
 

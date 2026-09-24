@@ -12,7 +12,7 @@ import { normalizeConditions } from './conditions.js';
 //
 // To sync a NEW field: add ONE descriptor here, and add its `data` key to the
 // commit_character_vitals allowlist and preservation trigger in
-// supabase/character_vitals.sql (a test asserts the
+// supabase/13_character_vitals.sql (a test asserts the
 // two never drift apart).
 //
 //   data      - key name in the character `data` blob

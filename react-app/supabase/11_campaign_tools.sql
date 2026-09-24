@@ -1,4 +1,4 @@
--- Run after sections.sql, campaigns.sql and hexcrawl.sql.
+-- Run after 02_sections.sql, 03_campaigns.sql and 10_hexcrawl.sql.
 -- Campaigns participate in tool groups directly. Removing the hexcrawl board
 -- must never remove the campaign's Encounter Builder or DM Screen links.
 -- Migrate existing board-mediated links once. Do not restore an explicitly

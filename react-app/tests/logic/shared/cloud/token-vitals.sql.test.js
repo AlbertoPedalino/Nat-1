@@ -60,7 +60,7 @@ async function setup() {
       $$ select true $$;
     create function map_token_campaign(p uuid) returns uuid language sql stable security definer as
       $$ select s.campaign_id from map_tokens t join map_scenes s on s.id = t.scene_id where t.id = p $$;
-    -- The same GM-only policy as vtt.sql; players read every visible piece.
+    -- The same GM-only policy as 06_vtt.sql; players read every visible piece.
     alter table map_token_secrets enable row level security;
     create policy map_token_secrets_all on map_token_secrets
       for all using (is_campaign_gm(map_token_campaign(token_id)))
@@ -69,7 +69,7 @@ async function setup() {
     grant select, insert, update on map_tokens, map_scenes to authenticated;
     grant select, insert, update, delete on map_token_secrets to authenticated;
   `);
-  await db.exec(await sql('encounter_fights.sql'));
+  await db.exec(await sql('08_encounter_fights.sql'));
   await db.exec('grant select, insert, update, delete on encounter_fights to authenticated');
   await db.query(
     "insert into encounter_fights (id, instance_id, owner, name, fight) values ('f1', 'inst', $1, 'Fight', $2)",
@@ -86,15 +86,15 @@ async function setup() {
       ('${ORPHAN}', '${SCENE}', 'inst:gone:m9', 7, 10, true);
     insert into map_token_secrets (token_id, label) values ('${LEGACY_HIDDEN}', 'Mimic');
   `);
-  // The player mark RPCs come from vtt.sql, defined here before the migration:
+  // The player mark RPCs come from 06_vtt.sql, defined here before the migration:
   // they must find its forwarding function at call time, whatever the order.
-  const vtt = await sql('vtt.sql');
+  const vtt = await sql('06_vtt.sql');
   for (const name of ['set_token_conditions', 'set_token_effects']) {
     const start = vtt.indexOf(`create or replace function public.${name}(`);
     const end = vtt.indexOf('$$;', vtt.indexOf('as $$', start)) + 3;
     await db.exec(vtt.slice(start, end));
   }
-  const migration = await sql('encounter_fight_vitals.sql');
+  const migration = await sql('14_token_vitals.sql');
   await db.exec(migration);
   await db.exec(migration); // safe to rerun: nothing is lost the second time
   return db;

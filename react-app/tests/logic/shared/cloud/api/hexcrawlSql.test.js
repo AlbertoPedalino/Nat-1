@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs';
 // in CI runs Postgres. These assertions guard the two claims the client is built
 // on: an unrevealed hex never reaches a player, and the board's own blob is not
 // where the shared clock lives.
-const sql = readFileSync(new URL('../../../../../supabase/hexcrawl.sql', import.meta.url), 'utf8').toLowerCase();
+const sql = readFileSync(new URL('../../../../../supabase/10_hexcrawl.sql', import.meta.url), 'utf8').toLowerCase();
 
 test('the hexcrawl tables exist with RLS and updated_at triggers', () => {
   for (const table of ['campaign_hexcrawl', 'campaign_hexcrawl_log', 'map_hex_cells']) {

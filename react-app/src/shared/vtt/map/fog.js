@@ -6,7 +6,7 @@
 // concurrent writer and a single blob on the scene row is the right shape.
 //
 // This is presentation, not security — the map image itself still reaches every
-// client. See the header of supabase/vtt.sql.
+// client. See the header of supabase/06_vtt.sql.
 
 const MAX_SIDE = 1200;
 

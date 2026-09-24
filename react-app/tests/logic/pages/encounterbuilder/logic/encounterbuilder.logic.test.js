@@ -193,9 +193,9 @@ test('quest choices are unique, trimmed, and alphabetical', () => {
 });
 
 test('synced field set matches the commit_character_vitals SQL allowlist', () => {
-  const sql = readFileSync(new URL('../../../../../supabase/character_vitals.sql', import.meta.url), 'utf8');
+  const sql = readFileSync(new URL('../../../../../supabase/13_character_vitals.sql', import.meta.url), 'utf8');
   const match = sql.match(/allowed\s+text\[\]\s*:=\s*array\[([^\]]+)\]/);
-  assert.ok(match, 'could not find the allowed[] array in character_vitals.sql');
+  assert.ok(match, 'could not find the allowed[] array in 13_character_vitals.sql');
   const sqlKeys = match[1].split(',').map((part) => part.trim().replace(/^'|'$/g, ''));
   assert.deepEqual([...sqlKeys].sort(), [...SYNCED_DATA_KEYS].sort());
 });

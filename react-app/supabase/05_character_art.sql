@@ -1,5 +1,5 @@
 -- ============================================================================
--- GM Board — Character portraits. Run this AFTER campaigns.sql.
+-- GM Board — Character portraits. Run this AFTER 03_campaigns.sql.
 -- SQL Editor > New query > paste all > Run.
 --
 -- A portrait is a small square picture a player uploads for their character.
@@ -23,7 +23,7 @@ on conflict (id) do nothing;
 
 -- 2) HELPERS ------------------------------------------------------------------
 -- A folder name is text; a policy needs it as a uuid, and a folder that is not
--- one must fail the check rather than the query. Repeated from vtt.sql so this
+-- one must fail the check rather than the query. Repeated from 06_vtt.sql so this
 -- file can be run on its own.
 create or replace function public.uuid_or_null(p_value text)
 returns uuid

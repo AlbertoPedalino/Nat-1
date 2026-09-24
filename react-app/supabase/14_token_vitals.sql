@@ -1,7 +1,7 @@
 -- Token health: authoritative sources and the public projection.
 --
--- Run AFTER vtt.sql and encounter_fights.sql. Safe to re-run, in any later order:
--- the player mark RPCs in vtt.sql find forward_token_marks at call time.
+-- Run AFTER 06_vtt.sql and 08_encounter_fights.sql. Safe to re-run, in any later order:
+-- the player mark RPCs in 06_vtt.sql find forward_token_marks at call time.
 --
 -- Real hit points live only in GM-only tables:
 --   * a monster linked through `source_ref = <instance>:<fight>:<combatant>`

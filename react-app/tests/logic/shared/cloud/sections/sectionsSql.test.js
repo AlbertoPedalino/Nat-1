@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-const sql = readFileSync(new URL('../../../../../supabase/sections.sql', import.meta.url), 'utf8').toLowerCase();
+const sql = readFileSync(new URL('../../../../../supabase/02_sections.sql', import.meta.url), 'utf8').toLowerCase();
 
 test('sections SQL creates all tables, indexes, and enables RLS', () => {
   for (const table of ['boards', 'encounters', 'dm_screens']) {

@@ -5,7 +5,7 @@ import { createDefaultCoreState } from '../../../pages/gmboard/state/defaultStat
 import { createDefaultTables } from '../../../pages/gmboard/tables/defaultTables.js';
 
 // Cloud side of the hexcrawl. Three stores, split by how often each is written
-// (see supabase/hexcrawl.sql): the clock is one row per campaign, the log is
+// (see supabase/10_hexcrawl.sql): the clock is one row per campaign, the log is
 // append-only, and every hex is its own row so a click is an upsert and not a
 // read-modify-write of the whole map.
 //

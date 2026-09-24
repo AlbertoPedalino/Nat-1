@@ -14,7 +14,7 @@ test('campaign links survive board removal and migration reruns preserve explici
       insert into boards values ('board', 'gm', 'link_party'), ('solo', 'gm', null), ('foreign', 'other', 'link_private');
       insert into campaigns values ('campaign', 'gm', 'board'), ('solo-campaign', 'gm', 'solo'), ('foreign-campaign', 'gm', 'foreign');
     `);
-    const migration = await readFile(new URL('../../../../../supabase/campaign_tools.sql', import.meta.url), 'utf8');
+    const migration = await readFile(new URL('../../../../../supabase/11_campaign_tools.sql', import.meta.url), 'utf8');
     await db.exec(migration);
     const read = async (id) => (await db.query('select * from campaigns where id = $1', [id])).rows[0];
     assert.equal((await read('campaign')).link_group_id, 'link_party');

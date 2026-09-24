@@ -1,4 +1,4 @@
--- Apply after campaigns.sql and vtt.sql. Private roll events are broadcast
+-- Apply after 03_campaigns.sql and 06_vtt.sql. Private roll events are broadcast
 -- only; no roll history is stored. Authorization follows campaign ownership.
 -- https://supabase.com/docs/guides/realtime/authorization
 drop policy if exists "gm_rolls_receive" on realtime.messages;

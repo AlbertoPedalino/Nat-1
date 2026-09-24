@@ -1,4 +1,4 @@
--- GM Board — Scene atmosphere. Run AFTER vtt.sql. Safe to re-run.
+-- GM Board — Scene atmosphere. Run AFTER 06_vtt.sql. Safe to re-run.
 -- Replaces the legacy `weather` column; its old values are intentionally
 -- discarded the first time this runs.
 

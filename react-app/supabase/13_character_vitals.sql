@@ -1,4 +1,4 @@
--- Run AFTER combat_sync.sql, BEFORE deploying the matching frontend.
+-- Run AFTER 04_characters_realtime.sql, BEFORE deploying the matching frontend.
 -- Existing characters retain their HP. Missing HP still means full health.
 alter table public.characters add column if not exists row_revision bigint not null default 0;
 alter table public.characters add column if not exists vitals_revision bigint not null default 0;

@@ -8,7 +8,7 @@
 // encounter must agree on, so it is a synced vital; an effect is one GM's
 // ruling for one fight, with no sheet-side meaning. It therefore lives on the
 // combatant and in the fight snapshot only, and the character health allowlist
-// in supabase/character_vitals.sql is untouched. Adding one here does NOT mean
+// in supabase/13_character_vitals.sql is untouched. Adding one here does NOT mean
 // adding a key to SYNCED_VITALS.
 //
 // Expiry is manual on purpose. A duration is a label the GM reads, not a timer:

@@ -1,6 +1,6 @@
 -- ============================================================================
--- GM Board — Virtual tabletop (maps + tokens). Run AFTER schema.sql and
--- campaigns.sql. Safe to re-run.
+-- GM Board — Virtual tabletop (maps + tokens). Run AFTER 01_schema.sql and
+-- 03_campaigns.sql. Safe to re-run.
 -- SQL Editor > New query > paste all > Run.
 --
 -- Unlike boards/encounters/dm_screens, this feature is cloud-only: there is no
@@ -527,7 +527,7 @@ begin
   end if;
 
   -- On a piece linked to a cloud fight the mark belongs to its combatant
-  -- (encounter_fight_vitals.sql); the piece shows it by projection. Looked up
+  -- (14_token_vitals.sql); the piece shows it by projection. Looked up
   -- at call time, so the order the scripts were run in does not matter.
   if token.source_ref is not null
      and to_regprocedure('public.forward_token_marks(public.map_tokens,jsonb)') is not null then

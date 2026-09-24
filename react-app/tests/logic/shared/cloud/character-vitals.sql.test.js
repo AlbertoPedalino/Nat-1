@@ -25,7 +25,7 @@ test('character health: revision check, stale sheet saves, legacy ledger removal
       create function commit_character_vitals(p_id text, p_revision bigint, p_operation uuid, p_patch jsonb)
         returns jsonb language sql as $$ select '{}'::jsonb $$;
     `);
-    const migration = await readFile(new URL('../../../../supabase/character_vitals.sql', import.meta.url), 'utf8');
+    const migration = await readFile(new URL('../../../../supabase/13_character_vitals.sql', import.meta.url), 'utf8');
     await db.exec(migration);
     await db.exec(migration); // safe to rerun in SQL Editor
 

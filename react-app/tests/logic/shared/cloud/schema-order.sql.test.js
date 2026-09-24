@@ -3,12 +3,8 @@ import assert from 'node:assert/strict';
 import { readFile, readdir } from 'node:fs/promises';
 import { PGlite } from '@electric-sql/pglite';
 
-// The documented setup order (CLOUD_SETUP.md, section 2).
-const ORDER = [
-  'schema.sql', 'sections.sql', 'campaigns.sql', 'combat_sync.sql', 'character-art.sql',
-  'vtt.sql', 'atmosphere.sql', 'encounter_fights.sql', 'dungeon.sql', 'hexcrawl.sql',
-  'campaign_tools.sql', 'rolls.sql', 'character_vitals.sql', 'encounter_fight_vitals.sql',
-];
+// The setup order is the file names: a two-digit prefix, run in name order
+// (CLOUD_SETUP.md, section 2).
 const DIR = new URL('../../../../supabase/', import.meta.url);
 
 // Minimal stand-ins for the schemas Supabase provides.
@@ -43,8 +39,13 @@ const REALTIME_TABLES = [
 ];
 
 test('every Supabase script is listed and the documented order builds the schema twice', async () => {
-  const files = (await readdir(DIR)).filter((name) => name.endsWith('.sql')).sort();
-  assert.deepEqual(files, [...ORDER].sort(), 'a new .sql file must be added to the setup order');
+  const ORDER = (await readdir(DIR)).filter((name) => name.endsWith('.sql')).sort();
+  const unnumbered = ORDER.filter((name) => !/^\d{2}_[a-z0-9_]+\.sql$/.test(name));
+  assert.deepEqual(unnumbered, [], 'every script needs a two-digit order prefix and a snake_case name');
+  const numbers = ORDER.map((name) => Number(name.slice(0, 2)));
+  assert.deepEqual(numbers, numbers.map((_, index) => index + 1), 'order prefixes must be 01, 02, … without gaps or repeats');
+  const documented = await readFile(new URL('../CLOUD_SETUP.md', DIR), 'utf8');
+  for (const name of ORDER) assert.ok(documented.includes(name), `${name} is missing from CLOUD_SETUP.md`);
 
   const db = new PGlite();
   try {

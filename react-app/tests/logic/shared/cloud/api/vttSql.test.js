@@ -6,8 +6,8 @@ import { readFileSync } from 'node:fs';
 // These assertions are the cheap guard against the file drifting away from the
 // guarantees the client assumes — above all that the GM layer is filtered by the
 // database, not by the UI.
-const sql = readFileSync(new URL('../../../../../supabase/vtt.sql', import.meta.url), 'utf8').toLowerCase();
-const atmosphereSql = readFileSync(new URL('../../../../../supabase/atmosphere.sql', import.meta.url), 'utf8').toLowerCase();
+const sql = readFileSync(new URL('../../../../../supabase/06_vtt.sql', import.meta.url), 'utf8').toLowerCase();
+const atmosphereSql = readFileSync(new URL('../../../../../supabase/07_atmosphere.sql', import.meta.url), 'utf8').toLowerCase();
 
 test('VTT SQL creates both tables, their indexes, RLS and updated_at triggers', () => {
   for (const table of ['map_scenes', 'map_tokens']) {

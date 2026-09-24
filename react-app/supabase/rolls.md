@@ -1,7 +1,7 @@
 # Campaign roll logs
 
-Apply `rolls.sql` in the Supabase SQL editor after `campaigns.sql` and
-`vtt.sql`. It grants the campaign GM access to private roll broadcasts;
+Apply `12_rolls.sql` in the Supabase SQL editor after `03_campaigns.sql` and
+`06_vtt.sql`. It grants the campaign GM access to private roll broadcasts;
 it creates no history table. Without these policies, hidden rolls still sync
 between tabs of the same browser/account, but cannot reach another device.
 Never fall back to the public channel for hidden rolls.

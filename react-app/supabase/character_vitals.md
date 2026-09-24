@@ -5,8 +5,8 @@ death saves and conditions. Encounter/fight/token snapshots are display caches.
 
 ## Deploy
 
-1. Run `character_vitals.sql` in the project's Supabase SQL Editor, after the
-   existing `schema.sql` and `combat_sync.sql`. It is safe to run again and
+1. Run `13_character_vitals.sql` in the project's Supabase SQL Editor, after the
+   existing `01_schema.sql` and `04_characters_realtime.sql`. It is safe to run again and
    retains every character's existing values.
 2. Deploy the matching frontend build.
 3. Open a character in two encounters, an embedded sheet and `/campaign-sheet`.

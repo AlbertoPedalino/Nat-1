@@ -1,13 +1,13 @@
 // Enemy vitals live in one place: the combatant inside its `encounter_fights`
 // row. The builder and the battle map both write them through
 // `commit_fight_combatant_vitals`; a linked map piece only displays a copy the
-// database derives from the fight (see supabase/encounter_fight_vitals.sql).
+// database derives from the fight (see supabase/14_token_vitals.sql).
 //
 // Everything here is pure: the callers own the requests and the state.
 
 import { fightWithTokenVitals, parseSourceRef } from './encounterSync.js';
 
-// Must match public.fight_monster_vital_keys() in encounter_fight_vitals.sql.
+// Must match public.fight_monster_vital_keys() in 14_token_vitals.sql.
 export const MONSTER_VITAL_KEYS = Object.freeze([
   'hpCurrent', 'hpMax', 'tempHP', 'maxHPBonus', 'activeConditions', 'activeEffects', 'isDead',
 ]);

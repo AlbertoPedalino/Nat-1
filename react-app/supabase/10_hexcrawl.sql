@@ -1,6 +1,6 @@
 -- ============================================================================
--- GM Board — Hexcrawl on the map. Run AFTER campaigns.sql, sections.sql and
--- vtt.sql. Safe to re-run.
+-- GM Board — Hexcrawl on the map. Run AFTER 03_campaigns.sql, 02_sections.sql and
+-- 06_vtt.sql. Safe to re-run.
 -- SQL Editor > New query > paste all > Run.
 --
 -- This file is the bridge between two things that were built apart: the GM Board

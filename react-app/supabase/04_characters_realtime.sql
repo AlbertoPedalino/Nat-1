@@ -1,5 +1,5 @@
 -- ============================================================================
--- GM Board — Live character sheets. Run this AFTER schema.sql. Safe to re-run.
+-- GM Board — Live character sheets. Run this AFTER 01_schema.sql. Safe to re-run.
 -- SQL Editor > New query > paste all > Run.
 --
 -- Adds `characters` to Supabase Realtime so open sheets, the encounter builder
@@ -7,7 +7,7 @@
 -- each connected client receives.
 --
 -- Character health (HP, temp HP, death saves, conditions) is written only
--- through commit_character_vitals in character_vitals.sql. The former
+-- through commit_character_vitals in 13_character_vitals.sql. The former
 -- patch_character_data RPC is retired: it is dropped here so existing
 -- databases do not keep an unused write path.
 -- ============================================================================

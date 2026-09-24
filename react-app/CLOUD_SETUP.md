@@ -10,27 +10,29 @@ the env vars the app runs 100% local (localStorage), exactly like before.
 
 ## 2. Create the tables
 Open **SQL Editor** → **New query**, paste the entire contents of each file
-below and **Run**, one query per file, **in this order**. Every file is safe to
-re-run; when a file changes, run it again on existing projects.
-`tests/logic/shared/cloud/schema-order.sql.test.js` applies this exact sequence
-twice to a local Postgres and fails if a new `.sql` file is missing from it.
+below and **Run**, one query per file, **in the order of their number prefix**.
+Every file is safe to re-run; when a file changes, run it again on existing
+projects. A new script takes the next number and a row in this table:
+`tests/logic/shared/cloud/schema-order.sql.test.js` applies the whole numbered
+sequence twice to a local Postgres and fails on a missing or repeated number,
+or on a script missing from this table.
 
 | # | File | What it adds |
 |---|------|--------------|
-| 1 | [`schema.sql`](supabase/schema.sql) | Profiles, characters, auth trigger |
-| 2 | [`sections.sql`](supabase/sections.sql) | GM Board, Encounter Builder and DM Screen saves (owner-only), linked-tool groups |
-| 3 | [`campaigns.sql`](supabase/campaigns.sql) | Campaigns, members, invite codes |
-| 4 | [`combat_sync.sql`](supabase/combat_sync.sql) | Realtime for character sheets (drops the retired `patch_character_data`) |
-| 5 | [`character-art.sql`](supabase/character-art.sql) | Private `character-art` portrait bucket |
-| 6 | [`vtt.sql`](supabase/vtt.sql) | Battle map: scenes, tokens, secrets, drawings, `map-images` bucket |
-| 7 | [`atmosphere.sql`](supabase/atmosphere.sql) | Scene atmosphere column |
-| 8 | [`encounter_fights.sql`](supabase/encounter_fights.sql) | One cloud row per encounter fight |
-| 9 | [`dungeon.sql`](supabase/dungeon.sql) | Dungeon rooms on scenes |
-| 10 | [`hexcrawl.sql`](supabase/hexcrawl.sql) | Hexcrawl cells, campaign clock and log |
-| 11 | [`campaign_tools.sql`](supabase/campaign_tools.sql) | Independent campaign tool links (migrates existing links once; rerunning keeps later unlinks) and the dungeon Encounter Builder selection |
-| 12 | [`rolls.sql`](supabase/rolls.sql) | Private realtime channels for shared rolls — see [`rolls.md`](supabase/rolls.md) |
-| 13 | [`character_vitals.sql`](supabase/character_vitals.sql) | Character health commands and revisions — see [`character_vitals.md`](supabase/character_vitals.md) |
-| 14 | [`encounter_fight_vitals.sql`](supabase/encounter_fight_vitals.sql) | Enemy health authority in fights, GM-only token HP, public HP projection |
+| 1 | [`01_schema.sql`](supabase/01_schema.sql) | Profiles, characters, auth trigger |
+| 2 | [`02_sections.sql`](supabase/02_sections.sql) | GM Board, Encounter Builder and DM Screen saves (owner-only), linked-tool groups |
+| 3 | [`03_campaigns.sql`](supabase/03_campaigns.sql) | Campaigns, members, invite codes |
+| 4 | [`04_characters_realtime.sql`](supabase/04_characters_realtime.sql) | Realtime for character sheets (drops the retired `patch_character_data`) |
+| 5 | [`05_character_art.sql`](supabase/05_character_art.sql) | Private `character-art` portrait bucket |
+| 6 | [`06_vtt.sql`](supabase/06_vtt.sql) | Battle map: scenes, tokens, secrets, drawings, `map-images` bucket |
+| 7 | [`07_atmosphere.sql`](supabase/07_atmosphere.sql) | Scene atmosphere column |
+| 8 | [`08_encounter_fights.sql`](supabase/08_encounter_fights.sql) | One cloud row per encounter fight |
+| 9 | [`09_dungeon.sql`](supabase/09_dungeon.sql) | Dungeon rooms on scenes |
+| 10 | [`10_hexcrawl.sql`](supabase/10_hexcrawl.sql) | Hexcrawl cells, campaign clock and log |
+| 11 | [`11_campaign_tools.sql`](supabase/11_campaign_tools.sql) | Independent campaign tool links (migrates existing links once; rerunning keeps later unlinks) and the dungeon Encounter Builder selection |
+| 12 | [`12_rolls.sql`](supabase/12_rolls.sql) | Private realtime channels for shared rolls — see [`rolls.md`](supabase/rolls.md) |
+| 13 | [`13_character_vitals.sql`](supabase/13_character_vitals.sql) | Character health commands and revisions — see [`character_vitals.md`](supabase/character_vitals.md) |
+| 14 | [`14_token_vitals.sql`](supabase/14_token_vitals.sql) | Enemy health authority in fights, GM-only token HP, public HP projection |
 
 Run 13 and 14 **before** deploying a frontend that needs them: the app sends
 health changes only through their RPCs.
@@ -78,10 +80,10 @@ repository **secrets** and pass them as env to `npm run build`.
   join one with a code. Attach your characters to a campaign; everyone in that campaign can
   **view** each other's sheets read-only (only the owner can edit).
 - **Character health** (HP, temp HP, death saves, conditions) is changed only through
-  `commit_character_vitals` (`character_vitals.sql`): one command per edit against the
-  row revision; ordinary sheet saves cannot change it. `combat_sync.sql` adds
+  `commit_character_vitals` (`13_character_vitals.sql`): one command per edit against the
+  row revision; ordinary sheet saves cannot change it. `04_characters_realtime.sql` adds
   `public.characters` to Realtime so every open view follows.
 - **Enemy health** lives in the fight row (`encounter_fights`) and is changed only through
   `commit_fight_combatant_vitals`. Standalone map pieces keep real HP in the GM-only
   `map_token_secrets`. `map_tokens` carries HP only while the GM shows the bar
-  (`encounter_fight_vitals.sql`), so hidden HP never reach players.
+  (`14_token_vitals.sql`), so hidden HP never reach players.

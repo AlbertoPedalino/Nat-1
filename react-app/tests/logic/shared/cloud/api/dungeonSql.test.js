@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs';
 // against the schema text itself. There are two: a player never sees a dungeon
 // key, and the plan is required on every row — which is why writing the key is
 // an update and not an upsert with fewer fields.
-const sql = readFileSync(new URL('../../../../../supabase/dungeon.sql', import.meta.url), 'utf8').toLowerCase();
+const sql = readFileSync(new URL('../../../../../supabase/09_dungeon.sql', import.meta.url), 'utf8').toLowerCase();
 const client = readFileSync(new URL('../../../../../src/shared/cloud/api/dungeon.js', import.meta.url), 'utf8');
 
 test('the dungeon table exists, keyed by scene, with RLS and a touch trigger', () => {
