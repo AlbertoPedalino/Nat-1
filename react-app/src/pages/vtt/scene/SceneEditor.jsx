@@ -98,6 +98,7 @@ import { useGmTokenVitals } from '../tokens/useGmTokenVitals.js';
 import { useSceneHexcrawl } from '../hexcrawl/useSceneHexcrawl.js';
 import { useSceneDungeon } from '../dungeon/useSceneDungeon.js';
 import { useSceneContent } from './useSceneContent.js';
+import { useCampaignRoster } from './useCampaignRoster.js';
 import { useVttRolls } from '../rolls/useVttRolls.js';
 import DungeonPanel from '../dungeon/DungeonPanel.jsx';
 import { useMonsterDb } from '../../encounterbuilder/bestiary/useMonsterDb.js';
@@ -233,18 +234,16 @@ export default function SceneEditor({
   const {
     beginTokenMove,
     drawings,
-    handleCharacterEvent,
     handleDrawingEvent,
     loading,
     reconcileContent,
     refreshVisibleTokens,
-    roster,
     setDrawings,
-    setRoster,
     setTokens,
     tokenImageUrls,
     tokens,
   } = useSceneContent({ scene, isGm: role.isGm, spectator, notify });
+  const roster = useCampaignRoster(scene.campaignId);
   // Public rows carry hit points only while a bar is shown; the GM reads the
   // real ones from the private sources and sees them overlaid at render.
   const gmVitals = useGmTokenVitals({ sceneId: scene.id, tokens, enabled: role.isGm && !spectator });
@@ -668,12 +667,10 @@ export default function SceneEditor({
     sendDrag, sendCamera, sendPresenterState, sendPresenterInspection,
   } = useSceneLive({
     sceneId: scene.id,
-    campaignId: scene.campaignId,
     onTokenEvent: handleTokenEvent,
     onSceneEvent: handleSceneEvent,
     onRemoteDrag: handleRemoteDrag,
     onDrawingEvent: handleDrawingEvent,
-    onCharacterEvent: handleCharacterEvent,
     cameraSourceId: role.isGm && !spectator ? presenterCameraSource : null,
     cameraFollowers: projectorControlsOpen,
     followCameraSource: spectator ? spectatorSource : null,

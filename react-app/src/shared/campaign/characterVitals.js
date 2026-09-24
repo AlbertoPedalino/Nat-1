@@ -1,62 +1,32 @@
-// Hit points for campaign characters.
+// The base maximum hit points of campaign characters.
 //
 // Max HP is NOT stored on a sheet: it is derived from hit dice, Constitution,
-// level and class features, so reading `data.maxHP` gets undefined for almost
-// every character. The derivation lives behind the class adapters, which is why
-// the encounter builder loads them before summarising — and why this module
-// does the same rather than guessing.
+// level, class and species features, feats and items. Character digests carry
+// everything else a table needs and a hash of these inputs; this derives the
+// base maximum (before `maxHPBonus`) from the full sheet, the same way the
+// health command does (`commandCharacterVitals`): runtime adapters first, then
+// `calcMaxHP`.
 //
 // The heavy imports are dynamic on purpose: `shared/` is imported by node tests
 // and by pages that must not pull the adapter barrel into their bundle. Nothing
-// is loaded until a scene actually asks for vitals.
+// is loaded until a consumer actually needs a maximum.
 
-function numberOrNull(value) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? Math.round(parsed) : null;
-}
-
-export async function readCampaignVitals(rows) {
-  const vitals = new Map();
-  const list = (rows || []).filter((row) => row?.id && row.data);
-  if (!list.length) return vitals;
-
-  const [adapters, summary, players] = await Promise.all([
-    import('../../adapters/index.js'),
-    import('../../pages/campaigns/sheetSummary.js'),
-    import('../../pages/encounterbuilder/campaign/campaignPlayer.js'),
+export async function readBaseMaxHp(rows) {
+  const out = new Map();
+  const list = (rows || []).filter((row) => row?.id && row.data && typeof row.data === 'object');
+  if (!list.length) return out;
+  const [{ ensureSheetRuntimeAdapters }, { calcMaxHP }] = await Promise.all([
+    import('../../pages/charsheet/state/sheetRuntimeAdapters.js'),
+    import('../../pages/charsheet/state/calculations.js'),
   ]);
-
-  // Class effects feed the max-HP calculation, so the adapters have to be
-  // registered before summarising or a barbarian reads short.
-  const classNames = [...new Set(list.flatMap((row) => players.characterClassNames(row.data)))];
-  await Promise.all([
-    adapters.loadCoreAdapters().catch(() => {}),
-    adapters.loadClassAdapters(classNames).catch(() => {}),
-  ]);
-
+  await ensureSheetRuntimeAdapters(list.map((row) => row.data));
   for (const row of list) {
-    const sheet = summary.summarizeCharacter(row.data);
-    if (!sheet) continue;
-    const hpMax = numberOrNull(sheet.maxHP);
-    if (hpMax == null) continue;
-    vitals.set(row.id, {
-      // An absent current HP means undamaged, not zero.
-      hpCurrent: numberOrNull(sheet.currentHP) ?? hpMax,
-      hpMax,
-      // Temporary hit points are not part of the maximum and are shown apart:
-      // adding them into the bar would make a character look over-healed.
-      tempHp: Math.max(0, numberOrNull(sheet.tempHP) ?? 0),
-    });
+    try {
+      const base = Number(calcMaxHP(row.data));
+      if (Number.isFinite(base)) out.set(String(row.id), Math.max(1, Math.round(base)));
+    } catch (_) {
+      // A sheet the rules cannot read keeps its bar hidden rather than wrong.
+    }
   }
-
-  return vitals;
-}
-
-// Fold freshly derived vitals into roster entries, leaving the rest untouched.
-export function mergeVitals(roster, vitals) {
-  if (!vitals?.size) return roster || [];
-  return (roster || []).map((entry) => {
-    const found = vitals.get(entry.characterId);
-    return found ? { ...entry, ...found } : entry;
-  });
+  return out;
 }

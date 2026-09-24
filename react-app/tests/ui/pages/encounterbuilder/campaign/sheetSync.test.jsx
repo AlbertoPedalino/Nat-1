@@ -1,28 +1,52 @@
 import { useReducer } from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { encounterReducer, createInitialState } from '../../../../../src/pages/encounterbuilder/state/reducer.js';
-import CharacterVitalBridge from '../../../../../src/pages/encounterbuilder/campaign/CharacterVitalBridge.jsx';
+import { useCharacterVitalSync } from '../../../../../src/pages/encounterbuilder/campaign/useCharacterVitalSync.js';
 import { useCharacterVitalDispatch } from '../../../../../src/pages/encounterbuilder/campaign/useCharacterVitalDispatch.js';
 import { publishCharacterRow } from '../../../../../src/shared/cloud/sync/characterRows.js';
 
-const cloud = vi.hoisted(() => ({ command: vi.fn(), get: vi.fn(), notify: vi.fn(), receivers: new Set(), states: {} }));
-vi.mock('../../../../../src/shared/cloud/api/cloudCharacters.js', () => ({ commandCharacterVitals: cloud.command, getCloudCharacter: cloud.get }));
+const cloud = vi.hoisted(() => ({
+  command: vi.fn(), get: vi.fn(), sheets: vi.fn(), notify: vi.fn(), receivers: new Set(), filters: [], states: {},
+}));
+vi.mock('../../../../../src/shared/cloud/api/cloudCharacters.js', () => ({ commandCharacterVitals: cloud.command }));
+vi.mock('../../../../../src/shared/cloud/api/characterDigests.js', async (original) => ({
+  ...await original(),
+  listCharacterDigests: (...args) => cloud.get(...args),
+  readCharacterSheets: (...args) => cloud.sheets(...args),
+}));
+vi.mock('../../../../../src/shared/campaign/characterVitals.js', () => ({
+  readBaseMaxHp: async (rows) => new Map(rows.map((row) => [row.id, 30])),
+}));
 vi.mock('../../../../../src/shared/ui/ToastProvider.jsx', () => ({ useToast: () => ({ notify: cloud.notify }) }));
 vi.mock('../../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({ useAuth: () => ({ cloudEnabled: true, status: 'authed', user: { id: 'owner' } }) }));
 vi.mock('../../../../../src/shared/cloud/supabaseClient.js', () => ({ supabase: {
   channel: () => ({
-    on(_type, _filter, fn) { this.receive = fn; cloud.receivers.add(fn); return this; },
+    on(_type, filter, fn) { this.receive = fn; cloud.filters.push(filter); cloud.receivers.add(fn); return this; },
     subscribe(fn) { fn('SUBSCRIBED'); return this; },
   }),
   removeChannel(channel) { cloud.receivers.delete(channel.receive); },
 } }));
-vi.mock('../../../../../src/pages/campaigns/sheetSummary.js', () => ({ summarizeCharacter: (data) => ({ ...data, maxHP: 30 }) }));
-vi.mock('../../../../../src/pages/charsheet/state/sheetRuntimeAdapters.js', () => ({ ensureSheetRuntimeAdapters: async () => {} }));
 
 const player = { id: 1, type: 'player', sourceId: 'character', name: 'Player', hpCurrent: 30, hpMax: 30, tempHP: 0, deathSaves: { s: 0, f: 0 }, activeConditions: [] };
 const monster = { id: 2, type: 'monster', name: 'Ogre', hpCurrent: 40, hpMax: 40 };
 const fight = { id: 'fight', encounterId: 'encounter', combatants: [player, monster], currentTurn: 0, round: 1 };
-const row = (hp, revision) => ({ id: 'character', row_revision: revision, data: { currentHP: hp, tempHP: 0, maxHPBonus: 0, activeConditions: [], deathSaves: { success: 0, fail: 0 } } });
+const vitals = (hp) => ({ currentHP: hp, tempHP: 0, maxHPBonus: 0, activeConditions: [], deathSaves: { success: 0, fail: 0 } });
+// A full sheet row, as a health command answers it.
+const row = (hp, revision) => ({ id: 'character', row_revision: revision, data: vitals(hp) });
+// The digest row the database keeps for it.
+const digestRow = (hp, revision) => ({
+  character_id: 'character', campaign_id: null, owner: 'owner', row_revision: revision,
+  digest: { name: 'Player', ...vitals(hp), hpBasis: 'basis-1' },
+});
+const digest = (hp, revision) => ({
+  characterId: 'character', campaignId: null, ownerId: 'owner', rowRevision: revision, source: 'server',
+  name: 'Player', ownerUsername: null, className: null, classIconColor: null, portraitPath: null,
+  ...vitals(hp), hpBasis: 'basis-1',
+});
+function VitalSync({ state, reduce }) {
+  useCharacterVitalSync({ characterIds: ['character'], dispatch: reduce, activeFightId: state.activeFightId });
+  return null;
+}
 function Harness({ id }) {
   const [state, reduce] = useReducer(encounterReducer, { ...createInitialState(), activeFightId: 'fight',
     players: [{ sourceId: 'character', hpMax: 30, currentHP: 30 }], fights: [fight, { ...fight, id: 'second' }],
@@ -31,16 +55,19 @@ function Harness({ id }) {
   const dispatch = useCharacterVitalDispatch(state.combat, reduce);
   cloud.states[id] = { state, dispatch };
   return <>
-    <CharacterVitalBridge charId="character" dispatch={reduce} refreshKey={state.activeFightId} />
+    <VitalSync state={state} reduce={reduce} />
     <output data-testid={id}>{state.combat.combatants[0].hpCurrent}</output>
     <button onClick={() => dispatch({ type: 'modifyHp', id: 1, delta: -5 })}>{id} damage</button>
   </>;
 }
-async function receive(hp, revision) { await act(async () => { for (const fn of cloud.receivers) fn({ new: row(hp, revision) }); }); }
+async function receive(hp, revision) {
+  await act(async () => { for (const fn of cloud.receivers) fn({ eventType: 'UPDATE', new: digestRow(hp, revision) }); });
+}
 beforeEach(() => {
-  cloud.receivers.clear(); cloud.states = {};
+  cloud.receivers.clear(); cloud.filters = []; cloud.states = {};
   cloud.command.mockReset().mockResolvedValue(undefined);
-  cloud.get.mockReset().mockResolvedValue(row(20, 1));
+  cloud.get.mockReset().mockResolvedValue([digest(20, 1)]);
+  cloud.sheets.mockReset().mockResolvedValue([{ id: 'character', data: vitals(20) }]);
   cloud.notify.mockReset();
 });
 
@@ -84,7 +111,7 @@ test('reconnect refreshes all cached fights while the builder view is open', asy
   render(<Harness id="A" />);
   await waitFor(() => expect(screen.getByTestId('A')).toHaveTextContent('20'));
   act(() => cloud.states.A.dispatch({ type: 'setView', view: 'builder' }));
-  cloud.get.mockResolvedValue(row(10, 2));
+  cloud.get.mockResolvedValue([digest(10, 2)]);
   act(() => window.dispatchEvent(new Event('online')));
   await waitFor(() => expect(screen.getByTestId('A')).toHaveTextContent('10'));
   expect(cloud.command).not.toHaveBeenCalled();
@@ -105,4 +132,22 @@ test('monsters still use the encounter reducer', async () => {
   act(() => cloud.states.A.dispatch({ type: 'modifyHp', id: 2, delta: -5 }));
   expect(cloud.states.A.state.combat.combatants[1].hpCurrent).toBe(35);
   expect(cloud.command).not.toHaveBeenCalled();
+});
+
+test('one digest channel for the linked players, and the full sheet read only once per max-HP basis', async () => {
+  render(<Harness id="A" />);
+  await waitFor(() => expect(screen.getByTestId('A')).toHaveTextContent('20'));
+  expect(cloud.filters).toEqual([
+    { event: '*', schema: 'public', table: 'character_digests', filter: 'character_id=in.(character)' },
+  ]);
+  await receive(14, 2);
+  await receive(9, 3);
+  expect(screen.getByTestId('A')).toHaveTextContent('9');
+  expect(cloud.sheets).toHaveBeenCalledTimes(1);
+  // A new basis (a level-up, a new item): that one sheet is read again.
+  await act(async () => {
+    for (const fn of cloud.receivers) fn({ eventType: 'UPDATE', new: { ...digestRow(9, 4), digest: { ...digestRow(9, 4).digest, hpBasis: 'basis-2' } } });
+  });
+  await waitFor(() => expect(cloud.sheets).toHaveBeenCalledTimes(2));
+  expect(cloud.sheets).toHaveBeenLastCalledWith(['character']);
 });

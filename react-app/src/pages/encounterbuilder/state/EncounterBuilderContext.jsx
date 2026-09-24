@@ -5,7 +5,7 @@ import { encounterReducer, createInitialState } from './reducer.js';
 import { useEncounterPersistence } from './useEncounterPersistence.js';
 import { useMonsterDb } from '../bestiary/useMonsterDb.js';
 import { useCampaignPlayers } from '../campaign/useCampaignPlayers.js';
-import CharacterVitalBridge from '../campaign/CharacterVitalBridge.jsx';
+import { useCharacterVitalSync } from '../campaign/useCharacterVitalSync.js';
 import { useCharacterVitalDispatch } from '../campaign/useCharacterVitalDispatch.js';
 import { useExternalFightSync } from '../sync/useExternalFightSync.js';
 import { useCloudFights } from '../sync/useCloudFights.js';
@@ -27,6 +27,7 @@ export function EncounterBuilderProvider({ instanceId, instanceSaved, linkGroupI
     ...(state.combat?.combatants || []).filter((p) => p.type === 'player').map((p) => p.sourceId),
     ...state.fights.flatMap((f) => (f.combatants || []).filter((p) => p.type === 'player').map((p) => p.sourceId)),
   ].filter(Boolean))];
+  useCharacterVitalSync({ characterIds, dispatch: reduce, activeFightId: state.activeFightId });
   const monsterDb = useMonsterDb();
   const campaignPlayers = useCampaignPlayers();
   const rollSync = useEncounterRolls({
@@ -117,7 +118,6 @@ export function EncounterBuilderProvider({ instanceId, instanceSaved, linkGroupI
 
   return (
     <EncounterBuilderContext.Provider value={value}>
-      {characterIds.map((id) => <CharacterVitalBridge key={id} charId={id} dispatch={reduce} refreshKey={state.activeFightId} />)}
       {children}
     </EncounterBuilderContext.Provider>
   );

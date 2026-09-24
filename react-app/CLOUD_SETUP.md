@@ -33,6 +33,8 @@ or on a script missing from this table.
 | 12 | [`12_rolls.sql`](supabase/12_rolls.sql) | Private realtime channels for shared rolls — see [`rolls.md`](supabase/rolls.md) |
 | 13 | [`13_character_vitals.sql`](supabase/13_character_vitals.sql) | Character health commands and revisions — see [`character_vitals.md`](supabase/character_vitals.md) |
 | 14 | [`14_token_vitals.sql`](supabase/14_token_vitals.sql) | Enemy health authority in fights, GM-only token HP, public HP projection |
+| 15 | [`15_live_scenes.sql`](supabase/15_live_scenes.sql) | `campaign_live_scenes`: which scene each campaign shows, kept by the database for players and projectors to follow |
+| 16 | [`16_character_digests.sql`](supabase/16_character_digests.sql) | `character_digests`: roster/vitals projection of each sheet (plus a max-HP input hash) for the battle map and encounter builder |
 
 Run 13 and 14 **before** deploying a frontend that needs them: the app sends
 health changes only through their RPCs.
@@ -82,7 +84,12 @@ repository **secrets** and pass them as env to `npm run build`.
 - **Character health** (HP, temp HP, death saves, conditions) is changed only through
   `commit_character_vitals` (`13_character_vitals.sql`): one command per edit against the
   row revision; ordinary sheet saves cannot change it. `04_characters_realtime.sql` adds
-  `public.characters` to Realtime so every open view follows.
+  `public.characters` to Realtime so an open sheet follows its own row. The battle map and
+  the encounter builder follow `character_digests` instead (`16_character_digests.sql`):
+  roster facts, vitals and a hash of the max-HP inputs, rewritten only when those change.
+- **Live scene**: `15_live_scenes.sql` keeps `campaign_live_scenes`, one row per campaign
+  naming the scene it shows; players and the projector follow that row to switch scenes and
+  the scene row itself for everything drawn on it.
 - **Enemy health** lives in the fight row (`encounter_fights`) and is changed only through
   `commit_fight_combatant_vitals`. Standalone map pieces keep real HP in the GM-only
   `map_token_secrets`. `map_tokens` carries HP only while the GM shows the bar

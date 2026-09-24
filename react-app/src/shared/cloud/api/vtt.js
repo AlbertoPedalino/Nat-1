@@ -62,19 +62,16 @@ export async function listLiveScenes() {
   return (data || []).map(toScene).filter(Boolean);
 }
 
-// Which scene of one campaign is live, and nothing else: following the table
-// needs the id, while the scene itself (fog and all) is loaded once by id.
-export async function listLiveSceneIds(campaignId) {
+// The id of the scene a campaign is showing, or null. Read from the
+// database's own projection (15_live_scenes.sql), a row of three columns.
+export async function readLiveSceneId(campaignId) {
   const { data, error } = await requireClient()
-    .from('map_scenes')
-    .select('id, campaign_id, updated_at')
-    .eq('is_live', true)
+    .from('campaign_live_scenes')
+    .select('scene_id')
     .eq('campaign_id', campaignId)
-    .order('updated_at', { ascending: false });
+    .maybeSingle();
   if (error) throw error;
-  return (data || []).map((row) => ({
-    id: row.id, campaignId: row.campaign_id || null, updatedAt: Date.parse(row.updated_at) || 0,
-  }));
+  return data?.scene_id || null;
 }
 
 export async function fetchScene(sceneId) {

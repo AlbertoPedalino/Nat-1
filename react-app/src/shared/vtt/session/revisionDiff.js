@@ -2,7 +2,8 @@
 // reports with what this client holds, and name only the rows worth fetching.
 //
 // Versions are whatever the table has — `updated_at` for scenes, pieces and
-// fights, `row_revision` for sheets, nothing at all for strokes (ids only).
+// fights, nothing at all for strokes (ids only). Sheets are not here: the
+// roster follows character digests (useCharacterDigests).
 
 // Past this many changed rows one full read is cheaper and simpler than a long
 // `id=in.(…)` list.
@@ -24,12 +25,6 @@ export function diffRevisions(remote, held, isStale = (theirs, ours) => theirs !
   }
   const removed = [...held.keys()].filter((id) => !seen.has(id));
   return { ids, changed, removed, clean: !changed.length && !removed.length };
-}
-
-// A sheet only needs re-reading when the database has a later revision; a held
-// row that is already newer (a realtime event beat the check) is kept.
-export function isOlderRevision(theirs, ours) {
-  return Number(theirs ?? 0) > Number(ours ?? -1);
 }
 
 // Strokes carry no version: any id we hold is current.

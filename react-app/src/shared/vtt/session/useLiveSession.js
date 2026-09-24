@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../cloud/auth/AuthProvider.jsx';
 import { supabase } from '../../cloud/supabaseClient.js';
-import { listLiveSceneIds } from '../../cloud/api/vtt.js';
+import { readLiveSceneId } from '../../cloud/api/vtt.js';
 import { coalesceReturns } from '../../cloud/sync/returnGate.js';
 
 const SESSION_RECONCILE_MS = 30_000;
@@ -10,42 +10,43 @@ const SESSION_RECONCILE_MS = 30_000;
 // is wherever that GM has the projector pointed. When the GM switches scenes the
 // player follows automatically; there is nothing for them to pick.
 //
+// This hook answers one question: which scene of this campaign is live. It
+// follows `campaign_live_scenes` (15_live_scenes.sql), a one-row-per-campaign
+// projection the database keeps from `map_scenes.is_live`, and never the scene
+// row itself — that is useSceneLive's, so a fog stroke reaches a player once.
+//
 // Several campaigns can be running at once, so the session is always scoped to
 // one: without the filter a player at two tables would be yanked between them.
-//
-// The subscription is campaign-wide rather than scene-specific: the event that
-// matters is another row becoming live, which a scene channel would never see.
-// The scene itself (fog, grid, tokens) is useSceneLive's business: this hook
-// only answers "which id is live", from a query that carries nothing else.
 
 export function useLiveSession({ campaignId, enabled = true } = {}) {
   const { cloudEnabled, status } = useAuth();
   const [session, setSession] = useState({ loading: true, scene: null });
-  const refreshRequestRef = useRef(0);
-  const sceneRef = useRef(null);
-  sceneRef.current = session.scene;
+  const requestRef = useRef(0);
+
+  const apply = useCallback((sceneId) => {
+    const scene = sceneId ? { id: sceneId, campaignId } : null;
+    setSession((current) => (
+      !current.loading && current.scene?.id === scene?.id ? current : { loading: false, scene }
+    ));
+  }, [campaignId]);
 
   const refresh = useCallback(async () => {
-    const request = ++refreshRequestRef.current;
+    const request = ++requestRef.current;
     try {
-      const scenes = await listLiveSceneIds(campaignId);
-      if (request !== refreshRequestRef.current) return;
-      const scene = scenes.find((entry) => entry.campaignId === campaignId) || null;
-      setSession((current) => (
-        !current.loading && current.scene?.id === scene?.id ? current : { loading: false, scene }
-      ));
+      const sceneId = await readLiveSceneId(campaignId);
+      if (request === requestRef.current) apply(sceneId);
     } catch (_) {
-      // Realtime recovery and the safety poll are best-effort. A momentary
-      // network failure must not throw a player off the map they already have.
-      if (request === refreshRequestRef.current) {
-        setSession((current) => ({ loading: false, scene: current.scene }));
+      // Recovery is best-effort. A momentary network failure must not throw a
+      // player off the map they already have.
+      if (request === requestRef.current) {
+        setSession((current) => (current.loading ? { loading: false, scene: current.scene } : current));
       }
     }
-  }, [campaignId]);
+  }, [apply, campaignId]);
 
   useEffect(() => {
     if (!enabled || !campaignId || !cloudEnabled || status !== 'authed') {
-      refreshRequestRef.current += 1;
+      requestRef.current += 1;
       setSession({ loading: false, scene: null });
       return undefined;
     }
@@ -58,27 +59,23 @@ export function useLiveSession({ campaignId, enabled = true } = {}) {
     let channel;
     try {
       channel = supabase.channel(`gb-vtt-session-${campaignId}`);
-      // Any scene change in this campaign can mean the projector moved.
-      // Re-reading is cheap and avoids reasoning about which events RLS lets
-      // through: a row leaving the live state stops being visible, so its own
-      // event may never arrive.
       channel.on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'map_scenes', filter: `campaign_id=eq.${campaignId}` },
+        { event: '*', schema: 'public', table: 'campaign_live_scenes', filter: `campaign_id=eq.${campaignId}` },
         (payload) => {
-          // The live scene editing itself (a fog stroke, the grid, a rename)
-          // does not move the table: the scene channel already has that row.
           const row = payload?.new;
-          const live = sceneRef.current;
-          if (row?.id && live?.id === row.id && row.is_live === true) return;
-          refresh();
+          if (row && Object.hasOwn(row, 'scene_id')) {
+            // The event is the answer; a read still in flight is older.
+            requestRef.current += 1;
+            apply(row.scene_id);
+          } else {
+            refresh();
+          }
         },
       );
       channel.subscribe((state) => {
-        // There is a small gap between the first read and the subscription
-        // becoming active. A live switch in that gap has no event to replay.
-        // SUBSCRIBED is also emitted again after a socket reconnect, so this
-        // read repairs both cases from the authoritative database state.
+        // Covers the gap between the first read and the subscription going
+        // live, and every reconnect: missed changes are not replayed.
         if (state === 'SUBSCRIBED') refresh();
       });
     } catch (_) {
@@ -88,9 +85,8 @@ export function useLiveSession({ campaignId, enabled = true } = {}) {
       return undefined;
     }
 
-    // Realtime transports can occasionally miss a change while a phone sleeps,
-    // changes network, or keeps the tab in the background. These inexpensive
-    // reconciliations make the session self-healing without a page reload.
+    // One tiny row: cheap enough to re-read after sleep, network changes or a
+    // background tab, which is when realtime can silently miss a change.
     const reconcile = () => { refresh(); };
     const reconcileOnReturn = coalesceReturns(reconcile);
     const reconcileWhenVisible = () => {
@@ -102,7 +98,7 @@ export function useLiveSession({ campaignId, enabled = true } = {}) {
     document.addEventListener('visibilitychange', reconcileWhenVisible);
 
     return () => {
-      refreshRequestRef.current += 1;
+      requestRef.current += 1;
       window.clearInterval(timer);
       window.removeEventListener('online', reconcile);
       window.removeEventListener('focus', reconcileOnReturn);
@@ -111,7 +107,7 @@ export function useLiveSession({ campaignId, enabled = true } = {}) {
         supabase.removeChannel(channel);
       } catch (_) {}
     };
-  }, [campaignId, cloudEnabled, enabled, refresh, status]);
+  }, [apply, campaignId, cloudEnabled, enabled, refresh, status]);
 
   return { ...session, refresh };
 }

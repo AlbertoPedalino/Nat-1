@@ -6,8 +6,11 @@ import {
 } from './cameraSync.js';
 import { coalesceReturns } from '../../cloud/sync/returnGate.js';
 
-// One channel per scene carries both streams: committed row changes for tokens
-// and the scene itself, plus ephemeral drag previews.
+// One channel per scene carries both streams: committed row changes for tokens,
+// strokes and the scene itself, plus ephemeral drag previews. This is the only
+// subscription to the current scene's row: which scene is live is
+// useLiveSession's question, answered from its own projection table, and the
+// characters behind the pieces come from useCampaignRoster's digests.
 //
 // RLS applies to realtime exactly as it does to a query, so a player is never
 // sent GM-layer rows here either — the filter is not something this hook has to
@@ -32,12 +35,10 @@ const SCENE_RECONCILE_MS = 30_000;
 
 export function useSceneLive({
   sceneId,
-  campaignId,
   onTokenEvent,
   onSceneEvent,
   onRemoteDrag,
   onDrawingEvent,
-  onCharacterEvent,
   cameraSourceId,
   // True while this presenter has opened a projector itself: stream the camera
   // even before that window has announced itself.
@@ -61,7 +62,6 @@ export function useSceneLive({
     onSceneEvent,
     onRemoteDrag,
     onDrawingEvent,
-    onCharacterEvent,
     cameraSourceId,
     cameraFollowers,
     followCameraSource,
@@ -135,21 +135,6 @@ export function useSceneLive({
           } catch (_) {}
         },
       );
-
-      // Character sheets, scoped to the campaign rather than the scene: damage
-      // taken on a sheet has to show on the piece without a reload, and the
-      // sheet stays the one place those hit points live.
-      if (campaignId) {
-        channel.on(
-          'postgres_changes',
-          { event: 'UPDATE', schema: 'public', table: 'characters', filter: `campaign_id=eq.${campaignId}` },
-          (payload) => {
-            try {
-              handlers.current.onCharacterEvent?.(payload);
-            } catch (_) {}
-          },
-        );
-      }
 
       channel.on('broadcast', { event: DRAG_EVENT }, (message) => {
         try {
@@ -300,7 +285,7 @@ export function useSceneLive({
         // Already closed.
       }
     };
-  }, [campaignId, cloudEnabled, sceneId, status]);
+  }, [cloudEnabled, sceneId, status]);
 
   // Fire-and-forget: a lost drag frame is a cosmetic glitch, and the committed
   // position arrives on drop regardless.

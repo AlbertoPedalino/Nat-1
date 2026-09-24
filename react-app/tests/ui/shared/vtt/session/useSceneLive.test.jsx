@@ -95,6 +95,19 @@ describe('useSceneLive recovery', () => {
     vi.useRealTimers();
   });
 
+  test('the scene channel is the only follower of the scene row, and reads no sheets', () => {
+    renderHook(() => useSceneLive({ sceneId: 'scene-1', campaignId: 'campaign-1' }));
+    const tables = mocks.channel.on.mock.calls
+      .filter(([type]) => type === 'postgres_changes')
+      .map(([, filter]) => `${filter.table}:${filter.filter}`);
+    expect(tables).toEqual([
+      'map_tokens:scene_id=eq.scene-1',
+      'map_scenes:id=eq.scene-1',
+      'map_drawings:scene_id=eq.scene-1',
+    ]);
+    vi.useRealTimers();
+  });
+
   test('a channel that fails half-way through setup is removed', () => {
     mocks.channel.subscribe = vi.fn(() => { throw new Error('socket'); });
     renderHook(() => useSceneLive({ sceneId: 'scene-1' }));

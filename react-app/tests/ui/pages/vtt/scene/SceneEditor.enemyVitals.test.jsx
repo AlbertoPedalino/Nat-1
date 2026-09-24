@@ -74,19 +74,19 @@ vi.mock('../../../../../src/pages/vtt/rolls/useVttRolls.js', () => ({
     handleSheetRoll: vi.fn(), rollBubbles: [], toast: null,
   }),
 }));
+vi.mock('../../../../../src/pages/vtt/scene/useCampaignRoster.js', () => ({
+  useCampaignRoster: () => [],
+}));
 vi.mock('../../../../../src/pages/vtt/scene/useSceneContent.js', () => ({
   useSceneContent: () => ({
     beginTokenMove: () => () => {},
     drawings: [],
-    handleCharacterEvent: vi.fn(),
     handleDrawingEvent: vi.fn(),
     loading: false,
     refreshVisibleTokens: m.refreshVisibleTokens,
     reconcileContent: vi.fn(async () => {}),
     refreshContent: vi.fn(async () => {}),
-    roster: [],
     setDrawings: vi.fn(),
-    setRoster: vi.fn(),
     setTokens: vi.fn(),
     tokenImageUrls: {},
     tokens: m.tokens.current,

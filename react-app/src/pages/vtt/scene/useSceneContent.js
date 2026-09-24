@@ -1,18 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { mergeVitals, readCampaignVitals } from '../../../shared/campaign/characterVitals.js';
-import { toRoster, toRosterEntry } from '../../../shared/campaign/roster.js';
-import {
-  listCampaignCharacterRevisions, listCampaignCharacters, listCampaignCharactersByIds,
-} from '../../../shared/cloud/api/campaigns.js';
 import {
   listDrawingIds, listDrawings, listDrawingsByIds, listTokenRevisions, listTokenSecrets,
   listTokens, listTokensByIds, signMapImage,
 } from '../../../shared/cloud/api/vtt.js';
 import {
-  assembleSnapshot, diffRevisions, idsOnly, isOlderRevision, tooManyToTarget,
+  assembleSnapshot, diffRevisions, idsOnly, tooManyToTarget,
 } from '../../../shared/vtt/session/revisionDiff.js';
 import { toDrawing } from '../../../shared/vtt/map/drawing.js';
-import { CHARACTER_ROW_EVENT } from '../../../shared/cloud/sync/characterRows.js';
 
 function attachSecrets(tokens, secrets, held = []) {
   const previous = Object.fromEntries(
@@ -46,9 +40,10 @@ function mergeSnapshot(current, baseline, incoming, protectedIds = new Set()) {
   ];
 }
 
+// The pieces and strokes of one scene. The characters behind the pieces are
+// not read here: they come from useCampaignRoster (character digests).
 export function useSceneContent({ scene, isGm, spectator, notify }) {
   const [tokens, setTokens] = useState([]);
-  const [roster, setRoster] = useState([]);
   const [drawings, setDrawings] = useState([]);
   const [tokenImageUrls, setTokenImageUrls] = useState({});
   const [loading, setLoading] = useState(true);
@@ -57,15 +52,11 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
   const tokensRef = useRef(tokens);
   const drawingsRef = useRef(drawings);
   const tokenMovesRef = useRef(new Map());
-  const characterRowsRef = useRef(new Map());
-  const rosterRef = useRef(roster);
   // Whether a full read has landed for this scene: the light recovery needs
   // something held to compare with.
   const loadedRef = useRef(false);
   tokensRef.current = tokens;
   drawingsRef.current = drawings;
-  rosterRef.current = roster;
-  useEffect(() => { characterRowsRef.current.clear(); }, [scene.campaignId]);
 
   const beginTokenMove = useCallback((ids) => {
     for (const id of ids) tokenMovesRef.current.set(id, (tokenMovesRef.current.get(id) || 0) + 1);
@@ -78,30 +69,6 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
     };
   }, []);
 
-  // A row already held at a later revision (a realtime event beat the read)
-  // is kept; anything else becomes the held row.
-  const holdCharacterRows = useCallback((characterRows) => characterRows.map((row) => {
-    const held = characterRowsRef.current.get(row.id);
-    if (held && Number(held.row_revision || 0) > Number(row.row_revision || 0)) return held;
-    characterRowsRef.current.set(row.id, row);
-    return row;
-  }), []);
-
-  // Optional: max HP needs the class adapters, so it never holds the map open.
-  const applyRoster = useCallback(async (rows, request) => {
-    try {
-      const vitals = await readCampaignVitals(rows);
-      if (request === loadRequestRef.current) setRoster((current) => {
-        const next = mergeVitals(toRoster(rows), vitals);
-        return next.map((entry) => {
-          const readRow = rows.find((row) => row.id === entry.characterId);
-          return characterRowsRef.current.get(entry.characterId) !== readRow
-            ? current.find((item) => item.characterId === entry.characterId) || entry : entry;
-        });
-      });
-    } catch (_) {}
-  }, []);
-
   const loadContent = useCallback(async ({ initial = false } = {}) => {
     const request = ++loadRequestRef.current;
     const tokenRequest = ++tokenRequestRef.current;
@@ -110,9 +77,8 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
     const protectedIds = new Set(tokenMovesRef.current.keys());
     if (initial) setLoading(true);
     try {
-      const [sceneTokens, characterRows, secrets, sceneDrawings] = await Promise.all([
+      const [sceneTokens, secrets, sceneDrawings] = await Promise.all([
         listTokens(scene.id),
-        scene.campaignId ? listCampaignCharacters(scene.campaignId) : Promise.resolve([]),
         isGm && !spectator ? listTokenSecrets(scene.id) : Promise.resolve({}),
         listDrawings(scene.id),
       ]);
@@ -123,13 +89,11 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
           current, baselineTokens, attachSecrets(sceneTokens, secrets, current), protectedIds,
         ));
       }
-      const rows = holdCharacterRows(characterRows);
       setDrawings((current) => mergeSnapshot(current, baselineDrawings, sceneDrawings));
       loadedRef.current = true;
       // A reconnect can supersede the initial request. Whichever request wins
-      // must release the loading screen; optional vitals do not hold it open.
+      // must release the loading screen.
       setLoading(false);
-      await applyRoster(rows, request);
     } catch (cause) {
       if (request === loadRequestRef.current) {
         notify('error', cause?.message || 'Could not load this scene.');
@@ -137,11 +101,11 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
     } finally {
       if (request === loadRequestRef.current) setLoading(false);
     }
-  }, [applyRoster, holdCharacterRows, isGm, notify, scene.campaignId, scene.id, spectator]);
+  }, [isGm, notify, scene.id, spectator]);
 
-  // The recovery poll. Versions first (ids plus updated_at / row_revision),
-  // then only the rows that moved: a quiet table costs a few hundred bytes
-  // instead of every sheet, stroke and piece again. `fullDrawings` is for a
+  // The recovery poll. Versions first (ids plus updated_at), then only the
+  // rows that moved: a quiet table costs a few hundred bytes instead of every
+  // stroke and piece again. `fullDrawings` is for a
   // reconnect, where a moved stroke — which has no version to compare — may
   // have been missed.
   const reconcileContent = useCallback(async ({ fullDrawings = false } = {}) => {
@@ -151,12 +115,10 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
     const tokenRequest = ++tokenRequestRef.current;
     const baselineTokens = tokensRef.current;
     const baselineDrawings = drawingsRef.current;
-    const baselineRoster = rosterRef.current;
     const protectedIds = new Set(tokenMovesRef.current.keys());
     try {
-      const [tokenRevisions, characterRevisions, secrets, drawingIds] = await Promise.all([
+      const [tokenRevisions, secrets, drawingIds] = await Promise.all([
         listTokenRevisions(scene.id),
-        scene.campaignId ? listCampaignCharacterRevisions(scene.campaignId) : Promise.resolve([]),
         isGm && !spectator ? listTokenSecrets(scene.id) : Promise.resolve({}),
         fullDrawings ? Promise.resolve(null) : listDrawingIds(scene.id),
       ]);
@@ -171,14 +133,6 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
         heldTokens.has(id) && (heldTokens.get(id).secretLabel || '') !== label
       ));
 
-      const characterDiff = diffRevisions(
-        characterRevisions.map((row) => ({ id: row.id, version: row.row_revision })),
-        new Map(baselineRoster.map((entry) => [
-          entry.characterId, characterRowsRef.current.get(entry.characterId)?.row_revision,
-        ])),
-        isOlderRevision,
-      );
-
       const drawingDiff = drawingIds && diffRevisions(
         drawingIds.map((id) => ({ id })),
         new Map(baselineDrawings.map((drawing) => [drawing.id, undefined])),
@@ -189,14 +143,9 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
         if (!diff.changed.length) return Promise.resolve([]);
         return tooManyToTarget(diff.changed) ? fetchAll() : fetchSome(diff.changed);
       };
-      const [freshTokens, freshCharacters, freshDrawings] = await Promise.all([
+      const [freshTokens, freshDrawings] = await Promise.all([
         tokenDiff.clean ? null : targeted(
           tokenDiff, () => listTokens(scene.id), (ids) => listTokensByIds(scene.id, ids),
-        ),
-        characterDiff.clean ? null : targeted(
-          characterDiff,
-          () => listCampaignCharacters(scene.campaignId),
-          (ids) => listCampaignCharactersByIds(scene.campaignId, ids),
         ),
         drawingDiff
           ? (drawingDiff.clean ? null : targeted(
@@ -223,19 +172,12 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
           : freshDrawings;
         setDrawings((current) => mergeSnapshot(current, baselineDrawings, incoming));
       }
-
-      if (freshCharacters) {
-        const rows = holdCharacterRows(assembleSnapshot(
-          characterDiff.ids, characterDiff.changed, freshCharacters, characterRowsRef.current,
-        ));
-        await applyRoster(rows, request);
-      }
     } catch (_) {
       // Best effort: the next tick, focus or reconnect tries again, and a
       // transient failure must not toast every 30 seconds.
     }
     return undefined;
-  }, [applyRoster, holdCharacterRows, isGm, loadContent, scene.campaignId, scene.id, spectator]);
+  }, [isGm, loadContent, scene.id, spectator]);
 
   useEffect(() => {
     loadedRef.current = false;
@@ -295,49 +237,15 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
     ));
   }, []);
 
-  const handleCharacterEvent = useCallback((payload) => {
-    const row = payload?.new;
-    const entry = toRosterEntry(row);
-    if (!entry) return;
-    const held = characterRowsRef.current.get(row.id);
-    if (!held && row.campaign_id !== scene.campaignId) return;
-    if (held && Number(held.row_revision || 0) > Number(row.row_revision || 0)) return;
-    characterRowsRef.current.set(row.id, row);
-    setRoster((current) => {
-      if (!current.some((item) => item.characterId === entry.characterId)) {
-        return held || row.campaign_id === scene.campaignId ? [...current, entry] : current;
-      }
-      return current.map((item) => (
-        item.characterId === entry.characterId
-          ? { ...entry, hpCurrent: item.hpCurrent, hpMax: item.hpMax, tempHp: item.tempHp }
-          : item
-      ));
-    });
-    readCampaignVitals([row])
-      .then((vitals) => {
-        if (characterRowsRef.current.get(row.id) === row) setRoster((current) => mergeVitals(current, vitals));
-      })
-      .catch(() => {});
-  }, [scene.campaignId]);
-
-  useEffect(() => {
-    const receive = ({ detail }) => handleCharacterEvent({ new: detail });
-    window.addEventListener(CHARACTER_ROW_EVENT, receive);
-    return () => window.removeEventListener(CHARACTER_ROW_EVENT, receive);
-  }, [handleCharacterEvent]);
-
   return {
     beginTokenMove,
     drawings,
-    handleCharacterEvent,
     handleDrawingEvent,
     loading,
     reconcileContent,
     refreshContent: loadContent,
     refreshVisibleTokens,
-    roster,
     setDrawings,
-    setRoster,
     setTokens,
     tokenImageUrls,
     tokens,

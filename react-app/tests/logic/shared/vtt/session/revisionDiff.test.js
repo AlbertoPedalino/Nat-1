@@ -5,7 +5,6 @@ import {
   assembleSnapshot,
   diffRevisions,
   idsOnly,
-  isOlderRevision,
   tooManyToTarget,
 } from '../../../../../src/shared/vtt/session/revisionDiff.js';
 
@@ -25,18 +24,6 @@ test('moved, new and vanished rows are told apart', () => {
   assert.deepEqual(diff.changed, ['b', 'c']);
   assert.deepEqual(diff.removed, ['gone']);
   assert.equal(diff.clean, false);
-});
-
-test('a sheet already held at a later revision is not re-read', () => {
-  const held = new Map([['pc', 7], ['unknown', undefined]]);
-  const diff = diffRevisions(
-    [{ id: 'pc', version: 6 }, { id: 'unknown', version: 0 }],
-    held,
-    isOlderRevision,
-  );
-  assert.deepEqual(diff.changed, ['unknown']);
-  assert.equal(isOlderRevision(8, 7), true);
-  assert.equal(isOlderRevision(7, 7), false);
 });
 
 test('strokes compare by id only', () => {

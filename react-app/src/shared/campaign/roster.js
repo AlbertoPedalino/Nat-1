@@ -35,8 +35,8 @@ export function toRosterEntry(row) {
     // Hit points are deliberately absent here. Current HP is stored on the
     // sheet but max HP is derived — from hit dice, Constitution and class
     // features — so reading `data.maxHP` yields undefined for almost every
-    // character, and a bar with no maximum is no bar at all. They are filled in
-    // by readCampaignVitals, which loads the adapters first.
+    // character, and a bar with no maximum is no bar at all. On the battle map
+    // they come from character digests (shared/campaign/characterDigest.js).
     hpCurrent: null,
     hpMax: null,
     tempHp: 0,

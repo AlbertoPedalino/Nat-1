@@ -19,11 +19,11 @@ vi.mock('../../../../../src/shared/cloud/supabaseClient.js', () => {
 });
 
 import {
-  fetchSceneRevision, listDrawingIds, listLiveSceneIds, listDrawingsByIds, listTokenRevisions, listTokensByIds,
+  fetchSceneRevision, listDrawingIds, readLiveSceneId, listDrawingsByIds, listTokenRevisions, listTokensByIds,
 } from '../../../../../src/shared/cloud/api/vtt.js';
 import {
-  listCampaignCharacterRevisions, listCampaignCharactersByIds,
-} from '../../../../../src/shared/cloud/api/campaigns.js';
+  listCharacterDigests, readCharacterSheets,
+} from '../../../../../src/shared/cloud/api/characterDigests.js';
 import { listFightRevisions, listFightVitals } from '../../../../../src/shared/cloud/api/encounterFights.js';
 
 const selected = () => m.calls.find(([method]) => method === 'select')?.[1];
@@ -35,10 +35,10 @@ beforeEach(() => {
 
 test.each([
   ['scene', () => fetchSceneRevision('s1'), 'map_scenes'],
-  ['live scene', () => listLiveSceneIds('c1'), 'map_scenes'],
+  ['live scene', () => readLiveSceneId('c1'), 'campaign_live_scenes'],
   ['pieces', () => listTokenRevisions('s1'), 'map_tokens'],
   ['strokes', () => listDrawingIds('s1'), 'map_drawings'],
-  ['sheets', () => listCampaignCharacterRevisions('c1'), 'characters'],
+  ['character digests', () => listCharacterDigests({ campaignId: 'c1' }), 'character_digests'],
   ['fights', () => listFightRevisions(['f1']), 'encounter_fights'],
 ])('the %s version check reads no payload columns', async (_, read, table) => {
   await read();
@@ -60,11 +60,7 @@ test('targeted reads stay inside the scene or campaign and skip an empty list', 
   await listDrawingsByIds('s1', ['d']);
   expect(m.calls).toEqual(expect.arrayContaining([['eq', 'scene_id', 's1'], ['in', 'id', ['d']]]));
   m.calls = [];
-  await listCampaignCharactersByIds('c1', ['pc']);
-  expect(m.calls).toEqual(expect.arrayContaining([['eq', 'campaign_id', 'c1'], ['in', 'id', ['pc']]]));
-  m.calls = [];
   expect(await listTokensByIds('s1', [])).toEqual([]);
-  expect(await listCampaignCharactersByIds('c1', [])).toEqual([]);
   expect(await listFightRevisions([])).toEqual([]);
   expect(m.calls).toEqual([]);
 });
@@ -80,7 +76,28 @@ test('a failed check throws rather than reading as "nothing changed"', async () 
   await expect(fetchSceneRevision('s1')).rejects.toThrow('refused');
 });
 
-test('the live-scene lookup is scoped to one campaign', async () => {
-  await listLiveSceneIds('c1');
-  expect(m.calls).toEqual(expect.arrayContaining([['eq', 'is_live', true], ['eq', 'campaign_id', 'c1']]));
+test('the live-scene lookup reads one campaign row, and null means no live scene', async () => {
+  m.result = { data: { scene_id: 'scene-b' }, error: null };
+  expect(await readLiveSceneId('c1')).toBe('scene-b');
+  expect(m.calls).toEqual(expect.arrayContaining([['eq', 'campaign_id', 'c1'], ['maybeSingle']]));
+  m.result = { data: null, error: null };
+  expect(await readLiveSceneId('c1')).toBeNull();
+});
+
+test('digests are read by campaign or by exact characters; a sheet is read only for max HP', async () => {
+  m.result = {
+    data: [{ character_id: 'pc', campaign_id: 'c1', owner: 'u1', row_revision: 4, digest: { name: 'Aria', hpBasis: 'h' } }],
+    error: null,
+  };
+  const [digest] = await listCharacterDigests({ campaignId: 'c1' });
+  expect(digest).toMatchObject({ characterId: 'pc', campaignId: 'c1', rowRevision: 4, name: 'Aria', hpBasis: 'h', source: 'server' });
+  m.calls = [];
+  await listCharacterDigests({ characterIds: ['c_b', 'c_a', 'bad id!'] });
+  expect(m.calls).toEqual(expect.arrayContaining([['in', 'character_id', ['c_a', 'c_b']]]));
+  m.calls = [];
+  expect(await listCharacterDigests({ characterIds: [] })).toEqual([]);
+  expect(m.calls).toEqual([]);
+  m.result = { data: [], error: null };
+  await readCharacterSheets(['pc']);
+  expect(m.calls).toEqual(expect.arrayContaining([['from', 'characters'], ['select', 'id, data'], ['in', 'id', ['pc']]]));
 });

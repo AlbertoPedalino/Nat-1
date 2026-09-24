@@ -3,16 +3,10 @@ import { vi } from 'vitest';
 import { useSceneContent } from '../../../../../src/pages/vtt/scene/useSceneContent.js';
 
 const cloud = vi.hoisted(() => ({
-  listTokens: vi.fn(), listDrawings: vi.fn(), listTokenSecrets: vi.fn(),
-  listCampaignCharacters: vi.fn(), readCampaignVitals: vi.fn(), signMapImage: vi.fn(),
+  listTokens: vi.fn(), listDrawings: vi.fn(), listTokenSecrets: vi.fn(), signMapImage: vi.fn(),
   listTokenRevisions: vi.fn(), listTokensByIds: vi.fn(), listDrawingIds: vi.fn(), listDrawingsByIds: vi.fn(),
-  listCampaignCharacterRevisions: vi.fn(), listCampaignCharactersByIds: vi.fn(),
 }));
 vi.mock('../../../../../src/shared/cloud/api/vtt.js', () => cloud);
-vi.mock('../../../../../src/shared/cloud/api/campaigns.js', () => cloud);
-vi.mock('../../../../../src/shared/campaign/characterVitals.js', async (original) => ({
-  ...await original(), readCampaignVitals: cloud.readCampaignVitals,
-}));
 
 function deferred() {
   let resolve;
@@ -22,12 +16,9 @@ function deferred() {
 beforeEach(() => {
   cloud.listTokens.mockReset().mockResolvedValue([]);
   cloud.listDrawings.mockReset().mockResolvedValue([]);
-  cloud.listTokenSecrets.mockResolvedValue({});
-  cloud.listCampaignCharacters.mockResolvedValue([]);
-  cloud.readCampaignVitals.mockReset().mockResolvedValue({});
+  cloud.listTokenSecrets.mockReset().mockResolvedValue({});
   for (const name of [
     'listTokenRevisions', 'listTokensByIds', 'listDrawingIds', 'listDrawingsByIds',
-    'listCampaignCharacterRevisions', 'listCampaignCharactersByIds',
   ]) cloud[name].mockReset().mockResolvedValue([]);
 });
 function openScene() {
@@ -39,38 +30,6 @@ function openScene() {
     })),
   };
 }
-
-test('late character calculations and older RPC responses cannot undo newer HP on the map', async () => {
-  const row = (hp, revision) => ({ id: 'pc', row_revision: revision, data: { currentHP: hp } });
-  const vitals = (hp) => new Map([['pc', { hpCurrent: hp, hpMax: 30, tempHp: 0 }]]);
-  cloud.listCampaignCharacters.mockResolvedValue([row(30, 0)]);
-  cloud.readCampaignVitals.mockResolvedValue(vitals(30));
-  const { result } = openScene();
-  await waitFor(() => expect(result.current.roster[0]?.hpCurrent).toBe(30));
-  const slow = deferred();
-  cloud.readCampaignVitals.mockReturnValueOnce(slow.promise).mockResolvedValueOnce(vitals(10));
-  act(() => result.current.handleCharacterEvent({ new: row(20, 1) }));
-  await act(async () => result.current.handleCharacterEvent({ new: row(10, 2) }));
-  expect(result.current.roster[0].hpCurrent).toBe(10);
-  await act(async () => slow.resolve(vitals(20)));
-  act(() => window.dispatchEvent(new CustomEvent('gb:character-row', { detail: row(20, 1) })));
-  expect(result.current.roster[0].hpCurrent).toBe(10);
-});
-
-test('a reconnect snapshot uses character updates received while its request was pending', async () => {
-  const row = (hp, revision) => ({ id: 'pc', row_revision: revision, data: { currentHP: hp } });
-  cloud.listCampaignCharacters.mockResolvedValue([row(30, 0)]);
-  cloud.readCampaignVitals.mockImplementation(async (rows) => new Map(rows.map((r) => [r.id, { hpCurrent: r.data.currentHP, hpMax: 30 }])));
-  const { result } = openScene();
-  await waitFor(() => expect(result.current.roster[0]?.hpCurrent).toBe(30));
-  const staleRead = deferred();
-  cloud.listCampaignCharacters.mockReturnValueOnce(staleRead.promise);
-  let refresh;
-  act(() => { refresh = result.current.refreshContent(); });
-  await act(async () => result.current.handleCharacterEvent({ new: row(10, 2) }));
-  await act(async () => { staleRead.resolve([row(20, 1)]); await refresh; });
-  expect(result.current.roster[0].hpCurrent).toBe(10);
-});
 
 test('a reconnect finishing before the initial load releases the spinner and wins', async () => {
   const initial = deferred();
@@ -92,12 +51,6 @@ test('a failed reconnect also releases an initial spinner', async () => {
   await act(async () => { await result.current.refreshContent(); });
   expect(result.current.loading).toBe(false);
   expect(notify).toHaveBeenCalledWith('error', 'Offline');
-});
-
-test('optional character vitals do not block a ready map', async () => {
-  cloud.readCampaignVitals.mockReturnValue(new Promise(() => {}));
-  const { result } = openScene();
-  await waitFor(() => expect(result.current.loading).toBe(false));
 });
 
 test.each(['refreshContent', 'refreshVisibleTokens'])('%s preserves changes made during the read and refreshes untouched tokens', async (method) => {
@@ -203,40 +156,29 @@ test('drawing changes made during a snapshot are preserved too', async () => {
 
 describe('light reconciliation', () => {
   const token = (id, updatedAt, x = 0) => ({ id, updatedAt, x });
-  const sheet = (id, revision, hp = 30) => ({ id, row_revision: revision, data: { name: id, currentHP: hp } });
 
-  async function settledScene({ tokens = [], characters = [], drawings = [] } = {}) {
+  async function settledScene({ tokens = [], drawings = [] } = {}) {
     cloud.listTokens.mockResolvedValueOnce(tokens);
-    cloud.listCampaignCharacters.mockResolvedValueOnce(characters);
     cloud.listDrawings.mockResolvedValueOnce(drawings);
-    cloud.readCampaignVitals.mockImplementation(async (rows) => new Map(rows.map((row) => [
-      row.id, { hpCurrent: row.data.currentHP, hpMax: 30, tempHp: 0 },
-    ])));
     const view = openScene();
     await waitFor(() => expect(view.result.current.loading).toBe(false));
-    await waitFor(() => expect(view.result.current.roster).toHaveLength(characters.length));
     for (const fn of Object.values(cloud)) fn.mockClear();
     cloud.listTokenRevisions.mockResolvedValue(tokens.map(({ id, updatedAt }) => ({ id, updatedAt })));
-    cloud.listCampaignCharacterRevisions.mockResolvedValue(
-      characters.map(({ id, row_revision: revision }) => ({ id, row_revision: revision })),
-    );
     cloud.listDrawingIds.mockResolvedValue(drawings.map(({ id }) => id));
     return view;
   }
 
   test('a quiet table reads versions only', async () => {
     const { result } = await settledScene({
-      tokens: [token('a', 1)], characters: [sheet('pc', 3)], drawings: [{ id: 'd', points: [] }],
+      tokens: [token('a', 1)], drawings: [{ id: 'd', points: [] }],
     });
-    const before = { tokens: result.current.tokens, drawings: result.current.drawings, roster: result.current.roster };
+    const before = { tokens: result.current.tokens, drawings: result.current.drawings };
     await act(async () => { await result.current.reconcileContent(); });
-    for (const heavy of [
-      'listTokens', 'listTokensByIds', 'listCampaignCharacters', 'listCampaignCharactersByIds',
-      'listDrawings', 'listDrawingsByIds', 'readCampaignVitals',
-    ]) expect(cloud[heavy]).not.toHaveBeenCalled();
+    for (const heavy of ['listTokens', 'listTokensByIds', 'listDrawings', 'listDrawingsByIds']) {
+      expect(cloud[heavy]).not.toHaveBeenCalled();
+    }
     expect(result.current.tokens).toBe(before.tokens);
     expect(result.current.drawings).toBe(before.drawings);
-    expect(result.current.roster).toBe(before.roster);
   });
 
   test('only the pieces whose version moved are fetched; vanished ones leave', async () => {
@@ -257,27 +199,6 @@ describe('light reconciliation', () => {
     await act(async () => { await result.current.reconcileContent(); });
     expect(result.current.tokens[0].secretLabel).toBe('Ambusher');
     expect(cloud.listTokensByIds).not.toHaveBeenCalled();
-  });
-
-  test('only a sheet with a later revision is re-read', async () => {
-    const { result } = await settledScene({ characters: [sheet('pc', 3), sheet('other', 5)] });
-    cloud.listCampaignCharacterRevisions.mockResolvedValue([
-      { id: 'pc', row_revision: 4 }, { id: 'other', row_revision: 5 },
-    ]);
-    cloud.listCampaignCharactersByIds.mockResolvedValue([sheet('pc', 4, 12)]);
-    await act(async () => { await result.current.reconcileContent(); });
-    expect(cloud.listCampaignCharactersByIds).toHaveBeenCalledWith('campaign', ['pc']);
-    expect(cloud.listCampaignCharacters).not.toHaveBeenCalled();
-    expect(result.current.roster.find((entry) => entry.characterId === 'pc').hpCurrent).toBe(12);
-    expect(result.current.roster.find((entry) => entry.characterId === 'other').hpCurrent).toBe(30);
-  });
-
-  test('a sheet leaving the campaign leaves the roster without any sheet download', async () => {
-    const { result } = await settledScene({ characters: [sheet('pc', 3), sheet('left', 1)] });
-    cloud.listCampaignCharacterRevisions.mockResolvedValue([{ id: 'pc', row_revision: 3 }]);
-    await act(async () => { await result.current.reconcileContent(); });
-    expect(cloud.listCampaignCharactersByIds).not.toHaveBeenCalled();
-    expect(result.current.roster.map((entry) => entry.characterId)).toEqual(['pc']);
   });
 
   test('new and erased strokes are found by id; a reconnect re-reads them all', async () => {
@@ -325,4 +246,12 @@ describe('light reconciliation', () => {
     expect(notify).not.toHaveBeenCalled();
     expect(result.current.tokens).toEqual([token('a', 1)]);
   });
+});
+
+test('the scene content hook reads no character sheets at all', async () => {
+  const { result } = openScene();
+  await waitFor(() => expect(result.current.loading).toBe(false));
+  await act(async () => { await result.current.reconcileContent(); });
+  expect(result.current).not.toHaveProperty('roster');
+  expect(result.current).not.toHaveProperty('handleCharacterEvent');
 });

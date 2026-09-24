@@ -123,6 +123,9 @@ vi.mock('../../../../../src/pages/vtt/rolls/useVttRolls.js', () => ({
     toast: null,
   }),
 }));
+vi.mock('../../../../../src/pages/vtt/scene/useCampaignRoster.js', () => ({
+  useCampaignRoster: () => sheetRoster.current,
+}));
 vi.mock('../../../../../src/pages/vtt/scene/useSceneContent.js', () => ({
   useSceneContent: () => ({
     beginTokenMove: beginTokenMoveMock,
@@ -130,15 +133,12 @@ vi.mock('../../../../../src/pages/vtt/scene/useSceneContent.js', () => ({
       { id: 'public-drawing', layer: 'tokens', color: '#ffffff' },
       { id: 'gm-drawing', layer: 'gm', color: '#ffffff' },
     ],
-    handleCharacterEvent: vi.fn(),
     handleDrawingEvent: vi.fn(),
     loading: false,
     refreshVisibleTokens: vi.fn(),
     reconcileContent: refreshContentMock,
     refreshContent: vi.fn(),
-    roster: sheetRoster.current,
     setDrawings: vi.fn(),
-    setRoster: vi.fn(),
     setTokens: vi.fn(),
     tokenImageUrls: {},
     tokens: encounterBridge.tokens || [
