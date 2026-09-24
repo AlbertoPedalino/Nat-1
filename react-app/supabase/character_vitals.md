@@ -17,15 +17,19 @@ death saves and conditions. Encounter/fight/token snapshots are display caches.
 
 Health controls submit an intent (damage, heal, set HP, rest, etc.). The client
 reads the character row, loads the same rules used by the sheet to calculate its
-maximum HP, and derives a patch. `commit_character_vitals` locks the row and
-commits only against that exact `row_revision`. On conflict the client reapplies
-the original intent to the returned row, including any changed class/feat data.
+maximum HP, and derives a patch. `commit_character_vitals(p_id, p_revision,
+p_patch)` locks the row and commits only against that exact `row_revision`.
 This avoids maintaining a second D&D rules engine in SQL.
 
-Each command has a UUID. The operation ledger makes transport retries idempotent,
-including a response lost after commit. Keep ledger entries while a character
-exists; deleting the character cascades to its ledger. The RPC uses caller RLS
-and fails when the caller cannot update the character.
+Each command is sent once. A stale revision is never applied: the RPC returns
+the current row, every view realigns on it, and the user repeats the action if
+it still makes sense. An RPC error or a timeout (8 s, `HEALTH_COMMAND_TIMEOUT_MS`)
+is not retried either; the client performs one bounded read of the character
+row and realigns on that. A request that timed out may still commit later; its
+realtime event then arrives like any other. No operation ledger or history is
+stored: rerunning this migration drops the former `character_vital_operations`
+table and the four-argument RPC. The RPC uses caller RLS and fails when the
+caller cannot update the character.
 
 The database trigger preserves health during ordinary full-sheet updates and
 upserts. It assigns server revisions and timestamps.
@@ -41,7 +45,7 @@ Local sheets excluded from cloud synchronization remain local.
 ## Validation
 
 `npm test` includes a PostgreSQL/PGlite test covering stale full saves,
-upsert defaults, interleaved client revisions, duplicate operation IDs and RLS,
+upsert defaults, interleaved client revisions, removal of the legacy ledger and RLS,
 plus command/API/UI tests for concurrent edits and stale encounter restores.
 PGlite tests exercise PostgreSQL SQL semantics locally; they do not deploy to or
 verify the production Supabase project's configuration.

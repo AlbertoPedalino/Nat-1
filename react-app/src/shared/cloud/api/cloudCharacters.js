@@ -117,49 +117,78 @@ export async function patchCharacterData(charId, patch) {
   return commandCharacterVitals(charId, { type: 'patch', patch });
 }
 
+export const HEALTH_COMMAND_TIMEOUT_MS = 8_000;
+export const HEALTH_CONFLICT = 'HEALTH_CONFLICT';
+export const HEALTH_TIMEOUT = 'HEALTH_TIMEOUT';
+
 const healthQueues = new Map();
 
-export function commandCharacterVitals(charId, command) {
-  const operationId = crypto.randomUUID();
-  // Preserve click order within this tab. Other tabs/devices are serialized by
-  // the database revision check, not by clocks or encounter timestamps.
+function withTimeout(promise, ms, label) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => {
+      reject(Object.assign(new Error(`${label} timed out.`), { code: HEALTH_TIMEOUT }));
+    }, ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
+// One attempt: read the row, derive the patch from it, commit against its
+// revision. The committed or current row is published either way, so every
+// view realigns on the server's answer.
+async function commitHealthCommand(charId, command) {
+  const [{ calcMaxHP }, { ensureSheetRuntimeAdapters }] = await Promise.all([
+    import('../../../pages/charsheet/state/calculations.js'),
+    import('../../../pages/charsheet/state/sheetRuntimeAdapters.js'),
+  ]);
+  let row;
+  try { row = await getCloudCharacter(charId); }
+  catch (error) {
+    const local = error.code === 'PGRST116' ? storeLoadCharacter(charId) : null;
+    if (!local) throw error;
+    // The first command on a newly created local sheet can precede autosave.
+    // Insert its starting state, then apply the intent once via the same RPC.
+    await pushCharacterData(charId, local);
+    row = await getCloudCharacter(charId);
+  }
+  if (row.row_revision == null) throw new Error('Character health update requires the database migration.');
+  await ensureSheetRuntimeAdapters(row.data);
+  const patch = applyVitalCommand(row.data, command, Math.max(1, calcMaxHP(row.data)));
+  const { data, error } = await requireClient().rpc('commit_character_vitals', {
+    p_id: charId, p_revision: row.row_revision, p_patch: patch,
+  });
+  if (error) throw error;
+  publishCharacterRow(data.row);
+  if (!data.applied) {
+    throw Object.assign(
+      new Error('Character health changed elsewhere. Showing the latest value; please try again.'),
+      { code: HEALTH_CONFLICT },
+    );
+  }
+  return data.row;
+}
+
+// Failure recovery is a single read of the authoritative row. Nothing is
+// resent; if this read fails too, realtime and the periodic refresh catch up.
+async function recoverHealthRow(charId, timeoutMs) {
+  try {
+    publishCharacterRow(await withTimeout(getCloudCharacter(charId), timeoutMs, 'Character health refresh'));
+  } catch (_) {}
+}
+
+export function commandCharacterVitals(charId, command, { timeoutMs = HEALTH_COMMAND_TIMEOUT_MS } = {}) {
+  // Preserve click order within this tab. Every link settles within the
+  // timeout plus one bounded read, so a hung request cannot block the queue.
+  // Other tabs/devices are serialized by the database revision check.
   const previous = healthQueues.get(charId) || Promise.resolve();
   const pending = previous.catch(() => {}).then(async () => {
-    const [{ calcMaxHP }, { ensureSheetRuntimeAdapters }] = await Promise.all([
-      import('../../../pages/charsheet/state/calculations.js'),
-      import('../../../pages/charsheet/state/sheetRuntimeAdapters.js'),
-    ]);
-    let row;
-    try { row = await getCloudCharacter(charId); }
-    catch (error) {
-      const local = error.code === 'PGRST116' ? storeLoadCharacter(charId) : null;
-      if (!local) throw error;
-      // The first command on a newly created local sheet can precede autosave.
-      // Insert its starting state, then apply the intent once via the same RPC.
-      await pushCharacterData(charId, local);
-      row = await getCloudCharacter(charId);
+    try {
+      return await withTimeout(commitHealthCommand(charId, command), timeoutMs, 'Character health update');
+    } catch (error) {
+      // A conflict already carried the current row back with it.
+      if (error?.code !== HEALTH_CONFLICT) await recoverHealthRow(charId, timeoutMs);
+      throw error;
     }
-    for (let attempt = 0; attempt < 12; attempt += 1) {
-      if (row.row_revision == null) throw new Error('Character health update requires the database migration.');
-      await ensureSheetRuntimeAdapters(row.data);
-      const patch = applyVitalCommand(row.data, command, Math.max(1, calcMaxHP(row.data)));
-      const args = { p_id: charId, p_revision: row.row_revision, p_operation: operationId, p_patch: patch };
-      let result;
-      // Retry transport failures using the SAME id, including lost acknowledgements.
-      for (let retry = 0; retry < 2; retry += 1) {
-        try {
-          result = await requireClient().rpc('commit_character_vitals', args);
-          if (result.error) throw result.error;
-          break;
-        } catch (error) { if (retry === 1) throw error; }
-      }
-      row = result.data.row;
-      if (result.data.applied) {
-        publishCharacterRow(row);
-        return row;
-      }
-    }
-    throw new Error('Character health is being edited elsewhere. Please try again.');
   });
   healthQueues.set(charId, pending);
   const cleanup = () => { if (healthQueues.get(charId) === pending) healthQueues.delete(charId); };
