@@ -3,8 +3,8 @@ import { useAuth } from '../auth/AuthProvider.jsx';
 import { supabase } from '../supabaseClient.js';
 import { listCharacterDigests, readCharacterSheets, safeCharacterIds } from '../api/characterDigests.js';
 import { readBaseMaxHp } from '../../campaign/characterVitals.js';
-import { digestFromSheetRow, isNewerDigest, toCharacterDigest } from '../../campaign/characterDigest.js';
-import { CHARACTER_ROW_EVENT } from './characterRows.js';
+import { digestFromVitalsAnswer, isNewerDigest, toCharacterDigest } from '../../campaign/characterDigest.js';
+import { CHARACTER_RECHECK_EVENT, CHARACTER_VITALS_EVENT } from './characterEvents.js';
 import { coalesceReturns } from './returnGate.js';
 
 const DIGEST_RECONCILE_MS = 30_000;
@@ -23,7 +23,10 @@ const EMPTY = new Map();
 // Recovery is the same light read everywhere — the digests themselves — on
 // SUBSCRIBED (first join and every reconnect), coming back to the tab, going
 // online, and a 30 s safety tick. There is no full-row polling.
-export function useCharacterDigests({ campaignId = null, characterIds = null, enabled = true } = {}) {
+//
+// `deriveMaxHp: false` is for a consumer that already holds the sheet (an
+// editable CharacterSheet derives its own maximum): no sheet is ever read.
+export function useCharacterDigests({ campaignId = null, characterIds = null, enabled = true, deriveMaxHp = true } = {}) {
   const { cloudEnabled, status } = useAuth();
   const idsKey = campaignId ? '' : safeCharacterIds(characterIds).join(',');
   const scope = useMemo(() => {
@@ -46,6 +49,8 @@ export function useCharacterDigests({ campaignId = null, characterIds = null, en
   // hpBasis currently being derived, per character, so a burst of digests
   // with the same basis asks for the sheet once.
   const derivingRef = useRef(new Map());
+  const deriveRef = useRef(deriveMaxHp);
+  deriveRef.current = deriveMaxHp;
 
   const inScope = useCallback((digest, target = scopeRef.current) => {
     if (!digest || !target) return false;
@@ -85,7 +90,7 @@ export function useCharacterDigests({ campaignId = null, characterIds = null, en
   // network failure is forgotten, so the next reconcile retries it.
   const deriveMissing = useCallback((list) => {
     const target = scopeRef.current;
-    if (!target) return;
+    if (!target || !deriveRef.current) return;
     const wanted = [];
     for (const digest of list) {
       if (!digest?.hpBasis) continue;
@@ -193,23 +198,31 @@ export function useCharacterDigests({ campaignId = null, characterIds = null, en
     }
 
     // A health command's answer is here before its digest: show it now.
-    const receiveRow = ({ detail }) => {
-      const held = digestsRef.current.get(String(detail?.id ?? ''));
-      const digest = digestFromSheetRow(detail, held);
+    const receiveVitals = ({ detail }) => {
+      const held = digestsRef.current.get(String(detail?.characterId ?? ''));
+      const digest = digestFromVitalsAnswer(detail, held);
       if (digest) upsert(digest);
+    };
+    // A command of this tab failed or timed out: whether it landed is read
+    // from the digests, like any other recovery.
+    const recheck = ({ detail }) => {
+      const id = String(detail?.characterId ?? '');
+      if (scope.campaignId ? digestsRef.current.has(id) : scope.characterIds.includes(id)) reconcile();
     };
     const onReturn = coalesceReturns(() => reconcile());
     const onVisible = () => { if (document.visibilityState === 'visible') onReturn(); };
     const onOnline = () => reconcile();
     const timer = window.setInterval(() => reconcile(), DIGEST_RECONCILE_MS);
-    window.addEventListener(CHARACTER_ROW_EVENT, receiveRow);
+    window.addEventListener(CHARACTER_VITALS_EVENT, receiveVitals);
+    window.addEventListener(CHARACTER_RECHECK_EVENT, recheck);
     window.addEventListener('focus', onReturn);
     window.addEventListener('online', onOnline);
     document.addEventListener('visibilitychange', onVisible);
     return () => {
       readRef.current += 1;
       window.clearInterval(timer);
-      window.removeEventListener(CHARACTER_ROW_EVENT, receiveRow);
+      window.removeEventListener(CHARACTER_VITALS_EVENT, receiveVitals);
+      window.removeEventListener(CHARACTER_RECHECK_EVENT, recheck);
       window.removeEventListener('focus', onReturn);
       window.removeEventListener('online', onOnline);
       document.removeEventListener('visibilitychange', onVisible);

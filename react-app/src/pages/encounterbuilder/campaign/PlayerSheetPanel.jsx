@@ -6,7 +6,7 @@ import { campaignSheetUrl } from './campaignSheetUrl.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 
 export default function PlayerSheetPanel({ selection, onClose }) {
-  const { state } = useEncounterBuilder();
+  const { state, characterDigests } = useEncounterBuilder();
   const combatant = state.combat?.combatants?.find((item) => item.id === selection?.combatantId);
   const sourceId = selection?.playerSourceId || combatant?.sourceId || null;
 
@@ -63,7 +63,14 @@ export default function PlayerSheetPanel({ selection, onClose }) {
       <Box sx={playerBodySx}>
         {sourceId ? (
           <Box sx={sheetFrameSx}>
-            <CampaignSheetView sheetId={sourceId} editable embedded />
+            {/* Linked players are already followed for the encounter: the sheet
+                takes its vitals from that digest instead of a channel of its own. */}
+            <CampaignSheetView
+              sheetId={sourceId}
+              editable
+              embedded
+              liveDigest={characterDigests?.get(String(sourceId)) ?? null}
+            />
           </Box>
         ) : (
           <Box sx={fallbackSx}>

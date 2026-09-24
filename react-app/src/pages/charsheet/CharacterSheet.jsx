@@ -41,7 +41,7 @@ import { loadItems, loadOptionalFeatures, loadConditions, reconcileInventoryWith
 import { updateCloudCharacterData, commandCharacterVitals } from '../../shared/cloud/api/cloudCharacters.js';
 import { useRollChannel } from '../../shared/cloud/sync/useRollChannel.js';
 import { useCharacterCampaign } from '../../shared/cloud/sync/useCharacterCampaign.js';
-import { useCloudCharacterLive } from '../../shared/cloud/sync/useCloudCharacterLive.js';
+import { useCharacterDigests } from '../../shared/cloud/sync/useCharacterDigests.js';
 import { useAuth } from '../../shared/cloud/auth/AuthProvider.jsx';
 import { isSyncExcluded } from '../../shared/cloud/sync/cloudSyncExclude.js';
 import { normalizeRoll } from '../../shared/vtt/rolls/rollFeed.js';
@@ -122,7 +122,7 @@ export default function CharacterSheet({
   externalCharId = null,
   readOnly = false,
   embedded = false,
-  liveVitals = null,
+  liveDigest,
   onRoll = null,
   showOwnRollToast = true,
 } = {}) {
@@ -165,30 +165,27 @@ export default function CharacterSheet({
   const usesExternalChar = Boolean(externalChar);
   const auth = useAuth();
   const hasCloudHealth = usesExternalChar || (auth.cloudEnabled && auth.status === 'authed');
-  const [localLiveVitals, setLocalLiveVitals] = useState(null);
-  const incomingVitals = localLiveVitals || liveVitals;
-  const healthRevisionRef = useRef(-1);
-  const healthRowRef = useRef(null);
-  const healthIdRef = useRef(null);
-  healthIdRef.current = usesExternalChar ? externalCharId : charId;
   const sheetReady = Boolean(sheet);
   sheetRef.current = sheet;
 
-  const acceptHealthRow = useCallback(async (row) => {
-    if (!row || String(row.id) !== String(healthIdRef.current) || Number(row.row_revision ?? 0) < healthRevisionRef.current) return;
-    healthRevisionRef.current = Number(row.row_revision ?? 0);
-    healthRowRef.current = row;
-    await ensureSheetRuntimeAdapters(row.data);
-    if (healthRowRef.current !== row || String(row.id) !== String(healthIdRef.current)) return;
-    const maxHP = Math.max(1, Math.max(1, calcMaxHP(row.data)) + (Number(row.data.maxHPBonus) || 0));
-    setLocalLiveVitals({ ...clampCharacterVitals(row.data, { maxHP, fallback: { currentHP: maxHP } }), maxHP });
-  }, []);
-
-  useCloudCharacterLive({
-    charId,
-    enabled: !readOnly && !isSyncExcluded(charId),
-    onUpdate: (row) => { acceptHealthRow(row).catch(() => {}); },
+  // An editable sheet is the author of everything but its vitals, which others
+  // (the GM, the battle map, the encounter builder) change through health
+  // commands. Those arrive in the character digest — the parent's when it
+  // already follows one (`liveDigest`, e.g. the battle map roster), otherwise
+  // this sheet's own — never as a whole row. Max HP is derived here from this
+  // sheet, so no sheet is ever downloaded for it. A read-only sheet is fed
+  // whole rows by its parent instead.
+  const healthId = usesExternalChar ? externalCharId : charId;
+  const followsVitals = Boolean(healthId) && !readOnly && !isSyncExcluded(healthId);
+  const { digests: ownDigests } = useCharacterDigests({
+    characterIds: healthId ? [healthId] : null,
+    enabled: followsVitals && liveDigest === undefined,
+    deriveMaxHp: false,
   });
+  const candidateDigest = liveDigest === undefined ? ownDigests.get(String(healthId)) : liveDigest;
+  const incomingDigest = followsVitals && candidateDigest?.characterId === String(healthId) ? candidateDigest : null;
+  const incomingDigestRef = useRef(null);
+  incomingDigestRef.current = incomingDigest;
 
   useEffect(() => {
     if (embedded) return;
@@ -200,9 +197,6 @@ export default function CharacterSheet({
     let alive = true;
     cloudSaveReadyRef.current = false;
     pendingCloudSaveRef.current = null;
-    healthRevisionRef.current = -1;
-    healthRowRef.current = null;
-    setLocalLiveVitals(null);
     localEditVersionRef.current = 0;
     queuedEditVersionRef.current = 0;
     cloudSaveErrorShownRef.current = false;
@@ -279,8 +273,14 @@ export default function CharacterSheet({
       const vitalPatch = Object.fromEntries(SYNCED_VITALS.filter((f) => Object.hasOwn(patch, f.data)).map((f) => [f.data, patch[f.data]]));
       const confirmed = sheetRef.current;
       setSheet((prev) => ({ ...prev, ...pickCharacterVitals(confirmed), maxHP: confirmed.maxHP }));
-      commandCharacterVitals(charId, command || { type: 'patch', patch: vitalPatch })
-        .then(acceptHealthRow)
+      // Computed from the digest this sheet follows and the base max HP this
+      // sheet derives (it is the author of its own structure), so nothing is
+      // read first. The answer (applied or not) comes back through the digest.
+      const digest = incomingDigestRef.current;
+      const base = digest && confirmed
+        ? { hpBasis: digest.hpBasis, baseMax: Math.max(1, (Number(confirmed.maxHP) || 1) - (Number(confirmed.maxHPBonus) || 0)) }
+        : null;
+      commandCharacterVitals(charId, command || { type: 'patch', patch: vitalPatch }, { digest, base })
         .catch((error) => setDiceToast({ label: 'Health update failed', detail: error.message, rolls: [], timestamp: Date.now() }));
       patch = Object.fromEntries(Object.entries(patch).filter(([key]) => !SYNCED_VITALS.some((f) => f.data === key)));
       if (!Object.keys(patch).length) return;
@@ -295,7 +295,7 @@ export default function CharacterSheet({
     const next = storePatchCharacter(charId, patch, { emit: !fromCloud });
     if (next) setC(next);
     else setC((prev) => prev ? { ...prev, ...patch } : prev);
-  }, [charId, usesExternalChar, hasCloudHealth, acceptHealthRow]);
+  }, [charId, usesExternalChar, hasCloudHealth]);
 
   const syncSheet = useCallback((updates) => {
     if (hasCloudHealth && !isSyncExcluded(charId)) {
@@ -308,14 +308,15 @@ export default function CharacterSheet({
   // Also apply updates received while the initial sheet was still loading.
   // Own save echoes are no-ops and remote changes never schedule a cloud write.
   useEffect(() => {
-    if (!incomingVitals || !sheetReady || readOnly) return;
+    if (!incomingDigest || !sheetReady || readOnly) return;
     const s = sheetRef.current;
     if (!s) return;
-    const vitals = clampCharacterVitals(incomingVitals, { fallback: s });
-    // Max HP is derived (base + bonus); apply the synced bonus and re-clamp current.
+    // Max HP is derived (this sheet's base + the synced bonus). A digest with
+    // no current HP means undamaged.
+    const raw = pickCharacterVitals(incomingDigest);
     const baseMax = Math.max(1, (Number(s.maxHP) || 1) - (Number(s.maxHPBonus) || 0));
-    const maxHP = incomingVitals.maxHP ?? Math.max(1, baseMax + vitals.maxHPBonus);
-    const next = { ...vitals, currentHP: Math.max(0, Math.min(maxHP, vitals.currentHP)) };
+    const maxHP = Math.max(1, baseMax + clampCharacterVitals(raw).maxHPBonus);
+    const next = clampCharacterVitals(raw, { maxHP, fallback: { currentHP: maxHP } });
     // Compared field by field through the registry's own normalizer, so a newly
     // synced field is covered the moment it is declared instead of needing a
     // clause here — the omission that let combat conditions arrive and be
@@ -326,7 +327,7 @@ export default function CharacterSheet({
     if (unchanged) return;
     setSheet((prev) => (prev ? { ...prev, ...next, maxHP } : prev));
     persist(next, { fromCloud: true });
-  }, [incomingVitals, sheetReady, readOnly, persist]);
+  }, [incomingDigest, sheetReady, readOnly, persist]);
 
   const updateCurrentCharacter = useCallback((updater) => {
     if (!C) return;

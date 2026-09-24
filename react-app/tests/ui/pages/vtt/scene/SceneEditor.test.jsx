@@ -23,7 +23,7 @@ const fetchSceneMock = vi.hoisted(() => vi.fn());
 const refreshContentMock = vi.hoisted(() => vi.fn());
 const fetchSceneRevisionMock = vi.hoisted(() => vi.fn());
 const sceneLiveOptions = vi.hoisted(() => ({ current: null }));
-const sheetRoster = vi.hoisted(() => ({ current: [] }));
+const sheetRoster = vi.hoisted(() => ({ current: [], digests: new Map() }));
 const encounterBridge = vi.hoisted(() => ({ real: false, tokens: null }));
 const patchCharacterMock = vi.hoisted(() => vi.fn());
 
@@ -41,6 +41,7 @@ beforeEach(() => {
   encounterBridge.tokens = null;
   patchCharacterMock.mockReset().mockResolvedValue(undefined);
   sheetRoster.current = [];
+  sheetRoster.digests = new Map();
   notifyMock.mockClear();
   sendPresenterStateMock.mockClear();
   sendDragMock.mockReset();
@@ -124,7 +125,7 @@ vi.mock('../../../../../src/pages/vtt/rolls/useVttRolls.js', () => ({
   }),
 }));
 vi.mock('../../../../../src/pages/vtt/scene/useCampaignRoster.js', () => ({
-  useCampaignRoster: () => sheetRoster.current,
+  useCampaignRoster: () => ({ roster: sheetRoster.current, digests: sheetRoster.digests }),
 }));
 vi.mock('../../../../../src/pages/vtt/scene/useSceneContent.js', () => ({
   useSceneContent: () => ({
@@ -156,7 +157,9 @@ vi.mock('../../../../../src/pages/vtt/map/SceneViewport.jsx', () => ({
 }));
 
 vi.mock('../../../../../src/pages/campaignsheet/CampaignSheetView.jsx', () => ({
-  default: ({ sheetId }) => <div data-testid="campaign-sheet">Sheet {sheetId}</div>,
+  default: ({ sheetId, liveDigest }) => (
+    <div data-testid="campaign-sheet" data-digest={liveDigest ? liveDigest.rowRevision : 'none'}>Sheet {sheetId}</div>
+  ),
 }));
 
 test('an open battle map never rewrites sheet HP from cached encounters on mount or saves', () => {
@@ -184,6 +187,8 @@ test('an open battle map never rewrites sheet HP from cached encounters on mount
 
 test('opening the scene sheet keeps the map visible alongside the selected character', async () => {
   sheetRoster.current = [{ characterId: 'aria', name: 'Aria', ownerId: 'gm-1' }];
+  // The roster's digest feeds the sheet: it opens no channel of its own.
+  sheetRoster.digests = new Map([['aria', { characterId: 'aria', rowRevision: 7 }]]);
   const scene = {
     id: 'scene-sheet',
     campaignId: 'campaign-1',
@@ -204,6 +209,7 @@ test('opening the scene sheet keeps the map visible alongside the selected chara
   expect(map).toBeVisible();
   fireEvent.click(screen.getByRole('button', { name: 'Show character sheet' }));
   expect(await screen.findByTestId('campaign-sheet')).toHaveTextContent('Sheet aria');
+  expect(screen.getByTestId('campaign-sheet')).toHaveAttribute('data-digest', '7');
   expect(screen.getByTestId('campaign-sheet')).toBeVisible();
   expect(map).toBeVisible();
   fireEvent.click(screen.getByRole('button', { name: 'Hide character sheet' }));

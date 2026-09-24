@@ -83,10 +83,12 @@ repository **secrets** and pass them as env to `npm run build`.
   **view** each other's sheets read-only (only the owner can edit).
 - **Character health** (HP, temp HP, death saves, conditions) is changed only through
   `commit_character_vitals` (`13_character_vitals.sql`): one command per edit against the
-  row revision; ordinary sheet saves cannot change it. `04_characters_realtime.sql` adds
-  `public.characters` to Realtime so an open sheet follows its own row. The battle map and
-  the encounter builder follow `character_digests` instead (`16_character_digests.sql`):
-  roster facts, vitals and a hash of the max-HP inputs, rewritten only when those change.
+  character digest's revision and max-HP basis, answered with vitals only; ordinary sheet
+  saves cannot change it. `04_characters_realtime.sql` adds
+  `public.characters` to Realtime so a read-only sheet viewer follows its row. Editable sheets,
+  the battle map and the encounter builder follow `character_digests` instead
+  (`16_character_digests.sql`): roster facts, vitals and a hash of the max-HP inputs,
+  rewritten only when those change.
 - **Live scene**: `15_live_scenes.sql` keeps `campaign_live_scenes`, one row per campaign
   naming the scene it shows; players and the projector follow that row to switch scenes and
   the scene row itself for everything drawn on it.

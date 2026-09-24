@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  digestFromSheetRow,
+  digestFromVitalsAnswer,
   digestMaxHp,
   isNewerDigest,
   rosterFromDigests,
@@ -49,17 +49,22 @@ test('revisions order digests; the database settles a local preview of the same 
   const newer = toCharacterDigest(row({ row_revision: 6 }));
   assert.equal(isNewerDigest(newer, server), true);
   assert.equal(isNewerDigest(server, newer), false);
-  const local = digestFromSheetRow(
-    { id: 'pc', row_revision: 6, data: { currentHP: 4, tempHP: 0, activeConditions: [] } },
-    server,
-  );
+  const answer = {
+    applied: true, characterId: 'pc', digestRevision: 6, hpBasis: 'h1',
+    vitals: { currentHP: 4, tempHP: 0, maxHPBonus: 2, deathSaves: { success: 0, fail: 0 }, activeConditions: [] },
+  };
+  const local = digestFromVitalsAnswer(answer, server);
   assert.equal(local.source, 'local');
-  assert.equal(local.hpBasis, 'h1', 'a health answer keeps the basis already held');
+  assert.equal(local.rowRevision, 6, 'the preview carries the digest revision the command produced');
+  assert.equal(local.hpBasis, 'h1');
   assert.equal(local.currentHP, 4);
-  assert.equal(local.portraitPath, 'art/aria.webp');
+  assert.equal(local.portraitPath, 'art/aria.webp', 'roster facts come from the digest already held');
   assert.equal(isNewerDigest(local, server), true);
   assert.equal(isNewerDigest(newer, local), true);
-  assert.equal(digestFromSheetRow({ id: 'pc', data: {} }, null), null, 'unknown characters wait for their digest');
+  assert.equal(digestFromVitalsAnswer({ ...answer, hpBasis: 'h2' }, server).hpBasis, 'h2', 'the answer knows the current basis');
+  assert.equal(digestFromVitalsAnswer(answer, null), null, 'unknown characters wait for their digest');
+  assert.equal(digestFromVitalsAnswer({ ...answer, characterId: 'other' }, server), null);
+  assert.equal(digestFromVitalsAnswer({ ...answer, digestRevision: null }, server), null);
 });
 
 test('the roster is sorted and shows hit points only once the base maximum is known', () => {

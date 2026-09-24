@@ -1,7 +1,11 @@
 import { requireClient } from '../supabaseClient.js';
 import { loadCharacter as storeLoadCharacter, saveCharacter as storeSaveCharacter } from '../../character/profile/store.js';
 import { applyVitalCommand } from '../../character/combat/vitalCommands.js';
-import { publishCharacterRow } from '../sync/characterRows.js';
+import { pickCharacterVitals } from '../../character/combat/vitals.js';
+import { readBaseMaxHp } from '../../campaign/characterVitals.js';
+import { publishCharacterVitals, requestCharacterRecheck } from '../sync/characterEvents.js';
+import { listCharacterDigests } from './characterDigests.js';
+import { healthCommandRoute } from './healthCommandRoute.js';
 
 const TABLE = 'characters';
 
@@ -65,6 +69,19 @@ export async function getCloudCharacter(charId) {
   return data;
 }
 
+// The row's version only (a few bytes): whether a held sheet is still current.
+// Null when the row is gone or unreadable.
+export async function getCloudCharacterRevision(charId) {
+  const supabase = requireClient();
+  const { data, error } = await supabase
+    .from(TABLE)
+    .select('row_revision')
+    .eq('id', charId)
+    .maybeSingle();
+  if (error) throw error;
+  return data?.row_revision == null ? null : Number(data.row_revision);
+}
+
 // Lightweight existence/freshness check: returns { updated_at } or null.
 export async function fetchCloudMeta(charId) {
   const supabase = requireClient();
@@ -110,18 +127,28 @@ export async function updateCloudCharacterData(charId, character) {
   return data;
 }
 
-// Explicit absolute edits only. Damage/healing must use commandCharacterVitals
-// with a delta so concurrent edits are recalculated against the current row.
-export async function patchCharacterData(charId, patch) {
-  if (!charId || !patch) return;
-  return commandCharacterVitals(charId, { type: 'patch', patch });
-}
-
 export const HEALTH_COMMAND_TIMEOUT_MS = 8_000;
 export const HEALTH_CONFLICT = 'HEALTH_CONFLICT';
 export const HEALTH_TIMEOUT = 'HEALTH_TIMEOUT';
 
+// Commands that add to what is there. When the database explicitly refused one
+// (`applied: false`, so it certainly did not land), it is recomputed once from
+// the state that answer carries: two players hitting the same character both
+// count. Absolute commands (set HP, a patch, a token edit, a toggle decided on
+// what the user saw) are never replayed over someone else's change.
+const RELATIVE_COMMANDS = new Set(['modifyHp', 'modifyTempHp', 'grantTempHp', 'modifyMaxHp', 'deathSaveRoll']);
+
 const healthQueues = new Map();
+// The newest answer this tab received per character, so a command queued
+// behind another starts from what that one committed, not from the digest the
+// caller held when it was clicked.
+const latestAnswers = new Map();
+// How many commands took each path, for diagnostics and tests.
+const routeCounts = { digest: 0, legacy: 0 };
+
+export function healthCommandStats() {
+  return { ...routeCounts };
+}
 
 function withTimeout(promise, ms, label) {
   let timer;
@@ -133,60 +160,125 @@ function withTimeout(promise, ms, label) {
   return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
 }
 
-// One attempt: read the row, derive the patch from it, commit against its
-// revision. The committed or current row is published either way, so every
-// view realigns on the server's answer.
-async function commitHealthCommand(charId, command) {
-  const [{ calcMaxHP }, { ensureSheetRuntimeAdapters }] = await Promise.all([
-    import('../../../pages/charsheet/state/calculations.js'),
-    import('../../../pages/charsheet/state/sheetRuntimeAdapters.js'),
-  ]);
-  let row;
-  try { row = await getCloudCharacter(charId); }
-  catch (error) {
-    const local = error.code === 'PGRST116' ? storeLoadCharacter(charId) : null;
-    if (!local) throw error;
+// The normal path: everything is already in hand. `digest` is the character
+// digest the caller follows; `base` is `{ hpBasis, baseMax }` for that basis.
+function stateFromDigest(charId, digest, base) {
+  const state = {
+    revision: Number(digest.rowRevision),
+    hpBasis: digest.hpBasis,
+    vitals: pickCharacterVitals(digest),
+    baseMax: base.baseMax,
+  };
+  const answer = latestAnswers.get(String(charId));
+  if (answer && answer.hpBasis === state.hpBasis && answer.digestRevision > state.revision) {
+    return { ...state, revision: answer.digestRevision, vitals: answer.vitals };
+  }
+  return state;
+}
+
+async function readDigest(charId) {
+  return (await listCharacterDigests({ characterIds: [charId] }))[0] || null;
+}
+
+// The rare path, for a caller that has no digest yet, no base max, or a base
+// max of another basis: read the digest first, then the sheet (a sheet newer
+// than that digest fails the commit's check instead of being trusted), and
+// derive the base max here.
+async function stateFromSheet(charId) {
+  let digest = await readDigest(charId);
+  if (!digest) {
+    if ((await getCloudCharacterRevision(charId)) != null) {
+      throw new Error('Character health update requires the database migration.');
+    }
     // The first command on a newly created local sheet can precede autosave.
     // Insert its starting state, then apply the intent once via the same RPC.
+    const local = storeLoadCharacter(charId);
+    if (!local) throw new Error('Character unavailable or no permission.');
     await pushCharacterData(charId, local);
-    row = await getCloudCharacter(charId);
+    digest = await readDigest(charId);
+    if (!digest) throw new Error('Character health update requires the database migration.');
   }
-  if (row.row_revision == null) throw new Error('Character health update requires the database migration.');
-  await ensureSheetRuntimeAdapters(row.data);
-  const patch = applyVitalCommand(row.data, command, Math.max(1, calcMaxHP(row.data)));
+  const row = await getCloudCharacter(charId);
+  const baseMax = (await readBaseMaxHp([row])).get(String(row.id));
+  if (!Number.isFinite(baseMax)) throw new Error('The maximum hit points of this character cannot be derived.');
+  return {
+    revision: digest.rowRevision,
+    hpBasis: digest.hpBasis,
+    vitals: { ...pickCharacterVitals(row.data), exhaustionLevel: row.data.exhaustionLevel },
+    baseMax,
+  };
+}
+
+function toAnswer(charId, data) {
+  if (!data || typeof data.applied !== 'boolean' || !data.vitals || typeof data.vitals !== 'object') {
+    throw new Error('Unexpected answer to a character health update.');
+  }
+  return {
+    applied: data.applied,
+    characterId: String(data.characterId ?? charId),
+    vitals: data.vitals,
+    digestRevision: data.digestRevision == null ? null : Number(data.digestRevision),
+    hpBasis: typeof data.hpBasis === 'string' ? data.hpBasis : null,
+  };
+}
+
+// One commit: an absolute patch against the digest it was computed from. The
+// answer — applied or not — is vitals only, and every view in this tab
+// realigns on it.
+async function commitVitals(charId, state, command) {
+  const patch = applyVitalCommand(state.vitals, command, Math.max(1, state.baseMax));
   const { data, error } = await requireClient().rpc('commit_character_vitals', {
-    p_id: charId, p_revision: row.row_revision, p_patch: patch,
+    p_id: charId, p_digest_revision: state.revision, p_hp_basis: state.hpBasis, p_patch: patch,
   });
   if (error) throw error;
-  publishCharacterRow(data.row);
-  if (!data.applied) {
+  const answer = toAnswer(charId, data);
+  const held = latestAnswers.get(answer.characterId);
+  if (answer.digestRevision != null && !(held?.digestRevision > answer.digestRevision)) {
+    latestAnswers.set(answer.characterId, answer);
+  }
+  publishCharacterVitals(answer);
+  return answer;
+}
+
+async function commitHealthCommand(charId, command, context) {
+  const route = healthCommandRoute(charId, command, context);
+  routeCounts[route === 'digest' ? 'digest' : 'legacy'] += 1;
+  const state = route === 'digest'
+    ? stateFromDigest(charId, context.digest, context.base)
+    : await stateFromSheet(charId);
+  let answer = await commitVitals(charId, state, command);
+  if (!answer.applied && RELATIVE_COMMANDS.has(command.type)
+    && answer.digestRevision != null && answer.hpBasis === state.hpBasis) {
+    answer = await commitVitals(charId, { ...state, revision: answer.digestRevision, vitals: answer.vitals }, command);
+  }
+  if (!answer.applied) {
     throw Object.assign(
       new Error('Character health changed elsewhere. Showing the latest value; please try again.'),
-      { code: HEALTH_CONFLICT },
+      { code: HEALTH_CONFLICT, answer },
     );
   }
-  return data.row;
+  return answer;
 }
 
-// Failure recovery is a single read of the authoritative row. Nothing is
-// resent; if this read fails too, realtime and the periodic refresh catch up.
-async function recoverHealthRow(charId, timeoutMs) {
-  try {
-    publishCharacterRow(await withTimeout(getCloudCharacter(charId), timeoutMs, 'Character health refresh'));
-  } catch (_) {}
-}
-
-export function commandCharacterVitals(charId, command, { timeoutMs = HEALTH_COMMAND_TIMEOUT_MS } = {}) {
+// Change a character's health. `digest` and `base` (`{ hpBasis, baseMax }`)
+// are what the caller already follows; with them nothing is read before the
+// commit and nothing but vitals comes back. Without them (or with a base max of
+// another basis) the command reads the sheet once — see healthCommandRoute.
+//
+// Sent once: a timeout or an error is never resent. A conflict already carried
+// the current state back; any other failure asks this tab's followers of the
+// character to run their light recovery, and a late commit arrives through the
+// digest like any other change.
+export function commandCharacterVitals(charId, command, { timeoutMs = HEALTH_COMMAND_TIMEOUT_MS, digest = null, base = null } = {}) {
   // Preserve click order within this tab. Every link settles within the
-  // timeout plus one bounded read, so a hung request cannot block the queue.
-  // Other tabs/devices are serialized by the database revision check.
+  // timeout, so a hung request cannot block the queue. Other tabs and devices
+  // are serialized by the database's digest check.
   const previous = healthQueues.get(charId) || Promise.resolve();
   const pending = previous.catch(() => {}).then(async () => {
     try {
-      return await withTimeout(commitHealthCommand(charId, command), timeoutMs, 'Character health update');
+      return await withTimeout(commitHealthCommand(charId, command, { digest, base }), timeoutMs, 'Character health update');
     } catch (error) {
-      // A conflict already carried the current row back with it.
-      if (error?.code !== HEALTH_CONFLICT) await recoverHealthRow(charId, timeoutMs);
+      if (error?.code !== HEALTH_CONFLICT) requestCharacterRecheck(charId);
       throw error;
     }
   });

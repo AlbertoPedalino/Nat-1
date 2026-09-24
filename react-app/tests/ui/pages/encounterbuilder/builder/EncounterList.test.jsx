@@ -11,7 +11,7 @@ vi.mock('../../../../../src/pages/encounterbuilder/bestiary/useMonsterDb.js', ()
   return { useMonsterDb: () => ({ monsters, status: 'ready' }) };
 });
 vi.mock('../../../../../src/pages/encounterbuilder/campaign/useCampaignPlayers.js', () => ({ useCampaignPlayers: () => ({ campaigns: [] }) }));
-vi.mock('../../../../../src/pages/encounterbuilder/campaign/useCharacterVitalSync.js', () => ({ useCharacterVitalSync: () => {} }));
+vi.mock('../../../../../src/pages/encounterbuilder/campaign/useCharacterVitalSync.js', () => ({ useCharacterVitalSync: () => ({ digests: new Map(), baseMax: new Map() }) }));
 vi.mock('../../../../../src/pages/encounterbuilder/sync/useExternalFightSync.js', () => ({ useExternalFightSync: () => {} }));
 vi.mock('../../../../../src/pages/encounterbuilder/sync/useCloudFights.js', () => ({ useCloudFights: () => ({ canSync: false }) }));
 vi.mock('../../../../../src/pages/encounterbuilder/rolls/useEncounterRolls.js', () => ({ useEncounterRolls: () => ({}) }));

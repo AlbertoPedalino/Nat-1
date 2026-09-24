@@ -1,93 +1,227 @@
 import {
-  commandCharacterVitals, HEALTH_CONFLICT, HEALTH_TIMEOUT,
+  commandCharacterVitals, healthCommandStats, HEALTH_CONFLICT, HEALTH_TIMEOUT,
 } from '../../../../../src/shared/cloud/api/cloudCharacters.js';
+import { toCharacterDigest } from '../../../../../src/shared/campaign/characterDigest.js';
+import { CHARACTER_RECHECK_EVENT, CHARACTER_VITALS_EVENT } from '../../../../../src/shared/cloud/sync/characterEvents.js';
 
-const server = vi.hoisted(() => ({ row: null, rpc: vi.fn(), read: vi.fn() }));
+// A database that behaves like commit_character_vitals: an absolute patch is
+// applied only against the current digest revision and max-HP basis, and the
+// answer is vitals only.
+const server = vi.hoisted(() => ({
+  data: null, revision: 0, basis: 'h1', exists: true, reads: [], rpc: vi.fn(), digests: vi.fn(), baseMax: vi.fn(),
+}));
+const VITAL_KEYS = ['currentHP', 'tempHP', 'maxHPBonus', 'deathSaves', 'activeConditions'];
+const vitalsOf = (data) => Object.fromEntries(VITAL_KEYS.filter((key) => key in data).map((key) => [key, data[key]]));
+const answer = (applied) => ({
+  applied, characterId: 'pc', vitals: structuredClone(vitalsOf(server.data)), digestRevision: server.revision, hpBasis: server.basis,
+});
+const digestRow = () => ({
+  character_id: 'pc', campaign_id: 'camp', owner: 'owner', row_revision: server.revision,
+  digest: { name: 'Fighter', ...structuredClone(vitalsOf(server.data)), hpBasis: server.basis },
+});
+// What a follower holds: the digest as it is now.
+const held = () => toCharacterDigest(digestRow());
+const base = (baseMax = 30, hpBasis = server.basis) => ({ hpBasis, baseMax });
+
 vi.mock('../../../../../src/shared/cloud/supabaseClient.js', () => ({
   requireClient: () => ({
-    from: () => ({ select: () => ({ eq: () => ({ single: server.read }) }) }),
+    auth: { getUser: async () => ({ data: { user: { id: 'owner', user_metadata: {} } }, error: null }) },
     rpc: server.rpc,
+    from: (table) => ({
+      select: (columns) => ({
+        eq: () => {
+          server.reads.push({ table, columns });
+          const row = server.exists ? { id: 'pc', owner: 'owner', row_revision: 7, data: structuredClone(server.data) } : null;
+          return {
+            single: async () => (row ? { data: row } : { data: null, error: { code: 'PGRST116' } }),
+            maybeSingle: async () => ({ data: row }),
+          };
+        },
+      }),
+      upsert: async (row) => {
+        server.reads.push({ table, upsert: true });
+        server.exists = true;
+        server.data = structuredClone(row.data);
+        return { error: null };
+      },
+    }),
   }),
 }));
-vi.mock('../../../../../src/pages/charsheet/state/calculations.js', () => ({ calcMaxHP: (data) => data.baseMax }));
-vi.mock('../../../../../src/pages/charsheet/state/sheetRuntimeAdapters.js', () => ({ ensureSheetRuntimeAdapters: async () => {} }));
+vi.mock('../../../../../src/shared/cloud/api/characterDigests.js', async (original) => ({
+  ...await original(),
+  listCharacterDigests: (...args) => server.digests(...args),
+}));
+vi.mock('../../../../../src/shared/campaign/characterVitals.js', () => ({
+  readBaseMaxHp: (...args) => server.baseMax(...args),
+}));
 
-const published = vi.fn();
-const onRow = (event) => published(event.detail);
+let start = 0;
+const vitalsEvents = vi.fn();
+const recheckEvents = vi.fn();
+const onVitals = (event) => vitalsEvents(event.detail);
+const onRecheck = (event) => recheckEvents(event.detail);
+const characterReads = () => server.reads.filter((read) => read.table === 'characters' && !read.upsert);
 
 beforeEach(() => {
-  server.row = { id: 'pc', row_revision: 0, data: { currentHP: 30, tempHP: 5, baseMax: 30 } };
-  server.read.mockReset().mockImplementation(async () => ({ data: structuredClone(server.row) }));
+  server.data = { currentHP: 30, tempHP: 5, maxHPBonus: 0, deathSaves: { success: 0, fail: 0 }, activeConditions: [], notes: 'long notes' };
+  // Revisions only grow, as in the database (this tab remembers its last answers).
+  server.revision += 100;
+  start = server.revision;
+  server.basis = 'h1';
+  server.exists = true;
+  server.reads = [];
+  server.digests.mockReset().mockImplementation(async () => (server.exists ? [held()] : []));
+  server.baseMax.mockReset().mockImplementation(async (rows) => new Map(rows.map((row) => [row.id, 30])));
   server.rpc.mockReset().mockImplementation(async (_name, args) => {
-    if (args.p_revision !== server.row.row_revision) {
-      return { data: { applied: false, row: structuredClone(server.row) } };
-    }
-    server.row = { ...server.row, row_revision: server.row.row_revision + 1, data: { ...server.row.data, ...args.p_patch } };
-    return { data: { applied: true, row: structuredClone(server.row) } };
+    if (args.p_digest_revision !== server.revision || args.p_hp_basis !== server.basis) return { data: answer(false) };
+    const before = JSON.stringify(vitalsOf(server.data));
+    server.data = { ...server.data, ...args.p_patch };
+    if (JSON.stringify(vitalsOf(server.data)) !== before) server.revision += 1;
+    return { data: answer(true) };
   });
-  published.mockReset();
-  window.addEventListener('gb:character-row', onRow);
+  vitalsEvents.mockReset();
+  recheckEvents.mockReset();
+  window.addEventListener(CHARACTER_VITALS_EVENT, onVitals);
+  window.addEventListener(CHARACTER_RECHECK_EVENT, onRecheck);
+});
+afterEach(() => {
+  window.removeEventListener(CHARACTER_VITALS_EVENT, onVitals);
+  window.removeEventListener(CHARACTER_RECHECK_EVENT, onRecheck);
 });
 
-afterEach(() => window.removeEventListener('gb:character-row', onRow));
-
-test('a normal update commits once against the known revision and publishes the committed row', async () => {
-  const result = await commandCharacterVitals('pc', { type: 'modifyHp', delta: -8 });
-  expect(result).toMatchObject({ row_revision: 1, data: { currentHP: 27, tempHP: 0 } });
-  expect(server.rpc).toHaveBeenCalledTimes(1);
-  expect(server.rpc.mock.calls[0][1]).toEqual({ p_id: 'pc', p_revision: 0, p_patch: expect.any(Object) });
-  expect(published).toHaveBeenCalledWith(result);
-});
-
-test('a revision conflict is not reapplied: the current row is published and the command stops', async () => {
-  server.read.mockImplementationOnce(async () => ({ data: structuredClone(server.row) }));
-  // Another client commits between our read and our RPC.
-  server.rpc.mockImplementationOnce(async () => {
-    server.row = { id: 'pc', row_revision: 1, data: { currentHP: 17, tempHP: 2, baseMax: 20 } };
-    return { data: { applied: false, row: structuredClone(server.row) } };
+describe('normal path: digest + base max in hand', () => {
+  test('no read before the commit; the answer is vitals only and is published as vitals', async () => {
+    const stats = healthCommandStats();
+    const result = await commandCharacterVitals('pc', { type: 'modifyHp', delta: -8 }, { digest: held(), base: base() });
+    expect(server.reads).toEqual([]);
+    expect(server.digests).not.toHaveBeenCalled();
+    expect(server.baseMax).not.toHaveBeenCalled();
+    expect(server.rpc).toHaveBeenCalledOnce();
+    expect(server.rpc.mock.calls[0][1]).toEqual({
+      p_id: 'pc', p_digest_revision: start, p_hp_basis: 'h1',
+      p_patch: { currentHP: 27, tempHP: 0, maxHPBonus: 0, deathSaves: { success: 0, fail: 0 }, activeConditions: [] },
+    });
+    expect(result).toEqual({
+      applied: true, characterId: 'pc', digestRevision: start + 1, hpBasis: 'h1',
+      vitals: { currentHP: 27, tempHP: 0, maxHPBonus: 0, deathSaves: { success: 0, fail: 0 }, activeConditions: [] },
+    });
+    expect(JSON.stringify(result)).not.toContain('long notes');
+    expect(vitalsEvents).toHaveBeenCalledWith(result);
+    expect(healthCommandStats()).toEqual({ digest: stats.digest + 1, legacy: stats.legacy });
   });
-  await expect(commandCharacterVitals('pc', { type: 'modifyHp', delta: -5 }))
-    .rejects.toMatchObject({ code: HEALTH_CONFLICT });
-  expect(server.rpc).toHaveBeenCalledTimes(1);
-  // The conflict already carries the authoritative row: no extra recovery read.
-  expect(server.read).toHaveBeenCalledTimes(1);
-  expect(published).toHaveBeenCalledTimes(1);
-  expect(published.mock.calls[0][0]).toMatchObject({ row_revision: 1, data: { currentHP: 17 } });
-  expect(server.row.data.currentHP).toBe(17);
+
+  test('the heal is clamped by the base max the caller derived plus the synced bonus', async () => {
+    server.data.currentHP = 10;
+    server.data.maxHPBonus = 4;
+    await commandCharacterVitals('pc', { type: 'modifyHp', delta: 50 }, { digest: held(), base: base(20) });
+    expect(server.data.currentHP).toBe(24);
+  });
+
+  test('two damages from one stale digest: the second is recomputed once from the refusal, both count', async () => {
+    const stale = held();
+    // Another device commits 10 damage (temp HP absorbs 5 of it).
+    server.data = { ...server.data, currentHP: 25, tempHP: 0 };
+    server.revision += 1;
+    await commandCharacterVitals('pc', { type: 'modifyHp', delta: -3 }, { digest: stale, base: base() });
+    expect(server.data.currentHP).toBe(22);
+    expect(server.rpc).toHaveBeenCalledTimes(2);
+    expect(server.rpc.mock.calls[1][1].p_digest_revision).toBe(start + 1);
+    expect(characterReads()).toEqual([]);
+  });
+
+  test('an absolute command is never replayed over someone else\'s change', async () => {
+    const stale = held();
+    server.data.currentHP = 12;
+    server.revision += 5; // another client moved HP meanwhile
+    await expect(commandCharacterVitals('pc', { type: 'setHp', value: 25 }, { digest: stale, base: base() }))
+      .rejects.toMatchObject({ code: HEALTH_CONFLICT });
+    expect(server.rpc).toHaveBeenCalledOnce();
+    expect(server.data.currentHP).toBe(12);
+    // The refusal realigns every view in this tab with no extra read.
+    expect(vitalsEvents).toHaveBeenCalledWith(expect.objectContaining({ applied: false, digestRevision: start + 5, vitals: expect.objectContaining({ currentHP: 12 }) }));
+    expect(characterReads()).toEqual([]);
+    expect(recheckEvents).not.toHaveBeenCalled();
+  });
+
+  test('a relative command is not replayed when the max-HP basis moved', async () => {
+    const stale = held();
+    server.basis = 'h2';
+    server.revision += 1;
+    await expect(commandCharacterVitals('pc', { type: 'modifyHp', delta: 5 }, { digest: stale, base: base(30, 'h1') }))
+      .rejects.toMatchObject({ code: HEALTH_CONFLICT });
+    expect(server.rpc).toHaveBeenCalledOnce();
+  });
+
+  test('rapid clicks in one tab start from the previous answer, not from the digest they were clicked with', async () => {
+    const digest = held();
+    await Promise.all([
+      commandCharacterVitals('pc', { type: 'setHp', value: 20 }, { digest, base: base() }),
+      commandCharacterVitals('pc', { type: 'setTempHp', value: 2 }, { digest, base: base() }),
+    ]);
+    expect(server.data).toMatchObject({ currentHP: 20, tempHP: 2 });
+    expect(server.rpc).toHaveBeenCalledTimes(2);
+  });
 });
 
-test('a timeout sends nothing again: one read of the server realigns and the command stops', async () => {
-  server.rpc.mockImplementationOnce(() => new Promise(() => {}));
-  await expect(commandCharacterVitals('pc', { type: 'modifyHp', delta: -8 }, { timeoutMs: 20 }))
-    .rejects.toMatchObject({ code: HEALTH_TIMEOUT });
-  expect(server.rpc).toHaveBeenCalledTimes(1);
-  expect(server.read).toHaveBeenCalledTimes(2);
-  expect(published).toHaveBeenCalledTimes(1);
-  expect(published.mock.calls[0][0]).toMatchObject({ row_revision: 0, data: { currentHP: 30 } });
+describe('failures are never resent', () => {
+  test('a timeout sends nothing again and asks followers to recheck, with no sheet read', async () => {
+    server.rpc.mockImplementationOnce(() => new Promise(() => {}));
+    await expect(commandCharacterVitals('pc', { type: 'modifyHp', delta: -8 }, { digest: held(), base: base(), timeoutMs: 20 }))
+      .rejects.toMatchObject({ code: HEALTH_TIMEOUT });
+    expect(server.rpc).toHaveBeenCalledOnce();
+    expect(recheckEvents).toHaveBeenCalledWith({ characterId: 'pc' });
+    expect(server.reads).toEqual([]);
+  });
+
+  test('a failed RPC is not retried', async () => {
+    server.rpc.mockRejectedValueOnce(new Error('Offline'));
+    await expect(commandCharacterVitals('pc', { type: 'modifyHp', delta: -8 }, { digest: held(), base: base() })).rejects.toThrow('Offline');
+    expect(server.rpc).toHaveBeenCalledOnce();
+    expect(recheckEvents).toHaveBeenCalledWith({ characterId: 'pc' });
+    expect(server.reads).toEqual([]);
+  });
+
+  test('a hung command does not block the next one for this character', async () => {
+    server.rpc.mockImplementationOnce(() => new Promise(() => {}));
+    const first = commandCharacterVitals('pc', { type: 'modifyHp', delta: -8 }, { digest: held(), base: base(), timeoutMs: 20 });
+    const second = commandCharacterVitals('pc', { type: 'modifyHp', delta: -4 }, { digest: held(), base: base(), timeoutMs: 1_000 });
+    await expect(first).rejects.toMatchObject({ code: HEALTH_TIMEOUT });
+    // Temporary HP absorbs the 4 damage; the hung first command never committed.
+    await expect(second).resolves.toMatchObject({ applied: true, vitals: { currentHP: 30, tempHP: 1 } });
+  });
 });
 
-test('a failed RPC is not retried and falls back to reading the authoritative row', async () => {
-  server.rpc.mockRejectedValueOnce(new Error('Offline'));
-  await expect(commandCharacterVitals('pc', { type: 'modifyHp', delta: -8 })).rejects.toThrow('Offline');
-  expect(server.rpc).toHaveBeenCalledTimes(1);
-  expect(server.read).toHaveBeenCalledTimes(2);
-  expect(published).toHaveBeenCalledWith(expect.objectContaining({ row_revision: 0 }));
-});
+describe('the rare legacy path', () => {
+  test.each([
+    ['no digest', () => ({ digest: null, base: base() })],
+    ['no base max', () => ({ digest: held(), base: null })],
+    ['a base max still being derived', () => ({ digest: held(), base: { hpBasis: 'h1', baseMax: null } })],
+    ['a base max of another basis', () => ({ digest: held(), base: base(99, 'old') })],
+  ])('%s: reads the digest, then the sheet, and derives the maximum itself', async (_label, context) => {
+    const stats = healthCommandStats();
+    server.data.currentHP = 10;
+    await commandCharacterVitals('pc', { type: 'modifyHp', delta: 50 }, context());
+    expect(server.digests).toHaveBeenCalledOnce();
+    expect(characterReads()).toHaveLength(1);
+    expect(server.baseMax).toHaveBeenCalledOnce();
+    expect(server.data.currentHP).toBe(30); // clamped by the derived 30, never by a stale 99
+    expect(healthCommandStats()).toEqual({ digest: stats.digest, legacy: stats.legacy + 1 });
+  });
 
-test('a hung command does not block the next one for this character', async () => {
-  server.rpc.mockImplementationOnce(() => new Promise(() => {}));
-  const first = commandCharacterVitals('pc', { type: 'modifyHp', delta: -8 }, { timeoutMs: 20 });
-  const second = commandCharacterVitals('pc', { type: 'modifyHp', delta: -4 }, { timeoutMs: 1_000 });
-  await expect(first).rejects.toMatchObject({ code: HEALTH_TIMEOUT });
-  // Temporary HP absorbs the 4 damage; the hung first command never committed.
-  await expect(second).resolves.toMatchObject({ row_revision: 1, data: { currentHP: 30, tempHP: 1 } });
-});
+  test('a long rest without its exhaustion level needs the sheet', async () => {
+    const stats = healthCommandStats();
+    await commandCharacterVitals('pc', { type: 'longRest' }, { digest: held(), base: base() });
+    expect(characterReads()).toHaveLength(1);
+    expect(healthCommandStats().legacy).toBe(stats.legacy + 1);
+  });
 
-test('rapid clicks in one tab are serialized without dropping damage', async () => {
-  await Promise.all([
-    commandCharacterVitals('pc', { type: 'modifyHp', delta: -8 }),
-    commandCharacterVitals('pc', { type: 'modifyHp', delta: -4 }),
-  ]);
-  expect(server.row.data.currentHP).toBe(23);
-  expect(server.rpc).toHaveBeenCalledTimes(2);
+  test('the first command on a sheet never uploaded inserts it, then commands it once', async () => {
+    const { saveCharacter } = await import('../../../../../src/shared/character/profile/store.js');
+    saveCharacter('pc', { name: 'Fighter', currentHP: 30, tempHP: 0 }, { emit: false });
+    server.exists = false;
+    await commandCharacterVitals('pc', { type: 'modifyHp', delta: -8 });
+    expect(server.reads.some((read) => read.upsert)).toBe(true);
+    expect(server.rpc).toHaveBeenCalledOnce();
+    expect(server.data.currentHP).toBe(22);
+  });
 });

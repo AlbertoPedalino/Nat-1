@@ -4,6 +4,7 @@ import { beforeEach, vi } from 'vitest';
 import { theme } from '../../../../../src/app/theme.js';
 import SceneEditor from '../../../../../src/pages/vtt/scene/SceneEditor.jsx';
 import { persistFights, registerEncounterInstance } from '../../../../../src/pages/encounterbuilder/state/storage.js';
+import { healthCommandRoute } from '../../../../../src/shared/cloud/api/healthCommandRoute.js';
 
 const m = vi.hoisted(() => ({
   commit: vi.fn(),
@@ -20,6 +21,8 @@ const m = vi.hoisted(() => ({
   fightRows: { current: [] },
   isGm: { current: true },
   tokens: { current: [] },
+  characterCommand: vi.fn(),
+  roster: { current: null },
 }));
 
 vi.mock('../../../../../src/shared/cloud/api/encounterFights.js', () => ({
@@ -42,7 +45,7 @@ vi.mock('../../../../../src/shared/cloud/api/vtt.js', async (importOriginal) => 
   listTokenSecretHp: async () => m.secretHp.current,
 }));
 vi.mock('../../../../../src/shared/cloud/api/cloudCharacters.js', () => ({
-  patchCharacterData: vi.fn(), commandCharacterVitals: vi.fn(),
+  commandCharacterVitals: (...args) => m.characterCommand(...args),
 }));
 vi.mock('../../../../../src/shared/ui/ToastProvider.jsx', () => ({ useToast: () => ({ notify: m.notify }) }));
 vi.mock('../../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({ useAuth: () => ({ user: { id: 'gm-1' } }) }));
@@ -75,7 +78,7 @@ vi.mock('../../../../../src/pages/vtt/rolls/useVttRolls.js', () => ({
   }),
 }));
 vi.mock('../../../../../src/pages/vtt/scene/useCampaignRoster.js', () => ({
-  useCampaignRoster: () => [],
+  useCampaignRoster: () => m.roster.current || { roster: [], digests: new Map(), baseMax: new Map() },
 }));
 vi.mock('../../../../../src/pages/vtt/scene/useSceneContent.js', () => ({
   useSceneContent: () => ({
@@ -141,6 +144,8 @@ beforeEach(() => {
   m.secretHp.current = {};
   m.fightRows.current = [];
   m.isGm.current = true;
+  m.characterCommand.mockReset().mockResolvedValue({ applied: true });
+  m.roster.current = null;
 });
 
 test('a GM editing a linked enemy on the map writes its combatant once, never the piece vitals', async () => {
@@ -242,4 +247,29 @@ test('the GM edits standalone HP in the private source only, and an unchanged sa
   expect(m.setTokenHp).toHaveBeenCalledTimes(1);
   expect(m.updateToken.mock.calls.some(([, patch]) => 'hp_current' in patch || 'hp_max' in patch)).toBe(false);
   expect(m.updateToken).toHaveBeenLastCalledWith('mimic-piece', expect.objectContaining({ show_hp: true }));
+});
+
+test('a character piece edited on the map commands health from the roster digest: no sheet is read', async () => {
+  const hero = {
+    id: 'hero-piece', layer: 'tokens', x: 2, y: 2, label: 'Hero', characterId: 'hero',
+    hpCurrent: 18, hpMax: 30, conditions: [], effects: [], showHp: true,
+  };
+  const digest = { characterId: 'hero', rowRevision: 12, hpBasis: 'h1', currentHP: 18, source: 'server' };
+  m.roster.current = {
+    roster: [{ characterId: 'hero', name: 'Hero', hpCurrent: 18, hpMax: 30 }],
+    digests: new Map([['hero', digest]]),
+    baseMax: new Map([['hero', { hpBasis: 'h1', baseMax: 30 }]]),
+  };
+  m.tokens.current = [hero];
+  mountEditor();
+  await saveFromMenu(hero, { hpCurrent: 11, healthPatch: { currentHP: 11 } });
+  await saveFromMenu(hero, { conditions: ['prone'], healthPatch: { activeConditions: ['prone'] } });
+  expect(m.characterCommand).toHaveBeenCalledTimes(2);
+  for (const [id, command, context] of m.characterCommand.mock.calls) {
+    expect(context).toEqual({ digest, base: { hpBasis: 'h1', baseMax: 30 } });
+    expect(healthCommandRoute(id, command, context)).toBe('digest');
+  }
+  expect(m.characterCommand.mock.calls[0][1]).toEqual({ type: 'editToken', patch: { currentHP: 11 } });
+  // A character's hit points belong to the sheet, never to the piece.
+  expect(m.updateToken.mock.calls.some(([, patch]) => Object.hasOwn(patch, 'hp_current'))).toBe(false);
 });

@@ -1,9 +1,10 @@
-import { useReducer } from 'react';
+import { useReducer, useRef } from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { encounterReducer, createInitialState } from '../../../../../src/pages/encounterbuilder/state/reducer.js';
 import { useCharacterVitalSync } from '../../../../../src/pages/encounterbuilder/campaign/useCharacterVitalSync.js';
 import { useCharacterVitalDispatch } from '../../../../../src/pages/encounterbuilder/campaign/useCharacterVitalDispatch.js';
-import { publishCharacterRow } from '../../../../../src/shared/cloud/sync/characterRows.js';
+import { publishCharacterVitals } from '../../../../../src/shared/cloud/sync/characterEvents.js';
+import { healthCommandRoute } from '../../../../../src/shared/cloud/api/healthCommandRoute.js';
 
 const cloud = vi.hoisted(() => ({
   command: vi.fn(), get: vi.fn(), sheets: vi.fn(), notify: vi.fn(), receivers: new Set(), filters: [], states: {},
@@ -31,8 +32,10 @@ const player = { id: 1, type: 'player', sourceId: 'character', name: 'Player', h
 const monster = { id: 2, type: 'monster', name: 'Ogre', hpCurrent: 40, hpMax: 40 };
 const fight = { id: 'fight', encounterId: 'encounter', combatants: [player, monster], currentTurn: 0, round: 1 };
 const vitals = (hp) => ({ currentHP: hp, tempHP: 0, maxHPBonus: 0, activeConditions: [], deathSaves: { success: 0, fail: 0 } });
-// A full sheet row, as a health command answers it.
-const row = (hp, revision) => ({ id: 'character', row_revision: revision, data: vitals(hp) });
+// What a health command answers: vitals, the digest revision and basis.
+const vitalsAnswer = (hp, revision) => ({
+  applied: true, characterId: 'character', digestRevision: revision, hpBasis: 'basis-1', vitals: vitals(hp),
+});
 // The digest row the database keeps for it.
 const digestRow = (hp, revision) => ({
   character_id: 'character', campaign_id: null, owner: 'owner', row_revision: revision,
@@ -43,8 +46,8 @@ const digest = (hp, revision) => ({
   name: 'Player', ownerUsername: null, className: null, classIconColor: null, portraitPath: null,
   ...vitals(hp), hpBasis: 'basis-1',
 });
-function VitalSync({ state, reduce }) {
-  useCharacterVitalSync({ characterIds: ['character'], dispatch: reduce, activeFightId: state.activeFightId });
+function VitalSync({ state, reduce, vitalsRef }) {
+  vitalsRef.current = useCharacterVitalSync({ characterIds: ['character'], dispatch: reduce, activeFightId: state.activeFightId });
   return null;
 }
 function Harness({ id }) {
@@ -52,10 +55,11 @@ function Harness({ id }) {
     players: [{ sourceId: 'character', hpMax: 30, currentHP: 30 }], fights: [fight, { ...fight, id: 'second' }],
     combat: { ...fight, fightId: 'fight' },
   });
-  const dispatch = useCharacterVitalDispatch(state.combat, reduce);
+  const vitalsRef = useRef(null);
+  const dispatch = useCharacterVitalDispatch(state.combat, reduce, vitalsRef);
   cloud.states[id] = { state, dispatch };
   return <>
-    <VitalSync state={state} reduce={reduce} />
+    <VitalSync state={state} reduce={reduce} vitalsRef={vitalsRef} />
     <output data-testid={id}>{state.combat.combatants[0].hpCurrent}</output>
     <button onClick={() => dispatch({ type: 'modifyHp', id: 1, delta: -5 })}>{id} damage</button>
   </>;
@@ -76,9 +80,13 @@ test('mount reconciles saved HP and a user damage click sends the intent only', 
   await waitFor(() => expect(screen.getByTestId('A')).toHaveTextContent('20'));
   expect(cloud.command).not.toHaveBeenCalled();
   fireEvent.click(screen.getByText('A damage'));
-  expect(cloud.command).toHaveBeenCalledWith('character', expect.objectContaining({ type: 'modifyHp', delta: -5 }));
+  expect(cloud.command).toHaveBeenCalledWith('character', expect.objectContaining({ type: 'modifyHp', delta: -5 }), expect.anything());
+  // The command starts from the digest the builder follows and its base max: no sheet read.
+  const [[commandId, command, context]] = cloud.command.mock.calls;
+  expect(healthCommandRoute(commandId, command, context)).toBe('digest');
+  expect(context.base).toEqual({ hpBasis: 'basis-1', baseMax: 30 });
   expect(screen.getByTestId('A')).toHaveTextContent('20');
-  await act(async () => publishCharacterRow(row(15, 2)));
+  await act(async () => publishCharacterVitals(vitalsAnswer(15, 2)));
   expect(screen.getByTestId('A')).toHaveTextContent('15');
 });
 

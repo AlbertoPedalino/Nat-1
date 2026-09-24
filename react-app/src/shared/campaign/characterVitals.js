@@ -3,9 +3,10 @@
 // Max HP is NOT stored on a sheet: it is derived from hit dice, Constitution,
 // level, class and species features, feats and items. Character digests carry
 // everything else a table needs and a hash of these inputs; this derives the
-// base maximum (before `maxHPBonus`) from the full sheet, the same way the
-// health command does (`commandCharacterVitals`): runtime adapters first, then
-// `calcMaxHP`.
+// base maximum (before `maxHPBonus`) from the full sheet: runtime adapters
+// first, then `calcMaxHP`. Its result, per `hpBasis`, is also what a health
+// command starts from (`commandCharacterVitals`), which reads a sheet only when
+// its caller does not have one.
 //
 // The heavy imports are dynamic on purpose: `shared/` is imported by node tests
 // and by pages that must not pull the adapter barrel into their bundle. Nothing

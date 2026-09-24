@@ -21,13 +21,17 @@ export function EncounterBuilderProvider({ instanceId, instanceSaved, linkGroupI
   // everything else straight to the reducer.
   const cloudFightsRef = useRef(null);
   const monsterVitals = useMonsterVitalDispatch({ state, reduce, cloudRef: cloudFightsRef });
-  const dispatch = useCharacterVitalDispatch(state.combat, monsterVitals.dispatch);
+  // Filled below by useCharacterVitalSync; read by player health commands.
+  const characterVitalsRef = useRef(null);
+  const dispatch = useCharacterVitalDispatch(state.combat, monsterVitals.dispatch, characterVitalsRef);
   const characterIds = [...new Set([
     ...state.players.map((p) => p.sourceId),
     ...(state.combat?.combatants || []).filter((p) => p.type === 'player').map((p) => p.sourceId),
     ...state.fights.flatMap((f) => (f.combatants || []).filter((p) => p.type === 'player').map((p) => p.sourceId)),
   ].filter(Boolean))];
-  useCharacterVitalSync({ characterIds, dispatch: reduce, activeFightId: state.activeFightId });
+  const characterVitals = useCharacterVitalSync({ characterIds, dispatch: reduce, activeFightId: state.activeFightId });
+  characterVitalsRef.current = characterVitals;
+  const characterDigests = characterVitals.digests;
   const monsterDb = useMonsterDb();
   const campaignPlayers = useCampaignPlayers();
   const rollSync = useEncounterRolls({
@@ -108,13 +112,14 @@ export function EncounterBuilderProvider({ instanceId, instanceSaved, linkGroupI
     dispatch,
     monsterDb,
     campaignPlayers,
+    characterDigests,
     rollSync,
     instanceId,
     instanceSaved,
     saveInstance,
     saveEncounterToLibrary,
     roll,
-  }), [campaignPlayers, rollSync, instanceId, instanceSaved, monsterDb, roll, saveEncounterToLibrary, saveInstance, state, dispatch]);
+  }), [campaignPlayers, characterDigests, rollSync, instanceId, instanceSaved, monsterDb, roll, saveEncounterToLibrary, saveInstance, state, dispatch]);
 
   return (
     <EncounterBuilderContext.Provider value={value}>

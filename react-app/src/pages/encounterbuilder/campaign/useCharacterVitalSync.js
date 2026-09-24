@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useCharacterDigests } from '../../../shared/cloud/sync/useCharacterDigests.js';
 import { sheetVitalsFromDigest } from '../../../shared/campaign/characterDigest.js';
 import { sheetVitalsToCombat } from './sheetSync.js';
@@ -8,6 +8,8 @@ import { sheetVitalsToCombat } from './sheetSync.js';
 // per character. A combatant is synced once its max HP is known, then again
 // only when what it would receive actually changes — or when the active fight
 // changes, since a newly resumed fight has not heard any of it yet.
+// Returns the digests and base maxima: an open player sheet takes its vitals
+// from them, and a health command starts from them instead of reading the sheet.
 export function useCharacterVitalSync({ characterIds, dispatch, activeFightId }) {
   const { digests, baseMax } = useCharacterDigests({ characterIds });
   const sentRef = useRef(new Map());
@@ -25,4 +27,6 @@ export function useCharacterVitalSync({ characterIds, dispatch, activeFightId })
       dispatch({ type: 'syncCombatantVitals', sourceId: id, vitals });
     }
   }, [activeFightId, baseMax, digests, dispatch]);
+
+  return useMemo(() => ({ digests, baseMax }), [digests, baseMax]);
 }

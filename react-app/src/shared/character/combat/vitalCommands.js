@@ -1,8 +1,9 @@
 import { clampCharacterVitals } from './vitals.js';
 import { setConditionActive, toggleCondition } from './conditions.js';
 
-// Apply an intent to a freshly read character, never to an encounter snapshot.
-// The caller commits this result only if the database revision still matches.
+// Apply an intent to the vitals a command starts from — the character digest
+// the caller follows (or, rarely, the sheet) — never to an encounter snapshot.
+// The result is committed only if that digest is still current.
 export function applyVitalCommand(data, command, baseMaxHP) {
   const maxFor = (bonus) => Math.max(1, baseMaxHP + bonus);
   const maxHP = maxFor(Number(data.maxHPBonus) || 0);

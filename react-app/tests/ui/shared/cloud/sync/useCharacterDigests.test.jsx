@@ -43,7 +43,7 @@ vi.mock('../../../../../src/shared/campaign/characterVitals.js', () => ({
 
 import { useCharacterDigests } from '../../../../../src/shared/cloud/sync/useCharacterDigests.js';
 import { toCharacterDigest } from '../../../../../src/shared/campaign/characterDigest.js';
-import { publishCharacterRow } from '../../../../../src/shared/cloud/sync/characterRows.js';
+import { publishCharacterVitals, requestCharacterRecheck } from '../../../../../src/shared/cloud/sync/characterEvents.js';
 
 const digestRow = (id, revision, patch = {}, campaign = 'camp') => ({
   character_id: id,
@@ -115,10 +115,22 @@ describe('useCharacterDigests', () => {
 
   test('a health command answer shows at once, and its digest settles it', async () => {
     const { result } = await openCampaign();
-    await act(async () => publishCharacterRow({ id: 'pc', row_revision: 2, data: { currentHP: 6, activeConditions: [] } }));
-    expect(result.current.digests.get('pc')).toMatchObject({ currentHP: 6, source: 'local', hpBasis: 'h1' });
+    await act(async () => publishCharacterVitals({
+      applied: true, characterId: 'pc', digestRevision: 2, hpBasis: 'h1', vitals: { currentHP: 6, activeConditions: [] },
+    }));
+    expect(result.current.digests.get('pc')).toMatchObject({ currentHP: 6, source: 'local', hpBasis: 'h1', rowRevision: 2 });
     await send({ eventType: 'UPDATE', new: digestRow('pc', 2, { currentHP: 6 }) });
     expect(result.current.digests.get('pc').source).toBe('server');
+    expect(m.sheets).toHaveBeenCalledTimes(1);
+  });
+
+  test('a failed command of this tab makes followers of that character re-read their digests', async () => {
+    await openCampaign();
+    const listed = m.list.mock.calls.length;
+    await act(async () => requestCharacterRecheck('stranger'));
+    expect(m.list.mock.calls.length).toBe(listed);
+    await act(async () => requestCharacterRecheck('pc'));
+    expect(m.list.mock.calls.length).toBe(listed + 1);
     expect(m.sheets).toHaveBeenCalledTimes(1);
   });
 
@@ -158,6 +170,16 @@ describe('useCharacterDigests', () => {
     renderHook(() => useCharacterDigests({ characterIds: [] }));
     await act(async () => {});
     expect(m.channels).toHaveLength(0);
+  });
+
+  test('a consumer that derives its own maximum never reads a sheet, whatever the basis', async () => {
+    const { result } = renderHook(() => useCharacterDigests({ characterIds: ['pc'], deriveMaxHp: false }));
+    await waitFor(() => expect(result.current.digests.get('pc')?.hpBasis).toBe('h1'));
+    await send({ eventType: 'UPDATE', new: digestRow('pc', 2, { hpBasis: 'h2', currentHP: 3 }) });
+    await act(async () => { await result.current.reconcile(); });
+    expect(result.current.digests.get('pc')).toMatchObject({ hpBasis: 'h2', currentHP: 3 });
+    expect(result.current.baseMax.size).toBe(0);
+    expect(m.sheets).not.toHaveBeenCalled();
   });
 
   test('a channel that fails half-way through setup is removed', async () => {

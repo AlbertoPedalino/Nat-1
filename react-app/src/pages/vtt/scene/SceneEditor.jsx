@@ -243,7 +243,16 @@ export default function SceneEditor({
     tokenImageUrls,
     tokens,
   } = useSceneContent({ scene, isGm: role.isGm, spectator, notify });
-  const roster = useCampaignRoster(scene.campaignId);
+  const { roster, digests: rosterDigests, baseMax: rosterBaseMax } = useCampaignRoster(scene.campaignId);
+  // What a character health command starts from: the digest the map follows
+  // and the base max HP derived for its basis (commandCharacterVitals).
+  const rosterVitalsRef = useRef(null);
+  rosterVitalsRef.current = { digests: rosterDigests, baseMax: rosterBaseMax };
+  const characterHealth = useCallback((characterId, command) => {
+    const id = String(characterId);
+    const { digests, baseMax } = rosterVitalsRef.current;
+    return commandCharacterVitals(characterId, command, { digest: digests.get(id) ?? null, base: baseMax.get(id) ?? null });
+  }, []);
   // Public rows carry hit points only while a bar is shown; the GM reads the
   // real ones from the private sources and sees them overlaid at render.
   const gmVitals = useGmTokenVitals({ sceneId: scene.id, tokens, enabled: role.isGm && !spectator });
@@ -1544,11 +1553,11 @@ export default function SceneEditor({
   // create a second copy that the next sheet update silently overwrites.
   const writeConditions = useCallback(async (token, conditions) => {
     if (token.characterId) {
-      await commandCharacterVitals(token.characterId, tokenHealthCommand(token, { activeConditions: conditions }));
+      await characterHealth(token.characterId, tokenHealthCommand(token, { activeConditions: conditions }));
       return;
     }
     await setTokenConditions(token.id, conditions);
-  }, []);
+  }, [characterHealth]);
 
   const handleMarkToken = useCallback(async (token, {
     conditions, showHp, effects, hpCurrent, deathSaves, healthPatch = {},
@@ -1568,7 +1577,7 @@ export default function SceneEditor({
     )));
     try {
       if (token.characterId && owned) {
-        if (Object.keys(healthPatch).length) await commandCharacterVitals(token.characterId, tokenHealthCommand(token, healthPatch));
+        if (Object.keys(healthPatch).length) await characterHealth(token.characterId, tokenHealthCommand(token, healthPatch));
       } else {
         await writeConditions(token, conditions);
       }
@@ -1584,7 +1593,7 @@ export default function SceneEditor({
       setTokens((current) => current.map((item) => (item.id === token.id ? token : item)));
       notify('error', cause?.message || 'Could not mark that token.');
     }
-  }, [canMove, notify, pushToEncounter, writeConditions]);
+  }, [canMove, characterHealth, notify, pushToEncounter, writeConditions]);
 
   const handleSaveToken = useCallback(async (token, {
     label, gmOnly, conditions, hpCurrent, hpMax, showHp, effects, deathSaves, healthPatch = {},
@@ -1612,7 +1621,7 @@ export default function SceneEditor({
       // sheet, a cloud fight's enemy to its combatant, anything else to its row.
       const linked = await commitLinkedMonster(token, { hpCurrent, hpMax, conditions, effects });
       if (token.characterId) {
-        if (Object.keys(healthPatch).length) await commandCharacterVitals(token.characterId, tokenHealthCommand(token, healthPatch));
+        if (Object.keys(healthPatch).length) await characterHealth(token.characterId, tokenHealthCommand(token, healthPatch));
       } else if (!linked) {
         await writeConditions(token, conditions);
         // `token` carries the GM's real values (overlaid), so an unchanged
@@ -1636,7 +1645,7 @@ export default function SceneEditor({
       setTokens((current) => current.map((item) => (item.id === token.id ? token : item)));
       notify('error', cause?.message || 'Could not update that token.');
     }
-  }, [commitLinkedMonster, gmVitals, notify, pushToEncounter, writeConditions]);
+  }, [characterHealth, commitLinkedMonster, gmVitals, notify, pushToEncounter, writeConditions]);
 
   const handleDeathSaveChange = useCallback((token, type, value) => {
     if (!token?.characterId || !['success', 'fail'].includes(type)) return;
@@ -2456,6 +2465,7 @@ export default function SceneEditor({
             <EmbeddedBattleMapSheet
               key={`floating:${sheetCharacterId}`}
               characterId={sheetCharacterId}
+              digest={rosterDigests.get(String(sheetCharacterId)) ?? null}
               onRoll={handleSheetRoll}
             />
           ) : null,
@@ -2479,6 +2489,7 @@ export default function SceneEditor({
                 <EmbeddedBattleMapSheet
                   key={`side:${sheetCharacterId}`}
                   characterId={sheetCharacterId}
+                  digest={rosterDigests.get(String(sheetCharacterId)) ?? null}
                   onRoll={handleSheetRoll}
                 />
               ) : null}
@@ -2549,13 +2560,16 @@ export default function SceneEditor({
   );
 }
 
-const EmbeddedBattleMapSheet = memo(function EmbeddedBattleMapSheet({ characterId, onRoll }) {
+// The sheet takes its vitals from the roster's digest: the map already follows
+// every campaign character, so the sheet opens no channel of its own.
+const EmbeddedBattleMapSheet = memo(function EmbeddedBattleMapSheet({ characterId, digest, onRoll }) {
   return (
     <Suspense fallback={<Box sx={sheetLoadingSx}><CircularProgress size={26} /></Box>}>
       <CampaignSheetView
         sheetId={characterId}
         editable
         embedded
+        liveDigest={digest}
         onRoll={onRoll}
         showOwnRollToast={false}
       />

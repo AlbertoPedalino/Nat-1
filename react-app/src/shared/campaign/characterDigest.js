@@ -58,26 +58,31 @@ export function toCharacterDigest(row) {
   });
 }
 
-// A full `characters` row this tab just received from a health command. Only
-// vitals can have changed through that path, so the max-HP basis is carried
-// over from the digest already held; the database's own digest follows.
-export function digestFromSheetRow(row, held) {
-  if (!row?.id || !row.data || !held) return null;
-  const data = row.data;
+// A health command's answer in this tab (`{ characterId, vitals,
+// digestRevision, hpBasis }`, see commit_character_vitals) as a preview of the
+// digest the database has just written: the answer's vitals, revision and
+// basis, the roster facts of the digest already held. The revision is the
+// digest's own, never the sheet's, so the next command is computed against the
+// right token. The database digest of the same revision settles it.
+export function digestFromVitalsAnswer(answer, held) {
+  if (!answer?.characterId || !answer.vitals || !held) return null;
+  if (String(held.characterId) !== String(answer.characterId)) return null;
+  const revision = Number(answer.digestRevision);
+  if (answer.digestRevision == null || !Number.isFinite(revision)) return null;
+  const vitals = answer.vitals;
   return fromFields({
     ...held,
-    name: data.name || row.name || held.name,
-    currentHP: data.currentHP,
-    tempHP: data.tempHP,
-    maxHPBonus: data.maxHPBonus,
-    deathSaves: data.deathSaves,
-    activeConditions: data.activeConditions,
-    hpBasis: held.hpBasis,
+    currentHP: vitals.currentHP,
+    tempHP: vitals.tempHP,
+    maxHPBonus: vitals.maxHPBonus,
+    deathSaves: vitals.deathSaves,
+    activeConditions: vitals.activeConditions,
+    hpBasis: typeof answer.hpBasis === 'string' ? answer.hpBasis : held.hpBasis,
   }, {
-    characterId: row.id,
+    characterId: held.characterId,
     campaignId: held.campaignId,
     ownerId: held.ownerId,
-    rowRevision: row.row_revision ?? held.rowRevision,
+    rowRevision: revision,
     source: 'local',
   });
 }
