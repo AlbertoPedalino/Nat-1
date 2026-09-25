@@ -22,7 +22,7 @@ or on a script missing from this table.
 | 1 | [`01_schema.sql`](supabase/01_schema.sql) | Profiles, characters, auth trigger |
 | 2 | [`02_sections.sql`](supabase/02_sections.sql) | GM Board, Encounter Builder and DM Screen saves (owner-only), linked-tool groups |
 | 3 | [`03_campaigns.sql`](supabase/03_campaigns.sql) | Campaigns, members, invite codes |
-| 4 | [`04_characters_realtime.sql`](supabase/04_characters_realtime.sql) | Realtime for character sheets (drops the retired `patch_character_data`) |
+| 4 | [`04_characters_realtime.sql`](supabase/04_characters_realtime.sql) | Keeps `characters` out of Realtime (REST/RPC only; removes it from an existing publication) and drops the retired `patch_character_data` |
 | 5 | [`05_character_art.sql`](supabase/05_character_art.sql) | Private `character-art` portrait bucket |
 | 6 | [`06_vtt.sql`](supabase/06_vtt.sql) | Battle map: scenes, tokens, secrets, drawings, `map-images` bucket |
 | 7 | [`07_atmosphere.sql`](supabase/07_atmosphere.sql) | Scene atmosphere column |
@@ -92,8 +92,10 @@ repository **secrets** and pass them as env to `npm run build`.
 - **Character health** (HP, temp HP, death saves, conditions) is changed only through
   `commit_character_vitals` (`13_character_vitals.sql`): one command per edit against the
   character digest's revision and max-HP basis, answered with vitals only; ordinary sheet
-  saves cannot change it. No client subscribes to `public.characters` (still published by
-  `04_characters_realtime.sql`). Every open sheet, the battle map and the encounter builder
+  saves cannot change it. `public.characters` is REST/RPC only: it is not in the
+  `supabase_realtime` publication (`04_characters_realtime.sql` removes it) and no client
+  subscribes to it; `tests/logic/shared/cloud/realtime-subscriptions.test.js` keeps it that
+  way. Every open sheet, the battle map and the encounter builder
   follow `character_digests` (`16_character_digests.sql`): roster facts, vitals and a hash of
   the max-HP inputs, rewritten only when those change. An open sheet also follows its row in
   `character_sheet_revisions` (`17_character_sheet_revisions.sql`) to know when its content

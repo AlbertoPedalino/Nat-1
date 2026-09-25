@@ -14,6 +14,8 @@ const REALTIME_TABLES = [
   'campaign_hexcrawl', 'campaign_live_scenes', 'character_digests', 'character_sheet_revisions', 'encounter_fights',
   'map_drawings', 'map_hex_cells', 'map_scenes', 'map_token_secrets', 'map_tokens',
 ];
+// REST/RPC only: never published, so no client can follow the whole sheet blob.
+const NOT_REALTIME_TABLES = ['characters'];
 
 test('every Supabase script is listed and the documented order builds the schema twice', async () => {
   const ORDER = (await readdir(DIR)).filter((name) => name.endsWith('.sql')).sort();
@@ -34,12 +36,16 @@ test('every Supabase script is listed and the documented order builds the schema
           `${file} fails on pass ${pass}`,
         );
       }
+      // An existing project still has `characters` published by the former
+      // 04_characters_realtime.sql: re-running the sequence must take it out.
+      if (pass === 1) await db.exec('alter publication supabase_realtime add table public.characters');
     }
     const rows = async (sql) => (await db.query(sql)).rows;
 
     const published = (await rows(`select tablename from pg_publication_tables
       where pubname = 'supabase_realtime' order by 1`)).map((row) => row.tablename);
     for (const table of REALTIME_TABLES) assert.ok(published.includes(table), `${table} is not in Realtime`);
+    for (const table of NOT_REALTIME_TABLES) assert.ok(!published.includes(table), `${table} must not be in Realtime`);
 
     const unprotected = await rows(`select c.relname from pg_class c join pg_namespace n on n.oid = c.relnamespace
       where n.nspname = 'public' and c.relkind = 'r'

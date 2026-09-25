@@ -197,11 +197,11 @@ test('an editable sheet opens one digest channel and never touches the character
   expect(cloud.revision).not.toHaveBeenCalled();
 });
 
-test('idle: several safety ticks read only the digest, never the sheet', async () => {
+test('idle: an open sheet reads nothing on a timer, neither digest nor sheet', async () => {
   await openSheet();
   const listed = cloud.list.mock.calls.length;
   await act(async () => { await vi.advanceTimersByTimeAsync(5 * 30_000); });
-  expect(cloud.list.mock.calls.length - listed).toBe(5);
+  expect(cloud.list.mock.calls.length - listed).toBe(0);
   expect(cloud.get).not.toHaveBeenCalled();
   expect(cloud.revision).not.toHaveBeenCalled();
   expect(cloud.sheets).not.toHaveBeenCalled();

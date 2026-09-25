@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 const m = vi.hoisted(() => ({
   list: vi.fn(),
@@ -189,4 +189,99 @@ describe('useCharacterDigests', () => {
     expect(m.removeChannel).toHaveBeenCalledWith(m.channels[0]);
   });
 
+});
+
+describe('useCharacterDigests recovery is event-driven', () => {
+  let visibility = 'visible';
+
+  beforeEach(() => {
+    visibility = 'visible';
+    Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => visibility });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    delete document.visibilityState;
+  });
+
+  const setVisibility = (state) => act(() => {
+    visibility = state;
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  const fire = (type) => act(() => { window.dispatchEvent(new Event(type)); });
+
+  test('an idle roster reads nothing, however long it stays open', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    await openCampaign();
+    await act(async () => { channel().status('SUBSCRIBED'); });
+    const listed = m.list.mock.calls.length;
+    const read = m.sheets.mock.calls.length;
+    await act(async () => { await vi.advanceTimersByTimeAsync(60_000); });
+    await act(async () => { await vi.advanceTimersByTimeAsync(10 * 60_000); });
+    await act(async () => { await vi.advanceTimersByTimeAsync(4 * 60 * 60_000); });
+    expect(m.list.mock.calls.length).toBe(listed);
+    expect(m.sheets.mock.calls.length).toBe(read);
+    // Nothing left scheduled: the hook keeps no timer of its own.
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  test('coming back to the tab reconciles once per return: focus, then hidden -> visible', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    await openCampaign();
+    const listed = m.list.mock.calls.length;
+    await fire('focus');
+    expect(m.list.mock.calls.length).toBe(listed + 1);
+    // The visibilitychange of the same return is coalesced with its focus.
+    await setVisibility('visible');
+    expect(m.list.mock.calls.length).toBe(listed + 1);
+    await act(async () => { await vi.advanceTimersByTimeAsync(5_000); });
+    await setVisibility('hidden');
+    expect(m.list.mock.calls.length).toBe(listed + 1);
+    await setVisibility('visible');
+    expect(m.list.mock.calls.length).toBe(listed + 2);
+  });
+
+  test('going back online reconciles', async () => {
+    await openCampaign();
+    const listed = m.list.mock.calls.length;
+    await fire('offline');
+    expect(m.list.mock.calls.length).toBe(listed);
+    await fire('online');
+    expect(m.list.mock.calls.length).toBe(listed + 1);
+  });
+
+  test('the first SUBSCRIBED and every rejoin reconcile', async () => {
+    await openCampaign();
+    const listed = m.list.mock.calls.length;
+    await act(async () => { channel().status('SUBSCRIBED'); });
+    expect(m.list.mock.calls.length).toBe(listed + 1);
+    await act(async () => { channel().status('CHANNEL_ERROR'); });
+    expect(m.list.mock.calls.length).toBe(listed + 1);
+    await act(async () => { channel().status('SUBSCRIBED'); });
+    expect(m.list.mock.calls.length).toBe(listed + 2);
+  });
+
+  test('a character inserted into the campaign arrives through Realtime alone', async () => {
+    const { result } = await openCampaign();
+    const listed = m.list.mock.calls.length;
+    await send({ eventType: 'INSERT', new: digestRow('newcomer', 1, { currentHP: 12 }) });
+    expect(result.current.digests.get('newcomer')).toMatchObject({ currentHP: 12, campaignId: 'camp' });
+    await waitFor(() => expect(result.current.baseMax.get('newcomer')?.baseMax).toBe(20));
+    expect(m.sheets).toHaveBeenLastCalledWith(['newcomer']);
+    expect(m.list.mock.calls.length).toBe(listed);
+  });
+
+  test('a base maximum that failed to derive is retried by the next event-driven reconcile', async () => {
+    const { result } = await openCampaign();
+    m.sheets.mockRejectedValueOnce(new Error('network'));
+    await send({ eventType: 'UPDATE', new: digestRow('pc', 2, { hpBasis: 'h2' }) });
+    await waitFor(() => expect(m.sheets).toHaveBeenCalledTimes(2));
+    await act(async () => {});
+    expect(result.current.baseMax.get('pc').hpBasis).toBe('h1');
+    m.baseMax.mockImplementation(async (rows) => new Map(rows.map((row) => [row.id, 26])));
+    await fire('online');
+    await waitFor(() => expect(result.current.baseMax.get('pc')).toEqual({ hpBasis: 'h2', baseMax: 26 }));
+    expect(m.sheets).toHaveBeenCalledTimes(3);
+    expect(m.sheets).toHaveBeenLastCalledWith(['pc']);
+  });
 });

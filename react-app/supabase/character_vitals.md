@@ -6,7 +6,8 @@ death saves and conditions. Encounter/fight/token snapshots are display caches.
 ## Deploy
 
 1. Run `13_character_vitals.sql` in the project's Supabase SQL Editor, after the
-   existing `01_schema.sql` and `04_characters_realtime.sql`. It is safe to run again and
+   existing `01_schema.sql` and `04_characters_realtime.sql` (which keeps `characters`
+   out of Realtime). It is safe to run again and
    retains every character's existing values.
 2. Deploy the matching frontend build.
 3. Open a character in two encounters, an embedded sheet and `/campaign-sheet`.
@@ -77,7 +78,8 @@ commands, no-ops, campaign moves and a save that only re-adds a runtime-only key
 leave it alone. `17_character_sheet_revisions.sql` projects it to
 `character_sheet_revisions` (one row per character, no sheet content, RLS as the
 digests, Realtime with DELETE), which is what an open sheet follows
-(`useCharacterSheetRevision`): nobody subscribes to `characters`.
+(`useCharacterSheetRevision`): nobody subscribes to `characters`, which is not in
+the Realtime publication at all (REST/RPC only).
 
 - A newer revision on a clean sheet → one full read (`structural-refresh`) and
   the sheet takes it: a cloud sheet through its parent, a local sheet as the

@@ -7,7 +7,6 @@ import { digestFromVitalsAnswer, isNewerDigest, toCharacterDigest } from '../../
 import { CHARACTER_RECHECK_EVENT, CHARACTER_VITALS_EVENT } from './characterEvents.js';
 import { coalesceReturns } from './returnGate.js';
 
-const DIGEST_RECONCILE_MS = 30_000;
 const EMPTY = new Map();
 
 // Character digests (16_character_digests.sql) for everyone who needs to know
@@ -22,7 +21,9 @@ const EMPTY = new Map();
 //
 // Recovery is the same light read everywhere — the digests themselves — on
 // SUBSCRIBED (first join and every reconnect), coming back to the tab, going
-// online, and a 30 s safety tick. There is no full-row polling.
+// online, and a failed command of this tab. Nothing is read on a timer: an
+// event Realtime missed is repaired by the next digest of that character (each
+// is a whole snapshot) or by the next of these triggers.
 //
 // `deriveMaxHp: false` is for a consumer that already holds the sheet (an
 // editable CharacterSheet derives its own maximum): no sheet is ever read.
@@ -86,8 +87,8 @@ export function useCharacterDigests({ campaignId = null, characterIds = null, en
 
   // Derive the base max HP for every digest whose basis is new. Only these
   // sheets are read, and only once per basis: a sheet the rules cannot read is
-  // remembered as such until its basis moves, never re-read on every tick. A
-  // network failure is forgotten, so the next reconcile retries it.
+  // remembered as such until its basis moves, never re-read on every recovery.
+  // A network failure is forgotten, so the next reconcile or digest retries it.
   const deriveMissing = useCallback((list) => {
     const target = scopeRef.current;
     if (!target || !deriveRef.current) return;
@@ -212,7 +213,6 @@ export function useCharacterDigests({ campaignId = null, characterIds = null, en
     const onReturn = coalesceReturns(() => reconcile());
     const onVisible = () => { if (document.visibilityState === 'visible') onReturn(); };
     const onOnline = () => reconcile();
-    const timer = window.setInterval(() => reconcile(), DIGEST_RECONCILE_MS);
     window.addEventListener(CHARACTER_VITALS_EVENT, receiveVitals);
     window.addEventListener(CHARACTER_RECHECK_EVENT, recheck);
     window.addEventListener('focus', onReturn);
@@ -220,7 +220,6 @@ export function useCharacterDigests({ campaignId = null, characterIds = null, en
     document.addEventListener('visibilitychange', onVisible);
     return () => {
       readRef.current += 1;
-      window.clearInterval(timer);
       window.removeEventListener(CHARACTER_VITALS_EVENT, receiveVitals);
       window.removeEventListener(CHARACTER_RECHECK_EVENT, recheck);
       window.removeEventListener('focus', onReturn);
