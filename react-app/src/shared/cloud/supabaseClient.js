@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import {
   createRealtimeStats, exposeRealtimeDiagnostics, realtimeDebugRequested, realtimeDiagnosticsOptions,
 } from './sync/realtimeStats.js';
+import { setSyncDiagnostics } from './sync/syncDiagnostics.js';
 
 // Cloud sync is OPTIONAL. If the env vars are missing the whole feature stays
 // dark and the app keeps working 100% locally (localStorage only).
@@ -28,6 +29,7 @@ export const supabase = isCloudConfigured()
   : null;
 
 if (diagnostics) exposeRealtimeDiagnostics(diagnostics, supabase, window);
+setSyncDiagnostics(diagnostics);
 
 // Supabase Auth needs an email. Players only type a username, so we map it to a
 // stable synthetic email. Same username always yields the same email.

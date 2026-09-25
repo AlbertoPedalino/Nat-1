@@ -23,7 +23,7 @@ function downloadBuilderSheet(character, data) {
   URL.revokeObjectURL(url);
 }
 
-export default function SheetStep({ state, dispatch, importDraft = false, onUploadToCloud, onDraftLocalSaved, onNotify }) {
+export default function SheetStep({ state, dispatch, importDraft = false, onUploadToCloud, onDraftLocalSaved, onCloudCopySavedLocally, onNotify }) {
   const navigate = useNavigate();
   const { cloudEnabled, status } = useAuth();
   const cloudActive = cloudEnabled && status === 'authed';
@@ -88,6 +88,9 @@ export default function SheetStep({ state, dispatch, importDraft = false, onUplo
                 const saved = saveCharacter(character, state.data, (cloudActive && !importDraft) ? { id: charIdFromUrl() } : {});
                 if (saved?.id) {
                   if (importDraft) onDraftLocalSaved?.(saved.id);
+                  // A local copy of the cloud character: its autosync push is
+                  // conditional on the revision the builder holds.
+                  else if (cloudActive) onCloudCopySavedLocally?.(saved.id);
                   onNotify?.('success', 'Saved locally.');
                 }
               }}

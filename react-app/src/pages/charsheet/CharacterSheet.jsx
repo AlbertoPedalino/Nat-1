@@ -15,6 +15,7 @@ import Movement from './stats/Movement.jsx';
 import RightTop from './stats/RightTop.jsx';
 import TabsPanel from './layout/TabsPanel.jsx';
 import DiceToast from '../../shared/character/dice/DiceToast.jsx';
+import SheetConflictBanner from '../../shared/ui/SheetConflictBanner.jsx';
 import { deriveSheetState } from './state/state.js';
 import { ProficiencySetsProvider } from './proficiency/ProficiencySetsContext.jsx';
 import { SheetActionsProvider } from './state/SheetActionsContext.jsx';
@@ -38,18 +39,28 @@ import { applyFreeCastRest, getFreeCastDefsForCharacter } from './spells/spellsT
 import { adapterRegistry as installedRegistry } from '../../adapters/registry.js';
 import { ensureSheetRuntimeAdapters } from './state/sheetRuntimeAdapters.js';
 import { loadItems, loadOptionalFeatures, loadConditions, reconcileInventoryWithItemsDb } from '../charbuilder/data/dataLoaders.js';
-import { updateCloudCharacterData, commandCharacterVitals } from '../../shared/cloud/api/cloudCharacters.js';
+import {
+  commandCharacterVitals, getCloudCharacter, SHEET_CONFLICT, updateCloudCharacterData,
+} from '../../shared/cloud/api/cloudCharacters.js';
+import { useCharacterSheetRevision } from '../../shared/cloud/sync/useCharacterSheetRevision.js';
+import { CLOUD_SYNC_EVENT, isCloudSyncBusy } from '../../shared/cloud/sync/cloudSyncState.js';
 import { useRollChannel } from '../../shared/cloud/sync/useRollChannel.js';
 import { useCharacterCampaign } from '../../shared/cloud/sync/useCharacterCampaign.js';
 import { useCharacterDigests } from '../../shared/cloud/sync/useCharacterDigests.js';
 import { useAuth } from '../../shared/cloud/auth/AuthProvider.jsx';
 import { isSyncExcluded } from '../../shared/cloud/sync/cloudSyncExclude.js';
+import { withRuntimeOnlyCharacterFields } from '../../shared/character/profile/runtimeFields.js';
 import { normalizeRoll } from '../../shared/vtt/rolls/rollFeed.js';
 import { SYNCED_VITALS, clampCharacterVitals, pickCharacterVitals } from '../../shared/character/combat/vitals.js';
 import {
   getActiveCharId,
+  getCharacterSyncMeta,
+  hasUnsyncedLocalChanges,
   loadCharacter as storeLoadCharacter,
+  markCharacterSynced,
   patchCharacter as storePatchCharacter,
+  rebaseCharacterSync,
+  saveCharacter as storeSaveCharacter,
   setActiveCharId,
 } from '../../shared/character/profile/store.js';
 
@@ -120,6 +131,11 @@ function loadCachedConditions() {
 export default function CharacterSheet({
   externalChar = null,
   externalCharId = null,
+  // The sheet revision of `externalChar`; with `onSheetRow` the parent takes a
+  // newer row when this sheet finds its content changed elsewhere.
+  externalSheetRevision = null,
+  onSheetRow = null,
+  onSheetDeleted = null,
   readOnly = false,
   embedded = false,
   liveDigest,
@@ -162,6 +178,13 @@ export default function CharacterSheet({
   const cloudSaveErrorShownRef = useRef(false);
   const localEditVersionRef = useRef(0);
   const queuedEditVersionRef = useRef(0);
+  // Content sync (useCharacterSheetRevision): the revision of the loaded sheet,
+  // a reload request for a local sheet that took the cloud's copy, and a
+  // conflict waiting for the user's decision.
+  const [sheetBaseRevision, setSheetBaseRevision] = useState(null);
+  const [reloadKey, setReloadKey] = useState(0);
+  const [sheetConflict, setSheetConflict] = useState(null);
+  const sheetConflictRef = useRef(null);
   const usesExternalChar = Boolean(externalChar);
   const auth = useAuth();
   const hasCloudHealth = usesExternalChar || (auth.cloudEnabled && auth.status === 'authed');
@@ -173,10 +196,10 @@ export default function CharacterSheet({
   // commands. Those arrive in the character digest — the parent's when it
   // already follows one (`liveDigest`, e.g. the battle map roster), otherwise
   // this sheet's own — never as a whole row. Max HP is derived here from this
-  // sheet, so no sheet is ever downloaded for it. A read-only sheet is fed
-  // whole rows by its parent instead.
+  // sheet, so no sheet is ever downloaded for it. A read-only sheet follows
+  // them the same way (it just never writes).
   const healthId = usesExternalChar ? externalCharId : charId;
-  const followsVitals = Boolean(healthId) && !readOnly && !isSyncExcluded(healthId);
+  const followsVitals = Boolean(healthId) && !isSyncExcluded(healthId);
   const { digests: ownDigests } = useCharacterDigests({
     characterIds: healthId ? [healthId] : null,
     enabled: followsVitals && liveDigest === undefined,
@@ -207,6 +230,11 @@ export default function CharacterSheet({
     const id = externalChar ? externalCharId : getCharIdFromUrl();
     const ch = externalChar || (id ? storeLoadCharacter(id) : null);
     if (!externalChar && id && ch) setActiveCharId(id);
+    // The sheet revision this copy is: the row's for a cloud sheet, the one the
+    // local copy was last aligned with otherwise (-1: unknown).
+    const loadedRevision = externalChar
+      ? Number(externalSheetRevision ?? -1)
+      : (id && ch ? (getCharacterSyncMeta(id).sheetRevision ?? -1) : null);
 
     Promise.all([
       // A failed adapter chunk (e.g. a stale-deploy 404) must not blank the whole
@@ -233,14 +261,21 @@ export default function CharacterSheet({
         const reconciled = normalizeCharacterAttunement({ ...ch, inventory: refreshed }, refreshed);
         if (reconciled !== ch.inventory) {
           nextChar = { ...ch, inventory: reconciled };
-          if (!externalChar && id) storePatchCharacter(id, { inventory: reconciled });
+          // Only a real change is a local edit (and a push): opening a sheet
+          // must not make an unchanged local copy look unsaved.
+          if (!externalChar && id && JSON.stringify(reconciled) !== JSON.stringify(ch.inventory)) {
+            storePatchCharacter(id, { inventory: reconciled });
+          }
         }
       }
 
+      // Runtime only: the catalog is rebuilt on every open and never persisted
+      // (runtimeFields.js strips it at every storage boundary).
       if (optFeatures?.length) nextChar = { ...nextChar, optionalFeatureEntries: optFeatures };
 
       setCharId(id);
       setC(nextChar);
+      setSheetBaseRevision(loadedRevision);
       if (nextChar) {
         setSheet(deriveSheetState(nextChar));
         const stored = nextChar.resources && typeof nextChar.resources === 'object' ? nextChar.resources : {};
@@ -258,13 +293,17 @@ export default function CharacterSheet({
           merged[def.key] = cur == null ? initial : Math.min(Math.max(0, Number(cur) || 0), max);
         });
         setResources(merged);
-        if (!externalChar && id) storePatchCharacter(id, { resources: merged });
+        if (!externalChar && id && JSON.stringify(merged) !== JSON.stringify(stored)) {
+          storePatchCharacter(id, { resources: merged });
+        }
         setFreeCastUses(nextChar.freeCastUses && typeof nextChar.freeCastUses === 'object' ? nextChar.freeCastUses : {});
       }
     });
 
     return () => { alive = false; };
-  }, [externalChar, externalCharId]);
+    // externalSheetRevision changes with externalChar (a newer row).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [externalChar, externalCharId, reloadKey]);
 
   const persist = useCallback((patch, { fromCloud = false, command } = {}) => {
     if (!charId || !patch) return;
@@ -292,8 +331,10 @@ export default function CharacterSheet({
       setC((prev) => prev ? { ...prev, ...patch } : prev);
       return;
     }
+    // The store keeps no runtime-only field (the optional-feature catalog):
+    // carry them over so rule text keeps resolving after the edit.
     const next = storePatchCharacter(charId, patch, { emit: !fromCloud });
-    if (next) setC(next);
+    if (next) setC((prev) => withRuntimeOnlyCharacterFields(next, prev));
     else setC((prev) => prev ? { ...prev, ...patch } : prev);
   }, [charId, usesExternalChar, hasCloudHealth]);
 
@@ -308,7 +349,7 @@ export default function CharacterSheet({
   // Also apply updates received while the initial sheet was still loading.
   // Own save echoes are no-ops and remote changes never schedule a cloud write.
   useEffect(() => {
-    if (!incomingDigest || !sheetReady || readOnly) return;
+    if (!incomingDigest || !sheetReady) return;
     const s = sheetRef.current;
     if (!s) return;
     // Max HP is derived (this sheet's base + the synced bonus). A digest with
@@ -327,7 +368,7 @@ export default function CharacterSheet({
     if (unchanged) return;
     setSheet((prev) => (prev ? { ...prev, ...next, maxHP } : prev));
     persist(next, { fromCloud: true });
-  }, [incomingDigest, sheetReady, readOnly, persist]);
+  }, [incomingDigest, sheetReady, persist]);
 
   const updateCurrentCharacter = useCallback((updater) => {
     if (!C) return;
@@ -392,6 +433,111 @@ export default function CharacterSheet({
     showDiceToast(label, message, null, []);
   }, [showDiceToast]);
 
+  // Content changed elsewhere (a GM adds an item, another device levels up).
+  // The sheet follows its revision — a few bytes, never with hit points — and
+  // downloads itself only when that moved past the one it holds. A clean sheet
+  // takes the new row: a cloud sheet through its parent (`onSheetRow`), a local
+  // one by storing it as the cloud's copy (no push back) and reloading. A sheet
+  // with local changes pending never takes it silently: its own save is
+  // conditional on the revision it is based on, and a real conflict waits for
+  // the user.
+  const sheetSyncProps = useRef({});
+  sheetSyncProps.current = { usesExternalChar, readOnly, healthId, onSheetRow, onSheetDeleted, C };
+  const sheetBusy = useCallback(() => {
+    const { usesExternalChar: external, readOnly: viewOnly, healthId: id } = sheetSyncProps.current;
+    if (sheetConflictRef.current) return true;
+    if (viewOnly) return false;
+    if (external) return Boolean(pendingCloudSaveRef.current || cloudSaveInFlightRef.current);
+    return isCloudSyncBusy(id) || hasUnsyncedLocalChanges(id);
+  }, []);
+
+  const applyRemoteSheet = useCallback((row) => {
+    const { usesExternalChar: external, healthId: id, onSheetRow: toParent } = sheetSyncProps.current;
+    if (!row?.data || String(row.id ?? '') !== String(id)) return;
+    if (external) {
+      toParent?.(row);
+      return;
+    }
+    storeSaveCharacter(id, row.data, { emit: false });
+    markCharacterSynced(id, row.sheet_revision ?? null);
+    setReloadKey((key) => key + 1);
+  }, []);
+
+  const enterSheetConflict = useCallback((row) => {
+    if (!row?.data) return;
+    sheetConflictRef.current = row;
+    setSheetConflict(row);
+  }, []);
+
+  const refreshForConflict = useCallback(async () => {
+    const { healthId: id } = sheetSyncProps.current;
+    try {
+      enterSheetConflict(await getCloudCharacter(id, { reason: 'conflict-refresh' }));
+    } catch (_) {
+      // Unreachable now: the pending save stays pending and fails again later.
+    }
+  }, [enterSheetConflict]);
+
+  const sheetSync = useCharacterSheetRevision({
+    characterId: healthId,
+    enabled: Boolean(healthId) && !isSyncExcluded(healthId),
+    baseRevision: sheetBaseRevision,
+    isBusy: sheetBusy,
+    onNewer: async () => {
+      const { healthId: id } = sheetSyncProps.current;
+      const row = await getCloudCharacter(id, { reason: 'structural-refresh' });
+      // Edited while the sheet was downloading: that is a conflict too.
+      if (sheetBusy()) enterSheetConflict(row);
+      else applyRemoteSheet(row);
+    },
+    onDeleted: () => { sheetSyncProps.current.onSheetDeleted?.(); },
+  });
+
+  // A local sheet's pushes run in CloudAutoSync: learn when one settles or
+  // finds the cloud moved on.
+  useEffect(() => {
+    if (usesExternalChar || !healthId) return undefined;
+    const onSync = ({ detail }) => {
+      if (String(detail?.id ?? '') !== String(healthId)) return;
+      if (detail.state === 'conflict') {
+        if (!sheetConflictRef.current) refreshForConflict();
+      } else if (detail.state === 'synced' || detail.state === 'cancelled' || detail.state === 'error') {
+        sheetSync.settle();
+      }
+    };
+    window.addEventListener(CLOUD_SYNC_EVENT, onSync);
+    return () => window.removeEventListener(CLOUD_SYNC_EVENT, onSync);
+  }, [usesExternalChar, healthId, refreshForConflict, sheetSync]);
+
+  // "Load the updated version": local changes are dropped for the cloud's.
+  const loadRemoteVersion = useCallback(() => {
+    const row = sheetConflictRef.current;
+    if (!row) return;
+    sheetConflictRef.current = null;
+    setSheetConflict(null);
+    pendingCloudSaveRef.current = null;
+    clearTimeout(cloudSaveTimerRef.current);
+    applyRemoteSheet(row);
+  }, [applyRemoteSheet]);
+
+  // "Keep my changes": an explicit save over that cloud version, still
+  // conditional on it (a change made after it is another conflict).
+  const keepLocalVersion = useCallback(() => {
+    const row = sheetConflictRef.current;
+    if (!row) return;
+    const { usesExternalChar: external, healthId: id, C: current } = sheetSyncProps.current;
+    sheetConflictRef.current = null;
+    setSheetConflict(null);
+    sheetSync.noteSaved(row.sheet_revision);
+    if (external) {
+      if (!pendingCloudSaveRef.current && current) pendingCloudSaveRef.current = { charId: id, character: current };
+      flushCloudSaveRef.current?.();
+    } else {
+      rebaseCharacterSync(id, row.sheet_revision);
+      storePatchCharacter(id, {});
+    }
+  }, [sheetSync]);
+
   const scheduleCloudSave = useCallback((delay = CLOUD_SAVE_DELAY_MS) => {
     clearTimeout(cloudSaveTimerRef.current);
     cloudSaveTimerRef.current = setTimeout(() => flushCloudSaveRef.current?.(), delay);
@@ -399,16 +545,26 @@ export default function CharacterSheet({
 
   const flushCloudSave = useCallback(async () => {
     const attempt = pendingCloudSaveRef.current;
-    if (!attempt || cloudSaveInFlightRef.current) return;
+    // A conflict waits for the user's decision; nothing is saved meanwhile.
+    if (!attempt || cloudSaveInFlightRef.current || sheetConflictRef.current) return;
     cloudSaveInFlightRef.current = attempt;
     try {
-      await updateCloudCharacterData(attempt.charId, attempt.character);
+      // Conditional on the revision this sheet is based on: a change made
+      // elsewhere since is reported, never overwritten.
+      const known = sheetSync.knownRevision();
+      const result = await updateCloudCharacterData(attempt.charId, attempt.character, {
+        expectedSheetRevision: known >= 0 ? known : null,
+      });
       if (pendingCloudSaveRef.current === attempt) {
         pendingCloudSaveRef.current = null;
       }
       cloudSaveErrorShownRef.current = false;
+      // Our own revision: its Realtime echo is not someone else's change.
+      sheetSync.noteSaved(result?.sheetRevision);
     } catch (error) {
-      if (!cloudSaveErrorShownRef.current) {
+      if (error?.code === SHEET_CONFLICT) {
+        refreshForConflict();
+      } else if (!cloudSaveErrorShownRef.current) {
         cloudSaveErrorShownRef.current = true;
         showNotice('Cloud Save', error?.message || 'Failed to save online sheet.');
       }
@@ -424,7 +580,7 @@ export default function CharacterSheet({
         scheduleCloudSave();
       }
     }
-  }, [scheduleCloudSave, showNotice]);
+  }, [refreshForConflict, scheduleCloudSave, sheetSync, showNotice]);
   flushCloudSaveRef.current = flushCloudSave;
 
   useEffect(() => {
@@ -908,6 +1064,9 @@ export default function CharacterSheet({
       <TopBar C={C} sheet={sheet} charId={charId} readOnly={readOnly} embedded={embedded} onShortRest={openShortRest} onLongRest={openLongRest} onUpdateXp={updateXp} onUpdateCharacter={updateCurrentCharacter}
         rollLog={rollLog} onClearRollLog={() => setRollLog([])} onShowToast={showDiceToast} />
       <Box sx={{ maxWidth: embedded ? 'none' : 1280, mx: embedded ? 0 : { md: 'auto' }, px: embedded ? 0 : { xs: '0.6rem', md: '1.1rem' }, overflow: 'hidden' }}>
+        {sheetConflict ? (
+          <SheetConflictBanner onLoadRemote={loadRemoteVersion} onKeepLocal={keepLocalVersion} />
+        ) : null}
         <Box sx={{ bgcolor: 'rgba(35,32,26,1)', borderBottom: 1, borderColor: 'divider', py: '0.55rem', px: embedded ? '0.45rem' : { xs: '0.45rem', md: '0.6rem' } }}>
           <Stack direction={embedded ? 'column' : { xs: 'column', md: 'row-reverse' }} spacing={0.6} sx={{ alignItems: embedded ? 'stretch' : { md: 'stretch' } }}>
             <HPBlock sheet={sheet}

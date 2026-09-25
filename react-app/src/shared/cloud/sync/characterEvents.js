@@ -9,9 +9,14 @@
 //   longer knows whether it landed. Followers of that character run their
 //   ordinary light recovery (a digest read, a revision check); nothing is
 //   resent.
+// - CHARACTER_SHEET_SAVED_EVENT: this tab saved a whole sheet; the detail is
+//   `{ characterId, sheetRevision }`, the revision that save produced. Whoever
+//   follows that sheet's revision takes it as known, so the Realtime echo of
+//   the save is not mistaken for someone else's change.
 
 export const CHARACTER_VITALS_EVENT = 'gb:character-vitals';
 export const CHARACTER_RECHECK_EVENT = 'gb:character-recheck';
+export const CHARACTER_SHEET_SAVED_EVENT = 'gb:character-sheet-saved';
 
 function dispatch(type, detail) {
   if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent(type, { detail }));
@@ -23,4 +28,11 @@ export function publishCharacterVitals(answer) {
 
 export function requestCharacterRecheck(characterId) {
   if (characterId) dispatch(CHARACTER_RECHECK_EVENT, { characterId: String(characterId) });
+}
+
+export function publishCharacterSheetSaved(characterId, sheetRevision) {
+  const revision = Number(sheetRevision);
+  if (characterId && sheetRevision != null && Number.isFinite(revision)) {
+    dispatch(CHARACTER_SHEET_SAVED_EVENT, { characterId: String(characterId), sheetRevision: revision });
+  }
 }

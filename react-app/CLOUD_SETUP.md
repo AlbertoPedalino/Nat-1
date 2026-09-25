@@ -35,9 +35,17 @@ or on a script missing from this table.
 | 14 | [`14_token_vitals.sql`](supabase/14_token_vitals.sql) | Enemy health authority in fights, GM-only token HP, public HP projection |
 | 15 | [`15_live_scenes.sql`](supabase/15_live_scenes.sql) | `campaign_live_scenes`: which scene each campaign shows, kept by the database for players and projectors to follow |
 | 16 | [`16_character_digests.sql`](supabase/16_character_digests.sql) | `character_digests`: roster/vitals projection of each sheet (plus a max-HP input hash) for the battle map and encounter builder |
+| 17 | [`17_character_sheet_revisions.sql`](supabase/17_character_sheet_revisions.sql) | `character_sheet_revisions`: one row per character carrying only `sheet_revision`, the signal an open sheet follows to know its content changed elsewhere |
 
 Run 13 and 14 **before** deploying a frontend that needs them: the app sends
 health changes only through their RPCs.
+
+One-off data maintenance lives in [`supabase/maintenance/`](supabase/maintenance/) and is
+**not** part of this sequence. `remove_optional_feature_entries.sql` deletes the
+optional-feature catalog (`optionalFeatureEntries`, ~31 KB per sheet) that older frontends
+saved into `characters.data`. Order: deploy the frontend that no longer saves it → re-run
+16 (the key is ignored by `hpBasis`) and 13 (the database strips it on every write) →
+run the maintenance script once → check that no row still carries the key.
 
 ## 3. Turn OFF email confirmation
 Players log in with username only (mapped to a synthetic email), so there is no inbox.
@@ -84,11 +92,13 @@ repository **secrets** and pass them as env to `npm run build`.
 - **Character health** (HP, temp HP, death saves, conditions) is changed only through
   `commit_character_vitals` (`13_character_vitals.sql`): one command per edit against the
   character digest's revision and max-HP basis, answered with vitals only; ordinary sheet
-  saves cannot change it. `04_characters_realtime.sql` adds
-  `public.characters` to Realtime so a read-only sheet viewer follows its row. Editable sheets,
-  the battle map and the encounter builder follow `character_digests` instead
-  (`16_character_digests.sql`): roster facts, vitals and a hash of the max-HP inputs,
-  rewritten only when those change.
+  saves cannot change it. No client subscribes to `public.characters` (still published by
+  `04_characters_realtime.sql`). Every open sheet, the battle map and the encounter builder
+  follow `character_digests` (`16_character_digests.sql`): roster facts, vitals and a hash of
+  the max-HP inputs, rewritten only when those change. An open sheet also follows its row in
+  `character_sheet_revisions` (`17_character_sheet_revisions.sql`) to know when its content
+  changed elsewhere, and downloads itself only then; full saves are conditional on that
+  revision.
 - **Live scene**: `15_live_scenes.sql` keeps `campaign_live_scenes`, one row per campaign
   naming the scene it shows; players and the projector follow that row to switch scenes and
   the scene row itself for everything drawn on it.

@@ -1,8 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { useAuth } from '../auth/AuthProvider.jsx';
-import { pushCharacter, updateForeignCharacter } from '../api/cloudCharacters.js';
+import { pushCharacter, SHEET_CONFLICT, updateForeignCharacter } from '../api/cloudCharacters.js';
 import { isSyncExcluded } from './cloudSyncExclude.js';
 import { isForeignEdit } from './cloudForeign.js';
+import { reportCloudSyncState } from './cloudSyncState.js';
 import { SECTION_REGISTRY } from '../../instances/sectionRegistry.js';
 import {
   createCloudAutoSyncEngine,
@@ -11,10 +12,10 @@ import {
 
 export const DEBOUNCE_MS = 1200;
 
-function emit(id, state, error) {
-  try {
-    window.dispatchEvent(new CustomEvent('gb:cloud-sync', { detail: { id, state, error } }));
-  } catch (_) {}
+// Every state goes to cloudSyncState.js and out as CLOUD_SYNC_EVENT. A push
+// refused because the cloud sheet moved on is a 'conflict', not an error.
+function emit(id, state, message, error) {
+  reportCloudSyncState(id, state === 'error' && error?.code === SHEET_CONFLICT ? 'conflict' : state, message);
 }
 
 // Headless: whenever logged in, every local character save is pushed to the
@@ -30,6 +31,8 @@ export default function CloudAutoSync() {
       delay: DEBOUNCE_MS,
       emit,
       isActive: () => activeRef.current,
+      // A refused push waits for the user's choice; nothing queued runs over it.
+      isConflict: (error) => error?.code === SHEET_CONFLICT,
     });
 
     const onCharacterSaved = (e) => {
@@ -45,7 +48,7 @@ export default function CloudAutoSync() {
 
     const onCharacterDeleted = (e) => {
       const id = e?.detail?.id;
-      if (id) engine.cancel(`character:${id}`);
+      if (id) engine.cancel(`character:${id}`, id);
     };
 
     const onForeignChanged = (e) => {

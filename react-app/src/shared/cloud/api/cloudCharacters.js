@@ -1,13 +1,23 @@
 import { requireClient } from '../supabaseClient.js';
-import { loadCharacter as storeLoadCharacter, saveCharacter as storeSaveCharacter } from '../../character/profile/store.js';
+import {
+  getCharacterSyncMeta, loadCharacter as storeLoadCharacter, markCharacterSynced, saveCharacter as storeSaveCharacter,
+} from '../../character/profile/store.js';
+import { stripRuntimeOnlyCharacterFields } from '../../character/profile/runtimeFields.js';
 import { applyVitalCommand } from '../../character/combat/vitalCommands.js';
 import { pickCharacterVitals } from '../../character/combat/vitals.js';
 import { readBaseMaxHp } from '../../campaign/characterVitals.js';
-import { publishCharacterVitals, requestCharacterRecheck } from '../sync/characterEvents.js';
+import { publishCharacterSheetSaved, publishCharacterVitals, requestCharacterRecheck } from '../sync/characterEvents.js';
+import { tagSync } from '../sync/syncDiagnostics.js';
 import { listCharacterDigests } from './characterDigests.js';
 import { healthCommandRoute } from './healthCommandRoute.js';
 
 const TABLE = 'characters';
+
+// What `characters.data` may hold: never the runtime-only fields an open sheet
+// attaches (runtimeFields.js). Every write of `data` goes through here.
+function sheetData(character) {
+  return stripRuntimeOnlyCharacterFields(character);
+}
 
 // Exported because a portrait's address begins with the owner's id, which is
 // what the storage policies key on.
@@ -30,13 +40,63 @@ async function getCloudOwner(supabase, charId) {
   return data?.owner || null;
 }
 
+// A whole-sheet save lost the race: the sheet moved past the revision the
+// save was based on (someone else saved in between). Nothing was written.
+export const SHEET_CONFLICT = 'SHEET_CONFLICT';
+
+function sheetConflict(charId, remoteSheetRevision) {
+  return Object.assign(
+    new Error('This sheet was changed elsewhere. Nothing was overwritten.'),
+    { code: SHEET_CONFLICT, characterId: String(charId), remoteSheetRevision },
+  );
+}
+
+// Update name/data of an existing row and answer with the sheet revision it
+// produced — only if the sheet is still at `expectedSheetRevision`
+// (`… and sheet_revision = expected`). The one rule for every whole-sheet
+// write: a copy that knows no revision (a local copy from before revisions
+// existed, a builder that never loaded the row) is not allowed to overwrite
+// the cloud — nothing is written, one light read of the revision tells the
+// caller what the cloud holds, and it is a SHEET_CONFLICT the user resolves.
+// A refused update is told apart from a missing permission the same way.
+async function updateSheet(charId, fields, expectedSheetRevision = null) {
+  if (expectedSheetRevision == null) {
+    const current = await getCloudSheetRevision(charId);
+    if (current != null) throw sheetConflict(charId, current);
+    throw new Error('Character unavailable or no permission.');
+  }
+  const { data, error } = await requireClient()
+    .from(TABLE)
+    .update({ ...fields, updated_at: new Date().toISOString() })
+    .eq('id', charId)
+    .eq('sheet_revision', expectedSheetRevision)
+    .select('id, sheet_revision')
+    .maybeSingle();
+  if (error) throw error;
+  if (data?.id) return Number(data.sheet_revision);
+  const current = await getCloudSheetRevision(charId);
+  if (current != null && current !== Number(expectedSheetRevision)) throw sheetConflict(charId, current);
+  throw new Error('No permission to update this character.');
+}
+
+// Every whole-sheet save of this tab announces the revision it produced.
+function saved(charId, sheetRevision) {
+  publishCharacterSheetSaved(charId, sheetRevision);
+  return { id: String(charId), sheetRevision };
+}
+
 // Push the local sheet. The database preserves existing combat vitals; only an
-// explicit health command can edit those on an existing character.
+// explicit health command can edit those on an existing character. An existing
+// row is updated only if it is still at the revision this local copy was last
+// aligned with, so a stale copy never overwrites a change made elsewhere; a
+// local copy with no known revision is refused (SHEET_CONFLICT) until the user
+// chooses a version. A missing row is created.
 export async function pushCharacter(charId) {
   const supabase = requireClient();
   const user = await currentUser();
   const local = storeLoadCharacter(charId);
   if (!local) throw new Error('Character not found locally.');
+  const { sheetRevision: expected, editVersion } = getCharacterSyncMeta(charId);
 
   const owner = await getCloudOwner(supabase, charId);
   if (owner && owner !== user.id) {
@@ -44,42 +104,56 @@ export async function pushCharacter(charId) {
   }
 
   const username = user.user_metadata?.username || null;
-  const row = {
-    id: charId,
-    owner: user.id,
-    owner_username: username,
-    name: local.name || 'Character',
-    data: local,
-    updated_at: new Date().toISOString(),
-  };
-  const { error } = await supabase.from(TABLE).upsert(row, { onConflict: 'id' });
-  if (error) throw error;
-  return row;
+  let sheetRevision;
+  if (owner) {
+    sheetRevision = await updateSheet(charId, {
+      owner_username: username, name: local.name || 'Character', data: sheetData(local),
+    }, expected);
+  } else {
+    const row = {
+      id: charId,
+      owner: user.id,
+      owner_username: username,
+      name: local.name || 'Character',
+      data: sheetData(local),
+      updated_at: new Date().toISOString(),
+    };
+    const { data, error } = await supabase.from(TABLE).insert(row).select('sheet_revision').maybeSingle();
+    // Created elsewhere in between (unique violation): not ours to overwrite.
+    if (error?.code === '23505') throw sheetConflict(charId, await getCloudSheetRevision(charId));
+    if (error) throw error;
+    sheetRevision = Number(data?.sheet_revision ?? 0);
+  }
+  markCharacterSynced(charId, sheetRevision, editVersion);
+  return saved(charId, sheetRevision);
 }
 
-// Read a cloud character WITHOUT touching local storage (for read-only viewing).
-export async function getCloudCharacter(charId) {
+// Read a cloud character WITHOUT touching local storage. `reason` only tags
+// the request for the traffic diagnostics (syncDiagnostics.js).
+export async function getCloudCharacter(charId, { reason = 'load' } = {}) {
   const supabase = requireClient();
+  tagSync(`characters full ${reason}`);
   const { data, error } = await supabase
     .from(TABLE)
-    .select('id, name, owner, owner_username, updated_at, row_revision, data')
+    .select('id, name, owner, owner_username, updated_at, row_revision, sheet_revision, data')
     .eq('id', charId)
     .single();
   if (error) throw error;
   return data;
 }
 
-// The row's version only (a few bytes): whether a held sheet is still current.
-// Null when the row is gone or unreadable.
-export async function getCloudCharacterRevision(charId) {
+// The sheet's content revision only (a few bytes): whether a held sheet is
+// still current. Null when the row is gone or unreadable.
+export async function getCloudSheetRevision(charId) {
   const supabase = requireClient();
+  tagSync('characters sheet_revision check');
   const { data, error } = await supabase
     .from(TABLE)
-    .select('row_revision')
+    .select('sheet_revision')
     .eq('id', charId)
     .maybeSingle();
   if (error) throw error;
-  return data?.row_revision == null ? null : Number(data.row_revision);
+  return data?.sheet_revision == null ? null : Number(data.sheet_revision);
 }
 
 // Lightweight existence/freshness check: returns { updated_at } or null.
@@ -94,37 +168,28 @@ export async function fetchCloudMeta(charId) {
   return data || null;
 }
 
-// Update someone else's cloud sheet (as a GM): writes data/name only, leaving
-// `owner` and `campaign_id` untouched so RLS and ownership stay intact.
+// Update someone else's cloud sheet (as a GM) from its local copy: writes
+// data/name only, leaving `owner` and `campaign_id` untouched so RLS and
+// ownership stay intact. Conditional on the revision the local copy is based on.
 export async function updateForeignCharacter(charId) {
-  const supabase = requireClient();
   const local = storeLoadCharacter(charId);
   if (!local) throw new Error('Character not found locally.');
-  const { data, error } = await supabase
-    .from(TABLE)
-    .update({ name: local.name || 'Character', data: local, updated_at: new Date().toISOString() })
-    .eq('id', charId)
-    .select('id')
-    .maybeSingle();
-  if (error) throw error;
-  if (!data?.id) throw new Error('No permission to update this character.');
-  return data;
+  const { sheetRevision: expected, editVersion } = getCharacterSyncMeta(charId);
+  const sheetRevision = await updateSheet(charId, { name: local.name || 'Character', data: sheetData(local) }, expected);
+  markCharacterSynced(charId, sheetRevision, editVersion);
+  return saved(charId, sheetRevision);
 }
 
 // Direct cloud edit path used when local storage persistence is disabled.
 // Updates only the sheet payload/name, preserving owner and campaign links.
-export async function updateCloudCharacterData(charId, character) {
+// With `expectedSheetRevision` (an open sheet always passes it), the save
+// fails with SHEET_CONFLICT instead of overwriting a newer sheet.
+export async function updateCloudCharacterData(charId, character, { expectedSheetRevision = null } = {}) {
   if (!charId || !character) throw new Error('Character data missing.');
-  const supabase = requireClient();
-  const { data, error } = await supabase
-    .from(TABLE)
-    .update({ name: character.name || 'Character', data: character, updated_at: new Date().toISOString() })
-    .eq('id', charId)
-    .select('id')
-    .maybeSingle();
-  if (error) throw error;
-  if (!data?.id) throw new Error('No permission to update this character.');
-  return data;
+  const sheetRevision = await updateSheet(
+    charId, { name: character.name || 'Character', data: sheetData(character) }, expectedSheetRevision,
+  );
+  return saved(charId, sheetRevision);
 }
 
 export const HEALTH_COMMAND_TIMEOUT_MS = 8_000;
@@ -187,7 +252,7 @@ async function readDigest(charId) {
 async function stateFromSheet(charId) {
   let digest = await readDigest(charId);
   if (!digest) {
-    if ((await getCloudCharacterRevision(charId)) != null) {
+    if ((await getCloudSheetRevision(charId)) != null) {
       throw new Error('Character health update requires the database migration.');
     }
     // The first command on a newly created local sheet can precede autosave.
@@ -198,7 +263,7 @@ async function stateFromSheet(charId) {
     digest = await readDigest(charId);
     if (!digest) throw new Error('Character health update requires the database migration.');
   }
-  const row = await getCloudCharacter(charId);
+  const row = await getCloudCharacter(charId, { reason: 'health-fallback' });
   const baseMax = (await readBaseMaxHp([row])).get(String(row.id));
   if (!Number.isFinite(baseMax)) throw new Error('The maximum hit points of this character cannot be derived.');
   return {
@@ -288,40 +353,56 @@ export function commandCharacterVitals(charId, command, { timeoutMs = HEALTH_COM
   return pending;
 }
 
-// Upsert a character to the cloud straight from an in-memory object — no local
-// store dependency. The builder's cloud-only autosave never writes localStorage,
-// so there's nothing for pushCharacter() (which reads the store) to read.
-export async function pushCharacterData(charId, character) {
+// Save a character to the cloud straight from an in-memory object — no local
+// store dependency (the builder's cloud-only autosave never writes
+// localStorage, so there's nothing for pushCharacter() to read).
+//
+// A character that does not exist yet is created (INSERT; its first
+// sheet_revision comes back). An existing one is only ever updated conditionally
+// on `expectedSheetRevision`, the revision the caller's copy is based on: a
+// caller that never saw the row has none, and gets SHEET_CONFLICT instead of
+// overwriting it blind. A GM saving a player's row writes data/name only.
+export async function pushCharacterData(charId, character, { expectedSheetRevision = null } = {}) {
   if (!charId || !character) throw new Error('Character data missing.');
   const supabase = requireClient();
   const user = await currentUser();
   const owner = await getCloudOwner(supabase, charId);
-  if (owner && owner !== user.id) {
-    // Not our row (e.g. a GM building on a player's id): data/name only.
-    return updateCloudCharacterData(charId, character);
-  }
   const username = user.user_metadata?.username || null;
+  if (owner) {
+    const fields = owner === user.id
+      ? { owner_username: username, name: character.name || 'Character', data: sheetData(character) }
+      : { name: character.name || 'Character', data: sheetData(character) };
+    return saved(charId, await updateSheet(charId, fields, expectedSheetRevision));
+  }
   const row = {
     id: charId,
     owner: user.id,
     owner_username: username,
     name: character.name || 'Character',
-    data: character,
+    data: sheetData(character),
     updated_at: new Date().toISOString(),
   };
-  const { error } = await supabase.from(TABLE).upsert(row, { onConflict: 'id' });
+  const { data, error } = await supabase.from(TABLE).insert(row).select('sheet_revision').maybeSingle();
+  // Created by someone else in between (unique violation): not ours to overwrite.
+  if (error?.code === '23505') throw sheetConflict(charId, await getCloudSheetRevision(charId));
   if (error) throw error;
-  return row;
+  return saved(charId, Number(data?.sheet_revision ?? 0));
 }
 
 // Pull a cloud character back into local storage (so existing screens can open it).
 export async function pullCharacter(charId) {
   const supabase = requireClient();
-  const { data, error } = await supabase.from(TABLE).select('data').eq('id', charId).single();
+  tagSync('characters full pull');
+  const { data, error } = await supabase.from(TABLE).select('data, sheet_revision').eq('id', charId).single();
   if (error) throw error;
   if (!data?.data) throw new Error('No cloud data for this character.');
-  storeSaveCharacter(charId, data.data);
-  return data.data;
+  // An older row may still carry runtime-only fields: never copy them locally.
+  // The copy is the cloud's, not a local edit: no push, and it is aligned with
+  // that revision.
+  const stored = sheetData(data.data);
+  storeSaveCharacter(charId, stored, { emit: false });
+  markCharacterSynced(charId, data.sheet_revision ?? null);
+  return stored;
 }
 
 // Characters OWNED by the logged-in user only. The select RLS is intentionally

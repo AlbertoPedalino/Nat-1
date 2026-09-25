@@ -62,12 +62,52 @@ Only an intentional health commit advances `vitals_revision`. As with editing
 the sheet itself, authorized clients are trusted to supply legal game actions;
 this is concurrency control, not an anti-cheat boundary.
 
-Views accept RPC responses and realtime events in revision order. Editable
-sheets take vitals from `character_digests` only; a read-only viewer follows
-its row and, after reconnect/focus and every 30 s, checks `row_revision` and
-downloads the row only when it moved. A failed command shows an error and
-leaves the confirmed value visible; it is not silently stored as an offline edit.
-Local sheets excluded from cloud synchronization remain local.
+Views accept RPC responses and realtime events in revision order. Every open
+sheet — editable or read-only — takes vitals from `character_digests` only. A
+failed command shows an error and leaves the confirmed value visible; it is not
+silently stored as an offline edit. Local sheets excluded from cloud
+synchronization remain local.
+
+## Sheet content: `sheet_revision`
+
+`characters.sheet_revision` is the version of a sheet's content: it advances by
+one, in `protect_character_vitals`, when `name` or `data` outside the vitals and
+the runtime-only keys changes (an item, a note, a resource, a level). Health
+commands, no-ops, campaign moves and a save that only re-adds a runtime-only key
+leave it alone. `17_character_sheet_revisions.sql` projects it to
+`character_sheet_revisions` (one row per character, no sheet content, RLS as the
+digests, Realtime with DELETE), which is what an open sheet follows
+(`useCharacterSheetRevision`): nobody subscribes to `characters`.
+
+- A newer revision on a clean sheet → one full read (`structural-refresh`) and
+  the sheet takes it: a cloud sheet through its parent, a local sheet as the
+  cloud's copy (stored without a push back, `gb:char-sync:<id>` metadata
+  aligned).
+- Whole-sheet saves are conditional (`… and sheet_revision = expected`) and
+  answer with the revision they produced; a stale one writes nothing and fails
+  with `SHEET_CONFLICT` (told apart from a missing permission by a read-back).
+  The sheet then reads the cloud version (`conflict-refresh`) and asks: load
+  it, or keep the local changes (an explicit save, conditional on that
+  version). No automatic merge.
+- Own echo: a save's revision becomes known (`CHARACTER_SHEET_SAVED_EVENT`); a
+  newer revision seen while a save is pending or in flight is held until it
+  settles, so an echo arriving before the save's answer downloads nothing.
+- Recovery: one light read of `sheet_revision` on SUBSCRIBED, focus/visibility
+  and online. No periodic timer.
+
+## Runtime-only fields
+
+An open sheet attaches the optional-feature catalog (`optionalFeatureEntries`)
+to the character it renders. It is identical for every character and rebuilt
+on every open, so it is never stored: `stripRuntimeOnlyCharacterFields`
+(`src/shared/character/profile/runtimeFields.js`) removes it at every
+persistence boundary (local store, every `characters.data` write, pull, builder
+save), and this file's `strip_character_runtime_fields` (INSERT) and
+`protect_character_vitals` (UPDATE) remove `character_runtime_only_keys()` on
+the database side, before the no-op and revision rules run. A save that only
+re-adds it changes nothing. `16_character_digests.sql` leaves it out of
+`hpBasis`. Older rows are cleaned once by
+`maintenance/remove_optional_feature_entries.sql`.
 
 ## Validation
 

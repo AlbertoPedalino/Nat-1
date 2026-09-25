@@ -10,6 +10,7 @@ import {
   realtimeLogger,
   restLabel,
 } from '../../../../../src/shared/cloud/sync/realtimeStats.js';
+import { setSyncDiagnostics, tagSync } from '../../../../../src/shared/cloud/sync/syncDiagnostics.js';
 
 function memoryStorage(values = {}) {
   const data = new Map(Object.entries(values));
@@ -78,4 +79,28 @@ test('the console handle reports channels from the client', () => {
   const target = {};
   exposeRealtimeDiagnostics(stats, { getChannels: () => [1, 2, 3] }, target);
   assert.equal(target.__gbRt.snapshot().channels, 3);
+});
+
+test('sync tags say why a request was made: sheet events, structural refreshes and light checks apart', () => {
+  let clock = 0;
+  const stats = createRealtimeStats({ now: () => clock });
+  const log = realtimeLogger(stats);
+  log('receive', 'realtime:gb-character-sheet-pc postgres_changes', { data: { table: 'character_sheet_revisions', type: 'UPDATE' } });
+  tagSync('ignored while diagnostics are off');
+  setSyncDiagnostics(stats);
+  tagSync('characters full initial-load');
+  tagSync('characters full structural-refresh');
+  tagSync('characters sheet_revision check');
+  tagSync('characters sheet_revision check');
+  setSyncDiagnostics(null);
+  tagSync('characters full structural-refresh');
+  clock = 1_000;
+  const snap = stats.snapshot();
+  assert.ok(snap.events.some((row) => row.key === 'in postgres_changes character_sheet_revisions UPDATE'));
+  assert.deepEqual(
+    Object.fromEntries(snap.tags.map((row) => [row.key, row.count])),
+    { 'characters sheet_revision check': 2, 'characters full initial-load': 1, 'characters full structural-refresh': 1 },
+  );
+  stats.reset();
+  assert.deepEqual(stats.snapshot().tags, []);
 });

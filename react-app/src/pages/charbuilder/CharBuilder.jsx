@@ -33,11 +33,18 @@ import { builderReducer, initialBuilderState, normalizeCharacterLevels } from '.
 import { BackgroundStep, ClassStep, EquipmentStep, ScoresStep, SheetStep, SpeciesStep } from './steps/index.js';
 import { useAuth } from '../../shared/cloud/auth/AuthProvider.jsx';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
-import { getCloudCharacter, pushCharacterData, updateCloudCharacterData, deleteOwnCloudCharacter } from '../../shared/cloud/api/cloudCharacters.js';
+import {
+  deleteOwnCloudCharacter, getCloudCharacter, getCloudSheetRevision, SHEET_CONFLICT,
+} from '../../shared/cloud/api/cloudCharacters.js';
+import { saveBuilderCharacter } from './state/cloudSave.js';
+import { createCloudSaveQueue } from './state/cloudSaveQueue.js';
+import { CHARACTER_SHEET_SAVED_EVENT } from '../../shared/cloud/sync/characterEvents.js';
+import SheetConflictBanner from '../../shared/ui/SheetConflictBanner.jsx';
 import {
   generateCharId,
   getActiveCharId,
   loadCharacter as storeLoadCharacter,
+  rebaseCharacterSync,
   setActiveCharId,
 } from '../../shared/character/profile/store.js';
 
@@ -133,6 +140,102 @@ export default function CharBuilder() {
   const builderIdRef = useRef(null);   // cloud character id for this session
   const cloudCreatedRef = useRef(false); // cloud row already inserted
   const cloudPrevRef = useRef(null);   // last persisted cloud object (merge base)
+  // The sheet_revision the builder's copy is based on. Every save of an
+  // existing row is conditional on it; a change made elsewhere since (the GM
+  // adds an item) is a conflict the user resolves, never overwritten.
+  const sheetRevisionRef = useRef(null);
+  const [cloudConflict, setCloudConflict] = useState(null);
+  const cloudConflictRef = useRef(null);
+
+  // The one way the builder writes the cloud (saveBuilderCharacter): created
+  // once, then only conditional updates. The revision a save produces becomes
+  // the one held.
+  const commitCloudSave = async (id, character) => {
+    const result = await saveBuilderCharacter({
+      id, character, created: cloudCreatedRef.current, knownRevision: sheetRevisionRef.current,
+    });
+    cloudCreatedRef.current = true;
+    cloudPrevRef.current = character;
+    sheetRevisionRef.current = result.sheetRevision;
+    return result;
+  };
+
+  // Saves run one at a time (createCloudSaveQueue): one requested while another
+  // is on its way waits for it, then writes the builder's state as it is by
+  // then, against the revision (or the row) the previous save produced.
+  const cloudSnapshotRef = useRef(null);
+  cloudSnapshotRef.current = () => buildSheetCharacter(state.character, state.data, cloudPrevRef.current || {});
+  const cloudSaveQueueRef = useRef(null);
+  if (!cloudSaveQueueRef.current) {
+    cloudSaveQueueRef.current = createCloudSaveQueue(async () => {
+      // A refused save waits for the user's decision; so does everything queued behind it.
+      if (cloudConflictRef.current) return null;
+      const id = builderIdRef.current;
+      if (!id) return null;
+      return commitCloudSave(id, { ...cloudSnapshotRef.current(), id });
+    });
+  }
+  const saveToCloud = () => cloudSaveQueueRef.current();
+
+  // A refused save pauses cloud autosave until the user decides.
+  const reportCloudError = (error, label) => {
+    if (error?.code === SHEET_CONFLICT) {
+      cloudConflictRef.current = error;
+      setCloudConflict(error);
+      return;
+    }
+    notify('error', `${label}: ${error?.message || error}`);
+  };
+
+  // "Load updated version": the builder takes the cloud character.
+  const loadCloudVersion = async () => {
+    const id = builderIdRef.current;
+    if (!id) return;
+    try {
+      const row = await getCloudCharacter(id, { reason: 'conflict-refresh' });
+      cloudCreatedRef.current = true;
+      cloudPrevRef.current = row.data;
+      sheetRevisionRef.current = row.sheet_revision ?? null;
+      cloudConflictRef.current = null;
+      setCloudConflict(null);
+      dispatch({ type: 'character/restore', character: row.data });
+    } catch (error) {
+      notify('error', `Cloud load error: ${error?.message || error}`);
+    }
+  };
+
+  // "Keep my changes": an explicit save over the current cloud version, still
+  // conditional on it (the resumed autosave does it).
+  const keepBuilderVersion = async () => {
+    const id = builderIdRef.current;
+    if (!id) return;
+    try {
+      const revision = cloudConflictRef.current?.remoteSheetRevision ?? await getCloudSheetRevision(id);
+      if (revision == null) {
+        notify('error', 'This character no longer exists in the cloud.');
+        return;
+      }
+      sheetRevisionRef.current = revision;
+      cloudCreatedRef.current = true;
+      cloudConflictRef.current = null;
+      setCloudConflict(null);
+    } catch (error) {
+      notify('error', `Cloud error: ${error?.message || error}`);
+    }
+  };
+
+  // A save of this character made elsewhere in this tab (e.g. the autosync
+  // push of a "Save local" copy) is ours: its revision becomes the one held.
+  useEffect(() => {
+    const onSaved = ({ detail }) => {
+      if (String(detail?.characterId ?? '') !== String(builderIdRef.current ?? '')) return;
+      if (sheetRevisionRef.current == null || detail.sheetRevision > sheetRevisionRef.current) {
+        sheetRevisionRef.current = detail.sheetRevision;
+      }
+    };
+    window.addEventListener(CHARACTER_SHEET_SAVED_EVENT, onSaved);
+    return () => window.removeEventListener(CHARACTER_SHEET_SAVED_EVENT, onSaved);
+  }, []);
   // An imported JSON is a DRAFT: held in builder state, persisted NOWHERE (no
   // localStorage, no cloud) until the user explicitly saves it from the Sheet
   // step. While true the autosave effect is suppressed. Applies on/offline.
@@ -144,20 +247,18 @@ export default function CharBuilder() {
   // the cloud id (for callers that then open the cloud sheet).
   const handleUploadToCloud = async () => {
     const id = builderIdRef.current || generateCharId();
-    const unified = buildSheetCharacter(state.character, state.data, cloudPrevRef.current || {});
-    const withId = { ...unified, id };
+    builderIdRef.current = id;
     try {
-      await pushCharacterData(id, withId);
-      builderIdRef.current = id;
-      cloudCreatedRef.current = true;
-      cloudPrevRef.current = withId;
+      // Through the same queue as autosave: never alongside another save.
+      const result = await saveToCloud();
+      if (!result) return null;
       includeInSync(id);
       setImportDraft(false);
       window.history.replaceState(null, '', `${window.location.pathname}?char=${id}`);
       notify('success', 'Uploaded to cloud.');
       return id;
     } catch (error) {
-      notify('error', `Upload error: ${error?.message || error}`);
+      reportCloudError(error, 'Upload error');
       return null;
     }
   };
@@ -170,6 +271,7 @@ export default function CharBuilder() {
     builderIdRef.current = id;
     cloudCreatedRef.current = false;
     cloudPrevRef.current = null;
+    sheetRevisionRef.current = null;
     setImportDraft(false);
     window.history.replaceState(null, '', `${window.location.pathname}?char=${id}`);
   };
@@ -198,6 +300,7 @@ export default function CharBuilder() {
       builderIdRef.current = null;
       cloudCreatedRef.current = false;
       cloudPrevRef.current = null;
+      sheetRevisionRef.current = null;
       setImportDraft(true);
       dispatch({ type: 'character/restore', character });
       window.history.replaceState(null, '', `${window.location.pathname}?char=new`);
@@ -230,6 +333,7 @@ export default function CharBuilder() {
           if (row?.data) {
             cloudCreatedRef.current = true;
             cloudPrevRef.current = row.data;
+            sheetRevisionRef.current = row.sheet_revision ?? null;
             dispatch({ type: 'character/restore', character: row.data });
           }
         })
@@ -318,6 +422,8 @@ export default function CharBuilder() {
     if (cloudActive && !hydratedRef.current) return;
     // A pending online import draft is persisted nowhere until the user uploads it.
     if (importDraft) return;
+    // A refused save waits for the user's decision (the conflict banner).
+    if (cloudConflict) return;
 
     const handle = setTimeout(() => {
       const activeId = builderIdRef.current || getActiveCharId();
@@ -328,22 +434,13 @@ export default function CharBuilder() {
       if (useCloud) {
         // Save straight to the server on open (no need to "Open sheet" first) and
         // on every edit — never touching localStorage. The first save inserts the
-        // row; later saves update it in place.
-        const unified = buildSheetCharacter(state.character, state.data, cloudPrevRef.current || {});
-        let id = builderIdRef.current;
-        if (!id) {
-          id = generateCharId();
-          builderIdRef.current = id;
+        // row; later saves update it in place, one at a time.
+        if (!builderIdRef.current) {
+          builderIdRef.current = generateCharId();
           // Point the URL at the new id so a reload/edit targets the same character.
-          window.history.replaceState(null, '', `${window.location.pathname}?char=${id}`);
+          window.history.replaceState(null, '', `${window.location.pathname}?char=${builderIdRef.current}`);
         }
-        const withId = { ...unified, id };
-        const op = cloudCreatedRef.current
-          ? updateCloudCharacterData(id, withId)
-          : pushCharacterData(id, withId);
-        op
-          .then(() => { cloudCreatedRef.current = true; cloudPrevRef.current = withId; })
-          .catch((error) => notify('error', `Cloud save error: ${error?.message || error}`));
+        saveToCloud().catch((error) => reportCloudError(error, 'Cloud save error'));
         return;
       }
 
@@ -355,7 +452,9 @@ export default function CharBuilder() {
       }
     }, cloudActive ? 1200 : 300);
     return () => clearTimeout(handle);
-  }, [state.character, state.loading, state.data, authResolved, cloudActive, importDraft]);
+    // saveToCloud/reportCloudError only read refs and stable setters.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.character, state.loading, state.data, authResolved, cloudActive, importDraft, cloudConflict]);
 
   useEffect(() => {
     // Re-hydrate the PRIMARY class object only. class/select is tab-aware: on an
@@ -444,6 +543,9 @@ export default function CharBuilder() {
           }}
         >
           <Box sx={{ minWidth: 0 }}>
+            {cloudConflict ? (
+              <SheetConflictBanner subject="character" onLoadRemote={loadCloudVersion} onKeepLocal={keepBuilderVersion} />
+            ) : null}
             <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mb: 0.75, color: 'primary.main' }}>
               <ActiveIcon size={16} />
               <Typography variant="h2" sx={{ fontSize: '0.86rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'primary.main' }}>{activeStep.label}</Typography>
@@ -453,7 +555,13 @@ export default function CharBuilder() {
             <ActiveStep
               state={state}
               dispatch={dispatch}
-              sheetProps={{ importDraft, onUploadToCloud: handleUploadToCloud, onDraftLocalSaved: handleDraftLocalSaved, onNotify: notify }}
+              sheetProps={{
+                importDraft,
+                onUploadToCloud: handleUploadToCloud,
+                onDraftLocalSaved: handleDraftLocalSaved,
+                onCloudCopySavedLocally: (id) => { if (id === builderIdRef.current) rebaseCharacterSync(id, sheetRevisionRef.current); },
+                onNotify: notify,
+              }}
             />
 
             <Divider sx={{ my: 1 }} />

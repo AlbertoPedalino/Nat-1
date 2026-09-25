@@ -11,7 +11,7 @@ const DIR = new URL('../../../../supabase/', import.meta.url);
 
 // Tables the frontend subscribes to with postgres_changes.
 const REALTIME_TABLES = [
-  'campaign_hexcrawl', 'campaign_live_scenes', 'character_digests', 'characters', 'encounter_fights',
+  'campaign_hexcrawl', 'campaign_live_scenes', 'character_digests', 'character_sheet_revisions', 'encounter_fights',
   'map_drawings', 'map_hex_cells', 'map_scenes', 'map_token_secrets', 'map_tokens',
 ];
 

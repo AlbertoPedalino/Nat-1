@@ -4,6 +4,30 @@
 -- Existing characters retain their HP. Missing HP still means full health.
 alter table public.characters add column if not exists row_revision bigint not null default 0;
 alter table public.characters add column if not exists vitals_revision bigint not null default 0;
+alter table public.characters add column if not exists sheet_revision bigint not null default 0;
+
+-- Keys an open sheet attaches to a character at runtime and that are never
+-- stored: the optional-feature catalog (optionalfeatures.json, identical for
+-- every character, rebuilt on every open). Mirrors RUNTIME_ONLY_CHARACTER_FIELDS
+-- in src/shared/character/profile/runtimeFields.js (a test keeps them equal).
+-- The client strips them before every write; the database strips them again
+-- on INSERT and UPDATE so no older client can bring them back, and
+-- 16_character_digests.sql leaves them out of hpBasis.
+create or replace function public.character_runtime_only_keys()
+returns text[] language sql immutable as $$
+  select array['optionalFeatureEntries'];
+$$;
+
+create or replace function public.strip_character_runtime_fields()
+returns trigger language plpgsql set search_path = public as $$
+begin
+  new.data := new.data - public.character_runtime_only_keys();
+  return new;
+end;
+$$;
+drop trigger if exists strip_character_runtime_fields on public.characters;
+create trigger strip_character_runtime_fields before insert on public.characters
+for each row execute function public.strip_character_runtime_fields();
 
 -- Every ordinary sheet/upsert save preserves the current combat state.
 -- Only the health RPC advances vitals_revision.
@@ -14,13 +38,25 @@ alter table public.characters add column if not exists vitals_revision bigint no
 -- compare it before downloading the row again, so a write that leaves the row
 -- as it was (an unchanged save, or one that only tried to change health) keeps
 -- the revision: nobody re-reads a sheet that did not change.
+--
+-- sheet_revision is the version of the sheet's content — everything a whole
+-- sheet shows except the vitals, which the character digest carries
+-- (16_character_digests.sql). It advances by one when `name` or `data` outside
+-- the vitals and the runtime-only keys changes: an item, a note, a resource, a
+-- level. Health commands, no-ops, campaign moves and a save that only re-adds
+-- a runtime-only key leave it alone. 17_character_sheet_revisions.sql
+-- publishes it so an open sheet knows when to download itself again, and full
+-- sheet saves send it back as their expected revision (optimistic
+-- concurrency: `... where id = X and sheet_revision = expected`).
 create or replace function public.protect_character_vitals()
 returns trigger language plpgsql set search_path = public as $$
 declare
   keys text[] := array['currentHP','tempHP','deathSaves','maxHPBonus','activeConditions'];
-  bookkeeping text[] := array['row_revision','vitals_revision','updated_at'];
+  bookkeeping text[] := array['row_revision','vitals_revision','sheet_revision','updated_at'];
   vitals jsonb;
 begin
+  -- First, so a save that differs only by a runtime-only key is a no-op below.
+  new.data := new.data - public.character_runtime_only_keys();
   if new.vitals_revision is distinct from old.vitals_revision + 1 then
     select coalesce(jsonb_object_agg(key, value), '{}'::jsonb) into vitals
       from jsonb_each(old.data) where key = any(keys);
@@ -33,6 +69,15 @@ begin
     new.vitals_revision := old.vitals_revision;
   else
     new.row_revision := old.row_revision + 1;
+  end if;
+  -- Compared without vitals or runtime-only keys on both sides, so an older
+  -- row that still carries a runtime-only key does not count as changed.
+  if new.name is distinct from old.name
+    or (new.data - keys - public.character_runtime_only_keys())
+       is distinct from (old.data - keys - public.character_runtime_only_keys()) then
+    new.sheet_revision := old.sheet_revision + 1;
+  else
+    new.sheet_revision := old.sheet_revision;
   end if;
   return new;
 end;

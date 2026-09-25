@@ -9,6 +9,7 @@ import {
   saveCharacter as storeSaveCharacter,
   setActiveCharId,
 } from '../../../shared/character/profile/store.js';
+import { stripRuntimeOnlyCharacterFields } from '../../../shared/character/profile/runtimeFields.js';
 import { collectAutoGrantedSpells as collectEntityAutoGrantedSpells } from '../spells/spells.js';
 import { normalizeCurrency } from '../../../shared/character/inventory/currency.js';
 import {
@@ -453,7 +454,9 @@ function stripHeavyFields(character) {
 export function buildSheetCharacter(character, data, previous = {}) {
   const builderCharacter = normalizeProficiencyChoicesForPersistence(character);
   const payload = makeSheetPayload(builderCharacter, data);
-  return stripHeavyFields({ ...(previous || {}), ...builderCharacter, ...payload });
+  // `previous` (a stored or cloud row) may still carry runtime-only fields from
+  // before they were stripped; they never survive a builder save.
+  return stripRuntimeOnlyCharacterFields(stripHeavyFields({ ...(previous || {}), ...builderCharacter, ...payload }));
 }
 
 export function saveCharacter(character, data, options = {}) {

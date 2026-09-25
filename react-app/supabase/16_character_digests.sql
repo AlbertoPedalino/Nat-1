@@ -29,7 +29,11 @@ returns text[] language sql immutable as $$
     'name', 'portraitPath', 'classIconColor',
     -- trackers that change all session and never feed max HP
     'notes', 'resources', 'freeCastUses', 'spellSlotsUsed', 'createdSpellSlots',
-    'usedHD', 'usedHDPools', 'currency', 'inspiration'
+    'usedHD', 'usedHDPools', 'currency', 'inspiration',
+    -- runtime-only catalog attached by an open sheet (13_character_vitals.sql,
+    -- character_runtime_only_keys): never stored, and never part of the basis
+    -- while older rows still carry it
+    'optionalFeatureEntries'
   ];
 $$;
 

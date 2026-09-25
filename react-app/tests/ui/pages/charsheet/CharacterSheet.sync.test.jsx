@@ -2,22 +2,26 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import CharacterSheet from '../../../../src/pages/charsheet/CharacterSheet.jsx';
 import CampaignSheetView from '../../../../src/pages/campaignsheet/CampaignSheetView.jsx';
 import CloudAutoSync from '../../../../src/shared/cloud/sync/CloudAutoSync.jsx';
-import { loadCharacter, saveCharacter, setActiveCharId } from '../../../../src/shared/character/profile/store.js';
+import {
+  getCharacterSyncMeta, loadCharacter, markCharacterSynced, saveCharacter, setActiveCharId,
+} from '../../../../src/shared/character/profile/store.js';
 import { excludeFromSync } from '../../../../src/shared/cloud/sync/cloudSyncExclude.js';
-import { publishCharacterVitals } from '../../../../src/shared/cloud/sync/characterEvents.js';
+import { publishCharacterSheetSaved, publishCharacterVitals } from '../../../../src/shared/cloud/sync/characterEvents.js';
 import { healthCommandRoute } from '../../../../src/shared/cloud/api/healthCommandRoute.js';
 import { toCharacterDigest } from '../../../../src/shared/campaign/characterDigest.js';
 
-// Editable sheets take only vitals from others, through the character digest.
-// They never subscribe to, poll or re-read the `characters` row.
+// Every sheet takes vitals from others through the character digest, and
+// learns that its content changed through its sheet revision
+// (character_sheet_revisions). No sheet subscribes to or polls `characters`.
 
 const cloud = vi.hoisted(() => ({
   save: vi.fn(), command: vi.fn(), push: vi.fn(), get: vi.fn(), revision: vi.fn(), list: vi.fn(), sheets: vi.fn(),
-  channels: [], digestRows: [],
+  channels: [], digestRows: [], sheetRevision: 0,
 }));
 vi.mock('../../../../src/shared/cloud/api/cloudCharacters.js', () => ({
   updateCloudCharacterData: cloud.save, pushCharacter: cloud.push, updateForeignCharacter: cloud.push,
-  getCloudCharacter: cloud.get, getCloudCharacterRevision: cloud.revision, commandCharacterVitals: cloud.command,
+  getCloudCharacter: cloud.get, getCloudSheetRevision: cloud.revision, commandCharacterVitals: cloud.command,
+  SHEET_CONFLICT: 'SHEET_CONFLICT',
 }));
 vi.mock('../../../../src/shared/cloud/api/characterDigests.js', async (original) => ({
   ...await original(),
@@ -65,9 +69,13 @@ vi.mock('../../../../src/pages/charsheet/stats/RightTop.jsx', () => ({ default: 
 vi.mock('../../../../src/pages/charsheet/proficiency/Proficiencies.jsx', () => ({ default: () => null }));
 vi.mock('../../../../src/pages/charsheet/layout/TabsPanel.jsx', async () => {
   const { useSheetActions } = await import('../../../../src/pages/charsheet/state/SheetActionsContext.jsx');
-  return { default: () => {
+  return { default: ({ C }) => {
     const actions = useSheetActions();
-    return <button onClick={() => actions.onUpdateNotes('Local note')}>Edit notes</button>;
+    return <>
+      <output data-testid="notes">{C?.notes || ''}</output>
+      <output data-testid="items">{(C?.inventory || []).map((item) => item.name).join(',')}</output>
+      <button onClick={() => actions.onUpdateNotes('Local note')}>Edit notes</button>
+    </>;
   } };
 });
 
@@ -76,7 +84,7 @@ const character = {
   finalScores: { str: 10, dex: 10, con: 14, int: 10, wis: 10, cha: 10 },
   currentHP: 20, tempHP: 0, maxHPBonus: 0, deathSaves: { success: 0, fail: 0 }, activeConditions: [],
 };
-const props = { externalChar: character, externalCharId: 'character', embedded: true };
+const props = { externalChar: character, externalCharId: 'character', externalSheetRevision: 0, embedded: true };
 const digestRow = (revision, patch = {}) => ({
   character_id: 'character', campaign_id: 'camp', owner: 'owner', row_revision: revision,
   digest: {
@@ -84,7 +92,9 @@ const digestRow = (revision, patch = {}) => ({
     activeConditions: [], hpBasis: 'h1', ...patch,
   },
 });
-const sheetRow = (revision, currentHP) => ({ id: 'character', row_revision: revision, data: { ...character, currentHP } });
+const sheetRow = (revision, currentHP, sheetRevision = 0, data = {}) => ({
+  id: 'character', row_revision: revision, sheet_revision: sheetRevision, data: { ...character, currentHP, ...data },
+});
 // What commit_character_vitals answers: vitals, digest revision, basis.
 const vitalsAnswer = (revision, currentHP) => ({
   applied: true, characterId: 'character', digestRevision: revision, hpBasis: 'h1',
@@ -109,6 +119,18 @@ async function openSheet(extra = {}) {
 }
 const digestChannels = () => cloud.channels.filter((channel) => channel.table === 'character_digests');
 const rowChannels = () => cloud.channels.filter((channel) => channel.table === 'characters');
+const sheetChannels = () => cloud.channels.filter((channel) => channel.table === 'character_sheet_revisions');
+// Someone else saves the sheet's content: the database moves sheet_revision
+// and character_sheet_revisions announces it.
+async function remoteSheetChange(sheetRevision, data) {
+  cloud.sheetRevision = sheetRevision;
+  cloud.get.mockResolvedValue(sheetRow(9, 20, sheetRevision, data));
+  await act(async () => sheetChannels().at(-1).receive({
+    eventType: 'UPDATE', new: { character_id: 'character', sheet_revision: sheetRevision },
+  }));
+  await flush();
+}
+const fullReads = (reason) => cloud.get.mock.calls.filter(([, options]) => !reason || options?.reason === reason).length;
 async function receive(currentHP, revision, patch = {}) {
   const row = digestRow(revision, { currentHP, ...patch });
   await act(async () => digestChannels().at(-1).receive({ eventType: 'UPDATE', new: row }));
@@ -119,11 +141,20 @@ beforeEach(() => {
   vi.useFakeTimers();
   cloud.channels = [];
   cloud.digestRows = [digestRow(0)];
-  cloud.save.mockReset().mockResolvedValue(undefined);
+  cloud.sheetRevision = 0;
+  cloud.save.mockReset().mockImplementation(async () => {
+    cloud.sheetRevision += 1;
+    return { id: 'character', sheetRevision: cloud.sheetRevision };
+  });
   cloud.command.mockReset().mockImplementation(answer(vitalsAnswer(1, 19)));
-  cloud.push.mockReset().mockResolvedValue(undefined);
+  // CloudAutoSync's push of a local sheet, as pushCharacter does it.
+  cloud.push.mockReset().mockImplementation(async (id) => {
+    cloud.sheetRevision += 1;
+    markCharacterSynced(id, cloud.sheetRevision);
+    publishCharacterSheetSaved(id, cloud.sheetRevision);
+  });
   cloud.get.mockReset().mockResolvedValue(sheetRow(0, 20));
-  cloud.revision.mockReset().mockResolvedValue(0);
+  cloud.revision.mockReset().mockImplementation(async () => cloud.sheetRevision);
   cloud.list.mockReset().mockImplementation(async () => cloud.digestRows.map(toCharacterDigest));
   cloud.sheets.mockReset().mockResolvedValue([]);
 });
@@ -177,9 +208,10 @@ test('idle: several safety ticks read only the digest, never the sheet', async (
   expect(screen.getByTestId('hp')).toHaveTextContent('20');
 });
 
-test('a digest handed down by the parent feeds the sheet; it opens no channel of its own', async () => {
+test('a digest handed down by the parent feeds the sheet; it opens no digest channel of its own', async () => {
   const view = await openSheet({ liveDigest: toCharacterDigest(digestRow(0)) });
-  expect(cloud.channels).toHaveLength(0);
+  expect(digestChannels()).toHaveLength(0);
+  expect(sheetChannels()).toHaveLength(1);
   view.rerender(<CharacterSheet {...props} liveDigest={toCharacterDigest(digestRow(3, { currentHP: 11 }))} />);
   await flush();
   expect(screen.getByTestId('hp')).toHaveTextContent('11');
@@ -217,7 +249,9 @@ test('remote damage and local notes share a sheet without sending a health comma
   fireEvent.click(screen.getByText('Edit notes'));
   await receive(15, 1);
   await flush();
-  expect(cloud.save).toHaveBeenCalledWith('character', expect.objectContaining({ currentHP: 15, notes: 'Local note' }));
+  expect(cloud.save).toHaveBeenCalledWith(
+    'character', expect.objectContaining({ currentHP: 15, notes: 'Local note' }), { expectedSheetRevision: 0 },
+  );
   expect(cloud.command).not.toHaveBeenCalled();
 });
 
@@ -330,26 +364,210 @@ test.each([true, false])('repeated damage stays stable through delayed echoes (e
   expect(cloud.get).toHaveBeenCalledOnce();
 });
 
-test('a read-only viewer follows the whole row live; idle ticks only check its revision', async () => {
-  window.history.replaceState({}, '', '/campaign-sheet?id=character');
-  render(<CampaignSheetView />);
+
+describe('content changed elsewhere (sheet revision)', () => {
+  test('no sheet subscribes to characters; each opens one sheet-revision channel', async () => {
+    await openSheet();
+    expect(rowChannels()).toHaveLength(0);
+    expect(sheetChannels()).toHaveLength(1);
+  });
+
+  test('editable, clean: a GM inventory change is one light event and one download', async () => {
+    render(<CampaignSheetView sheetId="character" editable embedded />);
+    await flush();
+    expect(fullReads()).toBe(1); // the initial load
+    await remoteSheetChange(1, { inventory: [{ name: 'Rope' }] });
+    expect(screen.getByTestId('items')).toHaveTextContent('Rope');
+    expect(fullReads('structural-refresh')).toBe(1);
+    expect(cloud.save).not.toHaveBeenCalled(); // the applied row is not written back
+    // The same revision seen again by a recovery read is not downloaded twice.
+    act(() => window.dispatchEvent(new Event('online')));
+    await flush();
+    expect(fullReads('structural-refresh')).toBe(1);
+  });
+
+  test('editable, dirty: a GM change while a save is pending is never overwritten; the user decides', async () => {
+    render(<CampaignSheetView sheetId="character" editable embedded />);
+    await flush();
+    fireEvent.click(screen.getByText('Edit notes')); // pending save (1.2 s debounce)
+    // The GM saves first: the pending save is based on revision 0.
+    cloud.sheetRevision = 1;
+    cloud.get.mockResolvedValue(sheetRow(9, 20, 1, { inventory: [{ name: 'Rope' }] }));
+    cloud.save.mockImplementation(async (_id, _data, { expectedSheetRevision }) => {
+      if (expectedSheetRevision !== cloud.sheetRevision) {
+        throw Object.assign(new Error('changed elsewhere'), { code: 'SHEET_CONFLICT', remoteSheetRevision: cloud.sheetRevision });
+      }
+      cloud.sheetRevision += 1;
+      return { id: 'character', sheetRevision: cloud.sheetRevision };
+    });
+    await act(async () => sheetChannels().at(-1).receive({
+      eventType: 'UPDATE', new: { character_id: 'character', sheet_revision: 1 },
+    }));
+    await flush();
+    expect(cloud.save).toHaveBeenCalledWith('character', expect.objectContaining({ notes: 'Local note' }), { expectedSheetRevision: 0 });
+    await flush();
+    expect(screen.getByText(/updated elsewhere/i)).toBeInTheDocument();
+    expect(fullReads('conflict-refresh')).toBe(1);
+    expect(fullReads('structural-refresh')).toBe(0);
+    expect(screen.getByTestId('notes')).toHaveTextContent('Local note'); // local version kept meanwhile
+    expect(screen.getByTestId('items')).toHaveTextContent('');
+
+    // "Keep my changes": an explicit save over revision 1, still conditional.
+    fireEvent.click(screen.getByText('Keep my changes'));
+    await flush();
+    expect(cloud.save).toHaveBeenLastCalledWith('character', expect.objectContaining({ notes: 'Local note' }), { expectedSheetRevision: 1 });
+    expect(screen.queryByText(/updated elsewhere/i)).toBeNull();
+  });
+
+  test('dirty, then "Load updated version" drops the local change for the cloud one', async () => {
+    render(<CampaignSheetView sheetId="character" editable embedded />);
+    await flush();
+    cloud.save.mockRejectedValue(Object.assign(new Error('changed elsewhere'), { code: 'SHEET_CONFLICT', remoteSheetRevision: 1 }));
+    cloud.get.mockResolvedValue(sheetRow(9, 20, 1, { notes: 'GM note', inventory: [{ name: 'Rope' }] }));
+    fireEvent.click(screen.getByText('Edit notes'));
+    await flush();
+    await flush();
+    fireEvent.click(screen.getByText('Load updated version'));
+    await flush();
+    expect(screen.getByTestId('notes')).toHaveTextContent('GM note');
+    expect(screen.getByTestId('items')).toHaveTextContent('Rope');
+    expect(cloud.save).toHaveBeenCalledTimes(1);
+  });
+
+  test('three health commands: digest only, no sheet event, no download', async () => {
+    render(<CampaignSheetView sheetId="character" editable embedded />);
+    await flush();
+    for (let hit = 1; hit <= 3; hit += 1) {
+      cloud.command.mockImplementation(answer(vitalsAnswer(hit, 20 - hit)));
+      fireEvent.click(screen.getByText('Damage'));
+      await flush();
+      await receive(20 - hit, hit);
+    }
+    expect(screen.getByTestId('hp')).toHaveTextContent('17');
+    expect(fullReads()).toBe(1);
+  });
+
+  test('own save: its echo is ignored, whether it arrives before or after the answer', async () => {
+    render(<CampaignSheetView sheetId="character" editable embedded />);
+    await flush();
+    let finish;
+    cloud.save.mockImplementationOnce(() => new Promise((resolve) => { finish = resolve; }));
+    fireEvent.click(screen.getByText('Edit notes'));
+    await flush(); // the save is in flight
+    await act(async () => sheetChannels().at(-1).receive({
+      eventType: 'UPDATE', new: { character_id: 'character', sheet_revision: 1 },
+    })); // its echo first
+    await act(async () => finish({ id: 'character', sheetRevision: 1 }));
+    await flush();
+    expect(fullReads()).toBe(1);
+    await act(async () => sheetChannels().at(-1).receive({
+      eventType: 'UPDATE', new: { character_id: 'character', sheet_revision: 1 },
+    })); // and again after
+    await flush();
+    expect(fullReads()).toBe(1);
+  });
+
+  test('read-only viewer: HP through the digest with no download; content through one download', async () => {
+    window.history.replaceState({}, '', '/campaign-sheet?id=character');
+    render(<CampaignSheetView />);
+    await flush();
+    expect(rowChannels()).toHaveLength(0);
+    expect(digestChannels()).toHaveLength(1);
+    await receive(11, 3);
+    expect(screen.getByTestId('hp')).toHaveTextContent('11');
+    expect(fullReads()).toBe(1);
+    await remoteSheetChange(2, { inventory: [{ name: 'Rope' }], currentHP: 11 });
+    expect(screen.getByTestId('items')).toHaveTextContent('Rope');
+    expect(fullReads('structural-refresh')).toBe(1);
+    expect(cloud.save).not.toHaveBeenCalled();
+    expect(cloud.command).not.toHaveBeenCalled();
+  });
+
+  test('a deleted character empties a cloud view', async () => {
+    render(<CampaignSheetView sheetId="character" editable embedded />);
+    await flush();
+    await act(async () => sheetChannels().at(-1).receive({ eventType: 'DELETE', old: { character_id: 'character' } }));
+    expect(screen.getByText('This sheet no longer exists.')).toBeInTheDocument();
+  });
+});
+
+describe('standalone local sheet', () => {
+  test('a change made while it was closed is recovered on open, stored as the cloud copy, not pushed back', async () => {
+    saveCharacter('character', character, { emit: false });
+    markCharacterSynced('character', 2);
+    setActiveCharId('character');
+    cloud.sheetRevision = 3; // the GM added an item while this copy was closed
+    cloud.get.mockResolvedValue(sheetRow(9, 20, 3, { inventory: [{ name: 'Rope' }] }));
+    render(<><CloudAutoSync /><CharacterSheet /></>);
+    await flush();
+    await act(async () => sheetChannels().at(-1).status('SUBSCRIBED'));
+    await flush();
+    expect(fullReads('structural-refresh')).toBe(1);
+    expect(screen.getByTestId('items')).toHaveTextContent('Rope');
+    expect(loadCharacter('character').inventory).toEqual([{ name: 'Rope' }]);
+    expect(getCharacterSyncMeta('character').sheetRevision).toBe(3);
+    await flush();
+    expect(cloud.push).not.toHaveBeenCalled();
+  });
+
+  test('its own pushes are recognised: editing notes downloads nothing', async () => {
+    await openLocalSheet();
+    fireEvent.click(screen.getByText('Edit notes'));
+    await flush(); // CloudAutoSync pushes: sheet_revision 1, announced
+    expect(cloud.push).toHaveBeenCalledOnce();
+    await act(async () => sheetChannels().at(-1).receive({
+      eventType: 'UPDATE', new: { character_id: 'character', sheet_revision: cloud.sheetRevision },
+    }));
+    await flush();
+    expect(fullReads()).toBe(0);
+  });
+});
+
+test('standalone, dirty: an autosync push refused by a newer cloud sheet asks the user, and nothing is overwritten', async () => {
+  await openLocalSheet();
+  cloud.push.mockRejectedValueOnce(Object.assign(new Error('changed elsewhere'), { code: 'SHEET_CONFLICT', remoteSheetRevision: 4 }));
+  cloud.get.mockResolvedValue(sheetRow(9, 20, 4, { notes: 'GM note' }));
+  fireEvent.click(screen.getByText('Edit notes'));
+  await flush(); // push → conflict
   await flush();
-  expect(digestChannels()).toHaveLength(0);
-  expect(rowChannels()).toHaveLength(1);
-  await act(async () => rowChannels()[0].status('SUBSCRIBED'));
-  await act(async () => rowChannels()[0].receive({ new: sheetRow(3, 11) }));
+  expect(screen.getByText(/updated elsewhere/i)).toBeInTheDocument();
+  expect(fullReads('conflict-refresh')).toBe(1);
+  expect(loadCharacter('character').notes).toBe('Local note'); // the local copy is kept until the user decides
+  fireEvent.click(screen.getByText('Load updated version'));
   await flush();
-  expect(screen.getByTestId('hp')).toHaveTextContent('11');
-  await act(async () => { await vi.advanceTimersByTimeAsync(3 * 30_000); });
-  expect(cloud.get).toHaveBeenCalledOnce();
-  expect(cloud.revision.mock.calls.length).toBeGreaterThanOrEqual(4);
-  // An edit made elsewhere while realtime missed it is found by the next check.
-  cloud.revision.mockResolvedValue(5);
-  cloud.get.mockResolvedValue(sheetRow(5, 7));
-  await act(async () => { await vi.advanceTimersByTimeAsync(30_000); });
+  expect(screen.getByTestId('notes')).toHaveTextContent('GM note');
+  expect(loadCharacter('character').notes).toBe('GM note');
+  expect(getCharacterSyncMeta('character').sheetRevision).toBe(4);
   await flush();
-  expect(screen.getByTestId('hp')).toHaveTextContent('7');
-  expect(cloud.get).toHaveBeenCalledTimes(2);
-  expect(cloud.save).not.toHaveBeenCalled();
-  expect(cloud.command).not.toHaveBeenCalled();
+  expect(cloud.push).toHaveBeenCalledTimes(1); // the cloud copy is not pushed back
+});
+
+test('standalone: an edit during a push waits for it; the echo of the first push downloads nothing and no conflict appears', async () => {
+  await openLocalSheet();
+  let finishFirst;
+  cloud.push.mockImplementationOnce((id) => new Promise((resolve) => {
+    finishFirst = () => {
+      cloud.sheetRevision += 1;
+      markCharacterSynced(id, cloud.sheetRevision);
+      publishCharacterSheetSaved(id, cloud.sheetRevision);
+      resolve();
+    };
+  }));
+  fireEvent.click(screen.getByText('Edit notes'));
+  await flush(); // push A is on its way
+  expect(cloud.push).toHaveBeenCalledTimes(1);
+  // Edit again while A runs: no second push yet.
+  saveCharacter('character', { ...loadCharacter('character'), notes: 'Later note' });
+  await flush();
+  expect(cloud.push).toHaveBeenCalledTimes(1);
+  // A's echo arrives before its answer, then A answers.
+  await act(async () => sheetChannels().at(-1).receive({
+    eventType: 'UPDATE', new: { character_id: 'character', sheet_revision: 1 },
+  }));
+  await act(async () => finishFirst());
+  await flush(); // B: scheduled after A, pushed from the latest copy
+  expect(cloud.push).toHaveBeenCalledTimes(2);
+  expect(getCharacterSyncMeta('character').sheetRevision).toBe(2);
+  expect(fullReads()).toBe(0);
+  expect(screen.queryByText(/updated elsewhere/i)).toBeNull();
 });

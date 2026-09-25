@@ -3,7 +3,8 @@ import { Button, Menu, MenuItem, Divider, Typography, Box, Tooltip } from '@mui/
 import { LogIn, LogOut, User, CloudUpload } from 'lucide-react';
 import { useAuth } from './AuthProvider.jsx';
 import AuthDialog from './AuthDialog.jsx';
-import { pushCharacter } from '../api/cloudCharacters.js';
+import { pushCharacter, SHEET_CONFLICT } from '../api/cloudCharacters.js';
+import { reportCloudSyncState } from '../sync/cloudSyncState.js';
 import { isSyncExcluded, includeInSync } from '../sync/cloudSyncExclude.js';
 import { useToast } from '../../ui/ToastProvider.jsx';
 
@@ -55,6 +56,12 @@ export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUplo
       await pushCharacter(id);
       notify('success', 'Sheet saved to cloud. Auto-sync is now on for it.');
     } catch (e) {
+      if (e?.code === SHEET_CONFLICT) {
+        // A cloud copy exists that this local copy was never aligned with:
+        // nothing was overwritten. The open sheet asks which version to keep.
+        reportCloudSyncState(id, 'conflict', e.message);
+        return;
+      }
       notify('error', e?.message || 'Failed to save.');
     }
   };
@@ -63,8 +70,11 @@ export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUplo
   useEffect(() => {
     const onSync = (e) => {
       const state = e?.detail?.state || 'idle';
-      setSyncState(state);
-      if (state === 'error') notify('error', `Sync failed: ${e.detail.error || ''}`);
+      // Waiting for the debounce, or dropped: nothing to show yet.
+      if (state === 'scheduled' || state === 'cancelled') return;
+      // A conflict wrote nothing and needs a decision (the open sheet asks it).
+      setSyncState(state === 'conflict' ? 'error' : state);
+      if (state === 'error' || state === 'conflict') notify('error', `Sync failed: ${e.detail.error || ''}`);
     };
     window.addEventListener('gb:cloud-sync', onSync);
     return () => window.removeEventListener('gb:cloud-sync', onSync);

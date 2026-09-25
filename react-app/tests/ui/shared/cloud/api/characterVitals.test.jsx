@@ -38,11 +38,11 @@ vi.mock('../../../../../src/shared/cloud/supabaseClient.js', () => ({
           };
         },
       }),
-      upsert: async (row) => {
+      insert: (row) => {
         server.reads.push({ table, upsert: true });
         server.exists = true;
         server.data = structuredClone(row.data);
-        return { error: null };
+        return { select: () => ({ maybeSingle: async () => ({ data: { sheet_revision: 0 }, error: null }) }) };
       },
     }),
   }),

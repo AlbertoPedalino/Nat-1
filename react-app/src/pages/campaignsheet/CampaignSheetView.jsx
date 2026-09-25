@@ -10,10 +10,11 @@ function editFromUrl() {
   return new URLSearchParams(window.location.search).get('edit') === '1';
 }
 
-// A cloud sheet, by id. A read-only viewer follows the whole row live. An
-// editable sheet reads it once: from then on it is the author of its own sheet
-// and takes only vitals from others, through the character digest — its
-// parent's (`liveDigest`, e.g. the battle map roster) or its own.
+// A cloud sheet, by id, read once. The sheet then follows the character itself:
+// vitals through the character digest — its parent's (`liveDigest`, e.g. the
+// battle map roster) or its own — and content through the sheet revision,
+// handing back a newer row here (`onSheetRow`) when the content changed. The
+// same for editable and read-only views; only an editable one ever writes.
 export default function CampaignSheetView({
   sheetId = null,
   editable = null,
@@ -24,7 +25,7 @@ export default function CampaignSheetView({
 } = {}) {
   const charId = sheetId || charIdFromUrl();
   const canEdit = editable ?? editFromUrl();
-  const { row, loading, error } = useCloudCharacterRow(charId, { live: !canEdit });
+  const { row, loading, error, replaceRow, markDeleted } = useCloudCharacterRow(charId);
 
   return (
     <Box sx={{ minHeight: embedded ? 'auto' : '100vh', bgcolor: embedded ? 'transparent' : 'background.default' }}>
@@ -36,11 +37,14 @@ export default function CampaignSheetView({
         <CharacterSheet
           externalChar={row.data}
           externalCharId={charId}
+          externalSheetRevision={row.sheet_revision ?? -1}
+          onSheetRow={replaceRow}
+          onSheetDeleted={markDeleted}
           readOnly={!canEdit}
           embedded={embedded}
           onRoll={onRoll}
           showOwnRollToast={showOwnRollToast}
-          liveDigest={canEdit ? liveDigest : undefined}
+          liveDigest={liveDigest}
         />
       )}
     </Box>

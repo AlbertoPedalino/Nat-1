@@ -87,6 +87,7 @@ export function createRealtimeStats({ now = () => Date.now() } = {}) {
   let byEvent = {};
   let byTopic = {};
   let rest = {};
+  let tags = {};
 
   return {
     recordFrame(direction, msg, payload) {
@@ -98,6 +99,11 @@ export function createRealtimeStats({ now = () => Date.now() } = {}) {
     },
     recordRest(method, url, bytes) {
       bump(rest, `${String(method || 'GET').toUpperCase()} ${restLabel(url)}`, Math.max(0, Number(bytes) || 0));
+    },
+    // Why the app made a request (syncDiagnostics.js), counted beside the
+    // requests themselves: e.g. "characters full structural-refresh".
+    recordTag(tag) {
+      if (tag) bump(tags, String(tag), 0);
     },
     snapshot({ channels = null } = {}) {
       const seconds = Math.max(1, (now() - startedAt) / 1000);
@@ -117,6 +123,7 @@ export function createRealtimeStats({ now = () => Date.now() } = {}) {
         events: rows(byEvent),
         topics: rows(byTopic),
         rest: rows(rest),
+        tags: rows(tags).map(({ key, count, perSecond }) => ({ key, count, perSecond })).sort((a, b) => b.count - a.count),
       };
     },
     reset() {
@@ -124,6 +131,7 @@ export function createRealtimeStats({ now = () => Date.now() } = {}) {
       byEvent = {};
       byTopic = {};
       rest = {};
+      tags = {};
     },
   };
 }
@@ -184,6 +192,7 @@ export function exposeRealtimeDiagnostics(stats, client, target = globalThis) {
       console.table(snap.events);
       console.table(snap.topics);
       console.table(snap.rest);
+      console.table(snap.tags);
       /* eslint-enable no-console */
       return snap;
     },
