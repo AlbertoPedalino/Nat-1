@@ -1026,7 +1026,7 @@ export function getSheetSlots(C) {
   const regularEntities = casterEntities.filter((entity) => normalizeProgression(entity.profile.casterProgression) !== 'pact');
   if (!regularEntities.length) return { regular: [], pact };
 
-  if (casterEntities.length === 1 && !pactEntity) {
+  if (regularEntities.length === 1) {
     const entity = regularEntities[0];
     const level = clampLevel(entity.level);
     const prog = normalizeProgression(entity.profile.casterProgression);

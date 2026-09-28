@@ -136,28 +136,33 @@ export function getCasterContribution(progression, level) {
   return 0;
 }
 
+function singleClassSlots(progression, level) {
+  if (progression === 'full') return FULL_SLOTS[level] || [];
+  if (progression === 'half' || progression === 'artificer') return HALF_SLOTS[level] || [];
+  if (progression === 'third') return THIRD_SLOTS[level] || [];
+  return [];
+}
+
+// Slots are one shared pool for the whole character. The multiclass table only
+// applies when more than one class has Spellcasting; Pact Magic stays separate.
 export function getSpellSlots(character) {
-  const primaryLv = getPrimaryClassLevel(character);
-  const primaryProg = getCasterProgression(character.className, character.cls, character.subclassShortName);
-  const extras = character.extraClasses || [];
-  const extraCasters = extras.filter((extra) => getCasterProgression(extra.name, extra.cls, extra.subclassShortName));
-  const pactSlot = primaryProg === 'pact' ? PACT_SLOTS[primaryLv] : null;
+  const entries = [
+    { progression: getCasterProgression(character.className, character.cls, character.subclassShortName), level: getPrimaryClassLevel(character) },
+    ...(character.extraClasses || []).map((extra) => ({
+      progression: getCasterProgression(extra.name, extra.cls, extra.subclassShortName),
+      level: extra.level || 1,
+    })),
+  ].filter((entry) => entry.progression);
 
-  if (!extras.length) {
-    if (primaryProg === 'full') return { slots: FULL_SLOTS[primaryLv] || [], pact: null };
-    if (primaryProg === 'half') return { slots: HALF_SLOTS[primaryLv] || [], pact: null };
-    if (primaryProg === 'artificer') return { slots: HALF_SLOTS[primaryLv] || [], pact: null };
-    if (primaryProg === 'third') return { slots: THIRD_SLOTS[primaryLv] || [], pact: null };
-    if (primaryProg === 'pact') return { slots: [], pact: pactSlot };
-    return { slots: [], pact: null };
+  const pactEntry = entries.find((entry) => entry.progression === 'pact');
+  const pact = pactEntry ? PACT_SLOTS[Math.min(20, pactEntry.level)] || null : null;
+  const regular = entries.filter((entry) => entry.progression !== 'pact');
+
+  if (regular.length === 1) {
+    return { slots: singleClassSlots(regular[0].progression, Math.min(20, regular[0].level)), pact };
   }
-
-  const casterLevel = getCasterContribution(primaryProg, primaryLv)
-    + extraCasters.reduce((sum, extra) => sum + getCasterContribution(getCasterProgression(extra.name, extra.cls, extra.subclassShortName), extra.level || 1), 0);
-  if (casterLevel > 0) return { slots: FULL_SLOTS[Math.min(20, casterLevel)] || [], pact: pactSlot };
-  if (primaryProg === 'half' || primaryProg === 'artificer') return { slots: HALF_SLOTS[primaryLv] || [], pact: pactSlot };
-  if (primaryProg === 'third') return { slots: THIRD_SLOTS[primaryLv] || [], pact: pactSlot };
-  return { slots: [], pact: pactSlot };
+  const casterLevel = regular.reduce((sum, entry) => sum + getCasterContribution(entry.progression, entry.level), 0);
+  return { slots: casterLevel > 0 ? FULL_SLOTS[Math.min(20, casterLevel)] || [] : [], pact };
 }
 
 export function getProficiencyBonus(level) {
