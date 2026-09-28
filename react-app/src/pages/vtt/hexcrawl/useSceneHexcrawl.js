@@ -135,9 +135,9 @@ export function useSceneHexcrawl({ scene, isGm }) {
       }
       const current = boardRef.current;
       if (!force && current?.id === boardId) {
-        const updatedAt = await readHexcrawlBoardVersion(boardId);
+        const version = await readHexcrawlBoardVersion(boardId);
         if (scope !== boardScopeRef.current) return boardRef.current;
-        if (updatedAt <= current.updatedAt) return current;
+        if (version === current.version) return current;
       }
       const loaded = await readHexcrawlBoard(boardId);
       if (scope !== boardScopeRef.current) return boardRef.current;

@@ -217,7 +217,7 @@ export async function readHexcrawlBoard(boardId) {
   const supabase = requireClient();
   const { data, error } = await supabase
     .from('boards')
-    .select('id, name, data, updated_at')
+    .select('id, name, data, version')
     .eq('id', id)
     .maybeSingle();
   if (error) throw error;
@@ -233,21 +233,23 @@ export async function readHexcrawlBoard(boardId) {
     name: data.name || id,
     state: parse(STORAGE_KEYS.state, createDefaultCoreState()),
     tables: parse(STORAGE_KEYS.tables, createDefaultTables()),
-    updatedAt: Date.parse(data.updated_at) || 0,
+    version: Number(data.version),
   };
 }
 
+// The board's data revision (supabase/18_section_versions.sql): it changes
+// exactly when its data does, so an open map rereads the board only then.
 export async function readHexcrawlBoardVersion(boardId) {
   const id = sanitizeInstanceId(boardId);
-  if (!id) return 0;
+  if (!id) return null;
   const supabase = requireClient();
   const { data, error } = await supabase
     .from('boards')
-    .select('updated_at')
+    .select('version')
     .eq('id', id)
     .maybeSingle();
   if (error) throw error;
-  return Date.parse(data?.updated_at) || 0;
+  return data ? Number(data.version) : null;
 }
 
 // Realtime, same shape as the scene channels: the GM's map and the GM's board

@@ -36,9 +36,14 @@ or on a script missing from this table.
 | 15 | [`15_live_scenes.sql`](supabase/15_live_scenes.sql) | `campaign_live_scenes`: which scene each campaign shows, kept by the database for players and projectors to follow |
 | 16 | [`16_character_digests.sql`](supabase/16_character_digests.sql) | `character_digests`: roster/vitals projection of each sheet (plus a max-HP input hash) for the battle map and encounter builder |
 | 17 | [`17_character_sheet_revisions.sql`](supabase/17_character_sheet_revisions.sql) | `character_sheet_revisions`: one row per character carrying only `sheet_revision`, the signal an open sheet follows to know its content changed elsewhere |
+| 18 | [`18_section_versions.sql`](supabase/18_section_versions.sql) | `version` on `boards`, `encounters`, `dm_screens`: the database-maintained revision tool-instance sync updates against (`where version = N`); `updated_at` becomes a server-set timestamp only |
 
 Run 13 and 14 **before** deploying a frontend that needs them: the app sends
 health changes only through their RPCs.
+
+Run 18 **before** deploying a frontend that syncs GM Board, Encounter Builder or
+DM Screen instances by `version`: without the column every data sync fails safely
+(nothing is overwritten) until it is applied.
 
 One-off data maintenance lives in [`supabase/maintenance/`](supabase/maintenance/) and is
 **not** part of this sequence. `remove_optional_feature_entries.sql` deletes the

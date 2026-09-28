@@ -83,6 +83,19 @@ vi.mock('../../../../src/pages/dmscreen/notes/NoteBoard.jsx', () => ({ default: 
 const SETTLE_MS = 80; // background syncs run on a 0 ms debounce here
 const wait = (ms) => new Promise((resolve) => { setTimeout(resolve, ms); });
 
+// What supabase/18_section_versions.sql does: the database owns `version`
+// (0 on insert, +1 when data changes) and `updated_at`; client values are ignored.
+function versioned(previous, next) {
+  const now = new Date().toISOString();
+  if (!previous) return { ...next, version: 0, updated_at: now };
+  const dataChanged = JSON.stringify(next.data) !== JSON.stringify(previous.data);
+  return {
+    ...next,
+    version: dataChanged ? previous.version + 1 : previous.version,
+    updated_at: dataChanged ? now : previous.updated_at,
+  };
+}
+
 // In-memory PostgREST: owner-scoped, unique ids, conditional updates, write log.
 function fakeCloud(rows = {}) {
   const tables = new Map(Object.entries(rows).map(([table, list]) => [table, new Map(list.map((row) => [row.id, structuredClone(row)]))]));
@@ -98,13 +111,13 @@ function fakeCloud(rows = {}) {
     if (query.op === 'insert') {
       writes.push({ table: query.table, op: 'insert', row: query.row });
       if (store.has(query.row.id)) return { data: null, error: { code: '23505', message: 'duplicate key value' } };
-      store.set(query.row.id, structuredClone(query.row));
-      return { data: [structuredClone(query.row)], error: null };
+      store.set(query.row.id, versioned(null, structuredClone(query.row)));
+      return { data: [structuredClone(store.get(query.row.id))], error: null };
     }
     if (query.op === 'update') {
       const found = matches();
       writes.push({ table: query.table, op: 'update', patch: query.patch });
-      for (const row of found) store.set(row.id, { ...row, ...structuredClone(query.patch) });
+      for (const row of found) store.set(row.id, versioned(row, { ...row, ...structuredClone(query.patch) }));
       return { data: found.map((row) => structuredClone(store.get(row.id))), error: null };
     }
     reads.push(query.table);
@@ -132,7 +145,7 @@ function fakeCloud(rows = {}) {
   return {
     client, writes, reads,
     row: (tableName, id) => structuredClone(table(tableName).get(id) || null),
-    edit: (tableName, id, patch) => table(tableName).set(id, { ...table(tableName).get(id), ...patch }),
+    edit: (tableName, id, patch) => table(tableName).set(id, versioned(table(tableName).get(id), { ...table(tableName).get(id), ...patch })),
   };
 }
 
@@ -179,7 +192,7 @@ let cloud;
 function cloudRow(key, overrides = {}) {
   return {
     id: TOOLS[key].id, owner: 'user-1', name: 'Boss Fight', link_group_id: null,
-    data: TOOLS[key].payload(), updated_at: 'v1', ...overrides,
+    data: TOOLS[key].payload(), version: 3, updated_at: '2026-09-01T10:00:00.000Z', ...overrides,
   };
 }
 
@@ -226,7 +239,7 @@ describe.each(Object.keys(TOOLS))('%s opened by URL in a browser without it', (k
 
     expect(await screen.findByTestId('editor')).toBeInTheDocument();
     await act(() => wait(SETTLE_MS));
-    expect(getInstance(key, TOOLS[key].id)).toMatchObject({ name: 'Boss Fight', cloud: 'linked', version: 'v1' });
+    expect(getInstance(key, TOOLS[key].id)).toMatchObject({ name: 'Boss Fight', cloud: 'linked', version: 3 });
     expect(readInstancePayload(key, TOOLS[key].id)).toEqual(row.data);
     expect(cloud.writes).toEqual([]);
     expect(cloud.row(table(key), TOOLS[key].id)).toEqual(row);
@@ -297,7 +310,7 @@ test('a copy changed on both sides shows a conflict; keeping this copy writes it
   first.unmount();
 
   // Another device moves the cloud on; this one edits its (older) copy.
-  cloud.edit('dm_screens', 'screen_boss', { data: { ...row.data, 'gb:dmscreen:screen_boss:notes:v2': '{"version":2,"notes":[]}' }, updated_at: 'v2' });
+  cloud.edit('dm_screens', 'screen_boss', { data: { ...row.data, 'gb:dmscreen:screen_boss:notes:v2': '{"version":2,"notes":[]}' } });
   signIn('anon');
   screenStorage.persistNotes('screen_boss', [{ id: 'mine', title: 'Mine', body: 'kept' }]);
   const mine = readInstancePayload('dmscreen', 'screen_boss');
@@ -305,7 +318,7 @@ test('a copy changed on both sides shows a conflict; keeping this copy writes it
   signIn('authed');
   render(page('dmscreen', urlOf('dmscreen')));
   expect(await screen.findByRole('alert')).toHaveTextContent('changed in the cloud');
-  expect(cloud.row('dm_screens', 'screen_boss').updated_at).toBe('v2');
+  expect(cloud.row('dm_screens', 'screen_boss').version).toBe(4);
 
   fireEvent.click(screen.getByRole('button', { name: 'Keep this copy' }));
   await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument());

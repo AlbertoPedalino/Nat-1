@@ -11,14 +11,16 @@ import { normalizeLinkGroupId } from './linkGroupId.js';
 // Registry entry:
 //   { id, name, updatedAt, linkGroupId,
 //     cloud: 'local-only' | 'linked' | 'conflict',
-//     version,   // cloud `updated_at` this copy is based on (linked only)
+//     version,   // cloud row `version` this copy is based on (linked only)
 //     conflict,  // { reason } while cloud === 'conflict'
 //     dirty: { data, name, linkGroup },  // local changes the cloud lacks
 //     rev }      // local data revision, so a sync knows what it covered
 //
 // - local-only: never confirmed as a cloud row; its first sync can only INSERT.
-// - linked: this copy is the cloud row at `version`; updates are conditional on
-//   it. A legacy linked entry without a version is verified before any write.
+// - linked: this copy is the cloud row at `version` (the database's integer
+//   revision); data updates are conditional on it. A linked entry without a
+//   valid version (older formats, including timestamp versions) is verified
+//   against the cloud data before any write.
 // - conflict: the cloud row and this copy diverged; nothing is written until
 //   the user chooses a side (instanceSync.resolveConflict).
 //
@@ -78,7 +80,7 @@ export function normalizeEntry(section, raw) {
     updatedAt: Number(raw.updatedAt) || 0,
     linkGroupId: normalizeLinkGroupId(raw.linkGroupId),
     cloud,
-    version: cloud === CLOUD_STATES.LOCAL ? null : (typeof raw.version === 'string' ? raw.version : null),
+    version: cloud !== CLOUD_STATES.LOCAL && Number.isSafeInteger(raw.version) && raw.version >= 0 ? raw.version : null,
     conflict: cloud === CLOUD_STATES.CONFLICT ? { reason: raw.conflict?.reason || 'version' } : null,
     dirty,
     rev: Number(raw.rev) || 0,

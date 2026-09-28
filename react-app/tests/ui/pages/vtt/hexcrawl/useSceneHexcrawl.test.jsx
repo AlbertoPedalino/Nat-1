@@ -50,7 +50,7 @@ beforeEach(() => {
 test('map inherits board travel settings instead of stale browser defaults', async () => {
   localStorage.setItem('gb:hexcrawl:defaults:scene-one', JSON.stringify({ terrain: 'Road', mountSpeed: 1 }));
   cloud.readHexcrawlBoard.mockResolvedValue({
-    id: 'board-one', updatedAt: 1,
+    id: 'board-one', version: 1,
     state: { season: 'Summer', terrain: 'Forest', pop: 'frontier', hexTier: 2, mountSpeed: 2 },
     tables: createDefaultTables(),
   });
@@ -70,7 +70,7 @@ test('campaign settings reach the map and its rolls, while existing hex terrain 
     meteo: 'Clear', intensity: '', hoursSinceWeather: 0, nextWeatherIn: 24,
   };
   cloud.listHexCells.mockResolvedValue([{ q: 0, r: 0, terrain: 'Road', status: 'unexplored' }]);
-  cloud.readHexcrawlBoard.mockResolvedValue({ id: 'board-one', updatedAt: 1, state: {}, tables: createDefaultTables() });
+  cloud.readHexcrawlBoard.mockResolvedValue({ id: 'board-one', version: 1, state: {}, tables: createDefaultTables() });
   const { rerender } = render(<Probe />);
   await waitFor(() => expect(hexcrawl.board).not.toBeNull());
   expect(hexcrawl.defaults).toEqual({ terrain: 'Forest', pop: 'frontier', tier: 2, mountSpeed: 2 });
@@ -85,7 +85,7 @@ test('campaign settings reach the map and its rolls, while existing hex terrain 
 });
 
 test('changing season does not overwrite the campaign time or weather', async () => {
-  cloud.readHexcrawlBoard.mockResolvedValue({ id: 'board-one', updatedAt: 1, state: { min: 10, meteo: 'Rain' }, tables: {} });
+  cloud.readHexcrawlBoard.mockResolvedValue({ id: 'board-one', version: 1, state: { min: 10, meteo: 'Rain' }, tables: {} });
   campaignClock.clock = { travelConfigured: true, min: 800, meteo: 'Clear', season: 'Summer' };
   render(<Probe />);
   await waitFor(() => expect(hexcrawl.board).not.toBeNull());
@@ -95,8 +95,8 @@ test('changing season does not overwrite the campaign time or weather', async ()
 
 test('an open VTT refreshes the linked GM Board after it changes', async () => {
   cloud.readHexcrawlBoard
-    .mockResolvedValueOnce({ id: 'board-one', updatedAt: 1, state: { season: 'Summer' }, tables: { revision: 1 } })
-    .mockResolvedValueOnce({ id: 'board-one', updatedAt: 2, state: { season: 'Winter' }, tables: { revision: 2 } });
+    .mockResolvedValueOnce({ id: 'board-one', version: 1, state: { season: 'Summer' }, tables: { revision: 1 } })
+    .mockResolvedValueOnce({ id: 'board-one', version: 2, state: { season: 'Winter' }, tables: { revision: 2 } });
 
   render(<Probe />);
   await waitFor(() => expect(hexcrawl.board?.tables.revision).toBe(1));

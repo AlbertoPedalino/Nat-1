@@ -42,6 +42,21 @@ const WRITE = {
   dmscreen: (id, n = 1) => dmScreen.persistNotes(id, [{ id: 'n', title: 'T', body: `B${n}` }]),
 };
 
+// What supabase/18_section_versions.sql does on every write: the database owns
+// `version` (0 on insert, +1 when data changes) and `updated_at`; whatever the
+// client sends for them is ignored.
+let clock = Date.parse('2026-09-01T00:00:00Z');
+const now = () => new Date(clock += 1000).toISOString();
+function versioned(previous, next) {
+  if (!previous) return { ...next, version: 0, updated_at: now() };
+  const dataChanged = JSON.stringify(next.data) !== JSON.stringify(previous.data);
+  return {
+    ...next,
+    version: dataChanged ? previous.version + 1 : previous.version,
+    updated_at: dataChanged ? now() : previous.updated_at,
+  };
+}
+
 // In-memory PostgREST: owner-scoped, unique ids (23505), conditional updates
 // through `eq` filters, and a log of every write it received.
 function fakeCloud() {
@@ -58,13 +73,13 @@ function fakeCloud() {
     if (query.op === 'insert') {
       writes.push({ table: query.table, op: 'insert', row: query.row });
       if (rows.has(query.row.id)) return { data: null, error: { code: '23505', message: 'duplicate key value' } };
-      rows.set(query.row.id, structuredClone(query.row));
-      return { data: [structuredClone(query.row)], error: null };
+      rows.set(query.row.id, versioned(null, structuredClone(query.row)));
+      return { data: [structuredClone(rows.get(query.row.id))], error: null };
     }
     if (query.op === 'update') {
       const found = matches();
       writes.push({ table: query.table, op: 'update', patch: query.patch, matched: found.length });
-      for (const row of found) rows.set(row.id, { ...row, ...structuredClone(query.patch) });
+      for (const row of found) rows.set(row.id, versioned(row, { ...row, ...structuredClone(query.patch) }));
       return { data: found.map((row) => structuredClone(rows.get(row.id))), error: null };
     }
     if (query.op === 'delete') {
@@ -101,8 +116,9 @@ function fakeCloud() {
     writes,
     reads,
     row: (tableName, id) => structuredClone(table(tableName).get(id) || null),
-    put: (tableName, row) => table(tableName).set(row.id, structuredClone(row)),
-    edit: (tableName, id, patch) => table(tableName).set(id, { ...table(tableName).get(id), ...patch }),
+    // Another client's write, through the same database rules.
+    put: (tableName, row) => table(tableName).set(row.id, versioned(null, structuredClone(row))),
+    edit: (tableName, id, patch) => table(tableName).set(id, versioned(table(tableName).get(id), { ...table(tableName).get(id), ...patch })),
   };
 }
 
@@ -301,7 +317,7 @@ test('insert race: a row created meanwhile makes the first sync a conflict', asy
     reset();
     online();
     assert.equal(await sync.openInstance(key, 'race_a'), 'created', key);
-    cloud.put(table(key), { id: 'race_a', owner: 'user-1', name: 'Other device', data: { kept: '1' }, updated_at: 'v-other' });
+    cloud.put(table(key), { id: 'race_a', owner: 'user-1', name: 'Other device', data: { kept: '1' } });
     WRITE[key]('race_a');
     await idle();
     assert.equal(entry(key, 'race_a').cloud, 'conflict', key);
@@ -465,11 +481,13 @@ test('legacy registry entries are normalized, and an unversioned copy is verifie
     { id: 'old_new', name: 'Never synced', updatedAt: 1, pendingInsert: true, namePending: true },
     { id: 'old_same', name: 'Synced', updatedAt: 2, linkGroupPending: true, linkGroupId: 'link_x' },
     { id: 'old_diff', name: 'Stale', updatedAt: 3 },
+    // The interim format that used a timestamp as the version.
+    { id: 'old_stamp', name: 'Stamped', updatedAt: 4, cloud: 'linked', version: '2026-09-01T10:00:00.000Z', dirty: {}, rev: 1 },
   ];
   storage.setItem('gb_board_registry', JSON.stringify(legacy));
   for (const item of legacy) WRITE.gmboard(item.id, 1);
-  cloud.put('boards', { id: 'old_same', owner: 'user-1', name: 'Synced', data: store.readInstancePayload('gmboard', 'old_same'), updated_at: 'v1' });
-  cloud.put('boards', { id: 'old_diff', owner: 'user-1', name: 'Stale', data: { other: '1' }, updated_at: 'v1' });
+  cloud.put('boards', { id: 'old_same', owner: 'user-1', name: 'Synced', data: store.readInstancePayload('gmboard', 'old_same') });
+  cloud.put('boards', { id: 'old_diff', owner: 'user-1', name: 'Stale', data: { other: '1' } });
 
   const byId = Object.fromEntries(store.listInstances('gmboard').map((item) => [item.id, item]));
   assert.equal(byId.old_new.cloud, 'local-only');
@@ -477,13 +495,15 @@ test('legacy registry entries are normalized, and an unversioned copy is verifie
   assert.equal(byId.old_same.cloud, 'linked');
   assert.equal(byId.old_same.version, null);
   assert.equal(byId.old_same.dirty.linkGroup, true);
+  assert.equal(byId.old_stamp.cloud, 'linked');
+  assert.equal(byId.old_stamp.version, null, 'a timestamp is never taken as a version');
   assert.ok(!('pendingInsert' in JSON.parse(storage.getItem('gb_board_registry'))[0]), 'written back in the new shape');
 
   online();
   await idle();
   assert.equal(entry('gmboard', 'old_new').cloud, 'linked');
   assert.equal(entry('gmboard', 'old_same').cloud, 'linked');
-  assert.equal(entry('gmboard', 'old_same').version, 'v1');
+  assert.equal(entry('gmboard', 'old_same').version, 0);
   assert.equal(cloud.row('boards', 'old_same').link_group_id, 'link_x');
   assert.equal(entry('gmboard', 'old_diff').cloud, 'conflict');
   assert.deepEqual(cloud.row('boards', 'old_diff').data, { other: '1' }, 'unverified copy never written');

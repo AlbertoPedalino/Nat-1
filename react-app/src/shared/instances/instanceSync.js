@@ -21,7 +21,8 @@ import { normalizeLinkGroupId } from './linkGroupId.js';
 // this engine, which syncs in the background whenever the cloud is reachable.
 //
 //   local-only                 → INSERT (an existing row is a conflict)
-//   linked, data dirty         → UPDATE if the row is still at our version,
+//   linked, data dirty         → UPDATE where version = ours (the database
+//                                increments it),
 //                                else conflict (or recreate a deleted row)
 //   linked, only name/link     → metadata update, version untouched
 //   linked, legacy, no version → adopt the row if it holds the same data,
@@ -114,7 +115,7 @@ function needsSync(sectionKey, entry) {
   if (!entry) return false;
   if (entry.cloud === CLOUD_STATES.CONFLICT) return false;
   if (entry.cloud === CLOUD_STATES.LOCAL) return hasInstancePayload(sectionKey, entry.id);
-  return !entry.version || entry.dirty.data || entry.dirty.name || entry.dirty.linkGroup;
+  return entry.version == null || entry.dirty.data || entry.dirty.name || entry.dirty.linkGroup;
 }
 
 function scheduleSync(sectionKey, id, delay = config?.delay ?? 0) {
@@ -150,8 +151,13 @@ function samePayload(left, right) {
   return canonical(left) === canonical(right);
 }
 
-function sameVersion(left, right) {
-  return Boolean(left && right) && (left === right || Date.parse(left) === Date.parse(right));
+// Row versions are the database's integer revisions (never timestamps). A
+// bigint may arrive as a numeric string.
+function rowVersion(row) {
+  const raw = row?.version;
+  const version = typeof raw === 'string' && /^\d+$/.test(raw) ? Number(raw) : raw;
+  if (!Number.isSafeInteger(version) || version < 0) throw new Error('The cloud row has no version: apply supabase/18_section_versions.sql.');
+  return version;
 }
 
 // Records a successful write. `sent` says what the write carried: data (as of
@@ -159,6 +165,7 @@ function sameVersion(left, right) {
 // is adopted from the row unless it is dirty here; what changed locally while
 // the write was in flight stays dirty and is synced next.
 function settle(sectionKey, started, row, sent) {
+  const version = rowVersion(row);
   const entry = updateInstance(sectionKey, started.id, (current) => {
     const dirty = { ...current.dirty };
     let { name, linkGroupId } = current;
@@ -168,7 +175,7 @@ function settle(sectionKey, started, row, sent) {
     if ('link' in sent) dirty.linkGroup = normalizeLinkGroupId(current.linkGroupId) !== normalizeLinkGroupId(sent.link);
     else if (!current.dirty.linkGroup && row.link_group_id !== undefined) linkGroupId = normalizeLinkGroupId(row.link_group_id);
     return {
-      ...current, name, linkGroupId, cloud: CLOUD_STATES.LINKED, version: row.updated_at, conflict: null, dirty,
+      ...current, name, linkGroupId, cloud: CLOUD_STATES.LINKED, version, conflict: null, dirty,
     };
   });
   announceSyncChange(sectionKey, started.id);
@@ -194,14 +201,13 @@ async function insertCopy(c, section, entry, payload) {
     name: entry.name,
     link_group_id: entry.linkGroupId,
     data: payload,
-    updated_at: cloud.nextVersion(null),
   });
   if (result.duplicate) return markConflict(section.key, entry.id, 'exists');
   return settle(section.key, entry, result.row, { data: true, name: entry.name, link: entry.linkGroupId });
 }
 
 async function pushData(c, section, entry, payload, retried = false) {
-  const patch = { data: payload, updated_at: cloud.nextVersion(entry.version) };
+  const patch = { data: payload };
   const sent = { data: true };
   if (entry.dirty.name) { patch.name = entry.name; sent.name = entry.name; }
   if (entry.dirty.linkGroup) { patch.link_group_id = entry.linkGroupId; sent.link = entry.linkGroupId; }
@@ -213,7 +219,7 @@ async function pushData(c, section, entry, payload, retried = false) {
   if (!meta) return insertCopy(c, section, entry, payload);
   // Another tab of this browser synced meanwhile: retry from its version.
   const latest = getInstance(section.key, entry.id);
-  if (!retried && latest?.version && !sameVersion(latest.version, entry.version) && sameVersion(latest.version, meta.updated_at)) {
+  if (!retried && latest?.version != null && latest.version !== entry.version && latest.version === rowVersion(meta)) {
     return pushData(c, section, { ...latest, rev: entry.rev }, payload, true);
   }
   return markConflict(section.key, entry.id, 'version');
@@ -254,7 +260,7 @@ export function syncInstance(sectionKey, id) {
     report(id, 'syncing');
     try {
       if (entry.cloud === CLOUD_STATES.LOCAL) return await insertCopy(c, section, entry, payload);
-      if (!entry.version) return await verifyLegacy(c, section, entry, payload);
+      if (entry.version == null) return await verifyLegacy(c, section, entry, payload);
       if (entry.dirty.data) return await pushData(c, section, entry, payload);
       return await pushMeta(c, section, entry);
     } catch (error) {
@@ -274,7 +280,7 @@ function pullLocked(sectionKey, id, row) {
     linkGroupId: current?.dirty.linkGroup ? current.linkGroupId : normalizeLinkGroupId(row.link_group_id),
     updatedAt: Date.parse(row.updated_at) || Date.now(),
     cloud: CLOUD_STATES.LINKED,
-    version: row.updated_at,
+    version: rowVersion(row),
     conflict: null,
     dirty: { data: false, name: Boolean(current?.dirty.name), linkGroup: Boolean(current?.dirty.linkGroup) },
   }));
@@ -348,11 +354,11 @@ export async function refreshInstance(sectionKey, id) {
     return 'local';
   }
   if (!meta) return 'local';
-  if (!entry.version || entry.dirty.data) {
+  if (entry.version == null || entry.dirty.data) {
     const synced = await syncInstance(sectionKey, id).catch(() => null);
     return synced?.cloud === CLOUD_STATES.CONFLICT ? 'conflict' : 'local';
   }
-  if (!sameVersion(meta.updated_at, entry.version)) {
+  if (rowVersion(meta) !== entry.version) {
     await pullInstance(sectionKey, id);
     return 'pulled';
   }
@@ -375,7 +381,7 @@ export async function resolveConflict(sectionKey, id, choice) {
   updateInstance(sectionKey, id, (current) => ({
     ...current,
     cloud: meta ? CLOUD_STATES.LINKED : CLOUD_STATES.LOCAL,
-    version: meta ? meta.updated_at : null,
+    version: meta ? rowVersion(meta) : null,
     conflict: null,
     dirty: { ...current.dirty, data: true },
   }));
