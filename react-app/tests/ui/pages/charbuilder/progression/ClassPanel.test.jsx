@@ -80,6 +80,36 @@ test('adding a multiclass and switching tabs need no confirmation', () => {
   expect(confirm).not.toHaveBeenCalled();
 });
 
+test('removing a multiclass requires confirmation and supports cancellation', () => {
+  const { dispatch, confirm } = setup({ activeClassTab: 1 });
+  fireEvent.click(screen.getByRole('button', { name: 'Remove' }));
+  const dialog = screen.getByRole('dialog', { name: 'Remove multiclass?' });
+  expect(dialog).toHaveTextContent('Rogue Lv 1');
+  expect(confirm).not.toHaveBeenCalled();
+  expect(dispatch).not.toHaveBeenCalled();
+
+  fireEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  expect(dispatch).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByRole('button', { name: 'Remove' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Remove class' }));
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  expect(dispatch).toHaveBeenCalledOnce();
+  expect(dispatch).toHaveBeenCalledWith({ type: 'multiclass/remove', index: 0 });
+});
+
+test('removing an empty multiclass tab needs no confirmation', () => {
+  const { dispatch } = setup({ activeClassTab: 1, extraClasses: [{ name: '', source: '', level: 1 }] });
+  fireEvent.click(screen.getByRole('button', { name: 'Remove' }));
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  expect(dispatch).toHaveBeenCalledWith({ type: 'multiclass/remove', index: 0 });
+});
+
+test('the primary class tab has no Remove button', () => {
+  setup();
+  expect(screen.queryByRole('button', { name: 'Remove' })).not.toBeInTheDocument();
+});
+
 test('Escape dismisses the confirmation panel without replacing the class', () => {
   const { dispatch } = setup();
   fireEvent.click(screen.getByText('Wizard'));

@@ -8,6 +8,12 @@ function recordKey(name, source) {
   return `${String(name || '').trim().toLowerCase()}|${String(source || '').trim().toLowerCase()}`;
 }
 
+// Magic variants carry their source on `inherits`, not at the top level, so
+// "+1 Weapon" (DMG) and "+1 Weapon" (XDMG) would otherwise share one key.
+function recordSource(record) {
+  return record?.source || record?.inherits?.source;
+}
+
 function getParentAndKey(target, path, create = false) {
   const parts = String(path || '').split('.').filter(Boolean);
   if (!parts.length) return null;
@@ -76,13 +82,13 @@ function applyCopyModification(target, path, rawModification) {
 /** Resolve 5etools `_copy` chains while keeping the upstream data external. */
 export function resolveCopyRecords(records) {
   const source = Array.isArray(records) ? records : [];
-  const lookup = new Map(source.map((record) => [recordKey(record?.name, record?.source), record]));
+  const lookup = new Map(source.map((record) => [recordKey(record?.name, recordSource(record)), record]));
   const resolved = new Map();
   const resolving = new Set();
 
   function resolve(record) {
     if (!record || typeof record !== 'object') return record;
-    const key = recordKey(record.name, record.source);
+    const key = recordKey(record.name, recordSource(record));
     if (resolved.has(key)) return cloneJson(resolved.get(key));
     if (resolving.has(key)) return cloneJson(record);
     resolving.add(key);
@@ -90,7 +96,7 @@ export function resolveCopyRecords(records) {
     let result = {};
     const copy = record._copy;
     if (copy?.name) {
-      const base = lookup.get(recordKey(copy.name, copy.source || record.source));
+      const base = lookup.get(recordKey(copy.name, copy.source || recordSource(record)));
       if (base) result = resolve(base);
       Object.entries(copy._mod || {}).forEach(([path, modification]) => {
         applyCopyModification(result, path, modification);

@@ -98,7 +98,8 @@ function checkMcPrereq(character, className) {
 }
 
 export default function ClassPanel({ state, character, dispatch }) {
-  const [pendingChange, setPendingChange] = useState(null);
+  // { action, title, confirmLabel, confirmColor?, message, note } — a destructive class edit awaiting confirmation.
+  const [pendingConfirm, setPendingConfirm] = useState(null);
   const classes = state.data.classes;
   const search = state.search.classes || '';
   const query = search.trim().toLowerCase();
@@ -115,8 +116,29 @@ export default function ClassPanel({ state, character, dispatch }) {
     && !character.extraClasses.some((extra) => !extra?.name);
 
   useEffect(() => {
-    setPendingChange(null);
+    setPendingConfirm(null);
   }, [character.activeClassTab, character.className, character.classSource, activeExtra?.name, activeExtra?.source]);
+
+  const requestRemove = () => {
+    const action = { type: 'multiclass/remove', index: character.activeClassTab - 1 };
+    // An empty tab holds no choices, so there is nothing to lose.
+    if (!activeExtra?.name) {
+      dispatch(action);
+      return;
+    }
+    setPendingConfirm({
+      action,
+      title: 'Remove multiclass?',
+      confirmLabel: 'Remove class',
+      confirmColor: 'error',
+      message: (
+        <>
+          Remove <Box component="strong">{activeExtra.name} Lv {activeExtra.level || 1}</Box> from this character?
+        </>
+      ),
+      note: 'Its levels and all choices associated with it will be lost.',
+    });
+  };
 
   return (
     <BuilderPanel
@@ -126,7 +148,7 @@ export default function ClassPanel({ state, character, dispatch }) {
       action={
         <Stack direction="row" spacing={0.55} flexWrap="wrap" useFlexGap sx={{ mt: 0.5 }}>
           {activeExtra ? (
-            <Button size="small" color="error" startIcon={<Trash2 size={16} />} onClick={() => dispatch({ type: 'multiclass/remove', index: character.activeClassTab - 1 })}>
+            <Button size="small" color="error" startIcon={<Trash2 size={16} />} onClick={requestRemove}>
               Remove
             </Button>
           ) : null}
@@ -187,10 +209,19 @@ export default function ClassPanel({ state, character, dispatch }) {
                       ? { type: 'extra-class/select', index: character.activeClassTab - 1, className: cls.name, source: cls.source, classObject: cls }
                       : { type: 'class/select', className: cls.name, source: cls.source, classObject: cls };
                     if (currentName) {
-                      setPendingChange({
+                      const currentLabel = currentSource ? `${currentName} (${currentSource})` : currentName;
+                      const nextLabel = cls.source ? `${cls.name} (${cls.source})` : cls.name;
+                      setPendingConfirm({
                         action,
-                        currentLabel: currentSource ? `${currentName} (${currentSource})` : currentName,
-                        nextLabel: cls.source ? `${cls.name} (${cls.source})` : cls.name,
+                        title: 'Change class?',
+                        confirmLabel: 'Change class',
+                        message: (
+                          <>
+                            Replace <Box component="strong">{currentLabel}</Box> with{' '}
+                            <Box component="strong">{nextLabel}</Box>?
+                          </>
+                        ),
+                        note: 'Choices associated with the previous class will be reset.',
                       });
                       return;
                     }
@@ -207,30 +238,25 @@ export default function ClassPanel({ state, character, dispatch }) {
           </List>
         </Paper>
       </Stack>
-      {pendingChange && (
+      {pendingConfirm && (
         <SheetDialog
           open
-          title="Change class?"
+          title={pendingConfirm.title}
           icon={<TriangleAlert size={20} />}
-          onClose={() => setPendingChange(null)}
+          onClose={() => setPendingConfirm(null)}
           actions={(
             <>
-              <Button autoFocus variant="outlined" onClick={() => setPendingChange(null)}>Cancel</Button>
-              <Button variant="contained" onClick={() => {
-                dispatch(pendingChange.action);
-                setPendingChange(null);
-              }}>Change class</Button>
+              <Button autoFocus variant="outlined" onClick={() => setPendingConfirm(null)}>Cancel</Button>
+              <Button variant="contained" color={pendingConfirm.confirmColor || 'primary'} onClick={() => {
+                dispatch(pendingConfirm.action);
+                setPendingConfirm(null);
+              }}>{pendingConfirm.confirmLabel}</Button>
             </>
           )}
         >
           <Stack spacing={1.5}>
-            <Typography>
-              Replace <Box component="strong">{pendingChange.currentLabel}</Box> with{' '}
-              <Box component="strong">{pendingChange.nextLabel}</Box>?
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Choices associated with the previous class will be reset.
-            </Typography>
+            <Typography>{pendingConfirm.message}</Typography>
+            <Typography variant="body2" color="text.secondary">{pendingConfirm.note}</Typography>
           </Stack>
         </SheetDialog>
       )}

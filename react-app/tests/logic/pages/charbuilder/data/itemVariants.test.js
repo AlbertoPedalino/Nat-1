@@ -61,3 +61,15 @@ test('variant excludes reject matching concrete bases only', () => {
   assert.equal(isExcludedByVariant({ name: 'Longsword', source: 'XPHB', type: 'M' }, excludes), true);
   assert.equal(isExcludedByVariant({ name: 'Rapier', source: 'XPHB', type: 'M' }, excludes), false);
 });
+
+test('resolveCopyRecords keeps same-name magic variants apart by their inherited source', () => {
+  // 5etools magic variants have no top-level source; it lives on `inherits`.
+  const records = [
+    { name: '+1 Weapon', requires: [{ weapon: true }], inherits: { namePrefix: '+1 ', source: 'DMG' } },
+    { name: '+1 Weapon', requires: [{ weapon: true }], inherits: { namePrefix: '+1 ', source: 'XDMG', page: 324 } },
+  ];
+  const [legacy, modern] = resolveCopyRecords(records);
+  assert.equal(legacy.inherits.source, 'DMG');
+  assert.equal(modern.inherits.source, 'XDMG');
+  assert.equal(modern.inherits.page, 324);
+});
