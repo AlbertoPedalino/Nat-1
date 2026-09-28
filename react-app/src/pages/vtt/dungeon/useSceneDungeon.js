@@ -15,8 +15,7 @@ import {
   pickEncounterInstanceInGroup,
 } from '../../../shared/dungeon/linkedEncounters.js';
 import { readCampaignToolLinks } from '../../../shared/cloud/api/campaignTools.js';
-import { readLocalToolInstances, mergeLinkedInstanceRows } from '../../../shared/instances/instanceLinks.js';
-import { getCloudSection } from '../../../shared/cloud/sections/cloudSections.js';
+import { listToolInstances } from '../../../shared/instances/instanceSync.js';
 import { localFightPresence, sendEncounterToBuilder } from '../../encounterbuilder/sync/handoff.js';
 import { readPersistedInstance } from '../../encounterbuilder/state/storage.js';
 import { restoreFight } from '../../encounterbuilder/combat/combat.js';
@@ -76,11 +75,10 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize, roster }) {
         const campaign = await readCampaignToolLinks(campaignId);
         if (cancelled || ticket !== request) return;
         setBoardId(campaign?.hexcrawl_board_id || null);
-        const local = readLocalToolInstances().filter((row) => row.sectionKey === 'encounters');
-        const cloud = cloudEnabled && status === 'authed'
-          ? await getCloudSection('encounters').listInstances() : [];
+        const listed = await listToolInstances('encounters', { includeCloud: cloudEnabled && status === 'authed' });
         if (cancelled || ticket !== request) return;
-        const encounters = mergeLinkedInstanceRows('encounters', cloud, local);
+        if (listed.error) throw new Error(listed.error);
+        const encounters = listed.rows;
         const instance = pickEncounterInstanceInGroup(encounters, campaign?.link_group_id, campaign?.dungeon_encounter_id);
         setEncounterInstance(instance);
         setLinkHint(instance ? '' : 'Choose a linked Encounter Builder for dungeon fights in this map\'s Linked tools menu.');

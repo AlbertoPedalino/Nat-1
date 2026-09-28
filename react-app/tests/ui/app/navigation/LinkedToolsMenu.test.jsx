@@ -5,9 +5,8 @@ import LinkedToolsMenu from '../../../../src/app/navigation/LinkedToolsMenu.jsx'
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   notify: vi.fn(),
-  readLocalToolInstances: vi.fn(),
+  localRows: vi.fn(),
   setLocalInstanceLink: vi.fn(),
-  fetchInstanceMeta: vi.fn(),
   listInstances: vi.fn(),
   listMyCampaigns: vi.fn(),
   linkBoardCampaign: vi.fn(),
@@ -26,14 +25,27 @@ vi.mock('react-router-dom', () => ({
 vi.mock('../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({
   useAuth: () => mocks.auth,
 }));
-vi.mock('../../../../src/shared/cloud/sections/cloudSections.js', () => ({
-  getCloudSection: (sectionKey) => ({
-    fetchInstanceMeta: (id) => mocks.fetchInstanceMeta(sectionKey, id),
-    listInstances: () => mocks.listInstances(sectionKey),
-    pushInstance: mocks.pushInstance,
-    setLinkGroup: (id, group) => mocks.setLinkGroup(sectionKey, id, group),
-  }),
-}));
+vi.mock('../../../../src/shared/instances/instanceSync.js', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    // Like the real one: local rows always, cloud rows when listed, the
+    // listing error reported alongside.
+    listToolInstances: async (sectionKey, { includeCloud }) => {
+      const local = mocks.localRows().filter((row) => row.sectionKey === sectionKey);
+      let cloud = [];
+      let error = null;
+      try {
+        cloud = includeCloud ? await mocks.listInstances(sectionKey) : [];
+      } catch (cause) {
+        error = cause.message;
+      }
+      return { rows: actual.mergeInstanceRows(sectionKey, cloud, local), error };
+    },
+    ensureInstanceInCloud: (_sectionKey, id) => mocks.pushInstance(id),
+    linkCloudInstance: (sectionKey, id, group) => mocks.setLinkGroup(sectionKey, id, group),
+  };
+});
 vi.mock('../../../../src/shared/cloud/api/campaigns.js', () => ({ listMyCampaigns: mocks.listMyCampaigns }));
 vi.mock('../../../../src/shared/cloud/api/hexcrawl.js', () => ({ setCampaignHexcrawlBoard: mocks.setCampaignBoard, linkHexcrawlBoardCampaign: mocks.linkBoardCampaign }));
 vi.mock('../../../../src/shared/cloud/api/campaignTools.js', () => ({
@@ -42,7 +54,6 @@ vi.mock('../../../../src/shared/cloud/api/campaignTools.js', () => ({
 vi.mock('../../../../src/shared/ui/ToastProvider.jsx', () => ({ useToast: () => ({ notify: mocks.notify }) }));
 vi.mock('../../../../src/shared/instances/instanceLinks.js', async (importOriginal) => ({
   ...await importOriginal(),
-  readLocalToolInstances: mocks.readLocalToolInstances,
   setLocalInstanceLink: mocks.setLocalInstanceLink,
 }));
 
@@ -58,9 +69,8 @@ beforeEach(() => {
   mocks.setCampaignBoard.mockResolvedValue();
   mocks.setLinkGroup.mockResolvedValue();
   mocks.pushInstance.mockResolvedValue({ id: 'board-a' });
-  mocks.fetchInstanceMeta.mockResolvedValue(null);
   mocks.listInstances.mockResolvedValue([]);
-  mocks.readLocalToolInstances.mockReturnValue([
+  mocks.localRows.mockReturnValue([
     {
       id: 'board-a', name: 'Board A', sectionKey: 'gmboard', linkGroupId: 'link_party', origin: 'local', hasLocal: true,
     },
@@ -75,7 +85,6 @@ test('linked-tools dialog opens a linked instance from the top bar', async () =>
     <LinkedToolsMenu
       sectionKey="gmboard"
       instanceId="board-a"
-      instanceSaved
       initialLinkGroupId="link_party"
     />,
   );
@@ -102,7 +111,7 @@ test('campaigns join the same list as the other tools', async () => {
   const campaign = { id: 'campaign-one', name: 'Campaign One', gm: 'gm-one', hexcrawl_board_id: null };
   mocks.listMyCampaigns.mockResolvedValue([campaign]);
   mocks.setCampaignGroup.mockImplementation(async (_id, group) => { campaign.link_group_id = group; });
-  render(<LinkedToolsMenu sectionKey="gmboard" instanceId="board-a" instanceSaved />);
+  render(<LinkedToolsMenu sectionKey="gmboard" instanceId="board-a" />);
   fireEvent.click(screen.getByRole('button', { name: 'Linked tools' }));
   await chooseTool(/Campaign One/);
   await waitFor(() => expect(mocks.setCampaignGroup).toHaveBeenCalledWith('campaign-one', 'link_party'));
@@ -118,13 +127,13 @@ test('removing the GM Board keeps the battlemap connected to the other tools', a
   mocks.auth.user = { id: 'gm-one' };
   const campaign = { id: 'campaign-one', name: 'Campaign One', gm: 'gm-one', link_group_id: 'link_party', hexcrawl_board_id: 'board-a' };
   mocks.listMyCampaigns.mockResolvedValue([campaign]);
-  const local = mocks.readLocalToolInstances();
+  const local = mocks.localRows();
   local.push({ id: 'enc-a', name: 'Fights', sectionKey: 'encounters', linkGroupId: 'link_party', origin: 'local', hasLocal: true });
   mocks.setLocalInstanceLink.mockImplementation((section, id, group) => {
     local.find((row) => row.sectionKey === section && row.id === id).linkGroupId = group;
   });
   mocks.setCampaignBoard.mockImplementation(async (_id, board) => { campaign.hexcrawl_board_id = board; });
-  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" instanceSaved />);
+  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" />);
   fireEvent.click(screen.getByRole('button', { name: 'Linked tools' }));
   fireEvent.click(await screen.findByRole('button', { name: 'Unlink Board A' }));
   await waitFor(() => expect(screen.queryByRole('link', { name: 'Open Board A' })).not.toBeInTheDocument());
@@ -141,18 +150,13 @@ test('a campaign without a GM Board can link an Encounter Builder directly', asy
   mocks.auth.status = 'authed';
   mocks.auth.user = { id: 'gm-one' };
   mocks.listMyCampaigns.mockResolvedValue([{ id: 'campaign-one', name: 'Campaign One', gm: 'gm-one' }]);
-  mocks.readLocalToolInstances.mockReturnValue([{ id: 'enc-a', name: 'Fights', sectionKey: 'encounters', hasLocal: true }]);
-  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" instanceSaved />);
+  mocks.localRows.mockReturnValue([{ id: 'enc-a', name: 'Fights', sectionKey: 'encounters', hasLocal: true }]);
+  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" />);
   fireEvent.click(screen.getByRole('button', { name: 'Linked tools' }));
   await chooseTool(/Fights/);
   await waitFor(() => expect(mocks.setCampaignGroup).toHaveBeenCalledWith('campaign-one', expect.stringMatching(/^link_/)));
   expect(mocks.setLocalInstanceLink).toHaveBeenCalledWith('encounters', 'enc-a', expect.stringMatching(/^link_/));
   expect(mocks.setCampaignBoard).not.toHaveBeenCalled();
-});
-
-test('an unsaved instance cannot open link management', () => {
-  render(<LinkedToolsMenu sectionKey="gmboard" instanceId="draft" instanceSaved={false} />);
-  expect(screen.getByRole('button', { name: 'Linked tools' })).toBeDisabled();
 });
 
 test('creating a linked tool registers it with the group before navigating', async () => {
@@ -161,7 +165,6 @@ test('creating a linked tool registers it with the group before navigating', asy
     <LinkedToolsMenu
       sectionKey="gmboard"
       instanceId="board-a"
-      instanceSaved
       initialLinkGroupId="link_party"
     />,
   );
@@ -177,25 +180,6 @@ test('creating a linked tool registers it with the group before navigating', asy
   expect(mocks.navigate).toHaveBeenCalledWith(`/dm-screen?screen=${registry[0].id}`);
 });
 
-test('a cloud-only instance can manage links without a local copy', async () => {
-  mocks.auth.cloudEnabled = true;
-  mocks.auth.status = 'authed';
-  mocks.readLocalToolInstances.mockReturnValue([]);
-  mocks.fetchInstanceMeta.mockResolvedValue({ id: 'cloud-board', link_group_id: null });
-  mocks.listInstances.mockImplementation(async (sectionKey) => (
-    sectionKey === 'gmboard'
-      ? [{ id: 'cloud-board', name: 'Cloud Board', link_group_id: null, updated_at: '2026-08-01T00:00:00Z' }]
-      : []
-  ));
-
-  render(<LinkedToolsMenu sectionKey="gmboard" instanceId="cloud-board" instanceSaved={false} />);
-
-  await waitFor(() => expect(screen.getByRole('button', { name: 'Linked tools' })).toBeEnabled());
-  expect(mocks.fetchInstanceMeta).toHaveBeenCalledWith('gmboard', 'cloud-board');
-  fireEvent.click(screen.getByRole('button', { name: 'Linked tools' }));
-  expect(await screen.findByRole('dialog', { name: 'Linked tools' })).toBeInTheDocument();
-});
-
 
 test('unlinking a campaign changes no other member', async () => {
   mocks.auth.cloudEnabled = true;
@@ -204,7 +188,7 @@ test('unlinking a campaign changes no other member', async () => {
   const campaign = { id: 'campaign-one', name: 'Campaign One', gm: 'gm-one', link_group_id: 'link_party' };
   mocks.listMyCampaigns.mockResolvedValue([campaign]);
   mocks.setCampaignGroup.mockImplementation(async (_id, group) => { campaign.link_group_id = group; });
-  render(<LinkedToolsMenu sectionKey="gmboard" instanceId="board-a" instanceSaved />);
+  render(<LinkedToolsMenu sectionKey="gmboard" instanceId="board-a" />);
   fireEvent.click(screen.getByRole('button', { name: 'Linked tools' }));
   fireEvent.click(await screen.findByRole('button', { name: 'Unlink Campaign One' }));
   await waitFor(() => expect(screen.queryByRole('link', { name: 'Open Campaign One' })).not.toBeInTheDocument());
@@ -217,7 +201,7 @@ test('a failed cloud list blocks membership changes while showing available link
   mocks.auth.cloudEnabled = true;
   mocks.auth.status = 'authed';
   mocks.listInstances.mockRejectedValue(new Error('offline'));
-  render(<LinkedToolsMenu sectionKey="gmboard" instanceId="board-a" instanceSaved />);
+  render(<LinkedToolsMenu sectionKey="gmboard" instanceId="board-a" />);
   fireEvent.click(screen.getByRole('button', { name: 'Linked tools' }));
   expect(await screen.findByRole('alert')).toHaveTextContent('Some links could not be loaded');
   expect(screen.getByRole('button', { name: 'Unlink Board A' })).toBeDisabled();
@@ -234,7 +218,7 @@ function campaignWithTwoBuilders() {
     hexcrawl_board_id: 'board-a', dungeon_encounter_id: 'enc-one',
   };
   mocks.listMyCampaigns.mockResolvedValue([campaign]);
-  const local = mocks.readLocalToolInstances();
+  const local = mocks.localRows();
   local.push(...['one', 'two'].map((id) => ({
     id: `enc-${id}`, name: `Builder ${id}`, sectionKey: 'encounters',
     linkGroupId: 'link_party', origin: 'local', hasLocal: true,
@@ -248,7 +232,7 @@ function campaignWithTwoBuilders() {
 
 test('a campaign chooses between linked builders and retains the choice when reopened', async () => {
   const campaign = campaignWithTwoBuilders();
-  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" instanceSaved />);
+  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" />);
   fireEvent.click(screen.getByRole('button', { name: 'Linked tools' }));
   fireEvent.mouseDown(await screen.findByRole('combobox', { name: 'Dungeon fights' }));
   await act(async () => { fireEvent.click(screen.getByRole('option', { name: 'Builder two' })); });
@@ -265,7 +249,7 @@ test('a campaign chooses between linked builders and retains the choice when reo
 
 test('unlinking the selected builder clears the destination and preserves all other links', async () => {
   campaignWithTwoBuilders();
-  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" instanceSaved />);
+  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" />);
   fireEvent.click(screen.getByRole('button', { name: 'Linked tools' }));
   fireEvent.click(await screen.findByRole('button', { name: 'Unlink Builder one' }));
   await waitFor(() => expect(screen.queryByRole('link', { name: 'Open Builder one' })).not.toBeInTheDocument());
@@ -281,7 +265,7 @@ test('unlinking the selected builder clears the destination and preserves all ot
 test('a failed destination change keeps the saved choice visible', async () => {
   campaignWithTwoBuilders();
   mocks.setDungeonEncounter.mockRejectedValue(new Error('Could not save selection'));
-  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" instanceSaved />);
+  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" />);
   fireEvent.click(screen.getByRole('button', { name: 'Linked tools' }));
   fireEvent.mouseDown(await screen.findByRole('combobox', { name: 'Dungeon fights' }));
   await act(async () => { fireEvent.click(screen.getByRole('option', { name: 'Builder two' })); });
@@ -296,7 +280,7 @@ test('the sole linked GM Board is selected and saved automatically for an existi
     expect(campaignId).toBe(campaign.id);
     campaign.hexcrawl_board_id = boardId;
   });
-  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" instanceSaved />);
+  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" />);
   fireEvent.click(screen.getByRole('button', { name: 'Linked tools' }));
   const select = await screen.findByRole('combobox', { name: /Time, weather & tables/ });
   expect(select).toHaveTextContent('Automatic: Board A');
@@ -312,11 +296,11 @@ test('the sole linked GM Board is selected and saved automatically for an existi
 test('multiple linked boards require a choice and offer no option to disable their assignment', async () => {
   const campaign = campaignWithTwoBuilders();
   campaign.hexcrawl_board_id = null;
-  mocks.readLocalToolInstances().push({
+  mocks.localRows().push({
     id: 'board-b', name: 'Board B', sectionKey: 'gmboard', linkGroupId: 'link_party', origin: 'local', hasLocal: true,
   });
   mocks.linkBoardCampaign.mockImplementation(async (boardId) => { campaign.hexcrawl_board_id = boardId; });
-  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" instanceSaved />);
+  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" />);
   fireEvent.click(screen.getByRole('button', { name: 'Linked tools' }));
   const select = await screen.findByRole('combobox', { name: /Time, weather & tables/ });
   expect(select).toHaveTextContent('Choose a GM Board');
@@ -332,12 +316,12 @@ test('multiple linked boards require a choice and offer no option to disable the
 
 test('unlinking the active board automatically assigns the sole remaining board', async () => {
   const campaign = campaignWithTwoBuilders();
-  mocks.readLocalToolInstances().push({
+  mocks.localRows().push({
     id: 'board-b', name: 'Board B', sectionKey: 'gmboard', linkGroupId: 'link_party', origin: 'local', hasLocal: true,
   });
   mocks.setCampaignBoard.mockImplementation(async (_id, boardId) => { campaign.hexcrawl_board_id = boardId; });
   mocks.linkBoardCampaign.mockImplementation(async (boardId) => { campaign.hexcrawl_board_id = boardId; });
-  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" instanceSaved />);
+  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" />);
   fireEvent.click(screen.getByRole('button', { name: 'Linked tools' }));
   fireEvent.click(await screen.findByRole('button', { name: 'Unlink Board A' }));
   await waitFor(() => expect(screen.getByRole('combobox', { name: /Time, weather & tables/ })).toHaveTextContent('Automatic: Board B'));
@@ -350,8 +334,8 @@ test('unlinking the active board automatically assigns the sole remaining board'
 test('a group without any board explains what to link instead of offering No GM Board', async () => {
   const campaign = campaignWithTwoBuilders();
   campaign.hexcrawl_board_id = null;
-  mocks.readLocalToolInstances.mockReturnValue(mocks.readLocalToolInstances().filter((row) => row.sectionKey !== 'gmboard'));
-  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" instanceSaved />);
+  mocks.localRows.mockReturnValue(mocks.localRows().filter((row) => row.sectionKey !== 'gmboard'));
+  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" />);
   fireEvent.click(screen.getByRole('button', { name: 'Linked tools' }));
   const select = await screen.findByRole('combobox', { name: /Time, weather & tables/ });
   expect(select).toHaveTextContent('Link a GM Board to use time, weather and tables');
@@ -365,7 +349,7 @@ test('automatic selection never takes a board assigned to another campaign', asy
   mocks.listMyCampaigns.mockResolvedValue([campaign, {
     id: 'other', name: 'Other campaign', gm: 'gm-one', link_group_id: 'link_other', hexcrawl_board_id: 'board-a',
   }]);
-  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" instanceSaved />);
+  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" />);
   fireEvent.click(screen.getByRole('button', { name: 'Linked tools' }));
   expect(await screen.findByRole('combobox', { name: /Time, weather & tables/ })).toHaveTextContent('Choose a GM Board');
   expect(mocks.linkBoardCampaign).not.toHaveBeenCalled();
@@ -374,8 +358,8 @@ test('automatic selection never takes a board assigned to another campaign', asy
 test.each([null, 'enc-one'])('one builder is automatic and locked with stored selection %s', async (selected) => {
   const campaign = campaignWithTwoBuilders();
   campaign.dungeon_encounter_id = selected;
-  mocks.readLocalToolInstances.mockReturnValue(mocks.readLocalToolInstances().filter((row) => row.id !== 'enc-two'));
-  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" instanceSaved />);
+  mocks.localRows.mockReturnValue(mocks.localRows().filter((row) => row.id !== 'enc-two'));
+  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" />);
   fireEvent.click(screen.getByRole('button', { name: 'Linked tools' }));
   const select = await screen.findByRole('combobox', { name: 'Dungeon fights' });
   expect(select).toHaveTextContent('Automatic: Builder one');
@@ -386,7 +370,7 @@ test.each([null, 'enc-one'])('one builder is automatic and locked with stored se
 test('multiple builders offer explicit destinations without a redundant Automatic option', async () => {
   const campaign = campaignWithTwoBuilders();
   campaign.dungeon_encounter_id = null;
-  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" instanceSaved />);
+  render(<LinkedToolsMenu sectionKey="campaign" instanceId="campaign-one" />);
   fireEvent.click(screen.getByRole('button', { name: 'Linked tools' }));
   const select = await screen.findByRole('combobox', { name: 'Dungeon fights' });
   expect(select).toHaveTextContent('Choose an Encounter Builder');

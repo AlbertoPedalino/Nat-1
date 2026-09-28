@@ -3,20 +3,14 @@ import { dedupeLibraryById } from '../library/library.js';
 import { normalizeFumbleTables } from '../rolls/fumbles.js';
 import { normalizeNegotiation } from '../negotiation/negotiation.js';
 import { hydrateEncounterItems, serializeEncounterItem } from '../bestiary/monsterUtils.js';
-import {
-  emitStorageEvent,
-  hasScopedPayload,
-  restoreScopedPayload,
-  snapshotScopedPayload,
-  touchRegistryEntry,
-} from '../../../shared/storage/scopedStoragePayload.js';
-import { SECTION_REGISTRY } from '../../../shared/instances/sectionRegistry.js';
-import { makeSectionInstanceId } from '../../../shared/instances/sectionInstances.js';
-import { normalizeLinkGroupId } from '../../../shared/instances/linkGroupId.js';
+import { readInstanceValue, saveLocal } from '../../../shared/instances/instanceStore.js';
 
-const SECTION = SECTION_REGISTRY.encounters;
-export const REGISTRY_KEY = SECTION.registryKey;
-export const ACTIVE_KEY = SECTION.activeKey;
+// Encounter Builder payload adapter: which keys an instance stores and how
+// they are (de)serialized. Registry, sync and opening are shared
+// (shared/instances/); every write goes through saveLocal, which skips
+// unchanged values.
+
+const SECTION_KEY = 'encounters';
 export const STORAGE_VERSION = 1;
 export const STORAGE_KEYS = Object.freeze({
   party: 'party:v1',
@@ -26,148 +20,18 @@ export const STORAGE_KEYS = Object.freeze({
   fumbles: 'fumbles:v1',
   negotiation: 'negotiation:v1',
 });
-const SAVE_EVENT = SECTION.saveEvent;
-
-export function sanitizeEncounterId(value) {
-  return String(value || '').toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 48);
-}
-
-export function makeEncounterId(now = Date.now(), random = Math.random) {
-  return makeSectionInstanceId(SECTION.key, now, random);
-}
 
 export function scopeKey(id, key) {
   return `gb:enc:${id}:${key}`;
 }
 
-export function scopedPrefix(id) {
-  return SECTION.scopedPrefix(id);
-}
-
-export function readRegistry() {
-  try {
-    return JSON.parse(localStorage.getItem(REGISTRY_KEY) || '[]').filter((entry) => entry && entry.id);
-  } catch {
-    return [];
-  }
-}
-
-export function writeRegistry(list) {
-  localStorage.setItem(REGISTRY_KEY, JSON.stringify((Array.isArray(list) ? list : []).slice(0, 20)));
-}
-
-export function hasScopedData(id) {
-  return hasScopedPayload(scopedPrefix(id));
-}
-
-export function isKnownEncounterInstance(id) {
-  return readRegistry().some((entry) => entry.id === id) || hasScopedData(id);
-}
-
-export function registerEncounterInstance(id, label, { force = false, linkGroupId } = {}) {
-  const cleanId = sanitizeEncounterId(id);
-  if (!cleanId) return null;
-  const now = Date.now();
-  const list = readRegistry();
-  const existing = list.find((entry) => entry.id === cleanId);
-  const name = !force && existing?.name ? existing.name : (String(label || '').trim() || cleanId);
-  const next = [{
-    ...existing,
-    id: cleanId,
-    name,
-    updatedAt: now,
-    ...(linkGroupId ? { linkGroupId: normalizeLinkGroupId(linkGroupId) } : {}),
-  }, ...list.filter((entry) => entry.id !== cleanId)].slice(0, 20);
-  localStorage.setItem(ACTIVE_KEY, cleanId);
-  writeRegistry(next);
-  return next[0];
-}
-
-export function resolveInstance(search) {
-  const params = new URLSearchParams(search || '');
-  let id = sanitizeEncounterId(params.get('enc'));
-  let linkGroupId = normalizeLinkGroupId(params.get('linkGroup'));
-  let saved = false;
-  let replaceSearch = '';
-
-  if (id === 'new') {
-    id = makeEncounterId();
-    replaceSearch = `?enc=${encodeURIComponent(id)}${linkGroupId ? `&linkGroup=${encodeURIComponent(linkGroupId)}` : ''}`;
-  } else if (id) {
-    saved = isKnownEncounterInstance(id);
-    linkGroupId = readRegistry().find((entry) => entry.id === id)?.linkGroupId || linkGroupId;
-  } else {
-    const activeId = sanitizeEncounterId(localStorage.getItem(ACTIVE_KEY));
-    if (activeId && isKnownEncounterInstance(activeId)) {
-      id = activeId;
-      saved = true;
-      linkGroupId = readRegistry().find((entry) => entry.id === id)?.linkGroupId || linkGroupId;
-      replaceSearch = `?enc=${encodeURIComponent(id)}`;
-    } else {
-      id = makeEncounterId();
-      replaceSearch = `?enc=${encodeURIComponent(id)}`;
-    }
-  }
-
-  const group = normalizeLinkGroupId(linkGroupId);
-  return { id, saved, replaceSearch, ...(group ? { linkGroupId: group } : {}) };
-}
-
 function readJson(id, key, fallback) {
   try {
-    const raw = localStorage.getItem(scopeKey(id, key));
+    const raw = readInstanceValue(SECTION_KEY, id, key);
     return raw == null ? fallback : JSON.parse(raw);
   } catch {
     return fallback;
   }
-}
-
-function writeJson(id, key, value) {
-  localStorage.setItem(scopeKey(id, key), JSON.stringify(value));
-  markEncounterPersisted(id);
-}
-
-export function readScopedPayload(id) {
-  return snapshotScopedPayload(scopedPrefix(id));
-}
-
-export function writeScopedPayload(id, payload, { name, updatedAt, linkGroupId } = {}) {
-  restoreScopedPayload(scopedPrefix(id), payload);
-  return touchRegistryEntry(REGISTRY_KEY, id, { name, updatedAt, linkGroupId });
-}
-
-// An instance is six keys, and saving it writes all six. Announcing each one
-// separately meant the first announcement went out while the other five were
-// still the previous save — and anything that reacts by reading storage read a
-// version that never existed. That is how a deleted encounter came back: the
-// party was written, the event fired, and the listener found the library key
-// still holding the entry the GM had just removed.
-//
-// So a save is one announcement, made once everything is on disk.
-let batchDepth = 0;
-const batched = new Set();
-
-export function batchPersist(run) {
-  batchDepth += 1;
-  try {
-    return run();
-  } finally {
-    batchDepth -= 1;
-    if (!batchDepth) {
-      const ids = [...batched];
-      batched.clear();
-      for (const id of ids) emitStorageEvent(SAVE_EVENT, id);
-    }
-  }
-}
-
-function markEncounterPersisted(id) {
-  if (!touchRegistryEntry(REGISTRY_KEY, id)) return;
-  if (batchDepth) {
-    batched.add(id);
-    return;
-  }
-  emitStorageEvent(SAVE_EVENT, id);
 }
 
 export function readPersistedInstance(id, monsters = []) {
@@ -190,39 +54,61 @@ export function readPersistedInstance(id, monsters = []) {
   };
 }
 
-export function persistParty(id, party, players) {
-  writeJson(id, STORAGE_KEYS.party, { version: STORAGE_VERSION, party, players });
-}
+const partyValue = (party, players) => JSON.stringify({ version: STORAGE_VERSION, party, players });
+const libraryValue = (library) => JSON.stringify(Array.isArray(library) ? library : []);
+const fightsValue = (activeFightId, fights) => JSON.stringify({
+  version: STORAGE_VERSION,
+  activeFightId: activeFightId || null,
+  items: Array.isArray(fights) ? fights : [],
+});
+const fumblesValue = (fumbleTables) => JSON.stringify(normalizeFumbleTables(fumbleTables));
+const negotiationValue = (negotiation) => JSON.stringify(normalizeNegotiation(negotiation));
 
-export function persistDraft(id, encounter, currentEncounterId, encounterName, encounterQuest) {
-  writeJson(id, STORAGE_KEYS.draft, {
+// The draft's `updatedAt` only stamps a change: the same draft keeps the stored
+// string (so saving it again is a no-op), a different one gets a new stamp.
+function draftValue(id, encounter, currentEncounterId, encounterName, encounterQuest) {
+  const draft = {
     version: STORAGE_VERSION,
     currentEncounterId: currentEncounterId || null,
     encounterName: encounterName || '',
     encounterQuest: normalizeEncounterQuest(encounterQuest),
     encounter: (Array.isArray(encounter) ? encounter : []).map(serializeEncounterItem),
-    updatedAt: Date.now(),
+  };
+  const previousRaw = readInstanceValue(SECTION_KEY, id, STORAGE_KEYS.draft);
+  const previous = readJson(id, STORAGE_KEYS.draft, null);
+  if (previous && JSON.stringify({ ...draft, updatedAt: previous.updatedAt }) === JSON.stringify(previous)) return previousRaw;
+  return JSON.stringify({ ...draft, updatedAt: Date.now() });
+}
+
+// A whole save: all six keys in one local write, so listeners and the sync
+// engine hear about it once, after every key is on disk.
+export function persistEncounter(id, state) {
+  return saveLocal(SECTION_KEY, id, {
+    [STORAGE_KEYS.party]: partyValue(state.party, state.players),
+    [STORAGE_KEYS.draft]: draftValue(id, state.encounter, state.currentEncounterId, state.encounterName, state.encounterQuest),
+    [STORAGE_KEYS.library]: libraryValue(state.library),
+    [STORAGE_KEYS.fights]: fightsValue(state.activeFightId, state.fights),
+    [STORAGE_KEYS.fumbles]: fumblesValue(state.fumbleTables),
+    [STORAGE_KEYS.negotiation]: negotiationValue(state.negotiation),
+  });
+}
+
+export function persistParty(id, party, players) {
+  return saveLocal(SECTION_KEY, id, { [STORAGE_KEYS.party]: partyValue(party, players) });
+}
+
+export function persistDraft(id, encounter, currentEncounterId, encounterName, encounterQuest) {
+  return saveLocal(SECTION_KEY, id, {
+    [STORAGE_KEYS.draft]: draftValue(id, encounter, currentEncounterId, encounterName, encounterQuest),
   });
 }
 
 export function persistLibrary(id, library) {
-  writeJson(id, STORAGE_KEYS.library, Array.isArray(library) ? library : []);
+  return saveLocal(SECTION_KEY, id, { [STORAGE_KEYS.library]: libraryValue(library) });
 }
 
 export function persistFights(id, activeFightId, fights) {
-  writeJson(id, STORAGE_KEYS.fights, {
-    version: STORAGE_VERSION,
-    activeFightId: activeFightId || null,
-    items: Array.isArray(fights) ? fights : [],
-  });
-}
-
-export function persistFumbles(id, fumbleTables) {
-  writeJson(id, STORAGE_KEYS.fumbles, normalizeFumbleTables(fumbleTables));
-}
-
-export function persistNegotiation(id, negotiation) {
-  writeJson(id, STORAGE_KEYS.negotiation, normalizeNegotiation(negotiation));
+  return saveLocal(SECTION_KEY, id, { [STORAGE_KEYS.fights]: fightsValue(activeFightId, fights) });
 }
 
 export function normalizeFightsData(value) {

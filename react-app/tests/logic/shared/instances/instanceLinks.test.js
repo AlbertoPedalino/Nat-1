@@ -11,17 +11,15 @@ class MemoryStorage {
 }
 
 Object.defineProperty(globalThis, 'localStorage', { value: new MemoryStorage(), configurable: true });
+if (!globalThis.window) globalThis.window = { dispatchEvent: () => true };
 
 const {
-  mergeLinkedInstanceRows,
   normalizeLinkGroupId,
   resolveGroupMerge,
   setLocalInstanceLink,
 } = await import('../../../../src/shared/instances/instanceLinks.js');
-const { createSectionInstance } = await import('../../../../src/shared/instances/sectionInstances.js');
-const gmBoardStorage = await import('../../../../src/pages/gmboard/state/storage.js');
-const encounterStorage = await import('../../../../src/pages/encounterbuilder/state/storage.js');
-const dmScreenStorage = await import('../../../../src/pages/dmscreen/state/storage.js');
+const { createInstance, getInstance, listInstances } = await import('../../../../src/shared/instances/instanceStore.js');
+const { mergeInstanceRows } = await import('../../../../src/shared/instances/instanceSync.js');
 
 test('link group ids are explicit safe identifiers, never instance names', () => {
   assert.equal(normalizeLinkGroupId('link_abc-123'), 'link_abc-123');
@@ -29,38 +27,32 @@ test('link group ids are explicit safe identifiers, never instance names', () =>
   assert.equal(normalizeLinkGroupId('../other'), null);
 });
 
-test('local linking preserves instance metadata and writes the group', () => {
+test('linking locally keeps the entry and marks the group for sync', () => {
   localStorage.clear();
-  localStorage.setItem('gb_board_registry', JSON.stringify([{
-    id: 'board-a', name: 'Board A', updatedAt: 1, custom: 'kept',
-  }]));
-
-  const entry = setLocalInstanceLink('gmboard', 'board-a', 'link_party', { emit: false });
-
+  createInstance('gmboard', { id: 'board-a', name: 'Board A' });
+  const entry = setLocalInstanceLink('gmboard', 'board-a', 'link_party');
   assert.equal(entry.linkGroupId, 'link_party');
-  assert.equal(entry.custom, 'kept');
-  assert.equal(JSON.parse(localStorage.getItem('gb_board_registry'))[0].linkGroupId, 'link_party');
+  assert.equal(entry.name, 'Board A');
+  assert.equal(entry.dirty.linkGroup, true);
+  assert.equal(getInstance('gmboard', 'board-a').linkGroupId, 'link_party');
+  assert.equal(setLocalInstanceLink('gmboard', 'missing', 'link_party'), null);
 });
 
-test('cloud metadata wins while local availability remains visible', () => {
-  const rows = mergeLinkedInstanceRows('gmboard', [{
-    id: 'board-a', name: 'Cloud', link_group_id: 'link_cloud', updated_at: '2026-01-01T00:00:00Z',
-  }], [{ id: 'board-a', name: 'Local', linkGroupId: 'link_local', updatedAt: 1 }]);
-  assert.equal(rows[0].name, 'Cloud');
-  assert.equal(rows[0].linkGroupId, 'link_cloud');
-  assert.equal(rows[0].hasLocal, true);
-  assert.equal(rows[0].origin, 'cloud');
-  const unlinked = mergeLinkedInstanceRows('gmboard', [{ id: 'board-a', link_group_id: null }], rows);
-  assert.equal(unlinked[0].linkGroupId, null, 'an explicit cloud unlink does not inherit the old local group');
-});
+test('rows prefer cloud metadata unless this browser changed it and has not synced', () => {
+  const cloudRows = [{ id: 'board-a', name: 'Cloud', link_group_id: 'link_cloud', updated_at: '2026-01-01T00:00:00Z' }];
+  const clean = { id: 'board-a', name: 'Local', linkGroupId: 'link_local', updatedAt: 1, cloud: 'linked', dirty: { data: false, name: false, linkGroup: false } };
+  let [row] = mergeInstanceRows('gmboard', cloudRows, [clean]);
+  assert.equal(row.name, 'Cloud');
+  assert.equal(row.linkGroupId, 'link_cloud');
+  assert.equal(row.hasLocal, true);
+  assert.equal(row.origin, 'cloud');
 
-test('restoring content without link metadata preserves the existing local group', () => {
-  localStorage.clear();
-  gmBoardStorage.registerBoardInstance('board-a', 'Board', { linkGroupId: 'link_party' });
-  gmBoardStorage.writeScopedPayload('board-a', { 'gb:board:board-a:state:v1': '{}' }, { name: 'Board' });
-  assert.equal(gmBoardStorage.readRegistry()[0].linkGroupId, 'link_party');
-  gmBoardStorage.writeScopedPayload('board-a', {}, { linkGroupId: null });
-  assert.equal(gmBoardStorage.readRegistry()[0].linkGroupId, null);
+  [row] = mergeInstanceRows('gmboard', cloudRows, [{ ...clean, dirty: { data: false, name: true, linkGroup: true } }]);
+  assert.equal(row.name, 'Local');
+  assert.equal(row.linkGroupId, 'link_local');
+
+  [row] = mergeInstanceRows('gmboard', [{ ...cloudRows[0], link_group_id: null }], [clean]);
+  assert.equal(row.linkGroupId, null, 'an explicit cloud unlink does not inherit the old local group');
 });
 
 test('merging different groups moves every member of both groups', () => {
@@ -76,24 +68,10 @@ test('merging different groups moves every member of both groups', () => {
   assert.deepEqual(plan.members.map((row) => row.id).sort(), ['b', 'd', 'e']);
 });
 
-test('a linked instance is created already registered with its group', () => {
+test('a linked instance is created with its group', () => {
   localStorage.clear();
-  const entry = createSectionInstance('dmscreen', { linkGroupId: 'link_party' });
+  const entry = createInstance('dmscreen', { linkGroupId: 'link_party' });
   assert.equal(entry.linkGroupId, 'link_party');
-  assert.equal(dmScreenStorage.resolveInstance(`?screen=${entry.id}`).linkGroupId, 'link_party');
-});
-
-// Legacy `?x=new&linkGroup=` URLs (bookmarks, older links) still have to carry
-// the group through: creation now happens before navigation, but the tool pages
-// remain the fallback that saves whatever arrives unregistered.
-test('every tool carries a linked group through creation routing', () => {
-  localStorage.clear();
-  const board = gmBoardStorage.resolveInstance('?board=new&linkGroup=link_party');
-  const encounter = encounterStorage.resolveInstance('?enc=new&linkGroup=link_party');
-  const screen = dmScreenStorage.resolveInstance('?screen=new&linkGroup=link_party', () => 'screen-new');
-  assert.equal(board.linkGroupId, 'link_party');
-  assert.match(board.replaceSearch, /linkGroup=link_party/);
-  assert.equal(encounter.linkGroupId, 'link_party');
-  assert.match(encounter.replaceSearch, /linkGroup=link_party/);
-  assert.equal(screen.linkGroupId, 'link_party');
+  assert.equal(listInstances('dmscreen')[0].linkGroupId, 'link_party');
+  assert.deepEqual(listInstances('encounters'), []);
 });

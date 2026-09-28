@@ -1,92 +1,85 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, vi } from 'vitest';
 import SectionPicker from '../../../../src/pages/library/SectionPicker.jsx';
+import { createInstance, getInstance } from '../../../../src/shared/instances/instanceStore.js';
+import { SECTION_REGISTRY } from '../../../../src/shared/instances/sectionRegistry.js';
 
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
-  listInstances: vi.fn(),
-  fetchInstanceMeta: vi.fn(),
-  pullInstance: vi.fn(),
+  cloudRows: [],
   renameCloudInstance: vi.fn(),
+  deleteInstance: vi.fn(),
 }));
 
-vi.mock('react-router-dom', () => ({
-  useNavigate: () => mocks.navigate,
-}));
-
+vi.mock('react-router-dom', () => ({ useNavigate: () => mocks.navigate }));
 vi.mock('../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({
   useAuth: () => ({ cloudEnabled: true, status: 'authed' }),
 }));
-
-vi.mock('../../../../src/shared/cloud/sections/cloudSections.js', () => ({
-  getCloudSection: () => ({
-    listInstances: mocks.listInstances,
-    fetchInstanceMeta: mocks.fetchInstanceMeta,
-    pullInstance: mocks.pullInstance,
+vi.mock('../../../../src/shared/instances/instanceSync.js', async (importOriginal) => {
+  const actual = await importOriginal();
+  const { listInstances } = await import('../../../../src/shared/instances/instanceStore.js');
+  return {
+    ...actual,
+    listToolInstances: async (sectionKey) => ({
+      rows: actual.mergeInstanceRows(sectionKey, mocks.cloudRows, listInstances(sectionKey)),
+      error: null,
+    }),
     renameCloudInstance: mocks.renameCloudInstance,
-    deleteCloudInstance: vi.fn(),
-  }),
-}));
-
-vi.mock('../../../../src/shared/storage/localStorageRegistries.js', async (importOriginal) => ({
-  ...await importOriginal(),
-  readRegistry: () => [{ id: 'local-board', name: 'Local Board', updatedAt: 1 }],
-  cancelPendingRegistryPush: vi.fn(),
-  deleteRegistryEntry: vi.fn(),
-  renameRegistryEntry: vi.fn(),
-}));
-
+    deleteInstance: mocks.deleteInstance,
+  };
+});
 vi.mock('../../../../src/pages/library/components/InstanceRow.jsx', () => ({
-  default: ({ name, onOpen, onRename }) => (
+  default: ({ name, onOpen, onRename, onDelete }) => (
     <div>
       <button type="button" onClick={onOpen}>{name}</button>
-      {onRename ? <button type="button" aria-label={`Rename ${name}`} onClick={onRename}>Rename</button> : null}
+      <button type="button" aria-label={`Rename ${name}`} onClick={onRename}>Rename</button>
+      <button type="button" aria-label={`Delete ${name}`} onClick={onDelete}>Delete</button>
     </div>
   ),
 }));
 
+const meta = { sectionKey: 'gmboard', label: 'GM Board', route: SECTION_REGISTRY.gmboard.route };
+
 beforeEach(() => {
   vi.clearAllMocks();
-  mocks.listInstances.mockResolvedValue([]);
+  localStorage.clear();
+  mocks.cloudRows = [];
+  mocks.deleteInstance.mockResolvedValue();
 });
 
-test('authenticated open checks cloud freshness for a local-origin row', async () => {
-  mocks.fetchInstanceMeta.mockResolvedValue({ updated_at: '2026-08-01T00:00:00.000Z' });
-  mocks.pullInstance.mockResolvedValue();
-  const meta = {
-    sectionKey: 'boards',
-    registryKey: 'gb_board_registry',
-    label: 'GM Board',
-    route: (id) => `/gmboard?board=${id}`,
-  };
-
+test('opening a row only navigates: the tool page opens it like any link', async () => {
+  createInstance('gmboard', { id: 'local-board', name: 'Local Board' });
   render(<SectionPicker meta={meta} />);
   fireEvent.click(await screen.findByRole('button', { name: 'Local Board' }));
-
-  await waitFor(() => expect(mocks.fetchInstanceMeta).toHaveBeenCalledWith('local-board'));
-  expect(mocks.pullInstance).toHaveBeenCalledWith('local-board');
   expect(mocks.navigate).toHaveBeenCalledWith('/gmboard?board=local-board');
 });
 
-test('cloud-origin rows can be renamed without requiring a local copy', async () => {
-  mocks.listInstances.mockResolvedValue([{
-    id: 'cloud-board',
-    name: 'Cloud Board',
-    updated_at: '2026-08-01T00:00:00.000Z',
-  }]);
-  const prompt = vi.spyOn(window, 'prompt').mockReturnValue('Renamed Cloud Board');
-  const meta = {
-    sectionKey: 'gmboard',
-    registryKey: 'gb_board_registry',
-    label: 'GM Board',
-    route: (id) => `/gmboard?board=${id}`,
-  };
-
+test('a local row is renamed locally (synced later); a cloud-only row in the cloud', async () => {
+  createInstance('gmboard', { id: 'local-board', name: 'Local Board', nameDirty: false });
+  mocks.cloudRows = [{ id: 'cloud-board', name: 'Cloud Board', updated_at: '2026-08-01T00:00:00.000Z' }];
+  const prompt = vi.spyOn(window, 'prompt')
+    .mockReturnValueOnce('Renamed Local')
+    .mockReturnValueOnce('Renamed Cloud');
   render(<SectionPicker meta={meta} />);
-  fireEvent.click(await screen.findByRole('button', { name: 'Rename Cloud Board' }));
 
-  await waitFor(() => {
-    expect(mocks.renameCloudInstance).toHaveBeenCalledWith('cloud-board', 'Renamed Cloud Board');
-  });
+  fireEvent.click(await screen.findByRole('button', { name: 'Rename Local Board' }));
+  await waitFor(() => expect(getInstance('gmboard', 'local-board').name).toBe('Renamed Local'));
+  expect(getInstance('gmboard', 'local-board').dirty.name).toBe(true);
+
+  fireEvent.click(await screen.findByRole('button', { name: 'Rename Cloud Board' }));
+  await waitFor(() => expect(mocks.renameCloudInstance).toHaveBeenCalledWith('gmboard', 'cloud-board', 'Renamed Cloud'));
   prompt.mockRestore();
+});
+
+test('deleting a local row stays local; a cloud row is deleted from the cloud too', async () => {
+  createInstance('gmboard', { id: 'local-board', name: 'Local Board' });
+  mocks.cloudRows = [{ id: 'cloud-board', name: 'Cloud Board', updated_at: '2026-08-01T00:00:00.000Z' }];
+  const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true);
+  render(<SectionPicker meta={meta} />);
+
+  fireEvent.click(await screen.findByRole('button', { name: 'Delete Local Board' }));
+  await waitFor(() => expect(mocks.deleteInstance).toHaveBeenCalledWith('gmboard', 'local-board', { cloud: false }));
+  fireEvent.click(await screen.findByRole('button', { name: 'Delete Cloud Board' }));
+  await waitFor(() => expect(mocks.deleteInstance).toHaveBeenCalledWith('gmboard', 'cloud-board', { cloud: true }));
+  confirm.mockRestore();
 });

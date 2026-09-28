@@ -11,17 +11,13 @@ import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import DifficultyBar from './DifficultyBar.jsx';
 
 export default function EncounterList() {
-  const { state, dispatch, instanceSaved, saveEncounterToLibrary } = useEncounterBuilder();
+  const { state, dispatch, saveEncounterToLibrary } = useEncounterBuilder();
   const { notify } = useToast();
   const difficulty = calculateDifficulty(state.encounter, state.party);
   const questOptions = useMemo(() => listQuestNames(state.library), [state.library]);
   const editingExisting = state.library.some((entry) => entry.id === state.currentEncounterId);
 
   const handleSave = () => {
-    if (!instanceSaved) {
-      notify('warning', 'Save this encounter-builder instance before saving library entries.');
-      return;
-    }
     const entry = saveEncounterToLibrary(state.encounterName);
     if (entry) notify('success', `"${entry.name}" ${editingExisting ? 'updated in' : 'saved to'} Library.`);
   };

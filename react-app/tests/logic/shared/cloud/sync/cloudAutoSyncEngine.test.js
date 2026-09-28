@@ -1,11 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import {
-  createCloudAutoSyncEngine,
-  registerSectionAutoSyncListeners,
-} from '../../../../../src/shared/cloud/sync/cloudAutoSyncEngine.js';
-import { SECTION_REGISTRY } from '../../../../../src/shared/instances/sectionRegistry.js';
+import { createCloudAutoSyncEngine } from '../../../../../src/shared/cloud/sync/cloudAutoSyncEngine.js';
 
 function harness() {
   let nextTimer = 1;
@@ -35,7 +30,7 @@ function harness() {
   };
 }
 
-test('autosync debounces repeated saves into one push per section id', async () => {
+test('autosync debounces repeated saves into one push per id', async () => {
   const { engine, pending, fire } = harness();
   let pushes = 0;
   const job = { key: 'gmboard:b1', id: 'b1', push: async () => { pushes += 1; } };
@@ -45,12 +40,6 @@ test('autosync debounces repeated saves into one push per section id', async () 
   assert.equal(pending(), 1);
   await fire();
   assert.equal(pushes, 1);
-});
-
-test('entry autosync keeps section storage adapters behind a dynamic import', () => {
-  const source = readFileSync(new URL('../../../../../src/shared/cloud/sync/CloudAutoSync.jsx', import.meta.url), 'utf8');
-  assert.doesNotMatch(source, /from ['"]\.\.\/sections\/(?:cloudSections|sectionDescriptors)\.js['"]/);
-  assert.match(source, /import\(['"]\.\.\/sections\/cloudSections\.js['"]\)/);
 });
 
 test('permission failure blocks id for session instead of retrying', async () => {
@@ -71,42 +60,4 @@ test('permission failure blocks id for session instead of retrying', async () =>
   assert.equal(pending(), 0);
   assert.equal(pushes, 1);
   assert.equal(events.at(-1)[1], 'error');
-});
-
-test('local delete cancels pending push and never invokes cloud delete', async () => {
-  const { engine, pending, fire } = harness();
-  let pushes = 0;
-  let cloudDeletes = 0;
-  let cloudLoads = 0;
-  const eventTarget = new EventTarget();
-  const sections = { dmscreen: SECTION_REGISTRY.dmscreen };
-  const removeListeners = registerSectionAutoSyncListeners({
-    eventTarget,
-    engine,
-    sections,
-    loadCloudSections: async () => {
-      cloudLoads += 1;
-      return {
-        dmscreen: {
-          pushInstance: async () => { pushes += 1; },
-          deleteCloudInstance: async () => { cloudDeletes += 1; },
-        },
-      };
-    },
-  });
-
-  const saveEvent = new Event(sections.dmscreen.saveEvent);
-  Object.defineProperty(saveEvent, 'detail', { value: { id: 's1' } });
-  eventTarget.dispatchEvent(saveEvent);
-  assert.equal(pending(), 1);
-
-  const deleteEvent = new Event(sections.dmscreen.deleteEvent);
-  Object.defineProperty(deleteEvent, 'detail', { value: { id: 's1' } });
-  eventTarget.dispatchEvent(deleteEvent);
-  assert.equal(pending(), 0);
-  await fire();
-  assert.equal(cloudLoads, 0);
-  assert.equal(pushes, 0);
-  assert.equal(cloudDeletes, 0);
-  removeListeners();
 });

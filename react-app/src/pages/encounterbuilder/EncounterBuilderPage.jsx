@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { Box, Button, Stack, Tab, Tabs, Typography } from '@mui/material';
 import { BookOpen, Library, Swords, Dices, Handshake, Skull } from 'lucide-react';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
 import LinkedToolsMenu from '../../app/navigation/LinkedToolsMenu.jsx';
 import CustomRollDialog from '../../shared/character/dice/CustomRollDialog.jsx';
-import { useSeedInstance } from '../../shared/instances/useSeedInstance.js';
+import { useToolInstance } from '../../shared/instances/useToolInstance.js';
+import CloudInstanceLoading from '../../shared/instances/CloudInstanceLoading.jsx';
+import InstanceConflictBanner from '../../shared/instances/InstanceConflictBanner.jsx';
 import BuilderView from './builder/BuilderView.jsx';
 import CombatView from './combat/CombatView.jsx';
 import LibraryView from './library/LibraryView.jsx';
@@ -15,43 +16,25 @@ import RollLogLauncher from './rolls/RollLogLauncher.jsx';
 import EncounterDiceToast, { buildEncounterDiceToast } from './rolls/EncounterDiceToast.jsx';
 import CriticalFumblesDialog from './rolls/CriticalFumblesDialog.jsx';
 import NegotiationDialog from './negotiation/NegotiationDialog.jsx';
-import { resolveInstance } from './state/storage.js';
 import { EncounterBuilderProvider, useEncounterBuilder } from './state/EncounterBuilderContext.jsx';
 
 export default function EncounterBuilderPage() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [instance, setInstance] = useState(() => resolveInstance(location.search));
-
-  useEffect(() => {
-    const next = resolveInstance(location.search);
-    setInstance(next);
-    if (next.replaceSearch) {
-      navigate({ pathname: location.pathname, search: next.replaceSearch }, { replace: true });
-    }
-  }, [location.pathname, location.search, navigate]);
+  const tool = useToolInstance('encounters');
+  if (!tool.ready) return <CloudInstanceLoading label="encounter" />;
 
   return (
-    <EncounterBuilderProvider
-      key={instance.id}
-      instanceId={instance.id}
-      instanceSaved={instance.saved}
-      linkGroupId={instance.linkGroupId}
-      onInstanceSaved={() => setInstance((prev) => ({ ...prev, saved: true }))}
-    >
-      <EncounterBuilderShell instance={instance} />
+    <EncounterBuilderProvider key={`${tool.id}:${tool.revision}`} instanceId={tool.id}>
+      <EncounterBuilderShell tool={tool} />
     </EncounterBuilderProvider>
   );
 }
 
-function EncounterBuilderShell({ instance }) {
-  const { state, dispatch, saveInstance, instanceSaved, roll } = useEncounterBuilder();
+function EncounterBuilderShell({ tool }) {
+  const { state, dispatch, roll } = useEncounterBuilder();
   const [customRollOpen, setCustomRollOpen] = useState(false);
   const [fumblesOpen, setFumblesOpen] = useState(false);
   const [negotiationOpen, setNegotiationOpen] = useState(false);
   const [diceToast, setDiceToast] = useState(null);
-
-  useSeedInstance('encounters', { instanceId: instance.id, instanceSaved, saveInstance });
 
   const handleCustomRoll = (formula) => {
     // GM roll — generic, no actor attribution.
@@ -62,14 +45,15 @@ function EncounterBuilderShell({ instance }) {
   return (
     <Box sx={pageSx}>
       <AppTopBar home backTo="/library/encounters" backLabel="Encounters">
-        <LinkedToolsMenu sectionKey="encounters" instanceId={instance.id} instanceSaved={instanceSaved} initialLinkGroupId={instance.linkGroupId} />
+        <LinkedToolsMenu sectionKey="encounters" instanceId={tool.id} initialLinkGroupId={tool.linkGroupId} />
       </AppTopBar>
       <Box sx={contentSx}>
         <Stack spacing={2}>
+          <InstanceConflictBanner tool={tool} />
           <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} sx={{ alignItems: { xs: 'stretch', md: 'center' }, justifyContent: 'space-between' }}>
             <Box>
               <Typography variant="h1">Encounter Builder</Typography>
-              <Typography variant="body2" color="text.secondary">Instance {instance.id}</Typography>
+              <Typography variant="body2" color="text.secondary">Instance {tool.id}</Typography>
             </Box>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ alignItems: { xs: 'stretch', sm: 'center' }, minWidth: 0 }}>
               <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: 'wrap' }}>

@@ -349,39 +349,6 @@ test('storage.js no longer exports a dead STORAGE_VERSION token', () => {
   assert.equal('STORAGE_VERSION' in storage, false);
 });
 
-test('resolveInstance("?board=new") creates a fresh unsaved id and asks to replace the URL', () => {
-  const result = storage.resolveInstance('?board=new');
-  assert.equal(result.saved, false);
-  assert.equal(result.replaceSearch, `?board=${result.id}`);
-});
-
-test('resolveInstance treats an unknown board id as unsaved with no URL change', () => {
-  const result = storage.resolveInstance('?board=totally-unknown-id');
-  assert.equal(result.id, 'totally-unknown-id');
-  assert.equal(result.saved, false);
-  assert.equal(result.replaceSearch, '');
-});
-
-test('resolveInstance recognizes a registered saved board id', () => {
-  localStorage.clear();
-  storage.registerBoardInstance('board-a', 'Board A');
-  const result = storage.resolveInstance('?board=board-a');
-  assert.equal(result.id, 'board-a');
-  assert.equal(result.saved, true);
-});
-
-test('resolveInstance with no query reuses the active board if known, else makes a new one', () => {
-  localStorage.clear();
-  const fresh = storage.resolveInstance('');
-  assert.equal(fresh.saved, false);
-  assert.ok(fresh.replaceSearch.startsWith('?board='));
-
-  storage.registerBoardInstance('active-board', 'Active');
-  const reused = storage.resolveInstance('');
-  assert.equal(reused.id, 'active-board');
-  assert.equal(reused.saved, true);
-});
-
 test('unsaved boards never write scoped storage keys', () => {
   localStorage.clear();
   const before = localStorage.length;
@@ -389,14 +356,6 @@ test('unsaved boards never write scoped storage keys', () => {
   assert.deepEqual(persisted.state, createDefaultCoreState());
   assert.deepEqual(persisted.results, createDefaultResults());
   assert.equal(localStorage.length, before);
-});
-
-test('registerBoardInstance writes the board registry and active id', () => {
-  localStorage.clear();
-  storage.registerBoardInstance('reg-board', 'My Board');
-  const registry = storage.readRegistry();
-  assert.ok(registry.some((entry) => entry.id === 'reg-board' && entry.name === 'My Board'));
-  assert.equal(localStorage.getItem(storage.ACTIVE_KEY), 'reg-board');
 });
 
 test('persisted board state round-trips and stays isolated per board id', () => {

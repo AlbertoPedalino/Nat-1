@@ -12,16 +12,9 @@ import { createQuests } from '../quests/quest.js';
 
 const GmBoardContext = createContext(null);
 
-export function GmBoardProvider({ instanceId, instanceSaved, linkGroupId, onInstanceSaved, children }) {
+export function GmBoardProvider({ instanceId, children }) {
   const [state, dispatch] = useReducer(gmBoardReducer, undefined, createInitialState);
-  const { saveInstance, resetTables } = useGmBoardPersistence({
-    instanceId,
-    instanceSaved,
-    linkGroupId,
-    state,
-    dispatch,
-    onSaved: onInstanceSaved,
-  });
+  const { resetTables } = useGmBoardPersistence({ instanceId, state, dispatch });
 
   // A board bound to a campaign keeps that campaign's clock, and so does its
   // map: both read the same row and write it only when the party actually
@@ -146,8 +139,6 @@ export function GmBoardProvider({ instanceId, instanceSaved, linkGroupId, onInst
     state,
     dispatch: dispatchSelection,
     instanceId,
-    instanceSaved,
-    saveInstance,
     resetTables,
     setStart,
     setTime,
@@ -161,7 +152,7 @@ export function GmBoardProvider({ instanceId, instanceSaved, linkGroupId, onInst
     campaign: campaignLink.campaign,
     campaignLinked: campaignClock.active,
     clockError: clockError || campaignClock.error || campaignLink.error,
-  }), [state, dispatchSelection, instanceId, instanceSaved, saveInstance, resetTables, setStart, setTime, setSeason, setWeatherOverride, proceed, advanceOnly, advanceManual, generateDungeon, generateQuests, campaignLink.campaign, campaignLink.error, campaignClock.active, campaignClock.error, clockError]);
+  }), [state, dispatchSelection, instanceId, resetTables, setStart, setTime, setSeason, setWeatherOverride, proceed, advanceOnly, advanceManual, generateDungeon, generateQuests, campaignLink.campaign, campaignLink.error, campaignClock.active, campaignClock.error, clockError]);
 
   return (
     <GmBoardContext.Provider value={value}>

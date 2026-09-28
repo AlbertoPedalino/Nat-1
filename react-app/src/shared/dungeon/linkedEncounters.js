@@ -1,17 +1,11 @@
 // Resolve an Encounter Builder from a tool group. Campaigns own their group
 // directly; board-based helpers also serve callers with a local GM Board.
 
-import { readRegistry } from '../storage/localStorageRegistries.js';
-import { SECTION_REGISTRY } from '../instances/sectionRegistry.js';
+import { listInstances } from '../instances/instanceStore.js';
 import { normalizeLinkGroupId } from '../instances/linkGroupId.js';
 
 function instancesOf(sectionKey) {
-  const section = SECTION_REGISTRY[sectionKey];
-  if (!section) return [];
-  return readRegistry(section.registryKey).map((entry) => ({
-    ...entry,
-    linkGroupId: normalizeLinkGroupId(entry.linkGroupId),
-  }));
+  return listInstances(sectionKey);
 }
 
 export function linkGroupOfBoard(boardId) {

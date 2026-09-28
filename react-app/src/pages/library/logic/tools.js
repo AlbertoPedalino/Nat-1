@@ -1,5 +1,6 @@
 import { ScrollText, LayoutDashboard, Swords, StickyNote } from 'lucide-react';
 import { REGISTRY_META } from '../../../shared/storage/localStorageRegistries.js';
+import { SECTION_REGISTRY } from '../../../shared/instances/sectionRegistry.js';
 
 // Single data-driven table: slug -> registry key, identity, and routes. Every
 // component that needs tool metadata reads from here instead of branching on
@@ -18,35 +19,32 @@ export const LIBRARY_TOOLS = {
   gmboard: {
     slug: 'gmboard',
     sectionKey: 'gmboard',
-    registryKey: 'gb_board_registry',
     label: 'GM Board',
     description: 'Hexcrawl, dungeon, and quest generators',
     color: 'warning.main',
     icon: LayoutDashboard,
-    newRoute: REGISTRY_META.gb_board_registry.newRoute,
-    route: REGISTRY_META.gb_board_registry.route,
+    newRoute: SECTION_REGISTRY.gmboard.newRoute,
+    route: SECTION_REGISTRY.gmboard.route,
   },
   encounters: {
     slug: 'encounters',
     sectionKey: 'encounters',
-    registryKey: 'gb_encounter_registry',
     label: 'Encounter Builder',
     description: 'Build and balance combat encounters',
     color: 'error.main',
     icon: Swords,
-    newRoute: REGISTRY_META.gb_encounter_registry.newRoute,
-    route: REGISTRY_META.gb_encounter_registry.route,
+    newRoute: SECTION_REGISTRY.encounters.newRoute,
+    route: SECTION_REGISTRY.encounters.route,
   },
   dmscreen: {
     slug: 'dmscreen',
     sectionKey: 'dmscreen',
-    registryKey: 'gb_dmscreen_registry',
     label: 'DM Screen',
     description: 'Keep notes and reminders close during play',
     color: 'secondary.main',
     icon: StickyNote,
-    newRoute: REGISTRY_META.gb_dmscreen_registry.newRoute,
-    route: REGISTRY_META.gb_dmscreen_registry.route,
+    newRoute: SECTION_REGISTRY.dmscreen.newRoute,
+    route: SECTION_REGISTRY.dmscreen.route,
   },
 };
 

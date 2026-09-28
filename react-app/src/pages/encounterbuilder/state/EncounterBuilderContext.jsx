@@ -15,7 +15,7 @@ import { encounterRollActor } from '../rolls/rollActor.js';
 
 const EncounterBuilderContext = createContext(null);
 
-export function EncounterBuilderProvider({ instanceId, instanceSaved, linkGroupId, onInstanceSaved, children }) {
+export function EncounterBuilderProvider({ instanceId, children }) {
   const [state, reduce] = useReducer(encounterReducer, undefined, createInitialState);
   // Enemy vitals go to their fight row; a linked player's to their sheet;
   // everything else straight to the reducer.
@@ -38,15 +38,12 @@ export function EncounterBuilderProvider({ instanceId, instanceSaved, linkGroupI
     instanceId, players: state.players, campaigns: campaignPlayers.campaigns, dispatch,
   });
   const { shareRoll } = rollSync;
-  const { saveInstance } = useEncounterPersistence({
+  useEncounterPersistence({
     instanceId,
-    instanceSaved,
-    linkGroupId,
     monsters: monsterDb.monsters,
     monsterStatus: monsterDb.status,
     state,
     dispatch,
-    onSaved: onInstanceSaved,
   });
 
   // Fights have a row each, and the row is the record. The blob beside them —
@@ -57,7 +54,6 @@ export function EncounterBuilderProvider({ instanceId, instanceSaved, linkGroupI
   // and its pieces display a copy the database derives.
   const cloudFights = useCloudFights({
     instanceId,
-    instanceSaved,
     fights: state.fights,
     library: state.library,
     activeFightId: state.activeFightId,
@@ -71,7 +67,6 @@ export function EncounterBuilderProvider({ instanceId, instanceSaved, linkGroupI
   // bring structure but never enemy vitals.
   useExternalFightSync({
     instanceId,
-    instanceSaved,
     activeFightId: state.activeFightId,
     fights: state.fights,
     library: state.library,
@@ -115,11 +110,9 @@ export function EncounterBuilderProvider({ instanceId, instanceSaved, linkGroupI
     characterDigests,
     rollSync,
     instanceId,
-    instanceSaved,
-    saveInstance,
     saveEncounterToLibrary,
     roll,
-  }), [campaignPlayers, characterDigests, rollSync, instanceId, instanceSaved, monsterDb, roll, saveEncounterToLibrary, saveInstance, state, dispatch]);
+  }), [campaignPlayers, characterDigests, rollSync, instanceId, monsterDb, roll, saveEncounterToLibrary, state, dispatch]);
 
   return (
     <EncounterBuilderContext.Provider value={value}>

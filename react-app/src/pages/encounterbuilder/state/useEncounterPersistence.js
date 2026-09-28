@@ -1,74 +1,27 @@
-import { useCallback, useEffect, useRef } from 'react';
-import {
-  batchPersist,
-  persistDraft,
-  persistFights,
-  persistFumbles,
-  persistLibrary,
-  persistNegotiation,
-  persistParty,
-  readPersistedInstance,
-  registerEncounterInstance,
-} from './storage.js';
+import { useEffect, useState } from 'react';
+import { hasInstancePayload } from '../../../shared/instances/instanceStore.js';
+import { persistEncounter, readPersistedInstance } from './storage.js';
 
-export function useEncounterPersistence({ instanceId, instanceSaved, linkGroupId, monsters, monsterStatus, state, dispatch, onSaved }) {
-  const hydratedRef = useRef(false);
-  const hydrateKeyRef = useRef('');
-  const skipNextPersistRef = useRef(false);
+// Loads the instance once the bestiary is known (stored encounter items are
+// rehydrated against it), then saves every state change locally. A new
+// instance has nothing stored: its first save writes the initial state, which
+// is what gives it data to sync. Saving an unchanged state is a no-op in the
+// store, so re-writing freshly hydrated state neither marks it dirty nor
+// syncs it back.
+export function useEncounterPersistence({ instanceId, monsters, monsterStatus, state, dispatch }) {
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    if (!instanceId || !instanceSaved) {
-      hydratedRef.current = true;
-      return;
+    if (hydrated || !instanceId) return;
+    if (monsterStatus !== 'ready' && monsterStatus !== 'error') return;
+    if (hasInstancePayload('encounters', instanceId)) {
+      dispatch({ type: 'hydrateStorage', payload: readPersistedInstance(instanceId, monsters), monsters });
     }
-    const canHydrate = monsterStatus === 'ready' || monsterStatus === 'error';
-    const hydrateKey = `${instanceId}:${monsterStatus}`;
-    if (!canHydrate || hydrateKeyRef.current === hydrateKey) return;
-    hydrateKeyRef.current = hydrateKey;
-    const persisted = readPersistedInstance(instanceId, monsters);
-    skipNextPersistRef.current = true;
-    dispatch({ type: 'hydrateStorage', payload: persisted, monsters });
-    hydratedRef.current = true;
-  }, [dispatch, instanceId, instanceSaved, monsterStatus, monsters]);
+    setHydrated(true);
+  }, [dispatch, hydrated, instanceId, monsterStatus, monsters]);
 
-  // One announcement for the six writes. Firing one per key let a listener read
-  // storage back while half of it was still the previous save — which is how a
-  // deleted encounter reappeared: the library key had not been rewritten yet.
-  const persistAll = useCallback(() => {
-    if (!instanceId) return;
-    batchPersist(() => {
-      persistParty(instanceId, state.party, state.players);
-      persistDraft(
-        instanceId,
-        state.encounter,
-        state.currentEncounterId,
-        state.encounterName,
-        state.encounterQuest,
-      );
-      persistLibrary(instanceId, state.library);
-      persistFights(instanceId, state.activeFightId, state.fights);
-      persistFumbles(instanceId, state.fumbleTables);
-      persistNegotiation(instanceId, state.negotiation);
-    });
-  }, [instanceId, state.activeFightId, state.currentEncounterId, state.encounter, state.encounterName, state.encounterQuest, state.fights, state.fumbleTables, state.library, state.negotiation, state.party, state.players]);
-
+  // Runs from the render after hydration, so it never writes pre-hydration state.
   useEffect(() => {
-    if (!instanceSaved || !hydratedRef.current) return;
-    if (skipNextPersistRef.current) {
-      skipNextPersistRef.current = false;
-      return;
-    }
-    persistAll();
-  }, [instanceSaved, persistAll]);
-
-  const saveInstance = useCallback(() => {
-    const entry = registerEncounterInstance(instanceId, `Encounter ${instanceId}`, {
-      linkGroupId: instanceSaved ? undefined : linkGroupId,
-    });
-    persistAll();
-    onSaved?.(entry);
-    return entry;
-  }, [instanceId, instanceSaved, linkGroupId, onSaved, persistAll]);
-
-  return { saveInstance };
+    if (hydrated && instanceId) persistEncounter(instanceId, state);
+  }, [hydrated, instanceId, state.activeFightId, state.currentEncounterId, state.encounter, state.encounterName, state.encounterQuest, state.fights, state.fumbleTables, state.library, state.negotiation, state.party, state.players]); // eslint-disable-line react-hooks/exhaustive-deps
 }

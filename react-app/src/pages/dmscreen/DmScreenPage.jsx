@@ -1,70 +1,36 @@
-import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, Stack, Typography } from '@mui/material';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
 import LinkedToolsMenu from '../../app/navigation/LinkedToolsMenu.jsx';
-import { useSeedInstance } from '../../shared/instances/useSeedInstance.js';
+import { useToolInstance } from '../../shared/instances/useToolInstance.js';
+import CloudInstanceLoading from '../../shared/instances/CloudInstanceLoading.jsx';
+import InstanceConflictBanner from '../../shared/instances/InstanceConflictBanner.jsx';
 import NoteBoard from './notes/NoteBoard.jsx';
-import { DmScreenProvider, useDmScreen } from './state/DmScreenContext.jsx';
-import { resolveInstance } from './state/storage.js';
+import { DmScreenProvider } from './state/DmScreenContext.jsx';
 
 export default function DmScreenPage() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [instance, setInstance] = useState(() => ({
-    ...resolveInstance(location.search),
-    sourceSearch: location.search,
-  }));
-
-  useEffect(() => {
-    if (instance.sourceSearch === location.search) {
-      if (instance.replaceSearch) {
-        navigate({ pathname: location.pathname, search: instance.replaceSearch }, { replace: true });
-      }
-      return;
-    }
-    const next = { ...resolveInstance(location.search), sourceSearch: location.search };
-    setInstance(next);
-    if (next.replaceSearch) {
-      navigate({ pathname: location.pathname, search: next.replaceSearch }, { replace: true });
-    }
-  }, [instance.sourceSearch, location.pathname, location.search, navigate]);
-
-  const handleInstanceSaved = (entry) => {
-    const search = `?screen=${encodeURIComponent(entry.id)}`;
-    setInstance((previous) => ({ ...previous, saved: true, sourceSearch: search }));
-    navigate({ pathname: location.pathname, search }, { replace: true });
-  };
+  const tool = useToolInstance('dmscreen');
+  if (!tool.ready) return <CloudInstanceLoading label="DM Screen" />;
 
   return (
-    <DmScreenProvider
-      key={instance.id}
-      instanceId={instance.id}
-      instanceSaved={instance.saved}
-      linkGroupId={instance.linkGroupId}
-      onInstanceSaved={handleInstanceSaved}
-    >
-      <DmScreenShell instance={instance} />
+    <DmScreenProvider key={`${tool.id}:${tool.revision}`} instanceId={tool.id}>
+      <DmScreenShell tool={tool} />
     </DmScreenProvider>
   );
 }
 
-function DmScreenShell({ instance }) {
-  const { instanceSaved, saveInstance } = useDmScreen();
-
-  useSeedInstance('dmscreen', { instanceId: instance.id, instanceSaved, saveInstance });
-
+function DmScreenShell({ tool }) {
   return (
     <Box sx={pageSx}>
       <AppTopBar home backTo="/library/dmscreen" backLabel="DM Screens">
-        <LinkedToolsMenu sectionKey="dmscreen" instanceId={instance.id} instanceSaved={instanceSaved} initialLinkGroupId={instance.linkGroupId} />
+        <LinkedToolsMenu sectionKey="dmscreen" instanceId={tool.id} initialLinkGroupId={tool.linkGroupId} />
       </AppTopBar>
       <Box component="main" sx={contentSx}>
         <Stack spacing={2}>
+          <InstanceConflictBanner tool={tool} />
           <Box>
             <Typography variant="h1">DM Screen</Typography>
             <Typography variant="body2" color="text.secondary">
-              Screen {instance.id}
+              Screen {tool.id}
             </Typography>
           </Box>
           <NoteBoard />

@@ -7,7 +7,8 @@ import { beforeEach, vi } from 'vitest';
 import { theme } from '../../../../../src/app/theme.js';
 import SceneEditor from '../../../../../src/pages/vtt/scene/SceneEditor.jsx';
 import { createFog, isRevealed, revealAll } from '../../../../../src/shared/vtt/map/fog.js';
-import { persistFights, registerEncounterInstance } from '../../../../../src/pages/encounterbuilder/state/storage.js';
+import { persistFights } from '../../../../../src/pages/encounterbuilder/state/storage.js';
+import { createInstance } from '../../../../../src/shared/instances/instanceStore.js';
 
 const sceneViewportMock = vi.hoisted(() => vi.fn());
 const signMapImageMock = vi.hoisted(() => vi.fn());
@@ -167,7 +168,7 @@ test('an open battle map never rewrites sheet HP from cached encounters on mount
   encounterBridge.tokens = [{ id: 'hero-token', characterId: 'hero', hpCurrent: null, hpMax: null, layer: 'tokens', x: 1, y: 1 }];
   sheetRoster.current = [{ characterId: 'hero', name: 'Hero', hpCurrent: 18, hpMax: 30 }];
   const saveFight = (instanceId, hpCurrent) => {
-    registerEncounterInstance(instanceId, instanceId);
+    createInstance('encounters', { id: instanceId });
     persistFights(instanceId, 'fight', [{ id: 'fight', fight: { combatants: [{
       id: 0, type: 'player', sourceId: 'hero', hpCurrent, hpMax: 30, activeConditions: [],
     }] } }]);

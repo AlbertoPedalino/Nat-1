@@ -1,9 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-// `deleteRegistryEntry` sweeps scoped keys via `Object.keys(localStorage)`,
-// so the stub must expose keys as own enumerable props (set via `setItem`),
-// not a Map-backed store — a Map stub would silently pass an empty sweep.
 class MemoryStorage {
   setItem(key, value) { this[key] = String(value); }
   getItem(key) { return Object.prototype.hasOwnProperty.call(this, key) ? this[key] : null; }
@@ -22,7 +19,8 @@ if (!globalThis.window) {
 globalThis.window.confirm = () => true;
 globalThis.prompt = (_message, defaultValue) => defaultValue;
 
-const { REGISTRY_META, readRegistry, deleteRegistryEntry, renameRegistryEntry } = await import('../../../../../src/shared/storage/localStorageRegistries.js');
+const { REGISTRY_META } = await import('../../../../../src/shared/storage/localStorageRegistries.js');
+const { SECTION_REGISTRY } = await import('../../../../../src/shared/instances/sectionRegistry.js');
 const { resolveTool, LIBRARY_TOOLS } = await import('../../../../../src/pages/library/logic/tools.js');
 const { mergeCharacterRows, canDeleteRow, deletePlanFor, loadCharacterRows } = await import('../../../../../src/pages/library/logic/characterRows.js');
 const { mergeInstanceRows, loadInstanceRows, sectionDeletePlan, shouldPullCloudCopy } = await import('../../../../../src/pages/library/logic/instanceRows.js');
@@ -32,7 +30,7 @@ test('resolveTool resolves every supported tool slug to a valid table entry', ()
     const meta = resolveTool(slug);
     assert.ok(meta, `expected a tool for slug "${slug}"`);
     assert.equal(meta.slug, slug);
-    assert.ok(REGISTRY_META[meta.registryKey], `registry meta missing for ${meta.registryKey}`);
+    assert.ok(meta.sectionKey ? SECTION_REGISTRY[meta.sectionKey] : REGISTRY_META[meta.registryKey], `identity missing for ${slug}`);
     assert.equal(typeof meta.newRoute, 'string');
     assert.ok(meta.newRoute.length > 0);
     assert.equal(typeof meta.route('some-id'), 'string');
@@ -49,80 +47,6 @@ test('resolveTool returns null for Object.prototype keys instead of a prototype 
   for (const slug of ['constructor', '__proto__', 'toString', 'valueOf', 'hasOwnProperty']) {
     assert.equal(resolveTool(slug), null, `expected null for prototype key "${slug}"`);
   }
-});
-
-test('readRegistry reads populated entries', () => {
-  localStorage.clear();
-  localStorage.setItem('gb_encounter_registry', JSON.stringify([{ id: 'e1', name: 'X', updatedAt: 5 }]));
-  assert.deepEqual(readRegistry('gb_encounter_registry'), [{ id: 'e1', name: 'X', updatedAt: 5 }]);
-});
-
-test('readRegistry returns an empty array when the key is missing', () => {
-  localStorage.clear();
-  assert.deepEqual(readRegistry('gb_board_registry'), []);
-});
-
-test('readRegistry falls back to an empty array for a corrupt payload', () => {
-  localStorage.clear();
-  localStorage.setItem('gb_board_registry', '{not json');
-  assert.deepEqual(readRegistry('gb_board_registry'), []);
-});
-
-test('readRegistry is uncapped by default, and delete/rename write back the full list', () => {
-  localStorage.clear();
-  const entries = Array.from({ length: 12 }, (_, i) => ({ id: `b${i}`, name: `Board ${i}`, updatedAt: i }));
-  localStorage.setItem('gb_board_registry', JSON.stringify(entries));
-
-  assert.equal(readRegistry('gb_board_registry').length, 12);
-
-  renameRegistryEntry('gb_board_registry', 'b11', 'Renamed 11');
-  const afterRename = JSON.parse(localStorage.getItem('gb_board_registry'));
-  assert.equal(afterRename.length, 12);
-  assert.equal(afterRename.find((e) => e.id === 'b11').name, 'Renamed 11');
-
-  deleteRegistryEntry('gb_board_registry', 'b0');
-  const afterDelete = JSON.parse(localStorage.getItem('gb_board_registry'));
-  assert.equal(afterDelete.length, 11);
-  assert.ok(afterDelete.some((e) => e.id === 'b11'));
-});
-
-test('readRegistry(key, { limit }) caps the result when a limit is explicitly requested', () => {
-  localStorage.clear();
-  const entries = Array.from({ length: 5 }, (_, i) => ({ id: `b${i}`, name: `Board ${i}`, updatedAt: i }));
-  localStorage.setItem('gb_board_registry', JSON.stringify(entries));
-  assert.equal(readRegistry('gb_board_registry', { limit: 2 }).length, 2);
-});
-
-test('deleteRegistryEntry removes scoped keys and the active id, leaving other tools untouched', () => {
-  localStorage.clear();
-  localStorage.setItem('gb_board_registry', JSON.stringify([{ id: 'b1', name: 'Board 1', updatedAt: 1 }]));
-  localStorage.setItem('gb:board:b1:state:v1', '{}');
-  localStorage.setItem('gb:board:b1:tables:v1', '{}');
-  localStorage.setItem('gb_active_board_id', 'b1');
-  localStorage.setItem('gb_encounter_registry', JSON.stringify([{ id: 'e1', name: 'Enc 1', updatedAt: 1 }]));
-  localStorage.setItem('gb:enc:e1:party:v1', '{}');
-
-  const ok = deleteRegistryEntry('gb_board_registry', 'b1');
-  assert.equal(ok, true);
-  assert.equal(localStorage.getItem('gb:board:b1:state:v1'), null);
-  assert.equal(localStorage.getItem('gb:board:b1:tables:v1'), null);
-  assert.equal(localStorage.getItem('gb_active_board_id'), null);
-  assert.deepEqual(JSON.parse(localStorage.getItem('gb_board_registry')), []);
-  assert.equal(localStorage.getItem('gb:enc:e1:party:v1'), '{}');
-  assert.equal(JSON.parse(localStorage.getItem('gb_encounter_registry')).length, 1);
-});
-
-test('renameRegistryEntry updates only the target entry', () => {
-  localStorage.clear();
-  localStorage.setItem('gb_board_registry', JSON.stringify([
-    { id: 'b1', name: 'A', updatedAt: 1 },
-    { id: 'b2', name: 'B', updatedAt: 2 },
-  ]));
-  const ok = renameRegistryEntry('gb_board_registry', 'b1', 'Renamed');
-  assert.equal(ok, true);
-  const list = JSON.parse(localStorage.getItem('gb_board_registry'));
-  assert.equal(list.find((e) => e.id === 'b1').name, 'Renamed');
-  assert.equal(list.find((e) => e.id === 'b2').name, 'B');
 });
 
 test('mergeCharacterRows keeps local-only and cloud-only rows with the right origin', () => {

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { SECTION_REGISTRY } from '../../../shared/instances/sectionRegistry.js';
-import { persistFights, readPersistedInstance, readRegistry } from '../../encounterbuilder/state/storage.js';
+import { listInstances, subscribeInstanceData } from '../../../shared/instances/instanceStore.js';
+import { persistFights, readPersistedInstance } from '../../encounterbuilder/state/storage.js';
 import { restoreFight } from '../../encounterbuilder/combat/combat.js';
 import {
   fightWithTokenVitals,
@@ -18,7 +19,6 @@ import {
 // Both directions guard against echoing: an update is only written when the
 // value actually differs, so a change does not bounce between the two forever.
 
-const ENCOUNTER_SAVED = SECTION_REGISTRY.encounters.saveEvent;
 const ENCOUNTER_REGISTRY_KEY = SECTION_REGISTRY.encounters.registryKey;
 const FIGHTS_STORAGE_KEY = /^gb:enc:[^:]+:fights:v1$/;
 
@@ -49,7 +49,7 @@ export function useEncounterBridge({ tokens, onTokenVitals }) {
     // for. Without this, a scene with only player pieces heard nothing from the
     // encounter at all.
     if (tokens.some((token) => token.characterId)) {
-      for (const instance of readRegistry()) {
+      for (const instance of listInstances('encounters')) {
         const persisted = readPersistedInstance(instance.id, []);
         const activeFightId = persisted?.fightsData?.activeFightId;
         if (activeFightId) {
@@ -84,8 +84,8 @@ export function useEncounterBridge({ tokens, onTokenVitals }) {
   }, [onTokenVitals]);
 
   useEffect(() => {
-    // Same tab: the encounter builder dispatches this on every persist.
-    window.addEventListener(ENCOUNTER_SAVED, pull);
+    // Same tab: every local save of an encounter instance.
+    const unsubscribe = subscribeInstanceData('encounters', null, pull);
     // Other tabs of this browser: localStorage writes surface as `storage`.
     const handleStorage = (event) => {
       if (event.key === ENCOUNTER_REGISTRY_KEY || FIGHTS_STORAGE_KEY.test(event.key || '')) pull();
@@ -93,7 +93,7 @@ export function useEncounterBridge({ tokens, onTokenVitals }) {
     window.addEventListener('storage', handleStorage);
     pull();
     return () => {
-      window.removeEventListener(ENCOUNTER_SAVED, pull);
+      unsubscribe();
       window.removeEventListener('storage', handleStorage);
     };
   }, [pull]);
@@ -106,7 +106,7 @@ export function useEncounterBridge({ tokens, onTokenVitals }) {
     // reference. Send them to every active fight that can match their sourceId;
     // fightWithTokenVitals is the guard that ignores unrelated encounters.
     if (!ref && token?.characterId) {
-      for (const instance of readRegistry()) {
+      for (const instance of listInstances('encounters')) {
         const persisted = readPersistedInstance(instance.id, []);
         if (!persisted?.fightsData?.activeFightId) continue;
         const fights = persisted.fightsData.items || [];

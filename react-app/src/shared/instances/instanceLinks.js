@@ -1,76 +1,19 @@
-import { readRegistry, writeRegistry } from '../storage/localStorageRegistries.js';
-import { emitStorageEvent } from '../storage/scopedStoragePayload.js';
-import { SECTION_KEYS, SECTION_REGISTRY } from './sectionRegistry.js';
+import { setInstanceLinkGroup } from './instanceStore.js';
 import { makeLinkGroupId, normalizeLinkGroupId } from './linkGroupId.js';
 
 export { makeLinkGroupId, normalizeLinkGroupId };
 
-export function readLocalToolInstances() {
-  return SECTION_KEYS.flatMap((sectionKey) => {
-    const section = SECTION_REGISTRY[sectionKey];
-    return readRegistry(section.registryKey).map((entry) => ({
-      ...entry,
-      sectionKey,
-      linkGroupId: normalizeLinkGroupId(entry.linkGroupId),
-      origin: 'local',
-      hasLocal: true,
-    }));
-  });
-}
-
-export function setLocalInstanceLink(sectionKey, id, linkGroupId, { emit = true } = {}) {
-  const section = SECTION_REGISTRY[sectionKey];
-  if (!section || !id) return null;
-  const list = readRegistry(section.registryKey);
-  const existing = list.find((entry) => entry.id === id);
-  if (!existing) return null;
-  const entry = {
-    ...existing,
-    linkGroupId: normalizeLinkGroupId(linkGroupId),
-    linkGroupPending: true,
-    updatedAt: Date.now(),
-  };
-  writeRegistry(section.registryKey, [entry, ...list.filter((item) => item.id !== id)]);
-  if (emit) emitStorageEvent(section.saveEvent, id);
+// Links (or unlinks, with null) a local instance. The change is local first
+// and synced like any other edit; views that show links are told directly.
+export function setLocalInstanceLink(sectionKey, id, linkGroupId) {
+  const entry = setInstanceLinkGroup(sectionKey, id, linkGroupId);
+  if (!entry) return null;
   try {
     window.dispatchEvent(new CustomEvent('gb:instance-links-changed', {
       detail: { sectionKey, id, linkGroupId: entry.linkGroupId },
     }));
   } catch (_) {}
   return entry;
-}
-
-export function mergeLinkedInstanceRows(sectionKey, cloudRows = [], localRows = []) {
-  const localById = new Map(localRows.map((entry) => [entry.id, entry]));
-  const rows = [];
-  const seen = new Set();
-  for (const cloud of cloudRows) {
-    if (!cloud?.id || seen.has(cloud.id)) continue;
-    const local = localById.get(cloud.id);
-    rows.push({
-      ...local,
-      id: cloud.id,
-      name: cloud.name || local?.name || cloud.id,
-      sectionKey,
-      linkGroupId: normalizeLinkGroupId(local?.linkGroupPending || cloud.link_group_id === undefined
-        ? local?.linkGroupId : cloud.link_group_id),
-      updatedAt: Date.parse(cloud.updated_at) || local?.updatedAt || 0,
-      origin: 'cloud',
-      hasLocal: Boolean(local),
-    });
-    seen.add(cloud.id);
-  }
-  for (const local of localRows) {
-    if (!local?.id || seen.has(local.id)) continue;
-    rows.push({
-      ...local,
-      sectionKey,
-      linkGroupId: normalizeLinkGroupId(local.linkGroupId),
-      origin: 'local',
-      hasLocal: true,
-    });
-  }
-  return rows;
 }
 
 export function resolveGroupMerge(current, target, rows, idFactory = makeLinkGroupId) {

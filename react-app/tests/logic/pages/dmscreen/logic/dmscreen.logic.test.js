@@ -288,54 +288,6 @@ test('reducer moves notes up and down while preserving ids and boundary order', 
   assert.equal(movedDown.notes[1].id, 'b');
 });
 
-test('resolveInstance keeps screen=new unsaved and entirely in memory', () => {
-  localStorage.clear();
-  const result = storage.resolveInstance('?screen=new', () => 'screen-memory');
-  assert.deepEqual(result, { id: 'screen-memory', saved: false, replaceSearch: '' });
-  assert.equal(localStorage.length, 0);
-});
-
-test('resolveInstance recognizes saved ids and reuses the active id', () => {
-  localStorage.clear();
-  storage.registerInstance('screen-a', 'Screen A');
-  assert.deepEqual(
-    storage.resolveInstance('?screen=screen-a'),
-    { id: 'screen-a', saved: true, replaceSearch: '' },
-  );
-  assert.deepEqual(
-    storage.resolveInstance(''),
-    { id: 'screen-a', saved: true, replaceSearch: '?screen=screen-a' },
-  );
-});
-
-test('resolveInstance treats an unknown safe id as unsaved and replaces an invalid id', () => {
-  localStorage.clear();
-  assert.deepEqual(
-    storage.resolveInstance('?screen=unknown'),
-    { id: 'unknown', saved: false, replaceSearch: '' },
-  );
-  assert.deepEqual(
-    storage.resolveInstance('?screen=!!!', () => 'screen-fresh'),
-    { id: 'screen-fresh', saved: false, replaceSearch: '?screen=screen-fresh' },
-  );
-});
-
-test('unsaved screens write no scoped keys before Save', () => {
-  localStorage.clear();
-  const wrote = storage.persistNotesIfSaved('screen-new', false, [createNote('a')]);
-  assert.equal(wrote, false);
-  assert.equal(localStorage.length, 0);
-  assert.equal(localStorage.getItem(storage.scopeKey('screen-new')), null);
-});
-
-test('Save registration writes the DM Screen registry and active id', () => {
-  localStorage.clear();
-  const entry = storage.registerInstance('screen-save', 'Session Notes');
-  assert.equal(entry.id, 'screen-save');
-  assert.ok(storage.readRegistry().some((item) => item.id === 'screen-save' && item.name === 'Session Notes'));
-  assert.equal(localStorage.getItem(storage.ACTIVE_KEY), 'screen-save');
-});
-
 test('persisted notes use isolated per-screen scoped keys', () => {
   localStorage.clear();
   storage.persistNotes('screen-a', [{ id: 'a', title: 'A', body: 'one' }]);
@@ -368,60 +320,23 @@ function withFailingWrites(shouldFail, run) {
   }
 }
 
-test('Save writes notes, registry, and active id together', () => {
+test('a failed notes write keeps what was stored and reports the failure', () => {
   localStorage.clear();
-  const entry = storage.saveInstanceWithNotes('screen-atomic', 'Session Notes', [{ id: 'a', title: 'A', body: 'one' }]);
-  assert.equal(entry.id, 'screen-atomic');
-  assert.deepEqual(storage.readPersistedNotes('screen-atomic'), [{ id: 'a', title: 'A', body: 'one', size: { cols: 4, height: 0 } }]);
-  assert.ok(storage.readRegistry().some((item) => item.id === 'screen-atomic'));
-  assert.equal(localStorage.getItem(storage.ACTIVE_KEY), 'screen-atomic');
-});
-
-test('Save leaves no registry entry when the notes write fails', () => {
-  localStorage.clear();
-  const entry = withFailingWrites(
+  assert.equal(storage.persistNotes('screen-quota', [{ id: 'a', title: 'A', body: 'one' }]), true);
+  const failedNotes = withFailingWrites(
     (key) => key === storage.scopeKey('screen-quota'),
-    () => storage.saveInstanceWithNotes('screen-quota', 'Session Notes', [{ id: 'a', title: 'A', body: 'one' }]),
+    () => storage.persistNotes('screen-quota', [{ id: 'a', title: 'A', body: 'two' }]),
   );
-  assert.equal(entry, null);
-  assert.deepEqual(storage.readRegistry(), []);
-  assert.equal(localStorage.getItem(storage.ACTIVE_KEY), null);
-  assert.equal(localStorage.getItem(storage.scopeKey('screen-quota')), null);
-});
+  assert.equal(failedNotes, false);
+  assert.deepEqual(storage.readPersistedNotes('screen-quota').map((note) => note.body), ['one']);
 
-test('Save rolls the notes write back when the registry write fails', () => {
-  localStorage.clear();
-  const entry = withFailingWrites(
-    (key) => key === storage.REGISTRY_KEY,
-    () => storage.saveInstanceWithNotes('screen-reg-fail', 'Session Notes', [{ id: 'a', title: 'A', body: 'one' }]),
+  // The registry write failing rolls the notes write back too.
+  const failedRegistry = withFailingWrites(
+    (key) => key === 'gb_dmscreen_registry',
+    () => storage.persistNotes('screen-quota', [{ id: 'a', title: 'A', body: 'three' }]),
   );
-  assert.equal(entry, null);
-  assert.equal(localStorage.getItem(storage.scopeKey('screen-reg-fail')), null);
-  assert.equal(localStorage.getItem(storage.ACTIVE_KEY), null);
-  assert.equal(localStorage.length, 0);
-});
-
-test('Save rolls registry and notes back when the active-id write fails', () => {
-  localStorage.clear();
-  const entry = withFailingWrites(
-    (key) => key === storage.ACTIVE_KEY,
-    () => storage.saveInstanceWithNotes('screen-active-fail', 'Session Notes', [{ id: 'a', title: 'A', body: 'one' }]),
-  );
-  assert.equal(entry, null);
-  assert.deepEqual(storage.readRegistry(), []);
-  assert.equal(localStorage.getItem(storage.scopeKey('screen-active-fail')), null);
-  assert.equal(localStorage.length, 0);
-});
-
-test('a failed re-save keeps the notes already stored for that screen', () => {
-  localStorage.clear();
-  storage.saveInstanceWithNotes('screen-existing', 'Session Notes', [{ id: 'a', title: 'A', body: 'one' }]);
-  const entry = withFailingWrites(
-    (key) => key === storage.REGISTRY_KEY,
-    () => storage.saveInstanceWithNotes('screen-existing', 'Session Notes', [{ id: 'a', title: 'A', body: 'two' }]),
-  );
-  assert.equal(entry, null);
-  assert.deepEqual(storage.readPersistedNotes('screen-existing'), [{ id: 'a', title: 'A', body: 'two', size: { cols: 4, height: 0 } }]);
+  assert.equal(failedRegistry, false);
+  assert.deepEqual(storage.readPersistedNotes('screen-quota').map((note) => note.body), ['one']);
 });
 
 test('persisted notes round-trip their size in the v2 payload', () => {

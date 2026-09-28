@@ -14,8 +14,8 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { readRegistry, readPersistedInstance } from '../../encounterbuilder/state/storage.js';
-import { SECTION_REGISTRY } from '../../../shared/instances/sectionRegistry.js';
+import { readPersistedInstance } from '../../encounterbuilder/state/storage.js';
+import { listInstances, subscribeInstanceData } from '../../../shared/instances/instanceStore.js';
 import { dedupeFightsByEncounter, mergeLibrary } from '../../encounterbuilder/library/library.js';
 import { buildCombat, restoreFight } from '../../encounterbuilder/combat/combat.js';
 import { hydrateEncounterItems } from '../../encounterbuilder/bestiary/monsterUtils.js';
@@ -50,7 +50,7 @@ export default function EncounterImportDialog({
 
   useEffect(() => {
     if (!open) return;
-    const list = readRegistry();
+    const list = listInstances('encounters');
     setInstances(list);
     setInstanceId((current) => (list.some((entry) => entry.id === current) ? current : list[0]?.id || ''));
   }, [open]);
@@ -60,8 +60,8 @@ export default function EncounterImportDialog({
   // Read once and held was the bug: this tab and the builder are two tabs of one
   // browser, and a map left open since before tonight's prep offered whatever
   // the instance held when it was first opened — an encounter saved since was
-  // simply not on the list. The save event covers the builder in this tab, and
-  // `storage` covers it in any other.
+  // simply not on the list. The instance store's feed covers the builder in
+  // this tab, and `storage` covers it in any other.
   useEffect(() => {
     if (!open || !instanceId) {
       if (!instanceId) {
@@ -77,10 +77,10 @@ export default function EncounterImportDialog({
     };
     read();
     window.addEventListener('storage', read);
-    window.addEventListener(ENCOUNTER_SAVED, read);
+    const unsubscribe = subscribeInstanceData('encounters', instanceId, read);
     return () => {
       window.removeEventListener('storage', read);
-      window.removeEventListener(ENCOUNTER_SAVED, read);
+      unsubscribe();
     };
   }, [instanceId, open]);
 
@@ -306,7 +306,6 @@ export default function EncounterImportDialog({
   );
 }
 
-const ENCOUNTER_SAVED = SECTION_REGISTRY.encounters.saveEvent;
 
 // The two options that are not a quest. A quest of its own goes in prefixed,
 // so one actually named "all" or "none" is still a quest and not the option

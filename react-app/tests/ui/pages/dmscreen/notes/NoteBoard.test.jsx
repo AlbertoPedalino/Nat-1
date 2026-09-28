@@ -1,15 +1,17 @@
 import React from 'react';
-import { describe, expect, test } from 'vitest';
+import { beforeEach, describe, expect, test } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DmScreenProvider } from '../../../../../src/pages/dmscreen/state/DmScreenContext.jsx';
 import NoteBoard from '../../../../../src/pages/dmscreen/notes/NoteBoard.jsx';
 
-// An unsaved instance keeps the whole board in memory: these tests exercise the
-// wiring between the search field, the filter, and the cards, not persistence.
+// Each test starts from an empty screen: these tests exercise the wiring
+// between the search field, the filter, and the cards, not persistence.
+beforeEach(() => localStorage.clear());
+
 function renderBoard() {
   render(
-    <DmScreenProvider instanceId="test-screen" instanceSaved={false}>
+    <DmScreenProvider instanceId="test-screen">
       <NoteBoard />
     </DmScreenProvider>,
   );

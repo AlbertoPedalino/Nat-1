@@ -96,39 +96,3 @@ export function createCloudAutoSyncEngine({
     isInFlight: (key) => inFlight.has(key),
   });
 }
-
-export function registerSectionAutoSyncListeners({
-  eventTarget,
-  engine,
-  sections,
-  loadCloudSections,
-}) {
-  const listeners = Object.values(sections).map((section) => {
-    const onSaved = (event) => {
-      const id = event?.detail?.id;
-      if (!id) return;
-      engine.schedule({
-        key: `${section.key}:${id}`,
-        id,
-        push: async () => {
-          const cloudSections = await loadCloudSections();
-          return cloudSections[section.key].pushInstance(id);
-        },
-      });
-    };
-    const onDeleted = (event) => {
-      const id = event?.detail?.id;
-      if (id) engine.cancel(`${section.key}:${id}`);
-    };
-    eventTarget.addEventListener(section.saveEvent, onSaved);
-    eventTarget.addEventListener(section.deleteEvent, onDeleted);
-    return { section, onSaved, onDeleted };
-  });
-
-  return () => {
-    for (const { section, onSaved, onDeleted } of listeners) {
-      eventTarget.removeEventListener(section.saveEvent, onSaved);
-      eventTarget.removeEventListener(section.deleteEvent, onDeleted);
-    }
-  };
-}

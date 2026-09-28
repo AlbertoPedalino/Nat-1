@@ -34,9 +34,17 @@ vi.mock('../../../../../src/shared/cloud/api/hexcrawl.js', () => ({
 vi.mock('../../../../../src/shared/cloud/api/campaignTools.js', () => ({
   readCampaignToolLinks: mocks.readCampaignToolLinks,
 }));
-vi.mock('../../../../../src/shared/cloud/sections/cloudSections.js', () => ({
-  getCloudSection: () => ({ listInstances: mocks.listBuilders }),
-}));
+vi.mock('../../../../../src/shared/instances/instanceSync.js', async (importOriginal) => {
+  const actual = await importOriginal();
+  const { listInstances } = await import('../../../../../src/shared/instances/instanceStore.js');
+  return {
+    ...actual,
+    listToolInstances: async (sectionKey, { includeCloud }) => ({
+      rows: actual.mergeInstanceRows(sectionKey, includeCloud ? await mocks.listBuilders() : [], listInstances(sectionKey)),
+      error: null,
+    }),
+  };
+});
 
 const OGRE = { name: 'Ogre', source: 'MM', cr: '2', hp: { average: 59 } };
 const EXISTING = { instanceId: 'enc_a', fightId: 900, encounterId: 500, combatants: [] };

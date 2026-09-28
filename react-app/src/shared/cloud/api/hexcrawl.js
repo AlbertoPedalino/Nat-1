@@ -1,6 +1,7 @@
 import { requireClient } from '../supabaseClient.js';
 import { toHexCell, toHexCellPatch } from '../../hexcrawl/hexCell.js';
-import { STORAGE_KEYS, sanitizeBoardId, scopeKey } from '../../../pages/gmboard/state/storage.js';
+import { STORAGE_KEYS, scopeKey } from '../../../pages/gmboard/state/storage.js';
+import { sanitizeInstanceId } from '../../instances/sectionRegistry.js';
 import { createDefaultCoreState } from '../../../pages/gmboard/state/defaultState.js';
 import { createDefaultTables } from '../../../pages/gmboard/tables/defaultTables.js';
 
@@ -207,11 +208,11 @@ export async function linkHexcrawlBoardCampaign(boardId, campaignId) {
 }
 
 // The board a campaign takes its tables from, read straight rather than pulled:
-// `pullInstance` restores the blob into this browser's localStorage and makes it
+// a pull (instanceSync.pullInstance) restores the blob into this browser's localStorage and makes it
 // the active board, which is right for "open my board here" and wrong for "the
 // map needs the tables". Reading is all the map does.
 export async function readHexcrawlBoard(boardId) {
-  const id = sanitizeBoardId(boardId);
+  const id = sanitizeInstanceId(boardId);
   if (!id) return null;
   const supabase = requireClient();
   const { data, error } = await supabase
@@ -237,7 +238,7 @@ export async function readHexcrawlBoard(boardId) {
 }
 
 export async function readHexcrawlBoardVersion(boardId) {
-  const id = sanitizeBoardId(boardId);
+  const id = sanitizeInstanceId(boardId);
   if (!id) return 0;
   const supabase = requireClient();
   const { data, error } = await supabase

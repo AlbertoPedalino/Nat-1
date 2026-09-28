@@ -27,13 +27,13 @@ const WRITE_DEBOUNCE_MS = 500;
 const DELETE_ATTEMPTS = 3;
 
 export function useCloudFights({
-  instanceId, instanceSaved, fights, library, activeFightId, dispatch, isVitalsBusy,
+  instanceId, fights, library, activeFightId, dispatch, isVitalsBusy,
 }) {
   const isVitalsBusyRef = useRef(isVitalsBusy);
   isVitalsBusyRef.current = isVitalsBusy;
   const { cloudEnabled, status } = useAuth();
   const { notify } = useToast();
-  const canSync = Boolean(cloudEnabled && status === 'authed' && instanceId && instanceSaved);
+  const canSync = Boolean(cloudEnabled && status === 'authed' && instanceId);
 
   const heldRef = useRef({ fights, library, activeFightId });
   heldRef.current = { fights, library, activeFightId };

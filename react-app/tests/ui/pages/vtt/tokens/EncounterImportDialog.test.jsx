@@ -3,11 +3,17 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, expect, test, vi } from 'vitest';
 import EncounterImportDialog from '../../../../../src/pages/vtt/tokens/EncounterImportDialog.jsx';
 
-const mocks = vi.hoisted(() => ({ persisted: null }));
+const mocks = vi.hoisted(() => ({ persisted: null, listeners: new Set() }));
 
 vi.mock('../../../../../src/pages/encounterbuilder/state/storage.js', () => ({
-  readRegistry: () => [{ id: 'enc_a', name: 'Session 4' }],
   readPersistedInstance: () => mocks.persisted,
+}));
+vi.mock('../../../../../src/shared/instances/instanceStore.js', () => ({
+  listInstances: () => [{ id: 'enc_a', name: 'Session 4' }],
+  subscribeInstanceData: (_sectionKey, _id, listener) => {
+    mocks.listeners.add(listener);
+    return () => mocks.listeners.delete(listener);
+  },
 }));
 
 // The bestiary and the snapshot restore are someone else's tests: what is under
@@ -171,7 +177,8 @@ test('an encounter saved while the map was open turns up without a reload', asyn
       { id: 'e4', name: 'Owlbear', quest: 'The Long Winter', updatedAt: 50, encounter: [{ name: 'Owlbear', qty: 1 }] },
     ],
   };
-  act(() => { window.dispatchEvent(new Event('gb:encounter-saved')); });
+  // The builder in this tab saved: the instance store announces it.
+  act(() => { for (const listener of mocks.listeners) listener({ sectionKey: 'encounters', id: 'enc_a', kind: 'data' }); });
 
   const options = within(await openEncounterMenu(user)).getAllByRole('option');
   expect(options.map((option) => option.textContent)).toContain('Owlbear');

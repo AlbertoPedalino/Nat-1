@@ -3,7 +3,7 @@ import { Box, Button, Typography } from '@mui/material';
 import { Plus } from 'lucide-react';
 import AppTopBar from '../../app/navigation/AppTopBar.jsx';
 import NotFoundPage from '../notfound/NotFoundPage.jsx';
-import { createSectionInstance } from '../../shared/instances/sectionInstances.js';
+import { createInstance } from '../../shared/instances/instanceStore.js';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
 import { resolveTool } from './logic/tools.js';
 import CharacterPicker from './CharacterPicker.jsx';
@@ -21,7 +21,7 @@ export default function InstancePickerPage() {
   // Section tools save the new instance here, then open it by id: the tool page
   // never shows an unsaved draft. Characters keep their own builder flow.
   const handleNew = () => {
-    const entry = createSectionInstance(meta.sectionKey);
+    const entry = createInstance(meta.sectionKey);
     if (!entry) {
       notify('error', `${meta.label} could not be saved on this device.`);
       return;

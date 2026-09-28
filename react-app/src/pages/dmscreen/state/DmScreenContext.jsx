@@ -6,16 +6,9 @@ import { createInitialState, dmScreenReducer } from './reducer.js';
 
 const DmScreenContext = createContext(null);
 
-export function DmScreenProvider({ instanceId, instanceSaved, linkGroupId, onInstanceSaved, children }) {
+export function DmScreenProvider({ instanceId, children }) {
   const [state, dispatch] = useReducer(dmScreenReducer, undefined, createInitialState);
-  const { saveInstance } = useDmScreenPersistence({
-    instanceId,
-    instanceSaved,
-    linkGroupId,
-    notes: state.notes,
-    dispatch,
-    onSaved: onInstanceSaved,
-  });
+  useDmScreenPersistence({ instanceId, notes: state.notes, dispatch });
 
   const addNewNote = useCallback(() => {
     const note = createNote(makeNoteId());
@@ -27,10 +20,8 @@ export function DmScreenProvider({ instanceId, instanceSaved, linkGroupId, onIns
     state,
     dispatch,
     instanceId,
-    instanceSaved,
-    saveInstance,
     addNewNote,
-  }), [state, instanceId, instanceSaved, saveInstance, addNewNote]);
+  }), [state, instanceId, addNewNote]);
 
   return <DmScreenContext.Provider value={value}>{children}</DmScreenContext.Provider>;
 }

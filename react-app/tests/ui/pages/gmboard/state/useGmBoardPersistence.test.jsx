@@ -7,8 +7,8 @@ import {
   persistBoardState,
   persistBoardTables,
   readPersistedBoard,
-  registerBoardInstance,
 } from '../../../../../src/pages/gmboard/state/storage.js';
+import { createInstance, subscribeInstanceData } from '../../../../../src/shared/instances/instanceStore.js';
 
 const campaignClock = vi.hoisted(() => ({
   active: false,
@@ -56,18 +56,18 @@ beforeEach(() => {
   });
 });
 
-test('table edits autosave locally and announce cloud sync', async () => {
+test('table edits save locally and notify the instance store feed', async () => {
   const tables = createDefaultTables();
   tables.weather[0] = { ...tables.weather[0], sole: 3 };
-  registerBoardInstance('table-autosave', 'Table autosave');
+  createInstance('gmboard', { id: 'table-autosave', name: 'Table autosave' });
   persistBoardState('table-autosave', readPersistedBoard('missing').state);
   persistBoardTables('table-autosave', tables);
   persistBoardResults('table-autosave', readPersistedBoard('missing').results);
 
   const onSaved = vi.fn();
-  window.addEventListener('gb:board-saved', onSaved);
+  const unsubscribe = subscribeInstanceData('gmboard', 'table-autosave', onSaved);
   render(
-    <GmBoardProvider instanceId="table-autosave" instanceSaved>
+    <GmBoardProvider instanceId="table-autosave">
       <Probe />
     </GmBoardProvider>,
   );
@@ -85,18 +85,17 @@ test('table edits autosave locally and announce cloud sync', async () => {
   }));
 
   await waitFor(() => expect(readPersistedBoard('table-autosave').tables.weather[0].sole).toBe(4));
-  expect(onSaved).toHaveBeenCalledWith(expect.objectContaining({
-    detail: { id: 'table-autosave' },
-  }));
-  window.removeEventListener('gb:board-saved', onSaved);
+  // One local save of the edit, which is what the sync engine picks up.
+  expect(onSaved).toHaveBeenCalledWith(expect.objectContaining({ id: 'table-autosave', kind: 'data' }));
+  unsubscribe();
 });
 
 test('date and time persist locally on a standalone board', async () => {
-  registerBoardInstance('clock-local', 'Local clock');
+  createInstance('gmboard', { id: 'clock-local', name: 'Local clock' });
   persistBoardState('clock-local', readPersistedBoard('missing').state);
 
   render(
-    <GmBoardProvider instanceId="clock-local" instanceSaved>
+    <GmBoardProvider instanceId="clock-local">
       <Probe />
     </GmBoardProvider>,
   );
@@ -116,7 +115,7 @@ test('date and time persist locally on a standalone board', async () => {
 test('date and time also update the shared clock of a linked campaign', async () => {
   campaignClock.active = true;
   campaignClock.readLink.mockResolvedValue({ id: 'campaign-one', name: 'Campaign One' });
-  registerBoardInstance('clock-linked', 'Linked clock');
+  createInstance('gmboard', { id: 'clock-linked', name: 'Linked clock' });
   persistBoardState('clock-linked', {
     ...readPersistedBoard('missing').state,
     campaignId: 'stale-local-campaign',
@@ -124,7 +123,7 @@ test('date and time also update the shared clock of a linked campaign', async ()
   });
 
   render(
-    <GmBoardProvider instanceId="clock-linked" instanceSaved>
+    <GmBoardProvider instanceId="clock-linked">
       <Probe />
     </GmBoardProvider>,
   );
@@ -176,7 +175,7 @@ test('travel selectors publish only their changed field and receive map selectio
     mountSpeed: 2, season: 'Summer', updatedAt: 1,
   };
   const view = () => (
-    <GmBoardProvider instanceId="travel-linked" instanceSaved={false}><Probe /></GmBoardProvider>
+    <GmBoardProvider instanceId="travel-linked"><Probe /></GmBoardProvider>
   );
   const { rerender } = render(view());
   await waitFor(() => expect(board.state).toMatchObject({

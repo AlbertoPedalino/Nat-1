@@ -1,11 +1,10 @@
-import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, Stack, Tab, Tabs, Typography } from '@mui/material';
 import { Map, Castle, ScrollText, Table, BookOpen } from 'lucide-react';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
 import LinkedToolsMenu from '../../app/navigation/LinkedToolsMenu.jsx';
-import { useSeedInstance } from '../../shared/instances/useSeedInstance.js';
-import { resolveInstance } from './state/storage.js';
+import { useToolInstance } from '../../shared/instances/useToolInstance.js';
+import CloudInstanceLoading from '../../shared/instances/CloudInstanceLoading.jsx';
+import InstanceConflictBanner from '../../shared/instances/InstanceConflictBanner.jsx';
 import { GmBoardProvider, useGmBoard } from './state/GmBoardContext.jsx';
 import HexcrawlView from './hexcrawl/HexcrawlView.jsx';
 import DungeonView from './dungeon/DungeonView.jsx';
@@ -22,46 +21,30 @@ const TABS = [
 ];
 
 export default function GmBoardPage() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [instance, setInstance] = useState(() => resolveInstance(location.search));
-
-  useEffect(() => {
-    const next = resolveInstance(location.search);
-    setInstance(next);
-    if (next.replaceSearch) {
-      navigate({ pathname: location.pathname, search: next.replaceSearch }, { replace: true });
-    }
-  }, [location.pathname, location.search, navigate]);
+  const tool = useToolInstance('gmboard');
+  if (!tool.ready) return <CloudInstanceLoading label="GM Board" />;
 
   return (
-    <GmBoardProvider
-      key={instance.id}
-      instanceId={instance.id}
-      instanceSaved={instance.saved}
-      linkGroupId={instance.linkGroupId}
-      onInstanceSaved={() => setInstance((prev) => ({ ...prev, saved: true }))}
-    >
-      <GmBoardShell instance={instance} />
+    <GmBoardProvider key={`${tool.id}:${tool.revision}`} instanceId={tool.id}>
+      <GmBoardShell tool={tool} />
     </GmBoardProvider>
   );
 }
 
-function GmBoardShell({ instance }) {
-  const { state, dispatch, saveInstance, instanceSaved } = useGmBoard();
-
-  useSeedInstance('gmboard', { instanceId: instance.id, instanceSaved, saveInstance });
+function GmBoardShell({ tool }) {
+  const { state, dispatch } = useGmBoard();
 
   return (
     <Box sx={pageSx}>
       <AppTopBar home backTo="/library/gmboard" backLabel="GM Boards">
-        <LinkedToolsMenu sectionKey="gmboard" instanceId={instance.id} instanceSaved={instanceSaved} initialLinkGroupId={instance.linkGroupId} />
+        <LinkedToolsMenu sectionKey="gmboard" instanceId={tool.id} initialLinkGroupId={tool.linkGroupId} />
       </AppTopBar>
       <Box sx={contentSx}>
         <Stack spacing={2}>
+          <InstanceConflictBanner tool={tool} />
           <Box>
             <Typography variant="h1">GM Board</Typography>
-            <Typography variant="body2" color="text.secondary">Instance {instance.id}</Typography>
+            <Typography variant="body2" color="text.secondary">Instance {tool.id}</Typography>
           </Box>
           <Tabs
             value={state.tab}

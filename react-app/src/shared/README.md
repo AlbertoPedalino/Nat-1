@@ -12,8 +12,8 @@ See the [source map](../README.md) for the page feature folders.
 | `content/` | D&D entry rendering, 5etools links, source filtering, text search |
 | `dungeon/` | Dungeon generation helpers, room markers, linked encounters |
 | `hexcrawl/` | Hex data and campaign clock |
-| `instances/` | Tool instance identity, linked groups, registry definitions, initial creation |
-| `storage/` | Generic localStorage access, registry persistence, scoped payloads |
+| `instances/` | GM Board / Encounter Builder / DM Screen instances: identity, local store, sync engine, page hook, links; see below |
+| `storage/` | Generic localStorage helpers and character registry metadata |
 | `ui/` | Reusable presentation components/hooks, toasts, colors, route titles |
 | `vtt/` | Battle-map geometry, fog, scenes, dice physics, sheets, and realtime state |
 
@@ -40,9 +40,23 @@ belongs in `content/`.
 | --- | --- |
 | `api/` | Resource operations for campaigns, characters, art, fights, dungeons, hexcrawls, VTT |
 | `auth/` | Auth provider, sign-in dialog, account/cloud menu |
-| `sections/` | Generic tool-section adapters and operations |
 | `sync/` | Autosync engine, sync exclusions/ownership, realtime character and roll hooks |
 | `supabaseClient.js` | Shared Supabase client configuration |
+
+## Instances
+
+One local-first model for every tool instance. Tools only add a payload
+adapter (`pages/<tool>/state/storage.js`) that writes through `saveLocal`.
+
+| File | Responsibility |
+| --- | --- |
+| `sectionRegistry.js` | Tool identity: routes, URL param, key prefixes, tables, id helpers |
+| `instanceStore.js` | Local repository: registry entries (cloud state, dirty flags), payload writes with no-op detection, legacy migration, change feed |
+| `instanceCloud.js` | The only Supabase path: INSERT, conditional UPDATE by version, metadata update, fetch, list, delete |
+| `instanceSync.js` | Sync engine: open, sync (insert/update/conflict), pull, refresh, conflict resolution, delete, listings |
+| `useToolInstance.js` | Page hook: URL resolution, cloud-first open of unknown ids, revision, conflict state |
+| `instanceLinks.js`, `linkGroupId.js` | Linked tool groups |
+| `InstanceConflictBanner.jsx`, `CloudInstanceLoading.jsx` | Conflict choice and open-wait UI |
 
 ## VTT
 

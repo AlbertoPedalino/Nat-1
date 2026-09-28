@@ -3,7 +3,8 @@ import { ThemeProvider } from '@mui/material';
 import { beforeEach, vi } from 'vitest';
 import { theme } from '../../../../../src/app/theme.js';
 import SceneEditor from '../../../../../src/pages/vtt/scene/SceneEditor.jsx';
-import { persistFights, registerEncounterInstance } from '../../../../../src/pages/encounterbuilder/state/storage.js';
+import { persistFights } from '../../../../../src/pages/encounterbuilder/state/storage.js';
+import { createInstance } from '../../../../../src/shared/instances/instanceStore.js';
 import { healthCommandRoute } from '../../../../../src/shared/cloud/api/healthCommandRoute.js';
 
 const m = vi.hoisted(() => ({
@@ -199,7 +200,7 @@ test('a piece whose fight has no cloud row keeps its HP in the GM-only source', 
 test('a stale local fight cache never writes enemy vitals, on mount or on later saves', () => {
   m.realBridge.current = true;
   const cache = (hpCurrent) => {
-    registerEncounterInstance('enc_a', 'enc_a');
+    createInstance('encounters', { id: 'enc_a' });
     persistFights('enc_a', 77, [{ id: 77, fight: { combatants: [{
       id: 0, type: 'monster', hpCurrent, hpMax: 59, activeConditions: ['prone'], activeEffects: [],
     }] } }]);

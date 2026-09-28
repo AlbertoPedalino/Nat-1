@@ -13,9 +13,9 @@
 import { buildCombat, restoreFight, snapshotFight } from '../combat/combat.js';
 import { importableCombatants } from '../../../shared/vtt/tokens/encounterImport.js';
 import {
-  isKnownEncounterInstance, makeSavedEncounter, persistFights, persistLibrary,
-  readPersistedInstance,
+  makeSavedEncounter, persistFights, persistLibrary, readPersistedInstance,
 } from '../state/storage.js';
+import { getInstance } from '../../../shared/instances/instanceStore.js';
 import { hydrateEncounterItems } from '../bestiary/monsterUtils.js';
 
 // The builder's own shape for a line of an encounter: a creature and how many.
@@ -206,7 +206,7 @@ export function launchLibraryEncounter(instanceId, encounterId, { monsters = [],
 //   'unknown'  — this browser has never held that instance, so it cannot say.
 export function localFightPresence(instanceId, fightId) {
   if (!instanceId || !fightId) return 'missing';
-  if (!isKnownEncounterInstance(instanceId)) return 'unknown';
+  if (!getInstance('encounters', instanceId)) return 'unknown';
   const items = readPersistedInstance(instanceId, [])?.fightsData?.items || [];
   return items.some((fight) => String(fight.id) === String(fightId)) ? 'present' : 'missing';
 }

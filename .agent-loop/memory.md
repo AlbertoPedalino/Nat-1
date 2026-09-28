@@ -30,8 +30,8 @@ GM-Board is React 19 + Vite + MUI 9 + Supabase SPA under `react-app/`. D&D data 
 - `shared/character/`: `combat`, `dice`, `forms`, `inventory`, `profile`, `progression`, `resources`, `spells`. Domain components stay beside their rules.
 - `shared/content/`: entry rendering, 5etools links, source filtering/priority, text search. These are shared by multiple tools, not specific to character sheets.
 - `shared/ui/`: generic components/hooks, toast provider, entity colors, route titles.
-- `shared/instances/`: section identity, linked tool groups, instance creation. `shared/storage/`: generic localStorage, registry persistence, scoped payloads.
-- `shared/cloud/`: `api` for resource operations, `auth` for authentication/account UI, `sections` for generic tool adapters, `sync` for autosync/realtime. The common `supabaseClient.js` stays at the cloud root.
+- `shared/instances/`: the tool-instance layer shared by GM Board, Encounter Builder and DM Screen (see Tool Instances). `shared/storage/`: generic localStorage helpers and character registry metadata.
+- `shared/cloud/`: `api` for resource operations, `auth` for authentication/account UI, `sync` for autosync/realtime. The common `supabaseClient.js` stays at the cloud root.
 - `shared/vtt/`: `map`, `scene`, `session`, `tokens`, `sheets`, `rolls`; palette stays in `colors.js`. `shared/campaign`, `dungeon`, and `hexcrawl` retain their compact domain structure.
 - Large pages group related components, hooks, styles, and logic together by feature. VTT: `scene`, `map`, `tokens`, `objects`, `atmosphere/shaders`, `sheets`, `rolls`, `session`, `dungeon`, `hexcrawl`. Character sheet: `actions`, `spells`, `inventory`, `forms`, `resources`, `stats`, `proficiency`, `details`, `layout`, `state`.
 - Builder, encounter builder, GM Board, and DM Screen follow the same feature grouping; see the source guide for their folder maps. Small pages retain their compact layout. Existing cross-page dependencies and adapter discovery remain unchanged; deleted charbuilder barrels must not be recreated.
@@ -47,25 +47,20 @@ GM-Board is React 19 + Vite + MUI 9 + Supabase SPA under `react-app/`. D&D data 
 - Home is eager; tool pages are route-lazy.
 - `AppTopBar` always renders `CloudMenu`.
 - GM Board, Encounter Builder, and DM Screen top bars include a back button to their instance picker and `LinkedToolsMenu`.
-- `SaveInstanceButton` accepts `{ saved, onClick, buttonSx }`.
 
 ## Home and Library
 
 - Home is launcher plus `Clear App Data`.
 - Character Sheet, GM Board, Encounter Builder, and DM Screen cards open `/library/<slug>`.
 - Character Builder and Campaigns open directly.
-- `InstancePickerPage.jsx` resolves `characters`, `gmboard`, `encounters`, and `dmscreen`.
-- `logic/tools.js` maps slug to registry/route/icon/color metadata; prototype keys resolve `null`.
-- Characters use `CharacterPicker`; other tools use `SectionPicker`.
-- `logic/instanceRows.js` owns pure merge, fallback loading, section-delete planning, and freshness logic.
-- Cloud wins merge collisions; rows retain `localUpdatedAt`.
-- Pull only when cloud `updated_at` is strictly newer. Equal, local-newer, invalid, or missing metadata means no pull.
-- Every authenticated section open fetches cloud metadata, including local-origin fallback rows.
-- Failed metadata lookup still opens an existing local copy.
+- `InstancePickerPage.jsx` resolves `characters`, `gmboard`, `encounters`, and `dmscreen`; New creates a local instance (`instanceStore.createInstance`) and opens it by id.
+- `logic/tools.js` maps slug to route/icon/color metadata (tools from `sectionRegistry`); prototype keys resolve `null`.
+- Characters use `CharacterPicker` (`logic/instanceRows.js`, `characterRows.js`: character merge, freshness, fallback loading); tools use `SectionPicker`.
+- `SectionPicker` lists `instanceSync.listToolInstances` rows (local + cloud; a name/link changed here and not yet synced wins). Opening only navigates: the tool page opens the instance exactly as for a link or bookmark.
 - Cloud-list failure preserves the full local list with a non-blocking notice.
 - Rows carry accessible `Cloud` or `Local` badges.
-- Local-only delete removes local only. Cloud-row delete confirms once and removes cloud plus local.
-- Rename is available for local and cloud rows; cloud rename is owner-scoped and mirrors to a local copy when present.
+- Local-only delete removes local only. Cloud-row delete confirms once and removes cloud plus local (`instanceSync.deleteInstance`, which waits for an in-flight sync).
+- Rename: a local copy is renamed locally (name dirty, synced by the engine); a cloud-only row is renamed in the cloud.
 - `InstanceRow` lacks a wrapper `aria-label`, preserving child accessible text.
 - Route-param picker reuse may briefly retain prior rows until async refresh completes.
 
@@ -75,22 +70,16 @@ GM-Board is React 19 + Vite + MUI 9 + Supabase SPA under `react-app/`. D&D data 
 - Local registries store `linkGroupId`; Supabase rows store `link_group_id` with `(owner, link_group_id)` indexes.
 - `app/navigation/LinkedToolsMenu.jsx` lists linked instances, links existing saves, creates linked tools, merges groups after confirmation, and unlinks members.
 - Groups can contain multiple instances of any supported tool type.
-- Opening a linked instance uses a React Router link with `target="_blank"` and `noopener noreferrer`.
-- Link management is enabled for a locally saved instance or an authenticated cloud-only instance; unsaved drafts remain disabled.
-- The ordinary picker remains local-first: opening a cloud row pulls only that selected instance into localStorage before navigation.
-- New linked-instance routes carry `linkGroup` until first save; later saves preserve registry metadata.
+- Opening a linked instance uses a React Router link with `target="_blank"` and `noopener noreferrer`; the new tab opens it through `useToolInstance` (cloud-first for an id unknown there).
+- Link management is always available on an open tool page (its instance exists locally). A local copy is relinked locally (link dirty) and synced with `ensureInstanceInCloud` before a campaign may reference it; a cloud-only row is relinked with `linkCloudInstance`.
+- `?<param>=new&linkGroup=<id>` creates the instance with that group.
 - Re-run `supabase/02_sections.sql` on existing projects to add `link_group_id` and its indexes.
 
 ## Registries
 
-- Registry metadata and generic rename/delete: `shared/storage/localStorageRegistries.js`.
-- Generic deletion removes scoped keys, clears matching active id, and emits section delete event.
-- Generic rename updates `updatedAt` and emits section save event.
-- `gb_char_registry` delegates to character store.
-- Shared `readRegistry` is uncapped unless `{ limit }` is supplied.
-- Section-native registries historically cap at 20.
-- `shared/storage/scopedStoragePayload.js` snapshots/restores raw scoped strings and updates registry metadata.
-- `shared/instances/sectionRegistry.js` is the lightweight source for section identity, routes, prefixes, table names, and save/delete event names.
+- Tool instances: one registry per tool (`gb_board_registry`, `gb_encounter_registry`, `gb_dmscreen_registry`) owned by `shared/instances/instanceStore.js`; see Tool Instances.
+- `shared/storage/localStorageRegistries.js` is character-only (`gb_char_registry` metadata, read, rename; delegates to the character store).
+- `shared/instances/sectionRegistry.js` is the lightweight source for tool identity: routes, URL param, key prefixes, registry/active keys, table names, default names; plus `sanitizeInstanceId` and `makeInstanceId`.
 
 ## GM Board
 
@@ -98,35 +87,30 @@ GM-Board is React 19 + Vite + MUI 9 + Supabase SPA under `react-app/`. D&D data 
 - State: `state/GmBoardContext.jsx`, `state/reducer.js`.
 - Persistence: `state/useGmBoardPersistence.js`, `state/storage.js`.
 - Keys: `gb_board_registry`, `gb_active_board_id`, `gb:board:<id>:state:v1`, `:tables:v1`, `:results:v1`.
-- Unsaved boards write nothing before Save.
-- Core state/results autosave; tables manual-save.
+- Core state, tables and results autosave through `persistBoard` (one local write).
 - Legacy unscoped migration applies only to `default`.
-- Events: `gb:board-saved`, `gb:board-deleted`.
 - Tests: `tests/logic/pages/gmboard/logic/gmboard.logic.test.js`.
 
 ## DM Screen
 
 - Route: `/dm-screen?screen=<id>|new`.
-- `screen=new` writes nothing before Save.
 - Keys: `gb_dmscreen_registry`, `gb_active_dmscreen_id`, `gb:dmscreen:<id>:notes:v2`.
 - V1 notes remain readable and upgrade on save.
 - Notes preserve `size: { cols, height }`; height 0 means auto.
 - Markdown uses `react-markdown` + `remark-gfm`; no raw HTML.
-- Save is atomic via `saveInstanceWithNotes`.
-- Events: `gb:dmscreen-saved`, `gb:dmscreen-deleted`.
+- `persistNotes` goes through `saveLocal` (all-or-nothing; returns false on a failed write).
 - Tests cover notes, cards, board behavior, and drag reorder.
 
 ## Encounter Builder
 
 - Root/entry: `src/pages/encounterbuilder/EncounterBuilderPage.jsx`; state wiring: `state/EncounterBuilderContext.jsx` and `state/reducer.js`; persistence: `state/useEncounterPersistence.js` and `state/storage.js`.
 - Route: `/encounter-builder?enc=<id>|new`.
-- The library entry is `/library/encounters`; canonical existing/new links come from `shared/instances/sectionRegistry.js`. Optional `linkGroup` links instances. `resolveInstance` normalizes `enc=new` to a generated id or restores a known active id when `enc` is absent; the provider remounts on instance-id changes. `useSeedInstance` saves an unsaved or empty instance when its page opens.
+- The library entry is `/library/encounters`; canonical existing/new links come from `shared/instances/sectionRegistry.js`. The page is `useToolInstance('encounters')` and a provider keyed `id:revision`.
 - Keys: `gb_encounter_registry`, `gb_active_encounter_id`; scoped `party`, `draft`, `library`, `fights`, `fumbles`, `negotiation` v1 keys.
 - Difficulty uses 2024 RAW XP without multipliers.
 - Missing-token fallback: XMM Skeleton.
 - Conditions sync to sheets; encounter-local effects do not.
-- Events: `gb:encounter-saved`, `gb:encounter-deleted`.
-- `useEncounterPersistence` batches all six local payload writes before announcing a save, so listeners never read a half-written library/fight set. `sync/useExternalFightSync.js` merges externally created fights/library entries and refreshes the active fight from same-tab save events or cross-tab storage events.
+- `persistEncounter` writes all six keys in one `saveLocal`, so listeners never read a half-written library/fight set. `sync/useExternalFightSync.js`, the battle map bridge and the import dialog follow local saves through `instanceStore.subscribeInstanceData` (this tab) and `storage` events (other tabs).
 - Cloud fights: `sync/useCloudFights.js` → `shared/cloud/api/encounterFights.js` → `encounter_fights` rows; `library/fightRecord.js` defines row/entry conversion and embedded library-card recovery. These per-fight rows complement the instance's local payload and section cloud sync.
 - Tests: `tests/logic/pages/encounterbuilder/logic/encounterbuilder.logic.test.js` plus component tests under `tests/ui/pages/encounterbuilder/`.
 
@@ -203,25 +187,25 @@ GM-Board is React 19 + Vite + MUI 9 + Supabase SPA under `react-app/`. D&D data 
 - `boards`, `encounters`, and `dm_screens` match the character-row shape.
 - All three section tables use owner-only RLS with no global-GM escape.
 - `cloudCharacters.js` remains the character cloud path.
-- `sectionDescriptors.js` binds section identity to storage sanitizer/read/write adapters.
-- `cloudSectionCore.js` provides injectable push/pull/meta/list/delete operations.
-- Section cloud APIs also provide owner-scoped rename and linked-group updates.
-- `cloudSections.js` binds descriptors to Supabase.
 - Section payloads store every scoped localStorage key as an unchanged raw string.
-- `CloudAutoSync` shares one debounced engine across characters and sections.
-- Entry eagerly imports only the lightweight section registry; cloud/storage adapters load dynamically on debounced section push.
-- Production chunks keep GM Board defaults and Encounter/DM Screen logic out of the entry bundle.
-- Permission/RLS errors block the typed section/id for the browser session.
-- Local delete events cancel queued pushes; cloud deletion remains an explicit picker action.
-- Pull writes payload and registry without emitting a save event, preventing sync echo.
-- Unsaved `new` or generated-but-unregistered instances produce no cloud write.
+- `CloudAutoSync` runs the character autosync scheduler (`cloudAutoSyncEngine.js`) and wires the tool-instance sync engine (`configureInstanceSync` with a lazily loaded Supabase client; `setInstanceSyncActive` from auth; `flushInstances` on `online`).
+
+## Tool Instances
+
+GM Board, Encounter Builder and DM Screen share one local-first model in `src/shared/instances/`; a tool only provides its payload adapter (`pages/<tool>/state/storage.js`: keys, (de)serialization, tool-specific no-op checks such as the Encounter draft's `updatedAt`).
+
+- `instanceStore.js` (local repository): registry entries `{ id, name, updatedAt, linkGroupId, cloud: local-only|linked|conflict, version, conflict, dirty: { data, name, linkGroup }, rev }`. `saveLocal(section, id, values)` is the only write path: unchanged values are skipped (no dirty mark, no notification), a write for an unlisted id registers it, failures roll back. `listInstances` normalizes legacy entries (`pendingInsert` -> local-only, `namePending`/`linkGroupPending` -> dirty) and re-lists ids whose data exists without an entry (local-only). No cap. In-process feed: `subscribeInstances` / `subscribeInstanceData` (replaces the old `gb:*-saved/deleted` window events).
+- `instanceCloud.js`: the only Supabase path (`boards`, `encounters`, `dm_screens`): `fetchMeta`, `fetchRow`, `listRows`, `insertRow` (INSERT only; 23505 -> duplicate), `updateData` (conditional on `updated_at`, the data version), `updateMeta` (name/link, version untouched), `deleteRow`. No upserts. No SQL change: `updated_at` is client-set and used as the version.
+- `instanceSync.js` (engine): local-only -> INSERT, duplicate -> conflict `exists`; linked + data dirty -> UPDATE at our version, mismatch -> conflict `version` (another tab's newer version -> retry; row gone -> re-INSERT); name/link only -> metadata update; legacy linked without version -> adopt the row if its data is identical, else conflict `unverified`. Settling adopts the cloud name/link unless dirty; edits made during a sync stay dirty (`rev`). Conflicts write nothing until `resolveConflict('cloud' | 'local')`. Also `openInstance`, `refreshInstance` (fast-forward a clean linked copy), `pullInstance` (keeps dirty name/link), `renameCloudInstance`/`linkCloudInstance` (cloud-only rows), `ensureInstanceInCloud`, `deleteInstance`, `listToolInstances`, `mergeInstanceRows`, `flushInstances`.
+- `useToolInstance(sectionKey)` (the page hook): resolves the URL (`new` mints, no param reopens the active instance), opens known local copies at once (linked ones refreshed in the background), makes unknown ids wait for auth then asks the cloud (pull / create / offline stand-in that can only INSERT), exposes `ready`, `revision` (provider key; bumped by pulls), `conflict`, `resolveConflict`. `InstanceConflictBanner` shows the choice; `CloudInstanceLoading` the wait.
+- Persistence hooks hydrate once (a `hydrated` state flag makes the first write happen from the post-hydration render) and then save every change; a new instance's first save is its seed.
 
 ## Tests
 
-- Section cloud: `tests/logic/shared/cloud/sections/cloudSections.test.js`.
+- Tool instances: behaviour over a fake Supabase for all three tools in `tests/logic/shared/instances/instanceSync.test.js`; real pages end to end in `tests/ui/shared/instances/toolInstancePages.test.jsx`.
 - Autosync: `tests/logic/shared/cloud/sync/cloudAutoSyncEngine.test.js`.
 - Picker/freshness/merge: `tests/logic/pages/library/logic/library.logic.test.js`.
-- Authenticated local-origin open regression: `tests/ui/pages/library/SectionPicker.test.jsx`.
+- Section picker: `tests/ui/pages/library/SectionPicker.test.jsx`.
 - Linked tools: `tests/logic/shared/instances/instanceLinks.test.js` and `tests/ui/app/navigation/LinkedToolsMenu.test.jsx`.
 - Route titles: `tests/logic/shared/ui/pageTitle.test.js`.
 - SQL assertions: `tests/logic/shared/cloud/sections/sectionsSql.test.js` and `tests/logic/shared/cloud/api/`.
