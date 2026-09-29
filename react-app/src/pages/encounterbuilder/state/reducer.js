@@ -136,6 +136,12 @@ function reduceEncounterState(state, action) {
       return {
         ...state,
         library: [action.entry, ...state.library.filter((entry) => entry.id !== action.entry.id)],
+        // Saving over an encounter is the GM choosing that version: a fight of the
+        // old one is superseded and goes, row and all (useCloudFights deletes what
+        // leaves this list). The fight being run is left to finish.
+        fights: state.fights.filter((fight) => (
+          fight.encounterId !== action.entry.id || fight.id === state.activeFightId
+        )),
         currentEncounterId: action.entry.id,
         encounterName: action.entry.name,
         encounterQuest: action.entry.quest || null,

@@ -21,10 +21,15 @@ export function isFightResumable(library, fight) {
 }
 
 // Each library encounter is one card, optionally carrying its in-progress fight.
+// A fight launched before the card was last saved is not that fight: it holds
+// the creatures of the old version (isFightSuperseded, below).
 export function mergeLibrary(encounters, fights) {
   return (encounters || [])
     .map((enc) => {
-      const linkedFight = fightForEncounter(fights, enc.id);
+      const linkedFight = fightForEncounter(
+        (fights || []).filter((fight) => !isFightSuperseded(enc, fight)),
+        enc.id,
+      );
       return { enc, fight: linkedFight, sortKey: Math.max(toTime(enc.updatedAt || enc.createdAt), linkedFight?.savedAt || 0) };
     })
     .sort((a, b) => b.sortKey - a.sortKey);
@@ -88,6 +93,27 @@ export function dedupeFightsByEncounter(fights, activeFightId = null) {
 // stamps ISO strings, and a fight stamps a number.
 export function cardTime(card) {
   return Math.max(toTime(card?.updatedAt), toTime(card?.createdAt));
+}
+
+// A fight is a snapshot of the card as it was when launched, and saving the card
+// again does not touch it. So a GM who changed an encounter after its fight was
+// launched was handed the old creatures by the battle map, under the new name.
+// Saving over an encounter is the GM saying which version they mean: a fight
+// launched before that save is superseded, and the card is launched afresh.
+//
+// When the fight was launched: the copy of the card it carries says so exactly;
+// otherwise its id, which the builder mints with `Date.now()` at launch. A fight
+// with neither is not second-guessed.
+function fightLaunchTime(fight) {
+  const copy = cardTime(fight?.encounter);
+  if (copy) return copy;
+  return typeof fight?.id === 'number' && Number.isSafeInteger(fight.id) ? fight.id : null;
+}
+
+export function isFightSuperseded(card, fight) {
+  if (!card || !fight) return false;
+  const launched = fightLaunchTime(fight);
+  return launched != null && cardTime(card) > launched;
 }
 
 // Repair duplicate cards already in storage as well as incoming batches.

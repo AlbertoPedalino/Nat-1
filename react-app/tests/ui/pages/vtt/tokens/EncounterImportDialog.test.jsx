@@ -107,6 +107,32 @@ test('an encounter launched again is offered once, not once per launch', async (
   expect(options.map((option) => option.textContent)).toEqual(['Wolves', 'Bandits', 'Loose ends']);
 });
 
+// The report this exists for: an encounter changed and saved again in the
+// builder still placed its old creatures, under its new name — the fight of the
+// earlier launch was imported instead of the card.
+test('an encounter saved again since its fight was launched imports the new version', async () => {
+  const launchedAt = Date.parse('2026-09-29T20:00:00Z');
+  mocks.persisted = {
+    library: [{
+      id: 'e1',
+      name: 'Wolves and their master',
+      updatedAt: '2026-09-30T10:00:00Z',
+      encounter: [{ name: 'Wolf', qty: 2 }, { name: 'Ogre', qty: 1 }],
+    }],
+    fightsData: { activeFightId: null, items: [fight(launchedAt, 'e1', 'Wolves', launchedAt)] },
+  };
+  const onImport = vi.fn();
+  const user = userEvent.setup();
+  render(<EncounterImportDialog {...props} onImport={onImport} />);
+
+  expect(screen.getByText('2 creatures to place')).toBeInTheDocument();
+  await user.click(screen.getByRole('button', { name: 'Place them' }));
+  expect(onImport).toHaveBeenCalledWith(
+    [{ id: 0, name: 'Wolf' }, { id: 1, name: 'Ogre' }],
+    expect.objectContaining({ fightId: null, encounterId: 'e1' }),
+  );
+});
+
 test('the quest narrows the encounters on offer', async () => {
   const user = userEvent.setup();
   render(<EncounterImportDialog {...props} />);

@@ -105,9 +105,22 @@ test('editing a loaded encounter updates its identity and keeps its resumable fi
   assert.deepEqual(updated.encounter.map((item) => item.name), ['Ogre']);
   assert.equal(state.encounterName, updated.name);
   assert.equal(state.library[1], other);
-  assert.equal(state.fights[0], fight);
+  // The fight of the old version is superseded by the save, not kept beside it.
+  assert.deepEqual(state.fights, []);
   state = encounterReducer(state, { type: 'saveEncounterToLibrary', entry: updated });
   assert.equal(state.library.length, 2);
+});
+
+test('saving over an encounter leaves the fight being run, and fights of other encounters', () => {
+  const entry = { id: 7, name: 'Wolves', encounter: [] };
+  const running = { id: 9, encounterId: 7, fight: { combatants: [] } };
+  const old = { id: 8, encounterId: 7, fight: { combatants: [] } };
+  const elsewhere = { id: 10, encounterId: 11, fight: { combatants: [] } };
+  const state = encounterReducer(
+    { ...createInitialState(), library: [entry], fights: [running, old, elsewhere], activeFightId: 9 },
+    { type: 'saveEncounterToLibrary', entry: { ...entry, name: 'Wolves again' } },
+  );
+  assert.deepEqual(state.fights.map((fight) => fight.id), [9, 10]);
 });
 
 test('quantity removal and an empty draft keep the loaded encounter identity', () => {

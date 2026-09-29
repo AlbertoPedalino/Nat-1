@@ -5,6 +5,7 @@ import {
   dedupeFightsByEncounter,
   fightForEncounter,
   groupLibraryByQuest,
+  isFightSuperseded,
   listQuestNames,
   mergeLibrary,
 } from '../../../../../src/pages/encounterbuilder/library/library.js';
@@ -66,4 +67,30 @@ test('a card carries its fight, and a quest groups the cards', () => {
   assert.equal(fightForEncounter([fight('f1', 'e1', 30)], 'e2'), null);
   assert.deepEqual(listQuestNames(encounters), ['The Long Winter']);
   assert.deepEqual(groupLibraryByQuest(merged).map((group) => group.quest), ['The Long Winter', '']);
+});
+
+// The bug: an encounter saved again after its fight was launched still placed
+// the old creatures on the battle map, under the new name.
+test('a fight launched before its card was last saved is superseded', () => {
+  const card = { id: 1, createdAt: '2026-09-01T10:00:00Z', updatedAt: '2026-09-30T10:00:00Z' };
+  const launchedBefore = Date.parse('2026-09-29T10:00:00Z');
+  const launchedAfter = Date.parse('2026-09-30T11:00:00Z');
+  assert.equal(isFightSuperseded(card, fight(launchedBefore, 1, launchedAfter)), true);
+  assert.equal(isFightSuperseded(card, fight(launchedAfter, 1, launchedAfter)), false);
+  // The card copy a fight carries says which version it was launched from.
+  assert.equal(isFightSuperseded(card, { ...fight('f1', 1, 0), encounter: { ...card, updatedAt: '2026-09-29T10:00:00Z' } }), true);
+  assert.equal(isFightSuperseded(card, { ...fight(launchedBefore, 1, 0), encounter: card }), false);
+  // No way to tell when it was launched: left alone.
+  assert.equal(isFightSuperseded(card, fight('f1', 1, 0)), false);
+  assert.equal(isFightSuperseded(null, fight(launchedBefore, 1, 0)), false);
+});
+
+// The builder's Library and the map's import dialog both read the card's fight
+// from here: a superseded one is not offered to resume.
+test('a card does not carry the fight of its previous version', () => {
+  const card = { id: 1, updatedAt: '2026-09-30T10:00:00Z' };
+  const before = Date.parse('2026-09-29T10:00:00Z');
+  const after = Date.parse('2026-09-30T11:00:00Z');
+  assert.equal(mergeLibrary([card], [fight(before, 1, before)])[0].fight, null);
+  assert.equal(mergeLibrary([card], [fight(before, 1, before), fight(after, 1, after)])[0].fight.id, after);
 });

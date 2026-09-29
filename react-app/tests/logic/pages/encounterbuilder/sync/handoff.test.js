@@ -35,7 +35,7 @@ const {
   withSheetIdentity,
 } = await import('../../../../../src/pages/encounterbuilder/sync/handoff.js');
 const {
-  makeSavedEncounter, persistLibrary, persistParty, readPersistedInstance,
+  makeSavedEncounter, persistFights, persistLibrary, persistParty, readPersistedInstance,
 } = await import('../../../../../src/pages/encounterbuilder/state/storage.js');
 
 const OGRE = { name: 'Ogre', source: 'MM', cr: '2', xp: 450, hp: { average: 59 } };
@@ -200,6 +200,65 @@ test('an encounter that already has a fight is handed that fight, not a new one'
   assert.equal(again.entry, null, 'nothing new to write online');
   assert.equal(again.combatants.length, 3);
   assert.equal(readPersistedInstance(instanceId, [GOBLIN]).fightsData.items.length, 1);
+});
+
+// Saving over an encounter is the GM choosing that version: the fight of the
+// earlier launch holds the old creatures and is not what they mean to place.
+test('an encounter saved again since its fight was launched is launched afresh', () => {
+  localStorage.clear();
+  const instanceId = 'enc-test-resaved';
+  const card = makeSavedEncounter('Wolves', [
+    { id: 'i1', name: 'Goblin', source: 'MM', cr: '1/4', xp: 50, qty: 3, monsterData: GOBLIN },
+  ], { count: 4, level: 1 });
+  persistLibrary(instanceId, [card]);
+  const first = launchLibraryEncounter(instanceId, card.id, { monsters: [GOBLIN, OGRE] });
+
+  const resaved = {
+    ...card,
+    updatedAt: new Date(Date.now() + 60_000).toISOString(),
+    encounter: [{ ...card.encounter[0], qty: 1 }, { id: 'i2', name: 'Ogre', source: 'MM', qty: 1 }],
+  };
+  persistLibrary(instanceId, [resaved]);
+  const again = launchLibraryEncounter(instanceId, card.id, { monsters: [GOBLIN, OGRE] });
+
+  assert.notEqual(again.fightId, first.fightId);
+  assert.ok(again.entry, 'the new fight is a row to write');
+  assert.deepEqual(again.combatants.map((combatant) => combatant.name).sort(), ['Goblin', 'Ogre']);
+  // The old version's fight goes, and is named so its row can be deleted.
+  assert.deepEqual(again.supersededFightIds, [first.fightId]);
+  assert.deepEqual(
+    readPersistedInstance(instanceId, [GOBLIN, OGRE]).fightsData.items.map((fight) => fight.id),
+    [again.fightId],
+  );
+
+  // Pieces deleted and the encounter imported once more, with no save between:
+  // still the fight of the last launch, not a third one.
+  const third = launchLibraryEncounter(instanceId, card.id, { monsters: [GOBLIN, OGRE] });
+  assert.equal(third.fightId, again.fightId);
+  assert.equal(third.entry, null);
+});
+
+// Saved over mid-combat: the fight the builder is running is not the map's to
+// delete, though the map launches the new version beside it.
+test('a map launch never removes the fight the builder is running', () => {
+  localStorage.clear();
+  const instanceId = 'enc-test-running';
+  const card = makeSavedEncounter('Wolves', [
+    { id: 'i1', name: 'Goblin', source: 'MM', cr: '1/4', xp: 50, qty: 2, monsterData: GOBLIN },
+  ], { count: 4, level: 1 });
+  persistLibrary(instanceId, [card]);
+  const first = launchLibraryEncounter(instanceId, card.id, { monsters: [GOBLIN] });
+  const persisted = readPersistedInstance(instanceId, [GOBLIN]);
+  persistFights(instanceId, first.fightId, persisted.fightsData.items);
+  persistLibrary(instanceId, [{ ...card, updatedAt: new Date(Date.now() + 60_000).toISOString() }]);
+
+  const again = launchLibraryEncounter(instanceId, card.id, { monsters: [GOBLIN] });
+
+  assert.notEqual(again.fightId, first.fightId);
+  assert.deepEqual(again.supersededFightIds, []);
+  const after = readPersistedInstance(instanceId, [GOBLIN]).fightsData;
+  assert.equal(after.activeFightId, first.fightId);
+  assert.deepEqual(after.items.map((fight) => fight.id).sort(), [first.fightId, again.fightId].sort());
 });
 
 test('an encounter the builder no longer has is said out loud rather than placed', () => {

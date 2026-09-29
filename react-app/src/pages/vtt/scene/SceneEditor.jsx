@@ -106,6 +106,7 @@ import { launchLibraryEncounter } from '../../encounterbuilder/sync/handoff.js';
 import {
   FIGHT_UNAVAILABLE,
   commitFightCombatantVitals,
+  deleteInstanceFight,
   saveInstanceFight,
 } from '../../../shared/cloud/api/encounterFights.js';
 import { parseSourceRef } from '../../../shared/vtt/tokens/encounterSync.js';
@@ -1438,6 +1439,12 @@ export default function SceneEditor({
             notify('warning', `The encounter was launched here, but not online: ${cause?.message || 'the fight could not be saved.'}`);
           }
         }
+        // The fight of the encounter's previous version, left behind by a save
+        // since: gone here already, and its row goes too so no screen offers it.
+        // Best effort — the import dialogs skip a superseded fight regardless.
+        (launched.supersededFightIds || []).forEach((fightId) => {
+          deleteInstanceFight(fightId).catch(() => {});
+        });
       }
       const laid = layoutTokens(
         placed.map((combatant) => combatantToToken(combatant, {

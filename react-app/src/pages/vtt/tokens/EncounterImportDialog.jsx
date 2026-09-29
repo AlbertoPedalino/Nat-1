@@ -19,7 +19,7 @@ import {
 import { readPersistedInstance } from '../../encounterbuilder/state/storage.js';
 import { CLOUD_STATES, listInstances, subscribeInstanceData } from '../../../shared/instances/instanceStore.js';
 import { listToolInstances, pullInstance, refreshInstance } from '../../../shared/instances/instanceSync.js';
-import { dedupeFightsByEncounter, mergeLibrary } from '../../encounterbuilder/library/library.js';
+import { dedupeFightsByEncounter, isFightSuperseded, mergeLibrary } from '../../encounterbuilder/library/library.js';
 import { buildCombat, restoreFight } from '../../encounterbuilder/combat/combat.js';
 import { hydrateEncounterItems } from '../../encounterbuilder/bestiary/monsterUtils.js';
 import { combatantToToken, importableCombatants } from '../../../shared/vtt/tokens/encounterImport.js';
@@ -186,8 +186,14 @@ export default function EncounterImportDialog({
   // board, and it is launched on the way out. Each card carries at most one
   // fight — the newest, once the older ones of the same encounter are dropped —
   // and the quest is written on the card rather than on the fight.
+  //
+  // A fight launched before its card was last saved is left out: it holds the
+  // creatures of the old version, and the card is launched again instead.
   const entries = useMemo(() => {
-    const current = dedupeFightsByEncounter(fights);
+    const cardsById = new Map((library || []).map((enc) => [String(enc?.id), enc]));
+    const current = dedupeFightsByEncounter(fights.filter((fight) => (
+      fight.encounterId == null || !isFightSuperseded(cardsById.get(String(fight.encounterId)), fight)
+    )));
     const cards = mergeLibrary(library, current).map(({ enc, fight }) => ({
       key: `e:${enc.id}`,
       encounterId: enc.id,

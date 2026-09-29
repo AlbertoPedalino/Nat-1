@@ -17,6 +17,7 @@ import {
 } from '../state/storage.js';
 import { getInstance } from '../../../shared/instances/instanceStore.js';
 import { hydrateEncounterItems } from '../bestiary/monsterUtils.js';
+import { isFightSuperseded } from '../library/library.js';
 
 // The builder's own shape for a line of an encounter: a creature and how many.
 function encounterItem(monster, count) {
@@ -145,10 +146,13 @@ export function launchLibraryEncounter(instanceId, encounterId, { monsters = [],
 
   // An encounter it already has a fight for is not launched again: that fight
   // is what the pieces on every other screen already point at, and a second one
-  // would leave half the table tracking hit points nobody else can see.
+  // would leave half the table tracking hit points nobody else can see. Unless
+  // the card was saved again since: that fight holds the old creatures, and the
+  // version the GM saved last is the one they mean to place.
   const items = persisted.fightsData?.items || [];
   const existing = items.find((fight) => (
     fight?.encounterId != null && String(fight.encounterId) === String(card.id)
+    && !isFightSuperseded(card, fight)
   ));
   if (existing) {
     return {
@@ -166,6 +170,9 @@ export function launchLibraryEncounter(instanceId, encounterId, { monsters = [],
   const players = withSheetIdentity(persisted.partyData?.players || [], roster);
   const combat = buildCombat(encounter, players, card.id);
   if (!combat.combatants.length) throw new Error('That encounter has no creatures to place.');
+  // An id minted in the same millisecond as a fight already in the list would
+  // overwrite it rather than stand beside it.
+  while (items.some((fight) => fight.id === combat.fightId)) combat.fightId += 1;
   combat.name = card.name;
   const fightEntry = {
     id: combat.fightId,
@@ -178,10 +185,19 @@ export function launchLibraryEncounter(instanceId, encounterId, { monsters = [],
     encounter: card,
     fight: snapshotFight(combat),
   };
+  // The fights of the old version go, as a launch in the builder drops them:
+  // named on the way out, because their rows are the caller's to delete. Not
+  // the one the builder is running, saved over mid-combat: it is left to finish.
+  const activeFightId = persisted.fightsData?.activeFightId ?? null;
+  const superseded = items.filter((fight) => (
+    fight?.encounterId != null && String(fight.encounterId) === String(card.id)
+    && isFightSuperseded(card, fight)
+    && (activeFightId == null || String(fight.id) !== String(activeFightId))
+  ));
   persistFights(
     instanceId,
-    persisted.fightsData?.activeFightId || null,
-    [fightEntry, ...items.filter((fight) => fight.id !== fightEntry.id)],
+    activeFightId,
+    [fightEntry, ...items.filter((fight) => fight.id !== fightEntry.id && !superseded.includes(fight))],
   );
 
   return {
@@ -190,6 +206,7 @@ export function launchLibraryEncounter(instanceId, encounterId, { monsters = [],
     fightId: combat.fightId,
     name: card.name,
     entry: fightEntry,
+    supersededFightIds: superseded.map((fight) => fight.id),
     combatants: importableCombatants(combat),
   };
 }
