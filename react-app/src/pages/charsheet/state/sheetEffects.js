@@ -6,6 +6,7 @@ import { weaponFilterMatches } from '../../../shared/character/inventory/weaponF
 import { collectOwnedFeatNames } from '../../../shared/character/progression/selectedFeats.js';
 import { isFeatKey, isFeatDetailKey } from '../../../shared/character/progression/featChoiceKeys.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
+import { featNamedEntries } from '../../../shared/character/progression/featDescription.js';
 
 function asArray(value) {
   if (value == null) return [];
@@ -728,7 +729,7 @@ export function getAcBonusEffects(character = {}, ctx = {}) {
 // Weapon-scoped attack/damage bonuses from active effects (e.g. Fighting Style:
 // Archery +2 ranged attack, Dueling +2 one-handed melee damage, Thrown Weapon
 // +2 thrown damage). `info` carries precomputed weapon flags
-// ({ ranged, melee, thrown, oneHanded, twoHanded, soloWeapon }) so this stays
+// ({ ranged, melee, thrown, heavy, oneHanded, twoHanded, soloWeapon }) so this stays
 // decoupled from the equipment helpers and can be called per weapon from the
 // actions layer. `requiresSoloWeapon` effects (Dueling: "no other weapons")
 // apply only when no other weapon is wielded.
@@ -744,6 +745,36 @@ export function getWeaponEffectBonuses(character = {}, info = {}) {
     else damage += Number(effect.value ?? 0);
   });
   return { attack, damage };
+}
+
+function ownerFeatNamedEntries(character, ownerName, entryName) {
+  const feat = asArray(character?.allFeatSnapshots).find((f) => norm(f?.name) === norm(ownerName));
+  return feat ? featNamedEntries(feat, entryName) : null;
+}
+
+// Weapon-scoped reminders from active effects (e.g. Great Weapon Master: Heavy
+// Weapon Mastery). They never change a number: the sheet can't tell which action
+// an attack belongs to, so the rule is shown as a tag + description on every
+// matching weapon card and the player applies it.
+// Shape: { type: 'weaponNote', weaponFilter, tag, title, note, entryName?, entries? }
+// — `note` keeps several notes from one owner distinct in dedupeEffects; the text
+// comes from the owning feat's official entry named `entryName` (default: title),
+// with `entries` as the fallback when no feat snapshot carries it.
+export function getWeaponNotes(character = {}, info = {}) {
+  const notes = [];
+  collectSheetEffects(character).forEach((effect) => {
+    if (norm(effect.type) !== 'weaponnote') return;
+    if (!weaponFilterMatches(effect.weaponFilter, info)) return;
+    const title = String(effect.title || effect.ownerName || '').trim();
+    notes.push({
+      key: norm(`${effect.ownerName}-${title}`),
+      tag: String(effect.tag || title).trim(),
+      title,
+      source: String(effect.ownerName || '').trim(),
+      entries: ownerFeatNamedEntries(character, effect.ownerName, effect.entryName || title) || asArray(effect.entries),
+    });
+  });
+  return notes;
 }
 
 export function getSkillAdvantageFromEffects(character = {}, skillName) {

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { featDescriptionEntries } from '../../../../src/shared/character/progression/featDescription.js';
+import { featDescriptionEntries, featNamedEntries } from '../../../../src/shared/character/progression/featDescription.js';
 import { entriesToTextBlocks } from '../../../../src/shared/character/spells/spellEntries.js';
 
 const textOf = (feat) => entriesToTextBlocks(featDescriptionEntries(feat)).map((block) => block.text).join('\n');
@@ -58,4 +58,20 @@ test('existing ability increase descriptions are not duplicated, including repea
   ]) {
     assert.equal(featDescriptionEntries({ ability, entries }), entries);
   }
+});
+
+test('a single named benefit can be read from the feat entries', () => {
+  const feat = {
+    name: 'Great Weapon Master',
+    entries: [
+      'You gain the following benefits.',
+      { type: 'entries', name: 'Heavy Weapon Mastery', entries: ['Extra damage equals your Proficiency Bonus.'] },
+      { type: 'entries', name: 'Hew', entries: ['One attack with the same weapon as a Bonus Action.'] },
+    ],
+  };
+
+  assert.deepEqual(featNamedEntries(feat, 'Hew'), ['One attack with the same weapon as a Bonus Action.']);
+  assert.deepEqual(featNamedEntries(feat, 'heavy weapon mastery'), ['Extra damage equals your Proficiency Bonus.']);
+  assert.equal(featNamedEntries(feat, 'Cleave'), null);
+  assert.equal(featNamedEntries(feat, ''), null);
 });

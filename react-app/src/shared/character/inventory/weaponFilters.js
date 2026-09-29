@@ -12,6 +12,7 @@ export const WEAPON_FILTERS = Object.freeze({
   ONE_HANDED_MELEE: 'oneHandedMelee',
   TWO_HANDED_MELEE: 'twoHandedMelee',
   THROWN: 'thrown',
+  HEAVY: 'heavy',
 });
 
 const VALID = new Set(Object.values(WEAPON_FILTERS).map((v) => v.toLowerCase()));
@@ -30,7 +31,7 @@ function warnUnknownFilter(filter) {
 }
 
 // Match a weapon filter (string or array → OR semantics) against precomputed
-// weapon flags { ranged, melee, thrown, oneHanded, twoHanded }. An empty/absent
+// weapon flags { ranged, melee, thrown, heavy, oneHanded, twoHanded }. An empty/absent
 // filter matches any weapon. Unknown values dev-warn once and never match.
 export function weaponFilterMatches(filter, info = {}) {
   const filters = (Array.isArray(filter) ? filter : (filter == null ? [] : [filter]))
@@ -42,6 +43,7 @@ export function weaponFilterMatches(filter, info = {}) {
       case 'ranged': return !!info.ranged;
       case 'melee': return !!info.melee;
       case 'thrown': return !!info.thrown;
+      case 'heavy': return !!info.heavy;
       case 'onehandedmelee': return !!info.melee && !!info.oneHanded;
       case 'twohandedmelee': return !!info.melee && !!info.twoHanded;
       default: warnUnknownFilter(f); return false;

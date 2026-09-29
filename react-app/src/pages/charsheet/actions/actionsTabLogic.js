@@ -2,7 +2,7 @@ import { getMod, getFinal, getPB } from '../state/calculations.js';
 import { classLevel, primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
 import { hasActionRequirement } from '../../../shared/character/progression/choiceUtils.js';
-import { featDescriptionEntries } from '../../../shared/character/progression/featDescription.js';
+import { featDescriptionEntries, featNamedEntries } from '../../../shared/character/progression/featDescription.js';
 import { getWeaponProficiencyInfo, hasNonProficientArmor } from '../proficiency/proficiencies.js';
 import {
   collectResolvedWeaponMasteries,
@@ -18,6 +18,7 @@ import {
   hasTwoWeaponFightingStyle,
   isTwoHandedWeapon,
   isThrownWeapon,
+  isHeavyWeapon,
   isWieldingWeaponOrShield,
   isWeapon,
 } from '../inventory/equipmentSlots.js';
@@ -26,7 +27,7 @@ import { parseBeastActions } from '../../../shared/character/forms/beasts.js';
 import { getActiveWildShape } from '../../../shared/character/forms/wildShapeForm.js';
 import { isItemEffectActive } from '../../../shared/character/inventory/itemAttunement.js';
 import { itemDisplayName, matchesItemReference } from '../../../shared/character/inventory/itemIdentity.js';
-import { getMeleeStrDamageBonus, getWeaponEffectBonuses } from '../state/sheetEffects.js';
+import { getMeleeStrDamageBonus, getWeaponEffectBonuses, getWeaponNotes } from '../state/sheetEffects.js';
 import { alpha } from '@mui/material';
 import { ACTION_COLORS, CHIP_TONES, ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
 import {
@@ -57,6 +58,7 @@ const TAG_TONES = {
   slot:       CHIP_TONES.info,       // neutral fact: weapon hand
   inlinePill: CHIP_TONES.info,       // neutral fact: range/DC/etc.
   wildShape:  ENTITY_COLORS.class,   // source: form-granted (class colour)
+  weaponNote: ENTITY_COLORS.feat,    // source: feat rule reminder (e.g. GWM)
 };
 
 // A MiniBadge descriptor ({ key, label, color, bg }) for a semantic tone.
@@ -75,6 +77,9 @@ export function buildActionTags(action, C) {
   if (action._weaponMastery) {
     tags.push(tagBadge('mastery', 'mastery', action._weaponMastery));
   }
+  (action._weaponNotes || []).forEach((note) => {
+    if (note.tag) tags.push(tagBadge(`note-${note.key}`, 'weaponNote', note.tag));
+  });
   if (action._notProficient) {
     tags.push(tagBadge('noprof', 'noprof', 'No Prof'));
   }
@@ -307,6 +312,9 @@ function warnMissingDescription(action, source) {
  * from character snapshots (XPHB / XDMG / EFA / FRAiF / FRHoF) via the
  * feature-name maps built below.
  *
+ * A feat action may set `entryName` to show only that named benefit of the feat
+ * (Great Weapon Master → "Hew") instead of the whole feat description.
+ *
  * Adapter-side `desc` / `descOverride` fields are no longer rendered. When the
  * snapshot lookup fails (and the action isn't flagged `noDescription`), a
  * dev-mode warning is emitted so the missing feature mapping can be fixed.
@@ -352,7 +360,7 @@ export function collectAdapterActions(C, sheet) {
     for (const candidate of ownerCandidates) {
       const feat = featSnapshotByName.get(candidate);
       if (feat) {
-        const entries = featDescriptionEntries(feat);
+        const entries = (action.entryName && featNamedEntries(feat, action.entryName)) || featDescriptionEntries(feat);
         if (entries.length) return entries;
       }
     }
@@ -475,23 +483,26 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
   // Rage Damage (and similar): adds to Strength-based melee weapon attacks only.
   const isRangedWeapon = String(item?.type || '').toUpperCase() === 'R';
   const strMeleeDamageBonus = finalAbility === 'str' && !isRangedWeapon ? (ctx.strMeleeDamageBonus || 0) : 0;
-  // Fighting Style and similar weapon-scoped bonuses (Archery, Dueling, Thrown Weapon).
+  // Fighting Style and similar weapon-scoped bonuses (Archery, Dueling, Thrown Weapon)
+  // plus weapon-scoped rule reminders (Great Weapon Master) share one weapon profile.
   const wieldedTwoHanded = item?.equippedSlot === 'twoHands' || isTwoHandedWeapon(item);
-  const fsBonus = getWeaponEffectBonuses(C, {
+  const isHeavy = isHeavyWeapon(item);
+  const weaponInfo = {
     ranged: isRangedWeapon,
     melee: String(item?.type || '').toUpperCase() === 'M',
     thrown: isThrownWeapon(item),
+    heavy: isHeavy,
     twoHanded: wieldedTwoHanded,
     oneHanded: !wieldedTwoHanded,
     soloWeapon: ctx.soloWeapon,
-  });
+  };
+  const fsBonus = getWeaponEffectBonuses(C, weaponInfo);
+  const weaponNotes = getWeaponNotes(C, weaponInfo);
   const finalMod = (opts.damageMod != null ? opts.damageMod : mod) + enhancement.damage + strMeleeDamageBonus + fsBonus.damage;
   const damageFormula = base ? base + (finalMod !== 0 ? (finalMod >= 0 ? '+' : '') + finalMod : '') : '';
   const dtype = weaponDamageType(item);
   // XPHB 2024 Heavy weapon: Disadvantage on attack rolls if both STR and DEX < 13.
-  const props = itemProps(item);
-  const isHeavyWeapon = props.includes('h') || props.includes('heavy');
-  const heavyUnderStat = isHeavyWeapon && getFinal(C, 'str') < 13 && getFinal(C, 'dex') < 13;
+  const heavyUnderStat = isHeavy && getFinal(C, 'str') < 13 && getFinal(C, 'dex') < 13;
   const disAdv = (untrainedArmor && (finalAbility === 'str' || finalAbility === 'dex')) || heavyUnderStat;
   const selectedEntry = selectedMasteriesByWeapon.get(normalizeWeaponName(item?.name || '')) || null;
   const directMastery = selectedEntry ? resolveWeaponMasteryForItem(item) : null;
@@ -514,6 +525,7 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
     _enhancement: enhancement.attack || enhancement.damage ? enhancement : null,
     _weaponIndex: index,
     _weaponMastery: mastery || null,
+    _weaponNotes: weaponNotes,
     _weaponSlot: item.equippedSlot || null,
     _colorBarCat: 'attack',
     _notProficient: !profInfo.proficient,
@@ -603,14 +615,16 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
     const ohStrMeleeDamageBonus = ohAbility === 'str' && !ohRanged ? ctx.strMeleeDamageBonus : 0;
     // Off-hand implies a second weapon → oneHanded=false so Dueling does not apply;
     // ranged/thrown bonuses (Archery, Thrown Weapon) still resolve.
-    const ohFsBonus = getWeaponEffectBonuses(C, {
+    const ohWeaponInfo = {
       ranged: ohRanged,
       melee: String(offHandItem?.type || '').toUpperCase() === 'M',
       thrown: isThrownWeapon(offHandItem),
+      heavy: isHeavyWeapon(offHandItem),
       twoHanded: false,
       oneHanded: false,
       soloWeapon: false, // off-hand implies a second weapon → never solo
-    });
+    };
+    const ohFsBonus = getWeaponEffectBonuses(C, ohWeaponInfo);
     const ohDmgMod = getOffHandDamageMod(ohMod, hasTWF) + ohEnhancement.damage + ohStrMeleeDamageBonus + ohFsBonus.damage;
     const ohSelectedEntry = selectedMasteriesByWeapon.get(normalizeWeaponName(offHandItem?.name || '')) || null;
     const ohDirectMastery = ohSelectedEntry ? resolveWeaponMasteryForItem(offHandItem) : null;
@@ -638,6 +652,7 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
       _weaponIndex: ohIndex,
       _weaponSlot: offHandItem.equippedSlot || null,
       _weaponMastery: ohMastery || null,
+      _weaponNotes: getWeaponNotes(C, ohWeaponInfo),
       _notProficient: !ohProfInfo.proficient,
       _disadvantage: false,
     });

@@ -24,6 +24,7 @@ import { getSheetSlots } from '../spells/spellsTabLogic.js';
 import { loadItems, loadVariantRules } from '../../charbuilder/data/dataLoaders.js';
 import { loadMasteryEntries } from '../../../shared/character/combat/weaponMastery.js';
 import { WeaponMasteryBlock } from '../../../shared/character/combat/WeaponMasteryBlock.jsx';
+import { WeaponNoteBlock } from '../../../shared/character/combat/WeaponNoteBlock.jsx';
 import {
   compactInputSx,
   filterChipSx,
@@ -978,6 +979,7 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
     || hasDescription
     || (action.choiceKey && onUpdateCharacter)
     || action._weaponMastery
+    || action._weaponNotes?.length
     || DetailRenderer
   );
   const hasStatusRow = Boolean(action._toggleKey && onUpdateCharacter);
@@ -1146,6 +1148,7 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
             <ChoicePicker action={action} C={C} onUpdateCharacter={onUpdateCharacter} onShowToast={onShowToast} />
           ) : null}
           <WeaponMasteryBlock mastery={action._weaponMastery} />
+          <WeaponNoteBlock notes={action._weaponNotes} />
           {DetailRenderer ? (
             <DetailRenderer
               action={action}

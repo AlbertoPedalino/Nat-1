@@ -1,145 +1,39 @@
 import { createAdapterBindings } from '../adapterBindings.js';
+import { WEAPON_FILTERS } from '../../shared/character/inventory/weaponFilters.js';
 
 export default function install(registry, context = {}) {
-  const {
-    SKILLS,
-    _ARTISAN_TOOLS,
-    _MUSICAL_INSTRUMENTS,
-    _GAMING_SETS,
-    _VEHICLE_TOOLS,
-    _STD_LANGS,
-    _EXOTIC_LANGS,
-    _ALL_LANGS,
-    _ALL_TOOLS,
-    allItemsDb,
-    registerClassAdapter,
-    getClassAdapter,
-    registerSubclassAdapter,
-    getSubclassAdapter,
-    registerSpeciesAdapter,
-    getSpeciesAdapter,
-    registerFeatAdapter,
-    getFeatAdapter,
-    registerClassSheetActions,
-    getClassSheetActions,
-    registerSubclassSheetActions,
-    getSubclassSheetActions,
-    registerSpeciesSheetActions,
-    getSpeciesSheetActions,
-    registerFeatSheetActions,
-    getFeatSheetActions,
-    registerClassSheetResources,
-    getClassSheetResources,
-    registerSubclassSheetResources,
-    getSubclassSheetResources,
-    registerSpeciesSheetResources,
-    getSpeciesSheetResources,
-    registerFeatSheetResources,
-    getFeatSheetResources,
-    registerClassSheetEffects,
-    getClassSheetEffects,
-    registerSubclassSheetEffects,
-    getSubclassSheetEffects,
-    registerSpeciesSheetEffects,
-    getSpeciesSheetEffects,
-    registerFeatSheetEffects,
-    getFeatSheetEffects,
-    registerClassRuntimeConfig,
-    getClassRuntimeConfig,
-    registerSubclassRuntimeConfig,
-    getSubclassRuntimeConfig,
-    registerSpeciesRuntimeConfig,
-    getSpeciesRuntimeConfig,
-    registerClassSheetChoiceMeta,
-    getClassSheetChoiceMeta,
-    registerSubclassSheetChoiceMeta,
-    getSubclassSheetChoiceMeta,
-    registerSpeciesSheetChoiceMeta,
-    getSpeciesSheetChoiceMeta,
-    registerClassSheetCommonChoiceMeta,
-    registerSubclassSheetCommonChoiceMeta,
-    registerSpeciesSheetCommonChoiceMeta,
-    registerItemFlagDef,
-    getItemFlagDef,
-    getAllItemFlagDefs,
-    registerWeaponAbilityOverride,
-    getWeaponAbilityOverrides,
-    registerClassSheetFeatureFilter,
-    getClassSheetFeatureFilters,
-    registerSubclassSheetFeatureFilter,
-    getSubclassSheetFeatureFilters,
-    registerSpeciesSheetFeatureFilter,
-    getSpeciesSheetFeatureFilters,
-    registerClassSheetProficiencies,
-    getClassSheetProficiencies,
-    registerSubclassSheetProficiencies,
-    getSubclassSheetProficiencies,
-    registerSpeciesSheetProficiencies,
-    getSpeciesSheetProficiencies,
-    registerClassSheetSpellModifiers,
-    getClassSheetSpellModifiers,
-    registerSubclassSheetSpellModifiers,
-    getSubclassSheetSpellModifiers,
-    registerSpeciesSheetSpellModifiers,
-    getSpeciesSheetSpellModifiers,
-    registerClassChoiceKeyFilter,
-    getClassChoiceKeyFilter,
-    registerClassChoiceLabelProvider,
-    getClassChoiceLabelProvider,
-    registerSpeciesSheetHpBonus,
-    getSpeciesSheetHpBonus,
-    registerClassAtWillSpells,
-    getClassAtWillSpells,
-    registerSpeciesLongRestGrants,
-    getSpeciesLongRestGrants,
-    registerResourceSideEffect,
-    getResourceSideEffect,
-    registerSubclassChoiceDetailDataProvider,
-    getSubclassChoiceDetailDataProvider,
-    registerGlobalClassAdapter,
-    getGlobalClassAdapters,
-    registerGlobalSubclassAdapter,
-    getGlobalSubclassAdapters,
-    registerGlobalSpeciesAdapter,
-    getGlobalSpeciesAdapters,
-    registerGlobalFeatAdapter,
-    getGlobalFeatAdapters,
-    registerGlobalSpellAdapter,
-    getGlobalSpellAdapters,
-    registerGlobalItemAdapter,
-    getGlobalItemAdapters,
-    registerCantripData,
-    getCantripData,
-    registerCantripDataModifier,
-    getCantripDataModifiers,
-    registerSpellData,
-    getSpellData,
-    getGenericSpeciesChoiceSpecs,
-    getGenericBackgroundChoiceSpecs,
-    getGenericBackgroundChoiceMeta,
-    getGenericBackgroundOriginFeat,
-  } = createAdapterBindings(registry, context);
-
+  const { registerFeatSheetActions, registerFeatSheetEffects } = createAdapterBindings(registry, context);
 
   if (typeof registerFeatSheetActions === "function") {
+    // Card text = the feat's official "Hew" benefit only (entryName).
     registerFeatSheetActions("Great Weapon Master", [
       {
-        name: "Cleave",
+        name: "Hew",
+        entryName: "Hew",
         icon: "swords",
-        cat: "action",
+        cat: "bonus",
         uses: "Bonus Action",
-        desc: "When you score a critical hit or reduce a creature to 0 HP with a Heavy melee weapon, make one more melee attack with a Heavy weapon as a Bonus Action."
-      },
-      {
-        name: "Great Weapon Master: Bonus Damage",
-        icon: "swords",
-        cat: "action",
-        uses: "Passive",
-        passive: true,
-        desc: "When you hit with a Heavy weapon attack, add your Proficiency Bonus to the damage roll."
+        desc: "Immediately after you score a Critical Hit with a Melee weapon or reduce a creature to 0 Hit Points with one, you can make one attack with the same weapon as a Bonus Action."
       }
     ]);
   }
 
+  // Heavy Weapon Mastery (+PB damage) applies only to hits made as part of the
+  // Attack action on your turn — not Hew or opportunity attacks — which
+  // the sheet can't tell apart, so it is a reminder on Heavy weapon cards
+  // (sheetEffects.getWeaponNotes) instead of a baked-in damage bonus.
+  if (typeof registerFeatSheetEffects === "function") {
+    registerFeatSheetEffects("Great Weapon Master", [
+      {
+        type: "weaponNote",
+        weaponFilter: WEAPON_FILTERS.HEAVY,
+        tag: "GWM",
+        title: "Heavy Weapon Mastery",
+        note: "Great Weapon Master: Heavy Weapon Mastery",
+        entries: [
+          "When you hit a creature with a weapon that has the Heavy property as part of the Attack action on your turn, you can cause the weapon to deal extra damage to the target. The extra damage equals your Proficiency Bonus."
+        ]
+      }
+    ]);
+  }
 }
-

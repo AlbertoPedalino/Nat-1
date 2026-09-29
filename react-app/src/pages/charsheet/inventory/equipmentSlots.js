@@ -35,6 +35,10 @@ export function isThrownWeapon(item) {
   return hasAnyProperty(item, 't', 'thrown');
 }
 
+export function isHeavyWeapon(item) {
+  return hasAnyProperty(item, 'h', 'heavy');
+}
+
 // True if a weapon or Shield is currently held in a hand. Used by Fighting Style:
 // Unarmed Fighting (d8 die only when not wielding any weapon or a Shield).
 export function isWieldingWeaponOrShield(inventory) {
