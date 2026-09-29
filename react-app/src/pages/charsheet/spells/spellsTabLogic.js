@@ -556,7 +556,8 @@ function applySpellGrantOverrides(spell, overrides) {
     next.components = Object.fromEntries(
       Object.entries(next.components).filter(([key]) => !removed.has(key.toLowerCase())),
     );
-    next.componentsLabel = null;
+    // Nothing left (e.g. Telekinetic's V/S-free Mage Hand) reads "None", not blank.
+    next.componentsLabel = Object.keys(next.components).length ? null : 'None';
     if (removed.has('m')) next.materialLabel = null;
   }
   if (overrides.rangeLabel) next.rangeLabel = overrides.rangeLabel;

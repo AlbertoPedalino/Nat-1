@@ -269,19 +269,8 @@ registerClassAdapter("Artificer", function (cls, lv, specs) {
     });
   }
 
-  [4, 8, 12, 16].forEach(function (featLv) {
-    if (lv >= featLv) {
-      specs.push({
-        key: 'artificer_feat_lv' + featLv,
-        label: 'Feat (Artificer Lv.' + featLv + ')',
-        type: 'feat_cat',
-        categories: ['G'],
-        count: 1,
-        level: featLv
-      });
-    }
-  });
-
+  // Lv 4/8/12/16 feat slots are the generic `feat_asi_lvN` ones injected from
+  // the class's Ability Score Improvement features, like every other class.
   if (lv >= 19) {
     specs.push({
       key: 'artificer_epic_boon',
