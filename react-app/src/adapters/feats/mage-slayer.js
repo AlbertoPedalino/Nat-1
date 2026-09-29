@@ -120,22 +120,9 @@ export default function install(registry, context = {}) {
     getGenericBackgroundOriginFeat,
   } = createAdapterBindings(registry, context);
 
-
-  if (typeof registerFeatSheetActions === "function") {
-    registerFeatSheetActions("Mage Slayer", [
-      {
-        name: "Mage Slayer: Interrupt",
-        icon: "zap-off",
-        cat: "action",
-        uses: "Reaction"
-      }
-    ]);
-  }
-
   // Advantage on saves against spells cast by creatures within 5 ft.
   registerFeatSheetEffects("Mage Slayer", [
     { type: "advantage", target: "save", source: "spells", note: "Mage Slayer" },
   ]);
-
 }
 

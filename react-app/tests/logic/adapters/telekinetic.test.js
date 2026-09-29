@@ -19,12 +19,10 @@ const telekinetic = {
   entries: ['You gain the following benefits.'],
 };
 
-test('Telekinetic Shove is a Bonus Action card showing only its own benefit', () => {
-  const actions = adapterRegistry.getFeatSheetActions('Telekinetic');
-
-  assert.deepEqual(actions.map((action) => [action.name, action.cat, action.entryName]), [
-    ['Telekinetic Shove', 'bonus', 'Telekinetic Shove'],
-  ]);
+// Telekinetic Shove has nothing to use on the sheet, so it is no card: its
+// rule is read in the feat's description.
+test('Telekinetic registers no action card', () => {
+  assert.deepEqual(adapterRegistry.getFeatSheetActions('Telekinetic'), []);
 });
 
 test('Mage Hand from Telekinetic has no components, 60 ft range and the increased ability', () => {

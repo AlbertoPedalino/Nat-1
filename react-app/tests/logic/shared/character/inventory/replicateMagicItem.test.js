@@ -6,6 +6,9 @@ import {
   collectReplicatePlanChoices,
   isReplicateArmorItem,
   itemMatchesBucket,
+  replicateBucketChoiceValue,
+  replicatedItemProperty,
+  itemCardName,
 } from '../../../../../src/shared/character/inventory/replicateMagicItem.js';
 
 const bucket = (id) => REPLICATE_BUCKETS.find((entry) => entry.id === id);
@@ -66,4 +69,27 @@ test('Repeating Shot and Returning Weapon resolve as Uncommon items', () => {
   const weapon = { name: 'Light Crossbow', source: 'XPHB', type: 'R', rarity: 'none' };
   assert.equal(applyReplicateItemPlan(weapon, bucket('repeating-shot')).rarity, 'uncommon');
   assert.equal(applyReplicateItemPlan(weapon, bucket('returning-weapon')).rarity, 'uncommon');
+});
+
+// The Actions tab titles the card with the weapon and shows the plan's rule as
+// a tag and a block, rather than "Light Crossbow (Repeating Shot)".
+test('a replicated plan weapon names the rule it adds, and nothing else does', () => {
+  const crossbow = { name: 'Light Crossbow', source: 'XPHB', type: 'R', property: ['A', 'LD', '2H'] };
+  const plan = replicateBucketChoiceValue(bucket('repeating-shot'), crossbow);
+  const item = {
+    ...applyReplicateItemPlan(crossbow, bucket('repeating-shot')),
+    flags: ['replicated'],
+    craftedFrom: plan,
+  };
+
+  const property = replicatedItemProperty(item);
+  assert.equal(item.name, 'Light Crossbow');
+  assert.equal(property.tag, 'Repeating Shot');
+  assert.equal(property.title, 'Repeating Shot');
+  assert.match(property.entries[0], /ignores the \{@itemProperty LD\|XPHB\|Loading\} property/);
+
+  assert.equal(itemCardName(item), 'Light Crossbow');
+  assert.equal(itemCardName({ name: 'Dagger', displayName: 'Dagger (silvered)' }), 'Dagger (silvered)');
+  assert.equal(replicatedItemProperty(crossbow), null);
+  assert.equal(replicatedItemProperty({ ...crossbow, flags: ['replicated'], craftedFrom: 'replicate-choice:v1:item:Bag:XPHB' }), null);
 });

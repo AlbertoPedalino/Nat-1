@@ -21,15 +21,21 @@ import {
   isHeavyWeapon,
   isWieldingWeaponOrShield,
   isWeapon,
+  isLightWeapon,
+  isFinesseWeapon,
+  isCrossbow,
+  isPolearmMasterWeapon,
+  hasEquippedShield,
 } from '../inventory/equipmentSlots.js';
 import { weaponEnhancement } from '../../../shared/character/inventory/itemBonus.js';
 import { parseBeastActions } from '../../../shared/character/forms/beasts.js';
 import { getActiveWildShape } from '../../../shared/character/forms/wildShapeForm.js';
 import { isItemEffectActive } from '../../../shared/character/inventory/itemAttunement.js';
-import { itemDisplayName, matchesItemReference } from '../../../shared/character/inventory/itemIdentity.js';
+import { itemIdentityKey, matchesItemReference } from '../../../shared/character/inventory/itemIdentity.js';
+import { itemCardName, replicatedItemProperty } from '../../../shared/character/inventory/replicateMagicItem.js';
 import { getMeleeStrDamageBonus, getWeaponEffectBonuses, getWeaponNotes } from '../state/sheetEffects.js';
 import { alpha } from '@mui/material';
-import { ACTION_COLORS, CHIP_TONES, ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
+import { ACTION_COLORS, CHIP_TONES, ENTITY_COLORS, ITEM_ATTUNEMENT } from '../../../shared/ui/entityColors.js';
 import {
   getActionRollers,
   resolveActionRollers,
@@ -62,6 +68,7 @@ const TAG_TONES = {
   inlinePill: CHIP_TONES.info,       // neutral fact: range/DC/etc.
   wildShape:  ENTITY_COLORS.class,   // source: form-granted (class colour)
   weaponNote: ENTITY_COLORS.feat,    // source: feat rule reminder (e.g. GWM)
+  itemProperty: ITEM_ATTUNEMENT,     // source: rule an item plan adds (Repeating Shot)
 };
 
 // A MiniBadge descriptor ({ key, label, color, bg }) for a semantic tone.
@@ -80,8 +87,16 @@ export function buildActionTags(action, C) {
   if (action._weaponMastery) {
     tags.push(tagBadge('mastery', 'mastery', action._weaponMastery));
   }
+  if (action._itemProperty) {
+    tags.push(tagBadge('item-property', 'itemProperty', action._itemProperty.tag));
+  }
+  // One tag per feat: its rules on this weapon share it, and each is spelled
+  // out in the expanded card.
+  const noteTags = new Set();
   (action._weaponNotes || []).forEach((note) => {
-    if (note.tag) tags.push(tagBadge(`note-${note.key}`, 'weaponNote', note.tag));
+    if (!note.tag || noteTags.has(note.tag)) return;
+    noteTags.add(note.tag);
+    tags.push(tagBadge(`note-${note.key}`, 'weaponNote', note.tag));
   });
   if (action._notProficient) {
     tags.push(tagBadge('noprof', 'noprof', 'No Prof'));
@@ -463,15 +478,101 @@ function weaponDamageType(item) {
   return item?.damage?.[0]?.type || item?.dmgType || '';
 }
 
-function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, inventory, items, ctx = {}, opts = {}) {
-  const { profSets, untrainedArmor } = ctx;
-  const weaponOverride = overrides.find(o => {
-    const type = String(item?.type || '').toUpperCase();
+// A weapon's card is titled with the weapon itself. The rule a replicated plan
+// adds to it (Repeating Shot) is a tag and a block in the expanded card, not a
+// suffix on the name: "Light Crossbow", tagged Repeating Shot.
+function weaponCardName(item) {
+  return { name: itemCardName(item, 'Weapon'), property: replicatedItemProperty(item) };
+}
+
+// The weapon's own kind, for weapon-scoped effects and notes (WEAPON_FILTERS).
+// How it is held (one or two hands, alone or not) is the caller's to add.
+function weaponKindInfo(item, ctx = {}) {
+  const type = String(item?.type || '').split('|')[0].toUpperCase();
+  return {
+    ranged: type === 'R',
+    melee: type === 'M',
+    thrown: isThrownWeapon(item),
+    heavy: isHeavyWeapon(item),
+    finesse: isFinesseWeapon(item),
+    light: isLightWeapon(item),
+    crossbow: isCrossbow(item),
+    polearm: isPolearmMasterWeapon(item),
+    shield: !!ctx.shieldEquipped,
+  };
+}
+
+function matchingWeaponOverride(C, item, overrides) {
+  const type = String(item?.type || '').toUpperCase();
+  return overrides.find((o) => {
     if (o.weaponTypes && !o.weaponTypes.includes(type)) return false;
     if (o.itemFlag && !(item?.flags || []).includes(o.itemFlag)) return false;
     if (typeof o.condition === 'function' && !o.condition(C)) return false;
     return true;
-  });
+  }) || null;
+}
+
+function isHeldWeapon(item) {
+  return ['mainHand', 'offHand', 'twoHands'].includes(item?.equippedSlot) || Boolean(item?.equipped && !item?.equippedSlot);
+}
+
+// A weapon a spell attacks through (True Strike), told apart from another copy
+// of the same weapon only when it is a different item: a replicated plan.
+export function spellWeaponKey(item) {
+  return `${itemIdentityKey(item)}|${item?.craftedFrom || ''}`;
+}
+
+// The weapons True Strike can be cast through — its material component is "a
+// weapon with which you have proficiency" — the ones in hand first.
+export function spellWeaponOptions(C, inventory, profSets) {
+  const overrides = installedRegistry.getWeaponAbilityOverrides();
+  const seen = new Set();
+  return (inventory || [])
+    .filter((item) => isWeapon(item)
+      && getWeaponProficiencyInfo(C, item, matchingWeaponOverride(C, item, overrides), profSets).proficient)
+    .sort((a, b) => Number(isHeldWeapon(b)) - Number(isHeldWeapon(a)))
+    .filter((item) => {
+      const key = spellWeaponKey(item);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .map((item) => ({ key: spellWeaponKey(item), item, name: weaponCardName(item).name, held: isHeldWeapon(item) }));
+}
+
+// One attack with a weapon, made through a spell that swaps Strength or
+// Dexterity for the spellcasting ability (True Strike). Everything else is the
+// weapon's own: its damage die (two-handed when so held), magic bonus, Fighting
+// Style bonuses, and the Heavy property's Disadvantage. `extraDamage` is the
+// spell's own dice, added to the one damage roll of the hit.
+export function spellWeaponAttack(C, item, { ability, inventory, extraDamage = '' } = {}) {
+  if (!item) return null;
+  const mod = getMod(getFinal(C, ability));
+  const enhancement = weaponEnhancement(item);
+  const held = (inventory || []).filter((i) => isWeapon(i) && isHeldWeapon(i)).length;
+  const twoHanded = item.equippedSlot === 'twoHands' || isTwoHandedWeapon(item);
+  const info = {
+    ...weaponKindInfo(item, { shieldEquipped: hasEquippedShield(inventory) }),
+    twoHanded,
+    oneHanded: !twoHanded,
+    soloWeapon: held <= 1,
+  };
+  const bonus = getWeaponEffectBonuses(C, info);
+  const flat = mod + enhancement.damage + bonus.damage;
+  const dice = [getWeaponDamageDice(item, item.equippedSlot), extraDamage].filter(Boolean).join('+');
+  const damageFormula = dice ? dice + (flat ? (flat > 0 ? '+' : '') + flat : '') : '';
+  return {
+    name: weaponCardName(item).name,
+    attackBonus: getPB(C) + mod + enhancement.attack + bonus.attack,
+    damageFormula,
+    damageType: weaponDamageType(item),
+    disadvantage: isHeavyWeapon(item) && getFinal(C, 'str') < 13 && getFinal(C, 'dex') < 13,
+  };
+}
+
+function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, inventory, items, ctx = {}, opts = {}) {
+  const { profSets, untrainedArmor } = ctx;
+  const weaponOverride = matchingWeaponOverride(C, item, overrides);
   const profInfo = getWeaponProficiencyInfo(C, item, weaponOverride, profSets);
   const ability = weaponAbility(C, item, weaponOverride);
   const overrideBlocked = weaponOverride?.requiresProficiency && !profInfo.proficient;
@@ -494,10 +595,7 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
   const wieldedTwoHanded = item?.equippedSlot === 'twoHands' || isTwoHandedWeapon(item);
   const isHeavy = isHeavyWeapon(item);
   const weaponInfo = {
-    ranged: isRangedWeapon,
-    melee: String(item?.type || '').toUpperCase() === 'M',
-    thrown: isThrownWeapon(item),
-    heavy: isHeavy,
+    ...weaponKindInfo(item, ctx),
     twoHanded: wieldedTwoHanded,
     oneHanded: !wieldedTwoHanded,
     soloWeapon: ctx.soloWeapon,
@@ -518,20 +616,22 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
   const mastery = selectedEntry
     ? (selectedEntry.mastery || directMastery || resolveWeaponMasteryForItem(dbItem))
     : null;
+  const card = weaponCardName(item);
   return {
-    name: opts.name || itemDisplayName(item, 'Weapon'),
+    name: opts.name || card.name,
     cat: opts.cat || 'action',
     uses: opts.uses || 'Equipped',
     _source: 'Weapon',
     attackBonus: (profInfo.proficient ? getPB(C) + mod : mod) + enhancement.attack + fsBonus.attack,
     rollers: [{ kind: 'damage', formula: damageFormula, label: damageFormula ? `Damage ${damageFormula}${dtype ? ` ${dtype}` : ''}` : 'Damage' }],
-    rollLabelPrefix: opts.rollLabelPrefix || itemDisplayName(item, 'Weapon'),
+    rollLabelPrefix: opts.rollLabelPrefix || card.name,
     noDescription: true,
     _item: item,
     _enhancement: enhancement.attack || enhancement.damage ? enhancement : null,
     _weaponIndex: index,
     _weaponMastery: mastery || null,
     _weaponNotes: weaponNotes,
+    _itemProperty: card.property,
     _weaponSlot: item.equippedSlot || null,
     _colorBarCat: 'attack',
     _notProficient: !profInfo.proficient,
@@ -586,6 +686,7 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
     untrainedArmor,
     strMeleeDamageBonus: getMeleeStrDamageBonus(C),
     soloWeapon: wieldedWeaponCount <= 1,
+    shieldEquipped: hasEquippedShield(inventory),
   };
 
   const weaponActions = [];
@@ -604,13 +705,7 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
 
   if (canLightExtra && offHandItem) {
     const ohIndex = attacks.indexOf(offHandItem);
-    const ohOverride = overrides.find(o => {
-      const type = String(offHandItem?.type || '').toUpperCase();
-      if (o.weaponTypes && !o.weaponTypes.includes(type)) return false;
-      if (o.itemFlag && !(offHandItem?.flags || []).includes(o.itemFlag)) return false;
-      if (typeof o.condition === 'function' && !o.condition(C)) return false;
-      return true;
-    });
+    const ohOverride = matchingWeaponOverride(C, offHandItem, overrides);
     const ohProfInfo = getWeaponProficiencyInfo(C, offHandItem, ohOverride, equipmentSets);
     const ohAbility = weaponAbility(C, offHandItem, ohOverride);
     const ohMod = getMod(getFinal(C, ohAbility));
@@ -622,10 +717,7 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
     // Off-hand implies a second weapon → oneHanded=false so Dueling does not apply;
     // ranged/thrown bonuses (Archery, Thrown Weapon) still resolve.
     const ohWeaponInfo = {
-      ranged: ohRanged,
-      melee: String(offHandItem?.type || '').toUpperCase() === 'M',
-      thrown: isThrownWeapon(offHandItem),
-      heavy: isHeavyWeapon(offHandItem),
+      ...weaponKindInfo(offHandItem, ctx),
       twoHanded: false,
       oneHanded: false,
       soloWeapon: false, // off-hand implies a second weapon → never solo
@@ -643,15 +735,16 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
     const isNick = ohMastery === 'Nick';
     const ohDamageFormula = ohBase ? ohBase + (ohDmgMod !== 0 ? (ohDmgMod >= 0 ? '+' : '') + ohDmgMod : '') : '';
 
+    const ohCard = weaponCardName(offHandItem);
     weaponActions.push({
-      name: itemDisplayName(offHandItem, 'Weapon'),
+      name: ohCard.name,
       cat: isNick ? 'action' : 'bonus',
       uses: isNick ? 'Part of Attack action (Nick)' : 'Bonus Action (Light)',
       _source: 'Weapon',
       _colorBarCat: 'attack',
       attackBonus: (ohProfInfo.proficient ? getPB(C) + ohMod : ohMod) + ohEnhancement.attack + ohFsBonus.attack,
       rollers: [{ kind: 'damage', formula: ohDamageFormula, label: ohDamageFormula ? `Damage ${ohDamageFormula}${ohDtype ? ` ${ohDtype}` : ''}` : 'Damage' }],
-      rollLabelPrefix: `Off-hand ${itemDisplayName(offHandItem, 'Weapon')}`,
+      rollLabelPrefix: `Off-hand ${ohCard.name}`,
       noDescription: true,
       _item: offHandItem,
       _enhancement: ohEnhancement.attack || ohEnhancement.damage ? ohEnhancement : null,
@@ -659,6 +752,7 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
       _weaponSlot: offHandItem.equippedSlot || null,
       _weaponMastery: ohMastery || null,
       _weaponNotes: getWeaponNotes(C, ohWeaponInfo),
+      _itemProperty: ohCard.property,
       _notProficient: !ohProfInfo.proficient,
       _disadvantage: false,
     });
@@ -694,6 +788,7 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
     }],
     rollLabelPrefix: 'Unarmed Strike',
     entries: ruleEntries.unarmedStrike || null,
+    _weaponNotes: getWeaponNotes(C, { unarmed: true }),
   });
   return weaponActions;
 }

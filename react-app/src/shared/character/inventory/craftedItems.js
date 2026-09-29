@@ -1,7 +1,8 @@
 import { alpha } from '@mui/material';
-import { ENTITY_COLORS } from '../../ui/entityColors.js';
+import { ENTITY_COLORS, ITEM_ATTUNEMENT } from '../../ui/entityColors.js';
 import { featOriginKind } from '../progression/selectedFeats.js';
 import { CRAFTED_FLAG_META, craftedFlagOf } from './craftedItemState.js';
+import { replicatedItemProperty } from './replicateMagicItem.js';
 
 // Public facade for crafted item state plus provenance-aware presentation.
 // State transitions live in craftedItemState.js so they remain data-only and
@@ -40,6 +41,12 @@ export function buildItemTags(item, character) {
   if (flag && item?.craftedLabel) {
     const color = craftedTagColor(flag, character);
     if (color) tags.push({ key: flag, label: item.craftedLabel, color, bg: alpha(color, 0.16) });
+  }
+  // The plan a replicated weapon was made from (Repeating Shot): its row is
+  // named after the weapon, as its card in the Actions tab is.
+  const property = replicatedItemProperty(item);
+  if (property) {
+    tags.push({ key: `plan-${property.key}`, label: property.tag, color: ITEM_ATTUNEMENT, bg: alpha(ITEM_ATTUNEMENT, 0.16) });
   }
   return tags;
 }

@@ -211,11 +211,14 @@ export default function install(registry, context = {}) {
     toHit: true, hasSave: false,
     notes: "Fire splash on nearby creature"
   });
+  // `weaponAttack`: the attack is made with a weapon the character picks on the
+  // spell card, which rolls that weapon's attack and damage (SpellEntry).
   registerCantripData("True Strike", {
     icon: "target",
     die: "1d6", dmgType: "radiant/weapon",
     range: "Self",
     toHit: true, hasSave: false,
+    weaponAttack: true,
     notes: "Make one attack with the weapon used in the spell's casting. Use your spellcasting ability for attack and damage; damage can be Radiant or the weapon's normal type. Extra Radiant damage at lv.5/11/17."
   });
 

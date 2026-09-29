@@ -22,7 +22,7 @@
 // the consumers never branch on bucket shape — adding a bucket is one entry,
 // built from a helper or a bespoke predicate.
 
-import { itemIdentityKey } from './itemIdentity.js';
+import { itemDisplayName, itemIdentityKey } from './itemIdentity.js';
 import { primaryClassLevel } from '../progression/classLevel.js';
 
 const norm = (value) => String(value || '').split('|')[0];
@@ -125,9 +125,11 @@ export const REPLICATE_BUCKETS = [
       entries: [{
         type: 'entries',
         name: 'Repeating Shot',
+        // Official EFA text (5etools magicvariants), {=bonusWeapon} filled in,
+        // so the sheet renders its tags like any other rule text.
         entries: [
-          'This weapon grants a +1 bonus to attack and damage rolls made with it.',
-          'It ignores the Loading property. If it has no ammunition loaded when you make a ranged attack with it, the weapon produces one piece of ammunition, which vanishes after the attack.',
+          "This magic weapon grants a +1 bonus to attack and damage rolls made with it when it's used to make a ranged attack, and it ignores the {@itemProperty LD|XPHB|Loading} property if it has that property.",
+          'If the weapon lacks ammunition, it produces its own, automatically creating one piece of magic ammunition when the wielder makes a ranged attack roll with it. The ammunition created by the weapon vanishes the instant after it hits or misses a target.',
         ],
       }],
     },
@@ -148,9 +150,9 @@ export const REPLICATE_BUCKETS = [
       entries: [{
         type: 'entries',
         name: 'Returning Weapon',
+        // Official EFA text (5etools magicvariants), {=bonusWeapon} filled in.
         entries: [
-          'This weapon grants a +1 bonus to attack and damage rolls made with it.',
-          'Immediately after you make a ranged attack with this weapon, it returns to your hand.',
+          'This magic weapon grants a +1 bonus to attack and damage rolls made with it, and it returns to your hand immediately after you use it to make a ranged attack roll.',
         ],
       }],
     },
@@ -320,6 +322,32 @@ export function applyReplicateItemPlan(item, bucket) {
     displayName: `${item.name} (${plan.nameSuffix || bucket.label})`,
     entries,
   };
+}
+
+// The rule a plan lays on its base weapon (Repeating Shot, Returning Weapon),
+// for the Actions tab to show as a tag and a rule block on the card of the
+// weapon it is, rather than as a suffix on its name. Null for anything that is
+// not a replicated plan item.
+export function replicatedItemProperty(item) {
+  if (!Array.isArray(item?.flags) || !item.flags.includes('replicated')) return null;
+  const parsed = parseReplicateBucketChoice(item.craftedFrom);
+  if (!parsed) return null;
+  const plan = parsed.bucket.itemPlan;
+  const title = plan.nameSuffix || parsed.bucket.label;
+  const block = (plan.entries || []).find((entry) => entry?.name === title);
+  return {
+    key: parsed.bucket.id,
+    tag: title,
+    title,
+    entries: block?.entries || plan.entries || [],
+  };
+}
+
+// The name a card shows for an item: a replicated plan weapon is the weapon
+// it is ("Light Crossbow"), its plan shown as a tag (replicatedItemProperty)
+// rather than as a suffix; anything else keeps its display name.
+export function itemCardName(item, fallback = '') {
+  return replicatedItemProperty(item) ? String(item?.name || fallback) : itemDisplayName(item, fallback);
 }
 
 function findReferencedItem(items, itemName, itemSource) {

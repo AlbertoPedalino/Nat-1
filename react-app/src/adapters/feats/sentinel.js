@@ -119,18 +119,5 @@ export default function install(registry, context = {}) {
     getGenericBackgroundChoiceMeta,
     getGenericBackgroundOriginFeat,
   } = createAdapterBindings(registry, context);
-
-
-  if (typeof registerFeatSheetActions === "function") {
-    registerFeatSheetActions("Sentinel", [
-      {
-        name: "Sentinel: Guard",
-        icon: "shield",
-        cat: "action",
-        uses: "Reaction"
-      }
-    ]);
-  }
-
 }
 

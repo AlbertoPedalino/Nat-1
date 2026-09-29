@@ -33,6 +33,7 @@ import { setCoinAmount, updateCustomCurrency } from '../../../shared/character/i
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import { ItemReferenceBody, QuantityAdder } from '../../../shared/character/inventory/ItemReference.jsx';
 import { itemDisplayName } from '../../../shared/character/inventory/itemIdentity.js';
+import { itemCardName } from '../../../shared/character/inventory/replicateMagicItem.js';
 import {
   carryCapacity,
   formatWeight,
@@ -1016,7 +1017,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onCharges,
           <Box onClick={toggle} sx={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', minWidth: 0 }}>
               <ItemNameIcon item={item} />
-              <Typography noWrap sx={{ fontSize: '0.875rem', color: 'text.primary', minWidth: 0 }}>{itemDisplayName(item)}</Typography>
+              <Typography noWrap sx={{ fontSize: '0.875rem', color: 'text.primary', minWidth: 0 }}>{itemCardName(item)}</Typography>
             </Box>
             <ItemTagsRow item={item} character={character} />
             {!carried ? (

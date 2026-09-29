@@ -39,6 +39,36 @@ export function isHeavyWeapon(item) {
   return hasAnyProperty(item, 'h', 'heavy');
 }
 
+export function isFinesseWeapon(item) {
+  return hasAnyProperty(item, 'f', 'fin', 'finesse');
+}
+
+export function isReachWeapon(item) {
+  return hasAnyProperty(item, 'r', 'reach');
+}
+
+// Base weapon name, so a "+1 Spear" or a "Light Crossbow of Warning" still
+// counts as the weapon it is built on.
+function baseWeaponName(item) {
+  return String(item?.baseItem || item?.name || '').split('|')[0].toLowerCase();
+}
+
+export function isCrossbow(item) {
+  return item?.crossbow === true || /\bcrossbow\b/.test(baseWeaponName(item));
+}
+
+// The weapons Polearm Master names: a Quarterstaff, a Spear, or a weapon with
+// the Heavy and Reach properties.
+export function isPolearmMasterWeapon(item) {
+  const name = baseWeaponName(item);
+  return /\bquarterstaff\b/.test(name) || /\bspear\b/.test(name)
+    || (isHeavyWeapon(item) && isReachWeapon(item));
+}
+
+export function hasEquippedShield(inventory) {
+  return (inventory || []).some((i) => i.equipped && String(i.type || '').split('|')[0].toUpperCase() === 'S');
+}
+
 // True if a weapon or Shield is currently held in a hand. Used by Fighting Style:
 // Unarmed Fighting (d8 die only when not wielding any weapon or a Shield).
 export function isWieldingWeaponOrShield(inventory) {

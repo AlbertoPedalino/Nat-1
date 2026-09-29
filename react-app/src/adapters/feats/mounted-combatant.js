@@ -119,18 +119,5 @@ export default function install(registry, context = {}) {
     getGenericBackgroundChoiceMeta,
     getGenericBackgroundOriginFeat,
   } = createAdapterBindings(registry, context);
-
-
-  if (typeof registerFeatSheetActions === "function") {
-    registerFeatSheetActions("Mounted Combatant", [
-      {
-        name: "Redirect Attack",
-        icon: "shield",
-        cat: "action",
-        uses: "Reaction"
-      }
-    ]);
-  }
-
 }
 

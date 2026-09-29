@@ -1149,6 +1149,7 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
             <ChoicePicker action={action} C={C} onUpdateCharacter={onUpdateCharacter} onShowToast={onShowToast} />
           ) : null}
           <WeaponMasteryBlock mastery={action._weaponMastery} />
+          {action._itemProperty ? <WeaponNoteBlock notes={[action._itemProperty]} /> : null}
           <WeaponNoteBlock notes={action._weaponNotes} />
           {DetailRenderer ? (
             <DetailRenderer

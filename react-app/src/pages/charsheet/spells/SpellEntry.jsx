@@ -1,4 +1,5 @@
-import { alpha, Box, Stack, Tooltip, Typography } from '@mui/material';
+import { useMemo } from 'react';
+import { alpha, Box, Stack, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from '@mui/material';
 import { SPELL_LEVEL_LABELS } from '../../charbuilder/constants.js';
 import { SpellNameIcon } from '../../../shared/content/FiveEToolsLink.jsx';
 import { RichInline } from '../../../shared/content/RichText.jsx';
@@ -14,6 +15,8 @@ import { getSpellAttackAdvantage } from '../state/sheetEffects.js';
 import { entriesToTextBlocks } from '../../../shared/character/spells/spellEntries.js';
 import {
   applySpellModifiers,
+  cantripScalingDamages,
+  cantripScalingDice,
   computeScaledFormula,
   extractDamageDice,
   getCastBadge,
@@ -27,11 +30,13 @@ import {
 import { inlineButtonSx, spellBodySx, spellRowSx } from './spellsTabStyles.js';
 import AttackRollButton from '../actions/AttackRollButton.jsx';
 import { isConcentrationSpell, isRitualSpell } from '../../../shared/character/spells/spellTags.js';
-import { ENTITY_COLORS, RICH_TEXT_ACCENT, SPELL_TAG_COLORS } from '../../../shared/ui/entityColors.js';
+import { CHIP_TONES, ENTITY_COLORS, RICH_TEXT_ACCENT, SPELL_TAG_COLORS } from '../../../shared/ui/entityColors.js';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import RollerButtons from '../../../shared/character/dice/RollerButtons.jsx';
 import SummonedCreaturePanel from '../forms/SummonedCreaturePanel.jsx';
 import CollapsibleNote from '../../../shared/ui/CollapsibleNote.jsx';
+import { spellWeaponAttack, spellWeaponOptions } from '../actions/actionsTabLogic.js';
+import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 
 function applyFlatToFormula(formula, flat) {
   if (!formula) return formula;
@@ -149,6 +154,60 @@ function groupModifierDetails(details) {
   return Array.from(groups.entries()).map(([label, items]) => ({ label, items }));
 }
 
+// The weapon a spell attacks through (True Strike). Stored per spell on the
+// character, so the collapsed card keeps rolling the one picked.
+function SpellWeaponPicker({ spellName, options, selectedKey, onUpdateCharacter }) {
+  if (!options.length) {
+    return (
+      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.7 }}>
+        No weapon you are proficient with in your inventory.
+      </Typography>
+    );
+  }
+  return (
+    <Box sx={{ mt: 0.7, pt: 0.5, borderTop: '1px dashed', borderColor: 'divider' }}>
+      <Typography sx={{ fontSize: '0.6rem', color: RICH_TEXT_ACCENT, fontFamily: '"Cinzel", Georgia, serif', fontWeight: 700, letterSpacing: '0.08em', mb: 0.3 }}>
+        Weapon
+      </Typography>
+      <ToggleButtonGroup
+        size="small"
+        exclusive
+        value={selectedKey}
+        onChange={(_, next) => {
+          if (!next || next === selectedKey) return;
+          onUpdateCharacter?.((prev) => ({
+            ...prev,
+            spellWeapons: { ...(prev?.spellWeapons || {}), [spellName]: next },
+          }));
+        }}
+        sx={{
+          flexWrap: 'wrap',
+          gap: '3px',
+          '& .MuiToggleButton-root': {
+            fontSize: '0.65rem',
+            px: '8px',
+            py: '3px',
+            border: 1,
+            borderColor: 'divider',
+            borderRadius: '999px !important',
+            color: 'text.secondary',
+            bgcolor: 'transparent',
+            '&.Mui-selected': {
+              bgcolor: (theme) => alpha(theme.palette.primary.main, 0.14),
+              color: 'primary.light',
+              borderColor: 'primary.main',
+            },
+          },
+        }}
+      >
+        {options.map((option) => (
+          <ToggleButton key={option.key} value={option.key}>{option.name}</ToggleButton>
+        ))}
+      </ToggleButtonGroup>
+    </Box>
+  );
+}
+
 export default function SpellEntry({
   entry,
   spellAttackBonus = 0,
@@ -158,13 +217,24 @@ export default function SpellEntry({
   activeConditions = [],
   installedRegistry,
   freeCastUses,
+  inventory = [],
 }) {
-  const { onRoll, onShowToast, onToggleFreeCast } = useSheetActions();
+  const { onRoll, onShowToast, onToggleFreeCast, onUpdateCharacter } = useSheetActions();
+  const profSets = useProficiencySets();
   const castLevel = entry.castLevel || entry.level || 0;
   const baseLevel = entry.level || 0;
   const bodyBlocks = entriesToTextBlocks(entry.descriptionEntries || entry.entries);
   const higherEntries = entry.higherLevelEntries || entry.entriesHigherLevel;
-  const rawDamages = extractDamageDice(entry.entries || []);
+  const characterLevel = Number(C?.level || C?.classLevel || 1);
+  const textDamages = extractDamageDice(entry.entries || []);
+  const spellAbility = getSpellAbilityForEntry(C, entry);
+  const spellMod = getMod(getFinal(C, spellAbility));
+  // A cantrip that deals damage rolls the dice of the character's level: the
+  // description holds only the level-1 dice.
+  const scaledCantripDamages = baseLevel === 0 && textDamages.length
+    ? cantripScalingDamages(entry.scalingLevelDice, characterLevel)
+    : [];
+  const rawDamages = scaledCantripDamages.length ? scaledCantripDamages : textDamages;
   const hasAttack = !!entry.spellAttack;
   const spellData = installedRegistry.getSpellData(entry.name);
   const hasConcentrationTag = entry?.spellOverrides?.concentration === false
@@ -178,8 +248,6 @@ export default function SpellEntry({
   const hasDamage = damages.length > 0;
   const steps = castLevel - baseLevel;
 
-  const spellAbility = getSpellAbilityForEntry(C, entry);
-  const spellMod = getMod(getFinal(C, spellAbility));
   // Per-entry casting ability + global magic-item spell-attack bonus (matches the
   // SpellsTab header so the button and the summary agree).
   const atk = getPB(C) + spellMod + spellAttackBonus;
@@ -218,14 +286,34 @@ export default function SpellEntry({
   const modifierDetailGroups = groupModifierDetails(modifierDetails);
   const detailTagLabels = modifierDetails.map((item) => item.tagLabel).filter(Boolean);
   const modifierTags = Array.from(new Set([...(cantripData?.modifierTags || []), ...detailTagLabels]));
-  const characterLevel = Number(C?.level || C?.classLevel || 1);
   const beamCount = typeof cantripData?.beamCount === 'function'
     ? Math.max(1, Number(cantripData.beamCount(characterLevel) || 1))
     : 1;
   const beamBonus = resolveDmgBonusValue(C, cantripData?.dmgBonusPerBeam, getMod, getFinal);
 
+  // A spell made as an attack with a weapon (True Strike): the weapon picked in
+  // the expanded card rolls its own attack and damage with the spellcasting
+  // ability, and the cantrip's extra dice join the damage roll.
+  const weaponAttack = !!cantripData?.weaponAttack;
+  const weaponOptions = useMemo(
+    () => (weaponAttack ? spellWeaponOptions(C, inventory, profSets) : []),
+    [C, inventory, profSets, weaponAttack],
+  );
+  const pickedKey = C?.spellWeapons?.[entry.name];
+  const pickedWeapon = weaponOptions.find((option) => option.key === pickedKey) || weaponOptions[0] || null;
+  const weaponStrike = pickedWeapon
+    ? spellWeaponAttack(C, pickedWeapon.item, {
+        ability: spellAbility,
+        inventory,
+        extraDamage: cantripScalingDice(entry.scalingLevelDice, characterLevel),
+      })
+    : null;
+  const weaponStrikeRoll = weaponStrike
+    ? describeAttackRoll(activeConditions, { extraDisadv: weaponStrike.disadvantage })
+    : null;
+
   const expandedBeams = baseScaledDamages.flatMap((dmg, idx) => {
-    const baseLabel = baseScaledDamages.length > 1 ? `Damage ${idx + 1}` : 'Damage';
+    const baseLabel = dmg.title || (baseScaledDamages.length > 1 ? `Damage ${idx + 1}` : 'Damage');
     if (beamCount <= 1) return [{ ...dmg, label: baseLabel, formula: applyFlatToFormula(dmg.formula, beamBonus) || dmg.formula }];
     return Array.from({ length: beamCount }, (_, beamIdx) => ({
       ...dmg,
@@ -272,7 +360,12 @@ export default function SpellEntry({
 
   const levelLabel = castLevel > baseLevel ? ` (Lv.${castLevel})` : '';
   const hasFreeCasts = Array.isArray(entry.freeCasts) && entry.freeCasts.length > 0;
-  const spellRollers = [
+  const spellRollers = weaponAttack ? (weaponStrike?.damageFormula ? [{
+    key: 'weapon-damage',
+    kind: 'damage',
+    formula: weaponStrike.damageFormula,
+    title: `Damage (${weaponStrike.damageType ? `${weaponStrike.damageType} or ` : ''}radiant)`,
+  }] : []) : [
     ...scaledDamages.map((damage, index) => ({
       key: `damage-${index}`,
       kind: 'damage',
@@ -296,7 +389,7 @@ export default function SpellEntry({
   ];
   // Only controls inside the expanded body warrant a separate description
   // disclosure. Header dice buttons and persistent use counters do not.
-  const hasInteractiveContent = Boolean(spellData?.summonedCreature);
+  const hasInteractiveContent = Boolean(spellData?.summonedCreature) || weaponAttack;
   const descriptionNode = (
     <>
       <EntryBlocks blocks={bodyBlocks} />
@@ -316,9 +409,21 @@ export default function SpellEntry({
           <Typography noWrap sx={{ overflow: 'hidden', minWidth: 0, fontSize: '0.875rem', color: 'text.primary', textOverflow: 'ellipsis' }}>{entry.name}</Typography>
           {castLevel > baseLevel ? <MiniBadge label={`Lv.${castLevel}`} color={ENTITY_COLORS.class} bg={alpha(ENTITY_COLORS.class, 0.14)} /> : null}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', ml: 'auto', flexShrink: 0 }}>
-            {(hasAttack || spellRollers.length > 0) ? (
+            {(hasAttack || weaponStrike || spellRollers.length > 0) ? (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                {hasAttack ? (
+                {weaponStrike ? (
+                  <AttackRollButton
+                    rawBonus={weaponStrike.attackBonus}
+                    exhaustionLevel={exhaustionLevel}
+                    label={formatRollTitle(entry.name, `${weaponStrike.name} Attack`)}
+                    advArg={weaponStrikeRoll.advArg}
+                    tag={weaponStrikeRoll.tag}
+                    tooltip={weaponStrikeRoll.tooltip}
+                    disadv={weaponStrikeRoll.disadv}
+                    onRoll={onRoll}
+                  />
+                ) : null}
+                {hasAttack && !weaponAttack ? (
                   <AttackRollButton
                     rawBonus={atk}
                     exhaustionLevel={exhaustionLevel}
@@ -344,6 +449,9 @@ export default function SpellEntry({
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', flexWrap: 'wrap', justifyContent: 'space-between' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', flexWrap: 'wrap' }}>
             <SourceBadge sourceInfo={entry.sourceInfo} sources={entry.sources} suffix={beamBonus ? ` ${beamBonus >= 0 ? '+' : ''}${beamBonus}` : ''} />
+            {weaponStrike ? (
+              <MiniBadge label={weaponStrike.name} color={CHIP_TONES.info} bg={alpha(CHIP_TONES.info, 0.16)} />
+            ) : null}
             {modifierTags.map(function (tag) { return <MiniBadge key={tag} label={tag} color="#9d7fb8" bg="rgba(157,127,184,0.16)" />; })}
             {spellRiders.filter((rider) => rider.tag).map((rider) => (
               <MiniBadge key={rider.id} label={rider.tag.label} color={rider.tag.color} bg={alpha(rider.tag.color, 0.16)} />
@@ -377,6 +485,14 @@ export default function SpellEntry({
         <>
           <SpellMetaGrid spell={entry} sx={{ mb: '6px' }} />
           {hasInteractiveContent ? <CollapsibleNote>{descriptionNode}</CollapsibleNote> : descriptionNode}
+          {weaponAttack ? (
+            <SpellWeaponPicker
+              spellName={entry.name}
+              options={weaponOptions}
+              selectedKey={pickedWeapon?.key || ''}
+              onUpdateCharacter={onUpdateCharacter}
+            />
+          ) : null}
           {spellData?.summonedCreature ? (
             <SummonedCreaturePanel
               descriptor={spellData.summonedCreature}

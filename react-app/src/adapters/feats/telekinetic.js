@@ -19,17 +19,4 @@ export default function install(registry, context = {}) {
       };
     });
   }
-
-  // Card text = the feat's official "Telekinetic Shove" benefit only (entryName).
-  if (typeof registerFeatSheetActions === "function") {
-    registerFeatSheetActions("Telekinetic", [
-      {
-        name: "Telekinetic Shove",
-        entryName: "Telekinetic Shove",
-        icon: "hand",
-        cat: "bonus",
-        uses: "Bonus Action"
-      }
-    ]);
-  }
 }

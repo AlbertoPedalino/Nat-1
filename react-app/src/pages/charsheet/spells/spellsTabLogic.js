@@ -1344,6 +1344,32 @@ export function getUpcastStep(entries) {
   return null;
 }
 
+// A cantrip's dice at a character level, from 5etools' `scalingLevelDice`
+// ({ scaling: { 5: '1d6', 11: '2d6', 17: '3d6' } }): the highest step reached,
+// or '' before the first (True Strike's extra Radiant damage starts at 5).
+export function cantripScalingDice(scalingLevelDice, level) {
+  const first = Array.isArray(scalingLevelDice) ? scalingLevelDice[0] : scalingLevelDice;
+  const steps = Object.entries(first?.scaling || {})
+    .map(([at, dice]) => [Number(at), String(dice || '')])
+    .filter(([at, dice]) => Number.isFinite(at) && dice && at <= Number(level || 0))
+    .sort((a, b) => b[0] - a[0]);
+  return steps[0]?.[1] || '';
+}
+
+// A cantrip's damage rolls at a character level, one per `scalingLevelDice`
+// line (Toll the Dead has two), titled with 5etools' own label. The text only
+// names the level-1 dice, so the dice are read from here rather than from the
+// description.
+export function cantripScalingDamages(scalingLevelDice, level) {
+  const lines = Array.isArray(scalingLevelDice) ? scalingLevelDice : (scalingLevelDice ? [scalingLevelDice] : []);
+  return lines.flatMap((line) => {
+    const dice = cantripScalingDice(line, level).replace(/\s+/g, '');
+    if (!/^\d+d\d+$/i.test(dice)) return [];
+    const label = String(line?.label || '').trim();
+    return [{ formula: dice, label: dice, title: label ? label[0].toUpperCase() + label.slice(1) : '' }];
+  });
+}
+
 export function extractDamageDice(entries) {
   const out = [];
   const seen = new Set();

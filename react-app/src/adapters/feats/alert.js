@@ -120,23 +120,10 @@ export default function install(registry, context = {}) {
     getGenericBackgroundOriginFeat,
   } = createAdapterBindings(registry, context);
 
-
-  if (typeof registerFeatSheetActions === "function") {
-    registerFeatSheetActions("Alert", [
-      {
-        name:  "Swap Initiative",
-        icon:  "arrow-left-right",
-        cat:   "action",
-        uses:  "Reaction"
-      }
-    ]);
-  }
-
   if (typeof registerFeatSheetEffects === "function") {
     registerFeatSheetEffects("Alert", [
       { type: "initiativeProficiency", note: "Alert." }
     ]);
   }
-
 }
 

@@ -119,24 +119,5 @@ export default function install(registry, context = {}) {
     getGenericBackgroundChoiceMeta,
     getGenericBackgroundOriginFeat,
   } = createAdapterBindings(registry, context);
-
-
-  if (typeof registerFeatSheetActions === "function") {
-    registerFeatSheetActions("Healer", [
-      {
-        name: "Healer's Kit Stabilize",
-        icon: "heart",
-        cat: "action",
-        uses: "Bonus Action"
-      },
-      {
-        name: "Healer's Kit Heal",
-        icon: "heart",
-        cat: "action",
-        uses: "Action"
-      }
-    ]);
-  }
-
 }
 
