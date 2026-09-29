@@ -49,7 +49,6 @@ export default function install(registry, context = {}) {
       cat: 'bonus',
       uses: 'Bardic Inspiration',
       minLevel: 3,
-      desc: 'When you give a creature a Bardic Inspiration die (Bonus Action), you can channel a random spirit (roll the Inspiration die and consult the Spirits from Beyond table). Controlled Channeling: as a Bonus Action you can expend a use of Bardic Inspiration to channel a specific spirit whose number is at most the highest face of your Inspiration die. As a Magic action, Unleash a channeled spirit at a creature within 30 ft (save DC = your Bard spell save DC).',
     },
     {
       name: 'Spiritual Manifestation',
@@ -58,16 +57,6 @@ export default function install(registry, context = {}) {
       uses: '1 / SR or LR',
       resKey: 'spirits_manifestation_cover',
       minLevel: 6,
-      desc: 'When you cast Spirit Guardians, you can cause it to grant Half Cover to you and your allies while they are in its Emanation. Once per Short or Long Rest.',
-    },
-    {
-      name: 'Power from Beyond',
-      icon: 'sparkles',
-      cat: 'special',
-      uses: 'Passive',
-      passive: true,
-      minLevel: 6,
-      desc: 'Once per turn, when you cast a Bard spell with a spell slot that deals damage or restores Hit Points, roll {@dice 1d6} and add it to one of the spell\'s damage rolls or to the total Hit Points restored.',
     },
   ]);
 

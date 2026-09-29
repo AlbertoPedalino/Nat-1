@@ -37,9 +37,9 @@ export default function install(registry, context = {}) {
   });
 
   registerSubclassSheetActions('Wizard_Transmuter', [
-    { name: "Transmuter's Stone", icon: 'gem', cat: 'special', uses: 'On Long Rest', minLevel: 3, desc: 'Create a stone that grants Constitution save proficiency and the selected benefit. Change its benefit when you cast a slotted Transmutation. At level 10 it grants up to two benefits.' },
-    { name: 'Empowered Transmutation', icon: 'sparkles', cat: 'special', uses: 'INT mod / LR', resKey: 'transmuter_empowered', minLevel: 6, desc: 'When a slotted Transmutation neither makes an attack roll nor forces a save, increase its effective level by 1.' },
-    { name: 'Master Transmuter', icon: 'gem', cat: 'action', uses: 'Consume stone', minLevel: 14, desc: 'Consume the stone to use Major Transformation, Panacea, Restore Life, or Restore Youth. A level 7+ spell slot prevents the stone from crumbling.' },
+    { name: "Transmuter's Stone", icon: 'gem', cat: 'special', uses: 'On Long Rest', minLevel: 3 },
+    { name: 'Empowered Transmutation', icon: 'sparkles', cat: 'special', uses: 'INT mod / LR', resKey: 'transmuter_empowered', minLevel: 6 },
+    { name: 'Master Transmuter', icon: 'gem', cat: 'action', uses: 'Consume stone', minLevel: 14 },
   ]);
   registerSubclassSheetResources('Wizard_Transmuter', [
     { key: 'transmuter_empowered', name: 'Empowered Transmutation', icon: 'sparkles', recharge: 'LR', minLevel: 6, max: (level, { int } = {}) => Math.max(1, int ?? 0) },

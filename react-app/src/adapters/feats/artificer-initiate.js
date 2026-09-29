@@ -140,16 +140,7 @@ export default function install(registry, context = {}) {
   }
 
   if (typeof registerFeatSheetActions === "function") {
-    registerFeatSheetActions("Artificer Initiate", [
-      {
-        name: "Artificer Cantrip & Spell",
-        icon: "flask-conical",
-        cat: "action",
-        uses: "Passive",
-        passive: true,
-        desc: "You know one Artificer cantrip and one 1st-level Artificer spell. Cast the 1st-level spell once per Long Rest without a spell slot (or using slots). Intelligence is your spellcasting ability. You gain proficiency with one artisan's tool usable as a spellcasting focus."
-      }
-    ]);
+    registerFeatSheetActions("Artificer Initiate", []);
   }
 
 }

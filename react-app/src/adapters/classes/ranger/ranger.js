@@ -183,57 +183,12 @@ registerClassAdapter("Ranger", function (cls, lv, specs, ctx = {}) {
 // [SheetRuntime] START
 registerClassSheetActions("Ranger", [
   {
-    "name": "Favored Enemy",
-    "icon": "",
-    "cat": "bonus",
-    "uses": "Passive",
-    "passive": true,
-    "desc": "You always have Hunter's Mark prepared (doesn't count against spells known). You can cast it without expending a spell slot: 2 free casts per LR at lv.1, scaling to 3 (lv.5), 4 (lv.9), 5 (lv.13), 6 (lv.17)."
-  },
-  {
-    "name": "Deft Explorer",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 2,
-    "desc": "Expertise in one skill. Learn two languages."
-  },
-  {
-    "name": "Roving",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 6,
-    "desc": "Your Speed increases by 10 ft. You gain Climb Speed and Swim Speed equal to your Speed."
-  },
-  {
-    "name": "Extra Attack",
-    "icon": "",
-    "cat": "attack",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 5,
-    "desc": "Attack twice when you take the Attack action."
-  },
-  {
     "name": "Tireless",
     "icon": "",
     "cat": "action",
     "uses": "WIS mod / LR",
     "resKey": "ranger_tireless",
-    "minLevel": 10,
-    "desc": "Magic action: gain 1d8 + WIS modifier Temporary HP. When you finish a Short Rest, your Exhaustion level is reduced by 1. Uses per Long Rest = WIS modifier."
-  },
-  {
-    "name": "Relentless Hunter",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 13,
-    "desc": "Taking damage can't break your Concentration on Hunter's Mark."
+    "minLevel": 10
   },
   {
     "name": "Nature's Veil",
@@ -241,35 +196,7 @@ registerClassSheetActions("Ranger", [
     "cat": "bonus",
     "uses": "WIS mod / LR",
     "resKey": "natures_veil",
-    "minLevel": 14,
-    "desc": "Bonus Action: become Invisible until the end of your next turn. Uses per Long Rest = WIS modifier."
-  },
-  {
-    "name": "Precise Hunter",
-    "icon": "",
-    "cat": "attack",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 17,
-    "desc": "You have Advantage on attack rolls against the creature currently marked by your Hunter's Mark."
-  },
-  {
-    "name": "Feral Senses",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 18,
-    "desc": "You gain Blindsight 30 ft."
-  },
-  {
-    "name": "Foe Slayer",
-    "icon": "",
-    "cat": "attack",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 20,
-    "desc": "The extra damage die from Hunter's Mark increases to 1d10 (instead of 1d6)."
+    "minLevel": 14
   }
 ]);
 registerClassSheetResources("Ranger", [

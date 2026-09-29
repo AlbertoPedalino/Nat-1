@@ -55,13 +55,10 @@ export default function install(registry, context = {}) {
 
   registerSubclassSheetActions('Cleric_Arcana', [
     { name: 'Fortifying Spell', icon: 'shield-plus', cat: 'special', uses: '1 Channel Divinity', resKey: 'channel_div', minLevel: 3,
-      rollers: [{ kind: 'utility', formula: ({ ownerLevel }) => `1d8+${Number(ownerLevel || 0)}`, label: 'Temporary HP' }],
-      desc: 'When you cast a spell, expend Channel Divinity with no action. One target gains 1d8 + your Cleric level Temporary Hit Points.' },
+      rollers: [{ kind: 'utility', formula: ({ ownerLevel }) => `1d8+${Number(ownerLevel || 0)}`, label: 'Temporary HP' }] },
     { name: 'Tenacious Spell', icon: 'sparkles', cat: 'special', uses: '1 Channel Divinity', resKey: 'channel_div', minLevel: 3,
-      rollers: [{ kind: 'utility', formula: '1d8', label: 'Save reduction' }],
-      desc: "When a creature you can see succeeds on a save against your spell, expend Channel Divinity and subtract 1d8 from that creature's first save against the spell." },
-    { name: 'Dispelling Recovery', icon: 'wand-sparkles', cat: 'special', uses: '1 / SR or LR', resKey: 'arcana_dispelling_recovery', minLevel: 6,
-      desc: 'After a slotted spell restores Hit Points or ends a condition, cast Dispel Magic as part of the same action without a slot. Restore the use on a Short or Long Rest, or by expending Channel Divinity.' },
+      rollers: [{ kind: 'utility', formula: '1d8', label: 'Save reduction' }] },
+    { name: 'Dispelling Recovery', icon: 'wand-sparkles', cat: 'special', uses: '1 / SR or LR', resKey: 'arcana_dispelling_recovery', minLevel: 6 },
   ]);
   registerSubclassSheetResources('Cleric_Arcana', [
     { key: 'arcana_dispelling_recovery', name: 'Dispelling Recovery', icon: 'wand-sparkles', recharge: 'SR+LR', minLevel: 6, max: 1 },

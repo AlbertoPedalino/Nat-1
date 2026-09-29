@@ -188,6 +188,7 @@ function uniqBySignature(items) {
 function isExecutableAction(action) {
   const cat = String(action?.cat || '').toLowerCase();
   if (!EXECUTABLE_CATS.has(cat)) return false;
+  // Adapters no longer register passive cards; older saves' adapterRuntime may.
   if (action.passive) return false;
   return true;
 }
@@ -304,7 +305,7 @@ function warnMissingDescription(action, source) {
   if (_missingDescWarned.has(key)) return;
   _missingDescWarned.add(key);
   // eslint-disable-next-line no-console
-  console.warn(`[actions] No description for "${action?.name}" (source: ${source || 'unknown'}). Add a matching 5etools feature entry or set descOverride.`);
+  console.warn(`[actions] No description for "${action?.name}" (source: ${source || 'unknown'}). Add a matching 5etools feature entry or set entryName.`);
 }
 
 /**
@@ -315,9 +316,11 @@ function warnMissingDescription(action, source) {
  * A feat action may set `entryName` to show only that named benefit of the feat
  * (Great Weapon Master → "Hew") instead of the whole feat description.
  *
- * Adapter-side `desc` / `descOverride` fields are no longer rendered. When the
- * snapshot lookup fails (and the action isn't flagged `noDescription`), a
- * dev-mode warning is emitted so the missing feature mapping can be fixed.
+ * Adapters carry no description text. Characters saved before that may still
+ * hold `desc` / `descOverride` in adapterRuntime; they are dropped below and
+ * never rendered. When the snapshot lookup fails (and the action isn't
+ * flagged `noDescription`), a dev-mode warning is emitted so the missing
+ * feature mapping can be fixed.
  */
 export function collectAdapterActions(C, sheet) {
   const out = [];

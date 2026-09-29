@@ -12,8 +12,7 @@ export default function install(registry, context = {}) {
         entryName: "Hew",
         icon: "swords",
         cat: "bonus",
-        uses: "Bonus Action",
-        desc: "Immediately after you score a Critical Hit with a Melee weapon or reduce a creature to 0 Hit Points with one, you can make one attack with the same weapon as a Bonus Action."
+        uses: "Bonus Action"
       }
     ]);
   }

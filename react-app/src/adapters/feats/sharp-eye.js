@@ -16,7 +16,6 @@ export default function install(registry, context = {}) {
         cat: 'special',
         uses: 'PB / LR',
         resKey: 'sharp_eye',
-        desc: 'When you take the Search or Study action, you can give yourself Advantage on any ability check made as part of that action. Uses equal to your Proficiency Bonus, regained on a Long Rest. If the check fails, the use is not expended.',
       },
     ]);
   }

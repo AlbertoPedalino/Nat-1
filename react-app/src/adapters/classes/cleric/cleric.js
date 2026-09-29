@@ -281,21 +281,12 @@ registerClassSheetEffects("Cleric", [
 ]);
 registerClassSheetActions("Cleric", [
   {
-    "name": "Divine Order",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "desc": "Choose at lv.1 — Protector: proficiency with Martial weapons and Heavy armor; or Thaumaturge: learn one extra Cleric cantrip and gain a bonus equal to your WIS modifier (min +1) to Intelligence (Arcana or Religion) checks."
-  },
-  {
     "name": "Turn Undead",
     "icon": "",
     "cat": "action",
     "uses": "1 Channel",
     "resKey": "channel_div",
-    "minLevel": 2,
-    "desc": "Channel Divinity option. Each Undead within 30 ft that can see or hear you must succeed on a WIS save (DC = 8+PB+WIS) or have the Frightened and Incapacitated condition for 1 minute and must flee."
+    "minLevel": 2
   },
   {
     "name": "Divine Spark",
@@ -329,8 +320,7 @@ registerClassSheetActions("Cleric", [
         },
       },
     ],
-    "rollLabelPrefix": "Divine Spark",
-    "desc": "Channel Divinity option. As a Magic action, point your Holy Symbol at a creature within 30 ft. Roll 1d8 + WIS modifier (scales by level: 2d8 at lv.7, 3d8 at lv.13, 4d8 at lv.18). Either restore that many HP, or force the creature to make a CON save — on failure it takes Radiant or Necrotic damage (your choice) equal to that total; on success it takes half."
+    "rollLabelPrefix": "Divine Spark"
   },
   {
     "name": "Sear Undead",
@@ -344,8 +334,7 @@ registerClassSheetActions("Cleric", [
         ? Number(getMod(getFinal(character, 'wis')) || 1)
         : 1;
       return `${Math.max(1, wis)}d8`;
-    }, label: ({ formula }) => `${formula} radiant` }],
-    "desc": "When you use Turn Undead, each Undead that fails its WIS save also takes Radiant damage equal to a number of d8s equal to your WIS modifier (minimum 1d8). This damage doesn't end the turn effect."
+    }, label: ({ formula }) => `${formula} radiant` }]
   },
   {
     "name": "Divine Intervention",
@@ -353,8 +342,7 @@ registerClassSheetActions("Cleric", [
     "cat": "action",
     "uses": "1 / LR",
     "resKey": "divine_intervention",
-    "minLevel": 10,
-    "desc": "Choose any Cleric spell of level 5 or lower that doesn't require a Reaction. Cast it without expending a spell slot or needing Material components. Recharge: Long Rest."
+    "minLevel": 10
   },
   {
     "name": "Blessed Strikes: Divine Strike",
@@ -370,8 +358,7 @@ registerClassSheetActions("Cleric", [
       const lv = Number(ownerLevel || 1);
       const dice = lv >= 14 ? "2d8" : "1d8";
       return `+${dice} ${divineStrikeDamageType(character).toLowerCase()}`;
-    } }],
-    "desc": "Once per turn when you hit a creature with a weapon attack, deal additional Radiant or Necrotic damage of the type chosen for Divine Strike. The damage is 1d8, increasing to 2d8 at Cleric level 14."
+    } }]
   },
   {
     "name": "Blessed Strikes: Potent Spellcasting",
@@ -379,16 +366,14 @@ registerClassSheetActions("Cleric", [
     "cat": "action",
     "uses": "Cantrip damage",
     "minLevel": 7,
-    "condition": (character) => hasCharacterChoice(character, "cleric_blessed_strikes", "Potent Spellcasting"),
-    "desc": "Add your Wisdom modifier to the damage rolls of your Cleric cantrips. At Cleric level 14, when you deal damage with a Cleric cantrip, grant Temporary HP equal to twice your WIS modifier to yourself or one creature within 60 ft."
+    "condition": (character) => hasCharacterChoice(character, "cleric_blessed_strikes", "Potent Spellcasting")
   },
   {
     "name": "Improved Blessed Strikes",
     "icon": "",
     "cat": "action",
     "uses": "Reminder",
-    "minLevel": 14,
-    "desc": "Your Blessed Strikes choice is upgraded — Divine Strike: extra damage increases to 2d8; Potent Spellcasting: when you deal damage with a Cleric cantrip, you also grant Temporary HP equal to twice your WIS modifier to yourself or one creature within 60 ft."
+    "minLevel": 14
   },
   {
     "name": "Greater Divine Intervention",
@@ -396,8 +381,7 @@ registerClassSheetActions("Cleric", [
     "cat": "action",
     "uses": "1 / LR",
     "resKey": "divine_intervention",
-    "minLevel": 20,
-    "desc": "Your Divine Intervention can now target a Wish spell. If you cast Wish this way, you can't use Divine Intervention again until you finish 2d4 Long Rests. Otherwise functions as Divine Intervention (cast any Cleric spell ≤lv5, no slot or material component). Recharge: Long Rest."
+    "minLevel": 20
   }
 ]);
 registerClassSheetSpellModifiers("Cleric", [

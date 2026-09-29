@@ -122,16 +122,7 @@ export default function install(registry, context = {}) {
 
 
   if (typeof registerFeatSheetActions === "function") {
-    registerFeatSheetActions("Skulker", [
-      {
-        name: "Skulker",
-        icon: "eye-off",
-        cat: "action",
-        uses: "Passive",
-        passive: true,
-        desc: "You can Hide when only Lightly Obscured. A missed ranged attack doesn't reveal your position when Hidden. No Disadvantage on Wisdom (Perception) checks that rely on sight while in dim light."
-      }
-    ]);
+    registerFeatSheetActions("Skulker", []);
   }
 
 }

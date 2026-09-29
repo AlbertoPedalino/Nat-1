@@ -52,7 +52,6 @@ export default function install(registry, context = {}) {
         cat: 'reaction',
         uses: 'PB / LR',
         resKey: 'gathered_whispers_scream',
-        desc: 'When you are hit by an attack roll, take a Reaction to add your Proficiency Bonus to your AC against that attack, potentially causing it to miss. Uses equal to your Proficiency Bonus, regained on a Long Rest.',
       },
     ]);
   }

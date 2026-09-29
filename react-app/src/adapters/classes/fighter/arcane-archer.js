@@ -45,22 +45,15 @@ export default function install(registry, context = {}) {
     { type: 'skill', values: ['Arcana', 'Nature'], minLevel: 3 },
   ]);
   registerSubclassSheetActions('Fighter_Arcane Archer', [
-    { name: 'Arcane Shot', icon: 'target', cat: 'attack', uses: 'INT mod / SR or LR', resKey: 'arcane_shot', minLevel: 3,
-      desc: 'Once per turn after hitting with a ranged weapon that has the Ammunition property, apply one selected Arcane Shot option. Save DC = 8 + PB + INT modifier.' },
-    { name: 'Curving Shot', icon: 'undo-2', cat: 'bonus', uses: 'After a miss', minLevel: 7,
-      desc: 'After a ranged ammunition-weapon attack misses, use a Bonus Action to make the attack against another creature within range and within 60 feet of the original target.' },
-    { name: 'Magical Ammunition', icon: 'sparkles', cat: 'bonus', uses: '1 / SR or LR', resKey: 'arcane_magical_ammunition', minLevel: 7,
-      desc: 'Imbue and fire nonmagical ammunition to create Darkening, Unlocking, or Vine Ammunition. Restore the use on a Short or Long Rest, or by expending Second Wind.' },
-    { name: 'Masterful Shots', icon: 'crosshair', cat: 'reaction', uses: 'Reaction', minLevel: 18,
-      desc: 'When a visible creature misses you, move up to half your Speed away without provoking Opportunity Attacks, then make a ranged attack against it if it is in range.' },
+    { name: 'Arcane Shot', icon: 'target', cat: 'attack', uses: 'INT mod / SR or LR', resKey: 'arcane_shot', minLevel: 3 },
+    { name: 'Curving Shot', icon: 'undo-2', cat: 'bonus', uses: 'After a miss', minLevel: 7 },
+    { name: 'Magical Ammunition', icon: 'sparkles', cat: 'bonus', uses: '1 / SR or LR', resKey: 'arcane_magical_ammunition', minLevel: 7 },
+    { name: 'Masterful Shots', icon: 'crosshair', cat: 'reaction', uses: 'Reaction', minLevel: 18 },
   ]);
   registerSubclassSheetResources('Fighter_Arcane Archer', [
     { key: 'arcane_shot', name: 'Arcane Shot', icon: 'target', recharge: 'SR+LR', minLevel: 3,
       max: (level, { int } = {}) => Math.max(1, int ?? 0),
       die: (level) => level >= 18 ? 'd12' : level >= 15 ? 'd10' : level >= 10 ? 'd8' : 'd6', pool: true, track: 'used' },
     { key: 'arcane_magical_ammunition', name: 'Magical Ammunition', icon: 'sparkles', recharge: 'SR+LR', minLevel: 7, max: 1 },
-  ]);
-  registerSubclassSheetEffects('Fighter_Arcane Archer', [
-    { type: 'saveDc', key: 'arcane_shot_dc', minLevel: 3, note: 'Arcane Shot save DC = 8 + PB + INT modifier.' },
   ]);
 }

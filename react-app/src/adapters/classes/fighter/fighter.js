@@ -167,8 +167,7 @@ registerClassSheetActions("Fighter", [
       const lvNum = Number(ownerLevel || 1);
       return `1d10${lvNum >= 0 ? '+' : ''}${lvNum}`;
     } }],
-    rollLabelPrefix: 'Heal',
-    desc: 'Bonus Action: regain 1d10 + Fighter level HP. Uses: 2 (lv.1), 3 (lv.4), 4 (lv.10). Recharge: Short or Long Rest.'
+    rollLabelPrefix: 'Heal'
   },
   {
     name: 'Action Surge',
@@ -176,8 +175,7 @@ registerClassSheetActions("Fighter", [
     cat: 'action',
     uses: '1-2 / SR',
     resKey: 'action_surge',
-    minLevel: 2,
-    desc: 'Take one additional action on your turn. Uses: 1 (lv.2-16), 2 (lv.17+). Recharge: Short or Long Rest.'
+    minLevel: 2
   },
   {
     name: 'Tactical Mind',
@@ -186,35 +184,7 @@ registerClassSheetActions("Fighter", [
     uses: 'Second Wind',
     minLevel: 2,
     rollers: [{ kind: 'utility', formula: '1d10', label: '1d10', title: 'Bonus' }],
-    rollLabelPrefix: 'Tactical Mind',
-    desc: 'When you fail an ability check, you can expend a use of Second Wind (as a Reaction) to add 1d10 to the check result, possibly changing the outcome.'
-  },
-  {
-    name: 'Extra Attack',
-    icon: '',
-    cat: 'attack',
-    uses: 'Passive',
-    passive: true,
-    minLevel: 5,
-    desc: 'Attack twice when you take the Attack action (lv.5). Three times at lv.11. Four times at lv.20.'
-  },
-  {
-    name: 'Tactical Master',
-    icon: '',
-    cat: 'attack',
-    uses: 'Passive',
-    passive: true,
-    minLevel: 9,
-    desc: 'Passive: when you attack with a weapon whose Mastery property you can use, you can replace that Mastery property with Push, Sap, or Slow for that attack only.'
-  },
-  {
-    name: 'Studied Attacks',
-    icon: '',
-    cat: 'attack',
-    uses: 'Passive',
-    passive: true,
-    minLevel: 13,
-    desc: 'Passive: when you miss with an attack roll using a weapon, you gain Advantage on your next attack roll against the same target before the end of your next turn.'
+    rollLabelPrefix: 'Tactical Mind'
   },
   {
     name: 'Indomitable',
@@ -222,17 +192,7 @@ registerClassSheetActions("Fighter", [
     cat: 'reaction',
     uses: '1-3 / LR',
     resKey: 'indomitable',
-    minLevel: 9,
-    desc: 'When you fail a saving throw, you can reroll it, adding your Fighter level to the result, and must use the new result. Uses: 1 (lv.9-12), 2 (lv.13-16), 3 (lv.17+). Recharge: Long Rest.'
-  },
-  {
-    name: 'Tactical Shift',
-    icon: '',
-    cat: 'bonus',
-    uses: 'On Second Wind',
-    passive: true,
-    minLevel: 5,
-    desc: "When you use Second Wind, you can move up to half your Speed without provoking Opportunity Attacks."
+    minLevel: 9
   }
 ]);
 registerClassSheetResources("Fighter", [

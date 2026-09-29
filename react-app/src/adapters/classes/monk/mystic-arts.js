@@ -35,10 +35,8 @@ export default function install(registry, context = {}) {
     },
   });
   registerSubclassSheetActions('Monk_Mystic Arts', [
-    { name: 'Convert Spell Slot to Focus', icon: 'refresh-cw', cat: 'special', uses: 'Spell slot', minLevel: 6,
-      desc: "Expend a spell slot without an action to regain expended Focus Points equal to the slot's level." },
-    { name: 'Recover Spell Slot', icon: 'refresh-cw', cat: 'special', uses: 'Focus Points', resKey: 'ki', minLevel: 6,
-      desc: 'After a Short Rest or Uncanny Metabolism, spend Focus Points to recover one slot: 2/3/5/6 Focus for a level 1/2/3/4 slot (minimum Monk levels 6/7/13/19).' },
+    { name: 'Convert Spell Slot to Focus', icon: 'refresh-cw', cat: 'special', uses: 'Spell slot', minLevel: 6 },
+    { name: 'Recover Spell Slot', icon: 'refresh-cw', cat: 'special', uses: 'Focus Points', resKey: 'ki', minLevel: 6 },
   ]);
   registerSubclassSheetEffects('Monk_Mystic Arts', [
     { type: 'reminder', minLevel: 3, note: 'Mystic Arts spellcasting uses Wisdom and the Sorcerer spell list; an Arcane Focus can be used as the focus.' },

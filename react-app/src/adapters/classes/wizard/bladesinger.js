@@ -150,42 +150,21 @@ const _wizardBladesingerActions = [
       });
       return { canActivate: !hasArmorOrShield, isSuppressed: hasArmorOrShield };
     },
-    "minLevel": 3,
-    "desc": "Bonus Action: activate Bladesong for 1 minute while you aren't wearing armor or using a Shield. While active you gain: a bonus to AC equal to your Intelligence modifier (minimum of +1), your Speed increases by 10 feet, Advantage on Dexterity (Acrobatics) checks, you can use your Intelligence modifier for attack and damage rolls with proficient weapons, and a bonus to Concentration saving throws equal to your Intelligence modifier. Use: INT modifier (minimum 1) per Long Rest."
-  },
-  {
-    "name": "Training in War and Song",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 3,
-    "desc": "You gain proficiency with all Melee Martial weapons that don't have the Heavy or Two-Handed property, and you can use a proficient Melee weapon as a spellcasting focus for your Wizard spells. Choose one skill proficiency: Acrobatics, Athletics, Performance, or Persuasion."
-  },
-  {
-    "name": "Extra Attack",
-    "icon": "",
-    "cat": "attack",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 6,
-    "desc": "You can attack twice when you take the Attack action. You can cast one Wizard cantrip with a casting time of an action in place of one of those attacks."
+    "minLevel": 3
   },
   {
     "name": "Song of Defense",
     "icon": "",
     "cat": "reaction",
     "uses": "Reaction + Spell Slot",
-    "minLevel": 10,
-    "desc": "While Bladesong is active: when you take damage, use your Reaction and expend a spell slot to reduce that damage by 5 x the slot's level."
+    "minLevel": 10
   },
   {
     "name": "Song of Victory",
     "icon": "",
     "cat": "bonus",
     "uses": "After action spell",
-    "minLevel": 14,
-    "desc": "After you cast a spell that has a casting time of an action, you can make one attack with a weapon as a Bonus Action."
+    "minLevel": 14
   }
 ];
 const _wizardBladesingerResources = [

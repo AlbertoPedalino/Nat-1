@@ -158,7 +158,6 @@ registerSpeciesSheetActions("Shifter_EFA", [
       const pb = Math.floor((lv - 1) / 4) + 2;
       return [{ icon: 'heart', label: 'Temp HP', value: 2 * pb }];
     },
-    desc: 'Bonus Action: shift for 1 minute or until you revert as a Bonus Action. When you shift, gain temporary hit points equal to 2 times your Proficiency Bonus, plus lineage-specific benefits.',
   },
 ]);
 registerSpeciesSheetResources("Shifter_EFA", [

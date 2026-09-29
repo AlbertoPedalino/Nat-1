@@ -190,22 +190,13 @@ registerClassAdapter("Druid", function (cls, lv, specs, ctx = {}) {
 // [SheetRuntime] START
 registerClassSheetActions("Druid", [
   {
-    "name": "Primal Order",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "desc": "Choose at lv.1 — Magician: learn one extra Druid cantrip; or Warden: proficiency with Martial weapons and training with Medium armor (if not already proficient)."
-  },
-  {
     "name": "Wild Shape",
     "icon": "",
     "cat": "bonus",
     "uses": "2 / SR+LR",
     "resKey": "wild_shape",
     "minLevel": 2,
-    detailType: 'wildShape',
-    "desc": "Bonus Action. Transform into a Beast form you know. Max CR: 1/4 (lv.2), 1/2 (lv.4), 1 (lv.8); no Fly Speed before lv.8; no swarms. Keep your own Hit Points and gain Temporary HP equal to your Druid level. Retain INT/WIS/CHA scores, class features, and your proficiencies (use the higher of your save/skill or the form's). Gain the beast's STR/DEX/CON, AC, attacks, and physical traits. Lasts hours equal to half your Druid level, or until you use Wild Shape again, are Incapacitated, or die. Recover 1 use on Short Rest, all on Long Rest."
+    detailType: 'wildShape'
   },
   {
     "name": "Wild Companion",
@@ -213,8 +204,7 @@ registerClassSheetActions("Druid", [
     "cat": "action",
     "uses": "Spell slot or Wild Shape",
     "minLevel": 2,
-    detailType: 'wildCompanion',
-    "desc": "Magic action. Spend one Wild Shape use (or a spell slot) to cast Find Familiar without Material components. The familiar takes the form of any Beast of CR 0, is a Fey creature, and vanishes when you finish a Long Rest."
+    detailType: 'wildCompanion'
   },
   {
     "name": "Wild Resurgence",
@@ -222,45 +212,7 @@ registerClassSheetActions("Druid", [
     "cat": "bonus",
     "uses": "Situational",
     "resKey": "wild_resurgence",
-    "minLevel": 5,
-    "desc": "If you have no Wild Shape uses left, you can spend a spell slot of lv.1 or higher to regain one. Alternatively, you can expend one Wild Shape use to regain a lv.1 spell slot (once per LR)."
-  },
-  {
-    "name": "Elemental Fury",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 7,
-    rollers: [{ kind: 'damage', formula: "1d8", label: "+1d8" }],
-    "desc": "Choose at lv.7 — Potent Spellcasting: add WIS modifier to Druid cantrip damage rolls; or Primal Strike: once per turn when you hit with a weapon or Beast attack, deal +1d8 Cold, Fire, Lightning, or Thunder damage (chosen when feature is gained)."
-  },
-  {
-    "name": "Improved Elemental Fury",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 15,
-    "desc": "Your Elemental Fury improves — Potent Spellcasting: your Druid cantrip range increases by 300 ft; Primal Strike: the extra damage increases to 2d8."
-  },
-  {
-    "name": "Beast Spells",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 18,
-    "desc": "While in Wild Shape, you can cast any Druid spell you have prepared, as long as it has no Material components or its Material components have no cost."
-  },
-  {
-    "name": "Archdruid",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 20,
-    "desc": "Three benefits: (1) Evergreen Wild Shape — when you roll Initiative, you regain one expended Wild Shape use; (2) Nature Magician — spend 2 Wild Shape uses to regain one expended spell slot of 5th level or lower (1/LR); (3) Longevity — you age at 1/10 the normal rate and can't be aged magically."
+    "minLevel": 5
   }
 ]);
 registerClassSheetResources("Druid", [

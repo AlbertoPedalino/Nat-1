@@ -55,7 +55,6 @@ export default function install(registry, context = {}) {
       uses: '1 / LR',
       resKey: 'reanimator_companion',
       minLevel: 3,
-      desc: 'Magic action (using Tinker\'s Tools or other Artisan\'s Tools you\'re proficient with): create a Reanimated Companion in an unoccupied space within 5 ft. It is Friendly to you and your allies, obeys you, and lasts until you finish a Long Rest or dismiss it. In combat it acts on your turn, taking only the Dodge action unless you spend a Bonus Action to command it. Once per Long Rest, or expend a spell slot to create one. Only one companion at a time.',
     },
     {
       name: 'Jolt to Life',
@@ -64,16 +63,6 @@ export default function install(registry, context = {}) {
       uses: 'INT mod / LR',
       resKey: 'reanimator_jolt',
       minLevel: 3,
-      desc: 'When you cast Spare the Dying, you can modify it so the target also regains Hit Points equal to your Artificer level, and each creature of your choice in a 10-ft Emanation from the target makes a Dexterity save against your spell save DC, taking {@dice 2d4} Lightning damage (half on a success). Uses equal to your Intelligence modifier, regained on a Long Rest. Lightning increases to 3d4 at level 11 and 4d4 at level 17.',
-    },
-    {
-      name: 'Facilitated Revival',
-      icon: 'cross',
-      cat: 'action',
-      uses: 'See Raise Dead',
-      passive: true,
-      minLevel: 15,
-      desc: 'Cast Raise Dead once without a spell slot and without Material components, using Tinker\'s Tools or other Artisan\'s Tools you\'re proficient with as the Spellcasting Focus. Once per Long Rest.',
     },
     {
       name: 'Life Transfer',
@@ -81,7 +70,6 @@ export default function install(registry, context = {}) {
       cat: 'reaction',
       uses: 'Special',
       minLevel: 15,
-      desc: 'When you or your Reanimated Companion takes damage, take a Reaction to gain Hit Points equal to your companion\'s current Hit Points. The companion then drops to 0 Hit Points and dies, triggering its Death Burst.',
     },
   ]);
 

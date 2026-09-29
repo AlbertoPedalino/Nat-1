@@ -163,7 +163,6 @@ registerSpeciesSheetActions("Goliath_XPHB", [
     resKey: 'goliath_giant_ancestry',
     minLevel: 1,
     condition: requiresGiantAncestry('cloud'),
-    desc: 'Bonus Action: magically teleport up to 30 feet to an unoccupied space you can see. Uses are shared with your chosen Giant Ancestry benefit.',
   },
   {
     name: "Fire's Burn",
@@ -174,7 +173,6 @@ registerSpeciesSheetActions("Goliath_XPHB", [
     rollers: [{ kind: 'damage', formula: '1d10' }],
     minLevel: 1,
     condition: requiresGiantAncestry('fire'),
-    desc: 'No action: when you hit a target with an attack roll and deal damage to it, also deal 1d10 Fire damage to that target. Uses are shared with your chosen Giant Ancestry benefit.',
   },
   {
     name: "Frost's Chill",
@@ -185,7 +183,6 @@ registerSpeciesSheetActions("Goliath_XPHB", [
     rollers: [{ kind: 'damage', formula: '1d6' }],
     minLevel: 1,
     condition: requiresGiantAncestry('frost'),
-    desc: 'No action: when you hit a target with an attack roll and deal damage to it, also deal 1d6 Cold damage and reduce its Speed by 10 feet until the start of your next turn. Uses are shared with your chosen Giant Ancestry benefit.',
   },
   {
     name: "Hill's Tumble",
@@ -195,7 +192,6 @@ registerSpeciesSheetActions("Goliath_XPHB", [
     resKey: 'goliath_giant_ancestry',
     minLevel: 1,
     condition: requiresGiantAncestry('hill'),
-    desc: 'No action: when you hit a Large or smaller creature with an attack roll and deal damage to it, give that target the Prone condition. Uses are shared with your chosen Giant Ancestry benefit.',
   },
   {
     name: "Stone's Endurance",
@@ -210,7 +206,6 @@ registerSpeciesSheetActions("Goliath_XPHB", [
       const conMod = Math.floor((conScore - 10) / 2);
       return [{ icon: 'shield', label: 'Reduction', value: `1d12${conMod >= 0 ? '+' : ''}${conMod}` }];
     },
-    desc: 'Reaction: when you take damage, roll 1d12, add your Constitution modifier, and reduce the damage by that total. Uses are shared with your chosen Giant Ancestry benefit.',
   },
   {
     name: "Storm's Thunder",
@@ -221,7 +216,6 @@ registerSpeciesSheetActions("Goliath_XPHB", [
     rollers: [{ kind: 'damage', formula: '1d8' }],
     minLevel: 1,
     condition: requiresGiantAncestry('storm'),
-    desc: 'Reaction: when you take damage from a creature within 60 feet of you, deal 1d8 Thunder damage to that creature. Uses are shared with your chosen Giant Ancestry benefit.',
   },
   {
     name: 'Large Form',
@@ -234,7 +228,6 @@ registerSpeciesSheetActions("Goliath_XPHB", [
       { icon: 'timer', label: 'Duration', value: '10 min' },
       { icon: 'footprints', label: 'Speed', value: '+10 ft' },
     ],
-    desc: 'Bonus Action: if you are in a big enough space, become Large for 10 minutes or until you end it with no action. For the duration, you have Advantage on Strength checks and your Speed increases by 10 feet. Recharge: Long Rest.',
   },
 ]);
 registerSpeciesSheetResources("Goliath_XPHB", [

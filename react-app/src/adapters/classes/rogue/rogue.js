@@ -175,92 +175,49 @@ registerClassSheetActions("Rogue", [
       const dice = Math.max(1, Math.ceil(lv / 2));
       return `${dice}d6`;
     }, label: ({ formula }) => `${String(formula || '')} extra` }],
-    "rollLabelPrefix": "Damage",
-    "desc": "Once per turn, deal extra damage with a Finesse or ranged weapon if you have Advantage on the attack OR a conscious ally is within 5 ft of the target (you must not have Disadvantage). Dice: 1d6 at lv.1, +1d6 every 2 levels."
+    "rollLabelPrefix": "Damage"
   },
   {
     "name": "Cunning Action",
     "icon": "",
     "cat": "bonus",
     "uses": "Unlimited",
-    "minLevel": 2,
-    "desc": "Bonus Action each turn: take the Dash, Disengage, or Hide action."
+    "minLevel": 2
   },
   {
     "name": "Steady Aim",
     "icon": "",
     "cat": "bonus",
     "uses": "Unlimited",
-    "minLevel": 3,
-    "desc": "Bonus Action: give yourself Advantage on your next attack roll this turn. You must not have moved during this turn, and your speed becomes 0 until the end of the turn."
+    "minLevel": 3
   },
   {
     "name": "Uncanny Dodge",
     "icon": "",
     "cat": "reaction",
     "uses": "Reaction",
-    "minLevel": 5,
-    "desc": "When an attacker you can see hits you with an attack roll, use your Reaction to halve the attack's damage against you."
+    "minLevel": 5
   },
   {
     "name": "Cunning Strike",
     "icon": "",
     "cat": "attack",
     "uses": "Sneak Attack die",
-    "minLevel": 5,
-    "desc": "When you deal Sneak Attack damage, forgo one or more Sneak Attack dice to apply an option: Disarm (1 die, DEX save or drops item), Poison (1 die, CON save or Poisoned 1 min), Trip (1 die, DEX save or Prone), Withdraw (1 die, movement doesn't provoke OA this turn)."
+    "minLevel": 5
   },
   {
     "name": "Improved Cunning Strike",
     "icon": "",
     "cat": "attack",
     "uses": "Sneak Attack dice",
-    "minLevel": 11,
-    "desc": "You can use up to two Cunning Strike options when you deal Sneak Attack damage, instead of only one."
+    "minLevel": 11
   },
   {
     "name": "Devious Strikes",
     "icon": "",
     "cat": "attack",
     "uses": "Sneak Attack dice",
-    "minLevel": 14,
-    "desc": "Additional Cunning Strike options: Daze (2 dice, CON save or Incapacitated until end of your next turn), Knock Out (6 dice, CON save or Unconscious for 1 min — ends if target takes damage or is shaken), Obscure (3 dice, DEX save or Blinded until end of your next turn)."
-  },
-  {
-    "name": "Evasion",
-    "icon": "",
-    "cat": "reaction",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 7,
-    "desc": "DEX save: take no damage on success, half on failure. Doesn't work if Incapacitated."
-  },
-  {
-    "name": "Reliable Talent",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 7,
-    "desc": "When you make an ability check using a skill you are proficient in, treat a d20 roll of 9 or lower as a 10."
-  },
-  {
-    "name": "Slippery Mind",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 15,
-    "desc": "Proficiency in WIS and CHA saving throws."
-  },
-  {
-    "name": "Elusive",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 18,
-    "desc": "No attack roll has Advantage against you while you are not Incapacitated."
+    "minLevel": 14
   },
   {
     "name": "Stroke of Luck",
@@ -268,8 +225,7 @@ registerClassSheetActions("Rogue", [
     "cat": "action",
     "uses": "1 / LR",
     "resKey": "stroke_of_luck",
-    "minLevel": 20,
-    "desc": "Once per Long Rest: turn a failed ability check into a success, or turn a miss into a hit. Recharge: Long Rest."
+    "minLevel": 20
   }
 ]);
 registerClassSheetResources("Rogue", [

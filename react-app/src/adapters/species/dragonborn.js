@@ -176,7 +176,6 @@ registerSpeciesSheetActions("Dragonborn_XPHB", [
       return [{ icon: 'shield', label: 'Save DC', value: 8 + pb + conMod }];
     },
     minLevel: 1,
-    desc: 'When you take the Attack action, you can replace one attack with destructive draconic energy in a 15 ft. cone or 30 ft. line. Each creature makes a DEX save (DC = 8 + PB + CON mod); half damage on success. Damage type depends on your Draconic Ancestry.',
   },
   {
     name: 'Draconic Flight',
@@ -185,7 +184,6 @@ registerSpeciesSheetActions("Dragonborn_XPHB", [
     uses: '1 / LR',
     resKey: 'dragonborn_flight',
     minLevel: 5,
-    desc: 'Bonus Action: sprout spectral wings for 10 minutes, until you retract them with no action, or until you have the Incapacitated condition. During that time, you have a Fly Speed equal to your Speed. Recharge: Long Rest.',
   },
 ]);
 registerSpeciesSheetResources("Dragonborn_XPHB", [

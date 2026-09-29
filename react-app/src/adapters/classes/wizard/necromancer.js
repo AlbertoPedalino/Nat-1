@@ -28,9 +28,9 @@ export default function install(registry, context = {}) {
   });
 
   registerSubclassSheetActions('Wizard_Necromancer', [
-    { name: 'Harvest Undead', icon: 'heart', cat: 'reaction', uses: 'Controlled Undead', minLevel: 10, desc: 'After damage makes you Bloodied without reducing you to 0 HP, reduce a visible Undead you control to 0 HP and regain HP equal to your Wizard level.' },
-    { name: 'Bolster Undead', icon: 'shield-plus', cat: 'bonus', uses: '1 / LR', resKey: 'necromancer_bolster', minLevel: 14, desc: 'Undead you created or summoned with Necromancy spells within 60 feet gain Temporary HP equal to your Wizard level.' },
-    { name: 'Extinguish Undead', icon: 'burst', cat: 'special', uses: 'Special', minLevel: 14, desc: 'When a visible Undead reaches 0 HP, explode it in a 10-foot Emanation. For an uncontrolled Undead, use a Reaction and a level 5+ spell slot.' },
+    { name: 'Harvest Undead', icon: 'heart', cat: 'reaction', uses: 'Controlled Undead', minLevel: 10 },
+    { name: 'Bolster Undead', icon: 'shield-plus', cat: 'bonus', uses: '1 / LR', resKey: 'necromancer_bolster', minLevel: 14 },
+    { name: 'Extinguish Undead', icon: 'burst', cat: 'special', uses: 'Special', minLevel: 14 },
   ]);
   registerSubclassSheetResources('Wizard_Necromancer', [
     { key: 'necromancer_bolster', name: 'Bolster Undead', icon: 'shield-plus', recharge: 'LR', minLevel: 14, max: 1 },

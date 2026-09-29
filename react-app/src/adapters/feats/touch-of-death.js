@@ -41,15 +41,6 @@ export default function install(registry, context = {}) {
   }
 
   if (typeof registerFeatSheetActions === 'function') {
-    registerFeatSheetActions('Touch of Death', [
-      {
-        name: 'Touch of Death',
-        icon: 'skull',
-        cat: 'action',
-        uses: 'Passive',
-        passive: true,
-        desc: 'You learn Chill Touch and can cast it without spell components; its Necrotic damage ignores Resistance. Pull of the Grave: you have Disadvantage on Death Saving Throws.',
-      },
-    ]);
+    registerFeatSheetActions('Touch of Death', []);
   }
 }

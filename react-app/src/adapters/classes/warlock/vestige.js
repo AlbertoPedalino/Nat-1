@@ -66,12 +66,9 @@ export default function install(registry, context = {}) {
         name: 'Vestige Companion', source: 'AU', levelClass: 'Warlock', ability: 'cha',
         variantChoiceKey: 'subclass_vestige_companion_type',
         divinePowerResourceKey: 'vestige_power',
-      },
-      desc: "Command the companion to take an action from its stat block or another action. You can instead replace one of your Attack-action attacks to command its Vestige's Strike." },
-    { name: 'Vestige Recovery', icon: 'heart-pulse', cat: 'reaction', uses: '1 / LR', resKey: 'vestige_recovery', minLevel: 10,
-      desc: 'When the companion would fall to 0 HP, expend a Pact Magic slot as a Reaction: it falls to 1 HP, teleports within 5 feet of you, and regains HP up to its maximum.' },
-    { name: 'Semblance of Life', icon: 'sparkles', cat: 'bonus', uses: '1 / LR', resKey: 'vestige_semblance', minLevel: 14,
-      desc: 'Transform the companion for 1 hour into the spirit form matching its Celestial, Fiend, or Undead type. It follows the summoning spell rules described by the feature.' },
+      } },
+    { name: 'Vestige Recovery', icon: 'heart-pulse', cat: 'reaction', uses: '1 / LR', resKey: 'vestige_recovery', minLevel: 10 },
+    { name: 'Semblance of Life', icon: 'sparkles', cat: 'bonus', uses: '1 / LR', resKey: 'vestige_semblance', minLevel: 14 },
   ]);
   registerSubclassSheetResources('Warlock_Vestige', [
     { key: 'vestige_power', name: 'Divine Power', icon: 'sparkles', recharge: 'SR+LR', minLevel: 3, srMinLevel: 6, lrMinLevel: 6, max: 1 },

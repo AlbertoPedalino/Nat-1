@@ -122,12 +122,6 @@ export default function install(registry, context = {}) {
   const getMod = context?.getMod;
   const getFinal = context?.getFinal;
 
-function fiendChoice(C, key) {
-  if (!C?.choices) return null;
-  if (C.choices[key] != null) return C.choices[key];
-  const found = Object.entries(C.choices).find(([choiceKey]) => choiceKey.replace(/^mc\d+_/, '') === key);
-  return found ? found[1] : null;
-}
 registerSubclassAdapter("Warlock_Fiend", function (cls, lv, specs) {
   if (lv >= 10) {
     specs.push({
@@ -144,15 +138,9 @@ registerSubclassAdapter("Warlock_Fiend", function (cls, lv, specs) {
 // [SheetRuntime] START
 registerSubclassSheetActions("Warlock_Fiend", [
 
-  { name: "Dark One's Own Luck", icon: "dice-6", cat: "reaction", uses: "CHA mod / LR", resKey: "fiend_luck", minLevel: 6,
-    desc: "When you make an ability check or saving throw, expend one use to add 1d10 to the roll. You can do so after seeing the roll but before the outcome is determined. Recharge: Long Rest." },
-  { name: "Fiendish Resilience", icon: "shield", cat: "action", uses: "Passive — change on rest", minLevel: 10,
-  passive: true,
-    inlinePills: ({ character }) => [{ icon: "shield", label: "Resistance", value: String(fiendChoice(character, "fiend_resilience_damage_type") || "Choose") }],
-    desc: "You have Resistance to the chosen damage type. At the end of a Short or Long Rest, you can change the type. Select the type in the builder (or adjust manually if the builder choice doesn't support rest-based updates)." },
+  { name: "Dark One's Own Luck", icon: "dice-6", cat: "reaction", uses: "CHA mod / LR", resKey: "fiend_luck", minLevel: 6 },
   { name: "Hurl Through Hell", icon: "flame", cat: "action", uses: "1 / LR or Pact Magic slot", resKey: "fiend_hurl", minLevel: 14,
-    rollers: [{ kind: 'damage', formula: "8d10", label: "Hurl Through Hell 8d10 Psychic" }],
-    desc: "When you hit a creature with an attack, banish it to the Lower Planes until the end of your next turn. When it returns, if it isn't a Fiend, it makes a CHA save or takes 8d10 Psychic damage and is Incapacitated until the end of its next turn; on success, half damage and no Incapacitated. Recharge: Long Rest, or expend a Pact Magic slot." },
+    rollers: [{ kind: 'damage', formula: "8d10", label: "Hurl Through Hell 8d10 Psychic" }] },
 ]);
 registerSubclassSheetEffects("Warlock_Fiend", [
   { type: "resistance-choice", key: "fiend_resilience_damage_type", minLevel: 10, note: "Fiendish Resilience" },

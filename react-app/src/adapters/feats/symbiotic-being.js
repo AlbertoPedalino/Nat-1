@@ -16,7 +16,6 @@ export default function install(registry, context = {}) {
         cat: 'reaction',
         uses: 'PB / LR',
         resKey: 'symbiotic_sustain',
-        desc: 'When you fail a saving throw, take a Reaction and expend one of your Hit Dice; roll the die and add the number rolled to the save, potentially turning the failure into a success. Uses equal to your Proficiency Bonus, regained on a Long Rest. (Symbiotic Agenda: after you roll a 1 on a D20 Test, make a DC 13 + PB Charisma save or be Charmed by your symbiote for 1d12 hours, repeating the save whenever you take damage.)',
       },
     ]);
   }

@@ -143,7 +143,6 @@ registerSpeciesSheetActions("Dwarf_XPHB", [
       { icon: 'radar', label: 'Sense', value: 'Tremorsense 60 ft' },
       { icon: 'timer', label: 'Duration', value: '10 min' },
     ],
-    desc: 'Bonus Action: gain Tremorsense with a range of 60 feet for 10 minutes. You must be on or touching a natural or worked stone surface. Recharge: Long Rest.',
   },
 ]);
 registerSpeciesSheetResources("Dwarf_XPHB", [

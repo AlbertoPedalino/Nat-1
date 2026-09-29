@@ -25,15 +25,6 @@ export default function install(registry, context = {}) {
   });
 
   if (typeof registerFeatSheetActions === 'function') {
-    registerFeatSheetActions('Skilled', [
-      {
-        name: 'Skilled',
-        icon: 'book-open',
-        cat: 'action',
-        uses: 'Passive',
-        passive: true,
-        desc: 'You gain proficiency in any combination of three skills or tools of your choice.',
-      },
-    ]);
+    registerFeatSheetActions('Skilled', []);
   }
 }

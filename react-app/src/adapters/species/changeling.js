@@ -138,7 +138,6 @@ registerSpeciesSheetActions("Changeling_EFA", [
     cat: 'action',
     uses: 'At will',
     minLevel: 1,
-    desc: 'Action: change your appearance and voice, including coloration, hair length, sex, height, weight, and size between Medium and Small. Your game statistics, clothing, and equipment do not change. While shape-shifted, you have Advantage on Charisma checks. Take an action to revert.',
   },
 ]);
 

@@ -144,15 +144,6 @@ registerSubclassAdapter("Druid_Stars", function (cls, lv, specs) {});
 // [SheetRuntime] START
 registerSubclassSheetActions("Druid_Stars", [
   {
-    "name": "Star Map",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 3,
-    "desc": "You create a star chart (Tiny object) that serves as your spellcasting focus. The Guidance and Guiding Bolt spells are always prepared for you. You can cast Guiding Bolt without expending a spell slot (WIS modifier uses, min 1, per Long Rest) — tracked on the Guiding Bolt spell. If you lose the map, perform a 1-hour ceremony to create a replacement (can be done during a Short or Long Rest)."
-  },
-  {
     "name": "Starry Form",
     "icon": "",
     "cat": "bonus",
@@ -168,8 +159,7 @@ registerSubclassSheetActions("Druid_Stars", [
     ],
     "choiceNoToast": true,
     "choiceAllowClear": true,
-    "choiceRestNote": "Choose a constellation when you assume Starry Form. Click the active one again to clear it. At level 10+ you can change it at the start of each of your turns.",
-    "desc": "Spend a Wild Shape use to take on a starry form for 10 minutes (retain your stats; body becomes luminous, sheds Bright Light 10 ft and Dim Light 10 ft beyond). Choose one constellation: Archer — when you activate this form and as a Bonus Action on subsequent turns, make a ranged spell attack (60 ft, 1d8+WIS Radiant on hit; 2d8+WIS at lv.10). Chalice — when you cast a spell using a spell slot that restores HP to a creature, you or another creature within 30 ft also regains 1d8+WIS HP (2d8+WIS at lv.10). Dragon — when you make an INT or WIS check or a CON save to maintain Concentration, treat a d20 roll of 9 or lower as a 10. At lv.10, you can change constellation at the start of each of your turns."
+    "choiceRestNote": "Choose a constellation when you assume Starry Form. Click the active one again to clear it. At level 10+ you can change it at the start of each of your turns."
   },
   {
     "name": "Starry Form: Archer",
@@ -192,26 +182,7 @@ registerSubclassSheetActions("Druid_Stars", [
     "cat": "reaction",
     "uses": "WIS mod / LR",
     "resKey": "stars_cosmic_omen",
-    "minLevel": 6,
-    "desc": "After each Long Rest, consult your Star Map and roll any die. Even = Weal, Odd = Woe. Uses: WIS modifier (min 1) per Long Rest. Reaction when a creature you can see within 30 ft is about to make a D20 Test: Weal — roll 1d6 and add the number to the roll. Woe — roll 1d6 and subtract the number from the roll."
-  },
-  {
-    "name": "Twinkling Constellations",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 10,
-    "desc": "Passive: while in Starry Form, the Archer and Chalice damage/healing increases to 2d8+WIS. The Dragon form instead grants a Fly Speed of 20 ft with Hover. Additionally, at the start of each of your turns while in Starry Form, you can change which constellation glimmers on your body."
-  },
-  {
-    "name": "Full of Stars",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 14,
-    "desc": "Passive: while in Starry Form, you become partially incorporeal and gain Resistance to Bludgeoning, Piercing, and Slashing damage."
+    "minLevel": 6
   }
 ]);
 if (typeof registerSubclassRuntimeConfig === "function") {

@@ -139,8 +139,7 @@ export default function install(registry, context = {}) {
         name: "Inspiring Speech",
         icon: "mic",
         cat: "action",
-        resKey: "inspiring_speech",
-        desc: "Spend 10 minutes giving an inspiring speech. Up to 6 creatures who can hear and understand you gain Temporary Hit Points equal to your Proficiency Bonus. Once per Long Rest."
+        resKey: "inspiring_speech"
       }
     ]);
   }

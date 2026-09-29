@@ -122,16 +122,7 @@ export default function install(registry, context = {}) {
 
 
   if (typeof registerFeatSheetActions === "function") {
-    registerFeatSheetActions("Savage Attacker", [
-      {
-        name: "Savage Attacker",
-        icon: "activity",
-        cat: "action",
-        uses: "Passive",
-        passive: true,
-        desc: "Once per turn when you roll damage for a melee weapon attack, reroll the weapon's damage dice and use either result."
-      }
-    ]);
+    registerFeatSheetActions("Savage Attacker", []);
   }
 
 }

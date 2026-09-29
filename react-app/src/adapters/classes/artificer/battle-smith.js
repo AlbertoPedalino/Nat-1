@@ -137,30 +137,11 @@ registerSubclassAdapter("Artificer_Battle Smith", function (cls, lv, specs, ctx 
 // [SheetRuntime] START
 registerSubclassSheetActions("Artificer_Battle Smith", [
   {
-    "name": "Battle Ready",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 3,
-    "desc": "Passive: you gain proficiency with martial weapons. When you attack with a magic weapon, you can use your INT modifier instead of STR or DEX for the attack and damage rolls. You can use a weapon with which you have proficiency as a spellcasting focus for your Artificer spells."
-  },
-  {
     "name": "Steel Defender",
     "icon": "",
     "cat": "bonus",
     "uses": "Bonus Action (command)",
-    "minLevel": 3,
-    "desc": "Your Steel Defender acts on your initiative. It takes the Dodge action unless you spend a Bonus Action to command it to take another action. If you are Incapacitated, it acts on its own. Revival: if it died within the last hour, take a Magic action and expend a spell slot to touch it — it revives after 1 minute with full HP. Recreate after Long Rest (requires Smith's Tools)."
-  },
-  {
-    "name": "Extra Attack",
-    "icon": "",
-    "cat": "attack",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 5,
-    "desc": "Attack twice instead of once when you take the Attack action. You can forgo one of those attacks to command your Steel Defender to take the Force-Empowered Rend action."
+    "minLevel": 3
   },
   {
     "name": "Arcane Jolt",
@@ -170,17 +151,7 @@ registerSubclassSheetActions("Artificer_Battle Smith", [
     "resKey": "arcane_jolt",
     "minLevel": 9,
     rollers: [{ kind: 'damage', formula: ({ ownerLevel }) => Number(ownerLevel || 1) >= 15 ? '4d6' : '2d6', label: ({ formula }) => `+${formula} force` }],
-    "rollLabelPrefix": "Arcane Jolt",
-    "desc": "When you or your Steel Defender hits with an attack, channel arcane energy: either deal extra Force damage (2d6; 4d6 at lv.15) to the target, OR restore HP to a creature within 30 ft of the target (same amount). Uses: INT modifier (min 1) per Long Rest. Recharge: Long Rest."
-  },
-  {
-    "name": "Improved Defender",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 15,
-    "desc": "Improved Jolt: Arcane Jolt damage/healing increases to 4d6. Improved Deflection: when your Steel Defender uses Deflect Attack, the attacker takes Force damage equal to 1d4 + your INT modifier."
+    "rollLabelPrefix": "Arcane Jolt"
   }
 ]);
 registerSubclassSheetResources("Artificer_Battle Smith", [

@@ -368,25 +368,14 @@ registerClassSheetActions("Artificer", [
     "cat": "reaction",
     "uses": "INT mod / LR",
     "resKey": "flash_genius",
-    "minLevel": 7,
-    "desc": "When you or a creature you can see within 30 ft fails an ability check or saving throw, add your Intelligence modifier to the roll."
+    "minLevel": 7
   },
   {
     "name": "Spell-Storing Item",
     "icon": "",
     "cat": "action",
     "uses": "1 active item",
-    "minLevel": 11,
-    "desc": "After a Long Rest, store one Artificer spell (level 1-3) in a weapon or spellcasting focus item so it can be cast repeatedly from that item."
-  },
-  {
-    "name": "Soul of Artifice",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 20,
-    "desc": "Cheat Death: when reduced to 0 HP, you can disintegrate replicated Uncommon or Rare magic items to remain at 20 HP per item. Magical Guidance: after a Short Rest, regain all Flash of Genius uses if you are attuned to at least one magic item."
+    "minLevel": 11
   }
 ]);
 registerClassSheetResources("Artificer", [

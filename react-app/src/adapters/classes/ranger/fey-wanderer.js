@@ -140,25 +140,14 @@ registerSubclassSheetActions("Ranger_Fey Wanderer", [
     "cat": "attack",
     "uses": "1 / turn",
     "minLevel": 3,
-    rollers: [{ kind: 'damage', formula: ({ ownerLevel }) => Number(ownerLevel || 1) >= 11 ? "1d6" : "1d4", label: ({ formula }) => `+${formula} psychic` }],
-    "desc": "Once per turn when you hit a creature with a weapon, deal an extra 1d4 Psychic damage (1d6 at lv.11)."
-  },
-  {
-    "name": "Otherworldly Glamour",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 3,
-    "desc": "Passive: whenever you make a Charisma check, add your WIS modifier as a bonus (minimum +1). You gain proficiency in one of: Deception, Performance, or Persuasion (your choice)."
+    rollers: [{ kind: 'damage', formula: ({ ownerLevel }) => Number(ownerLevel || 1) >= 11 ? "1d6" : "1d4", label: ({ formula }) => `+${formula} psychic` }]
   },
   {
     "name": "Beguiling Twist",
     "icon": "",
     "cat": "reaction",
     "uses": "At will",
-    "minLevel": 7,
-    "desc": "Passive: Advantage on saving throws to avoid or end the Charmed or Frightened condition. Reaction — when you or a creature you can see within 120 ft succeeds on a saving throw to avoid or end Charmed or Frightened: force a different creature you can see within 120 ft to make a WIS saving throw (spell save DC). On a failed save, the target is Charmed or Frightened (your choice) for 1 minute; it repeats the save at the end of each of its turns, ending the effect on a success."
+    "minLevel": 7
   },
   {
     "name": "Fey Reinforcements",
@@ -166,8 +155,7 @@ registerSubclassSheetActions("Ranger_Fey Wanderer", [
     "cat": "action",
     "uses": "1 / LR (free slot)",
     "resKey": "fey_reinforcements",
-    "minLevel": 11,
-    "desc": "You can cast Summon Fey without a Material component. Once per Long Rest you can cast it without expending a spell slot; additional castings require a spell slot. Whenever you start casting the spell, you can modify it to not require Concentration — if you do, the spell's duration becomes 1 minute."
+    "minLevel": 11
   },
   {
     "name": "Misty Wanderer",
@@ -175,8 +163,7 @@ registerSubclassSheetActions("Ranger_Fey Wanderer", [
     "cat": "bonus",
     "uses": "WIS mod / LR",
     "resKey": "fey_misty_wanderer",
-    "minLevel": 15,
-    "desc": "You can cast Misty Step without expending a spell slot (WIS modifier uses, min 1, per Long Rest). Whenever you cast Misty Step, you can bring one willing creature you can see within 5 ft along — it teleports to an unoccupied space of your choice within 5 ft of your destination."
+    "minLevel": 15
   }
 ]);
 registerSubclassSheetResources("Ranger_Fey Wanderer", [

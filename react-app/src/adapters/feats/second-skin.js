@@ -41,15 +41,6 @@ export default function install(registry, context = {}) {
   }
 
   if (typeof registerFeatSheetActions === 'function') {
-    registerFeatSheetActions('Second Skin', [
-      {
-        name: 'Alternate Form',
-        icon: 'user',
-        cat: 'action',
-        uses: 'Passive',
-        passive: true,
-        desc: 'You always have Alter Self prepared and can cast it once without a spell slot per Long Rest (or with slots you have); cast without a slot this way it requires no Concentration. Involuntary Change: after the triggering catalyst (rolled when you take the feat), at the start of your next turn make a DC 13 + PB Charisma save or immediately cast Alter Self without a slot — if already expended, you have the Stunned condition until the start of your next turn.',
-      },
-    ]);
+    registerFeatSheetActions('Second Skin', []);
   }
 }

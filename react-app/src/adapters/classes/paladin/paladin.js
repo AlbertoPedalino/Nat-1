@@ -157,34 +157,14 @@ registerClassSheetActions("Paladin", [
     "cat": "bonus",
     "uses": "1 Channel",
     "resKey": "paladin_channel_div",
-    "minLevel": 3,
-    "desc": "Channel Divinity option. Bonus Action: for 10 minutes, you know the location of any Aberration, Celestial, Fiend, or Undead within 60 ft, and any place consecrated or desecrated by a deity."
+    "minLevel": 3
   },
   {
     "name": "Lay on Hands",
     "icon": "",
     "cat": "bonus",
     "uses": "Pool / LR",
-    "resKey": "lay_on_hands",
-    "desc": "Touch a creature to restore HP from your pool (1 HP per point spent), or spend 5 points to remove the Poisoned condition. Pool = 5 × Paladin level. Recharge: Long Rest."
-  },
-  {
-    "name": "Aura of Protection",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 6,
-    "desc": "While conscious: you and friendly creatures within 10 ft gain +CHA modifier to saving throws (min +1)."
-  },
-  {
-    "name": "Aura of Courage",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 10,
-    "desc": "While conscious: you and friendly creatures within your aura are immune to the Frightened condition."
+    "resKey": "lay_on_hands"
   },
   {
     "name": "Abjure Foes",
@@ -192,8 +172,7 @@ registerClassSheetActions("Paladin", [
     "cat": "action",
     "uses": "1 Channel",
     "resKey": "paladin_channel_div",
-    "minLevel": 9,
-    "desc": "Channel Divinity option. Magic action: up to CHA modifier creatures (min 1) within 60 ft must succeed on a WIS save (spell save DC) or have the Frightened condition for 1 minute or until they take damage."
+    "minLevel": 9
   },
   {
     "name": "Restoring Touch",
@@ -201,27 +180,7 @@ registerClassSheetActions("Paladin", [
     "cat": "action",
     "uses": "Pool / LR",
     "resKey": "lay_on_hands",
-    "minLevel": 14,
-    "desc": "When you use Lay on Hands on a creature, you can also remove one of the following conditions: Blinded, Charmed, Deafened, Frightened, Paralyzed, or Stunned. Each condition removed costs 5 HP from your Lay on Hands pool."
-  },
-  {
-    "name": "Aura Expansion",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 18,
-    "desc": "Your Aura of Protection and Aura of Courage now extend to 30 ft."
-  },
-  {
-    "name": "Radiant Strikes",
-    "icon": "",
-    "cat": "attack",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 11,
-    rollers: [{ kind: 'damage', formula: "1d8", label: "+1d8 radiant" }],
-    "desc": "Your weapon and Unarmed Strike attacks deal an extra 1d8 Radiant damage."
+    "minLevel": 14
   }
 ]);
 registerClassSheetResources("Paladin", [

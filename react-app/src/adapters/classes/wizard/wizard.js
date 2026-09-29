@@ -217,40 +217,28 @@ registerClassSheetActions("Wizard", [
     "icon": "",
     "cat": "action",
     "uses": "1 / LR",
-    "resKey": "arc_recovery",
-    "desc": "After a Short Rest: recover spell slots with a combined level equal to or less than half your Wizard level (rounded up, max 6th-level slots). Recharge: Long Rest."
-  },
-  {
-    "name": "Spellbook",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "desc": "Contains your known Wizard spells. Cast Wizard spells with the Ritual tag from your spellbook as rituals without preparing them and without using a slot (+10 min). Copy new spells: costs 50 gp and 2 hours per spell level. Gain 2 free spells at each Wizard level."
+    "resKey": "arc_recovery"
   },
   {
     "name": "Memorize Spell",
     "icon": "",
     "cat": "bonus",
     "uses": "1 / SR",
-    "minLevel": 5,
-    "desc": "After a Short Rest: replace one prepared spell with another Wizard spell from your spellbook. Recharge: Short Rest."
+    "minLevel": 5
   },
   {
     "name": "Spell Mastery",
     "icon": "",
     "cat": "action",
     "uses": "At will",
-    "minLevel": 18,
-    "desc": "Choose 1 spell of 1st level and 1 of 2nd level from your spellbook: you can cast each at their lowest level without expending a spell slot, at will."
+    "minLevel": 18
   },
   {
     "name": "Signature Spells",
     "icon": "",
     "cat": "action",
     "uses": "1 / SR each",
-    "minLevel": 20,
-    "desc": "Choose two 3rd-level Wizard spells: they are always prepared (don't count toward limit) and you can cast each once per Short Rest without a spell slot."
+    "minLevel": 20
   }
 ]);
 registerClassSheetResources("Wizard", [

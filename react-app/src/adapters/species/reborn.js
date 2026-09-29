@@ -24,7 +24,6 @@ export default function install(registry, context = {}) {
       uses: 'PB / LR',
       resKey: 'reborn_knowledge',
       minLevel: 1,
-      desc: 'When you fail an ability check, you can roll {@dice 1d6} and add the number rolled to the d20, potentially turning the failure into a success. Uses equal to your Proficiency Bonus, regained on a Long Rest.',
     },
   ]);
 

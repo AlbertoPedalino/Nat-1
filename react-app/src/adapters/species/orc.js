@@ -137,7 +137,6 @@ registerSpeciesSheetActions("Orc_XPHB", [
       const pb = Math.floor((lv - 1) / 4) + 2;
       return [{ icon: 'heart', label: 'Temp HP', value: pb }];
     },
-    desc: 'Take the Dash action as a Bonus Action and gain temporary hit points equal to your Proficiency Bonus. Recharge: Short or Long Rest.',
   },
   {
     name: 'Relentless Endurance',
@@ -146,7 +145,6 @@ registerSpeciesSheetActions("Orc_XPHB", [
     uses: '1 / LR',
     resKey: 'orc_relentless_endurance',
     minLevel: 1,
-    desc: 'Reaction trigger: when you are reduced to 0 Hit Points but not killed outright, drop to 1 Hit Point instead. Recharge: Long Rest.',
   },
 ]);
 registerSpeciesSheetResources("Orc_XPHB", [

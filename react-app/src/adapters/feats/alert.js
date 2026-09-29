@@ -124,19 +124,10 @@ export default function install(registry, context = {}) {
   if (typeof registerFeatSheetActions === "function") {
     registerFeatSheetActions("Alert", [
       {
-        name:  "Alert",
-        icon:  "eye",
-        cat:   "action",
-        uses:  "Passive",
-        passive: true,
-        desc:  "Add your Proficiency Bonus to Initiative rolls. You can't be Surprised."
-      },
-      {
         name:  "Swap Initiative",
         icon:  "arrow-left-right",
         cat:   "action",
-        uses:  "Reaction",
-        desc:  "When you roll Initiative, you can swap your result with that of one willing creature you can see within 30 feet of you. Neither of you can be Surprised."
+        uses:  "Reaction"
       }
     ]);
   }

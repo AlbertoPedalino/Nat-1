@@ -20,7 +20,6 @@ registerSubclassSheetActions("Sorcerer_Wild Magic", [
     "uses": "Special",
     "minLevel": 3,
     "detailType": "panel",
-    "desc": "Tides of Chaos, Wild Magic Surge and related Sorcerer features. Click to expand.",
     "detail": {
       "levelClass": "Sorcerer",
       "sections": [
@@ -70,8 +69,7 @@ registerSubclassSheetActions("Sorcerer_Wild Magic", [
     "cat": "reaction",
     "uses": "1 Sorcery Point",
     "resKey": "sorc_pts",
-    "minLevel": 6,
-    "desc": "Reaction — immediately after another creature you can see rolls a d20 for a D20 Test: spend 1 Sorcery Point to roll 1d4 and apply the number as a bonus or penalty (your choice) to the d20 roll."
+    "minLevel": 6
   }
 ]);
 registerSubclassSheetResources("Sorcerer_Wild Magic", [

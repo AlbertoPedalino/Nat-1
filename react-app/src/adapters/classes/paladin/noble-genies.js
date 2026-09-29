@@ -135,22 +135,12 @@ registerSubclassAdapter("Paladin_Noble Genies", function (cls, lv, specs) {
 // [SheetRuntime] START
 registerSubclassSheetActions("Paladin_Noble Genies", [
   {
-    "name": "Genie's Splendor",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 3,
-    "desc": "Passive: while you aren't wearing armor, your AC equals 10 + DEX modifier + CHA modifier (shield still applies). You gain proficiency in one skill of your choice from Acrobatics, Intimidation, Performance, or Persuasion."
-  },
-  {
     "name": "Elemental Smite",
     "icon": "flame",
     "cat": "action",
     "uses": "1 Channel",
     "resKey": "paladin_channel_div",
     "minLevel": 3,
-    "desc": "Immediately after you deal Divine Smite damage, expend one use of Channel Divinity to choose one elemental effect.",
     "subOptions": [
       { "name": "Dao's Crush", "icon": "hand", "desc": "The target is Grappled (escape DC = spell save DC) and Restrained while Grappled." },
       { "name": "Djinni's Escape", "icon": "move", "desc": "Teleport up to 30 ft to an unoccupied space you can see. Until end of your next turn you are semi-incorporeal (Resistance to Bludgeoning/Piercing/Slashing; immune to Grappled/Prone/Restrained)." },
@@ -159,23 +149,13 @@ registerSubclassSheetActions("Paladin_Noble Genies", [
     ]
   },
   {
-    "name": "Aura of Elemental Shielding",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 7,
-    "desc": "Passive: at the start of each of your turns (no action required), choose one damage type: Acid, Cold, Fire, Lightning, or Thunder. You and friendly creatures within your Aura of Protection gain Resistance to that damage type until the start of your next turn."
-  },
-  {
     "name": "Elemental Rebuke",
     "icon": "",
     "cat": "reaction",
     "uses": "CHA mod / LR",
     "resKey": "noble_genies_rebuke",
     "minLevel": 15,
-    rollers: [{ kind: 'damage', formula: "2d10", label: ({ formula }) => `${formula} + CHA elemental` }],
-    "desc": "Reaction when you are hit by an attack: halve the damage you take (round down). The attacker must then make a DEX saving throw (spell save DC). On a failed save, the attacker takes 2d10 + CHA modifier elemental damage (Acid, Cold, Fire, Lightning, or Thunder — your choice); on a success, it takes half that damage. Uses: CHA modifier (min 1) per Long Rest."
+    rollers: [{ kind: 'damage', formula: "2d10", label: ({ formula }) => `${formula} + CHA elemental` }]
   },
   {
     "name": "Noble Scion",
@@ -183,8 +163,7 @@ registerSubclassSheetActions("Paladin_Noble Genies", [
     "cat": "bonus",
     "uses": "1 / LR",
     "resKey": "noble_genies_scion",
-    "minLevel": 20,
-    "desc": "Bonus Action: for 10 minutes (or until you use this feature again), assume the form of a Noble Genie. 1/LR, or expend a level 5+ spell slot. Benefits: Flight — you gain a Fly Speed of 60 ft with the Hover property. Minor Wish — when you or a creature within your Aura of Protection fails a D20 Test, you can use your Reaction to cause the roll to succeed instead."
+    "minLevel": 20
   }
 ]);
 registerSubclassSheetResources("Paladin_Noble Genies", [

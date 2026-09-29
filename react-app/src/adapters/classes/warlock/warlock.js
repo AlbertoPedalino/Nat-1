@@ -456,20 +456,6 @@ registerClassAdapter("Warlock", function (cls, lv, specs, adapterContext = {}) {
 // fields here (cat, uses, resKey, minLevel, condition, damage formulas).
 registerClassSheetActions("Warlock", [
   {
-    "name": "Eldritch Invocations",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true
-  },
-  {
-    "name": "Pact Magic",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true
-  },
-  {
     "name": "Magical Cunning",
     "icon": "",
     "cat": "action",
@@ -517,15 +503,6 @@ registerClassSheetActions("Warlock", [
     "condition": function(C) { return _warlockHasInvocation(C, 'Pact of the Chain'); }
   },
   {
-    "name": "Pact of the Tome",
-    "icon": "book-open",
-    "cat": "action",
-    "uses": "Passive / Focus",
-    "passive": true,
-    "minLevel": 1,
-    "condition": function(C) { return _warlockHasInvocation(C, 'Pact of the Tome'); }
-  },
-  {
     "name": "Investment of the Chain Master",
     "icon": "sparkles",
     "cat": "bonus",
@@ -570,26 +547,6 @@ registerClassSheetActions("Warlock", [
     "condition": function(C) { return _warlockHasInvocation(C, 'Gaze of Two Minds'); }
   },
 
-  // ── INVOCATIONS: Pact of the Blade combat upgrades ─────────────────────────
-
-  {
-    "name": "Thirsting Blade",
-    "icon": "swords",
-    "cat": "attack",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 5,
-    "condition": function(C) { return _warlockHasInvocation(C, 'Thirsting Blade') && _warlockHasInvocation(C, 'Pact of the Blade'); }
-  },
-  {
-    "name": "Devouring Blade",
-    "icon": "swords",
-    "cat": "attack",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 12,
-    "condition": function(C) { return _warlockHasInvocation(C, 'Devouring Blade') && _warlockHasInvocation(C, 'Thirsting Blade'); }
-  },
   {
     "name": "Eldritch Smite",
     "icon": "zap",
@@ -597,16 +554,7 @@ registerClassSheetActions("Warlock", [
     "uses": "Spend a Pact Slot on hit",
     "minLevel": 5,
     "condition": function(C) { return _warlockHasInvocation(C, 'Eldritch Smite') && _warlockHasInvocation(C, 'Pact of the Blade'); },
-    rollers: [{ kind: 'damage', formula: function(ctx) { var lv = Number(ctx.ownerLevel || 1); var slotLevel = lv >= 9 ? 5 : lv >= 7 ? 4 : lv >= 5 ? 3 : 1; return (slotLevel + 1) + 'd8'; }, label: function(ctx) { var lv = Number(ctx.ownerLevel || 1); var slotLevel = lv >= 9 ? 5 : lv >= 7 ? 4 : lv >= 5 ? 3 : 1; return 'Smite ' + (slotLevel + 1) + 'd8 Force'; } }],},
-  {
-    "name": "Lifedrinker",
-    "icon": "droplets",
-    "cat": "attack",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 9,
-    "condition": function(C) { return _warlockHasInvocation(C, 'Lifedrinker') && _warlockHasInvocation(C, 'Pact of the Blade'); },
-    rollers: [{ kind: 'damage', formula: "1d6", label: "Lifedrinker 1d6" }],}
+    rollers: [{ kind: 'damage', formula: function(ctx) { var lv = Number(ctx.ownerLevel || 1); var slotLevel = lv >= 9 ? 5 : lv >= 7 ? 4 : lv >= 5 ? 3 : 1; return (slotLevel + 1) + 'd8'; }, label: function(ctx) { var lv = Number(ctx.ownerLevel || 1); var slotLevel = lv >= 9 ? 5 : lv >= 7 ? 4 : lv >= 5 ? 3 : 1; return 'Smite ' + (slotLevel + 1) + 'd8 Force'; } }],}
 ]);
 // [SheetRuntime] END
 

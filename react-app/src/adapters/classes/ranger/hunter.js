@@ -145,48 +145,18 @@ registerSubclassAdapter("Ranger_Hunter", function (cls, lv, specs) {
 // [SheetRuntime] START
 registerSubclassSheetActions("Ranger_Hunter", [
   {
-    "name": "Hunter's Lore",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 3,
-    "desc": "Passive: while a creature is marked by your Hunter's Mark, you know whether that creature has any Immunities, Resistances, or Vulnerabilities, and if so, what they are."
-  },
-  {
-    "name": "Hunter's Prey",
-    "icon": "",
-    "cat": "attack",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 3,
-    "noRoll": true,
-    "desc": "Choose one option (swappable on Short or Long Rest): Colossus Slayer — when you hit a creature with a weapon, deal an extra 1d8 damage if the target is missing any HP (once per turn). Horde Breaker — once per turn when you make an attack with a weapon, make another attack with the same weapon against a different creature within 5 ft of the original target (within weapon range) that you haven't attacked this turn."
-  },
-  {
-    "name": "Defensive Tactics",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 7,
-    "desc": "Choose one option (swappable on Short or Long Rest): Escape the Horde — Opportunity Attacks against you have Disadvantage. Multiattack Defense — when a creature hits you with an attack roll, that creature has Disadvantage on all other attack rolls against you for the rest of this turn."
-  },
-  {
     "name": "Superior Hunter's Prey",
     "icon": "",
     "cat": "attack",
     "uses": "1 / turn",
-    "minLevel": 11,
-    "desc": "Once per turn, when you deal damage to a creature marked by your Hunter's Mark, you can also deal that spell's extra damage to a different creature you can see within 30 ft of the first creature."
+    "minLevel": 11
   },
   {
     "name": "Superior Hunter's Defense",
     "icon": "",
     "cat": "reaction",
     "uses": "At will",
-    "minLevel": 15,
-    "desc": "Reaction when you take damage: give yourself Resistance to that damage type and any other damage of the same type until the end of the current turn."
+    "minLevel": 15
   }
 ]);
 

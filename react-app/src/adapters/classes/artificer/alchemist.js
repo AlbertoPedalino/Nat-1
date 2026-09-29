@@ -141,17 +141,7 @@ registerSubclassSheetActions("Artificer_Alchemist", [
     "icon": "",
     "cat": "action",
     "uses": "After Long Rest",
-    "minLevel": 3,
-    "desc": "After a Long Rest (using Alchemist's Supplies), create elixirs: 2 at lv.3, 3 at lv.5, 4 at lv.9, 5 at lv.15. Each has a random (or chosen, if you expend a spell slot via Magic action) effect. Drinking (Bonus Action, administer within 5 ft): 1-Healing (2d8+INT HP; 3d8 at lv.9; 4d8 at lv.15), 2-Swiftness (+10ft Speed 1h; 15ft at lv.9; 20ft at lv.15), 3-Resilience (+1 AC 10 min; 1h at lv.9; 8h at lv.15), 4-Boldness (+1d4 to attack rolls and saves 1 min; 10 min at lv.9; 1h at lv.15), 5-Flight (10ft Fly Speed 10 min; 20ft at lv.9; 30ft at lv.15), 6-Choose (pick any other effect). Elixirs vanish at next Long Rest."
-  },
-  {
-    "name": "Alchemical Savant",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 5,
-    "desc": "Passive: when you cast an Artificer spell using Alchemist's Supplies as the spellcasting focus, add your INT modifier (min +1) to one roll that deals Acid, Fire, or Poison damage — or restores Hit Points."
+    "minLevel": 3
   },
   {
     "name": "Restorative Reagents",
@@ -159,18 +149,15 @@ registerSubclassSheetActions("Artificer_Alchemist", [
     "cat": "action",
     "uses": "INT mod / LR",
     "resKey": "restorative_reagents",
-    "minLevel": 9,
-    "desc": "Cast Lesser Restoration without expending a spell slot, using Alchemist's Supplies as the spellcasting focus. Uses: INT modifier (min 1). Recharge: Long Rest."
+    "minLevel": 9
   },
   {
     "name": "Chemical Mastery",
     "icon": "",
     "cat": "action",
-    "uses": "Passive + 1/LR",
-    "passive": true,
+    "uses": "1 / LR",
     "resKey": "chemical_mastery",
-    "minLevel": 15,
-    "desc": "Alchemical Eruption: when you cast an Artificer spell that deals Acid, Fire, or Poison damage to a target, also deal 2d8 Force damage to that target (once per turn). Chemical Resistance: Resistance to Acid and Poison damage; Immunity to the Poisoned condition. Conjured Cauldron: cast Tasha's Bubbling Cauldron without a spell slot, without preparing it, and without Material components (uses Alchemist's Supplies as focus). 1/LR."
+    "minLevel": 15
   }
 ]);
 registerSubclassSheetResources("Artificer_Alchemist", [

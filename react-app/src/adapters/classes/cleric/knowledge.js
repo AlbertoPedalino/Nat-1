@@ -147,17 +147,7 @@ registerSubclassSheetActions("Cleric_Knowledge", [
     "icon": "",
     "cat": "action",
     "uses": "1 Channel",
-    "resKey": "channel_div",
-    "desc": "Magic action: expend one use of Channel Divinity to cast a spell from the Divination school on the Knowledge Domain Spells table that you have prepared. Cast it without expending a spell slot or needing Material components."
-  },
-  {
-    "name": "Unfettered Mind",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 6,
-    "desc": "You gain Telepathy out to 60 ft. When you use this Telepathy, you can simultaneously contact a number of creatures equal to your WIS modifier (minimum 1). Additionally, you gain proficiency in Intelligence saving throws. If you already have that proficiency, gain proficiency in one other saving throw of your choice."
+    "resKey": "channel_div"
   },
   {
     "name": "Divine Foreknowledge",
@@ -165,8 +155,7 @@ registerSubclassSheetActions("Cleric_Knowledge", [
     "cat": "bonus",
     "uses": "1 / LR",
     "resKey": "divine_foreknowledge",
-    "minLevel": 17,
-    "desc": "Bonus Action to expand your mind to the future. For 1 hour, you have Advantage on D20 Tests. Once per Long Rest. You can restore this use by expending a level 6+ spell slot (no action required)."
+    "minLevel": 17
   }
 ]);
 if (typeof registerSubclassRuntimeConfig === "function") {

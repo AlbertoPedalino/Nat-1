@@ -28,8 +28,7 @@ export default function install(registry, context = {}) {
         entryName: "Telekinetic Shove",
         icon: "hand",
         cat: "bonus",
-        uses: "Bonus Action",
-        desc: "Shove one creature you can see within 30 feet: Strength save (DC 8 + the increased ability's modifier + PB) or be moved 5 feet toward or away from you."
+        uses: "Bonus Action"
       }
     ]);
   }

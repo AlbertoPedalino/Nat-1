@@ -122,12 +122,6 @@ export default function install(registry, context = {}) {
   const getMod = context?.getMod;
   const getFinal = context?.getFinal;
 
-function gooChoice(C, key) {
-  if (!C?.choices) return null;
-  if (C.choices[key] != null) return C.choices[key];
-  const found = Object.entries(C.choices).find(([choiceKey]) => choiceKey.replace(/^mc\d+_/, '') === key);
-  return found ? found[1] : null;
-}
 registerSubclassAdapter("Warlock_Great Old One", function (cls, lv, specs) {
   if (lv >= 10) {
     specs.push({
@@ -152,23 +146,10 @@ registerSubclassSheetActions("Warlock_Great Old One", [
         { icon: "radio", label: "Range", value: Math.max(1, cha) + " mi" },
         { icon: "clock", label: "Duration", value: lv + " min" },
       ];
-    },
-    desc: "Bonus Action: choose one creature you can see within CHA modifier miles. You can communicate telepathically for a number of minutes equal to your Warlock level. The target needn't share a language, but it must know at least one language. Recharge: Long Rest." },
-  { name: "Psychic Spells", icon: "brain", cat: "action", uses: "Passive", minLevel: 3,
-  passive: true,
-    desc: "When you cast a Warlock spell that deals damage, you can change its damage type to Psychic. When you cast a Warlock spell from the Enchantment or Illusion school, you can cast it without Verbal or Somatic components." },
-  { name: "Clairvoyant Combatant", icon: "eye", cat: "action", uses: "1 / SR or Pact Magic slot", resKey: "goo_clairvoyant", minLevel: 6,
-    desc: "When you establish telepathic contact with a creature using Awakened Mind, force it to make a WIS save. On failure, it has Disadvantage on attack rolls against you, and you have Advantage on attack rolls against it, until the telepathic contact ends. Recharge: Short/Long Rest, or expend a Pact Magic slot." },
-  { name: "Eldritch Hex", icon: "hexagon", cat: "action", uses: "Passive", minLevel: 10,
-  passive: true,
-    inlinePills: ({ character }) => [{ icon: "hexagon", label: "Save Disadvantage", value: String(gooChoice(character, "goo_eldritch_hex_ability") || "Choose") }],
-    desc: "Hex is always prepared and doesn't count against your number of spells prepared. When you cast Hex and choose an ability, the Hexed creature also has Disadvantage on saving throws using that ability for the duration." },
-  { name: "Thought Shield", icon: "shield", cat: "reaction", uses: "Passive", minLevel: 10,
-  passive: true,
-    desc: "You have Resistance to Psychic damage. In addition, when a creature deals Psychic damage to you, that creature takes the same amount of Psychic damage that you do." },
+    } },
+  { name: "Clairvoyant Combatant", icon: "eye", cat: "action", uses: "1 / SR or Pact Magic slot", resKey: "goo_clairvoyant", minLevel: 6 },
   { name: "Create Thrall", icon: "brain", cat: "action", uses: "1 / LR or Pact Magic slot", resKey: "goo_create_thrall", minLevel: 14,
-    inlinePills: ({ ownerLevel }) => [{ icon: "shield", label: "Aberration THP", value: Number(ownerLevel || 1) }],
-    desc: "Cast Summon Aberration without a spell slot, material components, or Concentration; it lasts for 1 minute. The aberration gains Temporary HP equal to your Warlock level. When you damage a creature under your Hex, the aberration can use its Reaction to move up to its Speed toward the Hexed target and make one attack." },
+    inlinePills: ({ ownerLevel }) => [{ icon: "shield", label: "Aberration THP", value: Number(ownerLevel || 1) }] },
 ]);
 
 registerSubclassSheetEffects("Warlock_Great Old One", [

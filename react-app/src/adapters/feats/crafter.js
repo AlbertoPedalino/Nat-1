@@ -50,14 +50,6 @@ export default function install(registry, context = {}) {
   if (typeof registerFeatSheetActions === 'function') {
     registerFeatSheetActions('Crafter', [
       {
-        name: 'Crafter: Discount',
-        icon: '',
-        cat: 'action',
-        uses: 'Passive',
-        passive: true,
-        desc: "Whenever you buy a nonmagical item, you receive a 20 percent discount on it.",
-      },
-      {
         name: 'Fast Crafting',
         icon: '',
         cat: 'action',

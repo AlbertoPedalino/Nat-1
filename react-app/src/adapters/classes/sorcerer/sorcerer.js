@@ -160,8 +160,7 @@ registerClassSheetActions("Sorcerer", [
     "uses": "2 / LR",
     "resKey": "innate_sorcery",
     "_toggleKey": "innate_sorcery",
-    "minLevel": 1,
-    "desc": "Bonus Action: unleash magical energy for 1 minute. During this time your spell save DC increases by 1, and you have Advantage on the attack rolls of Sorcerer spells you cast. Uses: 2 per Long Rest. Recharge: Long Rest."
+    "minLevel": 1
   },
   {
     "name": "Font of Magic",
@@ -169,8 +168,7 @@ registerClassSheetActions("Sorcerer", [
     "cat": "action",
     "uses": "Sorcery Points",
     "resKey": "sorc_pts",
-    "minLevel": 2,
-    "desc": "Sorcery Points = Sorcerer level (replenish on Long Rest). Spend points to create spell slots or convert slots into points. Creating a slot: lv.1=2pt, lv.2=3pt, lv.3=5pt, lv.4=6pt, lv.5=7pt."
+    "minLevel": 2
   },
   {
     "name": "Metamagic",
@@ -178,8 +176,7 @@ registerClassSheetActions("Sorcerer", [
     "cat": "action",
     "uses": "Sorcery Points",
     "resKey": "sorc_pts",
-    "minLevel": 2,
-    "desc": "Modify spells with Sorcery Points. Options: Careful (2pt, allies auto-succeed save), Distant (1pt, double range), Empowered (1pt, reroll damage dice up to CHA mod), Extended (1pt, double duration), Heightened (3pt, target has Disadvantage on first save), Quickened (2pt, cast as Bonus Action), Seeking (1pt/miss, reroll attack), Subtle (1pt, no V or S component), Transmuted (1pt, change damage type), Twinned (1pt, second target same spell)."
+    "minLevel": 2
   },
   {
     "name": "Sorcerous Restoration",
@@ -187,8 +184,7 @@ registerClassSheetActions("Sorcerer", [
     "cat": "action",
     "uses": "1 / LR",
     "resKey": "sorc_restoration",
-    "minLevel": 5,
-    "desc": "When you finish a Short Rest, you can regain expended Sorcery Points equal to half your Sorcerer level (rounded down). You can use this feature once per Long Rest."
+    "minLevel": 5
   },
   {
     "name": "Create Spell Slot (Font of Magic)",
@@ -197,8 +193,7 @@ registerClassSheetActions("Sorcerer", [
     "uses": "Sorcery Points",
     "resKey": "sorc_create_slot",
     "minLevel": 2,
-    "buttonLabel": "Create Slot",
-    "desc": "Spend Sorcery Points to create a spell slot. Costs: L1=2 SP, L2=3 SP, L3=5 SP, L4=6 SP, L5=7 SP."
+    "buttonLabel": "Create Slot"
   },
   {
     "name": "Convert Spell Slot (Font of Magic)",
@@ -207,8 +202,7 @@ registerClassSheetActions("Sorcerer", [
     "uses": "Spell slot",
     "resKey": "sorc_convert_slot",
     "minLevel": 2,
-    "buttonLabel": "Convert Slot",
-    "desc": "Convert an expended spell slot into Sorcery Points equal to the slot's level."
+    "buttonLabel": "Convert Slot"
   },
   {
     "name": "Sorcery Incarnate",
@@ -216,17 +210,7 @@ registerClassSheetActions("Sorcerer", [
     "cat": "bonus",
     "uses": "2 SP",
     "resKey": "sorc_pts",
-    "minLevel": 7,
-    "desc": "While Innate Sorcery is active, you can apply two different Metamagic options to the same spell. If you have no uses of Innate Sorcery remaining, you can spend 2 Sorcery Points to activate it again."
-  },
-  {
-    "name": "Arcane Apotheosis",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 20,
-    "desc": "While Innate Sorcery is active, you can use one Metamagic option on each spell you cast without spending Sorcery Points."
+    "minLevel": 7
   }
 ]);
 // Innate Sorcery (while active): +1 spell save DC and Advantage on the attack

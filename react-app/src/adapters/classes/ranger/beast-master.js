@@ -139,35 +139,7 @@ registerSubclassSheetActions("Ranger_Beast Master", [
     "icon": "",
     "cat": "bonus",
     "uses": "Commands / turn",
-    "minLevel": 3,
-    "desc": "Your beast acts during your turn: it can move and use its Reaction on its own, but takes the Dodge action unless you use a Bonus Action to command it to take an action from its stat block or another action. You can also sacrifice one of your attacks when you take the Attack action to command it to use Beast's Strike. If you are Incapacitated, the beast acts on its own. If it died within the last hour, take a Magic action, touch it, and expend a spell slot — it returns to life after 1 minute with all HP restored. On a Long Rest, you can summon a different primal beast (choosing stat block and appearance)."
-  },
-  {
-    "name": "Exceptional Training",
-    "icon": "",
-    "cat": "bonus",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 7,
-    "desc": "When you use a Bonus Action to command your Primal Companion to take an action, it can also take the Dash, Disengage, Dodge, or Help action using its Bonus Action. In addition, whenever it hits with an attack roll and deals damage, it can deal Force damage or its normal damage type (your choice)."
-  },
-  {
-    "name": "Bestial Fury",
-    "icon": "",
-    "cat": "attack",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 11,
-    "desc": "When you command your Primal Companion to use Beast's Strike, it can use that action twice. In addition, the first time each turn it hits a creature under the effect of your Hunter's Mark, the beast deals extra Force damage equal to Hunter's Mark's bonus damage."
-  },
-  {
-    "name": "Share Spells",
-    "icon": "",
-    "cat": "action",
-    "uses": "Passive",
-    "passive": true,
-    "minLevel": 15,
-    "desc": "Passive: when you cast a spell targeting yourself, you can also affect your Primal Companion with the spell if the beast is within 30 ft of you."
+    "minLevel": 3
   }
 ]);
 

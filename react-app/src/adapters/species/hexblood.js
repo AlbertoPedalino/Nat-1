@@ -31,7 +31,6 @@ export default function install(registry, context = {}) {
       uses: '1 / LR',
       resKey: 'hexblood_token',
       minLevel: 1,
-      desc: 'Bonus Action: create a magical token from a lock of hair, a nail, or similar. Distant Message — as a Magic action, send a telepathic message of 25 words or fewer to a creature holding the token while within 10 miles. Remote Viewing — within 10 miles, take a Magic action to see and hear from the token for 1 minute (ends if Incapacitated or you end it), destroying the token afterward. The token otherwise lasts until you finish a Long Rest. Once you create a token, you can\'t do so again until you finish a Long Rest.',
     },
   ]);
 

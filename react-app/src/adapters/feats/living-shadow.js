@@ -42,7 +42,6 @@ export default function install(registry, context = {}) {
         cat: 'special',
         uses: 'PB / LR',
         resKey: 'living_shadow_reach',
-        desc: 'When you make a melee attack roll as part of the Attack or Magic action on your turn, you can increase your reach for that attack by 10 feet as your shadow stretches. Uses equal to your Proficiency Bonus, regained on a Long Rest. (Ominous Will: after you roll a 1 on a D20 Test, make a DC 13 + PB Wisdom save or be Incapacitated until the start of your next turn and roll on the Shadow\'s Will table.)',
       },
     ]);
   }

@@ -124,27 +124,10 @@ export default function install(registry, context = {}) {
   if (typeof registerFeatSheetActions === "function") {
     registerFeatSheetActions("Sentinel", [
       {
-        name: "Sentinel: Stop",
-        icon: "eye",
-        cat: "action",
-        uses: "Passive",
-        passive: true,
-        desc: "When you hit a creature with an Opportunity Attack, its Speed becomes 0 for the rest of the turn."
-      },
-      {
-        name: "Sentinel: No Escape",
-        icon: "eye",
-        cat: "action",
-        uses: "Passive",
-        passive: true,
-        desc: "Creatures within your reach provoke Opportunity Attacks even if they take the Disengage action."
-      },
-      {
         name: "Sentinel: Guard",
         icon: "shield",
         cat: "action",
-        uses: "Reaction",
-        desc: "When a creature within 5 ft makes an attack against a target other than you, make one melee weapon attack against the attacking creature."
+        uses: "Reaction"
       }
     ]);
   }

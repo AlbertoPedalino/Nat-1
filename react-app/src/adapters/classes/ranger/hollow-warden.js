@@ -19,7 +19,6 @@ export default function install(registry, context = {}) {
       cat: 'bonus',
       uses: 'Favored Enemy',
       minLevel: 3,
-      desc: 'Bonus Action: expend a use of Favored Enemy to transform into a ghastly form for 1 minute (ends if Incapacitated, you die, or you end it). Ancient Armor: +1 AC (+2 at Ranger level 11). Prowling Retribution: when a creature within 5 ft damages you or an ally, you can make an Opportunity Attack against it. Unnerving Aura: on transforming and at the start of each of your turns, creatures of your choice in a 10-ft Emanation make a Wisdom save or are Frightened until the start of your next turn.',
     },
     {
       name: 'Fortifying Soul',
@@ -28,7 +27,6 @@ export default function install(registry, context = {}) {
       uses: '1 / LR',
       resKey: 'hollow_fortify',
       minLevel: 7,
-      desc: 'Magic action: choose creatures you can see equal to your Wisdom modifier (minimum 1). Each regains {@dice 1d10} plus your Ranger level Hit Points and has Advantage on saves to avoid or end the Frightened condition for 1 hour. Once per Long Rest.',
     },
     {
       name: 'Persistent Wrath',
@@ -37,7 +35,6 @@ export default function install(registry, context = {}) {
       uses: '1 / LR',
       resKey: 'hollow_persist',
       minLevel: 15,
-      desc: 'If you are reduced to 0 Hit Points but not killed outright while transformed using Wrath of the Wild, your Hit Points instead change to twice your Ranger level. Once per Long Rest, or expend a level 4+ spell slot (no action) to restore the use.',
     },
   ]);
 

@@ -175,15 +175,9 @@ registerSubclassAdapter("Fighter_Battle Master", function (cls, lv, specs) {
 
 // [SheetRuntime] START
 registerSubclassSheetActions("Fighter_Battle Master", [
-  { name: "Combat Maneuvers", icon: "", cat: "attack", uses: "Superiority Dice", resKey: "superiority_dice", minLevel: 3,
-    desc: "Spend Superiority Dice to enhance attacks (d8 at lv.3, d10 at lv.10, d12 at lv.18). Only one maneuver per attack. Save DC = 8 + STR or DEX (your choice) + PB. Recharge: Short or Long Rest." },
-  { name: "Know Your Enemy", icon: "", cat: "bonus", uses: "1 / LR or Superiority Die", resKey: "know_your_enemy", minLevel: 7,
-    desc: "Bonus Action: choose a creature within 30 ft you can see. Learn whether it has any Immunities, Resistances, or Vulnerabilities, and if so what they are. 1/LR, or expend one Superiority Die (no action) to restore." },
-  { name: "Relentless", icon: "", cat: "action", uses: "1 / turn", minLevel: 15,
-    desc: "Once per turn, when you use a maneuver, you can roll a d8 and use the number rolled instead of expending a Superiority Die." },
-  { name: "Ultimate Combat Superiority", icon: "", cat: "action", uses: "Passive", minLevel: 18,
-  passive: true,
-    desc: "Your Superiority Die becomes a d12." },
+  { name: "Combat Maneuvers", icon: "", cat: "attack", uses: "Superiority Dice", resKey: "superiority_dice", minLevel: 3 },
+  { name: "Know Your Enemy", icon: "", cat: "bonus", uses: "1 / LR or Superiority Die", resKey: "know_your_enemy", minLevel: 7 },
+  { name: "Relentless", icon: "", cat: "action", uses: "1 / turn", minLevel: 15 },
 ]);
 registerSubclassSheetResources("Fighter_Battle Master", [
   { key: "superiority_dice", name: "Superiority Dice", actionName: "Combat Maneuvers", icon: "swords", recharge: "SR",
@@ -197,7 +191,6 @@ registerSubclassSheetEffects("Fighter_Battle Master", [
 
   { type: "toolProficiency", count: 1, minLevel: 3, note: "Student of War: artisan's tool choice." },
   { type: "skillProficiency", values: ["History", "Insight", "Performance", "Persuasion"], count: 1, minLevel: 3, note: "Student of War." },
-  { type: "saveDc", key: "maneuver_dc", minLevel: 3, note: "Maneuver Save DC = 8 + STR or DEX mod + PB." },
 ]);
 // [SheetRuntime] END
 
