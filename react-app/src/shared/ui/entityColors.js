@@ -35,6 +35,7 @@ export const ACTION_COLORS = {
   action: '#22c7e0',   // vivid electric cyan (kept clear of the muted subclass teal)
   bonus: '#6f8fd8',    // steel blue
   reaction: '#c46fd9', // orchid purple
+  special: '#9aa5b1',  // neutral slate: no-action / triggered features ("Other")
 };
 
 // Spell-tag mini-chip accents (Concentration / Ritual) shown next to spell

@@ -91,6 +91,7 @@ function warnDanglingResKey(action, resMaxMap) {
 function actionLabel(value) {
   if (value === 'all') return 'All';
   if (value === 'bonus') return 'Bonus Action';
+  if (value === 'special') return 'Other';
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 

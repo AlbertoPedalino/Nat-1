@@ -37,15 +37,18 @@ import {
 
 export { getActionRollers } from '../../../shared/character/dice/rollers.js';
 
-export const FILTERS = ['all', 'action', 'bonus', 'reaction'];
+export const FILTERS = ['all', 'action', 'bonus', 'reaction', 'special'];
 // Weapon/unarmed attacks get a red left-bar so attacks stand apart from other
 // Actions at a glance; the rest follow the shared action-economy colours.
 export const CAT_COLORS = { ...ACTION_COLORS, attack: '#de675f' };
-const EXECUTABLE_CATS = new Set(['attack', 'action', 'bonus', 'reaction']);
+// 'special' = features used with no action or on a trigger (Lengthened Strike,
+// Umbral Form, Portal Step…), shown in the "Other" section.
+const EXECUTABLE_CATS = new Set(['attack', 'action', 'bonus', 'reaction', 'special']);
 export const SECTION_DEFS = [
   { key: 'action', title: 'Actions', cats: ['action', 'attack'] },
   { key: 'bonus', title: 'Bonus Actions', cats: ['bonus'] },
   { key: 'reaction', title: 'Reactions', cats: ['reaction'] },
+  { key: 'special', title: 'Other', cats: ['special'] },
 ];
 
 // Action-tab tags render as MiniBadges — the same primitive the spell tab uses —
