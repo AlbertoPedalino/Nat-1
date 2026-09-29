@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Cloud } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import {
   Box,
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -15,7 +17,8 @@ import {
   Typography,
 } from '@mui/material';
 import { readPersistedInstance } from '../../encounterbuilder/state/storage.js';
-import { listInstances, subscribeInstanceData } from '../../../shared/instances/instanceStore.js';
+import { CLOUD_STATES, listInstances, subscribeInstanceData } from '../../../shared/instances/instanceStore.js';
+import { listToolInstances, pullInstance, refreshInstance } from '../../../shared/instances/instanceSync.js';
 import { dedupeFightsByEncounter, mergeLibrary } from '../../encounterbuilder/library/library.js';
 import { buildCombat, restoreFight } from '../../encounterbuilder/combat/combat.js';
 import { hydrateEncounterItems } from '../../encounterbuilder/bestiary/monsterUtils.js';
@@ -33,9 +36,16 @@ import {
   battleMapDropDialogSx,
 } from '../map/battleMapSurface.js';
 
-// Encounters are local-first and scenes are cloud-only, so there is no query
-// that joins them: the GM's own browser holds the encounter data, and the GM is
-// the one importing. Reading localStorage here is the honest way round.
+// The encounters come from the GM's Encounter Builder saves, in this browser and
+// in the cloud. The payload is always read from the local copy, which is what the
+// builder writes and what the fights restore from; the cloud decides which saves
+// are on offer and keeps those copies current:
+// - a save only in the cloud is pulled down when it is picked, so the one
+//   prepared on another machine imports here too;
+// - a local copy linked to the cloud is fast-forwarded if the cloud moved on
+//   and nothing here is unsynced;
+// - a local-only save is read as it is.
+// Offline, or with the cloud unreachable, the list is this browser's saves.
 export default function EncounterImportDialog({
   open, onClose, onImport, busy, placing = false, onPlacementDragStart, onPlacementDragEnd,
 }) {
@@ -47,13 +57,96 @@ export default function EncounterImportDialog({
   const [instances, setInstances] = useState([]);
   const [fights, setFights] = useState([]);
   const [library, setLibrary] = useState([]);
+  const [listNotice, setListNotice] = useState('');
+  // True until the cloud has answered: an empty list before then is not yet
+  // "no saves", only "none in this browser".
+  const [listing, setListing] = useState(false);
+  const [fetching, setFetching] = useState(false);
+  const [fetchNotice, setFetchNotice] = useState('');
+  // Each save is asked of the cloud once per opening of the dialog: switching
+  // back to it, or the list refreshing under it, is not a reason to ask again.
+  const fetchedRef = useRef(new Set());
+  // Until the GM picks a save, the newest one is shown — including one the
+  // cloud list brings in after this browser's own were already on screen.
+  const pickedRef = useRef(false);
 
   useEffect(() => {
-    if (!open) return;
-    const list = listInstances('encounters');
-    setInstances(list);
-    setInstanceId((current) => (list.some((entry) => entry.id === current) ? current : list[0]?.id || ''));
+    if (!open) return undefined;
+    let cancelled = false;
+    fetchedRef.current = new Set();
+    pickedRef.current = false;
+    const apply = (rows) => {
+      const list = [...rows].sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+      setInstances(list);
+      setInstanceId((current) => (
+        pickedRef.current && list.some((entry) => entry.id === current) ? current : list[0]?.id || ''
+      ));
+    };
+    // This browser's saves at once; the cloud's join them when it answers.
+    apply(listInstances('encounters').map((entry) => ({
+      ...entry, origin: 'local', hasLocal: true, cloudState: entry.cloud,
+    })));
+    setListNotice('');
+    setListing(true);
+    const unreachable = 'Could not reach the cloud: showing the saves in this browser.';
+    listToolInstances('encounters')
+      .then(({ rows, error }) => {
+        if (cancelled) return;
+        apply(rows);
+        if (error) setListNotice(unreachable);
+      })
+      .catch(() => {
+        if (!cancelled) setListNotice(unreachable);
+      })
+      .finally(() => { if (!cancelled) setListing(false); });
+    return () => { cancelled = true; };
   }, [open]);
+
+  const selectedInstance = instances.find((entry) => entry.id === instanceId) || null;
+  const cloudOnly = Boolean(selectedInstance && !selectedInstance.hasLocal);
+  const linked = Boolean(selectedInstance?.hasLocal && selectedInstance.cloudState === CLOUD_STATES.LINKED);
+
+  useEffect(() => {
+    setFetchNotice('');
+    if (!open || !instanceId || (!cloudOnly && !linked)) return undefined;
+    if (fetchedRef.current.has(instanceId)) return undefined;
+    fetchedRef.current.add(instanceId);
+    let cancelled = false;
+    // Only a save with nothing here to show waits on the cloud; a linked copy is
+    // shown as it is while it is brought up to date. Either way the new payload
+    // reaches the reader below through the store's 'pulled' notice.
+    if (cloudOnly) setFetching(true);
+    const id = instanceId;
+    const job = cloudOnly
+      ? pullInstance('encounters', id).then(() => 'pulled')
+      : refreshInstance('encounters', id);
+    job
+      .then((result) => {
+        // Downloaded is local now, whether or not it is still the one on show.
+        if (cloudOnly) {
+          setInstances((list) => list.map((entry) => (entry.id === id
+            ? { ...entry, hasLocal: true, cloudState: CLOUD_STATES.LINKED }
+            : entry)));
+        }
+        if (!cancelled && result === 'conflict') {
+          setFetchNotice('This save changed here and in the cloud. Open it in the Encounter Builder to choose; importing from the copy in this browser.');
+        }
+      })
+      .catch(() => {
+        // Let it be tried again the next time it is picked, even if the GM has
+        // moved on to another save meanwhile.
+        fetchedRef.current.delete(id);
+        if (cancelled) return;
+        setFetchNotice(cloudOnly
+          ? 'Could not download this save from the cloud.'
+          : 'Could not check the cloud for a newer copy; importing from this browser.');
+      })
+      .finally(() => { if (!cancelled) setFetching(false); });
+    return () => {
+      cancelled = true;
+      setFetching(false);
+    };
+  }, [cloudOnly, instanceId, linked, open]);
 
   // Read every time the dialog is opened, and again whenever the builder writes.
   //
@@ -186,24 +279,47 @@ export default function EncounterImportDialog({
       <DialogTitle sx={battleMapDialogTitleSx}>Import from an encounter</DialogTitle>
       <DialogContent dividers sx={battleMapDialogContentSx}>
         <Stack spacing={2} sx={{ pt: 0.5 }}>
-          {!instances.length ? (
+          {listNotice ? <Typography sx={noticeSx}>{listNotice}</Typography> : null}
+          {!instances.length && listing ? (
+            <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+              <CircularProgress size={16} />
+              <Typography color="text.secondary" variant="body2">Loading your encounter saves…</Typography>
+            </Stack>
+          ) : null}
+          {!instances.length && !listing ? (
             <Typography color="text.secondary" variant="body2">
-              No encounter builder saves in this browser. Encounters live on the device that built
-              them, so import from the machine you prepared on.
+              No Encounter Builder saves yet. Prepare one in the Encounter Builder, and sign in to
+              see the ones made on another device.
             </Typography>
-          ) : (
+          ) : null}
+          {instances.length ? (
             <>
               <TextField
                 select
                 size="small"
                 label="Encounter builder"
                 value={instanceId}
-                onChange={(event) => setInstanceId(event.target.value)}
+                onChange={(event) => {
+                  pickedRef.current = true;
+                  setInstanceId(event.target.value);
+                }}
+                helperText={fetching ? 'Downloading from the cloud…' : null}
               >
                 {instances.map((instance) => (
-                  <MenuItem key={instance.id} value={instance.id}>{instance.name || instance.id}</MenuItem>
+                  <MenuItem key={instance.id} value={instance.id}>
+                    <Box component="span" sx={instanceRowSx}>
+                      <Box component="span" sx={instanceNameSx}>{instance.name || instance.id}</Box>
+                      {instance.hasLocal ? null : (
+                        <Box component="span" sx={cloudBadgeSx}>
+                          <Cloud size={12} aria-hidden />
+                          Cloud
+                        </Box>
+                      )}
+                    </Box>
+                  </MenuItem>
                 ))}
               </TextField>
+              {fetchNotice ? <Typography sx={noticeSx}>{fetchNotice}</Typography> : null}
 
               {quests.length ? (
                 <TextField
@@ -230,7 +346,7 @@ export default function EncounterImportDialog({
                 disabled={!visible.length}
                 helperText={visible.length
                   ? null
-                  : (entries.length
+                  : fetching ? 'Waiting for the cloud copy…' : (entries.length
                     ? 'No encounter in this quest.'
                     : 'This save has no encounter to import yet.')}
               >
@@ -284,7 +400,7 @@ export default function EncounterImportDialog({
                 </Box>
               </Box>
             </>
-          )}
+          ) : null}
         </Stack>
       </DialogContent>
       <DialogActions sx={battleMapDialogActionsSx}>
@@ -329,4 +445,23 @@ const placementCardSx = {
     borderColor: vttAlpha(VTT_COLORS.gold, 0.6),
     bgcolor: vttAlpha(VTT_COLORS.gold, 0.06),
   },
+};
+
+const noticeSx = { color: 'warning.main', fontSize: '0.75rem', lineHeight: 1.4 };
+const instanceRowSx = { display: 'flex', alignItems: 'center', gap: 1, minWidth: 0, width: '100%' };
+const instanceNameSx = { minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' };
+
+// A save that is not in this browser yet: picking it downloads it.
+const cloudBadgeSx = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 0.4,
+  ml: 'auto',
+  flexShrink: 0,
+  px: 0.6,
+  fontSize: '0.66rem',
+  color: 'gmboard.vtt.gold',
+  border: '1px solid',
+  borderColor: 'gmboard.vtt.goldBorder',
+  borderRadius: 1,
 };

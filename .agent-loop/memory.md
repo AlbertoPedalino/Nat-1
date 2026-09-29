@@ -111,6 +111,7 @@ GM-Board is React 19 + Vite + MUI 9 + Supabase SPA under `react-app/`. D&D data 
 - Missing-token fallback: XMM Skeleton.
 - Conditions sync to sheets; encounter-local effects do not.
 - `persistEncounter` writes all six keys in one `saveLocal`, so listeners never read a half-written library/fight set. `sync/useExternalFightSync.js`, the battle map bridge and the import dialog follow local saves through `instanceStore.subscribeInstanceData` (this tab) and `storage` events (other tabs).
+- VTT import dialog (`pages/vtt/tokens/EncounterImportDialog.jsx`): lists saves via `listToolInstances('encounters')` (local at once, cloud merged when it answers); a cloud-only save is `pullInstance`d when picked (never `openInstance`, which would create an empty local stand-in on failure), a linked copy is `refreshInstance`d once per dialog opening; payload always read from the local copy.
 - Cloud fights: `sync/useCloudFights.js` → `shared/cloud/api/encounterFights.js` → `encounter_fights` rows; `library/fightRecord.js` defines row/entry conversion and embedded library-card recovery. These per-fight rows complement the instance's local payload and section cloud sync.
 - Tests: `tests/logic/pages/encounterbuilder/logic/encounterbuilder.logic.test.js` plus component tests under `tests/ui/pages/encounterbuilder/`.
 
