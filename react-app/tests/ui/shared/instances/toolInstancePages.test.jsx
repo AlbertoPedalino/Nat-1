@@ -249,6 +249,9 @@ describe.each(Object.keys(TOOLS))('%s opened by URL in a browser without it', (k
     useCloud({});
     render(page(key, urlOf(key)));
     expect(await screen.findByTestId('editor')).toBeInTheDocument();
+    // Wait for the INSERT itself (a fixed delay flakes under full-suite load),
+    // then settle once more so a second write would still be caught.
+    await waitFor(() => expect(cloud.writes.map((write) => write.op)).toEqual(['insert']));
     await act(() => wait(SETTLE_MS));
     expect(cloud.writes.map((write) => write.op)).toEqual(['insert']);
     expect(getInstance(key, TOOLS[key].id).cloud).toBe('linked');

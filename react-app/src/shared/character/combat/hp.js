@@ -1,4 +1,5 @@
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
+import { collectOwnedFeatNames } from '../progression/selectedFeats.js';
 
 function statModFromScore(score) {
   return Math.floor((Number(score || 0) - 10) / 2);
@@ -49,27 +50,16 @@ function speciesHpBonus(character) {
   return Number(character?.speciesSnapshot?.hpBonusPerLevel || 0);
 }
 
+// Owned feats (choice slots, background, species — the shared owner-key rules)
+// plus any saved snapshot, so a feat still counts before its snapshot exists.
 function collectFeatNames(character) {
   const out = new Set();
   (character?.allFeatSnapshots || []).forEach((feat) => { if (feat?.name) out.add(feat.name); });
-  Object.entries(character?.choices || {}).forEach(([key, value]) => {
-    const lk = String(key || '').toLowerCase();
-    const isFeatKey =
-      lk === 'feat_origin' ||
-      lk === 'species_origin_feat' ||
-      lk.startsWith('feat_') ||
-      /^mc\d+_feat_/.test(lk) ||
-      lk.includes('fighting_style') ||
-      lk.includes('epic_boon') ||
-      /^feat_asi_lv\d+$/.test(lk);
-    if (!isFeatKey) return;
-    const arr = Array.isArray(value) ? value : [value];
-    arr.forEach((entry) => {
-      if (typeof entry !== 'string' || !entry) return;
-      out.add(entry.split('|')[0].trim());
-    });
+  collectOwnedFeatNames(character).forEach((name) => {
+    const clean = String(name || '').split('|')[0].trim();
+    if (clean) out.add(clean);
   });
-  return [...out].filter(Boolean);
+  return [...out];
 }
 
 function featHpBonusPerLevel(featName, featSnapshot) {
