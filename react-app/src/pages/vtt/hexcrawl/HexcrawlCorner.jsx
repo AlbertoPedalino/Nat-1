@@ -1,21 +1,29 @@
+import { useState } from 'react';
 import {
-  Box, IconButton, Tooltip, Typography,
+  Box, IconButton, Stack, Tooltip, Typography,
 } from '@mui/material';
-import { Hexagon, X } from 'lucide-react';
+import { Hexagon, Settings, X } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import HexcrawlPanel from './HexcrawlPanel.jsx';
+import HexcrawlSettingsDialog from './HexcrawlSettingsDialog.jsx';
 import { ICON_STRIP } from '../scene/MapCorner.jsx';
 
 // Top left, beside the picture settings: the hexcrawl is how this map is played
 // rather than a tool you pick up, so it belongs with the scene's own settings
 // and not in the rail of brushes and rulers.
+//
+// The corner reports; the gear opens the settings, centred and full size, for
+// the moments the table decides something has changed.
 export default function HexcrawlCorner({ open = false, onOpenChange, ...props }) {
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const openSettings = () => setSettingsOpen(true);
+
   return (
     <Box sx={cornerSx}>
-      <Tooltip title={open ? 'Hide the hexcrawl settings' : 'Hexcrawl: season, terrain, travel'}>
+      <Tooltip title={open ? 'Hide the hexcrawl' : 'Hexcrawl: time, weather, travel'}>
         <IconButton
           size="small"
-          aria-label="Hexcrawl settings"
+          aria-label="Hexcrawl"
           aria-expanded={open}
           onClick={() => onOpenChange?.(!open)}
           sx={buttonSx}
@@ -26,10 +34,23 @@ export default function HexcrawlCorner({ open = false, onOpenChange, ...props })
 
       {open ? (
         <Box sx={panelSx}>
-          <Typography sx={titleSx}>Hexcrawl</Typography>
-          <HexcrawlPanel {...props} />
+          <Stack direction="row" sx={titleRowSx}>
+            <Typography sx={titleSx}>Hexcrawl</Typography>
+            <Tooltip title="Hexcrawl settings">
+              <IconButton size="small" aria-label="Hexcrawl settings" onClick={openSettings} sx={settingsButtonSx}>
+                <Settings size={14} />
+              </IconButton>
+            </Tooltip>
+          </Stack>
+          <HexcrawlPanel {...props} onOpenSettings={openSettings} />
         </Box>
       ) : null}
+
+      <HexcrawlSettingsDialog
+        {...props}
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+      />
     </Box>
   );
 }
@@ -78,5 +99,8 @@ const titleSx = {
   fontSize: '0.7rem',
   letterSpacing: '0.08em',
   color: 'primary.main',
-  mb: 1,
 };
+
+const settingsButtonSx = { color: 'text.secondary', p: 0.4, '&:hover': { color: 'primary.main' } };
+
+const titleRowSx = { alignItems: 'center', justifyContent: 'space-between', mb: 0.75 };

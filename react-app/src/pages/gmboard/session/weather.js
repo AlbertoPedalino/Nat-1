@@ -21,6 +21,22 @@ export function effectiveHours(terrainHours, meteo, intensity, mountSpeed = 1) {
   return Math.max(0.25, Math.round((hours / speed) * 4) / 4);
 }
 
+// What a hex will cost and why, for the panels that say it before the party
+// walks. The reasons are named because they pull opposite ways: a mount in
+// heavy snow can land back on the terrain's own hours.
+export function travelTime(terrainHours, meteo, intensity, mountSpeed = 1) {
+  const speed = Number(mountSpeed) > 0 ? Number(mountSpeed) : 1;
+  const reasons = [
+    effectiveHours(terrainHours, meteo, intensity) !== terrainHours ? 'weather' : null,
+    speed !== 1 ? `×${speed} mount` : null,
+  ].filter(Boolean);
+  return {
+    base: terrainHours,
+    hours: effectiveHours(terrainHours, meteo, intensity, speed),
+    reasons,
+  };
+}
+
 export function weatherEffectLabel(meteo, intensity) {
   if (meteo === 'Rain') {
     if (intensity === 'Light') return '×1 travel';

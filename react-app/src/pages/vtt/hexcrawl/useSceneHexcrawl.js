@@ -11,8 +11,9 @@ import {
 } from '../../../shared/cloud/api/hexcrawl.js';
 import { hexCellsByKey } from '../../../shared/hexcrawl/hexCell.js';
 import {
-  clockFromState, hexEntrySummary, mergeBoardClock, runHexEntry, travelFromState,
+  clockFromResult, clockFromState, hexEntrySummary, mergeBoardClock, runHexEntry, travelFromState,
 } from '../../../shared/hexcrawl/hexEntry.js';
+import { resolveManualAdvance } from '../../gmboard/hexcrawl/hex.js';
 import { useCampaignClock } from '../../../shared/hexcrawl/useCampaignClock.js';
 import { hexKey, isHexGrid } from '../../../shared/vtt/map/hexGeometry.js';
 
@@ -373,30 +374,57 @@ export function useSceneHexcrawl({ scene, isGm }) {
     });
   }, [armed, cellsByKey, clearHexAt, enterHexAt]);
 
-  // The season belongs to the campaign once there is one: both screens read it
-  // from the same row. Written with the rest of the clock so the first save
-  // carries the board's own time rather than the schema's defaults.
-  const setSeason = useCallback(async (season) => {
+  // The season, the date and the sky belong to the campaign once there is one:
+  // both screens read them from the same row. Written with the rest of the clock
+  // so the first save carries the board's own time rather than the schema's
+  // defaults. `patch` may be a function of the merged state, resolved when the
+  // queued write runs, so it builds on whatever the write before it saved.
+  const patchClock = useCallback(async (patch, failure) => {
     if (!enabled || !clock.active) return null;
     setBusy(true);
     try {
       const activeBoard = await refreshBoard({ force: true });
       if (!activeBoard) throw new Error('This campaign has no hexcrawl board linked.');
-      const base = mergeBoardClock(activeBoard.state, clock.clock);
-      const saved = await clock.saveClock((current) => ({
-        ...(!current ? clockFromState(base) : {}),
-        ...(!current?.travelConfigured ? { ...travelFromState(base), travelConfigured: true } : {}),
-        season: season || null,
-      }));
+      const saved = await clock.saveClock((current) => {
+        const base = mergeBoardClock(activeBoard.state, current);
+        return {
+          ...(!current ? clockFromState(base) : {}),
+          ...(!current?.travelConfigured ? { ...travelFromState(base), travelConfigured: true } : {}),
+          ...(typeof patch === 'function' ? patch(base, activeBoard) : patch),
+        };
+      });
       setError(null);
       return saved;
     } catch (cause) {
-      setError(cause?.message || 'Could not set the season.');
+      setError(cause?.message || failure);
       return null;
     } finally {
       setBusy(false);
     }
   }, [clock, enabled, refreshBoard]);
+
+  const setSeason = useCallback(
+    (season) => patchClock({ season: season || null }, 'Could not set the season.'),
+    [patchClock],
+  );
+
+  // Date, time of day or the sky, set by hand: the GM Board's Date & Time and
+  // weather override, for a table that is running the crawl from the map.
+  const setClock = useCallback(
+    (fields) => patchClock(fields, 'Could not change the campaign clock.'),
+    [patchClock],
+  );
+
+  // Hours that pass off the map — a rest, a siege, a day in town. The weather
+  // keeps its own count through them, exactly as it does on the board.
+  const advanceClock = useCallback((hours) => {
+    const amount = Number(hours);
+    if (!Number.isFinite(amount) || amount <= 0) return Promise.resolve(null);
+    return patchClock((base, activeBoard) => {
+      const advanced = resolveManualAdvance(base, amount, activeBoard.tables);
+      return { ...clockFromResult(advanced), season: base.season || null };
+    }, 'Could not advance the campaign clock.');
+  }, [patchClock]);
 
   // Where the party stands, said as fully as this browser can say it. A hex
   // entered in this session carries its whole answer; one entered from the GM
@@ -442,6 +470,8 @@ export function useSceneHexcrawl({ scene, isGm }) {
     defaults,
     setDefaults,
     setSeason,
+    setClock,
+    advanceClock,
     board,
     clock: clock.clock,
     log: clock.log,

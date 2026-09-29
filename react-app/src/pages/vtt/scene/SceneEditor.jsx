@@ -2392,6 +2392,8 @@ export default function SceneEditor({
                   onHexColorChange={(hexColor) => handleGridChange({ ...scene.grid, hexColor })}
                   onDefaultsChange={hexcrawl.setDefaults}
                   onSeasonChange={hexcrawl.setSeason}
+                  onClockChange={hexcrawl.setClock}
+                  onClockAdvance={hexcrawl.advanceClock}
                   onArmedChange={hexcrawl.setArmed}
                 />
               ) : null}

@@ -125,3 +125,31 @@ test('a square map leaves the campaign clock alone', async () => {
   await act(async () => {});
   expect(campaignClock.args[0]).toBe('campaign-one');
 });
+
+test('the map sets the date and the sky without touching anything else', async () => {
+  cloud.readHexcrawlBoard.mockResolvedValue({ id: 'board-one', version: 1, state: {}, tables: createDefaultTables() });
+  campaignClock.clock = { travelConfigured: true, min: 800, day: 3, month: 4, year: 1000, meteo: 'Clear', season: 'Summer' };
+  render(<Probe />);
+  await waitFor(() => expect(hexcrawl.board).not.toBeNull());
+  await act(async () => hexcrawl.setClock({ day: 9, month: 5, year: 1001, min: 60 }));
+  await act(async () => hexcrawl.setClock({ meteo: 'Snow', intensity: 'Heavy' }));
+  expect(campaignClock.saveClock.mock.calls[0][0](campaignClock.clock)).toEqual({ day: 9, month: 5, year: 1001, min: 60 });
+  expect(campaignClock.saveClock.mock.calls[1][0](campaignClock.clock)).toEqual({ meteo: 'Snow', intensity: 'Heavy' });
+});
+
+test('time passed off the map moves the clock and the weather count', async () => {
+  cloud.readHexcrawlBoard.mockResolvedValue({ id: 'board-one', version: 1, state: {}, tables: createDefaultTables() });
+  campaignClock.clock = {
+    travelConfigured: true, min: 1380, day: 31, month: 12, year: 1000,
+    meteo: 'Clear', intensity: '', season: null, hoursSinceWeather: 1, nextWeatherIn: 24,
+  };
+  render(<Probe />);
+  await waitFor(() => expect(hexcrawl.board).not.toBeNull());
+  await act(async () => hexcrawl.advanceClock(2));
+  const write = campaignClock.saveClock.mock.calls[0][0](campaignClock.clock);
+  expect(write).toMatchObject({
+    min: 60, day: 1, month: 1, year: 1001, hoursSinceWeather: 3, meteo: 'Clear', season: null,
+  });
+  await act(async () => hexcrawl.advanceClock(0));
+  expect(campaignClock.saveClock).toHaveBeenCalledTimes(1);
+});

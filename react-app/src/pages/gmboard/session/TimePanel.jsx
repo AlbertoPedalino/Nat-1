@@ -3,7 +3,7 @@ import { Box, Button, Stack, TextField, Typography, useTheme } from '@mui/materi
 import { CalendarDays, Check, Clock, Compass, FastForward } from 'lucide-react';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import { formatDate, formatHM, parseHM, validateStart } from './time.js';
-import { effectiveHours } from './weather.js';
+import { travelTime } from './weather.js';
 
 export default function TimePanel() {
   const { state, setStart, setTime, advanceManual } = useGmBoard();
@@ -51,20 +51,12 @@ export default function TimePanel() {
     advanceManual(manualHours);
   };
 
-  const effH = state.terrain
-    ? effectiveHours(state.terrainH, state.meteo, state.intensity, state.mountSpeed)
-    : 0;
-  // Says which of the two moved the number, because they pull opposite ways: a
-  // mount in heavy snow can land back on the terrain's own hours.
-  const reasons = [
-    effectiveHours(state.terrainH, state.meteo, state.intensity) !== state.terrainH ? 'weather' : null,
-    Number(state.mountSpeed) > 1 ? `×${state.mountSpeed} mount` : null,
-  ].filter(Boolean);
+  const travel = travelTime(state.terrainH, state.meteo, state.intensity, state.mountSpeed);
   const terrainLabel = !state.terrain
     ? '— no terrain —'
-    : effH === state.terrainH
-      ? `${state.terrain} (${effH}h)`
-      : `${state.terrain} (${state.terrainH}h → ${effH}h due to ${reasons.join(' and ')})`;
+    : travel.hours === travel.base
+      ? `${state.terrain} (${travel.hours}h)`
+      : `${state.terrain} (${travel.base}h → ${travel.hours}h due to ${travel.reasons.join(' and ')})`;
 
   return (
     <Stack spacing={1.5} sx={panelSx}>

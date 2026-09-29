@@ -68,3 +68,12 @@ export function validateStart({ day, month, year, time }) {
   if (min == null) return null;
   return { day: d, month: m, year: y, min };
 }
+
+// A leg's length as a table says it: "1h 30m", "45m", never "1.5h".
+export function formatDuration(hours) {
+  const total = Math.round(Number(hours) * 60);
+  if (!Number.isFinite(total) || total <= 0) return '0m';
+  const h = Math.floor(total / 60);
+  const m = total % 60;
+  return [h ? `${h}h` : '', m ? `${m}m` : ''].filter(Boolean).join(' ');
+}

@@ -1,123 +1,63 @@
 import {
-  Box, Button, FormControlLabel, MenuItem, Stack, Switch, TextField, Typography, alpha, useTheme,
+  Box, Button, FormControlLabel, Stack, Switch, Typography, alpha, useTheme,
 } from '@mui/material';
-import { Dices, Footprints } from 'lucide-react';
-import ColorField from '../../../shared/ui/ColorField.jsx';
-import MountSelector from '../../gmboard/hexcrawl/MountSelector.jsx';
+import {
+  CalendarDays, Compass, Dices, Footprints, Rabbit, Swords,
+} from 'lucide-react';
 import InfoHint from '../../../shared/ui/InfoHint.jsx';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { formatDateTime } from '../../gmboard/session/time.js';
-import { hasWeatherDisadvantage, weatherEffectLabel, weatherTimerLabel } from '../../gmboard/session/weather.js';
 import {
-  HEX_POPULATION_OPTIONS, SEASONS, TERRAIN_OPTIONS, TIER_OPTIONS,
-} from '../../gmboard/state/constants.js';
+  advanceMinutes, formatDate, formatDateTime, formatDuration, formatHM,
+} from '../../gmboard/session/time.js';
+import {
+  hasWeatherDisadvantage, travelTime, weatherEffectLabel, weatherTimerLabel,
+} from '../../gmboard/session/weather.js';
+import { MOUNT_OPTIONS, normalizeMountSpeed } from '../../gmboard/state/constants.js';
 import {
   FALLBACK_WEATHER_ICON, POPULATION_ICONS, SEASON_ICONS, TERRAIN_ICONS, WEATHER_ICONS,
 } from '../../gmboard/hexcrawl/hexIcons.js';
-import { mergeBoardClock, missingHexSetup, terrainOption } from '../../../shared/hexcrawl/hexEntry.js';
-import { DEFAULT_GRID } from '../../../shared/vtt/scene/scene.js';
+import {
+  mergeBoardClock, missingHexSetup, populationOption, terrainOption, tierOption,
+} from '../../../shared/hexcrawl/hexEntry.js';
 
-const DEFAULT_HEX_COLOR = DEFAULT_GRID.hexColor;
-
-// The hexcrawl's settings, in the corner where the map's other settings live.
+// The hexcrawl as it stands, in the corner where the map's other settings live.
 //
-// Set up once — season, and what a hex is — and after that a click on the board
-// is the whole interaction: the party walks in, the engine rolls, and the answer
-// comes back as a dialog. There is deliberately no per-hex form here: filling
-// one in before every click is the tedium this replaces.
-//
-// It reads as the GM Board's Travel panel does — weather card, icons per
-// option, tier in its own colour — because it is the same hexcrawl, and a GM
-// moves between the two screens in the middle of a leg.
+// A report, not a form: what time it is, what the sky is doing, what the next
+// click will cost, and where the party last walked. The one control kept here is
+// whether a click walks the party at all — it is flipped mid-session, while
+// everything else is set once in the settings dialog behind the gear.
 export default function HexcrawlPanel({
-  board, clock, clockLinked, defaults, armed, busy, error, lastHex, hasResult,
-  hexColor, onHexColorChange,
-  onDefaultsChange, onSeasonChange, onArmedChange, onOpenResult,
+  board, clock, clockLinked, defaults, armed, error, lastHex, hasResult,
+  onArmedChange, onOpenResult, onOpenSettings,
 }) {
   const theme = useTheme();
   const boardState = board?.state ? mergeBoardClock(board.state, clock) : null;
-  const season = boardState?.season || '';
+  // The clock as the next click will read it: the campaign row laid over the
+  // board, or the row alone while the board is still loading. A campaign that
+  // has never been written still has a date — the board's — and it is the one
+  // its first write will seed.
+  const sky = boardState || clock;
   // Measured against the defaults, because those are what a clicked hex will be
   // rolled with. Said here rather than after the click, where it would be a
   // refusal instead of a setup step.
   const missing = boardState ? missingHexSetup(defaults, boardState) : null;
+  const mountSpeed = normalizeMountSpeed(defaults?.mountSpeed ?? boardState?.mountSpeed ?? 1);
 
   return (
     <Stack spacing={1.1}>
-      {clock ? <WeatherCard clock={clock} /> : null}
+      {sky ? <WeatherCard clock={sky} /> : null}
 
-      <TextField
-        select
-        size="small"
-        label="Season"
-        value={season}
-        onChange={(event) => onSeasonChange(event.target.value || null)}
-        disabled={busy || !clockLinked || !board}
-      >
-        <MenuItem value="">Not set</MenuItem>
-        {SEASONS.map((option) => (
-          <MenuItem key={option} value={option}>
-            <OptionRow icon={SEASON_ICONS[option]} label={option} />
-          </MenuItem>
-        ))}
-      </TextField>
+      <NextHexLine terrain={defaults?.terrain} clock={sky} mountSpeed={mountSpeed} />
 
-      <Typography sx={sectionSx}>A hex is, unless it says otherwise</Typography>
-
-      <TextField
-        select
-        size="small"
-        label="Terrain"
-        value={defaults?.terrain || ''}
-        onChange={(event) => onDefaultsChange({ terrain: event.target.value || null })}
-        disabled={busy || !clockLinked || !board}
-      >
-        <MenuItem value="">Not set</MenuItem>
-        {TERRAIN_OPTIONS.map((option) => (
-          <MenuItem key={option.id} value={option.label}>
-            <OptionRow icon={TERRAIN_ICONS[option.id]} label={option.label} sub={option.sub} />
-          </MenuItem>
-        ))}
-      </TextField>
-
-      <TextField
-        select
-        size="small"
-        label="Population"
-        value={defaults?.pop || ''}
-        onChange={(event) => onDefaultsChange({ pop: event.target.value || null })}
-        disabled={busy || !clockLinked || !board}
-      >
-        <MenuItem value="">Not set</MenuItem>
-        {HEX_POPULATION_OPTIONS.map((option) => (
-          <MenuItem key={option.id} value={option.id}>
-            <OptionRow icon={POPULATION_ICONS[option.id]} label={option.label} sub={option.sub} />
-          </MenuItem>
-        ))}
-      </TextField>
-
-      {/* The tier is the one setting with a colour of its own on the GM Board,
-          and it keeps it here: it is read at a glance mid-fight, not browsed. */}
-      <TierRow
-        value={defaults?.tier ?? null}
-        busy={busy || !clockLinked || !board}
+      <SetupSummary
+        season={boardState?.season || null}
+        defaults={defaults}
+        mountSpeed={mountSpeed}
         tones={theme.palette.gmboard.tier}
-        onChange={(tier) => onDefaultsChange({ tier })}
-      />
-
-      {/* The party's speed is shared with the GM Board across every map. */}
-      <MountSelector
-        dense
-        label="Mount"
-        disabled={busy || !clockLinked || !board}
-        value={defaults?.mountSpeed ?? boardState?.mountSpeed ?? 1}
-        onChange={(mountSpeed) => onDefaultsChange({ mountSpeed })}
       />
 
       {/* Off while a map is being drawn up: laying out terrain would otherwise
-          cost the party a day of travel per click. What a click does is behind
-          the icon rather than spelled out under it: the panel sits on the map,
-          so every line of prose is a line of map, and this one is read once. */}
+          cost the party a day of travel per click. */}
       <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
         <FormControlLabel
           sx={{ mr: 0 }}
@@ -150,43 +90,16 @@ export default function HexcrawlPanel({
       {error ? <Typography sx={warnSx}>{error}</Typography> : null}
 
       {missing?.length && board ? (
-        <Typography sx={hintSx}>Set {missing.join(', ')} before walking into a hex.</Typography>
+        <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
+          <Typography sx={hintSx}>Set {missing.join(', ')} before walking into a hex.</Typography>
+          {onOpenSettings ? (
+            <Button size="small" sx={linkButtonSx} onClick={onOpenSettings}>Open settings</Button>
+          ) : null}
+        </Stack>
       ) : null}
 
-      {/* The colour of the country the party has walked. A green wash reads as
-          forest on one map and as nothing at all on another, so it is the GM's
-          to pick — and it is kept on the scene, where the players and the
-          projector read it too. */}
-      {onHexColorChange ? (
-        <Box>
-          <Typography sx={sectionSx}>Explored hex colour</Typography>
-          <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center' }}>
-            {/* The same deferred well the grid's own colour uses: a controlled
-                colour input re-renders on every move inside the picker and
-                snaps the widget away from the pointer. */}
-            <ColorField
-              value={hexColor || DEFAULT_HEX_COLOR}
-              onChange={onHexColorChange}
-              deferMs={180}
-              label="Explored hex colour"
-              sx={swatchSx}
-            />
-            <Typography sx={hintSx}>{hexColor || DEFAULT_HEX_COLOR}</Typography>
-            {(hexColor || DEFAULT_HEX_COLOR) !== DEFAULT_HEX_COLOR ? (
-              <Button
-                size="small"
-                sx={lastButtonSx}
-                onClick={() => onHexColorChange(DEFAULT_HEX_COLOR)}
-              >
-                Reset
-              </Button>
-            ) : null}
-          </Stack>
-        </Box>
-      ) : null}
-
-      {/* Last, under the settings: it is the answer to what has already been
-          done, and the setup above it is what the next click will use. */}
+      {/* Last: it is the answer to what has already been done, and the report
+          above it is what the next click will use. */}
       {lastHex ? (
         <LastHexCard
           last={lastHex}
@@ -237,6 +150,95 @@ function WeatherCard({ clock }) {
   );
 }
 
+// How long the next click will take, before it is clicked. The bubble says it
+// afterwards, which is too late to decide whether the party makes camp first.
+function NextHexLine({ terrain, clock, mountSpeed }) {
+  const option = terrainOption(terrain);
+  if (!option) {
+    return <Typography sx={hintSx}>Next hex: pick a terrain to see how long it takes.</Typography>;
+  }
+  const travel = travelTime(option.hours, clock?.meteo, clock?.intensity, mountSpeed);
+  const Icon = TERRAIN_ICONS[option.id] || Footprints;
+  const timed = clock && Number.isFinite(clock.min) && clock.day && clock.month && clock.year;
+  const arrival = timed ? advanceMinutes(clock, travel.hours) : null;
+  const nextDay = arrival
+    && (arrival.day !== clock.day || arrival.month !== clock.month || arrival.year !== clock.year);
+
+  return (
+    <Box sx={nextHexSx}>
+      <Icon size={16} color={VTT_COLORS.gold} />
+      <Box sx={{ minWidth: 0, flex: 1 }}>
+        <Typography sx={nextHexTitleSx}>Next hex · {formatDuration(travel.hours)}</Typography>
+        <Typography sx={effectSx}>
+          {option.label} {formatDuration(travel.base)}
+          {travel.reasons.length ? ` → ${formatDuration(travel.hours)} (${travel.reasons.join(', ')})` : ''}
+        </Typography>
+        {arrival ? (
+          <Typography sx={effectSx}>
+            Arrive {formatHM(arrival.min)}{nextDay ? `, ${formatDate(arrival)}` : ''}
+          </Typography>
+        ) : null}
+      </Box>
+      <InfoHint
+        label="About travel time"
+        text="Measured for the default terrain; a hex with a terrain of its own takes that terrain's hours. The weather now sets the pace, even if it turns on the way."
+      />
+    </Box>
+  );
+}
+
+// What an untouched hex will be rolled as, in one line of chips. Changing any of
+// it is the settings dialog's job; reading it is this line's.
+function SetupSummary({ season, defaults, mountSpeed, tones }) {
+  const population = populationOption(defaults?.pop);
+  const tier = tierOption(defaults?.tier);
+  const mount = MOUNT_OPTIONS.find((option) => option.speed === mountSpeed);
+  const tierTone = tier ? tones[tier.tier] : null;
+
+  // The same icons the settings dialog and the GM Board use for each choice, so
+  // the chip reads as the button it was picked from.
+  return (
+    <Box sx={chipRowSx} aria-label="Hexcrawl setup">
+      <Chip
+        icon={(season && SEASON_ICONS[season]) || CalendarDays}
+        label={season || 'No season'}
+        missing={!season}
+      />
+      <Chip
+        icon={(population && POPULATION_ICONS[population.id]) || Compass}
+        label={population?.label || 'No population'}
+        missing={!population}
+      />
+      <Chip
+        icon={Swords}
+        label={tier ? `${tier.shortLabel} · ${tier.shortLevels}` : 'No tier'}
+        missing={!tier}
+        tone={tierTone?.color}
+      />
+      <Chip
+        icon={mountSpeed === 1 ? Footprints : Rabbit}
+        label={mount ? mount.label : `×${mountSpeed} mount`}
+      />
+    </Box>
+  );
+}
+
+function Chip({ icon: Icon, label, missing = false, tone = null }) {
+  return (
+    <Box
+      component="span"
+      sx={{
+        ...chipSx,
+        ...(tone ? { color: tone, borderColor: alpha(tone, 0.6) } : null),
+        ...(missing ? missingChipSx : null),
+      }}
+    >
+      {Icon ? <Icon size={12} aria-hidden /> : null}
+      {label}
+    </Box>
+  );
+}
+
 // Where the party stands, and what the hex did to them on the way in. The
 // bubble over the map says this once and fades; a GM who looked away, or who
 // opened the panel an hour later, still has to know where everyone is.
@@ -282,60 +284,10 @@ function LastHexCard({ last, onOpenResult }) {
   );
 }
 
-// Four buttons rather than a fifth dropdown: the tier is the one field a GM
-// changes between parties, and its colour is how the board says how hard the
-// hex is about to be.
-function TierRow({ value, tones, busy, onChange }) {
-  return (
-    <Box>
-      <Typography sx={sectionSx}>Encounter tier</Typography>
-      <Box role="group" aria-label="Encounter tier" sx={tierRowSx}>
-        {TIER_OPTIONS.map((option) => {
-          const selected = value === option.tier;
-          const tone = tones[option.tier];
-          return (
-            <Box
-              component="button"
-              type="button"
-              key={option.tier}
-              disabled={busy}
-              aria-pressed={selected}
-              // Clicking the tier it is already on clears it, so a map can be
-              // laid out without claiming a difficulty it has not been given.
-              onClick={() => onChange(selected ? null : option.tier)}
-              sx={{
-                ...tierButtonSx,
-                borderColor: selected ? tone.color : tone.dim,
-                color: selected ? tone.color : tone.dim,
-                bgcolor: selected ? alpha(tone.color, 0.16) : 'transparent',
-                '&:hover:not(:disabled)': { borderColor: tone.color, bgcolor: alpha(tone.color, 0.1) },
-              }}
-            >
-              <Box component="span" sx={{ fontWeight: 700 }}>{option.shortLabel}</Box>
-              <Box component="span" sx={{ fontSize: '0.56rem', opacity: 0.85 }}>{option.shortLevels}</Box>
-            </Box>
-          );
-        })}
-      </Box>
-    </Box>
-  );
-}
-
-function OptionRow({ icon: Icon, label, sub }) {
-  return (
-    <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', minWidth: 0 }}>
-      {Icon ? <Icon size={14} /> : null}
-      <Box component="span">{label}</Box>
-      {sub ? <Box component="span" sx={optionSubSx}>{sub}</Box> : null}
-    </Stack>
-  );
-}
-
 const hintSx = { color: VTT_COLORS.panelTextMuted, fontSize: '0.72rem', lineHeight: 1.45 };
 const sectionSx = { color: VTT_COLORS.panelTextFaint, fontSize: '0.62rem', letterSpacing: '0.04em', mb: 0.5 };
 const clockSx = { color: VTT_COLORS.panelText, fontSize: '0.72rem' };
 const warnSx = { color: 'warning.main', fontSize: '0.66rem', lineHeight: 1.35 };
-const optionSubSx = { color: 'text.secondary', fontSize: '0.68rem' };
 
 const cardSx = {
   p: 0.9,
@@ -346,17 +298,45 @@ const cardSx = {
 const weatherNameSx = { fontSize: '0.8rem', fontWeight: 700, lineHeight: 1.2 };
 const effectSx = { color: 'text.secondary', fontSize: '0.66rem' };
 
-const tierRowSx = { display: 'flex', flexWrap: 'wrap', gap: 0.6 };
+const nextHexSx = {
+  display: 'flex',
+  alignItems: 'flex-start',
+  gap: 0.9,
+  p: 0.9,
+  border: '1px solid',
+  borderColor: vttAlpha(VTT_COLORS.gold, 0.35),
+  borderRadius: 1.5,
+  bgcolor: vttAlpha(VTT_COLORS.gold, 0.06),
+};
+const nextHexTitleSx = { fontSize: '0.8rem', fontWeight: 700, lineHeight: 1.2, color: VTT_COLORS.gold };
 
-const swatchSx = {
-  width: 34,
-  height: 26,
-  p: 0,
-  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.35)}`,
+const chipRowSx = { display: 'flex', flexWrap: 'wrap', gap: 0.5 };
+
+const chipSx = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 0.4,
+  px: 0.75,
+  py: 0.2,
+  fontSize: '0.66rem',
+  lineHeight: 1.4,
+  color: VTT_COLORS.panelText,
+  border: '1px solid',
+  borderColor: 'divider',
   borderRadius: 1,
-  bgcolor: 'transparent',
-  cursor: 'pointer',
-  flexShrink: 0,
+};
+
+const missingChipSx = {
+  color: 'warning.main',
+  borderColor: 'warning.main',
+  borderStyle: 'dashed',
+};
+
+const linkButtonSx = {
+  px: 0.75,
+  minWidth: 0,
+  fontSize: '0.66rem',
+  textTransform: 'none',
 };
 
 const lastCardSx = {
@@ -384,22 +364,4 @@ const lastButtonSx = {
   minWidth: 0,
   fontSize: '0.66rem',
   textTransform: 'none',
-};
-
-const tierButtonSx = {
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  gap: 0.1,
-  flex: '1 1 60px',
-  py: 0.5,
-  px: 0.75,
-  fontFamily: 'inherit',
-  fontSize: '0.7rem',
-  lineHeight: 1.2,
-  border: '1px solid',
-  borderRadius: 1,
-  cursor: 'pointer',
-  '&:disabled': { cursor: 'default', opacity: 0.5 },
-  '&:focus-visible': { outline: '2px solid currentColor', outlineOffset: '1px' },
 };

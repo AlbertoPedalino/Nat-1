@@ -38,8 +38,6 @@ const panel = (overrides = {}) => (
     clockLinked
     defaults={DEFAULTS}
     armed
-    onDefaultsChange={noop}
-    onSeasonChange={noop}
     onArmedChange={noop}
     {...overrides}
   />
@@ -53,48 +51,6 @@ test('the panel shows the campaign clock and its weather before anything is pick
   // Heavy rain costs the party advantage, and the panel says so rather than
   // leaving the GM to remember the table.
   expect(screen.getByText(/disadvantage/i)).toBeInTheDocument();
-});
-
-test('the season is set once, on the campaign rather than on the hex', () => {
-  const onSeasonChange = vi.fn();
-  render(panel({ onSeasonChange }));
-  fireEvent.mouseDown(screen.getByRole('combobox', { name: 'Season' }));
-  fireEvent.click(within(screen.getByRole('listbox')).getByText('Autumn'));
-  expect(onSeasonChange).toHaveBeenCalledWith('Autumn');
-});
-
-test('the defaults are what an untouched hex is assumed to be', () => {
-  const onDefaultsChange = vi.fn();
-  render(panel({ onDefaultsChange }));
-  fireEvent.mouseDown(screen.getByRole('combobox', { name: 'Terrain' }));
-  fireEvent.click(within(screen.getByRole('listbox')).getByText(/^Mountain/));
-  expect(onDefaultsChange).toHaveBeenCalledWith({ terrain: 'Mountain' });
-});
-
-// The tier keeps the GM Board's colours and its one-click row rather than
-// hiding behind a fifth dropdown.
-test('the tier is picked from the coloured row, and clicking it again clears it', () => {
-  const onDefaultsChange = vi.fn();
-  const { rerender } = render(panel({ onDefaultsChange }));
-  const tiers = screen.getByRole('group', { name: 'Encounter tier' });
-
-  fireEvent.click(within(tiers).getByRole('button', { name: /T3/ }));
-  expect(onDefaultsChange).toHaveBeenCalledWith({ tier: 3 });
-
-  rerender(panel({ onDefaultsChange, defaults: { ...DEFAULTS, tier: 3 } }));
-  fireEvent.click(within(screen.getByRole('group', { name: 'Encounter tier' })).getByRole('button', { name: /T3/ }));
-  expect(onDefaultsChange).toHaveBeenLastCalledWith({ tier: null });
-});
-
-// The mount is the party's, and the map can say so without going back to the
-// board — a party rides out of a city on the screen the GM is looking at.
-test('the mount is picked on the map as well as on the board', () => {
-  const onDefaultsChange = vi.fn();
-  render(panel({ onDefaultsChange }));
-  const mounts = screen.getByRole('group', { name: 'Mount' });
-
-  fireEvent.click(within(mounts).getByRole('button', { name: /×3/ }));
-  expect(onDefaultsChange).toHaveBeenCalledWith({ mountSpeed: 3 });
 });
 
 test('the weather card says what the weather costs, not only what it is', () => {
@@ -222,4 +178,40 @@ test('the bubble answers over the hex, and opens the rolls when clicked', () => 
 test('no result means no dialog on the map', () => {
   render(<HexResultDialog result={null} onClose={noop} />);
   expect(screen.queryByRole('dialog')).toBeNull();
+});
+
+// The cost of a click is said before the click: terrain, weather and mount
+// together, and the hour the party will arrive.
+test('the panel says how long the next hex takes and when the party arrives', () => {
+  render(panel({ defaults: { ...DEFAULTS, terrain: 'Forest', mountSpeed: 2 } }));
+  // Forest 4h, doubled by heavy rain, halved by the mount.
+  expect(screen.getByText('Next hex · 4h')).toBeInTheDocument();
+  expect(screen.getByText(/Forest 4h → 4h \(weather, ×2 mount\)/)).toBeInTheDocument();
+  expect(screen.getByText('Arrive 12:00')).toBeInTheDocument();
+});
+
+test('the next hex asks for a terrain before it can say how long it takes', () => {
+  render(panel({ defaults: { ...DEFAULTS, terrain: null } }));
+  expect(screen.getByText(/pick a terrain to see how long it takes/i)).toBeInTheDocument();
+});
+
+// The corner reports; it does not ask. Everything a hex is rolled with is read
+// at a glance, and a missing piece is marked where it would be.
+test('the panel sums up the setup instead of asking for it', () => {
+  render(panel({ defaults: { ...DEFAULTS, mountSpeed: 2 } }));
+  const setup = screen.getByLabelText('Hexcrawl setup');
+  expect(within(setup).getByText('Summer')).toBeInTheDocument();
+  expect(within(setup).getByText('Unexplored')).toBeInTheDocument();
+  expect(within(setup).getByText(/^T1/)).toBeInTheDocument();
+  expect(within(setup).getByText('Riding')).toBeInTheDocument();
+  expect(screen.queryByRole('combobox')).toBeNull();
+  expect(screen.queryByRole('group', { name: 'Encounter tier' })).toBeNull();
+});
+
+test('a missing setting points at the settings', () => {
+  const onOpenSettings = vi.fn();
+  render(panel({ defaults: { terrain: 'Plains', pop: null, tier: null }, onOpenSettings }));
+  expect(within(screen.getByLabelText('Hexcrawl setup')).getByText('No tier')).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Open settings' }));
+  expect(onOpenSettings).toHaveBeenCalled();
 });

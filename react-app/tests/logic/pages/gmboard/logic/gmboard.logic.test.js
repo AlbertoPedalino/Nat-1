@@ -18,8 +18,8 @@ if (!globalThis.localStorage) {
   Object.defineProperty(globalThis, 'localStorage', { value: new MemoryStorage(), configurable: true });
 }
 
-const { daysInMonth, isLeapYear, advanceMinutes, formatHM, formatDate, validateStart } = await import('../../../../../src/pages/gmboard/session/time.js');
-const { effectiveHours, hasWeatherDisadvantage, weatherEffectLabel, weatherTimerLabel, runWeatherChecks } = await import('../../../../../src/pages/gmboard/session/weather.js');
+const { daysInMonth, isLeapYear, advanceMinutes, formatHM, formatDate, formatDuration, validateStart } = await import('../../../../../src/pages/gmboard/session/time.js');
+const { effectiveHours, hasWeatherDisadvantage, travelTime, weatherEffectLabel, weatherTimerLabel, runWeatherChecks } = await import('../../../../../src/pages/gmboard/session/weather.js');
 const { getEvent, getLoot, getEnc, getTrap, getCompl, getEnvSev } = await import('../../../../../src/pages/gmboard/tables/tables.js');
 const { rollDie, rollD8D12, rollD20D20 } = await import('../../../../../src/pages/gmboard/logic/rng.js');
 const { resolveProceed, resolveAdvanceOnly, resolveManualAdvance } = await import('../../../../../src/pages/gmboard/hexcrawl/hex.js');
@@ -498,4 +498,17 @@ test('no GM Board source file references the deleted public/tools/gmboard.html o
 
   walk(srcDir);
   assert.deepEqual(offenders, []);
+});
+
+test('travelTime names what moved a hex away from its terrain hours', () => {
+  assert.deepEqual(travelTime(4, 'Clear', '', 1), { base: 4, hours: 4, reasons: [] });
+  assert.deepEqual(travelTime(4, 'Snow', 'Heavy', 4), { base: 4, hours: 4, reasons: ['weather', '×4 mount'] });
+  assert.deepEqual(travelTime(2, 'Clear', '', 0.5), { base: 2, hours: 4, reasons: ['×0.5 mount'] });
+});
+
+test('formatDuration says hours and minutes, not fractions', () => {
+  assert.equal(formatDuration(4), '4h');
+  assert.equal(formatDuration(1.5), '1h 30m');
+  assert.equal(formatDuration(0.25), '15m');
+  assert.equal(formatDuration(0), '0m');
 });

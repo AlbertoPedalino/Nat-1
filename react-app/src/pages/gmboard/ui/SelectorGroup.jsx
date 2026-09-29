@@ -10,6 +10,7 @@ export default function SelectorGroup({
   getLabel = (o) => o.label,
   getSub = (o) => o.sub,
   getIcon,
+  disabled = false,
 }) {
   const theme = useTheme();
   const labelId = useId();
@@ -29,6 +30,7 @@ export default function SelectorGroup({
               variant={selected ? 'contained' : 'outlined'}
               color={selected ? 'primary' : 'inherit'}
               aria-pressed={selected}
+              disabled={disabled}
               onClick={() => onChange(option)}
               sx={{
                 ...optionBtnSx,
