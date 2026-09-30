@@ -168,6 +168,7 @@ function reduceEncounterState(state, action) {
         null,
         state.encounterName,
         state.encounterQuest,
+        action.initiative,
       );
     case 'launchLibraryEncounter':
       return launchCombat(
@@ -176,6 +177,7 @@ function reduceEncounterState(state, action) {
         action.entry?.id || null,
         action.entry?.name,
         action.entry?.quest,
+        action.initiative,
       );
     case 'resumeFight':
       return withCombat(state, restoreFight(action.entry, action.monsters), { view: 'combat' });
@@ -600,7 +602,9 @@ function campaignAverageLevel(players) {
 // Every launch is backed by a library encounter, so its card always exposes the
 // full Load/Launch/Resume/Delete actions. Builder launches always pass a null
 // id to save a new snapshot; Library launches restart the selected saved entry.
-function launchCombat(state, encounter, encounterId, name, quest = null) {
+// `initiative`: the optional per-creature advantage/disadvantage chosen in the
+// launch panel (initiativeRoster keys); a plain Launch passes none.
+function launchCombat(state, encounter, encounterId, name, quest = null, initiative = {}) {
   let library = state.library;
   let id = encounterId || null;
   if (id == null && encounter.length) {
@@ -609,7 +613,7 @@ function launchCombat(state, encounter, encounterId, name, quest = null) {
     library = [entry, ...library];
     id = entry.id;
   }
-  const combat = buildCombat(encounter, state.players, id);
+  const combat = buildCombat(encounter, state.players, id, Math.random, { initiative: initiative || {} });
   // Two quick launches must not replace each other through Date.now() ids.
   while (state.fights.some((fight) => fight.id === combat.fightId)) combat.fightId += 1;
   combat.name = library.find((entry) => entry.id === id)?.name || autoFightName(combat.combatants);

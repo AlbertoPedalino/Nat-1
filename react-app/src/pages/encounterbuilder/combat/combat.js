@@ -15,11 +15,75 @@ import {
   setEffectDuration,
   toggleEffect,
 } from '../../../shared/character/combat/combatEffects.js';
+import { creatureRollSources } from '../../../shared/character/combat/rollSources.js';
+import { advArgFor, withExtraSource } from '../../../shared/character/dice/advantage.js';
 
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 export function d20(rng = Math.random) {
   return Math.floor(rng() * 20) + 1;
+}
+
+// Initiative is a Dexterity check: advantage keeps the higher of two d20s,
+// disadvantage the lower (advArg as rollD20 takes it).
+function rollInitiativeD20(advArg, rng) {
+  if (advArg !== true && advArg !== false) return d20(rng);
+  const first = d20(rng);
+  const second = d20(rng);
+  return advArg ? Math.max(first, second) : Math.min(first, second);
+}
+
+// Who rolls initiative when an encounter launches, one row per creature in
+// launch order — never "Goblin x3" — so the GM can give just one of them
+// disadvantage (surprise) before the fight starts. `key` is what buildCombat
+// reads the choice back by; `sources` is what the creature already has on its
+// own (a player's synced conditions and effects; monsters start clean).
+export function initiativeRoster(encounter, players) {
+  const labelFor = createLabeler();
+  const rows = [];
+  (Array.isArray(players) ? players : []).forEach((player, index) => {
+    rows.push({
+      key: initiativeKey('player', index),
+      side: 'party',
+      name: player.name || 'PC',
+      sources: playerInitiativeSources(player),
+    });
+  });
+  const items = Array.isArray(encounter) ? encounter : [];
+  const nameOf = (item) => item?.monsterData?.name || item?.name || 'Monster';
+  const qtyOf = (item) => clampInt(item?.qty, 0, 99, 0);
+  // The same letters the tracker will show; only needed where a name repeats.
+  const totals = new Map();
+  items.forEach((item) => totals.set(nameOf(item), (totals.get(nameOf(item)) || 0) + qtyOf(item)));
+  items.forEach((item, itemIndex) => {
+    const name = nameOf(item);
+    for (let n = 0; n < qtyOf(item); n += 1) {
+      const { label } = labelFor(name);
+      rows.push({
+        key: initiativeKey('monster', itemIndex, n),
+        side: 'monsters',
+        name: totals.get(name) > 1 ? `${name} ${label}` : name,
+        sources: { adv: false, disadv: false },
+      });
+    }
+  });
+  return rows;
+}
+
+function initiativeKey(kind, index, n = 0) {
+  return kind === 'player' ? `player:${index}` : `monster:${index}:${n}`;
+}
+
+function playerInitiativeSources(player) {
+  const { adv, disadv } = creatureRollSources(
+    { conditions: player?.activeConditions, effects: player?.activeEffects }, 'check',
+  );
+  return { adv, disadv };
+}
+
+// The GM's launch choice ('adv' | 'disadv') on top of the creature's own.
+function initiativeAdvArg(sources, choice) {
+  return advArgFor(choice === 'adv' || choice === 'disadv' ? withExtraSource(sources, choice) : sources);
 }
 
 function clampTempHp(value) {
@@ -59,11 +123,13 @@ function createLabeler(existing = []) {
   };
 }
 
-export function buildCombat(encounter, players, encounterId = null, rng = Math.random) {
+// `initiative`: { [initiativeRoster key]: 'adv' | 'disadv' } chosen before the
+// launch; anything absent rolls on the creature's own sources.
+export function buildCombat(encounter, players, encounterId = null, rng = Math.random, { initiative = {} } = {}) {
   const assignLabel = createLabeler();
   let id = 0;
   const combatants = [];
-  (Array.isArray(encounter) ? encounter : []).forEach((item) => {
+  (Array.isArray(encounter) ? encounter : []).forEach((item, itemIndex) => {
     const monster = item.monsterData;
     if (!monster) return;
     const initMod = abilityMod(monster.dex || 10);
@@ -75,7 +141,9 @@ export function buildCombat(encounter, players, encounterId = null, rng = Math.r
         name: monster.name,
         source: monster.source,
         type: 'monster',
-        initiative: d20(rng) + initMod,
+        initiative: rollInitiativeD20(
+          initiativeAdvArg({ adv: false, disadv: false }, initiative[initiativeKey('monster', itemIndex, i)]), rng,
+        ) + initMod,
         initMod,
         ac,
         hpMax: hp,
@@ -99,7 +167,9 @@ export function buildCombat(encounter, players, encounterId = null, rng = Math.r
       type: 'player',
       sourceId: player.sourceId || null,
       campaignId: player.campaignId || null,
-      initiative: d20(rng) + initMod,
+      initiative: rollInitiativeD20(
+        initiativeAdvArg(playerInitiativeSources(player), initiative[initiativeKey('player', index)]), rng,
+      ) + initMod,
       initMod,
       ac: clampInt(player.ac, 1, 99, 10),
       // Includes the player's advantage/disadvantage effects, a synced vital.

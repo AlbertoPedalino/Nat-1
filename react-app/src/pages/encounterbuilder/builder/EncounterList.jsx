@@ -1,14 +1,15 @@
 import {
   Autocomplete, Box, Button, IconButton, Paper, Stack, TextField, Tooltip, Typography,
 } from '@mui/material';
-import { useMemo } from 'react';
-import { Minus, Plus, Save, Swords, Trash2 } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Minus, Plus, Save, SlidersHorizontal, Swords, Trash2 } from 'lucide-react';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import { calculateDifficulty } from './difficulty.js';
 import { listQuestNames } from '../library/library.js';
 import { formatNumber } from '../bestiary/monsterUtils.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import DifficultyBar from './DifficultyBar.jsx';
+import InitiativeLaunchDialog from './InitiativeLaunchDialog.jsx';
 
 export default function EncounterList() {
   const { state, dispatch, saveEncounterToLibrary } = useEncounterBuilder();
@@ -22,9 +23,12 @@ export default function EncounterList() {
     if (entry) notify('success', `"${entry.name}" ${editingExisting ? 'updated in' : 'saved to'} Library.`);
   };
 
-  const handleLaunch = () => {
+  const [initiativeOpen, setInitiativeOpen] = useState(false);
+  const cannotLaunch = !state.encounter.length || state.encounter.some((item) => !item.monsterData);
+
+  const handleLaunch = (initiative) => {
     if (!state.encounter.length) return;
-    dispatch({ type: 'launchCurrentEncounter' });
+    dispatch({ type: 'launchCurrentEncounter', initiative });
   };
 
   return (
@@ -103,15 +107,29 @@ export default function EncounterList() {
         </Stack>
         <DifficultyBar encounter={state.encounter} party={state.party} />
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-          <Button
-            variant="contained"
-            startIcon={<Swords size={16} />}
-            onClick={handleLaunch}
-            disabled={!state.encounter.length || state.encounter.some((item) => !item.monsterData)}
-            fullWidth
-          >
-            Launch
-          </Button>
+          <Stack direction="row" spacing={0.5} sx={{ flex: 1 }}>
+            <Button
+              variant="contained"
+              startIcon={<Swords size={16} />}
+              onClick={() => handleLaunch()}
+              disabled={cannotLaunch}
+              fullWidth
+            >
+              Launch
+            </Button>
+            <Tooltip title="Launch with initiative advantage / disadvantage">
+              <span>
+                <IconButton
+                  aria-label="Launch with initiative options"
+                  onClick={() => setInitiativeOpen(true)}
+                  disabled={cannotLaunch}
+                  sx={{ border: 1, borderColor: 'divider', borderRadius: 1 }}
+                >
+                  <SlidersHorizontal size={16} />
+                </IconButton>
+              </span>
+            </Tooltip>
+          </Stack>
           <Button
             variant="outlined"
             startIcon={<Save size={16} />}
@@ -125,6 +143,16 @@ export default function EncounterList() {
         <Typography variant="caption" color="text.secondary">
           Launch saves a new encounter in Library and starts combat.
         </Typography>
+        <InitiativeLaunchDialog
+          open={initiativeOpen}
+          onClose={() => setInitiativeOpen(false)}
+          encounter={state.encounter}
+          players={state.players}
+          onLaunch={(initiative) => {
+            setInitiativeOpen(false);
+            handleLaunch(initiative);
+          }}
+        />
       </Stack>
     </Paper>
   );

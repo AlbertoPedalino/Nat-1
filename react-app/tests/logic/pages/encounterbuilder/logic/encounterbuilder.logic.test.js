@@ -23,6 +23,7 @@ import {
   addCombatantEffect,
   applySheetVitals,
   buildCombat,
+  initiativeRoster,
   clearCombatantConditions,
   clearCombatantEffects,
   modifyHp,
@@ -1291,4 +1292,45 @@ test('a fight launched from an imported party starts with the sheet conditions',
   const combat = buildCombat([], state.players.filter((p) => p.sourceId), 1, () => 0.5);
 
   assert.deepEqual(combat.combatants[0].activeConditions, ['blinded', 'prone']);
+});
+
+// Initiative at launch: one row per creature, and the GM's choice for a row
+// reaches exactly that creature's roll.
+test("the launch roster lists every creature on its own, with the tracker's letters", () => {
+  const goblin = { name: 'Goblin', dex: 14 };
+  const ogre = { name: 'Ogre', dex: 8 };
+  const rows = initiativeRoster(
+    [{ monsterData: goblin, qty: 2 }, { monsterData: ogre, qty: 1 }],
+    [{ name: 'Aria', activeEffects: [{ key: 'selfCheckDisadv', duration: 'manual' }] }],
+  );
+  assert.deepEqual(rows.map((row) => [row.side, row.name, row.key]), [
+    ['party', 'Aria', 'player:0'],
+    ['monsters', 'Goblin A', 'monster:0:0'],
+    ['monsters', 'Goblin B', 'monster:0:1'],
+    ['monsters', 'Ogre', 'monster:1:0'],
+  ]);
+  assert.deepEqual(rows[0].sources, { adv: false, disadv: true }, 'a player brings their own check effects');
+});
+
+test('a launch choice gives one creature advantage or disadvantage on initiative', () => {
+  // Every d20 comes up 10, then 20, alternately: a single roll is 10, advantage 20, disadvantage 10.
+  const rngFor = () => { let i = 0; return () => [0.45, 0.95][i++ % 2]; };
+  const goblin = { name: 'Goblin', dex: 10, hp: { average: 7 }, ac: [15] };
+  const encounter = [{ monsterData: goblin, qty: 2 }];
+  const plain = buildCombat(encounter, [], null, rngFor());
+  assert.deepEqual(plain.combatants.map((c) => c.initiative).sort(), [10, 20]);
+
+  const chosen = buildCombat(encounter, [], null, rngFor(), { initiative: { 'monster:0:1': 'adv' } });
+  const byLabel = Object.fromEntries(chosen.combatants.map((c) => [c.label, c.initiative]));
+  assert.equal(byLabel.A, 10);
+  assert.equal(byLabel.B, 20, 'the second goblin kept the higher die');
+
+  // A player's own disadvantage and the GM's advantage cancel to one die.
+  const players = [{ name: 'Aria', hpMax: 10, initMod: 0, activeEffects: [{ key: 'selfCheckDisadv', duration: 'manual' }] }];
+  // Here the dice come up 20, then 10: one die is 20, disadvantage keeps 10.
+  const highFirst = () => { let i = 0; return () => [0.95, 0.45][i++ % 2]; };
+  const own = buildCombat([], players, null, highFirst());
+  assert.equal(own.combatants[0].initiative, 10, 'disadvantage keeps the lower');
+  const cancelled = buildCombat([], players, null, highFirst(), { initiative: { 'player:0': 'adv' } });
+  assert.equal(cancelled.combatants[0].initiative, 20, 'a straight roll: one die');
 });
