@@ -51,7 +51,7 @@ for each row execute function public.strip_character_runtime_fields();
 create or replace function public.protect_character_vitals()
 returns trigger language plpgsql set search_path = public as $$
 declare
-  keys text[] := array['currentHP','tempHP','deathSaves','maxHPBonus','activeConditions'];
+  keys text[] := array['currentHP','tempHP','deathSaves','maxHPBonus','activeConditions','activeEffects'];
   bookkeeping text[] := array['row_revision','vitals_revision','sheet_revision','updated_at'];
   vitals jsonb;
 begin
@@ -106,7 +106,7 @@ create or replace function public.character_vitals_answer(
     'vitals', (
       select coalesce(jsonb_object_agg(key, value), '{}'::jsonb)
         from jsonb_each(coalesce(p_data, '{}'::jsonb))
-       where key = any(array['currentHP','tempHP','deathSaves','maxHPBonus','activeConditions'])
+       where key = any(array['currentHP','tempHP','deathSaves','maxHPBonus','activeConditions','activeEffects'])
     ),
     'digestRevision', p_digest_revision,
     'hpBasis', p_hp_basis
@@ -129,7 +129,7 @@ create or replace function public.commit_character_vitals(
 declare
   c public.characters;
   clean jsonb;
-  allowed text[] := array['currentHP','tempHP','deathSaves','maxHPBonus','activeConditions'];
+  allowed text[] := array['currentHP','tempHP','deathSaves','maxHPBonus','activeConditions','activeEffects'];
   digest_revision bigint;
   hp_basis text;
 begin

@@ -89,7 +89,7 @@ test('an applied command answers with vitals, the new digest revision and the ba
     assert.deepEqual(Object.keys(answer).sort(), ANSWER_KEYS);
     assert.equal(answer.applied, true);
     assert.equal(answer.characterId, 'pc');
-    assert.deepEqual(Object.keys(answer.vitals).sort(), ['activeConditions', 'currentHP', 'deathSaves', 'maxHPBonus', 'tempHP']);
+    assert.deepEqual(Object.keys(answer.vitals).sort(), ['activeConditions', 'activeEffects', 'currentHP', 'deathSaves', 'maxHPBonus', 'tempHP']);
     assert.equal(answer.vitals.currentHP, 27);
     assert.equal(answer.vitals.tempHP, 0);
     assert.equal(JSON.stringify(answer).includes('original'), false, 'no sheet content in the answer');
@@ -187,5 +187,28 @@ test('ordinary saves still cannot change health; a no-op command keeps the diges
     );
     await as(db, PLAYER);
     assert.deepEqual([(await sheet(db)).data.currentHP, (await sheet(db)).data.tempHP], [30, 3], 'the GM damage (absorbed by temp HP) stands');
+  } finally { await db.close(); }
+});
+
+// Advantage/disadvantage effects ride with the vitals: committed by the health
+// command, carried by the digest, kept through ordinary saves, and never a
+// content change that would make open sheets download themselves again.
+test('effects are a vital: committed by command, in the digest, safe from saves, no sheet revision', async () => {
+  const db = await schema();
+  try {
+    await as(db, PLAYER);
+    const held = await digest(db);
+    const revisionBefore = Number((await sheet(db)).sheet_revision);
+    const answer = await command(db, held, { type: 'toggleCombatantEffect', key: 'selfAttackAdv' });
+    assert.equal(answer.applied, true);
+    assert.deepEqual(answer.vitals.activeEffects, [{ key: 'selfAttackAdv', duration: 'next' }]);
+    const now = await digest(db);
+    assert.deepEqual(now.vitals.activeEffects, [{ key: 'selfAttackAdv', duration: 'next' }]);
+    assert.equal(now.hpBasis, held.hpBasis, 'effects do not feed max HP');
+    assert.equal(Number((await sheet(db)).sheet_revision), revisionBefore, 'not a content change');
+
+    // A full-sheet save from a client that still holds no effects keeps them.
+    await db.query(`update public.characters set data = data - 'activeEffects' || '{"notes":"later"}' where id = 'pc'`);
+    assert.deepEqual((await sheet(db)).data.activeEffects, [{ key: 'selfAttackAdv', duration: 'next' }]);
   } finally { await db.close(); }
 });

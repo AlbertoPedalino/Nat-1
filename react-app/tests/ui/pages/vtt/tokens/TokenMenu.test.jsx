@@ -249,3 +249,15 @@ test('a placed map object debounces color updates while the picker moves', () =>
   );
   vi.useRealTimers();
 });
+
+// A character's advantage/disadvantage live on its sheet: toggling one on the
+// piece is a health edit carrying the new list, and nothing else.
+test('toggling an effect on a character piece sends it as a sheet health edit', () => {
+  const onSave = vi.fn();
+  render(<TokenMenu token={{ id: 'pc', characterId: 'character', label: 'Hero', hpCurrent: 20, hpMax: 30, conditions: [], effects: [] }}
+    anchor={{ x: 20, y: 20 }} onClose={vi.fn()} onSave={onSave} onDelete={vi.fn()} />);
+  fireEvent.click(screen.getAllByText('ADV')[0]);
+  expect(onSave).toHaveBeenLastCalledWith(expect.anything(), expect.objectContaining({
+    healthPatch: { activeEffects: [{ key: 'selfAttackAdv', duration: 'next' }] },
+  }));
+});

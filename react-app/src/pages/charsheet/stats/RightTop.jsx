@@ -6,33 +6,46 @@ import { getConditionsWithEffect } from '../../../shared/character/combat/condit
 import { getArmorTrainingInfo } from '../proficiency/proficiencies.js';
 import { collectResolvedResistanceItems, collectResolvedImmunityItems, getInitiativeAdvantageFromEffects } from '../state/sheetEffects.js';
 import { advantageVisual } from './advantageMark.jsx';
+import { EFFECT_ROLL_SOURCE, effectRollAdvantage } from '../../../shared/character/combat/combatEffects.js';
 import { collectItemResistanceItems, collectItemImmunityItems, collectItemConditionImmunityItems, collectItemEffects } from '../../../shared/character/inventory/itemEffects.js';
 import { computeBestArmorClass } from '../../../shared/character/combat/ac.js';
 import { resolveInitiativeTriggeredResourceRecoveries } from '../../../shared/character/combat/initiativeEffects.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import ConditionsBlock from './ConditionsBlock.jsx';
+import EffectsBlock from './EffectsBlock.jsx';
 
-export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearConditions, onSetExhaustion, conditionEntries, onToggleInspiration, resources, setResources, onShowToast }) {
+export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearConditions, effectActions, onSetExhaustion, conditionEntries, onToggleInspiration, resources, setResources, onShowToast }) {
   // Initiative is a DEX check (D20 Test) but rolls its own d20 here (it also fires
   // initiative-triggered recoveries), so the exhaustion −2/level penalty is applied
   // to the modifier directly rather than via rollD20. Adapter-granted bonuses
   // (e.g. Alert feat → +PB) are folded in by getInitiative.
   const initMod = getInitiative(C, sheet);
   const initAdv = getInitiativeAdvantageFromEffects(C);
-  const hasInitAdv = !!initAdv;
+  // Initiative is a Dexterity check, so the ability-check effects apply too.
+  // Any advantage plus any disadvantage is a straight roll.
+  const checkEffects = effectRollAdvantage(sheet?.activeEffects, 'check');
+  const initHasAdv = !!initAdv || checkEffects.adv;
+  const initHasDisadv = checkEffects.disadv;
+  const initMode = initHasAdv && !initHasDisadv ? 'adv' : initHasDisadv && !initHasAdv ? 'disadv' : null;
+  const initTooltip = [
+    initAdv ? `Advantage on Initiative — ${initAdv.source}` : '',
+    checkEffects.adv ? `Advantage: ${EFFECT_ROLL_SOURCE}` : '',
+    checkEffects.disadv ? `Disadvantage: ${EFFECT_ROLL_SOURCE}` : '',
+    initHasAdv && initHasDisadv ? 'Advantage and Disadvantage cancel' : '',
+  ].filter(Boolean).join(' • ');
   const [lastInitiativeRoll, setLastInitiativeRoll] = useState(null);
   const [initiativeMessage, setInitiativeMessage] = useState('');
 
   const handleInitiativeRoll = useCallback(() => {
-    // Roll with Advantage (keep higher of 2d20) when a source grants it.
+    // Advantage keeps the higher of 2d20, disadvantage the lower.
     const r1 = Math.floor(Math.random() * 20) + 1;
-    const r2 = hasInitAdv ? Math.floor(Math.random() * 20) + 1 : null;
-    const d20 = r2 != null ? Math.max(r1, r2) : r1;
+    const r2 = initMode ? Math.floor(Math.random() * 20) + 1 : null;
+    const d20 = r2 == null ? r1 : initMode === 'adv' ? Math.max(r1, r2) : Math.min(r1, r2);
     const total = d20 + initMod;
     setLastInitiativeRoll({ d20, mod: initMod, total });
 
     const bonusText = initMod >= 0 ? `+${initMod}` : `${initMod}`;
-    const advText = hasInitAdv ? ' (Adv)' : '';
+    const advText = initMode === 'adv' ? ' (Adv)' : initMode === 'disadv' ? ' (Dis)' : '';
     const recoveryParts = [];
 
     if (resources && typeof setResources === 'function') {
@@ -51,7 +64,7 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
     }
 
     const dice = r2 != null
-      ? [{ v: r1, faces: 20, kept: r1 >= r2 }, { v: r2, faces: 20, kept: r2 > r1 }]
+      ? [{ v: r1, faces: 20, kept: r1 === d20 }, { v: r2, faces: 20, kept: r2 === d20 && r1 !== d20 }]
       : [{ v: d20, faces: 20, kept: true }];
 
     const toastDetail = recoveryParts.length
@@ -61,7 +74,7 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
     if (typeof onShowToast === 'function') {
       onShowToast('Initiative', toastDetail, total, dice, { bonus: initMod, kept: d20 });
     }
-  }, [C, resources, setResources, onShowToast, initMod, hasInitAdv]);
+  }, [C, resources, setResources, onShowToast, initMod, initMode]);
 
   const inv = sheet?.sheetInventory || [];
   const equippedShield = inv.find(i => i.equipped && i.type === 'S');
@@ -77,13 +90,13 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
     <Box sx={{ width: '100%' }}>
       <Box sx={{ display: 'flex', gap: '0.45rem', mb: '0.4rem', flexWrap: 'wrap' }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.15 }}>
-          <Tooltip title={initAdv ? `Advantage on Initiative — ${initAdv.source}` : ''}>
+          <Tooltip title={initTooltip}>
             <Box>
               <CircleStat onClick={handleInitiativeRoll} value={initMod >= 0 ? `+${initMod}` : initMod} label="Initiative" clickable />
             </Box>
           </Tooltip>
-          {initAdv && (() => {
-            const v = advantageVisual(true, false);
+          {(initHasAdv || initHasDisadv) && (() => {
+            const v = advantageVisual(initHasAdv, initHasDisadv);
             const Icon = v.Icon;
             return (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
@@ -108,6 +121,7 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
         <DefensesBlock C={C} activeConditions={sheet?.activeConditions || []} />
       </Box>
       <ConditionsBlock sheet={sheet} onToggle={onToggleCondition} onClear={onClearConditions} onSetExhaustion={onSetExhaustion} conditionEntries={conditionEntries} />
+      {effectActions ? <EffectsBlock sheet={sheet} actions={effectActions} /> : null}
     </Box>
   );
 }

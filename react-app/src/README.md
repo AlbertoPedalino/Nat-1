@@ -39,7 +39,7 @@ has enough related files to benefit from a group.
 Examples:
 
 - A VTT token change starts in `pages/vtt/tokens/`, including
-  `TokenLayer.jsx`, `TokenMenu.jsx`, and `useEncounterBridge.js`.
+  `TokenLayer.jsx` and `TokenMenu.jsx`.
 - Spell-list rendering and its filtering rules are together in
   `pages/charsheet/spells/`.
 - Quest generation and its result cards are together in `pages/gmboard/quests/`.

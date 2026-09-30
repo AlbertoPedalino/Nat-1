@@ -1,8 +1,9 @@
 import { normalizeConditions } from './conditions.js';
+import { normalizeEffects } from './combatEffects.js';
 
 // Vitals are the character `data` fields kept in sync between the sheet and the
-// encounter combat: current HP, temp HP, max-HP bonus, death saves, and active
-// conditions.
+// encounter combat: current HP, temp HP, max-HP bonus, death saves, active
+// conditions and active advantage/disadvantage effects.
 //
 // SYNCED_VITALS is the single declarative source of truth. Each descriptor owns
 // its own mapping + clamps, so heterogeneous shapes (scalars, nested objects,
@@ -98,6 +99,17 @@ export const SYNCED_VITALS = [
     toData: (c) => normalizeConditions(c.activeConditions),
     clampData: (value, fallback) => normalizeConditions(value ?? fallback),
     normalize: (v) => normalizeConditions(v),
+  },
+  {
+    // Advantage/disadvantage rulings (combatEffects.js). Same absent-vs-empty
+    // rule as conditions: absent says nothing, [] means "none left".
+    data: 'activeEffects',
+    combat: 'activeEffects',
+    toCombat: (src) => (src.activeEffects == null ? null : normalizeEffects(src.activeEffects)),
+    defaultCombat: () => [],
+    toData: (c) => normalizeEffects(c.activeEffects),
+    clampData: (value, fallback) => normalizeEffects(value ?? fallback),
+    normalize: (v) => normalizeEffects(v),
   },
   {
     data: 'deathSaves',

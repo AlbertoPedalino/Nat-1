@@ -4,6 +4,7 @@
 // would drag the class adapters into the VTT bundle for nothing.
 
 import { normalizeConditions } from '../character/combat/conditions.js';
+import { normalizeEffects } from '../character/combat/combatEffects.js';
 
 const HEX_COLOR_RE = /^#[0-9a-f]{6}$/i;
 
@@ -43,6 +44,8 @@ export function toRosterEntry(row) {
     // Conditions ARE stored on the sheet — they are a synced vital, unlike max
     // HP which is derived — so they can be read straight from the blob.
     conditions: normalizeConditions(sheet.activeConditions),
+    // Advantage/disadvantage rulings are a synced vital too.
+    effects: normalizeEffects(sheet.activeEffects),
   };
 }
 
@@ -56,6 +59,7 @@ export function rosterVitals(roster) {
       hpMax: entry.hpMax,
       tempHp: entry.tempHp || 0,
       conditions: entry.conditions || [],
+      effects: entry.effects || [],
       portraitPath: entry.portraitPath || null,
       className: entry.className || null,
       deathSaves: deathSavesOf(entry.deathSaves),
@@ -79,6 +83,7 @@ export function withSheetVitals(tokens, roster) {
       return {
         ...token,
         conditions: sheet.conditions,
+        effects: sheet.effects,
         portraitPath: sheet.portraitPath,
         className: sheet.className,
         deathSaves: sheet.deathSaves,
@@ -98,6 +103,9 @@ export function withSheetVitals(tokens, roster) {
       // The sheet owns a character's conditions, exactly as it owns their hit
       // points: the map shows them and writes back, it does not keep a copy.
       conditions: sheet.conditions,
+      // Advantage/disadvantage too: the piece shows the sheet's list and never
+      // keeps one of its own.
+      effects: sheet.effects,
       // Marks the piece as reading a sheet, which is what earns it the numbers
       // inside the bar; a monster shows the bar alone. Whether any bar appears
       // at all is the token's own `showHp`.

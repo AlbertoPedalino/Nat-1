@@ -16,7 +16,6 @@ const m = vi.hoisted(() => ({
   notify: vi.fn(),
   menu: { current: null },
   viewport: { current: null },
-  realBridge: { current: false },
   setTokenHp: vi.fn(),
   secretHp: { current: {} },
   fightRows: { current: [] },
@@ -61,11 +60,6 @@ vi.mock('../../../../../src/shared/vtt/session/useSceneLive.js', () => ({
 vi.mock('../../../../../src/shared/character/profile/usePortraits.js', () => ({ usePortraits: () => ({}) }));
 vi.mock('../../../../../src/pages/encounterbuilder/bestiary/useMonsterDb.js', () => ({ useMonsterDb: () => ({ monsters: [] }) }));
 vi.mock('../../../../../src/pages/encounterbuilder/combat/useConditionEntries.js', () => ({ useConditionEntries: () => [] }));
-vi.mock('../../../../../src/pages/vtt/tokens/useEncounterBridge.js', async (importOriginal) => {
-  const { useEncounterBridge } = await importOriginal();
-  return { useEncounterBridge: (options) => (m.realBridge.current
-    ? useEncounterBridge(options) : { pull: vi.fn(), push: vi.fn() }) };
-});
 vi.mock('../../../../../src/pages/vtt/dungeon/useSceneDungeon.js', () => ({
   useSceneDungeon: () => ({ fights: [], monstersForRoom: () => [], markersForRoom: () => [] }),
 }));
@@ -133,7 +127,6 @@ const hpWrites = () => m.updateToken.mock.calls.filter(([, patch]) => (
 
 beforeEach(() => {
   localStorage.clear();
-  m.realBridge.current = false;
   m.tokens.current = [OGRE];
   m.commit.mockReset().mockResolvedValue({ applied: true, row: null });
   m.updateToken.mockReset().mockResolvedValue(null);
@@ -198,7 +191,6 @@ test('a piece whose fight has no cloud row keeps its HP in the GM-only source', 
 });
 
 test('a stale local fight cache never writes enemy vitals, on mount or on later saves', () => {
-  m.realBridge.current = true;
   const cache = (hpCurrent) => {
     createInstance('encounters', { id: 'enc_a' });
     persistFights('enc_a', 77, [{ id: 77, fight: { combatants: [{
@@ -273,4 +265,27 @@ test('a character piece edited on the map commands health from the roster digest
   expect(m.characterCommand.mock.calls[0][1]).toEqual({ type: 'editToken', patch: { currentHP: 11 } });
   // A character's hit points belong to the sheet, never to the piece.
   expect(m.updateToken.mock.calls.some(([, patch]) => Object.hasOwn(patch, 'hp_current'))).toBe(false);
+});
+
+test('a character piece\'s effects go to its sheet, never onto the piece row', async () => {
+  const hero = {
+    id: 'hero-piece', layer: 'tokens', x: 2, y: 2, label: 'Hero', characterId: 'hero',
+    hpCurrent: 18, hpMax: 30, conditions: [], effects: [], showHp: true,
+  };
+  const digest = { characterId: 'hero', rowRevision: 12, hpBasis: 'h1', currentHP: 18, source: 'server' };
+  m.roster.current = {
+    roster: [{ characterId: 'hero', name: 'Hero', hpCurrent: 18, hpMax: 30 }],
+    digests: new Map([['hero', digest]]),
+    baseMax: new Map([['hero', { hpBasis: 'h1', baseMax: 30 }]]),
+  };
+  m.tokens.current = [hero];
+  mountEditor();
+  const effects = [{ key: 'selfSaveDisadv', duration: 'next' }];
+  await saveFromMenu(hero, { effects, healthPatch: { activeEffects: effects } });
+  expect(m.characterCommand).toHaveBeenCalledTimes(1);
+  expect(m.characterCommand.mock.calls[0][1]).toEqual({
+    type: 'editToken', patch: {}, addEffects: effects, removeEffects: [],
+  });
+  expect(m.setTokenEffects).not.toHaveBeenCalled();
+  expect(m.updateToken.mock.calls.some(([, patch]) => Object.hasOwn(patch, 'effects'))).toBe(false);
 });

@@ -1,5 +1,8 @@
 import { clampCharacterVitals } from './vitals.js';
 import { setConditionActive, toggleCondition } from './conditions.js';
+import {
+  addCustomEffect, effectId, normalizeEffects, removeEffect, setEffectDuration, toggleEffect,
+} from './combatEffects.js';
 
 // Apply an intent to the vitals a command starts from — the character digest
 // the caller follows (or, rarely, the sheet) — never to an encounter snapshot.
@@ -58,6 +61,17 @@ export function applyVitalCommand(data, command, baseMaxHP) {
       if (v.activeConditions.includes('dead')) { v.currentHP = 1; recover = true; }
       v.activeConditions = command.clearExhaustion ? [] : v.activeConditions.filter((k) => k === 'exhaustion');
       break;
+    // Advantage/disadvantage effects: the encounter builder's own action names,
+    // so its dispatch forwards them unchanged. Toggled by hand, never expired.
+    case 'toggleCombatantEffect': v.activeEffects = toggleEffect(v.activeEffects, command.key); break;
+    case 'addCombatantEffect':
+      v.activeEffects = addCustomEffect(v.activeEffects, command.payload?.text, command.payload?.polarity);
+      break;
+    case 'setCombatantEffectDuration':
+      v.activeEffects = setEffectDuration(v.activeEffects, command.effectId, command.duration);
+      break;
+    case 'removeCombatantEffect': v.activeEffects = removeEffect(v.activeEffects, command.effectId); break;
+    case 'clearCombatantEffects': v.activeEffects = []; break;
     case 'patch':
       v = { ...v, ...command.patch };
       recover = Object.hasOwn(command.patch, 'currentHP');
@@ -74,6 +88,11 @@ export function applyVitalCommand(data, command, baseMaxHP) {
       if (Object.hasOwn(command.patch, 'currentHP')) { v.currentHP = command.patch.currentHP; recover = true; }
       for (const key of command.removeConditions || []) v.activeConditions = setConditionActive(v.activeConditions, key, false);
       for (const key of command.addConditions || []) v.activeConditions = setConditionActive(v.activeConditions, key, true);
+      if (command.removeEffects?.length) {
+        const gone = new Set(command.removeEffects);
+        v.activeEffects = v.activeEffects.filter((effect) => !gone.has(effectId(effect)));
+      }
+      if (command.addEffects?.length) v.activeEffects = normalizeEffects([...v.activeEffects, ...command.addEffects]);
       v.deathSaves = { ...v.deathSaves, ...command.deathSaves };
       if (command.removeConditions?.includes('dead') && !command.deathSaves) {
         if (!Object.hasOwn(command.patch, 'currentHP')) v.currentHP = Math.max(1, v.currentHP);

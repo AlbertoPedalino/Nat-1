@@ -25,7 +25,7 @@ const refreshContentMock = vi.hoisted(() => vi.fn());
 const fetchSceneRevisionMock = vi.hoisted(() => vi.fn());
 const sceneLiveOptions = vi.hoisted(() => ({ current: null }));
 const sheetRoster = vi.hoisted(() => ({ current: [], digests: new Map() }));
-const encounterBridge = vi.hoisted(() => ({ real: false, tokens: null }));
+const sceneTokens = vi.hoisted(() => ({ current: null }));
 const patchCharacterMock = vi.hoisted(() => vi.fn());
 
 const GM_ROLE = {
@@ -38,8 +38,7 @@ const GM_ROLE = {
 
 beforeEach(() => {
   localStorage.clear();
-  encounterBridge.real = false;
-  encounterBridge.tokens = null;
+  sceneTokens.current = null;
   patchCharacterMock.mockReset().mockResolvedValue(undefined);
   sheetRoster.current = [];
   sheetRoster.digests = new Map();
@@ -95,11 +94,6 @@ vi.mock('../../../../../src/pages/encounterbuilder/bestiary/useMonsterDb.js', ()
 vi.mock('../../../../../src/pages/encounterbuilder/combat/useConditionEntries.js', () => ({
   useConditionEntries: () => [],
 }));
-vi.mock('../../../../../src/pages/vtt/tokens/useEncounterBridge.js', async (importOriginal) => {
-  const { useEncounterBridge } = await importOriginal();
-  return { useEncounterBridge: (options) => encounterBridge.real
-    ? useEncounterBridge(options) : { pull: vi.fn(), push: vi.fn() } };
-});
 vi.mock('../../../../../src/pages/vtt/dungeon/useSceneDungeon.js', () => ({
   useSceneDungeon: () => ({ fights: [], monstersForRoom: () => [], markersForRoom: () => [] }),
 }));
@@ -143,7 +137,7 @@ vi.mock('../../../../../src/pages/vtt/scene/useSceneContent.js', () => ({
     setDrawings: vi.fn(),
     setTokens: vi.fn(),
     tokenImageUrls: {},
-    tokens: encounterBridge.tokens || [
+    tokens: sceneTokens.current || [
       { id: 'visible', layer: 'tokens', secretLabel: 'Mimic', x: 1, y: 1 },
       { id: 'staged', layer: 'tokens', x: 9, y: 1 },
       { id: 'hidden-map-prop', layer: 'map', hiddenFromPlayers: true, x: 1, y: 1 },
@@ -164,8 +158,7 @@ vi.mock('../../../../../src/pages/campaignsheet/CampaignSheetView.jsx', () => ({
 }));
 
 test('an open battle map never rewrites sheet HP from cached encounters on mount or saves', () => {
-  encounterBridge.real = true;
-  encounterBridge.tokens = [{ id: 'hero-token', characterId: 'hero', hpCurrent: null, hpMax: null, layer: 'tokens', x: 1, y: 1 }];
+  sceneTokens.current = [{ id: 'hero-token', characterId: 'hero', hpCurrent: null, hpMax: null, layer: 'tokens', x: 1, y: 1 }];
   sheetRoster.current = [{ characterId: 'hero', name: 'Hero', hpCurrent: 18, hpMax: 30 }];
   const saveFight = (instanceId, hpCurrent) => {
     createInstance('encounters', { id: instanceId });

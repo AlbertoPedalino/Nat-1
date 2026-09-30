@@ -25,6 +25,7 @@ import { getEquippedArmorPenalties } from '../inventory/armorPenalties.js';
 import { collectSheetEffects } from '../state/sheetEffects.js';
 import { SLBL, STATS } from '../state/calculations.js';
 import { getConditionsWithEffect } from '../../../shared/character/combat/conditions.js';
+import { EFFECT_ROLL_SOURCE, effectRollAdvantage } from '../../../shared/character/combat/combatEffects.js';
 
 function titleCase(value) {
   return String(value || '').replace(/\b\w/g, (c) => c.toUpperCase());
@@ -126,14 +127,27 @@ function collectConditionSaveModifiers(activeConditions = []) {
   return out;
 }
 
+// --- Advantage/disadvantage effects (sheet, map piece, encounter) --------
+// "Advantage on its saving throws" covers every save, so it is a fixed
+// modifier on each ability and drives the auto-roll like any other.
+
+function collectEffectSaveModifiers(activeEffects = []) {
+  const { adv, disadv } = effectRollAdvantage(activeEffects, 'save');
+  const kinds = [adv ? 'advantage' : null, disadv ? 'disadvantage' : null].filter(Boolean);
+  return kinds.flatMap((kind) => STATS.map((ability) => ({
+    kind, mode: 'fixed', ability, label: abilityLabel(ability), source: EFFECT_ROLL_SOURCE,
+  })));
+}
+
 // --- Public API ----------------------------------------------------------
 
-export function collectSaveModifiers(C, inventory, profSets, activeConditions = []) {
+export function collectSaveModifiers(C, inventory, profSets, activeConditions = [], activeEffects = []) {
   return [
     ...collectSheetSaveEffects(C).flatMap(normalizeSheetEffect),
     ...collectArmorSaveDisadvantages(C, inventory, profSets),
     ...collectItemSaveAdvantages(inventory),
     ...collectConditionSaveModifiers(activeConditions),
+    ...collectEffectSaveModifiers(activeEffects),
   ];
 }
 

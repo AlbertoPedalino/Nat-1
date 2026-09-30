@@ -169,3 +169,21 @@ test('conditionLabel falls back to the raw key', () => {
   assert.equal(conditionLabel('prone'), 'Prone');
   assert.equal(conditionLabel('mystery'), 'mystery');
 });
+
+test('attack roll: advantage/disadvantage effects count, and any of each cancel to a straight roll', () => {
+  const adv = describeAttackRoll([], { effects: [{ key: 'selfAttackAdv' }] });
+  assert.equal(adv.advArg, true);
+  assert.equal(adv.tag, ' ADV');
+  assert.match(adv.tooltip, /Advantage: Adv\/Dis effect/);
+
+  const cancelled = describeAttackRoll(['poisoned'], { effects: [{ key: 'selfAttackAdv' }] });
+  assert.equal(cancelled.advArg, undefined);
+  assert.equal(cancelled.tag, '');
+  assert.match(cancelled.tooltip, /cancel/);
+
+  const stacked = describeAttackRoll(['poisoned'], { effects: [{ key: 'selfAttackDisadv' }], extraDisadv: true });
+  assert.equal(stacked.advArg, false, 'several disadvantages are still one disadvantage');
+
+  assert.equal(describeAttackRoll([], { effects: [{ key: 'incomingAttackAdv' }] }).advArg, undefined,
+    'an effect on attacks against the creature does not touch its own');
+});

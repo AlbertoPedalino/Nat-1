@@ -3,7 +3,10 @@ import { commandCharacterVitals } from '../../../shared/cloud/api/cloudCharacter
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 
 const VITAL_ACTIONS = new Set(['modifyHp', 'setHp', 'setTempHp', 'modifyTempHp', 'setMaxHp',
-  'modifyMaxHp', 'setMaxHpBonus', 'setDeathSave', 'toggleCombatantCondition', 'clearCombatantConditions']);
+  'modifyMaxHp', 'setMaxHpBonus', 'setDeathSave', 'toggleCombatantCondition', 'clearCombatantConditions',
+  // A linked PC's advantage/disadvantage live on the sheet like its conditions.
+  'toggleCombatantEffect', 'addCombatantEffect', 'setCombatantEffectDuration', 'removeCombatantEffect',
+  'clearCombatantEffects']);
 
 // `vitalsRef.current` is `{ digests, baseMax }` from useCharacterVitalSync: a
 // command starts from the digest the builder follows and the base max HP

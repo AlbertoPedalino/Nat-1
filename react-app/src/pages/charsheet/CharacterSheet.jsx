@@ -32,6 +32,9 @@ import {
   setConditionActive,
   toggleCondition as toggleConditionKey,
 } from '../../shared/character/combat/conditions.js';
+import {
+  addCustomEffect, removeEffect, setEffectDuration, toggleEffect,
+} from '../../shared/character/combat/combatEffects.js';
 import { normalizeCharacterAttunement } from './inventory/attunement.js';
 import { applyResourceRest, getAllResourceDefs, getHitDicePools, getUsedHitDiceTotal, normalizeResourceMax, resourceFullValue } from './resources/restResources.js';
 import { clearedToggles } from './state/toggleState.js';
@@ -63,6 +66,8 @@ import {
   saveCharacter as storeSaveCharacter,
   setActiveCharId,
 } from '../../shared/character/profile/store.js';
+
+const noopEffect = () => {};
 
 function getCharIdFromUrl() {
   return new URLSearchParams(window.location.search).get('char') || getActiveCharId();
@@ -950,6 +955,33 @@ export default function CharacterSheet({
     persist(patch, { command: { type: 'clearCombatantConditions', clearExhaustion: true } });
   }, [sheet, persist]);
 
+  // Advantage/disadvantage effects, a synced vital: each change is committed as
+  // the same named command the encounter builder sends, so a concurrent edit
+  // from the map or the builder is merged rather than overwritten.
+  const changeEffects = useCallback((next, command) => {
+    if (!sheet) return;
+    setSheet({ ...sheet, activeEffects: next });
+    persist({ activeEffects: next }, { command });
+  }, [sheet, persist]);
+
+  const effectActions = useMemo(() => ({
+    toggle: (key) => changeEffects(toggleEffect(sheet?.activeEffects, key), { type: 'toggleCombatantEffect', key }),
+    addCustom: (text) => changeEffects(
+      addCustomEffect(sheet?.activeEffects, text, 'note'),
+      { type: 'addCombatantEffect', payload: { text, polarity: 'note' } },
+    ),
+    retime: (id, duration) => changeEffects(
+      setEffectDuration(sheet?.activeEffects, id, duration),
+      { type: 'setCombatantEffectDuration', effectId: id, duration },
+    ),
+    remove: (id) => changeEffects(removeEffect(sheet?.activeEffects, id), { type: 'removeCombatantEffect', effectId: id }),
+    clear: () => changeEffects([], { type: 'clearCombatantEffects' }),
+  }), [changeEffects, sheet?.activeEffects]);
+
+  const readOnlyEffectActions = useMemo(() => ({
+    toggle: noopEffect, addCustom: noopEffect, retime: noopEffect, remove: noopEffect, clear: noopEffect,
+  }), []);
+
   const toggleInspiration = useCallback(() => {
     if (!sheet) return;
     const next = !sheet.sheetInspiration;
@@ -1117,6 +1149,7 @@ export default function CharacterSheet({
           <Stack spacing={0.55} sx={{ ...SHEET_GRID_ITEM_SX, gridArea: SHEET_AREAS.right }}>
             <RightTop C={C} sheet={sheet} onRoll={rollD20}
               onToggleCondition={readOnly ? noop : toggleCondition} onClearConditions={readOnly ? noop : clearConditions}
+              effectActions={readOnly ? readOnlyEffectActions : effectActions}
               onSetExhaustion={readOnly ? noop : setExhaustion}
               conditionEntries={conditionEntries}
               onToggleInspiration={readOnly ? noop : toggleInspiration}

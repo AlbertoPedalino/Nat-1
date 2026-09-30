@@ -7,6 +7,8 @@
 // conditions to combatants, and the two surfaces must agree on the table and on
 // which conditions imply which.
 
+import { EFFECT_ROLL_SOURCE, effectRollAdvantage } from './combatEffects.js';
+
 export const CONDITIONS = [
   { key: 'blinded', label: 'Blinded', icon: 'EyeOff' }, { key: 'charmed', label: 'Charmed', icon: 'Heart' },
   { key: 'deafened', label: 'Deafened', icon: 'Ear' }, { key: 'frightened', label: 'Frightened', icon: 'Ghost' },
@@ -169,11 +171,13 @@ export function describeCheckDisadvantage(activeConditions = [], armorDisadv = f
 // straight roll.
 //   extraAdv    → non-condition advantage source label (e.g. 'Innate Sorcery').
 //   extraDisadv → non-condition disadvantage (heavy/untrained weapon).
+//   effects     → the character's active advantage/disadvantage effects.
 // Returns the roll input (advArg, as rollD20 expects) alongside its display
 // (tag, tooltip) and `disadv` for tinting, so those can never disagree.
-export function describeAttackRoll(activeConditions = [], { extraAdv = null, extraDisadv = false } = {}) {
-  const hasAdv = !!extraAdv || hasConditionEffect(activeConditions, 'yourAttacksAdv');
-  const hasDisadv = !!extraDisadv || hasConditionEffect(activeConditions, 'yourAttacksDisadv');
+export function describeAttackRoll(activeConditions = [], { extraAdv = null, extraDisadv = false, effects = [] } = {}) {
+  const fromEffects = effectRollAdvantage(effects, 'attack');
+  const hasAdv = !!extraAdv || fromEffects.adv || hasConditionEffect(activeConditions, 'yourAttacksAdv');
+  const hasDisadv = !!extraDisadv || fromEffects.disadv || hasConditionEffect(activeConditions, 'yourAttacksDisadv');
   const adv = hasAdv && !hasDisadv;
   const disadv = hasDisadv && !hasAdv;
   // Situational disadvantage (Frightened in sight, Grappled vs non-grappler):
@@ -188,6 +192,9 @@ export function describeAttackRoll(activeConditions = [], { extraAdv = null, ext
     tag: disadv ? ' DIS' : adv ? ' ADV' : situational ? ' DIS?' : '',
     tooltip: [
       adv && typeof extraAdv === 'string' ? `Advantage: ${extraAdv}` : '',
+      adv && fromEffects.adv ? `Advantage: ${EFFECT_ROLL_SOURCE}` : '',
+      disadv && fromEffects.disadv ? `Disadvantage: ${EFFECT_ROLL_SOURCE}` : '',
+      hasAdv && hasDisadv && (fromEffects.adv || fromEffects.disadv) ? 'Advantage and Disadvantage cancel' : '',
       condNotes.length ? `Situational disadvantage: ${condNotes.join('; ')}` : '',
     ].filter(Boolean).join(' • '),
   };

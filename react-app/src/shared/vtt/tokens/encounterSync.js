@@ -1,13 +1,12 @@
 // Keeping an imported piece and its combatant in step.
 //
-// The two live in different places on purpose: encounters are local-first blobs
-// in the GM's browser, scenes are cloud rows. There is no server that can see
-// both, so the only meeting point is a browser with both tabs open. That is what
-// this module supports, and it is why the sync is best-effort rather than
-// authoritative — close the encounter tab and the map simply stops hearing about
-// hit points until it is opened again.
+// A piece imported from a fight carries a `sourceRef` to its combatant; an edit
+// on the map becomes the combatant that fight should end up with, which
+// fightVitals.js commits to the fight row (the one authority for enemy
+// vitals). A character's piece takes nothing from here: its vitals, conditions
+// and advantage/disadvantage effects belong to the sheet.
 //
-// Everything here is pure: the callers own the storage reads and the writes.
+// Everything here is pure: the callers own the reads and the writes.
 
 import { effectId, normalizeEffects } from '../../character/combat/combatEffects.js';
 import {
@@ -37,25 +36,6 @@ function deathSavesOf(value) {
   const clamp = (entry) => Math.max(0, Math.min(3, Math.round(Number(entry) || 0)));
   return { success: clamp(raw.success ?? raw.s), fail: clamp(raw.fail ?? raw.f) };
 }
-function vitalsOf(combatant) {
-  const hpCurrent = Number.isFinite(Number(combatant?.hpCurrent)) ? Math.round(Number(combatant.hpCurrent)) : null;
-  const player = combatant?.type === 'player' || Boolean(combatant?.sourceId);
-  const deathSaves = player ? deathSavesOf(combatant) : null;
-  const dead = player
-    ? hpCurrent === 0 && (deathSaves.fail >= 3 || Boolean(combatant?.isDead)
-      || normalizeConditions(combatant?.activeConditions).includes(DEAD_CONDITION_KEY))
-    : hpCurrent === 0 || Boolean(combatant?.isDead);
-  return {
-    hpCurrent,
-    hpMax: Number.isFinite(Number(combatant?.hpMax)) ? Math.round(Number(combatant.hpMax)) : null,
-    // Conditions and effects travel too: marking a creature prone in one tool
-    // and finding it upright in the other is exactly the kind of drift that
-    // makes two views of a fight worse than one.
-    conditions: setConditionActive(combatant?.activeConditions, DEAD_CONDITION_KEY, dead),
-    effects: normalizeEffects(combatant?.activeEffects),
-    ...(player ? { deathSaves: dead ? { ...deathSaves, fail: 3 } : deathSaves } : {}),
-  };
-}
 
 // Order and shape are normalized on both sides, so these compare meaning rather
 // than JSON: a differently ordered list is not a change to write back.
@@ -71,50 +51,6 @@ function deathSavesKey(value) {
   if (value == null) return '';
   const saves = deathSavesOf(value);
   return `${saves.success}|${saves.fail}`;
-}
-
-// Which combatant a piece stands for. Two ways in, because pieces arrive by two
-// routes: a monster imported from this fight carries its reference, while a
-// character's piece was placed from the party roster and is matched by the sheet
-// it represents — the same `sourceId` the encounter builder uses to sync sheets.
-export function matchCombatant(token, { instanceId, fightId, byRef, bySheet }) {
-  const ref = parseSourceRef(token?.sourceRef);
-  if (ref) {
-    if (ref.instanceId !== instanceId || ref.fightId !== String(fightId)) return null;
-    return byRef.get(ref.combatantId) || null;
-  }
-  return token?.characterId ? bySheet.get(token.characterId) || null : null;
-}
-
-// Encounter -> map, from a locally cached fight. Only encounter effects on
-// character pieces. Enemy vitals are never taken from a cache: their fight row
-// is the authority and linked pieces display a copy the database derives.
-export function tokenUpdatesFromFight(tokens, { instanceId, fightId, combatants }) {
-  const byRef = new Map((combatants || []).map((combatant) => [String(combatant?.id), combatant]));
-  const bySheet = new Map(
-    (combatants || []).filter((combatant) => combatant?.sourceId).map((c) => [c.sourceId, c]),
-  );
-  const updates = [];
-
-  for (const token of tokens || []) {
-    if (!token?.characterId) continue;
-    const combatant = matchCombatant(token, { instanceId, fightId, byRef, bySheet });
-    if (!combatant) continue;
-    const vitals = vitalsOf(combatant);
-    // Character vitals come from the sheet, already synced by the encounter.
-    // Raw map tokens do not carry those vitals, so comparing them to a saved
-    // fight always reported a difference. Replaying that fight to the sheet on
-    // every storage event made old encounters repeatedly undo player damage.
-    // Only encounter effects belong on the character's map-token row.
-    if (effectsKey(vitals.effects) === effectsKey(token.effects)) continue;
-    updates.push({
-      id: token.id,
-      characterId: token.characterId,
-      effects: vitals.effects,
-    });
-  }
-
-  return updates;
 }
 
 // Map -> encounter. The combatants a fight should end up with once a token's

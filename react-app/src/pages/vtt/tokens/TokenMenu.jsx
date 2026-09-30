@@ -96,6 +96,7 @@ export default function TokenMenu({
       healthPatch: {
         ...(Object.hasOwn(patch, 'hpCurrent') ? { currentHP: next.hpCurrent === '' ? 0 : Number(next.hpCurrent) } : {}),
         ...(Object.hasOwn(patch, 'conditions') ? { activeConditions: next.conditions } : {}),
+        ...(Object.hasOwn(patch, 'effects') ? { activeEffects: next.effects } : {}),
         ...(Object.hasOwn(patch, 'deathSaves') ? { deathSaves: next.deathSaves } : {}),
       },
     });

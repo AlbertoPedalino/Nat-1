@@ -94,7 +94,6 @@ import {
   sheetGridColumns,
   writeSheetSplit,
 } from '../../../shared/vtt/sheets/sheetLayout.js';
-import { useEncounterBridge } from '../tokens/useEncounterBridge.js';
 import { useGmTokenVitals } from '../tokens/useGmTokenVitals.js';
 import { useSceneHexcrawl } from '../hexcrawl/useSceneHexcrawl.js';
 import { useSceneDungeon } from '../dungeon/useSceneDungeon.js';
@@ -1516,22 +1515,6 @@ export default function SceneEditor({
   // keeping it on the token row would deliver it to the players.
   // A player's only write on a piece that is not theirs. It goes through the
   // RPC, which touches the conditions column and nothing else.
-  // Encounter effects on character pieces, from a locally cached fight. Sheet
-  // vitals arrive through character realtime; enemy vitals only ever come from
-  // their fight row, never from this cache.
-  const applyTokenVitals = useCallback((updates) => {
-    setTokens((current) => current.map((token) => {
-      const update = updates.find((item) => item.id === token.id);
-      return update && token.characterId ? { ...token, effects: update.effects } : token;
-    }));
-    for (const update of updates) {
-      if (!update.characterId) continue;
-      updateToken(update.id, { effects: update.effects }).catch(() => {
-        // The next encounter save retries map effects.
-      });
-    }
-  }, []);
-
   // An enemy piece imported from a cloud fight: its vitals are written to the
   // combatant in that fight, once, and the piece shows the copy the database
   // derives from it. Answers false when the fight has no cloud row, so the
@@ -1559,11 +1542,6 @@ export default function SceneEditor({
       return true;
     }
   }, [notify, refreshVisibleTokens]);
-
-  const { push: pushToEncounter } = useEncounterBridge({
-    tokens: role.isGm && !spectator ? tokens : [],
-    onTokenVitals: applyTokenVitals,
-  });
 
   // A character's conditions live on their sheet, which is what the encounter
   // builder and the sheet view both read. Writing them onto the token row would
@@ -1602,15 +1580,15 @@ export default function SceneEditor({
       // checks the table rather than the row: calling out that the ogre has
       // advantage is not the same as being handed the ogre.
       // On a piece linked to a cloud fight both marks are forwarded to its
-      // combatant by the database.
-      await setTokenEffects(token.id, effects);
+      // combatant by the database. A character's effects are on its sheet and
+      // went with the health command above.
+      if (!token.characterId) await setTokenEffects(token.id, effects);
       if (owned) await updateToken(token.id, { show_hp: showHp });
-      if (token.characterId) pushToEncounter({ ...token, conditions, effects, hpCurrent, deathSaves });
     } catch (cause) {
       setTokens((current) => current.map((item) => (item.id === token.id ? token : item)));
       notify('error', cause?.message || 'Could not mark that token.');
     }
-  }, [canMove, characterHealth, notify, pushToEncounter, writeConditions]);
+  }, [canMove, characterHealth, notify, writeConditions]);
 
   const handleSaveToken = useCallback(async (token, {
     label, gmOnly, conditions, hpCurrent, hpMax, showHp, effects, deathSaves, healthPatch = {},
@@ -1648,21 +1626,19 @@ export default function SceneEditor({
           gmVitals.setLocal(token.id, { hpCurrent, hpMax });
         }
       }
+      // A character's effects are on its sheet (the health command above), a
+      // linked enemy's in its fight; only any other piece keeps them on its row.
       await updateToken(token.id, {
         label: publicLabel,
         show_hp: showHp,
-        ...(linked ? {} : { effects }),
+        ...(linked || token.characterId ? {} : { effects }),
       });
       if (secret !== (token.secretLabel || '')) await setTokenSecret(token.id, secret);
-      // A character's piece is matched to its combatant by the sheet it stands
-      // for; a same-browser builder hears its effects through local storage.
-      // Enemy vitals never travel that way.
-      if (token.characterId) pushToEncounter({ ...token, hpCurrent, hpMax, conditions, effects, deathSaves });
     } catch (cause) {
       setTokens((current) => current.map((item) => (item.id === token.id ? token : item)));
       notify('error', cause?.message || 'Could not update that token.');
     }
-  }, [characterHealth, commitLinkedMonster, gmVitals, notify, pushToEncounter, writeConditions]);
+  }, [characterHealth, commitLinkedMonster, gmVitals, notify, writeConditions]);
 
   const handleDeathSaveChange = useCallback((token, type, value) => {
     if (!token?.characterId || !['success', 'fail'].includes(type)) return;

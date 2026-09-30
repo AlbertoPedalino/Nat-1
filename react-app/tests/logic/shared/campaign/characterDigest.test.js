@@ -28,7 +28,7 @@ test('a digest row becomes the roster facts, vitals and max-HP basis', () => {
     characterId: 'pc', campaignId: 'camp', ownerId: 'user-1', rowRevision: 5, source: 'server',
     name: 'Aria', ownerUsername: 'aria', className: 'Fighter', classIconColor: '#aabbcc',
     portraitPath: 'art/aria.webp', currentHP: 12, tempHP: 3, maxHPBonus: 2,
-    deathSaves: { success: 1, fail: 0 }, activeConditions: ['prone'], hpBasis: 'h1',
+    deathSaves: { success: 1, fail: 0 }, activeConditions: ['prone'], activeEffects: [], hpBasis: 'h1',
   });
   assert.equal(toCharacterDigest({ character_id: 'pc' }), null);
 });
@@ -38,7 +38,7 @@ test('max HP is the base maximum plus the bonus, and absent current HP means und
   assert.equal(digestMaxHp(digest, 20), 25);
   assert.equal(digestMaxHp(digest, undefined), null);
   assert.deepEqual(sheetVitalsFromDigest(digest, 20), {
-    currentHP: 25, tempHP: 3, maxHPBonus: 5, deathSaves: { success: 1, fail: 0 }, activeConditions: ['prone'], maxHP: 25,
+    currentHP: 25, tempHP: 3, maxHPBonus: 5, deathSaves: { success: 1, fail: 0 }, activeConditions: ['prone'], activeEffects: [], maxHP: 25,
   });
   const over = toCharacterDigest(row({}, { currentHP: 99, maxHPBonus: 0 }));
   assert.equal(sheetVitalsFromDigest(over, 20).currentHP, 20);

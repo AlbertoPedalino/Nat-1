@@ -10,6 +10,7 @@
 // Pure: no Supabase, no adapters.
 
 import { normalizeConditions } from '../character/combat/conditions.js';
+import { normalizeEffects } from '../character/combat/combatEffects.js';
 import { normalizeIconColor } from './roster.js';
 
 function numberOrNull(value) {
@@ -42,6 +43,7 @@ function fromFields(fields, meta) {
     maxHPBonus: numberOrNull(fields.maxHPBonus),
     deathSaves: deathSavesOf(fields.deathSaves),
     activeConditions: normalizeConditions(fields.activeConditions),
+    activeEffects: normalizeEffects(fields.activeEffects),
     hpBasis: typeof fields.hpBasis === 'string' ? fields.hpBasis : null,
   };
 }
@@ -77,6 +79,7 @@ export function digestFromVitalsAnswer(answer, held) {
     maxHPBonus: vitals.maxHPBonus,
     deathSaves: vitals.deathSaves,
     activeConditions: vitals.activeConditions,
+    activeEffects: vitals.activeEffects,
     hpBasis: typeof answer.hpBasis === 'string' ? answer.hpBasis : held.hpBasis,
   }, {
     characterId: held.characterId,
@@ -116,6 +119,7 @@ export function sheetVitalsFromDigest(digest, baseMax) {
     maxHPBonus: Math.round(digest?.maxHPBonus || 0),
     deathSaves: digest?.deathSaves || { success: 0, fail: 0 },
     activeConditions: digest?.activeConditions || [],
+    activeEffects: digest?.activeEffects || [],
     maxHP,
   };
 }
@@ -137,6 +141,7 @@ export function rosterEntryFromDigest(digest, baseMax) {
     hpMax: vitals.maxHP,
     tempHp: vitals.tempHP,
     conditions: digest.activeConditions,
+    effects: digest.activeEffects || [],
   };
 }
 

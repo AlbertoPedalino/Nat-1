@@ -4,7 +4,6 @@ import {
   fightWithTokenVitals,
   makeSourceRef,
   parseSourceRef,
-  tokenUpdatesFromFight,
 } from '../../../../../src/shared/vtt/tokens/encounterSync.js';
 
 test('a source reference survives a round trip', () => {
@@ -33,79 +32,6 @@ test('the first combatant, whose id is zero, is not lost', () => {
 
 // Enemy vitals belong to the fight row. A cached fight, however different it
 // is from the pieces, never produces a write for them.
-test('a cached fight never writes enemy vitals onto the pieces that came from it', () => {
-  const tokens = [
-    { id: 't1', sourceRef: 'enc_1:f1:0', hpCurrent: 7, hpMax: 7, conditions: [], effects: [] },
-    { id: 't2', sourceRef: 'enc_1:f1:1', hpCurrent: 5, hpMax: 5, conditions: [], effects: [] },
-  ];
-  const updates = tokenUpdatesFromFight(tokens, {
-    instanceId: 'enc_1',
-    fightId: 'f1',
-    combatants: [
-      { id: 0, hpCurrent: 3, hpMax: 7, activeConditions: ['prone'] },
-      { id: 1, hpCurrent: 5, hpMax: 5, activeEffects: [{ key: 'selfAttackDisadv', duration: 'next' }] },
-    ],
-  });
-  assert.deepEqual(updates, []);
-});
-
-// A character's piece is placed from the party roster, not imported from a
-// fight, so it has no source reference. Matching it by the sheet it stands for
-// is what lets encounter-only effects reach the map.
-test('a character piece receives only encounter effects, matched by its sheet', () => {
-  const tokens = [{ id: 't1', characterId: 'char-1', conditions: [], effects: [] }];
-  const updates = tokenUpdatesFromFight(tokens, {
-    instanceId: 'enc_1',
-    fightId: 'f1',
-    combatants: [{ id: 0, sourceId: 'char-1', hpCurrent: 4, hpMax: 22, activeConditions: ['prone'], activeEffects: [{ key: 'selfAttackDisadv', duration: 'next' }] }],
-  });
-  assert.equal(updates.length, 1);
-  assert.deepEqual(updates[0], { id: 't1', characterId: 'char-1', effects: [{ key: 'selfAttackDisadv', duration: 'next' }] });
-  assert.deepEqual(tokenUpdatesFromFight([{ ...tokens[0], effects: updates[0].effects }], {
-    instanceId: 'enc_1', fightId: 'f1', combatants: [{
-      id: 0, sourceId: 'char-1', hpCurrent: 20, hpMax: 22,
-      activeEffects: [{ key: 'selfAttackDisadv', duration: 'next' }],
-    }],
-  }), []);
-});
-
-test('stale death saves and Dead in a cached fight do not overwrite a character sheet', () => {
-  const tokens = [{
-    id: 't1',
-    characterId: 'char-1',
-    hpCurrent: 0,
-    conditions: [],
-    effects: [],
-    deathSaves: { success: 1, fail: 2 },
-  }];
-  const updates = tokenUpdatesFromFight(tokens, {
-    instanceId: 'enc_1',
-    fightId: 'f1',
-    combatants: [{
-      id: 0,
-      type: 'player',
-      sourceId: 'char-1',
-      hpCurrent: 0,
-      hpMax: 22,
-      deathSaves: { s: 1, f: 3 },
-      activeConditions: [],
-      isDead: true,
-    }],
-  });
-
-  assert.deepEqual(updates, []);
-});
-
-test('raw character tokens without HP never trigger a replay of cached fight vitals', () => {
-  const tokens = [{ id: 't1', characterId: 'char-1', hpCurrent: null, hpMax: null }];
-  for (const hpCurrent of [30, 18, 17, 0]) {
-    assert.deepEqual(tokenUpdatesFromFight(tokens, {
-      instanceId: 'enc_1', fightId: 'f1',
-      combatants: [{ id: 0, type: 'player', sourceId: 'char-1', hpCurrent, hpMax: 30 }],
-    }), []);
-  }
-});
-
 test('a condition set on a character piece reaches its combatant', () => {
   const combatants = [{ id: 0, sourceId: 'char-1', hpCurrent: 9, hpMax: 22, isDead: false }];
   const next = fightWithTokenVitals(combatants, {
@@ -116,28 +42,6 @@ test('a condition set on a character piece reaches its combatant', () => {
   });
   assert.deepEqual(next[0].activeConditions, ['frightened']);
   assert.equal(next[0].hpCurrent, 9);
-});
-
-test('pieces from another fight, or from none, are left alone', () => {
-  const tokens = [
-    { id: 't1', sourceRef: 'enc_1:other:0', hpCurrent: 7, hpMax: 7 },
-    { id: 't2', sourceRef: 'other_enc:f1:0', hpCurrent: 7, hpMax: 7 },
-    { id: 't3', sourceRef: null, characterId: null, hpCurrent: 7, hpMax: 7 },
-  ];
-  const updates = tokenUpdatesFromFight(tokens, {
-    instanceId: 'enc_1',
-    fightId: 'f1',
-    combatants: [{ id: 0, hpCurrent: 1, hpMax: 7 }],
-  });
-  assert.deepEqual(updates, []);
-});
-
-test('a combatant that no longer exists does not produce an update', () => {
-  const updates = tokenUpdatesFromFight(
-    [{ id: 't1', sourceRef: 'enc_1:f1:9', hpCurrent: 7, hpMax: 7 }],
-    { instanceId: 'enc_1', fightId: 'f1', combatants: [{ id: 0, hpCurrent: 1, hpMax: 7 }] },
-  );
-  assert.deepEqual(updates, []);
 });
 
 test('editing a piece writes back into the fight and keeps isDead honest', () => {

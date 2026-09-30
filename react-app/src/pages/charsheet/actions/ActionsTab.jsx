@@ -1001,10 +1001,13 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
   const rollers = getActionRollers(action);
   const hasRollers = Number.isFinite(action.attackBonus) || rollers.length > 0;
 
-  // Attack-roll advantage/disadvantage from active conditions, combined with the
-  // weapon-level disadvantage (heavy/untrained).
+  // Attack-roll advantage/disadvantage from active conditions and effects,
+  // combined with the weapon-level disadvantage (heavy/untrained).
   const activeConditions = sheet?.activeConditions || [];
-  const attackRoll = describeAttackRoll(activeConditions, { extraDisadv: !!action._disadvantage });
+  const attackRoll = describeAttackRoll(activeConditions, {
+    extraDisadv: !!action._disadvantage,
+    effects: sheet?.activeEffects,
+  });
 
   return (
     <ExpandableCard

@@ -20,7 +20,9 @@ export default function SavingThrows({ C, sheet, onRoll }) {
   const itemSaveBonus = aggregateSavingThrowBonus(effectInventory);
   const itemEffects = collectItemEffects(itemEffectInventory(C, C?.inventory));
   const saveContexts = [...itemEffects.advantageOnSaveAgainst.entries()];
-  const saveModifiers = collectSaveModifiers(C, effectInventory, profSets, sheet?.activeConditions || []);
+  const saveModifiers = collectSaveModifiers(
+    C, effectInventory, profSets, sheet?.activeConditions || [], sheet?.activeEffects || [],
+  );
   // Reminder list shows only situational modifiers (e.g. "vs Frightened").
   // Fixed ones (e.g. Gnomish Cunning on INT/WIS/CHA, armor) are already
   // surfaced per-stat (icon + auto-roll), so they're excluded here.
@@ -37,9 +39,15 @@ export default function SavingThrows({ C, sheet, onRoll }) {
   const [menuStat, setMenuStat] = useState(null);
   const [menuOptions, setMenuOptions] = useState({ hasDisadv: false, baseAdv: false });
 
+  // Any advantage plus any disadvantage is a straight roll, whatever the count.
+  const rollOptions = (adv, disadv) => ({
+    advantage: (adv && !disadv) || undefined,
+    disadvantage: (disadv && !adv) || undefined,
+  });
+
   const handleSaveClick = (event, st, hasDisadv, baseAdv) => {
     if (saveContexts.length === 0) {
-      onRoll(st, { disadvantage: hasDisadv || undefined, advantage: baseAdv && !hasDisadv || undefined });
+      onRoll(st, rollOptions(baseAdv, hasDisadv));
       return;
     }
     setMenuAnchor(event.currentTarget);
@@ -50,8 +58,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
   const handleMenuPick = (context) => {
     if (!menuStat) { setMenuAnchor(null); return; }
     const advFromContext = context && context !== 'none';
-    const adv = (advFromContext || menuOptions.baseAdv) && !menuOptions.hasDisadv;
-    onRoll(menuStat, { disadvantage: menuOptions.hasDisadv || undefined, advantage: adv || undefined });
+    onRoll(menuStat, rollOptions(advFromContext || menuOptions.baseAdv, menuOptions.hasDisadv));
     setMenuAnchor(null);
     setMenuStat(null);
   };

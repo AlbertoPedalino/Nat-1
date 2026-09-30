@@ -99,7 +99,7 @@ describe('normal path: digest + base max in hand', () => {
     expect(server.rpc).toHaveBeenCalledOnce();
     expect(server.rpc.mock.calls[0][1]).toEqual({
       p_id: 'pc', p_digest_revision: start, p_hp_basis: 'h1',
-      p_patch: { currentHP: 27, tempHP: 0, maxHPBonus: 0, deathSaves: { success: 0, fail: 0 }, activeConditions: [] },
+      p_patch: { currentHP: 27, tempHP: 0, maxHPBonus: 0, deathSaves: { success: 0, fail: 0 }, activeConditions: [], activeEffects: [] },
     });
     expect(result).toEqual({
       applied: true, characterId: 'pc', digestRevision: start + 1, hpBasis: 'h1',

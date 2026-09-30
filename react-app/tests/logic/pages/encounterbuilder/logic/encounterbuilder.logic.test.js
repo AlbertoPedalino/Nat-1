@@ -265,6 +265,7 @@ test('sheet sync mappers clamp and keep the sheet patch shallow', () => {
     // null, not []: this payload carries no opinion about conditions, and the
     // difference is what stops it from wiping the combat's own.
     activeConditions: null,
+    activeEffects: null,
     deathSaves: { s: 3, f: 0 },
   });
 
@@ -279,6 +280,7 @@ test('sheet sync mappers clamp and keep the sheet patch shallow', () => {
     tempHP: 3,
     maxHPBonus: 0,
     activeConditions: [],
+    activeEffects: [],
     deathSaves: { success: 2, fail: 3 },
   });
   assert.equal(Object.hasOwn(patch, 'maxHP'), false);
@@ -292,6 +294,7 @@ test('sheet sync mappers clamp and keep the sheet patch shallow', () => {
     tempHP: 2,
     maxHPBonus: 0,
     activeConditions: [],
+    activeEffects: [],
     deathSaves: { success: 1, fail: 3 },
   });
   assert.equal(sheetPatchKey(patch), sheetPatchKey({
@@ -804,7 +807,7 @@ test('a custom effect is added, removed by id, and cleared wholesale', () => {
   assert.deepEqual(clearCombatantEffects(removed, id).combatants[0].activeEffects, []);
 });
 
-// Effects are outside SYNCED_VITALS, so the snapshot has to name them by hand —
+// A monster's effects are in no registry, so the snapshot names them by hand —
 // exactly the omission that lost conditions from every saved fight.
 test('effects survive a fight snapshot and restore', () => {
   const combat = buildCombat([], [{ name: 'Aria', sourceId: 'char-1', hpMax: 22 }], 1, () => 0.5);
@@ -823,17 +826,32 @@ test('effects survive a fight snapshot and restore', () => {
   ]);
 });
 
-// The reason effects are not a synced vital: they mean nothing on a character
-// sheet, so they must never widen the patch or the SQL allowlist.
-test('effects stay in the encounter and never reach the sheet patch', () => {
+// A player's advantage/disadvantage live on the sheet like its conditions: the
+// patch carries them and a sheet payload that has them replaces the combatant's.
+test('effects are a synced vital: they reach the sheet patch and come back from it', () => {
   const patch = combatantToSheetPatch({
     hpCurrent: 5,
     hpMax: 22,
     activeConditions: ['prone'],
     activeEffects: [{ key: 'selfAttackDisadv', duration: 'next' }],
   });
-  assert.equal('activeEffects' in patch, false);
-  assert.equal(SYNCED_DATA_KEYS.includes('activeEffects'), false);
+  assert.deepEqual(patch.activeEffects, [{ key: 'selfAttackDisadv', duration: 'next' }]);
+  assert.equal(SYNCED_DATA_KEYS.includes('activeEffects'), true);
+
+  const combat = buildCombat([], [{ name: 'Aria', sourceId: 'char-1', hpMax: 22 }], 1, () => 0.5);
+  const id = combat.combatants[0].id;
+  const synced = applySheetVitals(toggleCombatantEffect(combat, id, 'selfAttackDisadv'), 'char-1', {
+    hpMax: 22, activeEffects: [{ key: 'selfSaveAdv', duration: 'manual' }],
+  });
+  assert.deepEqual(synced.combatants[0].activeEffects, [{ key: 'selfSaveAdv', duration: 'manual' }]);
+});
+
+// A linked player enters the fight with the effects on their sheet.
+test('a launched player keeps the effects their sheet carries', () => {
+  const combat = buildCombat([], [{
+    name: 'Aria', sourceId: 'char-1', hpMax: 22, activeEffects: [{ key: 'selfCheckAdv', duration: 'manual' }],
+  }], 1, () => 0.5);
+  assert.deepEqual(combat.combatants[0].activeEffects, [{ key: 'selfCheckAdv', duration: 'manual' }]);
 });
 
 // A live sheet payload knows nothing about effects; resolving vitals from one
@@ -924,7 +942,7 @@ test('closing an encounter deactivates it but keeps the fight resumable', () => 
   assert.equal(resumed.combat.combatants[0].name, 'Aria');
 });
 
-test('external fight refresh keeps linked sheet vitals while updating monsters and encounter effects', () => {
+test('external fight refresh keeps linked sheet vitals, effects included, while updating monsters', () => {
   const player = {
     id: 'player', type: 'player', sourceId: 'character', name: 'Aria', hpMax: 30,
     hpCurrent: 20, tempHP: 4, maxHPBonus: 2, activeConditions: ['prone'], deathSaves: { s: 0, f: 0 },
@@ -945,7 +963,8 @@ test('external fight refresh keeps linked sheet vitals while updating monsters a
   assert.equal(pc.tempHP, 4);
   assert.equal(pc.maxHPBonus, 2);
   assert.deepEqual(pc.activeConditions, ['prone']);
-  assert.deepEqual(pc.activeEffects, [{ key: 'selfAttackDisadv', duration: 'next' }]);
+  // A linked player's effects are the sheet's, never a stale fight copy's.
+  assert.deepEqual(pc.activeEffects, []);
   assert.equal(next.combat.combatants.find((item) => item.id === monster.id).hpCurrent, 12);
   assert.equal(encounterReducer(state, { type: 'syncExternalFight', entry: { ...incoming, id: 'other' } }), state);
 });

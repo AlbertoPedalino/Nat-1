@@ -13,6 +13,7 @@ import {
   durationLabel,
   effectId,
   effectPolarity,
+  effectRollAdvantage,
   effectShortLabel,
   normalizeEffects,
   removeEffect,
@@ -171,4 +172,22 @@ test('normalize tolerates the shapes a hand-edited snapshot can produce', () => 
   assert.deepEqual(normalizeEffects([null, 3, 'x', { key: 'selfAttackAdv', duration: 'next' }]), [
     { key: 'selfAttackAdv', duration: 'next' },
   ]);
+});
+
+test('effects decide advantage only for the rolls of their own kind, made by the creature itself', () => {
+  const effects = [
+    { key: 'selfAttackAdv', duration: 'manual' },
+    { key: 'selfSaveDisadv', duration: 'next' },
+    { key: 'incomingAttackDisadv', duration: 'next' },
+    { key: 'custom', duration: 'next', text: 'cover', polarity: 'adv' },
+  ];
+  assert.deepEqual(effectRollAdvantage(effects, 'attack'), { adv: true, disadv: false });
+  assert.deepEqual(effectRollAdvantage(effects, 'save'), { adv: false, disadv: true });
+  assert.deepEqual(effectRollAdvantage(effects, 'check'), { adv: false, disadv: false });
+  assert.deepEqual(
+    effectRollAdvantage([{ key: 'selfCheckAdv' }, { key: 'selfCheckDisadv' }], 'check'),
+    { adv: true, disadv: true },
+    'both are reported; the roll folds them into a straight one',
+  );
+  assert.deepEqual(effectRollAdvantage(null, 'attack'), { adv: false, disadv: false });
 });

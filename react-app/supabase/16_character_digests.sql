@@ -4,9 +4,9 @@
 --
 -- A sheet is one big `data` blob. The battle map and the encounter builder
 -- need a sliver of it — name, portrait, class colour, hit points, death
--- saves, conditions — plus to know when max HP may have moved. Subscribing to
--- `characters` sent them the whole blob on every autosave: a note typed, a
--- spell slot ticked, a coin spent.
+-- saves, conditions, advantage/disadvantage effects — plus to know when max
+-- HP may have moved. Subscribing to `characters` sent them the whole blob on
+-- every autosave: a note typed, a spell slot ticked, a coin spent.
 --
 -- `character_digests` is a projection kept by the database: one row per
 -- character, rewritten only when the digest itself changes. Clients read and
@@ -24,7 +24,7 @@ create or replace function public.character_hp_basis_ignored_keys()
 returns text[] language sql immutable as $$
   select array[
     -- carried in the digest itself (maxHPBonus is added on top of the base max)
-    'currentHP', 'tempHP', 'maxHPBonus', 'deathSaves', 'activeConditions',
+    'currentHP', 'tempHP', 'maxHPBonus', 'deathSaves', 'activeConditions', 'activeEffects',
     -- presentation carried in the digest
     'name', 'portraitPath', 'classIconColor',
     -- trackers that change all session and never feed max HP
@@ -50,6 +50,7 @@ returns jsonb language sql immutable as $$
     'maxHPBonus', p_data->'maxHPBonus',
     'deathSaves', p_data->'deathSaves',
     'activeConditions', p_data->'activeConditions',
+    'activeEffects', p_data->'activeEffects',
     -- jsonb text output is canonical (sorted keys), so equal sheets hash equal.
     'hpBasis', md5((coalesce(p_data, '{}'::jsonb) - public.character_hp_basis_ignored_keys())::text)
   );

@@ -102,10 +102,8 @@ export function buildCombat(encounter, players, encounterId = null, rng = Math.r
       initiative: d20(rng) + initMod,
       initMod,
       ac: clampInt(player.ac, 1, 99, 10),
+      // Includes the player's advantage/disadvantage effects, a synced vital.
       ...vitals,
-      // Not part of `vitals`: effects are encounter-local and never sync to a
-      // player's sheet, so they are not in the SYNCED_VITALS registry.
-      activeEffects: [],
       monsterData: null,
       label: null,
       shape: null,
@@ -491,9 +489,8 @@ export function snapshotFight(combat) {
       // here. A field added to SYNCED_VITALS is now persisted without touching
       // this function.
       ...resolveCombatVitals(combatant, combatant),
-      // Listed by hand because effects are deliberately outside SYNCED_VITALS
-      // (they never reach a sheet). Normalized on the way out so a fight saved
-      // now restores clean even if the catalog loses an effect later.
+      // Already in the line above for everyone; repeated so a monster's list is
+      // normalized on the way out even if the registry changes shape later.
       activeEffects: normalizeEffects(combatant.activeEffects),
       // Deliberately not taken from the line above: resolveCombatVitals infers
       // death from failed death saves, which is right for a player and wrong for

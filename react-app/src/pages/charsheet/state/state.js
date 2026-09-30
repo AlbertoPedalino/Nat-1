@@ -1,5 +1,6 @@
 import { calcMaxHP } from './calculations.js';
 import { normalizeCurrency } from '../../../shared/character/inventory/currency.js';
+import { normalizeEffects } from '../../../shared/character/combat/combatEffects.js';
 
 export function deriveSheetState(C) {
   const baseMax = Math.max(1, calcMaxHP(C));
@@ -32,12 +33,14 @@ export function deriveSheetState(C) {
 
   const sheetInspiration = Boolean(C?.inspiration);
   const activeConditions = Array.isArray(C?.activeConditions) ? C.activeConditions : [];
+  // Advantage/disadvantage rulings (combatEffects.js), a synced vital.
+  const activeEffects = normalizeEffects(C?.activeEffects);
   const exhaustionLevel = Math.max(0, Math.min(6, Math.floor(Number(C?.exhaustionLevel) || 0)));
   const xpStored = Number(C?.xp || 0);
   const notes = C?.notes ?? '';
 
   return {
     currentHP, maxHP, maxHPBonus, tempHP, deathSaves, usedHD, usedHDPools, spellSlotUsed, createdSpellSlots,
-    sheetInventory, sheetCurrency, sheetInspiration, activeConditions, exhaustionLevel, xpStored, notes, arcaneArmorItemKey,
+    sheetInventory, sheetCurrency, sheetInspiration, activeConditions, activeEffects, exhaustionLevel, xpStored, notes, arcaneArmorItemKey,
   };
 }

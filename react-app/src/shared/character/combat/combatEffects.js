@@ -3,13 +3,12 @@
 // throws" calls a GM makes mid-fight. Dependency-free for the same reason
 // conditions.js is — it must stay importable by the plain node test runner.
 //
-// These are NOT conditions, and deliberately do not travel to player sheets.
-// A condition is a named rules state with published text that the sheet and the
-// encounter must agree on, so it is a synced vital; an effect is one GM's
-// ruling for one fight, with no sheet-side meaning. It therefore lives on the
-// combatant and in the fight snapshot only, and the character health allowlist
-// in supabase/13_character_vitals.sql is untouched. Adding one here does NOT mean
-// adding a key to SYNCED_VITALS.
+// These are NOT conditions, but on a player character they are a synced vital
+// all the same: `activeEffects` is in SYNCED_VITALS and in the health allowlist
+// of supabase/13_character_vitals.sql, so the sheet, the battle-map piece and
+// the encounter combatant show one list, and the sheet's dice honour it
+// (effectRollAdvantage). A monster's effects stay on its combatant / fight.
+// Adding an effect to the catalog below needs nothing else.
 //
 // Expiry is manual on purpose. A duration is a label the GM reads, not a timer:
 // initiative here can be stepped backwards (prevTurn), so an effect destroyed by
@@ -172,6 +171,26 @@ export function addCustomEffect(effects, text, polarity = 'note') {
   const effect = coerceEffect({ key: CUSTOM_EFFECT_KEY, text, duration: DEFAULT_EFFECT_DURATION, polarity });
   return effect ? normalizeEffects([...list, effect]) : list;
 }
+
+// Whether the active effects give advantage and/or disadvantage on this
+// creature's own rolls of one kind ('attack' | 'save' | 'check'). Both can be
+// true: the caller folds them in with its other sources, and any advantage
+// plus any disadvantage is a straight roll. "Against it" effects and custom
+// notes change nothing here — they are rulings for somebody else's roll.
+export function effectRollAdvantage(effects, roll) {
+  let adv = false;
+  let disadv = false;
+  for (const effect of normalizeEffects(effects)) {
+    const entry = EFFECT_BY_KEY[effect.key];
+    if (!entry || entry.target !== 'self' || entry.roll !== roll) continue;
+    if (entry.polarity === 'adv') adv = true;
+    if (entry.polarity === 'disadv') disadv = true;
+  }
+  return { adv, disadv };
+}
+
+// The tooltip name of that source, beside feature and condition names.
+export const EFFECT_ROLL_SOURCE = 'Adv/Dis effect';
 
 export function removeEffect(effects, id) {
   return normalizeEffects(effects).filter((effect) => effectId(effect) !== id);
