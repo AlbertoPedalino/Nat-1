@@ -106,28 +106,30 @@ export default function EncounterList() {
           )}
         </Stack>
         <DifficultyBar encounter={state.encounter} party={state.party} />
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-          <Stack direction="row" spacing={0.5} sx={{ flex: 1 }}>
+        {/* Two rows: Launch keeps its initiative options beside it, and the
+            panel is too narrow for three controls side by side. */}
+        <Stack spacing={1}>
+          <Stack direction="row" spacing={0.75} sx={{ alignItems: 'stretch' }}>
             <Button
               variant="contained"
               startIcon={<Swords size={16} />}
               onClick={() => handleLaunch()}
               disabled={cannotLaunch}
-              fullWidth
+              sx={{ flex: 1, minWidth: 0 }}
             >
               Launch
             </Button>
             <Tooltip title="Launch with initiative advantage / disadvantage">
-              <span>
+              <Box component="span" sx={{ display: 'flex', flexShrink: 0 }}>
                 <IconButton
                   aria-label="Launch with initiative options"
                   onClick={() => setInitiativeOpen(true)}
                   disabled={cannotLaunch}
-                  sx={{ border: 1, borderColor: 'divider', borderRadius: 1 }}
+                  sx={{ border: 1, borderColor: 'divider', borderRadius: 1, px: 1.25 }}
                 >
                   <SlidersHorizontal size={16} />
                 </IconButton>
-              </span>
+              </Box>
             </Tooltip>
           </Stack>
           <Button
