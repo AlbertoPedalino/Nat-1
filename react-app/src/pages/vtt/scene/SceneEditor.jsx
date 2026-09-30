@@ -58,6 +58,7 @@ import {
   layoutTokens,
   monsterGroupTokens,
 } from '../../../shared/vtt/tokens/encounterImport.js';
+import { placeAroundCenter } from '../../../shared/vtt/tokens/placement.js';
 import {
   DEFAULT_FOG_SCALE,
   applyCells,
@@ -73,7 +74,7 @@ import {
 import { REMOTE_MEASURE_TTL_MS } from '../../../shared/vtt/map/measureSync.js';
 import { acceptFogDelta, newFogStroke } from '../../../shared/vtt/map/fogStream.js';
 import {
-  canMarkToken, isTokenVisibleToPlayers, normalizePlayArea, sceneTitleFor, toScene,
+  canMarkToken, isTokenInPlay, isTokenVisibleToPlayers, normalizePlayArea, sceneTitleFor, toScene,
 } from '../../../shared/vtt/scene/scene.js';
 import { sanitizeNoteText } from '../../../shared/vtt/map/drawing.js';
 import { normalizeAtmosphere } from '../../../shared/vtt/scene/atmosphere.js';
@@ -1223,11 +1224,24 @@ export default function SceneEditor({
     return false;
   }, [notify, shownImageForViewport]);
 
+  // Pieces placed with a click land around the middle of the placer's own view,
+  // square or hex, so they see where they went. A player's must stay inside the
+  // play area they are allowed to receive: a row outside it would be hidden by
+  // RLS from the player who just created it. The GM may place anywhere.
+  const viewCenterRef = useRef(null);
+  const placeInView = useCallback((pieces) => {
+    const center = viewCenterRef.current?.();
+    if (!center) return null;
+    const accept = role.isGm ? undefined : (position) => isTokenInPlay(position, scene.playArea);
+    return placeAroundCenter(pieces, tokens, center, { grid: scene.grid, accept });
+  }, [role.isGm, scene.grid, scene.playArea, tokens]);
+
   const nextFreeCell = useCallback(() => {
+    const [inView] = placeInView([{}]) || [];
+    if (inView) return { x: inView.x, y: inView.y };
     const taken = new Set(tokens.map((token) => `${Math.round(token.x)}:${Math.round(token.y)}`));
-    // A player's click-placement must land inside the play area they are
-    // allowed to receive. Putting it at absolute 0,0 could create a row which
-    // RLS immediately hides from the player who just created it.
+    // No view to centre on: the first free cell of the play area, never
+    // absolute 0,0, for the same reason as above.
     const startX = scene.playArea?.x || 0;
     const startY = scene.playArea?.y || 0;
     const cols = Math.min(20, scene.playArea?.w || 20);
@@ -1238,7 +1252,7 @@ export default function SceneEditor({
       }
     }
     return { x: startX, y: startY };
-  }, [scene.playArea, tokens]);
+  }, [placeInView, scene.playArea, tokens]);
 
   // An extra picture is a piece, not a third slot: it can be moved, resized and
   // removed like everything else. It lands on the layer being edited — scenery
@@ -1300,11 +1314,9 @@ export default function SceneEditor({
     if (!canPlacePiece()) return;
     setBusy(true);
     try {
-      const laid = layoutTokens(
-        monsterGroupTokens(monster, count, { layer }),
-        tokens,
-        position ? { origin: position } : undefined,
-      );
+      const pieces = monsterGroupTokens(monster, count, { layer });
+      const laid = (!position && placeInView(pieces))
+        || layoutTokens(pieces, tokens, position ? { origin: position } : undefined);
       for (const token of laid) {
         // eslint-disable-next-line no-await-in-loop
         const created = await createToken(scene.id, token);
@@ -1317,7 +1329,7 @@ export default function SceneEditor({
     } finally {
       setBusy(false);
     }
-  }, [canPlacePiece, notify, scene.id, tokens]);
+  }, [canPlacePiece, notify, placeInView, scene.id, tokens]);
 
   const handleAddToken = useCallback(async (draft = {}, position) => {
     if (!canPlacePiece()) return;
@@ -1446,15 +1458,13 @@ export default function SceneEditor({
           deleteInstanceFight(fightId).catch(() => {});
         });
       }
-      const laid = layoutTokens(
-        placed.map((combatant) => combatantToToken(combatant, {
-          layer,
-          instanceId: instance,
-          fightId: ref,
-        })),
-        tokens,
-        position ? { origin: position } : undefined,
-      );
+      const pieces = placed.map((combatant) => combatantToToken(combatant, {
+        layer,
+        instanceId: instance,
+        fightId: ref,
+      }));
+      const laid = (!position && placeInView(pieces))
+        || layoutTokens(pieces, tokens, position ? { origin: position } : undefined);
       // Sequential rather than parallel: a burst of inserts on one scene is the
       // easiest way to hit a rate limit, and the order they land in is the order
       // the GM sees them appear.
@@ -1472,7 +1482,7 @@ export default function SceneEditor({
     }
   }, [
     canPlacePiece, dungeon.linkHint, dungeon.sendRoomToBuilder, monsterDb.monsters, notify,
-    roster, scene.id, tokens,
+    placeInView, roster, scene.id, tokens,
   ]);
 
   const handleDropPlacement = useCallback((placement, position) => {
@@ -2466,6 +2476,7 @@ export default function SceneEditor({
         />}
         onFullscreenChange={handleMapFullscreenChange}
         onViewChange={role.isGm && !gmPlayerPreview ? handleCameraViewChange : undefined}
+        viewCenterRef={viewCenterRef}
         fullscreenSheet={!gmPlayerPreview && sheetChoices.length ? {
           choices: sheetChoices,
           selectedId: sheetCharacterId,

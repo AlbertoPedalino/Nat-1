@@ -1606,3 +1606,41 @@ describe('shared ruler traffic', () => {
     expect(onMeasure).toHaveBeenLastCalledWith(null);
   });
 });
+
+// A piece placed with a click lands in the middle of the placer's view, so the
+// viewport answers which cell that is — a square, or the hex under the centre.
+test.each(['square', 'hex'])('the view reports the %s cell under its centre', async (shape) => {
+  const rectSpy = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
+    bottom: 300, height: 300, left: 0, right: 400, top: 0, width: 400, x: 0, y: 0, toJSON: () => ({}),
+  });
+  const grid = { size: 50, offsetX: 0, offsetY: 0, visible: false, shape };
+  const viewCenterRef = { current: null };
+  try {
+    render(
+      <SceneViewport
+        scene={{ grid, playArea: null }}
+        imageUrl={null}
+        tokens={[]}
+        snap
+        canMove={() => false}
+        fog={null}
+        drawings={[]}
+        lasers={[]}
+        rollBubbles={[]}
+        diceThrows={[]}
+        viewCenterRef={viewCenterRef}
+      />,
+    );
+    await waitFor(() => expect(viewCenterRef.current?.()).toBeTruthy());
+    const center = viewCenterRef.current();
+    if (shape === 'square') {
+      expect(center).toEqual({ x: 4, y: 3 });
+    } else {
+      const { hexToWorld } = await import('../../../../../src/shared/vtt/map/hexGeometry.js');
+      const middle = hexToWorld({ q: center.x, r: center.y }, grid);
+      expect(Math.hypot(middle.x - 200, middle.y - 150)).toBeLessThanOrEqual(50);
+    }
+  } finally {
+    rectSpy.mockRestore();
+  }
+});

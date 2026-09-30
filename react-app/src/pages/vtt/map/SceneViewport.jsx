@@ -192,6 +192,9 @@ export default function SceneViewport({
   onFullscreenChange,
   followView,
   onViewChange,
+  // Filled with a function answering the cell at the middle of this view, for
+  // pieces placed with a click rather than dragged to a spot.
+  viewCenterRef,
   cameraLocked = false,
   fillViewport = false,
   showFullscreenControl = true,
@@ -668,6 +671,22 @@ export default function SceneViewport({
     const cell = worldToCell(world, scene.grid);
     return { x: cell.col - Math.floor(w / 2), y: cell.row - Math.floor(h / 2) };
   }, [cellPoint, placementDrag, scene.grid, screenPoint, snapObjects, view]);
+
+  // The cell under the middle of the view: col/row on squares, q/r on hexes.
+  useEffect(() => {
+    if (!viewCenterRef) return undefined;
+    viewCenterRef.current = () => {
+      if (!viewportSize.width || !viewportSize.height) return null;
+      const world = screenToWorld({ x: viewportSize.width / 2, y: viewportSize.height / 2 }, view);
+      if (isHexGrid(scene.grid)) {
+        const cell = axialRound(worldToAxial(world, scene.grid));
+        return { x: cell.q, y: cell.r };
+      }
+      const cell = worldToCell(world, scene.grid);
+      return { x: cell.col, y: cell.row };
+    };
+    return () => { viewCenterRef.current = null; };
+  }, [scene.grid, view, viewCenterRef, viewportSize]);
 
   // Placement arrives through pointer events so mouse, touch and pen share the
   // same reliable path instead of depending on native HTML drag-and-drop.
