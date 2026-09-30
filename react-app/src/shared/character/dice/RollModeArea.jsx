@@ -15,6 +15,12 @@ import { advArgFor, rollModeLabel, withExtraSource } from './advantage.js';
 // What a phone's own long press feels like (same numbers as the battle map).
 const LONG_PRESS_MS = 480;
 const LONG_PRESS_SLOP = 12;
+// How long after the finger lifts a click still belongs to the long press.
+const SWALLOW_CLICK_MS = 700;
+
+// A roller is pressed, not read: no text selection and no iOS callout, which a
+// long press would otherwise open over the menu.
+const pressSx = { userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' };
 
 const OPTIONS = [
   { extra: 'adv', label: '+ Advantage' },
@@ -22,18 +28,26 @@ const OPTIONS = [
 ];
 
 export default function RollModeArea({
-  component: Component = Box, sources, onPick, children, onClick,
+  component: Component = Box, sources, onPick, children, onClick, sx,
   onContextMenu, onTouchStart, onTouchMove, onTouchEnd, onTouchCancel, ...props
 }) {
   const [anchor, setAnchor] = useState(null);
   const pressRef = useRef(null);
-  // A long press ends in a click the browser still delivers; it must not also
-  // roll the ordinary way.
-  const swallowClickRef = useRef(false);
+  // A long press may end in a click (Android does, iOS mostly does not); that
+  // click must not also roll the ordinary way. Only a click right after the
+  // finger lifts is the long press's own: a flag left standing would swallow
+  // the next ordinary tap instead.
+  const longPressRef = useRef(false);
+  const swallowUntilRef = useRef(0);
 
   useEffect(() => () => clearTimeout(pressRef.current?.timer), []);
 
-  const open = (x, y) => setAnchor({ top: y, left: x });
+  const open = (x, y) => {
+    // A long press starts the browser's text selection too; left in place it
+    // covers the page and eats the taps meant for the menu.
+    try { window.getSelection?.()?.removeAllRanges(); } catch (_) {}
+    setAnchor({ top: y, left: x });
+  };
   const cancelPress = () => {
     clearTimeout(pressRef.current?.timer);
     pressRef.current = null;
@@ -53,11 +67,12 @@ export default function RollModeArea({
       const touch = event.touches?.[0];
       if (!touch || event.touches.length > 1) return;
       cancelPress();
+      longPressRef.current = false;
       pressRef.current = {
         x: touch.clientX,
         y: touch.clientY,
         timer: setTimeout(() => {
-          swallowClickRef.current = true;
+          longPressRef.current = true;
           open(touch.clientX, touch.clientY);
         }, LONG_PRESS_MS),
       };
@@ -69,11 +84,18 @@ export default function RollModeArea({
       if (!touch || !press) return;
       if (Math.hypot(touch.clientX - press.x, touch.clientY - press.y) > LONG_PRESS_SLOP) cancelPress();
     },
-    onTouchEnd: (event) => { onTouchEnd?.(event); cancelPress(); },
+    onTouchEnd: (event) => {
+      onTouchEnd?.(event);
+      cancelPress();
+      if (longPressRef.current) {
+        longPressRef.current = false;
+        swallowUntilRef.current = Date.now() + SWALLOW_CLICK_MS;
+      }
+    },
     onTouchCancel: (event) => { onTouchCancel?.(event); cancelPress(); },
     onClick: (event) => {
-      if (swallowClickRef.current) {
-        swallowClickRef.current = false;
+      if (Date.now() < swallowUntilRef.current) {
+        swallowUntilRef.current = 0;
         event.preventDefault();
         event.stopPropagation();
         return;
@@ -88,7 +110,7 @@ export default function RollModeArea({
   };
 
   return (
-    <Component {...props} {...triggerProps}>
+    <Component {...props} {...triggerProps} sx={[pressSx, ...(Array.isArray(sx) ? sx : [sx])]}>
       {children}
       {/* Events from a portalled menu still bubble through React to the
           roller; stop them here or picking an option also rolls normally. */}

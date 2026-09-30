@@ -59,3 +59,28 @@ test('a press that moves is a scroll, not a long press', () => {
     vi.useRealTimers();
   }
 });
+
+// iOS usually sends no click after a long press: the next ordinary tap must
+// still roll, not be taken for the long press's leftover click.
+test('after a long press, a later ordinary tap rolls normally', () => {
+  vi.useFakeTimers();
+  try {
+    const { onClick, roller } = renderArea();
+    fireEvent.touchStart(roller, { touches: [{ clientX: 5, clientY: 5 }] });
+    act(() => { vi.advanceTimersByTime(500); });
+    fireEvent.touchEnd(roller);
+    fireEvent.keyDown(screen.getByRole('menu'), { key: 'Escape' });
+    act(() => { vi.advanceTimersByTime(1000); });
+    fireEvent.touchStart(roller, { touches: [{ clientX: 5, clientY: 5 }] });
+    fireEvent.touchEnd(roller);
+    fireEvent.click(roller);
+    expect(onClick).toHaveBeenCalledTimes(1);
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+test('a roller cannot be text-selected, so a long press opens only the menu', () => {
+  const { roller } = renderArea();
+  expect(roller).toHaveStyle({ userSelect: 'none' });
+});
