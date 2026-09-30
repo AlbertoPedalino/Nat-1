@@ -1,5 +1,6 @@
 import { Box, Link } from '@mui/material';
 import { parseCleanTokens } from './markup.js';
+import RollText from './RollText.jsx';
 
 export default function InlineText({ value, onRoll }) {
   return <>{parseCleanTokens(value).map((token, index) => renderToken(token, `${index}`, onRoll))}</>;
@@ -14,17 +15,7 @@ function renderToken(token, key, onRoll) {
     return <Box key={key} component="b">{token.children?.map((child, index) => renderToken(child, `${key}-${index}`, onRoll))}</Box>;
   }
   if (token.type === 'roll') {
-    return (
-      <Box
-        key={key}
-        component="button"
-        type="button"
-        onClick={() => onRoll?.(token.notation, token.rollType)}
-        sx={rollableSx}
-      >
-        {token.text}
-      </Box>
-    );
+    return <RollText key={key} notation={token.notation} type={token.rollType} onRoll={onRoll}>{token.text}</RollText>;
   }
   if (token.type === 'link') {
     return (
@@ -35,19 +26,3 @@ function renderToken(token, key, onRoll) {
   }
   return null;
 }
-
-const rollableSx = {
-  appearance: 'none',
-  border: '1px solid rgba(112,183,166,0.45)',
-  bgcolor: 'rgba(112,183,166,0.12)',
-  color: '#96d8c6',
-  borderRadius: '4px',
-  px: '0.25rem',
-  py: 0,
-  mx: '0.1rem',
-  font: 'inherit',
-  cursor: 'pointer',
-  '&:hover': {
-    bgcolor: 'rgba(112,183,166,0.22)',
-  },
-};

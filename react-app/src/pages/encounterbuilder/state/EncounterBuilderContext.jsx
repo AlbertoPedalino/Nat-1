@@ -82,8 +82,8 @@ export function EncounterBuilderProvider({ instanceId, children }) {
   // `actorOverride` lets a caller force the attribution (pass `null` for a
   // generic GM roll with no actor). Omit it to default to the selected/current
   // combatant via getRollActor().
-  const roll = useCallback((notation, type, actorOverride, note = '', { localOnly = false } = {}) => {
-    const result = rollDice(notation, type);
+  const roll = useCallback((notation, type, actorOverride, note = '', { localOnly = false, advantage } = {}) => {
+    const result = rollDice(notation, type, Math.random, { advantage });
     if (!result) return null;
     const identity = actorOverride !== undefined ? { actorName: actorOverride || 'GM' } : getRollActor();
     const actor = identity.actorName;

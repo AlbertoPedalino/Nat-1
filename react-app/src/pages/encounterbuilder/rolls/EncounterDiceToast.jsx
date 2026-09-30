@@ -12,8 +12,10 @@ export function buildEncounterDiceToast(result) {
     label: result.actor ? `${result.actor} - ${result.type || 'Roll'}` : result.type || 'Roll',
     detail,
     total: result.result,
-    rolls: parseRolls(detail, result),
-    meta,
+    // A roll that already knows its dice (two d20s with the kept one) keeps
+    // them; otherwise they are read back from the formula text.
+    rolls: Array.isArray(result.rolls) && result.rolls.length ? result.rolls : parseRolls(detail, result),
+    meta: result.mode ? { bonus: result.bonus, kept: result.naturalD20, mode: result.mode } : meta,
     timestamp: Date.now(),
   };
 }

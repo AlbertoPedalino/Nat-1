@@ -60,11 +60,14 @@ export function resultClass(result, maxResult, naturalD20 = null) {
   return result >= maxResult * 0.75 ? 'high' : result >= maxResult * 0.4 ? 'mid' : 'low';
 }
 
-export function rollDice(notation, type = 'Roll', rng = Math.random) {
+// `advantage`: true / false / undefined, as the sheet's rollD20 takes it. It
+// applies to a d20 test written as a bare modifier ("+5"); a dice formula is
+// rolled as written.
+export function rollDice(notation, type = 'Roll', rng = Math.random, { advantage } = {}) {
   const formula = String(notation || '').replace(/\s+/g, '').toLowerCase();
   if (!formula) return null;
   const rollResult = formula.startsWith('+') || formula.startsWith('-') || !formula.includes('d')
-    ? rollModifier(formula, rng)
+    ? rollModifier(formula, rng, advantage)
     : rollDiceFormula(formula, rng);
   if (!rollResult) return null;
   return {
@@ -75,14 +78,35 @@ export function rollDice(notation, type = 'Roll', rng = Math.random) {
   };
 }
 
-function rollModifier(formula, rng) {
+function rollModifier(formula, rng, advantage) {
   const mod = parseInt(formula, 10) || 0;
-  const naturalD20 = rollDie(20, rng);
+  const modText = mod >= 0 ? `+${mod}` : String(mod);
+  if (advantage !== true && advantage !== false) {
+    const naturalD20 = rollDie(20, rng);
+    return {
+      result: naturalD20 + mod,
+      maxResult: 20 + mod,
+      naturalD20,
+      mathStr: `1d20 (${naturalD20}) ${modText}`,
+    };
+  }
+  // Two d20s, the higher (advantage) or lower (disadvantage) kept; the dice
+  // carry which one counted so toasts, the log and the map show both.
+  const r1 = rollDie(20, rng);
+  const r2 = rollDie(20, rng);
+  const kept = advantage ? Math.max(r1, r2) : Math.min(r1, r2);
+  const mode = advantage ? 'advantage' : 'disadvantage';
   return {
-    result: naturalD20 + mod,
+    result: kept + mod,
     maxResult: 20 + mod,
-    naturalD20,
-    mathStr: `1d20 (${naturalD20}) ${mod >= 0 ? `+${mod}` : mod}`,
+    naturalD20: kept,
+    rolls: [
+      { v: r1, faces: 20, kept: r1 === kept },
+      { v: r2, faces: 20, kept: r2 === kept && r1 !== kept },
+    ],
+    bonus: mod,
+    mode,
+    mathStr: `${advantage ? 'Advantage' : 'Disadvantage'}: 1d20 (${r1}, ${r2}) keep ${kept} ${modText}`,
   };
 }
 

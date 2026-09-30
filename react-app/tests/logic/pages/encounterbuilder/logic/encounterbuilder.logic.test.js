@@ -621,6 +621,23 @@ test('dice parses formulas and d20 modifiers', () => {
   assert.equal(attack.cls, 'nat1');
 });
 
+test('a d20 test rolls two dice with advantage or disadvantage and keeps the right one', () => {
+  const faces = [0.5, 0.2]; // 11, then 5
+  const rngFor = () => { let i = 0; return () => faces[i++ % faces.length]; };
+  const adv = rollDice('+3', 'Attack Roll', rngFor(), { advantage: true });
+  assert.equal(adv.result, 14);
+  assert.equal(adv.mode, 'advantage');
+  assert.deepEqual(adv.rolls, [{ v: 11, faces: 20, kept: true }, { v: 5, faces: 20, kept: false }]);
+  assert.equal(adv.bonus, 3);
+  assert.equal(adv.naturalD20, 11);
+  const dis = rollDice('+3', 'Attack Roll', rngFor(), { advantage: false });
+  assert.equal(dis.result, 8);
+  assert.deepEqual(dis.rolls.map((die) => die.kept), [false, true]);
+  // A straight roll and a dice formula are unchanged.
+  assert.equal(rollDice('+3', 'Attack Roll', rngFor()).rolls, undefined);
+  assert.equal(rollDice('2d6', 'Damage', rngFor(), { advantage: true }).mode, undefined);
+});
+
 test('markup converts 5etools tags into safe tokens', () => {
   const tokens = parseCleanTokens('Hit: {@hit 7}, damage {@damage 2d6+3}, spell {@spell fireball|xphb|Fireball}.');
   assert.equal(tokens.some((token) => token.type === 'roll' && token.notation === '+7'), true);

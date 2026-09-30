@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   Box,
   Button,
@@ -38,6 +38,11 @@ import EncounterDiceToast, { buildEncounterDiceToast } from '../rolls/EncounterD
 import InlineText from './InlineText.jsx';
 import MonsterToken from './MonsterToken.jsx';
 import PlayerSheetPanel from '../campaign/PlayerSheetPanel.jsx';
+import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
+import { advArgFor } from '../../../shared/character/dice/advantage.js';
+import { creatureRollSources } from '../../../shared/character/combat/rollSources.js';
+import { StatRollContext, advTag, d20RollKind } from './statRolls.js';
+import RollText from './RollText.jsx';
 
 const ABILITIES = [
   ['str', 'STR'],
@@ -149,14 +154,40 @@ function StatBlockBody({ monster, allowAdd = false }) {
   const hpFormula = monster.hp?.formula;
   const spellcasting = groupSpellcasting(monster.spellcasting);
 
-  const handleRoll = useCallback((notation, type) => {
-    const result = roll(notation, type);
+  // The combatant this stat block was opened for, if any: its conditions and
+  // advantage/disadvantage effects decide how its d20 tests roll. A monster
+  // looked up in the bestiary has none and rolls straight.
+  const combatantId = state.selectedStatblock?.combatantId;
+  const combatant = useMemo(() => (
+    combatantId == null
+      ? null
+      : (state.combat?.combatants || []).find((entry) => String(entry.id) === String(combatantId)) || null
+  ), [combatantId, state.combat]);
+
+  const sourcesFor = useCallback((type) => {
+    const info = d20RollKind(type);
+    if (!info) return null;
+    if (!combatant || !info.kind) return { adv: false, disadv: false, autoFail: false };
+    return creatureRollSources(
+      { conditions: combatant.activeConditions, effects: combatant.activeEffects }, info.kind, info.ability,
+    );
+  }, [combatant]);
+
+  // `advantage` present (even undefined, a straight roll) is the right-click
+  // menu's choice; absent, the creature's own sources decide.
+  const handleRoll = useCallback((notation, type, options = {}) => {
+    const sources = sourcesFor(type);
+    const advantage = Object.hasOwn(options, 'advantage')
+      ? options.advantage
+      : (sources ? advArgFor(sources) : undefined);
+    const note = sources?.autoFail ? 'Auto-fail: a condition fails STR and DEX saves' : '';
+    const result = roll(notation, type, undefined, note, { advantage });
     const toast = buildEncounterDiceToast(result);
     if (toast) setDiceToast(toast);
-  }, [roll]);
+  }, [roll, sourcesFor]);
 
   return (
-    <>
+    <StatRollContext.Provider value={sourcesFor}>
       <Stack spacing={1.5}>
         <Prop label="Armor Class">{getAC(monster.ac)}{getACDesc(monster.ac)}</Prop>
         <Prop label="Hit Points">
@@ -172,18 +203,29 @@ function StatBlockBody({ monster, allowAdd = false }) {
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(6,minmax(0,1fr))', gap: 1 }}>
           {ABILITIES.map(([key, label]) => {
             const mod = abilityModString(monster[key]);
+            const type = `${label} Check`;
+            const sources = sourcesFor(type);
             return (
-              <Button key={key} variant="outlined" color="secondary" onClick={() => handleRoll(mod, `${label} Check`)} sx={{ minWidth: 0, p: 1 }}>
+              <RollModeArea
+                key={key}
+                component={Button}
+                variant="outlined"
+                color="secondary"
+                sources={sources}
+                onPick={(advantage) => handleRoll(mod, type, { advantage })}
+                onClick={() => handleRoll(mod, type)}
+                sx={{ minWidth: 0, p: 1 }}
+              >
                 <Stack spacing={0} sx={{ alignItems: 'center' }}>
-                  <Typography variant="caption">{label}</Typography>
+                  <Typography variant="caption">{label}{advTag(advArgFor(sources))}</Typography>
                   <Typography fontWeight={700}>{monster[key] ?? 10} ({mod})</Typography>
                 </Stack>
-              </Button>
+              </RollModeArea>
             );
           })}
         </Box>
         <OptionalProp label="Saving Throws" value={monster.save} render={(save) => renderRollMap(save, 'Save', handleRoll)} />
-        <OptionalProp label="Skills" value={monster.skill} render={(skills) => renderRollMap(skills, '', handleRoll)} />
+        <OptionalProp label="Skills" value={monster.skill} render={(skills) => renderRollMap(skills, 'Check', handleRoll)} />
         <OptionalProp label="Damage Vulnerabilities" value={formatDamageList(monster.vulnerable, 'vulnerable')} />
         <OptionalProp label="Damage Resistances" value={formatDamageList(monster.resist, 'resist')} />
         <OptionalProp label="Damage Immunities" value={formatDamageList(monster.immune, 'immune')} />
@@ -226,7 +268,7 @@ function StatBlockBody({ monster, allowAdd = false }) {
         ) : null}
       </Stack>
       {diceToast ? <EncounterDiceToast toast={diceToast} onClose={() => setDiceToast(null)} /> : null}
-    </>
+    </StatRollContext.Provider>
   );
 }
 
@@ -242,14 +284,6 @@ function Prop({ label, children }) {
 function OptionalProp({ label, value, render }) {
   if (!value || (typeof value === 'object' && !Object.keys(value).length)) return null;
   return <Prop label={label}>{render ? render(value) : value}</Prop>;
-}
-
-function RollText({ notation, type, onRoll, children }) {
-  return (
-    <Box component="button" type="button" onClick={() => onRoll(notation, type)} sx={rollableSx}>
-      {children}
-    </Box>
-  );
 }
 
 function renderRollMap(value, suffix, onRoll) {
@@ -386,21 +420,6 @@ function defaultLegendaryIntro(monster) {
     </>
   );
 }
-
-const rollableSx = {
-  appearance: 'none',
-  border: '1px solid rgba(112,183,166,0.45)',
-  bgcolor: 'rgba(112,183,166,0.12)',
-  color: '#96d8c6',
-  borderRadius: '4px',
-  px: '0.25rem',
-  py: 0,
-  font: 'inherit',
-  cursor: 'pointer',
-  '&:hover': {
-    bgcolor: 'rgba(112,183,166,0.22)',
-  },
-};
 
 const statPanelSx = {
   bgcolor: 'background.paper',
