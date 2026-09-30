@@ -418,6 +418,7 @@ export default function SpellEntry({
                     exhaustionLevel={exhaustionLevel}
                     label={formatRollTitle(entry.name, `${weaponStrike.name} Attack`)}
                     advArg={weaponStrikeRoll.advArg}
+                    sources={weaponStrikeRoll.sources}
                     tag={weaponStrikeRoll.tag}
                     tooltip={weaponStrikeRoll.tooltip}
                     disadv={weaponStrikeRoll.disadv}
@@ -430,6 +431,7 @@ export default function SpellEntry({
                     exhaustionLevel={exhaustionLevel}
                     label={formatRollTitle(entry.name, `Spell Attack${levelLabel}`)}
                     advArg={spellAttackRoll.advArg}
+                    sources={spellAttackRoll.sources}
                     tag={spellAttackRoll.tag}
                     tooltip={spellAttackRoll.tooltip}
                     disadv={spellAttackRoll.disadv}

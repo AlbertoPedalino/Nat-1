@@ -44,7 +44,9 @@ test('condition effect lookups split always-on from situational', () => {
 
 test('attack roll: a plain roll carries no tag, no tint and no adv argument', () => {
   const roll = describeAttackRoll([]);
-  assert.deepEqual(roll, { adv: false, disadv: false, advArg: undefined, tag: '', tooltip: '' });
+  assert.deepEqual(roll, {
+    adv: false, disadv: false, advArg: undefined, sources: { adv: false, disadv: false }, tag: '', tooltip: '',
+  });
 });
 
 test('attack roll: condition disadvantage tags and tints the roll', () => {
@@ -186,4 +188,9 @@ test('attack roll: advantage/disadvantage effects count, and any of each cancel 
 
   assert.equal(describeAttackRoll([], { effects: [{ key: 'incomingAttackAdv' }] }).advArg, undefined,
     'an effect on attacks against the creature does not touch its own');
+});
+
+test('attack roll: the unfolded sources survive a cancelled roll, for a one-off extra source', () => {
+  assert.deepEqual(describeAttackRoll(['blinded'], { extraAdv: 'Vow' }).sources, { adv: true, disadv: true });
+  assert.deepEqual(describeAttackRoll(['blinded']).sources, { adv: false, disadv: true });
 });

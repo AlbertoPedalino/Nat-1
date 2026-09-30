@@ -5,6 +5,7 @@ import { describeCheckDisadvantage } from '../../../shared/character/combat/cond
 import { EFFECT_ROLL_SOURCE, effectRollAdvantage } from '../../../shared/character/combat/combatEffects.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import { advantageVisual, conditionalDisadvantageVisual } from './advantageMark.jsx';
+import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
 
 export default function AbilityScores({ C, sheet, onRoll }) {
   const pb = getPB(C);
@@ -46,7 +47,9 @@ export default function AbilityScores({ C, sheet, onRoll }) {
             : `Situational disadvantage: ${condNotes.join('; ')}`;
           const advArg = hasAdv && !hasDisadv ? true : hasDisadv && !hasAdv ? false : undefined;
           return (
-            <Box key={s} onClick={() => onRoll(mod, FULL_LBL[s] + ' Check', advArg)}
+            <RollModeArea key={s} onClick={() => onRoll(mod, FULL_LBL[s] + ' Check', advArg)}
+              sources={{ adv: hasAdv, disadv: hasDisadv }}
+              onPick={(picked) => onRoll(mod, FULL_LBL[s] + ' Check', picked)}
               sx={{
                 bgcolor: 'background.paper', border: 1, borderColor: advArg === false ? 'warning.main' : 'divider', borderRadius: 1,
                 display: 'flex', flexDirection: 'column', alignItems: 'center', p: '0.4rem 0.25rem',
@@ -71,7 +74,7 @@ export default function AbilityScores({ C, sheet, onRoll }) {
                   <visual.Icon size={12} style={{ color: visual.color, marginTop: '2px' }} />
                 </Tooltip>
               ) : null}
-            </Box>
+            </RollModeArea>
           );
         })}
         <Box sx={{

@@ -13,6 +13,7 @@ import { resolveInitiativeTriggeredResourceRecoveries } from '../../../shared/ch
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import ConditionsBlock from './ConditionsBlock.jsx';
 import EffectsBlock from './EffectsBlock.jsx';
+import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
 
 export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearConditions, effectActions, onSetExhaustion, conditionEntries, onToggleInspiration, resources, setResources, onShowToast }) {
   // Initiative is a DEX check (D20 Test) but rolls its own d20 here (it also fires
@@ -26,7 +27,7 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
   const checkEffects = effectRollAdvantage(sheet?.activeEffects, 'check');
   const initHasAdv = !!initAdv || checkEffects.adv;
   const initHasDisadv = checkEffects.disadv;
-  const initMode = initHasAdv && !initHasDisadv ? 'adv' : initHasDisadv && !initHasAdv ? 'disadv' : null;
+  const initAdvArg = initHasAdv && !initHasDisadv ? true : initHasDisadv && !initHasAdv ? false : undefined;
   const initTooltip = [
     initAdv ? `Advantage on Initiative — ${initAdv.source}` : '',
     checkEffects.adv ? `Advantage: ${EFFECT_ROLL_SOURCE}` : '',
@@ -36,7 +37,10 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
   const [lastInitiativeRoll, setLastInitiativeRoll] = useState(null);
   const [initiativeMessage, setInitiativeMessage] = useState('');
 
-  const handleInitiativeRoll = useCallback(() => {
+  // `advArg` as rollD20 takes it: true / false / undefined. The ordinary click
+  // uses the sheet's own sources; the right-click menu adds one.
+  const rollInitiative = useCallback((advArg) => {
+    const initMode = advArg === true ? 'adv' : advArg === false ? 'disadv' : null;
     // Advantage keeps the higher of 2d20, disadvantage the lower.
     const r1 = Math.floor(Math.random() * 20) + 1;
     const r2 = initMode ? Math.floor(Math.random() * 20) + 1 : null;
@@ -74,7 +78,7 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
     if (typeof onShowToast === 'function') {
       onShowToast('Initiative', toastDetail, total, dice, { bonus: initMod, kept: d20 });
     }
-  }, [C, resources, setResources, onShowToast, initMod, initMode]);
+  }, [C, resources, setResources, onShowToast, initMod]);
 
   const inv = sheet?.sheetInventory || [];
   const equippedShield = inv.find(i => i.equipped && i.type === 'S');
@@ -91,9 +95,13 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
       <Box sx={{ display: 'flex', gap: '0.45rem', mb: '0.4rem', flexWrap: 'wrap' }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.15 }}>
           <Tooltip title={initTooltip}>
-            <Box>
-              <CircleStat onClick={handleInitiativeRoll} value={initMod >= 0 ? `+${initMod}` : initMod} label="Initiative" clickable />
-            </Box>
+            <RollModeArea
+              sources={{ adv: initHasAdv, disadv: initHasDisadv }}
+              onPick={rollInitiative}
+              onClick={() => rollInitiative(initAdvArg)}
+            >
+              <CircleStat value={initMod >= 0 ? `+${initMod}` : initMod} label="Initiative" clickable />
+            </RollModeArea>
           </Tooltip>
           {(initHasAdv || initHasDisadv) && (() => {
             const v = advantageVisual(initHasAdv, initHasDisadv);

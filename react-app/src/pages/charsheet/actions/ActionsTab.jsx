@@ -1032,6 +1032,7 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
                         exhaustionLevel={sheet?.exhaustionLevel}
                         label={formatRollTitle(action.name, 'Attack')}
                         advArg={attackRoll.advArg}
+                        sources={attackRoll.sources}
                         tag={attackRoll.tag}
                         tooltip={attackRoll.tooltip}
                         disadv={attackRoll.disadv}

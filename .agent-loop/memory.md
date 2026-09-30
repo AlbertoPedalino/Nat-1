@@ -181,6 +181,7 @@ GM-Board is React 19 + Vite + MUI 9 + Supabase SPA under `react-app/`. D&D data 
 - Helpers: `shared/character/profile/store.js`.
 - Local delete emits `gb:char-deleted`; it never cascades cloud deletion.
 - Logged-in saved characters autosync; imported JSON remains a draft until saved/uploaded.
+- Sheet d20 rollers (attack button, saves, skills, ability checks, initiative) are wrapped in `shared/character/dice/RollModeArea.jsx`: right-click / 480 ms long press opens "+ Advantage / + Disadvantage" for that one roll. It ADDS a source to the unfolded `{ adv, disadv }` (`shared/character/dice/advantage.js`, `describeAttackRoll().sources`), never forces a mode, and stores nothing (target-specific cases like Vow of Enmity).
 
 ## Cloud and Supabase
 

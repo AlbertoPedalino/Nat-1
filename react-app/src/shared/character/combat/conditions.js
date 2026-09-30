@@ -173,7 +173,8 @@ export function describeCheckDisadvantage(activeConditions = [], armorDisadv = f
 //   extraDisadv → non-condition disadvantage (heavy/untrained weapon).
 //   effects     → the character's active advantage/disadvantage effects.
 // Returns the roll input (advArg, as rollD20 expects) alongside its display
-// (tag, tooltip) and `disadv` for tinting, so those can never disagree.
+// (tag, tooltip) and `disadv` for tinting, so those can never disagree, plus
+// the unfolded `sources` a one-off extra source is added to.
 export function describeAttackRoll(activeConditions = [], { extraAdv = null, extraDisadv = false, effects = [] } = {}) {
   const fromEffects = effectRollAdvantage(effects, 'attack');
   const hasAdv = !!extraAdv || fromEffects.adv || hasConditionEffect(activeConditions, 'yourAttacksAdv');
@@ -189,6 +190,7 @@ export function describeAttackRoll(activeConditions = [], { extraAdv = null, ext
     adv,
     disadv,
     advArg: disadv ? false : adv ? true : undefined,
+    sources: { adv: hasAdv, disadv: hasDisadv },
     tag: disadv ? ' DIS' : adv ? ' ADV' : situational ? ' DIS?' : '',
     tooltip: [
       adv && typeof extraAdv === 'string' ? `Advantage: ${extraAdv}` : '',

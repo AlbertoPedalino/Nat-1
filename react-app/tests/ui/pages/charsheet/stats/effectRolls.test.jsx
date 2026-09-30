@@ -55,3 +55,28 @@ test('an ability-check effect reaches every skill, and cancels against a conditi
   fireEvent.click(screen.getByText('Athletics'));
   expect(onRoll).toHaveBeenLastCalledWith('Athletics', expect.any(Number), {});
 });
+
+// Vow of Enmity while Blinded: the paladin right-clicks the attack against the
+// vowed target and adds advantage, which cancels Blinded to a straight roll.
+test('the attack button adds a one-off source on right-click, cancelling against Blinded', async () => {
+  const { default: AttackRollButton } = await import('../../../../../src/pages/charsheet/actions/AttackRollButton.jsx');
+  const { describeAttackRoll } = await import('../../../../../src/shared/character/combat/conditions.js');
+  const roll = describeAttackRoll(['blinded']);
+  const onRoll = vi.fn();
+  render(<AttackRollButton rawBonus={5} label="Longsword" advArg={roll.advArg} sources={roll.sources} onRoll={onRoll} />);
+  fireEvent.click(screen.getByRole('button', { name: /Hit/ }));
+  expect(onRoll).toHaveBeenLastCalledWith(5, 'Longsword', false);
+  fireEvent.contextMenu(screen.getByRole('button', { name: /Hit/ }));
+  fireEvent.click(screen.getByRole('menuitem', { name: /\+ Advantage/ }));
+  expect(onRoll).toHaveBeenLastCalledWith(5, 'Longsword', undefined);
+  expect(onRoll).toHaveBeenCalledTimes(2);
+});
+
+test('a saving throw takes the one-off source too', () => {
+  const onRoll = vi.fn();
+  renderWithSets(<SavingThrows C={C} sheet={sheetWith({})} onRoll={onRoll} />);
+  fireEvent.contextMenu(screen.getByText('CON'));
+  fireEvent.click(screen.getByRole('menuitem', { name: /\+ Disadvantage/ }));
+  expect(onRoll).toHaveBeenCalledTimes(1);
+  expect(onRoll).toHaveBeenLastCalledWith('con', { advantage: undefined, disadvantage: true });
+});

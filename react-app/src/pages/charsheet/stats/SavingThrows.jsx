@@ -9,6 +9,7 @@ import { collectItemEffects } from '../../../shared/character/inventory/itemEffe
 import { itemEffectInventory } from '../../../shared/character/forms/wildShapeForm.js';
 import { collectSaveModifiers, fixedModifiersForAbility, summarizeSaveModifiers } from './saveModifiers.js';
 import { advantageVisual, autoFailVisual } from './advantageMark.jsx';
+import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
 
 export default function SavingThrows({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
@@ -84,7 +85,9 @@ export default function SavingThrows({ C, sheet, onRoll }) {
           const hasContextMenu = saveContexts.length > 0;
 
           return (
-            <Box key={st} onClick={(e) => handleSaveClick(e, st, hasDisadv, hasAdv)}
+            <RollModeArea key={st} onClick={(e) => handleSaveClick(e, st, hasDisadv, hasAdv)}
+              sources={{ adv: hasAdv, disadv: hasDisadv }}
+              onPick={(advArg) => onRoll(st, { advantage: advArg === true || undefined, disadvantage: advArg === false || undefined })}
               sx={{ display: 'flex', alignItems: 'center', gap: 1, py: '3px', cursor: 'pointer', borderRadius: 1, '&:hover': { bgcolor: 'rgba(202,165,80,0.04)' } }}>
               <Box sx={{ width: 10, height: 10, borderRadius: '50%', flexShrink: 0, transition: 'all 0.1s', border: 1, borderColor: 'divider', bgcolor: prof ? 'primary.main' : 'transparent' }} />
               <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', fontWeight: 600, color: 'text.secondary', letterSpacing: '0.08em', width: 28, flexShrink: 0 }}>
@@ -106,7 +109,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
                   <ChevronDown size={12} style={{ color: '#edd48a', flexShrink: 0, opacity: 0.6 }} />
                 </Tooltip>
               ) : null}
-            </Box>
+            </RollModeArea>
           );
         })}
       </Box>

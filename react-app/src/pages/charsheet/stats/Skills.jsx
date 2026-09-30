@@ -1,5 +1,6 @@
 import { Box, Paper, Typography, Tooltip } from '@mui/material';
 import { advantageVisual, conditionalDisadvantageVisual } from './advantageMark.jsx';
+import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
 import { SKILLS, getSkillTraining, getSkillBonus, fbonus, SLBL, effectiveD20Modifier } from '../state/calculations.js';
 import { describeCheckDisadvantage } from '../../../shared/character/combat/conditions.js';
 import { EFFECT_ROLL_SOURCE, effectRollAdvantage } from '../../../shared/character/combat/combatEffects.js';
@@ -99,11 +100,13 @@ export default function Skills({ C, sheet, onRoll }) {
           : `Situational disadvantage: ${condNotes.join('; ')}`;
 
         return (
-          <Box key={sk.n} onClick={() => {
+          <RollModeArea key={sk.n} onClick={() => {
             const withAdv = hasAdv && !hasDisadv;
             const withDis = hasDisadv && !hasAdv;
             onRoll(sk.n, bonus, withAdv ? { advantage: true } : withDis ? { disadvantage: true } : {});
           }}
+            sources={{ adv: Boolean(hasAdv), disadv: hasDisadv }}
+            onPick={(advArg) => onRoll(sk.n, bonus, advArg === true ? { advantage: true } : advArg === false ? { disadvantage: true } : {})}
             sx={{ display: 'grid', gridTemplateColumns: '20px 30px 1fr auto', gap: '4px', px: '0.9rem', py: '3px', alignItems: 'center', cursor: 'pointer', transition: 'background 0.1s', '&:hover': { bgcolor: 'rgba(202,165,80,0.05)' } }}>
             <Box />
             <SkillProficiencyDot training={training} />
@@ -123,7 +126,7 @@ export default function Skills({ C, sheet, onRoll }) {
                 </Tooltip>
               )}
             </Box>
-          </Box>
+          </RollModeArea>
         );
       })}
     </Paper>
