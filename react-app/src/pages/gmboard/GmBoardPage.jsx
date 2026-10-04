@@ -1,5 +1,5 @@
 import { Box, Stack, Tab, Tabs, Typography } from '@mui/material';
-import { Map, Castle, ScrollText, Table, BookOpen } from 'lucide-react';
+import { Map, Castle, ScrollText, Dices, Table, BookOpen } from 'lucide-react';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
 import LinkedToolsMenu from '../../app/navigation/LinkedToolsMenu.jsx';
 import { useToolInstance } from '../../shared/instances/useToolInstance.js';
@@ -9,6 +9,7 @@ import { GmBoardProvider, useGmBoard } from './state/GmBoardContext.jsx';
 import HexcrawlView from './hexcrawl/HexcrawlView.jsx';
 import DungeonView from './dungeon/DungeonView.jsx';
 import QuestView from './quests/QuestView.jsx';
+import RollView from './tables/RollView.jsx';
 import TablesView from './tables/TablesView.jsx';
 import GuideView from './ui/GuideView.jsx';
 
@@ -16,6 +17,7 @@ const TABS = [
   { value: 'hex', label: 'Hexcrawl', Icon: Map },
   { value: 'dungeon', label: 'Dungeon', Icon: Castle },
   { value: 'quest', label: 'Quest', Icon: ScrollText },
+  { value: 'roll', label: 'Roll', Icon: Dices },
   { value: 'editor', label: 'Tables', Icon: Table },
   { value: 'guide', label: 'Guide', Icon: BookOpen },
 ];
@@ -75,6 +77,7 @@ function GmBoardShell({ tool }) {
             {state.tab === 'hex' ? <HexcrawlView /> : null}
             {state.tab === 'dungeon' ? <DungeonView /> : null}
             {state.tab === 'quest' ? <QuestView /> : null}
+            {state.tab === 'roll' ? <RollView /> : null}
             {state.tab === 'editor' ? <TablesView /> : null}
             {state.tab === 'guide' ? <GuideView /> : null}
           </Box>

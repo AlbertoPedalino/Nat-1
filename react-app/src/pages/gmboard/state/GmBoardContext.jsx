@@ -9,6 +9,7 @@ import { useCampaignClock } from '../../../shared/hexcrawl/useCampaignClock.js';
 import { useBoardCampaign } from '../../../shared/hexcrawl/useBoardCampaign.js';
 import { createDungeon, isValidRoomCount } from '../dungeon/dungeon.js';
 import { createQuests } from '../quests/quest.js';
+import { rollTable } from '../tables/rollTable.js';
 
 const GmBoardContext = createContext(null);
 
@@ -135,6 +136,14 @@ export function GmBoardProvider({ instanceId, children }) {
     return true;
   }, [state.tables]);
 
+  const rollSeqRef = useRef(0);
+  const rollOnTable = useCallback((tableId) => {
+    const roll = rollTable(state.tables, tableId, { tier: state.rollTier }, Math.random);
+    if (!roll) return;
+    rollSeqRef.current += 1;
+    dispatch({ type: 'addRoll', roll: { ...roll, id: `roll_${rollSeqRef.current}` } });
+  }, [state.tables, state.rollTier]);
+
   const value = useMemo(() => ({
     state,
     dispatch: dispatchSelection,
@@ -149,10 +158,11 @@ export function GmBoardProvider({ instanceId, children }) {
     advanceManual,
     generateDungeon,
     generateQuests,
+    rollOnTable,
     campaign: campaignLink.campaign,
     campaignLinked: campaignClock.active,
     clockError: clockError || campaignClock.error || campaignLink.error,
-  }), [state, dispatchSelection, instanceId, resetTables, setStart, setTime, setSeason, setWeatherOverride, proceed, advanceOnly, advanceManual, generateDungeon, generateQuests, campaignLink.campaign, campaignLink.error, campaignClock.active, campaignClock.error, clockError]);
+  }), [state, dispatchSelection, instanceId, resetTables, setStart, setTime, setSeason, setWeatherOverride, proceed, advanceOnly, advanceManual, generateDungeon, generateQuests, rollOnTable, campaignLink.campaign, campaignLink.error, campaignClock.active, campaignClock.error, clockError]);
 
   return (
     <GmBoardContext.Provider value={value}>

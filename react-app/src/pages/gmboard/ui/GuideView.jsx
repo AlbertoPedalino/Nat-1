@@ -1,5 +1,5 @@
 import { Box, Stack, Typography, useTheme } from '@mui/material';
-import { Castle, Map, ScrollText, Table as TableIcon } from 'lucide-react';
+import { Castle, Dices, Map, ScrollText, Table as TableIcon } from 'lucide-react';
 
 function StepMarker({ n }) {
   return <Box component="span" sx={stepMarkerSx}>{n}</Box>;
@@ -80,6 +80,17 @@ export default function GuideView() {
         <GuideRow>Each quest rolls 2d20 on the Event Table for its hook. Encounter and Enemy Camp events also
           roll 2d20 on the tier Encounter Table. Every quest rolls 1d8+1d12 for its reward on the Loot Table;
           if that roll finds nothing, a minimum reward is rerolled at a fixed result of 15 instead.</GuideRow>
+      </GuideCard>
+
+      <GuideCard title="Table Roller" icon={Dices}>
+        <GuideRow>The <strong>Roll</strong> tab rolls once on a single table: Event and Encounter use 2d20;
+          Loot, Trap, Complication and Environment use 1d8+1d12. The tier applies to Encounter and Trap.</GuideRow>
+        <GuideRow>Where a result calls for a check, its DC (1d8+1d12) is rolled with it and shown on the
+          same card: loot that was found, an Enemy Camp to spot, any other event to interact with. A trap
+          has one DC, the one on its table row: it is the DC both to detect it and to disarm it.</GuideRow>
+        <GuideRow>When a result would lead to another table — an Encounter event, an Environment Damage
+          complication — the card offers that roll, but never makes it for you. Rolls here do not move
+          time, weather or the session log, and the history is cleared when the page is reloaded.</GuideRow>
       </GuideCard>
 
       <GuideCard title="Table Editor" icon={TableIcon}>

@@ -89,7 +89,8 @@ GM-Board is React 19 + Vite + MUI 9 + Supabase SPA under `react-app/`. D&D data 
 - Keys: `gb_board_registry`, `gb_active_board_id`, `gb:board:<id>:state:v1`, `:tables:v1`, `:results:v1`.
 - Core state, tables and results autosave through `persistBoard` (one local write).
 - Legacy unscoped migration applies only to `default`.
-- Tests: `tests/logic/pages/gmboard/logic/gmboard.logic.test.js`.
+- Roll tab (`tables/RollView.jsx`, pure `tables/rollTable.js`): one roll on one table (Event, Encounter, Loot, Trap, Complication, Environment; no Weather by user decision 2026-10-04). Follow-up tables are offered, never rolled automatically. A result's DC (1d8+1d12) is rolled with it inside the same card as `roll.dc` — found loot, Enemy Camp, generic events — with no separate DC card and none for traps: a trap's row DC is the DC both to detect and to disarm it (user rule 2026-10-04; the hexcrawl generator still rolls its own detection DC). `describeRoll` returns `{ titleLabel, title, stats: [{ label, value, note?, emphasis? }] }`; cards render each stat under its label, the history joins them with `summarizeStats`. `rollTier` and `rolls` (newest first, `ROLL_HISTORY_LIMIT`) live in reducer state outside the core keys: in memory only, never persisted, and a roll never touches clock, weather or log.
+- Tests: `tests/logic/pages/gmboard/logic/gmboard.logic.test.js`, `tests/logic/pages/gmboard/tables/rollTable.test.js`, `tests/ui/pages/gmboard/tables/RollView.test.jsx`.
 
 ## DM Screen
 

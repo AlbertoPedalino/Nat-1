@@ -1,6 +1,6 @@
 import { createDefaultCoreState, createDefaultResults } from './defaultState.js';
 import { createDefaultTables } from '../tables/defaultTables.js';
-import { LOG_STORE_LIMIT, normalizeMountSpeed } from './constants.js';
+import { LOG_STORE_LIMIT, ROLL_HISTORY_LIMIT, normalizeMountSpeed } from './constants.js';
 import { mergeBoardClock } from '../../../shared/hexcrawl/hexEntry.js';
 
 export const CORE_FIELD_KEYS = Object.freeze(Object.keys(createDefaultCoreState()));
@@ -18,6 +18,11 @@ export function createInitialState() {
     tables: createDefaultTables(),
     results: createDefaultResults(),
     hexResult: null,
+    // The Roll tab's tier and history. Like `tab` and `hexResult` they sit
+    // outside the core state, so they last until the page is reloaded and are
+    // never saved or synced.
+    rollTier: 1,
+    rolls: [],
   };
 }
 
@@ -124,6 +129,12 @@ export function gmBoardReducer(state, action) {
       return { ...state, results: { ...state.results, quest: action.result } };
     case 'clearQuests':
       return { ...state, results: { ...state.results, quest: null } };
+    case 'setRollTier':
+      return { ...state, rollTier: action.tier };
+    case 'addRoll':
+      return { ...state, rolls: [action.roll, ...state.rolls].slice(0, ROLL_HISTORY_LIMIT) };
+    case 'clearRolls':
+      return { ...state, rolls: [] };
     case 'editTableCell':
       return { ...state, tables: setTableCell(state.tables, action.tableKey, action.matchField, action.matchValue, action.field, action.value) };
     case 'resetTables':

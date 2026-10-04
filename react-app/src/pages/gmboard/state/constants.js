@@ -77,6 +77,7 @@ export const TIER_OPTIONS = Object.freeze([
 
 export const LOG_STORE_LIMIT = 50;
 export const LOG_RENDER_LIMIT = 30;
+export const ROLL_HISTORY_LIMIT = 20;
 
 export const EDITOR_TABS = Object.freeze([
   { id: 'ed-weather', label: 'Seasonal Weather', tableName: 'Seasonal Weather Table', group: 'Shared tables', feeds: 'Hexcrawl', roll: 'auto-checked' },
