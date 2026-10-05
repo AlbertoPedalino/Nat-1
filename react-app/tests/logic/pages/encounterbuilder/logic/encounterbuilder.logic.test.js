@@ -57,6 +57,7 @@ import {
 } from '../../../../../src/pages/encounterbuilder/library/library.js';
 import { cleanToText, parseCleanTokens } from '../../../../../src/pages/encounterbuilder/bestiary/markup.js';
 import { isEncounterMonster, resolveLegendaryGroups } from '../../../../../src/pages/encounterbuilder/bestiary/bestiary.js';
+import { crPB } from '../../../../../src/pages/encounterbuilder/bestiary/monsterUtils.js';
 import {
   SYNCED_DATA_KEYS,
   combatantToSheetPatch,
@@ -671,6 +672,14 @@ test('encounter bestiary accepts AU and AUD monsters but rejects summon template
   assert.equal(isEncounterMonster({ name: 'Abveku', source: 'AUD', cr: '14' }), true);
   assert.equal(isEncounterMonster({ name: 'Battle Familiar', source: 'AU', summonedBySpell: 'Battle Familiar|AU' }), false);
   assert.equal(isEncounterMonster({ name: 'Legacy Creature', source: 'MM', cr: '1' }), false);
+});
+
+test('proficiency bonus follows challenge rating in steps of four', () => {
+  assert.deepEqual(['0', '1/8', '1/2', '4'].map(crPB), [2, 2, 2, 2]);
+  assert.deepEqual(['5', '8', '9', '16', '17', '20'].map(crPB), [3, 3, 4, 5, 6, 6]);
+  assert.deepEqual(['21', '24', '25', '29', '30'].map(crPB), [7, 7, 8, 9, 9]);
+  assert.equal(crPB({ cr: '13', lair: '14' }), 5);
+  assert.equal(crPB(undefined), 2);
 });
 
 function combatWithOneCombatant(activeConditions = []) {

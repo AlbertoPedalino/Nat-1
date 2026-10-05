@@ -17,6 +17,7 @@ import { Plus, X } from 'lucide-react';
 import { getLegendaryGroup } from './bestiary.js';
 import {
   abilityModString,
+  crPB,
   crXP,
   formatAlignment,
   formatDamageList,
@@ -233,6 +234,7 @@ function StatBlockBody({ monster, allowAdd = false }) {
         <OptionalProp label="Senses" value={[...(monster.senses || []), monster.passive != null ? `passive Perception ${monster.passive}` : ''].filter(Boolean).join(', ')} />
         <Prop label="Languages">{Array.isArray(monster.languages) ? monster.languages.join(', ') : monster.languages || '—'}</Prop>
         <Prop label="Challenge">{cr} ({formatNumber(crXP(cr))} XP)</Prop>
+        <Prop label="Proficiency Bonus">{monster.pbNote || formatMod(crPB(cr))}</Prop>
         <Divider />
         <Section title="Traits" entries={monster.trait} extra={spellcasting.trait} onRoll={handleRoll} />
         <Section title="Actions" entries={monster.action} extra={spellcasting.action} onRoll={handleRoll} />

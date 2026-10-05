@@ -1,4 +1,5 @@
 import { CR_XP, FALLBACK_MONSTER_TOKEN, IMAGE_BASE, SIZE_LABELS } from '../state/constants.js';
+import { parseCr } from '../../../shared/character/forms/beasts.js';
 
 export function numberOr(value, fallback = 0) {
   const n = Number(value);
@@ -23,6 +24,11 @@ export function getCR(cr) {
 
 export function crXP(cr) {
   return CR_XP[getCR(cr)] || 0;
+}
+
+// Proficiency Bonus by Challenge Rating: +2 up to CR 4, then +1 every four CR.
+export function crPB(cr) {
+  return Math.max(2, Math.ceil((parseCr(getCR(cr)) || 0) / 4) + 1);
 }
 
 export function getType(type) {
