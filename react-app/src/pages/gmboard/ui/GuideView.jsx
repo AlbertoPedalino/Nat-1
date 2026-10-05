@@ -57,8 +57,8 @@ export default function GuideView() {
           whether an event occurs this leg.</GuideRow>
         <GuideRow step={4}>Event table — 2d20. Encounter results roll 2d20 on the tier Encounter Table. Loot results
           roll 1d8+1d12 for the item, then a second 1d8+1d12 for the recovery DC. Enemy Camp rolls a spot DC,
-          then a 2d20 encounter, then loot. Env. Damage/Trap rolls a detection DC, then 1d8+1d12 on the tier
-          Trap Table. Every other event is a raw 1d8+1d12 DC to interact.</GuideRow>
+          then a 2d20 encounter, then loot. Env. Damage/Trap rolls 1d8+1d12 on the tier Trap Table; the trap's DC is
+          the DC both to detect it and to disarm it. Every other event is a raw 1d8+1d12 DC to interact.</GuideRow>
       </GuideCard>
 
       <GuideCard title="Dungeon Explorer — Full Flow" icon={Castle}>
@@ -67,7 +67,8 @@ export default function GuideView() {
         <GuideRow>Population mode sets complication rolls per room: Random rolls 1–3 per room; Unexplored is
           1 fixed roll; Frontier is 2; Settled is 3.</GuideRow>
         <GuideRow>Each complication rolls 1d8+1d12 on the Complication Table. Encounter rolls 2d20 on the tier
-          Encounter Table. Environment Damage rolls 1d8+1d12 on the tier Trap Table. Environment rolls
+          Encounter Table. Environment Damage rolls 1d8+1d12 on the tier Trap Table, whose DC both detects and disarms the
+          trap. Environment rolls
           1d8+1d12 on the Environment Severity Table. None has no further roll.</GuideRow>
         <GuideRow>Each room also rolls loot once (1d8+1d12). Results of 8–14 find nothing; any other result
           rolls a second 1d8+1d12 for the recovery DC.</GuideRow>

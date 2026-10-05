@@ -75,16 +75,11 @@ function renderStep(step, index, tones, last) {
           DC {step.sum} (d8+d12){step.disadvantage ? ' — Weather Disadvantage' : ''}
         </StepRow>
       );
-    case 'trapDetectDc':
-      return (
-        <StepRow key={index} icon={Eye} iconColor={tones.dim} label="Detect" last={last}>
-          DC {step.sum} (d8+d12){step.disadvantage ? ' — Weather Disadvantage' : ''}
-        </StepRow>
-      );
     case 'trap':
       return (
         <StepRow key={index} icon={Flame} iconColor={tones.result.trap} label="Trap" last={last}>
-          (d8+d12={step.sum}): <strong>{step.data.tipo}</strong> Level {step.data.lv} · DC {step.data.dc} · {step.data.danno}
+          (d8+d12={step.sum}): <strong>{step.data.tipo}</strong> Level {step.data.lv} · DC {step.data.dc} (detect & disarm) · {step.data.danno}
+          {step.disadvantage ? ' — Weather Disadvantage' : ''}
         </StepRow>
       );
     case 'genericDc':

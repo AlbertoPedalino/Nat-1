@@ -71,12 +71,12 @@ function resolveEventOutcome({ ev, hexTier, tables, disadvantage, rng }) {
       logSuffix = ` · DC=${spotDc.sum} · Loot:nothing`;
     }
   } else if (ev.name === 'Env. Damage/Trap') {
-    const detectDc = resolveDc(rng);
-    steps.push({ kind: 'trapDetectDc', d8: detectDc.d8, d12: detectDc.d12, sum: detectDc.sum, disadvantage });
+    // A trap has one DC, the one on its table row: the same number finds it
+    // and disarms it, so no separate detection DC is rolled.
     const trapRoll = resolveDc(rng);
     const trap = getTrap(tables, hexTier, trapRoll.sum);
-    steps.push({ kind: 'trap', d8: trapRoll.d8, d12: trapRoll.d12, sum: trapRoll.sum, data: trap });
-    logSuffix = ` · DC=${detectDc.sum} · Trap:${trap.tipo} DC${trap.dc} ${trap.danno}`;
+    steps.push({ kind: 'trap', d8: trapRoll.d8, d12: trapRoll.d12, sum: trapRoll.sum, data: trap, disadvantage });
+    logSuffix = ` · Trap:${trap.tipo} DC${trap.dc} ${trap.danno}${disadvantage ? ' (Weather Disadvantage)' : ''}`;
   } else {
     const dc = resolveDc(rng);
     steps.push({ kind: 'genericDc', d8: dc.d8, d12: dc.d12, sum: dc.sum, disadvantage });

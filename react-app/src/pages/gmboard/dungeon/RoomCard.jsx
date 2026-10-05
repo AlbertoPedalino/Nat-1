@@ -34,7 +34,7 @@ function SlotBlock({ slot, tones }) {
         </Typography>
       ) : null}
       {slot.extra?.kind === 'trap' ? (
-        <Typography sx={lineSx}>{slot.extra.data.tipo} Lv {slot.extra.data.lv} · DC {slot.extra.data.dc} · {slot.extra.data.danno}</Typography>
+        <Typography sx={lineSx}>{slot.extra.data.tipo} Lv {slot.extra.data.lv} · DC {slot.extra.data.dc} (detect & disarm) · {slot.extra.data.danno}</Typography>
       ) : null}
       {slot.extra?.kind === 'env' ? (
         <Typography sx={lineSx}>Severity: {slot.extra.data.gravita}</Typography>

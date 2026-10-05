@@ -180,9 +180,9 @@ export function hexEntrySummary(result) {
   }
   if (trap?.data?.tipo) {
     const damage = trap.data.danno ? ` · ${trap.data.danno}` : '';
-    lines.push(`Trap: ${trap.data.tipo}${trap.data.dc ? ` DC${trap.data.dc}` : ''}${damage}`);
+    lines.push(`Trap: ${trap.data.tipo}${trap.data.dc ? ` DC${trap.data.dc} (detect & disarm)` : ''}${damage}${trap.disadvantage ? ' (disadvantage)' : ''}`);
   }
-  const spot = step('campSpotDc') || step('trapDetectDc');
+  const spot = step('campSpotDc');
   if (spot?.sum != null) lines.push(`Spot DC ${spot.sum}${spot.disadvantage ? ' (disadvantage)' : ''}`);
   const dc = step('lootDc') || step('campLootDc') || step('genericDc');
   if (dc?.sum != null) {

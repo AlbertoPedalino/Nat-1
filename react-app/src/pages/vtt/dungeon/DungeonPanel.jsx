@@ -253,7 +253,7 @@ function SlotLine({ slot, tones }) {
       <Stack direction="row" spacing={0.6} sx={{ alignItems: 'center' }}>
         <Flame size={13} color={tones.result.trap} />
         <Typography sx={lineSx}>
-          {extra.data.tipo} · DC {extra.data.dc} · {extra.data.danno}
+          {extra.data.tipo} · DC {extra.data.dc} (detect & disarm) · {extra.data.danno}
         </Typography>
       </Stack>
     );

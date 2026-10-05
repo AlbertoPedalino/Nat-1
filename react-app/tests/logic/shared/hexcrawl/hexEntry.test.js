@@ -153,6 +153,17 @@ test('the bubble says the outcome in one breath, and the dialog keeps the rest',
     'Loot: Coins · Rare',
     'Spot DC 14 (disadvantage)',
   ]);
+
+  // A trap says its one DC; a detection DC saved by an older roll is not read out.
+  const trapped = hexEntrySummary({
+    steps: [
+      { kind: 'popRoll', d6: 1, threshold: 2 },
+      { kind: 'event', name: 'Env. Damage/Trap', type: 'other' },
+      { kind: 'trapDetectDc', sum: 14 },
+      { kind: 'trap', data: { tipo: 'Deadly', dc: 15, danno: '11 (2d10)' }, disadvantage: true },
+    ],
+  });
+  assert.deepEqual(trapped.lines, ['d6 1 vs 2', 'Trap: Deadly DC15 (detect & disarm) · 11 (2d10) (disadvantage)']);
   assert.equal(hexEntrySummary(null).headline, 'Travelled');
 });
 

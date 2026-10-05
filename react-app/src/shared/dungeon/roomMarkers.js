@@ -57,12 +57,13 @@ export function trapIconFor(name) {
   return TRAP_ICONS.default;
 }
 
-// Everything the GM needs while the party is standing on it.
+// Everything the GM needs while the party is standing on it. A trap has one
+// DC, and the label says what it is for: finding the trap and disarming it.
 export function trapLabel(trap) {
   const dc = numberOr(trap?.dc);
   return [
     String(trap?.tipo || 'Trap'),
-    dc != null ? `DC ${dc}` : null,
+    dc != null ? `DC ${dc} (detect & disarm)` : null,
     trap?.danno ? String(trap.danno) : null,
   ].filter(Boolean).join(' · ');
 }

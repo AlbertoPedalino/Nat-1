@@ -97,7 +97,7 @@ test('each room shows what was rolled in it', () => {
 
   expect(screen.getByText(`Hard · Level 5 · ${(1100).toLocaleString()} XP/PC`)).toBeInTheDocument();
   expect(screen.getByText('Coins · Rare · DC 14')).toBeInTheDocument();
-  expect(screen.getByText('Pit · DC 13 · 2d6')).toBeInTheDocument();
+  expect(screen.getByText('Pit · DC 13 (detect & disarm) · 2d6')).toBeInTheDocument();
   // "Nothing found" is not worth a line.
   expect(screen.queryByText(/nothing found/i)).toBeNull();
 });
@@ -159,12 +159,12 @@ test('a trap is dragged out as a GM-layer marker with its numbers on it', () => 
   const onPlacementDragStart = vi.fn();
   renderPanel({
     markersForRoom: (number) => (number === 2
-      ? [{ kind: 'trap', iconKey: 'chevrons-down', label: 'Pit · DC 13 · 2d6' }]
+      ? [{ kind: 'trap', iconKey: 'chevrons-down', label: 'Pit · DC 13 (detect & disarm) · 2d6' }]
       : []),
     onPlacementDragStart,
   });
 
-  drag(screen.getAllByText('Pit · DC 13 · 2d6').at(-1));
+  drag(screen.getAllByText('Pit · DC 13 (detect & disarm) · 2d6').at(-1));
 
   // `key` is the field the map's object placement reads; called `iconKey` it
   // dragged fine and landed nowhere.
@@ -172,7 +172,7 @@ test('a trap is dragged out as a GM-layer marker with its numbers on it', () => 
     kind: 'object',
     object: expect.objectContaining({
       key: 'chevrons-down',
-      label: 'Pit · DC 13 · 2d6',
+      label: 'Pit · DC 13 (detect & disarm) · 2d6',
       layer: 'gm',
       // The DC travels as a secret, so showing the trap to the party later
       // shows them the icon and not what they are rolling against.

@@ -193,6 +193,29 @@ test('resolveProceed triggers and resolves an encounter event deterministically'
   assert.equal(encStep.data.diff, 'High');
 });
 
+test('resolveProceed rolls a trap once: its table DC is the only DC', () => {
+  const tables = createDefaultTables();
+  const state = { ...createDefaultCoreState(), terrain: 'Road', terrainH: 1, hexTier: 1, popThr: 6 };
+  // d6=1 triggers; event 2d20 sums to 8 -> Env. Damage/Trap; trap d8+d12 sums to 2.
+  // The rng throws if anything else is rolled, such as a separate detection DC.
+  const result = resolveProceed(state, tables, seqRng([0, 0.15, 0.15, 0, 0]));
+  assert.deepEqual(result.steps.map((s) => s.kind), ['popRoll', 'event', 'trap']);
+  const trapStep = result.steps.at(-1);
+  assert.equal(trapStep.data.dc, 15);
+  assert.equal(trapStep.disadvantage, false);
+  assert.match(result.logEntry, /→ Env\. Damage\/Trap · Trap:Deadly DC15 11 \(2d10\)$/);
+});
+
+test('a trap met in heavy weather is marked for disadvantage', () => {
+  const tables = createDefaultTables();
+  const state = {
+    ...createDefaultCoreState(), terrain: 'Road', terrainH: 1, hexTier: 1, popThr: 6, meteo: 'Rain', intensity: 'Heavy',
+  };
+  const result = resolveProceed(state, tables, seqRng([0, 0.15, 0.15, 0, 0]));
+  assert.equal(result.steps.at(-1).disadvantage, true);
+  assert.match(result.logEntry, /DC15 11 \(2d10\) \(Weather Disadvantage\)$/);
+});
+
 test('resolveAdvanceOnly moves time without a population/event roll', () => {
   const tables = createDefaultTables();
   const state = { ...createDefaultCoreState(), terrain: 'Road', terrainH: 2 };

@@ -7,7 +7,7 @@ import { fillBudget } from '../../../../src/shared/dungeon/roomBudget.js';
 // The GM reads the marker at the moment the party steps on it. "Trap" sends
 // them back to a panel; the numbers do not.
 test('a trap marker carries its kind, its DC and its damage', () => {
-  assert.equal(trapLabel({ tipo: 'Pit', dc: 13, danno: '2d6 bludgeoning' }), 'Pit · DC 13 · 2d6 bludgeoning');
+  assert.equal(trapLabel({ tipo: 'Pit', dc: 13, danno: '2d6 bludgeoning' }), 'Pit · DC 13 (detect & disarm) · 2d6 bludgeoning');
   assert.equal(trapLabel({ tipo: 'Alarm' }), 'Alarm');
   assert.equal(trapLabel(null), 'Trap');
 });
@@ -43,7 +43,7 @@ test('a rolled room offers its trap, its hazard and its hoard, and no empties', 
   });
 
   assert.deepEqual(markers.map((marker) => marker.kind), ['trap', 'hazard', 'loot']);
-  assert.equal(markers[0].label, 'Pit · DC 13 · 2d6');
+  assert.equal(markers[0].label, 'Pit · DC 13 (detect & disarm) · 2d6');
   assert.equal(markers[2].label, 'Coins · Rare · DC 12');
   // The encounter is creatures, not a marker.
   assert.ok(markers.every((marker) => marker.kind !== 'enc'));
