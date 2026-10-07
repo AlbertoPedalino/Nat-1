@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Box, ListItemText, Menu, MenuItem } from '@mui/material';
+import { suppressGestureSelection } from '../../vtt/map/gestureSelection.js';
 import { advArgFor, rollModeLabel, withExtraSource } from './advantage.js';
 
 // A roller that also answers a right-click or a long press with a small menu:
@@ -39,14 +40,35 @@ export default function RollModeArea({
   // the next ordinary tap instead.
   const longPressRef = useRef(false);
   const swallowUntilRef = useRef(0);
+  // An unselectable roller is not enough: held down, some browsers (iOS Safari
+  // above all) select the nearest text that is selectable instead, in practice
+  // the whole page, and they start a moment after the menu opens. So nothing on
+  // the page is selectable from the first touch until the finger lifts or, if
+  // the press opened the menu, until the menu closes.
+  const selectionGuardRef = useRef(null);
+  const menuOpenRef = useRef(false);
 
-  useEffect(() => () => clearTimeout(pressRef.current?.timer), []);
+  const releaseSelection = () => {
+    selectionGuardRef.current?.();
+    selectionGuardRef.current = null;
+  };
+
+  useEffect(() => () => {
+    clearTimeout(pressRef.current?.timer);
+    releaseSelection();
+  }, []);
 
   const open = (x, y) => {
-    // A long press starts the browser's text selection too; left in place it
-    // covers the page and eats the taps meant for the menu.
+    // A selection already started would cover the page and eat the taps meant
+    // for the menu.
     try { window.getSelection?.()?.removeAllRanges(); } catch (_) {}
+    menuOpenRef.current = true;
     setAnchor({ top: y, left: x });
+  };
+  const close = () => {
+    menuOpenRef.current = false;
+    setAnchor(null);
+    releaseSelection();
   };
   const cancelPress = () => {
     clearTimeout(pressRef.current?.timer);
@@ -67,6 +89,7 @@ export default function RollModeArea({
       const touch = event.touches?.[0];
       if (!touch || event.touches.length > 1) return;
       cancelPress();
+      selectionGuardRef.current ||= suppressGestureSelection();
       longPressRef.current = false;
       pressRef.current = {
         x: touch.clientX,
@@ -87,12 +110,17 @@ export default function RollModeArea({
     onTouchEnd: (event) => {
       onTouchEnd?.(event);
       cancelPress();
+      if (!menuOpenRef.current) releaseSelection();
       if (longPressRef.current) {
         longPressRef.current = false;
         swallowUntilRef.current = Date.now() + SWALLOW_CLICK_MS;
       }
     },
-    onTouchCancel: (event) => { onTouchCancel?.(event); cancelPress(); },
+    onTouchCancel: (event) => {
+      onTouchCancel?.(event);
+      cancelPress();
+      if (!menuOpenRef.current) releaseSelection();
+    },
     onClick: (event) => {
       if (Date.now() < swallowUntilRef.current) {
         swallowUntilRef.current = 0;
@@ -105,7 +133,7 @@ export default function RollModeArea({
   };
 
   const pick = (extra) => {
-    setAnchor(null);
+    close();
     onPick(advArgFor(withExtraSource(sources, extra)));
   };
 
@@ -125,7 +153,7 @@ export default function RollModeArea({
       >
         <Menu
           open={Boolean(anchor)}
-          onClose={() => setAnchor(null)}
+          onClose={close}
           anchorReference="anchorPosition"
           anchorPosition={anchor || undefined}
           slotProps={{ list: { dense: true, 'aria-label': 'Roll with' } }}

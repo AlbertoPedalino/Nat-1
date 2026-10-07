@@ -8,8 +8,8 @@ import RollModeArea from '../../../../../src/shared/character/dice/RollModeArea.
 function renderArea(sources = { adv: false, disadv: true }) {
   const onClick = vi.fn();
   const onPick = vi.fn();
-  render(<RollModeArea sources={sources} onClick={onClick} onPick={onPick}>Hit +5</RollModeArea>);
-  return { onClick, onPick, roller: screen.getByText('Hit +5') };
+  const { unmount } = render(<RollModeArea sources={sources} onClick={onClick} onPick={onPick}>Hit +5</RollModeArea>);
+  return { onClick, onPick, unmount, roller: screen.getByText('Hit +5') };
 }
 
 test('a plain click rolls as before and opens nothing', () => {
@@ -83,4 +83,41 @@ test('after a long press, a later ordinary tap rolls normally', () => {
 test('a roller cannot be text-selected, so a long press opens only the menu', () => {
   const { roller } = renderArea();
   expect(roller).toHaveStyle({ userSelect: 'none' });
+});
+
+// Unselectable rollers are not enough: iOS Safari then selects the text around
+// them. The whole page is unselectable while a roller is held or its menu open.
+const selectionBlocked = () => !document.body.dispatchEvent(
+  new Event('selectstart', { bubbles: true, cancelable: true }),
+);
+
+test('nothing on the page can be selected while a roller is held', () => {
+  const { roller } = renderArea();
+  expect(selectionBlocked()).toBe(false);
+  fireEvent.touchStart(roller, { touches: [{ clientX: 5, clientY: 5 }] });
+  expect(selectionBlocked()).toBe(true);
+  fireEvent.touchEnd(roller);
+  expect(selectionBlocked()).toBe(false);
+});
+
+test('the page stays unselectable until the long-press menu closes', () => {
+  vi.useFakeTimers();
+  try {
+    const { roller } = renderArea();
+    fireEvent.touchStart(roller, { touches: [{ clientX: 5, clientY: 5 }] });
+    act(() => { vi.advanceTimersByTime(500); });
+    fireEvent.touchEnd(roller);
+    expect(selectionBlocked()).toBe(true);
+    fireEvent.keyDown(screen.getByRole('menu'), { key: 'Escape' });
+    expect(selectionBlocked()).toBe(false);
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+test('a roller removed mid-press gives the page its selection back', () => {
+  const { roller, unmount } = renderArea();
+  fireEvent.touchStart(roller, { touches: [{ clientX: 5, clientY: 5 }] });
+  unmount();
+  expect(selectionBlocked()).toBe(false);
 });
