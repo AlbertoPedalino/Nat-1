@@ -384,6 +384,7 @@ export default function SceneEditor({
   const {
     clearFeed: clearRollFeed,
     diceThrows,
+    dismissRollBubble,
     dismissToast: dismissRollToast,
     feed: rollFeed,
     handleCustomRoll,
@@ -2459,6 +2460,7 @@ export default function SceneEditor({
         onLaser={gmPlayerPreview ? undefined : handleLaser}
         lasers={laserDots}
         rollBubbles={gmPlayerPreview ? projectedRollBubbles : rollBubbles}
+        onRollBubbleDismiss={dismissRollBubble}
         diceThrows={gmPlayerPreview ? projectedDiceThrows : diceThrows}
         measureShape={measureShape}
         feetPerCellForRuler={feetPerCell}

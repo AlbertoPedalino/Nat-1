@@ -176,6 +176,7 @@ export default function SceneViewport({
   onLaser,
   lasers,
   rollBubbles,
+  onRollBubbleDismiss,
   diceThrows,
   conditionEntries,
   presentedInspection,
@@ -1761,6 +1762,7 @@ export default function SceneViewport({
             x={at.x + (rect.width * view.zoom) / 2}
             y={at.y - 6}
             underFog={fogOnTop}
+            onDismiss={onRollBubbleDismiss}
           />
         );
       })}

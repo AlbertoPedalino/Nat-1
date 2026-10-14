@@ -42,3 +42,23 @@ test.each([false, true])('background rolls ignore hidden pieces and map mode res
   expect(onMoveToken).not.toHaveBeenCalled();
   expect(token).toMatchObject({ x: 7, y: 8 });
 });
+
+test('a tap on a roll bubble closes it without reaching the map underneath', () => {
+  vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null);
+  const token = { id: 'hero', characterId: 'character', label: 'Hero piece', layer: 'tokens', x: 2, y: 2 };
+  const roll = { id: 'roll', label: 'Perception roll', actorName: 'Player', total: 14, rolls: [] };
+  const onRollBubbleDismiss = vi.fn();
+  render(
+    <SceneViewport
+      scene={{ grid: { size: 50, offsetX: 0, offsetY: 0, visible: false }, playArea: null }}
+      imageUrl="scene.webp" tokens={[token]} canMove={() => false}
+      fog={null} drawings={[]} lasers={[]}
+      rollBubbles={[{ roll, token }]} diceThrows={[]}
+      onRollBubbleDismiss={onRollBubbleDismiss}
+    />,
+  );
+  const bubble = screen.getByRole('button', { name: 'Close roll' });
+  expect(bubble).toHaveTextContent('Perception roll');
+  bubble.click();
+  expect(onRollBubbleDismiss).toHaveBeenCalledWith('roll');
+});

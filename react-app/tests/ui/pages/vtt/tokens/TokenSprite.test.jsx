@@ -390,3 +390,63 @@ test('a token with only reminders wears no badge', () => {
   expect(screen.getByText('Bless')).toBeInTheDocument();
   expect(screen.queryByText('1')).not.toBeInTheDocument();
 });
+
+// jsdom has no PointerEvent, so the touch fields are put on a mouse event.
+function touch(target, type, { x = 10, y = 10 } = {}) {
+  const event = new MouseEvent(type, { bubbles: true, cancelable: true, clientX: x, clientY: y });
+  Object.defineProperties(event, {
+    pointerType: { value: 'touch' },
+    isPrimary: { value: true },
+  });
+  fireEvent(target, event);
+}
+
+test('on a touch screen a tap opens the condition pills and a second tap or a tap elsewhere closes them', () => {
+  const onInspectionChange = vi.fn();
+  render(
+    <TokenSprite
+      token={{ id: 'goblin-1', label: 'Goblin', layer: 'tokens', conditions: ['prone'], effects: [] }}
+      size={64}
+      interactive
+      movable
+      conditionEntries={{ prone: ['Prone rules'] }}
+      onInspectionChange={onInspectionChange}
+    />,
+  );
+  const token = screen.getByRole('button', { name: 'Goblin' });
+  const tap = () => {
+    touch(token, 'pointerover');
+    touch(token, 'pointerdown');
+    touch(token, 'pointerup', { x: 11 });
+    touch(token, 'pointerout');
+  };
+
+  tap();
+  expect(screen.getByText('Prone')).toBeInTheDocument();
+  expect(onInspectionChange).toHaveBeenLastCalledWith({ tokenId: 'goblin-1', conditionKey: null });
+
+  tap();
+  expect(screen.queryByText('Prone')).not.toBeInTheDocument();
+  expect(screen.getByText('1')).toBeInTheDocument();
+
+  tap();
+  touch(document.body, 'pointerdown');
+  expect(screen.queryByText('Prone')).not.toBeInTheDocument();
+  expect(onInspectionChange).toHaveBeenLastCalledWith(null);
+});
+
+test('a touch that drags the piece does not open its condition pills', () => {
+  render(
+    <TokenSprite
+      token={{ id: 'goblin-1', label: 'Goblin', layer: 'tokens', conditions: ['prone'], effects: [] }}
+      size={64}
+      interactive
+      movable
+    />,
+  );
+  const token = screen.getByRole('button', { name: 'Goblin' });
+  touch(token, 'pointerdown');
+  touch(token, 'pointermove', { x: 60 });
+  touch(token, 'pointerup');
+  expect(screen.queryByText('Prone')).not.toBeInTheDocument();
+});

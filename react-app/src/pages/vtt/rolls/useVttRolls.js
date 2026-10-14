@@ -16,6 +16,9 @@ export function useVttRolls({ campaignId, role, roster, tokens }) {
   const [feed, setFeed] = useState([]);
   const [toast, setToast] = useState(null);
   const [tick, setTick] = useState(0);
+  // Bubbles closed by hand on this screen. Local only: closing one over your
+  // own map says nothing about what the rest of the table wants to look at.
+  const [dismissedBubbleIds, setDismissedBubbleIds] = useState(() => new Set());
 
   const dismissToast = useCallback(() => setToast(null), []);
   const clearFeed = useCallback(() => setFeed([]), []);
@@ -50,6 +53,7 @@ export function useVttRolls({ campaignId, role, roster, tokens }) {
   useEffect(() => {
     setFeed([]);
     setToast(null);
+    setDismissedBubbleIds(new Set());
   }, [campaignId, role.isGm]);
 
   const handleCustomRoll = useCallback((formula) => {
@@ -93,14 +97,24 @@ export function useVttRolls({ campaignId, role, roster, tokens }) {
   ), [tokenByCharacter, tokenBySource]);
 
   const bubbles = useMemo(() => currentBubbles(feed)
+    .filter((roll) => !dismissedBubbleIds.has(roll.id))
     .map((roll) => ({ roll, token: tokenForRoll(roll) }))
-    .filter((entry) => entry.token), [feed, tick, tokenForRoll]);
+    .filter((entry) => entry.token), [dismissedBubbleIds, feed, tick, tokenForRoll]);
+
+  // Only ids still in the feed are kept, so the set never outgrows it.
+  const dismissRollBubble = useCallback((rollId) => {
+    setDismissedBubbleIds((current) => {
+      const live = new Set(feed.map((roll) => roll.id));
+      return new Set([...current, rollId].filter((id) => live.has(id)));
+    });
+  }, [feed]);
 
   const throws = useMemo(() => currentThrows(feed)
     .map((roll) => ({ roll, token: tokenForRoll(roll) })), [feed, tick, tokenForRoll]);
 
   return {
     clearFeed,
+    dismissRollBubble,
     dismissToast,
     feed,
     handleCustomRoll,

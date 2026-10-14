@@ -1,4 +1,5 @@
 import { Box, Chip, Typography } from '@mui/material';
+import { X } from 'lucide-react';
 import { resolveToastLayout } from '../../../shared/character/dice/rollToastLayout.js';
 import DiceRow from '../../../shared/character/dice/DiceRow.jsx';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
@@ -11,7 +12,11 @@ const FONT = '"Cinzel", Georgia, serif';
 //
 // Laid out by the same function as the sheet's toast, so the player who rolled
 // and the table watching the map read the same thing.
-export default function RollBubble({ roll, x, y, underFog = false }) {
+//
+// With `onDismiss`, a tap anywhere on it closes it early: the bubble sits right
+// over the pieces, and on a phone eight seconds is long to wait for the board
+// back. The little cross only says that it can be closed.
+export default function RollBubble({ roll, x, y, underFog = false, onDismiss }) {
   const layout = resolveToastLayout({
     label: roll.label,
     detail: roll.detail,
@@ -28,11 +33,37 @@ export default function RollBubble({ roll, x, y, underFog = false }) {
       ...(underFog ? underFogSx : null),
       transform: `translate(${x}px, ${y}px) translate(-50%, -100%)`,
     }}>
-      <Box sx={{
-        ...bubbleSx,
-        ...(layout.isCrit ? critSx : {}),
-        ...(layout.isFail ? failSx : {}),
-      }}>
+      <Box
+        {...(onDismiss ? {
+          role: 'button',
+          tabIndex: 0,
+          'aria-label': 'Close roll',
+          'data-viewport-control': true,
+          // Not a pan, a drag or a long press on whatever is underneath.
+          onPointerDown: (event) => event.stopPropagation(),
+          onClick: (event) => {
+            event.stopPropagation();
+            onDismiss(roll.id);
+          },
+          onKeyDown: (event) => {
+            if (event.key !== 'Enter' && event.key !== ' ' && event.key !== 'Escape') return;
+            event.preventDefault();
+            onDismiss(roll.id);
+          },
+        } : null)}
+        sx={{
+          ...bubbleSx,
+          ...(layout.isCrit ? critSx : {}),
+          ...(layout.isFail ? failSx : {}),
+          ...(onDismiss ? dismissableSx : {}),
+        }}
+      >
+        {onDismiss ? (
+          <Box aria-hidden sx={closeSx}>
+            <X size={11} strokeWidth={2.6} />
+          </Box>
+        ) : null}
+
         {roll.actorName ? <Typography sx={actorSx}>{roll.actorName}</Typography> : null}
 
         <Typography sx={labelSx}>{layout.label}</Typography>
@@ -104,6 +135,28 @@ const bubbleSx = {
     from: { opacity: 0, transform: 'scale(0.25)' },
     to: { opacity: 1, transform: 'scale(1)' },
   },
+};
+
+const dismissableSx = {
+  pointerEvents: 'auto',
+  cursor: 'pointer',
+  // Room for the cross, so it never sits on the actor's name.
+  px: 2.2,
+  '&:focus-visible': { outline: `2px solid ${VTT_COLORS.gold}`, outlineOffset: 2 },
+};
+
+const closeSx = {
+  position: 'absolute',
+  top: 4,
+  right: 4,
+  width: 16,
+  height: 16,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  borderRadius: '50%',
+  color: 'text.secondary',
+  bgcolor: vttAlpha(VTT_COLORS.black, 0.35),
 };
 
 const critSx = {
