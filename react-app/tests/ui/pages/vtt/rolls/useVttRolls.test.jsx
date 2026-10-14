@@ -110,3 +110,15 @@ test('the embedded-sheet handoff deduplicates a local channel delivery and suppr
   expect(result.current.rollBubbles).toHaveLength(0);
   expect(result.current.diceThrows).toHaveLength(1);
 });
+
+test('a roll bubble closed by hand stays closed while the roll is still in the feed', () => {
+  const { result } = openRolls();
+  act(() => channel.onRoll(entry({ id: 'remote-roll' })));
+  expect(result.current.rollBubbles).toHaveLength(1);
+
+  act(() => result.current.dismissRollBubble('remote-roll'));
+
+  expect(result.current.rollBubbles).toHaveLength(0);
+  expect(result.current.feed).toHaveLength(1);
+  expect(result.current.diceThrows).toHaveLength(1);
+});

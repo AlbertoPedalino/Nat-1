@@ -13,6 +13,12 @@ import { isMapPiece } from '../../../shared/vtt/map/mapObjects.js';
 // One piece on the map: the artwork, its name plate underneath, a hit point bar
 // and the conditions badge. Kept apart from the viewport because the viewport is
 // about coordinates and this is about a creature.
+
+// A tap is a touch that neither moved nor lasted long enough to be the long
+// press that opens the token menu (the viewport's own numbers).
+const TAP_MAX_MS = 480;
+const TAP_SLOP = 12;
+
 export default function TokenSprite({
   token,
   size,
@@ -33,9 +39,17 @@ export default function TokenSprite({
   onContextMenu,
 }) {
   const [hovered, setHovered] = useState(false);
+  // A finger cannot hover, so on a tablet or a phone the conditions are opened
+  // by tapping the piece and stay open until it is tapped again or the finger
+  // lands anywhere else.
+  const [pinned, setPinned] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const rootRef = useRef(null);
+  const touchRef = useRef(null);
   const hoverCloseTimerRef = useRef(null);
-  const keepMarksOpen = () => {
+  const keepMarksOpen = (event) => {
+    // Touch fires enter/leave around every tap; that is not a hover.
+    if (event?.pointerType === 'touch') return;
     clearTimeout(hoverCloseTimerRef.current);
     hoverCloseTimerRef.current = null;
     if (!dragging) {
@@ -43,7 +57,8 @@ export default function TokenSprite({
       onInspectionChange?.({ tokenId: token.id, conditionKey: null });
     }
   };
-  const scheduleMarksClose = () => {
+  const scheduleMarksClose = (event) => {
+    if (event?.pointerType === 'touch') return;
     clearTimeout(hoverCloseTimerRef.current);
     // The pills sit just outside the token. Keep them mounted while the pointer
     // crosses that tiny gap, otherwise they vanish before they can be hovered.
@@ -53,6 +68,18 @@ export default function TokenSprite({
     }, 180);
   };
   useEffect(() => () => clearTimeout(hoverCloseTimerRef.current), []);
+  const unpin = () => {
+    setPinned(false);
+    onInspectionChange?.(null);
+  };
+  useEffect(() => {
+    if (!pinned) return undefined;
+    const closeOutside = (event) => {
+      if (!rootRef.current?.contains(event.target)) unpin();
+    };
+    document.addEventListener('pointerdown', closeOutside, true);
+    return () => document.removeEventListener('pointerdown', closeOutside, true);
+  });
   // The resize hint is controlled rather than left to MUI's own hover, so it can
   // be dismissed the moment the drag starts: a label sitting over the piece
   // being sized is exactly what you need to see past. It stays down until the
@@ -116,7 +143,7 @@ export default function TokenSprite({
   // Placement previews have no id until saved; two missing ids are not a match.
   const remotelyExpanded = Boolean(presentedInspection?.tokenId)
     && presentedInspection.tokenId === token.id;
-  const marksExpanded = !dragging && (hovered || remotelyExpanded);
+  const marksExpanded = !dragging && (hovered || (pinned && marks > 0) || remotelyExpanded);
   // Opt-in per piece. A scene where every creature wears a bar is unreadable,
   // and which ones do is a call the GM makes at the table, not a default.
   const hasHp = Boolean(token.showHp) && token.hpMax != null && token.hpMax > 0;
@@ -145,16 +172,42 @@ export default function TokenSprite({
 
   return (
     <Box
+      ref={rootRef}
       onPointerDown={(event) => {
         clearTimeout(hoverCloseTimerRef.current);
         hoverCloseTimerRef.current = null;
         setHovered(false);
-        onInspectionChange?.(null);
+        touchRef.current = event.pointerType === 'touch' && event.isPrimary
+          ? { x: event.clientX, y: event.clientY, at: event.timeStamp }
+          : null;
+        if (!touchRef.current) onInspectionChange?.(null);
         setDragging(Boolean(movable));
         onPointerDown?.(event);
       }}
-      onPointerUp={() => setDragging(false)}
-      onPointerCancel={() => setDragging(false)}
+      onPointerMove={(event) => {
+        const touch = touchRef.current;
+        if (!touch || Math.hypot(event.clientX - touch.x, event.clientY - touch.y) <= TAP_SLOP) return;
+        // Became a drag: the open pills would only be dragged along.
+        touchRef.current = null;
+        if (pinned) unpin();
+      }}
+      onPointerUp={(event) => {
+        setDragging(false);
+        const touch = touchRef.current;
+        touchRef.current = null;
+        if (!touch || !marks || event.timeStamp - touch.at >= TAP_MAX_MS) return;
+        if (Math.hypot(event.clientX - touch.x, event.clientY - touch.y) > TAP_SLOP) return;
+        if (pinned) {
+          unpin();
+        } else {
+          setPinned(true);
+          onInspectionChange?.({ tokenId: token.id, conditionKey: null });
+        }
+      }}
+      onPointerCancel={() => {
+        touchRef.current = null;
+        setDragging(false);
+      }}
       onContextMenu={onContextMenu}
       onPointerEnter={keepMarksOpen}
       onPointerLeave={scheduleMarksClose}
@@ -440,6 +493,9 @@ function ConditionTokenPill({ conditionKey, entries, tooltipOpen, onInspect }) {
     <Tooltip
       arrow
       placement="top"
+      // A tap on the pill reads its rules; MUI's default asks for a long press.
+      enterTouchDelay={0}
+      leaveTouchDelay={4000}
       {...(tooltipOpen == null ? null : { open: tooltipOpen })}
       title={(
         <Box sx={conditionTooltipBodySx}>
