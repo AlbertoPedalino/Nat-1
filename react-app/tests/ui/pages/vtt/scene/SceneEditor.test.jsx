@@ -9,6 +9,7 @@ import SceneEditor from '../../../../../src/pages/vtt/scene/SceneEditor.jsx';
 import { createFog, isRevealed, revealAll } from '../../../../../src/shared/vtt/map/fog.js';
 import { persistFights } from '../../../../../src/pages/encounterbuilder/state/storage.js';
 import { createInstance } from '../../../../../src/shared/instances/instanceStore.js';
+import { createProjectorLink } from '../../../../../src/shared/vtt/session/projectorLink.js';
 
 const sceneViewportMock = vi.hoisted(() => vi.fn());
 const signMapImageMock = vi.hoisted(() => vi.fn());
@@ -991,5 +992,137 @@ test('a remote ruler whose owner stopped refreshing it fades out', async () => {
     expect(sceneViewportMock.mock.calls.at(-1)[0].remoteMeasure).toBeNull();
   } finally {
     vi.useRealTimers();
+  }
+});
+
+// Projector mode. The GM goes back to Tables and into a scene again, which
+// unmounts and remounts this editor: the projector must still be attached, or
+// "Projector mode" is offered over a running projector and opens a second one.
+const LIVE_SCENE = {
+  id: 'scene-projector',
+  campaignId: 'campaign-1',
+  name: 'On the table',
+  shownImage: 'map',
+  imagePath: null,
+  backgroundPath: null,
+  fog: { cols: 1, rows: 1, cells: '0' },
+  atmosphere: null,
+  isLive: true,
+  playArea: { x: 0, y: 0, w: 5, h: 5 },
+  grid: { size: 50, offsetX: 0, offsetY: 0, visible: false },
+};
+
+const projectorEditor = (props) => (
+  <ThemeProvider theme={theme}>
+    <SceneEditor scene={LIVE_SCENE} onSceneChange={vi.fn()} cameraSourceId="cam-test" {...props} />
+  </ThemeProvider>
+);
+
+test('the projector stays attached when the GM leaves the scene and comes back', () => {
+  const handle = { closed: false, close: vi.fn() };
+  const open = vi.spyOn(window, 'open').mockReturnValue(handle);
+  const projectorWindowRef = { current: null };
+  try {
+    const first = render(projectorEditor({ projectorWindowRef }));
+    fireEvent.click(screen.getByRole('button', { name: 'Projector mode' }));
+    expect(open).toHaveBeenCalledTimes(1);
+    expect(screen.getByText('Stop projector mode')).toBeInTheDocument();
+    first.unmount();
+
+    render(projectorEditor({ projectorWindowRef }));
+    expect(screen.getByText('Stop projector mode')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Projector mode' })).toBeNull();
+    expect(open).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByText('Stop projector mode'));
+    expect(handle.close).toHaveBeenCalledTimes(1);
+    expect(projectorWindowRef.current).toBeNull();
+    expect(screen.getByRole('button', { name: 'Projector mode' })).toBeInTheDocument();
+  } finally {
+    open.mockRestore();
+  }
+});
+
+test('a scene that is not live hides the projector controls without detaching the projector', () => {
+  const projectorWindowRef = { current: { closed: false, close: vi.fn() } };
+  const view = render(projectorEditor({ projectorWindowRef, scene: { ...LIVE_SCENE, isLive: false } }));
+  expect(screen.queryByText(/projector mode/i)).toBeNull();
+
+  view.rerender(projectorEditor({ projectorWindowRef }));
+  expect(screen.getByText('Stop projector mode')).toBeInTheDocument();
+  expect(projectorWindowRef.current.close).not.toHaveBeenCalled();
+});
+
+test('a projector closed by hand is noticed when the GM window comes back to the front', () => {
+  vi.useFakeTimers();
+  try {
+    const handle = { closed: false, close: vi.fn() };
+    const projectorWindowRef = { current: handle };
+    render(projectorEditor({ projectorWindowRef }));
+    expect(screen.getByText('Stop projector mode')).toBeInTheDocument();
+
+    handle.closed = true;
+    act(() => {
+      window.dispatchEvent(new Event('focus'));
+      vi.advanceTimersByTime(1_000);
+    });
+    expect(screen.getByRole('button', { name: 'Projector mode' })).toBeInTheDocument();
+    expect(projectorWindowRef.current).toBeNull();
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+// After a reload the handle is gone, but the projector is still there and says
+// so; Stop then reaches it by message.
+test('a projector with no handle left answers for itself and can still be stopped', () => {
+  const channels = new Set();
+  class FakeChannel {
+    constructor(name) { this.name = name; this.onmessage = null; channels.add(this); }
+    postMessage(data) {
+      for (const other of channels) if (other !== this && other.name === this.name) other.onmessage?.({ data });
+    }
+    close() { channels.delete(this); }
+  }
+  vi.stubGlobal('BroadcastChannel', FakeChannel);
+  const closed = vi.fn();
+  let projector = null;
+  projector = createProjectorLink('cam-test', { who: () => projector.send('here'), close: closed });
+  const open = vi.spyOn(window, 'open');
+  try {
+    render(projectorEditor({ projectorWindowRef: { current: null } }));
+    expect(screen.getByText('Stop projector mode')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Projector mode' })).toBeNull();
+
+    fireEvent.click(screen.getByText('Stop projector mode'));
+    expect(closed).toHaveBeenCalledTimes(1);
+    expect(open).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: 'Projector mode' })).toBeInTheDocument();
+  } finally {
+    projector.close();
+    open.mockRestore();
+    vi.unstubAllGlobals();
+  }
+});
+
+test('a projector following another GM tab does not attach to this one', () => {
+  const channels = new Set();
+  class FakeChannel {
+    constructor(name) { this.name = name; this.onmessage = null; channels.add(this); }
+    postMessage(data) {
+      for (const other of channels) if (other !== this && other.name === this.name) other.onmessage?.({ data });
+    }
+    close() { channels.delete(this); }
+  }
+  vi.stubGlobal('BroadcastChannel', FakeChannel);
+  let projector = null;
+  projector = createProjectorLink('cam-other', { who: () => projector.send('here') });
+  try {
+    render(projectorEditor({ projectorWindowRef: { current: null } }));
+    projector.send('here');
+    expect(screen.getByRole('button', { name: 'Projector mode' })).toBeInTheDocument();
+  } finally {
+    projector.close();
+    vi.unstubAllGlobals();
   }
 });

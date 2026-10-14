@@ -87,6 +87,7 @@ import { createCameraSourceId } from '../../../shared/vtt/session/cameraSync.js'
 import {
   projectPlayerTokens, shouldApplyPresenterFrame, spectatorUrl,
 } from '../../../shared/vtt/session/spectator.js';
+import { createProjectorLink, isWindowOpen } from '../../../shared/vtt/session/projectorLink.js';
 import { sheetChoicesForRole } from '../../../shared/vtt/sheets/sheetView.js';
 import {
   DEFAULT_SHEET_SPLIT,
@@ -162,6 +163,8 @@ const GRID_SAVE_DELAY = 600;
 const ATMOSPHERE_SAVE_DELAY = 400;
 const GHOST_SWEEP_MS = 2000;
 const LASER_TTL_MS = 2500;
+// How long an open projector in this browser has to say it is there.
+const PROJECTOR_ANSWER_MS = 400;
 const FOG_BROADCAST_MS = 80;
 // The GM needs to see what is still hidden from the party without being blind
 // to the map underneath; a player gets the real thing.
@@ -228,6 +231,7 @@ export default function SceneEditor({
   spectatorSource = null,
   cameraSourceId = null,
   presenterFollowingRef = null,
+  projectorWindowRef: presenterWindowRef = null,
 }) {
   const { notify } = useToast();
   const { user } = useAuth();
@@ -349,12 +353,18 @@ export default function SceneEditor({
   const localProjectorFollowingRef = useRef(true);
   const projectorFollowingRef = presenterFollowingRef || localProjectorFollowingRef;
   const [projectorFollowing, setProjectorFollowing] = useState(projectorFollowingRef.current);
-  // The open projector window is the state; the flag only mirrors it for render.
-  // Nothing is persisted: after a reload the controls are gone, and pressing
-  // Projector mode again lands on the same named window rather than opening a
-  // second one, which hands the handle straight back.
-  const projectorWindowRef = useRef(null);
-  const [projectorControlsOpen, setProjectorControlsOpen] = useState(false);
+  // Whether this GM window has a projector running. The window handle belongs
+  // to the VTT page, so it outlives this editor (back to Tables, another
+  // scene); after a reload, when no handle is left, the projector itself says
+  // it is there (projectorLink.js). Either way "Projector mode" is not offered
+  // twice, which is what used to open a second projector.
+  const localProjectorWindowRef = useRef(null);
+  const projectorWindowRef = presenterWindowRef || localProjectorWindowRef;
+  const projectorLinkRef = useRef(null);
+  const [projectorAttached, setProjectorAttached] = useState(() => isWindowOpen(projectorWindowRef.current));
+  // A scene that is not live has no projector to point anywhere; the projector
+  // stays attached and the controls return with the live scene.
+  const projectorControlsOpen = projectorAttached && scene.isLive;
   const hasPresenterFrameRef = useRef(false);
   const [projectorShownImage, setProjectorShownImage] = useState(scene.shownImage);
   // The database value is the picture published to players. While presentation
@@ -382,24 +392,42 @@ export default function SceneEditor({
     toast: rollToast,
   } = useVttRolls({ campaignId: scene.campaignId, role, roster, tokens });
 
+  // Asked on arrival and whenever this window comes back to the front, which is
+  // exactly when a projector closed by hand was closed: it must not leave "Stop
+  // projector mode" offering to close a window that is already gone. An open
+  // handle or an answer keeps the projector attached; with neither, it is
+  // taken as closed.
   useEffect(() => {
-    if (!scene.isLive) setProjectorControlsOpen(false);
-  }, [scene.isLive]);
-
-  // A projector closed by hand must not leave "Stop projector mode" offering to
-  // close a window that is already gone. Checked when this window comes back to
-  // the front, which is exactly when closing the other one happened.
-  useEffect(() => {
-    if (!projectorControlsOpen) return undefined;
-    const check = () => {
-      if (projectorWindowRef.current?.closed !== false) {
+    if (!role.isGm || spectator) return undefined;
+    let answered = false;
+    let timer = null;
+    const link = createProjectorLink(presenterCameraSource, {
+      here: () => {
+        answered = true;
+        setProjectorAttached(true);
+      },
+      gone: () => ask(),
+    });
+    projectorLinkRef.current = link;
+    function ask() {
+      answered = false;
+      link?.send('who');
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        if (answered || isWindowOpen(projectorWindowRef.current)) return;
         projectorWindowRef.current = null;
-        setProjectorControlsOpen(false);
-      }
+        setProjectorAttached(false);
+      }, PROJECTOR_ANSWER_MS);
+    }
+    ask();
+    window.addEventListener('focus', ask);
+    return () => {
+      window.removeEventListener('focus', ask);
+      clearTimeout(timer);
+      projectorLinkRef.current = null;
+      link?.close();
     };
-    window.addEventListener('focus', check);
-    return () => window.removeEventListener('focus', check);
-  }, [projectorControlsOpen]);
+  }, [presenterCameraSource, projectorWindowRef, role.isGm, spectator]);
 
 
   useEffect(() => {
@@ -2159,15 +2187,18 @@ export default function SceneEditor({
       return;
     }
     projectorWindowRef.current = projector;
-    setProjectorControlsOpen(true);
-  }, [notify, presenterCameraSource, scene.campaignId]);
+    setProjectorAttached(true);
+  }, [notify, presenterCameraSource, projectorWindowRef, scene.campaignId]);
 
+  // By handle where there is one, and by asking it to close itself for a
+  // projector this window no longer holds a handle to.
   const stopProjector = useCallback(() => {
-    setProjectorControlsOpen(false);
+    setProjectorAttached(false);
     const projector = projectorWindowRef.current;
     projectorWindowRef.current = null;
     try { projector?.close(); } catch (_) {}
-  }, []);
+    projectorLinkRef.current?.send('close');
+  }, [projectorWindowRef]);
 
   if (loading || role.loading) return <CircularProgress size={24} />;
 
