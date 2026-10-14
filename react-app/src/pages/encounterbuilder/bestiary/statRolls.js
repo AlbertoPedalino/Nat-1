@@ -3,7 +3,7 @@ import { createContext, useContext } from 'react';
 // A stat block's rollers hand their label along ("Attack Roll", "Dex Save",
 // "STR Check", "Perception Check", "D20 Roll", "Damage", "HP"). The d20 tests
 // among them are what advantage/disadvantage can touch; the kind decides which
-// of the creature's conditions and effects apply.
+// of the creature's conditions apply.
 //
 // Returns { kind, ability } for a d20 test (kind null when the text does not
 // say which: a bare {@d20}), or null for anything that is not one.

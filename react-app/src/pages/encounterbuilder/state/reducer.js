@@ -13,7 +13,6 @@ import {
   removeCombatantEffect,
   rerollInitiative,
   restoreFight,
-  setCombatantEffectDuration,
   setDeathSave,
   setHp,
   setMaxHp,
@@ -21,7 +20,6 @@ import {
   setTempHp,
   snapshotFight,
   toggleCombatantCondition,
-  toggleCombatantEffect,
   autoFightName,
 } from '../combat/combat.js';
 import { addRollLogEntry } from '../rolls/dice.js';
@@ -233,12 +231,8 @@ function reduceEncounterState(state, action) {
       return state.combat ? withCombat(state, toggleCombatantCondition(state.combat, action.id, action.key)) : state;
     case 'clearCombatantConditions':
       return state.combat ? withCombat(state, clearCombatantConditions(state.combat, action.id)) : state;
-    case 'toggleCombatantEffect':
-      return state.combat ? withCombat(state, toggleCombatantEffect(state.combat, action.id, action.key)) : state;
     case 'addCombatantEffect':
       return state.combat ? withCombat(state, addCombatantEffect(state.combat, action.id, action.payload)) : state;
-    case 'setCombatantEffectDuration':
-      return state.combat ? withCombat(state, setCombatantEffectDuration(state.combat, action.id, action.effectId, action.duration)) : state;
     case 'removeCombatantEffect':
       return state.combat ? withCombat(state, removeCombatantEffect(state.combat, action.id, action.effectId)) : state;
     case 'clearCombatantEffects':

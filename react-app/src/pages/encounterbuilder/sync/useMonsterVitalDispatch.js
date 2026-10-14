@@ -17,8 +17,7 @@ import { encounterReducer } from '../state/reducer.js';
 export const MONSTER_VITAL_ACTIONS = new Set([
   'modifyHp', 'setHp', 'setMaxHp', 'setTempHp', 'modifyTempHp', 'modifyMaxHp', 'setMaxHpBonus',
   'toggleCombatantCondition', 'clearCombatantConditions',
-  'toggleCombatantEffect', 'addCombatantEffect', 'setCombatantEffectDuration',
-  'removeCombatantEffect', 'clearCombatantEffects',
+  'addCombatantEffect', 'removeCombatantEffect', 'clearCombatantEffects',
 ]);
 
 // Enemy vitals of a cloud fight are written in one place: the combatant in its

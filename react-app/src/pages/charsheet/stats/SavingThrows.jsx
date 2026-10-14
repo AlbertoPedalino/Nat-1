@@ -21,9 +21,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
   const itemSaveBonus = aggregateSavingThrowBonus(effectInventory);
   const itemEffects = collectItemEffects(itemEffectInventory(C, C?.inventory));
   const saveContexts = [...itemEffects.advantageOnSaveAgainst.entries()];
-  const saveModifiers = collectSaveModifiers(
-    C, effectInventory, profSets, sheet?.activeConditions || [], sheet?.activeEffects || [],
-  );
+  const saveModifiers = collectSaveModifiers(C, effectInventory, profSets, sheet?.activeConditions || []);
   // Reminder list shows only situational modifiers (e.g. "vs Frightened").
   // Fixed ones (e.g. Gnomish Cunning on INT/WIS/CHA, armor) are already
   // surfaced per-stat (icon + auto-roll), so they're excluded here.

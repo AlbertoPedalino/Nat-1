@@ -1577,8 +1577,8 @@ export default function SceneEditor({
         await writeConditions(token, conditions);
       }
       // Both marks go through their own function, which writes one column and
-      // checks the table rather than the row: calling out that the ogre has
-      // advantage is not the same as being handed the ogre.
+      // checks the table rather than the row: noting that the ogre is under
+      // Bane is not the same as being handed the ogre.
       // On a piece linked to a cloud fight both marks are forwarded to its
       // combatant by the database. A character's effects are on its sheet and
       // went with the health command above.
@@ -2530,9 +2530,9 @@ export default function SceneEditor({
           ownedCharacterIds: role.ownedCharacterIds,
         })}
         canShowHp={role.isGm || canMove(menuToken)}
-        // Advantage and the rest are marks like conditions, and answer to the
-        // same question: anyone at the table may put one on a creature, nobody
-        // may put one on somebody else's character.
+        // Reminders are marks like conditions, and answer to the same
+        // question: anyone at the table may put one on a creature, nobody may
+        // put one on somebody else's character.
         canSetEffects={canMarkToken(menuToken, {
           isGm: role.isGm,
           ownedCharacterIds: role.ownedCharacterIds,

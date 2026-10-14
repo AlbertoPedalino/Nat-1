@@ -85,12 +85,12 @@ test('placed character ids ignore pieces that stand for nobody', () => {
   assert.equal(placed.size, 1);
 });
 
-// Advantage/disadvantage effects are the sheet's too: the piece shows them and
-// never keeps its own copy.
-test('sheet effects replace whatever the piece was carrying', () => {
-  const roster = toRoster([row('c1', { name: 'Aria', activeEffects: [{ key: 'selfAttackAdv', duration: 'manual' }] })]);
-  const tokens = [{ id: 't1', characterId: 'c1', effects: [{ key: 'selfSaveDisadv', duration: 'next' }] }];
-  assert.deepEqual(withSheetVitals(tokens, roster)[0].effects, [{ key: 'selfAttackAdv', duration: 'manual' }]);
-  const monster = [{ id: 'm1', effects: [{ key: 'selfSaveDisadv', duration: 'next' }] }];
-  assert.deepEqual(withSheetVitals(monster, roster)[0].effects, [{ key: 'selfSaveDisadv', duration: 'next' }]);
+// Reminders are the sheet's too: the piece shows them and never keeps its own
+// copy.
+test('sheet reminders replace whatever the piece was carrying', () => {
+  const roster = toRoster([row('c1', { name: 'Aria', activeEffects: [{ key: 'custom', text: 'Guidance' }] })]);
+  const tokens = [{ id: 't1', characterId: 'c1', effects: [{ key: 'custom', text: 'Bless' }] }];
+  assert.deepEqual(withSheetVitals(tokens, roster)[0].effects, [{ key: 'custom', text: 'Guidance' }]);
+  const monster = [{ id: 'm1', effects: [{ key: 'custom', text: 'Bless' }] }];
+  assert.deepEqual(withSheetVitals(monster, roster)[0].effects, [{ key: 'custom', text: 'Bless' }]);
 });

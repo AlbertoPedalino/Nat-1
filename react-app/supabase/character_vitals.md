@@ -1,7 +1,7 @@
 # Shared character health
 
 `characters.data` is authoritative for current HP, temporary HP, max-HP bonus,
-death saves, conditions and advantage/disadvantage effects (`activeEffects`).
+death saves, conditions and reminders (`activeEffects`).
 Encounter/fight/token snapshots are display caches.
 
 ## Deploy

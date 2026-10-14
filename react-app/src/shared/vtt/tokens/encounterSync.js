@@ -4,7 +4,7 @@
 // on the map becomes the combatant that fight should end up with, which
 // fightVitals.js commits to the fight row (the one authority for enemy
 // vitals). A character's piece takes nothing from here: its vitals, conditions
-// and advantage/disadvantage effects belong to the sheet.
+// and reminders belong to the sheet.
 //
 // Everything here is pure: the callers own the reads and the writes.
 

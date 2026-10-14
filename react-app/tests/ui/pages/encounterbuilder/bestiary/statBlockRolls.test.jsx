@@ -3,7 +3,7 @@ import { vi } from 'vitest';
 import { StatBlockPanel } from '../../../../../src/pages/encounterbuilder/bestiary/StatBlockDialog.jsx';
 
 // A stat block opened for a combatant rolls its d20 tests the way its
-// conditions and effects say, and takes a one-off source on right-click.
+// conditions say, and takes a one-off source on right-click.
 
 const builder = vi.hoisted(() => ({ current: null }));
 vi.mock('../../../../../src/pages/encounterbuilder/state/EncounterBuilderContext.jsx', () => ({
@@ -51,10 +51,10 @@ test('right-click adds one source: poisoned plus a one-off advantage is a straig
   expect(roll).toHaveBeenLastCalledWith('+6', 'Attack Roll', undefined, '', { advantage: undefined });
 });
 
-test('effects reach saves by kind; a restrained creature has DEX-save disadvantage', () => {
-  const roll = mount({ conditions: ['restrained'], effects: [{ key: 'selfCheckAdv', duration: 'manual' }] });
+test('a restrained creature has DEX-save disadvantage, and its reminders change no roll', () => {
+  const roll = mount({ conditions: ['restrained'], effects: [{ key: 'custom', text: 'Guidance' }] });
   fireEvent.click(screen.getByRole('button', { name: /Dex -1 DIS/ }));
   expect(roll).toHaveBeenLastCalledWith('-1', 'Dex Save', undefined, '', { advantage: false });
-  fireEvent.click(screen.getByRole('button', { name: /STR ADV/ }));
-  expect(roll).toHaveBeenLastCalledWith('+4', 'STR Check', undefined, '', { advantage: true });
+  fireEvent.click(screen.getByRole('button', { name: /^STR/ }));
+  expect(roll).toHaveBeenLastCalledWith('+4', 'STR Check', undefined, '', { advantage: undefined });
 });

@@ -102,10 +102,10 @@ test('a condition set on the map reaches the fight without touching hit points',
     sourceRef: 'enc_1:f1:0',
     hpCurrent: null,
     conditions: ['prone'],
-    effects: [{ key: 'incomingAttackAdv', duration: 'next' }],
+    effects: [{ key: 'custom', text: 'Bane' }],
   });
   assert.deepEqual(next[0].activeConditions, ['prone']);
-  assert.deepEqual(next[0].activeEffects, [{ key: 'incomingAttackAdv', duration: 'next' }]);
+  assert.deepEqual(next[0].activeEffects, [{ key: 'custom', text: 'Bane' }]);
   assert.equal(next[0].hpCurrent, 7, 'health is left exactly as it was');
   assert.equal(next[0].isDead, false);
 });

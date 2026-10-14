@@ -30,12 +30,10 @@ import {
   nextTurn,
   removeCombatantEffect,
   restoreFight,
-  setCombatantEffectDuration,
   setDeathSave,
   setTempHp,
   snapshotFight,
   toggleCombatantCondition,
-  toggleCombatantEffect,
 } from '../../../../../src/pages/encounterbuilder/combat/combat.js';
 import { effectId } from '../../../../../src/shared/character/combat/combatEffects.js';
 import { rollDice, rollDiceFormula } from '../../../../../src/pages/encounterbuilder/rolls/dice.js';
@@ -788,108 +786,84 @@ test('a fight saved before conditions existed restores with an empty list', () =
   assert.deepEqual(restoreFight(legacy, []).combatants[0].activeEffects, []);
 });
 
-test('combatants start a fight with no effects', () => {
+test('combatants start a fight with no reminders', () => {
   const monster = { name: 'Goblin', cr: '1/4', hp: { average: 7 }, ac: 15, dex: 14 };
   const combat = buildCombat([{ qty: 1, monsterData: monster }], [{ name: 'Aria', hpMax: 22 }], 1, () => 0.5);
   for (const combatant of combat.combatants) {
-    assert.deepEqual(combatant.activeEffects, [], `${combatant.name} started with effects`);
+    assert.deepEqual(combatant.activeEffects, [], `${combatant.name} started with reminders`);
   }
 });
 
-test('an effect lands on one combatant and leaves the rest of the fight alone', () => {
+test('a reminder lands on one combatant and leaves the rest of the fight alone', () => {
   const combat = buildCombat([], [{ name: 'Aria', hpMax: 22 }, { name: 'Bran', hpMax: 20 }], 1, () => 0.5);
   const id = combat.combatants[0].id;
-  const next = toggleCombatantEffect(combat, id, 'selfAttackDisadv');
-  assert.deepEqual(next.combatants[0].activeEffects, [{ key: 'selfAttackDisadv', duration: 'next' }]);
+  const next = addCombatantEffect(combat, id, { text: 'Guidance' });
+  assert.deepEqual(next.combatants[0].activeEffects, [{ key: 'custom', text: 'Guidance' }]);
   assert.deepEqual(next.combatants[1].activeEffects, []);
   assert.equal(next.round, combat.round);
   assert.equal(next.currentTurn, combat.currentTurn);
 });
 
-// Durations are per effect, so one combatant routinely holds two at once.
-test('re-timing one effect on a combatant leaves its other effects alone', () => {
+test('a reminder is added, removed by id, and cleared wholesale', () => {
   const combat = buildCombat([], [{ name: 'Aria', hpMax: 22 }], 1, () => 0.5);
   const id = combat.combatants[0].id;
-  const both = toggleCombatantEffect(toggleCombatantEffect(combat, id, 'selfAttackDisadv'), id, 'selfSaveDisadv');
-  const retimed = setCombatantEffectDuration(both, id, 'selfSaveDisadv|next|', 'manual');
-  assert.deepEqual(retimed.combatants[0].activeEffects, [
-    { key: 'selfAttackDisadv', duration: 'next' },
-    { key: 'selfSaveDisadv', duration: 'manual' },
-  ]);
-});
+  const withBoth = addCombatantEffect(addCombatantEffect(combat, id, { text: 'Guidance' }), id, { text: 'bleeding 1d4' });
+  assert.equal(withBoth.combatants[0].activeEffects.length, 2);
 
-test('a custom effect is added, removed by id, and cleared wholesale', () => {
-  const combat = buildCombat([], [{ name: 'Aria', hpMax: 22 }], 1, () => 0.5);
-  const id = combat.combatants[0].id;
-  const withEffects = addCombatantEffect(
-    toggleCombatantEffect(combat, id, 'incomingAttackAdv'),
-    id,
-    { text: 'bleeding 1d4' },
-  );
-  assert.equal(withEffects.combatants[0].activeEffects.length, 2);
-
-  const custom = withEffects.combatants[0].activeEffects[1];
-  const removed = removeCombatantEffect(withEffects, id, effectId(custom));
-  assert.deepEqual(removed.combatants[0].activeEffects, [{ key: 'incomingAttackAdv', duration: 'next' }]);
+  const second = withBoth.combatants[0].activeEffects[1];
+  const removed = removeCombatantEffect(withBoth, id, effectId(second));
+  assert.deepEqual(removed.combatants[0].activeEffects, [{ key: 'custom', text: 'Guidance' }]);
   assert.deepEqual(clearCombatantEffects(removed, id).combatants[0].activeEffects, []);
 });
 
-// A monster's effects are in no registry, so the snapshot names them by hand —
+// A monster's reminders are in no registry, so the snapshot names them by hand —
 // exactly the omission that lost conditions from every saved fight.
-test('effects survive a fight snapshot and restore', () => {
+test('reminders survive a fight snapshot and restore', () => {
   const combat = buildCombat([], [{ name: 'Aria', sourceId: 'char-1', hpMax: 22 }], 1, () => 0.5);
   const id = combat.combatants[0].id;
-  const withEffect = setCombatantEffectDuration(
-    addCombatantEffect(toggleCombatantEffect(combat, id, 'selfSaveDisadv'), id, { text: 'marked' }),
-    id,
-    'selfSaveDisadv|next|',
-    'turn',
-  );
+  const withReminder = addCombatantEffect(combat, id, { text: 'marked' });
 
-  const restored = restoreFight({ id: 1, fight: snapshotFight(withEffect) }, []);
-  assert.deepEqual(restored.combatants[0].activeEffects, [
-    { key: 'selfSaveDisadv', duration: 'turn' },
-    { key: 'custom', duration: 'next', text: 'marked', polarity: 'note' },
-  ]);
+  const restored = restoreFight({ id: 1, fight: snapshotFight(withReminder) }, []);
+  assert.deepEqual(restored.combatants[0].activeEffects, [{ key: 'custom', text: 'marked' }]);
 });
 
-// A player's advantage/disadvantage live on the sheet like its conditions: the
-// patch carries them and a sheet payload that has them replaces the combatant's.
-test('effects are a synced vital: they reach the sheet patch and come back from it', () => {
+// A player's reminders live on the sheet like its conditions: the patch carries
+// them and a sheet payload that has them replaces the combatant's.
+test('reminders are a synced vital: they reach the sheet patch and come back from it', () => {
   const patch = combatantToSheetPatch({
     hpCurrent: 5,
     hpMax: 22,
     activeConditions: ['prone'],
-    activeEffects: [{ key: 'selfAttackDisadv', duration: 'next' }],
+    activeEffects: [{ key: 'custom', text: 'Guidance' }],
   });
-  assert.deepEqual(patch.activeEffects, [{ key: 'selfAttackDisadv', duration: 'next' }]);
+  assert.deepEqual(patch.activeEffects, [{ key: 'custom', text: 'Guidance' }]);
   assert.equal(SYNCED_DATA_KEYS.includes('activeEffects'), true);
 
   const combat = buildCombat([], [{ name: 'Aria', sourceId: 'char-1', hpMax: 22 }], 1, () => 0.5);
   const id = combat.combatants[0].id;
-  const synced = applySheetVitals(toggleCombatantEffect(combat, id, 'selfAttackDisadv'), 'char-1', {
-    hpMax: 22, activeEffects: [{ key: 'selfSaveAdv', duration: 'manual' }],
+  const synced = applySheetVitals(addCombatantEffect(combat, id, { text: 'Guidance' }), 'char-1', {
+    hpMax: 22, activeEffects: [{ key: 'custom', text: 'Bless' }],
   });
-  assert.deepEqual(synced.combatants[0].activeEffects, [{ key: 'selfSaveAdv', duration: 'manual' }]);
+  assert.deepEqual(synced.combatants[0].activeEffects, [{ key: 'custom', text: 'Bless' }]);
 });
 
-// A linked player enters the fight with the effects on their sheet.
-test('a launched player keeps the effects their sheet carries', () => {
+// A linked player enters the fight with the reminders on their sheet.
+test('a launched player keeps the reminders their sheet carries', () => {
   const combat = buildCombat([], [{
-    name: 'Aria', sourceId: 'char-1', hpMax: 22, activeEffects: [{ key: 'selfCheckAdv', duration: 'manual' }],
+    name: 'Aria', sourceId: 'char-1', hpMax: 22, activeEffects: [{ key: 'custom', text: 'Guidance' }],
   }], 1, () => 0.5);
-  assert.deepEqual(combat.combatants[0].activeEffects, [{ key: 'selfCheckAdv', duration: 'manual' }]);
+  assert.deepEqual(combat.combatants[0].activeEffects, [{ key: 'custom', text: 'Guidance' }]);
 });
 
-// A live sheet payload knows nothing about effects; resolving vitals from one
-// must not be read as "this combatant has no effects".
-test('a sheet sync leaves a combatant\'s effects untouched', () => {
+// A live sheet payload knows nothing about reminders; resolving vitals from one
+// must not be read as "this combatant has none".
+test('a sheet sync leaves a combatant\'s reminders untouched', () => {
   const combat = buildCombat([], [{ name: 'Aria', sourceId: 'char-1', hpMax: 22 }], 1, () => 0.5);
   const id = combat.combatants[0].id;
-  const withEffect = toggleCombatantEffect(combat, id, 'selfAttackDisadv');
-  const synced = applySheetVitals(withEffect, 'char-1', { hpMax: 22, currentHP: 9, activeConditions: ['blinded'] });
+  const withReminder = addCombatantEffect(combat, id, { text: 'Guidance' });
+  const synced = applySheetVitals(withReminder, 'char-1', { hpMax: 22, currentHP: 9, activeConditions: ['blinded'] });
   assert.equal(synced.combatants[0].hpCurrent, 9);
-  assert.deepEqual(synced.combatants[0].activeEffects, [{ key: 'selfAttackDisadv', duration: 'next' }]);
+  assert.deepEqual(synced.combatants[0].activeEffects, [{ key: 'custom', text: 'Guidance' }]);
 });
 
 test('a fight is only reachable through the library card of its encounter', () => {
@@ -969,7 +943,7 @@ test('closing an encounter deactivates it but keeps the fight resumable', () => 
   assert.equal(resumed.combat.combatants[0].name, 'Aria');
 });
 
-test('external fight refresh keeps linked sheet vitals, effects included, while updating monsters', () => {
+test('external fight refresh keeps linked sheet vitals, reminders included, while updating monsters', () => {
   const player = {
     id: 'player', type: 'player', sourceId: 'character', name: 'Aria', hpMax: 30,
     hpCurrent: 20, tempHP: 4, maxHPBonus: 2, activeConditions: ['prone'], deathSaves: { s: 0, f: 0 },
@@ -980,7 +954,7 @@ test('external fight refresh keeps linked sheet vitals, effects included, while 
   });
   const incoming = {
     id: 'fight', fight: { combatants: [
-      { ...player, hpCurrent: 30, tempHP: 0, maxHPBonus: 0, activeConditions: [], activeEffects: [{ key: 'selfAttackDisadv', duration: 'next' }] },
+      { ...player, hpCurrent: 30, tempHP: 0, maxHPBonus: 0, activeConditions: [], activeEffects: [{ key: 'custom', text: 'Guidance' }] },
       { ...monster, hpCurrent: 12 },
     ] },
   };
@@ -990,7 +964,7 @@ test('external fight refresh keeps linked sheet vitals, effects included, while 
   assert.equal(pc.tempHP, 4);
   assert.equal(pc.maxHPBonus, 2);
   assert.deepEqual(pc.activeConditions, ['prone']);
-  // A linked player's effects are the sheet's, never a stale fight copy's.
+  // A linked player's reminders are the sheet's, never a stale fight copy's.
   assert.deepEqual(pc.activeEffects, []);
   assert.equal(next.combat.combatants.find((item) => item.id === monster.id).hpCurrent, 12);
   assert.equal(encounterReducer(state, { type: 'syncExternalFight', entry: { ...incoming, id: 'other' } }), state);
@@ -1184,19 +1158,16 @@ test('closing with no active encounter changes nothing', () => {
   assert.equal(encounterReducer(state, { type: 'closeCombat' }), state);
 });
 
-test('the reducer routes every effect action through the fight snapshot', () => {
+test('the reducer routes every reminder action through the fight snapshot', () => {
   let state = encounterReducer(createInitialState(), { type: 'launchCurrentEncounter' });
   state = { ...state, combat: buildCombat([], [{ name: 'Aria', hpMax: 22 }], null, () => 0.5) };
   const id = state.combat.combatants[0].id;
 
-  state = encounterReducer(state, { type: 'toggleCombatantEffect', id, key: 'selfCheckDisadv' });
-  assert.deepEqual(state.combat.combatants[0].activeEffects, [{ key: 'selfCheckDisadv', duration: 'next' }]);
-
-  state = encounterReducer(state, {
-    type: 'setCombatantEffectDuration', id, effectId: 'selfCheckDisadv|next|', duration: 'round',
-  });
-  assert.deepEqual(state.combat.combatants[0].activeEffects, [{ key: 'selfCheckDisadv', duration: 'round' }]);
-  assert.deepEqual(state.fights[0].fight.combatants[0].activeEffects, [{ key: 'selfCheckDisadv', duration: 'round' }]);
+  state = encounterReducer(state, { type: 'addCombatantEffect', id, payload: { text: 'Guidance' } });
+  state = encounterReducer(state, { type: 'addCombatantEffect', id, payload: { text: 'Bless' } });
+  state = encounterReducer(state, { type: 'removeCombatantEffect', id, effectId: 'Bless' });
+  assert.deepEqual(state.combat.combatants[0].activeEffects, [{ key: 'custom', text: 'Guidance' }]);
+  assert.deepEqual(state.fights[0].fight.combatants[0].activeEffects, [{ key: 'custom', text: 'Guidance' }]);
 
   state = encounterReducer(state, { type: 'clearCombatantEffects', id });
   assert.deepEqual(state.combat.combatants[0].activeEffects, []);
@@ -1310,7 +1281,7 @@ test("the launch roster lists every creature on its own, with the tracker's lett
   const ogre = { name: 'Ogre', dex: 8 };
   const rows = initiativeRoster(
     [{ monsterData: goblin, qty: 2 }, { monsterData: ogre, qty: 1 }],
-    [{ name: 'Aria', activeEffects: [{ key: 'selfCheckDisadv', duration: 'manual' }] }],
+    [{ name: 'Aria', activeConditions: ['poisoned'] }],
   );
   assert.deepEqual(rows.map((row) => [row.side, row.name, row.key]), [
     ['party', 'Aria', 'player:0'],
@@ -1318,7 +1289,7 @@ test("the launch roster lists every creature on its own, with the tracker's lett
     ['monsters', 'Goblin B', 'monster:0:1'],
     ['monsters', 'Ogre', 'monster:1:0'],
   ]);
-  assert.deepEqual(rows[0].sources, { adv: false, disadv: true }, 'a player brings their own check effects');
+  assert.deepEqual(rows[0].sources, { adv: false, disadv: true }, 'a player brings their own conditions');
 });
 
 test('a launch choice gives one creature advantage or disadvantage on initiative', () => {
@@ -1335,7 +1306,7 @@ test('a launch choice gives one creature advantage or disadvantage on initiative
   assert.equal(byLabel.B, 20, 'the second goblin kept the higher die');
 
   // A player's own disadvantage and the GM's advantage cancel to one die.
-  const players = [{ name: 'Aria', hpMax: 10, initMod: 0, activeEffects: [{ key: 'selfCheckDisadv', duration: 'manual' }] }];
+  const players = [{ name: 'Aria', hpMax: 10, initMod: 0, activeConditions: ['poisoned'] }];
   // Here the dice come up 20, then 10: one die is 20, disadvantage keeps 10.
   const highFirst = () => { let i = 0; return () => [0.95, 0.45][i++ % 2]; };
   const own = buildCombat([], players, null, highFirst());

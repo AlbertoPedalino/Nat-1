@@ -6,7 +6,7 @@ import HpStepper from '../../../shared/character/combat/HpStepper.jsx';
 import { campaignSheetUrl } from '../campaign/campaignSheetUrl.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import CombatantConditions from './CombatantConditions.jsx';
-import CombatantEffects from './CombatantEffects.jsx';
+import CombatantReminders from './CombatantReminders.jsx';
 import MonsterToken from '../bestiary/MonsterToken.jsx';
 import PortraitBadge from '../../../shared/character/profile/PortraitBadge.jsx';
 
@@ -258,7 +258,7 @@ export default function CombatantCard({ combatant, active }) {
           <CombatantConditions combatant={combatant} />
         </Box>
         <Box sx={effectsRowSx}>
-          <CombatantEffects combatant={combatant} />
+          <CombatantReminders combatant={combatant} />
         </Box>
       </Box>
     </Paper>
@@ -416,7 +416,7 @@ const conditionsRowSx = {
   borderColor: 'divider',
 };
 
-// No divider of its own: conditions and effects read as one block of markers,
+// No divider of its own: conditions and reminders read as one block of markers,
 // and a second rule inside it would split the card three ways.
 const effectsRowSx = {
   flex: '1 1 100%',

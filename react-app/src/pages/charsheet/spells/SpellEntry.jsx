@@ -215,7 +215,6 @@ export default function SpellEntry({
   C,
   exhaustionLevel = 0,
   activeConditions = [],
-  activeEffects = [],
   installedRegistry,
   freeCastUses,
   inventory = [],
@@ -260,7 +259,7 @@ export default function SpellEntry({
   // Same resolver as the weapon attacks in ActionsTab, so spell and weapon
   // attacks stay aligned.
   const innateSpellAdv = hasAttack ? getSpellAttackAdvantage(C, { ownerClassName: entry.ownerClassName }) : null;
-  const spellAttackRoll = describeAttackRoll(activeConditions, { extraAdv: innateSpellAdv?.source || null, effects: activeEffects });
+  const spellAttackRoll = describeAttackRoll(activeConditions, { extraAdv: innateSpellAdv?.source || null });
 
 
   const upcastStepDie = (steps > 0) ? (spellData?.upcastDie || getUpcastStep(entry.entriesHigherLevel)?.stepDie) : null;
@@ -310,7 +309,7 @@ export default function SpellEntry({
       })
     : null;
   const weaponStrikeRoll = weaponStrike
-    ? describeAttackRoll(activeConditions, { extraDisadv: weaponStrike.disadvantage, effects: activeEffects })
+    ? describeAttackRoll(activeConditions, { extraDisadv: weaponStrike.disadvantage })
     : null;
 
   const expandedBeams = baseScaledDamages.flatMap((dmg, idx) => {

@@ -10,8 +10,8 @@ import { advArgFor, rollModeLabel, withExtraSource } from '../../../shared/chara
 // (surprise, a ruling), one row per creature — the second of three goblins can
 // be surprised alone. Opened from the settings button beside Launch; a plain
 // Launch never asks. Nothing is stored: the choice is for this launch only.
-// Each row adds to what the creature already has (a player's synced effects
-// and conditions), so any advantage plus any disadvantage is a straight roll.
+// Each row adds to what the creature already has (a player's synced
+// conditions), so any advantage plus any disadvantage is a straight roll.
 
 const SIDES = [
   { side: 'party', label: 'Party' },

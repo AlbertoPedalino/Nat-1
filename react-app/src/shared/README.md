@@ -21,7 +21,7 @@ See the [source map](../README.md) for the page feature folders.
 
 | Folder | Responsibility |
 | --- | --- |
-| `combat/` | AC, HP, conditions, combat effects, initiative, weapon mastery |
+| `combat/` | AC, HP, conditions, reminders, initiative, weapon mastery |
 | `dice/` | Roll calculations, dice rendering, roll logs and toasts |
 | `forms/` | Wild Shape, companions, summons, and cannon forms |
 | `inventory/` | Items, crafting, currency, attunement, charges, inventory filtering |

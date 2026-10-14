@@ -155,9 +155,9 @@ function StatBlockBody({ monster, allowAdd = false }) {
   const hpFormula = monster.hp?.formula;
   const spellcasting = groupSpellcasting(monster.spellcasting);
 
-  // The combatant this stat block was opened for, if any: its conditions and
-  // advantage/disadvantage effects decide how its d20 tests roll. A monster
-  // looked up in the bestiary has none and rolls straight.
+  // The combatant this stat block was opened for, if any: its conditions
+  // decide how its d20 tests roll. A monster looked up in the bestiary has
+  // none and rolls straight.
   const combatantId = state.selectedStatblock?.combatantId;
   const combatant = useMemo(() => (
     combatantId == null
@@ -169,9 +169,7 @@ function StatBlockBody({ monster, allowAdd = false }) {
     const info = d20RollKind(type);
     if (!info) return null;
     if (!combatant || !info.kind) return { adv: false, disadv: false, autoFail: false };
-    return creatureRollSources(
-      { conditions: combatant.activeConditions, effects: combatant.activeEffects }, info.kind, info.ability,
-    );
+    return creatureRollSources({ conditions: combatant.activeConditions }, info.kind, info.ability);
   }, [combatant]);
 
   // `advantage` present (even undefined, a straight roll) is the right-click
