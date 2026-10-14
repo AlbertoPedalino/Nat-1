@@ -314,3 +314,43 @@ test('on a touch screen the label field is not focused, so no keyboard slides th
     vi.unstubAllGlobals();
   }
 });
+
+// The menu stays mounted between openings. Reopening it on the same piece must
+// read the piece again, or a reminder added from another screen meanwhile is
+// written away by the next edit made here.
+test('reopening the menu on the same piece shows reminders added elsewhere meanwhile', () => {
+  const onSave = vi.fn();
+  const menu = (token, anchor) => (
+    <TokenMenu token={token} anchor={anchor} onClose={vi.fn()} onSave={onSave} onDelete={vi.fn()} />
+  );
+  const ogre = { id: 'ogre', label: 'Ogre', conditions: [], effects: [{ key: 'custom', text: 'Bane' }] };
+  const { rerender } = render(menu(ogre, { x: 20, y: 20 }));
+  rerender(menu(null, null));
+  rerender(menu({ ...ogre, effects: [...ogre.effects, { key: 'custom', text: 'Bless' }] }, { x: 20, y: 20 }));
+
+  expect(screen.getByText('Bless')).toBeInTheDocument();
+  fireEvent.click(screen.getByLabelText('Remove Bane'));
+  expect(onSave).toHaveBeenLastCalledWith(expect.anything(), expect.objectContaining({
+    effects: [{ key: 'custom', text: 'Bless' }],
+  }));
+});
+
+// Marks are toggled, never typed, so an open menu follows them live.
+test('an open menu follows marks changed at another screen and keeps them on its next edit', () => {
+  const onSave = vi.fn();
+  const menu = (token) => (
+    <TokenMenu token={token} anchor={{ x: 20, y: 20 }} onClose={vi.fn()} onSave={onSave} onDelete={vi.fn()} />
+  );
+  const ogre = { id: 'ogre', label: 'Ogre', conditions: [], effects: [] };
+  const { rerender } = render(menu(ogre));
+  rerender(menu({ ...ogre, conditions: ['prone'], effects: [{ key: 'custom', text: 'Bless' }] }));
+
+  expect(screen.getByText('Bless')).toBeInTheDocument();
+  const field = screen.getByLabelText('Reminder');
+  fireEvent.change(field, { target: { value: 'Bane' } });
+  fireEvent.keyDown(field, { key: 'Enter' });
+  expect(onSave).toHaveBeenLastCalledWith(expect.anything(), expect.objectContaining({
+    conditions: ['prone'],
+    effects: [{ key: 'custom', text: 'Bless' }, { key: 'custom', text: 'Bane' }],
+  }));
+});

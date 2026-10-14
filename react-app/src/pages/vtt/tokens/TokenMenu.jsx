@@ -49,11 +49,17 @@ export default function TokenMenu({
   const pendingPatchRef = useRef({});
   const objectStyleTimerRef = useRef(null);
 
-  // Loaded once per piece, keyed by id rather than by object identity: a
+  // Loaded once per opening, keyed by id rather than by object identity: a
   // realtime update rebuilds the token on every render, and resyncing on that
-  // would wipe whatever is half-typed in the fields.
+  // would wipe whatever is half-typed in the fields. The menu stays mounted
+  // while closed, so closing forgets the piece: reopening the same one must
+  // read it again, or its next edit writes back what this screen saw last time.
   useEffect(() => {
-    if (!token || syncedIdRef.current === token.id) return;
+    if (!token) {
+      syncedIdRef.current = null;
+      return;
+    }
+    if (syncedIdRef.current === token.id) return;
     syncedIdRef.current = token.id;
     pendingPatchRef.current = {};
     clearTimeout(typingTimerRef.current);
@@ -67,6 +73,22 @@ export default function TokenMenu({
     setEffects(token.effects || []);
     setDeathSaves(deathSavesForToken(token.deathSaves, token.conditions, token.characterId));
   }, [token]);
+
+  // Conditions and reminders are toggled, never typed, so an open menu follows
+  // them live. Every save sends the whole list: a stale one would undo what
+  // another screen set meanwhile.
+  const liveConditions = JSON.stringify(token?.conditions || []);
+  const liveEffects = JSON.stringify(token?.effects || []);
+  useEffect(() => {
+    if (!token || syncedIdRef.current !== token.id) return;
+    setConditions(token.conditions || []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [liveConditions]);
+  useEffect(() => {
+    if (!token || syncedIdRef.current !== token.id) return;
+    setEffects(token.effects || []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [liveEffects]);
 
   useEffect(() => () => clearTimeout(typingTimerRef.current), []);
 
