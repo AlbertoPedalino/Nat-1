@@ -296,3 +296,21 @@ test('someone who may not mark the piece reads its reminders but cannot change t
   expect(screen.queryByLabelText('Remove Bane')).toBeNull();
   expect(screen.queryByLabelText('Reminder')).toBeNull();
 });
+
+test('on a touch screen the label field is not focused, so no keyboard slides the page up', () => {
+  const matchMedia = vi.fn((query) => ({ matches: query === '(pointer: coarse)' }));
+  vi.stubGlobal('matchMedia', matchMedia);
+  try {
+    render(
+      <TokenMenu
+        token={{ id: 'goblin', label: 'Goblin', layer: 'tokens' }}
+        anchor={{ x: 100, y: 100 }}
+        onClose={() => {}}
+        onSave={() => {}}
+      />,
+    );
+    expect(screen.getByLabelText('Label')).not.toHaveFocus();
+  } finally {
+    vi.unstubAllGlobals();
+  }
+});

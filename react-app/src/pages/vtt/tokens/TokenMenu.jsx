@@ -132,7 +132,10 @@ export default function TokenMenu({
             ...battleMapDialogPaperSx,
             width: isMapObject ? 270 : 360,
             maxWidth: 'calc(100vw - 16px)',
-            maxHeight: 'calc(100vh - 16px)',
+            // Of the visible window, not 100vh: on a phone 100vh is taller than
+            // the screen while the browser bar shows, and a menu that tall gets
+            // pushed up past the top edge. 32px leaves Popover's 16px margins.
+            maxHeight: 'calc(100% - 32px)',
             '& .MuiMenu-list': { p: 0 },
           },
         },
@@ -170,7 +173,9 @@ export default function TokenMenu({
           <TextField
             label="Label"
             size="small"
-            autoFocus
+            // Not on a touch screen: focusing a field there raises the keyboard
+            // and the page slides up under the finger that held the piece.
+            autoFocus={!coarsePointer()}
             value={label}
             onChange={(event) => {
               setLabel(event.target.value);
@@ -446,6 +451,10 @@ function DeathSaveControls({ deathSaves, disabled, onChange }) {
       </Box>
     </Box>
   );
+}
+
+function coarsePointer() {
+  return Boolean(window.matchMedia?.('(pointer: coarse)').matches);
 }
 
 function normalizeDeathSaves(value) {
