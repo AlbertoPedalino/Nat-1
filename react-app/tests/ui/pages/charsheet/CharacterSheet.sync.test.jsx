@@ -67,8 +67,8 @@ vi.mock('../../../../src/pages/charsheet/stats/Skills.jsx', () => ({ default: ()
 vi.mock('../../../../src/pages/charsheet/stats/Movement.jsx', () => ({ default: () => null }));
 vi.mock('../../../../src/pages/charsheet/stats/RightTop.jsx', () => ({ default: ({ sheet, effectActions }) => (
   <>
-    <output data-testid="effects">{(sheet.activeEffects || []).map((effect) => effect.key).join(',')}</output>
-    <button onClick={() => effectActions.toggle('selfAttackAdv')}>Toggle attack advantage</button>
+    <output data-testid="effects">{(sheet.activeEffects || []).map((effect) => effect.text).join(',')}</output>
+    <button onClick={() => effectActions.add('Guidance')}>Add Guidance</button>
   </>
 ) }));
 vi.mock('../../../../src/pages/charsheet/proficiency/Proficiencies.jsx', () => ({ default: () => null }));
@@ -193,20 +193,19 @@ test.each([true, false])('embedded=%s reads HP from the digest and sends damage 
   expect(cloud.save).not.toHaveBeenCalled();
 });
 
-// Advantage/disadvantage effects are a vital: a toggle is a named health
-// command (never a sheet save) and whatever the map or the builder set arrives
-// through the digest.
-test('an effect toggle is a health command, and effects set elsewhere arrive through the digest', async () => {
+// Reminders are a vital: adding one is a named health command (never a sheet
+// save) and whatever the map or the builder set arrives through the digest.
+test('a reminder is a health command, and reminders set elsewhere arrive through the digest', async () => {
   await openSheet();
   const applied = vitalsAnswer(1, 20);
-  applied.vitals.activeEffects = [{ key: 'selfAttackAdv', duration: 'next' }];
+  applied.vitals.activeEffects = [{ key: 'custom', text: 'Guidance' }];
   cloud.command.mockImplementation(answer(applied));
-  fireEvent.click(screen.getByText('Toggle attack advantage'));
+  fireEvent.click(screen.getByText('Add Guidance'));
   await flush();
-  expect(cloud.command).toHaveBeenCalledWith('character', { type: 'toggleCombatantEffect', key: 'selfAttackAdv' }, expect.anything());
-  expect(screen.getByTestId('effects')).toHaveTextContent('selfAttackAdv');
-  await receive(20, 2, { activeEffects: [{ key: 'selfSaveDisadv', duration: 'manual' }] });
-  expect(screen.getByTestId('effects')).toHaveTextContent(/^selfSaveDisadv$/);
+  expect(cloud.command).toHaveBeenCalledWith('character', { type: 'addCombatantEffect', payload: { text: 'Guidance' } }, expect.anything());
+  expect(screen.getByTestId('effects')).toHaveTextContent('Guidance');
+  await receive(20, 2, { activeEffects: [{ key: 'custom', text: 'Bless' }] });
+  expect(screen.getByTestId('effects')).toHaveTextContent(/^Bless$/);
   expect(cloud.save).not.toHaveBeenCalled();
 });
 

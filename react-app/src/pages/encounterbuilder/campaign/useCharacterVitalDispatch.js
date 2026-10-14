@@ -4,9 +4,8 @@ import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 
 const VITAL_ACTIONS = new Set(['modifyHp', 'setHp', 'setTempHp', 'modifyTempHp', 'setMaxHp',
   'modifyMaxHp', 'setMaxHpBonus', 'setDeathSave', 'toggleCombatantCondition', 'clearCombatantConditions',
-  // A linked PC's advantage/disadvantage live on the sheet like its conditions.
-  'toggleCombatantEffect', 'addCombatantEffect', 'setCombatantEffectDuration', 'removeCombatantEffect',
-  'clearCombatantEffects']);
+  // A linked PC's reminders live on the sheet like its conditions.
+  'addCombatantEffect', 'removeCombatantEffect', 'clearCombatantEffects']);
 
 // `vitalsRef.current` is `{ digests, baseMax }` from useCharacterVitalSync: a
 // command starts from the digest the builder follows and the base max HP

@@ -41,43 +41,47 @@ test('correcting a token death-save failure leaves the character at zero HP', ()
   assert.deepEqual(v.activeConditions, []);
 });
 
-// Advantage/disadvantage effects are a synced vital: the builder's own action
-// names are health commands, toggled by hand and never expired.
-test('effect commands toggle, add, re-time, remove and clear without touching health', () => {
+// Reminders are a synced vital: the builder's own action names are health
+// commands, set by hand and never expired.
+test('reminder commands add, remove and clear without touching health', () => {
   const start = { currentHP: 12, activeConditions: ['prone'] };
-  let v = apply(start, { type: 'toggleCombatantEffect', key: 'selfAttackAdv' });
-  assert.deepEqual(v.activeEffects, [{ key: 'selfAttackAdv', duration: 'next' }]);
+  let v = apply(start, { type: 'addCombatantEffect', payload: { text: 'Guidance' } });
+  assert.deepEqual(v.activeEffects, [{ key: 'custom', text: 'Guidance' }]);
   assert.equal(v.currentHP, 12);
   assert.deepEqual(v.activeConditions, ['prone']);
-  v = apply(v, { type: 'addCombatantEffect', payload: { text: 'cover', polarity: 'note' } });
-  v = apply(v, { type: 'setCombatantEffectDuration', effectId: 'selfAttackAdv|next|', duration: 'manual' });
-  assert.deepEqual(v.activeEffects, [
-    { key: 'selfAttackAdv', duration: 'manual' },
-    { key: 'custom', duration: 'next', text: 'cover', polarity: 'note' },
-  ]);
-  v = apply(v, { type: 'removeCombatantEffect', effectId: 'custom|next|cover' });
-  assert.deepEqual(v.activeEffects, [{ key: 'selfAttackAdv', duration: 'manual' }]);
+  v = apply(v, { type: 'addCombatantEffect', payload: { text: 'cover' } });
+  assert.deepEqual(v.activeEffects, [{ key: 'custom', text: 'Guidance' }, { key: 'custom', text: 'cover' }]);
+  v = apply(v, { type: 'removeCombatantEffect', effectId: 'cover' });
+  assert.deepEqual(v.activeEffects, [{ key: 'custom', text: 'Guidance' }]);
   assert.deepEqual(apply(v, { type: 'clearCombatantEffects' }).activeEffects, []);
-  // Toggling the same key again takes it off, whatever its duration.
-  assert.deepEqual(apply(v, { type: 'toggleCombatantEffect', key: 'selfAttackAdv' }).activeEffects, []);
 });
 
-test('a health command keeps the effects it did not touch', () => {
-  const v = apply({ currentHP: 20, activeEffects: [{ key: 'selfSaveDisadv', duration: 'manual' }] }, { type: 'modifyHp', delta: -5 });
+test('a health command keeps the reminders it did not touch', () => {
+  const v = apply({ currentHP: 20, activeEffects: [{ key: 'custom', text: 'Bless' }] }, { type: 'modifyHp', delta: -5 });
   assert.equal(v.currentHP, 15);
-  assert.deepEqual(v.activeEffects, [{ key: 'selfSaveDisadv', duration: 'manual' }]);
+  assert.deepEqual(v.activeEffects, [{ key: 'custom', text: 'Bless' }]);
 });
 
-test('token effect edits add and remove only what the map changed', () => {
-  const token = { effects: [{ key: 'selfAttackAdv', duration: 'next' }] };
-  const command = tokenHealthCommand(token, { activeEffects: [{ key: 'selfCheckDisadv', duration: 'next' }] });
-  assert.deepEqual(command.addEffects, [{ key: 'selfCheckDisadv', duration: 'next' }]);
-  assert.deepEqual(command.removeEffects, ['selfAttackAdv|next|']);
+// What the list used to hold as well — advantage/disadvantage calls, with a
+// duration and a polarity — is dropped the next time the list is written.
+test('a command drops the advantage calls an older list still carries', () => {
+  const v = apply({
+    currentHP: 20,
+    activeEffects: [
+      { key: 'selfAttackAdv', duration: 'next' },
+      { key: 'custom', duration: 'next', text: 'cover', polarity: 'note' },
+    ],
+  }, { type: 'modifyHp', delta: -5 });
+  assert.deepEqual(v.activeEffects, [{ key: 'custom', text: 'cover' }]);
+});
+
+test('token reminder edits add and remove only what the map changed', () => {
+  const token = { effects: [{ key: 'custom', text: 'Guidance' }] };
+  const command = tokenHealthCommand(token, { activeEffects: [{ key: 'custom', text: 'Bane' }] });
+  assert.deepEqual(command.addEffects, [{ key: 'custom', text: 'Bane' }]);
+  assert.deepEqual(command.removeEffects, ['Guidance']);
   // One the sheet added meanwhile survives the map's edit.
-  const v = apply({ activeEffects: [{ key: 'selfAttackAdv', duration: 'next' }, { key: 'selfSaveAdv', duration: 'manual' }] }, command);
-  assert.deepEqual(v.activeEffects, [
-    { key: 'selfSaveAdv', duration: 'manual' },
-    { key: 'selfCheckDisadv', duration: 'next' },
-  ]);
+  const v = apply({ activeEffects: [{ key: 'custom', text: 'Guidance' }, { key: 'custom', text: 'Bless' }] }, command);
+  assert.deepEqual(v.activeEffects, [{ key: 'custom', text: 'Bless' }, { key: 'custom', text: 'Bane' }]);
   assert.equal(Object.hasOwn(tokenHealthCommand(token, { currentHP: 3 }), 'addEffects'), false);
 });

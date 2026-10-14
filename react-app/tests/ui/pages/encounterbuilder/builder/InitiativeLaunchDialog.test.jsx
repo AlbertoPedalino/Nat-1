@@ -4,7 +4,7 @@ import InitiativeLaunchDialog from '../../../../../src/pages/encounterbuilder/bu
 
 // One row per creature: only the second goblin is surprised.
 const encounter = [{ monsterData: { name: 'Goblin' }, qty: 2 }];
-const players = [{ name: 'Aria', activeEffects: [{ key: 'selfCheckAdv', duration: 'manual' }] }];
+const players = [{ name: 'Aria', activeConditions: ['poisoned'] }];
 
 function open(onLaunch = vi.fn()) {
   render(<InitiativeLaunchDialog open onClose={vi.fn()} encounter={encounter} players={players} onLaunch={onLaunch} />);
@@ -20,13 +20,13 @@ test('each creature has its own row, and only the chosen ones launch with a mode
   expect(onLaunch).toHaveBeenCalledWith({ 'monster:0:1': 'disadv' });
 });
 
-test('a side shortcut sets every row of that side, and a player shows what their own effects make it', () => {
+test('a side shortcut sets every row of that side, and a player shows what their own conditions make it', () => {
   const onLaunch = open();
-  expect(screen.getByText(/Own: Advantage · → Advantage/)).toBeInTheDocument();
+  expect(screen.getByText(/Own: Disadvantage · → Disadvantage/)).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'All monsters: disadvantage' }));
-  fireEvent.click(screen.getByRole('button', { name: 'Aria: disadvantage' }));
-  // Aria's own advantage and the surprise cancel.
-  expect(screen.getByText(/Own: Advantage · → Straight roll/)).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Aria: advantage' }));
+  // Aria's own disadvantage (poisoned) and the GM's advantage cancel.
+  expect(screen.getByText(/Own: Disadvantage · → Straight roll/)).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'Launch' }));
-  expect(onLaunch).toHaveBeenCalledWith({ 'player:0': 'disadv', 'monster:0:0': 'disadv', 'monster:0:1': 'disadv' });
+  expect(onLaunch).toHaveBeenCalledWith({ 'player:0': 'adv', 'monster:0:0': 'disadv', 'monster:0:1': 'disadv' });
 });

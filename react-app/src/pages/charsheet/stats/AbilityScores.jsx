@@ -2,7 +2,6 @@ import { Box, Typography, Tooltip } from '@mui/material';
 import { getEquippedArmorPenalties } from '../inventory/armorPenalties.js';
 import { STATS, SLBL, FULL_LBL, getFinal, getMod, getPB, fbonus, effectiveD20Modifier } from '../state/calculations.js';
 import { describeCheckDisadvantage } from '../../../shared/character/combat/conditions.js';
-import { EFFECT_ROLL_SOURCE, effectRollAdvantage } from '../../../shared/character/combat/combatEffects.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import { advantageVisual, conditionalDisadvantageVisual } from './advantageMark.jsx';
 import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
@@ -12,7 +11,6 @@ export default function AbilityScores({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
   const armorPenalties = getEquippedArmorPenalties(C, sheet?.sheetInventory || C?.inventory || [], profSets);
   const activeConditions = sheet?.activeConditions || [];
-  const checkEffects = effectRollAdvantage(sheet?.activeEffects, 'check');
 
   return (
     <Box sx={{
@@ -30,25 +28,22 @@ export default function AbilityScores({ C, sheet, onRoll }) {
           const armorDisadv = armorPenalties.hasPenalty && armorPenalties.disadvantageOn.includes(`${s}-checks`);
           const checkDisadv = describeCheckDisadvantage(activeConditions, armorDisadv);
           const { conditional } = checkDisadv;
-          const hasDisadv = checkDisadv.has || checkEffects.disadv;
-          const hasAdv = checkEffects.adv;
-          const disadvReason = [checkDisadv.reason, checkEffects.disadv ? EFFECT_ROLL_SOURCE : ''].filter(Boolean).join(', ');
+          const hasDisadv = checkDisadv.has;
+          const disadvReason = checkDisadv.reason;
           const condNotes = conditional.map((c) => `${c.source} (${c.note})`);
           const situational = condNotes.length ? ` • Situational: ${condNotes.join('; ')}` : '';
-          // Solid adv/disadv drive the roll (both together cancel); a purely
-          // situational disadvantage is a hint only.
-          const visual = (hasAdv || hasDisadv)
-            ? advantageVisual(hasAdv, hasDisadv)
+          // Solid disadvantage drives the roll; a purely situational one is a
+          // hint only.
+          const visual = hasDisadv
+            ? advantageVisual(false, true)
             : (condNotes.length ? conditionalDisadvantageVisual() : null);
-          const tooltipText = hasAdv && hasDisadv
-            ? `Advantage and Disadvantage cancel${situational}`
-            : hasAdv ? `Advantage: ${EFFECT_ROLL_SOURCE}${situational}`
-            : hasDisadv ? `Disadvantage: ${disadvReason}${situational}`
+          const tooltipText = hasDisadv
+            ? `Disadvantage: ${disadvReason}${situational}`
             : `Situational disadvantage: ${condNotes.join('; ')}`;
-          const advArg = hasAdv && !hasDisadv ? true : hasDisadv && !hasAdv ? false : undefined;
+          const advArg = hasDisadv ? false : undefined;
           return (
             <RollModeArea key={s} onClick={() => onRoll(mod, FULL_LBL[s] + ' Check', advArg)}
-              sources={{ adv: hasAdv, disadv: hasDisadv }}
+              sources={{ adv: false, disadv: hasDisadv }}
               onPick={(picked) => onRoll(mod, FULL_LBL[s] + ' Check', picked)}
               sx={{
                 bgcolor: 'background.paper', border: 1, borderColor: advArg === false ? 'warning.main' : 'divider', borderRadius: 1,

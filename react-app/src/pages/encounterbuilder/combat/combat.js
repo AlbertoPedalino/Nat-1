@@ -8,13 +8,7 @@ import {
   DEAD_CONDITION_KEY,
   EXHAUSTION_KEY,
 } from '../../../shared/character/combat/conditions.js';
-import {
-  addCustomEffect,
-  normalizeEffects,
-  removeEffect,
-  setEffectDuration,
-  toggleEffect,
-} from '../../../shared/character/combat/combatEffects.js';
+import { addReminder, normalizeEffects, removeEffect } from '../../../shared/character/combat/combatEffects.js';
 import { creatureRollSources } from '../../../shared/character/combat/rollSources.js';
 import { advArgFor, withExtraSource } from '../../../shared/character/dice/advantage.js';
 
@@ -37,7 +31,7 @@ function rollInitiativeD20(advArg, rng) {
 // launch order — never "Goblin x3" — so the GM can give just one of them
 // disadvantage (surprise) before the fight starts. `key` is what buildCombat
 // reads the choice back by; `sources` is what the creature already has on its
-// own (a player's synced conditions and effects; monsters start clean).
+// own (a player's synced conditions; monsters start clean).
 export function initiativeRoster(encounter, players) {
   const labelFor = createLabeler();
   const rows = [];
@@ -75,9 +69,7 @@ function initiativeKey(kind, index, n = 0) {
 }
 
 function playerInitiativeSources(player) {
-  const { adv, disadv } = creatureRollSources(
-    { conditions: player?.activeConditions, effects: player?.activeEffects }, 'check',
-  );
+  const { adv, disadv } = creatureRollSources({ conditions: player?.activeConditions }, 'check');
   return { adv, disadv };
 }
 
@@ -172,7 +164,7 @@ export function buildCombat(encounter, players, encounterId = null, rng = Math.r
       ) + initMod,
       initMod,
       ac: clampInt(player.ac, 1, 99, 10),
-      // Includes the player's advantage/disadvantage effects, a synced vital.
+      // Includes the player's reminders, a synced vital.
       ...vitals,
       monsterData: null,
       label: null,
@@ -287,27 +279,13 @@ export function clearCombatantConditions(combat, id) {
   });
 }
 
-// Ad-hoc effects ("disadvantage on its next attack"). Unlike conditions these
-// stay in the encounter: they carry no meaning on a character sheet, so nothing
-// here touches the vitals sync.
-export function toggleCombatantEffect(combat, id, key) {
+// Reminders ("Bardic Inspiration", "Guidance") on a combatant: the
+// `activeEffects` list (combatEffects.js). A linked player's are sent to the
+// sheet by the dispatch, a monster's stay in the fight.
+export function addCombatantEffect(combat, id, { text } = {}) {
   return updateCombatant(combat, id, (combatant) => ({
     ...combatant,
-    activeEffects: toggleEffect(combatant.activeEffects, key),
-  }));
-}
-
-export function addCombatantEffect(combat, id, { text, polarity } = {}) {
-  return updateCombatant(combat, id, (combatant) => ({
-    ...combatant,
-    activeEffects: addCustomEffect(combatant.activeEffects, text, polarity),
-  }));
-}
-
-export function setCombatantEffectDuration(combat, id, effectId, duration) {
-  return updateCombatant(combat, id, (combatant) => ({
-    ...combatant,
-    activeEffects: setEffectDuration(combatant.activeEffects, effectId, duration),
+    activeEffects: addReminder(combatant.activeEffects, text),
   }));
 }
 

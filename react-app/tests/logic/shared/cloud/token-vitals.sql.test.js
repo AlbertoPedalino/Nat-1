@@ -223,3 +223,46 @@ test('hidden HP never reach a table, a row or an event a player can read', async
     assert.deepEqual((await token(db, ORPHAN)).conditions, []);
   } finally { await db.close(); }
 });
+
+// A creature's reminders ("Bane", "Hexed") are one list whichever tool set
+// them: the builder writes the combatant and every piece linked to it shows
+// it; a mark set on a piece reaches the combatant; a piece outside any cloud
+// fight keeps its own.
+test('creature reminders: builder, linked pieces and player marks share the combatant list', async () => {
+  const db = await setup();
+  try {
+    const bane = [{ key: 'custom', text: 'Bane' }];
+    const both = [...bane, { key: 'custom', text: 'Hexed' }];
+
+    // Encounter builder -> every linked piece, with hit points left alone.
+    await as(db, GM);
+    assert.equal((await commit(db, { hpCurrent: 30 }, { activeEffects: bane })).applied, true);
+    assert.deepEqual((await goblin(db)).activeEffects, bane);
+    assert.equal((await goblin(db)).hpCurrent, 30);
+    assert.deepEqual((await token(db, LINKED)).effects, bane);
+    assert.deepEqual((await token(db, HIDDEN)).effects, bane, 'a piece with its bar off still shows reminders');
+
+    // A player's mark on the piece -> the combatant, then back to both pieces.
+    await as(db, PLAYER);
+    await db.query('select set_token_effects($1, $2)', [LINKED, JSON.stringify(both)]);
+    assert.deepEqual((await token(db, HIDDEN)).effects, both);
+    await as(db, GM);
+    assert.deepEqual((await goblin(db)).activeEffects, both);
+
+    // A value written straight onto a linked piece's row is discarded.
+    await db.query('update map_tokens set effects = $1 where id = $2', [JSON.stringify(bane), LINKED]);
+    assert.deepEqual((await token(db, LINKED)).effects, both);
+
+    // Removing one in the builder removes it from the pieces.
+    await commit(db, { hpCurrent: 30 }, { activeEffects: bane });
+    assert.deepEqual((await token(db, LINKED)).effects, bane);
+    assert.deepEqual((await token(db, HIDDEN)).effects, bane);
+
+    // A standalone piece: its own row is the list.
+    await as(db, PLAYER);
+    await db.query('select set_token_effects($1, $2)', [LEGACY_SHOWN, JSON.stringify(both)]);
+    assert.deepEqual((await token(db, LEGACY_SHOWN)).effects, both);
+    await as(db, GM);
+    assert.deepEqual((await goblin(db)).activeEffects, bane, 'and it touches no fight');
+  } finally { await db.close(); }
+});

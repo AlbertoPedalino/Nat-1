@@ -12,6 +12,7 @@ import { useLiveSession } from '../../shared/vtt/session/useLiveSession.js';
 import { sessionCameraSource } from '../../shared/vtt/session/cameraSync.js';
 import { VTT_COLORS, vttAlpha } from '../../shared/vtt/colors.js';
 import { spectatorRoute } from '../../shared/vtt/session/spectator.js';
+import { createProjectorLink } from '../../shared/vtt/session/projectorLink.js';
 import CampaignLinksMenu from './session/CampaignLinksMenu.jsx';
 import CampaignSessionPicker from './session/CampaignSessionPicker.jsx';
 import SceneEditor from './scene/SceneEditor.jsx';
@@ -40,6 +41,10 @@ export default function VttPage() {
   // scenes does not sever an already-open projector from this GM window.
   const presenterSourceRef = useRef(sessionCameraSource());
   const presenterFollowingRef = useRef(true);
+  // The projector window too: going back to Tables unmounts the editor, and a
+  // handle kept there came back empty, with "Projector mode" offered again over
+  // a projector that was still running.
+  const projectorWindowRef = useRef(null);
 
   const {
     allCampaigns,
@@ -120,6 +125,27 @@ export default function VttPage() {
     const retry = setTimeout(handBack, 400);
     return () => clearTimeout(retry);
   }, [spectatorRequested]);
+
+  // The projector answers the GM window that opened it (projectorLink.js), so
+  // that window knows a projector is already running after a reload, and can
+  // stop one whose handle it no longer holds. Here rather than in the editor:
+  // a projector waiting for the live scene has no editor mounted.
+  const spectatorSource = spectator.source;
+  useEffect(() => {
+    if (!spectatorRequested || !spectatorSource) return undefined;
+    const link = createProjectorLink(spectatorSource, {
+      who: () => link.send('here'),
+      close: () => window.close(),
+    });
+    if (!link) return undefined;
+    link.send('here');
+    const leave = () => link.send('gone');
+    window.addEventListener('pagehide', leave);
+    return () => {
+      window.removeEventListener('pagehide', leave);
+      link.close();
+    };
+  }, [spectatorRequested, spectatorSource]);
 
   const openScene = useCallback((id) => {
     navigate(id ? `/vtt?scene=${encodeURIComponent(id)}` : '/vtt');
@@ -218,6 +244,7 @@ export default function VttPage() {
             spectatorSource={spectator.source}
             cameraSourceId={presenterSourceRef.current}
             presenterFollowingRef={presenterFollowingRef}
+            projectorWindowRef={projectorWindowRef}
           />
         ) : null}
       </Box>

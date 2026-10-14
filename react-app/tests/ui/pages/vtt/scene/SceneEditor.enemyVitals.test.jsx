@@ -267,7 +267,7 @@ test('a character piece edited on the map commands health from the roster digest
   expect(m.updateToken.mock.calls.some(([, patch]) => Object.hasOwn(patch, 'hp_current'))).toBe(false);
 });
 
-test('a character piece\'s effects go to its sheet, never onto the piece row', async () => {
+test('a character piece\'s reminders go to its sheet, never onto the piece row', async () => {
   const hero = {
     id: 'hero-piece', layer: 'tokens', x: 2, y: 2, label: 'Hero', characterId: 'hero',
     hpCurrent: 18, hpMax: 30, conditions: [], effects: [], showHp: true,
@@ -280,7 +280,7 @@ test('a character piece\'s effects go to its sheet, never onto the piece row', a
   };
   m.tokens.current = [hero];
   mountEditor();
-  const effects = [{ key: 'selfSaveDisadv', duration: 'next' }];
+  const effects = [{ key: 'custom', text: 'Guidance' }];
   await saveFromMenu(hero, { effects, healthPatch: { activeEffects: effects } });
   expect(m.characterCommand).toHaveBeenCalledTimes(1);
   expect(m.characterCommand.mock.calls[0][1]).toEqual({

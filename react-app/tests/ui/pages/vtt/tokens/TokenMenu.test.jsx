@@ -250,14 +250,49 @@ test('a placed map object debounces color updates while the picker moves', () =>
   vi.useRealTimers();
 });
 
-// A character's advantage/disadvantage live on its sheet: toggling one on the
-// piece is a health edit carrying the new list, and nothing else.
-test('toggling an effect on a character piece sends it as a sheet health edit', () => {
+// A character's reminders live on its sheet: adding one on the piece is a
+// health edit carrying the new list, and nothing else.
+test('a reminder added on a character piece is sent as a sheet health edit', () => {
   const onSave = vi.fn();
   render(<TokenMenu token={{ id: 'pc', characterId: 'character', label: 'Hero', hpCurrent: 20, hpMax: 30, conditions: [], effects: [] }}
     anchor={{ x: 20, y: 20 }} onClose={vi.fn()} onSave={onSave} onDelete={vi.fn()} />);
-  fireEvent.click(screen.getAllByText('ADV')[0]);
+  const field = screen.getByLabelText('Reminder');
+  fireEvent.change(field, { target: { value: 'Bardic Inspiration' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Add' }));
   expect(onSave).toHaveBeenLastCalledWith(expect.anything(), expect.objectContaining({
-    healthPatch: { activeEffects: [{ key: 'selfAttackAdv', duration: 'next' }] },
+    healthPatch: { activeEffects: [{ key: 'custom', text: 'Bardic Inspiration' }] },
   }));
+});
+
+test('the token menu no longer offers advantage or disadvantage', () => {
+  render(<TokenMenu token={{ id: 'ogre', label: 'Ogre', conditions: [], effects: [] }}
+    anchor={{ x: 20, y: 20 }} onClose={vi.fn()} onSave={vi.fn()} onDelete={vi.fn()} />);
+  expect(screen.queryByText('ADV')).toBeNull();
+  expect(screen.queryByText('DIS')).toBeNull();
+  expect(screen.getByText('Reminders')).toBeInTheDocument();
+});
+
+// Reminders are set from the piece too, on a monster as on a character.
+test('a reminder typed in the token menu is saved on the piece and can be removed', () => {
+  const onSave = vi.fn();
+  render(<TokenMenu token={{ id: 'ogre', label: 'Ogre', hpCurrent: 20, hpMax: 30, conditions: [], effects: [] }}
+    anchor={{ x: 20, y: 20 }} onClose={vi.fn()} onSave={onSave} onDelete={vi.fn()} />);
+  const field = screen.getByLabelText('Reminder');
+  fireEvent.change(field, { target: { value: 'Bane' } });
+  fireEvent.keyDown(field, { key: 'Enter' });
+  const effects = [{ key: 'custom', text: 'Bane' }];
+  expect(onSave).toHaveBeenLastCalledWith(expect.anything(), expect.objectContaining({ effects }));
+
+  fireEvent.click(screen.getByLabelText('Remove Bane'));
+  expect(onSave).toHaveBeenLastCalledWith(expect.anything(), expect.objectContaining({ effects: [] }));
+});
+
+test('someone who may not mark the piece reads its reminders but cannot change them', () => {
+  render(<TokenMenu
+    token={{ id: 'ogre', label: 'Ogre', conditions: [], effects: [{ key: 'custom', text: 'Bane' }] }}
+    anchor={{ x: 20, y: 20 }} canEdit={false} canSetEffects={false}
+    onClose={vi.fn()} onSave={vi.fn()} onDelete={vi.fn()} />);
+  expect(screen.getByText('Bane')).toBeInTheDocument();
+  expect(screen.queryByLabelText('Remove Bane')).toBeNull();
+  expect(screen.queryByLabelText('Reminder')).toBeNull();
 });

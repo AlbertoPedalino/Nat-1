@@ -6,13 +6,12 @@ import { getConditionsWithEffect } from '../../../shared/character/combat/condit
 import { getArmorTrainingInfo } from '../proficiency/proficiencies.js';
 import { collectResolvedResistanceItems, collectResolvedImmunityItems, getInitiativeAdvantageFromEffects } from '../state/sheetEffects.js';
 import { advantageVisual } from './advantageMark.jsx';
-import { EFFECT_ROLL_SOURCE, effectRollAdvantage } from '../../../shared/character/combat/combatEffects.js';
 import { collectItemResistanceItems, collectItemImmunityItems, collectItemConditionImmunityItems, collectItemEffects } from '../../../shared/character/inventory/itemEffects.js';
 import { computeBestArmorClass } from '../../../shared/character/combat/ac.js';
 import { resolveInitiativeTriggeredResourceRecoveries } from '../../../shared/character/combat/initiativeEffects.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import ConditionsBlock from './ConditionsBlock.jsx';
-import EffectsBlock from './EffectsBlock.jsx';
+import RemindersBlock from './RemindersBlock.jsx';
 import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
 
 export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearConditions, effectActions, onSetExhaustion, conditionEntries, onToggleInspiration, resources, setResources, onShowToast }) {
@@ -22,18 +21,9 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
   // (e.g. Alert feat → +PB) are folded in by getInitiative.
   const initMod = getInitiative(C, sheet);
   const initAdv = getInitiativeAdvantageFromEffects(C);
-  // Initiative is a Dexterity check, so the ability-check effects apply too.
-  // Any advantage plus any disadvantage is a straight roll.
-  const checkEffects = effectRollAdvantage(sheet?.activeEffects, 'check');
-  const initHasAdv = !!initAdv || checkEffects.adv;
-  const initHasDisadv = checkEffects.disadv;
-  const initAdvArg = initHasAdv && !initHasDisadv ? true : initHasDisadv && !initHasAdv ? false : undefined;
-  const initTooltip = [
-    initAdv ? `Advantage on Initiative — ${initAdv.source}` : '',
-    checkEffects.adv ? `Advantage: ${EFFECT_ROLL_SOURCE}` : '',
-    checkEffects.disadv ? `Disadvantage: ${EFFECT_ROLL_SOURCE}` : '',
-    initHasAdv && initHasDisadv ? 'Advantage and Disadvantage cancel' : '',
-  ].filter(Boolean).join(' • ');
+  const initHasAdv = !!initAdv;
+  const initAdvArg = initHasAdv ? true : undefined;
+  const initTooltip = initAdv ? `Advantage on Initiative — ${initAdv.source}` : '';
   const [lastInitiativeRoll, setLastInitiativeRoll] = useState(null);
   const [initiativeMessage, setInitiativeMessage] = useState('');
 
@@ -96,15 +86,15 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.15 }}>
           <Tooltip title={initTooltip}>
             <RollModeArea
-              sources={{ adv: initHasAdv, disadv: initHasDisadv }}
+              sources={{ adv: initHasAdv, disadv: false }}
               onPick={rollInitiative}
               onClick={() => rollInitiative(initAdvArg)}
             >
               <CircleStat value={initMod >= 0 ? `+${initMod}` : initMod} label="Initiative" clickable />
             </RollModeArea>
           </Tooltip>
-          {(initHasAdv || initHasDisadv) && (() => {
-            const v = advantageVisual(initHasAdv, initHasDisadv);
+          {initHasAdv && (() => {
+            const v = advantageVisual(true, false);
             const Icon = v.Icon;
             return (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
@@ -129,7 +119,7 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
         <DefensesBlock C={C} activeConditions={sheet?.activeConditions || []} />
       </Box>
       <ConditionsBlock sheet={sheet} onToggle={onToggleCondition} onClear={onClearConditions} onSetExhaustion={onSetExhaustion} conditionEntries={conditionEntries} />
-      {effectActions ? <EffectsBlock sheet={sheet} actions={effectActions} /> : null}
+      {effectActions ? <RemindersBlock sheet={sheet} actions={effectActions} /> : null}
     </Box>
   );
 }

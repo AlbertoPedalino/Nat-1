@@ -13,7 +13,8 @@ import {
 } from '@mui/material';
 import { Trash2 } from 'lucide-react';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
-import { EFFECT_GROUPS, toggleEffect } from '../../../shared/character/combat/combatEffects.js';
+import { addReminder, removeEffect } from '../../../shared/character/combat/combatEffects.js';
+import { ReminderEditor } from '../../../shared/character/combat/ReminderChips.jsx';
 import {
   ASSIGNABLE_CONDITIONS,
   DEAD_CONDITION_KEY,
@@ -370,43 +371,25 @@ export default function TokenMenu({
             </Box>
           </Box>
 
-          {/* Advantage and disadvantage, from the same table the encounter builder
-              uses — a matrix rather than a list, because the choice being made is
-              "advantage or disadvantage on X", not "which of twelve flags". */}
-          <Box sx={{ ...markerSectionSx, ...effectSectionSx }}>
-            <Typography sx={sectionTitleSx}>Advantage / disadvantage</Typography>
+          {/* Reminders ("Bardic Inspiration", "Guidance"): written by name above
+              the piece for the whole table, as on the sheet. */}
+          <Box sx={{ ...markerSectionSx, ...reminderSectionSx }}>
+            <Typography sx={sectionTitleSx}>Reminders</Typography>
             {!canSetEffects ? <Typography sx={helperSx}>Only its player or the GM can set these.</Typography> : null}
-            {EFFECT_GROUPS.map((group) => (
-              <Stack key={group.target} spacing={0.2}>
-                <Typography sx={groupLabelSx}>{group.label}</Typography>
-                {group.rows.map((row) => (
-                  <Stack key={row.roll} direction="row" spacing={0.3} sx={effectRowSx}>
-                    <Typography sx={effectLabelSx}>{row.label}</Typography>
-                    {[['adv', 'ADV', 'success'], ['disadv', 'DIS', 'error']].map(([kind, text, colour]) => {
-                      const key = row[kind];
-                      if (!key) return null;
-                      const active = effects.some((effect) => effect.key === key);
-                      return (
-                        <Chip
-                          key={key}
-                          size="small"
-                          label={text}
-                          variant={active ? 'filled' : 'outlined'}
-                          color={active ? colour : 'default'}
-                          disabled={!canSetEffects}
-                          onClick={canSetEffects ? () => {
-                            const next = toggleEffect(effects, key);
-                            setEffects(next);
-                            save({ effects: next });
-                          } : undefined}
-                          sx={effectChipSx}
-                        />
-                      );
-                    })}
-                  </Stack>
-                ))}
-              </Stack>
-            ))}
+            <ReminderEditor
+              effects={effects}
+              disabled={!canSetEffects}
+              onAdd={(text) => {
+                const next = addReminder(effects, text);
+                setEffects(next);
+                save({ effects: next });
+              }}
+              onRemove={(id) => {
+                const next = removeEffect(effects, id);
+                setEffects(next);
+                save({ effects: next });
+              }}
+            />
           </Box>
         </Box> : null}
 
@@ -562,7 +545,7 @@ const markerSectionSx = {
   gap: 0.35,
 };
 
-const effectSectionSx = {
+const reminderSectionSx = {
   borderLeft: '1px solid',
   borderLeftColor: 'gmboard.vtt.goldTint',
 };
@@ -586,28 +569,6 @@ const chipsSx = {
 const compactChipSx = {
   height: 20,
   '& .MuiChip-label': { px: 0.55, fontSize: '0.57rem', lineHeight: 1 },
-};
-
-const groupLabelSx = {
-  mt: 0.15,
-  color: 'text.disabled',
-  fontSize: '0.54rem',
-  fontWeight: 700,
-  lineHeight: 1.15,
-};
-
-const effectRowSx = { alignItems: 'center', minHeight: 20 };
-const effectLabelSx = {
-  flex: 1,
-  minWidth: 0,
-  fontSize: '0.56rem',
-  lineHeight: 1.05,
-};
-
-const effectChipSx = {
-  minWidth: 34,
-  height: 19,
-  '& .MuiChip-label': { px: 0.4, fontSize: '0.52rem', fontWeight: 800 },
 };
 
 const menuButtonSx = {

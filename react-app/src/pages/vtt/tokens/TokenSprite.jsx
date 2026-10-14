@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Box, Tooltip, Typography } from '@mui/material';
 import { RotateCw, Skull } from 'lucide-react';
-import { describeEffect, effectId, effectPolarity } from '../../../shared/character/combat/combatEffects.js';
+import { effectId } from '../../../shared/character/combat/combatEffects.js';
 import { DEAD_CONDITION_KEY, conditionLabel } from '../../../shared/character/combat/conditions.js';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import { classIcon } from '../../../shared/character/profile/classIcon.js';
@@ -108,10 +108,11 @@ export default function TokenSprite({
   const conditions = token.conditions || [];
   const dead = conditions.includes(DEAD_CONDITION_KEY);
   const visibleConditions = conditions.filter((condition) => condition !== DEAD_CONDITION_KEY);
-  const effects = token.effects || [];
-  // One badge for everything the GM has flagged on this creature: two counters
-  // side by side would be read as one number anyway.
-  const marks = visibleConditions.length + effects.length;
+  // Reminders ("Bardic Inspiration", "Guidance") are written out above the
+  // piece at all times: they are there to be read at a glance, which a count
+  // behind a hover is not. Only conditions are counted in the badge.
+  const reminders = token.effects || [];
+  const marks = visibleConditions.length;
   // Placement previews have no id until saved; two missing ids are not a match.
   const remotelyExpanded = Boolean(presentedInspection?.tokenId)
     && presentedInspection.tokenId === token.id;
@@ -377,28 +378,39 @@ export default function TokenSprite({
 
       {/* One pill each, wrapped: a run-on sentence of six states is read as a
           wall, while pills are counted at a glance and colour-coded by kind. */}
-      {marks && marksExpanded ? (
-        <Box sx={pillsSx} onPointerEnter={keepMarksOpen} onPointerLeave={scheduleMarksClose}>
-          {visibleConditions.map((key) => (
-            <ConditionTokenPill
-              key={key}
-              conditionKey={key}
-              entries={conditionEntries[key]}
-              tooltipOpen={remotelyExpanded ? presentedInspection.conditionKey === key : undefined}
-              onInspect={(conditionKey) => onInspectionChange?.({
-                tokenId: token.id,
-                conditionKey,
-              })}
-            />
-          ))}
-          {effects.map((effect) => (
-            <Box
-              key={effectId(effect)}
-              sx={{ ...pillSx, ...(effectPolarity(effect) === 'adv' ? advPillSx : disPillSx) }}
-            >
-              {describeEffect(effect)}
+      {reminders.length || (marks && marksExpanded) ? (
+        // Transparent to the pointer until the marks are open: the reminders
+        // alone must not take clicks meant for the map or the next piece.
+        <Box
+          sx={{ ...aboveSx, pointerEvents: marksExpanded ? 'auto' : 'none' }}
+          onPointerEnter={keepMarksOpen}
+          onPointerLeave={scheduleMarksClose}
+        >
+          {marks && marksExpanded ? (
+            <Box sx={pillsSx}>
+              {visibleConditions.map((key) => (
+                <ConditionTokenPill
+                  key={key}
+                  conditionKey={key}
+                  entries={conditionEntries[key]}
+                  tooltipOpen={remotelyExpanded ? presentedInspection.conditionKey === key : undefined}
+                  onInspect={(conditionKey) => onInspectionChange?.({
+                    tokenId: token.id,
+                    conditionKey,
+                  })}
+                />
+              ))}
             </Box>
-          ))}
+          ) : null}
+          {reminders.length ? (
+            <Box sx={remindersSx} data-token-reminders>
+              {reminders.map((effect) => (
+                <Box key={effectId(effect)} component="span" title={effect.text} sx={reminderSx}>
+                  {effect.text}
+                </Box>
+              ))}
+            </Box>
+          ) : null}
         </Box>
       ) : null}
     </Box>
@@ -692,18 +704,18 @@ const deadBadgeSx = {
 // Above the piece and growing upwards, so a long list never covers the creature
 // it describes. Nothing is trimmed: a truncated list of what is wrong with a
 // creature is worse than none, because you cannot tell what was cut.
-const pillsSx = {
+const aboveSx = {
   position: 'absolute',
   left: '50%',
-  bottom: 'calc(100% + 6px)',
+  // Clear of the badge and the skull, which stick out past the top edge.
+  bottom: 'calc(100% + 8px)',
   transform: 'translateX(-50%)',
   display: 'flex',
-  flexWrap: 'wrap',
-  justifyContent: 'center',
+  flexDirection: 'column',
+  alignItems: 'center',
   gap: '3px',
   width: 'max-content',
   maxWidth: 230,
-  pointerEvents: 'auto',
   // Invisible hover bridge across the visual gap between disc and pills.
   '&::after': {
     content: '""',
@@ -711,8 +723,44 @@ const pillsSx = {
     top: '100%',
     left: 0,
     width: '100%',
-    height: 6,
+    height: 8,
   },
+};
+
+const pillsSx = {
+  display: 'flex',
+  flexWrap: 'wrap',
+  justifyContent: 'center',
+  gap: '3px',
+};
+
+// Nearest the piece, under the marks when those are open: the reminders are
+// the part that never moves.
+const remindersSx = {
+  display: 'flex',
+  flexWrap: 'wrap',
+  justifyContent: 'center',
+  gap: '2px',
+};
+
+// The light blue of the reminder chips on the sheet and in the token menu, so
+// the same thing is the same colour everywhere. On a dark plate rather than a
+// tint, because it has to stay legible over any map.
+const reminderSx = {
+  maxWidth: 170,
+  px: 0.6,
+  py: '1px',
+  borderRadius: '10px',
+  bgcolor: vttAlpha(VTT_COLORS.ink, 0.88),
+  color: 'info.main',
+  border: '1px solid',
+  borderColor: 'info.main',
+  fontSize: '0.74rem',
+  fontWeight: 700,
+  lineHeight: 1.35,
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
 };
 
 const pillSx = {
@@ -744,6 +792,3 @@ const conditionTooltipTitleSx = {
   letterSpacing: '0.06em',
   color: VTT_COLORS.warning,
 };
-// The same two colours the encounter builder tints its effect pills with.
-const advPillSx = { bgcolor: VTT_COLORS.success, color: VTT_COLORS.parchment };
-const disPillSx = { bgcolor: VTT_COLORS.danger, color: VTT_COLORS.parchment };

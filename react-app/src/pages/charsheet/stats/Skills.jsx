@@ -3,7 +3,6 @@ import { advantageVisual, conditionalDisadvantageVisual } from './advantageMark.
 import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
 import { SKILLS, getSkillTraining, getSkillBonus, fbonus, SLBL, effectiveD20Modifier } from '../state/calculations.js';
 import { describeCheckDisadvantage } from '../../../shared/character/combat/conditions.js';
-import { EFFECT_ROLL_SOURCE, effectRollAdvantage } from '../../../shared/character/combat/combatEffects.js';
 import { getEquippedArmorPenalties } from '../inventory/armorPenalties.js';
 import { getSkillAdvantageFromEffects } from '../state/sheetEffects.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
@@ -55,9 +54,6 @@ export default function Skills({ C, sheet, onRoll }) {
   const armorPenalties = getEquippedArmorPenalties(C, effectInventory, profSets);
   const itemCheckBonus = aggregateAbilityCheckBonus(effectInventory);
   const activeConditions = sheet?.activeConditions || [];
-  // A skill check is an ability check: "advantage on its ability checks" and
-  // its counterpart apply to every skill.
-  const checkEffects = effectRollAdvantage(sheet?.activeEffects, 'check');
 
   return (
     <Paper variant="outlined" sx={{ overflow: 'hidden' }}>
@@ -83,11 +79,11 @@ export default function Skills({ C, sheet, onRoll }) {
         );
         const checkDisadv = describeCheckDisadvantage(activeConditions, armorDisadv);
         const { conditional } = checkDisadv;
-        const hasDisadv = checkDisadv.has || checkEffects.disadv;
-        const disadvReason = [checkDisadv.reason, checkEffects.disadv ? EFFECT_ROLL_SOURCE : ''].filter(Boolean).join(', ');
+        const hasDisadv = checkDisadv.has;
+        const disadvReason = checkDisadv.reason;
         const condNotes = conditional.map((c) => `${c.source} (${c.note})`);
         const situational = condNotes.length ? ` • Situational: ${condNotes.join('; ')}` : '';
-        const hasAdv = getSkillAdvantage(C, sk.n, shaped) || (checkEffects.adv ? { source: EFFECT_ROLL_SOURCE } : null);
+        const hasAdv = getSkillAdvantage(C, sk.n, shaped);
         const hasBoth = hasAdv && hasDisadv;
         // Solid adv/disadv drive the roll; a purely situational disadvantage is a hint only.
         const visual = (hasAdv || hasDisadv)

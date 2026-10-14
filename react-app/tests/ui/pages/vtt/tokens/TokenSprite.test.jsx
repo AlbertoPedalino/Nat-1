@@ -342,3 +342,51 @@ test('token and condition hover changes are reported to the presenter', () => {
   expect(onInspectionChange).toHaveBeenCalledWith({ tokenId: 'goblin-1', conditionKey: null });
   expect(onInspectionChange).toHaveBeenCalledWith({ tokenId: 'goblin-1', conditionKey: 'prone' });
 });
+
+// A reminder is there to be read at a glance: written out above the piece
+// without hovering, and never folded into the numbered badge.
+test('reminders are always written above the token and are not counted in the badge', () => {
+  render(
+    <TokenSprite
+      token={{
+        id: 'hero-1',
+        characterId: 'character-1',
+        label: 'Aria',
+        layer: 'tokens',
+        conditions: ['prone'],
+        effects: [
+          { key: 'custom', text: 'Bardic Inspiration' },
+          { key: 'custom', text: 'Guidance' },
+        ],
+      }}
+      size={64}
+      interactive
+      movable={false}
+    />,
+  );
+
+  expect(screen.getByText('Bardic Inspiration')).toBeInTheDocument();
+  expect(screen.getByText('Guidance')).toBeInTheDocument();
+  // Prone only; the two reminders are not marks.
+  expect(screen.getByText('1')).toBeInTheDocument();
+  expect(screen.queryByText('Prone')).not.toBeInTheDocument();
+
+  fireEvent.pointerEnter(screen.getByRole('button', { name: 'Aria' }));
+  expect(screen.getByText('Prone')).toBeInTheDocument();
+  expect(screen.getAllByText('Bardic Inspiration')).toHaveLength(1);
+});
+
+test('a token with only reminders wears no badge', () => {
+  render(
+    <TokenSprite
+      token={{
+        id: 'hero-2', label: 'Bram', layer: 'tokens', conditions: [],
+        effects: [{ key: 'custom', text: 'Bless' }],
+      }}
+      size={64}
+    />,
+  );
+
+  expect(screen.getByText('Bless')).toBeInTheDocument();
+  expect(screen.queryByText('1')).not.toBeInTheDocument();
+});

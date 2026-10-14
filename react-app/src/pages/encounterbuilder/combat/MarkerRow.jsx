@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Box, Button, Collapse } from '@mui/material';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
-// The shared frame for a combatant's marker rows — conditions and effects today.
+// The shared frame for a combatant's marker rows — conditions and reminders today.
 // Both are the same shape: pills that stay visible so the initiative list can be
 // scanned, a labelled disclosure hiding the surface that assigns more, and a
 // Clear that only exists once there is something to clear.

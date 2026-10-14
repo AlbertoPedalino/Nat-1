@@ -1,8 +1,6 @@
 import { clampCharacterVitals } from './vitals.js';
 import { setConditionActive, toggleCondition } from './conditions.js';
-import {
-  addCustomEffect, effectId, normalizeEffects, removeEffect, setEffectDuration, toggleEffect,
-} from './combatEffects.js';
+import { addReminder, effectId, normalizeEffects, removeEffect } from './combatEffects.js';
 
 // Apply an intent to the vitals a command starts from — the character digest
 // the caller follows (or, rarely, the sheet) — never to an encounter snapshot.
@@ -61,15 +59,9 @@ export function applyVitalCommand(data, command, baseMaxHP) {
       if (v.activeConditions.includes('dead')) { v.currentHP = 1; recover = true; }
       v.activeConditions = command.clearExhaustion ? [] : v.activeConditions.filter((k) => k === 'exhaustion');
       break;
-    // Advantage/disadvantage effects: the encounter builder's own action names,
-    // so its dispatch forwards them unchanged. Toggled by hand, never expired.
-    case 'toggleCombatantEffect': v.activeEffects = toggleEffect(v.activeEffects, command.key); break;
-    case 'addCombatantEffect':
-      v.activeEffects = addCustomEffect(v.activeEffects, command.payload?.text, command.payload?.polarity);
-      break;
-    case 'setCombatantEffectDuration':
-      v.activeEffects = setEffectDuration(v.activeEffects, command.effectId, command.duration);
-      break;
+    // Reminders: the encounter builder's own action names, so its dispatch
+    // forwards them unchanged. Set by hand, never expired.
+    case 'addCombatantEffect': v.activeEffects = addReminder(v.activeEffects, command.payload?.text); break;
     case 'removeCombatantEffect': v.activeEffects = removeEffect(v.activeEffects, command.effectId); break;
     case 'clearCombatantEffects': v.activeEffects = []; break;
     case 'patch':

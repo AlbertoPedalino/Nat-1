@@ -19,7 +19,7 @@ import MarkerRow from './MarkerRow.jsx';
 // Conditions on a combatant. Active ones are always visible so a GM can scan the
 // initiative list and see who is prone without opening anything; the grid to
 // assign them hides behind a disclosure. MarkerRow owns that frame, shared with
-// the effects row directly below so the two cannot drift apart.
+// the reminders row directly below so the two cannot drift apart.
 //
 // Exhaustion is shown but not editable here: it is graded 0-6 and that level
 // lives on the character sheet, which this surface does not sync. Offering a
