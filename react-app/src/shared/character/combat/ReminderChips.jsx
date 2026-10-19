@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import { Box, Button, Chip, TextField } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import { X } from 'lucide-react';
@@ -8,6 +8,13 @@ import {
   effectId,
   normalizeEffects,
 } from './combatEffects.js';
+import {
+  forgetStoredReminder,
+  getReminderHistory,
+  rememberReminder,
+  subscribeReminderHistory,
+  suggestReminders,
+} from './reminderHistory.js';
 
 // Reminder chip and field, shared by the character sheet, the battle-map token
 // menu and the encounter builder: a creature's reminders are one list, so
@@ -68,35 +75,86 @@ export function ReminderChip({ effect, onRemove, fontSize = '0.62rem' }) {
 // The list is capped, and a cap that silently swallows an entry is worse than
 // no cap: at the limit the field is disabled and says why, while the chips stay
 // removable.
+//
+// Reminders added before on this device (reminderHistory.js) sit under the
+// field as one-tap chips, narrowed by what is typed and minus those already on
+// the creature; their × forgets the entry, for typos.
 export function ReminderField({ effects, onAdd }) {
   const [text, setText] = useState('');
-  const full = normalizeEffects(effects).length >= MAX_EFFECTS;
-  const add = () => {
-    if (!text.trim()) return;
-    onAdd(text);
+  const history = useSyncExternalStore(subscribeReminderHistory, getReminderHistory, getReminderHistory);
+  const active = normalizeEffects(effects);
+  const full = active.length >= MAX_EFFECTS;
+  const suggestions = suggestReminders(history, { active, query: text });
+  const add = (value) => {
+    if (!value.trim()) return;
+    onAdd(value);
+    rememberReminder(value);
     setText('');
   };
   return (
-    <Box sx={fieldRowSx}>
-      <TextField
-        size="small"
-        placeholder={full ? `Limit of ${MAX_EFFECTS} reminders reached — remove one first` : 'Reminder… (Guidance, Bless)'}
-        value={text}
-        disabled={full}
-        onChange={(event) => setText(event.target.value)}
-        onKeyDown={(event) => {
-          // Inside the token menu a keystroke would otherwise be taken as the
-          // menu's type-ahead.
-          event.stopPropagation();
-          if (event.key !== 'Enter') return;
-          event.preventDefault();
-          add();
-        }}
-        slotProps={{ htmlInput: { maxLength: MAX_EFFECT_TEXT, 'aria-label': 'Reminder' } }}
-        sx={fieldSx}
-      />
-      <Button size="small" onClick={add} disabled={full || !text.trim()} sx={addSx}>Add</Button>
+    <Box sx={editorSx}>
+      <Box sx={fieldRowSx}>
+        <TextField
+          size="small"
+          placeholder={full ? `Limit of ${MAX_EFFECTS} reminders reached — remove one first` : 'Reminder… (Guidance, Bless)'}
+          value={text}
+          disabled={full}
+          onChange={(event) => setText(event.target.value)}
+          onKeyDown={(event) => {
+            // Inside the token menu a keystroke would otherwise be taken as the
+            // menu's type-ahead.
+            event.stopPropagation();
+            if (event.key !== 'Enter') return;
+            event.preventDefault();
+            add(text);
+          }}
+          slotProps={{ htmlInput: { maxLength: MAX_EFFECT_TEXT, 'aria-label': 'Reminder' } }}
+          sx={fieldSx}
+        />
+        <Button size="small" onClick={() => add(text)} disabled={full || !text.trim()} sx={addSx}>Add</Button>
+      </Box>
+      {suggestions.length ? (
+        <Box sx={chipsSx} role="group" aria-label="Recent reminders">
+          {suggestions.map((entry) => (
+            <RecentReminderChip
+              key={entry}
+              text={entry}
+              disabled={full}
+              onPick={() => add(entry)}
+              onForget={() => forgetStoredReminder(entry)}
+            />
+          ))}
+        </Box>
+      ) : null}
     </Box>
+  );
+}
+
+// Dashed and faint: offered, not on the creature.
+function RecentReminderChip({ text, disabled, onPick, onForget }) {
+  return (
+    <Chip
+      size="small"
+      variant="outlined"
+      label={text}
+      disabled={disabled}
+      onClick={onPick}
+      onDelete={onForget}
+      aria-label={`Add ${text}`}
+      deleteIcon={<X size={11} aria-label={`Forget ${text}`} />}
+      sx={(theme) => {
+        const accent = theme.palette.info.main;
+        return {
+          height: 18,
+          fontSize: '0.56rem',
+          maxWidth: '100%',
+          color: alpha(accent, 0.8),
+          borderStyle: 'dashed',
+          borderColor: alpha(accent, 0.5),
+          '& .MuiChip-deleteIcon': { color: alpha(accent, 0.6), '&:hover': { color: accent } },
+        };
+      }}
+    />
   );
 }
 
