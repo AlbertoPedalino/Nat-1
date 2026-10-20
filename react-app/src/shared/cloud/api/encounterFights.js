@@ -29,6 +29,32 @@ export async function listInstanceFights(instanceId) {
   return (data || []).map(toFightEntry).filter(Boolean);
 }
 
+// Id and version of every fight of the instance, for the builder's recovery
+// poll: a few bytes per fight instead of every fight's JSON. The version is
+// `updated_at` as milliseconds, the same number toFightEntry calls savedAt.
+export async function listInstanceFightRevisions(instanceId) {
+  if (!instanceId) return [];
+  const { data, error } = await requireClient()
+    .from('encounter_fights')
+    .select('id, updated_at')
+    .eq('instance_id', instanceId);
+  if (error) throw error;
+  return (data || []).map((row) => ({ id: String(row.id), updatedAt: Date.parse(row.updated_at) || 0 }));
+}
+
+// Just the fights whose version moved.
+export async function listInstanceFightsByIds(instanceId, ids) {
+  const wanted = [...new Set((ids || []).filter(Boolean).map(String))];
+  if (!instanceId || !wanted.length) return [];
+  const { data, error } = await requireClient()
+    .from('encounter_fights')
+    .select(FIGHT_COLUMNS)
+    .eq('instance_id', instanceId)
+    .in('id', wanted);
+  if (error) throw error;
+  return (data || []).map(toFightEntry).filter(Boolean);
+}
+
 // Upsert rather than insert-or-update by hand: the map creates a fight the
 // builder has never seen, and the builder saves one the map created. Both are
 // the same statement.

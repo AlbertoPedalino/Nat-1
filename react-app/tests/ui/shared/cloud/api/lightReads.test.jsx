@@ -24,7 +24,7 @@ import {
 import {
   listCharacterDigests, readCharacterSheets,
 } from '../../../../../src/shared/cloud/api/characterDigests.js';
-import { listFightRevisions, listFightVitals } from '../../../../../src/shared/cloud/api/encounterFights.js';
+import { listFightRevisions, listFightVitals, listInstanceFightRevisions } from '../../../../../src/shared/cloud/api/encounterFights.js';
 
 const selected = () => m.calls.find(([method]) => method === 'select')?.[1];
 
@@ -40,6 +40,7 @@ test.each([
   ['marks', () => listDrawingRevisions('s1'), 'map_drawings'],
   ['character digests', () => listCharacterDigests({ campaignId: 'c1' }), 'character_digests'],
   ['fights', () => listFightRevisions(['f1']), 'encounter_fights'],
+  ['builder fights', () => listInstanceFightRevisions('enc_a'), 'encounter_fights'],
 ])('the %s version check reads no payload columns', async (_, read, table) => {
   await read();
   expect(m.calls[0]).toEqual(['from', table]);
