@@ -134,6 +134,33 @@ export function resolveTokens(tokens, ghosts, draggingId = null) {
   });
 }
 
+// The pieces you may move are drawn over the ones you may not, among the
+// pieces of the token layer. A player who parks their piece on another
+// player's square otherwise covered it on the other player's screen: every
+// press landed on a piece they could not move, and theirs could not be reached
+// until somebody else moved. Each screen now has its own pieces on top. The
+// order of everything else is kept — scenery and the GM's layer stay where
+// their `z` puts them, and for the GM, who moves every piece of the layer in
+// hand, nothing changes.
+export function liftMovablePieces(tokens, canMove) {
+  const list = tokens || [];
+  if (!canMove) return list;
+  const slots = [];
+  const still = [];
+  const movable = [];
+  list.forEach((token, index) => {
+    if (token?.layer !== 'tokens') return;
+    slots.push(index);
+    (canMove(token) ? movable : still).push(token);
+  });
+  if (!still.length || !movable.length) return list;
+  const lifted = [...still, ...movable];
+  if (lifted.every((token, index) => token === list[slots[index]])) return list;
+  const next = list.slice();
+  slots.forEach((slot, index) => { next[slot] = lifted[index]; });
+  return next;
+}
+
 // Bound form of `canMoveToken` for the viewport, which asks the same question
 // once per token per render. The rule itself stays in scene.js next to the
 // other RLS mirrors — one place to change when the policy changes.
