@@ -176,7 +176,8 @@ export default function AtmosphereOverlay({ atmosphere }) {
   );
 }
 
-function createProgram(gl, vertexSource, fragmentSource) {
+// Also used by the area-of-effect canvas, which draws with the same care.
+export function createProgram(gl, vertexSource, fragmentSource) {
   const compile = (type, source) => {
     const shader = gl.createShader(type);
     gl.shaderSource(shader, source);

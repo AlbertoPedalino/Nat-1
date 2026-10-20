@@ -53,6 +53,16 @@ export const VTT_COLORS = Object.freeze({
   dungeon: '#7a5aa8',
   objectDefault: '#6f5b32',
   exploredHex: '#6f8f5a',
+  // Areas of effect: the outline each effect suggests, and the hue its
+  // animation is built around.
+  areaFire: '#ff7a2a',
+  areaPoison: '#7cc444',
+  areaCold: '#86d4ff',
+  areaAcid: '#cde04a',
+  areaLightning: '#a9c4ff',
+  areaNecrotic: '#9a6ad8',
+  areaRadiant: '#ffd86a',
+  areaDarkness: '#7a6a9a',
 });
 
 export function vttAlpha(color, alpha) {

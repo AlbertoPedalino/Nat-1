@@ -1644,3 +1644,67 @@ test.each(['square', 'hex'])('the view reports the %s cell under its centre', as
     rectSpy.mockRestore();
   }
 });
+
+test('an area is dragged out a square at a time and opens its menu on a right click or a long press', async () => {
+  const { drawingAtPoint } = await import('../../../../../src/shared/vtt/map/drawing.js');
+  const onPlaceArea = vi.fn();
+  const props = {
+    scene: { grid: { size: 50, offsetX: 0, offsetY: 0, visible: false }, playArea: null },
+    imageUrl: null,
+    tokens: [],
+    canMove: () => false,
+    fog: null,
+    lasers: [],
+    rollBubbles: [],
+    diceThrows: [],
+    feetPerCellForRuler: 5,
+    areaOptions: { shape: 'circle', filled: true, effect: 'fire', breadthFt: 5, label: 'Fireball' },
+  };
+  const { rerender } = render(<SceneViewport {...props} paintMode="area" drawings={[]} onPlaceArea={onPlaceArea} />);
+  const viewport = screen.getByText('Upload a map image to start building this scene.').parentElement;
+
+  // A press alone places nothing.
+  fireEvent.pointerDown(viewport, { button: 0, clientX: 100, clientY: 100, pointerId: 70 });
+  fireEvent.pointerUp(viewport, { button: 0, clientX: 100, clientY: 100, pointerId: 70 });
+  expect(onPlaceArea).not.toHaveBeenCalled();
+
+  // Four squares and a bit to the right: a 20 ft radius.
+  fireEvent.pointerDown(viewport, { button: 0, clientX: 100, clientY: 100, pointerId: 71 });
+  fireEvent.pointerMove(viewport, { button: 0, clientX: 310, clientY: 100, pointerId: 71 });
+  fireEvent.pointerUp(viewport, { button: 0, clientX: 310, clientY: 100, pointerId: 71 });
+  expect(onPlaceArea).toHaveBeenCalledTimes(1);
+  const placed = onPlaceArea.mock.calls[0][0];
+  expect(placed.area).toEqual({ shape: 'circle', filled: true, effect: 'fire' });
+  expect(placed.text).toBe('Fireball');
+  const [origin, tip] = placed.points;
+  expect(Math.hypot(tip.x - origin.x, tip.y - origin.y)).toBeCloseTo(4, 2);
+
+  const drawing = { id: 'area-1', ...placed, color: '#ff7a2a', width: 3 };
+  const onDrawingMenu = vi.fn();
+  rerender(
+    <SceneViewport
+      {...props}
+      paintMode="select"
+      drawings={[drawing]}
+      onSelectDrawing={vi.fn()}
+      movableDrawing={(point) => drawingAtPoint([drawing], point, 0.5, { areaEdgeOnly: true })}
+      drawingForMenu={(point) => drawingAtPoint([drawing], point)}
+      onDrawingMenu={onDrawingMenu}
+    />,
+  );
+  // Anywhere inside the area answers a right click: 1.4 squares from its origin.
+  fireEvent.contextMenu(viewport, { clientX: 170, clientY: 100 });
+  expect(onDrawingMenu).toHaveBeenCalledWith(drawing, { x: 170, y: 100 });
+
+  // A finger held still on it does the same.
+  vi.useFakeTimers();
+  try {
+    const touch = new MouseEvent('pointerdown', { bubbles: true, cancelable: true, button: 0, clientX: 170, clientY: 100 });
+    Object.defineProperties(touch, { pointerType: { value: 'touch' }, isPrimary: { value: true }, pointerId: { value: 72 } });
+    fireEvent(viewport, touch);
+    act(() => { vi.advanceTimersByTime(600); });
+    expect(onDrawingMenu).toHaveBeenCalledTimes(2);
+  } finally {
+    vi.useRealTimers();
+  }
+});

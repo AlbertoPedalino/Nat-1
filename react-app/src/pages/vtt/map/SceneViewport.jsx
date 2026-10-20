@@ -37,6 +37,8 @@ import {
   cameraPoseToView, viewToCameraPose,
 } from '../../../shared/vtt/session/cameraSync.js';
 import DrawingCanvas from './DrawingCanvas.jsx';
+import AreaEffectsCanvas from './AreaEffectsCanvas.jsx';
+import { areaFromDrag, snapAreaOrigin } from '../../../shared/vtt/map/areas.js';
 import FogCanvas from './FogCanvas.jsx';
 import RollBubble from '../rolls/RollBubble.jsx';
 import DiceTray from '../rolls/DiceTray.jsx';
@@ -92,6 +94,7 @@ function cursorFor(paintMode) {
   if (paintMode === 'erase') return ERASER_CURSOR;
   if (paintMode === 'reveal' || paintMode === 'hide') return 'crosshair';
   if (paintMode === 'text') return 'text';
+  if (paintMode === 'area') return 'crosshair';
   if (paintMode === 'laser' || paintMode === 'measure') return 'crosshair';
   if (paintMode === 'marquee') return 'crosshair';
   return 'grab';
@@ -173,6 +176,13 @@ export default function SceneViewport({
   onDrawEnd,
   onErase,
   onWriteNote,
+  // The area tool: what to place ({shape, filled, effect, breadthFt, label});
+  // its size is dragged out. Where it goes when the button is released.
+  areaOptions,
+  onPlaceArea,
+  // A mark's menu: which mark is under a point, and opening it there.
+  drawingForMenu,
+  onDrawingMenu,
   onLaser,
   lasers,
   rollBubbles,
@@ -279,6 +289,9 @@ export default function SceneViewport({
   // stroke onwards came out as a single dot.
   const strokeRef = useRef([]);
   const [strokeTick, setStrokeTick] = useState(0);
+  // The area being placed: its origin is where the button went down, and for a
+  // cone or a line the pointer says which way it faces.
+  const [areaDraft, setAreaDraft] = useState(null);
   const [loadedImageSize, setLoadedImageSize] = useState(null);
   // SceneEditor decodes each replacement before exposing it and supplies its
   // dimensions in the same render as the URL. This prevents one paint with the
@@ -733,11 +746,12 @@ export default function SceneViewport({
     longPressRef.current = null;
   }, []);
 
-  // A finger has no right button, so holding still on a piece is how the menu
-  // is asked for. Armed before the "can this be moved" check: marking somebody
-  // else's monster is exactly what a player needs the menu for.
-  const armLongPress = useCallback((event, token) => {
-    if (event.pointerType === 'mouse' || !onContextMenu) return;
+  // A finger has no right button, so holding still on a piece or a mark is how
+  // its menu is asked for. For a piece it is armed before the "can this be
+  // moved" check: marking somebody else's monster is exactly what a player
+  // needs the menu for.
+  const armLongPress = useCallback((event, open) => {
+    if (event.pointerType === 'mouse' || !open) return;
     const at = { x: event.clientX, y: event.clientY };
     cancelLongPress();
     longPressRef.current = {
@@ -747,10 +761,11 @@ export default function SceneViewport({
         // What became a menu was never a drag.
         dragRef.current = null;
         setDrag(null);
-        onContextMenu(token, at);
+        setMarkDrag(null);
+        open(at);
       }, LONG_PRESS_MS),
     };
-  }, [cancelLongPress, onContextMenu]);
+  }, [cancelLongPress]);
 
   useEffect(() => cancelLongPress, [cancelLongPress]);
 
@@ -783,6 +798,7 @@ export default function SceneViewport({
     measurePublisherRef.current.finish();
     strokeRef.current = [];
     setStrokeTick((tick) => tick + 1);
+    setAreaDraft(null);
     pinchRef.current = readPinch();
   };
 
@@ -861,10 +877,25 @@ export default function SceneViewport({
       return;
     }
 
+    if (event.button === 0 && paintMode === 'area' && areaOptions) {
+      const origin = snapAreaOrigin(cellPoint(point), { hex: isHexGrid(scene.grid) });
+      dragRef.current = { kind: 'area', origin };
+      setAreaDraft(null);
+      return;
+    }
+
     if (event.button === 0 && paintMode === 'text') {
       dragRef.current = { kind: 'note' };
       onWriteNote?.(cellPoint(point));
       return;
+    }
+
+    // Held still on a mark, a finger opens its menu, as on a piece. Whatever
+    // the press starts meanwhile (a pan, picking the mark up) is dropped if
+    // the menu opens, and the hold is let go if the finger moves.
+    if (event.button === 0 && paintMode === 'select' && drawingForMenu && onDrawingMenu) {
+      const mark = drawingForMenu(cellPoint(point));
+      if (mark) armLongPress(event, (at) => onDrawingMenu(mark, at));
     }
 
     // In hand rather than in a tool: a mark is picked up the way a piece is, by
@@ -963,7 +994,7 @@ export default function SceneViewport({
       return;
     }
     setSelectedMapObjectId(isMapPiece(token) ? token.id : null);
-    armLongPress(event, token);
+    armLongPress(event, onContextMenu ? (at) => onContextMenu(token, at) : null);
     if (!canMove(token)) return;
     const pointer = screenToWorld(screenPoint(event), view);
     const rect = tokenWorldRect(token, scene.grid);
@@ -974,7 +1005,7 @@ export default function SceneViewport({
     };
     setDrag({ id: token.id, x: token.x, y: token.y });
     event.currentTarget.setPointerCapture?.(event.pointerId);
-  }, [armLongPress, canMove, paintMode, scene.grid, screenPoint, selectedTokenIds, tokens, view]);
+  }, [armLongPress, canMove, onContextMenu, paintMode, scene.grid, screenPoint, selectedTokenIds, tokens, view]);
 
   const beginTokenResize = useCallback((event, token) => {
     event.stopPropagation();
@@ -1088,6 +1119,11 @@ export default function SceneViewport({
 
     if (state.kind === 'erase') {
       onErase?.(cellPoint(point));
+      return;
+    }
+
+    if (state.kind === 'area') {
+      setAreaDraft(areaFromDrag(areaOptions, state.origin, cellPoint(point), feetPerCellForRuler));
       return;
     }
 
@@ -1220,6 +1256,13 @@ export default function SceneViewport({
       return;
     }
 
+    if (state?.kind === 'area') {
+      const placed = areaDraft;
+      setAreaDraft(null);
+      if (placed) onPlaceArea?.({ points: placed.points, area: placed.area, text: placed.text });
+      return;
+    }
+
     if (state?.kind === 'draw') {
       const points = strokeRef.current;
       strokeRef.current = [];
@@ -1323,7 +1366,15 @@ export default function SceneViewport({
           onLaser?.(null);
         }
       }}
-      onContextMenu={(event) => event.preventDefault()}
+      onContextMenu={(event) => {
+        event.preventDefault();
+        // A right click on a mark opens its menu; pieces open their own and
+        // never let the click get this far.
+        if (!drawingForMenu || !onDrawingMenu) return;
+        if (event.target.closest?.(VIEWPORT_CONTROL_SELECTOR)) return;
+        const mark = drawingForMenu(cellPoint(screenPoint(event)));
+        if (mark) onDrawingMenu(mark, { x: event.clientX, y: event.clientY });
+      }}
       onDragOver={(event) => {
         if (backgroundOnly) {
           event.dataTransfer.dropEffect = 'none';
@@ -1493,6 +1544,13 @@ export default function SceneViewport({
       {/* Committed strokes go under the fog: a note scribbled on a room the
           party has not reached is the GM's business until they get there. The
           live stroke, the ruler and the laser go over everything — see below. */}
+      {/* Under the marks, so an area's outline and label stay on top of its
+          flames; under the fog, like the marks. */}
+      <AreaEffectsCanvas
+        drawings={backgroundOnly ? null : shownDrawings}
+        grid={scene.grid}
+        view={view}
+      />
       <DrawingCanvas
         drawings={backgroundOnly ? null : shownDrawings}
         selectedId={backgroundOnly ? null : selectedDrawingId}
@@ -1773,9 +1831,11 @@ export default function SceneViewport({
           pointing at something in the dark still means something. */}
       <DrawingCanvas
         onTop
-        live={strokeRef.current.length
-          ? { points: strokeRef.current, color: drawColor, width: drawWidth, tick: strokeTick }
-          : null}
+        live={areaDraft
+          ? { ...areaDraft, color: drawColor, width: drawWidth }
+          : strokeRef.current.length
+            ? { points: strokeRef.current, color: drawColor, width: drawWidth, tick: strokeTick }
+            : null}
         measure={measure || remoteMeasure || measured?.trail}
         grid={scene.grid}
         view={view}

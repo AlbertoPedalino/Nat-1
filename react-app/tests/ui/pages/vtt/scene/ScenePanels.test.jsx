@@ -1,7 +1,8 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
 import { DEFAULT_GRID } from '../../../../../src/shared/vtt/scene/scene.js';
-import { FogPanel, MapPanel } from '../../../../../src/pages/vtt/scene/ScenePanels.jsx';
+import { DrawPanel, FogPanel, MapPanel } from '../../../../../src/pages/vtt/scene/ScenePanels.jsx';
+import { DEFAULT_AREA_OPTIONS } from '../../../../../src/shared/vtt/map/areas.js';
 
 test('the fog brush accepts a half-cell diameter as a valid number', () => {
   const onBrushSizeChange = vi.fn();
@@ -117,4 +118,51 @@ test('uploaded scene pictures expose their matching remove actions', () => {
 
   expect(onRemoveMap).toHaveBeenCalledOnce();
   expect(onRemoveBackground).toHaveBeenCalledOnce();
+});
+
+test('the area tool offers shape, fill, the feet per square step, effect and label', () => {
+  const onAreaOptionsChange = vi.fn();
+  const onPaintModeChange = vi.fn();
+  const onFeetPerCellChange = vi.fn();
+  const props = {
+    busy: false,
+    drawColor: '#e8c96a',
+    drawWidth: 3,
+    canUndo: false,
+    feetPerCell: 5,
+    onPaintModeChange,
+    onDrawColorChange: vi.fn(),
+    onDrawWidthChange: vi.fn(),
+    onUndoDrawing: vi.fn(),
+    onAreaOptionsChange,
+    onFeetPerCellChange,
+  };
+  const { rerender } = render(<DrawPanel {...props} paintMode="draw" areaOptions={DEFAULT_AREA_OPTIONS} />);
+  // Only the area tool shows its options.
+  expect(screen.queryByRole('spinbutton', { name: 'Feet per square' })).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Area' }));
+  expect(onPaintModeChange).toHaveBeenCalledWith('area');
+
+  rerender(<DrawPanel {...props} paintMode="area" areaOptions={DEFAULT_AREA_OPTIONS} />);
+  // No size up front: it is dragged out on the map, in steps of this.
+  fireEvent.change(screen.getByRole('spinbutton', { name: 'Feet per square' }), { target: { value: '10' } });
+  expect(onFeetPerCellChange).toHaveBeenLastCalledWith(10);
+  fireEvent.click(screen.getByRole('button', { name: 'Outline only' }));
+  expect(onAreaOptionsChange).toHaveBeenLastCalledWith({ filled: false });
+  fireEvent.change(screen.getByRole('textbox', { name: 'Label' }), { target: { value: 'Fireball' } });
+  expect(onAreaOptionsChange).toHaveBeenLastCalledWith({ label: 'Fireball' });
+  fireEvent.click(screen.getByRole('button', { name: 'Line' }));
+  expect(onAreaOptionsChange).toHaveBeenLastCalledWith({ shape: 'line' });
+
+  // A line also asks how wide it is; an effect fills the area by itself.
+  rerender(
+    <DrawPanel
+      {...props}
+      paintMode="area"
+      areaOptions={{ ...DEFAULT_AREA_OPTIONS, shape: 'line', effect: 'fire' }}
+    />,
+  );
+  expect(screen.getAllByRole('spinbutton')).toHaveLength(3);
+  expect(screen.getByRole('spinbutton', { name: 'Width (ft)' })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Outline only' })).toBeDisabled();
 });

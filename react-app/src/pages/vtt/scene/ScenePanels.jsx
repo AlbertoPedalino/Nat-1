@@ -24,6 +24,7 @@ import {
   CloudRain,
   CloudSnow,
   ChevronDown,
+  CircleDashed,
   Coins,
   Eraser,
   Eye,
@@ -34,6 +35,7 @@ import {
   House,
   Image as ImageIcon,
   ImagePlus,
+  Minus,
   MousePointer2,
   Pencil,
   Circle,
@@ -55,6 +57,7 @@ import ColorField from '../../../shared/ui/ColorField.jsx';
 import InfoHint from '../../../shared/ui/InfoHint.jsx';
 import { DEFAULT_GRID } from '../../../shared/vtt/scene/scene.js';
 import { ATMOSPHERE_PRESETS, normalizeAtmosphere } from '../../../shared/vtt/scene/atmosphere.js';
+import { AREA_EFFECTS } from '../../../shared/vtt/map/areas.js';
 import { battleMapDialogPaperSx } from '../map/battleMapSurface.js';
 
 // The scene's settings, split by the question they answer. Each one is a panel
@@ -683,10 +686,11 @@ export function FogPanel({ scene, busy, paintMode, brushSize, onEnableFog, onPai
 // own tool — it leaves nothing behind, so it does not belong beside the ones
 // that do.
 export function DrawPanel({
-  busy, paintMode, drawColor, drawWidth, canUndo,
-  onPaintModeChange, onDrawColorChange, onDrawWidthChange, onUndoDrawing,
+  busy, paintMode, drawColor, drawWidth, canUndo, areaOptions, feetPerCell = 5, gridShape = 'square',
+  onPaintModeChange, onDrawColorChange, onDrawWidthChange, onUndoDrawing, onAreaOptionsChange,
+  onFeetPerCellChange,
 }) {
-  const DRAW_MODES = ['draw', 'erase', 'text'];
+  const DRAW_MODES = ['draw', 'area', 'erase', 'text'];
 
   return (
     <Stack spacing={1}>
@@ -699,6 +703,9 @@ export function DrawPanel({
         aria-label="Drawing tool"
       >
         <Tooltip title="Draw"><ToggleButton value="draw" aria-label="Draw"><Pencil size={14} /></ToggleButton></Tooltip>
+        <Tooltip title="Mark an area of effect">
+          <ToggleButton value="area" aria-label="Area"><CircleDashed size={14} /></ToggleButton>
+        </Tooltip>
         <Tooltip title="Erase your strokes">
           <ToggleButton value="erase" aria-label="Erase"><Eraser size={14} /></ToggleButton>
         </Tooltip>
@@ -706,6 +713,16 @@ export function DrawPanel({
           <ToggleButton value="text" aria-label="Write"><Type size={14} /></ToggleButton>
         </Tooltip>
       </ToggleButtonGroup>
+
+      {paintMode === 'area' && areaOptions ? (
+        <AreaOptions
+          options={areaOptions}
+          feetPerCell={feetPerCell}
+          gridShape={gridShape}
+          onChange={onAreaOptionsChange}
+          onFeetPerCellChange={onFeetPerCellChange}
+        />
+      ) : null}
 
       <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
         <ColorField
@@ -743,6 +760,112 @@ export function DrawPanel({
     </Stack>
   );
 }
+
+// What the next area will be. Its size is dragged out on the map a square at a
+// time, so the panel asks only what one square is worth — the same number the
+// ruler uses, changed in either place.
+function AreaOptions({ options, feetPerCell, gridShape, onChange, onFeetPerCellChange }) {
+  const cellWord = gridShape === 'hex' ? 'hex' : 'square';
+  const feetField = (value) => {
+    const number = Number(value);
+    return Number.isFinite(number) && number >= 0 ? number : 0;
+  };
+
+  return (
+    <Stack spacing={1}>
+      <ToggleButtonGroup
+        size="small"
+        exclusive
+        fullWidth
+        value={options.shape}
+        onChange={(_, value) => value && onChange?.({ shape: value })}
+        aria-label="Area shape"
+      >
+        <Tooltip title="Circle"><ToggleButton value="circle" aria-label="Circle"><Circle size={14} /></ToggleButton></Tooltip>
+        <Tooltip title="Square"><ToggleButton value="square" aria-label="Square"><Square size={14} /></ToggleButton></Tooltip>
+        <Tooltip title="Cone"><ToggleButton value="cone" aria-label="Cone"><Triangle size={14} /></ToggleButton></Tooltip>
+        <Tooltip title="Line"><ToggleButton value="line" aria-label="Line"><Minus size={14} /></ToggleButton></Tooltip>
+      </ToggleButtonGroup>
+
+      {/* An effect paints the inside itself, so outline or fill only matters
+          for a plain area. */}
+      <ToggleButtonGroup
+        size="small"
+        exclusive
+        fullWidth
+        value={options.filled || options.effect ? 'filled' : 'outline'}
+        disabled={Boolean(options.effect)}
+        onChange={(_, value) => value && onChange?.({ filled: value === 'filled' })}
+        aria-label="Area fill"
+      >
+        <ToggleButton value="outline" aria-label="Outline only">Outline</ToggleButton>
+        <ToggleButton value="filled" aria-label="Filled">Filled</ToggleButton>
+      </ToggleButtonGroup>
+
+      <Stack direction="row" spacing={1}>
+        <TextField
+          label={`Feet per ${cellWord}`}
+          size="small"
+          type="number"
+          value={feetPerCell}
+          disabled={!onFeetPerCellChange}
+          onChange={(event) => onFeetPerCellChange?.(Number(event.target.value))}
+          slotProps={{ htmlInput: { min: 0, step: 5 } }}
+          sx={{ flex: 1 }}
+        />
+        {options.shape === 'line' ? (
+          <TextField
+            label="Width (ft)"
+            size="small"
+            type="number"
+            value={options.breadthFt}
+            onChange={(event) => onChange?.({ breadthFt: feetField(event.target.value) })}
+            slotProps={{ htmlInput: { min: 0, step: 5 } }}
+            sx={{ flex: 1 }}
+          />
+        ) : null}
+      </Stack>
+
+      <TextField
+        select
+        label="Effect"
+        size="small"
+        value={options.effect || 'none'}
+        onChange={(event) => onChange?.({ effect: event.target.value === 'none' ? null : event.target.value })}
+      >
+        <MenuItem value="none">None</MenuItem>
+        {AREA_EFFECTS.map((effect) => (
+          <MenuItem key={effect.key} value={effect.key}>
+            <Box component="span" sx={{ ...effectDotSx, bgcolor: effect.color }} />
+            {effect.label}
+          </MenuItem>
+        ))}
+      </TextField>
+
+      <TextField
+        label="Label"
+        size="small"
+        placeholder="Spirit Guardians"
+        value={options.label}
+        onChange={(event) => onChange?.({ label: event.target.value })}
+        slotProps={{ htmlInput: { maxLength: 120 } }}
+      />
+
+      <Typography variant="caption" color="text.secondary">
+        {`Press where it starts and drag it out, one ${cellWord} (${feetPerCell} ft) at a time; a cone or a line faces where you drag. Right-click it (or hold it on a touch screen) to change it later.`}
+      </Typography>
+    </Stack>
+  );
+}
+
+const effectDotSx = {
+  display: 'inline-block',
+  width: 10,
+  height: 10,
+  mr: 1,
+  borderRadius: '50%',
+  flexShrink: 0,
+};
 
 // The 5e templates, the way Roll20 offers them: pick a shape, then drag from
 // the origin. The number is the same for all of them — how far it reaches —

@@ -3,6 +3,8 @@ import { Box } from '@mui/material';
 import { useResizeTick } from './useResizeTick.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { cellSize, worldToScreen } from '../../../shared/vtt/map/geometry.js';
+import { CONE_SPREAD, areaGeometry, areaLabelAnchor } from '../../../shared/vtt/map/areas.js';
+import { isNote, strokeLabelAnchor } from '../../../shared/vtt/map/drawing.js';
 
 // Committed strokes plus the one still under the pointer, on the same canvas so
 // the live stroke lines up exactly with where it will land.
@@ -58,7 +60,11 @@ export default function DrawingCanvas({ drawings, selectedId, live, measure, gri
         context.restore();
       }
 
+      // Hidden from the players: still the GM's to see, but plainly not
+      // on the table.
+      context.globalAlpha = stroke.hiddenFromPlayers ? 0.45 : 1;
       drawStroke(context, stroke, points, toScreen, cell, view);
+      context.globalAlpha = 1;
     }
 
     // The ruler above the marks: a template you are still dragging has to be
@@ -116,10 +122,15 @@ export default function DrawingCanvas({ drawings, selectedId, live, measure, gri
 // an unexplored room has to be visible on both, or the gesture means nothing.
 const topSx = { zIndex: 4 };
 
-// One mark, whether it is a line, a dot or a word.
+// One mark, whether it is a line, a dot, a word or an area.
 function drawStroke(context, stroke, points, toScreen, cell, view) {
+  if (stroke.area) {
+    drawArea(context, stroke, toScreen, cell, view);
+    return;
+  }
+
   // A note is anchored by one point and drawn as text, not as a mark.
-  if (stroke.text) {
+  if (isNote(stroke)) {
     const at = toScreen(points[0]);
     const fontSize = Math.max(10, ((stroke.width || 3) / 3) * cell * view.zoom * 0.4);
     context.font = `700 ${fontSize}px "EB Garamond", Georgia, serif`;
@@ -157,6 +168,88 @@ function drawStroke(context, stroke, points, toScreen, cell, view) {
     context.lineTo(at.x, at.y);
   }
   context.stroke();
+
+  const anchor = stroke.text ? strokeLabelAnchor(points) : null;
+  if (anchor) {
+    const at = toScreen(anchor.point);
+    // Clear of the line's own thickness when it sits above it.
+    const lift = anchor.above ? context.lineWidth / 2 + 3 : 0;
+    drawMapLabel(context, stroke.text, { x: at.x, y: at.y - lift }, cell * view.zoom, anchor.above ? 'bottom' : 'middle');
+  }
+}
+
+// An area of effect: its outline, a translucent fill when it is filled and has
+// no effect (an effect paints its own inside, on the canvas underneath), and
+// its label in the middle.
+function drawArea(context, stroke, toScreen, cell, view) {
+  const geometry = areaGeometry(stroke);
+  if (!geometry) return;
+  const scale = cell * view.zoom;
+  const at = toScreen(geometry.origin);
+  const reach = geometry.reach * scale;
+  const color = stroke.color || VTT_COLORS.gold;
+  const { shape, filled, effect } = stroke.area;
+
+  context.beginPath();
+  if (shape === 'circle') {
+    context.arc(at.x, at.y, reach, 0, Math.PI * 2);
+  } else if (shape === 'square') {
+    context.rect(at.x - reach, at.y - reach, reach * 2, reach * 2);
+  } else {
+    const half = shape === 'cone' ? null : (geometry.breadth * scale) / 2;
+    context.save();
+    context.translate(at.x, at.y);
+    context.rotate(geometry.angle);
+    if (shape === 'cone') {
+      context.moveTo(0, 0);
+      context.lineTo(reach, -reach * CONE_SPREAD);
+      context.lineTo(reach, reach * CONE_SPREAD);
+      context.closePath();
+    } else {
+      context.rect(0, -half, reach, half * 2);
+    }
+    context.restore();
+  }
+
+  if (filled && !effect) {
+    context.fillStyle = vttAlpha(color, 0.3);
+    context.fill();
+  }
+  // Thinner than ink of the same size: an outline frames, it is not the mark.
+  context.strokeStyle = color;
+  context.lineWidth = Math.max(1.5, ((stroke.width || 3) / 30) * scale);
+  context.stroke();
+
+  const anchor = stroke.text ? areaLabelAnchor(stroke) : null;
+  if (anchor) drawMapLabel(context, stroke.text, toScreen(anchor), scale, 'middle');
+
+  // While it is being dragged out: how big it is, by the pointer, in the
+  // ruler's colours.
+  if (stroke.hint && stroke.points?.[1]) {
+    const tip = toScreen(stroke.points[1]);
+    context.font = '700 13px "Cinzel", Georgia, serif';
+    context.textAlign = 'center';
+    context.textBaseline = 'bottom';
+    context.lineWidth = 3;
+    context.strokeStyle = vttAlpha(VTT_COLORS.black, 0.9);
+    context.strokeText(stroke.hint, tip.x, tip.y - 10);
+    context.fillStyle = VTT_COLORS.drawingText;
+    context.fillText(stroke.hint, tip.x, tip.y - 10);
+  }
+}
+
+// The label on a stroke or an area: parchment with a dark edge, sized to the
+// squares so it reads at any zoom without swamping a small mark.
+function drawMapLabel(context, text, at, cellPixels, baseline) {
+  const fontSize = Math.max(11, Math.min(26, cellPixels * 0.32));
+  context.font = `700 ${fontSize}px "EB Garamond", Georgia, serif`;
+  context.textAlign = 'center';
+  context.textBaseline = baseline;
+  context.lineWidth = Math.max(2, fontSize / 5);
+  context.strokeStyle = vttAlpha(VTT_COLORS.black, 0.9);
+  context.strokeText(text, at.x, at.y);
+  context.fillStyle = VTT_COLORS.parchment;
+  context.fillText(text, at.x, at.y);
 }
 
 const canvasSx = {

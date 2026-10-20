@@ -1,9 +1,14 @@
 // Freehand strokes on a scene, in cell coordinates.
 //
+// The same rows also hold notes (a stroke with words on it) and areas of effect
+// (a stroke with a shape; see areas.js).
+//
 // A raw stroke is hundreds of points sampled at pointer rate, most of them
 // indistinguishable from the line between their neighbours. They are simplified
 // before they are stored: the jsonb is smaller, the realtime payload is smaller,
 // and the redraw is cheaper — for a line nobody can tell apart from the original.
+
+import { isPointOnArea, normalizeArea } from './areas.js';
 
 const DEFAULT_TOLERANCE = 0.08; // cells
 
@@ -77,13 +82,55 @@ export function toDrawing(row) {
     layer: row.layer || 'tokens',
     points: normalizePoints(row.points),
     color: typeof row.color === 'string' ? row.color : null,
-    // Present on a note, absent on a freehand stroke.
+    // Present on a note, absent on a freehand stroke. On an area it is the
+    // label ("Spirit Guardians").
     text: typeof row.text === 'string' && row.text ? row.text : null,
+    area: normalizeArea(row.area),
+    // Hidden by the GM: still on the GM's board, never sent to a player.
+    hiddenFromPlayers: Boolean(row.hidden_from_players),
     width: Math.max(0.5, numberOr(row.width, 3)),
     // Who drew it: a player may rub out their own strokes and nobody else's.
     createdBy: row.created_by || null,
     createdAt: Date.parse(row.created_at) || 0,
   };
+}
+
+// A note is words pinned to one point. A stroke with words on it is a stroke
+// with a label, and an area's words are its label too.
+export function isNote(drawing) {
+  return !drawing?.area && Boolean(drawing?.text) && (drawing?.points?.length || 0) <= 1;
+}
+
+// Where a stroke's label goes. A closed shape — a ring drawn round a door, a
+// room outlined — is labelled in its middle; an open one — an arrow, a path —
+// half way along its length, sitting just above the line so the line stays
+// visible under it. Null for a dot, which has nowhere to put one.
+export function strokeLabelAnchor(points) {
+  const list = normalizePoints(points);
+  if (list.length < 2) return null;
+  const xs = list.map((point) => point.x);
+  const ys = list.map((point) => point.y);
+  const diagonal = Math.hypot(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys));
+  const first = list[0];
+  const last = list[list.length - 1];
+  if (list.length > 2 && Math.hypot(last.x - first.x, last.y - first.y) <= diagonal * 0.25) {
+    return {
+      point: { x: (Math.min(...xs) + Math.max(...xs)) / 2, y: (Math.min(...ys) + Math.max(...ys)) / 2 },
+      above: false,
+    };
+  }
+  const lengths = list.slice(1).map((point, index) => Math.hypot(point.x - list[index].x, point.y - list[index].y));
+  let remaining = lengths.reduce((sum, length) => sum + length, 0) / 2;
+  for (let index = 0; index < lengths.length; index += 1) {
+    if (remaining <= lengths[index] || index === lengths.length - 1) {
+      const t = lengths[index] > 0 ? Math.min(1, remaining / lengths[index]) : 0;
+      const a = list[index];
+      const b = list[index + 1];
+      return { point: { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t }, above: true };
+    }
+    remaining -= lengths[index];
+  }
+  return null;
 }
 
 // A stroke of one point is a dot, which is a legitimate mark; a stroke of none
@@ -100,15 +147,19 @@ export function sanitizeNoteText(value) {
 
 // Which stroke the eraser is over. Distance is measured to the segments, not to
 // the stored points, or erasing a long straight line would only work at its two
-// ends. The newest match wins, matching what is drawn on top.
-export function drawingAtPoint(drawings, point, radius = 0.5) {
+// ends. The newest match wins, matching what is drawn on top. An area is hit
+// anywhere inside it, or with `areaEdgeOnly` only on its rim and origin — what
+// picking one up asks for, so the map can still be panned across it.
+export function drawingAtPoint(drawings, point, radius = 0.5, { areaEdgeOnly = false } = {}) {
   const target = normalizePoint(point);
   if (!target) return null;
   let found = null;
   for (const drawing of drawings || []) {
     const points = drawing?.points || [];
     const reach = radius + (drawing.width || 0) / 20;
-    const hit = points.length === 1
+    const hit = drawing.area
+      ? isPointOnArea(drawing, target, { slop: areaEdgeOnly ? 0.35 : 0.15, edgeOnly: areaEdgeOnly })
+      : points.length === 1
       ? Math.hypot(points[0].x - target.x, points[0].y - target.y) <= reach
       : points.some((point2, index) => (
         index > 0 && distanceToSegment(target, points[index - 1], point2) <= reach
@@ -139,6 +190,22 @@ export function movedPoints(drawing, dx, dy) {
   return normalizePoints((drawing?.points || []).map((point) => ({
     x: point.x + shift.x,
     y: point.y + shift.y,
+  })));
+}
+
+// A stroke made bigger or smaller about the middle of its bounding box, so it
+// grows in place rather than away from its first point.
+export function scaledPoints(points, factor) {
+  const list = normalizePoints(points);
+  const scale = Math.max(0.05, numberOr(factor, 1));
+  if (list.length < 2) return list;
+  const xs = list.map((point) => point.x);
+  const ys = list.map((point) => point.y);
+  const cx = (Math.min(...xs) + Math.max(...xs)) / 2;
+  const cy = (Math.min(...ys) + Math.max(...ys)) / 2;
+  return normalizePoints(list.map((point) => ({
+    x: cx + (point.x - cx) * scale,
+    y: cy + (point.y - cy) * scale,
   })));
 }
 
