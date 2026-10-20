@@ -2,7 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   GHOST_TTL_MS,
+  applyCommittedDrawing,
   applyCommittedToken,
+  applyDrawingEvent,
   applyTokenEvent,
   dropGhost,
   movableFilter,
@@ -161,4 +163,45 @@ test('a row replaces a ghost only once its drag has been let go', () => {
   ghosts = putGhost(ghosts, { id: 't1', x: 7, y: 1, actor: 'gm', released: true });
   assert.deepEqual(settleGhost(ghosts, 't1'), {});
   assert.deepEqual(settleGhost({}, 't1'), {});
+});
+
+// After the drop, a late echo of an older write (hit points from the encounter
+// builder) still stands where the piece was: it must not end the drag preview
+// and show the piece back there until the move's own row arrives.
+test('a released ghost waits for the row standing where the piece was let go', () => {
+  const ghosts = putGhost({}, { id: 't1', x: 7, y: 1, actor: 'gm', released: true });
+  assert.equal(settleGhost(ghosts, 't1', row('t1', { x: 2, y: 1 })), ghosts);
+  assert.deepEqual(settleGhost(ghosts, 't1', row('t1', { x: 7, y: 1 })), {});
+  // A row without a position cannot tell, and does not hold the ghost.
+  assert.deepEqual(settleGhost(ghosts, 't1', { id: 't1' }), {});
+});
+
+const mark = (id, patch = {}) => ({
+  id, scene_id: 's1', layer: 'tokens', points: [{ x: 0, y: 0 }, { x: 1, y: 1 }], color: '#e8c96a', ...patch,
+});
+
+test('mark events add, replace and remove, and an older version is history', () => {
+  let marks = applyDrawingEvent([], { eventType: 'INSERT', new: mark('d1', { updated_at: '2026-10-20T10:00:01Z' }) });
+  assert.equal(marks.length, 1);
+  marks = applyDrawingEvent(marks, {
+    eventType: 'UPDATE', new: mark('d1', { color: '#ff0000', updated_at: '2026-10-20T10:00:03Z' }),
+  });
+  assert.equal(marks[0].color, '#ff0000');
+  // The echo of an earlier colour lands late: kept as it is.
+  const late = applyDrawingEvent(marks, {
+    eventType: 'UPDATE', new: mark('d1', { color: '#00ff00', updated_at: '2026-10-20T10:00:02Z' }),
+  });
+  assert.equal(late, marks);
+  assert.deepEqual(applyDrawingEvent(marks, { eventType: 'DELETE', old: { id: 'd1' } }), []);
+});
+
+// Two colours picked one after the other: the first write's echo lands while
+// the second is still being written, and used to flash the first colour back.
+test('a mark still being written ignores its echoes until its last write answers', () => {
+  const held = [{ id: 'd1', color: '#0000ff', updatedAt: 1000 }];
+  const echo = { eventType: 'UPDATE', new: mark('d1', { color: '#ff0000', updated_at: '2026-10-20T10:00:02Z' }) };
+  assert.equal(applyDrawingEvent(held, echo, { pendingIds: new Set(['d1']) }), held);
+  const answered = applyCommittedDrawing(held, { id: 'd1', color: '#0000ff', updatedAt: 5000 });
+  assert.equal(answered[0].updatedAt, 5000);
+  assert.equal(applyCommittedDrawing(answered, { id: 'd1', color: '#ff0000', updatedAt: 4000 }), answered);
 });

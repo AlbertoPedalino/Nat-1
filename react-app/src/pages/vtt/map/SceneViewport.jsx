@@ -1188,6 +1188,7 @@ export default function SceneViewport({
 
     // Follow the pointer unsnapped so the piece does not stutter between cells;
     // the snap happens once, on drop.
+    state.lastPoint = point;
     const next = dropPosition({
       pointerWorld: screenToWorld(point, view),
       grabOffset: state.grabOffset,
@@ -1307,21 +1308,25 @@ export default function SceneViewport({
 
     if (!state || state.kind !== 'token') return;
 
-    const landing = dropPosition({
-      pointerWorld: screenToWorld(screenPoint(event), view),
+    // A cancelled pointer (the system took the touch) carries no trustworthy
+    // position: the piece lands where it was last seen under the finger.
+    const releasedAt = event.type === 'pointercancel' ? state.lastPoint : screenPoint(event);
+    const landing = releasedAt ? dropPosition({
+      pointerWorld: screenToWorld(releasedAt, view),
       grabOffset: state.grabOffset,
       grid: scene.grid,
       snap: snapFor(state.token),
       span: state.token,
-    });
+    }) : { x: state.token.x, y: state.token.y };
     setDrag(null);
     // One write per gesture, and only when the piece actually changed square.
-    // A drag that ends where it started still needs the final broadcast undone,
-    // which the committed-position handler does for the other viewers.
+    // A drag that ends where it started writes nothing, but is still let go
+    // of, here and on the other screens; a click that never dragged has
+    // nothing to let go of.
     if (landing.x !== state.token.x || landing.y !== state.token.y) {
       onMoveToken?.(state.token, landing);
-    } else {
-      onDragToken?.(state.token, { x: state.token.x, y: state.token.y });
+    } else if (state.lastBroadcast) {
+      onDragToken?.(state.token, { x: state.token.x, y: state.token.y, released: true });
     }
   };
 

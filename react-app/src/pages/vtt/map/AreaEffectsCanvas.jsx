@@ -2,7 +2,8 @@ import { useEffect, useRef } from 'react';
 import { Box } from '@mui/material';
 import { AREA_EFFECTS, areaGeometry } from '../../../shared/vtt/map/areas.js';
 import { cellSize, worldToScreen } from '../../../shared/vtt/map/geometry.js';
-import { createProgram } from '../atmosphere/AtmosphereOverlay.jsx';
+import { createProgram, shaderSeconds } from '../atmosphere/AtmosphereOverlay.jsx';
+import { releaseContext, useContextRecovery } from '../atmosphere/webglCanvas.js';
 import { AREA_FRAGMENT_SHADER, AREA_SHAPE_INDEX, AREA_VERTEX_SHADER } from './areaEffectShader.js';
 
 // The animated insides of the areas that carry an effect (fire, poison…). Its
@@ -16,6 +17,7 @@ export default function AreaEffectsCanvas({ drawings, grid, view }) {
   const stateRef = useRef({ effects, grid, view });
   stateRef.current = { effects, grid, view };
   const active = effects.length > 0;
+  const { generation, failed, recover } = useContextRecovery();
 
   useEffect(() => {
     if (!active) return undefined;
@@ -76,8 +78,7 @@ export default function AreaEffectsCanvas({ drawings, grid, view }) {
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.useProgram(program);
       gl.uniform2f(uniforms.resolution, width, height);
-      // Wrapped well short of where float precision would start to show.
-      gl.uniform1f(uniforms.time, reducedMotion?.matches ? 7 : (Date.now() / 1000) % 600);
+      gl.uniform1f(uniforms.time, reducedMotion?.matches ? 7 : shaderSeconds());
 
       const { effects: shown, grid: currentGrid, view: currentView } = stateRef.current;
       const cell = cellSize(currentGrid) * currentView.zoom;
@@ -138,6 +139,7 @@ export default function AreaEffectsCanvas({ drawings, grid, view }) {
     const handleContextLost = (event) => {
       event.preventDefault();
       stop();
+      recover();
     };
     document.addEventListener('visibilitychange', handleVisibility);
     reducedMotion?.addEventListener?.('change', start);
@@ -153,8 +155,9 @@ export default function AreaEffectsCanvas({ drawings, grid, view }) {
       drawRef.current = null;
       gl.deleteBuffer(buffer);
       gl.deleteProgram(program);
+      releaseContext(gl);
     };
-  }, [active]);
+  }, [active, generation, recover]);
 
   // A pan or a zoom lands in the same frame as the map, not on the next tick
   // of the animation.
@@ -162,8 +165,8 @@ export default function AreaEffectsCanvas({ drawings, grid, view }) {
     drawRef.current?.();
   }, [drawings, grid, view]);
 
-  if (!active) return null;
-  return <Box component="canvas" ref={canvasRef} aria-hidden data-area-effects sx={canvasSx} />;
+  if (!active || failed) return null;
+  return <Box component="canvas" key={generation} ref={canvasRef} aria-hidden data-area-effects sx={canvasSx} />;
 }
 
 // A stable per-area offset into the noise, so two fires side by side do not

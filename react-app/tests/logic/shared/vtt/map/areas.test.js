@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { AREA_FRAGMENT_SHADER } from '../../../../../src/pages/vtt/map/areaEffectShader.js';
 import {
   AREA_EFFECTS,
   areaEdgeDistance,
@@ -35,6 +36,13 @@ test('an area description is reduced to what the canvas trusts', () => {
     { shape: 'line', filled: false, effect: 'fire', breadth: 0.1 },
   );
   assert.ok(AREA_EFFECTS.every((effect) => effect.color && effect.label));
+});
+
+test('every effect has its own branch in the shader', () => {
+  // Effects are drawn by their 1-based index: n effects take n - 1
+  // `u_effect < k.5` tests and a final else.
+  const tests = AREA_FRAGMENT_SHADER.match(/u_effect < \d+\.5/g) || [];
+  assert.equal(tests.length, AREA_EFFECTS.length - 1);
 });
 
 test('feet become cells on the map scale', () => {

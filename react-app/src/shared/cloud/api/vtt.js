@@ -37,7 +37,7 @@ const SIGNED_URL_MARGIN_MS = 15 * 60 * 1000;
 const SIGNED_URL_KEY = 'gb:vtt:signed-url:';
 const SCENE_COLUMNS = 'id, campaign_id, name, image_path, background_path, shown_image, grid, atmosphere, fog, is_live, play_area, updated_at';
 const TOKEN_COLUMNS = 'id, scene_id, layer, hidden_from_players, x, y, w, h, z, character_id, label, color, image_path, image_url, icon_key, icon_stroke_width, rotation, hp_current, hp_max, conditions, effects, source_ref, show_hp, created_by, updated_at';
-const DRAWING_COLUMNS = 'id, scene_id, layer, points, color, width, text, area, hidden_from_players, created_by, created_at';
+const DRAWING_COLUMNS = 'id, scene_id, layer, points, color, width, text, area, hidden_from_players, created_by, created_at, updated_at';
 
 export async function listScenes(campaignId) {
   const supabase = requireClient();
@@ -359,17 +359,17 @@ export async function listDrawings(sceneId) {
   return (data || []).map(toDrawing).filter(Boolean);
 }
 
-// Strokes have no version column, so the recovery poll compares ids only: a
-// new or erased stroke shows up here, a moved one is left to realtime and to
-// the full read on reconnect.
-export async function listDrawingIds(sceneId) {
+// Id and version of every mark the caller may see, in listDrawings order, for
+// the recovery poll: a new, erased or edited mark shows up here. RLS applies as
+// to listDrawings, so a mark the GM hid is simply missing.
+export async function listDrawingRevisions(sceneId) {
   const { data, error } = await requireClient()
     .from('map_drawings')
-    .select('id')
+    .select('id, updated_at')
     .eq('scene_id', sceneId)
     .order('created_at', { ascending: true });
   if (error) throw error;
-  return (data || []).map((row) => row.id);
+  return (data || []).map((row) => ({ id: row.id, updatedAt: Date.parse(row.updated_at) || 0 }));
 }
 
 export async function listDrawingsByIds(sceneId, ids) {

@@ -40,6 +40,7 @@ import {
   uploadMapImage,
 } from '../../../shared/cloud/api/vtt.js';
 import {
+  applyCommittedDrawing,
   applyCommittedToken,
   applyTokenEvent,
   dropGhost,
@@ -167,6 +168,10 @@ const CampaignSheetView = lazy(() => import('../../campaignsheet/CampaignSheetVi
 const GRID_SAVE_DELAY = 600;
 const ATMOSPHERE_SAVE_DELAY = 400;
 const GHOST_SWEEP_MS = 2000;
+// A piece held still under the pointer sends no frames, and the other screens
+// would sweep its ghost away and show it back where it started. The last frame
+// is sent again this often, well inside GHOST_TTL_MS.
+const DRAG_KEEPALIVE_MS = 1500;
 const LASER_TTL_MS = 2500;
 // How long an open projector in this browser has to say it is there.
 const PROJECTOR_ANSWER_MS = 400;
@@ -242,6 +247,7 @@ export default function SceneEditor({
   const { user } = useAuth();
   const role = useSceneRole(scene.campaignId);
   const {
+    beginDrawingWrite,
     beginTokenMove,
     movingTokenIds,
     drawings,
@@ -313,6 +319,8 @@ export default function SceneEditor({
   const atmosphereTimerRef = useRef(null);
   const playAreaTimerRef = useRef(null);
   const draggingRef = useRef(null);
+  // The last drag frame sent to the table, repeated while the piece is held.
+  const dragFrameRef = useRef(null);
   const gridEditRef = useRef(false);
   const paintingRef = useRef(false);
   const fogBroadcastRef = useRef(0);
@@ -593,10 +601,12 @@ export default function SceneEditor({
       pendingIds: movingTokenIds(),
     }));
     const id = payload?.new?.id || payload?.old?.id;
-    // The committed row supersedes the drag preview once the drag is over; a
-    // removed piece takes its ghost with it at once.
+    // The row the drop wrote supersedes the drag preview once the drag is over;
+    // a removed piece takes its ghost with it at once.
     const removed = String(payload?.eventType || payload?.type || '').toUpperCase() === 'DELETE';
-    if (id) setGhosts((current) => (removed ? dropGhost(current, id) : settleGhost(current, id)));
+    if (id) {
+      setGhosts((current) => (removed ? dropGhost(current, id) : settleGhost(current, id, payload?.new)));
+    }
   }, [movingTokenIds]);
 
   const handleSceneEvent = useCallback((payload) => {
@@ -701,10 +711,9 @@ export default function SceneEditor({
     setProjectorInspection(inspection);
   }, []);
   // Runs every 30 seconds on every device at the table, so it asks for
-  // versions first and reads a row (the scene with its fog, a sheet, a fight)
-  // only when that version moved. A reconnect also re-reads the strokes, which
-  // have no version to compare.
-  const reconcilePersistentState = useCallback(async ({ reason } = {}) => {
+  // versions first and reads a row (the scene with its fog, a piece, a mark, a
+  // fight) only when that version moved.
+  const reconcilePersistentState = useCallback(async () => {
     // The picture is part of the scene as much as the row is. A load that
     // failed earlier is not visible in the data, so repair it here too —
     // unless one is still running, whose download this would only restart.
@@ -718,7 +727,7 @@ export default function SceneEditor({
     };
     const [freshScene] = await Promise.all([
       readSceneIfMoved(),
-      reconcileContent({ fullDrawings: reason === 'subscribed' }),
+      reconcileContent(),
       gmVitals.reconcile(),
     ]);
     if (freshScene && !gridEditRef.current && !paintingRef.current) onSceneChange(freshScene);
@@ -821,12 +830,34 @@ export default function SceneEditor({
   );
 
   const handleDragToken = useCallback((token, position) => {
+    const { released, ...place } = position;
+    const moving = { ...token, ...place };
+    const shown = isTokenVisibleToPlayers(moving, scene.playArea);
+    // Put back where it was picked up: nothing to write, but the other screens
+    // let go of the drag and this one listens to the piece's row again.
+    if (released) {
+      if (draggingRef.current === token.id) draggingRef.current = null;
+      dragFrameRef.current = null;
+      if (shown) sendDrag({ id: token.id, x: place.x, y: place.y, released: true });
+      return;
+    }
     draggingRef.current = token.id;
-    const moving = { ...token, ...position };
-    if (isTokenVisibleToPlayers(moving, scene.playArea)) {
-      sendDrag({ id: token.id, x: position.x, y: position.y });
+    if (shown) {
+      dragFrameRef.current = { id: token.id, x: place.x, y: place.y, at: Date.now() };
+      sendDrag({ id: token.id, x: place.x, y: place.y });
     }
   }, [scene.playArea, sendDrag]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const frame = dragFrameRef.current;
+      if (!frame || draggingRef.current !== frame.id) return;
+      if (Date.now() - frame.at < DRAG_KEEPALIVE_MS) return;
+      frame.at = Date.now();
+      sendDrag({ id: frame.id, x: frame.x, y: frame.y });
+    }, DRAG_KEEPALIVE_MS / 2);
+    return () => clearInterval(timer);
+  }, [sendDrag]);
 
   const handleMoveToken = useCallback(async (token, position) => {
     const finishMove = beginTokenMove([token.id]);
@@ -835,9 +866,12 @@ export default function SceneEditor({
     setTokens((current) => current.map((item) => (
       item.id === token.id ? { ...item, ...position } : item
     )));
+    dragFrameRef.current = null;
     // Let go where it landed, before the write: other screens keep showing
-    // the drag until then, and only then take the row that comes back.
-    if (willBeVisible) sendDrag({ id: token.id, x: position.x, y: position.y, released: true });
+    // the drag until then, and only then take the row that comes back. A turn
+    // or a resize has no place to land on and no drag to let go of.
+    const placed = Number.isFinite(position?.x) && Number.isFinite(position?.y);
+    if (placed && willBeVisible) sendDrag({ id: token.id, x: position.x, y: position.y, released: true });
     let committed = null;
     try {
       committed = await updateToken(token.id, position);
@@ -1097,15 +1131,21 @@ export default function SceneEditor({
     setDrawings((current) => current.map((item) => (
       item.id === drawing.id ? { ...item, points } : item
     )));
+    const finishWrite = beginDrawingWrite(drawing.id);
+    let committed = null;
     try {
-      await moveDrawing(drawing.id, points);
+      committed = await moveDrawing(drawing.id, points);
     } catch (cause) {
       setDrawings((current) => current.map((item) => (
         item.id === drawing.id ? drawing : item
       )));
       notify('error', cause?.message || 'Could not move that mark.');
+    } finally {
+      // Echoes of this mark waited while it was being written; the last
+      // write's answer is the row now.
+      if (finishWrite() && committed) setDrawings((current) => applyCommittedDrawing(current, committed));
     }
-  }, [notify]);
+  }, [beginDrawingWrite, notify]);
 
   // An area of effect is a mark too: one row, same undo and eraser.
   const handlePlaceArea = useCallback(async ({ points, area, text }) => {
@@ -1148,15 +1188,21 @@ export default function SceneEditor({
 
   const handleSaveDrawing = useCallback(async (drawing, patch) => {
     handlePreviewDrawing(drawing, patch);
+    const finishWrite = beginDrawingWrite(drawing.id);
+    let committed = null;
     try {
-      await updateDrawing(drawing.id, patch);
+      committed = await updateDrawing(drawing.id, patch);
       return true;
     } catch (cause) {
       notify('error', cause?.message || 'Could not change that mark.');
       reconcileContent({ fullDrawings: true });
       return false;
+    } finally {
+      // As for a move: a colour picked twice in a row must not flash back to
+      // the first one when its echo lands after the second write.
+      if (finishWrite() && committed) setDrawings((current) => applyCommittedDrawing(current, committed));
     }
-  }, [handlePreviewDrawing, notify, reconcileContent]);
+  }, [beginDrawingWrite, handlePreviewDrawing, notify, reconcileContent, setDrawings]);
 
   const handleDrawingVisibility = useCallback(async (drawing, hidden) => {
     if (await handleSaveDrawing(drawing, { hiddenFromPlayers: Boolean(hidden) })) {

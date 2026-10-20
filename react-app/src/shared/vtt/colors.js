@@ -63,6 +63,7 @@ export const VTT_COLORS = Object.freeze({
   areaNecrotic: '#9a6ad8',
   areaRadiant: '#ffd86a',
   areaDarkness: '#7a6a9a',
+  areaThorns: '#8f9a45',
 });
 
 export function vttAlpha(color, alpha) {

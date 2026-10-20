@@ -19,7 +19,7 @@ vi.mock('../../../../../src/shared/cloud/supabaseClient.js', () => {
 });
 
 import {
-  fetchSceneRevision, listDrawingIds, listLiveCampaignIds, readLiveSceneId, listDrawingsByIds, listTokenRevisions, listTokensByIds,
+  fetchSceneRevision, listDrawingRevisions, listLiveCampaignIds, readLiveSceneId, listDrawingsByIds, listTokenRevisions, listTokensByIds,
 } from '../../../../../src/shared/cloud/api/vtt.js';
 import {
   listCharacterDigests, readCharacterSheets,
@@ -37,7 +37,7 @@ test.each([
   ['scene', () => fetchSceneRevision('s1'), 'map_scenes'],
   ['live scene', () => readLiveSceneId('c1'), 'campaign_live_scenes'],
   ['pieces', () => listTokenRevisions('s1'), 'map_tokens'],
-  ['strokes', () => listDrawingIds('s1'), 'map_drawings'],
+  ['marks', () => listDrawingRevisions('s1'), 'map_drawings'],
   ['character digests', () => listCharacterDigests({ campaignId: 'c1' }), 'character_digests'],
   ['fights', () => listFightRevisions(['f1']), 'encounter_fights'],
 ])('the %s version check reads no payload columns', async (_, read, table) => {

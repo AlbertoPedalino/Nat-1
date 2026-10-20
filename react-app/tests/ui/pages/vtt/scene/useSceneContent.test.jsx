@@ -4,7 +4,7 @@ import { useSceneContent } from '../../../../../src/pages/vtt/scene/useSceneCont
 
 const cloud = vi.hoisted(() => ({
   listTokens: vi.fn(), listDrawings: vi.fn(), listTokenSecrets: vi.fn(), signMapImage: vi.fn(),
-  listTokenRevisions: vi.fn(), listTokensByIds: vi.fn(), listDrawingIds: vi.fn(), listDrawingsByIds: vi.fn(),
+  listTokenRevisions: vi.fn(), listTokensByIds: vi.fn(), listDrawingRevisions: vi.fn(), listDrawingsByIds: vi.fn(),
 }));
 vi.mock('../../../../../src/shared/cloud/api/vtt.js', () => cloud);
 
@@ -18,7 +18,7 @@ beforeEach(() => {
   cloud.listDrawings.mockReset().mockResolvedValue([]);
   cloud.listTokenSecrets.mockReset().mockResolvedValue({});
   for (const name of [
-    'listTokenRevisions', 'listTokensByIds', 'listDrawingIds', 'listDrawingsByIds',
+    'listTokenRevisions', 'listTokensByIds', 'listDrawingRevisions', 'listDrawingsByIds',
   ]) cloud[name].mockReset().mockResolvedValue([]);
 });
 function openScene() {
@@ -164,13 +164,13 @@ describe('light reconciliation', () => {
     await waitFor(() => expect(view.result.current.loading).toBe(false));
     for (const fn of Object.values(cloud)) fn.mockClear();
     cloud.listTokenRevisions.mockResolvedValue(tokens.map(({ id, updatedAt }) => ({ id, updatedAt })));
-    cloud.listDrawingIds.mockResolvedValue(drawings.map(({ id }) => id));
+    cloud.listDrawingRevisions.mockResolvedValue(drawings.map(({ id, updatedAt }) => ({ id, updatedAt })));
     return view;
   }
 
   test('a quiet table reads versions only', async () => {
     const { result } = await settledScene({
-      tokens: [token('a', 1)], drawings: [{ id: 'd', points: [] }],
+      tokens: [token('a', 1)], drawings: [{ id: 'd', points: [], updatedAt: 1 }],
     });
     const before = { tokens: result.current.tokens, drawings: result.current.drawings };
     await act(async () => { await result.current.reconcileContent(); });
@@ -201,18 +201,40 @@ describe('light reconciliation', () => {
     expect(cloud.listTokensByIds).not.toHaveBeenCalled();
   });
 
-  test('new and erased strokes are found by id; a reconnect re-reads them all', async () => {
-    const { result } = await settledScene({ drawings: [{ id: 'kept', points: [] }, { id: 'erased', points: [] }] });
-    cloud.listDrawingIds.mockResolvedValue(['kept', 'added']);
-    cloud.listDrawingsByIds.mockResolvedValue([{ id: 'added', points: [1] }]);
+  test('new, erased and edited marks are found by version; a full re-read takes them all', async () => {
+    const { result } = await settledScene({
+      drawings: [
+        { id: 'kept', points: [], updatedAt: 1 },
+        { id: 'moved', points: [0], updatedAt: 1 },
+        { id: 'erased', points: [], updatedAt: 1 },
+      ],
+    });
+    cloud.listDrawingRevisions.mockResolvedValue([
+      { id: 'kept', updatedAt: 1 }, { id: 'moved', updatedAt: 2 }, { id: 'added', updatedAt: 1 },
+    ]);
+    cloud.listDrawingsByIds.mockResolvedValue([
+      { id: 'moved', points: [3], updatedAt: 2 }, { id: 'added', points: [1], updatedAt: 1 },
+    ]);
     await act(async () => { await result.current.reconcileContent(); });
-    expect(cloud.listDrawingsByIds).toHaveBeenCalledWith('scene', ['added']);
-    expect(result.current.drawings.map((item) => item.id)).toEqual(['kept', 'added']);
+    expect(cloud.listDrawingsByIds).toHaveBeenCalledWith('scene', ['moved', 'added']);
+    expect(result.current.drawings.map((item) => item.id)).toEqual(['kept', 'moved', 'added']);
+    expect(result.current.drawings[1].points).toEqual([3]);
 
-    cloud.listDrawings.mockResolvedValueOnce([{ id: 'kept', points: [5] }, { id: 'added', points: [1] }]);
+    cloud.listDrawings.mockResolvedValueOnce([{ id: 'kept', points: [5], updatedAt: 1 }]);
     await act(async () => { await result.current.reconcileContent({ fullDrawings: true }); });
-    expect(cloud.listDrawingIds).toHaveBeenCalledTimes(1);
-    expect(result.current.drawings[0].points).toEqual([5]);
+    expect(cloud.listDrawingRevisions).toHaveBeenCalledTimes(1);
+    expect(result.current.drawings).toEqual([{ id: 'kept', points: [5], updatedAt: 1 }]);
+  });
+
+  test('a mark being written keeps what this screen shows against a poll', async () => {
+    const { result } = await settledScene({ drawings: [{ id: 'd', points: [0], updatedAt: 1 }] });
+    let finish;
+    act(() => { finish = result.current.beginDrawingWrite('d'); });
+    cloud.listDrawingRevisions.mockResolvedValue([{ id: 'd', updatedAt: 2 }]);
+    cloud.listDrawingsByIds.mockResolvedValue([{ id: 'd', points: [9], updatedAt: 2 }]);
+    await act(async () => { await result.current.reconcileContent(); });
+    expect(result.current.drawings[0].points).toEqual([0]);
+    expect(finish()).toBe(true);
   });
 
   test('before the first full read lands, recovery is the full read', async () => {
