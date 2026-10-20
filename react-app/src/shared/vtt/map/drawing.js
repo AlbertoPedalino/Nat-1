@@ -92,6 +92,8 @@ export function toDrawing(row) {
     // Who drew it: a player may rub out their own strokes and nobody else's.
     createdBy: row.created_by || null,
     createdAt: Date.parse(row.created_at) || 0,
+    // The database's version of the row: late echoes are measured against it.
+    updatedAt: Date.parse(row.updated_at) || 0,
   };
 }
 

@@ -62,7 +62,7 @@ vec2 moteDrift(float salt) {
 }
 
 // Travel has to be applied here, against this small coefficient, and never by
-// translating p at the call site: u_time runs to 4096, so an offset added
+// translating p at the call site: u_time runs for hours (shaderSeconds), so an offset added
 // outside reaches hundreds of units, and once it is multiplied by scale the
 // sub-cell position that draws the mote falls below what mediump can represent.
 // The motes then vanish entirely, and they do it minutes into a session rather
@@ -99,9 +99,17 @@ float dustMoteLayer(vec2 p, vec2 drift, float scale, float time, float salt, flo
   return circle * exists * (0.6 + sizeVariation * 0.28);
 }`;
 
+// High precision where the GPU has it. Phones and tablets honour mediump as
+// 16-bit floats, where a clock of a few thousand seconds only advances in
+// whole-second steps and the hash noise breaks into blocks: the weather
+// jerked and flickered on them while it ran smoothly on a desktop.
 export function createAtmosphereFragmentShader({ helpers = '', body }) {
   return `
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
 precision mediump float;
+#endif
 varying vec2 v_uv;
 uniform vec2 u_resolution;
 uniform float u_time;

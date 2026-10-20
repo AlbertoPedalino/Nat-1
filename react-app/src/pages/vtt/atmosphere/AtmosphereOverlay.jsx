@@ -86,7 +86,7 @@ export default function AtmosphereOverlay({ atmosphere }) {
       const active = configRef.current;
       const seconds = reducedMotion?.matches
         ? active.seed * 0.17
-        : ((Date.now() / 1000) % 4096);
+        : shaderSeconds();
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.useProgram(program);
@@ -174,6 +174,20 @@ export default function AtmosphereOverlay({ atmosphere }) {
       }}
     />
   );
+}
+
+// The clock the animated overlays run on: seconds since the page opened. Not
+// the wall clock: that has to be wrapped to fit a float, and every wrap made
+// the whole effect jump to another frame at once (every 68 minutes for the
+// weather). This one wraps only after four hours of one open page, short enough that
+// the fastest effects still read time finely in a 32-bit float.
+const CLOCK_ORIGIN = globalThis.performance?.now?.() ?? Date.now();
+const CLOCK_PERIOD_S = 4 * 60 * 60;
+
+export function shaderSeconds() {
+  const now = globalThis.performance?.now?.() ?? Date.now();
+  // Started a minute in: some effects open with a quiet frame at zero.
+  return (60 + (now - CLOCK_ORIGIN) / 1000) % CLOCK_PERIOD_S;
 }
 
 // Also used by the area-of-effect canvas, which draws with the same care.

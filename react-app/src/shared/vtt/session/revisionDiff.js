@@ -1,9 +1,9 @@
 // Light recovery for a live scene: compare the ids and versions the database
 // reports with what this client holds, and name only the rows worth fetching.
 //
-// Versions are whatever the table has — `updated_at` for scenes, pieces and
-// fights, nothing at all for strokes (ids only). Sheets are not here: the
-// roster follows character digests (useCharacterDigests).
+// Versions are the tables' `updated_at`: scenes, pieces, marks and fights.
+// Sheets are not here: the roster follows character digests
+// (useCharacterDigests).
 
 // Past this many changed rows one full read is cheaper and simpler than a long
 // `id=in.(…)` list.
@@ -26,9 +26,6 @@ export function diffRevisions(remote, held, isStale = (theirs, ours) => theirs !
   const removed = [...held.keys()].filter((id) => !seen.has(id));
   return { ids, changed, removed, clean: !changed.length && !removed.length };
 }
-
-// Strokes carry no version: any id we hold is current.
-export const idsOnly = () => false;
 
 // The list in the database's order: fetched rows where we asked for them, held
 // ones elsewhere. An id that vanished between the check and the fetch is left

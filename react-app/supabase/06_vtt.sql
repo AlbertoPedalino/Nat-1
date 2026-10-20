@@ -229,6 +229,11 @@ alter table public.map_drawings add column if not exists area jsonb;
 -- Hidden by the GM from the drawing's menu, like a piece: its layer is kept,
 -- the players are simply never sent it.
 alter table public.map_drawings add column if not exists hidden_from_players boolean not null default false;
+-- Set by the database on every change (trigger below), never by a client: the
+-- recovery poll compares it to tell an edited mark (moved, recoloured,
+-- relabelled) from one it already holds, and late realtime echoes are put in
+-- order with it.
+alter table public.map_drawings add column if not exists updated_at timestamptz not null default now();
 
 create index if not exists map_scenes_campaign_idx on public.map_scenes(campaign_id);
 create index if not exists map_drawings_scene_idx on public.map_drawings(scene_id);
@@ -250,6 +255,10 @@ create trigger map_scenes_touch before update on public.map_scenes
 
 drop trigger if exists map_tokens_touch on public.map_tokens;
 create trigger map_tokens_touch before update on public.map_tokens
+  for each row execute function public.touch_updated_at();
+
+drop trigger if exists map_drawings_touch on public.map_drawings;
+create trigger map_drawings_touch before update on public.map_drawings
   for each row execute function public.touch_updated_at();
 
 drop trigger if exists map_token_secrets_touch on public.map_token_secrets;

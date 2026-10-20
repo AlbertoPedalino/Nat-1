@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  listDrawingIds, listDrawings, listDrawingsByIds, listTokenRevisions, listTokenSecrets,
+  listDrawingRevisions, listDrawings, listDrawingsByIds, listTokenRevisions, listTokenSecrets,
   listTokens, listTokensByIds, signMapImage,
 } from '../../../shared/cloud/api/vtt.js';
 import {
-  assembleSnapshot, diffRevisions, idsOnly, tooManyToTarget,
+  assembleSnapshot, diffRevisions, tooManyToTarget,
 } from '../../../shared/vtt/session/revisionDiff.js';
-import { toDrawing } from '../../../shared/vtt/map/drawing.js';
+import { applyDrawingEvent } from '../../../shared/vtt/session/liveScene.js';
 
 function attachSecrets(tokens, secrets, held = []) {
   const previous = Object.fromEntries(
@@ -52,6 +52,7 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
   const tokensRef = useRef(tokens);
   const drawingsRef = useRef(drawings);
   const tokenMovesRef = useRef(new Map());
+  const drawingWritesRef = useRef(new Map());
   // Whether a full read has landed for this scene: the light recovery needs
   // something held to compare with.
   const loadedRef = useRef(false);
@@ -80,6 +81,22 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
   // Pieces with a move still being written: their realtime echoes wait.
   const movingTokenIds = useCallback(() => new Set(tokenMovesRef.current.keys()), []);
 
+  // The same count for a mark being edited or moved. Finishing answers whether
+  // that was the mark's last write in flight, whose row is then final.
+  const beginDrawingWrite = useCallback((id) => {
+    const writes = drawingWritesRef.current;
+    writes.set(id, (writes.get(id) || 0) + 1);
+    return () => {
+      const count = writes.get(id) || 0;
+      if (count <= 1) {
+        writes.delete(id);
+        return true;
+      }
+      writes.set(id, count - 1);
+      return false;
+    };
+  }, []);
+
   const loadContent = useCallback(async ({ initial = false } = {}) => {
     const request = ++loadRequestRef.current;
     const tokenRequest = ++tokenRequestRef.current;
@@ -100,7 +117,9 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
           current, baselineTokens, attachSecrets(sceneTokens, secrets, current), protectedIds,
         ));
       }
-      setDrawings((current) => mergeSnapshot(current, baselineDrawings, sceneDrawings));
+      setDrawings((current) => mergeSnapshot(
+        current, baselineDrawings, sceneDrawings, new Set(drawingWritesRef.current.keys()),
+      ));
       loadedRef.current = true;
       // A reconnect can supersede the initial request. Whichever request wins
       // must release the loading screen.
@@ -116,9 +135,9 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
 
   // The recovery poll. Versions first (ids plus updated_at), then only the
   // rows that moved: a quiet table costs a few hundred bytes instead of every
-  // stroke and piece again. `fullDrawings` is for a
-  // reconnect, where a moved stroke — which has no version to compare — may
-  // have been missed.
+  // stroke and piece again. `fullDrawings` re-reads every mark, for when what
+  // this client shows may differ from the row at the same version (a refused
+  // edit's preview).
   const reconcileContent = useCallback(async ({ fullDrawings = false } = {}) => {
     // Nothing held yet to compare against: the full read is the recovery.
     if (!loadedRef.current) return loadContent();
@@ -128,10 +147,10 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
     const baselineDrawings = drawingsRef.current;
     const protectedIds = new Set(tokenMovesRef.current.keys());
     try {
-      const [tokenRevisions, secrets, drawingIds] = await Promise.all([
+      const [tokenRevisions, secrets, drawingRevisions] = await Promise.all([
         listTokenRevisions(scene.id),
         isGm && !spectator ? listTokenSecrets(scene.id) : Promise.resolve({}),
-        fullDrawings ? Promise.resolve(null) : listDrawingIds(scene.id),
+        fullDrawings ? Promise.resolve(null) : listDrawingRevisions(scene.id),
       ]);
       if (request !== loadRequestRef.current) return;
 
@@ -144,10 +163,9 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
         heldTokens.has(id) && (heldTokens.get(id).secretLabel || '') !== label
       ));
 
-      const drawingDiff = drawingIds && diffRevisions(
-        drawingIds.map((id) => ({ id })),
-        new Map(baselineDrawings.map((drawing) => [drawing.id, undefined])),
-        idsOnly,
+      const drawingDiff = drawingRevisions && diffRevisions(
+        drawingRevisions.map(({ id, updatedAt }) => ({ id, version: updatedAt })),
+        new Map(baselineDrawings.map((drawing) => [drawing.id, drawing.updatedAt])),
       );
 
       const targeted = (diff, fetchAll, fetchSome) => {
@@ -181,7 +199,9 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
             new Map(baselineDrawings.map((drawing) => [drawing.id, drawing])),
           )
           : freshDrawings;
-        setDrawings((current) => mergeSnapshot(current, baselineDrawings, incoming));
+        setDrawings((current) => mergeSnapshot(
+          current, baselineDrawings, incoming, new Set(drawingWritesRef.current.keys()),
+        ));
       }
     } catch (_) {
       // Best effort: the next tick, focus or reconnect tries again, and a
@@ -233,22 +253,13 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
   }, [isGm, scene.id, spectator]);
 
   const handleDrawingEvent = useCallback((payload) => {
-    const type = String(payload?.eventType || '').toUpperCase();
-    if (type === 'DELETE') {
-      const id = payload?.old?.id || payload?.old_record?.id;
-      if (id) setDrawings((current) => current.filter((item) => item.id !== id));
-      return;
-    }
-    const drawing = toDrawing(payload?.new);
-    if (!drawing) return;
-    setDrawings((current) => (
-      current.some((item) => item.id === drawing.id)
-        ? current.map((item) => (item.id === drawing.id ? drawing : item))
-        : [...current, drawing]
-    ));
+    setDrawings((current) => applyDrawingEvent(current, payload, {
+      pendingIds: new Set(drawingWritesRef.current.keys()),
+    }));
   }, []);
 
   return {
+    beginDrawingWrite,
     beginTokenMove,
     movingTokenIds,
     drawings,

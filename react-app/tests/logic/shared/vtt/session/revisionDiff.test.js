@@ -4,7 +4,6 @@ import {
   MAX_TARGETED_IDS,
   assembleSnapshot,
   diffRevisions,
-  idsOnly,
   tooManyToTarget,
 } from '../../../../../src/shared/vtt/session/revisionDiff.js';
 
@@ -24,12 +23,6 @@ test('moved, new and vanished rows are told apart', () => {
   assert.deepEqual(diff.changed, ['b', 'c']);
   assert.deepEqual(diff.removed, ['gone']);
   assert.equal(diff.clean, false);
-});
-
-test('strokes compare by id only', () => {
-  const diff = diffRevisions([{ id: 'a' }, { id: 'new' }], new Map([['a', undefined], ['erased', undefined]]), idsOnly);
-  assert.deepEqual(diff.changed, ['new']);
-  assert.deepEqual(diff.removed, ['erased']);
 });
 
 test('the snapshot keeps database order and drops a changed row that did not come back', () => {

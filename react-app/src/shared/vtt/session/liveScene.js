@@ -8,6 +8,7 @@
 // A "ghost" is the broadcast position of a piece somebody else is dragging right
 // now. It is presentation only: the committed row always wins once it lands.
 
+import { toDrawing } from '../map/drawing.js';
 import { canMoveToken, toToken } from '../scene/scene.js';
 
 export const GHOST_TTL_MS = 5000;
@@ -83,13 +84,28 @@ export function putGhost(ghosts, { id, x, y, actor, released } = {}, now = Date.
   };
 }
 
-// A row event replaces a ghost only once its drag has been let go. While the
-// piece is still being dragged — picked up again before the last drop came
-// back — the late row is an earlier position, and taking it made the piece
-// jump back and then follow the pointer again. A drag whose release never
-// arrives still expires with the ghost sweep.
-export function settleGhost(ghosts, id) {
-  return ghosts?.[id]?.released ? dropGhost(ghosts, id) : ghosts;
+// A row event replaces a ghost only once its drag has been let go, and only
+// with the row the drop wrote — the one standing where the piece was let go.
+// While the piece is still being dragged — picked up again before the last
+// drop came back — the late row is an earlier position, and taking it made the
+// piece jump back and then follow the pointer again. After the drop, a late
+// echo of an older write (hit points from the encounter builder, say) still
+// stands where the piece was before: taking it pulled the piece back until
+// the move's own row arrived. A drop whose row never comes, like a drag whose
+// release never arrives, expires with the ghost sweep.
+export function settleGhost(ghosts, id, row = null) {
+  const ghost = ghosts?.[id];
+  if (!ghost?.released) return ghosts;
+  if (row && !standsAt(row, ghost)) return ghosts;
+  return dropGhost(ghosts, id);
+}
+
+function standsAt(row, ghost) {
+  const x = Number(row.x);
+  const y = Number(row.y);
+  // A row without a position says nothing about where the piece is.
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return true;
+  return Math.abs(x - ghost.x) < 1e-6 && Math.abs(y - ghost.y) < 1e-6;
 }
 
 export function dropGhost(ghosts, id) {
@@ -123,4 +139,42 @@ export function resolveTokens(tokens, ghosts, draggingId = null) {
 // other RLS mirrors — one place to change when the policy changes.
 export function movableFilter(role) {
   return (token) => canMoveToken(token, role);
+}
+
+// Marks (strokes, notes, areas) follow the same rules as pieces, without the
+// drag preview: an edit from the menu or a move writes the row, and the
+// realtime echo of an earlier write can land after a later one.
+//
+// `pendingIds` are marks this client is still writing: their echoes wait, and
+// the last write's own answer brings the row in (applyCommittedDrawing). A
+// version older than the one held is history.
+export function applyDrawingEvent(drawings, event, { pendingIds = null } = {}) {
+  const list = Array.isArray(drawings) ? drawings : [];
+  const type = String(event?.eventType || event?.type || '').toUpperCase();
+
+  if (type === 'DELETE') {
+    const removedId = event?.old?.id || event?.oldRecord?.id || event?.old_record?.id;
+    if (!removedId) return list;
+    return list.filter((drawing) => drawing.id !== removedId);
+  }
+
+  const drawing = toDrawing(event?.new || event?.record);
+  if (!drawing) return list;
+  if (pendingIds?.has(drawing.id)) return list;
+  const index = list.findIndex((item) => item.id === drawing.id);
+  if (index < 0) return [...list, drawing];
+  if (isOlder(drawing, list[index])) return list;
+  const next = list.slice();
+  next[index] = drawing;
+  return next;
+}
+
+export function applyCommittedDrawing(drawings, committed) {
+  const list = Array.isArray(drawings) ? drawings : [];
+  if (!committed?.id) return list;
+  const index = list.findIndex((item) => item.id === committed.id);
+  if (index < 0 || isOlder(committed, list[index])) return list;
+  const next = list.slice();
+  next[index] = committed;
+  return next;
 }

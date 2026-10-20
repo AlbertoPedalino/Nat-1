@@ -125,6 +125,7 @@ vi.mock('../../../../../src/pages/vtt/scene/useCampaignRoster.js', () => ({
 }));
 vi.mock('../../../../../src/pages/vtt/scene/useSceneContent.js', () => ({
   useSceneContent: () => ({
+    beginDrawingWrite: () => () => true,
     beginTokenMove: beginTokenMoveMock,
     drawings: [
       { id: 'public-drawing', layer: 'tokens', color: '#ffffff' },
@@ -646,6 +647,30 @@ test.each([
   expect(finishTokenMoveMock).toHaveBeenCalledTimes(1);
 });
 
+// A turn or a resize goes through the same handler as a move, with no place in
+// it: letting go of a drag there sent the piece to the map's corner on every
+// other screen until its row arrived.
+test('turning a piece lets go of no drag on the other screens', async () => {
+  updateTokenMock.mockResolvedValueOnce(null);
+  sendDragMock.mockClear();
+  const scene = {
+    id: 'scene-turning', campaignId: 'campaign-1', shownImage: 'map',
+    imagePath: null, backgroundPath: null, fog: null, atmosphere: null,
+    isLive: true, playArea: null, grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
+  };
+  render(<ThemeProvider theme={theme}><SceneEditor scene={scene} onSceneChange={vi.fn()} /></ThemeProvider>);
+  const props = sceneViewportMock.mock.calls.at(-1)[0];
+  await act(async () => {
+    await props.onRotateToken({ id: 'turning', layer: 'tokens', x: 2, y: 3 }, { rotation: 90 });
+  });
+  expect(sendDragMock.mock.calls.filter(([payload]) => payload?.id === 'turning')).toEqual([]);
+
+  await act(async () => {
+    await props.onMoveToken({ id: 'turning', layer: 'tokens', x: 2, y: 3 }, { x: 4, y: 3 });
+  });
+  expect(sendDragMock).toHaveBeenCalledWith({ id: 'turning', x: 4, y: 3, released: true });
+});
+
 test('an obsolete image load cannot restart the current image during reconciliation', async () => {
   sceneViewportMock.mockClear();
   signMapImageMock.mockReset().mockImplementation(async (path) => `signed:${path}`);
@@ -820,7 +845,7 @@ describe('light scene reconciliation', () => {
     await act(async () => { await sceneLiveOptions.current.onReconcile({ reason: 'interval' }); });
     expect(fetchSceneRevisionMock).toHaveBeenCalledWith('scene-light');
     expect(fetchSceneMock).not.toHaveBeenCalled();
-    expect(refreshContentMock).toHaveBeenCalledWith({ fullDrawings: false });
+    expect(refreshContentMock).toHaveBeenCalledWith();
     expect(onSceneChange).not.toHaveBeenCalled();
   });
 
@@ -834,11 +859,11 @@ describe('light scene reconciliation', () => {
     expect(onSceneChange).toHaveBeenCalledWith(fresh);
   });
 
-  test('a reconnect also re-reads every stroke', async () => {
+  test('a reconnect checks the marks by version like any other recovery', async () => {
     fetchSceneRevisionMock.mockResolvedValue(1000);
     renderScene();
     await act(async () => { await sceneLiveOptions.current.onReconcile({ reason: 'subscribed' }); });
-    expect(refreshContentMock).toHaveBeenCalledWith({ fullDrawings: true });
+    expect(refreshContentMock).toHaveBeenCalledWith();
   });
 
   test('a scene the caller can no longer see is left as it is', async () => {

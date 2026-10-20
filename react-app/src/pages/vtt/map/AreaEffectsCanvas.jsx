@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Box } from '@mui/material';
 import { AREA_EFFECTS, areaGeometry } from '../../../shared/vtt/map/areas.js';
 import { cellSize, worldToScreen } from '../../../shared/vtt/map/geometry.js';
-import { createProgram } from '../atmosphere/AtmosphereOverlay.jsx';
+import { createProgram, shaderSeconds } from '../atmosphere/AtmosphereOverlay.jsx';
 import { AREA_FRAGMENT_SHADER, AREA_SHAPE_INDEX, AREA_VERTEX_SHADER } from './areaEffectShader.js';
 
 // The animated insides of the areas that carry an effect (fire, poison…). Its
@@ -76,8 +76,7 @@ export default function AreaEffectsCanvas({ drawings, grid, view }) {
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.useProgram(program);
       gl.uniform2f(uniforms.resolution, width, height);
-      // Wrapped well short of where float precision would start to show.
-      gl.uniform1f(uniforms.time, reducedMotion?.matches ? 7 : (Date.now() / 1000) % 600);
+      gl.uniform1f(uniforms.time, reducedMotion?.matches ? 7 : shaderSeconds());
 
       const { effects: shown, grid: currentGrid, view: currentView } = stateRef.current;
       const cell = cellSize(currentGrid) * currentView.zoom;
