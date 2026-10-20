@@ -4,7 +4,7 @@ import { listTokenSecretHp } from '../../../shared/cloud/api/vtt.js';
 import { listFightRevisions, listFightVitals } from '../../../shared/cloud/api/encounterFights.js';
 import { diffRevisions } from '../../../shared/vtt/session/revisionDiff.js';
 import { parseSourceRef } from '../../../shared/vtt/tokens/encounterSync.js';
-import { withGmTokenVitals } from '../../../shared/vtt/tokens/fightVitals.js';
+import { newerFightRow, withGmTokenVitals } from '../../../shared/vtt/tokens/fightVitals.js';
 
 // The GM's real hit points for the pieces of a scene. Public rows carry HP
 // only while a bar is shown, so the GM reads the private sources instead:
@@ -32,6 +32,8 @@ export function useGmTokenVitals({ sceneId, tokens, enabled }) {
     ]);
     if (request !== requestRef.current) return;
     if (secretHp) setByToken(secretHp);
+    // Taken whole: this is the read that recovers from anything, a fight made
+    // anew under the same id (its revision starting again) included.
     if (fightRows) setFights(Object.fromEntries(fightRows.map((row) => [String(row.id), row])));
   }, [enabled, fightKey, sceneId]);
 
@@ -58,7 +60,10 @@ export function useGmTokenVitals({ sceneId, tokens, enabled }) {
     if (request !== requestRef.current || !fresh) return;
     const byId = new Map(fresh.map((row) => [String(row.id), row]));
     setFights((current) => Object.fromEntries(diff.ids
-      .map((id) => [id, byId.get(id) || (diff.changed.includes(id) ? null : current[id])])
+      .map((id) => [id, byId.has(id)
+        // The poll's read may have left before a realtime event arrived.
+        ? newerFightRow(current[id], byId.get(id))
+        : (diff.changed.includes(id) ? null : current[id])])
       .filter(([, row]) => row)));
   }, [enabled, fightKey, sceneId]);
 
@@ -93,7 +98,9 @@ export function useGmTokenVitals({ sceneId, tokens, enabled }) {
           event: 'UPDATE', schema: 'public', table: 'encounter_fights', filter: `id=in.(${fightKey})`,
         }, (payload) => {
           const row = payload?.new;
-          if (row?.id) setFights((current) => ({ ...current, [String(row.id)]: row }));
+          if (row?.id) {
+            setFights((current) => ({ ...current, [String(row.id)]: newerFightRow(current[String(row.id)], row) }));
+          }
         });
       }
       // A reconnect does not replay missed events: read again.

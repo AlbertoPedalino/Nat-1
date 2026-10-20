@@ -11,7 +11,7 @@
 
 import { cardTime, dedupeLibraryById } from './library.js';
 
-export const FIGHT_COLUMNS = 'id, instance_id, name, encounter_id, encounter, fight, updated_at';
+export const FIGHT_COLUMNS = 'id, instance_id, name, encounter_id, encounter, fight, updated_at, vitals_revision';
 
 // The builder mints both ids with `Date.now()` — numbers — and half the code
 // that finds a fight or its library card compares them with `===`. The column is
@@ -40,6 +40,12 @@ export function toFightEntry(row) {
     // another screen arrives as a fight nothing can open.
     encounter: row.encounter && typeof row.encounter === 'object' ? row.encounter : null,
     fight: row.fight,
+    // Advanced by the database on every enemy-vitals command and nothing else,
+    // so it orders rows where `updated_at` cannot (an ordinary save stamps
+    // that with the browser's clock). Null when the read did not carry it.
+    vitalsRevision: row.vitals_revision == null || !Number.isFinite(Number(row.vitals_revision))
+      ? null
+      : Number(row.vitals_revision),
   };
 }
 

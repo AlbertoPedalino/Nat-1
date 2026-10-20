@@ -49,6 +49,19 @@ export function useCloudFights({
   // What the database is known to hold, per fight: the last version we wrote or
   // were told about. A fight whose signature still matches has nothing to say.
   const settledRef = useRef(new Map());
+  // The newest vitals revision seen per fight. Realtime can deliver the row of
+  // an earlier command after the answer to a later one; taking it put the old
+  // hit points back on screen until the next echo put the new ones back.
+  const vitalsSeenRef = useRef(new Map());
+  const freshVitals = useCallback((entry) => {
+    const revision = entry?.vitalsRevision;
+    if (revision == null) return true;
+    const key = String(entry.id);
+    const seen = vitalsSeenRef.current.get(key);
+    if (seen != null && revision < seen) return false;
+    vitalsSeenRef.current.set(key, revision);
+    return true;
+  }, []);
   // Discovering a cloud row is not a local deletion intent. The reducer may
   // hide it in favour of the fight still running on this screen.
   const localIdsRef = useRef(new Set());
@@ -132,10 +145,10 @@ export function useCloudFights({
     // local vitals command is still in flight its own answer realigns instead.
     const activeKey = held.activeFightId == null ? null : String(held.activeFightId);
     const active = activeKey ? rows.find((entry) => String(entry.id) === activeKey) : null;
-    if (active && !isVitalsBusyRef.current?.(active.id)) {
+    if (active && !isVitalsBusyRef.current?.(active.id) && freshVitals(active)) {
       dispatchRef.current({ type: 'absorbFightVitals', fightId: active.id, fight: active.fight });
     }
-  }, []);
+  }, [freshVitals]);
 
   const refresh = useCallback(async () => {
     if (!canSync) return;
@@ -166,6 +179,11 @@ export function useCloudFights({
     // left to remember.
     for (const key of [...removedRef.current.keys()]) {
       if (!stillThere.has(key)) removedRef.current.delete(key);
+    }
+    // A fight gone from the database starts its count again if it is made anew.
+    const standing = new Set(all.map((entry) => String(entry.id)));
+    for (const key of [...vitalsSeenRef.current.keys()]) {
+      if (!standing.has(key)) vitalsSeenRef.current.delete(key);
     }
 
     absorbRows(rows);
@@ -207,10 +225,10 @@ export function useCloudFights({
   // first, so taking its vitals does not look like a local edit to save.
   const acceptRemoteFight = useCallback((row) => {
     const entry = toFightEntry(row);
-    if (!entry) return;
+    if (!entry || !freshVitals(entry)) return;
     settledRef.current.set(String(entry.id), fightSignature(entry));
     dispatchRef.current({ type: 'absorbFightVitals', fightId: entry.id, fight: entry.fight });
-  }, []);
+  }, [freshVitals]);
 
   // A local edit already sent through its own command: the full save has
   // nothing to add for it.
@@ -280,6 +298,7 @@ export function useCloudFights({
       if (!localIdsRef.current.has(key)) continue;
       localIdsRef.current.delete(key);
       settledRef.current.delete(key);
+      vitalsSeenRef.current.delete(key);
       // The pending write goes first. A fight saved half a second ago and
       // deleted now would otherwise have its own timer put the row back after
       // the delete had already run, and the encounter would be standing there

@@ -2,12 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   GHOST_TTL_MS,
+  applyCommittedToken,
   applyTokenEvent,
   dropGhost,
   movableFilter,
   pruneGhosts,
   putGhost,
   resolveTokens,
+  settleGhost,
 } from '../../../../../src/shared/vtt/session/liveScene.js';
 
 const row = (id, patch = {}) => ({
@@ -107,4 +109,56 @@ test('a player may drag only their own non-GM pieces', () => {
 
   const gm = movableFilter({ isGm: true });
   assert.equal(gm({ layer: 'gm', characterId: null }), true);
+});
+
+// The rubber band: a piece moved twice in quick succession. The first move's
+// echo lands while the second is still being written, and used to pull the
+// piece back before the second echo pushed it forward again.
+test('a piece moved twice never jumps back to its first drop', () => {
+  const at = (iso) => ({ updated_at: iso });
+  let tokens = applyTokenEvent([], { eventType: 'INSERT', new: row('t1', { x: 0, ...at('2026-10-21T10:00:00.000Z') }) });
+  // Both drops shown locally at once.
+  tokens = tokens.map((token) => ({ ...token, x: 2 }));
+  tokens = tokens.map((token) => ({ ...token, x: 5 }));
+
+  // The first echo while the second write is in flight: held back.
+  const first = row('t1', { x: 2, ...at('2026-10-21T10:00:01.000Z') });
+  tokens = applyTokenEvent(tokens, { eventType: 'UPDATE', new: first }, { pendingIds: new Set(['t1']) });
+  assert.equal(tokens[0].x, 5);
+
+  // The second write answers: that row is the piece now.
+  const second = row('t1', { x: 5, hp_current: 7, ...at('2026-10-21T10:00:02.000Z') });
+  const committed = applyTokenEvent([], { eventType: 'INSERT', new: second })[0];
+  tokens = applyCommittedToken(tokens, committed);
+  assert.equal(tokens[0].x, 5);
+  assert.equal(tokens[0].hpCurrent, 7);
+
+  // The first echo arriving even later than that is history, not news.
+  tokens = applyTokenEvent(tokens, { eventType: 'UPDATE', new: first });
+  assert.equal(tokens[0].x, 5);
+
+  // Anything newer still comes through.
+  tokens = applyTokenEvent(tokens, { eventType: 'UPDATE', new: row('t1', { x: 8, ...at('2026-10-21T10:00:03.000Z') }) });
+  assert.equal(tokens[0].x, 8);
+});
+
+test('a committed row keeps the GM-only label and never replaces a newer one', () => {
+  const held = [{ id: 't1', x: 3, updatedAt: 2000, secretLabel: 'Pit' }];
+  assert.deepEqual(applyCommittedToken(held, { id: 't1', x: 1, updatedAt: 1000 }), held);
+  const after = applyCommittedToken(held, { id: 't1', x: 4, updatedAt: 3000, secretLabel: '' });
+  assert.equal(after[0].x, 4);
+  assert.equal(after[0].secretLabel, 'Pit');
+});
+
+// The same rubber band on everybody else's screen: the piece is picked up
+// again before its first drop comes back, and that late row used to wipe the
+// ghost of the second drag.
+test('a row replaces a ghost only once its drag has been let go', () => {
+  let ghosts = putGhost({}, { id: 't1', x: 6, y: 1, actor: 'gm' });
+  // The first drop's row lands while the second drag is still going.
+  assert.equal(settleGhost(ghosts, 't1'), ghosts);
+  // Let go: the next row is the one this drag produced.
+  ghosts = putGhost(ghosts, { id: 't1', x: 7, y: 1, actor: 'gm', released: true });
+  assert.deepEqual(settleGhost(ghosts, 't1'), {});
+  assert.deepEqual(settleGhost({}, 't1'), {});
 });
