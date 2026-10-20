@@ -19,7 +19,7 @@ import {
   worldToScreen,
   zoomAt,
 } from '../../../shared/vtt/map/geometry.js';
-import { measureLabel, movementLabel } from '../../../shared/vtt/map/measure.js';
+import { measureLabel, movementLabel, snapRuler } from '../../../shared/vtt/map/measure.js';
 import { createMeasurePublisher } from '../../../shared/vtt/map/measureSync.js';
 import { suppressGestureSelection } from '../../../shared/vtt/map/gestureSelection.js';
 import { movedPoints } from '../../../shared/vtt/map/drawing.js';
@@ -913,7 +913,7 @@ export default function SceneViewport({
     }
 
     if (event.button === 0 && paintMode === 'measure') {
-      const at = cellPoint(point);
+      const at = snapRuler(measureShape, cellPoint(point), cellPoint(point), { hex: isHexGrid(scene.grid) }).from;
       dragRef.current = { kind: 'measure', from: at };
       setMeasure({ shape: measureShape, from: at, to: at, label: '' });
       return;
@@ -1130,7 +1130,7 @@ export default function SceneViewport({
     if (state.kind === 'note') return;
 
     if (state.kind === 'measure') {
-      const at = cellPoint(point);
+      const { to: at } = snapRuler(measureShape, state.from, cellPoint(point), { hex: isHexGrid(scene.grid) });
       const next = {
         shape: measureShape,
         from: state.from,

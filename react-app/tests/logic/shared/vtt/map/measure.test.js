@@ -12,6 +12,7 @@ import {
   formatMiles,
   movementLabel,
   overlandLabel,
+  snapRuler,
   stepsBetween,
 } from '../../../../../src/shared/vtt/map/measure.js';
 
@@ -109,4 +110,37 @@ test('a custom cell scale is honoured, and nonsense falls back to five feet', ()
   assert.equal(feetBetween({ x: 0, y: 0 }, { x: 2, y: 0 }, { feetPerCell: 0 }), 10);
   assert.equal(feetBetween({ x: 0, y: 0 }, { x: 2, y: 0 }, { feetPerCell: 'x' }), 10);
   assert.equal(formatFeet(12.4), '12 ft');
+});
+
+// The line used to follow the pointer while its number jumped at the middle of
+// each square: nobody could tell where 5 ft ended and 10 ft began. Now both
+// ends sit in the middle of their squares and the number moves on as the
+// pointer enters the next one.
+test('the ruler runs from square to square and its number moves on at the border', () => {
+  const start = { x: 2.2, y: 3.9 };
+  const label = (shape, to) => {
+    const snapped = snapRuler(shape, start, to);
+    return measureLabel(shape, snapped.from, snapped.to);
+  };
+  assert.deepEqual(snapRuler('line', start, { x: 3.95, y: 3.1 }), { from: { x: 2.5, y: 3.5 }, to: { x: 3.5, y: 3.5 } });
+  // Still in the next square: 5 ft, however far into it.
+  assert.equal(label('line', { x: 3.05, y: 3.5 }), '5 ft');
+  assert.equal(label('line', { x: 3.95, y: 3.5 }), '5 ft');
+  // Over the border into the one after: 10 ft.
+  assert.equal(label('line', { x: 4.02, y: 3.5 }), '10 ft');
+});
+
+test('a template is drawn exactly as big as its label, a square at a time', () => {
+  const start = { x: 0.4, y: 0.4 };
+  // Three across and three down from the start: 4.24 squares away, a 20 ft
+  // reach, and the drawn end is 4 squares out along that direction.
+  const { from, to } = snapRuler('radius', start, { x: 3.6, y: 3.6 });
+  assert.deepEqual(from, { x: 0.5, y: 0.5 });
+  assert.ok(Math.abs(Math.hypot(to.x - from.x, to.y - from.y) - 4) < 1e-9);
+  assert.equal(measureLabel('radius', from, to), '20 ft radius');
+  // Not out of the starting square yet: nothing drawn.
+  assert.deepEqual(snapRuler('cone', start, { x: 0.9, y: 0.1 }).to, { x: 0.5, y: 0.5 });
+  // Hexes are left alone.
+  const hex = { x: 1.3, y: 2.7 };
+  assert.deepEqual(snapRuler('line', hex, hex, { hex: true }), { from: hex, to: hex });
 });

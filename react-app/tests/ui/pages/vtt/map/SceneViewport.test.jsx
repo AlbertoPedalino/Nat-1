@@ -1579,7 +1579,8 @@ describe('shared ruler traffic', () => {
     const shown = onMeasure.mock.calls.map(([value]) => value);
     // 39 pointer moves in ~160ms: a handful of messages, not 39.
     expect(shown.length).toBeLessThanOrEqual(5);
-    expect(shown.at(-1).to.x).toBeCloseTo(400 / 50, 1);
+    // The middle of the square under the last position (x = 8 squares in).
+    expect(shown.at(-1).to.x).toBeCloseTo(8.5, 5);
 
     fireEvent.pointerUp(surface(), { clientX: 400, clientY: 10, pointerId: 3 });
     expect(onMeasure).toHaveBeenLastCalledWith(null);
