@@ -823,6 +823,44 @@ test('the reconciliation leaves a picture that is already on screen alone', asyn
   }
 });
 
+// Picking a second atmosphere while the first was still being saved: the
+// first write finishing used to lift the guard for every scene edit, and its
+// echo then put the old atmosphere back before the new one returned.
+test('a second atmosphere picked mid-save is not undone by the echo of the first', async () => {
+  const scene = {
+    id: 'scene-weather', campaignId: 'campaign-1', name: 'Weather', shownImage: 'map',
+    imagePath: null, backgroundPath: null, fog: null, atmosphere: null, isLive: true,
+    playArea: null, updatedAt: Date.parse('2026-10-20T10:00:00Z'),
+    grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
+  };
+  const saves = [];
+  updateSceneMock.mockImplementation(() => new Promise((resolve) => { saves.push(resolve); }));
+  const onSceneChange = vi.fn();
+  render(<ThemeProvider theme={theme}><SceneEditor scene={scene} onSceneChange={onSceneChange} /></ThemeProvider>);
+  const corner = [].concat(sceneViewportMock.mock.calls.at(-1)[0].imageSwitch.props.children)
+    .find((element) => element?.props?.onAtmosphereChange);
+  const row = (type, at) => ({
+    id: scene.id, campaign_id: scene.campaignId, name: scene.name, atmosphere: { type }, updated_at: at,
+  });
+  const atmospheres = () => onSceneChange.mock.calls.map(([next]) => next?.atmosphere?.type);
+
+  act(() => { corner.props.onAtmosphereChange({ type: 'rain' }); });
+  await waitFor(() => expect(saves).toHaveLength(1));
+  act(() => { corner.props.onAtmosphereChange({ type: 'snow' }); });
+  // The rain write lands and its echo arrives while snow is still waiting.
+  await act(async () => { saves[0](null); });
+  act(() => { sceneLiveOptions.current.onSceneEvent({ new: row('rain', '2026-10-20T10:00:01Z') }); });
+  expect(atmospheres()).toEqual(['rain', 'snow']);
+
+  await waitFor(() => expect(saves).toHaveLength(2));
+  await act(async () => { saves[1](null); });
+  act(() => { sceneLiveOptions.current.onSceneEvent({ new: row('snow', '2026-10-20T10:00:02Z') }); });
+  expect(atmospheres()).toEqual(['rain', 'snow', 'snow']);
+  // A row older than the scene this screen holds is history.
+  act(() => { sceneLiveOptions.current.onSceneEvent({ new: row('rain', '2026-10-20T09:59:59Z') }); });
+  expect(atmospheres()).toEqual(['rain', 'snow', 'snow']);
+});
+
 describe('light scene reconciliation', () => {
   const scene = {
     id: 'scene-light', campaignId: 'campaign-1', name: 'Quiet table',

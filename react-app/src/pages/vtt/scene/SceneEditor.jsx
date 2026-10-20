@@ -321,7 +321,29 @@ export default function SceneEditor({
   const draggingRef = useRef(null);
   // The last drag frame sent to the table, repeated while the piece is held.
   const dragFrameRef = useRef(null);
-  const gridEditRef = useRef(false);
+  // Scene fields this screen has changed and not finished writing (grid,
+  // atmosphere, play area), each with the token of its latest change. One
+  // shared flag was cleared by the first write to finish while a later change
+  // was still waiting: picking a second atmosphere then let the echo of the
+  // first one in, and the screen went new, old, new.
+  const sceneEditsRef = useRef(new Map());
+  const beginSceneEdit = useCallback((field) => {
+    const token = {};
+    sceneEditsRef.current.set(field, token);
+    return () => {
+      if (sceneEditsRef.current.get(field) === token) sceneEditsRef.current.delete(field);
+    };
+  }, []);
+  // Whether a scene row from elsewhere may replace what this screen shows:
+  // not while one of our own edits or a fog stroke is still on its way, and
+  // never a version older than the one held (a recovery read that left before
+  // the latest echo arrived).
+  const acceptsScene = useCallback((next) => (
+    Boolean(next)
+    && !sceneEditsRef.current.size
+    && !paintingRef.current
+    && !(next.updatedAt && sceneUpdatedAtRef.current && next.updatedAt < sceneUpdatedAtRef.current)
+  ), []);
   const paintingRef = useRef(false);
   const fogBroadcastRef = useRef(0);
   // The fog the brush works on. It follows the scene between strokes; during
@@ -611,11 +633,10 @@ export default function SceneEditor({
 
   const handleSceneEvent = useCallback((payload) => {
     const next = toScene(payload?.new);
-    // Ignore remote scene changes while this client is editing the grid fields
-    // or painting: the echo of our own debounced write would overwrite the
+    // The echo of our own debounced write would overwrite the edit or the
     // stroke still in progress.
-    if (next && !gridEditRef.current && !paintingRef.current) onSceneChange(next);
-  }, [onSceneChange]);
+    if (acceptsScene(next)) onSceneChange(next);
+  }, [acceptsScene, onSceneChange]);
 
   // One channel carries several kinds of ephemeral message, so each is
   // recognised by its own field. The token-drag guard used to run first and
@@ -730,8 +751,8 @@ export default function SceneEditor({
       reconcileContent(),
       gmVitals.reconcile(),
     ]);
-    if (freshScene && !gridEditRef.current && !paintingRef.current) onSceneChange(freshScene);
-  }, [gmVitals, onSceneChange, reconcileContent, scene.id]);
+    if (acceptsScene(freshScene)) onSceneChange(freshScene);
+  }, [acceptsScene, gmVitals, onSceneChange, reconcileContent, scene.id]);
   const {
     sendDrag, sendCamera, sendPresenterState, sendPresenterInspection,
   } = useSceneLive({
@@ -977,27 +998,27 @@ export default function SceneEditor({
   }, [notify, sendDrag]);
 
   const handleGridChange = useCallback((grid) => {
-    gridEditRef.current = true;
+    const finishEdit = beginSceneEdit('grid');
     onSceneChange({ ...scene, grid });
     clearTimeout(gridTimerRef.current);
     gridTimerRef.current = setTimeout(() => {
       updateScene(scene.id, { grid })
         .catch((cause) => notify('error', cause?.message || 'Could not save the grid.'))
-        .finally(() => { gridEditRef.current = false; });
+        .finally(finishEdit);
     }, GRID_SAVE_DELAY);
-  }, [notify, onSceneChange, scene]);
+  }, [beginSceneEdit, notify, onSceneChange, scene]);
 
   const handleAtmosphereChange = useCallback((atmosphere) => {
     const next = normalizeAtmosphere(atmosphere);
-    gridEditRef.current = true;
+    const finishEdit = beginSceneEdit('atmosphere');
     onSceneChange({ ...scene, atmosphere: next });
     clearTimeout(atmosphereTimerRef.current);
     atmosphereTimerRef.current = setTimeout(() => {
       updateScene(scene.id, { atmosphere: next })
         .catch((cause) => notify('error', cause?.message || 'Could not save the atmosphere.'))
-        .finally(() => { gridEditRef.current = false; });
+        .finally(finishEdit);
     }, ATMOSPHERE_SAVE_DELAY);
-  }, [notify, onSceneChange, scene]);
+  }, [beginSceneEdit, notify, onSceneChange, scene]);
 
   // Painting mirrors the token drag: every stroke frame goes out on broadcast,
   // and the database sees one write when the brush lifts.
@@ -1293,16 +1314,16 @@ export default function SceneEditor({
   // keystroke, and this one changes what the players can see.
   const handlePlayAreaChange = useCallback((playArea) => {
     const area = normalizePlayArea(playArea);
-    gridEditRef.current = true;
+    const finishEdit = beginSceneEdit('playArea');
     onSceneChange({ ...scene, playArea: area });
     clearTimeout(playAreaTimerRef.current);
     playAreaTimerRef.current = setTimeout(() => {
       updateScene(scene.id, { playArea: area })
         .then(() => sendDrag({ tokensChanged: true }))
         .catch((cause) => notify('error', cause?.message || 'Could not save the play area.'))
-        .finally(() => { gridEditRef.current = false; });
+        .finally(finishEdit);
     }, GRID_SAVE_DELAY);
-  }, [notify, onSceneChange, scene, sendDrag]);
+  }, [beginSceneEdit, notify, onSceneChange, scene, sendDrag]);
 
   // The map itself is the sensible play area: the GM only ever needs to change
   // it to make room for staging outside the picture.
