@@ -114,3 +114,15 @@ export function monsterEditFromToken(token, edit) {
   }) || [before];
   return { before, after };
 }
+
+// Of two copies of one fight row, the one with the newer enemy vitals. The
+// database advances `vitals_revision` on every vitals command and on nothing
+// else, so it orders a late read against a realtime event where `updated_at`
+// (stamped by the browser on an ordinary save) cannot. Either copy lacking it
+// is not compared: the incoming one wins, as before.
+export function newerFightRow(held, incoming) {
+  const before = Number(held?.vitals_revision);
+  const after = Number(incoming?.vitals_revision);
+  if (held && Number.isFinite(before) && Number.isFinite(after) && after < before) return held;
+  return incoming;
+}

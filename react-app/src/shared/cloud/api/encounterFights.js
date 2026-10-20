@@ -63,7 +63,7 @@ export async function listFightVitals(fightIds) {
   if (!ids.length) return [];
   const { data, error } = await requireClient()
     .from('encounter_fights')
-    .select('id, instance_id, fight, updated_at')
+    .select('id, instance_id, fight, updated_at, vitals_revision')
     .in('id', ids);
   if (error) throw error;
   return data || [];

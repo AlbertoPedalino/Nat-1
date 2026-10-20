@@ -58,16 +58,27 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
   tokensRef.current = tokens;
   drawingsRef.current = drawings;
 
+  // Each move's write is counted per piece. Finishing one answers which pieces
+  // have nothing else in flight, so the caller knows whose answer is final.
   const beginTokenMove = useCallback((ids) => {
     for (const id of ids) tokenMovesRef.current.set(id, (tokenMovesRef.current.get(id) || 0) + 1);
     return () => {
+      const settled = [];
       for (const id of ids) {
         const count = tokenMovesRef.current.get(id) || 0;
-        if (count <= 1) tokenMovesRef.current.delete(id);
-        else tokenMovesRef.current.set(id, count - 1);
+        if (count <= 1) {
+          tokenMovesRef.current.delete(id);
+          settled.push(id);
+        } else {
+          tokenMovesRef.current.set(id, count - 1);
+        }
       }
+      return settled;
     };
   }, []);
+
+  // Pieces with a move still being written: their realtime echoes wait.
+  const movingTokenIds = useCallback(() => new Set(tokenMovesRef.current.keys()), []);
 
   const loadContent = useCallback(async ({ initial = false } = {}) => {
     const request = ++loadRequestRef.current;
@@ -239,6 +250,7 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
 
   return {
     beginTokenMove,
+    movingTokenIds,
     drawings,
     handleDrawingEvent,
     loading,

@@ -309,3 +309,46 @@ describe('realtime events without re-reading the instance', () => {
     await act(async () => finish([FIGHT]));
   });
 });
+
+// The flicker: clicking an enemy's hit points down, the answer to the last
+// command lands, then Realtime delivers the row of an earlier command — and the
+// old value showed again until the next echo. Rows are ordered by the
+// database's vitals revision, not by when they happen to arrive.
+test('a late row from an earlier vitals command never puts old hit points back', async () => {
+  const hp = (value) => ({ combatants: [{ id: 'gob', type: 'monster', hpCurrent: value, hpMax: 7 }], currentTurn: 0, round: 1 });
+  const row = (revision, value) => ({
+    id: '900', instance_id: 'enc_a', name: 'Room', encounter_id: '500', encounter: CARD,
+    fight: hp(value), updated_at: '2026-10-21T10:00:00Z', vitals_revision: revision,
+  });
+  mocks.listInstanceFights.mockResolvedValue([{ ...FIGHT, fight: hp(7), vitalsRevision: 1 }]);
+  const dispatch = vi.fn();
+  const hookRef = { current: null };
+  function ActiveHarness() {
+    hookRef.current = useCloudFights({
+      instanceId: 'enc_a',
+      fights: [{ ...FIGHT, fight: hp(7) }],
+      library: [CARD],
+      activeFightId: 900,
+      dispatch,
+      isVitalsBusy: () => false,
+    });
+    return null;
+  }
+  render(<ActiveHarness />);
+  await waitFor(() => expect(mocks.listInstanceFights).toHaveBeenCalledTimes(1));
+  await act(async () => {});
+  const absorbed = () => dispatch.mock.calls
+    .filter(([action]) => action.type === 'absorbFightVitals')
+    .map(([action]) => action.fight.combatants[0].hpCurrent);
+  dispatch.mockClear();
+
+  // The answer to the third command: 4 hit points left.
+  act(() => { hookRef.current.acceptRemoteFight(row(4, 4)); });
+  // The second command's echo, late.
+  await act(async () => { await mocks.fireRemoteChange({ eventType: 'UPDATE', new: row(3, 5) }); });
+  // The third command's own echo, and then somebody else's newer edit.
+  await act(async () => { await mocks.fireRemoteChange({ eventType: 'UPDATE', new: row(4, 4) }); });
+  await act(async () => { await mocks.fireRemoteChange({ eventType: 'UPDATE', new: row(5, 2) }); });
+
+  expect(absorbed()).toEqual([4, 4, 2]);
+});

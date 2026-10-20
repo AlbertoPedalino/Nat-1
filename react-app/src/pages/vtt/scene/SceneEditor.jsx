@@ -40,11 +40,13 @@ import {
   uploadMapImage,
 } from '../../../shared/cloud/api/vtt.js';
 import {
+  applyCommittedToken,
   applyTokenEvent,
   dropGhost,
   movableFilter,
   pruneGhosts,
   putGhost,
+  settleGhost,
   resolveTokens,
 } from '../../../shared/vtt/session/liveScene.js';
 import {
@@ -241,6 +243,7 @@ export default function SceneEditor({
   const role = useSceneRole(scene.campaignId);
   const {
     beginTokenMove,
+    movingTokenIds,
     drawings,
     handleDrawingEvent,
     loading,
@@ -585,11 +588,16 @@ export default function SceneEditor({
   }, [role.isGm]);
 
   const handleTokenEvent = useCallback((payload) => {
-    setTokens((current) => applyTokenEvent(current, payload, { draggingId: draggingRef.current }));
+    setTokens((current) => applyTokenEvent(current, payload, {
+      draggingId: draggingRef.current,
+      pendingIds: movingTokenIds(),
+    }));
     const id = payload?.new?.id || payload?.old?.id;
-    // The committed row supersedes whatever the drag preview was showing.
-    if (id) setGhosts((current) => dropGhost(current, id));
-  }, []);
+    // The committed row supersedes the drag preview once the drag is over; a
+    // removed piece takes its ghost with it at once.
+    const removed = String(payload?.eventType || payload?.type || '').toUpperCase() === 'DELETE';
+    if (id) setGhosts((current) => (removed ? dropGhost(current, id) : settleGhost(current, id)));
+  }, [movingTokenIds]);
 
   const handleSceneEvent = useCallback((payload) => {
     const next = toScene(payload?.new);
@@ -827,8 +835,12 @@ export default function SceneEditor({
     setTokens((current) => current.map((item) => (
       item.id === token.id ? { ...item, ...position } : item
     )));
+    // Let go where it landed, before the write: other screens keep showing
+    // the drag until then, and only then take the row that comes back.
+    if (willBeVisible) sendDrag({ id: token.id, x: position.x, y: position.y, released: true });
+    let committed = null;
     try {
-      await updateToken(token.id, position);
+      committed = await updateToken(token.id, position);
       if (wasVisible !== willBeVisible) sendDrag({ tokensChanged: true });
     } catch (cause) {
       setTokens((current) => current.map((item) => (item.id === token.id ? token : item)));
@@ -837,7 +849,12 @@ export default function SceneEditor({
       // Released only after the write settles: until then a remote echo would
       // still be our own move coming back.
       draggingRef.current = null;
-      finishMove();
+      const settled = finishMove();
+      // The last move of this piece to come back answers for it: its echoes
+      // were held back while moves were in flight.
+      if (committed && settled.includes(token.id)) {
+        setTokens((current) => applyCommittedToken(current, committed));
+      }
     }
   }, [beginTokenMove, notify, scene.playArea, sendDrag]);
 
@@ -856,7 +873,15 @@ export default function SceneEditor({
 
     const results = await Promise.allSettled(
       valid.map(({ token, position }) => updateToken(token.id, position)),
-    ).finally(finishMove);
+    );
+    const settled = new Set(finishMove());
+    // As for a single move: rows whose last write this was come in whole.
+    const committedRows = results.flatMap((result) => (
+      result.status === 'fulfilled' && result.value && settled.has(result.value.id) ? [result.value] : []
+    ));
+    if (committedRows.length) {
+      setTokens((current) => committedRows.reduce(applyCommittedToken, current));
+    }
     const failedIds = new Set(results.flatMap((result, index) => (
       result.status === 'rejected' ? [valid[index].token.id] : []
     )));
