@@ -343,10 +343,11 @@ test('token and condition hover changes are reported to the presenter', () => {
   expect(onInspectionChange).toHaveBeenCalledWith({ tokenId: 'goblin-1', conditionKey: 'prone' });
 });
 
-// A reminder is there to be read at a glance: written out above the piece
-// without hovering, and never folded into the numbered badge.
-test('reminders are always written above the token and are not counted in the badge', () => {
-  render(
+// A reminder is there to be read at a glance, so the first one is written
+// inside the cell without hovering, with a count of the rest; hovering writes
+// the rest out above the piece. Never folded into the numbered badge.
+test('reminders are written on the token, in full on hover, and are not counted in the badge', () => {
+  const { container } = render(
     <TokenSprite
       token={{
         id: 'hero-1',
@@ -365,15 +366,20 @@ test('reminders are always written above the token and are not counted in the ba
     />,
   );
 
-  expect(screen.getByText('Bardic Inspiration')).toBeInTheDocument();
-  expect(screen.getByText('Guidance')).toBeInTheDocument();
+  const inline = container.querySelector('[data-token-reminders]');
+  expect(inline).toHaveTextContent('Bardic Inspiration');
+  expect(inline).toHaveTextContent('+1');
+  expect(screen.queryByText('Guidance')).not.toBeInTheDocument();
   // Prone only; the two reminders are not marks.
   expect(screen.getByText('1')).toBeInTheDocument();
   expect(screen.queryByText('Prone')).not.toBeInTheDocument();
 
   fireEvent.pointerEnter(screen.getByRole('button', { name: 'Aria' }));
   expect(screen.getByText('Prone')).toBeInTheDocument();
+  expect(screen.getByText('Guidance')).toBeInTheDocument();
+  // The first reminder stays put in the cell; only the rest open above.
   expect(screen.getAllByText('Bardic Inspiration')).toHaveLength(1);
+  expect(inline).toHaveTextContent('Bardic Inspiration');
 });
 
 test('a token with only reminders wears no badge', () => {
@@ -449,4 +455,25 @@ test('a touch that drags the piece does not open its condition pills', () => {
   touch(token, 'pointermove', { x: 60 });
   touch(token, 'pointerup');
   expect(screen.queryByText('Prone')).not.toBeInTheDocument();
+});
+
+// The map lifts the holder of an open piece over its neighbours by this flag,
+// for a local hover and for a projector following the GM's alike.
+test('a token flags itself while its condition pills are open', () => {
+  const token = { id: 'goblin-1', label: 'Goblin', layer: 'tokens', conditions: ['prone'], effects: [] };
+  const { rerender } = render(<TokenSprite token={token} size={64} interactive movable={false} />);
+  const piece = screen.getByRole('button', { name: 'Goblin' });
+  expect(piece).not.toHaveAttribute('data-marks-expanded');
+
+  fireEvent.pointerEnter(piece);
+  expect(piece).toHaveAttribute('data-marks-expanded', 'true');
+
+  rerender(
+    <TokenSprite
+      token={{ ...token, id: 'goblin-2' }}
+      size={64}
+      presentedInspection={{ tokenId: 'goblin-2', conditionKey: null }}
+    />,
+  );
+  expect(screen.getByRole('button', { name: 'Goblin' })).toHaveAttribute('data-marks-expanded', 'true');
 });

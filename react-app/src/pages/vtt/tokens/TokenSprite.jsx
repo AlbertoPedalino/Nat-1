@@ -22,6 +22,7 @@ const TAP_SLOP = 12;
 export default function TokenSprite({
   token,
   size,
+  hex = false,
   dimmed,
   staged,
   interactive,
@@ -140,10 +141,16 @@ export default function TokenSprite({
   // behind a hover is not. Only conditions are counted in the badge.
   const reminders = token.effects || [];
   const marks = visibleConditions.length;
+  // Hovering or tapping opens what the cell has no room for: the condition
+  // pills and the reminders after the first. The first one stays where it is
+  // written, so nothing on the piece moves under the pointer. Objects have no
+  // reminder line of their own, so theirs all open above.
+  const moreReminders = hasHandles ? reminders : reminders.slice(1);
+  const expandable = marks > 0 || moreReminders.length > 0;
   // Placement previews have no id until saved; two missing ids are not a match.
   const remotelyExpanded = Boolean(presentedInspection?.tokenId)
     && presentedInspection.tokenId === token.id;
-  const marksExpanded = !dragging && (hovered || (pinned && marks > 0) || remotelyExpanded);
+  const marksExpanded = expandable && !dragging && (hovered || pinned || remotelyExpanded);
   // Opt-in per piece. A scene where every creature wears a bar is unreadable,
   // and which ones do is a call the GM makes at the table, not a default.
   const hasHp = Boolean(token.showHp) && token.hpMax != null && token.hpMax > 0;
@@ -195,7 +202,7 @@ export default function TokenSprite({
         setDragging(false);
         const touch = touchRef.current;
         touchRef.current = null;
-        if (!touch || !marks || event.timeStamp - touch.at >= TAP_MAX_MS) return;
+        if (!touch || !expandable || event.timeStamp - touch.at >= TAP_MAX_MS) return;
         if (Math.hypot(event.clientX - touch.x, event.clientY - touch.y) > TAP_SLOP) return;
         if (pinned) {
           unpin();
@@ -211,6 +218,8 @@ export default function TokenSprite({
       onContextMenu={onContextMenu}
       onPointerEnter={keepMarksOpen}
       onPointerLeave={scheduleMarksClose}
+      // Lets the piece's holder on the map lift it above its neighbours.
+      data-marks-expanded={marksExpanded ? 'true' : undefined}
       role="button"
       tabIndex={interactive ? 0 : -1}
       aria-label={name || 'Token'}
@@ -233,81 +242,188 @@ export default function TokenSprite({
         // covered by the next piece along.
         zIndex: marksExpanded ? 3 : 1,
         touchAction: 'none',
+        // Everything on the piece is sized in fractions of it (cqmin), so the
+        // name and bars shrink with the cell when the map is zoomed out.
+        containerType: 'size',
       }}
     >
-      <Box
-        sx={{
-          width: '100%',
-          height: '100%',
-          borderRadius: isScenery || isMapObject ? 0 : '50%',
-          boxSizing: 'border-box',
-          // Artwork stands on its own: no disc behind it, which would show
-          // through the transparent corners of a bestiary token as a coloured
-          // circle. A character keeps a thick ring in their own colour; a
-          // creature gets only the thin dark edge that separates it from the
-          // map, and none at all once it has its own artwork.
-          borderStyle: 'solid',
-          borderWidth: ringWidth(),
-          borderColor: isCharacter || hasUploadedArtworkRing
-            ? (token.color || vttAlpha(VTT_COLORS.black, 0.6))
-            : vttAlpha(VTT_COLORS.black, 0.6),
-          bgcolor: isScenery || isMapObject || showArtwork ? 'transparent' : (token.color || 'secondary.main'),
-          outline: token.hiddenFromPlayers || token.layer === 'gm'
-            ? `2px dashed ${vttAlpha(VTT_COLORS.gold, 0.9)}`
-            : 'none',
-          outlineOffset: '-4px',
-          // A turned piece must not be cut off at the corners of its own box; a
-          // creature still needs the clip that crops its art into the circle.
-          overflow: hasHandles ? 'visible' : 'hidden',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          opacity: dead ? 0.58 : 1,
-          filter: dead ? 'grayscale(0.75)' : 'none',
-        }}
-      >
-        {isMapObject ? (
-          <Box sx={{
-            ...mapObjectSx,
-            color: token.color || VTT_COLORS.gold,
-            transform: `rotate(${Number(token.rotation) || 0}deg)`,
-          }}>
-            <MapObjectGlyph iconKey={token.iconKey} strokeWidth={token.iconStrokeWidth} />
+      {/* A creature keeps everything that belongs to it inside its own cell:
+          the art shrinks to leave room for the reminder line above it and the
+          name and hit points below, so neighbouring pieces no longer pile
+          their labels on each other. Scenery and objects fill their box and
+          keep their label underneath, where resizing them expects it. */}
+      <Box sx={hasHandles ? pieceLayoutSx : { ...cellLayoutSx, inset: hex ? HEX_INSET : 0 }}>
+        {!hasHandles && reminders.length ? (
+          <Box data-token-reminders sx={inlineRemindersSx}>
+            <Box component="span" title={reminders[0].text} sx={reminderInlineSx}>
+              {reminders[0].text}
+            </Box>
+            {reminders.length > 1 ? (
+              <Box
+                component="span"
+                title={reminders.slice(1).map((effect) => effect.text).join(', ')}
+                sx={{ ...reminderInlineSx, flexShrink: 0 }}
+              >
+                +{reminders.length - 1}
+              </Box>
+            ) : null}
           </Box>
-        ) : showArtwork ? (
+        ) : null}
+
+        <Box sx={hasHandles ? pieceFrameSx : discFrameSx}>
           <Box
-            component="img"
-            src={token.imageUrl}
-            alt=""
-            draggable={false}
-            // Art that will not load hands the piece back to its colour and
-            // initials, rather than leaving a hole on the board.
-            onError={() => setArtworkFailed(true)}
             sx={{
               width: '100%',
               height: '100%',
-              // Scenery is placed at the size it should cover, so it stretches;
-              // a picture dropped on the token layer is scenery too. A
-              // creature's art is cropped into its circle instead.
-              objectFit: isScenery || hasHandles ? 'fill' : 'cover',
-              transform: hasHandles ? `rotate(${Number(token.rotation) || 0}deg)` : 'none',
-              pointerEvents: 'none',
+              borderRadius: isScenery || isMapObject ? 0 : '50%',
+              boxSizing: 'border-box',
+              // Artwork stands on its own: no disc behind it, which would show
+              // through the transparent corners of a bestiary token as a coloured
+              // circle. A character keeps a thick ring in their own colour; a
+              // creature gets only the thin dark edge that separates it from the
+              // map, and none at all once it has its own artwork.
+              borderStyle: 'solid',
+              borderWidth: ringWidth(),
+              borderColor: isCharacter || hasUploadedArtworkRing
+                ? (token.color || vttAlpha(VTT_COLORS.black, 0.6))
+                : vttAlpha(VTT_COLORS.black, 0.6),
+              bgcolor: isScenery || isMapObject || showArtwork ? 'transparent' : (token.color || 'secondary.main'),
+              outline: token.hiddenFromPlayers || token.layer === 'gm'
+                ? `2px dashed ${vttAlpha(VTT_COLORS.gold, 0.9)}`
+                : 'none',
+              outlineOffset: '-4px',
+              // A turned piece must not be cut off at the corners of its own box; a
+              // creature still needs the clip that crops its art into the circle.
+              overflow: hasHandles ? 'visible' : 'hidden',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              opacity: dead ? 0.58 : 1,
+              filter: dead ? 'grayscale(0.75)' : 'none',
             }}
-          />
-        ) : ClassIcon ? (
-          <Box data-class-icon={token.className || 'unknown'} sx={classIconSx}>
-            <ClassIcon size={Math.max(16, Math.min(32, (Number(size) || 48) * 0.46))} />
+          >
+            {isMapObject ? (
+              <Box sx={{
+                ...mapObjectSx,
+                color: token.color || VTT_COLORS.gold,
+                transform: `rotate(${Number(token.rotation) || 0}deg)`,
+              }}>
+                <MapObjectGlyph iconKey={token.iconKey} strokeWidth={token.iconStrokeWidth} />
+              </Box>
+            ) : showArtwork ? (
+              <Box
+                component="img"
+                src={token.imageUrl}
+                alt=""
+                draggable={false}
+                // Art that will not load hands the piece back to its colour and
+                // initials, rather than leaving a hole on the board.
+                onError={() => setArtworkFailed(true)}
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  // Scenery is placed at the size it should cover, so it stretches;
+                  // a picture dropped on the token layer is scenery too. A
+                  // creature's art is cropped into its circle instead.
+                  objectFit: isScenery || hasHandles ? 'fill' : 'cover',
+                  transform: hasHandles ? `rotate(${Number(token.rotation) || 0}deg)` : 'none',
+                  pointerEvents: 'none',
+                }}
+              />
+            ) : ClassIcon ? (
+              <Box data-class-icon={token.className || 'unknown'} sx={classIconSx}>
+                <ClassIcon size="50%" />
+              </Box>
+            ) : (
+              <Typography sx={initialsSx}>{initials(name)}</Typography>
+            )}
           </Box>
-        ) : (
-          <Typography sx={initialsSx}>{initials(name)}</Typography>
-        )}
-      </Box>
 
-      {dead ? (
-        <Box aria-label="Dead" title="Dead" sx={deadBadgeSx}>
-          <Skull size={14} strokeWidth={2.4} />
+          {dead ? (
+            <Box aria-label="Dead" title="Dead" sx={deadBadgeSx}>
+              <Skull size="64%" strokeWidth={2.4} />
+            </Box>
+          ) : null}
+
+          {marks && !marksExpanded ? <Box sx={badgeSx}>{marks}</Box> : null}
         </Box>
-      ) : null}
+
+        {/* Bars and plate stack under the art. The numbers ride inside the bar
+            rather than beside it: one strip to read instead of two things to
+            line up, and it stays legible over any map. */}
+        {!isScenery && (hasHp || showDeathSaves || name) ? (
+          <Box sx={hasHandles ? stackBelowSx : stackInsideSx}>
+            {/* The whole name where it fits; a long one is cut at the edge of
+                the cell rather than written across the next. First in the
+                stack, so the eye reads who it is before how hurt they are. */}
+            {name ? <Box sx={{ ...plateSx, maxWidth: hasHandles ? 'none' : (hex ? '100%' : '116%') }}>{name}</Box> : null}
+
+            {showDeathSaves ? (
+              <Box
+                aria-label={`${deathSuccesses} death save successes, ${deathFailures} failures`}
+                title={`${deathSuccesses}/3 successes · ${deathFailures}/3 failures`}
+                sx={{ ...deathTrackSx, pointerEvents: canSetDeathSaves ? 'auto' : 'none' }}
+              >
+                <Box sx={deathDotsSx}>
+                  {[0, 1, 2].map((index) => (
+                    <Box
+                      component="button"
+                      type="button"
+                      key={`success-${index}`}
+                      aria-label={`Death save success ${index + 1}`}
+                      disabled={!canSetDeathSaves}
+                      data-death-save="success"
+                      data-active={index < deathSuccesses ? 'true' : 'false'}
+                      onPointerDown={(event) => event.stopPropagation()}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onDeathSaveChange?.('success', deathSuccesses === index + 1 ? index : index + 1);
+                      }}
+                      sx={{ ...deathDotSx, ...(index < deathSuccesses ? deathSuccessSx : null) }}
+                    />
+                  ))}
+                </Box>
+                <Box sx={deathDividerSx} />
+                <Box sx={deathDotsSx}>
+                  {[0, 1, 2].map((index) => (
+                    <Box
+                      component="button"
+                      type="button"
+                      key={`failure-${index}`}
+                      aria-label={`Death save failure ${index + 1}`}
+                      disabled={!canSetDeathSaves}
+                      data-death-save="failure"
+                      data-active={index < deathFailures ? 'true' : 'false'}
+                      onPointerDown={(event) => event.stopPropagation()}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onDeathSaveChange?.('fail', deathFailures === index + 1 ? index : index + 1);
+                      }}
+                      sx={{ ...deathDotSx, ...(index < deathFailures ? deathFailureSx : null) }}
+                    />
+                  ))}
+                </Box>
+              </Box>
+            ) : hasHp ? (
+              <Box sx={{ ...hpBarSx, width: hex ? '72%' : '88%' }} title={`${current} / ${token.hpMax}`}>
+                <Box sx={{ ...hpFillSx, width: `${ratio * 100}%`, bgcolor: hpColor(ratio) }} />
+                <Box component="span" sx={hpTextSx}>{current}/{token.hpMax}</Box>
+              </Box>
+            ) : null}
+
+            {/* Its own bar, under the real one: temporary hit points sit on top of
+                the maximum, so folding them into the same strip would show a
+                character healthier than they can be. Scaled against max HP just to
+                give the cushion a size — it has no maximum of its own. */}
+            {hasHp && !showDeathSaves && token.tempHp > 0 ? (
+              <Box sx={{ ...tempBarSx, width: hex ? '60%' : '72%' }} title={`${token.tempHp} temporary hit points`}>
+                <Box sx={{ ...tempFillSx, width: `${tempRatio * 100}%` }} />
+                <Box component="span" sx={tempTextSx}>+{token.tempHp}</Box>
+              </Box>
+            ) : null}
+          </Box>
+        ) : null}
+      </Box>
 
       {hasHandles && resizable ? (
         // Each side follows the corner on its own axis, so the two gestures have
@@ -351,95 +467,17 @@ export default function TokenSprite({
         </Box>
       ) : null}
 
-      {/* Bars and plate stack under the piece. The numbers ride inside the bar
-          rather than beside it: one strip to read instead of two things to
-          line up, and it stays legible over any map. */}
-      {!isScenery && (hasHp || showDeathSaves || name) ? (
-        <Box sx={stackSx}>
-          {/* The whole name, not an abbreviation: two goblins are only told
-              apart by their letter. First in the stack, so the eye reads who it
-              is before how hurt they are. */}
-          {name ? <Box sx={plateSx}>{name}</Box> : null}
-
-          {showDeathSaves ? (
-            <Box
-              aria-label={`${deathSuccesses} death save successes, ${deathFailures} failures`}
-              title={`${deathSuccesses}/3 successes · ${deathFailures}/3 failures`}
-              sx={{ ...deathTrackSx, pointerEvents: canSetDeathSaves ? 'auto' : 'none' }}
-            >
-              <Box sx={deathDotsSx}>
-                {[0, 1, 2].map((index) => (
-                  <Box
-                    component="button"
-                    type="button"
-                    key={`success-${index}`}
-                    aria-label={`Death save success ${index + 1}`}
-                    disabled={!canSetDeathSaves}
-                    data-death-save="success"
-                    data-active={index < deathSuccesses ? 'true' : 'false'}
-                    onPointerDown={(event) => event.stopPropagation()}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      onDeathSaveChange?.('success', deathSuccesses === index + 1 ? index : index + 1);
-                    }}
-                    sx={{ ...deathDotSx, ...(index < deathSuccesses ? deathSuccessSx : null) }}
-                  />
-                ))}
-              </Box>
-              <Box sx={deathDividerSx} />
-              <Box sx={deathDotsSx}>
-                {[0, 1, 2].map((index) => (
-                  <Box
-                    component="button"
-                    type="button"
-                    key={`failure-${index}`}
-                    aria-label={`Death save failure ${index + 1}`}
-                    disabled={!canSetDeathSaves}
-                    data-death-save="failure"
-                    data-active={index < deathFailures ? 'true' : 'false'}
-                    onPointerDown={(event) => event.stopPropagation()}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      onDeathSaveChange?.('fail', deathFailures === index + 1 ? index : index + 1);
-                    }}
-                    sx={{ ...deathDotSx, ...(index < deathFailures ? deathFailureSx : null) }}
-                  />
-                ))}
-              </Box>
-            </Box>
-          ) : hasHp ? (
-            <Box sx={hpBarSx} title={`${current} / ${token.hpMax}`}>
-              <Box sx={{ ...hpFillSx, width: `${ratio * 100}%`, bgcolor: hpColor(ratio) }} />
-              <Box component="span" sx={hpTextSx}>{current}/{token.hpMax}</Box>
-            </Box>
-          ) : null}
-
-          {/* Its own bar, under the real one: temporary hit points sit on top of
-              the maximum, so folding them into the same strip would show a
-              character healthier than they can be. Scaled against max HP just to
-              give the cushion a size — it has no maximum of its own. */}
-          {hasHp && !showDeathSaves && token.tempHp > 0 ? (
-            <Box sx={tempBarSx} title={`${token.tempHp} temporary hit points`}>
-              <Box sx={{ ...tempFillSx, width: `${tempRatio * 100}%` }} />
-              <Box component="span" sx={tempTextSx}>+{token.tempHp}</Box>
-            </Box>
-          ) : null}
-        </Box>
-      ) : null}
-
-      {marks && !marksExpanded ? <Box sx={badgeSx}>{marks}</Box> : null}
-
-      {/* One pill each, wrapped: a run-on sentence of six states is read as a
-          wall, while pills are counted at a glance and colour-coded by kind. */}
-      {reminders.length || (marks && marksExpanded) ? (
-        // Transparent to the pointer until the marks are open: the reminders
-        // alone must not take clicks meant for the map or the next piece.
+      {/* Opened on hover or tap: one pill each, wrapped, since a run-on
+          sentence of six states is read as a wall while pills are counted at a
+          glance; then the reminders the cell had no room for. Above the cell
+          and over its neighbours, but only while someone is looking at it. */}
+      {marksExpanded ? (
         <Box
-          sx={{ ...aboveSx, pointerEvents: marksExpanded ? 'auto' : 'none' }}
+          sx={aboveSx}
           onPointerEnter={keepMarksOpen}
           onPointerLeave={scheduleMarksClose}
         >
-          {marks && marksExpanded ? (
+          {marks ? (
             <Box sx={pillsSx}>
               {visibleConditions.map((key) => (
                 <ConditionTokenPill
@@ -455,9 +493,9 @@ export default function TokenSprite({
               ))}
             </Box>
           ) : null}
-          {reminders.length ? (
-            <Box sx={remindersSx} data-token-reminders>
-              {reminders.map((effect) => (
+          {moreReminders.length ? (
+            <Box sx={remindersSx}>
+              {moreReminders.map((effect) => (
                 <Box key={effectId(effect)} component="span" title={effect.text} sx={reminderSx}>
                   {effect.text}
                 </Box>
@@ -538,15 +576,24 @@ function hpColor(ratio) {
   return VTT_COLORS.hpCritical;
 }
 
+// A pointy-top hex is narrow at its top and bottom points, so on a hex grid
+// the column is pulled in from those ends to keep the plate and the reminder
+// line where the hex is still wide.
+const HEX_INSET = '8% 0';
+
 const initialsSx = {
-  fontSize: '0.7rem',
+  fontSize: 'clamp(8px, 24cqmin, 18px)',
   fontWeight: 800,
   color: vttAlpha(VTT_COLORS.black, 0.75),
   pointerEvents: 'none',
 };
 
 const classIconSx = {
+  width: '100%',
+  height: '100%',
   display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
   color: VTT_COLORS.parchment,
   filter: `drop-shadow(0 1px 2px ${vttAlpha(VTT_COLORS.black, 0.9)})`,
   pointerEvents: 'none',
@@ -600,24 +647,61 @@ const rotateHandleSx = {
   '&:hover': { bgcolor: VTT_COLORS.goldBright },
 };
 
-// Everything under the piece, in one column so the bars and the plate stay
-// centred on it however wide the name is.
-const stackSx = {
+// The cell as one column: reminder line, art, name and bars. The art takes
+// whatever height is left and stays round through its aspect ratio, so a piece
+// with nothing written on it still fills its cell.
+const cellLayoutSx = {
   position: 'absolute',
-  top: 'calc(100% + 4px)',
-  left: '50%',
-  transform: 'translateX(-50%)',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
+  gap: '2cqmin',
+};
+
+const discFrameSx = {
+  position: 'relative',
+  flex: '1 1 0',
+  minHeight: 0,
+  aspectRatio: '1',
+  maxWidth: '100%',
+};
+
+const pieceLayoutSx = { position: 'absolute', inset: 0 };
+const pieceFrameSx = { position: 'relative', width: '100%', height: '100%' };
+
+const stackInsideSx = {
+  flex: 'none',
+  width: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: '1px',
+  pointerEvents: 'none',
+};
+
+// An object's label hangs under it, centred however wide the name is.
+const stackBelowSx = {
+  ...stackInsideSx,
+  position: 'absolute',
+  top: 'calc(100% + 4px)',
+  left: '50%',
+  width: 'max-content',
+  transform: 'translateX(-50%)',
+};
+
+// One line: the first reminder and how many more there are. The rest are a
+// hover or a tap away, written out in full above the piece.
+const inlineRemindersSx = {
+  flex: 'none',
+  width: '100%',
+  display: 'flex',
+  justifyContent: 'center',
   gap: '2px',
   pointerEvents: 'none',
 };
 
 const barBaseSx = {
   position: 'relative',
-  // Wide enough for "100/100" without stretching a small token's footprint.
-  width: 56,
   borderRadius: 3,
   bgcolor: vttAlpha(VTT_COLORS.black, 0.75),
   border: `1px solid ${vttAlpha(VTT_COLORS.black, 0.6)}`,
@@ -628,26 +712,26 @@ const barBaseSx = {
   boxSizing: 'border-box',
 };
 
-const hpBarSx = { ...barBaseSx, height: 17 };
+const hpBarSx = { ...barBaseSx, height: 'clamp(6px, 14cqmin, 16px)' };
 
 const deathTrackSx = {
-  height: 18,
-  px: 0.55,
+  height: 'clamp(7px, 15cqmin, 18px)',
+  px: 'clamp(1px, 3cqmin, 4px)',
   borderRadius: 3,
   bgcolor: vttAlpha(VTT_COLORS.black, 0.82),
   border: `1px solid ${vttAlpha(VTT_COLORS.black, 0.65)}`,
   display: 'flex',
   alignItems: 'center',
-  gap: 0.45,
+  gap: 'clamp(1px, 3cqmin, 4px)',
   boxSizing: 'border-box',
 };
 
-const deathDotsSx = { display: 'flex', alignItems: 'center', gap: '3px' };
+const deathDotsSx = { display: 'flex', alignItems: 'center', gap: 'clamp(1px, 2.5cqmin, 3px)' };
 
 const deathDotSx = {
   minWidth: 0,
-  width: 10,
-  height: 10,
+  width: 'clamp(4px, 9cqmin, 10px)',
+  height: 'clamp(4px, 9cqmin, 10px)',
   p: 0,
   borderRadius: '50%',
   bgcolor: vttAlpha(VTT_COLORS.neutralMark, 0.12),
@@ -669,7 +753,7 @@ const deathFailureSx = {
   boxShadow: `0 0 4px ${vttAlpha(VTT_COLORS.danger, 0.8)}`,
 };
 
-const deathDividerSx = { width: 1, height: 9, bgcolor: vttAlpha(VTT_COLORS.gold, 0.34) };
+const deathDividerSx = { width: 1, height: '60%', bgcolor: vttAlpha(VTT_COLORS.gold, 0.34) };
 
 const hpFillSx = {
   position: 'absolute',
@@ -681,7 +765,7 @@ const hpFillSx = {
 
 const textBaseSx = {
   position: 'relative',
-  fontSize: '0.76rem',
+  fontSize: 'clamp(6px, 11cqmin, 12px)',
   fontWeight: 700,
   lineHeight: 1,
   fontVariantNumeric: 'tabular-nums',
@@ -692,7 +776,7 @@ const textBaseSx = {
 
 const hpTextSx = { ...textBaseSx, color: VTT_COLORS.parchment };
 
-const tempBarSx = { ...barBaseSx, height: 14 };
+const tempBarSx = { ...barBaseSx, height: 'clamp(5px, 10cqmin, 12px)' };
 
 const tempFillSx = {
   position: 'absolute',
@@ -703,35 +787,40 @@ const tempFillSx = {
   transition: 'width 120ms linear',
 };
 
-const tempTextSx = { ...textBaseSx, color: VTT_COLORS.tempHpText, fontSize: '0.7rem' };
+const tempTextSx = { ...textBaseSx, color: VTT_COLORS.tempHpText, fontSize: 'clamp(5px, 9cqmin, 10px)' };
 
 const plateSx = {
-  px: 0.6,
-  py: '1px',
+  flex: 'none',
+  px: 'clamp(2px, 4cqmin, 5px)',
   borderRadius: 1,
   bgcolor: vttAlpha(VTT_COLORS.ink, 0.85),
   color: VTT_COLORS.parchmentMuted,
-  // Read from across the table on a projector, not only at a laptop.
-  fontSize: '0.85rem',
-  lineHeight: 1.3,
+  // As large as the cell allows, up to what reads across the table on a
+  // projector; zoomed far out it gets small rather than spilling over.
+  fontSize: 'clamp(7px, 15cqmin, 14px)',
+  lineHeight: 1.25,
   whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  boxSizing: 'border-box',
 };
 
-// Sticks out past the edge of the disc so it reads as attached to the piece
-// rather than drawn on it.
+// On the corner of the art, only just past its edge, so it reads as attached
+// to the piece without reaching into the next cell.
 const badgeSx = {
   position: 'absolute',
-  top: '-6px',
-  right: '-6px',
-  minWidth: 16,
-  height: 16,
-  px: 0.4,
+  top: '-2px',
+  right: '-2px',
+  minWidth: 'clamp(10px, 22cqmin, 16px)',
+  height: 'clamp(10px, 22cqmin, 16px)',
+  px: '2px',
   borderRadius: '8px',
   bgcolor: VTT_COLORS.warning,
   color: VTT_COLORS.ink,
-  fontSize: '0.62rem',
+  fontSize: 'clamp(6px, 14cqmin, 10px)',
   fontWeight: 800,
-  lineHeight: '16px',
+  lineHeight: 'clamp(10px, 22cqmin, 16px)',
+  boxSizing: 'border-box',
   textAlign: 'center',
   whiteSpace: 'nowrap',
   pointerEvents: 'none',
@@ -740,10 +829,10 @@ const badgeSx = {
 
 const deadBadgeSx = {
   position: 'absolute',
-  top: '-7px',
-  left: '-7px',
-  width: 20,
-  height: 20,
+  top: '-3px',
+  left: '-3px',
+  width: 'clamp(11px, 26cqmin, 20px)',
+  height: 'clamp(11px, 26cqmin, 20px)',
   borderRadius: '50%',
   bgcolor: VTT_COLORS.dangerDeep,
   color: VTT_COLORS.deathText,
@@ -763,8 +852,7 @@ const deadBadgeSx = {
 const aboveSx = {
   position: 'absolute',
   left: '50%',
-  // Clear of the badge and the skull, which stick out past the top edge.
-  bottom: 'calc(100% + 8px)',
+  bottom: 'calc(100% + 6px)',
   transform: 'translateX(-50%)',
   display: 'flex',
   flexDirection: 'column',
@@ -790,8 +878,7 @@ const pillsSx = {
   gap: '3px',
 };
 
-// Nearest the piece, under the marks when those are open: the reminders are
-// the part that never moves.
+// Nearest the piece, under the marks.
 const remindersSx = {
   display: 'flex',
   flexWrap: 'wrap',
@@ -817,6 +904,16 @@ const reminderSx = {
   whiteSpace: 'nowrap',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
+};
+
+const reminderInlineSx = {
+  ...reminderSx,
+  minWidth: 0,
+  maxWidth: '100%',
+  px: 'clamp(2px, 3cqmin, 5px)',
+  py: 0,
+  fontSize: 'clamp(6px, 11cqmin, 12px)',
+  lineHeight: 1.3,
 };
 
 const pillSx = {
