@@ -6,6 +6,8 @@ import { useCloudFights } from '../../../../../src/pages/encounterbuilder/sync/u
 
 const mocks = vi.hoisted(() => ({
   listInstanceFights: vi.fn(),
+  listInstanceFightRevisions: vi.fn(),
+  listInstanceFightsByIds: vi.fn(),
   saveInstanceFight: vi.fn(),
   deleteInstanceFight: vi.fn(),
   subscribeInstanceFights: vi.fn(),
@@ -17,6 +19,8 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('../../../../../src/shared/cloud/api/encounterFights.js', () => ({
   listInstanceFights: mocks.listInstanceFights,
+  listInstanceFightRevisions: mocks.listInstanceFightRevisions,
+  listInstanceFightsByIds: mocks.listInstanceFightsByIds,
   saveInstanceFight: mocks.saveInstanceFight,
   deleteInstanceFight: mocks.deleteInstanceFight,
   getInstanceFight: mocks.getInstanceFight,
@@ -57,8 +61,18 @@ function Harness({ fights, library, dispatch }) {
   return null;
 }
 
+// What the table holds right now, without counting as a full read: the light
+// recovery's two reads are answered from the same rows the test gave the list.
+async function tableRows() {
+  return (await mocks.listInstanceFights.getMockImplementation()?.('enc_a')) || [];
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
+  mocks.listInstanceFightRevisions.mockImplementation(async () => (await tableRows())
+    .map((entry) => ({ id: String(entry.id), updatedAt: entry.savedAt || 0 })));
+  mocks.listInstanceFightsByIds.mockImplementation(async (_instanceId, ids) => (await tableRows())
+    .filter((entry) => ids.includes(String(entry.id))));
   mocks.fireRemoteChange = null;
   mocks.saveInstanceFight.mockResolvedValue(null);
   mocks.deleteInstanceFight.mockResolvedValue(undefined);
@@ -262,12 +276,14 @@ describe('realtime events without re-reading the instance', () => {
     expect(fightIds(dispatch)).toEqual([901]);
   });
 
-  test('a DELETE re-reads the list', async () => {
+  test('a DELETE checks versions, not every fight', async () => {
     await mounted();
     await act(async () => {
       await mocks.fireRemoteChange({ eventType: 'DELETE', new: {}, old: { id: '900' } });
     });
-    expect(mocks.listInstanceFights).toHaveBeenCalledTimes(2);
+    expect(mocks.listInstanceFightRevisions).toHaveBeenCalledTimes(1);
+    expect(mocks.listInstanceFights).toHaveBeenCalledTimes(1);
+    expect(mocks.listInstanceFightsByIds).not.toHaveBeenCalled();
   });
 
   test('a row Realtime had to trim is fetched alone; a vanished one falls back to the list', async () => {
@@ -286,15 +302,38 @@ describe('realtime events without re-reading the instance', () => {
     await act(async () => {
       await mocks.fireRemoteChange({ eventType: 'UPDATE', new: { id: '903', instance_id: 'enc_a' } });
     });
-    expect(mocks.listInstanceFights).toHaveBeenCalledTimes(2);
+    expect(mocks.listInstanceFightRevisions).toHaveBeenCalledTimes(1);
+    expect(mocks.listInstanceFights).toHaveBeenCalledTimes(1);
   });
 
-  test('a reconnect recovers with a full read', async () => {
+  test('a reconnect recovers with the light check', async () => {
     await mounted();
     await act(async () => { await mocks.fireStatus('SUBSCRIBED'); });
-    expect(mocks.listInstanceFights).toHaveBeenCalledTimes(2);
+    expect(mocks.listInstanceFightRevisions).toHaveBeenCalledTimes(1);
     await act(async () => { await mocks.fireStatus('CHANNEL_ERROR'); });
-    expect(mocks.listInstanceFights).toHaveBeenCalledTimes(2);
+    expect(mocks.listInstanceFightRevisions).toHaveBeenCalledTimes(1);
+    expect(mocks.listInstanceFights).toHaveBeenCalledTimes(1);
+  });
+
+  // The safety net the battle map has had all along: a change whose event
+  // never arrived is found by the next check, which reads versions and then
+  // only the fight that moved.
+  test('every 30 seconds the versions are checked and only a moved fight is read', async () => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
+    try {
+      await mounted();
+      await act(async () => { await vi.advanceTimersByTimeAsync(30_000); });
+      expect(mocks.listInstanceFightRevisions).toHaveBeenCalledTimes(1);
+      expect(mocks.listInstanceFightsByIds).not.toHaveBeenCalled();
+
+      const moved = { ...FIGHT, savedAt: 20, fight: { ...FIGHT.fight, round: 4 } };
+      mocks.listInstanceFights.mockResolvedValue([moved]);
+      await act(async () => { await vi.advanceTimersByTimeAsync(30_000); });
+      expect(mocks.listInstanceFightsByIds).toHaveBeenCalledWith('enc_a', ['900']);
+      expect(mocks.listInstanceFights).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   test('an event before the first read lands is answered with the full read', async () => {

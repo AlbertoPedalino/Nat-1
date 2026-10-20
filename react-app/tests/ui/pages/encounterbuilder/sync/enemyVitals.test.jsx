@@ -22,6 +22,11 @@ const db = vi.hoisted(() => ({
 vi.mock('../../../../../src/shared/cloud/api/encounterFights.js', () => ({
   FIGHT_UNAVAILABLE: 'FIGHT_UNAVAILABLE',
   listInstanceFights: (...args) => db.list(...args),
+  // The light recovery reads the same fake table.
+  listInstanceFightRevisions: async () => (db.row
+    ? [{ id: String(db.row.id), updatedAt: Date.parse(db.row.updated_at) || 0 }] : []),
+  listInstanceFightsByIds: async (_instanceId, ids) => (db.row && ids.includes(String(db.row.id))
+    ? [toFightEntry(structuredClone(db.row))] : []),
   saveInstanceFight: (...args) => db.save(...args),
   deleteInstanceFight: vi.fn(async () => {}),
   getInstanceFight: (...args) => db.get(...args),
@@ -73,7 +78,9 @@ function applyOnServer(fightId, combatantId, { base, patch }) {
   const stale = Object.entries(base || {}).some(([key, value]) => (current[key] ?? null) !== (value ?? null));
   if (stale) return { applied: false, row: clone(db.row) };
   const combatants = db.row.fight.combatants.map((c) => (c.id === current.id ? { ...c, ...patch } : c));
-  db.row = { ...db.row, fight: { ...db.row.fight, combatants } };
+  // Like the RPC, every applied command moves the row's version.
+  const updatedAt = new Date(Date.parse(db.row.updated_at) + 1000).toISOString();
+  db.row = { ...db.row, fight: { ...db.row.fight, combatants }, updated_at: updatedAt };
   return { applied: true, row: clone(db.row) };
 }
 
