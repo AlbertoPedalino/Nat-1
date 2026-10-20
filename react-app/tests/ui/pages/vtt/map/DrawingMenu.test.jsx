@@ -113,3 +113,29 @@ test('a note cannot be emptied into an invisible mark', () => {
   fireEvent.blur(text);
   expect(props.onSave).not.toHaveBeenCalled();
 });
+
+// On a phone the keyboard shortened the window as soon as the label was
+// tapped, and the menu was moved to fit — again on every letter — so it jumped
+// up under the thumb. On a touch screen it opens pinned to the top instead,
+// where the keyboard never reaches, and is not placed at the press at all.
+test('on a touch screen the menu is pinned to the top, not placed at the press', () => {
+  const matchMedia = vi.spyOn(window, 'matchMedia').mockImplementation((query) => ({
+    matches: query === '(pointer: coarse)',
+    media: query,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+  }));
+  try {
+    render(<DrawingMenu drawing={fireArea} {...menuProps({ anchor: { x: 300, y: 600 } })} />);
+    const paper = document.querySelector('.MuiMenu-paper');
+    const style = window.getComputedStyle(paper);
+    expect(style.top).toBe('8px');
+    // Popover leaves the position to the paper: nothing placed it at the press.
+    expect(paper.style.top).toBe('');
+    expect(paper.style.left).toBe('');
+  } finally {
+    matchMedia.mockRestore();
+  }
+});

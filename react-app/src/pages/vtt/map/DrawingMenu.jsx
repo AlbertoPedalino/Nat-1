@@ -19,6 +19,7 @@ import {
 } from '../../../shared/vtt/map/areas.js';
 import { isNote as isNoteDrawing, scaledPoints } from '../../../shared/vtt/map/drawing.js';
 import { fullscreenContainer } from './fullscreenContainer.js';
+import { menuPlacement } from './menuPlacement.js';
 import { battleMapDialogPaperSx } from './battleMapSurface.js';
 
 // Right-click (or a long press) on a mark: the same idea as a piece's menu.
@@ -123,6 +124,9 @@ export default function DrawingMenu({
     circle: 'Radius (ft)', square: 'Side (ft)', cone: 'Length (ft)', line: 'Length (ft)',
   }[area?.shape];
 
+  // On a touch screen pinned to the top, out of the keyboard's way.
+  const placement = menuPlacement(anchor, MENU_WIDTH);
+
   return (
     <Menu
       open={Boolean(anchor)}
@@ -130,17 +134,17 @@ export default function DrawingMenu({
         clearTimeout(typingTimerRef.current);
         onClose();
       }}
-      anchorReference="anchorPosition"
-      anchorPosition={anchor ? { top: anchor.y, left: anchor.x } : undefined}
+      {...placement.menuProps}
       container={fullscreenContainer}
       slotProps={{
         paper: {
           sx: {
             ...battleMapDialogPaperSx,
-            width: 280,
+            width: MENU_WIDTH,
             maxWidth: 'calc(100vw - 16px)',
             maxHeight: 'calc(100% - 32px)',
             '& .MuiMenu-list': { p: 0 },
+            ...placement.paperSx,
           },
         },
       }}
@@ -333,6 +337,7 @@ export default function DrawingMenu({
   );
 }
 
+const MENU_WIDTH = 280;
 const TYPING_DELAY = 400;
 const COLOR_DELAY = 180;
 
