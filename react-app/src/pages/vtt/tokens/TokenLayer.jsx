@@ -4,6 +4,7 @@ import { cellSize, tokenWorldRect, worldToScreen } from '../../../shared/vtt/map
 import { decodeCells } from '../../../shared/vtt/map/fog.js';
 import { isHexGrid } from '../../../shared/vtt/map/hexGeometry.js';
 import { isTokenInPlay, isTokenVisibleToPlayers } from '../../../shared/vtt/scene/scene.js';
+import { liftMovablePieces } from '../../../shared/vtt/session/liveScene.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import TokenSprite from './TokenSprite.jsx';
 
@@ -166,7 +167,11 @@ export default memo(function TokenLayer({
       : null
   ), [fog, hideCovered]);
 
-  return (tokens || []).map((token) => {
+  // Your own pieces over everybody else's, so one parked on yours never
+  // stands between you and it.
+  const stacked = useMemo(() => liftMovablePieces(tokens, canMove), [canMove, tokens]);
+
+  return stacked.map((token) => {
     const groupPosition = groupDrag?.[token.id];
     const moved = groupPosition
       ? { ...token, x: groupPosition.x, y: groupPosition.y }

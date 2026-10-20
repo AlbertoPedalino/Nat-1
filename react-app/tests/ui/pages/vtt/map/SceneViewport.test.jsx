@@ -621,6 +621,31 @@ test('with snapping off objects land between squares while creatures keep theirs
   );
 });
 
+// Two players' pieces on one square: on each screen your own is the one on
+// top, so a press reaches it instead of a piece you cannot move.
+test('a player’s own piece stands over another parked on its square', () => {
+  render(
+    <SceneViewport
+      scene={{ grid: { size: 50, offsetX: 0, offsetY: 0, visible: false }, playArea: null }}
+      imageUrl={null}
+      tokens={[
+        { id: 'mine', label: 'Mine', layer: 'tokens', x: 2, y: 2, w: 1, h: 1, characterId: 'hero-1' },
+        { id: 'theirs', label: 'Theirs', layer: 'tokens', x: 2, y: 2, w: 1, h: 1, characterId: 'hero-2' },
+      ]}
+      canMove={(token) => token.id === 'mine'}
+      fog={null}
+      drawings={[]}
+      lasers={[]}
+      rollBubbles={[]}
+      diceThrows={[]}
+    />,
+  );
+  const mine = screen.getByRole('button', { name: 'Mine' });
+  const theirs = screen.getByRole('button', { name: 'Theirs' });
+  // Same stacking level: the later one in the document is drawn on top.
+  expect(theirs.compareDocumentPosition(mine) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+});
+
 test('the marquee selects only movable pieces on the active layer and moves them as a group', () => {
   const onMoveTokens = vi.fn();
   const { container } = render(

@@ -7,6 +7,7 @@ import {
   applyDrawingEvent,
   applyTokenEvent,
   dropGhost,
+  liftMovablePieces,
   movableFilter,
   pruneGhosts,
   putGhost,
@@ -204,4 +205,25 @@ test('a mark still being written ignores its echoes until its last write answers
   const answered = applyCommittedDrawing(held, { id: 'd1', color: '#0000ff', updatedAt: 5000 });
   assert.equal(answered[0].updatedAt, 5000);
   assert.equal(applyCommittedDrawing(answered, { id: 'd1', color: '#ff0000', updatedAt: 4000 }), answered);
+});
+
+// A player parked their piece on another player's square: on the other
+// player's screen it covered theirs, every press landed on a piece they could
+// not move, and their own could not be reached.
+test('your own pieces are drawn over the others, the rest keep their order', () => {
+  const rug = { id: 'rug', layer: 'map' };
+  const mine = { id: 'mine', layer: 'tokens' };
+  const theirs = { id: 'theirs', layer: 'tokens' };
+  const ogre = { id: 'ogre', layer: 'tokens' };
+  const secret = { id: 'secret', layer: 'gm' };
+  const canMove = (token) => token.id === 'mine';
+
+  const stacked = liftMovablePieces([rug, mine, theirs, secret, ogre], canMove);
+  assert.deepEqual(stacked.map((token) => token.id), ['rug', 'theirs', 'ogre', 'secret', 'mine']);
+
+  // Already in that order, or nothing to lift: the same list back.
+  const settled = [rug, theirs, mine];
+  assert.equal(liftMovablePieces(settled, canMove), settled);
+  const gmView = [rug, mine, theirs];
+  assert.equal(liftMovablePieces(gmView, () => true), gmView);
 });
