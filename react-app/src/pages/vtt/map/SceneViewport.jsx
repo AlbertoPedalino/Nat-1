@@ -1563,6 +1563,7 @@ export default function SceneViewport({
             <TokenSprite
               token={token}
               size="100%"
+              hex={isHexGrid(scene.grid)}
               interactive={false}
               movable={false}
               conditionEntries={conditionEntries}

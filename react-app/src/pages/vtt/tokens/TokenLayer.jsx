@@ -2,14 +2,16 @@ import { memo, useMemo } from 'react';
 import { Box } from '@mui/material';
 import { cellSize, tokenWorldRect, worldToScreen } from '../../../shared/vtt/map/geometry.js';
 import { decodeCells } from '../../../shared/vtt/map/fog.js';
+import { isHexGrid } from '../../../shared/vtt/map/hexGeometry.js';
 import { isTokenInPlay, isTokenVisibleToPlayers } from '../../../shared/vtt/scene/scene.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import TokenSprite from './TokenSprite.jsx';
 
 const VIEWPORT_OVERSCAN = 180;
 
-function touchesRevealedFog(rect, grid, fog, fogBytes) {
-  if (!fog) return true;
+// How much of the piece's box the fog has revealed: 'none', 'partial' or 'full'.
+function revealedCoverage(rect, grid, fog, fogBytes) {
+  if (!fog) return 'full';
   const size = cellSize(grid) / Math.max(1, fog.scale || 1);
   const offsetX = Number(grid?.offsetX) || 0;
   const offsetY = Number(grid?.offsetY) || 0;
@@ -18,16 +20,28 @@ function touchesRevealedFog(rect, grid, fog, fogBytes) {
   const lastCol = Math.ceil((rect.x + rect.width - offsetX) / size) - 1;
   const lastRow = Math.ceil((rect.y + rect.height - offsetY) / size) - 1;
 
+  let revealed = false;
+  let covered = false;
   for (let row = firstRow; row <= lastRow; row += 1) {
     if (row < 0 || row >= fog.rows) continue;
     for (let col = firstCol; col <= lastCol; col += 1) {
       if (col < 0 || col >= fog.cols) continue;
       const index = row * fog.cols + col;
-      if (fogBytes[index >> 3] & (1 << (index & 7))) return true;
+      if (fogBytes[index >> 3] & (1 << (index & 7))) revealed = true;
+      else covered = true;
     }
   }
-  return false;
+  if (!revealed) return 'none';
+  return covered ? 'partial' : 'full';
 }
+
+// While a piece shows its conditions it goes over every other piece, so a
+// neighbour's name plate never covers the pills. Above the players' fog too
+// (which sits at 4) — but only when nothing of the piece is under it, or
+// lifting it would uncover the hidden part on the players' screens and the
+// projector, which open the pills whenever the GM hovers.
+const EXPANDED_Z = 5;
+const EXPANDED_UNDER_FOG_Z = 3;
 
 function outsideViewport(rect, at, zoom, viewport) {
   if (!(viewport?.width > 0) || !(viewport?.height > 0)) return false;
@@ -61,6 +75,7 @@ const TokenNode = memo(function TokenNode({
   onContextMenu,
   selected = false,
   aboveFog = false,
+  fullyRevealed = true,
 }) {
   const rect = tokenWorldRect(token, grid);
   const at = worldToScreen(rect, view);
@@ -81,11 +96,15 @@ const TokenNode = memo(function TokenNode({
         outlineOffset: 3,
         boxShadow: selected ? `0 0 0 2px ${vttAlpha(VTT_COLORS.black, 0.72)}` : 'none',
         zIndex: aboveFog ? 4 : selected ? 2 : undefined,
+        '&:has([data-marks-expanded])': {
+          zIndex: aboveFog || fullyRevealed ? EXPANDED_Z : EXPANDED_UNDER_FOG_Z,
+        },
       }}
     >
       <TokenSprite
         token={token}
         size="100%"
+        hex={isHexGrid(grid)}
         dimmed={!onActiveLayer}
         staged={staged}
         interactive={interactive}
@@ -161,7 +180,10 @@ export default memo(function TokenLayer({
     // projector. Ownership only grants visibility to additional personal markers.
     const aboveFog = Boolean(hideCovered && isTokenVisibleToPlayers(token, playArea)
       && (token.characterId || canSeeThroughFog?.(token)));
-    if (hideCovered && !aboveFog && fogBytes && !touchesRevealedFog(rect, grid, fog, fogBytes)) return null;
+    const coverage = hideCovered && !aboveFog && fogBytes
+      ? revealedCoverage(rect, grid, fog, fogBytes)
+      : 'full';
+    if (coverage === 'none') return null;
 
     const onActiveLayer = !activeLayer || token.layer === activeLayer;
     const interactive = !cameraLocked && onActiveLayer && ['select', 'marquee'].includes(paintMode);
@@ -191,6 +213,7 @@ export default memo(function TokenLayer({
         onContextMenu={onContextMenu}
         selected={selectedTokenIds.includes(token.id)}
         aboveFog={aboveFog}
+        fullyRevealed={coverage === 'full'}
       />
     );
   });
