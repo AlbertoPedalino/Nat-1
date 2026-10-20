@@ -172,11 +172,42 @@ void main() {
       * pow(0.5 + 0.5 * sin(t * 3.0 + hash(floor(g) + 2.0) * 6.2831), 8.0);
     color = mix(vec3(1.0, 0.78, 0.3), vec3(1.0, 0.97, 0.8), core * 0.7 + rays * 0.3 + twinkle);
     alpha = 0.32 + rays * 0.35 + core * 0.45 * (0.7 + pulse * 0.3) + twinkle * 0.4 + rim * 0.2;
-  } else {
+  } else if (u_effect < 8.5) {
     // Darkness: near-opaque, barely stirring.
     float n = fbm(q * 0.7 + vec2(t * 0.04, -t * 0.03));
     color = vec3(0.02, 0.01, 0.04) + n * vec3(0.06, 0.03, 0.09);
     alpha = 0.82 + n * 0.1;
+  } else {
+    // Thorns & roots: knotted roots slowly writhing over dark earth, hooked
+    // spines growing out of them, thin green tendrils between (Spike Growth,
+    // Entangle, Plant Growth…).
+    vec2 f = q * 0.6;
+    vec2 w = vec2(fbm(f * 0.8 + t * 0.04), fbm(f * 0.8 + 3.7 - t * 0.035));
+    float ridge = 1.0 - abs(fbm(f + w * 1.2) * 2.0 - 1.0);
+    float root = smoothstep(0.88, 0.94, ridge);
+    float reach = smoothstep(0.72, 0.9, ridge);
+    float swell = smoothstep(0.9, 1.0, ridge);
+    float bark = fbm(q * vec2(7.0, 2.5) + w * 4.0);
+    float tendril = smoothstep(0.93, 0.98, 1.0 - abs(fbm(q * 1.6 + w * 0.8 + 11.3) * 2.0 - 1.0));
+    // A hooked spine in some cells, kept near a root: dark at the base,
+    // pale at the tip.
+    vec2 g = q * 2.0;
+    vec2 id = floor(g);
+    vec2 local = fract(g) - 0.5 - (vec2(hash(id + 2.1), hash(id + 5.9)) - 0.5) * 0.3;
+    float a = hash(id + 8.3) * 6.2831 + sin(t * 0.7 + hash(id) * 6.2831) * 0.1;
+    vec2 p = vec2(cos(a) * local.x + sin(a) * local.y, -sin(a) * local.x + cos(a) * local.y);
+    float along = p.x + 0.22;
+    float bend = p.y - along * along * 1.2;
+    float spine = step(0.0, along) * step(along, 0.48)
+      * (1.0 - smoothstep(0.0, 0.02, abs(bend) - 0.1 * (1.0 - along / 0.48)));
+    spine *= step(0.45, hash(id + 1.1)) * reach;
+    float soil = fbm(q * 0.9 + 4.0);
+    color = mix(vec3(0.06, 0.05, 0.02), vec3(0.13, 0.19, 0.05), smoothstep(0.35, 0.75, soil));
+    color = mix(color, vec3(0.3, 0.45, 0.12), tendril * 0.8);
+    vec3 wood = mix(vec3(0.22, 0.13, 0.05), vec3(0.5, 0.34, 0.16), swell * 0.7 + bark * 0.5);
+    color = mix(color, wood, root);
+    color = mix(color, mix(vec3(0.42, 0.27, 0.11), vec3(0.93, 0.87, 0.66), smoothstep(0.0, 0.3, along)), spine);
+    alpha = 0.45 + soil * 0.15 + tendril * 0.2 + root * 0.35 + spine * 0.45 + rim * 0.15;
   }
 
   gl_FragColor = vec4(color, clamp(alpha, 0.0, 0.95) * mask * u_opacity);

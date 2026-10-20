@@ -24,6 +24,7 @@ export const AREA_EFFECTS = Object.freeze([
   { key: 'necrotic', label: 'Necrotic', color: VTT_COLORS.areaNecrotic },
   { key: 'radiant', label: 'Radiant', color: VTT_COLORS.areaRadiant },
   { key: 'darkness', label: 'Darkness', color: VTT_COLORS.areaDarkness },
+  { key: 'thorns', label: 'Thorns & roots', color: VTT_COLORS.areaThorns },
 ]);
 
 const EFFECT_KEYS = AREA_EFFECTS.map((effect) => effect.key);
