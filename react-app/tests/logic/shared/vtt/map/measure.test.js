@@ -92,6 +92,9 @@ test('every ruler shape reports the same distance, labelled for its template', (
   assert.equal(measureLabel('cone', from, to), '20 ft cone');
   assert.equal(measureLabel('square', from, to), '20 ft square');
   assert.equal(measureFeet('cone', from, to), 20);
+  // A square turns with the pointer: four squares away on the diagonal is a
+  // 20 ft reach, drawn and labelled alike, not the grid's count of three.
+  assert.equal(measureLabel('square', from, { x: 2.83, y: 2.83 }), '20 ft square');
 
   // An unknown shape is a line rather than an error.
   assert.equal(normalizeShape('nonsense'), 'line');

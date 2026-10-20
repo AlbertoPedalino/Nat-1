@@ -5,6 +5,7 @@ import {
   AREA_EFFECTS,
   areaEdgeDistance,
   areaFromDrag,
+  areaGeometry,
   areaSizeFeet,
   resizedAreaPoints,
   areaLabelAnchor,
@@ -193,4 +194,41 @@ test('only words on a single point are a note', () => {
   assert.equal(isNote({ points: [{ x: 1, y: 1 }, { x: 2, y: 2 }], text: 'Path' }), false);
   assert.equal(isNote({ points: [{ x: 1, y: 1 }], text: null }), false);
   assert.equal(isNote({ points: [{ x: 1, y: 1 }, { x: 4, y: 1 }], text: 'Fireball', area: { shape: 'circle' } }), false);
+});
+
+// A square turns with the pointer like a cone or a line, in 15° steps, so it
+// can lie along a crooked corridor and still go back square to the map.
+test('a square is dragged out turned toward the pointer, in 15 degree steps', () => {
+  const origin = { x: 5, y: 5 };
+  const options = { shape: 'square', filled: true };
+  // Three across and three down: the pointer on the middle of a side 4.24
+  // squares away, so a side of 8 squares (40 ft), turned 45°.
+  const turned = areaFromDrag(options, origin, { x: 8, y: 8 });
+  assert.equal(turned.area.turned, true);
+  assert.equal(turned.hint, '40 ft square');
+  const drawing = { id: 'sq', ...turned };
+  const geometry = areaGeometry(drawing);
+  assert.ok(Math.abs(geometry.angle - Math.PI / 4) < 1e-9);
+  assert.ok(Math.abs(geometry.reach - 4) < 1e-3);
+  // Its corner points along the map's axis, not across it.
+  assert.ok(areaEdgeDistance(drawing, { x: 5 + 5.5, y: 5 }) < 0);
+  assert.ok(areaEdgeDistance(drawing, { x: 5 + 3.9, y: 5 + 3.9 }) > 0);
+
+  // 50° snaps to 45°; a drag along an axis stays square to the map.
+  const near = areaFromDrag(options, origin, { x: 5 + Math.cos(0.873) * 3, y: 5 + Math.sin(0.873) * 3 });
+  assert.ok(Math.abs(areaGeometry({ ...near }).angle - Math.PI / 4) < 1e-9);
+  const straight = areaFromDrag(options, origin, { x: 9, y: 5 });
+  assert.equal(areaGeometry({ ...straight }).angle, 0);
+  assert.equal(straight.hint, '40 ft square');
+});
+
+// No migration: a square from before squares turned keeps being drawn square
+// to the map, whatever direction its points happen to carry.
+test('a square placed before squares turned stays square to the map', () => {
+  const old = { id: 'old', points: [{ x: 0, y: 0 }, { x: 2, y: 2 }], area: normalizeArea({ shape: 'square', filled: true }) };
+  assert.equal(old.area.turned, undefined);
+  assert.equal(areaGeometry(old).angle, 0);
+  const half = Math.hypot(2, 2);
+  assert.ok(areaEdgeDistance(old, { x: half - 0.1, y: half - 0.1 }) < 0);
+  assert.equal(normalizeArea({ shape: 'circle', turned: true }).turned, undefined);
 });

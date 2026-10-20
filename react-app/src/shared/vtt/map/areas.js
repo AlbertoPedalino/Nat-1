@@ -6,8 +6,14 @@
 // Geometry lives in the drawing's two points, in cells: the origin and a tip.
 // The distance between them is the reach — a circle's radius, half a square's
 // side, a cone's or a line's length — and the direction from one to the other
-// is where a cone or a line points. A line's width is the one number the points
-// cannot carry, so it rides in the description as `breadth` (cells).
+// is where a cone or a line points, and which way a square is turned. A line's
+// width is the one number the points cannot carry, so it rides in the
+// description as `breadth` (cells).
+//
+// Squares placed before they could be turned stored a direction too (the way
+// they happened to be dragged) and were drawn square to the map regardless:
+// only a square marked `turned` follows its direction, so those stay as they
+// were.
 
 import { VTT_COLORS } from '../colors.js';
 import { FEET_PER_CELL, formatFeet } from './measure.js';
@@ -42,6 +48,18 @@ export const DEFAULT_AREA_OPTIONS = Object.freeze({
 // The tan of a 5e cone's half-angle: as wide at the far end as it is long.
 export const CONE_SPREAD = 0.5;
 
+// A square turns in steps of this many degrees: free enough to lie along a
+// crooked corridor, and square to the map again without a steady hand.
+export const SQUARE_TURN_STEP_DEG = 15;
+
+// The direction a square dragged toward (dx, dy) faces, in radians, snapped to
+// SQUARE_TURN_STEP_DEG. Shared by the area tool and the ruler.
+export function squareTurn(dx, dy) {
+  if (!Math.hypot(dx, dy)) return 0;
+  const step = (SQUARE_TURN_STEP_DEG * Math.PI) / 180;
+  return Math.round(Math.atan2(dy, dx) / step) * step;
+}
+
 const MAX_REACH_CELLS = 200;
 
 function numberOr(value, fallback) {
@@ -65,6 +83,7 @@ export function normalizeArea(raw) {
   if (raw.shape === 'line') {
     area.breadth = Math.min(MAX_REACH_CELLS, Math.max(0.1, numberOr(raw.breadth, 1)));
   }
+  if (raw.shape === 'square' && raw.turned) area.turned = true;
   return area;
 }
 
@@ -105,16 +124,19 @@ export function buildAreaPoints(shape, origin, toward, sizeCells) {
 // The area being dragged out from `origin` to the pointer at `toward`. It grows
 // a whole square at a time — the step the ruler is set to, 5 ft unless told
 // otherwise — and the hint says how big it is in feet. A square is dragged from
-// its centre, so its side is twice the pointer's distance on the longer axis.
-// Null until the pointer has gone half a square: a click alone places nothing.
+// its centre with the pointer on the middle of a side, so its side is twice
+// the pointer's distance, and it turns with the pointer like a cone or a line
+// (in SQUARE_TURN_STEP_DEG steps). Null until the pointer has gone half a
+// square: a click alone places nothing.
 export function areaFromDrag(options, origin, toward, feetPerCell = FEET_PER_CELL) {
-  const area = normalizeArea({ ...options, breadth: feetToCells(options?.breadthFt, feetPerCell) });
+  const square = options?.shape === 'square';
+  const area = normalizeArea({
+    ...options, breadth: feetToCells(options?.breadthFt, feetPerCell), turned: square,
+  });
   if (!area || !origin || !toward) return null;
   const dx = toward.x - origin.x;
   const dy = toward.y - origin.y;
-  const raw = area.shape === 'square'
-    ? 2 * Math.max(Math.abs(dx), Math.abs(dy))
-    : Math.hypot(dx, dy);
+  const raw = square ? 2 * Math.hypot(dx, dy) : Math.hypot(dx, dy);
   const cells = Math.min(MAX_REACH_CELLS, Math.round(raw));
   if (cells < 1) return null;
   const perCell = Number(feetPerCell) > 0 ? Number(feetPerCell) : FEET_PER_CELL;
@@ -125,9 +147,11 @@ export function areaFromDrag(options, origin, toward, feetPerCell = FEET_PER_CEL
     cone: `${feet} cone`,
     line: `${feet} × ${formatFeet((area.breadth || 1) * perCell)} line`,
   }[area.shape];
+  const turn = square ? squareTurn(dx, dy) : null;
+  const facing = turn === null ? toward : { x: origin.x + Math.cos(turn), y: origin.y + Math.sin(turn) };
   return {
     area,
-    points: buildAreaPoints(area.shape, origin, toward, cells),
+    points: buildAreaPoints(area.shape, origin, facing, cells),
     text: String(options?.label || '').trim() || null,
     hint,
   };
@@ -162,10 +186,12 @@ export function areaGeometry(drawing) {
   const dx = end.x - origin.x;
   const dy = end.y - origin.y;
   const reach = Math.hypot(dx, dy);
+  // A square from before squares turned is square to the map.
+  const unturned = drawing?.area?.shape === 'square' && !drawing.area.turned;
   return {
     origin,
     reach,
-    angle: reach > 1e-6 ? Math.atan2(dy, dx) : 0,
+    angle: reach > 1e-6 && !unturned ? Math.atan2(dy, dx) : 0,
     breadth: drawing?.area?.breadth || 1,
   };
 }
@@ -180,11 +206,11 @@ export function areaEdgeDistance(drawing, point) {
   const ly = point.y - origin.y;
   const shape = drawing.area?.shape;
   if (shape === 'circle') return Math.hypot(lx, ly) - reach;
-  if (shape === 'square') return Math.max(Math.abs(lx), Math.abs(ly)) - reach;
   const cos = Math.cos(angle);
   const sin = Math.sin(angle);
   const along = lx * cos + ly * sin;
   const across = Math.abs(-lx * sin + ly * cos);
+  if (shape === 'square') return Math.max(Math.abs(along), across) - reach;
   const ends = Math.max(-along, along - reach);
   if (shape === 'cone') {
     // Distance to the slanted side, measured square to it.

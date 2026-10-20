@@ -3,7 +3,7 @@ import { Box } from '@mui/material';
 import { useResizeTick } from './useResizeTick.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { cellSize, worldToScreen } from '../../../shared/vtt/map/geometry.js';
-import { CONE_SPREAD, areaGeometry, areaLabelAnchor } from '../../../shared/vtt/map/areas.js';
+import { CONE_SPREAD, areaGeometry, areaLabelAnchor, squareTurn } from '../../../shared/vtt/map/areas.js';
 import { isNote, strokeLabelAnchor } from '../../../shared/vtt/map/drawing.js';
 
 // Committed strokes plus the one still under the pointer, on the same canvas so
@@ -82,8 +82,13 @@ export default function DrawingCanvas({ drawings, selectedId, live, measure, gri
       if (measure.shape === 'radius') {
         context.arc(from.x, from.y, reach, 0, Math.PI * 2);
       } else if (measure.shape === 'square') {
-        // Centred on the origin, like a 5e cube placed on a square.
-        context.rect(from.x - reach, from.y - reach, reach * 2, reach * 2);
+        // Centred on the origin, like a 5e cube placed on a square, with the
+        // pointer on the middle of a side: it turns as the pointer goes round.
+        context.save();
+        context.translate(from.x, from.y);
+        context.rotate(squareTurn(to.x - from.x, to.y - from.y));
+        context.rect(-reach, -reach, reach * 2, reach * 2);
+        context.restore();
       } else if (measure.shape === 'cone') {
         // 5e cones are as wide at the far end as they are long, which is a 53°
         // spread — not the 60° people assume.
@@ -194,7 +199,11 @@ function drawArea(context, stroke, toScreen, cell, view) {
   if (shape === 'circle') {
     context.arc(at.x, at.y, reach, 0, Math.PI * 2);
   } else if (shape === 'square') {
-    context.rect(at.x - reach, at.y - reach, reach * 2, reach * 2);
+    context.save();
+    context.translate(at.x, at.y);
+    context.rotate(geometry.angle);
+    context.rect(-reach, -reach, reach * 2, reach * 2);
+    context.restore();
   } else {
     const half = shape === 'cone' ? null : (geometry.breadth * scale) / 2;
     context.save();

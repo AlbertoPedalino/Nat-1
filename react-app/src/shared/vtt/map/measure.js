@@ -94,12 +94,23 @@ export function measureLabel(shape, from, to, options) {
   const kind = normalizeShape(shape);
   if (overland) return kind === 'line' ? overland : `${overland} ${kind}`;
 
-  const feet = measureFeet(shape, from, to, options);
+  // A square turns with the pointer, which sits on the middle of its side: its
+  // reach is the straight distance, not the grid count, or a square turned 45°
+  // would be labelled smaller than it is drawn.
+  const feet = kind === 'square'
+    ? squareReachFeet(from, to, options)
+    : measureFeet(shape, from, to, options);
   if (feet <= 0) return '';
   if (kind === 'radius') return `${formatFeet(feet)} radius`;
   if (kind === 'cone') return `${formatFeet(feet)} cone`;
   if (kind === 'square') return `${formatFeet(feet)} square`;
   return formatFeet(feet);
+}
+
+function squareReachFeet(from, to, { feetPerCell = FEET_PER_CELL } = {}) {
+  const perCell = Number(feetPerCell) > 0 ? Number(feetPerCell) : FEET_PER_CELL;
+  const cells = Math.hypot((Number(to?.x) || 0) - (Number(from?.x) || 0), (Number(to?.y) || 0) - (Number(from?.y) || 0));
+  return Math.round(cells) * perCell;
 }
 
 // The badge is noise on a piece that has not left its square yet.
