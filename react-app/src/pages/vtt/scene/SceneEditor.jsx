@@ -1139,10 +1139,9 @@ export default function SceneEditor({
   const movableDrawing = useCallback((point) => (
     drawingAtPoint(
       drawings.filter((drawing) => canMoveDrawing(drawing, { isGm: role.isGm, userId: user?.id })),
+      // An area is picked up from anywhere inside it (user request): the map
+      // still pans from outside it, or with the middle button or two fingers.
       point,
-      0.5,
-      // An area is picked up by its rim or its origin; its inside still pans.
-      { areaEdgeOnly: true },
     )
   ), [drawings, role.isGm, user?.id]);
 

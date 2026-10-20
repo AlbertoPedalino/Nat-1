@@ -8,7 +8,7 @@
 // before they are stored: the jsonb is smaller, the realtime payload is smaller,
 // and the redraw is cheaper — for a line nobody can tell apart from the original.
 
-import { isPointOnArea, normalizeArea } from './areas.js';
+import { areaGeometry, isPointOnArea, normalizeArea } from './areas.js';
 
 const DEFAULT_TOLERANCE = 0.08; // cells
 
@@ -147,11 +147,14 @@ export function sanitizeNoteText(value) {
   return String(value ?? '').replace(/\s+/g, ' ').trim().slice(0, 120);
 }
 
-// Which stroke the eraser is over. Distance is measured to the segments, not to
-// the stored points, or erasing a long straight line would only work at its two
-// ends. The newest match wins, matching what is drawn on top. An area is hit
-// anywhere inside it, or with `areaEdgeOnly` only on its rim and origin — what
-// picking one up asks for, so the map can still be panned across it.
+// Which mark is under the pointer, for the eraser, the menu and picking one up.
+// Distance is measured to the segments, not to the stored points, or erasing a
+// long straight line would only work at its two ends. An area is hit anywhere
+// inside it, or with `areaEdgeOnly` only on its rim and origin.
+//
+// When several are hit, a line or a note drawn over an area wins over the
+// area, and of two areas the smaller one — the one inside the other, which
+// could otherwise never be reached; then the newest, which is drawn on top.
 export function drawingAtPoint(drawings, point, radius = 0.5, { areaEdgeOnly = false } = {}) {
   const target = normalizePoint(point);
   if (!target) return null;
@@ -166,9 +169,19 @@ export function drawingAtPoint(drawings, point, radius = 0.5, { areaEdgeOnly = f
       : points.some((point2, index) => (
         index > 0 && distanceToSegment(target, points[index - 1], point2) <= reach
       ));
-    if (hit && (!found || (drawing.createdAt || 0) >= (found.createdAt || 0))) found = drawing;
+    if (hit && (!found || pickedOver(drawing, found))) found = drawing;
   }
   return found;
+}
+
+function pickedOver(candidate, held) {
+  if (Boolean(candidate.area) !== Boolean(held.area)) return !candidate.area;
+  if (candidate.area) {
+    const size = areaGeometry(candidate)?.reach ?? 0;
+    const heldSize = areaGeometry(held)?.reach ?? 0;
+    if (size !== heldSize) return size < heldSize;
+  }
+  return (candidate.createdAt || 0) >= (held.createdAt || 0);
 }
 
 // Mirrors the delete policy, so the eraser does not offer a rub-out the database

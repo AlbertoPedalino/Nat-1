@@ -87,16 +87,27 @@ test('each shape knows what is inside it', () => {
   assert.ok(areaEdgeDistance(line, { x: 0.6, y: 5 }) > 0);
 });
 
-test('picking an area up takes its rim or origin, not its inside', () => {
+test('the edge-only hit takes an area by its rim or origin, not its inside', () => {
   const circle = area('circle', [{ x: 0, y: 0 }, { x: 4, y: 0 }]);
   assert.equal(isPointOnArea(circle, { x: 2, y: 0 }), true);
   assert.equal(isPointOnArea(circle, { x: 2, y: 0 }, { edgeOnly: true }), false);
   assert.equal(isPointOnArea(circle, { x: 3.9, y: 0 }, { edgeOnly: true }), true);
   assert.equal(isPointOnArea(circle, { x: 0.2, y: 0.1 }, { edgeOnly: true }), true);
 
-  // The eraser takes it from anywhere inside; moving needs the rim.
+  // Eraser, menu and picking up take it from anywhere inside.
   assert.equal(drawingAtPoint([circle], { x: 2, y: 0 })?.id, 'circle-1');
   assert.equal(drawingAtPoint([circle], { x: 2, y: 0 }, 0.5, { areaEdgeOnly: true }), null);
+});
+
+// Taken from anywhere inside, a big area would swallow every mark on it: a
+// line drawn across it, or a smaller area inside it, could never be picked.
+test('over an area, a line or a smaller area inside it is the one picked', () => {
+  const big = { ...area('circle', [{ x: 0, y: 0 }, { x: 6, y: 0 }]), id: 'big', createdAt: 3 };
+  const small = { ...area('square', [{ x: 1, y: 0 }, { x: 2, y: 0 }]), id: 'small', createdAt: 1 };
+  const stroke = { id: 'stroke', points: [{ x: -3, y: 2 }, { x: 3, y: 2 }], width: 3, createdAt: 0 };
+  assert.equal(drawingAtPoint([small, big], { x: 1.5, y: 0 })?.id, 'small');
+  assert.equal(drawingAtPoint([big, stroke], { x: 0, y: 2 })?.id, 'stroke');
+  assert.equal(drawingAtPoint([big, small, stroke], { x: -3, y: -3 })?.id, 'big');
 });
 
 test('the label sits in the middle of the area', () => {
