@@ -19,7 +19,7 @@ import {
 } from '../../../shared/vtt/map/areas.js';
 import { isNote as isNoteDrawing, scaledPoints } from '../../../shared/vtt/map/drawing.js';
 import { fullscreenContainer } from './fullscreenContainer.js';
-import { menuPlacement } from './menuPlacement.js';
+import { useMenuPlacement } from './menuPlacement.js';
 import { battleMapDialogPaperSx } from './battleMapSurface.js';
 
 // Right-click (or a long press) on a mark: the same idea as a piece's menu.
@@ -62,6 +62,10 @@ export default function DrawingMenu({
       : '');
     setScale(1);
   }, [drawing, feetPerCell]);
+
+  // At the press; on a touch screen left there while typing, lifted only to
+  // keep the field above the keyboard.
+  const placement = useMenuPlacement(anchor);
 
   useEffect(() => () => {
     clearTimeout(typingTimerRef.current);
@@ -124,9 +128,6 @@ export default function DrawingMenu({
     circle: 'Radius (ft)', square: 'Side (ft)', cone: 'Length (ft)', line: 'Length (ft)',
   }[area?.shape];
 
-  // On a touch screen pinned to the top, out of the keyboard's way.
-  const placement = menuPlacement(anchor, MENU_WIDTH);
-
   return (
     <Menu
       open={Boolean(anchor)}
@@ -137,6 +138,7 @@ export default function DrawingMenu({
       {...placement.menuProps}
       container={fullscreenContainer}
       slotProps={{
+        transition: placement.transitionProps,
         paper: {
           sx: {
             ...battleMapDialogPaperSx,
@@ -144,7 +146,6 @@ export default function DrawingMenu({
             maxWidth: 'calc(100vw - 16px)',
             maxHeight: 'calc(100% - 32px)',
             '& .MuiMenu-list': { p: 0 },
-            ...placement.paperSx,
           },
         },
       }}

@@ -1,4 +1,4 @@
-import { fireEvent, render as baseRender, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render as baseRender, screen, waitFor, within } from '@testing-library/react';
 import { ThemeProvider } from '@mui/material';
 import { vi } from 'vitest';
 import { theme } from '../../../../../src/app/theme.js';
@@ -115,10 +115,11 @@ test('a note cannot be emptied into an invisible mark', () => {
 });
 
 // On a phone the keyboard shortened the window as soon as the label was
-// tapped, and the menu was moved to fit — again on every letter — so it jumped
-// up under the thumb. On a touch screen it opens pinned to the top instead,
-// where the keyboard never reaches, and is not placed at the press at all.
-test('on a touch screen the menu is pinned to the top, not placed at the press', () => {
+// tapped, and the menu was clamped back inside it: one opened low jumped up
+// under the thumb. Pinned to the top it stopped jumping but left the press.
+// Now it opens at the press, stays there, and is lifted only as far as the
+// keyboard would cover the field being typed into.
+test('on a touch screen the menu opens at the press and only rises to clear the keyboard', async () => {
   const matchMedia = vi.spyOn(window, 'matchMedia').mockImplementation((query) => ({
     matches: query === '(pointer: coarse)',
     media: query,
@@ -127,15 +128,41 @@ test('on a touch screen the menu is pinned to the top, not placed at the press',
     addListener: vi.fn(),
     removeListener: vi.fn(),
   }));
+  const listeners = {};
+  const keyboard = {
+    offsetTop: 0,
+    height: window.innerHeight,
+    addEventListener: (type, run) => { listeners[type] = run; },
+    removeEventListener: vi.fn(),
+  };
+  Object.defineProperty(window, 'visualViewport', { value: keyboard, configurable: true });
   try {
     render(<DrawingMenu drawing={fireArea} {...menuProps({ anchor: { x: 300, y: 600 } })} />);
     const paper = document.querySelector('.MuiMenu-paper');
-    const style = window.getComputedStyle(paper);
-    expect(style.top).toBe('8px');
-    // Popover leaves the position to the paper: nothing placed it at the press.
-    expect(paper.style.top).toBe('');
-    expect(paper.style.left).toBe('');
+    await waitFor(() => expect(paper.style.top).toBe('600px'));
+    expect(paper.style.left).toBe('300px');
+
+    // The keyboard comes up over the bottom of the screen and the label is
+    // tapped: the field, 100px below the menu's top, would sit under it.
+    const label = screen.getByRole('textbox', { name: 'Label' });
+    vi.spyOn(label, 'getBoundingClientRect').mockImplementation(() => ({
+      top: 0, left: 0, right: 0, width: 0, height: 0,
+      bottom: Number.parseFloat(paper.style.top) + 100,
+    }));
+    keyboard.height = 400;
+    act(() => { label.focus(); });
+    // Lifted until the field's bottom is just above the keyboard (400 - 8).
+    expect(paper.style.top).toBe('292px');
+    // Typing does not move it.
+    fireEvent.change(label, { target: { value: 'Wall of Fire' } });
+    expect(paper.style.top).toBe('292px');
+
+    // The keyboard goes: back where it was pressed.
+    keyboard.height = window.innerHeight;
+    act(() => { listeners.resize(); });
+    expect(paper.style.top).toBe('600px');
   } finally {
     matchMedia.mockRestore();
+    delete window.visualViewport;
   }
 });

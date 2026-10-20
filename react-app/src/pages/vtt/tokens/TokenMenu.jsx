@@ -22,7 +22,7 @@ import {
   toggleCondition,
 } from '../../../shared/character/combat/conditions.js';
 import { fullscreenContainer } from '../map/fullscreenContainer.js';
-import { coarsePointer, menuPlacement } from '../map/menuPlacement.js';
+import { coarsePointer, useMenuPlacement } from '../map/menuPlacement.js';
 import { battleMapDialogPaperSx } from '../map/battleMapSurface.js';
 
 // Right-click menu on the piece itself. Label, conditions and removal used to be
@@ -45,6 +45,9 @@ export default function TokenMenu({
   const [showHp, setShowHp] = useState(false);
   const [effects, setEffects] = useState([]);
   const [deathSaves, setDeathSaves] = useState({ success: 0, fail: 0 });
+  // At the press; on a touch screen left there while typing, lifted only to
+  // keep the field above the keyboard.
+  const placement = useMenuPlacement(anchor);
   const syncedIdRef = useRef(null);
   const typingTimerRef = useRef(null);
   const pendingPatchRef = useRef({});
@@ -143,8 +146,6 @@ export default function TokenMenu({
 
 
   const menuWidth = isMapObject ? 270 : 360;
-  // On a touch screen pinned to the top, out of the keyboard's way.
-  const placement = menuPlacement(anchor, menuWidth);
 
   return (
     <Menu
@@ -153,6 +154,7 @@ export default function TokenMenu({
       {...placement.menuProps}
       container={fullscreenContainer}
       slotProps={{
+        transition: placement.transitionProps,
         paper: {
           sx: {
             ...battleMapDialogPaperSx,
@@ -163,7 +165,6 @@ export default function TokenMenu({
             // pushed up past the top edge. 32px leaves Popover's 16px margins.
             maxHeight: 'calc(100% - 32px)',
             '& .MuiMenu-list': { p: 0 },
-            ...placement.paperSx,
           },
         },
       }}
