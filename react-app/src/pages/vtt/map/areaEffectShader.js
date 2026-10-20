@@ -63,10 +63,10 @@ float fbm(vec2 p) {
 // Signed distance in pixels to the area's edge, negative inside.
 float edgeDistance(vec2 l) {
   if (u_shape < 0.5) return length(l) - u_reach;
-  if (u_shape < 1.5) return max(abs(l.x), abs(l.y)) - u_reach;
   vec2 dir = vec2(cos(u_angle), sin(u_angle));
   float along = dot(l, dir);
   float across = abs(dot(l, vec2(-dir.y, dir.x)));
+  if (u_shape < 1.5) return max(abs(along), across) - u_reach;
   float ends = max(-along, along - u_reach);
   if (u_shape < 2.5) return max(ends, (across - along * 0.5) * 0.8944);
   return max(ends, across - u_breadth * 0.5);

@@ -94,12 +94,51 @@ export function measureLabel(shape, from, to, options) {
   const kind = normalizeShape(shape);
   if (overland) return kind === 'line' ? overland : `${overland} ${kind}`;
 
-  const feet = measureFeet(shape, from, to, options);
+  // A template (radius, cone, square) is drawn at the straight distance from
+  // its origin, so that is what it says — on a hex map a step is still a step.
+  // The line counts squares the way a move does.
+  const feet = kind !== 'line' && options?.shape !== 'hex'
+    ? templateReachFeet(from, to, options)
+    : measureFeet(shape, from, to, options);
   if (feet <= 0) return '';
   if (kind === 'radius') return `${formatFeet(feet)} radius`;
   if (kind === 'cone') return `${formatFeet(feet)} cone`;
   if (kind === 'square') return `${formatFeet(feet)} square`;
   return formatFeet(feet);
+}
+
+function templateReachFeet(from, to, { feetPerCell = FEET_PER_CELL } = {}) {
+  const perCell = Number(feetPerCell) > 0 ? Number(feetPerCell) : FEET_PER_CELL;
+  const cells = Math.hypot((Number(to?.x) || 0) - (Number(from?.x) || 0), (Number(to?.y) || 0) - (Number(from?.y) || 0));
+  return Math.round(cells) * perCell;
+}
+
+// Where the ruler is drawn, on a map of squares: from the middle of the square
+// it was started on to the middle of the square under the pointer, so the
+// number changes as the pointer enters the next square and the line ends where
+// it is counted to. A template's reach is whole squares as well: it grows a
+// square at a time, and what is drawn is exactly what the label says. Without
+// this the line followed the pointer while the number jumped at the middle of
+// each square, and nobody could tell where 5 ft ended and 10 ft began. Hexes
+// are left as they are.
+export function snapRuler(shape, from, to, { hex = false } = {}) {
+  if (hex || !from || !to) return { from, to };
+  const centre = (point) => ({
+    x: Math.floor(Number(point.x) || 0) + 0.5,
+    y: Math.floor(Number(point.y) || 0) + 0.5,
+  });
+  const start = centre(from);
+  const end = centre(to);
+  if (normalizeShape(shape) === 'line') return { from: start, to: end };
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const length = Math.hypot(dx, dy);
+  const reach = Math.round(length);
+  if (!reach) return { from: start, to: start };
+  return {
+    from: start,
+    to: { x: start.x + (dx / length) * reach, y: start.y + (dy / length) * reach },
+  };
 }
 
 // The badge is noise on a piece that has not left its square yet.
