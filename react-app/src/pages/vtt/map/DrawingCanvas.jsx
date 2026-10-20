@@ -178,9 +178,9 @@ function drawStroke(context, stroke, points, toScreen, cell, view) {
   }
 }
 
-// An area of effect: its outline, a translucent fill when it is filled and has
-// no effect (an effect paints its own inside, on the canvas underneath), and
-// its label in the middle.
+// An area of effect: its outline, a solid fill in the outline's colour when it
+// is filled and has no effect (an effect paints its own, see-through inside,
+// on the canvas underneath), and its label in the middle.
 function drawArea(context, stroke, toScreen, cell, view) {
   const geometry = areaGeometry(stroke);
   if (!geometry) return;
@@ -212,7 +212,7 @@ function drawArea(context, stroke, toScreen, cell, view) {
   }
 
   if (filled && !effect) {
-    context.fillStyle = vttAlpha(color, 0.3);
+    context.fillStyle = color;
     context.fill();
   }
   // Thinner than ink of the same size: an outline frames, it is not the mark.
