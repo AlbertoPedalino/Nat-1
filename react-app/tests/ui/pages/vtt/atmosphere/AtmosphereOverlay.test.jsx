@@ -1,4 +1,4 @@
-import { render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import { afterEach, vi } from 'vitest';
 import { ATMOSPHERE_TYPES } from '../../../../../src/shared/vtt/scene/atmosphere.js';
 import AtmosphereOverlay, { atmosphereRenderScale } from '../../../../../src/pages/vtt/atmosphere/AtmosphereOverlay.jsx';
@@ -48,4 +48,54 @@ test('heatwave avoids the expensive multi-cell dust search and FBM noise', () =>
   // The shared shader prelude defines fbm for other presets, but Heatwave must
   // not call it from its own helpers or body.
   expect(shader.match(/\bfbm\(/g)).toHaveLength(1);
+});
+
+// Enough of a WebGL context for the renderer to set itself up and draw.
+function fakeContext() {
+  const lose = { loseContext: vi.fn() };
+  const gl = new Proxy({
+    isContextLost: () => false,
+    getExtension: (name) => (name === 'WEBGL_lose_context' ? lose : null),
+    getShaderParameter: () => true,
+    getProgramParameter: () => true,
+  }, {
+    get: (target, key) => (key in target ? target[key] : (typeof key === 'string' && /^[A-Z_]+$/.test(key) ? 1 : () => ({}))),
+  });
+  return { gl, lose };
+}
+
+// A browser takes the oldest WebGL context away when too many are open. The
+// weather then broke for the rest of the evening, until it was switched off and
+// on again; it now starts again on a new canvas by itself, and gives its
+// context back as soon as its canvas goes.
+test('a lost context starts the weather again on a new canvas, and contexts are given back', async () => {
+  vi.useFakeTimers();
+  try {
+    const contexts = [];
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(() => {
+      const context = fakeContext();
+      contexts.push(context);
+      return context.gl;
+    });
+    vi.spyOn(globalThis, 'requestAnimationFrame').mockImplementation(() => 0);
+    const { container, unmount } = render(<AtmosphereOverlay atmosphere={{ type: 'rain', intensity: 0.8 }} />);
+    const first = container.querySelector('canvas[data-atmosphere-overlay="rain"]');
+    expect(contexts).toHaveLength(1);
+
+    act(() => {
+      const lost = new Event('webglcontextlost', { cancelable: true });
+      first.dispatchEvent(lost);
+    });
+    await act(async () => { vi.advanceTimersByTime(500); });
+
+    const second = container.querySelector('canvas[data-atmosphere-overlay="rain"]');
+    expect(second).not.toBe(first);
+    expect(contexts).toHaveLength(2);
+    expect(contexts[0].lose.loseContext).toHaveBeenCalled();
+
+    unmount();
+    expect(contexts[1].lose.loseContext).toHaveBeenCalled();
+  } finally {
+    vi.useRealTimers();
+  }
 });

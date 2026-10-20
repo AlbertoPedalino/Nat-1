@@ -4,6 +4,7 @@ import { normalizeAtmosphere } from '../../../shared/vtt/scene/atmosphere.js';
 import { ATMOSPHERE_VERTEX_SHADER } from './shaders/common.js';
 import { atmosphereFallbackSx } from './shaders/fallback.js';
 import { getAtmosphereFragmentShader } from './shaders/index.js';
+import { releaseContext, useContextRecovery } from './webglCanvas.js';
 
 // The renderer owns one low-resolution fullscreen triangle. Each atmosphere keeps
 // its own fragment shader module, so changing one effect cannot alter another.
@@ -16,10 +17,14 @@ export default function AtmosphereOverlay({ atmosphere }) {
   configRef.current = config;
   const fragmentShader = getAtmosphereFragmentShader(config.type);
   const enabled = Boolean(fragmentShader);
+  const recovery = useContextRecovery();
+  const { generation, recover, reset } = recovery;
 
   useEffect(() => {
-    if (!enabled) setFallback(false);
-  }, [enabled]);
+    if (enabled) return;
+    setFallback(false);
+    reset();
+  }, [enabled, reset]);
 
   useEffect(() => {
     if (!enabled) return undefined;
@@ -118,10 +123,12 @@ export default function AtmosphereOverlay({ atmosphere }) {
       }
     };
     const handleVisibility = () => (document.hidden ? stop() : start());
+    // Taken by the browser (too many contexts, the GPU reset, the app sent to
+    // the background on a phone): start again on a new canvas.
     const handleContextLost = (event) => {
       event.preventDefault();
       stop();
-      setFallback(true);
+      recover();
     };
     const observer = typeof ResizeObserver === 'function' ? new ResizeObserver(() => draw()) : null;
     observer?.observe(canvas.parentElement || canvas);
@@ -143,15 +150,18 @@ export default function AtmosphereOverlay({ atmosphere }) {
       drawRef.current = null;
       gl.deleteBuffer(buffer);
       gl.deleteProgram(program);
+      // The canvas goes with this effect (it is keyed by the same things), so
+      // its context is given back now rather than whenever it is collected.
+      releaseContext(gl);
     };
-  }, [enabled, fragmentShader]);
+  }, [enabled, fragmentShader, config.type, generation, recover]);
 
   useEffect(() => {
     drawRef.current?.();
   }, [config.direction, config.intensity, config.seed, config.speed, config.type]);
 
   if (!enabled) return null;
-  if (fallback) {
+  if (fallback || recovery.failed) {
     return (
       <Box
         aria-hidden
@@ -163,6 +173,7 @@ export default function AtmosphereOverlay({ atmosphere }) {
   return (
     <Box
       component="canvas"
+      key={`${config.type}:${generation}`}
       ref={canvasRef}
       aria-hidden
       data-atmosphere-overlay={config.type}
