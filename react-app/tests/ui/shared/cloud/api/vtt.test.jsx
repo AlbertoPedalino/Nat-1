@@ -24,6 +24,7 @@ import {
   removeSceneImage,
   replaceSceneImage,
   setTokenVisibility,
+  updateDrawing,
 } from '../../../../../src/shared/cloud/api/vtt.js';
 
 describe('VTT Storage cleanup', () => {
@@ -208,5 +209,36 @@ describe('VTT Storage cleanup', () => {
     await setTokenVisibility('legacy-1', false, 'gm');
 
     expect(update).toHaveBeenCalledWith({ hidden_from_players: false, layer: 'tokens' });
+  });
+});
+
+describe('drawing menu writes', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  test('only the fields the menu touched are written, in column form', async () => {
+    const row = {
+      id: 'd1', scene_id: 's1', layer: 'tokens', points: [{ x: 1, y: 1 }, { x: 5, y: 1 }],
+      color: '#ff7a2a', width: 3, text: null, area: { shape: 'circle', filled: true },
+      hidden_from_players: true,
+    };
+    const single = vi.fn(async () => ({ data: row, error: null }));
+    const select = vi.fn(() => ({ single }));
+    const eq = vi.fn(() => ({ select }));
+    const update = vi.fn(() => ({ eq }));
+    mocks.client.from.mockReturnValueOnce({ update });
+
+    const drawing = await updateDrawing('d1', { text: '   ', hiddenFromPlayers: 1 });
+
+    expect(mocks.client.from).toHaveBeenCalledWith('map_drawings');
+    // An emptied label is removed; nothing else is sent.
+    expect(update).toHaveBeenCalledWith({ text: null, hidden_from_players: true });
+    expect(eq).toHaveBeenCalledWith('id', 'd1');
+    expect(drawing.hiddenFromPlayers).toBe(true);
+    expect(drawing.area).toEqual({ shape: 'circle', filled: true, effect: null });
+  });
+
+  test('an empty change writes nothing', async () => {
+    expect(await updateDrawing('d1', {})).toBeNull();
+    expect(mocks.client.from).not.toHaveBeenCalled();
   });
 });

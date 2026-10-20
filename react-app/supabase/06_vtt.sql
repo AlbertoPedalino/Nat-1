@@ -222,6 +222,13 @@ create table if not exists public.map_drawings (
 
 alter table public.map_drawings add column if not exists created_by uuid default auth.uid();
 alter table public.map_drawings add column if not exists text text;
+-- An area of effect is a stroke with a shape: {shape, filled, effect, breadth}.
+-- Its two points are the origin and the tip, its text the label. Validated by
+-- the client (shared/vtt/map/areas.js); null on a plain stroke or a note.
+alter table public.map_drawings add column if not exists area jsonb;
+-- Hidden by the GM from the drawing's menu, like a piece: its layer is kept,
+-- the players are simply never sent it.
+alter table public.map_drawings add column if not exists hidden_from_players boolean not null default false;
 
 create index if not exists map_scenes_campaign_idx on public.map_scenes(campaign_id);
 create index if not exists map_drawings_scene_idx on public.map_drawings(scene_id);
@@ -303,14 +310,15 @@ alter table public.map_tokens enable row level security;
 alter table public.map_token_secrets enable row level security;
 alter table public.map_drawings enable row level security;
 
--- Drawings follow the token rules: the GM's own layer never reaches a player,
--- and only the live scene is readable at all. Only the GM draws.
+-- Drawings follow the token rules: the GM's own layer and anything the GM hid
+-- never reach a player, and only the live scene is readable at all.
 drop policy if exists map_drawings_select on public.map_drawings;
 create policy map_drawings_select on public.map_drawings
   for select using (
     public.is_campaign_gm(public.map_scene_campaign(scene_id))
     or (
       layer <> 'gm'
+      and not hidden_from_players
       and public.map_scene_is_live(scene_id)
       and public.map_scene_campaign(scene_id) in (select public.user_campaign_ids())
     )
@@ -326,6 +334,7 @@ create policy map_drawings_insert on public.map_drawings
     public.is_campaign_gm(public.map_scene_campaign(scene_id))
     or (
       layer <> 'gm'
+      and not hidden_from_players
       and created_by = auth.uid()
       and public.map_scene_is_live(scene_id)
       and public.map_scene_campaign(scene_id) in (select public.user_campaign_ids())
@@ -351,6 +360,8 @@ create policy map_drawings_update on public.map_drawings
     public.is_campaign_gm(public.map_scene_campaign(scene_id))
     or (
       layer <> 'gm'
+      -- Hiding is the GM's call, as it is for pieces.
+      and not hidden_from_players
       and created_by = auth.uid()
       and public.map_scene_is_live(scene_id)
       and public.map_scene_campaign(scene_id) in (select public.user_campaign_ids())

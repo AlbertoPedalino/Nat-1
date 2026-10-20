@@ -34,6 +34,7 @@ import {
   setTokenHp,
   setTokenSecret,
   signMapImage,
+  updateDrawing,
   updateScene,
   updateToken,
   uploadMapImage,
@@ -77,6 +78,7 @@ import {
   canMarkToken, isTokenInPlay, isTokenVisibleToPlayers, normalizePlayArea, sceneTitleFor, toScene,
 } from '../../../shared/vtt/scene/scene.js';
 import { sanitizeNoteText } from '../../../shared/vtt/map/drawing.js';
+import { DEFAULT_AREA_OPTIONS, areaEffect } from '../../../shared/vtt/map/areas.js';
 import { normalizeAtmosphere } from '../../../shared/vtt/scene/atmosphere.js';
 import { FEET_PER_CELL } from '../../../shared/vtt/map/measure.js';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
@@ -156,6 +158,7 @@ import {
 } from './ScenePanels.jsx';
 import SceneViewport from '../map/SceneViewport.jsx';
 import TokenMenu from '../tokens/TokenMenu.jsx';
+import DrawingMenu from '../map/DrawingMenu.jsx';
 
 const CampaignSheetView = lazy(() => import('../../campaignsheet/CampaignSheetView.jsx'));
 
@@ -215,7 +218,7 @@ function naturalImageSize(image) {
 
 function paintToolGroup(mode) {
   if (mode === 'marquee') return 'select';
-  if (['draw', 'erase', 'text'].includes(mode)) return 'draw';
+  if (['draw', 'erase', 'text', 'area'].includes(mode)) return 'draw';
   if (mode === 'laser') return 'laser';
   if (mode === 'measure') return 'ruler';
   if (mode === 'reveal' || mode === 'hide') return 'fog';
@@ -335,6 +338,9 @@ export default function SceneEditor({
   const [selectedDrawingId, setSelectedDrawingId] = useState(null);
   const [drawColor, setDrawColor] = useState(VTT_COLORS.gold);
   const [drawWidth, setDrawWidth] = useState(3);
+  // The next area of effect to place. Kept between placements, so a row of
+  // fire is a row of clicks.
+  const [areaOptions, setAreaOptions] = useState(DEFAULT_AREA_OPTIONS);
   const [contentView, setContentView] = useState('map');
   const [mapFullscreen, setMapFullscreen] = useState(false);
   // A local audit mode for the GM. The account keeps GM permissions, while the
@@ -609,6 +615,13 @@ export default function SceneEditor({
       return;
     }
 
+    // Same for a mark the GM hid or showed: realtime never tells a player about
+    // a row they may no longer read, so they re-read the marks through RLS.
+    if (payload.drawingsChanged) {
+      reconcileContent({ fullDrawings: true });
+      return;
+    }
+
     // A live painting frame: only the cells it flipped. Applied in order; a
     // gap waits for the stroke's final snapshot instead of guessing.
     if (payload.fogDelta) {
@@ -652,7 +665,7 @@ export default function SceneEditor({
       return;
     }
     setGhosts((current) => putGhost(current, payload));
-  }, [onSceneChange, refreshVisibleTokens]);
+  }, [onSceneChange, reconcileContent, refreshVisibleTokens]);
 
   const getCameraPose = useCallback(() => cameraPoseRef.current, []);
   const getPresenterState = useCallback(() => ({
@@ -1047,6 +1060,9 @@ export default function SceneEditor({
     drawingAtPoint(
       drawings.filter((drawing) => canMoveDrawing(drawing, { isGm: role.isGm, userId: user?.id })),
       point,
+      0.5,
+      // An area is picked up by its rim or its origin; its inside still pans.
+      { areaEdgeOnly: true },
     )
   ), [drawings, role.isGm, user?.id]);
 
@@ -1065,6 +1081,71 @@ export default function SceneEditor({
       notify('error', cause?.message || 'Could not move that mark.');
     }
   }, [notify]);
+
+  // An area of effect is a mark too: one row, same undo and eraser.
+  const handlePlaceArea = useCallback(async ({ points, area, text }) => {
+    try {
+      const created = await createDrawing(scene.id, {
+        points,
+        area,
+        text,
+        color: drawColor,
+        width: drawWidth,
+        layer: role.isGm ? activeLayer : 'tokens',
+      });
+      if (created) setDrawings((current) => [...current, created]);
+    } catch (cause) {
+      notify('error', cause?.message || 'Could not place that area.');
+    }
+  }, [activeLayer, drawColor, drawWidth, notify, role.isGm, scene.id]);
+
+  // The mark's own menu (right click, or a long press on a touch screen).
+  // Changes show at once; a refused write re-reads the marks rather than
+  // guessing what the row holds now.
+  const [drawingMenu, setDrawingMenu] = useState(null);
+  const menuDrawing = useMemo(
+    () => drawings.find((drawing) => drawing.id === drawingMenu?.drawingId) || null,
+    [drawingMenu, drawings],
+  );
+
+  // What a right click or a long press opens: anything of yours under the
+  // pointer, an area from anywhere inside it.
+  const drawingForMenu = useCallback((point) => (
+    drawingAtPoint(
+      drawings.filter((drawing) => canMoveDrawing(drawing, { isGm: role.isGm, userId: user?.id })),
+      point,
+    )
+  ), [drawings, role.isGm, user?.id]);
+
+  const handlePreviewDrawing = useCallback((drawing, patch) => {
+    setDrawings((current) => current.map((item) => (item.id === drawing.id ? { ...item, ...patch } : item)));
+  }, [setDrawings]);
+
+  const handleSaveDrawing = useCallback(async (drawing, patch) => {
+    handlePreviewDrawing(drawing, patch);
+    try {
+      await updateDrawing(drawing.id, patch);
+      return true;
+    } catch (cause) {
+      notify('error', cause?.message || 'Could not change that mark.');
+      reconcileContent({ fullDrawings: true });
+      return false;
+    }
+  }, [handlePreviewDrawing, notify, reconcileContent]);
+
+  const handleDrawingVisibility = useCallback(async (drawing, hidden) => {
+    if (await handleSaveDrawing(drawing, { hiddenFromPlayers: Boolean(hidden) })) {
+      sendDrag({ drawingsChanged: true });
+    }
+  }, [handleSaveDrawing, sendDrag]);
+
+  // Picking an effect suggests its colour for the outline; the colour can still
+  // be changed afterwards.
+  const handleAreaOptionsChange = useCallback((patch) => {
+    setAreaOptions((current) => ({ ...current, ...patch }));
+    const effect = patch.effect ? areaEffect(patch.effect) : null;
+    if (effect) setDrawColor(effect.color);
+  }, []);
 
   // A note is a stroke with words on it, so it takes the same path: same table,
   // same visibility rules, same undo and eraser.
@@ -1805,6 +1886,11 @@ export default function SceneEditor({
           paintMode={paintMode}
           drawColor={drawColor}
           drawWidth={drawWidth}
+          areaOptions={areaOptions}
+          feetPerCell={feetPerCell}
+          gridShape={isHexGrid(scene.grid) ? 'hex' : 'square'}
+          onFeetPerCellChange={setFeetPerCell}
+          onAreaOptionsChange={handleAreaOptionsChange}
           canUndo={erasable.length > 0}
           onPaintModeChange={setPaintMode}
           onDrawColorChange={setDrawColor}
@@ -2005,7 +2091,8 @@ export default function SceneEditor({
       },
     ];
   }, [
-    activeLayer, brushSize, busy, drawColor, drawWidth, erasable.length, handleAddMarker,
+    activeLayer, areaOptions, brushSize, busy, drawColor, drawWidth, erasable.length, handleAddMarker,
+    handleAreaOptionsChange,
     handleAddToken, handleEnableFog, handleFitPlayArea, handleFogAll, handleGridChange,
     handlePlaceCharacter, handlePlaceObject, handlePlayAreaChange, handleRemoveCharacter,
     handleUndoDrawing, handleUploadMap,
@@ -2019,7 +2106,7 @@ export default function SceneEditor({
   // the moment you switch tools.
   const visibleDrawings = useMemo(() => (
     spectator || gmPlayerPreview
-      ? drawings.filter((drawing) => drawing.layer !== 'gm')
+      ? drawings.filter((drawing) => drawing.layer !== 'gm' && !drawing.hiddenFromPlayers)
       : role.isGm
       ? drawings.map((drawing) => (
         drawing.layer === activeLayer ? drawing : { ...drawing, color: fade(drawing.color) }
@@ -2457,6 +2544,10 @@ export default function SceneEditor({
         onDrawEnd={gmPlayerPreview ? undefined : handleDrawEnd}
         onErase={gmPlayerPreview ? undefined : handleErase}
         onWriteNote={gmPlayerPreview ? undefined : handleWriteNote}
+        areaOptions={areaOptions}
+        onPlaceArea={gmPlayerPreview ? undefined : handlePlaceArea}
+        drawingForMenu={gmPlayerPreview ? undefined : drawingForMenu}
+        onDrawingMenu={gmPlayerPreview ? undefined : (drawing, at) => setDrawingMenu({ drawingId: drawing.id, at })}
         onLaser={gmPlayerPreview ? undefined : handleLaser}
         lasers={laserDots}
         rollBubbles={gmPlayerPreview ? projectedRollBubbles : rollBubbles}
@@ -2553,6 +2644,20 @@ export default function SceneEditor({
         onPlacementDragStart={setPlacementDrag}
         onPlacementDragEnd={() => setPlacementDrag(null)}
       />
+
+      {!gmPlayerPreview ? (
+        <DrawingMenu
+          drawing={menuDrawing}
+          anchor={drawingMenu?.at || null}
+          feetPerCell={feetPerCell}
+          gridShape={isHexGrid(scene.grid) ? 'hex' : 'square'}
+          onClose={() => setDrawingMenu(null)}
+          onPreview={handlePreviewDrawing}
+          onSave={handleSaveDrawing}
+          onVisibility={role.isGm ? handleDrawingVisibility : undefined}
+          onDelete={removeDrawing}
+        />
+      ) : null}
 
       {!gmPlayerPreview ? <TokenMenu
         token={menuToken}

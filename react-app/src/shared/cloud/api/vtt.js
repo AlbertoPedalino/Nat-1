@@ -7,6 +7,7 @@ import {
   simplifyStroke,
   toDrawing,
 } from '../../vtt/map/drawing.js';
+import { normalizeArea } from '../../vtt/map/areas.js';
 import { normalizeFog } from '../../vtt/map/fog.js';
 import { normalizeAtmosphere } from '../../vtt/scene/atmosphere.js';
 import {
@@ -36,7 +37,7 @@ const SIGNED_URL_MARGIN_MS = 15 * 60 * 1000;
 const SIGNED_URL_KEY = 'gb:vtt:signed-url:';
 const SCENE_COLUMNS = 'id, campaign_id, name, image_path, background_path, shown_image, grid, atmosphere, fog, is_live, play_area, updated_at';
 const TOKEN_COLUMNS = 'id, scene_id, layer, hidden_from_players, x, y, w, h, z, character_id, label, color, image_path, image_url, icon_key, icon_stroke_width, rotation, hp_current, hp_max, conditions, effects, source_ref, show_hp, created_by, updated_at';
-const DRAWING_COLUMNS = 'id, scene_id, layer, points, color, width, text, created_by, created_at';
+const DRAWING_COLUMNS = 'id, scene_id, layer, points, color, width, text, area, hidden_from_players, created_by, created_at';
 
 export async function listScenes(campaignId) {
   const supabase = requireClient();
@@ -382,12 +383,16 @@ export async function listDrawingsByIds(sceneId, ids) {
   return (data || []).map(toDrawing).filter(Boolean);
 }
 
-export async function createDrawing(sceneId, { points, color, width, layer, text } = {}) {
+export async function createDrawing(sceneId, { points, color, width, layer, text, area } = {}) {
   const supabase = requireClient();
   const note = sanitizeNoteText(text);
+  const shape = normalizeArea(area);
+  // An area is exactly its origin and tip, and its text is an optional label.
   // A note is anchored by a single point and needs no simplification; a stroke
   // is worth storing only if it went somewhere.
-  const simplified = note ? normalizePoints(points).slice(0, 1) : simplifyStroke(points);
+  const simplified = shape
+    ? normalizePoints(points).slice(0, 2)
+    : note ? normalizePoints(points).slice(0, 1) : simplifyStroke(points);
   if (!isDrawable(simplified)) return null;
   const { data, error } = await supabase
     .from('map_drawings')
@@ -398,7 +403,32 @@ export async function createDrawing(sceneId, { points, color, width, layer, text
       color: color || null,
       width: Number(width) > 0 ? Number(width) : 3,
       text: note || null,
+      area: shape,
     })
+    .select(DRAWING_COLUMNS)
+    .single();
+  if (error) throw error;
+  return toDrawing(data);
+}
+
+// What a drawing's menu changes: shape and place (points), colour, width,
+// text (a note's words or an area's label; empty removes a label), the area's
+// description, and whether the players see it. Only the fields given are
+// written, so a colour change cannot replay a stale label.
+export async function updateDrawing(drawingId, patch = {}) {
+  if (!drawingId) return null;
+  const row = {};
+  if (Object.hasOwn(patch, 'points')) row.points = normalizePoints(patch.points);
+  if (Object.hasOwn(patch, 'color')) row.color = patch.color || null;
+  if (Object.hasOwn(patch, 'width') && Number(patch.width) > 0) row.width = Number(patch.width);
+  if (Object.hasOwn(patch, 'text')) row.text = sanitizeNoteText(patch.text) || null;
+  if (Object.hasOwn(patch, 'area')) row.area = normalizeArea(patch.area);
+  if (Object.hasOwn(patch, 'hiddenFromPlayers')) row.hidden_from_players = Boolean(patch.hiddenFromPlayers);
+  if (!Object.keys(row).length) return null;
+  const { data, error } = await requireClient()
+    .from('map_drawings')
+    .update(row)
+    .eq('id', drawingId)
     .select(DRAWING_COLUMNS)
     .single();
   if (error) throw error;
