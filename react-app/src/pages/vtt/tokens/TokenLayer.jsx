@@ -40,8 +40,10 @@ function revealedCoverage(rect, grid, fog, fogBytes) {
 // neighbour's name plate never covers the pills. Above the players' fog too
 // (which sits at 4) — but only when nothing of the piece is under it, or
 // lifting it would uncover the hidden part on the players' screens and the
-// projector, which open the pills whenever the GM hovers.
-const EXPANDED_Z = 5;
+// projector, which open the pills whenever the GM hovers. Level with the fog,
+// not above it: the weather (also 4, mounted after the pieces) has to stay on
+// top, or a hovered piece lost its tint and looked selected (user report).
+const EXPANDED_Z = 4;
 const EXPANDED_UNDER_FOG_Z = 3;
 
 function outsideViewport(rect, at, zoom, viewport) {

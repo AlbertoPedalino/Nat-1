@@ -769,6 +769,12 @@ export default function SceneViewport({
 
   useEffect(() => cancelLongPress, [cancelLongPress]);
 
+  // A mark whose menu is open is the one in hand: it can be dragged next.
+  const openDrawingMenu = (mark, at) => {
+    onSelectDrawing?.(mark.id);
+    onDrawingMenu?.(mark, at);
+  };
+
   // Two fingers are a pinch, whatever they landed on: whatever was being drawn,
   // painted or dragged is abandoned rather than continued with one of them.
   const trackPointer = (event) => {
@@ -895,21 +901,23 @@ export default function SceneViewport({
     // the menu opens, and the hold is let go if the finger moves.
     if (event.button === 0 && paintMode === 'select' && drawingForMenu && onDrawingMenu) {
       const mark = drawingForMenu(cellPoint(point));
-      if (mark) armLongPress(event, (at) => onDrawingMenu(mark, at));
+      if (mark) armLongPress(event, (at) => openDrawingMenu(mark, at));
     }
 
-    // In hand rather than in a tool: a mark is picked up the way a piece is, by
-    // taking hold of it. The board still pans from anywhere it is not covered.
+    // Selected first, then moved (user request): a finger sliding across the
+    // board to pan used to drag along whatever mark it started on. A press on
+    // the selected mark takes hold of it; anywhere else it pans, and a tap
+    // that went nowhere selects what it landed on, or nothing.
+    let tappedMark;
     if (event.button === 0 && paintMode === 'select' && movableDrawing) {
       const at = cellPoint(point);
       const mark = movableDrawing(at);
-      if (mark) {
-        onSelectDrawing?.(mark.id);
+      if (mark && mark.id === selectedDrawingId) {
         dragRef.current = { kind: 'mark', mark, from: at, offset: { x: 0, y: 0 } };
         setMarkDrag({ id: mark.id, x: 0, y: 0 });
         return;
       }
-      onSelectDrawing?.(null);
+      tappedMark = mark;
     }
 
     if (event.button === 0 && paintMode === 'measure') {
@@ -955,6 +963,7 @@ export default function SceneViewport({
       : null;
     const hexMapBox = isHexGrid(scene.grid) && imageSize ? imageBox(imageSize, view) : null;
     const canPickHex = event.button === 0
+      && !tappedMark
       && onHexClick
       && isHexGrid(scene.grid)
       && paintMode === 'select'
@@ -968,6 +977,8 @@ export default function SceneViewport({
       hex: canPickHex
         ? worldToHex(screenToWorld(point, view), scene.grid)
         : null,
+      // undefined: this press selects nothing (another tool, or no marks).
+      mark: tappedMark,
     };
   };
 
@@ -1272,12 +1283,15 @@ export default function SceneViewport({
       return;
     }
 
-    if (state?.kind === 'pan' && state.hex) {
-      // A pan that went nowhere was a click on a hex. Same slop as a long press:
-      // a hand on a trackpad never releases on the exact pixel it pressed.
+    if (state?.kind === 'pan' && (state.hex || state.mark !== undefined)) {
+      // A pan that went nowhere was a click on a hex or a mark. Same slop as a
+      // long press: a hand on a trackpad never releases on the exact pixel it
+      // pressed.
       const at = screenPoint(event);
       const moved = Math.hypot(at.x - state.from.x, at.y - state.from.y);
-      if (moved <= LONG_PRESS_SLOP) onHexClick(state.hex);
+      if (event.type === 'pointercancel' || moved > LONG_PRESS_SLOP) return;
+      if (state.mark !== undefined) onSelectDrawing?.(state.mark?.id ?? null);
+      if (state.hex) onHexClick(state.hex);
       return;
     }
 
@@ -1378,7 +1392,7 @@ export default function SceneViewport({
         if (!drawingForMenu || !onDrawingMenu) return;
         if (event.target.closest?.(VIEWPORT_CONTROL_SELECTOR)) return;
         const mark = drawingForMenu(cellPoint(screenPoint(event)));
-        if (mark) onDrawingMenu(mark, { x: event.clientX, y: event.clientY });
+        if (mark) openDrawingMenu(mark, { x: event.clientX, y: event.clientY });
       }}
       onDragOver={(event) => {
         if (backgroundOnly) {

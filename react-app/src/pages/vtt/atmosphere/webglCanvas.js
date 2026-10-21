@@ -15,8 +15,13 @@ const RECOVERY_DELAY_MS = 400;
 const LOSS_WINDOW_MS = 30000;
 const MAX_LOSSES = 3;
 
+// Only once the canvas has left the page: an effect cleaned up and run again on
+// the same canvas (StrictMode does this on every mount in development) would
+// otherwise find its context already lost, and the canvas painted white over
+// the map.
 export function releaseContext(gl) {
   try {
+    if (gl?.canvas?.isConnected) return;
     if (gl && !gl.isContextLost()) gl.getExtension('WEBGL_lose_context')?.loseContext();
   } catch (_) {
     // Nothing more to give back.

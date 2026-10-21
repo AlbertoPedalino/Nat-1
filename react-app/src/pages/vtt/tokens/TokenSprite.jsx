@@ -797,7 +797,7 @@ const plateSx = {
   color: VTT_COLORS.parchmentMuted,
   // As large as the cell allows, up to what reads across the table on a
   // projector; zoomed far out it gets small rather than spilling over.
-  fontSize: 'clamp(7px, 15cqmin, 14px)',
+  fontSize: 'clamp(5px, 12cqmin, 11px)',
   lineHeight: 1.25,
   whiteSpace: 'nowrap',
   overflow: 'hidden',
