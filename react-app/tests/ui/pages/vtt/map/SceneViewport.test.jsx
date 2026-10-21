@@ -1734,3 +1734,51 @@ test('an area is dragged out a square at a time and opens its menu on a right cl
     vi.useRealTimers();
   }
 });
+
+test('a mark is selected by a tap and only the selected one is dragged', async () => {
+  const { drawingAtPoint } = await import('../../../../../src/shared/vtt/map/drawing.js');
+  const drawing = { id: 'stroke-1', points: [{ x: 2, y: 2 }, { x: 6, y: 2 }], color: '#fff', width: 3 };
+  const onSelectDrawing = vi.fn();
+  const onMoveDrawing = vi.fn();
+  const props = {
+    scene: { grid: { size: 50, offsetX: 0, offsetY: 0, visible: false }, playArea: null },
+    imageUrl: null,
+    tokens: [],
+    canMove: () => false,
+    fog: null,
+    lasers: [],
+    rollBubbles: [],
+    diceThrows: [],
+    paintMode: 'select',
+    drawings: [drawing],
+    onSelectDrawing,
+    onMoveDrawing,
+    movableDrawing: (point) => drawingAtPoint([drawing], point),
+  };
+  const { rerender } = render(<SceneViewport {...props} selectedDrawingId={null} />);
+  const viewport = screen.getByText('Upload a map image to start building this scene.').parentElement;
+
+  // Sliding across an unselected mark pans: nothing is moved or selected.
+  fireEvent.pointerDown(viewport, { button: 0, clientX: 200, clientY: 100, pointerId: 80 });
+  fireEvent.pointerMove(viewport, { button: 0, clientX: 300, clientY: 100, pointerId: 80 });
+  fireEvent.pointerUp(viewport, { button: 0, clientX: 300, clientY: 100, pointerId: 80 });
+  expect(onMoveDrawing).not.toHaveBeenCalled();
+  expect(onSelectDrawing).not.toHaveBeenCalled();
+
+  // A tap selects it.
+  fireEvent.pointerDown(viewport, { button: 0, clientX: 200, clientY: 100, pointerId: 81 });
+  fireEvent.pointerUp(viewport, { button: 0, clientX: 200, clientY: 100, pointerId: 81 });
+  expect(onSelectDrawing).toHaveBeenLastCalledWith('stroke-1');
+
+  // Once selected, the same gesture moves it two squares.
+  rerender(<SceneViewport {...props} selectedDrawingId="stroke-1" />);
+  fireEvent.pointerDown(viewport, { button: 0, clientX: 200, clientY: 100, pointerId: 82 });
+  fireEvent.pointerMove(viewport, { button: 0, clientX: 300, clientY: 100, pointerId: 82 });
+  fireEvent.pointerUp(viewport, { button: 0, clientX: 300, clientY: 100, pointerId: 82 });
+  expect(onMoveDrawing).toHaveBeenCalledWith(drawing, { x: 2, y: 0 });
+
+  // A tap on the empty board lets it go.
+  fireEvent.pointerDown(viewport, { button: 0, clientX: 200, clientY: 400, pointerId: 83 });
+  fireEvent.pointerUp(viewport, { button: 0, clientX: 200, clientY: 400, pointerId: 83 });
+  expect(onSelectDrawing).toHaveBeenLastCalledWith(null);
+});
