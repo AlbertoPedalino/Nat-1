@@ -1,5 +1,5 @@
 import { requireClient, supabase } from '../supabaseClient.js';
-import { currentUser } from './cloudCharacters.js';
+import { currentUser, getCharacterOwner } from './cloudCharacters.js';
 import {
   PORTRAIT_SIZE,
   forgetPortrait,
@@ -62,9 +62,13 @@ export async function uploadPortrait(characterId, file) {
   if (!isSupportedPortrait(file)) throw new Error('Pick an image file under 12 MB.');
   const client = requireClient();
   const user = await currentUser();
+  // The owner's folder, so the old portrait the sheet replaces is in the same
+  // folder whoever uploads the new one — and either of them can remove it. A
+  // character not yet in the cloud will be the uploader's when it gets there.
+  const owner = (await getCharacterOwner(characterId)) || user.id;
 
   const { blob, url } = await downscale(file);
-  const path = portraitPath(user.id, characterId);
+  const path = portraitPath(owner, characterId);
   if (!path) throw new Error('Missing character for this portrait.');
 
   const { error } = await client.storage

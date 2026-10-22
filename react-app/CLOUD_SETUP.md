@@ -37,6 +37,7 @@ or on a script missing from this table.
 | 16 | [`16_character_digests.sql`](supabase/16_character_digests.sql) | `character_digests`: roster/vitals projection of each sheet (plus a max-HP input hash) for the battle map and encounter builder |
 | 17 | [`17_character_sheet_revisions.sql`](supabase/17_character_sheet_revisions.sql) | `character_sheet_revisions`: one row per character carrying only `sheet_revision`, the signal an open sheet follows to know its content changed elsewhere |
 | 18 | [`18_section_versions.sql`](supabase/18_section_versions.sql) | `version` on `boards`, `encounters`, `dm_screens`: the database-maintained revision tool-instance sync updates against (`where version = N`); `updated_at` becomes a server-set timestamp only |
+| 19 | [`19_character_art_editors.sql`](supabase/19_character_art_editors.sql) | Portrait insert/delete also for a GM who may edit the character, so a portrait stays in its owner's folder whoever uploads it |
 
 Run 13 and 14 **before** deploying a frontend that needs them: the app sends
 health changes only through their RPCs.

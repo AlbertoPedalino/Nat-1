@@ -40,6 +40,12 @@ async function getCloudOwner(supabase, charId) {
   return data?.owner || null;
 }
 
+// Whose folder a character's portrait goes in: the owner's, even when the GM is
+// the one uploading. Null for a character that has not reached the cloud yet.
+export async function getCharacterOwner(charId) {
+  return getCloudOwner(requireClient(), charId);
+}
+
 // A whole-sheet save lost the race: the sheet moved past the revision the
 // save was based on (someone else saved in between). Nothing was written.
 export const SHEET_CONFLICT = 'SHEET_CONFLICT';
