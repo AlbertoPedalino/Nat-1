@@ -12,6 +12,7 @@ import { resolveReplicateCraftedItem } from '../../../shared/character/inventory
 import {
   BACKGROUND_ALLOWED_SOURCES,
   CLASS_ALLOWED_SOURCES,
+  CORE_2024_SOURCE_PRIORITY,
   FEAT_ALLOWED_SOURCES,
   ITEM_SOURCE_PRIORITY,
   OPTIONAL_FEATURE_ALLOWED_SOURCES,
@@ -159,6 +160,21 @@ export async function loadConditions() {
     .filter((c) => c.source === 'XPHB')
     .forEach((c) => { out[String(c.name).toLowerCase()] = c.entries || []; });
   return out;
+}
+
+// Whole condition records of the supported manuals (name, source, entries),
+// for a reader that lists them rather than looks one up by key.
+export async function loadConditionRecords() {
+  const data = await getJson('conditionsdiseases.json');
+  return (data.condition || [])
+    .filter((condition) => isAllowedSource(condition.source, CORE_2024_SOURCE_PRIORITY) && Array.isArray(condition.entries));
+}
+
+// The actions of the 2024 rules (Attack, Dash, Help…).
+export async function loadActions() {
+  const data = await getJson('actions.json');
+  return (data.action || [])
+    .filter((action) => isAllowedSource(action.source, CORE_2024_SOURCE_PRIORITY) && Array.isArray(action.entries));
 }
 
 export async function loadVariantRules() {

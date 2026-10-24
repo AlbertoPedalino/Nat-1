@@ -1355,3 +1355,10 @@ test('a launch choice gives one creature advantage or disadvantage on initiative
   const cancelled = buildCombat([], players, null, highFirst(), { initiative: { 'player:0': 'adv' } });
   assert.equal(cancelled.combatants[0].initiative, 20, 'a straight roll: one die');
 });
+
+test('a speed with a condition reads as one, and hover is not a speed', async () => {
+  const { formatSpeed } = await import('../../../../../src/pages/encounterbuilder/bestiary/monsterUtils.js');
+  assert.equal(formatSpeed({ walk: 10, fly: { number: 60, condition: '(hover)' }, canHover: true }), '10 ft., fly 60 ft. (hover)');
+  assert.equal(formatSpeed({ walk: 30, swim: 30 }), '30 ft., swim 30 ft.');
+  assert.equal(formatSpeed(null), '—');
+});

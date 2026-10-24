@@ -16,6 +16,8 @@ export default function SearchField({
   iconSize = 16,
   showSearchIcon = true,
   stopPropagation = false,
+  // The field's accessible name, when no visible label gives it one.
+  ariaLabel,
   sx,
   ...rest
 }) {
@@ -28,7 +30,7 @@ export default function SearchField({
       onChange={(event) => onChange(event.target.value)}
       onClick={stopPropagation ? (event) => event.stopPropagation() : undefined}
       sx={sx}
-      slotProps={{ input: {
+      slotProps={{ htmlInput: ariaLabel ? { 'aria-label': ariaLabel } : undefined, input: {
         startAdornment: showSearchIcon ? (
           <InputAdornment position="start">
             <Search size={iconSize} />

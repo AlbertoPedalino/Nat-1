@@ -71,6 +71,21 @@ export const ROLL_TONES = {
   tempHp: '#3e8e5a',
 };
 
+// Kind tags in the compendium. No hue of its own: each kind wears the one it
+// already has elsewhere in the app (an item the attunement bordeaux, a feat
+// its entity red…), so a tag reads the same as on the sheet.
+export const COMPENDIUM_KIND_COLORS = {
+  spell: ENTITY_COLORS.tool,
+  item: ITEM_ATTUNEMENT,
+  monster: ROLL_TONES.damage,
+  condition: SPELL_TAG_COLORS.concentration,
+  action: ACTION_COLORS.action,
+  rule: NEUTRAL_TONE,
+  feat: ENTITY_COLORS.feat,
+  species: ENTITY_COLORS.species,
+  background: ENTITY_COLORS.background,
+};
+
 // The one roll-button recipe: solid text color over a translucent border of the
 // same hue, so every roll button on the sheet reads as one family. Pass a
 // ROLL_TONES value.

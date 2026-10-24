@@ -1,6 +1,7 @@
 import { Box, Stack, Typography } from '@mui/material';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
 import LinkedToolsMenu from '../../app/navigation/LinkedToolsMenu.jsx';
+import CompendiumButton from '../compendium/CompendiumButton.jsx';
 import { useToolInstance } from '../../shared/instances/useToolInstance.js';
 import CloudInstanceLoading from '../../shared/instances/CloudInstanceLoading.jsx';
 import InstanceConflictBanner from '../../shared/instances/InstanceConflictBanner.jsx';
@@ -23,6 +24,7 @@ function DmScreenShell({ tool }) {
     <Box sx={pageSx}>
       <AppTopBar home backTo="/library/dmscreen" backLabel="DM Screens">
         <LinkedToolsMenu sectionKey="dmscreen" instanceId={tool.id} initialLinkGroupId={tool.linkGroupId} />
+        <CompendiumButton />
       </AppTopBar>
       <Box component="main" sx={contentSx}>
         <Stack spacing={2}>

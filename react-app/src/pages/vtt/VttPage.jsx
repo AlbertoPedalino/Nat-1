@@ -4,6 +4,7 @@ import {
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, CircularProgress, Typography } from '@mui/material';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
+import CompendiumButton from '../compendium/CompendiumButton.jsx';
 import { toRoster } from '../../shared/campaign/roster.js';
 import { useGmCampaigns } from '../../shared/campaign/useGmCampaigns.js';
 import { useAuth } from '../../shared/cloud/auth/AuthProvider.jsx';
@@ -194,6 +195,7 @@ export default function VttPage() {
       {!spectator.requested && !mapFullscreen ? (
         <AppTopBar home backTo={atRoot ? '/campaigns' : '/vtt'} backLabel={atRoot ? 'Campaigns' : 'Tables'}>
           {ownCampaignId ? <CampaignLinksMenu campaignId={ownCampaignId} /> : null}
+          <CompendiumButton />
         </AppTopBar>
       ) : null}
       <Box
