@@ -11,6 +11,9 @@ import {
   rollAuthor,
 } from '../../../shared/vtt/rolls/rollFeed.js';
 import { throwFormula } from '../../../shared/vtt/rolls/throwRoll.js';
+import { normalizeRollIdentity } from '../../../shared/character/dice/rollLogPresentation.js';
+import { rollDice } from '../../encounterbuilder/rolls/dice.js';
+import { buildEncounterDiceToast } from '../../encounterbuilder/rolls/EncounterDiceToast.jsx';
 
 export function useVttRolls({ campaignId, role, roster, tokens }) {
   const [feed, setFeed] = useState([]);
@@ -80,6 +83,36 @@ export function useVttRolls({ campaignId, role, roster, tokens }) {
     publish(entry);
   }, [acceptRoll, publish, role.isGm, role.ownedCharacterIds, roster, tokens]);
 
+  // A roll from a creature's stat block, opened on the map by the GM. Shaped as
+  // the encounter builder shares its own, so it lands in every log alike and,
+  // when public, its bubble and dice over the creature's piece (`sourceRef`).
+  // `visibility: 'gm'` keeps it in the GM's log: no bubble, no dice, never on
+  // a player's screen or the projector.
+  const handleCreatureRoll = useCallback(({
+    notation, type, advantage, note = '', actor = {}, visibility = 'gm',
+  }) => {
+    const result = rollDice(notation, type, Math.random, { advantage });
+    if (!result) return null;
+    const actorName = actor.actorName || 'GM';
+    const toast = buildEncounterDiceToast({ ...result, actor: actorName });
+    const timestamp = Date.now();
+    const entry = {
+      ...toast,
+      id: `creature:${timestamp}:${Math.random().toString(36).slice(2, 12)}`,
+      timestamp,
+      actorName,
+      characterId: null,
+      sourceRef: actor.sourceRef || null,
+      ...normalizeRollIdentity(actor),
+      note,
+      visibility: visibility === 'public' ? 'public' : 'gm',
+      thrown: Boolean(toast.rolls?.length),
+    };
+    acceptRoll(entry, { local: true });
+    publish(entry, { visibility: entry.visibility });
+    return entry;
+  }, [acceptRoll, publish]);
+
   useEffect(() => {
     if (!feed.length) return undefined;
     const timer = setInterval(() => setTick((current) => current + 1), 1000);
@@ -117,6 +150,7 @@ export function useVttRolls({ campaignId, role, roster, tokens }) {
     dismissRollBubble,
     dismissToast,
     feed,
+    handleCreatureRoll,
     handleCustomRoll,
     handleSheetRoll,
     rollBubbles: bubbles,

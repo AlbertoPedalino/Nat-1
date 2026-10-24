@@ -11,7 +11,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { Trash2 } from 'lucide-react';
+import { ScrollText, Trash2 } from 'lucide-react';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { addReminder, removeEffect } from '../../../shared/character/combat/combatEffects.js';
 import { ReminderEditor } from '../../../shared/character/combat/ReminderChips.jsx';
@@ -36,6 +36,8 @@ export default function TokenMenu({
   token, anchor, canEdit = true, canShowHp = true, canRemove = true, canMark = true,
   canSetEffects = true, canSetDeathSaves = true, canStyleObject = true,
   onClose, onSave, onObjectStyle, onVisibility, onDelete,
+  // Set only for a creature whose stat block the GM can open from here.
+  onStatBlock = null,
 }) {
   const [label, setLabel] = useState('');
   const [gmOnly, setGmOnly] = useState(false);
@@ -430,6 +432,17 @@ export default function TokenMenu({
 
         <Stack direction="row" spacing={0.6}>
           <Button size="small" variant="outlined" onClick={onClose} sx={{ ...menuButtonSx, flex: 1 }}>Done</Button>
+          {onStatBlock ? (
+            <Button
+              size="small"
+              variant="outlined"
+              startIcon={<ScrollText size={14} />}
+              onClick={() => { onStatBlock(token); onClose(); }}
+              sx={menuButtonSx}
+            >
+              Stat block
+            </Button>
+          ) : null}
           {/* A player may take back what they put down — their own piece or a
               marker they dropped — and the delete policy says the same. */}
           {canRemove ? (

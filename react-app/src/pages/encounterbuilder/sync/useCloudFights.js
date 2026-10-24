@@ -163,6 +163,9 @@ export function useCloudFights({
     if (active && !isVitalsBusyRef.current?.(active.id) && freshVitals(active)) {
       dispatchRef.current({ type: 'absorbFightVitals', fightId: active.id, fight: active.fight });
     }
+    // Its turn too, once the battle map has moved it: the reducer takes it only
+    // from a row with a newer turnRevision, so no echo of ours can go back.
+    if (active) dispatchRef.current({ type: 'absorbFightTurn', fightId: active.id, fight: active.fight });
   }, [freshVitals]);
 
   // What the database says is standing, against what this tab deleted. A
@@ -278,6 +281,7 @@ export function useCloudFights({
     if (!freshVitals(entry)) return;
     settledRef.current.set(String(entry.id), fightSignature(entry));
     dispatchRef.current({ type: 'absorbFightVitals', fightId: entry.id, fight: entry.fight });
+    dispatchRef.current({ type: 'absorbFightTurn', fightId: entry.id, fight: entry.fight });
   }, [freshVitals]);
 
   // Our own write is not a change to read back on the next check.

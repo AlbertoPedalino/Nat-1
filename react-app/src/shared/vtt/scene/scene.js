@@ -238,6 +238,10 @@ export function toToken(row) {
     // Advantage/disadvantage rulings, same shape as a combatant's in the
     // encounter builder.
     effects: normalizeEffects(row.effects),
+    // Where the piece stands in the fight its scene shows (20_scene_turns.sql),
+    // kept by the database: 1-based, null when it is not in it.
+    turnOrder: Number.isInteger(Number(row.turn_order)) && row.turn_order !== null ? Number(row.turn_order) : null,
+    turnActive: Boolean(row.turn_active),
     // Filled from map_token_secrets, which only a GM can read at all.
     secretLabel: typeof row.secretLabel === 'string' ? row.secretLabel : '',
     updatedAt: Date.parse(row.updated_at) || 0,

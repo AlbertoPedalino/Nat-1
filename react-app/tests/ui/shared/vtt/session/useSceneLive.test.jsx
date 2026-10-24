@@ -104,6 +104,7 @@ describe('useSceneLive recovery', () => {
       'map_tokens:scene_id=eq.scene-1',
       'map_scenes:id=eq.scene-1',
       'map_drawings:scene_id=eq.scene-1',
+      'map_scene_turns:scene_id=eq.scene-1',
     ]);
     vi.useRealTimers();
   });

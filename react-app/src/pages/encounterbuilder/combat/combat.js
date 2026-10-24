@@ -562,6 +562,10 @@ export function snapshotFight(combat) {
     })),
     currentTurn: combat.currentTurn || 0,
     round: combat.round || 1,
+    // The last "next turn" the database counted (20_scene_turns.sql). Sent back
+    // with every save, so a save from before the battle map moved the turn is
+    // known for what it is and cannot put the earlier turn back.
+    turnRevision: combat.turnRevision || 0,
   };
 }
 
@@ -583,5 +587,26 @@ export function restoreFight(entry, monsters) {
     })),
     currentTurn: fight?.currentTurn || 0,
     round: fight?.round || 1,
+    turnRevision: fight?.turnRevision || 0,
+  };
+}
+
+// The turn from the fight's database row, once the GM has moved it elsewhere
+// (the battle map's next turn advances turnRevision). Taken by combatant rather
+// than by index: an initiative edit here may have reordered the list since.
+// Same combat back when the row has nothing newer, so its echo saves nothing.
+export function absorbFightTurn(combat, fight) {
+  const revision = Number(fight?.turnRevision) || 0;
+  if (!combat || revision <= (Number(combat.turnRevision) || 0)) return combat;
+  const stored = Array.isArray(fight?.combatants) ? fight.combatants : [];
+  const storedTurn = Math.max(0, Math.round(numberOr(fight.currentTurn, 0)));
+  const currentId = stored[storedTurn]?.id;
+  const combatants = combat.combatants || [];
+  const index = currentId == null ? -1 : combatants.findIndex((combatant) => String(combatant.id) === String(currentId));
+  return {
+    ...combat,
+    currentTurn: index >= 0 ? index : Math.min(storedTurn, Math.max(0, combatants.length - 1)),
+    round: Math.max(1, Math.round(numberOr(fight.round, 1))),
+    turnRevision: revision,
   };
 }

@@ -120,10 +120,17 @@ export function useGmTokenVitals({ sceneId, tokens, enabled }) {
     setByToken((current) => ({ ...current, [tokenId]: vitals }));
   }, []);
 
+  // A fight row this client was just handed (the answer to its own turn step),
+  // kept unless a newer copy already arrived.
+  const acceptFight = useCallback((row) => {
+    if (!row?.id) return;
+    setFights((current) => ({ ...current, [String(row.id)]: newerFightRow(current[String(row.id)], row) }));
+  }, []);
+
   const overlay = useCallback(
     (list) => (enabled ? withGmTokenVitals(list, { byToken, fights }) : list),
     [byToken, enabled, fights],
   );
 
-  return { overlay, reconcile, reload, setLocal };
+  return { overlay, reconcile, reload, setLocal, fights, acceptFight };
 }

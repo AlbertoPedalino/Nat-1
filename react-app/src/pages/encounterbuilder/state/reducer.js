@@ -1,4 +1,5 @@
 import {
+  absorbFightTurn,
   addCombatantEffect,
   addManualCombatant,
   addMonsterCombatant,
@@ -306,6 +307,8 @@ function reduceEncounterState(state, action) {
       return absorbExternal(state, action);
     case 'absorbFightVitals':
       return absorbFightVitals(state, action.fightId, action.fight);
+    case 'absorbFightTurn':
+      return absorbActiveFightTurn(state, action.fightId, action.fight);
     default:
       return state;
   }
@@ -377,6 +380,13 @@ function syncCombatantVitals(state, sourceId, vitals) {
 function absorbFightVitals(state, fightId, fight) {
   if (!state.combat || fightId == null || String(state.combat.fightId) !== String(fightId)) return state;
   const combat = absorbMonsterVitals(state.combat, fight);
+  return combat === state.combat ? state : withCombat(state, combat);
+}
+
+// The turn from the fight's database row, when the battle map moved it.
+function absorbActiveFightTurn(state, fightId, fight) {
+  if (!state.combat || fightId == null || String(state.combat.fightId) !== String(fightId)) return state;
+  const combat = absorbFightTurn(state.combat, fight);
   return combat === state.combat ? state : withCombat(state, combat);
 }
 

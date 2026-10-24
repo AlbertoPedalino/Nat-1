@@ -198,6 +198,11 @@ export default function SceneViewport({
   controls,
   layerSwitch,
   imageSwitch,
+  // The turn order; it places itself (top centre) and is a viewport control.
+  initiative = null,
+  // A mouse click on a piece that did not move it (a touch tap keeps opening
+  // its marks, and a long press its menu).
+  onTokenClick = null,
   toast,
   fullscreenSheet,
   onFullscreenChange,
@@ -1013,6 +1018,8 @@ export default function SceneViewport({
       kind: 'token',
       token,
       grabOffset: { x: pointer.x - rect.x, y: pointer.y - rect.y },
+      from: screenPoint(event),
+      mouse: event.pointerType === 'mouse' && event.button === 0,
     };
     setDrag({ id: token.id, x: token.x, y: token.y });
     event.currentTarget.setPointerCapture?.(event.pointerId);
@@ -1339,8 +1346,16 @@ export default function SceneViewport({
     // nothing to let go of.
     if (landing.x !== state.token.x || landing.y !== state.token.y) {
       onMoveToken?.(state.token, landing);
-    } else if (state.lastBroadcast) {
-      onDragToken?.(state.token, { x: state.token.x, y: state.token.y, released: true });
+    } else {
+      if (state.lastBroadcast) {
+        onDragToken?.(state.token, { x: state.token.x, y: state.token.y, released: true });
+      }
+      // A hand on a mouse never releases on the exact pixel it pressed: the
+      // long press's slop decides what was a click.
+      if (state.mouse && releasedAt && event.type !== 'pointercancel'
+        && Math.hypot(releasedAt.x - state.from.x, releasedAt.y - state.from.y) <= LONG_PRESS_SLOP) {
+        onTokenClick?.(state.token);
+      }
     }
   };
 
@@ -1749,6 +1764,8 @@ export default function SceneViewport({
       {imageSwitch ? (
         <Box data-viewport-control sx={imageSwitchSx}>{imageSwitch}</Box>
       ) : null}
+
+      {initiative}
 
       {layerSwitch ? (
         <Box data-viewport-control sx={layerSwitchSx}>{layerSwitch}</Box>

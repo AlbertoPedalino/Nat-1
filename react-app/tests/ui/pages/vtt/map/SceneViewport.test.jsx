@@ -1782,3 +1782,53 @@ test('a mark is selected by a tap and only the selected one is dragged', async (
   fireEvent.pointerUp(viewport, { button: 0, clientX: 200, clientY: 400, pointerId: 83 });
   expect(onSelectDrawing).toHaveBeenLastCalledWith(null);
 });
+
+// The GM opens a creature's stat block by clicking its piece: a press that
+// moves the piece is a move, a touch is the marks' tap, and only a still mouse
+// click counts.
+test('a still mouse click on a piece is a click; a drag or a touch is not', () => {
+  const onMoveToken = vi.fn();
+  const onTokenClick = vi.fn();
+  render(
+    <SceneViewport
+      scene={{ grid: { size: 50, offsetX: 0, offsetY: 0, visible: false }, playArea: null }}
+      imageUrl={null}
+      tokens={[{ id: 'ogre-1', label: 'Ogre', layer: 'tokens', x: 4, y: 0, w: 1, h: 1, sourceRef: 'inst:77:0' }]}
+      snap
+      canMove={() => true}
+      fog={null}
+      onMoveToken={onMoveToken}
+      onTokenClick={onTokenClick}
+      drawings={[]}
+      lasers={[]}
+      rollBubbles={[]}
+      diceThrows={[]}
+    />,
+  );
+  const viewport = screen.getByText('Upload a map image to start building this scene.').parentElement;
+  const ogre = screen.getByRole('button', { name: 'Ogre' });
+
+  const press = (target, type, pointerType, pointerId, clientX, clientY) => {
+    const event = new MouseEvent(type, { bubbles: true, cancelable: true, button: 0, clientX, clientY });
+    Object.defineProperties(event, {
+      pointerId: { value: pointerId }, pointerType: { value: pointerType }, isPrimary: { value: true },
+    });
+    fireEvent(target, event);
+  };
+
+  press(ogre, 'pointerdown', 'mouse', 51, 225, 25);
+  press(viewport, 'pointermove', 'mouse', 51, 227, 26);
+  press(viewport, 'pointerup', 'mouse', 51, 227, 26);
+  expect(onTokenClick).toHaveBeenCalledWith(expect.objectContaining({ id: 'ogre-1' }));
+  expect(onMoveToken).not.toHaveBeenCalled();
+
+  onTokenClick.mockClear();
+  press(ogre, 'pointerdown', 'mouse', 52, 225, 25);
+  press(viewport, 'pointerup', 'mouse', 52, 290, 25);
+  expect(onTokenClick).not.toHaveBeenCalled();
+  expect(onMoveToken).toHaveBeenCalled();
+
+  press(ogre, 'pointerdown', 'touch', 53, 225, 25);
+  press(viewport, 'pointerup', 'touch', 53, 225, 25);
+  expect(onTokenClick).not.toHaveBeenCalled();
+});

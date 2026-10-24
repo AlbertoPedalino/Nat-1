@@ -89,7 +89,7 @@ export async function listFightVitals(fightIds) {
   if (!ids.length) return [];
   const { data, error } = await requireClient()
     .from('encounter_fights')
-    .select('id, instance_id, fight, updated_at, vitals_revision')
+    .select('id, instance_id, name, fight, updated_at, vitals_revision')
     .in('id', ids);
   if (error) throw error;
   return data || [];
@@ -132,6 +132,37 @@ export async function commitFightCombatantVitals(fightId, combatantId, { base = 
     p_combatant_id: String(combatantId),
     p_base: base,
     p_patch: patch,
+  })).then(({ data, error }) => {
+    if (error) {
+      if (error.code === 'P0002' || error.code === 'PGRST202') {
+        throw Object.assign(new Error(error.message || 'Fight unavailable.'), { code: FIGHT_UNAVAILABLE });
+      }
+      throw error;
+    }
+    return { applied: Boolean(data?.applied), row: data?.row || null };
+  });
+  try {
+    return await Promise.race([request, timeout]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// The GM's next (1) or previous (-1) turn, from the battle map. `base` is the
+// turn the caller saw ({ currentTurn, round, turnRevision }); the database
+// moves nothing if the fight has moved on and returns the current row instead.
+// Resolves to { applied, row }. Nothing here retries.
+export async function commitFightTurn(fightId, base, step, { timeoutMs = FIGHT_VITALS_TIMEOUT_MS } = {}) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => {
+      reject(Object.assign(new Error('Turn change timed out.'), { code: FIGHT_TIMEOUT }));
+    }, timeoutMs);
+  });
+  const request = Promise.resolve(requireClient().rpc('commit_fight_turn', {
+    p_fight_id: String(fightId),
+    p_base: base || null,
+    p_step: step < 0 ? -1 : 1,
   })).then(({ data, error }) => {
     if (error) {
       if (error.code === 'P0002' || error.code === 'PGRST202') {
