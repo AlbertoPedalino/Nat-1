@@ -32,6 +32,15 @@ and `logic/` trees.
 | `gmboard/` | `dungeon/`, `hexcrawl/`, and `quests/`: generation and result views; `tables/`: tables, editing, and single-table rolls; `session/`: time, weather, log, and campaign link; `ui/`: controls used across the page; `state/`: context, reducer, defaults, migration, and persistence; `logic/`: common RNG |
 | `dmscreen/` | `notes/`: note board, cards, and layout; `search/`: filtering and highlighting; `drag/`: drag/reorder behavior and styles; `state/`: context, reducer, and persistence |
 
+`compendium/` is one search over the supported 5etools records: `compendiumIndex.js`
+(pure index and ranking), `loadCompendium.js` (loads every kind once per tab through
+the existing loaders), `CompendiumBrowser.jsx` (search, kind filter, results, entry),
+`CompendiumDetail.jsx`, the Books tab (`books.js`: book list, chapters split into
+sections, reference resolution and in-book search; `BooksBrowser.jsx`), the tabs
+(`CompendiumHome.jsx`), the `/compendium` page and the session side panel
+(`CompendiumPanel.jsx`, opened by `CompendiumButton.jsx` in the battle map's and DM
+Screen's top bars).
+
 The smaller `campaigns/`, `campaignsheet/`, `home/`, `library/`, and `notfound/`
 pages retain their compact structure. Add subfolders when a distinct element
 has enough related files to benefit from a group.

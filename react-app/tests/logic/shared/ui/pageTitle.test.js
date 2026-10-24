@@ -12,6 +12,7 @@ test('tool routes use a stable page title without instance details', () => {
 test('library and general routes have readable titles', () => {
   assert.equal(pageTitleForPath('/'), 'Home');
   assert.equal(pageTitleForPath('/campaigns'), 'Campaigns');
+  assert.equal(pageTitleForPath('/compendium'), 'Compendium');
   assert.equal(pageTitleForPath('/library/encounters'), 'Encounter Builders');
   assert.equal(pageTitleForPath('/unknown'), 'Page Not Found');
 });

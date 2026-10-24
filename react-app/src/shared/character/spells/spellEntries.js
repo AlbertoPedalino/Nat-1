@@ -3,9 +3,31 @@ function asArray(value) {
   return Array.isArray(value) ? value : [value];
 }
 
+// The 2024 stat block labels ({@atkr m}, {@actSave dex}, …).
+const ATTACK_ROLL_LABELS = {
+  m: 'Melee Attack Roll:',
+  r: 'Ranged Attack Roll:',
+  'm,r': 'Melee or Ranged Attack Roll:',
+  'r,m': 'Melee or Ranged Attack Roll:',
+};
+const ABILITY_NAMES = {
+  str: 'Strength', dex: 'Dexterity', con: 'Constitution', int: 'Intelligence', wis: 'Wisdom', cha: 'Charisma',
+};
+const FIXED_LABELS = {
+  actsavefail: 'Failure:',
+  actsavesuccess: 'Success:',
+  actsavesuccessorfail: 'Failure or Success:',
+  acttrigger: 'Trigger:',
+  actresponse: 'Response:',
+  hom: 'Hit or Miss:',
+};
+
 function pickTagDisplay(tag, rawValue) {
   const parts = String(rawValue || '').split('|').map((part) => part.trim()).filter(Boolean);
   if (tag === 'h') return 'Hit: ';
+  if (FIXED_LABELS[tag]) return FIXED_LABELS[tag];
+  if (tag === 'atkr') return ATTACK_ROLL_LABELS[String(parts[0] || '').replace(/\s+/g, '')] || 'Attack Roll:';
+  if (tag === 'actsave') return `${ABILITY_NAMES[parts[0]] || parts[0] || ''} Saving Throw:`;
   if (!parts.length) return '';
   if (tag === 'dc') return `DC ${parts[0]}`;
   if (tag === 'hit') return `+${parts[0].replace(/^\+/, '')}`;
@@ -32,8 +54,21 @@ const REF_TAGS = new Set([
   'object', 'optfeature', 'reward', 'deity', 'language', 'variantrule',
 ]);
 
+// A tag inside another tag ({@tip {@link DnD Beyond|https://…}|…}) becomes its
+// shown text first, so the outer one can be read like any other.
+function flattenNestedTags(text) {
+  const nested = /(\{@\w+\s+[^{}]*)\{@(\w+)(?:\s+([^{}]*))?\}/g;
+  let current = text;
+  let previous;
+  do {
+    previous = current;
+    current = current.replace(nested, (_match, head, tag, content) => `${head}${pickTagDisplay(tag.toLowerCase(), content || '')}`);
+  } while (current !== previous);
+  return current;
+}
+
 function tokenizeInlineMarkup(raw) {
-  const text = String(raw ?? '');
+  const text = flattenNestedTags(String(raw ?? ''));
   if (!text) return [];
   const out = [];
   const re = /\{@(\w+)(?:\s+([^{}]+))?\}|\{([^{}]+)\}/g;
@@ -166,17 +201,48 @@ function nodeToTokens(node) {
   return body;
 }
 
-function walkEntries(node, out, depth = 0, listDepth = 0) {
+// A picture as a block, only for a caller that shows pictures (a book reader):
+// `imageUrl(path)` resolves 5etools' internal image paths to an address.
+function pushImage(out, node, imageUrl) {
+  const href = node?.href || {};
+  const src = href.type === 'external' ? href.url : (href.path ? imageUrl(href.path) : null);
+  if (!src) return;
+  out.push({
+    kind: 'image',
+    src,
+    title: strip5eMarkup(node.title || ''),
+    credit: strip5eMarkup(node.credit || ''),
+    width: Number(node.width) || null,
+    height: Number(node.height) || null,
+  });
+}
+
+function walkEntries(node, out, depth = 0, listDepth = 0, options = {}) {
   if (node == null) return;
   if (typeof node === 'string' || typeof node === 'number') {
     pushText(out, 'paragraph', node, depth);
     return;
   }
   if (Array.isArray(node)) {
-    node.forEach((entry) => walkEntries(entry, out, depth, listDepth));
+    node.forEach((entry) => walkEntries(entry, out, depth, listDepth, options));
     return;
   }
   if (typeof node !== 'object') return;
+
+  if (node.type === 'image' || node.type === 'gallery') {
+    if (!options.imageUrl) return;
+    if (node.type === 'image') pushImage(out, node, options.imageUrl);
+    else asArray(node.images).forEach((image) => pushImage(out, image, options.imageUrl));
+    return;
+  }
+
+  // A sidebar or read-aloud box, marked so a book reader can draw it as one.
+  if (options.boxes && (node.type === 'inset' || node.type === 'insetReadaloud')) {
+    out.push({ kind: 'boxStart', variant: node.type === 'insetReadaloud' ? 'readaloud' : 'inset' });
+    walkEntries({ ...node, type: 'entries' }, out, depth, listDepth, options);
+    out.push({ kind: 'boxEnd' });
+    return;
+  }
 
   if (node.type === 'list') {
     asArray(node.items).forEach((item) => {
@@ -205,14 +271,17 @@ function walkEntries(node, out, depth = 0, listDepth = 0) {
   }
 
   if (node.name) pushText(out, 'heading', node.name, depth);
-  if (node.entries != null) walkEntries(node.entries, out, depth + (node.name ? 1 : 0), listDepth);
-  else if (node.entry != null) walkEntries(node.entry, out, depth, listDepth);
-  else if (node.items != null) walkEntries(node.items, out, depth, listDepth);
+  if (node.entries != null) walkEntries(node.entries, out, depth + (node.name ? 1 : 0), listDepth, options);
+  else if (node.entry != null) walkEntries(node.entry, out, depth, listDepth, options);
+  else if (node.items != null) walkEntries(node.items, out, depth, listDepth, options);
 }
 
-export function entriesToTextBlocks(entries) {
+// `options.imageUrl(path)`: also turn pictures into 'image' blocks (left out
+// otherwise, as every rules card wants). `options.boxes`: mark sidebars and
+// read-aloud text with 'boxStart'/'boxEnd' blocks around them.
+export function entriesToTextBlocks(entries, options = {}) {
   const out = [];
-  walkEntries(entries, out);
+  walkEntries(entries, out, 0, 0, options);
   return out;
 }
 

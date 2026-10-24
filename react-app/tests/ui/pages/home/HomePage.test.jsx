@@ -11,6 +11,7 @@ describe('Home tool table', () => {
       '/library/dmscreen',
       '/vtt',
       '/library/encounters',
+      '/compendium',
     ]);
 
     const campaigns = TOOLS.find((tool) => tool.label === 'Campaigns');

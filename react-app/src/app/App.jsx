@@ -17,6 +17,7 @@ const InstancePickerPage = lazy(() => import('../pages/library/InstancePickerPag
 const CampaignsPage = lazy(() => import('../pages/campaigns/CampaignsPage.jsx'));
 const VttPage = lazy(() => import('../pages/vtt/VttPage.jsx'));
 const CampaignSheetView = lazy(() => import('../pages/campaignsheet/CampaignSheetView.jsx'));
+const CompendiumPage = lazy(() => import('../pages/compendium/CompendiumPage.jsx'));
 const NotFoundPage = lazy(() => import('../pages/notfound/NotFoundPage.jsx'));
 
 export default function App() {
@@ -37,6 +38,7 @@ export default function App() {
           <Route path="/campaign-sheet" element={<CampaignSheetView />} />
           <Route path="/vtt" element={<VttPage />} />
           <Route path="/encounter-builder" element={<EncounterBuilderPage />} />
+          <Route path="/compendium" element={<CompendiumPage />} />
           <Route path="/builder" element={<Navigate to="/charbuilder" replace />} />
           <Route path="/sheet" element={<Navigate to="/charsheet" replace />} />
           <Route path="*" element={<NotFoundPage />} />

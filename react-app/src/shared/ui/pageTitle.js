@@ -8,6 +8,7 @@ const EXACT_TITLES = Object.freeze({
   '/campaigns': 'Campaigns',
   '/campaign-sheet': 'Campaign Sheet',
   '/vtt': 'Battle Map',
+  '/compendium': 'Compendium',
 });
 
 const LIBRARY_TITLES = Object.freeze({

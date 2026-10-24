@@ -99,11 +99,19 @@ export function formatAlignment(alignment) {
   return String(alignment);
 }
 
+// A speed is a number of feet or {number, condition} ("fly 60 ft. (hover)");
+// `canHover` and `choose` are flags, not speeds.
 export function formatSpeed(speed) {
   if (!speed) return '—';
   return Object.entries(speed)
-    .filter(([, value]) => value)
-    .map(([key, value]) => `${key === 'walk' ? '' : `${key} `}${value} ft.`)
+    .filter(([key, value]) => value && key !== 'canHover' && key !== 'choose')
+    .map(([key, value]) => {
+      const feet = typeof value === 'object' ? value.number : value;
+      if (feet == null || typeof feet === 'object') return '';
+      const condition = typeof value === 'object' && value.condition ? ` ${value.condition.replace(/[[\]]/g, '')}` : '';
+      return `${key === 'walk' ? '' : `${key} `}${feet} ft.${condition}`;
+    })
+    .filter(Boolean)
     .join(', ') || '—';
 }
 
