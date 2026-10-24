@@ -830,12 +830,14 @@ const badgeSx = {
   transition: 'all 120ms ease',
 };
 
+// A thin white ring keeps the colour apart from the art and from the map.
+const turnRing = `0 0 0 2px ${VTT_COLORS.white}, 0 0 0 5px ${VTT_COLORS.turnActive}`;
 const turnActiveSx = {
-  boxShadow: `0 0 0 3px ${VTT_COLORS.gold}, 0 0 16px 4px ${vttAlpha(VTT_COLORS.gold, 0.65)}`,
-  animation: 'gbTurnGlow 1.8s ease-in-out infinite',
+  boxShadow: `${turnRing}, 0 0 18px 6px ${vttAlpha(VTT_COLORS.turnActive, 0.7)}`,
+  animation: 'gbTurnGlow 1.6s ease-in-out infinite',
   '@keyframes gbTurnGlow': {
-    '0%, 100%': { boxShadow: `0 0 0 3px ${VTT_COLORS.gold}, 0 0 12px 2px ${vttAlpha(VTT_COLORS.gold, 0.5)}` },
-    '50%': { boxShadow: `0 0 0 3px ${VTT_COLORS.gold}, 0 0 22px 7px ${vttAlpha(VTT_COLORS.gold, 0.75)}` },
+    '0%, 100%': { boxShadow: `${turnRing}, 0 0 12px 3px ${vttAlpha(VTT_COLORS.turnActive, 0.55)}` },
+    '50%': { boxShadow: `${turnRing}, 0 0 26px 10px ${vttAlpha(VTT_COLORS.turnActive, 0.85)}` },
   },
   '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
 };

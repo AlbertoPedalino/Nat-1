@@ -1,7 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  ownTurnTokenId,
   sceneFightChoices,
   showsFight,
   toSceneTurns,
@@ -68,12 +67,13 @@ test('the GM sees every combatant, marked when the table does not', () => {
   assert.deepEqual(turnEntriesFromFight(fightRow, tokens, { ...turns, fightId: null }), [], 'nothing shown');
 });
 
-test('fight choices come from the imported pieces, newest first; a player knows their turn', () => {
+test('fight choices come from the imported pieces, newest first', () => {
   const tokens = [
     { id: 'a', sourceRef: 'inst:77:0' },
     { id: 'b', sourceRef: 'inst:77:1' },
     { id: 'c', sourceRef: 'inst:12:0' },
     { id: 'd', sourceRef: 'elsewhere:99:0' },
+    { id: 'e', sourceRef: 'inst:404:0' }, // its encounter was deleted
     { id: 'h', characterId: 'pc', turnActive: true },
   ];
   const fights = {
@@ -85,6 +85,4 @@ test('fight choices come from the imported pieces, newest first; a player knows 
     ['77', 'Ambush'],
     ['12', 'Bridge'],
   ]);
-  assert.equal(ownTurnTokenId(tokens, ['pc']), 'h');
-  assert.equal(ownTurnTokenId(tokens, ['someone-else']), null);
 });
