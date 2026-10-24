@@ -24,7 +24,8 @@ const modeChipSx = (chip) => ({
   bgcolor: chip.bgColor, '& .MuiChip-label': { px: 0.5 },
 });
 
-export default function DiceToast({ toast, onClose, hidden = false }) {
+// `sx` adjusts where it sits, for a screen with something else in its corner.
+export default function DiceToast({ toast, onClose, hidden = false, sx = null }) {
   useEffect(() => {
     if (!toast) return;
     const timer = setTimeout(onClose, 6000);
@@ -41,11 +42,11 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
   const seed = `${toast.timestamp || 0}:${layout.label}`;
 
   return (
-    <Box sx={{
+    <Box sx={[{
       ...toastRootSx,
       ...(layout.isCrit ? { borderColor: '#edd48a', boxShadow: '0 8px 32px rgba(0,0,0,0.6), 0 0 20px rgba(237,212,138,0.25)' } : {}),
       ...(layout.isFail ? { borderColor: '#de675f', boxShadow: '0 8px 32px rgba(0,0,0,0.6), 0 0 20px rgba(222,103,95,0.25)' } : {}),
-    }}>
+    }, sx]}>
       <IconButton size="small" onClick={onClose} sx={{ position: 'absolute', top: 6, right: 8, color: 'text.secondary' }}>
         <X size={14} />
       </IconButton>

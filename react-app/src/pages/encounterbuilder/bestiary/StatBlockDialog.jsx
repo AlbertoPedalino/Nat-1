@@ -120,7 +120,7 @@ export function StatBlockPanel() {
   );
 }
 
-function StatBlockHeader({ monster, onClose }) {
+export function StatBlockHeader({ monster, onClose }) {
   const url = monster5eUrl(monster);
   return (
     <>
@@ -150,10 +150,6 @@ function StatBlockHeader({ monster, onClose }) {
 function StatBlockBody({ monster, allowAdd = false }) {
   const { state, dispatch, monsterDb, roll } = useEncounterBuilder();
   const [diceToast, setDiceToast] = useState(null);
-  const legendaryGroup = getLegendaryGroup(monster, monsterDb.legendaryGroups);
-  const cr = getCR(monster.cr);
-  const hpFormula = monster.hp?.formula;
-  const spellcasting = groupSpellcasting(monster.spellcasting);
 
   // The combatant this stat block was opened for, if any: its conditions
   // decide how its d20 tests roll. A monster looked up in the bestiary has
@@ -165,12 +161,55 @@ function StatBlockBody({ monster, allowAdd = false }) {
       : (state.combat?.combatants || []).find((entry) => String(entry.id) === String(combatantId)) || null
   ), [combatantId, state.combat]);
 
+  const handleRoll = useCallback(({ notation, type, advantage, note }) => {
+    const result = roll(notation, type, undefined, note, { advantage });
+    const toast = buildEncounterDiceToast(result);
+    if (toast) setDiceToast(toast);
+  }, [roll]);
+
+  return (
+    <>
+      <StatBlockSheet
+        monster={monster}
+        legendaryGroups={monsterDb.legendaryGroups}
+        conditions={combatant ? combatant.activeConditions || [] : null}
+        onRoll={handleRoll}
+      >
+        {allowAdd && state.selectedStatblock?.combatantId == null ? (
+          <Button
+            variant="contained"
+            startIcon={<Plus size={16} />}
+            onClick={() => {
+              dispatch({ type: 'addMonster', monster });
+              dispatch({ type: 'closeStatblock' });
+            }}
+          >
+            Add to Encounter
+          </Button>
+        ) : null}
+      </StatBlockSheet>
+      {diceToast ? <EncounterDiceToast toast={diceToast} onClose={() => setDiceToast(null)} /> : null}
+    </>
+  );
+}
+
+// The stat block itself, with every number that can be rolled. Who rolls it is
+// the caller's: the builder's roll log, or the battle map's dice. `conditions`
+// are the creature's (its d20 tests take advantage/disadvantage from them);
+// null for a monster looked up in the bestiary, which rolls straight.
+// `onRoll({ notation, type, advantage, note })`; `children` go at the end.
+export function StatBlockSheet({ monster, legendaryGroups, conditions = null, onRoll, children = null }) {
+  const legendaryGroup = getLegendaryGroup(monster, legendaryGroups);
+  const cr = getCR(monster.cr);
+  const hpFormula = monster.hp?.formula;
+  const spellcasting = groupSpellcasting(monster.spellcasting);
+
   const sourcesFor = useCallback((type) => {
     const info = d20RollKind(type);
     if (!info) return null;
-    if (!combatant || !info.kind) return { adv: false, disadv: false, autoFail: false };
-    return creatureRollSources({ conditions: combatant.activeConditions }, info.kind, info.ability);
-  }, [combatant]);
+    if (!conditions || !info.kind) return { adv: false, disadv: false, autoFail: false };
+    return creatureRollSources({ conditions }, info.kind, info.ability);
+  }, [conditions]);
 
   // `advantage` present (even undefined, a straight roll) is the right-click
   // menu's choice; absent, the creature's own sources decide.
@@ -180,10 +219,8 @@ function StatBlockBody({ monster, allowAdd = false }) {
       ? options.advantage
       : (sources ? advArgFor(sources) : undefined);
     const note = sources?.autoFail ? 'Auto-fail: a condition fails STR and DEX saves' : '';
-    const result = roll(notation, type, undefined, note, { advantage });
-    const toast = buildEncounterDiceToast(result);
-    if (toast) setDiceToast(toast);
-  }, [roll, sourcesFor]);
+    onRoll?.({ notation, type, advantage, note });
+  }, [onRoll, sourcesFor]);
 
   return (
     <StatRollContext.Provider value={sourcesFor}>
@@ -254,20 +291,8 @@ function StatBlockBody({ monster, allowAdd = false }) {
         {legendaryGroup?.lairActions?.length ? <Section title="Lair Actions" entries={legendaryGroup.lairActions} onRoll={handleRoll} force /> : null}
         {legendaryGroup?.regionalEffects?.length ? <Section title="Regional Effects" entries={legendaryGroup.regionalEffects} onRoll={handleRoll} force /> : null}
         {legendaryGroup?.mythicEncounter?.length ? <Section title={`${monster.name} as a Mythic Encounter`} entries={legendaryGroup.mythicEncounter} onRoll={handleRoll} force /> : null}
-        {allowAdd && state.selectedStatblock?.combatantId == null ? (
-          <Button
-            variant="contained"
-            startIcon={<Plus size={16} />}
-            onClick={() => {
-              dispatch({ type: 'addMonster', monster });
-              dispatch({ type: 'closeStatblock' });
-            }}
-          >
-            Add to Encounter
-          </Button>
-        ) : null}
+        {children}
       </Stack>
-      {diceToast ? <EncounterDiceToast toast={diceToast} onClose={() => setDiceToast(null)} /> : null}
     </StatRollContext.Provider>
   );
 }

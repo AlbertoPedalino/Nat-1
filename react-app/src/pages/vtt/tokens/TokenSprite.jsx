@@ -292,6 +292,9 @@ export default function TokenSprite({
                 ? `2px dashed ${vttAlpha(VTT_COLORS.gold, 0.9)}`
                 : 'none',
               outlineOffset: '-4px',
+              // Whose turn it is, readable from across the table and on the
+              // projector: a gold halo outside the piece's own ring.
+              ...(token.turnActive && !isScenery && !isMapObject ? turnActiveSx : null),
               // A turned piece must not be cut off at the corners of its own box; a
               // creature still needs the clip that crops its art into the circle.
               overflow: hasHandles ? 'visible' : 'hidden',
@@ -825,6 +828,16 @@ const badgeSx = {
   whiteSpace: 'nowrap',
   pointerEvents: 'none',
   transition: 'all 120ms ease',
+};
+
+const turnActiveSx = {
+  boxShadow: `0 0 0 3px ${VTT_COLORS.gold}, 0 0 16px 4px ${vttAlpha(VTT_COLORS.gold, 0.65)}`,
+  animation: 'gbTurnGlow 1.8s ease-in-out infinite',
+  '@keyframes gbTurnGlow': {
+    '0%, 100%': { boxShadow: `0 0 0 3px ${VTT_COLORS.gold}, 0 0 12px 2px ${vttAlpha(VTT_COLORS.gold, 0.5)}` },
+    '50%': { boxShadow: `0 0 0 3px ${VTT_COLORS.gold}, 0 0 22px 7px ${vttAlpha(VTT_COLORS.gold, 0.75)}` },
+  },
+  '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
 };
 
 const deadBadgeSx = {

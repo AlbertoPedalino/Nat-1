@@ -124,5 +124,9 @@ export function newerFightRow(held, incoming) {
   const before = Number(held?.vitals_revision);
   const after = Number(incoming?.vitals_revision);
   if (held && Number.isFinite(before) && Number.isFinite(after) && after < before) return held;
+  // The turn has its own counter (20_scene_turns.sql), advanced by "next turn".
+  const turnBefore = Number(held?.fight?.turnRevision) || 0;
+  const turnAfter = Number(incoming?.fight?.turnRevision) || 0;
+  if (held && turnAfter < turnBefore) return held;
   return incoming;
 }

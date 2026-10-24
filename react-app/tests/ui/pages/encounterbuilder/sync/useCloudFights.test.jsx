@@ -391,3 +391,38 @@ test('a late row from an earlier vitals command never puts old hit points back',
 
   expect(absorbed()).toEqual([4, 4, 2]);
 });
+
+// The battle map's "next turn" lands as a row with a newer turnRevision: the
+// fight on screen is handed it (the reducer decides whether it is newer).
+test('a turn moved on the battle map reaches the fight on screen', async () => {
+  const fight = { combatants: [{ id: 'gob', type: 'monster', hpCurrent: 7, hpMax: 7 }], currentTurn: 0, round: 1 };
+  mocks.listInstanceFights.mockResolvedValue([{ ...FIGHT, fight }]);
+  const dispatch = vi.fn();
+  function ActiveHarness() {
+    useCloudFights({
+      instanceId: 'enc_a',
+      fights: [{ ...FIGHT, fight }],
+      library: [CARD],
+      activeFightId: 900,
+      dispatch,
+      isVitalsBusy: () => true,
+    });
+    return null;
+  }
+  render(<ActiveHarness />);
+  await waitFor(() => expect(mocks.listInstanceFights).toHaveBeenCalledTimes(1));
+  await act(async () => {});
+  dispatch.mockClear();
+  const moved = { ...fight, currentTurn: 0, round: 2, turnRevision: 3 };
+  await act(async () => {
+    await mocks.fireRemoteChange({
+      eventType: 'UPDATE',
+      new: {
+        id: '900', instance_id: 'enc_a', name: 'Room', encounter_id: '500', encounter: CARD,
+        fight: moved, updated_at: '2026-10-24T10:00:00Z', vitals_revision: 0,
+      },
+    });
+  });
+  // Even while a vitals command is in flight: the turn is not a vital.
+  expect(dispatch.mock.calls.map(([action]) => action)).toContainEqual({ type: 'absorbFightTurn', fightId: 900, fight: moved });
+});

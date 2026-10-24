@@ -22,6 +22,7 @@ import {
   toToken,
   toTokenPatch,
 } from '../../vtt/scene/scene.js';
+import { toSceneTurns } from '../../vtt/tokens/initiative.js';
 
 // Cloud-only feature: scenes and tokens live in Postgres, with no local copy and
 // no JSON payload. That is why this module does not go through
@@ -36,7 +37,7 @@ const SIGNED_URL_TTL = 8 * 60 * 60;
 const SIGNED_URL_MARGIN_MS = 15 * 60 * 1000;
 const SIGNED_URL_KEY = 'gb:vtt:signed-url:';
 const SCENE_COLUMNS = 'id, campaign_id, name, image_path, background_path, shown_image, grid, atmosphere, fog, is_live, play_area, updated_at';
-const TOKEN_COLUMNS = 'id, scene_id, layer, hidden_from_players, x, y, w, h, z, character_id, label, color, image_path, image_url, icon_key, icon_stroke_width, rotation, hp_current, hp_max, conditions, effects, source_ref, show_hp, created_by, updated_at';
+const TOKEN_COLUMNS = 'id, scene_id, layer, hidden_from_players, x, y, w, h, z, character_id, label, color, image_path, image_url, icon_key, icon_stroke_width, rotation, hp_current, hp_max, conditions, effects, source_ref, show_hp, turn_order, turn_active, created_by, updated_at';
 const DRAWING_COLUMNS = 'id, scene_id, layer, points, color, width, text, area, hidden_from_players, created_by, created_at, updated_at';
 
 export async function listScenes(campaignId) {
@@ -172,6 +173,34 @@ export async function deleteScene(sceneId, campaignId) {
     cleanupError = cause;
   }
   return { cleanupError };
+}
+
+// Which fight the scene shows as its initiative (20_scene_turns.sql). Null when
+// it shows none; players read it only while the scene is live.
+export async function fetchSceneTurns(sceneId) {
+  const { data, error } = await requireClient()
+    .from('map_scene_turns')
+    .select('scene_id, instance_id, fight_id, round')
+    .eq('scene_id', sceneId)
+    .maybeSingle();
+  if (error) throw error;
+  return toSceneTurns(data);
+}
+
+// The GM's choice; `null` shows none. The database checks the fight is the
+// campaign GM's and fills in its round.
+export async function setSceneTurnFight(sceneId, choice) {
+  const { data, error } = await requireClient()
+    .from('map_scene_turns')
+    .upsert({
+      scene_id: sceneId,
+      instance_id: choice?.instanceId ? String(choice.instanceId) : null,
+      fight_id: choice?.fightId ? String(choice.fightId) : null,
+    }, { onConflict: 'scene_id' })
+    .select('scene_id, instance_id, fight_id, round')
+    .single();
+  if (error) throw error;
+  return toSceneTurns(data);
 }
 
 // RLS decides what comes back: a player never receives the GM layer, so this is

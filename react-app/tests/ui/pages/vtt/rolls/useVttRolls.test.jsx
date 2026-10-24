@@ -122,3 +122,28 @@ test('a roll bubble closed by hand stays closed while the roll is still in the f
   expect(result.current.feed).toHaveLength(1);
   expect(result.current.diceThrows).toHaveLength(1);
 });
+
+// A GM rolling from a creature's stat block on the map.
+test('a creature roll stays in the GM log unless shown, and then lands over its piece', () => {
+  const { result } = openRolls({
+    role: { isGm: true, ownedCharacterIds: [] },
+    tokens: [{ id: 'gob', sourceRef: 'inst:77:0' }],
+  });
+  const actor = { actorName: 'Goblin', actorLabel: 'A', sourceRef: 'inst:77:0' };
+
+  act(() => { result.current.handleCreatureRoll({ notation: '+4', type: 'Scimitar (Attack Roll)', actor }); });
+  const [secret, { visibility: secretVisibility }] = channel.publish.mock.calls[0];
+  expect(secretVisibility).toBe('gm');
+  expect(secret).toMatchObject({ actorName: 'Goblin', actorLabel: 'A', sourceRef: 'inst:77:0', visibility: 'gm' });
+  expect(result.current.toast).toMatchObject({ total: secret.total });
+  expect(result.current.feed[0].visibility).toBe('gm');
+  expect(result.current.diceThrows).toHaveLength(0);
+
+  act(() => {
+    result.current.handleCreatureRoll({ notation: '1d6+2', type: 'Scimitar (Damage)', actor, visibility: 'public' });
+  });
+  const [shown, { visibility: shownVisibility }] = channel.publish.mock.calls[1];
+  expect(shownVisibility).toBe('public');
+  expect(shown.thrown).toBe(true);
+  expect(result.current.diceThrows.map((entry) => entry.token?.id)).toEqual(['gob']);
+});

@@ -60,7 +60,8 @@ const problems = sourceFiles
 
 function namedImports(path, source) {
   const imports = [];
-  const expression = /\b(?:import|export)\s*\{([^}]*)\}\s*from\s*['"]([^'"]+)['"]/gs;
+  // `import Default, { named } from` included: the braces are what is named.
+  const expression = /\b(?:import|export)\s*(?:[A-Za-z_$][\w$]*\s*,\s*)?\{([^}]*)\}\s*from\s*['"]([^'"]+)['"]/gs;
   for (const match of source.matchAll(expression)) {
     const target = resolveModule(path, match[2]);
     if (!target) continue;

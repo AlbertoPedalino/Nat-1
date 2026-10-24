@@ -39,6 +39,7 @@ export function useSceneLive({
   onSceneEvent,
   onRemoteDrag,
   onDrawingEvent,
+  onTurnsEvent,
   cameraSourceId,
   // True while this presenter has opened a projector itself: stream the camera
   // even before that window has announced itself.
@@ -62,6 +63,7 @@ export function useSceneLive({
     onSceneEvent,
     onRemoteDrag,
     onDrawingEvent,
+    onTurnsEvent,
     cameraSourceId,
     cameraFollowers,
     followCameraSource,
@@ -132,6 +134,17 @@ export function useSceneLive({
         (payload) => {
           try {
             handlers.current.onDrawingEvent?.(payload);
+          } catch (_) {}
+        },
+      );
+
+      // Which fight the scene shows, and its round (20_scene_turns.sql).
+      channel.on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'map_scene_turns', filter: `scene_id=eq.${sceneId}` },
+        (payload) => {
+          try {
+            handlers.current.onTurnsEvent?.(payload);
           } catch (_) {}
         },
       );

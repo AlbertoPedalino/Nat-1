@@ -1081,6 +1081,47 @@ test('the fight row is the authority for enemy vitals on screen', () => {
   assert.equal(other, hit);
 });
 
+// The battle map's "next turn" (commit_fight_turn) advances turnRevision; the
+// fight on screen follows it, by combatant, and only from a newer revision.
+test('the fight on screen takes a turn moved on the battle map, never an older one', () => {
+  let state = encounterReducer(createInitialState(), { type: 'launchCurrentEncounter' });
+  const combatant = (id, name) => ({
+    id, name, type: 'monster', initiative: 10, hpCurrent: 7, hpMax: 7, activeConditions: [], activeEffects: [], isDead: false,
+  });
+  // Reordered here since the row was written: the bandit leads on screen.
+  const combat = {
+    ...buildCombat([], [], null, () => 0.5),
+    fightId: 77,
+    combatants: [combatant(1, 'Bandit'), combatant(0, 'Ogre'), combatant(2, 'Wolf')],
+    currentTurn: 0,
+    round: 1,
+  };
+  state = { ...state, combat, activeFightId: 77 };
+  const row = (currentTurn, round, turnRevision) => ({
+    currentTurn,
+    round,
+    turnRevision,
+    combatants: [combatant(0, 'Ogre'), combatant(1, 'Bandit'), combatant(2, 'Wolf')],
+  });
+
+  const moved = encounterReducer(state, { type: 'absorbFightTurn', fightId: 77, fight: row(2, 3, 4) });
+  assert.equal(moved.combat.combatants[moved.combat.currentTurn].name, 'Wolf');
+  assert.equal(moved.combat.round, 3);
+  assert.equal(moved.combat.turnRevision, 4);
+  assert.equal(snapshotFight(moved.combat).turnRevision, 4, 'saved back with the revision it saw');
+  assert.equal(restoreFight({ id: 77, fight: snapshotFight(moved.combat) }, []).turnRevision, 4);
+
+  // The echo, or a late row from an earlier step: same state, nothing to save.
+  assert.equal(encounterReducer(moved, { type: 'absorbFightTurn', fightId: 77, fight: row(2, 3, 4) }), moved);
+  assert.equal(encounterReducer(moved, { type: 'absorbFightTurn', fightId: 77, fight: row(0, 1, 3) }), moved);
+  // A row without a revision (a vitals answer, an old save) moves nothing.
+  assert.equal(encounterReducer(state, { type: 'absorbFightTurn', fightId: 77, fight: { ...row(1, 1), turnRevision: undefined } }), state);
+  // Somebody else's fight is not ours to apply.
+  assert.equal(encounterReducer(state, { type: 'absorbFightTurn', fightId: 78, fight: row(1, 1, 9) }), state);
+  // The turn moved on here keeps the revision, so the database knows it is ours.
+  assert.equal(snapshotFight(nextTurn(moved.combat)).turnRevision, 4);
+});
+
 test('a local fight cache never replays enemy vitals over a cloud fight', () => {
   let state = encounterReducer(createInitialState(), { type: 'launchCurrentEncounter' });
   const ogre = {
