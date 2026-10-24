@@ -284,11 +284,12 @@ const placeableSx = {
   touchAction: 'pan-x',
 };
 
+// The same colour as the halo on the acting piece, so the two read as one.
 const activeEntrySx = {
-  bgcolor: 'gmboard.vtt.goldTint',
-  borderColor: 'gmboard.vtt.gold',
+  bgcolor: vttAlpha(VTT_COLORS.turnActive, 0.16),
+  borderColor: VTT_COLORS.turnActive,
   color: VTT_COLORS.parchment,
-  boxShadow: `0 0 10px ${vttAlpha(VTT_COLORS.gold, 0.45)}`,
+  boxShadow: `0 0 10px ${vttAlpha(VTT_COLORS.turnActive, 0.5)}`,
 };
 
 const deadEntrySx = {

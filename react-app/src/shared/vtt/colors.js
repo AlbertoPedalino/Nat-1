@@ -64,6 +64,9 @@ export const VTT_COLORS = Object.freeze({
   areaRadiant: '#ffd86a',
   areaDarkness: '#7a6a9a',
   areaThorns: '#8f9a45',
+  // Whose turn it is: a colour nothing else on the board uses (gold already
+  // means hidden or selected), readable over any map and on a projector.
+  turnActive: '#3fe0ff',
 });
 
 export function vttAlpha(color, alpha) {

@@ -122,7 +122,6 @@ import {
 } from '../../../shared/cloud/api/encounterFights.js';
 import { makeSourceRef, parseSourceRef } from '../../../shared/vtt/tokens/encounterSync.js';
 import {
-  ownTurnTokenId,
   sceneFightChoices,
   showsFight,
   turnBase,
@@ -2397,13 +2396,6 @@ export default function SceneEditor({
       onPlacementDragEnd: () => setPlacementDrag(null),
     });
   }, [activeLayer, combatantFor, monsterFor, turnRefFor]);
-  // A player hears when one of their characters is up.
-  const ownTurnId = !role.isGm && !spectator ? ownTurnTokenId(tokens, role.ownedCharacterIds) : null;
-  const ownTurnRef = useRef(null);
-  useEffect(() => {
-    if (ownTurnId && ownTurnId !== ownTurnRef.current) notify('info', "It's your turn.");
-    ownTurnRef.current = ownTurnId;
-  }, [notify, ownTurnId]);
   const projectedRollBubbles = useMemo(() => (
     spectator || gmPlayerPreview
       ? rollBubbles

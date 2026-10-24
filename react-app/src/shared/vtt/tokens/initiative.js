@@ -105,8 +105,10 @@ export function turnEntriesFromFight(fightRow, tokens, turns) {
   });
 }
 
-// The fights a GM can show on this scene: those its imported pieces came from.
-// `fights` maps fight id -> its row (name, fight), when loaded.
+// The fights a GM can show on this scene: those its imported pieces came from,
+// and only while the fight still exists. Pieces outlive their encounter — a
+// deleted fight left them pointing at nothing, offered as a nameless "Fight".
+// `fights` maps fight id -> its row (name, fight), as loaded.
 export function sceneFightChoices(tokens, fights = {}) {
   const choices = new Map();
   for (const token of tokens || []) {
@@ -115,8 +117,9 @@ export function sceneFightChoices(tokens, fights = {}) {
     const key = `${ref.instanceId}:${ref.fightId}`;
     if (choices.has(key)) continue;
     const row = fights[ref.fightId];
-    // A row of another instance under the same id is not this fight.
-    if (row && row.instance_id && String(row.instance_id) !== ref.instanceId) continue;
+    // No row: deleted (or not loaded yet). A row of another instance under the
+    // same id is not this fight either.
+    if (!row || String(row.instance_id) !== ref.instanceId) continue;
     choices.set(key, {
       key,
       instanceId: ref.instanceId,
@@ -126,12 +129,4 @@ export function sceneFightChoices(tokens, fights = {}) {
     });
   }
   return [...choices.values()].sort((a, b) => b.updatedAt - a.updatedAt);
-}
-
-// The character piece of this viewer whose turn it is, if any: what tells a
-// player at the table that they are up.
-export function ownTurnTokenId(tokens, ownedCharacterIds = []) {
-  const owned = new Set((ownedCharacterIds || []).map(String));
-  const token = (tokens || []).find((entry) => entry?.turnActive && entry.characterId && owned.has(String(entry.characterId)));
-  return token?.id || null;
 }

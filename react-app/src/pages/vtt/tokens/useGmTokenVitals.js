@@ -103,6 +103,20 @@ export function useGmTokenVitals({ sceneId, tokens, enabled }) {
           }
         });
       }
+      // A fight deleted with its encounter: gone from here at once, not at the
+      // next recovery read (its pieces stay, pointing at nothing). Realtime
+      // does not filter deletes, so this hears every fight of the GM's (RLS)
+      // and keeps only the ones it holds.
+      channel.on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'encounter_fights' }, (payload) => {
+        const id = payload?.old?.id;
+        if (id == null) return;
+        setFights((current) => {
+          if (!Object.hasOwn(current, String(id))) return current;
+          const next = { ...current };
+          delete next[String(id)];
+          return next;
+        });
+      });
       // A reconnect does not replay missed events: read again.
       channel.subscribe((state) => { if (state === 'SUBSCRIBED') reload(); });
     } catch (_) {
