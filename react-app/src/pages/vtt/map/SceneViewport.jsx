@@ -309,7 +309,15 @@ export default function SceneViewport({
   // The controls live inside the viewport rather than around it, which is the
   // only way they survive fullscreen — a fullscreen element hides its siblings.
   const [controlsOpen, setControlsOpen] = useState(false);
-  const [floatingSheetOpen, setFloatingSheetOpen] = useState(false);
+  // The floating sheet is the page's to open as well when it passes `open`:
+  // a creature clicked on a fullscreen board shows its stat block in it.
+  const [localSheetOpen, setLocalSheetOpen] = useState(false);
+  const floatingSheetOpen = fullscreenSheet?.open ?? localSheetOpen;
+  const onSheetOpenChange = fullscreenSheet?.onOpenChange;
+  const setFloatingSheetOpen = useCallback((next) => {
+    setLocalSheetOpen(next);
+    onSheetOpenChange?.(next);
+  }, [onSheetOpenChange]);
   const [measure, setMeasure] = useState(null);
   const onMeasureRef = useRef(onMeasure);
   onMeasureRef.current = onMeasure;
@@ -564,7 +572,7 @@ export default function SceneViewport({
   useEffect(() => {
     onFullscreenChange?.(fullscreenActive);
     if (!fullscreenActive) setFloatingSheetOpen(false);
-  }, [fullscreenActive, onFullscreenChange]);
+  }, [fullscreenActive, onFullscreenChange, setFloatingSheetOpen]);
 
   // Escape and the browser's own control leave fullscreen without telling us,
   // so the icon follows the document rather than our last click.
@@ -1742,7 +1750,7 @@ export default function SceneViewport({
             startIcon={<ScrollText size={14} />}
             data-viewport-control
             aria-label={floatingSheetOpen ? 'Hide floating character sheet' : 'Show floating character sheet'}
-            onClick={() => setFloatingSheetOpen((open) => !open)}
+            onClick={() => setFloatingSheetOpen(!floatingSheetOpen)}
             sx={fullscreenSheetButtonSx}
           >
             Sheet

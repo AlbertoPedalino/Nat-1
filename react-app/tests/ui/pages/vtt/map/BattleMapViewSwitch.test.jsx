@@ -59,4 +59,41 @@ describe('BattleMapViewSwitch', () => {
 
     expect(screen.getByRole('button', { name: 'Show character sheet' })).toBeDisabled();
   });
+
+  it('lists only characters while a stat block is shown, and leads back to one', () => {
+    const onSelectionChange = vi.fn();
+    render(
+      <BattleMapViewSwitch
+        view="sheet"
+        choices={[choices[0]]}
+        selectedId={null}
+        onViewChange={() => {}}
+        onSelectionChange={onSelectionChange}
+      />,
+    );
+
+    // Even the only character can be picked: it puts the character back.
+    const select = screen.getByRole('combobox');
+    expect(select).toHaveTextContent('Character…');
+    fireEvent.mouseDown(select);
+    expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual(['Arannis']);
+    fireEvent.click(screen.getByRole('option', { name: 'Arannis' }));
+    expect(onSelectionChange).toHaveBeenCalledWith('c1');
+  });
+
+  it('stays usable for a stat block when the GM has no characters', () => {
+    render(
+      <BattleMapViewSwitch
+        view="sheet"
+        choices={[]}
+        selectedId={null}
+        available
+        onViewChange={() => {}}
+        onSelectionChange={() => {}}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: 'Hide character sheet' })).toBeEnabled();
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
+  });
 });

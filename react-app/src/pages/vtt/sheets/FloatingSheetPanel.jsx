@@ -37,6 +37,7 @@ export default function FloatingSheetPanel({
   // on whether its queued style write had run yet, and would fold in the
   // container's border on every cycle.
   const placementRef = useRef(null);
+  const picked = choices.some((entry) => entry.characterId === selectedId);
 
   useEffect(() => () => cancelAnimationFrame(frameRef.current), []);
 
@@ -258,14 +259,16 @@ export default function FloatingSheetPanel({
         <GripHorizontal size={15} aria-hidden="true" />
         <Typography sx={titleSx}>Sheet</Typography>
         <Box sx={{ flex: 1 }} />
-        {choices.length > 1 ? (
+        {choices.length > 1 || (choices.length && !picked) ? (
           <Box
             component="select"
             aria-label="Character sheet"
-            value={selectedId || ''}
+            value={picked ? selectedId : ''}
             onChange={(event) => onSelectionChange(event.target.value)}
             sx={selectSx}
           >
+            {/* No character picked: a stat block is on show. */}
+            {picked ? null : <option value="" disabled>Character…</option>}
             {choices.map((entry) => (
               <option key={entry.characterId} value={entry.characterId}>
                 {entry.name}

@@ -1,11 +1,6 @@
 import { useCallback, useState } from 'react';
-import {
-  Box, FormControlLabel, Paper, Portal, Switch,
-} from '@mui/material';
+import { Box, FormControlLabel, Switch } from '@mui/material';
 import { StatBlockHeader, StatBlockSheet } from '../../encounterbuilder/bestiary/StatBlockDialog.jsx';
-import { fullscreenContainer } from '../map/fullscreenContainer.js';
-import { battleMapDialogPaperSx, battleMapDialogTitleSx } from '../map/battleMapSurface.js';
-import { APP_TOP_BAR_HEIGHT } from '../../../app/navigation/AppTopBar.jsx';
 
 // Per GM device, like the builder's own "show to players": most monster rolls
 // are the GM's business, and the default says so.
@@ -20,10 +15,11 @@ function readPublic() {
 // log; d20 tests take the advantage or disadvantage of the combatant's current
 // conditions.
 //
-// A side panel, not a modal: the board stays live beside it — pieces move,
-// turns pass, menus open — and clicking another creature shows its block here.
-export default function MonsterStatBlockPanel({
-  open, monster, legendaryGroups, conditions, onRoll, onClose,
+// Shown where the character sheets are — the side column beside the board, or
+// the floating sheet in fullscreen — so a creature and a character are looked
+// up in the same place, and the board stays uncovered.
+export default function MonsterStatBlockView({
+  monster, legendaryGroups, conditions, onRoll, onClose,
 }) {
   const [shown, setShown] = useState(readPublic);
   const toggleShown = useCallback((event) => {
@@ -41,17 +37,14 @@ export default function MonsterStatBlockPanel({
     if (event.key === 'Escape' && !event.defaultPrevented) onClose?.();
   }, [onClose]);
 
-  if (!open || !monster) return null;
+  if (!monster) return null;
   return (
-    <Portal container={fullscreenContainer}>
-      <Paper
-        role="dialog"
-        aria-label={`${monster.name} stat block`}
-        data-viewport-control
-        onKeyDown={handleKeyDown}
-        sx={[battleMapDialogPaperSx, panelSx]}
-      >
-      <Box sx={[battleMapDialogTitleSx, titleSx]}>
+    <Box
+      role="region"
+      aria-label={`${monster.name} stat block`}
+      onKeyDown={handleKeyDown}
+    >
+      <Box sx={headerSx}>
         <StatBlockHeader monster={monster} onClose={onClose} />
       </Box>
       <Box sx={bodySx}>
@@ -67,53 +60,20 @@ export default function MonsterStatBlockPanel({
           onRoll={handleRoll}
         />
       </Box>
-      </Paper>
-    </Portal>
+    </Box>
   );
 }
 
-// How wide it is beside the board, for whatever has to make room for it (the
-// dice toast moves to its left).
-export const STAT_BLOCK_PANEL_WIDTH = 480;
-
-// On the right of the screen, over the board, under the app's top bar (whose
-// height it starts below — under it, the close button could not be reached),
-// menus and dialogs. On a phone it takes the top half, so the dice toast in
-// the bottom corner stays in sight.
-const panelSx = {
-  position: 'fixed',
-  zIndex: 1250,
-  top: `calc(${APP_TOP_BAR_HEIGHT} + 8px)`,
-  right: { xs: 8, sm: 16 },
-  bottom: { xs: 'auto', sm: 16 },
-  maxHeight: { xs: '52vh', sm: 'none' },
-  width: { xs: 'calc(100% - 16px)', sm: STAT_BLOCK_PANEL_WIDTH },
-  display: 'flex',
-  flexDirection: 'column',
-  overflow: 'hidden',
+const headerSx = {
+  position: 'relative',
+  px: 2,
+  py: 1.5,
+  borderBottom: '1px solid',
+  borderBottomColor: 'gmboard.vtt.goldBorder',
 };
 
 const bodySx = {
-  flex: 1,
-  minHeight: 0,
-  overflowY: 'auto',
   p: 2,
-  borderTop: '1px solid',
-  borderTopColor: 'gmboard.vtt.goldTint',
-};
-
-// The header carries its own typography (name, type line, source chip); the
-// battle-map title style only lends it the surface and the rule beneath.
-const titleSx = {
-  position: 'relative',
-  flexShrink: 0,
-  px: 2,
-  py: 1.5,
-  pr: 7,
-  fontFamily: 'inherit',
-  fontSize: 'inherit',
-  fontWeight: 'inherit',
-  letterSpacing: 0,
 };
 
 const switchSx = {
