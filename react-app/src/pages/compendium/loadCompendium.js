@@ -17,13 +17,15 @@ import { CLASS_ALLOWED_SOURCES, isAllowedSource } from '../../shared/content/sou
 import { getJson, loadMonsterDatabase } from '../encounterbuilder/bestiary/bestiary.js';
 import { IMAGE_BASE } from '../encounterbuilder/state/constants.js';
 import { itemGroupLookup, itemImageMap, itemPicture } from './itemCatalog.js';
+import { spellClasses } from './spellCatalog.js';
+import { getMonsterTokenUrls } from '../encounterbuilder/bestiary/monsterUtils.js';
 import { buildCompendiumIndex } from './compendiumIndex.js';
 
 // Every kind at once, each from the loader the rest of the app uses (and so
 // from the same per-file cache). A kind that fails to load is left out and
 // named, rather than costing the others. Built once per tab.
 const LOADERS = Object.freeze({
-  spell: () => loadSpells().then((result) => result.spells),
+  spell: loadSpells,
   item: loadItems,
   monster: () => loadMonsterDatabase(),
   condition: loadConditionRecords,
@@ -66,6 +68,7 @@ export function loadCompendium() {
     const records = {};
     const failed = [];
     let legendaryGroups = new Map();
+    let classSpellIndex = {};
     results.forEach((result, index) => {
       const kind = kinds[index];
       if (result.status !== 'fulfilled') {
@@ -75,6 +78,11 @@ export function loadCompendium() {
       if (kind === 'monster') {
         records.monster = result.value.monsters;
         legendaryGroups = result.value.legendaryGroups || legendaryGroups;
+      } else if (kind === 'spell') {
+        records.spell = result.value.spells;
+        // Class name -> spell names (arrays), made sets once for the lookups.
+        classSpellIndex = Object.fromEntries(Object.entries(result.value.classSpellIndex || {})
+          .map(([name, spells]) => [name, new Set(spells)]));
       } else {
         records[kind] = result.value;
       }
@@ -82,6 +90,12 @@ export function loadCompendium() {
     // Offline, nothing loads: the next opening asks again.
     if (failed.length === kinds.length) compendiumPromise = null;
     const index = buildCompendiumIndex(records);
+    // Noted on the compendium's own entries: the class lists a spell is on, a
+    // creature's token when 5etools has one.
+    index.forEach((entry) => {
+      if (entry.kind === 'spell') entry.classes = spellClasses(entry.record, classSpellIndex);
+      if (entry.kind === 'monster' && entry.record.hasToken) [entry.image] = getMonsterTokenUrls(entry.record);
+    });
     // The index's entries are the compendium's own: a picture can be noted on
     // an item entry without touching the item record the sheet shares.
     if (images) {

@@ -2,16 +2,19 @@ import { useState } from 'react';
 import { Box, Tab, Tabs } from '@mui/material';
 import CompendiumBrowser from './CompendiumBrowser.jsx';
 import { EquipmentCatalog, MagicItemCatalog } from './ItemCatalogs.jsx';
+import { MonsterCatalog, SpellCatalog } from './SpellMonsterCatalogs.jsx';
 import BookLinks from './BookLinks.jsx';
 
 const TABS = [
   { key: 'search', label: 'Search' },
+  { key: 'spells', label: 'Spells' },
+  { key: 'monsters', label: 'Monsters' },
   { key: 'magic', label: 'Magic Items' },
   { key: 'equipment', label: 'Equipment' },
   { key: 'books', label: 'Books' },
 ];
 
-// Search, the two item catalogs and the books, as tabs. A tab is mounted the
+// Search, the spell, monster and item catalogs and the books, as tabs. A tab is mounted the
 // first time it is opened and kept, so switching back keeps its search and
 // filters. Books are links to their 5etools pages.
 export default function CompendiumHome({ compendium, layout = 'page', autoFocus = false }) {
@@ -23,6 +26,8 @@ export default function CompendiumHome({ compendium, layout = 'page', autoFocus 
   };
   const panes = {
     search: <CompendiumBrowser compendium={compendium} layout={layout} autoFocus={autoFocus} />,
+    spells: <SpellCatalog compendium={compendium} layout={layout} />,
+    monsters: <MonsterCatalog compendium={compendium} layout={layout} />,
     magic: <MagicItemCatalog compendium={compendium} layout={layout} />,
     equipment: <EquipmentCatalog compendium={compendium} layout={layout} />,
     books: <BookLinks />,
@@ -32,7 +37,7 @@ export default function CompendiumHome({ compendium, layout = 'page', autoFocus 
       <Tabs
         value={tab}
         onChange={choose}
-        variant={layout === 'panel' ? 'scrollable' : 'fullWidth'}
+        variant="scrollable"
         scrollButtons={false}
         sx={tabsSx}
       >
