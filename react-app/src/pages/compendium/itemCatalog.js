@@ -5,6 +5,7 @@
 // Pure, testable in node; the pages are MagicItemCatalog/EquipmentCatalog.
 
 import { normalizeSearchText } from '../../shared/content/searchText.js';
+import { CORE_2024_SOURCE_PRIORITY, isAllowedSource } from '../../shared/content/sourcePriority.js';
 import { decodeDamageType, decodeProperty, itemMasteryLabels } from '../../shared/character/inventory/itemCodes.js';
 
 const typeCode = (item) => String(item?.type || '').toUpperCase().split('|')[0].trim();
@@ -195,11 +196,19 @@ export function filterEquipment(entries, filters = EQUIPMENT_FILTERS) {
   return list.sort(byName);
 }
 
+// The books pictures may come from: the supported 2024 manuals, never an
+// earlier edition (user rule 2026-10-26).
+export const PICTURE_SOURCES = Object.freeze([...CORE_2024_SOURCE_PRIORITY, 'XMM']);
+
 // Item pictures from fluff-items.json: name|source -> address of the first
 // image, following an entry that copies another's ({_copy: {name, source}}).
-export function itemImageMap(fluffJson, imageBase) {
+// Only records of `sources` are kept, so no lookup — direct, through a copy,
+// a group or a base item — can reach a picture of an older edition.
+export function itemImageMap(fluffJson, imageBase, { sources = PICTURE_SOURCES } = {}) {
   const key = (name, source) => `${String(name || '').toLowerCase()}|${String(source || '').toLowerCase()}`;
-  const records = new Map((fluffJson?.itemFluff || []).map((record) => [key(record.name, record.source), record]));
+  const records = new Map((fluffJson?.itemFluff || [])
+    .filter((record) => isAllowedSource(record.source, sources))
+    .map((record) => [key(record.name, record.source), record]));
   const pathOf = (record, depth = 0) => {
     const path = record?.images?.find((image) => image?.href?.path)?.href?.path;
     if (path) return path;
