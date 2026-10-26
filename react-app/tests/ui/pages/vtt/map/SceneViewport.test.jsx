@@ -1456,6 +1456,45 @@ test('fullscreen exposes a sheet button and opens the sheet inside the viewport'
   expect(onSelectionChange).toHaveBeenCalledWith('borin');
 });
 
+test('the page can hold the floating sheet open, and hears it closed', () => {
+  const onOpenChange = vi.fn();
+  render(
+    <SceneViewport
+      scene={{ grid: { size: 50, offsetX: 0, offsetY: 0, visible: false }, playArea: null }}
+      imageUrl={null}
+      tokens={[]}
+      snap
+      canMove={() => false}
+      fog={null}
+      drawings={[]}
+      lasers={[]}
+      rollBubbles={[]}
+      diceThrows={[]}
+      fullscreenSheet={{
+        // A stat block on show: no character is picked, and the creature is
+        // not one of the choices.
+        choices: [{ characterId: 'aria', name: 'Aria' }],
+        selectedId: null,
+        onSelectionChange: vi.fn(),
+        open: true,
+        onOpenChange,
+        content: <div>Goblin stat block</div>,
+      }}
+    />,
+  );
+
+  // Only a fullscreen board has the floating sheet.
+  expect(screen.queryByText('Goblin stat block')).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Fullscreen map' }));
+  expect(screen.getByText('Goblin stat block')).toBeInTheDocument();
+  const select = screen.getByRole('combobox', { name: 'Character sheet' });
+  expect([...select.options].map((option) => option.textContent)).toEqual(['Character…', 'Aria']);
+  expect(select.value).toBe('');
+
+  fireEvent.click(screen.getByRole('button', { name: 'Close floating sheet' }));
+  expect(onOpenChange).toHaveBeenLastCalledWith(false);
+});
+
 test('an iPad identifying as a Mac uses stable window coverage even with native fullscreen available', () => {
   vi.spyOn(navigator, 'platform', 'get').mockReturnValue('MacIntel');
   Object.defineProperty(navigator, 'maxTouchPoints', { configurable: true, value: 5 });

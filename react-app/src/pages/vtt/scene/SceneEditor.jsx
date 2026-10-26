@@ -104,7 +104,7 @@ import { useGmTokenVitals } from '../tokens/useGmTokenVitals.js';
 import { useSceneHexcrawl } from '../hexcrawl/useSceneHexcrawl.js';
 import { useSceneTurns } from '../initiative/useSceneTurns.js';
 import InitiativeStrip, { InitiativeButton } from '../initiative/InitiativeStrip.jsx';
-import MonsterStatBlockPanel, { STAT_BLOCK_PANEL_WIDTH } from '../tokens/MonsterStatBlockPanel.jsx';
+import MonsterStatBlockView from '../tokens/MonsterStatBlockView.jsx';
 import { beginPiecePointerDrag } from '../tokens/PiecePreview.jsx';
 import { useSceneDungeon } from '../dungeon/useSceneDungeon.js';
 import { useSceneContent } from './useSceneContent.js';
@@ -396,6 +396,9 @@ export default function SceneEditor({
   const [playerPreviewRequested, setGmPlayerPreview] = useState(false);
   const gmPlayerPreview = role.isGm && playerPreviewRequested;
   const [sheetCharacterId, setSheetCharacterId] = useState(null);
+  // The floating sheet of a fullscreen board, held here so a creature clicked
+  // on that board can open its stat block in it.
+  const [floatingSheetOpen, setFloatingSheetOpen] = useState(false);
   const [, startSheetTransition] = useTransition();
   const [sheetSplit, setSheetSplit] = useState(DEFAULT_SHEET_SPLIT);
   const contentLayoutRef = useRef(null);
@@ -2312,7 +2315,14 @@ export default function SceneEditor({
   // combatant names the monster and carries the conditions its d20 tests roll
   // with. Opened by clicking its piece or its initiative entry, or from the
   // piece's menu; it need not be on the board at all.
+  //
+  // It is shown where the character sheets are — the side column, or the
+  // floating sheet in fullscreen — in place of the character, without becoming
+  // one of the sheet selector's choices (user decision 2026-10-26): picking a
+  // character there puts the character back.
   const [statBlockRef, setStatBlockRef] = useState(null);
+  // Whether the sheet area was opened for the stat block, and so closes with it.
+  const statBlockOpenedAreaRef = useRef(false);
   const combatantFor = useCallback((ref) => {
     const row = ref ? gmVitals.fights[String(ref.fightId)] : null;
     if (!row || String(row.instance_id) !== String(ref.instanceId)) return null;
@@ -2331,13 +2341,24 @@ export default function SceneEditor({
     const monster = monsterFor(combatant);
     return monster ? { monster, combatant, ref } : null;
   }, [combatantFor, monsterFor]);
+  const sheetAreaOpen = mapFullscreen ? floatingSheetOpen : contentView === 'sheet';
   const openStatBlock = useCallback((ref) => {
-    if (gmTurnView && statBlockFor(ref)) setStatBlockRef(ref);
-  }, [gmTurnView, statBlockFor]);
-  const handleTokenClick = useCallback((token) => {
-    const ref = parseSourceRef(token?.sourceRef);
-    if (ref) openStatBlock(ref);
-  }, [openStatBlock]);
+    if (!gmTurnView || !statBlockFor(ref)) return;
+    // Another creature clicked while one is on show keeps the answer of the
+    // first: the area goes back to whatever it was before either.
+    if (!(sheetAreaOpen && statBlockRef)) statBlockOpenedAreaRef.current = !sheetAreaOpen;
+    setStatBlockRef(ref);
+    if (mapFullscreen) setFloatingSheetOpen(true);
+    else setContentView('sheet');
+  }, [gmTurnView, mapFullscreen, sheetAreaOpen, statBlockFor, statBlockRef]);
+  const closeStatBlock = useCallback(() => {
+    setStatBlockRef(null);
+    if (statBlockOpenedAreaRef.current) {
+      setContentView('map');
+      setFloatingSheetOpen(false);
+    }
+    statBlockOpenedAreaRef.current = false;
+  }, []);
   const statBlock = gmTurnView && statBlockRef ? statBlockFor(statBlockRef) : null;
   const handleStatBlockRoll = useCallback((roll) => {
     if (!statBlock) return;
@@ -2443,21 +2464,67 @@ export default function SceneEditor({
   useEffect(() => {
     if (!sheetChoices.length) {
       setSheetCharacterId(null);
-      setContentView('map');
+      // A GM without characters still reads a creature's stat block there.
+      if (!statBlockRef) setContentView('map');
       return;
     }
     if (!sheetChoices.some((entry) => entry.characterId === sheetCharacterId)) {
       setSheetCharacterId(sheetChoices[0].characterId);
     }
-  }, [sheetCharacterId, sheetChoices]);
+  }, [sheetCharacterId, sheetChoices, statBlockRef]);
 
   // In fullscreen the viewport is the only subtree the browser paints. The
   // same sheet therefore moves into its draggable viewport window instead of
   // remaining mounted a second time in the hidden side column.
-  const sideSheetOpen = contentView === 'sheet' && !mapFullscreen && !gmPlayerPreview;
+  const showsStatBlock = Boolean(statBlock);
+  // No character is picked while a stat block is on show.
+  const sheetAreaSelectedId = showsStatBlock ? null : sheetCharacterId;
+  const hasSheetContent = sheetChoices.length > 0 || showsStatBlock;
+  const sideSheetOpen = contentView === 'sheet' && !mapFullscreen && !gmPlayerPreview && hasSheetContent;
   const selectSheetCharacter = useCallback((characterId) => {
+    // Picked a character: the area is the user's now, and stays open.
+    setStatBlockRef(null);
+    statBlockOpenedAreaRef.current = false;
     startSheetTransition(() => setSheetCharacterId(characterId));
   }, []);
+  // The GM's click on a piece: a character's opens their sheet beside the
+  // board, a creature's its stat block (user decision 2026-10-26: GM only — a
+  // player has the Sheet button for their own).
+  const openCharacterSheet = useCallback((characterId) => {
+    if (!sheetChoices.some((entry) => entry.characterId === characterId)) return;
+    selectSheetCharacter(characterId);
+    if (mapFullscreen) setFloatingSheetOpen(true);
+    else setContentView('sheet');
+  }, [mapFullscreen, selectSheetCharacter, sheetChoices]);
+  const handleTokenClick = useCallback((token) => {
+    if (token?.characterId) {
+      openCharacterSheet(token.characterId);
+      return;
+    }
+    const ref = parseSourceRef(token?.sourceRef);
+    if (ref) openStatBlock(ref);
+  }, [openCharacterSheet, openStatBlock]);
+  const sheetAreaContent = (placement) => {
+    if (showsStatBlock) {
+      return (
+        <MonsterStatBlockView
+          monster={statBlock.monster}
+          legendaryGroups={monsterDb.legendaryGroups}
+          conditions={statBlock.combatant.activeConditions || []}
+          onRoll={handleStatBlockRoll}
+          onClose={closeStatBlock}
+        />
+      );
+    }
+    return sheetCharacterId ? (
+      <EmbeddedBattleMapSheet
+        key={`${placement}:${sheetCharacterId}`}
+        characterId={sheetCharacterId}
+        digest={rosterDigests.get(String(sheetCharacterId)) ?? null}
+        onRoll={handleSheetRoll}
+      />
+    ) : null;
+  };
 
   // The page is told as well, because its own top bar is fixed and painted above
   // the map. Where the browser has no Fullscreen API — a phone — "fullscreen" is
@@ -2680,7 +2747,8 @@ export default function SceneEditor({
             <BattleMapViewSwitch
               view={contentView}
               choices={sheetChoices}
-              selectedId={sheetCharacterId}
+              selectedId={sheetAreaSelectedId}
+              available={hasSheetContent}
               onViewChange={setContentView}
               onSelectionChange={selectSheetCharacter}
             />
@@ -2833,28 +2901,17 @@ export default function SceneEditor({
         )}
         // Inside the viewport, not beside it: a fullscreen map paints nothing
         // that is not one of its own descendants.
-        toast={<DiceToast
-          toast={rollToast}
-          onClose={dismissRollToast}
-          // Beside an open stat block rather than under it: the result of a
-          // roll made from it is what the GM is looking for.
-          sx={statBlock ? { right: { xs: '1.2rem', sm: `calc(${STAT_BLOCK_PANEL_WIDTH}px + 2.2rem)` } } : null}
-        />}
+        toast={<DiceToast toast={rollToast} onClose={dismissRollToast} />}
         onFullscreenChange={handleMapFullscreenChange}
         onViewChange={role.isGm && !gmPlayerPreview ? handleCameraViewChange : undefined}
         viewCenterRef={viewCenterRef}
-        fullscreenSheet={!gmPlayerPreview && sheetChoices.length ? {
+        fullscreenSheet={!gmPlayerPreview && hasSheetContent ? {
           choices: sheetChoices,
-          selectedId: sheetCharacterId,
+          selectedId: sheetAreaSelectedId,
           onSelectionChange: selectSheetCharacter,
-          content: sheetCharacterId ? (
-            <EmbeddedBattleMapSheet
-              key={`floating:${sheetCharacterId}`}
-              characterId={sheetCharacterId}
-              digest={rosterDigests.get(String(sheetCharacterId)) ?? null}
-              onRoll={handleSheetRoll}
-            />
-          ) : null,
+          open: floatingSheetOpen,
+          onOpenChange: setFloatingSheetOpen,
+          content: sheetAreaContent('floating'),
         } : null}
         // Bottom left, opposite the fullscreen button: the layer you are editing
         // is a constant piece of state, not a setting you go and find.
@@ -2870,16 +2927,7 @@ export default function SceneEditor({
               value={sheetSplit}
               onCommit={commitSheetSplit}
             />
-            <Box sx={sheetViewSx}>
-              {sheetCharacterId ? (
-                <EmbeddedBattleMapSheet
-                  key={`side:${sheetCharacterId}`}
-                  characterId={sheetCharacterId}
-                  digest={rosterDigests.get(String(sheetCharacterId)) ?? null}
-                  onRoll={handleSheetRoll}
-                />
-              ) : null}
-            </Box>
+            <Box sx={sheetViewSx}>{sheetAreaContent('side')}</Box>
           </>
         ) : null}
       </Box>
@@ -2953,15 +3001,6 @@ export default function SceneEditor({
           ? (token) => openStatBlock(parseSourceRef(token.sourceRef))
           : null}
       /> : null}
-
-      <MonsterStatBlockPanel
-        open={Boolean(statBlock)}
-        monster={statBlock?.monster || null}
-        legendaryGroups={monsterDb.legendaryGroups}
-        conditions={statBlock?.combatant.activeConditions || []}
-        onRoll={handleStatBlockRoll}
-        onClose={() => setStatBlockRef(null)}
-      />
 
       {gmPlayerPreview ? (
         <Typography variant="caption" color="text.secondary">

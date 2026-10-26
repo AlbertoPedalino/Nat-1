@@ -174,12 +174,12 @@ const searchBarSx = {
   flexShrink: 0,
 };
 
+// Wrapped, not scrolled: in one scrolling row the chips shrank to their first
+// letter on a phone or in the panel.
 const kindRowSx = {
   display: 'flex',
+  flexWrap: 'wrap',
   gap: 0.75,
-  overflowX: 'auto',
-  pb: 0.25,
-  scrollbarWidth: 'thin',
 };
 
 const statusSx = {

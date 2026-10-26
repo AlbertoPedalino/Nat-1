@@ -8,20 +8,32 @@ export default function BattleMapViewSwitch({
   selectedId,
   onViewChange,
   onSelectionChange,
+  // Whether there is anything to show, when that is more than the characters
+  // (a creature's stat block).
+  available = choices.length > 0,
 }) {
-  const hasSheets = choices.length > 0;
+  const hasSheets = available;
   const showingSheet = view === 'sheet';
+  // No character picked: something else (a stat block) is on show, and the
+  // selector is the way back to a character, even to the only one.
+  const picked = choices.some((entry) => entry.characterId === selectedId);
 
   return (
     <Stack direction="row" spacing={0.75} sx={rootSx}>
-      {showingSheet && choices.length > 1 ? (
+      {showingSheet && (choices.length > 1 || (choices.length && !picked)) ? (
         <TextField
           select
           size="small"
-          value={selectedId || ''}
+          value={picked ? selectedId : ''}
           onChange={(event) => onSelectionChange(event.target.value)}
           sx={selectSx}
-          slotProps={{ select: { inputProps: { 'aria-label': 'Character sheet' } } }}
+          slotProps={{
+            select: {
+              displayEmpty: true,
+              renderValue: (value) => choices.find((entry) => entry.characterId === value)?.name || 'Character…',
+              inputProps: { 'aria-label': 'Character sheet' },
+            },
+          }}
         >
           {choices.map((entry) => (
             <MenuItem key={entry.characterId} value={entry.characterId}>

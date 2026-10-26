@@ -99,10 +99,12 @@ export const contentLayoutOpenSx = {
   // Leave part of the actual workspace available for the sheet, even when
   // browser chrome and wrapped controls leave little height in landscape.
   // A viewport-only map height can cover the whole scroll area; map gestures
-  // then intercept every touch and the sheet below is unreachable.
+  // then intercept every touch and the sheet below is unreachable. A fifth is
+  // enough for the sheet's header and a swipe; at 65% the map of a phone was
+  // a small square (user report 2026-10-26).
   overflowX: 'hidden',
   overflowY: 'auto',
-  gridTemplateRows: 'min(52dvh, 520px, 65%) max-content',
+  gridTemplateRows: '80% max-content',
   alignContent: 'start',
   [SHEET_SIDE_BY_SIDE_QUERY]: {
     gridTemplateColumns: 'var(--sheet-grid-columns)',
