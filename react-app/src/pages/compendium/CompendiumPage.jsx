@@ -4,7 +4,7 @@ import CompendiumHome from './CompendiumHome.jsx';
 import { useCompendium } from './loadCompendium.js';
 
 // Spells, items, monsters and rules of the supported manuals, in one search,
-// and the manuals themselves to read.
+// and links to the manuals on 5etools.
 export default function CompendiumPage() {
   const compendium = useCompendium();
   return (

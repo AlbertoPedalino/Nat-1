@@ -170,6 +170,20 @@ export async function loadConditionRecords() {
     .filter((condition) => isAllowedSource(condition.source, CORE_2024_SOURCE_PRIORITY) && Array.isArray(condition.entries));
 }
 
+// Item groups (Belt of Giant Strength and its six belts…): the same file the
+// item load reads, so this costs no second download.
+export async function loadItemGroups() {
+  const data = await getJson('items.json');
+  return data.itemGroup || [];
+}
+
+// The skills of the 2024 rules (Acrobatics, Stealth…).
+export async function loadSkills() {
+  const data = await getJson('skills.json');
+  return (data.skill || [])
+    .filter((skill) => isAllowedSource(skill.source, CORE_2024_SOURCE_PRIORITY) && Array.isArray(skill.entries));
+}
+
 // The actions of the 2024 rules (Attack, Dash, Help…).
 export async function loadActions() {
   const data = await getJson('actions.json');

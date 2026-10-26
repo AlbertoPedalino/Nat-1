@@ -35,9 +35,9 @@ and `logic/` trees.
 `compendium/` is one search over the supported 5etools records: `compendiumIndex.js`
 (pure index and ranking), `loadCompendium.js` (loads every kind once per tab through
 the existing loaders), `CompendiumBrowser.jsx` (search, kind filter, results, entry),
-`CompendiumDetail.jsx`, the Books tab (`books.js`: book list, chapters split into
-sections, reference resolution and in-book search; `BooksBrowser.jsx`), the tabs
-(`CompendiumHome.jsx`), the `/compendium` page and the session side panel
+`CompendiumDetail.jsx`, the Magic Items and Equipment catalogs (`itemCatalog.js` filters, `ItemCatalogs.jsx`
+with a react-window list), the Books tab (`books.js` + `BookLinks.jsx`: the supported books
+as links to their 5etools pages), the tabs (`CompendiumHome.jsx`), the `/compendium` page and the session side panel
 (`CompendiumPanel.jsx`, opened by `CompendiumButton.jsx` in the battle map's and DM
 Screen's top bars).
 

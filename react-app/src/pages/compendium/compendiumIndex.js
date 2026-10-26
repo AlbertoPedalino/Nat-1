@@ -19,7 +19,30 @@ export const COMPENDIUM_KINDS = Object.freeze([
   { key: 'feat', label: 'Feats', single: 'Feat' },
   { key: 'species', label: 'Species', single: 'Species' },
   { key: 'background', label: 'Backgrounds', single: 'Background' },
+  { key: 'classFeature', label: 'Class Features', single: 'Class Feature' },
+  { key: 'option', label: 'Class Options', single: 'Class Option' },
+  { key: 'skill', label: 'Skills', single: 'Skill' },
 ]);
+
+// Optional features by type: invocations, metamagic, maneuvers…
+const OPTION_TYPES = Object.freeze({
+  EI: 'Eldritch Invocation',
+  MM: 'Metamagic',
+  'MV:B': 'Battle Master Maneuver',
+  'FS:F': 'Fighting Style',
+  'FS:P': 'Fighting Style',
+  'FS:R': 'Fighting Style',
+  'FS:B': 'Fighting Style',
+  PB: 'Pact Boon',
+  AS: 'Arcane Shot',
+  AI: 'Artificer Infusion',
+  ED: 'Elemental Discipline',
+  RN: 'Rune',
+});
+
+const ABILITY_NAMES = Object.freeze({
+  str: 'Strength', dex: 'Dexterity', con: 'Constitution', int: 'Intelligence', wis: 'Wisdom', cha: 'Charisma',
+});
 
 const FEAT_CATEGORIES = Object.freeze({
   O: 'Origin feat',
@@ -70,13 +93,24 @@ const SUBTITLES = {
   rule: () => 'Rule',
   species: () => 'Species',
   background: () => 'Background',
+  // "Barbarian 1", or "Path of the Berserker (Barbarian) 3".
+  classFeature: (feature) => (feature.subclassName
+    ? `${feature.subclassName} (${feature.className}) ${feature.level}`
+    : `${feature.className} ${feature.level}`),
+  option: (option) => [...new Set((Array.isArray(option.featureType) ? option.featureType : [option.featureType])
+    .map((type) => OPTION_TYPES[type]).filter(Boolean))].join(', ') || 'Class option',
+  skill: (skill) => (ABILITY_NAMES[skill.ability] ? `${ABILITY_NAMES[skill.ability]} skill` : 'Skill'),
 };
 
 function toEntry(kind, record) {
   if (!record?.name) return null;
   const source = String(record.source || '');
+  // Every class has its own "Spellcasting" or "Ability Score Improvement".
+  const owner = kind === 'classFeature'
+    ? `|${record.className}|${record.subclassShortName || ''}|${record.level}`
+    : '';
   return {
-    key: `${kind}:${record.name}|${source}`,
+    key: `${kind}:${record.name}|${source}${owner}`,
     kind,
     name: String(record.name),
     source,
@@ -164,24 +198,6 @@ export function searchCompendium(index, query, { kind = 'all', limit = 100, inTe
     || a.entry.name.localeCompare(b.entry.name)
     || sourceRank(a.entry.source, CORE_2024_SOURCE_PRIORITY) - sourceRank(b.entry.source, CORE_2024_SOURCE_PRIORITY));
   return ranked.slice(0, limit).map(({ entry }) => entry);
-}
-
-// Find an entry by kind, name and source (a book's reference to it); any
-// source of that name when the exact one is not held.
-export function createCompendiumLookup(index) {
-  const exact = new Map();
-  const byName = new Map();
-  for (const entry of index || []) {
-    exact.set(`${entry.kind}|${entry.nameText}|${entry.source.toLowerCase()}`, entry);
-    const key = `${entry.kind}|${entry.nameText}`;
-    if (!byName.has(key)) byName.set(key, entry);
-  }
-  return (kind, name, source) => {
-    const nameText = normalizeSearchText(name);
-    return exact.get(`${kind}|${nameText}|${String(source || '').toLowerCase()}`)
-      || byName.get(`${kind}|${nameText}`)
-      || null;
-  };
 }
 
 export function compendiumKind(key) {

@@ -201,48 +201,17 @@ function nodeToTokens(node) {
   return body;
 }
 
-// A picture as a block, only for a caller that shows pictures (a book reader):
-// `imageUrl(path)` resolves 5etools' internal image paths to an address.
-function pushImage(out, node, imageUrl) {
-  const href = node?.href || {};
-  const src = href.type === 'external' ? href.url : (href.path ? imageUrl(href.path) : null);
-  if (!src) return;
-  out.push({
-    kind: 'image',
-    src,
-    title: strip5eMarkup(node.title || ''),
-    credit: strip5eMarkup(node.credit || ''),
-    width: Number(node.width) || null,
-    height: Number(node.height) || null,
-  });
-}
-
-function walkEntries(node, out, depth = 0, listDepth = 0, options = {}) {
+function walkEntries(node, out, depth = 0, listDepth = 0) {
   if (node == null) return;
   if (typeof node === 'string' || typeof node === 'number') {
     pushText(out, 'paragraph', node, depth);
     return;
   }
   if (Array.isArray(node)) {
-    node.forEach((entry) => walkEntries(entry, out, depth, listDepth, options));
+    node.forEach((entry) => walkEntries(entry, out, depth, listDepth));
     return;
   }
   if (typeof node !== 'object') return;
-
-  if (node.type === 'image' || node.type === 'gallery') {
-    if (!options.imageUrl) return;
-    if (node.type === 'image') pushImage(out, node, options.imageUrl);
-    else asArray(node.images).forEach((image) => pushImage(out, image, options.imageUrl));
-    return;
-  }
-
-  // A sidebar or read-aloud box, marked so a book reader can draw it as one.
-  if (options.boxes && (node.type === 'inset' || node.type === 'insetReadaloud')) {
-    out.push({ kind: 'boxStart', variant: node.type === 'insetReadaloud' ? 'readaloud' : 'inset' });
-    walkEntries({ ...node, type: 'entries' }, out, depth, listDepth, options);
-    out.push({ kind: 'boxEnd' });
-    return;
-  }
 
   if (node.type === 'list') {
     asArray(node.items).forEach((item) => {
@@ -271,17 +240,14 @@ function walkEntries(node, out, depth = 0, listDepth = 0, options = {}) {
   }
 
   if (node.name) pushText(out, 'heading', node.name, depth);
-  if (node.entries != null) walkEntries(node.entries, out, depth + (node.name ? 1 : 0), listDepth, options);
-  else if (node.entry != null) walkEntries(node.entry, out, depth, listDepth, options);
-  else if (node.items != null) walkEntries(node.items, out, depth, listDepth, options);
+  if (node.entries != null) walkEntries(node.entries, out, depth + (node.name ? 1 : 0), listDepth);
+  else if (node.entry != null) walkEntries(node.entry, out, depth, listDepth);
+  else if (node.items != null) walkEntries(node.items, out, depth, listDepth);
 }
 
-// `options.imageUrl(path)`: also turn pictures into 'image' blocks (left out
-// otherwise, as every rules card wants). `options.boxes`: mark sidebars and
-// read-aloud text with 'boxStart'/'boxEnd' blocks around them.
-export function entriesToTextBlocks(entries, options = {}) {
+export function entriesToTextBlocks(entries) {
   const out = [];
-  walkEntries(entries, out, 0, 0, options);
+  walkEntries(entries, out);
   return out;
 }
 
