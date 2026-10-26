@@ -58,3 +58,24 @@ test('description text drops 5etools markup and is computed once', () => {
   assert.match(compendiumEntryText(entry), /8d6 fire damage/);
   assert.equal(compendiumEntryText(entry), compendiumEntryText(entry));
 });
+
+test('class features, class options and skills are entries too, each class its own', () => {
+  const index = buildCompendiumIndex({
+    classFeature: [
+      { name: 'Spellcasting', source: 'XPHB', className: 'Bard', classSource: 'XPHB', level: 1, entries: ['Bard spells.'] },
+      { name: 'Spellcasting', source: 'XPHB', className: 'Wizard', classSource: 'XPHB', level: 1, entries: ['Wizard spells.'] },
+      { name: 'Frenzy', source: 'XPHB', className: 'Barbarian', classSource: 'XPHB', subclassShortName: 'Berserker', subclassName: 'Path of the Berserker', level: 3, entries: ['Extra damage.'] },
+    ],
+    option: [{ name: 'Agonizing Blast', source: 'XPHB', featureType: ['EI'], entries: ['Add your Charisma.'] }],
+    skill: [{ name: 'Stealth', source: 'XPHB', ability: 'dex', entries: ['Escape notice.'] }],
+  });
+  const lines = index.map((entry) => [entry.kind, entry.name, entry.subtitle]);
+  assert.deepEqual(lines, [
+    ['option', 'Agonizing Blast', 'Eldritch Invocation'],
+    ['classFeature', 'Frenzy', 'Path of the Berserker (Barbarian) 3'],
+    ['classFeature', 'Spellcasting', 'Bard 1'],
+    ['classFeature', 'Spellcasting', 'Wizard 1'],
+    ['skill', 'Stealth', 'Dexterity skill'],
+  ]);
+  assert.equal(new Set(index.map((entry) => entry.key)).size, index.length, 'no two entries share a key');
+});

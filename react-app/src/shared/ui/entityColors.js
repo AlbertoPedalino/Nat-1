@@ -84,6 +84,9 @@ export const COMPENDIUM_KIND_COLORS = {
   feat: ENTITY_COLORS.feat,
   species: ENTITY_COLORS.species,
   background: ENTITY_COLORS.background,
+  classFeature: ENTITY_COLORS.class,
+  option: ENTITY_COLORS.subclass,
+  skill: ENTITY_COLORS.skill,
 };
 
 // The one roll-button recipe: solid text color over a translucent border of the

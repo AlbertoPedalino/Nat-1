@@ -57,6 +57,9 @@ export default function CompendiumDetail({ entry, legendaryGroups }) {
           <Typography variant="caption" color="text.secondary">{entry.source}</Typography>
         </Stack>
       </Box>
+      {entry.image ? (
+        <Box component="img" src={entry.image} alt={entry.name} loading="lazy" sx={pictureSx} />
+      ) : null}
       {kind === 'spell' ? <SpellMetaGrid spell={record} /> : null}
       {kind === 'item' ? <ItemFacts item={record} /> : null}
       <EntryBlocks entries={record.descriptionEntries || record.entries} />
@@ -83,6 +86,16 @@ function formatValue(copper) {
   if (copper >= 10 && copper % 10 === 0) return `${copper / 10} sp`;
   return `${copper} cp`;
 }
+
+// An item's picture, large: it is what the entry is opened for as often as
+// its text.
+const pictureSx = {
+  alignSelf: 'center',
+  maxWidth: '100%',
+  maxHeight: { xs: 320, sm: 480 },
+  objectFit: 'contain',
+  borderRadius: 1,
+};
 
 const titleSx = {
   fontSize: '1.15rem',

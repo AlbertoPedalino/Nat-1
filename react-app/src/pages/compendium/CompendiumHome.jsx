@@ -1,29 +1,48 @@
 import { useState } from 'react';
 import { Box, Tab, Tabs } from '@mui/material';
 import CompendiumBrowser from './CompendiumBrowser.jsx';
-import BooksBrowser from './BooksBrowser.jsx';
+import { EquipmentCatalog, MagicItemCatalog } from './ItemCatalogs.jsx';
+import BookLinks from './BookLinks.jsx';
 
-// Search and Books, as tabs. Both stay mounted, so switching back keeps the
-// search typed or the page being read. The books load only once opened.
+const TABS = [
+  { key: 'search', label: 'Search' },
+  { key: 'magic', label: 'Magic Items' },
+  { key: 'equipment', label: 'Equipment' },
+  { key: 'books', label: 'Books' },
+];
+
+// Search, the two item catalogs and the books, as tabs. A tab is mounted the
+// first time it is opened and kept, so switching back keeps its search and
+// filters. Books are links to their 5etools pages.
 export default function CompendiumHome({ compendium, layout = 'page', autoFocus = false }) {
   const [tab, setTab] = useState('search');
-  const [booksOpened, setBooksOpened] = useState(false);
+  const [opened, setOpened] = useState(() => new Set(['search']));
   const choose = (_event, value) => {
     setTab(value);
-    if (value === 'books') setBooksOpened(true);
+    setOpened((current) => (current.has(value) ? current : new Set([...current, value])));
+  };
+  const panes = {
+    search: <CompendiumBrowser compendium={compendium} layout={layout} autoFocus={autoFocus} />,
+    magic: <MagicItemCatalog compendium={compendium} layout={layout} />,
+    equipment: <EquipmentCatalog compendium={compendium} layout={layout} />,
+    books: <BookLinks />,
   };
   return (
     <Box sx={rootSx}>
-      <Tabs value={tab} onChange={choose} variant="fullWidth" sx={tabsSx}>
-        <Tab value="search" label="Search" />
-        <Tab value="books" label="Books" />
+      <Tabs
+        value={tab}
+        onChange={choose}
+        variant={layout === 'panel' ? 'scrollable' : 'fullWidth'}
+        scrollButtons={false}
+        sx={tabsSx}
+      >
+        {TABS.map(({ key, label }) => <Tab key={key} value={key} label={label} />)}
       </Tabs>
-      <Box sx={[paneSx, tab !== 'search' && hiddenSx]} role="tabpanel" aria-label="Search">
-        <CompendiumBrowser compendium={compendium} layout={layout} autoFocus={autoFocus} />
-      </Box>
-      <Box sx={[paneSx, tab !== 'books' && hiddenSx]} role="tabpanel" aria-label="Books">
-        {booksOpened ? <BooksBrowser layout={layout} compendium={compendium} /> : null}
-      </Box>
+      {TABS.map(({ key, label }) => (
+        <Box key={key} sx={[paneSx, tab !== key && hiddenSx]} role="tabpanel" aria-label={label}>
+          {opened.has(key) ? panes[key] : null}
+        </Box>
+      ))}
     </Box>
   );
 }
