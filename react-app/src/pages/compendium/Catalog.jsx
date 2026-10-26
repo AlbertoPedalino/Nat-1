@@ -1,6 +1,7 @@
 import { useDeferredValue, useMemo, useState } from 'react';
 import {
   Alert, Box, Button, CircularProgress, Dialog, DialogContent, IconButton, MenuItem, Stack, TextField, Typography,
+  useMediaQuery, useTheme,
 } from '@mui/material';
 import { X } from 'lucide-react';
 import { List } from 'react-window';
@@ -45,7 +46,10 @@ export default function Catalog({
   const deferred = useDeferredValue(filters);
   const results = useMemo(() => filter(entries, deferred), [deferred, entries, filter]);
   const set = (key) => (value) => setFilters((current) => ({ ...current, [key]: value }));
-  const narrow = layout === 'panel';
+  // A phone gets the panel's compact rows: the columns left a name its first
+  // few letters.
+  const phone = useMediaQuery(useTheme().breakpoints.down('sm'));
+  const narrow = layout === 'panel' || phone;
   const changed = Object.keys(initialFilters).some((key) => key !== 'sort' && filters[key] !== initialFilters[key]);
 
   if (compendium.status === 'loading') {
