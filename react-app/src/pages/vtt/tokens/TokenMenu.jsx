@@ -38,6 +38,9 @@ export default function TokenMenu({
   onClose, onSave, onObjectStyle, onVisibility, onDelete,
   // Set only for a creature whose stat block the GM can open from here.
   onStatBlock = null,
+  // Set only for a character whose sheet this user can open (the GM any,
+  // a player their own): the touch way to what a click on the piece does.
+  onSheet = null,
 }) {
   const [label, setLabel] = useState('');
   const [gmOnly, setGmOnly] = useState(false);
@@ -432,6 +435,17 @@ export default function TokenMenu({
 
         <Stack direction="row" spacing={0.6}>
           <Button size="small" variant="outlined" onClick={onClose} sx={{ ...menuButtonSx, flex: 1 }}>Done</Button>
+          {onSheet ? (
+            <Button
+              size="small"
+              variant="outlined"
+              startIcon={<ScrollText size={14} />}
+              onClick={() => { onSheet(token); onClose(); }}
+              sx={menuButtonSx}
+            >
+              Sheet
+            </Button>
+          ) : null}
           {onStatBlock ? (
             <Button
               size="small"

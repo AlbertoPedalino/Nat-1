@@ -3000,6 +3000,9 @@ export default function SceneEditor({
         onStatBlock={gmTurnView && statBlockFor(parseSourceRef(menuToken?.sourceRef))
           ? (token) => openStatBlock(parseSourceRef(token.sourceRef))
           : null}
+        onSheet={!gmPlayerPreview && sheetChoices.some((entry) => entry.characterId === menuToken?.characterId)
+          ? (token) => openCharacterSheet(token.characterId)
+          : null}
       /> : null}
 
       {gmPlayerPreview ? (
