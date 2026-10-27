@@ -3,7 +3,7 @@ import {
 } from 'react';
 import { Box, Button, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import { MapPin, Maximize2, Minimize2, ScrollText, Settings2, Trash2, X } from 'lucide-react';
-import { brushStrokeCells } from '../../../shared/vtt/map/fog.js';
+import { brushStrokeCells, fogOrigin } from '../../../shared/vtt/map/fog.js';
 import {
   DEFAULT_VIEW,
   cellSize,
@@ -652,9 +652,10 @@ export default function SceneViewport({
     const scale = Math.max(1, fog?.scale || 1);
     const world = screenToWorld(point, view);
     const unit = cellSize(scene.grid) / scale;
+    const origin = fogOrigin(scene.grid);
     const at = {
-      col: (world.x - (scene.grid.offsetX || 0)) / unit,
-      row: (world.y - (scene.grid.offsetY || 0)) / unit,
+      col: (world.x - origin.x) / unit,
+      row: (world.y - origin.y) / unit,
     };
     const stroke = dragRef.current;
     // The brush is set in squares, so it grows with the resolution rather than

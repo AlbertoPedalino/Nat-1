@@ -7,6 +7,7 @@ import {
   createFog,
   decodeCells,
   encodeCells,
+  fogOrigin,
   fogSizeForImage,
   hideAll,
   isRevealed,
@@ -167,6 +168,17 @@ test('the image is measured in fog cells, not in grid squares', () => {
   assert.deepEqual(fogSizeForImage({ width: 1400, height: 700 }, { size: 70 }, 1), { cols: 20, rows: 10 });
   assert.deepEqual(fogSizeForImage({ width: 1400, height: 700 }, { size: 70 }, 4), { cols: 80, rows: 40 });
   assert.deepEqual(fogSizeForImage({ width: 1400, height: 700 }, { size: 70 }), { cols: 80, rows: 40 });
+});
+
+// The grid offset may lie outside one square (hex rows need it), but the fog
+// bitmap is anchored inside the first square so saved fog never moves.
+test('fog hangs from the grid offset folded into one square', () => {
+  assert.deepEqual(fogOrigin({ size: 70, offsetX: 20, offsetY: 30 }), { x: 20, y: 30 });
+  assert.deepEqual(fogOrigin({ size: 70, offsetX: -10, offsetY: 100 }), { x: 60, y: 30 });
+  assert.deepEqual(
+    fogSizeForImage({ width: 1400, height: 700 }, { size: 70, offsetX: -10, offsetY: 100 }, 1),
+    fogSizeForImage({ width: 1400, height: 700 }, { size: 70, offsetX: 60, offsetY: 30 }, 1),
+  );
 });
 
 test('scene size is clamped so a bad grid cannot allocate unbounded memory', () => {

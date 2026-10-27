@@ -1,7 +1,7 @@
 import { memo, useMemo } from 'react';
 import { Box } from '@mui/material';
 import { cellSize, tokenWorldRect, worldToScreen } from '../../../shared/vtt/map/geometry.js';
-import { decodeCells } from '../../../shared/vtt/map/fog.js';
+import { decodeCells, fogOrigin } from '../../../shared/vtt/map/fog.js';
 import { isHexGrid } from '../../../shared/vtt/map/hexGeometry.js';
 import { isTokenInPlay, isTokenVisibleToPlayers } from '../../../shared/vtt/scene/scene.js';
 import { liftMovablePieces } from '../../../shared/vtt/session/liveScene.js';
@@ -14,8 +14,7 @@ const VIEWPORT_OVERSCAN = 180;
 function revealedCoverage(rect, grid, fog, fogBytes) {
   if (!fog) return 'full';
   const size = cellSize(grid) / Math.max(1, fog.scale || 1);
-  const offsetX = Number(grid?.offsetX) || 0;
-  const offsetY = Number(grid?.offsetY) || 0;
+  const { x: offsetX, y: offsetY } = fogOrigin(grid);
   const firstCol = Math.floor((rect.x - offsetX) / size);
   const firstRow = Math.floor((rect.y - offsetY) / size);
   const lastCol = Math.ceil((rect.x + rect.width - offsetX) / size) - 1;

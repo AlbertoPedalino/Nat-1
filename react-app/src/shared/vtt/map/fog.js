@@ -255,12 +255,23 @@ export function brushStrokeCells(from, to, size, { cols, rows }) {
   return cells;
 }
 
+// Where fog cell (0, 0) begins, in world pixels: the grid offset folded into one
+// square. The grid offset itself may lie anywhere (a hex row can need more than
+// one square of it), but the fog is a bitmap over the picture and has to start
+// on it. Offsets used to be stored already folded, so saved fog keeps its place.
+export function fogOrigin(grid) {
+  const size = Math.max(1, Number(grid?.size) || 1);
+  const fold = (value) => (((Number(value) || 0) % size) + size) % size;
+  return { x: fold(grid?.offsetX), y: fold(grid?.offsetY) };
+}
+
 // How many fog cells cover an image at the scene's calibration. The offset
 // shifts the first line, so a partially covered square at the edge still counts.
 export function fogSizeForImage({ width, height }, grid, scale = DEFAULT_FOG_SCALE) {
   const size = Math.max(1, Number(grid?.size) || 1) / normalizeScale(scale);
+  const origin = fogOrigin(grid);
   return {
-    cols: clampSide(Math.ceil(((Number(width) || 0) + (Number(grid?.offsetX) || 0)) / size)),
-    rows: clampSide(Math.ceil(((Number(height) || 0) + (Number(grid?.offsetY) || 0)) / size)),
+    cols: clampSide(Math.ceil(((Number(width) || 0) + origin.x) / size)),
+    rows: clampSide(Math.ceil(((Number(height) || 0) + origin.y) / size)),
   };
 }

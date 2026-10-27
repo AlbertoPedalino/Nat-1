@@ -55,10 +55,14 @@ export function normalizeGrid(grid) {
   const size = clamp(Math.round(numberOr(source.size, DEFAULT_GRID.size)), MIN_CELL, MAX_CELL);
   return {
     size,
-    // Offsets are within one cell: an offset of exactly `size` is the same grid
-    // shifted by a whole square, so it is folded back to keep calibration sane.
-    offsetX: ((numberOr(source.offsetX, 0) % size) + size) % size,
-    offsetY: ((numberOr(source.offsetY, 0) % size) + size) % size,
+    // Offsets are kept exactly as calibrated. Folding them into one square looks
+    // harmless, but every stored position (pieces, play area, drawings, hexes)
+    // counts cells from the offset, so a fold moved all of them by a whole cell
+    // on the next load. On hexes it was worse: rows repeat every √3 × size, not
+    // every `size`, so a folded offset Y no longer lined the hexes up with the
+    // picture at all.
+    offsetX: numberOr(source.offsetX, 0),
+    offsetY: numberOr(source.offsetY, 0),
     visible: source.visible !== false,
     // Whether scenery and uploaded pictures land on whole squares. Kept beside
     // the calibration rather than on each piece: it is how this map is being

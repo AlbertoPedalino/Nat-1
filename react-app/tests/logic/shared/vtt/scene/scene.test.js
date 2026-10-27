@@ -21,13 +21,16 @@ import {
   toTokenPatch,
 } from '../../../../../src/shared/vtt/scene/scene.js';
 
-test('grid calibration is clamped and folded into a single cell', () => {
+test('grid size is clamped and offsets are kept exactly as calibrated', () => {
   assert.deepEqual(normalizeGrid(null), DEFAULT_GRID);
   assert.equal(normalizeGrid({ size: 2 }).size, 8);
   assert.equal(normalizeGrid({ size: 9999 }).size, 512);
-  assert.equal(normalizeGrid({ size: 50, offsetX: 50 }).offsetX, 0);
-  assert.equal(normalizeGrid({ size: 50, offsetX: 60 }).offsetX, 10);
-  assert.equal(normalizeGrid({ size: 50, offsetY: -10 }).offsetY, 40);
+  // Every stored position counts cells from the offset, and hex rows repeat
+  // every √3 × size: folding moved pieces and broke hex alignment on reload.
+  assert.equal(normalizeGrid({ size: 50, offsetX: 60 }).offsetX, 60);
+  assert.equal(normalizeGrid({ size: 50, offsetY: -10 }).offsetY, -10);
+  assert.equal(normalizeGrid({ size: 70, offsetY: 100, shape: 'hex' }).offsetY, 100);
+  assert.equal(normalizeGrid({ size: 50, offsetX: 'nonsense' }).offsetX, 0);
   assert.equal(normalizeGrid({ visible: false }).visible, false);
   assert.equal(normalizeGrid({ size: 'nonsense' }).size, DEFAULT_GRID.size);
   // A scene saved before the switch existed was built with snapping on, so a
