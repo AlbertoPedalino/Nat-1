@@ -1215,6 +1215,8 @@ export default function SceneViewport({
     // Follow the pointer unsnapped so the piece does not stutter between cells;
     // the snap happens once, on drop.
     state.lastPoint = point;
+    // Carried away and brought back is a drag, not a click.
+    if (Math.hypot(point.x - state.from.x, point.y - state.from.y) > LONG_PRESS_SLOP) state.wandered = true;
     const next = dropPosition({
       pointerWorld: screenToWorld(point, view),
       grabOffset: state.grabOffset,
@@ -1360,7 +1362,7 @@ export default function SceneViewport({
       }
       // A hand on a mouse never releases on the exact pixel it pressed: the
       // long press's slop decides what was a click.
-      if (state.mouse && releasedAt && event.type !== 'pointercancel'
+      if (state.mouse && !state.wandered && releasedAt && event.type !== 'pointercancel'
         && Math.hypot(releasedAt.x - state.from.x, releasedAt.y - state.from.y) <= LONG_PRESS_SLOP) {
         onTokenClick?.(state.token);
       }
