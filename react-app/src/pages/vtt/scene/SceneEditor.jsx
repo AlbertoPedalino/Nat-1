@@ -85,7 +85,8 @@ import { DEFAULT_AREA_OPTIONS, areaEffect } from '../../../shared/vtt/map/areas.
 import { normalizeAtmosphere } from '../../../shared/vtt/scene/atmosphere.js';
 import { FEET_PER_CELL } from '../../../shared/vtt/map/measure.js';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
-import { hexPlayAreaForImage, isHexGrid } from '../../../shared/vtt/map/hexGeometry.js';
+import { isHexGrid } from '../../../shared/vtt/map/hexGeometry.js';
+import { playAreaForImage } from '../../../shared/vtt/map/geometry.js';
 import { useSceneLive } from '../../../shared/vtt/session/useSceneLive.js';
 import { useSceneRole } from '../../../shared/vtt/session/useSceneRole.js';
 import { createCameraSourceId } from '../../../shared/vtt/session/cameraSync.js';
@@ -194,6 +195,11 @@ const GM_FOG_OPACITY = 0.55;
 const PLAYER_FOG_OPACITY = 1;
 // Only used before the map image has loaded, or when the scene has none yet.
 const DEFAULT_MAP_CELLS = { cols: 40, rows: 30 };
+
+function samePlayArea(left, right) {
+  if (!left || !right) return left === right;
+  return left.x === right.x && left.y === right.y && left.w === right.w && left.h === right.h;
+}
 
 // A picture arrives at its own shape rather than as a square: a banner dropped
 // as 4x4 has to be un-squashed by hand every single time, and the corner handle
@@ -529,10 +535,10 @@ export default function SceneEditor({
   );
 
   const fittedPlayArea = useMemo(() => (
-    imageSize && isHexGrid(scene.grid)
-      ? hexPlayAreaForImage(imageSize, scene.grid)
-      : { x: 0, y: 0, w: mapCells.cols, h: mapCells.rows }
-  ), [imageSize, mapCells, scene.grid]);
+    imageSize
+      ? playAreaForImage(imageSize, scene.grid)
+      : { x: 0, y: 0, w: DEFAULT_MAP_CELLS.cols, h: DEFAULT_MAP_CELLS.rows }
+  ), [imageSize, scene.grid]);
 
   const fogCells = useMemo(
     () => (imageSize ? fogSizeForImage(imageSize, scene.grid) : {
@@ -1018,16 +1024,37 @@ export default function SceneEditor({
     }
   }, [notify, sendDrag]);
 
+  // Debounced like the grid: dragging a number field should not write a row per
+  // keystroke, and this one changes what the players can see.
+  const savePlayArea = useCallback((area) => {
+    const finishEdit = beginSceneEdit('playArea');
+    clearTimeout(playAreaTimerRef.current);
+    playAreaTimerRef.current = setTimeout(() => {
+      updateScene(scene.id, { playArea: area })
+        .then(() => sendDrag({ tokensChanged: true }))
+        .catch((cause) => notify('error', cause?.message || 'Could not save the play area.'))
+        .finally(finishEdit);
+    }, GRID_SAVE_DELAY);
+  }, [beginSceneEdit, notify, scene.id, sendDrag]);
+
   const handleGridChange = useCallback((grid) => {
     const finishEdit = beginSceneEdit('grid');
-    onSceneChange({ ...scene, grid });
+    // A play area fitted to the picture stays fitted while the grid is being
+    // calibrated or switched between squares and hexes. Left behind, it cut a
+    // strip off the map the moment the lines moved. A custom area is the GM's
+    // own choice and is never touched.
+    const fitted = role.isGm && !spectator && shownImageForViewport === 'map' && imageSize
+      && samePlayArea(scene.playArea, playAreaForImage(imageSize, scene.grid));
+    const playArea = fitted ? playAreaForImage(imageSize, grid) : scene.playArea;
+    onSceneChange({ ...scene, grid, playArea });
+    if (!samePlayArea(playArea, scene.playArea)) savePlayArea(playArea);
     clearTimeout(gridTimerRef.current);
     gridTimerRef.current = setTimeout(() => {
       updateScene(scene.id, { grid })
         .catch((cause) => notify('error', cause?.message || 'Could not save the grid.'))
         .finally(finishEdit);
     }, GRID_SAVE_DELAY);
-  }, [beginSceneEdit, notify, onSceneChange, scene]);
+  }, [beginSceneEdit, imageSize, notify, onSceneChange, role.isGm, savePlayArea, scene, shownImageForViewport, spectator]);
 
   const handleAtmosphereChange = useCallback((atmosphere) => {
     const next = normalizeAtmosphere(atmosphere);
@@ -1330,20 +1357,11 @@ export default function SceneEditor({
     }
   }, [notify, onSceneChange, scene.id, scene.name]);
 
-  // Debounced like the grid: dragging a number field should not write a row per
-  // keystroke, and this one changes what the players can see.
   const handlePlayAreaChange = useCallback((playArea) => {
     const area = normalizePlayArea(playArea);
-    const finishEdit = beginSceneEdit('playArea');
     onSceneChange({ ...scene, playArea: area });
-    clearTimeout(playAreaTimerRef.current);
-    playAreaTimerRef.current = setTimeout(() => {
-      updateScene(scene.id, { playArea: area })
-        .then(() => sendDrag({ tokensChanged: true }))
-        .catch((cause) => notify('error', cause?.message || 'Could not save the play area.'))
-        .finally(finishEdit);
-    }, GRID_SAVE_DELAY);
-  }, [beginSceneEdit, notify, onSceneChange, scene, sendDrag]);
+    savePlayArea(area);
+  }, [onSceneChange, savePlayArea, scene]);
 
   // The map itself is the sensible play area: the GM only ever needs to change
   // it to make room for staging outside the picture.
@@ -1358,9 +1376,7 @@ export default function SceneEditor({
     if (!role.isGm || spectator || shownImageForViewport !== 'map' || !imageSize || !isHexGrid(scene.grid)) return;
     const current = scene.playArea;
     const legacy = { x: 0, y: 0, w: mapCells.cols, h: mapCells.rows };
-    const same = (left, right) => left && right
-      && left.x === right.x && left.y === right.y && left.w === right.w && left.h === right.h;
-    if (same(current, legacy) && !same(current, fittedPlayArea)) handlePlayAreaChange(fittedPlayArea);
+    if (samePlayArea(current, legacy) && !samePlayArea(current, fittedPlayArea)) handlePlayAreaChange(fittedPlayArea);
   }, [fittedPlayArea, handlePlayAreaChange, imageSize, mapCells, role.isGm, scene.grid, scene.playArea, shownImageForViewport, spectator]);
 
   // One upload path for both slots: the only difference is which column it

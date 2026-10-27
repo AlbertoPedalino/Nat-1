@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef } from 'react';
 import { Box } from '@mui/material';
 import { useResizeTick } from './useResizeTick.js';
-import { decodeCells } from '../../../shared/vtt/map/fog.js';
+import { decodeCells, fogOrigin } from '../../../shared/vtt/map/fog.js';
 import { cellSize, worldToScreen } from '../../../shared/vtt/map/geometry.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 
@@ -71,7 +71,7 @@ export default function FogCanvas({ fog, grid, view, opacity, onTop = false }) {
     // A fog cell is a fraction of a grid square, so the buffer is scaled by the
     // cell size divided by that fraction.
     const size = cellSize(grid) / Math.max(1, fog.scale || 1);
-    const origin = worldToScreen({ x: grid.offsetX, y: grid.offsetY }, view);
+    const origin = worldToScreen(fogOrigin(grid), view);
     // Smoothing on: at four fog cells to a square the edge is fine enough that
     // interpolating reads as a soft edge of light, while nearest-neighbour would
     // show the staircase a round brush is meant to avoid.

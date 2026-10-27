@@ -10,13 +10,16 @@ import {
   fillView,
   fitView,
   panBy,
+  playAreaForImage,
   screenToWorld,
+  squarePlayAreaForImage,
   tokenAtPoint,
   tokenWorldRect,
   worldToCell,
   worldToScreen,
   zoomAt,
 } from '../../../../../src/shared/vtt/map/geometry.js';
+import { hexToWorld, worldToHex } from '../../../../../src/shared/vtt/map/hexGeometry.js';
 
 const GRID = { size: 50, offsetX: 10, offsetY: 20, visible: true };
 
@@ -144,4 +147,47 @@ test('a covered background can zoom in but never expose empty space', () => {
   assert.deepEqual(constrainCoverView({ x: -900, y: -500, zoom: 1.2 }, frame), {
     x: -600, y: -200, zoom: 1.2,
   });
+});
+
+test('a square play area covers every square the picture touches', () => {
+  assert.deepEqual(squarePlayAreaForImage({ width: 1400, height: 700 }, { size: 70 }), {
+    x: 0, y: 0, w: 20, h: 10,
+  });
+  // The partial squares on the left and top edge are still on the map.
+  assert.deepEqual(squarePlayAreaForImage({ width: 1400, height: 700 }, { size: 70, offsetX: 20, offsetY: 30 }), {
+    x: -1, y: -1, w: 21, h: 11,
+  });
+  // Offsets beyond one square or below zero shift the indices, not the coverage.
+  assert.deepEqual(squarePlayAreaForImage({ width: 1400, height: 700 }, { size: 70, offsetX: 90, offsetY: -10 }), {
+    x: -2, y: 0, w: 21, h: 11,
+  });
+});
+
+test('every square or hex over the picture is inside the fitted play area', () => {
+  const image = { width: 1234, height: 777 };
+  for (const shape of ['square', 'hex']) {
+    for (const offsetX of [-45, 0, 33, 95]) {
+      for (const offsetY of [-30, 0, 41, 110]) {
+        const grid = { size: 70, offsetX, offsetY, shape };
+        const area = playAreaForImage(image, grid);
+        for (const [x, y] of [[0, 0], [1233, 0], [0, 776], [1233, 776], [600, 400]]) {
+          let cell;
+          if (shape === 'hex') {
+            const hex = worldToHex({ x, y }, grid);
+            cell = { col: hex.q, row: hex.r };
+            // A hex is in play by its centre; the corner pixel may belong to a
+            // hex whose centre is off the picture.
+            const centre = hexToWorld(hex, grid);
+            if (centre.x < 0 || centre.y < 0 || centre.x >= image.width || centre.y >= image.height) continue;
+          } else {
+            cell = worldToCell({ x, y }, grid);
+          }
+          assert.ok(
+            cell.col >= area.x && cell.col < area.x + area.w && cell.row >= area.y && cell.row < area.y + area.h,
+            `${shape} ${offsetX},${offsetY}: (${x}, ${y}) was cut off`,
+          );
+        }
+      }
+    }
+  }
 });

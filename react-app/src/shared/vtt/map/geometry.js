@@ -10,7 +10,7 @@
 // on the same square instead of drifting by whatever the pixel offset changed.
 
 import {
-  axialRound, hexToWorld, hexWidth, isHexGrid, worldToAxial,
+  axialRound, hexPlayAreaForImage, hexToWorld, hexWidth, isHexGrid, worldToAxial,
 } from './hexGeometry.js';
 
 export const ZOOM_MIN = 0.15;
@@ -95,6 +95,25 @@ export function cellToWorld(cell, grid) {
     x: numberOr(cell?.col, 0) * size + numberOr(grid?.offsetX, 0),
     y: numberOr(cell?.row, 0) * size + numberOr(grid?.offsetY, 0),
   };
+}
+
+// The smallest range of squares that covers the whole image, counting a square
+// the picture only partly fills: a piece standing on the edge of the map is on
+// the map. The offset can lie anywhere, so the first square may be negative.
+export function squarePlayAreaForImage(image, grid) {
+  const size = cellSize(grid);
+  const offsetX = numberOr(grid?.offsetX, 0);
+  const offsetY = numberOr(grid?.offsetY, 0);
+  const x = Math.floor(-offsetX / size) + 0;
+  const y = Math.floor(-offsetY / size) + 0;
+  const afterX = Math.ceil((Math.max(1, numberOr(image?.width, 1)) - offsetX) / size);
+  const afterY = Math.ceil((Math.max(1, numberOr(image?.height, 1)) - offsetY) / size);
+  return { x, y, w: Math.max(1, afterX - x), h: Math.max(1, afterY - y) };
+}
+
+// The play area that matches the picture, in whichever cells the scene uses.
+export function playAreaForImage(image, grid) {
+  return isHexGrid(grid) ? hexPlayAreaForImage(image, grid) : squarePlayAreaForImage(image, grid);
 }
 
 // A token's on-screen box. Position and span are both in cells, so this is the
