@@ -34,6 +34,8 @@ import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import { ItemReferenceBody, QuantityAdder } from '../../../shared/character/inventory/ItemReference.jsx';
 import { itemDisplayName } from '../../../shared/character/inventory/itemIdentity.js';
 import { itemCardName } from '../../../shared/character/inventory/replicateMagicItem.js';
+import { scrollCardName } from '../../../shared/character/inventory/spellScrolls.js';
+import ScrollSpellPicker from './ScrollSpellPicker.jsx';
 import {
   carryCapacity,
   formatWeight,
@@ -722,6 +724,21 @@ export default function InventoryTab({ C, sheet }) {
     updateInv(next);
   }, [updateInv]);
 
+  // What is written on a Spell Scroll (its spell, DC, attack). Null removes a
+  // field, so a cleared number falls back to the scroll's fixed one.
+  const writeOnScroll = useCallback((index, patch) => {
+    const current = invRef.current || [];
+    updateInv(current.map((item, idx) => {
+      if (idx !== index) return item;
+      const next = { ...item };
+      Object.entries(patch).forEach(([field, value]) => {
+        if (value == null) delete next[field];
+        else next[field] = value;
+      });
+      return next;
+    }));
+  }, [updateInv]);
+
   const consumeTome = useCallback((index) => {
     const current = invRef.current || [];
     const target = current[index];
@@ -890,6 +907,7 @@ export default function InventoryTab({ C, sheet }) {
                     attunementContext={attunementState.context}
                     attunementLimit={attunementState.limit}
                     onSetAbilityChoice={setAbilityChoice}
+                    onWriteOnScroll={writeOnScroll}
                     onConsumeTome={consumeTome}
                   />
                 ))}
@@ -982,7 +1000,7 @@ function ItemTagsRow({ item, character }) {
   );
 }
 
-const InventoryRow = memo(function InventoryRow({ item, index, onQty, onCharges, onRemove, onEquip, onEquipSlot, onCarried, penaltyMsg, canPactWeapon, onPactWeapon, isArmorer, hasArcaneArmor, onArcaneArmor, onAttune, attunementFull, character, attunementContext, attunementLimit, onSetAbilityChoice, onConsumeTome }) {
+const InventoryRow = memo(function InventoryRow({ item, index, onQty, onCharges, onRemove, onEquip, onEquipSlot, onCarried, penaltyMsg, canPactWeapon, onPactWeapon, isArmorer, hasArcaneArmor, onArcaneArmor, onAttune, attunementFull, character, attunementContext, attunementLimit, onSetAbilityChoice, onWriteOnScroll, onConsumeTome }) {
   const type = String(item.type || '').toUpperCase();
   const canEquip = ['M', 'R', 'LA', 'MA', 'HA', 'S', 'SCF', 'WD', 'RD', 'ST', 'WI', 'WEAPON', 'ARMOR'].includes(type);
   const carried = isItemCarried(item);
@@ -1000,6 +1018,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onCharges,
       details={(
         <>
           <ItemReferenceBody item={item} />
+          <ScrollSpellPicker item={item} onWrite={(patch) => onWriteOnScroll?.(index, patch)} />
           {showTomeConsume ? (
             <TomeConsumePanel item={item} onConsume={() => onConsumeTome?.(index)} />
           ) : null}
@@ -1017,7 +1036,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onCharges,
           <Box onClick={toggle} sx={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', minWidth: 0 }}>
               <ItemNameIcon item={item} />
-              <Typography noWrap sx={{ fontSize: '0.875rem', color: 'text.primary', minWidth: 0 }}>{itemCardName(item)}</Typography>
+              <Typography noWrap sx={{ fontSize: '0.875rem', color: 'text.primary', minWidth: 0 }}>{scrollCardName(item, itemCardName(item))}</Typography>
             </Box>
             <ItemTagsRow item={item} character={character} />
             {!carried ? (
