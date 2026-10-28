@@ -358,8 +358,20 @@ export default function TokenSprite({
           <Box sx={hasHandles ? stackBelowSx : stackInsideSx}>
             {/* The whole name where it fits; a long one is cut at the edge of
                 the cell rather than written across the next. First in the
-                stack, so the eye reads who it is before how hurt they are. */}
-            {name ? <Box sx={{ ...plateSx, maxWidth: hasHandles ? 'none' : (hex ? '100%' : '116%') }}>{name}</Box> : null}
+                stack, so the eye reads who it is before how hurt they are.
+                A name the players never receive wears the dashed gold of
+                everything else only the GM sees. */}
+            {name ? (
+              <Box
+                sx={{
+                  ...plateSx,
+                  ...(token.secretLabel ? secretPlateSx : null),
+                  maxWidth: hasHandles ? 'none' : (hex ? '100%' : '116%'),
+                }}
+              >
+                {name}
+              </Box>
+            ) : null}
 
             {showDeathSaves ? (
               <Box
@@ -806,6 +818,11 @@ const plateSx = {
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   boxSizing: 'border-box',
+};
+
+const secretPlateSx = {
+  outline: `1px dashed ${vttAlpha(VTT_COLORS.gold, 0.9)}`,
+  outlineOffset: '-1px',
 };
 
 // On the corner of the art, only just past its edge, so it reads as attached

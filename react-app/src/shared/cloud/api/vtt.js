@@ -277,21 +277,36 @@ export async function createToken(sceneId, token = {}) {
 export async function listTokenSecretHp(sceneId) {
   const { data, error } = await requireClient()
     .from('map_token_secrets')
-    .select('token_id, hp_current, hp_max, map_tokens!inner(scene_id)')
+    .select('token_id, hp_current, hp_max, hp_temp, hp_max_bonus, map_tokens!inner(scene_id)')
     .eq('map_tokens.scene_id', sceneId);
   if (error) throw error;
   return Object.fromEntries((data || []).map((row) => [
-    row.token_id, { hpCurrent: row.hp_current ?? null, hpMax: row.hp_max ?? null },
+    row.token_id, secretVitals(row),
   ]));
 }
 
+// A standalone piece's private hit points, as the map reads them.
+export function secretVitals(row) {
+  return {
+    hpCurrent: row.hp_current ?? null,
+    hpMax: row.hp_max ?? null,
+    tempHp: row.hp_temp ?? 0,
+    maxHpBonus: row.hp_max_bonus ?? 0,
+  };
+}
+
 // The one write for a standalone piece's hit points. RLS keeps it to the GM.
-export async function setTokenHp(tokenId, { hpCurrent = null, hpMax = null } = {}) {
+// Temporary ones and the maximum's bonus (21_token_hp_modifiers.sql) are
+// written only when given, so an edit of the hit points alone keeps them.
+export async function setTokenHp(tokenId, { hpCurrent = null, hpMax = null, ...rest } = {}) {
   const round = (value) => (value == null || value === '' || !Number.isFinite(Number(value))
     ? null : Math.round(Number(value)));
+  const row = { token_id: tokenId, hp_current: round(hpCurrent), hp_max: round(hpMax) };
+  if (Object.hasOwn(rest, 'tempHp')) row.hp_temp = Math.max(0, round(rest.tempHp) ?? 0);
+  if (Object.hasOwn(rest, 'maxHpBonus')) row.hp_max_bonus = round(rest.maxHpBonus) ?? 0;
   const { error } = await requireClient()
     .from('map_token_secrets')
-    .upsert({ token_id: tokenId, hp_current: round(hpCurrent), hp_max: round(hpMax) }, { onConflict: 'token_id' });
+    .upsert(row, { onConflict: 'token_id' });
   if (error) throw error;
 }
 

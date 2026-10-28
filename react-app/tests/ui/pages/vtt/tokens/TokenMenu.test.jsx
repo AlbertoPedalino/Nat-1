@@ -354,3 +354,81 @@ test('an open menu follows marks changed at another screen and keeps them on its
     effects: [{ key: 'custom', text: 'Bless' }, { key: 'custom', text: 'Bane' }],
   }));
 });
+
+test('every piece has the same hit point row; a raised or lowered maximum says by how much', () => {
+  const props = { anchor: { x: 20, y: 20 }, onClose: vi.fn(), onSave: vi.fn(), onDelete: vi.fn() };
+  const hero = { id: 'pc', characterId: 'hero', label: 'Hero', hpCurrent: 5, hpMax: 14, tempHp: 0, maxHpBonus: 5, conditions: [], effects: [] };
+  // Without the commands (a player) a character shows no hit point fields.
+  const { rerender } = render(<TokenMenu {...props} canEdit={false} token={hero} />);
+  expect(screen.queryByRole('spinbutton', { name: 'HP' })).toBeNull();
+  rerender(<TokenMenu {...props} onVitals={vi.fn()} token={hero} />);
+  expect(screen.getByRole('spinbutton', { name: 'HP' })).toHaveValue(5);
+  expect(screen.getByRole('spinbutton', { name: 'Temp' })).toHaveValue(0);
+  expect(screen.getByText('+5')).toHaveAttribute('title', 'Maximum raised by 5');
+  rerender(<TokenMenu {...props} onVitals={vi.fn()} token={{ id: 'ogre', label: 'Ogre', sourceRef: 'enc:1:0', hpCurrent: 5, hpMax: 9, tempHp: 0, maxHpBonus: -3, conditions: [], effects: [] }} />);
+  expect(screen.getByText('-3')).toHaveAttribute('title', 'Maximum lowered by 3');
+  rerender(<TokenMenu {...props} onVitals={vi.fn()} token={{ id: 'chest', label: 'Chest', hpCurrent: 5, hpMax: 9, conditions: [], effects: [] }} />);
+  expect(screen.queryByTitle(/Maximum/)).toBeNull();
+});
+
+test('a character typed to 0 HP is dying, not marked Dead', () => {
+  const onSave = vi.fn();
+  render(<TokenMenu token={{ id: 'pc', characterId: 'hero', label: 'Hero', hpCurrent: 5, hpMax: 14, conditions: [], effects: [] }}
+    anchor={{ x: 20, y: 20 }} onClose={vi.fn()} onSave={onSave} onVitals={vi.fn()} onDelete={vi.fn()} />);
+  const hp = screen.getByRole('spinbutton', { name: 'HP' });
+  fireEvent.change(hp, { target: { value: '0' } });
+  fireEvent.blur(hp);
+  expect(onSave).toHaveBeenLastCalledWith(expect.anything(), expect.objectContaining({ healthPatch: { currentHP: 0 } }));
+});
+
+test('a maximum typed with the commands is sent as one, not as a token save', () => {
+  const onVitals = vi.fn();
+  const onSave = vi.fn();
+  render(<TokenMenu token={{ id: 'pc', characterId: 'hero', label: 'Hero', hpCurrent: 5, hpMax: 14, conditions: [], effects: [] }}
+    anchor={{ x: 20, y: 20 }} onClose={vi.fn()} onSave={onSave} onVitals={onVitals} onDelete={vi.fn()} />);
+  const max = screen.getByRole('spinbutton', { name: 'Max' });
+  fireEvent.change(max, { target: { value: '1' } });
+  fireEvent.change(max, { target: { value: '18' } });
+  fireEvent.blur(max);
+  expect(onVitals.mock.calls.map(([, command]) => command)).toEqual([{ type: 'setMaxHp', value: 18 }]);
+});
+
+test('one + 5 - steps HP, max or temp, by the field last picked', () => {
+  const onVitals = vi.fn();
+  const onSave = vi.fn();
+  render(<TokenMenu token={{ id: 'chest', label: 'Mimic', hpCurrent: 20, hpMax: 30, tempHp: 3, conditions: [], effects: [] }}
+    anchor={{ x: 20, y: 20 }} onClose={vi.fn()} onSave={onSave} onVitals={onVitals} onDelete={vi.fn()} />);
+  expect(screen.getAllByRole('textbox', { name: 'Step amount' })).toHaveLength(1);
+  fireEvent.click(screen.getByRole('button', { name: 'Damage' }));
+  // Applied to what the menu shows, temporary hit points first.
+  expect(onVitals).toHaveBeenLastCalledWith(
+    expect.objectContaining({ id: 'chest' }),
+    { type: 'modifyHp', delta: -5 },
+    expect.objectContaining({ hpCurrent: 20, hpMax: 30, tempHP: 3 }),
+  );
+  expect(screen.getByRole('spinbutton', { name: 'HP' })).toHaveValue(18);
+  expect(screen.getByRole('spinbutton', { name: 'Temp' })).toHaveValue(0);
+
+  fireEvent.focus(screen.getByRole('spinbutton', { name: 'Temp' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Add temp HP' }));
+  expect(onVitals.mock.lastCall[1]).toEqual({ type: 'modifyTempHp', delta: 5 });
+
+  fireEvent.focus(screen.getByRole('spinbutton', { name: 'Max' }));
+  fireEvent.change(screen.getByRole('textbox', { name: 'Step amount' }), { target: { value: '10' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Decrease max HP' }));
+  expect(onVitals.mock.lastCall[1]).toEqual({ type: 'modifyMaxHp', delta: -10 });
+  expect(screen.getByRole('spinbutton', { name: 'Max' })).toHaveValue(20);
+  expect(screen.getByRole('spinbutton', { name: 'HP' })).toHaveValue(18);
+  expect(onSave.mock.calls.every(([, edit]) => !Object.keys(edit.healthPatch).length)).toBe(true);
+});
+
+test('temporary hit points typed in the menu are sent once, when the field is left', () => {
+  const onVitals = vi.fn();
+  render(<TokenMenu token={{ id: 'chest', label: 'Mimic', hpCurrent: 20, hpMax: 30, tempHp: 0, conditions: [], effects: [] }}
+    anchor={{ x: 20, y: 20 }} onClose={vi.fn()} onSave={vi.fn()} onVitals={onVitals} onDelete={vi.fn()} />);
+  const temp = screen.getByRole('spinbutton', { name: 'Temp' });
+  fireEvent.change(temp, { target: { value: '1' } });
+  fireEvent.change(temp, { target: { value: '12' } });
+  fireEvent.blur(temp);
+  expect(onVitals.mock.calls.map(([, command]) => command)).toEqual([{ type: 'setTempHp', value: 12 }]);
+});

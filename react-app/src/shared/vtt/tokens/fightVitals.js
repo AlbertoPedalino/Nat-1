@@ -5,6 +5,7 @@
 //
 // Everything here is pure: the callers own the requests and the state.
 
+import { DEAD_CONDITION_KEY, setConditionActive } from '../../character/combat/conditions.js';
 import { fightWithTokenVitals, parseSourceRef } from './encounterSync.js';
 
 // Must match public.fight_monster_vital_keys() in 14_token_vitals.sql.
@@ -70,17 +71,86 @@ export function absorbMonsterVitals(combat, fight) {
 export function withGmTokenVitals(tokens, { byToken = {}, fights = {} } = {}) {
   return (tokens || []).map((token) => {
     if (!token || token.characterId) return token;
-    const ref = parseSourceRef(token.sourceRef);
-    const row = ref ? fights[ref.fightId] : null;
-    const combatant = row && String(row.instance_id) === ref.instanceId
-      ? (row.fight?.combatants || []).find((c) => String(c?.id) === ref.combatantId && isMonsterCombatant(c))
-      : null;
-    const real = combatant
-      ? { hpCurrent: combatant.hpCurrent ?? null, hpMax: combatant.hpMax ?? null }
+    const combatant = linkedCombatant(fights, parseSourceRef(token.sourceRef));
+    const stored = combatant
+      ? { hpCurrent: combatant.hpCurrent, hpMax: combatant.hpMax, tempHp: combatant.tempHP, maxHpBonus: combatant.maxHPBonus }
       : byToken[token.id];
-    if (!real || (real.hpCurrent === token.hpCurrent && real.hpMax === token.hpMax)) return token;
-    return { ...token, hpCurrent: real.hpCurrent, hpMax: real.hpMax };
+    if (!stored) return token;
+    const real = {
+      hpCurrent: stored.hpCurrent ?? null,
+      hpMax: stored.hpMax ?? null,
+      tempHp: tempHpOf(stored.tempHp),
+      maxHpBonus: Math.round(Number(stored.maxHpBonus) || 0),
+    };
+    if (Object.keys(real).every((key) => real[key] === token[key])) return token;
+    return { ...token, ...real };
   });
+}
+
+// The monster combatant a parsed source ref names, as stored in its loaded
+// fight row.
+export function linkedCombatant(fights, ref) {
+  const row = ref ? fights?.[ref.fightId] : null;
+  if (!row || String(row.instance_id) !== ref.instanceId) return null;
+  return (row.fight?.combatants || []).find((c) => String(c?.id) === ref.combatantId && isMonsterCombatant(c)) || null;
+}
+
+function tempHpOf(value) {
+  return Math.max(0, Math.round(Number(value) || 0));
+}
+
+// The commands that are amounts rather than values: safe to apply again to a
+// newer copy after a conflict.
+export const RELATIVE_VITAL_COMMANDS = new Set(['modifyHp', 'modifyTempHp', 'modifyMaxHp']);
+
+// Damage, healing, temporary and maximum hit points for a creature, with the
+// builder's rules (combat.js): damage takes temporary HP first, healing never
+// passes the maximum, lowering the maximum lowers current HP but raising it
+// heals nothing, and 0 HP is Dead. The commands are the character health
+// command names, so the menu sends one intent whatever the piece is.
+// Only the fields the command touched change, so the result diffs into a
+// minimal fight patch.
+export function applyMonsterVitalCommand(before, command) {
+  const n = Math.trunc(Number(command?.value ?? command?.delta) || 0);
+  const hpMax = before?.hpMax == null ? null : Math.round(Number(before.hpMax));
+  const current = Math.round(Number(before?.hpCurrent ?? hpMax ?? 0));
+  const clampHp = (value, max = hpMax) => Math.max(0, max == null ? value : Math.min(max, value));
+  const next = { ...before };
+  switch (command?.type) {
+    case 'modifyHp': {
+      const temp = tempHpOf(before?.tempHP);
+      const absorbed = n < 0 ? Math.min(temp, -n) : 0;
+      if (absorbed) next.tempHP = temp - absorbed;
+      next.hpCurrent = clampHp(current + n + absorbed);
+      break;
+    }
+    case 'setHp': next.hpCurrent = clampHp(n); break;
+    case 'setTempHp': next.tempHP = Math.max(0, n); break;
+    case 'modifyTempHp': next.tempHP = Math.max(0, tempHpOf(before?.tempHP) + n); break;
+    // A maximum moved by an amount is a new maximum.
+    case 'modifyMaxHp':
+      return applyMonsterVitalCommand(before, { type: 'setMaxHp', value: (hpMax ?? current) + n });
+    case 'setMaxHp': {
+      const max = Math.max(1, n);
+      next.hpMax = max;
+      // A creature without hit points yet starts whole.
+      next.hpCurrent = before?.hpCurrent == null && hpMax == null ? max : clampHp(current, max);
+      // As the builder's setMaxHp: the change is tracked as a bonus so the
+      // base maximum stays recoverable.
+      next.maxHPBonus = (Number(before?.maxHPBonus) || 0) + (max - (hpMax ?? max));
+      break;
+    }
+    default: throw new Error('Unknown creature health command.');
+  }
+  if (next.hpCurrent !== before?.hpCurrent) {
+    const dead = next.hpCurrent <= 0;
+    const conditions = Array.isArray(before?.activeConditions) ? before.activeConditions : [];
+    if (conditions.includes(DEAD_CONDITION_KEY) !== dead) {
+      next.activeConditions = setConditionActive(conditions, DEAD_CONDITION_KEY, dead);
+    }
+    if (Boolean(before?.isDead) !== dead) next.isDead = dead;
+  }
+  return next;
 }
 
 // A linked piece's displayed values as the combatant they mirror, and the same

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { supabase } from '../../../shared/cloud/supabaseClient.js';
-import { listTokenSecretHp } from '../../../shared/cloud/api/vtt.js';
+import { listTokenSecretHp, secretVitals } from '../../../shared/cloud/api/vtt.js';
 import { listFightRevisions, listFightVitals } from '../../../shared/cloud/api/encounterFights.js';
 import { diffRevisions } from '../../../shared/vtt/session/revisionDiff.js';
 import { parseSourceRef } from '../../../shared/vtt/tokens/encounterSync.js';
@@ -83,7 +83,7 @@ export function useGmTokenVitals({ sceneId, tokens, enabled }) {
         const row = payload?.new;
         if (row?.token_id) {
           setByToken((current) => ({
-            ...current, [row.token_id]: { hpCurrent: row.hp_current ?? null, hpMax: row.hp_max ?? null },
+            ...current, [row.token_id]: secretVitals(row),
           }));
         } else if (payload?.old?.token_id) {
           setByToken((current) => {
@@ -130,8 +130,9 @@ export function useGmTokenVitals({ sceneId, tokens, enabled }) {
   }, [enabled, fightKey, reload, sceneId]);
 
   // A value this client just saved, shown before its realtime event arrives.
+  // Merged: saving the hit points alone keeps the temporary ones.
   const setLocal = useCallback((tokenId, vitals) => {
-    setByToken((current) => ({ ...current, [tokenId]: vitals }));
+    setByToken((current) => ({ ...current, [tokenId]: { ...current[tokenId], ...vitals } }));
   }, []);
 
   // A fight row this client was just handed (the answer to its own turn step),
