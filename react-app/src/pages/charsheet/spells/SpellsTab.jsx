@@ -13,6 +13,7 @@ import SearchField from '../../../shared/ui/SearchField.jsx';
 import { SPELL_LEVEL_LABELS } from '../../charbuilder/constants.js';
 import { SLBL, getFinal, getMod, getPB, effectiveD20Modifier } from '../state/calculations.js';
 import { loadSpells } from '../../charbuilder/data/dataLoaders.js';
+import { scrollRowKey } from '../../../shared/character/inventory/spellScrolls.js';
 import { spellMatchesClass } from '../../charbuilder/spells/spells.js';
 import { installedRegistry, loadClassAdapters, loadCoreAdapters, loadSpellsAdapters } from '../../../adapters/index.js';
 import { getEquippedArmorPenalties } from '../inventory/armorPenalties.js';
@@ -503,7 +504,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
 
       {visibleCantrips.length || showEmptyCantrips ? (
         <SpellSection title="Cantrip">
-          {visibleCantrips.map((entry) => <SpellEntry key={`${entry.name}|${entry.source}`} entry={entry} spellAttackBonus={spellItemBonuses.spellAttack} spellSaveDc={dc} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} inventory={inventoryForBonuses} />)}
+          {visibleCantrips.map((entry) => <SpellEntry key={`${entry.name}|${entry.source}${scrollRowKey(entry.scroll)}`} entry={entry} spellAttackBonus={spellItemBonuses.spellAttack} spellSaveDc={dc} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} inventory={inventoryForBonuses} />)}
           {!visibleCantrips.length ? <Empty text="None" /> : null}
         </SpellSection>
       ) : null}
@@ -516,7 +517,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
 
       {visibleLeveled.map(([level, entries]) => (
         <SpellSection key={level} title={SPELL_LEVEL_LABELS[level] || `Level ${level}`}>
-          {entries.map((entry) => <SpellEntry key={`${level}-${entry.name}-${entry.source}-${entry.castLevel || 'base'}`} entry={entry} spellAttackBonus={spellItemBonuses.spellAttack} spellSaveDc={dc} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} inventory={inventoryForBonuses} />)}
+          {entries.map((entry) => <SpellEntry key={`${level}-${entry.name}-${entry.source}-${entry.castLevel || 'base'}${scrollRowKey(entry.scroll)}`} entry={entry} spellAttackBonus={spellItemBonuses.spellAttack} spellSaveDc={dc} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} inventory={inventoryForBonuses} />)}
         </SpellSection>
       ))}
 

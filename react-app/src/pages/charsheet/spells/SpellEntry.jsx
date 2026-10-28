@@ -250,8 +250,11 @@ export default function SpellEntry({
 
   // Per-entry casting ability + global magic-item spell-attack bonus (matches the
   // SpellsTab header so the button and the summary agree).
-  const atk = getPB(C) + spellMod + spellAttackBonus;
-  const resolvedSpellSaveDc = Number.isFinite(Number(spellSaveDc)) ? Number(spellSaveDc) : 8 + atk;
+  // Read from a Spell Scroll, the scroll's own numbers apply instead.
+  const atk = entry.scroll ? entry.scroll.attack : getPB(C) + spellMod + spellAttackBonus;
+  const resolvedSpellSaveDc = entry.scroll
+    ? entry.scroll.dc
+    : (Number.isFinite(Number(spellSaveDc)) ? Number(spellSaveDc) : 8 + atk);
 
   // Spell-attack advantage/disadvantage. Sources: effect-based advantage scoped
   // to this spell's owning class (e.g. Sorcerer Innate Sorcery) + condition-based

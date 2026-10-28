@@ -9,6 +9,7 @@ import { enumerateAutoGrantedSpells, grantSourceLabel } from '../../../shared/ch
 import { featSlotOrigin } from '../../../shared/character/progression/featChoiceKeys.js';
 import { collectFreeCastsForGrant, mergeFreeCastsById, normalizeFreeCast, getFeatFreeCastTemplate, applyFreeCastRest } from '../../../shared/character/spells/spellFreeCasts.js';
 import { collectItemAttachedSpells } from '../../../shared/character/inventory/itemAttachedSpells.js';
+import { collectScrollSpells, scrollRowKey } from '../../../shared/character/inventory/spellScrolls.js';
 import { isWarlockModifierCantripChoiceKey } from '../../../shared/character/progression/warlockUtils.js';
 import { enumerateFixedAdditionalSpells } from '../../../shared/character/spells/additionalSpellGrants.js';
 import { ENTITY_COLORS, ITEM_ATTUNEMENT, ACTION_COLORS } from '../../../shared/ui/entityColors.js';
@@ -198,7 +199,9 @@ export function buildSpellInfo(C, spellIndex) {
       { ...(full || {}), name: canonicalName, level: Number(full?.level ?? fallbackLevel ?? 0) },
       grantMeta?.spellOverrides,
     );
-    const key = rowKey(spell, castLevel);
+    // A scroll's spell is a row of its own: it casts with the scroll's save DC
+    // and attack bonus.
+    const key = `${rowKey(spell, castLevel)}${scrollRowKey(grantMeta?.scroll)}`;
     const row = {
       ...spell,
       sourceInfo: source,
@@ -209,6 +212,7 @@ export function buildSpellInfo(C, spellIndex) {
       spellcastingAbility,
       spellOverrides: grantMeta?.spellOverrides || null,
       grantModifiers: grantMeta?.modifiers || [],
+      scroll: grantMeta?.scroll || null,
       locked,
     };
     const existing = rows.get(key);
@@ -262,6 +266,13 @@ export function buildSpellInfo(C, spellIndex) {
       if (normalized) freeCasts = [normalized];
     }
     push(grant.name, grant.source, true, null, 0, null, null, freeCasts, null, { spellSource: grant.spellSource });
+  });
+
+  collectScrollSpells(C).forEach((grant) => {
+    push(grant.name, grant.source, true, null, grant.level, null, null, null, null, {
+      spellSource: grant.spellSource,
+      scroll: grant.scroll,
+    });
   });
 
   const all = [...rows.values()];
