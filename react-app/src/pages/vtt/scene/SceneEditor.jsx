@@ -106,6 +106,7 @@ import { useSceneHexcrawl } from '../hexcrawl/useSceneHexcrawl.js';
 import { useSceneTurns } from '../initiative/useSceneTurns.js';
 import InitiativeStrip, { InitiativeButton } from '../initiative/InitiativeStrip.jsx';
 import MonsterStatBlockView from '../tokens/MonsterStatBlockView.jsx';
+import { useTokenVitalCommands } from '../tokens/useTokenVitalCommands.js';
 import { beginPiecePointerDrag } from '../tokens/PiecePreview.jsx';
 import { useSceneDungeon } from '../dungeon/useSceneDungeon.js';
 import { useSceneContent } from './useSceneContent.js';
@@ -1016,7 +1017,9 @@ export default function SceneEditor({
     )));
     try {
       const updated = await setTokenVisibility(token.id, gmOnly, token.layer);
-      setTokens((current) => current.map((item) => (item.id === token.id ? updated : item)));
+      // Not taken whole: the row knows nothing of the GM-only label, which
+      // lives apart from it, and the piece lost its name until a reload.
+      setTokens((current) => applyCommittedToken(current, updated));
       sendDrag({ tokensChanged: true });
     } catch (cause) {
       setTokens((current) => current.map((item) => (item.id === token.id ? token : item)));
@@ -1877,6 +1880,10 @@ export default function SceneEditor({
       notify('error', cause?.message || 'Could not update that token.');
     }
   }, [characterHealth, commitLinkedMonster, gmVitals, notify, writeConditions]);
+
+  const handleTokenVitals = useTokenVitalCommands({
+    gmVitals, characterHealth, writeConditions, setTokens, notify, refreshVisibleTokens,
+  });
 
   const handleDeathSaveChange = useCallback((token, type, value) => {
     if (!token?.characterId || !['success', 'fail'].includes(type)) return;
@@ -3010,6 +3017,7 @@ export default function SceneEditor({
         canRemove={role.isGm || canMove(menuToken)}
         onClose={() => setMenu(null)}
         onSave={role.isGm ? handleSaveToken : handleMarkToken}
+        onVitals={role.isGm ? handleTokenVitals : null}
         onObjectStyle={handleObjectStyle}
         onVisibility={role.isGm ? handleTokenVisibility : undefined}
         onDelete={handleDeleteToken}

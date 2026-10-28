@@ -39,6 +39,7 @@ or on a script missing from this table.
 | 18 | [`18_section_versions.sql`](supabase/18_section_versions.sql) | `version` on `boards`, `encounters`, `dm_screens`: the database-maintained revision tool-instance sync updates against (`where version = N`); `updated_at` becomes a server-set timestamp only |
 | 19 | [`19_character_art_editors.sql`](supabase/19_character_art_editors.sql) | Portrait insert/delete also for a GM who may edit the character, so a portrait stays in its owner's folder whoever uploads it |
 | 20 | [`20_scene_turns.sql`](supabase/20_scene_turns.sql) | Initiative on the battle map: `commit_fight_turn` (the GM's next/previous turn, guarded by `turnRevision` in the fight), `map_scene_turns` (which fight a scene shows) and the player-visible `map_tokens.turn_order / turn_active` projection |
+| 21 | [`21_token_hp_modifiers.sql`](supabase/21_token_hp_modifiers.sql) | `map_token_secrets.hp_temp / hp_max_bonus`: temporary hit points and the maximum's stepped bonus of pieces without an encounter, GM-only beside their private HP |
 
 Run 13 and 14 **before** deploying a frontend that needs them: the app sends
 health changes only through their RPCs.

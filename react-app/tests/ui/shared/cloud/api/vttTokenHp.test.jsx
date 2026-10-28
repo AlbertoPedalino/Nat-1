@@ -46,3 +46,19 @@ test('clearing a secret label keeps the private hit points in the same row', asy
   await setTokenSecret('piece-1', '');
   expect(calls).toEqual([{ table: 'map_token_secrets', op: 'update', row: { label: null } }]);
 });
+
+test('temporary HP are written only when given, so an HP edit keeps them', async () => {
+  await setTokenHp('piece-1', { hpCurrent: 12, hpMax: 30, tempHp: 5 });
+  await setTokenHp('piece-1', { hpCurrent: 10, hpMax: 30 });
+  expect(calls.map((call) => call.row)).toEqual([
+    { token_id: 'piece-1', hp_current: 12, hp_max: 30, hp_temp: 5 },
+    { token_id: 'piece-1', hp_current: 10, hp_max: 30 },
+  ]);
+});
+
+test('a stepped maximum is written only when given', async () => {
+  await setTokenHp('piece-1', { hpCurrent: 12, hpMax: 35, maxHpBonus: 5 });
+  expect(calls.map((call) => call.row)).toEqual([
+    { token_id: 'piece-1', hp_current: 12, hp_max: 35, hp_max_bonus: 5 },
+  ]);
+});

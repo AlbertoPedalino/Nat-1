@@ -140,6 +140,7 @@ export function rosterEntryFromDigest(digest, baseMax) {
     hpCurrent: vitals.currentHP,
     hpMax: vitals.maxHP,
     tempHp: vitals.tempHP,
+    maxHpBonus: vitals.maxHPBonus,
     conditions: digest.activeConditions,
     effects: digest.activeEffects || [],
   };

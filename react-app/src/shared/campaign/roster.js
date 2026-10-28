@@ -41,6 +41,7 @@ export function toRosterEntry(row) {
     hpCurrent: null,
     hpMax: null,
     tempHp: 0,
+    maxHpBonus: 0,
     // Conditions ARE stored on the sheet — they are a synced vital, unlike max
     // HP which is derived — so they can be read straight from the blob.
     conditions: normalizeConditions(sheet.activeConditions),
@@ -58,6 +59,7 @@ export function rosterVitals(roster) {
       hpCurrent: entry.hpCurrent,
       hpMax: entry.hpMax,
       tempHp: entry.tempHp || 0,
+      maxHpBonus: entry.maxHpBonus || 0,
       conditions: entry.conditions || [],
       effects: entry.effects || [],
       portraitPath: entry.portraitPath || null,
@@ -100,6 +102,7 @@ export function withSheetVitals(tokens, roster) {
       hpCurrent: sheet.hpCurrent,
       hpMax: sheet.hpMax,
       tempHp: sheet.tempHp,
+      maxHpBonus: sheet.maxHpBonus,
       // The sheet owns a character's conditions, exactly as it owns their hit
       // points: the map shows them and writes back, it does not keep a copy.
       conditions: sheet.conditions,

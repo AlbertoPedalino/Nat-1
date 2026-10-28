@@ -15,6 +15,8 @@ import { ScrollText, Trash2 } from 'lucide-react';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { addReminder, removeEffect } from '../../../shared/character/combat/combatEffects.js';
 import { ReminderEditor } from '../../../shared/character/combat/ReminderChips.jsx';
+import HpStepper from '../../../shared/character/combat/HpStepper.jsx';
+import { applyMonsterVitalCommand } from '../../../shared/vtt/tokens/fightVitals.js';
 import {
   ASSIGNABLE_CONDITIONS,
   DEAD_CONDITION_KEY,
@@ -36,6 +38,9 @@ export default function TokenMenu({
   token, anchor, canEdit = true, canShowHp = true, canRemove = true, canMark = true,
   canSetEffects = true, canSetDeathSaves = true, canStyleObject = true,
   onClose, onSave, onObjectStyle, onVisibility, onDelete,
+  // Set for the GM: temporary and maximum hit points and the "+ 5 -" stepper,
+  // as health commands (modifyHp, setTempHp, ...) whatever the piece is.
+  onVitals = null,
   // Set only for a creature whose stat block the GM can open from here.
   onStatBlock = null,
   // Set only for a character whose sheet this user can open (the GM any,
@@ -47,6 +52,14 @@ export default function TokenMenu({
   const [conditions, setConditions] = useState([]);
   const [hpCurrent, setHpCurrent] = useState('');
   const [hpMax, setHpMax] = useState('');
+  const [tempHp, setTempHp] = useState('');
+  // How far the maximum stands above (or below) the base one: a character's
+  // sheet, an encounter creature's, or a loose piece's maximum last typed.
+  const [maxBonus, setMaxBonus] = useState(0);
+  // One "+ 5 -" for the three fields: it acts on the one the cursor was last
+  // in, HP until another is picked. The amount stays between pieces.
+  const [stepTarget, setStepTarget] = useState('hp');
+  const [stepAmount, setStepAmount] = useState('5');
   const [showHp, setShowHp] = useState(false);
   const [effects, setEffects] = useState([]);
   const [deathSaves, setDeathSaves] = useState({ success: 0, fail: 0 });
@@ -57,6 +70,8 @@ export default function TokenMenu({
   const typingTimerRef = useRef(null);
   const pendingPatchRef = useRef({});
   const objectStyleTimerRef = useRef(null);
+  const vitalsTimerRef = useRef(null);
+  const pendingVitalsRef = useRef({});
 
   // Loaded once per opening, keyed by id rather than by object identity: a
   // realtime update rebuilds the token on every render, and resyncing on that
@@ -72,12 +87,17 @@ export default function TokenMenu({
     syncedIdRef.current = token.id;
     pendingPatchRef.current = {};
     clearTimeout(typingTimerRef.current);
+    pendingVitalsRef.current = {};
+    clearTimeout(vitalsTimerRef.current);
+    setStepTarget('hp');
     const secret = token.secretLabel || '';
     setGmOnly(Boolean(secret));
     setLabel(secret || token.label || '');
     setConditions(token.conditions || []);
     setHpCurrent(token.hpCurrent ?? '');
     setHpMax(token.hpMax ?? '');
+    setTempHp(token.tempHp ?? 0);
+    setMaxBonus(token.maxHpBonus || 0);
     setShowHp(Boolean(token.showHp));
     setEffects(token.effects || []);
     setDeathSaves(deathSavesForToken(token.deathSaves, token.conditions, token.characterId));
@@ -99,7 +119,25 @@ export default function TokenMenu({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [liveEffects]);
 
-  useEffect(() => () => clearTimeout(typingTimerRef.current), []);
+  // Hit points change under an open menu too (a step from here coming back,
+  // another screen). A field with a typed value still waiting keeps it.
+  const liveVitals = [token?.hpCurrent, token?.hpMax, token?.tempHp, token?.maxHpBonus].join('|');
+  useEffect(() => {
+    if (!token || syncedIdRef.current !== token.id) return;
+    const pending = pendingVitalsRef.current;
+    if (!Object.hasOwn(pendingPatchRef.current, 'hpCurrent')) setHpCurrent(token.hpCurrent ?? '');
+    if (!Object.hasOwn(pendingPatchRef.current, 'hpMax') && !pending.setMaxHp) {
+      setHpMax(token.hpMax ?? '');
+      setMaxBonus(token.maxHpBonus || 0);
+    }
+    if (!pending.setTempHp) setTempHp(token.tempHp ?? 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [liveVitals]);
+
+  useEffect(() => () => {
+    clearTimeout(typingTimerRef.current);
+    clearTimeout(vitalsTimerRef.current);
+  }, []);
 
   // Every control writes as it is used. A Save button in a menu opened by
   // right-clicking a piece mid-combat is one click too many, and forgetting it
@@ -142,6 +180,47 @@ export default function TokenMenu({
     typingTimerRef.current = setTimeout(() => save({}), TYPING_DELAY);
   }, [save]);
 
+  // Maximum and temporary hit points typed in: one command per field once the
+  // typing stops, the last value of each.
+  const flushVitals = useCallback(() => {
+    clearTimeout(vitalsTimerRef.current);
+    const pending = Object.values(pendingVitalsRef.current);
+    pendingVitalsRef.current = {};
+    if (token && onVitals) pending.forEach((command) => onVitals(token, command));
+  }, [onVitals, token]);
+
+  const vitalsSoon = useCallback((command) => {
+    clearTimeout(vitalsTimerRef.current);
+    pendingVitalsRef.current = { ...pendingVitalsRef.current, [command.type]: command };
+    vitalsTimerRef.current = setTimeout(flushVitals, TYPING_DELAY);
+  }, [flushVitals]);
+
+  // A stepper click on the targeted field, shown at once and corrected by the
+  // values that come back. A value still being typed goes first.
+  const step = useCallback((delta) => {
+    if (!token || !onVitals) return;
+    flushVitals();
+    if (Object.keys(pendingPatchRef.current).length) save({});
+    const command = { type: STEP_TARGETS[stepTarget].command, delta };
+    // What the GM sees is what the step applies to: a value typed a moment ago
+    // may not have come back on the piece yet.
+    const shown = {
+      hpCurrent: hpCurrent === '' ? null : Number(hpCurrent),
+      hpMax: hpMax === '' ? null : Number(hpMax),
+      tempHP: Number(tempHp) || 0,
+      maxHPBonus: maxBonus,
+      activeConditions: conditions,
+    };
+    const after = applyMonsterVitalCommand(shown, command);
+    setHpCurrent(after.hpCurrent ?? '');
+    setHpMax(after.hpMax ?? '');
+    setTempHp(after.tempHP ?? 0);
+    setMaxBonus(after.maxHPBonus || 0);
+    // A character at 0 HP is dying, not dead: their sheet decides.
+    if (!token.characterId && after.activeConditions) setConditions(after.activeConditions);
+    onVitals(token, command, shown);
+  }, [conditions, flushVitals, hpCurrent, hpMax, maxBonus, onVitals, save, stepTarget, tempHp, token]);
+
   if (!token) return null;
   const isMapObject = Boolean(token.iconKey);
   // Read off the piece rather than kept in state: the layer is written
@@ -151,6 +230,7 @@ export default function TokenMenu({
 
 
   const menuWidth = isMapObject ? 270 : 360;
+  const hpFieldWidth = onVitals ? 60 : 82;
 
   return (
     <Menu
@@ -192,11 +272,6 @@ export default function TokenMenu({
               label={<Typography sx={controlLabelSx}>Hidden from the players</Typography>}
               sx={formControlSx}
             />
-            <Typography sx={helperSx}>
-              {hiddenFromPlayers
-                ? 'The players are never sent this piece at all.'
-                : 'Everyone at the table can see it; its editing layer is unchanged.'}
-            </Typography>
             <Divider />
           </>
         ) : null}
@@ -234,23 +309,14 @@ export default function TokenMenu({
             label={<Typography sx={controlLabelSx}>Label visible to the GM only</Typography>}
             sx={formControlSx}
           />
-          <Typography sx={helperSx}>
-            {gmOnly
-              ? 'The name is stored apart from the piece: the players never receive it.'
-              : 'The name is shown to everyone who can see this piece.'}
-          </Typography>
 
-          {!isMapObject ? <>
-          <Divider />
+          {!isMapObject ? <Divider /> : null}
 
-          {/* Hit points are editable only where the piece owns them. For a
-              character the sheet is the source of truth, and a field here would
-              edit a copy that the next sheet update overwrites. */}
-          {token.characterId ? (
-            <Typography sx={helperSx}>
-              Hit points come from the character sheet and update by themselves.
-            </Typography>
-          ) : (
+          {/* The same row on every piece. A character's hit points are edited
+              as health commands on their sheet, an encounter creature's on its
+              fight, any other piece's in its GM-only values: never a copy on
+              the piece. Without the commands a character's are not shown. */}
+          {!isMapObject && (onVitals || !token.characterId) ? <>
             <Stack direction="row" spacing={0.6} sx={{ alignItems: 'center' }}>
               <TextField
                 label="HP"
@@ -260,6 +326,12 @@ export default function TokenMenu({
                 onChange={(event) => {
                   const value = event.target.value;
                   setHpCurrent(value);
+                  // A character at 0 is dying rather than dead, and a blank
+                  // sheet value would read as 0.
+                  if (token.characterId) {
+                    if (value !== '') saveSoon({ hpCurrent: value });
+                    return;
+                  }
                   if (value === '') {
                     saveSoon({ hpCurrent: value });
                     return;
@@ -272,44 +344,95 @@ export default function TokenMenu({
                   setConditions(nextConditions);
                   saveSoon({ hpCurrent: value, conditions: nextConditions });
                 }}
+                onFocus={() => setStepTarget('hp')}
                 onBlur={() => save({})}
                 onKeyDown={(event) => {
                   event.stopPropagation();
                   if (event.key === 'Enter') { save({}); onClose(); }
                 }}
-                sx={{ ...compactFieldSx, width: 82 }}
+                sx={{ ...compactFieldSx, ...stepTargetSx(onVitals && stepTarget === 'hp'), width: hpFieldWidth }}
               />
               <Typography sx={slashSx}>/</Typography>
-              <TextField
-                label="Max"
-                size="small"
-                type="number"
-                value={hpMax}
-                onChange={(event) => {
-                  setHpMax(event.target.value);
-                  saveSoon({ hpMax: event.target.value });
-                }}
-                onBlur={() => save({})}
-                onKeyDown={(event) => {
-                  event.stopPropagation();
-                  if (event.key === 'Enter') { save({}); onClose(); }
-                }}
-                sx={{ ...compactFieldSx, width: 82 }}
-              />
+              <Box sx={maxSlotSx}>
+                <TextField
+                  label="Max"
+                  size="small"
+                  type="number"
+                  value={hpMax}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    setHpMax(value);
+                    if (!onVitals) {
+                      saveSoon({ hpMax: value });
+                      return;
+                    }
+                    if (value !== '' && Number(value) >= 1) {
+                      vitalsSoon({ type: 'setMaxHp', value: Math.trunc(Number(value)) });
+                    }
+                  }}
+                  onFocus={() => setStepTarget('max')}
+                  onBlur={() => (onVitals ? flushVitals() : save({}))}
+                  onKeyDown={(event) => {
+                    event.stopPropagation();
+                    if (event.key === 'Enter') { flushVitals(); save({}); onClose(); }
+                  }}
+                  sx={{ ...compactFieldSx, ...stepTargetSx(onVitals && stepTarget === 'max'), width: hpFieldWidth }}
+                />
+                {/* A maximum above or below the base one (Aid, a curse) says
+                    by how much, on the field's corner. */}
+                {maxBonus ? (
+                  <Box
+                    component="span"
+                    title={`Maximum ${maxBonus > 0 ? 'raised' : 'lowered'} by ${Math.abs(maxBonus)}`}
+                    sx={{ ...maxBonusSx, color: maxBonus > 0 ? 'success.main' : 'error.main' }}
+                  >
+                    {maxBonus > 0 ? '+' : ''}{maxBonus}
+                  </Box>
+                ) : null}
+              </Box>
+              {onVitals ? (
+                <>
+                <TextField
+                  label="Temp"
+                  size="small"
+                  type="number"
+                  value={tempHp}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    setTempHp(value);
+                    if (value !== '') vitalsSoon({ type: 'setTempHp', value: Math.max(0, Math.trunc(Number(value)) || 0) });
+                  }}
+                  onFocus={() => setStepTarget('temp')}
+                  onBlur={flushVitals}
+                  onKeyDown={(event) => {
+                    event.stopPropagation();
+                    if (event.key === 'Enter') { flushVitals(); onClose(); }
+                  }}
+                  sx={{ ...compactFieldSx, ...tempFieldSx, ...stepTargetSx(stepTarget === 'temp'), width: hpFieldWidth }}
+                />
+                <Box sx={stepperSlotSx} onKeyDown={(event) => event.stopPropagation()}>
+                  <HpStepper
+                    amount={stepAmount}
+                    onAmount={setStepAmount}
+                    onPlus={(n) => step(n)}
+                    onMinus={(n) => step(-n)}
+                    plusColor="success.main"
+                    minusColor="error.main"
+                    plusLabel={STEP_TARGETS[stepTarget].plusLabel}
+                    minusLabel={STEP_TARGETS[stepTarget].minusLabel}
+                  />
+                </Box>
+                </>
+              ) : null}
             </Stack>
-          )}
-
-          <Divider />
+            <Divider />
           </> : null}
           </>
         ) : null}
 
         {isMapObject ? (
           <Box sx={objectStyleSx}>
-            <Box>
-              <Typography sx={sectionTitleSx}>Object color</Typography>
-              <Typography sx={helperSx}>The color is saved after you stop moving the selector.</Typography>
-            </Box>
+            <Typography sx={sectionTitleSx}>Object color</Typography>
             <Box
               key={`${token.id}-color`}
               component="input"
@@ -370,7 +493,6 @@ export default function TokenMenu({
         {!isMapObject ? <Box sx={markerGridSx}>
           <Box sx={markerSectionSx}>
             <Typography sx={sectionTitleSx}>Conditions</Typography>
-            {!canMark ? <Typography sx={helperSx}>Only its player or the GM can set these.</Typography> : null}
             <Box sx={chipsSx}>
               {ASSIGNABLE_CONDITIONS.map((condition) => {
                 const active = conditions.includes(condition.key);
@@ -413,7 +535,6 @@ export default function TokenMenu({
               the piece for the whole table, as on the sheet. */}
           <Box sx={{ ...markerSectionSx, ...reminderSectionSx }}>
             <Typography sx={sectionTitleSx}>Reminders</Typography>
-            {!canSetEffects ? <Typography sx={helperSx}>Only its player or the GM can set these.</Typography> : null}
             <ReminderEditor
               effects={effects}
               disabled={!canSetEffects}
@@ -540,8 +661,33 @@ const formControlSx = {
 };
 
 const controlLabelSx = { fontSize: '0.68rem', lineHeight: 1.2 };
-const helperSx = { color: 'text.secondary', fontSize: '0.57rem', lineHeight: 1.25 };
 const slashSx = { color: 'text.secondary', fontSize: '0.68rem' };
+const tempFieldSx = { '& .MuiInputBase-input': { color: VTT_COLORS.tempHpText } };
+const stepperSlotSx = { ml: 'auto !important', display: 'flex' };
+const maxSlotSx = { position: 'relative', display: 'flex' };
+// On the field's top-right corner, over its outline, as the label sits on
+// the top-left one.
+const maxBonusSx = {
+  position: 'absolute',
+  top: -7,
+  right: 4,
+  px: 0.3,
+  bgcolor: 'gmboard.vtt.surfaceSolid',
+  fontSize: '0.55rem',
+  fontWeight: 700,
+  lineHeight: 1.2,
+  pointerEvents: 'none',
+};
+// The field the stepper acts on keeps a gold outline after the cursor leaves.
+const stepTargetSx = (active) => (active
+  ? { '& .MuiOutlinedInput-notchedOutline': { borderColor: 'primary.main' } }
+  : {});
+
+const STEP_TARGETS = {
+  hp: { command: 'modifyHp', plusLabel: 'Heal', minusLabel: 'Damage' },
+  max: { command: 'modifyMaxHp', plusLabel: 'Increase max HP', minusLabel: 'Decrease max HP' },
+  temp: { command: 'modifyTempHp', plusLabel: 'Add temp HP', minusLabel: 'Remove temp HP' },
+};
 
 const objectStyleSx = {
   display: 'grid',

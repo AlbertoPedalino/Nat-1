@@ -477,3 +477,10 @@ test('a token flags itself while its condition pills are open', () => {
   );
   expect(screen.getByRole('button', { name: 'Goblin' })).toHaveAttribute('data-marks-expanded', 'true');
 });
+
+test('a name only the GM sees wears the dashed gold outline, a public one none', () => {
+  const { rerender } = render(<TokenSprite token={{ id: 'chest', label: '', secretLabel: 'Mimic', layer: 'tokens' }} size={64} />);
+  expect(getComputedStyle(screen.getByText('Mimic')).outline).toMatch(/dashed/);
+  rerender(<TokenSprite token={{ id: 'chest', label: 'Chest', layer: 'tokens' }} size={64} />);
+  expect(getComputedStyle(screen.getByText('Chest')).outline).not.toMatch(/dashed/);
+});
