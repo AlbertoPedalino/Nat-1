@@ -7,6 +7,7 @@ import { beforeEach, vi } from 'vitest';
 import { theme } from '../../../../../src/app/theme.js';
 import SceneEditor from '../../../../../src/pages/vtt/scene/SceneEditor.jsx';
 import { createFog, isRevealed, revealAll } from '../../../../../src/shared/vtt/map/fog.js';
+import { toScene } from '../../../../../src/shared/vtt/scene/scene.js';
 import { persistFights } from '../../../../../src/pages/encounterbuilder/state/storage.js';
 import { createInstance } from '../../../../../src/shared/instances/instanceStore.js';
 import { createProjectorLink } from '../../../../../src/shared/vtt/session/projectorLink.js';
@@ -859,6 +860,36 @@ test('a second atmosphere picked mid-save is not undone by the echo of the first
   // A row older than the scene this screen holds is history.
   act(() => { sceneLiveOptions.current.onSceneEvent({ new: row('rain', '2026-10-20T09:59:59Z') }); });
   expect(atmospheres()).toEqual(['rain', 'snow', 'snow']);
+});
+
+// A local edit does not move the scene's own version, and the echo of the
+// write is usually turned away while it is pending. A row from before the
+// write that arrived after it (a slow recovery read, the echo of an earlier
+// write) then put the old grid or play area back.
+test('a row older than our own finished write does not undo it', async () => {
+  const scene = {
+    id: 'scene-stale', campaignId: 'campaign-1', name: 'Stale', shownImage: 'map',
+    imagePath: null, backgroundPath: null, fog: null, atmosphere: null, isLive: true,
+    playArea: null, updatedAt: Date.parse('2026-10-20T10:00:00Z'),
+    grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
+  };
+  const row = (type, at) => ({
+    id: scene.id, campaign_id: scene.campaignId, name: scene.name, atmosphere: type ? { type } : null, updated_at: at,
+  });
+  updateSceneMock.mockResolvedValue(toScene(row('rain', '2026-10-20T10:00:05Z')));
+  const onSceneChange = vi.fn();
+  render(<ThemeProvider theme={theme}><SceneEditor scene={scene} onSceneChange={onSceneChange} /></ThemeProvider>);
+  const corner = [].concat(sceneViewportMock.mock.calls.at(-1)[0].imageSwitch.props.children)
+    .find((element) => element?.props?.onAtmosphereChange);
+  const atmospheres = () => onSceneChange.mock.calls.map(([next]) => next?.atmosphere?.type ?? null);
+
+  act(() => { corner.props.onAtmosphereChange({ type: 'rain' }); });
+  await waitFor(() => expect(updateSceneMock).toHaveBeenCalledTimes(1));
+  await act(async () => {});
+  act(() => { sceneLiveOptions.current.onSceneEvent({ new: row(null, '2026-10-20T10:00:03Z') }); });
+  expect(atmospheres()).toEqual(['rain']);
+  act(() => { sceneLiveOptions.current.onSceneEvent({ new: row('snow', '2026-10-20T10:00:06Z') }); });
+  expect(atmospheres()).toEqual(['rain', 'snow']);
 });
 
 describe('light scene reconciliation', () => {
