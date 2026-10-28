@@ -34,7 +34,7 @@ import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import { ItemReferenceBody, QuantityAdder } from '../../../shared/character/inventory/ItemReference.jsx';
 import { itemDisplayName } from '../../../shared/character/inventory/itemIdentity.js';
 import { itemCardName } from '../../../shared/character/inventory/replicateMagicItem.js';
-import { scrollCardName } from '../../../shared/character/inventory/spellScrolls.js';
+import { scrollCardName, writeOnScroll } from '../../../shared/character/inventory/spellScrolls.js';
 import ScrollSpellPicker from './ScrollSpellPicker.jsx';
 import {
   carryCapacity,
@@ -724,19 +724,10 @@ export default function InventoryTab({ C, sheet }) {
     updateInv(next);
   }, [updateInv]);
 
-  // What is written on a Spell Scroll (its spell, DC, attack). Null removes a
-  // field, so a cleared number falls back to the scroll's fixed one.
-  const writeOnScroll = useCallback((index, patch) => {
-    const current = invRef.current || [];
-    updateInv(current.map((item, idx) => {
-      if (idx !== index) return item;
-      const next = { ...item };
-      Object.entries(patch).forEach(([field, value]) => {
-        if (value == null) delete next[field];
-        else next[field] = value;
-      });
-      return next;
-    }));
+  // What is written on a Spell Scroll (its spell, DC, attack): see
+  // writeOnScroll for how a stack splits and joins.
+  const writeScroll = useCallback((index, patch) => {
+    updateInv(writeOnScroll(invRef.current || [], index, patch));
   }, [updateInv]);
 
   const consumeTome = useCallback((index) => {
@@ -907,7 +898,7 @@ export default function InventoryTab({ C, sheet }) {
                     attunementContext={attunementState.context}
                     attunementLimit={attunementState.limit}
                     onSetAbilityChoice={setAbilityChoice}
-                    onWriteOnScroll={writeOnScroll}
+                    onWriteOnScroll={writeScroll}
                     onConsumeTome={consumeTome}
                   />
                 ))}

@@ -6,6 +6,7 @@ import {
   scrollStatsOf,
   scrollSpellStats,
   spellScrollLevel,
+  writeOnScroll,
 } from '../../../../../src/shared/character/inventory/spellScrolls.js';
 import { buildSpellInfo } from '../../../../../src/pages/charsheet/spells/spellsTabLogic.js';
 
@@ -74,4 +75,44 @@ test('two scrolls of one spell written with different numbers are two rows', () 
   };
   const rows = buildSpellInfo(C, spellIndex).leveled[3];
   assert.deepEqual(rows.map((row) => [row.scroll.dc, row.scroll.attack]).sort(), [[15, 7], [16, 8]]);
+});
+
+const FIREBALL = { name: 'Fireball', source: 'XPHB' };
+const COUNTERSPELL = { name: 'Counterspell', source: 'XPHB' };
+const summary = (inventory) => inventory.map((item) => [item.scrollSpell?.name || '-', item.qty, item.scrollDc ?? null]);
+
+test('writing a spell takes one scroll off the stack; the same spell again joins it', () => {
+  const rope = { name: 'Rope', source: 'XPHB', qty: 1 };
+  let inventory = [scroll(3, null, { qty: 3 }), rope];
+  inventory = writeOnScroll(inventory, 0, { scrollSpell: FIREBALL });
+  assert.deepEqual(summary(inventory), [['-', 2, null], ['Fireball', 1, null], ['-', 1, null]]);
+  inventory = writeOnScroll(inventory, 0, { scrollSpell: FIREBALL });
+  assert.deepEqual(summary(inventory), [['-', 1, null], ['Fireball', 2, null], ['-', 1, null]]);
+  // The last blank scroll becomes a spell of its own, in place.
+  inventory = writeOnScroll(inventory, 0, { scrollSpell: COUNTERSPELL });
+  assert.deepEqual(summary(inventory), [['Counterspell', 1, null], ['Fireball', 2, null], ['-', 1, null]]);
+  assert.equal(inventory[2], rope);
+});
+
+test('a scroll with typed numbers is another scroll: it joins only its own kind', () => {
+  let inventory = [scroll(3, FIREBALL, { scrollDc: 16 }), scroll(3, null, { qty: 2 })];
+  inventory = writeOnScroll(inventory, 1, { scrollSpell: FIREBALL });
+  assert.deepEqual(summary(inventory), [['Fireball', 1, 16], ['-', 1, null], ['Fireball', 1, null]]);
+  // Numbers belong to the whole entry; made equal, the two Fireball entries become one.
+  inventory = writeOnScroll(inventory, 0, { scrollDc: null });
+  assert.deepEqual(summary(inventory), [['-', 1, null], ['Fireball', 2, null]]);
+});
+
+test('changing or clearing the spell of a stack moves one scroll; a cleared one is blank again', () => {
+  let inventory = [scroll(3, FIREBALL, { qty: 2, scrollDc: 16 }), scroll(3, null)];
+  inventory = writeOnScroll(inventory, 0, { scrollSpell: null });
+  assert.deepEqual(summary(inventory), [['Fireball', 1, 16], ['-', 2, null]]);
+  inventory = writeOnScroll(inventory, 0, { scrollSpell: COUNTERSPELL });
+  assert.deepEqual(summary(inventory), [['Counterspell', 1, 16], ['-', 2, null]]);
+});
+
+test('picking the spell a scroll already holds changes nothing', () => {
+  const inventory = [scroll(3, FIREBALL, { qty: 2 })];
+  assert.equal(writeOnScroll(inventory, 0, { scrollSpell: { ...FIREBALL } })[0], inventory[0]);
+  assert.deepEqual(summary(writeOnScroll(inventory, 0, { scrollSpell: { ...FIREBALL } })), [['Fireball', 2, null]]);
 });
