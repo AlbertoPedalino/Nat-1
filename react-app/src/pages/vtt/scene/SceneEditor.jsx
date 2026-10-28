@@ -356,16 +356,33 @@ export default function SceneEditor({
       if (sceneEditsRef.current.get(field) === token) sceneEditsRef.current.delete(field);
     };
   }, []);
+  // The version of the row our own latest write produced. A local edit never
+  // moves `scene.updatedAt`, and the echo of the write is usually turned away
+  // while it is still pending, so without this a recovery read that left
+  // before the write (and waits on the rest of the reconcile) or the echo of
+  // an earlier write came in afterwards and put the old grid or play area
+  // back (user report 2026-10-28).
+  const savedRevisionRef = useRef({ sceneId: scene.id, updatedAt: 0 });
+  const noteSceneWrite = useCallback((saved) => {
+    if (!saved?.id || !saved.updatedAt) return;
+    const held = savedRevisionRef.current;
+    if (held.sceneId !== saved.id || saved.updatedAt > held.updatedAt) {
+      savedRevisionRef.current = { sceneId: saved.id, updatedAt: saved.updatedAt };
+    }
+  }, []);
   // Whether a scene row from elsewhere may replace what this screen shows:
   // not while one of our own edits or a fog stroke is still on its way, and
-  // never a version older than the one held (a recovery read that left before
-  // the latest echo arrived).
-  const acceptsScene = useCallback((next) => (
-    Boolean(next)
-    && !sceneEditsRef.current.size
-    && !paintingRef.current
-    && !(next.updatedAt && sceneUpdatedAtRef.current && next.updatedAt < sceneUpdatedAtRef.current)
-  ), []);
+  // never a version older than the one held or than our own last write.
+  const acceptsScene = useCallback((next) => {
+    if (!next || sceneEditsRef.current.size || paintingRef.current) return false;
+    if (!next.updatedAt) return true;
+    const saved = savedRevisionRef.current;
+    const floor = Math.max(
+      sceneUpdatedAtRef.current || 0,
+      saved.sceneId === next.id ? saved.updatedAt : 0,
+    );
+    return next.updatedAt >= floor;
+  }, []);
   const paintingRef = useRef(false);
   const fogBroadcastRef = useRef(0);
   // The fog the brush works on. It follows the scene between strokes; during
@@ -819,7 +836,7 @@ export default function SceneEditor({
     // same frozen frame as everyone already connected.
     if (following && shownImage !== scene.shownImage) {
       try {
-        await updateScene(scene.id, { shownImage });
+        noteSceneWrite(await updateScene(scene.id, { shownImage }));
         onSceneChange({ ...scene, shownImage });
       } catch (cause) {
         notify('error', cause?.message || 'Could not share the prepared view.');
@@ -834,7 +851,7 @@ export default function SceneEditor({
       shownImage,
       pose: following ? cameraPoseRef.current : frozenCameraPoseRef.current,
     });
-  }, [gmShownImage, notify, onSceneChange, scene, sendPresenterState]);
+  }, [gmShownImage, noteSceneWrite, notify, onSceneChange, scene, sendPresenterState]);
 
   // Switching Map/Background is presenter state as well as persisted scene
   // state. Broadcasting it keeps ordering deterministic relative to a freeze.
@@ -1034,11 +1051,14 @@ export default function SceneEditor({
     clearTimeout(playAreaTimerRef.current);
     playAreaTimerRef.current = setTimeout(() => {
       updateScene(scene.id, { playArea: area })
-        .then(() => sendDrag({ tokensChanged: true }))
+        .then((saved) => {
+          noteSceneWrite(saved);
+          sendDrag({ tokensChanged: true });
+        })
         .catch((cause) => notify('error', cause?.message || 'Could not save the play area.'))
         .finally(finishEdit);
     }, GRID_SAVE_DELAY);
-  }, [beginSceneEdit, notify, scene.id, sendDrag]);
+  }, [beginSceneEdit, noteSceneWrite, notify, scene.id, sendDrag]);
 
   const handleGridChange = useCallback((grid) => {
     const finishEdit = beginSceneEdit('grid');
@@ -1054,10 +1074,11 @@ export default function SceneEditor({
     clearTimeout(gridTimerRef.current);
     gridTimerRef.current = setTimeout(() => {
       updateScene(scene.id, { grid })
+        .then(noteSceneWrite)
         .catch((cause) => notify('error', cause?.message || 'Could not save the grid.'))
         .finally(finishEdit);
     }, GRID_SAVE_DELAY);
-  }, [beginSceneEdit, imageSize, notify, onSceneChange, role.isGm, savePlayArea, scene, shownImageForViewport, spectator]);
+  }, [beginSceneEdit, imageSize, noteSceneWrite, notify, onSceneChange, role.isGm, savePlayArea, scene, shownImageForViewport, spectator]);
 
   const handleAtmosphereChange = useCallback((atmosphere) => {
     const next = normalizeAtmosphere(atmosphere);
@@ -1066,10 +1087,11 @@ export default function SceneEditor({
     clearTimeout(atmosphereTimerRef.current);
     atmosphereTimerRef.current = setTimeout(() => {
       updateScene(scene.id, { atmosphere: next })
+        .then(noteSceneWrite)
         .catch((cause) => notify('error', cause?.message || 'Could not save the atmosphere.'))
         .finally(finishEdit);
     }, ATMOSPHERE_SAVE_DELAY);
-  }, [beginSceneEdit, notify, onSceneChange, scene]);
+  }, [beginSceneEdit, noteSceneWrite, notify, onSceneChange, scene]);
 
   // Painting mirrors the token drag: every stroke frame goes out on broadcast,
   // and the database sees one write when the brush lifts.
@@ -1108,10 +1130,10 @@ export default function SceneEditor({
     // The snapshot below carries every cell; frames still pending are moot.
     fogDeltaRef.current = { stroke: null, seq: 0, on: [], off: [] };
     sendDrag({ fog });
-    updateScene(scene.id, { fog }).catch((cause) => {
+    updateScene(scene.id, { fog }).then(noteSceneWrite).catch((cause) => {
       notify('error', cause?.message || 'Could not save the fog.');
     });
-  }, [notify, scene.id, sendDrag]);
+  }, [noteSceneWrite, notify, scene.id, sendDrag]);
 
   const handlePaintEnd = useCallback(() => {
     paintingRef.current = false;
@@ -1436,11 +1458,11 @@ export default function SceneEditor({
     if (role.isGm && !projectorFollowingRef.current) return;
     onSceneChange({ ...scene, shownImage });
     try {
-      await updateScene(scene.id, { shownImage });
+      noteSceneWrite(await updateScene(scene.id, { shownImage }));
     } catch (cause) {
       notify('error', cause?.message || 'Could not switch the picture.');
     }
-  }, [notify, onSceneChange, role.isGm, scene]);
+  }, [noteSceneWrite, notify, onSceneChange, role.isGm, scene]);
 
   const addToken = useCallback(async (token) => {
     setBusy(true);
