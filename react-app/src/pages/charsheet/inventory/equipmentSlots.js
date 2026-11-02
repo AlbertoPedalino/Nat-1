@@ -1,5 +1,7 @@
 import { inventoryStackKey, isInventoryItemStackable } from '../../../shared/character/inventory/itemIdentity.js';
 
+export const THROWN_SLOT = 'thrown';
+
 export function itemProps(item) {
   return [...(Array.isArray(item?.property) ? item.property : []), ...(Array.isArray(item?.properties) ? item.properties : [])]
     .map(p => String(p).toLowerCase());
@@ -197,6 +199,23 @@ function compactUnequippedStacks(inventory) {
   return next;
 }
 
+// Ready to throw, not held. A Thrown weapon is drawn as part of the attack that
+// throws it, so it needs no hand of its own until then: it takes no hand slot,
+// displaces nothing, and the whole stack stays ready rather than one at a time.
+function readyToThrow(inventory, index) {
+  const target = inventory[index];
+  const stackKey = isInventoryItemStackable(unequipItem(target)) ? inventoryStackKey(target) : null;
+  const existing = stackKey === null ? -1 : inventory.findIndex((item, idx) => (
+    idx !== index && item.equippedSlot === THROWN_SLOT && inventoryStackKey(item) === stackKey
+  ));
+
+  return compactUnequippedStacks(inventory.flatMap((item, idx) => {
+    if (idx === index) return existing === -1 ? [{ ...item, equipped: true, equippedSlot: THROWN_SLOT }] : [];
+    if (idx === existing) return [{ ...item, qty: itemQty(item) + itemQty(target) }];
+    return [item];
+  }));
+}
+
 export function equipToSlot(inventory, index, slot) {
   const target = inventory[index];
   if (!target) return inventory;
@@ -206,6 +225,8 @@ export function equipToSlot(inventory, index, slot) {
       idx === index ? unequipItem(item) : item
     )));
   }
+
+  if (slot === THROWN_SLOT) return readyToThrow(inventory, index);
 
   const next = [];
   inventory.forEach((item, idx) => {

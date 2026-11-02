@@ -9,6 +9,8 @@ import {
   isWeapon,
   canOneHand,
   canTwoHand,
+  isThrownWeapon,
+  THROWN_SLOT,
   equipToSlot as equipToSlotHelper,
   getSlotConflictWarnings,
 } from './equipmentSlots.js';
@@ -574,7 +576,9 @@ export default function InventoryTab({ C, sheet }) {
     const current = invRef.current || [];
     const target = current[index];
     if (!target) return;
-    if (delta > 0 && (target.equipped || target.equippedSlot || itemChargeMaximum(target) > 0)) {
+    // A stack readied to throw stays one stack; anything else equipped is a single unit.
+    const singleUnit = (target.equipped || target.equippedSlot) && target.equippedSlot !== THROWN_SLOT;
+    if (delta > 0 && (singleUnit || itemChargeMaximum(target) > 0)) {
       const unequippedCopy = { ...target, qty: delta, equipped: false };
       delete unequippedCopy.equippedSlot;
       if (itemChargeMaximum(target) > 0) {
@@ -1054,6 +1058,9 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onCharges,
               {canTwoHand(item) ? (
                 <SlotBtn active={item.equippedSlot === 'twoHands'} onClick={() => onEquipSlot(index, 'twoHands')} label="2H" />
               ) : null}
+              {isThrownWeapon(item) ? (
+                <SlotBtn active={item.equippedSlot === THROWN_SLOT} onClick={() => onEquipSlot(index, THROWN_SLOT)} label="Thrown" />
+              ) : null}
             </Box>
           ) : carried && canEquip ? (
             <Button size="small" onClick={() => onEquip(index)} startIcon={item.equipped ? <Check size={11} /> : null}
@@ -1103,11 +1110,12 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onCharges,
               </ChargeStepButton>
             </Box>
           ) : null}
-          <Button size="small" onClick={() => onCarried(index)} startIcon={!carried ? <Archive size={11} /> : null}
-            sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: carried ? 'divider' : '#8a7d66', borderRadius: '3px', color: carried ? 'text.secondary' : '#c7b690', bgcolor: carried ? 'transparent' : 'rgba(138,125,102,0.14)', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem' }}>
-            {carried ? 'Stash' : 'Carry'}
-          </Button>
+          {/* Where the item is and how many, apart from how it is being used. */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, ml: 'auto' }}>
+            <Button size="small" onClick={() => onCarried(index)} startIcon={!carried ? <Archive size={11} /> : null}
+              sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: carried ? 'divider' : '#8a7d66', borderRadius: '3px', color: carried ? 'text.secondary' : '#c7b690', bgcolor: carried ? 'transparent' : 'rgba(138,125,102,0.14)', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem' }}>
+              {carried ? 'Stash' : 'Carry'}
+            </Button>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
               <QtyButton onClick={() => onQty(index, -1)}><Minus size={12} /></QtyButton>
               <Box sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.8125rem', fontWeight: 700, color: '#edd48a', minWidth: 18, textAlign: 'center' }}>{qty(item)}</Box>
@@ -1228,7 +1236,7 @@ function SlotBtn({ active, onClick, label }) {
   return (
     <IconButton size="small" onClick={onClick}
       sx={{
-        width: 24, height: 24,
+        minWidth: 24, height: 24, px: '4px',
         border: 1,
         borderColor: active ? '#caa550' : 'divider',
         borderRadius: '3px',
