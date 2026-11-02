@@ -237,7 +237,7 @@ export function MapPanel({
             disabled={busy}
             onClick={() => backgroundRef.current?.click()}
           >
-            {scene.backgroundPath ? 'Replace bg' : 'Upload bg'}
+            {scene.backgroundPath ? 'Replace background' : 'Upload background'}
           </Button>
           {scene.backgroundPath ? (
             <Tooltip title="Remove background">
