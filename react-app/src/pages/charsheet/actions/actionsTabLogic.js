@@ -598,7 +598,9 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
     ...weaponKindInfo(item, ctx),
     twoHanded: wieldedTwoHanded,
     oneHanded: !wieldedTwoHanded,
-    soloWeapon: ctx.soloWeapon,
+    // A weapon readied to throw is not among those wielded, but it is in hand
+    // alongside them once drawn.
+    soloWeapon: ctx.wieldedWeaponCount + (isHeldWeapon(item) ? 0 : 1) <= 1,
   };
   const fsBonus = getWeaponEffectBonuses(C, weaponInfo);
   const weaponNotes = getWeaponNotes(C, weaponInfo);
@@ -685,7 +687,7 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
     profSets: equipmentSets,
     untrainedArmor,
     strMeleeDamageBonus: getMeleeStrDamageBonus(C),
-    soloWeapon: wieldedWeaponCount <= 1,
+    wieldedWeaponCount,
     shieldEquipped: hasEquippedShield(inventory),
   };
 
