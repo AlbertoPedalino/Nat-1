@@ -12,7 +12,7 @@
 // CPU at every frame.
 
 export const IMAGE_FILTER_PRESETS = Object.freeze([
-  { value: 'none', label: 'Daylight (as painted)' },
+  { value: 'none', label: 'None (original)' },
   { value: 'dawn', label: 'Dawn' },
   { value: 'afternoon', label: 'Late afternoon' },
   { value: 'sunset', label: 'Sunset' },
