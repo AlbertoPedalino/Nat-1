@@ -210,5 +210,9 @@ void main() {
     alpha = 0.45 + soil * 0.15 + tendril * 0.2 + root * 0.35 + spine * 0.45 + rim * 0.15;
   }
 
-  gl_FragColor = vec4(color, clamp(alpha, 0.0, 0.95) * mask * u_opacity);
+  float finalAlpha = clamp(alpha, 0.0, 0.95) * mask * u_opacity;
+  // Premultiplied, and exactly what desktop showed before the canvas switched
+  // to premultiplied alpha: (colour·a³, a²). The old straight-alpha blend
+  // stored (colour·a, a²) and the browser then multiplied by a² again.
+  gl_FragColor = vec4(color * finalAlpha * finalAlpha * finalAlpha, finalAlpha * finalAlpha);
 }`;

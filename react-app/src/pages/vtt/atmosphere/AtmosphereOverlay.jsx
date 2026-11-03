@@ -34,7 +34,11 @@ export default function AtmosphereOverlay({ atmosphere }) {
       alpha: true,
       antialias: false,
       depth: false,
-      premultipliedAlpha: false,
+      // The default, and the only mode WebKit composites correctly. With
+      // `false`, Safari and every browser on an iPad or iPhone composite the
+      // canvas differently from desktop Chrome and the weather came out far
+      // stronger on tablets. The shaders write premultiplied colour instead.
+      premultipliedAlpha: true,
       preserveDrawingBuffer: false,
     });
     if (!gl) {
@@ -56,7 +60,8 @@ export default function AtmosphereOverlay({ atmosphere }) {
     gl.enableVertexAttribArray(position);
     gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
     gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    // Premultiplied colour from the shader, so the source is not scaled again.
+    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
     const uniforms = {
       resolution: gl.getUniformLocation(program, 'u_resolution'),
