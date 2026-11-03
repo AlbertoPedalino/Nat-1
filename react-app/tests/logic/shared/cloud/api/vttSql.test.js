@@ -371,3 +371,8 @@ test('policy helpers are security definer and search_path pinned', () => {
     assert.ok(body.includes('set search_path = public'), `${fn} must pin search_path`);
   }
 });
+
+test('a scene keeps a list of backgrounds beside the one on show', () => {
+  const backgroundsSql = readFileSync(new URL('../../../../../supabase/22_scene_backgrounds.sql', import.meta.url), 'utf8').toLowerCase();
+  assert.match(backgroundsSql, /alter table public\.map_scenes add column if not exists backgrounds jsonb not null default '\[\]'::jsonb/);
+});

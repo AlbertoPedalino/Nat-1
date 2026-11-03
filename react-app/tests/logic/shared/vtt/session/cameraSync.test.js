@@ -78,6 +78,15 @@ test('presenter state carries follow mode, picture, and an optional camera snaps
   assert.equal(presenterStateMessage('camera-1234', {
     following: 'yes', shownImage: 'map', pose: null,
   }), null);
+  // Which background travels with the frame, so a frozen projector keeps its own.
+  assert.deepEqual(presenterStateMessage('camera-1234', {
+    following: false, shownImage: 'background', backgroundPath: 'c1/s1/night.webp', pose: null,
+  }), {
+    source: 'camera-1234', following: false, shownImage: 'background', backgroundPath: 'c1/s1/night.webp', pose: null,
+  });
+  assert.equal(presenterStateMessage('camera-1234', {
+    following: true, shownImage: 'background', backgroundPath: 42, pose: null,
+  }).backgroundPath, undefined);
 });
 
 test('camera poses preserve the same world centre across different screens', () => {

@@ -21,6 +21,8 @@ import {
   deleteCampaignMapImages,
   deleteScene,
   deleteToken,
+  addSceneBackground,
+  removeSceneBackground,
   removeSceneImage,
   replaceSceneImage,
   setTokenVisibility,
@@ -82,7 +84,7 @@ describe('VTT Storage cleanup', () => {
     const result = await replaceSceneImage({
       id: 's1', campaignId: 'c1', imagePath: 'c1/s1/old-map.webp',
       backgroundPath: 'c1/s1/background.webp', shownImage: 'map',
-    }, 'map', { name: 'Map.webp' });
+    }, { name: 'Map.webp' });
 
     expect(mocks.upload).toHaveBeenCalledWith('c1/s1/ya-map.webp', expect.anything(), expect.anything());
     expect(update).toHaveBeenCalledWith({ image_path: 'c1/s1/ya-map.webp', shown_image: 'map' });
@@ -92,10 +94,10 @@ describe('VTT Storage cleanup', () => {
     now.mockRestore();
   });
 
-  test('removing the active background clears its column, switches to the map and removes its file', async () => {
+  test('removing the background on show passes the show to its neighbour and removes its file', async () => {
     const row = {
       id: 's1', campaign_id: 'c1', name: 'Scene', image_path: 'c1/s1/map.webp',
-      background_path: null, shown_image: 'map', grid: {},
+      background_path: 'c1/s1/night.webp', backgrounds: ['c1/s1/night.webp'], shown_image: 'background', grid: {},
     };
     const single = vi.fn(async () => ({ data: row, error: null }));
     const select = vi.fn(() => ({ single }));
@@ -103,22 +105,46 @@ describe('VTT Storage cleanup', () => {
     const update = vi.fn(() => ({ eq }));
     mocks.client.from.mockReturnValueOnce({ update });
 
-    const result = await removeSceneImage({
+    const result = await removeSceneBackground({
+      id: 's1', campaignId: 'c1', imagePath: 'c1/s1/map.webp',
+      backgroundPath: 'c1/s1/day.webp', backgrounds: ['c1/s1/day.webp', 'c1/s1/night.webp'], shownImage: 'background',
+    }, 'c1/s1/day.webp');
+
+    expect(update).toHaveBeenCalledWith({
+      backgrounds: ['c1/s1/night.webp'], background_path: 'c1/s1/night.webp', shown_image: 'background',
+    });
+    expect(mocks.remove).toHaveBeenCalledWith(['c1/s1/day.webp']);
+    expect(result.scene.backgroundPath).toBe('c1/s1/night.webp');
+  });
+
+  test('removing the last background clears its column and switches to the map', async () => {
+    const row = {
+      id: 's1', campaign_id: 'c1', name: 'Scene', image_path: 'c1/s1/map.webp',
+      background_path: null, backgrounds: [], shown_image: 'map', grid: {},
+    };
+    const single = vi.fn(async () => ({ data: row, error: null }));
+    const select = vi.fn(() => ({ single }));
+    const eq = vi.fn(() => ({ select }));
+    const update = vi.fn(() => ({ eq }));
+    mocks.client.from.mockReturnValueOnce({ update });
+
+    // A scene from before the list: only its single background column.
+    const result = await removeSceneBackground({
       id: 's1', campaignId: 'c1', imagePath: 'c1/s1/map.webp',
       backgroundPath: 'c1/s1/background.webp', shownImage: 'background',
-    }, 'background');
+    }, 'c1/s1/background.webp');
 
-    expect(update).toHaveBeenCalledWith({ background_path: null, shown_image: 'map' });
+    expect(update).toHaveBeenCalledWith({ backgrounds: [], background_path: null, shown_image: 'map' });
     expect(mocks.remove).toHaveBeenCalledWith(['c1/s1/background.webp']);
     expect(result.scene.backgroundPath).toBeNull();
   });
 
-  test('replacing a background updates only its slot and removes the old background', async () => {
+  test('adding a background keeps the others and puts the new one on show', async () => {
     const now = vi.spyOn(Date, 'now').mockReturnValue(5678);
     const newPath = `c1/s1/${(5678).toString(36)}-room.png`;
     const row = {
       id: 's1', campaign_id: 'c1', name: 'Scene', image_path: 'c1/s1/map.webp',
-      background_path: newPath, shown_image: 'background', grid: {},
+      background_path: newPath, backgrounds: ['c1/s1/old-background.webp', newPath], shown_image: 'background', grid: {},
     };
     const single = vi.fn(async () => ({ data: row, error: null }));
     const select = vi.fn(() => ({ single }));
@@ -126,13 +152,36 @@ describe('VTT Storage cleanup', () => {
     const update = vi.fn(() => ({ eq }));
     mocks.client.from.mockReturnValueOnce({ update });
 
-    await replaceSceneImage({
+    const result = await addSceneBackground({
       id: 's1', campaignId: 'c1', imagePath: 'c1/s1/map.webp',
       backgroundPath: 'c1/s1/old-background.webp', shownImage: 'map',
-    }, 'background', { name: 'Room.png' });
+    }, { name: 'Room.png' });
 
-    expect(update).toHaveBeenCalledWith({ background_path: newPath, shown_image: 'background' });
-    expect(mocks.remove).toHaveBeenCalledWith(['c1/s1/old-background.webp']);
+    expect(update).toHaveBeenCalledWith({
+      background_path: newPath,
+      backgrounds: ['c1/s1/old-background.webp', newPath],
+      shown_image: 'background',
+    });
+    expect(mocks.remove).not.toHaveBeenCalled();
+    expect(result.path).toBe(newPath);
+    expect(result.scene.backgrounds).toEqual(['c1/s1/old-background.webp', newPath]);
+    now.mockRestore();
+  });
+
+  test('a background added behind a frozen presentation does not change what is shown', async () => {
+    const now = vi.spyOn(Date, 'now').mockReturnValue(5678);
+    const newPath = `c1/s1/${(5678).toString(36)}-room.png`;
+    const single = vi.fn(async () => ({ data: { id: 's1', campaign_id: 'c1', grid: {} }, error: null }));
+    const select = vi.fn(() => ({ single }));
+    const eq = vi.fn(() => ({ select }));
+    const update = vi.fn(() => ({ eq }));
+    mocks.client.from.mockReturnValueOnce({ update });
+
+    await addSceneBackground({
+      id: 's1', campaignId: 'c1', backgroundPath: 'c1/s1/day.webp', shownImage: 'map',
+    }, { name: 'Room.png' }, { show: false });
+
+    expect(update).toHaveBeenCalledWith({ backgrounds: ['c1/s1/day.webp', newPath] });
     now.mockRestore();
   });
 
@@ -150,7 +199,7 @@ describe('VTT Storage cleanup', () => {
     await removeSceneImage({
       id: 's1', campaignId: 'c1', imagePath: 'c1/s1/map.webp',
       backgroundPath: 'c1/s1/background.webp', shownImage: 'map',
-    }, 'map');
+    });
 
     expect(update).toHaveBeenCalledWith({ image_path: null, shown_image: 'background' });
     expect(mocks.remove).toHaveBeenCalledWith(['c1/s1/map.webp']);

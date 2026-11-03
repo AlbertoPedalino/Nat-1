@@ -16,6 +16,7 @@ import { commandCharacterVitals } from '../../../shared/cloud/api/cloudCharacter
 import { tokenHealthCommand } from '../../../shared/vtt/tokens/characterHealth.js';
 import { DEAD_CONDITION_KEY, setConditionActive } from '../../../shared/character/combat/conditions.js';
 import {
+  addSceneBackground,
   clearLiveScene,
   createDrawing,
   createToken,
@@ -25,6 +26,7 @@ import {
   fetchScene,
   fetchSceneRevision,
   moveDrawing,
+  removeSceneBackground,
   removeSceneImage,
   replaceSceneImage,
   setLiveScene,
@@ -78,7 +80,8 @@ import {
 import { REMOTE_MEASURE_TTL_MS } from '../../../shared/vtt/map/measureSync.js';
 import { acceptFogDelta, newFogStroke } from '../../../shared/vtt/map/fogStream.js';
 import {
-  canMarkToken, isTokenInPlay, isTokenVisibleToPlayers, normalizePlayArea, sceneTitleFor, toScene,
+  canMarkToken, isTokenInPlay, isTokenVisibleToPlayers, normalizePlayArea, sceneBackgrounds, sceneTitleFor,
+  sceneView, toScene, viewBackgroundPath, viewImagePath, viewPatch,
 } from '../../../shared/vtt/scene/scene.js';
 import { sanitizeNoteText } from '../../../shared/vtt/map/drawing.js';
 import { DEFAULT_AREA_OPTIONS, areaEffect } from '../../../shared/vtt/map/areas.js';
@@ -148,6 +151,7 @@ import MapObjectsPanel from '../objects/MapObjectsPanel.jsx';
 import SceneSwitcher from './SceneSwitcher.jsx';
 import SceneToolRail from './SceneToolRail.jsx';
 import MapCorner from './MapCorner.jsx';
+import BackgroundStrip from './BackgroundStrip.jsx';
 import BattleMapViewSwitch from '../map/BattleMapViewSwitch.jsx';
 import BattleMapSheetResizeHandle from '../sheets/BattleMapSheetResizeHandle.jsx';
 import {
@@ -321,7 +325,7 @@ export default function SceneEditor({
     sceneId: scene.id,
     url: null,
     imageSize: null,
-    path: scene.shownImage === 'background' ? scene.backgroundPath || null : scene.imagePath || null,
+    path: viewImagePath(scene, sceneView(scene)),
     shownImage: scene.shownImage,
   }));
   const [busy, setBusy] = useState(false);
@@ -447,13 +451,14 @@ export default function SceneEditor({
   // stays attached and the controls return with the live scene.
   const projectorControlsOpen = projectorAttached && scene.isLive;
   const hasPresenterFrameRef = useRef(false);
-  const [projectorShownImage, setProjectorShownImage] = useState(scene.shownImage);
+  // A view is the mode plus, in background mode, which background.
+  const [projectorView, setProjectorView] = useState(() => sceneView(scene));
   // The database value is the picture published to players. While presentation
   // is frozen the GM gets a private selection here, so they can prepare the
   // other picture without moving either players or the projector to it.
-  const [gmShownImage, setGmShownImage] = useState(scene.shownImage);
-  const sceneShownImageRef = useRef(scene.shownImage);
-  sceneShownImageRef.current = scene.shownImage;
+  const [gmView, setGmView] = useState(() => sceneView(scene));
+  const sceneViewRef = useRef(sceneView(scene));
+  sceneViewRef.current = sceneView(scene);
   const sheetSplitStorageKey = `gb:vtt:sheet-split:${user?.id || 'local'}`;
   const [lasers, setLasers] = useState({});
   const [measureShape, setMeasureShape] = useState('line');
@@ -517,8 +522,8 @@ export default function SceneEditor({
     // A live-scene switch always wins over a paused camera: enter the new scene
     // on its current picture, accept one fresh presenter snapshot, then remain
     // paused if that is still the GM's chosen mode.
-    setProjectorShownImage(scene.shownImage);
-    setGmShownImage(scene.shownImage);
+    setProjectorView(sceneView(scene));
+    setGmView(sceneView(scene));
     setFollowCameraPose(null);
     hasPresenterFrameRef.current = false;
     presenterInspectionRef.current = null;
@@ -526,12 +531,16 @@ export default function SceneEditor({
   }, [scene.id]);
 
   useEffect(() => {
-    if (spectator && projectorFollowing) setProjectorShownImage(scene.shownImage);
-  }, [projectorFollowing, scene.shownImage, spectator]);
+    if (spectator && projectorFollowing) {
+      setProjectorView({ shownImage: scene.shownImage, backgroundPath: scene.backgroundPath || null });
+    }
+  }, [projectorFollowing, scene.backgroundPath, scene.shownImage, spectator]);
 
   useEffect(() => {
-    if (role.isGm && projectorFollowingRef.current) setGmShownImage(scene.shownImage);
-  }, [role.isGm, scene.shownImage]);
+    if (role.isGm && projectorFollowingRef.current) {
+      setGmView({ shownImage: scene.shownImage, backgroundPath: scene.backgroundPath || null });
+    }
+  }, [role.isGm, scene.backgroundPath, scene.shownImage]);
 
   useEffect(() => {
     const storage = typeof window === 'undefined' ? null : window.localStorage;
@@ -566,12 +575,16 @@ export default function SceneEditor({
     [imageSize, scene.grid],
   );
 
-  // Whichever of the two pictures the table is looking at. The other stays
-  // uploaded and one click away.
-  const shownImageForViewport = spectator
-    ? projectorShownImage
-    : role.isGm && !gmPlayerPreview ? gmShownImage : scene.shownImage;
-  const shownPath = shownImageForViewport === 'background' ? scene.backgroundPath : scene.imagePath;
+  // Whichever picture this client is looking at: the battlemap or one of the
+  // backgrounds. The others stay uploaded and one click away.
+  const viewForViewport = spectator
+    ? projectorView
+    : role.isGm && !gmPlayerPreview ? gmView : sceneView(scene);
+  const shownImageForViewport = viewForViewport.shownImage;
+  // Resolved against the scene's list: a view pointing at a background removed
+  // since falls back instead of going blank.
+  const backgroundForViewport = viewBackgroundPath(scene, viewForViewport);
+  const shownPath = viewImagePath(scene, viewForViewport);
   const shownPathOrNull = shownPath || null;
   const displayIsTarget = displayed.sceneId === scene.id
     && displayed.shownImage === shownImageForViewport
@@ -752,7 +765,8 @@ export default function SceneEditor({
   const getCameraPose = useCallback(() => cameraPoseRef.current, []);
   const getPresenterState = useCallback(() => ({
     following: projectorFollowingRef.current,
-    shownImage: sceneShownImageRef.current,
+    shownImage: sceneViewRef.current.shownImage,
+    backgroundPath: sceneViewRef.current.backgroundPath,
     pose: projectorFollowingRef.current ? cameraPoseRef.current : frozenCameraPoseRef.current,
   }), []);
   const getPresenterInspection = useCallback(() => presenterInspectionRef.current, []);
@@ -765,7 +779,7 @@ export default function SceneEditor({
     // are deliberately ignored until the presenter reconnects the projector.
     if (!hasPresenterFrameRef.current || shouldApplyPresenterFrame(wasFollowing, next.following)) {
       if (next.pose) setFollowCameraPose(next.pose);
-      setProjectorShownImage(next.shownImage);
+      setProjectorView({ shownImage: next.shownImage, backgroundPath: next.backgroundPath || null });
     }
     hasPresenterFrameRef.current = true;
     projectorFollowingRef.current = next.following;
@@ -830,14 +844,19 @@ export default function SceneEditor({
 
   const handleToggleProjectorFollow = useCallback(async () => {
     const following = !projectorFollowingRef.current;
-    const shownImage = following ? gmShownImage : scene.shownImage;
+    const published = sceneView(scene);
+    // The prepared background is resolved against the list first: one removed
+    // while frozen must not be published as a dangling path.
+    const prepared = { shownImage: gmView.shownImage, backgroundPath: viewBackgroundPath(scene, gmView) };
+    const view = following ? prepared : published;
     // Unfreezing publishes the picture the GM prepared. Freezing leaves the
     // persisted picture untouched, which also gives late-joining players the
     // same frozen frame as everyone already connected.
-    if (following && shownImage !== scene.shownImage) {
+    const patch = following ? viewPatch(published, view) : {};
+    if (Object.keys(patch).length) {
       try {
-        noteSceneWrite(await updateScene(scene.id, { shownImage }));
-        onSceneChange({ ...scene, shownImage });
+        noteSceneWrite(await updateScene(scene.id, patch));
+        onSceneChange({ ...scene, ...patch });
       } catch (cause) {
         notify('error', cause?.message || 'Could not share the prepared view.');
         return;
@@ -848,10 +867,11 @@ export default function SceneEditor({
     setProjectorFollowing(following);
     sendPresenterState({
       following,
-      shownImage,
+      shownImage: view.shownImage,
+      backgroundPath: view.backgroundPath,
       pose: following ? cameraPoseRef.current : frozenCameraPoseRef.current,
     });
-  }, [gmShownImage, noteSceneWrite, notify, onSceneChange, scene, sendPresenterState]);
+  }, [gmView, noteSceneWrite, notify, onSceneChange, scene, sendPresenterState]);
 
   // Switching Map/Background is presenter state as well as persisted scene
   // state. Broadcasting it keeps ordering deterministic relative to a freeze.
@@ -860,9 +880,10 @@ export default function SceneEditor({
     sendPresenterState({
       following: projectorFollowingRef.current,
       shownImage: scene.shownImage,
+      backgroundPath: scene.backgroundPath || null,
       pose: cameraPoseRef.current,
     });
-  }, [role.isGm, scene.shownImage, sendPresenterState, spectator]);
+  }, [role.isGm, scene.backgroundPath, scene.shownImage, sendPresenterState, spectator]);
 
   // A client that vanishes mid-drag never sends its release; sweeping keeps its
   // piece from being pinned at the ghost position forever.
@@ -1404,65 +1425,86 @@ export default function SceneEditor({
     if (samePlayArea(current, legacy) && !samePlayArea(current, fittedPlayArea)) handlePlayAreaChange(fittedPlayArea);
   }, [fittedPlayArea, handlePlayAreaChange, imageSize, mapCells, role.isGm, scene.grid, scene.playArea, shownImageForViewport, spectator]);
 
-  // One upload path for both slots: the only difference is which column it
-  // lands in, and which picture the table then sees.
-  const uploadSceneImage = useCallback(async (file, slot) => {
+  // Every picture change takes the same shape: one cloud call returning the
+  // updated row, plus a cleanup that may fail without failing the change.
+  const runSceneImageChange = useCallback(async (change, failure) => {
     setBusy(true);
     try {
-      const { scene: updated, cleanupError } = await replaceSceneImage(scene, slot, file);
-      onSceneChange(updated);
-      if (cleanupError) {
-        notify('warning', 'The new image was saved, but the previous file could not be cleaned up.');
+      const result = await change();
+      onSceneChange(result.scene);
+      if (result.cleanupError) {
+        notify('warning', 'The picture was saved, but an old uploaded file could not be cleaned up.');
       }
+      return result;
     } catch (cause) {
-      notify('error', cause?.message || 'Could not upload that image.');
+      notify('error', cause?.message || failure);
+      return null;
     } finally {
       setBusy(false);
     }
-  }, [notify, onSceneChange, scene]);
+  }, [notify, onSceneChange]);
 
-  const handleUploadMap = useCallback((file) => uploadSceneImage(file, 'map'), [uploadSceneImage]);
-  const handleUploadBackground = useCallback(
-    (file) => uploadSceneImage(file, 'background'),
-    [uploadSceneImage],
+  const handleUploadMap = useCallback(
+    (file) => runSceneImageChange(() => replaceSceneImage(scene, file), 'Could not upload that image.'),
+    [runSceneImageChange, scene],
   );
-
-  const handleRemoveSceneImage = useCallback(async (slot) => {
-    setBusy(true);
-    try {
-      const { scene: updated, cleanupError } = await removeSceneImage(scene, slot);
-      onSceneChange(updated);
-      if (cleanupError) {
-        notify('warning', 'The picture was removed, but its uploaded file could not be cleaned up.');
-      }
-    } catch (cause) {
-      notify('error', cause?.message || 'Could not remove that picture.');
-    } finally {
-      setBusy(false);
-    }
-  }, [notify, onSceneChange, scene]);
-
   const handleRemoveMap = useCallback(
-    () => handleRemoveSceneImage('map'),
-    [handleRemoveSceneImage],
-  );
-  const handleRemoveBackground = useCallback(
-    () => handleRemoveSceneImage('background'),
-    [handleRemoveSceneImage],
+    () => runSceneImageChange(() => removeSceneImage(scene), 'Could not remove that picture.'),
+    [runSceneImageChange, scene],
   );
 
-  const handleShownImageChange = useCallback(async (shownImage) => {
-    setGmShownImage(shownImage);
+  // A new background goes on show at once — unless presentation is frozen:
+  // then it is the GM's private preparation like any other pick.
+  const handleUploadBackground = useCallback(async (file) => {
+    const show = projectorFollowingRef.current;
+    const result = await runSceneImageChange(
+      () => addSceneBackground(scene, file, { show }),
+      'Could not upload that image.',
+    );
+    if (result?.path) setGmView({ shownImage: 'background', backgroundPath: result.path });
+  }, [runSceneImageChange, scene]);
+
+  // Without a path: the background currently on this GM's screen.
+  const handleRemoveBackground = useCallback((path) => {
+    const target = typeof path === 'string' ? path : backgroundForViewport;
+    if (!target) return null;
+    return runSceneImageChange(
+      () => removeSceneBackground(scene, target),
+      'Could not remove that picture.',
+    );
+  }, [backgroundForViewport, runSceneImageChange, scene]);
+
+  // Mode switch and background pick are one move: the GM's view changes, and
+  // the row follows unless presentation is frozen.
+  const changeView = useCallback(async (next, failure) => {
+    setGmView(next);
     // A frozen selection is private preparation. The public scene row remains
     // on its previous picture until the GM explicitly resumes sharing.
     if (role.isGm && !projectorFollowingRef.current) return;
-    onSceneChange({ ...scene, shownImage });
+    const patch = viewPatch(sceneView(scene), next);
+    if (!Object.keys(patch).length) return;
+    onSceneChange({ ...scene, ...patch });
     try {
-      noteSceneWrite(await updateScene(scene.id, { shownImage }));
+      noteSceneWrite(await updateScene(scene.id, patch));
     } catch (cause) {
-      notify('error', cause?.message || 'Could not switch the picture.');
+      notify('error', cause?.message || failure);
     }
   }, [noteSceneWrite, notify, onSceneChange, role.isGm, scene]);
+
+  const handleShownImageChange = useCallback(
+    (shownImage) => changeView(
+      { shownImage, backgroundPath: backgroundForViewport },
+      'Could not switch the picture.',
+    ),
+    [backgroundForViewport, changeView],
+  );
+  const handleSelectBackground = useCallback(
+    (backgroundPath) => changeView(
+      { shownImage: 'background', backgroundPath },
+      'Could not switch the background.',
+    ),
+    [changeView],
+  );
 
   const addToken = useCallback(async (token) => {
     setBusy(true);
@@ -2847,7 +2889,7 @@ export default function SceneEditor({
           ? (
             <Stack direction="row" spacing={0.75} sx={{ alignItems: 'flex-start' }}>
               <MapCorner
-                scene={{ ...scene, shownImage: shownImageForViewport }}
+                scene={{ ...scene, shownImage: shownImageForViewport, backgroundPath: backgroundForViewport }}
                 busy={busy}
                 open={openCorner === 'pictures'}
                 onOpenChange={(next) => setOpenCorner(next ? 'pictures' : null)}
@@ -2962,6 +3004,18 @@ export default function SceneEditor({
         // is a constant piece of state, not a setting you go and find.
         layerSwitch={role.isGm && !gmPlayerPreview
           ? <LayerPanel compact activeLayer={activeLayer} onActiveLayerChange={setActiveLayer} />
+          : null}
+        backgroundStrip={role.isGm && !gmPlayerPreview && shownImageForViewport === 'background'
+          ? (
+            <BackgroundStrip
+              backgrounds={sceneBackgrounds(scene)}
+              selected={backgroundForViewport}
+              busy={busy}
+              onSelect={handleSelectBackground}
+              onAdd={handleUploadBackground}
+              onRemove={handleRemoveBackground}
+            />
+          )
           : null}
           />
         </Box>

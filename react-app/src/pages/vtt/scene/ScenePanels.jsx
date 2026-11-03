@@ -237,11 +237,11 @@ export function MapPanel({
             disabled={busy}
             onClick={() => backgroundRef.current?.click()}
           >
-            {scene.backgroundPath ? 'Replace background' : 'Upload background'}
+            {scene.backgroundPath ? 'Add another background' : 'Upload background'}
           </Button>
           {scene.backgroundPath ? (
-            <Tooltip title="Remove background">
-              <IconButton size="small" color="error" disabled={busy} aria-label="Remove background" onClick={onRemoveBackground}>
+            <Tooltip title="Remove the background on show">
+              <IconButton size="small" color="error" disabled={busy} aria-label="Remove background" onClick={() => onRemoveBackground()}>
                 <Trash2 size={15} />
               </IconButton>
             </Tooltip>

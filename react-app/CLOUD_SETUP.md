@@ -40,6 +40,7 @@ or on a script missing from this table.
 | 19 | [`19_character_art_editors.sql`](supabase/19_character_art_editors.sql) | Portrait insert/delete also for a GM who may edit the character, so a portrait stays in its owner's folder whoever uploads it |
 | 20 | [`20_scene_turns.sql`](supabase/20_scene_turns.sql) | Initiative on the battle map: `commit_fight_turn` (the GM's next/previous turn, guarded by `turnRevision` in the fight), `map_scene_turns` (which fight a scene shows) and the player-visible `map_tokens.turn_order / turn_active` projection |
 | 21 | [`21_token_hp_modifiers.sql`](supabase/21_token_hp_modifiers.sql) | `map_token_secrets.hp_temp / hp_max_bonus`: temporary hit points and the maximum's stepped bonus of pieces without an encounter, GM-only beside their private HP |
+| 22 | [`22_scene_backgrounds.sql`](supabase/22_scene_backgrounds.sql) | `map_scenes.backgrounds`: every background uploaded to a scene, so the GM can switch between them; `background_path` stays the one shown |
 
 Run 13 and 14 **before** deploying a frontend that needs them: the app sends
 health changes only through their RPCs.

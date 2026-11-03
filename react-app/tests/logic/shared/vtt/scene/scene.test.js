@@ -3,6 +3,12 @@ import assert from 'node:assert/strict';
 import {
   DEFAULT_GRID,
   LAYERS,
+  backgroundRemovalPatch,
+  normalizeBackgrounds,
+  sceneView,
+  viewBackgroundPath,
+  viewImagePath,
+  viewPatch,
   TOKEN_PATCH_KEYS,
   canMarkToken,
   canMoveToken,
@@ -284,4 +290,47 @@ test('scene names are trimmed with a fallback', () => {
   assert.equal(sanitizeName('   '), 'Scene');
   assert.equal(sanitizeName(null, 'Mappa'), 'Mappa');
   assert.equal(sanitizeName('a'.repeat(200)).length, 80);
+});
+
+test('a scene keeps every background, and a scene from before the list reads as a list of one', () => {
+  assert.deepEqual(normalizeBackgrounds(['a.webp', ' a.webp ', '', 3, 'b.webp']), ['a.webp', 'b.webp']);
+  assert.deepEqual(normalizeBackgrounds(null, 'old.webp'), ['old.webp']);
+  assert.deepEqual(normalizeBackgrounds(['a.webp'], 'a.webp'), ['a.webp']);
+  const scene = toScene({ id: 's', background_path: 'old.webp', shown_image: 'background' });
+  assert.deepEqual(scene.backgrounds, ['old.webp']);
+  assert.equal(viewImagePath(scene, sceneView(scene)), 'old.webp');
+});
+
+test('a view on a removed background falls back to the published one, then the first', () => {
+  const scene = { imagePath: 'map.webp', backgroundPath: 'b', backgrounds: ['a', 'b'] };
+  assert.equal(viewBackgroundPath(scene, { shownImage: 'background', backgroundPath: 'a' }), 'a');
+  assert.equal(viewBackgroundPath(scene, { shownImage: 'background', backgroundPath: 'gone' }), 'b');
+  assert.equal(viewBackgroundPath({ ...scene, backgroundPath: null }, { backgroundPath: null }), 'a');
+  assert.equal(viewImagePath(scene, { shownImage: 'map', backgroundPath: 'a' }), 'map.webp');
+});
+
+test('switching views writes only the columns that moved', () => {
+  const published = { shownImage: 'map', backgroundPath: 'a' };
+  assert.deepEqual(viewPatch(published, { shownImage: 'background', backgroundPath: 'a' }), { shownImage: 'background' });
+  assert.deepEqual(viewPatch(published, { shownImage: 'background', backgroundPath: 'b' }), {
+    shownImage: 'background', backgroundPath: 'b',
+  });
+  // Back to the battlemap leaves the chosen background for the way back.
+  assert.deepEqual(viewPatch({ shownImage: 'background', backgroundPath: 'b' }, { shownImage: 'map', backgroundPath: 'a' }), {
+    shownImage: 'map',
+  });
+  assert.deepEqual(viewPatch(published, published), {});
+});
+
+test('removing a background hands the show to its neighbour, and the last one returns to the map', () => {
+  const scene = { backgroundPath: 'b', backgrounds: ['a', 'b', 'c'], shownImage: 'background' };
+  assert.deepEqual(backgroundRemovalPatch(scene, 'b'), { backgrounds: ['a', 'c'], backgroundPath: 'c', shownImage: 'background' });
+  assert.deepEqual(backgroundRemovalPatch({ ...scene, backgroundPath: 'c' }, 'c'), {
+    backgrounds: ['a', 'b'], backgroundPath: 'b', shownImage: 'background',
+  });
+  assert.deepEqual(backgroundRemovalPatch(scene, 'a'), { backgrounds: ['b', 'c'], backgroundPath: 'b', shownImage: 'background' });
+  assert.deepEqual(backgroundRemovalPatch({ backgroundPath: 'a', backgrounds: ['a'], shownImage: 'background' }, 'a'), {
+    backgrounds: [], backgroundPath: null, shownImage: 'map',
+  });
+  assert.equal(backgroundRemovalPatch(scene, 'missing'), null);
 });

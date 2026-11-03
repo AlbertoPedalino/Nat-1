@@ -183,6 +183,89 @@ export function sceneTitleFor(scene, { isGm = false, campaignName = '' } = {}) {
   return campaign ? `${campaign} · ${name}` : name;
 }
 
+// Every background uploaded to a scene, in upload order, without repeats. A
+// scene made before the list existed holds only `background_path`: read as a
+// list of one, so it needs no backfill. The shown one is kept even if a stale
+// list misses it — it is in Storage and on screen.
+export function normalizeBackgrounds(list, shownPath = null) {
+  const paths = [];
+  for (const entry of Array.isArray(list) ? list : []) {
+    const path = typeof entry === 'string' ? entry.trim() : '';
+    if (path && !paths.includes(path)) paths.push(path);
+  }
+  const shown = typeof shownPath === 'string' ? shownPath.trim() : '';
+  if (shown && !paths.includes(shown)) paths.push(shown);
+  return paths;
+}
+
+// A scene's background list, whether it came from the database (`toScene`) or
+// is a partial object built by hand.
+export function sceneBackgrounds(scene) {
+  return normalizeBackgrounds(scene?.backgrounds, scene?.backgroundPath);
+}
+
+// What a client is looking at: which of the two modes, and in background mode
+// which background. The scene row holds the published one; the GM may hold a
+// private one while presentation is frozen, and the projector a frozen one.
+export function sceneView(scene) {
+  return {
+    shownImage: scene?.shownImage === 'background' ? 'background' : 'map',
+    backgroundPath: scene?.backgroundPath || null,
+  };
+}
+
+export function sameView(a, b) {
+  return (a?.shownImage || 'map') === (b?.shownImage || 'map')
+    && (a?.backgroundPath || null) === (b?.backgroundPath || null);
+}
+
+// The background a view resolves to on this scene. A view pointing at a
+// background that has since been removed falls back to the published one, then
+// to the first left, rather than to an empty frame.
+export function viewBackgroundPath(scene, view) {
+  const list = sceneBackgrounds(scene);
+  const wanted = view?.backgroundPath || null;
+  if (wanted && list.includes(wanted)) return wanted;
+  if (scene?.backgroundPath && list.includes(scene.backgroundPath)) return scene.backgroundPath;
+  return list[0] || null;
+}
+
+// The scene columns to write to move the published view from `from` to `to`.
+// Going to the battlemap leaves the chosen background alone, so coming back
+// lands on the same one.
+export function viewPatch(from, to) {
+  const patch = {};
+  const shownImage = to?.shownImage === 'background' ? 'background' : 'map';
+  if (shownImage !== (from?.shownImage === 'background' ? 'background' : 'map')) patch.shownImage = shownImage;
+  const backgroundPath = to?.backgroundPath || null;
+  if (shownImage === 'background' && backgroundPath && backgroundPath !== (from?.backgroundPath || null)) {
+    patch.backgroundPath = backgroundPath;
+  }
+  return patch;
+}
+
+export function viewImagePath(scene, view) {
+  return view?.shownImage === 'background'
+    ? viewBackgroundPath(scene, view)
+    : scene?.imagePath || null;
+}
+
+// The scene patch for taking one background out. The one on show passes to its
+// right-hand neighbour (the left one at the end of the list); with none left
+// the table goes back to the battlemap rather than to an empty background.
+export function backgroundRemovalPatch(scene, path) {
+  const list = sceneBackgrounds(scene);
+  const index = list.indexOf(path);
+  if (index < 0) return null;
+  const backgrounds = list.filter((entry) => entry !== path);
+  let backgroundPath = scene?.backgroundPath || null;
+  if (!backgroundPath || backgroundPath === path || !backgrounds.includes(backgroundPath)) {
+    backgroundPath = backgrounds[Math.min(index, backgrounds.length - 1)] || null;
+  }
+  const shownImage = scene?.shownImage === 'background' && backgroundPath ? 'background' : 'map';
+  return { backgrounds, backgroundPath, shownImage };
+}
+
 // Database row -> the shape the editor works with (camelCase, no nulls where a
 // number is expected).
 export function toScene(row) {
@@ -192,7 +275,9 @@ export function toScene(row) {
     campaignId: row.campaign_id || null,
     name: sanitizeName(row.name),
     imagePath: row.image_path || null,
+    // The background on show; always one of `backgrounds`.
     backgroundPath: row.background_path || null,
+    backgrounds: normalizeBackgrounds(row.backgrounds, row.background_path),
     // Which picture the table is looking at. The other one stays uploaded.
     shownImage: row.shown_image === 'background' ? 'background' : 'map',
     grid: normalizeGrid(row.grid),

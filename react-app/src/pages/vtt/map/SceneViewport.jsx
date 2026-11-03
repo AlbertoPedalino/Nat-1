@@ -198,6 +198,8 @@ export default function SceneViewport({
   controls,
   layerSwitch,
   imageSwitch,
+  // Bottom centre: the GM's slider through the scene's backgrounds.
+  backgroundStrip = null,
   // The turn order; it places itself (top centre) and is a viewport control.
   initiative = null,
   // A mouse click on a piece that did not move it (a touch tap keeps opening
@@ -1782,6 +1784,10 @@ export default function SceneViewport({
         <Box data-viewport-control sx={layerSwitchSx}>{layerSwitch}</Box>
       ) : null}
 
+      {backgroundStrip ? (
+        <Box data-viewport-control sx={backgroundStripSx}>{backgroundStrip}</Box>
+      ) : null}
+
       {showFullscreenControl ? (
         <Tooltip title={fullscreenActive ? 'Leave fullscreen' : 'Fullscreen map'}>
           <IconButton
@@ -2240,6 +2246,21 @@ const layerSwitchSx = {
   bottom: 8,
   zIndex: 6,
   borderRadius: 1,
+  cursor: 'default',
+};
+
+// Bottom centre, clear of the layer switch on the left and the fullscreen
+// button on the right; on a narrow map it rises above the layer switch instead.
+const backgroundStripSx = {
+  position: 'absolute',
+  left: '50%',
+  transform: 'translateX(-50%)',
+  bottom: { xs: 52, md: 8 },
+  zIndex: 6,
+  display: 'flex',
+  justifyContent: 'center',
+  width: 'max-content',
+  maxWidth: { xs: 'calc(100% - 16px)', md: 'calc(100% - 400px)' },
   cursor: 'default',
 };
 
