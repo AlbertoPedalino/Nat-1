@@ -11,13 +11,16 @@ import { normalizeArea } from '../../vtt/map/areas.js';
 import { normalizeFog } from '../../vtt/map/fog.js';
 import { normalizeAtmosphere } from '../../vtt/scene/atmosphere.js';
 import {
+  backgroundRemovalPatch,
   mapImageCampaignFolder,
   mapImageFolder,
   mapImagePath,
+  normalizeBackgrounds,
   normalizeGrid,
   normalizeLayer,
   normalizePlayArea,
   sanitizeName,
+  sceneBackgrounds,
   toScene,
   toToken,
   toTokenPatch,
@@ -36,7 +39,7 @@ const SIGNED_URL_TTL = 8 * 60 * 60;
 // Re-signed a little early, so a link never expires in the middle of a scene.
 const SIGNED_URL_MARGIN_MS = 15 * 60 * 1000;
 const SIGNED_URL_KEY = 'gb:vtt:signed-url:';
-const SCENE_COLUMNS = 'id, campaign_id, name, image_path, background_path, shown_image, grid, atmosphere, fog, is_live, play_area, updated_at';
+const SCENE_COLUMNS = 'id, campaign_id, name, image_path, background_path, backgrounds, shown_image, grid, atmosphere, fog, is_live, play_area, updated_at';
 const TOKEN_COLUMNS = 'id, scene_id, layer, hidden_from_players, x, y, w, h, z, character_id, label, color, image_path, image_url, icon_key, icon_stroke_width, rotation, hp_current, hp_max, conditions, effects, source_ref, show_hp, turn_order, turn_active, created_by, updated_at';
 const DRAWING_COLUMNS = 'id, scene_id, layer, points, color, width, text, area, hidden_from_players, created_by, created_at, updated_at';
 
@@ -114,7 +117,7 @@ export async function createScene(campaignId, name) {
 }
 
 export async function updateScene(sceneId, {
-  name, grid, atmosphere, imagePath, backgroundPath, shownImage, fog, playArea,
+  name, grid, atmosphere, imagePath, backgroundPath, backgrounds, shownImage, fog, playArea,
 } = {}) {
   const supabase = requireClient();
   const patch = {};
@@ -123,6 +126,7 @@ export async function updateScene(sceneId, {
   if (atmosphere !== undefined) patch.atmosphere = normalizeAtmosphere(atmosphere);
   if (imagePath !== undefined) patch.image_path = imagePath || null;
   if (backgroundPath !== undefined) patch.background_path = backgroundPath || null;
+  if (backgrounds !== undefined) patch.backgrounds = normalizeBackgrounds(backgrounds);
   if (shownImage !== undefined) patch.shown_image = shownImage === 'background' ? 'background' : 'map';
   // Null clears it, which puts the whole scene back in play.
   if (playArea !== undefined) patch.play_area = normalizePlayArea(playArea);
@@ -553,29 +557,20 @@ export async function uploadMapImage(campaignId, sceneId, file) {
   return path;
 }
 
-function sceneImageSlot(scene, slot) {
-  const background = slot === 'background';
-  return {
-    key: background ? 'backgroundPath' : 'imagePath',
-    path: background ? scene?.backgroundPath : scene?.imagePath,
-    otherPath: background ? scene?.imagePath : scene?.backgroundPath,
-    otherSlot: background ? 'map' : 'background',
-    slot: background ? 'background' : 'map',
-  };
-}
+// The battlemap is one picture you replace; backgrounds are a list you add to
+// (addSceneBackground / removeSceneBackground). A file is deleted only once no
+// column of the row points at it any more: a legacy scene may reference the
+// same object as both its battlemap and a background.
 
-// Replacing either of the scene's two pictures is one operation to callers:
-// persist the fresh path, then remove the path the row no longer references.
-export async function replaceSceneImage(scene, slot, file) {
-  const target = sceneImageSlot(scene, slot);
+// Replacing the battlemap is one operation to callers: persist the fresh path,
+// then remove the path the row no longer references.
+export async function replaceSceneImage(scene, file) {
+  const previous = scene?.imagePath || null;
   let uploadedPath = null;
   let updated = null;
   try {
     uploadedPath = await uploadMapImage(scene?.campaignId, scene?.id, file);
-    updated = await updateScene(scene?.id, {
-      [target.key]: uploadedPath,
-      shownImage: target.slot,
-    });
+    updated = await updateScene(scene?.id, { imagePath: uploadedPath, shownImage: 'map' });
   } catch (cause) {
     // If the row never took ownership of this upload, do not leave it behind.
     if (uploadedPath) {
@@ -585,9 +580,9 @@ export async function replaceSceneImage(scene, slot, file) {
   }
 
   let cleanupError = null;
-  if (target.path && target.path !== uploadedPath && target.path !== target.otherPath) {
+  if (previous && previous !== uploadedPath && !sceneBackgrounds(scene).includes(previous)) {
     try {
-      await deleteMapImage(target.path);
+      await deleteMapImage(previous);
     } catch (cause) {
       cleanupError = cause;
     }
@@ -595,23 +590,54 @@ export async function replaceSceneImage(scene, slot, file) {
   return { scene: updated, cleanupError };
 }
 
-// Clear the database reference before deleting its bytes. A legacy scene may
-// reference the same object from both slots; in that case the remaining slot
-// still owns the file and it must stay in Storage.
-export async function removeSceneImage(scene, slot) {
-  const target = sceneImageSlot(scene, slot);
-  if (!target.path) return { scene: scene || null, cleanupError: null };
-  const shownImage = scene?.shownImage === target.slot
-    ? (target.otherPath ? target.otherSlot : 'map')
-    : scene?.shownImage;
-  const updated = await updateScene(scene?.id, {
-    [target.key]: null,
-    shownImage,
-  });
+// Clear the database reference before deleting its bytes.
+export async function removeSceneImage(scene) {
+  const previous = scene?.imagePath || null;
+  if (!previous) return { scene: scene || null, cleanupError: null };
+  const backgrounds = sceneBackgrounds(scene);
+  const shownImage = scene?.shownImage === 'map' && backgrounds.length ? 'background' : scene?.shownImage;
+  const updated = await updateScene(scene?.id, { imagePath: null, shownImage });
   let cleanupError = null;
-  if (target.path !== target.otherPath) {
+  if (!backgrounds.includes(previous)) {
     try {
-      await deleteMapImage(target.path);
+      await deleteMapImage(previous);
+    } catch (cause) {
+      cleanupError = cause;
+    }
+  }
+  return { scene: updated, cleanupError };
+}
+
+// A new background joins the end of the list. With `show` it also becomes the
+// published picture; without it (the GM is preparing behind a frozen
+// presentation) the table stays where it is.
+export async function addSceneBackground(scene, file, { show = true } = {}) {
+  let uploadedPath = null;
+  try {
+    uploadedPath = await uploadMapImage(scene?.campaignId, scene?.id, file);
+    const backgrounds = [...sceneBackgrounds(scene), uploadedPath];
+    const patch = show
+      ? { backgrounds, backgroundPath: uploadedPath, shownImage: 'background' }
+      // A scene with no background yet still needs one named as its own.
+      : { backgrounds, ...(scene?.backgroundPath ? {} : { backgroundPath: uploadedPath }) };
+    const updated = await updateScene(scene?.id, patch);
+    return { scene: updated, path: uploadedPath };
+  } catch (cause) {
+    if (uploadedPath) {
+      try { await deleteMapImage(uploadedPath); } catch {}
+    }
+    throw cause;
+  }
+}
+
+export async function removeSceneBackground(scene, path) {
+  const patch = backgroundRemovalPatch(scene, path);
+  if (!patch) return { scene: scene || null, cleanupError: null };
+  const updated = await updateScene(scene?.id, patch);
+  let cleanupError = null;
+  if (path !== scene?.imagePath) {
+    try {
+      await deleteMapImage(path);
     } catch (cause) {
       cleanupError = cause;
     }

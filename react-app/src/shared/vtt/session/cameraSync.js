@@ -88,10 +88,16 @@ export function presenterStateMessage(source, state) {
   const shownImage = state?.shownImage === 'background' ? 'background'
     : state?.shownImage === 'map' ? 'map' : null;
   if (!safeSource || typeof state?.following !== 'boolean' || !shownImage) return null;
+  // Which of the scene's backgrounds: a storage path, matched by the receiver
+  // against the scene's own list, so it can only ever pick one of those.
+  const backgroundPath = typeof state.backgroundPath === 'string' && state.backgroundPath.length <= 512
+    ? state.backgroundPath
+    : null;
   return {
     source: safeSource,
     following: state.following,
     shownImage,
+    ...(backgroundPath ? { backgroundPath } : {}),
     pose: normalizeCameraPose(state.pose),
   };
 }

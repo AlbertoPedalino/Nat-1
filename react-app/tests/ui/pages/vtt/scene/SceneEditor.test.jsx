@@ -382,6 +382,70 @@ test('freezing the public view lets the GM prepare a picture before sharing it',
   });
 });
 
+test('the GM picks among the scene backgrounds from the strip, privately while frozen', async () => {
+  sceneViewportMock.mockClear();
+  updateSceneMock.mockClear();
+  // Never resolves: this test is about the choice, not the picture loading.
+  signMapImageMock.mockReset().mockImplementation(() => new Promise(() => {}));
+  const onSceneChange = vi.fn();
+  const scene = {
+    id: 'scene-backgrounds',
+    campaignId: 'campaign-1',
+    name: 'The tavern',
+    shownImage: 'map',
+    imagePath: null,
+    backgroundPath: 'day.webp',
+    backgrounds: ['day.webp', 'night.webp'],
+    fog: null,
+    atmosphere: null,
+    isLive: true,
+    playArea: null,
+    grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
+  };
+  const renderEditor = (value) => (
+    <ThemeProvider theme={theme}>
+      <SceneEditor scene={value} onSceneChange={onSceneChange} />
+    </ThemeProvider>
+  );
+  const { rerender } = render(renderEditor(scene));
+
+  // No strip over the battlemap.
+  expect(sceneViewportMock.mock.calls.at(-1)[0].backgroundStrip).toBeNull();
+
+  const showing = { ...scene, shownImage: 'background' };
+  rerender(renderEditor(showing));
+  const strip = sceneViewportMock.mock.calls.at(-1)[0].backgroundStrip;
+  expect(strip.props.backgrounds).toEqual(['day.webp', 'night.webp']);
+  expect(strip.props.selected).toBe('day.webp');
+
+  await act(async () => strip.props.onSelect('night.webp'));
+  expect(updateSceneMock).toHaveBeenCalledWith(scene.id, { backgroundPath: 'night.webp' });
+  expect(onSceneChange).toHaveBeenCalledWith(expect.objectContaining({ backgroundPath: 'night.webp' }));
+
+  // Frozen: the pick stays on the GM's screen until the view is shared again.
+  const atNight = { ...showing, backgroundPath: 'night.webp' };
+  rerender(renderEditor(atNight));
+  fireEvent.click(screen.getByRole('button', { name: 'Freeze view' }));
+  updateSceneMock.mockClear();
+  onSceneChange.mockClear();
+  await act(async () => sceneViewportMock.mock.calls.at(-1)[0].backgroundStrip.props.onSelect('day.webp'));
+  await waitFor(() => {
+    expect(sceneViewportMock.mock.calls.at(-1)[0].backgroundStrip.props.selected).toBe('day.webp');
+  });
+  expect(updateSceneMock).not.toHaveBeenCalled();
+
+  sendPresenterStateMock.mockClear();
+  fireEvent.click(screen.getByRole('button', { name: 'Unfreeze view' }));
+  await waitFor(() => {
+    expect(updateSceneMock).toHaveBeenCalledWith(scene.id, { backgroundPath: 'day.webp' });
+    expect(sendPresenterStateMock).toHaveBeenLastCalledWith(expect.objectContaining({
+      following: true,
+      shownImage: 'background',
+      backgroundPath: 'day.webp',
+    }));
+  });
+});
+
 test('battlemap and background swap only after the next image is decoded', async () => {
   sceneViewportMock.mockClear();
   signMapImageMock.mockReset();
