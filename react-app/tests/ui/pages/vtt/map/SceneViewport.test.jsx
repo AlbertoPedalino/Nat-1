@@ -1022,6 +1022,8 @@ test('clicking the board of a hex map picks a hex, dragging it still pans', () =
     />,
   );
   const viewport = screen.getByText('Upload a map image to start building this scene.').parentElement;
+  // The hand hides which hex a click lands on; the cross points at it.
+  expect(viewport).toHaveStyle({ cursor: 'crosshair' });
 
   fireEvent.pointerDown(viewport, { button: 0, clientX: 50, clientY: 0, pointerId: 51 });
   fireEvent.pointerUp(viewport, { button: 0, clientX: 50, clientY: 0, pointerId: 51 });
@@ -1033,6 +1035,66 @@ test('clicking the board of a hex map picks a hex, dragging it still pans', () =
   fireEvent.pointerMove(viewport, { clientX: 160, clientY: 90, pointerId: 52 });
   fireEvent.pointerUp(viewport, { button: 0, clientX: 160, clientY: 90, pointerId: 52 });
   expect(onHexClick).not.toHaveBeenCalled();
+});
+
+test('clicking the hex bubble closes it without picking the hex behind it', () => {
+  const onHexClick = vi.fn();
+  const onHexBubbleClose = vi.fn();
+  render(
+    <SceneViewport
+      scene={HEX_SCENE}
+      imageUrl={null}
+      tokens={[]}
+      snap
+      canMove={() => false}
+      fog={null}
+      onHexClick={onHexClick}
+      hexBubble={{ hex: { q: 1, r: 0 }, headline: 'Wandering Monster', lines: [] }}
+      onHexBubbleClose={onHexBubbleClose}
+      drawings={[]}
+      lasers={[]}
+      rollBubbles={[]}
+      diceThrows={[]}
+    />,
+  );
+  const bubble = screen.getByRole('button', { name: /wandering monster — close/i });
+
+  fireEvent.pointerDown(bubble, { button: 0, clientX: 50, clientY: 0, pointerId: 71 });
+  fireEvent.pointerUp(bubble, { button: 0, clientX: 50, clientY: 0, pointerId: 71 });
+  fireEvent.click(bubble);
+  expect(onHexBubbleClose).toHaveBeenCalledOnce();
+  expect(onHexClick).not.toHaveBeenCalled();
+});
+
+// A background is a picture shown instead of the map: its pixels are no hex,
+// and the bubble of the last hex has nowhere to stand on it.
+test('a background shown over a hex map picks no hex and hides the hex bubble', () => {
+  const onHexClick = vi.fn();
+  render(
+    <SceneViewport
+      scene={HEX_SCENE}
+      imageUrl={null}
+      backgroundOnly
+      tokens={[]}
+      snap
+      canMove={() => false}
+      fog={null}
+      onHexClick={onHexClick}
+      hexBubble={{ hex: { q: 1, r: 0 }, headline: 'Wandering Monster', lines: [] }}
+      onHexBubbleClose={vi.fn()}
+      drawings={[]}
+      lasers={[]}
+      rollBubbles={[]}
+      diceThrows={[]}
+    />,
+  );
+  const viewport = screen.getByText('Upload a map image to start building this scene.').parentElement;
+
+  expect(viewport).toHaveStyle({ cursor: 'grab' });
+  fireEvent.pointerDown(viewport, { button: 0, clientX: 50, clientY: 0, pointerId: 61 });
+  fireEvent.pointerUp(viewport, { button: 0, clientX: 50, clientY: 0, pointerId: 61 });
+  expect(onHexClick).not.toHaveBeenCalled();
+  expect(screen.queryByText('Wandering Monster')).toBeNull();
 });
 
 test('a hex outside the play area cannot be selected or rolled', () => {
