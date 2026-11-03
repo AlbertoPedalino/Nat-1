@@ -5,8 +5,8 @@ import {
   Box, Button, CircularProgress, IconButton, Stack, Tooltip, Typography,
 } from '@mui/material';
 import {
-  Cloud, Dices, DoorOpen, Eye, EyeOff, Lock, LockOpen, MonitorOff, MonitorPlay, Pencil, Pointer,
-  Radio, Ruler, Shapes, SquareDashedMousePointer, Users,
+  Cloud, Dices, DoorOpen, Eye, EyeOff, Pencil, Pointer,
+  Ruler, Shapes, SquareDashedMousePointer, Users,
 } from 'lucide-react';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
@@ -153,6 +153,7 @@ import SceneToolRail from './SceneToolRail.jsx';
 import MapCorner from './MapCorner.jsx';
 import BackgroundStrip from './BackgroundStrip.jsx';
 import BattleMapViewSwitch from '../map/BattleMapViewSwitch.jsx';
+import LiveControls from './LiveControls.jsx';
 import BattleMapSheetResizeHandle from '../sheets/BattleMapSheetResizeHandle.jsx';
 import {
   contentLayoutOpenSx,
@@ -165,6 +166,8 @@ import {
   sceneTitleSx,
   sceneTopbarSx,
   sceneViewSwitchSx,
+  scenePlayerViewSwitchSx,
+  viewButtonSx,
   sheetLoadingSx,
   sheetViewSx,
   spectatorRootSx,
@@ -2755,91 +2758,58 @@ export default function SceneEditor({
         {role.isGm ? (
           <Stack direction="row" spacing={0.75} useFlexGap sx={scenePresenterActionsSx}>
             {!gmPlayerPreview ? (
-              <Button
-                size="small"
-                color={scene.isLive ? 'success' : 'inherit'}
-                variant={scene.isLive ? 'contained' : 'outlined'}
-                startIcon={<Radio size={14} />}
-                aria-pressed={scene.isLive}
-                onClick={handleToggleLive}
-              >
-                {scene.isLive ? 'Live' : 'Go live'}
-              </Button>
+              <LiveControls
+                isLive={scene.isLive}
+                projectorFollowing={projectorFollowing}
+                // A scene that is not live has no projector to point anywhere.
+                projectorAttached={projectorControlsOpen}
+                onToggleLive={handleToggleLive}
+                onToggleFreeze={handleToggleProjectorFollow}
+                onOpenProjector={openSpectator}
+                onStopProjector={stopProjector}
+              />
             ) : null}
             {gmTurnView && !initiativeEntries.length ? (
               <InitiativeButton choices={initiativeChoices} onChoose={handleChooseFight} />
             ) : null}
-            <Tooltip title={gmPlayerPreview
-              ? 'Return to the GM controls'
-              : 'Preview exactly what players can see; editing is disabled'}>
-              <Button
-                size="small"
-                variant={gmPlayerPreview ? 'contained' : 'outlined'}
-                startIcon={gmPlayerPreview ? <EyeOff size={14} /> : <Eye size={14} />}
-                aria-label={gmPlayerPreview ? 'Exit player view' : 'Player view'}
-                aria-pressed={gmPlayerPreview}
-                onClick={handleTogglePlayerPreview}
-              >
-                {gmPlayerPreview ? 'Exit player view' : 'Player view'}
-              </Button>
-            </Tooltip>
-            {/* One public-view lock for the whole table. Players are held on the
-                persisted picture; an open projector also holds its camera. */}
-            {!gmPlayerPreview && scene.isLive ? (
-              <Tooltip
-                title={projectorFollowing
-                  ? 'Freeze the current picture for players and the projector while you prepare another view'
-                  : 'Publish your prepared picture and let the projector follow your camera again'}
-              >
-                <Button
-                  size="small"
-                  variant={projectorFollowing ? 'outlined' : 'contained'}
-                  startIcon={projectorFollowing ? <Lock size={14} /> : <LockOpen size={14} />}
-                  aria-label={projectorFollowing ? 'Freeze view' : 'Unfreeze view'}
-                  aria-pressed={!projectorFollowing}
-                  onClick={handleToggleProjectorFollow}
-                >
-                  {projectorFollowing ? 'Freeze view' : 'Unfreeze view'}
-                </Button>
-              </Tooltip>
-            ) : null}
-            {/* A scene that is not live has no projector to point anywhere, and
-                a projector already running only needs stopping and freezing. */}
-            {!gmPlayerPreview && scene.isLive && !projectorControlsOpen ? (
-              <Button
-                size="small"
-                variant="outlined"
-                startIcon={<MonitorPlay size={14} />}
-                onClick={openSpectator}
-              >
-                Projector mode
-              </Button>
-            ) : null}
-            {!gmPlayerPreview && scene.isLive && projectorControlsOpen ? (
-              <Tooltip title="Closes the projector tab">
-                <Button
-                  size="small"
-                  variant="outlined"
-                  startIcon={<MonitorOff size={14} />}
-                  onClick={stopProjector}
-                >
-                  Stop projector mode
-                </Button>
-              </Tooltip>
-            ) : null}
           </Stack>
         ) : null}
-        {!gmPlayerPreview ? (
-          <Box sx={sceneViewSwitchSx}>
-            <BattleMapViewSwitch
-              view={contentView}
-              choices={sheetChoices}
-              selectedId={sheetAreaSelectedId}
-              available={hasSheetContent}
-              onViewChange={setContentView}
-              onSelectionChange={selectSheetCharacter}
-            />
-          </Box>
+        {/* What the GM is looking at, on the far side of what the table sees:
+            the player preview changes nothing for anyone else, like the sheet. */}
+        {role.isGm || !gmPlayerPreview ? (
+          <Stack
+            direction="row"
+            spacing={0.75}
+            sx={role.isGm ? sceneViewSwitchSx : scenePlayerViewSwitchSx}
+          >
+            {role.isGm ? (
+              <Tooltip title={gmPlayerPreview
+                ? 'Return to the GM controls'
+                : 'Preview exactly what players can see; editing is disabled'}>
+                <Button
+                  size="small"
+                  variant={gmPlayerPreview ? 'contained' : 'outlined'}
+                  startIcon={gmPlayerPreview ? <EyeOff size={14} /> : <Eye size={14} />}
+                  aria-label={gmPlayerPreview ? 'Exit player view' : 'Player view'}
+                  aria-pressed={gmPlayerPreview}
+                  onClick={handleTogglePlayerPreview}
+                  sx={viewButtonSx}
+                >
+                  {gmPlayerPreview ? 'Exit player view' : 'Player view'}
+                </Button>
+              </Tooltip>
+            ) : null}
+            {!gmPlayerPreview ? (
+              <BattleMapViewSwitch
+                view={contentView}
+                choices={sheetChoices}
+                selectedId={sheetAreaSelectedId}
+                available={hasSheetContent}
+                onViewChange={setContentView}
+                onSelectionChange={selectSheetCharacter}
+              />
+            ) : null}
+          </Stack>
         ) : null}
       </Box>
 
