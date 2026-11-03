@@ -166,3 +166,66 @@ test('the area tool offers shape, fill, the feet per square step, effect and lab
   expect(screen.getByRole('spinbutton', { name: 'Width (ft)' })).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Outline only' })).toBeDisabled();
 });
+
+test('the light filter belongs to the picture on show', () => {
+  const onImageFilterChange = vi.fn();
+  render(
+    <MapPanel
+      scene={{
+        imagePath: 'map.png',
+        backgroundPath: 'bg.png',
+        backgrounds: ['bg.png'],
+        shownImage: 'background',
+        imageFilters: { 'map.png': { type: 'night', intensity: 1 } },
+        grid: DEFAULT_GRID,
+        playArea: null,
+        atmosphere: { type: 'none', intensity: 0.65, direction: 12, speed: 1, seed: 1 },
+      }}
+      busy={false}
+      onUploadMap={vi.fn()}
+      onUploadBackground={vi.fn()}
+      onShownImageChange={vi.fn()}
+      onAddImage={vi.fn()}
+      onGridChange={vi.fn()}
+      onAtmosphereChange={vi.fn()}
+      onImageFilterChange={onImageFilterChange}
+      onPlayAreaChange={vi.fn()}
+      onFitPlayArea={vi.fn()}
+    />,
+  );
+
+  // The battlemap's night does not carry over to the background.
+  expect(screen.getByText('Light on this background')).toBeInTheDocument();
+  expect(screen.queryByRole('slider', { name: 'Light filter strength' })).toBeNull();
+  fireEvent.mouseDown(screen.getByRole('combobox', { name: 'Light filter' }));
+  fireEvent.click(screen.getByRole('option', { name: 'Sunset' }));
+
+  expect(onImageFilterChange).toHaveBeenCalledWith('bg.png', { type: 'sunset', intensity: 1 });
+});
+
+test('no light filter is offered before a picture is uploaded', () => {
+  render(
+    <MapPanel
+      scene={{
+        imagePath: null,
+        backgroundPath: null,
+        shownImage: 'map',
+        grid: DEFAULT_GRID,
+        playArea: null,
+        atmosphere: { type: 'none', intensity: 0.65, direction: 12, speed: 1, seed: 1 },
+      }}
+      busy={false}
+      onUploadMap={vi.fn()}
+      onUploadBackground={vi.fn()}
+      onShownImageChange={vi.fn()}
+      onAddImage={vi.fn()}
+      onGridChange={vi.fn()}
+      onAtmosphereChange={vi.fn()}
+      onImageFilterChange={vi.fn()}
+      onPlayAreaChange={vi.fn()}
+      onFitPlayArea={vi.fn()}
+    />,
+  );
+
+  expect(screen.queryByRole('combobox', { name: 'Light filter' })).toBeNull();
+});

@@ -57,6 +57,7 @@ import ColorField from '../../../shared/ui/ColorField.jsx';
 import InfoHint from '../../../shared/ui/InfoHint.jsx';
 import { DEFAULT_GRID } from '../../../shared/vtt/scene/scene.js';
 import { ATMOSPHERE_PRESETS, normalizeAtmosphere } from '../../../shared/vtt/scene/atmosphere.js';
+import { IMAGE_FILTER_PRESETS, imageFilterFor } from '../../../shared/vtt/scene/imageFilters.js';
 import { AREA_EFFECTS } from '../../../shared/vtt/map/areas.js';
 import { battleMapDialogPaperSx } from '../map/battleMapSurface.js';
 
@@ -191,10 +192,53 @@ function AtmospherePicker({ value, onSelect }) {
   );
 }
 
+// The light of the picture on show: a daylight painting at dusk or at night.
+// Each picture keeps its own, so it follows the battlemap/background switch.
+function ImageLightSection({ scene, onImageFilterChange }) {
+  const showingBackground = scene.shownImage === 'background';
+  const path = showingBackground ? scene.backgroundPath : scene.imagePath;
+  if (!path || !onImageFilterChange) return null;
+  const filter = imageFilterFor(scene.imageFilters, path);
+  const setFilter = (patch) => onImageFilterChange(path, { ...filter, ...patch });
+
+  return (
+    <Stack spacing={0.5}>
+      <SectionLabel
+        label={showingBackground ? 'Light on this background' : 'Light on the battlemap'}
+        hint="Shows a daylight picture at another time of day. It tints the picture only: tokens, drawings and the atmosphere stay as they are. Every picture keeps its own, so the same background uploaded twice can be shown by day and by night."
+      />
+      <TextField
+        select
+        size="small"
+        value={filter.type}
+        onChange={(event) => setFilter({ type: event.target.value })}
+        slotProps={{ select: { inputProps: { 'aria-label': 'Light filter' } } }}
+      >
+        {IMAGE_FILTER_PRESETS.map((preset) => (
+          <MenuItem key={preset.value} value={preset.value}>{preset.label}</MenuItem>
+        ))}
+      </TextField>
+      {filter.type === 'none' ? null : (
+        <Slider
+          size="small"
+          min={0.1}
+          max={1}
+          step={0.05}
+          value={filter.intensity}
+          valueLabelDisplay="auto"
+          aria-label="Light filter strength"
+          onChange={(_, value) => setFilter({ intensity: value })}
+          sx={{ mx: 0.5, width: 'calc(100% - 8px)' }}
+        />
+      )}
+    </Stack>
+  );
+}
+
 export function MapPanel({
   scene, busy, onUploadMap, onUploadBackground, onRemoveMap, onRemoveBackground,
   onShownImageChange, onAddImage,
-  onGridChange, onAtmosphereChange, onPlayAreaChange, onFitPlayArea,
+  onGridChange, onAtmosphereChange, onImageFilterChange, onPlayAreaChange, onFitPlayArea,
   // The switch has its own place on the map when this panel sits under it.
   hideSwitch = false,
 }) {
@@ -272,6 +316,8 @@ export function MapPanel({
       <HiddenFileInput inputRef={mapRef} onPick={onUploadMap} />
       <HiddenFileInput inputRef={backgroundRef} onPick={onUploadBackground} />
       <HiddenFileInput inputRef={extraRef} onPick={onAddImage} />
+
+      <ImageLightSection scene={scene} onImageFilterChange={onImageFilterChange} />
 
       <SectionLabel
         label="Atmosphere"
