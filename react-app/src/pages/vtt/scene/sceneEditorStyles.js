@@ -65,6 +65,21 @@ export const sceneViewSwitchSx = {
   pl: { xs: 0, md: 0.5 },
 };
 
+// The player preview sits with the sheet switch and takes its height, so the
+// two read as one pair of view controls.
+export const viewButtonSx = {
+  height: 32,
+  fontSize: '0.67rem',
+  whiteSpace: 'nowrap',
+};
+
+// A player's bar holds only the name and this button, so on a phone or tablet
+// it belongs at the far edge too, not pressed against the campaign's name.
+export const scenePlayerViewSwitchSx = {
+  ml: 'auto',
+  pl: 0.5,
+};
+
 export const spectatorRootSx = {
   position: 'fixed',
   inset: 0,

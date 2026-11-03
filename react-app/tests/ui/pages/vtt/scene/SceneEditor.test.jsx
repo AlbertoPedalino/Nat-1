@@ -293,9 +293,15 @@ test('a GM can switch the battlemap to a read-only player view', () => {
   const liveButton = screen.getByRole('button', { name: 'Live' });
   const playerViewButton = screen.getByRole('button', { name: 'Player view' });
   const freezeButton = screen.getByRole('button', { name: 'Freeze view' });
-  const projectorButton = screen.getByRole('button', { name: 'Projector mode' });
-  expect(liveButton.compareDocumentPosition(playerViewButton) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-  expect(freezeButton.compareDocumentPosition(projectorButton) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  // What the table sees first (Live, Freeze), then what the GM looks at
+  // (Player view, beside the sheet); the projector waits in Live's menu.
+  expect(liveButton.compareDocumentPosition(freezeButton) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  expect(freezeButton.compareDocumentPosition(playerViewButton) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  expect(screen.queryByRole('button', { name: 'Projector mode' })).toBeNull();
+  fireEvent.click(liveButton);
+  expect(screen.getByRole('menuitem', { name: 'Projector mode' })).toBeInTheDocument();
+  expect(screen.getByRole('menuitem', { name: /stop live/i })).toBeInTheDocument();
+  fireEvent.keyDown(screen.getByRole('menu'), { key: 'Escape' });
   act(() => {
     sceneViewportMock.mock.calls.at(-1)[0].onSelectDrawing('public-drawing');
   });
@@ -1170,6 +1176,16 @@ const LIVE_SCENE = {
   grid: { size: 50, offsetX: 0, offsetY: 0, visible: false },
 };
 
+// The projector is opened and stopped from the Live button's menu.
+const liveMenuItem = (name) => {
+  fireEvent.click(screen.getByRole('button', { name: 'Live' }));
+  return screen.queryByRole('menuitem', { name });
+};
+const closeLiveMenu = () => {
+  const menu = screen.queryByRole('menu');
+  if (menu) fireEvent.keyDown(menu, { key: 'Escape' });
+};
+
 const projectorEditor = (props) => (
   <ThemeProvider theme={theme}>
     <SceneEditor scene={LIVE_SCENE} onSceneChange={vi.fn()} cameraSourceId="cam-test" {...props} />
@@ -1182,20 +1198,23 @@ test('the projector stays attached when the GM leaves the scene and comes back',
   const projectorWindowRef = { current: null };
   try {
     const first = render(projectorEditor({ projectorWindowRef }));
-    fireEvent.click(screen.getByRole('button', { name: 'Projector mode' }));
+    fireEvent.click(liveMenuItem('Projector mode'));
     expect(open).toHaveBeenCalledTimes(1);
-    expect(screen.getByText('Stop projector mode')).toBeInTheDocument();
+    expect(liveMenuItem(/stop projector mode/i)).not.toBeNull();
+    closeLiveMenu();
     first.unmount();
 
     render(projectorEditor({ projectorWindowRef }));
-    expect(screen.getByText('Stop projector mode')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Projector mode' })).toBeNull();
+    expect(liveMenuItem(/stop projector mode/i)).not.toBeNull();
+    expect(screen.queryByRole('menuitem', { name: 'Projector mode' })).toBeNull();
+    closeLiveMenu();
     expect(open).toHaveBeenCalledTimes(1);
 
-    fireEvent.click(screen.getByText('Stop projector mode'));
+    fireEvent.click(liveMenuItem(/stop projector mode/i));
     expect(handle.close).toHaveBeenCalledTimes(1);
     expect(projectorWindowRef.current).toBeNull();
-    expect(screen.getByRole('button', { name: 'Projector mode' })).toBeInTheDocument();
+    expect(liveMenuItem('Projector mode')).not.toBeNull();
+    closeLiveMenu();
   } finally {
     open.mockRestore();
   }
@@ -1207,7 +1226,8 @@ test('a scene that is not live hides the projector controls without detaching th
   expect(screen.queryByText(/projector mode/i)).toBeNull();
 
   view.rerender(projectorEditor({ projectorWindowRef }));
-  expect(screen.getByText('Stop projector mode')).toBeInTheDocument();
+  expect(liveMenuItem(/stop projector mode/i)).not.toBeNull();
+  closeLiveMenu();
   expect(projectorWindowRef.current.close).not.toHaveBeenCalled();
 });
 
@@ -1217,14 +1237,16 @@ test('a projector closed by hand is noticed when the GM window comes back to the
     const handle = { closed: false, close: vi.fn() };
     const projectorWindowRef = { current: handle };
     render(projectorEditor({ projectorWindowRef }));
-    expect(screen.getByText('Stop projector mode')).toBeInTheDocument();
+    expect(liveMenuItem(/stop projector mode/i)).not.toBeNull();
+    closeLiveMenu();
 
     handle.closed = true;
     act(() => {
       window.dispatchEvent(new Event('focus'));
       vi.advanceTimersByTime(1_000);
     });
-    expect(screen.getByRole('button', { name: 'Projector mode' })).toBeInTheDocument();
+    expect(liveMenuItem('Projector mode')).not.toBeNull();
+    closeLiveMenu();
     expect(projectorWindowRef.current).toBeNull();
   } finally {
     vi.useRealTimers();
@@ -1249,13 +1271,15 @@ test('a projector with no handle left answers for itself and can still be stoppe
   const open = vi.spyOn(window, 'open');
   try {
     render(projectorEditor({ projectorWindowRef: { current: null } }));
-    expect(screen.getByText('Stop projector mode')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Projector mode' })).toBeNull();
+    expect(liveMenuItem(/stop projector mode/i)).not.toBeNull();
+    expect(screen.queryByRole('menuitem', { name: 'Projector mode' })).toBeNull();
+    closeLiveMenu();
 
-    fireEvent.click(screen.getByText('Stop projector mode'));
+    fireEvent.click(liveMenuItem(/stop projector mode/i));
     expect(closed).toHaveBeenCalledTimes(1);
     expect(open).not.toHaveBeenCalled();
-    expect(screen.getByRole('button', { name: 'Projector mode' })).toBeInTheDocument();
+    expect(liveMenuItem('Projector mode')).not.toBeNull();
+    closeLiveMenu();
   } finally {
     projector.close();
     open.mockRestore();
@@ -1278,7 +1302,8 @@ test('a projector following another GM tab does not attach to this one', () => {
   try {
     render(projectorEditor({ projectorWindowRef: { current: null } }));
     projector.send('here');
-    expect(screen.getByRole('button', { name: 'Projector mode' })).toBeInTheDocument();
+    expect(liveMenuItem('Projector mode')).not.toBeNull();
+    closeLiveMenu();
   } finally {
     projector.close();
     vi.unstubAllGlobals();
