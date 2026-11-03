@@ -166,6 +166,8 @@ import {
   sceneTitleSx,
   sceneTopbarSx,
   sceneViewSwitchSx,
+  sceneGmControlsSx,
+  sceneControlsPassThroughSx,
   scenePlayerViewSwitchSx,
   viewButtonSx,
   sheetLoadingSx,
@@ -2755,6 +2757,9 @@ export default function SceneEditor({
             </Tooltip>
           ) : null}
         </Box>
+        {/* On a phone the GM's four buttons share one row under the name: what
+            the table sees on the left, what the GM is looking at on the right. */}
+        <Box sx={role.isGm ? sceneGmControlsSx : sceneControlsPassThroughSx}>
         {role.isGm ? (
           <Stack direction="row" spacing={0.75} useFlexGap sx={scenePresenterActionsSx}>
             {!gmPlayerPreview ? (
@@ -2811,6 +2816,7 @@ export default function SceneEditor({
             ) : null}
           </Stack>
         ) : null}
+        </Box>
       </Box>
 
       <Box

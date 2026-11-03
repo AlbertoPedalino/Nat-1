@@ -61,8 +61,37 @@ export const sceneRenameButtonSx = {
 };
 
 export const sceneViewSwitchSx = {
-  ml: { xs: 0, md: 'auto' },
+  ml: 'auto',
   pl: { xs: 0, md: 0.5 },
+};
+
+// On a desktop the wrapper disappears and its children sit in the bar as
+// before. Below md it becomes its own full-width row under the name, with the
+// live controls on the left and Player view + Sheet on the right; the buttons
+// lose their leading icons and some padding so the four fit a phone's width.
+export const sceneGmControlsSx = (theme) => ({
+  display: { xs: 'flex', md: 'contents' },
+  flexBasis: '100%',
+  flexWrap: 'wrap',
+  alignItems: 'center',
+  gap: 0.75,
+  minWidth: 0,
+  // Phones only: tablets keep the buttons as they are.
+  [theme.breakpoints.down('sm')]: {
+    '& .MuiButton-root': {
+      minWidth: 0,
+      px: 0.75,
+      fontSize: '0.6rem',
+    },
+    '& .MuiButton-startIcon': {
+      display: 'none',
+    },
+  },
+});
+
+// A player's bar keeps the Sheet button on the name's row.
+export const sceneControlsPassThroughSx = {
+  display: 'contents',
 };
 
 // The player preview sits with the sheet switch and takes its height, so the
