@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import {
-  Button, Divider, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Tooltip,
+  Box, Button, Divider, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Tooltip,
 } from '@mui/material';
 import {
   ChevronDown, Lock, LockOpen, MonitorOff, MonitorPlay, Radio, RadioTower,
 } from 'lucide-react';
 import { battleMapDialogPaperSx } from '../map/battleMapSurface.js';
+import { hiddenOnPhoneSx } from './sceneEditorStyles.js';
 
 // Everything that decides what the table sees, in one place: whether this scene
 // is the live one, whether the picture is frozen while the GM prepares the next,
@@ -81,7 +82,8 @@ export default function LiveControls({
           aria-pressed={!projectorFollowing}
           onClick={onToggleFreeze}
         >
-          {projectorFollowing ? 'Freeze view' : 'Unfreeze view'}
+          {projectorFollowing ? 'Freeze' : 'Unfreeze'}
+          <Box component="span" sx={hiddenOnPhoneSx}>{' view'}</Box>
         </Button>
       </Tooltip>
       <Menu

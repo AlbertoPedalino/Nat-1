@@ -168,6 +168,7 @@ import {
   sceneViewSwitchSx,
   sceneGmControlsSx,
   sceneControlsPassThroughSx,
+  hiddenOnPhoneSx,
   scenePlayerViewSwitchSx,
   viewButtonSx,
   sheetLoadingSx,
@@ -2800,7 +2801,11 @@ export default function SceneEditor({
                   onClick={handleTogglePlayerPreview}
                   sx={viewButtonSx}
                 >
-                  {gmPlayerPreview ? 'Exit player view' : 'Player view'}
+                  {/* In the preview the live controls are gone, so the full
+                      label has room even on a phone. */}
+                  {gmPlayerPreview ? 'Exit player view' : (
+                    <>Player<Box component="span" sx={hiddenOnPhoneSx}>{' view'}</Box></>
+                  )}
                 </Button>
               </Tooltip>
             ) : null}
