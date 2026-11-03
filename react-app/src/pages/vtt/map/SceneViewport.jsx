@@ -89,7 +89,7 @@ function brushRadiusFor(paintMode, { brushSize, drawWidth, cell, fogScale }) {
   return 0;
 }
 
-function cursorFor(paintMode) {
+function cursorFor(paintMode, { picksHex = false } = {}) {
   if (paintMode === 'draw') return PENCIL_CURSOR;
   if (paintMode === 'erase') return ERASER_CURSOR;
   if (paintMode === 'reveal' || paintMode === 'hide') return 'crosshair';
@@ -97,6 +97,8 @@ function cursorFor(paintMode) {
   if (paintMode === 'area') return 'crosshair';
   if (paintMode === 'laser' || paintMode === 'measure') return 'crosshair';
   if (paintMode === 'marquee') return 'crosshair';
+  // A click here picks a hex: the hand hides which one, the cross points at it.
+  if (picksHex) return 'crosshair';
   return 'grab';
 }
 
@@ -165,7 +167,7 @@ export default function SceneViewport({
   onHexClick,
   // What the last entered hex answered, spoken over that hex until it fades.
   hexBubble = null,
-  onHexBubbleOpen,
+  onHexBubbleClose,
   drawings,
   movableDrawing,
   selectedDrawingId,
@@ -978,7 +980,10 @@ export default function SceneViewport({
       ? worldToHex(screenToWorld(point, view), scene.grid)
       : null;
     const hexMapBox = isHexGrid(scene.grid) && imageSize ? imageBox(imageSize, view) : null;
+    // A background is a picture over the map, not the map: its pixels are no
+    // hex, so a click on it must not walk the party anywhere.
     const canPickHex = event.button === 0
+      && !backgroundOnly
       && !tappedMark
       && onHexClick
       && isHexGrid(scene.grid)
@@ -1382,6 +1387,7 @@ export default function SceneViewport({
 
   const size = cellSize(scene.grid) * view.zoom;
   const gridVisible = !backgroundOnly && scene.grid.visible && size > 4;
+  const picksHex = Boolean(onHexClick) && !backgroundOnly && isHexGrid(scene.grid);
   const gridColor = gridLineColor(scene.grid);
   const gridLine = normalizeGridLineWidth(scene.grid.lineWidth);
   const measured = measurementBadge(tokens, drag, scene.grid, view, feetPerCell);
@@ -1467,7 +1473,7 @@ export default function SceneViewport({
         ...(fillViewport ? fillViewportSx : null),
         ...(covering ? coveringSx : null),
         ...(placementDrag && !backgroundOnly ? placementTargetSx : null),
-        cursor: cameraLocked ? 'default' : cursorFor(paintMode),
+        cursor: cameraLocked ? 'default' : cursorFor(paintMode, { picksHex }),
       }}
     >
       {placementDrag && !backgroundOnly ? (
@@ -1851,7 +1857,7 @@ export default function SceneViewport({
         );
       })() : null}
 
-      {hexBubble ? (() => {
+      {hexBubble && !backgroundOnly ? (() => {
         const centre = worldToScreen(hexToWorld(hexBubble.hex, scene.grid), view);
         return (
           <HexBubble
@@ -1859,7 +1865,7 @@ export default function SceneViewport({
             x={centre.x}
             // Clear of the hex itself: half its height, plus the tail.
             y={centre.y - (hexHeight(scene.grid) * view.zoom) / 2 - 4}
-            onOpen={onHexBubbleOpen}
+            onClose={onHexBubbleClose}
           />
         );
       })() : null}

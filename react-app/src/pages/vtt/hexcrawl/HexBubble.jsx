@@ -16,8 +16,9 @@ const FONT = '"Cinzel", Georgia, serif';
 // It is sized to hold the whole answer — where, when, what the sky is doing and
 // every line the entry produced — because a bubble that only fits half of it
 // sends the GM into the dialog for the other half, which is the modal it exists
-// to avoid. Every die is still one click behind it.
-export default function HexBubble({ bubble, x, y, onOpen }) {
+// to avoid. A click puts it away; every die stays behind "See the rolls" in the
+// hexcrawl corner.
+export default function HexBubble({ bubble, x, y, onClose }) {
   const theme = useTheme();
   const clock = bubble.clock || null;
   const terrain = terrainOption(bubble.hex?.terrain);
@@ -29,11 +30,14 @@ export default function HexBubble({ bubble, x, y, onOpen }) {
   return (
     <Box sx={{ ...rootSx, transform: `translate(${x}px, ${y}px) translate(-50%, -100%)` }}>
       <Box
-        component={onOpen ? 'button' : 'div'}
-        type={onOpen ? 'button' : undefined}
-        onClick={onOpen}
-        aria-label={onOpen ? `${bubble.headline} — see every roll` : undefined}
-        sx={{ ...bubbleSx, ...(onOpen ? clickableSx : null) }}
+        component={onClose ? 'button' : 'div'}
+        type={onClose ? 'button' : undefined}
+        onClick={onClose}
+        // A control over the map, not the map: without this the press reaches
+        // the viewport too and picks the hex behind the bubble.
+        data-viewport-control=""
+        aria-label={onClose ? `${bubble.headline} — close` : undefined}
+        sx={{ ...bubbleSx, ...(onClose ? clickableSx : null) }}
       >
         <Stack direction="row" spacing={0.6} sx={{ alignItems: 'center', mb: 0.35 }}>
           {TerrainIcon ? <TerrainIcon size={12} color={theme.palette.text.secondary} /> : null}
@@ -68,7 +72,6 @@ export default function HexBubble({ bubble, x, y, onOpen }) {
           </Stack>
         ) : null}
 
-        {onOpen ? <Typography sx={moreSx}>Click for the rolls</Typography> : null}
         <Box sx={tailSx} />
       </Box>
     </Box>
@@ -141,13 +144,6 @@ const footerSx = {
 };
 
 const footerTextSx = { fontSize: '0.68rem', color: 'text.secondary', whiteSpace: 'nowrap' };
-
-const moreSx = {
-  mt: 0.5,
-  fontSize: '0.58rem',
-  letterSpacing: '0.06em',
-  color: 'text.secondary',
-};
 
 const tailSx = {
   position: 'absolute',

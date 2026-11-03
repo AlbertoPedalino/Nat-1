@@ -2936,7 +2936,7 @@ export default function SceneEditor({
         selectedHex={gmPlayerPreview ? null : hexcrawl.selected}
         onHexClick={!gmPlayerPreview && hexcrawl.enabled ? hexcrawl.clickHex : undefined}
         hexBubble={!gmPlayerPreview && hexcrawl.enabled ? hexcrawl.bubble : null}
-        onHexBubbleOpen={!gmPlayerPreview ? hexcrawl.openResult : undefined}
+        onHexBubbleClose={!gmPlayerPreview ? hexcrawl.dismissBubble : undefined}
         onImageSize={setImageSize}
         onDragToken={gmPlayerPreview ? undefined : handleDragToken}
         onMoveToken={gmPlayerPreview ? undefined : handleMoveToken}

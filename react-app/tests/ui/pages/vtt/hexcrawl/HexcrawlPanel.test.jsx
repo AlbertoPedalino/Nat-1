@@ -148,8 +148,8 @@ test('a hex entered elsewhere is shown without pretending we rolled it', () => {
   expect(screen.queryByRole('button', { name: /see the rolls/i })).toBeNull();
 });
 
-test('the bubble answers over the hex, and opens the rolls when clicked', () => {
-  const onOpen = vi.fn();
+test('the bubble answers over the hex, and closes when clicked', () => {
+  const onClose = vi.fn();
   render(
     <HexBubble
       bubble={{
@@ -160,7 +160,7 @@ test('the bubble answers over the hex, and opens the rolls when clicked', () => 
       }}
       x={120}
       y={80}
-      onOpen={onOpen}
+      onClose={onClose}
     />,
   );
 
@@ -171,8 +171,8 @@ test('the bubble answers over the hex, and opens the rolls when clicked', () => 
   expect(screen.getByText('Encounter: Hard')).toBeInTheDocument();
   expect(screen.getByText(/rain · heavy · dis/i)).toBeInTheDocument();
 
-  fireEvent.click(screen.getByRole('button', { name: /wandering monster — see every roll/i }));
-  expect(onOpen).toHaveBeenCalled();
+  fireEvent.click(screen.getByRole('button', { name: /wandering monster — close/i }));
+  expect(onClose).toHaveBeenCalled();
 });
 
 test('no result means no dialog on the map', () => {

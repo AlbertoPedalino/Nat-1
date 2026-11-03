@@ -477,6 +477,10 @@ export function useSceneHexcrawl({ scene, isGm }) {
     log: clock.log,
     clockLinked: clock.active,
     bubble,
+    dismissBubble: () => {
+      clearTimeout(bubbleTimerRef.current);
+      setBubble(null);
+    },
     lastHex,
     // Whether there are rolls to go back to: the panel offers the dialog only
     // for a hex this browser rolled.
