@@ -8,6 +8,7 @@ import { normalizeFog } from '../map/fog.js';
 import { normalizeMapObjectKey, normalizeMapObjectStroke } from '../map/mapObjects.js';
 import { VTT_COLORS } from '../colors.js';
 import { normalizeAtmosphere } from './atmosphere.js';
+import { normalizeImageFilters } from './imageFilters.js';
 
 export const LAYERS = Object.freeze(['map', 'tokens', 'gm']);
 export const DEFAULT_GRID = Object.freeze({
@@ -282,6 +283,8 @@ export function toScene(row) {
     shownImage: row.shown_image === 'background' ? 'background' : 'map',
     grid: normalizeGrid(row.grid),
     atmosphere: normalizeAtmosphere(row.atmosphere),
+    // Light filter per picture, keyed by storage path (`imageFilters.js`).
+    imageFilters: normalizeImageFilters(row.image_filters),
     // null is "this scene has no fog", not "everything is hidden".
     fog: normalizeFog(row.fog),
     // The scene the players are currently shown. Only one per campaign.

@@ -47,6 +47,7 @@ import LaserOverlay from './LaserOverlay.jsx';
 import TokenSprite from '../tokens/TokenSprite.jsx';
 import TokenLayer from '../tokens/TokenLayer.jsx';
 import AtmosphereOverlay from '../atmosphere/AtmosphereOverlay.jsx';
+import { imageFilterLook } from '../../../shared/vtt/scene/imageFilters.js';
 import DeletePiecesDialog from '../tokens/DeletePiecesDialog.jsx';
 import { PIECE_POINTER_DRAG_EVENT } from '../tokens/PiecePreview.jsx';
 
@@ -132,6 +133,9 @@ export default function SceneViewport({
   canMove,
   fog,
   atmosphere,
+  // The light filter of the picture on show (`imageFilters.js`): it tints the
+  // picture only, never what stands on it.
+  imageFilter = null,
   fogOpacity = 1,
   fogOnTop = false,
   canSeeThroughFog,
@@ -306,6 +310,7 @@ export default function SceneViewport({
   // dimensions in the same render as the URL. This prevents one paint with the
   // previous picture's fit while the new <img> waits to emit `load`.
   const imageSize = preparedImageSize || loadedImageSize;
+  const imageLook = useMemo(() => imageFilterLook(imageFilter), [imageFilter]);
   const [fullscreen, setFullscreen] = useState(false);
   // The stand-in for fullscreen where the browser will not give us the real
   // thing.
@@ -1506,11 +1511,33 @@ export default function SceneViewport({
             imageRendering: 'auto',
             userSelect: 'none',
             pointerEvents: 'none',
+            filter: imageLook.filter || undefined,
           }}
         />
       ) : (
         <Typography sx={placeholderSx}>Upload a map image to start building this scene.</Typography>
       )}
+      {/* The colour half of the light filter: laid exactly over the picture and
+          multiplied into it, under everything that stands on the map. */}
+      {imageUrl && imageSize && imageLook.tint ? (
+        <Box
+          data-image-tint
+          aria-hidden
+          sx={{
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            width: imageSize.width,
+            height: imageSize.height,
+            transformOrigin: '0 0',
+            transform: `translate(${view.x}px, ${view.y}px) scale(${view.zoom})`,
+            bgcolor: imageLook.tint.color,
+            opacity: imageLook.tint.opacity,
+            mixBlendMode: 'multiply',
+            pointerEvents: 'none',
+          }}
+        />
+      ) : null}
 
       {/* Rendered whenever the map is a hexcrawl, not only while its mesh is
           on: the painted country and the picked hex are content, and the grid

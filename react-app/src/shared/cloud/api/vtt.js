@@ -10,6 +10,7 @@ import {
 import { normalizeArea } from '../../vtt/map/areas.js';
 import { normalizeFog } from '../../vtt/map/fog.js';
 import { normalizeAtmosphere } from '../../vtt/scene/atmosphere.js';
+import { normalizeImageFilters } from '../../vtt/scene/imageFilters.js';
 import {
   backgroundRemovalPatch,
   mapImageCampaignFolder,
@@ -39,7 +40,7 @@ const SIGNED_URL_TTL = 8 * 60 * 60;
 // Re-signed a little early, so a link never expires in the middle of a scene.
 const SIGNED_URL_MARGIN_MS = 15 * 60 * 1000;
 const SIGNED_URL_KEY = 'gb:vtt:signed-url:';
-const SCENE_COLUMNS = 'id, campaign_id, name, image_path, background_path, backgrounds, shown_image, grid, atmosphere, fog, is_live, play_area, updated_at';
+const SCENE_COLUMNS = 'id, campaign_id, name, image_path, background_path, backgrounds, shown_image, grid, atmosphere, image_filters, fog, is_live, play_area, updated_at';
 const TOKEN_COLUMNS = 'id, scene_id, layer, hidden_from_players, x, y, w, h, z, character_id, label, color, image_path, image_url, icon_key, icon_stroke_width, rotation, hp_current, hp_max, conditions, effects, source_ref, show_hp, turn_order, turn_active, created_by, updated_at';
 const DRAWING_COLUMNS = 'id, scene_id, layer, points, color, width, text, area, hidden_from_players, created_by, created_at, updated_at';
 
@@ -117,13 +118,14 @@ export async function createScene(campaignId, name) {
 }
 
 export async function updateScene(sceneId, {
-  name, grid, atmosphere, imagePath, backgroundPath, backgrounds, shownImage, fog, playArea,
+  name, grid, atmosphere, imageFilters, imagePath, backgroundPath, backgrounds, shownImage, fog, playArea,
 } = {}) {
   const supabase = requireClient();
   const patch = {};
   if (name !== undefined) patch.name = sanitizeName(name);
   if (grid !== undefined) patch.grid = normalizeGrid(grid);
   if (atmosphere !== undefined) patch.atmosphere = normalizeAtmosphere(atmosphere);
+  if (imageFilters !== undefined) patch.image_filters = normalizeImageFilters(imageFilters);
   if (imagePath !== undefined) patch.image_path = imagePath || null;
   if (backgroundPath !== undefined) patch.background_path = backgroundPath || null;
   if (backgrounds !== undefined) patch.backgrounds = normalizeBackgrounds(backgrounds);

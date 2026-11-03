@@ -23,6 +23,7 @@ export default function MapCorner({
   onAddImage,
   onGridChange,
   onAtmosphereChange,
+  onImageFilterChange,
   onPlayAreaChange,
   onFitPlayArea,
 }) {
@@ -58,6 +59,7 @@ export default function MapCorner({
             onAddImage={onAddImage}
             onGridChange={onGridChange}
             onAtmosphereChange={onAtmosphereChange}
+            onImageFilterChange={onImageFilterChange}
             onPlayAreaChange={onPlayAreaChange}
             onFitPlayArea={onFitPlayArea}
             onShownImageChange={onShownImageChange}

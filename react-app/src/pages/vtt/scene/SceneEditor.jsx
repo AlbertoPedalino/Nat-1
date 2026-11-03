@@ -86,6 +86,7 @@ import {
 import { sanitizeNoteText } from '../../../shared/vtt/map/drawing.js';
 import { DEFAULT_AREA_OPTIONS, areaEffect } from '../../../shared/vtt/map/areas.js';
 import { normalizeAtmosphere } from '../../../shared/vtt/scene/atmosphere.js';
+import { imageFilterFor, withImageFilter } from '../../../shared/vtt/scene/imageFilters.js';
 import { FEET_PER_CELL } from '../../../shared/vtt/map/measure.js';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { isHexGrid } from '../../../shared/vtt/map/hexGeometry.js';
@@ -168,6 +169,7 @@ import {
   sceneViewSwitchSx,
   sceneGmControlsSx,
   sceneControlsPassThroughSx,
+  hiddenOnPhoneSx,
   scenePlayerViewSwitchSx,
   viewButtonSx,
   sheetLoadingSx,
@@ -348,6 +350,7 @@ export default function SceneEditor({
   const imageLoadingRef = useRef(false);
   const gridTimerRef = useRef(null);
   const atmosphereTimerRef = useRef(null);
+  const imageFilterTimerRef = useRef(null);
   const playAreaTimerRef = useRef(null);
   const draggingRef = useRef(null);
   // The last drag frame sent to the table, repeated while the piece is held.
@@ -671,6 +674,7 @@ export default function SceneEditor({
   useEffect(() => () => {
     clearTimeout(gridTimerRef.current);
     clearTimeout(atmosphereTimerRef.current);
+    clearTimeout(imageFilterTimerRef.current);
     clearTimeout(playAreaTimerRef.current);
   }, []);
 
@@ -1118,6 +1122,31 @@ export default function SceneEditor({
         .finally(finishEdit);
     }, ATMOSPHERE_SAVE_DELAY);
   }, [beginSceneEdit, noteSceneWrite, notify, onSceneChange, scene]);
+
+  // The light filter of one picture. The whole map is written, pruned to the
+  // pictures the scene still has, so a removed background's entry goes with
+  // the next change instead of needing a cleanup of its own.
+  const handleImageFilterChange = useCallback((path, filter) => {
+    if (!path) return;
+    const next = withImageFilter(
+      scene.imageFilters,
+      path,
+      filter,
+      [scene.imagePath, ...sceneBackgrounds(scene)],
+    );
+    const finishEdit = beginSceneEdit('imageFilters');
+    onSceneChange({ ...scene, imageFilters: next });
+    clearTimeout(imageFilterTimerRef.current);
+    imageFilterTimerRef.current = setTimeout(() => {
+      updateScene(scene.id, { imageFilters: next })
+        .then(noteSceneWrite)
+        .catch((cause) => notify('error', cause?.message || 'Could not save the light filter.'))
+        .finally(finishEdit);
+    }, ATMOSPHERE_SAVE_DELAY);
+  }, [beginSceneEdit, noteSceneWrite, notify, onSceneChange, scene]);
+  // The filter of the picture actually on screen: the one held while the next
+  // is decoding keeps its own light until it is replaced.
+  const viewportImageFilter = imageFilterFor(scene.imageFilters, viewportDisplay.path);
 
   // Painting mirrors the token drag: every stroke frame goes out on broadcast,
   // and the database sees one write when the brush lifts.
@@ -2705,6 +2734,7 @@ export default function SceneEditor({
           canMove={() => false}
           fog={scene.fog}
           atmosphere={scene.atmosphere}
+          imageFilter={viewportImageFilter}
           fogOpacity={PLAYER_FOG_OPACITY}
           fogOnTop
           paintMode="select"
@@ -2800,7 +2830,11 @@ export default function SceneEditor({
                   onClick={handleTogglePlayerPreview}
                   sx={viewButtonSx}
                 >
-                  {gmPlayerPreview ? 'Exit player view' : 'Player view'}
+                  {/* In the preview the live controls are gone, so the full
+                      label has room even on a phone. */}
+                  {gmPlayerPreview ? 'Exit player view' : (
+                    <>Player<Box component="span" sx={hiddenOnPhoneSx}>{' view'}</Box></>
+                  )}
                 </Button>
               </Tooltip>
             ) : null}
@@ -2834,6 +2868,7 @@ export default function SceneEditor({
         canMove={gmPlayerPreview ? () => false : canMove}
         fog={scene.fog}
         atmosphere={scene.atmosphere}
+        imageFilter={viewportImageFilter}
         fogOpacity={role.isGm && !gmPlayerPreview ? GM_FOG_OPACITY : PLAYER_FOG_OPACITY}
         fogOnTop={!role.isGm || gmPlayerPreview}
         canSeeThroughFog={!role.isGm ? canMove : undefined}
@@ -2877,6 +2912,7 @@ export default function SceneEditor({
                 onAddImage={handleAddImage}
                 onGridChange={handleGridChange}
                 onAtmosphereChange={handleAtmosphereChange}
+                onImageFilterChange={handleImageFilterChange}
                 onPlayAreaChange={handlePlayAreaChange}
                 onFitPlayArea={handleFitPlayArea}
               />

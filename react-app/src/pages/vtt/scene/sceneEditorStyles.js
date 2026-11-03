@@ -76,9 +76,10 @@ export const sceneGmControlsSx = (theme) => ({
   alignItems: 'center',
   gap: 0.75,
   minWidth: 0,
-  // Phones only: tablets keep the buttons as they are.
+  // Phones only: tablets keep the buttons as they are. `&&` outranks the
+  // presenter group's own button rule, which is inserted after this one.
   [theme.breakpoints.down('sm')]: {
-    '& .MuiButton-root': {
+    '&& .MuiButton-root': {
       minWidth: 0,
       px: 0.75,
       fontSize: '0.6rem',
@@ -88,6 +89,12 @@ export const sceneGmControlsSx = (theme) => ({
     },
   },
 });
+
+// The " view" of Freeze view / Player view: dropped on phones so the GM's four
+// buttons fit one row.
+export const hiddenOnPhoneSx = {
+  display: { xs: 'none', sm: 'inline' },
+};
 
 // A player's bar keeps the Sheet button on the name's row.
 export const sceneControlsPassThroughSx = {
