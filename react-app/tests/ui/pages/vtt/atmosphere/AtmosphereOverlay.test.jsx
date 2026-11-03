@@ -99,3 +99,20 @@ test('a lost context starts the weather again on a new canvas, and contexts are 
     vi.useRealTimers();
   }
 });
+
+// WebKit (Safari, and every browser on an iPad or iPhone) does not composite a
+// straight-alpha canvas the way desktop Chrome does, and the weather came out
+// far stronger on tablets. The canvas stays premultiplied, the default every
+// browser agrees on, and the shaders write premultiplied colour for it.
+test('the weather canvas is premultiplied so tablets composite it like desktop', () => {
+  const getContext = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(() => fakeContext().gl);
+  vi.spyOn(globalThis, 'requestAnimationFrame').mockImplementation(() => 0);
+  render(<AtmosphereOverlay atmosphere={{ type: 'fog', intensity: 0.8 }} />);
+
+  expect(getContext).toHaveBeenCalledWith('webgl', expect.objectContaining({ premultipliedAlpha: true }));
+  ATMOSPHERE_TYPES.filter((type) => type !== 'none').forEach((type) => {
+    expect(getAtmosphereFragmentShader(type)).toContain(
+      'gl_FragColor = vec4(color * finalAlpha * finalAlpha * finalAlpha, finalAlpha * finalAlpha);',
+    );
+  });
+});

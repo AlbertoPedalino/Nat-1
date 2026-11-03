@@ -133,6 +133,10 @@ void main() {
 ${body}
 
   float presence = 0.28 + u_intensity * 0.86;
-  gl_FragColor = vec4(color, clamp(alpha * presence, 0.0, 0.92));
+  float finalAlpha = clamp(alpha * presence, 0.0, 0.92);
+  // Premultiplied, and exactly what desktop showed before the canvas switched
+  // to premultiplied alpha: (colour·a³, a²). The old straight-alpha blend
+  // stored (colour·a, a²) and the browser then multiplied by a² again.
+  gl_FragColor = vec4(color * finalAlpha * finalAlpha * finalAlpha, finalAlpha * finalAlpha);
 }`;
 }
