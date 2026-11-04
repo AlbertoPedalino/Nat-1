@@ -169,7 +169,6 @@ import {
   sceneViewSwitchSx,
   sceneGmControlsSx,
   sceneControlsPassThroughSx,
-  hiddenOnPhoneSx,
   scenePlayerViewSwitchSx,
   viewButtonSx,
   sheetLoadingSx,
@@ -2839,11 +2838,9 @@ export default function SceneEditor({
                   onClick={handleTogglePlayerPreview}
                   sx={viewButtonSx}
                 >
-                  {/* In the preview the live controls are gone, so the full
-                      label has room even on a phone. */}
-                  {gmPlayerPreview ? 'Exit player view' : (
-                    <>Player<Box component="span" sx={hiddenOnPhoneSx}>{' view'}</Box></>
-                  )}
+                  {/* The full label even on a phone: a bare "Player" reads
+                      as a person, not a view. */}
+                  {gmPlayerPreview ? 'Exit player view' : 'Player view'}
                 </Button>
               </Tooltip>
             ) : null}
@@ -3125,12 +3122,6 @@ export default function SceneEditor({
           ? (token) => openCharacterSheet(token.characterId)
           : null}
       /> : null}
-
-      {gmPlayerPreview ? (
-        <Typography variant="caption" color="text.secondary">
-          Player view is read-only and hides GM-only content, staged pieces, and unrevealed fog.
-        </Typography>
-      ) : null}
     </Stack>
   );
 }
