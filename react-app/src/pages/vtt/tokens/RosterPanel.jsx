@@ -1,15 +1,9 @@
-import { useEffect, useState } from 'react';
-import {
-  Box, Button, Collapse, IconButton, Stack, TextField, Typography,
-} from '@mui/material';
-import {
-  ImagePlus, Plus, Skull, Swords, X,
-} from 'lucide-react';
-import ColorField from '../../../shared/ui/ColorField.jsx';
+import { Box, Button, Stack, Typography } from '@mui/material';
+import { Skull, Swords } from 'lucide-react';
 import { placedCharacterIds } from '../../../shared/campaign/roster.js';
 import { usePortraits } from '../../../shared/character/profile/usePortraits.js';
-import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import PiecePreview, { beginPiecePointerDrag } from './PiecePreview.jsx';
+import TokenComposer from './TokenComposer.jsx';
 
 const LAYER_NAMES = { map: 'map', tokens: 'token', gm: 'GM' };
 
@@ -32,35 +26,6 @@ export default function RosterPanel({
 }) {
   const placed = placedCharacterIds(tokens);
   const portraits = usePortraits((roster || []).map((entry) => entry.portraitPath));
-  const [looseTokenOpen, setLooseTokenOpen] = useState(false);
-  const [looseTokenName, setLooseTokenName] = useState('Token');
-  const [looseTokenColor, setLooseTokenColor] = useState(VTT_COLORS.dungeon);
-  const [looseTokenImage, setLooseTokenImage] = useState(null);
-  const [looseTokenImageUrl, setLooseTokenImageUrl] = useState(null);
-
-  useEffect(() => {
-    if (!looseTokenImage) {
-      setLooseTokenImageUrl(null);
-      return undefined;
-    }
-    const url = URL.createObjectURL(looseTokenImage);
-    setLooseTokenImageUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [looseTokenImage]);
-
-  const looseTokenLabel = looseTokenName.trim()
-    || (activeLayer === 'gm' ? 'Hidden' : 'Token');
-  const looseTokenPlacement = {
-    kind: 'token',
-    token: {
-      layer: activeLayer,
-      label: looseTokenLabel,
-      color: looseTokenColor,
-      w: 1,
-      h: 1,
-      ...(looseTokenImage ? { imageFile: looseTokenImage, imageUrl: looseTokenImageUrl } : {}),
-    },
-  };
 
   return (
     <Box sx={panelInnerSx}>
@@ -133,86 +98,17 @@ export default function RosterPanel({
 
         {/* New pieces land on the layer being edited: there is no separate
             "hidden token" button, because the GM layer is a layer. */}
-        <Button
-          size="small"
-          variant="outlined"
-          startIcon={looseTokenOpen ? <X size={15} /> : <Plus size={15} />}
-          disabled={placementDisabled || busy}
-          aria-expanded={looseTokenOpen}
-          onClick={() => setLooseTokenOpen((current) => !current)}
-        >
-          {looseTokenOpen
-            ? 'Close token editor'
-            : `Add ${LAYER_NAMES[activeLayer] || 'token'} piece`}
-        </Button>
-        <Collapse in={looseTokenOpen} unmountOnExit>
-          <Stack spacing={1} sx={composerSx}>
-            <Box
-              role="button"
-              tabIndex={0}
-              aria-disabled={busy || placementDisabled}
-              aria-label="Drag generic token to map"
-              onPointerDown={(event) => {
-                if (busy || placementDisabled) return;
-                beginPiecePointerDrag(event, looseTokenPlacement, {
-                  onPlacementDragStart,
-                  onPlacementDragEnd,
-                });
-              }}
-              onKeyDown={(event) => {
-                if (busy || placementDisabled || !['Enter', ' '].includes(event.key)) return;
-                event.preventDefault();
-                onAddToken?.(looseTokenPlacement.token);
-              }}
-              sx={{
-                ...tokenDraftSx,
-                ...((busy || placementDisabled) ? tokenDraftDisabledSx : null),
-              }}
-            >
-              <PiecePreview token={looseTokenPlacement.token} size={42} />
-              <Typography noWrap sx={draftNameSx}>{looseTokenLabel}</Typography>
-            </Box>
-            <TextField
-              size="small"
-              label="Token name"
-              value={looseTokenName}
-              slotProps={{ htmlInput: { maxLength: 60 } }}
-              onChange={(event) => setLooseTokenName(event.target.value)}
-            />
-            <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center' }}>
-              <ColorField
-                value={looseTokenColor}
-                onChange={setLooseTokenColor}
-                label="Token color"
-                sx={tokenColorSx}
-              />
-              <Button component="label" size="small" startIcon={<ImagePlus size={14} />}>
-                {looseTokenImage ? 'Change image' : 'Image'}
-                <Box
-                  component="input"
-                  type="file"
-                  accept="image/*"
-                  hidden
-                  onChange={(event) => setLooseTokenImage(event.target.files?.[0] || null)}
-                />
-              </Button>
-              {looseTokenImage ? (
-                <IconButton size="small" aria-label="Remove token image" onClick={() => setLooseTokenImage(null)}>
-                  <X size={14} />
-                </IconButton>
-              ) : null}
-              <Button
-                size="small"
-                variant="contained"
-                disabled={busy || placementDisabled}
-                onClick={() => onAddToken?.(looseTokenPlacement.token)}
-                sx={{ ml: 'auto !important' }}
-              >
-                Place
-              </Button>
-            </Stack>
-          </Stack>
-        </Collapse>
+        <TokenComposer
+          layer={activeLayer}
+          emptyLabel={activeLayer === 'gm' ? 'Hidden' : 'Token'}
+          openLabel={`Add ${LAYER_NAMES[activeLayer] || 'token'} piece`}
+          allowImage
+          busy={busy}
+          disabled={placementDisabled}
+          onAdd={onAddToken}
+          onPlacementDragStart={onPlacementDragStart}
+          onPlacementDragEnd={onPlacementDragEnd}
+        />
         {/* Two ways in, because they answer different questions: a prepared
             fight, or the creature nobody planned for. */}
         <Button
@@ -254,41 +150,6 @@ const rowSx = {
 };
 
 const panelInnerSx = { p: 0, bgcolor: 'transparent', backgroundImage: 'none' };
-
-const composerSx = {
-  mt: 0.75,
-  p: 1,
-  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.25)}`,
-  borderRadius: 1,
-  bgcolor: vttAlpha(VTT_COLORS.black, 0.2),
-};
-
-const tokenDraftSx = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: 1,
-  p: 0.75,
-  borderRadius: 1,
-  border: `1px dashed ${vttAlpha(VTT_COLORS.gold, 0.55)}`,
-  touchAction: 'pan-y',
-  WebkitTouchCallout: 'none',
-  userSelect: 'none',
-  cursor: 'grab',
-};
-
-const tokenDraftDisabledSx = { opacity: 0.5, cursor: 'default' };
-
-const draftNameSx = { minWidth: 0, fontSize: '0.82rem', color: 'text.primary' };
-
-const tokenColorSx = {
-  width: 38,
-  height: 30,
-  p: 0.25,
-  borderRadius: 1,
-  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.4)}`,
-  bgcolor: vttAlpha(VTT_COLORS.black, 0.3),
-  cursor: 'pointer',
-};
 
 const nameSx = {
   flex: 1,

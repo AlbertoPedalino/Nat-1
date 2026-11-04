@@ -83,3 +83,24 @@ test('the open panel fades in place while a piece is being positioned', () => {
   expect(panel).toHaveStyle({ opacity: 0, pointerEvents: 'none' });
   expect(panel.style.transform).toBe('');
 });
+
+test('the cursor opens its own panel when it has one, and a second click folds it', () => {
+  const useCursor = vi.fn();
+
+  render(
+    <SceneToolRail
+      activeId="cursor"
+      onCursor={useCursor}
+      cursorContent={<div>Cursor modes</div>}
+      groups={[]}
+    />,
+  );
+
+  fireEvent.click(screen.getByRole('button', { name: 'Normal cursor' }));
+  expect(useCursor).toHaveBeenCalledOnce();
+  expect(screen.getByText('Cursor modes')).toBeInTheDocument();
+
+  fireEvent.click(screen.getByRole('button', { name: 'Normal cursor' }));
+  expect(useCursor).toHaveBeenCalledOnce();
+  expect(screen.queryByText('Cursor modes')).not.toBeInTheDocument();
+});

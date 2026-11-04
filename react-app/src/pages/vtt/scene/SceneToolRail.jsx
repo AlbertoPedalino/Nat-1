@@ -11,9 +11,14 @@ import { battleMapSurfaceSx } from '../map/battleMapSurface.js';
 // controls over a battlemap covered the board it was meant to adjust. Only one
 // group is open at a time, and the panel is anchored rather than modal so the
 // map stays visible and usable behind it.
-export default function SceneToolRail({ groups, activeId = 'cursor', onCursor, placing = false }) {
+// The cursor's own panel, when given, holds its modes (pointer or box select):
+// the cursor button then opens it like any other tool.
+export default function SceneToolRail({
+  groups, activeId = 'cursor', onCursor, cursorContent = null, placing = false,
+}) {
   const [openId, setOpenId] = useState(null);
-  const open = groups.find((group) => group.id === openId) || null;
+  const cursorGroup = cursorContent ? { id: 'cursor', label: 'Cursor', content: cursorContent } : null;
+  const open = (openId === 'cursor' ? cursorGroup : groups.find((group) => group.id === openId)) || null;
   const closePanel = () => setOpenId(null);
 
   return (
@@ -25,8 +30,14 @@ export default function SceneToolRail({ groups, activeId = 'cursor', onCursor, p
           aria-label="Normal cursor"
           aria-pressed={activeId === 'cursor'}
           onClick={() => {
+            // A second click only folds the cursor's panel away: box select,
+            // if chosen there, stays on.
+            if (openId === 'cursor') {
+              closePanel();
+              return;
+            }
             onCursor?.();
-            closePanel();
+            setOpenId(cursorGroup ? 'cursor' : null);
           }}
           sx={{ ...railButtonSx, ...(activeId === 'cursor' ? railButtonActiveSx : null) }}
         >

@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import {
   Cloud, Dices, DoorOpen, Eye, EyeOff, Pencil, Pointer,
-  Ruler, Shapes, SquareDashedMousePointer, Users,
+  Ruler, Shapes, Users,
 } from 'lucide-react';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
@@ -181,6 +181,7 @@ import {
 import {
   DrawPanel,
   FogPanel,
+  CursorPanel,
   LaserPanel,
   LayerPanel,
   MeasurePanel,
@@ -255,7 +256,7 @@ function naturalImageSize(image) {
 }
 
 function paintToolGroup(mode) {
-  if (mode === 'marquee') return 'select';
+  if (mode === 'marquee') return 'cursor';
   if (['draw', 'erase', 'text', 'area'].includes(mode)) return 'draw';
   if (mode === 'laser') return 'laser';
   if (mode === 'measure') return 'ruler';
@@ -1708,18 +1709,6 @@ export default function SceneEditor({
     }
   }, [activeLayer, canPlacePiece, nextFreeCell, notify, scene.campaignId, scene.id, setTokens]);
 
-  // A player's marker always lands on the token layer: they have no layer
-  // selector, and the GM layer is not theirs to write to — the insert policy
-  // would refuse it anyway.
-  const handleAddMarker = useCallback(() => {
-    if (!canPlacePiece()) return;
-    addToken({
-      ...nextFreeCell(),
-      layer: 'tokens',
-      label: 'Marker',
-    });
-  }, [addToken, canPlacePiece, nextFreeCell]);
-
   const handlePlaceObject = useCallback(async (object, position) => {
     if (!object?.key) return;
     if (!canPlacePiece()) return;
@@ -2164,22 +2153,8 @@ export default function SceneEditor({
       ),
     };
 
-    const selectGroup = {
-      id: 'select',
-      label: 'Select',
-      icon: SquareDashedMousePointer,
-      onActivate: () => setPaintMode('marquee'),
-      content: (
-        <Typography variant="caption" color="text.secondary">
-          Drag a rectangle over pieces you can control. Drag any selected piece to move the group;
-          hold Shift or Ctrl to add another area. Use Delete or Backspace to remove it, and Escape to clear.
-        </Typography>
-      ),
-    };
-
     if (!role.isGm) {
       return [
-        selectGroup,
         {
           id: 'pieces',
           label: 'Pieces',
@@ -2193,7 +2168,9 @@ export default function SceneEditor({
               placementDisabled={shownImageForViewport === 'background'}
               onPlaceCharacter={handlePlaceCharacter}
               onRemoveCharacter={handleRemoveCharacter}
-              onAddMarker={handleAddMarker}
+              // A player's marker always says layer 'tokens': the GM layer is not
+              // theirs to write to, and the insert policy would refuse it anyway.
+              onAddToken={handleAddToken}
               onPlacementDragStart={setPlacementDrag}
               onPlacementDragEnd={() => setPlacementDrag(null)}
             />
@@ -2235,7 +2212,6 @@ export default function SceneEditor({
     }
 
     return [
-      selectGroup,
       {
         id: 'pieces',
         label: 'Pieces',
@@ -2336,7 +2312,7 @@ export default function SceneEditor({
       },
     ];
   }, [
-    activeLayer, areaOptions, brushSize, busy, drawColor, drawWidth, erasable.length, handleAddMarker,
+    activeLayer, areaOptions, brushSize, busy, drawColor, drawWidth, erasable.length,
     handleAreaOptionsChange,
     handleAddToken, handleEnableFog, handleFitPlayArea, handleFogAll, handleGridChange,
     handlePlaceCharacter, handlePlaceObject, handlePlayAreaChange, handleRemoveCharacter,
@@ -3017,6 +2993,7 @@ export default function SceneEditor({
             groups={toolGroups}
             activeId={paintToolGroup(allowedPaintMode)}
             onCursor={() => setPaintMode('select')}
+            cursorContent={<CursorPanel paintMode={allowedPaintMode} onPaintModeChange={setPaintMode} />}
             placing={Boolean(placementDrag)}
           />
         )}

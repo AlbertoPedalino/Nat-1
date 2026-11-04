@@ -1,11 +1,12 @@
 import { Box, Button, Stack, Typography } from '@mui/material';
-import { MapPin, Plus } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import { placedCharacterIds } from '../../../shared/campaign/roster.js';
 import { usePortraits } from '../../../shared/character/profile/usePortraits.js';
 import PiecePreview, { beginPiecePointerDrag } from '../tokens/PiecePreview.jsx';
+import TokenComposer from '../tokens/TokenComposer.jsx';
 
 // What a player can do to the board. Deliberately short: place their own
-// character, drop a plain marker, and move or pick up either. Everything else on
+// character, add a marker of their own (a name and a colour), and move or pick up either. Everything else on
 // the map belongs to the GM, and the database says so too — this panel only
 // stops them being offered a write that would be refused.
 export default function PlayerPanel({
@@ -15,7 +16,7 @@ export default function PlayerPanel({
   busy,
   onPlaceCharacter,
   onRemoveCharacter,
-  onAddMarker,
+  onAddToken,
   onPlacementDragStart,
   onPlacementDragEnd,
   placementDisabled = false,
@@ -89,15 +90,16 @@ export default function PlayerPanel({
           </Typography>
         )}
 
-        <Button
-          size="small"
-          variant="outlined"
-          startIcon={<Plus size={15} />}
-          disabled={placementDisabled || busy}
-          onClick={onAddMarker}
-        >
-          Drop a marker
-        </Button>
+        <TokenComposer
+          layer="tokens"
+          defaultLabel="Marker"
+          openLabel="Add a marker"
+          busy={busy}
+          disabled={placementDisabled}
+          onAdd={onAddToken}
+          onPlacementDragStart={onPlacementDragStart}
+          onPlacementDragEnd={onPlacementDragEnd}
+        />
 
         <Stack direction="row" spacing={0.75} sx={{ alignItems: 'flex-start' }}>
           <Box sx={{ color: 'text.secondary', mt: '2px' }}><MapPin size={13} /></Box>

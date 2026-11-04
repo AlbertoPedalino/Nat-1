@@ -45,6 +45,7 @@ import {
   Ruler,
   Snowflake,
   Square,
+  SquareDashedMousePointer,
   SunMedium,
   ThermometerSun,
   Triangle,
@@ -1179,6 +1180,38 @@ export function MeasurePanel({
 
 // Its own tool rather than a fourth pencil: everything in the drawing panel
 // leaves a row behind, and this leaves nothing at all.
+// The cursor and the rectangle are two ways of picking up the same pieces, so
+// they share one rail button: the plain pointer, or a box drawn around several.
+export function CursorPanel({ paintMode, onPaintModeChange }) {
+  const boxSelect = paintMode === 'marquee';
+  return (
+    <Stack spacing={1}>
+      <ToggleButtonGroup
+        size="small"
+        exclusive
+        fullWidth
+        value={boxSelect ? 'marquee' : 'select'}
+        onChange={(_, value) => value && onPaintModeChange(value)}
+        aria-label="Cursor mode"
+      >
+        <ToggleButton value="select" aria-label="Pointer">
+          <MousePointer2 size={14} />
+          <Box component="span" sx={pillLabelSx}>Pointer</Box>
+        </ToggleButton>
+        <ToggleButton value="marquee" aria-label="Box select">
+          <SquareDashedMousePointer size={14} />
+          <Box component="span" sx={pillLabelSx}>Box select</Box>
+        </ToggleButton>
+      </ToggleButtonGroup>
+      <Typography variant="caption" color="text.secondary">
+        {boxSelect
+          ? 'Drag a rectangle over pieces you can control. Drag any selected piece to move the group; hold Shift or Ctrl to add another area. Use Delete or Backspace to remove it, and Escape to clear.'
+          : 'Drag a piece to move it. Right-click a piece for its label and conditions.'}
+      </Typography>
+    </Stack>
+  );
+}
+
 export function LaserPanel({ paintMode, onPaintModeChange }) {
   const active = paintMode === 'laser';
   return (

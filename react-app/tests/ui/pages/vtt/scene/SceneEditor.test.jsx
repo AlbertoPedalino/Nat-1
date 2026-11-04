@@ -677,7 +677,9 @@ test('players receive the group-selection tool with permission-checked batch act
   );
 
   const props = sceneViewportMock.mock.calls.at(-1)[0];
-  expect(props.controls.props.groups.map((group) => group.id)).toContain('select');
+  // Box select lives in the cursor's own panel, not a rail group of its own.
+  expect(props.controls.props.groups.map((group) => group.id)).not.toContain('select');
+  expect(props.controls.props.cursorContent).toBeTruthy();
   expect(props.onMoveTokens).toEqual(expect.any(Function));
   expect(props.onDeleteTokens).toEqual(expect.any(Function));
   expect(props.canSeeThroughFog({ characterId: 'hero-1', layer: 'tokens' })).toBe(true);
