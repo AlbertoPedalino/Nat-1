@@ -1,9 +1,32 @@
+// The key a choice is saved under: the base key, or a multiclass-prefixed copy
+// (`mc1_<key>`) when the class was added as a multiclass.
+const isChoiceKey = (stored, key) => stored === key || stored.replace(/^mc\d+_/, '') === key;
+
 export function getChoiceValue(C, key) {
   if (!C?.choices) return null;
-  const match = Object.entries(C.choices).find(([k]) => k === key || k.replace(/^mc\d+_/, '') === key);
+  const match = Object.entries(C.choices).find(([k]) => isChoiceKey(k, key));
   if (!match) return null;
   const raw = match[1];
   return String(Array.isArray(raw) ? raw[0] : raw || '');
+}
+
+// The prefix the builder gives a class's choices: none for the primary class,
+// `mc<i>_` for the i-th multiclass.
+export function classChoicePrefix(C, className) {
+  const target = String(className || '').toLowerCase();
+  const index = (C?.extraClasses || []).findIndex((ec) => String(ec?.name || '').toLowerCase() === target);
+  return String(C?.className || '').toLowerCase() !== target && index >= 0 ? `mc${index}_` : '';
+}
+
+// Patch that sets a single-pick builder choice from the sheet, in the builder's
+// own format (a one-item array), under the key it is already saved as — or, if
+// never chosen, the key the builder uses for `className`'s choices.
+export function setChoiceValuePatch(C, key, value, { className = '' } = {}) {
+  const choices = { ...(C?.choices || {}) };
+  const storedKey = Object.keys(choices).find((k) => isChoiceKey(k, key))
+    || `${classChoicePrefix(C, className)}${key}`;
+  choices[storedKey] = [value];
+  return { choices };
 }
 
 export function matchesChoiceRequirement(C, requirement) {

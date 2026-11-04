@@ -14,14 +14,19 @@
 // uses it twice. Share Spells (lv.15): a spell targeting you can also affect the
 // beast within 30 ft.
 //
-// Shape of `C.primalCompanion` (absent until the sheet first changes it):
-//   { beast: 'Beast of the Land' | 'Beast of the Sea' | 'Beast of the Sky',
-//     damageType: string, hpCurrent: number | null }
+// Which beast is summoned is the builder choice `subclass_beast_companion_type`
+// — the one place the builder and the sheet both read and write. The rest lives
+// in `C.primalCompanion` (absent until the sheet first changes it):
+//   { beast: string, damageType: string, hpCurrent: number | null }
+//   `beast` tags the beast this state belongs to: when the choice moves to a
+//   different beast, the state is stale and the new one starts fresh.
 //   hpCurrent null = at full HP; its maximum comes from the stat block, which
 //   grows with the Ranger level, so a number is only stored once it is hurt.
 //
 // Like the Eldritch Cannon, the beast's HP lives on the character and is NOT a
 // synced combat vital.
+
+import { getChoiceValue, setChoiceValuePatch } from '../progression/choiceUtils.js';
 
 export const PRIMAL_BEASTS = Object.freeze([
   { name: 'Beast of the Land', short: 'Land', damageTypes: ['Bludgeoning', 'Piercing', 'Slashing'] },
@@ -42,11 +47,12 @@ export function primalStrikeDamageTypes(beastName, rangerLevel) {
   return Number(rangerLevel) >= EXCEPTIONAL_TRAINING_LEVEL ? [...types, 'Force'] : types;
 }
 
-// The companion as the sheet shows it: the stored state, or the beast picked in
-// the builder (`builderChoice`), each field falling back to a valid default.
-export function getPrimalCompanion(C, { builderChoice = '', rangerLevel = 0 } = {}) {
-  const stored = C?.primalCompanion || {};
-  const beast = beastByName(stored.beast)?.name || beastByName(builderChoice)?.name || PRIMAL_BEASTS[0].name;
+// The companion as the sheet shows it: the chosen beast (Land when none is
+// chosen) with its stored damage type and HP, each falling back to a valid
+// default.
+export function getPrimalCompanion(C, { rangerLevel = 0 } = {}) {
+  const beast = beastByName(getChoiceValue(C, PRIMAL_COMPANION_CHOICE_KEY))?.name || PRIMAL_BEASTS[0].name;
+  const stored = C?.primalCompanion?.beast === beast ? C.primalCompanion : {};
   const types = primalStrikeDamageTypes(beast, rangerLevel);
   const damageType = types.includes(stored.damageType) ? stored.damageType : types[0];
   const hp = stored.hpCurrent == null ? NaN : Number(stored.hpCurrent);
@@ -61,11 +67,13 @@ export function primalCompanionHp(companion, maxHp) {
 }
 
 // Summoning a beast (a different one after a Long Rest, or the same one again)
-// brings it at full HP with the first damage type it allows.
-export function summonPrimalBeastPatch(beastName, rangerLevel) {
+// records it as the builder choice and brings it at full HP with the first
+// damage type it allows.
+export function summonPrimalBeastPatch(C, beastName, rangerLevel) {
   const beast = beastByName(beastName);
   if (!beast) return null;
   return {
+    ...setChoiceValuePatch(C, PRIMAL_COMPANION_CHOICE_KEY, beast.name, { className: 'Ranger' }),
     primalCompanion: {
       beast: beast.name,
       damageType: primalStrikeDamageTypes(beast.name, rangerLevel)[0],

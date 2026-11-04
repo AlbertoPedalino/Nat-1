@@ -43,7 +43,7 @@ const ranger = (primalCompanion) => ({
   level: 5,
   scoreMethod: 'manual',
   manualScores: { str: 10, dex: 14, con: 12, int: 10, wis: 16, cha: 8 },
-  choices: { subclass_beast_companion_type: 'Beast of the Land' },
+  choices: { subclass_beast_companion_type: ['Beast of the Land'] },
   ...(primalCompanion ? { primalCompanion } : {}),
 });
 
@@ -70,10 +70,12 @@ test('shows the builder beast at full HP, scaled to the Ranger', () => {
   expect(screen.getByRole('button', { name: 'Bludgeoning' })).toHaveAttribute('aria-pressed', 'true');
 });
 
-test('choosing another beast summons it at full HP; the damage type is saved', () => {
+test('choosing another beast summons it at full HP and updates the builder choice; the damage type is saved', () => {
   const { saved, onUpdateCharacter } = renderPanel(ranger());
   fireEvent.click(screen.getByRole('button', { name: 'Sky' }));
   expect(saved()[0].primalCompanion).toEqual({ beast: 'Beast of the Sky', damageType: 'Slashing', hpCurrent: null });
+  // The builder reads the same choice.
+  expect(saved()[0].choices.subclass_beast_companion_type).toEqual(['Beast of the Sky']);
 
   onUpdateCharacter.mockClear();
   fireEvent.click(screen.getByRole('button', { name: 'Piercing' }));

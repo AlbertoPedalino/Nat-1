@@ -71,17 +71,26 @@ test('damage types follow the beast, with Force from Exceptional Training', () =
   assert.deepEqual(primalStrikeDamageTypes('Beast of the Sky', 7), ['Slashing', 'Force']);
 });
 
-test('the companion starts from the builder choice and falls back to valid values', () => {
+const withChoice = (beast, extra = {}) => ({ choices: { subclass_beast_companion_type: [beast] }, ...extra });
+
+test('the beast is the builder choice; its stored state falls back to valid values', () => {
   assert.deepEqual(
-    getPrimalCompanion({}, { builderChoice: 'Beast of the Sea', rangerLevel: 3 }),
+    getPrimalCompanion(withChoice('Beast of the Sea'), { rangerLevel: 3 }),
     { beast: 'Beast of the Sea', damageType: 'Bludgeoning', hpCurrent: null },
   );
-  // The stored beast wins over the builder's; a type the beast cannot deal resets.
+  // A multiclass-prefixed choice is read too.
+  assert.equal(getPrimalCompanion({ choices: { mc1_subclass_beast_companion_type: 'Beast of the Sky' } }).beast, 'Beast of the Sky');
+  // A damage type the beast cannot deal resets.
   assert.deepEqual(
-    getPrimalCompanion({ primalCompanion: { beast: 'Beast of the Sky', damageType: 'Piercing', hpCurrent: 4 } }, { builderChoice: 'Beast of the Sea' }),
+    getPrimalCompanion(withChoice('Beast of the Sky', { primalCompanion: { beast: 'Beast of the Sky', damageType: 'Piercing', hpCurrent: 4 } })),
     { beast: 'Beast of the Sky', damageType: 'Slashing', hpCurrent: 4 },
   );
   assert.equal(getPrimalCompanion({}).beast, 'Beast of the Land');
+});
+
+test('changing the beast in the builder leaves the old beast state behind', () => {
+  const C = withChoice('Beast of the Sea', { primalCompanion: { beast: 'Beast of the Land', damageType: 'Slashing', hpCurrent: 2 } });
+  assert.deepEqual(getPrimalCompanion(C), { beast: 'Beast of the Sea', damageType: 'Bludgeoning', hpCurrent: null });
 });
 
 test('HP is full until hurt, clamped, and full again when restored', () => {
@@ -96,11 +105,21 @@ test('HP is full until hurt, clamped, and full again when restored', () => {
   assert.equal(restorePrimalCompanionPatch(hurt).primalCompanion.hpCurrent, null);
 });
 
-test('summoning another beast brings it at full HP with its own damage type', () => {
-  assert.deepEqual(summonPrimalBeastPatch('Beast of the Sky', 3), {
+test('summoning another beast saves the builder choice and brings it at full HP', () => {
+  assert.deepEqual(summonPrimalBeastPatch({ choices: { other: 'x', subclass_beast_companion_type: ['Beast of the Land'] } }, 'Beast of the Sky', 3), {
+    choices: { other: 'x', subclass_beast_companion_type: ['Beast of the Sky'] },
     primalCompanion: { beast: 'Beast of the Sky', damageType: 'Slashing', hpCurrent: null },
   });
-  assert.equal(summonPrimalBeastPatch('Owl', 3), null);
+  // Written back under the multiclass key the builder saved it as…
+  assert.deepEqual(
+    summonPrimalBeastPatch({ choices: { mc1_subclass_beast_companion_type: ['Beast of the Land'] } }, 'Beast of the Sea', 3).choices,
+    { mc1_subclass_beast_companion_type: ['Beast of the Sea'] },
+  );
+  // …or, never chosen, under the key the builder gives the Ranger's choices.
+  const multiclass = { className: 'Fighter', extraClasses: [{ name: 'Rogue' }, { name: 'Ranger' }] };
+  assert.deepEqual(summonPrimalBeastPatch(multiclass, 'Beast of the Sea', 3).choices, { mc1_subclass_beast_companion_type: ['Beast of the Sea'] });
+  assert.deepEqual(summonPrimalBeastPatch({ className: 'Ranger' }, 'Beast of the Sea', 3).choices, { subclass_beast_companion_type: ['Beast of the Sea'] });
+  assert.equal(summonPrimalBeastPatch({}, 'Owl', 3), null);
 });
 
 test('a Long Rest heals the companion and leaves an unhurt one alone', () => {

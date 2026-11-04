@@ -7,7 +7,6 @@ import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { getFinal, getMod, getPB } from '../state/calculations.js';
 import { getSheetSlots } from '../spells/spellsTabLogic.js';
 import { consumeSlot, lowestAvailableSlotLevel } from '../../../shared/character/spells/spellSlots.js';
-import { getChoiceValue } from '../../../shared/character/progression/choiceUtils.js';
 import { classLevel } from '../../../shared/character/progression/classLevel.js';
 import HpPoolBar from '../../../shared/character/combat/HpPoolBar.jsx';
 import {
@@ -19,7 +18,6 @@ import {
   EXCEPTIONAL_TRAINING_LEVEL,
   PRIMAL_BEASTS,
   PRIMAL_BEAST_SOURCE,
-  PRIMAL_COMPANION_CHOICE_KEY,
   SHARE_SPELLS_LEVEL,
   applyPrimalCompanionTraits,
   getPrimalCompanion,
@@ -55,10 +53,7 @@ export default function PrimalCompanionPanel({ character, sheet }) {
   const C = character;
 
   const rangerLevel = classLevel(C, 'Ranger');
-  const companion = getPrimalCompanion(C, {
-    builderChoice: getChoiceValue(C, PRIMAL_COMPANION_CHOICE_KEY),
-    rangerLevel,
-  });
+  const companion = getPrimalCompanion(C, { rangerLevel });
   const pb = getPB(C);
   const wisMod = getMod(getFinal(C, 'wis'));
   const spellAttack = pb + wisMod;
@@ -86,10 +81,15 @@ export default function PrimalCompanionPanel({ character, sheet }) {
   const damageTypes = primalStrikeDamageTypes(companion.beast, rangerLevel);
   const rules = companionRules(rangerLevel);
 
-  const save = (patch) => {
-    if (patch && onUpdateCharacter) onUpdateCharacter((prev) => ({ ...prev, ...patch }));
+  // `patchFor(prev)` builds the patch from the latest character.
+  const update = (patchFor) => {
+    onUpdateCharacter?.((prev) => {
+      const patch = patchFor(prev);
+      return patch ? { ...prev, ...patch } : prev;
+    });
   };
-  const summon = (beastName) => save(summonPrimalBeastPatch(beastName, rangerLevel));
+  const save = (patch) => { if (patch) update(() => patch); };
+  const summon = (beastName) => update((prev) => summonPrimalBeastPatch(prev, beastName, rangerLevel));
   const applyHp = (delta) => {
     const next = currentHp + delta;
     if (delta && next !== currentHp) save(setPrimalCompanionHpPatch(companion, next, maxHp));
