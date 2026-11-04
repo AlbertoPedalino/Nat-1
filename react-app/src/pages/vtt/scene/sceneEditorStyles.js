@@ -90,12 +90,6 @@ export const sceneGmControlsSx = (theme) => ({
   },
 });
 
-// The " view" of Freeze view: dropped on phones so the GM's four
-// buttons fit one row.
-export const hiddenOnPhoneSx = {
-  display: { xs: 'none', sm: 'inline' },
-};
-
 // A player's bar keeps the Sheet button on the name's row.
 export const sceneControlsPassThroughSx = {
   display: 'contents',
