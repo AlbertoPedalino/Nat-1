@@ -15,7 +15,6 @@ export default function TokenComposer({
   layer = 'tokens',
   defaultLabel = 'Token',
   emptyLabel = defaultLabel,
-  defaultColor = VTT_COLORS.dungeon,
   openLabel,
   allowImage = false,
   busy = false,
@@ -26,7 +25,7 @@ export default function TokenComposer({
 }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(defaultLabel);
-  const [color, setColor] = useState(defaultColor);
+  const [color, setColor] = useState(VTT_COLORS.dungeon);
   const [image, setImage] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
 

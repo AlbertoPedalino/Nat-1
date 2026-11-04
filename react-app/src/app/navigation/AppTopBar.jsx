@@ -2,6 +2,7 @@ import { Box, Button } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import { ArrowLeft, Home } from 'lucide-react';
 import CloudMenu from '../../shared/cloud/auth/CloudMenu.jsx';
+import { iconOnlyOnPhoneButtonSx, phoneHiddenLabelSx } from '../../shared/ui/iconOnlyOnPhone.js';
 
 export const APP_TOP_BAR_HEIGHT = '48px';
 
@@ -21,7 +22,7 @@ export default function AppTopBar({ sx, children, home = false, backTo, backLabe
               startIcon={<Home size={14} />}
               sx={navBtnSx}
             >
-              <Box component="span" sx={navTextSx}>HOME</Box>
+              <Box component="span" sx={phoneHiddenLabelSx}>HOME</Box>
             </Button>
           ) : null}
           {backTo ? (
@@ -35,7 +36,7 @@ export default function AppTopBar({ sx, children, home = false, backTo, backLabe
               startIcon={<ArrowLeft size={14} />}
               sx={navBtnSx}
             >
-              <Box component="span" sx={navTextSx}>{backLabel}</Box>
+              <Box component="span" sx={phoneHiddenLabelSx}>{backLabel}</Box>
             </Button>
           ) : null}
         </Box>
@@ -58,16 +59,7 @@ const navBtnSx = {
   fontSize: '0.625rem',
   letterSpacing: '0.08em',
   whiteSpace: 'nowrap',
-  minWidth: { xs: 32, sm: 64 },
-  px: { xs: 0.75, sm: 1.25 },
-  '& .MuiButton-startIcon': {
-    mr: { xs: 0, sm: 1 },
-    ml: 0,
-  },
-};
-
-const navTextSx = {
-  display: { xs: 'none', sm: 'inline' },
+  ...iconOnlyOnPhoneButtonSx,
 };
 
 const appTopBarSx = {

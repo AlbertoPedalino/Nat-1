@@ -7,6 +7,7 @@ import { pushCharacter, SHEET_CONFLICT } from '../api/cloudCharacters.js';
 import { reportCloudSyncState } from '../sync/cloudSyncState.js';
 import { isSyncExcluded, includeInSync } from '../sync/cloudSyncExclude.js';
 import { useToast } from '../../ui/ToastProvider.jsx';
+import { iconOnlyOnPhoneButtonSx, phoneHiddenLabelSx } from '../../ui/iconOnlyOnPhone.js';
 
 // The "active sheet" for the cloud menu is the one in the URL (builder/charsheet
 // ?char=…). We deliberately do NOT fall back to localStorage's gb:active_char:
@@ -21,19 +22,6 @@ const loginBtnSx = {
   fontFamily: '"Cinzel", Georgia, serif',
   fontSize: '0.625rem',
   letterSpacing: '0.08em',
-};
-
-const accountBtnSx = {
-  minWidth: { xs: 32, sm: 64 },
-  px: { xs: 0.75, sm: 1.25 },
-  '& .MuiButton-startIcon': {
-    mr: { xs: 0, sm: 1 },
-    ml: 0,
-  },
-};
-
-const accountNameSx = {
-  display: { xs: 'none', sm: 'inline' },
 };
 
 export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUploadDraft }) {
@@ -111,12 +99,12 @@ export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUplo
         startIcon={status === 'authed' ? <User size={14} /> : <LogIn size={14} />}
         aria-label={status === 'authed' ? `Account: ${username || 'signed in'}` : 'Log in'}
         onClick={(e) => setAnchor(e.currentTarget)}
-        sx={{ ...loginBtnSx, ...(status === 'authed' ? accountBtnSx : null), ...buttonSx }}
+        sx={{ ...loginBtnSx, ...(status === 'authed' ? iconOnlyOnPhoneButtonSx : null), ...buttonSx }}
       >
         {/* Phones show only the figure and the sync dot; the full name is in
             the menu it opens. */}
         {status === 'authed'
-          ? <Box component="span" sx={accountNameSx}>{username || 'ACCOUNT'}</Box>
+          ? <Box component="span" sx={phoneHiddenLabelSx}>{username || 'ACCOUNT'}</Box>
           : 'LOGIN'}
         {dot ? <Box component="span" sx={{ ml: 0.6, width: 7, height: 7, borderRadius: '50%', bgcolor: dot }} /> : null}
       </Button>

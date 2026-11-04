@@ -172,7 +172,7 @@ import {
   sceneControlsPassThroughSx,
   scenePlayerViewSwitchSx,
   viewButtonSx,
-  rollsSlotOrderSx,
+  sceneRollsSlotSx,
   sheetLoadingSx,
   sheetViewSx,
   spectatorRootSx,
@@ -2195,9 +2195,7 @@ export default function SceneEditor({
           content: (
             <MeasurePanel
               paintMode={paintMode}
-              rollBubbles={rollBubbles}
-        diceThrows={diceThrows}
-        measureShape={measureShape}
+              measureShape={measureShape}
               feetPerCell={feetPerCell}
               gridShape={scene.grid.shape}
               measureUnit={scene.grid.measureUnit}
@@ -2252,9 +2250,7 @@ export default function SceneEditor({
         content: (
           <MeasurePanel
             paintMode={paintMode}
-            rollBubbles={rollBubbles}
-        diceThrows={diceThrows}
-        measureShape={measureShape}
+            measureShape={measureShape}
             feetPerCell={feetPerCell}
             gridShape={scene.grid.shape}
             measureUnit={scene.grid.measureUnit}
@@ -2776,16 +2772,17 @@ export default function SceneEditor({
           ) : null}
         </Box>
         {/* The rolls in the middle of the bar, the one thing everybody at the
-            table reaches for. On a desktop the order puts it between the GM's
-            live controls and the view switch; on a phone it stays on the name's
-            row, since the GM's controls take a row of their own. */}
+            table reaches for. On a phone it stays on the name's row, since the
+            GM's controls take a row of their own. */}
         {!gmPlayerPreview ? (
-          <RollsButton
-            feed={rollFeed}
-            onCustomRoll={handleCustomRoll}
-            onClear={clearRollFeed}
-            sx={rollsSlotOrderSx}
-          />
+          <Box sx={sceneRollsSlotSx}>
+            <RollsButton
+              feed={rollFeed}
+              onCustomRoll={handleCustomRoll}
+              onClear={clearRollFeed}
+              sx={viewButtonSx}
+            />
+          </Box>
         ) : null}
         {/* On a phone the GM's four buttons share one row under the name: what
             the table sees on the left, what the GM is looking at on the right. */}

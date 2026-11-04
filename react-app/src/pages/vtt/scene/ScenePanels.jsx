@@ -1178,8 +1178,6 @@ export function MeasurePanel({
   );
 }
 
-// Its own tool rather than a fourth pencil: everything in the drawing panel
-// leaves a row behind, and this leaves nothing at all.
 // The cursor and the rectangle are two ways of picking up the same pieces, so
 // they share one rail button: the plain pointer, or a box drawn around several.
 export function CursorPanel({ paintMode, onPaintModeChange }) {
@@ -1212,6 +1210,8 @@ export function CursorPanel({ paintMode, onPaintModeChange }) {
   );
 }
 
+// Its own tool rather than a fourth pencil: everything in the drawing panel
+// leaves a row behind, and this leaves nothing at all.
 export function LaserPanel({ paintMode, onPaintModeChange }) {
   const active = paintMode === 'laser';
   return (

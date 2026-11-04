@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Box, Button } from '@mui/material';
 import { BookOpen } from 'lucide-react';
 import CompendiumPanel from './CompendiumPanel.jsx';
+import { iconOnlyOnPhoneButtonSx, phoneHiddenLabelSx } from '../../shared/ui/iconOnlyOnPhone.js';
 
 // The compendium from a session's top bar: opens and closes the side panel.
 export default function CompendiumButton() {
@@ -15,25 +16,11 @@ export default function CompendiumButton() {
         aria-label="Compendium"
         aria-pressed={open}
         onClick={() => setOpen((value) => !value)}
-        sx={iconOnlyOnPhoneSx}
+        sx={iconOnlyOnPhoneButtonSx}
       >
-        <Box component="span" sx={labelSx}>Compendium</Box>
+        <Box component="span" sx={phoneHiddenLabelSx}>Compendium</Box>
       </Button>
       <CompendiumPanel open={open} onClose={() => setOpen(false)} />
     </>
   );
 }
-
-// Phones keep only the book: the top bar has no room for the word.
-const iconOnlyOnPhoneSx = {
-  minWidth: { xs: 32, sm: 64 },
-  px: { xs: 0.75, sm: 1.25 },
-  '& .MuiButton-startIcon': {
-    mr: { xs: 0, sm: 1 },
-    ml: 0,
-  },
-};
-
-const labelSx = {
-  display: { xs: 'none', sm: 'inline' },
-};

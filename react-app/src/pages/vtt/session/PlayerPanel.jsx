@@ -6,9 +6,10 @@ import PiecePreview, { beginPiecePointerDrag } from '../tokens/PiecePreview.jsx'
 import TokenComposer from '../tokens/TokenComposer.jsx';
 
 // What a player can do to the board. Deliberately short: place their own
-// character, add a marker of their own (a name and a colour), and move or pick up either. Everything else on
-// the map belongs to the GM, and the database says so too — this panel only
-// stops them being offered a write that would be refused.
+// character, add a marker of their own (a name and a colour), and move or pick
+// up either. Everything else on the map belongs to the GM, and the database says
+// so too — this panel only stops them being offered a write that would be
+// refused.
 export default function PlayerPanel({
   roster,
   tokens,

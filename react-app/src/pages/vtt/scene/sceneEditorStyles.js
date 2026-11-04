@@ -66,9 +66,14 @@ export const sceneViewSwitchSx = {
   order: { md: 2 },
 };
 
-// The rolls button comes after the GM's live controls on a desktop, where the
-// controls' wrapper dissolves into the bar; see sceneGmControlsSx.
-export const rollsSlotOrderSx = {
+// The rolls button takes the free middle of the bar. On a desktop the order
+// puts it after the GM's live controls, whose wrapper dissolves into the bar
+// there (see sceneGmControlsSx) and before the view switch.
+export const sceneRollsSlotSx = {
+  flex: '1 1 auto',
+  display: 'flex',
+  justifyContent: 'center',
+  minWidth: 0,
   order: { xs: 0, md: 1 },
 };
 
