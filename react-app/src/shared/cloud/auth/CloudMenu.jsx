@@ -23,6 +23,19 @@ const loginBtnSx = {
   letterSpacing: '0.08em',
 };
 
+const accountBtnSx = {
+  minWidth: { xs: 32, sm: 64 },
+  px: { xs: 0.75, sm: 1.25 },
+  '& .MuiButton-startIcon': {
+    mr: { xs: 0, sm: 1 },
+    ml: 0,
+  },
+};
+
+const accountNameSx = {
+  display: { xs: 'none', sm: 'inline' },
+};
+
 const SYNC_TEXT = {
   syncing: 'Saving…',
   synced: 'All changes saved',
@@ -103,10 +116,15 @@ export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUplo
         variant="outlined"
         color="primary"
         startIcon={status === 'authed' ? <User size={14} /> : <LogIn size={14} />}
+        aria-label={status === 'authed' ? `Account: ${username || 'signed in'}` : 'Log in'}
         onClick={(e) => setAnchor(e.currentTarget)}
-        sx={{ ...loginBtnSx, ...buttonSx }}
+        sx={{ ...loginBtnSx, ...(status === 'authed' ? accountBtnSx : null), ...buttonSx }}
       >
-        {status === 'authed' ? (username || 'ACCOUNT') : 'LOGIN'}
+        {/* Phones show only the figure and the sync dot; the full name is in
+            the menu it opens. */}
+        {status === 'authed'
+          ? <Box component="span" sx={accountNameSx}>{username || 'ACCOUNT'}</Box>
+          : 'LOGIN'}
         {dot ? <Box component="span" sx={{ ml: 0.6, width: 7, height: 7, borderRadius: '50%', bgcolor: dot }} /> : null}
       </Button>
 
