@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import RollsButton from '../../../../../src/pages/vtt/rolls/RollsButton.jsx';
 
 describe('RollsButton', () => {
-  it('opens the roll log from the scene bar', () => {
+  it('opens the roll log from the dice icon', () => {
     render(
       <RollsButton
         feed={[{

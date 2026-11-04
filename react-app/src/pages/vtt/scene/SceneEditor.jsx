@@ -5,7 +5,7 @@ import {
   Box, Button, CircularProgress, IconButton, Stack, Tooltip, Typography,
 } from '@mui/material';
 import {
-  Cloud, Dices, DoorOpen, Eye, EyeOff, Pencil, Pointer,
+  Cloud, DoorOpen, Eye, EyeOff, Pencil, Pointer,
   Ruler, Shapes, Users,
 } from 'lucide-react';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
@@ -145,7 +145,6 @@ import { useConditionEntries } from '../../encounterbuilder/combat/useConditionE
 import EncounterImportDialog from '../tokens/EncounterImportDialog.jsx';
 import MonsterPickerDialog from '../tokens/MonsterPickerDialog.jsx';
 import DiceToast from '../../../shared/character/dice/DiceToast.jsx';
-import RollLogPanel from '../rolls/RollLogPanel.jsx';
 import RollsButton from '../rolls/RollsButton.jsx';
 import PlayerPanel from '../session/PlayerPanel.jsx';
 import RosterPanel from '../tokens/RosterPanel.jsx';
@@ -172,7 +171,6 @@ import {
   sceneControlsPassThroughSx,
   scenePlayerViewSwitchSx,
   viewButtonSx,
-  sceneRollsSlotSx,
   sheetLoadingSx,
   sheetViewSx,
   spectatorRootSx,
@@ -2091,22 +2089,6 @@ export default function SceneEditor({
   // What the rail offers, in the order a session needs it. A player gets the two
   // groups that are theirs; the rest would only be buttons the database refuses.
   const toolGroups = useMemo(() => {
-    const rollsGroup = {
-      id: 'rolls',
-      label: 'Rolls',
-      icon: Dices,
-      content: ({ closePanel }) => (
-        <RollLogPanel
-          feed={rollFeed}
-          onCustomRoll={(formula) => {
-            handleCustomRoll(formula);
-            closePanel();
-          }}
-          onClear={clearRollFeed}
-        />
-      ),
-    };
-
     const drawGroup = {
       id: 'draw',
       label: 'Draw',
@@ -2178,8 +2160,6 @@ export default function SceneEditor({
         },
         objectsGroup,
         drawGroup,
-        // A fullscreen map paints no scene bar: the rail stands in for its button.
-        ...(mapFullscreen ? [rollsGroup] : []),
         {
           id: 'laser',
           label: 'Laser',
@@ -2233,8 +2213,6 @@ export default function SceneEditor({
       },
       objectsGroup,
       drawGroup,
-      // A fullscreen map paints no scene bar: the rail stands in for its button.
-      ...(mapFullscreen ? [rollsGroup] : []),
       {
         id: 'laser',
         label: 'Laser',
@@ -2315,7 +2293,7 @@ export default function SceneEditor({
     handleUndoDrawing, handleUploadMap,
     handleUploadBackground, handleShownImageChange, handleAddImage, paintMode,
     role.isGm, role.ownedCharacterIds, roster, scene, shownImageForViewport, tokens, measureShape, feetPerCell,
-    rollFeed, handleCustomRoll, clearRollFeed, hexcrawl, dungeon, mapFullscreen,
+    hexcrawl, dungeon,
   ]);
 
   // While editing one layer, strokes on the others fade back rather than
@@ -2771,19 +2749,6 @@ export default function SceneEditor({
             </Tooltip>
           ) : null}
         </Box>
-        {/* The rolls in the middle of the bar, the one thing everybody at the
-            table reaches for. On a phone it stays on the name's row, since the
-            GM's controls take a row of their own. */}
-        {!gmPlayerPreview ? (
-          <Box sx={sceneRollsSlotSx}>
-            <RollsButton
-              feed={rollFeed}
-              onCustomRoll={handleCustomRoll}
-              onClear={clearRollFeed}
-              sx={viewButtonSx}
-            />
-          </Box>
-        ) : null}
         {/* On a phone the GM's four buttons share one row under the name: what
             the table sees on the left, what the GM is looking at on the right. */}
         <Box sx={role.isGm ? sceneGmControlsSx : sceneControlsPassThroughSx}>
@@ -2985,6 +2950,14 @@ export default function SceneEditor({
         onMeasure={gmPlayerPreview ? undefined : handleMeasure}
         remoteMeasure={remoteMeasure}
         feetPerCell={feetPerCell}
+        // On the map, not in the scene bar, so fullscreen keeps it too.
+        rolls={gmPlayerPreview ? null : (
+          <RollsButton
+            feed={rollFeed}
+            onCustomRoll={handleCustomRoll}
+            onClear={clearRollFeed}
+          />
+        )}
         controls={gmPlayerPreview ? null : (
           <SceneToolRail
             groups={toolGroups}

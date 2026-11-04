@@ -793,6 +793,17 @@ test('selecting after editing a tool field transfers focus so the first Delete w
   expect(onDeleteTokens).toHaveBeenCalledOnce();
 });
 
+test('the rolls button sits just left of the tools toggle, in the same corner row', () => {
+  renderSelectionViewport(vi.fn(), {
+    controls: <div>Tool rail</div>,
+    rolls: <button type="button">Rolls</button>,
+  });
+  const rolls = screen.getByRole('button', { name: 'Rolls' });
+  const toggle = screen.getByRole('button', { name: 'Show the tools' });
+  expect(rolls.parentElement).toBe(toggle.parentElement);
+  expect(rolls.compareDocumentPosition(toggle) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+});
+
 test('the Delete toolbar works on the first click and cancelling keeps the selection', async () => {
   const user = userEvent.setup();
   const onDeleteTokens = vi.fn();

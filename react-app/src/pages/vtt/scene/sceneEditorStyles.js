@@ -66,17 +66,6 @@ export const sceneViewSwitchSx = {
   order: { md: 2 },
 };
 
-// The rolls button takes the free middle of the bar. On a desktop the order
-// puts it after the GM's live controls, whose wrapper dissolves into the bar
-// there (see sceneGmControlsSx) and before the view switch.
-export const sceneRollsSlotSx = {
-  flex: '1 1 auto',
-  display: 'flex',
-  justifyContent: 'center',
-  minWidth: 0,
-  order: { xs: 0, md: 1 },
-};
-
 // On a desktop the wrapper disappears and its children sit in the bar as
 // before. Below md it becomes its own full-width row under the name, with the
 // live controls on the left and Player view + Sheet on the right; the buttons

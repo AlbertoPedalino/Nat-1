@@ -50,6 +50,7 @@ import AtmosphereOverlay from '../atmosphere/AtmosphereOverlay.jsx';
 import { imageFilterLook } from '../../../shared/vtt/scene/imageFilters.js';
 import DeletePiecesDialog from '../tokens/DeletePiecesDialog.jsx';
 import { PIECE_POINTER_DRAG_EVENT } from '../tokens/PiecePreview.jsx';
+import { mapIconButtonSx } from './battleMapSurface.js';
 
 const WHEEL_STEP = 1.12;
 const VIEWPORT_CONTROL_SELECTOR = '[data-viewport-control], .MuiModal-root, .MuiPopover-root, .MuiPopper-root';
@@ -202,6 +203,8 @@ export default function SceneViewport({
   onMeasure,
   remoteMeasure,
   controls,
+  // The rolls button, shown just left of the tools toggle in the top right.
+  rolls = null,
   layerSwitch,
   imageSwitch,
   // Bottom centre: the GM's slider through the scene's backgrounds.
@@ -1758,53 +1761,55 @@ export default function SceneViewport({
         onConfirm={confirmDelete}
       />
 
-      {controls ? (
-        <>
-          <Tooltip title={controlsOpen ? 'Hide the tools' : 'Show the tools'}>
-            <IconButton
+      {/* Top right, in one row: the rolls, the fullscreen Sheet, then the tools
+          toggle in the corner. A row rather than set offsets, so a button that
+          is missing (no sheet outside fullscreen) leaves no gap. */}
+      {rolls || controls || (fullscreenActive && fullscreenSheet) ? (
+        <Stack direction="row" spacing={0.75} data-viewport-control sx={cornerButtonsSx}>
+          {rolls}
+          {fullscreenActive && fullscreenSheet ? (
+            <Button
               size="small"
-              data-viewport-control
-              aria-label={controlsOpen ? 'Hide the tools' : 'Show the tools'}
-              aria-expanded={controlsOpen}
-              onClick={() => setControlsOpen((open) => !open)}
-              sx={{ ...roundBtnSx, right: 8, top: 8 }}
+              variant={floatingSheetOpen ? 'contained' : 'outlined'}
+              startIcon={<ScrollText size={14} />}
+              aria-label={floatingSheetOpen ? 'Hide floating character sheet' : 'Show floating character sheet'}
+              onClick={() => setFloatingSheetOpen(!floatingSheetOpen)}
+              sx={fullscreenSheetButtonSx}
             >
-              {controlsOpen ? <X size={16} /> : <Settings2 size={16} />}
-            </IconButton>
-          </Tooltip>
-
-          {/* Rendered as-is: the rail positions itself against the map. Wrapping
-              it in a second absolutely positioned box left it anchored to that
-              box instead, which is why the tools were nowhere to be seen. */}
-          {controlsOpen ? controls : null}
-        </>
+              Sheet
+            </Button>
+          ) : null}
+          {controls ? (
+            <Tooltip title={controlsOpen ? 'Hide the tools' : 'Show the tools'}>
+              <IconButton
+                size="small"
+                aria-label={controlsOpen ? 'Hide the tools' : 'Show the tools'}
+                aria-expanded={controlsOpen}
+                onClick={() => setControlsOpen((open) => !open)}
+                sx={mapIconButtonSx}
+              >
+                {controlsOpen ? <X size={16} /> : <Settings2 size={16} />}
+              </IconButton>
+            </Tooltip>
+          ) : null}
+        </Stack>
       ) : null}
 
-      {fullscreenActive && fullscreenSheet ? (
-        <>
-          <Button
-            size="small"
-            variant={floatingSheetOpen ? 'contained' : 'outlined'}
-            startIcon={<ScrollText size={14} />}
-            data-viewport-control
-            aria-label={floatingSheetOpen ? 'Hide floating character sheet' : 'Show floating character sheet'}
-            onClick={() => setFloatingSheetOpen(!floatingSheetOpen)}
-            sx={fullscreenSheetButtonSx}
-          >
-            Sheet
-          </Button>
-          {floatingSheetOpen ? (
-            <FloatingSheetPanel
-              choices={fullscreenSheet.choices}
-              selectedId={fullscreenSheet.selectedId}
-              onSelectionChange={fullscreenSheet.onSelectionChange}
-              onClose={() => setFloatingSheetOpen(false)}
-              containerRef={hostRef}
-            >
-              {fullscreenSheet.content}
-            </FloatingSheetPanel>
-          ) : null}
-        </>
+      {/* Rendered as-is: the rail positions itself against the map. Wrapping
+          it in a second absolutely positioned box left it anchored to that
+          box instead, which is why the tools were nowhere to be seen. */}
+      {controls && controlsOpen ? controls : null}
+
+      {fullscreenActive && fullscreenSheet && floatingSheetOpen ? (
+        <FloatingSheetPanel
+          choices={fullscreenSheet.choices}
+          selectedId={fullscreenSheet.selectedId}
+          onSelectionChange={fullscreenSheet.onSelectionChange}
+          onClose={() => setFloatingSheetOpen(false)}
+          containerRef={hostRef}
+        >
+          {fullscreenSheet.content}
+        </FloatingSheetPanel>
       ) : null}
 
       {imageSwitch ? (
@@ -2148,15 +2153,6 @@ function pointInBox(point, box) {
     && point.y < box.top + box.height;
 }
 
-const roundBtnSx = {
-  position: 'absolute',
-  zIndex: 6,
-  color: VTT_COLORS.gold,
-  bgcolor: vttAlpha(VTT_COLORS.ink, 0.8),
-  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.35)}`,
-  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.ink, 0.95) },
-};
-
 const placementTargetSx = {
   outline: `2px dashed ${vttAlpha(VTT_COLORS.gold, 0.78)}`,
   outlineOffset: -5,
@@ -2231,11 +2227,8 @@ const playAreaStrokeProps = {
   strokeDasharray: '7 5',
 };
 
+// The fullscreen Sheet: dark glass, gold edge, the tools toggle's height.
 const fullscreenSheetButtonSx = {
-  position: 'absolute',
-  right: 46,
-  top: 8,
-  zIndex: 7,
   height: 32,
   minWidth: 88,
   borderColor: vttAlpha(VTT_COLORS.gold, 0.42),
@@ -2246,8 +2239,17 @@ const fullscreenSheetButtonSx = {
   '&:hover': { bgcolor: vttAlpha(VTT_COLORS.ink, 0.96) },
 };
 
+// Above the rail (top 48), which hangs just below the tools toggle.
+const cornerButtonsSx = {
+  position: 'absolute',
+  top: 8,
+  right: 8,
+  zIndex: 7,
+  alignItems: 'center',
+};
+
 // Bottom right, above everything, and out of the way of the pieces.
-const fullscreenBtnSx = { ...roundBtnSx, right: 8, bottom: 8 };
+const fullscreenBtnSx = { ...mapIconButtonSx, position: 'absolute', zIndex: 6, right: 8, bottom: 8 };
 
 // Top left, and everything about pictures with it: the switch and the panel
 // that manages them are one job, and splitting them across two corners meant

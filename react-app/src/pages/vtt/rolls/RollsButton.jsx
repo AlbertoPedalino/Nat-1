@@ -1,35 +1,36 @@
 import { useState } from 'react';
-import { Button, Popover } from '@mui/material';
+import { IconButton, Popover, Tooltip } from '@mui/material';
 import { Dices } from 'lucide-react';
 import RollLogPanel from './RollLogPanel.jsx';
-import { battleMapDialogPaperSx } from '../map/battleMapSurface.js';
+import { battleMapDialogPaperSx, mapIconButtonSx } from '../map/battleMapSurface.js';
 
-// The roll log behind a button, for the scene bar: what everyone at the table
-// reaches for most, so it sits by the name rather than among the map tools. A
-// fullscreen map paints no bar, so there the rail offers the same panel instead.
-export default function RollsButton({ feed, onCustomRoll, onClear, sx }) {
+// The roll log behind a dice icon in the map's top-right corner, beside the
+// tools toggle and shaped like it: what everyone at the table reaches for most,
+// so it is never inside the rail, and being on the map it stays in fullscreen.
+export default function RollsButton({ feed, onCustomRoll, onClear }) {
   const [anchor, setAnchor] = useState(null);
   const close = () => setAnchor(null);
 
   return (
     <>
-      <Button
-        size="small"
-        variant={anchor ? 'contained' : 'outlined'}
-        startIcon={<Dices size={14} />}
-        aria-haspopup="dialog"
-        aria-expanded={anchor ? 'true' : undefined}
-        onClick={(event) => setAnchor(anchor ? null : event.currentTarget)}
-        sx={sx}
-      >
-        Rolls
-      </Button>
+      <Tooltip title="Rolls">
+        <IconButton
+          size="small"
+          aria-label="Rolls"
+          aria-haspopup="dialog"
+          aria-expanded={anchor ? 'true' : undefined}
+          onClick={(event) => setAnchor(anchor ? null : event.currentTarget)}
+          sx={anchor ? openButtonSx : mapIconButtonSx}
+        >
+          <Dices size={16} />
+        </IconButton>
+      </Tooltip>
       <Popover
         open={Boolean(anchor)}
         anchorEl={anchor}
         onClose={close}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'center' }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         slotProps={{ paper: { sx: paperSx } }}
       >
         <RollLogPanel
@@ -44,6 +45,9 @@ export default function RollsButton({ feed, onCustomRoll, onClear, sx }) {
     </>
   );
 }
+
+// While the log is open the gold edge is lit.
+const openButtonSx = { ...mapIconButtonSx, borderColor: 'primary.main' };
 
 const paperSx = {
   ...battleMapDialogPaperSx,

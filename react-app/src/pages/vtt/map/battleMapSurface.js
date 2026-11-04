@@ -12,6 +12,14 @@ export const battleMapSurfaceSx = {
   WebkitBackdropFilter: 'blur(10px)',
 };
 
+// The round icon buttons on the map (Rolls, the tools toggle, fullscreen).
+export const mapIconButtonSx = {
+  color: VTT_COLORS.gold,
+  bgcolor: vttAlpha(VTT_COLORS.ink, 0.8),
+  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.35)}`,
+  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.ink, 0.95) },
+};
+
 export const battleMapDialogPaperSx = {
   ...battleMapSurfaceSx,
   borderRadius: 1,
