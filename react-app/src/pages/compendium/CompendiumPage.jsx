@@ -9,7 +9,7 @@ export default function CompendiumPage() {
   const compendium = useCompendium();
   return (
     <Box sx={rootSx}>
-      <AppTopBar home />
+      <AppTopBar home compendium={false} />
       <Box sx={bodySx}>
         <CompendiumHome compendium={compendium} layout="page" autoFocus />
       </Box>

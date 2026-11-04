@@ -1,11 +1,14 @@
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { Box, Button } from '@mui/material';
 import { BookOpen } from 'lucide-react';
-import CompendiumPanel from './CompendiumPanel.jsx';
 import { iconOnlyOnPhoneButtonSx, phoneHiddenLabelSx } from '../../shared/ui/iconOnlyOnPhone.js';
 
-// The compendium from a session's top bar: opens and closes the side panel.
-export default function CompendiumButton() {
+// Loaded on first opening: the button is in every top bar, and most pages
+// never open the compendium.
+const CompendiumPanel = lazy(() => import('./CompendiumPanel.jsx'));
+
+// The compendium from any top bar: opens and closes the side panel.
+export default function CompendiumButton({ sx }) {
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -16,11 +19,15 @@ export default function CompendiumButton() {
         aria-label="Compendium"
         aria-pressed={open}
         onClick={() => setOpen((value) => !value)}
-        sx={iconOnlyOnPhoneButtonSx}
+        sx={[iconOnlyOnPhoneButtonSx, ...(Array.isArray(sx) ? sx : [sx])]}
       >
         <Box component="span" sx={phoneHiddenLabelSx}>Compendium</Box>
       </Button>
-      <CompendiumPanel open={open} onClose={() => setOpen(false)} />
+      {open ? (
+        <Suspense fallback={null}>
+          <CompendiumPanel open onClose={() => setOpen(false)} />
+        </Suspense>
+      ) : null}
     </>
   );
 }

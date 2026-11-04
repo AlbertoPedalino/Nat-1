@@ -2,11 +2,15 @@ import { Box, Button } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import { ArrowLeft, Home } from 'lucide-react';
 import CloudMenu from '../../shared/cloud/auth/CloudMenu.jsx';
+import CompendiumButton from '../../pages/compendium/CompendiumButton.jsx';
 import { iconOnlyOnPhoneButtonSx, phoneHiddenLabelSx } from '../../shared/ui/iconOnlyOnPhone.js';
 
 export const APP_TOP_BAR_HEIGHT = '48px';
 
-export default function AppTopBar({ sx, children, home = false, backTo, backLabel = 'Back' }) {
+// Every bar offers the compendium, except the compendium's own page.
+export default function AppTopBar({
+  sx, children, home = false, backTo, backLabel = 'Back', compendium = true,
+}) {
   return (
     <Box sx={{ ...appTopBarSx, ...sx }}>
       {home || backTo ? (
@@ -42,6 +46,7 @@ export default function AppTopBar({ sx, children, home = false, backTo, backLabe
         </Box>
       ) : null}
       {children}
+      {compendium ? <CompendiumButton sx={navFontSx} /> : null}
       <CloudMenu />
     </Box>
   );
@@ -54,11 +59,15 @@ const leftActionsSx = {
   minWidth: 0,
 };
 
-const navBtnSx = {
+const navFontSx = {
   fontFamily: '"Cinzel", Georgia, serif',
   fontSize: '0.625rem',
   letterSpacing: '0.08em',
   whiteSpace: 'nowrap',
+};
+
+const navBtnSx = {
+  ...navFontSx,
   ...iconOnlyOnPhoneButtonSx,
 };
 

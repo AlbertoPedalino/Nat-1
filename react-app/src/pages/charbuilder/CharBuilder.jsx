@@ -21,6 +21,7 @@ import { theme } from '../../app/theme.js';
 import ChoiceDescriptionDialog from './choices/ChoiceDescriptionDialog.jsx';
 import ImportSheetFab from './layout/ImportSheetFab.jsx';
 import CloudMenu from '../../shared/cloud/auth/CloudMenu.jsx';
+import CompendiumButton from '../compendium/CompendiumButton.jsx';
 import { excludeFromSync, includeInSync, isSyncExcluded } from '../../shared/cloud/sync/cloudSyncExclude.js';
 import PreviewPane from './preview/PreviewPane.jsx';
 import { STEPS } from './constants.js';
@@ -491,8 +492,8 @@ export default function CharBuilder() {
             >
               HOME
             </Button>
+            <CompendiumButton sx={[appNavButtonSx, { ml: 'auto' }]} />
             <CloudMenu
-              sx={{ ml: 'auto' }}
               buttonSx={appNavButtonSx}
               canUploadDraft={importDraft && cloudActive}
               onUploadDraft={handleUploadToCloud}

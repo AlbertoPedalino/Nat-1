@@ -10,6 +10,7 @@ import { deletePortrait, uploadPortrait } from '../../../shared/cloud/api/charac
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import XpDeltaControl from '../../../shared/character/progression/XpDeltaControl.jsx';
 import CloudMenu from '../../../shared/cloud/auth/CloudMenu.jsx';
+import CompendiumButton from '../../compendium/CompendiumButton.jsx';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { classIcon } from '../../../shared/character/profile/classIcon.js';
 import CustomRollDialog from '../../../shared/character/dice/CustomRollDialog.jsx';
@@ -146,11 +147,8 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
               </Button>
             )}
           </Box>
-          <Box sx={{
-            display: 'flex', gap: '0.35rem', flexShrink: 0,
-            flexDirection: { xs: 'column', md: 'row' },
-            alignItems: { xs: 'flex-end', md: 'center' },
-          }}>
+          <Box sx={{ display: 'flex', gap: '0.35rem', flexShrink: 0, alignItems: 'center' }}>
+            <CompendiumButton sx={appNavButtonSx} />
             <CloudMenu buttonSx={appNavButtonSx} />
           </Box>
         </Box>
