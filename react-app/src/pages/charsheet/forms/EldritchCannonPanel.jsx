@@ -6,13 +6,15 @@ import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { getMod, getFinal, getPB } from '../state/calculations.js';
 import { getSheetSlots } from '../spells/spellsTabLogic.js';
-import { consumeSlot, getRegularSlotUsed } from '../../../shared/character/spells/spellSlots.js';
+import { consumeSlot, lowestAvailableSlotLevel } from '../../../shared/character/spells/spellSlots.js';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import { RichText } from '../../../shared/content/RichText.jsx';
 import RollerButtons from '../../../shared/character/dice/RollerButtons.jsx';
 import HpPoolBar from '../../../shared/character/combat/HpPoolBar.jsx';
+import ACDisplay from '../stats/ACDisplay.jsx';
+import DefensesPanel from '../stats/DefensesPanel.jsx';
 import AttackRollButton from '../actions/AttackRollButton.jsx';
-import { panelSx, headerSx, subSx, rowSx, dismissButtonSx } from './BeastStatBlock.jsx';
+import { panelSx, headerSx, subSx, creatureHpBoxSx, dismissButtonSx } from './BeastStatBlock.jsx';
 import { inlineButtonSx } from '../spells/spellsTabStyles.js';
 import { ACTION_COLORS } from '../../../shared/ui/entityColors.js';
 import {
@@ -41,18 +43,8 @@ const CINZEL = '"Cinzel", Georgia, serif';
 // level 9, Detonate (Reaction). Each row is tinted by the action-economy colour
 // of its type, not an arbitrary hue.
 
-// Lowest available regular spell-slot level (a cannon can be created by
-// expending any slot; the cheapest is preferred).
-function lowestAvailableSlotLevel(regularSlots, sheet) {
-  const used = sheet?.spellSlotUsed || {};
-  const created = sheet?.createdSpellSlots || {};
-  for (let lv = 1; lv <= regularSlots.length; lv++) {
-    const total = Number(regularSlots[lv - 1] || 0);
-    if (!total) continue;
-    if (total - getRegularSlotUsed(used, lv) + Number(created[lv] || 0) > 0) return lv;
-  }
-  return 0;
-}
+// The cannon's defenses, as the character's Defenses box lists them.
+const CANNON_DEFENSES = CANNON_DAMAGE_IMMUNITIES.map((type) => ({ kind: 'Immune', type }));
 
 const signed = (n) => (n >= 0 ? `+${n}` : `${n}`);
 
@@ -159,14 +151,14 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
         <Typography sx={{ ...subSx, ml: 'auto' }}>{cannons.length}/{capacity} active</Typography>
       </Box>
 
-      <CannonRulesSummary maxHp={maxHp} />
+      <CannonRulesSummary maxHp={maxHp} level={lv} />
 
       {/* Active cannon boards */}
       <Stack spacing={0.8}>
         {cannons.map((cannon, index) => {
           const cur = Math.min(Number(cannon?.hpCurrent ?? maxHp), maxHp);
           return (
-            <Box key={index} sx={{ ...rowSx, flexDirection: 'column', alignItems: 'stretch', gap: 0.6, p: 0.8 }}>
+            <Box key={index} sx={cannonBoardSx}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
                 <Typography sx={{ ...headerSx, fontSize: '0.62rem' }}>
                   {CANNON_SIZE_LABEL[cannon?.size] || 'Small'} Cannon {capacity > 1 ? `#${index + 1}` : ''}
@@ -180,26 +172,23 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
                 </Button>
               </Box>
               <Box sx={cannonDefenseSx}>
-                <Box sx={defenseBadgeSx}>
-                  <Typography component="span" sx={defenseLabelSx}>AC</Typography>
-                  <Typography component="span" sx={defenseValueSx}>{CANNON_AC}</Typography>
-                </Box>
-                <Typography sx={defenseTextSx}>
-                  Immune to {CANNON_DAMAGE_IMMUNITIES.join(' and ')} damage
-                </Typography>
+                <ACDisplay value={CANNON_AC} />
+                <DefensesPanel items={CANNON_DEFENSES} sx={{ flex: 1, minWidth: 140 }} />
               </Box>
 
-              {/* HP editor — shared creature HP pool (readout + heal/damage stepper) */}
-              <HpPoolBar
-                current={cur}
-                max={maxHp}
-                onDelta={(d) => applyHp(index, d)}
-                amount={hpAmt[index] ?? '1'}
-                onAmount={(v) => setHpAmt((prev) => ({ ...prev, [index]: v }))}
-                plusLabel="Repair cannon"
-                minusLabel="Damage cannon"
-                stateLabel="destroyed"
-              />
+              {/* HP editor — the shared creature HP box (readout + heal/damage stepper) */}
+              <Box sx={{ ...creatureHpBoxSx, mb: 0 }}>
+                <HpPoolBar
+                  current={cur}
+                  max={maxHp}
+                  onDelta={(d) => applyHp(index, d)}
+                  amount={hpAmt[index] ?? '1'}
+                  onAmount={(v) => setHpAmt((prev) => ({ ...prev, [index]: v }))}
+                  plusLabel="Repair cannon"
+                  minusLabel="Damage cannon"
+                  stateLabel="destroyed"
+                />
+              </Box>
 
               {/* Firing options grouped by action economy */}
               {['bonus', 'reaction'].map((cat) => {
@@ -267,17 +256,13 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
               : `Creating spends ${effectiveCost === 'slot' ? `a level ${slotLevel} spell slot` : 'the 1/Long Rest use'}.`}
           </Typography>
         </Box>
-      ) : (
-        <Typography sx={{ ...subSx, fontStyle: 'italic', mt: 0.8 }}>
-          Maximum cannons active ({capacity}). Dismiss one to build another.
-        </Typography>
-      )}
+      ) : null}
     </Box>
   );
 }
 
-function CannonRulesSummary({ maxHp }) {
-  const groups = eldritchCannonRuleGroups(maxHp);
+function CannonRulesSummary({ maxHp, level }) {
+  const groups = eldritchCannonRuleGroups(maxHp, level);
 
   return (
     <ExpandableCard
@@ -356,6 +341,18 @@ function CannonActionRow({ mode, exhaustionLevel, onRoll, onShowToast }) {
     />
   );
 }
+
+// One active cannon: an outlined board, so the dark HP box inside stands out
+// as it does on the other creature panels.
+const cannonBoardSx = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 0.6,
+  p: 0.8,
+  border: 1,
+  borderColor: 'divider',
+  borderRadius: 1,
+};
 
 const toggleSx = {
   fontSize: '0.64rem',
@@ -457,38 +454,10 @@ const rulesValueSx = {
   color: 'text.secondary',
 };
 
+// AC shield beside the Defenses box, as in the character's header.
 const cannonDefenseSx = {
   display: 'flex',
   alignItems: 'center',
-  gap: '8px',
+  gap: '0.45rem',
   flexWrap: 'wrap',
-};
-
-const defenseBadgeSx = {
-  display: 'inline-flex',
-  alignItems: 'baseline',
-  gap: '4px',
-  px: '7px',
-  py: '2px',
-  border: '1px solid rgba(202,165,80,0.45)',
-  borderRadius: '5px',
-  bgcolor: 'rgba(202,165,80,0.12)',
-  color: '#edd48a',
-};
-
-const defenseLabelSx = {
-  fontSize: '0.52rem',
-  fontWeight: 700,
-  letterSpacing: '0.08em',
-};
-
-const defenseValueSx = {
-  fontSize: '0.72rem',
-  fontWeight: 800,
-  lineHeight: 1,
-};
-
-const defenseTextSx = {
-  fontSize: '0.62rem',
-  color: 'text.secondary',
 };

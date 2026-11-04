@@ -32,23 +32,38 @@ export const CANNON_COMMAND_RANGE_FT = 60;
 export const CANNON_MOVE_FT = 15;
 export const CANNON_MENDING_HEAL = '2d6';
 export const CANNON_DAMAGE_IMMUNITIES = Object.freeze(['Poison', 'Psychic']);
+export const FORTIFIED_POSITION_LEVEL = 15;
 
-export function eldritchCannonRuleGroups(maxHp) {
+// The Cannon Rules summary (EFA). `level` is the Artificer level: Fortified
+// Position (15) changes the limit, creation and command rows and adds the cover.
+// Explosive Cannon (9) needs no row — Detonate and the extra 1d8 are in the
+// cannon's own options.
+export function eldritchCannonRuleGroups(maxHp, level = 0) {
+  const fortified = Number(level) >= FORTIFIED_POSITION_LEVEL;
   return [
     {
       title: 'Create',
       rows: [
-        ['Action', `Magic Action within ${CANNON_CREATE_RANGE_FT} ft`],
+        ['Action', `Magic Action with Smith's or Woodcarver's Tools, on a horizontal surface within ${CANNON_CREATE_RANGE_FT} ft`],
         ['Size/Form', 'Small or Tiny; carried, legs, or wheels'],
-        ['Cost', '1/Long Rest or expend a spell slot'],
+        ['Cost', fortified
+          ? '1/Long Rest or expend a spell slot (a slot for each cannon paid that way)'
+          : '1/Long Rest or expend a spell slot'],
+        ['Limit', fortified
+          ? 'Two at a time, both created with the same Magic Action'
+          : `One at a time (two from level ${FORTIFIED_POSITION_LEVEL})`],
       ],
     },
     {
       title: 'Operate',
       rows: [
-        ['Command', `Bonus Action while within ${CANNON_COMMAND_RANGE_FT} ft`],
+        ['Command', fortified
+          ? `Bonus Action while within ${CANNON_COMMAND_RANGE_FT} ft; one Bonus Action activates both`
+          : `Bonus Action while within ${CANNON_COMMAND_RANGE_FT} ft`],
         ['Move', `Up to ${CANNON_MOVE_FT} ft before or after the option`],
-        ['Mode', 'Choose Flamethrower, Force Ballista, or Protector each activation'],
+        ['Mode', fortified
+          ? 'Flamethrower, Force Ballista, or Protector each activation (the same or different per cannon)'
+          : 'Choose Flamethrower, Force Ballista, or Protector each activation'],
       ],
     },
     {
@@ -57,6 +72,7 @@ export function eldritchCannonRuleGroups(maxHp) {
         ['Defenses', `AC ${CANNON_AC}; HP ${maxHp}; immune ${CANNON_DAMAGE_IMMUNITIES.join('/')}`],
         ['Repair', `Mending restores ${CANNON_MENDING_HEAL} HP`],
         ['Ends', 'After 1 hour, at 0 HP, or dismissed with a Magic Action'],
+        ...(fortified ? [['Cover', 'You and your allies within 10 ft of a cannon have Half Cover']] : []),
       ],
     },
   ];
@@ -75,7 +91,7 @@ export function cannonMaxHp(level) {
 
 // Max simultaneous cannons: 2 from level 15 (Fortified Position), else 1.
 export function maxCannons(level) {
-  return Number(level || 0) >= 15 ? 2 : 1;
+  return Number(level || 0) >= FORTIFIED_POSITION_LEVEL ? 2 : 1;
 }
 
 // Explosive Cannon (lv.9) bumps every cannon damage roll by 1d8.

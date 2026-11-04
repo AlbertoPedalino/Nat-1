@@ -8,10 +8,10 @@ import { filterOptions } from '../../../shared/content/searchText.js';
 import { findFamiliarBeasts } from '../../../shared/character/forms/beasts.js';
 import { WILD_SHAPE_RESOURCE_KEY } from '../../../shared/character/forms/wildShapeForm.js';
 import { getSheetSlots } from '../spells/spellsTabLogic.js';
-import { consumeSlot, getRegularSlotUsed } from '../../../shared/character/spells/spellSlots.js';
-import { rollD20, rollFormula, formatD20Detail, buildD20Meta } from '../../../shared/character/dice/dice.js';
-import { BeastNameLink, BeastStatBlock, BeastPickerRow, panelSx, headerSx, subSx, dismissButtonSx } from './BeastStatBlock.jsx';
+import { consumeSlot, lowestAvailableSlotLevel } from '../../../shared/character/spells/spellSlots.js';
+import { BeastNameLink, BeastStatBlock, BeastPickerRow, creatureHpBoxSx, panelSx, headerSx, subSx, dismissButtonSx } from './BeastStatBlock.jsx';
 import { useBeastsDb } from './useBeastsDb.js';
+import { useCreatureRolls } from './useCreatureRolls.js';
 import {
   getActiveWildCompanion,
   getWildCompanionHp,
@@ -26,21 +26,11 @@ import {
 // separate creature (no transform / stat override) — its form is stored at
 // C.wildCompanion for the stat block.
 
-// Lowest available regular spell-slot level. Find Familiar is a 1st-level spell,
-// so any slot of level 1+ works and the cheapest one is preferred.
-function lowestAvailableSlotLevel(regularSlots, sheet) {
-  const used = sheet?.spellSlotUsed || {};
-  const created = sheet?.createdSpellSlots || {};
-  for (let lv = 1; lv <= regularSlots.length; lv++) {
-    const total = Number(regularSlots[lv - 1] || 0);
-    if (!total) continue;
-    if (total - getRegularSlotUsed(used, lv) + Number(created[lv] || 0) > 0) return lv;
-  }
-  return 0;
-}
-
 export default function WildCompanionPanel({ character, sheet, resources, onResChange }) {
-  const { onUpdateCharacter, onUpdateSheet, onShowToast } = useSheetActions();
+  const { onUpdateCharacter, onUpdateSheet } = useSheetActions();
+  // The familiar is its own creature: its rolls never take the druid's
+  // exhaustion penalty.
+  const { rollCheck, rollFormulaToast } = useCreatureRolls();
   const beastsDb = useBeastsDb();
   const [query, setQuery] = useState('');
   const [costMode, setCostMode] = useState('ws'); // 'ws' | 'slot'
@@ -81,26 +71,6 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
     onUpdateCharacter((prev) => ({ ...prev, ...dismissWildCompanionPatch() }));
   };
 
-  // The familiar is its own creature: roll pure d20/dice and surface the result
-  // in the shared dice toast. Deliberately NOT the character's rollD20, so the
-  // druid's exhaustion penalty never applies to the summoned Fey.
-  const rollCheck = (bonus, label) => {
-    if (!onShowToast) return;
-    const r = rollD20(bonus);
-    onShowToast(label, formatD20Detail(r), r.total, r.rolls, buildD20Meta(r));
-  };
-  // Generic dice-formula roll (HP hit dice + attack damage).
-  const rollFormulaToast = (formula, label) => {
-    if (!onShowToast) return;
-    const result = rollFormula(formula);
-    if (!result.valid) {
-      onShowToast(label, `Unable to roll ${formula}: ${result.error?.message || 'invalid formula'}`, null, []);
-      return;
-    }
-    const { total, rolls, modifier } = result;
-    onShowToast(label, formula, total, rolls, modifier ? { bonus: modifier } : undefined);
-  };
-
   // Apply a signed HP delta to the familiar, resolving/clamping against the latest
   // state so rapid clicks never race off a stale current value.
   const applyHpDelta = (delta) => onUpdateCharacter?.((prev) => {
@@ -122,7 +92,7 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
           </Button>
         </Box>
         {hp ? (
-          <Box sx={{ mb: 0.6 }}>
+          <Box sx={creatureHpBoxSx}>
             <HpPoolBar
               current={hp.current}
               max={hp.max}

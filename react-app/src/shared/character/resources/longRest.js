@@ -1,5 +1,6 @@
 import { dismissWildCompanionPatch } from '../forms/wildCompanionForm.js';
 import { dismissAllCannonsPatch, getActiveCannons } from '../forms/eldritchCannonForm.js';
+import { restorePrimalCompanionPatch } from '../forms/primalCompanionForm.js';
 
 // Character-level fields reset when a Long Rest is finished.
 //
@@ -14,5 +15,7 @@ export function longRestCharacterPatch(C) {
   if (C?.wildCompanion) Object.assign(patch, dismissWildCompanionPatch());
   // Artillerist Eldritch Cannons (EFA) last at most 1 hour — none survive a rest.
   if (getActiveCannons(C).length) Object.assign(patch, dismissAllCannonsPatch());
+  // Beast Master Primal Companion (XPHB 2024) rests with you: back to full HP.
+  if (C?.primalCompanion?.hpCurrent != null) Object.assign(patch, restorePrimalCompanionPatch(C.primalCompanion));
   return patch;
 }

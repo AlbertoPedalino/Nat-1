@@ -44,6 +44,7 @@ import WildCompanionPanel from '../forms/WildCompanionPanel.jsx';
 import EldritchCannonPanel from '../forms/EldritchCannonPanel.jsx';
 import MagicItemTinkerPanel from '../inventory/MagicItemTinkerPanel.jsx';
 import SummonedCreaturePanel from '../forms/SummonedCreaturePanel.jsx';
+import PrimalCompanionPanel from '../forms/PrimalCompanionPanel.jsx';
 import AttackRollButton from './AttackRollButton.jsx';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
@@ -75,6 +76,7 @@ const ACTION_DETAIL_RENDERERS = {
   eldritchCannon: EldritchCannonPanel,
   magicItemTinker: MagicItemTinkerPanel,
   summonedCreature: SummonedCreaturePanel,
+  primalCompanion: PrimalCompanionPanel,
 };
 
 const _danglingResKeyWarned = typeof Set === 'function' ? new Set() : null;

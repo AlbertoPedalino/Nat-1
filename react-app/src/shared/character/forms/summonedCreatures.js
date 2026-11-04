@@ -1,5 +1,16 @@
-const SUMMONED_CREATURE_DATA_URL = 'https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/bestiary/bestiary-au.json';
+// Bestiary files holding creatures a spell or class feature summons (their
+// records carry `summonedBySpell` / `summonedByClass`). XPHB has the Ranger's
+// primal beasts.
+const BESTIARY_BASE_URL = 'https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/bestiary';
+const SUMMONED_CREATURE_FILES = ['bestiary-au.json', 'bestiary-xphb.json'];
 const ABILITIES = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
+// The ability a stat block scales with is named in prose: "13 plus your Wisdom
+// modifier", "{@damage 1d8 + 2} plus your Charisma modifier".
+const ABILITY_NAME = '(?:Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma)';
+const ABILITY_MODIFIER = new RegExp(`${ABILITY_NAME} modifier`, 'i');
+const DAMAGE_PLUS_ABILITY = new RegExp(String.raw`\{@damage ([^}]+)\}\s+plus your ${ABILITY_NAME} modifier`, 'gi');
+const DICE_PLUS_ABILITY = new RegExp(String.raw`\{@dice ([^}]+)\}\s+plus your ${ABILITY_NAME} modifier`, 'gi');
+const NUMBER_WORDS = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10 };
 
 let recordsPromise = null;
 
@@ -12,12 +23,14 @@ const clone = (value) => {
 export async function loadSummonedCreatureRecords() {
   if (recordsPromise) return recordsPromise;
   recordsPromise = (async () => {
-    const response = await fetch(SUMMONED_CREATURE_DATA_URL);
-    if (!response.ok) throw new Error(`bestiary-au.json: HTTP ${response.status}`);
-    const data = await response.json();
-    return (data.monster || []).filter((monster) => (
+    const files = await Promise.all(SUMMONED_CREATURE_FILES.map(async (file) => {
+      const response = await fetch(`${BESTIARY_BASE_URL}/${file}`);
+      if (!response.ok) throw new Error(`${file}: HTTP ${response.status}`);
+      return response.json();
+    }));
+    return files.flatMap((data) => (data.monster || []).filter((monster) => (
       monster?.summonedBySpell || monster?.summonedByClass || monster?.summonedByClassFeature
-    ));
+    )));
   })();
   recordsPromise.catch(() => { recordsPromise = null; });
   return recordsPromise;
@@ -124,7 +137,7 @@ function resolveAc(ac, { spellLevel, abilityMod }) {
   const special = String(first?.special || '').trim();
   const base = Number(special.match(/^(\d+)/)?.[1]);
   if (Number.isFinite(base) && /spell's level/i.test(special)) return base + spellLevel;
-  if (Number.isFinite(base) && /charisma modifier/i.test(special)) return base + abilityMod;
+  if (Number.isFinite(base) && ABILITY_MODIFIER.test(special)) return base + abilityMod;
   return special || null;
 }
 
@@ -140,6 +153,18 @@ function resolveHp(hp, { spellLevel, classLevel }) {
   }
   if (/^4\s*\+\s*four times your warlock level/i.test(special)) {
     return { average: 4 + (4 * classLevel), formula: `${classLevel}d6` };
+  }
+  // "5 plus five times your Ranger level (… Hit Dice [d8s] equal to your Ranger level)"
+  const perClassLevel = special.match(/^(\d+)\s*(?:\+|plus)\s*(\w+)\s+times your \w+ level/i);
+  if (perClassLevel) {
+    const per = NUMBER_WORDS[perClassLevel[2].toLowerCase()] ?? Number(perClassLevel[2]);
+    if (Number.isFinite(per)) {
+      const hitDie = special.match(/\[d(\d+)s?\]/i)?.[1];
+      return {
+        average: Number(perClassLevel[1]) + per * classLevel,
+        formula: hitDie && classLevel ? `${classLevel}d${hitDie}` : '',
+      };
+    }
   }
   return { average: special || 1, formula: '' };
 }
@@ -171,8 +196,8 @@ function resolveEntryText(node, { spellLevel, spellAttackBonus, spellSaveDc, abi
   if (typeof node === 'string') {
     return node
       .replace(/\{@hitYourSpellAttack Bonus equals your spell attack modifier\}/gi, `{@hit ${spellAttackBonus}}`)
-      .replace(/\{@damage ([^}]+)\}\s+plus your Charisma modifier/gi, (_, formula) => `{@damage ${formulaWithAbilityModifier(formula, abilityMod)}}`)
-      .replace(/\{@dice ([^}]+)\}\s+plus your Charisma modifier/gi, (_, formula) => `{@dice ${formulaWithAbilityModifier(formula, abilityMod)}}`)
+      .replace(DAMAGE_PLUS_ABILITY, (_, formula) => `{@damage ${formulaWithAbilityModifier(formula, abilityMod)}}`)
+      .replace(DICE_PLUS_ABILITY, (_, formula) => `{@dice ${formulaWithAbilityModifier(formula, abilityMod)}}`)
       .replace(/summonSpellLevel/g, String(spellLevel))
       .replace(/your spell save DC/gi, String(spellSaveDc));
   }

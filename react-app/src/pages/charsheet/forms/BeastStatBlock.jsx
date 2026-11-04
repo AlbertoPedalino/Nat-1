@@ -53,7 +53,8 @@ export function BeastNameLink({ name, source, sx }) {
 // makes the HP dice formula rollable. Both optional — omit them for a plain,
 // read-only stat block. Rolls are the creature's own, so callers should route
 // them through pure dice + a toast (not the character's rollD20, whose exhaustion
-// penalty must not bleed onto a separate summoned creature).
+// penalty must not bleed onto a separate summoned creature). `b.checkBonus` is
+// added to every ability check (a Ranger's Primal Bond adds the PB).
 export function BeastStatBlock({
   b,
   typeLabel = 'Beast',
@@ -114,7 +115,7 @@ export function BeastStatBlock({
               {rollable ? (
                 <RollChip
                   sx={{ fontSize: '0.64rem' }}
-                  onClick={() => onRoll(getMod(Number(b.abilities[k]) || 10), formatRollTitle(b.name, `${k.toUpperCase()} Check`))}
+                  onClick={() => onRoll(getMod(Number(b.abilities[k]) || 10) + (Number(b.checkBonus) || 0), formatRollTitle(b.name, `${k.toUpperCase()} Check`))}
                 >
                   {scoreText}
                 </RollChip>
@@ -316,6 +317,27 @@ export const headerSx = {
 
 export const subSx = { fontSize: '0.62rem', color: 'text.secondary' };
 
+// A labelled row of choices above a summon's stat block (form, creature type,
+// damage type…), and the toggle look its buttons share.
+export function CreatureOptionRow({ label, children }) {
+  return (
+    <Box sx={{ mb: 0.8 }}>
+      <Typography sx={{ ...subSx, mb: 0.3, fontWeight: 700 }}>{label}</Typography>
+      {children}
+    </Box>
+  );
+}
+
+export const optionToggleSx = {
+  fontSize: '0.62rem',
+  py: '3px',
+  px: '8px',
+  textTransform: 'none',
+  color: '#edd48a',
+  borderColor: 'rgba(202,165,80,0.4)',
+  '&.Mui-selected': { bgcolor: 'rgba(237,212,138,0.18)', color: '#edd48a' },
+};
+
 // Muted text button for "dismiss / revert" actions on summon-style panels
 // (Wild Companion, Wild Shape, Eldritch Cannon). No outline/icon — a small
 // low-emphasis control so it never competes with the roll/HP controls above it.
@@ -332,6 +354,21 @@ export const dismissButtonSx = {
   borderColor: 'rgba(201,138,138,0.45)',
   borderRadius: 1,
   '&:hover': { borderColor: '#c98a8a', bgcolor: 'rgba(201,138,138,0.1)' },
+};
+
+// The box holding a summon's HP bar (and, at 0 HP, what brings it back):
+// a row panel stacked vertically, set off from the stat block below it.
+export const creatureHpBoxSx = {
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'stretch',
+  gap: 0.6,
+  p: 0.8,
+  mb: 0.8,
+  border: 1,
+  borderColor: 'divider',
+  borderRadius: 1,
+  bgcolor: 'rgba(35,32,26,1)',
 };
 
 export const rowSx = {

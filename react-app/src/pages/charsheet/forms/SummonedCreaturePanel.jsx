@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Box,
   Button,
@@ -18,16 +18,17 @@ import {
   findSummonedCreature,
   getSummonedCreatureTypeChoices,
   getSummonedCreatureVersions,
-  loadSummonedCreatureRecords,
   normalizeSummonedCreature,
 } from '../../../shared/character/forms/summonedCreatures.js';
-import { buildD20Meta, formatD20Detail, rollD20, rollFormula } from '../../../shared/character/dice/dice.js';
 import { getFinal, getMod, getPB } from '../state/calculations.js';
-import { useSheetActions } from '../state/SheetActionsContext.jsx';
+import { useSummonedCreatureRecords } from './useSummonedCreatureRecords.js';
+import { useCreatureRolls } from './useCreatureRolls.js';
 import {
   BeastNameLink,
   BeastStatBlock,
+  CreatureOptionRow,
   headerSx,
+  optionToggleSx,
   panelSx,
   subSx,
 } from './BeastStatBlock.jsx';
@@ -53,29 +54,11 @@ export default function SummonedCreaturePanel({
   onResChange,
 }) {
   const config = descriptor || action?.summonedCreature || {};
-  const { onShowToast } = useSheetActions();
-  const [records, setRecords] = useState([]);
-  const [status, setStatus] = useState('loading');
+  const { records, status } = useSummonedCreatureRecords();
+  const { rollCheck, rollFormulaToast } = useCreatureRolls();
   const [selectedVersion, setSelectedVersion] = useState('');
   const [selectedCreatureType, setSelectedCreatureType] = useState('');
   const [selectedSpellLevel, setSelectedSpellLevel] = useState(null);
-
-  useEffect(() => {
-    let alive = true;
-    setStatus('loading');
-    loadSummonedCreatureRecords()
-      .then((result) => {
-        if (!alive) return;
-        setRecords(result || []);
-        setStatus('ready');
-      })
-      .catch(() => {
-        if (!alive) return;
-        setRecords([]);
-        setStatus('error');
-      });
-    return () => { alive = false; };
-  }, []);
 
   const raw = useMemo(
     () => findSummonedCreature(records, config.name, config.source || 'AU'),
@@ -123,26 +106,6 @@ export default function SummonedCreaturePanel({
     spellSaveDc: resolvedDc,
     creatureType: activeCreatureType,
   }), [activeVersion, resolvedSpellLevel, resolvedClassLevel, resolvedAbilityMod, resolvedAttack, resolvedDc, activeCreatureType]);
-  const rollCheck = (bonus, label) => {
-    if (!onShowToast) return;
-    const result = rollD20(bonus);
-    onShowToast(label, formatD20Detail(result), result.total, result.rolls, buildD20Meta(result));
-  };
-  const rollFormulaToast = (formula, label) => {
-    if (!onShowToast) return;
-    const result = rollFormula(formula);
-    if (!result.valid) {
-      onShowToast(label, `Unable to roll ${formula}: ${result.error?.message || 'invalid formula'}`, null, []);
-      return;
-    }
-    onShowToast(
-      label,
-      formula,
-      result.total,
-      result.rolls,
-      result.modifier ? { bonus: result.modifier } : undefined,
-    );
-  };
   const divinePowerKey = config.divinePowerResourceKey;
   const divinePowerAvailable = divinePowerKey
     ? Number(resources?.[divinePowerKey] ?? 1) > 0
@@ -195,7 +158,7 @@ export default function SummonedCreaturePanel({
             sx={{ flexWrap: 'wrap' }}
           >
             {versions.map((version) => (
-              <ToggleButton key={version.name} value={version.name} disabled={hasFixedChoice} sx={toggleSx}>
+              <ToggleButton key={version.name} value={version.name} disabled={hasFixedChoice} sx={optionToggleSx}>
                 {variantToken(version.name)}
               </ToggleButton>
             ))}
@@ -212,7 +175,7 @@ export default function SummonedCreaturePanel({
             sx={{ flexWrap: 'wrap' }}
           >
             {creatureTypeChoices.map((type) => (
-              <ToggleButton key={type} value={type} sx={toggleSx}>{capitalize(type)}</ToggleButton>
+              <ToggleButton key={type} value={type} sx={optionToggleSx}>{capitalize(type)}</ToggleButton>
             ))}
           </ToggleButtonGroup>
         </CreatureOptionRow>
@@ -283,22 +246,3 @@ export function DivinePowerStatusButton({ available, onToggle }) {
     </Button>
   );
 }
-
-function CreatureOptionRow({ label, children }) {
-  return (
-    <Box sx={{ mb: 0.8 }}>
-      <Typography sx={{ ...subSx, mb: 0.3, fontWeight: 700 }}>{label}</Typography>
-      {children}
-    </Box>
-  );
-}
-
-const toggleSx = {
-  fontSize: '0.62rem',
-  py: '3px',
-  px: '8px',
-  textTransform: 'none',
-  color: '#edd48a',
-  borderColor: 'rgba(202,165,80,0.4)',
-  '&.Mui-selected': { bgcolor: 'rgba(237,212,138,0.18)', color: '#edd48a' },
-};

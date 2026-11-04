@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
-import { Box, Typography, Chip, Tooltip } from '@mui/material';
-import { Swords, Shield, Sparkles, AlertCircle } from 'lucide-react';
+import { Box, Typography, Tooltip } from '@mui/material';
+import { Sparkles } from 'lucide-react';
 import { getInitiative, getPB, fbonus } from '../state/calculations.js';
 import { getConditionsWithEffect } from '../../../shared/character/combat/conditions.js';
 import { getArmorTrainingInfo } from '../proficiency/proficiencies.js';
@@ -10,10 +10,11 @@ import { collectItemResistanceItems, collectItemImmunityItems, collectItemCondit
 import { computeBestArmorClass } from '../../../shared/character/combat/ac.js';
 import { resolveInitiativeTriggeredResourceRecoveries } from '../../../shared/character/combat/initiativeEffects.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
+import ACDisplay from './ACDisplay.jsx';
 import ConditionsBlock from './ConditionsBlock.jsx';
 import RemindersBlock from './RemindersBlock.jsx';
 import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
-import { chipTintStyle, damageTypeTone } from '../../../shared/ui/entityColors.js';
+import DefensesPanel from './DefensesPanel.jsx';
 
 export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearConditions, effectActions, onSetExhaustion, conditionEntries, onToggleInspiration, resources, setResources, onShowToast }) {
   // Initiative is a DEX check (D20 Test) but rolls its own d20 here (it also fires
@@ -141,33 +142,6 @@ function SquareStat({ value, label, clickable }) {
   );
 }
 
-function ACDisplay({ value, shieldUnproficient, source, showBadge, badgeLabel }) {
-  const tooltipText = shieldUnproficient
-    ? "Shield not proficient - no AC bonus"
-    : source
-      ? `AC ${value} — ${source}`
-      : '';
-  return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.25, flexShrink: 0 }}>
-      <Tooltip title={tooltipText}>
-        <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 62, height: 68, flexShrink: 0, borderRadius: 1, border: shieldUnproficient ? 1 : 'none', borderColor: shieldUnproficient ? 'warning.main' : 'transparent' }}>
-          <Shield size={62} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', color: shieldUnproficient ? 'rgba(255,152,0,0.2)' : 'rgba(202,165,80,0.14)' }} />
-          <Box sx={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
-            <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '1.25rem', fontWeight: 700, color: '#edd48a', lineHeight: 1 }}>{value}</Typography>
-            <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.44rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'text.secondary' }}>AC</Typography>
-          </Box>
-          {shieldUnproficient && <AlertCircle size={12} style={{ position: 'absolute', top: 2, right: 2, color: '#ff9800' }} />}
-        </Box>
-      </Tooltip>
-      {showBadge && badgeLabel ? (
-        <Typography sx={{ fontSize: '0.45rem', color: '#70b7a6', fontWeight: 700, textAlign: 'center', lineHeight: 1.1, maxWidth: 72, whiteSpace: 'normal', wordBreak: 'break-word' }}>
-          {badgeLabel}
-        </Typography>
-      ) : null}
-    </Box>
-  );
-}
-
 function InspirationBlock({ sheet, onToggle }) {
   const insp = sheet.sheetInspiration;
   return (
@@ -206,25 +180,5 @@ function DefensesBlock({ C, activeConditions = [] }) {
     ...passiveTraits,
   ];
 
-  return (
-    <Box sx={{ flex: 1, minWidth: 140, bgcolor: 'rgba(35,32,26,1)', border: 1, borderColor: 'divider', borderRadius: 1, p: '0.4rem 0.62rem' }}>
-      <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'primary.main', mb: 0.4 }}>Defenses</Typography>
-      {all.length === 0 && <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', fontStyle: 'italic' }}>No resistances detected.</Typography>}
-      {all.map((d, i) => {
-        // Only resistances and immunities name a damage type; the rest stay neutral.
-        const tone = d.kind === 'Resist' || d.kind === 'Immune' ? damageTypeTone(d.type) : null;
-        // An immunity is the stronger defense, so it gets the fuller tint.
-        const tint = tone ? chipTintStyle(tone, { bgAlpha: d.kind === 'Immune' ? 0.3 : 0.12 }) : null;
-        return (
-          <Chip
-            key={`${d.kind}-${d.type}-${i}`}
-            size="small"
-            label={`${d.kind} ${d.type}${d.source ? ` · ${d.source}` : ''}`}
-            variant="outlined"
-            sx={{ fontSize: '0.5rem', m: 0.15, ...tint }}
-          />
-        );
-      })}
-    </Box>
-  );
+  return <DefensesPanel items={all} sx={{ flex: 1, minWidth: 140 }} />;
 }

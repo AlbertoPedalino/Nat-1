@@ -47,6 +47,19 @@ export function persistCreatedSlots(createdSlots, onUpdateSheet, onUpdateCharact
   if (typeof onUpdateCharacter === 'function') onUpdateCharacter((prev) => ({ ...prev, createdSpellSlots: createdSlots }));
 }
 
+// Lowest regular spell-slot level with a slot left (created slots included), or
+// 0 when none: features that take "a spell slot" of any level spend the cheapest.
+export function lowestAvailableSlotLevel(regularSlots, sheet) {
+  const used = sheet?.spellSlotUsed || {};
+  const created = sheet?.createdSpellSlots || {};
+  for (let lv = 1; lv <= regularSlots.length; lv++) {
+    const total = Number(regularSlots[lv - 1] || 0);
+    if (!total) continue;
+    if (total - getRegularSlotUsed(used, lv) + Number(created[lv] || 0) > 0) return lv;
+  }
+  return 0;
+}
+
 export function consumeSlot(regularSlots, sheet, level, onUpdateSheet, onUpdateCharacter) {
   const idx = Number(level) - 1;
   if (idx < 0 || idx >= regularSlots.length) return false;
