@@ -90,7 +90,7 @@ export const sceneGmControlsSx = (theme) => ({
   },
 });
 
-// The " view" of Freeze view / Player view: dropped on phones so the GM's four
+// The " view" of Freeze view: dropped on phones so the GM's four
 // buttons fit one row.
 export const hiddenOnPhoneSx = {
   display: { xs: 'none', sm: 'inline' },
