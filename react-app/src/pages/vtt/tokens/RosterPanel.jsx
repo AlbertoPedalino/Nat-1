@@ -102,7 +102,6 @@ export default function RosterPanel({
           layer={activeLayer}
           emptyLabel={activeLayer === 'gm' ? 'Hidden' : 'Token'}
           openLabel={`Add ${LAYER_NAMES[activeLayer] || 'token'} piece`}
-          allowImage
           busy={busy}
           disabled={placementDisabled}
           onAdd={onAddToken}

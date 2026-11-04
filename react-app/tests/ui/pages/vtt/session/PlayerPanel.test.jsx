@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import PlayerPanel from '../../../../../src/pages/vtt/session/PlayerPanel.jsx';
 
 describe('PlayerPanel', () => {
-  it('lets a player name and colour a marker of their own, without a picture', () => {
+  it('gives a player the same token composer as the GM, picture included', () => {
     const onAddToken = vi.fn();
     render(
       <PlayerPanel
@@ -16,8 +16,8 @@ describe('PlayerPanel', () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Add a marker' }));
-    expect(screen.queryByText('Image')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Add token piece' }));
+    expect(screen.getByText('Image')).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText('Token name'), { target: { value: 'Trap here' } });
     fireEvent.click(screen.getByRole('button', { name: 'Place' }));
 
@@ -25,6 +25,5 @@ describe('PlayerPanel', () => {
       layer: 'tokens',
       label: 'Trap here',
     }));
-    expect(onAddToken.mock.calls[0][0]).not.toHaveProperty('imageFile');
   });
 });

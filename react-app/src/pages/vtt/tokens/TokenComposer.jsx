@@ -7,16 +7,14 @@ import ColorField from '../../../shared/ui/ColorField.jsx';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import PiecePreview, { beginPiecePointerDrag } from './PiecePreview.jsx';
 
-// A loose piece built by hand: a name, a colour and, for the GM, a picture.
-// Drag the preview onto the map to put it exactly, or press Place to drop it
-// in view. The GM and the players share it; only the GM may upload a picture,
-// because the map image bucket takes uploads from the GM alone.
+// A loose piece built by hand: a name, a colour and a picture. Drag the preview
+// onto the map to put it exactly, or press Place to drop it in view. The GM and
+// the players share it; a player's picture goes into a live scene of their
+// campaign, which is all supabase/25_player_token_images.sql lets them upload.
 export default function TokenComposer({
   layer = 'tokens',
-  defaultLabel = 'Token',
-  emptyLabel = defaultLabel,
+  emptyLabel = 'Token',
   openLabel,
-  allowImage = false,
   busy = false,
   disabled = false,
   onAdd,
@@ -24,7 +22,7 @@ export default function TokenComposer({
   onPlacementDragEnd,
 }) {
   const [open, setOpen] = useState(false);
-  const [name, setName] = useState(defaultLabel);
+  const [name, setName] = useState('Token');
   const [color, setColor] = useState(VTT_COLORS.dungeon);
   const [image, setImage] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
@@ -48,7 +46,7 @@ export default function TokenComposer({
       color,
       w: 1,
       h: 1,
-      ...(allowImage && image ? { imageFile: image, imageUrl } : {}),
+      ...(image ? { imageFile: image, imageUrl } : {}),
     },
   };
   const blocked = busy || disabled;
@@ -103,19 +101,17 @@ export default function TokenComposer({
               label="Token color"
               sx={colorSx}
             />
-            {allowImage ? (
-              <Button component="label" size="small" startIcon={<ImagePlus size={14} />}>
-                {image ? 'Change image' : 'Image'}
-                <Box
-                  component="input"
-                  type="file"
-                  accept="image/*"
-                  hidden
-                  onChange={(event) => setImage(event.target.files?.[0] || null)}
-                />
-              </Button>
-            ) : null}
-            {allowImage && image ? (
+            <Button component="label" size="small" startIcon={<ImagePlus size={14} />}>
+              {image ? 'Change image' : 'Image'}
+              <Box
+                component="input"
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={(event) => setImage(event.target.files?.[0] || null)}
+              />
+            </Button>
+            {image ? (
               <IconButton size="small" aria-label="Remove token image" onClick={() => setImage(null)}>
                 <X size={14} />
               </IconButton>

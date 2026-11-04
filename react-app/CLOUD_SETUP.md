@@ -43,6 +43,7 @@ or on a script missing from this table.
 | 22 | [`22_scene_backgrounds.sql`](supabase/22_scene_backgrounds.sql) | `map_scenes.backgrounds`: every background uploaded to a scene, so the GM can switch between them; `background_path` stays the one shown |
 | 23 | [`23_scene_image_filters.sql`](supabase/23_scene_image_filters.sql) | `map_scenes.image_filters`: a light filter (dawn, dusk, night…) per scene picture, keyed by its storage path |
 | 24 | [`24_scene_image_atmospheres.sql`](supabase/24_scene_image_atmospheres.sql) | `map_scenes.image_atmospheres`: the atmosphere (rain, fog, snow…) per scene picture, keyed by its storage path; the old scene-wide `atmosphere` column is no longer read |
+| 25 | [`25_player_token_images.sql`](supabase/25_player_token_images.sql) | Players may upload a picture for their own token pieces (live scene of their campaign only) and delete the pictures they uploaded; replaces the `map-images` insert/delete policies of 06 |
 
 Run 13 and 14 **before** deploying a frontend that needs them: the app sends
 health changes only through their RPCs.
