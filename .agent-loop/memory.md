@@ -204,6 +204,7 @@ GM-Board is React 19 + Vite + MUI 9 + Supabase SPA under `react-app/`. D&D data 
 
 - Builder: `pages/charbuilder/CharBuilder.jsx`.
 - Sheet: `pages/charsheet/CharacterSheet.jsx`.
+- Sheet header (2026-11-04, user request): ability scores and HP are two separate panels, no shared band behind them. The Proficiency Bonus is a square stat in `stats/RightTop.jsx`, in the row AC · Initiative · Prof. Bonus · Inspiration · Defenses; Initiative is square too. Defenses chips (resist/immune) are tinted by damage type through `damageTypeTone`/`DAMAGE_TYPE_COLORS` (`shared/ui/entityColors.js`), immunity with the fuller tint; other defenses stay neutral.
 - Keys: `gb:char:<id>`, `gb:chars`, `gb:active_char`.
 - Helpers: `shared/character/profile/store.js`.
 - Local delete emits `gb:char-deleted`; it never cascades cloud deletion.

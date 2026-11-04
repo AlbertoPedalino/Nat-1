@@ -46,6 +46,35 @@ export const SPELL_TAG_COLORS = {
   ritual: '#58b879',        // green
 };
 
+// One hue per damage type, for the sheet's Defenses chips (resistances and
+// immunities). Physical types share one stone tone; `all` covers "All damage".
+const PHYSICAL_DAMAGE_TONE = '#b3a58a';
+export const DAMAGE_TYPE_COLORS = {
+  acid: '#cde04a',
+  cold: '#86d4ff',
+  fire: '#ff7a2a',
+  force: '#d46fd0',
+  lightning: '#a9c4ff',
+  necrotic: '#9a6ad8',
+  poison: '#7cc444',
+  psychic: '#e07ab8',
+  radiant: '#ffd86a',
+  thunder: '#4fb3bf',
+  bludgeoning: PHYSICAL_DAMAGE_TONE,
+  piercing: PHYSICAL_DAMAGE_TONE,
+  slashing: PHYSICAL_DAMAGE_TONE,
+  all: NEUTRAL_TONE,
+};
+
+// The hue of the first damage type named in a defense label ("Fire",
+// "All damage", "Bludgeoning (nonmagical)"…), or null when it names none.
+// Whole words only, so "all" never matches inside another word.
+const DAMAGE_TYPE_PATTERN = new RegExp(`\\b(${Object.keys(DAMAGE_TYPE_COLORS).join('|')})\\b`, 'i');
+export function damageTypeTone(label) {
+  const match = String(label || '').match(DAMAGE_TYPE_PATTERN);
+  return match ? DAMAGE_TYPE_COLORS[match[1].toLowerCase()] : null;
+}
+
 // Semantic tones for the action-tab entry chips. Muted on purpose so a chip
 // reads as a status/fact, never as an entity-kind tag. `info` = neutral fact
 // (weapon hand, range, duration, save DC…), `positive`/`negative` = good/bad

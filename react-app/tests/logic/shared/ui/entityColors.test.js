@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { ROLL_TONES, attackRollerToneSx, rollerToneSx } from '../../../../src/shared/ui/entityColors.js';
+import { DAMAGE_TYPE_COLORS, NEUTRAL_TONE, ROLL_TONES, attackRollerToneSx, damageTypeTone, rollerToneSx } from '../../../../src/shared/ui/entityColors.js';
 
 test('a roll-button tint is its tone plus a translucent border of the same hue', () => {
   const sx = rollerToneSx(ROLL_TONES.damage);
@@ -31,4 +31,19 @@ test('disadvantage outranks not-proficient', () => {
     attackRollerToneSx({ disadv: true, notProficient: true }),
     attackRollerToneSx({ notProficient: true }),
   );
+});
+
+test('a defense label takes the hue of the damage type it names', () => {
+  assert.equal(damageTypeTone('Fire'), DAMAGE_TYPE_COLORS.fire);
+  assert.equal(damageTypeTone('cold'), DAMAGE_TYPE_COLORS.cold);
+  assert.equal(damageTypeTone('Bludgeoning (nonmagical)'), DAMAGE_TYPE_COLORS.bludgeoning);
+  assert.equal(damageTypeTone('All damage'), NEUTRAL_TONE);
+});
+
+test('a label naming no damage type has no hue', () => {
+  assert.equal(damageTypeTone('Frightened'), null);
+  assert.equal(damageTypeTone(''), null);
+  assert.equal(damageTypeTone(undefined), null);
+  // Whole words only: "all" inside another word is not "All damage".
+  assert.equal(damageTypeTone('Small creatures'), null);
 });

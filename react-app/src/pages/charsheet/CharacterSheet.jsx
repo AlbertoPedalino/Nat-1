@@ -1091,18 +1091,16 @@ export default function CharacterSheet({
         {sheetConflict ? (
           <SheetConflictBanner onLoadRemote={loadRemoteVersion} onKeepLocal={keepLocalVersion} />
         ) : null}
-        <Box sx={{ bgcolor: 'rgba(35,32,26,1)', borderBottom: 1, borderColor: 'divider', py: '0.55rem', px: embedded ? '0.45rem' : { xs: '0.45rem', md: '0.6rem' } }}>
-          <Stack direction={embedded ? 'column' : { xs: 'column', md: 'row-reverse' }} spacing={0.6} sx={{ alignItems: embedded ? 'stretch' : { md: 'stretch' } }}>
-            <HPBlock sheet={sheet}
-              onHeal={readOnly ? noop : (amt) => adjustHP(1, amt)} onDamage={readOnly ? noop : (amt) => adjustHP(-1, amt)}
-              onTempHP={readOnly ? noop : adjustTempHP} onMaxHPBonus={readOnly ? noop : adjustMaxHpBonus}
-              onSetHP={readOnly ? noop : setCurrentHP} onSetTempHP={readOnly ? noop : setTempHP} onSetMaxHPBonus={readOnly ? noop : setMaxHpBonus}
-              onDeathSave={readOnly ? noop : rollDeathSave} onDeathSaveSet={readOnly ? noop : setDeathSave} />
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              <AbilityScores C={C} sheet={sheet} onRoll={rollD20} />
-            </Box>
-          </Stack>
-        </Box>
+        <Stack direction={embedded ? 'column' : { xs: 'column', md: 'row-reverse' }} spacing={0.8} sx={{ pt: '0.55rem', alignItems: embedded ? 'stretch' : { md: 'stretch' } }}>
+          <HPBlock sheet={sheet}
+            onHeal={readOnly ? noop : (amt) => adjustHP(1, amt)} onDamage={readOnly ? noop : (amt) => adjustHP(-1, amt)}
+            onTempHP={readOnly ? noop : adjustTempHP} onMaxHPBonus={readOnly ? noop : adjustMaxHpBonus}
+            onSetHP={readOnly ? noop : setCurrentHP} onSetTempHP={readOnly ? noop : setTempHP} onSetMaxHPBonus={readOnly ? noop : setMaxHpBonus}
+            onDeathSave={readOnly ? noop : rollDeathSave} onDeathSaveSet={readOnly ? noop : setDeathSave} />
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <AbilityScores C={C} sheet={sheet} onRoll={rollD20} />
+          </Box>
+        </Stack>
         <Box sx={{
           display: 'grid',
           width: '100%',
