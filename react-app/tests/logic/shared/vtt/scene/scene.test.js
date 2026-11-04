@@ -114,7 +114,7 @@ test('rows become editor shapes with usable numbers', () => {
   });
   assert.equal(scene.name, 'Cripta dei Re');
   assert.equal(scene.grid.size, 64);
-  assert.equal(scene.atmosphere.type, 'none', 'old scenes begin without an atmosphere');
+  assert.deepEqual(scene.atmospheres, {}, 'old scenes begin without an atmosphere on any picture');
   assert.equal(scene.fog, null, 'a scene without fog is not a scene in darkness');
   assert.equal(scene.updatedAt, Date.parse('2026-08-02T10:00:00.000Z'));
   assert.equal(toScene(null), null);

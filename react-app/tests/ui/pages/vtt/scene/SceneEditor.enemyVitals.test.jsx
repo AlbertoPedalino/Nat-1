@@ -110,7 +110,7 @@ const OGRE = {
 function mountEditor() {
   render(<ThemeProvider theme={theme}><SceneEditor scene={{
     id: 'scene', campaignId: 'campaign', shownImage: 'map', imagePath: null, backgroundPath: null,
-    fog: null, atmosphere: null, isLive: true, playArea: null,
+    fog: null, atmospheres: {}, isLive: true, playArea: null,
     grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
   }} onSceneChange={vi.fn()} /></ThemeProvider>);
 }
