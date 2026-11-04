@@ -36,13 +36,6 @@ const accountNameSx = {
   display: { xs: 'none', sm: 'inline' },
 };
 
-const SYNC_TEXT = {
-  syncing: 'Saving…',
-  synced: 'All changes saved',
-  error: 'Sync error',
-  idle: 'Auto-sync on',
-};
-
 export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUploadDraft }) {
   const { cloudEnabled, status, username, role, signOut } = useAuth();
   const [anchor, setAnchor] = useState(null);
@@ -133,9 +126,6 @@ export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUplo
           <Box key="hdr" sx={{ px: 2, py: 0.5 }}>
             <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary' }}>
               {username} · {role === 'gm' ? 'GM' : 'Player'}
-            </Typography>
-            <Typography sx={{ fontSize: '0.62rem', color: syncState === 'error' ? '#de675f' : '#58b879' }}>
-              {SYNC_TEXT[syncState] || SYNC_TEXT.idle}
             </Typography>
           </Box>,
           <Divider key="d1" />,
