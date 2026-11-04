@@ -42,7 +42,8 @@ export default function HomePage() {
 
   return (
     <Box sx={homeRootSx}>
-      <AppTopBar />
+      {/* Home already has the Compendium card. */}
+      <AppTopBar compendium={false} />
       <Box sx={heroSx}>
         <Box component="img" src={`${import.meta.env.BASE_URL}favicon.png`} alt="" sx={heroLogoSx} />
         <Typography sx={heroTitleSx}>Nat-1 D&D 5.5e</Typography>
