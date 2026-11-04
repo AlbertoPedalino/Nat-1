@@ -1,4 +1,11 @@
 import { createAdapterBindings } from '../adapterBindings.js';
+import { resolveScalingFormula } from '../../shared/character/dice/scalingFormula.js';
+
+// The bite deals 1d4 + CON Piercing instead of the Unarmed Strike's damage.
+function biteDamageFormula(character) {
+  const con = resolveScalingFormula('abilityMod:con', character) ?? 0;
+  return con ? `1d4${con > 0 ? '+' : ''}${con}` : '1d4';
+}
 
 export default function install(registry, context = {}) {
   const {
@@ -23,7 +30,7 @@ export default function install(registry, context = {}) {
       uses: 'PB / LR',
       resKey: 'dhampir_bite',
       minLevel: 1,
-      rollers: [{ kind: 'damage', formula: '1d4', label: ({ formula }) => `${formula} + CON piercing` }],
+      rollers: [{ kind: 'damage', formula: ({ character }) => biteDamageFormula(character), label: ({ formula }) => `${formula} piercing` }],
       rollLabelPrefix: 'Vampiric Bite',
     },
   ]);
