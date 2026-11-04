@@ -146,6 +146,7 @@ import EncounterImportDialog from '../tokens/EncounterImportDialog.jsx';
 import MonsterPickerDialog from '../tokens/MonsterPickerDialog.jsx';
 import DiceToast from '../../../shared/character/dice/DiceToast.jsx';
 import RollLogPanel from '../rolls/RollLogPanel.jsx';
+import RollsButton from '../rolls/RollsButton.jsx';
 import PlayerPanel from '../session/PlayerPanel.jsx';
 import RosterPanel from '../tokens/RosterPanel.jsx';
 import MapObjectsPanel from '../objects/MapObjectsPanel.jsx';
@@ -171,6 +172,7 @@ import {
   sceneControlsPassThroughSx,
   scenePlayerViewSwitchSx,
   viewButtonSx,
+  rollsSlotOrderSx,
   sheetLoadingSx,
   sheetViewSx,
   spectatorRootSx,
@@ -2199,7 +2201,8 @@ export default function SceneEditor({
         },
         objectsGroup,
         drawGroup,
-        rollsGroup,
+        // A fullscreen map paints no scene bar: the rail stands in for its button.
+        ...(mapFullscreen ? [rollsGroup] : []),
         {
           id: 'laser',
           label: 'Laser',
@@ -2256,7 +2259,8 @@ export default function SceneEditor({
       },
       objectsGroup,
       drawGroup,
-      rollsGroup,
+      // A fullscreen map paints no scene bar: the rail stands in for its button.
+      ...(mapFullscreen ? [rollsGroup] : []),
       {
         id: 'laser',
         label: 'Laser',
@@ -2339,7 +2343,7 @@ export default function SceneEditor({
     handleUndoDrawing, handleUploadMap,
     handleUploadBackground, handleShownImageChange, handleAddImage, paintMode,
     role.isGm, role.ownedCharacterIds, roster, scene, shownImageForViewport, tokens, measureShape, feetPerCell,
-    rollFeed, handleCustomRoll, clearRollFeed, hexcrawl, dungeon,
+    rollFeed, handleCustomRoll, clearRollFeed, hexcrawl, dungeon, mapFullscreen,
   ]);
 
   // While editing one layer, strokes on the others fade back rather than
@@ -2795,6 +2799,18 @@ export default function SceneEditor({
             </Tooltip>
           ) : null}
         </Box>
+        {/* The rolls in the middle of the bar, the one thing everybody at the
+            table reaches for. On a desktop the order puts it between the GM's
+            live controls and the view switch; on a phone it stays on the name's
+            row, since the GM's controls take a row of their own. */}
+        {!gmPlayerPreview ? (
+          <RollsButton
+            feed={rollFeed}
+            onCustomRoll={handleCustomRoll}
+            onClear={clearRollFeed}
+            sx={rollsSlotOrderSx}
+          />
+        ) : null}
         {/* On a phone the GM's four buttons share one row under the name: what
             the table sees on the left, what the GM is looking at on the right. */}
         <Box sx={role.isGm ? sceneGmControlsSx : sceneControlsPassThroughSx}>

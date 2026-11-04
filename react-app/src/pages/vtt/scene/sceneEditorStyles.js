@@ -63,6 +63,13 @@ export const sceneRenameButtonSx = {
 export const sceneViewSwitchSx = {
   ml: 'auto',
   pl: { xs: 0, md: 0.5 },
+  order: { md: 2 },
+};
+
+// The rolls button comes after the GM's live controls on a desktop, where the
+// controls' wrapper dissolves into the bar; see sceneGmControlsSx.
+export const rollsSlotOrderSx = {
+  order: { xs: 0, md: 1 },
 };
 
 // On a desktop the wrapper disappears and its children sit in the bar as
@@ -108,6 +115,7 @@ export const viewButtonSx = {
 export const scenePlayerViewSwitchSx = {
   ml: 'auto',
   pl: 0.5,
+  order: { md: 2 },
 };
 
 export const spectatorRootSx = {
