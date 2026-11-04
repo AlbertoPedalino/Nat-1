@@ -4,6 +4,12 @@ import { DEFAULT_GRID } from '../../../../../src/shared/vtt/scene/scene.js';
 import { DrawPanel, FogPanel, MapPanel } from '../../../../../src/pages/vtt/scene/ScenePanels.jsx';
 import { DEFAULT_AREA_OPTIONS } from '../../../../../src/shared/vtt/map/areas.js';
 
+// The scene panel remembers its open sections per browser; every test starts
+// from the default (only Pictures open).
+beforeEach(() => window.localStorage.clear());
+
+const openSection = (name) => fireEvent.click(screen.getByRole('button', { name: new RegExp(`^${name}`) }));
+
 test('the fog brush accepts a half-cell diameter as a valid number', () => {
   const onBrushSizeChange = vi.fn();
   const { rerender } = render(<FogPanel scene={{ fog: { scale: 4 } }} brushSize={1} onBrushSizeChange={onBrushSizeChange} />);
@@ -20,12 +26,12 @@ test('atmosphere controls update the scene as one description', () => {
   render(
     <MapPanel
       scene={{
-        imagePath: null,
+        imagePath: 'map.png',
         backgroundPath: null,
         shownImage: 'map',
         grid: DEFAULT_GRID,
         playArea: null,
-        atmosphere: { type: 'rain', intensity: 0.7, direction: 12, speed: 1, seed: 42 },
+        atmospheres: { 'map.png': { type: 'rain', intensity: 0.7, direction: 12, speed: 1, seed: 42 } },
       }}
       busy={false}
       onUploadMap={vi.fn()}
@@ -39,12 +45,12 @@ test('atmosphere controls update the scene as one description', () => {
     />,
   );
 
-  expect(screen.queryByRole('slider', { name: 'Atmosphere intensity' })).toBeNull();
-  fireEvent.click(screen.getByRole('button', { name: 'Choose atmosphere. Current: Rain' }));
+  openSection('Light & weather');
+  // The strength sits under the picker, like the light filter's.
   expect(screen.getByRole('slider', { name: 'Atmosphere intensity' })).toHaveValue('0.7');
   fireEvent.change(screen.getByLabelText('Direction'), { target: { value: '45' } });
 
-  expect(onAtmosphereChange).toHaveBeenCalledWith({
+  expect(onAtmosphereChange).toHaveBeenCalledWith('map.png', {
     type: 'rain', intensity: 0.7, direction: 45, speed: 1, seed: 42,
   });
 });
@@ -55,12 +61,12 @@ test('the atmosphere picker filters presets and selects one immediately', () => 
   render(
     <MapPanel
       scene={{
-        imagePath: null,
+        imagePath: 'map.png',
         backgroundPath: null,
         shownImage: 'map',
         grid: DEFAULT_GRID,
         playArea: null,
-        atmosphere: { type: 'none', intensity: 0.65, direction: 12, speed: 1, seed: 1 },
+        atmospheres: {},
       }}
       busy={false}
       onUploadMap={vi.fn()}
@@ -74,6 +80,7 @@ test('the atmosphere picker filters presets and selects one immediately', () => 
     />,
   );
 
+  openSection('Light & weather');
   fireEvent.click(screen.getByRole('button', { name: 'Choose atmosphere. Current: None' }));
   fireEvent.change(screen.getByRole('searchbox', { name: 'Search atmospheres' }), {
     target: { value: 'gold' },
@@ -81,7 +88,7 @@ test('the atmosphere picker filters presets and selects one immediately', () => 
   expect(screen.queryByRole('button', { name: 'Rain' })).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'Gold vault' }));
 
-  expect(onAtmosphereChange).toHaveBeenCalledWith({
+  expect(onAtmosphereChange).toHaveBeenCalledWith('map.png', {
     type: 'goldvault', intensity: 0.65, direction: 12, speed: 1, seed: 123457,
   });
 });
@@ -97,7 +104,7 @@ test('uploaded scene pictures expose their matching remove actions', () => {
         shownImage: 'map',
         grid: DEFAULT_GRID,
         playArea: null,
-        atmosphere: null,
+        atmospheres: {},
       }}
       busy={false}
       onUploadMap={vi.fn()}
@@ -194,6 +201,9 @@ test('the light filter belongs to the picture on show', () => {
     />,
   );
 
+  // Closed, the section still says what the picture on show looks like.
+  expect(screen.getByRole('button', { name: /^Light & weather/ })).toHaveTextContent('Original light · no atmosphere');
+  openSection('Light & weather');
   // The battlemap's night does not carry over to the background.
   expect(screen.getByText('Light on this background')).toBeInTheDocument();
   expect(screen.queryByRole('slider', { name: 'Light filter strength' })).toBeNull();
@@ -227,5 +237,85 @@ test('no light filter is offered before a picture is uploaded', () => {
     />,
   );
 
+  expect(screen.getByRole('button', { name: /^Light & weather/ })).toHaveTextContent('No picture on show');
+  openSection('Light & weather');
   expect(screen.queryByRole('combobox', { name: 'Light filter' })).toBeNull();
+  expect(screen.queryByRole('button', { name: /^Choose atmosphere/ })).toBeNull();
+});
+
+test('the atmosphere belongs to the picture on show, like its light', () => {
+  const onAtmosphereChange = vi.fn();
+  render(
+    <MapPanel
+      scene={{
+        imagePath: 'map.png',
+        backgroundPath: 'bg.png',
+        backgrounds: ['bg.png'],
+        shownImage: 'background',
+        atmospheres: { 'map.png': { type: 'storm', intensity: 0.9 } },
+        grid: DEFAULT_GRID,
+        playArea: null,
+      }}
+      busy={false}
+      onUploadMap={vi.fn()}
+      onUploadBackground={vi.fn()}
+      onShownImageChange={vi.fn()}
+      onAddImage={vi.fn()}
+      onGridChange={vi.fn()}
+      onAtmosphereChange={onAtmosphereChange}
+      onImageFilterChange={vi.fn()}
+      onPlayAreaChange={vi.fn()}
+      onFitPlayArea={vi.fn()}
+    />,
+  );
+
+  // The battlemap's storm does not rain on the background.
+  expect(screen.getByRole('button', { name: /^Light & weather/ })).toHaveTextContent('Original light · no atmosphere');
+  openSection('Light & weather');
+  expect(screen.getByText('Atmosphere on this background')).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Choose atmosphere. Current: None' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Snowfall' }));
+  expect(onAtmosphereChange).toHaveBeenCalledWith('bg.png', expect.objectContaining({ type: 'snow' }));
+});
+
+test('scene settings are grouped in sections that summarise themselves and remember being open', () => {
+  const props = {
+    scene: {
+      imagePath: 'map.png',
+      backgroundPath: null,
+      backgrounds: [],
+      shownImage: 'map',
+      grid: { ...DEFAULT_GRID, shape: 'hex', size: 80, visible: false },
+      playArea: { x: 0, y: 0, w: 30, h: 20 },
+      atmospheres: { 'map.png': { type: 'rain', intensity: 0.7, direction: 12, speed: 1, seed: 42 } },
+    },
+    busy: false,
+    onUploadMap: vi.fn(),
+    onUploadBackground: vi.fn(),
+    onShownImageChange: vi.fn(),
+    onAddImage: vi.fn(),
+    onGridChange: vi.fn(),
+    onAtmosphereChange: vi.fn(),
+    onPlayAreaChange: vi.fn(),
+    onFitPlayArea: vi.fn(),
+  };
+  const { unmount } = render(<MapPanel {...props} />);
+
+  // Pictures starts open; the others answer in their header.
+  expect(screen.getByRole('button', { name: /^Pictures/ })).toHaveAttribute('aria-expanded', 'true');
+  expect(screen.getByRole('button', { name: /^Grid/ })).toHaveTextContent('Hexes · 80 px · hidden');
+  expect(screen.getByRole('button', { name: /^Play area/ })).toHaveTextContent('30 × 20 hexes');
+  expect(screen.getByRole('button', { name: /^Light & weather/ })).toHaveTextContent('Original light · Rain');
+  expect(screen.queryByRole('spinbutton', { name: 'Cell' })).toBeNull();
+
+  openSection('Grid');
+  expect(screen.getByRole('spinbutton', { name: 'Cell' })).toHaveValue(80);
+  openSection('Pictures');
+  expect(screen.getByRole('button', { name: /^Pictures/ })).toHaveAttribute('aria-expanded', 'false');
+
+  // Reopening the panel keeps the same sections open.
+  unmount();
+  render(<MapPanel {...props} />);
+  expect(screen.getByRole('button', { name: /^Grid/ })).toHaveAttribute('aria-expanded', 'true');
+  expect(screen.getByRole('button', { name: /^Pictures/ })).toHaveAttribute('aria-expanded', 'false');
 });

@@ -173,7 +173,7 @@ test('an open battle map never rewrites sheet HP from cached encounters on mount
   saveFight('current-encounter', 18);
   render(<ThemeProvider theme={theme}><SceneEditor scene={{
     id: 'scene', campaignId: 'campaign', shownImage: 'map', imagePath: null, backgroundPath: null,
-    fog: null, atmosphere: null, isLive: true, playArea: null,
+    fog: null, atmospheres: {}, isLive: true, playArea: null,
     grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
   }} onSceneChange={vi.fn()} /></ThemeProvider>);
   expect(patchCharacterMock).not.toHaveBeenCalled();
@@ -276,7 +276,7 @@ test('a GM can switch the battlemap to a read-only player view', () => {
     imagePath: null,
     backgroundPath: null,
     fog: { cols: 1, rows: 1, cells: '0' },
-    atmosphere: null,
+    atmospheres: {},
     isLive: true,
     playArea: { x: 0, y: 0, w: 5, h: 5 },
     grid: { size: 50, offsetX: 0, offsetY: 0, visible: false },
@@ -345,7 +345,7 @@ test('freezing the public view lets the GM prepare a picture before sharing it',
     imagePath: null,
     backgroundPath: null,
     fog: null,
-    atmosphere: null,
+    atmospheres: {},
     isLive: true,
     playArea: null,
     grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
@@ -403,7 +403,7 @@ test('the GM picks among the scene backgrounds from the strip, privately while f
     backgroundPath: 'day.webp',
     backgrounds: ['day.webp', 'night.webp'],
     fog: null,
-    atmosphere: null,
+    atmospheres: {},
     isLive: true,
     playArea: null,
     grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
@@ -485,7 +485,7 @@ test('battlemap and background swap only after the next image is decoded', async
     imagePath: 'map.webp',
     backgroundPath: 'background.webp',
     fog: null,
-    atmosphere: null,
+    atmospheres: {},
     isLive: false,
     playArea: null,
     grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
@@ -576,7 +576,7 @@ test('a failed image decode keeps the current composition on screen', async () =
     imagePath: 'map.webp',
     backgroundPath: 'background.webp',
     fog: null,
-    atmosphere: null,
+    atmospheres: {},
     isLive: false,
     playArea: null,
     grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
@@ -626,7 +626,7 @@ test('player preview cannot remain active after GM permissions are lost', () => 
     imagePath: null,
     backgroundPath: null,
     fog: null,
-    atmosphere: null,
+    atmospheres: {},
     isLive: false,
     playArea: null,
     grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
@@ -664,7 +664,7 @@ test('players receive the group-selection tool with permission-checked batch act
     imagePath: null,
     backgroundPath: null,
     fog: null,
-    atmosphere: null,
+    atmospheres: {},
     isLive: true,
     playArea: null,
     grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
@@ -697,7 +697,7 @@ test.each([
   }));
   const scene = {
     id: 'scene-moving', campaignId: 'campaign-1', shownImage: 'map',
-    imagePath: null, backgroundPath: null, fog: null, atmosphere: null,
+    imagePath: null, backgroundPath: null, fog: null, atmospheres: {},
     isLive: true, playArea: null, grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
   };
   render(<ThemeProvider theme={theme}><SceneEditor scene={scene} onSceneChange={vi.fn()} /></ThemeProvider>);
@@ -726,7 +726,7 @@ test('turning a piece lets go of no drag on the other screens', async () => {
   sendDragMock.mockClear();
   const scene = {
     id: 'scene-turning', campaignId: 'campaign-1', shownImage: 'map',
-    imagePath: null, backgroundPath: null, fog: null, atmosphere: null,
+    imagePath: null, backgroundPath: null, fog: null, atmospheres: {},
     isLive: true, playArea: null, grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
   };
   render(<ThemeProvider theme={theme}><SceneEditor scene={scene} onSceneChange={vi.fn()} /></ThemeProvider>);
@@ -759,7 +759,7 @@ test('an obsolete image load cannot restart the current image during reconciliat
   const scene = {
     id: 'scene-race', campaignId: 'campaign-1', name: 'Changing scene',
     shownImage: 'map', imagePath: 'map.webp', backgroundPath: 'background.webp',
-    fog: null, atmosphere: null, isLive: true, playArea: null,
+    fog: null, atmospheres: {}, isLive: true, playArea: null,
     grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
   };
   const renderEditor = (value) => (
@@ -812,7 +812,7 @@ test('a picture that failed to load is retried by the reconciliation, not left b
     imagePath: 'map.webp',
     backgroundPath: 'background.webp',
     fog: null,
-    atmosphere: null,
+    atmospheres: {},
     isLive: true,
     playArea: null,
     grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
@@ -867,7 +867,7 @@ test('the reconciliation leaves a picture that is already on screen alone', asyn
     imagePath: 'map.webp',
     backgroundPath: null,
     fog: null,
-    atmosphere: null,
+    atmospheres: {},
     isLive: true,
     playArea: null,
     grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
@@ -900,10 +900,12 @@ test('the reconciliation leaves a picture that is already on screen alone', asyn
 test('a second atmosphere picked mid-save is not undone by the echo of the first', async () => {
   const scene = {
     id: 'scene-weather', campaignId: 'campaign-1', name: 'Weather', shownImage: 'map',
-    imagePath: null, backgroundPath: null, fog: null, atmosphere: null, isLive: true,
+    imagePath: 'map.png', backgroundPath: null, fog: null, atmospheres: {}, isLive: true,
     playArea: null, updatedAt: Date.parse('2026-10-20T10:00:00Z'),
     grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
   };
+  // The picture is only there to own the atmosphere; it never needs to load.
+  signMapImageMock.mockReset().mockImplementation(() => new Promise(() => {}));
   const saves = [];
   updateSceneMock.mockImplementation(() => new Promise((resolve) => { saves.push(resolve); }));
   const onSceneChange = vi.fn();
@@ -911,13 +913,14 @@ test('a second atmosphere picked mid-save is not undone by the echo of the first
   const corner = [].concat(sceneViewportMock.mock.calls.at(-1)[0].imageSwitch.props.children)
     .find((element) => element?.props?.onAtmosphereChange);
   const row = (type, at) => ({
-    id: scene.id, campaign_id: scene.campaignId, name: scene.name, atmosphere: { type }, updated_at: at,
+    id: scene.id, campaign_id: scene.campaignId, name: scene.name, image_path: 'map.png',
+    image_atmospheres: { 'map.png': { type } }, updated_at: at,
   });
-  const atmospheres = () => onSceneChange.mock.calls.map(([next]) => next?.atmosphere?.type);
+  const atmospheres = () => onSceneChange.mock.calls.map(([next]) => next?.atmospheres?.['map.png']?.type);
 
-  act(() => { corner.props.onAtmosphereChange({ type: 'rain' }); });
+  act(() => { corner.props.onAtmosphereChange('map.png', { type: 'rain' }); });
   await waitFor(() => expect(saves).toHaveLength(1));
-  act(() => { corner.props.onAtmosphereChange({ type: 'snow' }); });
+  act(() => { corner.props.onAtmosphereChange('map.png', { type: 'snow' }); });
   // The rain write lands and its echo arrives while snow is still waiting.
   await act(async () => { saves[0](null); });
   act(() => { sceneLiveOptions.current.onSceneEvent({ new: row('rain', '2026-10-20T10:00:01Z') }); });
@@ -939,21 +942,23 @@ test('a second atmosphere picked mid-save is not undone by the echo of the first
 test('a row older than our own finished write does not undo it', async () => {
   const scene = {
     id: 'scene-stale', campaignId: 'campaign-1', name: 'Stale', shownImage: 'map',
-    imagePath: null, backgroundPath: null, fog: null, atmosphere: null, isLive: true,
+    imagePath: 'map.png', backgroundPath: null, fog: null, atmospheres: {}, isLive: true,
     playArea: null, updatedAt: Date.parse('2026-10-20T10:00:00Z'),
     grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
   };
   const row = (type, at) => ({
-    id: scene.id, campaign_id: scene.campaignId, name: scene.name, atmosphere: type ? { type } : null, updated_at: at,
+    id: scene.id, campaign_id: scene.campaignId, name: scene.name, image_path: 'map.png',
+    image_atmospheres: type ? { 'map.png': { type } } : {}, updated_at: at,
   });
+  signMapImageMock.mockReset().mockImplementation(() => new Promise(() => {}));
   updateSceneMock.mockResolvedValue(toScene(row('rain', '2026-10-20T10:00:05Z')));
   const onSceneChange = vi.fn();
   render(<ThemeProvider theme={theme}><SceneEditor scene={scene} onSceneChange={onSceneChange} /></ThemeProvider>);
   const corner = [].concat(sceneViewportMock.mock.calls.at(-1)[0].imageSwitch.props.children)
     .find((element) => element?.props?.onAtmosphereChange);
-  const atmospheres = () => onSceneChange.mock.calls.map(([next]) => next?.atmosphere?.type ?? null);
+  const atmospheres = () => onSceneChange.mock.calls.map(([next]) => next?.atmospheres?.['map.png']?.type ?? null);
 
-  act(() => { corner.props.onAtmosphereChange({ type: 'rain' }); });
+  act(() => { corner.props.onAtmosphereChange('map.png', { type: 'rain' }); });
   await waitFor(() => expect(updateSceneMock).toHaveBeenCalledTimes(1));
   await act(async () => {});
   act(() => { sceneLiveOptions.current.onSceneEvent({ new: row(null, '2026-10-20T10:00:03Z') }); });
@@ -966,7 +971,7 @@ describe('light scene reconciliation', () => {
   const scene = {
     id: 'scene-light', campaignId: 'campaign-1', name: 'Quiet table',
     shownImage: 'map', imagePath: null, backgroundPath: null,
-    fog: null, atmosphere: null, isLive: true, playArea: null, updatedAt: 1000,
+    fog: null, atmospheres: {}, isLive: true, playArea: null, updatedAt: 1000,
     grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
   };
   const renderScene = (onSceneChange = vi.fn()) => {
@@ -1018,7 +1023,7 @@ describe('fog painting', () => {
   const fogScene = (fog) => ({
     id: 'scene-fog', campaignId: 'campaign-1', name: 'Fogged',
     shownImage: 'map', imagePath: null, backgroundPath: null,
-    fog, atmosphere: null, isLive: true, playArea: null,
+    fog, atmospheres: {}, isLive: true, playArea: null,
     grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
   });
   const fogBroadcasts = () => sendDragMock.mock.calls.filter(([payload]) => payload?.fog);
@@ -1136,7 +1141,7 @@ test('a remote ruler whose owner stopped refreshing it fades out', async () => {
         <SceneEditor
           scene={{
             id: 'scene-ruler', campaignId: 'campaign-1', name: 'Ruler', shownImage: 'map', imagePath: null,
-            backgroundPath: null, fog: null, atmosphere: null, isLive: true, playArea: null,
+            backgroundPath: null, fog: null, atmospheres: {}, isLive: true, playArea: null,
             grid: { size: 50, offsetX: 0, offsetY: 0, visible: true },
           }}
           onSceneChange={vi.fn()}
@@ -1170,7 +1175,7 @@ const LIVE_SCENE = {
   imagePath: null,
   backgroundPath: null,
   fog: { cols: 1, rows: 1, cells: '0' },
-  atmosphere: null,
+  atmospheres: {},
   isLive: true,
   playArea: { x: 0, y: 0, w: 5, h: 5 },
   grid: { size: 50, offsetX: 0, offsetY: 0, visible: false },

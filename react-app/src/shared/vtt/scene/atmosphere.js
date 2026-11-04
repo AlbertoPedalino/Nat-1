@@ -49,3 +49,30 @@ export function normalizeAtmosphere(value) {
     seed: clamp(Math.round(numberOr(source.seed, DEFAULT_ATMOSPHERE.seed)), 1, 999999),
   };
 }
+
+// One atmosphere per scene picture, keyed by storage path like the light
+// filters (`imageFilters.js`): the battlemap can be under a storm while the
+// tavern background stays dry. Stored as `map_scenes.image_atmospheres`
+// `{ [storagePath]: atmosphere }`; a picture without weather has no entry.
+// With `paths`, entries for pictures no longer in the scene are dropped.
+export function normalizeImageAtmospheres(value, paths = null) {
+  const keep = Array.isArray(paths) ? new Set(paths.filter(Boolean)) : null;
+  const result = {};
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return result;
+  for (const [path, atmosphere] of Object.entries(value)) {
+    if (!path || (keep && !keep.has(path))) continue;
+    const normalized = normalizeAtmosphere(atmosphere);
+    if (normalized.type !== 'none') result[path] = normalized;
+  }
+  return result;
+}
+
+export function atmosphereFor(atmospheres, path) {
+  return normalizeAtmosphere(path && atmospheres ? atmospheres[path] : null);
+}
+
+// `atmospheres` with `path` set to `atmosphere`, pruned to the scene's pictures.
+export function withImageAtmosphere(atmospheres, path, atmosphere, paths) {
+  if (!path) return normalizeImageAtmospheres(atmospheres, paths);
+  return normalizeImageAtmospheres({ ...atmospheres, [path]: atmosphere }, paths);
+}

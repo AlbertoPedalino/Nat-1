@@ -3,6 +3,7 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import {
   Box,
   Button,
+  ButtonBase,
   FormControlLabel,
   IconButton,
   MenuItem,
@@ -30,6 +31,7 @@ import {
   Eye,
   EyeOff,
   Flame,
+  Frame,
   Grid3x3,
   Hexagon,
   House,
@@ -55,8 +57,9 @@ import {
 } from 'lucide-react';
 import ColorField from '../../../shared/ui/ColorField.jsx';
 import InfoHint from '../../../shared/ui/InfoHint.jsx';
+import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
 import { DEFAULT_GRID } from '../../../shared/vtt/scene/scene.js';
-import { ATMOSPHERE_PRESETS, normalizeAtmosphere } from '../../../shared/vtt/scene/atmosphere.js';
+import { ATMOSPHERE_PRESETS, atmosphereFor } from '../../../shared/vtt/scene/atmosphere.js';
 import { IMAGE_FILTER_PRESETS, imageFilterFor } from '../../../shared/vtt/scene/imageFilters.js';
 import { AREA_EFFECTS } from '../../../shared/vtt/map/areas.js';
 import { battleMapDialogPaperSx } from '../map/battleMapSurface.js';
@@ -77,7 +80,7 @@ function SectionLabel({ label, hint }) {
   return (
     <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
       <Typography variant="caption" color="text.secondary">{label}</Typography>
-      <InfoHint label={`About the ${label.toLowerCase()}`} text={hint} />
+      {hint ? <InfoHint label={`About the ${label.toLowerCase()}`} text={hint} /> : null}
     </Stack>
   );
 }
@@ -235,20 +238,76 @@ function ImageLightSection({ scene, onImageFilterChange }) {
   );
 }
 
-export function MapPanel({
-  scene, busy, onUploadMap, onUploadBackground, onRemoveMap, onRemoveBackground,
-  onShownImageChange, onAddImage,
-  onGridChange, onAtmosphereChange, onImageFilterChange, onPlayAreaChange, onFitPlayArea,
-  // The switch has its own place on the map when this panel sits under it.
-  hideSwitch = false,
-}) {
-  const mapRef = useRef(null);
-  const backgroundRef = useRef(null);
-  const extraRef = useRef(null);
+// Which of the scene panel's sections are open. A per-browser convenience: a
+// GM who calibrates once and then lives in the weather should not reopen it
+// every time. Read through try/catch, so a blocked storage only forgets.
+const SECTIONS_KEY = 'gb:vtt-scene-sections';
+const DEFAULT_SECTIONS = Object.freeze(['pictures']);
+
+function readOpenSections() {
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(SECTIONS_KEY));
+    return Array.isArray(parsed) ? parsed : DEFAULT_SECTIONS;
+  } catch {
+    return DEFAULT_SECTIONS;
+  }
+}
+
+function useOpenSections() {
+  const [open, setOpen] = useState(readOpenSections);
+  const toggle = (id) => {
+    const next = open.includes(id) ? open.filter((entry) => entry !== id) : [...open, id];
+    setOpen(next);
+    try { window.localStorage.setItem(SECTIONS_KEY, JSON.stringify(next)); } catch {}
+  };
+  return [open, toggle];
+}
+
+// One question about the scene behind one header. Closed, the header still
+// answers it in a line ("Squares · 70 px · shown"), so the panel reads as an
+// overview first and a form second.
+function PanelSection({ id, icon: Icon, title, summary, open, onToggle, children }) {
+  const bodyId = `scene-panel-${id}`;
+  return (
+    <Box sx={sectionSx}>
+      <ButtonBase
+        onClick={() => onToggle(id)}
+        aria-expanded={open}
+        aria-controls={bodyId}
+        sx={sectionHeaderSx}
+      >
+        <Box component="span" sx={sectionIconSx}><Icon size={15} strokeWidth={1.8} /></Box>
+        <Box component="span" sx={{ minWidth: 0, flex: 1, textAlign: 'left' }}>
+          <Typography component="span" sx={sectionTitleSx}>{title}</Typography>
+          {open ? null : (
+            <Typography component="span" variant="caption" noWrap sx={sectionSummarySx}>
+              {summary}
+            </Typography>
+          )}
+        </Box>
+        <Box
+          component="span"
+          sx={{ display: 'flex', color: VTT_COLORS.railText, transition: 'transform 150ms', transform: open ? 'rotate(180deg)' : 'none' }}
+        >
+          <ChevronDown size={15} />
+        </Box>
+      </ButtonBase>
+      <CollapsibleBody open={open} id={bodyId}>
+        <Stack spacing={1} sx={{ px: 1, pt: 0.25, pb: 1.1 }}>{children}</Stack>
+      </CollapsibleBody>
+    </Box>
+  );
+}
+
+// The weather of the picture on show, kept per picture like its light: the
+// battlemap under a storm, the tavern background dry.
+function ImageAtmosphereSection({ scene, onAtmosphereChange }) {
   const [atmosphereAnchor, setAtmosphereAnchor] = useState(null);
-  const setGrid = (patch) => onGridChange({ ...scene.grid, ...patch });
-  const atmosphere = normalizeAtmosphere(scene.atmosphere);
-  const setAtmosphere = (patch) => onAtmosphereChange?.({ ...atmosphere, ...patch });
+  const showingBackground = scene.shownImage === 'background';
+  const path = showingBackground ? scene.backgroundPath : scene.imagePath;
+  if (!path || !onAtmosphereChange) return null;
+  const atmosphere = atmosphereFor(scene.atmospheres, path);
+  const setAtmosphere = (patch) => onAtmosphereChange(path, { ...atmosphere, ...patch });
   const selectAtmosphere = (type) => setAtmosphere({
     type,
     seed: type === atmosphere.type ? atmosphere.seed : (Date.now() % 999999) + 1,
@@ -257,71 +316,10 @@ export function MapPanel({
   const SelectedAtmosphereIcon = ATMOSPHERE_ICONS[atmosphere.type] || Cloud;
 
   return (
-    <Stack spacing={1.25}>
-      {hideSwitch ? null : <ShownImageSwitch scene={scene} onShownImageChange={onShownImageChange} />}
-
-      <Stack spacing={0.65}>
-        <Stack direction="row" spacing={0.5}>
-          <Button size="small" variant="outlined" fullWidth disabled={busy} onClick={() => mapRef.current?.click()}>
-            {scene.imagePath ? 'Replace map' : 'Upload map'}
-          </Button>
-          {scene.imagePath ? (
-            <Tooltip title="Remove battlemap">
-              <IconButton size="small" color="error" disabled={busy} aria-label="Remove battlemap" onClick={onRemoveMap}>
-                <Trash2 size={15} />
-              </IconButton>
-            </Tooltip>
-          ) : null}
-        </Stack>
-        <Stack direction="row" spacing={0.5}>
-          <Button
-            size="small"
-            variant="outlined"
-            fullWidth
-            disabled={busy}
-            onClick={() => backgroundRef.current?.click()}
-          >
-            {scene.backgroundPath ? 'Add another background' : 'Upload background'}
-          </Button>
-          {scene.backgroundPath ? (
-            <Tooltip title="Remove the background on show">
-              <IconButton size="small" color="error" disabled={busy} aria-label="Remove background" onClick={() => onRemoveBackground()}>
-                <Trash2 size={15} />
-              </IconButton>
-            </Tooltip>
-          ) : null}
-        </Stack>
-      </Stack>
-
-      {/* Anything else that belongs on the map — a rug, a door, a handout — is a
-          piece on the map layer, so it can be moved, resized and removed like
-          everything else instead of being a third special slot. */}
-      <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-        <Button
-          size="small"
-          variant="outlined"
-          fullWidth
-          startIcon={<ImagePlus size={15} />}
-          disabled={busy}
-          onClick={() => extraRef.current?.click()}
-        >
-          Add an image to the map
-        </Button>
-        <InfoHint
-          label="About images on the map"
-          text="It lands on the layer you are editing. Click it to get its corner handles: the corner moves each side on its own — drag it diagonally to scale, sideways or downwards to stretch — and the top handle turns it."
-        />
-      </Stack>
-
-      <HiddenFileInput inputRef={mapRef} onPick={onUploadMap} />
-      <HiddenFileInput inputRef={backgroundRef} onPick={onUploadBackground} />
-      <HiddenFileInput inputRef={extraRef} onPick={onAddImage} />
-
-      <ImageLightSection scene={scene} onImageFilterChange={onImageFilterChange} />
-
+    <Stack spacing={0.75}>
       <SectionLabel
-        label="Atmosphere"
-        hint="A procedural atmospheric layer shared by the battlemap and background. It is rendered locally as a continuous field, so denser rain or fog does not create more particles."
+        label={showingBackground ? 'Atmosphere on this background' : 'Atmosphere on the battlemap'}
+        hint="A procedural weather layer over the picture on show. Every picture keeps its own, so the battlemap can be under a storm while a background stays dry. It is rendered locally as a continuous field, so denser rain or fog does not create more particles."
       />
       <Button
         fullWidth
@@ -366,33 +364,22 @@ export function MapPanel({
         }}
       >
         <AtmospherePicker value={atmosphere.type} onSelect={selectAtmosphere} />
-        {atmosphere.type === 'none' ? null : (
-          <Stack
-            spacing={0.35}
-            sx={{
-              mt: 1,
-              pt: 0.9,
-              borderTop: `1px solid ${vttAlpha(VTT_COLORS.railText, 0.16)}`,
-            }}
-          >
-            <SectionLabel
-              label="Intensity"
-              hint="Controls opacity and density without changing the amount of work done by the renderer."
-            />
-            <Slider
-              size="small"
-              min={0.1}
-              max={1}
-              step={0.05}
-              value={atmosphere.intensity}
-              valueLabelDisplay="auto"
-              aria-label="Atmosphere intensity"
-              onChange={(_, value) => setAtmosphere({ intensity: value })}
-              sx={{ mx: 0.5, width: 'calc(100% - 8px)' }}
-            />
-          </Stack>
-        )}
       </Popover>
+      {/* Under the picker, like the light filter's strength: it is the knob
+          turned mid-scene, so it should not sit behind a second click. */}
+      {atmosphere.type === 'none' ? null : (
+        <Slider
+          size="small"
+          min={0.1}
+          max={1}
+          step={0.05}
+          value={atmosphere.intensity}
+          valueLabelDisplay="auto"
+          aria-label="Atmosphere intensity"
+          onChange={(_, value) => setAtmosphere({ intensity: value })}
+          sx={{ mx: 0.5, width: 'calc(100% - 8px)' }}
+        />
+      )}
       {atmosphere.type === 'none' ? null : (
         <Stack spacing={0.5}>
           <SectionLabel label="Wind" hint="Direction is measured clockwise; movement changes how quickly the atmospheric field crosses the view." />
@@ -422,169 +409,358 @@ export function MapPanel({
           </Stack>
         </Stack>
       )}
-
-      <SectionLabel
-        label="Grid"
-        hint="The cell size almost never matches the image, so all three numbers are editable: set Cell to the width of one square on the picture, then nudge the offsets until the lines sit on it."
-      />
-      {/* Squares for a dungeon, hexes for the wilderness. Changing it changes
-          what a piece's stored position means, so it is asked once, up here with
-          the calibration, rather than offered as a view option. */}
-      <ToggleButtonGroup
-        size="small"
-        exclusive
-        fullWidth
-        value={scene.grid.shape === 'hex' ? 'hex' : 'square'}
-        onChange={(_, value) => value && setGrid({ shape: value })}
-        aria-label="Grid shape"
-      >
-        <ToggleButton value="square" aria-label="Square grid">
-          <Grid3x3 size={14} />
-          <Box component="span" sx={pillLabelSx}>Squares</Box>
-        </ToggleButton>
-        <ToggleButton value="hex" aria-label="Hex grid">
-          <Hexagon size={14} />
-          <Box component="span" sx={pillLabelSx}>Hexes</Box>
-        </ToggleButton>
-      </ToggleButtonGroup>
-      <Stack direction="row" spacing={0.75}>
-        <TextField
-          label="Cell"
-          size="small"
-          type="number"
-          value={scene.grid.size}
-          onChange={(event) => setGrid({ size: Number(event.target.value) })}
-          sx={numberSx}
-        />
-        <TextField
-          label="Offset X"
-          size="small"
-          type="number"
-          value={scene.grid.offsetX}
-          onChange={(event) => setGrid({ offsetX: Number(event.target.value) })}
-          sx={numberSx}
-        />
-        <TextField
-          label="Offset Y"
-          size="small"
-          type="number"
-          value={scene.grid.offsetY}
-          onChange={(event) => setGrid({ offsetY: Number(event.target.value) })}
-          sx={numberSx}
-        />
-      </Stack>
-      {/* How the lines look, beside the numbers that place them: a printed
-          battlemap already has squares of its own, and gold over a snowfield is
-          not the same read as gold over a cave. */}
-      <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-        <ColorField
-          value={scene.grid.color || DEFAULT_GRID.color}
-          onChange={(color) => setGrid({ color })}
-          deferMs={180}
-          label="Grid colour"
-          sx={colorInputSx}
-        />
-        <TextField
-          label="Line"
-          size="small"
-          type="number"
-          value={scene.grid.lineWidth ?? DEFAULT_GRID.lineWidth}
-          onChange={(event) => setGrid({ lineWidth: Number(event.target.value) })}
-          slotProps={{ htmlInput: { min: 0.5, max: 6, step: 0.5 } }}
-          sx={numberSx}
-        />
-        <InfoHint
-          label="About the grid lines"
-          text="Half a pixel to six, in screen pixels, so a line stays as fine at one zoom as at another. Whatever colour you pick is drawn faint enough to read the map through."
-        />
-      </Stack>
-      <FormControlLabel
-        control={(
-          <Switch
-            size="small"
-            checked={scene.grid.visible}
-            onChange={(event) => setGrid({ visible: event.target.checked })}
-          />
-        )}
-        label={<Typography variant="body2">Show the grid</Typography>}
-      />
-      {/* Creatures always take a square — that is what a battlemap is for. This
-          is about the scenery: a door across a wall, a rug at an angle, a
-          handout dropped between two squares. */}
-      <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-        <FormControlLabel
-          control={(
-            <Switch
-              size="small"
-              checked={scene.grid.snapObjects !== false}
-              onChange={(event) => setGrid({ snapObjects: event.target.checked })}
-            />
-          )}
-          label={<Typography variant="body2">Objects snap to the grid</Typography>}
-        />
-        <InfoHint
-          label="About snapping"
-          text="Off, objects and pictures are placed and dragged freely. Creature pieces keep their square either way."
-        />
-      </Stack>
-
-      <SectionLabel
-        label="Play area"
-        hint="Anything outside this rectangle is staging: the players never receive it, so an ambush can be arranged off the edge of the board in plain sight."
-      />
-      {scene.playArea ? (
-        <>
-          <Stack direction="row" spacing={0.75}>
-            {['x', 'y', 'w', 'h'].map((key) => (
-              <TextField
-                key={key}
-                label={key.toUpperCase()}
-                size="small"
-                type="number"
-                value={scene.playArea[key]}
-                onChange={(event) => onPlayAreaChange({ ...scene.playArea, [key]: Number(event.target.value) })}
-                sx={numberSx}
-              />
-            ))}
-          </Stack>
-          <Button
-            size="small"
-            variant="outlined"
-            disabled={busy || scene.shownImage !== 'map'}
-            onClick={onFitPlayArea}
-          >
-            Refit to the map
-          </Button>
-          <Button size="small" disabled={busy} onClick={() => onPlayAreaChange(null)}>
-            Use the whole scene
-          </Button>
-        </>
-      ) : (
-        // Sized from the picture on screen, so it has to be the battlemap:
-        // fitted while the background is up it would take that one's shape.
-        // Said on the disabled button itself rather than under it — a line of
-        // explanation that only appears sometimes moves everything below it.
-        <Tooltip
-          title={scene.shownImage !== 'map'
-            ? 'Switch to the battlemap first — the play area is measured from the picture on screen.'
-            : ''}
-        >
-          <span>
-            <Button
-              size="small"
-              variant="outlined"
-              fullWidth
-              disabled={busy || scene.shownImage !== 'map'}
-              onClick={onFitPlayArea}
-            >
-              Limit to the map
-            </Button>
-          </span>
-        </Tooltip>
-      )}
     </Stack>
   );
 }
+
+function pictureSummary(scene) {
+  const backgrounds = Array.isArray(scene.backgrounds)
+    ? scene.backgrounds.length
+    : (scene.backgroundPath ? 1 : 0);
+  if (!scene.imagePath && !backgrounds) return 'Nothing uploaded yet';
+  const parts = [scene.imagePath ? 'Battlemap' : 'No battlemap'];
+  parts.push(backgrounds ? `${backgrounds} background${backgrounds === 1 ? '' : 's'}` : 'no background');
+  parts.push(scene.shownImage === 'background' ? 'background on show' : 'battlemap on show');
+  return parts.join(' · ');
+}
+
+function lookSummary(scene) {
+  const path = scene.shownImage === 'background' ? scene.backgroundPath : scene.imagePath;
+  if (!path) return 'No picture on show';
+  const filter = imageFilterFor(scene.imageFilters, path);
+  const atmosphere = atmosphereFor(scene.atmospheres, path);
+  const light = filter.type !== 'none'
+    ? IMAGE_FILTER_PRESETS.find((preset) => preset.value === filter.type)?.label
+    : null;
+  const weather = atmosphere.type === 'none' ? null : atmospherePresetsByType.get(atmosphere.type)?.label;
+  return [light || 'Original light', weather || 'no atmosphere'].join(' · ');
+}
+
+function gridSummary(grid) {
+  return [
+    grid.shape === 'hex' ? 'Hexes' : 'Squares',
+    `${grid.size} px`,
+    grid.visible ? 'shown' : 'hidden',
+  ].join(' · ');
+}
+
+export function MapPanel({
+  scene, busy, onUploadMap, onUploadBackground, onRemoveMap, onRemoveBackground,
+  onShownImageChange, onAddImage,
+  onGridChange, onAtmosphereChange, onImageFilterChange, onPlayAreaChange, onFitPlayArea,
+  // The switch has its own place on the map when this panel sits under it.
+  hideSwitch = false,
+}) {
+  const mapRef = useRef(null);
+  const backgroundRef = useRef(null);
+  const extraRef = useRef(null);
+  const [openSections, toggleSection] = useOpenSections();
+  const setGrid = (patch) => onGridChange({ ...scene.grid, ...patch });
+  const pictureOnShow = scene.shownImage === 'background' ? scene.backgroundPath : scene.imagePath;
+  const cellPlural = scene.grid.shape === 'hex' ? 'hexes' : 'squares';
+  const sectionProps = (id) => ({ id, open: openSections.includes(id), onToggle: toggleSection });
+
+  return (
+    <Stack spacing={0.75}>
+      <PanelSection
+        {...sectionProps('pictures')}
+        icon={ImageIcon}
+        title="Pictures"
+        summary={pictureSummary(scene)}
+      >
+        {hideSwitch ? null : <ShownImageSwitch scene={scene} onShownImageChange={onShownImageChange} />}
+
+        <SectionLabel label="Battlemap" />
+        <Stack direction="row" spacing={0.5}>
+          <Button size="small" variant="outlined" fullWidth disabled={busy} onClick={() => mapRef.current?.click()}>
+            {scene.imagePath ? 'Replace map' : 'Upload map'}
+          </Button>
+          {scene.imagePath ? (
+            <Tooltip title="Remove battlemap">
+              <IconButton size="small" color="error" disabled={busy} aria-label="Remove battlemap" onClick={onRemoveMap}>
+                <Trash2 size={15} />
+              </IconButton>
+            </Tooltip>
+          ) : null}
+        </Stack>
+
+        <SectionLabel
+          label="Backgrounds"
+          hint="Establishing shots without a grid. A scene can hold several; switch between them from the strip at the bottom of the map while the background is on show."
+        />
+        <Stack direction="row" spacing={0.5}>
+          <Button
+            size="small"
+            variant="outlined"
+            fullWidth
+            disabled={busy}
+            onClick={() => backgroundRef.current?.click()}
+          >
+            {scene.backgroundPath ? 'Add another background' : 'Upload background'}
+          </Button>
+          {scene.backgroundPath ? (
+            <Tooltip title="Remove the background on show">
+              <IconButton size="small" color="error" disabled={busy} aria-label="Remove background" onClick={() => onRemoveBackground()}>
+                <Trash2 size={15} />
+              </IconButton>
+            </Tooltip>
+          ) : null}
+        </Stack>
+
+        {/* Anything else that belongs on the map — a rug, a door, a handout — is a
+            piece on the map layer, so it can be moved, resized and removed like
+            everything else instead of being a third special slot. */}
+        <SectionLabel
+          label="Images on the map"
+          hint="It lands on the layer you are editing. Click it to get its corner handles: the corner moves each side on its own — drag it diagonally to scale, sideways or downwards to stretch — and the top handle turns it."
+        />
+        <Button
+          size="small"
+          variant="outlined"
+          fullWidth
+          startIcon={<ImagePlus size={15} />}
+          disabled={busy}
+          onClick={() => extraRef.current?.click()}
+        >
+          Add an image to the map
+        </Button>
+
+        <HiddenFileInput inputRef={mapRef} onPick={onUploadMap} />
+        <HiddenFileInput inputRef={backgroundRef} onPick={onUploadBackground} />
+        <HiddenFileInput inputRef={extraRef} onPick={onAddImage} />
+      </PanelSection>
+
+      <PanelSection
+        {...sectionProps('mood')}
+        icon={SunMedium}
+        title="Light & weather"
+        summary={lookSummary(scene)}
+      >
+        {pictureOnShow ? null : (
+          <Typography variant="caption" color="text.secondary">
+            Upload a battlemap or a background first: light and weather belong to a picture.
+          </Typography>
+        )}
+        <ImageLightSection scene={scene} onImageFilterChange={onImageFilterChange} />
+        <ImageAtmosphereSection scene={scene} onAtmosphereChange={onAtmosphereChange} />
+
+      </PanelSection>
+
+      <PanelSection
+        {...sectionProps('grid')}
+        icon={Grid3x3}
+        title="Grid"
+        summary={gridSummary(scene.grid)}
+      >
+        {/* Squares for a dungeon, hexes for the wilderness. Changing it changes
+            what a piece's stored position means, so it is asked once, here with
+            the calibration, rather than offered as a view option. */}
+        <ToggleButtonGroup
+          size="small"
+          exclusive
+          fullWidth
+          value={scene.grid.shape === 'hex' ? 'hex' : 'square'}
+          onChange={(_, value) => value && setGrid({ shape: value })}
+          aria-label="Grid shape"
+        >
+          <ToggleButton value="square" aria-label="Square grid">
+            <Grid3x3 size={14} />
+            <Box component="span" sx={pillLabelSx}>Squares</Box>
+          </ToggleButton>
+          <ToggleButton value="hex" aria-label="Hex grid">
+            <Hexagon size={14} />
+            <Box component="span" sx={pillLabelSx}>Hexes</Box>
+          </ToggleButton>
+        </ToggleButtonGroup>
+
+        <SectionLabel
+          label="Alignment"
+          hint="The cell size almost never matches the image, so all three numbers are editable: set Cell to the width of one square on the picture, then nudge the offsets until the lines sit on it."
+        />
+        <Stack direction="row" spacing={0.75}>
+          <TextField
+            label="Cell"
+            size="small"
+            type="number"
+            value={scene.grid.size}
+            onChange={(event) => setGrid({ size: Number(event.target.value) })}
+            sx={numberSx}
+          />
+          <TextField
+            label="Offset X"
+            size="small"
+            type="number"
+            value={scene.grid.offsetX}
+            onChange={(event) => setGrid({ offsetX: Number(event.target.value) })}
+            sx={numberSx}
+          />
+          <TextField
+            label="Offset Y"
+            size="small"
+            type="number"
+            value={scene.grid.offsetY}
+            onChange={(event) => setGrid({ offsetY: Number(event.target.value) })}
+            sx={numberSx}
+          />
+        </Stack>
+
+        {/* How the lines look: a printed battlemap already has squares of its
+            own, and gold over a snowfield is not the same read as gold over a
+            cave. */}
+        <SectionLabel
+          label="Lines"
+          hint="Half a pixel to six, in screen pixels, so a line stays as fine at one zoom as at another. Whatever colour you pick is drawn faint enough to read the map through."
+        />
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+          <ColorField
+            value={scene.grid.color || DEFAULT_GRID.color}
+            onChange={(color) => setGrid({ color })}
+            deferMs={180}
+            label="Grid colour"
+            sx={colorInputSx}
+          />
+          <TextField
+            label="Line"
+            size="small"
+            type="number"
+            value={scene.grid.lineWidth ?? DEFAULT_GRID.lineWidth}
+            onChange={(event) => setGrid({ lineWidth: Number(event.target.value) })}
+            slotProps={{ htmlInput: { min: 0.5, max: 6, step: 0.5 } }}
+            sx={numberSx}
+          />
+          <FormControlLabel
+            control={(
+              <Switch
+                size="small"
+                checked={scene.grid.visible}
+                onChange={(event) => setGrid({ visible: event.target.checked })}
+              />
+            )}
+            label={<Typography variant="body2">Show</Typography>}
+            sx={{ ml: 0, mr: 0 }}
+          />
+        </Stack>
+
+        {/* Creatures always take a square — that is what a battlemap is for. This
+            is about the scenery: a door across a wall, a rug at an angle, a
+            handout dropped between two squares. */}
+        <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
+          <FormControlLabel
+            control={(
+              <Switch
+                size="small"
+                checked={scene.grid.snapObjects !== false}
+                onChange={(event) => setGrid({ snapObjects: event.target.checked })}
+              />
+            )}
+            label={<Typography variant="body2">Objects snap to the grid</Typography>}
+          />
+          <InfoHint
+            label="About snapping"
+            text="Off, objects and pictures are placed and dragged freely. Creature pieces keep their square either way."
+          />
+        </Stack>
+      </PanelSection>
+
+      <PanelSection
+        {...sectionProps('playArea')}
+        icon={Frame}
+        title="Play area"
+        summary={scene.playArea ? `${scene.playArea.w} × ${scene.playArea.h} ${cellPlural}` : 'Whole scene'}
+      >
+        <Typography variant="caption" color="text.secondary">
+          Outside it is staging: the players never receive what stands there.
+        </Typography>
+        {scene.playArea ? (
+          <>
+            <Stack direction="row" spacing={0.75}>
+              {['x', 'y', 'w', 'h'].map((key) => (
+                <TextField
+                  key={key}
+                  label={key.toUpperCase()}
+                  size="small"
+                  type="number"
+                  value={scene.playArea[key]}
+                  onChange={(event) => onPlayAreaChange({ ...scene.playArea, [key]: Number(event.target.value) })}
+                  sx={numberSx}
+                />
+              ))}
+            </Stack>
+            <Stack direction="row" spacing={0.5}>
+              <Button
+                size="small"
+                variant="outlined"
+                fullWidth
+                disabled={busy || scene.shownImage !== 'map'}
+                onClick={onFitPlayArea}
+              >
+                Refit to the map
+              </Button>
+              <Button size="small" fullWidth disabled={busy} onClick={() => onPlayAreaChange(null)}>
+                Use the whole scene
+              </Button>
+            </Stack>
+          </>
+        ) : (
+          // Sized from the picture on screen, so it has to be the battlemap:
+          // fitted while the background is up it would take that one's shape.
+          <Tooltip
+            title={scene.shownImage !== 'map'
+              ? 'Switch to the battlemap first — the play area is measured from the picture on screen.'
+              : ''}
+          >
+            <span>
+              <Button
+                size="small"
+                variant="outlined"
+                fullWidth
+                disabled={busy || scene.shownImage !== 'map'}
+                onClick={onFitPlayArea}
+              >
+                Limit to the map
+              </Button>
+            </span>
+          </Tooltip>
+        )}
+      </PanelSection>
+    </Stack>
+  );
+}
+
+const sectionSx = {
+  borderRadius: 1,
+  border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.16)}`,
+  bgcolor: vttAlpha(VTT_COLORS.gold, 0.03),
+  overflow: 'hidden',
+};
+
+const sectionHeaderSx = {
+  width: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  gap: 0.85,
+  px: 1,
+  py: 0.75,
+  color: VTT_COLORS.panelText,
+  '&:hover': { bgcolor: vttAlpha(VTT_COLORS.gold, 0.08) },
+  '&.Mui-focusVisible': { outline: `1px solid ${VTT_COLORS.gold}`, outlineOffset: -1 },
+};
+
+const sectionIconSx = { display: 'flex', color: VTT_COLORS.gold, flexShrink: 0 };
+
+const sectionTitleSx = {
+  display: 'block',
+  fontFamily: '"Cinzel", Georgia, serif',
+  fontSize: '0.68rem',
+  letterSpacing: '0.06em',
+  lineHeight: 1.4,
+};
+
+const sectionSummarySx = {
+  display: 'block',
+  color: VTT_COLORS.panelTextFaint,
+  lineHeight: 1.3,
+};
 
 // Two slots rather than one picture you keep replacing: the battlemap is the
 // thing with a grid on it, the background is the establishing shot, and a

@@ -85,7 +85,7 @@ import {
 } from '../../../shared/vtt/scene/scene.js';
 import { sanitizeNoteText } from '../../../shared/vtt/map/drawing.js';
 import { DEFAULT_AREA_OPTIONS, areaEffect } from '../../../shared/vtt/map/areas.js';
-import { normalizeAtmosphere } from '../../../shared/vtt/scene/atmosphere.js';
+import { atmosphereFor, withImageAtmosphere } from '../../../shared/vtt/scene/atmosphere.js';
 import { imageFilterFor, withImageFilter } from '../../../shared/vtt/scene/imageFilters.js';
 import { FEET_PER_CELL } from '../../../shared/vtt/map/measure.js';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
@@ -1110,13 +1110,21 @@ export default function SceneEditor({
     }, GRID_SAVE_DELAY);
   }, [beginSceneEdit, imageSize, noteSceneWrite, notify, onSceneChange, role.isGm, savePlayArea, scene, shownImageForViewport, spectator]);
 
-  const handleAtmosphereChange = useCallback((atmosphere) => {
-    const next = normalizeAtmosphere(atmosphere);
-    const finishEdit = beginSceneEdit('atmosphere');
-    onSceneChange({ ...scene, atmosphere: next });
+  // The atmosphere of one picture, written like its light filter: the whole
+  // map, pruned to the pictures the scene still has.
+  const handleAtmosphereChange = useCallback((path, atmosphere) => {
+    if (!path) return;
+    const next = withImageAtmosphere(
+      scene.atmospheres,
+      path,
+      atmosphere,
+      [scene.imagePath, ...sceneBackgrounds(scene)],
+    );
+    const finishEdit = beginSceneEdit('atmospheres');
+    onSceneChange({ ...scene, atmospheres: next });
     clearTimeout(atmosphereTimerRef.current);
     atmosphereTimerRef.current = setTimeout(() => {
-      updateScene(scene.id, { atmosphere: next })
+      updateScene(scene.id, { atmospheres: next })
         .then(noteSceneWrite)
         .catch((cause) => notify('error', cause?.message || 'Could not save the atmosphere.'))
         .finally(finishEdit);
@@ -1147,6 +1155,7 @@ export default function SceneEditor({
   // The filter of the picture actually on screen: the one held while the next
   // is decoding keeps its own light until it is replaced.
   const viewportImageFilter = imageFilterFor(scene.imageFilters, viewportDisplay.path);
+  const viewportAtmosphere = atmosphereFor(scene.atmospheres, viewportDisplay.path);
 
   // Painting mirrors the token drag: every stroke frame goes out on broadcast,
   // and the database sees one write when the brush lifts.
@@ -2733,7 +2742,7 @@ export default function SceneEditor({
           snap
           canMove={() => false}
           fog={scene.fog}
-          atmosphere={scene.atmosphere}
+          atmosphere={viewportAtmosphere}
           imageFilter={viewportImageFilter}
           fogOpacity={PLAYER_FOG_OPACITY}
           fogOnTop
@@ -2867,7 +2876,7 @@ export default function SceneEditor({
         snap
         canMove={gmPlayerPreview ? () => false : canMove}
         fog={scene.fog}
-        atmosphere={scene.atmosphere}
+        atmosphere={viewportAtmosphere}
         imageFilter={viewportImageFilter}
         fogOpacity={role.isGm && !gmPlayerPreview ? GM_FOG_OPACITY : PLAYER_FOG_OPACITY}
         fogOnTop={!role.isGm || gmPlayerPreview}
