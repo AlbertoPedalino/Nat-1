@@ -1092,7 +1092,7 @@ export default function CharacterSheet({
           <SheetConflictBanner onLoadRemote={loadRemoteVersion} onKeepLocal={keepLocalVersion} />
         ) : null}
         <Stack direction={embedded ? 'column' : { xs: 'column', md: 'row-reverse' }} spacing={0.8} sx={{ pt: '0.55rem', alignItems: embedded ? 'stretch' : { md: 'stretch' } }}>
-          <HPBlock sheet={sheet}
+          <HPBlock sheet={sheet} fillWidth={embedded}
             onHeal={readOnly ? noop : (amt) => adjustHP(1, amt)} onDamage={readOnly ? noop : (amt) => adjustHP(-1, amt)}
             onTempHP={readOnly ? noop : adjustTempHP} onMaxHPBonus={readOnly ? noop : adjustMaxHpBonus}
             onSetHP={readOnly ? noop : setCurrentHP} onSetTempHP={readOnly ? noop : setTempHP} onSetMaxHPBonus={readOnly ? noop : setMaxHpBonus}
