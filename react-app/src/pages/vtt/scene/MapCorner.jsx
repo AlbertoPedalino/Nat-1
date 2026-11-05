@@ -1,7 +1,7 @@
 import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import { Images, X } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { MapPanel } from './ScenePanels.jsx';
+import { MapPanel } from './MapPanel.jsx';
 
 // How far under the top of the strip a panel starts: the icon button, plus the
 // gap that keeps it from touching one.
