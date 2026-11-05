@@ -122,6 +122,12 @@ export function gridLineColor(grid) {
 // The part of the scene that is in play, in cells. Anything outside it is the
 // GM's staging area, and RLS keeps it off the players' wire — this mirrors
 // map_token_in_play so the editor can dim what it already knows is private.
+// Same rectangle (or both missing).
+export function samePlayArea(left, right) {
+  if (!left || !right) return left === right;
+  return left.x === right.x && left.y === right.y && left.w === right.w && left.h === right.h;
+}
+
 export function normalizePlayArea(value) {
   if (!value || typeof value !== 'object') return null;
   const x = Math.round(numberOr(value.x, 0));

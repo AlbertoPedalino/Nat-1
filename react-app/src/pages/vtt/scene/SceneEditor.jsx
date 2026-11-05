@@ -63,10 +63,9 @@ import {
   viewBackgroundPath,
   viewImagePath,
   viewPatch,
+  samePlayArea,
 } from '../../../shared/vtt/scene/scene.js';
 import { DEFAULT_AREA_OPTIONS } from '../../../shared/vtt/map/areas.js';
-import { atmosphereFor, withImageAtmosphere } from '../../../shared/vtt/scene/atmosphere.js';
-import { imageFilterFor, withImageFilter } from '../../../shared/vtt/scene/imageFilters.js';
 import { FEET_PER_CELL } from '../../../shared/vtt/map/measure.js';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { isHexGrid } from '../../../shared/vtt/map/hexGeometry.js';
@@ -145,11 +144,10 @@ import { useSceneDrawings } from '../map/useSceneDrawings.js';
 import { useTokenPlacement } from '../tokens/useTokenPlacement.js';
 import { useTokenEdits } from '../tokens/useTokenEdits.js';
 import { useSceneInitiative } from '../initiative/useSceneInitiative.js';
+import { useSceneSettings } from './useSceneSettings.js';
 
 const CampaignSheetView = lazy(() => import('../../campaignsheet/CampaignSheetView.jsx'));
 
-const GRID_SAVE_DELAY = 600;
-const ATMOSPHERE_SAVE_DELAY = 400;
 const GHOST_SWEEP_MS = 2000;
 // A piece held still under the pointer sends no frames, and the other screens
 // would sweep its ghost away and show it back where it started. The last frame
@@ -166,10 +164,6 @@ const PLAYER_FOG_OPACITY = 1;
 // Only used before the map image has loaded, or when the scene has none yet.
 const DEFAULT_MAP_CELLS = { cols: 40, rows: 30 };
 
-function samePlayArea(left, right) {
-  if (!left || !right) return left === right;
-  return left.x === right.x && left.y === right.y && left.w === right.w && left.h === right.h;
-}
 
 function waitForImage(image) {
   if (typeof image.decode === 'function') return image.decode();
@@ -284,10 +278,6 @@ export default function SceneEditor({
   const sceneUpdatedAtRef = useRef(scene.updatedAt);
   sceneUpdatedAtRef.current = scene.updatedAt;
   const imageLoadingRef = useRef(false);
-  const gridTimerRef = useRef(null);
-  const atmosphereTimerRef = useRef(null);
-  const imageFilterTimerRef = useRef(null);
-  const playAreaTimerRef = useRef(null);
   const draggingRef = useRef(null);
   // The last drag frame sent to the table, repeated while the piece is held.
   const dragFrameRef = useRef(null);
@@ -606,13 +596,6 @@ export default function SceneEditor({
       imageLoadingRef.current = false;
     };
   }, [scene.id, shownImageForViewport, shownPath, imageAttempt]);
-
-  useEffect(() => () => {
-    clearTimeout(gridTimerRef.current);
-    clearTimeout(atmosphereTimerRef.current);
-    clearTimeout(imageFilterTimerRef.current);
-    clearTimeout(playAreaTimerRef.current);
-  }, []);
 
   useEffect(() => {
     if (!role.isGm) setGmPlayerPreview(false);
@@ -1010,88 +993,13 @@ export default function SceneEditor({
     }
   }, [notify, sendDrag]);
 
-  // Debounced like the grid: dragging a number field should not write a row per
-  // keystroke, and this one changes what the players can see.
-  const savePlayArea = useCallback((area) => {
-    const finishEdit = beginSceneEdit('playArea');
-    clearTimeout(playAreaTimerRef.current);
-    playAreaTimerRef.current = setTimeout(() => {
-      updateScene(scene.id, { playArea: area })
-        .then((saved) => {
-          noteSceneWrite(saved);
-          sendDrag({ tokensChanged: true });
-        })
-        .catch((cause) => notify('error', cause?.message || 'Could not save the play area.'))
-        .finally(finishEdit);
-    }, GRID_SAVE_DELAY);
-  }, [beginSceneEdit, noteSceneWrite, notify, scene.id, sendDrag]);
-
-  const handleGridChange = useCallback((grid) => {
-    const finishEdit = beginSceneEdit('grid');
-    // A play area fitted to the picture stays fitted while the grid is being
-    // calibrated or switched between squares and hexes. Left behind, it cut a
-    // strip off the map the moment the lines moved. A custom area is the GM's
-    // own choice and is never touched.
-    const fitted = role.isGm && !spectator && shownImageForViewport === 'map' && imageSize
-      && samePlayArea(scene.playArea, playAreaForImage(imageSize, scene.grid));
-    const playArea = fitted ? playAreaForImage(imageSize, grid) : scene.playArea;
-    onSceneChange({ ...scene, grid, playArea });
-    if (!samePlayArea(playArea, scene.playArea)) savePlayArea(playArea);
-    clearTimeout(gridTimerRef.current);
-    gridTimerRef.current = setTimeout(() => {
-      updateScene(scene.id, { grid })
-        .then(noteSceneWrite)
-        .catch((cause) => notify('error', cause?.message || 'Could not save the grid.'))
-        .finally(finishEdit);
-    }, GRID_SAVE_DELAY);
-  }, [beginSceneEdit, imageSize, noteSceneWrite, notify, onSceneChange, role.isGm, savePlayArea, scene, shownImageForViewport, spectator]);
-
-  // The atmosphere of one picture, written like its light filter: the whole
-  // map, pruned to the pictures the scene still has.
-  const handleAtmosphereChange = useCallback((path, atmosphere) => {
-    if (!path) return;
-    const next = withImageAtmosphere(
-      scene.atmospheres,
-      path,
-      atmosphere,
-      [scene.imagePath, ...sceneBackgrounds(scene)],
-    );
-    const finishEdit = beginSceneEdit('atmospheres');
-    onSceneChange({ ...scene, atmospheres: next });
-    clearTimeout(atmosphereTimerRef.current);
-    atmosphereTimerRef.current = setTimeout(() => {
-      updateScene(scene.id, { atmospheres: next })
-        .then(noteSceneWrite)
-        .catch((cause) => notify('error', cause?.message || 'Could not save the atmosphere.'))
-        .finally(finishEdit);
-    }, ATMOSPHERE_SAVE_DELAY);
-  }, [beginSceneEdit, noteSceneWrite, notify, onSceneChange, scene]);
-
-  // The light filter of one picture. The whole map is written, pruned to the
-  // pictures the scene still has, so a removed background's entry goes with
-  // the next change instead of needing a cleanup of its own.
-  const handleImageFilterChange = useCallback((path, filter) => {
-    if (!path) return;
-    const next = withImageFilter(
-      scene.imageFilters,
-      path,
-      filter,
-      [scene.imagePath, ...sceneBackgrounds(scene)],
-    );
-    const finishEdit = beginSceneEdit('imageFilters');
-    onSceneChange({ ...scene, imageFilters: next });
-    clearTimeout(imageFilterTimerRef.current);
-    imageFilterTimerRef.current = setTimeout(() => {
-      updateScene(scene.id, { imageFilters: next })
-        .then(noteSceneWrite)
-        .catch((cause) => notify('error', cause?.message || 'Could not save the light filter.'))
-        .finally(finishEdit);
-    }, ATMOSPHERE_SAVE_DELAY);
-  }, [beginSceneEdit, noteSceneWrite, notify, onSceneChange, scene]);
-  // The filter of the picture actually on screen: the one held while the next
-  // is decoding keeps its own light until it is replaced.
-  const viewportImageFilter = imageFilterFor(scene.imageFilters, viewportDisplay.path);
-  const viewportAtmosphere = atmosphereFor(scene.atmospheres, viewportDisplay.path);
+  const {
+    savePlayArea, handleGridChange, handleAtmosphereChange, handleImageFilterChange,
+    viewportImageFilter, viewportAtmosphere,
+  } = useSceneSettings({
+    scene, onSceneChange, role, spectator, notify, beginSceneEdit, noteSceneWrite,
+    imageSize, shownImageForViewport, viewportDisplay, sendDrag,
+  });
 
   // Painting mirrors the token drag: every stroke frame goes out on broadcast,
   // and the database sees one write when the brush lifts.
