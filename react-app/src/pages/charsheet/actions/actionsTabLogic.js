@@ -424,4 +424,3 @@ export function makeWildShapeActions(C) {
     ...parseBeastActions(beast.reactions).map((a) => toCard(a, 'reaction')),
   ];
 }
-
