@@ -55,6 +55,46 @@ Examples:
 - Quest generation and its result cards are together in `pages/gmboard/quests/`.
 - Shared token synchronization rules are in `shared/vtt/tokens/`.
 
+## Class features on the sheet
+
+What a class, subclass, species or feat adds to the sheet is declared in its
+adapter (`adapters/classes/<class>/<subclass>.js`, `adapters/feats/`,
+`adapters/species/`): action cards, resources, effects, proficiencies, item
+flags (`registerItemFlagDef`) and what spending a resource triggers
+(`registerResourceSideEffect`). An adapter destructures from
+`createAdapterBindings` only the names it calls. New sheet code reads what
+the registry returns instead of checking a class or feature name.
+
+A feature with its own state and an interactive panel (Wild Shape, Wild
+Companion, Primal Companion, Eldritch Cannon, Magic Item Tinker) takes these
+pieces; Primal Companion is a complete example:
+
+1. **Rules and state:** `shared/character/forms/<feature>Form.js`
+   (`primalCompanionForm.js`). The state lives on the character
+   (`C.primalCompanion`), is read through one accessor (`getPrimalCompanion`)
+   and changed through patch builders (`summonPrimalBeastPatch`) that the panel
+   hands to `onUpdateCharacter`. Pure functions, tested in
+   `tests/logic/shared/character/forms/`.
+2. **Card:** the adapter's action card declares `detailType: '<feature>'`.
+3. **Panel:** `pages/charsheet/forms/<Feature>Panel.jsx`, registered under that
+   `detailType` in `pages/charsheet/actions/actionDetailRenderers.js`. It
+   receives `{ action, character, sheet, resources, onResChange, resMax }`,
+   writes through `useSheetActions()`, and spends slots with
+   `shared/character/spells/spellSlots.js` (`consumeSlot`,
+   `lowestAvailableSlotLevel`). Creature panels reuse
+   `useSummonedCreatureRecords`, `useCreatureRolls` and `BeastStatBlock.jsx`.
+4. **Rest:** a state that ends or resets on a Long Rest adds one line to
+   `shared/character/resources/longRest.js`.
+5. **Export:** the state field joins `CHARACTER_PLAY_STATE_FIELDS` in
+   `pages/charbuilder/state/characterExport.js`.
+6. **Numbers:** a feature that changes the character's numbers (Wild Shape's
+   AC, speeds, saves, skills) does it through its module's accessors, called by
+   the one calculation that owns each number (`shared/character/combat/ac.js`,
+   `pages/charsheet/state/calculations.js`), never inside a panel.
+
+Rules stay in `shared/` because the battle map and the encounter builder read
+them too; adapters hold no React, since they are loaded as rule modules.
+
 ## Boundaries and imports
 
 - Use `shared/` for reusable capabilities, and `app/` for application composition

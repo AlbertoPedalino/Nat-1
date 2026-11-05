@@ -22,6 +22,8 @@ const CHARACTER_PLAY_STATE_FIELDS = [
   'resources', 'freeCastUses',
   'inspiration', 'activeConditions', 'exhaustionLevel',
   'notes', 'arcaneArmorItemKey', 'consumedItemBonuses',
+  // Class features with their own state (shared/character/forms/*Form.js).
+  'wildShape', 'wildCompanion', 'eldritchCannons', 'primalCompanion',
 ];
 
 const EXTRA_CLASS_DEFINITION_FIELDS = [
