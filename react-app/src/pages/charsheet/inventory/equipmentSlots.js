@@ -3,34 +3,24 @@ import {
   isInventoryItemStackable,
 } from '../../../shared/character/inventory/itemIdentity.js';
 import { hasOwnedFeat } from '../../../shared/character/progression/selectedFeats.js';
+import { itemHasProperty } from '../../../shared/character/inventory/weaponProperties.js';
 
 export const THROWN_SLOT = 'thrown';
-
-export function itemProps(item) {
-  return [...(Array.isArray(item?.property) ? item.property : []), ...(Array.isArray(item?.properties) ? item.properties : [])]
-    .map(p => String(p).toLowerCase());
-}
-
-function hasAnyProperty(item, ...wanted) {
-  const props = itemProps(item);
-  const wantedNorm = wanted.flat().map(p => String(p).toLowerCase());
-  return props.some(p => wantedNorm.includes(p));
-}
 
 export function isWeapon(item) {
   return item && ['M', 'R'].includes(String(item.type || '').toUpperCase());
 }
 
 export function isLightWeapon(item) {
-  return hasAnyProperty(item, 'l', 'light');
+  return itemHasProperty(item, 'light');
 }
 
 export function isVersatileWeapon(item) {
-  return hasAnyProperty(item, 'v', 'versatile');
+  return itemHasProperty(item, 'versatile');
 }
 
 export function isTwoHandedWeapon(item) {
-  return hasAnyProperty(item, '2h', 'twohanded', 'two-handed');
+  return itemHasProperty(item, 'two-handed');
 }
 
 export function canOneHand(item) {
@@ -38,19 +28,19 @@ export function canOneHand(item) {
 }
 
 export function isThrownWeapon(item) {
-  return hasAnyProperty(item, 't', 'thrown');
+  return itemHasProperty(item, 'thrown');
 }
 
 export function isHeavyWeapon(item) {
-  return hasAnyProperty(item, 'h', 'heavy');
+  return itemHasProperty(item, 'heavy');
 }
 
 export function isFinesseWeapon(item) {
-  return hasAnyProperty(item, 'f', 'fin', 'finesse');
+  return itemHasProperty(item, 'finesse');
 }
 
 export function isReachWeapon(item) {
-  return hasAnyProperty(item, 'r', 'reach');
+  return itemHasProperty(item, 'reach');
 }
 
 // Base weapon name, so a "+1 Spear" or a "Light Crossbow of Warning" still

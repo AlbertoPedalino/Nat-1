@@ -3,42 +3,14 @@
 // Pure functions; no React, no character collection logic.
 // ============================================================
 
+import { canonicalProperty, itemHasProperty } from '../../../shared/character/inventory/weaponProperties.js';
+
 export function normKey(value) {
   return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
-const PROPERTY_CANONICAL = {
-  f: 'finesse', finesse: 'finesse', fin: 'finesse',
-  l: 'light', light: 'light',
-  h: 'heavy', heavy: 'heavy',
-  v: 'versatile', versatile: 'versatile',
-  t: 'thrown', thrown: 'thrown',
-  '2h': 'two-handed', 'two-handed': 'two-handed', twohanded: 'two-handed',
-  a: 'ammunition', ammunition: 'ammunition',
-  ld: 'loading', loading: 'loading',
-  rch: 'reach', reach: 'reach',
-  s: 'special', special: 'special',
-  rld: 'reload', reload: 'reload',
-  n: 'net', net: 'net',
-};
-
-export function canonicalProperty(value) {
-  const key = String(value || '').toLowerCase().trim();
-  return PROPERTY_CANONICAL[key] || key;
-}
-
-function itemProps(item) {
-  const raw = [
-    ...(Array.isArray(item?.property) ? item.property : []),
-    ...(Array.isArray(item?.properties) ? item.properties : []),
-  ];
-  return raw.map(canonicalProperty);
-}
-
-export function itemHasProperty(item, props) {
-  const wanted = new Set((Array.isArray(props) ? props : [props]).map(canonicalProperty));
-  return itemProps(item).some((p) => wanted.has(p));
-}
+// Properties are read by the shared reader.
+export { canonicalProperty, itemHasProperty };
 
 export function getWeaponCategory(item) {
   const raw = String(item?.weaponCategory || '').toLowerCase();

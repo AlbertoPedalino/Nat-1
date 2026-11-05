@@ -8,7 +8,6 @@ import {
   resolveWeaponMasteryForItem,
 } from '../../../shared/character/combat/weaponMastery.js';
 import {
-  itemProps,
   getWeaponDamageDice,
   canUseLightExtraAttack,
   getOffHandDamageMod,
@@ -57,10 +56,14 @@ function weaponAbility(C, item, weaponOverride) {
     if (typeof o.condition === 'function' && !o.condition(C)) continue;
     return o.ability;
   }
-  const props = itemProps(item);
-  const finesse = props.includes('f') || props.includes('fin') || props.includes('finesse');
-  if (type === 'R') return 'dex';
-  if (finesse) return getMod(getFinal(C, 'dex')) > getMod(getFinal(C, 'str')) ? 'dex' : 'str';
+  return baseWeaponAbility(C, item);
+}
+
+// The ability a weapon uses by the rules alone: Dexterity for a ranged
+// weapon, the better of Strength and Dexterity for a finesse one.
+function baseWeaponAbility(C, item) {
+  if (String(item?.type || '').toUpperCase() === 'R') return 'dex';
+  if (isFinesseWeapon(item)) return getMod(getFinal(C, 'dex')) > getMod(getFinal(C, 'str')) ? 'dex' : 'str';
   return 'str';
 }
 
@@ -170,14 +173,7 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
   const profInfo = getWeaponProficiencyInfo(C, item, weaponOverride, profSets);
   const ability = weaponAbility(C, item, weaponOverride);
   const overrideBlocked = weaponOverride?.requiresProficiency && !profInfo.proficient;
-  const finalAbility = overrideBlocked ? (() => {
-    const props = itemProps(item);
-    const finesse = props.includes('f') || props.includes('fin') || props.includes('finesse');
-    const type = String(item?.type || '').toUpperCase();
-    if (type === 'R') return 'dex';
-    if (finesse) return getMod(getFinal(C, 'dex')) > getMod(getFinal(C, 'str')) ? 'dex' : 'str';
-    return 'str';
-  })() : ability;
+  const finalAbility = overrideBlocked ? baseWeaponAbility(C, item) : ability;
   const mod = getMod(getFinal(C, finalAbility));
   const enhancement = weaponEnhancement(item);
   const base = opts.damageBase != null ? opts.damageBase : weaponDamageBase(item);

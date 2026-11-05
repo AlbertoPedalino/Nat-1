@@ -24,6 +24,7 @@
 
 import { itemDisplayName, itemIdentityKey } from './itemIdentity.js';
 import { primaryClassLevel } from '../progression/classLevel.js';
+import { itemHasProperty } from './weaponProperties.js';
 
 const norm = (value) => String(value || '').split('|')[0];
 const lc = (value) => String(value || '').toLowerCase();
@@ -56,14 +57,7 @@ const isBaseWeapon = (item) => (
   && ['none', ''].includes(lc(item.rarity))
   && !item.bonusVariant
 );
-const propertyCodes = (item) => new Set(
-  (Array.isArray(item?.property) ? item.property : [])
-    .map((value) => norm(value).toUpperCase()),
-);
-const hasAnyProperty = (...codes) => (item) => {
-  const properties = propertyCodes(item);
-  return codes.some((code) => properties.has(code));
-};
+const hasAnyProperty = (...codes) => (item) => itemHasProperty(item, codes);
 const matchesAll = (...predicates) => (item) => predicates.every((predicate) => predicate(item));
 
 // Predicate for a rarity-class bucket (Common / Uncommon Wondrous / …). A

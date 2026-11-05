@@ -3,6 +3,7 @@ import {
   isSupportedEdition,
   ITEM_SOURCE_PRIORITY,
 } from '../../content/sourcePriority.js';
+import { itemHasProperty } from '../inventory/weaponProperties.js';
 
 const MASTERY_DATA_URL = 'https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/items-base.json';
 
@@ -74,24 +75,6 @@ const WEAPON_MASTERY_PROGRESSIONS = Object.freeze({
     Object.freeze({ level: 1, count: 2 }),
   ]),
 });
-
-function canonicalWeaponProperty(value) {
-  const key = compactKey(value);
-  if (key === 'finesse') return 'f';
-  if (key === 'light') return 'l';
-  return key;
-}
-
-function itemHasProperty(item, property) {
-  const target = canonicalWeaponProperty(property);
-  return [...asArray(item?.property), ...asArray(item?.properties)]
-    .some((value) => {
-      const itemProperty = typeof value === 'object'
-        ? (value?.name ?? value?.abbreviation ?? value?.id)
-        : value;
-      return canonicalWeaponProperty(itemProperty) === target;
-    });
-}
 
 function weaponMatchesRule(item, rule) {
   if (rule?.melee === true) {
