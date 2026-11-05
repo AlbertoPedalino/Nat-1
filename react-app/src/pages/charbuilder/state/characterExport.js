@@ -1,3 +1,5 @@
+import { SYNCED_DATA_KEYS } from '../../../shared/character/combat/vitals.js';
+
 export const CHARACTER_EXPORT_TYPE = 'gb-sheet-export';
 export const CHARACTER_EXPORT_VERSION = 2;
 
@@ -16,11 +18,12 @@ const CHARACTER_DEFINITION_FIELDS = [
 ];
 
 const CHARACTER_PLAY_STATE_FIELDS = [
-  'currentHP', 'tempHP', 'maxHPBonus', 'deathSaves',
+  // HP, death saves, conditions, reminders: the synced vitals, one list.
+  ...SYNCED_DATA_KEYS,
   'usedHD', 'usedHDPools',
   'spellSlotsUsed', 'createdSpellSlots',
   'resources', 'freeCastUses',
-  'inspiration', 'activeConditions', 'exhaustionLevel',
+  'inspiration', 'exhaustionLevel',
   'notes', 'arcaneArmorItemKey', 'consumedItemBonuses',
   // Class features with their own state (shared/character/forms/*Form.js).
   'wildShape', 'wildCompanion', 'eldritchCannons', 'primalCompanion',
