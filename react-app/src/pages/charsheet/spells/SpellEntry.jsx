@@ -13,20 +13,20 @@ import { getFinal, getMod, getPB } from '../state/calculations.js';
 import { describeAttackRoll } from '../../../shared/character/combat/conditions.js';
 import { getSpellAttackAdvantage } from '../state/sheetEffects.js';
 import { entriesToTextBlocks } from '../../../shared/character/spells/spellEntries.js';
+import { getCastBadge, getSpellAbilityForEntry, getSpellStatusChips } from './spellsTabLogic.js';
 import {
   applySpellModifiers,
+  getResolvedCantripData,
+  collectSpellRiders,
+  resolveDmgBonusValue,
+} from './spellModifiers.js';
+import {
   cantripScalingDamages,
   cantripScalingDice,
   computeScaledFormula,
   extractDamageDice,
-  getCastBadge,
-  getResolvedCantripData,
-  getSpellAbilityForEntry,
-  getSpellStatusChips,
-  collectSpellRiders,
   getUpcastStep,
-  resolveDmgBonusValue,
-} from './spellsTabLogic.js';
+} from './spellDice.js';
 import { inlineButtonSx, spellBodySx, spellRowSx } from './spellsTabStyles.js';
 import AttackRollButton from '../actions/AttackRollButton.jsx';
 import { isConcentrationSpell, isRitualSpell } from '../../../shared/character/spells/spellTags.js';

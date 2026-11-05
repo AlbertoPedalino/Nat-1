@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { loadClassAdapters, loadCoreAdapters } from '../../../../../src/adapters/index.js';
-import { getSheetSlots } from '../../../../../src/pages/charsheet/spells/spellsTabLogic.js';
+import { getSheetSlots } from '../../../../../src/pages/charsheet/spells/spellcasting.js';
 
 describe('getSheetSlots', () => {
   beforeAll(async () => {

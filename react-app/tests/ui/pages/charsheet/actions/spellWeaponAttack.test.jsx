@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
 import { spellWeaponAttack, spellWeaponKey, spellWeaponOptions } from '../../../../../src/pages/charsheet/actions/actionsTabLogic.js';
-import { cantripScalingDamages, cantripScalingDice } from '../../../../../src/pages/charsheet/spells/spellsTabLogic.js';
+import { cantripScalingDamages, cantripScalingDice } from '../../../../../src/pages/charsheet/spells/spellDice.js';
 import { collectEquipmentProficiencySets } from '../../../../../src/pages/charsheet/proficiency/index.js';
 
 // True Strike: the attack is the weapon's, made with the spellcasting ability.

@@ -20,7 +20,7 @@ import {
   getActionRollers,
   buildActionTags,
 } from './actionsTabLogic.js';
-import { getSheetSlots } from '../spells/spellsTabLogic.js';
+import { getSheetSlots } from '../spells/spellcasting.js';
 import { loadItems, loadVariantRules } from '../../charbuilder/data/dataLoaders.js';
 import { loadMasteryEntries } from '../../../shared/character/combat/weaponMastery.js';
 import { WeaponMasteryBlock } from '../../../shared/character/combat/WeaponMasteryBlock.jsx';

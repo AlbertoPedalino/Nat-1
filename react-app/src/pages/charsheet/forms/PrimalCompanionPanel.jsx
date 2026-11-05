@@ -5,7 +5,7 @@ import {
 import { PawPrint } from 'lucide-react';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { getFinal, getMod, getPB } from '../state/calculations.js';
-import { getSheetSlots } from '../spells/spellsTabLogic.js';
+import { getSheetSlots } from '../spells/spellcasting.js';
 import { consumeSlot, lowestAvailableSlotLevel } from '../../../shared/character/spells/spellSlots.js';
 import { classLevel } from '../../../shared/character/progression/classLevel.js';
 import HpPoolBar from '../../../shared/character/combat/HpPoolBar.jsx';

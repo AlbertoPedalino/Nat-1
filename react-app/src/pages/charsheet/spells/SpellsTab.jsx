@@ -24,22 +24,24 @@ import { getSpellSaveDcBonus } from '../state/sheetEffects.js';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import {
   buildSpellInfo,
-  canManageSpells,
   dedupeSpells,
-  formatBonus,
-  getMaxLearnableSpellLevel,
-  getMaxLearnableSpellLevelForEntity,
-  getSheetSlots,
   getSpellAbility,
-  getSpellEntities,
-  getSpellcastingProfile,
-  getSpellLimits,
-  hasSpellcastingProfile,
   norm,
   normalizeWizardBook,
   toSnapshot,
   upsertSnapshot,
 } from './spellsTabLogic.js';
+import {
+  canManageSpells,
+  getMaxLearnableSpellLevel,
+  getMaxLearnableSpellLevelForEntity,
+  getSheetSlots,
+  getSpellEntities,
+  getSpellcastingProfile,
+  getSpellLimits,
+  hasSpellcastingProfile,
+} from './spellcasting.js';
+import { formatBonus } from './spellDice.js';
 import { getClassSpellLimits } from '../../../shared/character/spells/spellProgression.js';
 import { getPactMagicInfo, getSpellCastMode } from '../../../shared/character/spells/pactMagic.js';
 import {
