@@ -14,11 +14,11 @@ import {
   normalizeResourceMax,
   resolveActionFormulas,
   collectAdapterActions,
-  makeWeaponActions,
   makeWildShapeActions,
   getActionRollers,
   buildActionTags,
 } from './actionsTabLogic.js';
+import { makeWeaponActions } from './weaponActions.js';
 import { loadItems, loadVariantRules } from '../../charbuilder/data/dataLoaders.js';
 import { loadMasteryEntries } from '../../../shared/character/combat/weaponMastery.js';
 import { WeaponMasteryBlock } from '../../../shared/character/combat/WeaponMasteryBlock.jsx';

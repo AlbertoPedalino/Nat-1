@@ -6,7 +6,7 @@ import { SheetActionsProvider } from '../../../../../src/pages/charsheet/state/S
 import { ProficiencySetsProvider } from '../../../../../src/pages/charsheet/proficiency/ProficiencySetsContext.jsx';
 import { adapterRegistry } from '../../../../../src/adapters/registry.js';
 import installCantrips from '../../../../../src/adapters/spells/cantrips.js';
-import { spellWeaponKey } from '../../../../../src/pages/charsheet/actions/actionsTabLogic.js';
+import { spellWeaponKey } from '../../../../../src/pages/charsheet/actions/weaponActions.js';
 import { theme } from '../../../../../src/app/theme.js';
 
 installCantrips(adapterRegistry);

@@ -3,7 +3,7 @@ import { adapterRegistry } from '../../../../../src/adapters/registry.js';
 import installMonk from '../../../../../src/adapters/classes/monk/monk.js';
 import installFightingStyles from '../../../../../src/adapters/feats/fighting-styles.js';
 import installTavernBrawler from '../../../../../src/adapters/feats/tavern-brawler.js';
-import { makeWeaponActions } from '../../../../../src/pages/charsheet/actions/actionsTabLogic.js';
+import { makeWeaponActions } from '../../../../../src/pages/charsheet/actions/weaponActions.js';
 import { collectEquipmentProficiencySets } from '../../../../../src/pages/charsheet/proficiency/index.js';
 
 installMonk(adapterRegistry);

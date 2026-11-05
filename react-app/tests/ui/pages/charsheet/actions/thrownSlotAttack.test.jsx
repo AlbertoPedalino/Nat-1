@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest';
 import { adapterRegistry } from '../../../../../src/adapters/registry.js';
 import installFightingStyles from '../../../../../src/adapters/feats/fighting-styles.js';
-import { makeWeaponActions } from '../../../../../src/pages/charsheet/actions/actionsTabLogic.js';
+import { makeWeaponActions } from '../../../../../src/pages/charsheet/actions/weaponActions.js';
 import { collectEquipmentProficiencySets } from '../../../../../src/pages/charsheet/proficiency/index.js';
 
 installFightingStyles(adapterRegistry);

@@ -35,7 +35,7 @@ import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import RollerButtons from '../../../shared/character/dice/RollerButtons.jsx';
 import SummonedCreaturePanel from '../forms/SummonedCreaturePanel.jsx';
 import CollapsibleNote from '../../../shared/ui/CollapsibleNote.jsx';
-import { spellWeaponAttack, spellWeaponOptions } from '../actions/actionsTabLogic.js';
+import { spellWeaponAttack, spellWeaponOptions } from '../actions/weaponActions.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 
 function applyFlatToFormula(formula, flat) {
