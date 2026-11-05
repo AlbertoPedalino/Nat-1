@@ -1596,7 +1596,7 @@ test('a rejected fullscreen request falls back to window coverage and can exit',
   await screen.findByRole('button', { name: 'Leave fullscreen' });
   expect(viewport).toHaveStyle({ position: 'fixed' });
   fireEvent.keyDown(document, { key: 'Escape' });
-  expect(screen.getByRole('button', { name: 'Fullscreen map' })).toBeInTheDocument();
+  expect(await screen.findByRole('button', { name: 'Fullscreen map' })).toBeInTheDocument();
 });
 
 test('a replacement picture is framed from its prepared dimensions before paint', () => {
