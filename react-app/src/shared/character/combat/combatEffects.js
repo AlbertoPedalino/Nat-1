@@ -10,7 +10,7 @@
 // here is read by the dice.
 //
 // The list is the `activeEffects` vital: on a player character it is in
-// SYNCED_VITALS and in the health allowlist of supabase/13_character_vitals.sql,
+// SYNCED_VITALS and in character_vital_keys() of supabase/13_character_vitals.sql,
 // so sheet, piece and combatant show one list; a monster's stays on its
 // combatant / fight. Entries are `{ key: 'custom', text }`. The list once also
 // held advantage/disadvantage calls (other keys, a duration, a polarity): those

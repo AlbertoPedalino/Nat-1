@@ -11,6 +11,7 @@
 
 import { normalizeConditions } from '../character/combat/conditions.js';
 import { normalizeEffects } from '../character/combat/combatEffects.js';
+import { pickCharacterVitals } from '../character/combat/vitals.js';
 import { normalizeIconColor } from './roster.js';
 
 function numberOrNull(value) {
@@ -71,15 +72,9 @@ export function digestFromVitalsAnswer(answer, held) {
   if (String(held.characterId) !== String(answer.characterId)) return null;
   const revision = Number(answer.digestRevision);
   if (answer.digestRevision == null || !Number.isFinite(revision)) return null;
-  const vitals = answer.vitals;
   return fromFields({
     ...held,
-    currentHP: vitals.currentHP,
-    tempHP: vitals.tempHP,
-    maxHPBonus: vitals.maxHPBonus,
-    deathSaves: vitals.deathSaves,
-    activeConditions: vitals.activeConditions,
-    activeEffects: vitals.activeEffects,
+    ...pickCharacterVitals(answer.vitals),
     hpBasis: typeof answer.hpBasis === 'string' ? answer.hpBasis : held.hpBasis,
   }, {
     characterId: held.characterId,

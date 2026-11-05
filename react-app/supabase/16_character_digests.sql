@@ -22,9 +22,9 @@
 
 create or replace function public.character_hp_basis_ignored_keys()
 returns text[] language sql immutable as $$
-  select array[
-    -- carried in the digest itself (maxHPBonus is added on top of the base max)
-    'currentHP', 'tempHP', 'maxHPBonus', 'deathSaves', 'activeConditions', 'activeEffects',
+  -- the vitals, carried in the digest itself (maxHPBonus is added on top of
+  -- the base max)
+  select public.character_vital_keys() || array[
     -- presentation carried in the digest
     'name', 'portraitPath', 'classIconColor',
     -- trackers that change all session and never feed max HP
@@ -45,15 +45,11 @@ returns jsonb language sql immutable as $$
     'className', p_data->'className',
     'classIconColor', p_data->'classIconColor',
     'portraitPath', p_data->'portraitPath',
-    'currentHP', p_data->'currentHP',
-    'tempHP', p_data->'tempHP',
-    'maxHPBonus', p_data->'maxHPBonus',
-    'deathSaves', p_data->'deathSaves',
-    'activeConditions', p_data->'activeConditions',
-    'activeEffects', p_data->'activeEffects',
     -- jsonb text output is canonical (sorted keys), so equal sheets hash equal.
     'hpBasis', md5((coalesce(p_data, '{}'::jsonb) - public.character_hp_basis_ignored_keys())::text)
-  );
+  )
+  -- Every vital, null when the sheet has none (missing HP means full health).
+  || (select jsonb_object_agg(key, p_data->key) from unnest(public.character_vital_keys()) as key);
 $$;
 
 create table if not exists public.character_digests (

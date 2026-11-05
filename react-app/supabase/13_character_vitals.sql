@@ -18,6 +18,15 @@ returns text[] language sql immutable as $$
   select array['optionalFeatureEntries'];
 $$;
 
+-- The vitals: the character `data` keys only a health command changes and
+-- the character digest carries (16_character_digests.sql). The one list in
+-- the database; it mirrors SYNCED_DATA_KEYS in
+-- src/shared/character/combat/vitals.js (a test keeps them equal).
+create or replace function public.character_vital_keys()
+returns text[] language sql immutable as $$
+  select array['currentHP','tempHP','deathSaves','maxHPBonus','activeConditions','activeEffects'];
+$$;
+
 create or replace function public.strip_character_runtime_fields()
 returns trigger language plpgsql set search_path = public as $$
 begin
@@ -51,7 +60,7 @@ for each row execute function public.strip_character_runtime_fields();
 create or replace function public.protect_character_vitals()
 returns trigger language plpgsql set search_path = public as $$
 declare
-  keys text[] := array['currentHP','tempHP','deathSaves','maxHPBonus','activeConditions','activeEffects'];
+  keys text[] := public.character_vital_keys();
   bookkeeping text[] := array['row_revision','vitals_revision','sheet_revision','updated_at'];
   vitals jsonb;
 begin
@@ -106,7 +115,7 @@ create or replace function public.character_vitals_answer(
     'vitals', (
       select coalesce(jsonb_object_agg(key, value), '{}'::jsonb)
         from jsonb_each(coalesce(p_data, '{}'::jsonb))
-       where key = any(array['currentHP','tempHP','deathSaves','maxHPBonus','activeConditions','activeEffects'])
+       where key = any(public.character_vital_keys())
     ),
     'digestRevision', p_digest_revision,
     'hpBasis', p_hp_basis
@@ -129,7 +138,6 @@ create or replace function public.commit_character_vitals(
 declare
   c public.characters;
   clean jsonb;
-  allowed text[] := array['currentHP','tempHP','deathSaves','maxHPBonus','activeConditions','activeEffects'];
   digest_revision bigint;
   hp_basis text;
 begin
@@ -141,7 +149,7 @@ begin
     return public.character_vitals_answer(false, c.id, c.data, digest_revision, hp_basis);
   end if;
   select coalesce(jsonb_object_agg(key,value), '{}'::jsonb) into clean
-    from jsonb_each(p_patch) where key = any(allowed);
+    from jsonb_each(p_patch) where key = any(public.character_vital_keys());
   update public.characters set data = data || clean, vitals_revision = vitals_revision + 1
     where id = p_id returning * into c;
   if not found then raise exception 'No permission to change character health.'; end if;

@@ -4,6 +4,7 @@ import { readFile, readdir } from 'node:fs/promises';
 import { PGlite } from '@electric-sql/pglite';
 import { SUPABASE_STUBS } from './supabaseStubs.js';
 import { applyVitalCommand } from '../../../../src/shared/character/combat/vitalCommands.js';
+import { SYNCED_DATA_KEYS } from '../../../../src/shared/character/combat/vitals.js';
 
 // commit_character_vitals (13_character_vitals.sql): a health command commits an
 // absolute vitals patch against the character digest the client computed it
@@ -210,5 +211,20 @@ test('effects are a vital: committed by command, in the digest, safe from saves,
     // A full-sheet save from a client that still holds no effects keeps them.
     await db.query(`update public.characters set data = data - 'activeEffects' || '{"notes":"later"}' where id = 'pc'`);
     assert.deepEqual((await sheet(db)).data.activeEffects, [{ key: 'custom', text: 'Guidance' }]);
+  } finally { await db.close(); }
+});
+
+test('one list of vitals, equal to the JavaScript one, read by the digest and the max-HP basis', async () => {
+  const db = await schema();
+  try {
+    const keys = (await one(db, 'select public.character_vital_keys() as keys')).keys;
+    assert.deepEqual([...keys].sort(), [...SYNCED_DATA_KEYS].sort());
+    const ignored = (await one(db, 'select public.character_hp_basis_ignored_keys() as keys')).keys;
+    for (const key of keys) assert.ok(ignored.includes(key), `${key} does not feed max HP`);
+    // Every vital is in the digest, null when the sheet has none.
+    const { vitals } = await digest(db);
+    for (const key of keys) assert.ok(Object.hasOwn(vitals, key), `digest carries ${key}`);
+    assert.equal(vitals.currentHP, 30);
+    assert.equal(vitals.deathSaves, null);
   } finally { await db.close(); }
 });

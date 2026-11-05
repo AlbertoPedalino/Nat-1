@@ -17,7 +17,6 @@ test('cloud card versions merge once and hydration repairs existing duplicates',
   });
   assert.deepEqual(repaired.library, [latest]);
 });
-import { readFileSync } from 'node:fs';
 import { calculateDifficulty } from '../../../../../src/pages/encounterbuilder/builder/difficulty.js';
 import {
   addCombatantEffect,
@@ -203,14 +202,6 @@ test('quest choices are unique, trimmed, and alphabetical', () => {
     { quest: null },
     { quest: 'Broken Crown' },
   ]), ['Ashes of Winter', 'Broken Crown']);
-});
-
-test('synced field set matches the commit_character_vitals SQL allowlist', () => {
-  const sql = readFileSync(new URL('../../../../../supabase/13_character_vitals.sql', import.meta.url), 'utf8');
-  const match = sql.match(/allowed\s+text\[\]\s*:=\s*array\[([^\]]+)\]/);
-  assert.ok(match, 'could not find the allowed[] array in 13_character_vitals.sql');
-  const sqlKeys = match[1].split(',').map((part) => part.trim().replace(/^'|'$/g, ''));
-  assert.deepEqual([...sqlKeys].sort(), [...SYNCED_DATA_KEYS].sort());
 });
 
 test('difficulty uses raw monster XP without encounter multiplier', () => {

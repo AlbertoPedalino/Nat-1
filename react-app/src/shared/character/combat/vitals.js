@@ -11,10 +11,11 @@ import { normalizeEffects } from './combatEffects.js';
 // the sheet-side helpers below and the encounter combat mappers in
 // pages/encounterbuilder/logic/sheetSync.js both iterate this list.
 //
-// To sync a NEW field: add ONE descriptor here, and add its `data` key to the
-// commit_character_vitals allowlist and preservation trigger in
-// supabase/13_character_vitals.sql (a test asserts the
-// two never drift apart).
+// To sync a NEW field: add ONE descriptor here, add its `data` key to
+// character_vital_keys() in supabase/13_character_vitals.sql (the health
+// command, the preservation trigger and the digest all read that one list; a
+// test keeps it equal to SYNCED_DATA_KEYS), and read it in the digest's
+// fromFields (shared/campaign/characterDigest.js).
 //
 //   data      - key name in the character `data` blob
 //   combat    - key name on a combat combatant
