@@ -557,3 +557,28 @@ test('a background refresh never overwrites an edit made while the cloud row was
   // Sent instead, it meets the newer cloud copy as an explicit conflict.
   assert.equal(entry('dmscreen', 'race_a').cloud, 'conflict');
 });
+
+test('encounter fights stay on this device: never synced, never dirty, never replaced by a pull', async () => {
+  reset();
+  await linkedCopy('encounters', 'enc_fights', 1);
+  const fightsKey = 'gb:enc:enc_fights:fights:v1';
+  const writesBefore = cloud.writes.length;
+
+  // Absorbing another device's hit points rewrites only the fights cache.
+  store.saveLocal('encounters', 'enc_fights', { 'fights:v1': JSON.stringify({ items: [{ id: 1, hp: 7 }] }) });
+  await idle();
+  assert.equal(entry('encounters', 'enc_fights').dirty.data, false);
+  assert.equal(cloud.writes.length, writesBefore);
+
+  // An edit the cloud carries goes up without the fights.
+  WRITE.encounters('enc_fights', 2);
+  await idle();
+  assert.equal(fightsKey in cloud.row('encounters', 'enc_fights').data, false);
+
+  // A cloud copy from before the split still carries fights: a pull keeps ours.
+  cloud.edit('encounters', 'enc_fights', {
+    data: { ...cloud.row('encounters', 'enc_fights').data, [fightsKey]: JSON.stringify({ items: [] }) },
+  });
+  assert.equal(await sync.refreshInstance('encounters', 'enc_fights'), 'pulled');
+  assert.equal(JSON.parse(storage.getItem(fightsKey)).items[0].hp, 7);
+});

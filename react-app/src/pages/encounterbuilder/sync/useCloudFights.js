@@ -290,6 +290,28 @@ export function useCloudFights({
     if (row?.id != null && version) versionsRef.current.set(String(row.id), version);
   }, []);
 
+  // Fights whose last write failed (offline, timeout). A fight's row is its
+  // only cloud copy, so a failed write is tried again on the recovery triggers,
+  // with what is on screen then; nothing is sent when no write failed.
+  const unsavedRef = useRef(new Set());
+  const writeFight = useCallback((key, entry) => {
+    unsavedRef.current.delete(key);
+    saveInstanceFight(instanceId, entry).then(noteWritten).catch(() => {
+      unsavedRef.current.add(key);
+    });
+  }, [instanceId, noteWritten]);
+  const retryUnsaved = useCallback(() => {
+    for (const key of [...unsavedRef.current]) {
+      // A newer write of it is already on its way.
+      if (timersRef.current.has(key)) continue;
+      unsavedRef.current.delete(key);
+      const entry = (heldRef.current.fights || []).find((fight) => String(fight.id) === key);
+      if (!entry || removedRef.current.has(key)) continue;
+      settledRef.current.set(key, fightSignature(entry));
+      writeFight(key, entry);
+    }
+  }, [writeFight]);
+
   // A local edit already sent through its own command: the full save has
   // nothing to add for it.
   const markSettled = useCallback((entry) => {
@@ -308,9 +330,9 @@ export function useCloudFights({
     timersRef.current.set(key, setTimeout(() => {
       timersRef.current.delete(key);
       const entry = find();
-      if (entry) saveInstanceFight(instanceId, entry).then(noteWritten).catch(() => {});
+      if (entry) writeFight(key, entry);
     }, WRITE_DEBOUNCE_MS));
-  }, [canSync, instanceId, noteWritten]);
+  }, [canSync, writeFight]);
 
   // First read, then every change to this instance's fights from anywhere.
   useEffect(() => {
@@ -328,8 +350,11 @@ export function useCloudFights({
   // once when it is shown again or the network comes back.
   useEffect(() => {
     if (!canSync) return undefined;
-    return listenForRecovery(() => { reconcile(); }, { intervalMs: FIGHT_RECONCILE_MS });
-  }, [canSync, reconcile]);
+    return listenForRecovery(() => {
+      retryUnsaved();
+      reconcile();
+    }, { intervalMs: FIGHT_RECONCILE_MS });
+  }, [canSync, reconcile, retryUnsaved]);
 
   // Local -> row. One write per fight that actually changed, so running a combat
   // does not rewrite the twenty rooms sitting beside it.
@@ -352,10 +377,7 @@ export function useCloudFights({
       if (running) clearTimeout(running);
       timersRef.current.set(key, setTimeout(() => {
         timersRef.current.delete(key);
-        saveInstanceFight(instanceId, entry).then(noteWritten).catch(() => {
-          // Best effort: the local copy still holds it, and the next change tries
-          // again.
-        });
+        writeFight(key, entry);
       }, WRITE_DEBOUNCE_MS));
     }
 
@@ -375,7 +397,7 @@ export function useCloudFights({
       timersRef.current.delete(key);
       askAgain(key);
     }
-  }, [canSync, fights, instanceId, noteWritten]);
+  }, [canSync, fights, writeFight]);
 
   return { canSync, acceptRemoteFight, markSettled, requestSave };
 }

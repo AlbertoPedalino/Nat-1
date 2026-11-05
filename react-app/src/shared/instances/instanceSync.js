@@ -7,7 +7,7 @@ import {
   getInstance,
   hasInstancePayload,
   listInstances,
-  readInstancePayload,
+  cloudPayload,
   replaceInstancePayload,
   subscribeInstances,
   updateInstance,
@@ -114,7 +114,7 @@ export function getSyncState(sectionKey, id) {
 function needsSync(sectionKey, entry) {
   if (!entry) return false;
   if (entry.cloud === CLOUD_STATES.CONFLICT) return false;
-  if (entry.cloud === CLOUD_STATES.LOCAL) return hasInstancePayload(sectionKey, entry.id);
+  if (entry.cloud === CLOUD_STATES.LOCAL) return Object.keys(cloudPayload(sectionKey, entry.id)).length > 0;
   return entry.version == null || entry.dirty.data || entry.dirty.name || entry.dirty.linkGroup;
 }
 
@@ -232,7 +232,7 @@ async function pushMeta(c, section, entry) {
   if (entry.dirty.linkGroup) { patch.link_group_id = entry.linkGroupId; sent.link = entry.linkGroupId; }
   const row = await cloud.updateMeta(c, section, entry.id, patch);
   if (row) return settle(section.key, entry, row, sent);
-  const payload = readInstancePayload(section.key, entry.id);
+  const payload = cloudPayload(section.key, entry.id);
   return Object.keys(payload).length ? insertCopy(c, section, entry, payload) : entry;
 }
 
@@ -241,7 +241,7 @@ async function pushMeta(c, section, entry) {
 async function verifyLegacy(c, section, entry, payload) {
   const row = await cloud.fetchRow(c, section, entry.id);
   if (!row) return insertCopy(c, section, entry, payload);
-  if (!samePayload(row.data, payload)) return markConflict(section.key, entry.id, 'unverified');
+  if (!samePayload(cloudPayload(section.key, entry.id, row.data), payload)) return markConflict(section.key, entry.id, 'unverified');
   return settle(section.key, entry, row, { data: true });
 }
 
@@ -254,7 +254,7 @@ export function syncInstance(sectionKey, id) {
     const entry = getInstance(sectionKey, id);
     if (!needsSync(sectionKey, entry)) return entry;
     const c = client();
-    const payload = readInstancePayload(sectionKey, id);
+    const payload = cloudPayload(sectionKey, id);
     syncing.add(key);
     announceSyncChange(sectionKey, id);
     report(id, 'syncing');

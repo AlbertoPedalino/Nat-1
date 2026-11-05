@@ -34,6 +34,11 @@ export const SECTION_REGISTRY = Object.freeze({
     route: (id) => `/encounter-builder?enc=${encodeURIComponent(id)}`,
     newRoute: '/encounter-builder?enc=new',
     defaultName: (id) => `Encounter ${id}`,
+    // Fights live in their own rows (encounter_fights): the cloud copy of each
+    // is its row. This key is this device's cache of them (and the bridge the
+    // battle map writes through in the same browser): kept out of the synced
+    // instance, so absorbing another device's hit points never makes it dirty.
+    localOnlyKeys: ['fights:v1'],
   }),
   dmscreen: section({
     key: 'dmscreen',

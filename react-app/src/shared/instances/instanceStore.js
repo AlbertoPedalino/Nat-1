@@ -225,6 +225,21 @@ export function readInstancePayload(sectionKey, id) {
   return payload;
 }
 
+// The keys a tool keeps on this device only (section.localOnlyKeys): written,
+// read and announced like the rest, but never synced, never marking the
+// instance dirty, and never replaced by a pull.
+function isLocalOnlyKey(section, prefix, key) {
+  return (section.localOnlyKeys || []).includes(key.slice(prefix.length));
+}
+
+// What the cloud row holds for this instance: the payload without its
+// local-only keys. `payload` defaults to this copy's.
+export function cloudPayload(sectionKey, id, payload = readInstancePayload(sectionKey, id)) {
+  const section = requireSection(sectionKey);
+  const prefix = section.scopedPrefix(id);
+  return Object.fromEntries(Object.entries(payload || {}).filter(([key]) => !isLocalOnlyKey(section, prefix, key)));
+}
+
 export function hasInstancePayload(sectionKey, id) {
   return Object.keys(readInstancePayload(sectionKey, id)).length > 0;
 }
@@ -248,12 +263,15 @@ export function saveLocal(sectionKey, id, values) {
       if (raw == null) localStorage.removeItem(prefix + subKey);
       else localStorage.setItem(prefix + subKey, raw);
     }
-    const now = Date.now();
-    const touched = updateInstance(sectionKey, id, (entry) => ({
-      ...entry, updatedAt: now, rev: entry.rev + 1, dirty: { ...entry.dirty, data: true },
-    }));
-    // listInstances registered it from its data if it had no entry.
-    if (!touched) throw new Error('Could not register this instance.');
+    // Only a change the cloud carries is an edit to sync.
+    if (changed.some(([subKey]) => !isLocalOnlyKey(section, prefix, prefix + subKey))) {
+      const now = Date.now();
+      const touched = updateInstance(sectionKey, id, (entry) => ({
+        ...entry, updatedAt: now, rev: entry.rev + 1, dirty: { ...entry.dirty, data: true },
+      }));
+      // listInstances registered it from its data if it had no entry.
+      if (!touched) throw new Error('Could not register this instance.');
+    }
   } catch (error) {
     for (const [key, raw] of previous) {
       try {
@@ -295,8 +313,14 @@ export function replaceInstancePayload(sectionKey, id, payload, entryPatch) {
     || Object.entries(payload).some(([key, value]) => !key.startsWith(prefix) || typeof value !== 'string')) {
     throw new Error('Invalid cloud instance payload.');
   }
-  for (const key of Object.keys(readInstancePayload(sectionKey, id))) localStorage.removeItem(key);
-  for (const [key, value] of Object.entries(payload)) localStorage.setItem(key, value);
+  // This device's local-only keys stay; an older cloud copy may still carry
+  // them, and is not let in over them.
+  for (const key of Object.keys(readInstancePayload(sectionKey, id))) {
+    if (!isLocalOnlyKey(section, prefix, key)) localStorage.removeItem(key);
+  }
+  for (const [key, value] of Object.entries(payload)) {
+    if (!isLocalOnlyKey(section, prefix, key)) localStorage.setItem(key, value);
+  }
   const exists = getInstance(sectionKey, id);
   const entry = exists
     ? updateInstance(sectionKey, id, (current) => ({ ...current, ...entryPatch(current), rev: current.rev + 1 }))

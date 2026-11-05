@@ -426,3 +426,21 @@ test('a turn moved on the battle map reaches the fight on screen', async () => {
   // Even while a vitals command is in flight: the turn is not a vital.
   expect(dispatch.mock.calls.map(([action]) => action)).toContainEqual({ type: 'absorbFightTurn', fightId: 900, fight: moved });
 });
+
+// A fight's row is its only cloud copy: a write that failed is tried again on
+// the recovery triggers, without waiting for the next change.
+test('a fight whose write failed is written again on the next recovery, as it stands then', async () => {
+  mocks.listInstanceFights.mockResolvedValue([]);
+  mocks.saveInstanceFight.mockRejectedValueOnce(new Error('offline'));
+  const dispatch = vi.fn();
+  render(<Harness fights={[FIGHT]} library={[CARD]} dispatch={dispatch} />);
+  await waitFor(() => expect(mocks.saveInstanceFight).toHaveBeenCalledTimes(1));
+
+  await act(async () => { window.dispatchEvent(new Event('online')); });
+  await waitFor(() => expect(mocks.saveInstanceFight).toHaveBeenCalledTimes(2));
+  expect(mocks.saveInstanceFight).toHaveBeenLastCalledWith('enc_a', FIGHT);
+
+  // Written now: nothing more to send.
+  await act(async () => { window.dispatchEvent(new Event('online')); });
+  expect(mocks.saveInstanceFight).toHaveBeenCalledTimes(2);
+});
