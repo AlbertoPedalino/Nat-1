@@ -15,7 +15,7 @@ import { toCharacterDigest } from '../../../../src/shared/campaign/characterDige
 // (character_sheet_revisions). No sheet subscribes to or polls `characters`.
 
 const cloud = vi.hoisted(() => ({
-  save: vi.fn(), command: vi.fn(), push: vi.fn(), get: vi.fn(), revision: vi.fn(), list: vi.fn(), sheets: vi.fn(),
+  save: vi.fn(), command: vi.fn(), push: vi.fn(), get: vi.fn(), revision: vi.fn(), list: vi.fn(), revisions: vi.fn(), sheets: vi.fn(),
   channels: [], digestRows: [], sheetRevision: 0,
 }));
 vi.mock('../../../../src/shared/cloud/api/cloudCharacters.js', () => ({
@@ -26,6 +26,7 @@ vi.mock('../../../../src/shared/cloud/api/cloudCharacters.js', () => ({
 vi.mock('../../../../src/shared/cloud/api/characterDigests.js', async (original) => ({
   ...await original(),
   listCharacterDigests: (...args) => cloud.list(...args),
+  listCharacterDigestRevisions: (...args) => cloud.revisions(...args),
   readCharacterSheets: (...args) => cloud.sheets(...args),
 }));
 vi.mock('../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({
@@ -161,6 +162,7 @@ beforeEach(() => {
   cloud.get.mockReset().mockResolvedValue(sheetRow(0, 20));
   cloud.revision.mockReset().mockImplementation(async () => cloud.sheetRevision);
   cloud.list.mockReset().mockImplementation(async () => cloud.digestRows.map(toCharacterDigest));
+  cloud.revisions.mockReset().mockImplementation(async () => cloud.digestRows.map(toCharacterDigest).map((d) => ({ id: d.characterId, version: d.rowRevision })));
   cloud.sheets.mockReset().mockResolvedValue([]);
 });
 afterEach(() => { vi.useRealTimers(); window.history.replaceState({}, '', '/'); });
@@ -221,10 +223,13 @@ test('an editable sheet opens one digest channel and never touches the character
 test('idle: an open sheet only makes the light check every 30 s, and never downloads itself', async () => {
   await openSheet();
   const listed = cloud.list.mock.calls.length;
+  const versions = cloud.revisions.mock.calls.length;
   const checked = cloud.revision.mock.calls.length;
   await act(async () => { await vi.advanceTimersByTimeAsync(5 * 30_000); });
-  // One digest read and one revision read per interval: a few hundred bytes.
-  expect(cloud.list.mock.calls.length - listed).toBe(5);
+  // Per interval only versions: the digest's and the sheet's. Nothing moved,
+  // so no digest is read.
+  expect(cloud.revisions.mock.calls.length - versions).toBe(5);
+  expect(cloud.list.mock.calls.length).toBe(listed);
   expect(cloud.revision.mock.calls.length - checked).toBe(5);
   expect(cloud.get).not.toHaveBeenCalled();
   expect(cloud.sheets).not.toHaveBeenCalled();

@@ -22,7 +22,7 @@ import {
   fetchSceneRevision, listDrawingRevisions, listLiveCampaignIds, readLiveSceneId, listDrawingsByIds, listTokenRevisions, listTokensByIds,
 } from '../../../../../src/shared/cloud/api/vtt.js';
 import {
-  listCharacterDigests, readCharacterSheets,
+  listCharacterDigestRevisions, listCharacterDigests, readCharacterSheets,
 } from '../../../../../src/shared/cloud/api/characterDigests.js';
 import { listFightRevisions, listFightVitals, listInstanceFightRevisions } from '../../../../../src/shared/cloud/api/encounterFights.js';
 
@@ -38,13 +38,13 @@ test.each([
   ['live scene', () => readLiveSceneId('c1'), 'campaign_live_scenes'],
   ['pieces', () => listTokenRevisions('s1'), 'map_tokens'],
   ['marks', () => listDrawingRevisions('s1'), 'map_drawings'],
-  ['character digests', () => listCharacterDigests({ campaignId: 'c1' }), 'character_digests'],
+  ['character digests', () => listCharacterDigestRevisions({ campaignId: 'c1' }), 'character_digests'],
   ['fights', () => listFightRevisions(['f1']), 'encounter_fights'],
   ['builder fights', () => listInstanceFightRevisions('enc_a'), 'encounter_fights'],
 ])('the %s version check reads no payload columns', async (_, read, table) => {
   await read();
   expect(m.calls[0]).toEqual(['from', table]);
-  expect(selected()).not.toMatch(/\b(fog|data|points|fight|grid|atmosphere|conditions|effects)\b/);
+  expect(selected()).not.toMatch(/\b(fog|data|digest|points|fight|grid|atmosphere|conditions|effects)\b/);
 });
 
 test('versions come back as comparable numbers, and an invisible scene as null', async () => {
@@ -92,6 +92,7 @@ test('digests are read by campaign or by exact characters; a sheet is read only 
   };
   const [digest] = await listCharacterDigests({ campaignId: 'c1' });
   expect(digest).toMatchObject({ characterId: 'pc', campaignId: 'c1', rowRevision: 4, name: 'Aria', hpBasis: 'h', source: 'server' });
+  expect(await listCharacterDigestRevisions({ campaignId: 'c1' })).toEqual([{ id: 'pc', version: 4 }]);
   m.calls = [];
   await listCharacterDigests({ characterIds: ['c_b', 'c_a', 'bad id!'] });
   expect(m.calls).toEqual(expect.arrayContaining([['in', 'character_id', ['c_a', 'c_b']]]));

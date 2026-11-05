@@ -17,6 +17,7 @@ vi.mock('../../../../src/shared/cloud/api/cloudCharacters.js', () => ({
 vi.mock('../../../../src/shared/cloud/api/characterDigests.js', async (original) => ({
   ...await original(),
   listCharacterDigests: (...args) => cloud.list(...args),
+  listCharacterDigestRevisions: async () => [],
   readCharacterSheets: async () => [],
 }));
 vi.mock('../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({

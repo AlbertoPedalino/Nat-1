@@ -13,6 +13,7 @@ vi.mock('../../../../../src/shared/cloud/api/cloudCharacters.js', () => ({ comma
 vi.mock('../../../../../src/shared/cloud/api/characterDigests.js', async (original) => ({
   ...await original(),
   listCharacterDigests: (...args) => cloud.get(...args),
+  listCharacterDigestRevisions: async (...args) => (await cloud.get(...args)).map((d) => ({ id: d.characterId, version: d.rowRevision })),
   readCharacterSheets: (...args) => cloud.sheets(...args),
 }));
 vi.mock('../../../../../src/shared/campaign/characterVitals.js', () => ({

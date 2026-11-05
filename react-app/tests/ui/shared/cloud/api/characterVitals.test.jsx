@@ -50,6 +50,7 @@ vi.mock('../../../../../src/shared/cloud/supabaseClient.js', () => ({
 vi.mock('../../../../../src/shared/cloud/api/characterDigests.js', async (original) => ({
   ...await original(),
   listCharacterDigests: (...args) => server.digests(...args),
+  listCharacterDigestRevisions: async () => (server.exists ? [held()] : []).map((d) => ({ id: d.characterId, version: d.rowRevision })),
 }));
 vi.mock('../../../../../src/shared/campaign/characterVitals.js', () => ({
   readBaseMaxHp: (...args) => server.baseMax(...args),

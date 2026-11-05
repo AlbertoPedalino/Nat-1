@@ -2,8 +2,8 @@
 // database reports with what this client holds, name only the rows worth
 // fetching, and fetch just those (or everything, past MAX_TARGETED_IDS).
 //
-// Versions are the tables' `updated_at`: pieces, marks, fights, hex cells.
-// Character health is not here: it follows digests (useCharacterDigests).
+// Versions are the tables' `updated_at` (pieces, marks, fights, hex cells) or
+// a revision counter (character digests' `row_revision`).
 
 // Past this many changed rows one full read is cheaper and simpler than a long
 // `id=in.(…)` list.
