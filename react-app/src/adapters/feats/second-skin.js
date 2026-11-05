@@ -1,10 +1,7 @@
 import { createAdapterBindings } from '../adapterBindings.js';
 
 export default function install(registry, context = {}) {
-  const {
-    registerFeatAdapter,
-    registerFeatSheetActions,
-  } = createAdapterBindings(registry, context);
+  const { registerFeatAdapter, registerFeatSheetActions } = createAdapterBindings(registry, context);
 
   // Ravenloft Dark Gift. Alter Self (free 1/LR, no Concentration when cast this
   // way) is granted from the feat JSON additionalSpells; the adapter adds the

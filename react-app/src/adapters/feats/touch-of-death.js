@@ -1,10 +1,7 @@
 import { createAdapterBindings } from '../adapterBindings.js';
 
 export default function install(registry, context = {}) {
-  const {
-    registerFeatAdapter,
-    registerFeatSheetActions,
-  } = createAdapterBindings(registry, context);
+  const { registerFeatAdapter, registerFeatSheetActions } = createAdapterBindings(registry, context);
 
   // Ravenloft Dark Gift. Chill Touch (no components, Necrotic ignores Resistance)
   // is granted from the feat JSON additionalSpells; the adapter adds the

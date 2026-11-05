@@ -25,10 +25,7 @@ const FAST_CRAFTING_TABLE = [
 ];
 
 export default function install(registry, context = {}) {
-  const {
-    registerFeatAdapter,
-    registerFeatSheetActions,
-  } = createAdapterBindings(registry, context);
+  const { registerFeatAdapter, registerFeatSheetActions } = createAdapterBindings(registry, context);
 
   if (typeof registerFeatAdapter !== 'function') return;
 

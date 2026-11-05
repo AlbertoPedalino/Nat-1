@@ -12,7 +12,6 @@ export default function install(registry, context = {}) {
     registerSubclassRuntimeConfig,
     registerSubclassSheetActions,
     registerSubclassSheetResources,
-    registerSubclassSheetEffects,
     registerSubclassSheetProficiencies,
   } = createAdapterBindings(registry, context);
 

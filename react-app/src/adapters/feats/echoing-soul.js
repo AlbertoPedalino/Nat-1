@@ -1,10 +1,7 @@
 import { createAdapterBindings } from '../adapterBindings.js';
 
 export default function install(registry, context = {}) {
-  const {
-    registerFeatAdapter,
-    registerFeatSheetActions,
-  } = createAdapterBindings(registry, context);
+  const { registerFeatAdapter, registerFeatSheetActions } = createAdapterBindings(registry, context);
 
   if (typeof registerFeatAdapter === 'function') {
     registerFeatAdapter('Echoing Soul', function (feat) {

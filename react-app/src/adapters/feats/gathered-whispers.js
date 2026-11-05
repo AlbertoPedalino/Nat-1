@@ -1,11 +1,7 @@
 import { createAdapterBindings } from '../adapterBindings.js';
 
 export default function install(registry, context = {}) {
-  const {
-    registerFeatAdapter,
-    registerFeatSheetActions,
-    registerFeatSheetResources,
-  } = createAdapterBindings(registry, context);
+  const { registerFeatAdapter, registerFeatSheetActions, registerFeatSheetResources } = createAdapterBindings(registry, context);
 
   // Ravenloft Dark Gift. Message (no Material components) and Augury (free 1/LR)
   // are granted from the feat JSON additionalSpells; the adapter adds the

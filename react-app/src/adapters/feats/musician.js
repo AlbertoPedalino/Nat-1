@@ -1,11 +1,7 @@
 import { createAdapterBindings } from '../adapterBindings.js';
 
 export default function install(registry, context = {}) {
-  const {
-    _MUSICAL_INSTRUMENTS,
-    registerFeatAdapter,
-    registerFeatSheetActions,
-  } = createAdapterBindings(registry, context);
+  const { _MUSICAL_INSTRUMENTS, registerFeatAdapter, registerFeatSheetActions } = createAdapterBindings(registry, context);
 
   if (typeof registerFeatAdapter !== "function") return;
 

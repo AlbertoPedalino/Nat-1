@@ -1,10 +1,7 @@
 import { createAdapterBindings } from '../adapterBindings.js';
 
 export default function install(registry, context = {}) {
-  const {
-    registerFeatSheetActions,
-    registerFeatSheetResources,
-  } = createAdapterBindings(registry, context);
+  const { registerFeatSheetActions, registerFeatSheetResources } = createAdapterBindings(registry, context);
 
   // Origin feat. Hypervigilance is passive (reroll Initiative if 9 or lower);
   // Steel Yourself is a 1/LR Reaction.

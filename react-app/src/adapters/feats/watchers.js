@@ -1,10 +1,7 @@
 import { createAdapterBindings } from '../adapterBindings.js';
 
 export default function install(registry, context = {}) {
-  const {
-    registerFeatAdapter,
-    registerFeatSheetActions,
-  } = createAdapterBindings(registry, context);
+  const { registerFeatAdapter, registerFeatSheetActions } = createAdapterBindings(registry, context);
 
   // Ravenloft Dark Gift. Beast Sense and Speak with Animals (each free 1/LR) are
   // granted from the feat JSON additionalSpells; the adapter adds the

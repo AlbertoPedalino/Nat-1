@@ -1,10 +1,7 @@
 import { createAdapterBindings } from '../adapterBindings.js';
 
 export default function install(registry, context = {}) {
-  const {
-    registerFeatSheetActions,
-    registerFeatSheetResources,
-  } = createAdapterBindings(registry, context);
+  const { registerFeatSheetActions, registerFeatSheetResources } = createAdapterBindings(registry, context);
 
   // Ravenloft Dark Gift. Mist Walk is a limited-use Reaction teleport; Domain
   // Traveler and Poisoned Roots are narrative/DM-facing and not tracked here.

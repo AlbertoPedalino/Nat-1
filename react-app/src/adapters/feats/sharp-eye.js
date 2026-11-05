@@ -1,10 +1,7 @@
 import { createAdapterBindings } from '../adapterBindings.js';
 
 export default function install(registry, context = {}) {
-  const {
-    registerFeatSheetActions,
-    registerFeatSheetResources,
-  } = createAdapterBindings(registry, context);
+  const { registerFeatSheetActions, registerFeatSheetResources } = createAdapterBindings(registry, context);
 
   // Origin feat. Limited-use Advantage on Search/Study; a failed check does not
   // expend the use.
