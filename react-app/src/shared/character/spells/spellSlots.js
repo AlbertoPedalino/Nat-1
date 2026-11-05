@@ -47,6 +47,28 @@ export function persistCreatedSlots(createdSlots, onUpdateSheet, onUpdateCharact
   if (typeof onUpdateCharacter === 'function') onUpdateCharacter((prev) => ({ ...prev, createdSpellSlots: createdSlots }));
 }
 
+// One more temporary slot of `level` (Font of Magic, Wild Resurgence): lasts
+// until a Long Rest and is spent before the regular ones (see consumeSlot).
+export function addCreatedSlot(sheet, level, onUpdateSheet, onUpdateCharacter) {
+  const next = { ...getCreatedSpellSlots(sheet) };
+  const key = String(level);
+  next[key] = Number(next[key] || 0) + 1;
+  persistCreatedSlots(next, onUpdateSheet, onUpdateCharacter);
+}
+
+// Every regular spell-slot level with a slot left (created slots included), for
+// features that let the player pick which slot to spend.
+export function availableRegularSlotLevels(regularSlots, sheet) {
+  const created = sheet?.createdSpellSlots || {};
+  const levels = [];
+  for (let level = 1; level <= regularSlots.length; level++) {
+    if (!Number(regularSlots[level - 1] || 0)) continue;
+    const available = getAvailableRegularSlots(regularSlots, sheet, level);
+    if (available > 0) levels.push({ level, available, hasCreated: Number(created[level] || 0) > 0 });
+  }
+  return levels;
+}
+
 // Lowest regular spell-slot level with a slot left (created slots included), or
 // 0 when none: features that take "a spell slot" of any level spend the cheapest.
 export function lowestAvailableSlotLevel(regularSlots, sheet) {

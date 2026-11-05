@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  addCreatedSlot,
+  availableRegularSlotLevels,
+  consumeSlot,
   consumePactSlot,
   getAvailablePactSlots,
   getPactSlotUsedKey,
@@ -47,4 +50,25 @@ test('Pact Magic recovery preserves unrelated slot state', () => {
     used: { 1: 2, 'pact:3': 1 },
     recovered: 1,
   });
+});
+
+test('the slot levels offered to pick from are those with a slot left, temporary ones included', () => {
+  const regular = [2, 1, 0, 1];
+  const sheet = { spellSlotUsed: { 1: 2, 2: 1 }, createdSpellSlots: { 2: 1 } };
+  assert.deepEqual(availableRegularSlotLevels(regular, sheet), [
+    { level: 2, available: 1, hasCreated: true },
+    { level: 4, available: 1, hasCreated: false },
+  ]);
+});
+
+test('a created slot is added, then spent before the regular slots of its level', () => {
+  let sheet = { spellSlotUsed: {}, createdSpellSlots: {} };
+  const onUpdateSheet = (patch) => { sheet = { ...sheet, ...patch }; };
+  addCreatedSlot(sheet, 1, onUpdateSheet);
+  assert.deepEqual(sheet.createdSpellSlots, { 1: 1 });
+  assert.equal(consumeSlot([2], sheet, 1, onUpdateSheet), true);
+  assert.deepEqual(sheet.createdSpellSlots, {});
+  assert.deepEqual(sheet.spellSlotUsed, {});
+  assert.equal(consumeSlot([2], sheet, 1, onUpdateSheet), true);
+  assert.deepEqual(sheet.spellSlotUsed, { 1: 1 });
 });

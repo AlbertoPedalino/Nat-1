@@ -3,9 +3,13 @@ import { installedRegistry } from '../../../adapters/index.js';
 import { PACT_SLOTS, SPELL_LEVEL_LABELS } from '../../charbuilder/constants.js';
 import { getSheetSlots } from '../spells/spellcasting.js';
 import {
+  addCreatedSlot,
+  availableRegularSlotLevels,
+  consumeSlot,
   getPactSlotUsed,
   getPactSlotUsedKey,
   getRegularSlotUsed,
+  lowestAvailableSlotLevel,
   recoverPactSlots,
 } from '../../../shared/character/spells/spellSlots.js';
 
@@ -77,31 +81,14 @@ export function useResourceSideEffects({
     if (beforeSP < cost) { onShowToast?.('Create Spell Slot', 'Not enough Sorcery Points.', 0, []); return; }
     res[createSlotDialog.sourceKey] = beforeSP - cost;
     setResources(res);
-    const created = { ...(sheet?.createdSpellSlots || {}) };
-    const key = String(level);
-    created[key] = (created[key] || 0) + 1;
-    onUpdateSheet?.({ createdSpellSlots: created });
-    onUpdateCharacter?.((prev) => ({ ...prev, createdSpellSlots: created }));
+    addCreatedSlot(sheet, level, onUpdateSheet, onUpdateCharacter);
     setCreateSlotDialog(null);
     setCreateSlotSelection(null);
     onShowToast?.('Create Spell Slot', `Created a temporary level ${level} spell slot (lasts until Long Rest).`, 0, []);
   };
 
   const openConvertSlotDialog = (result) => {
-    const slots = getSheetSlots(C);
-    const regularSlots = slots?.regular || [];
-    const used = sheet?.spellSlotUsed || {};
-    const created = sheet?.createdSpellSlots || {};
-    const levels = [];
-    for (let level = 1; level <= regularSlots.length; level++) {
-      const total = Number(regularSlots[level - 1] || 0);
-      if (!total) continue;
-      const usedCount = getRegularSlotUsed(used, level);
-      const createdCount = Number(created[level] || 0);
-      const available = total - usedCount + createdCount;
-      if (available <= 0) continue;
-      levels.push({ level, available, hasCreated: createdCount > 0 });
-    }
+    const levels = availableRegularSlotLevels(getSheetSlots(C)?.regular || [], sheet);
     if (!levels.length) {
       onShowToast?.(result?.label || 'Convert Spell Slot', 'No spell slots available to convert.', 0, []);
       return;
@@ -120,21 +107,7 @@ export function useResourceSideEffects({
     const beforeSP = Number(res[targetKey] || 0);
     const afterSP = Math.min(max, beforeSP + spGain);
     if (afterSP <= beforeSP) { onShowToast?.('Convert Spell Slot', 'Sorcery Points already at maximum.', 0, []); return; }
-    const created = { ...(sheet?.createdSpellSlots || {}) };
-    const ckey = String(level);
-    if ((created[ckey] || 0) > 0) {
-      created[ckey] = (created[ckey] || 0) - 1;
-      if (created[ckey] <= 0) delete created[ckey];
-      onUpdateSheet?.({ createdSpellSlots: created });
-      onUpdateCharacter?.((prev) => ({ ...prev, createdSpellSlots: created }));
-    } else {
-      const used = { ...(sheet?.spellSlotUsed || {}) };
-      const slotsData = getSheetSlots(C);
-      const maxTotal = Number((slotsData?.regular || [])[level - 1] || 0);
-      used[String(level)] = Math.max(0, Math.min(maxTotal, Number(used[String(level)] || 0) + 1));
-      onUpdateSheet?.({ spellSlotUsed: used });
-      onUpdateCharacter?.((prev) => ({ ...prev, spellSlotsUsed: used }));
-    }
+    consumeSlot(getSheetSlots(C)?.regular || [], sheet, level, onUpdateSheet, onUpdateCharacter);
     res[targetKey] = afterSP;
     setResources(res);
     setConvertSlotDialog(null);
@@ -163,37 +136,12 @@ export function useResourceSideEffects({
       if (beforeWS <= 0) { onShowToast?.('Wild Resurgence', 'No Wild Shape uses available.', 0, []); return; }
       res.wild_shape = beforeWS - 1;
       setResources(res);
-        const created = { ...(sheet?.createdSpellSlots || {}) };
-      created[1] = (created[1] || 0) + 1;
-      onUpdateSheet?.({ createdSpellSlots: created });
-      onUpdateCharacter?.((prev) => ({ ...prev, createdSpellSlots: created }));
+      addCreatedSlot(sheet, 1, onUpdateSheet, onUpdateCharacter);
       onShowToast?.('Wild Resurgence', 'Expended 1 Wild Shape use to create a temporary level 1 spell slot.', 0, []);
     } else if (choice === 'slot_to_shape') {
-      const slots = getSheetSlots(C);
-      const regularSlots = slots?.regular || [];
-      const used = sheet?.spellSlotUsed || {};
-      const created = sheet?.createdSpellSlots || {};
-      let consumed = false;
-      for (let lv = 1; lv <= regularSlots.length; lv++) {
-        const total = Number(regularSlots[lv - 1] || 0);
-        if (!total) continue;
-        const avail = total - getRegularSlotUsed(used, lv) + Number(created[lv] || 0);
-        if (avail <= 0) continue;
-        if ((created[lv] || 0) > 0) {
-          const next = { ...created };
-          next[lv] = (next[lv] || 0) - 1;
-          if (next[lv] <= 0) delete next[lv];
-          onUpdateSheet?.({ createdSpellSlots: next });
-          onUpdateCharacter?.((prev) => ({ ...prev, createdSpellSlots: next }));
-        } else {
-          const next = { ...used };
-          next[String(lv)] = (next[String(lv)] || 0) + 1;
-          onUpdateSheet?.({ spellSlotUsed: next });
-          onUpdateCharacter?.((prev) => ({ ...prev, spellSlotsUsed: next }));
-        }
-        consumed = true;
-        break;
-      }
+      const regularSlots = getSheetSlots(C)?.regular || [];
+      const level = lowestAvailableSlotLevel(regularSlots, sheet);
+      const consumed = level > 0 && consumeSlot(regularSlots, sheet, level, onUpdateSheet, onUpdateCharacter);
       if (!consumed) { onShowToast?.('Wild Resurgence', 'No available spell slots to expend.', 0, []); return; }
       const res = { ...resources };
       const beforeWS = Number(res.wild_shape || 0);
@@ -205,20 +153,7 @@ export function useResourceSideEffects({
 
   const openSpendSlotRecoverResource = (result) => {
     if (!result?.targetKey) return;
-    const slots = getSheetSlots(C);
-    const regularSlots = slots?.regular || [];
-    const used = sheet?.spellSlotUsed || {};
-    const created = sheet?.createdSpellSlots || {};
-    const levels = [];
-    for (let lv = 1; lv <= regularSlots.length; lv++) {
-      const total = Number(regularSlots[lv - 1] || 0);
-      if (!total) continue;
-      const usedCount = getRegularSlotUsed(used, lv);
-      const createdCount = Number(created[lv] || 0);
-      const available = total - usedCount + createdCount;
-      if (available <= 0) continue;
-      levels.push({ level: lv, available });
-    }
+    const levels = availableRegularSlotLevels(getSheetSlots(C)?.regular || [], sheet);
     if (!levels.length) {
       onShowToast?.(result?.label || 'Spell Slot Recovery', 'No spell slots available to expend.', 0, []);
       return;
@@ -255,21 +190,7 @@ export function useResourceSideEffects({
       setSpendSlotRecoverSelection(null);
       return;
     }
-    const created = { ...(sheet?.createdSpellSlots || {}) };
-    const ckey = String(level);
-    if ((created[ckey] || 0) > 0) {
-      created[ckey] = (created[ckey] || 0) - 1;
-      if (created[ckey] <= 0) delete created[ckey];
-      onUpdateSheet?.({ createdSpellSlots: created });
-      onUpdateCharacter?.((prev) => ({ ...prev, createdSpellSlots: created }));
-    } else {
-      const used = { ...(sheet?.spellSlotUsed || {}) };
-      const slotsData = getSheetSlots(C);
-      const maxTotal = Number((slotsData?.regular || [])[level - 1] || 0);
-      used[String(level)] = Math.max(0, Math.min(maxTotal, Number(used[String(level)] || 0) + 1));
-      onUpdateSheet?.({ spellSlotUsed: used });
-      onUpdateCharacter?.((prev) => ({ ...prev, spellSlotsUsed: used }));
-    }
+    consumeSlot(getSheetSlots(C)?.regular || [], sheet, level, onUpdateSheet, onUpdateCharacter);
     res[targetKey] = afterTarget;
     setResources(res);
     setSpendSlotRecoverDialog(null);
