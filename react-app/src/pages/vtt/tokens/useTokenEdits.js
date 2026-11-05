@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { tokenHealthCommand } from '../../../shared/vtt/tokens/characterHealth.js';
+import { clampDeathSaveCount, normalizeDeathSaves } from '../../../shared/character/combat/vitals.js';
 import {
   DEAD_CONDITION_KEY,
   setConditionActive,
@@ -159,11 +160,7 @@ export function useTokenEdits({
 
   const handleDeathSaveChange = useCallback((token, type, value) => {
     if (!token?.characterId || !['success', 'fail'].includes(type)) return;
-    const deathSaves = {
-      success: Math.max(0, Math.min(3, Number(token.deathSaves?.success) || 0)),
-      fail: Math.max(0, Math.min(3, Number(token.deathSaves?.fail) || 0)),
-      [type]: Math.max(0, Math.min(3, Number(value) || 0)),
-    };
+    const deathSaves = { ...normalizeDeathSaves(token.deathSaves), [type]: clampDeathSaveCount(value) };
     const conditions = setConditionActive(
       token.conditions || [],
       DEAD_CONDITION_KEY,

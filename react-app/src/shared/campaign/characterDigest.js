@@ -11,18 +11,12 @@
 
 import { normalizeConditions } from '../character/combat/conditions.js';
 import { normalizeEffects } from '../character/combat/combatEffects.js';
-import { pickCharacterVitals } from '../character/combat/vitals.js';
+import { normalizeDeathSaves, pickCharacterVitals } from '../character/combat/vitals.js';
 import { normalizeIconColor } from './roster.js';
 
 function numberOrNull(value) {
   const parsed = Number(value);
   return value == null || value === '' || !Number.isFinite(parsed) ? null : parsed;
-}
-
-function deathSavesOf(value) {
-  const raw = value || {};
-  const clamp = (entry) => Math.max(0, Math.min(3, Math.round(Number(entry) || 0)));
-  return { success: clamp(raw.success ?? raw.s), fail: clamp(raw.fail ?? raw.f) };
 }
 
 function fromFields(fields, meta) {
@@ -42,7 +36,7 @@ function fromFields(fields, meta) {
     currentHP: numberOrNull(fields.currentHP),
     tempHP: numberOrNull(fields.tempHP),
     maxHPBonus: numberOrNull(fields.maxHPBonus),
-    deathSaves: deathSavesOf(fields.deathSaves),
+    deathSaves: normalizeDeathSaves(fields.deathSaves),
     activeConditions: normalizeConditions(fields.activeConditions),
     activeEffects: normalizeEffects(fields.activeEffects),
     hpBasis: typeof fields.hpBasis === 'string' ? fields.hpBasis : null,

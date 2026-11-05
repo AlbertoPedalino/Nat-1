@@ -1,6 +1,7 @@
 import { calcMaxHP } from './calculations.js';
 import { normalizeCurrency } from '../../../shared/character/inventory/currency.js';
 import { normalizeEffects } from '../../../shared/character/combat/combatEffects.js';
+import { normalizeDeathSaves } from '../../../shared/character/combat/vitals.js';
 
 export function deriveSheetState(C) {
   const baseMax = Math.max(1, calcMaxHP(C));
@@ -12,11 +13,7 @@ export function deriveSheetState(C) {
   const currentHP = Math.max(0, Math.min(maxHP, typeof storedCurrent === 'number' ? storedCurrent : maxHP));
   const tempHP = Math.max(0, Number(C?.tempHP || 0));
 
-  const deathSavesRaw = C?.deathSaves || {};
-  const deathSaves = {
-    success: Math.max(0, Math.min(3, Number(deathSavesRaw.success) || 0)),
-    fail: Math.max(0, Math.min(3, Number(deathSavesRaw.fail) || 0)),
-  };
+  const deathSaves = normalizeDeathSaves(C?.deathSaves);
 
   const usedHD = Number(C?.usedHD || 0);
   const usedHDPoolsRaw = C?.usedHDPools;

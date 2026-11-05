@@ -5,14 +5,9 @@
 
 import { normalizeConditions } from '../character/combat/conditions.js';
 import { normalizeEffects } from '../character/combat/combatEffects.js';
+import { normalizeDeathSaves } from '../character/combat/vitals.js';
 
 const HEX_COLOR_RE = /^#[0-9a-f]{6}$/i;
-
-function deathSavesOf(value) {
-  const raw = value || {};
-  const clamp = (entry) => Math.max(0, Math.min(3, Math.round(Number(entry) || 0)));
-  return { success: clamp(raw.success ?? raw.s), fail: clamp(raw.fail ?? raw.f) };
-}
 
 export function normalizeIconColor(value) {
   const color = typeof value === 'string' ? value.trim() : '';
@@ -29,7 +24,7 @@ export function toRosterEntry(row) {
     ownerUsername: row.owner_username || null,
     color: normalizeIconColor(sheet.classIconColor),
     className: typeof sheet.className === 'string' ? sheet.className : null,
-    deathSaves: deathSavesOf(sheet.deathSaves),
+    deathSaves: normalizeDeathSaves(sheet.deathSaves),
     // The portrait belongs to the sheet, exactly as hit points and conditions
     // do: the piece on the map shows what the sheet says and never the reverse.
     portraitPath: typeof sheet.portraitPath === 'string' ? sheet.portraitPath : null,
@@ -64,7 +59,7 @@ export function rosterVitals(roster) {
       effects: entry.effects || [],
       portraitPath: entry.portraitPath || null,
       className: entry.className || null,
-      deathSaves: deathSavesOf(entry.deathSaves),
+      deathSaves: normalizeDeathSaves(entry.deathSaves),
     });
   }
   return vitals;

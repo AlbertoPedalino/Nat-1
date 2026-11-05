@@ -9,6 +9,7 @@
 // Everything here is pure: the callers own the reads and the writes.
 
 import { effectId, normalizeEffects } from '../../character/combat/combatEffects.js';
+import { normalizeDeathSaves } from '../../character/combat/vitals.js';
 import {
   DEAD_CONDITION_KEY,
   normalizeConditions,
@@ -31,10 +32,9 @@ export function parseSourceRef(ref) {
   return { instanceId: parts[0], fightId: parts[1], combatantId: parts[2] };
 }
 
+// Takes saves or anything carrying them (a token, a combatant).
 function deathSavesOf(value) {
-  const raw = value?.deathSaves || value || {};
-  const clamp = (entry) => Math.max(0, Math.min(3, Math.round(Number(entry) || 0)));
-  return { success: clamp(raw.success ?? raw.s), fail: clamp(raw.fail ?? raw.f) };
+  return normalizeDeathSaves(value?.deathSaves || value);
 }
 
 // Order and shape are normalized on both sides, so these compare meaning rather

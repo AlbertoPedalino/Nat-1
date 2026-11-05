@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Box, Tooltip, Typography } from '@mui/material';
 import { RotateCw, Skull } from 'lucide-react';
 import { effectId } from '../../../shared/character/combat/combatEffects.js';
+import { normalizeDeathSaves } from '../../../shared/character/combat/vitals.js';
 import { DEAD_CONDITION_KEY, conditionLabel } from '../../../shared/character/combat/conditions.js';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import { classIcon } from '../../../shared/character/profile/classIcon.js';
@@ -197,8 +198,7 @@ export default function TokenSprite({
   const hasHp = Boolean(token.showHp) && token.hpMax != null && token.hpMax > 0;
   const current = token.hpCurrent ?? token.hpMax;
   const showDeathSaves = isCharacter && Number(current) === 0 && !dead;
-  const deathSuccesses = Math.max(0, Math.min(3, Number(token.deathSaves?.success) || 0));
-  const deathFailures = Math.max(0, Math.min(3, Number(token.deathSaves?.fail) || 0));
+  const { success: deathSuccesses, fail: deathFailures } = normalizeDeathSaves(token.deathSaves);
   const ratio = hasHp ? Math.max(0, Math.min(1, current / token.hpMax)) : 0;
   const tempRatio = hasHp ? Math.max(0, Math.min(1, (token.tempHp || 0) / token.hpMax)) : 0;
   // The label the GM typed in secret replaces the public one for them only; a

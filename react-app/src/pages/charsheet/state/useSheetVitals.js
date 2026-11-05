@@ -11,6 +11,7 @@ import {
   toggleCondition as toggleConditionKey,
 } from '../../../shared/character/combat/conditions.js';
 import { addReminder, removeEffect } from '../../../shared/character/combat/combatEffects.js';
+import { clampDeathSaveCount } from '../../../shared/character/combat/vitals.js';
 
 // The sheet's vitals handlers: hit points, temporary and bonus HP, death saves,
 // Exhaustion, conditions, reminders and Inspiration. Each one updates the sheet
@@ -93,7 +94,7 @@ export function useSheetVitals({ C, sheet, setSheet, persist, showDiceToast, sho
 
   const setDeathSave = useCallback((type, count) => {
     if (!sheet) return;
-    const value = Math.max(0, Math.min(3, count));
+    const value = clampDeathSaveCount(count);
     const ds = { ...sheet.deathSaves, [type]: value };
     const dead = ds.fail >= 3;
     const activeConditions = setConditionActive(sheet.activeConditions, DEAD_CONDITION_KEY, dead);

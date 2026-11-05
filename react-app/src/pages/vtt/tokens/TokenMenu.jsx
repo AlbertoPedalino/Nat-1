@@ -14,6 +14,7 @@ import {
 import { ScrollText, Trash2 } from 'lucide-react';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { addReminder, removeEffect } from '../../../shared/character/combat/combatEffects.js';
+import { clampDeathSaveCount, normalizeDeathSaves } from '../../../shared/character/combat/vitals.js';
 import { ReminderEditor } from '../../../shared/character/combat/ReminderChips.jsx';
 import HpStepper from '../../../shared/character/combat/HpStepper.jsx';
 import { applyMonsterVitalCommand } from '../../../shared/vtt/tokens/fightVitals.js';
@@ -476,7 +477,7 @@ export default function TokenMenu({
             onChange={(type, value) => {
               const current = deathSaves[type];
               const nextValue = current === value ? value - 1 : value;
-              const nextDeathSaves = { ...deathSaves, [type]: Math.max(0, Math.min(3, nextValue)) };
+              const nextDeathSaves = { ...deathSaves, [type]: clampDeathSaveCount(nextValue) };
               const dead = nextDeathSaves.fail >= 3;
               const nextConditions = setConditionActive(conditions, DEAD_CONDITION_KEY, dead);
               setDeathSaves(nextDeathSaves);
@@ -627,12 +628,6 @@ function DeathSaveControls({ deathSaves, disabled, onChange }) {
       </Box>
     </Box>
   );
-}
-
-function normalizeDeathSaves(value) {
-  const raw = value || {};
-  const clamp = (entry) => Math.max(0, Math.min(3, Math.round(Number(entry) || 0)));
-  return { success: clamp(raw.success ?? raw.s), fail: clamp(raw.fail ?? raw.f) };
 }
 
 function deathSavesForToken(value, conditions, characterId) {

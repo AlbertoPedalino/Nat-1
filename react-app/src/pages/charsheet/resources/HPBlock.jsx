@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Box, Typography, TextField, Button, Tooltip } from '@mui/material';
 import { HeartPulse, Sparkles, Skull } from 'lucide-react';
 import HpStepper from '../../../shared/character/combat/HpStepper.jsx';
+import { normalizeDeathSaves } from '../../../shared/character/combat/vitals.js';
 import { EXHAUSTION_MAX } from '../state/calculations.js';
 
 const CINZEL = '"Cinzel", Georgia, serif';
@@ -56,8 +57,7 @@ export default function HPBlock({
   }, [editing]);
 
   if (!sheet) return null;
-  const dsSuccess = Math.max(0, Math.min(3, sheet.deathSaves.success || 0));
-  const dsFail = Math.max(0, Math.min(3, sheet.deathSaves.fail || 0));
+  const { success: dsSuccess, fail: dsFail } = normalizeDeathSaves(sheet.deathSaves);
   const atZero = sheet.currentHP === 0;
   const dead = (sheet.exhaustionLevel || 0) >= EXHAUSTION_MAX;
   const hpColor = sheet.currentHP > sheet.maxHP / 2 ? '#58b879' : sheet.currentHP > 0 ? '#d69245' : '#c54a3f';

@@ -50,6 +50,16 @@ function getDeathSave(raw, sheetKey, combatKey) {
   return clampInt(raw[sheetKey] ?? raw[combatKey], 0, 3, 0);
 }
 
+// Death saves in their stored shape `{ success, fail }`, each 0-3; reads the
+// combat shape `{ s, f }` too. The one clamp every view uses.
+export function clampDeathSaveCount(value) {
+  return clampInt(value, 0, 3, 0);
+}
+
+export function normalizeDeathSaves(value) {
+  return { success: getDeathSave(value, 'success', 's'), fail: getDeathSave(value, 'fail', 'f') };
+}
+
 export const SYNCED_VITALS = [
   {
     data: 'currentHP',
@@ -127,7 +137,7 @@ export const SYNCED_VITALS = [
       success: clampInt(value?.success ?? fallback?.success, 0, 3, 0),
       fail: clampInt(value?.fail ?? fallback?.fail, 0, 3, 0),
     }),
-    normalize: (v) => ({ success: getDeathSave(v, 'success', 's'), fail: getDeathSave(v, 'fail', 'f') }),
+    normalize: normalizeDeathSaves,
   },
 ];
 
