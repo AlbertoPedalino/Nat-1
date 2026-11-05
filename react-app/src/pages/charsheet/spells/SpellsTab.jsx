@@ -36,6 +36,7 @@ import {
   getSpellLimits,
   hasSpellcastingProfile,
   norm,
+  normalizeWizardBook,
   toSnapshot,
   upsertSnapshot,
 } from './spellsTabLogic.js';
@@ -729,14 +730,6 @@ function normalizeLimit(value) {
   if (value == null) return null;
   const n = Number(value);
   return Number.isFinite(n) ? Math.max(0, n) : null;
-}
-
-function normalizeWizardBook(book) {
-  const next = {};
-  for (let level = 0; level <= 9; level++) {
-    next[level] = [...new Set((book?.[level] || []).map((entry) => typeof entry === 'string' ? entry : entry?.name).filter(Boolean))];
-  }
-  return next;
 }
 
 function getSpellbookLevel(bucket, level) {

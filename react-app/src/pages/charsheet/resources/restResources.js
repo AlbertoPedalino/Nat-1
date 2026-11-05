@@ -1,9 +1,10 @@
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
 import { getFinal, getMod, getPB } from '../state/calculations.js';
-import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
+import { classEntities, primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { resolveScalingFormula } from '../../../shared/character/dice/scalingFormula.js';
 import { rechargesOnRest, isKnownRecharge } from '../../../shared/character/resources/rechargeRules.js';
-import { hasActionRequirement } from '../../../shared/character/progression/choiceUtils.js';
+import { adapterEntryApplies } from '../../../shared/character/progression/choiceUtils.js';
+import { ownedFeatNames } from '../../../shared/character/progression/selectedFeats.js';
 function resourceOwnerLevel(def, character) {
   return Number(def?.ownerLevel ?? primaryClassLevel(character));
 }
@@ -40,38 +41,6 @@ export function normalizeResourceMax(def, character = null) {
   return Math.max(0, Math.floor(n));
 }
 
-function hasCondition(def, character) {
-  if (typeof def?.condition !== 'function' && !def?.requiresChoice && !(def?.choiceKey && def?.model) && !def?.requiresInventoryFlag) return true;
-  try { return hasActionRequirement(def, character); } catch { return false; }
-}
-
-function getClassEntities(character) {
-  if (!character) return [];
-  const out = [];
-  if (character.className) {
-    out.push({
-      className: character.className,
-      subclassShortName: character.subclassShortName || '',
-      level: primaryClassLevel(character),
-      ownerName: character.className,
-    });
-  }
-  (character.extraClasses || []).forEach((extra) => {
-    if (!extra?.name) return;
-    out.push({
-      className: extra.name,
-      subclassShortName: extra.subclassShortName || '',
-      level: Number(extra.level || 1),
-      ownerName: extra.name,
-    });
-  });
-  return out;
-}
-
-function selectedFeatNames(character) {
-  return (character?.allFeatSnapshots || []).map((feat) => feat?.name).filter(Boolean);
-}
-
 const KNOWN_TRACK = new Set(['used', 'remaining']);
 const _badResourceDefWarned = typeof Set === 'function' ? new Set() : null;
 function warnBadResourceDef(def, ownerName) {
@@ -99,7 +68,7 @@ function pushResource(out, def, character, ownerName, ownerLevel) {
   if (!def?.key) return;
   const lv = Number(def.ownerLevel ?? ownerLevel ?? character?.level ?? 1);
   if (def.minLevel && lv < Number(def.minLevel)) return;
-  if (!hasCondition(def, character)) return;
+  if (!adapterEntryApplies(def, character)) return;
   warnBadResourceDef(def, ownerName);
   out.push({ ...def, ownerName: def.ownerName || ownerName, ownerLevel: lv });
 }
@@ -126,7 +95,7 @@ function restBlockedByLevel(def, character, type) {
 export function getAllResourceDefs(character) {
   const out = [];
 
-  getClassEntities(character).forEach((entity) => {
+  classEntities(character).forEach((entity) => {
     (installedRegistry.getClassSheetResources(entity.className) || [])
       .forEach((def) => pushResource(out, def, character, entity.ownerName, entity.level));
     if (entity.subclassShortName) {
@@ -140,7 +109,7 @@ export function getAllResourceDefs(character) {
       .forEach((def) => pushResource(out, def, character, character.speciesName, character.level || 1));
   }
 
-  selectedFeatNames(character).forEach((featName) => {
+  ownedFeatNames(character).forEach((featName) => {
     (installedRegistry.getFeatSheetResources(featName) || [])
       .forEach((def) => pushResource(out, def, character, featName, character?.level || 1));
   });

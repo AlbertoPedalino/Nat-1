@@ -1,4 +1,5 @@
 import { inventoryStackKey, isInventoryItemStackable } from '../../../shared/character/inventory/itemIdentity.js';
+import { hasOwnedFeat } from '../../../shared/character/progression/selectedFeats.js';
 
 export const THROWN_SLOT = 'thrown';
 
@@ -116,19 +117,7 @@ export function getEquippedShield(inventory) {
 }
 
 export function hasTwoWeaponFightingStyle(C) {
-  const nc = C?.normalizedChoices;
-  if (nc?.feats?.selected) {
-    const found = nc.feats.selected.some(f => {
-      const s = String(f || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-      return s.includes('twoweaponfighting');
-    });
-    if (found) return true;
-  }
-  const choices = C?.choices || {};
-  return Object.values(choices).some(val => {
-    const str = String(val || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-    return str === 'twoweaponfighting';
-  });
+  return hasOwnedFeat(C, 'Two-Weapon Fighting');
 }
 
 export function getOffHandDamageMod(abilityMod, hasTwoWeaponFightingStyle) {

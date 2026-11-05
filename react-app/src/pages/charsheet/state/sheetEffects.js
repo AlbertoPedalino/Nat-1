@@ -3,7 +3,7 @@ import { canonicalDisplayLabel, cleanProficiencyText } from '../../../shared/cha
 import { matchesRequiredChoice } from '../../../shared/character/progression/lineageMatch.js';
 import { inventoryHasFlag } from '../../../shared/character/progression/choiceUtils.js';
 import { weaponFilterMatches } from '../../../shared/character/inventory/weaponFilters.js';
-import { collectOwnedFeatNames } from '../../../shared/character/progression/selectedFeats.js';
+import { ownedFeatNames } from '../../../shared/character/progression/selectedFeats.js';
 import { isFeatKey, isFeatDetailKey } from '../../../shared/character/progression/featChoiceKeys.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { featNamedEntries } from '../../../shared/character/progression/featDescription.js';
@@ -49,38 +49,6 @@ function ownerLevelOf(character, className, isPrimary) {
   if (isPrimary) return primaryClassLevel(character);
   const found = (character?.extraClasses || []).find((entry) => norm(entry?.name) === norm(className));
   return Number(found?.level || 1);
-}
-
-export function selectedFeatNames(character) {
-  const out = new Set();
-
-  collectOwnedFeatNames(character).forEach((feat) => {
-    const text = cleanText(feat).split('|')[0];
-    if (text) out.add(text);
-  });
-
-  asArray(character?.allFeatSnapshots).forEach((feat) => {
-    if (feat?.name) out.add(feat.name);
-  });
-
-  asArray(character?.normalizedChoices?.feats?.selected).forEach((feat) => {
-    if (feat) out.add(cleanText(feat).split('|')[0]);
-  });
-
-  // Choice-granted feats: free/ASI feat slots, epic boons, AND fighting styles.
-  // `isFeatKey` recognizes 'fightingstyle' keys (e.g. fighter_fighting_style),
-  // which a plain 'feat'/'boon' substring test misses — so the Defense style's
-  // acBonus would silently vanish whenever allFeatSnapshots is incomplete.
-  // Detail keys (e.g. *_skill, *_asi) carry non-feat values; skip them.
-  Object.entries(character?.choices || {}).forEach(([key, value]) => {
-    if (!isFeatKey(key) || isFeatDetailKey(key)) return;
-    asArray(value).forEach((item) => {
-      const text = cleanText(item).split('|')[0];
-      if (text) out.add(text);
-    });
-  });
-
-  return [...out].filter(Boolean);
 }
 
 function conditionPasses(effect, context) {
@@ -310,7 +278,7 @@ export function collectSheetEffects(character = {}) {
     }, character);
   }
 
-  selectedFeatNames(character).forEach((feat) => {
+  ownedFeatNames(character).forEach((feat) => {
     collectFromList(out, installedRegistry.getFeatSheetEffects(feat), {
       ownerName: feat,
       ownerType: 'feat',

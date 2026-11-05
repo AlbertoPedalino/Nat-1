@@ -1,4 +1,5 @@
-import { isFeatDetailKey, featSlotOrigin } from './featChoiceKeys.js';
+import { isFeatDetailKey, isFeatKey, featSlotOrigin } from './featChoiceKeys.js';
+import { cleanProficiencyText } from './proficiencyDisplay.js';
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
 import {
   backgroundGuaranteedFeatNames,
@@ -127,6 +128,48 @@ export function collectOwnedFeatNames(character) {
 
 export function getChoiceSelectedFeatNames(character) {
   return [...new Set(fromChoices(character))];
+}
+
+function featNameText(value) {
+  if (value == null) return '';
+  if (typeof value === 'object') return featNameText(value.name ?? value.label ?? value.value ?? value.key ?? value.id);
+  return cleanProficiencyText(value);
+}
+
+function featValues(value) {
+  if (value == null) return [];
+  return Array.isArray(value) ? value : [value];
+}
+
+// Every feat the character has, by plain name — the ONE answer for "which feats"
+// on the sheet (actions, resources, effects, toggles, HP, weapon riders):
+// owned feats (choice slots, background, species), the saved snapshots, and
+// every feat-like choice (feat slots, epic boons, fighting styles). The
+// snapshots alone are not enough: a feat whose record did not load when the
+// character was saved has none, and would lose its actions and resources.
+export function ownedFeatNames(character) {
+  const out = new Set();
+  const add = (value) => {
+    const name = featNameText(value);
+    if (name) out.add(name);
+  };
+  collectOwnedFeatNames(character).forEach(add);
+  featValues(character?.allFeatSnapshots).forEach((feat) => { if (feat?.name) out.add(feat.name); });
+  featValues(character?.normalizedChoices?.feats?.selected).forEach(add);
+  Object.entries(character?.choices || {}).forEach(([key, value]) => {
+    if (!isFeatKey(key) || isFeatDetailKey(key)) return;
+    featValues(value).forEach(add);
+  });
+  return [...out];
+}
+
+function compactFeatName(value) {
+  return featNameText(value).toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+export function hasOwnedFeat(character, name) {
+  const wanted = compactFeatName(name);
+  return Boolean(wanted) && ownedFeatNames(character).some((feat) => compactFeatName(feat) === wanted);
 }
 
 // Keep selected definitions available to shared calculations in both the live

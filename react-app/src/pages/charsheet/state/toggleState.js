@@ -9,7 +9,7 @@
 // the convention from here, so adding a toggle never touches either of them.
 
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
-import { selectedFeatNames } from './sheetEffects.js';
+import { ownedFeatNames } from '../../../shared/character/progression/selectedFeats.js';
 
 export function toggleActiveField(toggleKey) {
   return `${toggleKey}Active`;
@@ -34,7 +34,7 @@ export function collectToggleActiveFields(C) {
     if (sub) scan(installedRegistry.getSubclassSheetActions(name, sub));
   });
   if (C?.speciesName) scan(installedRegistry.getSpeciesSheetActions(C.speciesName, C.speciesSource));
-  selectedFeatNames(C).forEach((feat) => scan(installedRegistry.getFeatSheetActions(feat)));
+  ownedFeatNames(C).forEach((feat) => scan(installedRegistry.getFeatSheetActions(feat)));
 
   return [...fields];
 }

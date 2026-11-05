@@ -808,7 +808,8 @@ function sourceFromChoiceKey(C, key) {
   return { label: 'Choice', color: SRC_COLOR.choice, originType: 'unknown', originLabel: 'Choice' };
 }
 
-function normalizeWizardBook(book) {
+// A wizard's spellbook by level: names only, once each (case-insensitive).
+export function normalizeWizardBook(book) {
   const next = {};
   for (let level = 0; level <= 9; level++) {
     const seen = new Set();

@@ -1,7 +1,7 @@
 import { getMod, getFinal, getPB } from '../state/calculations.js';
-import { classLevel, primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
+import { classEntities, classLevel, primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
-import { hasActionRequirement } from '../../../shared/character/progression/choiceUtils.js';
+import { adapterEntryApplies } from '../../../shared/character/progression/choiceUtils.js';
 import { featDescriptionEntries, featNamedEntries } from '../../../shared/character/progression/featDescription.js';
 import { getWeaponProficiencyInfo, hasNonProficientArmor } from '../proficiency/proficiencies.js';
 import {
@@ -40,6 +40,7 @@ import {
   getActionRollers,
   resolveActionRollers,
 } from '../../../shared/character/dice/rollers.js';
+import { hasOwnedFeat, ownedFeatNames } from '../../../shared/character/progression/selectedFeats.js';
 
 export { getActionRollers } from '../../../shared/character/dice/rollers.js';
 
@@ -127,38 +128,6 @@ export function buildActionTags(action, C) {
 // 'proficiencyBonus' + function form). Re-exported so ActionsTab builds its
 // resource-max map from the same resolver instead of a divergent copy.
 export { normalizeResourceMax } from '../resources/restResources.js';
-
-function hasCondition(def, C, sheet) {
-  if (typeof def?.condition !== 'function' && !def?.requiresChoice && !(def?.choiceKey && def?.model) && !def?.requiresInventoryFlag) return true;
-  try { return hasActionRequirement(def, C, sheet); } catch { return false; }
-}
-
-function getClassEntities(C) {
-  if (!C) return [];
-  const out = [];
-  if (C.className) {
-    out.push({
-      className: C.className,
-      subclassShortName: C.subclassShortName || '',
-      level: primaryClassLevel(C),
-      ownerName: C.className,
-    });
-  }
-  (C.extraClasses || []).forEach((extra) => {
-    if (!extra?.name) return;
-    out.push({
-      className: extra.name,
-      subclassShortName: extra.subclassShortName || '',
-      level: Number(extra.level || 1),
-      ownerName: extra.name,
-    });
-  });
-  return out;
-}
-
-function selectedFeatNames(C) {
-  return (C?.allFeatSnapshots || []).map((feat) => feat?.name).filter(Boolean);
-}
 
 function normActionKey(value) {
   return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -398,7 +367,7 @@ export function collectAdapterActions(C, sheet) {
       if (!a || !a.name) return;
       const lv = Number(a.ownerLevel ?? ownerLevel ?? C?.level ?? 1);
       if (a.minLevel && lv < Number(a.minLevel)) return;
-      if (!hasCondition(a, C, sheet)) return;
+      if (!adapterEntryApplies(a, C, sheet)) return;
       if (!isExecutableAction(a)) return;
       const officialEntries = resolveOfficialEntries(a, source);
       if (!officialEntries && !a.noDescription) {
@@ -417,7 +386,7 @@ export function collectAdapterActions(C, sheet) {
 
   // Prefer live registry data so function properties such as condition/max/formula survive
   // after the character has been serialized to localStorage.
-  getClassEntities(C).forEach((entity) => {
+  classEntities(C).forEach((entity) => {
     pushFiltered(installedRegistry.getClassSheetActions(entity.className), entity.ownerName, entity.level);
     if (entity.subclassShortName) {
       pushFiltered(
@@ -430,7 +399,7 @@ export function collectAdapterActions(C, sheet) {
   if (C?.speciesName) {
     pushFiltered(installedRegistry.getSpeciesSheetActions(C.speciesName, C.speciesSource), C.speciesName, C.level || 1);
   }
-  selectedFeatNames(C).forEach((featName) => {
+  ownedFeatNames(C).forEach((featName) => {
     pushFiltered(installedRegistry.getFeatSheetActions(featName), featName, C.level || 1);
   });
 
@@ -448,10 +417,6 @@ export function collectAdapterActions(C, sheet) {
   return uniqBySignature(out);
 }
 
-
-function hasFeat(C, name) {
-  return (C?.allFeatSnapshots || []).some(f => String(f?.name || '').toLowerCase() === String(name).toLowerCase());
-}
 
 function weaponAbility(C, item, weaponOverride) {
   if (weaponOverride?.ability) return weaponOverride.ability;
@@ -770,10 +735,10 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
   // Unarmed Fighting (d6, or d8 while not wielding any weapon or Shield), and
   // Tavern Brawler (d4). Defaults to a flat 1.
   const monkDie = monkLevel >= 17 ? 12 : monkLevel >= 11 ? 10 : monkLevel >= 5 ? 8 : monkLevel >= 1 ? 6 : 0;
-  const unarmedFightingDie = hasFeat(C, 'Unarmed Fighting')
+  const unarmedFightingDie = hasOwnedFeat(C, 'Unarmed Fighting')
     ? (isWieldingWeaponOrShield(inventory) ? 6 : 8)
     : 0;
-  const tavernBrawlerDie = hasFeat(C, 'Tavern Brawler') ? 4 : 0;
+  const tavernBrawlerDie = hasOwnedFeat(C, 'Tavern Brawler') ? 4 : 0;
   const dieFace = Math.max(monkDie, unarmedFightingDie, tavernBrawlerDie, 1);
   const die = dieFace > 1 ? `1d${dieFace}` : '1';
   const unarmedDamageFormula = die + (unarmedDmgMod !== 0 ? (unarmedDmgMod >= 0 ? '+' : '') + unarmedDmgMod : '');

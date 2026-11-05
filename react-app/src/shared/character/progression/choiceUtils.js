@@ -58,6 +58,13 @@ export function inventoryHasFlag(inventory, requirement) {
   });
 }
 
+// Whether an adapter entry (action, resource) applies: entries without any
+// requirement always do; a requirement that throws counts as unmet.
+export function adapterEntryApplies(def, C, sheet) {
+  if (typeof def?.condition !== 'function' && !def?.requiresChoice && !(def?.choiceKey && def?.model) && !def?.requiresInventoryFlag) return true;
+  try { return hasActionRequirement(def, C, sheet); } catch { return false; }
+}
+
 export function hasActionRequirement(action, C, sheet) {
   if (typeof action?.condition === 'function') {
     try { if (!action.condition(C)) return false; } catch { return false; }

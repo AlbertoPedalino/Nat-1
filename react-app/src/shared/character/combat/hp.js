@@ -1,5 +1,5 @@
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
-import { collectOwnedFeatNames } from '../progression/selectedFeats.js';
+import { ownedFeatNames } from '../progression/selectedFeats.js';
 
 function statModFromScore(score) {
   return Math.floor((Number(score || 0) - 10) / 2);
@@ -50,18 +50,6 @@ function speciesHpBonus(character) {
   return Number(character?.speciesSnapshot?.hpBonusPerLevel || 0);
 }
 
-// Owned feats (choice slots, background, species — the shared owner-key rules)
-// plus any saved snapshot, so a feat still counts before its snapshot exists.
-function collectFeatNames(character) {
-  const out = new Set();
-  (character?.allFeatSnapshots || []).forEach((feat) => { if (feat?.name) out.add(feat.name); });
-  collectOwnedFeatNames(character).forEach((name) => {
-    const clean = String(name || '').split('|')[0].trim();
-    if (clean) out.add(clean);
-  });
-  return [...out];
-}
-
 function featHpBonusPerLevel(featName, featSnapshot) {
   if (featSnapshot?.hpBonusPerLevel != null) return Number(featSnapshot.hpBonusPerLevel) || 0;
   const adapter = typeof installedRegistry.getFeatAdapter === 'function'
@@ -109,7 +97,7 @@ export function computeMaxHp(character, conMod) {
 
   total += speciesHpBonus(character) * totalLevel;
 
-  const featNames = collectFeatNames(character);
+  const featNames = ownedFeatNames(character);
   const featSnapshotsByName = new Map(
     (character?.allFeatSnapshots || []).map((feat) => [feat?.name, feat]),
   );

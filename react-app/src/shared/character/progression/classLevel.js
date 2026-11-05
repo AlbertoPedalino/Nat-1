@@ -32,3 +32,28 @@ export function classLevel(C, className) {
   );
   return Number(extra?.level || 0);
 }
+
+// Each class the character has (primary first, then multiclasses), with its
+// subclass and level: the owners whose adapter actions/resources apply.
+export function classEntities(C) {
+  if (!C) return [];
+  const out = [];
+  if (C.className) {
+    out.push({
+      className: C.className,
+      subclassShortName: C.subclassShortName || '',
+      level: primaryClassLevel(C),
+      ownerName: C.className,
+    });
+  }
+  (C.extraClasses || []).forEach((extra) => {
+    if (!extra?.name) return;
+    out.push({
+      className: extra.name,
+      subclassShortName: extra.subclassShortName || '',
+      level: Number(extra.level || 1),
+      ownerName: extra.name,
+    });
+  });
+  return out;
+}
