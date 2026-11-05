@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
-import { useSceneContent } from '../../../../../src/pages/vtt/scene/useSceneContent.js';
+import { attachSecrets, useSceneContent } from '../../../../../src/pages/vtt/scene/useSceneContent.js';
 
 const cloud = vi.hoisted(() => ({
   listTokens: vi.fn(), listDrawings: vi.fn(), listTokenSecrets: vi.fn(), signMapImage: vi.fn(),
@@ -276,4 +276,21 @@ test('the scene content hook reads no character sheets at all', async () => {
   await act(async () => { await result.current.reconcileContent(); });
   expect(result.current).not.toHaveProperty('roster');
   expect(result.current).not.toHaveProperty('handleCharacterEvent');
+});
+
+test('a GM-only label cleared in another GM window is cleared here too', () => {
+  const held = [{ id: 'orc', label: 'Orc', secretLabel: 'Bandit chief' }];
+  const [orc] = attachSecrets([{ id: 'orc', label: 'Orc' }], { orc: '' }, held);
+  expect(orc.secretLabel).toBeUndefined();
+});
+
+test('a GM-only label read from its row wins; with no row read the held one stays', () => {
+  const held = [
+    { id: 'a', secretLabel: 'Old' },
+    { id: 'b', secretLabel: 'Kept' },
+  ];
+  const tokens = [{ id: 'a' }, { id: 'b' }, { id: 'c' }];
+  expect(attachSecrets(tokens, { a: 'New' }, held).map((t) => t.secretLabel)).toEqual(['New', 'Kept', undefined]);
+  // A player reads no secrets at all: nothing to attach.
+  expect(attachSecrets([{ id: 'c' }], {}, [])).toEqual([{ id: 'c' }]);
 });

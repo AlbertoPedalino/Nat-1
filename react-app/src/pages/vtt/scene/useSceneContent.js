@@ -8,13 +8,19 @@ import {
 } from '../../../shared/vtt/session/revisionDiff.js';
 import { applyDrawingEvent } from '../../../shared/vtt/session/liveScene.js';
 
-function attachSecrets(tokens, secrets, held = []) {
+// The GM-only label of each piece. A secrets row read for the piece is the
+// answer, an empty label included (cleared elsewhere); the label already held
+// only fills in for a piece with no row read (none yet, or not the GM).
+export function attachSecrets(tokens, secrets, held = []) {
   const previous = Object.fromEntries(
     held.filter((token) => token.secretLabel).map((token) => [token.id, token.secretLabel]),
   );
   return tokens.map((token) => {
-    const secretLabel = secrets[token.id] || previous[token.id] || '';
-    return secretLabel ? { ...token, secretLabel } : token;
+    const secretLabel = Object.hasOwn(secrets, token.id) ? secrets[token.id] : (previous[token.id] || '');
+    if (secretLabel) return { ...token, secretLabel };
+    if (!token.secretLabel) return token;
+    const { secretLabel: _cleared, ...rest } = token;
+    return rest;
   });
 }
 
