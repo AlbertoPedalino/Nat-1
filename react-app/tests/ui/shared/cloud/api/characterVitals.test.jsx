@@ -117,15 +117,16 @@ describe('normal path: digest + base max in hand', () => {
     expect(server.data.currentHP).toBe(24);
   });
 
-  test('two damages from one stale digest: the second is recomputed once from the refusal, both count', async () => {
+  test('damage from a stale view is refused like any command, and shows the current health', async () => {
     const stale = held();
     // Another device commits 10 damage (temp HP absorbs 5 of it).
     server.data = { ...server.data, currentHP: 25, tempHP: 0 };
     server.revision += 1;
-    await commandCharacterVitals('pc', { type: 'modifyHp', delta: -3 }, { digest: stale, base: base() });
-    expect(server.data.currentHP).toBe(22);
-    expect(server.rpc).toHaveBeenCalledTimes(2);
-    expect(server.rpc.mock.calls[1][1].p_digest_revision).toBe(start + 1);
+    await expect(commandCharacterVitals('pc', { type: 'modifyHp', delta: -3 }, { digest: stale, base: base() }))
+      .rejects.toMatchObject({ code: HEALTH_CONFLICT });
+    expect(server.data.currentHP).toBe(25);
+    expect(server.rpc).toHaveBeenCalledOnce();
+    expect(vitalsEvents).toHaveBeenCalledWith(expect.objectContaining({ applied: false, vitals: expect.objectContaining({ currentHP: 25 }) }));
     expect(characterReads()).toEqual([]);
   });
 
@@ -143,7 +144,7 @@ describe('normal path: digest + base max in hand', () => {
     expect(recheckEvents).not.toHaveBeenCalled();
   });
 
-  test('a relative command is not replayed when the max-HP basis moved', async () => {
+  test('a command is refused when the max-HP basis moved', async () => {
     const stale = held();
     server.basis = 'h2';
     server.revision += 1;

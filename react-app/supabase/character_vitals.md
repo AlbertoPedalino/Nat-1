@@ -35,11 +35,9 @@ hpBasis }`, a few hundred bytes — never the sheet. It is published in the tab 
 previews the digest and is never taken for a whole sheet.
 
 Each command is sent once. A stale digest or basis is never applied: the answer
-carries the current vitals and every view realigns on it. A relative command
-(`modifyHp`, `modifyTempHp`, `grantTempHp`, `modifyMaxHp`, `deathSaveRoll`)
-explicitly refused that way is recomputed once from that answer, since it
-certainly did not land; absolute ones (set HP, patches, token edits, toggles)
-are not, and the user repeats them if they still make sense. An RPC error or a
+carries the current vitals and every view realigns on it. Every command is
+treated alike, damage and healing included: none is recomputed or replayed,
+and the user repeats it if it still makes sense. An RPC error or a
 timeout (8 s, `HEALTH_COMMAND_TIMEOUT_MS`) is not retried; the tab's followers
 of that character run their light recovery (`CHARACTER_RECHECK_EVENT`). A
 request that timed out may still commit later; its digest then arrives like any

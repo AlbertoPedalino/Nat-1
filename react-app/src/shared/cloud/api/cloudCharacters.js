@@ -202,13 +202,6 @@ export const HEALTH_COMMAND_TIMEOUT_MS = 8_000;
 export const HEALTH_CONFLICT = 'HEALTH_CONFLICT';
 export const HEALTH_TIMEOUT = 'HEALTH_TIMEOUT';
 
-// Commands that add to what is there. When the database explicitly refused one
-// (`applied: false`, so it certainly did not land), it is recomputed once from
-// the state that answer carries: two players hitting the same character both
-// count. Absolute commands (set HP, a patch, a token edit, a toggle decided on
-// what the user saw) are never replayed over someone else's change.
-const RELATIVE_COMMANDS = new Set(['modifyHp', 'modifyTempHp', 'grantTempHp', 'modifyMaxHp', 'deathSaveRoll']);
-
 const healthQueues = new Map();
 // The newest answer this tab received per character, so a command queued
 // behind another starts from what that one committed, not from the digest the
@@ -318,11 +311,10 @@ async function commitHealthCommand(charId, command, context) {
   const state = route === 'digest'
     ? stateFromDigest(charId, context.digest, context.base)
     : await stateFromSheet(charId);
-  let answer = await commitVitals(charId, state, command);
-  if (!answer.applied && RELATIVE_COMMANDS.has(command.type)
-    && answer.digestRevision != null && answer.hpBasis === state.hpBasis) {
-    answer = await commitVitals(charId, { ...state, revision: answer.digestRevision, vitals: answer.vitals }, command);
-  }
+  // One rule for every command: computed from the health this view holds, and
+  // refused if that changed meanwhile (another device, the GM, the map). The
+  // refusal already brought the current values here; the user decides again.
+  const answer = await commitVitals(charId, state, command);
   if (!answer.applied) {
     throw Object.assign(
       new Error('Character health changed elsewhere. Showing the latest value; please try again.'),
