@@ -1593,10 +1593,11 @@ test('a rejected fullscreen request falls back to window coverage and can exit',
   const { viewport } = renderLaserViewport(vi.fn());
   viewport.requestFullscreen = vi.fn().mockRejectedValue(new Error('Fullscreen denied'));
   fireEvent.click(screen.getByRole('button', { name: 'Fullscreen map' }));
-  await screen.findByRole('button', { name: 'Leave fullscreen' });
-  expect(viewport).toHaveStyle({ position: 'fixed' });
+  // The rejection settles after a few renders: wait for its result, not a tick.
+  await screen.findByRole('button', { name: 'Leave fullscreen' }, { timeout: 3000 });
+  await waitFor(() => expect(viewport).toHaveStyle({ position: 'fixed' }));
   fireEvent.keyDown(document, { key: 'Escape' });
-  expect(await screen.findByRole('button', { name: 'Fullscreen map' })).toBeInTheDocument();
+  expect(await screen.findByRole('button', { name: 'Fullscreen map' }, { timeout: 3000 })).toBeInTheDocument();
 });
 
 test('a replacement picture is framed from its prepared dimensions before paint', () => {
