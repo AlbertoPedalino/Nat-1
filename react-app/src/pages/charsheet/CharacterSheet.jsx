@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Box, Stack, Button, Typography } from '@mui/material';
-import { Hourglass, Moon } from 'lucide-react';
+import { Box, Stack } from '@mui/material';
 import { SHEET_AREAS, SHEET_GRID, SHEET_GRID_ITEM_SX } from './layout/layout.js';
 import TopBar from './layout/TopBar.jsx';
 import AbilityScores from './stats/AbilityScores.jsx';
@@ -8,32 +7,26 @@ import HPBlock from './resources/HPBlock.jsx';
 import SavingThrows from './stats/SavingThrows.jsx';
 import Senses from './stats/Senses.jsx';
 import Proficiencies from './proficiency/Proficiencies.jsx';
-import HitDiceSpendControl from './resources/HitDiceSpendControl.jsx';
-import SheetDialog from '../../shared/ui/SheetDialog.jsx';
 import Skills from './stats/Skills.jsx';
 import Movement from './stats/Movement.jsx';
 import RightTop from './stats/RightTop.jsx';
 import TabsPanel from './layout/TabsPanel.jsx';
+import RestDialogs from './resources/RestDialogs.jsx';
+import { useRests } from './resources/useRests.js';
 import DiceToast from '../../shared/character/dice/DiceToast.jsx';
 import SheetConflictBanner from '../../shared/ui/SheetConflictBanner.jsx';
 import { deriveSheetState } from './state/state.js';
 import { ProficiencySetsProvider } from './proficiency/ProficiencySetsContext.jsx';
 import { SheetActionsProvider } from './state/SheetActionsContext.jsx';
-import { clearCraftedByFlag, VANISH_ON_LONG_REST_FLAGS } from '../../shared/character/inventory/craftedItems.js';
 import { collectReplicatePlanChoices } from '../../shared/character/inventory/replicateMagicItem.js';
 import { pruneReplicatedItemsForPlans } from '../../shared/character/inventory/magicItemTinker.js';
 import { buildD20Meta, formatD20Detail, rollD20 as rollD20Dice } from '../../shared/character/dice/dice.js';
 import { aggregateSavingThrowBonus } from '../../shared/character/inventory/itemBonus.js';
 import { itemEffectInventory } from '../../shared/character/forms/wildShapeForm.js';
-import { longRestCharacterPatch } from '../../shared/character/resources/longRest.js';
-import { getMod, getFinal, getSaveBonus, clampExhaustion, exhaustionD20Penalty } from './state/calculations.js';
+import { getSaveBonus, exhaustionD20Penalty } from './state/calculations.js';
 import { useSheetVitals } from './state/useSheetVitals.js';
-import { DEAD_CONDITION_KEY, setConditionActive } from '../../shared/character/combat/conditions.js';
 import { normalizeCharacterAttunement } from './inventory/attunement.js';
-import { applyResourceRest, getAllResourceDefs, getHitDicePools, getUsedHitDiceTotal, normalizeResourceMax, resourceFullValue } from './resources/restResources.js';
-import { clearedToggles } from './state/toggleState.js';
-import { applyFreeCastRest, getFreeCastDefsForCharacter } from './spells/spellsTabLogic.js';
-import { adapterRegistry as installedRegistry } from '../../adapters/registry.js';
+import { getAllResourceDefs, normalizeResourceMax, resourceFullValue } from './resources/restResources.js';
 import { ensureSheetRuntimeAdapters } from './state/sheetRuntimeAdapters.js';
 import { loadItems, loadOptionalFeatures, loadConditions, reconcileInventoryWithItemsDb } from '../charbuilder/data/dataLoaders.js';
 import {
@@ -65,16 +58,6 @@ const noopEffect = () => {};
 
 function getCharIdFromUrl() {
   return new URLSearchParams(window.location.search).get('char') || getActiveCharId();
-}
-
-// A long rest reduces Exhaustion by 1 (XPHB 2024). Returns the patch fields that
-// lower the level and drop the pill once it reaches 0. Shared by both rest paths.
-function longRestExhaustionPatch(sheet) {
-  const exhaustionLevel = clampExhaustion((sheet.exhaustionLevel || 0) - 1);
-  const activeConditions = exhaustionLevel === 0
-    ? (sheet.activeConditions || []).filter((k) => k !== 'exhaustion')
-    : (sheet.activeConditions || []);
-  return { exhaustionLevel, activeConditions };
 }
 
 const EMBEDDED_SHEET_GRID = {
@@ -164,9 +147,6 @@ export default function CharacterSheet({
   useEffect(() => { setRollLog([]); }, [campaignId, charId]);
   const [resources, setResources] = useState({});
   const [freeCastUses, setFreeCastUses] = useState({});
-  const [shortRestOpen, setShortRestOpen] = useState(false);
-  const [longRestOpen, setLongRestOpen] = useState(false);
-  const [hdToSpend, setHdToSpend] = useState({});
   const [conditionEntries, setConditionEntries] = useState({});
   const cloudSaveReadyRef = useRef(false);
   const pendingCloudSaveRef = useRef(null);
@@ -633,123 +613,9 @@ export default function CharacterSheet({
     };
   }, []);
 
-  const openShortRest = useCallback(() => {
-    setHdToSpend({});
-    setShortRestOpen(true);
-  }, []);
-
-  const confirmShortRest = useCallback(() => {
-    const s = { ...sheet };
-    let res = { ...resources };
-    const conMod = getMod(getFinal(C, 'con'));
-    const pools = getHitDicePools(C, s.usedHDPools, s.usedHD);
-    const spendByPool = {};
-
-    let totalHeal = 0;
-    const rolls = [];
-    pools.forEach((pool) => {
-      const n = Math.max(0, Math.min(Number(hdToSpend[pool.key] || 0), pool.remaining));
-      if (!n) return;
-      spendByPool[pool.key] = n;
-      for (let i = 0; i < n; i++) {
-        const v = Math.floor(Math.random() * pool.faces) + 1;
-        rolls.push({ v, faces: pool.faces, label: pool.label });
-        totalHeal += v + conMod;
-      }
-    });
-    const totalSpent = getUsedHitDiceTotal(spendByPool);
-
-    const patch = {};
-    if (totalSpent > 0) {
-      s.currentHP = Math.min(s.maxHP, s.currentHP + totalHeal);
-      const nextUsedPools = {};
-      pools.forEach((pool) => {
-        nextUsedPools[pool.key] = pool.used + (spendByPool[pool.key] || 0);
-      });
-      s.usedHDPools = nextUsedPools;
-      s.usedHD = getUsedHitDiceTotal(nextUsedPools);
-      Object.assign(patch, {
-        currentHP: s.currentHP, tempHP: s.tempHP, maxHPBonus: s.maxHPBonus,
-        usedHD: s.usedHD, usedHDPools: s.usedHDPools,
-      });
-    }
-
-    if (C) {
-      res = applyResourceRest(res, getAllResourceDefs(C), C, 'short');
-      setResources(res);
-      patch.resources = res;
-      const nextFC = applyFreeCastRest(freeCastUses, getFreeCastDefsForCharacter(C), 'short');
-      setFreeCastUses(nextFC);
-      patch.freeCastUses = nextFC;
-    }
-
-    setSheet(s);
-    if (Object.keys(patch).length) persist(patch, { command: { type: 'modifyHp', delta: Math.max(0, totalHeal) } });
-    setShortRestOpen(false);
-    if (totalSpent > 0) {
-      showDiceToast('Short Rest', `Healed ${totalHeal} HP (${totalSpent} HD spent)`, totalHeal, rolls);
-    } else {
-      showNotice('Short Rest', 'Short Rest complete (no Hit Dice spent).');
-    }
-  }, [sheet, resources, freeCastUses, C, hdToSpend, persist, showDiceToast, showNotice]);
-
-  const openLongRest = useCallback(() => {
-    setLongRestOpen(true);
-  }, []);
-
-  const confirmLongRest = useCallback(() => {
-    const s = { ...sheet };
-    let res = { ...resources };
-    s.currentHP = s.maxHP;
-    s.tempHP = 0;
-    s.usedHD = 0;
-    s.usedHDPools = {};
-    s.deathSaves = { success: 0, fail: 0 };
-    s.spellSlotUsed = {};
-    s.createdSpellSlots = {};
-    const exRest = longRestExhaustionPatch(s);
-    s.exhaustionLevel = exRest.exhaustionLevel;
-    s.activeConditions = setConditionActive(exRest.activeConditions, DEAD_CONDITION_KEY, false);
-
-    // Crafted items that last only until a Long Rest (Tinker's Magic, Fast
-    // Crafting) vanish now. Replicate Magic Item items persist and are untouched.
-    const prunedInv = clearCraftedByFlag(s.sheetInventory || [], VANISH_ON_LONG_REST_FLAGS);
-    const inventoryVanished = prunedInv.length !== (s.sheetInventory || []).length;
-    if (inventoryVanished) s.sheetInventory = prunedInv;
-
-    const patch = {
-      currentHP: s.currentHP, tempHP: s.tempHP, maxHPBonus: s.maxHPBonus,
-      usedHD: 0, usedHDPools: {},
-      deathSaves: s.deathSaves,
-      spellSlotsUsed: {}, createdSpellSlots: {},
-      exhaustionLevel: exRest.exhaustionLevel, activeConditions: s.activeConditions,
-    };
-    if (inventoryVanished) patch.inventory = prunedInv;
-
-    if (C) {
-      res = applyResourceRest(res, getAllResourceDefs(C), C, 'long');
-      setResources(res);
-      patch.resources = res;
-      const nextFC = applyFreeCastRest(freeCastUses, getFreeCastDefsForCharacter(C), 'long');
-      setFreeCastUses(nextFC);
-      patch.freeCastUses = nextFC;
-      Object.assign(patch, clearedToggles(C));
-      Object.assign(patch, longRestCharacterPatch(C));
-    }
-
-    if (C?.speciesName) {
-      const grants = installedRegistry.getSpeciesLongRestGrants(C.speciesName, C.speciesSource);
-      if (grants?.inspiration) {
-        s.sheetInspiration = true;
-        patch.inspiration = true;
-      }
-    }
-
-    setSheet(s);
-    persist(patch, { command: { type: 'longRest', exhaustionLevel: exRest.exhaustionLevel } });
-    setLongRestOpen(false);
-    showNotice('Long Rest', 'Fully restored!');
-  }, [sheet, resources, freeCastUses, C, persist, showNotice]);
+  const rest = useRests({
+    C, sheet, setSheet, resources, setResources, freeCastUses, setFreeCastUses, persist, showDiceToast, showNotice,
+  });
 
   const {
     adjustHP,
@@ -865,17 +731,13 @@ export default function CharacterSheet({
     );
   }
 
-  const hitDicePools = getHitDicePools(C, sheet.usedHDPools, sheet.usedHD);
-  const totalHitDiceRemaining = hitDicePools.reduce((sum, pool) => sum + pool.remaining, 0);
-  const totalHitDiceToSpend = getUsedHitDiceTotal(hdToSpend);
-  const conMod = getMod(getFinal(C, 'con'));
   const sheetGridSx = embedded ? EMBEDDED_SHEET_GRID : SHEET_GRID;
 
   return (
     <ProficiencySetsProvider character={C}>
     <SheetActionsProvider value={effectiveActions}>
     <Box sx={{ minHeight: embedded ? 'auto' : '100vh', bgcolor: 'background.default', pb: embedded ? 1 : 4, width: '100%' }}>
-      <TopBar C={C} sheet={sheet} charId={charId} readOnly={readOnly} embedded={embedded} onShortRest={openShortRest} onLongRest={openLongRest} onUpdateXp={updateXp} onUpdateCharacter={updateCurrentCharacter}
+      <TopBar C={C} sheet={sheet} charId={charId} readOnly={readOnly} embedded={embedded} onShortRest={rest.openShortRest} onLongRest={rest.openLongRest} onUpdateXp={updateXp} onUpdateCharacter={updateCurrentCharacter}
         rollLog={rollLog} onClearRollLog={() => setRollLog([])} onShowToast={showDiceToast} />
       <Box sx={{ maxWidth: embedded ? 'none' : 1280, mx: embedded ? 0 : { md: 'auto' }, px: embedded ? 0 : { xs: '0.6rem', md: '1.1rem' }, overflow: 'hidden' }}>
         {sheetConflict ? (
@@ -941,61 +803,7 @@ export default function CharacterSheet({
       </Box>
       {showOwnRollToast && diceToast ? <DiceToast toast={diceToast} onClose={() => setDiceToast(null)} /> : null}
 
-      <SheetDialog
-        open={shortRestOpen}
-        onClose={() => setShortRestOpen(false)}
-        title="Short Rest"
-        icon={<Hourglass size={20} />}
-        actions={(
-          <>
-            <Button onClick={() => setShortRestOpen(false)} sx={{ color: 'text.secondary' }}>Cancel</Button>
-            <Button variant="contained" onClick={confirmShortRest}>
-              Take Short Rest
-            </Button>
-          </>
-        )}
-      >
-        <Typography sx={{ fontSize: '0.8rem', color: 'text.secondary', mb: 2 }}>
-          Optionally spend Hit Dice to recover HP. Each die adds CON mod ({conMod}). Resources that recharge on a Short Rest will still recover even if you spend no Hit Dice.
-        </Typography>
-        <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary', mb: 1 }}>
-          Available: {totalHitDiceRemaining} HD
-        </Typography>
-        <Stack spacing={1.25}>
-          {hitDicePools.map((pool) => {
-            const value = Math.max(0, Math.min(Number(hdToSpend[pool.key] || 0), pool.remaining));
-            return (
-              <HitDiceSpendControl
-                key={pool.key}
-                pool={pool}
-                value={value}
-                conMod={conMod}
-                onChange={(next) => setHdToSpend((prev) => ({ ...prev, [pool.key]: next }))}
-              />
-            );
-          })}
-        </Stack>
-        <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary', textAlign: 'center', mt: 1.25 }}>
-          {totalHitDiceToSpend > 0 ? `Spending ${totalHitDiceToSpend} HD` : 'No Hit Dice will be spent'}
-        </Typography>
-      </SheetDialog>
-
-      <SheetDialog
-        open={longRestOpen}
-        onClose={() => setLongRestOpen(false)}
-        title="Take a Long Rest?"
-        icon={<Moon size={20} />}
-        actions={(
-          <>
-            <Button onClick={() => setLongRestOpen(false)} sx={{ color: 'text.secondary' }}>Cancel</Button>
-            <Button variant="contained" onClick={confirmLongRest}>Confirm Long Rest</Button>
-          </>
-        )}
-      >
-        <Typography sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
-          This will restore all HP, Hit Dice, spell slots, and class resources.
-        </Typography>
-      </SheetDialog>
+      <RestDialogs C={C} sheet={sheet} rest={rest} />
     </Box>
     </SheetActionsProvider>
     </ProficiencySetsProvider>
