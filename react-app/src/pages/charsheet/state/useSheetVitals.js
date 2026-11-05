@@ -1,5 +1,10 @@
 import { useCallback, useMemo } from 'react';
-import { calcMaxHP, clampExhaustion, exhaustionD20Penalty, EXHAUSTION_MAX } from './calculations.js';
+import {
+  calcMaxHP,
+  clampExhaustion,
+  exhaustionD20Penalty,
+  EXHAUSTION_MAX,
+} from './calculations.js';
 import {
   DEAD_CONDITION_KEY,
   setConditionActive,

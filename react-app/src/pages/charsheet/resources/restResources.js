@@ -1,8 +1,14 @@
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
 import { getFinal, getMod, getPB } from '../state/calculations.js';
-import { classEntities, primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
+import {
+  classEntities,
+  primaryClassLevel,
+} from '../../../shared/character/progression/classLevel.js';
 import { resolveScalingFormula } from '../../../shared/character/dice/scalingFormula.js';
-import { rechargesOnRest, isKnownRecharge } from '../../../shared/character/resources/rechargeRules.js';
+import {
+  rechargesOnRest,
+  isKnownRecharge,
+} from '../../../shared/character/resources/rechargeRules.js';
 import { adapterEntryApplies } from '../../../shared/character/progression/choiceUtils.js';
 import { ownedFeatNames } from '../../../shared/character/progression/selectedFeats.js';
 function resourceOwnerLevel(def, character) {

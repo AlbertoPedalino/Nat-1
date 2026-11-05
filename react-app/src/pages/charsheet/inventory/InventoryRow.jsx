@@ -6,9 +6,16 @@ import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import { ENTITY_COLORS, ITEM_ATTUNEMENT, chipTintStyle } from '../../../shared/ui/entityColors.js';
 import { ItemReferenceBody } from '../../../shared/character/inventory/ItemReference.jsx';
-import { attunementRequirementText, getAttunementEligibility } from '../../../shared/character/inventory/itemAttunement.js';
+import {
+  attunementRequirementText,
+  getAttunementEligibility,
+} from '../../../shared/character/inventory/itemAttunement.js';
 import { buildItemTags } from '../../../shared/character/inventory/craftedItems.js';
-import { itemChargeCurrent, itemChargeMaximum, shouldShowItemCharges } from '../../../shared/character/inventory/itemCharges.js';
+import {
+  itemChargeCurrent,
+  itemChargeMaximum,
+  shouldShowItemCharges,
+} from '../../../shared/character/inventory/itemCharges.js';
 import { hasItemFlag, itemFlagFitsItem } from '../../../shared/character/inventory/itemFlags.js';
 import { itemCardName } from '../../../shared/character/inventory/replicateMagicItem.js';
 import { scrollCardName } from '../../../shared/character/inventory/spellScrolls.js';

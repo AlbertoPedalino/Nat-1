@@ -7,7 +7,11 @@ import { collectMovementEffects, effectSummary, effectTitle } from '../state/she
 import { getSpeedBonus } from '../state/effectBonuses.js';
 import { collectItemEffects } from '../../../shared/character/inventory/itemEffects.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
-import { carryCapacity, formatWeight, totalCarriedWeight } from '../../../shared/character/inventory/weight.js';
+import {
+  carryCapacity,
+  formatWeight,
+  totalCarriedWeight,
+} from '../../../shared/character/inventory/weight.js';
 import { getActiveWildShape } from '../../../shared/character/forms/wildShapeForm.js';
 
 const EXTRA_SPEED_MODES = ['burrow', 'climb', 'fly', 'swim'];

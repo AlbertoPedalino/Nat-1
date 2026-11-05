@@ -1,5 +1,11 @@
 import { useCallback } from 'react';
-import { addSceneBackground, removeSceneBackground, removeSceneImage, replaceSceneImage, updateScene } from '../../../shared/cloud/api/vtt.js';
+import {
+  addSceneBackground,
+  removeSceneBackground,
+  removeSceneImage,
+  replaceSceneImage,
+  updateScene,
+} from '../../../shared/cloud/api/vtt.js';
 import { sceneView, viewPatch } from '../../../shared/vtt/scene/scene.js';
 
 // The scene's pictures: uploading or removing the battlemap and backgrounds,

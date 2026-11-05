@@ -3,7 +3,13 @@ import { combatantToToken } from '../../../shared/vtt/tokens/encounterImport.js'
 import { beginPiecePointerDrag } from '../tokens/PiecePreview.jsx';
 import { FIGHT_UNAVAILABLE, commitFightTurn } from '../../../shared/cloud/api/encounterFights.js';
 import { makeSourceRef } from '../../../shared/vtt/tokens/encounterSync.js';
-import { sceneFightChoices, showsFight, turnBase, turnEntriesFromFight, turnEntriesFromTokens } from '../../../shared/vtt/tokens/initiative.js';
+import {
+  sceneFightChoices,
+  showsFight,
+  turnBase,
+  turnEntriesFromFight,
+  turnEntriesFromTokens,
+} from '../../../shared/vtt/tokens/initiative.js';
 
 // The initiative strip and creature stat blocks on the map. The GM reads the
 // shown fight row and sees every combatant; everyone else (player preview and

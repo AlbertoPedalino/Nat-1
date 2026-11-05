@@ -26,9 +26,20 @@ import {
 } from '../inventory/equipmentSlots.js';
 import { weaponEnhancement } from '../../../shared/character/inventory/itemBonus.js';
 import { isItemEffectActive } from '../../../shared/character/inventory/itemAttunement.js';
-import { itemIdentityKey, matchesItemReference } from '../../../shared/character/inventory/itemIdentity.js';
-import { itemCardName, replicatedItemProperty } from '../../../shared/character/inventory/replicateMagicItem.js';
-import { getMeleeStrDamageBonus, getUnarmedStrike, getWeaponEffectBonuses, getWeaponNotes } from '../state/effectBonuses.js';
+import {
+  itemIdentityKey,
+  matchesItemReference,
+} from '../../../shared/character/inventory/itemIdentity.js';
+import {
+  itemCardName,
+  replicatedItemProperty,
+} from '../../../shared/character/inventory/replicateMagicItem.js';
+import {
+  getMeleeStrDamageBonus,
+  getUnarmedStrike,
+  getWeaponEffectBonuses,
+  getWeaponNotes,
+} from '../state/effectBonuses.js';
 
 // Action cards for weapons: one per wielded weapon (main hand, off hand,
 // thrown, two-handed), with ability, proficiency, mastery, fighting-style and

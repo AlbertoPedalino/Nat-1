@@ -1,5 +1,8 @@
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
-import { canonicalDisplayLabel, cleanProficiencyText } from '../../../shared/character/progression/proficiencyDisplay.js';
+import {
+  canonicalDisplayLabel,
+  cleanProficiencyText,
+} from '../../../shared/character/progression/proficiencyDisplay.js';
 import { matchesRequiredChoice } from '../../../shared/character/progression/lineageMatch.js';
 import { inventoryHasFlag } from '../../../shared/character/progression/choiceUtils.js';
 import { ownedFeatNames } from '../../../shared/character/progression/selectedFeats.js';

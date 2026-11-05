@@ -1,7 +1,16 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
-import { warlockHasInvocation, warlockLevel, warlockKnownInvocations, warlockInvocationSelections, WARLOCK_MODIFIER_CANTRIP_INVOCATIONS, warlockModifierCantripChoiceKey } from '../../../shared/character/progression/warlockUtils.js';
+import {
+  warlockHasInvocation,
+  warlockLevel,
+  warlockKnownInvocations,
+  warlockInvocationSelections,
+  WARLOCK_MODIFIER_CANTRIP_INVOCATIONS,
+  warlockModifierCantripChoiceKey,
+} from '../../../shared/character/progression/warlockUtils.js';
 import { registerChoiceLevelMap } from '../../../shared/character/progression/choiceLevels.js';
-import { buildOptionalFeatureEntryLookup } from '../../../shared/character/progression/optionalFeatures.js';
+import {
+  buildOptionalFeatureEntryLookup,
+} from '../../../shared/character/progression/optionalFeatures.js';
 import { entriesToPlainText } from '../../../shared/character/spells/spellEntries.js';
 
 export default function install(registry, context = {}) {

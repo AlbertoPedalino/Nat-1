@@ -1,11 +1,23 @@
 import { useCallback, useRef } from 'react';
-import { createToken, deleteMapImage, setTokenSecret, uploadMapImage } from '../../../shared/cloud/api/vtt.js';
-import { combatantToToken, layoutTokens, monsterGroupTokens } from '../../../shared/vtt/tokens/encounterImport.js';
+import {
+  createToken,
+  deleteMapImage,
+  setTokenSecret,
+  uploadMapImage,
+} from '../../../shared/cloud/api/vtt.js';
+import {
+  combatantToToken,
+  layoutTokens,
+  monsterGroupTokens,
+} from '../../../shared/vtt/tokens/encounterImport.js';
 import { placeAroundCenter } from '../../../shared/vtt/tokens/placement.js';
 import { isTokenInPlay } from '../../../shared/vtt/scene/scene.js';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { launchLibraryEncounter } from '../../encounterbuilder/sync/handoff.js';
-import { deleteInstanceFight, saveInstanceFight } from '../../../shared/cloud/api/encounterFights.js';
+import {
+  deleteInstanceFight,
+  saveInstanceFight,
+} from '../../../shared/cloud/api/encounterFights.js';
 
 // Putting pieces on the scene: markers, uploaded images, campaign characters,
 // monsters, map objects and a whole encounter from the library, by click (in

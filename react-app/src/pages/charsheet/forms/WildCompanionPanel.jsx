@@ -8,8 +8,20 @@ import { filterOptions } from '../../../shared/content/searchText.js';
 import { findFamiliarBeasts } from '../../../shared/character/forms/beasts.js';
 import { WILD_SHAPE_RESOURCE_KEY } from '../../../shared/character/forms/wildShapeForm.js';
 import { getSheetSlots } from '../spells/spellcasting.js';
-import { consumeSlot, lowestAvailableSlotLevel } from '../../../shared/character/spells/spellSlots.js';
-import { BeastNameLink, BeastStatBlock, BeastPickerRow, creatureHpBoxSx, panelSx, headerSx, subSx, dismissButtonSx } from './BeastStatBlock.jsx';
+import {
+  consumeSlot,
+  lowestAvailableSlotLevel,
+} from '../../../shared/character/spells/spellSlots.js';
+import {
+  BeastNameLink,
+  BeastStatBlock,
+  BeastPickerRow,
+  creatureHpBoxSx,
+  panelSx,
+  headerSx,
+  subSx,
+  dismissButtonSx,
+} from './BeastStatBlock.jsx';
 import { useBeastsDb } from './useBeastsDb.js';
 import { useCreatureRolls } from './useCreatureRolls.js';
 import {

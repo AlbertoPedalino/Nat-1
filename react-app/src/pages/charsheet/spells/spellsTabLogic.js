@@ -2,13 +2,31 @@ import { adapterRegistry as installedRegistry } from '../../../adapters/registry
 import { isRitualSpell } from '../../../shared/character/spells/spellTags.js';
 import { filterByRequiredChoice } from '../../../shared/character/progression/lineageMatch.js';
 import { isGrantUnlocked } from '../../../shared/character/spells/spellGrants.js';
-import { enumerateAutoGrantedSpells, grantSourceLabel } from '../../../shared/character/spells/autoGrantedSpells.js';
+import {
+  enumerateAutoGrantedSpells,
+  grantSourceLabel,
+} from '../../../shared/character/spells/autoGrantedSpells.js';
 import { featSlotOrigin } from '../../../shared/character/progression/featChoiceKeys.js';
-import { collectFreeCastsForGrant, mergeFreeCastsById, normalizeFreeCast, getFeatFreeCastTemplate, applyFreeCastRest } from '../../../shared/character/spells/spellFreeCasts.js';
-import { collectItemAttachedSpells } from '../../../shared/character/inventory/itemAttachedSpells.js';
-import { collectScrollSpells, scrollRowKey } from '../../../shared/character/inventory/spellScrolls.js';
-import { isWarlockModifierCantripChoiceKey } from '../../../shared/character/progression/warlockUtils.js';
-import { enumerateFixedAdditionalSpells } from '../../../shared/character/spells/additionalSpellGrants.js';
+import {
+  collectFreeCastsForGrant,
+  mergeFreeCastsById,
+  normalizeFreeCast,
+  getFeatFreeCastTemplate,
+  applyFreeCastRest,
+} from '../../../shared/character/spells/spellFreeCasts.js';
+import {
+  collectItemAttachedSpells,
+} from '../../../shared/character/inventory/itemAttachedSpells.js';
+import {
+  collectScrollSpells,
+  scrollRowKey,
+} from '../../../shared/character/inventory/spellScrolls.js';
+import {
+  isWarlockModifierCantripChoiceKey,
+} from '../../../shared/character/progression/warlockUtils.js';
+import {
+  enumerateFixedAdditionalSpells,
+} from '../../../shared/character/spells/additionalSpellGrants.js';
 import { ENTITY_COLORS, ITEM_ATTUNEMENT, ACTION_COLORS } from '../../../shared/ui/entityColors.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import {

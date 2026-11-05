@@ -23,7 +23,11 @@ import { createMeasurePublisher } from '../../../shared/vtt/map/measureSync.js';
 import { suppressGestureSelection } from '../../../shared/vtt/map/gestureSelection.js';
 import { movedPoints } from '../../../shared/vtt/map/drawing.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { gridLineColor, isTokenInPlay, normalizeGridLineWidth } from '../../../shared/vtt/scene/scene.js';
+import {
+  gridLineColor,
+  isTokenInPlay,
+  normalizeGridLineWidth,
+} from '../../../shared/vtt/scene/scene.js';
 import { isMapPiece } from '../../../shared/vtt/map/mapObjects.js';
 import {
   axialRound, hexHeight, hexPlayAreaForImage, hexToWorld, hexWidth, isHexGrid,
@@ -48,8 +52,36 @@ import { imageFilterLook } from '../../../shared/vtt/scene/imageFilters.js';
 import DeletePiecesDialog from '../tokens/DeletePiecesDialog.jsx';
 import { PIECE_POINTER_DRAG_EVENT } from '../tokens/PiecePreview.jsx';
 import { mapIconButtonSx } from './battleMapSurface.js';
-import { overlandMiles, brushRadiusFor, cursorFor, screenSelectionRect, overlapsSelection, measurementBadge, playAreaBox, hexPlayAreaPolygon, imageBox, pointInBox } from './viewportGeometry.js';
-import { coveringSx, hostSx, fillViewportSx, placementTargetSx, placementTargetHintSx, selectionMarqueeSx, selectionToolbarSx, selectionCountSx, fullscreenSheetButtonSx, cornerButtonsSx, fullscreenBtnSx, imageSwitchSx, layerSwitchSx, backgroundStripSx, distanceSx, placementCountSx } from './sceneViewportStyles.js';
+import {
+  overlandMiles,
+  brushRadiusFor,
+  cursorFor,
+  screenSelectionRect,
+  overlapsSelection,
+  measurementBadge,
+  playAreaBox,
+  hexPlayAreaPolygon,
+  imageBox,
+  pointInBox,
+} from './viewportGeometry.js';
+import {
+  coveringSx,
+  hostSx,
+  fillViewportSx,
+  placementTargetSx,
+  placementTargetHintSx,
+  selectionMarqueeSx,
+  selectionToolbarSx,
+  selectionCountSx,
+  fullscreenSheetButtonSx,
+  cornerButtonsSx,
+  fullscreenBtnSx,
+  imageSwitchSx,
+  layerSwitchSx,
+  backgroundStripSx,
+  distanceSx,
+  placementCountSx,
+} from './sceneViewportStyles.js';
 import { samePlayArea } from '../../../shared/vtt/scene/scene.js';
 import MapBackdrop from './MapBackdrop.jsx';
 

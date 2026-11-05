@@ -21,7 +21,11 @@ import { SheetActionsProvider } from './state/SheetActionsContext.jsx';
 import { useSheetVitals } from './state/useSheetVitals.js';
 import { useSheetRolls } from './state/useSheetRolls.js';
 import { useSheetCloudSave } from './state/useSheetCloudSave.js';
-import { initialSheetResources, loadSheetReferenceData, reconcileLoadedCharacter } from './state/sheetLoad.js';
+import {
+  initialSheetResources,
+  loadSheetReferenceData,
+  reconcileLoadedCharacter,
+} from './state/sheetLoad.js';
 import { normalizeCharacterAttunement } from './inventory/attunement.js';
 import {
   commandCharacterVitals,
@@ -30,7 +34,11 @@ import { useCharacterDigests } from '../../shared/cloud/sync/useCharacterDigests
 import { useAuth } from '../../shared/cloud/auth/AuthProvider.jsx';
 import { isSyncExcluded } from '../../shared/cloud/sync/cloudSyncExclude.js';
 import { withRuntimeOnlyCharacterFields } from '../../shared/character/profile/runtimeFields.js';
-import { SYNCED_VITALS, clampCharacterVitals, pickCharacterVitals } from '../../shared/character/combat/vitals.js';
+import {
+  SYNCED_VITALS,
+  clampCharacterVitals,
+  pickCharacterVitals,
+} from '../../shared/character/combat/vitals.js';
 import {
   getActiveCharId,
   getCharacterSyncMeta,

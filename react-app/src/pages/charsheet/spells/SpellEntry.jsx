@@ -1,10 +1,21 @@
 import { useMemo } from 'react';
-import { alpha, Box, Stack, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from '@mui/material';
+import {
+  alpha,
+  Box,
+  Stack,
+  ToggleButton,
+  ToggleButtonGroup,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import { SPELL_LEVEL_LABELS } from '../../charbuilder/constants.js';
 import { SpellNameIcon } from '../../../shared/content/FiveEToolsLink.jsx';
 import { RichInline } from '../../../shared/content/RichText.jsx';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
-import { SpellMetaGrid, HigherLevelBlock } from '../../../shared/character/spells/SpellReference.jsx';
+import {
+  SpellMetaGrid,
+  HigherLevelBlock,
+} from '../../../shared/character/spells/SpellReference.jsx';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import PipButton from '../../../shared/ui/PipButton.jsx';
@@ -30,7 +41,12 @@ import {
 import { inlineButtonSx, spellBodySx, spellRowSx } from './spellsTabStyles.js';
 import AttackRollButton from '../actions/AttackRollButton.jsx';
 import { isConcentrationSpell, isRitualSpell } from '../../../shared/character/spells/spellTags.js';
-import { CHIP_TONES, ENTITY_COLORS, RICH_TEXT_ACCENT, SPELL_TAG_COLORS } from '../../../shared/ui/entityColors.js';
+import {
+  CHIP_TONES,
+  ENTITY_COLORS,
+  RICH_TEXT_ACCENT,
+  SPELL_TAG_COLORS,
+} from '../../../shared/ui/entityColors.js';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import RollerButtons from '../../../shared/character/dice/RollerButtons.jsx';
 import SummonedCreaturePanel from '../forms/SummonedCreaturePanel.jsx';

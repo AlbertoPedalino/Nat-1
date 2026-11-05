@@ -1,11 +1,22 @@
-import { classEntities, primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
+import {
+  classEntities,
+  primaryClassLevel,
+} from '../../../shared/character/progression/classLevel.js';
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
 import { adapterEntryApplies } from '../../../shared/character/progression/choiceUtils.js';
-import { featDescriptionEntries, featNamedEntries } from '../../../shared/character/progression/featDescription.js';
+import {
+  featDescriptionEntries,
+  featNamedEntries,
+} from '../../../shared/character/progression/featDescription.js';
 import { parseBeastActions } from '../../../shared/character/forms/beasts.js';
 import { getActiveWildShape } from '../../../shared/character/forms/wildShapeForm.js';
 import { alpha } from '@mui/material';
-import { ACTION_COLORS, CHIP_TONES, ENTITY_COLORS, ITEM_ATTUNEMENT } from '../../../shared/ui/entityColors.js';
+import {
+  ACTION_COLORS,
+  CHIP_TONES,
+  ENTITY_COLORS,
+  ITEM_ATTUNEMENT,
+} from '../../../shared/ui/entityColors.js';
 import {
   getActionRollers,
   resolveActionRollers,

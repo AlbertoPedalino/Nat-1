@@ -6,7 +6,10 @@ import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { getMod, getFinal, getPB } from '../state/calculations.js';
 import { getSheetSlots } from '../spells/spellcasting.js';
-import { consumeSlot, lowestAvailableSlotLevel } from '../../../shared/character/spells/spellSlots.js';
+import {
+  consumeSlot,
+  lowestAvailableSlotLevel,
+} from '../../../shared/character/spells/spellSlots.js';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import { RichText } from '../../../shared/content/RichText.jsx';
 import RollerButtons from '../../../shared/character/dice/RollerButtons.jsx';

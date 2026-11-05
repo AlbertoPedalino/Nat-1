@@ -1,5 +1,10 @@
 import { Box, Button, Typography } from '@mui/material';
-import { extractTomeBonus, getAbilityChoiceGroups, hasAbilityChoice, isConsumableTome } from '../../../shared/character/inventory/itemEffects.js';
+import {
+  extractTomeBonus,
+  getAbilityChoiceGroups,
+  hasAbilityChoice,
+  isConsumableTome,
+} from '../../../shared/character/inventory/itemEffects.js';
 import ScrollSpellPicker from './ScrollSpellPicker.jsx';
 
 // What an expanded inventory entry offers beyond its reference text, by kind of

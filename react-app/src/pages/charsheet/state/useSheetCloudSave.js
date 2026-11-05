@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { getCloudCharacter, SHEET_CONFLICT, updateCloudCharacterData } from '../../../shared/cloud/api/cloudCharacters.js';
+import {
+  getCloudCharacter,
+  SHEET_CONFLICT,
+  updateCloudCharacterData,
+} from '../../../shared/cloud/api/cloudCharacters.js';
 import { useCharacterSheetRevision } from '../../../shared/cloud/sync/useCharacterSheetRevision.js';
 import { CLOUD_SYNC_EVENT, isCloudSyncBusy } from '../../../shared/cloud/sync/cloudSyncState.js';
 import { isSyncExcluded } from '../../../shared/cloud/sync/cloudSyncExclude.js';

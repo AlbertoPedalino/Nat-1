@@ -1,20 +1,50 @@
 import { memo } from 'react';
-import { Box, Card, CardContent, Chip, Divider, Grid, Paper, Stack, Typography } from '@mui/material';
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Divider,
+  Grid,
+  Paper,
+  Stack,
+  Typography,
+} from '@mui/material';
 import { Feather, Languages, Layers, Shield, Sparkles, Sword } from 'lucide-react';
 import { STAT_LABELS, STATS } from '../constants.js';
-import { calcMaxHp, formatMod, getAllFinalScores, getPrimaryClassLevel } from '../progression/calculations.js';
-import { collectAllProficiencies, collectEquipmentProficiencySets } from '../../charsheet/proficiency/proficiencies.js';
+import {
+  calcMaxHp,
+  formatMod,
+  getAllFinalScores,
+  getPrimaryClassLevel,
+} from '../progression/calculations.js';
+import {
+  collectAllProficiencies,
+  collectEquipmentProficiencySets,
+} from '../../charsheet/proficiency/proficiencies.js';
 import { collectPreviewEffectProficiencySections } from '../../charsheet/state/sheetEffects.js';
 import { collectPreviewDefenseSections } from '../../charsheet/state/sheetDefenses.js';
-import { collapseWeaponProficiencies, uniqueDisplayLabels } from '../../../shared/character/progression/proficiencyDisplay.js';
+import {
+  collapseWeaponProficiencies,
+  uniqueDisplayLabels,
+} from '../../../shared/character/progression/proficiencyDisplay.js';
 import {
   parseTypedProficiencyValue,
   extractFixedProficiencyLabels,
 } from '../../../shared/character/progression/typedProficiencies.js';
 import { collectResolvedWeaponMasteries } from '../../../shared/character/combat/weaponMastery.js';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
-import { EntryAccordion, partitionNamedEntries, splitNamedEntries } from '../../../shared/content/EntryAccordion.jsx';
-import { collectAcFormulas, getEquippedArmor, getEquippedShield, computeAcFormulaValue } from '../../../shared/character/combat/ac.js';
+import {
+  EntryAccordion,
+  partitionNamedEntries,
+  splitNamedEntries,
+} from '../../../shared/content/EntryAccordion.jsx';
+import {
+  collectAcFormulas,
+  getEquippedArmor,
+  getEquippedShield,
+  computeAcFormulaValue,
+} from '../../../shared/character/combat/ac.js';
 import { collectOwnedFeatNames } from '../../../shared/character/progression/selectedFeats.js';
 import { featDescriptionEntries } from '../../../shared/character/progression/featDescription.js';
 import { buildPreviewSheetCharacter } from './previewSheet.js';

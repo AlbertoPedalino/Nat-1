@@ -15,7 +15,12 @@ import { SLBL, getFinal, getMod, getPB, effectiveD20Modifier } from '../state/ca
 import { loadSpells } from '../../charbuilder/data/dataLoaders.js';
 import { scrollRowKey } from '../../../shared/character/inventory/spellScrolls.js';
 import { spellMatchesClass } from '../../charbuilder/spells/spells.js';
-import { installedRegistry, loadClassAdapters, loadCoreAdapters, loadSpellsAdapters } from '../../../adapters/index.js';
+import {
+  installedRegistry,
+  loadClassAdapters,
+  loadCoreAdapters,
+  loadSpellsAdapters,
+} from '../../../adapters/index.js';
 import { getEquippedArmorPenalties } from '../inventory/armorPenalties.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import { aggregateSpellBonuses } from '../../../shared/character/inventory/itemBonus.js';
@@ -55,9 +60,18 @@ import {
 import SpellEntry, { SourceBadge } from './SpellEntry.jsx';
 import { Empty, SlotPanel, SpellSection, StatBox } from './SpellsUiParts.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
-import { SpellMiniTags, SpellReferenceBody, SpellRowLabel, SpellSelectButton } from '../../../shared/character/spells/SpellReference.jsx';
+import {
+  SpellMiniTags,
+  SpellReferenceBody,
+  SpellRowLabel,
+  SpellSelectButton,
+} from '../../../shared/character/spells/SpellReference.jsx';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
-import { getPactSlotUsed, getPactSlotUsedKey, getRegularSlotUsed } from '../../../shared/character/spells/spellSlots.js';
+import {
+  getPactSlotUsed,
+  getPactSlotUsedKey,
+  getRegularSlotUsed,
+} from '../../../shared/character/spells/spellSlots.js';
 
 const SPELL_ACTION_FILTERS = [
   { key: 'all', label: 'All' },

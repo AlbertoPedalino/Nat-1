@@ -1,11 +1,28 @@
 import { useCallback } from 'react';
 import { tokenHealthCommand } from '../../../shared/vtt/tokens/characterHealth.js';
-import { DEAD_CONDITION_KEY, setConditionActive } from '../../../shared/character/combat/conditions.js';
-import { deleteToken, setTokenConditions, setTokenEffects, setTokenHp, setTokenSecret, updateToken } from '../../../shared/cloud/api/vtt.js';
+import {
+  DEAD_CONDITION_KEY,
+  setConditionActive,
+} from '../../../shared/character/combat/conditions.js';
+import {
+  deleteToken,
+  setTokenConditions,
+  setTokenEffects,
+  setTokenHp,
+  setTokenSecret,
+  updateToken,
+} from '../../../shared/cloud/api/vtt.js';
 import { useTokenVitalCommands } from './useTokenVitalCommands.js';
-import { FIGHT_UNAVAILABLE, commitFightCombatantVitals } from '../../../shared/cloud/api/encounterFights.js';
+import {
+  FIGHT_UNAVAILABLE,
+  commitFightCombatantVitals,
+} from '../../../shared/cloud/api/encounterFights.js';
 import { parseSourceRef } from '../../../shared/vtt/tokens/encounterSync.js';
-import { monsterEditFromToken, monsterVitalsBase, monsterVitalsPatch } from '../../../shared/vtt/tokens/fightVitals.js';
+import {
+  monsterEditFromToken,
+  monsterVitalsBase,
+  monsterVitalsPatch,
+} from '../../../shared/vtt/tokens/fightVitals.js';
 
 // Changing pieces already on the scene: conditions, reminders, HP and the rest
 // of the token menu, death saves, visibility, deletion. A character's vitals go

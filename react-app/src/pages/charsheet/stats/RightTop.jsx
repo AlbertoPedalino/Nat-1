@@ -4,12 +4,22 @@ import { Sparkles } from 'lucide-react';
 import { getInitiative, getPB, fbonus } from '../state/calculations.js';
 import { getConditionsWithEffect } from '../../../shared/character/combat/conditions.js';
 import { getArmorTrainingInfo } from '../proficiency/proficiencies.js';
-import { collectResolvedResistanceItems, collectResolvedImmunityItems } from '../state/sheetDefenses.js';
+import {
+  collectResolvedResistanceItems,
+  collectResolvedImmunityItems,
+} from '../state/sheetDefenses.js';
 import { getInitiativeAdvantageFromEffects } from '../state/effectBonuses.js';
 import { advantageVisual } from './advantageMark.jsx';
-import { collectItemResistanceItems, collectItemImmunityItems, collectItemConditionImmunityItems, collectItemEffects } from '../../../shared/character/inventory/itemEffects.js';
+import {
+  collectItemResistanceItems,
+  collectItemImmunityItems,
+  collectItemConditionImmunityItems,
+  collectItemEffects,
+} from '../../../shared/character/inventory/itemEffects.js';
 import { computeBestArmorClass } from '../../../shared/character/combat/ac.js';
-import { resolveInitiativeTriggeredResourceRecoveries } from '../../../shared/character/combat/initiativeEffects.js';
+import {
+  resolveInitiativeTriggeredResourceRecoveries,
+} from '../../../shared/character/combat/initiativeEffects.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import ACDisplay from './ACDisplay.jsx';
 import ConditionsBlock from './ConditionsBlock.jsx';

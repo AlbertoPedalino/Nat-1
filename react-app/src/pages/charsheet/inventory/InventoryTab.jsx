@@ -1,10 +1,23 @@
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { Box, Button, TextField, Typography, Alert } from '@mui/material';
-import { Backpack, Check, ChevronDown, ChevronRight, Package, Plus, Shield, Sparkles, Swords } from 'lucide-react';
+import {
+  Backpack,
+  Check,
+  ChevronDown,
+  ChevronRight,
+  Package,
+  Plus,
+  Shield,
+  Sparkles,
+  Swords,
+} from 'lucide-react';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import { getFinal } from '../state/calculations.js';
 import { installedRegistry } from '../../../adapters/index.js';
-import { availableItemFlagDefs, toggleItemFlag } from '../../../shared/character/inventory/itemFlags.js';
+import {
+  availableItemFlagDefs,
+  toggleItemFlag,
+} from '../../../shared/character/inventory/itemFlags.js';
 import {
   THROWN_SLOT,
   equipToSlot as equipToSlotHelper,
@@ -12,7 +25,10 @@ import {
 } from './equipmentSlots.js';
 
 import { ItemNameIcon } from '../../../shared/content/FiveEToolsLink.jsx';
-import { addInventoryEntries, setOneInventoryUnitCarried } from '../../../shared/character/inventory/itemContainers.js';
+import {
+  addInventoryEntries,
+  setOneInventoryUnitCarried,
+} from '../../../shared/character/inventory/itemContainers.js';
 import {
   countAttunedItems,
   toggleItemAttunement,
@@ -22,9 +38,15 @@ import { getArmorPenalties } from './armorPenalties.js';
 import { getCharacterAttunementState } from './attunement.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import { CurrencyRow } from '../../../shared/character/inventory/CurrencyCoinBox.jsx';
-import { setCoinAmount, updateCustomCurrency } from '../../../shared/character/inventory/currency.js';
+import {
+  setCoinAmount,
+  updateCustomCurrency,
+} from '../../../shared/character/inventory/currency.js';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
-import { ItemReferenceBody, QuantityAdder } from '../../../shared/character/inventory/ItemReference.jsx';
+import {
+  ItemReferenceBody,
+  QuantityAdder,
+} from '../../../shared/character/inventory/ItemReference.jsx';
 import { writeOnScroll } from '../../../shared/character/inventory/spellScrolls.js';
 import InventoryRow from './InventoryRow.jsx';
 import {
@@ -41,7 +63,10 @@ import {
   setInventoryItemCharges,
 } from '../../../shared/character/inventory/itemCharges.js';
 import ItemFilterPanel from '../../../shared/character/inventory/ItemFilterPanel.jsx';
-import { hasActiveItemFilters, itemMatchesFilters } from '../../../shared/character/inventory/itemFilters.js';
+import {
+  hasActiveItemFilters,
+  itemMatchesFilters,
+} from '../../../shared/character/inventory/itemFilters.js';
 import { useItemFilters } from '../../../shared/character/inventory/useItemFilters.js';
 import { usePagedList } from '../../../shared/ui/usePagedList.js';
 import {
@@ -51,7 +76,13 @@ import {
   itemGroupKey as itemType,
   matchesItemGroupChip,
 } from '../../../shared/character/inventory/itemGroups.js';
-import { itemMatchesSearch, compareItemsBySearch, itemMatchesPreparedSearch, byItemName, loadItemsCached } from './itemSearch.js';
+import {
+  itemMatchesSearch,
+  compareItemsBySearch,
+  itemMatchesPreparedSearch,
+  byItemName,
+  loadItemsCached,
+} from './itemSearch.js';
 
 // Keys and labels come from the shared chip taxonomy; the sheet only adds the
 // icons, which are its own presentation. The add-item search gets the plain set

@@ -1,4 +1,7 @@
-import { inventoryStackKey, isInventoryItemStackable } from '../../../shared/character/inventory/itemIdentity.js';
+import {
+  inventoryStackKey,
+  isInventoryItemStackable,
+} from '../../../shared/character/inventory/itemIdentity.js';
 import { hasOwnedFeat } from '../../../shared/character/progression/selectedFeats.js';
 
 export const THROWN_SLOT = 'thrown';

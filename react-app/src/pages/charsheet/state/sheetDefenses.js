@@ -1,4 +1,14 @@
-import { asArray, cleanText, norm, displayLabel, inferDamageTypeFromText, resolveChoiceValue, collectSheetEffects, effectTitle, effectSummary } from './sheetEffects.js';
+import {
+  asArray,
+  cleanText,
+  norm,
+  displayLabel,
+  inferDamageTypeFromText,
+  resolveChoiceValue,
+  collectSheetEffects,
+  effectTitle,
+  effectSummary,
+} from './sheetEffects.js';
 
 // Damage resistances and immunities as the sheet and the builder preview show
 // them: the species' and other static defense blocks, the choices that pick a

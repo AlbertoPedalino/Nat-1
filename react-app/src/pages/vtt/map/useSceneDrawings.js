@@ -1,7 +1,19 @@
 import { useCallback, useMemo, useState } from 'react';
-import { createDrawing, deleteDrawing, moveDrawing, updateDrawing } from '../../../shared/cloud/api/vtt.js';
+import {
+  createDrawing,
+  deleteDrawing,
+  moveDrawing,
+  updateDrawing,
+} from '../../../shared/cloud/api/vtt.js';
 import { applyCommittedDrawing } from '../../../shared/vtt/session/liveScene.js';
-import { canEraseDrawing, canMoveDrawing, drawingAtPoint, lastDrawing, movedPoints, sanitizeNoteText } from '../../../shared/vtt/map/drawing.js';
+import {
+  canEraseDrawing,
+  canMoveDrawing,
+  drawingAtPoint,
+  lastDrawing,
+  movedPoints,
+  sanitizeNoteText,
+} from '../../../shared/vtt/map/drawing.js';
 import { areaEffect } from '../../../shared/vtt/map/areas.js';
 
 // The scene's marks: freehand strokes, areas of effect, text notes and their
