@@ -99,10 +99,6 @@ function tempHpOf(value) {
   return Math.max(0, Math.round(Number(value) || 0));
 }
 
-// The commands that are amounts rather than values: safe to apply again to a
-// newer copy after a conflict.
-export const RELATIVE_VITAL_COMMANDS = new Set(['modifyHp', 'modifyTempHp', 'modifyMaxHp']);
-
 // Damage, healing, temporary and maximum hit points for a creature, with the
 // builder's rules (combat.js): damage takes temporary HP first, healing never
 // passes the maximum, lowering the maximum lowers current HP but raising it

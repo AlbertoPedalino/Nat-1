@@ -323,23 +323,14 @@ test('damage on an encounter creature is applied to its stored combatant, tempor
   expect(m.setTokenHp).not.toHaveBeenCalled();
 });
 
-test('a step that lost a race applies once more to the values the database answered with', async () => {
-  m.fightRows.current = [fightWith({ hpCurrent: 30, hpMax: 59 })];
-  m.commit
-    .mockResolvedValueOnce({ applied: false, row: fightWith({ hpCurrent: 25, hpMax: 59 }) })
-    .mockResolvedValueOnce({ applied: true, row: null });
-  const { onVitals } = await ogreMenuVitals();
-  await act(async () => { await onVitals({ type: 'modifyHp', delta: -10 }); });
-  expect(m.commit).toHaveBeenCalledTimes(2);
-  expect(m.commit.mock.calls[1][2]).toEqual({ base: { hpCurrent: 25, hpMax: 59, tempHP: null }, patch: { hpCurrent: 15 } });
-  expect(m.notify).not.toHaveBeenCalled();
-});
-
-test('a value set outright is not replayed over a newer one', async () => {
+test.each([
+  ['damage', { type: 'modifyHp', delta: -10 }],
+  ['a value set outright', { type: 'setTempHp', value: 6 }],
+])('%s that lost a race is not replayed: the map shows the answer and warns', async (_, command) => {
   m.fightRows.current = [fightWith({ hpCurrent: 30, hpMax: 59 })];
   m.commit.mockResolvedValue({ applied: false, row: fightWith({ hpCurrent: 25, hpMax: 59 }) });
   const { onVitals } = await ogreMenuVitals();
-  await act(async () => { await onVitals({ type: 'setTempHp', value: 6 }); });
+  await act(async () => { await onVitals(command); });
   expect(m.commit).toHaveBeenCalledTimes(1);
   expect(m.notify).toHaveBeenCalledWith('warning', expect.any(String));
 });

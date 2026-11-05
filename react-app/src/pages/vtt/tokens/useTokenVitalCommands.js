@@ -8,7 +8,6 @@ import {
   monsterVitalsBase,
   monsterVitalsPatch,
   newerFightRow,
-  RELATIVE_VITAL_COMMANDS,
 } from '../../../shared/vtt/tokens/fightVitals.js';
 
 // The hit points of any piece, from its menu: damage, healing, temporary and
@@ -32,28 +31,23 @@ export function useTokenVitalCommands({
     const fightId = String(ref.fightId);
     const run = async () => {
       const latestRow = newerFightRow(answeredFightsRef.current[fightId], fightsRef.current[fightId]);
-      let before = linkedCombatant({ [fightId]: latestRow }, ref);
+      const before = linkedCombatant({ [fightId]: latestRow }, ref);
       if (!before) return;
       try {
-        // Damage and healing are amounts: on a conflict they apply once more
-        // to the values the database answered with. A value set outright is
-        // not replayed over somebody else's.
-        for (let attempt = 0; attempt < 2; attempt += 1) {
-          const patch = monsterVitalsPatch(before, applyMonsterVitalCommand(before, command));
-          if (!Object.keys(patch).length) return;
-          const { applied, row } = await commitFightCombatantVitals(ref.fightId, ref.combatantId, {
-            base: monsterVitalsBase(before),
-            patch,
-          });
-          if (row) {
-            answeredFightsRef.current[fightId] = row;
-            gmVitals.acceptFight(row);
-          }
-          if (applied) return;
-          const latest = row && linkedCombatant({ [fightId]: row }, ref);
-          if (!latest || !RELATIVE_VITAL_COMMANDS.has(command.type)) break;
-          before = latest;
+        // Sent once, like every health command: a conflict is never replayed,
+        // damage and healing included. The map realigns on the answer and the
+        // GM repeats the step if it still applies.
+        const patch = monsterVitalsPatch(before, applyMonsterVitalCommand(before, command));
+        if (!Object.keys(patch).length) return;
+        const { applied, row } = await commitFightCombatantVitals(ref.fightId, ref.combatantId, {
+          base: monsterVitalsBase(before),
+          patch,
+        });
+        if (row) {
+          answeredFightsRef.current[fightId] = row;
+          gmVitals.acceptFight(row);
         }
+        if (applied) return;
         notify('warning', 'This creature changed elsewhere. Showing the latest values; try again if needed.');
       } catch (cause) {
         notify('error', cause?.message || 'Could not update that creature.');
