@@ -8,19 +8,13 @@ import {
   armorSetTrainsKind,
   getArmorKindEntry,
 } from './armorRules.js';
-
-function requireSets(sets, fnName) {
-  if (!sets) {
-    throw new Error(`${fnName} requires equipmentSets from collectEquipmentProficiencySets(character)`);
-  }
-  return sets;
-}
+import { requireEquipmentSets } from './equipmentSets.js';
 
 export function getWeaponProficiencyInfo(character, item, weaponOverride, equipmentSets) {
   const itemType = String(item?.type || '').toUpperCase();
   if (!item || !['M', 'R'].includes(itemType)) return { proficient: true, source: '' };
   if (weaponOverride?.grantsProficiency) return { proficient: true, source: weaponOverride.label || weaponOverride.key || '' };
-  const { weaponRules } = requireSets(equipmentSets, 'getWeaponProficiencyInfo');
+  const { weaponRules } = requireEquipmentSets(equipmentSets, 'getWeaponProficiencyInfo');
   const matched = weaponRules.find((rule) => weaponMatchesRule(item, rule));
   if (matched) return { proficient: true, source: formatRule(matched) };
   return { proficient: false, source: '' };
@@ -32,12 +26,12 @@ export function getArmorTrainingInfo(character, item, armorOverride, equipmentSe
   if (armorOverride?.grantsTraining) {
     return { trained: true, kind: entry.kind, source: armorOverride.label || armorOverride.key || '' };
   }
-  const { armorSet } = requireSets(equipmentSets, 'getArmorTrainingInfo');
+  const { armorSet } = requireEquipmentSets(equipmentSets, 'getArmorTrainingInfo');
   return { trained: armorSetTrainsKind(armorSet, entry), kind: entry.kind };
 }
 
 export function getUntrainedArmor(character, inventory, equipmentSets) {
-  const sets = requireSets(equipmentSets, 'getUntrainedArmor');
+  const sets = requireEquipmentSets(equipmentSets, 'getUntrainedArmor');
   return (inventory || [])
     .filter((item) => item.equipped && ARMOR_KIND_KEYS[String(item.type || '').toUpperCase()])
     .map((item) => ({ item, info: getArmorTrainingInfo(character, item, null, sets) }))

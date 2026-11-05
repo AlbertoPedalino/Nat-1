@@ -9,20 +9,14 @@
  */
 
 import { getArmorTrainingInfo } from '../proficiency/proficiencies.js';
+import { requireEquipmentSets } from '../proficiency/equipmentSets.js';
 import { getFinal } from '../state/calculations.js';
-
-function requireSets(sets, fnName) {
-  if (!sets) {
-    throw new Error(`${fnName} requires equipmentSets from collectEquipmentProficiencySets(character)`);
-  }
-  return sets;
-}
 
 export function getArmorPenalties(C, item, equipmentSets) {
   if (!item || !['LA', 'MA', 'HA', 'S'].includes(item.type)) {
     return { hasPenalty: false, penalties: [], cannotCastSpells: false };
   }
-  const sets = requireSets(equipmentSets, 'getArmorPenalties');
+  const sets = requireEquipmentSets(equipmentSets, 'getArmorPenalties');
 
   const penalties = [];
   const info = getArmorTrainingInfo(C, item, null, sets);
@@ -56,7 +50,7 @@ export function getArmorPenalties(C, item, equipmentSets) {
 }
 
 export function getEquippedArmorPenalties(C, inventory, equipmentSets) {
-  const sets = requireSets(equipmentSets, 'getEquippedArmorPenalties');
+  const sets = requireEquipmentSets(equipmentSets, 'getEquippedArmorPenalties');
   const equippedArmor = (inventory || [])
     .filter(item => item.equipped && ['LA', 'MA', 'HA', 'S'].includes(item.type));
 

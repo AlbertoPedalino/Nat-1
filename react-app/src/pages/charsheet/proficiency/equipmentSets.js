@@ -32,6 +32,15 @@ export function resolveWeaponProficiencyRules(character, adapterGrants) {
   return dedupeRules(rules);
 }
 
+// The sets a proficiency or armor query needs, or a clear error naming the
+// caller that forgot to collect them.
+export function requireEquipmentSets(sets, fnName) {
+  if (!sets) {
+    throw new Error(`${fnName} requires equipmentSets from collectEquipmentProficiencySets(character)`);
+  }
+  return sets;
+}
+
 export function collectEquipmentProficiencySets(character) {
   const sp = character?.clsSnapshot?.startingProficiencies || {};
   const armorSet = new Set();
