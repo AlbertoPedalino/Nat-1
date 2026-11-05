@@ -9,14 +9,19 @@ import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import { carryCapacity, formatWeight, totalCarriedWeight } from '../../../shared/character/inventory/weight.js';
 import { getActiveWildShape } from '../../../shared/character/forms/wildShapeForm.js';
 
+const EXTRA_SPEED_MODES = ['burrow', 'climb', 'fly', 'swim'];
+
+// 5etools marks a mode "equal to your Speed" with `true` (e.g. Dhampir climb).
 function normalizeSpeed(speed) {
   if (typeof speed === 'number') return { walk: speed };
   if (!speed || typeof speed !== 'object') return { walk: 30 };
-  const out = {};
-  Object.entries(speed).forEach(([key, value]) => {
-    if (typeof value === 'number' && value > 0) out[key] = value;
+  const walk = typeof speed.walk === 'number' && speed.walk > 0 ? speed.walk : 30;
+  const out = { walk };
+  EXTRA_SPEED_MODES.forEach((mode) => {
+    const value = speed[mode];
+    if (typeof value === 'number' && value > 0) out[mode] = value;
+    else if (value === true) out[mode] = walk;
   });
-  if (!out.walk) out.walk = 30;
   return out;
 }
 
