@@ -10,6 +10,7 @@ import {
 import { getBackgroundPattern, getPrimaryClassLevel } from '../progression/calculations.js';
 import { handleBackgroundSelect, handleClassSelect, handleSpellToggle, handleWizardSpellbookToggle } from './stateHandlers.js';
 import { getChoiceLevel } from '../../../shared/character/progression/choiceLevels.js';
+import { rollPool } from '../../../shared/character/dice/dice.js';
 import {
   normalizeCoinAmount,
   setCoinAmount,
@@ -574,7 +575,7 @@ export function builderReducer(state, action) {
       return updateNestedCharacter(state, 'hpManualRolls', { [action.key]: action.value });
     case 'dice/roll': {
       const dicePool = Array.from({ length: 6 }, () => {
-        const rolls = Array.from({ length: 4 }, () => Math.floor(Math.random() * 6) + 1).sort((a, b) => b - a);
+        const rolls = rollPool(4, 6).sort((a, b) => b - a);
         return rolls[0] + rolls[1] + rolls[2];
       });
       return updateCharacter(state, {

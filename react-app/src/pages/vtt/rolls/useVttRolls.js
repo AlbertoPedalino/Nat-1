@@ -12,7 +12,7 @@ import {
 } from '../../../shared/vtt/rolls/rollFeed.js';
 import { throwFormula } from '../../../shared/vtt/rolls/throwRoll.js';
 import { normalizeRollIdentity } from '../../../shared/character/dice/rollLogPresentation.js';
-import { rollDice } from '../../encounterbuilder/rolls/dice.js';
+import { rollDice } from '../../../shared/character/dice/rollNotation.js';
 import { buildEncounterDiceToast } from '../../encounterbuilder/rolls/EncounterDiceToast.jsx';
 
 export function useVttRolls({ campaignId, role, roster, tokens }) {

@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useMemo, useReducer, useRef } from 'react';
-import { rollDice } from '../rolls/dice.js';
+import { rollDice } from '../../../shared/character/dice/rollNotation.js';
 import { makeSavedEncounter } from './storage.js';
 import { encounterReducer, createInitialState } from './reducer.js';
 import { useEncounterPersistence } from './useEncounterPersistence.js';

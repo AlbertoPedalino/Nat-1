@@ -11,20 +11,17 @@ import {
 import { addReminder, normalizeEffects, removeEffect } from '../../../shared/character/combat/combatEffects.js';
 import { creatureRollSources } from '../../../shared/character/combat/rollSources.js';
 import { advArgFor, withExtraSource } from '../../../shared/character/dice/advantage.js';
+import { rollD20, rollDie } from '../../../shared/character/dice/dice.js';
 
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 export function d20(rng = Math.random) {
-  return Math.floor(rng() * 20) + 1;
+  return rollDie(20, rng);
 }
 
-// Initiative is a Dexterity check: advantage keeps the higher of two d20s,
-// disadvantage the lower (advArg as rollD20 takes it).
+// Initiative is a Dexterity check: a d20 test (advArg as rollD20 takes it).
 function rollInitiativeD20(advArg, rng) {
-  if (advArg !== true && advArg !== false) return d20(rng);
-  const first = d20(rng);
-  const second = d20(rng);
-  return advArg ? Math.max(first, second) : Math.min(first, second);
+  return rollD20(0, { advantage: advArg, rng }).kept;
 }
 
 // Who rolls initiative when an encounter launches, one row per creature in

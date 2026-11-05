@@ -1,4 +1,5 @@
 import { getSurgeEffect } from '../spells/wildMagicSurgeTable.js';
+import { rollDie } from './dice.js';
 
 const TABLES = {
   wildMagicSurge: {
@@ -17,7 +18,7 @@ export function rollTable(key, { count = 1 } = {}) {
   if (!table) return null;
   const rolls = [];
   for (let i = 0; i < count; i += 1) {
-    const value = Math.floor(Math.random() * table.sides) + 1;
+    const value = rollDie(table.sides);
     const entry = table.lookup ? table.lookup(value) : null;
     rolls.push({
       value,

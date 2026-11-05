@@ -1,6 +1,9 @@
-// Pure dice utilities + roll-result formatters.
-// Single source of truth for d20 tests and damage/heal/utility rolls so that
-// spell, action, and ability roll popups stay consistent.
+// The dice engine of the whole app: every die is rolled here (sheet, builder,
+// compendium, battle map, GM Board, character builder). Pure, plus d20 and
+// formula result formatters.
+//
+// Every roller takes an optional `rng` (a function returning [0, 1), like
+// Math.random) so tests and seeded generators can drive it.
 
 export const DICE_LIMITS = Object.freeze({
   formulaLength: 120,
@@ -10,8 +13,13 @@ export const DICE_LIMITS = Object.freeze({
   modifierAbs: 10000,
 });
 
-export function rollDie(faces) {
-  return Math.floor(Math.random() * Math.max(1, Number(faces) || 1)) + 1;
+export function rollDie(faces, rng = Math.random) {
+  return Math.floor(rng() * Math.max(1, Number(faces) || 1)) + 1;
+}
+
+// `count` dice of `faces` sides, in the order rolled.
+export function rollPool(count, faces, rng = Math.random) {
+  return Array.from({ length: Math.max(0, Number(count) || 0) }, () => rollDie(faces, rng));
 }
 
 function bonusText(bonus) {
@@ -19,7 +27,10 @@ function bonusText(bonus) {
   return b >= 0 ? `+${b}` : `${b}`;
 }
 
+// A d20 test: `advantage: true` keeps the higher of two d20s, `advantage:
+// false` (or `disadvantage: true`) the lower; anything else rolls one.
 export function rollD20(bonus, options = {}) {
+  const rng = options.rng || Math.random;
   const b = Number(bonus) || 0;
   let mode = 'normal';
   if (options.advantage === true) mode = 'advantage';
@@ -28,23 +39,23 @@ export function rollD20(bonus, options = {}) {
   let kept;
   let rolls;
   if (mode === 'advantage') {
-    const r1 = rollDie(20);
-    const r2 = rollDie(20);
+    const r1 = rollDie(20, rng);
+    const r2 = rollDie(20, rng);
     kept = Math.max(r1, r2);
     rolls = [
       { v: r1, faces: 20, kept: r1 >= r2 },
       { v: r2, faces: 20, kept: r2 > r1 },
     ];
   } else if (mode === 'disadvantage') {
-    const r1 = rollDie(20);
-    const r2 = rollDie(20);
+    const r1 = rollDie(20, rng);
+    const r2 = rollDie(20, rng);
     kept = Math.min(r1, r2);
     rolls = [
       { v: r1, faces: 20, kept: r1 <= r2 },
       { v: r2, faces: 20, kept: r2 < r1 },
     ];
   } else {
-    const r = rollDie(20);
+    const r = rollDie(20, rng);
     kept = r;
     rolls = [{ v: r, faces: 20, kept: true }];
   }
@@ -133,6 +144,7 @@ export function parseFormula(formula) {
       if (!Number.isSafeInteger(value)) {
         return invalidFormula('INVALID_MODIFIER', 'Formula modifier must be a safe integer.');
       }
+      terms.push({ flat: sign * value });
       modifier += sign * value;
       if (!Number.isSafeInteger(modifier) || Math.abs(modifier) > DICE_LIMITS.modifierAbs) {
         return invalidFormula(
@@ -145,14 +157,16 @@ export function parseFormula(formula) {
 
   const dice = [];
   for (const term of terms) {
-    for (let index = 0; index < term.count; index += 1) {
+    for (let index = 0; index < (term.count || 0); index += 1) {
       dice.push({ faces: term.faces, sign: term.sign });
     }
   }
-  return { valid: true, error: null, dice, modifier };
+  // `terms`: the formula as written, in order: { count, faces, sign } for a
+  // dice term, { flat } (signed) for a number.
+  return { valid: true, error: null, dice, modifier, terms };
 }
 
-export function rollFormula(formula) {
+export function rollFormula(formula, { rng = Math.random } = {}) {
   const parsed = parseFormula(formula);
   if (!parsed.valid) return { valid: false, error: parsed.error, total: null, rolls: [], modifier: 0 };
 
@@ -160,7 +174,7 @@ export function rollFormula(formula) {
   let total = modifier;
   const rolls = [];
   for (const die of dice) {
-    const v = rollDie(die.faces);
+    const v = rollDie(die.faces, rng);
     rolls.push({ v, faces: die.faces });
     total += die.sign * v;
   }

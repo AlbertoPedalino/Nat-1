@@ -12,6 +12,7 @@ import {
 } from '../../../shared/character/combat/conditions.js';
 import { addReminder, removeEffect } from '../../../shared/character/combat/combatEffects.js';
 import { clampDeathSaveCount } from '../../../shared/character/combat/vitals.js';
+import { rollDie } from '../../../shared/character/dice/dice.js';
 
 // The sheet's vitals handlers: hit points, temporary and bonus HP, death saves,
 // Exhaustion, conditions, reminders and Inspiration. Each one updates the sheet
@@ -113,7 +114,7 @@ export function useSheetVitals({ C, sheet, setSheet, persist, showDiceToast, sho
       showNotice('Death Save', sheet.deathSaves.success >= 3 ? 'Already stable' : 'Character is dead');
       return;
     }
-    const roll = Math.floor(Math.random() * 20) + 1;
+    const roll = rollDie(20);
     // A death saving throw is a D20 Test, so Exhaustion (−2/level) lowers the total
     // versus DC 10. The natural die still governs the crit (1 → two fails, 20 →
     // regain 1 HP) regardless of the penalty.

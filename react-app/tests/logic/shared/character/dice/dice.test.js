@@ -23,6 +23,7 @@ test('a flat integer remains a valid formula but contains no dice', () => {
     error: null,
     dice: [],
     modifier: 3,
+    terms: [{ flat: 3 }],
   });
 });
 

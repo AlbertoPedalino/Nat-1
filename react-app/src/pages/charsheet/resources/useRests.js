@@ -18,6 +18,7 @@ import {
 import { clearedToggles } from '../state/toggleState.js';
 import { applyFreeCastRest, getFreeCastDefsForCharacter } from '../spells/spellsTabLogic.js';
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
+import { rollDie } from '../../../shared/character/dice/dice.js';
 
 // A long rest reduces Exhaustion by 1 (XPHB 2024). Returns the patch fields that
 // lower the level and drop the pill once it reaches 0. Shared by both rest paths.
@@ -55,7 +56,7 @@ export function useRests({ C, sheet, setSheet, resources, setResources, freeCast
       if (!n) return;
       spendByPool[pool.key] = n;
       for (let i = 0; i < n; i++) {
-        const v = Math.floor(Math.random() * pool.faces) + 1;
+        const v = rollDie(pool.faces);
         rolls.push({ v, faces: pool.faces, label: pool.label });
         totalHeal += v + conMod;
       }

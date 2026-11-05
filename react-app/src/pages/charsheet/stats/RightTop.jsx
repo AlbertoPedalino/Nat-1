@@ -25,6 +25,7 @@ import ACDisplay from './ACDisplay.jsx';
 import ConditionsBlock from './ConditionsBlock.jsx';
 import RemindersBlock from './RemindersBlock.jsx';
 import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
+import { rollD20 } from '../../../shared/character/dice/dice.js';
 import DefensesPanel from './DefensesPanel.jsx';
 
 export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearConditions, effectActions, onSetExhaustion, conditionEntries, onToggleInspiration, resources, setResources, onShowToast }) {
@@ -45,10 +46,9 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
   const rollInitiative = useCallback((advArg) => {
     const initMode = advArg === true ? 'adv' : advArg === false ? 'disadv' : null;
     // Advantage keeps the higher of 2d20, disadvantage the lower.
-    const r1 = Math.floor(Math.random() * 20) + 1;
-    const r2 = initMode ? Math.floor(Math.random() * 20) + 1 : null;
-    const d20 = r2 == null ? r1 : initMode === 'adv' ? Math.max(r1, r2) : Math.min(r1, r2);
-    const total = d20 + initMod;
+    const roll = rollD20(initMod, { advantage: advArg });
+    const d20 = roll.kept;
+    const total = roll.total;
     setLastInitiativeRoll({ d20, mod: initMod, total });
 
     const bonusText = initMod >= 0 ? `+${initMod}` : `${initMod}`;
@@ -70,9 +70,7 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
       setInitiativeMessage('');
     }
 
-    const dice = r2 != null
-      ? [{ v: r1, faces: 20, kept: r1 === d20 }, { v: r2, faces: 20, kept: r2 === d20 && r1 !== d20 }]
-      : [{ v: d20, faces: 20, kept: true }];
+    const dice = roll.rolls;
 
     const toastDetail = recoveryParts.length
       ? `d20${advText} ${bonusText} = ${total} · ${recoveryParts.map(a => `${a.label}: ${a.resourceLabel || a.resourceKey} ${a.from} → ${a.to}`).join(', ')}`

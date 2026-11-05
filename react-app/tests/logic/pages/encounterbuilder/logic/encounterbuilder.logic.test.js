@@ -35,7 +35,7 @@ import {
   toggleCombatantCondition,
 } from '../../../../../src/pages/encounterbuilder/combat/combat.js';
 import { effectId } from '../../../../../src/shared/character/combat/combatEffects.js';
-import { rollDice, rollDiceFormula } from '../../../../../src/pages/encounterbuilder/rolls/dice.js';
+import { rollDice, rollDiceFormula } from '../../../../../src/shared/character/dice/rollNotation.js';
 import {
   buildFumbleFormula,
   createDefaultFumbleTables,

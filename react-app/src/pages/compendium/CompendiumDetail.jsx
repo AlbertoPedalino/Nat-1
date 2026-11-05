@@ -9,7 +9,7 @@ import DiceToast from '../../shared/character/dice/DiceToast.jsx';
 import { COMPENDIUM_KIND_COLORS, chipTintStyle } from '../../shared/ui/entityColors.js';
 import { StatBlockHeader, StatBlockSheet } from '../encounterbuilder/bestiary/StatBlockDialog.jsx';
 import { monster5eUrl } from '../encounterbuilder/bestiary/monsterUtils.js';
-import { rollDice } from '../encounterbuilder/rolls/dice.js';
+import { rollDice } from '../../shared/character/dice/rollNotation.js';
 import { buildEncounterDiceToast } from '../encounterbuilder/rolls/EncounterDiceToast.jsx';
 import { compendiumKind } from './compendiumIndex.js';
 
