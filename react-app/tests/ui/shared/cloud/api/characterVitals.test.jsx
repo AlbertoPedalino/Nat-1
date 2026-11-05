@@ -223,5 +223,9 @@ describe('the rare legacy path', () => {
     expect(server.reads.some((read) => read.upsert)).toBe(true);
     expect(server.rpc).toHaveBeenCalledOnce();
     expect(server.data.currentHP).toBe(22);
+    // The local copy now knows the revision it created: its next autosave is an
+    // ordinary conditional update, not a conflict with itself.
+    const { getCharacterSyncMeta } = await import('../../../../../src/shared/character/profile/store.js');
+    expect(getCharacterSyncMeta('pc').sheetRevision).toBe(0);
   });
 });

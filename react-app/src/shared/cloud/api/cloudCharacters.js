@@ -263,9 +263,10 @@ async function stateFromSheet(charId) {
     }
     // The first command on a newly created local sheet can precede autosave.
     // Insert its starting state, then apply the intent once via the same RPC.
-    const local = storeLoadCharacter(charId);
-    if (!local) throw new Error('Character unavailable or no permission.');
-    await pushCharacterData(charId, local);
+    // Through pushCharacter, so the local copy records the revision it created
+    // and its next autosave is not refused as a conflict with itself.
+    if (!storeLoadCharacter(charId)) throw new Error('Character unavailable or no permission.');
+    await pushCharacter(charId);
     digest = await readDigest(charId);
     if (!digest) throw new Error('Character health update requires the database migration.');
   }
