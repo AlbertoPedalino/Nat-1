@@ -1,6 +1,11 @@
-// The dice engine of the whole app: every die is rolled here (sheet, builder,
-// compendium, battle map, GM Board, character builder). Pure, plus d20 and
-// formula result formatters.
+// The dice engine of the whole app: every random die is rolled here (sheet,
+// builder, compendium, battle map, GM Board, character builder). Pure, plus d20
+// and formula result formatters.
+//
+// One roll is decided otherwise, on purpose: a custom roll thrown in the
+// battle map's dice tray (shared/vtt/rolls/throwRoll.js) reads its formula with
+// parseFormula below, but its result is the faces a seeded physics throw lands
+// on, so every screen replays the same throw.
 //
 // Every roller takes an optional `rng` (a function returning [0, 1), like
 // Math.random) so tests and seeded generators can drive it.
