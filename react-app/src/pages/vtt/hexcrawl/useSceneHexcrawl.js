@@ -16,6 +16,7 @@ import {
 import { resolveManualAdvance } from '../../gmboard/hexcrawl/hex.js';
 import { useCampaignClock } from '../../../shared/hexcrawl/useCampaignClock.js';
 import { hexKey, isHexGrid } from '../../../shared/vtt/map/hexGeometry.js';
+import { listenForRecovery } from '../../../shared/cloud/sync/recoveryTriggers.js';
 
 // The map's half of the hexcrawl: the hexes of this scene, the campaign's clock,
 // and the board whose tables the rolls come from.
@@ -28,9 +29,6 @@ const EMPTY_CELLS = new Map();
 // Long enough to read three lines and decide whether to open the rolls, short
 // enough that a bubble is never still sitting on the map two hexes later.
 const BUBBLE_MS = 12000;
-// A safety net only: focus re-reads at once, every roll forces a fresh read,
-// and the check itself is a version number before any board download.
-export const BOARD_REFRESH_MS = 30_000;
 
 export function useSceneHexcrawl({ scene, isGm }) {
   const campaignId = scene?.campaignId || null;
@@ -194,14 +192,12 @@ export function useSceneHexcrawl({ scene, isGm }) {
       if (!cancelled && !boardRef.current) setBoard(null);
     });
     refresh();
-    const timer = setInterval(refresh, BOARD_REFRESH_MS);
-    const onFocus = () => refresh();
-    window.addEventListener('focus', onFocus);
+    // Map content: followed in a background tab too, like the scene.
+    const stopRecovery = listenForRecovery(() => refresh(), { periodic: true, whenHidden: true });
     return () => {
       cancelled = true;
       if (boardScopeRef.current === scope) boardScopeRef.current = null;
-      clearInterval(timer);
-      window.removeEventListener('focus', onFocus);
+      stopRecovery();
     };
   }, [refreshBoard]);
 

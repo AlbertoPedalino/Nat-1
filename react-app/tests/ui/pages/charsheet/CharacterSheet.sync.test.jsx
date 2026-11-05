@@ -218,13 +218,15 @@ test('an editable sheet opens one digest channel and never touches the character
   expect(cloud.revision).not.toHaveBeenCalled();
 });
 
-test('idle: an open sheet reads nothing on a timer, neither digest nor sheet', async () => {
+test('idle: an open sheet only makes the light check every 30 s, and never downloads itself', async () => {
   await openSheet();
   const listed = cloud.list.mock.calls.length;
+  const checked = cloud.revision.mock.calls.length;
   await act(async () => { await vi.advanceTimersByTimeAsync(5 * 30_000); });
-  expect(cloud.list.mock.calls.length - listed).toBe(0);
+  // One digest read and one revision read per interval: a few hundred bytes.
+  expect(cloud.list.mock.calls.length - listed).toBe(5);
+  expect(cloud.revision.mock.calls.length - checked).toBe(5);
   expect(cloud.get).not.toHaveBeenCalled();
-  expect(cloud.revision).not.toHaveBeenCalled();
   expect(cloud.sheets).not.toHaveBeenCalled();
   expect(screen.getByTestId('hp')).toHaveTextContent('20');
 });
@@ -343,8 +345,8 @@ test('campaign-sheet?edit=1 reads the row once and receives GM damage through th
   await receive(15, 1);
   expect(screen.getByTestId('hp')).toHaveTextContent('15');
   await act(async () => { await vi.advanceTimersByTimeAsync(3 * 30_000); });
+  // The periodic check reads the revision, never the row again.
   expect(cloud.get).toHaveBeenCalledOnce();
-  expect(cloud.revision).not.toHaveBeenCalled();
   expect(rowChannels()).toHaveLength(0);
   expect(cloud.save).not.toHaveBeenCalled();
 });

@@ -20,10 +20,10 @@ const EMPTY = new Map();
 // digest that only moved hit points or conditions costs a few hundred bytes.
 //
 // Recovery is the same light read everywhere — the digests themselves — on
-// SUBSCRIBED (first join and every reconnect), coming back to the tab, going
-// online, and a failed command of this tab. Nothing is read on a timer: an
-// event Realtime missed is repaired by the next digest of that character (each
-// is a whole snapshot) or by the next of these triggers.
+// SUBSCRIBED (first join and every reconnect), a failed command of this tab,
+// and the shared recovery triggers (back online, back to the tab, every
+// RECOVERY_INTERVAL_MS while shown): a projector or a second screen nobody
+// comes back to is repaired too.
 //
 // `deriveMaxHp: false` is for a consumer that already holds the sheet (an
 // editable CharacterSheet derives its own maximum): no sheet is ever read.
@@ -212,7 +212,7 @@ export function useCharacterDigests({ campaignId = null, characterIds = null, en
     };
     window.addEventListener(CHARACTER_VITALS_EVENT, receiveVitals);
     window.addEventListener(CHARACTER_RECHECK_EVENT, recheck);
-    const stopRecovery = listenForRecovery(() => reconcile());
+    const stopRecovery = listenForRecovery(() => reconcile(), { periodic: true });
     return () => {
       readRef.current += 1;
       window.removeEventListener(CHARACTER_VITALS_EVENT, receiveVitals);

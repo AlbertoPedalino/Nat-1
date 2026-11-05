@@ -1,6 +1,7 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, vi } from 'vitest';
-import { CLOCK_FALLBACK_MS, useCampaignClock } from '../../../../src/shared/hexcrawl/useCampaignClock.js';
+import { useCampaignClock } from '../../../../src/shared/hexcrawl/useCampaignClock.js';
+import { RECOVERY_INTERVAL_MS } from '../../../../src/shared/cloud/sync/recoveryTriggers.js';
 
 const api = vi.hoisted(() => ({
   readCampaignClock: vi.fn(), saveCampaignClock: vi.fn(), subscribeHexcrawl: vi.fn(),
@@ -91,7 +92,7 @@ describe('traffic', () => {
     const loadingSeen = [];
     await act(async () => { await vi.advanceTimersByTimeAsync(5_000); });
     expect(api.readCampaignClock).toHaveBeenCalledTimes(1);
-    await act(async () => { await vi.advanceTimersByTimeAsync(CLOCK_FALLBACK_MS); });
+    await act(async () => { await vi.advanceTimersByTimeAsync(RECOVERY_INTERVAL_MS); });
     loadingSeen.push(result.current.loading);
     expect(api.readCampaignClock).toHaveBeenCalledTimes(2);
     expect(api.listCampaignLog).toHaveBeenCalledTimes(1);

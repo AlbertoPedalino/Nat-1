@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../cloud/auth/AuthProvider.jsx';
 import { readHexcrawlBoardCampaign } from '../cloud/api/hexcrawl.js';
+import { listenForRecovery } from '../cloud/sync/recoveryTriggers.js';
 
 // The board-campaign link changes rarely and local changes announce
-// themselves; the timer only catches another device's edit.
-const LINK_REFRESH_MS = 30_000;
+// themselves; the shared recovery triggers catch another device's edit.
 
 // Read the same campaign -> board relation as the map. Saved board blobs never
 // decide which campaign receives writes, including after a link is replaced.
@@ -29,13 +29,11 @@ export function useBoardCampaign(boardId) {
       }
     };
     refresh();
-    const timer = setInterval(refresh, LINK_REFRESH_MS);
-    window.addEventListener('focus', refresh);
+    const stopRecovery = listenForRecovery(() => refresh(), { periodic: true });
     window.addEventListener('gb:campaign-board-link-changed', refresh);
     return () => {
       cancelled = true;
-      clearInterval(timer);
-      window.removeEventListener('focus', refresh);
+      stopRecovery();
       window.removeEventListener('gb:campaign-board-link-changed', refresh);
     };
   }, [active, boardId]);

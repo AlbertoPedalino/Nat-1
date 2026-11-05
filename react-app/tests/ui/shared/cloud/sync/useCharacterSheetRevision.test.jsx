@@ -25,6 +25,7 @@ vi.mock('../../../../../src/shared/cloud/api/cloudCharacters.js', () => ({
 }));
 
 import { useCharacterSheetRevision } from '../../../../../src/shared/cloud/sync/useCharacterSheetRevision.js';
+import { RECOVERY_INTERVAL_MS } from '../../../../../src/shared/cloud/sync/recoveryTriggers.js';
 import { publishCharacterSheetSaved } from '../../../../../src/shared/cloud/sync/characterEvents.js';
 
 const channel = () => m.channels.at(-1);
@@ -134,11 +135,10 @@ describe('useCharacterSheetRevision', () => {
     expect(props.onNewer).toHaveBeenCalledWith(9);
   });
 
-  test('no periodic timer: hours idle read nothing', async () => {
+  test('idle: one light revision read per recovery interval, nothing else', async () => {
     follow();
-    await act(async () => { await vi.advanceTimersByTimeAsync(6 * 60 * 60 * 1000); });
-    expect(m.revision).not.toHaveBeenCalled();
-    expect(vi.getTimerCount()).toBe(0);
+    await act(async () => { await vi.advanceTimersByTimeAsync(4 * RECOVERY_INTERVAL_MS); });
+    expect(m.revision).toHaveBeenCalledTimes(4);
   });
 
   test('deleted: a DELETE event or a recovery read finding nothing', async () => {

@@ -42,6 +42,7 @@ vi.mock('../../../../../src/shared/campaign/characterVitals.js', () => ({
 }));
 
 import { useCharacterDigests } from '../../../../../src/shared/cloud/sync/useCharacterDigests.js';
+import { RECOVERY_INTERVAL_MS } from '../../../../../src/shared/cloud/sync/recoveryTriggers.js';
 import { toCharacterDigest } from '../../../../../src/shared/campaign/characterDigest.js';
 import { publishCharacterVitals, requestCharacterRecheck } from '../../../../../src/shared/cloud/sync/characterEvents.js';
 
@@ -191,7 +192,7 @@ describe('useCharacterDigests', () => {
 
 });
 
-describe('useCharacterDigests recovery is event-driven', () => {
+describe('useCharacterDigests recovery: events and the shared interval', () => {
   let visibility = 'visible';
 
   beforeEach(() => {
@@ -210,19 +211,15 @@ describe('useCharacterDigests recovery is event-driven', () => {
   });
   const fire = (type) => act(() => { window.dispatchEvent(new Event(type)); });
 
-  test('an idle roster reads nothing, however long it stays open', async () => {
+  test('an idle roster reads only the digests, once per recovery interval, never a sheet', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     await openCampaign();
     await act(async () => { channel().status('SUBSCRIBED'); });
     const listed = m.list.mock.calls.length;
     const read = m.sheets.mock.calls.length;
-    await act(async () => { await vi.advanceTimersByTimeAsync(60_000); });
-    await act(async () => { await vi.advanceTimersByTimeAsync(10 * 60_000); });
-    await act(async () => { await vi.advanceTimersByTimeAsync(4 * 60 * 60_000); });
-    expect(m.list.mock.calls.length).toBe(listed);
+    await act(async () => { await vi.advanceTimersByTimeAsync(10 * RECOVERY_INTERVAL_MS); });
+    expect(m.list.mock.calls.length - listed).toBe(10);
     expect(m.sheets.mock.calls.length).toBe(read);
-    // Nothing left scheduled: the hook keeps no timer of its own.
-    expect(vi.getTimerCount()).toBe(0);
   });
 
   test('coming back to the tab reconciles once per return: focus, then hidden -> visible', async () => {

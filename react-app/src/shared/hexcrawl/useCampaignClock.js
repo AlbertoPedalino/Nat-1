@@ -7,7 +7,7 @@ import {
   subscribeHexcrawl,
 } from '../cloud/api/hexcrawl.js';
 import { useAuth } from '../cloud/auth/AuthProvider.jsx';
-import { coalesceReturns } from '../cloud/sync/returnGate.js';
+import { listenForRecovery } from '../cloud/sync/recoveryTriggers.js';
 
 // The campaign's travelling clock, shared by the GM Board and the map.
 //
@@ -16,8 +16,6 @@ import { coalesceReturns } from '../cloud/sync/returnGate.js';
 // changing, or the two screens would echo each other's updates forever.
 
 const IDLE = Object.freeze({ clock: null, log: [], loading: false });
-// Realtime is the live path; this is only the safety net for missed events.
-export const CLOCK_FALLBACK_MS = 60_000;
 
 function sameLog(a, b) {
   if (a === b) return true;
@@ -108,16 +106,11 @@ export function useCampaignClock(campaignId, { withLog = false } = {}) {
     if (!active) return undefined;
     // Realtime carries changes; this only recovers ones missed while a phone
     // slept or a tab sat in the background.
-    const onReturn = coalesceReturns(() => refresh());
-    const onVisible = () => { if (document.visibilityState === 'visible') onReturn(); };
-    const timer = setInterval(() => refresh({ includeLog: false }), CLOCK_FALLBACK_MS);
-    window.addEventListener('focus', onReturn);
-    document.addEventListener('visibilitychange', onVisible);
-    return () => {
-      clearInterval(timer);
-      window.removeEventListener('focus', onReturn);
-      document.removeEventListener('visibilitychange', onVisible);
-    };
+    // The periodic check reads the clock only; coming back reads the log too.
+    return listenForRecovery(
+      (reason) => refresh(reason === 'interval' ? { includeLog: false } : undefined),
+      { periodic: true },
+    );
   }, [active, refresh]);
 
   useEffect(() => {

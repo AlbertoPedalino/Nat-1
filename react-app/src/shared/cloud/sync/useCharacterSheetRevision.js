@@ -32,8 +32,9 @@ import { listenForRecovery } from './recoveryTriggers.js';
 // the view is busy — is ignored.
 //
 // Recovery, for an event Realtime lost: one light read of the revision on
-// SUBSCRIBED (first join and every reconnect), on coming back to the tab and
-// on going online. There is deliberately no periodic timer.
+// SUBSCRIBED (first join and every reconnect) and on the shared recovery
+// triggers (back online, back to the tab, every RECOVERY_INTERVAL_MS while
+// shown).
 
 function channelSuffix(characterId, instanceId) {
   return `${characterId}-${instanceId}`.replace(/[^a-z0-9_-]/gi, '_').slice(0, 90);
@@ -166,7 +167,7 @@ export function useCharacterSheetRevision({
       if (String(detail?.characterId ?? '') === id) noteSaved(detail.sheetRevision);
     };
     window.addEventListener(CHARACTER_SHEET_SAVED_EVENT, receiveSaved);
-    const stopRecovery = listenForRecovery(() => check());
+    const stopRecovery = listenForRecovery(() => check(), { periodic: true });
     return () => {
       alive = false;
       window.removeEventListener(CHARACTER_SHEET_SAVED_EVENT, receiveSaved);

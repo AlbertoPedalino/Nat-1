@@ -21,10 +21,10 @@ import { readPersistedInstance } from '../../encounterbuilder/state/storage.js';
 import { restoreFight } from '../../encounterbuilder/combat/combat.js';
 import { importableCombatants } from '../../../shared/vtt/tokens/encounterImport.js';
 import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
+import { listenForRecovery } from '../../../shared/cloud/sync/recoveryTriggers.js';
 
-// Links change rarely and every local change announces itself (focus, the
-// gb:* link events, storage); the timer only catches another device's edit.
-const LINK_REFRESH_MS = 30_000;
+// Links change rarely and every local change announces itself (the gb:* link
+// events, storage); the shared recovery triggers catch another device's edit.
 
 // The dungeon a map is being played as: how many rooms, what is in them, and
 // what their fights are worth.
@@ -92,15 +92,13 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize, roster }) {
       }
     };
     refresh();
-    const timer = setInterval(refresh, LINK_REFRESH_MS);
-    window.addEventListener('focus', refresh);
+    const stopRecovery = listenForRecovery(() => refresh(), { periodic: true });
     window.addEventListener('gb:campaign-board-link-changed', refresh);
     window.addEventListener('gb:instance-links-changed', refresh);
     window.addEventListener('storage', refresh);
     return () => {
       cancelled = true;
-      clearInterval(timer);
-      window.removeEventListener('focus', refresh);
+      stopRecovery();
       window.removeEventListener('gb:campaign-board-link-changed', refresh);
       window.removeEventListener('gb:instance-links-changed', refresh);
       window.removeEventListener('storage', refresh);
