@@ -18,15 +18,11 @@ import SheetConflictBanner from '../../shared/ui/SheetConflictBanner.jsx';
 import { deriveSheetState } from './state/state.js';
 import { ProficiencySetsProvider } from './proficiency/ProficiencySetsContext.jsx';
 import { SheetActionsProvider } from './state/SheetActionsContext.jsx';
-import { collectReplicatePlanChoices } from '../../shared/character/inventory/replicateMagicItem.js';
-import { pruneReplicatedItemsForPlans } from '../../shared/character/inventory/magicItemTinker.js';
 import { useSheetVitals } from './state/useSheetVitals.js';
 import { useSheetRolls } from './state/useSheetRolls.js';
 import { useSheetCloudSave } from './state/useSheetCloudSave.js';
+import { initialSheetResources, loadSheetReferenceData, reconcileLoadedCharacter } from './state/sheetLoad.js';
 import { normalizeCharacterAttunement } from './inventory/attunement.js';
-import { getAllResourceDefs, normalizeResourceMax, resourceFullValue } from './resources/restResources.js';
-import { ensureSheetRuntimeAdapters } from './state/sheetRuntimeAdapters.js';
-import { loadItems, loadOptionalFeatures, loadConditions, reconcileInventoryWithItemsDb } from '../charbuilder/data/dataLoaders.js';
 import {
   commandCharacterVitals,
 } from '../../shared/cloud/api/cloudCharacters.js';
@@ -61,40 +57,6 @@ const EMBEDDED_SHEET_GRID = {
   `,
   gap: '0.55rem',
 };
-
-// The JSON fetcher caches raw files, but turning the full items/optional-feature
-// datasets into sheet-ready records is also expensive. Share that processed
-// work between every sheet mounted in this tab; a failed load is evicted so a
-// later character can still retry it.
-let itemsDbPromise = null;
-let optionalFeaturesPromise = null;
-let conditionsPromise = null;
-
-function cachedReferenceLoad(current, load, clear) {
-  if (current) return current;
-  const pending = load();
-  pending.catch(() => clear());
-  return pending;
-}
-
-function loadCachedItems() {
-  itemsDbPromise = cachedReferenceLoad(itemsDbPromise, loadItems, () => { itemsDbPromise = null; });
-  return itemsDbPromise;
-}
-
-function loadCachedOptionalFeatures() {
-  optionalFeaturesPromise = cachedReferenceLoad(
-    optionalFeaturesPromise,
-    loadOptionalFeatures,
-    () => { optionalFeaturesPromise = null; },
-  );
-  return optionalFeaturesPromise;
-}
-
-function loadCachedConditions() {
-  conditionsPromise = cachedReferenceLoad(conditionsPromise, loadConditions, () => { conditionsPromise = null; });
-  return conditionsPromise;
-}
 
 export default function CharacterSheet({
   externalChar = null,
@@ -174,64 +136,25 @@ export default function CharacterSheet({
       ? Number(externalSheetRevision ?? -1)
       : (id && ch ? (getCharacterSyncMeta(id).sheetRevision ?? -1) : null);
 
-    Promise.all([
-      // A failed adapter chunk (e.g. a stale-deploy 404) must not blank the whole
-      // sheet — fall back to base values and still render the character.
-      ensureSheetRuntimeAdapters(ch),
-      loadCachedItems().catch(() => []),
-      loadCachedOptionalFeatures().catch(() => []),
-      loadCachedConditions().catch(() => ({})),
-    ]).then(([, itemsDb, optFeatures, condEntries]) => {
+    loadSheetReferenceData(ch).then(({ itemsDb, optionalFeatures, conditionEntries: condEntries }) => {
       if (!alive) return;
-      setConditionEntries(condEntries || {});
+      setConditionEntries(condEntries);
 
-      // Re-merge structured effect fields from the items DB into the stored
-      // inventory so sheet calculations and item effects read canonical item
-      // records while preserving user-managed inventory state.
-      let nextChar = ch;
-      if (ch && Array.isArray(ch.inventory)) {
-        // Replacing a Replicate Magic Item plan immediately ends every item
-        // made from that plan. Apply this before DB reconciliation so a stale
-        // crafted item cannot survive by resolving against its old plan value.
-        const currentPlans = collectReplicatePlanChoices(ch);
-        const validInventory = pruneReplicatedItemsForPlans(ch.inventory, currentPlans);
-        const refreshed = reconcileInventoryWithItemsDb(validInventory, itemsDb);
-        const reconciled = normalizeCharacterAttunement({ ...ch, inventory: refreshed }, refreshed);
-        if (reconciled !== ch.inventory) {
-          nextChar = { ...ch, inventory: reconciled };
-          // Only a real change is a local edit (and a push): opening a sheet
-          // must not make an unchanged local copy look unsaved.
-          if (!externalChar && id && JSON.stringify(reconciled) !== JSON.stringify(ch.inventory)) {
-            storePatchCharacter(id, { inventory: reconciled });
-          }
-        }
+      const { character: nextChar, inventoryChanged } = reconcileLoadedCharacter(ch, itemsDb, optionalFeatures);
+      // Only a real change is a local edit (and a push): opening a sheet
+      // must not make an unchanged local copy look unsaved.
+      if (!externalChar && id && inventoryChanged) {
+        storePatchCharacter(id, { inventory: nextChar.inventory });
       }
-
-      // Runtime only: the catalog is rebuilt on every open and never persisted
-      // (runtimeFields.js strips it at every storage boundary).
-      if (optFeatures?.length) nextChar = { ...nextChar, optionalFeatureEntries: optFeatures };
 
       setCharId(id);
       setC(nextChar);
       setSheetBaseRevision(loadedRevision);
       if (nextChar) {
         setSheet(deriveSheetState(nextChar));
-        const stored = nextChar.resources && typeof nextChar.resources === 'object' ? nextChar.resources : {};
-        const allResDefs = getAllResourceDefs(nextChar);
-        const merged = { ...stored };
-        allResDefs.forEach((def) => {
-          if (!def.key) return;
-          const max = normalizeResourceMax(def, nextChar);
-          // 'used'-tracked pools (e.g. Lay on Hands) start empty (0 spent);
-          // 'remaining'-tracked resources start full (max).
-          const initial = resourceFullValue(def, max);
-          const cur = merged[def.key];
-          // Initialize new pools; clamp existing value to the recomputed max
-          // (e.g. after a level-up changed Proficiency Bonus).
-          merged[def.key] = cur == null ? initial : Math.min(Math.max(0, Number(cur) || 0), max);
-        });
+        const { resources: merged, changed } = initialSheetResources(nextChar);
         setResources(merged);
-        if (!externalChar && id && JSON.stringify(merged) !== JSON.stringify(stored)) {
+        if (!externalChar && id && changed) {
           storePatchCharacter(id, { resources: merged });
         }
         setFreeCastUses(nextChar.freeCastUses && typeof nextChar.freeCastUses === 'object' ? nextChar.freeCastUses : {});
