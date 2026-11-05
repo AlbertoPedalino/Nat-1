@@ -4,7 +4,8 @@ import { Backpack, Check, ChevronDown, ChevronRight, Minus, Package, Plus, Shiel
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import { loadItems } from '../../charbuilder/data/dataLoaders.js';
 import { getFinal } from '../state/calculations.js';
-import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
+import { installedRegistry } from '../../../adapters/index.js';
+import { availableItemFlagDefs, hasItemFlag, itemFlagFitsItem, toggleItemFlag } from '../../../shared/character/inventory/itemFlags.js';
 import {
   isWeapon,
   canOneHand,
@@ -19,7 +20,7 @@ import { ItemNameIcon } from '../../../shared/content/FiveEToolsLink.jsx';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { INVENTORY_SOURCE_PRIORITY, sourceRank } from '../../../shared/content/sourcePriority.js';
 import { addInventoryEntries, setOneInventoryUnitCarried } from '../../../shared/character/inventory/itemContainers.js';
-import { ITEM_ATTUNEMENT } from '../../../shared/ui/entityColors.js';
+import { ENTITY_COLORS, ITEM_ATTUNEMENT, chipTintStyle } from '../../../shared/ui/entityColors.js';
 import {
   attunementRequirementText,
   countAttunedItems,
@@ -210,33 +211,9 @@ function normalizeStoredItem(item) {
   };
 }
 
-function itemFlags(item) {
-  return Array.isArray(item?.flags) ? item.flags : [];
-}
-
 function parseDecimalInput(value) {
   const parsed = Number(String(value ?? '').trim().replace(',', '.'));
   return Number.isFinite(parsed) ? parsed : 0;
-}
-
-function hasItemFlag(item, flag) {
-  return itemFlags(item).includes(flag);
-}
-
-function hasWarlockInvocation(C, name) {
-  if (!C?.choices) return false;
-  return Object.entries(C.choices).some(([key, value]) => (
-    key.replace(/^mc\d+_/, '').startsWith('warlock_invocation_')
-    && String(value || '').split('|')[0].trim() === name
-  ));
-}
-
-function canUsePactWeaponFlag(C, item) {
-  if (!C || !item) return false;
-  const type = String(item.type || '').toUpperCase();
-  if (!['M', 'R', 'WEAPON'].includes(type)) return false;
-  const hasWarlock = C.className === 'Warlock' || (C.extraClasses || []).some((extra) => extra?.name === 'Warlock');
-  return hasWarlock && hasWarlockInvocation(C, 'Pact of the Blade');
 }
 
 function normalizeSearch(value) {
@@ -637,54 +614,14 @@ export default function InventoryTab({ C, sheet }) {
     updateInv(setOneInventoryUnitCarried(current, index, !isItemCarried(target)));
   }, [updateInv]);
 
-  const togglePactWeapon = useCallback((index) => {
+  // Flags a class feature lets the player put on an item (Pact Weapon, Arcane
+  // Armor…), declared by the adapters with registerItemFlagDef.
+  const itemFlagDefs = useMemo(() => availableItemFlagDefs(installedRegistry.getAllItemFlagDefs(), C), [C]);
+
+  const toggleFlag = useCallback((index, def) => {
     const current = invRef.current || [];
-    const target = current[index];
-    if (!canUsePactWeaponFlag(C, target)) return;
-    const next = current.map((item, idx) => {
-      const flags = itemFlags(item).filter((flag) => flag !== 'pactWeapon');
-      if (idx !== index) return flags.length === itemFlags(item).length ? item : { ...item, flags };
-      const shouldSet = !hasItemFlag(item, 'pactWeapon');
-      return { ...item, flags: shouldSet ? [...flags, 'pactWeapon'] : flags };
-    });
-    updateInv(next);
-  }, [C, updateInv]);
-
-  const isArmorer = useMemo(() => {
-    if (!C) return false;
-    const cls = String(C.className || '').toLowerCase();
-    const sub = String(C.subclassShortName || '').toLowerCase();
-    const lv = primaryClassLevel(C);
-    if (cls === 'artificer' && sub === 'armorer' && lv >= 3) return true;
-    return (C.extraClasses || []).some((ec) => String(ec.name || '').toLowerCase() === 'artificer' && String(ec.subclassShortName || '').toLowerCase() === 'armorer' && (ec.level || 1) >= 3);
-  }, [C]);
-
-  const _isArcaneEligible = (item) => {
-    const t = String(item.type || '').toUpperCase();
-    if (['S', 'SHIELD'].includes(t)) return false;
-    const n = String(item.name || '').toLowerCase();
-    if (n === 'shield' || n.endsWith(' shield')) return false;
-    const b = String(item.baseItem || '').toLowerCase();
-    if (b === 'shield' || b.endsWith(' shield')) return false;
-    return ['LA', 'MA', 'HA'].includes(t);
-  };
-
-  const toggleArcaneArmor = useCallback((index) => {
-    const current = invRef.current || [];
-    const target = current[index];
-    if (!_isArcaneEligible(target)) return;
-    const alreadyHas = hasItemFlag(target, 'arcaneArmor');
-    const next = current.map((item, idx) => {
-      if (idx !== index) {
-        if (alreadyHas) return item;
-        const flags = itemFlags(item).filter((flag) => flag !== 'arcaneArmor');
-        return { ...item, flags };
-      }
-      const flags = itemFlags(item).filter((flag) => flag !== 'arcaneArmor');
-      if (alreadyHas) return { ...item, flags };
-      return { ...item, flags: [...flags, 'arcaneArmor'] };
-    });
-    updateInv(next);
+    const next = toggleItemFlag(current, index, def);
+    if (next !== current) updateInv(next);
   }, [updateInv]);
 
   const toggleAttuned = useCallback((index, { curseBroken = false } = {}) => {
@@ -891,11 +828,8 @@ export default function InventoryTab({ C, sheet }) {
                     onEquipSlot={equipToSlot}
                     onCarried={toggleCarried}
                     penaltyMsg={getPenaltyMessage(C, item, profSets)}
-                    canPactWeapon={canUsePactWeaponFlag(C, item)}
-                    onPactWeapon={togglePactWeapon}
-                    isArmorer={isArmorer}
-                    hasArcaneArmor={hasItemFlag(item, 'arcaneArmor')}
-                    onArcaneArmor={toggleArcaneArmor}
+                    itemFlagDefs={itemFlagDefs}
+                    onToggleFlag={toggleFlag}
                     onAttune={toggleAttuned}
                     attunementFull={attunementFull}
                     character={C}
@@ -995,7 +929,7 @@ function ItemTagsRow({ item, character }) {
   );
 }
 
-const InventoryRow = memo(function InventoryRow({ item, index, onQty, onCharges, onRemove, onEquip, onEquipSlot, onCarried, penaltyMsg, canPactWeapon, onPactWeapon, isArmorer, hasArcaneArmor, onArcaneArmor, onAttune, attunementFull, character, attunementContext, attunementLimit, onSetAbilityChoice, onWriteOnScroll, onConsumeTome }) {
+const InventoryRow = memo(function InventoryRow({ item, index, onQty, onCharges, onRemove, onEquip, onEquipSlot, onCarried, penaltyMsg, itemFlagDefs, onToggleFlag, onAttune, attunementFull, character, attunementContext, attunementLimit, onSetAbilityChoice, onWriteOnScroll, onConsumeTome }) {
   const type = String(item.type || '').toUpperCase();
   const canEquip = ['M', 'R', 'LA', 'MA', 'HA', 'S', 'SCF', 'WD', 'RD', 'ST', 'WI', 'WEAPON', 'ARMOR'].includes(type);
   const carried = isItemCarried(item);
@@ -1068,18 +1002,9 @@ const InventoryRow = memo(function InventoryRow({ item, index, onQty, onCharges,
               {item.equipped ? 'Equip.' : 'Equip'}
             </Button>
           ) : null}
-          {carried && canPactWeapon ? (
-            <Button size="small" onClick={() => onPactWeapon(index)} startIcon={hasItemFlag(item, 'pactWeapon') ? <Check size={11} /> : null}
-              sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: hasItemFlag(item, 'pactWeapon') ? '#9d7fb8' : 'divider', borderRadius: '3px', color: hasItemFlag(item, 'pactWeapon') ? '#9d7fb8' : 'text.secondary', bgcolor: hasItemFlag(item, 'pactWeapon') ? 'rgba(157,127,184,0.14)' : 'transparent', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem' }}>
-              {hasItemFlag(item, 'pactWeapon') ? 'Pact' : 'Pact Weapon'}
-            </Button>
-          ) : null}
-          {carried && isArmorer && (() => { const t = String(item.type || '').toUpperCase(); const n = String(item.name || '').toLowerCase(); return ['LA', 'MA', 'HA'].includes(t) && !['S', 'SHIELD'].includes(t) && n !== 'shield' && !n.endsWith(' shield'); })() ? (
-            <Button size="small" onClick={() => onArcaneArmor(index)} startIcon={hasArcaneArmor ? <Check size={11} /> : null}
-              sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: hasArcaneArmor ? '#58b879' : 'divider', borderRadius: '3px', color: hasArcaneArmor ? '#58b879' : 'text.secondary', bgcolor: hasArcaneArmor ? 'rgba(88,184,121,0.14)' : 'transparent', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem' }}>
-              {hasArcaneArmor ? 'Arcane' : 'Arcane Armor'}
-            </Button>
-          ) : null}
+          {carried ? itemFlagDefs.filter((def) => itemFlagFitsItem(def, item)).map((def) => (
+            <ItemFlagButton key={def.key} def={def} active={hasItemFlag(item, def.key)} onClick={() => onToggleFlag(index, def)} />
+          )) : null}
           {carried && item.reqAttune ? (
             <AttuneButton item={item} index={index} attunementFull={attunementFull} character={character} attunementContext={attunementContext} attunementLimit={attunementLimit} onAttune={onAttune} />
           ) : null}
@@ -1198,6 +1123,19 @@ function AbilityChoicePanel({ item, onPick }) {
         );
       })}
     </Box>
+  );
+}
+
+function ItemFlagButton({ def, active, onClick }) {
+  const tone = def.tone || ENTITY_COLORS.class;
+  return (
+    <Button size="small" onClick={onClick} startIcon={active ? <Check size={11} /> : null}
+      sx={{
+        minWidth: 0, px: '7px', py: '2px', border: 1, borderRadius: '3px', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem',
+        ...(active ? chipTintStyle(tone, { bgAlpha: 0.14, borderAlpha: 1 }) : { borderColor: 'divider', color: 'text.secondary', bgcolor: 'transparent' }),
+      }}>
+      {active ? (def.activeLabel || def.label) : def.label}
+    </Button>
   );
 }
 

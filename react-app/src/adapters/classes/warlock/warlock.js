@@ -562,8 +562,10 @@ registerClassSheetActions("Warlock", [
 if (typeof registerItemFlagDef === 'function') {
   registerItemFlagDef("pactWeapon", {
     label: "Pact Weapon",
+    activeLabel: "Pact",
+    tone: "#9d7fb8",
     icon: "swords",
-    types: ['M', 'R'],
+    types: ['M', 'R', 'WEAPON'],
     maxCount: 1,
     requireClass: "Warlock",
     requireInvocation: "Pact of the Blade",
