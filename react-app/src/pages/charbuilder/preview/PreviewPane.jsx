@@ -4,7 +4,8 @@ import { Feather, Languages, Layers, Shield, Sparkles, Sword } from 'lucide-reac
 import { STAT_LABELS, STATS } from '../constants.js';
 import { calcMaxHp, formatMod, getAllFinalScores, getPrimaryClassLevel } from '../progression/calculations.js';
 import { collectAllProficiencies, collectEquipmentProficiencySets } from '../../charsheet/proficiency/proficiencies.js';
-import { collectPreviewDefenseSections, collectPreviewEffectProficiencySections } from '../../charsheet/state/sheetEffects.js';
+import { collectPreviewEffectProficiencySections } from '../../charsheet/state/sheetEffects.js';
+import { collectPreviewDefenseSections } from '../../charsheet/state/sheetDefenses.js';
 import { collapseWeaponProficiencies, uniqueDisplayLabels } from '../../../shared/character/progression/proficiencyDisplay.js';
 import {
   parseTypedProficiencyValue,

@@ -9,7 +9,7 @@ import installShieldMaster from '../../../../../src/adapters/feats/shield-master
 import installTavernBrawler from '../../../../../src/adapters/feats/tavern-brawler.js';
 import installCharger from '../../../../../src/adapters/feats/charger.js';
 import installDefensiveDuelist from '../../../../../src/adapters/feats/defensive-duelist.js';
-import { getWeaponEffectBonuses, getWeaponNotes } from '../../../../../src/pages/charsheet/state/sheetEffects.js';
+import { getWeaponEffectBonuses, getWeaponNotes } from '../../../../../src/pages/charsheet/state/effectBonuses.js';
 import {
   isCrossbow, isHeavyWeapon, isPolearmMasterWeapon,
 } from '../../../../../src/pages/charsheet/inventory/equipmentSlots.js';

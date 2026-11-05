@@ -4,7 +4,7 @@ import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
 import { SKILLS, getSkillTraining, getSkillBonus, fbonus, SLBL, effectiveD20Modifier } from '../state/calculations.js';
 import { describeCheckDisadvantage } from '../../../shared/character/combat/conditions.js';
 import { getEquippedArmorPenalties } from '../inventory/armorPenalties.js';
-import { getSkillAdvantageFromEffects } from '../state/sheetEffects.js';
+import { getSkillAdvantageFromEffects } from '../state/effectBonuses.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import { aggregateAbilityCheckBonus } from '../../../shared/character/inventory/itemBonus.js';
 import { getItemAdvantageOnSkill } from '../../../shared/character/inventory/itemEffects.js';

@@ -11,7 +11,7 @@ import PipButton from '../../../shared/ui/PipButton.jsx';
 import { formatRollTitle } from '../../../shared/character/dice/dice.js';
 import { getFinal, getMod, getPB } from '../state/calculations.js';
 import { describeAttackRoll } from '../../../shared/character/combat/conditions.js';
-import { getSpellAttackAdvantage } from '../state/sheetEffects.js';
+import { getSpellAttackAdvantage } from '../state/effectBonuses.js';
 import { entriesToTextBlocks } from '../../../shared/character/spells/spellEntries.js';
 import { getCastBadge, getSpellAbilityForEntry, getSpellStatusChips } from './spellsTabLogic.js';
 import {

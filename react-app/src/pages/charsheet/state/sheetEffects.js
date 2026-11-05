@@ -2,18 +2,15 @@ import { adapterRegistry as installedRegistry } from '../../../adapters/registry
 import { canonicalDisplayLabel, cleanProficiencyText } from '../../../shared/character/progression/proficiencyDisplay.js';
 import { matchesRequiredChoice } from '../../../shared/character/progression/lineageMatch.js';
 import { inventoryHasFlag } from '../../../shared/character/progression/choiceUtils.js';
-import { weaponFilterMatches } from '../../../shared/character/inventory/weaponFilters.js';
 import { ownedFeatNames } from '../../../shared/character/progression/selectedFeats.js';
-import { isFeatKey, isFeatDetailKey } from '../../../shared/character/progression/featChoiceKeys.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
-import { featNamedEntries } from '../../../shared/character/progression/featDescription.js';
 
-function asArray(value) {
+export function asArray(value) {
   if (value == null) return [];
   return Array.isArray(value) ? value : [value];
 }
 
-function cleanText(value) {
+export function cleanText(value) {
   if (value == null) return '';
   if (typeof value === 'object') {
     return cleanText(value.name ?? value.label ?? value.value ?? value.key ?? value.id);
@@ -21,7 +18,7 @@ function cleanText(value) {
   return cleanProficiencyText(value);
 }
 
-function norm(value) {
+export function norm(value) {
   return cleanText(value).toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
@@ -41,7 +38,7 @@ const DAMAGE_TYPES = [
   'Thunder',
 ];
 
-function displayLabel(value) {
+export function displayLabel(value) {
   return canonicalDisplayLabel(value);
 }
 
@@ -173,7 +170,7 @@ function parentheticalDamageType(text) {
   return DAMAGE_TYPES.find((type) => norm(type) === norm(inside)) || '';
 }
 
-function inferDamageTypeFromText(text) {
+export function inferDamageTypeFromText(text) {
   const cleaned = cleanText(text);
   const inParen = parentheticalDamageType(cleaned);
   if (inParen) return inParen;
@@ -208,7 +205,7 @@ function lookupMapValue(map, choice) {
   return partial ? partial[1] : '';
 }
 
-function resolveChoiceValue(effect, character) {
+export function resolveChoiceValue(effect, character) {
   let choice = firstChoiceText(character, effect?.key);
   if (!choice && effect?.ownerType === 'feat' && effect?.choiceKeySuffix) {
     const featSlot = Object.entries(character?.choices || {}).find(([, value]) => (
@@ -464,385 +461,6 @@ export function collectMovementEffects(character = {}) {
 
 export function collectResistanceEffects(character = {}) {
   return collectSheetEffects(character).filter((effect) => norm(effect.type).includes('resistance'));
-}
-
-
-function splitDefenseText(value) {
-  return cleanText(value)
-    .split(/[;,/]/)
-    .map((item) => displayLabel(item))
-    .filter(Boolean);
-}
-
-function defenseItemsFromBlock(block, kind, source) {
-  const out = [];
-
-  const push = (label) => {
-    const text = displayLabel(label);
-    if (!text) return;
-    out.push({ label: text, kind, source });
-  };
-
-  if (block == null) return out;
-
-  if (typeof block === 'string') {
-    splitDefenseText(block).forEach(push);
-    return out;
-  }
-
-  if (Array.isArray(block)) {
-    block.forEach((entry) => out.push(...defenseItemsFromBlock(entry, kind, source)));
-    return out;
-  }
-
-  if (typeof block === 'object') {
-    if (block.special) push(block.special);
-    if (block.note) push(block.note);
-
-    if (block.resist) out.push(...defenseItemsFromBlock(block.resist, 'Resistance', source));
-    if (block.immune) out.push(...defenseItemsFromBlock(block.immune, 'Immunity', source));
-    if (block.vulnerable) out.push(...defenseItemsFromBlock(block.vulnerable, 'Vulnerability', source));
-
-    // Important: `choose.from` means "pick one", not "gain all".
-    // The selected value is read separately from character.choices / normalized choices.
-    // Do not expand all possible choices here, otherwise Dragonborn appears resistant
-    // to Acid, Cold, Fire, Lightning, and Poison at the same time.
-    Object.entries(block).forEach(([key, value]) => {
-      if (['choose', 'special', 'note', 'resist', 'immune', 'vulnerable'].includes(key)) return;
-      if (value === true) push(key);
-      else if (typeof value === 'string') push(value);
-      else if (Array.isArray(value)) value.forEach((entry) => push(entry));
-    });
-  }
-
-  return out;
-}
-
-function collectSelectedSpeciesResistanceChoices(character = {}, source = 'Species') {
-  const out = [];
-
-  const pushMaybeDamageType = (value) => {
-    const raw = displayLabel(value);
-    const damageType = inferDamageTypeFromText(raw);
-    if (damageType) out.push({ label: damageType, kind: 'Resistance', source });
-  };
-
-  const speciesChoiceCanGrantResistance = (key) => {
-    const k = norm(String(key).replace(/^mc\d+_/, ''));
-    if (!k.startsWith('species')) return false;
-    return k.includes('resist') || k.includes('resistance');
-  };
-
-  Object.entries(character.choices || {}).forEach(([key, value]) => {
-    if (!speciesChoiceCanGrantResistance(key)) return;
-    asArray(value).forEach((entry) => pushMaybeDamageType(entry, key));
-  });
-
-  const normalized = character.normalizedChoices || {};
-  [
-    normalized.species?.options,
-    normalized.speciesOptions,
-    normalized.rawByKey,
-  ].forEach((bucket) => {
-    if (!bucket || typeof bucket !== 'object') return;
-    Object.entries(bucket).forEach(([key, value]) => {
-      if (!speciesChoiceCanGrantResistance(key)) return;
-      asArray(value).forEach((entry) => pushMaybeDamageType(entry, key));
-    });
-  });
-
-  return dedupeDefenseItems(out);
-}
-
-function collectStaticDefenseItems(character = {}) {
-  const species = character.speciesSnapshot || character.speciesObj || {};
-  const cls = character.clsSnapshot || character.cls || {};
-  const bg = character.backgroundSnapshot || character.backgroundObj || {};
-
-  const groups = [
-    { source: species.name || character.speciesName || 'Species', data: species },
-    { source: cls.name || character.className || 'Class', data: cls },
-    { source: bg.name || character.backgroundName || 'Background', data: bg },
-  ];
-
-  const out = [];
-  groups.forEach(({ source, data }) => {
-    out.push(...defenseItemsFromBlock(data.resist, 'Resistance', source));
-    out.push(...defenseItemsFromBlock(data.immune, 'Immunity', source));
-    out.push(...defenseItemsFromBlock(data.vulnerable, 'Vulnerability', source));
-    out.push(...defenseItemsFromBlock(data.conditionImmune, 'Immunity', source));
-  });
-
-  out.push(...collectSelectedSpeciesResistanceChoices(character, species.name || character.speciesName || 'Species'));
-
-  return dedupeDefenseItems(out);
-}
-
-function resistanceItemsFromEffects(character = {}) {
-  return collectSheetEffects(character)
-    .filter((effect) => norm(effect.type).includes('resistance'))
-    .flatMap((effect) => {
-      const summary = effectSummary(effect, character);
-      const fromSummary = summary
-        .split('•')[0]
-        .trim()
-        .replace(/\s+Resistance.*$/i, '');
-
-      const labels = [];
-      if (fromSummary && !/^choose$/i.test(fromSummary)) labels.push(fromSummary);
-      asArray(effect.damageTypes).forEach((type) => labels.push(cleanText(type)));
-
-      return labels
-        .map((label) => displayLabel(label))
-        .filter(Boolean)
-        .map((label) => ({
-          label,
-          kind: 'Resistance',
-          source: effect.ownerName || '',
-          note: cleanText(effect.note || ''),
-        }));
-    });
-}
-
-function immunityItemsFromEffects(character = {}) {
-  return collectSheetEffects(character)
-    .filter((effect) => norm(effect.type).includes('immunity'))
-    .flatMap((effect) => {
-      const labels = [];
-
-      if (norm(effect.type).includes('immunitychoice')) {
-        const resolved = resolveChoiceValue(effect, character);
-        if (resolved && !/^choose$/i.test(resolved)) labels.push(resolved);
-      } else {
-        labels.push(...asArray(effect.conditions).map(cleanText));
-        labels.push(...asArray(effect.damageTypes).map(cleanText));
-        if (effect.value != null) labels.push(cleanText(effect.value));
-      }
-
-      if (!labels.length) {
-        const fallback = effectSummary(effect, character).split('•')[0].trim() || effectTitle(effect);
-        if (fallback && !/^choose$/i.test(fallback)) labels.push(fallback);
-      }
-
-      return labels
-        .map((label) => displayLabel(label))
-        .filter(Boolean)
-        .map((label) => ({
-          label,
-          kind: 'Immunity',
-          source: effect.ownerName || '',
-          note: cleanText(effect.note || ''),
-        }));
-    });
-}
-
-function dedupeDefenseItems(items) {
-  const byKey = new Map();
-  items.forEach((item) => {
-    const label = displayLabel(item.label);
-    if (!label) return;
-    const key = `${norm(item.kind)}|${norm(label)}`;
-    const existing = byKey.get(key);
-    if (!existing) {
-      byKey.set(key, { ...item, label });
-      return;
-    }
-    if (!existing.source && item.source) byKey.set(key, { ...item, label });
-  });
-  return [...byKey.values()].sort((a, b) => (
-    String(a.kind).localeCompare(String(b.kind)) || String(a.label).localeCompare(String(b.label))
-  ));
-}
-
-export function collectResolvedResistanceItems(character = {}) {
-  const staticItems = collectStaticDefenseItems(character).filter((item) => item.kind === 'Resistance');
-  return dedupeDefenseItems([...staticItems, ...resistanceItemsFromEffects(character)]);
-}
-
-export function collectResolvedImmunityItems(character = {}) {
-  const staticItems = collectStaticDefenseItems(character).filter((item) => item.kind === 'Immunity');
-  return dedupeDefenseItems([...staticItems, ...immunityItemsFromEffects(character)]);
-}
-
-export function collectPreviewDefenseSections(character = {}) {
-  const resistanceItems = collectResolvedResistanceItems(character)
-    .map((item) => `${displayLabel(item.label)}${item.source ? ` (${item.source})` : ''}`);
-  const immunityItems = collectResolvedImmunityItems(character)
-    .map((item) => `${displayLabel(item.label)}${item.source ? ` (${item.source})` : ''}`);
-
-  return [
-    resistanceItems.length ? { title: 'Resistances', items: resistanceItems } : null,
-    immunityItems.length ? { title: 'Immunities', items: immunityItems } : null,
-  ].filter(Boolean);
-}
-
-function bladesingerIntMod(character) {
-  return Math.max(1, Math.floor((Number(character?.finalScores?.int ?? 10) - 10) / 2));
-}
-
-// Additive AC bonus from active effects. Some effects are gated on wearing armor
-// (Fighting Style: Defense → +1 AC only while wearing armor); the caller passes
-// `ctx.wearingArmor` since equipped-armor state lives in the AC layer, not here.
-export function getAcBonusEffects(character = {}, ctx = {}) {
-  let total = 0;
-  collectSheetEffects(character).forEach((effect) => {
-    if (norm(effect.type) !== 'acbonus') return;
-    if (effect.requiresArmor && !ctx.wearingArmor) return;
-    if (effect.ability === 'int') total += bladesingerIntMod(character);
-    else total += Number(effect.value ?? 1);
-  });
-  return total;
-}
-
-// Weapon-scoped attack/damage bonuses from active effects (e.g. Fighting Style:
-// Archery +2 ranged attack, Dueling +2 one-handed melee damage, Thrown Weapon
-// +2 thrown damage). `info` carries precomputed weapon flags
-// ({ ranged, melee, thrown, heavy, oneHanded, twoHanded, soloWeapon }) so this stays
-// decoupled from the equipment helpers and can be called per weapon from the
-// actions layer. `requiresSoloWeapon` effects (Dueling: "no other weapons")
-// apply only when no other weapon is wielded.
-export function getWeaponEffectBonuses(character = {}, info = {}) {
-  let attack = 0;
-  let damage = 0;
-  collectSheetEffects(character).forEach((effect) => {
-    const type = norm(effect.type);
-    if (type !== 'weaponattackbonus' && type !== 'weapondamagebonus') return;
-    if (effect.requiresSoloWeapon && !info.soloWeapon) return;
-    if (!weaponFilterMatches(effect.weaponFilter, info)) return;
-    if (type === 'weaponattackbonus') attack += Number(effect.value ?? 0);
-    else damage += Number(effect.value ?? 0);
-  });
-  return { attack, damage };
-}
-
-function ownerFeatNamedEntries(character, ownerName, entryName) {
-  const feat = asArray(character?.allFeatSnapshots).find((f) => norm(f?.name) === norm(ownerName));
-  return feat ? featNamedEntries(feat, entryName) : null;
-}
-
-// Weapon-scoped reminders from active effects (e.g. Great Weapon Master: Heavy
-// Weapon Mastery). They never change a number: the sheet can't tell which action
-// an attack belongs to, so the rule is shown as a tag + description on every
-// matching weapon card and the player applies it.
-// Shape: { type: 'weaponNote', weaponFilter, tag, title, note, entryName?, entries? }
-// — `note` keeps several notes from one owner distinct in dedupeEffects; the text
-// comes from the owning feat's official entry named `entryName` (default: title),
-// with `entries` as the fallback when no feat snapshot carries it.
-export function getWeaponNotes(character = {}, info = {}) {
-  const notes = [];
-  collectSheetEffects(character).forEach((effect) => {
-    if (norm(effect.type) !== 'weaponnote') return;
-    if (!weaponFilterMatches(effect.weaponFilter, info)) return;
-    const title = String(effect.title || effect.ownerName || '').trim();
-    notes.push({
-      key: norm(`${effect.ownerName}-${title}`),
-      tag: String(effect.tag || title).trim(),
-      title,
-      source: String(effect.ownerName || '').trim(),
-      entries: ownerFeatNamedEntries(character, effect.ownerName, effect.entryName || title) || asArray(effect.entries),
-    });
-  });
-  return notes;
-}
-
-export function getSkillAdvantageFromEffects(character = {}, skillName) {
-  const s = String(skillName || '').toLowerCase();
-  let found = null;
-  collectSheetEffects(character).forEach((effect) => {
-    if (norm(effect.type) !== 'advantage') return;
-    if (effect.target !== 'skill') return;
-    if (String(effect.skill || '').toLowerCase() !== s) return;
-    found = { source: effect.note || effect.ownerName || 'Advantage' };
-  });
-  // No extra toggle gate: any toggle/condition (e.g. Bladesong) is already
-  // enforced per-effect by collectSheetEffects via `condition`.
-  return found;
-}
-
-// Advantage on Initiative rolls from any source (Barbarian Feral Instinct,
-// Champion Remarkable Athlete, Assassin Assassinate, …). Canonical effect shape:
-// { type: 'advantage', target: 'initiative' }.
-export function getInitiativeAdvantageFromEffects(character = {}) {
-  let found = null;
-  collectSheetEffects(character).forEach((effect) => {
-    if (norm(effect.type) !== 'advantage') return;
-    if (effect.target !== 'initiative') return;
-    found = { source: effect.note || effect.ownerName || 'Advantage' };
-  });
-  return found;
-}
-
-export function getConcentrationBonus(character = {}) {
-  let total = 0;
-  collectSheetEffects(character).forEach((effect) => {
-    if (norm(effect.type) !== 'concentrationbonus') return;
-    if (effect.ability === 'int') total += bladesingerIntMod(character);
-    else total += Number(effect.value ?? 0);
-  });
-  return total;
-}
-
-// Active `d20-floor` effects (e.g. Stars Druid Dragon constellation: treat a
-// d20 roll at or below minRoll-1 as minRoll on INT/WIS checks and Concentration
-// saves). Only active effects survive collectSheetEffects, so a gated effect
-// appears only when its requiredChoice matches. Surfaced as a reminder.
-export function getD20FloorReminders(character = {}) {
-  return collectSheetEffects(character)
-    .filter((effect) => norm(effect?.type) === 'd20floor')
-    .map((effect) => ({
-      minRoll: Number(effect.minRoll || 10),
-      note: cleanText(effect.note) || '',
-      source: cleanText(effect.ownerName) || '',
-    }));
-}
-
-// Additive bonus to spell save DC from active effects (e.g. Sorcerer Innate
-// Sorcery while toggled on). Only active effects survive collectSheetEffects.
-export function getSpellSaveDcBonus(character = {}) {
-  let total = 0;
-  collectSheetEffects(character).forEach((effect) => {
-    if (norm(effect.type) !== 'spellsavedcbonus') return;
-    total += Number(effect.value ?? 0);
-  });
-  return total;
-}
-
-// Advantage on spell attack rolls from active effects (e.g. Sorcerer Innate
-// Sorcery while toggled on). An effect may scope to a class via `spellClass`;
-// when set it only applies to spells whose owning class matches the entry's
-// ownerClassName (multiclass-safe). Returns the source label or null.
-export function getSpellAttackAdvantage(character = {}, { ownerClassName } = {}) {
-  let found = null;
-  collectSheetEffects(character).forEach((effect) => {
-    if (found) return;
-    if (norm(effect.type) !== 'spellattackadvantage') return;
-    if (effect.spellClass && norm(effect.spellClass) !== norm(ownerClassName)) return;
-    found = { source: effect.note || effect.ownerName || 'Advantage' };
-  });
-  return found;
-}
-
-// Additive damage bonus for Strength-based melee attacks (e.g. Barbarian Rage).
-// Tiers are separate effects gated by minLevel + condition; only the active
-// ones survive collectSheetEffects, so the highest value is the current tier.
-export function getMeleeStrDamageBonus(character = {}) {
-  let bonus = 0;
-  collectSheetEffects(character).forEach((effect) => {
-    if (norm(effect.type) !== 'meleedamagebonus') return;
-    if (effect.ability && String(effect.ability).toLowerCase() !== 'str') return;
-    bonus = Math.max(bonus, Number(effect.value ?? 0));
-  });
-  return bonus;
-}
-
-export function getSpeedBonus(character = {}) {
-  let total = 0;
-  collectSheetEffects(character).forEach((effect) => {
-    if (!norm(effect.type).includes('speed')) return;
-    if (norm(effect.type).includes('fly') || norm(effect.type).includes('climb') || norm(effect.type).includes('swim')) return;
-    total += Number(effect.value ?? 0);
-  });
-  return total;
 }
 
 export function collectPreviewEffectProficiencySections(character = {}) {

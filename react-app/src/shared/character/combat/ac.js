@@ -1,5 +1,5 @@
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
-import { getAcBonusEffects } from '../../../pages/charsheet/state/sheetEffects.js';
+import { getAcBonusEffects } from '../../../pages/charsheet/state/effectBonuses.js';
 import { getActiveWildShape } from '../forms/wildShapeForm.js';
 import { primaryClassLevel } from '../progression/classLevel.js';
 

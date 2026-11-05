@@ -20,7 +20,7 @@ import { getEquippedArmorPenalties } from '../inventory/armorPenalties.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import { aggregateSpellBonuses } from '../../../shared/character/inventory/itemBonus.js';
 import { itemEffectInventory } from '../../../shared/character/forms/wildShapeForm.js';
-import { getSpellSaveDcBonus } from '../state/sheetEffects.js';
+import { getSpellSaveDcBonus } from '../state/effectBonuses.js';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import {
   buildSpellInfo,

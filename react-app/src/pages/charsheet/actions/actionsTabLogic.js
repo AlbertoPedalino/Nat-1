@@ -33,7 +33,7 @@ import { getActiveWildShape } from '../../../shared/character/forms/wildShapeFor
 import { isItemEffectActive } from '../../../shared/character/inventory/itemAttunement.js';
 import { itemIdentityKey, matchesItemReference } from '../../../shared/character/inventory/itemIdentity.js';
 import { itemCardName, replicatedItemProperty } from '../../../shared/character/inventory/replicateMagicItem.js';
-import { getMeleeStrDamageBonus, getWeaponEffectBonuses, getWeaponNotes } from '../state/sheetEffects.js';
+import { getMeleeStrDamageBonus, getWeaponEffectBonuses, getWeaponNotes } from '../state/effectBonuses.js';
 import { alpha } from '@mui/material';
 import { ACTION_COLORS, CHIP_TONES, ENTITY_COLORS, ITEM_ATTUNEMENT } from '../../../shared/ui/entityColors.js';
 import {

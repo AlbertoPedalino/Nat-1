@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Box, Paper, Typography, Tooltip, Menu, MenuItem } from '@mui/material';
 import { Dice5, Sparkles, ChevronDown } from 'lucide-react';
 import { STATS, SLBL, FULL_LBL, hasSaveProficiency, getSaveBonus, fbonus, effectiveD20Modifier } from '../state/calculations.js';
-import { getConcentrationBonus, getD20FloorReminders } from '../state/sheetEffects.js';
+import { getConcentrationBonus, getD20FloorReminders } from '../state/effectBonuses.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import { aggregateSavingThrowBonus } from '../../../shared/character/inventory/itemBonus.js';
 import { collectItemEffects } from '../../../shared/character/inventory/itemEffects.js';
