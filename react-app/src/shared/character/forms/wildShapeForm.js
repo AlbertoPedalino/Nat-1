@@ -1,10 +1,17 @@
-// Druid Wild Shape — active form state + stat overrides.
+// Druid Wild Shape — active form state + every rule of the form.
 //
 // When a Druid transforms, the resolved beast snapshot is stored directly on the
 // character at `C.wildShape` (so stat/AC/HP consumers never need the beast DB at
-// compute time). This module is the single accessor + override layer; consumers
-// (getFinal, ac, sheet state, actions) branch only through these helpers, so the
-// transform logic lives in one place.
+// compute time). This module holds every rule of the form; each part of the
+// sheet asks it one question and branches on nothing else:
+//   - ability scores, saves, skills  wildShapeAbilityScore / SaveBonus / SkillBonus
+//   - armor class                    wildShapeArmorClass
+//   - speed                          wildShapeSpeed
+//   - senses                         wildShapeSenses
+//   - equipment                      itemEffectInventory (merges: no item counts;
+//                                     read through characterItemEffects /
+//                                     characterItemBonuses / armor penalties)
+//   - attacks and actions            the beast's own, as cards (actionsTabLogic)
 //
 // Shape of `C.wildShape` (null when not transformed):
 //   { beast: <normalizeBeast snapshot> }   // name, abilities, ac, hp, actions…
@@ -75,6 +82,41 @@ export function wildShapeSkillBonus(C, skillName) {
   const key = String(skillName || '').toLowerCase().replace(/[^a-z]/g, '');
   const v = ws.beast.skills?.[key];
   return Number.isFinite(v) ? v : null;
+}
+
+// The beast's stat block replaces your AC entirely; null in your own form (or
+// for a form that lists none).
+export function wildShapeArmorClass(C) {
+  const ws = getActiveWildShape(C);
+  if (ws?.beast?.ac == null) return null;
+  return {
+    value: Number(ws.beast.ac),
+    source: `Wild Shape (${ws.beast.name})`,
+    label: 'AC (Beast)',
+    formulaLabel: 'Beast',
+    shieldApplied: false,
+    shieldBonus: 0,
+    sourceType: 'wildshape',
+  };
+}
+
+// The beast's speeds replace yours; null in your own form.
+export function wildShapeSpeed(C) {
+  return getActiveWildShape(C)?.beast?.speed ?? null;
+}
+
+// The beast's senses ("Darkvision 60 ft.") as { type, range, note }; empty in
+// your own form. They join your other senses, the best range winning.
+export function wildShapeSenses(C) {
+  const ws = getActiveWildShape(C);
+  if (!ws) return [];
+  return (ws.beast.senses || []).map((text) => {
+    const m = String(text || '').match(/^([A-Za-z' ]+?)\s+(\d+)\s*ft/i);
+    if (!m) return null;
+    const type = m[1].toLowerCase().replace(/[^a-z]/g, '');
+    const range = Number(m[2]);
+    return type && range ? { type, range, note: text } : null;
+  }).filter(Boolean);
 }
 
 // Build the `C.wildShape` patch for assuming a beast form. Caller (sheet panel)

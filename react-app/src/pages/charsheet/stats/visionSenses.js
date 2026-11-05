@@ -19,7 +19,7 @@
 
 import { collectSenseEffects } from '../state/sheetEffects.js';
 import { getItemSenses } from '../../../shared/character/inventory/itemEffects.js';
-import { getActiveWildShape } from '../../../shared/character/forms/wildShapeForm.js';
+import { wildShapeSenses } from '../../../shared/character/forms/wildShapeForm.js';
 
 export const SENSE_LABELS = {
   darkvision: 'Darkvision',
@@ -80,20 +80,9 @@ function sheetSenseEntries(C) {
   return { vision, other };
 }
 
-// Wild Shape: the active beast's senses (e.g. "Darkvision 60 ft.") become yours.
-function parseBeastSense(text) {
-  const m = String(text || '').match(/^([A-Za-z' ]+?)\s+(\d+)\s*ft/i);
-  if (!m) return null;
-  const type = m[1].toLowerCase().replace(/[^a-z]/g, '');
-  const range = Number(m[2]);
-  if (!type || !range) return null;
-  return { type, range, source: 'Wild Shape', additive: false, note: text };
-}
-
+// Wild Shape: the active beast's senses become yours.
 function beastVisionEntries(C) {
-  const active = getActiveWildShape(C);
-  if (!active) return [];
-  return (active.beast.senses || []).map(parseBeastSense).filter(Boolean);
+  return wildShapeSenses(C).map(({ type, range, note }) => ({ type, range, source: 'Wild Shape', additive: false, note }));
 }
 
 function collectVisionEntries(C) {

@@ -1,6 +1,6 @@
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
 import { getAcBonusEffects } from '../../../pages/charsheet/state/effectBonuses.js';
-import { getActiveWildShape } from '../forms/wildShapeForm.js';
+import { wildShapeArmorClass } from '../forms/wildShapeForm.js';
 import { primaryClassLevel } from '../progression/classLevel.js';
 
 function asArray(value) {
@@ -175,19 +175,8 @@ export function computeAcFormulaValue(character, formula) {
 }
 
 export function computeBestArmorClass(character, items, shieldTrained) {
-  // Wild Shape: the beast's stat block replaces your AC entirely.
-  const activeForm = getActiveWildShape(character);
-  if (activeForm && activeForm.beast?.ac != null) {
-    return {
-      value: Number(activeForm.beast.ac),
-      source: `Wild Shape (${activeForm.beast.name})`,
-      label: 'AC (Beast)',
-      formulaLabel: 'Beast',
-      shieldApplied: false,
-      shieldBonus: 0,
-      sourceType: 'wildshape',
-    };
-  }
+  const beastAc = wildShapeArmorClass(character);
+  if (beastAc) return beastAc;
   const shield = getEquippedShield(character, items);
   const hasShield = !!shield;
   const shieldBonus = hasShield && shieldTrained !== false ? 2 + armorEnhancement(shield) : 0;
