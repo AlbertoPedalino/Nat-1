@@ -26,7 +26,7 @@ export default function install(registry, context = {}) {
   });
 
   registerSubclassSheetActions('Wizard_Enchanter', [
-    { name: 'Hypnotic Presence', icon: 'eye', cat: 'bonus', uses: 'INT mod / LR', resKey: 'enchanter_presence', minLevel: 3 },
+    { name: 'Hypnotic Presence', icon: 'eye', cat: 'action', uses: 'INT mod / LR', resKey: 'enchanter_presence', minLevel: 3 },
     { name: 'Split Enchantment', icon: 'split', cat: 'special', uses: 'INT mod / LR', resKey: 'enchanter_split', minLevel: 6 },
     { name: 'Instinctive Charm', icon: 'shield', cat: 'reaction', uses: '1 / LR', resKey: 'enchanter_charm', minLevel: 10 },
     { name: 'Alter Memories', icon: 'brain', cat: 'action', uses: 'While target is Charmed', minLevel: 14 },

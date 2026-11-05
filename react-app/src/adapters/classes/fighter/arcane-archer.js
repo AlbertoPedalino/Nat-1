@@ -45,9 +45,9 @@ export default function install(registry, context = {}) {
     { type: 'skill', values: ['Arcana', 'Nature'], minLevel: 3 },
   ]);
   registerSubclassSheetActions('Fighter_Arcane Archer', [
-    { name: 'Arcane Shot', icon: 'target', cat: 'attack', uses: 'INT mod / SR or LR', resKey: 'arcane_shot', minLevel: 3 },
+    { name: 'Arcane Shot', icon: 'target', cat: 'special', uses: 'INT mod / SR or LR', resKey: 'arcane_shot', minLevel: 3 },
     { name: 'Curving Shot', icon: 'undo-2', cat: 'bonus', uses: 'After a miss', minLevel: 7 },
-    { name: 'Magical Ammunition', icon: 'sparkles', cat: 'bonus', uses: '1 / SR or LR', resKey: 'arcane_magical_ammunition', minLevel: 7 },
+    { name: 'Magical Ammunition', icon: 'sparkles', cat: 'action', uses: '1 / SR or LR', resKey: 'arcane_magical_ammunition', minLevel: 7 },
     { name: 'Masterful Shots', icon: 'crosshair', cat: 'reaction', uses: 'Reaction', minLevel: 18 },
   ]);
   registerSubclassSheetResources('Fighter_Arcane Archer', [

@@ -52,7 +52,7 @@ export default function install(registry, context = {}) {
       {
         name: 'Fast Crafting',
         icon: '',
-        cat: 'action',
+        cat: 'special',
         uses: '1 item / LR',
         // Description lives in the Features tab; the card drives the create panel.
         entries: [],

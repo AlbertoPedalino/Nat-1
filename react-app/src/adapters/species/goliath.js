@@ -167,7 +167,7 @@ registerSpeciesSheetActions("Goliath_XPHB", [
   {
     name: "Fire's Burn",
     icon: '',
-    cat: 'action',
+    cat: 'special',
     uses: 'PB / LR',
     resKey: 'goliath_giant_ancestry',
     rollers: [{ kind: 'damage', formula: '1d10' }],
@@ -177,7 +177,7 @@ registerSpeciesSheetActions("Goliath_XPHB", [
   {
     name: "Frost's Chill",
     icon: '',
-    cat: 'action',
+    cat: 'special',
     uses: 'PB / LR',
     resKey: 'goliath_giant_ancestry',
     rollers: [{ kind: 'damage', formula: '1d6' }],
@@ -187,7 +187,7 @@ registerSpeciesSheetActions("Goliath_XPHB", [
   {
     name: "Hill's Tumble",
     icon: '',
-    cat: 'action',
+    cat: 'special',
     uses: 'PB / LR',
     resKey: 'goliath_giant_ancestry',
     minLevel: 1,

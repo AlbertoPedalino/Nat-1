@@ -138,7 +138,7 @@ export default function install(registry, context = {}) {
       {
         name:   'Lucky',
         icon:   'clover',
-        cat:    'reaction',
+        cat:    'special',
         uses:   'PB / Long Rest',
         resKey: 'lucky_points',
       },

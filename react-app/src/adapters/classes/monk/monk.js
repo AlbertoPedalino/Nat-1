@@ -147,7 +147,7 @@ registerClassSheetActions("Monk", [
   {
     name: 'Uncanny Metabolism',
     icon: '',
-    cat: 'action',
+    cat: 'special',
     uses: '1 / LR',
     resKey: 'uncanny_metabolism',
     minLevel: 2
@@ -201,7 +201,7 @@ registerClassSheetActions("Monk", [
   {
     name: 'Stunning Strike',
     icon: '',
-    cat: 'attack',
+    cat: 'special',
     uses: '1 Focus Point',
     resKey: 'ki',
     minLevel: 5
@@ -209,7 +209,7 @@ registerClassSheetActions("Monk", [
   {
     name: 'Disciplined Survivor',
     icon: '',
-    cat: 'action',
+    cat: 'special',
     uses: '1 Focus Point',
     resKey: 'ki',
     minLevel: 14
@@ -217,7 +217,7 @@ registerClassSheetActions("Monk", [
   {
     name: 'Superior Defense',
     icon: '',
-    cat: 'action',
+    cat: 'special',
     uses: '3 Focus Points',
     resKey: 'ki',
     minLevel: 18

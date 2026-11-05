@@ -141,7 +141,7 @@ registerSpeciesSheetActions("Orc_XPHB", [
   {
     name: 'Relentless Endurance',
     icon: '',
-    cat: 'reaction',
+    cat: 'special',
     uses: '1 / LR',
     resKey: 'orc_relentless_endurance',
     minLevel: 1,

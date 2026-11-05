@@ -180,7 +180,7 @@ registerClassSheetActions("Fighter", [
   {
     name: 'Tactical Mind',
     icon: '',
-    cat: 'reaction',
+    cat: 'special',
     uses: 'Second Wind',
     minLevel: 2,
     rollers: [{ kind: 'utility', formula: '1d10', label: '1d10', title: 'Bonus' }],
@@ -189,7 +189,7 @@ registerClassSheetActions("Fighter", [
   {
     name: 'Indomitable',
     icon: '',
-    cat: 'reaction',
+    cat: 'special',
     uses: '1-3 / LR',
     resKey: 'indomitable',
     minLevel: 9
