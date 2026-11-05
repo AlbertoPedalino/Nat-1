@@ -10,7 +10,7 @@ import {
   normalizeRoll,
   rollAuthor,
 } from '../../../shared/vtt/rolls/rollFeed.js';
-import { throwFormula } from '../../../shared/vtt/rolls/throwRoll.js';
+import { rollCustomFormula } from '../../../shared/vtt/rolls/customRoll.js';
 import { normalizeRollIdentity } from '../../../shared/character/dice/rollLogPresentation.js';
 import { rollDice } from '../../../shared/character/dice/rollNotation.js';
 import { buildEncounterDiceToast } from '../../encounterbuilder/rolls/EncounterDiceToast.jsx';
@@ -61,7 +61,7 @@ export function useVttRolls({ campaignId, role, roster, tokens }) {
 
   const handleCustomRoll = useCallback((formula) => {
     const id = `custom:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
-    const thrown = throwFormula(formula, id);
+    const thrown = rollCustomFormula(formula);
     if (!thrown) return;
     const entry = {
       id,

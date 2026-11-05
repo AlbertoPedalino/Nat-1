@@ -2,13 +2,14 @@
 //
 // The map is seen from above, so the table is the screen: x and y are the board,
 // z is height over it. Dice come down, bounce, skid, knock into each other and
-// into the edges of the tray, and stop — and the face left looking at you is
-// what was rolled. Nothing here is decorating a number decided elsewhere: the
-// throw IS the roll, which is the whole point of throwing it.
+// into the edges of the tray, and stop. The number was rolled by the dice
+// engine (shared/character/dice/dice.js) before the throw; the tray paints it on
+// the face left looking at you (DiceTray.jsx), so the dice always show the roll
+// in the log.
 //
-// Seeded rather than random, so the roller and everyone watching get the same
-// throw and therefore the same result, and computed up front rather than
-// stepped live, so a slow frame cannot change where a die lands.
+// Seeded rather than random, so the roller and everyone watching see the same
+// throw, and computed up front rather than stepped live, so a slow frame cannot
+// change where a die lands.
 //
 // Orientation is a quaternion, not three angles. Reading a result means asking
 // which face points at the camera once the die stops. The orientation is never
@@ -25,8 +26,7 @@ export const THROWN_DIE_SIZE = 76;
 export const TRAY = { width: 460, height: 300 };
 
 // Keep ordinary pools large and readable, then shrink crowded pools using
-// only their dice count. The same function is used when deciding the result
-// and when drawing it, so collisions cannot change between the two passes.
+// only their dice count, so every screen simulates the same collisions.
 // At the formula limit (100 dice) this yields 26px: small, but still readable
 // and able to fit in the deterministic tray without a pile of overlaps.
 export function thrownDieSize(count) {

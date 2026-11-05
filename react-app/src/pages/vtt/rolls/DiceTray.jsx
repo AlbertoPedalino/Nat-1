@@ -111,10 +111,9 @@ function DiceThrow({ roll, at, table, startedAt, onSettled, centered }) {
         const geometry = dieGeometry(die.faces);
         const numbering = faceNumbering(geometry.faces.length, die.faces, `${roll.id}:${index}`);
         const landed = results[index] ?? geometry.landing;
-        // The throw decided this number, but the roll that was published is
-        // what the table has already been told. Painting it onto the face that
-        // landed means the dice can never contradict the log, even if a future
-        // change lets one screen's throw drift from another's.
+        // The number was rolled by the dice engine and published before the
+        // throw; painting it onto the face that landed means the dice can never
+        // contradict the log, whichever face the physics left up.
         numbering[landed] = die.v;
         return { ...die, numbering, landed };
       }),
