@@ -2,6 +2,7 @@ import {
   useCallback, useEffect, useMemo, useRef, useState,
 } from 'react';
 import {
+  listHexCellRevisions,
   listHexCells,
   readCampaignHexcrawlBoard,
   readHexcrawlBoard,
@@ -17,6 +18,7 @@ import { resolveManualAdvance } from '../../gmboard/hexcrawl/hex.js';
 import { useCampaignClock } from '../../../shared/hexcrawl/useCampaignClock.js';
 import { hexKey, isHexGrid } from '../../../shared/vtt/map/hexGeometry.js';
 import { listenForRecovery } from '../../../shared/cloud/sync/recoveryTriggers.js';
+import { diffRevisions } from '../../../shared/cloud/sync/revisionDiff.js';
 
 // The map's half of the hexcrawl: the hexes of this scene, the campaign's clock,
 // and the board whose tables the rolls come from.
@@ -201,9 +203,35 @@ export function useSceneHexcrawl({ scene, isGm }) {
     };
   }, [refreshBoard]);
 
+  // Hex events Realtime missed are recovered like the scene's pieces: versions
+  // first (a few bytes a hex), the list again only when one moved. On every
+  // reconnect and on the shared triggers; map content, so also while hidden.
+  const cellsRef = useRef(cells);
+  cellsRef.current = cells;
   useEffect(() => {
     if (!visible) return undefined;
-    return subscribeHexcrawl({
+    let cancelled = false;
+    const keyOf = (cell) => `${cell.q}:${cell.r}`;
+    const reconcileCells = async () => {
+      let revisions;
+      try {
+        revisions = await listHexCellRevisions(sceneId);
+      } catch (_) {
+        return; // The next trigger tries again.
+      }
+      if (cancelled) return;
+      const diff = diffRevisions(
+        revisions.map((row) => ({ id: keyOf(row), version: row.updatedAt })),
+        new Map(cellsRef.current.map((cell) => [keyOf(cell), cell.updatedAt])),
+      );
+      if (diff.clean) return;
+      try {
+        const rows = await listHexCells(sceneId);
+        if (!cancelled) setCells(rows);
+      } catch (_) { /* the map keeps the hexes it has */ }
+    };
+    let subscribedOnce = false;
+    const unsubscribe = subscribeHexcrawl({
       sceneId,
       onCell: ({ cell, removed }) => {
         if (!cell) return;
@@ -212,7 +240,20 @@ export function useSceneHexcrawl({ scene, isGm }) {
           return removed ? rest : [...rest, cell];
         });
       },
+      // The first subscription follows the mount read; later ones are
+      // reconnects, which do not replay what was missed.
+      onStatus: (status) => {
+        if (status !== 'SUBSCRIBED') return;
+        if (subscribedOnce) reconcileCells();
+        subscribedOnce = true;
+      },
     });
+    const stopRecovery = listenForRecovery(() => reconcileCells(), { periodic: true, whenHidden: true });
+    return () => {
+      cancelled = true;
+      unsubscribe();
+      stopRecovery();
+    };
   }, [sceneId, visible]);
 
   // A player sees the country the party has been through, and nothing else: an

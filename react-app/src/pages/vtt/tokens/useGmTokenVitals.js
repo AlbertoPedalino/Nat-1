@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { supabase } from '../../../shared/cloud/supabaseClient.js';
 import { listTokenSecretHp, secretVitals } from '../../../shared/cloud/api/vtt.js';
 import { listFightRevisions, listFightVitals } from '../../../shared/cloud/api/encounterFights.js';
-import { diffRevisions } from '../../../shared/vtt/session/revisionDiff.js';
+import { diffRevisions } from '../../../shared/cloud/sync/revisionDiff.js';
 import { parseSourceRef } from '../../../shared/vtt/tokens/encounterSync.js';
 import { newerFightRow, withGmTokenVitals } from '../../../shared/vtt/tokens/fightVitals.js';
 

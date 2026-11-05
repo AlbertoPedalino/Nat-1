@@ -4,8 +4,8 @@ import {
   listTokens, listTokensByIds, signMapImage,
 } from '../../../shared/cloud/api/vtt.js';
 import {
-  assembleSnapshot, diffRevisions, tooManyToTarget,
-} from '../../../shared/vtt/session/revisionDiff.js';
+  assembleSnapshot, diffRevisions, readChanged,
+} from '../../../shared/cloud/sync/revisionDiff.js';
 import { applyDrawingEvent } from '../../../shared/vtt/session/liveScene.js';
 
 // The GM-only label of each piece. A secrets row read for the piece is the
@@ -174,18 +174,14 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
         new Map(baselineDrawings.map((drawing) => [drawing.id, drawing.updatedAt])),
       );
 
-      const targeted = (diff, fetchAll, fetchSome) => {
-        if (!diff.changed.length) return Promise.resolve([]);
-        return tooManyToTarget(diff.changed) ? fetchAll() : fetchSome(diff.changed);
-      };
       const [freshTokens, freshDrawings] = await Promise.all([
-        tokenDiff.clean ? null : targeted(
-          tokenDiff, () => listTokens(scene.id), (ids) => listTokensByIds(scene.id, ids),
-        ),
+        tokenDiff.clean ? null : readChanged(tokenDiff, {
+          fetchAll: () => listTokens(scene.id), fetchSome: (ids) => listTokensByIds(scene.id, ids),
+        }),
         drawingDiff
-          ? (drawingDiff.clean ? null : targeted(
-            drawingDiff, () => listDrawings(scene.id), (ids) => listDrawingsByIds(scene.id, ids),
-          ))
+          ? (drawingDiff.clean ? null : readChanged(drawingDiff, {
+            fetchAll: () => listDrawings(scene.id), fetchSome: (ids) => listDrawingsByIds(scene.id, ids),
+          }))
           : listDrawings(scene.id),
       ]);
       if (request !== loadRequestRef.current) return;

@@ -1,9 +1,9 @@
-// Light recovery for a live scene: compare the ids and versions the database
-// reports with what this client holds, and name only the rows worth fetching.
+// The light recovery every synced list uses: compare the ids and versions the
+// database reports with what this client holds, name only the rows worth
+// fetching, and fetch just those (or everything, past MAX_TARGETED_IDS).
 //
-// Versions are the tables' `updated_at`: scenes, pieces, marks and fights.
-// Sheets are not here: the roster follows character digests
-// (useCharacterDigests).
+// Versions are the tables' `updated_at`: pieces, marks, fights, hex cells.
+// Character health is not here: it follows digests (useCharacterDigests).
 
 // Past this many changed rows one full read is cheaper and simpler than a long
 // `id=in.(…)` list.
@@ -38,4 +38,11 @@ export function assembleSnapshot(ids, changed, fetched, held) {
 
 export function tooManyToTarget(changed) {
   return changed.length > MAX_TARGETED_IDS;
+}
+
+// The rows a diff named: none, the changed ones by id, or one full read when
+// there are too many to list.
+export function readChanged(diff, { fetchAll, fetchSome }) {
+  if (!diff?.changed?.length) return Promise.resolve([]);
+  return tooManyToTarget(diff.changed) ? fetchAll() : fetchSome(diff.changed);
 }

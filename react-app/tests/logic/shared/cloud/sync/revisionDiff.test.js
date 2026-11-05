@@ -5,7 +5,8 @@ import {
   assembleSnapshot,
   diffRevisions,
   tooManyToTarget,
-} from '../../../../../src/shared/vtt/session/revisionDiff.js';
+  readChanged,
+} from '../../../../../src/shared/cloud/sync/revisionDiff.js';
 
 test('an unchanged table is clean and names nothing to fetch', () => {
   const diff = diffRevisions(
@@ -34,4 +35,13 @@ test('the snapshot keeps database order and drops a changed row that did not com
 test('a long change list falls back to one full read', () => {
   assert.equal(tooManyToTarget(Array.from({ length: MAX_TARGETED_IDS }, (_, i) => i)), false);
   assert.equal(tooManyToTarget(Array.from({ length: MAX_TARGETED_IDS + 1 }, (_, i) => i)), true);
+});
+
+test('readChanged fetches nothing, the changed rows by id, or everything past the limit', async () => {
+  const fetchAll = async () => 'all';
+  const fetchSome = async (ids) => ids;
+  assert.deepEqual(await readChanged({ changed: [] }, { fetchAll, fetchSome }), []);
+  assert.deepEqual(await readChanged({ changed: ['a', 'b'] }, { fetchAll, fetchSome }), ['a', 'b']);
+  const many = Array.from({ length: MAX_TARGETED_IDS + 1 }, (_, index) => `id${index}`);
+  assert.equal(await readChanged({ changed: many }, { fetchAll, fetchSome }), 'all');
 });

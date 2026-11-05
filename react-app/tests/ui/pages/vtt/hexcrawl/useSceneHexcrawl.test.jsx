@@ -4,6 +4,7 @@ import { useSceneHexcrawl } from '../../../../../src/pages/vtt/hexcrawl/useScene
 import { createDefaultTables } from '../../../../../src/pages/gmboard/tables/defaultTables.js';
 
 const cloud = vi.hoisted(() => ({
+  listHexCellRevisions: vi.fn(),
   listHexCells: vi.fn(),
   readCampaignHexcrawlBoard: vi.fn(),
   readHexcrawlBoard: vi.fn(),
@@ -40,6 +41,7 @@ beforeEach(() => {
   campaignClock.clock = null;
   campaignClock.saveClock.mockReset().mockResolvedValue(null);
   cloud.listHexCells.mockReset().mockResolvedValue([]);
+  cloud.listHexCellRevisions.mockReset().mockResolvedValue([]);
   cloud.readCampaignHexcrawlBoard.mockReset().mockResolvedValue('board-one');
   cloud.readHexcrawlBoard.mockReset();
   cloud.readHexcrawlBoardVersion.mockReset().mockResolvedValue(1);
@@ -152,4 +154,23 @@ test('time passed off the map moves the clock and the weather count', async () =
   });
   await act(async () => hexcrawl.advanceClock(0));
   expect(campaignClock.saveClock).toHaveBeenCalledTimes(1);
+});
+
+// Hex events Realtime missed: versions first, the list again only if one moved.
+test('a missed hex change is recovered on the next check; an unchanged map reads only versions', async () => {
+  const hex = { sceneId: 'scene-one', q: 1, r: 2, terrain: 'Forest', tier: 1, pop: null, status: null, note: '', revealed: true, updatedAt: 10 };
+  cloud.listHexCells.mockResolvedValue([hex]);
+  cloud.listHexCellRevisions.mockResolvedValue([{ q: 1, r: 2, updatedAt: 10 }]);
+  render(<Probe />);
+  await waitFor(() => expect(cloud.listHexCells).toHaveBeenCalledTimes(1));
+
+  await act(async () => { window.dispatchEvent(new Event('online')); });
+  await waitFor(() => expect(cloud.listHexCellRevisions).toHaveBeenCalledTimes(1));
+  expect(cloud.listHexCells).toHaveBeenCalledTimes(1);
+
+  // The GM changed it elsewhere and the event never arrived.
+  cloud.listHexCellRevisions.mockResolvedValue([{ q: 1, r: 2, updatedAt: 20 }]);
+  cloud.listHexCells.mockResolvedValue([{ ...hex, terrain: 'Hills', updatedAt: 20 }]);
+  await act(async () => { window.dispatchEvent(new Event('online')); });
+  await waitFor(() => expect(cloud.listHexCells).toHaveBeenCalledTimes(2));
 });

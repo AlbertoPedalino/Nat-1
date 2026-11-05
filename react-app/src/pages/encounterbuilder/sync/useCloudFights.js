@@ -10,7 +10,7 @@ import {
   saveInstanceFight,
   subscribeInstanceFights,
 } from '../../../shared/cloud/api/encounterFights.js';
-import { MAX_TARGETED_IDS } from '../../../shared/vtt/session/revisionDiff.js';
+import { diffRevisions, readChanged } from '../../../shared/cloud/sync/revisionDiff.js';
 import { externalDelta } from './externalSync.js';
 import { fightSignature, libraryCardUpdates, toFightEntry } from '../library/fightRecord.js';
 import { listenForRecovery } from '../../../shared/cloud/sync/recoveryTriggers.js';
@@ -222,16 +222,18 @@ export function useCloudFights({
     // A fight this screen does not hold is read whatever its version: the
     // reducer may have set it aside (an older launch of the encounter on
     // screen) and must be offered it again, as the full read used to.
-    const held = new Set((heldRef.current.fights || []).map((fight) => String(fight.id)));
-    const changed = revisions
-      .filter(({ id, updatedAt }) => wanted.has(id) && (!held.has(id) || versionsRef.current.get(id) !== updatedAt))
-      .map(({ id }) => id);
-    if (!changed.length) return undefined;
+    const held = new Map((heldRef.current.fights || []).map((fight) => [String(fight.id), versionsRef.current.get(String(fight.id))]));
+    const diff = diffRevisions(
+      revisions.filter(({ id }) => wanted.has(id)).map(({ id, updatedAt }) => ({ id, version: updatedAt })),
+      held,
+    );
+    if (!diff.changed.length) return undefined;
     let rows;
     try {
-      rows = changed.length > MAX_TARGETED_IDS
-        ? (await listInstanceFights(instanceId)).filter((entry) => changed.includes(String(entry.id)))
-        : await listInstanceFightsByIds(instanceId, changed);
+      rows = await readChanged(diff, {
+        fetchAll: async () => (await listInstanceFights(instanceId)).filter((entry) => diff.changed.includes(String(entry.id))),
+        fetchSome: (ids) => listInstanceFightsByIds(instanceId, ids),
+      });
     } catch (_) {
       return undefined;
     }

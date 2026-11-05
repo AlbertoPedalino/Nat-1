@@ -142,6 +142,19 @@ export async function listHexCells(sceneId) {
   return (data || []).map(toHexCell).filter(Boolean);
 }
 
+// The light recovery's read: which hexes exist (that this reader may see) and
+// their versions, a few bytes each.
+export async function listHexCellRevisions(sceneId) {
+  if (!sceneId) return [];
+  const supabase = requireClient();
+  const { data, error } = await supabase
+    .from('map_hex_cells')
+    .select('q, r, updated_at')
+    .eq('scene_id', sceneId);
+  if (error) throw error;
+  return (data || []).map((row) => ({ q: Number(row.q), r: Number(row.r), updatedAt: Date.parse(row.updated_at) || 0 }));
+}
+
 export async function saveHexCell(sceneId, cell, patch) {
   if (!sceneId) throw new Error('This hex has no scene.');
   const supabase = requireClient();
