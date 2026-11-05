@@ -22,15 +22,14 @@ import { collectReplicatePlanChoices } from '../../shared/character/inventory/re
 import { pruneReplicatedItemsForPlans } from '../../shared/character/inventory/magicItemTinker.js';
 import { useSheetVitals } from './state/useSheetVitals.js';
 import { useSheetRolls } from './state/useSheetRolls.js';
+import { useSheetCloudSave } from './state/useSheetCloudSave.js';
 import { normalizeCharacterAttunement } from './inventory/attunement.js';
 import { getAllResourceDefs, normalizeResourceMax, resourceFullValue } from './resources/restResources.js';
 import { ensureSheetRuntimeAdapters } from './state/sheetRuntimeAdapters.js';
 import { loadItems, loadOptionalFeatures, loadConditions, reconcileInventoryWithItemsDb } from '../charbuilder/data/dataLoaders.js';
 import {
-  commandCharacterVitals, getCloudCharacter, SHEET_CONFLICT, updateCloudCharacterData,
+  commandCharacterVitals,
 } from '../../shared/cloud/api/cloudCharacters.js';
-import { useCharacterSheetRevision } from '../../shared/cloud/sync/useCharacterSheetRevision.js';
-import { CLOUD_SYNC_EVENT, isCloudSyncBusy } from '../../shared/cloud/sync/cloudSyncState.js';
 import { useCharacterDigests } from '../../shared/cloud/sync/useCharacterDigests.js';
 import { useAuth } from '../../shared/cloud/auth/AuthProvider.jsx';
 import { isSyncExcluded } from '../../shared/cloud/sync/cloudSyncExclude.js';
@@ -39,12 +38,8 @@ import { SYNCED_VITALS, clampCharacterVitals, pickCharacterVitals } from '../../
 import {
   getActiveCharId,
   getCharacterSyncMeta,
-  hasUnsyncedLocalChanges,
   loadCharacter as storeLoadCharacter,
-  markCharacterSynced,
   patchCharacter as storePatchCharacter,
-  rebaseCharacterSync,
-  saveCharacter as storeSaveCharacter,
   setActiveCharId,
 } from '../../shared/character/profile/store.js';
 
@@ -66,9 +61,6 @@ const EMBEDDED_SHEET_GRID = {
   `,
   gap: '0.55rem',
 };
-
-const CLOUD_SAVE_DELAY_MS = 1_200;
-const CLOUD_RETRY_MS = 30_000;
 
 // The JSON fetcher caches raw files, but turning the full items/optional-feature
 // datasets into sheet-ready records is also expensive. Share that processed
@@ -129,22 +121,8 @@ export default function CharacterSheet({
   const [resources, setResources] = useState({});
   const [freeCastUses, setFreeCastUses] = useState({});
   const [conditionEntries, setConditionEntries] = useState({});
-  const cloudSaveReadyRef = useRef(false);
-  const pendingCloudSaveRef = useRef(null);
-  const cloudSaveInFlightRef = useRef(null);
-  const cloudSaveTimerRef = useRef(null);
-  const flushCloudSaveRef = useRef(null);
-  const cloudSaveMountedRef = useRef(true);
-  const cloudSaveErrorShownRef = useRef(false);
-  const localEditVersionRef = useRef(0);
-  const queuedEditVersionRef = useRef(0);
-  // Content sync (useCharacterSheetRevision): the revision of the loaded sheet,
-  // a reload request for a local sheet that took the cloud's copy, and a
-  // conflict waiting for the user's decision.
+  // The sheet revision of the loaded copy (content sync, useSheetCloudSave).
   const [sheetBaseRevision, setSheetBaseRevision] = useState(null);
-  const [reloadKey, setReloadKey] = useState(0);
-  const [sheetConflict, setSheetConflict] = useState(null);
-  const sheetConflictRef = useRef(null);
   const usesExternalChar = Boolean(externalChar);
   const auth = useAuth();
   const hasCloudHealth = usesExternalChar || (auth.cloudEnabled && auth.status === 'authed');
@@ -170,6 +148,12 @@ export default function CharacterSheet({
   const incomingDigestRef = useRef(null);
   incomingDigestRef.current = incomingDigest;
 
+  const {
+    sheetConflict, loadRemoteVersion, keepLocalVersion, noteLocalEdit, resetCloudSave, reloadKey,
+  } = useSheetCloudSave({
+    C, charId, healthId, usesExternalChar, readOnly, onSheetRow, onSheetDeleted, sheetBaseRevision, showNotice,
+  });
+
   useEffect(() => {
     if (embedded) return;
     const characterName = String(C?.name || '').trim();
@@ -178,13 +162,7 @@ export default function CharacterSheet({
 
   useEffect(() => {
     let alive = true;
-    cloudSaveReadyRef.current = false;
-    pendingCloudSaveRef.current = null;
-    localEditVersionRef.current = 0;
-    queuedEditVersionRef.current = 0;
-    cloudSaveErrorShownRef.current = false;
-    clearTimeout(cloudSaveTimerRef.current);
-    cloudSaveTimerRef.current = null;
+    resetCloudSave();
     // Read-only view feeds the character directly (from the cloud); skip local
     // store entirely so nothing is written and auto-sync stays silent.
     const id = externalChar ? externalCharId : getCharIdFromUrl();
@@ -284,9 +262,7 @@ export default function CharacterSheet({
       patch = Object.fromEntries(Object.entries(patch).filter(([key]) => !SYNCED_VITALS.some((f) => f.data === key)));
       if (!Object.keys(patch).length) return;
     }
-    if (!fromCloud) {
-      localEditVersionRef.current += 1;
-    }
+    if (!fromCloud) noteLocalEdit();
     if (usesExternalChar) {
       setC((prev) => prev ? { ...prev, ...patch } : prev);
       return;
@@ -296,7 +272,7 @@ export default function CharacterSheet({
     const next = storePatchCharacter(charId, patch, { emit: !fromCloud });
     if (next) setC((prev) => withRuntimeOnlyCharacterFields(next, prev));
     else setC((prev) => prev ? { ...prev, ...patch } : prev);
-  }, [charId, usesExternalChar, hasCloudHealth]);
+  }, [charId, usesExternalChar, hasCloudHealth, noteLocalEdit]);
 
   const syncSheet = useCallback((updates) => {
     if (hasCloudHealth && !isSyncExcluded(charId)) {
@@ -356,207 +332,6 @@ export default function CharacterSheet({
     setResources(next);
     persist({ resources: next });
   }, [persist]);
-
-  // Content changed elsewhere (a GM adds an item, another device levels up).
-  // The sheet follows its revision — a few bytes, never with hit points — and
-  // downloads itself only when that moved past the one it holds. A clean sheet
-  // takes the new row: a cloud sheet through its parent (`onSheetRow`), a local
-  // one by storing it as the cloud's copy (no push back) and reloading. A sheet
-  // with local changes pending never takes it silently: its own save is
-  // conditional on the revision it is based on, and a real conflict waits for
-  // the user.
-  const sheetSyncProps = useRef({});
-  sheetSyncProps.current = { usesExternalChar, readOnly, healthId, onSheetRow, onSheetDeleted, C };
-  const sheetBusy = useCallback(() => {
-    const { usesExternalChar: external, readOnly: viewOnly, healthId: id } = sheetSyncProps.current;
-    if (sheetConflictRef.current) return true;
-    if (viewOnly) return false;
-    if (external) return Boolean(pendingCloudSaveRef.current || cloudSaveInFlightRef.current);
-    return isCloudSyncBusy(id) || hasUnsyncedLocalChanges(id);
-  }, []);
-
-  const applyRemoteSheet = useCallback((row) => {
-    const { usesExternalChar: external, healthId: id, onSheetRow: toParent } = sheetSyncProps.current;
-    if (!row?.data || String(row.id ?? '') !== String(id)) return;
-    if (external) {
-      toParent?.(row);
-      return;
-    }
-    storeSaveCharacter(id, row.data, { emit: false });
-    markCharacterSynced(id, row.sheet_revision ?? null);
-    setReloadKey((key) => key + 1);
-  }, []);
-
-  const enterSheetConflict = useCallback((row) => {
-    if (!row?.data) return;
-    sheetConflictRef.current = row;
-    setSheetConflict(row);
-  }, []);
-
-  const refreshForConflict = useCallback(async () => {
-    const { healthId: id } = sheetSyncProps.current;
-    try {
-      enterSheetConflict(await getCloudCharacter(id, { reason: 'conflict-refresh' }));
-    } catch (_) {
-      // Unreachable now: the pending save stays pending and fails again later.
-    }
-  }, [enterSheetConflict]);
-
-  const sheetSync = useCharacterSheetRevision({
-    characterId: healthId,
-    enabled: Boolean(healthId) && !isSyncExcluded(healthId),
-    baseRevision: sheetBaseRevision,
-    isBusy: sheetBusy,
-    onNewer: async () => {
-      const { healthId: id } = sheetSyncProps.current;
-      const row = await getCloudCharacter(id, { reason: 'structural-refresh' });
-      // Edited while the sheet was downloading: that is a conflict too.
-      if (sheetBusy()) enterSheetConflict(row);
-      else applyRemoteSheet(row);
-    },
-    onDeleted: () => { sheetSyncProps.current.onSheetDeleted?.(); },
-  });
-
-  // A local sheet's pushes run in CloudAutoSync: learn when one settles or
-  // finds the cloud moved on.
-  useEffect(() => {
-    if (usesExternalChar || !healthId) return undefined;
-    const onSync = ({ detail }) => {
-      if (String(detail?.id ?? '') !== String(healthId)) return;
-      if (detail.state === 'conflict') {
-        if (!sheetConflictRef.current) refreshForConflict();
-      } else if (detail.state === 'synced' || detail.state === 'cancelled' || detail.state === 'error') {
-        sheetSync.settle();
-      }
-    };
-    window.addEventListener(CLOUD_SYNC_EVENT, onSync);
-    return () => window.removeEventListener(CLOUD_SYNC_EVENT, onSync);
-  }, [usesExternalChar, healthId, refreshForConflict, sheetSync]);
-
-  // "Load the updated version": local changes are dropped for the cloud's.
-  const loadRemoteVersion = useCallback(() => {
-    const row = sheetConflictRef.current;
-    if (!row) return;
-    sheetConflictRef.current = null;
-    setSheetConflict(null);
-    pendingCloudSaveRef.current = null;
-    clearTimeout(cloudSaveTimerRef.current);
-    applyRemoteSheet(row);
-  }, [applyRemoteSheet]);
-
-  // "Keep my changes": an explicit save over that cloud version, still
-  // conditional on it (a change made after it is another conflict).
-  const keepLocalVersion = useCallback(() => {
-    const row = sheetConflictRef.current;
-    if (!row) return;
-    const { usesExternalChar: external, healthId: id, C: current } = sheetSyncProps.current;
-    sheetConflictRef.current = null;
-    setSheetConflict(null);
-    sheetSync.noteSaved(row.sheet_revision);
-    if (external) {
-      if (!pendingCloudSaveRef.current && current) pendingCloudSaveRef.current = { charId: id, character: current };
-      flushCloudSaveRef.current?.();
-    } else {
-      rebaseCharacterSync(id, row.sheet_revision);
-      storePatchCharacter(id, {});
-    }
-  }, [sheetSync]);
-
-  const scheduleCloudSave = useCallback((delay = CLOUD_SAVE_DELAY_MS) => {
-    clearTimeout(cloudSaveTimerRef.current);
-    cloudSaveTimerRef.current = setTimeout(() => flushCloudSaveRef.current?.(), delay);
-  }, []);
-
-  const flushCloudSave = useCallback(async () => {
-    const attempt = pendingCloudSaveRef.current;
-    // A conflict waits for the user's decision; nothing is saved meanwhile.
-    if (!attempt || cloudSaveInFlightRef.current || sheetConflictRef.current) return;
-    cloudSaveInFlightRef.current = attempt;
-    try {
-      // Conditional on the revision this sheet is based on: a change made
-      // elsewhere since is reported, never overwritten.
-      const known = sheetSync.knownRevision();
-      const result = await updateCloudCharacterData(attempt.charId, attempt.character, {
-        expectedSheetRevision: known >= 0 ? known : null,
-      });
-      if (pendingCloudSaveRef.current === attempt) {
-        pendingCloudSaveRef.current = null;
-      }
-      cloudSaveErrorShownRef.current = false;
-      // Our own revision: its Realtime echo is not someone else's change.
-      sheetSync.noteSaved(result?.sheetRevision);
-    } catch (error) {
-      if (error?.code === SHEET_CONFLICT) {
-        refreshForConflict();
-      } else if (!cloudSaveErrorShownRef.current) {
-        cloudSaveErrorShownRef.current = true;
-        showNotice('Cloud Save', error?.message || 'Failed to save online sheet.');
-      }
-      // Keep the exact snapshot pending. Online/focus/visibility and the
-      // 30-second safety timer below will retry it.
-    } finally {
-      cloudSaveInFlightRef.current = null;
-      if (
-        cloudSaveMountedRef.current
-        && pendingCloudSaveRef.current
-        && pendingCloudSaveRef.current !== attempt
-      ) {
-        scheduleCloudSave();
-      }
-    }
-  }, [refreshForConflict, scheduleCloudSave, sheetSync, showNotice]);
-  flushCloudSaveRef.current = flushCloudSave;
-
-  useEffect(() => {
-    if (!usesExternalChar || readOnly || !charId || !C) return undefined;
-    if (!cloudSaveReadyRef.current) {
-      cloudSaveReadyRef.current = true;
-      return undefined;
-    }
-    // Receiving vitals changes C too, but is not a new local edit. Writing it
-    // back creates another realtime event and can bounce old HP between peers.
-    // A queued local edit still needs the merged vitals in its next snapshot.
-    if (localEditVersionRef.current === queuedEditVersionRef.current) {
-      if (pendingCloudSaveRef.current && pendingCloudSaveRef.current !== cloudSaveInFlightRef.current) {
-        pendingCloudSaveRef.current = { ...pendingCloudSaveRef.current, character: C };
-      }
-      return undefined;
-    }
-    queuedEditVersionRef.current = localEditVersionRef.current;
-    pendingCloudSaveRef.current = {
-      charId,
-      character: C,
-    };
-    cloudSaveErrorShownRef.current = false;
-    scheduleCloudSave();
-    return undefined;
-  }, [usesExternalChar, readOnly, charId, C, scheduleCloudSave]);
-
-  useEffect(() => {
-    if (!usesExternalChar || readOnly) return undefined;
-    const retry = () => flushCloudSaveRef.current?.();
-    const retryWhenVisible = () => {
-      if (document.visibilityState === 'visible') retry();
-    };
-    const timer = window.setInterval(retry, CLOUD_RETRY_MS);
-    window.addEventListener('online', retry);
-    window.addEventListener('focus', retry);
-    document.addEventListener('visibilitychange', retryWhenVisible);
-    return () => {
-      window.clearInterval(timer);
-      window.removeEventListener('online', retry);
-      window.removeEventListener('focus', retry);
-      document.removeEventListener('visibilitychange', retryWhenVisible);
-    };
-  }, [readOnly, usesExternalChar]);
-
-  useEffect(() => {
-    cloudSaveMountedRef.current = true;
-    return () => {
-      cloudSaveMountedRef.current = false;
-      clearTimeout(cloudSaveTimerRef.current);
-    };
-  }, []);
 
   const rest = useRests({
     C, sheet, setSheet, resources, setResources, freeCastUses, setFreeCastUses, persist, showDiceToast, showNotice,
