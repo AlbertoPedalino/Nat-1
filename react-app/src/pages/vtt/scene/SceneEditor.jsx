@@ -126,6 +126,7 @@ import { useSceneInitiative } from '../initiative/useSceneInitiative.js';
 import { useSceneSettings } from './useSceneSettings.js';
 import { useSceneImages } from './useSceneImages.js';
 import SceneTopBar from './SceneTopBar.jsx';
+import { createPendingWrites } from '../../../shared/cloud/sync/pendingWrites.js';
 
 const CampaignSheetView = lazy(() => import('../../campaignsheet/CampaignSheetView.jsx'));
 
@@ -267,14 +268,8 @@ export default function SceneEditor({
   // shared flag was cleared by the first write to finish while a later change
   // was still waiting: picking a second atmosphere then let the echo of the
   // first one in, and the screen went new, old, new.
-  const sceneEditsRef = useRef(new Map());
-  const beginSceneEdit = useCallback((field) => {
-    const token = {};
-    sceneEditsRef.current.set(field, token);
-    return () => {
-      if (sceneEditsRef.current.get(field) === token) sceneEditsRef.current.delete(field);
-    };
-  }, []);
+  const [sceneEdits] = useState(createPendingWrites);
+  const beginSceneEdit = useCallback((field) => sceneEdits.begin(field), [sceneEdits]);
   // The version of the row our own latest write produced. A local edit never
   // moves `scene.updatedAt`, and the echo of the write is usually turned away
   // while it is still pending, so without this a recovery read that left
@@ -293,7 +288,7 @@ export default function SceneEditor({
   // not while one of our own edits or a fog stroke is still on its way, and
   // never a version older than the one held or than our own last write.
   const acceptsScene = useCallback((next) => {
-    if (!next || sceneEditsRef.current.size || paintingRef.current) return false;
+    if (!next || sceneEdits.size || paintingRef.current) return false;
     if (!next.updatedAt) return true;
     const saved = savedRevisionRef.current;
     const floor = Math.max(
@@ -301,7 +296,7 @@ export default function SceneEditor({
       saved.sceneId === next.id ? saved.updatedAt : 0,
     );
     return next.updatedAt >= floor;
-  }, []);
+  }, [sceneEdits]);
   const paintingRef = useRef(false);
   const fogBroadcastRef = useRef(0);
   // The fog the brush works on. It follows the scene between strokes; during

@@ -7,6 +7,7 @@ import {
   assembleSnapshot, diffRevisions, readChanged,
 } from '../../../shared/cloud/sync/revisionDiff.js';
 import { applyDrawingEvent } from '../../../shared/vtt/session/liveScene.js';
+import { createPendingWrites } from '../../../shared/cloud/sync/pendingWrites.js';
 
 // The GM-only label of each piece. A secrets row read for the piece is the
 // answer, an empty label included (cleared elsewhere); the label already held
@@ -57,8 +58,8 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
   const tokenRequestRef = useRef(0);
   const tokensRef = useRef(tokens);
   const drawingsRef = useRef(drawings);
-  const tokenMovesRef = useRef(new Map());
-  const drawingWritesRef = useRef(new Map());
+  const [tokenMoves] = useState(createPendingWrites);
+  const [drawingWrites] = useState(createPendingWrites);
   // Whether a full read has landed for this scene: the light recovery needs
   // something held to compare with.
   const loadedRef = useRef(false);
@@ -67,48 +68,24 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
 
   // Each move's write is counted per piece. Finishing one answers which pieces
   // have nothing else in flight, so the caller knows whose answer is final.
-  const beginTokenMove = useCallback((ids) => {
-    for (const id of ids) tokenMovesRef.current.set(id, (tokenMovesRef.current.get(id) || 0) + 1);
-    return () => {
-      const settled = [];
-      for (const id of ids) {
-        const count = tokenMovesRef.current.get(id) || 0;
-        if (count <= 1) {
-          tokenMovesRef.current.delete(id);
-          settled.push(id);
-        } else {
-          tokenMovesRef.current.set(id, count - 1);
-        }
-      }
-      return settled;
-    };
-  }, []);
+  const beginTokenMove = useCallback((ids) => tokenMoves.begin(ids), [tokenMoves]);
 
   // Pieces with a move still being written: their realtime echoes wait.
-  const movingTokenIds = useCallback(() => new Set(tokenMovesRef.current.keys()), []);
+  const movingTokenIds = useCallback(() => tokenMoves.keys(), [tokenMoves]);
 
   // The same count for a mark being edited or moved. Finishing answers whether
   // that was the mark's last write in flight, whose row is then final.
   const beginDrawingWrite = useCallback((id) => {
-    const writes = drawingWritesRef.current;
-    writes.set(id, (writes.get(id) || 0) + 1);
-    return () => {
-      const count = writes.get(id) || 0;
-      if (count <= 1) {
-        writes.delete(id);
-        return true;
-      }
-      writes.set(id, count - 1);
-      return false;
-    };
-  }, []);
+    const finish = drawingWrites.begin(id);
+    return () => finish().length > 0;
+  }, [drawingWrites]);
 
   const loadContent = useCallback(async ({ initial = false } = {}) => {
     const request = ++loadRequestRef.current;
     const tokenRequest = ++tokenRequestRef.current;
     const baselineTokens = tokensRef.current;
     const baselineDrawings = drawingsRef.current;
-    const protectedIds = new Set(tokenMovesRef.current.keys());
+    const protectedIds = tokenMoves.keys();
     if (initial) setLoading(true);
     try {
       const [sceneTokens, secrets, sceneDrawings] = await Promise.all([
@@ -118,13 +95,13 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
       ]);
       if (request !== loadRequestRef.current) return;
       if (tokenRequest === tokenRequestRef.current) {
-        for (const id of tokenMovesRef.current.keys()) protectedIds.add(id);
+        for (const id of tokenMoves.keys()) protectedIds.add(id);
         setTokens((current) => mergeSnapshot(
           current, baselineTokens, attachSecrets(sceneTokens, secrets, current), protectedIds,
         ));
       }
       setDrawings((current) => mergeSnapshot(
-        current, baselineDrawings, sceneDrawings, new Set(drawingWritesRef.current.keys()),
+        current, baselineDrawings, sceneDrawings, drawingWrites.keys(),
       ));
       loadedRef.current = true;
       // A reconnect can supersede the initial request. Whichever request wins
@@ -151,7 +128,7 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
     const tokenRequest = ++tokenRequestRef.current;
     const baselineTokens = tokensRef.current;
     const baselineDrawings = drawingsRef.current;
-    const protectedIds = new Set(tokenMovesRef.current.keys());
+    const protectedIds = tokenMoves.keys();
     try {
       const [tokenRevisions, secrets, drawingRevisions] = await Promise.all([
         listTokenRevisions(scene.id),
@@ -187,7 +164,7 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
       if (request !== loadRequestRef.current) return;
 
       if ((freshTokens || labelsMoved) && tokenRequest === tokenRequestRef.current) {
-        for (const id of tokenMovesRef.current.keys()) protectedIds.add(id);
+        for (const id of tokenMoves.keys()) protectedIds.add(id);
         const incoming = assembleSnapshot(tokenDiff.ids, tokenDiff.changed, freshTokens, heldTokens);
         setTokens((current) => mergeSnapshot(
           current, baselineTokens, attachSecrets(incoming, secrets, current), protectedIds,
@@ -202,7 +179,7 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
           )
           : freshDrawings;
         setDrawings((current) => mergeSnapshot(
-          current, baselineDrawings, incoming, new Set(drawingWritesRef.current.keys()),
+          current, baselineDrawings, incoming, drawingWrites.keys(),
         ));
       }
     } catch (_) {
@@ -237,14 +214,14 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
   const refreshVisibleTokens = useCallback(async () => {
     const request = ++tokenRequestRef.current;
     const baseline = tokensRef.current;
-    const protectedIds = new Set(tokenMovesRef.current.keys());
+    const protectedIds = tokenMoves.keys();
     try {
       const [fresh, secrets] = await Promise.all([
         listTokens(scene.id),
         isGm && !spectator ? listTokenSecrets(scene.id) : Promise.resolve({}),
       ]);
       if (request !== tokenRequestRef.current) return;
-      for (const id of tokenMovesRef.current.keys()) protectedIds.add(id);
+      for (const id of tokenMoves.keys()) protectedIds.add(id);
       setTokens((current) => mergeSnapshot(
         current, baseline, attachSecrets(fresh, secrets, current), protectedIds,
       ));
@@ -256,7 +233,7 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
 
   const handleDrawingEvent = useCallback((payload) => {
     setDrawings((current) => applyDrawingEvent(current, payload, {
-      pendingIds: new Set(drawingWritesRef.current.keys()),
+      pendingIds: drawingWrites.keys(),
     }));
   }, []);
 
