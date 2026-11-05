@@ -5,7 +5,7 @@ import {
   moveDrawing,
   updateDrawing,
 } from '../../../shared/cloud/api/vtt.js';
-import { applyCommittedDrawing } from '../../../shared/vtt/session/liveScene.js';
+import { addById, applyCommittedDrawing } from '../../../shared/vtt/session/liveScene.js';
 import {
   canEraseDrawing,
   canMoveDrawing,
@@ -32,7 +32,7 @@ export function useSceneDrawings({
         width: drawWidth,
         layer: role.isGm ? activeLayer : 'tokens',
       });
-      if (created) setDrawings((current) => [...current, created]);
+      if (created) setDrawings((current) => addById(current, created));
     } catch (cause) {
       notify('error', cause?.message || 'Could not save that stroke.');
     }
@@ -44,7 +44,7 @@ export function useSceneDrawings({
     try {
       await deleteDrawing(drawing.id);
     } catch (cause) {
-      setDrawings((current) => [...current, drawing]);
+      setDrawings((current) => addById(current, drawing));
       notify('error', cause?.message || 'Could not remove that stroke.');
     }
   }, [notify]);
@@ -104,7 +104,7 @@ export function useSceneDrawings({
         width: drawWidth,
         layer: role.isGm ? activeLayer : 'tokens',
       });
-      if (created) setDrawings((current) => [...current, created]);
+      if (created) setDrawings((current) => addById(current, created));
     } catch (cause) {
       notify('error', cause?.message || 'Could not place that area.');
     }
@@ -177,7 +177,7 @@ export function useSceneDrawings({
         width: drawWidth,
         layer: role.isGm ? activeLayer : 'tokens',
       });
-      if (created) setDrawings((current) => [...current, created]);
+      if (created) setDrawings((current) => addById(current, created));
     } catch (cause) {
       notify('error', cause?.message || 'Could not write that note.');
     }

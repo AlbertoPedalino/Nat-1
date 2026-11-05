@@ -18,6 +18,7 @@ import {
   deleteInstanceFight,
   saveInstanceFight,
 } from '../../../shared/cloud/api/encounterFights.js';
+import { addById } from '../../../shared/vtt/session/liveScene.js';
 
 // Putting pieces on the scene: markers, uploaded images, campaign characters,
 // monsters, map objects and a whole encounter from the library, by click (in
@@ -52,9 +53,7 @@ export function useTokenPlacement({
     setBusy(true);
     try {
       const created = await createToken(scene.id, token);
-      setTokens((current) => (
-        current.some((item) => item.id === created.id) ? current : [...current, created]
-      ));
+      setTokens((current) => addById(current, created));
       return created;
     } catch (cause) {
       notify('error', cause?.message || 'Could not add that token.');
@@ -117,7 +116,7 @@ export function useTokenPlacement({
         label: '',
         image_path: uploadedPath,
       });
-      setTokens((current) => [...current, created]);
+      setTokens((current) => addById(current, created));
     } catch (cause) {
       if (uploadedPath) {
         try { await deleteMapImage(uploadedPath); } catch {}
@@ -166,9 +165,7 @@ export function useTokenPlacement({
       for (const token of laid) {
         // eslint-disable-next-line no-await-in-loop
         const created = await createToken(scene.id, token);
-        setTokens((current) => (
-          current.some((item) => item.id === created.id) ? current : [...current, created]
-        ));
+        setTokens((current) => addById(current, created));
       }
     } catch (cause) {
       notify('error', cause?.message || 'Could not place that creature.');
@@ -193,9 +190,7 @@ export function useTokenPlacement({
         color: draft.color || null,
         image_path: uploadedPath,
       });
-      setTokens((current) => (
-        current.some((item) => item.id === created.id) ? current : [...current, created]
-      ));
+      setTokens((current) => addById(current, created));
     } catch (cause) {
       if (uploadedPath) {
         try { await deleteMapImage(uploadedPath); } catch {}
@@ -305,9 +300,7 @@ export function useTokenPlacement({
       for (const token of laid) {
         // eslint-disable-next-line no-await-in-loop
         const created = await createToken(scene.id, token);
-        setTokens((current) => (
-          current.some((item) => item.id === created.id) ? current : [...current, created]
-        ));
+        setTokens((current) => addById(current, created));
       }
     } catch (cause) {
       notify('error', cause?.message || 'Could not import that encounter.');

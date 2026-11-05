@@ -42,3 +42,11 @@ test('a player can erase and undo only their own marks; undo takes the newest', 
   await waitFor(() => expect(deleteDrawing).toHaveBeenLastCalledWith('b'));
   expect(result.current.drawings.map((d) => d.id)).toEqual(['a', 'c']);
 });
+
+test('a stroke whose realtime INSERT arrived before the write answered is shown once', async () => {
+  // The echo got here first: the new row is already on the list.
+  const echoed = { id: 'new', createdBy: 'me', createdAt: 3, layer: 'tokens', points: [[1, 1]] };
+  const { result } = setup({ drawings: [echoed] });
+  await act(() => result.current.marks.handleDrawEnd([[1, 1]]));
+  expect(result.current.drawings.map((d) => d.id)).toEqual(['new']);
+});

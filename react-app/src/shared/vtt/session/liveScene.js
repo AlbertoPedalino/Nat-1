@@ -13,6 +13,14 @@ import { canMoveToken, toToken } from '../scene/scene.js';
 
 export const GHOST_TTL_MS = 5000;
 
+// A row this screen created, added once: its realtime INSERT may already have
+// put it on the list before the write's own answer comes back.
+export function addById(list, row) {
+  const current = Array.isArray(list) ? list : [];
+  if (!row) return current;
+  return current.some((item) => item.id === row.id) ? current : [...current, row];
+}
+
 // The row a remote event carries is the same shape a fetch returns, so it goes
 // through the same normalizer instead of being trusted raw.
 //

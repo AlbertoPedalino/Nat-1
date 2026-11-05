@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  addById,
   GHOST_TTL_MS,
   applyCommittedDrawing,
   applyCommittedToken,
@@ -226,4 +227,12 @@ test('your own pieces are drawn over the others, the rest keep their order', () 
   assert.equal(liftMovablePieces(settled, canMove), settled);
   const gmView = [rug, mine, theirs];
   assert.equal(liftMovablePieces(gmView, () => true), gmView);
+});
+
+test('a created row is added once, even when its realtime INSERT got there first', () => {
+  const echoed = [{ id: 'a', label: 'Echo' }];
+  assert.equal(addById(echoed, { id: 'a', label: 'Answer' }), echoed);
+  assert.deepEqual(addById(echoed, { id: 'b' }).map((row) => row.id), ['a', 'b']);
+  assert.deepEqual(addById(null, { id: 'c' }), [{ id: 'c' }]);
+  assert.equal(addById(echoed, null), echoed);
 });
