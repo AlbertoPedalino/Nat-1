@@ -162,7 +162,9 @@ test('a missed hex change is recovered on the next check; an unchanged map reads
   cloud.listHexCells.mockResolvedValue([hex]);
   cloud.listHexCellRevisions.mockResolvedValue([{ q: 1, r: 2, updatedAt: 10 }]);
   render(<Probe />);
-  await waitFor(() => expect(cloud.listHexCells).toHaveBeenCalledTimes(1));
+  // The mount read has landed: the check compares against the hex on screen.
+  await waitFor(() => expect(hexcrawl.cellsByKey.size).toBe(1));
+  expect(cloud.listHexCells).toHaveBeenCalledTimes(1);
 
   await act(async () => { window.dispatchEvent(new Event('online')); });
   await waitFor(() => expect(cloud.listHexCellRevisions).toHaveBeenCalledTimes(1));
@@ -173,4 +175,5 @@ test('a missed hex change is recovered on the next check; an unchanged map reads
   cloud.listHexCells.mockResolvedValue([{ ...hex, terrain: 'Hills', updatedAt: 20 }]);
   await act(async () => { window.dispatchEvent(new Event('online')); });
   await waitFor(() => expect(cloud.listHexCells).toHaveBeenCalledTimes(2));
+  await waitFor(() => expect([...hexcrawl.cellsByKey.values()][0].terrain).toBe('Hills'));
 });
