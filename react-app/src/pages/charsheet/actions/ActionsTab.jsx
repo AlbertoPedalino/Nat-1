@@ -37,14 +37,7 @@ import {
 } from '../spells/spellsTabStyles.js';
 import { Empty } from '../spells/SpellsUiParts.jsx';
 import SearchField from '../../../shared/ui/SearchField.jsx';
-import ActionDetailPanel from './ActionDetailPanel.jsx';
-import CreatedItemsPanel from '../inventory/CreatedItemsPanel.jsx';
-import WildShapePanel from '../forms/WildShapePanel.jsx';
-import WildCompanionPanel from '../forms/WildCompanionPanel.jsx';
-import EldritchCannonPanel from '../forms/EldritchCannonPanel.jsx';
-import MagicItemTinkerPanel from '../inventory/MagicItemTinkerPanel.jsx';
-import SummonedCreaturePanel from '../forms/SummonedCreaturePanel.jsx';
-import PrimalCompanionPanel from '../forms/PrimalCompanionPanel.jsx';
+import { ACTION_DETAIL_RENDERERS } from './actionDetailRenderers.js';
 import AttackRollButton from './AttackRollButton.jsx';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
@@ -66,17 +59,6 @@ import {
   getRegularSlotUsed,
   recoverPactSlots,
 } from '../../../shared/character/spells/spellSlots.js';
-
-const ACTION_DETAIL_RENDERERS = {
-  panel: ActionDetailPanel,
-  createdItems: CreatedItemsPanel,
-  wildShape: WildShapePanel,
-  wildCompanion: WildCompanionPanel,
-  eldritchCannon: EldritchCannonPanel,
-  magicItemTinker: MagicItemTinkerPanel,
-  summonedCreature: SummonedCreaturePanel,
-  primalCompanion: PrimalCompanionPanel,
-};
 
 const _danglingResKeyWarned = typeof Set === 'function' ? new Set() : null;
 function warnDanglingResKey(action, resMaxMap) {

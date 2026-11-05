@@ -1,33 +1,25 @@
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
-import { Box, Button, IconButton, TextField, Tooltip, Typography, Alert, alpha } from '@mui/material';
-import { Backpack, Check, ChevronDown, ChevronRight, Minus, Package, Plus, Shield, Sparkles, Swords, Trash2, AlertTriangle, Archive } from 'lucide-react';
+import { Box, Button, TextField, Typography, Alert } from '@mui/material';
+import { Backpack, Check, ChevronDown, ChevronRight, Package, Plus, Shield, Sparkles, Swords } from 'lucide-react';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import { loadItems } from '../../charbuilder/data/dataLoaders.js';
 import { getFinal } from '../state/calculations.js';
 import { installedRegistry } from '../../../adapters/index.js';
-import { availableItemFlagDefs, hasItemFlag, itemFlagFitsItem, toggleItemFlag } from '../../../shared/character/inventory/itemFlags.js';
+import { availableItemFlagDefs, toggleItemFlag } from '../../../shared/character/inventory/itemFlags.js';
 import {
-  isWeapon,
-  canOneHand,
-  canTwoHand,
-  isThrownWeapon,
   THROWN_SLOT,
   equipToSlot as equipToSlotHelper,
   getSlotConflictWarnings,
 } from './equipmentSlots.js';
 
 import { ItemNameIcon } from '../../../shared/content/FiveEToolsLink.jsx';
-import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { INVENTORY_SOURCE_PRIORITY, sourceRank } from '../../../shared/content/sourcePriority.js';
 import { addInventoryEntries, setOneInventoryUnitCarried } from '../../../shared/character/inventory/itemContainers.js';
-import { ENTITY_COLORS, ITEM_ATTUNEMENT, chipTintStyle } from '../../../shared/ui/entityColors.js';
 import {
-  attunementRequirementText,
   countAttunedItems,
-  getAttunementEligibility,
   toggleItemAttunement,
 } from '../../../shared/character/inventory/itemAttunement.js';
-import { isConsumableTome, extractTomeBonus, hasAbilityChoice, getAbilityChoiceGroups } from '../../../shared/character/inventory/itemEffects.js';
+import { extractTomeBonus } from '../../../shared/character/inventory/itemEffects.js';
 import { getArmorPenalties } from './armorPenalties.js';
 import { getCharacterAttunementState } from './attunement.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
@@ -36,9 +28,8 @@ import { setCoinAmount, updateCustomCurrency } from '../../../shared/character/i
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import { ItemReferenceBody, QuantityAdder } from '../../../shared/character/inventory/ItemReference.jsx';
 import { itemDisplayName } from '../../../shared/character/inventory/itemIdentity.js';
-import { itemCardName } from '../../../shared/character/inventory/replicateMagicItem.js';
-import { scrollCardName, writeOnScroll } from '../../../shared/character/inventory/spellScrolls.js';
-import ScrollSpellPicker from './ScrollSpellPicker.jsx';
+import { writeOnScroll } from '../../../shared/character/inventory/spellScrolls.js';
+import InventoryRow from './InventoryRow.jsx';
 import {
   carryCapacity,
   formatWeight,
@@ -47,12 +38,10 @@ import {
   totalCarriedWeight,
 } from '../../../shared/character/inventory/weight.js';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
-import { buildItemTags } from '../../../shared/character/inventory/craftedItems.js';
 import {
   itemChargeCurrent,
   itemChargeMaximum,
   setInventoryItemCharges,
-  shouldShowItemCharges,
 } from '../../../shared/character/inventory/itemCharges.js';
 import ItemFilterPanel from '../../../shared/character/inventory/ItemFilterPanel.jsx';
 import { hasActiveItemFilters, itemMatchesFilters } from '../../../shared/character/inventory/itemFilters.js';
@@ -139,20 +128,6 @@ const inventorySectionTitleSx = {
   letterSpacing: '0.12em',
   textTransform: 'uppercase',
   color: 'text.secondary',
-};
-
-const itemStateChipBaseSx = {
-  minWidth: 0,
-  px: '7px',
-  py: '2px',
-  border: 1,
-  borderRadius: '3px',
-  fontFamily: '"Cinzel", Georgia, serif',
-  fontSize: '0.58rem',
-  fontWeight: 700,
-  lineHeight: 1.75,
-  letterSpacing: 0,
-  textTransform: 'none',
 };
 
 const addPanelToggleSx = (open) => ({
@@ -698,6 +673,26 @@ export default function InventoryTab({ C, sheet }) {
     onUpdateCurrency?.(updateCustomCurrency(currency, id, { amount: value }));
   }, [currency, onUpdateCurrency]);
 
+
+  // Stable for the memoized rows: every row receives the same two objects.
+  const rowActions = useMemo(() => ({
+    qty: adjustQty,
+    charges: adjustCharges,
+    remove: removeItem,
+    equip: toggleEquipped,
+    equipSlot: equipToSlot,
+    carried: toggleCarried,
+    toggleFlag,
+    attune: toggleAttuned,
+    abilityChoice: setAbilityChoice,
+    writeScroll,
+    consumeTome,
+  }), [adjustQty, adjustCharges, removeItem, toggleEquipped, equipToSlot, toggleCarried, toggleFlag, toggleAttuned, setAbilityChoice, writeScroll, consumeTome]);
+  const rowAttunement = useMemo(() => ({
+    full: attunementFull,
+    context: attunementState.context,
+    limit: attunementState.limit,
+  }), [attunementFull, attunementState]);
   return (
     <Box>
       <CurrencyRow
@@ -821,23 +816,11 @@ export default function InventoryTab({ C, sheet }) {
                     key={`${item.name}-${item.source}-${index}`}
                     item={item}
                     index={index}
-                    onQty={adjustQty}
-                    onCharges={adjustCharges}
-                    onRemove={removeItem}
-                    onEquip={toggleEquipped}
-                    onEquipSlot={equipToSlot}
-                    onCarried={toggleCarried}
+                    character={C}
                     penaltyMsg={getPenaltyMessage(C, item, profSets)}
                     itemFlagDefs={itemFlagDefs}
-                    onToggleFlag={toggleFlag}
-                    onAttune={toggleAttuned}
-                    attunementFull={attunementFull}
-                    character={C}
-                    attunementContext={attunementState.context}
-                    attunementLimit={attunementState.limit}
-                    onSetAbilityChoice={setAbilityChoice}
-                    onWriteOnScroll={writeScroll}
-                    onConsumeTome={consumeTome}
+                    attunement={rowAttunement}
+                    actions={rowActions}
                   />
                 ))}
               </Box>
@@ -914,322 +897,6 @@ const getPenaltyMessage = (() => {
     return msg;
   };
 })();
-
-// Provenance tags ([custom] + crafted badges) on their own row beneath the item
-// name so a long name truncates cleanly instead of being shoved by trailing tags
-// (notably on mobile). `[custom]` stays plain text — it's a flag, not a tone pill.
-function ItemTagsRow({ item, character }) {
-  const tags = buildItemTags(item, character);
-  if (!item.custom && tags.length === 0) return null;
-  return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap', mt: '3px' }}>
-      {item.custom ? <Box component="span" sx={{ fontSize: '0.56rem', color: 'text.secondary' }}>[custom]</Box> : null}
-      {tags.map((tag) => <MiniBadge key={tag.key} label={tag.label} color={tag.color} bg={tag.bg} />)}
-    </Box>
-  );
-}
-
-const InventoryRow = memo(function InventoryRow({ item, index, onQty, onCharges, onRemove, onEquip, onEquipSlot, onCarried, penaltyMsg, itemFlagDefs, onToggleFlag, onAttune, attunementFull, character, attunementContext, attunementLimit, onSetAbilityChoice, onWriteOnScroll, onConsumeTome }) {
-  const type = String(item.type || '').toUpperCase();
-  const canEquip = ['M', 'R', 'LA', 'MA', 'HA', 'S', 'SCF', 'WD', 'RD', 'ST', 'WI', 'WEAPON', 'ARMOR'].includes(type);
-  const carried = isItemCarried(item);
-  const chargeMaximum = itemChargeMaximum(item);
-  const chargeCurrent = itemChargeCurrent(item);
-
-  const showAbilityChoice = hasAbilityChoice(item);
-  const showTomeConsume = isConsumableTome(item);
-  const rowBorderColor = penaltyMsg ? 'warning.main' : (item.equipped ? '#2ca797' : (!carried ? '#8a7d66' : 'divider'));
-
-  return (
-    <ExpandableCard
-      containerSx={{ mb: '4px', overflow: 'hidden' }}
-      detailsSx={{ fontSize: '0.7rem', color: 'text.secondary', lineHeight: 1.45, bgcolor: '#12100e', border: 1, borderTop: 'none', borderColor: rowBorderColor, borderRadius: '0 0 8px 8px', px: '10px', py: '6px', mt: 0, mb: 0 }}
-      details={(
-        <>
-          <ItemReferenceBody item={item} />
-          <ScrollSpellPicker item={item} onWrite={(patch) => onWriteOnScroll?.(index, patch)} />
-          {showTomeConsume ? (
-            <TomeConsumePanel item={item} onConsume={() => onConsumeTome?.(index)} />
-          ) : null}
-          {showAbilityChoice ? (
-            <AbilityChoicePanel
-              item={item}
-              onPick={(groupIdx, abilities) => onSetAbilityChoice?.(index, groupIdx, abilities)}
-            />
-          ) : null}
-        </>
-      )}
-      summary={({ toggle, open }) => (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px', px: '10px', py: '6px', bgcolor: item.equipped ? 'rgba(26,188,156,0.06)' : (!carried ? 'rgba(35,32,26,0.55)' : 'rgba(35,32,26,1)'), border: 1, borderColor: rowBorderColor, borderRadius: open ? '8px 8px 0 0' : 1, mb: 0, opacity: carried ? 1 : 0.82, '&:hover': { borderColor: 'rgba(202,165,80,0.34)' } }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
-          <Box onClick={toggle} sx={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', minWidth: 0 }}>
-              <ItemNameIcon item={item} />
-              <Typography noWrap sx={{ fontSize: '0.875rem', color: 'text.primary', minWidth: 0 }}>{scrollCardName(item, itemCardName(item))}</Typography>
-            </Box>
-            <ItemTagsRow item={item} character={character} />
-            {!carried ? (
-              <Typography sx={{ fontSize: '0.56rem', color: '#9a8f7a', mt: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <Archive size={10} /> Owned, not carried
-              </Typography>
-            ) : null}
-            {penaltyMsg && (
-              <Typography sx={{ fontSize: '0.6rem', color: 'warning.main', mt: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <AlertTriangle size={10} /> {penaltyMsg}
-              </Typography>
-            )}
-          </Box>
-        </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', flexWrap: 'wrap' }}>
-          {carried && isWeapon(item) ? (
-            <Box sx={{ display: 'flex', gap: '2px' }}>
-              {canOneHand(item) ? (
-                <SlotBtn active={item.equippedSlot === 'mainHand'} onClick={() => onEquipSlot(index, 'mainHand')} label="MH" />
-              ) : null}
-              {canOneHand(item) ? (
-                <SlotBtn active={item.equippedSlot === 'offHand'} onClick={() => onEquipSlot(index, 'offHand')} label="OH" />
-              ) : null}
-              {canTwoHand(item) ? (
-                <SlotBtn active={item.equippedSlot === 'twoHands'} onClick={() => onEquipSlot(index, 'twoHands')} label="2H" />
-              ) : null}
-              {isThrownWeapon(item) ? (
-                <SlotBtn active={item.equippedSlot === THROWN_SLOT} onClick={() => onEquipSlot(index, THROWN_SLOT)} label="Thrown" />
-              ) : null}
-            </Box>
-          ) : carried && canEquip ? (
-            <Button size="small" onClick={() => onEquip(index)} startIcon={item.equipped ? <Check size={11} /> : null}
-              sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: item.equipped ? '#2ca797' : 'divider', borderRadius: '3px', color: item.equipped ? '#2ca797' : 'text.secondary', bgcolor: item.equipped ? 'rgba(26,188,156,0.12)' : 'transparent', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem' }}>
-              {item.equipped ? 'Equip.' : 'Equip'}
-            </Button>
-          ) : null}
-          {carried ? itemFlagDefs.filter((def) => itemFlagFitsItem(def, item)).map((def) => (
-            <ItemFlagButton key={def.key} def={def} active={hasItemFlag(item, def.key)} onClick={() => onToggleFlag(index, def)} />
-          )) : null}
-          {carried && item.reqAttune ? (
-            <AttuneButton item={item} index={index} attunementFull={attunementFull} character={character} attunementContext={attunementContext} attunementLimit={attunementLimit} onAttune={onAttune} />
-          ) : null}
-          {shouldShowItemCharges(item) ? (
-            <Box
-              aria-label={`${item.name} charges`}
-              sx={{
-                ...itemStateChipBaseSx,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                borderColor: ITEM_ATTUNEMENT,
-                color: ITEM_ATTUNEMENT,
-                bgcolor: alpha(ITEM_ATTUNEMENT, 0.14),
-              }}
-            >
-              <Box component="span">
-                Charges
-              </Box>
-              <ChargeStepButton ariaLabel={`Spend one ${item.name} charge`} disabled={chargeCurrent <= 0} onClick={() => onCharges?.(index, -1)}>
-                <Minus size={10} />
-              </ChargeStepButton>
-              <Box component="span" sx={{ minWidth: 28, textAlign: 'center' }}>
-                {chargeCurrent}/{chargeMaximum}
-              </Box>
-              <ChargeStepButton ariaLabel={`Restore one ${item.name} charge`} disabled={chargeCurrent >= chargeMaximum} onClick={() => onCharges?.(index, 1)}>
-                <Plus size={10} />
-              </ChargeStepButton>
-            </Box>
-          ) : null}
-          {/* Where the item is and how many, apart from how it is being used. */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, ml: 'auto' }}>
-            <Button size="small" onClick={() => onCarried(index)} startIcon={!carried ? <Archive size={11} /> : null}
-              sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: carried ? 'divider' : '#8a7d66', borderRadius: '3px', color: carried ? 'text.secondary' : '#c7b690', bgcolor: carried ? 'transparent' : 'rgba(138,125,102,0.14)', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem' }}>
-              {carried ? 'Stash' : 'Carry'}
-            </Button>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
-              <QtyButton onClick={() => onQty(index, -1)}><Minus size={12} /></QtyButton>
-              <Box sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.8125rem', fontWeight: 700, color: '#edd48a', minWidth: 18, textAlign: 'center' }}>{qty(item)}</Box>
-              <QtyButton onClick={() => onQty(index, 1)}><Plus size={12} /></QtyButton>
-            </Box>
-            <Tooltip title="Remove">
-              <Box component="span" sx={{ display: 'inline-flex' }}>
-                <QtyButton danger onClick={() => onRemove(index)}><Trash2 size={12} /></QtyButton>
-              </Box>
-            </Tooltip>
-          </Box>
-        </Box>
-      </Box>
-      )}
-    />
-  );
-});
-
-const ABILITY_LABEL = { str: 'STR', dex: 'DEX', con: 'CON', int: 'INT', wis: 'WIS', cha: 'CHA' };
-
-function TomeConsumePanel({ item, onConsume }) {
-  const bonus = extractTomeBonus(item);
-  if (!bonus) return null;
-  return (
-    <Box sx={{ mt: '8px', pt: '8px', borderTop: '1px dashed', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1 }}>
-      <Typography sx={{ flex: 1, fontSize: '0.66rem', color: 'text.secondary' }}>
-        Read & study to permanently gain <b style={{ color: '#edd48a' }}>+{bonus.value} {ABILITY_LABEL[bonus.ability]}</b>. The book then loses its magic.
-      </Typography>
-      <Button size="small" variant="outlined" onClick={onConsume}
-        sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.6rem', letterSpacing: '0.06em', borderColor: '#edd48a', color: '#edd48a', '&:hover': { bgcolor: 'rgba(237,212,138,0.08)', borderColor: '#edd48a' } }}>
-        Read & Consume
-      </Button>
-    </Box>
-  );
-}
-
-function AbilityChoicePanel({ item, onPick }) {
-  const groups = getAbilityChoiceGroups(item);
-  if (!groups.length) return null;
-  const stored = (item.abilityChoice && typeof item.abilityChoice === 'object') ? item.abilityChoice : {};
-
-  return (
-    <Box sx={{ mt: '8px', pt: '8px', borderTop: '1px dashed', borderColor: 'divider' }}>
-      <Typography sx={{ fontSize: '0.6rem', color: '#edd48a', fontFamily: '"Cinzel", Georgia, serif', fontWeight: 700, letterSpacing: '0.08em', mb: 0.3 }}>
-        Ability Choice
-      </Typography>
-      {groups.map((group, groupIdx) => {
-        const from = Array.isArray(group.from) ? group.from : [];
-        const count = Math.max(1, Number(group.count || 1));
-        const amount = group.amount ?? 2;
-        const current = Array.isArray(stored[groupIdx]) ? stored[groupIdx] : (stored[groupIdx] ? [stored[groupIdx]] : []);
-
-        const togglePick = (abil) => {
-          const exists = current.includes(abil);
-          let next;
-          if (exists) next = current.filter((a) => a !== abil);
-          else next = count === 1 ? [abil] : [...current, abil].slice(-count);
-          onPick(groupIdx, next);
-        };
-
-        return (
-          <Box key={groupIdx} sx={{ mb: 0.4 }}>
-            <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', mb: 0.25 }}>
-              Pick {count} (+{amount} each)
-            </Typography>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.3 }}>
-              {from.map((abil) => {
-                const isOn = current.includes(abil);
-                return (
-                  <Button key={abil} size="small" variant={isOn ? 'contained' : 'outlined'}
-                    onClick={() => togglePick(abil)}
-                    sx={{ minWidth: 0, px: '8px', py: '2px', fontSize: '0.6rem', fontFamily: '"Cinzel", Georgia, serif',
-                      ...(isOn ? { bgcolor: 'rgba(237,212,138,0.18)', color: '#edd48a', borderColor: '#edd48a' } : { color: 'text.secondary' }) }}>
-                    {ABILITY_LABEL[abil] || abil.toUpperCase()}
-                  </Button>
-                );
-              })}
-            </Box>
-          </Box>
-        );
-      })}
-    </Box>
-  );
-}
-
-function ItemFlagButton({ def, active, onClick }) {
-  const tone = def.tone || ENTITY_COLORS.class;
-  return (
-    <Button size="small" onClick={onClick} startIcon={active ? <Check size={11} /> : null}
-      sx={{
-        minWidth: 0, px: '7px', py: '2px', border: 1, borderRadius: '3px', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem',
-        ...(active ? chipTintStyle(tone, { bgAlpha: 0.14, borderAlpha: 1 }) : { borderColor: 'divider', color: 'text.secondary', bgcolor: 'transparent' }),
-      }}>
-      {active ? (def.activeLabel || def.label) : def.label}
-    </Button>
-  );
-}
-
-function QtyButton({ children, danger = false, disabled = false, ariaLabel, onClick }) {
-  return (
-    <IconButton size="small" disabled={disabled} aria-label={ariaLabel} onClick={onClick}
-      sx={{ width: 20, height: 20, border: 1, borderColor: 'divider', borderRadius: '3px', color: 'text.secondary', '&:hover': { borderColor: danger ? '#de675f' : '#caa550', color: danger ? '#de675f' : '#caa550' } }}>
-      {children}
-    </IconButton>
-  );
-}
-
-function ChargeStepButton({ children, disabled = false, ariaLabel, onClick }) {
-  return (
-    <IconButton
-      size="small"
-      disabled={disabled}
-      aria-label={ariaLabel}
-      onClick={onClick}
-      sx={{
-        width: 16,
-        height: 16,
-        p: 0,
-        color: 'inherit',
-        borderRadius: '3px',
-        '&:hover': { color: 'inherit', bgcolor: alpha(ITEM_ATTUNEMENT, 0.16) },
-        '&.Mui-disabled': { color: 'inherit', opacity: 0.35 },
-      }}
-    >
-      {children}
-    </IconButton>
-  );
-}
-
-function SlotBtn({ active, onClick, label }) {
-  return (
-    <IconButton size="small" onClick={onClick}
-      sx={{
-        minWidth: 24, height: 24, px: '4px',
-        border: 1,
-        borderColor: active ? '#caa550' : 'divider',
-        borderRadius: '3px',
-        color: active ? '#edd48a' : 'text.secondary',
-        bgcolor: active ? 'rgba(202,165,80,0.14)' : 'transparent',
-        fontFamily: '"Cinzel", Georgia, serif',
-        fontSize: '0.48rem',
-        fontWeight: 700,
-        letterSpacing: '0.04em',
-        '&:hover': { borderColor: '#caa550', color: '#caa550' },
-      }}
-    >
-      {label}
-    </IconButton>
-  );
-}
-
-// Attune toggle for an item requiring attunement. Structured prerequisite
-// failures block attunement; unmodeled alternatives remain advisory.
-function AttuneButton({ item, index, attunementFull, character, attunementContext, attunementLimit, onAttune }) {
-  const reqText = attunementRequirementText(item);
-  const eligibility = getAttunementEligibility(item, character, attunementContext);
-  const hasRequirementWarning = eligibility.status === 'ineligible' || eligibility.status === 'unknown';
-  const blockedByLimit = !item.attuned && attunementFull;
-  const blocked = blockedByLimit || (!item.attuned && eligibility.status === 'ineligible');
-  const cursedAttuned = Boolean(item.attuned && item.curse);
-  const tip = [
-    reqText,
-    blockedByLimit ? `Attunement limit reached (${attunementLimit})` : null,
-    hasRequirementWarning ? eligibility.reason : null,
-    cursedAttuned ? 'A cursed item cannot be unattuned voluntarily' : null,
-  ].filter(Boolean).join(' · ');
-  const accent = item.attuned ? ITEM_ATTUNEMENT : (hasRequirementWarning ? '#c9923f' : null);
-  return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-      <Tooltip title={tip} arrow>
-        <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center' }}>
-          <Button size="small" disabled={blocked} onClick={() => onAttune?.(index)}
-            startIcon={cursedAttuned ? <AlertTriangle size={11} /> : (item.attuned ? <Check size={11} /> : (hasRequirementWarning ? <AlertTriangle size={11} /> : null))}
-            sx={{ ...itemStateChipBaseSx, borderColor: accent || 'divider', color: accent || 'text.secondary', bgcolor: item.attuned ? alpha(ITEM_ATTUNEMENT, 0.14) : 'transparent', '&.Mui-disabled': { opacity: 0.4 } }}>
-            {cursedAttuned ? 'Cursed' : (item.attuned ? 'Attuned' : 'Attune')}
-          </Button>
-        </Box>
-      </Tooltip>
-      {cursedAttuned ? (
-        <Tooltip title="Use Remove Curse or equivalent magic, then end attunement" arrow>
-          <Button size="small" onClick={() => onAttune?.(index, { curseBroken: true })}
-            sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: '#a75d5d', borderRadius: '3px', color: '#d99292', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem' }}>
-            Break Curse & Unattune
-          </Button>
-        </Tooltip>
-      ) : null}
-    </Box>
-  );
-}
 
 const statPillSx = {
   bgcolor: 'rgba(35,32,26,1)',
