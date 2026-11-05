@@ -20,11 +20,8 @@ import { ProficiencySetsProvider } from './proficiency/ProficiencySetsContext.js
 import { SheetActionsProvider } from './state/SheetActionsContext.jsx';
 import { collectReplicatePlanChoices } from '../../shared/character/inventory/replicateMagicItem.js';
 import { pruneReplicatedItemsForPlans } from '../../shared/character/inventory/magicItemTinker.js';
-import { buildD20Meta, formatD20Detail, rollD20 as rollD20Dice } from '../../shared/character/dice/dice.js';
-import { aggregateSavingThrowBonus } from '../../shared/character/inventory/itemBonus.js';
-import { itemEffectInventory } from '../../shared/character/forms/wildShapeForm.js';
-import { getSaveBonus, exhaustionD20Penalty } from './state/calculations.js';
 import { useSheetVitals } from './state/useSheetVitals.js';
+import { useSheetRolls } from './state/useSheetRolls.js';
 import { normalizeCharacterAttunement } from './inventory/attunement.js';
 import { getAllResourceDefs, normalizeResourceMax, resourceFullValue } from './resources/restResources.js';
 import { ensureSheetRuntimeAdapters } from './state/sheetRuntimeAdapters.js';
@@ -34,13 +31,10 @@ import {
 } from '../../shared/cloud/api/cloudCharacters.js';
 import { useCharacterSheetRevision } from '../../shared/cloud/sync/useCharacterSheetRevision.js';
 import { CLOUD_SYNC_EVENT, isCloudSyncBusy } from '../../shared/cloud/sync/cloudSyncState.js';
-import { useRollChannel } from '../../shared/cloud/sync/useRollChannel.js';
-import { useCharacterCampaign } from '../../shared/cloud/sync/useCharacterCampaign.js';
 import { useCharacterDigests } from '../../shared/cloud/sync/useCharacterDigests.js';
 import { useAuth } from '../../shared/cloud/auth/AuthProvider.jsx';
 import { isSyncExcluded } from '../../shared/cloud/sync/cloudSyncExclude.js';
 import { withRuntimeOnlyCharacterFields } from '../../shared/character/profile/runtimeFields.js';
-import { normalizeRoll } from '../../shared/vtt/rolls/rollFeed.js';
 import { SYNCED_VITALS, clampCharacterVitals, pickCharacterVitals } from '../../shared/character/combat/vitals.js';
 import {
   getActiveCharId,
@@ -129,22 +123,9 @@ export default function CharacterSheet({
   const sheetRef = useRef(null);
   const [charId, setCharId] = useState(null);
   const [tab, setTab] = useState(0);
-  const [diceToast, setDiceToast] = useState(null);
-  const campaignId = useCharacterCampaign(charId);
-  // Rolls are shared with the campaign, not with a scene: this sheet has no idea
-  // which map is up and does not need to learn.
-  const [rollLog, setRollLog] = useState([]);
-  const receiveRoll = useCallback((entry) => {
-    const roll = normalizeRoll(entry);
-    if (!roll || roll.visibility === 'gm') return;
-    const toastEntry = {
-      ...roll, timestamp: roll.at, meta: { mode: roll.mode, bonus: roll.bonus },
-    };
-    setRollLog((current) => current.some((item) => item.id === roll.id)
-      ? current : [toastEntry, ...current].slice(0, 50));
-  }, []);
-  const { publish: publishRoll } = useRollChannel({ campaignId, onRoll: receiveRoll });
-  useEffect(() => { setRollLog([]); }, [campaignId, charId]);
+  const {
+    diceToast, setDiceToast, rollLog, setRollLog, showDiceToast, showNotice, rollD20, rollSave, rollSkill,
+  } = useSheetRolls({ C, sheet, charId, onRoll, showOwnRollToast });
   const [resources, setResources] = useState({});
   const [freeCastUses, setFreeCastUses] = useState({});
   const [conditionEntries, setConditionEntries] = useState({});
@@ -376,42 +357,6 @@ export default function CharacterSheet({
     persist({ resources: next });
   }, [persist]);
 
-  const showDiceToast = useCallback((label, detail, total, rolls, meta) => {
-    const timestamp = Date.now();
-    const entry = {
-      id: `sheet:${charId || 'anon'}:${timestamp}:${Math.random().toString(36).slice(2, 8)}`,
-      label,
-      detail,
-      total,
-      rolls,
-      meta,
-      // A map that is currently open should replay these dice physically. The
-      // published values stay authoritative; DiceTray paints them onto the
-      // faces that naturally land, so there is no final snap or contradiction.
-      thrown: Boolean(rolls?.length),
-      timestamp,
-      characterId: charId,
-      actorName: C?.name || '',
-      actorColor: C?.classIconColor || null,
-    };
-    if (showOwnRollToast) setDiceToast(entry);
-    setRollLog((prev) => [entry, ...prev].slice(0, 50));
-    // Said out loud at the table: the same entry the toast shows, so a roll
-    // reads on the battle map exactly as it read here. Every roll on this sheet
-    // goes through this one function, custom rolls included.
-    const sharedEntry = { ...entry, characterId: charId, actorName: C?.name || '' };
-    publishRoll(sharedEntry);
-    // Also hand off directly while campaign metadata is still loading.
-    // The map deduplicates the shared event by id.
-    onRoll?.(sharedEntry);
-  }, [C?.name, C?.classIconColor, charId, onRoll, publishRoll, showOwnRollToast]);
-
-  // Non-dice events (rests, death-save guards): no roll, no numeric total — just a
-  // labelled message. Routes through the same toast so DiceToast renders the detail.
-  const showNotice = useCallback((label, message) => {
-    showDiceToast(label, message, null, []);
-  }, [showDiceToast]);
-
   // Content changed elsewhere (a GM adds an item, another device levels up).
   // The sheet follows its revision — a few bytes, never with hit points — and
   // downloads itself only when that moved past the one it holds. A clean sheet
@@ -636,31 +581,6 @@ export default function CharacterSheet({
   const readOnlyEffectActions = useMemo(() => ({
     add: noopEffect, remove: noopEffect, readOnly: true,
   }), []);
-
-  const rollD20 = useCallback((bonus, label, advantage) => {
-    // Exhaustion (XPHB 2024): −2 per level to every D20 Test. rollD20 is the single
-    // executor for saves/checks/skills/attacks/initiative, so applying it here
-    // covers all of them in one place.
-    const exPenalty = exhaustionD20Penalty(sheet?.exhaustionLevel);
-    const finalLabel = exPenalty ? `${label} (Exhaustion −${exPenalty})` : label;
-    const result = rollD20Dice(bonus - exPenalty, {
-      advantage: advantage === true ? true : advantage === false ? false : undefined,
-    });
-    showDiceToast(finalLabel, formatD20Detail(result), result.total, result.rolls, buildD20Meta(result));
-  }, [showDiceToast, sheet]);
-
-  const rollSave = useCallback((stat, options = {}) => {
-    if (!C) return;
-    const inventory = sheet?.sheetInventory || C?.inventory || [];
-    // Wild Shape: merged equipment grants no save bonus (see SavingThrows panel).
-    const bonus = getSaveBonus(C, stat) + aggregateSavingThrowBonus(itemEffectInventory(C, inventory));
-    const lbl = stat.charAt(0).toUpperCase() + stat.slice(1) + ' Save';
-    rollD20(bonus, lbl, options.disadvantage ? false : (options.advantage || undefined));
-  }, [C, sheet, rollD20]);
-
-  const rollSkill = useCallback((skillName, bonus, options = {}) => {
-    rollD20(bonus, skillName + ' Check', options.disadvantage ? false : (options.advantage || undefined));
-  }, [rollD20]);
 
   const updateXp = useCallback((val) => {
     const xp = parseInt(val) || 0;
