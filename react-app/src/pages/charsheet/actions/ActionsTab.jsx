@@ -60,7 +60,6 @@ import { ItemPropertyTable } from '../../../shared/character/inventory/ItemPrope
 import { formatRollTitle } from '../../../shared/character/dice/dice.js';
 import RollerButtons from '../../../shared/character/dice/RollerButtons.jsx';
 import { CHIP_TONES, chipToneStyle } from '../../../shared/ui/entityColors.js';
-import { classLevel } from '../../../shared/character/progression/classLevel.js';
 import {
   getPactSlotUsed,
   getPactSlotUsedKey,
@@ -378,10 +377,7 @@ export default function ActionsTab({ C, sheet, resources }) {
       if (!consumed) { onShowToast?.('Wild Resurgence', 'No available spell slots to expend.', 0, []); return; }
       const res = { ...resources };
       const beforeWS = Number(res.wild_shape || 0);
-      const slotsData = getSheetSlots(C);
-      const druidLv = classLevel(C, 'Druid');
-      const maxWS = druidLv >= 17 ? 4 : druidLv >= 6 ? 3 : 2;
-      res.wild_shape = Math.min(maxWS, beforeWS + 1);
+      res.wild_shape = Math.min(resMaxMap.wild_shape ?? 0, beforeWS + 1);
       setResources(res);
         onShowToast?.('Wild Resurgence', 'Regained 1 Wild Shape use by spending a spell slot.', 0, []);
     }
@@ -585,15 +581,11 @@ export default function ActionsTab({ C, sheet, resources }) {
     onUpdateSheet?.({ spellSlotUsed: used });
     onUpdateCharacter?.((prev) => ({ ...prev, spellSlotsUsed: used }));
 
-    // Arcane Recovery also restores 1 expended Bladesong use
+    // Arcane Recovery also restores 1 expended Bladesong use. The Bladesong
+    // resource exists only for a Bladesinger and carries its own max.
     if (C?.bladesongActive != null) {
-      const isBladesinger = (String(C.className || '') === 'Wizard' &&
-        (C.subclassShortName === 'Bladesinger' || C.subclassShortName === 'Bladesinging')) ||
-        (C.extraClasses || []).some(ec =>
-          ec.name === 'Wizard' && (ec.subclassShortName === 'Bladesinger' || ec.subclassShortName === 'Bladesinging')
-        );
-      if (isBladesinger) {
-        const bladeMax = Math.max(1, getMod(getFinal(C, 'int')));
+      const bladeMax = resMaxMap.bladesong;
+      if (bladeMax != null) {
         const bladeCur = Number(resources?.['bladesong'] ?? 0);
         if (bladeCur < bladeMax) {
           const nextRes = { ...resources, bladesong: Math.min(bladeMax, bladeCur + 1) };
