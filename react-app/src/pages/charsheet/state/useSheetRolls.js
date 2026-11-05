@@ -4,8 +4,7 @@ import {
   formatD20Detail,
   rollD20 as rollD20Dice,
 } from '../../../shared/character/dice/dice.js';
-import { aggregateSavingThrowBonus } from '../../../shared/character/inventory/itemBonus.js';
-import { itemEffectInventory } from '../../../shared/character/forms/wildShapeForm.js';
+import { characterItemBonuses } from '../../../shared/character/inventory/itemBonus.js';
 import { getSaveBonus, exhaustionD20Penalty } from './calculations.js';
 import { useRollChannel } from '../../../shared/cloud/sync/useRollChannel.js';
 import { useCharacterCampaign } from '../../../shared/cloud/sync/useCharacterCampaign.js';
@@ -83,8 +82,8 @@ export function useSheetRolls({ C, sheet, charId, onRoll, showOwnRollToast }) {
   const rollSave = useCallback((stat, options = {}) => {
     if (!C) return;
     const inventory = sheet?.sheetInventory || C?.inventory || [];
-    // Wild Shape: merged equipment grants no save bonus (see SavingThrows panel).
-    const bonus = getSaveBonus(C, stat) + aggregateSavingThrowBonus(itemEffectInventory(C, inventory));
+    // Wild Shape: merged equipment grants no save bonus.
+    const bonus = getSaveBonus(C, stat) + characterItemBonuses(C, inventory).savingThrow;
     const lbl = stat.charAt(0).toUpperCase() + stat.slice(1) + ' Save';
     rollD20(bonus, lbl, options.disadvantage ? false : (options.advantage || undefined));
   }, [C, sheet, rollD20]);

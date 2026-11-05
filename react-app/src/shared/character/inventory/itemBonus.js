@@ -3,6 +3,7 @@
 // attack/damage/AC/save/spell calculations stay consistent.
 
 import { isItemEffectActive } from './itemAttunement.js';
+import { itemEffectInventory } from '../forms/wildShapeForm.js';
 
 export function parseSignedBonus(value) {
   if (value == null) return 0;
@@ -63,5 +64,17 @@ export function aggregateSpellBonuses(inventory) {
   return {
     spellAttack: sumField(inventory, 'bonusSpellAttack'),
     spellSaveDc: sumField(inventory, 'bonusSpellSaveDc'),
+  };
+}
+
+// The flat item bonuses that count for a character: none while Wild Shaped
+// (the equipment merges into the form). Character-level callers read these,
+// never the inventory sums above, so the form rule cannot be missed.
+export function characterItemBonuses(C, inventory = C?.inventory) {
+  const items = itemEffectInventory(C, inventory);
+  return {
+    savingThrow: aggregateSavingThrowBonus(items),
+    abilityCheck: aggregateAbilityCheckBonus(items),
+    ...aggregateSpellBonuses(items),
   };
 }

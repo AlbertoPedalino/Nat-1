@@ -20,7 +20,7 @@
 // that adapter; nothing in this file changes. A brand-new *domain* (armor,
 // items, …) = one collector spread into collectSaveModifiers.
 
-import { collectItemEffects } from '../../../shared/character/inventory/itemEffects.js';
+import { characterItemEffects } from '../../../shared/character/inventory/itemEffects.js';
 import { getEquippedArmorPenalties } from '../inventory/armorPenalties.js';
 import { collectSheetEffects } from '../state/sheetEffects.js';
 import { SLBL, STATS } from '../state/calculations.js';
@@ -98,8 +98,8 @@ function collectArmorSaveDisadvantages(C, inventory, profSets) {
 
 // --- Magic-item contextual advantages (vs poison, vs spells, ...) --------
 
-function collectItemSaveAdvantages(inventory) {
-  const effects = collectItemEffects(inventory);
+function collectItemSaveAdvantages(C, inventory) {
+  const effects = characterItemEffects(C, inventory);
   return [...effects.advantageOnSaveAgainst.entries()].map(([target, sources]) => ({
     kind: 'advantage',
     mode: 'conditional',
@@ -132,7 +132,7 @@ export function collectSaveModifiers(C, inventory, profSets, activeConditions = 
   return [
     ...collectSheetSaveEffects(C).flatMap(normalizeSheetEffect),
     ...collectArmorSaveDisadvantages(C, inventory, profSets),
-    ...collectItemSaveAdvantages(inventory),
+    ...collectItemSaveAdvantages(C, inventory),
     ...collectConditionSaveModifiers(activeConditions),
   ];
 }

@@ -5,7 +5,7 @@ import { getFinal, exhaustionSpeedPenalty } from '../state/calculations.js';
 import { getSpeedZeroConditions } from '../../../shared/character/combat/conditions.js';
 import { collectMovementEffects, effectSummary, effectTitle } from '../state/sheetEffects.js';
 import { getSpeedBonus } from '../state/effectBonuses.js';
-import { collectItemEffects } from '../../../shared/character/inventory/itemEffects.js';
+import { characterItemEffects } from '../../../shared/character/inventory/itemEffects.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import {
   carryCapacity,
@@ -57,7 +57,7 @@ export default function Movement({ C, sheet }) {
     return true;
   });
   const runtimeSpeedBonus = getSpeedBonus(C);
-  const itemEffects = collectItemEffects(C?.inventory);
+  const itemEffects = characterItemEffects(C);
   // Compose modes referenced by `equal` rules even if they aren't in baseSpeeds.
   const allModes = new Set(Object.keys(baseSpeeds));
   Object.keys(itemEffects.speedEqual || {}).forEach((mode) => allModes.add(mode));

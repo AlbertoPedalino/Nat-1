@@ -8,7 +8,7 @@
 import { parseSignedBonus } from './itemBonus.js';
 import { isItemEffectActive } from './itemAttunement.js';
 import { getItemNarrativeEffects } from './itemNarrativeEffects.js';
-import { isWildShaped } from '../forms/wildShapeForm.js';
+import { itemEffectInventory } from '../forms/wildShapeForm.js';
 
 const ABILITY_KEYS = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
 const SENSE_TYPES = ['darkvision', 'blindsight', 'truesight', 'tremorsense'];
@@ -261,6 +261,8 @@ function computeEffects(inventory) {
   return out;
 }
 
+// Item-level: the effects of these items, whoever holds them. With a
+// character, read `characterItemEffects` instead.
 export function collectItemEffects(inventory) {
   if (!Array.isArray(inventory) || inventory.length === 0) {
     return createEmptyEffects();
@@ -270,6 +272,13 @@ export function collectItemEffects(inventory) {
   const result = computeEffects(inventory);
   _cache.set(inventory, result);
   return result;
+}
+
+// The item effects that count for a character: none while Wild Shaped (the
+// equipment merges into the form), the inventory's otherwise. Every
+// character-level reader goes through here, so the form rule cannot be missed.
+export function characterItemEffects(C, inventory = C?.inventory) {
+  return collectItemEffects(itemEffectInventory(C, inventory));
 }
 
 function consumedBonusFor(C, key) {
@@ -282,13 +291,11 @@ function consumedBonusFor(C, key) {
 export function getFinalAbilityScore(C, stat, baseScore, { ignoreWildShape = false } = {}) {
   const key = String(stat || '').toLowerCase();
   const consumed = consumedBonusFor(C, key);
-  // Wild Shape (RAW 2024): worn/held equipment merges into the form and has no
-  // effect, so item ability bonuses/overrides don't apply. Permanently consumed
-  // boosts (Tome/Manual) are part of your scores, not equipment, so they remain.
-  // `ignoreWildShape` reconstructs your normal score (e.g. for retained Hit Points,
-  // which are computed from your own Constitution as if untransformed).
-  if (!ignoreWildShape && isWildShaped(C)) return baseScore + consumed;
-  const effects = collectItemEffects(C?.inventory);
+  // Permanently consumed boosts (Tome/Manual) are part of your scores, not
+  // equipment, so they count in Wild Shape too. `ignoreWildShape` reconstructs
+  // your normal score (e.g. for retained Hit Points, computed from your own
+  // Constitution as if untransformed).
+  const effects = ignoreWildShape ? collectItemEffects(C?.inventory) : characterItemEffects(C);
   const withBonus = baseScore + (effects.abilityBonuses[key] || 0) + consumed;
   const override = effects.abilityOverrides[key];
   return override != null ? Math.max(withBonus, override.value) : withBonus;
@@ -331,67 +338,67 @@ export function getAbilityChoiceGroups(item) {
 }
 
 export function collectItemResistanceItems(C) {
-  return collectItemEffects(C?.inventory).resistances
+  return characterItemEffects(C).resistances
     .map((entry) => ({ label: entry.label, kind: 'Resistance', source: entry.source }));
 }
 
 export function collectItemImmunityItems(C) {
-  return collectItemEffects(C?.inventory).immunities
+  return characterItemEffects(C).immunities
     .map((entry) => ({ label: entry.label, kind: 'Immunity', source: entry.source }));
 }
 
 export function collectItemVulnerabilityItems(C) {
-  return collectItemEffects(C?.inventory).vulnerabilities
+  return characterItemEffects(C).vulnerabilities
     .map((entry) => ({ label: entry.label, kind: 'Vulnerability', source: entry.source }));
 }
 
 export function collectItemConditionImmunityItems(C) {
-  return collectItemEffects(C?.inventory).conditionImmunities
+  return characterItemEffects(C).conditionImmunities
     .map((entry) => ({ label: entry.label, kind: 'Condition Immunity', source: entry.source }));
 }
 
 export function getItemSpeedOverride(C, mode = 'walk') {
-  const override = collectItemEffects(C?.inventory).speedOverride[mode];
+  const override = characterItemEffects(C).speedOverride[mode];
   return override ? override.value : null;
 }
 
 export function getItemSpeedBonus(C, mode = 'walk') {
-  return collectItemEffects(C?.inventory).speedBonus[mode] || 0;
+  return characterItemEffects(C).speedBonus[mode] || 0;
 }
 
 export function getItemSpeedMultiplier(C, mode = 'walk') {
-  const mul = collectItemEffects(C?.inventory).speedMultiplier[mode];
+  const mul = characterItemEffects(C).speedMultiplier[mode];
   return mul ? mul.value : 1;
 }
 
 export function getItemSpeedEqual(C, mode) {
-  return collectItemEffects(C?.inventory).speedEqual[mode] || null;
+  return characterItemEffects(C).speedEqual[mode] || null;
 }
 
 export function getItemSenses(C) {
-  return collectItemEffects(C?.inventory).senses;
+  return characterItemEffects(C).senses;
 }
 
 export function getItemProficiencyBonus(C) {
-  return collectItemEffects(C?.inventory).proficiencyBonus || 0;
+  return characterItemEffects(C).proficiencyBonus || 0;
 }
 
 export function getItemAdvantageOnSkill(C, skillName) {
-  const map = collectItemEffects(C?.inventory).advantageOnSkill;
+  const map = characterItemEffects(C).advantageOnSkill;
   const key = String(skillName || '').toLowerCase();
   return map.get(key) || null;
 }
 
 export function getItemAdvantageOnSave(C, target) {
-  const map = collectItemEffects(C?.inventory).advantageOnSaveAgainst;
+  const map = characterItemEffects(C).advantageOnSaveAgainst;
   const key = String(target || '').toLowerCase();
   return map.get(key) || null;
 }
 
 export function getItemAttackerDisadvantage(C) {
-  return collectItemEffects(C?.inventory).disadvantageOnAttackersAgainstYou;
+  return characterItemEffects(C).disadvantageOnAttackersAgainstYou;
 }
 
 export function getItemPassiveTraits(C) {
-  return collectItemEffects(C?.inventory).passiveTraits;
+  return characterItemEffects(C).passiveTraits;
 }

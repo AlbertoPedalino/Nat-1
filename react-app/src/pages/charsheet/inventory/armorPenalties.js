@@ -10,6 +10,7 @@
 
 import { getArmorTrainingInfo } from '../proficiency/proficiencies.js';
 import { requireEquipmentSets } from '../proficiency/equipmentSets.js';
+import { itemEffectInventory } from '../../../shared/character/forms/wildShapeForm.js';
 import { getFinal } from '../state/calculations.js';
 
 export function getArmorPenalties(C, item, equipmentSets) {
@@ -51,7 +52,8 @@ export function getArmorPenalties(C, item, equipmentSets) {
 
 export function getEquippedArmorPenalties(C, inventory, equipmentSets) {
   const sets = requireEquipmentSets(equipmentSets, 'getEquippedArmorPenalties');
-  const equippedArmor = (inventory || [])
+  // Wild Shape: the armor merges into the form, so it imposes nothing.
+  const equippedArmor = itemEffectInventory(C, inventory)
     .filter(item => item.equipped && ['LA', 'MA', 'HA', 'S'].includes(item.type));
 
   const allPenalties = equippedArmor

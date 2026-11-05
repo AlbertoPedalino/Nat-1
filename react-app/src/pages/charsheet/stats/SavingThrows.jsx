@@ -12,9 +12,8 @@ import {
 } from '../state/calculations.js';
 import { getConcentrationBonus, getD20FloorReminders } from '../state/effectBonuses.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
-import { aggregateSavingThrowBonus } from '../../../shared/character/inventory/itemBonus.js';
-import { collectItemEffects } from '../../../shared/character/inventory/itemEffects.js';
-import { itemEffectInventory } from '../../../shared/character/forms/wildShapeForm.js';
+import { characterItemBonuses } from '../../../shared/character/inventory/itemBonus.js';
+import { characterItemEffects } from '../../../shared/character/inventory/itemEffects.js';
 import {
   collectSaveModifiers,
   fixedModifiersForAbility,
@@ -25,15 +24,13 @@ import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
 
 export default function SavingThrows({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
-  // Wild Shape: equipment merges into the form, so item-sourced save bonuses,
-  // advantages and modifiers are suppressed (itemEffectInventory → [] while
-  // shaped). Feature/condition modifiers (via C / activeConditions) are retained.
+  // Item bonuses, advantages and armor penalties already leave out merged
+  // equipment while Wild Shaped; feature and condition modifiers stay.
   const inventory = sheet?.sheetInventory || C?.inventory || [];
-  const effectInventory = itemEffectInventory(C, inventory);
-  const itemSaveBonus = aggregateSavingThrowBonus(effectInventory);
-  const itemEffects = collectItemEffects(itemEffectInventory(C, C?.inventory));
+  const itemSaveBonus = characterItemBonuses(C, inventory).savingThrow;
+  const itemEffects = characterItemEffects(C);
   const saveContexts = [...itemEffects.advantageOnSaveAgainst.entries()];
-  const saveModifiers = collectSaveModifiers(C, effectInventory, profSets, sheet?.activeConditions || []);
+  const saveModifiers = collectSaveModifiers(C, inventory, profSets, sheet?.activeConditions || []);
   // Reminder list shows only situational modifiers (e.g. "vs Frightened").
   // Fixed ones (e.g. Gnomish Cunning on INT/WIS/CHA, armor) are already
   // surfaced per-stat (icon + auto-roll), so they're excluded here.

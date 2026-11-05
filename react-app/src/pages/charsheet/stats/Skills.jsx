@@ -13,12 +13,8 @@ import { describeCheckDisadvantage } from '../../../shared/character/combat/cond
 import { getEquippedArmorPenalties } from '../inventory/armorPenalties.js';
 import { getSkillAdvantageFromEffects } from '../state/effectBonuses.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
-import { aggregateAbilityCheckBonus } from '../../../shared/character/inventory/itemBonus.js';
+import { characterItemBonuses } from '../../../shared/character/inventory/itemBonus.js';
 import { getItemAdvantageOnSkill } from '../../../shared/character/inventory/itemEffects.js';
-import {
-  isWildShaped,
-  itemEffectInventory,
-} from '../../../shared/character/forms/wildShapeForm.js';
 
 function SkillProficiencyDot({ training }) {
   const dotColor = training === 'exp' ? 'secondary.main' : training ? 'primary.main' : 'divider';
@@ -44,10 +40,9 @@ function SkillProficiencyDot({ training }) {
 // already gated by minLevel/condition/requiredChoice/requiredItemFlag) and
 // magic items. Adding a source = register a `{ type:'advantage', target:'skill',
 // skill }` sheet effect in its adapter; nothing here changes.
-function getSkillAdvantage(C, skillName, shaped = false) {
+function getSkillAdvantage(C, skillName) {
   const fromEffects = getSkillAdvantageFromEffects(C, skillName);
   if (fromEffects) return fromEffects;
-  if (shaped) return null; // item-granted advantages merge away while Wild Shaped
   const fromItem = getItemAdvantageOnSkill(C, skillName);
   if (fromItem && fromItem.length) return { source: fromItem[0] };
   return null;
@@ -56,13 +51,10 @@ function getSkillAdvantage(C, skillName, shaped = false) {
 export default function Skills({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
   const inventory = sheet?.sheetInventory || C?.inventory || [];
-  // Wild Shape: equipment merges into the form (no effect), so item check bonuses
-  // and armor penalties (you're not wearing the armor) are suppressed; `shaped`
-  // also drops item-granted skill advantages below.
-  const shaped = isWildShaped(C);
-  const effectInventory = itemEffectInventory(C, inventory);
-  const armorPenalties = getEquippedArmorPenalties(C, effectInventory, profSets);
-  const itemCheckBonus = aggregateAbilityCheckBonus(effectInventory);
+  // Item bonuses, advantages and armor penalties already leave out merged
+  // equipment while Wild Shaped.
+  const armorPenalties = getEquippedArmorPenalties(C, inventory, profSets);
+  const itemCheckBonus = characterItemBonuses(C, inventory).abilityCheck;
   const activeConditions = sheet?.activeConditions || [];
 
   return (
@@ -93,7 +85,7 @@ export default function Skills({ C, sheet, onRoll }) {
         const disadvReason = checkDisadv.reason;
         const condNotes = conditional.map((c) => `${c.source} (${c.note})`);
         const situational = condNotes.length ? ` • Situational: ${condNotes.join('; ')}` : '';
-        const hasAdv = getSkillAdvantage(C, sk.n, shaped);
+        const hasAdv = getSkillAdvantage(C, sk.n);
         const hasBoth = hasAdv && hasDisadv;
         // Solid adv/disadv drive the roll; a purely situational disadvantage is a hint only.
         const visual = (hasAdv || hasDisadv)

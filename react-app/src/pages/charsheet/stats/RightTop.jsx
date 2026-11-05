@@ -14,7 +14,7 @@ import {
   collectItemResistanceItems,
   collectItemImmunityItems,
   collectItemConditionImmunityItems,
-  collectItemEffects,
+  characterItemEffects,
 } from '../../../shared/character/inventory/itemEffects.js';
 import { computeBestArmorClass } from '../../../shared/character/combat/ac.js';
 import {
@@ -166,7 +166,7 @@ function InspirationBlock({ sheet, onToggle }) {
 }
 
 function DefensesBlock({ C, activeConditions = [] }) {
-  const itemEffects = collectItemEffects(C?.inventory);
+  const itemEffects = characterItemEffects(C);
   // Conditions granting resistance to all damage (e.g. Petrified).
   const conditionResistAll = getConditionsWithEffect(activeConditions, 'resistAllDmg')
     .map((source) => ({ type: 'All damage', kind: 'Resist', source }));
