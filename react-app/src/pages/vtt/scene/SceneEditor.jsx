@@ -2,13 +2,10 @@ import {
   lazy, memo, Suspense, useCallback, useEffect, useMemo, useRef, useState, useTransition,
 } from 'react';
 import {
-  Box, Button, CircularProgress, IconButton, Stack, Tooltip, Typography,
+  Box,
+  CircularProgress,
+  Stack,
 } from '@mui/material';
-import {
-  Eye,
-  EyeOff,
-  Pencil,
-} from 'lucide-react';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
 import { withSheetVitals } from '../../../shared/campaign/roster.js';
@@ -53,7 +50,6 @@ import {
   isTokenVisibleToPlayers,
   normalizePlayArea,
   sceneBackgrounds,
-  sceneTitleFor,
   sceneView,
   toScene,
   viewBackgroundPath,
@@ -83,7 +79,7 @@ import {
 import { useGmTokenVitals } from '../tokens/useGmTokenVitals.js';
 import { useSceneHexcrawl } from '../hexcrawl/useSceneHexcrawl.js';
 import { useSceneTurns } from '../initiative/useSceneTurns.js';
-import InitiativeStrip, { InitiativeButton } from '../initiative/InitiativeStrip.jsx';
+import InitiativeStrip from '../initiative/InitiativeStrip.jsx';
 import MonsterStatBlockView from '../tokens/MonsterStatBlockView.jsx';
 import { useSceneDungeon } from '../dungeon/useSceneDungeon.js';
 import { useSceneContent } from './useSceneContent.js';
@@ -101,28 +97,15 @@ import EncounterImportDialog from '../tokens/EncounterImportDialog.jsx';
 import MonsterPickerDialog from '../tokens/MonsterPickerDialog.jsx';
 import DiceToast from '../../../shared/character/dice/DiceToast.jsx';
 import RollsButton from '../rolls/RollsButton.jsx';
-import SceneSwitcher from './SceneSwitcher.jsx';
 import SceneToolRail from './SceneToolRail.jsx';
 import MapCorner from './MapCorner.jsx';
 import BackgroundStrip from './BackgroundStrip.jsx';
-import BattleMapViewSwitch from '../map/BattleMapViewSwitch.jsx';
-import LiveControls from './LiveControls.jsx';
 import BattleMapSheetResizeHandle from '../sheets/BattleMapSheetResizeHandle.jsx';
 import {
   contentLayoutOpenSx,
   contentLayoutSx,
   editorRootSx,
   fade,
-  sceneIdentitySx,
-  scenePresenterActionsSx,
-  sceneRenameButtonSx,
-  sceneTitleSx,
-  sceneTopbarSx,
-  sceneViewSwitchSx,
-  sceneGmControlsSx,
-  sceneControlsPassThroughSx,
-  scenePlayerViewSwitchSx,
-  viewButtonSx,
   sheetLoadingSx,
   sheetViewSx,
   spectatorRootSx,
@@ -142,6 +125,7 @@ import { useTokenEdits } from '../tokens/useTokenEdits.js';
 import { useSceneInitiative } from '../initiative/useSceneInitiative.js';
 import { useSceneSettings } from './useSceneSettings.js';
 import { useSceneImages } from './useSceneImages.js';
+import SceneTopBar from './SceneTopBar.jsx';
 
 const CampaignSheetView = lazy(() => import('../../campaignsheet/CampaignSheetView.jsx'));
 
@@ -1503,88 +1487,31 @@ export default function SceneEditor({
     // here counts pixels, which is what stops the board being cut off or
     // floating above a strip of empty background.
     <Stack spacing={1} sx={editorRootSx}>
-      <Box sx={sceneTopbarSx}>
-        {role.isGm && !gmPlayerPreview && onOpenScene ? (
-          <SceneSwitcher scene={scene} onOpenScene={onOpenScene} />
-        ) : null}
-        <Box sx={sceneIdentitySx}>
-          <Typography variant="h1" sx={sceneTitleSx}>
-            {sceneTitleFor(scene, {
-              isGm: role.isGm && !gmPlayerPreview,
-              campaignName: role.campaignName,
-            })}
-          </Typography>
-          {role.isGm && !gmPlayerPreview ? (
-            <Tooltip title="Rename scene">
-              <IconButton size="small" aria-label="Rename scene" onClick={handleRename} sx={sceneRenameButtonSx}>
-                <Pencil size={11} />
-              </IconButton>
-            </Tooltip>
-          ) : null}
-        </Box>
-        {/* On a phone the GM's four buttons share one row under the name: what
-            the table sees on the left, what the GM is looking at on the right. */}
-        <Box sx={role.isGm ? sceneGmControlsSx : sceneControlsPassThroughSx}>
-        {role.isGm ? (
-          <Stack direction="row" spacing={0.75} useFlexGap sx={scenePresenterActionsSx}>
-            {!gmPlayerPreview ? (
-              <LiveControls
-                isLive={scene.isLive}
-                projectorFollowing={projectorFollowing}
-                // A scene that is not live has no projector to point anywhere.
-                projectorAttached={projectorControlsOpen}
-                onToggleLive={handleToggleLive}
-                onToggleFreeze={handleToggleProjectorFollow}
-                onOpenProjector={openSpectator}
-                onStopProjector={stopProjector}
-              />
-            ) : null}
-            {gmTurnView && !initiativeEntries.length ? (
-              <InitiativeButton choices={initiativeChoices} onChoose={handleChooseFight} />
-            ) : null}
-          </Stack>
-        ) : null}
-        {/* What the GM is looking at, on the far side of what the table sees:
-            the player preview changes nothing for anyone else, like the sheet. */}
-        {role.isGm || !gmPlayerPreview ? (
-          <Stack
-            direction="row"
-            spacing={0.75}
-            sx={role.isGm ? sceneViewSwitchSx : scenePlayerViewSwitchSx}
-          >
-            {role.isGm ? (
-              <Tooltip title={gmPlayerPreview
-                ? 'Return to the GM controls'
-                : 'Preview exactly what players can see; editing is disabled'}>
-                <Button
-                  size="small"
-                  variant={gmPlayerPreview ? 'contained' : 'outlined'}
-                  startIcon={gmPlayerPreview ? <EyeOff size={14} /> : <Eye size={14} />}
-                  aria-label={gmPlayerPreview ? 'Exit player view' : 'Player view'}
-                  aria-pressed={gmPlayerPreview}
-                  onClick={handleTogglePlayerPreview}
-                  sx={viewButtonSx}
-                >
-                  {/* The full label even on a phone: a bare "Player" reads
-                      as a person, not a view. */}
-                  {gmPlayerPreview ? 'Exit player view' : 'Player view'}
-                </Button>
-              </Tooltip>
-            ) : null}
-            {!gmPlayerPreview ? (
-              <BattleMapViewSwitch
-                view={contentView}
-                choices={sheetChoices}
-                selectedId={sheetAreaSelectedId}
-                available={hasSheetContent}
-                onViewChange={setContentView}
-                onSelectionChange={selectSheetCharacter}
-              />
-            ) : null}
-          </Stack>
-        ) : null}
-        </Box>
-      </Box>
+      <SceneTopBar
+        scene={scene}
+        role={role}
+        onOpenScene={onOpenScene}
+        gmPlayerPreview={gmPlayerPreview}
+        handleRename={handleRename}
+        handleToggleLive={handleToggleLive}
+        handleTogglePlayerPreview={handleTogglePlayerPreview}
+        projectorAttached={projectorAttached}
+        projectorControlsOpen={projectorControlsOpen}
+        projectorFollowing={projectorFollowing}
+        handleToggleProjectorFollow={handleToggleProjectorFollow}
+        openSpectator={openSpectator}
+        stopProjector={stopProjector}
+        gmTurnView={gmTurnView}
+        initiativeEntries={initiativeEntries}
+        initiativeChoices={initiativeChoices}
+        handleChooseFight={handleChooseFight}
+        contentView={contentView}
+        setContentView={setContentView}
+        hasSheetContent={hasSheetContent}
+        sheetChoices={sheetChoices}
+        sheetAreaSelectedId={sheetAreaSelectedId}
+        selectSheetCharacter={selectSheetCharacter}
+      />
 
       <Box
         ref={contentLayoutRef}
