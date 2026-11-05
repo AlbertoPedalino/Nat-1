@@ -20,6 +20,18 @@ import {
   resolveConflict,
   subscribeInstanceSyncAvailability,
 } from './instanceSync.js';
+import { listenForRecovery } from '../cloud/sync/recoveryTriggers.js';
+
+// How often an open tool instance checks the cloud version of its copy.
+export const INSTANCE_FOLLOW_MS = 30_000;
+
+function isEditingText() {
+  const element = document.activeElement;
+  if (!element) return false;
+  if (element.isContentEditable) return true;
+  const tag = String(element.tagName || '').toLowerCase();
+  return tag === 'textarea' || (tag === 'input' && !['button', 'checkbox', 'radio', 'range', 'submit'].includes(element.type));
+}
 
 function useInstanceSyncOnline() {
   return useSyncExternalStore(subscribeInstanceSyncAvailability, isInstanceSyncOnline, () => false);
@@ -125,6 +137,25 @@ export function useToolInstance(sectionKey) {
   }, [authPending, current, notify, online, sectionKey]);
 
   const id = current?.id || '';
+
+  // The open instance follows the cloud while it is shown: on the shared
+  // recovery triggers (every 30 s, coming back to the tab, back online) it
+  // reads only the row's version, pulls the copy when it moved and nothing
+  // here is unsynced, and sends what is unsynced here. Never while a text
+  // field has the focus: a pull remounts the editor, so it waits a turn.
+  const shown = gate.id === id && gate.ready;
+  useEffect(() => {
+    if (!id || !shown || !online) return undefined;
+    const entry = getInstance(sectionKey, id);
+    if (!entry || entry.cloud === CLOUD_STATES.LOCAL) return undefined;
+    return listenForRecovery(() => {
+      if (isEditingText()) return;
+      refreshInstance(sectionKey, id).then((outcome) => {
+        if (outcome === 'pulled') notify('info', 'Changes made on another device are now shown.');
+      }, () => {});
+    }, { intervalMs: INSTANCE_FOLLOW_MS });
+  }, [id, notify, online, sectionKey, shown]);
+
   useEffect(() => {
     if (!id) return undefined;
     return subscribeInstances((event) => {

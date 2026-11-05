@@ -524,3 +524,36 @@ test('the three tools share one instance layer; adapters hold payload code only'
     assert.match(read(page), /useToolInstance\('(gmboard|encounters|dmscreen)'\)/, page);
   }
 });
+
+test('a background refresh never overwrites an edit made while the cloud row was being read', async () => {
+  reset();
+  await linkedCopy('dmscreen', 'race_a', 1);
+  const clientB = storage.dump();
+  WRITE.dmscreen('race_a', 2);
+  await idle();
+  storage.load(clientB);
+
+  // The second read of this refresh is the full row: the user types meanwhile.
+  const from = cloud.client.from.bind(cloud.client);
+  let selects = 0;
+  cloud.client.from = (name) => {
+    const builder = from(name);
+    const typeOnSecondRead = (run) => (...args) => {
+      selects += 1;
+      if (selects === 2) WRITE.dmscreen('race_a', 3);
+      return run(...args);
+    };
+    builder.maybeSingle = typeOnSecondRead(builder.maybeSingle);
+    builder.then = typeOnSecondRead(builder.then);
+    return builder;
+  };
+  try {
+    assert.equal(await sync.refreshInstance('dmscreen', 'race_a'), 'local');
+  } finally {
+    cloud.client.from = from;
+  }
+  assert.equal(dmScreen.readPersistedNotes('race_a')[0].body, 'B3');
+  await idle();
+  // Sent instead, it meets the newer cloud copy as an explicit conflict.
+  assert.equal(entry('dmscreen', 'race_a').cloud, 'conflict');
+});

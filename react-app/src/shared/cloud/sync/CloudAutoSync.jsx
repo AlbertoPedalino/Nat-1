@@ -50,11 +50,12 @@ export default function CloudAutoSync() {
         onStatus: (id, state, message) => reportCloudSyncState(id, state, message),
       });
     }, () => {});
-    const onOnline = () => flushInstances();
-    window.addEventListener('online', onOnline);
+    // Tool instances with unsynced edits (a failed sync, a tab closed inside the
+    // debounce) go again on the shared triggers; nothing is sent when none is.
+    const stopRecovery = listenForRecovery(() => flushInstances(), { intervalMs: UNSYNCED_RETRY_MS });
     return () => {
       disposed = true;
-      window.removeEventListener('online', onOnline);
+      stopRecovery();
       dispose();
     };
   }, [cloudEnabled]);

@@ -289,12 +289,19 @@ function pullLocked(sectionKey, id, row) {
 }
 
 // Replaces this copy's data with the cloud row. A rename or link change made
-// here and not yet synced survives, and is sent next.
-export function pullInstance(sectionKey, id) {
+// here and not yet synced survives, and is sent next. With `onlyIfClean` (a
+// background refresh), an edit made here while the row was being read is not
+// overwritten: it is sent instead, and meets the newer cloud copy as an
+// explicit conflict.
+export function pullInstance(sectionKey, id, { onlyIfClean = false } = {}) {
   const section = getSection(sectionKey);
   return withLock(keyOf(sectionKey, id), async () => {
     const row = await cloud.fetchRow(client(), section, id);
     if (!row?.data) throw new Error('No cloud data for this instance.');
+    if (onlyIfClean && getInstance(sectionKey, id)?.dirty.data) {
+      scheduleSync(sectionKey, id, 0);
+      return null;
+    }
     return pullLocked(sectionKey, id, row);
   });
 }
@@ -359,8 +366,7 @@ export async function refreshInstance(sectionKey, id) {
     return synced?.cloud === CLOUD_STATES.CONFLICT ? 'conflict' : 'local';
   }
   if (rowVersion(meta) !== entry.version) {
-    await pullInstance(sectionKey, id);
-    return 'pulled';
+    return (await pullInstance(sectionKey, id, { onlyIfClean: true })) ? 'pulled' : 'local';
   }
   const adopted = updateInstance(sectionKey, id, (current) => {
     const name = current.dirty.name || !meta.name ? current.name : meta.name;
