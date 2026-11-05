@@ -5,7 +5,7 @@ import {
   updateCloudCharacterData,
 } from '../../../shared/cloud/api/cloudCharacters.js';
 import { useCharacterSheetRevision } from '../../../shared/cloud/sync/useCharacterSheetRevision.js';
-import { CLOUD_SYNC_EVENT, isCloudSyncBusy } from '../../../shared/cloud/sync/cloudSyncState.js';
+import { CLOUD_SYNC_EVENT, cloudSyncState, isCloudSyncBusy } from '../../../shared/cloud/sync/cloudSyncState.js';
 import { isSyncExcluded } from '../../../shared/cloud/sync/cloudSyncExclude.js';
 import {
   hasUnsyncedLocalChanges,
@@ -121,6 +121,11 @@ export function useSheetCloudSave({
   // finds the cloud moved on.
   useEffect(() => {
     if (usesExternalChar || !healthId) return undefined;
+    // A push of this sheet refused before it was opened (the autosync re-sends
+    // unacknowledged edits of closed sheets too): ask the user now.
+    if (cloudSyncState(healthId) === 'conflict' && hasUnsyncedLocalChanges(healthId) && !sheetConflictRef.current) {
+      refreshForConflict();
+    }
     const onSync = ({ detail }) => {
       if (String(detail?.id ?? '') !== String(healthId)) return;
       if (detail.state === 'conflict') {

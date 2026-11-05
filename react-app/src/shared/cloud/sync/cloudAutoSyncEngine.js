@@ -96,3 +96,15 @@ export function createCloudAutoSyncEngine({
     isInFlight: (key) => inFlight.has(key),
   });
 }
+
+// Local characters with edits the cloud never acknowledged (a push that failed,
+// a tab closed inside the debounce, a sheet made while logged out) and nothing
+// already deciding their fate: not queued or running, and not waiting for the
+// user's choice after a conflict.
+export function charactersToResend(ids, { isUnsynced, stateOf }) {
+  return ids.filter((id) => {
+    if (!isUnsynced(id)) return false;
+    const state = stateOf(id);
+    return state !== 'scheduled' && state !== 'syncing' && state !== 'conflict';
+  });
+}

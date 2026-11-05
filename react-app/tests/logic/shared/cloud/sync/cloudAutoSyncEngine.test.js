@@ -61,3 +61,14 @@ test('permission failure blocks id for session instead of retrying', async () =>
   assert.equal(pushes, 1);
   assert.equal(events.at(-1)[1], 'error');
 });
+
+test('re-sent: unacknowledged local edits, except those queued, running or waiting on a conflict', async () => {
+  const { charactersToResend } = await import('../../../../../src/shared/cloud/sync/cloudAutoSyncEngine.js');
+  const unsynced = new Set(['failed', 'queued', 'running', 'conflict', 'never-pushed']);
+  const states = { failed: 'error', queued: 'scheduled', running: 'syncing', conflict: 'conflict' };
+  const ids = ['clean', 'failed', 'queued', 'running', 'conflict', 'never-pushed'];
+  assert.deepEqual(
+    charactersToResend(ids, { isUnsynced: (id) => unsynced.has(id), stateOf: (id) => states[id] || null }),
+    ['failed', 'never-pushed'],
+  );
+});

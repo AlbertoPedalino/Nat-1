@@ -3,8 +3,10 @@ import { useAuth } from '../auth/AuthProvider.jsx';
 import { pushCharacter, SHEET_CONFLICT, updateForeignCharacter } from '../api/cloudCharacters.js';
 import { isSyncExcluded } from './cloudSyncExclude.js';
 import { isForeignEdit } from './cloudForeign.js';
-import { reportCloudSyncState } from './cloudSyncState.js';
-import { createCloudAutoSyncEngine } from './cloudAutoSyncEngine.js';
+import { cloudSyncState, reportCloudSyncState } from './cloudSyncState.js';
+import { coalesceReturns } from './returnGate.js';
+import { hasUnsyncedLocalChanges, listCharacters } from '../../character/profile/store.js';
+import { charactersToResend, createCloudAutoSyncEngine } from './cloudAutoSyncEngine.js';
 import {
   configureInstanceSync,
   flushInstances,
@@ -12,6 +14,8 @@ import {
 } from '../../instances/instanceSync.js';
 
 export const DEBOUNCE_MS = 1200;
+// How often a visible app re-sends local edits the cloud has not acknowledged.
+export const UNSYNCED_RETRY_MS = 30_000;
 
 // Every state goes to cloudSyncState.js and out as CLOUD_SYNC_EVENT. A push
 // refused because the cloud sheet moved on is a 'conflict', not an error.
@@ -29,6 +33,7 @@ export default function CloudAutoSync() {
   const { cloudEnabled, status } = useAuth();
   const activeRef = useRef(false);
   activeRef.current = cloudEnabled && status === 'authed';
+  const resendRef = useRef(() => {});
 
   useEffect(() => {
     if (!cloudEnabled) return undefined;
@@ -68,16 +73,40 @@ export default function CloudAutoSync() {
       isConflict: isConflictError,
     });
 
+    const scheduleCharacter = (id) => engine.schedule({
+      key: `character:${id}`,
+      id,
+      canSync: () => !isSyncExcluded(id),
+      push: () => (isForeignEdit(id) ? updateForeignCharacter(id) : pushCharacter(id)),
+    });
+
     const onCharacterSaved = (e) => {
       const id = e?.detail?.id;
       if (!id) return;
-      engine.schedule({
-        key: `character:${id}`,
-        id,
-        canSync: () => !isSyncExcluded(id),
-        push: () => (isForeignEdit(id) ? updateForeignCharacter(id) : pushCharacter(id)),
-      });
+      scheduleCharacter(id);
     };
+
+    // A push only starts on a local save, so an edit whose push failed (or never
+    // started) would wait for the next edit — and meanwhile hold back every
+    // newer cloud version of that sheet. Re-send such edits whenever the cloud
+    // becomes reachable, the user comes back, and periodically while visible.
+    const resendUnsynced = () => {
+      if (!activeRef.current) return;
+      charactersToResend(listCharacters().map((entry) => String(entry.id)), {
+        isUnsynced: hasUnsyncedLocalChanges,
+        stateOf: cloudSyncState,
+      }).forEach(scheduleCharacter);
+    };
+    resendRef.current = resendUnsynced;
+    const onReturn = coalesceReturns(resendUnsynced);
+    const onVisibility = () => { if (document.visibilityState === 'visible') onReturn(); };
+    const timer = setInterval(() => {
+      if (document.visibilityState === 'visible') resendUnsynced();
+    }, UNSYNCED_RETRY_MS);
+    window.addEventListener('online', resendUnsynced);
+    window.addEventListener('focus', onReturn);
+    document.addEventListener('visibilitychange', onVisibility);
+    resendUnsynced();
 
     const onCharacterDeleted = (e) => {
       const id = e?.detail?.id;
@@ -96,9 +125,19 @@ export default function CloudAutoSync() {
       window.removeEventListener('gb:char-saved', onCharacterSaved);
       window.removeEventListener('gb:char-deleted', onCharacterDeleted);
       window.removeEventListener('gb:cloud-foreign-changed', onForeignChanged);
+      window.removeEventListener('online', resendUnsynced);
+      window.removeEventListener('focus', onReturn);
+      document.removeEventListener('visibilitychange', onVisibility);
+      clearInterval(timer);
+      resendRef.current = () => {};
       engine.dispose();
     };
   }, [cloudEnabled]);
+
+  // Logging in makes the cloud reachable: edits made while logged out go now.
+  useEffect(() => {
+    if (status === 'authed') resendRef.current();
+  }, [status]);
 
   return null;
 }
