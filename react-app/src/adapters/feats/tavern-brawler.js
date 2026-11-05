@@ -9,6 +9,7 @@ export default function install(registry, context = {}) {
   // to use.
   if (typeof registerFeatSheetEffects === "function") {
     registerFeatSheetEffects("Tavern Brawler", [
+      { type: "unarmedStrike", face: 4, note: "Tavern Brawler: Enhanced Unarmed Strike" },
       {
         type: "weaponNote",
         weaponFilter: WEAPON_FILTERS.UNARMED,

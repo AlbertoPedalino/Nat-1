@@ -15,6 +15,7 @@ import { getProficiencyBonus } from '../../shared/character/progression/proficie
 //   - weaponAttackBonus { value, weaponFilter, requiresSoloWeapon? } → sheetEffects.getWeaponEffectBonuses / actionsTabLogic
 //   - weaponDamageBonus { value, weaponFilter, requiresSoloWeapon? } → sheetEffects.getWeaponEffectBonuses / actionsTabLogic
 //   - sense { senseType, value }                                → visionSenses.collectSenses
+//   - unarmedStrike { face, emptyHandedFace?, dexterity?, uses? } → effectBonuses.getUnarmedStrike / actionsTabLogic
 // weaponFilter values come from the shared WEAPON_FILTERS enum (typos → dev-warn,
 // never a silent no-op). requiresSoloWeapon gates "no other weapons" (Dueling).
 //
@@ -25,7 +26,6 @@ import { getProficiencyBonus } from '../../shared/character/progression/proficie
 // Add a new statically-computable style = add a row below. Styles handled outside
 // this table because their rule is not a static modifier:
 //   - Two-Weapon Fighting   → equipmentSlots.getOffHandDamageMod (off-hand ability mod)
-//   - Unarmed Fighting      → unarmed strike die override (actionsTabLogic.makeWeaponActions)
 //   - Great Weapon Fighting → reroll 1s/2s on the damage die (dice-roll mechanic, no static value)
 const FIGHTING_STYLES = {
   Defense: [
@@ -42,6 +42,9 @@ const FIGHTING_STYLES = {
   ],
   'Blind Fighting': [
     { type: 'sense', senseType: 'blindsight', value: 10, note: 'Fighting Style: Blind Fighting' },
+  ],
+  'Unarmed Fighting': [
+    { type: 'unarmedStrike', face: 6, emptyHandedFace: 8, note: 'Fighting Style: Unarmed Fighting' },
   ],
 };
 

@@ -1,5 +1,5 @@
 import { getMod, getFinal, getPB } from '../state/calculations.js';
-import { classEntities, classLevel, primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
+import { classEntities, primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
 import { adapterEntryApplies } from '../../../shared/character/progression/choiceUtils.js';
 import { featDescriptionEntries, featNamedEntries } from '../../../shared/character/progression/featDescription.js';
@@ -33,14 +33,14 @@ import { getActiveWildShape } from '../../../shared/character/forms/wildShapeFor
 import { isItemEffectActive } from '../../../shared/character/inventory/itemAttunement.js';
 import { itemIdentityKey, matchesItemReference } from '../../../shared/character/inventory/itemIdentity.js';
 import { itemCardName, replicatedItemProperty } from '../../../shared/character/inventory/replicateMagicItem.js';
-import { getMeleeStrDamageBonus, getWeaponEffectBonuses, getWeaponNotes } from '../state/effectBonuses.js';
+import { getMeleeStrDamageBonus, getUnarmedStrike, getWeaponEffectBonuses, getWeaponNotes } from '../state/effectBonuses.js';
 import { alpha } from '@mui/material';
 import { ACTION_COLORS, CHIP_TONES, ENTITY_COLORS, ITEM_ATTUNEMENT } from '../../../shared/ui/entityColors.js';
 import {
   getActionRollers,
   resolveActionRollers,
 } from '../../../shared/character/dice/rollers.js';
-import { hasOwnedFeat, ownedFeatNames } from '../../../shared/character/progression/selectedFeats.js';
+import { ownedFeatNames } from '../../../shared/character/progression/selectedFeats.js';
 
 export { getActionRollers } from '../../../shared/character/dice/rollers.js';
 
@@ -725,28 +725,22 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
     });
   }
 
-  const monkLevel = classLevel(C, 'Monk');
-  const useDexUnarmed = monkLevel > 0 && getMod(getFinal(C, 'dex')) > getMod(getFinal(C, 'str'));
+  // Die, Dexterity and label come from the features that change the Unarmed
+  // Strike (Martial Arts, Unarmed Fighting, Tavern Brawler…), declared in their
+  // adapters as `unarmedStrike` effects.
+  const unarmed = getUnarmedStrike(C, { emptyHanded: !isWieldingWeaponOrShield(inventory) });
+  const useDexUnarmed = unarmed.dexterity && getMod(getFinal(C, 'dex')) > getMod(getFinal(C, 'str'));
   const ability = useDexUnarmed ? 'dex' : 'str';
   const mod = getMod(getFinal(C, ability));
   // Rage Damage applies to Strength-based Unarmed Strikes too.
   const unarmedDmgMod = mod + (ability === 'str' ? ctx.strMeleeDamageBonus : 0);
-  // Unarmed Strike die = largest face among Monk Martial Arts, Fighting Style:
-  // Unarmed Fighting (d6, or d8 while not wielding any weapon or Shield), and
-  // Tavern Brawler (d4). Defaults to a flat 1.
-  const monkDie = monkLevel >= 17 ? 12 : monkLevel >= 11 ? 10 : monkLevel >= 5 ? 8 : monkLevel >= 1 ? 6 : 0;
-  const unarmedFightingDie = hasOwnedFeat(C, 'Unarmed Fighting')
-    ? (isWieldingWeaponOrShield(inventory) ? 6 : 8)
-    : 0;
-  const tavernBrawlerDie = hasOwnedFeat(C, 'Tavern Brawler') ? 4 : 0;
-  const dieFace = Math.max(monkDie, unarmedFightingDie, tavernBrawlerDie, 1);
-  const die = dieFace > 1 ? `1d${dieFace}` : '1';
+  const die = unarmed.face > 1 ? `1d${unarmed.face}` : '1';
   const unarmedDamageFormula = die + (unarmedDmgMod !== 0 ? (unarmedDmgMod >= 0 ? '+' : '') + unarmedDmgMod : '');
   weaponActions.push({
     name: 'Unarmed Strike',
     cat: 'action',
     _colorBarCat: 'attack',
-    uses: monkLevel ? 'Martial Arts' : 'Attack',
+    uses: unarmed.uses || 'Attack',
     _source: 'Basic',
     attackBonus: getPB(C) + mod,
     rollers: [{

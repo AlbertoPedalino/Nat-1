@@ -30,6 +30,11 @@ registerClassAdapter("Monk", function (cls, lv, specs) {
 
 registerClassSheetEffects("Monk", [
   { type: "acFormula", key: "monk_unarmored_defense", label: "Unarmored Defense", base: 10, abilities: ["dex", "wis"], allowShield: false, minLevel: 1, requiresNoArmor: true },
+  // Martial Arts: the Unarmed Strike die grows with Monk level and may use Dexterity.
+  { type: "unarmedStrike", face: 6, dexterity: true, uses: "Martial Arts", minLevel: 1, note: "Martial Arts" },
+  { type: "unarmedStrike", face: 8, dexterity: true, uses: "Martial Arts", minLevel: 5, note: "Martial Arts" },
+  { type: "unarmedStrike", face: 10, dexterity: true, uses: "Martial Arts", minLevel: 11, note: "Martial Arts" },
+  { type: "unarmedStrike", face: 12, dexterity: true, uses: "Martial Arts", minLevel: 17, note: "Martial Arts" },
 ]);
 
 // [SheetRuntime] START
