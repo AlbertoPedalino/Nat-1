@@ -22,9 +22,6 @@ import {
 } from './instanceSync.js';
 import { listenForRecovery } from '../cloud/sync/recoveryTriggers.js';
 
-// How often an open tool instance checks the cloud version of its copy.
-export const INSTANCE_FOLLOW_MS = 30_000;
-
 function isEditingText() {
   const element = document.activeElement;
   if (!element) return false;
@@ -153,7 +150,7 @@ export function useToolInstance(sectionKey) {
       refreshInstance(sectionKey, id).then((outcome) => {
         if (outcome === 'pulled') notify('info', 'Changes made on another device are now shown.');
       }, () => {});
-    }, { intervalMs: INSTANCE_FOLLOW_MS });
+    }, { periodic: true });
   }, [id, notify, online, sectionKey, shown]);
 
   useEffect(() => {

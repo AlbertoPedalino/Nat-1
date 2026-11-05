@@ -1,6 +1,7 @@
 import { act, render } from '@testing-library/react';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
-import CloudAutoSync, { DEBOUNCE_MS, UNSYNCED_RETRY_MS } from '../../../../../src/shared/cloud/sync/CloudAutoSync.jsx';
+import CloudAutoSync, { DEBOUNCE_MS } from '../../../../../src/shared/cloud/sync/CloudAutoSync.jsx';
+import { RECOVERY_INTERVAL_MS } from '../../../../../src/shared/cloud/sync/recoveryTriggers.js';
 import { markCharacterSynced, saveCharacter } from '../../../../../src/shared/character/profile/store.js';
 import { reportCloudSyncState, setCloudSyncState } from '../../../../../src/shared/cloud/sync/cloudSyncState.js';
 
@@ -42,7 +43,7 @@ test('a push that failed is retried while the app stays open, without a new edit
   render(<CloudAutoSync />);
   await act(async () => { vi.advanceTimersByTime(DEBOUNCE_MS + 10); });
   expect(cloud.push).toHaveBeenCalledTimes(1);
-  await act(async () => { vi.advanceTimersByTime(UNSYNCED_RETRY_MS + DEBOUNCE_MS + 10); });
+  await act(async () => { vi.advanceTimersByTime(RECOVERY_INTERVAL_MS + DEBOUNCE_MS + 10); });
   expect(cloud.push).toHaveBeenCalledTimes(2);
 });
 
@@ -52,6 +53,6 @@ test('synced characters and those waiting on a conflict are not re-sent', async 
   unsyncedCharacter('c_conflict');
   reportCloudSyncState('c_conflict', 'conflict');
   render(<CloudAutoSync />);
-  await act(async () => { vi.advanceTimersByTime(UNSYNCED_RETRY_MS + DEBOUNCE_MS + 10); });
+  await act(async () => { vi.advanceTimersByTime(RECOVERY_INTERVAL_MS + DEBOUNCE_MS + 10); });
   expect(cloud.push).not.toHaveBeenCalled();
 });

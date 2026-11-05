@@ -31,7 +31,6 @@ const FOLLOWER_QUERY_EVENT = 'camera-follower-query';
 export const FOLLOWER_HEARTBEAT_MS = 30_000;
 export const FOLLOWER_TTL_MS = 75_000;
 const CAMERA_SEND_MS = 50;
-const SCENE_RECONCILE_MS = 30_000;
 
 export function useSceneLive({
   sceneId,
@@ -256,7 +255,7 @@ export function useSceneLive({
       // Missed events are recovered on the shared triggers. The map keeps
       // following in a background tab (a projector, a second screen), so its
       // timer runs while hidden too.
-      const stopRecovery = listenForRecovery(requestReconcile, { intervalMs: SCENE_RECONCILE_MS, whenHidden: true });
+      const stopRecovery = listenForRecovery(requestReconcile, { periodic: true, whenHidden: true });
 
       cleanupReconcile = () => {
         window.clearInterval(followerTimer);

@@ -17,7 +17,6 @@ import {
 import { listenForRecovery } from '../../../shared/cloud/sync/recoveryTriggers.js';
 
 const CLOUD_SAVE_DELAY_MS = 1_200;
-const CLOUD_RETRY_MS = 30_000;
 
 // The sheet's content sync with the cloud:
 //   - a cloud sheet (`usesExternalChar`) saves its own edits, debounced and
@@ -242,7 +241,7 @@ export function useSheetCloudSave({
     if (!usesExternalChar || readOnly) return undefined;
     // A pending save is tried again on the shared triggers; a cloud sheet keeps
     // retrying while hidden too (it may be a map's embedded sheet).
-    return listenForRecovery(() => flushCloudSaveRef.current?.(), { intervalMs: CLOUD_RETRY_MS, whenHidden: true });
+    return listenForRecovery(() => flushCloudSaveRef.current?.(), { periodic: true, whenHidden: true });
   }, [readOnly, usesExternalChar]);
 
   useEffect(() => {

@@ -14,8 +14,6 @@ import {
 import { listenForRecovery } from './recoveryTriggers.js';
 
 export const DEBOUNCE_MS = 1200;
-// How often a visible app re-sends local edits the cloud has not acknowledged.
-export const UNSYNCED_RETRY_MS = 30_000;
 
 // Every state goes to cloudSyncState.js and out as CLOUD_SYNC_EVENT. A push
 // refused because the cloud sheet moved on is a 'conflict', not an error.
@@ -52,7 +50,7 @@ export default function CloudAutoSync() {
     }, () => {});
     // Tool instances with unsynced edits (a failed sync, a tab closed inside the
     // debounce) go again on the shared triggers; nothing is sent when none is.
-    const stopRecovery = listenForRecovery(() => flushInstances(), { intervalMs: UNSYNCED_RETRY_MS });
+    const stopRecovery = listenForRecovery(() => flushInstances(), { periodic: true });
     return () => {
       disposed = true;
       stopRecovery();
@@ -99,7 +97,7 @@ export default function CloudAutoSync() {
       }).forEach(scheduleCharacter);
     };
     resendRef.current = resendUnsynced;
-    const stopRecovery = listenForRecovery(() => resendUnsynced(), { intervalMs: UNSYNCED_RETRY_MS });
+    const stopRecovery = listenForRecovery(() => resendUnsynced(), { periodic: true });
     resendUnsynced();
 
     const onCharacterDeleted = (e) => {

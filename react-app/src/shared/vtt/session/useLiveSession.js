@@ -4,7 +4,6 @@ import { supabase } from '../../cloud/supabaseClient.js';
 import { readLiveSceneId } from '../../cloud/api/vtt.js';
 import { listenForRecovery } from '../../cloud/sync/recoveryTriggers.js';
 
-const SESSION_RECONCILE_MS = 30_000;
 
 // A player has no scene list — they pick a campaign and join its session, which
 // is wherever that GM has the projector pointed. When the GM switches scenes the
@@ -87,7 +86,7 @@ export function useLiveSession({ campaignId, enabled = true } = {}) {
 
     // One tiny row: cheap enough to re-read after sleep, network changes or a
     // background tab, which is when realtime can silently miss a change.
-    const stopRecovery = listenForRecovery(() => { refresh(); }, { intervalMs: SESSION_RECONCILE_MS, whenHidden: true });
+    const stopRecovery = listenForRecovery(() => { refresh(); }, { periodic: true, whenHidden: true });
 
     return () => {
       requestRef.current += 1;

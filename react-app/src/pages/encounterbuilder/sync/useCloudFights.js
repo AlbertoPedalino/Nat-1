@@ -32,7 +32,6 @@ const DELETE_ATTEMPTS = 3;
 // The same safety net as the battle map's: an event Realtime lost is found by
 // the next check, which reads versions only and then just the fights that
 // moved. Skipped while the tab is hidden; coming back checks at once.
-export const FIGHT_RECONCILE_MS = 30_000;
 
 export function useCloudFights({
   instanceId, fights, library, activeFightId, dispatch, isVitalsBusy,
@@ -346,14 +345,14 @@ export function useCloudFights({
     });
   }, [canSync, handleChange, instanceId, reconcile, refresh]);
 
-  // The safety net: every FIGHT_RECONCILE_MS while the tab is shown, and at
+  // The safety net: every RECOVERY_INTERVAL_MS while the tab is shown, and at
   // once when it is shown again or the network comes back.
   useEffect(() => {
     if (!canSync) return undefined;
     return listenForRecovery(() => {
       retryUnsaved();
       reconcile();
-    }, { intervalMs: FIGHT_RECONCILE_MS });
+    }, { periodic: true });
   }, [canSync, reconcile, retryUnsaved]);
 
   // Local -> row. One write per fight that actually changed, so running a combat
