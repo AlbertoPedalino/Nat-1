@@ -5,7 +5,7 @@ import { listCharacterDigests, readCharacterSheets, safeCharacterIds } from '../
 import { readBaseMaxHp } from '../../campaign/characterVitals.js';
 import { digestFromVitalsAnswer, isNewerDigest, toCharacterDigest } from '../../campaign/characterDigest.js';
 import { CHARACTER_RECHECK_EVENT, CHARACTER_VITALS_EVENT } from './characterEvents.js';
-import { coalesceReturns } from './returnGate.js';
+import { listenForRecovery } from './recoveryTriggers.js';
 
 const EMPTY = new Map();
 
@@ -210,21 +210,14 @@ export function useCharacterDigests({ campaignId = null, characterIds = null, en
       const id = String(detail?.characterId ?? '');
       if (scope.campaignId ? digestsRef.current.has(id) : scope.characterIds.includes(id)) reconcile();
     };
-    const onReturn = coalesceReturns(() => reconcile());
-    const onVisible = () => { if (document.visibilityState === 'visible') onReturn(); };
-    const onOnline = () => reconcile();
     window.addEventListener(CHARACTER_VITALS_EVENT, receiveVitals);
     window.addEventListener(CHARACTER_RECHECK_EVENT, recheck);
-    window.addEventListener('focus', onReturn);
-    window.addEventListener('online', onOnline);
-    document.addEventListener('visibilitychange', onVisible);
+    const stopRecovery = listenForRecovery(() => reconcile());
     return () => {
       readRef.current += 1;
       window.removeEventListener(CHARACTER_VITALS_EVENT, receiveVitals);
       window.removeEventListener(CHARACTER_RECHECK_EVENT, recheck);
-      window.removeEventListener('focus', onReturn);
-      window.removeEventListener('online', onOnline);
-      document.removeEventListener('visibilitychange', onVisible);
+      stopRecovery();
       try { supabase.removeChannel(channel); } catch (_) {}
     };
   }, [active, reconcile, remove, scope, upsert]);

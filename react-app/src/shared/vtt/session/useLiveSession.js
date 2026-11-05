@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../cloud/auth/AuthProvider.jsx';
 import { supabase } from '../../cloud/supabaseClient.js';
 import { readLiveSceneId } from '../../cloud/api/vtt.js';
-import { coalesceReturns } from '../../cloud/sync/returnGate.js';
+import { listenForRecovery } from '../../cloud/sync/recoveryTriggers.js';
 
 const SESSION_RECONCILE_MS = 30_000;
 
@@ -87,22 +87,11 @@ export function useLiveSession({ campaignId, enabled = true } = {}) {
 
     // One tiny row: cheap enough to re-read after sleep, network changes or a
     // background tab, which is when realtime can silently miss a change.
-    const reconcile = () => { refresh(); };
-    const reconcileOnReturn = coalesceReturns(reconcile);
-    const reconcileWhenVisible = () => {
-      if (document.visibilityState === 'visible') reconcileOnReturn();
-    };
-    const timer = window.setInterval(reconcile, SESSION_RECONCILE_MS);
-    window.addEventListener('online', reconcile);
-    window.addEventListener('focus', reconcileOnReturn);
-    document.addEventListener('visibilitychange', reconcileWhenVisible);
+    const stopRecovery = listenForRecovery(() => { refresh(); }, { intervalMs: SESSION_RECONCILE_MS, whenHidden: true });
 
     return () => {
       requestRef.current += 1;
-      window.clearInterval(timer);
-      window.removeEventListener('online', reconcile);
-      window.removeEventListener('focus', reconcileOnReturn);
-      document.removeEventListener('visibilitychange', reconcileWhenVisible);
+      stopRecovery();
       try {
         supabase.removeChannel(channel);
       } catch (_) {}

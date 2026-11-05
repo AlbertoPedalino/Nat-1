@@ -14,6 +14,7 @@ import {
   rebaseCharacterSync,
   saveCharacter as storeSaveCharacter,
 } from '../../../shared/character/profile/store.js';
+import { listenForRecovery } from '../../../shared/cloud/sync/recoveryTriggers.js';
 
 const CLOUD_SAVE_DELAY_MS = 1_200;
 const CLOUD_RETRY_MS = 30_000;
@@ -239,20 +240,9 @@ export function useSheetCloudSave({
 
   useEffect(() => {
     if (!usesExternalChar || readOnly) return undefined;
-    const retry = () => flushCloudSaveRef.current?.();
-    const retryWhenVisible = () => {
-      if (document.visibilityState === 'visible') retry();
-    };
-    const timer = window.setInterval(retry, CLOUD_RETRY_MS);
-    window.addEventListener('online', retry);
-    window.addEventListener('focus', retry);
-    document.addEventListener('visibilitychange', retryWhenVisible);
-    return () => {
-      window.clearInterval(timer);
-      window.removeEventListener('online', retry);
-      window.removeEventListener('focus', retry);
-      document.removeEventListener('visibilitychange', retryWhenVisible);
-    };
+    // A pending save is tried again on the shared triggers; a cloud sheet keeps
+    // retrying while hidden too (it may be a map's embedded sheet).
+    return listenForRecovery(() => flushCloudSaveRef.current?.(), { intervalMs: CLOUD_RETRY_MS, whenHidden: true });
   }, [readOnly, usesExternalChar]);
 
   useEffect(() => {

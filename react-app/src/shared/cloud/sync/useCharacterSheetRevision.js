@@ -3,7 +3,7 @@ import { useAuth } from '../auth/AuthProvider.jsx';
 import { supabase } from '../supabaseClient.js';
 import { getCloudSheetRevision } from '../api/cloudCharacters.js';
 import { CHARACTER_SHEET_SAVED_EVENT } from './characterEvents.js';
-import { coalesceReturns } from './returnGate.js';
+import { listenForRecovery } from './recoveryTriggers.js';
 
 // Whether the whole sheet this view holds is still the cloud's.
 //
@@ -162,21 +162,15 @@ export function useCharacterSheetRevision({
       return undefined;
     }
 
-    const checkOnReturn = coalesceReturns(check);
-    const checkWhenVisible = () => { if (document.visibilityState === 'visible') checkOnReturn(); };
     const receiveSaved = ({ detail }) => {
       if (String(detail?.characterId ?? '') === id) noteSaved(detail.sheetRevision);
     };
     window.addEventListener(CHARACTER_SHEET_SAVED_EVENT, receiveSaved);
-    window.addEventListener('online', check);
-    window.addEventListener('focus', checkOnReturn);
-    document.addEventListener('visibilitychange', checkWhenVisible);
+    const stopRecovery = listenForRecovery(() => check());
     return () => {
       alive = false;
       window.removeEventListener(CHARACTER_SHEET_SAVED_EVENT, receiveSaved);
-      window.removeEventListener('online', check);
-      window.removeEventListener('focus', checkOnReturn);
-      document.removeEventListener('visibilitychange', checkWhenVisible);
+      stopRecovery();
       try { supabase.removeChannel(channel); } catch (_) {}
     };
   }, [ready, id, instanceId, consider, noteSaved]);

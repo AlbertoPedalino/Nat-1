@@ -10,10 +10,10 @@ import {
   saveInstanceFight,
   subscribeInstanceFights,
 } from '../../../shared/cloud/api/encounterFights.js';
-import { coalesceReturns } from '../../../shared/cloud/sync/returnGate.js';
 import { MAX_TARGETED_IDS } from '../../../shared/vtt/session/revisionDiff.js';
 import { externalDelta } from './externalSync.js';
 import { fightSignature, libraryCardUpdates, toFightEntry } from '../library/fightRecord.js';
+import { listenForRecovery } from '../../../shared/cloud/sync/recoveryTriggers.js';
 
 // The fights of this instance, with the database as the record.
 //
@@ -328,21 +328,7 @@ export function useCloudFights({
   // once when it is shown again or the network comes back.
   useEffect(() => {
     if (!canSync) return undefined;
-    const check = () => { reconcile(); };
-    const onReturn = coalesceReturns(check);
-    const onVisible = () => { if (document.visibilityState === 'visible') onReturn(); };
-    const timer = window.setInterval(() => {
-      if (document.visibilityState !== 'hidden') check();
-    }, FIGHT_RECONCILE_MS);
-    window.addEventListener('focus', onReturn);
-    window.addEventListener('online', check);
-    document.addEventListener('visibilitychange', onVisible);
-    return () => {
-      window.clearInterval(timer);
-      window.removeEventListener('focus', onReturn);
-      window.removeEventListener('online', check);
-      document.removeEventListener('visibilitychange', onVisible);
-    };
+    return listenForRecovery(() => { reconcile(); }, { intervalMs: FIGHT_RECONCILE_MS });
   }, [canSync, reconcile]);
 
   // Local -> row. One write per fight that actually changed, so running a combat

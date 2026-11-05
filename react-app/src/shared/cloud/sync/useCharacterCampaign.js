@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../auth/AuthProvider.jsx';
 import { fetchCloudMeta } from '../api/cloudCharacters.js';
+import { listenForRecovery } from './recoveryTriggers.js';
 
 const CAMPAIGN_RETRY_MS = 5000;
 
@@ -35,19 +36,12 @@ export function useCharacterCampaign(charId) {
         loading = false;
       }
     };
-    const refreshWhenVisible = () => {
-      if (document.visibilityState === 'visible') refresh();
-    };
     refresh();
-    window.addEventListener('online', refresh);
-    window.addEventListener('focus', refresh);
-    document.addEventListener('visibilitychange', refreshWhenVisible);
+    const stopRecovery = listenForRecovery(() => refresh());
     return () => {
       cancelled = true;
       window.clearTimeout(timer);
-      window.removeEventListener('online', refresh);
-      window.removeEventListener('focus', refresh);
-      document.removeEventListener('visibilitychange', refreshWhenVisible);
+      stopRecovery();
     };
   }, [charId, account, enabled]);
 

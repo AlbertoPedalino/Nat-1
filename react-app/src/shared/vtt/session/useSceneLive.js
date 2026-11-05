@@ -4,7 +4,7 @@ import { supabase } from '../../cloud/supabaseClient.js';
 import {
   cameraMessage, normalizeCameraSource, presenterInspectionMessage, presenterStateMessage,
 } from './cameraSync.js';
-import { coalesceReturns } from '../../cloud/sync/returnGate.js';
+import { listenForRecovery } from '../../cloud/sync/recoveryTriggers.js';
 
 // One channel per scene carries both streams: committed row changes for tokens,
 // strokes and the scene itself, plus ephemeral drag previews. This is the only
@@ -247,32 +247,20 @@ export function useSceneLive({
       });
       channelRef.current = channel;
 
-      // Focus and visibilitychange arrive together when a tab comes back: one
-      // recovery, not two.
-      const reconcileOnReturn = coalesceReturns((reason) => requestReconcile(reason));
-      const reconcileWhenVisible = () => {
-        if (document.visibilityState === 'visible') reconcileOnReturn('visible');
-      };
-      const reconcileOnTimer = () => requestReconcile('interval');
-      const reconcileOnline = () => requestReconcile('online');
-      const reconcileOnFocus = () => reconcileOnReturn('focus');
       const followerTimer = window.setInterval(() => {
         try {
           const followed = normalizeCameraSource(handlers.current.followCameraSource);
           if (followed) channel.send({ type: 'broadcast', event: FOLLOWER_EVENT, payload: { source: followed } });
         } catch (_) {}
       }, FOLLOWER_HEARTBEAT_MS);
-      const timer = window.setInterval(reconcileOnTimer, SCENE_RECONCILE_MS);
-      window.addEventListener('online', reconcileOnline);
-      window.addEventListener('focus', reconcileOnFocus);
-      document.addEventListener('visibilitychange', reconcileWhenVisible);
+      // Missed events are recovered on the shared triggers. The map keeps
+      // following in a background tab (a projector, a second screen), so its
+      // timer runs while hidden too.
+      const stopRecovery = listenForRecovery(requestReconcile, { intervalMs: SCENE_RECONCILE_MS, whenHidden: true });
 
       cleanupReconcile = () => {
-        window.clearInterval(timer);
         window.clearInterval(followerTimer);
-        window.removeEventListener('online', reconcileOnline);
-        window.removeEventListener('focus', reconcileOnFocus);
-        document.removeEventListener('visibilitychange', reconcileWhenVisible);
+        stopRecovery();
       };
     } catch (_) {
       channelRef.current = null;

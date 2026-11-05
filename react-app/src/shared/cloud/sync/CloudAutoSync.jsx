@@ -4,7 +4,6 @@ import { pushCharacter, SHEET_CONFLICT, updateForeignCharacter } from '../api/cl
 import { isSyncExcluded } from './cloudSyncExclude.js';
 import { isForeignEdit } from './cloudForeign.js';
 import { cloudSyncState, reportCloudSyncState } from './cloudSyncState.js';
-import { coalesceReturns } from './returnGate.js';
 import { hasUnsyncedLocalChanges, listCharacters } from '../../character/profile/store.js';
 import { charactersToResend, createCloudAutoSyncEngine } from './cloudAutoSyncEngine.js';
 import {
@@ -12,6 +11,7 @@ import {
   flushInstances,
   setInstanceSyncActive,
 } from '../../instances/instanceSync.js';
+import { listenForRecovery } from './recoveryTriggers.js';
 
 export const DEBOUNCE_MS = 1200;
 // How often a visible app re-sends local edits the cloud has not acknowledged.
@@ -98,14 +98,7 @@ export default function CloudAutoSync() {
       }).forEach(scheduleCharacter);
     };
     resendRef.current = resendUnsynced;
-    const onReturn = coalesceReturns(resendUnsynced);
-    const onVisibility = () => { if (document.visibilityState === 'visible') onReturn(); };
-    const timer = setInterval(() => {
-      if (document.visibilityState === 'visible') resendUnsynced();
-    }, UNSYNCED_RETRY_MS);
-    window.addEventListener('online', resendUnsynced);
-    window.addEventListener('focus', onReturn);
-    document.addEventListener('visibilitychange', onVisibility);
+    const stopRecovery = listenForRecovery(() => resendUnsynced(), { intervalMs: UNSYNCED_RETRY_MS });
     resendUnsynced();
 
     const onCharacterDeleted = (e) => {
@@ -125,10 +118,7 @@ export default function CloudAutoSync() {
       window.removeEventListener('gb:char-saved', onCharacterSaved);
       window.removeEventListener('gb:char-deleted', onCharacterDeleted);
       window.removeEventListener('gb:cloud-foreign-changed', onForeignChanged);
-      window.removeEventListener('online', resendUnsynced);
-      window.removeEventListener('focus', onReturn);
-      document.removeEventListener('visibilitychange', onVisibility);
-      clearInterval(timer);
+      stopRecovery();
       resendRef.current = () => {};
       engine.dispose();
     };
