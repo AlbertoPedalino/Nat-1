@@ -1944,3 +1944,93 @@ test('a still mouse click on a piece is a click; a drag or a touch is not', () =
   press(viewport, 'pointerup', 'touch', 53, 225, 25);
   expect(onTokenClick).not.toHaveBeenCalled();
 });
+
+// A finger that pressed a piece, moved a hair (other screens already saw it in
+// motion) and then became a long press or a pinch must let the piece go on the
+// other screens; otherwise this screen's keepalive pins it there.
+function touchEvent(type, init) {
+  const event = new MouseEvent(type, { bubbles: true, cancelable: true, button: 0, ...init });
+  Object.defineProperties(event, {
+    pointerType: { value: 'touch' },
+    isPrimary: { value: init.isPrimary ?? true },
+    pointerId: { value: init.pointerId },
+  });
+  return event;
+}
+
+function renderTouchPiece(onDragToken) {
+  render(
+    <SceneViewport
+      scene={{ grid: { size: 50, offsetX: 0, offsetY: 0, visible: false }, playArea: null }}
+      imageUrl={null}
+      tokens={[{ id: 'ogre-1', label: 'Ogre', layer: 'tokens', x: 2, y: 2, w: 1, h: 1 }]}
+      canMove={() => true}
+      fog={null}
+      onDragToken={onDragToken}
+      onMoveToken={vi.fn()}
+      onContextMenu={vi.fn()}
+      drawings={[]}
+      lasers={[]}
+      rollBubbles={[]}
+      diceThrows={[]}
+    />,
+  );
+  const viewport = screen.getByText('Upload a map image to start building this scene.').parentElement;
+  fireEvent(screen.getByRole('button', { name: 'Ogre' }), touchEvent('pointerdown', { clientX: 125, clientY: 125, pointerId: 90 }));
+  fireEvent(viewport, touchEvent('pointermove', { clientX: 127, clientY: 125, pointerId: 90 }));
+  expect(onDragToken).toHaveBeenCalledTimes(1);
+  return viewport;
+}
+
+test('a piece nudged and then long-pressed for its menu is let go of on the other screens', () => {
+  vi.useFakeTimers();
+  try {
+    const onDragToken = vi.fn();
+    renderTouchPiece(onDragToken);
+    act(() => { vi.advanceTimersByTime(600); });
+    expect(onDragToken).toHaveBeenLastCalledWith(
+      expect.objectContaining({ id: 'ogre-1' }),
+      { x: 2, y: 2, released: true },
+    );
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+test('a second finger turning a piece drag into a pinch lets the piece go on the other screens', () => {
+  const onDragToken = vi.fn();
+  const viewport = renderTouchPiece(onDragToken);
+  fireEvent(viewport, touchEvent('pointerdown', { clientX: 300, clientY: 300, pointerId: 91, isPrimary: false }));
+  expect(onDragToken).toHaveBeenLastCalledWith(
+    expect.objectContaining({ id: 'ogre-1' }),
+    { x: 2, y: 2, released: true },
+  );
+});
+
+test('fog already painted is stored when a second finger turns the brush into a pinch', () => {
+  const onPaint = vi.fn();
+  const onPaintEnd = vi.fn();
+  render(
+    <SceneViewport
+      scene={{ grid: { size: 40, offsetX: 0, offsetY: 0, visible: false }, playArea: null }}
+      imageUrl={null}
+      tokens={[]}
+      canMove={() => false}
+      fog={createFog(40, 40)}
+      paintMode="reveal"
+      brushSize={1}
+      onPaint={onPaint}
+      onPaintEnd={onPaintEnd}
+      drawings={[]}
+      lasers={[]}
+      rollBubbles={[]}
+      diceThrows={[]}
+    />,
+  );
+  const viewport = screen.getByText('Upload a map image to start building this scene.').parentElement;
+  fireEvent(viewport, touchEvent('pointerdown', { clientX: 25, clientY: 25, pointerId: 95 }));
+  fireEvent(viewport, touchEvent('pointermove', { clientX: 85, clientY: 25, pointerId: 95 }));
+  expect(onPaint).toHaveBeenCalled();
+  fireEvent(viewport, touchEvent('pointerdown', { clientX: 300, clientY: 300, pointerId: 96, isPrimary: false }));
+  expect(onPaintEnd).toHaveBeenCalledTimes(1);
+});

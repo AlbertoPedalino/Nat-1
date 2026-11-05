@@ -311,6 +311,26 @@ export default function SceneViewport({
   const [measure, setMeasure] = useState(null);
   const onMeasureRef = useRef(onMeasure);
   onMeasureRef.current = onMeasure;
+  // Read by abandonGesture, which runs from timers and touch handlers created
+  // before the latest render.
+  const onDragTokenRef = useRef(onDragToken);
+  onDragTokenRef.current = onDragToken;
+  const onPaintEndRef = useRef(onPaintEnd);
+  onPaintEndRef.current = onPaintEnd;
+
+  // A gesture taken over by another one (a long press opening a menu, a second
+  // finger starting a pinch) ends here instead of just being dropped: a piece
+  // this screen was already showing in motion is let go of on the other screens
+  // (otherwise its keepalive frame keeps pinning it where the finger was), and
+  // fog already painted is stored as when the brush lifts.
+  const abandonGesture = useCallback(() => {
+    const state = dragRef.current;
+    dragRef.current = null;
+    if (state?.kind === 'token' && state.lastBroadcast) {
+      onDragTokenRef.current?.(state.token, { x: state.token.x, y: state.token.y, released: true });
+    }
+    if (state?.kind === 'paint') onPaintEndRef.current?.();
+  }, []);
   const measurePublisherRef = useRef(null);
   if (!measurePublisherRef.current) {
     measurePublisherRef.current = createMeasurePublisher({ send: (value) => onMeasureRef.current?.(value) });
@@ -763,13 +783,13 @@ export default function SceneViewport({
       timer: setTimeout(() => {
         longPressRef.current = null;
         // What became a menu was never a drag.
-        dragRef.current = null;
+        abandonGesture();
         setDrag(null);
         setMarkDrag(null);
         open(at);
       }, LONG_PRESS_MS),
     };
-  }, [cancelLongPress]);
+  }, [abandonGesture, cancelLongPress]);
 
   useEffect(() => cancelLongPress, [cancelLongPress]);
 
@@ -797,7 +817,7 @@ export default function SceneViewport({
     event.currentTarget.setPointerCapture?.(event.pointerId);
 
     cancelLongPress();
-    dragRef.current = null;
+    abandonGesture();
     setDrag(null);
     setGroupDrag(null);
     setSelectionBox(null);
