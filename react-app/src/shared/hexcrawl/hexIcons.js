@@ -15,6 +15,10 @@ export const WEATHER_ICONS = Object.freeze({ Clear: Sun, Rain: CloudRain, Snow: 
 
 export const FALLBACK_WEATHER_ICON = CloudSun;
 
+export function weatherIcon(weather) {
+  return WEATHER_ICONS[weather] || FALLBACK_WEATHER_ICON;
+}
+
 // Keyed by the terrain option id, and by its label too, because a hex stores the
 // label rather than the id.
 export const TERRAIN_ICONS = Object.freeze({

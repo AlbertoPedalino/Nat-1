@@ -1,10 +1,11 @@
 import {
   Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography,
 } from '@mui/material';
-import { CloudRain, Clock } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import HexResultSteps from '../../../shared/hexcrawl/ui/HexResultSteps.jsx';
 import { formatCampaignDateTime } from '../../../shared/gmboard/campaignTime.js';
-import { hasWeatherDisadvantage } from '../../../shared/gmboard/weather.js';
+import { hasWeatherDisadvantage, weatherName } from '../../../shared/gmboard/weather.js';
+import { weatherIcon } from '../../../shared/hexcrawl/hexIcons.js';
 import { terrainOption } from '../../../shared/hexcrawl/hexEntry.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
@@ -21,6 +22,7 @@ export default function HexResultDialog({ result, onClose }) {
   const hex = result?.hex || null;
   const terrain = terrainOption(hex?.terrain);
   const disadvantage = clock ? hasWeatherDisadvantage(clock.weather, clock.intensity) : false;
+  const WeatherIcon = weatherIcon(clock?.weather);
 
   return (
     <Dialog
@@ -41,9 +43,9 @@ export default function HexResultDialog({ result, onClose }) {
         </Box>
         {clock ? (
           <Box sx={{ ...weatherBadgeSx, ...(disadvantage ? weatherWarnSx : null) }}>
-            <CloudRain size={13} />
+            <WeatherIcon size={13} />
             <Typography component="span" sx={weatherTextSx}>
-              {clock.weather}{clock.intensity ? ` · ${clock.intensity}` : ''}
+              {weatherName(clock.weather, clock.intensity)}
               {disadvantage ? ' · disadvantage' : ''}
             </Typography>
           </Box>

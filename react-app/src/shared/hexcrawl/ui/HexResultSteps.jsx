@@ -3,6 +3,7 @@ import { Coins, Dice5, Eye, Flame, Leaf, Lock, Map, Swords, CloudRain } from 'lu
 import ResultBadge from '../../gmboard/ui/ResultBadge.jsx';
 import { formatNumber } from '../../ui/numberFormat.js';
 import { UI_FONTS } from '../../ui/fonts.js';
+import { weatherTone } from '../../gmboard/weather.js';
 
 function formatLoot(loot) {
   const valueLine = [loot.value, loot.extra].filter(Boolean).join(' ');
@@ -102,7 +103,7 @@ export default function HexResultSteps({ result }) {
     difficulty: theme.palette.gmboard.difficulty,
     rarity: theme.palette.gmboard.rarity,
     fallback: theme.palette.gmboard.rarity.Common,
-    weather: theme.palette.gmboard.weather[result.steps.find((s) => s.kind === 'weatherChange')?.weather] || theme.palette.gmboard.weather.Clear,
+    weather: weatherTone(theme.palette, result.steps.find((s) => s.kind === 'weatherChange')?.weather),
     result: theme.palette.gmboard.result,
     dim: theme.palette.text.secondary,
   };

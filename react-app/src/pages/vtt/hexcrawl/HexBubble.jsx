@@ -1,9 +1,7 @@
 import { Box, Stack, Typography, alpha, useTheme } from '@mui/material';
 import { formatCampaignDateTime } from '../../../shared/gmboard/campaignTime.js';
-import { hasWeatherDisadvantage } from '../../../shared/gmboard/weather.js';
-import {
-  FALLBACK_WEATHER_ICON, TERRAIN_ICONS, WEATHER_ICONS,
-} from '../../../shared/hexcrawl/hexIcons.js';
+import { hasWeatherDisadvantage, weatherName, weatherTone } from '../../../shared/gmboard/weather.js';
+import { TERRAIN_ICONS, weatherIcon } from '../../../shared/hexcrawl/hexIcons.js';
 import { terrainOption } from '../../../shared/hexcrawl/hexEntry.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
@@ -24,8 +22,8 @@ export default function HexBubble({ bubble, x, y, onClose }) {
   const clock = bubble.clock || null;
   const terrain = terrainOption(bubble.hex?.terrain);
   const TerrainIcon = terrain ? TERRAIN_ICONS[terrain.id] : null;
-  const tone = clock ? theme.palette.gmboard.weather[clock.weather] : null;
-  const WeatherIcon = clock ? (WEATHER_ICONS[clock.weather] || FALLBACK_WEATHER_ICON) : null;
+  const tone = clock ? weatherTone(theme.palette, clock.weather) : null;
+  const WeatherIcon = clock ? weatherIcon(clock.weather) : null;
   const disadvantage = clock ? hasWeatherDisadvantage(clock.weather, clock.intensity) : false;
 
   return (
@@ -66,7 +64,7 @@ export default function HexBubble({ bubble, x, y, onClose }) {
           >
             {WeatherIcon ? <WeatherIcon size={13} color={tone} /> : null}
             <Typography sx={{ ...footerTextSx, color: tone }}>
-              {clock.weather}{clock.intensity ? ` · ${clock.intensity}` : ''}
+              {weatherName(clock.weather, clock.intensity)}
               {disadvantage ? ' · Dis' : ''}
             </Typography>
             <Typography sx={{ ...footerTextSx, ml: 'auto' }}>{formatCampaignDateTime(clock)}</Typography>

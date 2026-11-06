@@ -10,16 +10,17 @@ import {
   advanceMinutes, formatDate, formatCampaignDateTime, formatDuration, formatHM,
 } from '../../../shared/gmboard/campaignTime.js';
 import {
-  hasWeatherDisadvantage, travelTime, weatherEffectLabel, weatherTimerLabel,
+  travelTime, weatherTimerLabel, weatherTone,
 } from '../../../shared/gmboard/weather.js';
 import { MOUNT_OPTIONS, normalizeMountSpeed } from '../../../shared/gmboard/boardOptions.js';
 import {
-  FALLBACK_WEATHER_ICON, POPULATION_ICONS, SEASON_ICONS, TERRAIN_ICONS, WEATHER_ICONS,
+  POPULATION_ICONS, SEASON_ICONS, TERRAIN_ICONS,
 } from '../../../shared/hexcrawl/hexIcons.js';
 import {
   mergeBoardClock, missingHexSetup, populationOption, terrainOption, tierOption,
 } from '../../../shared/hexcrawl/hexEntry.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import WeatherSummary from '../../../shared/gmboard/ui/WeatherSummary.jsx';
 
 // The hexcrawl as it stands, in the corner where the map's other settings live.
 //
@@ -115,9 +116,7 @@ export default function HexcrawlPanel({
 // says it: the condition first, what it costs second.
 function WeatherCard({ clock }) {
   const theme = useTheme();
-  const tone = theme.palette.gmboard.weather[clock.weather] || theme.palette.gmboard.weather.Clear;
-  const Icon = WEATHER_ICONS[clock.weather] || FALLBACK_WEATHER_ICON;
-  const disadvantage = hasWeatherDisadvantage(clock.weather, clock.intensity);
+  const tone = weatherTone(theme.palette, clock.weather);
   // A clock row that predates the weather counters has neither, and a countdown
   // to nowhere is worse than no countdown.
   const timed = clock.season
@@ -126,19 +125,7 @@ function WeatherCard({ clock }) {
 
   return (
     <Box sx={{ ...cardSx, borderColor: alpha(tone, 0.55), bgcolor: alpha(tone, 0.08) }}>
-      <Stack direction="row" spacing={0.9} sx={{ alignItems: 'center' }}>
-        <Icon size={20} color={tone} />
-        <Box sx={{ minWidth: 0 }}>
-          <Typography sx={{ ...weatherNameSx, color: tone }}>
-            {clock.weather}{clock.intensity ? ` · ${clock.intensity}` : ''}
-          </Typography>
-          {/* The cost is said once, in the effect line, and turns amber when it
-              is the party's rolls that pay it. */}
-          <Typography sx={[effectSx, disadvantage && { color: 'warning.main' }]}>
-            {weatherEffectLabel(clock.weather, clock.intensity)}
-          </Typography>
-        </Box>
-      </Stack>
+      <WeatherSummary weather={clock.weather} intensity={clock.intensity} dense />
       <Stack direction="row" spacing={1} sx={{ justifyContent: 'space-between', mt: 0.6 }}>
         <Typography sx={clockSx}>{formatCampaignDateTime(clock)}</Typography>
         {timed ? (
@@ -296,7 +283,6 @@ const cardSx = {
   borderRadius: 1.5,
 };
 
-const weatherNameSx = { fontSize: '0.8rem', fontWeight: 700, lineHeight: 1.2 };
 const effectSx = { color: 'text.secondary', fontSize: '0.66rem' };
 
 const nextHexSx = {

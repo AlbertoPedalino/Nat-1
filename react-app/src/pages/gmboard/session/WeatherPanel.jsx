@@ -1,8 +1,9 @@
 import { Box, Stack, Typography, useTheme } from '@mui/material';
 import SelectorGroup from '../../../shared/gmboard/ui/SelectorGroup.jsx';
-import { FALLBACK_WEATHER_ICON, SEASON_ICONS, WEATHER_ICONS } from '../../../shared/hexcrawl/hexIcons.js';
+import { SEASON_ICONS, WEATHER_ICONS } from '../../../shared/hexcrawl/hexIcons.js';
 import { SELECTOR_CONTRACTS } from '../../../shared/gmboard/ui/selectorContracts.js';
-import { weatherEffectLabel, weatherTimerLabel } from '../../../shared/gmboard/weather.js';
+import { weatherTimerLabel, weatherTone } from '../../../shared/gmboard/weather.js';
+import WeatherSummary from '../../../shared/gmboard/ui/WeatherSummary.jsx';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
@@ -12,8 +13,7 @@ export default function WeatherPanel() {
   const seasonContract = SELECTOR_CONTRACTS.season;
   const weatherContract = SELECTOR_CONTRACTS.weatherOverride;
 
-  const WeatherIcon = WEATHER_ICONS[state.weather] || FALLBACK_WEATHER_ICON;
-  const weatherTone = theme.palette.gmboard.weather[state.weather] || theme.palette.gmboard.weather.Clear;
+  const tone = weatherTone(theme.palette, state.weather);
   const timerLabel = weatherTimerLabel(state.season, state.nextWeatherIn, state.hoursSinceWeather);
 
   return (
@@ -37,16 +37,8 @@ export default function WeatherPanel() {
           getIcon={(o) => WEATHER_ICONS[o.weather]}
         />
       </Box>
-      <Box sx={{ ...displayCardSx, borderColor: weatherTone, bgcolor: theme.palette.gmboard.panelOverlay }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-          <WeatherIcon size={20} color={weatherTone} />
-          <Box>
-            <Typography sx={{ ...weatherNameSx, color: weatherTone }}>
-              {state.weather}{state.intensity ? ` · ${state.intensity}` : ''}
-            </Typography>
-            <Typography sx={effectSx}>{weatherEffectLabel(state.weather, state.intensity)}</Typography>
-          </Box>
-        </Box>
+      <Box sx={{ ...displayCardSx, borderColor: tone, bgcolor: theme.palette.gmboard.panelOverlay }}>
+        <WeatherSummary weather={state.weather} intensity={state.intensity} />
         <Typography sx={{ ...timerSx, color: state.season ? 'text.secondary' : 'text.disabled' }}>
           {timerLabel}
         </Typography>
@@ -85,17 +77,6 @@ const displayCardSx = {
   p: 1,
   border: '1px solid',
   borderRadius: 1.5,
-};
-
-const weatherNameSx = {
-  fontSize: '0.85rem',
-  fontWeight: 700,
-  lineHeight: 1.2,
-};
-
-const effectSx = {
-  fontSize: '0.72rem',
-  color: 'text.secondary',
 };
 
 const timerSx = {

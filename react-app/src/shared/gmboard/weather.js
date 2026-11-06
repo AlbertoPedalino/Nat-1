@@ -37,6 +37,16 @@ export function travelTime(terrainHours, weather, intensity, mountSpeed = 1) {
   };
 }
 
+// "Rain · Heavy": the condition and, when it has one, its intensity.
+export function weatherName(weather, intensity) {
+  return intensity ? `${weather} · ${intensity}` : `${weather || ''}`;
+}
+
+// The theme colour of a condition; an unknown one reads as clear sky.
+export function weatherTone(palette, weather) {
+  return palette.gmboard.weather[weather] || palette.gmboard.weather.Clear;
+}
+
 export function weatherEffectLabel(weather, intensity) {
   if (weather === 'Rain') {
     if (intensity === 'Light') return '×1 travel';
