@@ -16,10 +16,10 @@ export function readRegistry(key) {
   return key === 'gb_char_registry' ? listCharacters() : [];
 }
 
-export function renameRegistryEntry(registryKey, id, nextName) {
+export function renameRegistryEntry(registryKey, id, name) {
   if (registryKey !== 'gb_char_registry') return false;
-  const name = nextName || prompt('Nome salvataggio', id);
-  if (!name || !name.trim()) return false;
-  renameCharacter(id, name.trim());
+  const trimmed = String(name || '').trim();
+  if (!trimmed) return false;
+  renameCharacter(id, trimmed);
   return true;
 }

@@ -14,6 +14,7 @@ import { sectionDeletePlan } from './logic/instanceRows.js';
 import { formatUpdatedAt } from './logic/tools.js';
 import * as s from './styles.js';
 import { confirmAction } from '../../shared/ui/confirmAction.js';
+import { promptText } from '../../shared/ui/promptText.js';
 
 // Opening only navigates: the tool page opens the instance (pulling a cloud
 // copy this browser lacks, refreshing a linked one) through the shared
@@ -43,8 +44,7 @@ export default function SectionPicker({ meta }) {
   useEffect(() => { refresh(); }, [refresh]);
 
   const handleRename = useCallback(async (row) => {
-    const nextName = window.prompt('Nome salvataggio', row.name);
-    const name = String(nextName || '').trim();
+    const name = promptText('Save name', row.name);
     if (!name || name === row.name) return;
     try {
       if (row.hasLocal) renameInstance(meta.sectionKey, row.id, name);

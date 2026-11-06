@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { clearLiveScene, setLiveScene, updateScene } from '../../../shared/cloud/api/vttScenes.js';
+import { promptText } from '../../../shared/ui/promptText.js';
 
 // The scene's own row, from the header: going live and renaming.
 export function useSceneHeaderActions({ scene, onSceneChange, notify }) {
@@ -20,8 +21,8 @@ export function useSceneHeaderActions({ scene, onSceneChange, notify }) {
   // "the ambush"), so the name is editable here and not only from the scene
   // list. Nothing to hide from the players: they never see it.
   const handleRename = useCallback(async () => {
-    const next = window.prompt('Scene name', scene.name);
-    if (next === null) return;
+    const next = promptText('Scene name', scene.name);
+    if (!next || next === scene.name) return;
     try {
       onSceneChange(await updateScene(scene.id, { name: next }));
     } catch (cause) {

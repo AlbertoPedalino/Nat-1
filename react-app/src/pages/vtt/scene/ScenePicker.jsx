@@ -24,6 +24,7 @@ import { uploadMapImage } from '../../../shared/cloud/api/vttMapImages.js';
 import NewSceneDialog from './NewSceneDialog.jsx';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { promptText } from '../../../shared/ui/promptText.js';
 
 // Scenes belong to a campaign, so the picker is grouped by campaign rather than
 // being a flat list like the local tools' Library.
@@ -124,8 +125,8 @@ export default function ScenePicker({
   };
 
   const handleRename = async (scene) => {
-    const next = window.prompt('Scene name', scene.name);
-    if (next === null) return;
+    const next = promptText('Scene name', scene.name);
+    if (!next || next === scene.name) return;
     try {
       await updateScene(scene.id, { name: next });
       await refresh(campaigns.map((campaign) => campaign.id));

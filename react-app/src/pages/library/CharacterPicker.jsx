@@ -18,6 +18,7 @@ import { formatUpdatedAt } from './logic/tools.js';
 import InstanceRow from './components/InstanceRow.jsx';
 import * as s from './styles.js';
 import { confirmAction } from '../../shared/ui/confirmAction.js';
+import { promptText } from '../../shared/ui/promptText.js';
 
 // Cloud sheets (role-scoped) merged with locally saved characters into one
 // list. Absorbs the old /gmsheets page: same role-aware heading, same
@@ -87,7 +88,8 @@ export default function CharacterPicker() {
   }, [cloudEnabled, status, isGm, myId, navigate]);
 
   const handleRename = useCallback((row) => {
-    if (renameRegistryEntry('gb_char_registry', row.id)) refresh();
+    const name = promptText('Character name', row.name);
+    if (name && renameRegistryEntry('gb_char_registry', row.id, name)) refresh();
   }, [refresh]);
 
   const handleDelete = useCallback(async (row) => {

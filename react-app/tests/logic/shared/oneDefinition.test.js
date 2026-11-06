@@ -87,7 +87,7 @@ test('numbers and dates are formatted only by numberFormat.js and dateFormat.js'
 // placeholders in a regular expression, not a string).
 test('no Italian text in interface strings', () => {
   assert.deepEqual(sourceLinesMatching(
-    /['"`][^'"`\n]*\b(Metà|Giocatore|[Pp]ersonaggi[oa]?|Eliminare|Sovrascrivere|scheda|Carica|riconosciuto|Scegli|Annulla|Conferma|Salvare|dardi|danno su)\b/,
+    /['"`][^'"`\n]*\b(Metà|Giocatore|[Pp]ersonaggi[oa]?|Eliminare|Sovrascrivere|scheda|Carica|riconosciuto|Scegli|Annulla|Conferma|Salvare|dardi|danno su|[Nn]ome|annullat[oa]|salvataggio)\b/,
   ), []);
 });
 
@@ -98,6 +98,10 @@ test('no Italian data field names in code', () => {
     /\b(meteo|tipo|danno|rarita|qualita|valore|gravita|pioggia)\b/,
     { allow: ['pages/gmboard/state/migration.js'] },
   ), []);
+});
+
+test('every text prompt goes through promptText', () => {
+  assert.deepEqual(sourceFilesMatching(/\bprompt\(/, { allow: ['shared/ui/promptText.js'] }), []);
 });
 
 test('every confirmation goes through confirmAction', () => {

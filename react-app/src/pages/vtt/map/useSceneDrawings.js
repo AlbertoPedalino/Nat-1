@@ -15,6 +15,7 @@ import {
   sanitizeNoteText,
 } from '../../../shared/vtt/map/drawing.js';
 import { areaEffect } from '../../../shared/vtt/map/areas.js';
+import { promptText } from '../../../shared/ui/promptText.js';
 
 // The scene's marks: freehand strokes, areas of effect, text notes and their
 // menu (label, colour, size, visibility), erasing, moving and undoing them, plus
@@ -167,7 +168,7 @@ export function useSceneDrawings({
   // A note is a stroke with words on it, so it takes the same path: same table,
   // same visibility rules, same undo and eraser.
   const handleWriteNote = useCallback(async (point) => {
-    const text = sanitizeNoteText(window.prompt('Write on the map'));
+    const text = sanitizeNoteText(promptText('Write on the map'));
     if (!text) return;
     try {
       const created = await createDrawing(scene.id, {

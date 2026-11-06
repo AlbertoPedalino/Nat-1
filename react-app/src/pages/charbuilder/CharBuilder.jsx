@@ -292,7 +292,7 @@ export default function CharBuilder() {
       const cur = state.character;
       const hasExisting = cur && (cur.className || (cur.name || '').trim());
       if (hasExisting && !confirmAction('A character is already open in the builder. Replace it with the imported sheet?')) {
-        notify('info', 'Import annullato.');
+        notify('info', 'Import cancelled.');
         return;
       }
       // Drop the blank cloud placeholder auto-created on open so it never lingers
