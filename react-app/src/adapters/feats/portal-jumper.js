@@ -1,23 +1,9 @@
-import { installFeatAdapter } from '../featAdapterHelpers.js';
-
-function addResistanceChoice(feat) {
-  return {
-    ...feat,
-    choiceUi: {
-      ...(feat.choiceUi || {}),
-      damageType: {
-        keySuffix: 'resistance',
-        label: 'Damage Resistance',
-        options: ['Necrotic', 'Psychic', 'Radiant'],
-      },
-    },
-  };
-}
+import { installFeatAdapter, withResistanceChoice } from '../featAdapterHelpers.js';
 
 export default function install(registry, context = {}) {
   installFeatAdapter(registry, context, {
     name: 'Portal Jumper',
-    adapt: addResistanceChoice,
+    adapt: withResistanceChoice(['Necrotic', 'Psychic', 'Radiant']),
     actions: [{
       name: 'Portal Step', icon: 'move', cat: 'special', uses: 'PB / LR', resKey: 'portal_jumper_step',
     }],

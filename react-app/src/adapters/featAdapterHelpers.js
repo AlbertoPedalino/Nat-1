@@ -19,6 +19,19 @@ export function withSpellAbilityChoice(feat) {
   };
 }
 
+// A feat adapter adding the pick of one damage resistance among `options`
+// (stored under the `resistance` choice key, read by a 'resistance-choice'
+// effect).
+export function withResistanceChoice(options) {
+  return (feat) => ({
+    ...feat,
+    choiceUi: {
+      ...(feat.choiceUi || {}),
+      damageType: { keySuffix: 'resistance', label: 'Damage Resistance', options },
+    },
+  });
+}
+
 export function installFeatAdapter(registry, context, {
   name,
   adapt,
