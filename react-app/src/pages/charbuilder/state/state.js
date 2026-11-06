@@ -24,6 +24,7 @@ import { emptyItemFilters } from '../../../shared/character/inventory/itemFilter
 import { isFeatKey, isFeatDetailKey } from '../../../shared/character/progression/featChoiceKeys.js';
 import { normalizeCharacterChoices } from '../../../shared/character/progression/choiceNormalization.js';
 import { withOwnedFeatSnapshots } from '../../../shared/character/progression/selectedFeats.js';
+import { matchKey } from '../../../shared/content/nameKeys.js';
 
 // Fields whose value feeds normalizeCharacterChoices. When a reducer patch touches
 // any of them, normalizedChoices is rebuilt so it stays the single source of truth
@@ -105,11 +106,9 @@ export function normalizeCharacterLevels(character = {}) {
 }
 
 function normChoice(value) {
-  return String(value || '')
+  return matchKey(String(value || '')
     .split('|')[0]
-    .replace(/\{@[a-z]+ ([^|}]+)(?:\|[^}]*)?\}/gi, '$1')
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, '');
+    .replace(/\{@[a-z]+ ([^|}]+)(?:\|[^}]*)?\}/gi, '$1'));
 }
 
 export const initialCharacter = {
@@ -270,9 +269,7 @@ function clearSpeciesChoices(choices = {}) {
 }
 
 function pruneStaleSpeciesLineageChoices(choices = {}, versionValue) {
-  const stored = String(Array.isArray(versionValue) ? versionValue[0] : versionValue || '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, '');
+  const stored = matchKey(Array.isArray(versionValue) ? versionValue[0] : versionValue);
   const next = { ...choices };
   Object.keys(next).forEach((key) => {
     const m = key.match(/^species_(.+?)_(cantrip|spell)(?:_|$)/);

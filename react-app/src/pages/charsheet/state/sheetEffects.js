@@ -184,13 +184,10 @@ export function inferDamageTypeFromText(text) {
 }
 
 function normalizeChoiceToken(value) {
-  return cleanText(value)
+  return matchKey(cleanText(value)
     .split('|')[0]
     .split('(')[0]
-    .replace(/\bdragon\b/gi, '')
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '');
+    .replace(/\bdragon\b/gi, ''));
 }
 
 function lookupMapValue(map, choice) {

@@ -1,4 +1,5 @@
 import { asArray } from '../../../shared/lists.js';
+import { matchKey } from '../../../shared/content/nameKeys.js';
 const CHOICE_KEYS = [
   'choose',
   'any',
@@ -39,9 +40,7 @@ export function normalizeArtificerTool(value) {
 }
 
 export function artificerToolKey(value) {
-  return normalizeArtificerTool(value)
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, '');
+  return matchKey(normalizeArtificerTool(value));
 }
 
 function addTool(out, value) {

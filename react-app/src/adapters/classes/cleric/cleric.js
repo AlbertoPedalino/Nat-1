@@ -1,5 +1,6 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
+import { matchKey } from '../../../shared/content/nameKeys.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -21,9 +22,7 @@ function cleanChoice(value) {
 }
 
 function normChoice(value) {
-  return cleanChoice(value)
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, '');
+  return matchKey(cleanChoice(value));
 }
 
 function asChoiceArray(value) {
