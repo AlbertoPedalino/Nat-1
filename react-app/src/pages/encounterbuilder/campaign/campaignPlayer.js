@@ -1,6 +1,7 @@
 import { summarizeCharacter } from '../../../shared/campaign/sheetSummary.js';
 import { combatantToSheetPatch, resolveCombatVitals } from '../../../shared/encounter/sheetSync.js';
-import { clampInt, numberOr } from '../../../shared/numbers.js';
+import { clampInt } from '../../../shared/numbers.js';
+import { totalLevel } from '../../../shared/character/progression/classLevel.js';
 
 // Maps a stored campaign character row into the player shape the encounter
 // builder imports. Kept out of `useCampaignPlayers` — which must import the
@@ -8,17 +9,6 @@ import { clampInt, numberOr } from '../../../shared/numbers.js';
 // so this mapping stays covered.
 
 const HEX_COLOR_RE = /^#[0-9a-f]{6}$/i;
-
-export function getCharacterLevel(character) {
-  const explicit = Number(character?.level);
-  if (Number.isFinite(explicit) && explicit > 0) return clampInt(explicit, 1, 20, 1);
-  const primary = Number(character?.classLevel);
-  const extras = Array.isArray(character?.extraClasses)
-    ? character.extraClasses.reduce((sum, item) => sum + numberOr(item?.level, 0), 0)
-    : 0;
-  const total = (Number.isFinite(primary) && primary > 0 ? primary : 0) + extras;
-  return clampInt(total || 1, 1, 20, 1);
-}
 
 export function normalizeIconColor(value) {
   const color = typeof value === 'string' ? value.trim() : '';
@@ -48,7 +38,7 @@ export function toEncounterPlayer(row, campaign) {
     campaignName: campaign.name || 'Campaign',
     name: sheet.name || row.name || 'Character',
     ownerUsername: row.owner_username || null,
-    level: getCharacterLevel(sheet),
+    level: totalLevel(sheet),
     ac: clampInt(summary.ac, 1, 99, 10),
     hpMax: clampInt(hpMax, 1, 999, 10),
     ...combatantToSheetPatch(vitals),

@@ -9,6 +9,7 @@ import { describeMulticlassProficiencies } from '../../../shared/character/progr
 import { getPrimaryClassLevel } from './calculations.js';
 import { checkMulticlassPrerequisite, getMulticlassProficienciesGained } from './multiclassRules.js';
 import { classIcon } from '../../../shared/character/profile/classIcon.js';
+import { hitDieFaces } from '../../../shared/character/combat/hp.js';
 
 // Renders the multiclass proficiency summary (data shaped by
 // describeMulticlassProficiencies). Pure view: a "grants nothing" note when the
@@ -38,7 +39,7 @@ function MulticlassProfDetails({ className, profs }) {
 
 function ClassRow({ cls, selected, onSelect, prereqMet = true, prereqReason = '', details = null }) {
   const Icon = classIcon(cls.name);
-  const hitDie = cls.hitDie || `d${cls.hd?.faces || '?'}`;
+  const hitDie = `d${hitDieFaces(cls)}`;
   const saves = (cls.proficiency || []).map((save) => save.toUpperCase()).join(', ');
   return (
     <ExpandableCard

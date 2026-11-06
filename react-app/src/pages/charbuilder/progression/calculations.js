@@ -24,10 +24,6 @@ export function getBackgroundPattern(background, index = 0) {
   return values.length ? values : [2, 1];
 }
 
-export function getHitDieFaces(classObject) {
-  return classObject?.hd?.faces || classObject?.hd?.[0]?.faces || 8;
-}
-
 export function getCasterProgression(className, classObject, subclassName) {
   const name = String(className || classObject?.name || '').toLowerCase();
   const explicit = classObject?.casterProgression;

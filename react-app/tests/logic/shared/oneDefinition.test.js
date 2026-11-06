@@ -289,3 +289,10 @@ test('choice keys and values are read through shared/character/progression/choic
     allow: ['shared/character/progression/choiceUtils.js'],
   }), []);
 });
+
+// Levels and Hit Dice: classLevel.js and hp.js answer them once.
+test('total and multiclass levels and Hit Die faces have one definition', () => {
+  assert.deepEqual(sourceFilesMatching(/extraClasses[\s\S]{0,80}\.reduce\(\(sum,|hd\??\.faces/, {
+    allow: ['shared/character/progression/classLevel.js', 'shared/character/combat/hp.js', 'adapters/adapterPipeline.js'],
+  }), []);
+});

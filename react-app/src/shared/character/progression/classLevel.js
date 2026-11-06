@@ -14,14 +14,28 @@
 // level as the primary class. Owner-scoped levels (an adapter's `ownerLevel`)
 // and multiclass TOTAL level are deliberately NOT this module's concern.
 
+// Levels in multiclasses. A multiclass slot without a class yet counts
+// nothing; one with a class but no level counts 1, as the builder adds it.
+// `except` leaves out one slot (the one being edited).
+export function multiclassLevels(extraClasses, { except = -1 } = {}) {
+  return (extraClasses || [])
+    .filter((extra, index) => index !== except && extra?.name)
+    .reduce((sum, extra) => sum + (Number(extra.level) || 1), 0);
+}
+
+// The character's total level: the stored level, else primary + multiclasses.
+export function totalLevel(C) {
+  const stored = Number(C?.level);
+  if (Number.isFinite(stored) && stored > 0) return Math.min(20, Math.floor(stored));
+  const primary = Number(C?.classLevel);
+  return Math.min(20, Math.max(1, (primary > 0 ? primary : 1) + multiclassLevels(C?.extraClasses)));
+}
+
 export function primaryClassLevel(C) {
   const explicit = Number(C?.classLevel);
   if (Number.isFinite(explicit) && explicit > 0) return explicit;
   const total = Number(C?.level || 0) || 1;
-  const extras = (C?.extraClasses || [])
-    .filter((extra) => extra?.name)
-    .reduce((sum, extra) => sum + (Number(extra.level) || 1), 0);
-  return Math.max(1, total - extras);
+  return Math.max(1, total - multiclassLevels(C?.extraClasses));
 }
 
 export function classLevel(C, className) {

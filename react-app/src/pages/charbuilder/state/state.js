@@ -19,6 +19,7 @@ import { normalizeCharacterChoices } from '../../../shared/character/progression
 import { withOwnedFeatSnapshots } from '../../../shared/character/progression/selectedFeats.js';
 import { matchKey, stripSource } from '../../../shared/content/nameKeys.js';
 import { ABILITIES } from '../../../shared/content/rulesVocabulary.js';
+import { multiclassLevels } from '../../../shared/character/progression/classLevel.js';
 
 // Fields whose value feeds normalizeCharacterChoices. When a reducer patch touches
 // any of them, normalizedChoices is rebuilt so it stays the single source of truth
@@ -77,17 +78,11 @@ function cleanChoicesForLevel(choices, classLevel) {
 }
 
 // Sum of levels from selected (named) multiclass slots. A blank slot — just added
-// but not yet assigned a class — contributes nothing until a class is chosen.
-function extraClassLevels(extraClasses) {
-  return (extraClasses || [])
-    .filter((ec) => ec && ec.name)
-    .reduce((sum, ec) => sum + (Number(ec.level) || 1), 0);
-}
 
 // Total character level = primary class level + selected multiclass levels.
 // Single source of truth for the stats level; XP is tracked separately (xp/set).
 function totalCharacterLevel(classLevel, extraClasses) {
-  return (Number(classLevel) || 1) + extraClassLevels(extraClasses);
+  return (Number(classLevel) || 1) + multiclassLevels(extraClasses);
 }
 
 export function normalizeCharacterLevels(character = {}) {
@@ -357,7 +352,7 @@ export function builderReducer(state, action) {
     case 'field/set':
       return updateCharacter(state, { [action.field]: action.value });
     case 'class/level': {
-      const extras = extraClassLevels(state.character.extraClasses);
+      const extras = multiclassLevels(state.character.extraClasses);
       const classLevel = Math.min(Math.max(1, 20 - extras), Math.max(1, Number(action.level) || 1));
       const choices = cleanChoicesForLevel(state.character.choices || {}, classLevel);
       return updateCharacter(state, {
@@ -509,9 +504,7 @@ export function builderReducer(state, action) {
       const idx = Number(action.index);
       if (!Number.isInteger(idx) || idx < 0) return state;
       const primaryLevel = getPrimaryClassLevel(state.character);
-      const otherExtraLevels = (state.character.extraClasses || [])
-        .filter((extraClass, itemIndex) => itemIndex !== idx && extraClass?.name)
-        .reduce((sum, extraClass) => sum + (Number(extraClass.level) || 1), 0);
+      const otherExtraLevels = multiclassLevels(state.character.extraClasses, { except: idx });
       const maxLevel = Math.max(1, 20 - primaryLevel - otherExtraLevels);
       const newLevel = Math.min(maxLevel, Math.max(1, Number(action.level) || 1));
       const extraClasses = state.character.extraClasses.map((extraClass, itemIndex) => (

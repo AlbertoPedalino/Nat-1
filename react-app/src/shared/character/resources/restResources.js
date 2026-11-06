@@ -11,6 +11,7 @@ import {
 } from './rechargeRules.js';
 import { adapterEntryApplies } from '../progression/choiceUtils.js';
 import { ownedFeatNames } from '../progression/selectedFeats.js';
+import { hitDieFaces } from '../combat/hp.js';
 function resourceOwnerLevel(def, character) {
   return Number(def?.ownerLevel ?? primaryClassLevel(character));
 }
@@ -129,14 +130,14 @@ export function getHitDicePools(character, usedPools = {}, legacyUsed = 0) {
   pools.push({
     key: 'primary',
     label: character.className || 'Class',
-    faces: getHitDieFaces(character.clsSnapshot?.hd),
+    faces: hitDieFaces(character.cls || character.clsSnapshot),
     total: Math.max(0, primaryClassLevel(character)),
   });
   (character.extraClasses || []).forEach((ec, index) => {
     pools.push({
       key: `extra_${index}`,
       label: ec.name || 'Class',
-      faces: getHitDieFaces(ec.clsSnapshot?.hd),
+      faces: hitDieFaces(ec.cls || ec.clsSnapshot),
       total: Math.max(0, Number(ec.level || 1)),
     });
   });
@@ -153,13 +154,6 @@ export function getHitDicePools(character, usedPools = {}, legacyUsed = 0) {
 
 export function getUsedHitDiceTotal(usedPools = {}) {
   return Object.values(usedPools || {}).reduce((sum, value) => sum + Math.max(0, Math.floor(Number(value) || 0)), 0);
-}
-
-function getHitDieFaces(hd) {
-  if (hd?.faces) return Number(hd.faces) || 8;
-  if (Array.isArray(hd) && hd[0]?.faces) return Number(hd[0].faces) || 8;
-  const parsed = String(hd || '').match(/d(\d+)/i);
-  return parsed ? Number(parsed[1]) || 8 : 8;
 }
 
 // The value a resource holds when fully available: 0 for 'used'-tracked pools

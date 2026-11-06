@@ -1,13 +1,16 @@
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
 import { ownedFeatNames } from '../progression/selectedFeats.js';
 import { finalAbilityModifier } from '../progression/abilityScores.js';
+import { primaryClassLevel, totalLevel } from '../progression/classLevel.js';
 
-function getHitDieFaces(source) {
-  const hd = source?.hd;
-  if (!hd) return 8;
-  if (hd.faces) return Number(hd.faces) || 8;
+// The faces of a class's Hit Die, from its 5etools record or saved snapshot
+// (`hd: { faces }`, a list of those, or text like 'd10'); d8 when unknown.
+export function hitDieFaces(classRecord) {
+  const hd = classRecord?.hd ?? classRecord?.hitDie;
+  if (hd?.faces) return Number(hd.faces) || 8;
   if (Array.isArray(hd) && hd[0]?.faces) return Number(hd[0].faces) || 8;
-  return 8;
+  const parsed = String(hd || '').match(/d(\d+)/i);
+  return parsed ? Number(parsed[1]) || 8 : 8;
 }
 
 function levelEntry(character, key, faces) {
@@ -67,11 +70,10 @@ export function computeMaxHp(character, conMod) {
     ? Number(conMod)
     : finalAbilityModifier(character, 'con', { ignoreWildShape: true });
   const extras = character.extraClasses || [];
-  const totalLevel = Math.max(1, Number(character.level || 1));
-  const extrasTotal = extras.reduce((sum, ec) => sum + Number(ec.level || 0), 0);
-  const primaryLevel = Math.max(1, Number(character.classLevel || (totalLevel - extrasTotal) || 1));
+  const primaryLevel = primaryClassLevel(character);
+  const characterLevel = totalLevel(character);
 
-  const primaryFaces = getHitDieFaces(character.cls || character.clsSnapshot);
+  const primaryFaces = hitDieFaces(character.cls || character.clsSnapshot);
   let total = primaryFaces + conModNum;
   for (let lv = 2; lv <= primaryLevel; lv += 1) {
     total += levelEntry(character, lv, primaryFaces) + conModNum;
@@ -84,7 +86,7 @@ export function computeMaxHp(character, conMod) {
   );
 
   extras.forEach((ec, index) => {
-    const faces = getHitDieFaces(ec.cls || ec.clsSnapshot);
+    const faces = hitDieFaces(ec.cls || ec.clsSnapshot);
     const ecLevel = Math.max(1, Number(ec.level || 1));
     for (let lv = 1; lv <= ecLevel; lv += 1) {
       total += levelEntry(character, `extra_${index}_${lv}`, faces) + conModNum;
@@ -92,7 +94,7 @@ export function computeMaxHp(character, conMod) {
     total += classHpBonusFor(ec.name, ec.subclassShortName, ecLevel, ec.adapterRuntime?.classEffects);
   });
 
-  total += speciesHpBonus(character) * totalLevel;
+  total += speciesHpBonus(character) * characterLevel;
 
   const featNames = ownedFeatNames(character);
   const featSnapshotsByName = new Map(
@@ -102,7 +104,7 @@ export function computeMaxHp(character, conMod) {
     (sum, name) => sum + featHpBonusPerLevel(name, featSnapshotsByName.get(name)),
     0,
   );
-  total += featBonusPerLevel * totalLevel;
+  total += featBonusPerLevel * characterLevel;
 
   return Math.max(1, total);
 }

@@ -3,7 +3,8 @@ import { HeartPulse } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { getPrimaryClassLevel } from './calculations.js';
 import { getProficiencyBonus } from '../../../shared/character/progression/proficiency.js';
-import { computeMaxHp } from '../../../shared/character/combat/hp.js';
+import { computeMaxHp, hitDieFaces } from '../../../shared/character/combat/hp.js';
+import { multiclassLevels } from '../../../shared/character/progression/classLevel.js';
 
 export default function LevelPanel({ character, dispatch }) {
   const tab = character.activeClassTab || 0;
@@ -12,13 +13,9 @@ export default function LevelPanel({ character, dispatch }) {
   const extraClass = isExtra ? character.extraClasses[extraIdx] : null;
   const cls = isExtra ? extraClass?.cls : character.cls;
   const hp = computeMaxHp(character);
-  const faces = cls?.hd?.faces || cls?.hitDie || '?';
-  const selectedExtraLevels = (character.extraClasses || [])
-    .filter((extra) => extra?.name)
-    .reduce((sum, extra) => sum + (Number(extra.level) || 1), 0);
-  const otherExtra = (character.extraClasses || [])
-    .filter((extra, idx) => idx !== extraIdx && extra?.name)
-    .reduce((sum, extra) => sum + (Number(extra.level) || 1), 0);
+  const faces = cls ? `d${hitDieFaces(cls)}` : '?';
+  const selectedExtraLevels = multiclassLevels(character.extraClasses);
+  const otherExtra = multiclassLevels(character.extraClasses, { except: extraIdx });
   const primaryLv = getPrimaryClassLevel(character);
   const maxLv = isExtra
     ? Math.max(1, 20 - primaryLv - otherExtra)
