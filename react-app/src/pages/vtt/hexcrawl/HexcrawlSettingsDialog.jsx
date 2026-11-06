@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Stack, TextField,
-  Tooltip, Typography, alpha, useTheme,
+  Tooltip, Typography,
 } from '@mui/material';
 import {
   CalendarDays, FastForward, Hexagon, Palette, Settings,
@@ -11,7 +11,7 @@ import SelectorGroup from '../../../shared/gmboard/ui/SelectorGroup.jsx';
 import MountSelector from '../../../shared/hexcrawl/ui/MountSelector.jsx';
 import { SELECTOR_CONTRACTS } from '../../../shared/gmboard/ui/selectorContracts.js';
 import { MONTH_NAMES, formatHM, validateStart } from '../../../shared/gmboard/campaignTime.js';
-import { HEX_POPULATION_OPTIONS, TERRAIN_OPTIONS, TIER_OPTIONS } from '../../../shared/gmboard/boardOptions.js';
+import { HEX_POPULATION_OPTIONS, TERRAIN_OPTIONS } from '../../../shared/gmboard/boardOptions.js';
 import {
   POPULATION_ICONS, SEASON_ICONS, TERRAIN_ICONS, WEATHER_ICONS,
 } from '../../../shared/hexcrawl/hexIcons.js';
@@ -22,6 +22,7 @@ import {
   battleMapDialogActionsSx, battleMapDialogContentSx, battleMapDialogPaperSx, battleMapDialogTitleSx,
 } from '../map/battleMapSurface.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import TierSelector from '../../../shared/gmboard/ui/TierSelector.jsx';
 
 const DEFAULT_HEX_COLOR = DEFAULT_GRID.hexColor;
 
@@ -38,7 +39,6 @@ export default function HexcrawlSettingsDialog({
   hexColor, onHexColorChange,
   onDefaultsChange, onSeasonChange, onClockChange, onClockAdvance,
 }) {
-  const theme = useTheme();
   const boardState = board?.state ? mergeBoardClock(board.state, clock) : null;
   const sky = boardState || clock;
   const locked = busy || !clockLinked || !board;
@@ -127,10 +127,13 @@ export default function HexcrawlSettingsDialog({
             />
             {/* The tier keeps the GM Board's colours: it is how the board says
                 how hard the hex is about to be. */}
-            <TierRow
+            {/* Clearable, so a map can be laid out without claiming a
+                difficulty it has not been given. */}
+            <TierSelector
+              label="Encounter tier"
               value={defaults?.tier ?? null}
-              busy={locked}
-              tones={theme.palette.gmboard.tier}
+              disabled={locked}
+              clearable
               onChange={(tier) => onDefaultsChange?.({ tier })}
             />
             {/* The party's speed is shared with the GM Board across every map. */}
@@ -309,42 +312,6 @@ function AdvanceForm({ disabled, onAdvance }) {
   );
 }
 
-// Clicking the tier it is already on clears it, so a map can be laid out
-// without claiming a difficulty it has not been given.
-function TierRow({ value, tones, busy, onChange }) {
-  return (
-    <Box>
-      <Typography sx={groupLabelSx}>Encounter tier</Typography>
-      <Box role="group" aria-label="Encounter tier" sx={tierRowSx}>
-        {TIER_OPTIONS.map((option) => {
-          const selected = value === option.tier;
-          const tone = tones[option.tier];
-          return (
-            <Box
-              component="button"
-              type="button"
-              key={option.tier}
-              disabled={busy}
-              aria-pressed={selected}
-              onClick={() => onChange(selected ? null : option.tier)}
-              sx={{
-                ...tierButtonSx,
-                borderColor: selected ? tone.color : tone.dim,
-                color: selected ? tone.color : tone.dim,
-                bgcolor: selected ? alpha(tone.color, 0.16) : 'transparent',
-                '&:hover:not(:disabled)': { borderColor: tone.color, bgcolor: alpha(tone.color, 0.1) },
-              }}
-            >
-              <Box component="span" sx={{ fontWeight: 700 }}>{option.shortLabel}</Box>
-              <Box component="span" sx={{ fontSize: '0.6rem', opacity: 0.85 }}>{option.shortLevels}</Box>
-            </Box>
-          );
-        })}
-      </Box>
-    </Box>
-  );
-}
-
 const titleSx = { display: 'flex', alignItems: 'center', gap: 0.75 };
 
 const columnsSx = {
@@ -412,22 +379,3 @@ const swatchSx = {
   flexShrink: 0,
 };
 
-const tierRowSx = { display: 'flex', flexWrap: 'wrap', gap: 0.75 };
-
-const tierButtonSx = {
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  gap: 0.1,
-  flex: '1 1 64px',
-  py: 0.5,
-  px: 0.75,
-  fontFamily: 'inherit',
-  fontSize: '0.72rem',
-  lineHeight: 1.2,
-  border: '1px solid',
-  borderRadius: 1,
-  cursor: 'pointer',
-  '&:disabled': { cursor: 'default', opacity: 0.5 },
-  '&:focus-visible': { outline: '2px solid currentColor', outlineOffset: '1px' },
-};

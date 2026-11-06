@@ -4,7 +4,8 @@ import { Circle } from 'lucide-react';
 import { TIER_OPTIONS } from '../boardOptions.js';
 import { UI_FONTS } from '../../ui/fonts.js';
 
-export default function TierSelector({ value, onChange, label = 'Tier' }) {
+// `clearable`: clicking the tier already picked clears it (onChange(null)).
+export default function TierSelector({ value, onChange, label = 'Tier', disabled = false, clearable = false }) {
   const theme = useTheme();
   const tierColors = theme.palette.gmboard.tier;
   const labelId = useId();
@@ -22,7 +23,8 @@ export default function TierSelector({ value, onChange, label = 'Tier' }) {
               size="small"
               variant="outlined"
               aria-pressed={selected}
-              onClick={() => onChange(option.tier)}
+              disabled={disabled}
+              onClick={() => onChange(clearable && selected ? null : option.tier)}
               sx={{
                 fontSize: '0.72rem',
                 textTransform: 'none',
