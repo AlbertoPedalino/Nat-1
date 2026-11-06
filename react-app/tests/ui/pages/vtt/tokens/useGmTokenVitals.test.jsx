@@ -84,3 +84,21 @@ test('a failed version check keeps what is held', async () => {
   await act(async () => { await result.current.reconcile(); });
   expect(m.listFightVitals).not.toHaveBeenCalled();
 });
+
+test('past the targeted-read limit the recovery reads the held fights in one go, like every synced list', async () => {
+  const many = Array.from({ length: 60 }, (_, i) => ({ id: `t${i}`, sourceRef: `inst:f${i}:c` }));
+  const ids = many.map((_, i) => `f${i}`).sort();
+  m.listFightVitals.mockResolvedValue(ids.map((id) => fight(id, '2026-09-24T10:00:00+00:00')));
+  const { result } = renderHook(() => useGmTokenVitals({ sceneId: 'scene', tokens: many, enabled: true }));
+  await waitFor(() => expect(m.listFightVitals).toHaveBeenCalled());
+  await act(async () => {});
+  m.listFightVitals.mockClear();
+  // 55 moved, 5 did not: more than 50 is one read of the whole set.
+  m.listFightRevisions.mockResolvedValue(ids.map((id, i) => ({
+    id, updated_at: i < 5 ? '2026-09-24T10:00:00+00:00' : '2026-09-24T10:00:09+00:00',
+  })));
+  m.listFightVitals.mockResolvedValue(ids.map((id) => fight(id, '2026-09-24T10:00:09+00:00', 4)));
+  await act(async () => { await result.current.reconcile(); });
+  expect(m.listFightVitals).toHaveBeenCalledTimes(1);
+  expect(m.listFightVitals).toHaveBeenCalledWith(ids);
+});

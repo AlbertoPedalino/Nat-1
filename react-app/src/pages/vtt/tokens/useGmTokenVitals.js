@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { openRealtimeChannel } from '../../../shared/cloud/realtimeChannel.js';
 import { listTokenSecretHp, secretVitals } from '../../../shared/cloud/api/vtt.js';
 import { listFightRevisions, listFightVitals } from '../../../shared/cloud/api/encounterFights.js';
-import { diffRevisions } from '../../../shared/cloud/sync/revisionDiff.js';
+import { diffRevisions, readChanged } from '../../../shared/cloud/sync/revisionDiff.js';
 import { parseSourceRef } from '../../../shared/vtt/tokens/encounterSync.js';
 import { newerFightRow, withGmTokenVitals } from '../../../shared/vtt/tokens/fightVitals.js';
 
@@ -56,7 +56,10 @@ export function useGmTokenVitals({ sceneId, tokens, enabled }) {
       new Map(Object.entries(fightsRef.current).map(([id, row]) => [id, Date.parse(row?.updated_at) || 0])),
     );
     if (diff.clean) return;
-    const fresh = diff.changed.length ? await listFightVitals(diff.changed).catch(() => null) : [];
+    const fresh = await readChanged(diff, {
+      fetchAll: () => listFightVitals(ids),
+      fetchSome: (changed) => listFightVitals(changed),
+    }).catch(() => null);
     if (request !== requestRef.current || !fresh) return;
     const byId = new Map(fresh.map((row) => [String(row.id), row]));
     setFights((current) => Object.fromEntries(diff.ids
