@@ -13,6 +13,7 @@ import InstanceRow from './components/InstanceRow.jsx';
 import { sectionDeletePlan } from './logic/instanceRows.js';
 import { formatUpdatedAt } from './logic/tools.js';
 import * as s from './styles.js';
+import { confirmAction } from '../../shared/ui/confirmAction.js';
 
 // Opening only navigates: the tool page opens the instance (pulling a cloud
 // copy this browser lacks, refreshing a linked one) through the shared
@@ -56,7 +57,7 @@ export default function SectionPicker({ meta }) {
 
   const handleDelete = useCallback(async (row) => {
     const plan = sectionDeletePlan(row);
-    if (!plan.confirmMessage || !window.confirm(plan.confirmMessage)) return;
+    if (!plan.confirmMessage || !confirmAction(plan.confirmMessage)) return;
     try {
       await deleteInstance(meta.sectionKey, row.id, { cloud: plan.cloud });
       refresh();

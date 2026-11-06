@@ -32,7 +32,7 @@ const { createDefaultTables } = await import('../../../../../src/pages/gmboard/t
 const { createDefaultCoreState, createDefaultResults } = await import('../../../../../src/pages/gmboard/state/defaultState.js');
 const { gmBoardReducer, createInitialState } = await import('../../../../../src/pages/gmboard/state/reducer.js');
 const { SELECTOR_CONTRACTS } = await import('../../../../../src/pages/gmboard/ui/selectorContracts.js');
-const { confirmDiscard } = await import('../../../../../src/shared/ui/confirmDiscard.js');
+const { confirmAction } = await import('../../../../../src/shared/ui/confirmAction.js');
 const storage = await import('../../../../../src/pages/gmboard/state/storage.js');
 
 function seqRng(values) {
@@ -489,17 +489,17 @@ test('every selector contract dispatches a state value that matches the option i
   }
 });
 
-// --- confirmDiscard.js ---
+// --- confirmAction.js ---
 
-test('confirmDiscard returns false and signals no discard when the injected confirm is declined', () => {
+test('confirmAction returns false and signals no discard when the injected confirm is declined', () => {
   let called = null;
-  const declined = confirmDiscard('Discard?', (msg) => { called = msg; return false; });
+  const declined = confirmAction('Discard?', (msg) => { called = msg; return false; });
   assert.equal(declined, false);
   assert.equal(called, 'Discard?');
 });
 
-test('confirmDiscard returns true when the injected confirm is accepted', () => {
-  const accepted = confirmDiscard('Discard?', () => true);
+test('confirmAction returns true when the injected confirm is accepted', () => {
+  const accepted = confirmAction('Discard?', () => true);
   assert.equal(accepted, true);
 });
 

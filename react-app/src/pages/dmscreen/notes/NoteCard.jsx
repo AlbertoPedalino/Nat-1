@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Box, Card, IconButton, TextField, Tooltip, Typography } from '@mui/material';
 import { Eye, GripVertical, Pencil, Trash2 } from 'lucide-react';
-import { confirmDiscard } from '../../../shared/ui/confirmDiscard.js';
+import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import {
   DEFAULT_NOTE_SIZE,
   MAX_NOTE_COLS,
@@ -97,7 +97,7 @@ export default function NoteCard({
   }, [editing]);
 
   const handleRemove = () => {
-    if (hasNoteContent(note) && !confirmDiscard('Delete this note?', confirmFn)) return;
+    if (hasNoteContent(note) && !confirmAction('Delete this note?', confirmFn)) return;
     onRemove(note.id);
   };
 

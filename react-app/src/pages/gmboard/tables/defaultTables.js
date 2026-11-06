@@ -111,7 +111,7 @@ const DEF_ENV = [
 ];
 
 function cp(value) {
-  return JSON.parse(JSON.stringify(value));
+  return structuredClone(value);
 }
 
 export function createDefaultTables() {

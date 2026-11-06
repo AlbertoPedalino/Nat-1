@@ -22,6 +22,7 @@ import {
   uploadMapImage,
 } from '../../../shared/cloud/api/vtt.js';
 import NewSceneDialog from './NewSceneDialog.jsx';
+import { confirmAction } from '../../../shared/ui/confirmAction.js';
 
 // Scenes belong to a campaign, so the picker is grouped by campaign rather than
 // being a flat list like the local tools' Library.
@@ -133,7 +134,7 @@ export default function ScenePicker({
   };
 
   const handleDelete = async (scene) => {
-    if (!window.confirm(`Delete "${scene.name}"? Its tokens and fog go with it.`)) return;
+    if (!confirmAction(`Delete "${scene.name}"? Its tokens and fog go with it.`)) return;
     try {
       const { cleanupError } = await deleteScene(scene.id, scene.campaignId);
       await refresh(campaigns.map((campaign) => campaign.id));

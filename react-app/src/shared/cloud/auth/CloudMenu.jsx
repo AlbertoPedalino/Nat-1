@@ -85,11 +85,11 @@ export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUplo
   if (!cloudEnabled) {
     return (
       <Tooltip title="Online features not configured">
-        <span style={{ display: 'inline-flex' }}>
+        <Box component="span" sx={{ display: 'inline-flex' }}>
           <Button size="small" variant="outlined" disabled startIcon={<LogIn size={14} />} sx={{ ...loginBtnSx, ...buttonSx }}>
             LOGIN
           </Button>
-        </span>
+        </Box>
       </Tooltip>
     );
   }

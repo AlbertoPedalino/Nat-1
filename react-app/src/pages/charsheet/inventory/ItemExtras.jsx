@@ -28,7 +28,7 @@ function TomeConsumePanel({ item, onConsume }) {
   return (
     <Box sx={{ mt: '8px', pt: '8px', borderTop: '1px dashed', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1 }}>
       <Typography sx={{ flex: 1, fontSize: '0.66rem', color: 'text.secondary' }}>
-        Read & study to permanently gain <b style={{ color: '#edd48a' }}>+{bonus.value} {ABILITY_LABEL[bonus.ability]}</b>. The book then loses its magic.
+        Read & study to permanently gain <Box component="b" sx={{ color: '#edd48a' }}>+{bonus.value} {ABILITY_LABEL[bonus.ability]}</Box>. The book then loses its magic.
       </Typography>
       <Button size="small" variant="outlined" onClick={onConsume}
         sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.6rem', letterSpacing: '0.06em', borderColor: '#edd48a', color: '#edd48a', '&:hover': { bgcolor: 'rgba(237,212,138,0.08)', borderColor: '#edd48a' } }}>

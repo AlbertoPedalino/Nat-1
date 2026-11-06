@@ -100,6 +100,20 @@ test('no Italian data field names in code', () => {
   ), []);
 });
 
+test('every confirmation goes through confirmAction', () => {
+  assert.deepEqual(sourceFilesMatching(/window\.confirm\(/, { allow: ['shared/ui/confirmAction.js'] }), []);
+});
+
+test('deep copies use structuredClone', () => {
+  assert.deepEqual(sourceFilesMatching(/JSON\.parse\(JSON\.stringify\(/), []);
+});
+
+// Styling goes through sx; inline style stays only on lucide icons, which are
+// not MUI components.
+test('no inline style on HTML elements', () => {
+  assert.deepEqual(sourceFilesMatching(/<(span|div|b|i|p|a|img|input|button|label|section|ul|li)\b[^>]*\sstyle=\{\{/), []);
+});
+
 test('asArray and flattenList are defined only in shared/lists.js', () => {
   assert.deepEqual(sourceFilesMatching(/(function|const)\s+(asArray|flattenList)\b/, {
     allow: ['shared/lists.js'],

@@ -5,7 +5,7 @@ import TierSelector from '../ui/TierSelector.jsx';
 import QuestCard from './QuestCard.jsx';
 import { QUEST_SCOPE_OPTIONS } from '../state/constants.js';
 import { SELECTOR_CONTRACTS } from '../ui/selectorContracts.js';
-import { confirmDiscard } from '../../../shared/ui/confirmDiscard.js';
+import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 
 function QuestCountHeader({ questSet }) {
@@ -56,7 +56,7 @@ export default function QuestView() {
   };
 
   const handleClear = () => {
-    if (!confirmDiscard('Discard the generated quests? This cannot be undone.')) return;
+    if (!confirmAction('Discard the generated quests? This cannot be undone.')) return;
     dispatch({ type: 'clearQuests' });
   };
 

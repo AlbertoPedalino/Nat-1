@@ -48,6 +48,7 @@ import {
   rebaseCharacterSync,
   setActiveCharId,
 } from '../../shared/character/profile/store.js';
+import { confirmAction } from '../../shared/ui/confirmAction.js';
 
 function StepLabel({ step, index }) {
   const Icon = step.icon;
@@ -287,7 +288,7 @@ export default function CharBuilder() {
       const character = buildImportedCharacter(payload);
       const cur = state.character;
       const hasExisting = cur && (cur.className || (cur.name || '').trim());
-      if (hasExisting && !window.confirm('A character is already open in the builder. Replace it with the imported sheet?')) {
+      if (hasExisting && !confirmAction('A character is already open in the builder. Replace it with the imported sheet?')) {
         notify('info', 'Import annullato.');
         return;
       }

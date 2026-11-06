@@ -74,12 +74,13 @@ export default function IconColorPicker({ anchorEl, onClose, currentColor, onSel
             position: 'relative', overflow: 'hidden',
           }}
         >
-          <input
+          <Box
+            component="input"
             ref={inputRef}
             type="color"
             value={localColor || '#4d95d6'}
             onInput={(e) => setLocalColor(e.target.value)}
-            style={{
+            sx={{
               position: 'absolute', left: -40, top: -40, width: 100, height: 100,
               cursor: 'pointer', border: 'none', padding: 0,
             }}

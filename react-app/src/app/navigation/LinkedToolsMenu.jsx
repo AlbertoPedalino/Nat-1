@@ -16,6 +16,7 @@ import { createInstance } from '../../shared/instances/instanceStore.js';
 import { ensureInstanceInCloud, linkCloudInstance, listToolInstances } from '../../shared/instances/instanceSync.js';
 import { SECTION_KEYS, SECTION_REGISTRY } from '../../shared/instances/sectionRegistry.js';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
+import { confirmAction } from '../../shared/ui/confirmAction.js';
 
 const TOOL_UI = {
   gmboard: { label: 'GM Board', icon: LayoutDashboard },
@@ -130,7 +131,7 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
   const handleLink = async (target) => {
     if (disabled) return;
     const plan = resolveGroupMerge(current, target, rows);
-    if (plan.mergesGroups && !window.confirm('These tools belong to different groups. Connect all tools in both groups?')) return;
+    if (plan.mergesGroups && !confirmAction('These tools belong to different groups. Connect all tools in both groups?')) return;
     await changeLinks(async () => {
       // Save tool instances before any campaign can reference them.
       for (const row of plan.members.filter((member) => member.sectionKey !== 'campaign')) await updateMember(row, plan.groupId);

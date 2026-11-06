@@ -12,6 +12,7 @@ import { formatNumber } from '../../../shared/ui/numberFormat.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import InitiativeLaunchDialog from '../builder/InitiativeLaunchDialog.jsx';
 import { formatDateTime } from '../../../shared/ui/dateFormat.js';
+import { confirmAction } from '../../../shared/ui/confirmAction.js';
 
 export default function LibraryView() {
   const { state, dispatch, monsterDb } = useEncounterBuilder();
@@ -22,7 +23,7 @@ export default function LibraryView() {
 
   const clearAll = () => {
     if (!items.length) return;
-    if (!window.confirm(`Delete all ${items.length} library and fight entries?`)) return;
+    if (!confirmAction(`Delete all ${items.length} library and fight entries?`)) return;
     dispatch({ type: 'clearLibrary' });
     notify('success', 'Encounter library cleared.');
   };
@@ -172,7 +173,7 @@ function LibraryCard({ item, monsters, players, questOptions, dispatch, notify }
           variant="outlined"
           startIcon={<Trash2 size={14} />}
           onClick={() => {
-            if (!window.confirm('Delete this entry from the library?')) return;
+            if (!confirmAction('Delete this entry from the library?')) return;
             dispatch({ type: 'deleteLibraryEncounter', id: enc.id });
           }}
         >

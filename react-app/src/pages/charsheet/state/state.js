@@ -23,7 +23,7 @@ export function deriveSheetState(C) {
   const createdSpellSlots = C?.createdSpellSlots && typeof C.createdSpellSlots === 'object' ? C.createdSpellSlots : {};
   const arcaneArmorItemKey = C?.arcaneArmorItemKey || null;
 
-  const sheetInventory = Array.isArray(C?.inventory) ? JSON.parse(JSON.stringify(C.inventory)) : [];
+  const sheetInventory = Array.isArray(C?.inventory) ? structuredClone(C.inventory) : [];
   const sheetCurrency = normalizeCurrency(
     C?.currency && typeof C.currency === 'object' ? C.currency : { cp: 0, sp: 0, gp: 10, pp: 0 },
   );

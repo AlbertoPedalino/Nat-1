@@ -1,4 +1,4 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Stack, Typography } from '@mui/material';
+import { Box, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Stack, Typography } from '@mui/material';
 import { X } from 'lucide-react';
 
 // Dialog chrome that matches the character-sheet panels (dark surface, gold
@@ -108,7 +108,7 @@ export default function SheetDialog({
           <Stack direction="row" spacing={1} alignItems="center" sx={{ width: '100%' }}>
             {icon}
             <Typography component="span" sx={titleTextSx}>{title}</Typography>
-            {right != null ? <><span style={{ flex: 1 }} />{right}</> : null}
+            {right != null ? <><Box component="span" sx={{ flex: 1 }} />{right}</> : null}
           </Stack>
         </DialogTitle>
       ) : null}

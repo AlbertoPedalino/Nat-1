@@ -55,7 +55,7 @@ export default function PartyConfig() {
                   endIcon={<ExternalLink size={13} />}
                   sx={{ justifyContent: 'flex-start', minWidth: 0, flex: 1 }}
                 >
-                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{player.name}</span>
+                  <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{player.name}</Box>
                 </Button>
               ) : (
                 <TextField

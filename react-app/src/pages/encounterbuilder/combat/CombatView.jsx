@@ -6,6 +6,7 @@ import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import CombatantCard from './CombatantCard.jsx';
 import Reinforcements from './Reinforcements.jsx';
 import { StatBlockPanel } from '../bestiary/StatBlockDialog.jsx';
+import { confirmAction } from '../../../shared/ui/confirmAction.js';
 
 export default function CombatView() {
   const { state, dispatch } = useEncounterBuilder();
@@ -50,7 +51,7 @@ export default function CombatView() {
     const message = isFightResumable(state.library, activeFight)
       ? 'Close this encounter? It stops being active; resume it from the Library.'
       : 'Close this encounter? It is not saved in the Library, so its progress cannot be resumed.';
-    if (!window.confirm(message)) return;
+    if (!confirmAction(message)) return;
     dispatch({ type: 'closeCombat' });
   };
 

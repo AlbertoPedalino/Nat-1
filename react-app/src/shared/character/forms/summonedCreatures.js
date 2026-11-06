@@ -17,8 +17,7 @@ let recordsPromise = null;
 
 const clone = (value) => {
   if (value == null) return value;
-  if (typeof structuredClone === 'function') return structuredClone(value);
-  return JSON.parse(JSON.stringify(value));
+  return structuredClone(value);
 };
 
 export async function loadSummonedCreatureRecords() {

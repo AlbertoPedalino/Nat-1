@@ -5,6 +5,7 @@ import { ScrollText, UserPen, LayoutDashboard, Swords, StickyNote, Flag, Map, Tr
 import { REGISTRY_META } from '../../shared/storage/localStorageRegistries.js';
 import { clearAppLocalStorage, listAppLocalStorageKeys } from '../../shared/storage/storage.js';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
+import { confirmAction } from '../../shared/ui/confirmAction.js';
 
 export const TOOLS = [
   { path: '/library/characters', label: 'Character Sheet', desc: 'View and manage your character in play', icon: ScrollText, color: 'success.main' },
@@ -32,7 +33,7 @@ export default function HomePage() {
   }, [refreshAppDataCount]);
 
   const handleClearAppData = useCallback(() => {
-    const confirmed = window.confirm('Delete all local Nat-1 data in this browser? Characters, boards, encounters and legacy data will be removed.');
+    const confirmed = confirmAction('Delete all local Nat-1 data in this browser? Characters, boards, encounters and legacy data will be removed.');
     if (!confirmed) return;
 
     const removed = clearAppLocalStorage();

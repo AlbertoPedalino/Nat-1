@@ -10,6 +10,7 @@ import CombatantReminders from './CombatantReminders.jsx';
 import MonsterToken from '../bestiary/MonsterToken.jsx';
 import PortraitBadge from '../../../shared/character/profile/PortraitBadge.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
+import { confirmAction } from '../../../shared/ui/confirmAction.js';
 
 export default function CombatantCard({ combatant, active }) {
   const { dispatch } = useEncounterBuilder();
@@ -41,7 +42,7 @@ export default function CombatantCard({ combatant, active }) {
   };
 
   const remove = () => {
-    if (!window.confirm('Remove this combatant?')) return;
+    if (!confirmAction('Remove this combatant?')) return;
     dispatch({ type: 'removeCombatant', id: combatant.id });
   };
 

@@ -15,6 +15,7 @@ import { summarizeCharacter } from './sheetSummary.js';
 import { resolveCampaignsPageState } from './campaignsPageState.js';
 import { ensureSheetRuntimeAdapters } from '../charsheet/state/sheetRuntimeAdapters.js';
 import { signed } from '../../shared/ui/numberFormat.js';
+import { confirmAction } from '../../shared/ui/confirmAction.js';
 
 export default function CampaignsPage() {
   const { cloudEnabled, status, user, isGm } = useAuth();
@@ -94,7 +95,7 @@ export default function CampaignsPage() {
   };
 
   const handleLeave = async (campaignId) => {
-    if (!window.confirm('Leave this campaign?')) return;
+    if (!confirmAction('Leave this campaign?')) return;
     setBusy(true);
     try { await leaveCampaign(campaignId); await load(); notify('info', 'Left campaign.'); }
     catch (e) { notify('error', e?.message || 'Failed to leave.'); }
@@ -102,7 +103,7 @@ export default function CampaignsPage() {
   };
 
   const handleDeleteCampaign = async (c) => {
-    if (!window.confirm(`Delete campaign "${c.name}"? Members are removed and their sheets are detached (not deleted).`)) return;
+    if (!confirmAction(`Delete campaign "${c.name}"? Members are removed and their sheets are detached (not deleted).`)) return;
     setBusy(true);
     try { await deleteCampaign(c.id); await load(); notify('info', 'Campaign deleted.'); }
     catch (e) { notify('error', e?.message || 'Failed to delete.'); }

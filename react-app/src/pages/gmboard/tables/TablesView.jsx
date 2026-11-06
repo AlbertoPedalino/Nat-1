@@ -3,7 +3,7 @@ import { Box, Button, Stack, Tab, Tabs, Typography, useTheme } from '@mui/materi
 import { AlertTriangle, CloudRain, Coins, Flame, Leaf, Map, RotateCcw, Swords, Table as TableIcon } from 'lucide-react';
 import TableEditorGrid from './TableEditorGrid.jsx';
 import { EDITOR_TABS } from '../state/constants.js';
-import { confirmDiscard } from '../../../shared/ui/confirmDiscard.js';
+import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 
@@ -92,7 +92,7 @@ export default function TablesView() {
   };
 
   const handleReset = () => {
-    if (!confirmDiscard('Reset all tables to their default values?')) return;
+    if (!confirmAction('Reset all tables to their default values?')) return;
     resetTables();
     notify('success', 'Tables reset to defaults.');
   };

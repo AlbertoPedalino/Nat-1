@@ -17,6 +17,7 @@ import { shouldPullCloudCopy } from './logic/instanceRows.js';
 import { formatUpdatedAt } from './logic/tools.js';
 import InstanceRow from './components/InstanceRow.jsx';
 import * as s from './styles.js';
+import { confirmAction } from '../../shared/ui/confirmAction.js';
 
 // Cloud sheets (role-scoped) merged with locally saved characters into one
 // list. Absorbs the old /gmsheets page: same role-aware heading, same
@@ -92,7 +93,7 @@ export default function CharacterPicker() {
   const handleDelete = useCallback(async (row) => {
     const plan = deletePlanFor(row, { myId, isGm });
     if (!plan.confirmMessage) return;
-    if (!window.confirm(plan.confirmMessage)) return;
+    if (!confirmAction(plan.confirmMessage)) return;
     try {
       if (plan.cloud === 'own') await deleteOwnCloudCharacter(row.id);
       else if (plan.cloud === 'any') await deleteCloudCharacter(row.id);

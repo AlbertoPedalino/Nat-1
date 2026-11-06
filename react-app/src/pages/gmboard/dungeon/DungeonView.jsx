@@ -5,7 +5,7 @@ import SelectorGroup from '../ui/SelectorGroup.jsx';
 import TierSelector from '../ui/TierSelector.jsx';
 import RoomCard from './RoomCard.jsx';
 import { SELECTOR_CONTRACTS } from '../ui/selectorContracts.js';
-import { confirmDiscard } from '../../../shared/ui/confirmDiscard.js';
+import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { isValidRoomCount, roomCountInputFrom } from './dungeon.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 
@@ -38,7 +38,7 @@ export default function DungeonView() {
   };
 
   const handleClear = () => {
-    if (!confirmDiscard('Discard the generated dungeon? This cannot be undone.')) return;
+    if (!confirmAction('Discard the generated dungeon? This cannot be undone.')) return;
     dispatch({ type: 'clearDungeon' });
   };
 

@@ -80,7 +80,7 @@ export default function AuthDialog({ open, onClose }) {
           onChange={(e) => setPassword(e.target.value)}
           autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
         />
-        <button type="submit" style={{ display: 'none' }} aria-hidden />
+        <button type="submit" hidden aria-hidden />
       </Box>
 
       {error ? <Alert severity="error" sx={{ mt: 1.2 }}>{error}</Alert> : null}
