@@ -10,16 +10,8 @@ import HexResultSteps from '../../../shared/hexcrawl/ui/HexResultSteps.jsx';
 import SessionLog from '../session/SessionLog.jsx';
 import { SELECTOR_CONTRACTS } from '../../../shared/gmboard/ui/selectorContracts.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
+import { missingHexSetup } from '../../../shared/hexcrawl/hexEntry.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
-
-function missingSelections(state) {
-  const missing = [];
-  if (!state.season) missing.push('season');
-  if (!state.terrain) missing.push('terrain');
-  if (!state.pop) missing.push('population');
-  if (!state.hexTier) missing.push('tier');
-  return missing;
-}
 
 export default function HexcrawlView() {
   const { state, dispatch, proceed, advanceOnly, clockError } = useGmBoard();
@@ -28,8 +20,9 @@ export default function HexcrawlView() {
   const terrainContract = SELECTOR_CONTRACTS.terrain;
 
   const canAdvanceOnly = Boolean(state.season) && Boolean(state.terrain);
-  const canProceed = canAdvanceOnly && Boolean(state.pop) && Boolean(state.hexTier);
-  const missing = missingSelections(state);
+  // The board's Travel picks stand for the hex, the way a map hex's own do.
+  const missing = missingHexSetup({ terrain: state.terrain, pop: state.pop, tier: state.hexTier }, state);
+  const canProceed = missing.length === 0;
 
   return (
     <Stack spacing={2}>
