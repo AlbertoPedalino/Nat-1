@@ -28,9 +28,8 @@ import { adaptBuilderData } from '../../adapters/adapterPipeline.js';
 import { useBuilderData } from './state/useBuilderData.js';
 import BuilderDataAlert from './layout/BuilderDataAlert.jsx';
 import { builderRootSx, builderTheme } from './layout/builderTheme.js';
-import {
-  extractSheetData, buildImportedCharacter, saveCharacter, buildSheetCharacter,
-} from './state/persistence.js';
+import { saveCharacter, buildSheetCharacter } from './state/persistence.js';
+import { extractSheetData, buildImportedCharacter } from './state/sheetImport.js';
 import { builderReducer } from './state/state.js';
 import { initialBuilderState } from './state/initialState.js';
 import { normalizeCharacterLevels } from './state/choiceCleanup.js';

@@ -11,16 +11,13 @@ import {
 import { stripRuntimeOnlyCharacterFields } from '../../../shared/character/profile/runtimeFields.js';
 import { collectAutoGrantedSpells as collectEntityAutoGrantedSpells } from '../spells/spells.js';
 import { DEFAULT_CURRENCY, normalizeCurrency } from '../../../shared/character/inventory/currency.js';
-import {
-  splitTypedProficiencies,
-  uniqueProficiencyLabels,
-} from '../../../shared/character/progression/typedProficiencies.js';
 import { enumerateFixedAdditionalSpells } from '../../../shared/character/spells/additionalSpellGrants.js';
 import { resolveActionRollers } from '../../../shared/character/dice/rollers.js';
 import { asArray } from '../../../shared/lists.js';
 import { stripSource } from '../../../shared/content/nameKeys.js';
 import { ABILITIES } from '../../../shared/content/rulesVocabulary.js';
 import { toSnapshot } from '../../../shared/character/spells/spellSnapshots.js';
+import { normalizeProficiencyChoicesForPersistence } from './proficiencyPersistence.js';
 
 const FEAT_SNAPSHOT_FIELDS = [
   'name',
@@ -53,73 +50,6 @@ function pickFields(source, fields) {
     if (source[field] !== undefined) out[field] = source[field];
   });
   return out;
-}
-
-export function extractSheetData(text) {
-  // Canonical export is a JSON file: { type, data, version } (or a bare character).
-  try {
-    const json = JSON.parse(text);
-    return json?.data || json;
-  } catch (_) {
-    return null;
-  }
-}
-
-function collectTypedProficiencyChoices(choices = {}) {
-  const all = Object.values(choices || {}).flatMap(asArray);
-  const split = splitTypedProficiencies(all);
-  return {
-    skills: uniqueProficiencyLabels(split.skill),
-    tools: uniqueProficiencyLabels(split.tool),
-    languages: uniqueProficiencyLabels(split.language),
-  };
-}
-
-function mergeSelectedSkills(selectedSkills, addedSkills) {
-  const additions = uniqueProficiencyLabels(addedSkills);
-  if (!additions.length) return selectedSkills || [];
-
-  if (selectedSkills && !Array.isArray(selectedSkills) && typeof selectedSkills === 'object') {
-    return {
-      ...selectedSkills,
-      proficient: uniqueProficiencyLabels([...(selectedSkills.proficient || []), ...additions]),
-    };
-  }
-
-  return uniqueProficiencyLabels([...(Array.isArray(selectedSkills) ? selectedSkills : []), ...additions]);
-}
-
-function mergeSelectedList(current, additions) {
-  const added = uniqueProficiencyLabels(additions);
-  if (!added.length) return Array.isArray(current) ? current : [];
-  return uniqueProficiencyLabels([...(Array.isArray(current) ? current : []), ...added]);
-}
-
-function mergeNormalizedChoices(normalizedChoices, typedProfs) {
-  const hasTyped = typedProfs.skills.length || typedProfs.tools.length || typedProfs.languages.length;
-  if (!normalizedChoices && !hasTyped) return null;
-
-  const normalized = normalizedChoices && typeof normalizedChoices === 'object'
-    ? { ...normalizedChoices }
-    : {};
-
-  normalized.skills = uniqueProficiencyLabels([...(normalized.skills || []), ...typedProfs.skills]);
-  normalized.tools = uniqueProficiencyLabels([...(normalized.tools || []), ...typedProfs.tools]);
-  normalized.languages = uniqueProficiencyLabels([...(normalized.languages || []), ...typedProfs.languages]);
-
-  return normalized;
-}
-
-function normalizeProficiencyChoicesForPersistence(character = {}) {
-  const typedProfs = collectTypedProficiencyChoices(character.choices || {});
-
-  return {
-    ...character,
-    selectedSkills: mergeSelectedSkills(character.selectedSkills, typedProfs.skills),
-    selectedTools: mergeSelectedList(character.selectedTools, typedProfs.tools),
-    selectedLanguages: mergeSelectedList(character.selectedLanguages, typedProfs.languages),
-    normalizedChoices: mergeNormalizedChoices(character.normalizedChoices, typedProfs),
-  };
 }
 
 function makeClassSnapshot(cls = null) {
@@ -402,7 +332,9 @@ const HEAVY_BUILDER_FIELDS = [
   'subclasses', 'dicePool',
 ];
 
-function stripHeavyFields(character) {
+// The builder-only working objects (full class/species/background records,
+// feature lists, the dice pool) never persisted with the character.
+export function stripHeavyFields(character) {
   const out = { ...character };
   HEAVY_BUILDER_FIELDS.forEach((key) => { delete out[key]; });
   if (Array.isArray(out.extraClasses)) {
@@ -440,98 +372,5 @@ export function saveCharacter(character, data, options = {}) {
     return created;
   }
   return storeSaveCharacter(id, unified);
-}
-
-function unwrapStructuredSheetPayload(payload) {
-  if (!payload || typeof payload !== 'object') return null;
-  // Tolerate a still-wrapped { data } payload; a real character carries className.
-  if (payload.data && typeof payload.data === 'object' && !payload.className) return payload.data;
-  return payload;
-}
-
-function isStructuredSheetPayload(payload) {
-  if (!payload || typeof payload !== 'object') return false;
-  return Boolean(payload.className || payload.choices);
-}
-
-function buildBuilderStateFromSheetPayload(data) {
-  const backgroundSnapshot = data.backgroundSnapshot || null;
-  const backgroundName = data.backgroundName || backgroundSnapshot?.name || '';
-  const backgroundSource = data.backgroundSource || backgroundSnapshot?.source || '';
-  const backgroundAbilities = data.backgroundAbilities || [];
-  const backgroundPattern = data.backgroundPattern || [2, 1];
-  const speciesName = data.speciesName || data.speciesSnapshot?.name || '';
-  const speciesSource = data.speciesSource || data.speciesSnapshot?.source || '';
-
-  const builderState = {
-    name: data.name || '',
-    level: Number(data.level || 1),
-    classLevel: getPrimaryClassLevel(data),
-    className: data.className || data.clsSnapshot?.name || '',
-    classSource: data.classSource || data.clsSnapshot?.source || '',
-    subclassShortName: data.subclassShortName || '',
-    subclassSource: data.subclassSource || '',
-    extraClasses: data.extraClasses || [],
-
-    speciesName,
-    speciesSource,
-    speciesObj: data.speciesObj || data.speciesSnapshot || null,
-
-    backgroundName,
-    backgroundSource,
-    backgroundObj: data.backgroundObj || backgroundSnapshot,
-    backgroundAbilities,
-    backgroundPattern,
-
-    scoreMethod: data.scoreMethod || 'pointbuy',
-    hpMode: data.hpMode || 'average',
-    hpManualRolls: data.hpManualRolls || {},
-    pbScores: data.pbScores || {},
-    arrAssign: data.arrAssign || {},
-    diceAssign: data.diceAssign || {},
-    manualScores: data.manualScores || {},
-
-    choices: data.choices || {},
-    equipChoices: data.equipChoices || {},
-    normalizedChoices: data.normalizedChoices || null,
-    selectedSkills: data.selectedSkills || [],
-    selectedLanguages: data.selectedLanguages || [],
-    selectedTools: data.selectedTools || [],
-
-    cls: data.cls || data.clsSnapshot || null,
-    clsSnapshot: data.clsSnapshot || data.cls || null,
-    allFeatures: data.allFeatures || data.allClassFeatures || [],
-    allClassFeatures: data.allClassFeatures || data.allFeatures || [],
-    allSubFeatures: data.allSubFeatures || [],
-    allFeatSnapshots: data.allFeatSnapshots || [],
-
-    selectedCantrips: data.selectedCantrips || [],
-    selectedSpells: data.selectedSpells || {},
-    wizardSpellbook: data.wizardSpellbook || {},
-    wizardSpellMastery: data.wizardSpellMastery || {},
-    wizardSignatureSpells: data.wizardSignatureSpells || {},
-    autoGrantedSpells: data.autoGrantedSpells || [],
-
-    inventory: data.inventory || [],
-    currency: normalizeCurrency(data.currency || { ...DEFAULT_CURRENCY }),
-    xp: Number(data.xp || 0),
-  };
-
-  return normalizeProficiencyChoicesForPersistence(builderState);
-}
-
-// Validate an imported payload and build the unified character object from it,
-// WITHOUT writing to any store (local or cloud). Throws on an unrecognized
-// format. Callers decide where (and whether) to persist the result.
-export function buildImportedCharacter(payload) {
-  const data = unwrapStructuredSheetPayload(payload);
-
-  if (!isStructuredSheetPayload(data)) {
-    throw new Error('Unrecognized file format: upload a Nat 1 character sheet JSON file.');
-  }
-
-  const normalizedData = normalizeProficiencyChoicesForPersistence(data);
-  const builderState = buildBuilderStateFromSheetPayload(normalizedData);
-  return stripHeavyFields({ ...builderState, ...normalizedData });
 }
 
