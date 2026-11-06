@@ -212,7 +212,7 @@ test('DOM listeners in components and hooks go through useEventListener', () => 
       'shared/cloud/sync/useCharacterDigests.js',
       'shared/cloud/sync/useCharacterSheetRevision.js',
       'pages/encounterbuilder/sync/useExternalFightSync.js',
-      'pages/vtt/tokens/EncounterImportDialog.jsx',
+      'pages/vtt/tokens/useEncounterSaves.js',
     ],
   }), []);
 });
