@@ -35,7 +35,7 @@ test('damage whitespace is normalized into a clean formula', () => {
 
 test('generic tags render display text and drop pipe metadata', () => {
   assert.equal(text(tokenizeBeastEntry('the target is {@condition prone|XPHB}.')), 'the target is prone.');
-  assert.equal(text(tokenizeBeastEntry('save DC {@dc 13}')), 'save DC 13');
+  assert.equal(text(tokenizeBeastEntry('{@actSave con} {@dc 13}')), 'Constitution Saving Throw: DC 13');
 });
 
 test('atkr with multiple modes reads as prose', () => {

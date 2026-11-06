@@ -233,3 +233,11 @@ test('ability scores are computed only by shared/character/progression/abilitySc
 test('Grid items are sized with size, never the removed item/xs props', () => {
   assert.deepEqual(sourceLinesMatching(/<Grid\b[^>]*\s(item|xs=|sm=|md=|lg=|xl=)/), []);
 });
+
+// One table of stat block words for every renderer (monsters, beasts, spells):
+// three copies had drifted, printing "m +5" or "con" for 2024 lead-ins.
+test('stat block label words come only from shared/content/statBlockTags.js', () => {
+  assert.deepEqual(sourceFilesMatching(/['"`](Hit or Miss|Melee Attack Roll|Ranged Attack Roll|Failure or Success):?/, {
+    allow: ['shared/content/statBlockTags.js'],
+  }), []);
+});

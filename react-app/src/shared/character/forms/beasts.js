@@ -9,6 +9,7 @@
 import { isAllowedSource, BEAST_ALLOWED_SOURCES } from '../../content/sourcePriority.js';
 import { signed } from '../../ui/numberFormat.js';
 import { stripSource } from '../../content/nameKeys.js';
+import { statBlockTagText } from '../../content/statBlockTags.js';
 
 const ABILITIES = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
 
@@ -233,26 +234,17 @@ export function findFamiliarBeasts(beastsDb) {
 const HIT_RE = /\{@hit\s+(-?\d+)\}/i;
 const DAMAGE_RE = /\{@(?:damage|dice)\s+([^}]+)\}/gi;
 
-// "{@atkr m}" / "{@atkr m,r}" → "Melee Attack Roll:" / "Melee or Ranged Attack Roll:".
-function formatAtkRoll(code) {
-  const words = String(code).split(',')
-    .map((p) => p.trim().toLowerCase())
-    .map((p) => (p === 'm' ? 'Melee' : p === 'r' ? 'Ranged' : p))
-    .filter(Boolean);
-  return `${words.join(' or ')} Attack Roll:`;
-}
-
 const textToken = (text) => ({ type: 'text', text });
 
 // The single source of truth for beast-prose tag semantics: map one inline
 // 5etools tag to display/roll tokens. {@hit N} → a d20 attack-roll pill;
-// {@damage X}/{@dice X} → a dice-formula pill; {@atk(r) …}/{@h} → prose; any
-// other tag → its display text (pipe-delimited metadata dropped). Both the flat
+// {@damage X}/{@dice X} → a dice-formula pill; label tags ({@atkr m}, {@h},
+// {@actSave con}, …) → their stat block words; any other tag → its display text (pipe-delimited metadata dropped). Both the flat
 // stripTags projection and the rich renderer read from here, so they can't drift.
 function beastTagToTokens(tag, arg, formulaRollType) {
   const t = tag.toLowerCase();
-  if (t === 'atk' || t === 'atkr') return [textToken(formatAtkRoll(arg))];
-  if (t === 'h') return [textToken('Hit: ')];
+  const label = statBlockTagText(t, arg);
+  if (label != null) return [textToken(label)];
   if (t === 'hit') {
     const bonus = Number(arg);
     return [{ type: 'roll', kind: 'd20', bonus, text: signed(bonus), rollType: 'Attack Roll' }];

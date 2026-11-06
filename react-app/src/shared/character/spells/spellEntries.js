@@ -1,36 +1,14 @@
 import { signed } from '../../ui/numberFormat.js';
 import { asArray } from '../../lists.js';
-// The 2024 stat block labels ({@atkr m}, {@actSave dex}, …).
-const ATTACK_ROLL_LABELS = {
-  m: 'Melee Attack Roll:',
-  r: 'Ranged Attack Roll:',
-  'm,r': 'Melee or Ranged Attack Roll:',
-  'r,m': 'Melee or Ranged Attack Roll:',
-};
-const ABILITY_NAMES = {
-  str: 'Strength', dex: 'Dexterity', con: 'Constitution', int: 'Intelligence', wis: 'Wisdom', cha: 'Charisma',
-};
-const FIXED_LABELS = {
-  actsavefail: 'Failure:',
-  actsavesuccess: 'Success:',
-  actsavesuccessorfail: 'Failure or Success:',
-  acttrigger: 'Trigger:',
-  actresponse: 'Response:',
-  hom: 'Hit or Miss:',
-};
+import { statBlockTagText } from '../../content/statBlockTags.js';
 
 function pickTagDisplay(tag, rawValue) {
   const parts = String(rawValue || '').split('|').map((part) => part.trim()).filter(Boolean);
-  if (tag === 'h') return 'Hit: ';
-  if (FIXED_LABELS[tag]) return FIXED_LABELS[tag];
-  if (tag === 'atkr') return ATTACK_ROLL_LABELS[String(parts[0] || '').replace(/\s+/g, '')] || 'Attack Roll:';
-  if (tag === 'actsave') return `${ABILITY_NAMES[parts[0]] || parts[0] || ''} Saving Throw:`;
+  const label = statBlockTagText(tag, parts[0]);
+  if (label != null) return label;
   if (!parts.length) return '';
-  if (tag === 'dc') return `DC ${parts[0]}`;
   if (tag === 'hit') return `+${parts[0].replace(/^\+/, '')}`;
   if (tag === 'd20') return signed(parts[0]);
-  if (tag === 'atk') return `${parts[0]} Attack:`;
-  if (tag === 'recharge') return `(Recharge ${parts[0]}-6)`;
   if (tag === 'chance') return `${parts[0]}%`;
   // {@scaledamage base|levels|step} — cantrip scaling at character levels: show base + per-level step.
   if (tag === 'scaledamage') {

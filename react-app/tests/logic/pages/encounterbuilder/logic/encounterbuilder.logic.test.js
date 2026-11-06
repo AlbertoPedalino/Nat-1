@@ -634,7 +634,7 @@ test('markup converts 5etools tags into safe tokens', () => {
   assert.equal(tokens.some((token) => token.type === 'roll' && token.notation === '+7'), true);
   assert.equal(tokens.some((token) => token.type === 'roll' && token.notation === '2d6+3'), true);
   assert.equal(tokens.some((token) => token.type === 'link' && token.text === 'Fireball'), true);
-  assert.equal(cleanToText('{@actSave dex} {@actSaveFail 1}'), 'Dexterity Saving Throw: Failure 1:');
+  assert.equal(cleanToText('{@actSave dex} {@actSaveFail 1}'), 'Dexterity Saving Throw: First Failure:');
 });
 
 test('legendary group copy inheritance applies array mods', () => {

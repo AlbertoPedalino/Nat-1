@@ -1,14 +1,6 @@
 import { spell5eUrl } from './monsterUtils.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
-
-const ABILITY_NAMES = {
-  str: 'Strength',
-  dex: 'Dexterity',
-  con: 'Constitution',
-  int: 'Intelligence',
-  wis: 'Wisdom',
-  cha: 'Charisma',
-};
+import { isStatBlockLeadIn, statBlockTagText } from '../../../shared/content/statBlockTags.js';
 
 function text(value) {
   return { type: 'text', text: String(value || '') };
@@ -44,15 +36,8 @@ function tagToTokens(rawTag) {
   const arg = firstSpace === -1 ? '' : rawTag.slice(firstSpace + 1);
   const lower = tag.toLowerCase();
 
-  if (lower === 'actsave') {
-    const ability = arg.trim().toLowerCase();
-    return [styleToken('italic', `${ABILITY_NAMES[ability] || ability} Saving Throw:`)];
-  }
-  if (lower === 'actsavefail') return [styleToken('italic', `Failure${arg ? ` ${arg}` : ''}:`)];
-  if (lower === 'actsavesuccess') return [styleToken('italic', 'Success:')];
-  if (lower === 'actsavesuccessorfail') return [styleToken('italic', 'Failure or Success:')];
-  if (lower === 'acttrigger') return [styleToken('italic', 'Trigger:')];
-  if (lower === 'actresponse') return [styleToken('italic', 'Response:')];
+  const label = statBlockTagText(lower, arg);
+  if (label != null) return [isStatBlockLeadIn(lower) ? styleToken('italic', label) : text(label)];
   if (lower === 'hit') {
     const notation = signed(arg);
     return [rollToken(notation, 'Attack Roll', notation)];
@@ -68,10 +53,6 @@ function tagToTokens(rawTag) {
     const href = spell5eUrl(arg);
     return href ? [{ type: 'link', text: display, href }] : [text(display)];
   }
-  if (lower === 'dc') return [text(`DC ${arg}`)];
-  if (lower === 'h') return [styleToken('italic', 'Hit:'), text(' ')];
-  if (lower === 'atk') return [styleToken('italic', `Attack ${arg}:`)];
-  if (lower === 'recharge') return [text(`(Recharge ${arg}-6)`)];
   if (lower === 'i') return [styleToken('italic', arg)];
   if (lower === 'b') return [styleToken('bold', arg)];
   if (lower === 'filter') return [text(arg.split('|')[0] || '')];
