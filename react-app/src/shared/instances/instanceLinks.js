@@ -1,5 +1,6 @@
 import { setInstanceLinkGroup } from './instanceStore.js';
 import { makeLinkGroupId, normalizeLinkGroupId } from './linkGroupId.js';
+import { INSTANCE_LINKS_CHANGED_EVENT } from '../appEvents.js';
 
 // Links (or unlinks, with null) a local instance. The change is local first
 // and synced like any other edit; views that show links are told directly.
@@ -7,7 +8,7 @@ export function setLocalInstanceLink(sectionKey, id, linkGroupId) {
   const entry = setInstanceLinkGroup(sectionKey, id, linkGroupId);
   if (!entry) return null;
   try {
-    window.dispatchEvent(new CustomEvent('gb:instance-links-changed', {
+    window.dispatchEvent(new CustomEvent(INSTANCE_LINKS_CHANGED_EVENT, {
       detail: { sectionKey, id, linkGroupId: entry.linkGroupId },
     }));
   } catch (_) {}

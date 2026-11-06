@@ -3,6 +3,7 @@ import { beforeEach, vi } from 'vitest';
 import { useSceneDungeon } from '../../../../../src/pages/vtt/dungeon/useSceneDungeon.js';
 import { combatantToToken } from '../../../../../src/shared/vtt/tokens/encounterImport.js';
 import { fightWithTokenVitals } from '../../../../../src/shared/vtt/tokens/encounterSync.js';
+import { CAMPAIGN_BOARD_LINK_CHANGED_EVENT, INSTANCE_LINKS_CHANGED_EVENT } from '../../../../../src/shared/appEvents.js';
 
 const mocks = vi.hoisted(() => ({
   readCampaignToolLinks: vi.fn(),
@@ -160,7 +161,7 @@ test('without cloud access an unknown fight is retained conservatively', async (
 test('removing the campaign board preserves the dungeon Encounter Builder link', async () => {
   const { result } = await openDungeon();
   mocks.readCampaignToolLinks.mockResolvedValue({ id: 'campaign_1', link_group_id: 'link_party', hexcrawl_board_id: null });
-  await act(async () => { window.dispatchEvent(new Event('gb:campaign-board-link-changed')); });
+  await act(async () => { window.dispatchEvent(new Event(CAMPAIGN_BOARD_LINK_CHANGED_EVENT)); });
   expect(result.current.encounterInstance.id).toBe('enc_a');
   expect(result.current.linkHint).toBe('');
   await act(async () => { await result.current.sendRoomToBuilder(1); });
@@ -192,7 +193,7 @@ test('changing the destination preserves already sent fights in their original b
   const { result } = await openDungeon();
   selectSecondBuilder();
   mocks.listInstanceFights.mockResolvedValue([{ id: '900' }]);
-  await act(async () => { window.dispatchEvent(new Event('gb:instance-links-changed')); });
+  await act(async () => { window.dispatchEvent(new Event(INSTANCE_LINKS_CHANGED_EVENT)); });
   await waitFor(() => expect(result.current.encounterInstance.id).toBe('enc_b'));
   await act(async () => { expect(await result.current.sendRoomToBuilder(1)).toEqual(EXISTING); });
   expect(mocks.listInstanceFights).toHaveBeenCalledWith('enc_a');

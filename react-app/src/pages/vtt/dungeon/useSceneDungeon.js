@@ -22,6 +22,7 @@ import { importableCombatants } from '../../../shared/vtt/tokens/encounterImport
 import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
 import { listenForRecovery } from '../../../shared/cloud/sync/recoveryTriggers.js';
 import { crKey, crXP } from '../../../shared/bestiary/challengeRating.js';
+import { CAMPAIGN_BOARD_LINK_CHANGED_EVENT, INSTANCE_LINKS_CHANGED_EVENT } from '../../../shared/appEvents.js';
 
 // Links change rarely and every local change announces itself (the gb:* link
 // events, storage); the shared recovery triggers catch another device's edit.
@@ -93,14 +94,14 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize, roster }) {
     };
     refresh();
     const stopRecovery = listenForRecovery(() => refresh(), { periodic: true });
-    window.addEventListener('gb:campaign-board-link-changed', refresh);
-    window.addEventListener('gb:instance-links-changed', refresh);
+    window.addEventListener(CAMPAIGN_BOARD_LINK_CHANGED_EVENT, refresh);
+    window.addEventListener(INSTANCE_LINKS_CHANGED_EVENT, refresh);
     window.addEventListener('storage', refresh);
     return () => {
       cancelled = true;
       stopRecovery();
-      window.removeEventListener('gb:campaign-board-link-changed', refresh);
-      window.removeEventListener('gb:instance-links-changed', refresh);
+      window.removeEventListener(CAMPAIGN_BOARD_LINK_CHANGED_EVENT, refresh);
+      window.removeEventListener(INSTANCE_LINKS_CHANGED_EVENT, refresh);
       window.removeEventListener('storage', refresh);
     };
   }, [campaignId, enabled, cloudEnabled, status]);

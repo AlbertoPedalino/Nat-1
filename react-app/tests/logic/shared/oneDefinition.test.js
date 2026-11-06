@@ -326,3 +326,10 @@ test('the signed-in user and command timeouts come from shared/cloud/cloudCall.j
     allow: ['shared/cloud/cloudCall.js'],
   }), []);
 });
+
+// App events are sent and heard by their named constants (shared/appEvents.js,
+// cloud/sync/characterEvents.js, cloud/sync/cloudSyncState.js), never by a
+// string typed at the call: a typo would be a listener that never fires.
+test('app events are named by constants, not string literals', () => {
+  assert.deepEqual(sourceLinesMatching(/(Event|addEventListener|removeEventListener|useEventListener)\([^)]*['"]gb:/), []);
+});

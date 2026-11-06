@@ -5,6 +5,7 @@ import { STORAGE_KEYS, scopeKey } from '../../gmboard/boardFormat.js';
 import { sanitizeInstanceId } from '../../instances/sectionRegistry.js';
 import { createDefaultCoreState } from '../../gmboard/defaultState.js';
 import { createDefaultTables } from '../../gmboard/defaultTables.js';
+import { CAMPAIGN_BOARD_LINK_CHANGED_EVENT } from '../../appEvents.js';
 
 // Cloud side of the hexcrawl. Three stores, split by how often each is written
 // (see supabase/10_hexcrawl.sql): the clock is one row per campaign, the log is
@@ -217,7 +218,7 @@ export async function linkHexcrawlBoardCampaign(boardId, campaignId) {
   if (campaignId) cleanup = cleanup.neq('id', campaignId);
   const { error } = await cleanup;
   // Readers refresh even if cleanup failed, since the destination may be saved.
-  window.dispatchEvent(new Event('gb:campaign-board-link-changed'));
+  window.dispatchEvent(new Event(CAMPAIGN_BOARD_LINK_CHANGED_EVENT));
   if (error) throw error;
 }
 

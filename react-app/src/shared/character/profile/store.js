@@ -4,6 +4,7 @@ import {
   setStorageItem, setStorageJson, writeStorageItemStrict,
 } from '../../storage/storage.js';
 import { makeId } from '../../ids.js';
+import { CHARACTER_DELETED_EVENT, CHARACTER_SAVED_EVENT } from '../../appEvents.js';
 
 const CHAR_KEY = (id) => `gb:char:${id}`;
 // Sync bookkeeping kept beside the sheet, never inside it: the cloud
@@ -83,7 +84,7 @@ export function saveCharacter(id, character, options = {}) {
     const meta = getCharacterSyncMeta(id);
     writeSyncMeta(id, { ...meta, editVersion: meta.editVersion + 1 });
     try {
-      window.dispatchEvent(new CustomEvent('gb:char-saved', { detail: { id } }));
+      window.dispatchEvent(new CustomEvent(CHARACTER_SAVED_EVENT, { detail: { id } }));
     } catch (_) {}
   }
   return next;
@@ -106,7 +107,7 @@ export function deleteCharacter(id) {
   // explicit action in "My sheets"). Auto-sync uses this event just to cancel
   // any pending push for the removed id.
   try {
-    window.dispatchEvent(new CustomEvent('gb:char-deleted', { detail: { id } }));
+    window.dispatchEvent(new CustomEvent(CHARACTER_DELETED_EVENT, { detail: { id } }));
   } catch (_) {}
 }
 

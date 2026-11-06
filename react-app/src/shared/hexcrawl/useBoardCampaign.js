@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../cloud/auth/AuthProvider.jsx';
 import { readHexcrawlBoardCampaign } from '../cloud/api/hexcrawl.js';
 import { listenForRecovery } from '../cloud/sync/recoveryTriggers.js';
+import { CAMPAIGN_BOARD_LINK_CHANGED_EVENT } from '../appEvents.js';
 
 // The board-campaign link changes rarely and local changes announce
 // themselves; the shared recovery triggers catch another device's edit.
@@ -30,11 +31,11 @@ export function useBoardCampaign(boardId) {
     };
     refresh();
     const stopRecovery = listenForRecovery(() => refresh(), { periodic: true });
-    window.addEventListener('gb:campaign-board-link-changed', refresh);
+    window.addEventListener(CAMPAIGN_BOARD_LINK_CHANGED_EVENT, refresh);
     return () => {
       cancelled = true;
       stopRecovery();
-      window.removeEventListener('gb:campaign-board-link-changed', refresh);
+      window.removeEventListener(CAMPAIGN_BOARD_LINK_CHANGED_EVENT, refresh);
     };
   }, [active, boardId]);
   return active && state.boardId === boardId ? state : { campaign: null, error: null };

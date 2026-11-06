@@ -4,7 +4,7 @@ import { LogIn, LogOut, User, CloudUpload } from 'lucide-react';
 import { useAuth } from './AuthProvider.jsx';
 import AuthDialog from './AuthDialog.jsx';
 import { pushCharacter, SHEET_CONFLICT } from '../api/cloudCharacters.js';
-import { reportCloudSyncState } from '../sync/cloudSyncState.js';
+import { CLOUD_SYNC_EVENT, reportCloudSyncState } from '../sync/cloudSyncState.js';
 import { isSyncExcluded, includeInSync } from '../sync/cloudSyncExclude.js';
 import { useToast } from '../../ui/ToastProvider.jsx';
 import { UI_COLORS } from '../../ui/colors.js';
@@ -72,7 +72,7 @@ export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUplo
   };
 
   // Live status from the headless auto-sync engine.
-  useEventListener(window, 'gb:cloud-sync', (e) => {
+  useEventListener(window, CLOUD_SYNC_EVENT, (e) => {
     const state = e?.detail?.state || 'idle';
     // Waiting for the debounce, or dropped: nothing to show yet.
     if (state === 'scheduled' || state === 'cancelled') return;

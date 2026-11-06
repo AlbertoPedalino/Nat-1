@@ -9,6 +9,7 @@ import {
   readPersistedBoard,
 } from '../../../../../src/pages/gmboard/state/storage.js';
 import { createInstance, subscribeInstanceData } from '../../../../../src/shared/instances/instanceStore.js';
+import { CAMPAIGN_BOARD_LINK_CHANGED_EVENT } from '../../../../../src/shared/appEvents.js';
 
 const campaignClock = vi.hoisted(() => ({
   active: false,
@@ -163,7 +164,7 @@ test('date and time also update the shared clock of a linked campaign', async ()
     intensity: 'Heavy',
   })));
   campaignClock.readLink.mockResolvedValue(null);
-  act(() => window.dispatchEvent(new Event('gb:campaign-board-link-changed')));
+  act(() => window.dispatchEvent(new Event(CAMPAIGN_BOARD_LINK_CHANGED_EVENT)));
   await waitFor(() => expect(board.campaign).toBeNull());
   expect(campaignClock.ids).toHaveBeenLastCalledWith(undefined);
 });

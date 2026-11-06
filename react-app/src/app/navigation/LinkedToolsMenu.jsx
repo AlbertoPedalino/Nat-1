@@ -17,6 +17,7 @@ import { SECTION_KEYS, SECTION_REGISTRY } from '../../shared/instances/sectionRe
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
 import { confirmAction } from '../../shared/ui/confirmAction.js';
 import { UI_FONTS } from '../../shared/ui/fonts.js';
+import { CAMPAIGN_BOARD_LINK_CHANGED_EVENT, INSTANCE_LINKS_CHANGED_EVENT } from '../../shared/appEvents.js';
 
 const TOOL_UI = {
   gmboard: { label: 'GM Board', icon: LayoutDashboard },
@@ -121,8 +122,8 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
     try { await action(); } catch (cause) { failure = cause; }
     // Refresh even after a partial cloud failure; never display stale membership.
     try { await loadRows(); } finally { setWorking(false); }
-    window.dispatchEvent(new Event('gb:campaign-board-link-changed'));
-    window.dispatchEvent(new Event('gb:instance-links-changed'));
+    window.dispatchEvent(new Event(CAMPAIGN_BOARD_LINK_CHANGED_EVENT));
+    window.dispatchEvent(new Event(INSTANCE_LINKS_CHANGED_EVENT));
     if (failure) { setError(failure.message || 'Could not update links.'); return false; }
     notify('success', success);
     return true;

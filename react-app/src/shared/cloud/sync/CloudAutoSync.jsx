@@ -11,6 +11,7 @@ import {
   setInstanceSyncActive,
 } from '../../instances/instanceSync.js';
 import { listenForRecovery } from './recoveryTriggers.js';
+import { CHARACTER_DELETED_EVENT, CHARACTER_SAVED_EVENT } from '../../appEvents.js';
 
 export const DEBOUNCE_MS = 1200;
 
@@ -105,11 +106,11 @@ export default function CloudAutoSync() {
       if (id) engine.cancel(`character:${id}`, id);
     };
 
-    window.addEventListener('gb:char-saved', onCharacterSaved);
-    window.addEventListener('gb:char-deleted', onCharacterDeleted);
+    window.addEventListener(CHARACTER_SAVED_EVENT, onCharacterSaved);
+    window.addEventListener(CHARACTER_DELETED_EVENT, onCharacterDeleted);
     return () => {
-      window.removeEventListener('gb:char-saved', onCharacterSaved);
-      window.removeEventListener('gb:char-deleted', onCharacterDeleted);
+      window.removeEventListener(CHARACTER_SAVED_EVENT, onCharacterSaved);
+      window.removeEventListener(CHARACTER_DELETED_EVENT, onCharacterDeleted);
       stopRecovery();
       resendRef.current = () => {};
       engine.dispose();
