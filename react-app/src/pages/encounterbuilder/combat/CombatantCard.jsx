@@ -13,6 +13,7 @@ import { signed } from '../../../shared/ui/numberFormat.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { hpTone } from '../../../shared/character/combat/vitals.js';
+import DeathSaveDots from '../../../shared/character/combat/DeathSaveDots.jsx';
 
 export default function CombatantCard({ combatant, active }) {
   const { dispatch } = useEncounterBuilder();
@@ -299,44 +300,12 @@ function HpFlag({ Icon, title, text }) {
 function DeathSaves({ combatant }) {
   const { dispatch } = useEncounterBuilder();
   return (
-    <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center' }}>
-      <Typography variant="caption" color="success.main">S</Typography>
-      {[1, 2, 3].map((value) => (
-        <Dot
-          key={`s-${value}`}
-          active={combatant.deathSaves.success >= value}
-          color="success.main"
-          onClick={() => dispatch({ type: 'setDeathSave', id: combatant.id, saveType: 'success', value })}
-        />
-      ))}
-      <Typography variant="caption" color="error.main">F</Typography>
-      {[1, 2, 3].map((value) => (
-        <Dot
-          key={`f-${value}`}
-          active={combatant.deathSaves.fail >= value}
-          color="error.main"
-          onClick={() => dispatch({ type: 'setDeathSave', id: combatant.id, saveType: 'fail', value })}
-        />
-      ))}
-    </Stack>
-  );
-}
-
-function Dot({ active, color, onClick }) {
-  return (
-    <Box
-      component="button"
-      type="button"
-      onClick={onClick}
-      sx={{
-        width: 16,
-        height: 16,
-        borderRadius: '50%',
-        border: '1px solid',
-        borderColor: color,
-        bgcolor: active ? color : 'transparent',
-        cursor: 'pointer',
-      }}
+    <DeathSaveDots
+      deathSaves={combatant.deathSaves}
+      size={16}
+      shortLabels
+      gap={1.5}
+      onChange={(saveType, value) => dispatch({ type: 'setDeathSave', id: combatant.id, saveType, value })}
     />
   );
 }
