@@ -50,7 +50,7 @@ export const DEFAULT_PARTY = Object.freeze({ count: 4, level: 5 });
 export function createDefaultPlayers(count = DEFAULT_PARTY.count) {
   return Array.from({ length: count }, (_, index) => ({
     id: index,
-    name: `Giocatore ${index + 1}`,
+    name: `Player ${index + 1}`,
     initMod: [2, 1, 3, 0][index] ?? 0,
     ac: [15, 14, 16, 18][index] ?? 10,
     hpMax: [30, 25, 28, 35][index] ?? 30,
@@ -470,7 +470,7 @@ function setPartyCount(state, value) {
     const index = players.length;
     players.push({
       id: index,
-      name: `Giocatore ${index + 1}`,
+      name: `Player ${index + 1}`,
       initMod: 0,
       ac: 10,
       hpMax: 30,
@@ -568,7 +568,7 @@ function normalizePlayer(player, index) {
   const vitals = combatantToSheetPatch(resolveCombatVitals({ hpMax }, { ...player, hpMax }));
   const normalized = {
     ...player,
-    name: String(player.name || `Giocatore ${index + 1}`),
+    name: String(player.name || `Player ${index + 1}`),
     initMod: clampInt(player.initMod, -20, 30, 0),
     ac: clampInt(player.ac, 1, 99, 10),
     hpMax,
@@ -593,7 +593,9 @@ function isDefaultPlaceholderParty(players) {
   if (!players.length) return true;
   return players.every((player, index) => (
     !player.sourceId
-    && /^Giocatore \d+$/i.test(String(player.name || ''))
+    // Placeholders were named "Giocatore N" before the interface went all
+    // English; a party saved then is still recognized as one.
+    && /^(Player|Giocatore) \d+$/i.test(String(player.name || ''))
     && (player.id == null || Number(player.id) === index)
   ));
 }

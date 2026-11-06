@@ -76,7 +76,7 @@ export default function install(registry, context = {}) {
 
     out.choiceUi = {
       ...(out.choiceUi && typeof out.choiceUi === "object" ? out.choiceUi : {}),
-      listLabel: "Scegli lista",
+      listLabel: "Choose list",
       spellAbility: {
         keySuffix: "spell_ability",
         label: "Spellcasting Ability",

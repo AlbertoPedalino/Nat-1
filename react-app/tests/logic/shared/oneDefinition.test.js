@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { sourceFilesMatching } from '../sourceScan.js';
+import { sourceFilesMatching, sourceLinesMatching } from '../sourceScan.js';
 
 // Rules the app computes in exactly one place. A copy elsewhere drifts: the
 // inline proficiency bonus, for one, missed the bonus magic items grant.
@@ -57,6 +57,15 @@ test('numbers and dates are formatted only by numberFormat.js and dateFormat.js'
   assert.deepEqual(sourceFilesMatching(/\.toLocale(Date|Time)?String\(/, {
     allow: ['shared/ui/numberFormat.js', 'shared/ui/dateFormat.js'],
   }), []);
+});
+
+// The interface is English. A quoted string with a typically Italian word
+// is a leftover (the encounter reducer still recognizes old "Giocatore N"
+// placeholders in a regular expression, not a string).
+test('no Italian text in interface strings', () => {
+  assert.deepEqual(sourceLinesMatching(
+    /['"`][^'"`\n]*\b(Metà|Giocatore|[Pp]ersonaggi[oa]?|Eliminare|Sovrascrivere|scheda|Carica|riconosciuto|Scegli|Annulla|Conferma|Salvare|dardi|danno su)\b/,
+  ), []);
 });
 
 test('asArray and flattenList are defined only in shared/lists.js', () => {

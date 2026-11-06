@@ -5,23 +5,23 @@ export default function install(registry, context = {}) {
 /**
  * adapters/spells/spells.js
  *
- * Dati strutturati per spell di livello 1–9. Nessun fallback su testo raw.
- * Ogni entry definisce:
- *   icon       — nome lucide icon
- *   toHit      — true = tiro per colpire
- *   hasSave    — true = tiro salvezza
- *   saveAbility — ability del save ('dex','con','wis', ecc.) o null
- *   dmgType    — tipo danno o ''
- *   baseDie    — dado/formula danno al livello base (es. '8d6')
- *   upcastDie  — dado/formula aggiuntivo per ogni slot superiore (es. '1d6') o ''
- *   range      — portata
- *   aoe        — area effetto (es. '20-ft sphere') o ''
- *   heal       — true se è una spell di cura
- *   concentration — true se richiede concentrazione
- *   notes      — testo note extra
+ * Structured data for level 1–9 spells. No fallback on raw text.
+ * Each entry defines:
+ *   icon       — lucide icon name
+ *   toHit      — true = attack roll
+ *   hasSave    — true = saving throw
+ *   saveAbility — the save's ability ('dex', 'con', 'wis', …) or null
+ *   dmgType    — damage type or ''
+ *   baseDie    — damage die/formula at base level (e.g. '8d6')
+ *   upcastDie  — extra die/formula per higher slot (e.g. '1d6') or ''
+ *   range      — range
+ *   aoe        — area of effect (e.g. '20-ft sphere') or ''
+ *   heal       — true for a healing spell
+ *   concentration — true when it needs Concentration
+ *   notes      — extra note text, shown on the sheet (English)
  *
- * Per aggiungere una spell: registerSpellData('Nome', { ... });
- * Spell non registrate: la sheet usa i dati 5etools raw.
+ * To add a spell: registerSpellData('Name', { ... });
+ * Spells not registered here: the sheet uses the raw 5etools data.
  */
 
 (function () {
@@ -46,11 +46,11 @@ export default function install(registry, context = {}) {
     icon: "zap",
     toHit: false, hasSave: false, saveAbility: null,
     dmgType: "force",
-    baseDie: "3d4+3",  // 3 dardi × (1d4+1)
+    baseDie: "3d4+3",  // 3 darts × (1d4+1)
     upcastDie: "1d4+1",  // +1 dardo per slot superiore
     range: "120 ft", aoe: "",
     heal: false, concentration: false,
-    notes: "3 dardi automatici (nessun tiro). +1 dardo per ogni slot superiore al 1°."
+    notes: "3 darts that hit automatically (no attack roll). +1 dart per slot level above 1st."
   });
   registerSpellData("Burning Hands", {
     icon: "flame",
@@ -59,7 +59,7 @@ export default function install(registry, context = {}) {
     baseDie: "3d6", upcastDie: "1d6",
     range: "Self", aoe: "15-ft cone",
     heal: false, concentration: false,
-    notes: "DEX save. Metà danno su successo."
+    notes: "DEX save. Half damage on a success."
   });
   registerSpellData("Cure Wounds", {
     icon: "heart-pulse",
@@ -68,7 +68,7 @@ export default function install(registry, context = {}) {
     baseDie: "2d8", upcastDie: "2d8",
     range: "Touch", aoe: "",
     heal: true, concentration: false,
-    notes: "Cura 2d8 + mod. spellcasting. +2d8 per slot superiore al 1°."
+    notes: "Heals 2d8 + spellcasting modifier. +2d8 per slot level above 1st."
   });
   registerSpellData("Healing Word", {
     icon: "heart",
@@ -77,7 +77,7 @@ export default function install(registry, context = {}) {
     baseDie: "2d4", upcastDie: "2d4",
     range: "60 ft", aoe: "",
     heal: true, concentration: false,
-    notes: "Bonus Action. Cura 2d4 + mod. spellcasting. +2d4 per slot superiore al 1°."
+    notes: "Bonus Action. Heals 2d4 + spellcasting modifier. +2d4 per slot level above 1st."
   });
   registerSpellData("Thunderwave", {
     icon: "waves",
@@ -86,7 +86,7 @@ export default function install(registry, context = {}) {
     baseDie: "2d8", upcastDie: "1d8",
     range: "Self", aoe: "15-ft cube",
     heal: false, concentration: false,
-    notes: "CON save. Metà danno su successo. Fallimento: spinto 10 ft."
+    notes: "CON save. Half damage on a success. On a failure: pushed 10 ft."
   });
   registerSpellData("Chromatic Orb", {
     icon: "circle",
@@ -95,7 +95,7 @@ export default function install(registry, context = {}) {
     baseDie: "3d8", upcastDie: "1d8",
     range: "90 ft", aoe: "",
     heal: false, concentration: false,
-    notes: "Scegli tipo danno: acid/cold/fire/lightning/poison/thunder."
+    notes: "Choose the damage type: acid/cold/fire/lightning/poison/thunder."
   });
   registerSpellData("Inflict Wounds", {
     icon: "skull",
@@ -113,7 +113,7 @@ export default function install(registry, context = {}) {
     baseDie: "4d6", upcastDie: "1d6",
     range: "120 ft", aoe: "",
     heal: false, concentration: false,
-    notes: "Prossimo attacco contro il bersaglio ha vantaggio (entro fine del tuo prossimo turno)."
+    notes: "The next attack roll against the target has Advantage (until the end of your next turn)."
   });
 
   /* ════════════════════════════
@@ -126,7 +126,7 @@ export default function install(registry, context = {}) {
     baseDie: "3d8", upcastDie: "1d8",
     range: "60 ft", aoe: "10-ft sphere",
     heal: false, concentration: false,
-    notes: "CON save. Metà danno su successo. Svantaggio per creature in armatura o inorganiche."
+    notes: "CON save. Half damage on a success. Disadvantage for creatures in armor or made of inorganic material."
   });
   registerSpellData("Scorching Ray", {
     icon: "flame",
@@ -135,7 +135,7 @@ export default function install(registry, context = {}) {
     baseDie: "6d6", upcastDie: "2d6",
     range: "120 ft", aoe: "",
     heal: false, concentration: false,
-    notes: "3 raggi, ogni raggio fa 2d6. +1 raggio per slot superiore al 2°."
+    notes: "3 rays, 2d6 each. +1 ray per slot level above 2nd."
   });
   registerSpellData("Spiritual Weapon", {
     icon: "sword",
@@ -166,7 +166,7 @@ export default function install(registry, context = {}) {
     baseDie: "8d6", upcastDie: "1d6",
     range: "150 ft", aoe: "20-ft sphere",
     heal: false, concentration: false,
-    notes: "DEX save. Metà danno su successo. Il fuoco si espande attorno agli angoli."
+    notes: "DEX save. Half damage on a success. The fire spreads around corners."
   });
   registerSpellData("Lightning Bolt", {
     icon: "zap",
@@ -175,7 +175,7 @@ export default function install(registry, context = {}) {
     baseDie: "8d6", upcastDie: "1d6",
     range: "Self", aoe: "100-ft line",
     heal: false, concentration: false,
-    notes: "DEX save. Metà danno su successo. Il fulmine rimbalza sulle pareti."
+    notes: "DEX save. Half damage on a success. The lightning bounces off walls."
   });
   registerSpellData("Mass Healing Word", {
     icon: "heart",
@@ -197,7 +197,7 @@ export default function install(registry, context = {}) {
     baseDie: "2d8+4d6", upcastDie: "1d8",
     range: "300 ft", aoe: "20-ft cylinder",
     heal: false, concentration: false,
-    notes: "DEX save. Metà danno su successo. Terreno ghiacciato = difficile."
+    notes: "DEX save. Half damage on a success. The frozen ground is Difficult Terrain."
   });
 
   /* ════════════════════════════
@@ -210,7 +210,7 @@ export default function install(registry, context = {}) {
     baseDie: "8d8", upcastDie: "1d8",
     range: "Self", aoe: "60-ft cone",
     heal: false, concentration: false,
-    notes: "CON save. Metà danno su successo."
+    notes: "CON save. Half damage on a success."
   });
   registerSpellData("Mass Cure Wounds", {
     icon: "heart-pulse",
@@ -219,7 +219,7 @@ export default function install(registry, context = {}) {
     baseDie: "5d8", upcastDie: "1d8",
     range: "60 ft", aoe: "",
     heal: true, concentration: false,
-    notes: "Fino a 6 creature. Cura 5d8 + mod. spellcasting ciascuna. +1d8 per slot superiore al 5°."
+    notes: "Up to 6 creatures. Each heals 5d8 + spellcasting modifier. +1d8 per slot level above 5th."
   });
 
   /* ════════════════════════════
@@ -232,7 +232,7 @@ export default function install(registry, context = {}) {
     baseDie: "10d8", upcastDie: "1d8",
     range: "150 ft", aoe: "",
     heal: false, concentration: false,
-    notes: "DEX save. Metà danno su successo. 3 archi secondari a bersagli entro 30 ft. +1 arco per slot superiore al 6°."
+    notes: "DEX save. Half damage on a success. 3 secondary arcs to targets within 30 ft. +1 arc per slot level above 6th."
   });
 
   /* ════════════════════════════
@@ -245,7 +245,7 @@ export default function install(registry, context = {}) {
     baseDie: "7d10", upcastDie: "",
     range: "150 ft", aoe: "10 10-ft cubes",
     heal: false, concentration: false,
-    notes: "DEX save. Metà danno su successo. Piante non magiche bruciano."
+    notes: "DEX save. Half damage on a success. Nonmagical plants catch fire."
   });
 
   /* ════════════════════════════
@@ -258,7 +258,7 @@ export default function install(registry, context = {}) {
     baseDie: "12d6", upcastDie: "",
     range: "150 ft", aoe: "60-ft sphere",
     heal: false, concentration: false,
-    notes: "CON save. Metà danno su successo. Fallimento: accecato fino alla prossima verifica al termine turno."
+    notes: "CON save. Half damage on a success. On a failure: Blinded until it succeeds on the save at the end of its turn."
   });
 
   /* ════════════════════════════
@@ -271,7 +271,7 @@ export default function install(registry, context = {}) {
     baseDie: "40d6", upcastDie: "",
     range: "1 mile", aoe: "4× 40-ft sphere",
     heal: false, concentration: false,
-    notes: "DEX save. Metà danno su successo. 4 meteore (20d6 bludg + 20d6 fire ciascuna) — possono colpire punti diversi."
+    notes: "DEX save. Half damage on a success. 4 meteors (20d6 bludgeoning + 20d6 fire each) that can strike different points."
   });
   registerSpellData("False Life", {
     icon: "skull",

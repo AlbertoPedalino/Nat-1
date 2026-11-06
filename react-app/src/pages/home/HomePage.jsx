@@ -32,7 +32,7 @@ export default function HomePage() {
   }, [refreshAppDataCount]);
 
   const handleClearAppData = useCallback(() => {
-    const confirmed = window.confirm('Eliminare tutti i dati locali di Nat-1 in questo browser? Personaggi, board, encounter e dati legacy verranno rimossi.');
+    const confirmed = window.confirm('Delete all local Nat-1 data in this browser? Characters, boards, encounters and legacy data will be removed.');
     if (!confirmed) return;
 
     const removed = clearAppLocalStorage();

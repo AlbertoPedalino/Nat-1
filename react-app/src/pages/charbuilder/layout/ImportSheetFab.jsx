@@ -23,7 +23,7 @@ export default function ImportSheetFab({ onNotify, onFile, sx, buttonSx }) {
 
           const isJson = file.type === 'application/json' || file.name.toLowerCase().endsWith('.json');
           if (!isJson) {
-            onNotify?.('error', 'Carica un file JSON scheda Nat 1.');
+            onNotify?.('error', 'Upload a Nat 1 character sheet JSON file.');
             event.target.value = '';
             return;
           }

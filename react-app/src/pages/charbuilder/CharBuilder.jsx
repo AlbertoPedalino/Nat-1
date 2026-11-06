@@ -287,7 +287,7 @@ export default function CharBuilder() {
       const character = buildImportedCharacter(payload);
       const cur = state.character;
       const hasExisting = cur && (cur.className || (cur.name || '').trim());
-      if (hasExisting && !window.confirm('Esiste gia un personaggio nel builder. Sovrascrivere con la scheda importata?')) {
+      if (hasExisting && !window.confirm('A character is already open in the builder. Replace it with the imported sheet?')) {
         notify('info', 'Import annullato.');
         return;
       }

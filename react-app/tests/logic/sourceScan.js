@@ -21,3 +21,16 @@ export function sourceFilesMatching(pattern, { allow = [] } = {}) {
   walk(SRC);
   return offenders;
 }
+
+// The same scan line by line, comment lines left out: `file:line` for every
+// code line that matches.
+export function sourceLinesMatching(pattern, { allow = [] } = {}) {
+  const hits = [];
+  for (const file of sourceFilesMatching(pattern, { allow })) {
+    readFileSync(join(SRC, file), 'utf8').split('\n').forEach((line, index) => {
+      if (/^\s*(\/\/|\*|\/\*)/.test(line)) return;
+      if (pattern.test(line)) hits.push(`${file}:${index + 1}`);
+    });
+  }
+  return hits;
+}

@@ -5,7 +5,7 @@ import { listCharacters, renameCharacter } from '../character/profile/store.js';
 // shared/instances/instanceStore.js.
 export const REGISTRY_META = Object.freeze({
   gb_char_registry: {
-    label: 'Personaggio',
+    label: 'Character',
     route: (id) => `/charsheet?char=${encodeURIComponent(id)}`,
     newRoute: '/charbuilder?char=new',
     custom: true,
