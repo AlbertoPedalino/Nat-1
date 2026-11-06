@@ -3,6 +3,7 @@ import { Box, ListItemText, Menu, MenuItem } from '@mui/material';
 import { suppressGestureSelection } from '../../vtt/map/gestureSelection.js';
 import { advArgFor, rollModeLabel, withExtraSource } from './advantage.js';
 import { asArray } from '../../lists.js';
+import { LONG_PRESS_MS, LONG_PRESS_SLOP } from '../../ui/longPress.js';
 
 // A roller that also answers a right-click or a long press with a small menu:
 // "+ Advantage" / "+ Disadvantage" for this one roll. It adds a source rather
@@ -14,9 +15,6 @@ import { asArray } from '../../lists.js';
 // prop goes to it. `sources` is { adv, disadv } before this roll's extra one;
 // `onPick(advArg)` rolls with the folded result.
 
-// What a phone's own long press feels like (same numbers as the battle map).
-const LONG_PRESS_MS = 480;
-const LONG_PRESS_SLOP = 12;
 // How long after the finger lifts a click still belongs to the long press.
 const SWALLOW_CLICK_MS = 700;
 

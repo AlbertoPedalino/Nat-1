@@ -3,7 +3,7 @@ import {
   cellSize, dropPosition, screenToWorld, tokenWorldRect,
 } from '../../../shared/vtt/map/geometry.js';
 import { isMapPiece } from '../../../shared/vtt/map/mapObjects.js';
-import { LONG_PRESS_SLOP } from './useLongPress.js';
+import { LONG_PRESS_SLOP } from '../../../shared/ui/longPress.js';
 
 const DRAG_BROADCAST_MS = 40;
 // Spans are kept to a tenth of a square: fine enough for a door that is half a

@@ -52,15 +52,11 @@ import {
   conditionTooltipTitleSx,
 } from './tokenSpriteStyles.js';
 import { initials } from '../../../shared/ui/textCase.js';
+import { LONG_PRESS_MS, LONG_PRESS_SLOP } from '../../../shared/ui/longPress.js';
 
 // One piece on the map: the artwork, its name plate underneath, a hit point bar
 // and the conditions badge. Kept apart from the viewport because the viewport is
 // about coordinates and this is about a creature.
-
-// A tap is a touch that neither moved nor lasted long enough to be the long
-// press that opens the token menu (the viewport's own numbers).
-const TAP_MAX_MS = 480;
-const TAP_SLOP = 12;
 
 export default function TokenSprite({
   token,
@@ -225,7 +221,7 @@ export default function TokenSprite({
       }}
       onPointerMove={(event) => {
         const touch = touchRef.current;
-        if (!touch || Math.hypot(event.clientX - touch.x, event.clientY - touch.y) <= TAP_SLOP) return;
+        if (!touch || Math.hypot(event.clientX - touch.x, event.clientY - touch.y) <= LONG_PRESS_SLOP) return;
         // Became a drag: the open pills would only be dragged along.
         touchRef.current = null;
         if (pinned) unpin();
@@ -234,8 +230,10 @@ export default function TokenSprite({
         setDragging(false);
         const touch = touchRef.current;
         touchRef.current = null;
-        if (!touch || !expandable || event.timeStamp - touch.at >= TAP_MAX_MS) return;
-        if (Math.hypot(event.clientX - touch.x, event.clientY - touch.y) > TAP_SLOP) return;
+        // A tap neither moved nor lasted long enough to be the long press that
+        // opens the token menu.
+        if (!touch || !expandable || event.timeStamp - touch.at >= LONG_PRESS_MS) return;
+        if (Math.hypot(event.clientX - touch.x, event.clientY - touch.y) > LONG_PRESS_SLOP) return;
         if (pinned) {
           unpin();
         } else {

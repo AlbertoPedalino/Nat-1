@@ -54,7 +54,8 @@ import {
 import MapBackdrop from './MapBackdrop.jsx';
 import { useViewportCamera } from './useViewportCamera.js';
 import { usePinchZoom } from './usePinchZoom.js';
-import { LONG_PRESS_SLOP, useLongPress } from './useLongPress.js';
+import { useLongPress } from './useLongPress.js';
+import { LONG_PRESS_SLOP } from '../../../shared/ui/longPress.js';
 import { useViewportSelection } from './useViewportSelection.js';
 import { useViewportFullscreen } from './useViewportFullscreen.js';
 import { useRuler } from './useRuler.js';

@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useRef } from 'react';
+import { LONG_PRESS_MS, LONG_PRESS_SLOP } from '../../../shared/ui/longPress.js';
 
 // A press has to be still to be a press, and long enough not to be a tap. Both
 // numbers are what a phone's own long-press feels like.
-const LONG_PRESS_MS = 480;
-export const LONG_PRESS_SLOP = 12;
 
 // A finger has no right button, so holding still on a piece or a mark is how
 // its menu is asked for. `onTakeover` ends whatever the press had started
