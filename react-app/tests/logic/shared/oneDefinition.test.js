@@ -397,3 +397,11 @@ test('a character\'s class names come from classNames', () => {
     allow: ['shared/character/progression/classLevel.js'],
   }), []);
 });
+
+// "Your spell attack modifier" and "your spell save DC" come from
+// spellcastingNumbers, for spells and for the companions that use them.
+test('spell attack and save DC are computed only by spellcastingNumbers', () => {
+  assert.deepEqual(sourceLinesMatching(/8 \+ getPB\(C\) \+ spellMod|const (spellAttack|spellAtk) = pb \+|spellDc = 8 \+|: 8 \+ (atk|resolvedAttack)\b/, {
+    allow: ['shared/character/spells/spellcastingNumbers.js'],
+  }), []);
+});

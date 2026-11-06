@@ -18,7 +18,7 @@ import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import PipButton from '../../../shared/ui/PipButton.jsx';
 import { formatRollTitle } from '../../../shared/character/dice/dice.js';
-import { getFinal, getMod, getPB } from '../../../shared/character/sheet/sheetStats.js';
+import { getFinal, getMod } from '../../../shared/character/sheet/sheetStats.js';
 import { describeAttackRoll } from '../../../shared/character/combat/conditions.js';
 import { getSpellAttackAdvantage } from '../../../shared/character/sheet/effectBonuses.js';
 import { entriesToTextBlocks } from '../../../shared/character/spells/spellEntries.js';
@@ -55,6 +55,7 @@ import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import { signed, withModifier } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
 
 function applyFlatToFormula(formula, flat) {
   if (!formula) return formula;
@@ -227,8 +228,6 @@ function SpellWeaponPicker({ spellName, options, selectedKey, onUpdateCharacter 
 
 export default function SpellEntry({
   entry,
-  spellAttackBonus = 0,
-  spellSaveDc = null,
   C,
   exhaustionLevel = 0,
   activeConditions = [],
@@ -245,7 +244,8 @@ export default function SpellEntry({
   const characterLevel = Number(C?.level || C?.classLevel || 1);
   const textDamages = extractDamageDice(entry.entries || []);
   const spellAbility = getSpellAbilityForEntry(C, entry);
-  const spellMod = getMod(getFinal(C, spellAbility));
+  const spellNumbers = spellcastingNumbers(C, spellAbility, { inventory });
+  const spellMod = spellNumbers.abilityModifier;
   // A cantrip that deals damage rolls the dice of the character's level: the
   // description holds only the level-1 dice.
   const scaledCantripDamages = baseLevel === 0 && textDamages.length
@@ -268,10 +268,8 @@ export default function SpellEntry({
   // Per-entry casting ability + global magic-item spell-attack bonus (matches the
   // SpellsTab header so the button and the summary agree).
   // Read from a Spell Scroll, the scroll's own numbers apply instead.
-  const atk = entry.scroll ? entry.scroll.attack : getPB(C) + spellMod + spellAttackBonus;
-  const resolvedSpellSaveDc = entry.scroll
-    ? entry.scroll.dc
-    : (Number.isFinite(Number(spellSaveDc)) ? Number(spellSaveDc) : 8 + atk);
+  const atk = entry.scroll ? entry.scroll.attack : spellNumbers.attack;
+  const resolvedSpellSaveDc = entry.scroll ? entry.scroll.dc : spellNumbers.dc;
 
   // Spell-attack advantage/disadvantage. Sources: effect-based advantage scoped
   // to this spell's owning class (e.g. Sorcerer Innate Sorcery) + condition-based

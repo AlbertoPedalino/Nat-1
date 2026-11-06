@@ -4,7 +4,7 @@ import {
 } from '@mui/material';
 import { PawPrint } from 'lucide-react';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
-import { getFinal, getMod, getPB } from '../../../shared/character/sheet/sheetStats.js';
+import { getPB } from '../../../shared/character/sheet/sheetStats.js';
 import { getSheetSlots } from '../spells/spellcasting.js';
 import {
   consumeSlot,
@@ -44,6 +44,7 @@ import {
 import { useSummonedCreatureRecords } from './useSummonedCreatureRecords.js';
 import { useCreatureRolls } from './useCreatureRolls.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
 
 // Sheet panel for the Beast Master's Primal Companion (XPHB 2024), in the
 // family of the Eldritch Cannon and Wild Companion panels: pick the beast and
@@ -59,9 +60,7 @@ export default function PrimalCompanionPanel({ character, sheet }) {
   const rangerLevel = classLevel(C, 'Ranger');
   const companion = getPrimalCompanion(C, { rangerLevel });
   const pb = getPB(C);
-  const wisMod = getMod(getFinal(C, 'wis'));
-  const spellAttack = pb + wisMod;
-  const spellDc = 8 + spellAttack;
+  const { abilityModifier: wisMod, attack: spellAttack, dc: spellDc } = spellcastingNumbers(C, 'wis');
 
   const record = useMemo(
     () => findSummonedCreature(records, companion.beast, PRIMAL_BEAST_SOURCE),

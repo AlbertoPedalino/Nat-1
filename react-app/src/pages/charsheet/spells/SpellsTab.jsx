@@ -23,8 +23,6 @@ import {
 } from '../../../adapters/index.js';
 import { getEquippedArmorPenalties } from '../inventory/armorPenalties.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
-import { characterItemBonuses } from '../../../shared/character/inventory/itemBonus.js';
-import { getSpellSaveDcBonus } from '../../../shared/character/sheet/effectBonuses.js';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import { buildSpellInfo } from './spellsTabLogic.js';
 import { dedupeSpells, toSnapshot, upsertSnapshot } from './spellSnapshots.js';
@@ -72,6 +70,7 @@ import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
 import { classNames } from '../../../shared/character/progression/classLevel.js';
+import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
 
 const SPELL_ACTION_FILTERS = [
   { key: 'all', label: 'All' },
@@ -298,12 +297,8 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
   const profSets = useProficiencySets();
   const armorPenalties = useMemo(() => getEquippedArmorPenalties(C, C?.inventory || [], profSets), [C, profSets]);
   const ability = getSpellAbility(C);
-  const spellMod = getMod(getFinal(C, ability));
   const inventoryForBonuses = sheet?.sheetInventory || C?.inventory || [];
-  // Wild Shape: merged equipment grants no spellcasting bonuses.
-  const spellItemBonuses = characterItemBonuses(C, inventoryForBonuses);
-  const dc = 8 + getPB(C) + spellMod + spellItemBonuses.spellSaveDc + getSpellSaveDcBonus(C);
-  const atk = getPB(C) + spellMod + spellItemBonuses.spellAttack;
+  const { attack: atk, dc } = spellcastingNumbers(C, ability, { inventory: inventoryForBonuses });
 
   useEffect(() => {
     if (pickerLevel > 0 && pickerLevel > maxSpellLevel) setPickerLevel(maxSpellLevel > 0 ? maxSpellLevel : 0);
@@ -519,20 +514,20 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
 
       {visibleCantrips.length || showEmptyCantrips ? (
         <SpellSection title="Cantrip">
-          {visibleCantrips.map((entry) => <SpellEntry key={`${entry.name}|${entry.source}${scrollRowKey(entry.scroll)}`} entry={entry} spellAttackBonus={spellItemBonuses.spellAttack} spellSaveDc={dc} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} inventory={inventoryForBonuses} />)}
+          {visibleCantrips.map((entry) => <SpellEntry key={`${entry.name}|${entry.source}${scrollRowKey(entry.scroll)}`} entry={entry} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} inventory={inventoryForBonuses} />)}
           {!visibleCantrips.length ? <Empty text="None" /> : null}
         </SpellSection>
       ) : null}
 
       {visibleAtWill.length ? (
         <SpellSection title="At Will">
-          {visibleAtWill.map((entry) => <SpellEntry key={`at-will-${entry.name}-${entry.source}`} entry={entry} spellAttackBonus={spellItemBonuses.spellAttack} spellSaveDc={dc} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} inventory={inventoryForBonuses} />)}
+          {visibleAtWill.map((entry) => <SpellEntry key={`at-will-${entry.name}-${entry.source}`} entry={entry} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} inventory={inventoryForBonuses} />)}
         </SpellSection>
       ) : null}
 
       {visibleLeveled.map(([level, entries]) => (
         <SpellSection key={level} title={SPELL_LEVEL_LABELS[level] || `Level ${level}`}>
-          {entries.map((entry) => <SpellEntry key={`${level}-${entry.name}-${entry.source}-${entry.castLevel || 'base'}${scrollRowKey(entry.scroll)}`} entry={entry} spellAttackBonus={spellItemBonuses.spellAttack} spellSaveDc={dc} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} inventory={inventoryForBonuses} />)}
+          {entries.map((entry) => <SpellEntry key={`${level}-${entry.name}-${entry.source}-${entry.castLevel || 'base'}${scrollRowKey(entry.scroll)}`} entry={entry} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} inventory={inventoryForBonuses} />)}
         </SpellSection>
       ))}
 

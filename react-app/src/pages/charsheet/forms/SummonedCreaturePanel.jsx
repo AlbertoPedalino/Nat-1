@@ -20,7 +20,6 @@ import {
   getSummonedCreatureVersions,
   normalizeSummonedCreature,
 } from '../../../shared/character/forms/summonedCreatures.js';
-import { getFinal, getMod, getPB } from '../../../shared/character/sheet/sheetStats.js';
 import { useSummonedCreatureRecords } from './useSummonedCreatureRecords.js';
 import { useCreatureRolls } from './useCreatureRolls.js';
 import {
@@ -35,6 +34,7 @@ import {
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
 
 function variantToken(name) {
   return String(name || '').match(/\(([^)]+)\)\s*$/)?.[1] || String(name || '');
@@ -80,15 +80,11 @@ export default function SummonedCreaturePanel({
     : (creatureTypeChoices[0] || '');
 
   const resolvedClassLevel = config.levelClass ? classLevel(character, config.levelClass) : 0;
-  const resolvedAbilityMod = Number.isFinite(Number(abilityMod))
-    ? Number(abilityMod)
-    : getMod(getFinal(character, config.ability || 'cha'));
-  const resolvedAttack = Number.isFinite(Number(spellAttackBonus))
-    ? Number(spellAttackBonus)
-    : getPB(character) + resolvedAbilityMod;
-  const resolvedDc = Number.isFinite(Number(spellSaveDc))
-    ? Number(spellSaveDc)
-    : 8 + resolvedAttack;
+  // The casting spell's numbers when it passes them, else the caster's own.
+  const ownNumbers = spellcastingNumbers(character, config.ability || 'cha');
+  const resolvedAbilityMod = Number.isFinite(Number(abilityMod)) ? Number(abilityMod) : ownNumbers.abilityModifier;
+  const resolvedAttack = Number.isFinite(Number(spellAttackBonus)) ? Number(spellAttackBonus) : ownNumbers.attack;
+  const resolvedDc = Number.isFinite(Number(spellSaveDc)) ? Number(spellSaveDc) : ownNumbers.dc;
   const incomingSpellLevel = Math.max(
     Number(config.minimumSpellLevel || 0),
     Number(castLevel || config.minimumSpellLevel || 0),

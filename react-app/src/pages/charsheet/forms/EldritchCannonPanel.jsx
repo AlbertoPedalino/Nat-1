@@ -4,7 +4,6 @@ import {
 } from '@mui/material';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
-import { getMod, getFinal, getPB } from '../../../shared/character/sheet/sheetStats.js';
 import { getSheetSlots } from '../spells/spellcasting.js';
 import {
   consumeSlot,
@@ -38,6 +37,7 @@ import { withModifier } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { SIZE_NAMES } from '../../../shared/content/rulesVocabulary.js';
+import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
 
 const CINZEL = UI_FONTS.display;
 
@@ -60,10 +60,7 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
   const [hpAmt, setHpAmt] = useState({}); // per-cannon step amount
 
   const lv = artificerLevel(C);
-  const intMod = getMod(getFinal(C, 'int'));
-  const pb = getPB(C);
-  const spellAtk = pb + intMod;
-  const dc = 8 + pb + intMod;
+  const { abilityModifier: intMod, attack: spellAtk, dc } = spellcastingNumbers(C, 'int');
   const maxHp = cannonMaxHp(lv);
   const dmgDice = cannonDamageDice(lv);
   const thpFormula = withModifier(protectorThpDice(lv), intMod);
