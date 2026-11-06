@@ -1,3 +1,4 @@
+import { titleCase } from '../../ui/textCase.js';
 // A map object stores only the kebab-case Lucide name. Rendering resolves that
 // name through Lucide's own dynamic catalog; arbitrary markup and image bytes
 // can therefore never enter the token row.
@@ -28,9 +29,5 @@ export function isMapPiece(token) {
 }
 
 export function mapObjectLabel(key) {
-  return String(normalizeMapObjectKey(key) || '')
-    .split('-')
-    .filter(Boolean)
-    .map((word) => word[0].toUpperCase() + word.slice(1))
-    .join(' ');
+  return titleCase(String(normalizeMapObjectKey(key) || '').split('-').filter(Boolean).join(' '));
 }

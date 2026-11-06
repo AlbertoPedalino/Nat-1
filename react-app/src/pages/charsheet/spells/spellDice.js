@@ -1,4 +1,5 @@
 import { withModifier } from '../../../shared/ui/numberFormat.js';
+import { capitalize } from '../../../shared/ui/textCase.js';
 
 // Dice formulas of spell rows: upcast steps, scaled formulas, cantrip damage
 // by character level, the damage dice found in a spell's text, and signed
@@ -53,7 +54,7 @@ export function cantripScalingDamages(scalingLevelDice, level) {
     const dice = cantripScalingDice(line, level).replace(/\s+/g, '');
     if (!/^\d+d\d+$/i.test(dice)) return [];
     const label = String(line?.label || '').trim();
-    return [{ formula: dice, label: dice, title: label ? label[0].toUpperCase() + label.slice(1) : '' }];
+    return [{ formula: dice, label: dice, title: capitalize(label || '') }];
   });
 }
 

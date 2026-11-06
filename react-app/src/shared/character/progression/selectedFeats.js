@@ -6,6 +6,7 @@ import {
   backgroundOriginFeat as normalizeBackgroundOriginFeat,
 } from './backgroundFeatOptions.js';
 import { matchKey, stripSource } from '../../content/nameKeys.js';
+import { titleCase } from '../../ui/textCase.js';
 
 const FRAMEWORK_EXACT = new Set(['feat_origin', 'species_origin_feat']);
 const FRAMEWORK_PREFIXES = ['feat_'];
@@ -87,7 +88,7 @@ function fromSpecies(character) {
       .filter((key) => key !== 'choose' && entry[key])
       .map((key) => stripSource(String(key).split(';')[0]))
       .filter(Boolean)
-      .forEach((raw) => out.push(raw.replace(/\b\w/g, (char) => char.toUpperCase())));
+      .forEach((raw) => out.push(titleCase(raw)));
   });
   return out;
 }

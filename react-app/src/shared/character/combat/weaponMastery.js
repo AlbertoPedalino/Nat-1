@@ -7,6 +7,7 @@ import { itemHasProperty } from '../inventory/weaponProperties.js';
 import { compareText, flattenList } from '../../lists.js';
 import { matchKey, stripSource } from '../../content/nameKeys.js';
 import { loadGameData } from '../../content/gameData.js';
+import { titleCase } from '../../ui/textCase.js';
 
 const _masteries = new Map();
 let _masteryLoadPromise = null;
@@ -124,12 +125,6 @@ function splitNameAndSource(value) {
   };
 }
 
-function toTitleCase(value) {
-  return String(value || '')
-    .toLowerCase()
-    .replace(/\b[a-z]/g, (char) => char.toUpperCase());
-}
-
 function parseChoiceValue(value) {
   if (value == null) return [];
   if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
@@ -192,7 +187,7 @@ function canonicalMasteryName(value) {
 function normalizeExplicitMasteryName(value) {
   const raw = stripSource(cleanTagText(value));
   if (!raw) return null;
-  return canonicalMasteryName(raw) || toTitleCase(raw);
+  return canonicalMasteryName(raw) || titleCase(String(raw || '').toLowerCase());
 }
 
 function getExplicitItemMastery(item) {
@@ -223,7 +218,7 @@ function itemMasteryFromEntries(item) {
 export function normalizeWeaponName(value) {
   const { name } = splitNameAndSource(typeof value === 'object' ? (value?.name ?? value?.label ?? value?.value ?? '') : value);
   if (!name) return '';
-  return toTitleCase(name.replace(/,\s*\+\d+$/i, '').replace(/\s*\+\d+$/i, '').trim());
+  return titleCase(name.replace(/,\s*\+\d+$/i, '').replace(/\s*\+\d+$/i, '').trim().toLowerCase());
 }
 
 export function collectWeaponMasteryChoiceEntries(character) {

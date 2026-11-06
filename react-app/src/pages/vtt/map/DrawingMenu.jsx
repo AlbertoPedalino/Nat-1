@@ -21,6 +21,7 @@ import { isNote as isNoteDrawing, scaledPoints } from '../../../shared/vtt/map/d
 import { useMenuPlacement } from './menuPlacement.js';
 import { battleMapDialogPaperSx } from './battleMapSurface.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { capitalize } from '../../../shared/ui/textCase.js';
 
 // Right-click (or a long press) on a mark: the same idea as a piece's menu.
 // Its label, who sees it, its colour, its size, and taking it away. Every
@@ -122,7 +123,7 @@ export default function DrawingMenu({
     : { points: scaledPoints(openedRef.current?.points || drawing.points, factor) });
 
   const kind = area
-    ? `${area.shape[0].toUpperCase()}${area.shape.slice(1)}${area.effect ? ` · ${areaEffect(area.effect)?.label}` : ''}`
+    ? `${capitalize(area.shape)}${area.effect ? ` · ${areaEffect(area.effect)?.label}` : ''}`
     : isNote ? 'Note' : 'Drawing';
   const sizeLabel = {
     circle: 'Radius (ft)', square: 'Side (ft)', cone: 'Length (ft)', line: 'Length (ft)',

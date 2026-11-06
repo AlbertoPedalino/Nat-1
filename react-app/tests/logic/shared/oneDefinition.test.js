@@ -361,3 +361,10 @@ test('numberOrNull, isWeaponItem and DEFAULT_CURRENCY have one definition', () =
 test('seeded random numbers come only from shared/seededRandom.js', () => {
   assert.deepEqual(sourceFilesMatching(/0x6d2b79f5|0x811c9dc5/, { allow: ['shared/seededRandom.js'] }), []);
 });
+
+// Word capitalizing and initials go through textCase.js, in any spelling.
+test('capitalizing in any spelling goes through shared/ui/textCase.js', () => {
+  assert.deepEqual(sourceLinesMatching(/\[0\]\??\.toUpperCase\(\)\s*\+|\b\w\/g, \(\w+\) => \w+\.toUpperCase\(\)|function (toTitleCase|initials)\(/, {
+    allow: ['shared/ui/textCase.js'],
+  }), []);
+});

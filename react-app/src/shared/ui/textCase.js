@@ -15,3 +15,9 @@ export function titleCase(value) {
     .replace(/_/g, ' ')
     .replace(/(^|[\s-])([a-z])/g, (_, before, letter) => before + letter.toUpperCase());
 }
+
+// Up to `count` initials of a name, upper case: "Goblin Boss" -> "GB".
+export function initials(value, count = 2) {
+  return String(value ?? '').split(/\s+/).filter(Boolean).slice(0, count)
+    .map((word) => word[0].toUpperCase()).join('');
+}

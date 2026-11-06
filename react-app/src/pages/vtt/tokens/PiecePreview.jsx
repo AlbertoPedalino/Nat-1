@@ -3,6 +3,7 @@ import { classIcon } from '../../../shared/character/profile/classIcon.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { suppressGestureSelection } from '../../../shared/vtt/map/gestureSelection.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { initials } from '../../../shared/ui/textCase.js';
 
 export const PIECE_POINTER_DRAG_EVENT = 'gb:vtt-piece-pointer-drag';
 const POINTER_DRAG_THRESHOLD = 7;
@@ -143,8 +144,7 @@ export default function PiecePreview({ token, size = 36, count = 1 }) {
     imageUrl && token?.color && (token?.imageFile || token?.imagePath),
   );
   const ClassIcon = isCharacter ? classIcon(token?.className) : null;
-  const initials = label.split(/\s+/).filter(Boolean).slice(0, 2)
-    .map((word) => word[0]?.toUpperCase()).join('');
+  const labelInitials = initials(label);
 
   return (
     <Box
@@ -167,7 +167,7 @@ export default function PiecePreview({ token, size = 36, count = 1 }) {
         </Box>
       ) : null}
       {!imageUrl && !ClassIcon ? (
-        <Typography component="span" sx={initialsSx}>{initials || '?'}</Typography>
+        <Typography component="span" sx={initialsSx}>{labelInitials || '?'}</Typography>
       ) : null}
       {count > 1 ? <Box sx={countSx}>×{count}</Box> : null}
     </Box>

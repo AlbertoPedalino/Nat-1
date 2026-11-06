@@ -51,6 +51,7 @@ import {
   conditionTooltipBodySx,
   conditionTooltipTitleSx,
 } from './tokenSpriteStyles.js';
+import { initials } from '../../../shared/ui/textCase.js';
 
 // One piece on the map: the artwork, its name plate underneath, a hit point bar
 // and the conditions badge. Kept apart from the viewport because the viewport is
@@ -603,15 +604,6 @@ function ConditionTokenPill({ conditionKey, entries, tooltipOpen, onInspect }) {
       {pill}
     </Tooltip>
   );
-}
-
-function initials(label) {
-  return String(label || '')
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => word[0].toUpperCase())
-    .join('');
 }
 
 // Green while healthy, amber past half, red when bloodied enough to matter.

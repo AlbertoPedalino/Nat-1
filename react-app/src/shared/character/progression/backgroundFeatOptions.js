@@ -1,8 +1,8 @@
+import { titleCase } from '../../ui/textCase.js';
+// "abilityScore_increase" -> "Ability Score Increase": camelCase and
+// separators split into words.
 function titleCaseWords(value) {
-  return String(value || '')
-    .replace(/([A-Z])/g, ' $1')
-    .replace(/[_-]+/g, ' ')
-    .replace(/\b\w/g, (char) => char.toUpperCase())
+  return titleCase(String(value || '').replace(/([A-Z])/g, ' $1').replace(/[_-]+/g, ' '))
     .replace(/\s+/g, ' ')
     .trim();
 }
