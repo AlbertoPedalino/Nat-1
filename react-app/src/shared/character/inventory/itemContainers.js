@@ -1,10 +1,10 @@
 import { canStackInventoryItems } from './itemIdentity.js';
 import { itemChargeMaximum } from './itemCharges.js';
 import { isItemCarried } from './weight.js';
-import { matchKey } from '../../content/nameKeys.js';
+import { matchKey, splitNameSource } from '../../content/nameKeys.js';
 
 export function parseInventoryItemRef(ref) {
-  const [name, source] = String(ref || '').split('|');
+  const { name, source } = splitNameSource(ref);
   return {
     name: cleanItemName(name),
     source: String(source || '').trim().toUpperCase(),

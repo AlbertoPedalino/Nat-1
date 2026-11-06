@@ -18,12 +18,13 @@
 
 import { isItemEffectActive } from './itemAttunement.js';
 import { ITEM_ATTUNEMENT } from '../../ui/entityColors.js';
+import { splitNameSource } from '../../content/nameKeys.js';
 
 function stripSpellRef(raw) {
   if (raw == null) return { name: '', source: '' };
   const text = String(raw).trim();
   if (!text) return { name: '', source: '' };
-  const [namePart, sourcePart] = text.split('|');
+  const { name: namePart, source: sourcePart } = splitNameSource(text);
   return {
     name: (namePart || '').trim(),
     source: (sourcePart || '').trim(),

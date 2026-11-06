@@ -16,7 +16,7 @@ import { itemMatchesFilters } from '../../../shared/character/inventory/itemFilt
 import { useItemFilters } from '../../../shared/character/inventory/useItemFilters.js';
 import { ITEM_GROUP_CHIPS, OWNED_ITEM_CHIPS, matchesItemGroupChip } from '../../../shared/character/inventory/itemGroups.js';
 import { usePagedList } from '../../../shared/ui/usePagedList.js';
-import { stripSource } from '../../../shared/content/nameKeys.js';
+import { splitNameSource, stripSource } from '../../../shared/content/nameKeys.js';
 import { byName } from '../../../shared/lists.js';
 
 const CHOICE_KEYS = ['A', 'B', 'C', 'D', 'E', 'a', 'b', 'c', 'd', 'e'];
@@ -91,7 +91,7 @@ function cpToCoins(cpValue) {
 }
 
 function parseItemRef(ref) {
-  const [name, source] = String(ref || '').split('|');
+  const { name, source } = splitNameSource(ref);
   return {
     name: strip5eMarkup(name || '').trim(),
     source: String(source || '').trim().toUpperCase(),

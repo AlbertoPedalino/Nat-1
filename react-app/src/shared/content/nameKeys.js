@@ -18,6 +18,13 @@ export function stripSource(value) {
   return String(value || '').split('|')[0].trim();
 }
 
+// A 5etools reference "Name|SOURCE|..." as { name, source }, trimmed ('' when
+// missing).
+export function splitNameSource(value) {
+  const [name = '', source = ''] = String(value ?? '').split('|');
+  return { name: name.trim(), source: source.trim() };
+}
+
 // The readable text of a stored choice: a string without its source and
 // {@tag } markup, a number as text, an option object by its label/name/key.
 export function choiceText(value) {

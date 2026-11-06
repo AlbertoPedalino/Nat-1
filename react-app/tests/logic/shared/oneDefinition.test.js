@@ -383,3 +383,10 @@ test('character page links and the ?char= param go through characterRoutes.js', 
     allow: ['shared/character/profile/characterRoutes.js'],
   }), []);
 });
+
+// A "Name|SOURCE" reference is split by splitNameSource (nameKeys.js).
+test('name|source references are split only by splitNameSource', () => {
+  assert.deepEqual(sourceLinesMatching(/const \[\w+, \w+(?: = '')?\] = [^;]*\.split\(['"]\|['"]\)/, {
+    allow: ['shared/content/nameKeys.js'],
+  }), []);
+});

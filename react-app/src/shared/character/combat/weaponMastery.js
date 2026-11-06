@@ -5,7 +5,7 @@ import {
 } from '../../content/sourcePriority.js';
 import { itemHasProperty } from '../inventory/weaponProperties.js';
 import { compareText, flattenList } from '../../lists.js';
-import { matchKey, stripSource } from '../../content/nameKeys.js';
+import { matchKey, splitNameSource, stripSource } from '../../content/nameKeys.js';
 import { loadGameData } from '../../content/gameData.js';
 import { titleCase } from '../../ui/textCase.js';
 
@@ -118,7 +118,7 @@ function cleanTagText(value) {
 function splitNameAndSource(value) {
   const raw = cleanTagText(value);
   if (!raw) return { name: '', source: '' };
-  const [namePart, sourcePart] = raw.split('|');
+  const { name: namePart, source: sourcePart } = splitNameSource(raw);
   return {
     name: String(namePart || '').trim(),
     source: String(sourcePart || '').trim(),

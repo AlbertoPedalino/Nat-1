@@ -8,7 +8,7 @@
 
 import { isAllowedSource, BEAST_ALLOWED_SOURCES } from '../../content/sourcePriority.js';
 import { signed } from '../../ui/numberFormat.js';
-import { stripSource } from '../../content/nameKeys.js';
+import { splitNameSource, stripSource } from '../../content/nameKeys.js';
 import { statBlockTagText } from '../../content/statBlockTags.js';
 import { ABILITIES, sizeName } from '../../content/rulesVocabulary.js';
 import { crNumber, formatCr } from '../../bestiary/challengeRating.js';
@@ -146,7 +146,7 @@ export function beastRefValue(beast) {
 }
 
 export function parseBeastRef(value) {
-  const [name, source = ''] = String(value || '').split('|');
+  const { name, source } = splitNameSource(value);
   return name ? { name: name.trim(), source: source.trim() } : null;
 }
 

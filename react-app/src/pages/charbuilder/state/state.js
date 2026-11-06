@@ -17,7 +17,7 @@ import { emptyItemFilters } from '../../../shared/character/inventory/itemFilter
 import { isFeatKey, isFeatDetailKey } from '../../../shared/character/progression/featChoiceKeys.js';
 import { normalizeCharacterChoices } from '../../../shared/character/progression/choiceNormalization.js';
 import { withOwnedFeatSnapshots } from '../../../shared/character/progression/selectedFeats.js';
-import { matchKey, stripSource } from '../../../shared/content/nameKeys.js';
+import { matchKey, splitNameSource, stripSource } from '../../../shared/content/nameKeys.js';
 import { ABILITIES } from '../../../shared/content/rulesVocabulary.js';
 import { multiclassLevels } from '../../../shared/character/progression/classLevel.js';
 
@@ -229,7 +229,7 @@ function findByNameSource(list, name, source) {
 // Remove a single unit of the item identified by `name|source` (decrement qty,
 // drop the row when it hits zero). Used to swap equipment-type picker selections.
 function removeOneByRef(inventory, ref) {
-  const [name, source = ''] = String(ref || '').split('|');
+  const { name, source } = splitNameSource(ref);
   const list = inventory || [];
   const idx = list.findIndex((item) => item.name === name && (item.source || '') === source);
   if (idx === -1) return list;

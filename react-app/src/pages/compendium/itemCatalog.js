@@ -9,7 +9,7 @@ import { CORE_2024_SOURCE_PRIORITY, isAllowedSource } from '../../shared/content
 import { decodeDamageType, decodeProperty, itemMasteryLabels } from '../../shared/character/inventory/itemCodes.js';
 import { capitalize } from '../../shared/ui/textCase.js';
 import { formatNumber } from '../../shared/ui/numberFormat.js';
-import { stripSource } from '../../shared/content/nameKeys.js';
+import { splitNameSource, stripSource } from '../../shared/content/nameKeys.js';
 import { byName } from '../../shared/lists.js';
 
 const typeCode = (item) => stripSource(item?.type).toUpperCase();
@@ -239,7 +239,7 @@ export function itemPicture(item, images, groupOf = () => null) {
   const group = groupOf(item.name, item.source);
   const fromGroup = group ? images.get(group.name, group.source) : null;
   if (fromGroup) return fromGroup;
-  const [baseName, baseSource] = String(item.baseItem || '').split('|');
+  const { name: baseName, source: baseSource } = splitNameSource(item.baseItem);
   return baseName ? images.get(baseName, baseSource || 'XPHB') : null;
 }
 
@@ -249,7 +249,7 @@ export function itemGroupLookup(groups) {
   const byMember = new Map();
   (groups || []).forEach((group) => {
     (group.items || []).forEach((ref) => {
-      const [name, source] = String(ref).split('|');
+      const { name, source } = splitNameSource(ref);
       byMember.set(key(name, source || group.source), { name: group.name, source: group.source });
     });
   });
