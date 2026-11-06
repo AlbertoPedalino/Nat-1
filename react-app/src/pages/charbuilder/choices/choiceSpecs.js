@@ -6,6 +6,7 @@ import { ABILITIES, ABILITY_ABBREVIATIONS, ALL_LANGUAGES, ALL_TOOLS, ARTISAN_TOO
 import { getLanguageOptions } from '../../../shared/character/progression/languages.js';
 import { filterByRequiredChoice } from '../../../shared/character/progression/lineageMatch.js';
 import { PROFICIENCY_CHOICE_KEYS } from '../../../shared/character/progression/typedProficiencies.js';
+import { asArray } from '../../../shared/lists.js';
 
 const STD_LANGS = STANDARD_LANGUAGES;
 const EXOTIC_LANGS = EXOTIC_LANGUAGES;
@@ -237,7 +238,7 @@ function deriveFeatureChoiceSpecs(features, maxLv, keyPrefix) {
     });
 
     if (feature.expertise) {
-      (Array.isArray(feature.expertise) ? feature.expertise : [feature.expertise]).forEach((ex, idx) => {
+      asArray(feature.expertise).forEach((ex, idx) => {
         if (ex?.choose) {
           specPush(out, {
             key: `${keyPrefix}_feat_exp_${fkey}_${idx}`,

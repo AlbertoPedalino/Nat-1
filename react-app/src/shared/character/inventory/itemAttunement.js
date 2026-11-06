@@ -1,6 +1,7 @@
 import { itemIdentityKey } from './itemIdentity.js';
 import { isItemCarried } from './weight.js';
 import { stripSource } from '../../content/nameKeys.js';
+import { asArray } from '../../lists.js';
 
 export const BASE_ATTUNEMENT_LIMIT = 3;
 
@@ -42,7 +43,7 @@ function normalizeRequirementValue(value) {
 
 function requirementTags(item) {
   if (!item?.reqAttuneTags) return [];
-  return (Array.isArray(item.reqAttuneTags) ? item.reqAttuneTags : [item.reqAttuneTags])
+  return asArray(item.reqAttuneTags)
     .filter((tag) => tag && typeof tag === 'object');
 }
 

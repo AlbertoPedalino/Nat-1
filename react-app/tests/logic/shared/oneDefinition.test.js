@@ -368,3 +368,10 @@ test('capitalizing in any spelling goes through shared/ui/textCase.js', () => {
     allow: ['shared/ui/textCase.js'],
   }), []);
 });
+
+// "One value or a list of them, as a list" is asArray, in any spelling.
+test('a value-or-list is wrapped only by asArray', () => {
+  assert.deepEqual(sourceLinesMatching(/Array\.isArray\(([\w.?]+)\) \? \1 : (\[\1\]|\1 == null \? \[\] : \[\1\])/, {
+    allow: ['shared/lists.js'],
+  }), []);
+});

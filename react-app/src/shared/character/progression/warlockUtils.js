@@ -1,6 +1,7 @@
 import { classLevel } from './classLevel.js';
 import { matchKey, stripSource } from '../../content/nameKeys.js';
 import { baseChoiceKey } from './choiceUtils.js';
+import { asArray } from '../../lists.js';
 
 // An invocation name compared without its source.
 const invocationKey = (value) => matchKey(stripSource(value));
@@ -16,7 +17,7 @@ function invocationNameFromValue(value) {
 }
 
 function invocationNamesFromChoiceValue(value) {
-  const arr = Array.isArray(value) ? value : [value];
+  const arr = asArray(value);
   return arr
     .map(invocationNameFromValue)
     .filter(Boolean);

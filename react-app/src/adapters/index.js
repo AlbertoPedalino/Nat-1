@@ -1,4 +1,5 @@
 import { adapterRegistry, installAdapters } from './registry.js';
+import { asArray } from '../shared/lists.js';
 
 const adapterModules = import.meta.glob('./{classes,feats,species,spells,items}/**/*.js');
 const loadedPaths = new Set();
@@ -90,7 +91,7 @@ export async function loadCoreAdapters(context = {}) {
 }
 
 export async function loadClassAdapters(classNames, context = {}) {
-  const names = (Array.isArray(classNames) ? classNames : [classNames]).filter(Boolean);
+  const names = asArray(classNames).filter(Boolean);
   const requestedClasses = [...new Set(names)];
   const classByPath = new Map();
   const allPaths = [];

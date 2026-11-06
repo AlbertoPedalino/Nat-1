@@ -1,5 +1,6 @@
 import { canonicalProficiencyLabel } from './proficiencyDisplay.js';
 import { matchKey } from '../../content/nameKeys.js';
+import { asArray } from '../../lists.js';
 
 const TYPED_PROFICIENCY_RE = /^(skill|tool|language|weapon):(.+)$/i;
 const CHOICE_PLACEHOLDER_RE = /\bchoose\b|\byour choice\b|\bof your choice\b|\bone type\b/i;
@@ -46,7 +47,7 @@ export function parseTypedProficiencyValue(value) {
 
 export function splitTypedProficiencies(values) {
   const out = { skill: [], tool: [], language: [], weapon: [], untyped: [] };
-  const list = Array.isArray(values) ? values : [values];
+  const list = asArray(values);
   list.flat().forEach((value) => {
     if (value == null || value === '') return;
     const parsed = parseTypedProficiencyValue(value);
@@ -62,7 +63,7 @@ export function splitTypedProficiencies(values) {
 
 export function extractFixedProficiencyLabels(blocks) {
   const labels = [];
-  const list = Array.isArray(blocks) ? blocks : [blocks];
+  const list = asArray(blocks);
   list.forEach((block) => {
     if (!block) return;
     if (typeof block === 'string') {
@@ -92,7 +93,7 @@ export function extractFixedProficiencyLabels(blocks) {
 export function uniqueProficiencyLabels(values) {
   const seen = new Set();
   const out = [];
-  (Array.isArray(values) ? values : [values]).flat().forEach((value) => {
+  asArray(values).flat().forEach((value) => {
     if (value == null || value === '') return;
     const label = canonicalProficiencyLabel(value);
     const key = matchKey(label);

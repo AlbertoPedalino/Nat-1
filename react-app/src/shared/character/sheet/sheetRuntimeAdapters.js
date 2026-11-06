@@ -1,8 +1,9 @@
 import { loadClassAdapters, loadCoreAdapters } from '../../../adapters/index.js';
 import { getFinal, getMod, getPB } from './sheetStats.js';
+import { asArray } from '../../lists.js';
 
 function asCharacterList(characters) {
-  return Array.isArray(characters) ? characters : [characters].filter(Boolean);
+  return asArray(characters).filter(Boolean);
 }
 
 export function collectSheetRuntimeClassNames(characters) {

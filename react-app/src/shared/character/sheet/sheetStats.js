@@ -10,6 +10,7 @@ import { collectSheetEffects } from './sheetEffects.js';
 import { getNormalizedChoices } from '../progression/choiceNormalization.js';
 import { matchKey, stripSource } from '../../content/nameKeys.js';
 import { SKILLS } from '../../content/rulesVocabulary.js';
+import { asArray } from '../../lists.js';
 
 const SKILL_ABILITY = Object.freeze(Object.fromEntries(SKILLS.map((skill) => [skill.name, skill.ability])));
 
@@ -125,7 +126,7 @@ function skillChoiceLabel(value) {
 function valuesIncludeSkill(values, skillName) {
   const nsk = normSkill(skillName);
   if (!nsk) return false;
-  return (Array.isArray(values) ? values : [values])
+  return asArray(values)
     .some((value) => normSkill(skillChoiceLabel(value)) === nsk);
 }
 
@@ -145,7 +146,7 @@ function proficiencyBearingFeatures(C) {
 
 function collectFixedProficiencyLabels(C, fields) {
   const features = proficiencyBearingFeatures(C);
-  return features.flatMap((feature) => (Array.isArray(fields) ? fields : [fields])
+  return features.flatMap((feature) => asArray(fields)
     .flatMap((field) => extractFixedProficiencyLabels(feature[field])));
 }
 

@@ -14,6 +14,7 @@ import { titleCase } from '../../../shared/ui/textCase.js';
 import { backgroundAbilityBonus } from '../../../shared/character/progression/abilityScores.js';
 import { ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
+import { asArray } from '../../../shared/lists.js';
 
 // One label/value row inside the grants grid (label column + wrapped values).
 function GrantRow({ label, values }) {
@@ -32,7 +33,7 @@ function GrantRow({ label, values }) {
 // labeled fact out so the detail card shows the same info as the preview.
 function factValue(node) {
   const raw = node?.entry != null ? node.entry : node?.entries;
-  const parts = Array.isArray(raw) ? raw : [raw];
+  const parts = asArray(raw);
   return strip5eMarkup(parts.filter((part) => typeof part === 'string').join(' ')).trim();
 }
 

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Box, ListItemText, Menu, MenuItem } from '@mui/material';
 import { suppressGestureSelection } from '../../vtt/map/gestureSelection.js';
 import { advArgFor, rollModeLabel, withExtraSource } from './advantage.js';
+import { asArray } from '../../lists.js';
 
 // A roller that also answers a right-click or a long press with a small menu:
 // "+ Advantage" / "+ Disadvantage" for this one roll. It adds a source rather
@@ -138,7 +139,7 @@ export default function RollModeArea({
   };
 
   return (
-    <Component {...props} {...triggerProps} sx={[pressSx, ...(Array.isArray(sx) ? sx : [sx])]}>
+    <Component {...props} {...triggerProps} sx={[pressSx, ...asArray(sx)]}>
       {children}
       {/* Events from a portalled menu still bubble through React to the
           roller; stop them here or picking an option also rolls normally. */}

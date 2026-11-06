@@ -1,3 +1,4 @@
+import { asArray } from '../../lists.js';
 // This screen's own writes still in flight, counted per key (a piece id, a
 // mark id, a scene field). While a key has one, realtime echoes and recovery
 // reads for it are held back, so an older row never undoes the newer local
@@ -9,7 +10,7 @@ export function createPendingWrites() {
   const counts = new Map();
   return {
     begin(keys) {
-      const list = Array.isArray(keys) ? keys : [keys];
+      const list = asArray(keys);
       for (const key of list) counts.set(key, (counts.get(key) || 0) + 1);
       let finished = false;
       return () => {

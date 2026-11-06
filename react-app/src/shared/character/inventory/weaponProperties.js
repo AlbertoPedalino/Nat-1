@@ -1,4 +1,5 @@
 import { stripSource } from '../../content/nameKeys.js';
+import { asArray } from '../../lists.js';
 // Weapon properties, read one way by every caller: proficiency rules, wielding
 // slots, attack ability, Weapon Mastery, Replicate Magic Item.
 //
@@ -42,6 +43,6 @@ export function itemProperties(item) {
 
 // Whether the item has any of `props` (one, or a list; codes or names).
 export function itemHasProperty(item, props) {
-  const wanted = new Set((Array.isArray(props) ? props : [props]).map(canonicalProperty));
+  const wanted = new Set(asArray(props).map(canonicalProperty));
   return itemProperties(item).some((property) => wanted.has(property));
 }

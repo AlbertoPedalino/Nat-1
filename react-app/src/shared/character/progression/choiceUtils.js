@@ -71,7 +71,7 @@ export function matchesChoiceRequirement(C, requirement) {
   const raw = getChoiceValue(C, key);
   if (!raw) return false;
   const selected = raw.toLowerCase();
-  const values = Array.isArray(requirement.value) ? requirement.value : [requirement.value];
+  const values = asArray(requirement.value);
   return values.some((v) => String(v).toLowerCase() === selected);
 }
 
@@ -86,7 +86,7 @@ export function inventoryHasFlag(inventory, requirement) {
     if (requireEquipped && !item.equipped) return false;
     if (itemType) {
       const type = String(item.type || '').toUpperCase();
-      const types = Array.isArray(itemType) ? itemType : [itemType];
+      const types = asArray(itemType);
       if (!types.some((t) => String(t).toUpperCase() === type)) return false;
     }
     return (item.flags || []).includes(flag);
@@ -111,7 +111,7 @@ export function hasActionRequirement(action, C, sheet) {
     const raw = getChoiceValue(C, action.choiceKey);
     if (!raw) return false;
     const selected = raw.toLowerCase();
-    const models = Array.isArray(action.model) ? action.model : [action.model];
+    const models = asArray(action.model);
     if (!models.some((m) => String(m).toLowerCase() === selected)) return false;
   }
   if (action.requiresInventoryFlag) {

@@ -2,6 +2,7 @@ import { lazy, Suspense, useState } from 'react';
 import { Box, Button } from '@mui/material';
 import { BookOpen } from 'lucide-react';
 import { iconOnlyOnPhoneButtonSx, phoneHiddenLabelSx } from '../../shared/ui/iconOnlyOnPhone.js';
+import { asArray } from '../../shared/lists.js';
 
 // Loaded on first opening: the button is in every top bar, and most pages
 // never open the compendium.
@@ -19,7 +20,7 @@ export default function CompendiumButton({ sx }) {
         aria-label="Compendium"
         aria-pressed={open}
         onClick={() => setOpen((value) => !value)}
-        sx={[iconOnlyOnPhoneButtonSx, ...(Array.isArray(sx) ? sx : [sx])]}
+        sx={[iconOnlyOnPhoneButtonSx, ...asArray(sx)]}
       >
         <Box component="span" sx={phoneHiddenLabelSx}>Compendium</Box>
       </Button>

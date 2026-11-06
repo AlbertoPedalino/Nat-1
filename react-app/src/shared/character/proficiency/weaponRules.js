@@ -6,6 +6,7 @@
 import { canonicalProperty, itemHasProperty } from '../inventory/weaponProperties.js';
 import { capitalize } from '../../ui/textCase.js';
 import { matchKey } from '../../content/nameKeys.js';
+import { asArray } from '../../lists.js';
 
 // Properties are read by the shared reader.
 export { canonicalProperty, itemHasProperty };
@@ -153,7 +154,7 @@ export function formatRule(rule) {
 export function processStructuredWeaponProficiencies(struct) {
   const rules = [];
   if (!struct) return rules;
-  const arr = Array.isArray(struct) ? struct : [struct];
+  const arr = asArray(struct);
   arr.forEach((entry) => {
     if (!entry || typeof entry !== 'object') return;
     Object.entries(entry).forEach(([key, value]) => {

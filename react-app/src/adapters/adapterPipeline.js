@@ -1,17 +1,13 @@
 import { normalizeSpellRecord } from '../shared/character/spells/spellNormalization.js';
 import { matchKey, stripSource } from '../shared/content/nameKeys.js';
-import { byName } from '../shared/lists.js';
+import { asArray, byName } from '../shared/lists.js';
 
 const WEAPON_TYPES = new Set(['M', 'R']);
 const ARMOR_TYPES = new Set(['LA', 'MA', 'HA']);
 const AMMO_TYPES = new Set(['A', 'AF', 'AT']);
 
-function arr(value) {
-  return Array.isArray(value) ? value : value == null ? [] : [value];
-}
-
 function runAdapters(record, adapters, label, context) {
-  return arr(adapters).reduce((acc, fn) => {
+  return asArray(adapters).reduce((acc, fn) => {
     if (typeof fn !== 'function') return acc;
     try {
       const next = fn(acc, context);
@@ -35,7 +31,7 @@ function parseFeatureRef(ref) {
 }
 
 function normalizeFeatureRefs(refs) {
-  return arr(refs).map(parseFeatureRef).filter((ref) => ref?.name);
+  return asArray(refs).map(parseFeatureRef).filter((ref) => ref?.name);
 }
 
 function hitDieText(hd) {
@@ -53,7 +49,7 @@ export function adaptClassRecord(rawClass, registry, context = {}) {
     source,
     hdText: hitDieText(raw.hd),
     spellcastingAbility: raw.spellcastingAbility ? String(raw.spellcastingAbility).toLowerCase() : null,
-    savingThrowProfs: arr(raw.proficiency).map((save) => String(save || '').toLowerCase()),
+    savingThrowProfs: asArray(raw.proficiency).map((save) => String(save || '').toLowerCase()),
     _featureRefs: normalizeFeatureRefs(raw.classFeatures),
     _meta: {
       ...(raw._meta && typeof raw._meta === 'object' ? raw._meta : {}),
@@ -107,7 +103,7 @@ export function adaptSpeciesRecord(rawSpecies, registry, context = {}) {
 function featCategoryCodes(rawCategory) {
   const map = { origin: 'O', general: 'G', 'fighting style': 'FS', fightingstyle: 'FS', 'epic boon': 'EB', epicboon: 'EB', druidic: 'D', origins: 'O' };
   const out = [];
-  arr(rawCategory).flat(Infinity).forEach((cat) => {
+  asArray(rawCategory).flat(Infinity).forEach((cat) => {
     const raw = String(cat || '').trim();
     if (!raw) return;
     const value = map[raw.toLowerCase()] || raw;
@@ -167,7 +163,7 @@ function formatPrerequisitePart(prerequisite) {
   if (prerequisite.class) return 'Class';
   if (prerequisite.background) return 'Background';
   if (prerequisite.species) return 'Species';
-  return arr(Object.values(prerequisite).flat()).map(cleanTag).find(Boolean) || '';
+  return asArray(Object.values(prerequisite).flat()).map(cleanTag).find(Boolean) || '';
 }
 
 function normalizeFeatRecord(rawFeat, context = {}) {
@@ -175,7 +171,7 @@ function normalizeFeatRecord(rawFeat, context = {}) {
   const name = String(raw.name || '').trim();
   const source = String(raw.source || context.defaultSource || '').trim();
   const categories = featCategoryCodes(raw.categories || raw.category);
-  const prerequisite = arr(raw.prerequisite).filter(Boolean);
+  const prerequisite = asArray(raw.prerequisite).filter(Boolean);
   const minLevel = extractNumericLevel(prerequisite);
   return {
     ...raw,
@@ -185,16 +181,16 @@ function normalizeFeatRecord(rawFeat, context = {}) {
     categories,
     prerequisite,
     prerequisiteText: prerequisite.map(formatPrerequisitePart).filter(Boolean).join(' - '),
-    additionalSpells: arr(raw.additionalSpells),
-    skillProficiencies: arr(raw.skillProficiencies),
-    toolProficiencies: arr(raw.toolProficiencies),
-    languageProficiencies: arr(raw.languageProficiencies),
-    skillToolLanguageProficiencies: arr(raw.skillToolLanguageProficiencies),
-    weaponProficiencies: arr(raw.weaponProficiencies),
-    armorProficiencies: arr(raw.armorProficiencies),
-    resist: arr(raw.resist),
-    immune: arr(raw.immune),
-    entries: arr(raw.entries),
+    additionalSpells: asArray(raw.additionalSpells),
+    skillProficiencies: asArray(raw.skillProficiencies),
+    toolProficiencies: asArray(raw.toolProficiencies),
+    languageProficiencies: asArray(raw.languageProficiencies),
+    skillToolLanguageProficiencies: asArray(raw.skillToolLanguageProficiencies),
+    weaponProficiencies: asArray(raw.weaponProficiencies),
+    armorProficiencies: asArray(raw.armorProficiencies),
+    resist: asArray(raw.resist),
+    immune: asArray(raw.immune),
+    entries: asArray(raw.entries),
     _meta: {
       ...(raw._meta && typeof raw._meta === 'object' ? raw._meta : {}),
       featKey: `${matchKey(name)}_${matchKey(source)}`,
@@ -269,9 +265,9 @@ export function adaptItemRecord(rawItem, registry, context = {}) {
     name: name || 'Unknown Item',
     source,
     type,
-    property: arr(raw.property).map((property) => stripSource(property)),
+    property: asArray(raw.property).map((property) => stripSource(property)),
     dmgType: raw.dmgType ? String(raw.dmgType).toLowerCase() : raw.dmgType || null,
-    mastery: raw.mastery ? stripSource(arr(raw.mastery)[0]) : null,
+    mastery: raw.mastery ? stripSource(asArray(raw.mastery)[0]) : null,
     weight: Number(raw.weight || 0),
     value: Number(raw.value || 0),
     _meta: {
@@ -294,11 +290,11 @@ export function adaptItemRecord(rawItem, registry, context = {}) {
 export function adaptBuilderData(data, registry, context = {}) {
   return {
     ...data,
-    classes: arr(data.classes).map((item) => adaptClassRecord(item, registry, context)).sort(byName),
-    subclasses: arr(data.subclasses).map((item) => adaptSubclassRecord(item, registry, context)),
-    species: arr(data.species).map((item) => adaptSpeciesRecord(item, registry, context)).sort(byName),
-    feats: arr(data.feats).map((item) => adaptFeatRecord(item, registry, context)).sort(byName),
-    spells: arr(data.spells).map((item) => adaptSpellRecord(item, registry, context)).sort((a, b) => (a.level - b.level) || byName(a, b)),
-    items: arr(data.items).map((item) => adaptItemRecord(item, registry, context)).sort(byName),
+    classes: asArray(data.classes).map((item) => adaptClassRecord(item, registry, context)).sort(byName),
+    subclasses: asArray(data.subclasses).map((item) => adaptSubclassRecord(item, registry, context)),
+    species: asArray(data.species).map((item) => adaptSpeciesRecord(item, registry, context)).sort(byName),
+    feats: asArray(data.feats).map((item) => adaptFeatRecord(item, registry, context)).sort(byName),
+    spells: asArray(data.spells).map((item) => adaptSpellRecord(item, registry, context)).sort((a, b) => (a.level - b.level) || byName(a, b)),
+    items: asArray(data.items).map((item) => adaptItemRecord(item, registry, context)).sort(byName),
   };
 }

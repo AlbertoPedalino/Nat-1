@@ -10,6 +10,7 @@ import { isItemEffectActive } from './itemAttunement.js';
 import { getItemNarrativeEffects } from './itemNarrativeEffects.js';
 import { itemEffectInventory } from '../forms/wildShapeForm.js';
 import { ABILITIES } from '../../content/rulesVocabulary.js';
+import { asArray } from '../../lists.js';
 
 const SENSE_TYPES = ['darkvision', 'blindsight', 'truesight', 'tremorsense'];
 
@@ -136,7 +137,7 @@ function applyModifySpeed(item, out, source) {
 }
 
 function applySensesField(out, value) {
-  const list = Array.isArray(value) ? value : [value];
+  const list = asArray(value);
   list.forEach((entry) => {
     if (entry == null) return;
     if (typeof entry === 'object') {
@@ -168,7 +169,7 @@ function applyChoiceAbilityBonus(item, out) {
   groups.forEach((group, idx) => {
     const picks = choice[idx] || choice;
     if (!picks) return;
-    const list = Array.isArray(picks) ? picks : [picks];
+    const list = asArray(picks);
     list.forEach((pick) => {
       const key = String(pick || '').toLowerCase();
       if (!ABILITIES.includes(key)) return;

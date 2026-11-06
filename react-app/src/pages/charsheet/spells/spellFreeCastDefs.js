@@ -11,6 +11,7 @@ import { stripSource } from '../../../shared/content/nameKeys.js';
 import { spellModifierEntities } from './spellModifiers.js';
 import { choiceKeyIsCantripChoice, featSpellSlotKey } from './spellChoiceKeys.js';
 import { buildFeatMetaMap, collectFixedFeatSpells } from './featSpellMeta.js';
+import { asArray } from '../../../shared/lists.js';
 
 // Every free cast the character has (species, class and subclass grants, feat
 // picks, fixed feat spells, items), merged by id: what a rest recovers.
@@ -61,7 +62,7 @@ export function getFreeCastDefsForCharacter(C) {
     const isCantrip = choiceKeyIsCantripChoice(key);
     const tpl = getFeatFreeCastTemplate(meta.name, { isCantrip });
     if (!tpl) return;
-    const values = Array.isArray(value) ? value : [value];
+    const values = asArray(value);
     values.forEach((entry) => {
       if (typeof entry !== 'string') return;
       const name = stripSource(entry);

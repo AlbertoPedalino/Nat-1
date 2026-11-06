@@ -11,7 +11,7 @@ import { getType } from '../../shared/bestiary/monsterUtils.js';
 import { capitalize } from '../../shared/ui/textCase.js';
 import { ABILITY_NAMES } from '../../shared/content/rulesVocabulary.js';
 import { crKey } from '../../shared/bestiary/challengeRating.js';
-import { byName, compareText } from '../../shared/lists.js';
+import { asArray, byName, compareText } from '../../shared/lists.js';
 
 export const COMPENDIUM_KINDS = Object.freeze([
   { key: 'spell', label: 'Spells', single: 'Spell' },
@@ -92,7 +92,7 @@ const SUBTITLES = {
   classFeature: (feature) => (feature.subclassName
     ? `${feature.subclassName} (${feature.className}) ${feature.level}`
     : `${feature.className} ${feature.level}`),
-  option: (option) => [...new Set((Array.isArray(option.featureType) ? option.featureType : [option.featureType])
+  option: (option) => [...new Set(asArray(option.featureType)
     .map((type) => OPTION_TYPES[type]).filter(Boolean))].join(', ') || 'Class option',
   skill: (skill) => (ABILITY_NAMES[skill.ability] ? `${ABILITY_NAMES[skill.ability]} skill` : 'Skill'),
 };

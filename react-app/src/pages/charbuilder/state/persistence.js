@@ -205,7 +205,7 @@ export function makeSheetPayload(character, data) {
 
   const choiceSpellNames = [];
   Object.entries(character.choices || {}).forEach(([key, value]) => {
-    const values = Array.isArray(value) ? value : [value];
+    const values = asArray(value);
     values.forEach((entry) => {
       if (typeof entry !== 'string') return;
       const name = stripSource(entry);

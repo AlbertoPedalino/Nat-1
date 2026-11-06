@@ -12,6 +12,7 @@ import {
   collectFixedFeatureProfs,
   normalizeLabel,
 } from './proficiencyHelpers.js';
+import { asArray } from '../../lists.js';
 
 function isProficiencyChoiceKey(lowerKey) {
   return lowerKey.includes('proficiency');
@@ -84,7 +85,7 @@ export function collectEquipmentProficiencySets(character) {
       if (!val) continue;
       const lk = key.toLowerCase();
       if (!isProficiencyChoiceKey(lk)) continue;
-      const vals = Array.isArray(val) ? val : [val];
+      const vals = asArray(val);
       if (lk.includes('mastery') && lk.includes('weapon')) {
         vals.forEach((v) => { const n = normalizeLabel(v); if (n) weaponMasterySet.add(n); });
         continue;
@@ -96,7 +97,7 @@ export function collectEquipmentProficiencySets(character) {
 
   adapterGrants.forEach((grant) => {
     if (!['armor', 'weapon', 'weaponMastery'].includes(grant.type)) return;
-    const vals = Array.isArray(grant.values) ? grant.values : [grant.values];
+    const vals = asArray(grant.values);
     const labels = vals.map(normalizeLabel).filter(Boolean);
     const targetSet = grant.type === 'armor' ? armorSet : grant.type === 'weaponMastery' ? weaponMasterySet : rawWeaponLabels;
     const hiddenSet = grant.type === 'armor' ? armorHidden : grant.type === 'weaponMastery' ? masteryHidden : weaponHidden;

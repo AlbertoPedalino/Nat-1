@@ -10,6 +10,7 @@ import { useOptionSearch } from '../../../shared/content/searchText.js';
 import { PROFICIENCY_CHOICE_KEYS, isChoicePlaceholderValue, parseTypedProficiencyValue } from '../../../shared/character/progression/typedProficiencies.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
 import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
+import { asArray } from '../../../shared/lists.js';
 
 function parseTypedChoiceValue(value) {
   const parsed = parseTypedProficiencyValue(value);
@@ -45,7 +46,7 @@ function specProficiencyKind(spec) {
 }
 
 function addFixedBlocks(out, blocks, kind) {
-  (Array.isArray(blocks) ? blocks : [blocks]).forEach((block) => {
+  asArray(blocks).forEach((block) => {
     if (!block) return;
     if (typeof block === 'string') {
       block.split(/[;,]/).forEach((value) => {

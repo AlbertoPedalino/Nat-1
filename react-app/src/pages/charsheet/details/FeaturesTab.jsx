@@ -34,7 +34,7 @@ export default function FeaturesTab({ C }) {
   function renderBackgroundEntries() {
     const out = [];
     if (backgroundEntries.length) {
-      const raw = Array.isArray(backgroundEntries) ? backgroundEntries : [backgroundEntries];
+      const raw = asArray(backgroundEntries);
       raw.forEach(e => {
         if (entriesToTextBlocks(e).length) out.push(e);
       });
@@ -44,7 +44,7 @@ export default function FeaturesTab({ C }) {
     if (C?.choices) {
       Object.entries(C.choices).forEach(([k, v]) => {
         if (!k.startsWith('bg_')) return;
-        const vals = Array.isArray(v) ? v : [v];
+        const vals = asArray(v);
         if (k.includes('skill')) backgroundChoices.skills = [...(backgroundChoices.skills || []), ...vals];
         else if (k.includes('tool') || k.includes('instrument')) backgroundChoices.tools = [...(backgroundChoices.tools || []), ...vals];
         else if (k.includes('language')) backgroundChoices.languages = [...(backgroundChoices.languages || []), ...vals];

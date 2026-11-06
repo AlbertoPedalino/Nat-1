@@ -43,6 +43,7 @@ import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { builtAbilityScores } from '../../../shared/character/progression/abilityScores.js';
 import { computeMaxHp } from '../../../shared/character/combat/hp.js';
 import { ABILITIES, ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
+import { asArray } from '../../../shared/lists.js';
 
 const darkChipText = UI_COLORS.primaryContrast;
 const PROFICIENCY_TONE = NEUTRAL_TONE;
@@ -366,7 +367,7 @@ function collectSkillProficiencies(character) {
   Object.entries(character.choices || {})
     .filter(([key]) => choiceKeyCanGrantSkill(key))
     .forEach(([, value]) => {
-      (Array.isArray(value) ? value : [value]).forEach(pushSkill);
+      asArray(value).forEach(pushSkill);
     });
 
   return uniqueClean(out);

@@ -1,6 +1,7 @@
 import { matchKey, stripSource } from '../nameKeys.js';
 import { canonicalItemSource, formatLeadingBonusName, withCanonicalSource } from './itemRecords.js';
 import { resolveVariantTemplate } from './entryTemplates.js';
+import { asArray } from '../../lists.js';
 
 // 5etools item variants: `_copy` resolution, base-item requirement matching,
 // and the expansion of magic variants into concrete items.
@@ -136,7 +137,7 @@ function isArmorType(type) {
 function matchesProperty(item, required) {
   const properties = (Array.isArray(item?.property) ? item.property : [])
     .map(normalizeComparable);
-  const requiredProperties = (Array.isArray(required) ? required : [required])
+  const requiredProperties = asArray(required)
     .map(normalizeComparable)
     .filter(Boolean);
   return requiredProperties.every((property) => properties.includes(property));

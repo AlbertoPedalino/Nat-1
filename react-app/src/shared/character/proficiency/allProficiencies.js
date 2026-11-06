@@ -8,6 +8,7 @@ import {
   collectFixedFeatureProfs,
   normalizeLabel,
 } from './proficiencyHelpers.js';
+import { asArray } from '../../lists.js';
 
 function parseTypedProficiencyValue(value) {
   const parsed = parseTypedProficiencyValueShared(value);
@@ -58,7 +59,7 @@ export function collectAllProficiencies(character, equipmentSets) {
     for (const [key, val] of Object.entries(character.choices)) {
       if (!val) continue;
       const lk = key.toLowerCase();
-      const vals = Array.isArray(val) ? val : [val];
+      const vals = asArray(val);
       vals.forEach((v) => {
         const typed = parseTypedProficiencyValue(v);
         if (typed) {
@@ -81,7 +82,7 @@ export function collectAllProficiencies(character, equipmentSets) {
 
   adapterGrants.forEach((grant) => {
     if (grant.display === false) return;
-    const vals = Array.isArray(grant.values) ? grant.values : [grant.values];
+    const vals = asArray(grant.values);
     vals.map(normalizeLabel).filter(Boolean).forEach((v) => {
       if (grant.type === 'tool') toolSet.add(v);
       else if (grant.type === 'language') langSet.add(v);

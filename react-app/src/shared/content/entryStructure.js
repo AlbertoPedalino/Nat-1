@@ -1,5 +1,6 @@
+import { asArray } from '../lists.js';
 export function partitionNamedEntries(entries) {
-  const list = entries == null ? [] : (Array.isArray(entries) ? entries : [entries]);
+  const list = entries == null ? [] : asArray(entries);
   const introEntries = [];
   const namedEntries = [];
 

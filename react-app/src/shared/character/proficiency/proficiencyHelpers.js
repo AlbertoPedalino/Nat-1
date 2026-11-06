@@ -3,13 +3,14 @@ import { canonicalProficiencyLabel } from '../progression/proficiencyDisplay.js'
 import { primaryClassLevel } from '../progression/classLevel.js';
 import { PROFICIENCY_CHOICE_KEYS, isChoicePlaceholderValue } from '../progression/typedProficiencies.js';
 import { matchKey, stripSource } from '../../content/nameKeys.js';
+import { asArray } from '../../lists.js';
 
 export function normalizeLabel(value) {
   return canonicalProficiencyLabel(value);
 }
 
 export function addFixedLabels(source, set) {
-  const arr = Array.isArray(source) ? source : [source];
+  const arr = asArray(source);
   arr.forEach((entry) => {
     if (!entry) return;
     if (typeof entry === 'string') {
@@ -39,7 +40,7 @@ export function collectFixedFeatureProfs(character, field) {
   features.forEach((feature) => {
     const raw = feature?.[field];
     if (!raw) return;
-    const arr = Array.isArray(raw) ? raw : [raw];
+    const arr = asArray(raw);
     arr.forEach((entry) => {
       if (typeof entry === 'string') {
         entry.split(/[;,]/).map(normalizeLabel).filter(Boolean).forEach((v) => out.add(v));
@@ -59,7 +60,7 @@ function choiceMatches(character, requiredChoice, prefix = '') {
   if (!requiredChoice?.key) return true;
   const choices = character?.choices || {};
   const keys = [requiredChoice.key, `${prefix || ''}${requiredChoice.key}`].filter(Boolean);
-  const wanted = Array.isArray(requiredChoice.value) ? requiredChoice.value : [requiredChoice.value];
+  const wanted = asArray(requiredChoice.value);
   const wantedNorm = wanted.map((value) => matchKey(stripSource(value)));
   return keys.some((key) => {
     const stored = choices[key];

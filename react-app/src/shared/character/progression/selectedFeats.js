@@ -7,6 +7,7 @@ import {
 } from './backgroundFeatOptions.js';
 import { matchKey, stripSource } from '../../content/nameKeys.js';
 import { titleCase } from '../../ui/textCase.js';
+import { asArray } from '../../lists.js';
 
 const FRAMEWORK_EXACT = new Set(['feat_origin', 'species_origin_feat']);
 const FRAMEWORK_PREFIXES = ['feat_'];
@@ -64,7 +65,7 @@ function fromChoices(character) {
   Object.entries(choices).forEach(([key, value]) => {
     if (!value) return;
     if (!isChoiceFeatOwnerKey(key)) return;
-    const values = Array.isArray(value) ? value : [value];
+    const values = asArray(value);
     values.forEach((entry) => {
       if (typeof entry === 'string' && entry) out.push(entry);
     });
@@ -136,7 +137,7 @@ function featNameText(value) {
 
 function featValues(value) {
   if (value == null) return [];
-  return Array.isArray(value) ? value : [value];
+  return asArray(value);
 }
 
 // Every feat the character has, by plain name — the ONE answer for "which feats"
@@ -202,7 +203,7 @@ export function featOriginKind(character, featName) {
   const choices = character.choices || {};
   for (const [key, value] of Object.entries(choices)) {
     if (!value || !isChoiceFeatOwnerKey(key)) continue;
-    const values = Array.isArray(value) ? value : [value];
+    const values = asArray(value);
     if (values.some((entry) => typeof entry === 'string' && entry.toLowerCase() === target)) {
       return featSlotOrigin(key);
     }

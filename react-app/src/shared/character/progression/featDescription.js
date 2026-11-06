@@ -1,6 +1,7 @@
 import { entriesToTextBlocks } from '../spells/spellEntries.js';
 import { matchKey } from '../../content/nameKeys.js';
 import { ABILITY_NAMES } from '../../content/rulesVocabulary.js';
+import { asArray } from '../../lists.js';
 
 function joinOptions(options, conjunction = 'or') {
   if (options.length < 2) return options[0] || '';
@@ -59,7 +60,7 @@ export function featNamedEntries(feat, entryName) {
 // Feat records store ASIs separately from entries. Render them wherever the
 // feat's full description appears, without modifying the stored source record.
 export function featDescriptionEntries(feat) {
-  const entries = feat?.entries == null ? [] : Array.isArray(feat.entries) ? feat.entries : [feat.entries];
+  const entries = feat?.entries == null ? [] : asArray(feat.entries);
   const alternatives = [...new Set((Array.isArray(feat?.ability) ? feat.ability : []).map(describeAbilityOption).filter(Boolean))];
   if (!alternatives.length) return entries;
   const text = entriesToTextBlocks(entries).map((block) => block.text || '').join(' ');

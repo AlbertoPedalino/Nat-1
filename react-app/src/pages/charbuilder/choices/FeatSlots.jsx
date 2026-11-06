@@ -13,6 +13,7 @@ import { buildFeatPrerequisiteContext } from './featPrerequisites.js';
 import { meetsFeatPrerequisites } from './featPrerequisiteRules.js';
 import { featDescriptionEntries } from '../../../shared/character/progression/featDescription.js';
 import { matchKey, stripSource } from '../../../shared/content/nameKeys.js';
+import { asArray } from '../../../shared/lists.js';
 
 function featMatchesCategory(feat, wanted, fixedOptions = []) {
   if (fixedOptions.some((name) => matchKey(name) === matchKey(feat?.name))) return true;
@@ -187,7 +188,7 @@ export function FeatFixedSlot({ spec, feats, character, state, dispatch }) {
 export function FeatCategorySlot({ spec, feats, character, state, dispatch }) {
   const taken = new Set(Object.entries(character.choices || {})
     .filter(([key]) => key !== spec.key)
-    .map(([, value]) => Array.isArray(value) ? value : [value])
+    .map(([, value]) => asArray(value))
     .flat()
     .map(featChoiceKey)
     .filter(Boolean));
