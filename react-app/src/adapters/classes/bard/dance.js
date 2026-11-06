@@ -1,7 +1,9 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
 
 export default function install(registry, context = {}) {
-  const { registerSubclassAdapter, registerSubclassSheetActions, registerSubclassSheetEffects } = createAdapterBindings(registry, context);
+  const {
+    registerSubclassAdapter, registerSubclassSheetActions, registerSubclassSheetEffects, registerSubclassRuntimeConfig,
+  } = createAdapterBindings(registry, context);
 registerSubclassAdapter("Bard_Dance", function (cls, lv, specs) {});
 
 registerSubclassSheetActions("Bard_Dance", [
@@ -17,6 +19,24 @@ registerSubclassSheetEffects("Bard_Dance", [
   // not a passive modifier — covered by its feature action above, no sheet effect.
   { type: "evasion", minLevel: 14, note: "Evasion." },
 ]);
+
+registerSubclassRuntimeConfig("Bard_Dance", {
+  unarmoredDefense: [{ name: "Dance of the Wind", base: 10, abilities: ["dex", "cha"], allowShield: false, minLevel: 3 }],
+  unarmedStrike: {
+    minLevel: 3,
+    requiresNoArmor: true,
+    requiresNoShield: true,
+    attackAbility: "dex",
+    damage: {
+      kind: "featureDie",
+      className: "Bard",
+      feature: "bardicInspiration",
+      ability: "dex",
+      label: "Bardic Damage (Unarmed)",
+    },
+    badge: "Bardic Damage",
+  },
+});
 
 }
 

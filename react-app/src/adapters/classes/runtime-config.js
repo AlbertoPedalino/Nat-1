@@ -1,14 +1,15 @@
 import { createAdapterBindings } from '../adapterBindings.js';
 
+// Every class's runtime config (multiclass prerequisites, spellcasting tables,
+// granted spells, unarmored defense), loaded with the core adapters: the class
+// list, multiclass checks and spell tables need it before a class's own folder
+// is loaded. A subclass's config lives in the subclass file, which loads with
+// its class.
 export default function install(registry, context = {}) {
-  const { registerClassRuntimeConfig, registerSubclassRuntimeConfig } = createAdapterBindings(registry, context);
-
+  const { registerClassRuntimeConfig } = createAdapterBindings(registry, context);
 
   function regClass(name, cfg) {
     registerClassRuntimeConfig(name, cfg || {});
-  }
-  function regSubclass(key, cfg) {
-    registerSubclassRuntimeConfig(key, cfg || {});
   }
 
   // XPHB 2024 fixed prepared-spell tables (source: 5etools class JSON)
@@ -71,6 +72,10 @@ export default function install(registry, context = {}) {
       cantripKnown: [2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
       preparedSpellsProgression: _PREP_FULL,
       ritualCasting: true,
+      // Druidic (level 1) keeps Speak with Animals always prepared.
+      alwaysPreparedSpells: [
+        { name: "Speak with Animals", minLevel: 1, level: 1 },
+      ],
       choiceSpellSources: {
         druid_magician_cantrip: { label: "Primal Order (Magician)", ability: "wis" },
       },
@@ -167,12 +172,22 @@ export default function install(registry, context = {}) {
       cantripKnown: [2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
       preparedSpellsProgression: _PREP_WARLOCK,
       alwaysPreparedSpells: [
-        { name: "Contact Other Plane", minLevel: 9, level: 5 },
+        { name: "Contact Other Plane", minLevel: 9, level: 5, source: "Contact Patron", sourceType: "class" },
+      ],
+      alwaysKnownSpells: [
+        { name: "Find Familiar", minLevel: 1, level: 1, source: "Pact of the Chain", sourceType: "class", invocation: "Pact of the Chain" },
+        { name: "Water Breathing", minLevel: 5, level: 3, source: "Gift of the Depths", sourceType: "class", invocation: "Gift of the Depths" },
       ],
       choiceSpellSources: {
         warlock_tome_cantrip_1: { label: "Pact of the Tome", ability: "cha" },
         warlock_tome_cantrip_2: { label: "Pact of the Tome", ability: "cha" },
         warlock_tome_cantrip_3: { label: "Pact of the Tome", ability: "cha" },
+        warlock_tome_ritual_1: { label: "Pact of the Tome", ability: "cha" },
+        warlock_tome_ritual_2: { label: "Pact of the Tome", ability: "cha" },
+        warlock_mystic_arcanum_6: { label: "Mystic Arcanum VI", ability: "cha" },
+        warlock_mystic_arcanum_7: { label: "Mystic Arcanum VII", ability: "cha" },
+        warlock_mystic_arcanum_8: { label: "Mystic Arcanum VIII", ability: "cha" },
+        warlock_mystic_arcanum_9: { label: "Mystic Arcanum IX", ability: "cha" },
       },
     },
   });
@@ -208,25 +223,5 @@ export default function install(registry, context = {}) {
     },
   });
 
-  regSubclass("Bard_Dance", {
-    unarmoredDefense: [{ name: "Dance of the Wind", base: 10, abilities: ["dex", "cha"], allowShield: false, minLevel: 3 }],
-    unarmedStrike: {
-      minLevel: 3,
-      requiresNoArmor: true,
-      requiresNoShield: true,
-      attackAbility: "dex",
-      damage: {
-        kind: "featureDie",
-        className: "Bard",
-        feature: "bardicInspiration",
-        ability: "dex",
-        label: "Bardic Damage (Unarmed)",
-      },
-      badge: "Bardic Damage",
-    },
-  });
-  regSubclass("Paladin_Noble Genies", {
-    unarmoredDefense: [{ name: "Genie's Splendor", base: 10, abilities: ["dex", "cha"], allowShield: true, minLevel: 3 }],
-  });
 }
 

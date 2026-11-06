@@ -21,8 +21,6 @@ export default function install(registry, context = {}) {
     registerClassSheetActions,
     registerClassSheetResources,
     registerClassSheetEffects,
-    registerClassRuntimeConfig,
-    getClassRuntimeConfig,
     registerClassSheetChoiceMeta,
     registerItemFlagDef,
     registerWeaponAbilityOverride,
@@ -580,43 +578,6 @@ registerResourceSideEffect('magical_cunning', function (ctx = {}) {
       ? ['vestige_power']
       : [],
   };
-});
-
-const existingRuntimeConfig = getClassRuntimeConfig('Warlock') || {};
-const existingSpellcasting = existingRuntimeConfig.spellcasting || {};
-const warlockCantripKnown = existingSpellcasting.cantripKnown || [2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4];
-const warlockPreparedSpells = existingSpellcasting.preparedSpellsProgression || existingSpellcasting.spellsKnown || [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15];
-
-registerClassRuntimeConfig('Warlock', {
-  ...existingRuntimeConfig,
-  multiclassPrerequisites: [{ cha: 13 }],
-  spellcasting: {
-    ...existingSpellcasting,
-    ability: 'cha',
-    casterProgression: 'pact',
-    preparedMode: 'prepared',
-    cantripKnown: warlockCantripKnown,
-    preparedSpellsProgression: warlockPreparedSpells,
-    alwaysPreparedSpells: [
-      { name: 'Contact Other Plane', minLevel: 9, level: 5, source: 'Contact Patron', sourceType: 'class' },
-    ],
-    alwaysKnownSpells: [
-      { name: 'Find Familiar', minLevel: 1, level: 1, source: 'Pact of the Chain', sourceType: 'class', invocation: 'Pact of the Chain' },
-      { name: 'Water Breathing', minLevel: 5, level: 3, source: 'Gift of the Depths', sourceType: 'class', invocation: 'Gift of the Depths' },
-    ],
-    choiceSpellSources: {
-      ...(existingSpellcasting.choiceSpellSources || {}),
-      warlock_tome_cantrip_1: { label: 'Pact of the Tome', ability: 'cha' },
-      warlock_tome_cantrip_2: { label: 'Pact of the Tome', ability: 'cha' },
-      warlock_tome_cantrip_3: { label: 'Pact of the Tome', ability: 'cha' },
-      warlock_tome_ritual_1: { label: 'Pact of the Tome', ability: 'cha' },
-      warlock_tome_ritual_2: { label: 'Pact of the Tome', ability: 'cha' },
-      warlock_mystic_arcanum_6: { label: 'Mystic Arcanum VI', ability: 'cha' },
-      warlock_mystic_arcanum_7: { label: 'Mystic Arcanum VII', ability: 'cha' },
-      warlock_mystic_arcanum_8: { label: 'Mystic Arcanum VIII', ability: 'cha' },
-      warlock_mystic_arcanum_9: { label: 'Mystic Arcanum IX', ability: 'cha' },
-    },
-  },
 });
 
 // Register choice-to-level mappings for the builder's choice cleanup system.

@@ -6,7 +6,6 @@ export default function install(registry, context = {}) {
     registerClassAdapter,
     registerClassSheetActions,
     registerClassSheetResources,
-    registerClassRuntimeConfig,
     registerClassSheetProficiencies,
     registerResourceSideEffect,
   } = createAdapterBindings(registry, context);
@@ -119,15 +118,6 @@ registerClassSheetProficiencies("Druid", [
   { type: "armor",  values: ["Medium"],  minLevel: 1, requiredChoice: { key: "druid_primal_order", value: "Warden" } },
   { type: "weapon", values: ["Martial"], minLevel: 1, requiredChoice: { key: "druid_primal_order", value: "Warden" } }
 ]);
-
-// Druidic feature (lv.1) always keeps Speak with Animals prepared.
-registerClassRuntimeConfig("Druid", {
-  spellcasting: {
-    alwaysPreparedSpells: [
-      { name: "Speak with Animals", minLevel: 1, level: 1 }
-    ],
-  },
-});
 
 registerResourceSideEffect('wild_resurgence', function (ctx = {}) {
   const res = ctx.resources || {};
