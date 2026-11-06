@@ -7,7 +7,7 @@ import { campaignSheetUrl } from '../campaign/campaignSheetUrl.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import CombatantConditions from './CombatantConditions.jsx';
 import CombatantReminders from './CombatantReminders.jsx';
-import MonsterToken from '../bestiary/MonsterToken.jsx';
+import MonsterToken from '../../../shared/bestiary/MonsterToken.jsx';
 import PortraitBadge from '../../../shared/character/profile/PortraitBadge.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';

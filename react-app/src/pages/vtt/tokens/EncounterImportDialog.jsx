@@ -19,11 +19,11 @@ import {
 import { readPersistedInstance } from '../../encounterbuilder/state/storage.js';
 import { CLOUD_STATES, listInstances, subscribeInstanceData } from '../../../shared/instances/instanceStore.js';
 import { listToolInstances, pullInstance, refreshInstance } from '../../../shared/instances/instanceSync.js';
-import { dedupeFightsByEncounter, isFightSuperseded, mergeLibrary } from '../../encounterbuilder/library/library.js';
-import { buildCombat, restoreFight } from '../../encounterbuilder/combat/combat.js';
-import { hydrateEncounterItems } from '../../encounterbuilder/bestiary/monsterUtils.js';
+import { dedupeFightsByEncounter, isFightSuperseded, mergeLibrary } from '../../../shared/encounter/library.js';
+import { buildCombat, restoreFight } from '../../../shared/encounter/combat.js';
+import { hydrateEncounterItems } from '../../../shared/bestiary/monsterUtils.js';
 import { combatantToToken, importableCombatants } from '../../../shared/vtt/tokens/encounterImport.js';
-import { useMonsterDb } from '../../encounterbuilder/bestiary/useMonsterDb.js';
+import { useMonsterDb } from '../../../shared/bestiary/useMonsterDb.js';
 import { fullscreenContainer } from '../map/fullscreenContainer.js';
 import PiecePreview, { beginPiecePointerDrag } from './PiecePreview.jsx';
 import {

@@ -6,7 +6,7 @@ import { useMemo, useState } from 'react';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import {
   groupLibraryByQuest, listQuestNames, mergeLibrary, toTime,
-} from './library.js';
+} from '../../../shared/encounter/library.js';
 import { normalizeEncounterQuest } from '../state/storage.js';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';

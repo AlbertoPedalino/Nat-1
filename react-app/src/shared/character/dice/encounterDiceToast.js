@@ -1,9 +1,5 @@
-import DiceToast from '../../../shared/character/dice/DiceToast.jsx';
-
-export default function EncounterDiceToast({ toast, onClose }) {
-  return <DiceToast toast={toast} onClose={onClose} />;
-}
-
+// A monster or notation roll (the encounter builder's result shape) as the
+// toast DiceToast shows: label, detail, total and the dice to draw.
 export function buildEncounterDiceToast(result) {
   if (!result) return null;
   const detail = result.mathStr || '';

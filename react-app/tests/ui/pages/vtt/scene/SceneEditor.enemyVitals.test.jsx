@@ -64,8 +64,8 @@ vi.mock('../../../../../src/shared/vtt/session/useSceneLive.js', () => ({
   }),
 }));
 vi.mock('../../../../../src/shared/character/profile/usePortraits.js', () => ({ usePortraits: () => ({}) }));
-vi.mock('../../../../../src/pages/encounterbuilder/bestiary/useMonsterDb.js', () => ({ useMonsterDb: () => ({ monsters: [] }) }));
-vi.mock('../../../../../src/pages/encounterbuilder/combat/useConditionEntries.js', () => ({ useConditionEntries: () => [] }));
+vi.mock('../../../../../src/shared/bestiary/useMonsterDb.js', () => ({ useMonsterDb: () => ({ monsters: [] }) }));
+vi.mock('../../../../../src/shared/character/combat/useConditionEntries.js', () => ({ useConditionEntries: () => [] }));
 vi.mock('../../../../../src/pages/vtt/dungeon/useSceneDungeon.js', () => ({
   useSceneDungeon: () => ({ fights: [], monstersForRoom: () => [], markersForRoom: () => [] }),
 }));

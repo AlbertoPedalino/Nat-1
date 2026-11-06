@@ -1,5 +1,5 @@
 import { summarizeCharacter } from '../../../shared/campaign/sheetSummary.js';
-import { combatantToSheetPatch, resolveCombatVitals } from './sheetSync.js';
+import { combatantToSheetPatch, resolveCombatVitals } from '../../../shared/encounter/sheetSync.js';
 import { clampInt, numberOr } from '../../../shared/numbers.js';
 
 // Maps a stored campaign character row into the player shape the encounter

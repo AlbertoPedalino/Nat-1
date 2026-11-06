@@ -8,7 +8,7 @@ import {
   isFightSuperseded,
   listQuestNames,
   mergeLibrary,
-} from '../../../../../src/pages/encounterbuilder/library/library.js';
+} from '../../../../../src/shared/encounter/library.js';
 
 const fight = (id, encounterId, savedAt) => ({ id, encounterId, savedAt, fight: { combatants: [] } });
 

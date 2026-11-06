@@ -8,7 +8,7 @@ import {
 } from '../../../shared/cloud/api/hexcrawl.js';
 import { createDungeon } from '../../gmboard/dungeon/dungeon.js';
 import { encounterBudget, fillBudget } from '../../../shared/dungeon/roomBudget.js';
-import { crXP, getCR } from '../../encounterbuilder/bestiary/monsterUtils.js';
+import { crXP, getCR } from '../../../shared/bestiary/monsterUtils.js';
 import { roomMarkers } from '../../../shared/dungeon/roomMarkers.js';
 import { seededRandom } from '../../../shared/dungeon/seededRandom.js';
 import {
@@ -18,7 +18,7 @@ import { readCampaignToolLinks } from '../../../shared/cloud/api/campaignTools.j
 import { listToolInstances } from '../../../shared/instances/instanceSync.js';
 import { localFightPresence, sendEncounterToBuilder } from '../../encounterbuilder/sync/handoff.js';
 import { readPersistedInstance } from '../../encounterbuilder/state/storage.js';
-import { restoreFight } from '../../encounterbuilder/combat/combat.js';
+import { restoreFight } from '../../../shared/encounter/combat.js';
 import { importableCombatants } from '../../../shared/vtt/tokens/encounterImport.js';
 import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
 import { listenForRecovery } from '../../../shared/cloud/sync/recoveryTriggers.js';

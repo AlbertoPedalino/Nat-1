@@ -16,11 +16,11 @@ import {
   Typography,
 } from '@mui/material';
 import { ChevronDown, Plus, Search } from 'lucide-react';
-import { CR_ORDER, TYPE_OPTIONS } from '../state/constants.js';
-import { filterQuickMonsters } from '../bestiary/filters.js';
-import { getCR, getType } from '../bestiary/monsterUtils.js';
+import { CR_ORDER, TYPE_OPTIONS } from '../../../shared/bestiary/bestiaryConstants.js';
+import { filterQuickMonsters } from '../../../shared/bestiary/filters.js';
+import { getCR, getType } from '../../../shared/bestiary/monsterUtils.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
-import MonsterToken from '../bestiary/MonsterToken.jsx';
+import MonsterToken from '../../../shared/bestiary/MonsterToken.jsx';
 import { capitalize } from '../../../shared/ui/textCase.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 

@@ -5,7 +5,7 @@ import {
   libraryCardUpdates,
   toFightEntry,
   toFightRow,
-} from '../../../../../src/pages/encounterbuilder/library/fightRecord.js';
+} from '../../../../../src/shared/encounter/fightRecord.js';
 
 const CARD = { id: 1786095432000, name: 'Ebonscar — room 3', encounter: [] };
 const ROW = {

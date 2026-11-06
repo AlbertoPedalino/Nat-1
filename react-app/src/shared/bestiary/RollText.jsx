@@ -1,8 +1,8 @@
 import { Box } from '@mui/material';
-import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
-import { advArgFor } from '../../../shared/character/dice/advantage.js';
+import RollModeArea from '../character/dice/RollModeArea.jsx';
+import { advArgFor } from '../character/dice/advantage.js';
 import { advTag, useStatRollSources } from './statRolls.js';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha } from '../ui/colors.js';
 
 // An inline roller in a stat block ("+5", "2d6 + 3", "Dex +4"). A d20 test
 // also takes a one-off advantage/disadvantage on right-click or long press,

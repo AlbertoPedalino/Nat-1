@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { Box, FormControlLabel, Switch } from '@mui/material';
-import { StatBlockHeader, StatBlockSheet } from '../../encounterbuilder/bestiary/StatBlockDialog.jsx';
+import { StatBlockHeader, StatBlockSheet } from '../../../shared/bestiary/StatBlockSheet.jsx';
 import { getStorageItem, setStorageItem } from '../../../shared/storage/storage.js';
 
 // Per GM device, like the builder's own "show to players": most monster rolls

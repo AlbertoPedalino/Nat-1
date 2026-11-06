@@ -7,9 +7,9 @@ import { HigherLevelBlock, SpellMetaGrid } from '../../shared/character/spells/S
 import { decodeDamageType, itemPropertyLabels } from '../../shared/character/inventory/itemCodes.js';
 import DiceToast from '../../shared/character/dice/DiceToast.jsx';
 import { COMPENDIUM_KIND_COLORS, chipTintStyle } from '../../shared/ui/entityColors.js';
-import { StatBlockHeader, StatBlockSheet } from '../encounterbuilder/bestiary/StatBlockDialog.jsx';
+import { StatBlockHeader, StatBlockSheet } from '../../shared/bestiary/StatBlockSheet.jsx';
 import { rollDice } from '../../shared/character/dice/rollNotation.js';
-import { buildEncounterDiceToast } from '../encounterbuilder/rolls/EncounterDiceToast.jsx';
+import { buildEncounterDiceToast } from '../../shared/character/dice/encounterDiceToast.js';
 import { compendiumKind } from './compendiumIndex.js';
 
 // One compendium entry, shown the way the rest of the app shows that kind: a

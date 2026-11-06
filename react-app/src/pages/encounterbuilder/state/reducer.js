@@ -22,7 +22,7 @@ import {
   snapshotFight,
   toggleCombatantCondition,
   autoFightName,
-} from '../combat/combat.js';
+} from '../../../shared/encounter/combat.js';
 import { addRollLogEntry } from '../rolls/dice.js';
 import {
   createDefaultFumbleCategory,
@@ -36,13 +36,13 @@ import {
   normalizeNegotiationThreshold,
   resolveNegotiation,
 } from '../negotiation/negotiation.js';
-import { PLAYER_COLORS } from './constants.js';
+import { PLAYER_COLORS } from '../../../shared/encounter/combatLabels.js';
 import { makeSavedEncounter, normalizeEncounterQuest } from './storage.js';
-import { hydrateEncounterItems, monsterKey, toEncounterMonster } from '../bestiary/monsterUtils.js';
-import { combatantToSheetPatch, resolveCombatVitals } from '../campaign/sheetSync.js';
+import { hydrateEncounterItems, monsterKey, toEncounterMonster } from '../../../shared/bestiary/monsterUtils.js';
+import { combatantToSheetPatch, resolveCombatVitals } from '../../../shared/encounter/sheetSync.js';
 import { SYNCED_VITALS, pickCharacterVitals } from '../../../shared/character/combat/vitals.js';
 import { absorbMonsterVitals } from '../../../shared/vtt/tokens/fightVitals.js';
-import { dedupeFightsByEncounter, dedupeLibraryById } from '../library/library.js';
+import { dedupeFightsByEncounter, dedupeLibraryById } from '../../../shared/encounter/library.js';
 import { clampInt } from '../../../shared/numbers.js';
 
 export const DEFAULT_PARTY = Object.freeze({ count: 4, level: 5 });

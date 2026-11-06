@@ -1,10 +1,10 @@
-import { SYNCED_VITALS } from '../../../shared/character/combat/vitals.js';
+import { SYNCED_VITALS } from '../character/combat/vitals.js';
 import {
   DEAD_CONDITION_KEY,
   normalizeConditions,
   setConditionActive,
-} from '../../../shared/character/combat/conditions.js';
-import { clampInt, numberOr } from '../../../shared/numbers.js';
+} from '../character/combat/conditions.js';
+import { clampInt, numberOr } from '../numbers.js';
 
 // The synced-field contract (which fields, how they map/clamp) lives in
 // shared/character/vitals.js. These functions are the encounter-side combat

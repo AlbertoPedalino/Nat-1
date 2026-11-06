@@ -3,7 +3,7 @@ import { rollDice } from '../../../shared/character/dice/rollNotation.js';
 import { makeSavedEncounter } from './storage.js';
 import { encounterReducer, createInitialState } from './reducer.js';
 import { useEncounterPersistence } from './useEncounterPersistence.js';
-import { useMonsterDb } from '../bestiary/useMonsterDb.js';
+import { useMonsterDb } from '../../../shared/bestiary/useMonsterDb.js';
 import { useCampaignPlayers } from '../campaign/useCampaignPlayers.js';
 import { useCharacterVitalSync } from '../campaign/useCharacterVitalSync.js';
 import { useCharacterVitalDispatch } from '../campaign/useCharacterVitalDispatch.js';

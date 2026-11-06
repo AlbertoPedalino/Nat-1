@@ -1,6 +1,6 @@
 import { Box, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 import InlineText from './InlineText.jsx';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha } from '../ui/colors.js';
 
 export default function EntryRenderer({ entries, onRoll }) {
   if (entries == null) return null;

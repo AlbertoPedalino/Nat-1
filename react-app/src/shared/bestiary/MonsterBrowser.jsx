@@ -15,13 +15,13 @@ import {
   Typography,
 } from '@mui/material';
 import { Plus } from 'lucide-react';
-import { CR_ORDER, TYPE_OPTIONS } from '../state/constants.js';
+import { CR_ORDER, TYPE_OPTIONS } from './bestiaryConstants.js';
 import { filterMonsters } from './filters.js';
 import { crXP, getCR, getType } from './monsterUtils.js';
 import MonsterToken from './MonsterToken.jsx';
-import { capitalize } from '../../../shared/ui/textCase.js';
-import { formatNumber } from '../../../shared/ui/numberFormat.js';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { capitalize } from '../ui/textCase.js';
+import { formatNumber } from '../ui/numberFormat.js';
+import { UI_COLORS, uiAlpha } from '../ui/colors.js';
 
 const PAGE_SIZE = 50;
 

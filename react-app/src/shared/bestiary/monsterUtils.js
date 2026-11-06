@@ -1,7 +1,7 @@
-import { CR_XP, SIZE_LABELS } from '../state/constants.js';
-import { FALLBACK_MONSTER_TOKEN, GAME_IMAGE_BASE } from '../../../shared/content/gameData.js';
-import { parseCr } from '../../../shared/character/forms/beasts.js';
-import { clampInt, numberOr } from '../../../shared/numbers.js';
+import { CR_XP, SIZE_LABELS } from './bestiaryConstants.js';
+import { FALLBACK_MONSTER_TOKEN, GAME_IMAGE_BASE } from '../content/gameData.js';
+import { parseCr } from '../character/forms/beasts.js';
+import { clampInt, numberOr } from '../numbers.js';
 
 export function getCR(cr) {
   if (!cr) return '0';

@@ -4,7 +4,7 @@ import {
   FIGHT_COLUMNS,
   toFightEntry,
   toFightRow,
-} from '../../../pages/encounterbuilder/library/fightRecord.js';
+} from '../../encounter/fightRecord.js';
 
 // Fights, as rows.
 //

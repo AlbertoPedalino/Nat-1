@@ -1,8 +1,8 @@
 import { calculateDifficulty } from '../builder/difficulty.js';
-import { dedupeLibraryById } from '../library/library.js';
+import { dedupeLibraryById } from '../../../shared/encounter/library.js';
 import { normalizeFumbleTables } from '../rolls/fumbles.js';
 import { normalizeNegotiation } from '../negotiation/negotiation.js';
-import { hydrateEncounterItems, serializeEncounterItem } from '../bestiary/monsterUtils.js';
+import { hydrateEncounterItems, serializeEncounterItem } from '../../../shared/bestiary/monsterUtils.js';
 import { readInstanceValue, saveLocal } from '../../../shared/instances/instanceStore.js';
 import { formatDateTime } from '../../../shared/ui/dateFormat.js';
 

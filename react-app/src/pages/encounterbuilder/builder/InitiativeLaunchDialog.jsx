@@ -3,7 +3,7 @@ import {
   Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, ToggleButton, ToggleButtonGroup, Typography,
 } from '@mui/material';
 import { Swords } from 'lucide-react';
-import { initiativeRoster } from '../combat/combat.js';
+import { initiativeRoster } from '../../../shared/encounter/combat.js';
 import { advArgFor, rollModeLabel, withExtraSource } from '../../../shared/character/dice/advantage.js';
 
 // Launch with initiative advantage/disadvantage for the creatures that need it

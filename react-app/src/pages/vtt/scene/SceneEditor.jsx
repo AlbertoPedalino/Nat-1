@@ -34,14 +34,14 @@ import { useSceneDungeon } from '../dungeon/useSceneDungeon.js';
 import { useSceneContent } from './useSceneContent.js';
 import { useCampaignRoster } from './useCampaignRoster.js';
 import { useVttRolls } from '../rolls/useVttRolls.js';
-import { useMonsterDb } from '../../encounterbuilder/bestiary/useMonsterDb.js';
+import { useMonsterDb } from '../../../shared/bestiary/useMonsterDb.js';
 import { parseSourceRef } from '../../../shared/vtt/tokens/encounterSync.js';
 import {
   showsFight,
 } from '../../../shared/vtt/tokens/initiative.js';
 import HexcrawlCorner from '../hexcrawl/HexcrawlCorner.jsx';
 import HexResultDialog from '../hexcrawl/HexResultDialog.jsx';
-import { useConditionEntries } from '../../encounterbuilder/combat/useConditionEntries.js';
+import { useConditionEntries } from '../../../shared/character/combat/useConditionEntries.js';
 import EncounterImportDialog from '../tokens/EncounterImportDialog.jsx';
 import MonsterPickerDialog from '../tokens/MonsterPickerDialog.jsx';
 import DiceToast from '../../../shared/character/dice/DiceToast.jsx';

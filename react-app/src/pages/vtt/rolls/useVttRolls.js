@@ -13,7 +13,7 @@ import {
 import { rollCustomFormula } from '../../../shared/vtt/rolls/customRoll.js';
 import { normalizeRollIdentity } from '../../../shared/character/dice/rollLogPresentation.js';
 import { rollDice } from '../../../shared/character/dice/rollNotation.js';
-import { buildEncounterDiceToast } from '../../encounterbuilder/rolls/EncounterDiceToast.jsx';
+import { buildEncounterDiceToast } from '../../../shared/character/dice/encounterDiceToast.js';
 import { makeId } from '../../../shared/ids.js';
 
 export function useVttRolls({ campaignId, role, roster, tokens }) {

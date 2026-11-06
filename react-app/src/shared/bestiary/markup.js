@@ -1,6 +1,6 @@
 import { spell5eUrl } from './monsterUtils.js';
-import { signed } from '../../../shared/ui/numberFormat.js';
-import { isStatBlockLeadIn, statBlockTagText } from '../../../shared/content/statBlockTags.js';
+import { signed } from '../ui/numberFormat.js';
+import { isStatBlockLeadIn, statBlockTagText } from '../content/statBlockTags.js';
 
 function text(value) {
   return { type: 'text', text: String(value || '') };

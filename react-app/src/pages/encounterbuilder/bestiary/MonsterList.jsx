@@ -1,5 +1,5 @@
 import { Paper } from '@mui/material';
-import MonsterBrowser from './MonsterBrowser.jsx';
+import MonsterBrowser from '../../../shared/bestiary/MonsterBrowser.jsx';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 
 // Thin wrapper: the browser itself is shared with the battle map, and only the

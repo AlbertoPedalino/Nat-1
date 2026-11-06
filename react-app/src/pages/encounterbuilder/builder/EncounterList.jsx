@@ -5,7 +5,7 @@ import { useMemo, useState } from 'react';
 import { Minus, Plus, Save, SlidersHorizontal, Swords, Trash2 } from 'lucide-react';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import { calculateDifficulty } from './difficulty.js';
-import { listQuestNames } from '../library/library.js';
+import { listQuestNames } from '../../../shared/encounter/library.js';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import DifficultyBar from './DifficultyBar.jsx';

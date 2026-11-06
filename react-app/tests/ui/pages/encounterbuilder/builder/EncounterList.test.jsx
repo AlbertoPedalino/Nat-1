@@ -6,7 +6,7 @@ import EncounterList from '../../../../../src/pages/encounterbuilder/builder/Enc
 import LibraryView from '../../../../../src/pages/encounterbuilder/library/LibraryView.jsx';
 import { readPersistedInstance } from '../../../../../src/pages/encounterbuilder/state/storage.js';
 
-vi.mock('../../../../../src/pages/encounterbuilder/bestiary/useMonsterDb.js', () => {
+vi.mock('../../../../../src/shared/bestiary/useMonsterDb.js', () => {
   const monsters = [{ name: 'Goblin', source: 'MM', cr: '1/4' }];
   return { useMonsterDb: () => ({ monsters, status: 'ready' }) };
 });

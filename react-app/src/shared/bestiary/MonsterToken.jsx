@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Avatar } from '@mui/material';
 import { getMonsterTokenUrls } from './monsterUtils.js';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS, uiAlpha } from '../ui/colors.js';
 
 export default function MonsterToken({ monster, size = 32, fallbackText = '?' }) {
   const urls = getMonsterTokenUrls(monster);

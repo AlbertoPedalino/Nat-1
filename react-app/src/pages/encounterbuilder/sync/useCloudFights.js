@@ -12,7 +12,7 @@ import {
 } from '../../../shared/cloud/api/encounterFights.js';
 import { diffRevisions, readChanged } from '../../../shared/cloud/sync/revisionDiff.js';
 import { externalDelta } from './externalSync.js';
-import { fightSignature, libraryCardUpdates, toFightEntry } from '../library/fightRecord.js';
+import { fightSignature, libraryCardUpdates, toFightEntry } from '../../../shared/encounter/fightRecord.js';
 import { listenForRecovery } from '../../../shared/cloud/sync/recoveryTriggers.js';
 
 // The fights of this instance, with the database as the record.

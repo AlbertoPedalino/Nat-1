@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useRollChannel } from '../../../shared/cloud/sync/useRollChannel.js';
 import { normalizeRoll } from '../../../shared/vtt/rolls/rollFeed.js';
-import { buildEncounterDiceToast } from './EncounterDiceToast.jsx';
+import { buildEncounterDiceToast } from '../../../shared/character/dice/encounterDiceToast.js';
 import { normalizeRollIdentity } from '../../../shared/character/dice/rollLogPresentation.js';
 import { getStorageJson, setStorageJson } from '../../../shared/storage/storage.js';
 import { makeId } from '../../../shared/ids.js';

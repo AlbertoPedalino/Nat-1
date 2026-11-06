@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { creatureRollSources } from '../../../../../src/shared/character/combat/rollSources.js';
-import { d20RollKind } from '../../../../../src/pages/encounterbuilder/bestiary/statRolls.js';
+import { d20RollKind } from '../../../../../src/shared/bestiary/statRolls.js';
 
 // A creature's own d20 tests, from its conditions.
 

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Box, Button, Paper, Stack, Typography } from '@mui/material';
 import { ArrowLeft, ArrowRight, RotateCcw, Swords, X } from 'lucide-react';
-import { isFightResumable } from '../library/library.js';
+import { isFightResumable } from '../../../shared/encounter/library.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import CombatantCard from './CombatantCard.jsx';
 import Reinforcements from './Reinforcements.jsx';

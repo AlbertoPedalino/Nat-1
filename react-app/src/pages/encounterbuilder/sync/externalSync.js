@@ -8,7 +8,7 @@
 //
 // Pure, so the rule for "new or newer" is testable without a browser.
 
-import { cardTime } from '../library/library.js';
+import { cardTime } from '../../../shared/encounter/library.js';
 
 export function externalDelta(persisted, held = {}) {
   const heldFights = held.fights || [];

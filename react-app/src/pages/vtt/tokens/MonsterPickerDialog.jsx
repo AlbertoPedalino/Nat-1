@@ -11,8 +11,8 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { useMonsterDb } from '../../encounterbuilder/bestiary/useMonsterDb.js';
-import MonsterBrowser from '../../encounterbuilder/bestiary/MonsterBrowser.jsx';
+import { useMonsterDb } from '../../../shared/bestiary/useMonsterDb.js';
+import MonsterBrowser from '../../../shared/bestiary/MonsterBrowser.jsx';
 import { monsterToToken } from '../../../shared/vtt/tokens/encounterImport.js';
 import { fullscreenContainer } from '../map/fullscreenContainer.js';
 import { beginPiecePointerDrag } from './PiecePreview.jsx';

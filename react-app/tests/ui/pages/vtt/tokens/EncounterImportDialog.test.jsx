@@ -37,16 +37,16 @@ vi.mock('../../../../../src/shared/instances/instanceSync.js', () => ({
 
 // The bestiary and the snapshot restore are someone else's tests: what is under
 // examination here is which encounters the dialog offers.
-vi.mock('../../../../../src/pages/encounterbuilder/bestiary/useMonsterDb.js', () => ({
+vi.mock('../../../../../src/shared/bestiary/useMonsterDb.js', () => ({
   useMonsterDb: () => ({ monsters: [], status: 'ready' }),
 }));
-vi.mock('../../../../../src/pages/encounterbuilder/combat/combat.js', () => ({
+vi.mock('../../../../../src/shared/encounter/combat.js', () => ({
   restoreFight: (entry) => entry.fight,
   buildCombat: (encounter) => ({
     combatants: (encounter || []).map((item, index) => ({ id: index, name: item.name })),
   }),
 }));
-vi.mock('../../../../../src/pages/encounterbuilder/bestiary/monsterUtils.js', () => ({
+vi.mock('../../../../../src/shared/bestiary/monsterUtils.js', () => ({
   hydrateEncounterItems: (items) => items || [],
 }));
 vi.mock('../../../../../src/shared/vtt/tokens/encounterImport.js', () => ({

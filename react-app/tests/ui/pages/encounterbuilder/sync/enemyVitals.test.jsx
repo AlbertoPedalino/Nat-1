@@ -2,8 +2,8 @@ import { useReducer, useRef } from 'react';
 import { act, render, waitFor } from '@testing-library/react';
 import { beforeEach, vi } from 'vitest';
 import { createInitialState, encounterReducer } from '../../../../../src/pages/encounterbuilder/state/reducer.js';
-import { snapshotFight } from '../../../../../src/pages/encounterbuilder/combat/combat.js';
-import { toFightEntry } from '../../../../../src/pages/encounterbuilder/library/fightRecord.js';
+import { snapshotFight } from '../../../../../src/shared/encounter/combat.js';
+import { toFightEntry } from '../../../../../src/shared/encounter/fightRecord.js';
 import { useCloudFights } from '../../../../../src/pages/encounterbuilder/sync/useCloudFights.js';
 import { useMonsterVitalDispatch } from '../../../../../src/pages/encounterbuilder/sync/useMonsterVitalDispatch.js';
 

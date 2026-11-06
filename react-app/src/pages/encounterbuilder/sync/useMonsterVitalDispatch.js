@@ -10,7 +10,7 @@ import {
   monsterVitalsBase,
   monsterVitalsPatch,
 } from '../../../shared/vtt/tokens/fightVitals.js';
-import { snapshotFight } from '../combat/combat.js';
+import { snapshotFight } from '../../../shared/encounter/combat.js';
 import { encounterReducer } from '../state/reducer.js';
 
 // Everything that changes an enemy's vitals or marks.

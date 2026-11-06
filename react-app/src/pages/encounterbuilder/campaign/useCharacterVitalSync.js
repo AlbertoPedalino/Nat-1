@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useCharacterDigests } from '../../../shared/cloud/sync/useCharacterDigests.js';
 import { sheetVitalsFromDigest } from '../../../shared/campaign/characterDigest.js';
-import { sheetVitalsToCombat } from './sheetSync.js';
+import { sheetVitalsToCombat } from '../../../shared/encounter/sheetSync.js';
 
 // Linked players' sheet vitals into the encounter: one digest channel for all
 // of them (16_character_digests.sql), instead of one full-sheet subscription

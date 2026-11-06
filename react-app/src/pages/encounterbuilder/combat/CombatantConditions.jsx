@@ -12,7 +12,7 @@ import {
   ConditionCard,
   ConditionPill,
 } from '../../../shared/character/combat/ConditionChips.jsx';
-import { useConditionEntries } from './useConditionEntries.js';
+import { useConditionEntries } from '../../../shared/character/combat/useConditionEntries.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import MarkerRow from './MarkerRow.jsx';
 

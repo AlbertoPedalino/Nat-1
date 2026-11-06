@@ -5,11 +5,11 @@ import { loadClassIndex, loadOptionalFeatures } from '../../shared/content/catal
 import { loadItemGroups, loadItems } from '../../shared/content/catalogs/itemData.js';
 import { loadSpells } from '../../shared/content/catalogs/spellData.js';
 import { CLASS_ALLOWED_SOURCES, isAllowedSource } from '../../shared/content/sourcePriority.js';
-import { loadMonsterDatabase } from '../encounterbuilder/bestiary/bestiary.js';
+import { loadMonsterDatabase } from '../../shared/bestiary/bestiary.js';
 import { GAME_IMAGE_BASE, loadGameData } from '../../shared/content/gameData.js';
 import { itemGroupLookup, itemImageMap, itemPicture } from './itemCatalog.js';
 import { spellClasses } from './spellCatalog.js';
-import { getMonsterTokenUrls } from '../encounterbuilder/bestiary/monsterUtils.js';
+import { getMonsterTokenUrls } from '../../shared/bestiary/monsterUtils.js';
 import { buildCompendiumIndex } from './compendiumIndex.js';
 
 // Every kind at once, each from the loader the rest of the app uses (and so

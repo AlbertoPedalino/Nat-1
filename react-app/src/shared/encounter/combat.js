@@ -1,19 +1,19 @@
-import { COMBAT_LABEL_COLORS, COMBAT_LABEL_SHAPES, PLAYER_COLORS } from '../state/constants.js';
+import { COMBAT_LABEL_COLORS, COMBAT_LABEL_SHAPES, PLAYER_COLORS } from './combatLabels.js';
 import { getAC, getHP } from '../bestiary/monsterUtils.js';
-import { abilityModifier } from '../../../shared/character/progression/abilityModifier.js';
-import { resolveCombatVitals, combatVitalsMatch } from '../campaign/sheetSync.js';
+import { abilityModifier } from '../character/progression/abilityModifier.js';
+import { resolveCombatVitals, combatVitalsMatch } from './sheetSync.js';
 import {
   normalizeConditions,
   setConditionActive,
   toggleCondition as toggleConditionKey,
   DEAD_CONDITION_KEY,
   EXHAUSTION_KEY,
-} from '../../../shared/character/combat/conditions.js';
-import { addReminder, normalizeEffects, removeEffect } from '../../../shared/character/combat/combatEffects.js';
-import { creatureRollSources } from '../../../shared/character/combat/rollSources.js';
-import { advArgFor, withExtraSource } from '../../../shared/character/dice/advantage.js';
-import { rollD20 } from '../../../shared/character/dice/dice.js';
-import { clampInt, numberOr } from '../../../shared/numbers.js';
+} from '../character/combat/conditions.js';
+import { addReminder, normalizeEffects, removeEffect } from '../character/combat/combatEffects.js';
+import { creatureRollSources } from '../character/combat/rollSources.js';
+import { advArgFor, withExtraSource } from '../character/dice/advantage.js';
+import { rollD20 } from '../character/dice/dice.js';
+import { clampInt, numberOr } from '../numbers.js';
 
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 

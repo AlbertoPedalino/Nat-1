@@ -10,14 +10,14 @@
 // Everything here goes through the builder's own storage functions rather than
 // touching its keys, so a change to how it stores things changes this too.
 
-import { buildCombat, restoreFight, snapshotFight } from '../combat/combat.js';
+import { buildCombat, restoreFight, snapshotFight } from '../../../shared/encounter/combat.js';
 import { importableCombatants } from '../../../shared/vtt/tokens/encounterImport.js';
 import {
   makeSavedEncounter, persistFights, persistLibrary, readPersistedInstance,
 } from '../state/storage.js';
 import { getInstance } from '../../../shared/instances/instanceStore.js';
-import { hydrateEncounterItems } from '../bestiary/monsterUtils.js';
-import { isFightSuperseded } from '../library/library.js';
+import { hydrateEncounterItems } from '../../../shared/bestiary/monsterUtils.js';
+import { isFightSuperseded } from '../../../shared/encounter/library.js';
 
 // The builder's own shape for a line of an encounter: a creature and how many.
 function encounterItem(monster, count) {

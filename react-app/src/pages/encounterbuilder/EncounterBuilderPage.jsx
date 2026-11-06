@@ -13,7 +13,8 @@ import LibraryView from './library/LibraryView.jsx';
 import StatBlockDialog from './bestiary/StatBlockDialog.jsx';
 import RollSharingControls from './rolls/RollSharingControls.jsx';
 import RollLogLauncher from './rolls/RollLogLauncher.jsx';
-import EncounterDiceToast, { buildEncounterDiceToast } from './rolls/EncounterDiceToast.jsx';
+import DiceToast from '../../shared/character/dice/DiceToast.jsx';
+import { buildEncounterDiceToast } from '../../shared/character/dice/encounterDiceToast.js';
 import CriticalFumblesDialog from './rolls/CriticalFumblesDialog.jsx';
 import NegotiationDialog from './negotiation/NegotiationDialog.jsx';
 import { EncounterBuilderProvider, useEncounterBuilder } from './state/EncounterBuilderContext.jsx';
@@ -119,7 +120,7 @@ function EncounterBuilderShell({ tool }) {
       />
       <CriticalFumblesDialog open={fumblesOpen} onClose={() => setFumblesOpen(false)} />
       <NegotiationDialog open={negotiationOpen} onClose={() => setNegotiationOpen(false)} />
-      {diceToast ? <EncounterDiceToast toast={diceToast} onClose={() => setDiceToast(null)} /> : null}
+      {diceToast ? <DiceToast toast={diceToast} onClose={() => setDiceToast(null)} /> : null}
     </Box>
   );
 }

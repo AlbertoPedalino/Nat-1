@@ -7,7 +7,7 @@
 import { normalizeSearchText } from '../../shared/content/searchText.js';
 import { CORE_2024_SOURCE_PRIORITY, isAllowedSource, sourceRank } from '../../shared/content/sourcePriority.js';
 import { decodeItemTypeLabel } from '../../shared/character/inventory/itemCodes.js';
-import { getCR, getType } from '../encounterbuilder/bestiary/monsterUtils.js';
+import { getCR, getType } from '../../shared/bestiary/monsterUtils.js';
 import { capitalize } from '../../shared/ui/textCase.js';
 
 export const COMPENDIUM_KINDS = Object.freeze([

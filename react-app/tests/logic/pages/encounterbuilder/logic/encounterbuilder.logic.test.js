@@ -1,5 +1,5 @@
 import test from 'node:test';
-import { libraryCardUpdates } from '../../../../../src/pages/encounterbuilder/library/fightRecord.js';
+import { libraryCardUpdates } from '../../../../../src/shared/encounter/fightRecord.js';
 import assert from 'node:assert/strict';
 
 test('cloud card versions merge once and hydration repairs existing duplicates', () => {
@@ -34,7 +34,7 @@ import {
   setTempHp,
   snapshotFight,
   toggleCombatantCondition,
-} from '../../../../../src/pages/encounterbuilder/combat/combat.js';
+} from '../../../../../src/shared/encounter/combat.js';
 import { effectId } from '../../../../../src/shared/character/combat/combatEffects.js';
 import { rollDice, rollDiceFormula } from '../../../../../src/shared/character/dice/rollNotation.js';
 import {
@@ -52,12 +52,12 @@ import {
 } from '../../../../../src/pages/encounterbuilder/negotiation/negotiation.js';
 import {
   groupLibraryByQuest, isFightResumable, listQuestNames, mergeLibrary,
-} from '../../../../../src/pages/encounterbuilder/library/library.js';
-import { cleanToText, parseCleanTokens } from '../../../../../src/pages/encounterbuilder/bestiary/markup.js';
-import { isEncounterMonster, resolveLegendaryGroups } from '../../../../../src/pages/encounterbuilder/bestiary/bestiary.js';
-import { crPB } from '../../../../../src/pages/encounterbuilder/bestiary/monsterUtils.js';
+} from '../../../../../src/shared/encounter/library.js';
+import { cleanToText, parseCleanTokens } from '../../../../../src/shared/bestiary/markup.js';
+import { isEncounterMonster, resolveLegendaryGroups } from '../../../../../src/shared/bestiary/bestiary.js';
+import { crPB } from '../../../../../src/shared/bestiary/monsterUtils.js';
 import { SYNCED_DATA_KEYS } from '../../../../../src/shared/character/combat/vitals.js';
-import { combatantToSheetPatch, resolveCombatVitals, sheetPatchKey, sheetVitalsToCombat, sheetVitalsToSheetPatch } from '../../../../../src/pages/encounterbuilder/campaign/sheetSync.js';
+import { combatantToSheetPatch, resolveCombatVitals, sheetPatchKey, sheetVitalsToCombat, sheetVitalsToSheetPatch } from '../../../../../src/shared/encounter/sheetSync.js';
 import { createInitialState, encounterReducer } from '../../../../../src/pages/encounterbuilder/state/reducer.js';
 import { makeSavedEncounter } from '../../../../../src/pages/encounterbuilder/state/storage.js';
 import { SYNCED_VITALS } from '../../../../../src/shared/character/combat/vitals.js';
@@ -1343,7 +1343,7 @@ test('a launch choice gives one creature advantage or disadvantage on initiative
 });
 
 test('a speed with a condition reads as one, and hover is not a speed', async () => {
-  const { formatSpeed } = await import('../../../../../src/pages/encounterbuilder/bestiary/monsterUtils.js');
+  const { formatSpeed } = await import('../../../../../src/shared/bestiary/monsterUtils.js');
   assert.equal(formatSpeed({ walk: 10, fly: { number: 60, condition: '(hover)' }, canHover: true }), '10 ft., fly 60 ft. (hover)');
   assert.equal(formatSpeed({ walk: 30, swim: 30 }), '30 ft., swim 30 ft.');
   assert.equal(formatSpeed(null), '—');

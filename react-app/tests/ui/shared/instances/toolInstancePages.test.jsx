@@ -69,9 +69,8 @@ vi.mock('../../../../src/pages/encounterbuilder/rolls/RollSharingControls.jsx', 
 vi.mock('../../../../src/pages/encounterbuilder/rolls/RollLogLauncher.jsx', stub);
 vi.mock('../../../../src/pages/encounterbuilder/rolls/CriticalFumblesDialog.jsx', stub);
 vi.mock('../../../../src/pages/encounterbuilder/negotiation/NegotiationDialog.jsx', stub);
-vi.mock('../../../../src/pages/encounterbuilder/rolls/EncounterDiceToast.jsx', () => ({
-  default: () => null, buildEncounterDiceToast: () => null,
-}));
+vi.mock('../../../../src/shared/character/dice/encounterDiceToast.js', () => ({ buildEncounterDiceToast: () => null }));
+vi.mock('../../../../src/shared/character/dice/DiceToast.jsx', stub);
 vi.mock('../../../../src/shared/character/dice/CustomRollDialog.jsx', stub);
 vi.mock('../../../../src/pages/gmboard/hexcrawl/HexcrawlView.jsx', () => ({ default: () => <div data-testid="editor" /> }));
 vi.mock('../../../../src/pages/gmboard/dungeon/DungeonView.jsx', stub);

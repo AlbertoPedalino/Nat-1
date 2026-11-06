@@ -7,7 +7,7 @@ import { X } from 'lucide-react';
 import { List } from 'react-window';
 import SearchField from '../../shared/ui/SearchField.jsx';
 import { fullscreenContainer } from '../vtt/map/fullscreenContainer.js';
-import { SOURCE_LABELS } from '../encounterbuilder/state/constants.js';
+import { SOURCE_LABELS } from '../../shared/bestiary/bestiaryConstants.js';
 import CompendiumDetail from './CompendiumDetail.jsx';
 
 // A compendium catalog: a filter bar of selects over one kind's entries, a

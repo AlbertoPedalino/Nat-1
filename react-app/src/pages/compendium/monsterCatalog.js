@@ -5,8 +5,8 @@
 
 import { normalizeSearchText } from '../../shared/content/searchText.js';
 import { parseCr } from '../../shared/character/forms/beasts.js';
-import { getCR, getHP, getAC, getType, getSizeLabel } from '../encounterbuilder/bestiary/monsterUtils.js';
-import { CR_ORDER } from '../encounterbuilder/state/constants.js';
+import { getCR, getHP, getAC, getType, getSizeLabel } from '../../shared/bestiary/monsterUtils.js';
+import { CR_ORDER } from '../../shared/bestiary/bestiaryConstants.js';
 
 export const CHALLENGE_RATINGS = Object.freeze(CR_ORDER.map((cr) => ({ key: cr, label: `CR ${cr}` })));
 

@@ -1,5 +1,5 @@
-import { RAW_ALLOWED_SOURCES, SOURCE_LABELS } from '../state/constants.js';
-import { loadGameData } from '../../../shared/content/gameData.js';
+import { RAW_ALLOWED_SOURCES, SOURCE_LABELS } from './bestiaryConstants.js';
+import { loadGameData } from '../content/gameData.js';
 import { monsterKey } from './monsterUtils.js';
 
 function legendaryGroupKey(name, source) {

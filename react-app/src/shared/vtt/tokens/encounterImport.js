@@ -4,7 +4,7 @@
 // scenes are cloud rows — so this is a translation and not a shared model. It
 // lives here, pure, because the mapping is where the judgement calls are.
 
-import { getHP, getMonsterTokenUrls } from '../../../pages/encounterbuilder/bestiary/monsterUtils.js';
+import { getHP, getMonsterTokenUrls } from '../../bestiary/monsterUtils.js';
 import { makeSourceRef } from './encounterSync.js';
 
 // D&D creature sizes in squares. A Large creature is the first that stops
