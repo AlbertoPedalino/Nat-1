@@ -5,9 +5,9 @@ import BuilderPanel from '../layout/BuilderPanel.jsx';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
-import { describeMulticlassProficiencies } from '../../../shared/character/progression/multiclassProficiencies.js';
+import { describeMulticlassProficiencies, getMulticlassProficiencies } from '../../../shared/character/progression/multiclassProficiencies.js';
 import { getPrimaryClassLevel } from './calculations.js';
-import { checkMulticlassPrerequisite, getMulticlassProficienciesGained } from './multiclassRules.js';
+import { checkMulticlassPrerequisite } from './multiclassRules.js';
 import { classIcon } from '../../../shared/character/profile/classIcon.js';
 import { hitDieFaces } from '../../../shared/character/combat/hp.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
@@ -192,7 +192,7 @@ export default function ClassPanel({ state, character, dispatch }) {
                     ? checkMcPrereq(character, cls.name)
                     : { met: false, reason: 'Class already taken' }
                 : { met: true, reason: '' };
-              const profGained = isExtraTab ? getMulticlassProficienciesGained(cls.name, cls) : null;
+              const profGained = isExtraTab ? getMulticlassProficiencies(cls.name, cls) : null;
               const details = isExtraTab ? <MulticlassProfDetails className={cls.name} profs={profGained} /> : null;
               return (
                 <ClassRow

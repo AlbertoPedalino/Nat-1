@@ -42,14 +42,3 @@ export function checkMulticlassPrerequisite(character, className) {
   };
 }
 
-export function getMulticlassProficienciesGained(className, cls = null) {
-  const cfg = adapterRegistry.getClassRuntimeConfig(className);
-  // Live only: adapter runtime config, then the class JSON
-  // (`cls.multiclassing.proficienciesGained`). No hardcoded fallback — returns
-  // null when the data source carries nothing.
-  return cfg?.multiclassProficienciesGained
-    || cls?.multiclassing?.proficienciesGained
-    || cls?.multiclassProficienciesGained
-    || null;
-}
-
