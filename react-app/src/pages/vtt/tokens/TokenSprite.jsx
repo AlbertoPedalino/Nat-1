@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Box, Tooltip, Typography } from '@mui/material';
 import { RotateCw, Skull } from 'lucide-react';
 import { effectId } from '../../../shared/character/combat/combatEffects.js';
-import { normalizeDeathSaves } from '../../../shared/character/combat/vitals.js';
+import { hpTone, normalizeDeathSaves } from '../../../shared/character/combat/vitals.js';
 import { DEAD_CONDITION_KEY, conditionLabel } from '../../../shared/character/combat/conditions.js';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import { classIcon } from '../../../shared/character/profile/classIcon.js';
@@ -607,10 +607,10 @@ function ConditionTokenPill({ conditionKey, entries, tooltipOpen, onInspect }) {
 }
 
 // Green while healthy, amber past half, red when bloodied enough to matter.
+const HP_TONE_COLORS = { healthy: VTT_COLORS.hpHealthy, wounded: VTT_COLORS.hpWounded, critical: VTT_COLORS.hpCritical };
+
 function hpColor(ratio) {
-  if (ratio > 0.5) return VTT_COLORS.hpHealthy;
-  if (ratio > 0.25) return VTT_COLORS.hpWounded;
-  return VTT_COLORS.hpCritical;
+  return HP_TONE_COLORS[hpTone(ratio, 1)];
 }
 
 // A pointy-top hex is narrow at its top and bottom points, so on a hex grid

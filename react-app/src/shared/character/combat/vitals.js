@@ -149,3 +149,12 @@ export function clampCharacterVitals(raw = {}, { maxHP = null, fallback = {} } =
   for (const field of SYNCED_VITALS) out[field.data] = field.clampData(raw[field.data], fallback[field.data], { maxHP });
   return out;
 }
+
+// How hurt a creature looks: 'healthy' above half its Hit Points, 'wounded'
+// above a quarter, 'critical' below that. Each view paints the three its way.
+export function hpTone(current, max) {
+  const ratio = Number(max) > 0 ? Number(current) / Number(max) : 0;
+  if (ratio > 0.5) return 'healthy';
+  if (ratio > 0.25) return 'wounded';
+  return 'critical';
+}

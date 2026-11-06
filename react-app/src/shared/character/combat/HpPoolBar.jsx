@@ -2,13 +2,14 @@ import { Box, Typography } from '@mui/material';
 import HpStepper from './HpStepper.jsx';
 import { UI_COLORS } from '../../ui/colors.js';
 import { UI_FONTS } from '../../ui/fonts.js';
+import { hpTone } from './vitals.js';
 
 const CINZEL = UI_FONTS.display;
 
-// Green above half, amber below, red at zero — the shared HP readout colour ramp.
+const HP_TONE_COLORS = { healthy: UI_COLORS.success, wounded: UI_COLORS.warning, critical: UI_COLORS.dangerHp };
+
 function hpColor(current, max) {
-  if (current <= 0) return UI_COLORS.dangerHp;
-  return current > max / 2 ? UI_COLORS.success : UI_COLORS.warning;
+  return HP_TONE_COLORS[hpTone(current, max)];
 }
 
 // "HP cur / max [state] + stepper" pool tracker shared by creature-like sheet

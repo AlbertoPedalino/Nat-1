@@ -12,6 +12,7 @@ import PortraitBadge from '../../../shared/character/profile/PortraitBadge.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { hpTone } from '../../../shared/character/combat/vitals.js';
 
 export default function CombatantCard({ combatant, active }) {
   const { dispatch } = useEncounterBuilder();
@@ -340,10 +341,10 @@ function Dot({ active, color, onClick }) {
   );
 }
 
+const HP_TONE_COLORS = { healthy: 'success.main', wounded: 'warning.main', critical: 'error.main' };
+
 function hpColor(percent) {
-  if (percent > 50) return 'success.main';
-  if (percent > 25) return 'warning.main';
-  return 'error.main';
+  return HP_TONE_COLORS[hpTone(percent, 100)];
 }
 
 function selectInputText(event) {
