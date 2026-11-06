@@ -58,11 +58,7 @@ import {
   SpellSelectButton,
 } from '../../../shared/character/spells/SpellReference.jsx';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
-import {
-  getPactSlotUsed,
-  getPactSlotUsedKey,
-  getRegularSlotUsed,
-} from '../../../shared/character/spells/spellSlots.js';
+import { getPactSlotUsed, getPactSlotUsedKey, getRegularSlotUsed, persistCreatedSlots, persistUsedSlots } from '../../../shared/character/spells/spellSlots.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { lowerKey } from '../../../shared/content/nameKeys.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
@@ -347,8 +343,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
       const nextUsed = index < used ? Math.max(0, index) : index + 1;
       const next = { ...slotUsed, [key]: Math.max(0, Math.min(total, nextUsed)) };
       setSlotUsed(next);
-      onUpdateSheet?.({ spellSlotUsed: next });
-      onUpdateCharacter?.((prev) => ({ ...prev, spellSlotsUsed: next }));
+      persistUsedSlots(next, onUpdateSheet, onUpdateCharacter);
       return;
     }
     if (index >= total) {
@@ -358,15 +353,13 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
       next[level] = created - 1;
       if (next[level] <= 0) delete next[level];
       setCreatedSlots(next);
-      onUpdateSheet?.({ createdSpellSlots: next });
-      onUpdateCharacter?.((prev) => ({ ...prev, createdSpellSlots: next }));
+      persistCreatedSlots(next, onUpdateSheet, onUpdateCharacter);
       return;
     }
     const nextUsed = index < used ? Math.max(0, index) : index + 1;
     const next = { ...slotUsed, [key]: nextUsed };
     setSlotUsed(next);
-    onUpdateSheet?.({ spellSlotUsed: next });
-    onUpdateCharacter?.((prev) => ({ ...prev, spellSlotsUsed: next }));
+    persistUsedSlots(next, onUpdateSheet, onUpdateCharacter);
   };
 
   const addSpell = (spell) => {

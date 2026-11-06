@@ -47,6 +47,13 @@ export function persistCreatedSlots(createdSlots, onUpdateSheet, onUpdateCharact
   if (typeof onUpdateCharacter === 'function') onUpdateCharacter((prev) => ({ ...prev, createdSpellSlots: createdSlots }));
 }
 
+// Spent slots live on the sheet (`spellSlotUsed`) and on the saved character
+// (`spellSlotsUsed`); every change writes both.
+export function persistUsedSlots(usedSlots, onUpdateSheet, onUpdateCharacter) {
+  if (typeof onUpdateSheet === 'function') onUpdateSheet({ spellSlotUsed: usedSlots });
+  if (typeof onUpdateCharacter === 'function') onUpdateCharacter((prev) => ({ ...prev, spellSlotsUsed: usedSlots }));
+}
+
 // One more temporary slot of `level` (Font of Magic, Wild Resurgence): lasts
 // until a Long Rest and is spent before the regular ones (see consumeSlot).
 export function addCreatedSlot(sheet, level, onUpdateSheet, onUpdateCharacter) {
@@ -99,8 +106,7 @@ export function consumeSlot(regularSlots, sheet, level, onUpdateSheet, onUpdateC
   } else {
     const next = { ...(sheet?.spellSlotUsed || {}) };
     next[level] = used + 1;
-    if (typeof onUpdateSheet === 'function') onUpdateSheet({ spellSlotUsed: next });
-    if (typeof onUpdateCharacter === 'function') onUpdateCharacter((prev) => ({ ...prev, spellSlotsUsed: next }));
+    persistUsedSlots(next, onUpdateSheet, onUpdateCharacter);
   }
   return true;
 }
@@ -113,9 +119,6 @@ export function consumePactSlot(pactSlots, sheet, onUpdateSheet, onUpdateCharact
   const next = { ...(sheet?.spellSlotUsed || {}) };
   const key = getPactSlotUsedKey(level);
   next[key] = Math.min(total, getPactSlotUsed(next, level) + 1);
-  if (typeof onUpdateSheet === 'function') onUpdateSheet({ spellSlotUsed: next });
-  if (typeof onUpdateCharacter === 'function') {
-    onUpdateCharacter((prev) => ({ ...prev, spellSlotsUsed: next }));
-  }
+  persistUsedSlots(next, onUpdateSheet, onUpdateCharacter);
   return true;
 }

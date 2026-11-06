@@ -3,12 +3,7 @@ import { Box, Button, MenuItem, Select, Stack, Typography } from '@mui/material'
 import { loadItems } from '../../../shared/content/catalogs/itemData.js';
 import { getSheetSlots } from '../spells/spellcasting.js';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
-import {
-  consumePactSlot,
-  consumeSlot,
-  getAvailablePactSlots,
-  getRegularSlotUsed,
-} from '../../../shared/character/spells/spellSlots.js';
+import { consumePactSlot, consumeSlot, getAvailablePactSlots, getRegularSlotUsed, persistCreatedSlots } from '../../../shared/character/spells/spellSlots.js';
 import { classLevel } from '../../../shared/character/progression/classLevel.js';
 import { removeOneCrafted } from '../../../shared/character/inventory/craftedItemState.js';
 import {
@@ -166,8 +161,7 @@ export default function MagicItemTinkerPanel({ character, sheet, resources }) {
     if (!level) return;
     const created = { ...(sheet?.createdSpellSlots || {}) };
     created[level] = Number(created[level] || 0) + 1;
-    onUpdateSheet?.({ createdSpellSlots: created });
-    onUpdateCharacter?.((prev) => ({ ...prev, createdSpellSlots: created }));
+    persistCreatedSlots(created, onUpdateSheet, onUpdateCharacter);
     onUpdateInventory?.(removeOneCrafted(inventory, 'replicated', drainSource));
     spendResource(MAGIC_ITEM_TINKER_DRAIN_RESOURCE);
     onShowToast?.('Drain Magic Item', `${selectedDrainItem.displayName || selectedDrainItem.name} vanished; created a level ${level} spell slot.`, null, []);

@@ -420,3 +420,11 @@ test('spell snapshots are built only by toSnapshot', () => {
     allow: ['shared/character/spells/spellSnapshots.js'],
   }), []);
 });
+
+// Spent and created spell slots are saved by persistUsedSlots and
+// persistCreatedSlots (spellSlots.js): the sheet and the character together.
+test('spell slot changes are saved only through spellSlots.js', () => {
+  assert.deepEqual(sourceLinesMatching(/onUpdateCharacter\??\.?\(\(prev\) => \(\{ \.\.\.prev, (spellSlotsUsed|createdSpellSlots): /, {
+    allow: ['shared/character/spells/spellSlots.js'],
+  }), []);
+});

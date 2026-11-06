@@ -2,16 +2,7 @@ import { useState } from 'react';
 import { installedRegistry } from '../../../adapters/index.js';
 import { SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
 import { getSheetSlots } from '../spells/spellcasting.js';
-import {
-  addCreatedSlot,
-  availableRegularSlotLevels,
-  consumeSlot,
-  getPactSlotUsed,
-  getPactSlotUsedKey,
-  getRegularSlotUsed,
-  lowestAvailableSlotLevel,
-  recoverPactSlots,
-} from '../../../shared/character/spells/spellSlots.js';
+import { addCreatedSlot, availableRegularSlotLevels, consumeSlot, getPactSlotUsed, getPactSlotUsedKey, getRegularSlotUsed, lowestAvailableSlotLevel, persistUsedSlots, recoverPactSlots } from '../../../shared/character/spells/spellSlots.js';
 
 // What spending an adapter resource triggers (registered with
 // registerResourceSideEffect): recovering slots or resources at once, or opening
@@ -234,8 +225,7 @@ export function useResourceSideEffects({
       pactMax,
       (getPactSlotUsed(used, level) + amount)
     );
-    onUpdateSheet?.({ spellSlotUsed: used });
-    onUpdateCharacter?.((prev) => ({ ...prev, spellSlotsUsed: used }));
+    persistUsedSlots(used, onUpdateSheet, onUpdateCharacter);
     setConsumePactSlotDialog(null);
     onShowToast?.(consumePactSlotDialog.label, `Expended ${amount} Pact Magic slot${amount > 1 ? 's' : ''} (level ${level}).`, 0, []);
   };
@@ -246,8 +236,7 @@ export function useResourceSideEffects({
     const recovery = recoverPactSlots(sheet?.spellSlotUsed, level, result.recover);
     if (!recovery) return;
     const { used, recovered } = recovery;
-    onUpdateSheet?.({ spellSlotUsed: used });
-    onUpdateCharacter?.((prev) => ({ ...prev, spellSlotsUsed: used }));
+    persistUsedSlots(used, onUpdateSheet, onUpdateCharacter);
     const label = result.label || 'Spell Recovery';
     onShowToast?.(label, `Recovered ${recovered} Pact Magic slot${recovered === 1 ? '' : 's'}`, recovered, []);
   };
@@ -319,8 +308,7 @@ export function useResourceSideEffects({
     setSlotRecoverySelection({});
     if (!recovered) return;
 
-    onUpdateSheet?.({ spellSlotUsed: used });
-    onUpdateCharacter?.((prev) => ({ ...prev, spellSlotsUsed: used }));
+    persistUsedSlots(used, onUpdateSheet, onUpdateCharacter);
 
     // Arcane Recovery also restores 1 expended Bladesong use. The Bladesong
     // resource exists only for a Bladesinger and carries its own max.
