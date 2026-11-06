@@ -1,17 +1,5 @@
 import { Chip, List, ListItemButton, ListItemText, Paper, Stack, Typography } from '@mui/material';
-import SharedSearchField from '../../../shared/ui/SearchField.jsx';
-
-export function SearchField({ value, onChange, placeholder }) {
-  return (
-    <SharedSearchField
-      value={value}
-      onChange={onChange}
-      placeholder={placeholder}
-      size="medium"
-      iconSize={14}
-    />
-  );
-}
+import SearchField from '../../../shared/ui/SearchField.jsx';
 
 export default function SearchList({ value, onSearch, placeholder, items, selectedName, onSelect, meta }) {
   return (
@@ -20,6 +8,8 @@ export default function SearchList({ value, onSearch, placeholder, items, select
         value={value}
         placeholder={placeholder}
         onChange={onSearch}
+        size="medium"
+        iconSize={14}
       />
       <Paper variant="outlined" sx={{ maxHeight: 390, overflow: 'auto' }}>
         <List dense disablePadding>

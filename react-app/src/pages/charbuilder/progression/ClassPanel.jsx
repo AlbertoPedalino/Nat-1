@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Box, Button, Chip, IconButton, List, ListItemButton, ListItemText, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { ChevronDown, ChevronUp, Plus, Trash2, TriangleAlert } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
-import { SearchField } from '../choices/SearchList.jsx';
+import SearchField from '../../../shared/ui/SearchField.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import { describeMulticlassProficiencies } from '../../../shared/character/progression/multiclassProficiencies.js';
@@ -175,6 +175,8 @@ export default function ClassPanel({ state, character, dispatch }) {
           value={search}
           placeholder="Search classes"
           onChange={(value) => dispatch({ type: 'search/set', scope: 'classes', value })}
+          size="medium"
+          iconSize={14}
         />
         <Paper variant="outlined" sx={{ maxHeight: 390, overflow: 'auto' }}>
           <List dense disablePadding>
