@@ -8,7 +8,7 @@ import { EntryAccordion } from '../../../shared/content/EntryAccordion.jsx';
 import { partitionNamedEntries } from '../../../shared/content/entryStructure.js';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import { findSpellListEntryIndexByClass } from '../../../shared/character/spells/featSpellLists.js';
-import { featChoiceSpecs } from './choiceSpecs.js';
+import { featChoiceSpecs } from './featChoiceSpecs.js';
 import { buildFeatPrerequisiteContext } from './featPrerequisites.js';
 import { meetsFeatPrerequisites } from './featPrerequisiteRules.js';
 import { featDescriptionEntries } from '../../../shared/character/progression/featDescription.js';
