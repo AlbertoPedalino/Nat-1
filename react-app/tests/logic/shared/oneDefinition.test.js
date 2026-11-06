@@ -390,3 +390,10 @@ test('name|source references are split only by splitNameSource', () => {
     allow: ['shared/content/nameKeys.js'],
   }), []);
 });
+
+// The names of a character's classes come from classNames (classLevel.js).
+test('a character\'s class names come from classNames', () => {
+  assert.deepEqual(sourceLinesMatching(/\[[\w.?]*className, \.\.\.\(?[\w.?]*extraClasses/, {
+    allow: ['shared/character/progression/classLevel.js'],
+  }), []);
+});

@@ -1,6 +1,7 @@
 import { loadClassAdapters, loadCoreAdapters } from '../../../adapters/index.js';
 import { getFinal, getMod, getPB } from './sheetStats.js';
 import { asArray } from '../../lists.js';
+import { classNames } from '../progression/classLevel.js';
 
 function asCharacterList(characters) {
   return asArray(characters).filter(Boolean);
@@ -10,11 +11,7 @@ export function collectSheetRuntimeClassNames(characters) {
   return [
     ...new Set(
       asCharacterList(characters)
-        .flatMap((character) => [
-          character?.className,
-          ...(character?.extraClasses || []).map((extra) => extra?.name),
-        ])
-        .filter(Boolean),
+        .flatMap((character) => classNames(character)),
     ),
   ];
 }

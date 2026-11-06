@@ -51,6 +51,7 @@ import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
 import { isWeaponItem } from '../../../shared/character/inventory/itemCodes.js';
+import { classNames } from '../../../shared/character/progression/classLevel.js';
 
 const _danglingResKeyWarned = typeof Set === 'function' ? new Set() : null;
 function warnDanglingResKey(action, resMaxMap) {
@@ -77,13 +78,13 @@ export default function ActionsTab({ C, sheet, resources }) {
   const [itemsDb, setItemsDb] = useState([]);
   const [variantRules, setVariantRules] = useState([]);
   const [, setMasteriesLoaded] = useState(false);
-  const classNames = [C?.className, ...(C?.extraClasses || []).map((e) => e.name)].filter(Boolean);
-  const classNamesKey = classNames.join('|');
+  const ownedClassNames = classNames(C);
+  const classNamesKey = ownedClassNames.join('|');
 
   useEffect(() => {
     Promise.all([
       loadCoreAdapters(),
-      loadClassAdapters(classNames, { getMod, getFinal }),
+      loadClassAdapters(ownedClassNames, { getMod, getFinal }),
     ]);
   }, [classNamesKey]);
 

@@ -9,13 +9,6 @@ import { normalizeHexColor } from '../../../shared/ui/colors.js';
 // adapter barrel for its loaders, and so cannot be loaded by a test runner —
 // so this mapping stays covered.
 
-export function characterClassNames(character) {
-  return [
-    character?.className,
-    ...(Array.isArray(character?.extraClasses) ? character.extraClasses.map((entry) => entry?.name) : []),
-  ].filter(Boolean);
-}
-
 export function toEncounterPlayer(row, campaign) {
   const sheet = row?.data || {};
   const summary = summarizeCharacter(sheet) || {};

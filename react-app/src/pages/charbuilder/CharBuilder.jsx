@@ -59,6 +59,7 @@ import { useEventListener } from '../../shared/ui/useEventListener.js';
 import { UI_COLORS, uiAlpha } from '../../shared/ui/colors.js';
 import { UI_FONTS } from '../../shared/ui/fonts.js';
 import { NEW_CHARACTER, characterIdFromUrl, replaceCharacterIdInUrl } from '../../shared/character/profile/characterRoutes.js';
+import { classNames } from '../../shared/character/progression/classLevel.js';
 
 function StepLabel({ step, index }) {
   const Icon = step.icon;
@@ -356,7 +357,7 @@ export default function CharBuilder() {
   useEffect(() => {
     if (state.adaptersLoaded || state.loading.items) return;
     let cancelled = false;
-    const activeClasses = [state.character.className, ...(state.character.extraClasses || []).map((extra) => extra.name)].filter(Boolean);
+    const activeClasses = classNames(state.character);
     Promise.all([
       loadCoreAdapters({ items: state.data.items }),
       loadClassAdapters(activeClasses, { items: state.data.items, getMod, getFinal }),
@@ -374,7 +375,7 @@ export default function CharBuilder() {
 
   useEffect(() => {
     if (!state.adaptersLoaded) return;
-    const classes = [state.character.className, ...(state.character.extraClasses || []).map((extra) => extra.name)].filter(Boolean);
+    const classes = classNames(state.character);
     if (!classes.length) return;
     let cancelled = false;
     loadClassAdapters(classes, { items: state.data.items, getMod, getFinal })

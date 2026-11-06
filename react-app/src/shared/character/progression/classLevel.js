@@ -71,3 +71,8 @@ export function classEntities(C) {
   });
   return out;
 }
+
+// The names of the character's classes, primary first.
+export function classNames(C) {
+  return [C?.className, ...(C?.extraClasses || []).map((extra) => extra?.name)].filter(Boolean);
+}

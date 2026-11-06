@@ -71,6 +71,7 @@ import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
+import { classNames } from '../../../shared/character/progression/classLevel.js';
 
 const SPELL_ACTION_FILTERS = [
   { key: 'all', label: 'All' },
@@ -111,7 +112,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
   const [createdSlots, setCreatedSlots] = useState(sheet?.createdSpellSlots || {});
 
   // Attunement and other character edits must not cancel/restart catalog loads.
-  const classKey = JSON.stringify([C?.className, ...(C?.extraClasses || []).map((extra) => extra.name)].filter(Boolean));
+  const classKey = JSON.stringify(classNames(C));
 
   useEffect(() => {
     let alive = true;

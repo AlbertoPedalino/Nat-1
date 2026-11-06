@@ -11,6 +11,7 @@ import { checkMulticlassPrerequisite, getMulticlassProficienciesGained } from '.
 import { classIcon } from '../../../shared/character/profile/classIcon.js';
 import { hitDieFaces } from '../../../shared/character/combat/hp.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
+import { classNames } from '../../../shared/character/progression/classLevel.js';
 
 // Renders the multiclass proficiency summary (data shaped by
 // describeMulticlassProficiencies). Pure view: a "grants nothing" note when the
@@ -107,7 +108,7 @@ export default function ClassPanel({ state, character, dispatch }) {
   const visibleClasses = classes.filter((cls) => matchesQuery(search, cls.name, cls.source));
   const activeExtra = character.activeClassTab > 0 ? character.extraClasses[character.activeClassTab - 1] : null;
   const isExtraTab = !!activeExtra;
-  const takenNames = new Set([character.className, ...character.extraClasses.map((extra) => extra.name)]);
+  const takenNames = new Set(classNames(character));
   const PanelIcon = classIcon(activeExtra?.name || character.className);
   const primaryLevel = getPrimaryClassLevel(character);
   const canAddMulticlass = Number(character.level || 1) < 20

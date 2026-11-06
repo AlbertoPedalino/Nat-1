@@ -1,17 +1,18 @@
 import { useCallback, useMemo } from 'react';
 import { loadClassAdapters, loadCoreAdapters } from '../../../adapters/index.js';
 import { useGmCampaigns } from '../../../shared/campaign/useGmCampaigns.js';
-import { characterClassNames, toEncounterPlayer } from './campaignPlayer.js';
+import { toEncounterPlayer } from './campaignPlayer.js';
+import { classNames } from '../../../shared/character/progression/classLevel.js';
 
 // Summaries (initiative, AC…) need the class/subclass adapters registered
 // before summarizeCharacter runs, so every fetch path loads them first. The
 // fetching itself lives in useGmCampaigns, shared with the VTT roster — only
 // this adapter-backed mapping is specific to the encounter builder.
 async function rowsToPlayers(rows, campaign) {
-  const classNames = [...new Set(rows.flatMap((row) => characterClassNames(row?.data)))];
+  const playerClasses = [...new Set(rows.flatMap((row) => classNames(row?.data)))];
   await Promise.all([
     loadCoreAdapters().catch(() => {}),
-    loadClassAdapters(classNames).catch(() => {}),
+    loadClassAdapters(playerClasses).catch(() => {}),
   ]);
   return rows.map((row) => toEncounterPlayer(row, campaign));
 }
