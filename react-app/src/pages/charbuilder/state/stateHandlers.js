@@ -1,22 +1,20 @@
 import { getBackgroundPattern } from '../progression/calculations.js';
 import { findSpellListEntryIndexByClass } from '../../../shared/character/spells/featSpellLists.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
-import { normalizeWizardBook } from '../../../shared/character/spells/wizardBook.js';
+import {
+  bucketCounts, hasPickedSpell, withoutSpellPicked, withSpellPicked, withWizardBookToggled,
+} from '../../../shared/character/spells/spellBuckets.js';
 
-function removeSelectedSpellAtLevel(bucket, level, name) {
-  const normalized = matchKey(name);
-  if (level === 0) {
-    return {
-      selectedCantrips: (bucket?.selectedCantrips || []).filter((entry) => matchKey(entry) !== normalized),
-    };
+// The class entry a spell action edits: an extra class by index, else the
+// character (the primary class).
+function updateSpellBucket(state, extraIndex, patchFor, updateCharacter) {
+  if (Number.isInteger(extraIndex) && extraIndex >= 0) {
+    const extraClasses = state.character.extraClasses.map((extraClass, itemIndex) => (
+      itemIndex === extraIndex ? { ...extraClass, ...patchFor(extraClass) } : extraClass
+    ));
+    return updateCharacter(state, { extraClasses });
   }
-  const selectedSpells = Object.fromEntries(
-    Object.entries(bucket?.selectedSpells || {}).map(([spellLevel, list]) => [spellLevel, Array.isArray(list) ? [...list] : []]),
-  );
-  const key = String(level);
-  selectedSpells[key] = (selectedSpells[key] || []).filter((entry) => matchKey(entry) !== normalized);
-  if (!selectedSpells[key].length) delete selectedSpells[key];
-  return { selectedSpells };
+  return updateCharacter(state, patchFor(state.character));
 }
 
 export function handleClassSelect(state, action, { findByNameSource, updateCharacter }) {
@@ -115,76 +113,17 @@ export function handleSpellToggle(state, action, { updateCharacter }) {
   const name = String(action.name || '');
   const max = Number(action.max || 0);
   if (!name) return state;
-  const extraIndex = action.extraIndex;
-  if (Number.isInteger(extraIndex) && extraIndex >= 0) {
-    const extraClasses = state.character.extraClasses.map((extraClass, itemIndex) => {
-      if (itemIndex !== extraIndex) return extraClass;
-      if (level === 0) {
-        const current = extraClass.selectedCantrips || [];
-        const has = current.includes(name);
-        if (!has && max > 0 && current.length >= max) return extraClass;
-        return { ...extraClass, selectedCantrips: has ? current.filter((spell) => spell !== name) : [...current, name] };
-      }
-      const currentByLevel = extraClass.selectedSpells || {};
-      const current = Array.isArray(currentByLevel[level]) ? currentByLevel[level] : [];
-      const has = current.includes(name);
-      const total = Object.values(currentByLevel).reduce((sum, spells) => sum + (Array.isArray(spells) ? spells.length : 0), 0);
-      if (!has && max > 0 && total >= max) return extraClass;
-      const nextLevel = has ? current.filter((spell) => spell !== name) : [...current, name];
-      const selectedSpells = { ...currentByLevel, [level]: nextLevel };
-      if (!nextLevel.length) delete selectedSpells[level];
-      return { ...extraClass, selectedSpells };
-    });
-    return updateCharacter(state, { extraClasses });
-  }
-  if (level === 0) {
-    const current = state.character.selectedCantrips || [];
-    const has = current.includes(name);
-    if (!has && max > 0 && current.length >= max) return state;
-    return updateCharacter(state, { selectedCantrips: has ? current.filter((spell) => spell !== name) : [...current, name] });
-  }
-  const currentByLevel = state.character.selectedSpells || {};
-  const current = Array.isArray(currentByLevel[level]) ? currentByLevel[level] : [];
-  const has = current.includes(name);
-  const total = Object.values(currentByLevel).reduce((sum, spells) => sum + (Array.isArray(spells) ? spells.length : 0), 0);
-  if (!has && max > 0 && total >= max) return state;
-  const nextLevel = has ? current.filter((spell) => spell !== name) : [...current, name];
-  const selectedSpells = { ...currentByLevel, [level]: nextLevel };
-  if (!nextLevel.length) delete selectedSpells[level];
-  return updateCharacter(state, { selectedSpells });
+  return updateSpellBucket(state, action.extraIndex, (bucket) => {
+    if (hasPickedSpell(bucket, level, name)) return withoutSpellPicked(bucket, level, name);
+    const counts = bucketCounts(bucket);
+    if (max > 0 && (level === 0 ? counts.cantrips : counts.spells) >= max) return {};
+    return withSpellPicked(bucket, level, name);
+  }, updateCharacter);
 }
 
 export function handleWizardSpellbookToggle(state, action, { updateCharacter }) {
   const level = Math.max(0, Math.min(9, Number(action.level || 0)));
   const name = String(action.name || '');
   if (!name) return state;
-  const normalized = matchKey(name);
-  const extraIndex = action.extraIndex;
-
-  if (Number.isInteger(extraIndex) && extraIndex >= 0) {
-    const extraClasses = state.character.extraClasses.map((extraClass, itemIndex) => {
-      if (itemIndex !== extraIndex) return extraClass;
-      const wizardSpellbook = normalizeWizardBook(extraClass.wizardSpellbook);
-      const current = wizardSpellbook[level] || [];
-      const has = current.some((entry) => matchKey(entry) === normalized);
-      wizardSpellbook[level] = has
-        ? current.filter((entry) => matchKey(entry) !== normalized)
-        : [...current, name];
-
-      const nextExtra = { ...extraClass, wizardSpellbook };
-      return has ? { ...nextExtra, ...removeSelectedSpellAtLevel(nextExtra, level, name) } : nextExtra;
-    });
-    return updateCharacter(state, { extraClasses });
-  }
-
-  const wizardSpellbook = normalizeWizardBook(state.character.wizardSpellbook);
-  const current = wizardSpellbook[level] || [];
-  const has = current.some((entry) => matchKey(entry) === normalized);
-  wizardSpellbook[level] = has
-    ? current.filter((entry) => matchKey(entry) !== normalized)
-    : [...current, name];
-
-  return updateCharacter(state, has
-    ? { wizardSpellbook, ...removeSelectedSpellAtLevel(state.character, level, name) }
-    : { wizardSpellbook });
+  return updateSpellBucket(state, action.extraIndex, (bucket) => withWizardBookToggled(bucket, level, name), updateCharacter);
 }

@@ -27,7 +27,6 @@ import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import { buildSpellInfo } from './spellsTabLogic.js';
 import { dedupeSpells, toSnapshot, upsertSnapshot } from '../../../shared/character/spells/spellSnapshots.js';
 import { getSpellAbility } from './spellAbility.js';
-import { normalizeWizardBook } from '../../../shared/character/spells/wizardBook.js';
 import {
   canManageSpells,
   getMaxLearnableSpellLevel,
@@ -67,6 +66,9 @@ import { ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.j
 import { matchesQuery } from '../../../shared/content/searchText.js';
 import { classNames } from '../../../shared/character/progression/classLevel.js';
 import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
+import {
+  bucketCounts, isInWizardBook, wizardBookLevel, wizardBookSize, withoutSpellPicked, withSpellPicked, withWizardBookToggled,
+} from '../../../shared/character/spells/spellBuckets.js';
 
 const SPELL_ACTION_FILTERS = [
   { key: 'all', label: 'All' },
@@ -286,9 +288,9 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
     .filter((entity) => entity.bucket && hasSpellcastingProfile(entity.profile)), [C, classSpellIndex, adapterRevision]);
   const activePicker = casterPickers[Math.min(pickerClassIndex, Math.max(0, casterPickers.length - 1))] || null;
   const activeLimits = useMemo(() => activePicker ? getPickerLimits(C, activePicker) : { cantrips: null, spells: null }, [C, activePicker]);
-  const activeCounts = useMemo(() => activePicker ? getBucketCounts(activePicker.bucket) : { cantrips: 0, spells: 0 }, [activePicker]);
+  const activeCounts = useMemo(() => activePicker ? bucketCounts(activePicker.bucket) : { cantrips: 0, spells: 0 }, [activePicker]);
   const activeIsWizard = String(activePicker?.className || '').toLowerCase() === 'wizard';
-  const activeSpellbookSize = activeIsWizard ? getSpellbookSize(activePicker?.bucket) : 0;
+  const activeSpellbookSize = activeIsWizard ? wizardBookSize(activePicker?.bucket) : 0;
   const profSets = useProficiencySets();
   const armorPenalties = useMemo(() => getEquippedArmorPenalties(C, C?.inventory || [], profSets), [C, profSets]);
   const ability = getSpellAbility(C);
@@ -312,7 +314,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
     if (!activePicker) return [];
     const hasIndex = Object.keys(classSpellIndex).length > 0;
     const spellbookNames = activeIsWizard && pickerWizardMode === 'prepare'
-      ? getSpellbookLevel(activePicker.bucket, pickerLevel)
+      ? wizardBookLevel(activePicker.bucket, pickerLevel)
       : null;
     const base = spellbookNames
       ? spellbookNames.map((name) => spellIndex.get(lowerKey(name)) || spellDb.find((spell) => lowerKey(spell.name) === lowerKey(name)) || { name, level: pickerLevel })
@@ -369,12 +371,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
     if (level > 0 && level > activePicker.maxLevel) return;
     if (level === 0 && activeLimits.cantrips != null && activeCounts.cantrips >= activeLimits.cantrips) return;
     if (level > 0 && activeLimits.spells != null && activeCounts.spells >= activeLimits.spells) return;
-    updateBucketSpell(activePicker, (bucket) => {
-      const next = cloneBucket(bucket);
-      if (level === 0) next.selectedCantrips = [...(next.selectedCantrips || []), name];
-      else next.selectedSpells = addToSelectedSpells(next.selectedSpells, level, name);
-      return next;
-    }, spell);
+    updateBucketSpell(activePicker, (bucket) => ({ ...bucket, ...withSpellPicked(bucket, level, name) }), spell);
   };
 
   const removeSpell = (spell) => {
@@ -382,12 +379,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
     const name = spell?.name;
     const level = Number(spell?.level || 0);
     if (!name || !selectedManualNames.has(name)) return;
-    updateBucketSpell(activePicker, (bucket) => {
-      const next = cloneBucket(bucket);
-      if (level === 0) next.selectedCantrips = (next.selectedCantrips || []).filter((entry) => entry !== name);
-      else next.selectedSpells = removeFromSelectedSpells(next.selectedSpells, level, name);
-      return next;
-    });
+    updateBucketSpell(activePicker, (bucket) => ({ ...bucket, ...withoutSpellPicked(bucket, level, name) }));
   };
 
   const toggleWizardBookSpell = (spell) => {
@@ -395,19 +387,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
     const level = Number(spell?.level || 0);
     const name = spell?.name;
     if (!name || level > activePicker.maxLevel) return;
-    updateBucketSpell(activePicker, (bucket) => {
-      const next = cloneBucket(bucket);
-      const book = normalizeWizardBook(next.wizardSpellbook);
-      const list = book[level] || [];
-      const has = list.some((entry) => lowerKey(entry) === lowerKey(name));
-      book[level] = has ? list.filter((entry) => lowerKey(entry) !== lowerKey(name)) : [...list, name];
-      next.wizardSpellbook = book;
-      if (has) {
-        if (level === 0) next.selectedCantrips = (next.selectedCantrips || []).filter((entry) => lowerKey(entry) !== lowerKey(name));
-        else next.selectedSpells = removeFromSelectedSpells(next.selectedSpells, level, name);
-      }
-      return next;
-    }, spell);
+    updateBucketSpell(activePicker, (bucket) => ({ ...bucket, ...withWizardBookToggled(bucket, level, name) }), spell);
   };
 
   const toggleWizardPreparedSpell = (spell) => {
@@ -684,38 +664,6 @@ function PickerSpellRow({ spell, selected, disabled, atLimit, autoGranted, locke
   );
 }
 
-function cloneBucket(bucket) {
-  return {
-    ...(bucket || {}),
-    selectedCantrips: [...(bucket?.selectedCantrips || [])],
-    selectedSpells: Object.fromEntries(Object.entries(bucket?.selectedSpells || {}).map(([level, names]) => [level, [...(names || [])]])),
-    wizardSpellbook: bucket?.wizardSpellbook ? normalizeWizardBook(bucket.wizardSpellbook) : bucket?.wizardSpellbook,
-  };
-}
-
-function addToSelectedSpells(selectedSpells, level, name) {
-  const next = Object.fromEntries(Object.entries(selectedSpells || {}).map(([lv, names]) => [lv, [...(names || [])]]));
-  const key = String(level);
-  const current = next[key] || [];
-  next[key] = current.includes(name) ? current : [...current, name];
-  return next;
-}
-
-function removeFromSelectedSpells(selectedSpells, level, name) {
-  const next = Object.fromEntries(Object.entries(selectedSpells || {}).map(([lv, names]) => [lv, [...(names || [])]]));
-  const key = String(level);
-  next[key] = (next[key] || []).filter((entry) => lowerKey(entry) !== lowerKey(name));
-  if (!next[key].length) delete next[key];
-  return next;
-}
-
-function getBucketCounts(bucket) {
-  return {
-    cantrips: (bucket?.selectedCantrips || []).length,
-    spells: Object.values(bucket?.selectedSpells || {}).reduce((sum, list) => sum + (Array.isArray(list) ? list.length : 0), 0),
-  };
-}
-
 function getPickerLimits(C, picker) {
   const level = Math.max(1, Math.min(20, Number(picker?.level || 1)));
   const profile = picker?.profile || getSpellcastingProfile(picker);
@@ -730,16 +678,4 @@ function normalizeLimit(value) {
   if (value == null) return null;
   const n = Number(value);
   return Number.isFinite(n) ? Math.max(0, n) : null;
-}
-
-function getSpellbookLevel(bucket, level) {
-  return normalizeWizardBook(bucket?.wizardSpellbook)[Number(level || 0)] || [];
-}
-
-function getSpellbookSize(bucket) {
-  return Object.values(normalizeWizardBook(bucket?.wizardSpellbook)).reduce((sum, list) => sum + list.length, 0);
-}
-
-function isInWizardBook(bucket, name, level) {
-  return getSpellbookLevel(bucket, level).some((entry) => lowerKey(entry) === lowerKey(name));
 }
