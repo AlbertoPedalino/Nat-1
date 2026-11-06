@@ -16,6 +16,7 @@ import LevelPanel from '../progression/LevelPanel.jsx';
 import SubclassPanel from '../progression/SubclassPanel.jsx';
 import SpellSlotsPanel from '../spells/SpellSlotsPanel.jsx';
 import SpellSelectionPanel from '../spells/SpellSelectionPanel.jsx';
+import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
 
 export default function ClassStep({ state, dispatch }) {
   const { character } = state;
@@ -60,7 +61,7 @@ export default function ClassStep({ state, dispatch }) {
     if (spec.type === 'feat_fixed') {
       return <FeatFixedSlot key={spec.key} spec={spec} feats={state.data.feats} character={character} state={state} dispatch={dispatch} />;
     }
-    if (spec.type === 'replicate_magic_item' || spec.key.replace(/^mc\d+_/, '') === 'artificer_replicate_magic_item_plans') {
+    if (spec.type === 'replicate_magic_item' || baseChoiceKey(spec.key) === 'artificer_replicate_magic_item_plans') {
       return <ReplicateMagicItemChoice key={spec.key} spec={spec} character={character} dispatch={dispatch} items={state.data.items} />;
     }
     if (spec.type === 'beast_choice') {

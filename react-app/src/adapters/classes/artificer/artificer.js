@@ -14,6 +14,7 @@ import {
 } from '../../../shared/character/inventory/magicItemTinker.js';
 import { titleCase } from '../../../shared/ui/textCase.js';
 import { matchKey, stripSource } from '../../../shared/content/nameKeys.js';
+import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
 
 const _REPLICATE_BUCKET_LABEL = Object.fromEntries(REPLICATE_BUCKETS.map((b) => [b.id, b.label]));
 
@@ -334,7 +335,7 @@ registerClassSheetChoiceMeta("Artificer", {
     const k = String(key || "");
     const raw = stripSource(value).replace(/\{@\w+ /g, "").replace(/\}/g, "").trim();
     if (!raw) return "";
-    if (k.replace(/^mc\d+_/, "") === "artificer_replicate_magic_item_plans") {
+    if (baseChoiceKey(k) === "artificer_replicate_magic_item_plans") {
       return replicateChoiceLabel(raw);
     }
     if (k === "armorer_model" || /^auto_(primary|ec\d+)_feat_.*_opt_\d+$/i.test(k)) {
@@ -346,6 +347,5 @@ registerClassSheetChoiceMeta("Artificer", {
     return raw;
   },
 });
-
 
 }

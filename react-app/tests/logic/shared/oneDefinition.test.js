@@ -280,3 +280,12 @@ test('challenge ratings are parsed only by shared/bestiary/challengeRating.js', 
     allow: ['shared/bestiary/challengeRating.js'],
   }), []);
 });
+
+// A multiclass choice key loses its `mcN_` prefix through baseChoiceKey, and a
+// choice value is read through readChoiceValue (choiceUtils.js): 17 inline
+// prefix strippers and three copies of the reader had grown.
+test('choice keys and values are read through shared/character/progression/choiceUtils.js', () => {
+  assert.deepEqual(sourceFilesMatching(/\^mc\d\+_|function\s+(readChoiceValue|choiceValueFrom|choiceValue)\s*\(/, {
+    allow: ['shared/character/progression/choiceUtils.js'],
+  }), []);
+});

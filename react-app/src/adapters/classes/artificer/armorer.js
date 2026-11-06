@@ -8,6 +8,7 @@ import {
 import { matchKey } from '../../../shared/content/nameKeys.js';
 import { finalAbilityModifier } from '../../../shared/character/progression/abilityScores.js';
 import { getProficiencyBonus } from '../../../shared/character/progression/proficiency.js';
+import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -34,7 +35,7 @@ registerSubclassAdapter("Artificer_Armorer", function (cls, lv, specs, ctx = {})
 
   if (lv >= 9) {
     const generalPlanSpec = specs.find((spec) => (
-      String(spec?.key || '').replace(/^mc\d+_/, '') === REPLICATE_GENERAL_CHOICE_KEY
+      baseChoiceKey(spec?.key || '') === REPLICATE_GENERAL_CHOICE_KEY
     ));
     if (generalPlanSpec) {
       specs.push({

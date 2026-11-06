@@ -9,6 +9,7 @@ import {
   effectTitle,
   effectSummary,
 } from './sheetEffects.js';
+import { baseChoiceKey } from '../progression/choiceUtils.js';
 
 // Damage resistances and immunities as the sheet and the builder preview show
 // them: the species' and other static defense blocks, the choices that pick a
@@ -75,7 +76,7 @@ function collectSelectedSpeciesResistanceChoices(character = {}, source = 'Speci
   };
 
   const speciesChoiceCanGrantResistance = (key) => {
-    const k = effectKey(String(key).replace(/^mc\d+_/, ''));
+    const k = effectKey(baseChoiceKey(key));
     if (!k.startsWith('species')) return false;
     return k.includes('resist') || k.includes('resistance');
   };

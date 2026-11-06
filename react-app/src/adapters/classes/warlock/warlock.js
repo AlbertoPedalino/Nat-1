@@ -12,6 +12,7 @@ import {
 } from '../../../shared/character/progression/optionalFeatures.js';
 import { entriesToPlainText } from '../../../shared/character/spells/spellEntries.js';
 import { matchKey, stripSource } from '../../../shared/content/nameKeys.js';
+import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -118,7 +119,7 @@ function _warlockChoiceValuesByBase(C, baseKey, fallback) {
   if (!C?.choices) return fallback ? [fallback] : [];
   var out = [];
   Object.entries(C.choices).forEach(function(entry) {
-    var key = entry[0].replace(/^mc\d+_/, '');
+    var key = baseChoiceKey(entry[0]);
     if (key === baseKey || key.startsWith(baseKey + '_')) {
       var value = stripSource(entry[1]);
       if (value) out.push(value);

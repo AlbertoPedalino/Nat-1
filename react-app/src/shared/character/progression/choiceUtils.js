@@ -1,6 +1,41 @@
-// The key a choice is saved under: the base key, or a multiclass-prefixed copy
-// (`mc1_<key>`) when the class was added as a multiclass.
-const isChoiceKey = (stored, key) => stored === key || stored.replace(/^mc\d+_/, '') === key;
+import { asArray } from '../../lists.js';
+import { choiceKey } from '../../content/nameKeys.js';
+// A choice is saved under its base key, or under a multiclass-prefixed copy
+// (`mc1_<key>`) when its class was added as a multiclass.
+export function baseChoiceKey(key) {
+  return String(key || '').replace(/^mc\d+_/, '');
+}
+
+const isChoiceKey = (stored, key) => stored === key || baseChoiceKey(stored) === key;
+
+// A character's stored value for a choice key, wherever it was saved: the
+// choice itself, the normalized choices (raw, then by bucket), or a
+// multiclass-prefixed copy. null when there is none.
+export function readChoiceValue(character, key) {
+  if (!character || !key) return null;
+
+  const direct = character?.choices?.[key];
+  if (direct != null) return direct;
+
+  const normalized = character?.normalizedChoices || {};
+  const byKey = normalized.rawByKey || {};
+  if (byKey[key] != null) return byKey[key];
+
+  const buckets = [
+    normalized.classOptions,
+    normalized.subclassOptions,
+    normalized.species?.options,
+    normalized.background?.options,
+    normalized.feats?.byKey,
+    normalized.spells?.byKey,
+  ];
+  for (const bucket of buckets) {
+    if (bucket && bucket[key] != null) return bucket[key];
+  }
+
+  const found = Object.entries(character?.choices || {}).find(([stored]) => baseChoiceKey(stored) === key);
+  return found ? found[1] : null;
+}
 
 export function getChoiceValue(C, key) {
   if (!C?.choices) return null;
@@ -84,4 +119,24 @@ export function hasActionRequirement(action, C, sheet) {
     if (!inventoryHasFlag(inv, action.requiresInventoryFlag)) return false;
   }
   return true;
+}
+
+// Whether a character's stored choice holds `expected` (names compared without
+// source or markup).
+export function hasChoiceValue(character, key, expected) {
+  const wanted = choiceKey(expected);
+  if (!wanted) return false;
+  return asArray(readChoiceValue(character, key)).some((value) => choiceKey(value) === wanted);
+}
+
+// A class adapter's own choice while the class is being built: the base key,
+// or the key with the class's multiclass prefix.
+export function classChoiceValue(choices, key, keyPrefix = '') {
+  const direct = choices?.[key];
+  return direct !== undefined ? direct : choices?.[keyPrefix + key];
+}
+
+export function classChoiceIs(choices, key, expected, keyPrefix = '') {
+  const wanted = choiceKey(expected);
+  return asArray(classChoiceValue(choices, key, keyPrefix)).some((value) => choiceKey(value) === wanted);
 }

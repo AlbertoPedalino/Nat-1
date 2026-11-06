@@ -4,7 +4,7 @@ import {
   cleanProficiencyText,
 } from '../progression/proficiencyDisplay.js';
 import { matchesRequiredChoice } from '../progression/lineageMatch.js';
-import { inventoryHasFlag } from '../progression/choiceUtils.js';
+import { inventoryHasFlag, readChoiceValue } from '../progression/choiceUtils.js';
 import { ownedFeatNames } from '../progression/selectedFeats.js';
 import { primaryClassLevel } from '../progression/classLevel.js';
 import { asArray } from '../../lists.js';
@@ -114,37 +114,8 @@ function collectFromList(out, list, meta, character) {
   });
 }
 
-function choiceValue(character, key) {
-  if (!key) return null;
-
-  const direct = character?.choices?.[key];
-  if (direct != null) return direct;
-
-  const normalized = character?.normalizedChoices || {};
-  const byKey = normalized.rawByKey || {};
-  if (byKey[key] != null) return byKey[key];
-
-  const buckets = [
-    normalized.classOptions,
-    normalized.subclassOptions,
-    normalized.species?.options,
-    normalized.background?.options,
-    normalized.feats?.byKey,
-    normalized.spells?.byKey,
-  ];
-
-  for (const bucket of buckets) {
-    if (bucket && bucket[key] != null) return bucket[key];
-  }
-
-  const found = Object.entries(character?.choices || {}).find(([choiceKey]) => (
-    String(choiceKey || '').replace(/^mc\d+_/, '') === key
-  ));
-  return found ? found[1] : null;
-}
-
 function firstChoiceText(character, key) {
-  const value = choiceValue(character, key);
+  const value = readChoiceValue(character, key);
   const first = asArray(value).find((item) => item != null && item !== '');
   return stripSource(cleanText(first));
 }

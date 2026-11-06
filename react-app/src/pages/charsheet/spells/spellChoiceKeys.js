@@ -1,13 +1,14 @@
 import { matchKey } from '../../../shared/content/nameKeys.js';
 import { titleCase } from '../../../shared/ui/textCase.js';
 import { SRC_COLOR, featSlotTone } from './spellSourceDisplay.js';
+import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
 
 // What a builder choice key that holds a spell says about that spell: the slot
 // it belongs to (feat-like or not), the class that owns it, whether it is a
 // cantrip pick, the species lineage it requires, and the source tag it shows.
 
 // The first string value of a stored choice (choices may be arrays).
-export function choiceValue(raw) {
+export function firstChoiceString(raw) {
   if (raw == null) return null;
   const val = Array.isArray(raw) ? raw[0] : raw;
   return typeof val === 'string' ? val : null;
@@ -19,20 +20,15 @@ export function choiceSpellSlotKey(key) {
   return m ? m[1] : null;
 }
 
-function slotKeyBase(slotKey) {
-  return String(slotKey || '').replace(/^mc\d+_/, '');
-}
-
 export function isFeatLikeSlotKey(C, slotKey) {
   const key = String(slotKey || '');
-  const baseKey = slotKeyBase(key);
+  const baseKey = baseChoiceKey(key);
   return (
     baseKey === 'feat_origin'
     || baseKey === 'species_origin_feat'
     || baseKey.startsWith('feat_')
     || baseKey.includes('boon')
     || baseKey.includes('fighting_style')
-    || /^mc\d+_feat_/.test(key)
     || Object.prototype.hasOwnProperty.call(C?.normalizedChoices?.feats?.byKey || {}, key)
     || Object.prototype.hasOwnProperty.call(C?.normalizedChoices?.feats?.byKey || {}, baseKey)
   );

@@ -12,6 +12,7 @@ import {
   isChoicePlaceholderValue,
 } from '../../../shared/character/progression/typedProficiencies.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
+import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
 
 const CHOICE_KEYS = ['choose', 'any', 'anyTool', 'anyArtisansTool', 'anyMusicalInstrument', 'anyGamingSet', 'anyStandard', 'anyExotic'];
 
@@ -160,7 +161,7 @@ function collectAlreadyExpertiseSkills({ character }) {
 }
 
 function isWeaponMasterySpec(spec) {
-  const key = String(spec?.key || '').replace(/^mc\d+_/, '').toLowerCase();
+  const key = baseChoiceKey(spec?.key || '').toLowerCase();
   return key.includes('weapon_mastery') || (key.includes('weapon') && key.includes('mastery'));
 }
 

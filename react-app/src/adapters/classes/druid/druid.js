@@ -1,5 +1,5 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
-import { stripSource } from '../../../shared/content/nameKeys.js';
+import { classChoiceIs } from '../../../shared/character/progression/choiceUtils.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -14,16 +14,7 @@ registerClassAdapter("Druid", function (cls, lv, specs, ctx = {}) {
   const character = ctx.character || {};
   const choices = ctx.choices || character.choices || {};
   const keyPrefix = ctx.keyPrefix || '';
-  const choiceValue = function (key) {
-    const direct = choices[key];
-    if (direct !== undefined) return direct;
-    return choices[keyPrefix + key];
-  };
-  const hasChoice = function (key, value) {
-    const raw = choiceValue(key);
-    const vals = Array.isArray(raw) ? raw : (raw ? [raw] : []);
-    return vals.some(function (v) { return stripSource(v).toLowerCase() === String(value).toLowerCase(); });
-  };
+  const hasChoice = (key, value) => classChoiceIs(choices, key, value, keyPrefix);
 
   if (lv >= 1) {
     specs.push({

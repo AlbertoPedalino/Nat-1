@@ -12,6 +12,7 @@ import {
 } from '../../../shared/character/forms/wildShapeForm.js';
 import { classLevel } from '../../../shared/character/progression/classLevel.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
+import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
 
 // Sheet panel for the Wild Shape action. Lists the player's known beast forms
 // (chosen in the builder), and transforms into / reverts from one. Transform
@@ -23,7 +24,7 @@ const druidLevel = (C) => classLevel(C, 'Druid');
 function knownFormRefs(C) {
   const choices = C?.choices || {};
   for (const [k, v] of Object.entries(choices)) {
-    if (k.replace(/^mc\d+_/, '') === 'druid_wild_shape_forms') {
+    if (baseChoiceKey(k) === 'druid_wild_shape_forms') {
       return Array.isArray(v) ? v : (v ? [v] : []);
     }
   }

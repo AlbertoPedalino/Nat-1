@@ -6,6 +6,7 @@ import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import SelectionSearch from '../choices/SelectionSearch.jsx';
 import { filterOptions, SEARCH_MIN_OPTIONS } from '../../../shared/content/searchText.js';
 import { stripSource } from '../../../shared/content/nameKeys.js';
+import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
 
 function _knownCantripNames(character) {
   const names = new Set();
@@ -51,10 +52,10 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
     }
 
     if (filter.modifierOnly) {
-      var keyBase = spec.key.replace(/^mc\d+_/, '').replace(/_\d+$/, '');
+      var keyBase = baseChoiceKey(spec.key).replace(/_\d+$/, '');
       var alreadyChosen = new Set();
       Object.entries(state.character.choices || {}).forEach(function (entry) {
-        var choiceKey = entry[0].replace(/^mc\d+_/, '');
+        var choiceKey = baseChoiceKey(entry[0]);
         if (choiceKey === spec.key) return;
         var choiceBase = choiceKey.replace(/_\d+$/, '');
         if (choiceBase !== keyBase) return;

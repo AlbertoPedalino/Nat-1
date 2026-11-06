@@ -1,5 +1,6 @@
 import { classLevel } from './classLevel.js';
 import { matchKey, stripSource } from '../../content/nameKeys.js';
+import { baseChoiceKey } from './choiceUtils.js';
 
 // An invocation name compared without its source.
 const invocationKey = (value) => matchKey(stripSource(value));
@@ -29,7 +30,7 @@ export function warlockInvocationSelectionsFromChoices(choices, keyPrefix = '') 
     const key = String(entry[0] || '');
     const matches = prefix
       ? key.startsWith(prefix + 'warlock_invocation_')
-      : key.replace(/^mc\d+_/, '').startsWith('warlock_invocation_');
+      : baseChoiceKey(key).startsWith('warlock_invocation_');
     if (!matches) return;
     invocationNamesFromChoiceValue(entry[1]).forEach(function (name) { out.push(name); });
   });
@@ -77,5 +78,5 @@ export function warlockModifierCantripChoiceKey(slug, index, total) {
 // True for choice keys produced by warlockModifierCantripChoiceKey. Such choices
 // store a cantrip name but only attach a modifier — they are not granted/known spells.
 export function isWarlockModifierCantripChoiceKey(key) {
-  return _MODIFIER_CANTRIP_CHOICE_KEY_RE.test(String(key || '').replace(/^mc\d+_/, ''));
+  return _MODIFIER_CANTRIP_CHOICE_KEY_RE.test(baseChoiceKey(key || ''));
 }

@@ -26,6 +26,7 @@ import { itemDisplayName, itemIdentityKey } from './itemIdentity.js';
 import { primaryClassLevel } from '../progression/classLevel.js';
 import { itemHasProperty } from './weaponProperties.js';
 import { stripSource } from '../../content/nameKeys.js';
+import { baseChoiceKey } from '../progression/choiceUtils.js';
 
 const lc = (value) => String(value || '').toLowerCase();
 const typeOf = (item) => stripSource(item?.type).toUpperCase();
@@ -192,7 +193,7 @@ export function hasImprovedArmorer(character) {
 }
 
 export function isReplicatePlanChoiceKey(key, character = null) {
-  const base = String(key || '').replace(/^mc\d+_/, '');
+  const base = baseChoiceKey(key || '');
   if (base === REPLICATE_GENERAL_CHOICE_KEY) return true;
   if (base !== REPLICATE_ARMORER_CHOICE_KEY) return false;
   return character ? hasImprovedArmorer(character) : true;

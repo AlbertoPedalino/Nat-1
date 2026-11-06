@@ -3,7 +3,7 @@ import { normalizeFreeCast } from '../../../shared/character/spells/spellFreeCas
 import { lowerKey } from '../../../shared/content/nameKeys.js';
 import {
   choiceSpellSlotKey,
-  choiceValue,
+  firstChoiceString,
   findFeatName,
   isFeatLikeSlotKey,
   ownerClassFromChoiceKey,
@@ -27,16 +27,16 @@ export function buildFeatMetaMap(C) {
     if (!slotKey || !snapshot || map.has(slotKey)) return;
     const abilityChoiceKey = `${slotKey}_spell_ability`;
     const ability = abilityKey(
-      choiceValue(choices[abilityChoiceKey])
-      || choiceValue(choices[`${slotKey}_asi`])
-      || choiceValue(choices[`${slotKey}_first_asi`]),
+      firstChoiceString(choices[abilityChoiceKey])
+      || firstChoiceString(choices[`${slotKey}_asi`])
+      || firstChoiceString(choices[`${slotKey}_first_asi`]),
     );
     map.set(slotKey, { name: snapshot.name, ability, snapshot });
   };
 
   Object.entries(choices).forEach(([key, value]) => {
     if (!isFeatLikeSlotKey(C, key)) return;
-    const selected = choiceValue(value);
+    const selected = firstChoiceString(value);
     if (selected) addMeta(key, selected);
   });
   Object.entries(C?.normalizedChoices?.feats?.byKey || {}).forEach(([key, value]) => {

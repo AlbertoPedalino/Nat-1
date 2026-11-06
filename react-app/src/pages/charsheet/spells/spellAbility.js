@@ -1,5 +1,5 @@
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
-import { choiceSpellSlotKey, choiceValue } from './spellChoiceKeys.js';
+import { choiceSpellSlotKey, firstChoiceString } from './spellChoiceKeys.js';
 import { abilityKey } from '../../../shared/content/rulesVocabulary.js';
 
 // Which ability a spell is cast with: the character's default, a spell row's
@@ -12,7 +12,7 @@ export function getChoiceSpellAbility(C, key) {
   if (slotKey) {
     const abilityChoiceKey = `${slotKey}_spell_ability`;
     const raw = C?.choices?.[abilityChoiceKey];
-    const val = choiceValue(raw);
+    const val = firstChoiceString(raw);
     if (val) {
       const normalized = abilityKey(val);
       if (normalized) return normalized;
@@ -20,7 +20,7 @@ export function getChoiceSpellAbility(C, key) {
   }
   if (String(key || '').startsWith('species_')) {
     const speciesAbility = C?.normalizedChoices?.species?.spellAbility
-      || choiceValue(C?.choices?.species_spell_ability);
+      || firstChoiceString(C?.choices?.species_spell_ability);
     const normalized = abilityKey(speciesAbility);
     if (normalized) return normalized;
   }
@@ -43,7 +43,7 @@ export function resolveEntrySpellAbility(C, entry = {}) {
     const ownerAbility = subCfg?.ability || clsCfg?.ability || null;
     if (ownerAbility) return String(ownerAbility).toLowerCase();
   }
-  const speciesAbility = choiceValue(C?.choices?.species_spell_ability);
+  const speciesAbility = firstChoiceString(C?.choices?.species_spell_ability);
   if (speciesAbility) {
     const sa = abilityKey(speciesAbility);
     if (sa) return sa;

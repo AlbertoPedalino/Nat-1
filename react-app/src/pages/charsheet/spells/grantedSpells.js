@@ -24,6 +24,7 @@ import {
 import { getChoiceSpellAbility } from './spellAbility.js';
 import { buildFeatMetaMap } from './featSpellMeta.js';
 import { ABILITIES } from '../../../shared/content/rulesVocabulary.js';
+import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
 
 // Spells the character has through a grant rather than its class list, each
 // with its source tag: at-will invocations, auto-granted spells (class,
@@ -127,7 +128,7 @@ export function collectChoiceSpells(C, spellIndex) {
   const featMetaMap = buildFeatMetaMap(C);
   const out = [];
   Object.entries(C?.choices || {}).forEach(([key, value]) => {
-    const cleanKey = key.replace(/^mc\d+_/, '');
+    const cleanKey = baseChoiceKey(key);
     if (isWarlockModifierCantripChoiceKey(cleanKey)) return;
     if (!speciesChoiceKeyMatchesActiveLineage(C, cleanKey)) return;
     const values = Array.isArray(value) ? value : [value];

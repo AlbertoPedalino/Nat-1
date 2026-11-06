@@ -1,7 +1,9 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
-import { matchKey } from '../../../shared/content/nameKeys.js';
 import { finalAbilityModifier } from '../../../shared/character/progression/abilityScores.js';
+import { classChoiceIs, hasChoiceValue, readChoiceValue } from '../../../shared/character/progression/choiceUtils.js';
+import { asArray } from '../../../shared/lists.js';
+import { choiceKey, choiceText } from '../../../shared/content/nameKeys.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -13,85 +15,22 @@ export default function install(registry, context = {}) {
     registerClassSheetSpellModifiers,
   } = createAdapterBindings(registry, context);
 
-function cleanChoice(value) {
-  return String(value || '')
-    .replace(/\{@[a-z]+ ([^|}]+)(?:\|[^}]*)?\}/gi, '$1')
-    .split('|')[0]
-    .trim();
-}
-
-function normChoice(value) {
-  return matchKey(cleanChoice(value));
-}
-
-function asChoiceArray(value) {
-  if (value == null) return [];
-  return Array.isArray(value) ? value : [value];
-}
-
-function choiceValueFrom(character, key) {
-  if (!character || !key) return null;
-
-  const direct = character?.choices?.[key];
-  if (direct != null) return direct;
-
-  const prefixed = Object.entries(character?.choices || {}).find(([choiceKey]) => (
-    String(choiceKey || '').replace(/^mc\d+_/, '') === key
-  ));
-  if (prefixed) return prefixed[1];
-
-  const normalized = character?.normalizedChoices || {};
-  const buckets = [
-    normalized.rawByKey,
-    normalized.classOptions,
-    normalized.subclassOptions,
-    normalized.species?.options,
-    normalized.background?.options,
-    normalized.feats?.byKey,
-    normalized.spells?.byKey,
-  ];
-
-  for (const bucket of buckets) {
-    if (bucket && bucket[key] != null) return bucket[key];
-  }
-
-  return null;
-}
-
-function hasCharacterChoice(character, key, expected) {
-  const wanted = normChoice(expected);
-  if (!wanted) return false;
-
-  return asChoiceArray(choiceValueFrom(character, key))
-    .some((value) => normChoice(value) === wanted);
-}
-
 function firstCharacterChoice(character, key, fallback = '') {
-  const first = asChoiceArray(choiceValueFrom(character, key))
+  const first = asArray(readChoiceValue(character, key))
     .find((value) => value != null && value !== '');
 
-  return cleanChoice(first) || fallback;
+  return choiceText(first) || fallback;
 }
 
 function divineStrikeDamageType(character) {
   const chosen = firstCharacterChoice(character, 'cleric_divine_strike_damage_type', 'Radiant');
-  return normChoice(chosen) === 'necrotic' ? 'Necrotic' : 'Radiant';
+  return choiceKey(chosen) === 'necrotic' ? 'Necrotic' : 'Radiant';
 }
 registerClassAdapter("Cleric", function (cls, lv, specs, ctx = {}) {
   const character = ctx.character || {};
   const choices = ctx.choices || character.choices || {};
   const keyPrefix = ctx.keyPrefix || '';
-  const choiceValue = function (key) {
-    const direct = choices[key];
-    if (direct !== undefined) return direct;
-    return choices[keyPrefix + key];
-  };
-  const hasChoice = function (key, value) {
-    const raw = choiceValue(key);
-    return asChoiceArray(raw).some(function (v) {
-      return normChoice(v) === normChoice(value);
-    });
-  };
+  const hasChoice = (key, value) => classChoiceIs(choices, key, value, keyPrefix);
 
   if (lv >= 1) {
     specs.push({
@@ -230,7 +169,7 @@ registerClassSheetActions("Cleric", [
     "cat": "attack",
     "uses": "Once/turn",
     "minLevel": 7,
-    "condition": (character) => hasCharacterChoice(character, "cleric_blessed_strikes", "Divine Strike"),
+    "condition": (character) => hasChoiceValue(character, "cleric_blessed_strikes", "Divine Strike"),
     rollers: [{ kind: 'damage', formula: ({ ownerLevel }) => {
       const lv = Number(ownerLevel || 1);
       return lv >= 14 ? "2d8" : "1d8";
@@ -246,7 +185,7 @@ registerClassSheetActions("Cleric", [
     "cat": "action",
     "uses": "Cantrip damage",
     "minLevel": 7,
-    "condition": (character) => hasCharacterChoice(character, "cleric_blessed_strikes", "Potent Spellcasting")
+    "condition": (character) => hasChoiceValue(character, "cleric_blessed_strikes", "Potent Spellcasting")
   },
   {
     "name": "Improved Blessed Strikes",
@@ -270,12 +209,12 @@ registerClassSheetSpellModifiers("Cleric", [
 
     const character = ctx.character || {};
     const ownerClassName = ctx.ownerClassName || ctx.spell?.ownerClassName || "";
-    if (normChoice(ownerClassName) !== "cleric") return ctx?.formula;
+    if (choiceKey(ownerClassName) !== "cleric") return ctx?.formula;
 
     const isCantrip = !!ctx.spell?.isCantrip || Number(ctx.level ?? ctx.spell?.level ?? 0) === 0;
     if (!isCantrip) return ctx?.formula;
 
-    if (!hasCharacterChoice(character, "cleric_blessed_strikes", "Potent Spellcasting")) {
+    if (!hasChoiceValue(character, "cleric_blessed_strikes", "Potent Spellcasting")) {
       return ctx?.formula;
     }
 
