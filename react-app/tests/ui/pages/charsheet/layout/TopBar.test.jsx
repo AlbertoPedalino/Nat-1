@@ -74,3 +74,12 @@ test('the sheet roll log does not invent a zero modifier for plain custom dice',
   expect(screen.getByText('=')).toBeInTheDocument();
   expect(screen.queryByText(/\+\s*0/)).not.toBeInTheDocument();
 });
+
+test('a read-only sheet shows its READ ONLY badge', () => {
+  render(
+    <MemoryRouter>
+      <TopBar C={character} sheet={{ xpStored: 0 }} embedded readOnly />
+    </MemoryRouter>,
+  );
+  expect(screen.getByText('READ ONLY')).toBeInTheDocument();
+});

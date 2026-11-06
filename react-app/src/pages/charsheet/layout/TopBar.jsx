@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { Box, Typography, Button, Chip, Menu, MenuItem } from '@mui/material';
-import { ArrowLeft, Home, Sun, Moon, Dices, Trash2, ImagePlus, Palette } from 'lucide-react';
+import { ArrowLeft, Home, Sun, Moon, Dices, Trash2, ImagePlus, Palette, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { levelFromXp, xpForLevel, xpProgressPct, MAX_LEVEL } from '../../../shared/character/progression/xp.js';
 import { rollFormula as rollFormulaDice, formatRollTitle } from '../../../shared/character/dice/dice.js';
