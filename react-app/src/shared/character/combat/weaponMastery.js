@@ -8,7 +8,6 @@ import { flattenList } from '../../lists.js';
 import { matchKey, stripSource } from '../../content/nameKeys.js';
 import { loadGameData } from '../../content/gameData.js';
 
-
 const _masteries = new Map();
 let _masteryLoadPromise = null;
 
@@ -184,13 +183,6 @@ export function getWeaponMasteryEntries(mastery) {
 
 export function getWeaponMasteryName(mastery) {
   return getMasteryRecord(mastery)?.name || null;
-}
-
-export function getWeaponMasteryReminderText(mastery) {
-  const entries = getWeaponMasteryEntries(mastery);
-  if (!entries?.length) return '';
-  const first = entries.find((node) => typeof node === 'string');
-  return first || '';
 }
 
 function canonicalMasteryName(value) {

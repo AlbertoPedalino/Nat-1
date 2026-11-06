@@ -6,7 +6,6 @@ import {
   STATS,
   THIRD_SLOTS,
 } from '../constants.js';
-import { collectOwnedFeatNames } from '../../../shared/character/progression/selectedFeats.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 
 export function pointBuySpent(scores) {
@@ -87,6 +86,3 @@ export function getSpellSlots(character) {
 // one derivation. Kept as a named export for existing importers.
 export const getPrimaryClassLevel = primaryClassLevel;
 
-export function getSelectedFeatNames(character) {
-  return collectOwnedFeatNames(character);
-}

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Box, Chip, List, ListItemButton, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { Chip, List, ListItemButton, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { BookOpen } from 'lucide-react';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
@@ -211,7 +211,6 @@ function getAutoGrantedLabel(spell, character) {
 
   return character?.subclassShortName || character?.className || 'Auto';
 }
-
 
 function dedupeSpells(spells) {
   const seen = new Set();

@@ -1,7 +1,7 @@
 import { Alert, Box, Button, Chip, Grid, Paper, Slider, Stack, Tab, Tabs, TextField, Typography } from '@mui/material';
 import { Dice5, Dumbbell } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
-import { PB_COST, STANDARD_ARRAY, STAT_LABELS, STATS } from '../constants.js';
+import { STANDARD_ARRAY, STAT_LABELS, STATS } from '../constants.js';
 import { pointBuySpent } from '../progression/calculations.js';
 import { abilityScoreBonuses, baseAbilityScore, builtAbilityScore } from '../../../shared/character/progression/abilityScores.js';
 import { getActiveScores } from '../state/state.js';

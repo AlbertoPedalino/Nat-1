@@ -2,7 +2,6 @@ import { canonicalProficiencyLabel } from './proficiencyDisplay.js';
 import { matchKey } from '../../content/nameKeys.js';
 
 const TYPED_PROFICIENCY_RE = /^(skill|tool|language|weapon):(.+)$/i;
-const TYPED_PROFICIENCY_PREFIX_RE = /^(skill|tool|language|weapon):\s*/i;
 const CHOICE_PLACEHOLDER_RE = /\bchoose\b|\byour choice\b|\bof your choice\b|\bone type\b/i;
 
 const FIXED_BLOCK_CHOICE_KEYS = new Set([
@@ -26,14 +25,6 @@ function stripTags(value) {
 
 function untypedLabel(value) {
   return stripTags(value).replace(/_/g, ' ').trim();
-}
-
-export function isTypedProficiencyValue(value) {
-  return TYPED_PROFICIENCY_RE.test(stripTags(value));
-}
-
-export function stripTypedProficiencyPrefix(value) {
-  return stripTags(value).replace(TYPED_PROFICIENCY_PREFIX_RE, '');
 }
 
 export function isChoicePlaceholderValue(value) {

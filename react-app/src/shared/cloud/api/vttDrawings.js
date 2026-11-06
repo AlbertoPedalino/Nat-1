@@ -122,8 +122,3 @@ export async function deleteDrawing(drawingId) {
   if (error) throw error;
 }
 
-export async function clearDrawings(sceneId) {
-  const supabase = requireClient();
-  const { error } = await supabase.from('map_drawings').delete().eq('scene_id', sceneId);
-  if (error) throw error;
-}

@@ -1,8 +1,7 @@
 import { createAdapterBindings } from '../adapterBindings.js';
 
 export default function install(registry, context = {}) {
-  const { registerClassRuntimeConfig, registerSubclassRuntimeConfig, registerSpeciesRuntimeConfig } = createAdapterBindings(registry, context);
-
+  const { registerClassRuntimeConfig, registerSubclassRuntimeConfig } = createAdapterBindings(registry, context);
 
   if (typeof registerClassRuntimeConfig !== "function") return;
 
@@ -12,11 +11,6 @@ export default function install(registry, context = {}) {
   function regSubclass(key, cfg) {
     if (typeof registerSubclassRuntimeConfig === "function") {
       registerSubclassRuntimeConfig(key, cfg || {});
-    }
-  }
-  function regSpecies(key, cfg) {
-    if (typeof registerSpeciesRuntimeConfig === "function") {
-      registerSpeciesRuntimeConfig(key, cfg || {});
     }
   }
 

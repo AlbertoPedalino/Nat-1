@@ -1,14 +1,6 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
 import { getArtificerConditionalBonusToolCount } from './artificerTools.js';
-import {
-  CANNON_AC,
-  CANNON_COMMAND_RANGE_FT,
-  CANNON_CREATE_RANGE_FT,
-  CANNON_DAMAGE_IMMUNITIES,
-  CANNON_MENDING_HEAL,
-  CANNON_MOVE_FT,
-  getActiveCannons,
-} from '../../../shared/character/forms/eldritchCannonForm.js';
+import { getActiveCannons } from '../../../shared/character/forms/eldritchCannonForm.js';
 
 export default function install(registry, context = {}) {
   const {

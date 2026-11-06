@@ -347,32 +347,9 @@ export function collectItemImmunityItems(C) {
     .map((entry) => ({ label: entry.label, kind: 'Immunity', source: entry.source }));
 }
 
-export function collectItemVulnerabilityItems(C) {
-  return characterItemEffects(C).vulnerabilities
-    .map((entry) => ({ label: entry.label, kind: 'Vulnerability', source: entry.source }));
-}
-
 export function collectItemConditionImmunityItems(C) {
   return characterItemEffects(C).conditionImmunities
     .map((entry) => ({ label: entry.label, kind: 'Condition Immunity', source: entry.source }));
-}
-
-export function getItemSpeedOverride(C, mode = 'walk') {
-  const override = characterItemEffects(C).speedOverride[mode];
-  return override ? override.value : null;
-}
-
-export function getItemSpeedBonus(C, mode = 'walk') {
-  return characterItemEffects(C).speedBonus[mode] || 0;
-}
-
-export function getItemSpeedMultiplier(C, mode = 'walk') {
-  const mul = characterItemEffects(C).speedMultiplier[mode];
-  return mul ? mul.value : 1;
-}
-
-export function getItemSpeedEqual(C, mode) {
-  return characterItemEffects(C).speedEqual[mode] || null;
 }
 
 export function getItemSenses(C) {
@@ -389,16 +366,3 @@ export function getItemAdvantageOnSkill(C, skillName) {
   return map.get(key) || null;
 }
 
-export function getItemAdvantageOnSave(C, target) {
-  const map = characterItemEffects(C).advantageOnSaveAgainst;
-  const key = String(target || '').toLowerCase();
-  return map.get(key) || null;
-}
-
-export function getItemAttackerDisadvantage(C) {
-  return characterItemEffects(C).disadvantageOnAttackersAgainstYou;
-}
-
-export function getItemPassiveTraits(C) {
-  return characterItemEffects(C).passiveTraits;
-}

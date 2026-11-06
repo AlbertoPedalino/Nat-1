@@ -127,10 +127,6 @@ export function collectOwnedFeatNames(character) {
   return value;
 }
 
-export function getChoiceSelectedFeatNames(character) {
-  return [...new Set(fromChoices(character))];
-}
-
 function featNameText(value) {
   if (value == null) return '';
   if (typeof value === 'object') return featNameText(value.name ?? value.label ?? value.value ?? value.key ?? value.id);

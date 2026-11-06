@@ -102,10 +102,6 @@ export function getEquippedOffHandWeapon(inventory) {
   return (inventory || []).find(i => i.equippedSlot === 'offHand');
 }
 
-export function getEquippedTwoHandedWeapon(inventory) {
-  return (inventory || []).find(i => i.equippedSlot === 'twoHands');
-}
-
 export function getEquippedShield(inventory) {
   return (inventory || []).find(i => i.equipped && i.type === 'S');
 }

@@ -13,9 +13,6 @@ export const PROJECT_TO_RAW_SOURCE = Object.freeze({
   AU: 'AU',
   AUD: 'AUD',
 });
-export const RAW_TO_PROJECT_SOURCE = Object.freeze(Object.fromEntries(
-  Object.entries(PROJECT_TO_RAW_SOURCE).map(([project, raw]) => [raw, project]),
-));
 export const RAW_ALLOWED_SOURCES = Object.freeze(PROJECT_ALLOWED_SOURCES.map((source) => PROJECT_TO_RAW_SOURCE[source]));
 export const SOURCE_LABELS = Object.freeze({
   XPHB: "Player's Handbook (2024)",

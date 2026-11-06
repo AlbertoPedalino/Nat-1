@@ -77,10 +77,6 @@ export function createCloudAutoSyncEngine({
     return true;
   }
 
-  function unblock(key) {
-    blocked.delete(key);
-  }
-
   function dispose() {
     for (const timer of timers.values()) clearTimer(timer);
     timers.clear();
@@ -90,7 +86,6 @@ export function createCloudAutoSyncEngine({
   return Object.freeze({
     schedule,
     cancel,
-    unblock,
     dispose,
     isBlocked: (key) => blocked.has(key),
     isInFlight: (key) => inFlight.has(key),

@@ -49,9 +49,3 @@ export async function saveSceneDungeon(sceneId, { key, fights } = {}) {
   return toDungeon(data);
 }
 
-export async function deleteSceneDungeon(sceneId) {
-  if (!sceneId) return;
-  const supabase = requireClient();
-  const { error } = await supabase.from('map_dungeons').delete().eq('scene_id', sceneId);
-  if (error) throw error;
-}

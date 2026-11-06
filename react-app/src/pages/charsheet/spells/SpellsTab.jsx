@@ -92,7 +92,7 @@ function getSpellActionFilter(entry) {
 }
 
 export default function SpellsTab({ C, sheet, freeCastUses }) {
-  const { onRoll, onUpdateSpells, onShowToast, onUpdateSheet, onToggleFreeCast, onUpdateCharacter, readOnly } = useSheetActions();
+  const { onUpdateSpells, onUpdateSheet, onUpdateCharacter, readOnly } = useSheetActions();
   const [spellDb, setSpellDb] = useState([]);
   const [spellVersions, setSpellVersions] = useState([]);
   const [classSpellIndex, setClassSpellIndex] = useState({});
@@ -661,7 +661,6 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
     </Box>
   );
 }
-
 
 // Picker row for the Add/Remove + Wizard Spellbook dialog. Tapping the row
 // expands the full rich reference (meta + description + upcast). An auto-granted

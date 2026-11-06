@@ -143,7 +143,6 @@ if (typeof registerClassRuntimeConfig === "function") {
 
 if (typeof registerResourceSideEffect === 'function') {
   registerResourceSideEffect('wild_resurgence', function (ctx = {}) {
-    const C = ctx.character || ctx.C;
     const res = ctx.resources || {};
     const currentWS = Number(res.wild_shape || 0);
     const slots = ctx.slots || { regular: [] };

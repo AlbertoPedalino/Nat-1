@@ -106,23 +106,6 @@ export function applyFreeCastRest(uses = {}, defs = [], restType = 'long') {
   return next;
 }
 
-export function getFreeCastRemaining(freeCast, uses = {}) {
-  if (!freeCast?.id) return 0;
-  const used = Math.max(0, Number(uses[freeCast.id] || 0));
-  const max = Math.max(0, Number(freeCast.max || 0));
-  return Math.max(0, max - used);
-}
-
-export function toggleFreeCastUse(uses = {}, freeCast) {
-  if (!freeCast?.id) return uses;
-  const used = Math.max(0, Number(uses[freeCast.id] || 0));
-  const max = Math.max(1, Number(freeCast.max || 1));
-  const next = { ...uses };
-  if (used >= max) delete next[freeCast.id];
-  else next[freeCast.id] = used + 1;
-  return next;
-}
-
 const FEAT_FREE_CAST_TEMPLATES = new Map();
 
 function normFeatKey(featName) {

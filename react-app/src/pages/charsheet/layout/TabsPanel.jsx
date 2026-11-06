@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Box, Paper, Tabs, Tab } from '@mui/material';
 import ActionsTab from '../actions/ActionsTab.jsx';
 import SpellsTab from '../spells/SpellsTab.jsx';

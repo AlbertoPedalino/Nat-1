@@ -16,13 +16,6 @@ const _METAMAGIC = [
   'Transmuted Spell', 'Twinned Spell',
 ];
 
-// Progressione: +2 a L2, +2 a L10, +2 a L17 (totale max 6)
-const _MM_SLOTS = [
-  { idx: 1, level: 2 }, { idx: 2, level: 2 },
-  { idx: 3, level: 10 }, { idx: 4, level: 10 },
-  { idx: 5, level: 17 }, { idx: 6, level: 17 },
-];
-
 registerClassAdapter("Sorcerer", function (cls, lv, specs, ctx = {}) {
   if (lv >= 2) {
     const count = lv >= 17 ? 6 : lv >= 10 ? 4 : 2;

@@ -2,7 +2,6 @@ import { createAdapterBindings } from '../../adapterBindings.js';
 import {
   warlockHasInvocation,
   warlockLevel,
-  warlockKnownInvocations,
   warlockInvocationSelections,
   WARLOCK_MODIFIER_CANTRIP_INVOCATIONS,
   warlockModifierCantripChoiceKey,
@@ -97,14 +96,6 @@ function _warlockAdapterCharacter(localContext) {
     || ((typeof char !== 'undefined' && char) ? char : null);
 }
 
-function _warlockInvocationCount(C, name) {
-  if (!C) return 0;
-  var target = matchKey(name);
-  return warlockInvocationSelections(C).filter(function (invName) {
-    return matchKey(invName) === target;
-  }).length;
-}
-
 function _warlockInvocationCountScoped(C, name, keyPrefix) {
   if (!C) return 0;
   var target = matchKey(name);
@@ -121,25 +112,8 @@ function _warlockHasInvocationScoped(C, name, keyPrefix) {
   });
 }
 
-function _warlockInvocationPrereqMet(C, inv, threshold) {
-  if (!inv) return false;
-  if (Number(threshold || 0) < Number(inv.minLevel || 1)) return false;
-  if (!inv.prereq) return true;
-  return _warlockHasInvocation(C, inv.prereq);
-}
-
 function _warlockLevel(C) {
   return warlockLevel(C);
-}
-
-function _warlockChoiceValue(C, key) {
-  if (!C?.choices) return null;
-  const direct = C.choices[key];
-  if (direct != null) return direct;
-  const found = Object.entries(C.choices).find(function (entry) {
-    return entry[0].replace(/^mc\d+_/, '') === key;
-  });
-  return found ? found[1] : null;
 }
 
 function _warlockChoiceValuesByBase(C, baseKey, fallback) {
@@ -160,10 +134,6 @@ function _warlockChoiceMatches(C, baseKey, cantripName, fallback) {
   return _warlockChoiceValuesByBase(C, baseKey, fallback).some(function(value) {
     return value === cantripName;
   });
-}
-
-function _knownWarlockInvocationChoices(C) {
-  return warlockKnownInvocations(C);
 }
 
 // XPHB 2024 progression: total invocations per level [1,3,3,3,5,5,6,6,7,7,7,8,8,8,9,9,9,10,10,10]

@@ -8,7 +8,6 @@
 import { hexDistance } from './hexGeometry.js';
 
 export const FEET_PER_CELL = 5;
-export const DIAGONAL_RULES = Object.freeze(['chebyshev', 'alternating']);
 
 function cellsBetween(from, to) {
   const dx = Math.abs(Math.round(Number(to?.x) || 0) - Math.round(Number(from?.x) || 0));

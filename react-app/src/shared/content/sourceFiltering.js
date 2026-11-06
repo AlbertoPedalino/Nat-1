@@ -1,5 +1,4 @@
 import {
-  CORE_2024_SOURCE,
   SUBCLASS_ALLOWED_SOURCES,
   SUBCLASS_SOURCE_PRIORITY,
   compareBySourcePriority,
@@ -10,10 +9,6 @@ import {
 import { matchKey } from './nameKeys.js';
 
 export { normalizeSource };
-
-export function isSupported2024Source(source, edition) {
-  return normalizeSource(source) === CORE_2024_SOURCE && isSupportedEdition(edition);
-}
 
 export function isSupportedSubclassSource(source, edition) {
   return isAllowedSource(source, SUBCLASS_ALLOWED_SOURCES) && isSupportedEdition(edition);

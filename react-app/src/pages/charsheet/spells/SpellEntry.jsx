@@ -8,9 +8,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { SPELL_LEVEL_LABELS } from '../../charbuilder/constants.js';
 import { SpellNameIcon } from '../../../shared/content/FiveEToolsLink.jsx';
-import { RichInline } from '../../../shared/content/RichText.jsx';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import {
   SpellMetaGrid,
@@ -134,7 +132,6 @@ function FreeCastsInline({ freeCasts, freeCastUses, onToggleFreeCast, sx }) {
     </Box>
   );
 }
-
 
 function normalizeModifierDetails(cantripData) {
   const raw = [
@@ -283,7 +280,6 @@ export default function SpellEntry({
   // attacks stay aligned.
   const innateSpellAdv = hasAttack ? getSpellAttackAdvantage(C, { ownerClassName: entry.ownerClassName }) : null;
   const spellAttackRoll = describeAttackRoll(activeConditions, { extraAdv: innateSpellAdv?.source || null });
-
 
   const upcastStepDie = (steps > 0) ? (spellData?.upcastDie || getUpcastStep(entry.entriesHigherLevel)?.stepDie) : null;
   const baseScaledDamages = upcastStepDie

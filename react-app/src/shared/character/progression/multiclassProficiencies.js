@@ -88,14 +88,6 @@ function fallbackForClass(className) {
   return Object.entries(XPHB_MULTICLASS_FALLBACK).find(([name]) => matchKey(name) === wanted)?.[1] || {};
 }
 
-export function isPrimaryClassContext(ctx = {}) {
-  return !isMulticlassContext(ctx);
-}
-
-export function isMulticlassContext(ctx = {}) {
-  return !!(ctx.isMulticlass || ctx.multiclass || ctx.keyPrefix || String(ctx.keyPrefix || '').startsWith('mc'));
-}
-
 export function getMulticlassProficiencies(className, cls = null) {
   return cls?.multiclassing?.proficienciesGained
     || cls?.multiclassProficienciesGained

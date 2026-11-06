@@ -47,20 +47,3 @@ export function resolveInitiativeTriggeredResourceRecoveries(character, resource
   return { resources: modified ? next : resources, applied };
 }
 
-export function applyInitiativeTriggeredResourceRecoveries(character, resources, setResources) {
-  if (!character || !resources || typeof setResources !== 'function') return { resources, applied: [] };
-  const result = resolveInitiativeTriggeredResourceRecoveries(character, resources);
-  if (result.resources !== resources) {
-    setResources(result.resources);
-  }
-  return result;
-}
-
-export function collectInitiativeRecoveryEffects(character) {
-  if (!character) return [];
-  return collectSheetEffects(character).filter((effect) => {
-    if (matchKey(effect.type) !== 'initiativerecovery') return false;
-    if (primaryClassLevel(character) < Number(effect.minLevel || 1)) return false;
-    return true;
-  });
-}

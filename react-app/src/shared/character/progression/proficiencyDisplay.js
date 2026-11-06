@@ -95,10 +95,6 @@ export function canonicalProficiencyLabel(value) {
   return canonicalDisplayLabel(value);
 }
 
-export function canonicalDamageTypeLabel(value) {
-  return canonicalDisplayLabel(value);
-}
-
 function splitSource(label) {
   const match = String(label || '').match(/^(.*?)\s*(\([^)]*\))\s*$/);
   if (!match) return { base: label, source: '' };

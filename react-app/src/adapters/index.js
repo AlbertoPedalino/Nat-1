@@ -120,14 +120,4 @@ export async function loadSpellsAdapters(context = {}) {
   return adapterRegistry;
 }
 
-export async function loadConvertedAdapters(context = {}) {
-  const all = Object.keys(adapterModules);
-  await loadPaths(all, context);
-  return adapterRegistry;
-}
-
-export function reinstallAdapters(context = {}) {
-  installAdapters(installedAdapters, adapterRegistry, context);
-}
-
 export { adapterRegistry };

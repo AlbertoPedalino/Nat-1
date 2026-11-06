@@ -90,39 +90,3 @@ export function getEquippedArmorPenalties(C, inventory, equipmentSets) {
   return result;
 }
 
-export function formatArmorPenaltyMessage(penalties) {
-  if (!penalties.hasPenalty) return '';
-  
-  const parts = [];
-  
-  if (penalties.disadvantageOn.length > 0) {
-    const stealth = penalties.disadvantageOn.includes('dex-stealth');
-    const checks = penalties.disadvantageOn.filter(x => x.includes('checks')).map(x => x.split('-')[0].toUpperCase()).join('/');
-    const saves = penalties.disadvantageOn.filter(x => x.includes('saves')).map(x => x.split('-')[0].toUpperCase()).join('/');
-    if (stealth) parts.push('Disadvantage on Stealth');
-    if (checks) parts.push(`Disadvantage on ${checks} checks`);
-    if (saves && saves !== checks) parts.push(`Disadvantage on ${saves} saves`);
-  }
-  
-  if (penalties.speedPenalty < 0) {
-    parts.push(`Speed -${Math.abs(penalties.speedPenalty)} ft`);
-  }
-  
-  if (penalties.acPenalty < 0) {
-    parts.push(`Shield AC ${penalties.acPenalty}`);
-  }
-
-  if (penalties.cannotCastSpells) {
-    parts.push("Can't cast spells");
-  }
-  
-  return parts.join(' • ');
-}
-
-export function getArmorAC(item) {
-  if (!item) return 0;
-  if (item.type === 'LA') return item.ac || 10;
-  if (item.type === 'MA') return item.ac || 12;
-  if (item.type === 'HA') return item.ac || 14;
-  return 0;
-}

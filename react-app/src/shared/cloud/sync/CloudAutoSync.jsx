@@ -1,8 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useAuth } from '../auth/AuthProvider.jsx';
-import { pushCharacter, SHEET_CONFLICT, updateForeignCharacter } from '../api/cloudCharacters.js';
+import { pushCharacter, SHEET_CONFLICT } from '../api/cloudCharacters.js';
 import { isSyncExcluded } from './cloudSyncExclude.js';
-import { isForeignEdit } from './cloudForeign.js';
 import { cloudSyncState, reportCloudSyncState } from './cloudSyncState.js';
 import { hasUnsyncedLocalChanges, listCharacters } from '../../character/profile/store.js';
 import { charactersToResend, createCloudAutoSyncEngine } from './cloudAutoSyncEngine.js';
@@ -76,7 +75,8 @@ export default function CloudAutoSync() {
       key: `character:${id}`,
       id,
       canSync: () => !isSyncExcluded(id),
-      push: () => (isForeignEdit(id) ? updateForeignCharacter(id) : pushCharacter(id)),
+      // pushCharacter updates only the data of a sheet someone else owns.
+      push: () => pushCharacter(id),
     });
 
     const onCharacterSaved = (e) => {
@@ -105,18 +105,11 @@ export default function CloudAutoSync() {
       if (id) engine.cancel(`character:${id}`, id);
     };
 
-    const onForeignChanged = (e) => {
-      const id = e?.detail?.id;
-      if (id && e?.detail?.foreign) engine.unblock(`character:${id}`);
-    };
-
     window.addEventListener('gb:char-saved', onCharacterSaved);
     window.addEventListener('gb:char-deleted', onCharacterDeleted);
-    window.addEventListener('gb:cloud-foreign-changed', onForeignChanged);
     return () => {
       window.removeEventListener('gb:char-saved', onCharacterSaved);
       window.removeEventListener('gb:char-deleted', onCharacterDeleted);
-      window.removeEventListener('gb:cloud-foreign-changed', onForeignChanged);
       stopRecovery();
       resendRef.current = () => {};
       engine.dispose();

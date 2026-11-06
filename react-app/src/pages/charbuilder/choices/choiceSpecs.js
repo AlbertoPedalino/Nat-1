@@ -3,21 +3,13 @@ import { adapterRegistry as installedRegistry } from '../../../adapters/registry
 import { getPrimaryClassLevel } from '../progression/calculations.js';
 import { backgroundOriginFeat } from '../../../shared/character/progression/selectedFeats.js';
 import { getMulticlassChoiceSpecs } from '../../../shared/character/progression/multiclassProficiencies.js';
-import { strip5eMarkup } from '../../../shared/character/spells/spellEntries.js';
-import {
-  parseTypedProficiencyValue,
-  splitTypedProficiencies,
-  uniqueProficiencyLabels,
-} from '../../../shared/character/progression/typedProficiencies.js';
 import {
   STANDARD_LANGUAGES,
   EXOTIC_LANGUAGES,
   ALL_LANGUAGES,
-  SPECIAL_LANGUAGES,
   getLanguageOptions,
 } from '../../../shared/character/progression/languages.js';
 import { filterByRequiredChoice } from '../../../shared/character/progression/lineageMatch.js';
-import { stripSource } from '../../../shared/content/nameKeys.js';
 
 const ALL_SKILLS = ['Acrobatics', 'Animal Handling', 'Arcana', 'Athletics', 'Deception', 'History', 'Insight', 'Intimidation', 'Investigation', 'Medicine', 'Nature', 'Perception', 'Performance', 'Persuasion', 'Religion', 'Sleight of Hand', 'Stealth', 'Survival'];
 const STD_LANGS = STANDARD_LANGUAGES;
@@ -46,20 +38,6 @@ function mixedSkillToolOptions() {
   ];
 }
 
-export function parseSkillToolChoiceValue(value) {
-  const parsed = parseTypedProficiencyValue(value);
-  if (parsed.kind !== 'skill' && parsed.kind !== 'tool') return null;
-  if (!parsed.label) return null;
-  return { kind: parsed.kind, name: parsed.label };
-}
-
-export function splitSkillToolChoiceValues(values) {
-  const split = splitTypedProficiencies(values);
-  return {
-    skills: uniqueProficiencyLabels(split.skill),
-    tools: uniqueProficiencyLabels(split.tool),
-  };
-}
 const CHOICE_KEYS = ['choose', 'any', 'anyTool', 'anyArtisansTool', 'anyMusicalInstrument', 'anyGamingSet', 'anyStandard', 'anyExotic'];
 
 export function fixedKeysFromBlocks(blocks, excluded = CHOICE_KEYS) {
@@ -660,16 +638,3 @@ export function featChoiceSpecs(feat, options = {}) {
   return specs;
 }
 
-export function summarizeFixedProficiencies(entity) {
-  const skills = fixedKeysFromBlocks(entity?.skillProficiencies || []);
-  const tools = fixedKeysFromBlocks(entity?.toolProficiencies || [], ['choose', 'any', 'anyTool', 'anyArtisansTool', 'anyMusicalInstrument', 'anyGamingSet']);
-  const languages = fixedKeysFromBlocks(entity?.languageProficiencies || [], ['choose', 'any', 'anyStandard']);
-  return { skills, tools, languages };
-}
-
-export function optionLabel(value) {
-  const parsed = parseSkillToolChoiceValue(value);
-  if (parsed?.name) return parsed.name;
-  const raw = strip5eMarkup(stripSource(value));
-  return STAT_LABELS[raw] || raw.replace(/_/g, ' ');
-}

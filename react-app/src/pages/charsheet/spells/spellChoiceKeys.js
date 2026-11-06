@@ -118,7 +118,7 @@ function findFeatNameByScanning(C, key) {
     const val = C?.choices?.[keyPrefix];
     if (val && typeof val === 'string' && !val.startsWith('feat_')) return val;
   }
-  for (const [ck, cv] of Object.entries(C.choices)) {
+  for (const ck of Object.keys(C.choices)) {
     if (ck === abilityKey || ck.startsWith(`${keyPrefix}_spell_ability`)) {
       const val = C?.choices?.[keyPrefix];
       if (val && typeof val === 'string' && !val.startsWith('feat_')) return val;

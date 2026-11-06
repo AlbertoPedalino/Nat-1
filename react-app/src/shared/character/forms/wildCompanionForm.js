@@ -20,10 +20,6 @@ export function getActiveWildCompanion(C) {
   return wc && wc.beast ? wc : null;
 }
 
-export function hasWildCompanion(C) {
-  return getActiveWildCompanion(C) != null;
-}
-
 // Max hit points for a familiar form (the Beast's average HP).
 const beastMaxHp = (beast) => Math.max(0, Number(beast?.hp?.average) || 0);
 

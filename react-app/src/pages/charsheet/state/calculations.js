@@ -23,20 +23,6 @@ export const SKILLS = [
   { n: 'Persuasion', a: 'cha' }, { n: 'Religion', a: 'int' }, { n: 'Survival', a: 'wis' },
 ];
 
-export const COMBAT_ACTIONS = [
-  { name: 'Attack', desc: 'Make an attack with a weapon.' },
-  { name: 'Dodge', desc: 'Until your next turn, every attack roll against you has disadvantage if you can see the attacker.' },
-  { name: 'Disengage', desc: 'Your movement does not provoke opportunity attacks for the rest of the turn.' },
-  { name: 'Hide', desc: 'Make a Dexterity (Stealth) check to hide.' },
-  { name: 'Help', desc: 'Grant advantage to an ally on an attack roll or ability check.' },
-  { name: 'Dash', desc: 'Your movement doubles for this turn.' },
-  { name: 'Ready', desc: 'Prepare an action to execute in response to a specific trigger.' },
-  { name: 'Study', desc: 'Make an Intelligence check to gain information about a target.' },
-  { name: 'Influence', desc: 'Make a Charisma (Persuasion/Deception/Intimidation) check against a target.' },
-  { name: 'Grapple', desc: 'Try to restrain a creature with an Athletics check.' },
-  { name: 'Shove', desc: 'Try to push or knock prone a creature.' },
-];
-
 // Exhaustion (XPHB 2024) is graded 1–6, not a boolean condition, so it lives in
 // sheet.exhaustionLevel rather than CONDITION_EFFECTS. Each level: −2 to every
 // D20 Test and −5 ft Speed; level 6 = death. The numbers live here as the single
@@ -63,7 +49,6 @@ export function effectiveD20Modifier(rawBonus, exhaustionLevel = 0) {
   return rawBonus - exhaustionD20Penalty(exhaustionLevel);
 }
 
-export const SCHOOL_LABELS = { A: 'Abjuration', C: 'Conjuration', D: 'Divination', E: 'Enchantment', I: 'Illusion', N: 'Necromancy', T: 'Transmutation', V: 'Evocation' };
 export const SPELL_LEVEL_LABELS = ['Cantrip', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th'];
 const XP_TABLE = XP_THRESHOLDS; // single source of truth: shared/character/xp.js
 

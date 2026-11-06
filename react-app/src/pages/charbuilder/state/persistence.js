@@ -63,7 +63,6 @@ export function extractSheetData(text) {
   }
 }
 
-
 function collectTypedProficiencyChoices(choices = {}) {
   const all = Object.values(choices || {}).flatMap(asArray);
   const split = splitTypedProficiencies(all);
@@ -557,24 +556,3 @@ export function buildImportedCharacter(payload) {
   return stripHeavyFields({ ...builderState, ...normalizedData });
 }
 
-export function importSheetPayload(payload, confirmOverwrite = () => true) {
-  const data = unwrapStructuredSheetPayload(payload);
-
-  if (!isStructuredSheetPayload(data)) {
-    throw new Error('Unrecognized file format: upload a Nat 1 character sheet JSON file.');
-  }
-
-  const activeId = getActiveCharId();
-  const hasExisting = activeId && storeLoadCharacter(activeId) != null;
-  if (hasExisting && !confirmOverwrite()) return 0;
-
-  const unified = buildImportedCharacter(payload);
-
-  if (activeId) storeSaveCharacter(activeId, unified);
-  else {
-    const created = storeCreateCharacter(unified);
-    setActiveCharId(created.id);
-  }
-
-  return 1;
-}

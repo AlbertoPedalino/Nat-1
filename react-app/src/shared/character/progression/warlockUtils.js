@@ -46,12 +46,6 @@ export function warlockHasInvocation(character, invocationName) {
   return warlockInvocationSelections(character).some(function(name) { return invocationKey(name) === wanted; });
 }
 
-export function warlockHasInvocationInChoices(choices, invocationName) {
-  if (!invocationName) return false;
-  const wanted = invocationKey(invocationName);
-  return warlockInvocationSelectionsFromChoices(choices).some(function(name) { return invocationKey(name) === wanted; });
-}
-
 export function warlockLevel(character) {
   return classLevel(character, 'Warlock');
 }

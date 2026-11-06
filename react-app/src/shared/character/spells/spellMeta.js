@@ -104,10 +104,3 @@ export function getSpellMetaSegments(spell) {
   ].filter((segment) => segment.value);
 }
 
-// Compact single-line meta for collapsed rows. `includeSchool` prepends the
-// spell school (builder list rows show it; the sheet card does not).
-export function getSpellMetaLine(spell, { includeSchool = false } = {}) {
-  const { time, range, components, duration } = getSpellMetaFields(spell);
-  const school = includeSchool ? formatSchool(spell) : null;
-  return [school, time, range, components, duration].filter(Boolean).join(' - ');
-}

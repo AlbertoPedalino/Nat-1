@@ -11,7 +11,6 @@ import {
   Tab,
   Tabs,
   Toolbar,
-  Tooltip,
   Typography,
   ThemeProvider,
   createTheme,

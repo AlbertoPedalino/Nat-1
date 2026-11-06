@@ -36,12 +36,7 @@ import {
   partitionNamedEntries,
   splitNamedEntries,
 } from '../../../shared/content/EntryAccordion.jsx';
-import {
-  collectAcFormulas,
-  getEquippedArmor,
-  getEquippedShield,
-  computeAcFormulaValue,
-} from '../../../shared/character/combat/ac.js';
+import { collectAcFormulas, getEquippedArmor, computeAcFormulaValue } from '../../../shared/character/combat/ac.js';
 import { collectOwnedFeatNames } from '../../../shared/character/progression/selectedFeats.js';
 import { featDescriptionEntries } from '../../../shared/character/progression/featDescription.js';
 import { buildPreviewSheetCharacter } from './previewSheet.js';
@@ -56,7 +51,6 @@ import { computeMaxHp } from '../../../shared/character/combat/hp.js';
 
 const darkChipText = UI_COLORS.primaryContrast;
 const PROFICIENCY_TONE = NEUTRAL_TONE;
-
 
 const PANEL_SX = {
   p: 1.25,

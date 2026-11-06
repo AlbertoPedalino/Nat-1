@@ -175,8 +175,6 @@ const BY_LABEL = new Map(REPLICATE_BUCKETS.map((b) => [b.label, b]));
 const BY_ID = new Map(REPLICATE_BUCKETS.map((b) => [b.id, b]));
 const CHOICE_PREFIX = 'replicate-choice:v1:';
 
-export const REPLICATE_BUCKET_LABELS = REPLICATE_BUCKETS.map((b) => b.label);
-
 export const REPLICATE_GENERAL_CHOICE_KEY = 'artificer_replicate_magic_item_plans';
 export const REPLICATE_ARMORER_CHOICE_KEY = 'armorer_replicate_magic_item_armor_plan';
 

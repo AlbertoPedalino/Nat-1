@@ -8,8 +8,6 @@ export default function install(registry, context = {}) {
     registerSubclassSheetEffects,
     registerSubclassRuntimeConfig,
   } = createAdapterBindings(registry, context);
-  const getMod = context?.getMod;
-  const getFinal = context?.getFinal;
 
 registerSubclassAdapter("Warlock_Fiend", function (cls, lv, specs) {
   if (lv >= 10) {

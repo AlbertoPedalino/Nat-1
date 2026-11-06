@@ -22,14 +22,6 @@ export const HEX_STATUS_TONES = Object.freeze({
   danger: '#a1503c',
 });
 
-export const HEX_STATUS_LABELS = Object.freeze({
-  unexplored: 'Unexplored',
-  scouted: 'Scouted',
-  travelled: 'Travelled',
-  settled: 'Settled',
-  danger: 'Dangerous',
-});
-
 const MAX_NOTE = 400;
 
 function numberOrNull(value) {

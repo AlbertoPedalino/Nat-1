@@ -1,5 +1,3 @@
-export const CORE_2024_SOURCE = 'XPHB';
-
 function frozenList(values) {
   return Object.freeze(values.slice());
 }

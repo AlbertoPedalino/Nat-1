@@ -26,10 +26,6 @@ export const WEAPON_FILTERS = Object.freeze({
 
 const VALID = new Set(Object.values(WEAPON_FILTERS).map((v) => v.toLowerCase()));
 
-export function isValidWeaponFilter(filter) {
-  return VALID.has(String(filter || '').toLowerCase());
-}
-
 const _warned = new Set();
 function warnUnknownFilter(filter) {
   if (typeof import.meta === 'undefined' || !import.meta?.env?.DEV) return;

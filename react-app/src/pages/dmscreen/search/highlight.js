@@ -36,6 +36,3 @@ export function splitHighlights(text, tokens) {
   return segments;
 }
 
-export function hasHighlight(text, tokens) {
-  return splitHighlights(text, tokens).some((segment) => segment.match);
-}

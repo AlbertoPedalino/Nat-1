@@ -123,10 +123,6 @@ export function getAllResourceDefs(character) {
   return uniqResources(out);
 }
 
-export function getTotalHitDice(character) {
-  return primaryClassLevel(character) + (character.extraClasses || []).reduce((sum, ec) => sum + (ec.level || 1), 0);
-}
-
 export function getHitDicePools(character, usedPools = {}, legacyUsed = 0) {
   if (!character) return [];
   const pools = [];

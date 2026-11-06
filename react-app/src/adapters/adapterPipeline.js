@@ -1,17 +1,6 @@
 import { normalizeSpellRecord } from '../shared/character/spells/spellNormalization.js';
 import { matchKey, stripSource } from '../shared/content/nameKeys.js';
 
-const SCHOOL_FULL = {
-  A: 'Abjuration',
-  C: 'Conjuration',
-  D: 'Divination',
-  E: 'Enchantment',
-  V: 'Evocation',
-  I: 'Illusion',
-  N: 'Necromancy',
-  T: 'Transmutation',
-};
-
 const WEAPON_TYPES = new Set(['M', 'R']);
 const ARMOR_TYPES = new Set(['LA', 'MA', 'HA']);
 const AMMO_TYPES = new Set(['A', 'AF', 'AT']);
@@ -227,47 +216,6 @@ export function adaptFeatRecord(rawFeat, registry, context = {}) {
     }
   }
   return runAdapters(feat, registry.getGlobalFeatAdapters(), 'FeatAdapter', context);
-}
-
-function normalizeRange(range) {
-  if (!range || typeof range !== 'object') return 'varies';
-  const type = String(range.type || '').toLowerCase();
-  if (type === 'self') return 'Self';
-  if (type === 'touch') return 'Touch';
-  if (type === 'sight') return 'Sight';
-  if (type === 'unlimited') return 'Unlimited';
-  if (type === 'special') return 'Special';
-  if (!range.distance) return 'varies';
-  const amount = range.distance.amount ?? '';
-  const unit = String(range.distance.type || '').replace(/feet|foot/i, 'ft').replace(/miles?/i, 'mi');
-  return amount !== '' ? `${amount} ${unit}`.trim() : unit || 'varies';
-}
-
-function castingTime(time) {
-  const first = arr(time)[0];
-  if (!first || typeof first !== 'object') return '';
-  const number = first.number ?? 1;
-  const unit = String(first.unit || '').toLowerCase();
-  if (number === 1 && unit === 'action') return '1 Action';
-  if (number === 1 && unit === 'bonus') return '1 Bonus Action';
-  if (number === 1 && unit === 'reaction') return '1 Reaction';
-  if (unit === 'minute') return `${number} Minute${number !== 1 ? 's' : ''}`;
-  if (unit === 'hour') return `${number} Hour${number !== 1 ? 's' : ''}`;
-  return `${number} ${unit}`.trim();
-}
-
-function durationText(duration) {
-  const first = arr(duration)[0];
-  if (!first || typeof first !== 'object') return '';
-  const type = String(first.type || '').toLowerCase();
-  if (type === 'instant') return 'Instantaneous';
-  if (type === 'permanent') return 'Until dispelled';
-  if (type === 'special') return 'Special';
-  if (!first.duration) return type;
-  const amount = first.duration.amount ?? '';
-  const unit = String(first.duration.type || '');
-  const concentration = first.concentration ? ' (C)' : '';
-  return amount !== '' ? `${amount} ${unit}${concentration}` : `${unit}${concentration}`;
 }
 
 export function adaptSpellRecord(rawSpell, registry, context = {}) {

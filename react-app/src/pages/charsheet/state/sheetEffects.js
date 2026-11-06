@@ -353,81 +353,6 @@ export function effectSummary(effect, character = {}) {
   return parts.filter(Boolean).join(' • ');
 }
 
-export function effectCategory(effect) {
-  const type = effectKey(effect?.type);
-
-  if (
-    type.includes('resistance')
-    || type.includes('immunity')
-    || type.includes('defense')
-    || type.includes('ward')
-    || type.includes('damagereduction')
-    || type.includes('unarmored')
-    || type.includes('acformula')
-    || type.includes('acbonus')
-    || type.includes('hprelated')
-    || type.includes('hpbonus')
-  ) return 'Defenses';
-
-  if (
-    type.includes('sense')
-    || type.includes('darkvision')
-    || type.includes('truesight')
-    || type.includes('telepathy')
-    || type.includes('underwaterbreathing')
-  ) return 'Senses & Awareness';
-
-  if (
-    type.includes('speed')
-    || type.includes('fly')
-    || type.includes('climb')
-    || type.includes('swim')
-    || type.includes('teleport')
-    || type.includes('mobility')
-    || type.includes('reach')
-    || type.includes('jump')
-  ) return 'Movement';
-
-  if (
-    type.includes('proficiency')
-    || type.includes('training')
-    || type.includes('expertise')
-    || type.includes('language')
-    || type.includes('tool')
-  ) return 'Proficiencies';
-
-  if (
-    type.includes('attack')
-    || type.includes('damage')
-    || type.includes('crit')
-    || type.includes('initiative')
-    || type.includes('save')
-    || type.includes('extra')
-    || type.includes('reroll')
-    || type.includes('d20')
-  ) return 'Combat';
-
-  if (
-    type.includes('spell')
-    || type.includes('cantrip')
-    || type.includes('magic')
-    || type.includes('metamagic')
-    || type.includes('summon')
-  ) return 'Magic';
-
-  return 'Passive Traits';
-}
-
-export function collectEffectCategories(character = {}) {
-  const grouped = {};
-  collectSheetEffects(character).forEach((effect) => {
-    const cat = effectCategory(effect);
-    if (!grouped[cat]) grouped[cat] = [];
-    grouped[cat].push(effect);
-  });
-  return grouped;
-}
-
 // Known sense-effect type tokens. Adapters may register either `type:'sense'`
 // (+ senseType) or the sense name directly (e.g. Shadow Arts → type:'darkvision').
 const SENSE_EFFECT_TYPES = [
@@ -455,10 +380,6 @@ export function collectMovementEffects(character = {}) {
       || type.includes('reach')
       || type.includes('jump');
   });
-}
-
-export function collectResistanceEffects(character = {}) {
-  return collectSheetEffects(character).filter((effect) => effectKey(effect.type).includes('resistance'));
 }
 
 export function collectPreviewEffectProficiencySections(character = {}) {

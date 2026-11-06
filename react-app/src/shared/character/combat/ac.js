@@ -217,33 +217,3 @@ export function computeBestArmorClass(character, items, shieldTrained) {
   return candidates[0] || { value: 10 + acBonus, source: 'Base AC', label: 'AC (Base)', formulaLabel: '10', shieldApplied: false, shieldBonus: 0, sourceType: 'base' };
 }
 
-export function explainArmorClass(character, items, shieldTrained) {
-  const best = computeBestArmorClass(character, items, shieldTrained);
-  const shield = getEquippedShield(character, items);
-  const hasShield = !!shield;
-  const shieldBonus = hasShield && shieldTrained !== false ? 2 : 0;
-
-  const formulas = collectAcFormulas(character).filter((f) => {
-    if (f.requiresNoArmor && getEquippedArmor(character, items)) return false;
-    if (!f.allowShield && hasShield) return false;
-    return true;
-  });
-
-  return {
-    value: best.value,
-    source: best.source,
-    sourceType: best.sourceType,
-    label: best.label,
-    formulaLabel: best.formulaLabel,
-    shieldApplied: best.shieldApplied,
-    shieldBonus: best.shieldBonus,
-    armorAc: computeArmorItemAc(character, items),
-    availableFormulas: formulas.map((f) => ({
-      key: f.key,
-      label: f.label,
-      value: computeAcFormulaValue(character, f),
-      abilities: f.abilities,
-      allowShield: f.allowShield,
-    })),
-  };
-}

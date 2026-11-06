@@ -1,9 +1,7 @@
-import { getWeaponMasteryReminderText } from '../combat/weaponMastery.js';
 import { parseSignedBonus } from './itemBonus.js';
 import { signed } from '../../ui/numberFormat.js';
 import { capitalize, titleCase } from '../../ui/textCase.js';
 import { stripSource } from '../../content/nameKeys.js';
-import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
 
 // Type codes match 5etools schema. Note: "R" here means a Ranged Weapon item type;
 // the same letter as a weapon property means "Reach" (see WEAPON_PROPERTY_LABELS).
@@ -151,89 +149,6 @@ export function itemMasteryLabels(item) {
     if (label) seen.add(label);
   });
   return [...seen];
-}
-
-const CHIP_BUILDERS = {
-  prop: function buildPropertyChipsFromCodes(item) {
-    return collectRawProperties(item)
-      .map((code) => decodeProperty(code, item))
-      .filter(Boolean)
-      .map((decoded) => ({ kind: 'prop', label: decoded.label, description: decoded.description }));
-  },
-  damage: function buildDamageChip(item) {
-    if (!item?.dmg1) return [];
-    return [{
-      kind: 'damage',
-      label: `Dmg ${item.dmg1}${item.dmgType ? ` ${item.dmgType}` : ''}`,
-      description: 'Base damage dealt on a hit.',
-    }];
-  },
-  ac: function buildAcChip(item) {
-    if (item?.ac == null) return [];
-    const t = rawTypeCode(item);
-    const dexCap = item?.dexterityMax;
-    const baseLabel = `AC ${item.ac}`;
-    const label =
-      t === 'LA' ? `${baseLabel} + Dex`
-      : t === 'MA' ? `${baseLabel} + Dex (max ${dexCap ?? 2})`
-      : t === 'S' ? `${baseLabel} (shield)`
-      : baseLabel;
-    return [{ kind: 'ac', label, description: 'Armor class contribution.' }];
-  },
-  req: function buildReqChip(item) {
-    if (!item?.strength) return [];
-    return [{
-      kind: 'req',
-      label: `Str ${item.strength}`,
-      description: `Requires Strength ${item.strength}. Speed reduced by 10 if not met.`,
-    }];
-  },
-  penalty: function buildStealthChip(item) {
-    if (!item?.stealth) return [];
-    return [{
-      kind: 'penalty',
-      label: 'Stealth DIS',
-      description: 'Disadvantage on Dexterity (Stealth) checks while worn.',
-    }];
-  },
-  range: function buildRangeChip(item) {
-    if (!item?.range) return [];
-    const handledByProperty = collectRawProperties(item).some((code) => /^(T|A|AF)$/.test(rawPropertyCode(code)));
-    if (handledByProperty) return [];
-    return [{ kind: 'range', label: `Range ${item.range}`, description: 'Effective range in feet.' }];
-  },
-  weight: function buildWeightChip(item) {
-    if (!item?.weight) return [];
-    return [{ kind: 'weight', label: `${item.weight} lb`, description: 'Item weight.' }];
-  },
-  mastery: function buildMasteryChips(item) {
-    const arr = Array.isArray(item?.mastery) ? item.mastery : [];
-    return arr
-      .map((entry) => rawPropertyCode(entry))
-      .filter(Boolean)
-      .map((code) => {
-        const titled = code.charAt(0) + code.slice(1).toLowerCase();
-        const description = getWeaponMasteryReminderText(titled) || '';
-        return { kind: 'mastery', label: `Mastery: ${titled}`, description };
-      });
-  },
-};
-
-export const CHIP_KINDS = ['prop', 'damage', 'ac', 'req', 'penalty', 'range', 'weight', 'mastery'];
-
-export function buildItemPropertyChips(item, options = {}) {
-  if (!item) return [];
-  const { kinds, exclude } = options;
-  const include = Array.isArray(kinds) && kinds.length ? kinds : CHIP_KINDS;
-  const excludeSet = new Set(Array.isArray(exclude) ? exclude : []);
-  const out = [];
-  include.forEach((kind) => {
-    if (excludeSet.has(kind)) return;
-    const builder = CHIP_BUILDERS[kind];
-    if (!builder) return;
-    builder(item).forEach((chip) => out.push(chip));
-  });
-  return out;
 }
 
 export const DAMAGE_TYPE_LABELS = {
@@ -439,8 +354,6 @@ registerItemPropertySegment('tags', (item) => {
   return [{ kind: 'tags', label: 'Tags', value: labels.join(', ') }];
 });
 
-export const ITEM_PROPERTY_SEGMENT_KINDS = SEGMENT_ORDER;
-
 export function buildItemPropertySegments(item, options = {}) {
   if (!item) return [];
   const { kinds, exclude } = options;
@@ -453,13 +366,3 @@ export function buildItemPropertySegments(item, options = {}) {
   });
 }
 
-export const PROPERTY_CHIP_TONES = {
-  prop: { color: UI_COLORS.textParchment, borderColor: uiAlpha(UI_COLORS.textParchment, 0.45), bgcolor: uiAlpha(UI_COLORS.textParchment, 0.10) },
-  damage: { color: UI_COLORS.danger, borderColor: uiAlpha(UI_COLORS.danger, 0.45), bgcolor: uiAlpha(UI_COLORS.danger, 0.12) },
-  ac: { color: UI_COLORS.blue, borderColor: uiAlpha(UI_COLORS.blue, 0.45), bgcolor: uiAlpha(UI_COLORS.blue, 0.12) },
-  req: { color: UI_COLORS.warning, borderColor: uiAlpha(UI_COLORS.warning, 0.45), bgcolor: uiAlpha(UI_COLORS.warning, 0.12) },
-  penalty: { color: UI_COLORS.danger, borderColor: uiAlpha(UI_COLORS.danger, 0.45), bgcolor: uiAlpha(UI_COLORS.danger, 0.12) },
-  range: { color: UI_COLORS.blue, borderColor: uiAlpha(UI_COLORS.blue, 0.45), bgcolor: uiAlpha(UI_COLORS.blue, 0.12) },
-  weight: { color: UI_COLORS.textStone, borderColor: uiAlpha(UI_COLORS.textStone, 0.45), bgcolor: 'transparent' },
-  mastery: { color: UI_COLORS.goldLight, borderColor: uiAlpha(UI_COLORS.goldLight, 0.55), bgcolor: uiAlpha(UI_COLORS.goldLight, 0.14) },
-};

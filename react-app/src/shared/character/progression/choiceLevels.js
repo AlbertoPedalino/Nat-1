@@ -21,6 +21,3 @@ export function getChoiceLevel(choiceKey) {
   return null;
 }
 
-export function clearChoiceLevelMaps() {
-  _maps.length = 0;
-}

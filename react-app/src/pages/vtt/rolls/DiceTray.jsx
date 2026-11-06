@@ -190,7 +190,7 @@ function DiceThrow({ roll, at, table, startedAt, onSettled, centered }) {
   }, [thrown, startedAt]);
 
   useEffect(() => {
-    const { frames, frameMs } = thrown;
+    const { frames } = thrown;
     let animationRaf = 0;
     let revealRaf = 0;
     let revealTimer = 0;

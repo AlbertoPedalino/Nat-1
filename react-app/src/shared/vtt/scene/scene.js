@@ -19,13 +19,6 @@ export const DEFAULT_GRID = Object.freeze({
   measureUnit: 'feet', milesPerCell: 6,
 });
 
-// What the ruler counts in. A dungeon is feet across a square; a wilderness map
-// is miles across a hex. Which one it is, is the map's own answer — asking it as
-// "how many miles is a cell, and zero means feet" was a riddle.
-export const MEASURE_UNITS = Object.freeze(['feet', 'miles']);
-
-export const GRID_SHAPES = Object.freeze(['square', 'hex']);
-
 const MIN_CELL = 8;
 const MAX_CELL = 512;
 // Half a pixel is the thinnest line a screen will still hint at; past a few the
@@ -212,11 +205,6 @@ export function sceneView(scene) {
     shownImage: scene?.shownImage === 'background' ? 'background' : 'map',
     backgroundPath: scene?.backgroundPath || null,
   };
-}
-
-export function sameView(a, b) {
-  return (a?.shownImage || 'map') === (b?.shownImage || 'map')
-    && (a?.backgroundPath || null) === (b?.backgroundPath || null);
 }
 
 // The background a view resolves to on this scene. A view pointing at a
