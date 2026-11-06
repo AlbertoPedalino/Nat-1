@@ -42,6 +42,7 @@ belongs in `content/`.
 | `auth/` | Auth provider, sign-in dialog, account/cloud menu |
 | `sync/` | Autosync engine, sync exclusions/ownership, realtime character and roll hooks |
 | `supabaseClient.js` | Shared Supabase client configuration |
+| `realtimeChannel.js` | `openRealtimeChannel`: the one way to open a realtime channel (topic rule, guarded listeners, SUBSCRIBED status, fail-soft close) |
 
 ## Instances
 

@@ -10,3 +10,9 @@ test('the proficiency bonus is read only through getProficiencyBonus', () => {
     allow: ['shared/character/progression/proficiency.js'],
   }), []);
 });
+
+test('every realtime channel opens through openRealtimeChannel', () => {
+  assert.deepEqual(sourceFilesMatching(/\.(channel|removeChannel)\(/, {
+    allow: ['shared/cloud/realtimeChannel.js'],
+  }), []);
+});

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useAuth } from '../auth/AuthProvider.jsx';
 import { supabase } from '../supabaseClient.js';
+import { openRealtimeChannel } from '../realtimeChannel.js';
 
 // Shared by embedded sheets and maps. Events stay in memory;
 // private GM rolls never enter the public campaign channel.
@@ -23,40 +24,28 @@ function acquire(topic, account, privateChannel, online) {
     });
   };
   let local;
-  let channel;
   try {
     local = new BroadcastChannel(`gb-local:${account}:${topic}`);
     local.onmessage = ({ data }) => receive(data);
   } catch (_) {}
-  if (online) {
-    try {
-      channel = supabase.channel(topic, {
-        config: { private: privateChannel, broadcast: { self: false } },
-      });
-      channel.on('broadcast', { event: 'roll' }, ({ payload }) => receive(payload));
-      channel.subscribe();
-    } catch (_) {
-      // Half-built: take it off the socket rather than leave it joined.
-      try { if (channel) Promise.resolve(supabase.removeChannel(channel)).catch(() => {}); } catch (__) {}
-      channel = null;
-    }
-  }
+  const channel = online
+    ? openRealtimeChannel(topic, {
+      config: { private: privateChannel, broadcast: { self: false } },
+      broadcasts: { roll: (payload) => receive(payload) },
+    })
+    : null;
   const transport = {
     listeners,
     publish(roll, origin) {
       receive(roll, origin);
       try { local?.postMessage(roll); } catch (_) {}
-      try {
-        Promise.resolve(channel?.send({ type: 'broadcast', event: 'roll', payload: roll })).catch(() => {});
-      } catch (_) {}
+      channel?.send('roll', roll);
     },
     release(listener) {
       listeners.delete(listener);
       if (listeners.size) return;
       local?.close();
-      if (channel) {
-        try { Promise.resolve(supabase.removeChannel(channel)).catch(() => {}); } catch (_) {}
-      }
+      channel?.close();
       transports.delete(key);
     },
   };

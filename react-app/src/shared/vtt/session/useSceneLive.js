@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useAuth } from '../../cloud/auth/AuthProvider.jsx';
 import { supabase } from '../../cloud/supabaseClient.js';
+import { openRealtimeChannel } from '../../cloud/realtimeChannel.js';
 import {
   cameraMessage, normalizeCameraSource, presenterInspectionMessage, presenterStateMessage,
 } from './cameraSync.js';
@@ -78,227 +79,134 @@ export function useSceneLive({
   useEffect(() => {
     if (!sceneId || !cloudEnabled || status !== 'authed' || !supabase) return undefined;
 
-    let channel;
-    let cleanupReconcile = () => {};
-    try {
-      channel = supabase.channel(`gb-vtt-${sceneId}`, {
-        // Our own drags are already on screen; echoing them back would fight the
-        // local pointer.
-        config: { broadcast: { self: false } },
-      });
+    // Handlers below send through the channel once it is open; nothing they
+    // answer arrives before then.
+    let channel = null;
+    const send = (event, payload) => channel?.send(event, payload);
 
-      const emitCamera = (source, pose) => {
-        const payload = cameraMessage(source, pose);
-        if (!payload) return;
-        channel.send({ type: 'broadcast', event: CAMERA_EVENT, payload });
-      };
+    const emitCamera = (source, pose) => {
+      const payload = cameraMessage(source, pose);
+      if (payload) send(CAMERA_EVENT, payload);
+    };
 
-      const emitPresenterState = (source, state) => {
-        const payload = presenterStateMessage(source, state);
-        if (!payload) return;
-        channel.send({ type: 'broadcast', event: PRESENTER_STATE_EVENT, payload });
-      };
+    const emitPresenterState = (source, state) => {
+      const payload = presenterStateMessage(source, state);
+      if (payload) send(PRESENTER_STATE_EVENT, payload);
+    };
 
-      const emitPresenterInspection = (source, inspection) => {
-        const payload = presenterInspectionMessage(source, inspection);
-        if (!payload) return;
-        channel.send({ type: 'broadcast', event: PRESENTER_INSPECTION_EVENT, payload });
-      };
+    const emitPresenterInspection = (source, inspection) => {
+      const payload = presenterInspectionMessage(source, inspection);
+      if (payload) send(PRESENTER_INSPECTION_EVENT, payload);
+    };
 
-      channel.on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'map_tokens', filter: `scene_id=eq.${sceneId}` },
-        (payload) => {
-          try {
-            handlers.current.onTokenEvent?.(payload);
-          } catch (_) {
-            // Realtime is opportunistic: a bad payload must not break the scene.
-          }
+    const followed = () => normalizeCameraSource(handlers.current.followCameraSource);
+    const presenter = () => normalizeCameraSource(handlers.current.cameraSourceId);
+
+    const requestReconcile = (reason) => {
+      try {
+        Promise.resolve(handlers.current.onReconcile?.({ reason })).catch(() => {});
+      } catch (_) {}
+    };
+
+    channel = openRealtimeChannel(`gb-vtt-${sceneId}`, {
+      // Our own drags are already on screen; echoing them back would fight the
+      // local pointer.
+      config: { broadcast: { self: false } },
+      changes: [
+        { table: 'map_tokens', filter: `scene_id=eq.${sceneId}`, onChange: (payload) => handlers.current.onTokenEvent?.(payload) },
+        { table: 'map_scenes', event: 'UPDATE', filter: `id=eq.${sceneId}`, onChange: (payload) => handlers.current.onSceneEvent?.(payload) },
+        { table: 'map_drawings', filter: `scene_id=eq.${sceneId}`, onChange: (payload) => handlers.current.onDrawingEvent?.(payload) },
+        // Which fight the scene shows, and its round (20_scene_turns.sql).
+        { table: 'map_scene_turns', filter: `scene_id=eq.${sceneId}`, onChange: (payload) => handlers.current.onTurnsEvent?.(payload) },
+      ],
+      broadcasts: {
+        [DRAG_EVENT]: (payload) => handlers.current.onRemoteDrag?.(payload),
+        [CAMERA_EVENT]: (message) => {
+          const payload = cameraMessage(message?.source, message?.pose);
+          if (followed() && payload?.source === followed()) handlers.current.onCameraPose?.(payload.pose);
         },
-      );
-
-      channel.on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'map_scenes', filter: `id=eq.${sceneId}` },
-        (payload) => {
-          try {
-            handlers.current.onSceneEvent?.(payload);
-          } catch (_) {}
+        [PRESENTER_STATE_EVENT]: (message) => {
+          const payload = presenterStateMessage(message?.source, message);
+          if (followed() && payload?.source === followed()) handlers.current.onPresenterState?.(payload);
         },
-      );
-
-      channel.on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'map_drawings', filter: `scene_id=eq.${sceneId}` },
-        (payload) => {
-          try {
-            handlers.current.onDrawingEvent?.(payload);
-          } catch (_) {}
-        },
-      );
-
-      // Which fight the scene shows, and its round (20_scene_turns.sql).
-      channel.on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'map_scene_turns', filter: `scene_id=eq.${sceneId}` },
-        (payload) => {
-          try {
-            handlers.current.onTurnsEvent?.(payload);
-          } catch (_) {}
-        },
-      );
-
-      channel.on('broadcast', { event: DRAG_EVENT }, (message) => {
-        try {
-          handlers.current.onRemoteDrag?.(message?.payload || null);
-        } catch (_) {}
-      });
-
-      channel.on('broadcast', { event: CAMERA_EVENT }, (message) => {
-        try {
-          const expected = normalizeCameraSource(handlers.current.followCameraSource);
-          const payload = cameraMessage(message?.payload?.source, message?.payload?.pose);
-          if (expected && payload?.source === expected) handlers.current.onCameraPose?.(payload.pose);
-        } catch (_) {}
-      });
-
-      channel.on('broadcast', { event: PRESENTER_STATE_EVENT }, (message) => {
-        try {
-          const expected = normalizeCameraSource(handlers.current.followCameraSource);
-          const payload = presenterStateMessage(message?.payload?.source, message?.payload);
-          if (expected && payload?.source === expected) handlers.current.onPresenterState?.(payload);
-        } catch (_) {}
-      });
-
-      channel.on('broadcast', { event: PRESENTER_INSPECTION_EVENT }, (message) => {
-        try {
-          const expected = normalizeCameraSource(handlers.current.followCameraSource);
-          const payload = presenterInspectionMessage(message?.payload?.source, message?.payload);
-          if (expected && payload?.source === expected) {
+        [PRESENTER_INSPECTION_EVENT]: (message) => {
+          const payload = presenterInspectionMessage(message?.source, message);
+          if (followed() && payload?.source === followed()) {
             handlers.current.onPresenterInspection?.(
               payload.tokenId ? { tokenId: payload.tokenId, conditionKey: payload.conditionKey } : null,
             );
           }
-        } catch (_) {}
-      });
-
-      // A late-opening projector should not wait for the GM's next pan. It asks
-      // the exact source window named in its URL, which replies with the camera
-      // pose it already has in memory; nothing about the camera is persisted.
-      channel.on('broadcast', { event: CAMERA_REQUEST_EVENT }, (message) => {
-        try {
-          const source = normalizeCameraSource(handlers.current.cameraSourceId);
-          const requested = normalizeCameraSource(message?.payload?.source);
-          if (source && requested === source) {
+        },
+        // A late-opening projector should not wait for the GM's next pan. It
+        // asks the exact source window named in its URL, which replies with the
+        // camera pose it already has in memory; nothing about the camera is
+        // persisted.
+        [CAMERA_REQUEST_EVENT]: (message) => {
+          const source = presenter();
+          if (source && normalizeCameraSource(message?.source) === source) {
             followerSeenRef.current = Date.now();
             emitCamera(source, handlers.current.getCameraPose?.());
             emitPresenterState(source, handlers.current.getPresenterState?.());
             emitPresenterInspection(source, handlers.current.getPresenterInspection?.());
           }
-        } catch (_) {}
-      });
-
-      // The reason lets the caller decide how thorough to be: a reconnect may
-      // have missed anything, a periodic tick only needs a version check.
-      channel.on('broadcast', { event: FOLLOWER_QUERY_EVENT }, (message) => {
-        try {
-          const followed = normalizeCameraSource(handlers.current.followCameraSource);
-          if (followed && normalizeCameraSource(message?.payload?.source) === followed) {
-            channel.send({ type: 'broadcast', event: FOLLOWER_EVENT, payload: { source: followed } });
-          }
-        } catch (_) {}
-      });
-
-      channel.on('broadcast', { event: FOLLOWER_EVENT }, (message) => {
-        try {
-          const source = normalizeCameraSource(handlers.current.cameraSourceId);
-          if (source && normalizeCameraSource(message?.payload?.source) === source) {
-            followerSeenRef.current = Date.now();
-          }
-        } catch (_) {}
-      });
-
-      const requestReconcile = (reason) => {
-        try {
-          Promise.resolve(handlers.current.onReconcile?.({ reason })).catch(() => {});
-        } catch (_) {}
-      };
-
-      channel.subscribe((state) => {
+        },
+        [FOLLOWER_QUERY_EVENT]: (message) => {
+          const source = followed();
+          if (source && normalizeCameraSource(message?.source) === source) send(FOLLOWER_EVENT, { source });
+        },
+        [FOLLOWER_EVENT]: (message) => {
+          const source = presenter();
+          if (source && normalizeCameraSource(message?.source) === source) followerSeenRef.current = Date.now();
+        },
+      },
+      onStatus: (state) => {
         if (state !== 'SUBSCRIBED') return;
         // A reconnect resumes future events but does not replay changes missed
         // while the socket was down. Pull the persistent scene snapshot now.
         requestReconcile('subscribed');
-        const followedSource = normalizeCameraSource(handlers.current.followCameraSource);
-        if (followedSource) {
-          channel.send({ type: 'broadcast', event: CAMERA_REQUEST_EVENT, payload: { source: followedSource } });
-        }
+        const followedSource = followed();
+        if (followedSource) send(CAMERA_REQUEST_EVENT, { source: followedSource });
         // On a GM refresh the projector is already subscribed and therefore
         // cannot send a new handshake. Re-announce this stable presenter source
         // as soon as the replacement channel is ready.
-        const presenterSource = normalizeCameraSource(handlers.current.cameraSourceId);
+        const presenterSource = presenter();
         if (presenterSource) {
-          channel.send({ type: 'broadcast', event: FOLLOWER_QUERY_EVENT, payload: { source: presenterSource } });
+          send(FOLLOWER_QUERY_EVENT, { source: presenterSource });
           emitCamera(presenterSource, handlers.current.getCameraPose?.());
           emitPresenterState(presenterSource, handlers.current.getPresenterState?.());
           emitPresenterInspection(presenterSource, handlers.current.getPresenterInspection?.());
         }
-      });
-      channelRef.current = channel;
+      },
+    });
+    if (!channel) return undefined;
+    channelRef.current = channel;
 
-      const followerTimer = window.setInterval(() => {
-        try {
-          const followed = normalizeCameraSource(handlers.current.followCameraSource);
-          if (followed) channel.send({ type: 'broadcast', event: FOLLOWER_EVENT, payload: { source: followed } });
-        } catch (_) {}
-      }, FOLLOWER_HEARTBEAT_MS);
-      // Missed events are recovered on the shared triggers. The map keeps
-      // following in a background tab (a projector, a second screen), so its
-      // timer runs while hidden too.
-      const stopRecovery = listenForRecovery(requestReconcile, { periodic: true, whenHidden: true });
-
-      cleanupReconcile = () => {
-        window.clearInterval(followerTimer);
-        stopRecovery();
-      };
-    } catch (_) {
-      channelRef.current = null;
-      cleanupReconcile();
-      // A channel that failed half-way through setup must not linger.
-      try {
-        if (channel) supabase.removeChannel(channel);
-      } catch (__) {}
-      return undefined;
-    }
+    const followerTimer = window.setInterval(() => {
+      const source = followed();
+      if (source) send(FOLLOWER_EVENT, { source });
+    }, FOLLOWER_HEARTBEAT_MS);
+    // Missed events are recovered on the shared triggers. The map keeps
+    // following in a background tab (a projector, a second screen), so its
+    // timer runs while hidden too.
+    const stopRecovery = listenForRecovery(requestReconcile, { periodic: true, whenHidden: true });
 
     return () => {
-      cleanupReconcile();
+      window.clearInterval(followerTimer);
+      stopRecovery();
       channelRef.current = null;
       const cameraState = cameraSendRef.current;
       clearTimeout(cameraState.timer);
       cameraState.timer = null;
       cameraState.pending = null;
       cameraState.last = 0;
-      try {
-        supabase.removeChannel(channel);
-      } catch (_) {
-        // Already closed.
-      }
+      channel.close();
     };
   }, [cloudEnabled, sceneId, status]);
 
   // Fire-and-forget: a lost drag frame is a cosmetic glitch, and the committed
   // position arrives on drop regardless.
   const sendDrag = useCallback((payload) => {
-    const channel = channelRef.current;
-    if (!channel) return;
-    try {
-      channel.send({
-        type: 'broadcast',
-        event: DRAG_EVENT,
-        payload: { ...payload, actor: user?.id || null },
-      });
-    } catch (_) {}
+    channelRef.current?.send(DRAG_EVENT, { ...payload, actor: user?.id || null });
   }, [user?.id]);
 
   const sendCamera = useCallback((pose) => {
@@ -312,7 +220,7 @@ export function useSceneLive({
       const channel = channelRef.current;
       if (!channel || !next) return;
       state.last = Date.now();
-      channel.send({ type: 'broadcast', event: CAMERA_EVENT, payload: next });
+      channel.send(CAMERA_EVENT, next);
     };
     const elapsed = Date.now() - state.last;
     if (elapsed >= CAMERA_SEND_MS) {
@@ -334,20 +242,12 @@ export function useSceneLive({
 
   const sendPresenterState = useCallback((state) => {
     const payload = presenterStateMessage(cameraSourceId, state);
-    const channel = channelRef.current;
-    if (!payload || !channel) return;
-    try {
-      channel.send({ type: 'broadcast', event: PRESENTER_STATE_EVENT, payload });
-    } catch (_) {}
+    if (payload) channelRef.current?.send(PRESENTER_STATE_EVENT, payload);
   }, [cameraSourceId]);
 
   const sendPresenterInspection = useCallback((inspection) => {
     const payload = presenterInspectionMessage(cameraSourceId, inspection);
-    const channel = channelRef.current;
-    if (!payload || !channel) return;
-    try {
-      channel.send({ type: 'broadcast', event: PRESENTER_INSPECTION_EVENT, payload });
-    } catch (_) {}
+    if (payload) channelRef.current?.send(PRESENTER_INSPECTION_EVENT, payload);
   }, [cameraSourceId]);
 
   return { sendDrag, sendCamera, sendPresenterState, sendPresenterInspection };

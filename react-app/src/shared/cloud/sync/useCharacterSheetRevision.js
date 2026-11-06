@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useMemo, useRef } from 'react';
 import { useAuth } from '../auth/AuthProvider.jsx';
 import { supabase } from '../supabaseClient.js';
+import { openRealtimeChannel } from '../realtimeChannel.js';
 import { getCloudSheetRevision } from '../api/cloudCharacters.js';
 import { CHARACTER_SHEET_SAVED_EVENT } from './characterEvents.js';
 import { listenForRecovery } from './recoveryTriggers.js';
@@ -35,10 +36,6 @@ import { listenForRecovery } from './recoveryTriggers.js';
 // SUBSCRIBED (first join and every reconnect) and on the shared recovery
 // triggers (back online, back to the tab, every RECOVERY_INTERVAL_MS while
 // shown).
-
-function channelSuffix(characterId, instanceId) {
-  return `${characterId}-${instanceId}`.replace(/[^a-z0-9_-]/gi, '_').slice(0, 90);
-}
 
 export function useCharacterSheetRevision({
   characterId,
@@ -137,31 +134,21 @@ export function useCharacterSheetRevision({
       }
     };
 
-    let channel;
-    try {
-      channel = supabase.channel(`gb-character-sheet-${channelSuffix(id, instanceId)}`);
-      channel.on('postgres_changes', {
-        event: '*',
-        schema: 'public',
+    const channel = openRealtimeChannel(`gb-character-sheet-${id}-${instanceId}`, {
+      changes: [{
         table: 'character_sheet_revisions',
         filter: `character_id=eq.${id}`,
-      }, (payload) => {
-        try {
+        onChange: (payload) => {
           const type = String(payload?.eventType || '').toUpperCase();
           if (type === 'DELETE') {
             if (String(payload?.old?.character_id ?? id) === id) deleted();
             return;
           }
           if (String(payload?.new?.character_id ?? '') === id) consider(payload.new.sheet_revision);
-        } catch (_) {
-          // Realtime is opportunistic; the next recovery read repairs.
-        }
-      });
-      channel.subscribe((state) => { if (state === 'SUBSCRIBED') check(); });
-    } catch (_) {
-      try { if (channel) supabase.removeChannel(channel); } catch (__) {}
-      return undefined;
-    }
+        },
+      }],
+      onStatus: (state) => { if (state === 'SUBSCRIBED') check(); },
+    });
 
     const receiveSaved = ({ detail }) => {
       if (String(detail?.characterId ?? '') === id) noteSaved(detail.sheetRevision);
@@ -172,7 +159,7 @@ export function useCharacterSheetRevision({
       alive = false;
       window.removeEventListener(CHARACTER_SHEET_SAVED_EVENT, receiveSaved);
       stopRecovery();
-      try { supabase.removeChannel(channel); } catch (_) {}
+      channel?.close();
     };
   }, [ready, id, instanceId, consider, noteSaved]);
 

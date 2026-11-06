@@ -1,4 +1,5 @@
-import { requireClient, supabase } from '../supabaseClient.js';
+import { requireClient } from '../supabaseClient.js';
+import { openRealtimeChannel } from '../realtimeChannel.js';
 import {
   FIGHT_COLUMNS,
   toFightEntry,
@@ -191,37 +192,10 @@ export async function deleteInstanceFight(fightId) {
 // a re-read is still needed. `onStatus` hears SUBSCRIBED, which after a
 // reconnect is the moment to recover what was missed.
 export function subscribeInstanceFights(instanceId, onChange, { onStatus } = {}) {
-  if (!instanceId || !supabase) return () => {};
-  let channel;
-  const remove = () => {
-    try {
-      if (channel) supabase.removeChannel(channel);
-    } catch (_) {
-      // Cleanup stays fail-soft if the socket was already closed.
-    }
-  };
-  try {
-    channel = supabase.channel(`gb-encounter-fights-${String(instanceId).replace(/[^a-z0-9_-]/gi, '_').slice(0, 60)}`);
-    channel.on('postgres_changes', {
-      event: '*',
-      schema: 'public',
-      table: 'encounter_fights',
-      filter: `instance_id=eq.${instanceId}`,
-    }, (payload) => {
-      try {
-        onChange(payload);
-      } catch (_) {
-        // Realtime is opportunistic: a listener that throws must not take the
-        // socket down with it.
-      }
-    });
-    channel.subscribe((status) => {
-      try { onStatus?.(status); } catch (_) {}
-    });
-  } catch (_) {
-    // A channel that failed half-way through setup must not linger.
-    remove();
-    return () => {};
-  }
-  return remove;
+  if (!instanceId) return () => {};
+  const channel = openRealtimeChannel(`gb-encounter-fights-${instanceId}`, {
+    changes: [{ table: 'encounter_fights', filter: `instance_id=eq.${instanceId}`, onChange }],
+    onStatus,
+  });
+  return () => channel?.close();
 }

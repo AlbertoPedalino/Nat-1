@@ -1,4 +1,5 @@
 import { requireClient } from '../supabaseClient.js';
+import { openRealtimeChannel } from '../realtimeChannel.js';
 import { toHexCell, toHexCellPatch } from '../../hexcrawl/hexCell.js';
 import { STORAGE_KEYS, scopeKey } from '../../../pages/gmboard/state/storage.js';
 import { sanitizeInstanceId } from '../../instances/sectionRegistry.js';
@@ -270,40 +271,25 @@ export async function readHexcrawlBoardVersion(boardId) {
 // `onStatus` hears the channel state, so a caller can re-read on SUBSCRIBED
 // (a reconnect does not replay what was missed).
 export function subscribeHexcrawl({ campaignId, sceneId, onClock, onCell, onStatus }) {
-  const supabase = requireClient();
-  let channel;
-  const remove = () => { try { if (channel) supabase.removeChannel(channel); } catch (_) {} };
-  try {
-    channel = supabase.channel(`hexcrawl:${campaignId || 'none'}:${sceneId || 'none'}`);
-
-    if (campaignId && onClock) {
-      channel.on(
-        'postgres_changes',
-        {
-          event: '*', schema: 'public', table: 'campaign_hexcrawl', filter: `campaign_id=eq.${campaignId}`,
-        },
-        (payload) => onClock(toClock(payload.new) || toClock(payload.old)),
-      );
-    }
-
-    if (sceneId && onCell) {
-      channel.on(
-        'postgres_changes',
-        {
-          event: '*', schema: 'public', table: 'map_hex_cells', filter: `scene_id=eq.${sceneId}`,
-        },
-        (payload) => onCell({
-          cell: toHexCell(payload.new) || toHexCell(payload.old),
-          removed: payload.eventType === 'DELETE',
-        }),
-      );
-    }
-
-    channel.subscribe((status) => { try { onStatus?.(status); } catch (_) {} });
-  } catch (_) {
-    // Half-built channels must not linger on the socket.
-    remove();
-    return () => {};
+  requireClient();
+  const changes = [];
+  if (campaignId && onClock) {
+    changes.push({
+      table: 'campaign_hexcrawl',
+      filter: `campaign_id=eq.${campaignId}`,
+      onChange: (payload) => onClock(toClock(payload.new) || toClock(payload.old)),
+    });
   }
-  return remove;
+  if (sceneId && onCell) {
+    changes.push({
+      table: 'map_hex_cells',
+      filter: `scene_id=eq.${sceneId}`,
+      onChange: (payload) => onCell({
+        cell: toHexCell(payload.new) || toHexCell(payload.old),
+        removed: payload.eventType === 'DELETE',
+      }),
+    });
+  }
+  const channel = openRealtimeChannel(`hexcrawl:${campaignId || 'none'}:${sceneId || 'none'}`, { changes, onStatus });
+  return () => channel?.close();
 }

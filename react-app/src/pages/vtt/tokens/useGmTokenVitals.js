@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { supabase } from '../../../shared/cloud/supabaseClient.js';
+import { openRealtimeChannel } from '../../../shared/cloud/realtimeChannel.js';
 import { listTokenSecretHp, secretVitals } from '../../../shared/cloud/api/vtt.js';
 import { listFightRevisions, listFightVitals } from '../../../shared/cloud/api/encounterFights.js';
 import { diffRevisions } from '../../../shared/cloud/sync/revisionDiff.js';
@@ -75,11 +75,9 @@ export function useGmTokenVitals({ sceneId, tokens, enabled }) {
       return undefined;
     }
     reload();
-    if (!supabase) return undefined;
-    let channel;
-    try {
-      channel = supabase.channel(`gb-gm-vitals-${sceneId}-${fightKey.replace(/[^a-z0-9_,-]/gi, '_').slice(0, 80)}`);
-      channel.on('postgres_changes', { event: '*', schema: 'public', table: 'map_token_secrets' }, (payload) => {
+    const secrets = {
+      table: 'map_token_secrets',
+      onChange: (payload) => {
         const row = payload?.new;
         if (row?.token_id) {
           setByToken((current) => ({
@@ -92,22 +90,27 @@ export function useGmTokenVitals({ sceneId, tokens, enabled }) {
             return next;
           });
         }
-      });
-      if (fightKey) {
-        channel.on('postgres_changes', {
-          event: 'UPDATE', schema: 'public', table: 'encounter_fights', filter: `id=in.(${fightKey})`,
-        }, (payload) => {
-          const row = payload?.new;
-          if (row?.id) {
-            setFights((current) => ({ ...current, [String(row.id)]: newerFightRow(current[String(row.id)], row) }));
-          }
-        });
-      }
-      // A fight deleted with its encounter: gone from here at once, not at the
-      // next recovery read (its pieces stay, pointing at nothing). Realtime
-      // does not filter deletes, so this hears every fight of the GM's (RLS)
-      // and keeps only the ones it holds.
-      channel.on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'encounter_fights' }, (payload) => {
+      },
+    };
+    const fightUpdates = {
+      table: 'encounter_fights',
+      event: 'UPDATE',
+      filter: `id=in.(${fightKey})`,
+      onChange: (payload) => {
+        const row = payload?.new;
+        if (row?.id) {
+          setFights((current) => ({ ...current, [String(row.id)]: newerFightRow(current[String(row.id)], row) }));
+        }
+      },
+    };
+    // A fight deleted with its encounter: gone from here at once, not at the
+    // next recovery read (its pieces stay, pointing at nothing). Realtime does
+    // not filter deletes, so this hears every fight of the GM's (RLS) and
+    // keeps only the ones it holds.
+    const fightDeletes = {
+      table: 'encounter_fights',
+      event: 'DELETE',
+      onChange: (payload) => {
         const id = payload?.old?.id;
         if (id == null) return;
         setFights((current) => {
@@ -116,16 +119,16 @@ export function useGmTokenVitals({ sceneId, tokens, enabled }) {
           delete next[String(id)];
           return next;
         });
-      });
+      },
+    };
+    const channel = openRealtimeChannel(`gb-gm-vitals-${sceneId}-${fightKey}`, {
+      changes: fightKey ? [secrets, fightUpdates, fightDeletes] : [secrets, fightDeletes],
       // A reconnect does not replay missed events: read again.
-      channel.subscribe((state) => { if (state === 'SUBSCRIBED') reload(); });
-    } catch (_) {
-      try { if (channel) supabase.removeChannel(channel); } catch (__) {}
-      return undefined;
-    }
+      onStatus: (state) => { if (state === 'SUBSCRIBED') reload(); },
+    });
     return () => {
       requestRef.current += 1;
-      try { supabase.removeChannel(channel); } catch (_) {}
+      channel?.close();
     };
   }, [enabled, fightKey, reload, sceneId]);
 

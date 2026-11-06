@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../auth/AuthProvider.jsx';
 import { supabase } from '../supabaseClient.js';
+import { openRealtimeChannel } from '../realtimeChannel.js';
 import {
   listCharacterDigestRevisions, listCharacterDigests, readCharacterSheets, safeCharacterIds,
 } from '../api/characterDigests.js';
@@ -188,18 +189,13 @@ export function useCharacterDigests({ campaignId = null, characterIds = null, en
   useEffect(() => {
     if (!active) return undefined;
     reconcile();
-    let channel;
-    try {
-      channel = supabase.channel(`gb-character-digests-${scope.key.replace(/[^a-z0-9_,-]/gi, '_').slice(0, 90)}`);
-      channel.on('postgres_changes', {
-        event: '*',
-        schema: 'public',
+    const channel = openRealtimeChannel(`gb-character-digests-${scope.key}`, {
+      changes: [{
         table: 'character_digests',
         filter: scope.campaignId
           ? `campaign_id=eq.${scope.campaignId}`
           : `character_id=in.(${scope.characterIds.join(',')})`,
-      }, (payload) => {
-        try {
+        onChange: (payload) => {
           const type = String(payload?.eventType || '').toUpperCase();
           if (type === 'DELETE') {
             const id = payload?.old?.character_id;
@@ -209,15 +205,10 @@ export function useCharacterDigests({ campaignId = null, characterIds = null, en
           const digest = toCharacterDigest(payload?.new);
           if (digest) upsert(digest);
           else reconcile();
-        } catch (_) {
-          // Realtime is opportunistic; the next reconcile repairs.
-        }
-      });
-      channel.subscribe((state) => { if (state === 'SUBSCRIBED') reconcile(); });
-    } catch (_) {
-      try { if (channel) supabase.removeChannel(channel); } catch (__) {}
-      return undefined;
-    }
+        },
+      }],
+      onStatus: (state) => { if (state === 'SUBSCRIBED') reconcile(); },
+    });
 
     // A health command's answer is here before its digest: show it now.
     const receiveVitals = ({ detail }) => {
@@ -239,7 +230,7 @@ export function useCharacterDigests({ campaignId = null, characterIds = null, en
       window.removeEventListener(CHARACTER_VITALS_EVENT, receiveVitals);
       window.removeEventListener(CHARACTER_RECHECK_EVENT, recheck);
       stopRecovery();
-      try { supabase.removeChannel(channel); } catch (_) {}
+      channel?.close();
     };
   }, [active, reconcile, remove, scope, upsert]);
 

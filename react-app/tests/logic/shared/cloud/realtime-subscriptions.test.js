@@ -24,14 +24,21 @@ async function walk(folder) {
   return nested.flat();
 }
 
+// Subscriptions are declared as `changes: [{ table, ... }]` for
+// openRealtimeChannel (shared/cloud/realtimeChannel.js, the only file that
+// calls postgres_changes itself): every `table:` in a file that opens a
+// channel is one.
+const HELPER = join(SRC, 'shared', 'cloud', 'realtimeChannel.js');
+
 async function subscriptions() {
-  const files = (await walk(SRC)).filter((path) => ['.js', '.jsx'].includes(extname(path)));
+  const files = (await walk(SRC)).filter((path) => ['.js', '.jsx'].includes(extname(path)) && path !== HELPER);
   const found = [];
   for (const path of files) {
     const source = await readFile(path, 'utf8');
-    for (const match of source.matchAll(/['"]postgres_changes['"]\s*,\s*\{/g)) {
-      const options = source.slice(match.index + match[0].length, match.index + match[0].length + 300);
-      const table = options.match(/\btable\s*:\s*(['"])([a-z0-9_]+)\1/);
+    if (/\.on\(\s*['"]postgres_changes['"]/.test(source)) found.push({ file: relative(ROOT, path), table: null });
+    if (!/\bopenRealtimeChannel\(/.test(source)) continue;
+    for (const match of source.matchAll(/\btable\s*:\s*([^,}\n]+)/g)) {
+      const table = match[1].trim().match(/^(['"])([a-z0-9_]+)\1$/);
       found.push({ file: relative(ROOT, path), table: table ? table[2] : null });
     }
   }

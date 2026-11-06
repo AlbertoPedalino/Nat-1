@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../cloud/auth/AuthProvider.jsx';
 import { supabase } from '../../cloud/supabaseClient.js';
+import { openRealtimeChannel } from '../../cloud/realtimeChannel.js';
 import { readLiveSceneId } from '../../cloud/api/vtt.js';
 import { listenForRecovery } from '../../cloud/sync/recoveryTriggers.js';
 
@@ -55,13 +56,11 @@ export function useLiveSession({ campaignId, enabled = true } = {}) {
     refresh();
 
     if (!supabase) return undefined;
-    let channel;
-    try {
-      channel = supabase.channel(`gb-vtt-session-${campaignId}`);
-      channel.on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'campaign_live_scenes', filter: `campaign_id=eq.${campaignId}` },
-        (payload) => {
+    const channel = openRealtimeChannel(`gb-vtt-session-${campaignId}`, {
+      changes: [{
+        table: 'campaign_live_scenes',
+        filter: `campaign_id=eq.${campaignId}`,
+        onChange: (payload) => {
           const row = payload?.new;
           if (row && Object.hasOwn(row, 'scene_id')) {
             // The event is the answer; a read still in flight is older.
@@ -71,18 +70,11 @@ export function useLiveSession({ campaignId, enabled = true } = {}) {
             refresh();
           }
         },
-      );
-      channel.subscribe((state) => {
-        // Covers the gap between the first read and the subscription going
-        // live, and every reconnect: missed changes are not replayed.
-        if (state === 'SUBSCRIBED') refresh();
-      });
-    } catch (_) {
-      try {
-        if (channel) supabase.removeChannel(channel);
-      } catch (__) {}
-      return undefined;
-    }
+      }],
+      // Covers the gap between the first read and the subscription going live,
+      // and every reconnect: missed changes are not replayed.
+      onStatus: (state) => { if (state === 'SUBSCRIBED') refresh(); },
+    });
 
     // One tiny row: cheap enough to re-read after sleep, network changes or a
     // background tab, which is when realtime can silently miss a change.
@@ -91,9 +83,7 @@ export function useLiveSession({ campaignId, enabled = true } = {}) {
     return () => {
       requestRef.current += 1;
       stopRecovery();
-      try {
-        supabase.removeChannel(channel);
-      } catch (_) {}
+      channel?.close();
     };
   }, [apply, campaignId, cloudEnabled, enabled, refresh, status]);
 
