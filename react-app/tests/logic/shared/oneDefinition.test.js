@@ -413,3 +413,10 @@ test('spell slot tables are read only by casterProgression.js', () => {
     allow: ['shared/character/spells/spellTables.js', 'shared/character/spells/casterProgression.js'],
   }), []);
 });
+
+// The spell record saved on a character is built by toSnapshot alone.
+test('spell snapshots are built only by toSnapshot', () => {
+  assert.deepEqual(sourceFilesMatching(/castingTimeLabel: spell\.castingTimeLabel \|\|/, {
+    allow: ['shared/character/spells/spellSnapshots.js'],
+  }), []);
+});

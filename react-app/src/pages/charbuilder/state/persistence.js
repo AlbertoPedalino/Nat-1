@@ -20,6 +20,7 @@ import { resolveActionRollers } from '../../../shared/character/dice/rollers.js'
 import { asArray } from '../../../shared/lists.js';
 import { stripSource } from '../../../shared/content/nameKeys.js';
 import { ABILITIES } from '../../../shared/content/rulesVocabulary.js';
+import { toSnapshot } from '../../../shared/character/spells/spellSnapshots.js';
 
 const FEAT_SNAPSHOT_FIELDS = [
   'name',
@@ -236,30 +237,7 @@ export function makeSheetPayload(character, data) {
       if (spell) return spell;
       return { name, level: selectedSpellLevels.get(name) ?? autoGrantedSpells.find((entry) => entry.name === name)?.level ?? 0 };
     })
-    .map((spell) => ({
-      name: spell.name,
-      level: Number(spell.level ?? selectedSpellLevels.get(spell.name) ?? 0),
-      school: spell.school,
-      source: spell.source,
-      components: spell.components,
-      duration: spell.duration,
-      range: spell.range,
-      time: spell.time,
-      ritual: spell.ritual,
-      concentration: spell.concentration,
-      entries: spell.entries,
-      entriesHigherLevel: spell.entriesHigherLevel || null,
-      descriptionEntries: spell.descriptionEntries || spell.entries || [],
-      higherLevelEntries: spell.higherLevelEntries || spell.entriesHigherLevel || null,
-      castingTimeLabel: spell.castingTimeLabel || spell.castingTime || null,
-      rangeLabel: spell.rangeLabel || spell.rangeText || null,
-      componentsLabel: spell.componentsLabel || null,
-      materialLabel: spell.materialLabel || null,
-      durationLabel: spell.durationLabel || spell.durationText || null,
-      scalingLevelDice: spell.scalingLevelDice || null,
-      spellAttack: spell.spellAttack || null,
-      damageInflict: spell.damageInflict || null,
-    }));
+    .map((spell) => toSnapshot({ ...spell, level: Number(spell.level ?? selectedSpellLevels.get(spell.name) ?? 0) }));
 
   const annotateActions = (actions, ownerName, ownerLevel, ownerType) => (
     (actions || []).map((action) => ({

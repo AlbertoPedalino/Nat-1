@@ -1,4 +1,4 @@
-import { lowerKey } from '../../../shared/content/nameKeys.js';
+import { lowerKey } from '../../content/nameKeys.js';
 
 // The spell record stored on the character (`C.spellSnapshots`) and the
 // one-record-per-name rule for spell lists.

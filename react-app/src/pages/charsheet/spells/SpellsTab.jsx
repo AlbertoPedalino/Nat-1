@@ -25,7 +25,7 @@ import { getEquippedArmorPenalties } from '../inventory/armorPenalties.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import { buildSpellInfo } from './spellsTabLogic.js';
-import { dedupeSpells, toSnapshot, upsertSnapshot } from './spellSnapshots.js';
+import { dedupeSpells, toSnapshot, upsertSnapshot } from '../../../shared/character/spells/spellSnapshots.js';
 import { getSpellAbility } from './spellAbility.js';
 import { normalizeWizardBook } from '../../../shared/character/spells/wizardBook.js';
 import {
