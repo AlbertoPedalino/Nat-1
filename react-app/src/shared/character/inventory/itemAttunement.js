@@ -1,5 +1,6 @@
 import { itemIdentityKey } from './itemIdentity.js';
 import { isItemCarried } from './weight.js';
+import { stripSource } from '../../content/nameKeys.js';
 
 export const BASE_ATTUNEMENT_LIMIT = 3;
 
@@ -36,7 +37,7 @@ export function resolveAttunementLimit(effects, baseLimit = BASE_ATTUNEMENT_LIMI
 }
 
 function normalizeRequirementValue(value) {
-  return String(value || '').split('|')[0].trim().toLowerCase();
+  return stripSource(value).toLowerCase();
 }
 
 function requirementTags(item) {

@@ -1,6 +1,7 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
 import { finalAbilityModifier } from '../../../shared/character/progression/abilityModifier.js';
 import { titleCase } from '../../../shared/ui/textCase.js';
+import { choiceText } from '../../../shared/content/nameKeys.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -167,13 +168,7 @@ registerClassSheetChoiceMeta("Bard", {
       .replace(/^subclass_(lore|swords|moon)_/, ""))
       .trim();
   },
-  normalizeChoiceValue: (value) => {
-    return String(value || "")
-      .split("|")[0]
-      .replace(/\{@\w+ /g, "")
-      .replace(/\}/g, "")
-      .trim();
-  },
+  normalizeChoiceValue: (value) => choiceText(value),
 });
 // [SheetRuntime] END
 

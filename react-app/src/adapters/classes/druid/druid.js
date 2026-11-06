@@ -1,4 +1,5 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
+import { stripSource } from '../../../shared/content/nameKeys.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -21,7 +22,7 @@ registerClassAdapter("Druid", function (cls, lv, specs, ctx = {}) {
   const hasChoice = function (key, value) {
     const raw = choiceValue(key);
     const vals = Array.isArray(raw) ? raw : (raw ? [raw] : []);
-    return vals.some(function (v) { return String(v).split('|')[0].trim().toLowerCase() === String(value).toLowerCase(); });
+    return vals.some(function (v) { return stripSource(v).toLowerCase() === String(value).toLowerCase(); });
   };
 
   if (lv >= 1) {

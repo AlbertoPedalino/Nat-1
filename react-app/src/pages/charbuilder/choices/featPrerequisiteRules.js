@@ -1,7 +1,7 @@
 import { asArray } from '../../../shared/lists.js';
-import { matchKey } from '../../../shared/content/nameKeys.js';
+import { matchKey, stripSource } from '../../../shared/content/nameKeys.js';
 function refName(value) {
-  return matchKey(String(value || '').split('|')[0]);
+  return matchKey(stripSource(value));
 }
 
 function meetsAbilityRequirement(requirement, scores) {

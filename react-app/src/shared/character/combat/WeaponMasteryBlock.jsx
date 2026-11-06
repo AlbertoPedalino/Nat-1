@@ -8,12 +8,13 @@ import {
   getWeaponMasteryName,
   loadMasteryEntries,
 } from './weaponMastery.js';
+import { stripSource } from '../../content/nameKeys.js';
 
 // First mastery code stripped of its source suffix ("Graze|XPHB" -> "Graze").
 // Accepts the raw item.mastery array, a single tagged string, or a clean name.
 export function masteryCodeOf(mastery) {
   const raw = Array.isArray(mastery) ? mastery.find(Boolean) : mastery;
-  return raw ? String(raw).split('|')[0].trim() : '';
+  return raw ? stripSource(raw) : '';
 }
 
 // Loads the mastery dataset once (module-cached) and re-renders when ready.

@@ -45,6 +45,22 @@ test('a lowercase-alphanumeric key is made only by matchKey, never inline or und
   ), []);
 });
 
+// A 5etools reference loses its source through stripSource. The {@tag text|…}
+// parsers split a tag's arguments (their first part is the text to show), and
+// multi-step text cleaners split as one step of their chain, on its own line.
+test('a name without its source comes from stripSource', () => {
+  assert.deepEqual(sourceFilesMatching(
+    /String\([^\n]*\)\s*(\.toUpperCase\(\))?\.split\(['"]\|['"]\)\[0\]|[\w$\]]\.split\(['"]\|['"]\)\[0\]/,
+    { allow: [
+      'shared/content/nameKeys.js',
+      'pages/encounterbuilder/bestiary/markup.js',
+      'shared/character/forms/beasts.js',
+      'shared/character/spells/spellEntries.js',
+      'pages/charbuilder/choices/choiceSpecs.js',
+    ] },
+  ), []);
+});
+
 test('capitalizing is done only by shared/ui/textCase.js', () => {
   assert.deepEqual(sourceFilesMatching(
     /charAt\(0\)\.toUpperCase\(\)\s*\+|\.replace\(\/(\^|\\b)\\w\/g?,\s*(\(c\)|c|function\s*\(c\))\s*(=>|\{)|function\s+(capitalize|titleCase)\s*\(|const\s+(capitalize|titleCase)\s*=/,

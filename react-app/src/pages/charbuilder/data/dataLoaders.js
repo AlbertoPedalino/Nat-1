@@ -32,7 +32,7 @@ import {
   resolveCopyRecords,
 } from './itemVariants.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
-import { matchKey } from '../../../shared/content/nameKeys.js';
+import { matchKey, stripSource } from '../../../shared/content/nameKeys.js';
 
 // Memoize by path: 5etools data is static per session, so repeated loads of the
 // same file (across builder + sheet panels) share one network request. The
@@ -397,7 +397,7 @@ const SCF_TYPE_FOCUS = {
   holy: ['Cleric', 'Paladin'],
 };
 
-const itemBaseType = (item) => String(item?.type || '').split('|')[0].toUpperCase();
+const itemBaseType = (item) => stripSource(item?.type).toUpperCase();
 const weaponCategoryOf = (item) => String(item?.weaponCategory || '').toLowerCase();
 const isWeaponItem = (item) => ['M', 'R'].includes(itemBaseType(item));
 
@@ -722,7 +722,7 @@ function stripTemplatedEntries(node) {
 }
 
 function normalizeItem(item) {
-  const rawType = item.type ? String(item.type).split('|')[0] : '';
+  const rawType = item.type ? stripSource(item.type) : '';
   return {
     name: formatLeadingBonusName(item.name),
     source: canonicalItemSource(item) || item.source || '',
@@ -736,7 +736,7 @@ function normalizeItem(item) {
     weaponCategory: item.weaponCategory || null,
     age: item.age || null,
     bonusVariant: item.bonusVariant || null,
-    mastery: Array.isArray(item.mastery) ? item.mastery.map((m) => String(m).split('|')[0]) : null,
+    mastery: Array.isArray(item.mastery) ? item.mastery.map((m) => stripSource(m)) : null,
     dmg1: item.dmg1 || null,
     dmg2: item.dmg2 || null,
     dmgType: item.dmgType || null,
@@ -769,7 +769,7 @@ function normalizeItem(item) {
     charges: item.charges ?? null,
     recharge: item.recharge || null,
     rechargeAmount: item.rechargeAmount || null,
-    property: Array.isArray(item.property) ? item.property.map((p) => String(p).split('|')[0]) : [],
+    property: Array.isArray(item.property) ? item.property.map((p) => stripSource(p)) : [],
     entries: Array.isArray(item.entries) ? stripTemplatedEntries(item.entries) : (item.entries || []),
     packContents: item.packContents || null,
     scfType: item.scfType || null,

@@ -12,7 +12,7 @@ import {
   buildOptionalFeatureEntryLookup,
 } from '../../../shared/character/progression/optionalFeatures.js';
 import { entriesToPlainText } from '../../../shared/character/spells/spellEntries.js';
-import { matchKey } from '../../../shared/content/nameKeys.js';
+import { matchKey, stripSource } from '../../../shared/content/nameKeys.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -148,7 +148,7 @@ function _warlockChoiceValuesByBase(C, baseKey, fallback) {
   Object.entries(C.choices).forEach(function(entry) {
     var key = entry[0].replace(/^mc\d+_/, '');
     if (key === baseKey || key.startsWith(baseKey + '_')) {
-      var value = String(entry[1] || '').split('|')[0].trim();
+      var value = stripSource(entry[1]);
       if (value) out.push(value);
     }
   });
@@ -256,7 +256,7 @@ registerClassAdapter("Warlock", function (cls, lv, specs, adapterContext = {}) {
     if (!_charRef || !_charRef.choices) return '';
     var raw = _charRef.choices[_choicePrefix + 'warlock_invocation_' + slotNumber];
     var val = Array.isArray(raw) ? raw[0] : raw;
-    return typeof val === 'string' ? val.split('|')[0].trim() : '';
+    return typeof val === 'string' ? stripSource(val) : '';
   }
 
   _INV_LEVELS.forEach(function (threshold, i) {

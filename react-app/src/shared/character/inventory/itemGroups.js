@@ -1,3 +1,4 @@
+import { stripSource } from '../../content/nameKeys.js';
 // The filter-chip taxonomy for item lists: which shelf an item sits on, the
 // chip set itself, and the test a chip applies. Shared so the builder and the
 // sheet cannot disagree — they used to classify independently, and a ring with
@@ -13,7 +14,7 @@ export const ITEM_GROUP_KEYS = Object.freeze(['weapon', 'armor', 'magic', 'gear'
 // a Flame Tongue is a Weapon, not Magic.
 export function itemGroupKey(item) {
   // 5etools types can carry a source suffix ("M|XPHB").
-  const type = String(item?.type || '').split('|')[0].trim().toUpperCase();
+  const type = stripSource(item?.type).toUpperCase();
   if (WEAPON_TYPES.has(type)) return 'weapon';
   if (ARMOR_TYPES.has(type)) return 'armor';
   if (MAGIC_TYPES.has(type)) return 'magic';

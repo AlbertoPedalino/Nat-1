@@ -2,6 +2,7 @@ import { loadItems } from '../../charbuilder/data/dataLoaders.js';
 import { INVENTORY_SOURCE_PRIORITY, sourceRank } from '../../../shared/content/sourcePriority.js';
 import { itemDisplayName } from '../../../shared/character/inventory/itemIdentity.js';
 import { itemGroupKey as itemType } from '../../../shared/character/inventory/itemGroups.js';
+import { stripSource } from '../../../shared/content/nameKeys.js';
 
 // Searching the item database from the inventory's add panel: normalized
 // search text per item (name, type, rarity, properties), relevance order (name
@@ -32,7 +33,7 @@ function itemSearchText(item) {
     Array.isArray(item?.mastery) ? item.mastery.join(' ') : '',
     Array.isArray(item?.focus) ? item.focus.join(' ') : '',
     Array.isArray(item?.group) ? item.group.join(' ') : '',
-    Array.isArray(item?.items) ? item.items.map((ref) => String(ref || '').split('|')[0]).join(' ') : '',
+    Array.isArray(item?.items) ? item.items.map((ref) => stripSource(ref)).join(' ') : '',
   ].filter(Boolean).join(' '));
 }
 

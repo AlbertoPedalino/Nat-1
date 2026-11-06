@@ -4,6 +4,7 @@ import {
 } from '../../../shared/character/inventory/itemIdentity.js';
 import { hasOwnedFeat } from '../../../shared/character/progression/selectedFeats.js';
 import { itemHasProperty } from '../../../shared/character/inventory/weaponProperties.js';
+import { stripSource } from '../../../shared/content/nameKeys.js';
 
 export const THROWN_SLOT = 'thrown';
 
@@ -46,7 +47,7 @@ export function isReachWeapon(item) {
 // Base weapon name, so a "+1 Spear" or a "Light Crossbow of Warning" still
 // counts as the weapon it is built on.
 function baseWeaponName(item) {
-  return String(item?.baseItem || item?.name || '').split('|')[0].toLowerCase();
+  return stripSource(item?.baseItem || item?.name).toLowerCase();
 }
 
 export function isCrossbow(item) {
@@ -62,7 +63,7 @@ export function isPolearmMasterWeapon(item) {
 }
 
 export function hasEquippedShield(inventory) {
-  return (inventory || []).some((i) => i.equipped && String(i.type || '').split('|')[0].toUpperCase() === 'S');
+  return (inventory || []).some((i) => i.equipped && stripSource(i.type).toUpperCase() === 'S');
 }
 
 // True if a weapon or Shield is currently held in a hand. Used by Fighting Style:

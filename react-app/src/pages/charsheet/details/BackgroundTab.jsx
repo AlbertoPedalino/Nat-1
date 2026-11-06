@@ -3,6 +3,7 @@ import { GraduationCap } from 'lucide-react';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
+import { stripSource } from '../../../shared/content/nameKeys.js';
 
 const BG = ENTITY_COLORS.background;
 
@@ -31,8 +32,8 @@ function listFeats(feats) {
     if (typeof f === 'string') { items.push(f); return; }
     if (typeof f === 'object') {
       const fixed = Object.keys(f).find(k => k !== 'choose' && f[k]);
-      if (fixed) items.push(fixed.split('|')[0]);
-      if (f.choose?.from?.length) items.push(`Choose: ${f.choose.from[0].split('|')[0]}`);
+      if (fixed) items.push(stripSource(fixed));
+      if (f.choose?.from?.length) items.push(`Choose: ${stripSource(f.choose.from[0])}`);
     }
   });
   return items.length ? items : null;

@@ -40,6 +40,7 @@ import {
   getWeaponNotes,
 } from '../state/effectBonuses.js';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
+import { stripSource } from '../../../shared/content/nameKeys.js';
 
 // Action cards for weapons: one per wielded weapon (main hand, off hand,
 // thrown, two-handed), with ability, proficiency, mastery, fighting-style and
@@ -86,7 +87,7 @@ function weaponCardName(item) {
 // The weapon's own kind, for weapon-scoped effects and notes (WEAPON_FILTERS).
 // How it is held (one or two hands, alone or not) is the caller's to add.
 function weaponKindInfo(item, ctx = {}) {
-  const type = String(item?.type || '').split('|')[0].toUpperCase();
+  const type = stripSource(item?.type).toUpperCase();
   return {
     ranged: type === 'R',
     melee: type === 'M',

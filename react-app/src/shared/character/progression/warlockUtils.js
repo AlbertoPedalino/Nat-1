@@ -6,12 +6,12 @@ const invocationKey = (value) => matchKey(stripSource(value));
 
 function invocationNameFromValue(value) {
   if (value == null) return '';
-  if (typeof value === 'string') return value.split('|')[0].trim();
+  if (typeof value === 'string') return stripSource(value);
   if (typeof value === 'object') {
     const raw = value.name || value.label || value.value || value.id || '';
-    return String(raw || '').split('|')[0].trim();
+    return stripSource(raw);
   }
-  return String(value || '').split('|')[0].trim();
+  return stripSource(value);
 }
 
 function invocationNamesFromChoiceValue(value) {

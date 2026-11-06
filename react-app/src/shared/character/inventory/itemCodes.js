@@ -2,6 +2,7 @@ import { getWeaponMasteryReminderText } from '../combat/weaponMastery.js';
 import { parseSignedBonus } from './itemBonus.js';
 import { signed } from '../../ui/numberFormat.js';
 import { capitalize, titleCase } from '../../ui/textCase.js';
+import { stripSource } from '../../content/nameKeys.js';
 
 // Type codes match 5etools schema. Note: "R" here means a Ranged Weapon item type;
 // the same letter as a weapon property means "Reach" (see WEAPON_PROPERTY_LABELS).
@@ -86,11 +87,11 @@ const ITEM_PROPERTY_KEYS = ['property', 'properties'];
 const WEAPON_TYPE_CODES = new Set(['M', 'R', 'WEAPON']);
 
 function rawPropertyCode(value) {
-  return String(value || '').toUpperCase().split('|')[0].trim();
+  return stripSource(value).toUpperCase();
 }
 
 function rawTypeCode(item) {
-  return String(item?.type || '').toUpperCase().split('|')[0].trim();
+  return stripSource(item?.type).toUpperCase();
 }
 
 function collectRawProperties(item) {
@@ -252,7 +253,7 @@ export const DAMAGE_TYPE_LABELS = {
 
 export function decodeDamageType(code) {
   if (!code) return '';
-  const key = String(code).toUpperCase().split('|')[0].trim();
+  const key = stripSource(code).toUpperCase();
   return DAMAGE_TYPE_LABELS[key] || String(code).toLowerCase();
 }
 

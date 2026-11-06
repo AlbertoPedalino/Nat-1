@@ -10,7 +10,7 @@ import { primaryClassLevel } from '../../../shared/character/progression/classLe
 import { XP_THRESHOLDS } from '../../../shared/character/progression/xp.js';
 import { collectSheetEffects } from './sheetEffects.js';
 import { getNormalizedChoices } from '../../../shared/character/progression/choiceNormalization.js';
-import { matchKey } from '../../../shared/content/nameKeys.js';
+import { matchKey, stripSource } from '../../../shared/content/nameKeys.js';
 
 const STATS = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
 const SLBL = { str: 'STR', dex: 'DEX', con: 'CON', int: 'INT', wis: 'WIS', cha: 'CHA' };
@@ -170,7 +170,7 @@ export function normSkill(s) {
 }
 
 function skillChoiceLabel(value) {
-  const raw = String(value || '').split('|')[0].trim();
+  const raw = stripSource(value);
   const typed = raw.match(/^(skill|tool|language|weapon):(.+)$/i);
   if (typed) return typed[1].toLowerCase() === 'skill' ? typed[2].trim() : '';
   return raw;

@@ -1,7 +1,7 @@
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
 import { isGrantUnlocked } from './spellGrants.js';
 import { primaryClassLevel } from '../progression/classLevel.js';
-import { matchKey } from '../../content/nameKeys.js';
+import { matchKey, stripSource } from '../../content/nameKeys.js';
 
 /**
  * Shared enumeration of auto-granted spells from class/subclass/species runtime
@@ -121,7 +121,7 @@ export function enumerateSpeciesGrants(character) {
 // the builder and the sheet compute them live (no snapshot dependency).
 
 function spellTagName(value) {
-  return String(value || '').split('|')[0].trim();
+  return stripSource(value);
 }
 
 function pushSpellTags(text, out) {

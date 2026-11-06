@@ -16,6 +16,7 @@ import { itemMatchesFilters } from '../../../shared/character/inventory/itemFilt
 import { useItemFilters } from '../../../shared/character/inventory/useItemFilters.js';
 import { ITEM_GROUP_CHIPS, OWNED_ITEM_CHIPS, matchesItemGroupChip } from '../../../shared/character/inventory/itemGroups.js';
 import { usePagedList } from '../../../shared/ui/usePagedList.js';
+import { stripSource } from '../../../shared/content/nameKeys.js';
 
 const CHOICE_KEYS = ['A', 'B', 'C', 'D', 'E', 'a', 'b', 'c', 'd', 'e'];
 
@@ -129,7 +130,7 @@ function flattenEquip(node, items = []) {
       return items;
     }
     if (node.item) {
-      const name = String(node.item || '').split('|')[0];
+      const name = stripSource(node.item);
       const qty = node.quantity && node.quantity > 1 ? ` x${node.quantity}` : '';
       const value = node.containsValue || node.value || 0;
       items.push(`${strip5eMarkup(name)}${qty}${value ? ` (${Math.floor(value / 100)} gp)` : ''}`);

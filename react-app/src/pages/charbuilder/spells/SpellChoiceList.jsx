@@ -5,6 +5,7 @@ import { SpellMiniTags, SpellReferenceBody, SpellRowLabel, SpellSelectButton } f
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import SelectionSearch from '../choices/SelectionSearch.jsx';
 import { filterOptions, SEARCH_MIN_OPTIONS } from '../../../shared/content/searchText.js';
+import { stripSource } from '../../../shared/content/nameKeys.js';
 
 function _knownCantripNames(character) {
   const names = new Set();
@@ -57,7 +58,7 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
         if (choiceKey === spec.key) return;
         var choiceBase = choiceKey.replace(/_\d+$/, '');
         if (choiceBase !== keyBase) return;
-        var val = String(entry[1] || '').split('|')[0].trim();
+        var val = stripSource(entry[1]);
         if (val) alreadyChosen.add(val);
       });
       if (alreadyChosen.size) {

@@ -17,6 +17,7 @@ import {
 import { backgroundOriginFeat } from '../shared/character/progression/backgroundFeatOptions.js';
 import { asArray } from '../shared/lists.js';
 import { capitalize } from '../shared/ui/textCase.js';
+import { stripSource } from '../shared/content/nameKeys.js';
 
 export function splitClassSubclass(rawKey) {
   const value = String(rawKey || '');
@@ -267,6 +268,6 @@ function getGenericBackgroundChoiceMeta() {
     sectionTitle: 'Background Choices',
     isChoiceKey: (key) => key === 'feat_origin' || /^bg_/i.test(String(key || '')),
     getLabel: (key) => String(key || '').replace(/^bg_/i, '').replace(/_/g, ' '),
-    normalizeChoiceValue: (value) => String(value || '').split('|')[0],
+    normalizeChoiceValue: (value) => stripSource(value),
   };
 }

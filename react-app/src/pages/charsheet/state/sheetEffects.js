@@ -8,7 +8,7 @@ import { inventoryHasFlag } from '../../../shared/character/progression/choiceUt
 import { ownedFeatNames } from '../../../shared/character/progression/selectedFeats.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { asArray } from '../../../shared/lists.js';
-import { matchKey } from '../../../shared/content/nameKeys.js';
+import { matchKey, stripSource } from '../../../shared/content/nameKeys.js';
 
 export function cleanText(value) {
   if (value == null) return '';
@@ -161,7 +161,7 @@ function choiceValue(character, key) {
 function firstChoiceText(character, key) {
   const value = choiceValue(character, key);
   const first = asArray(value).find((item) => item != null && item !== '');
-  return cleanText(first).split('|')[0];
+  return stripSource(cleanText(first));
 }
 
 function parentheticalDamageType(text) {

@@ -1,8 +1,8 @@
-import { matchKey } from '../../content/nameKeys.js';
+import { matchKey, stripSource } from '../../content/nameKeys.js';
 const MODES = ['known', 'innate', 'prepared'];
 
 function spellNameFromRef(value) {
-  return String(value || '').split('|')[0].split('#')[0].trim();
+  return stripSource(value).split('#')[0].trim();
 }
 
 function normalizeAbility(value, chosenAbility = null) {

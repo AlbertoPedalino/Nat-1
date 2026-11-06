@@ -1,3 +1,4 @@
+import { stripSource } from '../../content/nameKeys.js';
 // Weapon properties, read one way by every caller: proficiency rules, wielding
 // slots, attack ability, Weapon Mastery, Replicate Magic Item.
 //
@@ -26,7 +27,7 @@ export function canonicalProperty(value) {
   const raw = value && typeof value === 'object'
     ? (value.name ?? value.abbreviation ?? value.id)
     : value;
-  const key = String(raw ?? '').split('|')[0].trim().toLowerCase();
+  const key = stripSource(raw ?? '').toLowerCase();
   return CANONICAL[key] || key;
 }
 

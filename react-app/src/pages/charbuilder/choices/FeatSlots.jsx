@@ -10,7 +10,7 @@ import { findSpellListEntryIndexByClass } from '../../../shared/character/spells
 import { featChoiceSpecs } from './choiceSpecs.js';
 import { buildFeatPrerequisiteContext, meetsFeatPrerequisites } from './featPrerequisites.js';
 import { featDescriptionEntries } from '../../../shared/character/progression/featDescription.js';
-import { matchKey } from '../../../shared/content/nameKeys.js';
+import { matchKey, stripSource } from '../../../shared/content/nameKeys.js';
 
 function featMatchesCategory(feat, wanted, fixedOptions = []) {
   if (fixedOptions.some((name) => matchKey(name) === matchKey(feat?.name))) return true;
@@ -22,7 +22,7 @@ function featMatchesCategory(feat, wanted, fixedOptions = []) {
 
 function featChoiceName(value) {
   if (value && typeof value === 'object') return featChoiceName(value.name || value.label || value.value);
-  return String(value || '').split('|')[0].split(';')[0].trim();
+  return stripSource(value).split(';')[0].trim();
 }
 
 function featChoiceKey(value) {
@@ -60,7 +60,7 @@ function grantLabel(entry) {
       const arr = Array.isArray(items) ? items : items?._;
       if (!Array.isArray(arr)) continue;
       for (const item of arr) {
-        if (typeof item === 'string') return item.split('|')[0];
+        if (typeof item === 'string') return stripSource(item);
         if (item?.choose) {
           const cls = String(item.choose).split('|').find((p) => p.startsWith('class='));
           if (cls) return cls.slice(6).split(';')[0];

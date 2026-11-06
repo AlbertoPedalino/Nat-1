@@ -1,5 +1,5 @@
 import { normalizeSpellRecord } from '../shared/character/spells/spellNormalization.js';
-import { matchKey } from '../shared/content/nameKeys.js';
+import { matchKey, stripSource } from '../shared/content/nameKeys.js';
 
 const SCHOOL_FULL = {
   A: 'Abjuration',
@@ -127,7 +127,7 @@ function featCategoryCodes(rawCategory) {
 }
 
 function cleanTag(value) {
-  return String(value || '').split('|')[0].replace(/\{@\w+\s+/g, '').replace(/\}/g, '').trim();
+  return stripSource(value).replace(/\{@\w+\s+/g, '').replace(/\}/g, '').trim();
 }
 
 function extractNumericLevel(node, expectLevelValue = false) {
@@ -293,7 +293,7 @@ export function adaptSpellRecord(rawSpell, registry, context = {}) {
 }
 
 function resolveItemType(raw) {
-  let type = raw.type ? String(raw.type).split('|')[0] : null;
+  let type = raw.type ? stripSource(raw.type) : null;
   if (!type || type === 'G' || type === 'OTH') {
     if (raw.weapon) type = 'M';
     else if (raw.ammo) type = 'A';
@@ -320,9 +320,9 @@ export function adaptItemRecord(rawItem, registry, context = {}) {
     name: name || 'Unknown Item',
     source,
     type,
-    property: arr(raw.property).map((property) => String(property).split('|')[0]),
+    property: arr(raw.property).map((property) => stripSource(property)),
     dmgType: raw.dmgType ? String(raw.dmgType).toLowerCase() : raw.dmgType || null,
-    mastery: raw.mastery ? String(arr(raw.mastery)[0] || '').split('|')[0].trim() : null,
+    mastery: raw.mastery ? stripSource(arr(raw.mastery)[0]) : null,
     weight: Number(raw.weight || 0),
     value: Number(raw.value || 0),
     _meta: {

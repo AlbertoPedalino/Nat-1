@@ -5,7 +5,7 @@ import {
   backgroundGuaranteedFeatNames,
   backgroundOriginFeat as normalizeBackgroundOriginFeat,
 } from './backgroundFeatOptions.js';
-import { matchKey } from '../../content/nameKeys.js';
+import { matchKey, stripSource } from '../../content/nameKeys.js';
 
 const FRAMEWORK_EXACT = new Set(['feat_origin', 'species_origin_feat']);
 const FRAMEWORK_PREFIXES = ['feat_'];
@@ -85,7 +85,7 @@ function fromSpecies(character) {
     if (!entry || typeof entry !== 'object') return;
     Object.keys(entry)
       .filter((key) => key !== 'choose' && entry[key])
-      .map((key) => String(key).split(';')[0].split('|')[0].trim())
+      .map((key) => stripSource(String(key).split(';')[0]))
       .filter(Boolean)
       .forEach((raw) => out.push(raw.replace(/\b\w/g, (char) => char.toUpperCase())));
   });

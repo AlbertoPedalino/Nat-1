@@ -5,7 +5,7 @@ import {
 } from '../../content/sourcePriority.js';
 import { itemHasProperty } from '../inventory/weaponProperties.js';
 import { flattenList } from '../../lists.js';
-import { matchKey } from '../../content/nameKeys.js';
+import { matchKey, stripSource } from '../../content/nameKeys.js';
 
 const MASTERY_DATA_URL = 'https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/items-base.json';
 
@@ -172,7 +172,7 @@ function getMasteryRecord(value) {
   if (!value) return null;
   // Mastery values may carry a source suffix ("Graze|XPHB"); matchKey would
   // fold that into "grazexphb" and miss the record, so strip the source first.
-  const name = String(value).split('|')[0];
+  const name = stripSource(value);
   return _masteries.get(matchKey(name)) || null;
 }
 
@@ -200,7 +200,7 @@ function canonicalMasteryName(value) {
 }
 
 function normalizeExplicitMasteryName(value) {
-  const raw = cleanTagText(value).split('|')[0].trim();
+  const raw = stripSource(cleanTagText(value));
   if (!raw) return null;
   return canonicalMasteryName(raw) || toTitleCase(raw);
 }

@@ -34,7 +34,7 @@ import {
   mergeSpellSourceDisplay,
 } from './spellSourceDisplay.js';
 import { spellModifierEntities } from './spellModifiers.js';
-import { lowerKey, matchKey } from '../../../shared/content/nameKeys.js';
+import { lowerKey, matchKey, stripSource } from '../../../shared/content/nameKeys.js';
 import { titleCase } from '../../../shared/ui/textCase.js';
 
 // The Spells tab's list: every spell the character has, from each source
@@ -339,7 +339,7 @@ export function getFreeCastDefsForCharacter(C) {
     const values = Array.isArray(value) ? value : [value];
     values.forEach((entry) => {
       if (typeof entry !== 'string') return;
-      const name = entry.split('|')[0].trim();
+      const name = stripSource(entry);
       if (!name) return;
       const fc = normalizeFreeCast(tpl, { character: C, sourceType: 'feat', source: meta.name, spellName: name });
       if (fc) defs.push(fc);
@@ -584,7 +584,7 @@ function collectChoiceSpells(C, spellIndex) {
     const values = Array.isArray(value) ? value : [value];
     values.forEach((entry) => {
       if (typeof entry !== 'string') return;
-      const name = entry.split('|')[0].trim();
+      const name = stripSource(entry);
       if (!name) return;
       if (!spellIndex.has(lowerKey(name)) && !/(spell|cantrip|tome|magical|known|prepared|innate|expanded)/i.test(key)) return;
       if (['str', 'dex', 'con', 'int', 'wis', 'cha'].includes(lowerKey(name))) return;

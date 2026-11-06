@@ -17,6 +17,7 @@ import {
   getLanguageOptions,
 } from '../../../shared/character/progression/languages.js';
 import { filterByRequiredChoice } from '../../../shared/character/progression/lineageMatch.js';
+import { stripSource } from '../../../shared/content/nameKeys.js';
 
 const ALL_SKILLS = ['Acrobatics', 'Animal Handling', 'Arcana', 'Athletics', 'Deception', 'History', 'Insight', 'Intimidation', 'Investigation', 'Medicine', 'Nature', 'Perception', 'Performance', 'Persuasion', 'Religion', 'Sleight of Hand', 'Stealth', 'Survival'];
 const STD_LANGS = STANDARD_LANGUAGES;
@@ -669,6 +670,6 @@ export function summarizeFixedProficiencies(entity) {
 export function optionLabel(value) {
   const parsed = parseSkillToolChoiceValue(value);
   if (parsed?.name) return parsed.name;
-  const raw = strip5eMarkup(String(value || '').split('|')[0]);
+  const raw = strip5eMarkup(stripSource(value));
   return STAT_LABELS[raw] || raw.replace(/_/g, ' ');
 }

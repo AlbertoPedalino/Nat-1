@@ -9,8 +9,9 @@ import { CORE_2024_SOURCE_PRIORITY, isAllowedSource } from '../../shared/content
 import { decodeDamageType, decodeProperty, itemMasteryLabels } from '../../shared/character/inventory/itemCodes.js';
 import { capitalize } from '../../shared/ui/textCase.js';
 import { formatNumber } from '../../shared/ui/numberFormat.js';
+import { stripSource } from '../../shared/content/nameKeys.js';
 
-const typeCode = (item) => String(item?.type || '').toUpperCase().split('|')[0].trim();
+const typeCode = (item) => stripSource(item?.type).toUpperCase();
 const rarityOf = (item) => String(item?.rarity || 'none').toLowerCase();
 
 // "none" is a mundane item; "unknown" an object of no set worth (not magic).

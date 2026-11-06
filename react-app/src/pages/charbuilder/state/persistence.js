@@ -19,6 +19,7 @@ import {
 import { enumerateFixedAdditionalSpells } from '../../../shared/character/spells/additionalSpellGrants.js';
 import { resolveActionRollers } from '../../../shared/character/dice/rollers.js';
 import { asArray } from '../../../shared/lists.js';
+import { stripSource } from '../../../shared/content/nameKeys.js';
 
 const FEAT_SNAPSHOT_FIELDS = [
   'name',
@@ -208,7 +209,7 @@ export function makeSheetPayload(character, data) {
     const values = Array.isArray(value) ? value : [value];
     values.forEach((entry) => {
       if (typeof entry !== 'string') return;
-      const name = entry.split('|')[0].trim();
+      const name = stripSource(entry);
       if (!name) return;
       const knownSpell = data.spells.some((spell) => spell.name === name);
       const spellChoiceKey = /(spell|cantrip|tome|magical|known|prepared|innate|expanded)/i.test(key);

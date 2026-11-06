@@ -1,3 +1,4 @@
+import { stripSource } from '../../content/nameKeys.js';
 // Maps a feat's `additionalSpells` lists (5etools shape: one entry per class
 // spell list, e.g. Magic Initiate's Cleric/Druid/Wizard) to the index that a
 // background's `classHint` selects. Single source of truth shared by:
@@ -18,7 +19,7 @@ export function findSpellListEntryIndexByClass(additionalSpells, classHint) {
       Object.values(section).forEach((items) => {
         if (!Array.isArray(items)) return;
         items.forEach((spell) => {
-          if (typeof spell === 'string') sources.push(spell.split('|')[0]);
+          if (typeof spell === 'string') sources.push(stripSource(spell));
         });
       });
     });

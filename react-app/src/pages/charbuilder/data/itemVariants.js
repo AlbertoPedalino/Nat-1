@@ -1,4 +1,4 @@
-import { matchKey } from '../../../shared/content/nameKeys.js';
+import { matchKey, stripSource } from '../../../shared/content/nameKeys.js';
 function cloneJson(value) {
   if (value == null || typeof value !== 'object') return value;
   if (Array.isArray(value)) return value.map(cloneJson);
@@ -116,7 +116,7 @@ export function resolveCopyRecords(records) {
 }
 
 function normalizeComparable(value) {
-  return String(value || '').split('|')[0].trim().toLowerCase();
+  return stripSource(value).toLowerCase();
 }
 
 function isWeaponType(type) {
@@ -138,12 +138,12 @@ function matchesProperty(item, required) {
 
 export function matchesItemRequirement(item, requirement) {
   if (!item || !requirement || typeof requirement !== 'object') return false;
-  const type = String(item.type || '').split('|')[0].toUpperCase();
+  const type = stripSource(item.type).toUpperCase();
 
   if (requirement.name && matchKey(item.name) !== matchKey(requirement.name)) return false;
   if (requirement.source && String(item.source || '').toUpperCase() !== String(requirement.source).toUpperCase()) return false;
   if (requirement.type) {
-    const requiredType = String(requirement.type).split('|')[0].toUpperCase();
+    const requiredType = stripSource(requirement.type).toUpperCase();
     if (requiredType === 'WEAPON' && !isWeaponType(type)) return false;
     if (requiredType === 'ARMOR' && !isArmorType(type)) return false;
     if (!['WEAPON', 'ARMOR'].includes(requiredType) && requiredType !== type) return false;

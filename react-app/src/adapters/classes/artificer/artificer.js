@@ -13,7 +13,7 @@ import {
   MAGIC_ITEM_TINKER_TRANSMUTE_RESOURCE,
 } from '../../../shared/character/inventory/magicItemTinker.js';
 import { titleCase } from '../../../shared/ui/textCase.js';
-import { matchKey } from '../../../shared/content/nameKeys.js';
+import { matchKey, stripSource } from '../../../shared/content/nameKeys.js';
 
 const _REPLICATE_BUCKET_LABEL = Object.fromEntries(REPLICATE_BUCKETS.map((b) => [b.id, b.label]));
 
@@ -335,7 +335,7 @@ registerClassSheetChoiceMeta("Artificer", {
   },
   normalizeChoiceValue: (value, key) => {
     const k = String(key || "");
-    const raw = String(value || "").split("|")[0].replace(/\{@\w+ /g, "").replace(/\}/g, "").trim();
+    const raw = stripSource(value).replace(/\{@\w+ /g, "").replace(/\}/g, "").trim();
     if (!raw) return "";
     if (k.replace(/^mc\d+_/, "") === "artificer_replicate_magic_item_plans") {
       return replicateChoiceLabel(raw);
