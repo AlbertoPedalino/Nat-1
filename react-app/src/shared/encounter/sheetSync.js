@@ -1,10 +1,6 @@
 import { SYNCED_VITALS } from '../character/combat/vitals.js';
-import {
-  DEAD_CONDITION_KEY,
-  normalizeConditions,
-  setConditionActive,
-} from '../character/combat/conditions.js';
 import { clampInt, numberOr } from '../numbers.js';
+import { resolveMortality } from '../character/combat/mortality.js';
 
 // The synced-field contract (which fields, how they map/clamp) lives in
 // shared/character/vitals.js. These functions are the encounter-side combat
@@ -55,13 +51,12 @@ export function resolveCombatVitals(combatant = {}, vitals = {}) {
   // numberOr, because Number(null) is 0 — a finite value that would silently
   // win over the fallback and drop the combatant to 0 HP.
   out.hpCurrent = Math.max(0, Math.min(hpMax, Math.round(numberOr(out.hpCurrent ?? hpMax, hpMax))));
-  const dead = out.hpCurrent === 0 && (
-    out.deathSaves.fail >= 3
-    || normalizeConditions(out.activeConditions).includes(DEAD_CONDITION_KEY)
-  );
+  const { dead, conditions, deathSaves } = resolveMortality({
+    player: true, hp: out.hpCurrent, deathSaves: out.deathSaves, conditions: out.activeConditions,
+  });
   out.isDead = dead;
-  out.activeConditions = setConditionActive(out.activeConditions, DEAD_CONDITION_KEY, dead);
-  if (dead) out.deathSaves = { ...out.deathSaves, f: 3 };
+  out.activeConditions = conditions;
+  out.deathSaves = deathSaves;
   return out;
 }
 

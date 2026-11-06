@@ -10,11 +10,8 @@
 
 import { effectId, normalizeEffects } from '../../character/combat/combatEffects.js';
 import { normalizeDeathSaves } from '../../character/combat/vitals.js';
-import {
-  DEAD_CONDITION_KEY,
-  normalizeConditions,
-  setConditionActive,
-} from '../../character/combat/conditions.js';
+import { DEAD_CONDITION_KEY, normalizeConditions } from '../../character/combat/conditions.js';
+import { resolveMortality } from '../../character/combat/mortality.js';
 
 const SEPARATOR = ':';
 
@@ -75,17 +72,17 @@ export function fightWithTokenVitals(combatants, token) {
     let hpCurrent = token.hpCurrent == null ? combatant.hpCurrent : Math.round(Number(token.hpCurrent));
     const hpMax = token.hpMax == null ? combatant.hpMax : Math.round(Number(token.hpMax));
     const player = combatant.type === 'player' || Boolean(combatant.sourceId);
-    let deathSaves = player ? deathSavesOf(token.deathSaves ?? combatant.deathSaves) : combatant.deathSaves;
-    const explicitlyDead = conditions.includes(DEAD_CONDITION_KEY);
-    if (explicitlyDead) {
+    let saves = player ? deathSavesOf(token.deathSaves ?? combatant.deathSaves) : combatant.deathSaves;
+    // On the map, marking a piece Dead is what drops it to 0 HP; regaining hit
+    // points clears a character's death saves.
+    if (conditions.includes(DEAD_CONDITION_KEY)) {
       hpCurrent = 0;
-      if (player) deathSaves = { success: 0, fail: 3 };
+      if (player) saves = { success: 0, fail: 3 };
     }
-    if (hpCurrent > 0 && player) deathSaves = { success: 0, fail: 0 };
-    const isDead = player
-      ? hpCurrent === 0 && (explicitlyDead || deathSaves.fail >= 3)
-      : hpCurrent <= 0;
-    conditions = setConditionActive(conditions, DEAD_CONDITION_KEY, isDead);
+    if (hpCurrent > 0 && player) saves = { success: 0, fail: 0 };
+    const resolved = resolveMortality({ player, hp: hpCurrent, deathSaves: saves, conditions });
+    const { dead: isDead, deathSaves } = resolved;
+    conditions = resolved.conditions;
 
     if (combatant.hpCurrent === hpCurrent
       && combatant.hpMax === hpMax
