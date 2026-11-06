@@ -3,7 +3,8 @@ import { primaryClassLevel } from '../../../shared/character/progression/classLe
 import { collectEquipmentProficiencySets } from '../../charsheet/proficiency/index.js';
 import { ARMOR_KIND_KEYS, armorSetTrainsKind } from '../../charsheet/proficiency/armorRules.js';
 import { getWeaponCategory, weaponMatchesRule } from '../../charsheet/proficiency/weaponRules.js';
-import { getAllFinalScores, getCasterProgression } from '../progression/calculations.js';
+import { getCasterProgression } from '../progression/calculations.js';
+import { builtAbilityScores } from '../../../shared/character/progression/abilityScores.js';
 import {
   characterWithoutFeatChoiceSlot,
   meetsFeatPrerequisites,
@@ -110,7 +111,7 @@ export function buildFeatPrerequisiteContext({
 
   return {
     level: Number(baseCharacter.level || 1),
-    scores: getAllFinalScores(baseCharacter),
+    scores: builtAbilityScores(baseCharacter),
     ownedFeatNames,
     ownedCategories,
     hasSpellcasting,

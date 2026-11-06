@@ -1,10 +1,10 @@
-import { calcMaxHP } from './calculations.js';
+import { computeMaxHp } from '../../../shared/character/combat/hp.js';
 import { normalizeCurrency } from '../../../shared/character/inventory/currency.js';
 import { normalizeEffects } from '../../../shared/character/combat/combatEffects.js';
 import { normalizeDeathSaves } from '../../../shared/character/combat/vitals.js';
 
 export function deriveSheetState(C) {
-  const baseMax = Math.max(1, calcMaxHP(C));
+  const baseMax = Math.max(1, computeMaxHp(C));
   const maxHPBonus = Number(C?.maxHPBonus || 0);
   // RAW 2024: Wild Shape keeps your own Hit Points (no beast HP pool), so maxHP
   // is always your class-based max — transforming only adds Temporary HP.

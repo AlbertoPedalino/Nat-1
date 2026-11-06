@@ -65,7 +65,8 @@ vi.mock('../../../../src/pages/charsheet/layout/TabsPanel.jsx', async () => {
 
 const character = {
   name: 'Warlock', className: 'Warlock', level: 5, clsSnapshot: { hd: { faces: 8 } },
-  finalScores: { str: 10, dex: 10, con: 14, int: 10, wis: 10, cha: 16 },
+  scoreMethod: 'manual',
+  manualScores: { str: 10, dex: 10, con: 14, int: 10, wis: 10, cha: 16 },
   currentHP: 20, tempHP: 0, maxHPBonus: 0, deathSaves: { success: 0, fail: 0 }, activeConditions: [],
   choices: { invocations: ['Agonizing Blast'] }, notes: '',
 };

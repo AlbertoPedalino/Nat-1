@@ -1,5 +1,5 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
-import { finalAbilityModifier } from '../../../shared/character/progression/abilityModifier.js';
+import { finalAbilityModifier } from '../../../shared/character/progression/abilityScores.js';
 import { titleCase } from '../../../shared/ui/textCase.js';
 import { choiceText } from '../../../shared/content/nameKeys.js';
 

@@ -1,5 +1,6 @@
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
-import { getFinalScore, getCasterProgression, getCasterContribution } from './calculations.js';
+import { getCasterProgression, getCasterContribution } from './calculations.js';
+import { builtAbilityScore } from '../../../shared/character/progression/abilityScores.js';
 
 /**
  * Multiclass rules validator for 5e 2024
@@ -16,12 +17,12 @@ export function checkMulticlassPrerequisite(character, className) {
   if (!reqs.length) return { met: true, reason: '' };
   
   const scores = {
-    str: getFinalScore(character, 'str'),
-    dex: getFinalScore(character, 'dex'),
-    con: getFinalScore(character, 'con'),
-    int: getFinalScore(character, 'int'),
-    wis: getFinalScore(character, 'wis'),
-    cha: getFinalScore(character, 'cha'),
+    str: builtAbilityScore(character, 'str'),
+    dex: builtAbilityScore(character, 'dex'),
+    con: builtAbilityScore(character, 'con'),
+    int: builtAbilityScore(character, 'int'),
+    wis: builtAbilityScore(character, 'wis'),
+    cha: builtAbilityScore(character, 'cha'),
   };
   
   const metGroups = reqs.map((group) => 

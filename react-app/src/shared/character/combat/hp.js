@@ -1,6 +1,6 @@
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
 import { ownedFeatNames } from '../progression/selectedFeats.js';
-import { finalAbilityModifier } from '../progression/abilityModifier.js';
+import { finalAbilityModifier } from '../progression/abilityScores.js';
 
 function getHitDieFaces(source) {
   const hd = source?.hd;
@@ -65,7 +65,7 @@ export function computeMaxHp(character, conMod) {
   if (!character?.className) return 0;
   const conModNum = Number.isFinite(Number(conMod))
     ? Number(conMod)
-    : finalAbilityModifier(character, 'con');
+    : finalAbilityModifier(character, 'con', { ignoreWildShape: true });
   const extras = character.extraClasses || [];
   const totalLevel = Math.max(1, Number(character.level || 1));
   const extrasTotal = extras.reduce((sum, ec) => sum + Number(ec.level || 0), 0);

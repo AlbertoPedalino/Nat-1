@@ -1,6 +1,6 @@
 import { weaponFilterMatches } from '../../../shared/character/inventory/weaponFilters.js';
 import { featNamedEntries } from '../../../shared/character/progression/featDescription.js';
-import { finalAbilityModifier } from '../../../shared/character/progression/abilityModifier.js';
+import { finalAbilityModifier } from '../../../shared/character/progression/abilityScores.js';
 import { cleanText, effectKey, collectSheetEffects } from './sheetEffects.js';
 import { asArray } from '../../../shared/lists.js';
 

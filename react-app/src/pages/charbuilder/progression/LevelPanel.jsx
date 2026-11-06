@@ -1,7 +1,8 @@
 import { Chip, Grid, MenuItem, Select, Stack, TextField, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { HeartPulse } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
-import { calcMaxHp, getPrimaryClassLevel, getProficiencyBonus } from './calculations.js';
+import { getPrimaryClassLevel, getProficiencyBonus } from './calculations.js';
+import { computeMaxHp } from '../../../shared/character/combat/hp.js';
 
 export default function LevelPanel({ character, dispatch }) {
   const tab = character.activeClassTab || 0;
@@ -9,7 +10,7 @@ export default function LevelPanel({ character, dispatch }) {
   const extraIdx = tab - 1;
   const extraClass = isExtra ? character.extraClasses[extraIdx] : null;
   const cls = isExtra ? extraClass?.cls : character.cls;
-  const hp = calcMaxHp(character);
+  const hp = computeMaxHp(character);
   const faces = cls?.hd?.faces || cls?.hitDie || '?';
   const selectedExtraLevels = (character.extraClasses || [])
     .filter((extra) => extra?.name)

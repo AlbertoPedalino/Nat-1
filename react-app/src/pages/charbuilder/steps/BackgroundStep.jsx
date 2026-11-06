@@ -12,6 +12,7 @@ import { backgroundOriginFeat } from '../../../shared/character/progression/sele
 import { backgroundFeatOptionLabel } from '../../../shared/character/progression/backgroundFeatOptions.js';
 import { strip5eMarkup } from '../../../shared/character/spells/spellEntries.js';
 import { titleCase } from '../../../shared/ui/textCase.js';
+import { backgroundAbilityBonus } from '../../../shared/character/progression/abilityScores.js';
 
 
 // One label/value row inside the grants grid (label column + wrapped values).
@@ -174,12 +175,11 @@ export default function BackgroundStep({ state, dispatch }) {
           ) : null}
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
             {abilityPool.map((stat) => {
-              const idx = character.backgroundAbilities.indexOf(stat);
-              const bonus = idx >= 0 ? character.backgroundPattern[idx] || 0 : 0;
+              const bonus = backgroundAbilityBonus(character, stat);
               return (
                 <Button
                   key={stat}
-                  variant={idx >= 0 ? 'contained' : 'outlined'}
+                  variant={character.backgroundAbilities.includes(stat) ? 'contained' : 'outlined'}
                   onClick={() => dispatch({ type: 'background/ability-toggle', stat })}
                 >
                   {STAT_LABELS[stat]} {bonus ? `+${bonus}` : ''}

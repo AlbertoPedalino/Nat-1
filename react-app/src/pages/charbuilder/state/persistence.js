@@ -1,6 +1,5 @@
-import { calcMaxHp, getAllFinalScores, getPrimaryClassLevel } from '../progression/calculations.js';
+import { getPrimaryClassLevel } from '../progression/calculations.js';
 import { collectOwnedFeatNames, withOwnedFeatSnapshots } from '../../../shared/character/progression/selectedFeats.js';
-import { getMod, getFinal } from '../../charsheet/state/calculations.js';
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
 import {
   createCharacter as storeCreateCharacter,
@@ -269,17 +268,12 @@ export function makeSheetPayload(character, data) {
       rollers: resolveActionRollers(action, { character, ownerLevel }),
     }))
   );
-  const characterMods = {};
-  ['str','dex','con','int','wis','cha'].forEach(stat => {
-    characterMods[stat] = Number(getMod(getFinal(character, stat)) || 0);
-  });
   const annotateResources = (resources, ownerName, ownerLevel, ownerType) => (
     (resources || []).map((resource) => ({
       ...resource,
       ownerName,
       ownerLevel,
       ownerType,
-      maxComputed: typeof resource.max === 'function' ? resource.max(ownerLevel, characterMods) : resource.max,
     }))
   );
   const extraClasses = character.extraClasses || [];
@@ -370,7 +364,7 @@ export function makeSheetPayload(character, data) {
         Number(character.level || 1),
         'species',
       ),
-      speciesResources: (installedRegistry.getSpeciesSheetResources(character.speciesName, character.speciesSource) || []).map(r => ({ ...r, maxComputed: typeof r.max === 'function' ? r.max(character.level, characterMods) : r.max })),
+      speciesResources: installedRegistry.getSpeciesSheetResources(character.speciesName, character.speciesSource) || [],
       speciesEffects: installedRegistry.getSpeciesSheetEffects(character.speciesName, character.speciesSource),
       featActions: ownedFeatNames.flatMap((feat) => annotateActions(
         installedRegistry.getFeatSheetActions(feat),
@@ -378,7 +372,7 @@ export function makeSheetPayload(character, data) {
         Number(character.level || 1),
         'feat',
       )),
-      featResources: ownedFeatNames.flatMap((feat) => (installedRegistry.getFeatSheetResources(feat) || []).map(r => ({ ...r, maxComputed: typeof r.max === 'function' ? r.max(character.level, characterMods) : r.max }))),
+      featResources: ownedFeatNames.flatMap((feat) => installedRegistry.getFeatSheetResources(feat) || []),
       featEffects: ownedFeatNames.flatMap((feat) => installedRegistry.getFeatSheetEffects(feat)),
     },
     selectedCantrips: character.selectedCantrips || [],
@@ -388,8 +382,6 @@ export function makeSheetPayload(character, data) {
     wizardSignatureSpells: character.wizardSignatureSpells || {},
     autoGrantedSpells,
     xp: character.xp || 0,
-    maxHp: calcMaxHp(character),
-    finalScores: getAllFinalScores(character),
     inventory: character.inventory || [],
     currency: normalizeCurrency(character.currency || { cp: 0, sp: 0, gp: 10, pp: 0 }),
     equipChoices: character.equipChoices || {},

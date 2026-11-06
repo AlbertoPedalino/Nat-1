@@ -89,7 +89,8 @@ vi.mock('../../../../src/pages/charsheet/layout/TabsPanel.jsx', async () => {
 
 const character = {
   name: 'Fighter', className: 'Fighter', level: 5, clsSnapshot: { hd: { faces: 10 } },
-  finalScores: { str: 10, dex: 10, con: 14, int: 10, wis: 10, cha: 10 },
+  scoreMethod: 'manual',
+  manualScores: { str: 10, dex: 10, con: 14, int: 10, wis: 10, cha: 10 },
   currentHP: 20, tempHP: 0, maxHPBonus: 0, deathSaves: { success: 0, fail: 0 }, activeConditions: [],
 };
 const props = { externalChar: character, externalCharId: 'character', externalSheetRevision: 0, embedded: true };

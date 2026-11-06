@@ -12,7 +12,7 @@ function biteRoller() {
 
 test('Vampiric Bite deals 1d4 plus the Constitution modifier', () => {
   const roller = biteRoller();
-  const damage = (con) => roller.formula({ character: { finalScores: { con } } });
+  const damage = (con) => roller.formula({ character: { scoreMethod: 'manual', manualScores: { con } } });
   assert.equal(damage(16), '1d4+3');
   assert.equal(damage(10), '1d4');
   assert.equal(damage(8), '1d4-1');

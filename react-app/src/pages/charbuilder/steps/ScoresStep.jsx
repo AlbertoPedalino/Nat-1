@@ -2,7 +2,8 @@ import { Alert, Box, Button, Chip, Grid, Paper, Slider, Stack, Tab, Tabs, TextFi
 import { Dice5, Dumbbell } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { PB_COST, STANDARD_ARRAY, STAT_LABELS, STATS } from '../constants.js';
-import { getAbilityScoreBonusBreakdown, getBaseScore, getFinalScore, pointBuySpent } from '../progression/calculations.js';
+import { pointBuySpent } from '../progression/calculations.js';
+import { abilityScoreBonuses, baseAbilityScore, builtAbilityScore } from '../../../shared/character/progression/abilityScores.js';
 import { getActiveScores } from '../state/state.js';
 import { abilityModifier } from '../../../shared/character/progression/abilityModifier.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
@@ -64,9 +65,9 @@ export default function ScoresStep({ state, dispatch }) {
 
         <Grid container spacing={1.5}>
           {STATS.map((stat) => {
-            const baseScore = getBaseScore(character, stat);
-            const finalScore = getFinalScore(character, stat);
-            const bonusBreakdown = getAbilityScoreBonusBreakdown(character, stat);
+            const baseScore = baseAbilityScore(character, stat);
+            const finalScore = builtAbilityScore(character, stat);
+            const bonusBreakdown = abilityScoreBonuses(character, stat);
 
             return (
               <Grid key={stat} item xs={12} md={6}>

@@ -4,7 +4,7 @@
  *
  * Supported string formulas:
  *   - 'proficiencyBonus' | 'pb'   → Proficiency Bonus (item PB bonus included)
- *   - 'abilityMod:<stat>'         → ability modifier from canonical finalScores
+ *   - 'abilityMod:<stat>'         → ability modifier of the score in play
  *
  * Returns the raw numeric value, or null when `formula` is not a recognized
  * string. Callers apply their own clamping (resources floor at 0, free-casts
@@ -12,7 +12,7 @@
  * the two callers cannot drift apart.
  */
 import { getProficiencyBonus } from '../progression/proficiency.js';
-import { finalAbilityModifier } from '../progression/abilityModifier.js';
+import { finalAbilityModifier } from '../progression/abilityScores.js';
 
 export function resolveScalingFormula(formula, character) {
   if (typeof formula !== 'string') return null;

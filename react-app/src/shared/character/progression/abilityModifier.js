@@ -7,8 +7,3 @@ export function abilityModifier(score) {
   return Math.floor(((Number.isFinite(n) ? n : 10) - 10) / 2);
 }
 
-// The modifier of a character's final score (`finalScores`, kept by the
-// sheet), as adapters and scaling formulas read it.
-export function finalAbilityModifier(character, ability) {
-  return abilityModifier(character?.finalScores?.[String(ability).toLowerCase()]);
-}

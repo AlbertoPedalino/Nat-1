@@ -1,5 +1,5 @@
 import { createAdapterBindings } from '../adapterBindings.js';
-import { finalAbilityModifier } from '../../shared/character/progression/abilityModifier.js';
+import { finalAbilityModifier } from '../../shared/character/progression/abilityScores.js';
 import { withModifier } from '../../shared/ui/numberFormat.js';
 
 export default function install(registry, context = {}) {

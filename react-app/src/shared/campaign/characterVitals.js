@@ -4,7 +4,7 @@
 // level, class and species features, feats and items. Character digests carry
 // everything else a table needs and a hash of these inputs; this derives the
 // base maximum (before `maxHPBonus`) from the full sheet: runtime adapters
-// first, then `calcMaxHP`. Its result, per `hpBasis`, is also what a health
+// first, then `computeMaxHp`. Its result, per `hpBasis`, is also what a health
 // command starts from (`commandCharacterVitals`), which reads a sheet only when
 // its caller does not have one.
 //
@@ -16,14 +16,14 @@ export async function readBaseMaxHp(rows) {
   const out = new Map();
   const list = (rows || []).filter((row) => row?.id && row.data && typeof row.data === 'object');
   if (!list.length) return out;
-  const [{ ensureSheetRuntimeAdapters }, { calcMaxHP }] = await Promise.all([
+  const [{ ensureSheetRuntimeAdapters }, { computeMaxHp }] = await Promise.all([
     import('../../pages/charsheet/state/sheetRuntimeAdapters.js'),
-    import('../../pages/charsheet/state/calculations.js'),
+    import('../character/combat/hp.js'),
   ]);
   await ensureSheetRuntimeAdapters(list.map((row) => row.data));
   for (const row of list) {
     try {
-      const base = Number(calcMaxHP(row.data));
+      const base = Number(computeMaxHp(row.data));
       if (Number.isFinite(base)) out.set(String(row.id), Math.max(1, Math.round(base)));
     } catch (_) {
       // A sheet the rules cannot read keeps its bar hidden rather than wrong.

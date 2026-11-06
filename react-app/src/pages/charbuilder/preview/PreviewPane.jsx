@@ -13,8 +13,6 @@ import {
 import { Feather, Languages, Layers, Shield, Sparkles, Sword } from 'lucide-react';
 import { STAT_LABELS, STATS } from '../constants.js';
 import {
-  calcMaxHp,
-  getAllFinalScores,
   getPrimaryClassLevel,
 } from '../progression/calculations.js';
 import {
@@ -53,6 +51,8 @@ import { signed } from '../../../shared/ui/numberFormat.js';
 import { abilityModifier } from '../../../shared/character/progression/abilityModifier.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { builtAbilityScores } from '../../../shared/character/progression/abilityScores.js';
+import { computeMaxHp } from '../../../shared/character/combat/hp.js';
 
 const darkChipText = UI_COLORS.primaryContrast;
 const PROFICIENCY_TONE = NEUTRAL_TONE;
@@ -578,8 +578,8 @@ function PreviewFeat({ feat }) {
 }
 
 function PreviewPaneImpl({ character, items = [], feats = [] }) {
-  const scores = getAllFinalScores(character);
-  const hp = calcMaxHp(character);
+  const scores = builtAbilityScores(character);
+  const hp = computeMaxHp(character);
   const primaryLv = getPrimaryClassLevel(character);
   const proficiencySections = collectPreviewProficiencies(character);
   const weaponMasteries = collectResolvedWeaponMasteries(character, items);

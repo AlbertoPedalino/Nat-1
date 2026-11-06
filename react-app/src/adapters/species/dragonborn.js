@@ -1,5 +1,5 @@
 import { createAdapterBindings } from '../adapterBindings.js';
-import { finalAbilityModifier } from '../../shared/character/progression/abilityModifier.js';
+import { finalAbilityModifier } from '../../shared/character/progression/abilityScores.js';
 import { getProficiencyBonus } from '../../shared/character/progression/proficiency.js';
 
 export default function install(registry, context = {}) {

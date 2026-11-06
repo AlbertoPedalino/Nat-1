@@ -2,7 +2,7 @@ import { adapterRegistry as installedRegistry } from '../../../adapters/registry
 import { getAcBonusEffects } from '../../../pages/charsheet/state/effectBonuses.js';
 import { wildShapeArmorClass } from '../forms/wildShapeForm.js';
 import { primaryClassLevel } from '../progression/classLevel.js';
-import { finalAbilityModifier } from '../progression/abilityModifier.js';
+import { finalAbilityModifier } from '../progression/abilityScores.js';
 import { aggregateMiscAcBonus, armorEnhancement } from '../inventory/itemBonus.js';
 import { asArray } from '../../lists.js';
 import { matchKey } from '../../content/nameKeys.js';

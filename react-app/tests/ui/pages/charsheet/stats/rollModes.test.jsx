@@ -11,7 +11,8 @@ import { ProficiencySetsProvider } from '../../../../../src/pages/charsheet/prof
 
 const C = {
   name: 'Fighter', className: 'Fighter', level: 5,
-  finalScores: { str: 10, dex: 10, con: 14, int: 10, wis: 10, cha: 10 },
+  scoreMethod: 'manual',
+  manualScores: { str: 10, dex: 10, con: 14, int: 10, wis: 10, cha: 10 },
   inventory: [],
 };
 const sheetWith = (patch) => ({ sheetInventory: [], activeConditions: [], activeEffects: [], exhaustionLevel: 0, ...patch });

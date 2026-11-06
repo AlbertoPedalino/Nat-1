@@ -7,11 +7,8 @@ import {
   STATS,
   THIRD_SLOTS,
 } from '../constants.js';
-import { computeMaxHp as sharedComputeMaxHp } from '../../../shared/character/combat/hp.js';
-import { getFeatAsiBonus } from '../../../shared/character/progression/abilityBonuses.js';
 import { collectOwnedFeatNames } from '../../../shared/character/progression/selectedFeats.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
-import { abilityModifier } from '../../../shared/character/progression/abilityModifier.js';
 
 export function pointBuySpent(scores) {
   return STATS.reduce((sum, stat) => sum + (PB_COST[scores[stat]] || 0), 0);
@@ -34,73 +31,8 @@ export function getBackgroundPattern(background, index = 0) {
   return values.length ? values : [2, 1];
 }
 
-export function getBackgroundBonus(character, stat) {
-  const idx = (character.backgroundAbilities || []).indexOf(stat);
-  if (idx < 0) return 0;
-  const pattern = character.backgroundPattern || [2, 1];
-  return pattern[idx] || 0;
-}
-
-function normalizeStat(value) {
-  const key = String(value || '').toLowerCase().replace(/[^a-z]/g, '');
-  const aliases = {
-    strength: 'str',
-    dexterity: 'dex',
-    constitution: 'con',
-    intelligence: 'int',
-    wisdom: 'wis',
-    charisma: 'cha',
-  };
-  return aliases[key] || key;
-}
-
-function abilityBonusSourceLabel(key) {
-  const value = String(key || '');
-  const levelMatch = value.match(/lv(\d+)/i);
-  if (levelMatch) return `Feat Lv.${levelMatch[1]}`;
-  if (value.includes('origin')) return 'Origin Feat';
-  return 'Feat';
-}
-
-export function getBaseScore(character, stat) {
-  let base = 8;
-  if (character.scoreMethod === 'standard') base = character.arrAssign[stat] ?? 8;
-  else if (character.scoreMethod === 'manual') base = character.manualScores[stat] ?? 8;
-  else if (character.scoreMethod === 'dice') base = character.diceAssign[stat] ?? 8;
-  else base = character.pbScores[stat] ?? 8;
-  return Number(base);
-}
-
-export function getAbilityScoreBonusBreakdown(character, stat) {
-  const bonuses = [];
-  const backgroundBonus = getBackgroundBonus(character, stat);
-  if (backgroundBonus) bonuses.push({ source: 'Background', value: backgroundBonus });
-
-  const asiBonus = getFeatAsiBonus(character, stat, getBaseScore(character, stat) + backgroundBonus);
-  if (asiBonus) bonuses.push({ source: 'Feat/ASI', value: asiBonus });
-
-  return bonuses;
-}
-
-export function getAbilityScoreBonus(character, stat) {
-  return getAbilityScoreBonusBreakdown(character, stat).reduce((sum, bonus) => sum + bonus.value, 0);
-}
-
-export function getFinalScore(character, stat) {
-  return getBaseScore(character, stat) + getAbilityScoreBonus(character, stat);
-}
-
-export function getAllFinalScores(character) {
-  return Object.fromEntries(STATS.map((stat) => [stat, getFinalScore(character, stat)]));
-}
-
 export function getHitDieFaces(classObject) {
   return classObject?.hd?.faces || classObject?.hd?.[0]?.faces || 8;
-}
-
-export function calcMaxHp(character) {
-  if (!character?.className) return 0;
-  return sharedComputeMaxHp(character, abilityModifier(getFinalScore(character, 'con')));
 }
 
 export function getCasterProgression(className, classObject, subclassName) {

@@ -1,11 +1,9 @@
-import { computeMaxHp as sharedComputeMaxHp } from '../../../shared/character/combat/hp.js';
-import { getFeatAsiBonus } from '../../../shared/character/progression/abilityBonuses.js';
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
 import { extractFixedProficiencyLabels } from '../../../shared/character/progression/typedProficiencies.js';
-import { getFinalAbilityScore } from '../../../shared/character/inventory/itemEffects.js';
-import { wildShapeAbilityScore, wildShapeSaveBonus, wildShapeSaveProficient, wildShapeSkillBonus } from '../../../shared/character/forms/wildShapeForm.js';
+import { wildShapeSaveBonus, wildShapeSaveProficient, wildShapeSkillBonus } from '../../../shared/character/forms/wildShapeForm.js';
 import { getProficiencyBonus } from '../../../shared/character/progression/proficiency.js';
 import { abilityModifier } from '../../../shared/character/progression/abilityModifier.js';
+import { abilityScore } from '../../../shared/character/progression/abilityScores.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { XP_THRESHOLDS } from '../../../shared/character/progression/xp.js';
 import { collectSheetEffects } from './sheetEffects.js';
@@ -71,34 +69,7 @@ const XP_TABLE = XP_THRESHOLDS; // single source of truth: shared/character/xp.j
 
 export { STATS, SLBL, FULL_LBL, XP_TABLE };
 
-export function getBase(C, stat) {
-  if (!C) return 10;
-  const m = C.scoreMethod;
-  if (m === 'pointbuy') return C.pbScores?.[stat] || 8;
-  if (m === 'standard') { const v = C.arrAssign?.[stat]; return v != null ? v : 8; }
-  if (m === 'manual') { const v = C.manualScores?.[stat]; return v != null ? v : 8; }
-  const v = C.diceAssign?.[stat]; return v != null ? v : 8;
-}
-
-export function bgBonus(C, stat) {
-  if (!C?.backgroundAbilities?.length) return 0;
-  const idx = C.backgroundAbilities.indexOf(stat);
-  return idx < 0 ? 0 : idx === 0 ? 2 : 1;
-}
-
-export function getAsiFeatBonus(C, stat) {
-  return getFeatAsiBonus(C, stat, getBase(C, stat) + bgBonus(C, stat));
-}
-
-export function getFinal(C, stat) {
-  // Wild Shape replaces physical scores (STR/DEX/CON) with the beast's; mental
-  // scores stay the character's. Replacement, not a floor — so it short-circuits
-  // before background/ASI/item layers.
-  const formScore = wildShapeAbilityScore(C, stat);
-  if (formScore != null) return formScore;
-  const base = getBase(C, stat) + bgBonus(C, stat) + getAsiFeatBonus(C, stat);
-  return getFinalAbilityScore(C, stat, base);
-}
+export const getFinal = abilityScore;
 
 export const getMod = abilityModifier;
 
@@ -299,12 +270,3 @@ export function getSkillBonus(C, sk) {
   return formSkill != null ? Math.max(own, formSkill) : own;
 }
 
-export function calcMaxHP(C) {
-  if (!C) return 10;
-  // Hit Points are retained while Wild Shaped (RAW 2024), so max HP always uses
-  // your OWN Constitution — never the beast's. Bypass the form's score
-  // replacement (don't use getFinal) so transforming never changes max HP.
-  const conBase = getBase(C, 'con') + bgBonus(C, 'con') + getAsiFeatBonus(C, 'con');
-  const conScore = getFinalAbilityScore(C, 'con', conBase, { ignoreWildShape: true });
-  return sharedComputeMaxHp(C, getMod(conScore));
-}

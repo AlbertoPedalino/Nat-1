@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
+import { computeMaxHp } from '../../../shared/character/combat/hp.js';
 import {
-  calcMaxHP,
   clampExhaustion,
   exhaustionD20Penalty,
   EXHAUSTION_MAX,
@@ -55,7 +55,7 @@ export function useSheetVitals({ C, sheet, setSheet, persist, showDiceToast, sho
   const adjustMaxHpBonus = useCallback((dir) => {
     if (!sheet || !C) return;
     const s = { ...sheet, maxHPBonus: sheet.maxHPBonus + dir };
-    const baseMax = Math.max(1, calcMaxHP(C));
+    const baseMax = Math.max(1, computeMaxHp(C));
     s.maxHP = Math.max(1, baseMax + s.maxHPBonus);
     if (s.currentHP > s.maxHP) s.currentHP = s.maxHP;
     setSheet(s);
@@ -86,7 +86,7 @@ export function useSheetVitals({ C, sheet, setSheet, persist, showDiceToast, sho
   const setMaxHpBonus = useCallback((next) => {
     if (!sheet || !C) return;
     const bonus = parseInt(next) || 0;
-    const baseMax = Math.max(1, calcMaxHP(C));
+    const baseMax = Math.max(1, computeMaxHp(C));
     const s = { ...sheet, maxHPBonus: bonus, maxHP: Math.max(1, baseMax + bonus) };
     if (s.currentHP > s.maxHP) s.currentHP = s.maxHP;
     setSheet(s);

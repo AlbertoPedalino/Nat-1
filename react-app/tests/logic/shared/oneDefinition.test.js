@@ -218,3 +218,12 @@ test('a wizard spellbook is normalized only by shared/character/spells/wizardBoo
     allow: ['shared/character/spells/wizardBook.js'],
   }), []);
 });
+
+// Ability scores are computed from the character's choices every time, never
+// stored: a saved copy went stale (no items, Tomes or Wild Shape) and the
+// sheet's own background bonus ignored the +1/+1/+1 pattern.
+test('ability scores are computed only by shared/character/progression/abilityScores.js', () => {
+  assert.deepEqual(sourceFilesMatching(/\bfinalScores\b|getFinalAbilityScore\(|backgroundAbilities\.indexOf\(/, {
+    allow: ['shared/character/progression/abilityScores.js', 'shared/character/inventory/itemEffects.js'],
+  }), []);
+});
