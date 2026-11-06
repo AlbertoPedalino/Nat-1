@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { lootLabel, roomMarkers, trapIconFor, trapLabel } from '../../../../src/shared/dungeon/roomMarkers.js';
-import { seededRandom } from '../../../../src/shared/dungeon/seededRandom.js';
+import { seededRandom } from '../../../../src/shared/seededRandom.js';
 import { fillBudget } from '../../../../src/shared/dungeon/roomBudget.js';
 
 // The GM reads the marker at the moment the party steps on it. "Trap" sends

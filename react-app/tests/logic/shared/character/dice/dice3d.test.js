@@ -4,9 +4,9 @@ import {
   faceLabel,
   faceNumbering,
   faceValues,
-  seededRandom,
   tumbleTurns,
 } from '../../../../../src/shared/character/dice/dice3d.js';
+import { seededRandom } from '../../../../../src/shared/seededRandom.js';
 
 test('the face that lands is the value that was rolled', () => {
   assert.equal(faceValues(20, 17, 20, 'seed', 3)[3], 17);
@@ -79,4 +79,10 @@ test('a coin says heads and tails; every other die says its number', () => {
   assert.equal(faceLabel(2, 2), 'Tails');
   assert.equal(faceLabel(20, 17), '17');
   assert.equal(faceLabel(6, 3), '3');
+});
+
+test('dice keep every throw they ever made: the shared generator, one number skipped', () => {
+  const next = seededRandom('room-1', { warmup: 1 });
+  assert.deepEqual([next(), next(), next()].map((v) => v.toFixed(6)), ['0.635061', '0.526473', '0.188653']);
+  assert.deepEqual(faceValues(20, 17, 20, 'seed-a'), [17, 8, 9, 6, 3, 10, 15, 13, 18, 1, 20, 14, 4, 12, 7, 11, 5, 16, 19, 2]);
 });

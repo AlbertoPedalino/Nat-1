@@ -15,7 +15,7 @@
 // which face points at the camera once the die stops. The orientation is never
 // replaced afterwards just to make that face or its label look straighter.
 
-import { seededRandom } from '../../character/dice/dice3d.js';
+import { seededRandom } from '../../seededRandom.js';
 import { dieGeometry } from '../../character/dice/polyhedra.js';
 
 export const THROWN_DIE_SIZE = 76;
@@ -68,7 +68,8 @@ export function simulateThrow(dice, seed, options = {}) {
   const radius = size / 2;
   const half = { x: (options.tray || TRAY).width / 2, y: (options.tray || TRAY).height / 2 };
   const bounds = { minX: -half.x, maxX: half.x, minY: -half.y, maxY: half.y };
-  const next = seededRandom(`${seed}:physics`);
+  // Skips one number, as dice always have, so every throw keeps its path.
+  const next = seededRandom(`${seed}:physics`, { warmup: 1 });
 
   const bodies = (dice || []).map((die) => ({
     faces: dieGeometry(die?.faces).faces,

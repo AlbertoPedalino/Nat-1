@@ -9,7 +9,7 @@ import {
 import { createDungeon } from '../../../shared/dungeon/dungeon.js';
 import { encounterBudget, fillBudget } from '../../../shared/dungeon/roomBudget.js';
 import { roomMarkers } from '../../../shared/dungeon/roomMarkers.js';
-import { seededRandom } from '../../../shared/dungeon/seededRandom.js';
+import { seededRandom } from '../../../shared/seededRandom.js';
 import {
   pickEncounterInstanceInGroup,
 } from '../../../shared/dungeon/linkedEncounters.js';

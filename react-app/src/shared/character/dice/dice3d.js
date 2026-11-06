@@ -1,3 +1,4 @@
+import { seededRandom } from '../../seededRandom.js';
 // The throw behind a rolled die: which numbers sit on its other faces, and how
 // it tumbles before it settles.
 //
@@ -11,29 +12,9 @@
 // is about to be thrown on the battle map, where the face left on top is the
 // result, so which number sits on which face is part of the roll.
 
-// FNV-1a. Small, no dependencies, and stable across machines — which matters,
-// because the map and the sheet both derive the same throw from the same id.
-export function hashSeed(value) {
-  let hash = 0x811c9dc5;
-  const text = String(value ?? '');
-  for (let i = 0; i < text.length; i += 1) {
-    hash ^= text.charCodeAt(i);
-    hash = Math.imul(hash, 0x01000193);
-  }
-  return hash >>> 0;
-}
-
-// mulberry32: one seed in, a repeatable stream of numbers in [0, 1) out.
-export function seededRandom(seed) {
-  let state = (hashSeed(seed) + 0x6d2b79f5) >>> 0;
-  return function next() {
-    state = (state + 0x6d2b79f5) >>> 0;
-    let t = state;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
+// Dice draw from the shared generator with one number skipped, which is how
+// they always drew: every throw keeps its shape.
+const diceRandom = (seed) => seededRandom(seed, { warmup: 1 });
 
 // The numbers painted on a die. The face that lands towards the viewer carries
 // the value that was actually rolled; the rest are only there so the thing
@@ -44,7 +25,7 @@ export function faceValues(faceCount, value, sides, seed, landing = 0) {
   const range = Math.max(1, Math.floor(Number(sides) || total));
   const rolled = Number(value);
   const result = Number.isFinite(rolled) ? rolled : 1;
-  const next = seededRandom(`${seed}:${result}:${range}`);
+  const next = diceRandom(`${seed}:${result}:${range}`);
 
   const values = new Array(total);
   const used = new Set([result]);
@@ -74,7 +55,7 @@ export function faceValues(faceCount, value, sides, seed, landing = 0) {
 export function faceNumbering(faceCount, sides, seed) {
   const total = Math.max(1, Math.floor(Number(faceCount) || 1));
   const range = Math.max(1, Math.floor(Number(sides) || total));
-  const next = seededRandom(`${seed}:numbering`);
+  const next = diceRandom(`${seed}:numbering`);
 
   const numbers = [];
   const completeSets = Math.floor(total / range);
@@ -117,7 +98,7 @@ export function faceLabel(shape, value) {
 // rest with the rolled face towards the viewer, plus a lean that makes two dice
 // thrown together look thrown rather than cloned.
 export function tumbleTurns(seed) {
-  const next = seededRandom(`${seed}:tumble`);
+  const next = diceRandom(`${seed}:tumble`);
   return {
     x: (1 + Math.floor(next() * 3)) * 360 + Math.round(next() * 40) - 20,
     y: (1 + Math.floor(next() * 3)) * 360 + Math.round(next() * 40) - 20,

@@ -356,3 +356,8 @@ test('numberOrNull, isWeaponItem and DEFAULT_CURRENCY have one definition', () =
     allow: ['shared/numbers.js', 'shared/character/inventory/itemCodes.js', 'shared/character/inventory/currency.js'],
   }), []);
 });
+
+// One seeded generator (shared/seededRandom.js) for dungeons and dice.
+test('seeded random numbers come only from shared/seededRandom.js', () => {
+  assert.deepEqual(sourceFilesMatching(/0x6d2b79f5|0x811c9dc5/, { allow: ['shared/seededRandom.js'] }), []);
+});
