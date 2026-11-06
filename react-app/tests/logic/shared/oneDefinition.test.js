@@ -161,3 +161,9 @@ test('every realtime channel opens through openRealtimeChannel', () => {
     allow: ['shared/cloud/realtimeChannel.js'],
   }), []);
 });
+
+test('5etools data is downloaded only through loadGameData', () => {
+  assert.deepEqual(sourceFilesMatching(/raw\.githubusercontent\.com|5etools-mirror/, {
+    allow: ['shared/content/gameData.js'],
+  }).filter((file) => !file.startsWith('data/')), []);
+});

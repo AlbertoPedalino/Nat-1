@@ -1,7 +1,6 @@
 import {
   BEAST_FILES,
   CLASS_FILES,
-  DATA_BASE,
   ITEM_SUMMARIES,
   SPELL_FILES,
 } from '../constants.js';
@@ -33,24 +32,7 @@ import {
 } from './itemVariants.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
 import { matchKey, stripSource } from '../../../shared/content/nameKeys.js';
-
-// Memoize by path: 5etools data is static per session, so repeated loads of the
-// same file (across builder + sheet panels) share one network request. The
-// promise is cached; on failure it's evicted so a later call can retry.
-const _jsonCache = new Map();
-
-function getJson(path) {
-  const cached = _jsonCache.get(path);
-  if (cached) return cached;
-  const promise = (async () => {
-    const response = await fetch(DATA_BASE + path);
-    if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
-    return response.json();
-  })();
-  promise.catch(() => _jsonCache.delete(path));
-  _jsonCache.set(path, promise);
-  return promise;
-}
+import { loadGameData } from '../../../shared/content/gameData.js';
 
 const DEBUG_LOADERS = Boolean(import.meta.env?.DEV);
 
@@ -59,7 +41,7 @@ function debugLog(...args) {
 }
 
 export async function loadClassIndex() {
-  const entries = await Promise.allSettled(CLASS_FILES.map((file) => getJson(`class/${file}`)));
+  const entries = await Promise.allSettled(CLASS_FILES.map((file) => loadGameData(`class/${file}`)));
   const cache = {};
   const classes = [];
   const subclasses = [];
@@ -98,7 +80,7 @@ export async function loadClassIndex() {
 }
 
 export async function loadSpecies() {
-  const data = await getJson('races.json');
+  const data = await loadGameData('races.json');
   return (data.race || data.species || [])
     .filter((species) => isAllowedSource(species.source, SPECIES_ALLOWED_SOURCES))
     .sort((a, b) => a.name.localeCompare(b.name));
@@ -106,8 +88,8 @@ export async function loadSpecies() {
 
 export async function loadBackgrounds() {
   const [data, fluffData] = await Promise.allSettled([
-    getJson('backgrounds.json'),
-    getJson('fluff-backgrounds.json'),
+    loadGameData('backgrounds.json'),
+    loadGameData('fluff-backgrounds.json'),
   ]);
   const backgrounds = (data.status === 'fulfilled' ? (data.value.background || []) : [])
     .filter((background) => isAllowedSource(background.source, BACKGROUND_ALLOWED_SOURCES));
@@ -137,14 +119,14 @@ export async function loadBackgrounds() {
 }
 
 export async function loadFeats() {
-  const data = await getJson('feats.json');
+  const data = await loadGameData('feats.json');
   return (data.feat || [])
     .filter((feat) => isAllowedSource(feat.source, FEAT_ALLOWED_SOURCES))
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export async function loadSenses() {
-  const data = await getJson('senses.json');
+  const data = await loadGameData('senses.json');
   return data.sense || [];
 }
 
@@ -152,7 +134,7 @@ export async function loadSenses() {
 // CONDITIONS table keys in charsheet/logic/conditions.js (e.g. "blinded"). Returns a map of
 // key -> 5etools entries[] for rendering via entriesToTextBlocks/EntryBlocks.
 export async function loadConditions() {
-  const data = await getJson('conditionsdiseases.json');
+  const data = await loadGameData('conditionsdiseases.json');
   const out = {};
   (data.condition || [])
     .filter((c) => c.source === 'XPHB')
@@ -163,7 +145,7 @@ export async function loadConditions() {
 // Whole condition records of the supported manuals (name, source, entries),
 // for a reader that lists them rather than looks one up by key.
 export async function loadConditionRecords() {
-  const data = await getJson('conditionsdiseases.json');
+  const data = await loadGameData('conditionsdiseases.json');
   return (data.condition || [])
     .filter((condition) => isAllowedSource(condition.source, CORE_2024_SOURCE_PRIORITY) && Array.isArray(condition.entries));
 }
@@ -171,26 +153,26 @@ export async function loadConditionRecords() {
 // Item groups (Belt of Giant Strength and its six belts…): the same file the
 // item load reads, so this costs no second download.
 export async function loadItemGroups() {
-  const data = await getJson('items.json');
+  const data = await loadGameData('items.json');
   return data.itemGroup || [];
 }
 
 // The skills of the 2024 rules (Acrobatics, Stealth…).
 export async function loadSkills() {
-  const data = await getJson('skills.json');
+  const data = await loadGameData('skills.json');
   return (data.skill || [])
     .filter((skill) => isAllowedSource(skill.source, CORE_2024_SOURCE_PRIORITY) && Array.isArray(skill.entries));
 }
 
 // The actions of the 2024 rules (Attack, Dash, Help…).
 export async function loadActions() {
-  const data = await getJson('actions.json');
+  const data = await loadGameData('actions.json');
   return (data.action || [])
     .filter((action) => isAllowedSource(action.source, CORE_2024_SOURCE_PRIORITY) && Array.isArray(action.entries));
 }
 
 export async function loadVariantRules() {
-  const data = await getJson('variantrules.json');
+  const data = await loadGameData('variantrules.json');
   return (data.variantrule || []).filter((rule) => (
     rule?.name
     && rule?.source
@@ -199,14 +181,14 @@ export async function loadVariantRules() {
 }
 
 export async function loadOptionalFeatures() {
-  const data = await getJson('optionalfeatures.json');
+  const data = await loadGameData('optionalfeatures.json');
   return (data.optionalfeature || [])
     .filter((f) => isAllowedSource(f.source, OPTIONAL_FEATURE_ALLOWED_SOURCES) && Array.isArray(f.entries))
     .map((f) => ({ name: f.name, source: f.source, featureType: f.featureType, entries: stripTemplatedEntries(f.entries) }));
 }
 
 export async function loadSpells() {
-  const entries = await Promise.allSettled(SPELL_FILES.map((file) => getJson(`spells/${file}`)));
+  const entries = await Promise.allSettled(SPELL_FILES.map((file) => loadGameData(`spells/${file}`)));
   const spells = entries
     .flatMap((entry) => (entry.status === 'fulfilled' ? entry.value.spell || [] : []))
     .map(normalizeSpellRecord);
@@ -223,7 +205,7 @@ export async function loadSpells() {
   
   // Try to load gendata first (if it exists)
   try {
-    const lookup = await getJson('generated/gendata-spell-source-lookup.json');
+    const lookup = await loadGameData('generated/gendata-spell-source-lookup.json');
     debugLog('[loadSpells] Using gendata');
     classSpellIndex = buildClassSpellIndex(lookup);
   } catch (err) {
@@ -515,9 +497,9 @@ function withCanonicalSource(item) {
 
 export async function loadItems() {
   const [base, magic, variants] = await Promise.allSettled([
-    getJson('items-base.json'),
-    getJson('items.json'),
-    getJson('magicvariants.json'),
+    loadGameData('items-base.json'),
+    loadGameData('items.json'),
+    loadGameData('magicvariants.json'),
   ]);
 
   const rawBaseItems = base.status === 'fulfilled' ? resolveCopyRecords(base.value.baseitem || []) : [];
@@ -575,9 +557,9 @@ export async function loadItems() {
 
 // Wild Shape beast forms. Loads the configured bestiary files, keeps only beast
 // statblocks, normalizes to the compact sheet shape, and de-dupes by name+source
-// (highest-detail record wins). Cached per-file via getJson like every other load.
+// (highest-detail record wins). Cached per-file by loadGameData like every other load.
 export async function loadBeasts() {
-  const results = await Promise.allSettled(BEAST_FILES.map((file) => getJson(file)));
+  const results = await Promise.allSettled(BEAST_FILES.map((file) => loadGameData(file)));
   const raw = results.flatMap((r) => (r.status === 'fulfilled' ? (r.value?.monster || []) : []));
   const byKey = new Map();
   raw.forEach((record) => {

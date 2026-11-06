@@ -6,8 +6,8 @@ import {
 import { itemHasProperty } from '../inventory/weaponProperties.js';
 import { flattenList } from '../../lists.js';
 import { matchKey, stripSource } from '../../content/nameKeys.js';
+import { loadGameData } from '../../content/gameData.js';
 
-const MASTERY_DATA_URL = 'https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/items-base.json';
 
 const _masteries = new Map();
 let _masteryLoadPromise = null;
@@ -153,9 +153,7 @@ export async function loadMasteryEntries() {
   if (_masteryLoadPromise) return _masteryLoadPromise;
   _masteryLoadPromise = (async () => {
     try {
-      const response = await fetch(MASTERY_DATA_URL);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await response.json();
+      const data = await loadGameData('items-base.json');
       (data?.itemMastery || []).forEach((entry) => {
         if (!entry?.name || !Array.isArray(entry.entries)) return;
         _masteries.set(matchKey(entry.name), { name: entry.name, entries: entry.entries });

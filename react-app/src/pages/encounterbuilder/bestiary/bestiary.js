@@ -1,21 +1,6 @@
-import { DATA_BASE, RAW_ALLOWED_SOURCES, SOURCE_LABELS } from '../state/constants.js';
+import { RAW_ALLOWED_SOURCES, SOURCE_LABELS } from '../state/constants.js';
+import { loadGameData } from '../../../shared/content/gameData.js';
 import { monsterKey } from './monsterUtils.js';
-
-const jsonCache = new Map();
-
-export function getJson(path) {
-  const normalized = String(path || '').replace(/^\/+/, '');
-  const cached = jsonCache.get(normalized);
-  if (cached) return cached;
-  const promise = (async () => {
-    const response = await fetch(`${DATA_BASE}${normalized}`);
-    if (!response.ok) throw new Error(`${normalized}: HTTP ${response.status}`);
-    return response.json();
-  })();
-  promise.catch(() => jsonCache.delete(normalized));
-  jsonCache.set(normalized, promise);
-  return promise;
-}
 
 function legendaryGroupKey(name, source) {
   return `${source || ''}__${name || ''}`;
@@ -70,8 +55,8 @@ export function getLegendaryGroup(monster, legendaryGroups) {
 
 export async function loadBestiaryIndex() {
   const [index, legendaryResult] = await Promise.all([
-    getJson('bestiary/index.json'),
-    getJson('bestiary/legendarygroups.json').then(resolveLegendaryGroups).catch(() => new Map()),
+    loadGameData('bestiary/index.json'),
+    loadGameData('bestiary/legendarygroups.json').then(resolveLegendaryGroups).catch(() => new Map()),
   ]);
   const availableSources = RAW_ALLOWED_SOURCES.filter((source) => index?.[source]);
   return { index, availableSources, legendaryGroups: legendaryResult };
@@ -82,7 +67,7 @@ export async function loadMonsterDatabase() {
   const loaded = await Promise.all(availableSources.map(async (source) => {
     const file = index[source];
     const path = String(file || '').startsWith('bestiary/') ? file : `bestiary/${file}`;
-    const data = await getJson(path);
+    const data = await loadGameData(path);
     return (data.monster || []).filter(isEncounterMonster);
   }));
   const seen = new Set();

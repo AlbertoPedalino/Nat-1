@@ -1,8 +1,8 @@
 import { asArray } from '../../lists.js';
+import { loadGameData } from '../../content/gameData.js';
 // Bestiary files holding creatures a spell or class feature summons (their
 // records carry `summonedBySpell` / `summonedByClass`). XPHB has the Ranger's
 // primal beasts.
-const BESTIARY_BASE_URL = 'https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/bestiary';
 const SUMMONED_CREATURE_FILES = ['bestiary-au.json', 'bestiary-xphb.json'];
 const ABILITIES = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
 // The ability a stat block scales with is named in prose: "13 plus your Wisdom
@@ -23,11 +23,7 @@ const clone = (value) => {
 export async function loadSummonedCreatureRecords() {
   if (recordsPromise) return recordsPromise;
   recordsPromise = (async () => {
-    const files = await Promise.all(SUMMONED_CREATURE_FILES.map(async (file) => {
-      const response = await fetch(`${BESTIARY_BASE_URL}/${file}`);
-      if (!response.ok) throw new Error(`${file}: HTTP ${response.status}`);
-      return response.json();
-    }));
+    const files = await Promise.all(SUMMONED_CREATURE_FILES.map((file) => loadGameData(`bestiary/${file}`)));
     return files.flatMap((data) => (data.monster || []).filter((monster) => (
       monster?.summonedBySpell || monster?.summonedByClass || monster?.summonedByClassFeature
     )));

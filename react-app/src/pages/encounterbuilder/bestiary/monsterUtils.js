@@ -1,4 +1,5 @@
-import { CR_XP, FALLBACK_MONSTER_TOKEN, IMAGE_BASE, SIZE_LABELS } from '../state/constants.js';
+import { CR_XP, SIZE_LABELS } from '../state/constants.js';
+import { FALLBACK_MONSTER_TOKEN, GAME_IMAGE_BASE } from '../../../shared/content/gameData.js';
 import { parseCr } from '../../../shared/character/forms/beasts.js';
 import { clampInt, numberOr } from '../../../shared/numbers.js';
 
@@ -135,7 +136,7 @@ export function getMonsterTokenUrls(monster) {
   if (!monster?.name || !monster?.source) return [FALLBACK_MONSTER_TOKEN];
   const encodedName = encodeURIComponent(String(monster.name).replace(/[’]/g, "'"));
   return [
-    `${IMAGE_BASE}bestiary/tokens/${monster.source}/${encodedName}.webp`,
+    `${GAME_IMAGE_BASE}bestiary/tokens/${monster.source}/${encodedName}.webp`,
     FALLBACK_MONSTER_TOKEN,
   ];
 }

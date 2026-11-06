@@ -1,5 +1,5 @@
 // Live rules text for the Senses panel. Builds two lookups from the shared
-// 5etools loaders (getJson is memoized, so files already fetched elsewhere in
+// 5etools loaders (loadGameData is memoized, so files already fetched elsewhere in
 // the sheet — e.g. optionalfeatures via CharacterSheet — are reused, not
 // re-downloaded):
 //   - by sense type   (loadSenses):          Blindsight, Darkvision, Tremorsense,

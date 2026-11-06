@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 import { XP_THRESHOLDS } from '../../shared/character/progression/xp.js';
 
-export const DATA_BASE = 'https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/';
 export const STATS = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
 export const STAT_LABELS = { str: 'STR', dex: 'DEX', con: 'CON', int: 'INT', wis: 'WIS', cha: 'CHA' };
 export const PROFICIENCY_BONUS = [null, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6];

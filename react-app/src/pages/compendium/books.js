@@ -1,7 +1,7 @@
 // The supported manuals and adventures, each pointing at its 5etools page:
 // the books are read there, the compendium is for looking things up.
 
-import { getJson } from '../encounterbuilder/bestiary/bestiary.js';
+import { loadGameData } from '../../shared/content/gameData.js';
 import { CORE_2024_SOURCE_PRIORITY } from '../../shared/content/sourcePriority.js';
 
 // The player manuals, plus the 2024 Monster Manual.
@@ -25,8 +25,8 @@ export function toBookList(booksJson, adventuresJson) {
 
 export async function loadBookList() {
   const [books, adventures] = await Promise.all([
-    getJson('books.json'),
-    getJson('adventures.json').catch(() => ({ adventure: [] })),
+    loadGameData('books.json'),
+    loadGameData('adventures.json').catch(() => ({ adventure: [] })),
   ]);
   return toBookList(books, adventures);
 }

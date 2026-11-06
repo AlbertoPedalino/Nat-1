@@ -14,8 +14,8 @@ import {
   loadVariantRules,
 } from '../charbuilder/data/dataLoaders.js';
 import { CLASS_ALLOWED_SOURCES, isAllowedSource } from '../../shared/content/sourcePriority.js';
-import { getJson, loadMonsterDatabase } from '../encounterbuilder/bestiary/bestiary.js';
-import { IMAGE_BASE } from '../encounterbuilder/state/constants.js';
+import { loadMonsterDatabase } from '../encounterbuilder/bestiary/bestiary.js';
+import { GAME_IMAGE_BASE, loadGameData } from '../../shared/content/gameData.js';
 import { itemGroupLookup, itemImageMap, itemPicture } from './itemCatalog.js';
 import { spellClasses } from './spellCatalog.js';
 import { getMonsterTokenUrls } from '../encounterbuilder/bestiary/monsterUtils.js';
@@ -61,7 +61,7 @@ export function loadCompendium() {
   const kinds = Object.keys(LOADERS);
   // Item pictures ride along; without them the items still load.
   const pictures = Promise.all([
-    getJson('fluff-items.json').then((json) => itemImageMap(json, IMAGE_BASE)),
+    loadGameData('fluff-items.json').then((json) => itemImageMap(json, GAME_IMAGE_BASE)),
     loadItemGroups().then(itemGroupLookup).catch(() => () => null),
   ]).catch(() => null);
   compendiumPromise = Promise.all([Promise.allSettled(kinds.map((kind) => LOADERS[kind]())), pictures]).then(([results, images]) => {
