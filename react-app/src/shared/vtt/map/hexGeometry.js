@@ -34,6 +34,13 @@ export function isHexGrid(grid) {
   return grid?.shape === 'hex';
 }
 
+// What one cell of the grid is called in prose: 'hex' / 'square', or with
+// `plural` 'hexes' / 'squares'. Takes the grid shape ('hex' | 'square').
+export function gridCellWord(shape, { plural = false } = {}) {
+  if (shape === 'hex') return plural ? 'hexes' : 'hex';
+  return plural ? 'squares' : 'square';
+}
+
 // The centre of hex (q, r) in world pixels. Odd rows are pushed half a hex to
 // the right by the `r / 2` term — that is the whole of the offset layout.
 export function hexToWorld(cell, grid) {

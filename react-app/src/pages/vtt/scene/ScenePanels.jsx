@@ -2,7 +2,6 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import {
   Box,
   Button,
-  MenuItem,
   Stack,
   TextField,
   ToggleButton,
@@ -31,8 +30,9 @@ import {
   Users,
 } from 'lucide-react';
 import ColorField from '../../../shared/ui/ColorField.jsx';
-import { AREA_EFFECTS } from '../../../shared/vtt/map/areas.js';
 import { pillLabelSx, colorInputSx } from './panelStyles.js';
+import AreaEffectSelect from '../map/AreaEffectSelect.jsx';
+import { gridCellWord } from '../../../shared/vtt/map/hexGeometry.js';
 
 // The scene's settings, split by the question they answer. Each one is a panel
 // behind its own icon on the rail rather than a strip across the top: the map is
@@ -210,7 +210,7 @@ export function DrawPanel({
 // time, so the panel asks only what one square is worth — the same number the
 // ruler uses, changed in either place.
 function AreaOptions({ options, feetPerCell, gridShape, onChange, onFeetPerCellChange }) {
-  const cellWord = gridShape === 'hex' ? 'hex' : 'square';
+  const cellWord = gridCellWord(gridShape);
   const feetField = (value) => {
     const number = Number(value);
     return Number.isFinite(number) && number >= 0 ? number : 0;
@@ -271,21 +271,7 @@ function AreaOptions({ options, feetPerCell, gridShape, onChange, onFeetPerCellC
         ) : null}
       </Stack>
 
-      <TextField
-        select
-        label="Effect"
-        size="small"
-        value={options.effect || 'none'}
-        onChange={(event) => onChange?.({ effect: event.target.value === 'none' ? null : event.target.value })}
-      >
-        <MenuItem value="none">None</MenuItem>
-        {AREA_EFFECTS.map((effect) => (
-          <MenuItem key={effect.key} value={effect.key}>
-            <Box component="span" sx={{ ...effectDotSx, bgcolor: effect.color }} />
-            {effect.label}
-          </MenuItem>
-        ))}
-      </TextField>
+      <AreaEffectSelect value={options.effect} onChange={(effect) => onChange?.({ effect })} />
 
       <TextField
         label="Label"
@@ -303,15 +289,6 @@ function AreaOptions({ options, feetPerCell, gridShape, onChange, onFeetPerCellC
   );
 }
 
-const effectDotSx = {
-  display: 'inline-block',
-  width: 10,
-  height: 10,
-  mr: 1,
-  borderRadius: '50%',
-  flexShrink: 0,
-};
-
 // The 5e templates, the way Roll20 offers them: pick a shape, then drag from
 // the origin. The number is the same for all of them — how far it reaches —
 // which is why the panel is a shape picker and not four separate tools.
@@ -321,8 +298,8 @@ export function MeasurePanel({
   onPaintModeChange, onShapeChange, onFeetPerCellChange, onMilesPerCellChange,
   onMeasureUnitChange,
 }) {
-  const cellWord = gridShape === 'hex' ? 'hex' : 'square';
-  const cellPlural = gridShape === 'hex' ? 'hexes' : 'squares';
+  const cellWord = gridCellWord(gridShape);
+  const cellPlural = gridCellWord(gridShape, { plural: true });
   const miles = measureUnit === 'miles';
   return (
     <Stack spacing={1}>

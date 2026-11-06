@@ -6,7 +6,6 @@ import {
   Divider,
   FormControlLabel,
   Menu,
-  MenuItem,
   Slider,
   Stack,
   TextField,
@@ -15,13 +14,15 @@ import {
 import { Trash2 } from 'lucide-react';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import {
-  AREA_EFFECTS, areaEffect, areaSizeFeet, feetToCells, resizedAreaPoints,
+  areaEffect, areaSizeFeet, feetToCells, resizedAreaPoints,
 } from '../../../shared/vtt/map/areas.js';
 import { isNote as isNoteDrawing, scaledPoints } from '../../../shared/vtt/map/drawing.js';
 import { useMenuPlacement } from './menuPlacement.js';
 import { battleMapDialogPaperSx } from './battleMapSurface.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
+import AreaEffectSelect from './AreaEffectSelect.jsx';
+import { gridCellWord } from '../../../shared/vtt/map/hexGeometry.js';
 
 // Right-click (or a long press) on a mark: the same idea as a piece's menu.
 // Its label, who sees it, its colour, its size, and taking it away. Every
@@ -90,7 +91,7 @@ export default function DrawingMenu({
       if (pending) onPreview(drawing, pending);
     });
   };
-  const cellWord = gridShape === 'hex' ? 'hex' : 'square';
+  const cellWord = gridCellWord(gridShape);
 
   const saveSoon = (patch) => {
     clearTimeout(typingTimerRef.current);
@@ -217,27 +218,15 @@ export default function DrawingMenu({
         </Box>
 
         {area ? (
-          <TextField
-            select
-            label="Effect"
-            size="small"
-            value={area.effect || 'none'}
-            onChange={(event) => {
-              const effect = event.target.value === 'none' ? null : event.target.value;
+          <AreaEffectSelect
+            value={area.effect}
+            onChange={(effect) => {
               // An effect brings its colour, as it does in the Draw panel.
               const colour = effect ? areaEffect(effect)?.color : null;
               onSave(drawing, { area: { ...area, effect }, ...(colour ? { color: colour } : null) });
             }}
             sx={compactFieldSx}
-          >
-            <MenuItem value="none">None</MenuItem>
-            {AREA_EFFECTS.map((effect) => (
-              <MenuItem key={effect.key} value={effect.key}>
-                <Box component="span" sx={{ ...effectDotSx, bgcolor: effect.color }} />
-                {effect.label}
-              </MenuItem>
-            ))}
-          </TextField>
+          />
         ) : null}
 
         {area && !area.effect ? (
@@ -384,11 +373,3 @@ const colorInputSx = {
 
 const menuButtonSx = { fontSize: '0.68rem', py: 0.35 };
 
-const effectDotSx = {
-  display: 'inline-block',
-  width: 10,
-  height: 10,
-  mr: 1,
-  borderRadius: '50%',
-  flexShrink: 0,
-};
