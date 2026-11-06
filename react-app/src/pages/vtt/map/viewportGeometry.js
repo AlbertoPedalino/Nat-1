@@ -10,7 +10,10 @@ import {
   axialRound,
   hexToWorld,
   gridShape,
+  hexPlayAreaForImage,
+  isHexGrid,
 } from '../../../shared/vtt/map/hexGeometry.js';
+import { samePlayArea } from '../../../shared/vtt/scene/scene.js';
 
 // Pure geometry and cursors of the battle-map viewport: brush radius and
 // cursor per tool, the selection marquee, the movement badge of a dragged piece,
@@ -175,4 +178,20 @@ export function pointInBox(point, box) {
     && point.y >= box.top
     && point.x < box.left + box.width
     && point.y < box.top + box.height;
+}
+
+// How a hex map's play area is drawn: the picture's screen box, whether the
+// area is just the fit to the picture (then the picture's own edge shows it),
+// and otherwise the area's outline to clip the board to.
+export function hexPlayAreaLayout(scene, view, imageSize) {
+  const hexMapBox = isHexGrid(scene.grid) && imageSize ? imageBox(imageSize, view) : null;
+  const hexPlayAreaMatchesMap = Boolean(
+    hexMapBox
+    && scene.playArea
+    && samePlayArea(scene.playArea, hexPlayAreaForImage(imageSize, scene.grid)),
+  );
+  const hexPlayAreaClip = scene.playArea && !hexPlayAreaMatchesMap
+    ? hexPlayAreaPolygon(scene, view)
+    : null;
+  return { hexMapBox, hexPlayAreaMatchesMap, hexPlayAreaClip };
 }
