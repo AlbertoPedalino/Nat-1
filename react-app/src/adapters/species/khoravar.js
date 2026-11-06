@@ -1,8 +1,8 @@
 import { createAdapterBindings } from '../adapterBindings.js';
+import { SKILL_NAMES } from '../../shared/content/rulesVocabulary.js';
 
 export default function install(registry, context = {}) {
   const {
-    SKILLS,
     _ALL_TOOLS,
     registerSpeciesAdapter,
     registerSpeciesSheetCommonChoiceMeta,
@@ -13,7 +13,7 @@ registerSpeciesAdapter("Khoravar_EFA", function (s) {
 
   // Skill Versatility: choose 1 skill or tool (replaceable on Long Rest)
   const skillsAndTools = [
-    ...(SKILLS.map(function(sk){ return sk.n; })),
+    ...(SKILL_NAMES),
     ...(_ALL_TOOLS),
   ];
   specs.push({

@@ -254,3 +254,13 @@ test('ability keys, abbreviations and names come from shared/content/rulesVocabu
     { allow: ['shared/content/rulesVocabulary.js'] },
   ), []);
 });
+
+// Skills, tools and languages are listed once; the sheet had its own skill
+// table in another order and shape, the builder its own tool lists, and the
+// choice reader a language list missing Common Sign Language.
+test('skill, tool and language lists come from shared/content/rulesVocabulary.js', () => {
+  assert.deepEqual(sourceFilesMatching(
+    /['"]Animal Handling['"],\s*['"]Arcana['"]|\{ n: ['"]Acrobatics['"]|["']Alchemist's Supplies["'],\s*["']Brewer's Supplies["']|['"]Bagpipes['"],\s*['"]Drum['"]|['"]Dwarvish['"],\s*['"]Elvish['"]/,
+    { allow: ['shared/content/rulesVocabulary.js'] },
+  ), []);
+});

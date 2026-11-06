@@ -41,6 +41,8 @@ export const SKILLS = [
   { name: 'Survival', ability: 'wis' },
 ];
 
+export const SKILL_NAMES = Object.freeze(SKILLS.map((skill) => skill.name));
+
 export const ARTISAN_TOOLS = [
   "Alchemist's Supplies",
   "Brewer's Supplies",

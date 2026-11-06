@@ -1,9 +1,7 @@
 import { deriveSheetState } from '../character/sheet/sheetState.js';
-import { getInitiative, getSkillBonus } from '../character/sheet/sheetStats.js';
+import { getInitiative, passiveScore } from '../character/sheet/sheetStats.js';
 import { computeBestArmorClass } from '../character/combat/ac.js';
 import { pickCharacterVitals } from '../character/combat/vitals.js';
-
-const PERCEPTION = { a: 'wis', n: 'Perception' };
 
 // Quick combat-relevant summary from a stored character object. Best-effort:
 // wrapped in try/catch so a malformed sheet never breaks the campaign list.
@@ -20,7 +18,7 @@ export function summarizeCharacter(C) {
     const inv = Array.isArray(C.inventory) ? C.inventory : [];
     const ac = computeBestArmorClass(C, inv, true)?.value ?? 10;
     const initiative = getInitiative(C, sheet);
-    const passivePerception = 10 + getSkillBonus(C, PERCEPTION);
+    const passivePerception = passiveScore(C, 'Perception');
     return {
       ...pickCharacterVitals(sheet),
       maxHP: sheet.maxHP,

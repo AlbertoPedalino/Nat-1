@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Box, Button, Collapse, Link, Typography } from '@mui/material';
 import { ChevronDown, ChevronRight, ExternalLink } from 'lucide-react';
-import { SKILLS, getMod } from '../../../shared/character/sheet/sheetStats.js';
+import { getMod } from '../../../shared/character/sheet/sheetStats.js';
 import { beast5eToolsUrl, parseBeastActions, parseBeastActionsRich } from '../../../shared/character/forms/beasts.js';
 import { formatRollTitle } from '../../../shared/character/dice/dice.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
-import { ABILITIES } from '../../../shared/content/rulesVocabulary.js';
+import { ABILITIES, SKILL_NAMES } from '../../../shared/content/rulesVocabulary.js';
 
 // Shared presentational layer for a normalized beast snapshot, used by both the
 // Wild Shape and Wild Companion sheet panels. Renders a compact Monster-Manual
@@ -18,7 +18,7 @@ const fmtMod = (score) => signed(getMod(Number(score) || 10));
 
 // letters-only beast skill key ("animalhandling") → display name ("Animal Handling").
 const SKILL_LABEL = Object.fromEntries(
-  SKILLS.map((s) => [s.n.toLowerCase().replace(/[^a-z]/g, ''), s.n]),
+  SKILL_NAMES.map((name) => [name.toLowerCase().replace(/[^a-z]/g, ''), name]),
 );
 
 // Beast name rendered as a link to its 5e.tools bestiary page (opens in a new

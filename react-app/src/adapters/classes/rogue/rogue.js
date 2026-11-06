@@ -1,8 +1,8 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
+import { SKILL_NAMES } from '../../../shared/content/rulesVocabulary.js';
 
 export default function install(registry, context = {}) {
   const {
-    SKILLS,
     allItemsDb,
     getWeaponMasteryChoiceCount,
     getWeaponMasteryChoiceNames,
@@ -13,7 +13,7 @@ export default function install(registry, context = {}) {
     registerClassSheetProficiencies,
   } = createAdapterBindings(registry, context);
 registerClassAdapter("Rogue", function (cls, lv, specs, ctx = {}) {
-  const expertiseFrom = SKILLS.map(function (s) { return s.n; }).concat(["Thieves' Tools"]);
+  const expertiseFrom = SKILL_NAMES.concat(["Thieves' Tools"]);
   const weapons = getWeaponMasteryChoiceNames(ctx.items, allItemsDb, WEAPON_MASTERY_RULES.rogue);
 
   if (lv >= 1) {

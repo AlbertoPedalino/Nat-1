@@ -1,5 +1,6 @@
 import { strip5eMarkup } from '../spells/spellEntries.js';
 import { matchKey } from '../../content/nameKeys.js';
+import { MUSICAL_INSTRUMENTS } from '../../content/rulesVocabulary.js';
 
 const ARMOR_LABELS = { light: 'Light armor', medium: 'Medium armor', heavy: 'Heavy armor', shield: 'Shields', shields: 'Shields' };
 const WEAPON_LABELS = { simple: 'Simple weapons', martial: 'Martial weapons' };
@@ -80,8 +81,6 @@ const XPHB_MULTICLASS_FALLBACK = {
   },
   Wizard: {},
 };
-
-const MUSICAL_INSTRUMENTS = ['Bagpipes', 'Drum', 'Dulcimer', 'Flute', 'Hand Drum', 'Horn', 'Lute', 'Lyre', 'Pan Flute', 'Shawm', 'Viol'];
 
 function fallbackForClass(className) {
   const wanted = matchKey(className);

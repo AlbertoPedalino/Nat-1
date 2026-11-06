@@ -1,8 +1,8 @@
 import { createAdapterBindings } from '../adapterBindings.js';
+import { SKILL_NAMES } from '../../shared/content/rulesVocabulary.js';
 
 export default function install(registry, context = {}) {
   const {
-    SKILLS,
     registerSpeciesAdapter,
     registerSpeciesSheetCommonChoiceMeta,
     registerSpeciesLongRestGrants,
@@ -11,7 +11,7 @@ export default function install(registry, context = {}) {
 // Human XPHB: Skillful + Versatile — one skill proficiency and one extra Origin Feat.
 registerSpeciesAdapter("Human_XPHB", function (s) {
   let specs = getGenericSpeciesChoiceSpecs(s);
-  const skillNames = SKILLS.map(function (skill) { return skill.n; });
+  const skillNames = SKILL_NAMES;
 
   if (!specs.some(function (spec) { return spec.type === 'skill_choice' || String(spec.key || '').startsWith('species_skill_'); })) {
     specs.push({

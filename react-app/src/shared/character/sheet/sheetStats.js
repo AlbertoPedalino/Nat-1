@@ -9,15 +9,9 @@ import { XP_THRESHOLDS } from '../progression/xp.js';
 import { collectSheetEffects } from './sheetEffects.js';
 import { getNormalizedChoices } from '../progression/choiceNormalization.js';
 import { matchKey, stripSource } from '../../content/nameKeys.js';
+import { SKILLS } from '../../content/rulesVocabulary.js';
 
-export const SKILLS = [
-  { n: 'Acrobatics', a: 'dex' }, { n: 'Animal Handling', a: 'wis' }, { n: 'Arcana', a: 'int' },
-  { n: 'Athletics', a: 'str' }, { n: 'Insight', a: 'wis' }, { n: 'Sleight of Hand', a: 'dex' },
-  { n: 'Stealth', a: 'dex' }, { n: 'Investigation', a: 'int' }, { n: 'Deception', a: 'cha' },
-  { n: 'Perception', a: 'wis' }, { n: 'Intimidation', a: 'cha' }, { n: 'Medicine', a: 'wis' },
-  { n: 'Nature', a: 'int' }, { n: 'History', a: 'int' }, { n: 'Performance', a: 'cha' },
-  { n: 'Persuasion', a: 'cha' }, { n: 'Religion', a: 'int' }, { n: 'Survival', a: 'wis' },
-];
+const SKILL_ABILITY = Object.freeze(Object.fromEntries(SKILLS.map((skill) => [skill.name, skill.ability])));
 
 // Exhaustion (XPHB 2024) is graded 1–6, not a boolean condition, so it lives in
 // sheet.exhaustionLevel rather than CONDITION_EFFECTS. Each level: −2 to every
@@ -238,16 +232,21 @@ export function getSkillTraining(C, skillName) {
   return null;
 }
 
-export function getSkillBonus(C, sk) {
-  const m = getMod(getFinal(C, sk.a));
-  const training = getSkillTraining(C, sk.n);
+export function getSkillBonus(C, skillName) {
+  const m = getMod(getFinal(C, SKILL_ABILITY[skillName]));
+  const training = getSkillTraining(C, skillName);
   let own = m;
   if (training === 'exp') own = m + getPB(C) * 2;
   else if (training === 'prof') own = m + getPB(C);
   else if (training === 'half') own = m + Math.floor(getPB(C) / 2);
   // RAW 2024 Wild Shape: keep your own skill proficiencies, but if the form's
   // listed skill modifier is higher than yours, use it.
-  const formSkill = wildShapeSkillBonus(C, sk.n);
+  const formSkill = wildShapeSkillBonus(C, skillName);
   return formSkill != null ? Math.max(own, formSkill) : own;
+}
+
+// A passive check: 10 + the skill bonus.
+export function passiveScore(C, skillName) {
+  return 10 + getSkillBonus(C, skillName);
 }
 

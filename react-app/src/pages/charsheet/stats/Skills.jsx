@@ -1,7 +1,7 @@
 import { Box, Paper, Typography, Tooltip } from '@mui/material';
 import { advantageVisual, conditionalDisadvantageVisual } from './advantageMark.jsx';
 import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
-import { SKILLS, getSkillTraining, getSkillBonus, effectiveD20Modifier } from '../../../shared/character/sheet/sheetStats.js';
+import { getSkillTraining, getSkillBonus, effectiveD20Modifier } from '../../../shared/character/sheet/sheetStats.js';
 import { describeCheckDisadvantage } from '../../../shared/character/combat/conditions.js';
 import { getEquippedArmorPenalties } from '../inventory/armorPenalties.js';
 import { getSkillAdvantageFromEffects } from '../../../shared/character/sheet/effectBonuses.js';
@@ -12,7 +12,7 @@ import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import PanelHeader, { sectionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
-import { ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
+import { ABILITY_ABBREVIATIONS, SKILLS } from '../../../shared/content/rulesVocabulary.js';
 
 function SkillProficiencyDot({ training }) {
   const dotColor = training === 'exp' ? 'secondary.main' : training ? 'primary.main' : 'divider';
@@ -65,12 +65,12 @@ export default function Skills({ C, sheet, onRoll }) {
         <span>Mod.</span>
       </Box>
       {SKILLS.map(sk => {
-        const training = getSkillTraining(C, sk.n);
-        const bonus = getSkillBonus(C, sk) + itemCheckBonus;
+        const training = getSkillTraining(C, sk.name);
+        const bonus = getSkillBonus(C, sk.name) + itemCheckBonus;
         const shownBonus = effectiveD20Modifier(bonus, sheet?.exhaustionLevel);
-        const isStealth = String(sk.n || '').toLowerCase() === 'stealth';
+        const isStealth = String(sk.name || '').toLowerCase() === 'stealth';
         const armorDisadv = armorPenalties.hasPenalty && (
-          armorPenalties.disadvantageOn.includes(`${sk.a}-checks`)
+          armorPenalties.disadvantageOn.includes(`${sk.ability}-checks`)
           || (isStealth && armorPenalties.disadvantageOn.includes('dex-stealth'))
         );
         const checkDisadv = describeCheckDisadvantage(activeConditions, armorDisadv);
@@ -79,7 +79,7 @@ export default function Skills({ C, sheet, onRoll }) {
         const disadvReason = checkDisadv.reason;
         const condNotes = conditional.map((c) => `${c.source} (${c.note})`);
         const situational = condNotes.length ? ` • Situational: ${condNotes.join('; ')}` : '';
-        const hasAdv = getSkillAdvantage(C, sk.n);
+        const hasAdv = getSkillAdvantage(C, sk.name);
         const hasBoth = hasAdv && hasDisadv;
         // Solid adv/disadv drive the roll; a purely situational disadvantage is a hint only.
         const visual = (hasAdv || hasDisadv)
@@ -92,22 +92,22 @@ export default function Skills({ C, sheet, onRoll }) {
           : `Situational disadvantage: ${condNotes.join('; ')}`;
 
         return (
-          <RollModeArea key={sk.n} onClick={() => {
+          <RollModeArea key={sk.name} onClick={() => {
             const withAdv = hasAdv && !hasDisadv;
             const withDis = hasDisadv && !hasAdv;
-            onRoll(sk.n, bonus, withAdv ? { advantage: true } : withDis ? { disadvantage: true } : {});
+            onRoll(sk.name, bonus, withAdv ? { advantage: true } : withDis ? { disadvantage: true } : {});
           }}
             sources={{ adv: Boolean(hasAdv), disadv: hasDisadv }}
-            onPick={(advArg) => onRoll(sk.n, bonus, advArg === true ? { advantage: true } : advArg === false ? { disadvantage: true } : {})}
+            onPick={(advArg) => onRoll(sk.name, bonus, advArg === true ? { advantage: true } : advArg === false ? { disadvantage: true } : {})}
             sx={{ display: 'grid', gridTemplateColumns: '20px 30px 1fr auto', gap: '4px', px: '0.9rem', py: '3px', alignItems: 'center', cursor: 'pointer', transition: 'background 0.1s', '&:hover': { bgcolor: uiAlpha(UI_COLORS.gold, 0.05) } }}>
             <Box />
             <SkillProficiencyDot training={training} />
             <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
-              {sk.n}
+              {sk.name}
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
               <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.5rem', color: 'text.secondary', letterSpacing: '0.06em' }}>
-                {ABILITY_ABBREVIATIONS[sk.a]}
+                {ABILITY_ABBREVIATIONS[sk.ability]}
               </Typography>
               <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.75rem', fontWeight: 600, color: 'text.primary', textAlign: 'right' }}>
                 {signed(shownBonus)}

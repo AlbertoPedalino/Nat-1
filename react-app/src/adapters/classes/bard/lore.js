@@ -1,15 +1,15 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
+import { SKILL_NAMES } from '../../../shared/content/rulesVocabulary.js';
 
 export default function install(registry, context = {}) {
   const {
-    SKILLS,
     registerSubclassAdapter,
     registerSubclassSheetActions,
     registerSubclassSheetEffects,
   } = createAdapterBindings(registry, context);
 registerSubclassAdapter("Bard_Lore", function (cls, lv, specs) {
   if (lv >= 3) {
-    const allSkills = SKILLS.map(function (s) { return s.n; });
+    const allSkills = SKILL_NAMES;
 
     [1, 2, 3].forEach(function (i) {
       specs.push({

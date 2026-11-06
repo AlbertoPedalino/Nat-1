@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Box, Paper, Typography } from '@mui/material';
 import { ChevronDown, Eye } from 'lucide-react';
-import { getSkillBonus } from '../../../shared/character/sheet/sheetStats.js';
+import { passiveScore } from '../../../shared/character/sheet/sheetStats.js';
 import { collectSenses } from './visionSenses.js';
 import { loadSenseDescriptions, getSenseDescriptionEntries, getFeatureDescriptionEntries } from './senseDescriptions.js';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
@@ -11,9 +11,9 @@ import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import PanelHeader from '../../../shared/ui/PanelHeader.jsx';
 
 export default function Senses({ C }) {
-  const passPerc = 10 + getSkillBonus(C, { n: 'Perception', a: 'wis' });
-  const passInv = 10 + getSkillBonus(C, { n: 'Investigation', a: 'int' });
-  const passIns = 10 + getSkillBonus(C, { n: 'Insight', a: 'wis' });
+  const passPerc = passiveScore(C, 'Perception');
+  const passInv = passiveScore(C, 'Investigation');
+  const passIns = passiveScore(C, 'Insight');
   const { vision: visionRows, other: otherRows } = collectSenses(C);
   const [expanded, setExpanded] = useState(null);
   const [, setDescLoaded] = useState(false);

@@ -1,8 +1,8 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
+import { SKILL_NAMES } from '../../../shared/content/rulesVocabulary.js';
 
 export default function install(registry, context = {}) {
   const {
-    SKILLS,
     _ALL_LANGS,
     allItemsDb,
     getWeaponMasteryChoiceCount,
@@ -13,7 +13,7 @@ export default function install(registry, context = {}) {
     registerClassSheetResources,
   } = createAdapterBindings(registry, context);
 registerClassAdapter("Ranger", function (cls, lv, specs, ctx = {}) {
-  const skills = SKILLS.map(function (s) { return s.n; });
+  const skills = SKILL_NAMES;
   if (lv >= 1) {
     const weapons = getWeaponMasteryChoiceNames(ctx.items, allItemsDb, WEAPON_MASTERY_RULES.ranger);
     specs.push({

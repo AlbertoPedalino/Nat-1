@@ -2,23 +2,17 @@ import { adapterRegistry as installedRegistry } from '../../../adapters/registry
 import { getPrimaryClassLevel } from '../progression/calculations.js';
 import { backgroundOriginFeat } from '../../../shared/character/progression/selectedFeats.js';
 import { getMulticlassChoiceSpecs } from '../../../shared/character/progression/multiclassProficiencies.js';
-import { ABILITIES, ABILITY_ABBREVIATIONS, ALL_LANGUAGES, EXOTIC_LANGUAGES, STANDARD_LANGUAGES } from '../../../shared/content/rulesVocabulary.js';
+import { ABILITIES, ABILITY_ABBREVIATIONS, ALL_LANGUAGES, ALL_TOOLS, ARTISAN_TOOLS, EXOTIC_LANGUAGES, GAMING_SETS, MUSICAL_INSTRUMENTS, SKILL_NAMES, STANDARD_LANGUAGES } from '../../../shared/content/rulesVocabulary.js';
 import { getLanguageOptions } from '../../../shared/character/progression/languages.js';
 import { filterByRequiredChoice } from '../../../shared/character/progression/lineageMatch.js';
 
-const ALL_SKILLS = ['Acrobatics', 'Animal Handling', 'Arcana', 'Athletics', 'Deception', 'History', 'Insight', 'Intimidation', 'Investigation', 'Medicine', 'Nature', 'Perception', 'Performance', 'Persuasion', 'Religion', 'Sleight of Hand', 'Stealth', 'Survival'];
 const STD_LANGS = STANDARD_LANGUAGES;
 const EXOTIC_LANGS = EXOTIC_LANGUAGES;
 const ALL_LANGS = ALL_LANGUAGES;
-const ARTISAN_TOOLS = ["Alchemist's Supplies", "Brewer's Supplies", "Calligrapher's Supplies", "Carpenter's Tools", "Cartographer's Tools", "Cobbler's Tools", "Cook's Utensils", "Glassblower's Tools", "Jeweler's Tools", "Leatherworker's Tools", "Mason's Tools", "Painter's Supplies", "Potter's Tools", "Smith's Tools", "Tinker's Tools", "Weaver's Tools", "Woodcarver's Tools"];
-const MUSICAL = ['Bagpipes', 'Drum', 'Dulcimer', 'Flute', 'Hand Drum', 'Horn', 'Lute', 'Lyre', 'Pan Flute', 'Shawm', 'Viol'];
-const GAMING = ['Dice Set', 'Dragonchess Set', 'Playing Card Set', 'Three-Dragon Ante Set'];
-const VEHICLES = ['Vehicles (Land)', 'Vehicles (Water)'];
-const ALL_TOOLS = [...ARTISAN_TOOLS, ...MUSICAL, ...GAMING, ...VEHICLES, "Thieves' Tools", 'Disguise Kit', 'Forgery Kit', "Herbalism Kit", "Navigator's Tools", "Poisoner's Kit"];
 
 function mixedSkillToolOptions() {
   return [
-    ...ALL_SKILLS.map((skill) => ({
+    ...SKILL_NAMES.map((skill) => ({
       value: `skill:${skill}`,
       label: skill,
       group: 'Skills',
@@ -66,8 +60,8 @@ function choiceFromBlock(prefix, label, block, fallbackFrom = []) {
   let count = Number(choose?.count || choose?.weighted?.weights?.length || 0);
   if (!from?.length) {
     if (block.anyArtisansTool) from = ARTISAN_TOOLS;
-    else if (block.anyMusicalInstrument) from = MUSICAL;
-    else if (block.anyGamingSet) from = GAMING;
+    else if (block.anyMusicalInstrument) from = MUSICAL_INSTRUMENTS;
+    else if (block.anyGamingSet) from = GAMING_SETS;
     else if (block.anyStandard) from = STD_LANGS;
     else if (block.anyExotic) from = EXOTIC_LANGS;
     else if (block.anyTool || block.any) from = fallbackFrom;
@@ -203,7 +197,7 @@ function deriveFeatureChoiceSpecs(features, maxLv, keyPrefix) {
       const choose = block?.choose || {};
       const count = block?.any || choose.count || 0;
       if (!count) return;
-      const from = choose.from || ALL_SKILLS;
+      const from = choose.from || SKILL_NAMES;
       specPush(out, { key: `${baseKey}_skill_${bi}`, label: `${fname} — Skill`, type: 'skill_choice', count, level: feature.level || 1, from });
     });
 
@@ -223,8 +217,8 @@ function deriveFeatureChoiceSpecs(features, maxLv, keyPrefix) {
       let from = choose.from || [];
       if (!from.length) {
         if (block?.anyArtisansTool) from = ARTISAN_TOOLS;
-        else if (block?.anyMusicalInstrument) from = MUSICAL;
-        else if (block?.anyGamingSet) from = GAMING;
+        else if (block?.anyMusicalInstrument) from = MUSICAL_INSTRUMENTS;
+        else if (block?.anyGamingSet) from = GAMING_SETS;
         else from = ALL_TOOLS;
       }
       specPush(out, { key: `${baseKey}_tool_${bi}`, label: `${fname} — Tool`, type: 'generic_choice', count, level: feature.level || 1, from });
@@ -235,7 +229,7 @@ function deriveFeatureChoiceSpecs(features, maxLv, keyPrefix) {
       const from = specUniq((optNode.entries || []).map(optionEntryLabel).filter(Boolean));
       if (!count || !from.length) return;
       const fromLc = from.map((value) => String(value).toLowerCase());
-      const allSkillsLc = ALL_SKILLS.map((value) => value.toLowerCase());
+      const allSkillsLc = SKILL_NAMES.map((value) => value.toLowerCase());
       const allLangsLc = ALL_LANGS.map((value) => value.toLowerCase());
       const isAllSkills = fromLc.every((value) => allSkillsLc.includes(value));
       const isAllLangs = fromLc.every((value) => allLangsLc.includes(value));
@@ -290,7 +284,7 @@ function buildClassSpecs(cls, classLevel, options) {
   const prof = cls?.startingProficiencies || {};
   if (options.includeStartingProficiencies !== false) {
     (prof.skills || []).forEach((block, index) => {
-      const spec = typeof block === 'object' ? choiceFromBlock(`${options.keyPrefix}class_skill_${index}`, 'Class Skill', block, ALL_SKILLS) : null;
+      const spec = typeof block === 'object' ? choiceFromBlock(`${options.keyPrefix}class_skill_${index}`, 'Class Skill', block, SKILL_NAMES) : null;
       if (spec) specs.push({ ...spec, type: 'skill_choice', level: 1 });
     });
     [...(prof.tools || []), ...(prof.toolProficiencies || [])].forEach((block, index) => {
@@ -388,7 +382,7 @@ export function speciesChoiceSpecs(character) {
     }
   }
   (species.skillProficiencies || []).forEach((block, index) => {
-    const spec = choiceFromBlock(`species_skill_${index}`, 'Species Skill', block, ALL_SKILLS);
+    const spec = choiceFromBlock(`species_skill_${index}`, 'Species Skill', block, SKILL_NAMES);
     if (spec) specs.push({ ...spec, type: 'skill_choice' });
   });
   (species.languageProficiencies || []).forEach((block, index) => {
@@ -418,7 +412,7 @@ export function backgroundChoiceSpecs(character) {
     });
   }
   (background.skillProficiencies || []).forEach((block, index) => {
-    const spec = choiceFromBlock(`bg_skill_${index}`, 'Background Skill', block, ALL_SKILLS);
+    const spec = choiceFromBlock(`bg_skill_${index}`, 'Background Skill', block, SKILL_NAMES);
     if (spec) specs.push({ ...spec, type: 'skill_choice' });
   });
   (background.toolProficiencies || []).forEach((block, index) => {
@@ -535,7 +529,7 @@ export function featChoiceSpecs(feat, options = {}) {
       count: ui.skillOrToolProficiency.count || 1,
     });
   }
-  if (ui.skillProficiency) specs.push({ key: `${slotKey}_skill`, label: `${feat.name} Skill`, type: 'skill_choice', from: ALL_SKILLS, count: ui.skillProficiency.count || 1 });
+  if (ui.skillProficiency) specs.push({ key: `${slotKey}_skill`, label: `${feat.name} Skill`, type: 'skill_choice', from: SKILL_NAMES, count: ui.skillProficiency.count || 1 });
   if (ui.toolProficiency) specs.push({ key: `${slotKey}_tool`, label: ui.toolProficiency.label || `${feat.name} Tool`, type: 'generic_choice', from: ui.toolProficiency.options || ALL_TOOLS, count: ui.toolProficiency.count || 1 });
   if (ui.languageProficiency) specs.push({ key: `${slotKey}_language`, label: `${feat.name} Language`, type: 'language_choice', from: STD_LANGS, count: ui.languageProficiency.count || 1 });
   if (ui.spellAbility) {
@@ -565,7 +559,7 @@ export function featChoiceSpecs(feat, options = {}) {
       keySuffix: 'skill',
       label: `${feat.name} Skill`,
       type: 'skill_choice',
-      fallbackFrom: ALL_SKILLS,
+      fallbackFrom: SKILL_NAMES,
     }));
   }
 
@@ -609,7 +603,7 @@ export function featChoiceSpecs(feat, options = {}) {
       keySuffix: 'skill_tool_language',
       label: `${feat.name} Proficiency`,
       type: 'skill_tool_choice',
-      fallbackFrom: [...ALL_SKILLS, ...ALL_TOOLS, ...ALL_LANGS],
+      fallbackFrom: [...SKILL_NAMES, ...ALL_TOOLS, ...ALL_LANGS],
     }));
   }
 
@@ -623,7 +617,7 @@ export function featChoiceSpecs(feat, options = {}) {
         key: `${slotKey}_expertise_${index}`,
         label: `${feat.name} Expertise`,
         type: 'expertise',
-        from: choose.from || ALL_SKILLS,
+        from: choose.from || SKILL_NAMES,
         count,
         requiresProficiency: true,
       });

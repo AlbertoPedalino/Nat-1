@@ -2,10 +2,10 @@ import { createAdapterBindings } from '../../adapterBindings.js';
 import { finalAbilityModifier } from '../../../shared/character/progression/abilityScores.js';
 import { titleCase } from '../../../shared/ui/textCase.js';
 import { choiceText } from '../../../shared/content/nameKeys.js';
+import { SKILL_NAMES } from '../../../shared/content/rulesVocabulary.js';
 
 export default function install(registry, context = {}) {
   const {
-    SKILLS,
     registerClassAdapter,
     registerClassSheetActions,
     registerClassSheetResources,
@@ -14,7 +14,7 @@ export default function install(registry, context = {}) {
     registerResourceSideEffect,
   } = createAdapterBindings(registry, context);
 registerClassAdapter("Bard", function (cls, lv, specs, ctx = {}) {
-  const skills = SKILLS.map(function (s) { return s.n; });
+  const skills = SKILL_NAMES;
 
   if (lv >= 2) {
     specs.push({

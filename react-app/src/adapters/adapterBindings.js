@@ -38,7 +38,6 @@ export function createAdapterBindings(registry, context = {}) {
   };
 
   return {
-    SKILLS: SKILLS.map((skill) => ({ n: skill.name, a: skill.ability })),
     _ARTISAN_TOOLS: ARTISAN_TOOLS,
     _MUSICAL_INSTRUMENTS: MUSICAL_INSTRUMENTS,
     _ALL_LANGS: ALL_LANGUAGES,

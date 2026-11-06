@@ -1,47 +1,7 @@
 import { isFeatKey, isFeatDetailKey } from './featChoiceKeys.js';
 import { flattenList } from '../../lists.js';
 import { choiceKey, choiceText } from '../../content/nameKeys.js';
-import { ABILITIES } from '../../content/rulesVocabulary.js';
-
-const SKILL_NAMES = [
-  'Acrobatics',
-  'Animal Handling',
-  'Arcana',
-  'Athletics',
-  'Deception',
-  'History',
-  'Insight',
-  'Intimidation',
-  'Investigation',
-  'Medicine',
-  'Nature',
-  'Perception',
-  'Performance',
-  'Persuasion',
-  'Religion',
-  'Sleight of Hand',
-  'Stealth',
-  'Survival',
-];
-
-const COMMON_LANGUAGES = [
-  'Common',
-  'Draconic',
-  'Dwarvish',
-  'Elvish',
-  'Giant',
-  'Gnomish',
-  'Goblin',
-  'Halfling',
-  'Orc',
-  'Abyssal',
-  'Celestial',
-  'Deep Speech',
-  'Infernal',
-  'Primordial',
-  'Sylvan',
-  'Undercommon',
-];
+import { ABILITIES, ALL_LANGUAGES, SKILL_NAMES } from '../../content/rulesVocabulary.js';
 
 const VERSION_KEYS = new Set([
   'species_version',
@@ -77,7 +37,7 @@ function makeLookup(values) {
 }
 
 const SKILL_LOOKUP = makeLookup(SKILL_NAMES);
-const LANGUAGE_LOOKUP = makeLookup(COMMON_LANGUAGES);
+const LANGUAGE_LOOKUP = makeLookup(ALL_LANGUAGES);
 
 function isAbility(value) {
   return ABILITIES.includes(choiceKey(value));
