@@ -5,6 +5,7 @@ import { getMulticlassChoiceSpecs } from '../../../shared/character/progression/
 import { ABILITIES, ABILITY_ABBREVIATIONS, ALL_LANGUAGES, ALL_TOOLS, ARTISAN_TOOLS, EXOTIC_LANGUAGES, GAMING_SETS, MUSICAL_INSTRUMENTS, SKILL_NAMES, STANDARD_LANGUAGES } from '../../../shared/content/rulesVocabulary.js';
 import { getLanguageOptions } from '../../../shared/character/progression/languages.js';
 import { filterByRequiredChoice } from '../../../shared/character/progression/lineageMatch.js';
+import { PROFICIENCY_CHOICE_KEYS } from '../../../shared/character/progression/typedProficiencies.js';
 
 const STD_LANGS = STANDARD_LANGUAGES;
 const EXOTIC_LANGS = EXOTIC_LANGUAGES;
@@ -27,9 +28,7 @@ function mixedSkillToolOptions() {
   ];
 }
 
-const CHOICE_KEYS = ['choose', 'any', 'anyTool', 'anyArtisansTool', 'anyMusicalInstrument', 'anyGamingSet', 'anyStandard', 'anyExotic'];
-
-export function fixedKeysFromBlocks(blocks, excluded = CHOICE_KEYS) {
+export function fixedKeysFromBlocks(blocks, excluded = PROFICIENCY_CHOICE_KEYS) {
   return (blocks || []).flatMap((block) => Object.keys(block || {}).filter((key) => !excluded.includes(key) && block[key]));
 }
 

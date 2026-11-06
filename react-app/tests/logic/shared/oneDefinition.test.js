@@ -341,3 +341,10 @@ test('5e.tools page links are built only by fiveEToolsLinks.js', () => {
     allow: ['shared/content/fiveEToolsLinks.js'],
   }), []);
 });
+
+// Which keys of a 5etools proficiency block ask for a choice: one list.
+test('proficiency block choice keys come from typedProficiencies.js', () => {
+  assert.deepEqual(sourceFilesMatching(/['"]anyArtisansTool['"],\s*['"]anyMusicalInstrument['"]/, {
+    allow: ['shared/character/progression/typedProficiencies.js'],
+  }), []);
+});

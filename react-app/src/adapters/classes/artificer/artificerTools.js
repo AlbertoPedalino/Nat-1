@@ -1,15 +1,6 @@
 import { asArray } from '../../../shared/lists.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
-const CHOICE_KEYS = [
-  'choose',
-  'any',
-  'anyTool',
-  'anyArtisansTool',
-  'anyMusicalInstrument',
-  'anyGamingSet',
-  'anyStandard',
-  'anyExotic',
-];
+import { PROFICIENCY_CHOICE_KEYS } from '../../../shared/character/progression/typedProficiencies.js';
 
 export function normalizeArtificerTool(value) {
   if (!value) return '';
@@ -60,7 +51,7 @@ function addFixedToolBlocks(out, blocks) {
     if (typeof block !== 'object' || Array.isArray(block)) return;
 
     Object.keys(block)
-      .filter((key) => !CHOICE_KEYS.includes(key) && block[key] !== false)
+      .filter((key) => !PROFICIENCY_CHOICE_KEYS.includes(key) && block[key] !== false)
       .forEach((key) => addTool(out, key));
   });
 }

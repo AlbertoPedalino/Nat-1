@@ -7,14 +7,9 @@ import { WeaponMasteryBlock } from '../../../shared/character/combat/WeaponMaste
 import ExpandableSelectionList from './ExpandableSelectionList.jsx';
 import SelectionSearch from './SelectionSearch.jsx';
 import { useOptionSearch } from '../../../shared/content/searchText.js';
-import {
-  parseTypedProficiencyValue,
-  isChoicePlaceholderValue,
-} from '../../../shared/character/progression/typedProficiencies.js';
+import { PROFICIENCY_CHOICE_KEYS, isChoicePlaceholderValue, parseTypedProficiencyValue } from '../../../shared/character/progression/typedProficiencies.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
 import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
-
-const CHOICE_KEYS = ['choose', 'any', 'anyTool', 'anyArtisansTool', 'anyMusicalInstrument', 'anyGamingSet', 'anyStandard', 'anyExotic'];
 
 function parseTypedChoiceValue(value) {
   const parsed = parseTypedProficiencyValue(value);
@@ -60,7 +55,7 @@ function addFixedBlocks(out, blocks, kind) {
       return;
     }
     Object.keys(block)
-      .filter((key) => !CHOICE_KEYS.includes(key) && block[key] !== false && !isChoicePlaceholder(key))
+      .filter((key) => !PROFICIENCY_CHOICE_KEYS.includes(key) && block[key] !== false && !isChoicePlaceholder(key))
       .forEach((key) => addProficiencyBlock(out, key, kind));
   });
 }

@@ -1,10 +1,8 @@
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
 import { canonicalProficiencyLabel } from '../progression/proficiencyDisplay.js';
 import { primaryClassLevel } from '../progression/classLevel.js';
-import { isChoicePlaceholderValue } from '../progression/typedProficiencies.js';
+import { PROFICIENCY_CHOICE_KEYS, isChoicePlaceholderValue } from '../progression/typedProficiencies.js';
 import { matchKey, stripSource } from '../../content/nameKeys.js';
-
-export const CHOICE_KEYS = ['choose', 'any', 'anyTool', 'anyArtisansTool', 'anyMusicalInstrument', 'anyGamingSet', 'anyStandard', 'anyExotic'];
 
 export function normalizeLabel(value) {
   return canonicalProficiencyLabel(value);
@@ -24,7 +22,7 @@ export function addFixedLabels(source, set) {
     }
     if (typeof entry !== 'object') return;
     Object.keys(entry)
-      .filter((k) => !CHOICE_KEYS.includes(k) && entry[k] !== false && !isChoicePlaceholderValue(k))
+      .filter((k) => !PROFICIENCY_CHOICE_KEYS.includes(k) && entry[k] !== false && !isChoicePlaceholderValue(k))
       .map(normalizeLabel)
       .filter(Boolean)
       .forEach((v) => set.add(v));
@@ -47,7 +45,7 @@ export function collectFixedFeatureProfs(character, field) {
         entry.split(/[;,]/).map(normalizeLabel).filter(Boolean).forEach((v) => out.add(v));
       } else if (entry && typeof entry === 'object') {
         Object.keys(entry)
-          .filter((k) => !CHOICE_KEYS.includes(k) && entry[k] !== false)
+          .filter((k) => !PROFICIENCY_CHOICE_KEYS.includes(k) && entry[k] !== false)
           .map(normalizeLabel)
           .filter(Boolean)
           .forEach((v) => out.add(v));

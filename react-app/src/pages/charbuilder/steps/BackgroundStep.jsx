@@ -77,8 +77,8 @@ function extractBackgroundLore(background) {
 function BackgroundDetailCard({ background }) {
   if (!background) return null;
   const fixedSkills = fixedKeysFromBlocks(background.skillProficiencies || []);
-  const fixedTools = fixedKeysFromBlocks(background.toolProficiencies || [], ['choose', 'any', 'anyTool', 'anyArtisansTool', 'anyMusicalInstrument', 'anyGamingSet']);
-  const fixedLangs = fixedKeysFromBlocks(background.languageProficiencies || [], ['choose', 'any', 'anyStandard', 'anyExotic']);
+  const fixedTools = fixedKeysFromBlocks(background.toolProficiencies || []);
+  const fixedLangs = fixedKeysFromBlocks(background.languageProficiencies || []);
   const originFeat = backgroundFeatOptionLabel(background);
   const lore = extractBackgroundLore(background);
   const facts = extractBackgroundFacts(background);

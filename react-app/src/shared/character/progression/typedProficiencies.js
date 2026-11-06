@@ -4,15 +4,10 @@ import { matchKey } from '../../content/nameKeys.js';
 const TYPED_PROFICIENCY_RE = /^(skill|tool|language|weapon):(.+)$/i;
 const CHOICE_PLACEHOLDER_RE = /\bchoose\b|\byour choice\b|\bof your choice\b|\bone type\b/i;
 
-const FIXED_BLOCK_CHOICE_KEYS = new Set([
-  'choose',
-  'any',
-  'anyTool',
-  'anyArtisansTool',
-  'anyMusicalInstrument',
-  'anyGamingSet',
-  'anyStandard',
-  'anyExotic',
+// The keys of a 5etools proficiency block that ask for a choice instead of
+// naming a fixed proficiency ({ choose }, { anyTool: 1 }, …).
+export const PROFICIENCY_CHOICE_KEYS = Object.freeze([
+  'choose', 'any', 'anyTool', 'anyArtisansTool', 'anyMusicalInstrument', 'anyGamingSet', 'anyStandard', 'anyExotic',
 ]);
 
 function stripTags(value) {
@@ -84,7 +79,7 @@ export function extractFixedProficiencyLabels(blocks) {
     if (typeof block !== 'object') return;
     Object.entries(block).forEach(([key, value]) => {
       if (value === false) return;
-      if (FIXED_BLOCK_CHOICE_KEYS.has(key)) return;
+      if (PROFICIENCY_CHOICE_KEYS.includes(key)) return;
       if (isChoicePlaceholderValue(key)) return;
       const parsed = parseTypedProficiencyValue(key);
       const label = parsed.kind ? parsed.label : canonicalProficiencyLabel(parsed.label);
