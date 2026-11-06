@@ -23,6 +23,7 @@ import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import PanelHeader from '../../../shared/ui/PanelHeader.jsx';
 
 export default function SavingThrows({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
@@ -75,12 +76,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
 
   return (
     <Paper variant="outlined" sx={{ mb: '0.6rem', overflow: 'hidden' }}>
-      <Box sx={{ bgcolor: UI_COLORS.headerBg, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1, px: '0.8rem', py: '0.48rem', borderLeft: 3, borderLeftColor: 'primary.main' }}>
-        <Dice5 size={14} />
-        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'primary.main' }}>
-          Saving Throws
-        </Typography>
-      </Box>
+      <PanelHeader icon={Dice5} title="Saving Throws" />
       <Box sx={{ p: '0.55rem 0.8rem' }}>
         {STATS.map(st => {
           const bonus = getSaveBonus(C, st) + itemSaveBonus;

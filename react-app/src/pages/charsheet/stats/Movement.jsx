@@ -16,6 +16,7 @@ import { isWildShaped, wildShapeSpeed } from '../../../shared/character/forms/wi
 import { capitalize } from '../../../shared/ui/textCase.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import PanelHeader from '../../../shared/ui/PanelHeader.jsx';
 
 const EXTRA_SPEED_MODES = ['burrow', 'climb', 'fly', 'swim'];
 
@@ -92,17 +93,13 @@ export default function Movement({ C, sheet }) {
 
   return (
     <Paper variant="outlined" sx={{ mb: '0.6rem', overflow: 'hidden' }}>
-      <Box sx={{ bgcolor: UI_COLORS.headerBg, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1, px: '0.8rem', py: '0.48rem', borderLeft: 3, borderLeftColor: hasPenalty ? 'warning.main' : 'primary.main' }}>
-        <Footprints size={14} />
-        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: hasPenalty ? 'warning.main' : 'primary.main' }}>
-          Movement
-        </Typography>
+      <PanelHeader icon={Footprints} title="Movement" tone={hasPenalty ? 'warning.main' : 'primary.main'}>
         {hasPenalty ? (
           <Tooltip title={reason}>
             <AlertCircle size={12} style={{ color: UI_COLORS.orange, marginLeft: 'auto' }} />
           </Tooltip>
         ) : null}
-      </Box>
+      </PanelHeader>
       <Box sx={{ p: '0.55rem 0.8rem', display: 'grid', gap: 0.35 }}>
         {entries.map((entry) => (
           <Box key={entry.key} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 1, py: 0.35, bgcolor: UI_COLORS.headerBg, border: 1, borderColor: hasPenalty ? 'warning.main' : 'divider', borderRadius: 1 }}>

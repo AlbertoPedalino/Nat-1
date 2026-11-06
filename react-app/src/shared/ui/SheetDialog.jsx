@@ -2,6 +2,7 @@ import { Box, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Sta
 import { X } from 'lucide-react';
 import { UI_COLORS, uiAlpha } from './colors.js';
 import { UI_FONTS } from './fonts.js';
+import { panelBarSx } from './PanelHeader.jsx';
 
 // Dialog chrome that matches the character-sheet panels (dark surface, gold
 // left-accent header bar, uppercase Cinzel title) so dialogs feel native to
@@ -19,14 +20,7 @@ const paperSx = {
 };
 
 const titleSx = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: 1,
-  bgcolor: UI_COLORS.headerBg,
-  borderBottom: 1,
-  borderColor: 'divider',
-  borderLeft: 3,
-  borderLeftColor: 'primary.main',
+  ...panelBarSx,
   color: 'primary.main',
   px: 2,
   py: 1.1,
