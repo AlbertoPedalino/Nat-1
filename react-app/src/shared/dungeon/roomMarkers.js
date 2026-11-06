@@ -60,8 +60,10 @@ export function trapIconFor(name) {
 // DC, and the label says what it is for: finding the trap and disarming it.
 export function trapLabel(trap) {
   const dc = numberOr(trap?.dc, null);
+  const level = numberOr(trap?.lv, null);
   return [
     String(trap?.type || 'Trap'),
+    level != null ? `Level ${level}` : null,
     dc != null ? `DC ${dc} (detect & disarm)` : null,
     trap?.damage ? String(trap.damage) : null,
   ].filter(Boolean).join(' · ');

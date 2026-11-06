@@ -9,6 +9,7 @@ import { fillBudget } from '../../../../src/shared/dungeon/roomBudget.js';
 test('a trap marker carries its kind, its DC and its damage', () => {
   assert.equal(trapLabel({ type: 'Pit', dc: 13, damage: '2d6 bludgeoning' }), 'Pit · DC 13 (detect & disarm) · 2d6 bludgeoning');
   assert.equal(trapLabel({ type: 'Alarm' }), 'Alarm');
+  assert.equal(trapLabel({ type: 'Pit', lv: 3, dc: 13 }), 'Pit · Level 3 · DC 13 (detect & disarm)');
   assert.equal(trapLabel(null), 'Trap');
 });
 

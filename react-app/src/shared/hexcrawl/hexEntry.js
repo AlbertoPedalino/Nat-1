@@ -11,7 +11,8 @@
 
 import { HEX_POPULATION_OPTIONS, TERRAIN_OPTIONS, TIER_OPTIONS, normalizeMountSpeed } from '../gmboard/boardOptions.js';
 import { resolveAdvanceOnly, resolveProceed } from './hexRules.js';
-import { formatNumber } from '../ui/numberFormat.js';
+import { encounterDetail } from '../gmboard/resultText.js';
+import { trapLabel } from '../dungeon/roomMarkers.js';
 
 export const HEX_STATUSES = Object.freeze(['unexplored', 'frontier', 'settled']);
 
@@ -164,10 +165,7 @@ export function hexEntrySummary(result) {
   if (encounter?.data?.diff) {
     // Difficulty alone sends the GM to the dialog for the level and the XP,
     // which are the two numbers the fight is actually run on.
-    const detail = [
-      encounter.data.lv != null ? `Lv ${encounter.data.lv}` : null,
-      encounter.data.xp != null ? `${formatNumber(encounter.data.xp)} XP/PC` : null,
-    ].filter(Boolean).join(' · ');
+    const detail = encounterDetail(encounter.data);
     lines.push(`${encounter.label || 'Encounter'}: ${encounter.data.diff}${detail ? ` · ${detail}` : ''}`);
   }
   if (loot?.data?.type) {
@@ -175,8 +173,7 @@ export function hexEntrySummary(result) {
     lines.push(`Loot: ${loot.data.type}${rarity}`);
   }
   if (trap?.data?.type) {
-    const damage = trap.data.damage ? ` · ${trap.data.damage}` : '';
-    lines.push(`Trap: ${trap.data.type}${trap.data.dc ? ` DC${trap.data.dc} (detect & disarm)` : ''}${damage}${trap.disadvantage ? ' (disadvantage)' : ''}`);
+    lines.push(`Trap: ${trapLabel(trap.data)}${trap.disadvantage ? ' (disadvantage)' : ''}`);
   }
   const spot = step('campSpotDc');
   if (spot?.sum != null) lines.push(`Spot DC ${spot.sum}${spot.disadvantage ? ' (disadvantage)' : ''}`);

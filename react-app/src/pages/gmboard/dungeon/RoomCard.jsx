@@ -1,8 +1,9 @@
 import { Box, Stack, Typography, alpha, useTheme } from '@mui/material';
 import { Castle, Coins, Flame, Leaf, Lock, Minus, ShieldCheck, Swords } from 'lucide-react';
 import ResultBadge from '../../../shared/gmboard/ui/ResultBadge.jsx';
-import { formatNumber } from '../../../shared/ui/numberFormat.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { encounterDetail } from '../../../shared/gmboard/resultText.js';
+import { trapLabel } from '../../../shared/dungeon/roomMarkers.js';
 
 function formatLoot(loot) {
   const valueLine = [loot.value, loot.extra].filter(Boolean).join(' ');
@@ -32,11 +33,11 @@ function SlotBlock({ slot, tones }) {
       {slot.extra?.kind === 'enc' ? (
         <Typography sx={lineSx}>
           <ResultBadge tone={tones.difficulty[slot.extra.data.diff] || tones.fallback}>{slot.extra.data.diff}</ResultBadge>{' '}
-          Lv {slot.extra.data.lv} · {formatNumber(slot.extra.data.xp)} XP/PC
+          {encounterDetail(slot.extra.data)}
         </Typography>
       ) : null}
       {slot.extra?.kind === 'trap' ? (
-        <Typography sx={lineSx}>{slot.extra.data.type} Lv {slot.extra.data.lv} · DC {slot.extra.data.dc} (detect & disarm) · {slot.extra.data.damage}</Typography>
+        <Typography sx={lineSx}>{trapLabel(slot.extra.data)}</Typography>
       ) : null}
       {slot.extra?.kind === 'env' ? (
         <Typography sx={lineSx}>Severity: {slot.extra.data.severity}</Typography>

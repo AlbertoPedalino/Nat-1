@@ -1,8 +1,8 @@
 import { Box, Stack, Typography, alpha, useTheme } from '@mui/material';
 import { Coins, Compass, Minus, ScrollText, Swords, Tent } from 'lucide-react';
 import ResultBadge from '../../../shared/gmboard/ui/ResultBadge.jsx';
-import { formatNumber } from '../../../shared/ui/numberFormat.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { encounterDetail } from '../../../shared/gmboard/resultText.js';
 
 function formatLoot(loot) {
   const valueLine = [loot.value, loot.extra].filter(Boolean).join(' ');
@@ -55,7 +55,7 @@ export default function QuestCard({ quest }) {
               <ResultBadge tone={difficultyTone[quest.encounter.data.diff] || fallback}>{quest.encounter.data.diff}</ResultBadge>
               <Typography sx={detailSx}>d20({quest.encounter.d1})+d20({quest.encounter.d2})={quest.encounter.sum}</Typography>
             </Stack>
-            <Typography sx={lineSx}>Lv {quest.encounter.data.lv} · {formatNumber(quest.encounter.data.xp)} XP/PC</Typography>
+            <Typography sx={lineSx}>{encounterDetail(quest.encounter.data)}</Typography>
           </Box>
         ) : null}
         <Box sx={{ ...slotSx, borderLeftColor: rewardTone, bgcolor: alpha(rewardTone, 0.08) }}>

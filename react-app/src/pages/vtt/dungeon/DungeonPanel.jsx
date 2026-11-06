@@ -9,11 +9,11 @@ import { DUNGEON_POPULATION_OPTIONS, TIER_OPTIONS } from '../../../shared/gmboar
 import { MAX_ROOM_COUNT, MIN_ROOM_COUNT, isValidRoomCount } from '../../../shared/dungeon/dungeon.js';
 import { describeGroups } from '../../../shared/dungeon/roomBudget.js';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
-import { MARKER_COLORS } from '../../../shared/dungeon/roomMarkers.js';
+import { MARKER_COLORS, trapLabel } from '../../../shared/dungeon/roomMarkers.js';
 import InfoHint from '../../../shared/ui/InfoHint.jsx';
 import PiecePreview, { beginPiecePointerDrag } from '../tokens/PiecePreview.jsx';
-import { formatNumber } from '../../../shared/ui/numberFormat.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { encounterDetail } from '../../../shared/gmboard/resultText.js';
 
 // The dungeon this map is being played as.
 //
@@ -245,7 +245,7 @@ function SlotLine({ slot, tones }) {
       <Stack direction="row" spacing={0.6} sx={{ alignItems: 'center' }}>
         <Swords size={13} color={tones.result.encounter} />
         <Typography sx={lineSx}>
-          {extra.data.diff} · Level {extra.data.lv} · {formatNumber(extra.data.xp)} XP/PC
+          {[extra.data.diff, encounterDetail(extra.data)].filter(Boolean).join(' · ')}
         </Typography>
       </Stack>
     );
@@ -255,7 +255,7 @@ function SlotLine({ slot, tones }) {
       <Stack direction="row" spacing={0.6} sx={{ alignItems: 'center' }}>
         <Flame size={13} color={tones.result.trap} />
         <Typography sx={lineSx}>
-          {extra.data.type} · DC {extra.data.dc} (detect & disarm) · {extra.data.damage}
+          {trapLabel(extra.data)}
         </Typography>
       </Stack>
     );
