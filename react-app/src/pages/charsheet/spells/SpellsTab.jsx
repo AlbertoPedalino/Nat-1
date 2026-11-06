@@ -12,15 +12,9 @@ import { Plus, Sparkles } from 'lucide-react';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import { SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
 import { effectiveD20Modifier } from '../../../shared/character/sheet/sheetStats.js';
-import { loadSpells } from '../../../shared/content/catalogs/spellData.js';
 import { scrollRowKey } from '../../../shared/character/inventory/spellScrolls.js';
 import { spellMatchesClass } from '../../../shared/character/spells/spellClassMatch.js';
-import {
-  adapterRegistry,
-  loadClassAdapters,
-  loadCoreAdapters,
-  loadSpellsAdapters,
-} from '../../../adapters/index.js';
+import { adapterRegistry } from '../../../adapters/index.js';
 import { getEquippedArmorPenalties } from '../inventory/armorPenalties.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
@@ -37,7 +31,6 @@ import {
   getSpellLimits,
   hasSpellcastingProfile,
 } from './spellcasting.js';
-import { getClassSpellLimits } from '../../../shared/character/spells/spellProgression.js';
 import { getPactMagicInfo, getSpellCastMode } from '../../../shared/character/spells/pactMagic.js';
 import {
   addButtonSx,
@@ -47,28 +40,27 @@ import {
   panelRootSx,
   panelToolbarSx,
 } from './spellsTabStyles.js';
-import SpellEntry, { SourceBadge } from './SpellEntry.jsx';
+import SpellEntry from './SpellEntry.jsx';
 import { Empty, SlotPanel, SpellSection, StatBox } from './SpellsUiParts.jsx';
-import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
-import {
-  SpellMiniTags,
-  SpellReferenceBody,
-  SpellRowLabel,
-  SpellSelectButton,
-} from '../../../shared/character/spells/SpellReference.jsx';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
-import { getPactSlotUsed, getPactSlotUsedKey, getRegularSlotUsed, persistCreatedSlots, persistUsedSlots } from '../../../shared/character/spells/spellSlots.js';
+import {
+  getPactSlotUsed, getPactSlotUsedKey, getRegularSlotUsed, persistCreatedSlots, persistUsedSlots,
+} from '../../../shared/character/spells/spellSlots.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { lowerKey } from '../../../shared/content/nameKeys.js';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
 import { matchesQuery } from '../../../shared/content/searchText.js';
 import { classNames } from '../../../shared/character/progression/classLevel.js';
 import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
 import {
-  bucketCounts, isInWizardBook, wizardBookLevel, wizardBookSize, withoutSpellPicked, withSpellPicked, withWizardBookToggled,
+  bucketCounts, isInWizardBook, wizardBookLevel, wizardBookSize, withoutSpellPicked, withSpellPicked,
+  withWizardBookToggled,
 } from '../../../shared/character/spells/spellBuckets.js';
+import { PickerSpellRow } from './SpellPickerRow.jsx';
+import { getPickerLimits } from './spellPickerLimits.js';
+import { useSpellCatalog } from './useSpellCatalog.js';
 
 const SPELL_ACTION_FILTERS = [
   { key: 'all', label: 'All' },
@@ -93,11 +85,6 @@ function getSpellActionFilter(entry) {
 
 export default function SpellsTab({ C, sheet, freeCastUses }) {
   const { onUpdateSpells, onUpdateSheet, onUpdateCharacter, readOnly } = useSheetActions();
-  const [spellDb, setSpellDb] = useState([]);
-  const [spellVersions, setSpellVersions] = useState([]);
-  const [classSpellIndex, setClassSpellIndex] = useState({});
-  const [catalogStatus, setCatalogStatus] = useState('loading');
-  const [adapterRevision, setAdapterRevision] = useState(0);
   const [spellSearch, setSpellSearch] = useState('');
   const [spellFilter, setSpellFilter] = useState('all');
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -108,50 +95,9 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
   const [slotUsed, setSlotUsed] = useState(sheet?.spellSlotUsed || {});
   const [createdSlots, setCreatedSlots] = useState(sheet?.createdSpellSlots || {});
 
-  // Attunement and other character edits must not cancel/restart catalog loads.
-  const classKey = JSON.stringify(classNames(C));
-
-  useEffect(() => {
-    let alive = true;
-    Promise.all([
-      loadCoreAdapters(),
-      loadClassAdapters(JSON.parse(classKey)),
-      loadSpellsAdapters(),
-    ]).then(() => {
-      if (!alive) return;
-      setAdapterRevision((revision) => revision + 1);
-    }).catch(() => {
-      // Keep the available catalog usable if an adapter cannot be loaded.
-    });
-    return () => { alive = false; };
-  }, [classKey]);
-
-  useEffect(() => {
-    let alive = true;
-    setCatalogStatus('loading');
-    const load = async () => {
-      // Successful files are cached by the loader; the second attempt retries
-      // only failed requests, without discarding already available spell data.
-      for (let attempt = 0; attempt < 2; attempt += 1) {
-        try {
-          const result = await loadSpells();
-          if (!alive) return;
-          setSpellDb(result.spells || []);
-          setSpellVersions(result.spellVersions || result.spells || []);
-          setClassSpellIndex(result.classSpellIndex || {});
-          if (!result.failedFiles?.length) {
-            setCatalogStatus('ready');
-            return;
-          }
-        } catch {
-          if (!alive) return;
-        }
-      }
-      setCatalogStatus('error');
-    };
-    load();
-    return () => { alive = false; };
-  }, []);
+  const {
+    spellDb, spellVersions, classSpellIndex, catalogStatus, adapterRevision,
+  } = useSpellCatalog(classNames(C));
 
   useEffect(() => {
     setSlotUsed(sheet?.spellSlotUsed || {});
@@ -630,52 +576,3 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
   );
 }
 
-// Picker row for the Add/Remove + Wizard Spellbook dialog. Tapping the row
-// expands the full rich reference (meta + description + upcast). An auto-granted
-// spell always shows its tinted source chip (class/subclass/feat/etc., the same
-// badge used on the sheet spell rows), falling back to a plain AUTO label when no
-// source info is available. The Add/Remove button shows whenever the row is
-// editable (`!locked`) — so in Wizard "book" mode an auto-granted spell shows both
-// its badge and the spellbook toggle. The caret is a decorative indicator.
-function PickerSpellRow({ spell, selected, disabled, atLimit, autoGranted, locked, sourceInfo, sources, onToggle }) {
-  return (
-    <ExpandableCard
-      containerSx={{ flexShrink: 0, border: 1, borderColor: selected ? UI_COLORS.success : 'transparent', borderRadius: 1, overflow: 'hidden', opacity: atLimit ? 0.5 : 1, '&:hover': { borderColor: selected ? UI_COLORS.success : 'divider' } }}
-      bodySx={{ px: '9px', pt: '2px', pb: '8px' }}
-      body={<SpellReferenceBody spell={spell} />}
-      header={({ toggle }) => (
-        <Box
-          onClick={toggle}
-          sx={{ display: 'flex', alignItems: 'center', gap: 0.5, px: '9px', py: '6px', cursor: 'pointer', bgcolor: selected ? uiAlpha(UI_COLORS.successFlat, 0.08) : 'transparent', '&:hover': { bgcolor: selected ? uiAlpha(UI_COLORS.successFlat, 0.08) : UI_COLORS.headerBg } }}
-        >
-          <SpellRowLabel spell={spell} selected={selected} nameSx={{ fontSize: '0.875rem' }} sx={{ gap: 0.4 }} />
-          <SpellMiniTags spell={spell} sx={{ mx: 1 }} />
-          {autoGranted ? (
-            sourceInfo
-              ? <SourceBadge sourceInfo={sourceInfo} sources={sources} />
-              : <Box sx={{ fontFamily: UI_FONTS.display, fontSize: '0.7rem', color: UI_COLORS.success, flexShrink: 0 }}>AUTO</Box>
-          ) : null}
-          {!locked ? (
-            <SpellSelectButton selected={selected} disabled={disabled} onToggle={onToggle} addColor="success" />
-          ) : null}
-        </Box>
-      )}
-    />
-  );
-}
-
-function getPickerLimits(C, picker) {
-  const level = Math.max(1, Math.min(20, Number(picker?.level || 1)));
-  const profile = picker?.profile || getSpellcastingProfile(picker);
-  const { cantrips, spells } = getClassSpellLimits(profile, level);
-  return {
-    cantrips: normalizeLimit(cantrips),
-    spells: normalizeLimit(spells),
-  };
-}
-
-function normalizeLimit(value) {
-  if (value == null) return null;
-  const n = Number(value);
-  return Number.isFinite(n) ? Math.max(0, n) : null;
-}

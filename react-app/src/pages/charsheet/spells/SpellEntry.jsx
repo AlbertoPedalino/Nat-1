@@ -3,9 +3,6 @@ import {
   alpha,
   Box,
   Stack,
-  ToggleButton,
-  ToggleButtonGroup,
-  Tooltip,
   Typography,
 } from '@mui/material';
 import { SpellNameIcon } from '../../../shared/content/FiveEToolsLink.jsx';
@@ -16,7 +13,6 @@ import {
 } from '../../../shared/character/spells/SpellReference.jsx';
 import MiniBadge from '../../../shared/ui/MiniBadge.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
-import PipButton from '../../../shared/ui/PipButton.jsx';
 import { formatRollTitle } from '../../../shared/character/dice/dice.js';
 import { getFinal, getMod } from '../../../shared/character/sheet/sheetStats.js';
 import { describeAttackRoll } from '../../../shared/character/combat/conditions.js';
@@ -52,179 +48,12 @@ import SummonedCreaturePanel from '../forms/SummonedCreaturePanel.jsx';
 import CollapsibleNote from '../../../shared/ui/CollapsibleNote.jsx';
 import { spellWeaponAttack, spellWeaponOptions } from '../actions/weaponActions.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
-import { signed, withModifier } from '../../../shared/ui/numberFormat.js';
+import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
-
-function applyFlatToFormula(formula, flat) {
-  if (!formula) return formula;
-  if (!flat) return formula;
-  const text = String(formula).replace(/\s+/g, '');
-  const match = text.match(/^(\d+)d(\d+)([+-]\d+)?$/i);
-  if (!match) return formula;
-  const count = Number(match[1]);
-  const faces = Number(match[2]);
-  const total = Number(match[3] || 0) + Number(flat || 0);
-  return withModifier(`${count}d${faces}`, total);
-}
-
-// Source badge for a spell row. When the same spell is granted by more than
-// one source (e.g. a Forest Gnome Druid's Speak with Animals), the row stays
-// consolidated to a single badge showing the primary source plus a `+N`
-// indicator, with all contributing sources listed in a tooltip.
-export function SourceBadge({ sourceInfo, sources, suffix = '' }) {
-  if (!sourceInfo) return null;
-  const all = (sources && sources.length ? sources : [sourceInfo]).filter(Boolean);
-  const extra = all.length - 1;
-  const label = sourceInfo.label + suffix + (extra > 0 ? ` +${extra}` : '');
-  const tone = sourceInfo.color || UI_COLORS.purple;
-  const badge = <MiniBadge label={label} color={tone} bg={alpha(tone, 0.16)} />;
-  if (extra <= 0) return badge;
-  const title = 'Sources: ' + all.map((s) => s.originLabel || s.label).filter(Boolean).join(', ');
-  return <Tooltip title={title} arrow><Box component="span" sx={{ display: 'inline-flex' }}>{badge}</Box></Tooltip>;
-}
-
-function FreeCastsInline({ freeCasts, freeCastUses, onToggleFreeCast, sx }) {
-  if (!Array.isArray(freeCasts) || !freeCasts.length) return null;
-  const interactive = typeof onToggleFreeCast === 'function';
-  return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap', mt: 0.35, px: '7px', py: '4px', border: 1, borderColor: uiAlpha(UI_COLORS.gold, 0.28), borderRadius: '5px', bgcolor: uiAlpha(UI_COLORS.gold, 0.06), ...(sx || {}) }}>
-      <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontFamily: UI_FONTS.display, mr: 0.25, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-        Free Cast
-      </Typography>
-        {freeCasts.map((fc) => {
-          const used = Math.max(0, Number(freeCastUses?.[fc.id] || 0));
-          const max = Math.max(1, Number(fc.max) || 1);
-          return (
-            <Box key={fc.id} sx={{ display: 'flex', alignItems: 'center', gap: 0.55, flexWrap: 'wrap' }}>
-              <Typography variant="caption" sx={{ color: 'text.primary', fontWeight: 700, lineHeight: 1.1 }}>
-                {fc.label}
-              </Typography>
-              <Box sx={{ display: 'inline-flex', gap: '3px', alignItems: 'center' }}>
-                {Array.from({ length: max }).map((_, i) => {
-                  const isUsed = i < used;
-                  return (
-                    <PipButton
-                      key={`${fc.id}-dot-${i}`}
-                      size={10}
-                      round
-                      title={isUsed ? 'Free cast used' : 'Free cast available'}
-                      aria-label={`${fc.label}: ${isUsed ? 'free cast used' : 'free cast available'}`}
-                      onClick={interactive ? (e) => { e.stopPropagation(); onToggleFreeCast(fc); } : undefined}
-                      sx={{
-                        border: '1.5px solid',
-                        borderColor: isUsed ? UI_COLORS.goldLight : uiAlpha(UI_COLORS.gold, 0.35),
-                        bgcolor: isUsed ? UI_COLORS.gold : 'transparent',
-                        '&:hover:not(:disabled)': interactive ? { borderColor: UI_COLORS.goldLight, boxShadow: `0 0 0 2px ${uiAlpha(UI_COLORS.gold, 0.22)}` } : undefined,
-                      }}
-                    />
-                  );
-                })}
-              </Box>
-              <Typography variant="caption" color={used >= max ? UI_COLORS.dangerDeep : 'text.secondary'} sx={{ lineHeight: 1.1 }}>
-                {fc.rechargeLabel}
-                {fc.canAlsoUseSlots === false ? ' · free only' : ' · also slots'}
-                {used >= max ? ' · spent' : ''}
-              </Typography>
-            </Box>
-          );
-        })}
-    </Box>
-  );
-}
-
-function normalizeModifierDetails(cantripData) {
-  const raw = [
-    ...(Array.isArray(cantripData?.grantModifiers) ? cantripData.grantModifiers : []),
-    ...(Array.isArray(cantripData?.modifiers) ? cantripData.modifiers : []),
-    ...(Array.isArray(cantripData?.cantripModifiers) ? cantripData.cantripModifiers : []),
-    ...(Array.isArray(cantripData?.extraDetails) ? cantripData.extraDetails : []),
-  ];
-  const seen = new Set();
-  return raw
-    .filter((item) => item && typeof item === 'object')
-    .map((item) => ({
-      key: item.key || item.label || item.tagLabel || item.detailTitle || null,
-      label: item.label || null,
-      tagLabel: item.tagLabel || item.label || null,
-      detailGroupLabel: item.detailGroupLabel || item.groupLabel || null,
-      detailTitle: item.detailTitle || item.tagLabel || item.label || null,
-      detailText: item.detailText || item.description || null,
-      description: item.description || item.detailText || null,
-    }))
-    .filter((item) => {
-      const dedupeKey = item.key || item.label || item.tagLabel || item.detailTitle;
-      if (!dedupeKey || seen.has(dedupeKey)) return false;
-      if (!item.detailText && !item.description) return false;
-      seen.add(dedupeKey);
-      return true;
-    });
-}
-
-function groupModifierDetails(details) {
-  const groups = new Map();
-  details.forEach((item) => {
-    const label = item.detailGroupLabel || 'Modifier Details';
-    if (!groups.has(label)) groups.set(label, []);
-    groups.get(label).push(item);
-  });
-  return Array.from(groups.entries()).map(([label, items]) => ({ label, items }));
-}
-
-// The weapon a spell attacks through (True Strike). Stored per spell on the
-// character, so the collapsed card keeps rolling the one picked.
-function SpellWeaponPicker({ spellName, options, selectedKey, onUpdateCharacter }) {
-  if (!options.length) {
-    return (
-      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.7 }}>
-        No weapon you are proficient with in your inventory.
-      </Typography>
-    );
-  }
-  return (
-    <Box sx={{ mt: 0.7, pt: 0.5, borderTop: '1px dashed', borderColor: 'divider' }}>
-      <Typography sx={{ fontSize: '0.6rem', color: RICH_TEXT_ACCENT, fontFamily: UI_FONTS.display, fontWeight: 700, letterSpacing: '0.08em', mb: 0.3 }}>
-        Weapon
-      </Typography>
-      <ToggleButtonGroup
-        size="small"
-        exclusive
-        value={selectedKey}
-        onChange={(_, next) => {
-          if (!next || next === selectedKey) return;
-          onUpdateCharacter?.((prev) => ({
-            ...prev,
-            spellWeapons: { ...(prev?.spellWeapons || {}), [spellName]: next },
-          }));
-        }}
-        sx={{
-          flexWrap: 'wrap',
-          gap: '3px',
-          '& .MuiToggleButton-root': {
-            fontSize: '0.65rem',
-            px: '8px',
-            py: '3px',
-            border: 1,
-            borderColor: 'divider',
-            borderRadius: '999px !important',
-            color: 'text.secondary',
-            bgcolor: 'transparent',
-            '&.Mui-selected': {
-              bgcolor: (theme) => alpha(theme.palette.primary.main, 0.14),
-              color: 'primary.light',
-              borderColor: 'primary.main',
-            },
-          },
-        }}
-      >
-        {options.map((option) => (
-          <ToggleButton key={option.key} value={option.key}>{option.name}</ToggleButton>
-        ))}
-      </ToggleButtonGroup>
-    </Box>
-  );
-}
+import { applyFlatToFormula, normalizeModifierDetails, groupModifierDetails } from './spellEntryDetails.js';
+import { SourceBadge, FreeCastsInline, SpellWeaponPicker } from './SpellEntryParts.jsx';
 
 export default function SpellEntry({
   entry,
