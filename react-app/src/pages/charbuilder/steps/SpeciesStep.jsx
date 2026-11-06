@@ -8,6 +8,7 @@ import { splitNamedEntries } from '../../../shared/content/entryStructure.js';
 import SearchList from '../choices/SearchList.jsx';
 import SpellChoiceList from '../spells/SpellChoiceList.jsx';
 import { speciesChoiceSpecs } from '../choices/choiceSpecs.js';
+import { matchesQuery } from '../../../shared/content/searchText.js';
 
 function SpeciesDetailCard({ species }) {
   if (!species) return null;
@@ -38,8 +39,7 @@ function SpeciesDetailCard({ species }) {
 
 export default function SpeciesStep({ state, dispatch }) {
   const { character, search } = state;
-  const query = search.species.toLowerCase();
-  const species = state.data.species.filter((item) => item.name.toLowerCase().includes(query));
+  const species = state.data.species.filter((item) => matchesQuery(search.species, item.name));
   const selectedSpecies = character.speciesObj || species.find((item) => item.name === character.speciesName);
 
   return (

@@ -23,14 +23,17 @@ const defaultGetText = (option) => option?.label;
 // Filter options by query. `getText` maps an option to its searchable text
 // (a string or array of strings); every query term must match.
 export function filterOptions(options, query, getText = defaultGetText) {
+  if (!normalizeSearchText(query)) return options;
+  return options.filter((option) => matchesQuery(query, getText(option)));
+}
+
+// Whether every term of a search query appears in the given texts (strings or
+// lists of strings). An empty query matches everything.
+export function matchesQuery(query, ...texts) {
   const q = normalizeSearchText(query);
-  if (!q) return options;
-  const terms = q.split(' ');
-  return options.filter((option) => {
-    const raw = getText(option);
-    const haystack = normalizeSearchText(Array.isArray(raw) ? raw.join(' ') : raw);
-    return terms.every((term) => haystack.includes(term));
-  });
+  if (!q) return true;
+  const haystack = normalizeSearchText(texts.flat().filter((text) => text != null).join(' '));
+  return q.split(' ').every((term) => haystack.includes(term));
 }
 
 // Wiring shared by every selection panel: holds the query, derives the filtered

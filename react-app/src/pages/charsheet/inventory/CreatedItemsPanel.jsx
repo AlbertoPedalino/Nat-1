@@ -19,6 +19,7 @@ import {
 import { matchKey } from '../../../shared/content/nameKeys.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { matchesQuery } from '../../../shared/content/searchText.js';
 
 // Generic interactive "create items from a list" panel. Driven entirely by the
 // action's `detail` config so Replicate Magic Item, Tinker's Magic and Fast
@@ -167,12 +168,9 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
     onUpdateInventory(removeOneCrafted(inv, flag, value));
   };
 
-  const q = query.trim().toLowerCase();
   const visibleItems = useMemo(() => (
-    searchable && q
-      ? items.filter((value) => itemLabel(value).toLowerCase().includes(q))
-      : items
-  ), [itemLabel, items, searchable, q]);
+    searchable ? items.filter((value) => matchesQuery(query, itemLabel(value))) : items
+  ), [itemLabel, items, searchable, query]);
 
   // "No more can be made" when every craftable is blocked — either the global
   // cap is full, or each item already sits at its per-item limit.

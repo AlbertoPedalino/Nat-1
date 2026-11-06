@@ -11,6 +11,7 @@ import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import { entityChipSx } from '../../../shared/ui/entityColors.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
 import { normalizeWizardBook } from '../../../shared/character/spells/wizardBook.js';
+import { matchesQuery } from '../../../shared/content/searchText.js';
 
 export default function SpellSelectionPanel({ state, dispatch }) {
   const [wizardMode, setWizardMode] = useState('prepare');
@@ -40,7 +41,7 @@ export default function SpellSelectionPanel({ state, dispatch }) {
   const activeWizardSpellbook = (activeExtra ? activeExtra.wizardSpellbook : character.wizardSpellbook) || {};
   const activeSpellbookSize = activeIsWizard ? getSpellbookSize(activeWizardSpellbook) : 0;
   const autoGrantedSpells = collectAutoGrantedSpells(activeCharacter);
-  const query = state.search.spells.toLowerCase();
+  const query = state.search.spells;
   const levels = [0, ...Array.from({ length: Math.max(0, maxLevel) }, (_, index) => index + 1)];
   const classNames = [activeCharacter.className].filter(Boolean);
   const spellIndex = useMemo(() => {
@@ -63,9 +64,9 @@ export default function SpellSelectionPanel({ state, dispatch }) {
     : state.data.spells
       .filter((spell) => spell.level === level)
       .filter((spell) => spellMatchesAnyClass(spell, classNames, state.data.classSpellIndex))
-      .filter((spell) => !query || spell.name.toLowerCase().includes(query) || String(spell.schoolFull || spell.school || '').toLowerCase().includes(query));
+      .filter((spell) => matchesQuery(query, spell.name, spell.schoolFull || spell.school));
   const pool = dedupeSpells([...autoPool.filter((spell) => Number(spell.level || 0) === level), ...basePool])
-    .filter((spell) => !query || spell.name.toLowerCase().includes(query) || String(spell.schoolFull || spell.school || '').toLowerCase().includes(query))
+    .filter((spell) => matchesQuery(query, spell.name, spell.schoolFull || spell.school))
     .slice(0, 120);
   const isCaster = !!profile.casterProgression || cantrips > 0 || spells > 0 || maxLevel > 0 || autoGrantedSpells.length > 0;
   const wizardBookMode = activeIsWizard && wizardMode === 'book';

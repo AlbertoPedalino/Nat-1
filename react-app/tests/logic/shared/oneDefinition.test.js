@@ -304,3 +304,9 @@ test('saved colours are validated only by normalizeHexColor', () => {
     allow: ['shared/ui/colors.js'],
   }), []);
 });
+
+// Search boxes match through matchesQuery (shared/content/searchText.js): the
+// same forgiving rule everywhere (case, accents, punctuation, every term).
+test('search filters go through matchesQuery', () => {
+  assert.deepEqual(sourceLinesMatching(/toLowerCase\(\)\.includes\((q|sq|query|search|needle|term)\)/), []);
+});

@@ -70,6 +70,7 @@ import { lowerKey } from '../../../shared/content/nameKeys.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
+import { matchesQuery } from '../../../shared/content/searchText.js';
 
 const SPELL_ACTION_FILTERS = [
   { key: 'all', label: 'All' },
@@ -317,7 +318,6 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
   }, [activePicker, activeIsWizard, pickerLevel, pickerWizardMode]);
 
   const pickerList = useMemo(() => {
-    const q = pickerSearch.trim().toLowerCase();
     if (!activePicker) return [];
     const hasIndex = Object.keys(classSpellIndex).length > 0;
     const spellbookNames = activeIsWizard && pickerWizardMode === 'prepare'
@@ -330,7 +330,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
         .filter((spell) => Number(spell.level || 0) === 0 || Number(spell.level || 0) <= activePicker.maxLevel)
         .filter((spell) => !hasIndex || spellMatchesClass(spell, activePicker.className, classSpellIndex));
     return dedupeSpells(base)
-      .filter((spell) => !q || spell.name.toLowerCase().includes(q) || String(spell.schoolFull || spell.school || '').toLowerCase().includes(q))
+      .filter((spell) => matchesQuery(pickerSearch, spell.name, spell.schoolFull || spell.school))
       .slice(0, 200);
   }, [spellDb, spellIndex, pickerLevel, pickerSearch, classSpellIndex, activePicker, activeIsWizard, pickerWizardMode]);
 
@@ -461,11 +461,10 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
     onUpdateSpells?.({ extraClasses: nextExtraClasses, spellSnapshots: nextSnapshots });
   };
 
-  const sq = spellSearch.trim().toLowerCase();
   const matchSpell = (entry) => (
     (catalogStatus === 'ready' || spellIndex.has(lowerKey(entry.name)))
     && (spellFilter === 'all' || getSpellActionFilter(entry) === spellFilter)
-    && (!sq || String(entry?.name || '').toLowerCase().includes(sq))
+    && matchesQuery(spellSearch, entry?.name)
   );
   const visibleCantrips = spellInfo.cantrips.filter(matchSpell);
   const visibleAtWill = spellInfo.atWill.filter(matchSpell);
@@ -473,8 +472,8 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
     .map(([level, entries]) => [level, entries.filter(matchSpell)])
     .filter(([, entries]) => entries.length > 0);
   const hasVisibleSpells = visibleCantrips.length || visibleAtWill.length || visibleLeveled.length;
-  const showEmptyCantrips = catalogStatus === 'ready' && spellFilter === 'all' && !sq;
-  const emptySpellText = sq
+  const showEmptyCantrips = catalogStatus === 'ready' && spellFilter === 'all' && !spellSearch.trim();
+  const emptySpellText = spellSearch.trim()
     ? 'No spells match your search.'
     : spellFilter === 'all' ? 'No spells selected.' : 'No spells match this filter.';
 

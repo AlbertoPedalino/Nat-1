@@ -13,6 +13,7 @@ import { strip5eMarkup } from '../../../shared/character/spells/spellEntries.js'
 import { titleCase } from '../../../shared/ui/textCase.js';
 import { backgroundAbilityBonus } from '../../../shared/character/progression/abilityScores.js';
 import { ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
+import { matchesQuery } from '../../../shared/content/searchText.js';
 
 // One label/value row inside the grants grid (label column + wrapped values).
 function GrantRow({ label, values }) {
@@ -114,8 +115,7 @@ function BackgroundDetailCard({ background }) {
 
 export default function BackgroundStep({ state, dispatch }) {
   const { character, search } = state;
-  const query = search.background.toLowerCase();
-  const backgrounds = state.data.backgrounds.filter((item) => item.name.toLowerCase().includes(query));
+  const backgrounds = state.data.backgrounds.filter((item) => matchesQuery(search.background, item.name));
   const selectedBackground = character.backgroundObj || backgrounds.find((item) => item.name === character.backgroundName);
   const abilityPool = getBackgroundPool(selectedBackground);
   const patterns = selectedBackground?.ability?.map((_, index) => getBackgroundPattern(selectedBackground, index)) || [[2, 1]];
