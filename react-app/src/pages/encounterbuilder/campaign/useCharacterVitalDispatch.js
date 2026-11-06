@@ -1,5 +1,5 @@
 import { useCallback, useRef } from 'react';
-import { commandCharacterVitals } from '../../../shared/cloud/api/cloudCharacters.js';
+import { commandCharacterVitals } from '../../../shared/cloud/api/healthCommands.js';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 
 const VITAL_ACTIONS = new Set(['modifyHp', 'setHp', 'setTempHp', 'modifyTempHp', 'setMaxHp',

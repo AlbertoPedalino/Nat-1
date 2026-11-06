@@ -20,9 +20,10 @@ const cloud = vi.hoisted(() => ({
 }));
 vi.mock('../../../../src/shared/cloud/api/cloudCharacters.js', () => ({
   updateCloudCharacterData: cloud.save, pushCharacter: cloud.push, updateForeignCharacter: cloud.push,
-  getCloudCharacter: cloud.get, getCloudSheetRevision: cloud.revision, commandCharacterVitals: cloud.command,
+  getCloudCharacter: cloud.get, getCloudSheetRevision: cloud.revision,
   SHEET_CONFLICT: 'SHEET_CONFLICT',
 }));
+vi.mock('../../../../src/shared/cloud/api/healthCommands.js', () => ({ commandCharacterVitals: cloud.command }));
 vi.mock('../../../../src/shared/cloud/api/characterDigests.js', async (original) => ({
   ...await original(),
   listCharacterDigests: (...args) => cloud.list(...args),

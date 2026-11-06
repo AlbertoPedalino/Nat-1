@@ -1,6 +1,4 @@
-import {
-  commandCharacterVitals, healthCommandStats, HEALTH_CONFLICT, HEALTH_TIMEOUT,
-} from '../../../../../src/shared/cloud/api/cloudCharacters.js';
+import { commandCharacterVitals, healthCommandStats, HEALTH_CONFLICT, HEALTH_TIMEOUT } from '../../../../../src/shared/cloud/api/healthCommands.js';
 import { toCharacterDigest } from '../../../../../src/shared/campaign/characterDigest.js';
 import { CHARACTER_RECHECK_EVENT, CHARACTER_VITALS_EVENT } from '../../../../../src/shared/cloud/sync/characterEvents.js';
 

@@ -50,7 +50,7 @@ vi.mock('../../../../../src/shared/cloud/api/vttTokens.js', async (importOrigina
   setTokenHp: (...args) => m.setTokenHp(...args),
   listTokenSecretHp: async () => m.secretHp.current,
 }));
-vi.mock('../../../../../src/shared/cloud/api/cloudCharacters.js', () => ({
+vi.mock('../../../../../src/shared/cloud/api/healthCommands.js', () => ({
   commandCharacterVitals: (...args) => m.characterCommand(...args),
 }));
 vi.mock('../../../../../src/shared/ui/ToastProvider.jsx', () => ({ useToast: () => ({ notify: m.notify }) }));

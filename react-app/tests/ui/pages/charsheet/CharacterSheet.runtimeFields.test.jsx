@@ -11,9 +11,10 @@ const CATALOG = [{ name: 'Agonizing Blast', source: 'XPHB', featureType: ['EI'],
 const cloud = vi.hoisted(() => ({ save: vi.fn(), push: vi.fn(), list: vi.fn() }));
 vi.mock('../../../../src/shared/cloud/api/cloudCharacters.js', () => ({
   updateCloudCharacterData: cloud.save, pushCharacter: cloud.push, updateForeignCharacter: cloud.push,
-  commandCharacterVitals: vi.fn(), getCloudSheetRevision: vi.fn(async () => 0), getCloudCharacter: vi.fn(),
+  getCloudSheetRevision: vi.fn(async () => 0), getCloudCharacter: vi.fn(),
   SHEET_CONFLICT: 'SHEET_CONFLICT',
 }));
+vi.mock('../../../../src/shared/cloud/api/healthCommands.js', () => ({ commandCharacterVitals: vi.fn() }));
 vi.mock('../../../../src/shared/cloud/api/characterDigests.js', async (original) => ({
   ...await original(),
   listCharacterDigests: (...args) => cloud.list(...args),

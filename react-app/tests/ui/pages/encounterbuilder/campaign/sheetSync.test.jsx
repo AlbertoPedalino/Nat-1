@@ -9,7 +9,7 @@ import { healthCommandRoute } from '../../../../../src/shared/cloud/api/healthCo
 const cloud = vi.hoisted(() => ({
   command: vi.fn(), get: vi.fn(), sheets: vi.fn(), notify: vi.fn(), receivers: new Set(), filters: [], states: {},
 }));
-vi.mock('../../../../../src/shared/cloud/api/cloudCharacters.js', () => ({ commandCharacterVitals: cloud.command }));
+vi.mock('../../../../../src/shared/cloud/api/healthCommands.js', () => ({ commandCharacterVitals: cloud.command }));
 vi.mock('../../../../../src/shared/cloud/api/characterDigests.js', async (original) => ({
   ...await original(),
   listCharacterDigests: (...args) => cloud.get(...args),

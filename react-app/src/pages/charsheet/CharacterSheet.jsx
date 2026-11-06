@@ -27,9 +27,7 @@ import {
   reconcileLoadedCharacter,
 } from './state/sheetLoad.js';
 import { normalizeCharacterAttunement } from './inventory/attunement.js';
-import {
-  commandCharacterVitals,
-} from '../../shared/cloud/api/cloudCharacters.js';
+import { commandCharacterVitals } from '../../shared/cloud/api/healthCommands.js';
 import { useCharacterDigests } from '../../shared/cloud/sync/useCharacterDigests.js';
 import { useAuth } from '../../shared/cloud/auth/AuthProvider.jsx';
 import { isSyncExcluded } from '../../shared/cloud/sync/cloudSyncExclude.js';
