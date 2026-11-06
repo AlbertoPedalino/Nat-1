@@ -5,16 +5,17 @@ import {
 } from 'lucide-react';
 import { signMapImage } from '../../../shared/cloud/api/vtt.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
+import { getStorageItem, setStorageItem } from '../../../shared/storage/storage.js';
 
 // Folded or open is this GM's own preference, kept across scenes and reloads.
 const COLLAPSED_KEY = 'gb:vtt:background-strip-collapsed';
 
 function readCollapsed() {
-  try { return window.localStorage.getItem(COLLAPSED_KEY) === '1'; } catch { return false; }
+  return getStorageItem(COLLAPSED_KEY) === '1';
 }
 
 function writeCollapsed(value) {
-  try { window.localStorage.setItem(COLLAPSED_KEY, value ? '1' : '0'); } catch {}
+  setStorageItem(COLLAPSED_KEY, value ? '1' : '0');
 }
 
 // The GM's slider through the scene's backgrounds, along the bottom of the map

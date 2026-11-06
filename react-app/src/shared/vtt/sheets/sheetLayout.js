@@ -1,3 +1,5 @@
+import { getStorageItem, setStorageItem } from '../../storage/storage.js';
+
 export const DEFAULT_SHEET_SPLIT = 60;
 export const MIN_MAP_SPLIT = 35;
 export const MAX_MAP_SPLIT = 72;
@@ -23,20 +25,13 @@ export function sheetGridColumns(value) {
   return `minmax(0, ${map}fr) 12px minmax(360px, ${100 - map}fr)`;
 }
 
-export function readSheetSplit(storage, key) {
-  try {
-    return normalizeSheetSplit(storage?.getItem(key));
-  } catch (_) {
-    return DEFAULT_SHEET_SPLIT;
-  }
+// A layout preference of this device; a blocked storage only forgets it.
+export function readSheetSplit(key) {
+  return normalizeSheetSplit(getStorageItem(key));
 }
 
-export function writeSheetSplit(storage, key, value) {
+export function writeSheetSplit(key, value) {
   const normalized = normalizeSheetSplit(value);
-  try {
-    storage?.setItem(key, String(normalized));
-  } catch (_) {
-    // Layout preference is optional; a blocked storage must not affect play.
-  }
+  setStorageItem(key, normalized);
   return normalized;
 }

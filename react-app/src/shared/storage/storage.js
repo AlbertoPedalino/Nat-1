@@ -53,22 +53,28 @@ export function setStorageItem(key, value) {
   } catch (_) {}
 }
 
-export function removeStorageItem(key) {
-  try {
-    getStorage()?.removeItem(key);
-  } catch (_) {}
-}
-
+// A JSON value: `fallback` when it is missing, unreadable or storage is
+// blocked. Preferences and small caches read this way; a blocked storage only
+// forgets.
 export function getStorageJson(key, fallback = null) {
-  const raw = getStorageItem(key, null);
+  const raw = getStorageItem(key);
   if (raw == null) return fallback;
   try {
-    return JSON.parse(raw);
+    const value = JSON.parse(raw);
+    return value == null ? fallback : value;
   } catch (_) {
     return fallback;
   }
 }
 
 export function setStorageJson(key, value) {
-  setStorageItem(key, JSON.stringify(value));
+  try {
+    setStorageItem(key, JSON.stringify(value));
+  } catch (_) {}
+}
+
+export function removeStorageItem(key) {
+  try {
+    getStorage()?.removeItem(key);
+  } catch (_) {}
 }

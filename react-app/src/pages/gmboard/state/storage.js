@@ -2,6 +2,7 @@ import { createDefaultCoreState, createDefaultResults } from './defaultState.js'
 import { createDefaultTables } from '../tables/defaultTables.js';
 import { LEGACY_KEYS, migrateLegacyBoard } from './migration.js';
 import { readInstanceValue, saveLocal } from '../../../shared/instances/instanceStore.js';
+import { getStorageItem } from '../../../shared/storage/storage.js';
 
 // GM Board payload adapter: which keys an instance stores and how they are
 // (de)serialized. Registry, sync and opening are shared (shared/instances/);
@@ -16,14 +17,6 @@ export const STORAGE_KEYS = Object.freeze({
 
 export function scopeKey(id, key) {
   return `gb:board:${id}:${key}`;
-}
-
-function readRaw(key) {
-  try {
-    return localStorage.getItem(key);
-  } catch {
-    return null;
-  }
 }
 
 const readScoped = (id, key) => readInstanceValue(SECTION_KEY, id, key);
@@ -63,7 +56,7 @@ export function readPersistedBoard(id) {
   }
 
   const legacyScoped = readLegacyRecord((key) => readScoped(id, key));
-  const legacySource = legacyScoped || (id === 'default' ? readLegacyRecord((key) => readRaw(key)) : null);
+  const legacySource = legacyScoped || (id === 'default' ? readLegacyRecord((key) => getStorageItem(key)) : null);
   if (legacySource) {
     const migrated = migrateLegacyBoard(legacySource);
     return { state: migrated.state, tables: migrated.tables, results: createDefaultResults() };

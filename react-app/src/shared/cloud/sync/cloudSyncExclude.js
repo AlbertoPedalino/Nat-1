@@ -1,19 +1,15 @@
+import { getStorageJson, setStorageJson } from '../../storage/storage.js';
 // Character ids that must NOT auto-sync to the cloud (e.g. a sheet imported from
 // a JSON file someone sent you — it stays local and is never pushed to your account).
 const KEY = 'gb:cloud_nosync';
 
 function read() {
-  try {
-    const raw = localStorage.getItem(KEY);
-    const obj = raw ? JSON.parse(raw) : {};
-    return obj && typeof obj === 'object' ? obj : {};
-  } catch (_) {
-    return {};
-  }
+  const obj = getStorageJson(KEY, {});
+  return typeof obj === 'object' ? obj : {};
 }
 
 function write(map) {
-  try { localStorage.setItem(KEY, JSON.stringify(map)); } catch (_) {}
+  setStorageJson(KEY, map);
 }
 
 export function isSyncExcluded(id) {

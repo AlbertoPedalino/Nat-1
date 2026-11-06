@@ -1,20 +1,16 @@
+import { getStorageJson, setStorageJson } from '../../storage/storage.js';
 // Local character ids that are NOT mine but that I'm allowed to edit (a global
 // GM, or the GM of the sheet's campaign). For these, auto-sync updates the cloud
 // row's data only — it must never change `owner` or insert a new row.
 const KEY = 'gb:cloud_foreign';
 
 function read() {
-  try {
-    const raw = localStorage.getItem(KEY);
-    const obj = raw ? JSON.parse(raw) : {};
-    return obj && typeof obj === 'object' ? obj : {};
-  } catch (_) {
-    return {};
-  }
+  const obj = getStorageJson(KEY, {});
+  return typeof obj === 'object' ? obj : {};
 }
 
 function write(map) {
-  try { localStorage.setItem(KEY, JSON.stringify(map)); } catch (_) {}
+  setStorageJson(KEY, map);
 }
 
 function notify(id, foreign) {

@@ -1,14 +1,11 @@
 import { useCallback, useState } from 'react';
 import { Box, FormControlLabel, Switch } from '@mui/material';
 import { StatBlockHeader, StatBlockSheet } from '../../encounterbuilder/bestiary/StatBlockDialog.jsx';
+import { getStorageItem, setStorageItem } from '../../../shared/storage/storage.js';
 
 // Per GM device, like the builder's own "show to players": most monster rolls
 // are the GM's business, and the default says so.
 const PUBLIC_KEY = 'gb:vtt:creature-rolls-public';
-
-function readPublic() {
-  try { return localStorage.getItem(PUBLIC_KEY) === '1'; } catch (_) { return false; }
-}
 
 // The stat block of a creature of the shown fight, opened by the GM from its
 // piece or its entry in the initiative. Rolls go to the battle map's dice and
@@ -21,11 +18,11 @@ function readPublic() {
 export default function MonsterStatBlockView({
   monster, legendaryGroups, conditions, onRoll, onClose,
 }) {
-  const [shown, setShown] = useState(readPublic);
+  const [shown, setShown] = useState(() => getStorageItem(PUBLIC_KEY) === '1');
   const toggleShown = useCallback((event) => {
     const next = event.target.checked;
     setShown(next);
-    try { localStorage.setItem(PUBLIC_KEY, next ? '1' : '0'); } catch (_) {}
+    setStorageItem(PUBLIC_KEY, next ? '1' : '0');
   }, []);
   const handleRoll = useCallback((roll) => {
     onRoll?.({ ...roll, visibility: shown ? 'public' : 'gm' });

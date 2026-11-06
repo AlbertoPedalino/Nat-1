@@ -17,6 +17,7 @@ import CustomRollDialog from '../../../shared/character/dice/CustomRollDialog.js
 import RollActorLabel from '../../../shared/character/dice/RollActorLabel.jsx';
 import RollCalculation from '../../../shared/character/dice/RollCalculation.jsx';
 import { rollOutcome } from '../../../shared/character/dice/rollLogPresentation.js';
+import { getActiveCharId } from '../../../shared/character/profile/store.js';
 
 function cleanFormula(detail) {
   if (!detail) return '';
@@ -139,7 +140,7 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
                   // or wrong builder). C.id covers chars whose id lives in the data.
                   const targetId = charId || C?.id
                     || params.get('char') || params.get('id')
-                    || localStorage.getItem('gb:active_char') || 'new';
+                    || getActiveCharId() || 'new';
                   navigate(`/charbuilder?char=${encodeURIComponent(targetId)}`);
                 }}
                 sx={appNavButtonSx}>

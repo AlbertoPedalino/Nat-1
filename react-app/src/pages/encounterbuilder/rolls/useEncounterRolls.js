@@ -3,10 +3,10 @@ import { useRollChannel } from '../../../shared/cloud/sync/useRollChannel.js';
 import { normalizeRoll } from '../../../shared/vtt/rolls/rollFeed.js';
 import { buildEncounterDiceToast } from './EncounterDiceToast.jsx';
 import { normalizeRollIdentity } from '../../../shared/character/dice/rollLogPresentation.js';
+import { getStorageJson, setStorageJson } from '../../../shared/storage/storage.js';
 
 function readSettings(instanceId) {
-  try { return JSON.parse(localStorage.getItem(`gb-enc-rolls:${instanceId}`)) || {}; }
-  catch (_) { return {}; }
+  return getStorageJson(`gb-enc-rolls:${instanceId}`, {});
 }
 
 export function useEncounterRolls({ instanceId, players, campaigns, dispatch }) {
@@ -44,7 +44,7 @@ export function useEncounterRolls({ instanceId, players, campaigns, dispatch }) 
   const updateSettings = useCallback((patch) => {
     setSettings((current) => {
       const next = { ...current, ...patch };
-      try { localStorage.setItem(`gb-enc-rolls:${instanceId}`, JSON.stringify(next)); } catch (_) {}
+      setStorageJson(`gb-enc-rolls:${instanceId}`, next);
       return next;
     });
   }, [instanceId]);

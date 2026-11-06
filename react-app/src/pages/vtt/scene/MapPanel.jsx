@@ -49,6 +49,7 @@ import { ATMOSPHERE_PRESETS, atmosphereFor } from '../../../shared/vtt/scene/atm
 import { IMAGE_FILTER_PRESETS, imageFilterFor } from '../../../shared/vtt/scene/imageFilters.js';
 import { battleMapDialogPaperSx } from '../map/battleMapSurface.js';
 import { numberSx, pillLabelSx, colorInputSx } from './panelStyles.js';
+import { getStorageJson, setStorageJson } from '../../../shared/storage/storage.js';
 
 // The GM's scene panel (MapCorner): four collapsible sections — Pictures,
 // Light & weather (per-picture light filter and atmosphere), Grid, Play area —
@@ -226,18 +227,14 @@ function ImageLightSection({ scene, onImageFilterChange }) {
 
 // Which of the scene panel's sections are open. A per-browser convenience: a
 // GM who calibrates once and then lives in the weather should not reopen it
-// every time. Read through try/catch, so a blocked storage only forgets.
+// every time. A blocked storage only forgets.
 const SECTIONS_KEY = 'gb:vtt-scene-sections';
 
 const DEFAULT_SECTIONS = Object.freeze(['pictures']);
 
 function readOpenSections() {
-  try {
-    const parsed = JSON.parse(window.localStorage.getItem(SECTIONS_KEY));
-    return Array.isArray(parsed) ? parsed : DEFAULT_SECTIONS;
-  } catch {
-    return DEFAULT_SECTIONS;
-  }
+  const stored = getStorageJson(SECTIONS_KEY);
+  return Array.isArray(stored) ? stored : DEFAULT_SECTIONS;
 }
 
 function useOpenSections() {
@@ -245,7 +242,7 @@ function useOpenSections() {
   const toggle = (id) => {
     const next = open.includes(id) ? open.filter((entry) => entry !== id) : [...open, id];
     setOpen(next);
-    try { window.localStorage.setItem(SECTIONS_KEY, JSON.stringify(next)); } catch {}
+    setStorageJson(SECTIONS_KEY, next);
   };
   return [open, toggle];
 }

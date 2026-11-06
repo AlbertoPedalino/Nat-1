@@ -29,11 +29,22 @@ test('grid columns carry the selected ratio without losing the divider', () => {
 
 test('sheet split preference safely round-trips through storage', () => {
   const values = new Map();
-  const storage = {
-    getItem: (key) => values.get(key) ?? null,
-    setItem: (key, value) => values.set(key, value),
-  };
-  assert.equal(readSheetSplit(storage, 'missing'), DEFAULT_SHEET_SPLIT);
-  assert.equal(writeSheetSplit(storage, 'split', 64), 64);
-  assert.equal(readSheetSplit(storage, 'split'), 64);
+  const had = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
+  Object.defineProperty(globalThis, 'localStorage', {
+    configurable: true,
+    value: { getItem: (key) => values.get(key) ?? null, setItem: (key, value) => values.set(key, value) },
+  });
+  try {
+    assert.equal(readSheetSplit('missing'), DEFAULT_SHEET_SPLIT);
+    assert.equal(writeSheetSplit('split', 64), 64);
+    assert.equal(readSheetSplit('split'), 64);
+  } finally {
+    if (had) Object.defineProperty(globalThis, 'localStorage', had);
+    else delete globalThis.localStorage;
+  }
+});
+
+test('without a storage the split is the default and writing is harmless', () => {
+  assert.equal(readSheetSplit('split'), DEFAULT_SHEET_SPLIT);
+  assert.equal(writeSheetSplit('split', 50), 50);
 });

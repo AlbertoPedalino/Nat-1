@@ -453,13 +453,11 @@ export default function SceneEditor({
   }, [role.isGm, scene.backgroundPath, scene.shownImage]);
 
   useEffect(() => {
-    const storage = typeof window === 'undefined' ? null : window.localStorage;
-    setSheetSplit(readSheetSplit(storage, sheetSplitStorageKey));
+    setSheetSplit(readSheetSplit(sheetSplitStorageKey));
   }, [sheetSplitStorageKey]);
 
   const commitSheetSplit = useCallback((value) => {
-    const storage = typeof window === 'undefined' ? null : window.localStorage;
-    setSheetSplit(writeSheetSplit(storage, sheetSplitStorageKey, value));
+    setSheetSplit(writeSheetSplit(sheetSplitStorageKey, value));
   }, [sheetSplitStorageKey]);
 
   // How many cells the map image covers at the current calibration. Everything

@@ -27,6 +27,7 @@ import {
   toTokenPatch,
 } from '../../vtt/scene/scene.js';
 import { toSceneTurns } from '../../vtt/tokens/initiative.js';
+import { getStorageJson, setStorageJson, removeStorageItem } from '../../storage/storage.js';
 
 // Cloud-only feature: scenes and tokens live in Postgres, with no local copy and
 // no JSON payload. That is why this module does not go through
@@ -653,25 +654,13 @@ export async function removeSceneBackground(scene, path) {
 // a new address for the same bytes and downloaded a whole battlemap again on
 // each reload.
 function readCachedUrl(path) {
-  try {
-    const raw = localStorage.getItem(SIGNED_URL_KEY + path);
-    if (!raw) return null;
-    const entry = JSON.parse(raw);
-    return entry?.url && entry.expiresAt - SIGNED_URL_MARGIN_MS > Date.now() ? entry.url : null;
-  } catch {
-    return null;
-  }
+  const entry = getStorageJson(SIGNED_URL_KEY + path);
+  return entry?.url && entry.expiresAt - SIGNED_URL_MARGIN_MS > Date.now() ? entry.url : null;
 }
 
 function writeCachedUrl(path, url, expiresIn) {
-  try {
-    localStorage.setItem(SIGNED_URL_KEY + path, JSON.stringify({
-      url,
-      expiresAt: Date.now() + expiresIn * 1000,
-    }));
-  } catch {
-    // A full or denied storage only costs the caching, not the picture.
-  }
+  // A full or denied storage only costs the caching, not the picture.
+  setStorageJson(SIGNED_URL_KEY + path, { url, expiresAt: Date.now() + expiresIn * 1000 });
 }
 
 export async function signMapImage(path, expiresIn = SIGNED_URL_TTL) {
@@ -688,9 +677,7 @@ export async function signMapImage(path, expiresIn = SIGNED_URL_TTL) {
 }
 
 function forgetSignedMapUrl(path) {
-  try {
-    localStorage.removeItem(SIGNED_URL_KEY + path);
-  } catch {}
+  removeStorageItem(SIGNED_URL_KEY + path);
 }
 
 export async function deleteMapImages(paths) {

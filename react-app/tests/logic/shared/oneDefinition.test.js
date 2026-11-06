@@ -40,6 +40,15 @@ test('a character file is downloaded only by downloadCharacterExport', () => {
   }), []);
 });
 
+// Preferences and small caches go through storage.js, where a blocked storage
+// only forgets. The two data stores keep their raw writes: they must fail
+// loudly so a write that did not fit is rolled back.
+test('localStorage is touched only by storage.js and the two data stores', () => {
+  assert.deepEqual(sourceFilesMatching(/localStorage\.(getItem|setItem|removeItem|key)\(/, {
+    allow: ['shared/storage/storage.js', 'shared/character/profile/store.js', 'shared/instances/instanceStore.js'],
+  }), []);
+});
+
 test('every realtime channel opens through openRealtimeChannel', () => {
   assert.deepEqual(sourceFilesMatching(/\.(channel|removeChannel)\(/, {
     allow: ['shared/cloud/realtimeChannel.js'],
