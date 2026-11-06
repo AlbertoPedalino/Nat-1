@@ -1,12 +1,20 @@
 import { useDeferredValue, useMemo, useState } from 'react';
 import {
-  Alert, Box, Button, Chip, CircularProgress, List, ListItemButton, Stack, Typography,
+  Alert,
+  Box,
+  Button,
+  Chip,
+  List,
+  ListItemButton,
+  Stack,
+  Typography,
 } from '@mui/material';
 import { ArrowLeft } from 'lucide-react';
 import SearchField from '../../shared/ui/SearchField.jsx';
 import { COMPENDIUM_KIND_COLORS, chipTintStyle } from '../../shared/ui/entityColors.js';
 import { COMPENDIUM_KINDS, compendiumKind, searchCompendium } from './compendiumIndex.js';
 import CompendiumDetail from './CompendiumDetail.jsx';
+import LoadStatus, { isLoadPending } from '../../shared/ui/LoadStatus.jsx';
 
 const RESULT_LIMIT = 120;
 
@@ -65,15 +73,14 @@ export default function CompendiumBrowser({ compendium, layout = 'page', autoFoc
   );
 
   let list;
-  if (compendium.status === 'loading') {
+  if (isLoadPending(compendium.status)) {
     list = (
-      <Stack direction="row" spacing={1} sx={statusSx}>
-        <CircularProgress size={16} />
-        <Typography variant="body2" color="text.secondary">Loading the books…</Typography>
-      </Stack>
+      <LoadStatus
+        status={compendium.status}
+        loadingLabel="Loading the books…"
+        errorMessage="The compendium could not be loaded. Check the connection and reopen it."
+      />
     );
-  } else if (compendium.status === 'error') {
-    list = <Alert severity="error" sx={{ m: 1 }}>The compendium could not be loaded. Check the connection and reopen it.</Alert>;
   } else {
     list = (
       <>

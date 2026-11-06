@@ -1,13 +1,23 @@
 import { useDeferredValue, useMemo, useState } from 'react';
 import {
-  Alert, Box, Button, CircularProgress, Dialog, DialogContent, IconButton, MenuItem, Stack, TextField, Typography,
-  useMediaQuery, useTheme,
+  Box,
+  Button,
+  Dialog,
+  DialogContent,
+  IconButton,
+  MenuItem,
+  Stack,
+  TextField,
+  Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import { X } from 'lucide-react';
 import { List } from 'react-window';
 import SearchField from '../../shared/ui/SearchField.jsx';
 import { SOURCE_LABELS } from '../../shared/bestiary/bestiaryConstants.js';
 import CompendiumDetail from './CompendiumDetail.jsx';
+import LoadStatus, { isLoadPending } from '../../shared/ui/LoadStatus.jsx';
 
 // A compendium catalog: a filter bar of selects over one kind's entries, a
 // virtualized list with columns (one compact line in the panel), and the
@@ -51,16 +61,14 @@ export default function Catalog({
   const narrow = layout === 'panel' || phone;
   const changed = Object.keys(initialFilters).some((key) => key !== 'sort' && filters[key] !== initialFilters[key]);
 
-  if (compendium.status === 'loading') {
+  if (isLoadPending(compendium.status)) {
     return (
-      <Stack direction="row" spacing={1} sx={statusSx}>
-        <CircularProgress size={16} />
-        <Typography variant="body2" color="text.secondary">Loading the books…</Typography>
-      </Stack>
+      <LoadStatus
+        status={compendium.status}
+        loadingLabel="Loading the books…"
+        errorMessage="The items could not be loaded. Check the connection and reopen this page."
+      />
     );
-  }
-  if (compendium.status === 'error') {
-    return <Alert severity="error" sx={{ m: 1 }}>The items could not be loaded. Check the connection and reopen this page.</Alert>;
   }
 
   const template = columns.map((column) => column.width).join(' ');

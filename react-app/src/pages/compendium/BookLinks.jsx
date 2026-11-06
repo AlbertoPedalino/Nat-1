@@ -1,10 +1,16 @@
 import { useEffect, useState } from 'react';
 import {
-  Alert, Box, Chip, CircularProgress, List, ListItemButton, ListSubheader, Stack, Typography,
+  Box,
+  Chip,
+  List,
+  ListItemButton,
+  ListSubheader,
+  Typography,
 } from '@mui/material';
 import { ExternalLink } from 'lucide-react';
 import { loadBookList } from './books.js';
 import { UI_FONTS } from '../../shared/ui/fonts.js';
+import LoadStatus, { isLoadPending } from '../../shared/ui/LoadStatus.jsx';
 
 // The supported manuals and adventures, each opening its 5etools page in a new
 // tab.
@@ -18,16 +24,14 @@ export default function BookLinks() {
     return () => { cancelled = true; };
   }, []);
 
-  if (state.status === 'loading') {
+  if (isLoadPending(state.status)) {
     return (
-      <Stack direction="row" spacing={1} sx={statusSx}>
-        <CircularProgress size={16} />
-        <Typography variant="body2" color="text.secondary">Loading the shelf…</Typography>
-      </Stack>
+      <LoadStatus
+        status={state.status}
+        loadingLabel="Loading the shelf…"
+        errorMessage="The list of books could not be loaded. Check the connection and try again."
+      />
     );
-  }
-  if (state.status === 'error') {
-    return <Alert severity="error" sx={{ m: 1 }}>The list of books could not be loaded. Check the connection and try again.</Alert>;
   }
   const groups = [
     ['Manuals', state.books.filter((book) => book.kind === 'book')],
@@ -49,8 +53,6 @@ export default function BookLinks() {
     </Box>
   );
 }
-
-const statusSx = { p: 2, alignItems: 'center' };
 
 const scrollSx = { minHeight: 0, overflowY: 'auto', flex: 1 };
 
