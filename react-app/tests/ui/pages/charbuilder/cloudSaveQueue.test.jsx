@@ -1,4 +1,4 @@
-import { createCloudSaveQueue } from '../../../../src/pages/charbuilder/state/cloudSaveQueue.js';
+import { createCloudSaveQueue } from '../../../../src/shared/cloud/sync/cloudSaveQueue.js';
 import { saveBuilderCharacter } from '../../../../src/pages/charbuilder/state/cloudSave.js';
 import { SHEET_CONFLICT } from '../../../../src/shared/cloud/api/cloudCharacters.js';
 

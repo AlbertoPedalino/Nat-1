@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   getCloudCharacter,
-  SHEET_CONFLICT,
   updateCloudCharacterData,
 } from '../../../shared/cloud/api/cloudCharacters.js';
+import { useCharacterCloudSave } from '../../../shared/cloud/sync/useCharacterCloudSave.js';
 import { useCharacterSheetRevision } from '../../../shared/cloud/sync/useCharacterSheetRevision.js';
 import { CLOUD_SYNC_EVENT, cloudSyncState, isCloudSyncBusy } from '../../../shared/cloud/sync/cloudSyncState.js';
 import { isSyncExcluded } from '../../../shared/cloud/sync/cloudSyncExclude.js';
@@ -14,7 +14,6 @@ import {
   rebaseCharacterSync,
   saveCharacter as storeSaveCharacter,
 } from '../../../shared/character/profile/store.js';
-import { listenForRecovery } from '../../../shared/cloud/sync/recoveryTriggers.js';
 import { useEventListener } from '../../../shared/ui/useEventListener.js';
 
 const CLOUD_SAVE_DELAY_MS = 1_200;
@@ -36,8 +35,7 @@ export function useSheetCloudSave({
   const cloudSaveInFlightRef = useRef(null);
   const cloudSaveTimerRef = useRef(null);
   const flushCloudSaveRef = useRef(null);
-  const cloudSaveMountedRef = useRef(true);
-  const cloudSaveErrorShownRef = useRef(false);
+  const resetErrorNoticeRef = useRef(null);
   const localEditVersionRef = useRef(0);
   const queuedEditVersionRef = useRef(0);
   const [reloadKey, setReloadKey] = useState(0);
@@ -53,7 +51,7 @@ export function useSheetCloudSave({
     pendingCloudSaveRef.current = null;
     localEditVersionRef.current = 0;
     queuedEditVersionRef.current = 0;
-    cloudSaveErrorShownRef.current = false;
+    resetErrorNoticeRef.current?.();
     clearTimeout(cloudSaveTimerRef.current);
     cloudSaveTimerRef.current = null;
   }, []);
@@ -172,45 +170,38 @@ export function useSheetCloudSave({
     cloudSaveTimerRef.current = setTimeout(() => flushCloudSaveRef.current?.(), delay);
   }, []);
 
-  const flushCloudSave = useCallback(async () => {
-    const attempt = pendingCloudSaveRef.current;
-    // A conflict waits for the user's decision; nothing is saved meanwhile.
-    if (!attempt || cloudSaveInFlightRef.current || sheetConflictRef.current) return;
-    cloudSaveInFlightRef.current = attempt;
-    try {
-      // Conditional on the revision this sheet is based on: a change made
-      // elsewhere since is reported, never overwritten.
-      const known = sheetSync.knownRevision();
-      const result = await updateCloudCharacterData(attempt.charId, attempt.character, {
-        expectedSheetRevision: known >= 0 ? known : null,
-      });
-      if (pendingCloudSaveRef.current === attempt) {
-        pendingCloudSaveRef.current = null;
+  // A cloud sheet's own saves: the pending snapshot, conditional on the
+  // revision this sheet is based on (a change made elsewhere since is reported,
+  // never overwritten). A conflict waits for the user's decision; nothing is
+  // saved meanwhile. A failed save keeps the exact snapshot pending and is
+  // retried on the recovery triggers, also while hidden (it may be a map's
+  // embedded sheet).
+  const cloudSave = useCharacterCloudSave({
+    enabled: usesExternalChar && !readOnly,
+    whenHidden: true,
+    hasPending: () => Boolean(pendingCloudSaveRef.current),
+    save: async () => {
+      const attempt = pendingCloudSaveRef.current;
+      if (!attempt || sheetConflictRef.current) return null;
+      cloudSaveInFlightRef.current = attempt;
+      try {
+        const known = sheetSync.knownRevision();
+        const result = await updateCloudCharacterData(attempt.charId, attempt.character, {
+          expectedSheetRevision: known >= 0 ? known : null,
+        });
+        if (pendingCloudSaveRef.current === attempt) pendingCloudSaveRef.current = null;
+        // Our own revision: its Realtime echo is not someone else's change.
+        sheetSync.noteSaved(result?.sheetRevision);
+        return result;
+      } finally {
+        cloudSaveInFlightRef.current = null;
       }
-      cloudSaveErrorShownRef.current = false;
-      // Our own revision: its Realtime echo is not someone else's change.
-      sheetSync.noteSaved(result?.sheetRevision);
-    } catch (error) {
-      if (error?.code === SHEET_CONFLICT) {
-        refreshForConflict();
-      } else if (!cloudSaveErrorShownRef.current) {
-        cloudSaveErrorShownRef.current = true;
-        showNotice('Cloud Save', error?.message || 'Failed to save online sheet.');
-      }
-      // Keep the exact snapshot pending. Online/focus/visibility and the
-      // 30-second safety timer below will retry it.
-    } finally {
-      cloudSaveInFlightRef.current = null;
-      if (
-        cloudSaveMountedRef.current
-        && pendingCloudSaveRef.current
-        && pendingCloudSaveRef.current !== attempt
-      ) {
-        scheduleCloudSave();
-      }
-    }
-  }, [refreshForConflict, scheduleCloudSave, sheetSync, showNotice]);
-  flushCloudSaveRef.current = flushCloudSave;
+    },
+    onConflict: () => refreshForConflict(),
+    onError: (error) => showNotice('Cloud Save', error?.message || 'Failed to save online sheet.'),
+  });
+  flushCloudSaveRef.current = cloudSave.request;
+  resetErrorNoticeRef.current = cloudSave.resetErrorNotice;
 
   useEffect(() => {
     if (!usesExternalChar || readOnly || !charId || !C) return undefined;
@@ -232,25 +223,12 @@ export function useSheetCloudSave({
       charId,
       character: C,
     };
-    cloudSaveErrorShownRef.current = false;
+    cloudSave.resetErrorNotice();
     scheduleCloudSave();
     return undefined;
-  }, [usesExternalChar, readOnly, charId, C, scheduleCloudSave]);
+  }, [usesExternalChar, readOnly, charId, C, scheduleCloudSave, cloudSave]);
 
-  useEffect(() => {
-    if (!usesExternalChar || readOnly) return undefined;
-    // A pending save is tried again on the shared triggers; a cloud sheet keeps
-    // retrying while hidden too (it may be a map's embedded sheet).
-    return listenForRecovery(() => flushCloudSaveRef.current?.(), { periodic: true, whenHidden: true });
-  }, [readOnly, usesExternalChar]);
-
-  useEffect(() => {
-    cloudSaveMountedRef.current = true;
-    return () => {
-      cloudSaveMountedRef.current = false;
-      clearTimeout(cloudSaveTimerRef.current);
-    };
-  }, []);
+  useEffect(() => () => clearTimeout(cloudSaveTimerRef.current), []);
 
   return { sheetConflict, loadRemoteVersion, keepLocalVersion, noteLocalEdit, resetCloudSave, reloadKey };
 }

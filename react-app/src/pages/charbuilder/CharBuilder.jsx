@@ -39,10 +39,10 @@ import SpeciesStep from './steps/SpeciesStep.jsx';
 import { useAuth } from '../../shared/cloud/auth/AuthProvider.jsx';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
 import {
-  deleteOwnCloudCharacter, getCloudCharacter, getCloudSheetRevision, SHEET_CONFLICT,
+  deleteOwnCloudCharacter, getCloudCharacter, getCloudSheetRevision,
 } from '../../shared/cloud/api/cloudCharacters.js';
 import { saveBuilderCharacter } from './state/cloudSave.js';
-import { createCloudSaveQueue } from './state/cloudSaveQueue.js';
+import { useCharacterCloudSave } from '../../shared/cloud/sync/useCharacterCloudSave.js';
 import { CHARACTER_SHEET_SAVED_EVENT } from '../../shared/cloud/sync/characterEvents.js';
 import SheetConflictBanner from '../../shared/ui/SheetConflictBanner.jsx';
 import {
@@ -169,32 +169,28 @@ export default function CharBuilder() {
     return result;
   };
 
-  // Saves run one at a time (createCloudSaveQueue): one requested while another
-  // is on its way waits for it, then writes the builder's state as it is by
-  // then, against the revision (or the row) the previous save produced.
+  // Saves run one at a time (useCharacterCloudSave): one requested while
+  // another is on its way waits for it, then writes the builder's state as it
+  // is by then, against the revision (or the row) the previous save produced.
+  // A refused save pauses cloud autosave until the user decides; a failed one
+  // is reported once and retried on the recovery triggers.
   const cloudSnapshotRef = useRef(null);
   cloudSnapshotRef.current = () => buildSheetCharacter(state.character, state.data, cloudPrevRef.current || {});
-  const cloudSaveQueueRef = useRef(null);
-  if (!cloudSaveQueueRef.current) {
-    cloudSaveQueueRef.current = createCloudSaveQueue(async () => {
+  const cloudSave = useCharacterCloudSave({
+    enabled: cloudActive,
+    save: async () => {
       // A refused save waits for the user's decision; so does everything queued behind it.
       if (cloudConflictRef.current) return null;
       const id = builderIdRef.current;
       if (!id) return null;
       return commitCloudSave(id, { ...cloudSnapshotRef.current(), id });
-    });
-  }
-  const saveToCloud = () => cloudSaveQueueRef.current();
-
-  // A refused save pauses cloud autosave until the user decides.
-  const reportCloudError = (error, label) => {
-    if (error?.code === SHEET_CONFLICT) {
+    },
+    onConflict: (error) => {
       cloudConflictRef.current = error;
       setCloudConflict(error);
-      return;
-    }
-    notify('error', `${label}: ${error?.message || error}`);
-  };
+    },
+    onError: (error) => notify('error', `Cloud save error: ${error?.message || error}`),
+  });
 
   // "Load updated version": the builder takes the cloud character.
   const loadCloudVersion = async () => {
@@ -253,19 +249,15 @@ export default function CharBuilder() {
   const handleUploadToCloud = async () => {
     const id = builderIdRef.current || generateCharId();
     builderIdRef.current = id;
-    try {
-      // Through the same queue as autosave: never alongside another save.
-      const result = await saveToCloud();
-      if (!result) return null;
-      includeInSync(id);
-      setImportDraft(false);
-      replaceCharacterIdInUrl(id);
-      notify('success', 'Uploaded to cloud.');
-      return id;
-    } catch (error) {
-      reportCloudError(error, 'Upload error');
-      return null;
-    }
+    // Through the same queue as autosave: never alongside another save. A
+    // failure is reported (and retried) by the queue.
+    const result = await cloudSave.request();
+    if (!result) return null;
+    includeInSync(id);
+    setImportDraft(false);
+    replaceCharacterIdInUrl(id);
+    notify('success', 'Uploaded to cloud.');
+    return id;
   };
 
   // After an explicit "Save local" of an imported draft: keep it local-only
@@ -420,7 +412,7 @@ export default function CharBuilder() {
           // Point the URL at the new id so a reload/edit targets the same character.
           replaceCharacterIdInUrl(builderIdRef.current);
         }
-        saveToCloud().catch((error) => reportCloudError(error, 'Cloud save error'));
+        cloudSave.request();
         return;
       }
 
@@ -432,7 +424,7 @@ export default function CharBuilder() {
       }
     }, cloudActive ? 1200 : 300);
     return () => clearTimeout(handle);
-    // saveToCloud/reportCloudError only read refs and stable setters.
+    // cloudSave.request is stable and reads refs.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.character, state.loading, state.data, authResolved, cloudActive, importDraft, cloudConflict]);
 
