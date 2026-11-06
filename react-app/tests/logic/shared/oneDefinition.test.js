@@ -264,3 +264,11 @@ test('skill, tool and language lists come from shared/content/rulesVocabulary.js
     { allow: ['shared/content/rulesVocabulary.js'] },
   ), []);
 });
+
+// Sizes, spell schools, damage types and creature types: one table each.
+test('size, school, damage and creature type tables come from shared/content/rulesVocabulary.js', () => {
+  assert.deepEqual(sourceFilesMatching(
+    /\bT:\s*['"]Tiny['"]|\bA:\s*['"]Abjuration['"]|['"]Abjuration['"],\s*['"]Conjuration['"]|\bA:\s*['"]acid['"]|\bA:\s*['"]Acid['"]|['"]Acid['"],\s*['"]Bludgeoning['"]|['"]Aberration['"],\s*['"]Beast['"]|['"]aberration['"],\s*\n?\s*['"]beast['"]/i,
+    { allow: ['shared/content/rulesVocabulary.js'] },
+  ), []);
+});

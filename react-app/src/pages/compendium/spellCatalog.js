@@ -4,6 +4,7 @@
 // Pure; the page is SpellCatalog.jsx.
 
 import { normalizeSearchText } from '../../shared/content/searchText.js';
+import { SPELL_SCHOOL_NAMES } from '../../shared/content/rulesVocabulary.js';
 
 export const SPELL_LEVELS = Object.freeze([
   { key: '0', label: 'Cantrip' },
@@ -13,10 +14,7 @@ export const SPELL_LEVELS = Object.freeze([
   })),
 ]);
 
-export const SPELL_SCHOOLS = Object.freeze(
-  ['Abjuration', 'Conjuration', 'Divination', 'Enchantment', 'Evocation', 'Illusion', 'Necromancy', 'Transmutation']
-    .map((school) => ({ key: school, label: school })),
-);
+export const SPELL_SCHOOLS = Object.freeze(Object.values(SPELL_SCHOOL_NAMES).map((school) => ({ key: school, label: school })));
 
 export const SPELL_CLASSES = Object.freeze(
   ['Artificer', 'Bard', 'Cleric', 'Druid', 'Paladin', 'Ranger', 'Sorcerer', 'Warlock', 'Wizard']

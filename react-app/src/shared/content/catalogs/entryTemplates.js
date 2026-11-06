@@ -1,14 +1,10 @@
 import { capitalize } from '../../ui/textCase.js';
+import { DAMAGE_TYPE_NAMES } from '../rulesVocabulary.js';
 
 // 5etools `{=field}` placeholders in entries: magic variants fill them from the
 // concrete item; any record shown without its template context drops them.
 
 const TEMPLATE_PLACEHOLDER_RE = /\{=[^}]+\}/;
-
-const DAMAGE_TYPE_LABELS = {
-  A: 'Acid', B: 'Bludgeoning', C: 'Cold', F: 'Fire', O: 'Force', L: 'Lightning',
-  N: 'Necrotic', P: 'Piercing', I: 'Poison', Y: 'Psychic', R: 'Radiant', S: 'Slashing', T: 'Thunder',
-};
 
 export function resolveVariantTemplate(node, fields, baseName) {
   if (node == null) return node;
@@ -24,7 +20,7 @@ export function resolveVariantTemplate(node, fields, baseName) {
         return name;
       }
       const value = fields?.[field];
-      if (field === 'dmgType') return DAMAGE_TYPE_LABELS[value] || value || match;
+      if (field === 'dmgType') return DAMAGE_TYPE_NAMES[value] || value || match;
       return value == null ? match : String(value);
     });
   }

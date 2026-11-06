@@ -1,3 +1,4 @@
+import { CREATURE_TYPES } from '../content/rulesVocabulary.js';
 // The monster sources the app loads, their labels, CR to XP, and the type and
 // size vocabulary of the bestiary.
 export const PROJECT_ALLOWED_SOURCES = Object.freeze([
@@ -69,21 +70,5 @@ export const CR_XP = Object.freeze({
 
 export const CR_ORDER = Object.freeze(['0', '1/8', '1/4', '1/2', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30']);
 
-export const TYPE_OPTIONS = Object.freeze([
-  'aberration',
-  'beast',
-  'celestial',
-  'construct',
-  'dragon',
-  'elemental',
-  'fey',
-  'fiend',
-  'giant',
-  'humanoid',
-  'monstrosity',
-  'ooze',
-  'plant',
-  'undead',
-]);
+export const TYPE_OPTIONS = Object.freeze(CREATURE_TYPES.map((type) => type.toLowerCase()));
 
-export const SIZE_LABELS = Object.freeze({ T: 'Tiny', S: 'Small', M: 'Medium', L: 'Large', H: 'Huge', G: 'Gargantuan' });

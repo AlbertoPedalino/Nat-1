@@ -7,22 +7,13 @@ import { normalizeSearchText } from '../../shared/content/searchText.js';
 import { parseCr } from '../../shared/character/forms/beasts.js';
 import { getCR, getHP, getAC, getType, getSizeLabel } from '../../shared/bestiary/monsterUtils.js';
 import { CR_ORDER } from '../../shared/bestiary/bestiaryConstants.js';
+import { CREATURE_TYPES, SIZE_NAMES } from '../../shared/content/rulesVocabulary.js';
 
 export const CHALLENGE_RATINGS = Object.freeze(CR_ORDER.map((cr) => ({ key: cr, label: `CR ${cr}` })));
 
-export const MONSTER_TYPES = Object.freeze(
-  ['Aberration', 'Beast', 'Celestial', 'Construct', 'Dragon', 'Elemental', 'Fey', 'Fiend', 'Giant', 'Humanoid', 'Monstrosity', 'Ooze', 'Plant', 'Undead']
-    .map((type) => ({ key: type.toLowerCase(), label: type })),
-);
+export const MONSTER_TYPES = Object.freeze(CREATURE_TYPES.map((type) => ({ key: type.toLowerCase(), label: type })));
 
-export const MONSTER_SIZES = Object.freeze([
-  { key: 'T', label: 'Tiny' },
-  { key: 'S', label: 'Small' },
-  { key: 'M', label: 'Medium' },
-  { key: 'L', label: 'Large' },
-  { key: 'H', label: 'Huge' },
-  { key: 'G', label: 'Gargantuan' },
-]);
+export const MONSTER_SIZES = Object.freeze(Object.entries(SIZE_NAMES).map(([key, label]) => ({ key, label })));
 
 export function crValue(monster) {
   return parseCr(getCR(monster?.cr)) ?? 0;

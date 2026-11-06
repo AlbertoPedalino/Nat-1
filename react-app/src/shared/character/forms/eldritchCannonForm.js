@@ -24,7 +24,6 @@
 
 import { classLevel } from '../progression/classLevel.js';
 
-export const CANNON_SIZE_LABEL = { S: 'Small', T: 'Tiny' };
 // AC 18 is fixed by the stat block; expose it as a constant for the panel.
 export const CANNON_AC = 18;
 export const CANNON_CREATE_RANGE_FT = 5;

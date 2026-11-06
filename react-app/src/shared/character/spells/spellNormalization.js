@@ -3,17 +3,7 @@ import { SPELL_SOURCE_PRIORITY, sourceRank } from '../../content/sourcePriority.
 import { asArray } from '../../lists.js';
 import { matchKey } from '../../content/nameKeys.js';
 import { capitalize } from '../../ui/textCase.js';
-
-const SCHOOL_FULL = {
-  A: 'Abjuration',
-  C: 'Conjuration',
-  D: 'Divination',
-  E: 'Enchantment',
-  V: 'Evocation',
-  I: 'Illusion',
-  N: 'Necromancy',
-  T: 'Transmutation',
-};
+import { SPELL_SCHOOL_NAMES } from '../../content/rulesVocabulary.js';
 
 // An underscore key as a label with its first letter capitalized.
 function title(value) {
@@ -122,7 +112,7 @@ export function normalizeSpellRecord(rawSpell) {
     source: String(raw.source || '').trim(),
     level: Number(raw.level || 0),
     isCantrip: Number(raw.level || 0) === 0,
-    schoolFull: raw.schoolFull || SCHOOL_FULL[String(raw.school || '')] || String(raw.school || ''),
+    schoolFull: raw.schoolFull || SPELL_SCHOOL_NAMES[String(raw.school || '')] || String(raw.school || ''),
     castingTimeLabel,
     castingTime: raw.castingTime || castingTimeLabel,
     rangeLabel,

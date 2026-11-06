@@ -2,7 +2,7 @@ import { parseSignedBonus } from './itemBonus.js';
 import { signed } from '../../ui/numberFormat.js';
 import { capitalize, titleCase } from '../../ui/textCase.js';
 import { stripSource } from '../../content/nameKeys.js';
-import { ABILITY_ABBREVIATIONS } from '../../content/rulesVocabulary.js';
+import { ABILITY_ABBREVIATIONS, DAMAGE_TYPE_NAMES } from '../../content/rulesVocabulary.js';
 
 // Type codes match 5etools schema. Note: "R" here means a Ranged Weapon item type;
 // the same letter as a weapon property means "Reach" (see WEAPON_PROPERTY_LABELS).
@@ -152,26 +152,10 @@ export function itemMasteryLabels(item) {
   return [...seen];
 }
 
-export const DAMAGE_TYPE_LABELS = {
-  A: 'acid',
-  B: 'bludgeoning',
-  C: 'cold',
-  F: 'fire',
-  O: 'force',
-  L: 'lightning',
-  N: 'necrotic',
-  P: 'piercing',
-  I: 'poison',
-  Y: 'psychic',
-  R: 'radiant',
-  S: 'slashing',
-  T: 'thunder',
-};
-
 export function decodeDamageType(code) {
   if (!code) return '';
   const key = stripSource(code).toUpperCase();
-  return DAMAGE_TYPE_LABELS[key] || String(code).toLowerCase();
+  return DAMAGE_TYPE_NAMES[key]?.toLowerCase() || String(code).toLowerCase();
 }
 
 function formatGpValue(rawValue) {

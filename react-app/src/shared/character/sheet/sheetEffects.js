@@ -9,6 +9,7 @@ import { ownedFeatNames } from '../progression/selectedFeats.js';
 import { primaryClassLevel } from '../progression/classLevel.js';
 import { asArray } from '../../lists.js';
 import { matchKey, stripSource } from '../../content/nameKeys.js';
+import { DAMAGE_TYPES } from '../../content/rulesVocabulary.js';
 
 export function cleanText(value) {
   if (value == null) return '';
@@ -22,22 +23,6 @@ export function cleanText(value) {
 export function effectKey(value) {
   return matchKey(cleanText(value));
 }
-
-const DAMAGE_TYPES = [
-  'Acid',
-  'Bludgeoning',
-  'Cold',
-  'Fire',
-  'Force',
-  'Lightning',
-  'Necrotic',
-  'Piercing',
-  'Poison',
-  'Psychic',
-  'Radiant',
-  'Slashing',
-  'Thunder',
-];
 
 export function displayLabel(value) {
   return canonicalDisplayLabel(value);

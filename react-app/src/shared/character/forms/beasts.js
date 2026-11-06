@@ -10,7 +10,7 @@ import { isAllowedSource, BEAST_ALLOWED_SOURCES } from '../../content/sourcePrio
 import { signed } from '../../ui/numberFormat.js';
 import { stripSource } from '../../content/nameKeys.js';
 import { statBlockTagText } from '../../content/statBlockTags.js';
-import { ABILITIES } from '../../content/rulesVocabulary.js';
+import { ABILITIES, sizeName } from '../../content/rulesVocabulary.js';
 
 // Known Beast forms by Druid level (XPHB 2024 "Beast Shapes" table): 4 at lv.2,
 // 6 at lv.4, 8 at lv.8. You may swap one known form per Long Rest.
@@ -94,12 +94,6 @@ function normalizeSpeed(raw) {
   return out;
 }
 
-function normalizeSize(raw) {
-  const SIZE = { T: 'Tiny', S: 'Small', M: 'Medium', L: 'Large', H: 'Huge', G: 'Gargantuan' };
-  const s = Array.isArray(raw?.size) ? raw.size[0] : raw?.size;
-  return SIZE[s] || s || '';
-}
-
 // Beast stat blocks list saving throws as signed totals, e.g.
 // `"save": { "con": "+5", "wis": "+3" }`. Project them to a numeric map; the
 // value is the form's *final* save bonus (it already bakes in the beast's own
@@ -142,7 +136,7 @@ export function normalizeBeast(raw) {
   return {
     name: String(raw.name),
     source: String(raw.source || ''),
-    size: normalizeSize(raw),
+    size: sizeName(raw?.size),
     crNum,
     cr: formatCr(crNum),
     ac: ac.value,

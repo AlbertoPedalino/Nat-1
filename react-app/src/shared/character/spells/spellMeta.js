@@ -1,5 +1,5 @@
 import { titleCase } from '../../ui/textCase.js';
-import { ABILITY_ABBREVIATIONS, abilityKey } from '../../content/rulesVocabulary.js';
+import { ABILITY_ABBREVIATIONS, SPELL_SCHOOL_NAMES, abilityKey } from '../../content/rulesVocabulary.js';
 // Single source for a spell's header meta (Casting Time / Range / Components /
 // Duration). Both the builder selection panel and the sheet spell card derive
 // their meta line + meta grid from here, so the format lives in one place.
@@ -8,17 +8,11 @@ import { ABILITY_ABBREVIATIONS, abilityKey } from '../../content/rulesVocabulary
 // raw-shape fallback (spell.time / spell.range / spell.duration / components)
 // so un-normalized 5etools records still render.
 
-// 5etools single-letter school codes → full names (V = Evocation, E = Enchantment).
-const SCHOOL_NAMES = {
-  A: 'Abjuration', C: 'Conjuration', D: 'Divination', E: 'Enchantment',
-  V: 'Evocation', I: 'Illusion', N: 'Necromancy', T: 'Transmutation',
-};
-
 function formatSchool(spell) {
   if (spell?.schoolFull) return spell.schoolFull;
   const raw = spell?.school;
   if (!raw) return '';
-  return SCHOOL_NAMES[String(raw).toUpperCase()] || raw;
+  return SPELL_SCHOOL_NAMES[String(raw).toUpperCase()] || raw;
 }
 
 function formatComponents(components) {

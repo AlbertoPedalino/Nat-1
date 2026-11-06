@@ -1,4 +1,5 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
+import { DAMAGE_TYPES } from '../../../shared/content/rulesVocabulary.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -15,7 +16,8 @@ registerSubclassAdapter("Warlock_Fiend", function (cls, lv, specs) {
       key: "fiend_resilience_damage_type",
       label: "Fiendish Resilience — Damage Type",
       type: "generic_choice",
-      from: ["Acid", "Bludgeoning", "Cold", "Fire", "Lightning", "Necrotic", "Piercing", "Poison", "Psychic", "Radiant", "Slashing", "Thunder"],
+      // Any damage type but Force (XPHB 2024).
+      from: DAMAGE_TYPES.filter((type) => type !== 'Force'),
       count: 1,
       level: 10
     });

@@ -1,5 +1,6 @@
 import { titleCase } from '../../ui/textCase.js';
 import { matchKey } from '../../content/nameKeys.js';
+import { DAMAGE_TYPES } from '../../content/rulesVocabulary.js';
 const CANONICAL_DISPLAY_LABELS = {
   light: 'Light',
   medium: 'Medium',
@@ -9,19 +10,7 @@ const CANONICAL_DISPLAY_LABELS = {
   simple: 'Simple',
   martial: 'Martial',
   common: 'Common',
-  acid: 'Acid',
-  bludgeoning: 'Bludgeoning',
-  cold: 'Cold',
-  fire: 'Fire',
-  force: 'Force',
-  lightning: 'Lightning',
-  necrotic: 'Necrotic',
-  piercing: 'Piercing',
-  poison: 'Poison',
-  psychic: 'Psychic',
-  radiant: 'Radiant',
-  slashing: 'Slashing',
-  thunder: 'Thunder',
+  ...Object.fromEntries(DAMAGE_TYPES.map((type) => [type.toLowerCase(), type])),
 };
 
 const SIMPLE_WEAPONS = new Set([

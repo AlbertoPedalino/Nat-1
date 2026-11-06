@@ -1,6 +1,6 @@
 import { asArray } from '../../lists.js';
 import { loadGameData } from '../../content/gameData.js';
-import { ABILITIES } from '../../content/rulesVocabulary.js';
+import { ABILITIES, sizeName } from '../../content/rulesVocabulary.js';
 // Bestiary files holding creatures a spell or class feature summons (their
 // records carry `summonedBySpell` / `summonedByClass`). XPHB has the Ranger's
 // primal beasts.
@@ -109,12 +109,6 @@ function normalizeSpeed(speed) {
   return out;
 }
 
-function sizeLabel(size) {
-  const labels = { T: 'Tiny', S: 'Small', M: 'Medium', L: 'Large', H: 'Huge', G: 'Gargantuan' };
-  const key = asArray(size)[0];
-  return labels[key] || key || '';
-}
-
 function typeLabel(type) {
   if (typeof type === 'string') return type;
   if (typeof type?.type === 'string') return type.type;
@@ -217,7 +211,7 @@ export function normalizeSummonedCreature(record, options = {}) {
   return {
     name: String(record.name || 'Summoned Creature'),
     source: String(record.source || ''),
-    size: sizeLabel(record.size),
+    size: sizeName(record.size),
     type: String(options.creatureType || '').trim() || typeLabel(record.type),
     cr: null,
     ac: resolveAc(record.ac, { spellLevel, abilityMod }),

@@ -23,7 +23,6 @@ import { ACTION_COLORS } from '../../../shared/ui/entityColors.js';
 import {
   CANNON_AC,
   CANNON_DAMAGE_IMMUNITIES,
-  CANNON_SIZE_LABEL,
   artificerLevel,
   cannonMaxHp,
   maxCannons,
@@ -38,6 +37,7 @@ import {
 import { withModifier } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { SIZE_NAMES } from '../../../shared/content/rulesVocabulary.js';
 
 const CINZEL = UI_FONTS.display;
 
@@ -51,7 +51,6 @@ const CINZEL = UI_FONTS.display;
 
 // The cannon's defenses, as the character's Defenses box lists them.
 const CANNON_DEFENSES = CANNON_DAMAGE_IMMUNITIES.map((type) => ({ kind: 'Immune', type }));
-
 
 export default function EldritchCannonPanel({ action, character, sheet, resources, onResChange }) {
   const { onUpdateCharacter, onUpdateSheet, onRoll, onShowToast } = useSheetActions();
@@ -166,7 +165,7 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
             <Box key={index} sx={cannonBoardSx}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
                 <Typography sx={{ ...headerSx, fontSize: '0.62rem' }}>
-                  {CANNON_SIZE_LABEL[cannon?.size] || 'Small'} Cannon {capacity > 1 ? `#${index + 1}` : ''}
+                  {SIZE_NAMES[cannon?.size] || 'Small'} Cannon {capacity > 1 ? `#${index + 1}` : ''}
                 </Typography>
                 <Button
                   size="small"
