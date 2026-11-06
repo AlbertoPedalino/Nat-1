@@ -1,4 +1,3 @@
-import { useRef } from 'react';
 import {
   Box,
   Checkbox,
@@ -18,6 +17,7 @@ import DeathSaveControls from './DeathSaveControls.jsx';
 import TokenMarkers from './TokenMarkers.jsx';
 import TokenMenuActions from './TokenMenuActions.jsx';
 import { compactFieldSx, sectionTitleSx } from './tokenMenuStyles.js';
+import { useDebouncedCallback } from '../../../shared/ui/useDebouncedCallback.js';
 
 // Right-click menu on the piece itself. Label, conditions and removal used to be
 // spread between a top-bar button and nothing at all; they belong on the thing
@@ -44,7 +44,7 @@ export default function TokenMenu({
   const placement = useMenuPlacement(anchor);
   const fields = useTokenMenuState(token, { onSave, onVitals });
   const { label, gmOnly, conditions, hpCurrent, showHp, effects, deathSaves, save } = fields;
-  const objectStyleTimerRef = useRef(null);
+  const saveObjectColor = useDebouncedCallback((color) => onObjectStyle?.(token, { color }), OBJECT_STYLE_DELAY);
 
   if (!token) return null;
   const isMapObject = Boolean(token.iconKey);
@@ -52,7 +52,6 @@ export default function TokenMenu({
   // optimistically and rolled back if the database refuses, and a local copy
   // would keep showing the tick that never took.
   const hiddenFromPlayers = Boolean(token.hiddenFromPlayers) || token.layer === 'gm';
-
 
   const menuWidth = isMapObject ? 270 : 360;
 
@@ -154,13 +153,7 @@ export default function TokenMenu({
               title="Object color"
               disabled={!canStyleObject}
               defaultValue={token.color || VTT_COLORS.gold}
-              onInput={(event) => {
-                const color = event.currentTarget.value;
-                clearTimeout(objectStyleTimerRef.current);
-                objectStyleTimerRef.current = setTimeout(() => {
-                  onObjectStyle?.(token, { color });
-                }, OBJECT_STYLE_DELAY);
-              }}
+              onInput={(event) => saveObjectColor(event.currentTarget.value)}
               sx={objectColorInputSx}
             />
           </Box>

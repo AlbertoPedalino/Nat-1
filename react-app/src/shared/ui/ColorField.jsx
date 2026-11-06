@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Box } from '@mui/material';
+import { useDebouncedCallback } from './useDebouncedCallback.js';
 
 // A native colour well that does not fight the picker it opens.
 //
@@ -12,19 +13,15 @@ import { Box } from '@mui/material';
 export default function ColorField({ value, onChange, label, sx, deferMs = 0 }) {
   const inputRef = useRef(null);
   const editing = useRef(false);
-  const changeTimerRef = useRef(null);
+  const deferredChange = useDebouncedCallback((next) => onChange?.(next), deferMs);
 
   useEffect(() => {
     if (!editing.current && inputRef.current) inputRef.current.value = value || '#000000';
   }, [value]);
 
   const emitChange = (next) => {
-    if (!deferMs) {
-      onChange?.(next);
-      return;
-    }
-    clearTimeout(changeTimerRef.current);
-    changeTimerRef.current = setTimeout(() => onChange?.(next), deferMs);
+    if (deferMs) deferredChange(next);
+    else onChange?.(next);
   };
 
   return (
