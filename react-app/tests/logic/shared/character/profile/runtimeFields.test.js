@@ -7,7 +7,7 @@ import {
 } from '../../../../../src/shared/character/profile/runtimeFields.js';
 import { initialBuilderState } from '../../../../../src/pages/charbuilder/state/state.js';
 import { buildSheetCharacter } from '../../../../../src/pages/charbuilder/state/persistence.js';
-import { serializeCharacterForExport } from '../../../../../src/pages/charbuilder/state/characterExport.js';
+import { serializeCharacterForExport } from '../../../../../src/shared/character/profile/characterExport.js';
 
 const CATALOG = [{ name: 'Agonizing Blast', source: 'XPHB', featureType: ['EI'], entries: ['rule text'] }];
 

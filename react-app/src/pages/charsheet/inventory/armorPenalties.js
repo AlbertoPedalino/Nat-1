@@ -8,10 +8,10 @@
  * - Heavy armor always gives Stealth disadvantage. Other armor can also set it via the armor table property.
  */
 
-import { getArmorTrainingInfo } from '../proficiency/proficiencies.js';
-import { requireEquipmentSets } from '../proficiency/equipmentSets.js';
+import { getArmorTrainingInfo } from '../../../shared/character/proficiency/proficiencyQueries.js';
+import { requireEquipmentSets } from '../../../shared/character/proficiency/equipmentSets.js';
 import { itemEffectInventory } from '../../../shared/character/forms/wildShapeForm.js';
-import { getFinal } from '../state/calculations.js';
+import { getFinal } from '../../../shared/character/sheet/sheetStats.js';
 
 export function getArmorPenalties(C, item, equipmentSets) {
   if (!item || !['LA', 'MA', 'HA', 'S'].includes(item.type)) {

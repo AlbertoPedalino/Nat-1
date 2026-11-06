@@ -2,18 +2,13 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Box, IconButton, Typography } from '@mui/material';
 import { Minus, Plus } from 'lucide-react';
 import SearchField from '../../../shared/ui/SearchField.jsx';
-import { loadItems } from '../../charbuilder/data/itemData.js';
+import { loadItems } from '../../../shared/content/catalogs/itemData.js';
 import { ItemNameIcon } from '../../../shared/content/FiveEToolsLink.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import { ItemReferenceBody } from '../../../shared/character/inventory/ItemReference.jsx';
-import {
-  addCraftedItem,
-  removeOneCrafted,
-  craftedCount,
-  craftedCountFor,
-} from '../../../shared/character/inventory/craftedItems.js';
-import { collectAllProficiencies } from '../proficiency/index.js';
-import { getMod, getFinal } from '../state/calculations.js';
+import { addCraftedItem, removeOneCrafted, craftedCount, craftedCountFor } from '../../../shared/character/inventory/craftedItemState.js';
+import { collectAllProficiencies } from '../../../shared/character/proficiency/allProficiencies.js';
+import { getMod, getFinal } from '../../../shared/character/sheet/sheetStats.js';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import {

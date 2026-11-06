@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { canonicalProperty, itemHasProperty, itemProperties } from '../../../../../src/shared/character/inventory/weaponProperties.js';
 import { isFinesseWeapon, isReachWeapon, isTwoHandedWeapon } from '../../../../../src/pages/charsheet/inventory/equipmentSlots.js';
-import { itemHasProperty as proficiencyHasProperty } from '../../../../../src/pages/charsheet/proficiency/weaponRules.js';
+import { itemHasProperty as proficiencyHasProperty } from '../../../../../src/shared/character/inventory/weaponProperties.js';
 
 const glaive = { name: 'Glaive', type: 'M', property: ['H', 'R|XPHB', '2H'] };
 

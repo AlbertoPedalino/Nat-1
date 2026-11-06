@@ -1,14 +1,14 @@
 import { useState, useCallback } from 'react';
 import { Box, Typography, Tooltip } from '@mui/material';
 import { Sparkles } from 'lucide-react';
-import { getInitiative, getPB } from '../state/calculations.js';
+import { getInitiative, getPB } from '../../../shared/character/sheet/sheetStats.js';
 import { getConditionsWithEffect } from '../../../shared/character/combat/conditions.js';
-import { getArmorTrainingInfo } from '../proficiency/proficiencies.js';
+import { getArmorTrainingInfo } from '../../../shared/character/proficiency/proficiencyQueries.js';
 import {
   collectResolvedResistanceItems,
   collectResolvedImmunityItems,
-} from '../state/sheetDefenses.js';
-import { getInitiativeAdvantageFromEffects } from '../state/effectBonuses.js';
+} from '../../../shared/character/sheet/sheetDefenses.js';
+import { getInitiativeAdvantageFromEffects } from '../../../shared/character/sheet/effectBonuses.js';
 import { advantageVisual } from './advantageMark.jsx';
 import {
   collectItemResistanceItems,

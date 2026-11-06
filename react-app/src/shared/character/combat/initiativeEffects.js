@@ -1,5 +1,5 @@
-import { collectSheetEffects } from '../../../pages/charsheet/state/sheetEffects.js';
-import { getAllResourceDefs } from '../../../pages/charsheet/resources/restResources.js';
+import { collectSheetEffects } from '../sheet/sheetEffects.js';
+import { getAllResourceDefs } from '../resources/restResources.js';
 import { primaryClassLevel } from '../progression/classLevel.js';
 import { matchKey } from '../../content/nameKeys.js';
 

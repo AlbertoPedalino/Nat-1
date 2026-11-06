@@ -21,7 +21,8 @@ if (!globalThis.localStorage) {
 const { daysInMonth, isLeapYear, advanceMinutes, formatHM, formatDate, formatDuration, validateStart } = await import('../../../../../src/pages/gmboard/session/time.js');
 const { effectiveHours, hasWeatherDisadvantage, travelTime, weatherEffectLabel, weatherTimerLabel, runWeatherChecks } = await import('../../../../../src/pages/gmboard/session/weather.js');
 const { getEvent, getLoot, getEnc, getTrap, getCompl, getEnvSev } = await import('../../../../../src/pages/gmboard/tables/tables.js');
-const { rollDie, rollD8D12, rollD20D20 } = await import('../../../../../src/pages/gmboard/logic/rng.js');
+const { rollD8D12, rollD20D20 } = await import('../../../../../src/pages/gmboard/logic/rng.js');
+const { rollDie } = await import('../../../../../src/shared/character/dice/dice.js');
 const { resolveProceed, resolveAdvanceOnly, resolveManualAdvance } = await import('../../../../../src/pages/gmboard/hexcrawl/hex.js');
 const { normalizeMountSpeed } = await import('../../../../../src/pages/gmboard/state/constants.js');
 const { createDungeon, isValidRoomCount, roomCountInputFrom } = await import('../../../../../src/pages/gmboard/dungeon/dungeon.js');

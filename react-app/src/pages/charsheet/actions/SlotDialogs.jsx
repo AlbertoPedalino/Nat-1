@@ -1,5 +1,5 @@
 import { Box, Button, Typography } from '@mui/material';
-import { SPELL_LEVEL_LABELS } from '../../charbuilder/constants.js';
+import { SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { serializeCharacterForExport } from '../../../../../src/pages/charbuilder/state/characterExport.js';
+import { serializeCharacterForExport } from '../../../../../src/shared/character/profile/characterExport.js';
 import { SYNCED_DATA_KEYS } from '../../../../../src/shared/character/combat/vitals.js';
 
 test('an export keeps the state of class features in play (form, companions, cannons)', () => {

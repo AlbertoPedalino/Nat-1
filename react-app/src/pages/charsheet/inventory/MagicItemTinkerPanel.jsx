@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Box, Button, MenuItem, Select, Stack, Typography } from '@mui/material';
-import { loadItems } from '../../charbuilder/data/itemData.js';
+import { loadItems } from '../../../shared/content/catalogs/itemData.js';
 import { getSheetSlots } from '../spells/spellcasting.js';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import {

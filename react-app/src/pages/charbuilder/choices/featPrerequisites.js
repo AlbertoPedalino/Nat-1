@@ -1,14 +1,11 @@
 import { collectOwnedFeatNames } from '../../../shared/character/progression/selectedFeats.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
-import { collectEquipmentProficiencySets } from '../../charsheet/proficiency/index.js';
-import { ARMOR_KIND_KEYS, armorSetTrainsKind } from '../../charsheet/proficiency/armorRules.js';
-import { getWeaponCategory, weaponMatchesRule } from '../../charsheet/proficiency/weaponRules.js';
+import { collectEquipmentProficiencySets } from '../../../shared/character/proficiency/equipmentSets.js';
+import { ARMOR_KIND_KEYS, armorSetTrainsKind } from '../../../shared/character/proficiency/armorRules.js';
+import { getWeaponCategory, weaponMatchesRule } from '../../../shared/character/proficiency/weaponRules.js';
 import { getCasterProgression } from '../progression/calculations.js';
 import { builtAbilityScores } from '../../../shared/character/progression/abilityScores.js';
-import {
-  characterWithoutFeatChoiceSlot,
-  meetsFeatPrerequisites,
-} from './featPrerequisiteRules.js';
+import { characterWithoutFeatChoiceSlot } from './featPrerequisiteRules.js';
 import { buildPreviewSheetCharacter } from '../preview/previewSheet.js';
 import { asArray } from '../../../shared/lists.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
@@ -126,4 +123,3 @@ export function buildFeatPrerequisiteContext({
   };
 }
 
-export { meetsFeatPrerequisites };

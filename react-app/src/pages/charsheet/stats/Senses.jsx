@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Box, Paper, Typography } from '@mui/material';
 import { ChevronDown, Eye } from 'lucide-react';
-import { getSkillBonus } from '../state/calculations.js';
+import { getSkillBonus } from '../../../shared/character/sheet/sheetStats.js';
 import { collectSenses } from './visionSenses.js';
 import { loadSenseDescriptions, getSenseDescriptionEntries, getFeatureDescriptionEntries } from './senseDescriptions.js';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';

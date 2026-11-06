@@ -1,4 +1,4 @@
-import { rollDie } from '../logic/rng.js';
+import { rollDie } from '../../../shared/character/dice/dice.js';
 
 // How long a hex takes: the terrain, what the sky is doing to it, and what the
 // party is riding. The mount divides rather than subtracts — a mount is a rate,

@@ -15,12 +15,10 @@ import { STAT_LABELS, STATS } from '../constants.js';
 import {
   getPrimaryClassLevel,
 } from '../progression/calculations.js';
-import {
-  collectAllProficiencies,
-  collectEquipmentProficiencySets,
-} from '../../charsheet/proficiency/proficiencies.js';
-import { collectPreviewEffectProficiencySections } from '../../charsheet/state/sheetEffects.js';
-import { collectPreviewDefenseSections } from '../../charsheet/state/sheetDefenses.js';
+import { collectAllProficiencies } from '../../../shared/character/proficiency/allProficiencies.js';
+import { collectEquipmentProficiencySets } from '../../../shared/character/proficiency/equipmentSets.js';
+import { collectPreviewEffectProficiencySections } from '../../../shared/character/sheet/sheetEffects.js';
+import { collectPreviewDefenseSections } from '../../../shared/character/sheet/sheetDefenses.js';
 import {
   collapseWeaponProficiencies,
   uniqueDisplayLabels,
@@ -31,11 +29,8 @@ import {
 } from '../../../shared/character/progression/typedProficiencies.js';
 import { collectResolvedWeaponMasteries } from '../../../shared/character/combat/weaponMastery.js';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
-import {
-  EntryAccordion,
-  partitionNamedEntries,
-  splitNamedEntries,
-} from '../../../shared/content/EntryAccordion.jsx';
+import { EntryAccordion } from '../../../shared/content/EntryAccordion.jsx';
+import { partitionNamedEntries, splitNamedEntries } from '../../../shared/content/entryStructure.js';
 import { collectAcFormulas, getEquippedArmor, computeAcFormulaValue } from '../../../shared/character/combat/ac.js';
 import { collectOwnedFeatNames } from '../../../shared/character/progression/selectedFeats.js';
 import { featDescriptionEntries } from '../../../shared/character/progression/featDescription.js';

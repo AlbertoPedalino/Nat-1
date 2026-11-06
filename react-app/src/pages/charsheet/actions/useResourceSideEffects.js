@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { installedRegistry } from '../../../adapters/index.js';
-import { PACT_SLOTS, SPELL_LEVEL_LABELS } from '../../charbuilder/constants.js';
+import { PACT_SLOTS, SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
 import { getSheetSlots } from '../spells/spellcasting.js';
 import {
   addCreatedSlot,

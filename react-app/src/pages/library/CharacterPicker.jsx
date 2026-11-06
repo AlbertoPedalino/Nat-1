@@ -11,7 +11,7 @@ import {
 } from '../../shared/cloud/api/cloudCharacters.js';
 import { deleteCharacter } from '../../shared/character/profile/store.js';
 import { readRegistry, renameRegistryEntry, REGISTRY_META } from '../../shared/storage/localStorageRegistries.js';
-import { downloadCharacterExport } from '../charbuilder/state/characterExport.js';
+import { downloadCharacterExport } from '../../shared/character/profile/characterExport.js';
 import { loadCharacterRows, canDeleteRow, deletePlanFor } from './logic/characterRows.js';
 import { shouldPullCloudCopy } from './logic/instanceRows.js';
 import { formatUpdatedAt } from './logic/tools.js';

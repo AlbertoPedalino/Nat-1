@@ -1,6 +1,6 @@
 import { Button, Tooltip } from '@mui/material';
 import { Sword } from 'lucide-react';
-import { effectiveD20Modifier } from '../state/calculations.js';
+import { effectiveD20Modifier } from '../../../shared/character/sheet/sheetStats.js';
 import { inlineButtonSx } from '../spells/spellsTabStyles.js';
 import { attackRollerToneSx } from '../../../shared/ui/entityColors.js';
 import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';

@@ -1,4 +1,4 @@
-import { loadItems } from '../../charbuilder/data/itemData.js';
+import { loadItems } from '../../../shared/content/catalogs/itemData.js';
 import { INVENTORY_SOURCE_PRIORITY, sourceRank } from '../../../shared/content/sourcePriority.js';
 import { itemDisplayName } from '../../../shared/character/inventory/itemIdentity.js';
 import { itemGroupKey as itemType } from '../../../shared/character/inventory/itemGroups.js';

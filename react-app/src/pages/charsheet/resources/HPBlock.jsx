@@ -3,7 +3,7 @@ import { Box, Typography, TextField, Button, Tooltip } from '@mui/material';
 import { HeartPulse, Sparkles, Skull } from 'lucide-react';
 import HpStepper from '../../../shared/character/combat/HpStepper.jsx';
 import { normalizeDeathSaves } from '../../../shared/character/combat/vitals.js';
-import { EXHAUSTION_MAX } from '../state/calculations.js';
+import { EXHAUSTION_MAX } from '../../../shared/character/sheet/sheetStats.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';

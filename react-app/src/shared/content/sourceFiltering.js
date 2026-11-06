@@ -8,8 +8,6 @@ import {
 } from './sourcePriority.js';
 import { matchKey } from './nameKeys.js';
 
-export { normalizeSource };
-
 export function isSupportedSubclassSource(source, edition) {
   return isAllowedSource(source, SUBCLASS_ALLOWED_SOURCES) && isSupportedEdition(edition);
 }

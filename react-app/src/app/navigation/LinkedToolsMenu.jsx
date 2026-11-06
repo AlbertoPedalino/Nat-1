@@ -9,9 +9,8 @@ import { useAuth } from '../../shared/cloud/auth/AuthProvider.jsx';
 import { listMyCampaigns } from '../../shared/cloud/api/campaigns.js';
 import { setCampaignDungeonEncounter, setCampaignToolGroup } from '../../shared/cloud/api/campaignTools.js';
 import { linkHexcrawlBoardCampaign, setCampaignHexcrawlBoard } from '../../shared/cloud/api/hexcrawl.js';
-import {
-  makeLinkGroupId, normalizeLinkGroupId, resolveGroupMerge, setLocalInstanceLink,
-} from '../../shared/instances/instanceLinks.js';
+import { makeLinkGroupId, normalizeLinkGroupId } from '../../shared/instances/linkGroupId.js';
+import { resolveGroupMerge, setLocalInstanceLink } from '../../shared/instances/instanceLinks.js';
 import { createInstance } from '../../shared/instances/instanceStore.js';
 import { ensureInstanceInCloud, linkCloudInstance, listToolInstances } from '../../shared/instances/instanceSync.js';
 import { SECTION_KEYS, SECTION_REGISTRY } from '../../shared/instances/sectionRegistry.js';

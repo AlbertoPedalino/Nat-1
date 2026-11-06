@@ -10,9 +10,9 @@
 // The Senses panel resolves a row's description by sense type first, then by the
 // originating feature's name, then falls back to the raw effect note.
 
-import { loadSenses } from '../../charbuilder/data/rulesData.js';
-import { loadOptionalFeatures } from '../../charbuilder/data/classData.js';
-import { loadFeats } from '../../charbuilder/data/characterOptionData.js';
+import { loadSenses } from '../../../shared/content/catalogs/rulesData.js';
+import { loadOptionalFeatures } from '../../../shared/content/catalogs/classData.js';
+import { loadFeats } from '../../../shared/content/catalogs/characterOptionData.js';
 import { sourceRank, CORE_2024_SOURCE_PRIORITY } from '../../../shared/content/sourcePriority.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
 

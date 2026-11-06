@@ -5,7 +5,7 @@ import {
   rollD20 as rollD20Dice,
 } from '../../../shared/character/dice/dice.js';
 import { characterItemBonuses } from '../../../shared/character/inventory/itemBonus.js';
-import { getSaveBonus, exhaustionD20Penalty } from './calculations.js';
+import { getSaveBonus, exhaustionD20Penalty } from '../../../shared/character/sheet/sheetStats.js';
 import { useRollChannel } from '../../../shared/cloud/sync/useRollChannel.js';
 import { useCharacterCampaign } from '../../../shared/cloud/sync/useCharacterCampaign.js';
 import { normalizeRoll } from '../../../shared/vtt/rolls/rollFeed.js';

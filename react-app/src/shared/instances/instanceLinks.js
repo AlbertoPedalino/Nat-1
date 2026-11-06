@@ -1,8 +1,6 @@
 import { setInstanceLinkGroup } from './instanceStore.js';
 import { makeLinkGroupId, normalizeLinkGroupId } from './linkGroupId.js';
 
-export { makeLinkGroupId, normalizeLinkGroupId };
-
 // Links (or unlinks, with null) a local instance. The change is local first
 // and synced like any other edit; views that show links are told directly.
 export function setLocalInstanceLink(sectionKey, id, linkGroupId) {

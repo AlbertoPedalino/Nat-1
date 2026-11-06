@@ -3,7 +3,7 @@ import { ClipboardList, CloudUpload, Download, FileText, Save } from 'lucide-rea
 import { useNavigate } from 'react-router-dom';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { makeSheetPayload, saveCharacter } from '../state/persistence.js';
-import { downloadCharacterExport } from '../state/characterExport.js';
+import { downloadCharacterExport } from '../../../shared/character/profile/characterExport.js';
 import { getActiveCharId } from '../../../shared/character/profile/store.js';
 import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';

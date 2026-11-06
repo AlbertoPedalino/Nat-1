@@ -1,20 +1,17 @@
 import { useCallback, useState } from 'react';
-import { getMod, getFinal, clampExhaustion } from '../state/calculations.js';
+import { getMod, getFinal, clampExhaustion } from '../../../shared/character/sheet/sheetStats.js';
 import {
   DEAD_CONDITION_KEY,
   setConditionActive,
 } from '../../../shared/character/combat/conditions.js';
-import {
-  clearCraftedByFlag,
-  VANISH_ON_LONG_REST_FLAGS,
-} from '../../../shared/character/inventory/craftedItems.js';
+import { clearCraftedByFlag, VANISH_ON_LONG_REST_FLAGS } from '../../../shared/character/inventory/craftedItemState.js';
 import { longRestCharacterPatch } from '../../../shared/character/resources/longRest.js';
 import {
   applyResourceRest,
   getAllResourceDefs,
   getHitDicePools,
   getUsedHitDiceTotal,
-} from './restResources.js';
+} from '../../../shared/character/resources/restResources.js';
 import { clearedToggles } from '../state/toggleState.js';
 import { applyFreeCastRest } from '../../../shared/character/spells/spellFreeCasts.js';
 import { getFreeCastDefsForCharacter } from '../spells/spellFreeCastDefs.js';

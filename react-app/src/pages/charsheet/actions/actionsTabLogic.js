@@ -25,8 +25,6 @@ import { ownedFeatNames } from '../../../shared/character/progression/selectedFe
 import { matchKey } from '../../../shared/content/nameKeys.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 
-export { getActionRollers } from '../../../shared/character/dice/rollers.js';
-
 export const FILTERS = ['all', 'action', 'bonus', 'reaction', 'special'];
 // Weapon/unarmed attacks get a red left-bar so attacks stand apart from other
 // Actions at a glance; the rest follow the shared action-economy colours.
@@ -110,7 +108,6 @@ export function buildActionTags(action, C) {
 // Single source of truth lives in restResources (handles string formulas like
 // 'proficiencyBonus' + function form). Re-exported so ActionsTab builds its
 // resource-max map from the same resolver instead of a divergent copy.
-export { normalizeResourceMax } from '../resources/restResources.js';
 
 function actionDedupeKey(item) {
   return [

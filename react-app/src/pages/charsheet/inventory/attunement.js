@@ -3,7 +3,7 @@ import {
   enforceAttunementRules,
   resolveAttunementLimit,
 } from '../../../shared/character/inventory/itemAttunement.js';
-import { collectSheetEffects } from '../state/sheetEffects.js';
+import { collectSheetEffects } from '../../../shared/character/sheet/sheetEffects.js';
 
 function hasSpellcastingConfig(config) {
   return Boolean(config?.spellcasting && Object.keys(config.spellcasting).length);

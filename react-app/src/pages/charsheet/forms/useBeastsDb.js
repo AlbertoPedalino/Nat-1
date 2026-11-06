@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { loadBeasts } from '../../charbuilder/data/beastData.js';
+import { loadBeasts } from '../../../shared/content/catalogs/beastData.js';
 
 // Loads the normalized beast DB for a sheet panel (Wild Shape / Wild Companion).
 // loadBeasts is cached per-file by loadGameData, so multiple callers share one

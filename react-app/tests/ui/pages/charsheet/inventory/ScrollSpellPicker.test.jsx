@@ -4,7 +4,7 @@ import { expect, test, vi } from 'vitest';
 import { theme } from '../../../../../src/app/theme.js';
 import ScrollSpellPicker from '../../../../../src/pages/charsheet/inventory/ScrollSpellPicker.jsx';
 
-vi.mock('../../../../../src/pages/charbuilder/data/spellData.js', () => ({
+vi.mock('../../../../../src/shared/content/catalogs/spellData.js', () => ({
   // The loader's real shape: the catalog with its indexes, not a bare list.
   loadSpells: async () => ({
     spells: [

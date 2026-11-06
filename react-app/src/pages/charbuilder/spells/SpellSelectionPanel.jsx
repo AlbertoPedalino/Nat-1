@@ -3,8 +3,9 @@ import { Chip, List, ListItemButton, Paper, Stack, ToggleButton, ToggleButtonGro
 import { BookOpen } from 'lucide-react';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
-import { SPELL_LEVEL_LABELS } from '../constants.js';
-import { collectAutoGrantedSpells, getSpellCounts, maxSpellLevel, spellMatchesAnyClass } from './spells.js';
+import { SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
+import { collectAutoGrantedSpells, getSpellCounts, maxSpellLevel } from './spells.js';
+import { spellMatchesAnyClass } from '../../../shared/character/spells/spellClassMatch.js';
 import { SpellMiniTags, SpellReferenceBody, SpellRowLabel, SpellSelectButton } from '../../../shared/character/spells/SpellReference.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import { entityChipSx } from '../../../shared/ui/entityColors.js';

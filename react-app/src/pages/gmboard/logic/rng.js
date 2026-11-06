@@ -1,8 +1,6 @@
 // The GM Board's paired rolls (d8+d12, 2d20), on the one dice engine.
 import { rollDie } from '../../../shared/character/dice/dice.js';
 
-export { rollDie };
-
 export function rollD8D12(rng = Math.random) {
   const d8 = rollDie(8, rng);
   const d12 = rollDie(12, rng);

@@ -6,7 +6,7 @@ import { collectFeatAsiBonuses } from '../../../../src/shared/character/progress
 import { initialBuilderState } from '../../../../src/pages/charbuilder/state/state.js';
 import { classChoiceSpecs } from '../../../../src/pages/charbuilder/choices/choiceSpecs.js';
 import { makeSheetPayload } from '../../../../src/pages/charbuilder/state/persistence.js';
-import { getFinal } from '../../../../src/pages/charsheet/state/calculations.js';
+import { getFinal } from '../../../../src/shared/character/sheet/sheetStats.js';
 import { buildSpellInfo } from '../../../../src/pages/charsheet/spells/spellsTabLogic.js';
 
 installArtificer(adapterRegistry);

@@ -13,11 +13,8 @@ class MemoryStorage {
 Object.defineProperty(globalThis, 'localStorage', { value: new MemoryStorage(), configurable: true });
 if (!globalThis.window) globalThis.window = { dispatchEvent: () => true };
 
-const {
-  normalizeLinkGroupId,
-  resolveGroupMerge,
-  setLocalInstanceLink,
-} = await import('../../../../src/shared/instances/instanceLinks.js');
+const { resolveGroupMerge, setLocalInstanceLink } = await import('../../../../src/shared/instances/instanceLinks.js');
+const { normalizeLinkGroupId } = await import('../../../../src/shared/instances/linkGroupId.js');
 const { createInstance, getInstance, listInstances } = await import('../../../../src/shared/instances/instanceStore.js');
 const { mergeInstanceRows } = await import('../../../../src/shared/instances/instanceSync.js');
 

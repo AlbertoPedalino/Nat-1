@@ -1,8 +1,8 @@
-import { ensureSheetRuntimeAdapters } from './sheetRuntimeAdapters.js';
-import { loadItems } from '../../charbuilder/data/itemData.js';
-import { loadOptionalFeatures } from '../../charbuilder/data/classData.js';
-import { loadConditions } from '../../charbuilder/data/rulesData.js';
-import { reconcileInventoryWithItemsDb } from '../../charbuilder/data/inventoryReconcile.js';
+import { ensureSheetRuntimeAdapters } from '../../../shared/character/sheet/sheetRuntimeAdapters.js';
+import { loadItems } from '../../../shared/content/catalogs/itemData.js';
+import { loadOptionalFeatures } from '../../../shared/content/catalogs/classData.js';
+import { loadConditions } from '../../../shared/content/catalogs/rulesData.js';
+import { reconcileInventoryWithItemsDb } from '../../../shared/content/catalogs/inventoryReconcile.js';
 import {
   collectReplicatePlanChoices,
 } from '../../../shared/character/inventory/replicateMagicItem.js';
@@ -14,7 +14,7 @@ import {
   getAllResourceDefs,
   normalizeResourceMax,
   resourceFullValue,
-} from '../resources/restResources.js';
+} from '../../../shared/character/resources/restResources.js';
 
 // What opening a sheet needs besides the stored character: the reference data
 // (cached per tab), the character reconciled with it, and its resources.

@@ -1,9 +1,9 @@
 import { useCallback, useEffect } from 'react';
-import { loadBackgrounds, loadFeats, loadSpecies } from '../data/characterOptionData.js';
-import { loadClassIndex, loadOptionalFeatures } from '../data/classData.js';
-import { loadItems } from '../data/itemData.js';
-import { loadSpells } from '../data/spellData.js';
-import { loadBeasts } from '../data/beastData.js';
+import { loadBackgrounds, loadFeats, loadSpecies } from '../../../shared/content/catalogs/characterOptionData.js';
+import { loadClassIndex, loadOptionalFeatures } from '../../../shared/content/catalogs/classData.js';
+import { loadItems } from '../../../shared/content/catalogs/itemData.js';
+import { loadSpells } from '../../../shared/content/catalogs/spellData.js';
+import { loadBeasts } from '../../../shared/content/catalogs/beastData.js';
 
 // The game data the builder needs, by scope: how to load it and where it goes
 // in `state.data`. Scope names are also what the load-error banner shows.

@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
 import { getEquippedArmorPenalties } from '../../../../../src/pages/charsheet/inventory/armorPenalties.js';
-import { collectEquipmentProficiencySets } from '../../../../../src/pages/charsheet/proficiency/equipmentSets.js';
+import { collectEquipmentProficiencySets } from '../../../../../src/shared/character/proficiency/equipmentSets.js';
 
 // Worn armor merges into a Wild Shape form like every other piece of
 // equipment: it imposes nothing, wherever the sheet asks (checks, saves,

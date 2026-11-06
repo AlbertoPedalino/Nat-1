@@ -4,7 +4,7 @@ import {
 } from '@mui/material';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
-import { getMod, getFinal, getPB } from '../state/calculations.js';
+import { getMod, getFinal, getPB } from '../../../shared/character/sheet/sheetStats.js';
 import { getSheetSlots } from '../spells/spellcasting.js';
 import {
   consumeSlot,

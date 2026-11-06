@@ -1,6 +1,6 @@
-import { getMod, getFinal, getPB } from '../state/calculations.js';
+import { getMod, getFinal, getPB } from '../../../shared/character/sheet/sheetStats.js';
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
-import { getWeaponProficiencyInfo, hasNonProficientArmor } from '../proficiency/proficiencies.js';
+import { getWeaponProficiencyInfo, hasNonProficientArmor } from '../../../shared/character/proficiency/proficiencyQueries.js';
 import {
   collectResolvedWeaponMasteries,
   findWeaponItemByName,
@@ -38,7 +38,7 @@ import {
   getUnarmedStrike,
   getWeaponEffectBonuses,
   getWeaponNotes,
-} from '../state/effectBonuses.js';
+} from '../../../shared/character/sheet/effectBonuses.js';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
 import { stripSource } from '../../../shared/content/nameKeys.js';
 

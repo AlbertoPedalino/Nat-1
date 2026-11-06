@@ -11,9 +11,9 @@ import {
   listCampaignCharacters, listCampaignMembers, setCharacterCampaign, leaveCampaign, deleteCampaign,
 } from '../../shared/cloud/api/campaigns.js';
 import { listMyCharacters } from '../../shared/cloud/api/cloudCharacters.js';
-import { summarizeCharacter } from './sheetSummary.js';
+import { summarizeCharacter } from '../../shared/campaign/sheetSummary.js';
 import { resolveCampaignsPageState } from './campaignsPageState.js';
-import { ensureSheetRuntimeAdapters } from '../charsheet/state/sheetRuntimeAdapters.js';
+import { ensureSheetRuntimeAdapters } from '../../shared/character/sheet/sheetRuntimeAdapters.js';
 import { signed } from '../../shared/ui/numberFormat.js';
 import { confirmAction } from '../../shared/ui/confirmAction.js';
 import { UI_FONTS } from '../../shared/ui/fonts.js';

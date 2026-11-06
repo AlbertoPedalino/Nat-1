@@ -56,14 +56,8 @@ import {
 import { cleanToText, parseCleanTokens } from '../../../../../src/pages/encounterbuilder/bestiary/markup.js';
 import { isEncounterMonster, resolveLegendaryGroups } from '../../../../../src/pages/encounterbuilder/bestiary/bestiary.js';
 import { crPB } from '../../../../../src/pages/encounterbuilder/bestiary/monsterUtils.js';
-import {
-  SYNCED_DATA_KEYS,
-  combatantToSheetPatch,
-  resolveCombatVitals,
-  sheetPatchKey,
-  sheetVitalsToCombat,
-  sheetVitalsToSheetPatch,
-} from '../../../../../src/pages/encounterbuilder/campaign/sheetSync.js';
+import { SYNCED_DATA_KEYS } from '../../../../../src/shared/character/combat/vitals.js';
+import { combatantToSheetPatch, resolveCombatVitals, sheetPatchKey, sheetVitalsToCombat, sheetVitalsToSheetPatch } from '../../../../../src/pages/encounterbuilder/campaign/sheetSync.js';
 import { createInitialState, encounterReducer } from '../../../../../src/pages/encounterbuilder/state/reducer.js';
 import { makeSavedEncounter } from '../../../../../src/pages/encounterbuilder/state/storage.js';
 import { SYNCED_VITALS } from '../../../../../src/shared/character/combat/vitals.js';

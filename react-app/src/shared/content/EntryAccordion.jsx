@@ -1,7 +1,6 @@
 import { Accordion, AccordionDetails, AccordionSummary, Stack, Typography } from '@mui/material';
 import { ChevronDown } from 'lucide-react';
 import { EntryBlocks } from './EntryBlocks.jsx';
-export { partitionNamedEntries, splitNamedEntries } from './entryStructure.js';
 
 // One collapsed accordion row: title (+ optional `leading` element such as a
 // level chip) visible, body on expand. `tone` sets the left border (falls back

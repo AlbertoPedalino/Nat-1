@@ -4,7 +4,7 @@ import installMonk from '../../../../../src/adapters/classes/monk/monk.js';
 import installFightingStyles from '../../../../../src/adapters/feats/fighting-styles.js';
 import installTavernBrawler from '../../../../../src/adapters/feats/tavern-brawler.js';
 import { makeWeaponActions } from '../../../../../src/pages/charsheet/actions/weaponActions.js';
-import { collectEquipmentProficiencySets } from '../../../../../src/pages/charsheet/proficiency/index.js';
+import { collectEquipmentProficiencySets } from '../../../../../src/shared/character/proficiency/equipmentSets.js';
 
 installMonk(adapterRegistry);
 installFightingStyles(adapterRegistry);

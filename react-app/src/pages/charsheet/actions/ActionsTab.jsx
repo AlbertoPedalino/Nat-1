@@ -1,26 +1,18 @@
 import { useEffect, useState } from 'react';
 import { Box, Button, Chip, Typography } from '@mui/material';
-import { getMod, getFinal } from '../state/calculations.js';
+import { getMod, getFinal } from '../../../shared/character/sheet/sheetStats.js';
 import { describeAttackRoll } from '../../../shared/character/combat/conditions.js';
 import { loadCoreAdapters, loadClassAdapters } from '../../../adapters/index.js';
 import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { getChoiceValue } from '../../../shared/character/progression/choiceUtils.js';
-import { getAllResourceDefs } from '../resources/restResources.js';
+import { getAllResourceDefs } from '../../../shared/character/resources/restResources.js';
 import { toggleActiveField } from '../state/toggleState.js';
-import {
-  FILTERS,
-  CAT_COLORS,
-  SECTION_DEFS,
-  normalizeResourceMax,
-  resolveActionFormulas,
-  collectAdapterActions,
-  makeWildShapeActions,
-  getActionRollers,
-  buildActionTags,
-} from './actionsTabLogic.js';
+import { FILTERS, CAT_COLORS, SECTION_DEFS, resolveActionFormulas, collectAdapterActions, makeWildShapeActions, buildActionTags } from './actionsTabLogic.js';
+import { normalizeResourceMax } from '../../../shared/character/resources/restResources.js';
+import { getActionRollers } from '../../../shared/character/dice/rollers.js';
 import { makeWeaponActions } from './weaponActions.js';
-import { loadItems } from '../../charbuilder/data/itemData.js';
-import { loadVariantRules } from '../../charbuilder/data/rulesData.js';
+import { loadItems } from '../../../shared/content/catalogs/itemData.js';
+import { loadVariantRules } from '../../../shared/content/catalogs/rulesData.js';
 import { loadMasteryEntries } from '../../../shared/character/combat/weaponMastery.js';
 import { WeaponMasteryBlock } from '../../../shared/character/combat/WeaponMasteryBlock.jsx';
 import { WeaponNoteBlock } from '../../../shared/character/combat/WeaponNoteBlock.jsx';

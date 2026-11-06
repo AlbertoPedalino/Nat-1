@@ -1,4 +1,4 @@
-import { FULL_SLOTS, HALF_SLOTS, PACT_SLOTS, THIRD_SLOTS } from '../../charbuilder/constants.js';
+import { FULL_SLOTS, HALF_SLOTS, PACT_SLOTS, THIRD_SLOTS } from '../../../shared/character/spells/spellTables.js';
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
 import { getClassSpellLimits } from '../../../shared/character/spells/spellProgression.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';

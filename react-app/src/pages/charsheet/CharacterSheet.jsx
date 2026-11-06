@@ -15,7 +15,7 @@ import RestDialogs from './resources/RestDialogs.jsx';
 import { useRests } from './resources/useRests.js';
 import DiceToast from '../../shared/character/dice/DiceToast.jsx';
 import SheetConflictBanner from '../../shared/ui/SheetConflictBanner.jsx';
-import { deriveSheetState } from './state/state.js';
+import { deriveSheetState } from '../../shared/character/sheet/sheetState.js';
 import { ProficiencySetsProvider } from './proficiency/ProficiencySetsContext.jsx';
 import { SheetActionsProvider } from './state/SheetActionsContext.jsx';
 import { useSheetVitals } from './state/useSheetVitals.js';

@@ -10,11 +10,11 @@ import {
 } from '@mui/material';
 import { Plus, Sparkles } from 'lucide-react';
 import SearchField from '../../../shared/ui/SearchField.jsx';
-import { SPELL_LEVEL_LABELS } from '../../charbuilder/constants.js';
-import { SLBL, getFinal, getMod, getPB, effectiveD20Modifier } from '../state/calculations.js';
-import { loadSpells } from '../../charbuilder/data/spellData.js';
+import { SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
+import { SLBL, getFinal, getMod, getPB, effectiveD20Modifier } from '../../../shared/character/sheet/sheetStats.js';
+import { loadSpells } from '../../../shared/content/catalogs/spellData.js';
 import { scrollRowKey } from '../../../shared/character/inventory/spellScrolls.js';
-import { spellMatchesClass } from '../../charbuilder/spells/spells.js';
+import { spellMatchesClass } from '../../../shared/character/spells/spellClassMatch.js';
 import {
   installedRegistry,
   loadClassAdapters,
@@ -24,7 +24,7 @@ import {
 import { getEquippedArmorPenalties } from '../inventory/armorPenalties.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import { characterItemBonuses } from '../../../shared/character/inventory/itemBonus.js';
-import { getSpellSaveDcBonus } from '../state/effectBonuses.js';
+import { getSpellSaveDcBonus } from '../../../shared/character/sheet/effectBonuses.js';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import { buildSpellInfo } from './spellsTabLogic.js';
 import { dedupeSpells, toSnapshot, upsertSnapshot } from './spellSnapshots.js';

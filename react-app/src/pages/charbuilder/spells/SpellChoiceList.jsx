@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Chip, List, ListItemButton, Paper, Stack, Typography } from '@mui/material';
-import { spellMatchesAnyClass } from './spells.js';
+import { spellMatchesAnyClass } from '../../../shared/character/spells/spellClassMatch.js';
 import { SpellMiniTags, SpellReferenceBody, SpellRowLabel, SpellSelectButton } from '../../../shared/character/spells/SpellReference.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import SelectionSearch from '../choices/SelectionSearch.jsx';

@@ -1,11 +1,5 @@
-import {
-  FULL_SLOTS,
-  HALF_SLOTS,
-  PACT_SLOTS,
-  PB_COST,
-  STATS,
-  THIRD_SLOTS,
-} from '../constants.js';
+import { PB_COST, STATS } from '../constants.js';
+import { FULL_SLOTS, HALF_SLOTS, PACT_SLOTS, THIRD_SLOTS } from '../../../shared/character/spells/spellTables.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 
 export function pointBuySpent(scores) {

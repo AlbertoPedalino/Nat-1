@@ -1,5 +1,5 @@
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
-import { getFinal as getFinalScore, getMod as getAbilityMod } from '../state/calculations.js';
+import { getFinal as getFinalScore, getMod as getAbilityMod } from '../../../shared/character/sheet/sheetStats.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';

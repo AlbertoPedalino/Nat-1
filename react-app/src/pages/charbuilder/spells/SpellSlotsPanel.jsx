@@ -1,7 +1,7 @@
 import { Chip, Grid } from '@mui/material';
 import { Wand2 } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
-import { SPELL_LEVEL_LABELS } from '../constants.js';
+import { SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
 import { getPrimaryClassLevel, getSpellSlots } from '../progression/calculations.js';
 
 export default function SpellSlotsPanel({ character }) {

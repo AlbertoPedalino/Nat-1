@@ -4,7 +4,7 @@ import {
   clampExhaustion,
   exhaustionD20Penalty,
   EXHAUSTION_MAX,
-} from './calculations.js';
+} from '../../../shared/character/sheet/sheetStats.js';
 import {
   DEAD_CONDITION_KEY,
   setConditionActive,

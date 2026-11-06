@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Box, Button, Collapse, Link, Typography } from '@mui/material';
 import { ChevronDown, ChevronRight, ExternalLink } from 'lucide-react';
-import { SKILLS, getMod } from '../state/calculations.js';
+import { SKILLS, getMod } from '../../../shared/character/sheet/sheetStats.js';
 import { beast5eToolsUrl, parseBeastActions, parseBeastActionsRich } from '../../../shared/character/forms/beasts.js';
 import { formatRollTitle } from '../../../shared/character/dice/dice.js';
 import { signed } from '../../../shared/ui/numberFormat.js';

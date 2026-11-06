@@ -1,4 +1,4 @@
-import { PACT_SLOTS } from '../../../pages/charbuilder/constants.js';
+import { PACT_SLOTS } from './spellTables.js';
 import { classLevel } from '../progression/classLevel.js';
 
 function getPactSlotsForLevel(level) {

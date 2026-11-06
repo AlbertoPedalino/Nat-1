@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Box } from '@mui/material';
-import { getFinal } from '../state/calculations.js';
+import { getFinal } from '../../../shared/character/sheet/sheetStats.js';
 import { countAttunedItems } from '../../../shared/character/inventory/itemAttunement.js';
 import {
   carryCapacity,

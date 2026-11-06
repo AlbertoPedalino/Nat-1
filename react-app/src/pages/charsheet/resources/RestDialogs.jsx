@@ -2,8 +2,8 @@ import { Button, Stack, Typography } from '@mui/material';
 import { Hourglass, Moon } from 'lucide-react';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import HitDiceSpendControl from './HitDiceSpendControl.jsx';
-import { getMod, getFinal } from '../state/calculations.js';
-import { getHitDicePools, getUsedHitDiceTotal } from './restResources.js';
+import { getMod, getFinal } from '../../../shared/character/sheet/sheetStats.js';
+import { getHitDicePools, getUsedHitDiceTotal } from '../../../shared/character/resources/restResources.js';
 
 // The Short Rest dialog (Hit Dice to spend, per pool) and the Long Rest
 // confirmation. `rest` is the state and handlers from useRests.

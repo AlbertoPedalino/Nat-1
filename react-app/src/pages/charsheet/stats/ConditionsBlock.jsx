@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Box, Typography, Chip, Button, alpha } from '@mui/material';
 import { ChevronDown, ListChecks, X, Minus, Plus } from 'lucide-react';
-import { EXHAUSTION_MAX } from '../state/calculations.js';
+import { EXHAUSTION_MAX } from '../../../shared/character/sheet/sheetStats.js';
 import { CONDITIONS } from '../../../shared/character/combat/conditions.js';
 import {
   CONDITION_ACCENT as COND_ACCENT,

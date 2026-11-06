@@ -1,5 +1,5 @@
 import { createContext, useContext, useMemo } from 'react';
-import { collectEquipmentProficiencySets } from './index.js';
+import { collectEquipmentProficiencySets } from '../../../shared/character/proficiency/equipmentSets.js';
 
 // Cross-component memoized equipment proficiency sets.
 // Computation runs once per character reference change in the Provider and is

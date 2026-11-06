@@ -1,4 +1,4 @@
-import { summarizeCharacter } from '../../campaigns/sheetSummary.js';
+import { summarizeCharacter } from '../../../shared/campaign/sheetSummary.js';
 import { combatantToSheetPatch, resolveCombatVitals } from './sheetSync.js';
 import { clampInt, numberOr } from '../../../shared/numbers.js';
 

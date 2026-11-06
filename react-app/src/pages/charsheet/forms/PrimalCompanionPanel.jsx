@@ -4,7 +4,7 @@ import {
 } from '@mui/material';
 import { PawPrint } from 'lucide-react';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
-import { getFinal, getMod, getPB } from '../state/calculations.js';
+import { getFinal, getMod, getPB } from '../../../shared/character/sheet/sheetStats.js';
 import { getSheetSlots } from '../spells/spellcasting.js';
 import {
   consumeSlot,

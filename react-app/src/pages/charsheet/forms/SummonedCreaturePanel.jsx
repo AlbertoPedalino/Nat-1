@@ -20,7 +20,7 @@ import {
   getSummonedCreatureVersions,
   normalizeSummonedCreature,
 } from '../../../shared/character/forms/summonedCreatures.js';
-import { getFinal, getMod, getPB } from '../state/calculations.js';
+import { getFinal, getMod, getPB } from '../../../shared/character/sheet/sheetStats.js';
 import { useSummonedCreatureRecords } from './useSummonedCreatureRecords.js';
 import { useCreatureRolls } from './useCreatureRolls.js';
 import {

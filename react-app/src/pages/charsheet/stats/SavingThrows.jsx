@@ -8,8 +8,8 @@ import {
   hasSaveProficiency,
   getSaveBonus,
   effectiveD20Modifier,
-} from '../state/calculations.js';
-import { getConcentrationBonus, getD20FloorReminders } from '../state/effectBonuses.js';
+} from '../../../shared/character/sheet/sheetStats.js';
+import { getConcentrationBonus, getD20FloorReminders } from '../../../shared/character/sheet/effectBonuses.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import { characterItemBonuses } from '../../../shared/character/inventory/itemBonus.js';
 import { characterItemEffects } from '../../../shared/character/inventory/itemEffects.js';

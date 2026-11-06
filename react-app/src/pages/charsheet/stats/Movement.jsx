@@ -1,10 +1,10 @@
 import { Box, Chip, Paper, Tooltip, Typography } from '@mui/material';
 import { Footprints, AlertCircle } from 'lucide-react';
 import { getEquippedArmorPenalties } from '../inventory/armorPenalties.js';
-import { getFinal, exhaustionSpeedPenalty } from '../state/calculations.js';
+import { getFinal, exhaustionSpeedPenalty } from '../../../shared/character/sheet/sheetStats.js';
 import { getSpeedZeroConditions } from '../../../shared/character/combat/conditions.js';
-import { collectMovementEffects, effectSummary, effectTitle } from '../state/sheetEffects.js';
-import { getSpeedBonus } from '../state/effectBonuses.js';
+import { collectMovementEffects, effectSummary, effectTitle } from '../../../shared/character/sheet/sheetEffects.js';
+import { getSpeedBonus } from '../../../shared/character/sheet/effectBonuses.js';
 import { characterItemEffects } from '../../../shared/character/inventory/itemEffects.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import {

@@ -1,4 +1,5 @@
-import { rollDie, rollD8D12, rollD20D20 } from '../logic/rng.js';
+import { rollDie } from '../../../shared/character/dice/dice.js';
+import { rollD8D12, rollD20D20 } from '../logic/rng.js';
 import { getCompl, getEnc, getTrap, getEnvSev, getLoot } from '../tables/tables.js';
 import { DUNGEON_ROOM_POP_LABELS } from '../state/constants.js';
 

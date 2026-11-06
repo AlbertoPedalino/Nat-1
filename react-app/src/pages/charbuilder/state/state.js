@@ -1,12 +1,5 @@
-import {
-  BACKGROUND_SUMMARIES,
-  CLASS_SUMMARIES,
-  FEAT_SUMMARIES,
-  ITEM_SUMMARIES,
-  SPECIES_SUMMARIES,
-  STANDARD_ARRAY,
-  STATS,
-} from '../constants.js';
+import { BACKGROUND_SUMMARIES, CLASS_SUMMARIES, FEAT_SUMMARIES, SPECIES_SUMMARIES, STANDARD_ARRAY, STATS } from '../constants.js';
+import { ITEM_SUMMARIES } from '../../../shared/content/catalogs/itemData.js';
 import { getBackgroundPattern, getPrimaryClassLevel } from '../progression/calculations.js';
 import { handleBackgroundSelect, handleClassSelect, handleSpellToggle, handleWizardSpellbookToggle } from './stateHandlers.js';
 import { getChoiceLevel } from '../../../shared/character/progression/choiceLevels.js';

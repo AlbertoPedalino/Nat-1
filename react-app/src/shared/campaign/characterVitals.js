@@ -17,7 +17,7 @@ export async function readBaseMaxHp(rows) {
   const list = (rows || []).filter((row) => row?.id && row.data && typeof row.data === 'object');
   if (!list.length) return out;
   const [{ ensureSheetRuntimeAdapters }, { computeMaxHp }] = await Promise.all([
-    import('../../pages/charsheet/state/sheetRuntimeAdapters.js'),
+    import('../character/sheet/sheetRuntimeAdapters.js'),
     import('../character/combat/hp.js'),
   ]);
   await ensureSheetRuntimeAdapters(list.map((row) => row.data));

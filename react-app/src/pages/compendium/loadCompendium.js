@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { loadActions, loadConditionRecords, loadSkills, loadVariantRules } from '../charbuilder/data/rulesData.js';
-import { loadBackgrounds, loadFeats, loadSpecies } from '../charbuilder/data/characterOptionData.js';
-import { loadClassIndex, loadOptionalFeatures } from '../charbuilder/data/classData.js';
-import { loadItemGroups, loadItems } from '../charbuilder/data/itemData.js';
-import { loadSpells } from '../charbuilder/data/spellData.js';
+import { loadActions, loadConditionRecords, loadSkills, loadVariantRules } from '../../shared/content/catalogs/rulesData.js';
+import { loadBackgrounds, loadFeats, loadSpecies } from '../../shared/content/catalogs/characterOptionData.js';
+import { loadClassIndex, loadOptionalFeatures } from '../../shared/content/catalogs/classData.js';
+import { loadItemGroups, loadItems } from '../../shared/content/catalogs/itemData.js';
+import { loadSpells } from '../../shared/content/catalogs/spellData.js';
 import { CLASS_ALLOWED_SOURCES, isAllowedSource } from '../../shared/content/sourcePriority.js';
 import { loadMonsterDatabase } from '../encounterbuilder/bestiary/bestiary.js';
 import { GAME_IMAGE_BASE, loadGameData } from '../../shared/content/gameData.js';

@@ -86,11 +86,11 @@ pieces; Primal Companion is a complete example:
 4. **Rest:** a state that ends or resets on a Long Rest adds one line to
    `shared/character/resources/longRest.js`.
 5. **Export:** the state field joins `CHARACTER_PLAY_STATE_FIELDS` in
-   `pages/charbuilder/state/characterExport.js`.
+   `shared/character/profile/characterExport.js`.
 6. **Numbers:** a feature that changes the character's numbers (Wild Shape's
    AC, speeds, saves, skills) does it through its module's accessors, called by
    the one calculation that owns each number (`shared/character/combat/ac.js`,
-   `pages/charsheet/state/calculations.js`), never inside a panel.
+   `shared/character/sheet/sheetStats.js`), never inside a panel.
 
 Rules stay in `shared/` because the battle map and the encounter builder read
 them too; adapters hold no React, since they are loaded as rule modules.
@@ -105,10 +105,10 @@ them too; adapters hold no React, since they are loaded as rule modules.
   filenames are discovered by `adapters/index.js`; class and subclass adapters
   already have their own class folders. Individual feats and spells remain
   directly searchable by name in their existing domain folders.
-- This reorganization preserves behavior and existing dependencies. Some page
-  modules, such as character data loaders and sheet calculations, already have
-  consumers on other pages. Moving them here does not make those dependencies
-  private or change their API.
+- `shared/` never imports from `pages/`, and a page imports another page only
+  through that page's public entry points (an embedded page, a route button,
+  the encounter hand-off). Code two pages need lives in `shared/`.
+  `tests/logic/shared/layers.test.js` enforces both rules.
 
 ## Tests
 

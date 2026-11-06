@@ -22,8 +22,8 @@
 
 import { characterItemEffects } from '../../../shared/character/inventory/itemEffects.js';
 import { getEquippedArmorPenalties } from '../inventory/armorPenalties.js';
-import { collectSheetEffects } from '../state/sheetEffects.js';
-import { SLBL, STATS } from '../state/calculations.js';
+import { collectSheetEffects } from '../../../shared/character/sheet/sheetEffects.js';
+import { SLBL, STATS } from '../../../shared/character/sheet/sheetStats.js';
 import { getConditionsWithEffect } from '../../../shared/character/combat/conditions.js';
 import { titleCase } from '../../../shared/ui/textCase.js';
 

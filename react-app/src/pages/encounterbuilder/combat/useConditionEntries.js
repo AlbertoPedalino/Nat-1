@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { loadConditions } from '../../charbuilder/data/rulesData.js';
+import { loadConditions } from '../../../shared/content/catalogs/rulesData.js';
 
 // XPHB condition descriptions, keyed by condition key. Every combatant card asks
 // for these, so the fetch is shared: `loadConditions` reads through the module

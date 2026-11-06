@@ -17,7 +17,7 @@
 // nothing in this file changes. A brand-new vision *domain* = one collector
 // spread into collectVisionEntries.
 
-import { collectSenseEffects } from '../state/sheetEffects.js';
+import { collectSenseEffects } from '../../../shared/character/sheet/sheetEffects.js';
 import { getItemSenses } from '../../../shared/character/inventory/itemEffects.js';
 import { wildShapeSenses } from '../../../shared/character/forms/wildShapeForm.js';
 import { capitalize } from '../../../shared/ui/textCase.js';

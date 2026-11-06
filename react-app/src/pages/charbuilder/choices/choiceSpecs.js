@@ -3,12 +3,8 @@ import { adapterRegistry as installedRegistry } from '../../../adapters/registry
 import { getPrimaryClassLevel } from '../progression/calculations.js';
 import { backgroundOriginFeat } from '../../../shared/character/progression/selectedFeats.js';
 import { getMulticlassChoiceSpecs } from '../../../shared/character/progression/multiclassProficiencies.js';
-import {
-  STANDARD_LANGUAGES,
-  EXOTIC_LANGUAGES,
-  ALL_LANGUAGES,
-  getLanguageOptions,
-} from '../../../shared/character/progression/languages.js';
+import { STANDARD_LANGUAGES, EXOTIC_LANGUAGES, ALL_LANGUAGES } from '../../../adapters/gameData.js';
+import { getLanguageOptions } from '../../../shared/character/progression/languages.js';
 import { filterByRequiredChoice } from '../../../shared/character/progression/lineageMatch.js';
 
 const ALL_SKILLS = ['Acrobatics', 'Animal Handling', 'Arcana', 'Athletics', 'Deception', 'History', 'Insight', 'Intimidation', 'Investigation', 'Medicine', 'Nature', 'Perception', 'Performance', 'Persuasion', 'Religion', 'Sleight of Hand', 'Stealth', 'Survival'];

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { collectFeatAsiBonuses, getFeatAsiBonus, getAsiBonusBreakdown } from '../../../../src/shared/character/progression/abilityBonuses.js';
 import { builderReducer, initialBuilderState } from '../../../../src/pages/charbuilder/state/state.js';
 import { builtAbilityScore } from '../../../../src/shared/character/progression/abilityScores.js';
-import { getFinal } from '../../../../src/pages/charsheet/state/calculations.js';
+import { getFinal } from '../../../../src/shared/character/sheet/sheetStats.js';
 import { makeSheetPayload } from '../../../../src/pages/charbuilder/state/persistence.js';
 
 // The structured ability field from the 2024 feat record, not an adapter rule.

@@ -23,10 +23,6 @@ export function craftedFlagOf(item) {
   return CRAFTED_FLAGS.find((flag) => item.flags.includes(flag)) || '';
 }
 
-export function isCraftedItem(item) {
-  return craftedFlagOf(item) !== '';
-}
-
 function craftedSourceOf(item) {
   return String(item?.craftedFrom ?? '');
 }

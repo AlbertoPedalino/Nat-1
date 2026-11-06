@@ -8,18 +8,6 @@ import { replicatedItemProperty } from './replicateMagicItem.js';
 // State transitions live in craftedItemState.js so they remain data-only and
 // usable by non-UI consumers; colour resolution stays here because it depends
 // on character feat provenance and the installed adapter registry.
-export {
-  CRAFTED_FLAG_META,
-  CRAFTED_FLAGS,
-  VANISH_ON_LONG_REST_FLAGS,
-  addCraftedItem,
-  clearCraftedByFlag,
-  craftedCount,
-  craftedCountFor,
-  craftedFlagOf,
-  isCraftedItem,
-  removeOneCrafted,
-} from './craftedItemState.js';
 
 export function craftedTagColor(flag, character) {
   const meta = CRAFTED_FLAG_META[flag];

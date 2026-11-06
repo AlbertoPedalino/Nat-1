@@ -1,4 +1,5 @@
-import { rollDie, rollD8D12, rollD20D20 } from '../logic/rng.js';
+import { rollDie } from '../../../shared/character/dice/dice.js';
+import { rollD8D12, rollD20D20 } from '../logic/rng.js';
 import { advanceMinutes, formatDateTime } from '../session/time.js';
 import { effectiveHours, hasWeatherDisadvantage, runWeatherChecks } from '../session/weather.js';
 import { getEvent, getLoot, getEnc, getTrap } from '../tables/tables.js';

@@ -1,6 +1,6 @@
 import { Box, Paper, Typography } from '@mui/material';
 import { ScrollText } from 'lucide-react';
-import { collectAllProficiencies } from './proficiencies.js';
+import { collectAllProficiencies } from '../../../shared/character/proficiency/allProficiencies.js';
 import { useProficiencySets } from './ProficiencySetsContext.jsx';
 import PanelHeader, { sectionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
 

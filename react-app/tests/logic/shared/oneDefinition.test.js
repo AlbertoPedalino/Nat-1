@@ -147,7 +147,7 @@ test('pages reach Supabase only through shared/cloud', () => {
 
 test('a character file is downloaded only by downloadCharacterExport', () => {
   assert.deepEqual(sourceFilesMatching(/\.download\s*=/, {
-    allow: ['pages/charbuilder/state/characterExport.js'],
+    allow: ['shared/character/profile/characterExport.js'],
   }), []);
 });
 

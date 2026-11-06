@@ -7,10 +7,10 @@ import {
   getSkillBonus,
   SLBL,
   effectiveD20Modifier,
-} from '../state/calculations.js';
+} from '../../../shared/character/sheet/sheetStats.js';
 import { describeCheckDisadvantage } from '../../../shared/character/combat/conditions.js';
 import { getEquippedArmorPenalties } from '../inventory/armorPenalties.js';
-import { getSkillAdvantageFromEffects } from '../state/effectBonuses.js';
+import { getSkillAdvantageFromEffects } from '../../../shared/character/sheet/effectBonuses.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import { characterItemBonuses } from '../../../shared/character/inventory/itemBonus.js';
 import { getItemAdvantageOnSkill } from '../../../shared/character/inventory/itemEffects.js';

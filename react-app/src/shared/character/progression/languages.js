@@ -1,6 +1,4 @@
-import { STANDARD_LANGUAGES, EXOTIC_LANGUAGES, ALL_LANGUAGES } from '../../../adapters/gameData.js';
-
-export { STANDARD_LANGUAGES, EXOTIC_LANGUAGES, ALL_LANGUAGES };
+import { STANDARD_LANGUAGES, EXOTIC_LANGUAGES } from '../../../adapters/gameData.js';
 
 export const SPECIAL_LANGUAGES = ["Druidic", "Thieves' Cant"];
 
