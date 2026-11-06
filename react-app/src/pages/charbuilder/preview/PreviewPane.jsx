@@ -174,7 +174,7 @@ function AbilityScoreGrid({ scores }) {
   return (
     <Grid container spacing={0.6}>
       {STATS.map((stat) => (
-        <Grid key={stat} item xs={4}>
+        <Grid key={stat} size={{ xs: 4 }}>
           <Card variant="outlined" sx={{ textAlign: 'center', ...SECTION_CARD_SX }}>
             <CardContent sx={{ p: 0.65, '&:last-child': { pb: 0.65 } }}>
               <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.61rem', fontWeight: 700, letterSpacing: '0.04em' }}>

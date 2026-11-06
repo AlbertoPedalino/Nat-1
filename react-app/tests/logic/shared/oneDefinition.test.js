@@ -227,3 +227,9 @@ test('ability scores are computed only by shared/character/progression/abilitySc
     allow: ['shared/character/progression/abilityScores.js', 'shared/character/inventory/itemEffects.js'],
   }), []);
 });
+
+// MUI 9's Grid sizes its items with `size`; the old `item xs={…}` props are
+// ignored without a warning, leaving the column unsized.
+test('Grid items are sized with size, never the removed item/xs props', () => {
+  assert.deepEqual(sourceLinesMatching(/<Grid\b[^>]*\s(item|xs=|sm=|md=|lg=|xl=)/), []);
+});

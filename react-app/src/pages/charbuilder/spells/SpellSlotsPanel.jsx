@@ -29,7 +29,7 @@ export default function SpellSlotsPanel({ character }) {
     <BuilderPanel id="panel-slots" title={isMulticlass ? `Spell Slots — ${activeCharacter.className}` : 'Spell Slots'} icon={Wand2}>
       <Grid container spacing={1}>
         {SPELL_LEVEL_LABELS.slice(1).map((label, index) => (
-          <Grid key={label} item xs={4} sm={3} md={2}>
+          <Grid key={label} size={{ xs: 4, sm: 3, md: 2 }}>
             <Chip label={`${label}: ${slotData.slots[index] || '-'}`} variant="outlined" sx={{ width: '100%' }} />
           </Grid>
         ))}

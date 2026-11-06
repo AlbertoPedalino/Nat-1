@@ -42,20 +42,20 @@ export default function LevelPanel({ character, dispatch }) {
         : `Class Lv ${currentLevel} - Total Lv ${character.level} - HP ${hp || '-'} - PB +${getProficiencyBonus(character.level)} - Hit Die ${faces}`}
     >
       <Grid container spacing={1.5} alignItems="center">
-        <Grid item xs={12} md={4} sx={{ display: { xs: 'block', md: 'none' } }}>
+        <Grid size={{ xs: 12, md: 4 }} sx={{ display: { xs: 'block', md: 'none' } }}>
           <Select fullWidth value={currentLevel} onChange={(event) => setLevel(Number(event.target.value))}>
             {Array.from({ length: maxLv }, (_, index) => index + 1).map((level) => (
               <MenuItem key={level} value={level}>Level {level}</MenuItem>
             ))}
           </Select>
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid size={{ xs: 12, md: 4 }}>
           <ToggleButtonGroup value={character.hpMode} exclusive size="small" onChange={(_, mode) => mode && dispatch({ type: 'hp/mode', mode })}>
             <ToggleButton value="average">Average HP</ToggleButton>
             <ToggleButton value="rolled">Manual HP</ToggleButton>
           </ToggleButtonGroup>
         </Grid>
-        <Grid item xs={12} md={isExtra ? 12 : 8} sx={{ display: { xs: 'none', md: 'block' } }}>
+        <Grid size={{ xs: 12, md: isExtra ? 12 : 8 }} sx={{ display: { xs: 'none', md: 'block' } }}>
           <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
             {Array.from({ length: maxLv }, (_, index) => index + 1).map((level) => (
               <Chip
@@ -68,7 +68,7 @@ export default function LevelPanel({ character, dispatch }) {
           </Stack>
         </Grid>
         {character.hpMode === 'rolled' && rollLevels.length ? (
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
               {rollLevels.map((level) => (
                 <TextField

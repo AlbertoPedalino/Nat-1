@@ -70,7 +70,7 @@ export default function ScoresStep({ state, dispatch }) {
             const bonusBreakdown = abilityScoreBonuses(character, stat);
 
             return (
-              <Grid key={stat} item xs={12} md={6}>
+              <Grid key={stat} size={{ xs: 12, md: 6 }}>
                 <Paper variant="outlined" sx={{ p: 1.5, height: '100%' }}>
                   <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1.25}>
                     <Box sx={{ minWidth: 0, flex: 1 }}>
