@@ -1,8 +1,8 @@
 import { Box, Stack, Typography, useTheme } from '@mui/material';
-import SelectorGroup from '../ui/SelectorGroup.jsx';
-import { FALLBACK_WEATHER_ICON, SEASON_ICONS, WEATHER_ICONS } from '../hexcrawl/hexIcons.js';
-import { SELECTOR_CONTRACTS } from '../ui/selectorContracts.js';
-import { weatherEffectLabel, weatherTimerLabel } from './weather.js';
+import SelectorGroup from '../../../shared/gmboard/ui/SelectorGroup.jsx';
+import { FALLBACK_WEATHER_ICON, SEASON_ICONS, WEATHER_ICONS } from '../../../shared/hexcrawl/hexIcons.js';
+import { SELECTOR_CONTRACTS } from '../../../shared/gmboard/ui/selectorContracts.js';
+import { weatherEffectLabel, weatherTimerLabel } from '../../../shared/gmboard/weather.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 

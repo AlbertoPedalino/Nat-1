@@ -1,10 +1,10 @@
 import { requireClient } from '../supabaseClient.js';
 import { openRealtimeChannel } from '../realtimeChannel.js';
 import { toHexCell, toHexCellPatch } from '../../hexcrawl/hexCell.js';
-import { STORAGE_KEYS, scopeKey } from '../../../pages/gmboard/state/storage.js';
+import { STORAGE_KEYS, scopeKey } from '../../gmboard/boardFormat.js';
 import { sanitizeInstanceId } from '../../instances/sectionRegistry.js';
-import { createDefaultCoreState } from '../../../pages/gmboard/state/defaultState.js';
-import { createDefaultTables } from '../../../pages/gmboard/tables/defaultTables.js';
+import { createDefaultCoreState } from '../../gmboard/defaultState.js';
+import { createDefaultTables } from '../../gmboard/defaultTables.js';
 
 // Cloud side of the hexcrawl. Three stores, split by how often each is written
 // (see supabase/10_hexcrawl.sql): the clock is one row per campaign, the log is

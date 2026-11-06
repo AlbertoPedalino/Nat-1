@@ -1,6 +1,6 @@
 import { rollDie } from '../../../shared/character/dice/dice.js';
-import { rollD8D12, rollD20D20 } from '../logic/rng.js';
-import { getEvent, getEnc, getLoot } from '../tables/tables.js';
+import { rollD8D12, rollD20D20 } from '../../../shared/gmboard/tableDice.js';
+import { getEvent, getEnc, getLoot } from '../../../shared/gmboard/tables.js';
 
 const MINIMUM_REWARD_ROLL = 15;
 

@@ -3,11 +3,11 @@ import {
 } from 'react';
 import { gmBoardReducer, createInitialState } from './reducer.js';
 import { useGmBoardPersistence } from './useGmBoardPersistence.js';
-import { resolveProceed, resolveAdvanceOnly, resolveManualAdvance } from '../hexcrawl/hex.js';
+import { resolveProceed, resolveAdvanceOnly, resolveManualAdvance } from '../../../shared/hexcrawl/hexRules.js';
 import { clockFromResult, clockFromState, travelFromState } from '../../../shared/hexcrawl/hexEntry.js';
 import { useCampaignClock } from '../../../shared/hexcrawl/useCampaignClock.js';
 import { useBoardCampaign } from '../../../shared/hexcrawl/useBoardCampaign.js';
-import { createDungeon, isValidRoomCount } from '../dungeon/dungeon.js';
+import { createDungeon, isValidRoomCount } from '../../../shared/dungeon/dungeon.js';
 import { createQuests } from '../quests/quest.js';
 import { rollTable } from '../tables/rollTable.js';
 

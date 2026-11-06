@@ -1,7 +1,7 @@
 import { act, render, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 import { useSceneHexcrawl } from '../../../../../src/pages/vtt/hexcrawl/useSceneHexcrawl.js';
-import { createDefaultTables } from '../../../../../src/pages/gmboard/tables/defaultTables.js';
+import { createDefaultTables } from '../../../../../src/shared/gmboard/defaultTables.js';
 
 const cloud = vi.hoisted(() => ({
   listHexCellRevisions: vi.fn(),

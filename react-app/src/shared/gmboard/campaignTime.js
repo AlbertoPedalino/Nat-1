@@ -45,7 +45,7 @@ export function formatDate({ day, month, year }) {
   return `${day} ${MONTH_NAMES[month - 1]} ${year}`;
 }
 
-export function formatDateTime(time) {
+export function formatCampaignDateTime(time) {
   return `${formatDate(time)} — ${formatHM(time.min)}`;
 }
 

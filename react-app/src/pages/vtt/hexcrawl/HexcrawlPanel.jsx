@@ -7,15 +7,15 @@ import {
 import InfoHint from '../../../shared/ui/InfoHint.jsx';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import {
-  advanceMinutes, formatDate, formatDateTime, formatDuration, formatHM,
-} from '../../gmboard/session/time.js';
+  advanceMinutes, formatDate, formatCampaignDateTime, formatDuration, formatHM,
+} from '../../../shared/gmboard/campaignTime.js';
 import {
   hasWeatherDisadvantage, travelTime, weatherEffectLabel, weatherTimerLabel,
-} from '../../gmboard/session/weather.js';
-import { MOUNT_OPTIONS, normalizeMountSpeed } from '../../gmboard/state/constants.js';
+} from '../../../shared/gmboard/weather.js';
+import { MOUNT_OPTIONS, normalizeMountSpeed } from '../../../shared/gmboard/boardOptions.js';
 import {
   FALLBACK_WEATHER_ICON, POPULATION_ICONS, SEASON_ICONS, TERRAIN_ICONS, WEATHER_ICONS,
-} from '../../gmboard/hexcrawl/hexIcons.js';
+} from '../../../shared/hexcrawl/hexIcons.js';
 import {
   mergeBoardClock, missingHexSetup, populationOption, terrainOption, tierOption,
 } from '../../../shared/hexcrawl/hexEntry.js';
@@ -140,7 +140,7 @@ function WeatherCard({ clock }) {
         </Box>
       </Stack>
       <Stack direction="row" spacing={1} sx={{ justifyContent: 'space-between', mt: 0.6 }}>
-        <Typography sx={clockSx}>{formatDateTime(clock)}</Typography>
+        <Typography sx={clockSx}>{formatCampaignDateTime(clock)}</Typography>
         {timed ? (
           <Typography sx={effectSx}>
             {weatherTimerLabel(clock.season, clock.nextWeatherIn, clock.hoursSinceWeather)}
@@ -263,7 +263,7 @@ function LastHexCard({ last, onOpenResult }) {
           ))}
           {last.clock ? (
             <Typography sx={lastMetaSx}>
-              {formatDateTime(last.clock)}
+              {formatCampaignDateTime(last.clock)}
               {last.clock.weather ? ` · ${last.clock.weather}${last.clock.intensity ? ` ${last.clock.intensity}` : ''}` : ''}
             </Typography>
           ) : null}

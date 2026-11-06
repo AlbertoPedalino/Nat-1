@@ -14,7 +14,7 @@ import { hexCellsByKey } from '../../../shared/hexcrawl/hexCell.js';
 import {
   clockFromResult, clockFromState, hexEntrySummary, mergeBoardClock, runHexEntry, travelFromState,
 } from '../../../shared/hexcrawl/hexEntry.js';
-import { resolveManualAdvance } from '../../gmboard/hexcrawl/hex.js';
+import { resolveManualAdvance } from '../../../shared/hexcrawl/hexRules.js';
 import { useCampaignClock } from '../../../shared/hexcrawl/useCampaignClock.js';
 import { hexKey, isHexGrid } from '../../../shared/vtt/map/hexGeometry.js';
 import { listenForRecovery } from '../../../shared/cloud/sync/recoveryTriggers.js';

@@ -7,20 +7,17 @@ import {
   CalendarDays, FastForward, Hexagon, Palette, Settings,
 } from 'lucide-react';
 import ColorField from '../../../shared/ui/ColorField.jsx';
-import SelectorGroup from '../../gmboard/ui/SelectorGroup.jsx';
-import MountSelector from '../../gmboard/hexcrawl/MountSelector.jsx';
-import { SELECTOR_CONTRACTS } from '../../gmboard/ui/selectorContracts.js';
-import { MONTH_NAMES, formatHM, validateStart } from '../../gmboard/session/time.js';
-import {
-  HEX_POPULATION_OPTIONS, TERRAIN_OPTIONS, TIER_OPTIONS,
-} from '../../gmboard/state/constants.js';
+import SelectorGroup from '../../../shared/gmboard/ui/SelectorGroup.jsx';
+import MountSelector from '../../../shared/hexcrawl/ui/MountSelector.jsx';
+import { SELECTOR_CONTRACTS } from '../../../shared/gmboard/ui/selectorContracts.js';
+import { MONTH_NAMES, formatHM, validateStart } from '../../../shared/gmboard/campaignTime.js';
+import { HEX_POPULATION_OPTIONS, TERRAIN_OPTIONS, TIER_OPTIONS } from '../../../shared/gmboard/boardOptions.js';
 import {
   POPULATION_ICONS, SEASON_ICONS, TERRAIN_ICONS, WEATHER_ICONS,
-} from '../../gmboard/hexcrawl/hexIcons.js';
+} from '../../../shared/hexcrawl/hexIcons.js';
 import { mergeBoardClock } from '../../../shared/hexcrawl/hexEntry.js';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { DEFAULT_GRID } from '../../../shared/vtt/scene/scene.js';
-import { fullscreenContainer } from '../map/fullscreenContainer.js';
 import {
   battleMapDialogActionsSx, battleMapDialogContentSx, battleMapDialogPaperSx, battleMapDialogTitleSx,
 } from '../map/battleMapSurface.js';
@@ -54,7 +51,6 @@ export default function HexcrawlSettingsDialog({
       onClose={onClose}
       maxWidth="md"
       fullWidth
-      container={fullscreenContainer}
       slotProps={{ paper: { sx: battleMapDialogPaperSx } }}
     >
       <DialogTitle sx={[battleMapDialogTitleSx, titleSx]}>

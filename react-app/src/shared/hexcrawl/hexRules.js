@@ -1,8 +1,8 @@
-import { rollDie } from '../../../shared/character/dice/dice.js';
-import { rollD8D12, rollD20D20 } from '../logic/rng.js';
-import { advanceMinutes, formatDateTime } from '../session/time.js';
-import { effectiveHours, hasWeatherDisadvantage, runWeatherChecks } from '../session/weather.js';
-import { getEvent, getLoot, getEnc, getTrap } from '../tables/tables.js';
+import { rollDie } from '../character/dice/dice.js';
+import { rollD8D12, rollD20D20 } from '../gmboard/tableDice.js';
+import { advanceMinutes, formatCampaignDateTime } from '../gmboard/campaignTime.js';
+import { effectiveHours, hasWeatherDisadvantage, runWeatherChecks } from '../gmboard/weather.js';
+import { getEvent, getLoot, getEnc, getTrap } from '../gmboard/tables.js';
 
 function weatherLogFragment(changes) {
   if (!changes.length) return '';
@@ -103,7 +103,7 @@ export function resolveProceed(state, tables, rng = Math.random) {
   const triggered = d6 <= state.popThr;
   steps.push({ kind: 'popRoll', d6, threshold: state.popThr, triggered });
 
-  let logEntry = `${formatDateTime(time)} · ${state.terrain} (${travelHours}h) · ${weather} ${intensity}`.trim()
+  let logEntry = `${formatCampaignDateTime(time)} · ${state.terrain} (${travelHours}h) · ${weather} ${intensity}`.trim()
     + ` · d6=${d6}${weatherPhase.logFragment}`;
 
   if (!triggered) {
@@ -139,7 +139,7 @@ export function resolveAdvanceOnly(state, tables, rng = Math.random) {
   const weather = weatherPhase.result.weather;
   const intensity = weatherPhase.result.intensity;
 
-  const logEntry = `${formatDateTime(time)} · ${state.terrain} (${travelHours}h) · ${weather} ${intensity}`.trim()
+  const logEntry = `${formatCampaignDateTime(time)} · ${state.terrain} (${travelHours}h) · ${weather} ${intensity}`.trim()
     + ` · advanced without rolls${weatherPhase.logFragment}`;
 
   return {

@@ -1,8 +1,8 @@
 import { Box, Stack, Typography, useTheme } from '@mui/material';
 import { Coins, Dice5, Eye, Flame, Leaf, Lock, Map, Swords, CloudRain } from 'lucide-react';
-import ResultBadge from '../ui/ResultBadge.jsx';
-import { formatNumber } from '../../../shared/ui/numberFormat.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import ResultBadge from '../../gmboard/ui/ResultBadge.jsx';
+import { formatNumber } from '../../ui/numberFormat.js';
+import { UI_FONTS } from '../../ui/fonts.js';
 
 function formatLoot(loot) {
   const valueLine = [loot.value, loot.extra].filter(Boolean).join(' ');

@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { Box, Button, Stack, TextField, Typography, useTheme } from '@mui/material';
 import { CalendarDays, Check, Clock, Compass, FastForward } from 'lucide-react';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
-import { formatDate, formatHM, parseHM, validateStart } from './time.js';
-import { travelTime } from './weather.js';
+import { formatDate, formatHM, parseHM, validateStart } from '../../../shared/gmboard/campaignTime.js';
+import { travelTime } from '../../../shared/gmboard/weather.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 

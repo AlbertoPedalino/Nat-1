@@ -1,7 +1,7 @@
 import { act, render, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 import { GmBoardProvider, useGmBoard } from '../../../../../src/pages/gmboard/state/GmBoardContext.jsx';
-import { createDefaultTables } from '../../../../../src/pages/gmboard/tables/defaultTables.js';
+import { createDefaultTables } from '../../../../../src/shared/gmboard/defaultTables.js';
 import {
   persistBoardResults,
   persistBoardState,

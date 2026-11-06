@@ -6,7 +6,6 @@ import {
 import { X } from 'lucide-react';
 import { List } from 'react-window';
 import SearchField from '../../shared/ui/SearchField.jsx';
-import { fullscreenContainer } from '../vtt/map/fullscreenContainer.js';
 import { SOURCE_LABELS } from '../../shared/bestiary/bestiaryConstants.js';
 import CompendiumDetail from './CompendiumDetail.jsx';
 
@@ -113,7 +112,7 @@ export default function Catalog({
           <Typography variant="body2" color="text.secondary" sx={statusSx}>Nothing matches these filters.</Typography>
         )}
       </Box>
-      <Dialog open={Boolean(opened)} onClose={() => setOpened(null)} maxWidth="sm" fullWidth container={fullscreenContainer}>
+      <Dialog open={Boolean(opened)} onClose={() => setOpened(null)} maxWidth="sm" fullWidth>
         <DialogContent sx={{ position: 'relative', pt: 3 }}>
           <IconButton size="small" aria-label="Close" onClick={() => setOpened(null)} sx={dialogCloseSx}>
             <X size={16} />

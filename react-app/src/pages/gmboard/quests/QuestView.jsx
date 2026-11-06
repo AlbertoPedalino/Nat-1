@@ -1,10 +1,10 @@
 import { Box, Button, Stack, Typography, useTheme } from '@mui/material';
 import { Dices, ScrollText, Trash2 } from 'lucide-react';
-import SelectorGroup from '../ui/SelectorGroup.jsx';
-import TierSelector from '../ui/TierSelector.jsx';
+import SelectorGroup from '../../../shared/gmboard/ui/SelectorGroup.jsx';
+import TierSelector from '../../../shared/gmboard/ui/TierSelector.jsx';
 import QuestCard from './QuestCard.jsx';
-import { QUEST_SCOPE_OPTIONS } from '../state/constants.js';
-import { SELECTOR_CONTRACTS } from '../ui/selectorContracts.js';
+import { QUEST_SCOPE_OPTIONS } from '../../../shared/gmboard/boardOptions.js';
+import { SELECTOR_CONTRACTS } from '../../../shared/gmboard/ui/selectorContracts.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';

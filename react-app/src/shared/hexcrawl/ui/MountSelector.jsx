@@ -3,9 +3,9 @@ import {
   Box, Button, Stack, TextField, Typography, alpha, useTheme,
 } from '@mui/material';
 import { Footprints, Rabbit } from 'lucide-react';
-import { MAX_MOUNT_SPEED, MIN_MOUNT_SPEED, MOUNT_OPTIONS, normalizeMountSpeed } from '../state/constants.js';
-import { UI_COLORS } from '../../../shared/ui/colors.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { MAX_MOUNT_SPEED, MIN_MOUNT_SPEED, MOUNT_OPTIONS, normalizeMountSpeed } from '../../gmboard/boardOptions.js';
+import { UI_COLORS } from '../../ui/colors.js';
+import { UI_FONTS } from '../../ui/fonts.js';
 
 // What the party is travelling on, as a multiplier on its speed.
 //

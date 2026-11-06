@@ -12,8 +12,8 @@ import {
   terrainOption,
   tierOption,
 } from '../../../../src/shared/hexcrawl/hexEntry.js';
-import { createDefaultTables } from '../../../../src/pages/gmboard/tables/defaultTables.js';
-import { createDefaultCoreState } from '../../../../src/pages/gmboard/state/defaultState.js';
+import { createDefaultTables } from '../../../../src/shared/gmboard/defaultTables.js';
+import { createDefaultCoreState } from '../../../../src/shared/gmboard/defaultState.js';
 
 const BOARD = { ...createDefaultCoreState(), season: 'Summer' };
 const HEX = { terrain: 'Forest', pop: 'frontier', tier: 2 };

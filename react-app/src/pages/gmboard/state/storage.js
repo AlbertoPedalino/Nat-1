@@ -1,23 +1,15 @@
-import { createDefaultCoreState, createDefaultResults } from './defaultState.js';
-import { createDefaultTables } from '../tables/defaultTables.js';
+import { createDefaultCoreState, createDefaultResults } from '../../../shared/gmboard/defaultState.js';
+import { createDefaultTables } from '../../../shared/gmboard/defaultTables.js';
 import { LEGACY_KEYS, migrateLegacyBoard } from './migration.js';
 import { readInstanceValue, saveLocal } from '../../../shared/instances/instanceStore.js';
 import { getStorageItem } from '../../../shared/storage/storage.js';
+import { STORAGE_KEYS } from '../../../shared/gmboard/boardFormat.js';
 
 // GM Board payload adapter: which keys an instance stores and how they are
 // (de)serialized. Registry, sync and opening are shared (shared/instances/);
 // every write goes through saveLocal, which skips unchanged values.
 
 const SECTION_KEY = 'gmboard';
-export const STORAGE_KEYS = Object.freeze({
-  state: 'state:v1',
-  tables: 'tables:v1',
-  results: 'results:v1',
-});
-
-export function scopeKey(id, key) {
-  return `gb:board:${id}:${key}`;
-}
 
 const readScoped = (id, key) => readInstanceValue(SECTION_KEY, id, key);
 

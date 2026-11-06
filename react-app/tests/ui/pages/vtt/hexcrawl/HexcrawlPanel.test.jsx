@@ -5,8 +5,8 @@ import { theme } from '../../../../../src/app/theme.js';
 import HexcrawlPanel from '../../../../../src/pages/vtt/hexcrawl/HexcrawlPanel.jsx';
 import HexResultDialog from '../../../../../src/pages/vtt/hexcrawl/HexResultDialog.jsx';
 import HexBubble from '../../../../../src/pages/vtt/hexcrawl/HexBubble.jsx';
-import { createDefaultCoreState } from '../../../../../src/pages/gmboard/state/defaultState.js';
-import { createDefaultTables } from '../../../../../src/pages/gmboard/tables/defaultTables.js';
+import { createDefaultCoreState } from '../../../../../src/shared/gmboard/defaultState.js';
+import { createDefaultTables } from '../../../../../src/shared/gmboard/defaultTables.js';
 
 // The step rows read their tones from the app palette, so both components are
 // rendered under the real theme rather than MUI's default one.

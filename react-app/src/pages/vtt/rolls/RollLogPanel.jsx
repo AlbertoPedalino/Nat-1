@@ -5,7 +5,6 @@ import CustomRollDialog from '../../../shared/character/dice/CustomRollDialog.js
 import RollCalculation from '../../../shared/character/dice/RollCalculation.jsx';
 import RollActorLabel from '../../../shared/character/dice/RollActorLabel.jsx';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { fullscreenContainer } from '../map/fullscreenContainer.js';
 import {
   battleMapDialogActionsSx,
   battleMapDialogContentSx,
@@ -72,7 +71,6 @@ export default function RollLogPanel({ feed, onCustomRoll, onClear }) {
         onRoll={onCustomRoll}
         // The map is often fullscreen, and a dialog on the body is not painted
         // at all when it is.
-        container={fullscreenContainer}
         slotProps={{ paper: { sx: battleMapDialogPaperSx } }}
         titleSx={battleMapDialogTitleSx}
         contentSx={battleMapDialogContentSx}

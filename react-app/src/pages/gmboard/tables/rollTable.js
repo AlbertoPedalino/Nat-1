@@ -1,5 +1,5 @@
-import { rollD8D12, rollD20D20 } from '../logic/rng.js';
-import { getEvent, getLoot, getCompl, getEnc, getTrap, getEnvSev } from './tables.js';
+import { rollD8D12, rollD20D20 } from '../../../shared/gmboard/tableDice.js';
+import { getEvent, getLoot, getCompl, getEnc, getTrap, getEnvSev } from '../../../shared/gmboard/tables.js';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
 
 // The tables a GM can roll on directly, in the order the Roll tab shows them.

@@ -2,12 +2,11 @@ import {
   Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography,
 } from '@mui/material';
 import { CloudRain, Clock } from 'lucide-react';
-import HexResultSteps from '../../gmboard/hexcrawl/HexResultSteps.jsx';
-import { formatDateTime } from '../../gmboard/session/time.js';
-import { hasWeatherDisadvantage } from '../../gmboard/session/weather.js';
+import HexResultSteps from '../../../shared/hexcrawl/ui/HexResultSteps.jsx';
+import { formatCampaignDateTime } from '../../../shared/gmboard/campaignTime.js';
+import { hasWeatherDisadvantage } from '../../../shared/gmboard/weather.js';
 import { terrainOption } from '../../../shared/hexcrawl/hexEntry.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { fullscreenContainer } from '../map/fullscreenContainer.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 // What the party walked into. A dialog rather than a panel because it is the
@@ -29,7 +28,6 @@ export default function HexResultDialog({ result, onClose }) {
       onClose={onClose}
       maxWidth="sm"
       fullWidth
-      container={fullscreenContainer}
     >
       {/* The weather rides in the corner of the title rather than in the body:
           it is the standing condition every roll below was made under, and it is
@@ -57,7 +55,7 @@ export default function HexResultDialog({ result, onClose }) {
           {clock ? (
             <Box sx={lineSx}>
               <Clock size={14} />
-              <Typography sx={lineTextSx}>{formatDateTime(clock)}</Typography>
+              <Typography sx={lineTextSx}>{formatCampaignDateTime(clock)}</Typography>
             </Box>
           ) : null}
         </Stack>

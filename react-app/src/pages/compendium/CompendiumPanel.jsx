@@ -4,7 +4,7 @@ import {
 } from '@mui/material';
 import { BookOpen, X } from 'lucide-react';
 import { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
-import { fullscreenContainer } from '../vtt/map/fullscreenContainer.js';
+import { activePortalContainer } from '../../shared/ui/portalContainer.js';
 import CompendiumHome from './CompendiumHome.jsx';
 import { useCompendium } from './loadCompendium.js';
 import { UI_FONTS } from '../../shared/ui/fonts.js';
@@ -23,7 +23,7 @@ function OpenPanel({ onClose }) {
     if (event.key === 'Escape' && !event.defaultPrevented) onClose?.();
   }, [onClose]);
   return (
-    <Portal container={fullscreenContainer}>
+    <Portal container={activePortalContainer}>
       <Paper role="dialog" aria-label="Compendium" data-viewport-control onKeyDown={handleKeyDown} sx={panelSx}>
         <Box sx={headerSx}>
           <BookOpen size={16} />

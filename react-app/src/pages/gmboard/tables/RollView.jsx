@@ -1,7 +1,7 @@
 import { Box, Button, Stack, Typography, alpha, useTheme } from '@mui/material';
 import { AlertTriangle, Coins, CornerDownRight, Dices, Flame, History, Leaf, Map, Swords, Trash2 } from 'lucide-react';
-import ResultBadge from '../ui/ResultBadge.jsx';
-import TierSelector from '../ui/TierSelector.jsx';
+import ResultBadge from '../../../shared/gmboard/ui/ResultBadge.jsx';
+import TierSelector from '../../../shared/gmboard/ui/TierSelector.jsx';
 import { ROLL_TABLES, describeRoll, followUpTables, formatDice, summarizeStats } from './rollTable.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';

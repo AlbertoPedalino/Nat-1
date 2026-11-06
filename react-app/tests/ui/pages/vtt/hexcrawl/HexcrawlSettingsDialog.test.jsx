@@ -4,8 +4,8 @@ import { vi } from 'vitest';
 import { theme } from '../../../../../src/app/theme.js';
 import HexcrawlSettingsDialog from '../../../../../src/pages/vtt/hexcrawl/HexcrawlSettingsDialog.jsx';
 import HexcrawlCorner from '../../../../../src/pages/vtt/hexcrawl/HexcrawlCorner.jsx';
-import { createDefaultCoreState } from '../../../../../src/pages/gmboard/state/defaultState.js';
-import { createDefaultTables } from '../../../../../src/pages/gmboard/tables/defaultTables.js';
+import { createDefaultCoreState } from '../../../../../src/shared/gmboard/defaultState.js';
+import { createDefaultTables } from '../../../../../src/shared/gmboard/defaultTables.js';
 
 const render = (ui) => {
   const result = baseRender(<ThemeProvider theme={theme}>{ui}</ThemeProvider>);

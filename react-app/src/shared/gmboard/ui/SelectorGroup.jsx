@@ -1,6 +1,6 @@
 import { useId } from 'react';
 import { Box, Button, Typography, useTheme } from '@mui/material';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { UI_FONTS } from '../../ui/fonts.js';
 
 export default function SelectorGroup({
   label,

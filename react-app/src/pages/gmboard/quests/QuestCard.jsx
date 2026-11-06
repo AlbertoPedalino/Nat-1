@@ -1,6 +1,6 @@
 import { Box, Stack, Typography, alpha, useTheme } from '@mui/material';
 import { Coins, Compass, Minus, ScrollText, Swords, Tent } from 'lucide-react';
-import ResultBadge from '../ui/ResultBadge.jsx';
+import ResultBadge from '../../../shared/gmboard/ui/ResultBadge.jsx';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 

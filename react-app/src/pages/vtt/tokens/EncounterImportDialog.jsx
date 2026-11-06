@@ -24,7 +24,6 @@ import { buildCombat, restoreFight } from '../../../shared/encounter/combat.js';
 import { hydrateEncounterItems } from '../../../shared/bestiary/monsterUtils.js';
 import { combatantToToken, importableCombatants } from '../../../shared/vtt/tokens/encounterImport.js';
 import { useMonsterDb } from '../../../shared/bestiary/useMonsterDb.js';
-import { fullscreenContainer } from '../map/fullscreenContainer.js';
 import PiecePreview, { beginPiecePointerDrag } from './PiecePreview.jsx';
 import {
   battleMapDialogActionsSx,
@@ -275,7 +274,6 @@ export default function EncounterImportDialog({
       onClose={onClose}
       fullWidth
       maxWidth="xs"
-      container={fullscreenContainer}
       sx={battleMapDropDialogSx}
       slotProps={{
         paper: { sx: [battleMapDialogPaperSx, placing && battleMapDialogPlacingPaperSx] },

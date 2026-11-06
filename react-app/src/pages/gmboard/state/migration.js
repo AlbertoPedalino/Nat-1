@@ -1,5 +1,5 @@
-import { createDefaultCoreState } from './defaultState.js';
-import { createDefaultTables } from '../tables/defaultTables.js';
+import { createDefaultCoreState } from '../../../shared/gmboard/defaultState.js';
+import { createDefaultTables } from '../../../shared/gmboard/defaultTables.js';
 
 export const LEGACY_KEYS = Object.freeze([
   'gm_state', 'gm_wea', 'gm_ev', 'gm_lo', 'gm_co', 'gm_env',

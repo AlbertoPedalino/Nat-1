@@ -9,13 +9,8 @@
 //
 // Pure: no Supabase, no React. The cloud module writes what this returns.
 
-import {
-  HEX_POPULATION_OPTIONS,
-  TERRAIN_OPTIONS,
-  TIER_OPTIONS,
-  normalizeMountSpeed,
-} from '../../pages/gmboard/state/constants.js';
-import { resolveAdvanceOnly, resolveProceed } from '../../pages/gmboard/hexcrawl/hex.js';
+import { HEX_POPULATION_OPTIONS, TERRAIN_OPTIONS, TIER_OPTIONS, normalizeMountSpeed } from '../gmboard/boardOptions.js';
+import { resolveAdvanceOnly, resolveProceed } from './hexRules.js';
 import { formatNumber } from '../ui/numberFormat.js';
 
 export const HEX_STATUSES = Object.freeze(['unexplored', 'frontier', 'settled']);

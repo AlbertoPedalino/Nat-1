@@ -18,7 +18,6 @@ import {
   AREA_EFFECTS, areaEffect, areaSizeFeet, feetToCells, resizedAreaPoints,
 } from '../../../shared/vtt/map/areas.js';
 import { isNote as isNoteDrawing, scaledPoints } from '../../../shared/vtt/map/drawing.js';
-import { fullscreenContainer } from './fullscreenContainer.js';
 import { useMenuPlacement } from './menuPlacement.js';
 import { battleMapDialogPaperSx } from './battleMapSurface.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
@@ -137,7 +136,6 @@ export default function DrawingMenu({
         onClose();
       }}
       {...placement.menuProps}
-      container={fullscreenContainer}
       slotProps={{
         transition: placement.transitionProps,
         paper: {
@@ -229,8 +227,6 @@ export default function DrawingMenu({
               const colour = effect ? areaEffect(effect)?.color : null;
               onSave(drawing, { area: { ...area, effect }, ...(colour ? { color: colour } : null) });
             }}
-            // Its list must open inside the map, or fullscreen never paints it.
-            slotProps={{ select: { MenuProps: { container: fullscreenContainer } } }}
             sx={compactFieldSx}
           >
             <MenuItem value="none">None</MenuItem>

@@ -1,13 +1,7 @@
 import { createTheme } from '@mui/material';
 import { UI_FONTS } from '../shared/ui/fonts.js';
+import { activePortalContainer } from '../shared/ui/portalContainer.js';
 
-// Portalled controls must remain descendants of the browser's fullscreen
-// element or they are not painted at all. Outside fullscreen this is exactly
-// MUI's normal document.body destination.
-function activePortalContainer() {
-  if (typeof document === 'undefined') return null;
-  return document.fullscreenElement || document.webkitFullscreenElement || document.body;
-}
 import { chipTintStyle } from '../shared/ui/entityColors.js';
 import { VTT_COLORS, vttAlpha } from '../shared/vtt/colors.js';
 import { UI_COLORS } from '../shared/ui/colors.js';

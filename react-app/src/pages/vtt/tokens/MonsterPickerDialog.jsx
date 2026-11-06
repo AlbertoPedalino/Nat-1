@@ -14,7 +14,6 @@ import {
 import { useMonsterDb } from '../../../shared/bestiary/useMonsterDb.js';
 import MonsterBrowser from '../../../shared/bestiary/MonsterBrowser.jsx';
 import { monsterToToken } from '../../../shared/vtt/tokens/encounterImport.js';
-import { fullscreenContainer } from '../map/fullscreenContainer.js';
 import { beginPiecePointerDrag } from './PiecePreview.jsx';
 import {
   battleMapDialogActionsSx,
@@ -52,7 +51,6 @@ export default function MonsterPickerDialog({
       onClose={onClose}
       fullWidth
       maxWidth="md"
-      container={fullscreenContainer}
       sx={battleMapDropDialogSx}
       slotProps={{
         paper: { sx: [battleMapDialogPaperSx, placing && battleMapDialogPlacingPaperSx] },

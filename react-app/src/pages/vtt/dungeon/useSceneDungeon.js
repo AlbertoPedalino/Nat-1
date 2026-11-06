@@ -6,7 +6,7 @@ import { listInstanceFights, saveInstanceFight } from '../../../shared/cloud/api
 import {
   readHexcrawlBoard,
 } from '../../../shared/cloud/api/hexcrawl.js';
-import { createDungeon } from '../../gmboard/dungeon/dungeon.js';
+import { createDungeon } from '../../../shared/dungeon/dungeon.js';
 import { encounterBudget, fillBudget } from '../../../shared/dungeon/roomBudget.js';
 import { crXP, getCR } from '../../../shared/bestiary/monsterUtils.js';
 import { roomMarkers } from '../../../shared/dungeon/roomMarkers.js';

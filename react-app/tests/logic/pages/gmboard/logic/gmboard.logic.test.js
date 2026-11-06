@@ -18,21 +18,21 @@ if (!globalThis.localStorage) {
   Object.defineProperty(globalThis, 'localStorage', { value: new MemoryStorage(), configurable: true });
 }
 
-const { daysInMonth, isLeapYear, advanceMinutes, formatHM, formatDate, formatDuration, validateStart } = await import('../../../../../src/pages/gmboard/session/time.js');
-const { effectiveHours, hasWeatherDisadvantage, travelTime, weatherEffectLabel, weatherTimerLabel, runWeatherChecks } = await import('../../../../../src/pages/gmboard/session/weather.js');
-const { getEvent, getLoot, getEnc, getTrap, getCompl, getEnvSev } = await import('../../../../../src/pages/gmboard/tables/tables.js');
-const { rollD8D12, rollD20D20 } = await import('../../../../../src/pages/gmboard/logic/rng.js');
+const { daysInMonth, isLeapYear, advanceMinutes, formatHM, formatDate, formatDuration, validateStart } = await import('../../../../../src/shared/gmboard/campaignTime.js');
+const { effectiveHours, hasWeatherDisadvantage, travelTime, weatherEffectLabel, weatherTimerLabel, runWeatherChecks } = await import('../../../../../src/shared/gmboard/weather.js');
+const { getEvent, getLoot, getEnc, getTrap, getCompl, getEnvSev } = await import('../../../../../src/shared/gmboard/tables.js');
+const { rollD8D12, rollD20D20 } = await import('../../../../../src/shared/gmboard/tableDice.js');
 const { rollDie } = await import('../../../../../src/shared/character/dice/dice.js');
-const { resolveProceed, resolveAdvanceOnly, resolveManualAdvance } = await import('../../../../../src/pages/gmboard/hexcrawl/hex.js');
-const { normalizeMountSpeed } = await import('../../../../../src/pages/gmboard/state/constants.js');
-const { createDungeon, isValidRoomCount, roomCountInputFrom } = await import('../../../../../src/pages/gmboard/dungeon/dungeon.js');
+const { resolveProceed, resolveAdvanceOnly, resolveManualAdvance } = await import('../../../../../src/shared/hexcrawl/hexRules.js');
+const { normalizeMountSpeed } = await import('../../../../../src/shared/gmboard/boardOptions.js');
+const { createDungeon, isValidRoomCount, roomCountInputFrom } = await import('../../../../../src/shared/dungeon/dungeon.js');
 const { resolveCellCommit } = await import('../../../../../src/pages/gmboard/tables/tableEdit.js');
 const { createQuests } = await import('../../../../../src/pages/gmboard/quests/quest.js');
 const { migrateLegacyBoard, LEGACY_KEYS } = await import('../../../../../src/pages/gmboard/state/migration.js');
-const { createDefaultTables } = await import('../../../../../src/pages/gmboard/tables/defaultTables.js');
-const { createDefaultCoreState, createDefaultResults } = await import('../../../../../src/pages/gmboard/state/defaultState.js');
+const { createDefaultTables } = await import('../../../../../src/shared/gmboard/defaultTables.js');
+const { createDefaultCoreState, createDefaultResults } = await import('../../../../../src/shared/gmboard/defaultState.js');
 const { gmBoardReducer, createInitialState } = await import('../../../../../src/pages/gmboard/state/reducer.js');
-const { SELECTOR_CONTRACTS } = await import('../../../../../src/pages/gmboard/ui/selectorContracts.js');
+const { SELECTOR_CONTRACTS } = await import('../../../../../src/shared/gmboard/ui/selectorContracts.js');
 const { confirmAction } = await import('../../../../../src/shared/ui/confirmAction.js');
 const storage = await import('../../../../../src/pages/gmboard/state/storage.js');
 

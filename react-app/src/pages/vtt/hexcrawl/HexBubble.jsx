@@ -1,9 +1,9 @@
 import { Box, Stack, Typography, alpha, useTheme } from '@mui/material';
-import { formatDateTime } from '../../gmboard/session/time.js';
-import { hasWeatherDisadvantage } from '../../gmboard/session/weather.js';
+import { formatCampaignDateTime } from '../../../shared/gmboard/campaignTime.js';
+import { hasWeatherDisadvantage } from '../../../shared/gmboard/weather.js';
 import {
   FALLBACK_WEATHER_ICON, TERRAIN_ICONS, WEATHER_ICONS,
-} from '../../gmboard/hexcrawl/hexIcons.js';
+} from '../../../shared/hexcrawl/hexIcons.js';
 import { terrainOption } from '../../../shared/hexcrawl/hexEntry.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
@@ -69,7 +69,7 @@ export default function HexBubble({ bubble, x, y, onClose }) {
               {clock.weather}{clock.intensity ? ` · ${clock.intensity}` : ''}
               {disadvantage ? ' · Dis' : ''}
             </Typography>
-            <Typography sx={{ ...footerTextSx, ml: 'auto' }}>{formatDateTime(clock)}</Typography>
+            <Typography sx={{ ...footerTextSx, ml: 'auto' }}>{formatCampaignDateTime(clock)}</Typography>
           </Stack>
         ) : null}
 

@@ -1,8 +1,8 @@
 import { useId } from 'react';
 import { Box, Button, Typography, alpha, useTheme } from '@mui/material';
 import { Circle } from 'lucide-react';
-import { TIER_OPTIONS } from '../state/constants.js';
-import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { TIER_OPTIONS } from '../boardOptions.js';
+import { UI_FONTS } from '../../ui/fonts.js';
 
 export default function TierSelector({ value, onChange, label = 'Tier' }) {
   const theme = useTheme();

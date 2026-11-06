@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { Box, Button, Stack, TextField, Typography, useTheme } from '@mui/material';
 import { Castle, Dices, Trash2 } from 'lucide-react';
-import SelectorGroup from '../ui/SelectorGroup.jsx';
-import TierSelector from '../ui/TierSelector.jsx';
+import SelectorGroup from '../../../shared/gmboard/ui/SelectorGroup.jsx';
+import TierSelector from '../../../shared/gmboard/ui/TierSelector.jsx';
 import RoomCard from './RoomCard.jsx';
-import { SELECTOR_CONTRACTS } from '../ui/selectorContracts.js';
+import { SELECTOR_CONTRACTS } from '../../../shared/gmboard/ui/selectorContracts.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
-import { isValidRoomCount, roomCountInputFrom } from './dungeon.js';
+import { isValidRoomCount, roomCountInputFrom } from '../../../shared/dungeon/dungeon.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 

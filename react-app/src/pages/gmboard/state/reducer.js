@@ -1,6 +1,7 @@
-import { createDefaultCoreState, createDefaultResults } from './defaultState.js';
-import { createDefaultTables } from '../tables/defaultTables.js';
-import { LOG_STORE_LIMIT, ROLL_HISTORY_LIMIT, normalizeMountSpeed } from './constants.js';
+import { createDefaultCoreState, createDefaultResults } from '../../../shared/gmboard/defaultState.js';
+import { createDefaultTables } from '../../../shared/gmboard/defaultTables.js';
+import { LOG_STORE_LIMIT, ROLL_HISTORY_LIMIT } from './constants.js';
+import { normalizeMountSpeed } from '../../../shared/gmboard/boardOptions.js';
 import { mergeBoardClock } from '../../../shared/hexcrawl/hexEntry.js';
 
 export const CORE_FIELD_KEYS = Object.freeze(Object.keys(createDefaultCoreState()));

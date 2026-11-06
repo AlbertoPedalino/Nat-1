@@ -1,14 +1,14 @@
 import { Box, Button, Stack, Typography, useTheme } from '@mui/material';
 import { FastForward, Footprints, Map } from 'lucide-react';
-import { POPULATION_ICONS, TERRAIN_ICONS } from './hexIcons.js';
+import { POPULATION_ICONS, TERRAIN_ICONS } from '../../../shared/hexcrawl/hexIcons.js';
 import WeatherPanel from '../session/WeatherPanel.jsx';
 import TimePanel from '../session/TimePanel.jsx';
-import SelectorGroup from '../ui/SelectorGroup.jsx';
-import TierSelector from '../ui/TierSelector.jsx';
-import MountSelector from './MountSelector.jsx';
-import HexResultSteps from './HexResultSteps.jsx';
+import SelectorGroup from '../../../shared/gmboard/ui/SelectorGroup.jsx';
+import TierSelector from '../../../shared/gmboard/ui/TierSelector.jsx';
+import MountSelector from '../../../shared/hexcrawl/ui/MountSelector.jsx';
+import HexResultSteps from '../../../shared/hexcrawl/ui/HexResultSteps.jsx';
 import SessionLog from '../session/SessionLog.jsx';
-import { SELECTOR_CONTRACTS } from '../ui/selectorContracts.js';
+import { SELECTOR_CONTRACTS } from '../../../shared/gmboard/ui/selectorContracts.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 

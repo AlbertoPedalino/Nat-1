@@ -6,13 +6,16 @@ See the [source map](../README.md) for the page feature folders.
 
 | Folder | Responsibility |
 | --- | --- |
-| `campaign/` | Campaign roster, shared character vitals, campaign selection |
+| `bestiary/` | Monster records: database loader and hook, CR/XP, types, sizes, sources, markup and the stat block sheet every page shows |
+| `campaign/` | Campaign roster, shared character vitals and sheet summaries, campaign selection |
 | `character/` | Character rules and the UI tied to those rules; see below |
 | `cloud/` | Supabase access, authentication, and synchronization; see below |
 | `numbers.js` | `clamp` / `clampInt`, the one way to keep a number in range |
-| `content/` | D&D entry rendering, 5etools links, source filtering, text search |
-| `dungeon/` | Dungeon generation helpers, room markers, linked encounters |
-| `hexcrawl/` | Hex data and campaign clock |
+| `content/` | D&D entry rendering, 5etools links and loading (`gameData.js`), catalogs built from it (`catalogs/`: classes, species, backgrounds, feats, spells, items, rules, beasts), source filtering, text search |
+| `dungeon/` | Dungeon generation (`dungeon.js`), room markers, linked encounters |
+| `encounter/` | The combat model (combatants, initiative, vitals), combatant labels, fight records, the encounter library, sheet-vitals sync |
+| `gmboard/` | What other pages read of a GM Board: options, storage format, default state and tables, table dice, campaign time, weather, selector UI |
+| `hexcrawl/` | Hex data, hex travel rules (`hexRules.js`), icons, hex result and mount UI |
 | `instances/` | GM Board / Encounter Builder / DM Screen instances: identity, local store, sync engine, page hook, links; see below |
 | `storage/` | Generic localStorage helpers and character registry metadata |
 | `ui/` | Reusable presentation components/hooks, toasts, colors (`colors.js`: `UI_COLORS`, `uiAlpha`, the source the theme is built from), route titles, number/date/text formatting, `confirmAction`, `useEventListener` (DOM listeners for a mounted component) |
@@ -26,9 +29,11 @@ See the [source map](../README.md) for the page feature folders.
 | `dice/` | The one dice engine (`dice.js`: `rollDie`, `rollPool`, `rollD20`, `rollFormula`, each with an optional `rng`; every die in the app is rolled here; the battle map's dice tray only animates the result), notation rolls for logs and creatures (`rollNotation.js`), dice rendering, roll logs and toasts |
 | `forms/` | Wild Shape, companions, summons, and cannon forms |
 | `inventory/` | Items, crafting, currency, attunement, charges, inventory filtering |
-| `profile/` | Character persistence, portraits, class icons |
+| `profile/` | Character persistence, export, portraits, class icons |
+| `proficiency/` | Weapon and armor proficiency rules and queries |
 | `progression/` | Levels, ability bonuses, choices, feats, proficiencies, languages, XP |
-| `resources/` | Shared rest and recharge rules |
+| `resources/` | Rest and recharge rules, resource definitions (`restResources.js`) |
+| `sheet/` | The sheet's numbers: stats (`sheetStats.js`), effects, defenses, effect bonuses, runtime adapters, derived state |
 | `spells/` | Spell grants, metadata, slots, Pact Magic, free casts, spell references |
 
 Keep domain UI alongside its rules (for example, `combat/ConditionChips.jsx`).

@@ -7,7 +7,6 @@ import { DEAD_CONDITION_KEY, conditionLabel } from '../../../shared/character/co
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import { classIcon } from '../../../shared/character/profile/classIcon.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import { fullscreenContainer } from '../map/fullscreenContainer.js';
 import MapObjectGlyph from '../objects/MapObjectGlyph.jsx';
 import { isMapPiece } from '../../../shared/vtt/map/mapObjects.js';
 import { useEventListener } from '../../../shared/ui/useEventListener.js';
@@ -598,7 +597,6 @@ function ConditionTokenPill({ conditionKey, entries, tooltipOpen, onInspect }) {
         </Box>
       )}
       slotProps={{
-        popper: { container: fullscreenContainer },
         tooltip: { sx: conditionTooltipSx },
       }}
     >

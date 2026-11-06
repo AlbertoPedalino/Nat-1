@@ -1,12 +1,12 @@
 import {
-  SEASONS,
-  WEATHER_OVERRIDE_OPTIONS,
-  HEX_POPULATION_OPTIONS,
-  TERRAIN_OPTIONS,
   DUNGEON_POPULATION_OPTIONS,
+  HEX_POPULATION_OPTIONS,
   QUEST_SCOPE_OPTIONS,
+  SEASONS,
+  TERRAIN_OPTIONS,
   TIER_OPTIONS,
-} from '../state/constants.js';
+  WEATHER_OVERRIDE_OPTIONS,
+} from '../boardOptions.js';
 
 const SEASON_OPTIONS = SEASONS.map((s) => ({ id: s, label: s }));
 

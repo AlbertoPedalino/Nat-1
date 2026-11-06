@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 const { ROLL_TABLES, rollTable, followUpTables, formatDice, describeRoll, summarizeStats } = await import('../../../../../src/pages/gmboard/tables/rollTable.js');
-const { createDefaultTables } = await import('../../../../../src/pages/gmboard/tables/defaultTables.js');
+const { createDefaultTables } = await import('../../../../../src/shared/gmboard/defaultTables.js');
 const { gmBoardReducer, createInitialState, extractCoreState } = await import('../../../../../src/pages/gmboard/state/reducer.js');
 const { ROLL_HISTORY_LIMIT } = await import('../../../../../src/pages/gmboard/state/constants.js');
 

@@ -10,7 +10,6 @@ import {
   Typography,
 } from '@mui/material';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
-import { fullscreenContainer } from '../map/fullscreenContainer.js';
 import { coarsePointer, useMenuPlacement } from '../map/menuPlacement.js';
 import { battleMapDialogPaperSx } from '../map/battleMapSurface.js';
 import { useTokenMenuState } from './useTokenMenuState.js';
@@ -62,7 +61,6 @@ export default function TokenMenu({
       open={Boolean(anchor)}
       onClose={onClose}
       {...placement.menuProps}
-      container={fullscreenContainer}
       slotProps={{
         transition: placement.transitionProps,
         paper: {

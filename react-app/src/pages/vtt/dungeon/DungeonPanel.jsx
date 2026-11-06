@@ -5,8 +5,8 @@ import {
 import {
   Coins, Dices, Flame, Leaf, Swords, Trash2, Users,
 } from 'lucide-react';
-import { DUNGEON_POPULATION_OPTIONS, TIER_OPTIONS } from '../../gmboard/state/constants.js';
-import { MAX_ROOM_COUNT, MIN_ROOM_COUNT, isValidRoomCount } from '../../gmboard/dungeon/dungeon.js';
+import { DUNGEON_POPULATION_OPTIONS, TIER_OPTIONS } from '../../../shared/gmboard/boardOptions.js';
+import { MAX_ROOM_COUNT, MIN_ROOM_COUNT, isValidRoomCount } from '../../../shared/dungeon/dungeon.js';
 import { describeGroups } from '../../../shared/dungeon/roomBudget.js';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { MARKER_COLORS } from '../../../shared/dungeon/roomMarkers.js';
