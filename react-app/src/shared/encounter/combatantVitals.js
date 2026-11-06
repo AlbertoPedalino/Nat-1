@@ -158,7 +158,7 @@ export function applySheetVitals(combat, sourceId, vitals) {
   return changed ? { ...combat, combatants } : combat;
 }
 
-export function applyHp(combatant, value) {
+function applyHp(combatant, value) {
   const hpCurrent = Math.max(0, Math.min(numberOr(combatant.hpMax, 1), Math.round(value)));
   const isMonster = combatant.type === 'monster';
   const dead = isMonster
@@ -176,7 +176,7 @@ export function applyHp(combatant, value) {
   };
 }
 
-export function killCombatant(combatant) {
+function killCombatant(combatant) {
   const player = combatant.type === 'player';
   return {
     ...combatant,
@@ -187,7 +187,7 @@ export function killCombatant(combatant) {
   };
 }
 
-export function reviveCombatant(combatant) {
+function reviveCombatant(combatant) {
   const player = combatant.type === 'player';
   return {
     ...combatant,

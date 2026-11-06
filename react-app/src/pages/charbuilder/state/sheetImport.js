@@ -15,19 +15,19 @@ export function extractSheetData(text) {
   }
 }
 
-export function unwrapStructuredSheetPayload(payload) {
+function unwrapStructuredSheetPayload(payload) {
   if (!payload || typeof payload !== 'object') return null;
   // Tolerate a still-wrapped { data } payload; a real character carries className.
   if (payload.data && typeof payload.data === 'object' && !payload.className) return payload.data;
   return payload;
 }
 
-export function isStructuredSheetPayload(payload) {
+function isStructuredSheetPayload(payload) {
   if (!payload || typeof payload !== 'object') return false;
   return Boolean(payload.className || payload.choices);
 }
 
-export function buildBuilderStateFromSheetPayload(data) {
+function buildBuilderStateFromSheetPayload(data) {
   const backgroundSnapshot = data.backgroundSnapshot || null;
   const backgroundName = data.backgroundName || backgroundSnapshot?.name || '';
   const backgroundSource = data.backgroundSource || backgroundSnapshot?.source || '';

@@ -7,7 +7,7 @@ import { asArray } from '../../../shared/lists.js';
 // Typed proficiency choices (skill/tool/language picks stored under choice
 // keys) folded into the character's selected lists before it is saved.
 
-export function collectTypedProficiencyChoices(choices = {}) {
+function collectTypedProficiencyChoices(choices = {}) {
   const all = Object.values(choices || {}).flatMap(asArray);
   const split = splitTypedProficiencies(all);
   return {
@@ -17,7 +17,7 @@ export function collectTypedProficiencyChoices(choices = {}) {
   };
 }
 
-export function mergeSelectedSkills(selectedSkills, addedSkills) {
+function mergeSelectedSkills(selectedSkills, addedSkills) {
   const additions = uniqueProficiencyLabels(addedSkills);
   if (!additions.length) return selectedSkills || [];
 
@@ -31,13 +31,13 @@ export function mergeSelectedSkills(selectedSkills, addedSkills) {
   return uniqueProficiencyLabels([...(Array.isArray(selectedSkills) ? selectedSkills : []), ...additions]);
 }
 
-export function mergeSelectedList(current, additions) {
+function mergeSelectedList(current, additions) {
   const added = uniqueProficiencyLabels(additions);
   if (!added.length) return Array.isArray(current) ? current : [];
   return uniqueProficiencyLabels([...(Array.isArray(current) ? current : []), ...added]);
 }
 
-export function mergeNormalizedChoices(normalizedChoices, typedProfs) {
+function mergeNormalizedChoices(normalizedChoices, typedProfs) {
   const hasTyped = typedProfs.skills.length || typedProfs.tools.length || typedProfs.languages.length;
   if (!normalizedChoices && !hasTyped) return null;
 

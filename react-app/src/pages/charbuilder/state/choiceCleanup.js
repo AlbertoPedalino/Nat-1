@@ -11,7 +11,7 @@ import { stripMarkup } from '../../../shared/content/markupText.js';
 // Fields whose value feeds normalizeCharacterChoices. When a reducer patch touches
 // any of them, normalizedChoices is rebuilt so it stays the single source of truth
 // for derived proficiencies/expertise/spells (consumed by the sheet and previews).
-export const NORMALIZE_SOURCE_FIELDS = [
+const NORMALIZE_SOURCE_FIELDS = [
   'choices',
   'selectedSkills',
   'selectedTools',
@@ -85,7 +85,7 @@ export function normChoice(value) {
   return matchKey(stripSource(stripMarkup(value)));
 }
 
-export function isSpeciesChoiceKey(key) {
+function isSpeciesChoiceKey(key) {
   const k = String(key || '');
   return (
     k.startsWith('species_') ||

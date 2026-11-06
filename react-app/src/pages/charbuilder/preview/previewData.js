@@ -18,16 +18,16 @@ import { asArray } from '../../../shared/lists.js';
 // What the builder preview lists: skill and other proficiencies merged from
 // every source, and the feats the character holds.
 
-export function uniqueClean(values) {
+function uniqueClean(values) {
   return uniqueDisplayLabels(values);
 }
 
-export function choiceKeyCanGrantSkill(key) {
+function choiceKeyCanGrantSkill(key) {
   const lk = String(key || '').toLowerCase();
   return lk.includes('skill') || lk.includes('exp_') || lk.includes('expertise');
 }
 
-export function collectSkillProficiencies(character) {
+function collectSkillProficiencies(character) {
   const out = [];
   const pushSkill = (value) => {
     const parsed = parseTypedProficiencyValue(value);
@@ -73,7 +73,7 @@ export function collectSkillProficiencies(character) {
   return uniqueClean(out);
 }
 
-export function mergePreviewSection(sections, title, items, prepend = false) {
+function mergePreviewSection(sections, title, items, prepend = false) {
   const cleaned = title === 'Weapons' ? collapseWeaponProficiencies(items) : uniqueClean(items);
   if (!cleaned.length) return;
   const existing = sections.find((section) => section.title === title);

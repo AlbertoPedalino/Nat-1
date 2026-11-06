@@ -118,7 +118,7 @@ export function importCampaignPlayers(state, campaignPlayers) {
   };
 }
 
-export function normalizePlayer(player, index) {
+function normalizePlayer(player, index) {
   const hpMax = clampInt(player.hpMax, 1, 999, 10);
   // resolveCombatVitals rather than the raw mapper: it is the one that reads an
   // absent current HP as "undamaged" instead of 0.
@@ -141,7 +141,7 @@ export function normalizePlayer(player, index) {
   return normalized;
 }
 
-export function isDefaultPlaceholderParty(players) {
+function isDefaultPlaceholderParty(players) {
   if (!players.length) return true;
   return players.every((player, index) => (
     !player.sourceId
@@ -152,7 +152,7 @@ export function isDefaultPlaceholderParty(players) {
   ));
 }
 
-export function campaignAverageLevel(players) {
+function campaignAverageLevel(players) {
   if (!players.length) return 1;
   const total = players.reduce((sum, player) => sum + clampInt(player.level, 1, 20, 1), 0);
   return clampInt(total / players.length, 1, 20, 1);

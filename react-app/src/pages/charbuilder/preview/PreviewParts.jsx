@@ -15,7 +15,7 @@ import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 // The builder preview's building blocks: section cards, chip lists, inline
 // metadata and feature accordions.
 
-export const darkChipText = UI_COLORS.primaryContrast;
+const darkChipText = UI_COLORS.primaryContrast;
 
 export const PROFICIENCY_TONE = NEUTRAL_TONE;
 
@@ -34,7 +34,7 @@ export const SECTION_HEADER_SX = {
   lineHeight: 1.2,
 };
 
-export function EmptyCaption({ children }) {
+function EmptyCaption({ children }) {
   return (
     <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontSize: '0.72rem', lineHeight: 1.45 }}>
       {children}
@@ -101,7 +101,7 @@ export function filledChipSx(bg) {
   };
 }
 
-export function outlinedChipSx(color) {
+function outlinedChipSx(color) {
   return {
     color,
     borderColor: color,
@@ -149,7 +149,7 @@ export function PreviewEntryText({ entries }) {
   );
 }
 
-export function getFeatureBody(feature) {
+function getFeatureBody(feature) {
   if (!feature || typeof feature !== 'object') return feature;
   if (feature.entries != null) return feature.entries;
   if (feature.entry != null) return feature.entry;

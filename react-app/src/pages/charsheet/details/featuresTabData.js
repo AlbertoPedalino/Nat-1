@@ -1,0 +1,258 @@
+import { adapterRegistry } from '../../../adapters/registry.js';
+import { warlockInvocationSelections } from '../../../shared/character/progression/warlockUtils.js';
+import { buildOptionalFeatureEntryLookup } from '../../../shared/character/progression/optionalFeatures.js';
+import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
+import { asArray } from '../../../shared/lists.js';
+import { choiceKey } from '../../../shared/content/nameKeys.js';
+import { stripMarkup } from '../../../shared/content/markupText.js';
+
+// Which class, subclass and invocation features the Features tab shows:
+// level, class/subclass identity and choice gates.
+
+export function collectWarlockInvocationFeatures(C) {
+  const meta = adapterRegistry.getClassSheetChoiceMeta('Warlock');
+  const invocationData = Array.isArray(meta?.invocationData) ? meta.invocationData : [];
+  if (!invocationData.length) return [];
+
+  const invByName = new Map(
+    invocationData.map((entry) => [choiceKey(entry?.name), entry]).filter(([key]) => key),
+  );
+  // Live 2024 invocation descriptions (rich 5etools entries) from optionalfeatures.json.
+  const liveEntries = buildOptionalFeatureEntryLookup(C?.optionalFeatureEntries, 'EI');
+  const out = [];
+  const pushForPrefix = (keyPrefix, ownerLevel = 1) => {
+    const selected = warlockInvocationSelections(C, keyPrefix);
+    if (!selected.length) return;
+    const counts = new Map();
+    selected.forEach((name) => {
+      const clean = cleanChoiceText(name);
+      if (!clean) return;
+      counts.set(clean, (counts.get(clean) || 0) + 1);
+    });
+    counts.forEach((count, selectedName) => {
+      const data = invByName.get(choiceKey(selectedName)) || null;
+      const repeatable = !!data?.repeatable;
+      out.push({
+        name: count > 1 ? `${selectedName} x${count}` : selectedName,
+        level: Number(data?.minLevel || ownerLevel || 1),
+        source: repeatable ? 'Invocation - Repeatable' : 'Invocation',
+        sourceKind: 'class',
+        entries: liveEntries(selectedName) || null,
+      });
+    });
+  };
+
+  if (choiceKey(C?.className) === 'warlock') pushForPrefix('', primaryClassLevel(C));
+  (C?.extraClasses || []).forEach((extra, index) => {
+    if (choiceKey(extra?.name) !== 'warlock') return;
+    pushForPrefix(`mc${index}_`, Number(extra?.level || 1));
+  });
+
+  return dedupeFeatures(out);
+}
+
+export function collectClassBuckets(C) {
+  const out = [];
+  const primaryLevel = primaryClassLevel(C);
+
+  if (C?.className) {
+    const classFeatures = collectValidClassFeatures({
+      features: C?.allClassFeatures || C?.allFeatures || [],
+      className: C.className,
+      level: primaryLevel,
+      character: C,
+      choicePrefix: '',
+    }).map((feature) => ({ ...feature, source: C.className || 'Class', sourceKind: 'class' }));
+
+    const subclassFeatures = collectValidSubclassFeatures({
+      features: C?.allSubFeatures || [],
+      className: C.className,
+      subclassName: C?.subclassShortName || '',
+      level: primaryLevel,
+      character: C,
+      choicePrefix: '',
+    }).map((feature) => ({ ...feature, source: C.subclassShortName || 'Subclass', sourceKind: 'subclass' }));
+
+    out.push({
+      kind: 'class',
+      name: C.className,
+      title: `${C.className} ${primaryLevel}${C?.subclassShortName ? ` - ${C.subclassShortName}` : ''}`,
+      index: null,
+      features: dedupeFeatures([...classFeatures, ...subclassFeatures]),
+    });
+  }
+
+  (C?.extraClasses || []).forEach((extra, index) => {
+    if (!extra?.name) return;
+    const level = Number(extra?.level || 1);
+    const choicePrefix = `mc${index}_`;
+
+    const classFeatures = collectValidClassFeatures({
+      features: extra?.allClassFeatures || extra?.allFeatures || [],
+      className: extra.name,
+      level,
+      character: C,
+      choicePrefix,
+    }).map((feature) => ({ ...feature, source: extra.name || 'Class', sourceKind: 'class' }));
+
+    const subclassFeatures = collectValidSubclassFeatures({
+      features: extra?.allSubFeatures || [],
+      className: extra.name,
+      subclassName: extra?.subclassShortName || '',
+      level,
+      character: C,
+      choicePrefix,
+    }).map((feature) => ({ ...feature, source: extra.subclassShortName || 'Subclass', sourceKind: 'subclass' }));
+
+    out.push({
+      kind: 'multiclass',
+      name: extra.name,
+      title: `MC ${index + 1} - ${extra.name} ${level}${extra?.subclassShortName ? ` - ${extra.subclassShortName}` : ''}`,
+      index,
+      features: dedupeFeatures([...classFeatures, ...subclassFeatures]),
+    });
+  });
+
+  return out.filter((bucket) => bucket.features.length);
+}
+
+function collectValidClassFeatures({ features, className, level, character, choicePrefix }) {
+  return (features || [])
+    .filter((feature) => featureIsAvailable(feature, level))
+    .filter((feature) => featureMatchesClass(feature, className))
+    .filter((feature) => !hasSubclassIdentity(feature))
+    .filter((feature) => featurePassesChoiceGates(feature, character, choicePrefix));
+}
+
+function collectValidSubclassFeatures({ features, className, subclassName, level, character, choicePrefix }) {
+  if (!subclassName) return [];
+  return (features || [])
+    .filter((feature) => featureIsAvailable(feature, level))
+    .filter((feature) => featureMatchesClass(feature, className))
+    .filter((feature) => featureMatchesSubclass(feature, subclassName))
+    .filter((feature) => featurePassesChoiceGates(feature, character, choicePrefix));
+}
+
+
+function featureIsAvailable(feature, level) {
+  if (!feature || feature.isReprinted) return false;
+  const featureLevel = Number(feature?.level || 1);
+  return featureLevel <= Number(level || 1);
+}
+
+function featureMatchesClass(feature, className) {
+  const target = choiceKey(className);
+  if (!target) return true;
+
+  const explicit = feature?.className || feature?.class?.name || feature?.class;
+  if (explicit) return choiceKey(explicit) === target;
+
+  const ref = feature?.classFeature || feature?.subclassFeature;
+  const parsedClass = parseFeatureRefClass(ref);
+  if (parsedClass) return choiceKey(parsedClass) === target;
+
+  // If the feature has no class metadata, assume the caller already supplied
+  // the class-specific list (common for saved snapshots).
+  return true;
+}
+
+function hasSubclassIdentity(feature) {
+  return Boolean(
+    feature?.subclassShortName
+    || feature?.subclassName
+    || feature?.subclass?.shortName
+    || feature?.subclass?.name
+    || feature?.subclassFeature
+  );
+}
+
+function featureMatchesSubclass(feature, subclassName) {
+  const target = choiceKey(subclassName);
+  if (!target) return false;
+
+  const explicit = feature?.subclassShortName
+    || feature?.subclassName
+    || feature?.subclass?.shortName
+    || feature?.subclass?.name;
+  if (explicit) return choiceKey(explicit) === target;
+
+  const parsedSubclass = parseFeatureRefSubclass(feature?.subclassFeature);
+  if (parsedSubclass) return choiceKey(parsedSubclass) === target;
+
+  // If this list is already pre-filtered and lacks subclass metadata, keep it.
+  return true;
+}
+
+function parseFeatureRefClass(ref) {
+  if (!ref || typeof ref !== 'string') return '';
+  const parts = ref.split('|').map((part) => part.trim()).filter(Boolean);
+  // 5etools refs usually look like: Name|Class|Source|Level
+  return parts.length >= 2 ? parts[1] : '';
+}
+
+function parseFeatureRefSubclass(ref) {
+  if (!ref || typeof ref !== 'string') return '';
+  const parts = ref.split('|').map((part) => part.trim()).filter(Boolean);
+  // Subclass refs usually include: Name|Class|ClassSource|Subclass|SubclassSource|Level
+  return parts.length >= 4 ? parts[3] : '';
+}
+
+function featurePassesChoiceGates(feature, character, choicePrefix = '') {
+  const gates = [
+    ...asArray(feature?.requiredChoice),
+    ...asArray(feature?.requiredChoices),
+    ...asArray(feature?.choiceRequirement),
+    ...asArray(feature?.choiceRequirements),
+  ];
+  if (!gates.length) return true;
+  return gates.every((gate) => choiceGatePasses(gate, character, choicePrefix));
+}
+
+function choiceGatePasses(gate, character, choicePrefix = '') {
+  if (!gate) return true;
+  if (typeof gate === 'function') {
+    try { return !!gate(character); } catch { return false; }
+  }
+  if (typeof gate === 'string') return hasChoiceValue(character, gate, null, choicePrefix);
+  const key = gate.key || gate.choiceKey || gate.id;
+  if (!key) return true;
+  const expected = gate.value ?? gate.values ?? gate.option ?? gate.options ?? null;
+  return hasChoiceValue(character, key, expected, choicePrefix);
+}
+
+function hasChoiceValue(character, key, expected, choicePrefix = '') {
+  const choices = character?.choices || {};
+  const direct = choices[key];
+  const prefixed = choices[`${choicePrefix}${key}`];
+  const stored = prefixed != null ? prefixed : direct;
+  if (stored == null || stored === '') return false;
+  if (expected == null) return true;
+
+  const storedValues = asArray(stored).map(cleanChoiceText).map(choiceKey).filter(Boolean);
+  const expectedValues = asArray(expected).map(cleanChoiceText).map(choiceKey).filter(Boolean);
+  if (!expectedValues.length) return true;
+  return expectedValues.some((value) => storedValues.includes(value));
+}
+
+function dedupeFeatures(features) {
+  const seen = new Set();
+  const out = [];
+  (features || []).forEach((feature) => {
+    const key = `${choiceKey(feature?.name)}|${Number(feature?.level || 0)}|${choiceKey(feature?.source)}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    out.push(feature);
+  });
+  return out.sort((a, b) => Number(a?.level || 0) - Number(b?.level || 0));
+}
+
+export function featureKey(feature) {
+  return `${choiceKey(feature?.name)}|${Number(feature?.level || 0)}|${choiceKey(feature?.source)}`;
+}
+
+function cleanChoiceText(text) {
+  return stripMarkup(text)
+    .split('|')[0]
+    .replace(/_/g, ' ')
+    .trim();
+}

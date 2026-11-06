@@ -1,40 +1,26 @@
 import { useDeferredValue, useEffect, useMemo, useState } from 'react';
-import { Box, Button, Chip, Divider, IconButton, List, ListItemButton, ListItemText, Paper, Stack, Tooltip, Typography } from '@mui/material';
+import {
+  Box, Button, Chip, Divider, IconButton, List, ListItemButton, ListItemText, Paper, Stack, Tooltip,
+  Typography,
+} from '@mui/material';
 import { Backpack, Coins, PackagePlus, Trash2 } from 'lucide-react';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { ItemNameIcon } from '../../../shared/content/FiveEToolsLink.jsx';
-import { equipmentTypeCandidates } from '../../../shared/content/catalogs/equipmentTypes.js';
 import { CurrencyRow } from '../../../shared/character/inventory/CurrencyCoinBox.jsx';
-import { findInventoryItem } from '../../../shared/character/inventory/itemContainers.js';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import { ItemReferenceBody, QuantityAdder } from '../../../shared/character/inventory/ItemReference.jsx';
-import { strip5eMarkup } from '../../../shared/content/entryText.js';
 import { formatWeight, totalCarriedWeight } from '../../../shared/character/inventory/weight.js';
 import ItemFilterPanel from '../../../shared/character/inventory/ItemFilterPanel.jsx';
 import { itemMatchesFilters } from '../../../shared/character/inventory/itemFilters.js';
 import { useItemFilters } from '../../../shared/character/inventory/useItemFilters.js';
-import { ITEM_GROUP_CHIPS, OWNED_ITEM_CHIPS, matchesItemGroupChip } from '../../../shared/character/inventory/itemGroups.js';
+import {
+  ITEM_GROUP_CHIPS, OWNED_ITEM_CHIPS, matchesItemGroupChip,
+} from '../../../shared/character/inventory/itemGroups.js';
 import { usePagedList } from '../../../shared/ui/usePagedList.js';
-import { splitNameSource, stripSource } from '../../../shared/content/nameKeys.js';
 import { byName } from '../../../shared/lists.js';
-
-const CHOICE_KEYS = ['A', 'B', 'C', 'D', 'E', 'a', 'b', 'c', 'd', 'e'];
-
-// Human labels for 5etools `equipmentType` codes that resolve to a player choice.
-// Keys must match EQUIPMENT_TYPE_MATCHERS in equipmentTypes.js.
-const EQUIP_TYPE_LABELS = {
-  focusSpellcastingArcane: 'Arcane Focus',
-  focusSpellcastingDruidic: 'Druidic Focus',
-  focusSpellcastingHoly: 'Holy Symbol',
-  instrumentMusical: 'Musical Instrument',
-  setGaming: 'Gaming Set',
-  toolArtisan: "Artisan's Tools",
-  weaponSimple: 'Simple Weapon',
-  weaponSimpleMelee: 'Simple Melee Weapon',
-  weaponMartial: 'Martial Weapon',
-  weaponMartialMelee: 'Martial Melee Weapon',
-};
+import { itemSearchText } from './startingEquipment.js';
+import { StartingEquipmentBlock } from './StartingEquipmentBlock.jsx';
 
 // Both lists render a page at a time and grow on scroll. A hard cap used to hide
 // the tail of the DB, which made a broad filter look like it had only searched
@@ -79,178 +65,6 @@ function ShowMoreRow({ remaining, onClick }) {
       </Button>
     </Box>
   );
-}
-
-function cpToCoins(cpValue) {
-  let cp = Number(cpValue || 0);
-  const gp = Math.floor(cp / 100);
-  cp %= 100;
-  const sp = Math.floor(cp / 10);
-  cp %= 10;
-  return { gp, sp, cp };
-}
-
-function parseItemRef(ref) {
-  const { name, source } = splitNameSource(ref);
-  return {
-    name: strip5eMarkup(name || '').trim(),
-    source: String(source || '').trim().toUpperCase(),
-  };
-}
-
-function itemSearchText(item) {
-  return [
-    item?.name,
-    item?.source,
-    item?.sourceAlias,
-    item?.type,
-    item?.rarity,
-    item?.scfType,
-    Array.isArray(item?.focus) ? item.focus.join(' ') : '',
-    Array.isArray(item?.group) ? item.group.join(' ') : '',
-    Array.isArray(item?.items) ? item.items.map((ref) => parseItemRef(ref).name).join(' ') : '',
-  ].filter(Boolean).join(' ').toLowerCase();
-}
-
-function flattenEquip(node, items = []) {
-  if (!node) return items;
-  if (typeof node === 'string') {
-    items.push(strip5eMarkup(node).replace(/\|[a-zA-Z0-9-]+/g, ''));
-    return items;
-  }
-  if (typeof node === 'number') return items;
-  if (Array.isArray(node)) {
-    node.forEach((item) => flattenEquip(item, items));
-    return items;
-  }
-  if (typeof node === 'object') {
-    const choiceKeys = CHOICE_KEYS.filter((key) => Object.prototype.hasOwnProperty.call(node, key));
-    const resolved = [...new Set(choiceKeys.map((key) => key.toUpperCase()))].map((key) => (node[key] !== undefined ? key : key.toLowerCase()));
-    if (resolved.length > 1) {
-      items.push(resolved.map((key) => flattenEquip(node[key], []).join(', ')).join(' or '));
-      return items;
-    }
-    if (node.item) {
-      const name = stripSource(node.item);
-      const qty = node.quantity && node.quantity > 1 ? ` x${node.quantity}` : '';
-      const value = node.containsValue || node.value || 0;
-      items.push(`${strip5eMarkup(name)}${qty}${value ? ` (${Math.floor(value / 100)} gp)` : ''}`);
-    } else if (node.special) items.push(strip5eMarkup(node.special));
-    else if (node.equipmentType) items.push(strip5eMarkup(node.equipmentType));
-    else if (node.containsValue || node.value) items.push(`${Math.floor((node.containsValue || node.value) / 100)} gp`);
-    else if (node.entries) flattenEquip(node.entries, items);
-    else Object.entries(node).forEach(([key, value]) => {
-      if (!['source', 'page', 'type'].includes(key)) flattenEquip(value, items);
-    });
-  }
-  return items;
-}
-
-function extractEquipItems(node, result = { items: [], cp: 0 }) {
-  if (!node) return result;
-  if (typeof node === 'string') {
-    const gp = node.match(/(\d+)\s*gp/i);
-    const sp = node.match(/(\d+)\s*sp/i);
-    const cp = node.match(/(\d+)\s*cp/i);
-    if (gp) result.cp += Number(gp[1]) * 100;
-    else if (sp) result.cp += Number(sp[1]) * 10;
-    else if (cp) result.cp += Number(cp[1]);
-    else {
-      const name = node.replace(/\|[a-zA-Z0-9-]+/g, '').trim();
-      if (name) result.items.push({ name, qty: 1 });
-    }
-    return result;
-  }
-  if (Array.isArray(node)) {
-    node.forEach((item) => extractEquipItems(item, result));
-    return result;
-  }
-  if (typeof node === 'object') {
-    if (node.value) result.cp += Number(node.value || 0);
-    if (node.containsValue) result.cp += Number(node.containsValue || 0);
-    if (node.item) result.items.push({ ...parseItemRef(node.item), qty: node.quantity || 1 });
-    else if (node.equipmentType) result.items.push({ ...parseItemRef(node.equipmentType), qty: node.quantity || 1, equipmentType: true });
-    else if (node.entries) extractEquipItems(node.entries, result);
-    else Object.entries(node).forEach(([key, value]) => {
-      if (!['source', 'page', 'type', 'displayName', 'quantity', 'value', 'containsValue'].includes(key)) extractEquipItems(value, result);
-    });
-  }
-  return result;
-}
-
-function collectChoiceBlocks(eq, prefix) {
-  const blocks = [];
-  if (eq?.defaultData?.[0]) {
-    const choiceData = eq.defaultData[0];
-    const keys = ['A', 'B', 'C', 'D', 'E'].filter((key) => key in choiceData);
-    if (keys.length > 1) {
-      blocks.push({
-        key: `${prefix}_choice_0`,
-        label: 'Choose option',
-        options: keys.map((key) => ({ value: key, label: flattenEquip(choiceData[key], []).join(', ') || key, node: choiceData[key] })),
-      });
-      return blocks;
-    }
-  }
-
-  let index = 0;
-  const visit = (node) => {
-    if (!node || typeof node !== 'object') return;
-    if (Array.isArray(node)) {
-      node.forEach(visit);
-      return;
-    }
-    const keys = CHOICE_KEYS.filter((key) => Object.prototype.hasOwnProperty.call(node, key));
-    const resolved = [...new Set(keys.map((key) => key.toUpperCase()))].map((key) => (node[key] !== undefined ? key : key.toLowerCase()));
-    if (resolved.length > 1) {
-      blocks.push({
-        key: `${prefix}_choice_${index}`,
-        label: 'Choose option',
-        options: resolved.map((key) => ({ value: key, label: flattenEquip(node[key], []).join(', ') || key.toUpperCase(), node: node[key] })),
-      });
-      index += 1;
-      return;
-    }
-    Object.entries(node).forEach(([key, value]) => {
-      if (!['source', 'page', 'type'].includes(key)) visit(value);
-    });
-  };
-  visit(eq);
-  return blocks;
-}
-
-function resolveEquipmentItems(extracted, itemDb) {
-  const out = [];
-  extracted.items.forEach((item) => {
-    // equipmentType entries (gaming set, focus, …) are picked explicitly via the
-    // per-slot picker, not auto-resolved to a generic placeholder.
-    if (item.equipmentType) return;
-    const dbItem = findInventoryItem(itemDb, item.name, item.source);
-    if (dbItem) out.push({ ...dbItem, qty: item.qty ?? 1 });
-  });
-  return out;
-}
-
-// equipmentType slots that need an explicit item pick, derived from the currently
-// selected option of each choice block (or the whole block when it has no choices).
-function collectEquipmentTypeSlots(eq, prefix, blocks, equipChoices) {
-  const slots = [];
-  const pushFrom = (node, keyBase) => {
-    extractEquipItems(node).items
-      .filter((entry) => entry.equipmentType)
-      .forEach((entry, index) => slots.push({ slotKey: `${keyBase}__et${index}`, code: entry.name }));
-  };
-  if (blocks.length) {
-    blocks.forEach((block) => {
-      const selected = equipChoices[block.key];
-      if (!selected) return;
-      const option = block.options.find((opt) => opt.value === selected);
-      if (option) pushFrom(option.node, `${block.key}_${selected}`);
-    });
-  } else {
-    pushFrom(eq, prefix);
-  }
-  return slots;
 }
 
 // Add-list row: tap to expand the item reference (props + live rich text),
@@ -305,86 +119,6 @@ function CurrentInventoryRow({ item, index, dispatch }) {
         </Box>
       )}
     />
-  );
-}
-
-function StartingEquipmentBlock({ title, eq, prefix, character, items, dispatch }) {
-  const blocks = collectChoiceBlocks(eq, prefix);
-  const summary = flattenEquip(eq, []).slice(0, 8);
-  const typeSlots = collectEquipmentTypeSlots(eq, prefix, blocks, character.equipChoices);
-  if (!eq) return null;
-  return (
-    <Paper variant="outlined" sx={{ p: 1.5 }}>
-      <Typography variant="h2" sx={{ mb: 1 }}>{title}</Typography>
-      <Stack spacing={1}>
-        {blocks.map((block) => (
-          <Paper key={block.key} variant="outlined" sx={{ p: 1.25, bgcolor: 'background.default' }}>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{block.label}</Typography>
-            <Stack spacing={0.75}>
-              {block.options.map((option) => {
-                const selected = character.equipChoices[block.key] === option.value;
-                return (
-                  <Button
-                    key={`${block.key}-${option.value}`}
-                    size="small"
-                    variant={selected ? 'contained' : 'outlined'}
-                    sx={{ justifyContent: 'flex-start', textAlign: 'left' }}
-                    onClick={() => {
-                      dispatch({ type: 'equipment/select', key: block.key, value: option.value });
-                      if (!selected) {
-                        const extracted = extractEquipItems(option.node);
-                        dispatch({
-                          type: 'equipment/add-extracted',
-                          currency: cpToCoins(extracted.cp),
-                          items: resolveEquipmentItems(extracted, items),
-                        });
-                      }
-                    }}
-                  >
-                    {option.value.toUpperCase()}) {option.label}
-                  </Button>
-                );
-              })}
-            </Stack>
-          </Paper>
-        ))}
-        {typeSlots.map((slot) => {
-          const candidates = equipmentTypeCandidates(slot.code, items);
-          if (!candidates.length) return null;
-          const selectedRef = character.equipChoices[slot.slotKey] || null;
-          return (
-            <Paper key={slot.slotKey} variant="outlined" sx={{ p: 1.25, bgcolor: 'background.default' }}>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                Choose {EQUIP_TYPE_LABELS[slot.code] || 'item'}
-              </Typography>
-              <Stack spacing={0.75}>
-                {candidates.map((cand) => {
-                  const ref = `${cand.name}|${cand.source}`;
-                  const selected = selectedRef === ref;
-                  return (
-                    <Button
-                      key={ref}
-                      size="small"
-                      variant={selected ? 'contained' : 'outlined'}
-                      sx={{ justifyContent: 'flex-start', textAlign: 'left' }}
-                      onClick={() => dispatch({
-                        type: 'equipment/select-type-item',
-                        key: slot.slotKey,
-                        item: { ...cand, qty: 1 },
-                        prevRef: selectedRef,
-                      })}
-                    >
-                      {cand.name}
-                    </Button>
-                  );
-                })}
-              </Stack>
-            </Paper>
-          );
-        })}
-        {!blocks.length ? summary.map((line, index) => <Chip key={`${line}-${index}`} label={line} sx={{ justifyContent: 'flex-start' }} />) : null}
-      </Stack>
-    </Paper>
   );
 }
 

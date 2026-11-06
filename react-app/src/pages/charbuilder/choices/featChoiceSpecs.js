@@ -15,7 +15,7 @@ import {
 // The choices a feat asks for in the builder: its choiceUi, ability and
 // proficiency choose-blocks, and spell picks from additionalSpells.
 
-export function parseChooseString(value) {
+function parseChooseString(value) {
   const out = { level: null, levels: [], classes: [], schools: [] };
   String(value || '').split('|').forEach((part) => {
     const [k, v] = part.split('=');
@@ -29,7 +29,7 @@ export function parseChooseString(value) {
   return out;
 }
 
-export function collectChooseEntries(obj) {
+function collectChooseEntries(obj) {
   const entries = [];
   if (Array.isArray(obj)) {
     obj.forEach((item) => {
@@ -44,7 +44,7 @@ export function collectChooseEntries(obj) {
   return entries;
 }
 
-export function additionalSpellChoices(feat, slotKey, entryIdx) {
+function additionalSpellChoices(feat, slotKey, entryIdx) {
   const out = [];
   const additional = Array.isArray(feat?.additionalSpells) ? feat.additionalSpells : [];
   if (!additional.length) return out;
