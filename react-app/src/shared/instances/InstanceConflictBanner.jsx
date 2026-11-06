@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, Button, Stack } from '@mui/material';
+import ConflictBanner from '../ui/ConflictBanner.jsx';
 
 const MESSAGES = {
   exists: 'An instance with this id already exists in the cloud, and this copy was made separately.',
@@ -17,17 +17,14 @@ export default function InstanceConflictBanner({ tool }) {
     try { await tool.resolveConflict(choice); } finally { setBusy(false); }
   };
   return (
-    <Alert
-      severity="warning"
-      action={tool.online ? (
-        <Stack direction="row" spacing={1}>
-          <Button size="small" color="inherit" disabled={busy} onClick={() => choose('cloud')}>Use cloud copy</Button>
-          <Button size="small" color="inherit" disabled={busy} onClick={() => choose('local')}>Keep this copy</Button>
-        </Stack>
-      ) : null}
+    <ConflictBanner
+      busy={busy}
+      sx={{ mb: 0 }}
+      keepRemote={tool.online ? { label: 'Use cloud copy', onClick: () => choose('cloud') } : null}
+      keepLocal={tool.online ? { label: 'Keep this copy', onClick: () => choose('local') } : null}
     >
       {MESSAGES[tool.conflict.reason] || MESSAGES.version}
       {tool.online ? ' Choose which copy to keep.' : ' Sign in to choose which copy to keep; this copy stays usable here.'}
-    </Alert>
+    </ConflictBanner>
   );
 }
