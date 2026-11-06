@@ -14,6 +14,7 @@ import {
 } from '../shared/character/combat/weaponMastery.js';
 import { asArray } from '../shared/lists.js';
 import { capitalize } from '../shared/ui/textCase.js';
+import { KEYED_SLOTS } from './registry.js';
 
 export function splitClassSubclass(rawKey) {
   const value = String(rawKey || '');
@@ -27,17 +28,28 @@ export function splitSpecies(rawKey) {
   return idx < 0 ? [value, ''] : [value.slice(0, idx), value.slice(idx + 1)];
 }
 
+// What an adapter file gets to register with: every registry method, except
+// that a subclass or species register takes one raw key instead of two
+// ("Wizard_Evoker", "Elf_XPHB") and splits it here; plus the vocabulary lists
+// and helpers adapter files share.
 export function createAdapterBindings(registry, context = {}) {
-  const subclass = (rawKey, value, method) => {
-    const [className, subclassName] = splitClassSubclass(rawKey);
-    return registry[method](className, subclassName, value);
-  };
-  const species = (rawKey, value, method) => {
-    const [speciesName, speciesSource] = splitSpecies(rawKey);
-    return registry[method](speciesName, speciesSource, value);
-  };
+  const splitRegisters = {};
+  KEYED_SLOTS.forEach((slot) => {
+    if (slot.kinds.includes('Subclass')) {
+      const method = `registerSubclass${slot.register}`;
+      splitRegisters[method] = (rawKey, value) => registry[method](...splitClassSubclass(rawKey), value);
+    }
+    if (slot.kinds.includes('Species')) {
+      const method = `registerSpecies${slot.register}`;
+      splitRegisters[method] = (rawKey, value) => registry[method](...splitSpecies(rawKey), value);
+    }
+  });
 
   return {
+    ...registry,
+    ...splitRegisters,
+    registerSpeciesSheetCommonChoiceMeta: (rawKey, meta = {}) => splitRegisters.registerSpeciesSheetChoiceMeta(rawKey, meta),
+
     _ARTISAN_TOOLS: ARTISAN_TOOLS,
     _MUSICAL_INSTRUMENTS: MUSICAL_INSTRUMENTS,
     _ALL_LANGS: ALL_LANGUAGES,
@@ -46,128 +58,6 @@ export function createAdapterBindings(registry, context = {}) {
     getWeaponMasteryChoiceCount,
     getWeaponMasteryChoiceNames,
     WEAPON_MASTERY_RULES,
-
-    registerClassAdapter: registry.registerClassAdapter,
-    getClassAdapter: registry.getClassAdapter,
-    registerSubclassAdapter: (rawKey, fn) => subclass(rawKey, fn, 'registerSubclassAdapter'),
-    getSubclassAdapter: registry.getSubclassAdapter,
-    registerSpeciesAdapter: (rawKey, fn) => species(rawKey, fn, 'registerSpeciesAdapter'),
-    getSpeciesAdapter: registry.getSpeciesAdapter,
-    registerFeatAdapter: registry.registerFeatAdapter,
-    getFeatAdapter: registry.getFeatAdapter,
-
-    registerClassSheetActions: registry.registerClassSheetActions,
-    getClassSheetActions: registry.getClassSheetActions,
-    registerSubclassSheetActions: (rawKey, actions) => subclass(rawKey, actions, 'registerSubclassSheetActions'),
-    getSubclassSheetActions: registry.getSubclassSheetActions,
-    registerSpeciesSheetActions: (rawKey, actions) => species(rawKey, actions, 'registerSpeciesSheetActions'),
-    getSpeciesSheetActions: registry.getSpeciesSheetActions,
-    registerFeatSheetActions: registry.registerFeatSheetActions,
-    getFeatSheetActions: registry.getFeatSheetActions,
-
-    registerClassSheetResources: registry.registerClassSheetResources,
-    getClassSheetResources: registry.getClassSheetResources,
-    registerSubclassSheetResources: (rawKey, resources) => subclass(rawKey, resources, 'registerSubclassSheetResources'),
-    getSubclassSheetResources: registry.getSubclassSheetResources,
-    registerSpeciesSheetResources: (rawKey, resources) => species(rawKey, resources, 'registerSpeciesSheetResources'),
-    getSpeciesSheetResources: registry.getSpeciesSheetResources,
-    registerFeatSheetResources: registry.registerFeatSheetResources,
-    getFeatSheetResources: registry.getFeatSheetResources,
-
-    registerClassSheetEffects: registry.registerClassSheetEffects,
-    getClassSheetEffects: registry.getClassSheetEffects,
-    registerSubclassSheetEffects: (rawKey, effects) => subclass(rawKey, effects, 'registerSubclassSheetEffects'),
-    getSubclassSheetEffects: registry.getSubclassSheetEffects,
-    registerSpeciesSheetEffects: (rawKey, effects) => species(rawKey, effects, 'registerSpeciesSheetEffects'),
-    getSpeciesSheetEffects: registry.getSpeciesSheetEffects,
-    registerFeatSheetEffects: registry.registerFeatSheetEffects,
-    getFeatSheetEffects: registry.getFeatSheetEffects,
-
-    registerClassRuntimeConfig: registry.registerClassRuntimeConfig,
-    getClassRuntimeConfig: registry.getClassRuntimeConfig,
-    registerSubclassRuntimeConfig: (rawKey, config) => subclass(rawKey, config, 'registerSubclassRuntimeConfig'),
-    getSubclassRuntimeConfig: registry.getSubclassRuntimeConfig,
-    registerSpeciesRuntimeConfig: (rawKey, config) => species(rawKey, config, 'registerSpeciesRuntimeConfig'),
-    getSpeciesRuntimeConfig: registry.getSpeciesRuntimeConfig,
-
-    registerClassSheetChoiceMeta: registry.registerClassSheetChoiceMeta,
-    getClassSheetChoiceMeta: registry.getClassSheetChoiceMeta,
-    registerSubclassSheetChoiceMeta: (rawKey, meta) => subclass(rawKey, meta, 'registerSubclassSheetChoiceMeta'),
-    getSubclassSheetChoiceMeta: registry.getSubclassSheetChoiceMeta,
-    registerSpeciesSheetChoiceMeta: (rawKey, meta) => species(rawKey, meta, 'registerSpeciesSheetChoiceMeta'),
-    getSpeciesSheetChoiceMeta: registry.getSpeciesSheetChoiceMeta,
-    registerSpeciesSheetCommonChoiceMeta: (rawKey, meta = {}) => species(rawKey, meta, 'registerSpeciesSheetChoiceMeta'),
-
-    registerItemFlagDef: registry.registerItemFlagDef,
-    getItemFlagDef: registry.getItemFlagDef,
-    getAllItemFlagDefs: registry.getAllItemFlagDefs,
-    registerWeaponAbilityOverride: registry.registerWeaponAbilityOverride,
-    getWeaponAbilityOverrides: registry.getWeaponAbilityOverrides,
-    registerWeaponExtraAttack: registry.registerWeaponExtraAttack,
-    getWeaponExtraAttacks: registry.getWeaponExtraAttacks,
-    registerFeatOwnerKey: registry.registerFeatOwnerKey,
-    registerFeatOwnerKeyPrefix: registry.registerFeatOwnerKeyPrefix,
-    registerFeatOwnerKeyPattern: registry.registerFeatOwnerKeyPattern,
-    getFeatOwnerKeyExact: registry.getFeatOwnerKeyExact,
-    getFeatOwnerKeyPrefixes: registry.getFeatOwnerKeyPrefixes,
-    getFeatOwnerKeyPatterns: registry.getFeatOwnerKeyPatterns,
-
-    registerClassSheetFeatureFilter: registry.registerClassSheetFeatureFilter,
-    getClassSheetFeatureFilters: registry.getClassSheetFeatureFilters,
-    registerSubclassSheetFeatureFilter: (rawKey, fn) => subclass(rawKey, fn, 'registerSubclassSheetFeatureFilter'),
-    getSubclassSheetFeatureFilters: registry.getSubclassSheetFeatureFilters,
-    registerSpeciesSheetFeatureFilter: (rawKey, fn) => species(rawKey, fn, 'registerSpeciesSheetFeatureFilter'),
-    getSpeciesSheetFeatureFilters: registry.getSpeciesSheetFeatureFilters,
-    registerClassSheetProficiencies: registry.registerClassSheetProficiencies,
-    getClassSheetProficiencies: registry.getClassSheetProficiencies,
-    registerSubclassSheetProficiencies: (rawKey, grants) => subclass(rawKey, grants, 'registerSubclassSheetProficiencies'),
-    getSubclassSheetProficiencies: registry.getSubclassSheetProficiencies,
-    registerSpeciesSheetProficiencies: (rawKey, grants) => species(rawKey, grants, 'registerSpeciesSheetProficiencies'),
-    getSpeciesSheetProficiencies: registry.getSpeciesSheetProficiencies,
-    registerClassSheetSpellModifiers: registry.registerClassSheetSpellModifiers,
-    getClassSheetSpellModifiers: registry.getClassSheetSpellModifiers,
-    registerSubclassSheetSpellModifiers: (rawKey, modifiers) => subclass(rawKey, modifiers, 'registerSubclassSheetSpellModifiers'),
-    getSubclassSheetSpellModifiers: registry.getSubclassSheetSpellModifiers,
-    registerSpeciesSheetSpellModifiers: (rawKey, modifiers) => species(rawKey, modifiers, 'registerSpeciesSheetSpellModifiers'),
-    getSpeciesSheetSpellModifiers: registry.getSpeciesSheetSpellModifiers,
-    registerClassSpellRiders: registry.registerClassSpellRiders,
-    getClassSpellRiders: registry.getClassSpellRiders,
-    registerSubclassSpellRiders: (rawKey, riders) => subclass(rawKey, riders, 'registerSubclassSpellRiders'),
-    getSubclassSpellRiders: registry.getSubclassSpellRiders,
-    registerSpeciesSpellRiders: (rawKey, riders) => species(rawKey, riders, 'registerSpeciesSpellRiders'),
-    getSpeciesSpellRiders: registry.getSpeciesSpellRiders,
-    registerFeatSpellRiders: registry.registerFeatSpellRiders,
-    getFeatSpellRiders: registry.getFeatSpellRiders,
-
-    registerSpeciesSheetHpBonus: (rawKey, value) => species(rawKey, value, 'registerSpeciesSheetHpBonus'),
-    getSpeciesSheetHpBonus: registry.getSpeciesSheetHpBonus,
-    registerClassAtWillSpells: registry.registerClassAtWillSpells,
-    getClassAtWillSpells: registry.getClassAtWillSpells,
-    registerSpeciesLongRestGrants: registry.registerSpeciesLongRestGrants,
-    getSpeciesLongRestGrants: registry.getSpeciesLongRestGrants,
-    registerResourceSideEffect: registry.registerResourceSideEffect,
-    getResourceSideEffect: registry.getResourceSideEffect,
-
-    registerGlobalClassAdapter: registry.registerGlobalClassAdapter,
-    getGlobalClassAdapters: registry.getGlobalClassAdapters,
-    registerGlobalSubclassAdapter: registry.registerGlobalSubclassAdapter,
-    getGlobalSubclassAdapters: registry.getGlobalSubclassAdapters,
-    registerGlobalSpeciesAdapter: registry.registerGlobalSpeciesAdapter,
-    getGlobalSpeciesAdapters: registry.getGlobalSpeciesAdapters,
-    registerGlobalFeatAdapter: registry.registerGlobalFeatAdapter,
-    getGlobalFeatAdapters: registry.getGlobalFeatAdapters,
-    registerGlobalSpellAdapter: registry.registerGlobalSpellAdapter,
-    getGlobalSpellAdapters: registry.getGlobalSpellAdapters,
-    registerGlobalItemAdapter: registry.registerGlobalItemAdapter,
-    getGlobalItemAdapters: registry.getGlobalItemAdapters,
-
-    registerCantripData: registry.registerCantripData,
-    getCantripData: registry.getCantripData,
-    registerCantripDataModifier: registry.registerCantripDataModifier,
-    getCantripDataModifiers: registry.getCantripDataModifiers,
-    registerSpellData: registry.registerSpellData,
-    getSpellData: registry.getSpellData,
-
     getGenericSpeciesChoiceSpecs,
   };
 }

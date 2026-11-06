@@ -64,70 +64,128 @@ function mergeRuntimeConfig(base, patch) {
   return merged;
 }
 
-function setMergedStore(store, rawKey, value) {
+
+function getStore(store, rawKey) {
   const raw = String(rawKey || '');
-  const norm = matchKey(raw);
-  const existing = (raw && store.get(raw)) || (norm && store.get(norm)) || {};
-  const merged = mergeRuntimeConfig(existing, value);
-  if (raw) store.set(raw, merged);
-  if (norm) store.set(norm, merged);
+  return store.get(raw) || store.get(matchKey(raw)) || null;
 }
 
-function getStore(store, rawKey, fallbackKey = '') {
-  const raw = String(rawKey || '');
-  return store.get(raw) || store.get(matchKey(raw)) || (fallbackKey ? store.get(fallbackKey) : null);
+// How each owner kind is keyed: `arity` key arguments, then the value. `find` is the lookup a reader gets (a subclass
+// also matches by alias: "School of Evocation" finds "Evoker"); `exact` is the
+// one a merge or an append builds on, so it never lands on another owner's entry.
+const OWNER_KINDS = {
+  Class: {
+    arity: 1,
+    find: (store, [name]) => getStore(store, name),
+    exact: (store, [name]) => getStore(store, name),
+    write: (store, [name], value) => setStore(store, name, value),
+  },
+  Feat: {
+    arity: 1,
+    find: (store, [name]) => getStore(store, name),
+    exact: (store, [name]) => getStore(store, name),
+    write: (store, [name], value) => setStore(store, name, value),
+  },
+  Subclass: {
+    arity: 2,
+    find: (store, [className, subclassName]) => getSubclassStore(store, className, subclassName),
+    exact: (store, [className, subclassName]) => store.get(subclassKey(className, subclassName)),
+    write: (store, [className, subclassName], value) => store.set(subclassKey(className, subclassName), value),
+  },
+  Species: {
+    arity: 2,
+    find: (store, [name, source]) => store.get(speciesKey(name, source)),
+    exact: (store, [name, source]) => store.get(speciesKey(name, source)),
+    write: (store, [name, source], value) => store.set(speciesKey(name, source), value),
+  },
+};
+
+// What an owner (class, subclass, species, feat) can register, and how each
+// owner kind is keyed. Every row of KEYED_SLOTS becomes, for each of its kinds,
+// `register<Kind><register>(...key, value)` and `get<Kind><get>(...key)` —
+// e.g. registerSubclassSheetActions(className, subclassShortName, actions) and
+// getSubclassSheetActions(className, subclassShortName).
+//
+// Value modes:
+//   fn     — a function, or nothing is stored
+//   list   — an array (anything else stores [])
+//   object — an object (anything else stores {})
+//   merge  — an object deep-merged into what is already there
+//   append — a function added to the owner's list
+//   number — a number (anything else stores 0)
+//   raw    — stored as given
+export const KEYED_SLOTS = [
+  { register: 'Adapter', get: 'Adapter', kinds: ['Class', 'Subclass', 'Species', 'Feat'], mode: 'fn', empty: null },
+  { register: 'SheetActions', get: 'SheetActions', kinds: ['Class', 'Subclass', 'Species', 'Feat'], mode: 'list', empty: [] },
+  { register: 'SheetResources', get: 'SheetResources', kinds: ['Class', 'Subclass', 'Species', 'Feat'], mode: 'list', empty: [] },
+  { register: 'SheetEffects', get: 'SheetEffects', kinds: ['Class', 'Subclass', 'Species', 'Feat'], mode: 'list', empty: [] },
+  { register: 'RuntimeConfig', get: 'RuntimeConfig', kinds: ['Class', 'Subclass', 'Species'], mode: 'merge', empty: {} },
+  { register: 'SheetChoiceMeta', get: 'SheetChoiceMeta', kinds: ['Class', 'Subclass', 'Species'], mode: 'object', empty: {} },
+  { register: 'SheetFeatureFilter', get: 'SheetFeatureFilters', kinds: ['Class', 'Subclass', 'Species'], mode: 'append', empty: [] },
+  { register: 'SheetProficiencies', get: 'SheetProficiencies', kinds: ['Class', 'Subclass', 'Species'], mode: 'list', empty: [] },
+  { register: 'SheetSpellModifiers', get: 'SheetSpellModifiers', kinds: ['Class', 'Subclass', 'Species'], mode: 'list', empty: [] },
+  // Spell riders: factories `(ctx) => rider | null` that attach an extra roller /
+  // tag / description to a spell row at render time (e.g. Stars Druid Chalice).
+  { register: 'SpellRiders', get: 'SpellRiders', kinds: ['Class', 'Subclass', 'Species', 'Feat'], mode: 'list', empty: [] },
+  { register: 'SheetHpBonus', get: 'SheetHpBonus', kinds: ['Species'], mode: 'number', empty: 0 },
+  { register: 'AtWillSpells', get: 'AtWillSpells', kinds: ['Class'], mode: 'list', empty: null },
+  { register: 'LongRestGrants', get: 'LongRestGrants', kinds: ['Species'], mode: 'raw', empty: null },
+];
+
+// Adapters run over every entity of a kind, in registration order.
+const GLOBAL_ADAPTER_KINDS = ['Class', 'Subclass', 'Species', 'Feat', 'Spell', 'Item'];
+
+// A fresh copy of a slot's empty value, so a caller pushing into an empty
+// result never writes into the shared default.
+function emptyValue(empty) {
+  if (Array.isArray(empty)) return [];
+  if (isPlainObject(empty)) return {};
+  return empty;
+}
+
+function keyedSlotMethods(slot, kindName, store) {
+  const kind = OWNER_KINDS[kindName];
+  const { arity } = kind;
+  const register = (...args) => {
+    const key = args.slice(0, arity);
+    const value = args[arity];
+    switch (slot.mode) {
+      case 'fn': if (typeof value === 'function') kind.write(store, key, value); break;
+      case 'list': kind.write(store, key, Array.isArray(value) ? value : []); break;
+      case 'object': kind.write(store, key, value && typeof value === 'object' ? value : {}); break;
+      case 'merge': kind.write(store, key, mergeRuntimeConfig(kind.exact(store, key), value)); break;
+      case 'append':
+        if (typeof value === 'function') kind.write(store, key, [...(kind.exact(store, key) || []), value]);
+        break;
+      case 'number': kind.write(store, key, Number(value) || 0); break;
+      default: kind.write(store, key, value);
+    }
+  };
+  const get = (...args) => kind.find(store, args.slice(0, arity)) || emptyValue(slot.empty);
+  return {
+    [`register${kindName}${slot.register}`]: register,
+    [`get${kindName}${slot.get}`]: get,
+  };
 }
 
 export function createAdapterRegistry() {
+  const keyed = {};
+  KEYED_SLOTS.forEach((slot) => {
+    slot.kinds.forEach((kindName) => Object.assign(keyed, keyedSlotMethods(slot, kindName, new Map())));
+  });
+
+  const globals = {};
+  GLOBAL_ADAPTER_KINDS.forEach((kindName) => {
+    const list = [];
+    globals[`registerGlobal${kindName}Adapter`] = (fn) => { if (typeof fn === 'function') list.push(fn); };
+    globals[`getGlobal${kindName}Adapters`] = () => list.slice();
+  });
+
   const stores = {
-    classAdapters: new Map(),
-    subclassAdapters: new Map(),
-    speciesAdapters: new Map(),
-    featAdapters: new Map(),
-    classActions: new Map(),
-    subclassActions: new Map(),
-    speciesActions: new Map(),
-    featActions: new Map(),
-    classResources: new Map(),
-    subclassResources: new Map(),
-    speciesResources: new Map(),
-    featResources: new Map(),
-    classEffects: new Map(),
-    subclassEffects: new Map(),
-    speciesEffects: new Map(),
-    featEffects: new Map(),
-    classRuntimeConfigs: new Map(),
-    subclassRuntimeConfigs: new Map(),
-    speciesRuntimeConfigs: new Map(),
-    classChoiceMeta: new Map(),
-    subclassChoiceMeta: new Map(),
-    speciesChoiceMeta: new Map(),
-    classFeatureFilters: new Map(),
-    subclassFeatureFilters: new Map(),
-    speciesFeatureFilters: new Map(),
-    classProficiencies: new Map(),
-    subclassProficiencies: new Map(),
-    speciesProficiencies: new Map(),
-    classSpellModifiers: new Map(),
-    subclassSpellModifiers: new Map(),
-    speciesSpellModifiers: new Map(),
-    classSpellRiders: new Map(),
-    subclassSpellRiders: new Map(),
-    speciesSpellRiders: new Map(),
-    featSpellRiders: new Map(),
-    speciesHpBonus: new Map(),
-    classAtWillSpells: new Map(),
-    speciesLongRestGrants: new Map(),
     resourceSideEffects: new Map(),
     cantripData: new Map(),
     cantripDataModifiers: new Map(),
     spellData: new Map(),
-    globalClassAdapters: [],
-    globalSubclassAdapters: [],
-    globalSpeciesAdapters: [],
-    globalFeatAdapters: [],
-    globalSpellAdapters: [],
-    globalItemAdapters: [],
     itemFlagDefs: new Map(),
     weaponAbilityOverrides: [],
     weaponExtraAttacks: [],
@@ -139,245 +197,8 @@ export function createAdapterRegistry() {
   };
 
   return {
-    registerClassAdapter(name, fn) {
-      if (typeof fn === 'function') setStore(stores.classAdapters, name, fn);
-    },
-    getClassAdapter(name) {
-      return getStore(stores.classAdapters, name);
-    },
-    registerSubclassAdapter(className, subclassShortName, fn) {
-      if (typeof fn === 'function') stores.subclassAdapters.set(subclassKey(className, subclassShortName), fn);
-    },
-    getSubclassAdapter(className, subclassShortName) {
-      return getSubclassStore(stores.subclassAdapters, className, subclassShortName) || null;
-    },
-    registerSpeciesAdapter(speciesName, speciesSource, fn) {
-      if (typeof fn === 'function') stores.speciesAdapters.set(speciesKey(speciesName, speciesSource), fn);
-    },
-    getSpeciesAdapter(speciesName, speciesSource) {
-      return stores.speciesAdapters.get(speciesKey(speciesName, speciesSource)) || null;
-    },
-    registerFeatAdapter(name, fn) {
-      if (typeof fn === 'function') setStore(stores.featAdapters, name, fn);
-    },
-    getFeatAdapter(name) {
-      return getStore(stores.featAdapters, name);
-    },
-    registerClassSheetActions(name, actions) {
-      setStore(stores.classActions, name, Array.isArray(actions) ? actions : []);
-    },
-    getClassSheetActions(name) {
-      return getStore(stores.classActions, name) || [];
-    },
-    registerSubclassSheetActions(className, subclassShortName, actions) {
-      stores.subclassActions.set(subclassKey(className, subclassShortName), Array.isArray(actions) ? actions : []);
-    },
-    getSubclassSheetActions(className, subclassShortName) {
-      return getSubclassStore(stores.subclassActions, className, subclassShortName) || [];
-    },
-    registerSpeciesSheetActions(speciesName, speciesSource, actions) {
-      stores.speciesActions.set(speciesKey(speciesName, speciesSource), Array.isArray(actions) ? actions : []);
-    },
-    getSpeciesSheetActions(speciesName, speciesSource) {
-      return stores.speciesActions.get(speciesKey(speciesName, speciesSource)) || [];
-    },
-    registerFeatSheetActions(name, actions) {
-      setStore(stores.featActions, name, Array.isArray(actions) ? actions : []);
-    },
-    getFeatSheetActions(name) {
-      return getStore(stores.featActions, name) || [];
-    },
-    registerClassSheetResources(name, resources) {
-      setStore(stores.classResources, name, Array.isArray(resources) ? resources : []);
-    },
-    getClassSheetResources(name) {
-      return getStore(stores.classResources, name) || [];
-    },
-    registerSubclassSheetResources(className, subclassShortName, resources) {
-      stores.subclassResources.set(subclassKey(className, subclassShortName), Array.isArray(resources) ? resources : []);
-    },
-    getSubclassSheetResources(className, subclassShortName) {
-      return getSubclassStore(stores.subclassResources, className, subclassShortName) || [];
-    },
-    registerSpeciesSheetResources(speciesName, speciesSource, resources) {
-      stores.speciesResources.set(speciesKey(speciesName, speciesSource), Array.isArray(resources) ? resources : []);
-    },
-    getSpeciesSheetResources(speciesName, speciesSource) {
-      return stores.speciesResources.get(speciesKey(speciesName, speciesSource)) || [];
-    },
-    registerFeatSheetResources(name, resources) {
-      setStore(stores.featResources, name, Array.isArray(resources) ? resources : []);
-    },
-    getFeatSheetResources(name) {
-      return getStore(stores.featResources, name) || [];
-    },
-    registerClassSheetEffects(name, effects) {
-      setStore(stores.classEffects, name, Array.isArray(effects) ? effects : []);
-    },
-    getClassSheetEffects(name) {
-      return getStore(stores.classEffects, name) || [];
-    },
-    registerSubclassSheetEffects(className, subclassShortName, effects) {
-      stores.subclassEffects.set(subclassKey(className, subclassShortName), Array.isArray(effects) ? effects : []);
-    },
-    getSubclassSheetEffects(className, subclassShortName) {
-      return getSubclassStore(stores.subclassEffects, className, subclassShortName) || [];
-    },
-    registerSpeciesSheetEffects(speciesName, speciesSource, effects) {
-      stores.speciesEffects.set(speciesKey(speciesName, speciesSource), Array.isArray(effects) ? effects : []);
-    },
-    getSpeciesSheetEffects(speciesName, speciesSource) {
-      return stores.speciesEffects.get(speciesKey(speciesName, speciesSource)) || [];
-    },
-    registerFeatSheetEffects(name, effects) {
-      setStore(stores.featEffects, name, Array.isArray(effects) ? effects : []);
-    },
-    getFeatSheetEffects(name) {
-      return getStore(stores.featEffects, name) || [];
-    },
-    registerClassRuntimeConfig(name, config) {
-      setMergedStore(stores.classRuntimeConfigs, name, config);
-    },
-    getClassRuntimeConfig(name) {
-      return getStore(stores.classRuntimeConfigs, name) || {};
-    },
-    registerSubclassRuntimeConfig(className, subclassShortName, config) {
-      const key = subclassKey(className, subclassShortName);
-      stores.subclassRuntimeConfigs.set(key, mergeRuntimeConfig(stores.subclassRuntimeConfigs.get(key), config));
-    },
-    getSubclassRuntimeConfig(className, subclassShortName) {
-      return getSubclassStore(stores.subclassRuntimeConfigs, className, subclassShortName) || {};
-    },
-    registerSpeciesRuntimeConfig(speciesName, speciesSource, config) {
-      const key = speciesKey(speciesName, speciesSource);
-      stores.speciesRuntimeConfigs.set(key, mergeRuntimeConfig(stores.speciesRuntimeConfigs.get(key), config));
-    },
-    getSpeciesRuntimeConfig(speciesName, speciesSource) {
-      return stores.speciesRuntimeConfigs.get(speciesKey(speciesName, speciesSource)) || {};
-    },
-    registerClassSheetChoiceMeta(name, meta) {
-      setStore(stores.classChoiceMeta, name, meta && typeof meta === 'object' ? meta : {});
-    },
-    getClassSheetChoiceMeta(name) {
-      return getStore(stores.classChoiceMeta, name) || {};
-    },
-    registerSubclassSheetChoiceMeta(className, subclassShortName, meta) {
-      stores.subclassChoiceMeta.set(subclassKey(className, subclassShortName), meta && typeof meta === 'object' ? meta : {});
-    },
-    getSubclassSheetChoiceMeta(className, subclassShortName) {
-      return getSubclassStore(stores.subclassChoiceMeta, className, subclassShortName) || {};
-    },
-    registerSpeciesSheetChoiceMeta(speciesName, speciesSource, meta) {
-      stores.speciesChoiceMeta.set(speciesKey(speciesName, speciesSource), meta && typeof meta === 'object' ? meta : {});
-    },
-    getSpeciesSheetChoiceMeta(speciesName, speciesSource) {
-      return stores.speciesChoiceMeta.get(speciesKey(speciesName, speciesSource)) || {};
-    },
-    registerClassSheetFeatureFilter(name, fn) {
-      if (typeof fn !== 'function') return;
-      const list = getStore(stores.classFeatureFilters, name) || [];
-      setStore(stores.classFeatureFilters, name, [...list, fn]);
-    },
-    getClassSheetFeatureFilters(name) {
-      return getStore(stores.classFeatureFilters, name) || [];
-    },
-    registerSubclassSheetFeatureFilter(className, subclassShortName, fn) {
-      if (typeof fn !== 'function') return;
-      const keyName = subclassKey(className, subclassShortName);
-      stores.subclassFeatureFilters.set(keyName, [...(stores.subclassFeatureFilters.get(keyName) || []), fn]);
-    },
-    getSubclassSheetFeatureFilters(className, subclassShortName) {
-      return getSubclassStore(stores.subclassFeatureFilters, className, subclassShortName) || [];
-    },
-    registerSpeciesSheetFeatureFilter(speciesName, speciesSource, fn) {
-      if (typeof fn !== 'function') return;
-      const keyName = speciesKey(speciesName, speciesSource);
-      stores.speciesFeatureFilters.set(keyName, [...(stores.speciesFeatureFilters.get(keyName) || []), fn]);
-    },
-    getSpeciesSheetFeatureFilters(speciesName, speciesSource) {
-      return stores.speciesFeatureFilters.get(speciesKey(speciesName, speciesSource)) || [];
-    },
-    registerClassSheetProficiencies(name, grants) {
-      setStore(stores.classProficiencies, name, Array.isArray(grants) ? grants : []);
-    },
-    getClassSheetProficiencies(name) {
-      return getStore(stores.classProficiencies, name) || [];
-    },
-    registerSubclassSheetProficiencies(className, subclassShortName, grants) {
-      stores.subclassProficiencies.set(subclassKey(className, subclassShortName), Array.isArray(grants) ? grants : []);
-    },
-    getSubclassSheetProficiencies(className, subclassShortName) {
-      return getSubclassStore(stores.subclassProficiencies, className, subclassShortName) || [];
-    },
-    registerSpeciesSheetProficiencies(speciesName, speciesSource, grants) {
-      stores.speciesProficiencies.set(speciesKey(speciesName, speciesSource), Array.isArray(grants) ? grants : []);
-    },
-    getSpeciesSheetProficiencies(speciesName, speciesSource) {
-      return stores.speciesProficiencies.get(speciesKey(speciesName, speciesSource)) || [];
-    },
-    registerClassSheetSpellModifiers(name, modifiers) {
-      setStore(stores.classSpellModifiers, name, Array.isArray(modifiers) ? modifiers : []);
-    },
-    getClassSheetSpellModifiers(name) {
-      return getStore(stores.classSpellModifiers, name) || [];
-    },
-    registerSubclassSheetSpellModifiers(className, subclassShortName, modifiers) {
-      stores.subclassSpellModifiers.set(subclassKey(className, subclassShortName), Array.isArray(modifiers) ? modifiers : []);
-    },
-    getSubclassSheetSpellModifiers(className, subclassShortName) {
-      return getSubclassStore(stores.subclassSpellModifiers, className, subclassShortName) || [];
-    },
-    registerSpeciesSheetSpellModifiers(speciesName, speciesSource, modifiers) {
-      stores.speciesSpellModifiers.set(speciesKey(speciesName, speciesSource), Array.isArray(modifiers) ? modifiers : []);
-    },
-    getSpeciesSheetSpellModifiers(speciesName, speciesSource) {
-      return stores.speciesSpellModifiers.get(speciesKey(speciesName, speciesSource)) || [];
-    },
-    // Spell riders: factories `(ctx) => rider | null` that attach an extra
-    // roller / tag / description to a spell row at render time (e.g. Stars Druid
-    // Chalice). Mirrors the spell-modifier surface across class/subclass/species/feat.
-    registerClassSpellRiders(name, riders) {
-      setStore(stores.classSpellRiders, name, Array.isArray(riders) ? riders : []);
-    },
-    getClassSpellRiders(name) {
-      return getStore(stores.classSpellRiders, name) || [];
-    },
-    registerSubclassSpellRiders(className, subclassShortName, riders) {
-      stores.subclassSpellRiders.set(subclassKey(className, subclassShortName), Array.isArray(riders) ? riders : []);
-    },
-    getSubclassSpellRiders(className, subclassShortName) {
-      return getSubclassStore(stores.subclassSpellRiders, className, subclassShortName) || [];
-    },
-    registerSpeciesSpellRiders(speciesName, speciesSource, riders) {
-      stores.speciesSpellRiders.set(speciesKey(speciesName, speciesSource), Array.isArray(riders) ? riders : []);
-    },
-    getSpeciesSpellRiders(speciesName, speciesSource) {
-      return stores.speciesSpellRiders.get(speciesKey(speciesName, speciesSource)) || [];
-    },
-    registerFeatSpellRiders(name, riders) {
-      setStore(stores.featSpellRiders, name, Array.isArray(riders) ? riders : []);
-    },
-    getFeatSpellRiders(name) {
-      return getStore(stores.featSpellRiders, name) || [];
-    },
-    registerSpeciesSheetHpBonus(speciesName, speciesSource, value) {
-      stores.speciesHpBonus.set(speciesKey(speciesName, speciesSource), Number(value) || 0);
-    },
-    getSpeciesSheetHpBonus(speciesName, speciesSource) {
-      return stores.speciesHpBonus.get(speciesKey(speciesName, speciesSource)) || 0;
-    },
-    registerClassAtWillSpells(name, spells) {
-      setStore(stores.classAtWillSpells, name, Array.isArray(spells) ? spells : []);
-    },
-    getClassAtWillSpells(name) {
-      return getStore(stores.classAtWillSpells, name);
-    },
-    registerSpeciesLongRestGrants(speciesName, speciesSource, grants) {
-      stores.speciesLongRestGrants.set(speciesKey(speciesName, speciesSource), grants);
-    },
-    getSpeciesLongRestGrants(speciesName, speciesSource) {
-      return stores.speciesLongRestGrants.get(speciesKey(speciesName, speciesSource)) || null;
-    },
+    ...keyed,
+    ...globals,
     registerResourceSideEffect(name, fn) {
       if (typeof fn === 'function') stores.resourceSideEffects.set(String(name), fn);
     },
@@ -403,42 +224,6 @@ export function createAdapterRegistry() {
     },
     getSpellData(name) {
       return getStore(stores.spellData, name);
-    },
-    registerGlobalClassAdapter(fn) {
-      if (typeof fn === 'function') stores.globalClassAdapters.push(fn);
-    },
-    getGlobalClassAdapters() {
-      return stores.globalClassAdapters.slice();
-    },
-    registerGlobalSubclassAdapter(fn) {
-      if (typeof fn === 'function') stores.globalSubclassAdapters.push(fn);
-    },
-    getGlobalSubclassAdapters() {
-      return stores.globalSubclassAdapters.slice();
-    },
-    registerGlobalSpeciesAdapter(fn) {
-      if (typeof fn === 'function') stores.globalSpeciesAdapters.push(fn);
-    },
-    getGlobalSpeciesAdapters() {
-      return stores.globalSpeciesAdapters.slice();
-    },
-    registerGlobalFeatAdapter(fn) {
-      if (typeof fn === 'function') stores.globalFeatAdapters.push(fn);
-    },
-    getGlobalFeatAdapters() {
-      return stores.globalFeatAdapters.slice();
-    },
-    registerGlobalSpellAdapter(fn) {
-      if (typeof fn === 'function') stores.globalSpellAdapters.push(fn);
-    },
-    getGlobalSpellAdapters() {
-      return stores.globalSpellAdapters.slice();
-    },
-    registerGlobalItemAdapter(fn) {
-      if (typeof fn === 'function') stores.globalItemAdapters.push(fn);
-    },
-    getGlobalItemAdapters() {
-      return stores.globalItemAdapters.slice();
     },
     registerItemFlagDef(key, def) {
       if (key && def && typeof def === 'object') stores.itemFlagDefs.set(String(key), { key: String(key), ...def });

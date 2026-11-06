@@ -43,7 +43,7 @@ registerSpeciesSheetCommonChoiceMeta("Human_XPHB", {
 });
 
 // Heroic Inspiration: regain Inspiration on Long Rest
-registerSpeciesLongRestGrants('Human', 'XPHB', { inspiration: true });
+registerSpeciesLongRestGrants('Human_XPHB', { inspiration: true });
 
 }
 
