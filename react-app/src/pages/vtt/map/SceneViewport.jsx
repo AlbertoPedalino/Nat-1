@@ -1,63 +1,39 @@
 import {
-  useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
+  useCallback, useMemo, useRef, useState,
 } from 'react';
-import { Box, Button, IconButton, Stack, Tooltip, Typography } from '@mui/material';
-import { MapPin, Maximize2, Minimize2, ScrollText, Settings2, Trash2, X } from 'lucide-react';
-import { brushStrokeCells, fogOrigin } from '../../../shared/vtt/map/fog.js';
+import { Box } from '@mui/material';
 import {
-  DEFAULT_VIEW,
   cellSize,
-  constrainCoverView,
-  dropPosition,
-  fillView,
-  fitView,
   panBy,
   screenToWorld,
   tokenWorldRect,
-  worldToCell,
   worldToScreen,
-  zoomAt,
 } from '../../../shared/vtt/map/geometry.js';
-import { measureLabel, snapRuler } from '../../../shared/vtt/map/measure.js';
-import { createMeasurePublisher } from '../../../shared/vtt/map/measureSync.js';
-import { suppressGestureSelection } from '../../../shared/vtt/map/gestureSelection.js';
-import { movedPoints } from '../../../shared/vtt/map/drawing.js';
-import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import {
   gridLineColor,
   isTokenInPlay,
   normalizeGridLineWidth,
+  samePlayArea,
 } from '../../../shared/vtt/scene/scene.js';
 import { isMapPiece } from '../../../shared/vtt/map/mapObjects.js';
 import {
-  axialRound, hexHeight, hexPlayAreaForImage, hexToWorld, hexWidth, isHexGrid,
-  worldToAxial, worldToHex,
+  hexHeight, hexPlayAreaForImage, hexToWorld, isHexGrid, worldToHex,
 } from '../../../shared/vtt/map/hexGeometry.js';
 import HexBubble from '../hexcrawl/HexBubble.jsx';
-import {
-  cameraPoseToView, viewToCameraPose,
-} from '../../../shared/vtt/session/cameraSync.js';
 import DrawingCanvas from './DrawingCanvas.jsx';
 import AreaEffectsCanvas from './AreaEffectsCanvas.jsx';
-import { areaFromDrag, snapAreaOrigin } from '../../../shared/vtt/map/areas.js';
 import FogCanvas from './FogCanvas.jsx';
 import RollBubble from '../rolls/RollBubble.jsx';
 import DiceTray from '../rolls/DiceTray.jsx';
 import FloatingSheetPanel from '../sheets/FloatingSheetPanel.jsx';
 import LaserOverlay from './LaserOverlay.jsx';
-import TokenSprite from '../tokens/TokenSprite.jsx';
 import TokenLayer from '../tokens/TokenLayer.jsx';
 import AtmosphereOverlay from '../atmosphere/AtmosphereOverlay.jsx';
 import { imageFilterLook } from '../../../shared/vtt/scene/imageFilters.js';
 import DeletePiecesDialog from '../tokens/DeletePiecesDialog.jsx';
-import { PIECE_POINTER_DRAG_EVENT } from '../tokens/PiecePreview.jsx';
-import { mapIconButtonSx } from './battleMapSurface.js';
 import {
-  overlandMiles,
   brushRadiusFor,
   cursorFor,
-  screenSelectionRect,
-  overlapsSelection,
   measurementBadge,
   playAreaBox,
   hexPlayAreaPolygon,
@@ -71,31 +47,27 @@ import {
   placementTargetSx,
   placementTargetHintSx,
   selectionMarqueeSx,
-  selectionToolbarSx,
-  selectionCountSx,
-  fullscreenSheetButtonSx,
-  cornerButtonsSx,
-  fullscreenBtnSx,
   imageSwitchSx,
   layerSwitchSx,
   backgroundStripSx,
-  distanceSx,
-  placementCountSx,
 } from './sceneViewportStyles.js';
-import { samePlayArea } from '../../../shared/vtt/scene/scene.js';
 import MapBackdrop from './MapBackdrop.jsx';
-
-const WHEEL_STEP = 1.12;
-const VIEWPORT_CONTROL_SELECTOR = '[data-viewport-control], .MuiModal-root, .MuiPopover-root, .MuiPopper-root';
-// A press has to be still to be a press, and long enough not to be a tap. Both
-// numbers are what a phone's own long-press feels like.
-const LONG_PRESS_MS = 480;
-const LONG_PRESS_SLOP = 12;
-const DRAG_BROADCAST_MS = 40;
-// Spans are kept to a tenth of a square: fine enough for a door that is half a
-// cell deep, coarse enough that the number stays readable in the menu.
-const roundSpan = (span) => Math.max(0.5, Math.round(span * 10) / 10);
-const LASER_BROADCAST_MS = 50;
+import { useViewportCamera } from './useViewportCamera.js';
+import { usePinchZoom } from './usePinchZoom.js';
+import { LONG_PRESS_SLOP, useLongPress } from './useLongPress.js';
+import { useViewportSelection } from './useViewportSelection.js';
+import { useViewportFullscreen } from './useViewportFullscreen.js';
+import { useRuler } from './useRuler.js';
+import { useLaserPointer } from './useLaserPointer.js';
+import { useFogBrush } from './useFogBrush.js';
+import { useDrawingTools } from './useDrawingTools.js';
+import { usePiecePlacement } from './usePiecePlacement.js';
+import { useTokenGestures } from './useTokenGestures.js';
+import { useMarkGestures } from './useMarkGestures.js';
+import {
+  BrushPreview, DistanceBadge, PartyHexMarker, PlacementPreview,
+} from './ViewportOverlays.jsx';
+import { CornerButtons, FullscreenButton, SelectionToolbar } from './ViewportControls.jsx';
 
 // The tools that paint an area rather than acting on one point.
 const BRUSH_MODES = ['reveal', 'hide', 'draw', 'erase'];
@@ -205,112 +177,51 @@ export default function SceneViewport({
   showFullscreenControl = true,
 }) {
   const hostRef = useRef(null);
-  useEffect(() => {
-    const host = hostRef.current;
-    const guards = new Map();
-    const releaseGuards = () => {
-      guards.forEach((release) => release());
-      guards.clear();
-    };
-    const begin = (event) => {
-      if (event.button !== 0 && event.button !== 1) return;
-      if (event.target.closest?.(`${VIEWPORT_CONTROL_SELECTOR}, input, textarea, select, [contenteditable]:not([contenteditable="false"])`)) return;
-      if (event.pointerType === 'touch' && event.isPrimary) releaseGuards();
-      if (guards.has(event.pointerId)) return;
-      guards.set(event.pointerId, suppressGestureSelection({ touch: event.pointerType === 'touch' }));
-      window.getSelection()?.removeAllRanges();
-    };
-    const finish = (event) => {
-      // Capture can move from a token to the viewport when a pinch takes over.
-      if (event.type === 'lostpointercapture' && host.hasPointerCapture?.(event.pointerId)) return;
-      guards.get(event.pointerId)?.();
-      guards.delete(event.pointerId);
-      if (pointersRef.current.delete(event.pointerId)) pinchRef.current = null;
-    };
-    const releaseAll = () => {
-      releaseGuards();
-      pointersRef.current.clear();
-      pinchRef.current = null;
-    };
-    const visibilityChanged = () => {
-      if (document.visibilityState === 'hidden') releaseAll();
-    };
-    // Capture also covers token/object handlers that stop propagation. Listen
-    // on window for release outside the map, and retain guards during a pinch.
-    host.addEventListener('pointerdown', begin, true);
-    window.addEventListener('pointerup', finish, true);
-    window.addEventListener('pointercancel', finish, true);
-    window.addEventListener('lostpointercapture', finish, true);
-    window.addEventListener('blur', releaseAll);
-    document.addEventListener('visibilitychange', visibilityChanged);
-    return () => {
-      releaseAll();
-      host.removeEventListener('pointerdown', begin, true);
-      window.removeEventListener('pointerup', finish, true);
-      window.removeEventListener('pointercancel', finish, true);
-      window.removeEventListener('lostpointercapture', finish, true);
-      window.removeEventListener('blur', releaseAll);
-      document.removeEventListener('visibilitychange', visibilityChanged);
-    };
-  }, [cameraLocked]);
-  const dragRef = useRef(null);
-  const lastLaserRef = useRef(0);
-  const laserPointRef = useRef(null);
-  const laserSelectedRef = useRef(false);
-  // Every finger currently on the map, recorded in the capture phase so a
-  // pinch works even when one of them landed on a piece — a token stops the
-  // event from reaching the host, and the second finger would go unseen.
-  const pointersRef = useRef(new Map());
-  const pinchRef = useRef(null);
-  const longPressRef = useRef(null);
-  const [view, setView] = useState(DEFAULT_VIEW);
-  const [drag, setDrag] = useState(null);
-  const [resize, setResize] = useState(null);
-  const [rotate, setRotate] = useState(null);
-  const [selectedMapObjectId, setSelectedMapObjectId] = useState(null);
-  const [selectedTokenIds, setSelectedTokenIds] = useState([]);
-  const [deleteCandidates, setDeleteCandidates] = useState(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [deleting, setDeleting] = useState(false);
-  const [deleteError, setDeleteError] = useState(null);
-  const deletingRef = useRef(false);
-  const [selectionBox, setSelectionBox] = useState(null);
-  const [groupDrag, setGroupDrag] = useState(null);
-  const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
-  // The stroke in progress lives in a ref, not in state. Accumulating it in
-  // state meant the commit ran inside a state updater — a side effect in a
-  // function React may call more than once or defer, which is why the second
-  // stroke onwards came out as a single dot.
-  const strokeRef = useRef([]);
-  const [strokeTick, setStrokeTick] = useState(0);
-  // The area being placed: its origin is where the button went down, and for a
-  // cone or a line the pointer says which way it faces.
-  const [areaDraft, setAreaDraft] = useState(null);
   const [loadedImageSize, setLoadedImageSize] = useState(null);
   // SceneEditor decodes each replacement before exposing it and supplies its
   // dimensions in the same render as the URL. This prevents one paint with the
   // previous picture's fit while the new <img> waits to emit `load`.
   const imageSize = preparedImageSize || loadedImageSize;
   const imageLook = useMemo(() => imageFilterLook(imageFilter), [imageFilter]);
-  const [fullscreen, setFullscreen] = useState(false);
-  // The stand-in for fullscreen where the browser will not give us the real
-  // thing.
-  const [covering, setCovering] = useState(false);
+
+  const {
+    view, setView, viewportSize, constrainView, screenPoint, cellPoint,
+  } = useViewportCamera({
+    hostRef,
+    grid: scene.grid,
+    imageSize,
+    imageUrl,
+    backgroundOnly,
+    cameraLocked,
+    followView,
+    onViewChange,
+    viewCenterRef,
+  });
+  const { pointersRef, trackPointer, trackPointerMove } = usePinchZoom({
+    hostRef, cameraLocked, setView, constrainView,
+  });
+
+  // The gesture under way, whichever tool or piece started it: `kind` says
+  // which of the handlers below carries it on.
+  const dragRef = useRef(null);
+  // The piece being dragged, applied at render so it follows the pointer
+  // without a write per frame.
+  const [drag, setDrag] = useState(null);
+  // The mark being dragged, as an offset in cells: applied at render so the
+  // stroke follows the pointer without a write per frame.
+  const [markDrag, setMarkDrag] = useState(null);
+  // Where the cursor is, so a brush can show what it is about to cover. Tracked
+  // only while a brush is in hand: a state update per mouse move is not worth
+  // paying for while merely moving pieces around.
+  const [hover, setHover] = useState(null);
   // The controls live inside the viewport rather than around it, which is the
   // only way they survive fullscreen — a fullscreen element hides its siblings.
   const [controlsOpen, setControlsOpen] = useState(false);
-  // The floating sheet is the page's to open as well when it passes `open`:
-  // a creature clicked on a fullscreen board shows its stat block in it.
-  const [localSheetOpen, setLocalSheetOpen] = useState(false);
-  const floatingSheetOpen = fullscreenSheet?.open ?? localSheetOpen;
-  const onSheetOpenChange = fullscreenSheet?.onOpenChange;
-  const setFloatingSheetOpen = useCallback((next) => {
-    setLocalSheetOpen(next);
-    onSheetOpenChange?.(next);
-  }, [onSheetOpenChange]);
-  const [measure, setMeasure] = useState(null);
-  const onMeasureRef = useRef(onMeasure);
-  onMeasureRef.current = onMeasure;
+  // Scenery follows the scene's own switch; a creature keeps its square whatever
+  // that switch says, which is the whole reason the setting is not global.
+  const snapObjects = scene.grid?.snapObjects !== false;
+  const snapFor = (token) => (isMapPiece(token) ? snap && snapObjects : snap);
+
   // Read by abandonGesture, which runs from timers and touch handlers created
   // before the latest render.
   const onDragTokenRef = useRef(onDragToken);
@@ -331,537 +242,113 @@ export default function SceneViewport({
     }
     if (state?.kind === 'paint') onPaintEndRef.current?.();
   }, []);
-  const measurePublisherRef = useRef(null);
-  if (!measurePublisherRef.current) {
-    measurePublisherRef.current = createMeasurePublisher({ send: (value) => onMeasureRef.current?.(value) });
-  }
-  // Where the cursor is, so a brush can show what it is about to cover. Tracked
-  // only while a brush is in hand: a state update per mouse move is not worth
-  // paying for while merely moving pieces around.
-  const [hover, setHover] = useState(null);
-  const [placementHover, setPlacementHover] = useState(null);
-  // Scenery follows the scene's own switch; a creature keeps its square whatever
-  // that switch says, which is the whole reason the setting is not global.
-  const snapObjects = scene.grid?.snapObjects !== false;
-  const snapFor = (token) => (isMapPiece(token) ? snap && snapObjects : snap);
-  // The mark being dragged, as an offset in cells: applied at render so the
-  // stroke follows the pointer without a write per frame.
-  const [markDrag, setMarkDrag] = useState(null);
+  // What became a menu was never a drag.
+  const abandonForMenu = useCallback(() => {
+    abandonGesture();
+    setDrag(null);
+    setMarkDrag(null);
+  }, [abandonGesture]);
+  const { armLongPress, cancelLongPress, cancelLongPressIfMoved } = useLongPress(abandonForMenu);
 
-  const selectableTokensIn = useCallback((selection) => (
-    (tokens || []).filter((token) => {
-      if (activeLayer && token.layer !== activeLayer) return false;
-      if (!canMove(token)) return false;
-      const worldRect = tokenWorldRect(token, scene.grid);
-      const at = worldToScreen(worldRect, view);
-      return overlapsSelection({
-        left: at.x,
-        top: at.y,
-        width: worldRect.width * view.zoom,
-        height: worldRect.height * view.zoom,
-      }, selection);
-    })
-  ), [activeLayer, canMove, scene.grid, tokens, view]);
-
-  const clearSelection = useCallback(() => {
-    setSelectedTokenIds([]);
-    setSelectionBox(null);
-    setGroupDrag(null);
-  }, []);
-
-  const deleteSelection = useCallback(() => {
-    if (!onDeleteTokens || deleteDialogOpen || deletingRef.current) return;
-    const selected = (tokens || []).filter((token) => selectedTokenIds.includes(token.id) && canMove(token));
-    if (!selected.length) return;
-    setDeleteError(null);
-    setDeleteCandidates(selected);
-    setDeleteDialogOpen(true);
-  }, [canMove, deleteDialogOpen, onDeleteTokens, selectedTokenIds, tokens]);
-
-  const cancelDelete = () => {
-    if (!deletingRef.current) setDeleteDialogOpen(false);
-  };
-
-  const confirmDelete = async () => {
-    if (deletingRef.current || !deleteDialogOpen || !deleteCandidates || !onDeleteTokens) return;
-    deletingRef.current = true;
-    setDeleting(true);
-    setDeleteError(null);
-    const ids = new Set(deleteCandidates.map((token) => token.id));
-    // Re-read permissions and rows at confirmation: live updates may have
-    // changed them while the panel was open.
-    const pieces = (tokens || []).filter((token) => ids.has(token.id) && canMove(token));
-    try {
-      const removed = pieces.length ? await onDeleteTokens(pieces) : true;
-      if (removed !== false) {
-        setSelectedTokenIds((current) => current.filter((id) => !ids.has(id)));
-      }
-      // Keep the confirmed pieces while the dialog animates out. Clearing
-      // them here flashes "Remove 0 selected pieces" before it disappears.
-      setDeleteDialogOpen(false);
-    } catch (cause) {
-      setDeleteError(cause?.message || 'Could not delete the selected pieces. Please try again.');
-    } finally {
-      deletingRef.current = false;
-      setDeleting(false);
-    }
-  };
-
-  useEffect(() => {
-    if (paintMode !== 'marquee' || backgroundOnly) clearSelection();
-  }, [backgroundOnly, clearSelection, paintMode]);
-
-  useEffect(() => {
-    setSelectedTokenIds((current) => current.filter((id) => (
-      (tokens || []).some((token) => token.id === id && (!activeLayer || token.layer === activeLayer))
-    )));
-  }, [activeLayer, tokens]);
-
-  useEffect(() => {
-    if (paintMode !== 'marquee' || !selectedTokenIds.length) return undefined;
-    const handleKeyDown = (event) => {
-      if (event.defaultPrevented || event.repeat || deleteDialogOpen || deletingRef.current) return;
-      const target = event.target;
-      if (target?.closest?.('input, textarea, select, [contenteditable="true"], .MuiModal-root')) return;
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        clearSelection();
-      } else if (event.key === 'Delete' || event.key === 'Backspace') {
-        event.preventDefault();
-        deleteSelection();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [clearSelection, deleteDialogOpen, deleteSelection, paintMode, selectedTokenIds.length]);
-
-  const backgroundFrame = useMemo(() => (
-    backgroundOnly && imageSize && viewportSize.width > 0 && viewportSize.height > 0
-      ? {
-        imageWidth: imageSize.width,
-        imageHeight: imageSize.height,
-        viewportWidth: viewportSize.width,
-        viewportHeight: viewportSize.height,
-      }
-      : null
-  ), [backgroundOnly, imageSize, viewportSize]);
-  const backgroundCover = useMemo(
-    () => (backgroundFrame ? fillView(backgroundFrame) : null),
-    [backgroundFrame],
-  );
-
-  const constrainView = useCallback((next) => {
-    if (!backgroundFrame) return next;
-    return constrainCoverView(next, backgroundFrame);
-  }, [backgroundFrame]);
-
-  useEffect(() => {
-    const host = hostRef.current;
-    if (!host) return undefined;
-    const measure = () => {
-      const box = host.getBoundingClientRect();
-      setViewportSize((current) => (
-        current.width === box.width && current.height === box.height
-          ? current
-          : { width: box.width, height: box.height }
-      ));
-    };
-    measure();
-    if (typeof ResizeObserver !== 'function') return undefined;
-    const observer = new ResizeObserver(measure);
-    observer.observe(host);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const pose = viewToCameraPose(view, viewportSize, { zoomBase: backgroundCover?.zoom });
-    if (pose) onViewChange?.(pose);
-  }, [backgroundCover, onViewChange, view, viewportSize]);
-
-  // Projectors follow rather than jump. Each realtime target starts a short
-  // interpolation from the frame already on screen; a newer target cancels it
-  // and continues from that exact point, which stays smooth during a long pan.
-  useEffect(() => {
-    const converted = cameraPoseToView(followView, viewportSize, {
-      zoomBase: backgroundCover?.zoom,
-    });
-    const target = converted ? constrainView(converted) : null;
-    if (!target) return undefined;
-    let frame = 0;
-    let settled = false;
-    const step = () => {
-      setView((current) => {
-        const next = constrainView({
-          x: current.x + (target.x - current.x) * 0.34,
-          y: current.y + (target.y - current.y) * 0.34,
-          zoom: current.zoom + (target.zoom - current.zoom) * 0.34,
-        });
-        settled = Math.abs(next.x - target.x) < 0.15
-          && Math.abs(next.y - target.y) < 0.15
-          && Math.abs(next.zoom - target.zoom) < 0.001;
-        return settled ? target : next;
-      });
-      if (!settled) frame = requestAnimationFrame(step);
-    };
-    frame = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(frame);
-  }, [backgroundCover, constrainView, followView, viewportSize]);
-
-  useEffect(() => {
-    if (!placementDrag || backgroundOnly) setPlacementHover(null);
-  }, [backgroundOnly, placementDrag]);
-
-  // Resize and rotation furniture belongs only to the piece of scenery the user
-  // has picked. Drop the selection if that piece is removed or stops being
-  // scenery (for example after a realtime scene update).
-  useEffect(() => {
-    setSelectedMapObjectId((selectedId) => (
-      selectedId && tokens.some((token) => token.id === selectedId && isMapPiece(token))
-        ? selectedId
-        : null
-    ));
-  }, [tokens]);
-
-  // Reframe once per picture. A battlemap stays wholly visible with a little
-  // breathing room; an establishing-shot background fills the screen and may
-  // crop at the edges. Backgrounds also reframe when the viewport itself
-  // changes shape (fullscreen and device rotation) so no letterboxing returns.
-  const backgroundViewportWidth = backgroundOnly ? viewportSize.width : null;
-  const backgroundViewportHeight = backgroundOnly ? viewportSize.height : null;
-  useLayoutEffect(() => {
-    if (!imageSize || !hostRef.current) return;
-    const box = hostRef.current.getBoundingClientRect();
-    const frameView = backgroundOnly ? fillView : fitView;
-    setView(frameView({
-      imageWidth: imageSize.width,
-      imageHeight: imageSize.height,
-      viewportWidth: box.width,
-      viewportHeight: box.height,
-    }));
-  }, [
+  const selection = useViewportSelection({
+    hostRef,
+    dragRef,
+    tokens,
+    activeLayer,
+    canMove,
+    grid: scene.grid,
+    view,
+    screenPoint,
+    paintMode,
     backgroundOnly,
-    backgroundViewportHeight,
-    backgroundViewportWidth,
-    imageSize,
-    imageUrl,
-  ]);
-
-  // iPad's native fullscreen can dismiss itself during map pan/pinch gestures.
-  // Use the window-covering mode on iOS, including iPads identifying as Macs.
-  const toggleFullscreen = useCallback(async () => {
-    const host = hostRef.current;
-    if (!host) return;
-    const request = host.requestFullscreen || host.webkitRequestFullscreen;
-    const exit = document.exitFullscreen || document.webkitExitFullscreen;
-    if (covering) {
-      setCovering(false);
-      return;
-    }
-    const ios = /iPad|iPhone|iPod/.test(navigator.userAgent)
-      || (/Mac/.test(navigator.platform) && navigator.maxTouchPoints > 1);
-    try {
-      if (document.fullscreenElement || document.webkitFullscreenElement) await exit?.call(document);
-      else if (ios || !request) setCovering(true);
-      else await request.call(host);
-    } catch (_) {
-      setCovering(true);
-    }
-  }, [covering]);
-
-  const fullscreenActive = fullscreen || covering;
-
-  useEffect(() => {
-    if (!covering) return undefined;
-    const leaveOnEscape = (event) => {
-      if (event.key === 'Escape' && !event.defaultPrevented) setCovering(false);
-    };
-    document.addEventListener('keydown', leaveOnEscape);
-    return () => document.removeEventListener('keydown', leaveOnEscape);
-  }, [covering]);
-
-  useEffect(() => {
-    onFullscreenChange?.(fullscreenActive);
-    if (!fullscreenActive) setFloatingSheetOpen(false);
-  }, [fullscreenActive, onFullscreenChange, setFloatingSheetOpen]);
-
-  // Escape and the browser's own control leave fullscreen without telling us,
-  // so the icon follows the document rather than our last click.
-  useEffect(() => {
-    const sync = () => setFullscreen(
-      document.fullscreenElement === hostRef.current
-      || document.webkitFullscreenElement === hostRef.current,
-    );
-    document.addEventListener('fullscreenchange', sync);
-    document.addEventListener('webkitfullscreenchange', sync);
-    return () => {
-      document.removeEventListener('fullscreenchange', sync);
-      document.removeEventListener('webkitfullscreenchange', sync);
-    };
-  }, []);
-
-  const screenPoint = useCallback((event) => {
-    const box = hostRef.current?.getBoundingClientRect();
-    return { x: event.clientX - (box?.left || 0), y: event.clientY - (box?.top || 0) };
-  }, []);
-
-  const handleWheel = useCallback((event) => {
-    if (cameraLocked) return;
-    // Fullscreen dialogs and the floating sheet live inside the fullscreen map
-    // element (portals outside it are not painted by the browser). They are
-    // still UI surfaces, not map canvas: let their own scroll container receive
-    // the wheel instead of swallowing it here as map zoom.
-    if (event.target.closest?.(VIEWPORT_CONTROL_SELECTOR)) return;
-    event.preventDefault();
-    const factor = event.deltaY < 0 ? WHEEL_STEP : 1 / WHEEL_STEP;
-    setView((current) => constrainView(zoomAt(current, factor, screenPoint(event))));
-  }, [cameraLocked, constrainView, screenPoint]);
-
-  // Wheel has to be a non-passive native listener: React's onWheel is passive,
-  // and preventDefault there is ignored, so the page scrolls while zooming.
-  useEffect(() => {
-    const host = hostRef.current;
-    if (!host) return undefined;
-    host.addEventListener('wheel', handleWheel, { passive: false });
-    return () => host.removeEventListener('wheel', handleWheel);
-  }, [handleWheel]);
-
-  // Putting the ruler down — another tool, or the map closing — takes it off
-  // everyone else's screen too.
-  useEffect(() => {
-    if (paintMode === 'measure') return;
-    if (dragRef.current?.kind === 'measure') {
-      dragRef.current = null;
-      setMeasure(null);
-    }
-    measurePublisherRef.current.finish();
-  }, [paintMode]);
-  useEffect(() => () => measurePublisherRef.current.finish(), []);
-
-  // A stationary pointer is still pointing. Refresh the broadcast while the
-  // laser remains selected so its safety TTL only removes abandoned dots, not
-  // a dot deliberately held over one square. Switching tools clears it at once.
-  useEffect(() => {
-    if (paintMode !== 'laser') {
-      if (laserSelectedRef.current) onLaser?.(null);
-      laserSelectedRef.current = false;
-      laserPointRef.current = null;
-      return undefined;
-    }
-
-    laserSelectedRef.current = true;
-    const timer = setInterval(() => {
-      if (laserPointRef.current) onLaser?.(laserPointRef.current);
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [onLaser, paintMode]);
-
-  // The brush works in fog cells, which are finer than grid squares: that is
-  // what makes half a doorway possible, and what makes a round brush look round.
-  const paintAt = useCallback((point) => {
-    if (!fog) return;
-    const scale = Math.max(1, fog?.scale || 1);
-    const world = screenToWorld(point, view);
-    const unit = cellSize(scene.grid) / scale;
-    const origin = fogOrigin(scene.grid);
-    const at = {
-      col: (world.x - origin.x) / unit,
-      row: (world.y - origin.y) / unit,
-    };
-    const stroke = dragRef.current;
-    // The brush is set in squares, so it grows with the resolution rather than
-    // shrinking to a pinprick when the fog gets finer.
-    onPaint?.(brushStrokeCells(stroke?.lastFogPoint || at, at, Math.max(1, brushSize * scale), fog), paintMode === 'reveal');
-    if (stroke) stroke.lastFogPoint = at;
-  }, [brushSize, fog, onPaint, paintMode, scene.grid, view]);
-
-  // Strokes are stored in cells, fractionally: recalibrating the grid must not
-  // slide a drawing off the wall it was traced on.
-  const cellPoint = useCallback((point) => {
-    const world = screenToWorld(point, view);
-    const size = cellSize(scene.grid);
-    return {
-      x: (world.x - (scene.grid.offsetX || 0)) / size,
-      y: (world.y - (scene.grid.offsetY || 0)) / size,
-    };
-  }, [scene.grid, view]);
-
-  // Where a dragged-in piece would land, centred under the pointer. Only an
-  // object may come to rest between squares: a creature, an imported fight and a
-  // character are laid out in whole cells by the code that receives them.
-  const placementPosition = useCallback((event, placement = placementDrag) => {
-    const world = screenToWorld(screenPoint(event), view);
-    const w = Math.max(1, Number(placement?.token?.w) || 1);
-    const h = Math.max(1, Number(placement?.token?.h) || 1);
-    const free = placement?.kind === 'object' && !snapObjects;
-
-    // A hex piece stands on a hex, so the pointer is already its centre: none of
-    // the half-span shifting a square grid needs to centre a 2x2.
-    if (isHexGrid(scene.grid)) {
-      const axial = worldToAxial(world, scene.grid);
-      const cell = free ? axial : axialRound(axial);
-      return { x: cell.q, y: cell.r };
-    }
-
-    if (free) {
-      const at = cellPoint(screenPoint(event));
-      return { x: at.x - w / 2, y: at.y - h / 2 };
-    }
-    const cell = worldToCell(world, scene.grid);
-    return { x: cell.col - Math.floor(w / 2), y: cell.row - Math.floor(h / 2) };
-  }, [cellPoint, placementDrag, scene.grid, screenPoint, snapObjects, view]);
-
-  // The cell under the middle of the view: col/row on squares, q/r on hexes.
-  useEffect(() => {
-    if (!viewCenterRef) return undefined;
-    viewCenterRef.current = () => {
-      if (!viewportSize.width || !viewportSize.height) return null;
-      const world = screenToWorld({ x: viewportSize.width / 2, y: viewportSize.height / 2 }, view);
-      if (isHexGrid(scene.grid)) {
-        const cell = axialRound(worldToAxial(world, scene.grid));
-        return { x: cell.q, y: cell.r };
-      }
-      const cell = worldToCell(world, scene.grid);
-      return { x: cell.col, y: cell.row };
-    };
-    return () => { viewCenterRef.current = null; };
-  }, [scene.grid, view, viewCenterRef, viewportSize]);
-
-  // Placement arrives through pointer events so mouse, touch and pen share the
-  // same reliable path instead of depending on native HTML drag-and-drop.
-  // Listening on the window lets a drag cross the floating tool panel or a
-  // placement dialog before it reaches the map beneath.
-  useEffect(() => {
-    const handlePointerPlacement = (event) => {
-      const detail = event.detail;
-      const host = hostRef.current;
-      if (!detail?.placement || !host) return;
-      if (detail.phase === 'cancel') {
-        setPlacementHover(null);
-        return;
-      }
-
-      const box = host.getBoundingClientRect();
-      const inside = detail.clientX >= box.left && detail.clientX <= box.right
-        && detail.clientY >= box.top && detail.clientY <= box.bottom;
-      if (!inside || backgroundOnly) {
-        setPlacementHover(null);
-        return;
-      }
-
-      const pointer = { clientX: detail.clientX, clientY: detail.clientY };
-      const next = placementPosition(pointer, detail.placement);
-      if (detail.phase === 'drop') {
-        setPlacementHover(null);
-        onDropPlacement?.(detail.placement, next);
-        return;
-      }
-      setPlacementHover((current) => (
-        current?.x === next.x && current?.y === next.y ? current : next
-      ));
-    };
-
-    window.addEventListener(PIECE_POINTER_DRAG_EVENT, handlePointerPlacement);
-    return () => window.removeEventListener(PIECE_POINTER_DRAG_EVENT, handlePointerPlacement);
-  }, [backgroundOnly, onDropPlacement, placementPosition]);
-
-  const cancelLongPress = useCallback(() => {
-    if (!longPressRef.current) return;
-    clearTimeout(longPressRef.current.timer);
-    longPressRef.current = null;
-  }, []);
-
-  // A finger has no right button, so holding still on a piece or a mark is how
-  // its menu is asked for. For a piece it is armed before the "can this be
-  // moved" check: marking somebody else's monster is exactly what a player
-  // needs the menu for.
-  const armLongPress = useCallback((event, open) => {
-    if (event.pointerType === 'mouse' || !open) return;
-    const at = { x: event.clientX, y: event.clientY };
-    cancelLongPress();
-    longPressRef.current = {
-      from: at,
-      timer: setTimeout(() => {
-        longPressRef.current = null;
-        // What became a menu was never a drag.
-        abandonGesture();
-        setDrag(null);
-        setMarkDrag(null);
-        open(at);
-      }, LONG_PRESS_MS),
-    };
-  }, [abandonGesture, cancelLongPress]);
-
-  useEffect(() => cancelLongPress, [cancelLongPress]);
-
-  // A mark whose menu is open is the one in hand: it can be dragged next.
-  const openDrawingMenu = (mark, at) => {
-    onSelectDrawing?.(mark.id);
-    onDrawingMenu?.(mark, at);
-  };
+    snapFor,
+    onDeleteTokens,
+    onMoveTokens,
+  });
+  const { selectedTokenIds, setSelectedMapObjectId } = selection;
+  const {
+    covering, fullscreenActive, toggleFullscreen, floatingSheetOpen, setFloatingSheetOpen,
+  } = useViewportFullscreen({ hostRef, fullscreenSheet, onFullscreenChange });
+  const ruler = useRuler({
+    dragRef, paintMode, cellPoint, grid: scene.grid, measureShape, feetPerCellForRuler, onMeasure,
+  });
+  const laser = useLaserPointer({ paintMode, onLaser });
+  const fogBrush = useFogBrush({
+    dragRef, view, grid: scene.grid, fog, brushSize, paintMode, onPaint, onPaintEnd,
+  });
+  const drawingTools = useDrawingTools({
+    dragRef,
+    cellPoint,
+    grid: scene.grid,
+    paintMode,
+    areaOptions,
+    feetPerCellForRuler,
+    drawColor,
+    drawWidth,
+    onDrawEnd,
+    onErase,
+    onWriteNote,
+    onPlaceArea,
+  });
+  const { placementHover, dragHandlers } = usePiecePlacement({
+    hostRef,
+    view,
+    grid: scene.grid,
+    screenPoint,
+    cellPoint,
+    snapObjects,
+    placementDrag,
+    backgroundOnly,
+    onDropPlacement,
+    onDropCharacter,
+  });
+  const tokenGestures = useTokenGestures({
+    dragRef,
+    pointersRef,
+    view,
+    grid: scene.grid,
+    screenPoint,
+    paintMode,
+    canMove,
+    snapFor,
+    setDrag,
+    armLongPress,
+    setSelectedMapObjectId,
+    beginGroupDrag: selection.beginGroupDrag,
+    onContextMenu,
+    onDragToken,
+    onMoveToken,
+    onResizeToken,
+    onRotateToken,
+    onTokenClick,
+  });
+  const marks = useMarkGestures({
+    dragRef,
+    cellPoint,
+    screenPoint,
+    armLongPress,
+    markDrag,
+    setMarkDrag,
+    drawings,
+    movableDrawing,
+    selectedDrawingId,
+    onSelectDrawing,
+    onMoveDrawing,
+    drawingForMenu,
+    onDrawingMenu,
+  });
 
   // Two fingers are a pinch, whatever they landed on: whatever was being drawn,
   // painted or dragged is abandoned rather than continued with one of them.
-  const trackPointer = (event) => {
-    if (cameraLocked || event.pointerType !== 'touch') return;
-    if (event.target.closest?.(VIEWPORT_CONTROL_SELECTOR)) return;
-    // A new primary touch starts a fresh contact sequence, even if the browser
-    // never delivered the previous sequence's final pointerup/cancel.
-    if (event.isPrimary) {
-      pointersRef.current.clear();
-      pinchRef.current = null;
-    }
-    pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
-    if (pointersRef.current.size < 2) return;
-    // beginPan and the token handlers skip multi-touch, so capture additional
-    // fingers here to keep receiving their events outside the viewport.
-    event.currentTarget.setPointerCapture?.(event.pointerId);
-
+  const abandonForPinch = () => {
     cancelLongPress();
     abandonGesture();
     setDrag(null);
-    setGroupDrag(null);
-    setSelectionBox(null);
-    setResize(null);
-    setRotate(null);
+    selection.cancelGesture();
+    tokenGestures.cancel();
     setMarkDrag(null);
-    setMeasure(null);
-    measurePublisherRef.current.finish();
-    strokeRef.current = [];
-    setStrokeTick((tick) => tick + 1);
-    setAreaDraft(null);
-    pinchRef.current = readPinch();
-  };
-
-  const readPinch = () => {
-    if (pointersRef.current.size !== 2) return null;
-    const [a, b] = [...pointersRef.current.values()];
-    if (!a || !b) return null;
-    const box = hostRef.current?.getBoundingClientRect();
-    return {
-      distance: Math.max(1, Math.hypot(b.x - a.x, b.y - a.y)),
-      centre: {
-        x: (a.x + b.x) / 2 - (box?.left || 0),
-        y: (a.y + b.y) / 2 - (box?.top || 0),
-      },
-    };
-  };
-
-  const trackPointerMove = (event) => {
-    if (cameraLocked || !pointersRef.current.has(event.pointerId)) return;
-    pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
-
-    const previous = pinchRef.current;
-    const next = readPinch();
-    pinchRef.current = next;
-    if (!next || !previous) return;
-
-    // Zoom about the point between the fingers, and follow that point as it
-    // moves: on a phone, spreading and sliding are one gesture.
-    setView((current) => constrainView(panBy(
-      zoomAt(current, next.distance / previous.distance, next.centre),
-      next.centre.x - previous.centre.x,
-      next.centre.y - previous.centre.y,
-    )));
+    ruler.cancel();
+    drawingTools.cancel();
   };
 
   const beginPan = (event) => {
@@ -891,93 +378,32 @@ export default function SceneViewport({
     const point = screenPoint(event);
     event.currentTarget.setPointerCapture?.(event.pointerId);
 
-    // With a brush selected, the left button paints and panning moves to the
+    // With a tool selected, the left button uses it and panning moves to the
     // middle button: swapping tools every time you need to scroll the map is
     // the fastest way to make the feature annoying.
-    if (event.button === 0 && (paintMode === 'reveal' || paintMode === 'hide')) {
-      dragRef.current = { kind: 'paint' };
-      paintAt(point);
-      return;
-    }
-
-    if (event.button === 0 && paintMode === 'draw') {
-      dragRef.current = { kind: 'draw' };
-      strokeRef.current = [cellPoint(point)];
-      setStrokeTick((tick) => tick + 1);
-      return;
-    }
-
-    if (event.button === 0 && paintMode === 'area' && areaOptions) {
-      const origin = snapAreaOrigin(cellPoint(point), { hex: isHexGrid(scene.grid) });
-      dragRef.current = { kind: 'area', origin };
-      setAreaDraft(null);
-      return;
-    }
-
-    if (event.button === 0 && paintMode === 'text') {
-      dragRef.current = { kind: 'note' };
-      onWriteNote?.(cellPoint(point));
-      return;
-    }
-
-    // Held still on a mark, a finger opens its menu, as on a piece. Whatever
-    // the press starts meanwhile (a pan, picking the mark up) is dropped if
-    // the menu opens, and the hold is let go if the finger moves.
-    if (event.button === 0 && paintMode === 'select' && drawingForMenu && onDrawingMenu) {
-      const mark = drawingForMenu(cellPoint(point));
-      if (mark) armLongPress(event, (at) => openDrawingMenu(mark, at));
-    }
-
-    // Selected first, then moved (user request): a finger sliding across the
-    // board to pan used to drag along whatever mark it started on. A press on
-    // the selected mark takes hold of it; anywhere else it pans, and a tap
-    // that went nowhere selects what it landed on, or nothing.
     let tappedMark;
-    if (event.button === 0 && paintMode === 'select' && movableDrawing) {
-      const at = cellPoint(point);
-      const mark = movableDrawing(at);
-      if (mark && mark.id === selectedDrawingId) {
-        dragRef.current = { kind: 'mark', mark, from: at, offset: { x: 0, y: 0 } };
-        setMarkDrag({ id: mark.id, x: 0, y: 0 });
+    if (event.button === 0) {
+      if (fogBrush.beginGesture(point)) return;
+      if (drawingTools.beginGesture(point)) return;
+      if (ruler.beginGesture(point)) return;
+      if (paintMode === 'laser') {
+        // The laser is already live because the tool is selected. A click merely
+        // updates its position; it must not turn into a held gesture that clears
+        // the dot again on pointer-up.
+        laser.pointAt(cellPoint(point));
         return;
       }
-      tappedMark = mark;
+      if (paintMode === 'marquee') {
+        selection.beginMarquee(event, point);
+        return;
+      }
+      if (paintMode === 'select') {
+        const press = marks.press(event, point);
+        if (press.held) return;
+        tappedMark = press.tapped;
+      }
     }
 
-    if (event.button === 0 && paintMode === 'measure') {
-      const at = snapRuler(measureShape, cellPoint(point), cellPoint(point), { hex: isHexGrid(scene.grid) }).from;
-      dragRef.current = { kind: 'measure', from: at };
-      setMeasure({ shape: measureShape, from: at, to: at, label: '' });
-      return;
-    }
-
-    if (event.button === 0 && paintMode === 'laser') {
-      // The laser is already live because the tool is selected. A click merely
-      // updates its position; it must not turn into a held gesture that clears
-      // the dot again on pointer-up.
-      const at = cellPoint(point);
-      laserPointRef.current = at;
-      onLaser?.(at);
-      return;
-    }
-
-    if (event.button === 0 && paintMode === 'erase') {
-      dragRef.current = { kind: 'erase' };
-      onErase?.(cellPoint(point));
-      return;
-    }
-
-    if (event.button === 0 && paintMode === 'marquee') {
-      const additive = event.shiftKey || event.ctrlKey || event.metaKey;
-      dragRef.current = {
-        kind: 'marquee',
-        from: point,
-        baseIds: additive ? selectedTokenIds : [],
-      };
-      setSelectionBox(screenSelectionRect(point, point));
-      if (!additive) setSelectedTokenIds([]);
-      return;
-    }
     // On a hex map the empty board is not empty: every hex is a thing the GM can
     // pick. Recorded as the start of a pan and settled on release, so dragging
     // the map still pans instead of selecting whatever it started over.
@@ -1009,84 +435,8 @@ export default function SceneViewport({
     };
   };
 
-  const beginTokenDrag = useCallback((event, token) => {
-    event.stopPropagation();
-    if (pointersRef.current.size > 1) return;
-    if (paintMode === 'marquee') {
-      hostRef.current?.focus({ preventScroll: true });
-      setSelectedMapObjectId(null);
-      if (!canMove(token)) return;
-      const ids = selectedTokenIds.includes(token.id) ? selectedTokenIds : [token.id];
-      const members = (tokens || []).filter((item) => ids.includes(item.id) && canMove(item));
-      const pointer = screenToWorld(screenPoint(event), view);
-      const rect = tokenWorldRect(token, scene.grid);
-      setSelectedTokenIds(members.map((item) => item.id));
-      dragRef.current = {
-        kind: 'group',
-        anchor: token,
-        members,
-        grabOffset: { x: pointer.x - rect.x, y: pointer.y - rect.y },
-      };
-      setGroupDrag(Object.fromEntries(members.map((item) => [item.id, { x: item.x, y: item.y }])));
-      event.currentTarget.setPointerCapture?.(event.pointerId);
-      return;
-    }
-    setSelectedMapObjectId(isMapPiece(token) ? token.id : null);
-    armLongPress(event, onContextMenu ? (at) => onContextMenu(token, at) : null);
-    if (!canMove(token)) return;
-    const pointer = screenToWorld(screenPoint(event), view);
-    const rect = tokenWorldRect(token, scene.grid);
-    dragRef.current = {
-      kind: 'token',
-      token,
-      grabOffset: { x: pointer.x - rect.x, y: pointer.y - rect.y },
-      from: screenPoint(event),
-      mouse: event.pointerType === 'mouse' && event.button === 0,
-    };
-    setDrag({ id: token.id, x: token.x, y: token.y });
-    event.currentTarget.setPointerCapture?.(event.pointerId);
-  }, [armLongPress, canMove, onContextMenu, paintMode, scene.grid, screenPoint, selectedTokenIds, tokens, view]);
-
-  const beginTokenResize = useCallback((event, token) => {
-    event.stopPropagation();
-    if (pointersRef.current.size > 1) return;
-    if (!canMove(token)) return;
-    const width = Math.max(0.5, Number(token.w) || 1);
-    const height = Math.max(0.5, Number(token.h) || 1);
-    dragRef.current = {
-      kind: 'resize',
-      token,
-      from: screenToWorld(screenPoint(event), view),
-      width,
-      height,
-    };
-    setResize({ id: token.id, w: token.w || 1, h: token.h || 1 });
-    event.currentTarget.setPointerCapture?.(event.pointerId);
-  }, [canMove, screenPoint, view]);
-
-  const beginTokenRotate = useCallback((event, token) => {
-    event.stopPropagation();
-    if (pointersRef.current.size > 1) return;
-    if (!canMove(token)) return;
-    const rect = tokenWorldRect(token, scene.grid);
-    const centre = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
-    const pointer = screenToWorld(screenPoint(event), view);
-    dragRef.current = {
-      kind: 'rotate',
-      token,
-      centre,
-      fromAngle: Math.atan2(pointer.y - centre.y, pointer.x - centre.x),
-      rotation: Number(token.rotation) || 0,
-    };
-    setRotate({ id: token.id, rotation: Number(token.rotation) || 0 });
-    event.currentTarget.setPointerCapture?.(event.pointerId);
-  }, [canMove, scene.grid, screenPoint, view]);
-
   const handlePointerMove = (event) => {
-    const held = longPressRef.current;
-    if (held && Math.hypot(event.clientX - held.from.x, event.clientY - held.from.y) > LONG_PRESS_SLOP) {
-      cancelLongPress();
-    }
+    cancelLongPressIfMoved(event);
 
     const state = dragRef.current;
     const point = screenPoint(event);
@@ -1096,100 +446,11 @@ export default function SceneViewport({
     // button to be held made it look broken to everyone else: you point at
     // something, nobody sees a dot, and there is nothing on screen to say why.
     if (paintMode === 'laser' && !state) {
-      const at = cellPoint(point);
-      // Local rendering reads this ref on the next animation frame. Broadcasting
-      // stays throttled, but no longer limits what the person pointing sees.
-      laserPointRef.current = at;
-      const now = Date.now();
-      if (now - lastLaserRef.current >= LASER_BROADCAST_MS) {
-        lastLaserRef.current = now;
-        onLaser?.(at);
-      }
+      laser.follow(cellPoint(point));
       return;
     }
 
     if (!state) return;
-
-    if (state.kind === 'marquee') {
-      const selection = screenSelectionRect(state.from, point);
-      const hits = selectableTokensIn(selection).map((token) => token.id);
-      setSelectionBox(selection);
-      setSelectedTokenIds([...new Set([...state.baseIds, ...hits])]);
-      return;
-    }
-
-    if (state.kind === 'group') {
-      const anchorPosition = dropPosition({
-        pointerWorld: screenToWorld(point, view),
-        grabOffset: state.grabOffset,
-        grid: scene.grid,
-        snap: false,
-        span: state.anchor,
-      });
-      const delta = {
-        x: anchorPosition.x - state.anchor.x,
-        y: anchorPosition.y - state.anchor.y,
-      };
-      state.delta = delta;
-      setGroupDrag(Object.fromEntries(state.members.map((token) => [
-        token.id,
-        { x: token.x + delta.x, y: token.y + delta.y },
-      ])));
-      return;
-    }
-
-    if (state.kind === 'mark') {
-      const at = cellPoint(point);
-      const offset = { x: at.x - state.from.x, y: at.y - state.from.y };
-      state.offset = offset;
-      setMarkDrag({ id: state.mark.id, ...offset });
-      return;
-    }
-
-    if (state.kind === 'paint') {
-      paintAt(point);
-      return;
-    }
-
-    if (state.kind === 'draw') {
-      strokeRef.current.push(cellPoint(point));
-      setStrokeTick((tick) => tick + 1);
-      return;
-    }
-
-    if (state.kind === 'erase') {
-      onErase?.(cellPoint(point));
-      return;
-    }
-
-    if (state.kind === 'area') {
-      setAreaDraft(areaFromDrag(areaOptions, state.origin, cellPoint(point), feetPerCellForRuler));
-      return;
-    }
-
-    if (state.kind === 'note') return;
-
-    if (state.kind === 'measure') {
-      const { to: at } = snapRuler(measureShape, state.from, cellPoint(point), { hex: isHexGrid(scene.grid) });
-      const next = {
-        shape: measureShape,
-        from: state.from,
-        to: at,
-        // The ruler is told what it is measuring across: on hexes a step is a
-        // step, and a scene with a mile scale answers in miles.
-        label: measureLabel(measureShape, state.from, at, {
-          feetPerCell: feetPerCellForRuler,
-          milesPerCell: overlandMiles(scene.grid),
-          shape: isHexGrid(scene.grid) ? 'hex' : 'square',
-        }),
-      };
-      setMeasure(next);
-      // Shown to the table as it is dragged, like the laser: measuring out loud
-      // is half the point of measuring. Locally every move redraws; the table
-      // gets a throttled, de-duplicated stream (measureSync.js).
-      measurePublisherRef.current.update(next);
-      return;
-    }
 
     if (state.kind === 'pan') {
       const dx = point.x - state.last.x;
@@ -1199,55 +460,12 @@ export default function SceneViewport({
       return;
     }
 
-    if (state.kind === 'resize') {
-      const at = screenToWorld(point, view);
-      const cell = cellSize(scene.grid);
-      // Each side follows its own axis, always. Keeping the shape unless Shift
-      // was held made the corner useless on a tablet, where there is no Shift to
-      // hold: pulling it sideways only ever scaled the whole picture up, and a
-      // rug could never be fitted to the room it lies in. Dragging one way only
-      // is how a picture is now scaled on one axis; both ways scale both.
-      const next = {
-        w: roundSpan(state.width + (at.x - state.from.x) / cell),
-        h: roundSpan(state.height + (at.y - state.from.y) / cell),
-      };
-      state.next = next;
-      setResize({ id: state.token.id, ...next });
-      return;
-    }
-
-    if (state.kind === 'rotate') {
-      const at = screenToWorld(point, view);
-      const angle = Math.atan2(at.y - state.centre.y, at.x - state.centre.x);
-      const degrees = state.rotation + ((angle - state.fromAngle) * 180) / Math.PI;
-      const next = Math.round(((degrees % 360) + 360) % 360);
-      state.next = next;
-      setRotate({ id: state.token.id, rotation: next });
-      return;
-    }
-
-    // Follow the pointer unsnapped so the piece does not stutter between cells;
-    // the snap happens once, on drop.
-    state.lastPoint = point;
-    // Carried away and brought back is a drag, not a click.
-    if (Math.hypot(point.x - state.from.x, point.y - state.from.y) > LONG_PRESS_SLOP) state.wandered = true;
-    const next = dropPosition({
-      pointerWorld: screenToWorld(point, view),
-      grabOffset: state.grabOffset,
-      grid: scene.grid,
-      snap: false,
-      span: state.token,
-    });
-    setDrag({ id: state.token.id, x: next.x, y: next.y });
-
-    // Tell the other viewers where the piece is right now. Throttled to one
-    // frame's worth: this is a broadcast, not a write, but flooding the socket
-    // buys nothing the eye can see.
-    const now = Date.now();
-    if (now - (state.lastBroadcast || 0) >= DRAG_BROADCAST_MS) {
-      state.lastBroadcast = now;
-      onDragToken?.(state.token, next);
-    }
+    if (selection.moveGesture(state, point)) return;
+    if (marks.moveGesture(state, point)) return;
+    if (fogBrush.moveGesture(state, point)) return;
+    if (drawingTools.moveGesture(state, point)) return;
+    if (ruler.moveGesture(state, point)) return;
+    tokenGestures.moveGesture(state, point);
   };
 
   const handlePointerUp = (event) => {
@@ -1255,66 +473,10 @@ export default function SceneViewport({
     const state = dragRef.current;
     dragRef.current = null;
     event.currentTarget.releasePointerCapture?.(event.pointerId);
+    if (!state) return;
 
-    if (state?.kind === 'marquee') {
-      setSelectionBox(null);
-      return;
-    }
-
-    if (state?.kind === 'group') {
-      const anchorPosition = dropPosition({
-        pointerWorld: screenToWorld(screenPoint(event), view),
-        grabOffset: state.grabOffset,
-        grid: scene.grid,
-        snap: snapFor(state.anchor),
-        span: state.anchor,
-      });
-      const delta = {
-        x: anchorPosition.x - state.anchor.x,
-        y: anchorPosition.y - state.anchor.y,
-      };
-      setGroupDrag(null);
-      if (delta.x || delta.y) {
-        onMoveTokens?.(state.members.map((token) => ({
-          token,
-          position: { x: token.x + delta.x, y: token.y + delta.y },
-        })));
-      }
-      return;
-    }
-
-    if (state?.kind === 'mark') {
-      setMarkDrag(null);
-      // One write at the end, as with a piece: a stroke dragged across the board
-      // would otherwise be a row update per frame.
-      if (state.offset.x || state.offset.y) {
-        onMoveDrawing?.(state.mark, state.offset);
-      }
-      return;
-    }
-
-    // One write at the end of the stroke, same discipline as a token drag.
-    if (state?.kind === 'paint') {
-      onPaintEnd?.();
-      return;
-    }
-
-    if (state?.kind === 'area') {
-      const placed = areaDraft;
-      setAreaDraft(null);
-      if (placed) onPlaceArea?.({ points: placed.points, area: placed.area, text: placed.text });
-      return;
-    }
-
-    if (state?.kind === 'draw') {
-      const points = strokeRef.current;
-      strokeRef.current = [];
-      setStrokeTick((tick) => tick + 1);
-      if (points.length) onDrawEnd?.(points);
-      return;
-    }
-
-    if (state?.kind === 'pan' && (state.hex || state.mark !== undefined)) {
+    if (state.kind === 'pan') {
+      if (!state.hex && state.mark === undefined) return;
       // A pan that went nowhere was a click on a hex or a mark. Same slop as a
       // long press: a hand on a trackpad never releases on the exact pixel it
       // pressed.
@@ -1326,68 +488,18 @@ export default function SceneViewport({
       return;
     }
 
-    if (state?.kind === 'erase' || state?.kind === 'note') return;
-
-    // The ruler disappears on release; nothing is written down.
-    if (state?.kind === 'measure') {
-      setMeasure(null);
-      measurePublisherRef.current.finish();
-      return;
-    }
-
-    if (state?.kind === 'resize') {
-      const next = state.next || { w: state.width, h: state.height };
-      setResize(null);
-      if (next.w !== state.token.w || next.h !== state.token.h) onResizeToken?.(state.token, next);
-      return;
-    }
-
-    if (state?.kind === 'rotate') {
-      const next = state.next ?? state.rotation;
-      setRotate(null);
-      if (next !== state.token.rotation) onRotateToken?.(state.token, { rotation: next });
-      return;
-    }
-
-    if (!state || state.kind !== 'token') return;
-
-    // A cancelled pointer (the system took the touch) carries no trustworthy
-    // position: the piece lands where it was last seen under the finger.
-    const releasedAt = event.type === 'pointercancel' ? state.lastPoint : screenPoint(event);
-    const landing = releasedAt ? dropPosition({
-      pointerWorld: screenToWorld(releasedAt, view),
-      grabOffset: state.grabOffset,
-      grid: scene.grid,
-      snap: snapFor(state.token),
-      span: state.token,
-    }) : { x: state.token.x, y: state.token.y };
-    setDrag(null);
-    // One write per gesture, and only when the piece actually changed square.
-    // A drag that ends where it started writes nothing, but is still let go
-    // of, here and on the other screens; a click that never dragged has
-    // nothing to let go of.
-    if (landing.x !== state.token.x || landing.y !== state.token.y) {
-      onMoveToken?.(state.token, landing);
-    } else {
-      if (state.lastBroadcast) {
-        onDragToken?.(state.token, { x: state.token.x, y: state.token.y, released: true });
-      }
-      // A hand on a mouse never releases on the exact pixel it pressed: the
-      // long press's slop decides what was a click.
-      if (state.mouse && !state.wandered && releasedAt && event.type !== 'pointercancel'
-        && Math.hypot(releasedAt.x - state.from.x, releasedAt.y - state.from.y) <= LONG_PRESS_SLOP) {
-        onTokenClick?.(state.token);
-      }
-    }
+    if (selection.endGesture(state, event)) return;
+    if (marks.endGesture(state)) return;
+    if (fogBrush.endGesture(state)) return;
+    if (drawingTools.endGesture(state)) return;
+    if (ruler.endGesture(state)) return;
+    tokenGestures.endGesture(state, event);
   };
 
-  // The mark under the pointer is drawn where it is being taken, not where it
-  // still is in the database.
-  const shownDrawings = markDrag
-    ? (drawings || []).map((drawing) => (drawing.id === markDrag.id
-      ? { ...drawing, points: movedPoints(drawing, markDrag.x, markDrag.y) }
-      : drawing))
-    : drawings;
+  const handlePointerLeave = () => {
+    setHover(null);
+    if (paintMode === 'laser') laser.leave();
+  };
 
   const size = cellSize(scene.grid) * view.zoom;
   const gridVisible = !backgroundOnly && scene.grid.visible && size > 4;
@@ -1405,73 +517,22 @@ export default function SceneViewport({
   const hexPlayAreaClip = scene.playArea && !hexPlayAreaMatchesMap
     ? hexPlayAreaPolygon(scene, view)
     : null;
+  const { shownDrawings } = marks;
+  const { selectionBox } = selection;
 
   return (
     <Box
       ref={hostRef}
       tabIndex={-1}
-      onPointerDownCapture={trackPointer}
+      onPointerDownCapture={(event) => trackPointer(event, abandonForPinch)}
       onPointerMoveCapture={trackPointerMove}
       onPointerDown={beginPan}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
-      onPointerLeave={() => {
-        setHover(null);
-        if (paintMode === 'laser') {
-          laserPointRef.current = null;
-          onLaser?.(null);
-        }
-      }}
-      onContextMenu={(event) => {
-        event.preventDefault();
-        // A right click on a mark opens its menu; pieces open their own and
-        // never let the click get this far.
-        if (!drawingForMenu || !onDrawingMenu) return;
-        if (event.target.closest?.(VIEWPORT_CONTROL_SELECTOR)) return;
-        const mark = drawingForMenu(cellPoint(screenPoint(event)));
-        if (mark) openDrawingMenu(mark, { x: event.clientX, y: event.clientY });
-      }}
-      onDragOver={(event) => {
-        if (backgroundOnly) {
-          event.dataTransfer.dropEffect = 'none';
-          return;
-        }
-        if (!placementDrag && !onDropCharacter) return;
-        event.preventDefault();
-        event.dataTransfer.dropEffect = 'copy';
-        if (!placementDrag) return;
-        const next = placementPosition(event);
-        setPlacementHover((current) => (
-          current?.x === next.x && current?.y === next.y ? current : next
-        ));
-      }}
-      onDragLeave={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget)) setPlacementHover(null);
-      }}
-      onDrop={(event) => {
-        if (backgroundOnly) {
-          event.preventDefault();
-          setPlacementHover(null);
-          return;
-        }
-        if (!onDropPlacement && !onDropCharacter) return;
-        event.preventDefault();
-        if (placementDrag && onDropPlacement) {
-          const position = placementHover || placementPosition(event);
-          setPlacementHover(null);
-          onDropPlacement(placementDrag, position);
-          return;
-        }
-        if (!onDropCharacter) return;
-        const characterId = event.dataTransfer.getData('application/x-gb-character');
-        if (!characterId) return;
-        // Drop where the pointer is, centred on the piece rather than hanging
-        // off its top-left corner.
-        const world = screenToWorld(screenPoint(event), view);
-        const cell = worldToCell(world, scene.grid);
-        onDropCharacter(characterId, { x: cell.col, y: cell.row });
-      }}
+      onPointerLeave={handlePointerLeave}
+      onContextMenu={marks.handleContextMenu}
+      {...dragHandlers}
       sx={{
         ...hostSx,
         ...(fillViewport ? fillViewportSx : null),
@@ -1531,9 +592,9 @@ export default function SceneViewport({
       <TokenLayer
         tokens={backgroundOnly ? [] : tokens}
         drag={drag}
-        groupDrag={groupDrag}
-        resize={resize}
-        rotate={rotate}
+        groupDrag={selection.groupDrag}
+        resize={tokenGestures.resize}
+        rotate={tokenGestures.rotate}
         view={view}
         viewportSize={viewportSize}
         grid={scene.grid}
@@ -1543,7 +604,7 @@ export default function SceneViewport({
         cameraLocked={cameraLocked}
         paintMode={paintMode}
         canMove={canMove}
-        selectedMapObjectId={selectedMapObjectId}
+        selectedMapObjectId={selection.selectedMapObjectId}
         selectedTokenIds={selectedTokenIds}
         canSetDeathSaves={canSetDeathSaves}
         conditionEntries={conditionEntries}
@@ -1552,9 +613,9 @@ export default function SceneViewport({
         canSeeThroughFog={canSeeThroughFog}
         presentedInspection={presentedInspection}
         onInspectionChange={onTokenInspection}
-        onBeginDrag={beginTokenDrag}
-        onBeginResize={beginTokenResize}
-        onBeginRotate={beginTokenRotate}
+        onBeginDrag={tokenGestures.beginTokenDrag}
+        onBeginResize={tokenGestures.beginTokenResize}
+        onBeginRotate={tokenGestures.beginTokenRotate}
         onDeathSaveChange={onDeathSaveChange}
         onContextMenu={onContextMenu}
       />
@@ -1564,38 +625,16 @@ export default function SceneViewport({
           and before rulers/lasers so those tools stay in front. */}
       <AtmosphereOverlay atmosphere={atmosphere} />
 
-      {placementDrag && placementHover && !backgroundOnly ? (() => {
-        const token = { ...placementDrag.token, ...placementHover };
-        const rect = tokenWorldRect(token, scene.grid);
-        const at = worldToScreen(rect, view);
-        return (
-          <Box
-            data-placement-preview
-            sx={{
-              position: 'absolute',
-              left: 0,
-              top: 0,
-              width: rect.width * view.zoom,
-              height: rect.height * view.zoom,
-              transform: `translate(${at.x}px, ${at.y}px)`,
-              opacity: 0.88,
-              pointerEvents: 'none',
-              zIndex: fogOnTop ? 3 : 5,
-              filter: `drop-shadow(0 5px 8px ${vttAlpha(VTT_COLORS.black, 0.75)})`,
-            }}
-          >
-            <TokenSprite
-              token={token}
-              size="100%"
-              hex={isHexGrid(scene.grid)}
-              interactive={false}
-              movable={false}
-              conditionEntries={conditionEntries}
-            />
-            {placementDrag.count > 1 ? <Box sx={placementCountSx}>×{placementDrag.count}</Box> : null}
-          </Box>
-        );
-      })() : null}
+      {placementDrag && placementHover && !backgroundOnly ? (
+        <PlacementPreview
+          placementDrag={placementDrag}
+          placementHover={placementHover}
+          grid={scene.grid}
+          view={view}
+          fogOnTop={fogOnTop}
+          conditionEntries={conditionEntries}
+        />
+      ) : null}
 
       {selectionBox ? (
         <Box
@@ -1612,70 +651,29 @@ export default function SceneViewport({
       ) : null}
 
       {paintMode === 'marquee' && selectedTokenIds.length ? (
-        <Stack
-          data-viewport-control
-          direction="row"
-          spacing={0.75}
-          sx={selectionToolbarSx}
-        >
-          <Typography sx={selectionCountSx}>{selectedTokenIds.length} selected</Typography>
-          <Button
-            size="small"
-            color="error"
-            startIcon={<Trash2 size={14} />}
-            onClick={deleteSelection}
-            disabled={!onDeleteTokens}
-          >
-            Delete
-          </Button>
-          <IconButton size="small" aria-label="Clear selection" onClick={clearSelection}>
-            <X size={14} />
-          </IconButton>
-        </Stack>
+        <SelectionToolbar
+          count={selectedTokenIds.length}
+          canDelete={Boolean(onDeleteTokens)}
+          onDelete={selection.deleteSelection}
+          onClear={selection.clearSelection}
+        />
       ) : null}
 
       <DeletePiecesDialog
-        open={deleteDialogOpen}
-        pieces={deleteCandidates || []}
-        busy={deleting}
-        error={deleteError}
+        {...selection.deleteDialog}
         container={() => hostRef.current}
-        onCancel={cancelDelete}
-        onConfirm={confirmDelete}
       />
 
-      {/* Top right, in one row: the rolls, the fullscreen Sheet, then the tools
-          toggle in the corner. A row rather than set offsets, so a button that
-          is missing (no sheet outside fullscreen) leaves no gap. */}
       {rolls || controls || (fullscreenActive && fullscreenSheet) ? (
-        <Stack direction="row" spacing={0.75} data-viewport-control sx={cornerButtonsSx}>
-          {rolls}
-          {fullscreenActive && fullscreenSheet ? (
-            <Button
-              size="small"
-              variant={floatingSheetOpen ? 'contained' : 'outlined'}
-              startIcon={<ScrollText size={14} />}
-              aria-label={floatingSheetOpen ? 'Hide floating character sheet' : 'Show floating character sheet'}
-              onClick={() => setFloatingSheetOpen(!floatingSheetOpen)}
-              sx={fullscreenSheetButtonSx}
-            >
-              Sheet
-            </Button>
-          ) : null}
-          {controls ? (
-            <Tooltip title={controlsOpen ? 'Hide the tools' : 'Show the tools'}>
-              <IconButton
-                size="small"
-                aria-label={controlsOpen ? 'Hide the tools' : 'Show the tools'}
-                aria-expanded={controlsOpen}
-                onClick={() => setControlsOpen((open) => !open)}
-                sx={mapIconButtonSx}
-              >
-                {controlsOpen ? <X size={16} /> : <Settings2 size={16} />}
-              </IconButton>
-            </Tooltip>
-          ) : null}
-        </Stack>
+        <CornerButtons
+          rolls={rolls}
+          showSheetButton={Boolean(fullscreenActive && fullscreenSheet)}
+          sheetOpen={floatingSheetOpen}
+          onSheetOpenChange={setFloatingSheetOpen}
+          hasControls={Boolean(controls)}
+          controlsOpen={controlsOpen}
+          onToggleControls={() => setControlsOpen((open) => !open)}
+        />
       ) : null}
 
       {/* Rendered as-is: the rail positions itself against the map. Wrapping
@@ -1710,17 +708,7 @@ export default function SceneViewport({
       ) : null}
 
       {showFullscreenControl ? (
-        <Tooltip title={fullscreenActive ? 'Leave fullscreen' : 'Fullscreen map'}>
-          <IconButton
-            size="small"
-            data-viewport-control
-            aria-label={fullscreenActive ? 'Leave fullscreen' : 'Fullscreen map'}
-            onClick={toggleFullscreen}
-            sx={fullscreenBtnSx}
-          >
-            {fullscreenActive ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-          </IconButton>
-        </Tooltip>
+        <FullscreenButton active={fullscreenActive} onToggle={toggleFullscreen} />
       ) : null}
 
       {/* Over the piece that rolled: the position is recomputed here rather than
@@ -1742,35 +730,9 @@ export default function SceneViewport({
         })}
       />
 
-      {/* Where the party stands. Drawn for everyone looking at the map — the
-          players and the projector included — because a hexcrawl with no marker
-          is a coloured map nobody can point at. */}
-      {!backgroundOnly && partyHex && isHexGrid(scene.grid) ? (() => {
-        const centre = worldToScreen(hexToWorld(partyHex, scene.grid), view);
-        // Two thirds of the hex it stands in: the marker is read from across the
-        // table, and a pin the size of a token label is not.
-        const glyph = Math.min(96, Math.max(20, hexWidth(scene.grid) * view.zoom * 0.66));
-        return (
-          <Box
-            aria-hidden
-            data-party-hex={`${partyHex.q},${partyHex.r}`}
-            sx={{
-              position: 'absolute',
-              left: 0,
-              top: 0,
-              // The pin points at the hex, so it hangs above the centre rather
-              // than sitting on it.
-              transform: `translate(${centre.x}px, ${centre.y}px) translate(-50%, -78%)`,
-              pointerEvents: 'none',
-              color: VTT_COLORS.gold,
-              filter: `drop-shadow(0 2px 4px ${vttAlpha(VTT_COLORS.black, 0.85)})`,
-              zIndex: fogOnTop ? 3 : 5,
-            }}
-          >
-            <MapPin size={glyph} fill={vttAlpha(VTT_COLORS.surfaceRaised, 0.85)} strokeWidth={2} />
-          </Box>
-        );
-      })() : null}
+      {!backgroundOnly && partyHex && isHexGrid(scene.grid) ? (
+        <PartyHexMarker partyHex={partyHex} grid={scene.grid} view={view} fogOnTop={fogOnTop} />
+      ) : null}
 
       {hexBubble && !backgroundOnly ? (() => {
         const centre = worldToScreen(hexToWorld(hexBubble.hex, scene.grid), view);
@@ -1805,66 +767,28 @@ export default function SceneViewport({
           pointing at something in the dark still means something. */}
       <DrawingCanvas
         onTop
-        live={areaDraft
-          ? { ...areaDraft, color: drawColor, width: drawWidth }
-          : strokeRef.current.length
-            ? { points: strokeRef.current, color: drawColor, width: drawWidth, tick: strokeTick }
-            : null}
-        measure={measure || remoteMeasure || measured?.trail}
+        live={drawingTools.live}
+        measure={ruler.measure || remoteMeasure || measured?.trail}
         grid={scene.grid}
         view={view}
       />
       <LaserOverlay
         lasers={lasers}
-        localPointRef={laserPointRef}
+        localPointRef={laser.laserPointRef}
         localActive={paintMode === 'laser'}
         grid={scene.grid}
         view={view}
       />
 
-      {/* What the brush is about to touch. Guessing the reach of a fog brush from
-          its number alone is the fastest way to reveal a room you meant to keep
-          dark. */}
       {hover && brushRadius > 0 ? (
-        <Box
-          data-brush-preview={paintMode}
-          aria-hidden
-          sx={{
-            position: 'absolute',
-            left: 0,
-            top: 0,
-            width: brushRadius * 2,
-            height: brushRadius * 2,
-            transform: `translate(${hover.x - brushRadius}px, ${hover.y - brushRadius}px)`,
-            borderRadius: '50%',
-            border: `1px solid ${vttAlpha(VTT_COLORS.white, 0.85)}`,
-            boxShadow: `0 0 0 1px ${vttAlpha(VTT_COLORS.black, 0.6)} inset`,
-            pointerEvents: 'none',
-            zIndex: 4,
-          }}
-        />
+        <BrushPreview mode={paintMode} point={hover} radius={brushRadius} />
       ) : null}
 
-      {/* Outside the token nodes: they clip to a circle, and the badge has to
-          sit clear of the piece to stay readable. */}
       {/* Marked as a control: without it the host captures the pointer on the
           way down and the close button never receives the click. */}
       <Box data-viewport-control>{toast}</Box>
 
-      {measured ? (
-        <Box
-          sx={{
-            ...distanceSx,
-            // `measured.x` is the token centre. Offset by half the badge's own
-            // width, not by a fixed rem value: "5 ft" and "120 ft" must both
-            // remain centred over the piece.
-            transform: `translate(${measured.x}px, ${measured.y}px) translateX(-50%)`,
-            zIndex: fogOnTop ? 3 : undefined,
-          }}
-        >
-          {measured.label}
-        </Box>
-      ) : null}
+      {measured ? <DistanceBadge measured={measured} fogOnTop={fogOnTop} /> : null}
     </Box>
   );
 }
