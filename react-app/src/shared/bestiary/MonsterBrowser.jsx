@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import {
   Box,
   Button,
@@ -23,6 +23,7 @@ import { capitalize } from '../ui/textCase.js';
 import { formatNumber } from '../ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../ui/colors.js';
 import { crKey, crXP } from './challengeRating.js';
+import { usePagedList } from '../ui/usePagedList.js';
 
 const PAGE_SIZE = 50;
 
@@ -30,7 +31,7 @@ const PAGE_SIZE = 50;
 // it to its reducer; the battle map wires it to local state and drops the
 // chosen creature on the scene. Both get the same filters, the same paging and
 // the same rows — which is the point of it living here rather than being typed
-// out twice.
+// out twice. `onToggleSource` is optional: without it there is no source bar.
 export default function MonsterBrowser({
   monsterDb,
   filters,
@@ -42,11 +43,8 @@ export default function MonsterBrowser({
   pickLabel = 'Add',
   listSx,
 }) {
-  const [visible, setVisible] = useState(PAGE_SIZE);
   const filtered = useMemo(() => filterMonsters(monsterDb.monsters, filters), [monsterDb.monsters, filters]);
-  const visibleMonsters = filtered.slice(0, visible);
-
-  useEffect(() => { setVisible(PAGE_SIZE); }, [filters]);
+  const page = usePagedList(filtered, { pageSize: PAGE_SIZE, resetKey: filters });
 
   if (monsterDb.status === 'loading' || monsterDb.status === 'idle') {
     return (
@@ -65,22 +63,24 @@ export default function MonsterBrowser({
 
   return (
     <Stack spacing={2}>
-      <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }}>
-        {monsterDb.sourceOptions.map((source) => {
-          const active = allSourcesActive || filters.sources.includes(source.source);
-          return (
-            <Tooltip key={source.source} title={source.label}>
-              <Chip
-                label={source.source}
-                size="small"
-                clickable
-                color={active ? 'primary' : 'default'}
-                onClick={() => onToggleSource(source.source)}
-              />
-            </Tooltip>
-          );
-        })}
-      </Stack>
+      {onToggleSource ? (
+        <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }}>
+          {monsterDb.sourceOptions.map((source) => {
+            const active = allSourcesActive || filters.sources.includes(source.source);
+            return (
+              <Tooltip key={source.source} title={source.label}>
+                <Chip
+                  label={source.source}
+                  size="small"
+                  clickable
+                  color={active ? 'primary' : 'default'}
+                  onClick={() => onToggleSource(source.source)}
+                />
+              </Tooltip>
+            );
+          })}
+        </Stack>
+      ) : null}
 
       <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.25}>
         <TextField
@@ -110,8 +110,8 @@ export default function MonsterBrowser({
         {formatNumber(filtered.length)} monsters from allowed 2024 sources
       </Typography>
 
-      <Stack spacing={0.75} sx={{ ...defaultListSx, ...listSx }}>
-        {visibleMonsters.length ? visibleMonsters.map((monster) => (
+      <Stack spacing={0.75} sx={{ ...defaultListSx, ...listSx }} {...page.listProps}>
+        {page.visible.length ? page.visible.map((monster) => (
           <Box
             key={`${monster.name}-${monster.source}`}
             role="button"
@@ -151,9 +151,9 @@ export default function MonsterBrowser({
         )}
       </Stack>
 
-      {filtered.length > visible ? (
-        <Button variant="outlined" onClick={() => setVisible((value) => value + PAGE_SIZE)}>
-          Show more ({formatNumber(filtered.length - visible)})
+      {page.remaining > 0 ? (
+        <Button variant="outlined" onClick={page.showMore}>
+          Show more ({formatNumber(page.remaining)})
         </Button>
       ) : null}
     </Stack>

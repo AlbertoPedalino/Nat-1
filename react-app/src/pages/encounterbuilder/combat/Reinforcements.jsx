@@ -1,37 +1,21 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
   Box,
   Button,
-  FormControl,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Select,
   Stack,
   TextField,
-  Tooltip,
   Typography,
 } from '@mui/material';
 import { ChevronDown, Plus, Search } from 'lucide-react';
-import { CR_ORDER, TYPE_OPTIONS } from '../../../shared/bestiary/bestiaryConstants.js';
-import { filterQuickMonsters } from '../../../shared/bestiary/filters.js';
-import { getType } from '../../../shared/bestiary/monsterUtils.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
-import MonsterToken from '../../../shared/bestiary/MonsterToken.jsx';
-import { capitalize } from '../../../shared/ui/textCase.js';
-import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-import { crKey } from '../../../shared/bestiary/challengeRating.js';
+import MonsterBrowser from '../../../shared/bestiary/MonsterBrowser.jsx';
 
 export default function Reinforcements() {
   const { state, dispatch, monsterDb } = useEncounterBuilder();
   const [manual, setManual] = useState({ name: '', hpMax: 10, ac: 10, initMod: 0 });
-  const quickMonsters = useMemo(
-    () => filterQuickMonsters(monsterDb.monsters, state.quickFilters).slice(0, 50),
-    [monsterDb.monsters, state.quickFilters],
-  );
 
   const addManual = () => {
     if (!manual.name.trim()) return;
@@ -54,60 +38,15 @@ export default function Reinforcements() {
               <Search size={16} />
               <Typography fontWeight={700}>Search global database</Typography>
             </Stack>
-            <TextField
-              size="small"
-              label="Search monster"
-              value={state.quickFilters.search}
-              onChange={(event) => dispatch({ type: 'setQuickFilter', key: 'search', value: event.target.value })}
+            <MonsterBrowser
+              monsterDb={monsterDb}
+              filters={state.quickFilters}
+              onFilterChange={(key, value) => dispatch({ type: 'setQuickFilter', key, value })}
+              onSelect={(monster) => dispatch({ type: 'selectStatblock', payload: { monster } })}
+              onPick={(monster) => dispatch({ type: 'addMonsterCombatant', monster })}
+              pickLabel="Add to combat"
+              listSx={{ maxHeight: 280 }}
             />
-            <Stack direction="row" spacing={1}>
-              <FormControl size="small" fullWidth>
-                <InputLabel>CR</InputLabel>
-                <Select
-                  label="CR"
-                  value={state.quickFilters.cr}
-                  onChange={(event) => dispatch({ type: 'setQuickFilter', key: 'cr', value: event.target.value })}
-                >
-                  <MenuItem value="">All CR</MenuItem>
-                  {CR_ORDER.map((cr) => <MenuItem key={cr} value={cr}>CR {cr}</MenuItem>)}
-                </Select>
-              </FormControl>
-              <FormControl size="small" fullWidth>
-                <InputLabel>Type</InputLabel>
-                <Select
-                  label="Type"
-                  value={state.quickFilters.type}
-                  onChange={(event) => dispatch({ type: 'setQuickFilter', key: 'type', value: event.target.value })}
-                >
-                  <MenuItem value="">All types</MenuItem>
-                  {TYPE_OPTIONS.map((type) => <MenuItem key={type} value={type}>{capitalize(type)}</MenuItem>)}
-                </Select>
-              </FormControl>
-            </Stack>
-            <Stack spacing={0.75} sx={{ maxHeight: 280, overflow: 'auto' }}>
-              {quickMonsters.length ? quickMonsters.map((monster) => (
-                <Box key={`${monster.name}-${monster.source}`} sx={monsterRowSx} onClick={() => dispatch({ type: 'selectStatblock', payload: { monster } })}>
-                  <MonsterToken monster={monster} size={28} fallbackText={monster.name?.[0]} />
-                  <Box sx={{ minWidth: 0, flex: 1 }}>
-                    <Typography fontWeight={700} noWrap>{monster.name}</Typography>
-                    <Typography variant="caption" color="text.secondary">{monster.source} · {getType(monster.type)}</Typography>
-                  </Box>
-                  <Typography variant="caption" color="primary.main">CR {crKey(monster.cr)}</Typography>
-                  <Tooltip title="Add to combat">
-                    <IconButton
-                      size="small"
-                      color="primary"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        dispatch({ type: 'addMonsterCombatant', monster });
-                      }}
-                    >
-                      <Plus size={16} />
-                    </IconButton>
-                  </Tooltip>
-                </Box>
-              )) : <Typography color="text.secondary">No monsters found.</Typography>}
-            </Stack>
           </Stack>
           <Stack spacing={1.25}>
             <Typography fontWeight={700}>Manual quick-add</Typography>
@@ -126,19 +65,3 @@ export default function Reinforcements() {
     </Accordion>
   );
 }
-
-const monsterRowSx = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: 1,
-  p: 1,
-  border: '1px solid',
-  borderColor: 'divider',
-  borderRadius: 1,
-  bgcolor: uiAlpha(UI_COLORS.white, 0.025),
-  cursor: 'pointer',
-  '&:hover': {
-    borderColor: 'primary.main',
-    bgcolor: uiAlpha(UI_COLORS.primary, 0.08),
-  },
-};

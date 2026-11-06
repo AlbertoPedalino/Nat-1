@@ -20,16 +20,3 @@ export function filterMonsters(monsters, filters = {}) {
     return true;
   });
 }
-
-export function filterQuickMonsters(monsters, filters = {}) {
-  const list = Array.isArray(monsters) ? monsters : [];
-  const cr = String(filters.cr || '').trim();
-  const type = String(filters.type || '').toLowerCase().trim();
-
-  return list.filter((monster) => {
-    if (!matchesQuery(filters.search, monster.name)) return false;
-    if (cr && crKey(monster.cr) !== cr) return false;
-    if (type && !getType(monster.type).toLowerCase().includes(type)) return false;
-    return true;
-  });
-}
