@@ -19,22 +19,12 @@ test('cloud card versions merge once and hydration repairs existing duplicates',
 });
 import { calculateDifficulty } from '../../../../../src/pages/encounterbuilder/builder/difficulty.js';
 import {
-  addCombatantEffect,
-  applySheetVitals,
-  buildCombat,
-  initiativeRoster,
-  clearCombatantConditions,
-  clearCombatantEffects,
-  modifyHp,
-  nextTurn,
-  removeCombatantEffect,
-  rerollInitiative,
-  restoreFight,
-  setDeathSave,
-  setTempHp,
-  snapshotFight,
-  toggleCombatantCondition,
+  buildCombat, initiativeRoster, restoreFight, snapshotFight,
 } from '../../../../../src/shared/encounter/combat.js';
+import { nextTurn, rerollInitiative } from '../../../../../src/shared/encounter/initiative.js';
+import {
+  addCombatantEffect, applySheetVitals, clearCombatantConditions, clearCombatantEffects, modifyHp, removeCombatantEffect, setDeathSave, setTempHp, toggleCombatantCondition,
+} from '../../../../../src/shared/encounter/combatantVitals.js';
 import { effectId } from '../../../../../src/shared/character/combat/combatEffects.js';
 import { rollDice, rollDiceFormula } from '../../../../../src/shared/character/dice/rollNotation.js';
 import {
@@ -57,8 +47,12 @@ import { cleanToText, parseCleanTokens } from '../../../../../src/shared/bestiar
 import { isEncounterMonster, resolveLegendaryGroups } from '../../../../../src/shared/bestiary/bestiary.js';
 import { crPB } from '../../../../../src/shared/bestiary/challengeRating.js';
 import { SYNCED_DATA_KEYS } from '../../../../../src/shared/character/combat/vitals.js';
-import { combatantToSheetPatch, resolveCombatVitals, sheetPatchKey, sheetVitalsToCombat, sheetVitalsToSheetPatch } from '../../../../../src/shared/encounter/sheetSync.js';
-import { createInitialState, encounterReducer } from '../../../../../src/pages/encounterbuilder/state/reducer.js';
+import {
+  combatantToSheetPatch, resolveCombatVitals, sheetPatchKey, sheetVitalsToCombat, sheetVitalsToSheetPatch,
+} from '../../../../../src/shared/encounter/sheetSync.js';
+import {
+  createInitialState, encounterReducer,
+} from '../../../../../src/pages/encounterbuilder/state/reducer.js';
 import { makeSavedEncounter } from '../../../../../src/pages/encounterbuilder/state/storage.js';
 import { SYNCED_VITALS } from '../../../../../src/shared/character/combat/vitals.js';
 import { toEncounterPlayer } from '../../../../../src/pages/encounterbuilder/campaign/campaignPlayer.js';

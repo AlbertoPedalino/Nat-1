@@ -1,24 +1,10 @@
 import {
-  addCombatantEffect,
-  addManualCombatant,
-  addMonsterCombatant,
-  applySheetVitals,
-  clearCombatantConditions,
-  clearCombatantEffects,
-  modifyHp,
-  nextTurn,
-  prevTurn,
-  removeCombatant,
-  removeCombatantEffect,
-  rerollInitiative,
-  restoreFight,
-  setDeathSave,
-  setHp,
-  setMaxHp,
-  setInitiative,
-  setTempHp,
-  toggleCombatantCondition,
+  addManualCombatant, addMonsterCombatant, removeCombatant, restoreFight,
 } from '../../../shared/encounter/combat.js';
+import { nextTurn, prevTurn, rerollInitiative, setInitiative } from '../../../shared/encounter/initiative.js';
+import {
+  addCombatantEffect, applySheetVitals, clearCombatantConditions, clearCombatantEffects, modifyHp, removeCombatantEffect, setDeathSave, setHp, setMaxHp, setTempHp, toggleCombatantCondition,
+} from '../../../shared/encounter/combatantVitals.js';
 import { addRollLogEntry } from '../rolls/dice.js';
 import {
   createDefaultFumbleCategory,

@@ -1,10 +1,7 @@
 import {
-  absorbFightTurn,
-  applySheetVitals,
-  buildCombat,
-  snapshotFight,
-  autoFightName,
+  absorbFightTurn, buildCombat, snapshotFight, autoFightName,
 } from '../../../shared/encounter/combat.js';
+import { applySheetVitals } from '../../../shared/encounter/combatantVitals.js';
 import { makeSavedEncounter } from './storage.js';
 import { combatantToSheetPatch, resolveCombatVitals } from '../../../shared/encounter/sheetSync.js';
 import { absorbMonsterVitals } from '../../../shared/vtt/tokens/fightVitals.js';
