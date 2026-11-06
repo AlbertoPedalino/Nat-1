@@ -16,6 +16,7 @@ import {
 } from '../shared/character/combat/weaponMastery.js';
 import { backgroundOriginFeat } from '../shared/character/progression/backgroundFeatOptions.js';
 import { asArray } from '../shared/lists.js';
+import { capitalize } from '../shared/ui/textCase.js';
 
 export function splitClassSubclass(rawKey) {
   const value = String(rawKey || '');
@@ -190,16 +191,11 @@ export function createAdapterBindings(registry, context = {}) {
   };
 }
 
-function title(value) {
-  const text = String(value || '');
-  return text.charAt(0).toUpperCase() + text.slice(1);
-}
-
 function choiceFromChoose(key, label, type, block, fallback = []) {
   const choose = block?.choose;
   if (!choose && !block?.any && !block?.anyStandard && !block?.anyExotic && !block?.anyTool && !block?.anyArtisansTool && !block?.anyMusicalInstrument) return null;
   const count = Number(choose?.count || block.any || block.anyStandard || block.anyExotic || block.anyTool || block.anyArtisansTool || block.anyMusicalInstrument || 1);
-  const from = Array.isArray(choose?.from) ? choose.from.map(title) : fallback.slice();
+  const from = Array.isArray(choose?.from) ? choose.from.map(capitalize) : fallback.slice();
   return from.length ? { key, label, type, from, count, level: 1 } : null;
 }
 

@@ -9,6 +9,7 @@ import { getSaveBonus, exhaustionD20Penalty } from './calculations.js';
 import { useRollChannel } from '../../../shared/cloud/sync/useRollChannel.js';
 import { useCharacterCampaign } from '../../../shared/cloud/sync/useCharacterCampaign.js';
 import { normalizeRoll } from '../../../shared/vtt/rolls/rollFeed.js';
+import { capitalize } from '../../../shared/ui/textCase.js';
 
 // Every roll and notice on the sheet: the dice toast, the roll log (this sheet's
 // rolls plus the campaign's), publishing to the campaign, and the D20 executor
@@ -84,7 +85,7 @@ export function useSheetRolls({ C, sheet, charId, onRoll, showOwnRollToast }) {
     const inventory = sheet?.sheetInventory || C?.inventory || [];
     // Wild Shape: merged equipment grants no save bonus.
     const bonus = getSaveBonus(C, stat) + characterItemBonuses(C, inventory).savingThrow;
-    const lbl = stat.charAt(0).toUpperCase() + stat.slice(1) + ' Save';
+    const lbl = capitalize(stat) + ' Save';
     rollD20(bonus, lbl, options.disadvantage ? false : (options.advantage || undefined));
   }, [C, sheet, rollD20]);
 

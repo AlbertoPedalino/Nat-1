@@ -13,6 +13,7 @@ import { featDescriptionEntries } from '../../../shared/character/progression/fe
 import { ENTITY_COLORS as SOURCE_COLOR } from '../../../shared/ui/entityColors.js';
 import { asArray } from '../../../shared/lists.js';
 import { choiceKey } from '../../../shared/content/nameKeys.js';
+import { capitalize } from '../../../shared/ui/textCase.js';
 
 export default function FeaturesTab({ C }) {
   if (!C) return null;
@@ -48,8 +49,7 @@ export default function FeaturesTab({ C }) {
       });
     }
 
-    function titleCase(v) { return v.charAt(0).toUpperCase() + v.slice(1).toLowerCase(); }
-    const fixedSkills = (backgroundSnapshot.skillProficiencies || []).flatMap(sp => Object.keys(sp).filter(k => k !== 'choose' && !k.startsWith('any'))).map(titleCase);
+    const fixedSkills = (backgroundSnapshot.skillProficiencies || []).flatMap(sp => Object.keys(sp).filter(k => k !== 'choose' && !k.startsWith('any'))).map((v) => capitalize(v.toLowerCase()));
     const allSkills = [...new Set([...fixedSkills, ...(backgroundChoices.skills || [])])];
     const fixedTools = (backgroundSnapshot.toolProficiencies || []).flatMap(tp => Object.keys(tp).filter(k => k !== 'choose' && !k.startsWith('any')));
     const allTools = [...new Set([...fixedTools, ...(backgroundChoices.tools || [])])];

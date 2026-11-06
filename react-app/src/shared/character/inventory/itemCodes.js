@@ -1,6 +1,7 @@
 import { getWeaponMasteryReminderText } from '../combat/weaponMastery.js';
 import { parseSignedBonus } from './itemBonus.js';
 import { signed } from '../../ui/numberFormat.js';
+import { capitalize, titleCase } from '../../ui/textCase.js';
 
 // Type codes match 5etools schema. Note: "R" here means a Ranged Weapon item type;
 // the same letter as a weapon property means "Reach" (see WEAPON_PROPERTY_LABELS).
@@ -274,13 +275,13 @@ const WEAPON_MASTERY_DISPLAY = {
 
 function masteryDisplayName(rawCode) {
   const code = rawPropertyCode(rawCode).toLowerCase();
-  return WEAPON_MASTERY_DISPLAY[code] || (code.charAt(0).toUpperCase() + code.slice(1));
+  return WEAPON_MASTERY_DISPLAY[code] || capitalize(code);
 }
 
 function formatRarity(rarity) {
   const r = String(rarity || '').trim().toLowerCase();
   if (!r || r === 'none' || r === 'unknown' || r === 'varies') return '';
-  return r.replace(/\b\w/g, (c) => c.toUpperCase());
+  return titleCase(r);
 }
 
 const RECHARGE_LABELS = {
@@ -423,7 +424,7 @@ registerItemPropertySegment('abilitySet', (item) => {
 });
 registerItemPropertySegment('tier', (item) => {
   const t = String(item?.tier || '').trim();
-  return t ? [{ kind: 'tier', label: 'Tier', value: t.charAt(0).toUpperCase() + t.slice(1) }] : [];
+  return t ? [{ kind: 'tier', label: 'Tier', value: capitalize(t) }] : [];
 });
 registerItemPropertySegment('cursed', (item) => (item?.curse ? [{ kind: 'cursed', label: 'Curse', value: 'Cursed' }] : []));
 registerItemPropertySegment('sentient', (item) => (item?.sentient ? [{ kind: 'sentient', label: 'Sentient', value: 'Yes' }] : []));

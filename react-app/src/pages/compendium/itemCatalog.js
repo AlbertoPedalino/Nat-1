@@ -7,6 +7,7 @@
 import { normalizeSearchText } from '../../shared/content/searchText.js';
 import { CORE_2024_SOURCE_PRIORITY, isAllowedSource } from '../../shared/content/sourcePriority.js';
 import { decodeDamageType, decodeProperty, itemMasteryLabels } from '../../shared/character/inventory/itemCodes.js';
+import { capitalize } from '../../shared/ui/textCase.js';
 
 const typeCode = (item) => String(item?.type || '').toUpperCase().split('|')[0].trim();
 const rarityOf = (item) => String(item?.rarity || 'none').toLowerCase();
@@ -122,7 +123,6 @@ export function formatWeight(pounds) {
   return lb ? `${lb} lb.` : '—';
 }
 
-const capitalize = (text) => String(text || '').replace(/^\w/, (c) => c.toUpperCase());
 
 // Damage, AC, properties (with their details: Versatile (1d10), range) and
 // mastery, the row's "Attributes".

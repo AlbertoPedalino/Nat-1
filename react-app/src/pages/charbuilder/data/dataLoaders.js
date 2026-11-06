@@ -31,6 +31,7 @@ import {
   matchesItemRequirements,
   resolveCopyRecords,
 } from './itemVariants.js';
+import { capitalize } from '../../../shared/ui/textCase.js';
 
 function normalizeName(value) {
   return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -685,7 +686,7 @@ function resolveVariantTemplate(node, fields, baseName) {
         if (modifier === 'l') return name.toLowerCase();
         if (modifier === 'a' || modifier === 'at') {
           const article = /^[aeiou]/i.test(name) ? 'an' : 'a';
-          return modifier === 'at' ? article.charAt(0).toUpperCase() + article.slice(1) : article;
+          return modifier === 'at' ? capitalize(article) : article;
         }
         return name;
       }

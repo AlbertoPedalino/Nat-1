@@ -19,6 +19,7 @@ import { CR_ORDER, TYPE_OPTIONS } from '../state/constants.js';
 import { filterMonsters } from './filters.js';
 import { crXP, formatNumber, getCR, getType } from './monsterUtils.js';
 import MonsterToken from './MonsterToken.jsx';
+import { capitalize } from '../../../shared/ui/textCase.js';
 
 const PAGE_SIZE = 50;
 
@@ -154,10 +155,6 @@ export default function MonsterBrowser({
       ) : null}
     </Stack>
   );
-}
-
-function capitalize(value) {
-  return String(value || '').charAt(0).toUpperCase() + String(value || '').slice(1);
 }
 
 const defaultListSx = {

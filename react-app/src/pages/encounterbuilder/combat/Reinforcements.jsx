@@ -21,6 +21,7 @@ import { filterQuickMonsters } from '../bestiary/filters.js';
 import { getCR, getType } from '../bestiary/monsterUtils.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import MonsterToken from '../bestiary/MonsterToken.jsx';
+import { capitalize } from '../../../shared/ui/textCase.js';
 
 export default function Reinforcements() {
   const { state, dispatch, monsterDb } = useEncounterBuilder();
@@ -122,10 +123,6 @@ export default function Reinforcements() {
       </AccordionDetails>
     </Accordion>
   );
-}
-
-function capitalize(value) {
-  return String(value || '').charAt(0).toUpperCase() + String(value || '').slice(1);
 }
 
 const monsterRowSx = {

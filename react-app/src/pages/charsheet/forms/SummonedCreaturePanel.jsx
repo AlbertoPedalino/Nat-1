@@ -33,11 +33,7 @@ import {
   subSx,
 } from './BeastStatBlock.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
-
-function capitalize(value) {
-  const text = String(value || 'Creature');
-  return text.charAt(0).toUpperCase() + text.slice(1);
-}
+import { capitalize } from '../../../shared/ui/textCase.js';
 
 function variantToken(name) {
   return String(name || '').match(/\(([^)]+)\)\s*$/)?.[1] || String(name || '');
@@ -176,7 +172,7 @@ export default function SummonedCreaturePanel({
             sx={{ flexWrap: 'wrap' }}
           >
             {creatureTypeChoices.map((type) => (
-              <ToggleButton key={type} value={type} sx={optionToggleSx}>{capitalize(type)}</ToggleButton>
+              <ToggleButton key={type} value={type} sx={optionToggleSx}>{capitalize(type || 'Creature')}</ToggleButton>
             ))}
           </ToggleButtonGroup>
         </CreatureOptionRow>
@@ -199,7 +195,7 @@ export default function SummonedCreaturePanel({
       ) : null}
       <BeastStatBlock
         b={creature}
-        typeLabel={capitalize(creature.type)}
+        typeLabel={capitalize(creature.type || 'Creature')}
         showCr={false}
         onRoll={rollCheck}
         onRollFormula={rollFormulaToast}

@@ -25,10 +25,7 @@ import { getEquippedArmorPenalties } from '../inventory/armorPenalties.js';
 import { collectSheetEffects } from '../state/sheetEffects.js';
 import { SLBL, STATS } from '../state/calculations.js';
 import { getConditionsWithEffect } from '../../../shared/character/combat/conditions.js';
-
-function titleCase(value) {
-  return String(value || '').replace(/\b\w/g, (c) => c.toUpperCase());
-}
+import { titleCase } from '../../../shared/ui/textCase.js';
 
 function abilityLabel(ability) {
   return ability ? `${SLBL[ability]} saves` : 'saves';

@@ -35,6 +35,7 @@ import {
 } from './spellSourceDisplay.js';
 import { spellModifierEntities } from './spellModifiers.js';
 import { lowerKey } from '../../../shared/content/nameKeys.js';
+import { titleCase } from '../../../shared/ui/textCase.js';
 
 // The Spells tab's list: every spell the character has, from each source
 // (class, subclass, species, feats, items, scrolls, at-will grants), merged into
@@ -771,7 +772,7 @@ function sourceFromChoiceKey(C, key) {
   if (key.includes('tome')) return { label: 'Pact of the Tome', color: SRC_COLOR.choice, originType: 'invocation', originLabel: 'Pact of the Tome' };
   if (key.includes('mystic_arcanum')) return { label: 'M. Arcanum', color: SRC_COLOR.arcanum, originType: 'mystic_arcanum', originLabel: 'Mystic Arcanum' };
   if (key.startsWith('warlock_')) {
-    var invName = key.replace(/^warlock_/, '').replace(/_(cantrip|ritual).*$/, '').replace(/_/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+    var invName = titleCase(key.replace(/^warlock_/, '').replace(/_(cantrip|ritual).*$/, ''));
     if (invName) return { label: invName, color: SRC_COLOR.choice, originType: 'invocation', originLabel: invName };
   }
   return { label: 'Choice', color: SRC_COLOR.choice, originType: 'unknown', originLabel: 'Choice' };

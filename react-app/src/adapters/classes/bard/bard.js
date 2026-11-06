@@ -1,5 +1,6 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
 import { finalAbilityModifier } from '../../../shared/character/progression/abilityModifier.js';
+import { titleCase } from '../../../shared/ui/textCase.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -161,11 +162,9 @@ registerClassSheetChoiceMeta("Bard", {
   },
   getLabel: (key) => {
     const k = String(key || "");
-    return k
+    return titleCase(k
       .replace(/^bard_/, "")
-      .replace(/^subclass_(lore|swords|moon)_/, "")
-      .replace(/_/g, " ")
-      .replace(/\b[a-z]/g, c => c.toUpperCase())
+      .replace(/^subclass_(lore|swords|moon)_/, ""))
       .trim();
   },
   normalizeChoiceValue: (value) => {

@@ -20,6 +20,7 @@
 import { collectSenseEffects } from '../state/sheetEffects.js';
 import { getItemSenses } from '../../../shared/character/inventory/itemEffects.js';
 import { wildShapeSenses } from '../../../shared/character/forms/wildShapeForm.js';
+import { capitalize } from '../../../shared/ui/textCase.js';
 
 export const SENSE_LABELS = {
   darkvision: 'Darkvision',
@@ -31,7 +32,7 @@ export const SENSE_LABELS = {
 };
 
 function senseLabel(type) {
-  return SENSE_LABELS[type] || String(type || '').replace(/^\w/, (c) => c.toUpperCase());
+  return SENSE_LABELS[type] || capitalize(type || '');
 }
 
 // Canonical sense type for an effect: explicit senseType wins, else the effect

@@ -13,6 +13,7 @@ import {
   totalCarriedWeight,
 } from '../../../shared/character/inventory/weight.js';
 import { isWildShaped, wildShapeSpeed } from '../../../shared/character/forms/wildShapeForm.js';
+import { capitalize } from '../../../shared/ui/textCase.js';
 
 const EXTRA_SPEED_MODES = ['burrow', 'climb', 'fly', 'swim'];
 
@@ -31,7 +32,7 @@ function normalizeSpeed(speed) {
 }
 
 function speedLabel(key) {
-  return key === 'walk' ? 'Walk' : key.charAt(0).toUpperCase() + key.slice(1);
+  return key === 'walk' ? 'Walk' : capitalize(key);
 }
 
 export default function Movement({ C, sheet }) {

@@ -11,13 +11,8 @@ import { NEUTRAL_TONE } from '../../../shared/ui/entityColors.js';
 import { backgroundOriginFeat } from '../../../shared/character/progression/selectedFeats.js';
 import { backgroundFeatOptionLabel } from '../../../shared/character/progression/backgroundFeatOptions.js';
 import { strip5eMarkup } from '../../../shared/character/spells/spellEntries.js';
+import { titleCase } from '../../../shared/ui/textCase.js';
 
-
-function titleCase(value) {
-  return String(value || '').replace(/[_-]/g, ' ')
-    .replace(/(^|\s)\w/g, (c) => c.toUpperCase())
-    .replace(/'\w/g, (m) => m.toLowerCase());
-}
 
 // One label/value row inside the grants grid (label column + wrapped values).
 function GrantRow({ label, values }) {

@@ -1,3 +1,4 @@
+import { titleCase } from '../../ui/textCase.js';
 const CANONICAL_DISPLAY_LABELS = {
   light: 'Light',
   medium: 'Medium',
@@ -83,20 +84,10 @@ export function labelKey(value) {
   return cleanProficiencyText(value).toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
-function titleCase(value) {
-  return String(value || '')
-    .split(' ')
-    .map((word) => word
-      .split('-')
-      .map((part) => (part ? part.charAt(0).toUpperCase() + part.slice(1).toLowerCase() : part))
-      .join('-'))
-    .join(' ');
-}
-
 export function canonicalDisplayLabel(value) {
   const raw = cleanProficiencyText(value);
   if (!raw) return '';
-  return CANONICAL_DISPLAY_LABELS[labelKey(raw)] || titleCase(raw);
+  return CANONICAL_DISPLAY_LABELS[labelKey(raw)] || titleCase(String(raw || '').toLowerCase());
 }
 
 export function canonicalProficiencyLabel(value) {

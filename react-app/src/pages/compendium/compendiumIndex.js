@@ -8,6 +8,7 @@ import { normalizeSearchText } from '../../shared/content/searchText.js';
 import { CORE_2024_SOURCE_PRIORITY, isAllowedSource, sourceRank } from '../../shared/content/sourcePriority.js';
 import { decodeItemTypeLabel } from '../../shared/character/inventory/itemCodes.js';
 import { getCR, getType } from '../encounterbuilder/bestiary/monsterUtils.js';
+import { capitalize } from '../../shared/ui/textCase.js';
 
 export const COMPENDIUM_KINDS = Object.freeze([
   { key: 'spell', label: 'Spells', single: 'Spell' },
@@ -58,11 +59,6 @@ function ordinal(level) {
   const n = Number(level) || 0;
   const suffix = n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th';
   return `${n}${suffix}`;
-}
-
-function capitalize(text) {
-  const value = String(text || '');
-  return value ? value.charAt(0).toUpperCase() + value.slice(1) : '';
 }
 
 function spellSubtitle(spell) {

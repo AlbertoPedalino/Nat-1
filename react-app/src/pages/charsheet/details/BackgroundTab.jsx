@@ -2,6 +2,7 @@ import { Box, Card, CardContent, Chip, Paper, Stack, Typography } from '@mui/mat
 import { GraduationCap } from 'lucide-react';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
+import { capitalize } from '../../../shared/ui/textCase.js';
 
 const BG = ENTITY_COLORS.background;
 
@@ -83,7 +84,7 @@ function ProfList({ title, items }) {
       <Box component="ul" sx={{ m: 0, pl: 2, color: 'text.secondary', fontSize: '0.75rem' }}>
         {items.map((item) => (
           <Typography key={item} component="li" variant="caption" sx={{ color: 'text.secondary', mb: 0.1 }}>
-            {item.charAt(0).toUpperCase() + item.slice(1)}
+            {capitalize(item)}
           </Typography>
         ))}
       </Box>

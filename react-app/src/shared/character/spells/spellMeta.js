@@ -1,3 +1,4 @@
+import { titleCase } from '../../ui/textCase.js';
 // Single source for a spell's header meta (Casting Time / Range / Components /
 // Duration). Both the builder selection panel and the sheet spell card derive
 // their meta line + meta grid from here, so the format lives in one place.
@@ -65,10 +66,6 @@ const AREA_LABELS = {
   C: 'Cube', Y: 'Cylinder', H: 'Hemisphere', L: 'Line', S: 'Sphere',
   Q: 'Square', W: 'Wall',
 };
-
-function titleCase(value) {
-  return String(value || '').replace(/\b\w/g, (c) => c.toUpperCase());
-}
 
 function formatTagList(values, labelMap) {
   const arr = Array.isArray(values) ? values : [];

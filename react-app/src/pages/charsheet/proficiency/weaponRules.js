@@ -4,6 +4,7 @@
 // ============================================================
 
 import { canonicalProperty, itemHasProperty } from '../../../shared/character/inventory/weaponProperties.js';
+import { capitalize } from '../../../shared/ui/textCase.js';
 
 export function normKey(value) {
   return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -133,7 +134,7 @@ export function ruleKey(rule) {
 export function formatRule(rule) {
   if (!rule) return '';
   if (rule.weaponName) return rule.weaponName;
-  const cat = rule.category ? rule.category.charAt(0).toUpperCase() + rule.category.slice(1) : '';
+  const cat = rule.category ? capitalize(rule.category) : '';
   const isMelee = rule.type === 'M';
   const isRanged = rule.type === 'R';
   const parts = [];
@@ -141,11 +142,11 @@ export function formatRule(rule) {
   if (isMelee) parts.push('Melee');
   if (isRanged) parts.push('Ranged');
   if (rule.propertiesAny && rule.propertiesAny.length) {
-    const p = rule.propertiesAny.map((s) => s.charAt(0).toUpperCase() + s.slice(1));
+    const p = rule.propertiesAny.map((s) => capitalize(s));
     parts.push(`(${p.join(' or ')})`);
   }
   if (rule.excludeProperties && rule.excludeProperties.length) {
-    const p = rule.excludeProperties.map((s) => s.charAt(0).toUpperCase() + s.slice(1));
+    const p = rule.excludeProperties.map((s) => capitalize(s));
     parts.push(`without ${p.join(' or ')}`);
   }
   if (!parts.length) return 'Weapons';

@@ -53,6 +53,7 @@ import { formatRollTitle } from '../../../shared/character/dice/dice.js';
 import RollerButtons from '../../../shared/character/dice/RollerButtons.jsx';
 import { CHIP_TONES, chipToneStyle } from '../../../shared/ui/entityColors.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
+import { capitalize } from '../../../shared/ui/textCase.js';
 
 const _danglingResKeyWarned = typeof Set === 'function' ? new Set() : null;
 function warnDanglingResKey(action, resMaxMap) {
@@ -69,7 +70,7 @@ function actionLabel(value) {
   if (value === 'all') return 'All';
   if (value === 'bonus') return 'Bonus Action';
   if (value === 'special') return 'Other';
-  return value.charAt(0).toUpperCase() + value.slice(1);
+  return capitalize(value);
 }
 
 export default function ActionsTab({ C, sheet, resources }) {

@@ -2,6 +2,7 @@ import { strip5eMarkup } from './spellEntries.js';
 import { SPELL_SOURCE_PRIORITY, sourceRank } from '../../content/sourcePriority.js';
 import { asArray } from '../../lists.js';
 import { matchKey } from '../../content/nameKeys.js';
+import { capitalize } from '../../ui/textCase.js';
 
 const SCHOOL_FULL = {
   A: 'Abjuration',
@@ -14,9 +15,9 @@ const SCHOOL_FULL = {
   T: 'Transmutation',
 };
 
+// An underscore key as a label with its first letter capitalized.
 function title(value) {
-  const text = String(value || '').replace(/_/g, ' ').trim();
-  return text ? text.charAt(0).toUpperCase() + text.slice(1) : '';
+  return capitalize(String(value || '').replace(/_/g, ' ').trim());
 }
 
 function unitLabel(unit, amount) {

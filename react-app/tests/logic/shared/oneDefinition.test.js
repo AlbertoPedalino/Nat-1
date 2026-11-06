@@ -38,6 +38,13 @@ test('name keys come from shared/content/nameKeys.js, no local norm helpers', ()
   }), []);
 });
 
+test('capitalizing is done only by shared/ui/textCase.js', () => {
+  assert.deepEqual(sourceFilesMatching(
+    /charAt\(0\)\.toUpperCase\(\)\s*\+|\.replace\(\/(\^|\\b)\\w\/g?,\s*(\(c\)|c|function\s*\(c\))\s*(=>|\{)|function\s+(capitalize|titleCase)\s*\(|const\s+(capitalize|titleCase)\s*=/,
+    { allow: ['shared/ui/textCase.js'] },
+  ), []);
+});
+
 test('asArray and flattenList are defined only in shared/lists.js', () => {
   assert.deepEqual(sourceFilesMatching(/(function|const)\s+(asArray|flattenList)\b/, {
     allow: ['shared/lists.js'],

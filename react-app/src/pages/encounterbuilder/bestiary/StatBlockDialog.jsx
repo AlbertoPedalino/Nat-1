@@ -44,6 +44,7 @@ import { StatRollContext, advTag, d20RollKind } from './statRolls.js';
 import RollText from './RollText.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { abilityModifier } from '../../../shared/character/progression/abilityModifier.js';
+import { capitalize } from '../../../shared/ui/textCase.js';
 
 const ABILITIES = [
   ['str', 'STR'],
@@ -313,7 +314,7 @@ function OptionalProp({ label, value, render }) {
 
 function renderRollMap(value, suffix, onRoll) {
   return Object.entries(value).map(([key, mod], index) => {
-    const label = key.charAt(0).toUpperCase() + key.slice(1);
+    const label = capitalize(key);
     const type = suffix ? `${label} ${suffix}` : label;
     return (
       <Box component="span" key={key}>

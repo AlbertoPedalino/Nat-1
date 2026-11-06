@@ -12,6 +12,7 @@ import {
   MAGIC_ITEM_TINKER_DRAIN_RESOURCE,
   MAGIC_ITEM_TINKER_TRANSMUTE_RESOURCE,
 } from '../../../shared/character/inventory/magicItemTinker.js';
+import { titleCase } from '../../../shared/ui/textCase.js';
 
 const _REPLICATE_BUCKET_LABEL = Object.fromEntries(REPLICATE_BUCKETS.map((b) => [b.id, b.label]));
 
@@ -327,9 +328,9 @@ registerClassSheetChoiceMeta("Artificer", {
       s = s.replace(/_weaponProficiencies_\d+$/i, " Weapon Proficiency");
       s = s.replace(/_armorProficiencies_\d+$/i, " Armor Proficiency");
       s = s.replace(/_opt_\d+$/i, " Option");
-      return s.replace(/_/g, " ").replace(/\b[a-z]/g, c => c.toUpperCase()).trim();
+      return titleCase(s).trim();
     }
-    return k.replace(/^.*?_/, "").replace(/_/g, " ").replace(/\b[a-z]/g, c => c.toUpperCase()).trim();
+    return titleCase(k.replace(/^.*?_/, "")).trim();
   },
   normalizeChoiceValue: (value, key) => {
     const k = String(key || "");
@@ -368,7 +369,7 @@ const _ARTIFICER_CHOICE_LABELS = {
 };
 registerClassChoiceLabelProvider("Artificer", function (baseKey) {
   if (_ARTIFICER_CHOICE_LABELS[baseKey]) return _ARTIFICER_CHOICE_LABELS[baseKey];
-  const _tc = (s) => String(s || '').replace(/_/g, ' ').replace(/\b[a-z]/g, c => c.toUpperCase()).trim();
+  const _tc = (s) => titleCase(s).trim();
   if (/^auto_(primary|ec\d+)_feat_/i.test(baseKey)) {
     let s = baseKey.replace(/^auto_(primary|ec\d+)_feat_/i, '');
     s = s.replace(/_skill_\d+$/i, ' Skill Proficiency');
