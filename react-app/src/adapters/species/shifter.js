@@ -1,4 +1,5 @@
 import { createAdapterBindings } from '../adapterBindings.js';
+import { getProficiencyBonus } from '../../shared/character/progression/proficiency.js';
 import { buildLineageOptions } from './lineageOptions.js';
 
 export default function install(registry, context = {}) {
@@ -43,11 +44,7 @@ registerSpeciesSheetActions("Shifter_EFA", [
     uses: 'PB / LR',
     resKey: 'shifter_shift',
     minLevel: 1,
-    inlinePills: ({ character }) => {
-      const lv = Number(character?.level || 1);
-      const pb = Math.floor((lv - 1) / 4) + 2;
-      return [{ icon: 'heart', label: 'Temp HP', value: 2 * pb }];
-    },
+    inlinePills: ({ character }) => [{ icon: 'heart', label: 'Temp HP', value: 2 * getProficiencyBonus(character) }],
   },
 ]);
 registerSpeciesSheetResources("Shifter_EFA", [

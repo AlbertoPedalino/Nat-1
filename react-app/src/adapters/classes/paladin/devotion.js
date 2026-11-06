@@ -1,4 +1,5 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
+import { getProficiencyBonus } from '../../../shared/character/progression/proficiency.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -19,8 +20,7 @@ registerSubclassSheetActions("Paladin_Devotion", [
     inlinePills: ({ ownerLevel, character }) => {
       const cha = typeof getMod === "function" && typeof getFinal === "function"
         ? Number(getMod(getFinal(character, "cha")) || 0) : 0;
-      const pb = Math.floor((Number(character?.level || 1) - 1) / 4) + 2;
-      return [{ icon: "sun", label: "Radiant/turn", value: cha + pb }];
+      return [{ icon: "sun", label: "Radiant/turn", value: cha + getProficiencyBonus(character) }];
     } },
 ]);
 registerSubclassSheetResources("Paladin_Devotion", [

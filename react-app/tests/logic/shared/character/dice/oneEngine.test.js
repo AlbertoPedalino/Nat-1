@@ -1,7 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, readdirSync, statSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { sourceFilesMatching } from '../../../sourceScan.js';
 import { parseFormula, rollD20, rollFormula, rollPool } from '../../../../../src/shared/character/dice/dice.js';
 import { rollDice, rollDiceFormula } from '../../../../../src/shared/character/dice/rollNotation.js';
 
@@ -27,20 +26,8 @@ test('notation obeys the same limits as the sheet: a formula the engine refuses 
 // No die is rolled outside the engine: any other Math.random in the source is
 // an id, a seed or a pick from a list, never `* faces`.
 test('no file rolls a die by hand', () => {
-  const root = new URL('../../../../../src/', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1');
-  const engine = join(root, 'shared/character/dice/dice.js');
-  const offenders = [];
-  const walk = (dir) => {
-    for (const name of readdirSync(dir)) {
-      const path = join(dir, name);
-      if (statSync(path).isDirectory()) { if (name !== 'data') walk(path); continue; }
-      if (!/\.(js|jsx)$/.test(name) || path === engine) continue;
-      const text = readFileSync(path, 'utf8');
-      if (/Math\.floor\(\s*(Math\.random|rng)\(\)\s*\*\s*(\d+|[\w.]*(faces|sides)[\w.]*)\s*\)\s*\+\s*1/.test(text)) {
-        offenders.push(relative(root, path));
-      }
-    }
-  };
-  walk(root);
-  assert.deepEqual(offenders, []);
+  assert.deepEqual(sourceFilesMatching(
+    /Math\.floor\(\s*(Math\.random|rng)\(\)\s*\*\s*(\d+|[\w.]*(faces|sides)[\w.]*)\s*\)\s*\+\s*1/,
+    { allow: ['shared/character/dice/dice.js'] },
+  ), []);
 });

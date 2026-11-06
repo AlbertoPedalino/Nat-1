@@ -1,4 +1,5 @@
 import { createAdapterBindings } from '../adapterBindings.js';
+import { getProficiencyBonus } from '../../shared/character/progression/proficiency.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -33,11 +34,7 @@ registerSpeciesSheetActions("Aasimar_XPHB", [
     cat: 'action',
     uses: '1 / LR',
     resKey: 'aasimar_healing_hands',
-    rollers: [{ kind: 'heal', formula: ({ character }) => {
-      const lv = Number(character?.level || 1);
-      const pb = Math.floor((lv - 1) / 4) + 2;
-      return `${pb}d4`;
-    } }],
+    rollers: [{ kind: 'heal', formula: ({ character }) => `${getProficiencyBonus(character)}d4` }],
     minLevel: 1,
   },
   {

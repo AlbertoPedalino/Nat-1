@@ -1,4 +1,5 @@
 import { createAdapterBindings } from '../adapterBindings.js';
+import { getProficiencyBonus } from '../../shared/character/progression/proficiency.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -60,7 +61,7 @@ registerSpeciesSheetActions("Dragonborn_XPHB", [
       return `${dice}d10`;
     } }],
     inlinePills: ({ character }) => {
-      const pb = Math.floor((Number(character?.level || 1) - 1) / 4) + 2;
+      const pb = getProficiencyBonus(character);
       const conScore = character?.finalScores?.con ?? 10;
       const conMod = Math.floor((conScore - 10) / 2);
       return [{ icon: 'shield', label: 'Save DC', value: 8 + pb + conMod }];

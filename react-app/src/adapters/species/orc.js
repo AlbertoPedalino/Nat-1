@@ -1,4 +1,5 @@
 import { createAdapterBindings } from '../adapterBindings.js';
+import { getProficiencyBonus } from '../../shared/character/progression/proficiency.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -21,11 +22,7 @@ registerSpeciesSheetActions("Orc_XPHB", [
     uses: 'PB / SR or LR',
     resKey: 'orc_adrenaline_rush',
     minLevel: 1,
-    inlinePills: ({ character }) => {
-      const lv = Number(character?.level || 1);
-      const pb = Math.floor((lv - 1) / 4) + 2;
-      return [{ icon: 'heart', label: 'Temp HP', value: pb }];
-    },
+    inlinePills: ({ character }) => [{ icon: 'heart', label: 'Temp HP', value: getProficiencyBonus(character) }],
   },
   {
     name: 'Relentless Endurance',
