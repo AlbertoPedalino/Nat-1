@@ -6,7 +6,7 @@ import {
   MUSICAL_INSTRUMENTS,
   SKILLS,
   STANDARD_LANGUAGES,
-} from './gameData.js';
+} from '../shared/content/rulesVocabulary.js';
 import {
   getWeaponMasteryChoiceCount,
   getWeaponMasteryChoiceNames,

@@ -8,6 +8,7 @@ import {
 import ScrollSpellPicker from './ScrollSpellPicker.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
 
 // What an expanded inventory entry offers beyond its reference text, by kind of
 // item: the spell written on a Spell Scroll, reading a manual or tome, and the
@@ -22,15 +23,13 @@ export default function ItemExtras({ item, onWriteScroll, onConsumeTome, onPickA
   );
 }
 
-const ABILITY_LABEL = { str: 'STR', dex: 'DEX', con: 'CON', int: 'INT', wis: 'WIS', cha: 'CHA' };
-
 function TomeConsumePanel({ item, onConsume }) {
   const bonus = extractTomeBonus(item);
   if (!bonus) return null;
   return (
     <Box sx={{ mt: '8px', pt: '8px', borderTop: '1px dashed', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1 }}>
       <Typography sx={{ flex: 1, fontSize: '0.66rem', color: 'text.secondary' }}>
-        Read & study to permanently gain <Box component="b" sx={{ color: UI_COLORS.goldLight }}>+{bonus.value} {ABILITY_LABEL[bonus.ability]}</Box>. The book then loses its magic.
+        Read & study to permanently gain <Box component="b" sx={{ color: UI_COLORS.goldLight }}>+{bonus.value} {ABILITY_ABBREVIATIONS[bonus.ability]}</Box>. The book then loses its magic.
       </Typography>
       <Button size="small" variant="outlined" onClick={onConsume}
         sx={{ fontFamily: UI_FONTS.display, fontSize: '0.6rem', letterSpacing: '0.06em', borderColor: UI_COLORS.goldLight, color: UI_COLORS.goldLight, '&:hover': { bgcolor: uiAlpha(UI_COLORS.goldLight, 0.08), borderColor: UI_COLORS.goldLight } }}>
@@ -77,7 +76,7 @@ function AbilityChoicePanel({ item, onPick }) {
                     onClick={() => togglePick(abil)}
                     sx={{ minWidth: 0, px: '8px', py: '2px', fontSize: '0.6rem', fontFamily: UI_FONTS.display,
                       ...(isOn ? { bgcolor: uiAlpha(UI_COLORS.goldLight, 0.18), color: UI_COLORS.goldLight, borderColor: UI_COLORS.goldLight } : { color: 'text.secondary' }) }}>
-                    {ABILITY_LABEL[abil] || abil.toUpperCase()}
+                    {ABILITY_ABBREVIATIONS[abil] || abil.toUpperCase()}
                   </Button>
                 );
               })}

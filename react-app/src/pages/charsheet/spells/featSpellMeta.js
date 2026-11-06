@@ -8,7 +8,7 @@ import {
   isFeatLikeSlotKey,
   ownerClassFromChoiceKey,
 } from './spellChoiceKeys.js';
-import { normalizeSpellAbility } from './spellAbility.js';
+import { abilityKey } from '../../../shared/content/rulesVocabulary.js';
 import { featSlotTone } from './spellSourceDisplay.js';
 
 // The character's feats as spell grantors: which feat sits in each feat slot
@@ -25,9 +25,9 @@ export function buildFeatMetaMap(C) {
   const addMeta = (slotKey, name) => {
     const snapshot = snapshotByName.get(lowerKey(name));
     if (!slotKey || !snapshot || map.has(slotKey)) return;
-    const abilityKey = `${slotKey}_spell_ability`;
-    const ability = normalizeSpellAbility(
-      choiceValue(choices[abilityKey])
+    const abilityChoiceKey = `${slotKey}_spell_ability`;
+    const ability = abilityKey(
+      choiceValue(choices[abilityChoiceKey])
       || choiceValue(choices[`${slotKey}_asi`])
       || choiceValue(choices[`${slotKey}_first_asi`]),
     );
@@ -86,7 +86,7 @@ export function collectFixedFeatSpells(C) {
           originLabel: meta.name,
         },
         ownerClassName: ownerClassFromChoiceKey(C, slotKey),
-        spellcastingAbility: normalizeSpellAbility(grant.ability || meta.ability),
+        spellcastingAbility: abilityKey(grant.ability || meta.ability),
         freeCasts,
         spellOverrides: grant.spellOverrides,
         modifiers: grant.modifiers,

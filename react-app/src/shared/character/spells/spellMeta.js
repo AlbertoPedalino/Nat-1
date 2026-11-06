@@ -1,4 +1,5 @@
 import { titleCase } from '../../ui/textCase.js';
+import { ABILITY_ABBREVIATIONS, abilityKey } from '../../content/rulesVocabulary.js';
 // Single source for a spell's header meta (Casting Time / Range / Components /
 // Duration). Both the builder selection panel and the sheet spell card derive
 // their meta line + meta grid from here, so the format lives in one place.
@@ -56,10 +57,6 @@ export function getSpellMetaFields(spell) {
   return { time, range, components, duration };
 }
 
-const SAVE_ABBR = {
-  strength: 'STR', dexterity: 'DEX', constitution: 'CON',
-  intelligence: 'INT', wisdom: 'WIS', charisma: 'CHA',
-};
 const SPELL_ATTACK_LABELS = { M: 'Melee', R: 'Ranged' };
 const AREA_LABELS = {
   ST: 'Single target', MT: 'Multiple targets', R: 'Circle', N: 'Cone',
@@ -86,7 +83,7 @@ export function getSpellMetaSegments(spell) {
   // Ritual is compressed into the casting time row rather than its own line.
   const castingTime = time ? (isRitualSpell(spell) ? `${time} (Ritual)` : time) : '';
   const saves = (Array.isArray(spell?.savingThrow) ? spell.savingThrow : [])
-    .map((s) => SAVE_ABBR[String(s).toLowerCase()] || titleCase(s))
+    .map((s) => ABILITY_ABBREVIATIONS[abilityKey(s)] || titleCase(s))
     .filter(Boolean)
     .join(', ');
   const attack = formatTagList(spell?.spellAttack, SPELL_ATTACK_LABELS);

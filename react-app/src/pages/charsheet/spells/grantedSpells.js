@@ -23,6 +23,7 @@ import {
 } from './spellChoiceKeys.js';
 import { getChoiceSpellAbility } from './spellAbility.js';
 import { buildFeatMetaMap } from './featSpellMeta.js';
+import { ABILITIES } from '../../../shared/content/rulesVocabulary.js';
 
 // Spells the character has through a grant rather than its class list, each
 // with its source tag: at-will invocations, auto-granted spells (class,
@@ -135,7 +136,7 @@ export function collectChoiceSpells(C, spellIndex) {
       const name = stripSource(entry);
       if (!name) return;
       if (!spellIndex.has(lowerKey(name)) && !/(spell|cantrip|tome|magical|known|prepared|innate|expanded)/i.test(key)) return;
-      if (['str', 'dex', 'con', 'int', 'wis', 'cha'].includes(lowerKey(name))) return;
+      if (ABILITIES.includes(lowerKey(name))) return;
       const slotKey = featSpellSlotKey(C, key);
       const meta = slotKey ? featMetaMap.get(slotKey) : null;
       const ownerClassName = ownerClassFromChoiceKey(C, key);

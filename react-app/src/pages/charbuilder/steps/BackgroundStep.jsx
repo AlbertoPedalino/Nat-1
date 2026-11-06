@@ -4,7 +4,6 @@ import BuilderPanel from '../layout/BuilderPanel.jsx';
 import ChoiceBlock from '../choices/ChoiceBlock.jsx';
 import { FeatCategorySlot, FeatFixedSlot } from '../choices/FeatSlots.jsx';
 import SearchList from '../choices/SearchList.jsx';
-import { STAT_LABELS } from '../constants.js';
 import { getBackgroundPattern, getBackgroundPool } from '../progression/calculations.js';
 import { backgroundChoiceSpecs, fixedKeysFromBlocks } from '../choices/choiceSpecs.js';
 import { NEUTRAL_TONE } from '../../../shared/ui/entityColors.js';
@@ -13,7 +12,7 @@ import { backgroundFeatOptionLabel } from '../../../shared/character/progression
 import { strip5eMarkup } from '../../../shared/character/spells/spellEntries.js';
 import { titleCase } from '../../../shared/ui/textCase.js';
 import { backgroundAbilityBonus } from '../../../shared/character/progression/abilityScores.js';
-
+import { ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
 
 // One label/value row inside the grants grid (label column + wrapped values).
 function GrantRow({ label, values }) {
@@ -139,7 +138,7 @@ export default function BackgroundStep({ state, dispatch }) {
             return (
               <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap sx={{ mt: 1.5 }}>
                 {(item.abilities || getBackgroundPool(item)).map((ability) => (
-                  <Chip key={ability} size="small" label={STAT_LABELS[ability]} />
+                  <Chip key={ability} size="small" label={ABILITY_ABBREVIATIONS[ability]} />
                 ))}
                 {featLabel ? <Chip size="small" label={featLabel} /> : null}
               </Stack>
@@ -182,7 +181,7 @@ export default function BackgroundStep({ state, dispatch }) {
                   variant={character.backgroundAbilities.includes(stat) ? 'contained' : 'outlined'}
                   onClick={() => dispatch({ type: 'background/ability-toggle', stat })}
                 >
-                  {STAT_LABELS[stat]} {bonus ? `+${bonus}` : ''}
+                  {ABILITY_ABBREVIATIONS[stat]} {bonus ? `+${bonus}` : ''}
                 </Button>
               );
             })}

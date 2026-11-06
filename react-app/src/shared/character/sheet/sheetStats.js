@@ -10,10 +10,6 @@ import { collectSheetEffects } from './sheetEffects.js';
 import { getNormalizedChoices } from '../progression/choiceNormalization.js';
 import { matchKey, stripSource } from '../../content/nameKeys.js';
 
-const STATS = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
-const SLBL = { str: 'STR', dex: 'DEX', con: 'CON', int: 'INT', wis: 'WIS', cha: 'CHA' };
-const FULL_LBL = { str: 'Strength', dex: 'Dexterity', con: 'Constitution', int: 'Intelligence', wis: 'Wisdom', cha: 'Charisma' };
-
 export const SKILLS = [
   { n: 'Acrobatics', a: 'dex' }, { n: 'Animal Handling', a: 'wis' }, { n: 'Arcana', a: 'int' },
   { n: 'Athletics', a: 'str' }, { n: 'Insight', a: 'wis' }, { n: 'Sleight of Hand', a: 'dex' },
@@ -52,7 +48,7 @@ export function effectiveD20Modifier(rawBonus, exhaustionLevel = 0) {
 export const SPELL_LEVEL_LABELS = ['Cantrip', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th'];
 const XP_TABLE = XP_THRESHOLDS; // single source of truth: shared/character/xp.js
 
-export { STATS, SLBL, FULL_LBL, XP_TABLE };
+export { XP_TABLE };
 
 export const getFinal = abilityScore;
 

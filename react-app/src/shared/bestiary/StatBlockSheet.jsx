@@ -40,15 +40,7 @@ import RollText from './RollText.jsx';
 import { signed, formatNumber } from '../ui/numberFormat.js';
 import { abilityModifier } from '../character/progression/abilityModifier.js';
 import { capitalize } from '../ui/textCase.js';
-
-const ABILITIES = [
-  ['str', 'STR'],
-  ['dex', 'DEX'],
-  ['con', 'CON'],
-  ['int', 'INT'],
-  ['wis', 'WIS'],
-  ['cha', 'CHA'],
-];
+import { ABILITIES, ABILITY_ABBREVIATIONS } from '../content/rulesVocabulary.js';
 
 export function StatBlockHeader({ monster, onClose }) {
   const url = monster5eUrl(monster);
@@ -116,7 +108,8 @@ export function StatBlockSheet({ monster, legendaryGroups, conditions = null, on
         </Prop>
         <Prop label="Speed">{formatSpeed(monster.speed)}</Prop>
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(6,minmax(0,1fr))', gap: 1 }}>
-          {ABILITIES.map(([key, label]) => {
+          {ABILITIES.map((key) => {
+            const label = ABILITY_ABBREVIATIONS[key];
             const mod = signed(abilityModifier(monster[key]));
             const type = `${label} Check`;
             const sources = sourcesFor(type);

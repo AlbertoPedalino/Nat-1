@@ -28,6 +28,7 @@
 
 import { getChoiceValue, setChoiceValuePatch } from '../progression/choiceUtils.js';
 import { abilityModifier } from '../progression/abilityModifier.js';
+import { ABILITIES } from '../../content/rulesVocabulary.js';
 
 export const PRIMAL_BEASTS = Object.freeze([
   { name: 'Beast of the Land', short: 'Land', damageTypes: ['Bludgeoning', 'Piercing', 'Slashing'] },
@@ -109,8 +110,6 @@ function withStrikeDamageType(action, damageType) {
   ));
   return { ...action, entries };
 }
-
-const ABILITIES = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
 
 // Applies the Ranger's side of the stat block to a normalized creature: Primal
 // Bond (PB on every check and save) and the chosen Beast's Strike damage type.

@@ -1,4 +1,5 @@
 import { createContext, useContext } from 'react';
+import { ABILITIES } from '../content/rulesVocabulary.js';
 
 // A stat block's rollers hand their label along ("Attack Roll", "Dex Save",
 // "STR Check", "Perception Check", "D20 Roll", "Damage", "HP"). The d20 tests
@@ -7,8 +8,6 @@ import { createContext, useContext } from 'react';
 //
 // Returns { kind, ability } for a d20 test (kind null when the text does not
 // say which: a bare {@d20}), or null for anything that is not one.
-
-const ABILITIES = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
 
 export function d20RollKind(type) {
   const label = String(type || '').trim();

@@ -1,3 +1,25 @@
+// The rules vocabulary of D&D 2024, written once: abilities, skills, tools,
+// languages. Every page and adapter reads these lists from here.
+
+export const ABILITIES = Object.freeze(['str', 'dex', 'con', 'int', 'wis', 'cha']);
+
+export const ABILITY_ABBREVIATIONS = Object.freeze({
+  str: 'STR', dex: 'DEX', con: 'CON', int: 'INT', wis: 'WIS', cha: 'CHA',
+});
+
+export const ABILITY_NAMES = Object.freeze({
+  str: 'Strength', dex: 'Dexterity', con: 'Constitution', int: 'Intelligence', wis: 'Wisdom', cha: 'Charisma',
+});
+
+const ABILITY_BY_WORD = Object.freeze(Object.fromEntries(
+  ABILITIES.flatMap((key) => [[key, key], [ABILITY_NAMES[key].toLowerCase(), key]]),
+));
+
+// 'str', 'STR', 'Strength' -> 'str'; anything else -> null.
+export function abilityKey(value) {
+  return ABILITY_BY_WORD[String(value ?? '').trim().toLowerCase()] || null;
+}
+
 export const SKILLS = [
   { name: 'Acrobatics', ability: 'dex' },
   { name: 'Animal Handling', ability: 'wis' },

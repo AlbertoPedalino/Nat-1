@@ -9,6 +9,7 @@ import { CORE_2024_SOURCE_PRIORITY, isAllowedSource, sourceRank } from '../../sh
 import { decodeItemTypeLabel } from '../../shared/character/inventory/itemCodes.js';
 import { getCR, getType } from '../../shared/bestiary/monsterUtils.js';
 import { capitalize } from '../../shared/ui/textCase.js';
+import { ABILITY_NAMES } from '../../shared/content/rulesVocabulary.js';
 
 export const COMPENDIUM_KINDS = Object.freeze([
   { key: 'spell', label: 'Spells', single: 'Spell' },
@@ -39,10 +40,6 @@ const OPTION_TYPES = Object.freeze({
   AI: 'Artificer Infusion',
   ED: 'Elemental Discipline',
   RN: 'Rune',
-});
-
-const ABILITY_NAMES = Object.freeze({
-  str: 'Strength', dex: 'Dexterity', con: 'Constitution', int: 'Intelligence', wis: 'Wisdom', cha: 'Charisma',
 });
 
 const FEAT_CATEGORIES = Object.freeze({

@@ -11,7 +11,7 @@ import {
 import { Plus, Sparkles } from 'lucide-react';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import { SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
-import { SLBL, getFinal, getMod, getPB, effectiveD20Modifier } from '../../../shared/character/sheet/sheetStats.js';
+import { getFinal, getMod, getPB, effectiveD20Modifier } from '../../../shared/character/sheet/sheetStats.js';
 import { loadSpells } from '../../../shared/content/catalogs/spellData.js';
 import { scrollRowKey } from '../../../shared/character/inventory/spellScrolls.js';
 import { spellMatchesClass } from '../../../shared/character/spells/spellClassMatch.js';
@@ -69,6 +69,7 @@ import { signed } from '../../../shared/ui/numberFormat.js';
 import { lowerKey } from '../../../shared/content/nameKeys.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
 
 const SPELL_ACTION_FILTERS = [
   { key: 'all', label: 'All' },
@@ -482,7 +483,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
       <Box sx={{ display: 'flex', gap: 1, mb: 0.75, flexWrap: 'wrap' }}>
         <StatBox value={dc} label="Spell DC" />
         <StatBox value={signed(effectiveD20Modifier(atk, sheet?.exhaustionLevel))} label="Spell Attack" />
-        <StatBox value={SLBL[ability] || ability.toUpperCase()} label="Spell Ability" />
+        <StatBox value={ABILITY_ABBREVIATIONS[ability] || ability.toUpperCase()} label="Spell Ability" />
       </Box>
 
       <Box sx={panelToolbarSx}>

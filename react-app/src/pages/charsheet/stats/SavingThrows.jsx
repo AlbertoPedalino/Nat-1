@@ -1,14 +1,7 @@
 import { useState } from 'react';
 import { Box, Paper, Typography, Tooltip, Menu, MenuItem } from '@mui/material';
 import { Dice5, Sparkles, ChevronDown } from 'lucide-react';
-import {
-  STATS,
-  SLBL,
-  FULL_LBL,
-  hasSaveProficiency,
-  getSaveBonus,
-  effectiveD20Modifier,
-} from '../../../shared/character/sheet/sheetStats.js';
+import { hasSaveProficiency, getSaveBonus, effectiveD20Modifier } from '../../../shared/character/sheet/sheetStats.js';
 import { getConcentrationBonus, getD20FloorReminders } from '../../../shared/character/sheet/effectBonuses.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import { characterItemBonuses } from '../../../shared/character/inventory/itemBonus.js';
@@ -24,6 +17,7 @@ import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import PanelHeader from '../../../shared/ui/PanelHeader.jsx';
+import { ABILITIES, ABILITY_ABBREVIATIONS, ABILITY_NAMES } from '../../../shared/content/rulesVocabulary.js';
 
 export default function SavingThrows({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
@@ -78,7 +72,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
     <Paper variant="outlined" sx={{ mb: '0.6rem', overflow: 'hidden' }}>
       <PanelHeader icon={Dice5} title="Saving Throws" />
       <Box sx={{ p: '0.55rem 0.8rem' }}>
-        {STATS.map(st => {
+        {ABILITIES.map(st => {
           const bonus = getSaveBonus(C, st) + itemSaveBonus;
           const shownBonus = effectiveD20Modifier(bonus, sheet?.exhaustionLevel);
           const prof = hasSaveProficiency(C, st);
@@ -96,10 +90,10 @@ export default function SavingThrows({ C, sheet, onRoll }) {
               sx={{ display: 'flex', alignItems: 'center', gap: 1, py: '3px', cursor: 'pointer', borderRadius: 1, '&:hover': { bgcolor: uiAlpha(UI_COLORS.gold, 0.04) } }}>
               <Box sx={{ width: 10, height: 10, borderRadius: '50%', flexShrink: 0, transition: 'all 0.1s', border: 1, borderColor: 'divider', bgcolor: prof ? 'primary.main' : 'transparent' }} />
               <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.625rem', fontWeight: 600, color: 'text.secondary', letterSpacing: '0.08em', width: 28, flexShrink: 0 }}>
-                {SLBL[st]}
+                {ABILITY_ABBREVIATIONS[st]}
               </Typography>
               <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
-                {FULL_LBL[st]}
+                {ABILITY_NAMES[st]}
               </Typography>
               <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.75rem', fontWeight: 600, color: 'text.primary', ml: 'auto' }}>
                 {signed(shownBonus)}

@@ -1,5 +1,6 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
 import { finalAbilityModifier } from '../../../shared/character/progression/abilityScores.js';
+import { ABILITY_NAMES } from '../../../shared/content/rulesVocabulary.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -16,7 +17,7 @@ registerSubclassAdapter("Warlock_Great Old One", function (cls, lv, specs) {
       key: "goo_eldritch_hex_ability",
       label: "Eldritch Hex — Ability for Saving Throw Disadvantage",
       type: "generic_choice",
-      from: ["Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"],
+      from: Object.values(ABILITY_NAMES),
       count: 1,
       level: 10
     });

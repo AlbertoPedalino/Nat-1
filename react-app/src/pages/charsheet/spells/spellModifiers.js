@@ -3,6 +3,7 @@ import { getFinal as getFinalScore, getMod as getAbilityMod } from '../../../sha
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
+import { ABILITIES } from '../../../shared/content/rulesVocabulary.js';
 
 // What the character's features change on a spell row, registered by the
 // adapters: riders (extra rollers, tags, text), spell modifiers (flat damage or
@@ -78,8 +79,6 @@ export function getResolvedCantripData(C, name) {
   }, base ? { ...base } : {});
 }
 
-const ABILITY_KEYS = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
-
 export function resolveDmgBonusValue(C, dmgBonus, getModFn, getFinalFn) {
   if (dmgBonus == null || dmgBonus === '' || dmgBonus === 0) return 0;
   if (typeof dmgBonus === 'number') return dmgBonus;
@@ -87,7 +86,7 @@ export function resolveDmgBonusValue(C, dmgBonus, getModFn, getFinalFn) {
     try { return Number(dmgBonus({ character: C }) || 0); } catch { return 0; }
   }
   const key = String(dmgBonus).toLowerCase();
-  if (ABILITY_KEYS.includes(key) && typeof getModFn === 'function' && typeof getFinalFn === 'function') {
+  if (ABILITIES.includes(key) && typeof getModFn === 'function' && typeof getFinalFn === 'function') {
     return Number(getModFn(getFinalFn(C, key)) || 0);
   }
   const n = Number(dmgBonus);

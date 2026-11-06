@@ -1,6 +1,6 @@
 import { Box, Typography, Tooltip } from '@mui/material';
 import { getEquippedArmorPenalties } from '../inventory/armorPenalties.js';
-import { STATS, SLBL, FULL_LBL, getFinal, getMod, effectiveD20Modifier } from '../../../shared/character/sheet/sheetStats.js';
+import { getFinal, getMod, effectiveD20Modifier } from '../../../shared/character/sheet/sheetStats.js';
 import { describeCheckDisadvantage } from '../../../shared/character/combat/conditions.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import { advantageVisual, conditionalDisadvantageVisual } from './advantageMark.jsx';
@@ -8,6 +8,7 @@ import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { ABILITIES, ABILITY_ABBREVIATIONS, ABILITY_NAMES } from '../../../shared/content/rulesVocabulary.js';
 
 export default function AbilityScores({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
@@ -22,7 +23,7 @@ export default function AbilityScores({ C, sheet, onRoll }) {
         display: 'grid', gridTemplateColumns: { xs: 'repeat(3,1fr)', sm: 'repeat(6,minmax(62px,1fr))' },
         gap: '0.6rem', minWidth: 0,
       }}>
-        {STATS.map(s => {
+        {ABILITIES.map(s => {
           const val = getFinal(C, s);
           const mod = getMod(val);
           const shownMod = effectiveD20Modifier(mod, sheet?.exhaustionLevel);
@@ -43,9 +44,9 @@ export default function AbilityScores({ C, sheet, onRoll }) {
             : `Situational disadvantage: ${condNotes.join('; ')}`;
           const advArg = hasDisadv ? false : undefined;
           return (
-            <RollModeArea key={s} onClick={() => onRoll(mod, FULL_LBL[s] + ' Check', advArg)}
+            <RollModeArea key={s} onClick={() => onRoll(mod, ABILITY_NAMES[s] + ' Check', advArg)}
               sources={{ adv: false, disadv: hasDisadv }}
-              onPick={(picked) => onRoll(mod, FULL_LBL[s] + ' Check', picked)}
+              onPick={(picked) => onRoll(mod, ABILITY_NAMES[s] + ' Check', picked)}
               sx={{
                 bgcolor: 'background.paper', border: 1, borderColor: advArg === false ? 'warning.main' : 'divider', borderRadius: 1,
                 display: 'flex', flexDirection: 'column', alignItems: 'center', p: '0.4rem 0.25rem',
@@ -53,7 +54,7 @@ export default function AbilityScores({ C, sheet, onRoll }) {
                 '&:hover': { borderColor: 'primary.main' },
               }}>
               <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.14em', color: 'text.secondary', textTransform: 'uppercase', mb: 0.1 }}>
-                {SLBL[s]}
+                {ABILITY_ABBREVIATIONS[s]}
               </Typography>
               <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '1.5rem', fontWeight: 700, color: UI_COLORS.goldLight, lineHeight: 1 }}>
                 {signed(shownMod)}

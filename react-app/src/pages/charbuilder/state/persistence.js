@@ -19,6 +19,7 @@ import { enumerateFixedAdditionalSpells } from '../../../shared/character/spells
 import { resolveActionRollers } from '../../../shared/character/dice/rollers.js';
 import { asArray } from '../../../shared/lists.js';
 import { stripSource } from '../../../shared/content/nameKeys.js';
+import { ABILITIES } from '../../../shared/content/rulesVocabulary.js';
 
 const FEAT_SNAPSHOT_FIELDS = [
   'name',
@@ -211,7 +212,7 @@ export function makeSheetPayload(character, data) {
       if (!name) return;
       const knownSpell = data.spells.some((spell) => spell.name === name);
       const spellChoiceKey = /(spell|cantrip|tome|magical|known|prepared|innate|expanded)/i.test(key);
-      if ((knownSpell || spellChoiceKey) && !['str', 'dex', 'con', 'int', 'wis', 'cha'].includes(name.toLowerCase())) choiceSpellNames.push(name);
+      if ((knownSpell || spellChoiceKey) && !ABILITIES.includes(name.toLowerCase())) choiceSpellNames.push(name);
     });
   });
   const autoGrantedSpells = collectAutoGrantedSpells(character);

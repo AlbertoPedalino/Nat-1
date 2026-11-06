@@ -10,8 +10,7 @@ import { isAllowedSource, BEAST_ALLOWED_SOURCES } from '../../content/sourcePrio
 import { signed } from '../../ui/numberFormat.js';
 import { stripSource } from '../../content/nameKeys.js';
 import { statBlockTagText } from '../../content/statBlockTags.js';
-
-const ABILITIES = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
+import { ABILITIES } from '../../content/rulesVocabulary.js';
 
 // Known Beast forms by Druid level (XPHB 2024 "Beast Shapes" table): 4 at lv.2,
 // 6 at lv.4, 8 at lv.8. You may swap one known form per Long Rest.

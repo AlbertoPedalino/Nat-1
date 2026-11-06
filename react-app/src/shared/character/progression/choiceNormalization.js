@@ -1,6 +1,7 @@
 import { isFeatKey, isFeatDetailKey } from './featChoiceKeys.js';
 import { flattenList } from '../../lists.js';
 import { choiceKey, choiceText } from '../../content/nameKeys.js';
+import { ABILITIES } from '../../content/rulesVocabulary.js';
 
 const SKILL_NAMES = [
   'Acrobatics',
@@ -42,8 +43,6 @@ const COMMON_LANGUAGES = [
   'Undercommon',
 ];
 
-const ABILITY_KEYS = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
-
 const VERSION_KEYS = new Set([
   'species_version',
 ]);
@@ -81,7 +80,7 @@ const SKILL_LOOKUP = makeLookup(SKILL_NAMES);
 const LANGUAGE_LOOKUP = makeLookup(COMMON_LANGUAGES);
 
 function isAbility(value) {
-  return ABILITY_KEYS.includes(choiceKey(value));
+  return ABILITIES.includes(choiceKey(value));
 }
 
 function isSkill(value) {

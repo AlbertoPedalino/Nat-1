@@ -1,18 +1,19 @@
-import { PB_COST, STATS } from '../constants.js';
+import { PB_COST } from '../constants.js';
 import { FULL_SLOTS, HALF_SLOTS, PACT_SLOTS, THIRD_SLOTS } from '../../../shared/character/spells/spellTables.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
+import { ABILITIES } from '../../../shared/content/rulesVocabulary.js';
 
 export function pointBuySpent(scores) {
-  return STATS.reduce((sum, stat) => sum + (PB_COST[scores[stat]] || 0), 0);
+  return ABILITIES.reduce((sum, stat) => sum + (PB_COST[scores[stat]] || 0), 0);
 }
 
 export function getBackgroundPool(background) {
-  if (!background?.ability?.length) return STATS;
+  if (!background?.ability?.length) return ABILITIES;
   const ability = background.ability[0];
   if (ability.choose?.weighted?.from?.length) return ability.choose.weighted.from;
   if (ability.choose?.from?.length) return ability.choose.from;
-  const direct = Object.keys(ability).filter((key) => STATS.includes(key));
-  return direct.length ? direct : STATS;
+  const direct = Object.keys(ability).filter((key) => ABILITIES.includes(key));
+  return direct.length ? direct : ABILITIES;
 }
 
 export function getBackgroundPattern(background, index = 0) {

@@ -1,10 +1,6 @@
 import { entriesToTextBlocks } from '../spells/spellEntries.js';
 import { matchKey } from '../../content/nameKeys.js';
-
-const ABILITIES = {
-  str: 'Strength', dex: 'Dexterity', con: 'Constitution',
-  int: 'Intelligence', wis: 'Wisdom', cha: 'Charisma',
-};
+import { ABILITY_NAMES } from '../../content/rulesVocabulary.js';
 
 function joinOptions(options, conjunction = 'or') {
   if (options.length < 2) return options[0] || '';
@@ -15,16 +11,16 @@ function joinOptions(options, conjunction = 'or') {
 function describeAbilityOption(ability) {
   if (!ability || typeof ability !== 'object') return '';
   const max = Number(ability.max) || 20;
-  const parts = Object.entries(ABILITIES).flatMap(([key, name]) => {
+  const parts = Object.entries(ABILITY_NAMES).flatMap(([key, name]) => {
     const amount = Number(ability[key]);
     return amount > 0 ? [`Increase your ${name} score by ${amount}, to a maximum of ${max}.`] : [];
   });
   const choose = ability.choose;
   if (choose && typeof choose === 'object') {
-    const from = [...new Set(choose.from || choose.weighted?.from || [])].filter((key) => ABILITIES[key]);
+    const from = [...new Set(choose.from || choose.weighted?.from || [])].filter((key) => ABILITY_NAMES[key]);
     if (from.length) {
-      const names = from.map((key) => ABILITIES[key]);
-      const any = from.length === Object.keys(ABILITIES).length;
+      const names = from.map((key) => ABILITY_NAMES[key]);
+      const any = from.length === Object.keys(ABILITY_NAMES).length;
       const limit = Number(choose.max) || max;
       const weights = choose.weighted?.weights;
       if (Array.isArray(weights) && weights.length) {

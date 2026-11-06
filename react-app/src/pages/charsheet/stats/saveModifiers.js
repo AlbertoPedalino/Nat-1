@@ -23,12 +23,12 @@
 import { characterItemEffects } from '../../../shared/character/inventory/itemEffects.js';
 import { getEquippedArmorPenalties } from '../inventory/armorPenalties.js';
 import { collectSheetEffects } from '../../../shared/character/sheet/sheetEffects.js';
-import { SLBL, STATS } from '../../../shared/character/sheet/sheetStats.js';
 import { getConditionsWithEffect } from '../../../shared/character/combat/conditions.js';
 import { titleCase } from '../../../shared/ui/textCase.js';
+import { ABILITIES, ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
 
 function abilityLabel(ability) {
-  return ability ? `${SLBL[ability]} saves` : 'saves';
+  return ability ? `${ABILITY_ABBREVIATIONS[ability]} saves` : 'saves';
 }
 
 // --- Class / subclass / species / feat sheet effects ---------------------
@@ -85,7 +85,7 @@ function normalizeSheetEffect(effect) {
 function collectArmorSaveDisadvantages(C, inventory, profSets) {
   const armor = getEquippedArmorPenalties(C, inventory, profSets);
   if (!armor.hasPenalty) return [];
-  return STATS
+  return ABILITIES
     .filter((st) => armor.disadvantageOn.includes(`${st}-saves`))
     .map((st) => {
       const detail = armor.details.find((d) => d.type === 'disadvantage' && d.applies?.includes(`${st}-saves`));
@@ -150,7 +150,7 @@ export function summarizeSaveModifiers(modifiers) {
       groups.set(key, { kind: m.kind, mode: m.mode, source: m.source, abilities: [], labels: [] });
     }
     const group = groups.get(key);
-    if (m.ability) group.abilities.push(SLBL[m.ability]);
+    if (m.ability) group.abilities.push(ABILITY_ABBREVIATIONS[m.ability]);
     else group.labels.push(m.label);
   });
   return [...groups.values()].map((group) => {

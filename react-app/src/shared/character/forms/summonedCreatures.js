@@ -1,10 +1,10 @@
 import { asArray } from '../../lists.js';
 import { loadGameData } from '../../content/gameData.js';
+import { ABILITIES } from '../../content/rulesVocabulary.js';
 // Bestiary files holding creatures a spell or class feature summons (their
 // records carry `summonedBySpell` / `summonedByClass`). XPHB has the Ranger's
 // primal beasts.
 const SUMMONED_CREATURE_FILES = ['bestiary-au.json', 'bestiary-xphb.json'];
-const ABILITIES = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
 // The ability a stat block scales with is named in prose: "13 plus your Wisdom
 // modifier", "{@damage 1d8 + 2} plus your Charisma modifier".
 const ABILITY_NAME = '(?:Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma)';

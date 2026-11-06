@@ -1,13 +1,7 @@
 import { Box, Paper, Typography, Tooltip } from '@mui/material';
 import { advantageVisual, conditionalDisadvantageVisual } from './advantageMark.jsx';
 import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
-import {
-  SKILLS,
-  getSkillTraining,
-  getSkillBonus,
-  SLBL,
-  effectiveD20Modifier,
-} from '../../../shared/character/sheet/sheetStats.js';
+import { SKILLS, getSkillTraining, getSkillBonus, effectiveD20Modifier } from '../../../shared/character/sheet/sheetStats.js';
 import { describeCheckDisadvantage } from '../../../shared/character/combat/conditions.js';
 import { getEquippedArmorPenalties } from '../inventory/armorPenalties.js';
 import { getSkillAdvantageFromEffects } from '../../../shared/character/sheet/effectBonuses.js';
@@ -18,6 +12,7 @@ import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import PanelHeader, { sectionLabelSx } from '../../../shared/ui/PanelHeader.jsx';
+import { ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
 
 function SkillProficiencyDot({ training }) {
   const dotColor = training === 'exp' ? 'secondary.main' : training ? 'primary.main' : 'divider';
@@ -112,7 +107,7 @@ export default function Skills({ C, sheet, onRoll }) {
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
               <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.5rem', color: 'text.secondary', letterSpacing: '0.06em' }}>
-                {SLBL[sk.a]}
+                {ABILITY_ABBREVIATIONS[sk.a]}
               </Typography>
               <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.75rem', fontWeight: 600, color: 'text.primary', textAlign: 'right' }}>
                 {signed(shownBonus)}

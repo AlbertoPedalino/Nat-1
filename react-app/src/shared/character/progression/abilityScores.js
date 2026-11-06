@@ -2,6 +2,7 @@ import { getFeatAsiBonus } from './abilityBonuses.js';
 import { abilityModifier } from './abilityModifier.js';
 import { getFinalAbilityScore } from '../inventory/itemEffects.js';
 import { wildShapeAbilityScore } from '../forms/wildShapeForm.js';
+import { ABILITIES } from '../../content/rulesVocabulary.js';
 
 // A character's ability scores, in one place. The layers, in order:
 //   base        what the player bought, assigned or rolled (8 until set)
@@ -12,8 +13,6 @@ import { wildShapeAbilityScore } from '../forms/wildShapeForm.js';
 // The first three are the score the character was built with (the builder
 // shows it); all five are the score the sheet, AC, Hit Points, formulas and
 // adapters use. Scores are always computed from the choices, never stored.
-
-const ABILITIES = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
 
 const BASE_SCORE_FIELDS = {
   pointbuy: 'pbScores',

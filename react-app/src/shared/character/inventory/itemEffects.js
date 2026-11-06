@@ -9,8 +9,8 @@ import { parseSignedBonus } from './itemBonus.js';
 import { isItemEffectActive } from './itemAttunement.js';
 import { getItemNarrativeEffects } from './itemNarrativeEffects.js';
 import { itemEffectInventory } from '../forms/wildShapeForm.js';
+import { ABILITIES } from '../../content/rulesVocabulary.js';
 
-const ABILITY_KEYS = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
 const SENSE_TYPES = ['darkvision', 'blindsight', 'truesight', 'tremorsense'];
 
 const _cache = new WeakMap();
@@ -38,7 +38,7 @@ function createEmptyEffects() {
 
 function applyAbilityOverride(out, ability, value, source) {
   const key = String(ability || '').toLowerCase();
-  if (!ABILITY_KEYS.includes(key)) return;
+  if (!ABILITIES.includes(key)) return;
   const n = Number(value);
   if (!Number.isFinite(n)) return;
   const current = out.abilityOverrides[key];
@@ -49,7 +49,7 @@ function applyAbilityOverride(out, ability, value, source) {
 
 function applyAbilityBonus(out, ability, value) {
   const key = String(ability || '').toLowerCase();
-  if (!ABILITY_KEYS.includes(key)) return;
+  if (!ABILITIES.includes(key)) return;
   const n = parseSignedBonus(value);
   if (!n) return;
   out.abilityBonuses[key] = (out.abilityBonuses[key] || 0) + n;
@@ -92,7 +92,7 @@ function applyAbilityField(item, out, source) {
     });
   }
 
-  ABILITY_KEYS.forEach((key) => {
+  ABILITIES.forEach((key) => {
     if (ability[key] != null) applyAbilityBonus(out, key, ability[key]);
   });
 }
@@ -171,7 +171,7 @@ function applyChoiceAbilityBonus(item, out) {
     const list = Array.isArray(picks) ? picks : [picks];
     list.forEach((pick) => {
       const key = String(pick || '').toLowerCase();
-      if (!ABILITY_KEYS.includes(key)) return;
+      if (!ABILITIES.includes(key)) return;
       applyAbilityBonus(out, key, group.amount ?? 2);
     });
   });
@@ -310,13 +310,13 @@ export function isConsumableTome(item) {
   if (item.reqAttune) return false;
   if (!item.ability || typeof item.ability !== 'object') return false;
   if (item.ability.static || item.ability.choose || item.ability.from) return false;
-  if (!ABILITY_KEYS.some((key) => item.ability[key] != null)) return false;
+  if (!ABILITIES.some((key) => item.ability[key] != null)) return false;
   return /^(Manual of|Tome of)\s/i.test(item.name);
 }
 
 export function extractTomeBonus(item) {
   if (!isConsumableTome(item)) return null;
-  for (const key of ABILITY_KEYS) {
+  for (const key of ABILITIES) {
     if (item.ability[key] != null) {
       const value = Number(item.ability[key]);
       if (Number.isFinite(value)) return { ability: key, value, source: item.name };

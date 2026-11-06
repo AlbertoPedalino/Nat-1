@@ -1,12 +1,13 @@
 import { Alert, Box, Button, Chip, Grid, Paper, Slider, Stack, Tab, Tabs, TextField, Typography } from '@mui/material';
 import { Dice5, Dumbbell } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
-import { STANDARD_ARRAY, STAT_LABELS, STATS } from '../constants.js';
+import { STANDARD_ARRAY } from '../constants.js';
 import { pointBuySpent } from '../progression/calculations.js';
 import { abilityScoreBonuses, baseAbilityScore, builtAbilityScore } from '../../../shared/character/progression/abilityScores.js';
 import { getActiveScores } from '../state/state.js';
 import { abilityModifier } from '../../../shared/character/progression/abilityModifier.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
+import { ABILITIES, ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
 
 function scoreMod(value) {
   if (value == null) return '-';
@@ -64,7 +65,7 @@ export default function ScoresStep({ state, dispatch }) {
         ) : null}
 
         <Grid container spacing={1.5}>
-          {STATS.map((stat) => {
+          {ABILITIES.map((stat) => {
             const baseScore = baseAbilityScore(character, stat);
             const finalScore = builtAbilityScore(character, stat);
             const bonusBreakdown = abilityScoreBonuses(character, stat);
@@ -74,7 +75,7 @@ export default function ScoresStep({ state, dispatch }) {
                 <Paper variant="outlined" sx={{ p: 1.5, height: '100%' }}>
                   <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1.25}>
                     <Box sx={{ minWidth: 0, flex: 1 }}>
-                      <Typography variant="h2" sx={{ lineHeight: 1.15 }}>{STAT_LABELS[stat]}</Typography>
+                      <Typography variant="h2" sx={{ lineHeight: 1.15 }}>{ABILITY_ABBREVIATIONS[stat]}</Typography>
                       <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap sx={{ mt: 1 }}>
                         <Chip size="small" label={`Base ${baseScore}`} variant="outlined" />
                         {bonusBreakdown.map((bonus, index) => (

@@ -1,9 +1,8 @@
-import { STATS, STAT_LABELS } from '../constants.js';
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
 import { getPrimaryClassLevel } from '../progression/calculations.js';
 import { backgroundOriginFeat } from '../../../shared/character/progression/selectedFeats.js';
 import { getMulticlassChoiceSpecs } from '../../../shared/character/progression/multiclassProficiencies.js';
-import { STANDARD_LANGUAGES, EXOTIC_LANGUAGES, ALL_LANGUAGES } from '../../../adapters/gameData.js';
+import { ABILITIES, ABILITY_ABBREVIATIONS, ALL_LANGUAGES, EXOTIC_LANGUAGES, STANDARD_LANGUAGES } from '../../../shared/content/rulesVocabulary.js';
 import { getLanguageOptions } from '../../../shared/character/progression/languages.js';
 import { filterByRequiredChoice } from '../../../shared/character/progression/lineageMatch.js';
 
@@ -515,7 +514,7 @@ export function featChoiceSpecs(feat, options = {}) {
   const slotKey = options.slotKey || `feat_${feat.name}`;
   const asiUi = ui.abilityScoreIncrease;
   if (asiUi) {
-    const from = asiUi.from?.length ? asiUi.from : STATS;
+    const from = asiUi.from?.length ? asiUi.from : ABILITIES;
     const modes = asiUi.modes || ['single'];
     if (modes.includes('double') || modes.includes('split')) {
       specs.push({ key: `${slotKey}_first_asi`, label: `${feat.name} Ability +1`, type: 'ability_choice', from, count: 1 });
@@ -524,7 +523,7 @@ export function featChoiceSpecs(feat, options = {}) {
       specs.push({ key: `${slotKey}_asi`, label: `${feat.name} Ability`, type: 'ability_choice', from, count: 1 });
     }
   } else if (feat?.ability?.some((block) => block.choose)) {
-    specs.push({ key: `${slotKey}_asi`, label: `${feat.name} Ability`, type: 'ability_choice', from: STATS, count: 1 });
+    specs.push({ key: `${slotKey}_asi`, label: `${feat.name} Ability`, type: 'ability_choice', from: ABILITIES, count: 1 });
   }
   if (ui.skillOrToolProficiency) {
     specs.push({
@@ -544,7 +543,7 @@ export function featChoiceSpecs(feat, options = {}) {
       key: `${slotKey}_${ui.spellAbility.keySuffix || 'spell_ability'}`,
       label: ui.spellAbility.label || `${feat.name} Spellcasting Ability`,
       type: 'ability_choice',
-      options: ui.spellAbility.options || STATS.map((stat) => ({ value: stat, label: STAT_LABELS[stat] || stat })),
+      options: ui.spellAbility.options || ABILITIES.map((stat) => ({ value: stat, label: ABILITY_ABBREVIATIONS[stat] || stat })),
       count: 1,
     });
   }

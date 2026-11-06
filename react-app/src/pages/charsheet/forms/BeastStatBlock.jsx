@@ -7,13 +7,12 @@ import { formatRollTitle } from '../../../shared/character/dice/dice.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { ABILITIES } from '../../../shared/content/rulesVocabulary.js';
 
 // Shared presentational layer for a normalized beast snapshot, used by both the
 // Wild Shape and Wild Companion sheet panels. Renders a compact Monster-Manual
 // style stat block plus the name-as-link helper and the panel chrome styles, so
 // the two features can never disagree on how a beast reads.
-
-const ABILITY_ORDER = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
 
 const fmtMod = (score) => signed(getMod(Number(score) || 10));
 
@@ -71,7 +70,7 @@ export function BeastStatBlock({
   const speed = Object.entries(b.speed || {})
     .filter(([k]) => k !== 'hover')
     .map(([k, v]) => `${k} ${v} ft.`).join(', ');
-  const saveItems = ABILITY_ORDER.filter((k) => b.saves?.[k] != null).map((k) => ({
+  const saveItems = ABILITIES.filter((k) => b.saves?.[k] != null).map((k) => ({
     key: k,
     text: `${k.toUpperCase()} ${signed(b.saves[k])}`,
     bonus: b.saves[k],
@@ -109,7 +108,7 @@ export function BeastStatBlock({
       {tempHP > 0 ? <StatLine label="Temp HP" value={signed(tempHP)} accent /> : null}
       {speed ? <StatLine label="Speed" value={speed} /> : null}
       <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2px 8px', my: 0.5, py: 0.5, borderTop: 1, borderBottom: 1, borderColor: 'divider' }}>
-        {ABILITY_ORDER.map((k) => {
+        {ABILITIES.map((k) => {
           const scoreText = `${b.abilities[k]} (${fmtMod(b.abilities[k])})`;
           return (
             <Box key={k} sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>

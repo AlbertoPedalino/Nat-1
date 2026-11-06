@@ -1,10 +1,7 @@
 import { createAdapterBindings } from './adapterBindings.js';
+import { ABILITY_NAMES } from '../shared/content/rulesVocabulary.js';
 
-const SPELL_ABILITIES = [
-  { value: 'int', label: 'Intelligence' },
-  { value: 'wis', label: 'Wisdom' },
-  { value: 'cha', label: 'Charisma' },
-];
+const SPELL_ABILITIES = ['int', 'wis', 'cha'].map((value) => ({ value, label: ABILITY_NAMES[value] }));
 
 export function withSpellAbilityChoice(feat) {
   return {

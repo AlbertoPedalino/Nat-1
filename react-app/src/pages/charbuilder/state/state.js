@@ -1,4 +1,4 @@
-import { BACKGROUND_SUMMARIES, CLASS_SUMMARIES, FEAT_SUMMARIES, SPECIES_SUMMARIES, STANDARD_ARRAY, STATS } from '../constants.js';
+import { BACKGROUND_SUMMARIES, CLASS_SUMMARIES, FEAT_SUMMARIES, SPECIES_SUMMARIES, STANDARD_ARRAY } from '../constants.js';
 import { ITEM_SUMMARIES } from '../../../shared/content/catalogs/itemData.js';
 import { getBackgroundPattern, getPrimaryClassLevel } from '../progression/calculations.js';
 import { handleBackgroundSelect, handleClassSelect, handleSpellToggle, handleWizardSpellbookToggle } from './stateHandlers.js';
@@ -18,6 +18,7 @@ import { isFeatKey, isFeatDetailKey } from '../../../shared/character/progressio
 import { normalizeCharacterChoices } from '../../../shared/character/progression/choiceNormalization.js';
 import { withOwnedFeatSnapshots } from '../../../shared/character/progression/selectedFeats.js';
 import { matchKey, stripSource } from '../../../shared/content/nameKeys.js';
+import { ABILITIES } from '../../../shared/content/rulesVocabulary.js';
 
 // Fields whose value feeds normalizeCharacterChoices. When a reducer patch touches
 // any of them, normalizedChoices is rebuilt so it stays the single source of truth
@@ -131,9 +132,9 @@ export const initialCharacter = {
   hpMode: 'average',
   hpManualRolls: {},
   pbScores: { str: 8, dex: 8, con: 8, int: 8, wis: 8, cha: 8 },
-  arrAssign: Object.fromEntries(STATS.map((stat, index) => [stat, STANDARD_ARRAY[index] ?? null])),
+  arrAssign: Object.fromEntries(ABILITIES.map((stat, index) => [stat, STANDARD_ARRAY[index] ?? null])),
   dicePool: [],
-  diceAssign: Object.fromEntries(STATS.map((stat) => [stat, null])),
+  diceAssign: Object.fromEntries(ABILITIES.map((stat) => [stat, null])),
   manualScores: { str: 8, dex: 8, con: 8, int: 8, wis: 8, cha: 8 },
   selDiceIdx: null,
   selectedCantrips: [],
@@ -569,7 +570,7 @@ export function builderReducer(state, action) {
       });
       return updateCharacter(state, {
         dicePool,
-        diceAssign: Object.fromEntries(STATS.map((stat) => [stat, null])),
+        diceAssign: Object.fromEntries(ABILITIES.map((stat) => [stat, null])),
         selDiceIdx: null,
       });
     }

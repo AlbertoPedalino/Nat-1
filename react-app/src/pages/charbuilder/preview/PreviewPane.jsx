@@ -11,7 +11,6 @@ import {
   Typography,
 } from '@mui/material';
 import { Feather, Languages, Layers, Shield, Sparkles, Sword } from 'lucide-react';
-import { STAT_LABELS, STATS } from '../constants.js';
 import {
   getPrimaryClassLevel,
 } from '../progression/calculations.js';
@@ -43,6 +42,7 @@ import { matchKey } from '../../../shared/content/nameKeys.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { builtAbilityScores } from '../../../shared/character/progression/abilityScores.js';
 import { computeMaxHp } from '../../../shared/character/combat/hp.js';
+import { ABILITIES, ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';
 
 const darkChipText = UI_COLORS.primaryContrast;
 const PROFICIENCY_TONE = NEUTRAL_TONE;
@@ -162,12 +162,12 @@ function PreviewHeader({ character, hp }) {
 function AbilityScoreGrid({ scores }) {
   return (
     <Grid container spacing={0.6}>
-      {STATS.map((stat) => (
+      {ABILITIES.map((stat) => (
         <Grid key={stat} size={{ xs: 4 }}>
           <Card variant="outlined" sx={{ textAlign: 'center', ...SECTION_CARD_SX }}>
             <CardContent sx={{ p: 0.65, '&:last-child': { pb: 0.65 } }}>
               <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.61rem', fontWeight: 700, letterSpacing: '0.04em' }}>
-                {STAT_LABELS[stat]}
+                {ABILITY_ABBREVIATIONS[stat]}
               </Typography>
               <Typography variant="h2" sx={{ fontSize: '1rem', lineHeight: 1.15, color: 'text.primary' }}>
                 {scores[stat] ?? '-'}

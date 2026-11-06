@@ -245,3 +245,12 @@ test('stat block label words come only from shared/content/statBlockTags.js', ()
     allow: ['shared/content/statBlockTags.js'],
   }), []);
 });
+
+// The ability vocabulary (keys, STR-style abbreviations, full names) is written
+// once; sixteen local copies of the key list had grown under five names.
+test('ability keys, abbreviations and names come from shared/content/rulesVocabulary.js', () => {
+  assert.deepEqual(sourceFilesMatching(
+    /['"]str['"],\s*['"]dex['"],\s*['"]con['"],\s*['"]int['"]|\bstr:\s*['"](STR|Strength)['"]|['"]Strength['"],\s*['"]Dexterity['"]|strength:\s*['"](STR|str)['"]/,
+    { allow: ['shared/content/rulesVocabulary.js'] },
+  ), []);
+});

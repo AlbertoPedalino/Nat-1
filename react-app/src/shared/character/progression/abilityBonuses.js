@@ -2,12 +2,11 @@
 // Supports multiple formats for retroactive compatibility.
 import { collectOwnedFeatNames } from './selectedFeats.js';
 import { asArray } from '../../lists.js';
-
-const VALID_STATS = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
+import { ABILITIES } from '../../content/rulesVocabulary.js';
 
 function normalizeStat(value) {
   const s = String(value || '').toLowerCase().trim();
-  return VALID_STATS.includes(s) ? s : null;
+  return ABILITIES.includes(s) ? s : null;
 }
 
 /**
@@ -105,7 +104,7 @@ function fixedFeatAbilityGrants(character) {
     // Multiple ability entries are alternatives, not cumulative grants.
     if (!Array.isArray(feat.ability) || feat.ability.length !== 1) continue;
     const ability = feat.ability[0];
-    for (const stat of VALID_STATS) {
+    for (const stat of ABILITIES) {
       const bonus = Number(ability?.[stat]) || 0;
       if (bonus > 0) grants.push({ source: feat.name, stat, bonus, max: Number(ability.max) || 20 });
     }

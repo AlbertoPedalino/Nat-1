@@ -2,6 +2,7 @@ import { parseSignedBonus } from './itemBonus.js';
 import { signed } from '../../ui/numberFormat.js';
 import { capitalize, titleCase } from '../../ui/textCase.js';
 import { stripSource } from '../../content/nameKeys.js';
+import { ABILITY_ABBREVIATIONS } from '../../content/rulesVocabulary.js';
 
 // Type codes match 5etools schema. Note: "R" here means a Ranged Weapon item type;
 // the same letter as a weapon property means "Reach" (see WEAPON_PROPERTY_LABELS).
@@ -216,14 +217,12 @@ function formatRecharge(item) {
   return amount ? `regains ${amount} ${when}` : `recharges ${when}`;
 }
 
-const ITEM_ABILITY_ABBR = { str: 'STR', dex: 'DEX', con: 'CON', int: 'INT', wis: 'WIS', cha: 'CHA' };
-
 function formatAbilitySet(ability) {
   if (!ability || typeof ability !== 'object') return '';
   const src = ability.static && typeof ability.static === 'object' ? ability.static : ability;
-  return Object.keys(ITEM_ABILITY_ABBR)
+  return Object.keys(ABILITY_ABBREVIATIONS)
     .filter((k) => typeof src[k] === 'number')
-    .map((k) => `${ITEM_ABILITY_ABBR[k]} ${src[k]}`)
+    .map((k) => `${ABILITY_ABBREVIATIONS[k]} ${src[k]}`)
     .join(', ');
 }
 

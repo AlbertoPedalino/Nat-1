@@ -1,4 +1,5 @@
 import { stripSource } from './nameKeys.js';
+import { ABILITY_NAMES } from './rulesVocabulary.js';
 
 // The words a 2024 stat block prints for 5etools' label tags: {@atkr m} is
 // "Melee Attack Roll:", {@actSave con} "Constitution Saving Throw:", {@h}
@@ -6,9 +7,6 @@ import { stripSource } from './nameKeys.js';
 // words carry the space). Every renderer of monster, beast and spell prose reads them
 // from here; rolls ({@hit}, {@damage}) and links stay with each renderer.
 
-const ABILITY_NAMES = {
-  str: 'Strength', dex: 'Dexterity', con: 'Constitution', int: 'Intelligence', wis: 'Wisdom', cha: 'Charisma',
-};
 const ATTACK_ROLLS = { m: 'Melee', r: 'Ranged' };
 const ATTACK_KINDS = {
   mw: 'Melee Weapon', rw: 'Ranged Weapon', ms: 'Melee Spell', rs: 'Ranged Spell',
