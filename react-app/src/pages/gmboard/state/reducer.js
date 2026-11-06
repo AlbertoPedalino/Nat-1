@@ -76,7 +76,7 @@ export function gmBoardReducer(state, action) {
     case 'setSeason':
       return { ...state, season: action.season };
     case 'setWeatherOverride':
-      return { ...state, meteo: action.meteo, intensity: action.intensity };
+      return { ...state, weather: action.weather, intensity: action.intensity };
     case 'setPop':
       return { ...state, pop: action.pop, popThr: action.popThr };
     case 'setTerrain':
@@ -102,7 +102,7 @@ export function gmBoardReducer(state, action) {
         year: action.result.time.year,
         hoursSinceWeather: action.result.hoursSinceWeather,
         nextWeatherIn: action.result.nextWeatherIn,
-        meteo: action.result.meteo,
+        weather: action.result.weather,
         intensity: action.result.intensity,
         log: pushLog(state.log, action.result.logEntry),
         hexResult: { steps: action.result.steps },

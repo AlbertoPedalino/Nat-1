@@ -24,9 +24,9 @@ export const SELECTOR_CONTRACTS = Object.freeze({
   },
   weatherOverride: {
     options: WEATHER_OVERRIDE_OPTIONS,
-    getId: (o) => `${o.meteo}:${o.intensity}`,
-    deriveValue: (state) => `${state.meteo}:${state.intensity}`,
-    action: (o) => ({ type: 'setWeatherOverride', meteo: o.meteo, intensity: o.intensity }),
+    getId: (o) => `${o.weather}:${o.intensity}`,
+    deriveValue: (state) => `${state.weather}:${state.intensity}`,
+    action: (o) => ({ type: 'setWeatherOverride', weather: o.weather, intensity: o.intensity }),
   },
   pop: {
     options: HEX_POPULATION_OPTIONS,

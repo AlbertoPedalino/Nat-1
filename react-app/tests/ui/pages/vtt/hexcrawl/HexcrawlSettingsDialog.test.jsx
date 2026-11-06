@@ -22,7 +22,7 @@ const BOARD = {
   tables: createDefaultTables(),
 };
 const CLOCK = {
-  min: 480, day: 1, month: 1, year: 1000, meteo: 'Rain', intensity: 'Heavy', season: 'Summer',
+  min: 480, day: 1, month: 1, year: 1000, weather: 'Rain', intensity: 'Heavy', season: 'Summer',
 };
 const DEFAULTS = { terrain: 'Plains', pop: 'unexplored', tier: 1 };
 
@@ -106,7 +106,7 @@ test('the date, the time and the weather can be changed from the map', () => {
   expect(within(weather).getAllByRole('button', { pressed: true })).toHaveLength(1);
   // Snow's Light is the second "Light" in the row: Rain's comes first.
   fireEvent.click(within(weather).getAllByRole('button', { name: /Light/ })[1]);
-  expect(onClockChange).toHaveBeenLastCalledWith({ meteo: 'Snow', intensity: 'Light' });
+  expect(onClockChange).toHaveBeenLastCalledWith({ weather: 'Snow', intensity: 'Light' });
 });
 
 test('an impossible date is refused in place', () => {

@@ -4,8 +4,8 @@ import ResultBadge from '../ui/ResultBadge.jsx';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
 
 function formatLoot(loot) {
-  const valueLine = [loot.valore, loot.extra].filter(Boolean).join(' ');
-  return [loot.rarita, loot.qualita, valueLine].filter(Boolean).join(' · ');
+  const valueLine = [loot.value, loot.extra].filter(Boolean).join(' ');
+  return [loot.rarity, loot.quality, valueLine].filter(Boolean).join(' · ');
 }
 
 function StepRow({ icon: Icon, iconColor, label, children, last }) {
@@ -27,7 +27,7 @@ function renderStep(step, index, tones, last) {
     case 'weatherChange':
       return (
         <StepRow key={index} icon={CloudRain} iconColor={tones.weather} label="Weather" last={last}>
-          Shifts to <strong>{step.meteo}{step.intensity ? ` (${step.intensity})` : ''}</strong> [d20={step.d20}] — next check in {step.nextWeatherIn}h
+          Shifts to <strong>{step.weather}{step.intensity ? ` (${step.intensity})` : ''}</strong> [d20={step.d20}] — next check in {step.nextWeatherIn}h
         </StepRow>
       );
     case 'popRoll':
@@ -59,8 +59,8 @@ function renderStep(step, index, tones, last) {
     case 'campLoot':
       return (
         <StepRow key={index} icon={Coins} iconColor={tones.result.loot} label="Loot" last={last}>
-          (d8+d12={step.sum}): <ResultBadge tone={tones.rarity[step.data.rarita] || tones.fallback}>{step.data.tipo}</ResultBadge>{' '}
-          {step.data.rarita !== '—' ? formatLoot(step.data) : ''}
+          (d8+d12={step.sum}): <ResultBadge tone={tones.rarity[step.data.rarity] || tones.fallback}>{step.data.type}</ResultBadge>{' '}
+          {step.data.rarity !== '—' ? formatLoot(step.data) : ''}
         </StepRow>
       );
     case 'lootDc':
@@ -79,7 +79,7 @@ function renderStep(step, index, tones, last) {
     case 'trap':
       return (
         <StepRow key={index} icon={Flame} iconColor={tones.result.trap} label="Trap" last={last}>
-          (d8+d12={step.sum}): <strong>{step.data.tipo}</strong> Level {step.data.lv} · DC {step.data.dc} (detect & disarm) · {step.data.danno}
+          (d8+d12={step.sum}): <strong>{step.data.type}</strong> Level {step.data.lv} · DC {step.data.dc} (detect & disarm) · {step.data.damage}
           {step.disadvantage ? ' — Weather Disadvantage' : ''}
         </StepRow>
       );
@@ -101,7 +101,7 @@ export default function HexResultSteps({ result }) {
     difficulty: theme.palette.gmboard.difficulty,
     rarity: theme.palette.gmboard.rarity,
     fallback: theme.palette.gmboard.rarity.Common,
-    weather: theme.palette.gmboard.weather[result.steps.find((s) => s.kind === 'weatherChange')?.meteo] || theme.palette.gmboard.weather.Clear,
+    weather: theme.palette.gmboard.weather[result.steps.find((s) => s.kind === 'weatherChange')?.weather] || theme.palette.gmboard.weather.Clear,
     result: theme.palette.gmboard.result,
     dim: theme.palette.text.secondary,
   };

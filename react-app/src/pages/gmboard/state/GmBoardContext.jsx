@@ -96,11 +96,11 @@ export function GmBoardProvider({ instanceId, children }) {
     pushClockState(nextState, { season: season || null });
   }, [pushClockState]);
 
-  const setWeatherOverride = useCallback(({ meteo, intensity }) => {
-    const nextState = { ...clockStateRef.current, meteo, intensity };
+  const setWeatherOverride = useCallback(({ weather, intensity }) => {
+    const nextState = { ...clockStateRef.current, weather, intensity };
     clockStateRef.current = nextState;
-    dispatch({ type: 'setWeatherOverride', meteo, intensity });
-    pushClockState(nextState, { meteo, intensity });
+    dispatch({ type: 'setWeatherOverride', weather, intensity });
+    pushClockState(nextState, { weather, intensity });
   }, [pushClockState]);
 
   const proceed = useCallback(() => {

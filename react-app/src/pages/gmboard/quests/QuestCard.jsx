@@ -4,8 +4,8 @@ import ResultBadge from '../ui/ResultBadge.jsx';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
 
 function formatLoot(loot) {
-  const valueLine = [loot.valore, loot.extra].filter(Boolean).join(' ');
-  return [loot.rarita, loot.qualita, valueLine].filter(Boolean).join(' · ');
+  const valueLine = [loot.value, loot.extra].filter(Boolean).join(' ');
+  return [loot.rarity, loot.quality, valueLine].filter(Boolean).join(' · ');
 }
 
 function eventVisual(result, type) {
@@ -23,7 +23,7 @@ export default function QuestCard({ quest }) {
   const fallback = rarityTone.Common;
   const encounterTone = theme.palette.gmboard.result.encounter;
   const { Icon: EventIcon, tone: eventTone } = eventVisual(theme.palette.gmboard.result, quest.event.type);
-  const rewardTone = rarityTone[quest.reward.data.rarita] || fallback;
+  const rewardTone = rarityTone[quest.reward.data.rarity] || fallback;
 
   return (
     <Box sx={cardSx}>
@@ -61,11 +61,11 @@ export default function QuestCard({ quest }) {
           <Stack direction="row" spacing={0.6} alignItems="center" flexWrap="wrap">
             <Coins size={13} color={rewardTone} />
             <Typography sx={microLabelSx}>Reward</Typography>
-            <ResultBadge tone={rewardTone}>{quest.reward.data.tipo}</ResultBadge>
+            <ResultBadge tone={rewardTone}>{quest.reward.data.type}</ResultBadge>
             {quest.reward.isMinimum ? <ResultBadge tone={theme.palette.warning.main}>MINIMUM</ResultBadge> : null}
             <Typography sx={detailSx}>d8({quest.reward.d8})+d12({quest.reward.d12})={quest.reward.sum}</Typography>
           </Stack>
-          {quest.reward.data.rarita !== '—' ? <Typography sx={lineSx}>{formatLoot(quest.reward.data)}</Typography> : null}
+          {quest.reward.data.rarity !== '—' ? <Typography sx={lineSx}>{formatLoot(quest.reward.data)}</Typography> : null}
         </Box>
       </Stack>
     </Box>

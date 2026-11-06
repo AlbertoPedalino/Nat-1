@@ -69,7 +69,7 @@ test('campaign settings reach the map and its rolls, while existing hex terrain 
   campaignClock.clock = {
     travelConfigured: true, terrain: 'Forest', pop: 'frontier', hexTier: 2, mountSpeed: 2,
     season: 'Summer', min: 0, day: 1, month: 1, year: 1000,
-    meteo: 'Clear', intensity: '', hoursSinceWeather: 0, nextWeatherIn: 24,
+    weather: 'Clear', intensity: '', hoursSinceWeather: 0, nextWeatherIn: 24,
   };
   cloud.listHexCells.mockResolvedValue([{ q: 0, r: 0, terrain: 'Road', status: 'unexplored' }]);
   cloud.readHexcrawlBoard.mockResolvedValue({ id: 'board-one', version: 1, state: {}, tables: createDefaultTables() });
@@ -87,8 +87,8 @@ test('campaign settings reach the map and its rolls, while existing hex terrain 
 });
 
 test('changing season does not overwrite the campaign time or weather', async () => {
-  cloud.readHexcrawlBoard.mockResolvedValue({ id: 'board-one', version: 1, state: { min: 10, meteo: 'Rain' }, tables: {} });
-  campaignClock.clock = { travelConfigured: true, min: 800, meteo: 'Clear', season: 'Summer' };
+  cloud.readHexcrawlBoard.mockResolvedValue({ id: 'board-one', version: 1, state: { min: 10, weather: 'Rain' }, tables: {} });
+  campaignClock.clock = { travelConfigured: true, min: 800, weather: 'Clear', season: 'Summer' };
   render(<Probe />);
   await waitFor(() => expect(hexcrawl.board).not.toBeNull());
   await act(async () => hexcrawl.setSeason(null));
@@ -130,27 +130,27 @@ test('a square map leaves the campaign clock alone', async () => {
 
 test('the map sets the date and the sky without touching anything else', async () => {
   cloud.readHexcrawlBoard.mockResolvedValue({ id: 'board-one', version: 1, state: {}, tables: createDefaultTables() });
-  campaignClock.clock = { travelConfigured: true, min: 800, day: 3, month: 4, year: 1000, meteo: 'Clear', season: 'Summer' };
+  campaignClock.clock = { travelConfigured: true, min: 800, day: 3, month: 4, year: 1000, weather: 'Clear', season: 'Summer' };
   render(<Probe />);
   await waitFor(() => expect(hexcrawl.board).not.toBeNull());
   await act(async () => hexcrawl.setClock({ day: 9, month: 5, year: 1001, min: 60 }));
-  await act(async () => hexcrawl.setClock({ meteo: 'Snow', intensity: 'Heavy' }));
+  await act(async () => hexcrawl.setClock({ weather: 'Snow', intensity: 'Heavy' }));
   expect(campaignClock.saveClock.mock.calls[0][0](campaignClock.clock)).toEqual({ day: 9, month: 5, year: 1001, min: 60 });
-  expect(campaignClock.saveClock.mock.calls[1][0](campaignClock.clock)).toEqual({ meteo: 'Snow', intensity: 'Heavy' });
+  expect(campaignClock.saveClock.mock.calls[1][0](campaignClock.clock)).toEqual({ weather: 'Snow', intensity: 'Heavy' });
 });
 
 test('time passed off the map moves the clock and the weather count', async () => {
   cloud.readHexcrawlBoard.mockResolvedValue({ id: 'board-one', version: 1, state: {}, tables: createDefaultTables() });
   campaignClock.clock = {
     travelConfigured: true, min: 1380, day: 31, month: 12, year: 1000,
-    meteo: 'Clear', intensity: '', season: null, hoursSinceWeather: 1, nextWeatherIn: 24,
+    weather: 'Clear', intensity: '', season: null, hoursSinceWeather: 1, nextWeatherIn: 24,
   };
   render(<Probe />);
   await waitFor(() => expect(hexcrawl.board).not.toBeNull());
   await act(async () => hexcrawl.advanceClock(2));
   const write = campaignClock.saveClock.mock.calls[0][0](campaignClock.clock);
   expect(write).toMatchObject({
-    min: 60, day: 1, month: 1, year: 1001, hoursSinceWeather: 3, meteo: 'Clear', season: null,
+    min: 60, day: 1, month: 1, year: 1001, hoursSinceWeather: 3, weather: 'Clear', season: null,
   });
   await act(async () => hexcrawl.advanceClock(0));
   expect(campaignClock.saveClock).toHaveBeenCalledTimes(1);

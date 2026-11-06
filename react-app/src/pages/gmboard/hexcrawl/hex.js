@@ -5,14 +5,14 @@ import { getEvent, getLoot, getEnc, getTrap } from '../tables/tables.js';
 
 function weatherLogFragment(changes) {
   if (!changes.length) return '';
-  const parts = changes.map((c) => `${c.meteo}${c.intensity ? ` (${c.intensity})` : ''} [d20=${c.d20}]`);
+  const parts = changes.map((c) => `${c.weather}${c.intensity ? ` (${c.intensity})` : ''} [d20=${c.d20}]`);
   return ` · [Weather: ${parts.join(' → ')}]`;
 }
 
 function weatherSteps(changes) {
   return changes.map((change, index) => ({
     kind: 'weatherChange',
-    meteo: change.meteo,
+    weather: change.weather,
     intensity: change.intensity,
     d20: change.d20,
     nextWeatherIn: change.nextWeatherIn,
@@ -25,7 +25,7 @@ function runWeatherPhase(state, tables, rng) {
     season: state.season,
     hoursSinceWeather: state.hoursSinceWeather,
     nextWeatherIn: state.nextWeatherIn,
-    meteo: state.meteo,
+    weather: state.weather,
     intensity: state.intensity,
   }, tables.weather, rng);
   return { result, steps: weatherSteps(result.changes), logFragment: weatherLogFragment(result.changes) };
@@ -47,10 +47,10 @@ function resolveEventOutcome({ ev, hexTier, tables, disadvantage, rng }) {
     const roll = resolveDc(rng);
     const loot = getLoot(tables, roll.sum);
     steps.push({ kind: 'loot', d8: roll.d8, d12: roll.d12, sum: roll.sum, data: loot });
-    if (loot.tipo !== 'Nothing found') {
+    if (loot.type !== 'Nothing found') {
       const dc = resolveDc(rng);
       steps.push({ kind: 'lootDc', d8: dc.d8, d12: dc.d12, sum: dc.sum, disadvantage });
-      logSuffix = ` · Loot:${loot.tipo} · DC=${dc.sum}${disadvantage ? ' (Weather Disadvantage)' : ''}`;
+      logSuffix = ` · Loot:${loot.type} · DC=${dc.sum}${disadvantage ? ' (Weather Disadvantage)' : ''}`;
     } else {
       logSuffix = ' · Loot:nothing';
     }
@@ -63,10 +63,10 @@ function resolveEventOutcome({ ev, hexTier, tables, disadvantage, rng }) {
     const lootRoll = resolveDc(rng);
     const loot = getLoot(tables, lootRoll.sum);
     steps.push({ kind: 'campLoot', d8: lootRoll.d8, d12: lootRoll.d12, sum: lootRoll.sum, data: loot });
-    if (loot.tipo !== 'Nothing found') {
+    if (loot.type !== 'Nothing found') {
       const lootDc = resolveDc(rng);
       steps.push({ kind: 'campLootDc', d8: lootDc.d8, d12: lootDc.d12, sum: lootDc.sum, disadvantage });
-      logSuffix = ` · DC=${spotDc.sum} · Loot:${loot.tipo} · DC=${lootDc.sum}${disadvantage ? ' (Weather Disadvantage)' : ''}`;
+      logSuffix = ` · DC=${spotDc.sum} · Loot:${loot.type} · DC=${lootDc.sum}${disadvantage ? ' (Weather Disadvantage)' : ''}`;
     } else {
       logSuffix = ` · DC=${spotDc.sum} · Loot:nothing`;
     }
@@ -76,7 +76,7 @@ function resolveEventOutcome({ ev, hexTier, tables, disadvantage, rng }) {
     const trapRoll = resolveDc(rng);
     const trap = getTrap(tables, hexTier, trapRoll.sum);
     steps.push({ kind: 'trap', d8: trapRoll.d8, d12: trapRoll.d12, sum: trapRoll.sum, data: trap, disadvantage });
-    logSuffix = ` · Trap:${trap.tipo} DC${trap.dc} ${trap.danno}${disadvantage ? ' (Weather Disadvantage)' : ''}`;
+    logSuffix = ` · Trap:${trap.type} DC${trap.dc} ${trap.damage}${disadvantage ? ' (Weather Disadvantage)' : ''}`;
   } else {
     const dc = resolveDc(rng);
     steps.push({ kind: 'genericDc', d8: dc.d8, d12: dc.d12, sum: dc.sum, disadvantage });
@@ -87,14 +87,14 @@ function resolveEventOutcome({ ev, hexTier, tables, disadvantage, rng }) {
 }
 
 export function resolveProceed(state, tables, rng = Math.random) {
-  const travelHours = effectiveHours(state.terrainH, state.meteo, state.intensity, state.mountSpeed);
+  const travelHours = effectiveHours(state.terrainH, state.weather, state.intensity, state.mountSpeed);
   const time = advanceMinutes({ min: state.min, day: state.day, month: state.month, year: state.year }, travelHours);
   const hoursSinceWeather = state.hoursSinceWeather + travelHours;
 
   const weatherPhase = runWeatherPhase({ ...state, hoursSinceWeather }, tables, rng);
-  const meteo = weatherPhase.result.meteo;
+  const weather = weatherPhase.result.weather;
   const intensity = weatherPhase.result.intensity;
-  const disadvantage = hasWeatherDisadvantage(meteo, intensity);
+  const disadvantage = hasWeatherDisadvantage(weather, intensity);
 
   const steps = [...weatherPhase.steps];
 
@@ -102,7 +102,7 @@ export function resolveProceed(state, tables, rng = Math.random) {
   const triggered = d6 <= state.popThr;
   steps.push({ kind: 'popRoll', d6, threshold: state.popThr, triggered });
 
-  let logEntry = `${formatDateTime(time)} · ${state.terrain} (${travelHours}h) · ${meteo} ${intensity}`.trim()
+  let logEntry = `${formatDateTime(time)} · ${state.terrain} (${travelHours}h) · ${weather} ${intensity}`.trim()
     + ` · d6=${d6}${weatherPhase.logFragment}`;
 
   if (!triggered) {
@@ -110,7 +110,7 @@ export function resolveProceed(state, tables, rng = Math.random) {
     logEntry += ' → No event';
     return {
       time, hoursSinceWeather: weatherPhase.result.hoursSinceWeather, nextWeatherIn: weatherPhase.result.nextWeatherIn,
-      meteo, intensity, steps, logEntry, travelHours,
+      weather, intensity, steps, logEntry, travelHours,
     };
   }
 
@@ -125,25 +125,25 @@ export function resolveProceed(state, tables, rng = Math.random) {
 
   return {
     time, hoursSinceWeather: weatherPhase.result.hoursSinceWeather, nextWeatherIn: weatherPhase.result.nextWeatherIn,
-    meteo, intensity, steps, logEntry, travelHours,
+    weather, intensity, steps, logEntry, travelHours,
   };
 }
 
 export function resolveAdvanceOnly(state, tables, rng = Math.random) {
-  const travelHours = effectiveHours(state.terrainH, state.meteo, state.intensity, state.mountSpeed);
+  const travelHours = effectiveHours(state.terrainH, state.weather, state.intensity, state.mountSpeed);
   const time = advanceMinutes({ min: state.min, day: state.day, month: state.month, year: state.year }, travelHours);
   const hoursSinceWeather = state.hoursSinceWeather + travelHours;
 
   const weatherPhase = runWeatherPhase({ ...state, hoursSinceWeather }, tables, rng);
-  const meteo = weatherPhase.result.meteo;
+  const weather = weatherPhase.result.weather;
   const intensity = weatherPhase.result.intensity;
 
-  const logEntry = `${formatDateTime(time)} · ${state.terrain} (${travelHours}h) · ${meteo} ${intensity}`.trim()
+  const logEntry = `${formatDateTime(time)} · ${state.terrain} (${travelHours}h) · ${weather} ${intensity}`.trim()
     + ` · advanced without rolls${weatherPhase.logFragment}`;
 
   return {
     time, hoursSinceWeather: weatherPhase.result.hoursSinceWeather, nextWeatherIn: weatherPhase.result.nextWeatherIn,
-    meteo, intensity, steps: weatherPhase.steps, logEntry, travelHours,
+    weather, intensity, steps: weatherPhase.steps, logEntry, travelHours,
   };
 }
 
@@ -157,7 +157,7 @@ export function resolveManualAdvance(state, hours, tables, rng = Math.random) {
     time,
     hoursSinceWeather: weatherPhase.result.hoursSinceWeather,
     nextWeatherIn: weatherPhase.result.nextWeatherIn,
-    meteo: weatherPhase.result.meteo,
+    weather: weatherPhase.result.weather,
     intensity: weatherPhase.result.intensity,
     steps: weatherPhase.steps,
     logEntry: null,

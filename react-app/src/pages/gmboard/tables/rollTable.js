@@ -38,7 +38,7 @@ function rollDice(notation, rng) {
 // that was found, a camp to spot, an event to interact with. A trap has none
 // here because its row already carries its DC.
 function dcLabel(tableId, data) {
-  if (tableId === 'loot') return data.tipo !== 'Nothing found' ? 'DC to find it' : null;
+  if (tableId === 'loot') return data.type !== 'Nothing found' ? 'DC to find it' : null;
   if (tableId !== 'event') return null;
   if (data.type === 'camp_nemico') return 'DC to spot the camp';
   if (data.type === 'encounter' || data.type === 'loot' || data.type === 'nothing') return null;
@@ -112,28 +112,28 @@ function describeRow(roll) {
     case 'loot':
       return {
         titleLabel: 'Loot',
-        title: data.tipo,
-        stats: data.rarita !== '—' ? [
-          { label: 'Rarity', value: data.rarita },
-          { label: 'Quality', value: data.qualita },
-          { label: 'Value', value: data.valore, ...(data.extra ? { note: data.extra } : {}) },
+        title: data.type,
+        stats: data.rarity !== '—' ? [
+          { label: 'Rarity', value: data.rarity },
+          { label: 'Quality', value: data.quality },
+          { label: 'Value', value: data.value, ...(data.extra ? { note: data.extra } : {}) },
         ] : [],
       };
     case 'trap':
       return {
         titleLabel: 'Trap',
-        title: data.tipo,
+        title: data.type,
         stats: [
           { label: 'Level', value: String(data.lv) },
           // One DC per trap: the same number finds it and disarms it.
           { label: 'DC', value: String(data.dc), note: 'detect & disarm', emphasis: true },
-          { label: 'Damage', value: data.danno, emphasis: true },
+          { label: 'Damage', value: data.damage, emphasis: true },
         ],
       };
     case 'compl':
       return { titleLabel: 'Complication', title: data.type, stats: [] };
     case 'env':
-      return { titleLabel: 'Severity', title: data.gravita, stats: [] };
+      return { titleLabel: 'Severity', title: data.severity, stats: [] };
     default:
       return { titleLabel: '', title: '—', stats: [] };
   }

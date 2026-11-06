@@ -25,7 +25,7 @@ const BOARD = {
   tables: createDefaultTables(),
 };
 const CLOCK = {
-  min: 480, day: 1, month: 1, year: 1000, meteo: 'Rain', intensity: 'Heavy', season: 'Summer',
+  min: 480, day: 1, month: 1, year: 1000, weather: 'Rain', intensity: 'Heavy', season: 'Summer',
 };
 const DEFAULTS = { terrain: 'Plains', pop: 'unexplored', tier: 1 };
 
@@ -87,7 +87,7 @@ test('the result dialog reports the hex, the time, the weather and the rolls', (
         steps: [{ kind: 'none' }],
         hex: { q: 2, r: -1, terrain: 'Forest' },
         clock: {
-          min: 720, day: 2, month: 1, year: 1000, meteo: 'Snow', intensity: 'Heavy',
+          min: 720, day: 2, month: 1, year: 1000, weather: 'Snow', intensity: 'Heavy',
         },
       }}
       onClose={onClose}

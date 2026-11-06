@@ -55,11 +55,11 @@ test('the hex supplies the travel state, the board keeps the clock', () => {
 
 test('the campaign clock lays over the board without blanking what it has not set', () => {
   const merged = mergeBoardClock(BOARD, {
-    min: 600, day: 3, month: 2, year: 1001, season: null, meteo: 'Rain', intensity: 'Heavy',
+    min: 600, day: 3, month: 2, year: 1001, season: null, weather: 'Rain', intensity: 'Heavy',
     hoursSinceWeather: 2, nextWeatherIn: 6,
   });
   assert.equal(merged.min, 600);
-  assert.equal(merged.meteo, 'Rain');
+  assert.equal(merged.weather, 'Rain');
   // A campaign that has never picked a season must not erase the board's.
   assert.equal(merged.season, 'Summer');
   assert.deepEqual(mergeBoardClock(BOARD, null), { ...BOARD });
@@ -115,7 +115,7 @@ test('a mounted party crosses a hex in a fraction of the time', () => {
 test('the bubble says the outcome in one breath, and the dialog keeps the rest', () => {
   const quiet = hexEntrySummary({
     steps: [
-      { kind: 'weatherChange', meteo: 'Rain', intensity: 'Light', d20: 4 },
+      { kind: 'weatherChange', weather: 'Rain', intensity: 'Light', d20: 4 },
       { kind: 'popRoll', d6: 5, threshold: 2, triggered: false },
       { kind: 'none' },
     ],
@@ -137,11 +137,11 @@ test('the bubble says the outcome in one breath, and the dialog keeps the rest',
   // encounter, and the GM had to open the dialog to learn there was any.
   const busy = hexEntrySummary({
     steps: [
-      { kind: 'weatherChange', meteo: 'Snow', intensity: 'Heavy' },
+      { kind: 'weatherChange', weather: 'Snow', intensity: 'Heavy' },
       { kind: 'popRoll', d6: 1, threshold: 3 },
       { kind: 'event', name: 'Enemy Camp', type: 'camp_nemico' },
       { kind: 'encounter', label: 'Camp Difficulty', data: { diff: 'Deadly', lv: 7, xp: 1200 } },
-      { kind: 'campLoot', data: { tipo: 'Coins', rarita: 'Rare' } },
+      { kind: 'campLoot', data: { type: 'Coins', rarity: 'Rare' } },
       { kind: 'campSpotDc', sum: 14, disadvantage: true },
     ],
   });
@@ -160,7 +160,7 @@ test('the bubble says the outcome in one breath, and the dialog keeps the rest',
       { kind: 'popRoll', d6: 1, threshold: 2 },
       { kind: 'event', name: 'Env. Damage/Trap', type: 'other' },
       { kind: 'trapDetectDc', sum: 14 },
-      { kind: 'trap', data: { tipo: 'Deadly', dc: 15, danno: '11 (2d10)' }, disadvantage: true },
+      { kind: 'trap', data: { type: 'Deadly', dc: 15, damage: '11 (2d10)' }, disadvantage: true },
     ],
   });
   assert.deepEqual(trapped.lines, ['d6 1 vs 2', 'Trap: Deadly DC15 (detect & disarm) · 11 (2d10) (disadvantage)']);

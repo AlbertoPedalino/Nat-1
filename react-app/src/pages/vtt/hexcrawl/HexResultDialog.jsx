@@ -20,7 +20,7 @@ export default function HexResultDialog({ result, onClose }) {
   const clock = result?.clock || null;
   const hex = result?.hex || null;
   const terrain = terrainOption(hex?.terrain);
-  const disadvantage = clock ? hasWeatherDisadvantage(clock.meteo, clock.intensity) : false;
+  const disadvantage = clock ? hasWeatherDisadvantage(clock.weather, clock.intensity) : false;
 
   return (
     <Dialog
@@ -44,7 +44,7 @@ export default function HexResultDialog({ result, onClose }) {
           <Box sx={{ ...weatherBadgeSx, ...(disadvantage ? weatherWarnSx : null) }}>
             <CloudRain size={13} />
             <Typography component="span" sx={weatherTextSx}>
-              {clock.meteo}{clock.intensity ? ` · ${clock.intensity}` : ''}
+              {clock.weather}{clock.intensity ? ` · ${clock.intensity}` : ''}
               {disadvantage ? ' · disadvantage' : ''}
             </Typography>
           </Box>

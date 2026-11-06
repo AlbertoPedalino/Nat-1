@@ -48,7 +48,7 @@ create table if not exists public.campaign_hexcrawl (
   month               integer not null default 1,
   year                integer not null default 1,
   season              text,
-  meteo               text,
+  weather             text,
   intensity           text,
   hours_since_weather double precision not null default 0,
   next_weather_in     double precision not null default 0,
@@ -65,6 +65,19 @@ create table if not exists public.campaign_hexcrawl (
   scene_id            uuid references public.map_scenes(id) on delete set null,
   updated_at          timestamptz not null default now()
 );
+
+-- The weather column was named `meteo` before the data went all English. A
+-- database created then still has it: rename it, keeping its values. Does
+-- nothing once the column is `weather`.
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+     where table_schema = 'public' and table_name = 'campaign_hexcrawl' and column_name = 'meteo'
+  ) then
+    alter table public.campaign_hexcrawl rename column meteo to weather;
+  end if;
+end $$;
 
 -- The session log. Append-only, and read by the GM alone: an entry names what
 -- the party has not met yet.

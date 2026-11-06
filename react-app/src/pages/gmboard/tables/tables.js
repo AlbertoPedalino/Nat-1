@@ -3,7 +3,7 @@ export function getEvent(tables, sum) {
 }
 
 export function getLoot(tables, sum) {
-  return tables.loot.find((e) => e.r === sum) || { tipo: 'Nothing found', rarita: '—', qualita: '—', valore: '—', extra: '' };
+  return tables.loot.find((e) => e.r === sum) || { type: 'Nothing found', rarity: '—', quality: '—', value: '—', extra: '' };
 }
 
 export function getCompl(tables, sum) {
@@ -15,9 +15,9 @@ export function getEnc(tables, tier, sum) {
 }
 
 export function getTrap(tables, tier, sum) {
-  return (tables.trap[tier - 1] || []).find((e) => e.r === sum) || { tipo: 'Nuisance', lv: '?', dc: 10, danno: '?' };
+  return (tables.trap[tier - 1] || []).find((e) => e.r === sum) || { type: 'Nuisance', lv: '?', dc: 10, damage: '?' };
 }
 
 export function getEnvSev(tables, sum) {
-  return tables.env.find((e) => e.r === sum) || { gravita: 'Common' };
+  return tables.env.find((e) => e.r === sum) || { severity: 'Common' };
 }

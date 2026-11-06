@@ -4,8 +4,8 @@ import ResultBadge from '../ui/ResultBadge.jsx';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
 
 function formatLoot(loot) {
-  const valueLine = [loot.valore, loot.extra].filter(Boolean).join(' ');
-  return [loot.rarita, loot.qualita, valueLine].filter(Boolean).join(' · ');
+  const valueLine = [loot.value, loot.extra].filter(Boolean).join(' ');
+  return [loot.rarity, loot.quality, valueLine].filter(Boolean).join(' · ');
 }
 
 const SLOT_ICON = { Encounter: Swords, 'Environment Damage': Flame, Environment: Leaf, None: Minus };
@@ -35,10 +35,10 @@ function SlotBlock({ slot, tones }) {
         </Typography>
       ) : null}
       {slot.extra?.kind === 'trap' ? (
-        <Typography sx={lineSx}>{slot.extra.data.tipo} Lv {slot.extra.data.lv} · DC {slot.extra.data.dc} (detect & disarm) · {slot.extra.data.danno}</Typography>
+        <Typography sx={lineSx}>{slot.extra.data.type} Lv {slot.extra.data.lv} · DC {slot.extra.data.dc} (detect & disarm) · {slot.extra.data.damage}</Typography>
       ) : null}
       {slot.extra?.kind === 'env' ? (
-        <Typography sx={lineSx}>Severity: {slot.extra.data.gravita}</Typography>
+        <Typography sx={lineSx}>Severity: {slot.extra.data.severity}</Typography>
       ) : null}
     </Box>
   );
@@ -53,7 +53,7 @@ export default function RoomCard({ room }) {
     fallback: theme.palette.gmboard.rarity.Common,
   };
   const isSafe = room.slots.every((slot) => slot.type === 'None');
-  const lootTone = tones.rarity[room.loot.data.rarita] || tones.fallback;
+  const lootTone = tones.rarity[room.loot.data.rarity] || tones.fallback;
 
   return (
     <Box sx={cardSx}>
@@ -77,10 +77,10 @@ export default function RoomCard({ room }) {
           <Stack direction="row" spacing={0.6} alignItems="center" flexWrap="wrap">
             <Coins size={13} color={lootTone} />
             <Typography sx={microLabelSx}>Loot</Typography>
-            <ResultBadge tone={lootTone}>{room.loot.data.tipo}</ResultBadge>
+            <ResultBadge tone={lootTone}>{room.loot.data.type}</ResultBadge>
             <Typography sx={detailSx}>d8({room.loot.d8})+d12({room.loot.d12})={room.loot.sum}</Typography>
           </Stack>
-          {room.loot.data.rarita !== '—' ? <Typography sx={lineSx}>{formatLoot(room.loot.data)}</Typography> : null}
+          {room.loot.data.rarity !== '—' ? <Typography sx={lineSx}>{formatLoot(room.loot.data)}</Typography> : null}
           {room.lootDc ? (
             <Stack direction="row" spacing={0.4} alignItems="center" sx={{ mt: 0.3 }}>
               <Lock size={11} color={theme.palette.text.secondary} />

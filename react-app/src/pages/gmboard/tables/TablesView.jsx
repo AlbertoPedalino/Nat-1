@@ -9,8 +9,8 @@ import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 
 const WEATHER_COLUMNS = [
   { field: 's', label: 'Season', editable: false },
-  { field: 'sole', label: 'Clear ≤', editable: true, numeric: true },
-  { field: 'pioggia', label: 'Rain ≤', editable: true, numeric: true },
+  { field: 'clear', label: 'Clear ≤', editable: true, numeric: true },
+  { field: 'rain', label: 'Rain ≤', editable: true, numeric: true },
 ];
 const EVENT_COLUMNS = [
   { field: 'r', label: 'Roll', editable: false },
@@ -19,10 +19,10 @@ const EVENT_COLUMNS = [
 ];
 const LOOT_COLUMNS = [
   { field: 'r', label: 'Roll', editable: false },
-  { field: 'tipo', label: 'Type', editable: true },
-  { field: 'rarita', label: 'Rarity', editable: true },
-  { field: 'qualita', label: 'Quality', editable: true },
-  { field: 'valore', label: 'Value', editable: true },
+  { field: 'type', label: 'Type', editable: true },
+  { field: 'rarity', label: 'Rarity', editable: true },
+  { field: 'quality', label: 'Quality', editable: true },
+  { field: 'value', label: 'Value', editable: true },
   { field: 'extra', label: 'Extra', editable: true },
 ];
 const COMPL_COLUMNS = [
@@ -37,14 +37,14 @@ const ENC_COLUMNS = [
 ];
 const TRAP_COLUMNS = [
   { field: 'r', label: 'Roll', editable: false },
-  { field: 'tipo', label: 'Type', editable: true },
+  { field: 'type', label: 'Type', editable: true },
   { field: 'lv', label: 'Level', editable: true },
   { field: 'dc', label: 'DC', editable: true, numeric: true },
-  { field: 'danno', label: 'Damage', editable: true },
+  { field: 'damage', label: 'Damage', editable: true },
 ];
 const ENV_COLUMNS = [
   { field: 'r', label: 'Roll', editable: false },
-  { field: 'gravita', label: 'Severity', editable: true },
+  { field: 'severity', label: 'Severity', editable: true },
 ];
 
 function resolveEditorSource(editorId, tables) {

@@ -16,7 +16,7 @@ function buildQuest(index, { tier }, tables, rng) {
   const lootRoll = rollD8D12(rng);
   let lootData = getLoot(tables, lootRoll.sum);
   let isMinimum = false;
-  if (lootData.tipo === 'Nothing found') {
+  if (lootData.type === 'Nothing found') {
     lootData = getLoot(tables, MINIMUM_REWARD_ROLL);
     isMinimum = true;
   }

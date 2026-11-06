@@ -23,9 +23,9 @@ export default function HexBubble({ bubble, x, y, onClose }) {
   const clock = bubble.clock || null;
   const terrain = terrainOption(bubble.hex?.terrain);
   const TerrainIcon = terrain ? TERRAIN_ICONS[terrain.id] : null;
-  const tone = clock ? theme.palette.gmboard.weather[clock.meteo] : null;
-  const WeatherIcon = clock ? (WEATHER_ICONS[clock.meteo] || FALLBACK_WEATHER_ICON) : null;
-  const disadvantage = clock ? hasWeatherDisadvantage(clock.meteo, clock.intensity) : false;
+  const tone = clock ? theme.palette.gmboard.weather[clock.weather] : null;
+  const WeatherIcon = clock ? (WEATHER_ICONS[clock.weather] || FALLBACK_WEATHER_ICON) : null;
+  const disadvantage = clock ? hasWeatherDisadvantage(clock.weather, clock.intensity) : false;
 
   return (
     <Box sx={{ ...rootSx, transform: `translate(${x}px, ${y}px) translate(-50%, -100%)` }}>
@@ -65,7 +65,7 @@ export default function HexBubble({ bubble, x, y, onClose }) {
           >
             {WeatherIcon ? <WeatherIcon size={13} color={tone} /> : null}
             <Typography sx={{ ...footerTextSx, color: tone }}>
-              {clock.meteo}{clock.intensity ? ` · ${clock.intensity}` : ''}
+              {clock.weather}{clock.intensity ? ` · ${clock.intensity}` : ''}
               {disadvantage ? ' · Dis' : ''}
             </Typography>
             <Typography sx={{ ...footerTextSx, ml: 'auto' }}>{formatDateTime(clock)}</Typography>

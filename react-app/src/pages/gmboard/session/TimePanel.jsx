@@ -51,7 +51,7 @@ export default function TimePanel() {
     advanceManual(manualHours);
   };
 
-  const travel = travelTime(state.terrainH, state.meteo, state.intensity, state.mountSpeed);
+  const travel = travelTime(state.terrainH, state.weather, state.intensity, state.mountSpeed);
   const terrainLabel = !state.terrain
     ? '— no terrain —'
     : travel.hours === travel.base

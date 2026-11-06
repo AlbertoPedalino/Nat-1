@@ -7,15 +7,15 @@ import { fillBudget } from '../../../../src/shared/dungeon/roomBudget.js';
 // The GM reads the marker at the moment the party steps on it. "Trap" sends
 // them back to a panel; the numbers do not.
 test('a trap marker carries its kind, its DC and its damage', () => {
-  assert.equal(trapLabel({ tipo: 'Pit', dc: 13, danno: '2d6 bludgeoning' }), 'Pit · DC 13 (detect & disarm) · 2d6 bludgeoning');
-  assert.equal(trapLabel({ tipo: 'Alarm' }), 'Alarm');
+  assert.equal(trapLabel({ type: 'Pit', dc: 13, damage: '2d6 bludgeoning' }), 'Pit · DC 13 (detect & disarm) · 2d6 bludgeoning');
+  assert.equal(trapLabel({ type: 'Alarm' }), 'Alarm');
   assert.equal(trapLabel(null), 'Trap');
 });
 
 test('loot says what it is, how rare, and what it takes to get it out', () => {
-  assert.equal(lootLabel({ tipo: 'Coins', rarita: 'Rare' }, { sum: 14 }), 'Coins · Rare · DC 14');
+  assert.equal(lootLabel({ type: 'Coins', rarity: 'Rare' }, { sum: 14 }), 'Coins · Rare · DC 14');
   // An unrarity is not worth the space on a one-square marker.
-  assert.equal(lootLabel({ tipo: 'Coins', rarita: '—' }, null), 'Coins');
+  assert.equal(lootLabel({ type: 'Coins', rarity: '—' }, null), 'Coins');
 });
 
 // A triangle says "something happens here", which the GM already knew.
@@ -34,11 +34,11 @@ test('the icon follows the trap, in either language the tables are written in', 
 test('a rolled room offers its trap, its hazard and its hoard, and no empties', () => {
   const markers = roomMarkers({
     slots: [
-      { n: 1, type: 'Environment Damage', extra: { kind: 'trap', data: { tipo: 'Pit', dc: 13, danno: '2d6' } } },
-      { n: 2, type: 'Environment', extra: { kind: 'env', data: { gravita: 'High' } } },
+      { n: 1, type: 'Environment Damage', extra: { kind: 'trap', data: { type: 'Pit', dc: 13, damage: '2d6' } } },
+      { n: 2, type: 'Environment', extra: { kind: 'env', data: { severity: 'High' } } },
       { n: 3, type: 'Encounter', extra: { kind: 'enc', data: { diff: 'Hard' } } },
     ],
-    loot: { data: { tipo: 'Coins', rarita: 'Rare' } },
+    loot: { data: { type: 'Coins', rarity: 'Rare' } },
     lootDc: { sum: 12 },
   });
 
@@ -49,7 +49,7 @@ test('a rolled room offers its trap, its hazard and its hoard, and no empties', 
   assert.ok(markers.every((marker) => marker.kind !== 'enc'));
 
   // Nothing found is nothing placed.
-  assert.deepEqual(roomMarkers({ slots: [], loot: { data: { tipo: 'Nothing found' } } }), []);
+  assert.deepEqual(roomMarkers({ slots: [], loot: { data: { type: 'Nothing found' } } }), []);
   assert.deepEqual(roomMarkers(null), []);
 });
 

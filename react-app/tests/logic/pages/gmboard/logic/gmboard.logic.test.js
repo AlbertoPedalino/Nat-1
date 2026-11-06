@@ -127,18 +127,18 @@ test('weatherTimerLabel shows a select-season placeholder with no season, else t
 });
 
 test('runWeatherChecks is a no-op without a season', () => {
-  const result = runWeatherChecks({ season: null, hoursSinceWeather: 10, nextWeatherIn: 8, meteo: 'Clear', intensity: '' }, [], Math.random);
+  const result = runWeatherChecks({ season: null, hoursSinceWeather: 10, nextWeatherIn: 8, weather: 'Clear', intensity: '' }, [], Math.random);
   assert.equal(result.changes.length, 0);
   assert.equal(result.hoursSinceWeather, 10);
 });
 
 test('runWeatherChecks applies one weather roll when threshold is crossed', () => {
   const table = createDefaultTables().weather;
-  // interval reroll d6=1 -> +2 = 3; d20=5 (<=10 sole) -> Clear
+  // interval reroll d6=1 -> +2 = 3; d20=5 (<=10 clear) -> Clear
   const rng = seqRng([0 / 6, 4 / 20]);
-  const result = runWeatherChecks({ season: 'Spring', hoursSinceWeather: 8, nextWeatherIn: 8, meteo: 'Rain', intensity: 'Light' }, table, rng);
+  const result = runWeatherChecks({ season: 'Spring', hoursSinceWeather: 8, nextWeatherIn: 8, weather: 'Rain', intensity: 'Light' }, table, rng);
   assert.equal(result.changes.length, 1);
-  assert.equal(result.changes[0].meteo, 'Clear');
+  assert.equal(result.changes[0].weather, 'Clear');
   assert.equal(result.nextWeatherIn, 3);
   assert.equal(result.hoursSinceWeather, 0);
 });
@@ -148,11 +148,11 @@ test('runWeatherChecks applies one weather roll when threshold is crossed', () =
 test('table getters fall back to a safe default for unknown rolls', () => {
   const tables = createDefaultTables();
   assert.equal(getEvent(tables, 2).name, 'Dungeon');
-  assert.equal(getLoot(tables, 999).tipo, 'Nothing found');
+  assert.equal(getLoot(tables, 999).type, 'Nothing found');
   assert.equal(getEnc(tables, 1, 999).diff, 'Low');
-  assert.equal(getTrap(tables, 1, 999).tipo, 'Nuisance');
+  assert.equal(getTrap(tables, 1, 999).type, 'Nuisance');
   assert.equal(getCompl(tables, 999).type, 'None');
-  assert.equal(getEnvSev(tables, 999).gravita, 'Common');
+  assert.equal(getEnvSev(tables, 999).severity, 'Common');
 });
 
 // --- rng.js ---
@@ -209,7 +209,7 @@ test('resolveProceed rolls a trap once: its table DC is the only DC', () => {
 test('a trap met in heavy weather is marked for disadvantage', () => {
   const tables = createDefaultTables();
   const state = {
-    ...createDefaultCoreState(), terrain: 'Road', terrainH: 1, hexTier: 1, popThr: 6, meteo: 'Rain', intensity: 'Heavy',
+    ...createDefaultCoreState(), terrain: 'Road', terrainH: 1, hexTier: 1, popThr: 6, weather: 'Rain', intensity: 'Heavy',
   };
   const result = resolveProceed(state, tables, seqRng([0, 0.15, 0.15, 0, 0]));
   assert.equal(result.steps.at(-1).disadvantage, true);
@@ -307,7 +307,7 @@ test('createQuests applies the minimum-reward fallback when loot finds nothing',
   const [quest] = quests.quests;
   assert.equal(quest.encounter, null);
   assert.equal(quest.reward.isMinimum, true);
-  assert.equal(quest.reward.data.tipo, 'Consumable');
+  assert.equal(quest.reward.data.type, 'Consumable');
 });
 
 test('createQuests count is the max of the rolled scope dice', () => {
@@ -337,14 +337,21 @@ test('migrateLegacyBoard maps legacy Italian weather/intensity/loot/complication
     gm_lo: JSON.stringify([{ r: 2, tipo: 'Oggetto Maledetto', rarita: 'Leggendario', qualita: 'Corrotto', valore: '75×Lv', extra: '' }]),
     gm_co: JSON.stringify([{ r: 2, type: 'Niente' }]),
     gm_env: JSON.stringify([{ r: 2, gravita: 'Comune' }]),
+    gm_wea: JSON.stringify([{ s: 'Spring', sole: 9, pioggia: 18 }]),
+    gm_trap0: JSON.stringify([{ r: 2, tipo: 'Deadly', lv: '4', dc: 15, danno: '11 (2d10)' }]),
   };
   const migrated = migrateLegacyBoard(raw);
-  assert.equal(migrated.state.meteo, 'Rain');
+  assert.equal(migrated.state.weather, 'Rain');
   assert.equal(migrated.state.intensity, 'Heavy');
-  assert.equal(migrated.tables.loot[0].tipo, 'Cursed Item');
-  assert.equal(migrated.tables.loot[0].rarita, 'Legendary');
-  assert.equal(migrated.tables.loot[0].qualita, 'Corrupted');
+  assert.equal(migrated.tables.loot[0].type, 'Cursed Item');
+  assert.equal(migrated.tables.loot[0].rarity, 'Legendary');
+  assert.equal(migrated.tables.loot[0].quality, 'Corrupted');
+  assert.equal(migrated.tables.loot[0].value, '75×Lv');
   assert.equal(migrated.tables.compl[0].type, 'None');
+  assert.equal(migrated.tables.env[0].severity, 'Common');
+  assert.deepEqual(migrated.tables.weather[0], { s: 'Spring', clear: 9, rain: 18 });
+  assert.deepEqual(migrated.tables.trap[0][0], { r: 2, type: 'Deadly', lv: '4', dc: 15, damage: '11 (2d10)' });
+  assert.equal('tipo' in migrated.tables.loot[0], false);
 });
 
 test('migrateLegacyBoard is idempotent on already-English values and falls back to defaults when absent', () => {
@@ -418,14 +425,14 @@ test('reducer applyHexResult updates time/weather/log and clearLog empties the l
     time: { min: 60, day: 2, month: 1, year: 1000 },
     hoursSinceWeather: 1,
     nextWeatherIn: 8,
-    meteo: 'Rain',
+    weather: 'Rain',
     intensity: 'Light',
     steps: [{ kind: 'none' }],
     logEntry: 'test entry',
   };
   state = gmBoardReducer(state, { type: 'applyHexResult', result });
   assert.equal(state.log[0], 'test entry');
-  assert.equal(state.meteo, 'Rain');
+  assert.equal(state.weather, 'Rain');
   assert.deepEqual(state.hexResult, { steps: result.steps });
   state = gmBoardReducer(state, { type: 'clearLog' });
   assert.deepEqual(state.log, []);

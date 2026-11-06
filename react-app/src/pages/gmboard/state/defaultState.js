@@ -1,6 +1,6 @@
 export function createDefaultCoreState() {
   return {
-    season: null, meteo: 'Clear', intensity: '', hoursSinceWeather: 0, nextWeatherIn: 8,
+    season: null, weather: 'Clear', intensity: '', hoursSinceWeather: 0, nextWeatherIn: 8,
     min: 0, day: 1, month: 1, year: 1000, log: [],
     pop: null, popThr: 0, terrain: null, terrainH: 0, hexTier: null,
     // What the party is travelling on, as a multiplier on its speed. One is on

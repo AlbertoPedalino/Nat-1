@@ -127,12 +127,12 @@ export default function DungeonPanel({
               <SlotLine key={`${keyRoom.id}-${slot.n}`} slot={slot} tones={theme.palette.gmboard} />
             ))}
 
-            {keyRoom.loot?.data?.tipo && keyRoom.loot.data.tipo !== 'Nothing found' ? (
+            {keyRoom.loot?.data?.type && keyRoom.loot.data.type !== 'Nothing found' ? (
               <Stack direction="row" spacing={0.6} sx={{ alignItems: 'center' }}>
                 <Coins size={13} color={theme.palette.gmboard.result.loot} />
                 <Typography sx={lineSx}>
-                  {keyRoom.loot.data.tipo}
-                  {keyRoom.loot.data.rarita && keyRoom.loot.data.rarita !== '—' ? ` · ${keyRoom.loot.data.rarita}` : ''}
+                  {keyRoom.loot.data.type}
+                  {keyRoom.loot.data.rarity && keyRoom.loot.data.rarity !== '—' ? ` · ${keyRoom.loot.data.rarity}` : ''}
                   {keyRoom.lootDc ? ` · DC ${keyRoom.lootDc.sum}` : ''}
                 </Typography>
               </Stack>
@@ -254,7 +254,7 @@ function SlotLine({ slot, tones }) {
       <Stack direction="row" spacing={0.6} sx={{ alignItems: 'center' }}>
         <Flame size={13} color={tones.result.trap} />
         <Typography sx={lineSx}>
-          {extra.data.tipo} · DC {extra.data.dc} (detect & disarm) · {extra.data.danno}
+          {extra.data.type} · DC {extra.data.dc} (detect & disarm) · {extra.data.damage}
         </Typography>
       </Stack>
     );
@@ -263,7 +263,7 @@ function SlotLine({ slot, tones }) {
     <Stack direction="row" spacing={0.6} sx={{ alignItems: 'center' }}>
       <Leaf size={13} color={tones.result.none} />
       <Typography sx={lineSx}>
-        {slot.type}{extra.data?.gravita ? ` · ${extra.data.gravita}` : ''}
+        {slot.type}{extra.data?.severity ? ` · ${extra.data.severity}` : ''}
       </Typography>
     </Stack>
   );

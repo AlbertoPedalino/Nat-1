@@ -48,22 +48,30 @@ function migrateState(raw) {
     year: typeof parsed.year === 'number' ? parsed.year : base.year,
     log: Array.isArray(parsed.log) ? parsed.log : base.log,
     season: parsed.season || base.season,
-    meteo: METEO_MAP[parsed.meteo] || parsed.meteo || base.meteo,
+    weather: METEO_MAP[parsed.meteo] || parsed.meteo || base.weather,
     intensity: INTENSITY_MAP[parsed.intensita] || parsed.intensita || base.intensity,
     hoursSinceWeather: typeof parsed.hoursSinceWeather === 'number' ? parsed.hoursSinceWeather : base.hoursSinceWeather,
     nextWeatherIn: typeof parsed.nextWeatherIn === 'number' ? parsed.nextWeatherIn : base.nextWeatherIn,
   };
 }
 
+// Legacy rows used Italian field names (and values); a row already in the
+// current shape passes through unchanged.
 function migrateLoot(raw, fallback) {
   const parsed = parseJson(raw, null);
   if (!Array.isArray(parsed)) return fallback;
-  return parsed.map((entry) => ({
-    ...entry,
-    tipo: LOOT_TIPO_MAP[entry.tipo] || entry.tipo,
-    rarita: RARITA_MAP[entry.rarita] || entry.rarita,
-    qualita: QUALITA_MAP[entry.qualita] || entry.qualita,
-  }));
+  return parsed.map(({ tipo, rarita, qualita, valore, ...entry }) => {
+    const type = tipo ?? entry.type;
+    const rarity = rarita ?? entry.rarity;
+    const quality = qualita ?? entry.quality;
+    return {
+      ...entry,
+      type: LOOT_TIPO_MAP[type] || type,
+      rarity: RARITA_MAP[rarity] || rarity,
+      quality: QUALITA_MAP[quality] || quality,
+      value: valore ?? entry.value,
+    };
+  });
 }
 
 function migrateCompl(raw, fallback) {
@@ -75,7 +83,26 @@ function migrateCompl(raw, fallback) {
 function migrateEnv(raw, fallback) {
   const parsed = parseJson(raw, null);
   if (!Array.isArray(parsed)) return fallback;
-  return parsed.map((entry) => ({ ...entry, gravita: RARITA_MAP[entry.gravita] || entry.gravita }));
+  return parsed.map(({ gravita, ...entry }) => {
+    const severity = gravita ?? entry.severity;
+    return { ...entry, severity: RARITA_MAP[severity] || severity };
+  });
+}
+
+function migrateWeather(raw, fallback) {
+  const parsed = parseJson(raw, null);
+  if (!Array.isArray(parsed)) return fallback;
+  return parsed.map(({ sole, pioggia, ...entry }) => ({
+    ...entry, clear: sole ?? entry.clear, rain: pioggia ?? entry.rain,
+  }));
+}
+
+function migrateTrap(raw, fallback) {
+  const parsed = parseJson(raw, null);
+  if (!Array.isArray(parsed)) return fallback;
+  return parsed.map(({ tipo, danno, ...entry }) => ({
+    ...entry, type: tipo ?? entry.type, damage: danno ?? entry.damage,
+  }));
 }
 
 function migratePlainArray(raw, fallback) {
@@ -88,12 +115,12 @@ export function migrateLegacyBoard(raw) {
   return {
     state: migrateState(raw.gm_state),
     tables: {
-      weather: migratePlainArray(raw.gm_wea, defaults.weather),
+      weather: migrateWeather(raw.gm_wea, defaults.weather),
       events: migratePlainArray(raw.gm_ev, defaults.events),
       loot: migrateLoot(raw.gm_lo, defaults.loot),
       compl: migrateCompl(raw.gm_co, defaults.compl),
       enc: [0, 1, 2, 3].map((i) => migratePlainArray(raw[`gm_enc${i}`], defaults.enc[i])),
-      trap: [0, 1, 2, 3].map((i) => migratePlainArray(raw[`gm_trap${i}`], defaults.trap[i])),
+      trap: [0, 1, 2, 3].map((i) => migrateTrap(raw[`gm_trap${i}`], defaults.trap[i])),
       env: migrateEnv(raw.gm_env, defaults.env),
     },
   };

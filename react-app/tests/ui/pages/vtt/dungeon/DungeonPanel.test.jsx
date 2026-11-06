@@ -16,7 +16,7 @@ const KEY = {
         type: 'Encounter',
         extra: { kind: 'enc', data: { diff: 'Hard', lv: 5, xp: 1100 } },
       }],
-      loot: { data: { tipo: 'Coins', rarita: 'Rare' } },
+      loot: { data: { type: 'Coins', rarity: 'Rare' } },
       lootDc: { sum: 14 },
     },
     {
@@ -26,9 +26,9 @@ const KEY = {
       slots: [{
         n: 1,
         type: 'Environment Damage',
-        extra: { kind: 'trap', data: { tipo: 'Pit', dc: 13, danno: '2d6' } },
+        extra: { kind: 'trap', data: { type: 'Pit', dc: 13, damage: '2d6' } },
       }],
-      loot: { data: { tipo: 'Nothing found' } },
+      loot: { data: { type: 'Nothing found' } },
       lootDc: null,
     },
   ],

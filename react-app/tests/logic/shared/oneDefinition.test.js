@@ -91,6 +91,15 @@ test('no Italian text in interface strings', () => {
   ), []);
 });
 
+// Data field names are English too. Only the legacy board import reads the
+// old Italian names, as its input format.
+test('no Italian data field names in code', () => {
+  assert.deepEqual(sourceLinesMatching(
+    /\b(meteo|tipo|danno|rarita|qualita|valore|gravita|pioggia)\b/,
+    { allow: ['pages/gmboard/state/migration.js'] },
+  ), []);
+});
+
 test('asArray and flattenList are defined only in shared/lists.js', () => {
   assert.deepEqual(sourceFilesMatching(/(function|const)\s+(asArray|flattenList)\b/, {
     allow: ['shared/lists.js'],

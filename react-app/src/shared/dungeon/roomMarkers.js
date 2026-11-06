@@ -61,17 +61,17 @@ export function trapIconFor(name) {
 export function trapLabel(trap) {
   const dc = numberOr(trap?.dc, null);
   return [
-    String(trap?.tipo || 'Trap'),
+    String(trap?.type || 'Trap'),
     dc != null ? `DC ${dc} (detect & disarm)` : null,
-    trap?.danno ? String(trap.danno) : null,
+    trap?.damage ? String(trap.damage) : null,
   ].filter(Boolean).join(' · ');
 }
 
 export function lootLabel(loot, lootDc) {
-  const rarity = loot?.rarita && loot.rarita !== '—' ? String(loot.rarita) : null;
+  const rarity = loot?.rarity && loot.rarity !== '—' ? String(loot.rarity) : null;
   const dc = numberOr(lootDc?.sum, null);
   return [
-    String(loot?.tipo || 'Loot'),
+    String(loot?.type || 'Loot'),
     rarity,
     dc != null ? `DC ${dc}` : null,
   ].filter(Boolean).join(' · ');
@@ -88,20 +88,20 @@ export function roomMarkers(keyRoom) {
     if (extra?.kind === 'trap' && extra.data) {
       markers.push({
         kind: 'trap',
-        iconKey: trapIconFor(extra.data.tipo),
+        iconKey: trapIconFor(extra.data.type),
         label: trapLabel(extra.data),
       });
     } else if (extra?.kind === 'env' && extra.data) {
       markers.push({
         kind: 'hazard',
         iconKey: 'cloud-lightning',
-        label: [slot.type, extra.data.gravita].filter(Boolean).join(' · '),
+        label: [slot.type, extra.data.severity].filter(Boolean).join(' · '),
       });
     }
   }
 
   const loot = keyRoom.loot?.data;
-  if (loot?.tipo && loot.tipo !== 'Nothing found') {
+  if (loot?.type && loot.type !== 'Nothing found') {
     markers.push({
       kind: 'loot',
       iconKey: 'gem',

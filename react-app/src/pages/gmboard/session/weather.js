@@ -6,12 +6,12 @@ import { rollDie } from '../logic/rng.js';
 //
 // Rounded to the quarter hour: the clock is read to the minute, and a third of
 // a four-hour forest is not worth carrying to seven decimal places.
-export function effectiveHours(terrainHours, meteo, intensity, mountSpeed = 1) {
+export function effectiveHours(terrainHours, weather, intensity, mountSpeed = 1) {
   if (!terrainHours) return 0;
   let hours = terrainHours;
-  if (meteo === 'Rain') {
+  if (weather === 'Rain') {
     if (intensity === 'Moderate' || intensity === 'Heavy') hours *= 2;
-  } else if (meteo === 'Snow') {
+  } else if (weather === 'Snow') {
     if (intensity === 'Light' || intensity === 'Moderate') hours *= 2;
     if (intensity === 'Heavy') hours *= 4;
   }
@@ -24,25 +24,25 @@ export function effectiveHours(terrainHours, meteo, intensity, mountSpeed = 1) {
 // What a hex will cost and why, for the panels that say it before the party
 // walks. The reasons are named because they pull opposite ways: a mount in
 // heavy snow can land back on the terrain's own hours.
-export function travelTime(terrainHours, meteo, intensity, mountSpeed = 1) {
+export function travelTime(terrainHours, weather, intensity, mountSpeed = 1) {
   const speed = Number(mountSpeed) > 0 ? Number(mountSpeed) : 1;
   const reasons = [
-    effectiveHours(terrainHours, meteo, intensity) !== terrainHours ? 'weather' : null,
+    effectiveHours(terrainHours, weather, intensity) !== terrainHours ? 'weather' : null,
     speed !== 1 ? `×${speed} mount` : null,
   ].filter(Boolean);
   return {
     base: terrainHours,
-    hours: effectiveHours(terrainHours, meteo, intensity, speed),
+    hours: effectiveHours(terrainHours, weather, intensity, speed),
     reasons,
   };
 }
 
-export function weatherEffectLabel(meteo, intensity) {
-  if (meteo === 'Rain') {
+export function weatherEffectLabel(weather, intensity) {
+  if (weather === 'Rain') {
     if (intensity === 'Light') return '×1 travel';
     if (intensity === 'Moderate') return '×2 travel';
     if (intensity === 'Heavy') return '×2 travel · Disadvantage';
-  } else if (meteo === 'Snow') {
+  } else if (weather === 'Snow') {
     if (intensity === 'Light') return '×2 travel';
     if (intensity === 'Moderate') return '×2 travel · Disadvantage';
     if (intensity === 'Heavy') return '×4 travel · Disadvantage';
@@ -55,20 +55,20 @@ export function weatherTimerLabel(season, nextWeatherIn, hoursSinceWeather) {
   return `Next check in ${Math.max(nextWeatherIn - hoursSinceWeather, 0)}h`;
 }
 
-export function hasWeatherDisadvantage(meteo, intensity) {
-  return (meteo === 'Rain' && intensity === 'Heavy')
-    || (meteo === 'Snow' && (intensity === 'Moderate' || intensity === 'Heavy'));
+export function hasWeatherDisadvantage(weather, intensity) {
+  return (weather === 'Rain' && intensity === 'Heavy')
+    || (weather === 'Snow' && (intensity === 'Moderate' || intensity === 'Heavy'));
 }
 
-export function runWeatherChecks({ season, hoursSinceWeather, nextWeatherIn, meteo, intensity }, weatherTable, rng = Math.random) {
+export function runWeatherChecks({ season, hoursSinceWeather, nextWeatherIn, weather, intensity }, weatherTable, rng = Math.random) {
   let hours = hoursSinceWeather;
   let interval = nextWeatherIn;
-  let currentMeteo = meteo;
+  let currentWeather = weather;
   let currentIntensity = intensity;
   const changes = [];
 
   if (!season) {
-    return { hoursSinceWeather: hours, nextWeatherIn: interval, meteo: currentMeteo, intensity: currentIntensity, changes };
+    return { hoursSinceWeather: hours, nextWeatherIn: interval, weather: currentWeather, intensity: currentIntensity, changes };
   }
 
   while (hours >= interval) {
@@ -76,22 +76,22 @@ export function runWeatherChecks({ season, hoursSinceWeather, nextWeatherIn, met
     interval = rollDie(6, rng) + 2;
 
     const d20 = rollDie(20, rng);
-    const seasonData = weatherTable.find((w) => w.s === season) || { sole: 10, pioggia: 19 };
-    let nextMeteo = 'Clear';
-    if (d20 <= seasonData.sole) nextMeteo = 'Clear';
-    else if (d20 <= seasonData.pioggia) nextMeteo = 'Rain';
-    else nextMeteo = 'Snow';
+    const seasonData = weatherTable.find((w) => w.s === season) || { clear: 10, rain: 19 };
+    let nextWeather = 'Clear';
+    if (d20 <= seasonData.clear) nextWeather = 'Clear';
+    else if (d20 <= seasonData.rain) nextWeather = 'Rain';
+    else nextWeather = 'Snow';
 
     let nextIntensity = '';
-    if (nextMeteo !== 'Clear') {
+    if (nextWeather !== 'Clear') {
       const d6 = rollDie(6, rng);
       nextIntensity = d6 <= 3 ? 'Light' : d6 <= 5 ? 'Moderate' : 'Heavy';
     }
 
-    currentMeteo = nextMeteo;
+    currentWeather = nextWeather;
     currentIntensity = nextIntensity;
-    changes.push({ meteo: nextMeteo, intensity: nextIntensity, d20, nextWeatherIn: interval });
+    changes.push({ weather: nextWeather, intensity: nextIntensity, d20, nextWeatherIn: interval });
   }
 
-  return { hoursSinceWeather: hours, nextWeatherIn: interval, meteo: currentMeteo, intensity: currentIntensity, changes };
+  return { hoursSinceWeather: hours, nextWeatherIn: interval, weather: currentWeather, intensity: currentIntensity, changes };
 }

@@ -11,8 +11,8 @@ export default function WeatherPanel() {
   const seasonContract = SELECTOR_CONTRACTS.season;
   const weatherContract = SELECTOR_CONTRACTS.weatherOverride;
 
-  const WeatherIcon = WEATHER_ICONS[state.meteo] || FALLBACK_WEATHER_ICON;
-  const weatherTone = theme.palette.gmboard.weather[state.meteo] || theme.palette.gmboard.weather.Clear;
+  const WeatherIcon = WEATHER_ICONS[state.weather] || FALLBACK_WEATHER_ICON;
+  const weatherTone = theme.palette.gmboard.weather[state.weather] || theme.palette.gmboard.weather.Clear;
   const timerLabel = weatherTimerLabel(state.season, state.nextWeatherIn, state.hoursSinceWeather);
 
   return (
@@ -32,8 +32,8 @@ export default function WeatherPanel() {
           options={weatherContract.options}
           getId={weatherContract.getId}
           value={weatherContract.deriveValue(state)}
-          onChange={(o) => setWeatherOverride({ meteo: o.meteo, intensity: o.intensity })}
-          getIcon={(o) => WEATHER_ICONS[o.meteo]}
+          onChange={(o) => setWeatherOverride({ weather: o.weather, intensity: o.intensity })}
+          getIcon={(o) => WEATHER_ICONS[o.weather]}
         />
       </Box>
       <Box sx={{ ...displayCardSx, borderColor: weatherTone, bgcolor: theme.palette.gmboard.panelOverlay }}>
@@ -41,9 +41,9 @@ export default function WeatherPanel() {
           <WeatherIcon size={20} color={weatherTone} />
           <Box>
             <Typography sx={{ ...weatherNameSx, color: weatherTone }}>
-              {state.meteo}{state.intensity ? ` · ${state.intensity}` : ''}
+              {state.weather}{state.intensity ? ` · ${state.intensity}` : ''}
             </Typography>
-            <Typography sx={effectSx}>{weatherEffectLabel(state.meteo, state.intensity)}</Typography>
+            <Typography sx={effectSx}>{weatherEffectLabel(state.weather, state.intensity)}</Typography>
           </Box>
         </Box>
         <Typography sx={{ ...timerSx, color: state.season ? 'text.secondary' : 'text.disabled' }}>

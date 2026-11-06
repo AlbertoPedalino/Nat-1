@@ -97,9 +97,9 @@ export default function HexcrawlSettingsDialog({
                 label="Weather"
                 options={weatherContract.options}
                 getId={weatherContract.getId}
-                value={weatherContract.deriveValue({ meteo: sky.meteo || 'Clear', intensity: sky.intensity || '' })}
-                onChange={(option) => onClockChange({ meteo: option.meteo, intensity: option.intensity })}
-                getIcon={(option) => WEATHER_ICONS[option.meteo]}
+                value={weatherContract.deriveValue({ weather: sky.weather || 'Clear', intensity: sky.intensity || '' })}
+                onChange={(option) => onClockChange({ weather: option.weather, intensity: option.intensity })}
+                getIcon={(option) => WEATHER_ICONS[option.weather]}
                 disabled={locked}
               />
             ) : null}

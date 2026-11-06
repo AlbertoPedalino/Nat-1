@@ -26,7 +26,7 @@ const TRAP_ROLL = {
   tier: 1,
   dice: [{ sides: 8, value: 1 }, { sides: 12, value: 1 }],
   sum: 2,
-  data: { r: 2, tipo: 'Deadly', lv: '4', dc: 15, danno: '11 (2d10)' },
+  data: { r: 2, type: 'Deadly', lv: '4', dc: 15, damage: '11 (2d10)' },
   dc: null,
 };
 
@@ -36,7 +36,7 @@ const LOOT_ROLL = {
   tier: null,
   dice: [{ sides: 8, value: 8 }, { sides: 12, value: 9 }],
   sum: 17,
-  data: { r: 17, tipo: 'Magic Item', rarita: 'Uncommon', qualita: 'Masterwork', valore: '20×Lv', extra: '' },
+  data: { r: 17, type: 'Magic Item', rarity: 'Uncommon', quality: 'Masterwork', value: '20×Lv', extra: '' },
   dc: { label: 'DC to find it', dice: [{ sides: 8, value: 1 }, { sides: 12, value: 12 }], sum: 13 },
 };
 

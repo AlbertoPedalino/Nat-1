@@ -15,7 +15,7 @@ import { createDefaultTables } from '../../../pages/gmboard/tables/defaultTables
 // tables, one writer pushes it, and mixing the fast-moving clock into it is
 // exactly the contention this split exists to avoid.
 
-const CLOCK_COLUMNS = 'campaign_id, min, day, month, year, season, meteo, intensity, '
+const CLOCK_COLUMNS = 'campaign_id, min, day, month, year, season, weather, intensity, '
   + 'hours_since_weather, next_weather_in, party_q, party_r, scene_id, updated_at, '
   + 'travel_configured, terrain, pop, hex_tier, mount_speed';
 const CELL_COLUMNS = 'scene_id, q, r, terrain, tier, pop, status, note, revealed, updated_at';
@@ -34,7 +34,7 @@ function toClock(row) {
     pop: row.pop ?? null,
     hexTier: row.hex_tier ?? null,
     mountSpeed: row.mount_speed ?? 1,
-    meteo: row.meteo || 'Clear',
+    weather: row.weather || 'Clear',
     intensity: row.intensity || '',
     hoursSinceWeather: Number(row.hours_since_weather) || 0,
     nextWeatherIn: Number(row.next_weather_in) || 0,
@@ -59,7 +59,7 @@ function clockRow(campaignId, clock) {
     pop: 'pop',
     hexTier: 'hex_tier',
     mountSpeed: 'mount_speed',
-    meteo: 'meteo',
+    weather: 'weather',
     intensity: 'intensity',
     hoursSinceWeather: 'hours_since_weather',
     nextWeatherIn: 'next_weather_in',

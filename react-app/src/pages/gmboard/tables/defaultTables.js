@@ -1,8 +1,8 @@
 const DEF_WEATHER = [
-  { s: 'Spring', sole: 10, pioggia: 19 },
-  { s: 'Summer', sole: 16, pioggia: 20 },
-  { s: 'Autumn', sole: 8, pioggia: 19 },
-  { s: 'Winter', sole: 4, pioggia: 10 },
+  { s: 'Spring', clear: 10, rain: 19 },
+  { s: 'Summer', clear: 16, rain: 20 },
+  { s: 'Autumn', clear: 8, rain: 19 },
+  { s: 'Winter', clear: 4, rain: 10 },
 ];
 
 const DEF_EVENTS = [
@@ -48,25 +48,25 @@ const DEF_EVENTS = [
 ];
 
 const DEF_LOOT = [
-  { r: 2, tipo: 'Cursed Item', rarita: 'Legendary', qualita: 'Corrupted', valore: '75×Lv', extra: '(1/4 val)' },
-  { r: 3, tipo: 'Weapon / Armor', rarita: 'Very Rare', qualita: 'Damaged', valore: '60×Lv', extra: '(1/4 val)' },
-  { r: 4, tipo: 'Magic Item', rarita: 'Rare', qualita: 'Damaged', valore: '45×Lv', extra: '(1/4 val)' },
-  { r: 5, tipo: 'Weapon / Armor', rarita: 'Uncommon', qualita: 'Damaged', valore: '5×Lv', extra: '(1/4 val)' },
-  { r: 6, tipo: 'Equipment', rarita: 'Common', qualita: 'Damaged', valore: '2.5×Lv', extra: '(1/4 val)' },
-  { r: 7, tipo: 'Materials', rarita: 'Common', qualita: 'Damaged', valore: '2.5×Lv', extra: '(1/4 val)' },
-  { r: 8, tipo: 'Nothing found', rarita: '—', qualita: '—', valore: '—', extra: '' },
-  { r: 9, tipo: 'Nothing found', rarita: '—', qualita: '—', valore: '—', extra: '' },
-  { r: 10, tipo: 'Nothing found', rarita: '—', qualita: '—', valore: '—', extra: '' },
-  { r: 11, tipo: 'Nothing found', rarita: '—', qualita: '—', valore: '—', extra: '' },
-  { r: 12, tipo: 'Nothing found', rarita: '—', qualita: '—', valore: '—', extra: '' },
-  { r: 13, tipo: 'Nothing found', rarita: '—', qualita: '—', valore: '—', extra: '' },
-  { r: 14, tipo: 'Nothing found', rarita: '—', qualita: '—', valore: '—', extra: '' },
-  { r: 15, tipo: 'Consumable', rarita: 'Common', qualita: 'Standard', valore: '10×Lv', extra: '' },
-  { r: 16, tipo: 'Weapon / Armor', rarita: 'Common', qualita: 'Fine', valore: '10×Lv', extra: '' },
-  { r: 17, tipo: 'Magic Item', rarita: 'Uncommon', qualita: 'Masterwork', valore: '20×Lv', extra: '' },
-  { r: 18, tipo: 'Magic Weapon / Armor', rarita: 'Rare', qualita: 'Masterwork', valore: '180×Lv', extra: '' },
-  { r: 19, tipo: 'Magic Weapon / Armor', rarita: 'Very Rare', qualita: 'Pristine', valore: '240×Lv', extra: '' },
-  { r: 20, tipo: 'Artifact / Relic', rarita: 'Legendary', qualita: 'Pristine', valore: '300×Lv', extra: '' },
+  { r: 2, type: 'Cursed Item', rarity: 'Legendary', quality: 'Corrupted', value: '75×Lv', extra: '(1/4 val)' },
+  { r: 3, type: 'Weapon / Armor', rarity: 'Very Rare', quality: 'Damaged', value: '60×Lv', extra: '(1/4 val)' },
+  { r: 4, type: 'Magic Item', rarity: 'Rare', quality: 'Damaged', value: '45×Lv', extra: '(1/4 val)' },
+  { r: 5, type: 'Weapon / Armor', rarity: 'Uncommon', quality: 'Damaged', value: '5×Lv', extra: '(1/4 val)' },
+  { r: 6, type: 'Equipment', rarity: 'Common', quality: 'Damaged', value: '2.5×Lv', extra: '(1/4 val)' },
+  { r: 7, type: 'Materials', rarity: 'Common', quality: 'Damaged', value: '2.5×Lv', extra: '(1/4 val)' },
+  { r: 8, type: 'Nothing found', rarity: '—', quality: '—', value: '—', extra: '' },
+  { r: 9, type: 'Nothing found', rarity: '—', quality: '—', value: '—', extra: '' },
+  { r: 10, type: 'Nothing found', rarity: '—', quality: '—', value: '—', extra: '' },
+  { r: 11, type: 'Nothing found', rarity: '—', quality: '—', value: '—', extra: '' },
+  { r: 12, type: 'Nothing found', rarity: '—', quality: '—', value: '—', extra: '' },
+  { r: 13, type: 'Nothing found', rarity: '—', quality: '—', value: '—', extra: '' },
+  { r: 14, type: 'Nothing found', rarity: '—', quality: '—', value: '—', extra: '' },
+  { r: 15, type: 'Consumable', rarity: 'Common', quality: 'Standard', value: '10×Lv', extra: '' },
+  { r: 16, type: 'Weapon / Armor', rarity: 'Common', quality: 'Fine', value: '10×Lv', extra: '' },
+  { r: 17, type: 'Magic Item', rarity: 'Uncommon', quality: 'Masterwork', value: '20×Lv', extra: '' },
+  { r: 18, type: 'Magic Weapon / Armor', rarity: 'Rare', quality: 'Masterwork', value: '180×Lv', extra: '' },
+  { r: 19, type: 'Magic Weapon / Armor', rarity: 'Very Rare', quality: 'Pristine', value: '240×Lv', extra: '' },
+  { r: 20, type: 'Artifact / Relic', rarity: 'Legendary', quality: 'Pristine', value: '300×Lv', extra: '' },
 ];
 
 const DEF_COMPL = [
@@ -90,7 +90,7 @@ const DEF_ENC = [
 ];
 
 function mkTrap(data) {
-  return data.map(([r, tipo, lv, dc, danno]) => ({ r, tipo, lv, dc, danno }));
+  return data.map(([r, type, lv, dc, damage]) => ({ r, type, lv, dc, damage }));
 }
 
 const DEF_TRAP = [
@@ -101,13 +101,13 @@ const DEF_TRAP = [
 ];
 
 const DEF_ENV = [
-  { r: 2, gravita: 'Legendary' }, { r: 3, gravita: 'Very Rare' }, { r: 4, gravita: 'Very Rare' },
-  { r: 5, gravita: 'Rare' }, { r: 6, gravita: 'Rare' }, { r: 7, gravita: 'Rare' },
-  { r: 8, gravita: 'Uncommon' }, { r: 9, gravita: 'Uncommon' }, { r: 10, gravita: 'Uncommon' },
-  { r: 11, gravita: 'Common' }, { r: 12, gravita: 'Common' }, { r: 13, gravita: 'Common' },
-  { r: 14, gravita: 'Uncommon' }, { r: 15, gravita: 'Rare' }, { r: 16, gravita: 'Rare' },
-  { r: 17, gravita: 'Very Rare' }, { r: 18, gravita: 'Very Rare' },
-  { r: 19, gravita: 'Legendary' }, { r: 20, gravita: 'Legendary' },
+  { r: 2, severity: 'Legendary' }, { r: 3, severity: 'Very Rare' }, { r: 4, severity: 'Very Rare' },
+  { r: 5, severity: 'Rare' }, { r: 6, severity: 'Rare' }, { r: 7, severity: 'Rare' },
+  { r: 8, severity: 'Uncommon' }, { r: 9, severity: 'Uncommon' }, { r: 10, severity: 'Uncommon' },
+  { r: 11, severity: 'Common' }, { r: 12, severity: 'Common' }, { r: 13, severity: 'Common' },
+  { r: 14, severity: 'Uncommon' }, { r: 15, severity: 'Rare' }, { r: 16, severity: 'Rare' },
+  { r: 17, severity: 'Very Rare' }, { r: 18, severity: 'Very Rare' },
+  { r: 19, severity: 'Legendary' }, { r: 20, severity: 'Legendary' },
 ];
 
 function cp(value) {

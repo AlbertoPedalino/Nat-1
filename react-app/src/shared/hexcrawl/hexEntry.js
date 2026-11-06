@@ -85,7 +85,7 @@ export function clockFromResult(result) {
     year: result.time.year,
     hoursSinceWeather: result.hoursSinceWeather,
     nextWeatherIn: result.nextWeatherIn,
-    meteo: result.meteo,
+    weather: result.weather,
     intensity: result.intensity,
   };
 }
@@ -109,7 +109,7 @@ export function mergeBoardClock(boardState, clock) {
     year: clock.year ?? boardState.year,
     hoursSinceWeather: clock.hoursSinceWeather ?? boardState.hoursSinceWeather,
     nextWeatherIn: clock.nextWeatherIn ?? boardState.nextWeatherIn,
-    meteo: clock.meteo || boardState.meteo,
+    weather: clock.weather || boardState.weather,
     intensity: clock.intensity ?? boardState.intensity,
     // The season is the board's until the campaign has one of its own.
     season: clock.travelConfigured ? clock.season : (clock.season || boardState.season),
@@ -139,7 +139,7 @@ export function clockFromState(state) {
     year: state?.year ?? 1,
     hoursSinceWeather: state?.hoursSinceWeather ?? 0,
     nextWeatherIn: state?.nextWeatherIn ?? 0,
-    meteo: state?.meteo || 'Clear',
+    weather: state?.weather || 'Clear',
     intensity: state?.intensity || '',
     season: state?.season || null,
   };
@@ -159,7 +159,7 @@ export function hexEntrySummary(result) {
 
   const lines = [];
   if (weather) {
-    lines.push(`Weather: ${weather.meteo}${weather.intensity ? ` (${weather.intensity})` : ''}`);
+    lines.push(`Weather: ${weather.weather}${weather.intensity ? ` (${weather.intensity})` : ''}`);
   }
   if (pop) lines.push(`d6 ${pop.d6} vs ${pop.threshold}`);
 
@@ -175,13 +175,13 @@ export function hexEntrySummary(result) {
     ].filter(Boolean).join(' · ');
     lines.push(`${encounter.label || 'Encounter'}: ${encounter.data.diff}${detail ? ` · ${detail}` : ''}`);
   }
-  if (loot?.data?.tipo) {
-    const rarity = loot.data.rarita && loot.data.rarita !== '—' ? ` · ${loot.data.rarita}` : '';
-    lines.push(`Loot: ${loot.data.tipo}${rarity}`);
+  if (loot?.data?.type) {
+    const rarity = loot.data.rarity && loot.data.rarity !== '—' ? ` · ${loot.data.rarity}` : '';
+    lines.push(`Loot: ${loot.data.type}${rarity}`);
   }
-  if (trap?.data?.tipo) {
-    const damage = trap.data.danno ? ` · ${trap.data.danno}` : '';
-    lines.push(`Trap: ${trap.data.tipo}${trap.data.dc ? ` DC${trap.data.dc} (detect & disarm)` : ''}${damage}${trap.disadvantage ? ' (disadvantage)' : ''}`);
+  if (trap?.data?.type) {
+    const damage = trap.data.damage ? ` · ${trap.data.damage}` : '';
+    lines.push(`Trap: ${trap.data.type}${trap.data.dc ? ` DC${trap.data.dc} (detect & disarm)` : ''}${damage}${trap.disadvantage ? ' (disadvantage)' : ''}`);
   }
   const spot = step('campSpotDc');
   if (spot?.sum != null) lines.push(`Spot DC ${spot.sum}${spot.disadvantage ? ' (disadvantage)' : ''}`);

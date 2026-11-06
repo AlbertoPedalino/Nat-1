@@ -58,7 +58,7 @@ beforeEach(() => {
 
 test('table edits save locally and notify the instance store feed', async () => {
   const tables = createDefaultTables();
-  tables.weather[0] = { ...tables.weather[0], sole: 3 };
+  tables.weather[0] = { ...tables.weather[0], clear: 3 };
   createInstance('gmboard', { id: 'table-autosave', name: 'Table autosave' });
   persistBoardState('table-autosave', readPersistedBoard('missing').state);
   persistBoardTables('table-autosave', tables);
@@ -72,7 +72,7 @@ test('table edits save locally and notify the instance store feed', async () => 
     </GmBoardProvider>,
   );
 
-  await waitFor(() => expect(board.state.tables.weather[0].sole).toBe(3));
+  await waitFor(() => expect(board.state.tables.weather[0].clear).toBe(3));
   onSaved.mockClear();
 
   act(() => board.dispatch({
@@ -80,11 +80,11 @@ test('table edits save locally and notify the instance store feed', async () => 
     tableKey: 'weather',
     matchField: 's',
     matchValue: board.state.tables.weather[0].s,
-    field: 'sole',
+    field: 'clear',
     value: 4,
   }));
 
-  await waitFor(() => expect(readPersistedBoard('table-autosave').tables.weather[0].sole).toBe(4));
+  await waitFor(() => expect(readPersistedBoard('table-autosave').tables.weather[0].clear).toBe(4));
   // One local save of the edit, which is what the sync engine picks up.
   expect(onSaved).toHaveBeenCalledWith(expect.objectContaining({ id: 'table-autosave', kind: 'data' }));
   unsubscribe();
@@ -156,10 +156,10 @@ test('date and time also update the shared clock of a linked campaign', async ()
     min: 22 * 60 + 5,
   })));
 
-  act(() => board.setWeatherOverride({ meteo: 'Snow', intensity: 'Heavy' }));
+  act(() => board.setWeatherOverride({ weather: 'Snow', intensity: 'Heavy' }));
   await waitFor(() => expect(campaignClock.writes).toHaveBeenLastCalledWith(expect.objectContaining({
     season: 'Winter',
-    meteo: 'Snow',
+    weather: 'Snow',
     intensity: 'Heavy',
   })));
   campaignClock.readLink.mockResolvedValue(null);

@@ -114,9 +114,9 @@ export default function HexcrawlPanel({
 // says it: the condition first, what it costs second.
 function WeatherCard({ clock }) {
   const theme = useTheme();
-  const tone = theme.palette.gmboard.weather[clock.meteo] || theme.palette.gmboard.weather.Clear;
-  const Icon = WEATHER_ICONS[clock.meteo] || FALLBACK_WEATHER_ICON;
-  const disadvantage = hasWeatherDisadvantage(clock.meteo, clock.intensity);
+  const tone = theme.palette.gmboard.weather[clock.weather] || theme.palette.gmboard.weather.Clear;
+  const Icon = WEATHER_ICONS[clock.weather] || FALLBACK_WEATHER_ICON;
+  const disadvantage = hasWeatherDisadvantage(clock.weather, clock.intensity);
   // A clock row that predates the weather counters has neither, and a countdown
   // to nowhere is worse than no countdown.
   const timed = clock.season
@@ -129,12 +129,12 @@ function WeatherCard({ clock }) {
         <Icon size={20} color={tone} />
         <Box sx={{ minWidth: 0 }}>
           <Typography sx={{ ...weatherNameSx, color: tone }}>
-            {clock.meteo}{clock.intensity ? ` · ${clock.intensity}` : ''}
+            {clock.weather}{clock.intensity ? ` · ${clock.intensity}` : ''}
           </Typography>
           {/* The cost is said once, in the effect line, and turns amber when it
               is the party's rolls that pay it. */}
           <Typography sx={[effectSx, disadvantage && { color: 'warning.main' }]}>
-            {weatherEffectLabel(clock.meteo, clock.intensity)}
+            {weatherEffectLabel(clock.weather, clock.intensity)}
           </Typography>
         </Box>
       </Stack>
@@ -157,7 +157,7 @@ function NextHexLine({ terrain, clock, mountSpeed }) {
   if (!option) {
     return <Typography sx={hintSx}>Next hex: pick a terrain to see how long it takes.</Typography>;
   }
-  const travel = travelTime(option.hours, clock?.meteo, clock?.intensity, mountSpeed);
+  const travel = travelTime(option.hours, clock?.weather, clock?.intensity, mountSpeed);
   const Icon = TERRAIN_ICONS[option.id] || Footprints;
   const timed = clock && Number.isFinite(clock.min) && clock.day && clock.month && clock.year;
   const arrival = timed ? advanceMinutes(clock, travel.hours) : null;
@@ -263,7 +263,7 @@ function LastHexCard({ last, onOpenResult }) {
           {last.clock ? (
             <Typography sx={lastMetaSx}>
               {formatDateTime(last.clock)}
-              {last.clock.meteo ? ` · ${last.clock.meteo}${last.clock.intensity ? ` ${last.clock.intensity}` : ''}` : ''}
+              {last.clock.weather ? ` · ${last.clock.weather}${last.clock.intensity ? ` ${last.clock.intensity}` : ''}` : ''}
             </Typography>
           ) : null}
           {/* A hex remembered from the campaign row rather than rolled here: the

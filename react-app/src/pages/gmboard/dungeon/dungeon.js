@@ -39,7 +39,7 @@ function buildRoom(index, { popMode, thr, tier }, tables, rng) {
   const lootRoll = rollD8D12(rng);
   const lootData = getLoot(tables, lootRoll.sum);
   let lootDc = null;
-  if (lootData.tipo !== 'Nothing found') {
+  if (lootData.type !== 'Nothing found') {
     const dcRoll = rollD8D12(rng);
     lootDc = { d8: dcRoll.d8, d12: dcRoll.d12, sum: dcRoll.sum };
   }

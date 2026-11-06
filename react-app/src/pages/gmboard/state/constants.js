@@ -1,13 +1,13 @@
 export const SEASONS = Object.freeze(['Spring', 'Summer', 'Autumn', 'Winter']);
 
 export const WEATHER_OVERRIDE_OPTIONS = Object.freeze([
-  { meteo: 'Clear', intensity: '', label: 'Clear', sub: '' },
-  { meteo: 'Rain', intensity: 'Light', label: 'Light', sub: '×1 time' },
-  { meteo: 'Rain', intensity: 'Moderate', label: 'Moderate', sub: '×2 time' },
-  { meteo: 'Rain', intensity: 'Heavy', label: 'Heavy', sub: '×2 + Dis' },
-  { meteo: 'Snow', intensity: 'Light', label: 'Light', sub: '×2 time' },
-  { meteo: 'Snow', intensity: 'Moderate', label: 'Moderate', sub: '×2 + Dis' },
-  { meteo: 'Snow', intensity: 'Heavy', label: 'Heavy', sub: '×4 + Dis' },
+  { weather: 'Clear', intensity: '', label: 'Clear', sub: '' },
+  { weather: 'Rain', intensity: 'Light', label: 'Light', sub: '×1 time' },
+  { weather: 'Rain', intensity: 'Moderate', label: 'Moderate', sub: '×2 time' },
+  { weather: 'Rain', intensity: 'Heavy', label: 'Heavy', sub: '×2 + Dis' },
+  { weather: 'Snow', intensity: 'Light', label: 'Light', sub: '×2 time' },
+  { weather: 'Snow', intensity: 'Moderate', label: 'Moderate', sub: '×2 + Dis' },
+  { weather: 'Snow', intensity: 'Heavy', label: 'Heavy', sub: '×4 + Dis' },
 ]);
 
 // What the party is travelling on. A mount does not change what a hex is, only

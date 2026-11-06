@@ -62,3 +62,25 @@ test('hex rows replicate in full so deletes reach every viewer', () => {
   assert.match(sql, /alter table public\.map_hex_cells replica identity full/);
   assert.match(sql, /alter publication supabase_realtime add table public\.map_hex_cells/);
 });
+
+test('a clock created with the old `meteo` column keeps its weather as `weather`, and re-running changes nothing', async () => {
+  const { PGlite } = await import('@electric-sql/pglite');
+  const source = readFileSync(new URL('../../../../../supabase/10_hexcrawl.sql', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
+  const start = source.indexOf('do $$\nbegin\n  if exists (');
+  const rename = source.slice(start, source.indexOf('end $$;', start) + 'end $$;'.length);
+  assert.ok(start > -1 && rename.includes('rename column meteo to weather'));
+  const db = new PGlite();
+  try {
+    await db.exec(`create table public.campaign_hexcrawl (campaign_id int primary key, meteo text, intensity text);
+      insert into public.campaign_hexcrawl values (1, 'Rain', 'Heavy');`);
+    await db.exec(rename);
+    await db.exec(rename);
+    const { rows } = await db.query('select weather, intensity from public.campaign_hexcrawl');
+    assert.deepEqual(rows, [{ weather: 'Rain', intensity: 'Heavy' }]);
+    const columns = await db.query(`select column_name from information_schema.columns
+      where table_name = 'campaign_hexcrawl' order by column_name`);
+    assert.deepEqual(columns.rows.map((row) => row.column_name), ['campaign_id', 'intensity', 'weather']);
+  } finally {
+    await db.close();
+  }
+});

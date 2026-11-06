@@ -20,10 +20,10 @@ function rollTone(roll, palette) {
   switch (roll.tableId) {
     case 'event': return result[pick(EVENT_TONE, roll.data.type, 'trigger')];
     case 'encounter': return pick(difficulty, roll.data.diff, rarity.Common);
-    case 'loot': return pick(rarity, roll.data.rarita, rarity.Common);
+    case 'loot': return pick(rarity, roll.data.rarity, rarity.Common);
     case 'trap': return result.trap;
     case 'compl': return result[pick(COMPL_TONE, roll.data.type, 'none')];
-    case 'env': return pick(rarity, roll.data.gravita, rarity.Common);
+    case 'env': return pick(rarity, roll.data.severity, rarity.Common);
     default: return rarity.Common;
   }
 }
