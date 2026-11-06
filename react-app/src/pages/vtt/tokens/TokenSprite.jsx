@@ -1,58 +1,24 @@
-import { useEffect, useRef, useState } from 'react';
-import { Box, Tooltip, Typography } from '@mui/material';
+import { useRef, useState } from 'react';
+import { Box, Tooltip } from '@mui/material';
 import { RotateCw, Skull } from 'lucide-react';
-import { effectId } from '../../../shared/character/combat/combatEffects.js';
-import { hpTone, normalizeDeathSaves } from '../../../shared/character/combat/vitals.js';
-import { DEAD_CONDITION_KEY, conditionLabel } from '../../../shared/character/combat/conditions.js';
-import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
+import { DEAD_CONDITION_KEY } from '../../../shared/character/combat/conditions.js';
 import { classIcon } from '../../../shared/character/profile/classIcon.js';
-import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
-import MapObjectGlyph from '../objects/MapObjectGlyph.jsx';
 import { isMapPiece } from '../../../shared/vtt/map/mapObjects.js';
-import { useEventListener } from '../../../shared/ui/useEventListener.js';
+import TokenArt from './TokenArt.jsx';
+import TokenVitalsStack from './TokenVitalsStack.jsx';
+import { TokenExpandedMarks, TokenReminderLine } from './TokenSpriteMarks.jsx';
+import { useArtworkRetry } from './useArtworkRetry.js';
+import { useTokenMarksGesture } from './useTokenMarksGesture.js';
 import {
-  initialsSx,
-  classIconSx,
-  mapObjectSx,
   resizeHandleSx,
   rotateHandleSx,
   cellLayoutSx,
   discFrameSx,
   pieceLayoutSx,
   pieceFrameSx,
-  stackInsideSx,
-  stackBelowSx,
-  inlineRemindersSx,
-  hpBarSx,
-  deathTrackSx,
-  deathDotsSx,
-  deathDotSx,
-  deathSuccessSx,
-  deathFailureSx,
-  deathDividerSx,
-  hpFillSx,
-  hpTextSx,
-  tempBarSx,
-  tempFillSx,
-  tempTextSx,
-  plateSx,
-  secretPlateSx,
   badgeSx,
-  turnActiveSx,
   deadBadgeSx,
-  aboveSx,
-  pillsSx,
-  remindersSx,
-  reminderSx,
-  reminderInlineSx,
-  pillSx,
-  conditionPillSx,
-  conditionTooltipSx,
-  conditionTooltipBodySx,
-  conditionTooltipTitleSx,
 } from './tokenSpriteStyles.js';
-import { initials } from '../../../shared/ui/textCase.js';
-import { LONG_PRESS_MS, LONG_PRESS_SLOP } from '../../../shared/ui/longPress.js';
 
 // One piece on the map: the artwork, its name plate underneath, a hit point bar
 // and the conditions badge. Kept apart from the viewport because the viewport is
@@ -78,72 +44,6 @@ export default function TokenSprite({
   onDeathSaveChange,
   onContextMenu,
 }) {
-  const [hovered, setHovered] = useState(false);
-  // A finger cannot hover, so on a tablet or a phone the conditions are opened
-  // by tapping the piece and stay open until it is tapped again or the finger
-  // lands anywhere else.
-  const [pinned, setPinned] = useState(false);
-  const [dragging, setDragging] = useState(false);
-  const rootRef = useRef(null);
-  const touchRef = useRef(null);
-  const hoverCloseTimerRef = useRef(null);
-  const keepMarksOpen = (event) => {
-    // Touch fires enter/leave around every tap; that is not a hover.
-    if (event?.pointerType === 'touch') return;
-    clearTimeout(hoverCloseTimerRef.current);
-    hoverCloseTimerRef.current = null;
-    if (!dragging) {
-      setHovered(true);
-      onInspectionChange?.({ tokenId: token.id, conditionKey: null });
-    }
-  };
-  const scheduleMarksClose = (event) => {
-    if (event?.pointerType === 'touch') return;
-    clearTimeout(hoverCloseTimerRef.current);
-    // The pills sit just outside the token. Keep them mounted while the pointer
-    // crosses that tiny gap, otherwise they vanish before they can be hovered.
-    hoverCloseTimerRef.current = setTimeout(() => {
-      setHovered(false);
-      onInspectionChange?.(null);
-    }, 180);
-  };
-  useEffect(() => () => clearTimeout(hoverCloseTimerRef.current), []);
-  const unpin = () => {
-    setPinned(false);
-    onInspectionChange?.(null);
-  };
-  useEventListener(document, 'pointerdown', (event) => {
-    if (!rootRef.current?.contains(event.target)) unpin();
-  }, { enabled: pinned, capture: true });
-  // The resize hint is controlled rather than left to MUI's own hover, so it can
-  // be dismissed the moment the drag starts: a label sitting over the piece
-  // being sized is exactly what you need to see past. It stays down until the
-  // button is released, or re-entering the handle mid-drag would summon it back.
-  const [resizeHintOpen, setResizeHintOpen] = useState(false);
-  const resizingRef = useRef(false);
-  const dismissResizeHint = () => {
-    resizingRef.current = true;
-    setResizeHintOpen(false);
-    window.addEventListener('pointerup', () => { resizingRef.current = false; }, { once: true });
-  };
-  // Keep artwork failure separate from the colour fallback so an unavailable
-  // portrait still leaves a usable piece on the board.
-  const [artworkFailed, setArtworkFailed] = useState(false);
-  useEffect(() => { setArtworkFailed(false); }, [token.imageUrl]);
-  // Remount the failed image even when signing returns the same cached URL.
-  const retryArtwork = () => setArtworkFailed(false);
-  const retriesArtwork = artworkFailed && Boolean(token.imageUrl);
-  useEffect(() => {
-    if (!retriesArtwork) return undefined;
-    const timer = window.setTimeout(() => setArtworkFailed(false), 5000);
-    return () => window.clearTimeout(timer);
-  }, [retriesArtwork, token.imageUrl]);
-  useEventListener(window, 'online', retryArtwork, { enabled: retriesArtwork });
-  useEventListener(window, 'focus', retryArtwork, { enabled: retriesArtwork });
-  useEventListener(document, 'visibilitychange', () => {
-    if (document.visibilityState === 'visible') retryArtwork();
-  }, { enabled: retriesArtwork });
-  const showArtwork = Boolean(token.imageUrl) && !artworkFailed;
   // Scenery is a rectangle: a rug or a door forced into a circle is unusable,
   // and it wants none of the creature furniture either. This is based on what
   // the piece is, not its editing layer: token-maker portraits remain tokens
@@ -153,15 +53,6 @@ export default function TokenSprite({
   // the size it should cover, and that size is never right on the first drop.
   const hasHandles = isMapPiece(token);
   const isScenery = hasHandles && !isMapObject;
-  // A piece standing for somebody's character, as opposed to a creature the GM
-  // put down. Only these wear a colour: the party is who you need to pick out
-  // of a crowded board, and giving every goblin a bright ring buries them.
-  const isCharacter = Boolean(token.characterId);
-  const hasUploadedArtworkRing = showArtwork
-    && Boolean(token.imagePath)
-    && !hasHandles
-    && Boolean(token.color);
-  const ClassIcon = isCharacter ? classIcon(token.className) : null;
   const conditions = token.conditions || [];
   const dead = conditions.includes(DEAD_CONDITION_KEY);
   const visibleConditions = conditions.filter((condition) => condition !== DEAD_CONDITION_KEY);
@@ -176,6 +67,33 @@ export default function TokenSprite({
   // reminder line of their own, so theirs all open above.
   const moreReminders = hasHandles ? reminders : reminders.slice(1);
   const expandable = marks > 0 || moreReminders.length > 0;
+
+  const {
+    rootRef, hovered, pinned, dragging, keepMarksOpen, scheduleMarksClose, rootHandlers,
+  } = useTokenMarksGesture({ tokenId: token.id, movable, expandable, onInspectionChange, onPointerDown });
+
+  // The resize hint is controlled rather than left to MUI's own hover, so it can
+  // be dismissed the moment the drag starts: a label sitting over the piece
+  // being sized is exactly what you need to see past. It stays down until the
+  // button is released, or re-entering the handle mid-drag would summon it back.
+  const [resizeHintOpen, setResizeHintOpen] = useState(false);
+  const resizingRef = useRef(false);
+  const dismissResizeHint = () => {
+    resizingRef.current = true;
+    setResizeHintOpen(false);
+    window.addEventListener('pointerup', () => { resizingRef.current = false; }, { once: true });
+  };
+  const { showArtwork, markArtworkFailed } = useArtworkRetry(token.imageUrl);
+
+  // A piece standing for somebody's character, as opposed to a creature the GM
+  // put down. Only these wear a colour: the party is who you need to pick out
+  // of a crowded board, and giving every goblin a bright ring buries them.
+  const isCharacter = Boolean(token.characterId);
+  const hasUploadedArtworkRing = showArtwork
+    && Boolean(token.imagePath)
+    && !hasHandles
+    && Boolean(token.color);
+  const ClassIcon = isCharacter ? classIcon(token.className) : null;
   // Placement previews have no id until saved; two missing ids are not a match.
   const remotelyExpanded = Boolean(presentedInspection?.tokenId)
     && presentedInspection.tokenId === token.id;
@@ -185,69 +103,15 @@ export default function TokenSprite({
   const hasHp = Boolean(token.showHp) && token.hpMax != null && token.hpMax > 0;
   const current = token.hpCurrent ?? token.hpMax;
   const showDeathSaves = isCharacter && Number(current) === 0 && !dead;
-  const { success: deathSuccesses, fail: deathFailures } = normalizeDeathSaves(token.deathSaves);
-  const ratio = hasHp ? Math.max(0, Math.min(1, current / token.hpMax)) : 0;
-  const tempRatio = hasHp ? Math.max(0, Math.min(1, (token.tempHp || 0) / token.hpMax)) : 0;
   // The label the GM typed in secret replaces the public one for them only; a
   // player never receives it in the first place.
   const name = token.secretLabel || token.label || '';
 
-  // Selection is not drawn at all. What is picked is already obvious from what
-  // you just touched, and the menu that opens on it says so plainly; a ring on
-  // top of that only competed with the colour that means something.
-  const ringWidth = () => {
-    // Thick enough to read as the player's colour from across the table, at the
-    // size a piece actually is on a zoomed-out board.
-    if (isCharacter) return 5;
-    if (isMapObject) return 0;
-    if (isScenery) return 0;
-    if (hasUploadedArtworkRing) return 5;
-    return showArtwork ? 0 : 2;
-  };
-
   return (
     <Box
       ref={rootRef}
-      onPointerDown={(event) => {
-        clearTimeout(hoverCloseTimerRef.current);
-        hoverCloseTimerRef.current = null;
-        setHovered(false);
-        touchRef.current = event.pointerType === 'touch' && event.isPrimary
-          ? { x: event.clientX, y: event.clientY, at: event.timeStamp }
-          : null;
-        if (!touchRef.current) onInspectionChange?.(null);
-        setDragging(Boolean(movable));
-        onPointerDown?.(event);
-      }}
-      onPointerMove={(event) => {
-        const touch = touchRef.current;
-        if (!touch || Math.hypot(event.clientX - touch.x, event.clientY - touch.y) <= LONG_PRESS_SLOP) return;
-        // Became a drag: the open pills would only be dragged along.
-        touchRef.current = null;
-        if (pinned) unpin();
-      }}
-      onPointerUp={(event) => {
-        setDragging(false);
-        const touch = touchRef.current;
-        touchRef.current = null;
-        // A tap neither moved nor lasted long enough to be the long press that
-        // opens the token menu.
-        if (!touch || !expandable || event.timeStamp - touch.at >= LONG_PRESS_MS) return;
-        if (Math.hypot(event.clientX - touch.x, event.clientY - touch.y) > LONG_PRESS_SLOP) return;
-        if (pinned) {
-          unpin();
-        } else {
-          setPinned(true);
-          onInspectionChange?.({ tokenId: token.id, conditionKey: null });
-        }
-      }}
-      onPointerCancel={() => {
-        touchRef.current = null;
-        setDragging(false);
-      }}
+      {...rootHandlers}
       onContextMenu={onContextMenu}
-      onPointerEnter={keepMarksOpen}
-      onPointerLeave={scheduleMarksClose}
       // Lets the piece's holder on the map lift it above its neighbours.
       data-marks-expanded={marksExpanded ? 'true' : undefined}
       role="button"
@@ -283,94 +147,22 @@ export default function TokenSprite({
           their labels on each other. Scenery and objects fill their box and
           keep their label underneath, where resizing them expects it. */}
       <Box sx={hasHandles ? pieceLayoutSx : { ...cellLayoutSx, inset: hex ? HEX_INSET : 0 }}>
-        {!hasHandles && reminders.length ? (
-          <Box data-token-reminders sx={inlineRemindersSx}>
-            <Box component="span" title={reminders[0].text} sx={reminderInlineSx}>
-              {reminders[0].text}
-            </Box>
-            {reminders.length > 1 ? (
-              <Box
-                component="span"
-                title={reminders.slice(1).map((effect) => effect.text).join(', ')}
-                sx={{ ...reminderInlineSx, flexShrink: 0 }}
-              >
-                +{reminders.length - 1}
-              </Box>
-            ) : null}
-          </Box>
-        ) : null}
+        {!hasHandles && reminders.length ? <TokenReminderLine reminders={reminders} /> : null}
 
         <Box sx={hasHandles ? pieceFrameSx : discFrameSx}>
-          <Box
-            sx={{
-              width: '100%',
-              height: '100%',
-              borderRadius: isScenery || isMapObject ? 0 : '50%',
-              boxSizing: 'border-box',
-              // Artwork stands on its own: no disc behind it, which would show
-              // through the transparent corners of a bestiary token as a coloured
-              // circle. A character keeps a thick ring in their own colour; a
-              // creature gets only the thin dark edge that separates it from the
-              // map, and none at all once it has its own artwork.
-              borderStyle: 'solid',
-              borderWidth: ringWidth(),
-              borderColor: isCharacter || hasUploadedArtworkRing
-                ? (token.color || vttAlpha(VTT_COLORS.black, 0.6))
-                : vttAlpha(VTT_COLORS.black, 0.6),
-              bgcolor: isScenery || isMapObject || showArtwork ? 'transparent' : (token.color || 'secondary.main'),
-              outline: token.hiddenFromPlayers || token.layer === 'gm'
-                ? `2px dashed ${vttAlpha(VTT_COLORS.gold, 0.9)}`
-                : 'none',
-              outlineOffset: '-4px',
-              // Whose turn it is, readable from across the table and on the
-              // projector: a gold halo outside the piece's own ring.
-              ...(token.turnActive && !isScenery && !isMapObject ? turnActiveSx : null),
-              // A turned piece must not be cut off at the corners of its own box; a
-              // creature still needs the clip that crops its art into the circle.
-              overflow: hasHandles ? 'visible' : 'hidden',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              opacity: dead ? 0.58 : 1,
-              filter: dead ? 'grayscale(0.75)' : 'none',
-            }}
-          >
-            {isMapObject ? (
-              <Box sx={{
-                ...mapObjectSx,
-                color: token.color || VTT_COLORS.gold,
-                transform: `rotate(${Number(token.rotation) || 0}deg)`,
-              }}>
-                <MapObjectGlyph iconKey={token.iconKey} strokeWidth={token.iconStrokeWidth} />
-              </Box>
-            ) : showArtwork ? (
-              <Box
-                component="img"
-                src={token.imageUrl}
-                alt=""
-                draggable={false}
-                // Art that will not load hands the piece back to its colour and
-                // initials, rather than leaving a hole on the board.
-                onError={() => setArtworkFailed(true)}
-                sx={{
-                  width: '100%',
-                  height: '100%',
-                  // Scenery is placed at the size it should cover, so it stretches;
-                  // a picture dropped on the token layer is scenery too. A
-                  // creature's art is cropped into its circle instead.
-                  objectFit: isScenery || hasHandles ? 'fill' : 'cover',
-                  transform: hasHandles ? `rotate(${Number(token.rotation) || 0}deg)` : 'none',
-                  pointerEvents: 'none',
-                }}
-              />
-            ) : ClassIcon ? (
-              <Box data-class-icon={token.className || 'unknown'} sx={classIconSx}>
-                <ClassIcon size="50%" />
-              </Box>
-            ) : (
-              <Typography sx={initialsSx}>{initials(name)}</Typography>
-            )}
-          </Box>
+          <TokenArt
+            token={token}
+            name={name}
+            isMapObject={isMapObject}
+            isScenery={isScenery}
+            isCharacter={isCharacter}
+            hasHandles={hasHandles}
+            showArtwork={showArtwork}
+            hasUploadedArtworkRing={hasUploadedArtworkRing}
+            ClassIcon={ClassIcon}
+            dead={dead}
+            onArtworkError={markArtworkFailed}
+          />
 
           {dead ? (
             <Box aria-label="Dead" title="Dead" sx={deadBadgeSx}>
@@ -381,92 +173,18 @@ export default function TokenSprite({
           {marks && !marksExpanded ? <Box sx={badgeSx}>{marks}</Box> : null}
         </Box>
 
-        {/* Bars and plate stack under the art. The numbers ride inside the bar
-            rather than beside it: one strip to read instead of two things to
-            line up, and it stays legible over any map. */}
         {!isScenery && (hasHp || showDeathSaves || name) ? (
-          <Box sx={hasHandles ? stackBelowSx : stackInsideSx}>
-            {/* The whole name where it fits; a long one is cut at the edge of
-                the cell rather than written across the next. First in the
-                stack, so the eye reads who it is before how hurt they are.
-                A name the players never receive wears the dashed gold of
-                everything else only the GM sees. */}
-            {name ? (
-              <Box
-                sx={{
-                  ...plateSx,
-                  ...(token.secretLabel ? secretPlateSx : null),
-                  maxWidth: hasHandles ? 'none' : (hex ? '100%' : '116%'),
-                }}
-              >
-                {name}
-              </Box>
-            ) : null}
-
-            {showDeathSaves ? (
-              <Box
-                aria-label={`${deathSuccesses} death save successes, ${deathFailures} failures`}
-                title={`${deathSuccesses}/3 successes · ${deathFailures}/3 failures`}
-                sx={{ ...deathTrackSx, pointerEvents: canSetDeathSaves ? 'auto' : 'none' }}
-              >
-                <Box sx={deathDotsSx}>
-                  {[0, 1, 2].map((index) => (
-                    <Box
-                      component="button"
-                      type="button"
-                      key={`success-${index}`}
-                      aria-label={`Death save success ${index + 1}`}
-                      disabled={!canSetDeathSaves}
-                      data-death-save="success"
-                      data-active={index < deathSuccesses ? 'true' : 'false'}
-                      onPointerDown={(event) => event.stopPropagation()}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        onDeathSaveChange?.('success', deathSuccesses === index + 1 ? index : index + 1);
-                      }}
-                      sx={{ ...deathDotSx, ...(index < deathSuccesses ? deathSuccessSx : null) }}
-                    />
-                  ))}
-                </Box>
-                <Box sx={deathDividerSx} />
-                <Box sx={deathDotsSx}>
-                  {[0, 1, 2].map((index) => (
-                    <Box
-                      component="button"
-                      type="button"
-                      key={`failure-${index}`}
-                      aria-label={`Death save failure ${index + 1}`}
-                      disabled={!canSetDeathSaves}
-                      data-death-save="failure"
-                      data-active={index < deathFailures ? 'true' : 'false'}
-                      onPointerDown={(event) => event.stopPropagation()}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        onDeathSaveChange?.('fail', deathFailures === index + 1 ? index : index + 1);
-                      }}
-                      sx={{ ...deathDotSx, ...(index < deathFailures ? deathFailureSx : null) }}
-                    />
-                  ))}
-                </Box>
-              </Box>
-            ) : hasHp ? (
-              <Box sx={{ ...hpBarSx, width: hex ? '72%' : '88%' }} title={`${current} / ${token.hpMax}`}>
-                <Box sx={{ ...hpFillSx, width: `${ratio * 100}%`, bgcolor: hpColor(ratio) }} />
-                <Box component="span" sx={hpTextSx}>{current}/{token.hpMax}</Box>
-              </Box>
-            ) : null}
-
-            {/* Its own bar, under the real one: temporary hit points sit on top of
-                the maximum, so folding them into the same strip would show a
-                character healthier than they can be. Scaled against max HP just to
-                give the cushion a size — it has no maximum of its own. */}
-            {hasHp && !showDeathSaves && token.tempHp > 0 ? (
-              <Box sx={{ ...tempBarSx, width: hex ? '60%' : '72%' }} title={`${token.tempHp} temporary hit points`}>
-                <Box sx={{ ...tempFillSx, width: `${tempRatio * 100}%` }} />
-                <Box component="span" sx={tempTextSx}>+{token.tempHp}</Box>
-              </Box>
-            ) : null}
-          </Box>
+          <TokenVitalsStack
+            token={token}
+            name={name}
+            hex={hex}
+            hasHandles={hasHandles}
+            hasHp={hasHp}
+            current={current}
+            showDeathSaves={showDeathSaves}
+            canSetDeathSaves={canSetDeathSaves}
+            onDeathSaveChange={onDeathSaveChange}
+          />
         ) : null}
       </Box>
 
@@ -512,103 +230,21 @@ export default function TokenSprite({
         </Box>
       ) : null}
 
-      {/* Opened on hover or tap: one pill each, wrapped, since a run-on
-          sentence of six states is read as a wall while pills are counted at a
-          glance; then the reminders the cell had no room for. Above the cell
-          and over its neighbours, but only while someone is looking at it. */}
       {marksExpanded ? (
-        <Box
-          sx={aboveSx}
+        <TokenExpandedMarks
+          tokenId={token.id}
+          conditions={visibleConditions}
+          reminders={moreReminders}
+          conditionEntries={conditionEntries}
+          remotelyExpanded={remotelyExpanded}
+          presentedInspection={presentedInspection}
+          onInspectionChange={onInspectionChange}
           onPointerEnter={keepMarksOpen}
           onPointerLeave={scheduleMarksClose}
-        >
-          {marks ? (
-            <Box sx={pillsSx}>
-              {visibleConditions.map((key) => (
-                <ConditionTokenPill
-                  key={key}
-                  conditionKey={key}
-                  entries={conditionEntries[key]}
-                  tooltipOpen={remotelyExpanded ? presentedInspection.conditionKey === key : undefined}
-                  onInspect={(conditionKey) => onInspectionChange?.({
-                    tokenId: token.id,
-                    conditionKey,
-                  })}
-                />
-              ))}
-            </Box>
-          ) : null}
-          {moreReminders.length ? (
-            <Box sx={remindersSx}>
-              {moreReminders.map((effect) => (
-                <Box key={effectId(effect)} component="span" title={effect.text} sx={reminderSx}>
-                  {effect.text}
-                </Box>
-              ))}
-            </Box>
-          ) : null}
-        </Box>
+        />
       ) : null}
     </Box>
   );
-}
-
-function ConditionTokenPill({ conditionKey, entries, tooltipOpen, onInspect }) {
-  const label = conditionLabel(conditionKey);
-  const pill = (
-    <Box
-      component="span"
-      tabIndex={0}
-      onPointerDown={(event) => event.stopPropagation()}
-      onPointerEnter={() => onInspect?.(conditionKey)}
-      onPointerLeave={() => onInspect?.(null)}
-      onFocus={() => onInspect?.(conditionKey)}
-      onBlur={() => onInspect?.(null)}
-      sx={{ ...pillSx, ...conditionPillSx }}
-    >
-      {label}
-    </Box>
-  );
-
-  if (!entries?.length) return pill;
-
-  return (
-    <Tooltip
-      arrow
-      placement="top"
-      // A tap on the pill reads its rules; MUI's default asks for a long press.
-      enterTouchDelay={0}
-      leaveTouchDelay={4000}
-      {...(tooltipOpen == null ? null : { open: tooltipOpen })}
-      title={(
-        <Box sx={conditionTooltipBodySx}>
-          <Typography sx={conditionTooltipTitleSx}>{label}</Typography>
-          <EntryBlocks
-            entries={entries}
-            spacing={0.45}
-            fontSize="0.68rem"
-            headingColor={VTT_COLORS.goldSoft}
-            bodyColor={VTT_COLORS.parchment}
-            markerColor={VTT_COLORS.goldSoft}
-            strongColor={VTT_COLORS.goldSoft}
-            emptyText={null}
-          />
-        </Box>
-      )}
-      slotProps={{
-        tooltip: { sx: conditionTooltipSx },
-      }}
-    >
-      {pill}
-    </Tooltip>
-  );
-}
-
-// Green while healthy, amber past half, red when bloodied enough to matter.
-const HP_TONE_COLORS = { healthy: VTT_COLORS.hpHealthy, wounded: VTT_COLORS.hpWounded, critical: VTT_COLORS.hpCritical };
-
-function hpColor(ratio) {
-  return HP_TONE_COLORS[hpTone(ratio, 1)];
 }
 
 // A pointy-top hex is narrow at its top and bottom points, so on a hex grid
