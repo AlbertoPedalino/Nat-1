@@ -1,24 +1,11 @@
-import {
-  useCallback, useEffect, useMemo, useRef, useState,
-} from 'react';
-import {
-  listHexCellRevisions,
-  listHexCells,
-  readCampaignHexcrawlBoard,
-  readHexcrawlBoard,
-  readHexcrawlBoardVersion,
-  saveHexCell,
-  subscribeHexcrawl,
-} from '../../../shared/cloud/api/hexcrawl.js';
-import { hexCellsByKey } from '../../../shared/hexcrawl/hexCell.js';
-import {
-  clockFromResult, clockFromState, hexEntrySummary, mergeBoardClock, runHexEntry, travelFromState,
-} from '../../../shared/hexcrawl/hexEntry.js';
-import { resolveManualAdvance } from '../../../shared/hexcrawl/hexRules.js';
+import { useMemo, useState } from 'react';
+import { mergeBoardClock, travelFromState } from '../../../shared/hexcrawl/hexEntry.js';
 import { useCampaignClock } from '../../../shared/hexcrawl/useCampaignClock.js';
 import { hexKey, isHexGrid } from '../../../shared/vtt/map/hexGeometry.js';
-import { listenForRecovery } from '../../../shared/cloud/sync/recoveryTriggers.js';
-import { diffRevisions } from '../../../shared/cloud/sync/revisionDiff.js';
+import { useHexcrawlBoard } from './useHexcrawlBoard.js';
+import { useHexCells } from './useHexCells.js';
+import { useHexVisit } from './useHexVisit.js';
+import { useHexcrawlClockControls } from './useHexcrawlClockControls.js';
 
 // The map's half of the hexcrawl: the hexes of this scene, the campaign's clock,
 // and the board whose tables the rolls come from.
@@ -26,11 +13,6 @@ import { diffRevisions } from '../../../shared/cloud/sync/revisionDiff.js';
 // The engine is not reimplemented here — `runHexEntry` calls the GM Board's own
 // resolver. This hook only decides what to feed it and where the answer is
 // written: the hex row, the clock row, the log table.
-
-const EMPTY_CELLS = new Map();
-// Long enough to read three lines and decide whether to open the rolls, short
-// enough that a bubble is never still sitting on the map two hexes later.
-const BUBBLE_MS = 12000;
 
 export function useSceneHexcrawl({ scene, isGm }) {
   const campaignId = scene?.campaignId || null;
@@ -42,27 +24,9 @@ export function useSceneHexcrawl({ scene, isGm }) {
   const visible = Boolean(sceneId && isHexGrid(scene?.grid));
   const enabled = Boolean(isGm && visible);
 
-  const [cells, setCells] = useState([]);
-  const [selected, setSelected] = useState(null);
-  const [board, setBoard] = useState(null);
-  const boardRef = useRef(null);
-  const boardScopeRef = useRef(enabled && campaignId ? campaignId : null);
-  const boardRefreshQueueRef = useRef(Promise.resolve(null));
-  const [result, setResult] = useState(null);
-  // The bubble is the answer; the dialog is the working behind it, opened only
-  // when the GM asks for it. Walking a party across a map is a dozen small
-  // answers, and a modal for each one is what makes that feel like paperwork.
-  const [bubble, setBubble] = useState(null);
-  // Outlives the bubble: the panel's record of where the party last walked.
-  const [lastVisit, setLastVisit] = useState(null);
-  const [resultOpen, setResultOpen] = useState(false);
-  const bubbleTimerRef = useRef(null);
+  // Shared by every write below: one crawl, one spinner, one last error.
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
-  // Armed, a click walks the party in and rolls. Disarmed it only picks the hex,
-  // which is what setting a map up wants — otherwise laying out terrain would
-  // burn a day of travel per click.
-  const [armed, setArmed] = useState(true);
   // The log is the GM's notes and the database says so: a player asking for it
   // is refused, and the refusal used to take the clock down with it — both reads
   // are one `Promise.all`, so a player loaded no clock at all and stood on a map
@@ -70,398 +34,29 @@ export function useSceneHexcrawl({ scene, isGm }) {
   // Only a hex map shows the party or runs travel, so a square scene leaves the
   // campaign clock alone instead of keeping a poll and a channel open for it.
   const clock = useCampaignClock(visible ? campaignId : null, { withLog: isGm });
+  const { board, refreshBoard } = useHexcrawlBoard({ campaignId, enabled });
   const travel = travelFromState(mergeBoardClock(board?.state || {}, clock.clock));
   const defaults = {
     terrain: travel.terrain, pop: travel.pop, tier: travel.hexTier, mountSpeed: travel.mountSpeed,
   };
-  // Cleared whenever the scene changes: a result belongs to the hex it was
-  // rolled on, and that hex is not on the next map.
-  const sceneRef = useRef(sceneId);
 
-  useEffect(() => {
-    if (sceneRef.current === sceneId) return;
-    sceneRef.current = sceneId;
-    setSelected(null);
-    setResult(null);
-    setBubble(null);
-    setLastVisit(null);
-    setResultOpen(false);
-  }, [sceneId]);
-
-  useEffect(() => () => clearTimeout(bubbleTimerRef.current), []);
-
-  useEffect(() => {
-    let cancelled = false;
-    if (!visible) {
-      setCells([]);
-      return () => { cancelled = true; };
-    }
-    listHexCells(sceneId)
-      .then((rows) => { if (!cancelled) setCells(rows); })
-      .catch((cause) => { if (!cancelled) setError(cause?.message || 'Could not read this map\'s hexes.'); });
-    return () => { cancelled = true; };
-  }, [sceneId, visible]);
-
-  // A hex the GM takes back stops being readable by the players, and Realtime
-  // cannot deliver a row the reader is no longer allowed to see: the update
-  // simply never arrives and the old colour would sit there. So a player's list
-  // is read again whenever the campaign clock moves, which is what every entry
-  // and every un-visit of the party's own hex writes.
-  const clockStamp = clock.clock?.updatedAt || 0;
-  useEffect(() => {
-    let cancelled = false;
-    if (!visible || isGm || !clockStamp) return () => { cancelled = true; };
-    listHexCells(sceneId)
-      .then((rows) => { if (!cancelled) setCells(rows); })
-      .catch(() => { /* the map keeps the hexes it has */ });
-    return () => { cancelled = true; };
-  }, [clockStamp, isGm, sceneId, visible]);
-
-  // The tables come from the board this campaign was linked to, which is the
-  // pointer the database keeps — not from whatever board this browser happens to
-  // have open. A lightweight version check keeps an already-open VTT current
-  // when the board is edited in another tool or on another device. Every roll
-  // also forces one fresh read, so it can never use stale custom tables between
-  // two polling ticks.
-  const refreshBoard = useCallback(({ force = false } = {}) => {
-    const refresh = async () => {
-      const scope = enabled && campaignId ? campaignId : null;
-      if (!scope || scope !== boardScopeRef.current) return null;
-      const boardId = await readCampaignHexcrawlBoard(campaignId);
-      if (scope !== boardScopeRef.current) return boardRef.current;
-      if (!boardId) {
-        boardRef.current = null;
-        setBoard(null);
-        return null;
-      }
-      const current = boardRef.current;
-      if (!force && current?.id === boardId) {
-        const version = await readHexcrawlBoardVersion(boardId);
-        if (scope !== boardScopeRef.current) return boardRef.current;
-        if (version === current.version) return current;
-      }
-      const loaded = await readHexcrawlBoard(boardId);
-      if (scope !== boardScopeRef.current) return boardRef.current;
-      boardRef.current = loaded;
-      setBoard(loaded);
-      return loaded;
-    };
-    const queued = boardRefreshQueueRef.current.catch(() => null).then(refresh);
-    boardRefreshQueueRef.current = queued;
-    return queued;
-  }, [campaignId, enabled]);
-
-  const setDefaults = useCallback(async (patch) => {
-    if (!enabled || !clock.active) return null;
-    setBusy(true);
-    try {
-      const activeBoard = await refreshBoard({ force: true });
-      if (!activeBoard) throw new Error('This campaign has no hexcrawl board linked.');
-      const fields = {};
-      for (const key of ['terrain', 'pop', 'mountSpeed']) {
-        if (patch[key] !== undefined) fields[key] = patch[key];
-      }
-      if (patch.tier !== undefined) fields.hexTier = patch.tier;
-      const saved = await clock.saveClock((current) => {
-        const base = mergeBoardClock(activeBoard.state, current);
-        return {
-          ...(!current ? clockFromState(base) : {}),
-          ...(!current?.travelConfigured
-            ? { ...travelFromState(base), travelConfigured: true, season: base.season || null } : {}),
-          ...fields,
-        };
-      });
-      setError(null);
-      return saved;
-    } catch (cause) {
-      setError(cause?.message || 'Could not save the hexcrawl settings.');
-      return null;
-    } finally {
-      setBusy(false);
-    }
-  }, [clock, enabled, refreshBoard]);
-
-  useEffect(() => {
-    const scope = enabled && campaignId ? campaignId : null;
-    boardScopeRef.current = scope;
-    boardRef.current = null;
-    setBoard(null);
-    if (!scope) {
-      return undefined;
-    }
-    let cancelled = false;
-    const refresh = () => refreshBoard().catch(() => {
-      if (!cancelled && !boardRef.current) setBoard(null);
-    });
-    refresh();
-    // Map content: followed in a background tab too, like the scene.
-    const stopRecovery = listenForRecovery(() => refresh(), { periodic: true, whenHidden: true });
-    return () => {
-      cancelled = true;
-      if (boardScopeRef.current === scope) boardScopeRef.current = null;
-      stopRecovery();
-    };
-  }, [refreshBoard]);
-
-  // Hex events Realtime missed are recovered like the scene's pieces: versions
-  // first (a few bytes a hex), the list again only when one moved. On every
-  // reconnect and on the shared triggers; map content, so also while hidden.
-  const cellsRef = useRef(cells);
-  cellsRef.current = cells;
-  useEffect(() => {
-    if (!visible) return undefined;
-    let cancelled = false;
-    const keyOf = (cell) => `${cell.q}:${cell.r}`;
-    const reconcileCells = async () => {
-      let revisions;
-      try {
-        revisions = await listHexCellRevisions(sceneId);
-      } catch (_) {
-        return; // The next trigger tries again.
-      }
-      if (cancelled) return;
-      const diff = diffRevisions(
-        revisions.map((row) => ({ id: keyOf(row), version: row.updatedAt })),
-        new Map(cellsRef.current.map((cell) => [keyOf(cell), cell.updatedAt])),
-      );
-      if (diff.clean) return;
-      try {
-        const rows = await listHexCells(sceneId);
-        if (!cancelled) setCells(rows);
-      } catch (_) { /* the map keeps the hexes it has */ }
-    };
-    let subscribedOnce = false;
-    const unsubscribe = subscribeHexcrawl({
-      sceneId,
-      onCell: ({ cell, removed }) => {
-        if (!cell) return;
-        setCells((current) => {
-          const rest = current.filter((item) => !(item.q === cell.q && item.r === cell.r));
-          return removed ? rest : [...rest, cell];
-        });
-      },
-      // The first subscription follows the mount read; later ones are
-      // reconnects, which do not replay what was missed.
-      onStatus: (status) => {
-        if (status !== 'SUBSCRIBED') return;
-        if (subscribedOnce) reconcileCells();
-        subscribedOnce = true;
-      },
-    });
-    const stopRecovery = listenForRecovery(() => reconcileCells(), { periodic: true, whenHidden: true });
-    return () => {
-      cancelled = true;
-      unsubscribe();
-      stopRecovery();
-    };
-  }, [sceneId, visible]);
-
-  // A player sees the country the party has been through, and nothing else: an
-  // unrevealed hex the GM has already coloured in is the map they are making,
-  // not the map the table is looking at.
-  const travelledColor = scene?.grid?.hexColor || null;
-  const cellsByKey = useMemo(() => {
-    if (!visible) return EMPTY_CELLS;
-    return hexCellsByKey(
-      isGm ? cells : cells.filter((cell) => cell?.revealed),
-      { travelledColor },
-    );
-  }, [cells, isGm, travelledColor, visible]);
-
-  const storeCell = useCallback((saved) => {
-    if (!saved) return;
-    setCells((current) => [
-      ...current.filter((item) => !(item.q === saved.q && item.r === saved.r)),
-      saved,
-    ]);
-  }, []);
-
-  // Walking into a hex. The board supplies the tables and the season; the
-  // campaign row supplies the time of day and the weather, so a hex entered from
-  // the map and one entered from the board move the same clock.
-  //
-  // The hex is passed in rather than read from state: a click has to roll for
-  // the hex that was clicked, not for whichever one a render has caught up with.
-  const enterHexAt = useCallback(async (hex, mode = 'proceed') => {
-    if (!enabled || !hex) return null;
-    setBusy(true);
-    try {
-      const activeBoard = await refreshBoard({ force: true });
-      if (!activeBoard) {
-        throw new Error('This campaign has no hexcrawl board linked. Link one from the GM Board.');
-      }
-      // An untouched hex takes the map's defaults, and keeps them: after this it
-      // is a hex with a terrain, not one that happened to be rolled as forest.
-      const merged = mergeBoardClock(activeBoard.state, clock.clock);
-      const filled = {
-        ...hex,
-        terrain: hex.terrain || merged.terrain,
-        pop: hex.pop || merged.pop,
-        tier: hex.tier ?? merged.hexTier,
-      };
-      // Both screens use the campaign's travel speed, falling back to the
-      // linked board for campaigns that have not configured shared travel yet.
-      const boardState = {
-        ...merged,
-        mountSpeed: merged.mountSpeed ?? 1,
-      };
-      const entry = runHexEntry({
-        board: boardState, hex: filled, tables: activeBoard.tables, mode,
-      });
-      setResult({ ...entry.result, hex: filled, clock: entry.clock });
-      const summary = hexEntrySummary(entry.result);
-      const spoken = {
-        id: `${filled.q}:${filled.r}:${Date.now()}`,
-        hex: filled,
-        // The hours the leg cost, so the bubble is not still quoting the
-        // terrain's own while the party rides.
-        travelHours: entry.result.travelHours,
-        // The clock as it is *after* the leg: the bubble reports the hour the
-        // party arrived and the sky they arrived under, not the ones they left.
-        clock: { ...entry.clock, season: boardState.season || null },
-        ...summary,
-      };
-      setBubble(spoken);
-      // The bubble fades; what it said does not. The panel keeps the last hex so
-      // a GM who looked away still knows where the party is and what happened.
-      setLastVisit({
-        ...spoken, at: Date.now(), fromThisSession: true, onThisScene: true,
-      });
-      clearTimeout(bubbleTimerRef.current);
-      bubbleTimerRef.current = setTimeout(() => setBubble(null), BUBBLE_MS);
-      await clock.saveClock(
-        {
-          ...entry.clock,
-          season: boardState.season || null,
-          party: { q: filled.q, r: filled.r },
-          sceneId,
-        },
-        { logEntry: entry.result.logEntry },
-      );
-      // Entering a hex is what makes it travelled, and what the party has walked
-      // through is not a secret from them.
-      const saved = await saveHexCell(sceneId, filled, {
-        terrain: filled.terrain,
-        pop: filled.pop,
-        tier: filled.tier,
-        status: filled.status === 'unexplored' ? 'travelled' : filled.status,
-        revealed: true,
-      });
-      storeCell(saved);
-      setError(null);
-      return entry.result;
-    } catch (cause) {
-      setError(cause?.message || 'Could not enter that hex.');
-      return null;
-    } finally {
-      setBusy(false);
-    }
-  }, [clock, enabled, refreshBoard, sceneId, storeCell]);
-
-  // Taking a hex back. The terrain, population and tier stay — those are what
-  // the hex *is*, and re-entering it should not mean setting it up again. What
-  // is undone is the visit: its colour, and the players' sight of it.
-  //
-  // No clock is rewound. Hours the table has already played through are not the
-  // map's to give back, and pretending otherwise would put the party's own
-  // record of the day at odds with the campaign's.
-  const clearHexAt = useCallback(async (cell) => {
-    if (!enabled || !cell) return null;
-    setBusy(true);
-    try {
-      const saved = await saveHexCell(sceneId, cell, { status: 'unexplored', revealed: false });
-      storeCell(saved);
-      const isLast = lastVisit && lastVisit.hex.q === cell.q && lastVisit.hex.r === cell.r;
-      setBubble((current) => (
-        current && current.hex.q === cell.q && current.hex.r === cell.r ? null : current
-      ));
-      if (isLast) {
-        // The marker stood on this hex; with the visit gone there is nowhere for
-        // it to stand, and the rolls behind it describe a leg that no longer
-        // happened as far as the map is concerned.
-        setLastVisit(null);
-        setResult(null);
-        setResultOpen(false);
-        if (clock.active) await clock.saveClock({ party: null, sceneId });
-      }
-      setError(null);
-      return saved;
-    } catch (cause) {
-      setError(cause?.message || 'Could not clear that hex.');
-      return null;
-    } finally {
-      setBusy(false);
-    }
-  }, [clock, enabled, lastVisit, sceneId, storeCell]);
-
-  // What a click on the board does: pick the hex, and — while the crawl is
-  // armed — walk into it and roll. A hex the party has already been through is
-  // the exception: clicking that one takes the visit back rather than spending
-  // another day of travel on ground the GM only meant to un-mark.
-  const clickHex = useCallback((cell) => {
-    setSelected(cell);
-    if (!armed) return;
-    const stored = cellsByKey.get(hexKey(cell));
-    if (stored && stored.status !== 'unexplored') {
-      clearHexAt(stored);
-      return;
-    }
-    enterHexAt(stored || {
-      q: cell.q, r: cell.r, status: 'unexplored', revealed: false, note: '',
-    });
-  }, [armed, cellsByKey, clearHexAt, enterHexAt]);
-
-  // The season, the date and the sky belong to the campaign once there is one:
-  // both screens read them from the same row. Written with the rest of the clock
-  // so the first save carries the board's own time rather than the schema's
-  // defaults. `patch` may be a function of the merged state, resolved when the
-  // queued write runs, so it builds on whatever the write before it saved.
-  const patchClock = useCallback(async (patch, failure) => {
-    if (!enabled || !clock.active) return null;
-    setBusy(true);
-    try {
-      const activeBoard = await refreshBoard({ force: true });
-      if (!activeBoard) throw new Error('This campaign has no hexcrawl board linked.');
-      const saved = await clock.saveClock((current) => {
-        const base = mergeBoardClock(activeBoard.state, current);
-        return {
-          ...(!current ? clockFromState(base) : {}),
-          ...(!current?.travelConfigured ? { ...travelFromState(base), travelConfigured: true } : {}),
-          ...(typeof patch === 'function' ? patch(base, activeBoard) : patch),
-        };
-      });
-      setError(null);
-      return saved;
-    } catch (cause) {
-      setError(cause?.message || failure);
-      return null;
-    } finally {
-      setBusy(false);
-    }
-  }, [clock, enabled, refreshBoard]);
-
-  const setSeason = useCallback(
-    (season) => patchClock({ season: season || null }, 'Could not set the season.'),
-    [patchClock],
-  );
-
-  // Date, time of day or the sky, set by hand: the GM Board's Date & Time and
-  // weather override, for a table that is running the crawl from the map.
-  const setClock = useCallback(
-    (fields) => patchClock(fields, 'Could not change the campaign clock.'),
-    [patchClock],
-  );
-
-  // Hours that pass off the map — a rest, a siege, a day in town. The weather
-  // keeps its own count through them, exactly as it does on the board.
-  const advanceClock = useCallback((hours) => {
-    const amount = Number(hours);
-    if (!Number.isFinite(amount) || amount <= 0) return Promise.resolve(null);
-    return patchClock((base, activeBoard) => {
-      const advanced = resolveManualAdvance(base, amount, activeBoard.tables);
-      return { ...clockFromResult(advanced), season: base.season || null };
-    }, 'Could not advance the campaign clock.');
-  }, [patchClock]);
+  const { cellsByKey, storeCell } = useHexCells({
+    sceneId,
+    visible,
+    isGm,
+    clockStamp: clock.clock?.updatedAt || 0,
+    travelledColor: scene?.grid?.hexColor || null,
+    setError,
+  });
+  const visit = useHexVisit({
+    sceneId, enabled, clock, refreshBoard, cellsByKey, storeCell, setBusy, setError,
+  });
+  const {
+    setDefaults, setSeason, setClock, advanceClock,
+  } = useHexcrawlClockControls({
+    enabled, clock, refreshBoard, setBusy, setError,
+  });
+  const { lastVisit } = visit;
 
   // Where the party stands, said as fully as this browser can say it. A hex
   // entered in this session carries its whole answer; one entered from the GM
@@ -500,10 +95,10 @@ export function useSceneHexcrawl({ scene, isGm }) {
     visible,
     partyHex,
     cellsByKey,
-    selected,
-    clickHex,
-    armed,
-    setArmed,
+    selected: visit.selected,
+    clickHex: visit.clickHex,
+    armed: visit.armed,
+    setArmed: visit.setArmed,
     defaults,
     setDefaults,
     setSeason,
@@ -513,19 +108,13 @@ export function useSceneHexcrawl({ scene, isGm }) {
     clock: clock.clock,
     log: clock.log,
     clockLinked: clock.active,
-    bubble,
-    dismissBubble: () => {
-      clearTimeout(bubbleTimerRef.current);
-      setBubble(null);
-    },
+    bubble: visit.bubble,
+    dismissBubble: visit.dismissBubble,
     lastHex,
-    // Whether there are rolls to go back to: the panel offers the dialog only
-    // for a hex this browser rolled.
-    hasResult: Boolean(result),
-    // The dialog is only ever open because somebody opened it.
-    result: resultOpen ? result : null,
-    openResult: () => setResultOpen(Boolean(result)),
-    dismissResult: () => setResultOpen(false),
+    hasResult: visit.hasResult,
+    result: visit.result,
+    openResult: visit.openResult,
+    dismissResult: visit.dismissResult,
     busy,
     error: error || clock.error,
   };
