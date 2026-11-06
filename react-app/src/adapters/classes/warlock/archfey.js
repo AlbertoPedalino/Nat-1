@@ -10,7 +10,6 @@ export default function install(registry, context = {}) {
   } = createAdapterBindings(registry, context);
 registerSubclassAdapter("Warlock_Archfey", function (cls, lv, specs) {});
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Warlock_Archfey", [
   { name: "Steps of the Fey", icon: "sparkles", cat: "bonus", uses: "CHA mod / LR", resKey: "archfey_steps", minLevel: 3,
     rollers: [{ kind: 'tempHp', formula: "1d10" }] },
@@ -46,7 +45,6 @@ registerSubclassRuntimeConfig("Warlock_Archfey", {
     ],
   },
 });
-// [SheetRuntime] END
 
 }
 

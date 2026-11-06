@@ -24,7 +24,6 @@ registerSubclassAdapter("Artificer_Artillerist", function (cls, lv, specs, ctx =
   });
 });
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Artificer_Artillerist", [
   {
     "name": "Eldritch Cannon",
@@ -53,7 +52,6 @@ registerSubclassSheetProficiencies("Artificer_Artillerist", [
   { type: "tool", values: ["Woodcarver's Tools"], minLevel: 3 },
   { type: "weapon", values: ["Martial Ranged"], minLevel: 3 }
 ]);
-// [SheetRuntime] END
 
 }
 

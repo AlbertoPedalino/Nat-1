@@ -16,7 +16,6 @@ registerSubclassAdapter("Cleric_Light", function (cls, lv, specs) {
   // nessuna spec
 });
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Cleric_Light", [
   { name: "Warding Flare", icon: "", cat: "reaction", uses: "WIS mod / LR", resKey: "warding_flare", minLevel: 3 },
   { name: "Improved Warding Flare", icon: "", cat: "reaction", uses: "WIS mod / SR+LR", resKey: "warding_flare", minLevel: 6 },
@@ -56,7 +55,6 @@ registerSubclassSheetEffects("Cleric_Light", [
   { type: "reactionDefense", key: "warding_flare", minLevel: 6, note: "Improved Warding Flare: can also protect allies." },
   { type: "aura", key: "corona_light", minLevel: 17, note: "Corona of Light: enemies in bright light have Disadvantage on saves against Fire/Radiant spells." },
 ]);
-// [SheetRuntime] END
 
 }
 

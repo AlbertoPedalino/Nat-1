@@ -1,7 +1,7 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
 
 export default function install(registry, context = {}) {
-  const { registerSubclassAdapter, registerSubclassSheetActions, registerSubclassSheetEffects } = createAdapterBindings(registry, context);
+  const { registerSubclassAdapter,  registerSubclassSheetEffects } = createAdapterBindings(registry, context);
 registerSubclassAdapter("Fighter_Champion", function (cls, lv, specs) {
   if (lv >= 7) {
     specs.push({
@@ -15,8 +15,6 @@ registerSubclassAdapter("Fighter_Champion", function (cls, lv, specs) {
   }
 });
 
-// [SheetRuntime] START
-registerSubclassSheetActions("Fighter_Champion", []);
 
 registerSubclassSheetEffects("Fighter_Champion", [
 
@@ -26,7 +24,6 @@ registerSubclassSheetEffects("Fighter_Champion", [
   { type: "critRange", value: 18, minLevel: 15, note: "Superior Critical." },
   { type: "regeneration", minLevel: 18, note: "Survivor: regain HP at the start of your turn if Bloodied and not Incapacitated." },
 ]);
-// [SheetRuntime] END
 
 }
 

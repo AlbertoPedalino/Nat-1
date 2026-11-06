@@ -24,7 +24,6 @@ registerSubclassAdapter("Artificer_Alchemist", function (cls, lv, specs, ctx = {
   });
 });
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Artificer_Alchemist", [
   {
     "name": "Experimental Elixir",
@@ -74,7 +73,6 @@ registerSubclassSheetEffects("Artificer_Alchemist", [
   { type: "resist", damageType: "Poison", minLevel: 15 },
   { type: "condImmune", condition: "Poisoned", minLevel: 15 }
 ]);
-// [SheetRuntime] END
 
 }
 

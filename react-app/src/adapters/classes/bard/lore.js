@@ -30,7 +30,6 @@ registerSubclassAdapter("Bard_Lore", function (cls, lv, specs) {
   }
 });
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Bard_Lore", [
   { name: "Cutting Words", icon: "", cat: "reaction", uses: "With Bardic Insp.", minLevel: 3 },
   { name: "Peerless Skill", icon: "", cat: "action", uses: "With Bardic Insp.", minLevel: 14 },
@@ -42,7 +41,6 @@ registerSubclassSheetEffects("Bard_Lore", [
   { type: "reactionPenalty", minLevel: 3, note: "Cutting Words: subtract Bardic Inspiration die from enemy roll/damage." },
   { type: "selfInspiration", minLevel: 14, note: "Peerless Skill." },
 ]);
-// [SheetRuntime] END
 
 }
 

@@ -68,7 +68,6 @@ registerClassAdapter("Ranger", function (cls, lv, specs, ctx = {}) {
   }
 });
 
-// [SheetRuntime] START
 registerClassSheetActions("Ranger", [
   {
     "name": "Tireless",
@@ -105,6 +104,5 @@ registerClassSheetResources("Ranger", [
     "max": (lv, { wis } = {}) => Math.max(1, wis ?? 0)
   }
 ]);
-// [SheetRuntime] END
 
 }

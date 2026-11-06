@@ -10,7 +10,6 @@ export default function install(registry, context = {}) {
   } = createAdapterBindings(registry, context);
 registerSubclassAdapter("Fighter_Psi Warrior", function (cls, lv, specs) {});
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Fighter_Psi Warrior", [
   { name: "Protective Field", icon: "", cat: "reaction", uses: "1 Psi Die", resKey: "psi_dice", minLevel: 3 },
   { name: "Psionic Strike", icon: "", cat: "attack", uses: "1 Psi Die / turn", resKey: "psi_dice", minLevel: 3,
@@ -51,7 +50,6 @@ registerSubclassSheetEffects("Fighter_Psi Warrior", [
   { type: "conditionRemoval", conditions: ["Charmed", "Frightened"], minLevel: 10, note: "Guarded Mind." },
   { type: "resistance", damageTypes: ["Psychic"], minLevel: 10, note: "Guarded Mind." },
 ]);
-// [SheetRuntime] END
 
 }
 

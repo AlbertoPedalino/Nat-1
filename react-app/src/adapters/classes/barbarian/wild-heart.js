@@ -20,7 +20,6 @@ registerSubclassAdapter("Barbarian_Wild Heart", function (cls, lv, specs) {
   }
 });
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Barbarian_Wild Heart", [
   {
     name: "Animal Speaker",
@@ -65,7 +64,6 @@ registerSubclassSheetEffects("Barbarian_Wild Heart", [
   { type: "mobility", minLevel: 6, note: "Aspect of the Wilds: animal aspect utility." },
   { type: "rageAura", minLevel: 14, note: "Power of the Wilds: enhanced rage aspect." },
 ]);
-// [SheetRuntime] END
 
 }
 

@@ -51,7 +51,6 @@ registerClassAdapter("Rogue", function (cls, lv, specs, ctx = {}) {
   }
 });
 
-// [SheetRuntime] START
 registerClassSheetActions("Rogue", [
   {
     "name": "Sneak Attack",
@@ -135,6 +134,5 @@ registerClassSheetProficiencies("Rogue", [
   },
   { type: "language", values: ["Thieves' Cant"], minLevel: 1 }
 ]);
-// [SheetRuntime] END
 
 }

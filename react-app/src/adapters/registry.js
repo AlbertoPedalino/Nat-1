@@ -115,13 +115,10 @@ export function createAdapterRegistry() {
     subclassSpellRiders: new Map(),
     speciesSpellRiders: new Map(),
     featSpellRiders: new Map(),
-    classChoiceKeyFilters: new Map(),
-    classChoiceLabelProviders: new Map(),
     speciesHpBonus: new Map(),
     classAtWillSpells: new Map(),
     speciesLongRestGrants: new Map(),
     resourceSideEffects: new Map(),
-    subclassChoiceDetailDataProviders: new Map(),
     cantripData: new Map(),
     cantripDataModifiers: new Map(),
     spellData: new Map(),
@@ -363,18 +360,6 @@ export function createAdapterRegistry() {
     getFeatSpellRiders(name) {
       return getStore(stores.featSpellRiders, name) || [];
     },
-    registerClassChoiceKeyFilter(name, fn) {
-      if (typeof fn === 'function') setStore(stores.classChoiceKeyFilters, name, fn);
-    },
-    getClassChoiceKeyFilter(name) {
-      return getStore(stores.classChoiceKeyFilters, name);
-    },
-    registerClassChoiceLabelProvider(name, fn) {
-      if (typeof fn === 'function') setStore(stores.classChoiceLabelProviders, name, fn);
-    },
-    getClassChoiceLabelProvider(name) {
-      return getStore(stores.classChoiceLabelProviders, name);
-    },
     registerSpeciesSheetHpBonus(speciesName, speciesSource, value) {
       stores.speciesHpBonus.set(speciesKey(speciesName, speciesSource), Number(value) || 0);
     },
@@ -398,12 +383,6 @@ export function createAdapterRegistry() {
     },
     getResourceSideEffect(name) {
       return stores.resourceSideEffects.get(String(name)) || null;
-    },
-    registerSubclassChoiceDetailDataProvider(className, subclassShortName, fn) {
-      if (typeof fn === 'function') stores.subclassChoiceDetailDataProviders.set(subclassKey(className, subclassShortName), fn);
-    },
-    getSubclassChoiceDetailDataProvider(className, subclassShortName) {
-      return getSubclassStore(stores.subclassChoiceDetailDataProviders, className, subclassShortName) || null;
     },
     registerCantripData(name, data) {
       if (data && typeof data === 'object') setStore(stores.cantripData, name, data);
@@ -522,9 +501,6 @@ export function createAdapterRegistry() {
     },
     getFeatOwnerKeyPatterns() {
       return stores.featOwnerKeyPatterns.slice();
-    },
-    snapshot() {
-      return stores;
     },
   };
 }

@@ -63,7 +63,6 @@ registerClassAdapter("Wizard", function (cls, lv, specs) {
   }
 });
 
-// [SheetRuntime] START
 registerClassSheetActions("Wizard", [
   {
     "name": "Arcane Recovery",
@@ -103,7 +102,6 @@ registerClassSheetResources("Wizard", [
     "max": ()=>1
   }
 ]);
-// [SheetRuntime] END
 
 // Arcane Recovery: when used, recover spell slots up to budget (Wizard level/2, rounded up).
 registerResourceSideEffect('arc_recovery', function (ctx = {}) {

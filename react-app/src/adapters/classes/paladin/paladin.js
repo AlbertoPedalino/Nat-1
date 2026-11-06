@@ -37,7 +37,6 @@ registerClassAdapter("Paladin", function (cls, lv, specs, ctx = {}) {
   }
 });
 
-// [SheetRuntime] START
 registerClassSheetActions("Paladin", [
   {
     "name": "Divine Sense",
@@ -90,6 +89,5 @@ registerClassSheetResources("Paladin", [
     "max": (lv)=>lv>=11?3:lv>=3?2:0
   }
 ]);
-// [SheetRuntime] END
 
 }

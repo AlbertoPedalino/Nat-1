@@ -33,7 +33,6 @@ registerClassAdapter("Sorcerer", function (cls, lv, specs, ctx = {}) {
   }
 });
 
-// [SheetRuntime] START
 registerClassSheetActions("Sorcerer", [
   {
     "name": "Innate Sorcery",
@@ -182,7 +181,6 @@ registerResourceSideEffect('sorc_convert_slot', function (ctx = {}) {
     label: 'Convert Spell Slot',
   };
 });
-// [SheetRuntime] END
 
 }
 

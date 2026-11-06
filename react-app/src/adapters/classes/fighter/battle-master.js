@@ -62,7 +62,6 @@ registerSubclassAdapter("Fighter_Battle Master", function (cls, lv, specs) {
   });
 });
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Fighter_Battle Master", [
   { name: "Combat Maneuvers", icon: "", cat: "attack", uses: "Superiority Dice", resKey: "superiority_dice", minLevel: 3 },
   { name: "Know Your Enemy", icon: "", cat: "bonus", uses: "1 / LR or Superiority Die", resKey: "know_your_enemy", minLevel: 7 },
@@ -81,7 +80,6 @@ registerSubclassSheetEffects("Fighter_Battle Master", [
   { type: "toolProficiency", count: 1, minLevel: 3, note: "Student of War: artisan's tool choice." },
   { type: "skillProficiency", values: ["History", "Insight", "Performance", "Persuasion"], count: 1, minLevel: 3, note: "Student of War." },
 ]);
-// [SheetRuntime] END
 
 }
 

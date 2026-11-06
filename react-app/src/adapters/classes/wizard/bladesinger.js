@@ -24,7 +24,6 @@ function _wizardBladesingerAdapter(cls, lv, specs) {
 registerSubclassAdapter("Wizard_Bladesinger", _wizardBladesingerAdapter);
 registerSubclassAdapter("Wizard_Bladesinging", _wizardBladesingerAdapter);
 
-// [SheetRuntime] START
 const _wizardBladesingerActions = [
   {
     "name": "Bladesong",
@@ -135,6 +134,5 @@ registerSubclassSheetEffects("Wizard_Bladesinger", [
   { type: "extraAttackCantripReplacement", minLevel: 6, note: "Extra Attack." },
   { type: "damageReduction", minLevel: 10, note: "Song of Defense." },
 ]);
-// [SheetRuntime] END
 
 }

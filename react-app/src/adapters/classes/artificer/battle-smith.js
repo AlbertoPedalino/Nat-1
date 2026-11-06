@@ -23,7 +23,6 @@ registerSubclassAdapter("Artificer_Battle Smith", function (cls, lv, specs, ctx 
   });
 });
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Artificer_Battle Smith", [
   {
     "name": "Steel Defender",
@@ -55,7 +54,6 @@ registerSubclassSheetResources("Artificer_Battle Smith", [
 registerSubclassSheetProficiencies("Artificer_Battle Smith", [
   { type: "tool", values: ["Smith's Tools"], minLevel: 3 }
 ]);
-// [SheetRuntime] END
 
 }
 

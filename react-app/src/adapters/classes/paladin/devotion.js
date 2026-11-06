@@ -12,7 +12,6 @@ export default function install(registry, context = {}) {
   } = createAdapterBindings(registry, context);
 registerSubclassAdapter("Paladin_Devotion", function (cls, lv, specs) {});
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Paladin_Devotion", [
   { name: "Sacred Weapon", icon: "", cat: "action", uses: "1 Channel", resKey: "paladin_channel_div" },
   { name: "Holy Nimbus", icon: "", cat: "bonus", uses: "1 / LR or lv5 slot", resKey: "devotion_holy_nimbus", minLevel: 20,
@@ -47,7 +46,6 @@ registerSubclassSheetEffects("Paladin_Devotion", [
   { type: "aura", key: "holy_nimbus", minLevel: 20, note: "Holy Nimbus: bright sunlight aura; enemies in aura take Radiant damage and have Disadvantage against relevant saves while active." },
 
 ]);
-// [SheetRuntime] END
 
 }
 

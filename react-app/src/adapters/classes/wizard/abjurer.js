@@ -13,7 +13,6 @@ registerSubclassAdapter("Wizard_Abjurer", function (cls, lv, specs) {
   addWizardSavantSpellChoices(specs, lv, { key: "abjurer", label: "Abjuration", school: "A" });
 });
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Wizard_Abjurer", [
   { name: "Arcane Ward", icon: "", cat: "action", uses: "Ward HP", resKey: "arcane_ward", minLevel: 3 },
   { name: "Projected Ward", icon: "", cat: "reaction", uses: "Reaction", minLevel: 6 },
@@ -39,7 +38,6 @@ registerSubclassSheetEffects("Wizard_Abjurer", [
   { type: "advantage", target: "save", source: "spells", minLevel: 14, note: "Spell Resistance." },
   { type: "passiveNote", minLevel: 14, note: "Spell Resistance: Resistance to damage of spells." },
 ]);
-// [SheetRuntime] END
 
 }
 

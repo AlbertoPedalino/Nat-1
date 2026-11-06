@@ -321,7 +321,6 @@ registerClassAdapter("Warlock", function (cls, lv, specs, adapterContext = {}) {
   }
 });
 
-// [SheetRuntime] START
 // Sheet action cards. Descriptions are NOT defined here: the Actions tab
 // (collectAdapterActions) and the builder preview both resolve each card's body live
 // by name from the class-feature / optional-feature (invocation) entries, so the text
@@ -429,7 +428,6 @@ registerClassSheetActions("Warlock", [
     "condition": function(C) { return _warlockHasInvocation(C, 'Eldritch Smite') && _warlockHasInvocation(C, 'Pact of the Blade'); },
     rollers: [{ kind: 'damage', formula: function(ctx) { var lv = Number(ctx.ownerLevel || 1); var slotLevel = lv >= 9 ? 5 : lv >= 7 ? 4 : lv >= 5 ? 3 : 1; return (slotLevel + 1) + 'd8'; }, label: function(ctx) { var lv = Number(ctx.ownerLevel || 1); var slotLevel = lv >= 9 ? 5 : lv >= 7 ? 4 : lv >= 5 ? 3 : 1; return 'Smite ' + (slotLevel + 1) + 'd8 Force'; } }],}
 ]);
-// [SheetRuntime] END
 
 // Pact Weapon: unified via `pactWeapon` item flag. Weapon override `pact_blade` binds to it.
 registerItemFlagDef("pactWeapon", {

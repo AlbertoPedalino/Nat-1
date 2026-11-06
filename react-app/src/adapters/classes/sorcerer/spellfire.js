@@ -9,7 +9,6 @@ export default function install(registry, context = {}) {
   } = createAdapterBindings(registry, context);
 registerSubclassAdapter("Sorcerer_Spellfire", function (cls, lv, specs) {});
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Sorcerer_Spellfire", [
   {
     "name": "Spellfire Burst",
@@ -43,7 +42,6 @@ registerSubclassRuntimeConfig("Sorcerer_Spellfire", {
     ],
   },
 });
-// [SheetRuntime] END
 
 }
 

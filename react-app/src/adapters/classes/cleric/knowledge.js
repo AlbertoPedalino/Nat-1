@@ -30,7 +30,6 @@ registerSubclassAdapter("Cleric_Knowledge", function (cls, lv, specs) {
   }
 });
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Cleric_Knowledge", [
   {
     "name": "Mind Magic",
@@ -81,7 +80,6 @@ registerSubclassSheetResources("Cleric_Knowledge", [
   { key: "divine_foreknowledge", name: "Divine Foreknowledge", icon: "brain", recharge: "LR",
     max: (lv) => lv >= 17 ? 1 : 0 },
 ]);
-// [SheetRuntime] END
 
 }
 

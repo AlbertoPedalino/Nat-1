@@ -26,7 +26,6 @@ registerSubclassAdapter("Sorcerer_Draconic", function (cls, lv, specs) {
   }
 });
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Sorcerer_Draconic", [
   {
     "name": "Dragon Wings",
@@ -77,7 +76,6 @@ registerSubclassSheetEffects("Sorcerer_Draconic", [
   { type: "speed", speedType: "fly", value: 60, minLevel: 14, note: "Dragon Wings while active." },
 
 ]);
-// [SheetRuntime] END
 
 }
 

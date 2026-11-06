@@ -20,7 +20,6 @@ registerSubclassAdapter("Bard_Swords", function (cls, lv, specs) {
   }
 });
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Bard_Swords", [
   { name: "Blade Flourish",    icon: "", cat: "attack", uses: "Per attack action", minLevel: 3 },
 ]);
@@ -33,7 +32,6 @@ registerSubclassSheetEffects("Bard_Swords", [
   { type: "weaponFocus", minLevel: 3, note: "Blade Flourish: weapon as Bard spellcasting focus." },
   { type: "extraAttack", minLevel: 6, note: "Extra Attack." },
 ]);
-// [SheetRuntime] END
 
 }
 

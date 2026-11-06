@@ -15,7 +15,6 @@ registerSubclassAdapter("Ranger_Beast Master", function (cls, lv, specs) {
   }
 });
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Ranger_Beast Master", [
   {
     "name": "Primal Companion",
@@ -35,7 +34,6 @@ registerSubclassSheetEffects("Ranger_Beast Master", [
   { type: "companionExtraAttack", minLevel: 11, note: "Bestial Fury." },
   { type: "shareSpells", minLevel: 15, note: "Share Spells." },
 ]);
-// [SheetRuntime] END
 
 }
 

@@ -21,7 +21,6 @@ registerSubclassAdapter("Ranger_Fey Wanderer", function (cls, lv, specs) {
   }
 });
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Ranger_Fey Wanderer", [
   {
     "name": "Dreadful Strikes",
@@ -90,7 +89,6 @@ registerSubclassSheetEffects("Ranger_Fey Wanderer", [
   { type: "advantage", target: "save", conditions: ["Charmed", "Frightened"], minLevel: 7, note: "Beguiling Twist." },
 
 ]);
-// [SheetRuntime] END
 
 }
 

@@ -9,7 +9,6 @@ export default function install(registry, context = {}) {
   } = createAdapterBindings(registry, context);
 registerSubclassAdapter("Sorcerer_Aberrant Mind", function (cls, lv, specs) {});
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Sorcerer_Aberrant Mind", [
   {
     "name": "Telepathic Speech",
@@ -61,7 +60,6 @@ registerSubclassSheetEffects("Sorcerer_Aberrant Mind", [
   { type: "advantage", target: "save", conditions: ["Charmed", "Frightened"], minLevel: 6, note: "Psychic Defenses." },
 
 ]);
-// [SheetRuntime] END
 
 }
 

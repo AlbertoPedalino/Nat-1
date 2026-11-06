@@ -50,12 +50,6 @@ export function warlockLevel(character) {
   return classLevel(character, 'Warlock');
 }
 
-export function warlockKnownInvocations(character) {
-  return warlockInvocationSelections(character)
-    .map(function (name) { return invocationKey(name); })
-    .filter(Boolean);
-}
-
 // ── Eldritch Invocations that attach a modifier to a chosen damaging cantrip ──
 // Single source of truth for the "choose a known Warlock cantrip" invocations.
 // Drives the builder choice specs and sheet cantrip modifiers (see warlock.js),

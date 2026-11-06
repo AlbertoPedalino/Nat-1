@@ -24,8 +24,6 @@ export default function install(registry, context = {}) {
     registerClassSheetResources,
     registerClassSheetEffects,
     registerClassSheetChoiceMeta,
-    registerClassChoiceKeyFilter,
-    registerClassChoiceLabelProvider,
   } = createAdapterBindings(registry, context);
 
 // ── EFA (Eberron: Forge of the Artificer) — Replicate Magic Item ──
@@ -177,7 +175,6 @@ registerClassAdapter("Artificer", function (cls, lv, specs) {
   }
 });
 
-// [SheetRuntime] START
 // EFA Tinker's Magic item list (created with Tinker's Tools, vanish at Long Rest).
 const _TINKER_MAGIC_ITEMS = [
   'Ball Bearings', 'Basket', 'Bedroll', 'Bell', 'Blanket', 'Block and Tackle',
@@ -349,40 +346,6 @@ registerClassSheetChoiceMeta("Artificer", {
     return raw;
   },
 });
-// [SheetRuntime] END
 
-// ── Choice key filter: which char.choices keys belong to Artificer ──
-registerClassChoiceKeyFilter("Artificer", function (baseKey) {
-  if (/^(artificer_|alchemist_|armorer_|artillerist_|battlesmith_|cartographer_)/i.test(baseKey)) return true;
-  if (/^auto_(primary|ec\d+)_feat_/i.test(baseKey)) return true;
-  return false;
-});
-
-// ── Choice label provider: human-readable label for each Artificer choice key ──
-const _ARTIFICER_CHOICE_LABELS = {
-  artificer_replicate_magic_item_plans: 'Replicate Magic Item Plans',
-  armorer_model: 'Armor Model',
-  alchemist_bonus_tool: 'Tools of the Trade (Alchemist)',
-  armorer_bonus_tool: 'Tools of the Trade (Armorer)',
-  artillerist_bonus_tool: 'Tools of the Trade (Artillerist)',
-  battlesmith_bonus_tool: 'Tools of the Trade (Battle Smith)',
-  cartographer_bonus_tool: 'Tools of the Trade (Cartographer)',
-};
-registerClassChoiceLabelProvider("Artificer", function (baseKey) {
-  if (_ARTIFICER_CHOICE_LABELS[baseKey]) return _ARTIFICER_CHOICE_LABELS[baseKey];
-  const _tc = (s) => titleCase(s).trim();
-  if (/^auto_(primary|ec\d+)_feat_/i.test(baseKey)) {
-    let s = baseKey.replace(/^auto_(primary|ec\d+)_feat_/i, '');
-    s = s.replace(/_skill_\d+$/i, ' Skill Proficiency');
-    s = s.replace(/_lang_\d+$/i, ' Language');
-    s = s.replace(/_tool_\d+$/i, ' Tool Proficiency');
-    s = s.replace(/_stl_\d+_\d+$/i, ' Proficiency Choice');
-    s = s.replace(/_weaponProficiencies_\d+$/i, ' Weapon Proficiency');
-    s = s.replace(/_armorProficiencies_\d+$/i, ' Armor Proficiency');
-    s = s.replace(/_opt_\d+$/i, ' Option');
-    return _tc(s);
-  }
-  return _tc(baseKey.replace(/^.*?_/, ''));
-});
 
 }

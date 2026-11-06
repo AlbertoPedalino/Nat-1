@@ -10,7 +10,6 @@ export default function install(registry, context = {}) {
   } = createAdapterBindings(registry, context);
 registerSubclassAdapter("Paladin_Glory", function (cls, lv, specs) {});
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Paladin_Glory", [
   { name: "Inspiring Smite", icon: "", cat: "bonus", uses: "1 Channel", resKey: "paladin_channel_div" },
   { name: "Peerless Athlete", icon: "", cat: "bonus", uses: "1 Channel", resKey: "paladin_channel_div" },
@@ -45,7 +44,6 @@ registerSubclassSheetEffects("Paladin_Glory", [
   { type: "speed", value: 10, minLevel: 7, note: "Aura of Alacrity: your Speed increases by 10 ft; allies in aura gain +10 ft until end of their next turn." },
 
 ]);
-// [SheetRuntime] END
 
 }
 

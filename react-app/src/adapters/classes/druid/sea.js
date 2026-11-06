@@ -4,7 +4,6 @@ export default function install(registry, context = {}) {
   const { registerSubclassAdapter, registerSubclassSheetActions, registerSubclassSheetEffects } = createAdapterBindings(registry, context);
 registerSubclassAdapter("Druid_Sea", function (cls, lv, specs) {});
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Druid_Sea", [
   {
     "name": "Wrath of the Sea",
@@ -38,7 +37,6 @@ registerSubclassSheetEffects("Druid_Sea", [
   { type: "resistance", damageTypes: ["Cold", "Lightning", "Thunder"], minLevel: 10, note: "Stormborn while Wrath of the Sea is active." },
 
 ]);
-// [SheetRuntime] END
 
 }
 

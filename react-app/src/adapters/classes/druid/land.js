@@ -22,7 +22,6 @@ registerSubclassAdapter("Druid_Land", function (cls, lv, specs) {
   }
 });
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Druid_Land", [
   {
     "name": "Land's Aid",
@@ -88,7 +87,6 @@ registerResourceSideEffect('natural_recovery', function (ctx = {}) {
     label: 'Natural Recovery',
   };
 });
-// [SheetRuntime] END
 
 }
 

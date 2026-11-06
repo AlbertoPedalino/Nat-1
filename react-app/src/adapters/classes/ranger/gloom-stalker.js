@@ -10,7 +10,6 @@ export default function install(registry, context = {}) {
   } = createAdapterBindings(registry, context);
 registerSubclassAdapter("Ranger_Gloom Stalker", function (cls, lv, specs) {});
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Ranger_Gloom Stalker", [
   {
     "name": "Dread Ambusher",
@@ -58,7 +57,6 @@ registerSubclassSheetEffects("Ranger_Gloom Stalker", [
   { type: "saveProficiency", ability: "wis", minLevel: 7, note: "Iron Mind: if already proficient, choose INT or CHA instead." },
 
 ]);
-// [SheetRuntime] END
 
 }
 

@@ -9,7 +9,6 @@ export default function install(registry, context = {}) {
   } = createAdapterBindings(registry, context);
 registerSubclassAdapter("Rogue_Soulknife", function (cls, lv, specs) {});
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Rogue_Soulknife", [
   {
     "name": "Psychic Blades",
@@ -102,7 +101,6 @@ registerSubclassSheetEffects("Rogue_Soulknife", [
   { type: "invisibility", minLevel: 13, note: "Psychic Veil." },
   { type: "stun", minLevel: 17, note: "Rend Mind." },
 ]);
-// [SheetRuntime] END
 
 }
 

@@ -25,7 +25,6 @@ registerSubclassAdapter("Ranger_Hunter", function (cls, lv, specs) {
   }
 });
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Ranger_Hunter", [
   {
     "name": "Superior Hunter's Prey",
@@ -50,7 +49,6 @@ registerSubclassSheetEffects("Ranger_Hunter", [
   { type: "cleaveDamage", minLevel: 11, note: "Superior Hunter's Prey." },
   { type: "damageResistanceReaction", minLevel: 15, note: "Superior Hunter's Defense." },
 ]);
-// [SheetRuntime] END
 
 }
 

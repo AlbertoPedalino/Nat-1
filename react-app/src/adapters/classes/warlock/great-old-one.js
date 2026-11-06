@@ -23,7 +23,6 @@ registerSubclassAdapter("Warlock_Great Old One", function (cls, lv, specs) {
   }
 });
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Warlock_Great Old One", [
   { name: "Awakened Mind", icon: "brain", cat: "bonus", uses: "CHA mod / LR", resKey: "goo_awakened", minLevel: 3,
     inlinePills: ({ ownerLevel, character }) => {
@@ -71,7 +70,6 @@ registerSubclassRuntimeConfig("Warlock_Great Old One", {
     ],
   },
 });
-// [SheetRuntime] END
 
 }
 

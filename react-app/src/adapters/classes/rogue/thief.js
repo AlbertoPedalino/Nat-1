@@ -4,7 +4,6 @@ export default function install(registry, context = {}) {
   const { registerSubclassAdapter, registerSubclassSheetActions, registerSubclassSheetEffects } = createAdapterBindings(registry, context);
 registerSubclassAdapter("Rogue_Thief", function (cls, lv, specs) {});
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Rogue_Thief", [
   {
     "name": "Fast Hands",
@@ -30,7 +29,6 @@ registerSubclassSheetEffects("Rogue_Thief", [
   { type: "attunementSlots", value: 4, minLevel: 13, note: "Use Magic Device." },
   { type: "extraTurn", minLevel: 17, note: "Thief's Reflexes." },
 ]);
-// [SheetRuntime] END
 
 }
 

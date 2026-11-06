@@ -27,7 +27,6 @@ export default function install(registry, context = {}) {
   } = createAdapterBindings(registry, context);
 registerSubclassAdapter("Druid_Stars", function (cls, lv, specs) {});
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Druid_Stars", [
   {
     "name": "Starry Form",
@@ -136,7 +135,6 @@ registerSubclassSpellRiders("Druid_Stars", [
     };
   },
 ]);
-// [SheetRuntime] END
 
 }
 

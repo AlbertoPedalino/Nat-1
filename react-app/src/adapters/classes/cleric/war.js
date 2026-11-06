@@ -23,7 +23,6 @@ registerSubclassAdapter("Cleric_War", function (cls, lv, specs) {
   // nessuna spec
 });
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Cleric_War", [
   { name: "War Priest", icon: "", cat: "bonus", uses: "WIS mod / SR+LR", resKey: "war_priest", minLevel: 3 },
   { name: "Guided Strike", icon: "", cat: "reaction", uses: "1 Channel", resKey: "channel_div", minLevel: 3 },
@@ -54,7 +53,6 @@ registerSubclassSheetEffects("Cleric_War", [
   { type: "attackBonus", value: 10, minLevel: 3, note: "Guided Strike: add +10 to a missed attack roll using Channel Divinity." },
   { type: "resistance", damageTypes: ["Bludgeoning", "Piercing", "Slashing"], minLevel: 17, note: "Avatar of Battle." },
 ]);
-// [SheetRuntime] END
 
 }
 

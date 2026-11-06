@@ -15,7 +15,6 @@ registerSubclassAdapter("Rogue_Scion of the Three", function (cls, lv, specs) {
   }
 });
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Rogue_Scion of the Three", [
   {
     "name": "Bloodthirst",
@@ -42,7 +41,6 @@ registerSubclassSheetResources("Rogue_Scion of the Three", [
     "max": (lv, { int } = {}) => Math.max(1, int ?? 0)
   }
 ]);
-// [SheetRuntime] END
 
 }
 

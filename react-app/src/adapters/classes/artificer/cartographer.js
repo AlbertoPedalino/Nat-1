@@ -23,7 +23,6 @@ registerSubclassAdapter("Artificer_Cartographer", function (cls, lv, specs, ctx 
   });
 });
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Artificer_Cartographer", [
   {
     "name": "Adventurer's Atlas",
@@ -75,7 +74,6 @@ registerSubclassSheetResources("Artificer_Cartographer", [
 registerSubclassSheetProficiencies("Artificer_Cartographer", [
   { type: "tool", values: ["Calligrapher's Supplies", "Cartographer's Tools"], minLevel: 3 }
 ]);
-// [SheetRuntime] END
 
 }
 

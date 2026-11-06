@@ -44,7 +44,6 @@ registerClassAdapter("Fighter", function (cls, lv, specs, ctx = {}) {
   }
 });
 
-// [SheetRuntime] START
 registerClassSheetActions("Fighter", [
   {
     name: 'Second Wind',
@@ -107,5 +106,4 @@ registerClassSheetResources("Fighter", [
     max: (lv)=>lv>=17?3:lv>=13?2:1
   }
 ]);
-// [SheetRuntime] END
 }

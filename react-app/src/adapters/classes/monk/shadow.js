@@ -9,7 +9,6 @@ export default function install(registry, context = {}) {
   } = createAdapterBindings(registry, context);
 registerSubclassAdapter("Monk_Shadow", function (cls, lv, specs) {});
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Monk_Shadow", [
   { name: "Shadow Arts", icon: "", cat: "action", uses: "1 Focus Point (Darkness)", resKey: "ki", minLevel: 3 },
   { name: "Shadow Step", icon: "", cat: "bonus", uses: "At will", minLevel: 6 },
@@ -32,7 +31,6 @@ registerSubclassSheetEffects("Monk_Shadow", [
   { type: "invisibility", minLevel: 11, note: "Improved Shadow Step / Cloak of Shadows." },
   { type: "reactionAttack", minLevel: 17, note: "Opportunist." },
 ]);
-// [SheetRuntime] END
 
 }
 

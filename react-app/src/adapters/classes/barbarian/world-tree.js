@@ -4,7 +4,6 @@ export default function install(registry, context = {}) {
   const { registerSubclassAdapter, registerSubclassSheetActions, registerSubclassSheetEffects } = createAdapterBindings(registry, context);
 registerSubclassAdapter("Barbarian_World Tree", function (cls, lv, specs) {});
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Barbarian_World Tree", [
   { name: "Branches of the Tree", icon: "", cat: "reaction", uses: "While Raging", minLevel: 6 },
   { name: "Battering Roots", icon: "", cat: "action", uses: "While Raging", minLevel: 10 },
@@ -18,7 +17,6 @@ registerSubclassSheetEffects("Barbarian_World Tree", [
   { type: "reach", value: 10, minLevel: 10, note: "Battering Roots while raging." },
   { type: "teleport", minLevel: 14, note: "Travel Along the Tree." },
 ]);
-// [SheetRuntime] END
 
 }
 

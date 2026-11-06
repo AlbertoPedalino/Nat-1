@@ -55,7 +55,6 @@ registerClassAdapter("Bard", function (cls, lv, specs, ctx = {}) {
   }
 });
 
-// [SheetRuntime] START
 registerClassSheetActions("Bard", [
   { name: "Bardic Inspiration", icon: "", cat: "bonus",  uses: "CHA mod / SR", resKey: "bardic_insp",
     rollers: [{ kind: 'utility', formula: ({ ownerLevel }) => {
@@ -168,7 +167,6 @@ registerClassSheetChoiceMeta("Bard", {
   },
   normalizeChoiceValue: (value) => choiceText(value),
 });
-// [SheetRuntime] END
 
 }
 

@@ -10,7 +10,6 @@ export default function install(registry, context = {}) {
   } = createAdapterBindings(registry, context);
 registerSubclassAdapter("Bard_Glamour", function (cls, lv, specs) {});
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Bard_Glamour", [
   { name: "Beguiling Magic", icon: "", cat: "bonus", uses: "1 / LR", resKey: "glamour_beguiling", minLevel: 3 },
   { name: "Mantle of Inspiration", icon: "", cat: "bonus", uses: "With Bardic Insp.", minLevel: 3 },
@@ -39,7 +38,6 @@ registerSubclassSheetEffects("Bard_Glamour", [
   { type: "charm", minLevel: 6, note: "Mantle of Majesty: Command as Bonus Action while active." },
   { type: "defense", minLevel: 14, note: "Unbreakable Majesty: attackers may fail to attack you." },
 ]);
-// [SheetRuntime] END
 
 }
 

@@ -13,7 +13,6 @@ registerSubclassAdapter("Wizard_Illusionist", function (cls, lv, specs) {
   addWizardSavantSpellChoices(specs, lv, { key: "illusionist", label: "Illusion", school: "I" });
 });
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Wizard_Illusionist", [
   { name: "Phantasmal Creatures", icon: "", cat: "action", uses: "2 / LR", resKey: "phantasmal_creatures", minLevel: 6 },
   { name: "Illusory Self", icon: "", cat: "reaction", uses: "1 / SR+LR or lv2+ slot", resKey: "illusory_self", minLevel: 10 },
@@ -42,7 +41,6 @@ registerSubclassSheetEffects("Wizard_Illusionist", [
   { type: "reactionDefense", minLevel: 10, note: "Illusory Self." },
   { type: "illusionObjectReality", minLevel: 14, note: "Illusory Reality." },
 ]);
-// [SheetRuntime] END
 
 }
 

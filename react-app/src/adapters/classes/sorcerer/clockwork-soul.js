@@ -9,7 +9,6 @@ export default function install(registry, context = {}) {
   } = createAdapterBindings(registry, context);
 registerSubclassAdapter("Sorcerer_Clockwork Soul", function (cls, lv, specs) {});
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Sorcerer_Clockwork Soul", [
   {
     "name": "Restore Balance",
@@ -73,7 +72,6 @@ registerSubclassSheetEffects("Sorcerer_Clockwork Soul", [
   { type: "d20-floor", minRoll: 10, minLevel: 14, note: "Trance of Order: treat d20 rolls of 9 or lower as 10 while active." },
 
 ]);
-// [SheetRuntime] END
 
 }
 

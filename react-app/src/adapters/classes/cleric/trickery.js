@@ -15,7 +15,6 @@ registerSubclassAdapter("Cleric_Trickery", function (cls, lv, specs) {
   // nessuna spec
 });
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Cleric_Trickery", [
   { name: "Blessing of the Trickster", icon: "", cat: "action", uses: "1 hour or reuse", minLevel: 3 },
   { name: "Invoke Duplicity", icon: "", cat: "bonus", uses: "1 Channel / 1 min (C)", resKey: "channel_div" },
@@ -44,7 +43,6 @@ registerSubclassSheetEffects("Cleric_Trickery", [
   { type: "invisibility", minLevel: 6, note: "Cloak of Shadows: become Invisible until end of next turn." },
   { type: "passiveNote", minLevel: 17, note: "Improved Duplicity: create up to 4 duplicates with Invoke Duplicity." },
 ]);
-// [SheetRuntime] END
 
 }
 

@@ -78,7 +78,6 @@ registerClassAdapter("Druid", function (cls, lv, specs, ctx = {}) {
   }
 });
 
-// [SheetRuntime] START
 registerClassSheetActions("Druid", [
   {
     "name": "Wild Shape",
@@ -161,7 +160,6 @@ registerResourceSideEffect('wild_resurgence', function (ctx = {}) {
     label: 'Wild Resurgence',
   };
 });
-// [SheetRuntime] END
 
 }
 

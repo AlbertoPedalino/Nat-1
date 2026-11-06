@@ -3,21 +3,17 @@ import {
   ALL_TOOLS,
   ARTISAN_TOOLS,
   EXOTIC_LANGUAGES,
-  GAMING_SETS,
   MUSICAL_INSTRUMENTS,
   SKILLS,
   STANDARD_LANGUAGES,
-  VEHICLE_TOOLS,
 } from './gameData.js';
 import {
   getWeaponMasteryChoiceCount,
   getWeaponMasteryChoiceNames,
   WEAPON_MASTERY_RULES,
 } from '../shared/character/combat/weaponMastery.js';
-import { backgroundOriginFeat } from '../shared/character/progression/backgroundFeatOptions.js';
 import { asArray } from '../shared/lists.js';
 import { capitalize } from '../shared/ui/textCase.js';
-import { stripSource } from '../shared/content/nameKeys.js';
 
 export function splitClassSubclass(rawKey) {
   const value = String(rawKey || '');
@@ -45,10 +41,6 @@ export function createAdapterBindings(registry, context = {}) {
     SKILLS: SKILLS.map((skill) => ({ n: skill.name, a: skill.ability })),
     _ARTISAN_TOOLS: ARTISAN_TOOLS,
     _MUSICAL_INSTRUMENTS: MUSICAL_INSTRUMENTS,
-    _GAMING_SETS: GAMING_SETS,
-    _VEHICLE_TOOLS: VEHICLE_TOOLS,
-    _STD_LANGS: STANDARD_LANGUAGES,
-    _EXOTIC_LANGS: EXOTIC_LANGUAGES,
     _ALL_LANGS: ALL_LANGUAGES,
     _ALL_TOOLS: ALL_TOOLS,
     allItemsDb: context.items || [],
@@ -105,8 +97,6 @@ export function createAdapterBindings(registry, context = {}) {
     getSubclassSheetChoiceMeta: registry.getSubclassSheetChoiceMeta,
     registerSpeciesSheetChoiceMeta: (rawKey, meta) => species(rawKey, meta, 'registerSpeciesSheetChoiceMeta'),
     getSpeciesSheetChoiceMeta: registry.getSpeciesSheetChoiceMeta,
-    registerClassSheetCommonChoiceMeta: (className, meta = {}) => registry.registerClassSheetChoiceMeta(className, meta),
-    registerSubclassSheetCommonChoiceMeta: (rawKey, meta = {}) => subclass(rawKey, meta, 'registerSubclassSheetChoiceMeta'),
     registerSpeciesSheetCommonChoiceMeta: (rawKey, meta = {}) => species(rawKey, meta, 'registerSpeciesSheetChoiceMeta'),
 
     registerItemFlagDef: registry.registerItemFlagDef,
@@ -150,10 +140,6 @@ export function createAdapterBindings(registry, context = {}) {
     registerFeatSpellRiders: registry.registerFeatSpellRiders,
     getFeatSpellRiders: registry.getFeatSpellRiders,
 
-    registerClassChoiceKeyFilter: registry.registerClassChoiceKeyFilter,
-    getClassChoiceKeyFilter: registry.getClassChoiceKeyFilter,
-    registerClassChoiceLabelProvider: registry.registerClassChoiceLabelProvider,
-    getClassChoiceLabelProvider: registry.getClassChoiceLabelProvider,
     registerSpeciesSheetHpBonus: (rawKey, value) => species(rawKey, value, 'registerSpeciesSheetHpBonus'),
     getSpeciesSheetHpBonus: registry.getSpeciesSheetHpBonus,
     registerClassAtWillSpells: registry.registerClassAtWillSpells,
@@ -162,8 +148,6 @@ export function createAdapterBindings(registry, context = {}) {
     getSpeciesLongRestGrants: registry.getSpeciesLongRestGrants,
     registerResourceSideEffect: registry.registerResourceSideEffect,
     getResourceSideEffect: registry.getResourceSideEffect,
-    registerSubclassChoiceDetailDataProvider: registry.registerSubclassChoiceDetailDataProvider,
-    getSubclassChoiceDetailDataProvider: registry.getSubclassChoiceDetailDataProvider,
 
     registerGlobalClassAdapter: registry.registerGlobalClassAdapter,
     getGlobalClassAdapters: registry.getGlobalClassAdapters,
@@ -186,9 +170,6 @@ export function createAdapterBindings(registry, context = {}) {
     getSpellData: registry.getSpellData,
 
     getGenericSpeciesChoiceSpecs,
-    getGenericBackgroundChoiceSpecs,
-    getGenericBackgroundChoiceMeta,
-    getGenericBackgroundOriginFeat,
   };
 }
 
@@ -227,47 +208,3 @@ function getGenericSpeciesChoiceSpecs(species) {
   return specs;
 }
 
-function getGenericBackgroundChoiceSpecs(background) {
-  const specs = [];
-  asArray(background?.skillProficiencies).forEach((block, index) => {
-    const spec = choiceFromChoose(`bg_skill_${index}`, 'Background Skill', 'skill_choice', block, SKILLS.map((skill) => skill.name));
-    if (spec) specs.push(spec);
-  });
-  asArray(background?.toolProficiencies).forEach((block, index) => {
-    const fallback = block?.anyArtisansTool ? ARTISAN_TOOLS : block?.anyMusicalInstrument ? MUSICAL_INSTRUMENTS : ALL_TOOLS;
-    const spec = choiceFromChoose(`bg_tool_${index}`, 'Background Tool', 'generic_choice', block, fallback);
-    if (spec) specs.push(spec);
-  });
-  asArray(background?.languageProficiencies).forEach((block, index) => {
-    const fallback = block?.anyExotic ? EXOTIC_LANGUAGES : STANDARD_LANGUAGES;
-    const spec = choiceFromChoose(`bg_language_${index}`, 'Background Language', 'language_choice', block, fallback);
-    if (spec) specs.push(spec);
-  });
-  const origin = getGenericBackgroundOriginFeat(background);
-  if (origin?.fixed) specs.push({ key: 'feat_origin', label: 'Origin Feat', type: 'feat_fixed', fixed: origin.fixed, level: 1 });
-  else if (origin?.fixedOptions?.length || origin?.categories?.length) {
-    specs.push({
-      key: 'feat_origin',
-      label: 'Origin Feat',
-      type: 'feat_cat',
-      fixedOptions: origin.fixedOptions || [],
-      categories: origin.categories || [],
-      count: 1,
-      level: 1,
-    });
-  }
-  return specs;
-}
-
-function getGenericBackgroundOriginFeat(background) {
-  return backgroundOriginFeat(background);
-}
-
-function getGenericBackgroundChoiceMeta() {
-  return {
-    sectionTitle: 'Background Choices',
-    isChoiceKey: (key) => key === 'feat_origin' || /^bg_/i.test(String(key || '')),
-    getLabel: (key) => String(key || '').replace(/^bg_/i, '').replace(/_/g, ' '),
-    normalizeChoiceValue: (value) => stripSource(value),
-  };
-}

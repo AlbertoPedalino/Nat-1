@@ -42,7 +42,6 @@ registerSubclassAdapter("Rogue_Arcane Trickster", function (cls, lv, specs) {
   }
 });
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Rogue_Arcane Trickster", [
   {
     "name": "Mage Hand Legerdemain",
@@ -76,7 +75,6 @@ registerSubclassSheetResources("Rogue_Arcane Trickster", [
     "max": () => 1
   }
 ]);
-// [SheetRuntime] END
 
 }
 

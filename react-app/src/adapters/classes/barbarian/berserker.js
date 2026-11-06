@@ -9,7 +9,6 @@ export default function install(registry, context = {}) {
   } = createAdapterBindings(registry, context);
 registerSubclassAdapter("Barbarian_Berserker", function (cls, lv, specs) {});
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Barbarian_Berserker", [
   { name: "Frenzy", icon: "", cat: "attack", uses: "With Reckless Attack", minLevel: 3 },
   { name: "Intimidating Presence", icon: "", cat: "bonus", uses: "1 / LR or Rage use", resKey: "barb_intimidating", minLevel: 14 },
@@ -24,7 +23,6 @@ registerSubclassSheetEffects("Barbarian_Berserker", [
   { type: "immunity", conditions: ["Charmed", "Frightened"], minLevel: 6, note: "Mindless Rage while raging." },
   { type: "reactionAttack", minLevel: 10, note: "Retaliation." },
 ]);
-// [SheetRuntime] END
 
 }
 

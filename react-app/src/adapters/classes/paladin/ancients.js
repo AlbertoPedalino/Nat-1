@@ -10,7 +10,6 @@ export default function install(registry, context = {}) {
   } = createAdapterBindings(registry, context);
 registerSubclassAdapter("Paladin_Ancients", function (cls, lv, specs) {});
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Paladin_Ancients", [
   { name: "Nature's Wrath", icon: "", cat: "action", uses: "1 Channel", resKey: "paladin_channel_div" },
   { name: "Undying Sentinel", icon: "", cat: "action", uses: "1 / LR", resKey: "ancients_undying_sentinel", minLevel: 15 },
@@ -43,7 +42,6 @@ registerSubclassSheetEffects("Paladin_Ancients", [
   { type: "resistance", damageTypes: ["Necrotic", "Psychic", "Radiant"], minLevel: 7, note: "Aura of Warding: applies while in Aura of Protection." },
 
 ]);
-// [SheetRuntime] END
 
 }
 

@@ -1,7 +1,7 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
 
 export default function install(registry, context = {}) {
-  const { registerSubclassAdapter, registerSubclassSheetActions, registerSubclassRuntimeConfig } = createAdapterBindings(registry, context);
+  const { registerSubclassAdapter,  registerSubclassRuntimeConfig } = createAdapterBindings(registry, context);
 registerSubclassRuntimeConfig("Fighter_Eldritch Knight", {
   spellcasting: {
     ability: "int",
@@ -37,9 +37,6 @@ registerSubclassAdapter("Fighter_Eldritch Knight", function (cls, lv, specs) {
   }
 });
 
-// [SheetRuntime] START
-registerSubclassSheetActions("Fighter_Eldritch Knight", []);
-// [SheetRuntime] END
 
 }
 

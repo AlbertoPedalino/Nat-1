@@ -4,7 +4,6 @@ export default function install(registry, context = {}) {
   const { registerSubclassAdapter, registerSubclassSheetActions, registerSubclassSheetResources } = createAdapterBindings(registry, context);
 registerSubclassAdapter("Druid_Moon", function (cls, lv, specs) {});
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Druid_Moon", [
   {
     "name": "Circle Forms",
@@ -40,7 +39,6 @@ registerSubclassSheetResources("Druid_Moon", [
     "max": (lv, { wis } = {}) => Math.max(1, wis ?? 0)
   }
 ]);
-// [SheetRuntime] END
 
 }
 

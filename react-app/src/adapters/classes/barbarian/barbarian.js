@@ -55,7 +55,6 @@ registerClassSheetEffects("Barbarian", [
   { type: "meleeDamageBonus", ability: "str", value: 4, minLevel: 16, note: "Rage", condition: _barbarianRaging },
 ]);
 
-// [SheetRuntime] START
 registerClassSheetActions("Barbarian", [
   {
     "name": "Rage",
@@ -121,6 +120,5 @@ registerClassSheetResources("Barbarian", [
     "srRecover": 1
   }
 ]);
-// [SheetRuntime] END
 
 }

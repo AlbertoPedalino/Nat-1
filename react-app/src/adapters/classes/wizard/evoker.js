@@ -13,7 +13,6 @@ registerSubclassAdapter("Wizard_Evoker", function (cls, lv, specs) {
   addWizardSavantSpellChoices(specs, lv, { key: "evoker", label: "Evocation", school: "V" });
 });
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Wizard_Evoker", [
   { name: "Overchannel", icon: "", cat: "action", uses: "1st use free / LR", resKey: "overchannel", minLevel: 14 },
 ]);
@@ -37,7 +36,6 @@ registerSubclassSheetSpellModifiers("Wizard_Evoker", [
     note: "Empowered Evocation",
   },
 ]);
-// [SheetRuntime] END
 
 }
 

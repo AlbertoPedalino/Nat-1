@@ -37,7 +37,6 @@ registerClassSheetEffects("Monk", [
   { type: "unarmedStrike", face: 12, dexterity: true, uses: "Martial Arts", minLevel: 17, note: "Martial Arts" },
 ]);
 
-// [SheetRuntime] START
 registerClassSheetActions("Monk", [
   {
     name: 'Uncanny Metabolism',
@@ -135,7 +134,6 @@ registerClassSheetResources("Monk", [
     max: () => 1
   }
 ]);
-// [SheetRuntime] END
 
 }
 

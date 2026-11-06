@@ -66,7 +66,6 @@ registerSubclassSheetSpellModifiers("Cleric_Life", [
   }
 ]);
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Cleric_Life", [
   { name: "Preserve Life", icon: "", cat: "action", uses: "1 Channel", resKey: "channel_div",
     inlinePills: ({ ownerLevel }) => [
@@ -95,7 +94,6 @@ registerSubclassSheetEffects("Cleric_Life", [
   { type: "passiveNote", minLevel: 6, note: "Blessed Healer: when healing another creature with a spell slot, regain 2 + slot level HP." },
   { type: "healingMaximized", minLevel: 17, note: "Supreme Healing: use maximum values on healing dice." },
 ]);
-// [SheetRuntime] END
 
 }
 

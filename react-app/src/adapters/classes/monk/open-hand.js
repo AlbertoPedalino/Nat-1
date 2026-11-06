@@ -9,7 +9,6 @@ export default function install(registry, context = {}) {
   } = createAdapterBindings(registry, context);
 registerSubclassAdapter("Monk_Open Hand", function (cls, lv, specs) {});
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Monk_Open Hand", [
   { name: "Open Hand Technique", icon: "", cat: "attack", uses: "With Flurry", minLevel: 3 },
   { name: "Wholeness of Body", icon: "", cat: "bonus", uses: "WIS mod / LR", resKey: "open_hand_wholeness", minLevel: 6 },
@@ -29,7 +28,6 @@ registerSubclassSheetEffects("Monk_Open Hand", [
   { type: "reactionDefense", minLevel: 11, note: "Fleet Step / Tranquility style feature depending on adapter data." },
   { type: "saveOrDie", minLevel: 17, note: "Quivering Palm." },
 ]);
-// [SheetRuntime] END
 
 }
 

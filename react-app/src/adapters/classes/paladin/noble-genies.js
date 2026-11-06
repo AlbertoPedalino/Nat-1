@@ -21,7 +21,6 @@ registerSubclassAdapter("Paladin_Noble Genies", function (cls, lv, specs) {
   }
 });
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Paladin_Noble Genies", [
   {
     "name": "Elemental Smite",
@@ -95,7 +94,6 @@ registerSubclassRuntimeConfig("Paladin_Noble Genies", {
 registerSubclassSheetEffects("Paladin_Noble Genies", [
   { type: "acFormula", key: "paladin_noble_genies_genies_splendor", label: "Genie's Splendor", base: 10, abilities: ["dex", "cha"], allowShield: true, requiresNoArmor: true, minLevel: 3 },
 ]);
-// [SheetRuntime] END
 
 }
 

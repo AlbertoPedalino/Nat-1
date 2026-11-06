@@ -12,7 +12,6 @@ registerSubclassAdapter("Wizard_Diviner", function (cls, lv, specs) {
   addWizardSavantSpellChoices(specs, lv, { key: "diviner", label: "Divination", school: "D" });
 });
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Wizard_Diviner", [
   { name: "Portent", icon: "", cat: "action", uses: "2–3 / LR", resKey: "portent", minLevel: 3 },
   { name: "The Third Eye", icon: "", cat: "bonus", uses: "1 / SR+LR", resKey: "third_eye", minLevel: 10 },
@@ -28,7 +27,6 @@ registerSubclassSheetEffects("Wizard_Diviner", [
   { type: "spellSlotRecovery", minLevel: 6, note: "Expert Divination." },
   { type: "senseChoice", minLevel: 10, note: "The Third Eye: Darkvision 120 ft, read any language, or See Invisibility." },
 ]);
-// [SheetRuntime] END
 
 }
 

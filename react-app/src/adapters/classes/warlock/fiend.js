@@ -22,7 +22,6 @@ registerSubclassAdapter("Warlock_Fiend", function (cls, lv, specs) {
   }
 });
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Warlock_Fiend", [
 
   { name: "Dark One's Own Luck", icon: "dice-6", cat: "reaction", uses: "CHA mod / LR", resKey: "fiend_luck", minLevel: 6 },
@@ -55,7 +54,6 @@ registerSubclassRuntimeConfig("Warlock_Fiend", {
     ],
   },
 });
-// [SheetRuntime] END
 
 }
 

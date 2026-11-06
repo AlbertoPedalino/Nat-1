@@ -9,7 +9,6 @@ export default function install(registry, context = {}) {
   } = createAdapterBindings(registry, context);
 registerSubclassAdapter("Barbarian_Zealot", function (cls, lv, specs) {});
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Barbarian_Zealot", [
   { name: "Warrior of the Gods", icon: "", cat: "bonus", uses: "Pool / LR", resKey: "zealot_warrior_pool", minLevel: 3 },
   { name: "Fanatical Focus", icon: "", cat: "reaction", uses: "1 / Rage", minLevel: 6 },
@@ -30,7 +29,6 @@ registerSubclassSheetEffects("Barbarian_Zealot", [
   { type: "reroll", minLevel: 6, note: "Fanatical Focus: reroll a failed save while raging." },
   { type: "flySpeed", minLevel: 14, note: "Rage of the Gods: fly speed and resistance-related benefits while raging." },
 ]);
-// [SheetRuntime] END
 
 }
 

@@ -11,7 +11,6 @@ export default function install(registry, context = {}) {
   } = createAdapterBindings(registry, context);
 registerSubclassAdapter("Warlock_Celestial", function (cls, lv, specs) {});
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Warlock_Celestial", [
   { name: "Healing Light", icon: "sun", cat: "bonus", uses: "Pool / LR", resKey: "celestial_heal_light", minLevel: 3,
     rollers: [{ kind: 'heal', formula: "1d6" }] },
@@ -56,7 +55,6 @@ registerSubclassRuntimeConfig("Warlock_Celestial", {
     ],
   },
 });
-// [SheetRuntime] END
 
 }
 

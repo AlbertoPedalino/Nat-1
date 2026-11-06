@@ -9,7 +9,6 @@ export default function install(registry, context = {}) {
   } = createAdapterBindings(registry, context);
 registerSubclassAdapter("Monk_Elements", function (cls, lv, specs) {});
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Monk_Elements", [
   { name: "Manipulate Elements", icon: "", cat: "action", uses: "At will", minLevel: 3 },
   { name: "Elemental Attunement", icon: "", cat: "action", uses: "1 Focus Point", resKey: "ki", minLevel: 3 },
@@ -36,7 +35,6 @@ registerSubclassSheetEffects("Monk_Elements", [
   { type: "flySpeed", minLevel: 11, note: "Stride of the Elements." },
   { type: "resistance", damageTypes: ["Acid", "Cold", "Fire", "Lightning", "Thunder"], minLevel: 17, note: "Elemental Epitome while active." },
 ]);
-// [SheetRuntime] END
 
 }
 

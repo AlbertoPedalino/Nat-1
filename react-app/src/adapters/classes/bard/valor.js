@@ -9,7 +9,6 @@ export default function install(registry, context = {}) {
   } = createAdapterBindings(registry, context);
 registerSubclassAdapter("Bard_Valor", function (cls, lv, specs) {});
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Bard_Valor", [
   { name: "Combat Inspiration", icon: "", cat: "reaction", uses: "With Bardic Insp.", minLevel: 3 },
   { name: "Battle Magic",       icon: "", cat: "bonus",    uses: "After casting spell", minLevel: 14 },
@@ -24,7 +23,6 @@ registerSubclassSheetEffects("Bard_Valor", [
   { type: "bardicInspirationUpgrade", minLevel: 3, note: "Combat Inspiration." },
   { type: "extraAttack", minLevel: 6, note: "Extra Attack." },
 ]);
-// [SheetRuntime] END
 
 }
 

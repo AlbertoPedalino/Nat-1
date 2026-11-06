@@ -24,7 +24,6 @@ registerSubclassAdapter("Fighter_Banneret", function (cls, lv, specs) {
   }
 });
 
-// [SheetRuntime] START
 registerSubclassSheetActions("Fighter_Banneret", [
   {
     "name": "Shared Resilience",
@@ -41,7 +40,6 @@ registerSubclassSheetEffects("Fighter_Banneret", [
   { type: "skillExpertise", values: ["Persuasion"], minLevel: 7, note: "Royal Envoy." },
   { type: "reactionAttackGrant", minLevel: 10, note: "Inspiring Surge: when you Action Surge, ally can make one weapon attack." },
 ]);
-// [SheetRuntime] END
 
 }
 
