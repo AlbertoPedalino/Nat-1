@@ -1,22 +1,7 @@
 import { getBackgroundPattern } from '../progression/calculations.js';
 import { findSpellListEntryIndexByClass } from '../../../shared/character/spells/featSpellLists.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
-
-function normalizeWizardSpellbook(book) {
-  const next = {};
-  for (let level = 0; level <= 9; level++) {
-    const seen = new Set();
-    next[level] = [];
-    (book?.[level] || []).forEach((entry) => {
-      const name = typeof entry === 'string' ? entry : entry?.name;
-      const key = matchKey(name);
-      if (!key || seen.has(key)) return;
-      seen.add(key);
-      next[level].push(name);
-    });
-  }
-  return next;
-}
+import { normalizeWizardBook } from '../../../shared/character/spells/wizardBook.js';
 
 function removeSelectedSpellAtLevel(bucket, level, name) {
   const normalized = matchKey(name);
@@ -179,7 +164,7 @@ export function handleWizardSpellbookToggle(state, action, { updateCharacter }) 
   if (Number.isInteger(extraIndex) && extraIndex >= 0) {
     const extraClasses = state.character.extraClasses.map((extraClass, itemIndex) => {
       if (itemIndex !== extraIndex) return extraClass;
-      const wizardSpellbook = normalizeWizardSpellbook(extraClass.wizardSpellbook);
+      const wizardSpellbook = normalizeWizardBook(extraClass.wizardSpellbook);
       const current = wizardSpellbook[level] || [];
       const has = current.some((entry) => matchKey(entry) === normalized);
       wizardSpellbook[level] = has
@@ -192,7 +177,7 @@ export function handleWizardSpellbookToggle(state, action, { updateCharacter }) 
     return updateCharacter(state, { extraClasses });
   }
 
-  const wizardSpellbook = normalizeWizardSpellbook(state.character.wizardSpellbook);
+  const wizardSpellbook = normalizeWizardBook(state.character.wizardSpellbook);
   const current = wizardSpellbook[level] || [];
   const has = current.some((entry) => matchKey(entry) === normalized);
   wizardSpellbook[level] = has

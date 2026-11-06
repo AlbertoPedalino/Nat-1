@@ -218,7 +218,7 @@ test('DOM listeners in components and hooks go through useEventListener', () => 
 });
 
 test('a wizard spellbook is normalized only by shared/character/spells/wizardBook.js', () => {
-  assert.deepEqual(sourceFilesMatching(/function\s+normalizeWizardBook\b/, {
+  assert.deepEqual(sourceFilesMatching(/function\s+normalizeWizard(Spell)?Book\b|for \(let level = 0; level <= 9; level\+\+\) \{\n\s*const seen = new Set\(\);/, {
     allow: ['shared/character/spells/wizardBook.js'],
   }), []);
 });
