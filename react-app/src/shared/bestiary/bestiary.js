@@ -63,7 +63,21 @@ export async function loadBestiaryIndex() {
   return { index, availableSources, legendaryGroups: legendaryResult };
 }
 
-export async function loadMonsterDatabase() {
+// The bestiary is built once per page: the map's editor, its creature picker
+// and its encounter import (and the compendium) share one database instead of
+// each flattening, filtering and sorting every monster again. A failed build is
+// forgotten, so the next caller tries again.
+let monsterDatabase = null;
+
+export function loadMonsterDatabase() {
+  if (!monsterDatabase) {
+    monsterDatabase = buildMonsterDatabase();
+    monsterDatabase.catch(() => { monsterDatabase = null; });
+  }
+  return monsterDatabase;
+}
+
+async function buildMonsterDatabase() {
   const { index, availableSources, legendaryGroups } = await loadBestiaryIndex();
   const loaded = await Promise.all(availableSources.map(async (source) => {
     const file = index[source];
