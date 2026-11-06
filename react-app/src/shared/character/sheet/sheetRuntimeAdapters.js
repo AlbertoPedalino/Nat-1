@@ -1,5 +1,4 @@
 import { loadClassAdapters, loadCoreAdapters } from '../../../adapters/index.js';
-import { getFinal, getMod, getPB } from './sheetStats.js';
 import { asArray } from '../../lists.js';
 import { classNames } from '../progression/classLevel.js';
 
@@ -20,10 +19,9 @@ export function collectSheetRuntimeClassNames(characters) {
 // effects/resources/actions. Loading is best-effort: a stale chunk should degrade
 // a calculation, not break the whole screen.
 export async function ensureSheetRuntimeAdapters(characters) {
-  const context = { getMod, getFinal, getPB };
   const classNames = collectSheetRuntimeClassNames(characters);
   return Promise.allSettled([
-    loadCoreAdapters(context),
-    classNames.length ? loadClassAdapters(classNames, context) : Promise.resolve(null),
+    loadCoreAdapters(),
+    classNames.length ? loadClassAdapters(classNames) : Promise.resolve(null),
   ]);
 }

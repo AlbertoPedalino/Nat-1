@@ -26,7 +26,6 @@ import PreviewPane from './preview/PreviewPane.jsx';
 import { STEPS } from './constants.js';
 import { adapterRegistry } from '../../adapters/registry.js';
 import { loadClassAdapters, loadCoreAdapters } from '../../adapters/index.js';
-import { getMod, getFinal } from '../../shared/character/sheet/sheetStats.js';
 import { adaptBuilderData } from '../../adapters/adapterPipeline.js';
 import { useBuilderData } from './state/useBuilderData.js';
 import BuilderDataAlert from './layout/BuilderDataAlert.jsx';
@@ -360,7 +359,7 @@ export default function CharBuilder() {
     const activeClasses = classNames(state.character);
     Promise.all([
       loadCoreAdapters({ items: state.data.items }),
-      loadClassAdapters(activeClasses, { items: state.data.items, getMod, getFinal }),
+      loadClassAdapters(activeClasses, { items: state.data.items }),
     ])
       .then(() => {
         if (!cancelled) dispatch({ type: 'adapters/loaded' });
@@ -378,7 +377,7 @@ export default function CharBuilder() {
     const classes = classNames(state.character);
     if (!classes.length) return;
     let cancelled = false;
-    loadClassAdapters(classes, { items: state.data.items, getMod, getFinal })
+    loadClassAdapters(classes, { items: state.data.items })
       .then((result) => {
         if (cancelled) return;
         if (result?.loadedNewAdapters) {

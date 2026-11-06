@@ -11,7 +11,7 @@ import {
 import { Plus, Sparkles } from 'lucide-react';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import { SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
-import { getFinal, getMod, getPB, effectiveD20Modifier } from '../../../shared/character/sheet/sheetStats.js';
+import { effectiveD20Modifier } from '../../../shared/character/sheet/sheetStats.js';
 import { loadSpells } from '../../../shared/content/catalogs/spellData.js';
 import { scrollRowKey } from '../../../shared/character/inventory/spellScrolls.js';
 import { spellMatchesClass } from '../../../shared/character/spells/spellClassMatch.js';
@@ -111,11 +111,10 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
 
   useEffect(() => {
     let alive = true;
-    const context = { getMod, getFinal, getPB };
     Promise.all([
-      loadCoreAdapters(context),
-      loadClassAdapters(JSON.parse(classKey), context),
-      loadSpellsAdapters(context),
+      loadCoreAdapters(),
+      loadClassAdapters(JSON.parse(classKey)),
+      loadSpellsAdapters(),
     ]).then(() => {
       if (!alive) return;
       setAdapterRevision((revision) => revision + 1);

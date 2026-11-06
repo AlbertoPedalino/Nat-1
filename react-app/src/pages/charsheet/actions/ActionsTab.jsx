@@ -82,10 +82,9 @@ export default function ActionsTab({ C, sheet, resources }) {
   const classNamesKey = ownedClassNames.join('|');
 
   useEffect(() => {
-    Promise.all([
-      loadCoreAdapters(),
-      loadClassAdapters(ownedClassNames, { getMod, getFinal }),
-    ]);
+    // Best-effort: a stale chunk leaves the cards it would add out, it does not
+    // throw an unhandled rejection.
+    Promise.all([loadCoreAdapters(), loadClassAdapters(ownedClassNames)]).catch(() => {});
   }, [classNamesKey]);
 
   useEffect(() => {
