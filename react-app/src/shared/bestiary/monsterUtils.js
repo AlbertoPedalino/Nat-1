@@ -1,24 +1,7 @@
-import { CR_XP } from './bestiaryConstants.js';
 import { FALLBACK_MONSTER_TOKEN, GAME_IMAGE_BASE } from '../content/gameData.js';
-import { parseCr } from '../character/forms/beasts.js';
+import { crKey, crXP } from './challengeRating.js';
 import { clampInt, numberOr } from '../numbers.js';
 import { sizeName } from '../content/rulesVocabulary.js';
-
-export function getCR(cr) {
-  if (!cr) return '0';
-  if (typeof cr === 'string') return cr;
-  if (typeof cr === 'object') return String(cr.cr || '0');
-  return String(cr);
-}
-
-export function crXP(cr) {
-  return CR_XP[getCR(cr)] || 0;
-}
-
-// Proficiency Bonus by Challenge Rating: +2 up to CR 4, then +1 every four CR.
-export function crPB(cr) {
-  return Math.max(2, Math.ceil((parseCr(getCR(cr)) || 0) / 4) + 1);
-}
 
 export function getType(type) {
   if (!type) return '';
@@ -142,7 +125,7 @@ export function getMonsterTokenUrls(monster) {
 }
 
 export function toEncounterMonster(monster, id) {
-  const cr = getCR(monster?.cr);
+  const cr = crKey(monster?.cr);
   return {
     id,
     name: monster?.name || 'Monster',
@@ -170,7 +153,7 @@ export function hydrateEncounterItems(items, monsters) {
     const monsterData = db.find((monster) => (
       monster.name === item.name && (!item.source || monster.source === item.source)
     )) || null;
-    const cr = item.cr || getCR(monsterData?.cr);
+    const cr = item.cr || crKey(monsterData?.cr);
     return {
       id: item.id || `enc-${index}-${item.name || 'monster'}`,
       name: item.name || monsterData?.name || 'Monster',

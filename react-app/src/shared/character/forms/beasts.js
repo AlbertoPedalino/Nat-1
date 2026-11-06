@@ -11,6 +11,7 @@ import { signed } from '../../ui/numberFormat.js';
 import { stripSource } from '../../content/nameKeys.js';
 import { statBlockTagText } from '../../content/statBlockTags.js';
 import { ABILITIES, sizeName } from '../../content/rulesVocabulary.js';
+import { crNumber, formatCr } from '../../bestiary/challengeRating.js';
 
 // Known Beast forms by Druid level (XPHB 2024 "Beast Shapes" table): 4 at lv.2,
 // 6 at lv.4, 8 at lv.8. You may swap one known form per Long Rest.
@@ -20,27 +21,6 @@ export function wildShapeKnownFormsLimit(druidLevel) {
   if (lv >= 4) return 6;
   if (lv >= 2) return 4;
   return 0;
-}
-
-// CR may be a string ('1/4'), a number, or an object ({ cr: '1/4', ... }).
-export function parseCr(cr) {
-  const raw = cr && typeof cr === 'object' ? cr.cr : cr;
-  const text = String(raw ?? '').trim();
-  if (!text) return null;
-  if (text.includes('/')) {
-    const [num, den] = text.split('/').map(Number);
-    return den ? num / den : null;
-  }
-  const n = Number(text);
-  return Number.isFinite(n) ? n : null;
-}
-
-export function formatCr(crNum) {
-  if (crNum == null) return '—';
-  if (crNum === 0.125) return '1/8';
-  if (crNum === 0.25) return '1/4';
-  if (crNum === 0.5) return '1/2';
-  return String(crNum);
 }
 
 // Wild Shape max CR by Druid level (XPHB 2024): 1/4 at lv.2, 1/2 at lv.4, 1 at lv.8.
@@ -128,7 +108,7 @@ export function normalizeBeast(raw) {
   // Only beasts from supported 2024 sources (XMM + the core manuals) may be
   // assumed; this guards against bestiary files carrying disallowed reprints.
   if (!isAllowedSource(raw.source, BEAST_ALLOWED_SOURCES)) return null;
-  const crNum = parseCr(raw.cr);
+  const crNum = crNumber(raw.cr);
   const ac = firstAc(raw);
   const abilities = {};
   ABILITIES.forEach((key) => { abilities[key] = Number(raw[key] ?? 10); });

@@ -272,3 +272,11 @@ test('size, school, damage and creature type tables come from shared/content/rul
     { allow: ['shared/content/rulesVocabulary.js'] },
   ), []);
 });
+
+// A Challenge Rating is read and written by shared/bestiary/challengeRating.js:
+// three helpers in three folders did the same parsing.
+test('challenge ratings are parsed only by shared/bestiary/challengeRating.js', () => {
+  assert.deepEqual(sourceFilesMatching(/function\s+(getCR|parseCr|crValueOf|crKey|crNumber|formatCr)\s*\(|crNum === 0\.125/, {
+    allow: ['shared/bestiary/challengeRating.js'],
+  }), []);
+});

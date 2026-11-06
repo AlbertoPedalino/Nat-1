@@ -8,7 +8,6 @@ import {
 } from '../../../shared/cloud/api/hexcrawl.js';
 import { createDungeon } from '../../../shared/dungeon/dungeon.js';
 import { encounterBudget, fillBudget } from '../../../shared/dungeon/roomBudget.js';
-import { crXP, getCR } from '../../../shared/bestiary/monsterUtils.js';
 import { roomMarkers } from '../../../shared/dungeon/roomMarkers.js';
 import { seededRandom } from '../../../shared/dungeon/seededRandom.js';
 import {
@@ -22,6 +21,7 @@ import { restoreFight } from '../../../shared/encounter/combat.js';
 import { importableCombatants } from '../../../shared/vtt/tokens/encounterImport.js';
 import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
 import { listenForRecovery } from '../../../shared/cloud/sync/recoveryTriggers.js';
+import { crKey, crXP } from '../../../shared/bestiary/challengeRating.js';
 
 // Links change rarely and every local change announces itself (the gb:* link
 // events, storage); the shared recovery triggers catch another device's edit.
@@ -130,7 +130,7 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize, roster }) {
   // point, a skeleton's portrait and a one-square footprint — every field it
   // read was on the monster inside.
   const priced = useMemo(() => (monsters || [])
-    .map((monster) => ({ ...monster, xp: crXP(getCR(monster.cr)) }))
+    .map((monster) => ({ ...monster, xp: crXP(crKey(monster.cr)) }))
     .filter((entry) => entry.xp > 0), [monsters]);
 
   // What a room's encounter is worth, and what that buys.

@@ -14,21 +14,7 @@ import {
 } from '@mui/material';
 import { X } from 'lucide-react';
 import { getLegendaryGroup } from './bestiary.js';
-import {
-  crPB,
-  crXP,
-  formatAlignment,
-  formatDamageList,
-  formatSpeed,
-  getAC,
-  getACDesc,
-  getCR,
-  getHP,
-  getSizeLabel,
-  getType,
-  getTypeTags,
-  monster5eUrl,
-} from './monsterUtils.js';
+import { formatAlignment, formatDamageList, formatSpeed, getAC, getACDesc, getHP, getSizeLabel, getType, getTypeTags, monster5eUrl } from './monsterUtils.js';
 import EntryRenderer from './EntryRenderer.jsx';
 import InlineText from './InlineText.jsx';
 import MonsterToken from './MonsterToken.jsx';
@@ -41,6 +27,7 @@ import { signed, formatNumber } from '../ui/numberFormat.js';
 import { abilityModifier } from '../character/progression/abilityModifier.js';
 import { capitalize } from '../ui/textCase.js';
 import { ABILITIES, ABILITY_ABBREVIATIONS } from '../content/rulesVocabulary.js';
+import { crKey, crPB, crXP } from './challengeRating.js';
 
 export function StatBlockHeader({ monster, onClose }) {
   const url = monster5eUrl(monster);
@@ -71,7 +58,7 @@ export function StatBlockHeader({ monster, onClose }) {
 
 export function StatBlockSheet({ monster, legendaryGroups, conditions = null, onRoll, children = null }) {
   const legendaryGroup = getLegendaryGroup(monster, legendaryGroups);
-  const cr = getCR(monster.cr);
+  const cr = crKey(monster.cr);
   const hpFormula = monster.hp?.formula;
   const spellcasting = groupSpellcasting(monster.spellcasting);
 

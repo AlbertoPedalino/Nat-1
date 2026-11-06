@@ -55,7 +55,7 @@ import {
 } from '../../../../../src/shared/encounter/library.js';
 import { cleanToText, parseCleanTokens } from '../../../../../src/shared/bestiary/markup.js';
 import { isEncounterMonster, resolveLegendaryGroups } from '../../../../../src/shared/bestiary/bestiary.js';
-import { crPB } from '../../../../../src/shared/bestiary/monsterUtils.js';
+import { crPB } from '../../../../../src/shared/bestiary/challengeRating.js';
 import { SYNCED_DATA_KEYS } from '../../../../../src/shared/character/combat/vitals.js';
 import { combatantToSheetPatch, resolveCombatVitals, sheetPatchKey, sheetVitalsToCombat, sheetVitalsToSheetPatch } from '../../../../../src/shared/encounter/sheetSync.js';
 import { createInitialState, encounterReducer } from '../../../../../src/pages/encounterbuilder/state/reducer.js';

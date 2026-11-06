@@ -18,11 +18,12 @@ import {
 import { ChevronDown, Plus, Search } from 'lucide-react';
 import { CR_ORDER, TYPE_OPTIONS } from '../../../shared/bestiary/bestiaryConstants.js';
 import { filterQuickMonsters } from '../../../shared/bestiary/filters.js';
-import { getCR, getType } from '../../../shared/bestiary/monsterUtils.js';
+import { getType } from '../../../shared/bestiary/monsterUtils.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import MonsterToken from '../../../shared/bestiary/MonsterToken.jsx';
 import { capitalize } from '../../../shared/ui/textCase.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { crKey } from '../../../shared/bestiary/challengeRating.js';
 
 export default function Reinforcements() {
   const { state, dispatch, monsterDb } = useEncounterBuilder();
@@ -91,7 +92,7 @@ export default function Reinforcements() {
                     <Typography fontWeight={700} noWrap>{monster.name}</Typography>
                     <Typography variant="caption" color="text.secondary">{monster.source} · {getType(monster.type)}</Typography>
                   </Box>
-                  <Typography variant="caption" color="primary.main">CR {getCR(monster.cr)}</Typography>
+                  <Typography variant="caption" color="primary.main">CR {crKey(monster.cr)}</Typography>
                   <Tooltip title="Add to combat">
                     <IconButton
                       size="small"

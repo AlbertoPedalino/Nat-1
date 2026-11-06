@@ -4,10 +4,10 @@
 // Pure; the page is MonsterCatalog.jsx.
 
 import { normalizeSearchText } from '../../shared/content/searchText.js';
-import { parseCr } from '../../shared/character/forms/beasts.js';
-import { getCR, getHP, getAC, getType, getSizeLabel } from '../../shared/bestiary/monsterUtils.js';
+import { getHP, getAC, getType, getSizeLabel } from '../../shared/bestiary/monsterUtils.js';
 import { CR_ORDER } from '../../shared/bestiary/bestiaryConstants.js';
 import { CREATURE_TYPES, SIZE_NAMES } from '../../shared/content/rulesVocabulary.js';
+import { crKey, crNumber } from '../../shared/bestiary/challengeRating.js';
 
 export const CHALLENGE_RATINGS = Object.freeze(CR_ORDER.map((cr) => ({ key: cr, label: `CR ${cr}` })));
 
@@ -16,7 +16,7 @@ export const MONSTER_TYPES = Object.freeze(CREATURE_TYPES.map((type) => ({ key: 
 export const MONSTER_SIZES = Object.freeze(Object.entries(SIZE_NAMES).map(([key, label]) => ({ key, label })));
 
 export function crValue(monster) {
-  return parseCr(getCR(monster?.cr)) ?? 0;
+  return crNumber(monster?.cr) ?? 0;
 }
 
 export function monsterType(monster) {
@@ -28,7 +28,7 @@ export function monsterSizes(monster) {
 }
 
 export function monsterStats(monster) {
-  return { cr: getCR(monster?.cr), size: getSizeLabel(monster), ac: getAC(monster?.ac), hp: getHP(monster?.hp) };
+  return { cr: crKey(monster?.cr), size: getSizeLabel(monster), ac: getAC(monster?.ac), hp: getHP(monster?.hp) };
 }
 
 export const MONSTER_FILTERS = Object.freeze({
@@ -38,8 +38,8 @@ export const MONSTER_FILTERS = Object.freeze({
 export function filterMonsters(entries, filters = MONSTER_FILTERS) {
   const f = { ...MONSTER_FILTERS, ...filters };
   const terms = normalizeSearchText(f.search).split(' ').filter(Boolean);
-  const from = f.crFrom === 'all' ? -Infinity : parseCr(f.crFrom);
-  const to = f.crTo === 'all' ? Infinity : parseCr(f.crTo);
+  const from = f.crFrom === 'all' ? -Infinity : crNumber(f.crFrom);
+  const to = f.crTo === 'all' ? Infinity : crNumber(f.crTo);
   const list = entries.filter((entry) => {
     const monster = entry.record;
     if (terms.length && !terms.every((term) => entry.nameText.includes(term))) return false;

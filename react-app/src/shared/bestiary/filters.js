@@ -1,4 +1,5 @@
-import { getCR, getType } from './monsterUtils.js';
+import { getType } from './monsterUtils.js';
+import { crKey } from './challengeRating.js';
 
 export function normalizeSourceFilter(sources) {
   return new Set((Array.isArray(sources) ? sources : []).map((source) => String(source || '').trim()).filter(Boolean));
@@ -14,7 +15,7 @@ export function filterMonsters(monsters, filters = {}) {
   return list.filter((monster) => {
     if (activeSources.size && !activeSources.has(monster.source)) return false;
     if (search && !String(monster.name || '').toLowerCase().includes(search)) return false;
-    if (cr && getCR(monster.cr) !== cr) return false;
+    if (cr && crKey(monster.cr) !== cr) return false;
     if (type && getType(monster.type).toLowerCase() !== type) return false;
     return true;
   });
@@ -28,7 +29,7 @@ export function filterQuickMonsters(monsters, filters = {}) {
 
   return list.filter((monster) => {
     if (search && !String(monster.name || '').toLowerCase().includes(search)) return false;
-    if (cr && getCR(monster.cr) !== cr) return false;
+    if (cr && crKey(monster.cr) !== cr) return false;
     if (type && !getType(monster.type).toLowerCase().includes(type)) return false;
     return true;
   });

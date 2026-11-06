@@ -17,11 +17,12 @@ import {
 import { Plus } from 'lucide-react';
 import { CR_ORDER, TYPE_OPTIONS } from './bestiaryConstants.js';
 import { filterMonsters } from './filters.js';
-import { crXP, getCR, getType } from './monsterUtils.js';
+import { getType } from './monsterUtils.js';
 import MonsterToken from './MonsterToken.jsx';
 import { capitalize } from '../ui/textCase.js';
 import { formatNumber } from '../ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../ui/colors.js';
+import { crKey, crXP } from './challengeRating.js';
 
 const PAGE_SIZE = 50;
 
@@ -130,7 +131,7 @@ export default function MonsterBrowser({
               </Typography>
             </Box>
             <Typography variant="caption" color="primary.main" sx={{ minWidth: 92, textAlign: 'right' }}>
-              CR {getCR(monster.cr)} · {formatNumber(crXP(monster.cr))} XP
+              CR {crKey(monster.cr)} · {formatNumber(crXP(monster.cr))} XP
             </Typography>
             <Tooltip title={pickLabel}>
               <IconButton
