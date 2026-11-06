@@ -6,6 +6,28 @@ import RosterPanel from '../tokens/RosterPanel.jsx';
 import MapObjectsPanel from '../objects/MapObjectsPanel.jsx';
 import { DrawPanel, FogPanel, LaserPanel, MeasurePanel } from './ScenePanels.jsx';
 
+// Which rail group a paint mode belongs to, so the rail lights the right one.
+export function paintToolGroup(mode) {
+  if (mode === 'marquee') return 'cursor';
+  if (['draw', 'erase', 'text', 'area'].includes(mode)) return 'draw';
+  if (mode === 'laser') return 'laser';
+  if (mode === 'measure') return 'ruler';
+  if (mode === 'reveal' || mode === 'hide') return 'fog';
+  return 'cursor';
+}
+
+// The paint mode actually in force: the one picked, unless the picture on show
+// or the viewer's role rules it out.
+export function allowedPaintModeFor(paintMode, { isGm, shownImage }) {
+  // Nothing to paint on a background: no fog, no board, nothing that would be
+  // saved anywhere. The laser and the ruler still work — pointing at a picture
+  // is exactly what a background is for.
+  const showingBackground = shownImage === 'background';
+  if (showingBackground && !['select', 'laser', 'measure'].includes(paintMode)) return 'select';
+  const gmOnly = paintMode === 'reveal' || paintMode === 'hide';
+  return gmOnly && !isGm ? 'select' : paintMode;
+}
+
 // The groups of the scene's right tool rail (Draw, Fog, Measure, Laser,
 // Pieces, Objects, Players, Dungeon…), each with its icon, what selecting it
 // activates, and its panel. Built by SceneEditor from its state and handlers.

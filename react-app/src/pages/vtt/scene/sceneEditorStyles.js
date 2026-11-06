@@ -3,6 +3,11 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { SHEET_SIDE_BY_SIDE_QUERY } from '../../../shared/vtt/sheets/sheetLayout.js';
 import { normalizeHexColor } from '../../../shared/ui/colors.js';
 
+// The GM needs to see what is still hidden from the party without being blind
+// to the map underneath; a player gets the real thing.
+export const GM_FOG_OPACITY = 0.55;
+export const PLAYER_FOG_OPACITY = 1;
+
 export const sceneTopbarSx = {
   ...battleMapSurfaceSx,
   display: 'flex',

@@ -1,6 +1,4 @@
-import {
-  useCallback, useEffect, useMemo, useRef, useState,
-} from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
   Box,
   CircularProgress,
@@ -8,38 +6,24 @@ import {
 } from '@mui/material';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
-import { commandCharacterVitals } from '../../../shared/cloud/api/healthCommands.js';
-import { fetchScene, fetchSceneRevision } from '../../../shared/cloud/api/vttScenes.js';
-import { applyTokenEvent } from '../../../shared/vtt/session/liveScene.js';
 import {
-  canMarkToken,
   sceneBackgrounds,
   sceneView,
-  toScene,
   viewBackgroundPath,
 } from '../../../shared/vtt/scene/scene.js';
 import { DEFAULT_AREA_OPTIONS } from '../../../shared/vtt/map/areas.js';
 import { FEET_PER_CELL } from '../../../shared/vtt/map/measure.js';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { gridShape } from '../../../shared/vtt/map/hexGeometry.js';
-import { useSceneLive } from '../../../shared/vtt/session/useSceneLive.js';
 import { useSceneRole } from '../../../shared/vtt/session/useSceneRole.js';
 import { sheetGridColumns } from '../../../shared/vtt/sheets/sheetLayout.js';
-import { useGmTokenVitals } from '../tokens/useGmTokenVitals.js';
-import { useSceneHexcrawl } from '../hexcrawl/useSceneHexcrawl.js';
-import { useSceneTurns } from '../initiative/useSceneTurns.js';
 import InitiativeStrip from '../initiative/InitiativeStrip.jsx';
 import MonsterStatBlockView from '../tokens/MonsterStatBlockView.jsx';
-import { useSceneDungeon } from '../dungeon/useSceneDungeon.js';
 import { useSceneContent } from './useSceneContent.js';
-import { useCampaignRoster } from './useCampaignRoster.js';
 import { useVttRolls } from '../rolls/useVttRolls.js';
-import { useMonsterDb } from '../../../shared/bestiary/useMonsterDb.js';
-import { parseSourceRef } from '../../../shared/vtt/tokens/encounterSync.js';
 import {
   showsFight,
 } from '../../../shared/vtt/tokens/initiative.js';
-import HexcrawlCorner from '../hexcrawl/HexcrawlCorner.jsx';
 import HexResultDialog from '../hexcrawl/HexResultDialog.jsx';
 import { useConditionEntries } from '../../../shared/character/combat/useConditionEntries.js';
 import EncounterImportDialog from '../tokens/EncounterImportDialog.jsx';
@@ -54,8 +38,9 @@ import {
   contentLayoutOpenSx,
   contentLayoutSx,
   editorRootSx,
+  GM_FOG_OPACITY,
+  PLAYER_FOG_OPACITY,
   sheetViewSx,
-  spectatorRootSx,
   viewportCellSx,
 } from './sceneEditorStyles.js';
 import {
@@ -63,9 +48,8 @@ import {
   LayerPanel,
 } from './ScenePanels.jsx';
 import SceneViewport from '../map/SceneViewport.jsx';
-import TokenMenu from '../tokens/TokenMenu.jsx';
 import DrawingMenu from '../map/DrawingMenu.jsx';
-import { buildToolGroups } from './sceneToolGroups.jsx';
+import { allowedPaintModeFor, buildToolGroups, paintToolGroup } from './sceneToolGroups.jsx';
 import { useSceneDrawings } from '../map/useSceneDrawings.js';
 import { useTokenPlacement } from '../tokens/useTokenPlacement.js';
 import { useTokenEdits } from '../tokens/useTokenEdits.js';
@@ -77,28 +61,22 @@ import EmbeddedBattleMapSheet from './EmbeddedBattleMapSheet.jsx';
 import { useProjectorControls, useProjectorFollow } from './useProjector.js';
 import { useSheetSelection, useSheetSplit } from './useSceneSheets.js';
 import { useDisplayedImage } from './useDisplayedImage.js';
-import { useRemotePreviews } from './useRemotePreviews.js';
-import { useFogPainting, useFogReceiver } from './useFogPainting.js';
-import { useSceneWriteGuard } from './useSceneWriteGuard.js';
+import { useFogPainting } from './useFogPainting.js';
 import { useTokenMoves } from './useTokenMoves.js';
 import { usePlayArea } from './usePlayArea.js';
 import { useSceneHeaderActions } from './useSceneHeaderActions.js';
 import { useViewerProjection } from './useViewerProjection.js';
+import { useSceneSources } from './useSceneSources.js';
+import { useSceneSync } from './useSceneSync.js';
+import { usePlayerPreview } from './usePlayerPreview.js';
+import { useMapFullscreen } from './useMapFullscreen.js';
+import SceneHexcrawlCorner from './SceneHexcrawlCorner.jsx';
+import SceneTokenMenu from './SceneTokenMenu.jsx';
+import SpectatorSceneView from './SpectatorSceneView.jsx';
 
-// The GM needs to see what is still hidden from the party without being blind
-// to the map underneath; a player gets the real thing.
-const GM_FOG_OPACITY = 0.55;
-const PLAYER_FOG_OPACITY = 1;
-
-function paintToolGroup(mode) {
-  if (mode === 'marquee') return 'cursor';
-  if (['draw', 'erase', 'text', 'area'].includes(mode)) return 'draw';
-  if (mode === 'laser') return 'laser';
-  if (mode === 'measure') return 'ruler';
-  if (mode === 'reveal' || mode === 'hide') return 'fog';
-  return 'cursor';
-}
-
+// The hub of a scene: it reads the scene's sources, wires the editing hooks to
+// them and hands the result to the board. Each concern lives in its own hook;
+// what is left here is the wiring between them.
 export default function SceneEditor({
   scene,
   onSceneChange,
@@ -127,71 +105,30 @@ export default function SceneEditor({
     tokenImageUrls,
     tokens,
   } = useSceneContent({ scene, isGm: role.isGm, spectator, notify });
-  const { roster, digests: rosterDigests, baseMax: rosterBaseMax } = useCampaignRoster(scene.campaignId);
-  // What a character health command starts from: the digest the map follows
-  // and the base max HP derived for its basis (commandCharacterVitals).
-  const rosterVitalsRef = useRef(null);
-  rosterVitalsRef.current = { digests: rosterDigests, baseMax: rosterBaseMax };
-  const characterHealth = useCallback((characterId, command) => {
-    const id = String(characterId);
-    const { digests, baseMax } = rosterVitalsRef.current;
-    return commandCharacterVitals(characterId, command, { digest: digests.get(id) ?? null, base: baseMax.get(id) ?? null });
-  }, []);
-  // Public rows carry hit points only while a bar is shown; the GM reads the
-  // real ones from the private sources and sees them overlaid at render.
-  const gmVitals = useGmTokenVitals({ sceneId: scene.id, tokens, enabled: role.isGm && !spectator });
-  // Which fight the scene shows as its initiative. The turn itself is that
-  // fight's; players see it through the pieces (turn_order / turn_active).
-  const sceneTurns = useSceneTurns({ sceneId: scene.id, isGm: role.isGm && !spectator });
-  // Dormant on a square map: it asks the database for nothing until the scene
-  // is actually a hexcrawl. A player and the projector read it — the colours and
-  // the party marker are the map everyone is looking at — but only the GM's own
-  // window may run it, which is why the projector tab is not one even when it is
-  // the GM who opened it.
-  const hexcrawl = useSceneHexcrawl({ scene, isGm: role.isGm && !spectator });
-  // After the roster, which sizes the encounters it buys. The bestiary is
-  // already loaded for the monster picker; the dungeon uses it to turn a rolled
-  // budget in experience into creatures.
-  const monsterDb = useMonsterDb();
-  const dungeon = useSceneDungeon({
-    scene,
-    isGm: role.isGm && !spectator,
-    monsters: monsterDb.monsters,
-    partySize: Math.max(1, roster.length || 4),
-    // Not only to size the encounter: a fight sent to the builder takes the
-    // party's colours and portraits from these sheets.
-    roster,
-  });
+  const {
+    roster, rosterDigests, characterHealth, gmVitals, sceneTurns, hexcrawl, monsterDb, dungeon,
+  } = useSceneSources({ scene, tokens, gmWindow: role.isGm && !spectator });
   const [busy, setBusy] = useState(false);
   // The piece this screen is dragging: the realtime handler leaves its row
   // alone, and the board shows it under the pointer rather than at its ghost.
   const draggingRef = useRef(null);
-  const [paintMode, setPaintMode] = useState('select');
+  const {
+    gmPlayerPreview, handleTogglePlayerPreview,
+    paintMode, setPaintMode, openCorner, setOpenCorner, menu, setMenu,
+    importOpen, setImportOpen, monsterOpen, setMonsterOpen, placementDrag, setPlacementDrag,
+    selectedDrawingId, setSelectedDrawingId, contentView, setContentView,
+  } = usePlayerPreview({ isGm: role.isGm });
   const [brushSize, setBrushSize] = useState(3);
   const [activeLayer, setActiveLayer] = useState('tokens');
-  // Both top-left panels open in the same spot, so only one of them is out at a
-  // time: 'pictures', 'hexcrawl' or nothing.
-  const [openCorner, setOpenCorner] = useState(null);
-  const [menu, setMenu] = useState(null);
-  const [importOpen, setImportOpen] = useState(false);
-  const [monsterOpen, setMonsterOpen] = useState(false);
-  const [placementDrag, setPlacementDrag] = useState(null);
   const [imageSize, setImageSize] = useState(null);
-  const [selectedDrawingId, setSelectedDrawingId] = useState(null);
   const [drawColor, setDrawColor] = useState(VTT_COLORS.gold);
   const [drawWidth, setDrawWidth] = useState(3);
   // The next area of effect to place. Kept between placements, so a row of
   // fire is a row of clicks.
   const [areaOptions, setAreaOptions] = useState(DEFAULT_AREA_OPTIONS);
-  const [contentView, setContentView] = useState('map');
-  const [mapFullscreen, setMapFullscreen] = useState(false);
-  // A local audit mode for the GM. The account keeps GM permissions, while the
-  // viewport receives only the same player-safe projection as the projector.
-  const [playerPreviewRequested, setGmPlayerPreview] = useState(false);
-  const gmPlayerPreview = role.isGm && playerPreviewRequested;
-  // The floating sheet of a fullscreen board, held here so a creature clicked
-  // on that board can open its stat block in it.
-  const [floatingSheetOpen, setFloatingSheetOpen] = useState(false);
+  const {
+    mapFullscreen, handleMapFullscreenChange, floatingSheetOpen, setFloatingSheetOpen,
+  } = useMapFullscreen(onMapFullscreenChange);
   const contentLayoutRef = useRef(null);
   const [measureShape, setMeasureShape] = useState('line');
   const [feetPerCell, setFeetPerCell] = useState(FEET_PER_CELL);
@@ -230,90 +167,13 @@ export default function SceneEditor({
   const backgroundForViewport = viewBackgroundPath(scene, viewForViewport);
   const { viewportDisplay, repairImage } = useDisplayedImage({ scene, view: viewForViewport, notify });
 
-  useEffect(() => {
-    if (!role.isGm) setGmPlayerPreview(false);
-  }, [role.isGm]);
-
   const {
-    ghosts, setLasers, laserDots, remoteMeasure, receivePreview, settleTokenGhost,
-  } = useRemotePreviews({ role, roster });
-  const { paintingRef, receiveFog } = useFogReceiver({ onSceneChange });
-  const {
-    sceneUpdatedAtRef, beginSceneEdit, noteSceneWrite, acceptsScene,
-  } = useSceneWriteGuard({ scene, paintingRef });
-
-  const handleTokenEvent = useCallback((payload) => {
-    setTokens((current) => applyTokenEvent(current, payload, {
-      draggingId: draggingRef.current,
-      pendingIds: movingTokenIds(),
-    }));
-    settleTokenGhost(payload);
-  }, [movingTokenIds, settleTokenGhost]);
-
-  const handleSceneEvent = useCallback((payload) => {
-    const next = toScene(payload?.new);
-    // The echo of our own debounced write would overwrite the edit or the
-    // stroke still in progress.
-    if (acceptsScene(next)) onSceneChange(next);
-  }, [acceptsScene, onSceneChange]);
-
-  // One channel carries several kinds of ephemeral message, so each is
-  // recognised by its own field. The token-drag guard used to run first and
-  // dropped everything without an `id` — which is every laser, ruler and fog
-  // stroke: they worked locally and were never seen by anyone else.
-  const handleRemoteDrag = useCallback((payload) => {
-    if (!payload) return;
-
-    // Visibility transitions are deliberately broadcast without a token id.
-    // Recipients re-read through RLS after the committed move, so a token that
-    // entered or left the play area appears or disappears without disclosing a
-    // staged piece through the ephemeral channel.
-    if (payload.tokensChanged) {
-      refreshVisibleTokens();
-      return;
-    }
-
-    // Same for a mark the GM hid or showed: realtime never tells a player about
-    // a row they may no longer read, so they re-read the marks through RLS.
-    if (payload.drawingsChanged) {
-      reconcileContent({ fullDrawings: true });
-      return;
-    }
-
-    if (receiveFog(payload)) return;
-    // Rulers, lasers, and otherwise a piece being dragged.
-    receivePreview(payload);
-  }, [receiveFog, receivePreview, reconcileContent, refreshVisibleTokens]);
-
-  // Runs every 30 seconds on every device at the table, so it asks for
-  // versions first and reads a row (the scene with its fog, a piece, a mark, a
-  // fight) only when that version moved.
-  const reconcilePersistentState = useCallback(async () => {
-    repairImage();
-    const readSceneIfMoved = async () => {
-      const revision = await fetchSceneRevision(scene.id).catch(() => null);
-      if (revision === null || revision === sceneUpdatedAtRef.current) return null;
-      return fetchScene(scene.id).catch(() => null);
-    };
-    const [freshScene] = await Promise.all([
-      readSceneIfMoved(),
-      reconcileContent(),
-      gmVitals.reconcile(),
-      sceneTurns.reload(),
-    ]);
-    if (acceptsScene(freshScene)) onSceneChange(freshScene);
-  }, [acceptsScene, gmVitals, onSceneChange, reconcileContent, repairImage, scene.id, sceneTurns]);
-  const {
+    ghosts, setLasers, laserDots, remoteMeasure, paintingRef, beginSceneEdit, noteSceneWrite,
     sendDrag, sendCamera, sendPresenterState, sendPresenterInspection,
-  } = useSceneLive({
-    sceneId: scene.id,
-    onTokenEvent: handleTokenEvent,
-    onSceneEvent: handleSceneEvent,
-    onRemoteDrag: handleRemoteDrag,
-    onDrawingEvent: handleDrawingEvent,
-    onTurnsEvent: sceneTurns.handleEvent,
-    ...projector.liveOptions,
-    onReconcile: reconcilePersistentState,
+  } = useSceneSync({
+    scene, role, roster, onSceneChange, setTokens, draggingRef, movingTokenIds, refreshVisibleTokens,
+    reconcileContent, handleDrawingEvent, repairImage, gmVitals, sceneTurns,
+    liveOptions: projector.liveOptions,
   });
 
   const {
@@ -388,15 +248,10 @@ export default function SceneEditor({
     refreshVisibleTokens, setBusy,
   });
 
-  const allowedPaintMode = useMemo(() => {
-    // Nothing to paint on a background: no fog, no board, nothing that would be
-    // saved anywhere. The laser and the ruler still work — pointing at a picture
-    // is exactly what a background is for.
-    const showingBackground = shownImageForViewport === 'background';
-    if (showingBackground && !['select', 'laser', 'measure'].includes(paintMode)) return 'select';
-    const gmOnly = paintMode === 'reveal' || paintMode === 'hide';
-    return gmOnly && !role.isGm ? 'select' : paintMode;
-  }, [paintMode, role.isGm, shownImageForViewport]);
+  const allowedPaintMode = useMemo(
+    () => allowedPaintModeFor(paintMode, { isGm: role.isGm, shownImage: shownImageForViewport }),
+    [paintMode, role.isGm, shownImageForViewport],
+  );
 
   // What the rail offers, in the order a session needs it. A player gets the two
   // groups that are theirs; the rest would only be buttons the database refuses.
@@ -439,15 +294,6 @@ export default function SceneEditor({
     setFloatingSheetOpen, mapFullscreen, setPlacementDrag, handleCreatureRoll,
   });
 
-  // The menu must edit the same character state the piece displays. The raw
-  // map row deliberately has no sheet-owned HP or death saves, so using it here
-  // made a dead character look like 0/0 and an innocent blur could write that
-  // stale value back to the sheet.
-  const menuToken = useMemo(
-    () => visibleTokens.find((token) => token.id === menu?.tokenId) || null,
-    [menu, visibleTokens],
-  );
-
   const {
     sheetChoices, sheetCharacterId, showsStatBlock, sheetAreaSelectedId, hasSheetContent,
     sideSheetOpen, selectSheetCharacter, openCharacterSheet, handleTokenClick,
@@ -477,77 +323,31 @@ export default function SceneEditor({
     ) : null;
   };
 
-  // The page is told as well, because its own top bar is fixed and painted above
-  // the map. Where the browser has no Fullscreen API — a phone — "fullscreen" is
-  // the map covering the window, and the bar stayed on top of it, over exactly
-  // the corner controls that live at the top of the board.
-  const handleMapFullscreenChange = useCallback((active) => {
-    setMapFullscreen(active);
-    onMapFullscreenChange?.(active);
-  }, [onMapFullscreenChange]);
-
-  const handleTogglePlayerPreview = useCallback(() => {
-    if (!gmPlayerPreview) {
-      // The preview is deliberately read-only. Reset every editing surface so
-      // elevated GM writes cannot happen behind a player-looking board.
-      setContentView('map');
-      setPaintMode('select');
-      setOpenCorner(null);
-      setMenu(null);
-      setPlacementDrag(null);
-      setSelectedDrawingId(null);
-      setImportOpen(false);
-      setMonsterOpen(false);
-    }
-    setGmPlayerPreview((current) => !current);
-  }, [gmPlayerPreview]);
-
-  // Leaving the scene while covering the window must give the bar back, or the
-  // page returns to a list with no way out of it. Through a ref, so a caller
-  // passing a fresh function every render does not have the cleanup run — and
-  // the bar come back mid-fullscreen — on every one of them.
-  const mapFullscreenNoticeRef = useRef(onMapFullscreenChange);
-  mapFullscreenNoticeRef.current = onMapFullscreenChange;
-  useEffect(() => () => mapFullscreenNoticeRef.current?.(false), []);
-
   if (loading || role.loading) return <CircularProgress size={24} />;
 
   if (spectator) {
     return (
-      <Box data-spectator-view sx={spectatorRootSx}>
-        <SceneViewport
-          scene={scene}
-          imageUrl={viewportDisplay.url}
-          preparedImageSize={viewportDisplay.imageSize}
-          tokens={projectedTokens}
-          snap
-          canMove={() => false}
-          fog={scene.fog}
-          atmosphere={viewportAtmosphere}
-          imageFilter={viewportImageFilter}
-          fogOpacity={PLAYER_FOG_OPACITY}
-          fogOnTop
-          paintMode="select"
-          backgroundOnly={viewportDisplay.shownImage === 'background'}
-          // The projector shows the crawl as the table sees it: the country
-          // they have been through, and the hex they are standing in.
-          hexCells={projectedHexCells}
-          partyHex={hexcrawl.partyHex}
-          onImageSize={setImageSize}
-          drawings={visibleDrawings}
-          lasers={laserDots}
-          rollBubbles={projectedRollBubbles}
-          diceThrows={projectedDiceThrows}
-          conditionEntries={conditionEntries}
-          presentedInspection={projectorInspection}
-          initiative={<InitiativeStrip entries={initiativeEntries} round={initiativeRound} />}
-          remoteMeasure={remoteMeasure}
-          feetPerCell={feetPerCell}
-          followView={followCameraPose}
-          cameraLocked
-          fillViewport
-        />
-      </Box>
+      <SpectatorSceneView
+        scene={scene}
+        viewportDisplay={viewportDisplay}
+        tokens={projectedTokens}
+        atmosphere={viewportAtmosphere}
+        imageFilter={viewportImageFilter}
+        hexCells={projectedHexCells}
+        partyHex={hexcrawl.partyHex}
+        onImageSize={setImageSize}
+        drawings={visibleDrawings}
+        lasers={laserDots}
+        rollBubbles={projectedRollBubbles}
+        diceThrows={projectedDiceThrows}
+        conditionEntries={conditionEntries}
+        presentedInspection={projectorInspection}
+        initiativeEntries={initiativeEntries}
+        initiativeRound={initiativeRound}
+        remoteMeasure={remoteMeasure}
+        feetPerCell={feetPerCell}
+        followView={followCameraPose}
+      />
     );
   }
 
@@ -648,26 +448,12 @@ export default function SceneEditor({
                 onFitPlayArea={handleFitPlayArea}
               />
               {hexcrawl.enabled ? (
-                <HexcrawlCorner
+                <SceneHexcrawlCorner
+                  hexcrawl={hexcrawl}
+                  grid={scene.grid}
+                  onGridChange={handleGridChange}
                   open={openCorner === 'hexcrawl'}
                   onOpenChange={(next) => setOpenCorner(next ? 'hexcrawl' : null)}
-                  board={hexcrawl.board}
-                  clock={hexcrawl.clock}
-                  clockLinked={hexcrawl.clockLinked}
-                  defaults={hexcrawl.defaults}
-                  armed={hexcrawl.armed}
-                  busy={hexcrawl.busy}
-                  error={hexcrawl.error}
-                  lastHex={hexcrawl.lastHex}
-                  hasResult={hexcrawl.hasResult}
-                  onOpenResult={hexcrawl.openResult}
-                  hexColor={scene.grid.hexColor}
-                  onHexColorChange={(hexColor) => handleGridChange({ ...scene.grid, hexColor })}
-                  onDefaultsChange={hexcrawl.setDefaults}
-                  onSeasonChange={hexcrawl.setSeason}
-                  onClockChange={hexcrawl.setClock}
-                  onClockAdvance={hexcrawl.advanceClock}
-                  onArmedChange={hexcrawl.setArmed}
                 />
               ) : null}
             </Stack>
@@ -824,38 +610,26 @@ export default function SceneEditor({
         />
       ) : null}
 
-      {!gmPlayerPreview ? <TokenMenu
-        token={menuToken}
-        anchor={menu?.at || null}
-        canEdit={role.isGm}
-        canMark={canMarkToken(menuToken, {
-          isGm: role.isGm,
-          ownedCharacterIds: role.ownedCharacterIds,
-        })}
-        canShowHp={role.isGm || canMove(menuToken)}
-        // Reminders are marks like conditions, and answer to the same
-        // question: anyone at the table may put one on a creature, nobody may
-        // put one on somebody else's character.
-        canSetEffects={canMarkToken(menuToken, {
-          isGm: role.isGm,
-          ownedCharacterIds: role.ownedCharacterIds,
-        })}
-        canSetDeathSaves={role.isGm || canMove(menuToken)}
-        canStyleObject={Boolean(menuToken?.iconKey) && (role.isGm || canMove(menuToken))}
-        canRemove={role.isGm || canMove(menuToken)}
-        onClose={() => setMenu(null)}
-        onSave={role.isGm ? handleSaveToken : handleMarkToken}
-        onVitals={role.isGm ? handleTokenVitals : null}
-        onObjectStyle={handleObjectStyle}
-        onVisibility={role.isGm ? handleTokenVisibility : undefined}
-        onDelete={handleDeleteToken}
-        onStatBlock={gmTurnView && statBlockFor(parseSourceRef(menuToken?.sourceRef))
-          ? (token) => openStatBlock(parseSourceRef(token.sourceRef))
-          : null}
-        onSheet={!gmPlayerPreview && sheetChoices.some((entry) => entry.characterId === menuToken?.characterId)
-          ? (token) => openCharacterSheet(token.characterId)
-          : null}
-      /> : null}
+      {!gmPlayerPreview ? (
+        <SceneTokenMenu
+          menu={menu}
+          onClose={() => setMenu(null)}
+          visibleTokens={visibleTokens}
+          role={role}
+          canMove={canMove}
+          onSaveToken={handleSaveToken}
+          onMarkToken={handleMarkToken}
+          onTokenVitals={handleTokenVitals}
+          onObjectStyle={handleObjectStyle}
+          onTokenVisibility={handleTokenVisibility}
+          onDeleteToken={handleDeleteToken}
+          gmTurnView={gmTurnView}
+          statBlockFor={statBlockFor}
+          openStatBlock={openStatBlock}
+          sheetChoices={sheetChoices}
+          openCharacterSheet={openCharacterSheet}
+        />
+      ) : null}
     </Stack>
   );
 }
