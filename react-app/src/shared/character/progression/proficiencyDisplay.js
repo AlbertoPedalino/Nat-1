@@ -1,6 +1,7 @@
 import { titleCase } from '../../ui/textCase.js';
 import { matchKey } from '../../content/nameKeys.js';
 import { DAMAGE_TYPES } from '../../content/rulesVocabulary.js';
+import { compareText } from '../../lists.js';
 const CANONICAL_DISPLAY_LABELS = {
   light: 'Light',
   medium: 'Medium',
@@ -125,7 +126,7 @@ export function uniqueDisplayLabels(values) {
     seen.add(key);
     out.push(label);
   });
-  return out.sort((a, b) => a.localeCompare(b));
+  return out.sort(compareText);
 }
 
 export function collapseWeaponProficiencies(items, options = {}) {
@@ -146,5 +147,5 @@ export function collapseWeaponProficiencies(items, options = {}) {
     out.push(label);
   });
 
-  return out.sort((a, b) => a.localeCompare(b));
+  return out.sort(compareText);
 }

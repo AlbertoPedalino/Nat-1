@@ -8,6 +8,7 @@ import { getHP, getAC, getType, getSizeLabel } from '../../shared/bestiary/monst
 import { CR_ORDER } from '../../shared/bestiary/bestiaryConstants.js';
 import { CREATURE_TYPES, SIZE_NAMES } from '../../shared/content/rulesVocabulary.js';
 import { crKey, crNumber } from '../../shared/bestiary/challengeRating.js';
+import { byName } from '../../shared/lists.js';
 
 export const CHALLENGE_RATINGS = Object.freeze(CR_ORDER.map((cr) => ({ key: cr, label: `CR ${cr}` })));
 
@@ -50,7 +51,6 @@ export function filterMonsters(entries, filters = MONSTER_FILTERS) {
     if (f.source !== 'all' && entry.source !== f.source) return false;
     return true;
   });
-  const byName = (a, b) => a.name.localeCompare(b.name);
   if (f.sort === 'cr') return list.sort((a, b) => crValue(a.record) - crValue(b.record) || byName(a, b));
   return list.sort(byName);
 }

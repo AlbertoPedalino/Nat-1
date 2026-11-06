@@ -4,6 +4,7 @@ import { loadSpells } from '../../../shared/content/catalogs/spellData.js';
 import { scrollSpellStats, spellScrollLevel } from '../../../shared/character/inventory/spellScrolls.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { byName } from '../../../shared/lists.js';
 
 let spellsPromise = null;
 function loadSpellsCached() {
@@ -41,7 +42,7 @@ export default function ScrollSpellPicker({ item, onWrite }) {
   const options = useMemo(() => (spells || [])
     .filter((spell) => Number(spell.level ?? 0) === level)
     .map((spell) => ({ name: spell.name, source: spell.source || '' }))
-    .sort((a, b) => a.name.localeCompare(b.name)), [level, spells]);
+    .sort(byName), [level, spells]);
 
   if (level == null) return null;
   const current = item.scrollSpell?.name ? item.scrollSpell : null;

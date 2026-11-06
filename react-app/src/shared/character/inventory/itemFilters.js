@@ -4,6 +4,7 @@ import {
   itemMasteryLabels,
   itemPropertyLabels,
 } from './itemCodes.js';
+import { compareText } from '../../lists.js';
 
 // Single source of truth for the advanced item filters. The empty state, the
 // active-value count, the dropdown options, the match test and the panel rows
@@ -41,7 +42,7 @@ function compareDamageDice(a, b) {
   const [bCount, bFaces] = parse(b);
   if (aCount !== bCount) return aCount - bCount;
   if (aFaces !== bFaces) return aFaces - bFaces;
-  return a.localeCompare(b);
+  return compareText(a, b);
 }
 
 export const ITEM_FILTER_FIELDS = Object.freeze([
@@ -154,7 +155,7 @@ export function itemFiltersKey(filters) {
 
 function sortedUnique(values, compare) {
   return [...new Set(values.filter((value) => String(value || '').trim()))].sort(
-    compare || ((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' })),
+    compare || (compareText),
   );
 }
 

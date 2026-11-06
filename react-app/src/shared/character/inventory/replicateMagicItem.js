@@ -27,6 +27,7 @@ import { primaryClassLevel } from '../progression/classLevel.js';
 import { itemHasProperty } from './weaponProperties.js';
 import { stripSource } from '../../content/nameKeys.js';
 import { baseChoiceKey } from '../progression/choiceUtils.js';
+import { byName, compareText } from '../../lists.js';
 
 const lc = (value) => String(value || '').toLowerCase();
 const typeOf = (item) => stripSource(item?.type).toUpperCase();
@@ -403,6 +404,6 @@ export function replicateBucketItems(items, bucket, excludeNames) {
     if (!byIdentity.has(identity)) byIdentity.set(identity, it);
   });
   return [...byIdentity.values()].sort(
-    (a, b) => a.name.localeCompare(b.name) || String(a.source || '').localeCompare(String(b.source || '')),
+    (a, b) => byName(a, b) || compareText(a.source, b.source),
   );
 }

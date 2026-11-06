@@ -11,6 +11,7 @@ import {
 } from '../sourceFiltering.js';
 import { loadGameData } from '../gameData.js';
 import { stripTemplatedEntries } from './entryTemplates.js';
+import { byName } from '../../lists.js';
 
 // Classes, subclasses and their features, plus the optional features a class
 // chooses from (invocations, fighting styles, metamagic…).
@@ -47,7 +48,7 @@ export async function loadClassIndex() {
 
   return {
     cache,
-    classes: classes.sort((a, b) => a.name.localeCompare(b.name)),
+    classes: classes.sort(byName),
     subclasses,
     classFeatures,
     subclassFeatures,

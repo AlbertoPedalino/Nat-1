@@ -11,6 +11,7 @@ import { getType } from '../../shared/bestiary/monsterUtils.js';
 import { capitalize } from '../../shared/ui/textCase.js';
 import { ABILITY_NAMES } from '../../shared/content/rulesVocabulary.js';
 import { crKey } from '../../shared/bestiary/challengeRating.js';
+import { byName, compareText } from '../../shared/lists.js';
 
 export const COMPENDIUM_KINDS = Object.freeze([
   { key: 'spell', label: 'Spells', single: 'Spell' },
@@ -126,7 +127,7 @@ export function buildCompendiumIndex(records = {}) {
       if (entry) entries.push(entry);
     }
   }
-  return entries.sort((a, b) => a.name.localeCompare(b.name)
+  return entries.sort((a, b) => byName(a, b)
     || sourceRank(a.source, CORE_2024_SOURCE_PRIORITY) - sourceRank(b.source, CORE_2024_SOURCE_PRIORITY));
 }
 
@@ -189,7 +190,7 @@ export function searchCompendium(index, query, { kind = 'all', limit = 100, inTe
   }
   ranked.sort((a, b) => a.rank - b.rank
     || a.entry.name.length - b.entry.name.length
-    || a.entry.name.localeCompare(b.entry.name)
+    || compareText(a.entry.name, b.entry.name)
     || sourceRank(a.entry.source, CORE_2024_SOURCE_PRIORITY) - sourceRank(b.entry.source, CORE_2024_SOURCE_PRIORITY));
   return ranked.slice(0, limit).map(({ entry }) => entry);
 }

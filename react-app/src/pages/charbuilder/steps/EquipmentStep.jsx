@@ -17,6 +17,7 @@ import { useItemFilters } from '../../../shared/character/inventory/useItemFilte
 import { ITEM_GROUP_CHIPS, OWNED_ITEM_CHIPS, matchesItemGroupChip } from '../../../shared/character/inventory/itemGroups.js';
 import { usePagedList } from '../../../shared/ui/usePagedList.js';
 import { stripSource } from '../../../shared/content/nameKeys.js';
+import { byName } from '../../../shared/lists.js';
 
 const CHOICE_KEYS = ['A', 'B', 'C', 'D', 'E', 'a', 'b', 'c', 'd', 'e'];
 
@@ -419,7 +420,7 @@ export default function EquipmentStep({ state, dispatch }) {
       const aBase = !a.rarity || a.rarity === 'none' ? 0 : 1;
       const bBase = !b.rarity || b.rarity === 'none' ? 0 : 1;
       if (aBase !== bBase) return aBase - bBase;
-      return a.name.localeCompare(b.name);
+      return byName(a, b);
     }), [addPool, addList.filters]);
 
   const addPage = usePagedList(sortedItems, {

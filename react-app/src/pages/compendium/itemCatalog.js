@@ -10,6 +10,7 @@ import { decodeDamageType, decodeProperty, itemMasteryLabels } from '../../share
 import { capitalize } from '../../shared/ui/textCase.js';
 import { formatNumber } from '../../shared/ui/numberFormat.js';
 import { stripSource } from '../../shared/content/nameKeys.js';
+import { byName } from '../../shared/lists.js';
 
 const typeCode = (item) => stripSource(item?.type).toUpperCase();
 const rarityOf = (item) => String(item?.rarity || 'none').toLowerCase();
@@ -170,9 +171,9 @@ export function filterMagicItems(entries, filters = MAGIC_FILTERS) {
   });
   if (f.sort === 'rarity') {
     return list.sort((a, b) => (RARITY_RANK[rarityOf(a.record)] ?? 99) - (RARITY_RANK[rarityOf(b.record)] ?? 99)
-      || a.name.localeCompare(b.name));
+      || byName(a, b));
   }
-  return list.sort((a, b) => a.name.localeCompare(b.name));
+  return list.sort(byName);
 }
 
 export const EQUIPMENT_FILTERS = Object.freeze({
@@ -192,7 +193,6 @@ export function filterEquipment(entries, filters = EQUIPMENT_FILTERS) {
     if (f.source !== 'all' && entry.source !== f.source) return false;
     return true;
   });
-  const byName = (a, b) => a.name.localeCompare(b.name);
   if (f.sort === 'cost') return list.sort((a, b) => (Number(a.record.value) || 0) - (Number(b.record.value) || 0) || byName(a, b));
   if (f.sort === 'weight') return list.sort((a, b) => (Number(a.record.weight) || 0) - (Number(b.record.weight) || 0) || byName(a, b));
   return list.sort(byName);

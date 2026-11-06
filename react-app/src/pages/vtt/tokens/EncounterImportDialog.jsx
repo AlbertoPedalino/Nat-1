@@ -34,6 +34,7 @@ import {
   battleMapDropBackdropSx,
   battleMapDropDialogSx,
 } from '../map/battleMapSurface.js';
+import { compareText } from '../../../shared/lists.js';
 
 // The encounters come from the GM's Encounter Builder saves, in this browser and
 // in the cloud. The payload is always read from the local copy, which is what the
@@ -220,7 +221,7 @@ export default function EncounterImportDialog({
 
   const quests = useMemo(
     () => [...new Set(entries.map((entry) => entry.quest).filter(Boolean))]
-      .sort((a, b) => a.localeCompare(b)),
+      .sort(compareText),
     [entries],
   );
   const unquested = entries.some((entry) => !entry.quest);

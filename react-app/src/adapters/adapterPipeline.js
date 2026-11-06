@@ -1,5 +1,6 @@
 import { normalizeSpellRecord } from '../shared/character/spells/spellNormalization.js';
 import { matchKey, stripSource } from '../shared/content/nameKeys.js';
+import { byName } from '../shared/lists.js';
 
 const WEAPON_TYPES = new Set(['M', 'R']);
 const ARMOR_TYPES = new Set(['LA', 'MA', 'HA']);
@@ -293,11 +294,11 @@ export function adaptItemRecord(rawItem, registry, context = {}) {
 export function adaptBuilderData(data, registry, context = {}) {
   return {
     ...data,
-    classes: arr(data.classes).map((item) => adaptClassRecord(item, registry, context)).sort((a, b) => a.name.localeCompare(b.name)),
+    classes: arr(data.classes).map((item) => adaptClassRecord(item, registry, context)).sort(byName),
     subclasses: arr(data.subclasses).map((item) => adaptSubclassRecord(item, registry, context)),
-    species: arr(data.species).map((item) => adaptSpeciesRecord(item, registry, context)).sort((a, b) => a.name.localeCompare(b.name)),
-    feats: arr(data.feats).map((item) => adaptFeatRecord(item, registry, context)).sort((a, b) => a.name.localeCompare(b.name)),
-    spells: arr(data.spells).map((item) => adaptSpellRecord(item, registry, context)).sort((a, b) => (a.level - b.level) || a.name.localeCompare(b.name)),
-    items: arr(data.items).map((item) => adaptItemRecord(item, registry, context)).sort((a, b) => a.name.localeCompare(b.name)),
+    species: arr(data.species).map((item) => adaptSpeciesRecord(item, registry, context)).sort(byName),
+    feats: arr(data.feats).map((item) => adaptFeatRecord(item, registry, context)).sort(byName),
+    spells: arr(data.spells).map((item) => adaptSpellRecord(item, registry, context)).sort((a, b) => (a.level - b.level) || byName(a, b)),
+    items: arr(data.items).map((item) => adaptItemRecord(item, registry, context)).sort(byName),
   };
 }

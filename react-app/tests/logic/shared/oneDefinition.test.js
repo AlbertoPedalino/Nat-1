@@ -310,3 +310,12 @@ test('saved colours are validated only by normalizeHexColor', () => {
 test('search filters go through matchesQuery', () => {
   assert.deepEqual(sourceLinesMatching(/toLowerCase\(\)\.includes\((q|sq|query|search|needle|term)\)/), []);
 });
+
+// Lists sort with compareText / byName (shared/lists.js): English order,
+// whatever the browser's language. instanceSync orders keys for an exact
+// comparison, not for display.
+test('lists sort through compareText and byName', () => {
+  assert.deepEqual(sourceFilesMatching(/\.localeCompare\(/, {
+    allow: ['shared/lists.js', 'shared/instances/instanceSync.js'],
+  }), []);
+});

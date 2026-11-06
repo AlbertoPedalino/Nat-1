@@ -1,3 +1,4 @@
+import { compareText } from '../lists.js';
 // A fight is reachable only through the library card of the encounter it was
 // launched from: `mergeLibrary` walks encounters and attaches their fight, so a
 // fight with no `encounterId` (launched from a draft that was never saved) has
@@ -38,7 +39,7 @@ export function mergeLibrary(encounters, fights) {
 export function listQuestNames(encounters) {
   return [...new Set(
     (encounters || []).map((entry) => String(entry?.quest || '').trim()).filter(Boolean),
-  )].sort((a, b) => a.localeCompare(b));
+  )].sort(compareText);
 }
 
 export function groupLibraryByQuest(items) {
@@ -53,7 +54,7 @@ export function groupLibraryByQuest(items) {
     .sort((a, b) => {
       if (!a.quest) return 1;
       if (!b.quest) return -1;
-      return a.quest.localeCompare(b.quest);
+      return compareText(a.quest, b.quest);
     });
 }
 

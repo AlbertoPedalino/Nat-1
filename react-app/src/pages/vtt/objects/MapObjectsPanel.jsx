@@ -13,6 +13,7 @@ import {
 } from '../../../shared/vtt/map/mapObjects.js';
 import { beginPiecePointerDrag } from '../tokens/PiecePreview.jsx';
 import MapObjectGlyph from './MapObjectGlyph.jsx';
+import { compareText } from '../../../shared/lists.js';
 
 const PAGE_SIZE = 32;
 const DEFAULT_COLOR = VTT_COLORS.gold;
@@ -29,7 +30,7 @@ export default function MapObjectsPanel({
     const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
     return [...new Set(iconNames)]
       .filter((name) => words.every((word) => name.includes(word)))
-      .sort((a, b) => a.localeCompare(b));
+      .sort(compareText);
   }, [query]);
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const visible = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);

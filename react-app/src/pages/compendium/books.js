@@ -3,6 +3,7 @@
 
 import { loadGameData } from '../../shared/content/gameData.js';
 import { CORE_2024_SOURCE_PRIORITY } from '../../shared/content/sourcePriority.js';
+import { byName, compareText } from '../../shared/lists.js';
 
 // The player manuals, plus the 2024 Monster Manual.
 export const BOOK_IDS = Object.freeze([...new Set([...CORE_2024_SOURCE_PRIORITY, 'XMM'])]);
@@ -20,7 +21,7 @@ export function toBookList(booksJson, adventuresJson) {
       return { ...book, url: bookUrl(book) };
     });
   return [...pick(booksJson?.book, 'book'), ...pick(adventuresJson?.adventure, 'adventure')]
-    .sort((a, b) => a.published.localeCompare(b.published) || a.name.localeCompare(b.name));
+    .sort((a, b) => compareText(a.published, b.published) || byName(a, b));
 }
 
 export async function loadBookList() {

@@ -12,6 +12,7 @@ import { collectAtWillSpells, collectAutoGrantedSpells, collectChoiceSpells } fr
 import { collectFixedFeatSpells } from './featSpellMeta.js';
 import { resolveSpellMeta } from './spellPreparation.js';
 import { wizardRitualBookSpells } from './wizardSpellbook.js';
+import { compareText } from '../../../shared/lists.js';
 
 // The Spells tab's list: every spell the character has, from each source
 // (class, subclass, species, feats, items, scrolls, at-will grants), merged into
@@ -235,5 +236,5 @@ function applySpellGrantOverrides(spell, overrides) {
 }
 
 function sortByName(a, b) {
-  return String(a.name).localeCompare(String(b.name));
+  return compareText(a.name, b.name);
 }

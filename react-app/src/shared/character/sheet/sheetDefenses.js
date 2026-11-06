@@ -1,4 +1,4 @@
-import { asArray } from '../../lists.js';
+import { asArray, compareText } from '../../lists.js';
 import {
   cleanText,
   effectKey,
@@ -198,7 +198,7 @@ function dedupeDefenseItems(items) {
     if (!existing.source && item.source) byKey.set(key, { ...item, label });
   });
   return [...byKey.values()].sort((a, b) => (
-    String(a.kind).localeCompare(String(b.kind)) || String(a.label).localeCompare(String(b.label))
+    compareText(a.kind, b.kind) || compareText(a.label, b.label)
   ));
 }
 

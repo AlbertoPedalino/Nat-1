@@ -1,6 +1,7 @@
 import { RAW_ALLOWED_SOURCES, SOURCE_LABELS } from './bestiaryConstants.js';
 import { loadGameData } from '../content/gameData.js';
 import { monsterKey } from './monsterUtils.js';
+import { byName } from '../lists.js';
 
 function legendaryGroupKey(name, source) {
   return `${source || ''}__${name || ''}`;
@@ -76,7 +77,7 @@ export async function loadMonsterDatabase() {
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
-  }).sort((a, b) => a.name.localeCompare(b.name));
+  }).sort(byName);
   return {
     monsters,
     availableSources,

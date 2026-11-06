@@ -5,6 +5,7 @@ import {
   isAllowedSource,
 } from '../sourcePriority.js';
 import { loadGameData } from '../gameData.js';
+import { byName } from '../../lists.js';
 
 // The species, backgrounds and feats a character picks from.
 
@@ -12,7 +13,7 @@ export async function loadSpecies() {
   const data = await loadGameData('races.json');
   return (data.race || data.species || [])
     .filter((species) => isAllowedSource(species.source, SPECIES_ALLOWED_SOURCES))
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .sort(byName);
 }
 
 export async function loadBackgrounds() {
@@ -44,12 +45,12 @@ export async function loadBackgrounds() {
       if (fluffIndex[key]) bg._lore = fluffIndex[key];
     });
   }
-  return backgrounds.sort((a, b) => a.name.localeCompare(b.name));
+  return backgrounds.sort(byName);
 }
 
 export async function loadFeats() {
   const data = await loadGameData('feats.json');
   return (data.feat || [])
     .filter((feat) => isAllowedSource(feat.source, FEAT_ALLOWED_SOURCES))
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .sort(byName);
 }

@@ -4,7 +4,7 @@ import {
   ITEM_SOURCE_PRIORITY,
 } from '../../content/sourcePriority.js';
 import { itemHasProperty } from '../inventory/weaponProperties.js';
-import { flattenList } from '../../lists.js';
+import { compareText, flattenList } from '../../lists.js';
 import { matchKey, stripSource } from '../../content/nameKeys.js';
 import { loadGameData } from '../../content/gameData.js';
 
@@ -95,7 +95,7 @@ export function getWeaponMasteryChoiceNames(items, fallbackItems = [], rules = A
     .filter((item) => activeRules.some((rule) => weaponMatchesRule(item, rule)))
     .map((item) => String(item.name).trim())
     .filter(Boolean);
-  return [...new Set(names)].sort((a, b) => a.localeCompare(b));
+  return [...new Set(names)].sort(compareText);
 }
 
 export function getWeaponMasteryChoiceCount(className, level) {
@@ -299,5 +299,5 @@ export function collectResolvedWeaponMasteries(character, items = []) {
     });
   });
 
-  return out.sort((a, b) => a.weaponName.localeCompare(b.weaponName));
+  return out.sort((a, b) => compareText(a.weaponName, b.weaponName));
 }

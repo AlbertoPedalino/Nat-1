@@ -3,6 +3,7 @@ import { INVENTORY_SOURCE_PRIORITY, sourceRank } from '../../../shared/content/s
 import { itemDisplayName } from '../../../shared/character/inventory/itemIdentity.js';
 import { itemGroupKey as itemType } from '../../../shared/character/inventory/itemGroups.js';
 import { stripSource } from '../../../shared/content/nameKeys.js';
+import { byName, compareText } from '../../../shared/lists.js';
 
 // Searching the item database from the inventory's add panel: normalized
 // search text per item (name, type, rarity, properties), relevance order (name
@@ -81,7 +82,7 @@ export function compareItemsBySearch(query) {
     const br = b._rarityPriority ?? rarityPriority(b?.rarity);
     if (ar !== br) return ar - br;
 
-    return String(a?.name || '').localeCompare(String(b?.name || ''));
+    return byName(a, b);
   };
 }
 
@@ -106,7 +107,7 @@ export function itemMatchesPreparedSearch(item, query) {
 // Entries keep their original inventory index, so qty/equip/remove keep
 // targeting the right item no matter how the list is grouped or sliced.
 export function byItemName(a, b) {
-  return String(a.item?.name || '').localeCompare(String(b.item?.name || ''), undefined, { sensitivity: 'base' });
+  return compareText(a.item?.name, b.item?.name);
 }
 
 let itemsCachePromise = null;

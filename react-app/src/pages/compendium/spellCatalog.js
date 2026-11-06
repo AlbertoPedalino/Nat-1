@@ -5,6 +5,7 @@
 
 import { normalizeSearchText } from '../../shared/content/searchText.js';
 import { SPELL_SCHOOL_NAMES } from '../../shared/content/rulesVocabulary.js';
+import { byName } from '../../shared/lists.js';
 
 export const SPELL_LEVELS = Object.freeze([
   { key: '0', label: 'Cantrip' },
@@ -60,7 +61,6 @@ export function filterSpells(entries, filters = SPELL_FILTERS) {
     if (f.source !== 'all' && entry.source !== f.source) return false;
     return true;
   });
-  const byName = (a, b) => a.name.localeCompare(b.name);
   if (f.sort === 'level') return list.sort((a, b) => (Number(a.record.level) || 0) - (Number(b.record.level) || 0) || byName(a, b));
   return list.sort(byName);
 }

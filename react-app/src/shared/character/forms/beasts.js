@@ -12,6 +12,7 @@ import { stripSource } from '../../content/nameKeys.js';
 import { statBlockTagText } from '../../content/statBlockTags.js';
 import { ABILITIES, sizeName } from '../../content/rulesVocabulary.js';
 import { crNumber, formatCr } from '../../bestiary/challengeRating.js';
+import { byName } from '../../lists.js';
 
 // Known Beast forms by Druid level (XPHB 2024 "Beast Shapes" table): 4 at lv.2,
 // 6 at lv.4, 8 at lv.8. You may swap one known form per Long Rest.
@@ -186,7 +187,7 @@ export function eligibleBeasts(beastsDb, druidLevel) {
   const allowFly = Number(druidLevel || 0) >= 8;
   return (beastsDb || [])
     .filter((b) => b.crNum != null && b.crNum <= cap && (allowFly || !beastHasFlySpeed(b)))
-    .sort((a, b) => (a.crNum - b.crNum) || a.name.localeCompare(b.name));
+    .sort((a, b) => (a.crNum - b.crNum) || byName(a, b));
 }
 
 // Find Familiar (XPHB 2024) eligible forms — used by the Druid's Wild Companion.
@@ -196,7 +197,7 @@ export function eligibleBeasts(beastsDb, druidLevel) {
 export function findFamiliarBeasts(beastsDb) {
   return (beastsDb || [])
     .filter((b) => b.crNum === 0)
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .sort(byName);
 }
 
 // ── Beast actions → rollable attack cards ────────────────────────────────────

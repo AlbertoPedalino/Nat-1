@@ -1,4 +1,5 @@
 import { stripSource } from '../nameKeys.js';
+import { byName } from '../../lists.js';
 
 const itemBaseType = (item) => stripSource(item?.type).toUpperCase();
 const weaponCategoryOf = (item) => String(item?.weaponCategory || '').toLowerCase();
@@ -28,5 +29,5 @@ export function equipmentTypeCandidates(code, items) {
   if (!matcher) return [];
   return (items || [])
     .filter((item) => item && !item.generatedGroupParent && matcher(item))
-    .sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
+    .sort(byName);
 }

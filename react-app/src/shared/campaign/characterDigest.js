@@ -13,6 +13,7 @@ import { normalizeConditions } from '../character/combat/conditions.js';
 import { normalizeEffects } from '../character/combat/combatEffects.js';
 import { normalizeDeathSaves, pickCharacterVitals } from '../character/combat/vitals.js';
 import { normalizeHexColor } from '../ui/colors.js';
+import { byName, compareText } from '../lists.js';
 
 function numberOrNull(value) {
   const parsed = Number(value);
@@ -138,5 +139,5 @@ export function rosterEntryFromDigest(digest, baseMax) {
 export function rosterFromDigests(digests, baseMax) {
   return [...(digests?.values?.() || [])]
     .map((digest) => rosterEntryFromDigest(digest, baseMax?.get(digest.characterId)?.baseMax))
-    .sort((a, b) => a.name.localeCompare(b.name) || a.characterId.localeCompare(b.characterId));
+    .sort((a, b) => byName(a, b) || compareText(a.characterId, b.characterId));
 }

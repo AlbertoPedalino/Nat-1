@@ -3,6 +3,7 @@ import { dedupeSpellsBySourcePriority, normalizeSpellRecord } from '../../charac
 import { SPELL_SOURCE_PRIORITY } from '../sourcePriority.js';
 import { matchKey } from '../nameKeys.js';
 import { loadGameData } from '../gameData.js';
+import { byName } from '../../lists.js';
 
 // The spell catalog and the class spell lists (which class may learn which
 // spell), from the generated source lookup or, failing that, the spells' own
@@ -53,7 +54,7 @@ export async function loadSpells() {
   }
 
   return {
-    spells: dedupedSpells.sort((a, b) => (a.level - b.level) || a.name.localeCompare(b.name)),
+    spells: dedupedSpells.sort((a, b) => (a.level - b.level) || byName(a, b)),
     // Item references can explicitly request a lower-priority printing.
     spellVersions: spells,
     classSpellIndex,

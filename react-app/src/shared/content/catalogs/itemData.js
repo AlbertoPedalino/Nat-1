@@ -13,6 +13,7 @@ import {
   withCanonicalSource,
 } from './itemRecords.js';
 import { expandMagicVariants, isAllowedMagicVariant, resolveCopyRecords } from './itemVariants.js';
+import { byName } from '../../lists.js';
 
 // The item catalog of the supported manuals: base items, magic items and
 // expanded magic variants, one record per name, normalized and adapter-enriched.
@@ -97,18 +98,18 @@ export async function loadItems() {
   const all = [...fallback, ...fetchedItems].filter(isItem2024);
   all.push(...buildMissingGroupParents(all));
 
-  const byName = new Map();
+  const itemsByName = new Map();
   all.forEach((item) => {
     if (!item?.name) return;
     const key = matchKey(formatLeadingBonusName(item.name));
-    const existing = byName.get(key);
-    if (!existing) { byName.set(key, item); return; }
-    if (shouldReplaceItem(existing, item)) byName.set(key, item);
+    const existing = itemsByName.get(key);
+    if (!existing) { itemsByName.set(key, item); return; }
+    if (shouldReplaceItem(existing, item)) itemsByName.set(key, item);
   });
 
-  const items = [...byName.values()]
+  const items = [...itemsByName.values()]
     .map(normalizeItem)
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .sort(byName);
 
   // Every consumer, including sheet reconciliation, receives adapter-enriched
   // data. Lazy imports keep the Vite adapter discovery out of pure Node loaders.

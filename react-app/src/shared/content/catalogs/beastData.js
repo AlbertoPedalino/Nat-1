@@ -1,6 +1,7 @@
 import { BEAST_FILES } from './catalogFiles.js';
 import { normalizeBeast } from '../../character/forms/beasts.js';
 import { loadGameData } from '../gameData.js';
+import { byName } from '../../lists.js';
 
 // Wild Shape beast forms. Loads the configured bestiary files, keeps only beast
 // statblocks, normalizes to the compact sheet shape, and de-dupes by name+source
@@ -15,5 +16,5 @@ export async function loadBeasts() {
     const key = `${beast.name.toLowerCase()}|${beast.source.toLowerCase()}`;
     if (!byKey.has(key)) byKey.set(key, beast);
   });
-  return [...byKey.values()].sort((a, b) => a.name.localeCompare(b.name));
+  return [...byKey.values()].sort(byName);
 }
