@@ -6,12 +6,13 @@ import {
   Typography,
 } from '@mui/material';
 import { numberSx } from './panelStyles.js';
+import { gridCellWord } from '../../../shared/vtt/map/hexGeometry.js';
 
 // The scene panel's Play area section: the part of the scene the players
 // receive; outside it is staging.
 
 export function playAreaSummary(scene) {
-  const cellPlural = scene.grid.shape === 'hex' ? 'hexes' : 'squares';
+  const cellPlural = gridCellWord(scene.grid.shape, { plural: true });
   return scene.playArea ? `${scene.playArea.w} × ${scene.playArea.h} ${cellPlural}` : 'Whole scene';
 }
 

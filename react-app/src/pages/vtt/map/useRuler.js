@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { measureLabel, snapRuler } from '../../../shared/vtt/map/measure.js';
 import { createMeasurePublisher } from '../../../shared/vtt/map/measureSync.js';
-import { isHexGrid } from '../../../shared/vtt/map/hexGeometry.js';
+import { gridShape, isHexGrid } from '../../../shared/vtt/map/hexGeometry.js';
 import { overlandMiles } from './viewportGeometry.js';
 
 // The ruler tool: dragged out on this screen and shown to the table while it
@@ -50,7 +50,7 @@ export function useRuler({
       label: measureLabel(measureShape, state.from, at, {
         feetPerCell: feetPerCellForRuler,
         milesPerCell: overlandMiles(grid),
-        shape: isHexGrid(grid) ? 'hex' : 'square',
+        shape: gridShape(grid),
       }),
     };
     setMeasure(next);

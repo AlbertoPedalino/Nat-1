@@ -21,7 +21,7 @@ import {
 import { DEFAULT_AREA_OPTIONS } from '../../../shared/vtt/map/areas.js';
 import { FEET_PER_CELL } from '../../../shared/vtt/map/measure.js';
 import { VTT_COLORS } from '../../../shared/vtt/colors.js';
-import { isHexGrid } from '../../../shared/vtt/map/hexGeometry.js';
+import { gridShape } from '../../../shared/vtt/map/hexGeometry.js';
 import { useSceneLive } from '../../../shared/vtt/session/useSceneLive.js';
 import { useSceneRole } from '../../../shared/vtt/session/useSceneRole.js';
 import { sheetGridColumns } from '../../../shared/vtt/sheets/sheetLayout.js';
@@ -815,7 +815,7 @@ export default function SceneEditor({
           drawing={menuDrawing}
           anchor={drawingMenu?.at || null}
           feetPerCell={feetPerCell}
-          gridShape={isHexGrid(scene.grid) ? 'hex' : 'square'}
+          gridShape={gridShape(scene.grid)}
           onClose={() => setDrawingMenu(null)}
           onPreview={handlePreviewDrawing}
           onSave={handleSaveDrawing}

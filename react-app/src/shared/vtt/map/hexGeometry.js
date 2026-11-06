@@ -34,6 +34,11 @@ export function isHexGrid(grid) {
   return grid?.shape === 'hex';
 }
 
+// The grid's shape as the ruler and the panels name it: 'hex' or 'square'.
+export function gridShape(grid) {
+  return isHexGrid(grid) ? 'hex' : 'square';
+}
+
 // What one cell of the grid is called in prose: 'hex' / 'square', or with
 // `plural` 'hexes' / 'squares'. Takes the grid shape ('hex' | 'square').
 export function gridCellWord(shape, { plural = false } = {}) {

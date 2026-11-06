@@ -1,5 +1,5 @@
 import { Cloud, DoorOpen, Pencil, Pointer, Ruler, Shapes, Users } from 'lucide-react';
-import { isHexGrid } from '../../../shared/vtt/map/hexGeometry.js';
+import { gridShape } from '../../../shared/vtt/map/hexGeometry.js';
 import DungeonPanel from '../dungeon/DungeonPanel.jsx';
 import PlayerPanel from '../session/PlayerPanel.jsx';
 import RosterPanel from '../tokens/RosterPanel.jsx';
@@ -65,7 +65,7 @@ export function buildToolGroups({
         drawWidth={drawWidth}
         areaOptions={areaOptions}
         feetPerCell={feetPerCell}
-        gridShape={isHexGrid(scene.grid) ? 'hex' : 'square'}
+        gridShape={gridShape(scene.grid)}
         onFeetPerCellChange={setFeetPerCell}
         onAreaOptionsChange={handleAreaOptionsChange}
         canUndo={erasable.length > 0}

@@ -5,7 +5,7 @@
 // the DMG alternates the cost of diagonals, so it is offered but not the
 // default.
 
-import { hexDistance } from './hexGeometry.js';
+import { gridCellWord, hexDistance } from './hexGeometry.js';
 
 export const FEET_PER_CELL = 5;
 
@@ -65,9 +65,7 @@ export function overlandLabel(from, to, { milesPerCell, rule, shape } = {}) {
   if (!(perCell > 0)) return '';
   const steps = stepsBetween(from, to, { rule, shape });
   if (steps <= 0) return '';
-  const unit = shape === 'hex' ? 'hex' : 'square';
-  const plural = shape === 'hex' ? 'hexes' : 'squares';
-  return `${formatMiles(steps * perCell)} · ${steps} ${steps === 1 ? unit : plural}`;
+  return `${formatMiles(steps * perCell)} · ${steps} ${gridCellWord(shape, { plural: steps !== 1 })}`;
 }
 
 // The shapes a ruler can take, following the 5e templates the table already

@@ -9,7 +9,7 @@ import { isMapPiece } from '../../../shared/vtt/map/mapObjects.js';
 import {
   axialRound,
   hexToWorld,
-  isHexGrid,
+  gridShape,
 } from '../../../shared/vtt/map/hexGeometry.js';
 
 // Pure geometry and cursors of the battle-map viewport: brush radius and
@@ -82,7 +82,7 @@ export function measurementBadge(tokens, drag, grid, view, feetPerCell) {
   if (!token || isMapPiece(token)) return null;
   // On hexes the landing is a hex, and the count is in steps rather than in
   // squares with a diagonal rule attached.
-  const shape = isHexGrid(grid) ? 'hex' : 'square';
+  const shape = gridShape(grid);
   const landing = shape === 'hex'
     ? (() => {
       const cell = axialRound({ q: drag.x, r: drag.y });

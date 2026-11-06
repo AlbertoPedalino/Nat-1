@@ -14,13 +14,15 @@ import InfoHint from '../../../shared/ui/InfoHint.jsx';
 import { DEFAULT_GRID } from '../../../shared/vtt/scene/scene.js';
 import { numberSx, pillLabelSx, colorInputSx } from './panelStyles.js';
 import { SectionLabel } from './ScenePanelSection.jsx';
+import { gridCellWord, gridShape } from '../../../shared/vtt/map/hexGeometry.js';
+import { capitalize } from '../../../shared/ui/textCase.js';
 
 // The scene panel's Grid section: shape, calibration over the picture, how the
 // lines look, and whether scenery snaps to the cells.
 
 export function gridSummary(grid) {
   return [
-    grid.shape === 'hex' ? 'Hexes' : 'Squares',
+    capitalize(gridCellWord(grid.shape, { plural: true })),
     `${grid.size} px`,
     grid.visible ? 'shown' : 'hidden',
   ].join(' · ');
@@ -38,7 +40,7 @@ export function GridControls({ grid, onGridChange }) {
         size="small"
         exclusive
         fullWidth
-        value={grid.shape === 'hex' ? 'hex' : 'square'}
+        value={gridShape(grid)}
         onChange={(_, value) => value && setGrid({ shape: value })}
         aria-label="Grid shape"
       >
