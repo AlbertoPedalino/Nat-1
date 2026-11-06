@@ -1,5 +1,15 @@
 import { isHexGrid } from '../map/hexGeometry.js';
 
+// The layer a dialog's "GM layer" switch puts new pieces on.
+export function placementLayer(hidden) {
+  return hidden ? 'gm' : 'tokens';
+}
+
+// A token row draft as the drag preview reads it (camelCase artwork URL).
+export function previewToken(draft) {
+  return draft ? { ...draft, imageUrl: draft.image_url || null } : null;
+}
+
 // Where a piece placed with a click lands: as close as it can to the middle of
 // the view of whoever placed it, so they see it arrive. The top-left of the map
 // (or of the play area) was often somewhere else entirely, and on a hex map it

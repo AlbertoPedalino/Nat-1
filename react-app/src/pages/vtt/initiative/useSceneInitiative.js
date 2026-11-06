@@ -10,6 +10,7 @@ import {
   turnEntriesFromFight,
   turnEntriesFromTokens,
 } from '../../../shared/vtt/tokens/initiative.js';
+import { previewToken } from '../../../shared/vtt/tokens/placement.js';
 
 // The initiative strip and creature stat blocks on the map. The GM reads the
 // shown fight row and sees every combatant; everyone else (player preview and
@@ -158,14 +159,13 @@ export function useSceneInitiative({
     // stat block.
     const hydrated = { ...combatant, monsterData: monsterFor(combatant) };
     const layer = activeLayer === 'gm' ? 'gm' : 'tokens';
-    const draft = combatantToToken(hydrated, { layer, instanceId: ref.instanceId, fightId: ref.fightId });
     beginPiecePointerDrag(event, {
       kind: 'encounter',
       combatants: [hydrated],
       layer,
       instanceId: ref.instanceId,
       fightId: ref.fightId,
-      token: { ...draft, imageUrl: draft.image_url || null },
+      token: previewToken(combatantToToken(hydrated, { layer, instanceId: ref.instanceId, fightId: ref.fightId })),
       count: 1,
     }, {
       onPlacementDragStart: setPlacementDrag,

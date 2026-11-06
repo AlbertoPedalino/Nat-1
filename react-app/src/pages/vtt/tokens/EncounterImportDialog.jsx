@@ -5,10 +5,6 @@ import {
   Box,
   Button,
   CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   FormControlLabel,
   MenuItem,
   Stack,
@@ -25,16 +21,9 @@ import { hydrateEncounterItems } from '../../../shared/bestiary/monsterUtils.js'
 import { combatantToToken, importableCombatants } from '../../../shared/vtt/tokens/encounterImport.js';
 import { useMonsterDb } from '../../../shared/bestiary/useMonsterDb.js';
 import PiecePreview, { beginPiecePointerDrag } from './PiecePreview.jsx';
-import {
-  battleMapDialogActionsSx,
-  battleMapDialogContentSx,
-  battleMapDialogPaperSx,
-  battleMapDialogPlacingPaperSx,
-  battleMapDialogTitleSx,
-  battleMapDropBackdropSx,
-  battleMapDropDialogSx,
-} from '../map/battleMapSurface.js';
 import { compareText } from '../../../shared/lists.js';
+import PlacementDialog from './PlacementDialog.jsx';
+import { placementLayer, previewToken } from '../../../shared/vtt/tokens/placement.js';
 
 // The encounters come from the GM's Encounter Builder saves, in this browser and
 // in the cloud. The payload is always read from the local copy, which is what the
@@ -258,172 +247,161 @@ export default function EncounterImportDialog({
     return importableCombatants(buildCombat(encounter, [], selected.encounterId));
   }, [monsterDb.monsters, selected]);
 
-  const layer = hidden ? 'gm' : 'tokens';
-  const previewToken = useMemo(() => {
-    if (!combatants.length) return null;
-    const draft = combatantToToken(combatants[0], {
-      layer,
-      instanceId,
-      fightId: selected?.fight?.id,
-    });
-    return { ...draft, imageUrl: draft.image_url || null };
-  }, [combatants, instanceId, layer, selected]);
+  const layer = placementLayer(hidden);
+  const preview = useMemo(() => (combatants.length
+    ? previewToken(combatantToToken(combatants[0], { layer, instanceId, fightId: selected?.fight?.id }))
+    : null), [combatants, instanceId, layer, selected]);
 
   return (
-    <Dialog
+    <PlacementDialog
       open={open}
       onClose={onClose}
-      fullWidth
+      placing={placing}
       maxWidth="xs"
-      sx={battleMapDropDialogSx}
-      slotProps={{
-        paper: { sx: [battleMapDialogPaperSx, placing && battleMapDialogPlacingPaperSx] },
-        backdrop: { sx: battleMapDropBackdropSx },
-      }}
+      title="Import from an encounter"
+      actions={(
+        <>
+            <Button onClick={onClose} disabled={busy}>Cancel</Button>
+            <Button
+              variant="contained"
+              disabled={busy || !combatants.length}
+              onClick={() => onImport(combatants, {
+                layer,
+                instanceId,
+                fightId: selected?.fight?.id || null,
+                encounterId: selected?.encounterId ?? null,
+              })}
+            >
+              Place them
+            </Button>
+        </>
+      )}
     >
-      <DialogTitle sx={battleMapDialogTitleSx}>Import from an encounter</DialogTitle>
-      <DialogContent dividers sx={battleMapDialogContentSx}>
-        <Stack spacing={2} sx={{ pt: 0.5 }}>
-          {listNotice ? <Typography sx={noticeSx}>{listNotice}</Typography> : null}
-          {!instances.length && listing ? (
-            <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-              <CircularProgress size={16} />
-              <Typography color="text.secondary" variant="body2">Loading your encounter saves…</Typography>
-            </Stack>
-          ) : null}
-          {!instances.length && !listing ? (
-            <Typography color="text.secondary" variant="body2">
-              No Encounter Builder saves yet. Prepare one in the Encounter Builder, and sign in to
-              see the ones made on another device.
+      <Stack spacing={2} sx={{ pt: 0.5 }}>
+        {listNotice ? <Typography sx={noticeSx}>{listNotice}</Typography> : null}
+        {!instances.length && listing ? (
+          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+            <CircularProgress size={16} />
+            <Typography color="text.secondary" variant="body2">Loading your encounter saves…</Typography>
+          </Stack>
+        ) : null}
+        {!instances.length && !listing ? (
+          <Typography color="text.secondary" variant="body2">
+            No Encounter Builder saves yet. Prepare one in the Encounter Builder, and sign in to
+            see the ones made on another device.
+          </Typography>
+        ) : null}
+        {instances.length ? (
+          <>
+            <TextField
+              select
+              size="small"
+              label="Encounter builder"
+              value={instanceId}
+              onChange={(event) => {
+                pickedRef.current = true;
+                setInstanceId(event.target.value);
+              }}
+              helperText={fetching ? 'Downloading from the cloud…' : null}
+            >
+              {instances.map((instance) => (
+                <MenuItem key={instance.id} value={instance.id}>
+                  <Box component="span" sx={instanceRowSx}>
+                    <Box component="span" sx={instanceNameSx}>{instance.name || instance.id}</Box>
+                    {instance.hasLocal ? null : (
+                      <Box component="span" sx={cloudBadgeSx}>
+                        <Cloud size={12} aria-hidden />
+                        Cloud
+                      </Box>
+                    )}
+                  </Box>
+                </MenuItem>
+              ))}
+            </TextField>
+            {fetchNotice ? <Typography sx={noticeSx}>{fetchNotice}</Typography> : null}
+
+            {quests.length ? (
+              <TextField
+                select
+                size="small"
+                label="Quest"
+                value={questKey}
+                onChange={(event) => setQuestKey(event.target.value)}
+              >
+                <MenuItem value={ANY_QUEST}>All quests</MenuItem>
+                {quests.map((quest) => (
+                  <MenuItem key={quest} value={questValue(quest)}>{quest}</MenuItem>
+                ))}
+                {unquested ? <MenuItem value={NO_QUEST}>No quest</MenuItem> : null}
+              </TextField>
+            ) : null}
+
+            <TextField
+              select
+              size="small"
+              label="Encounter"
+              value={currentKey}
+              onChange={(event) => setEntryKey(event.target.value)}
+              disabled={!visible.length}
+              helperText={visible.length
+                ? null
+                : fetching ? 'Waiting for the cloud copy…' : (entries.length
+                  ? 'No encounter in this quest.'
+                  : 'This save has no encounter to import yet.')}
+            >
+              {visible.map((entry) => (
+                <MenuItem key={entry.key} value={entry.key}>{entry.name}</MenuItem>
+              ))}
+            </TextField>
+
+            <FormControlLabel
+              control={<Switch size="small" checked={hidden} onChange={(event) => setHidden(event.target.checked)} />}
+              label={<Typography variant="body2">Place on the GM layer</Typography>}
+            />
+            <Typography variant="caption" color="text.secondary">
+              {hidden
+                ? 'The party will not receive these pieces until you move them to the token layer.'
+                : 'The party sees these pieces as soon as they land.'}
             </Typography>
-          ) : null}
-          {instances.length ? (
-            <>
-              <TextField
-                select
-                size="small"
-                label="Encounter builder"
-                value={instanceId}
-                onChange={(event) => {
-                  pickedRef.current = true;
-                  setInstanceId(event.target.value);
-                }}
-                helperText={fetching ? 'Downloading from the cloud…' : null}
-              >
-                {instances.map((instance) => (
-                  <MenuItem key={instance.id} value={instance.id}>
-                    <Box component="span" sx={instanceRowSx}>
-                      <Box component="span" sx={instanceNameSx}>{instance.name || instance.id}</Box>
-                      {instance.hasLocal ? null : (
-                        <Box component="span" sx={cloudBadgeSx}>
-                          <Cloud size={12} aria-hidden />
-                          Cloud
-                        </Box>
-                      )}
-                    </Box>
-                  </MenuItem>
-                ))}
-              </TextField>
-              {fetchNotice ? <Typography sx={noticeSx}>{fetchNotice}</Typography> : null}
 
-              {quests.length ? (
-                <TextField
-                  select
-                  size="small"
-                  label="Quest"
-                  value={questKey}
-                  onChange={(event) => setQuestKey(event.target.value)}
-                >
-                  <MenuItem value={ANY_QUEST}>All quests</MenuItem>
-                  {quests.map((quest) => (
-                    <MenuItem key={quest} value={questValue(quest)}>{quest}</MenuItem>
-                  ))}
-                  {unquested ? <MenuItem value={NO_QUEST}>No quest</MenuItem> : null}
-                </TextField>
-              ) : null}
-
-              <TextField
-                select
-                size="small"
-                label="Encounter"
-                value={currentKey}
-                onChange={(event) => setEntryKey(event.target.value)}
-                disabled={!visible.length}
-                helperText={visible.length
-                  ? null
-                  : fetching ? 'Waiting for the cloud copy…' : (entries.length
-                    ? 'No encounter in this quest.'
-                    : 'This save has no encounter to import yet.')}
-              >
-                {visible.map((entry) => (
-                  <MenuItem key={entry.key} value={entry.key}>{entry.name}</MenuItem>
-                ))}
-              </TextField>
-
-              <FormControlLabel
-                control={<Switch size="small" checked={hidden} onChange={(event) => setHidden(event.target.checked)} />}
-                label={<Typography variant="body2">Place on the GM layer</Typography>}
-              />
-              <Typography variant="caption" color="text.secondary">
-                {hidden
-                  ? 'The party will not receive these pieces until you move them to the token layer.'
-                  : 'The party sees these pieces as soon as they land.'}
-              </Typography>
-
-              <Box
-                onPointerDown={previewToken && !busy ? (event) => beginPiecePointerDrag(event, {
-                  kind: 'encounter',
-                  combatants,
-                  layer,
-                  instanceId,
-                  fightId: selected?.fight?.id || null,
-                  // An encounter with no fight is launched where it lands, so
-                  // what travels is the encounter rather than a snapshot this
-                  // dialog would have had to write in order to hand one over.
-                  encounterId: selected?.encounterId ?? null,
-                  token: previewToken,
-                  count: combatants.length,
-                }, { onPlacementDragStart, onPlacementDragEnd }) : undefined}
-                sx={{ ...placementCardSx, cursor: previewToken && !busy ? 'grab' : 'default' }}
-              >
-                {previewToken ? <PiecePreview token={previewToken} count={combatants.length} size={44} /> : null}
-                <Box sx={{ minWidth: 0 }}>
-                  <Typography variant="body2">
-                  {monsterDb.status === 'loading'
-                    ? 'Loading the bestiary…'
-                    : (combatants.length
-                      ? `${combatants.length} creature${combatants.length === 1 ? '' : 's'} to place`
-                      : 'Nothing to import from this fight.')}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {combatants.length
-                      ? (selected?.fight
-                        ? 'Drag this group with mouse, touch or pen, or use Place them.'
-                        : 'Never launched: placing it starts its fight in the Encounter Builder.')
-                      : 'Player characters are skipped: they are already on the map.'}
-                  </Typography>
-                </Box>
+            <Box
+              onPointerDown={preview && !busy ? (event) => beginPiecePointerDrag(event, {
+                kind: 'encounter',
+                combatants,
+                layer,
+                instanceId,
+                fightId: selected?.fight?.id || null,
+                // An encounter with no fight is launched where it lands, so
+                // what travels is the encounter rather than a snapshot this
+                // dialog would have had to write in order to hand one over.
+                encounterId: selected?.encounterId ?? null,
+                token: preview,
+                count: combatants.length,
+              }, { onPlacementDragStart, onPlacementDragEnd }) : undefined}
+              sx={{ ...placementCardSx, cursor: preview && !busy ? 'grab' : 'default' }}
+            >
+              {preview ? <PiecePreview token={preview} count={combatants.length} size={44} /> : null}
+              <Box sx={{ minWidth: 0 }}>
+                <Typography variant="body2">
+                {monsterDb.status === 'loading'
+                  ? 'Loading the bestiary…'
+                  : (combatants.length
+                    ? `${combatants.length} creature${combatants.length === 1 ? '' : 's'} to place`
+                    : 'Nothing to import from this fight.')}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {combatants.length
+                    ? (selected?.fight
+                      ? 'Drag this group with mouse, touch or pen, or use Place them.'
+                      : 'Never launched: placing it starts its fight in the Encounter Builder.')
+                    : 'Player characters are skipped: they are already on the map.'}
+                </Typography>
               </Box>
-            </>
-          ) : null}
-        </Stack>
-      </DialogContent>
-      <DialogActions sx={battleMapDialogActionsSx}>
-        <Button onClick={onClose} disabled={busy}>Cancel</Button>
-        <Button
-          variant="contained"
-          disabled={busy || !combatants.length}
-          onClick={() => onImport(combatants, {
-            layer,
-            instanceId,
-            fightId: selected?.fight?.id || null,
-            encounterId: selected?.encounterId ?? null,
-          })}
-        >
-          Place them
-        </Button>
-      </DialogActions>
-    </Dialog>
+            </Box>
+          </>
+        ) : null}
+      </Stack>
+    </PlacementDialog>
   );
 }
 
