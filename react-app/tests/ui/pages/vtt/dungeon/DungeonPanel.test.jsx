@@ -95,7 +95,7 @@ test('a room count the engine would refuse cannot be rolled', () => {
 test('each room shows what was rolled in it', () => {
   renderPanel();
 
-  expect(screen.getByText(`Hard · Level 5 · ${(1100).toLocaleString()} XP/PC`)).toBeInTheDocument();
+  expect(screen.getByText('Hard · Level 5 · 1,100 XP/PC')).toBeInTheDocument();
   expect(screen.getByText('Coins · Rare · DC 14')).toBeInTheDocument();
   expect(screen.getByText('Pit · DC 13 (detect & disarm) · 2d6')).toBeInTheDocument();
   // "Nothing found" is not worth a line.

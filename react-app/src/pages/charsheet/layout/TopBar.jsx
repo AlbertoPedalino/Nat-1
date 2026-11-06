@@ -18,6 +18,7 @@ import RollActorLabel from '../../../shared/character/dice/RollActorLabel.jsx';
 import RollCalculation from '../../../shared/character/dice/RollCalculation.jsx';
 import { rollOutcome } from '../../../shared/character/dice/rollLogPresentation.js';
 import { getActiveCharId } from '../../../shared/character/profile/store.js';
+import { formatNumber } from '../../../shared/ui/numberFormat.js';
 
 function cleanFormula(detail) {
   if (!detail) return '';
@@ -237,7 +238,7 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
               XP · Level {level}
             </Typography>
             <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary', whiteSpace: 'nowrap' }}>
-              {isMaxLevel ? `${currentXp.toLocaleString()} XP` : `${currentXp.toLocaleString()} / ${nextXp.toLocaleString()}`}
+              {isMaxLevel ? `${formatNumber(currentXp)} XP` : `${formatNumber(currentXp)} / ${formatNumber(nextXp)}`}
             </Typography>
           </Box>
           <Box sx={{ width: '100%', height: 8, bgcolor: 'rgba(46,42,34,1)', borderRadius: 1, border: '1px solid', borderColor: 'divider', overflow: 'hidden' }}>

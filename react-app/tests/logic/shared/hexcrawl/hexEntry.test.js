@@ -149,7 +149,7 @@ test('the bubble says the outcome in one breath, and the dialog keeps the rest',
     'Weather: Snow (Heavy)',
     'd6 1 vs 3',
     // Grouped the way the dialog groups it, which is the reader's locale.
-    `Camp Difficulty: Deadly · Lv 7 · ${(1200).toLocaleString()} XP/PC`,
+    'Camp Difficulty: Deadly · Lv 7 · 1,200 XP/PC',
     'Loot: Coins · Rare',
     'Spot DC 14 (disadvantage)',
   ]);

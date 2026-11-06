@@ -67,7 +67,7 @@ test('the choice says what it came to', () => {
   // Grouped the way the reader's own locale groups it.
   assert.equal(
     describeGroups(groups, 1000),
-    `2 × Ogre and Goblin — ${(950).toLocaleString()} of ${(1000).toLocaleString()} XP`,
+    '2 × Ogre and Goblin — 950 of 1,000 XP',
   );
   assert.match(describeGroups([], 1000), /nothing in the bestiary fits/);
 });

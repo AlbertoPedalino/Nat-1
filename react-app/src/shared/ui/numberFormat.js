@@ -1,4 +1,10 @@
-// How a modifier is written everywhere in the app.
+// How numbers and modifiers are written everywhere in the app (en-US, like
+// the rest of the interface).
+
+// Thousands separated the English way: 1,000 XP, 25,000 gp.
+export function formatNumber(value) {
+  return (Number(value) || 0).toLocaleString('en-US');
+}
 
 // Always with its sign: +3, -1, +0. Anything that is not a number reads as 0.
 export function signed(value) {

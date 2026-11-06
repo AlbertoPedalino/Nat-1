@@ -1,6 +1,7 @@
 import { ScrollText, LayoutDashboard, Swords, StickyNote } from 'lucide-react';
 import { REGISTRY_META } from '../../../shared/storage/localStorageRegistries.js';
 import { SECTION_REGISTRY } from '../../../shared/instances/sectionRegistry.js';
+import { formatDateTime } from '../../../shared/ui/dateFormat.js';
 
 // Single data-driven table: slug -> registry key, identity, and routes. Every
 // component that needs tool metadata reads from here instead of branching on
@@ -54,7 +55,5 @@ export function resolveTool(slug) {
 }
 
 export function formatUpdatedAt(ts) {
-  if (!ts) return '';
-  const d = new Date(ts);
-  return Number.isNaN(d.getTime()) ? '' : d.toLocaleString();
+  return formatDateTime(ts);
 }

@@ -1,6 +1,7 @@
 import { Box, Stack, Typography, alpha, useTheme } from '@mui/material';
 import { Castle, Coins, Flame, Leaf, Lock, Minus, ShieldCheck, Swords } from 'lucide-react';
 import ResultBadge from '../ui/ResultBadge.jsx';
+import { formatNumber } from '../../../shared/ui/numberFormat.js';
 
 function formatLoot(loot) {
   const valueLine = [loot.valore, loot.extra].filter(Boolean).join(' ');
@@ -30,7 +31,7 @@ function SlotBlock({ slot, tones }) {
       {slot.extra?.kind === 'enc' ? (
         <Typography sx={lineSx}>
           <ResultBadge tone={tones.difficulty[slot.extra.data.diff] || tones.fallback}>{slot.extra.data.diff}</ResultBadge>{' '}
-          Lv {slot.extra.data.lv} · {Number(slot.extra.data.xp).toLocaleString()} XP/PC
+          Lv {slot.extra.data.lv} · {formatNumber(slot.extra.data.xp)} XP/PC
         </Typography>
       ) : null}
       {slot.extra?.kind === 'trap' ? (

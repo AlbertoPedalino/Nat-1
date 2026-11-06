@@ -8,9 +8,10 @@ import {
   groupLibraryByQuest, listQuestNames, mergeLibrary, toTime,
 } from './library.js';
 import { normalizeEncounterQuest } from '../state/storage.js';
-import { formatNumber } from '../bestiary/monsterUtils.js';
+import { formatNumber } from '../../../shared/ui/numberFormat.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import InitiativeLaunchDialog from '../builder/InitiativeLaunchDialog.jsx';
+import { formatDateTime } from '../../../shared/ui/dateFormat.js';
 
 export default function LibraryView() {
   const { state, dispatch, monsterDb } = useEncounterBuilder();
@@ -178,7 +179,7 @@ function LibraryCard({ item, monsters, players, questOptions, dispatch, notify }
           Delete
         </Button>
       </Stack>
-      <Typography variant="caption" color="text.secondary">{formatDate(date)}</Typography>
+      <Typography variant="caption" color="text.secondary">{formatDateTime(toTime(date))}</Typography>
       <InitiativeLaunchDialog
         open={initiativeOpen}
         onClose={() => setInitiativeOpen(false)}
@@ -229,7 +230,3 @@ function QuestAssignment({ encounter, options, dispatch, notify }) {
   );
 }
 
-function formatDate(value) {
-  const time = toTime(value);
-  return time ? new Date(time).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
-}

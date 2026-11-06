@@ -4,6 +4,7 @@ import { normalizeFumbleTables } from '../rolls/fumbles.js';
 import { normalizeNegotiation } from '../negotiation/negotiation.js';
 import { hydrateEncounterItems, serializeEncounterItem } from '../bestiary/monsterUtils.js';
 import { readInstanceValue, saveLocal } from '../../../shared/instances/instanceStore.js';
+import { formatDateTime } from '../../../shared/ui/dateFormat.js';
 
 // Encounter Builder payload adapter: which keys an instance stores and how
 // they are (de)serialized. Registry, sync and opening are shared
@@ -142,11 +143,5 @@ export function normalizeEncounterQuest(value) {
 }
 
 function defaultEncounterName() {
-  const date = new Date();
-  return `Encounter ${date.toLocaleString('en-US', {
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  })}`;
+  return `Encounter ${formatDateTime(new Date())}`;
 }

@@ -6,7 +6,7 @@ import { Minus, Plus, Save, SlidersHorizontal, Swords, Trash2 } from 'lucide-rea
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import { calculateDifficulty } from './difficulty.js';
 import { listQuestNames } from '../library/library.js';
-import { formatNumber } from '../bestiary/monsterUtils.js';
+import { formatNumber } from '../../../shared/ui/numberFormat.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import DifficultyBar from './DifficultyBar.jsx';
 import InitiativeLaunchDialog from './InitiativeLaunchDialog.jsx';

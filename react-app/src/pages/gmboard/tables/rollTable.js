@@ -1,5 +1,6 @@
 import { rollD8D12, rollD20D20 } from '../logic/rng.js';
 import { getEvent, getLoot, getCompl, getEnc, getTrap, getEnvSev } from './tables.js';
+import { formatNumber } from '../../../shared/ui/numberFormat.js';
 
 // The tables a GM can roll on directly, in the order the Roll tab shows them.
 // Each one is a single lookup: nothing here advances the clock or chains into
@@ -105,7 +106,7 @@ function describeRow(roll) {
         title: data.diff,
         stats: [
           { label: 'Level', value: String(data.lv) },
-          { label: 'XP / PC', value: Number(data.xp).toLocaleString(), emphasis: true },
+          { label: 'XP / PC', value: formatNumber(data.xp), emphasis: true },
         ],
       };
     case 'loot':

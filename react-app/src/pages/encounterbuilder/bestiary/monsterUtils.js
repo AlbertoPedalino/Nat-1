@@ -1,11 +1,6 @@
 import { CR_XP, FALLBACK_MONSTER_TOKEN, IMAGE_BASE, SIZE_LABELS } from '../state/constants.js';
 import { parseCr } from '../../../shared/character/forms/beasts.js';
-import { clampInt } from '../../../shared/numbers.js';
-import { numberOr } from '../../../shared/numbers.js';
-
-export function formatNumber(value) {
-  return Number(value || 0).toLocaleString('en-US');
-}
+import { clampInt, numberOr } from '../../../shared/numbers.js';
 
 export function getCR(cr) {
   if (!cr) return '0';

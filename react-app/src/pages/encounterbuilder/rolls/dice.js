@@ -1,5 +1,6 @@
 import { LOG_MAX } from '../state/constants.js';
 import { normalizeRollIdentity } from '../../../shared/character/dice/rollLogPresentation.js';
+import { formatClockTime } from '../../../shared/ui/dateFormat.js';
 
 // The builder's roll log. Rolls themselves come from shared/character/dice
 // (rollNotation.js on top of the one dice engine, dice.js).
@@ -7,7 +8,7 @@ export function addRollLogEntry(log, roll, actor, now = new Date()) {
   if (!roll) return Array.isArray(log) ? log : [];
   if (roll.id && (log || []).some((entry) => entry.id === roll.id)) return log;
   if (roll.timestamp) now = new Date(roll.timestamp);
-  const timeStr = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const timeStr = formatClockTime(now);
   return [
     {
       id: roll.id,

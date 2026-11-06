@@ -12,6 +12,7 @@ import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { MARKER_COLORS } from '../../../shared/dungeon/roomMarkers.js';
 import InfoHint from '../../../shared/ui/InfoHint.jsx';
 import PiecePreview, { beginPiecePointerDrag } from '../tokens/PiecePreview.jsx';
+import { formatNumber } from '../../../shared/ui/numberFormat.js';
 
 // The dungeon this map is being played as.
 //
@@ -243,7 +244,7 @@ function SlotLine({ slot, tones }) {
       <Stack direction="row" spacing={0.6} sx={{ alignItems: 'center' }}>
         <Swords size={13} color={tones.result.encounter} />
         <Typography sx={lineSx}>
-          {extra.data.diff} · Level {extra.data.lv} · {Number(extra.data.xp).toLocaleString()} XP/PC
+          {extra.data.diff} · Level {extra.data.lv} · {formatNumber(extra.data.xp)} XP/PC
         </Typography>
       </Stack>
     );

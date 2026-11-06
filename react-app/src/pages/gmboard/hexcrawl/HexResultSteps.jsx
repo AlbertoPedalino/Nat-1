@@ -1,6 +1,7 @@
 import { Box, Stack, Typography, useTheme } from '@mui/material';
 import { Coins, Dice5, Eye, Flame, Leaf, Lock, Map, Swords, CloudRain } from 'lucide-react';
 import ResultBadge from '../ui/ResultBadge.jsx';
+import { formatNumber } from '../../../shared/ui/numberFormat.js';
 
 function formatLoot(loot) {
   const valueLine = [loot.valore, loot.extra].filter(Boolean).join(' ');
@@ -51,7 +52,7 @@ function renderStep(step, index, tones, last) {
       return (
         <StepRow key={index} icon={Swords} iconColor={tones.result.encounter} label={step.label} last={last}>
           (d20+d20={step.sum}): <ResultBadge tone={tones.difficulty[step.data.diff] || tones.fallback}>{step.data.diff}</ResultBadge>{' '}
-          Level {step.data.lv} · {Number(step.data.xp).toLocaleString()} XP/PC
+          Level {step.data.lv} · {formatNumber(step.data.xp)} XP/PC
         </StepRow>
       );
     case 'loot':

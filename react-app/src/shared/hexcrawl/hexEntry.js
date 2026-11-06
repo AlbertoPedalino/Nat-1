@@ -16,6 +16,7 @@ import {
   normalizeMountSpeed,
 } from '../../pages/gmboard/state/constants.js';
 import { resolveAdvanceOnly, resolveProceed } from '../../pages/gmboard/hexcrawl/hex.js';
+import { formatNumber } from '../ui/numberFormat.js';
 
 export const HEX_STATUSES = Object.freeze(['unexplored', 'frontier', 'settled']);
 
@@ -170,7 +171,7 @@ export function hexEntrySummary(result) {
     // which are the two numbers the fight is actually run on.
     const detail = [
       encounter.data.lv != null ? `Lv ${encounter.data.lv}` : null,
-      encounter.data.xp != null ? `${Number(encounter.data.xp).toLocaleString()} XP/PC` : null,
+      encounter.data.xp != null ? `${formatNumber(encounter.data.xp)} XP/PC` : null,
     ].filter(Boolean).join(' · ');
     lines.push(`${encounter.label || 'Encounter'}: ${encounter.data.diff}${detail ? ` · ${detail}` : ''}`);
   }

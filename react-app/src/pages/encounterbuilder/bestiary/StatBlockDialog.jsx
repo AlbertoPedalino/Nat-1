@@ -20,7 +20,6 @@ import {
   crXP,
   formatAlignment,
   formatDamageList,
-  formatNumber,
   formatSpeed,
   getAC,
   getACDesc,
@@ -42,7 +41,7 @@ import { advArgFor } from '../../../shared/character/dice/advantage.js';
 import { creatureRollSources } from '../../../shared/character/combat/rollSources.js';
 import { StatRollContext, advTag, d20RollKind } from './statRolls.js';
 import RollText from './RollText.jsx';
-import { signed } from '../../../shared/ui/numberFormat.js';
+import { signed, formatNumber } from '../../../shared/ui/numberFormat.js';
 import { abilityModifier } from '../../../shared/character/progression/abilityModifier.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
 

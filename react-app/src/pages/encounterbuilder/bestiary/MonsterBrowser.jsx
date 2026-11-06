@@ -17,9 +17,10 @@ import {
 import { Plus } from 'lucide-react';
 import { CR_ORDER, TYPE_OPTIONS } from '../state/constants.js';
 import { filterMonsters } from './filters.js';
-import { crXP, formatNumber, getCR, getType } from './monsterUtils.js';
+import { crXP, getCR, getType } from './monsterUtils.js';
 import MonsterToken from './MonsterToken.jsx';
 import { capitalize } from '../../../shared/ui/textCase.js';
+import { formatNumber } from '../../../shared/ui/numberFormat.js';
 
 const PAGE_SIZE = 50;
 

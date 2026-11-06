@@ -51,6 +51,14 @@ test('new ids are made only by makeId in shared/ids.js', () => {
   }), []);
 });
 
+// The interface is English: numbers and dates go through the en-US
+// formatters, never the browser's locale.
+test('numbers and dates are formatted only by numberFormat.js and dateFormat.js', () => {
+  assert.deepEqual(sourceFilesMatching(/\.toLocale(Date|Time)?String\(/, {
+    allow: ['shared/ui/numberFormat.js', 'shared/ui/dateFormat.js'],
+  }), []);
+});
+
 test('asArray and flattenList are defined only in shared/lists.js', () => {
   assert.deepEqual(sourceFilesMatching(/(function|const)\s+(asArray|flattenList)\b/, {
     allow: ['shared/lists.js'],

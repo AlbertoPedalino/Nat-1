@@ -3,6 +3,7 @@ import { Layers } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { levelFromXp, xpForLevel, xpProgressPct, MAX_LEVEL } from '../../../shared/character/progression/xp.js';
 import XpDeltaControl from '../../../shared/character/progression/XpDeltaControl.jsx';
+import { formatNumber } from '../../../shared/ui/numberFormat.js';
 
 export default function XpPanel({ character, dispatch }) {
   const xp = Number(character.xp ?? 0);
@@ -20,7 +21,7 @@ export default function XpPanel({ character, dispatch }) {
         <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 1 }}>
           <Typography variant="body2" sx={{ fontWeight: 700, color: 'primary.main' }}>Player Level {trackerLevel}</Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}>
-            {isMaxLevel ? `${xp.toLocaleString()} XP` : `${xp.toLocaleString()} / ${nextXp.toLocaleString()} XP`}
+            {isMaxLevel ? `${formatNumber(xp)} XP` : `${formatNumber(xp)} / ${formatNumber(nextXp)} XP`}
           </Typography>
         </Box>
         <LinearProgress variant="determinate" value={progress} />

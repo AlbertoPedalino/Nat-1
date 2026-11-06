@@ -1,7 +1,7 @@
 import { Box, Chip, LinearProgress, Stack, Typography } from '@mui/material';
 import { DIFFICULTY_LABELS } from '../state/constants.js';
 import { calculateDifficulty } from './difficulty.js';
-import { formatNumber } from '../bestiary/monsterUtils.js';
+import { formatNumber } from '../../../shared/ui/numberFormat.js';
 
 export default function DifficultyBar({ encounter, party }) {
   const difficulty = calculateDifficulty(encounter, party);

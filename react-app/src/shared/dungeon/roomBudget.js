@@ -1,4 +1,5 @@
 import { numberOr } from '../numbers.js';
+import { formatNumber } from '../ui/numberFormat.js';
 // Turning a rolled encounter into creatures to put in the room.
 //
 // The dungeon engine answers in difficulty and experience — "Hard, level 5,
@@ -73,5 +74,5 @@ export function describeGroups(groups, budget) {
   const names = groups
     .map((group) => (group.count > 1 ? `${group.count} × ${group.monster.name}` : group.monster.name))
     .join(' and ');
-  return `${names} — ${groupsTotalXp(groups).toLocaleString()} of ${Math.round(budget).toLocaleString()} XP`;
+  return `${names} — ${formatNumber(groupsTotalXp(groups))} of ${formatNumber(Math.round(budget))} XP`;
 }

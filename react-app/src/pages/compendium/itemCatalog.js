@@ -8,6 +8,7 @@ import { normalizeSearchText } from '../../shared/content/searchText.js';
 import { CORE_2024_SOURCE_PRIORITY, isAllowedSource } from '../../shared/content/sourcePriority.js';
 import { decodeDamageType, decodeProperty, itemMasteryLabels } from '../../shared/character/inventory/itemCodes.js';
 import { capitalize } from '../../shared/ui/textCase.js';
+import { formatNumber } from '../../shared/ui/numberFormat.js';
 
 const typeCode = (item) => String(item?.type || '').toUpperCase().split('|')[0].trim();
 const rarityOf = (item) => String(item?.rarity || 'none').toLowerCase();
@@ -113,7 +114,7 @@ export const WEIGHT_RANGES = Object.freeze([
 export function formatCost(copper) {
   const cp = Number(copper) || 0;
   if (!cp) return '—';
-  if (cp >= 100 && cp % 100 === 0) return `${(cp / 100).toLocaleString('en-US')} gp`;
+  if (cp >= 100 && cp % 100 === 0) return `${formatNumber(cp / 100)} gp`;
   if (cp >= 10 && cp % 10 === 0) return `${cp / 10} sp`;
   return `${cp} cp`;
 }
