@@ -10,7 +10,7 @@ import {
 } from '../../../shared/character/profile/store.js';
 import { stripRuntimeOnlyCharacterFields } from '../../../shared/character/profile/runtimeFields.js';
 import { collectAutoGrantedSpells as collectEntityAutoGrantedSpells } from '../spells/spells.js';
-import { normalizeCurrency } from '../../../shared/character/inventory/currency.js';
+import { DEFAULT_CURRENCY, normalizeCurrency } from '../../../shared/character/inventory/currency.js';
 import {
   splitTypedProficiencies,
   uniqueProficiencyLabels,
@@ -383,7 +383,7 @@ export function makeSheetPayload(character, data) {
     autoGrantedSpells,
     xp: character.xp || 0,
     inventory: character.inventory || [],
-    currency: normalizeCurrency(character.currency || { cp: 0, sp: 0, gp: 10, pp: 0 }),
+    currency: normalizeCurrency(character.currency || { ...DEFAULT_CURRENCY }),
     equipChoices: character.equipChoices || {},
     grantSpellNames: choiceSpellNames,
     spellSnapshots,
@@ -535,7 +535,7 @@ function buildBuilderStateFromSheetPayload(data) {
     autoGrantedSpells: data.autoGrantedSpells || [],
 
     inventory: data.inventory || [],
-    currency: normalizeCurrency(data.currency || { cp: 0, sp: 0, gp: 10, pp: 0 }),
+    currency: normalizeCurrency(data.currency || { ...DEFAULT_CURRENCY }),
     xp: Number(data.xp || 0),
   };
 

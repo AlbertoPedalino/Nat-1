@@ -6,6 +6,14 @@ export function numberOr(value, fallback = 0) {
   return Number.isFinite(n) ? n : fallback;
 }
 
+// A stored number, or null when there is none: missing, empty or not a number
+// (Number(null) is 0, which is how a missing total once read as a zero).
+export function numberOrNull(value) {
+  if (value == null || value === '') return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
 // `value` held between `min` and `max`. A range whose max fell below its min
 // (a container smaller than the minimum size) gives min, never a value past it.
 export function clamp(value, min, max) {

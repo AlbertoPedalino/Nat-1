@@ -20,10 +20,11 @@ import { hasItemFlag, itemFlagFitsItem } from '../../../shared/character/invento
 import { itemCardName } from '../../../shared/character/inventory/replicateMagicItem.js';
 import { scrollCardName } from '../../../shared/character/inventory/spellScrolls.js';
 import { isItemCarried, itemQty as qty } from '../../../shared/character/inventory/weight.js';
-import { canOneHand, canTwoHand, isThrownWeapon, isWeapon, THROWN_SLOT } from './equipmentSlots.js';
+import { canOneHand, canTwoHand, isThrownWeapon, THROWN_SLOT } from './equipmentSlots.js';
 import ItemExtras from './ItemExtras.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { isWeaponItem } from '../../../shared/character/inventory/itemCodes.js';
 
 const itemStateChipBaseSx = {
   minWidth: 0,
@@ -103,7 +104,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
           </Box>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', flexWrap: 'wrap' }}>
-          {carried && isWeapon(item) ? (
+          {carried && isWeaponItem(item) ? (
             <Box sx={{ display: 'flex', gap: '2px' }}>
               {canOneHand(item) ? (
                 <SlotBtn active={item.equippedSlot === 'mainHand'} onClick={() => actions.equipSlot(index, 'mainHand')} label="MH" />

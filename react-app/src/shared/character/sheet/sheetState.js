@@ -1,5 +1,5 @@
 import { computeMaxHp } from '../combat/hp.js';
-import { normalizeCurrency } from '../inventory/currency.js';
+import { DEFAULT_CURRENCY, normalizeCurrency } from '../inventory/currency.js';
 import { normalizeEffects } from '../combat/combatEffects.js';
 import { normalizeDeathSaves } from '../combat/vitals.js';
 
@@ -25,7 +25,7 @@ export function deriveSheetState(C) {
 
   const sheetInventory = Array.isArray(C?.inventory) ? structuredClone(C.inventory) : [];
   const sheetCurrency = normalizeCurrency(
-    C?.currency && typeof C.currency === 'object' ? C.currency : { cp: 0, sp: 0, gp: 10, pp: 0 },
+    C?.currency && typeof C.currency === 'object' ? C.currency : { ...DEFAULT_CURRENCY },
   );
 
   const sheetInspiration = Boolean(C?.inspiration);

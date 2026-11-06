@@ -185,3 +185,6 @@ export function reorderCurrency(currency, key, dir) {
   [next[idx], next[swapIdx]] = [next[swapIdx], next[idx]];
   return { ...currency, [CURRENCY_ORDER_KEY]: next };
 }
+
+// The purse of a character whose sheet has none saved yet.
+export const DEFAULT_CURRENCY = Object.freeze({ cp: 0, sp: 0, gp: 10, pp: 0 });

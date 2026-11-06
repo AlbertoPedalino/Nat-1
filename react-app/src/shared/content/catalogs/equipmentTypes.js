@@ -1,9 +1,7 @@
-import { stripSource } from '../nameKeys.js';
 import { byName } from '../../lists.js';
+import { isWeaponItem, itemBaseType } from '../../character/inventory/itemCodes.js';
 
-const itemBaseType = (item) => stripSource(item?.type).toUpperCase();
 const weaponCategoryOf = (item) => String(item?.weaponCategory || '').toLowerCase();
-const isWeaponItem = (item) => ['M', 'R'].includes(itemBaseType(item));
 
 // Maps 5etools `equipmentType` codes (exactly as they appear in startingEquipment
 // data) to a predicate selecting the concrete items a player may pick for that

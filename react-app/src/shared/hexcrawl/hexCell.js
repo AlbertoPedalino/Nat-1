@@ -3,6 +3,7 @@
 // editor never sees a raw column name.
 
 import { hexKey } from '../vtt/map/hexGeometry.js';
+import { numberOrNull } from '../numbers.js';
 
 // What the GM has marked a hex as. Deliberately about the party's progress
 // through it, not about who lives there — population is its own column, because
@@ -23,11 +24,6 @@ export const HEX_STATUS_TONES = Object.freeze({
 });
 
 const MAX_NOTE = 400;
-
-function numberOrNull(value) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : null;
-}
 
 export function normalizeHexStatus(value) {
   const status = String(value || '').trim().toLowerCase();

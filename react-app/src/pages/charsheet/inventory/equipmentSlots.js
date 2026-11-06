@@ -5,12 +5,9 @@ import {
 import { hasOwnedFeat } from '../../../shared/character/progression/selectedFeats.js';
 import { itemHasProperty } from '../../../shared/character/inventory/weaponProperties.js';
 import { stripSource } from '../../../shared/content/nameKeys.js';
+import { isWeaponItem } from '../../../shared/character/inventory/itemCodes.js';
 
 export const THROWN_SLOT = 'thrown';
-
-export function isWeapon(item) {
-  return item && ['M', 'R'].includes(String(item.type || '').toUpperCase());
-}
 
 export function isLightWeapon(item) {
   return itemHasProperty(item, 'light');
@@ -71,7 +68,7 @@ export function hasEquippedShield(inventory) {
 export function isWieldingWeaponOrShield(inventory) {
   const list = inventory || [];
   const shield = list.some((i) => i.equipped && String(i.type || '').toUpperCase() === 'S');
-  const weapon = list.some((i) => ['mainHand', 'offHand', 'twoHands'].includes(i.equippedSlot) && isWeapon(i));
+  const weapon = list.some((i) => ['mainHand', 'offHand', 'twoHands'].includes(i.equippedSlot) && isWeaponItem(i));
   return shield || weapon;
 }
 
@@ -120,7 +117,7 @@ export function canUseLightExtraAttack(C, inventory) {
   if (!offHand) return false;
   const explicitMain = getEquippedMainHandWeapon(inventory);
   const mainWeapon = explicitMain || (inventory || []).find(i =>
-    i.equipped && isWeapon(i) && !i.equippedSlot
+    i.equipped && isWeaponItem(i) && !i.equippedSlot
   );
   if (!mainWeapon) return false;
   return isLightWeapon(mainWeapon) && isLightWeapon(offHand);

@@ -349,3 +349,12 @@ export function buildItemPropertySegments(item, options = {}) {
   });
 }
 
+// An item's 5etools type code without its source ('M|XPHB' -> 'M').
+export function itemBaseType(item) {
+  return stripSource(item?.type).toUpperCase();
+}
+
+// Melee or ranged weapon.
+export function isWeaponItem(item) {
+  return ['M', 'R'].includes(itemBaseType(item));
+}

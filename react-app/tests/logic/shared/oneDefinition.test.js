@@ -348,3 +348,11 @@ test('proficiency block choice keys come from typedProficiencies.js', () => {
     allow: ['shared/character/progression/typedProficiencies.js'],
   }), []);
 });
+
+// Small rules with one home: a stored number or null (numbers.js), "is this a
+// weapon" (itemCodes.js), the default purse (currency.js).
+test('numberOrNull, isWeaponItem and DEFAULT_CURRENCY have one definition', () => {
+  assert.deepEqual(sourceFilesMatching(/function numberOrNull\(|\[['"]M['"], ?['"]R['"]\]\.includes|gp: 10, pp: 0/, {
+    allow: ['shared/numbers.js', 'shared/character/inventory/itemCodes.js', 'shared/character/inventory/currency.js'],
+  }), []);
+});

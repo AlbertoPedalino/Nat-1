@@ -11,6 +11,7 @@
 import { DICE_LIMITS } from '../../character/dice/dice.js';
 import { normalizeRollIdentity } from '../../character/dice/rollLogPresentation.js';
 import { makeId } from '../../ids.js';
+import { numberOrNull } from '../../numbers.js';
 
 export const ROLL_TTL_MS = 8000;
 export const MAX_FEED = 40;
@@ -25,12 +26,10 @@ function boundedText(value, maxLength) {
   return String(value).trim().slice(0, maxLength);
 }
 
-function numberOrNull(value, maxAbs = MAX_ROLL_TOTAL_ABS) {
-  // `Number(null)` is 0, which is finite — so a rest or a death-save guard, which
-  // has no total at all, would have been shown as a roll of zero.
-  if (value === null || value === undefined || value === '') return null;
-  const parsed = Number(value);
-  return Number.isFinite(parsed) && Math.abs(parsed) <= maxAbs ? parsed : null;
+// A roll total, or null when there is none or it is out of range.
+function rollTotal(value, maxAbs = MAX_ROLL_TOTAL_ABS) {
+  const n = numberOrNull(value);
+  return n != null && Math.abs(n) <= maxAbs ? n : null;
 }
 
 function normalizeSharedDie(die) {
@@ -88,13 +87,13 @@ export function normalizeRoll(entry) {
     note: boundedText(entry.note, 240),
     label,
     detail,
-    total: numberOrNull(entry.total),
+    total: rollTotal(entry.total),
     rolls,
     // 'advantage' | 'disadvantage' | undefined, as the sheet records it.
     mode: VALID_MODES.has(requestedMode) ? requestedMode : null,
     // Carried so the bubble can lay the roll out exactly as the sheet's toast
     // did — dice, then the flat modifier, then the total.
-    bonus: numberOrNull(requestedBonus, DICE_LIMITS.modifierAbs),
+    bonus: rollTotal(requestedBonus, DICE_LIMITS.modifierAbs),
     // Requests physical playback on an open map. Both the map roller and a
     // synced sheet roll set it; notices without dice never do.
     thrown: Boolean(entry.thrown && rolls.length),

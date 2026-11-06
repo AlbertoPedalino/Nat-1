@@ -7,22 +7,7 @@ import {
   normalizeWeaponName,
   resolveWeaponMasteryForItem,
 } from '../../../shared/character/combat/weaponMastery.js';
-import {
-  getWeaponDamageDice,
-  canUseLightExtraAttack,
-  getOffHandDamageMod,
-  hasTwoWeaponFightingStyle,
-  isTwoHandedWeapon,
-  isThrownWeapon,
-  isHeavyWeapon,
-  isWieldingWeaponOrShield,
-  isWeapon,
-  isLightWeapon,
-  isFinesseWeapon,
-  isCrossbow,
-  isPolearmMasterWeapon,
-  hasEquippedShield,
-} from '../inventory/equipmentSlots.js';
+import { getWeaponDamageDice, canUseLightExtraAttack, getOffHandDamageMod, hasTwoWeaponFightingStyle, isTwoHandedWeapon, isThrownWeapon, isHeavyWeapon, isWieldingWeaponOrShield, isLightWeapon, isFinesseWeapon, isCrossbow, isPolearmMasterWeapon, hasEquippedShield } from '../inventory/equipmentSlots.js';
 import { weaponEnhancement } from '../../../shared/character/inventory/itemBonus.js';
 import { isItemEffectActive } from '../../../shared/character/inventory/itemAttunement.js';
 import {
@@ -41,6 +26,7 @@ import {
 } from '../../../shared/character/sheet/effectBonuses.js';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
 import { stripSource } from '../../../shared/content/nameKeys.js';
+import { isWeaponItem } from '../../../shared/character/inventory/itemCodes.js';
 
 // Action cards for weapons: one per wielded weapon (main hand, off hand,
 // thrown, two-handed), with ability, proficiency, mastery, fighting-style and
@@ -127,7 +113,7 @@ export function spellWeaponOptions(C, inventory, profSets) {
   const overrides = installedRegistry.getWeaponAbilityOverrides();
   const seen = new Set();
   return (inventory || [])
-    .filter((item) => isWeapon(item)
+    .filter((item) => isWeaponItem(item)
       && getWeaponProficiencyInfo(C, item, matchingWeaponOverride(C, item, overrides), profSets).proficient)
     .sort((a, b) => Number(isHeldWeapon(b)) - Number(isHeldWeapon(a)))
     .filter((item) => {
@@ -148,7 +134,7 @@ export function spellWeaponAttack(C, item, { ability, inventory, extraDamage = '
   if (!item) return null;
   const mod = getMod(getFinal(C, ability));
   const enhancement = weaponEnhancement(item);
-  const held = (inventory || []).filter((i) => isWeapon(i) && isHeldWeapon(i)).length;
+  const held = (inventory || []).filter((i) => isWeaponItem(i) && isHeldWeapon(i)).length;
   const twoHanded = item.equippedSlot === 'twoHands' || isTwoHandedWeapon(item);
   const info = {
     ...weaponKindInfo(item, { shieldEquipped: hasEquippedShield(inventory) }),
@@ -273,7 +259,7 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
   // explicit slot). Gates Fighting Style: Dueling ("a melee weapon in one hand and
   // no other weapons"); a Shield is not a weapon, so sword-and-board still qualifies.
   const wieldedWeaponCount = (inventory || []).filter((i) =>
-    isWeapon(i) && (['mainHand', 'offHand', 'twoHands'].includes(i.equippedSlot) || (i.equipped && !i.equippedSlot)),
+    isWeaponItem(i) && (['mainHand', 'offHand', 'twoHands'].includes(i.equippedSlot) || (i.equipped && !i.equippedSlot)),
   ).length;
   const ctx = {
     profSets: equipmentSets,

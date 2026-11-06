@@ -5,10 +5,10 @@ import {
   getArmorKindEntry,
 } from './armorRules.js';
 import { requireEquipmentSets } from './equipmentSets.js';
+import { isWeaponItem } from '../inventory/itemCodes.js';
 
 export function getWeaponProficiencyInfo(character, item, weaponOverride, equipmentSets) {
-  const itemType = String(item?.type || '').toUpperCase();
-  if (!item || !['M', 'R'].includes(itemType)) return { proficient: true, source: '' };
+  if (!item || !isWeaponItem(item)) return { proficient: true, source: '' };
   if (weaponOverride?.grantsProficiency) return { proficient: true, source: weaponOverride.label || weaponOverride.key || '' };
   const { weaponRules } = requireEquipmentSets(equipmentSets, 'getWeaponProficiencyInfo');
   const matched = weaponRules.find((rule) => weaponMatchesRule(item, rule));

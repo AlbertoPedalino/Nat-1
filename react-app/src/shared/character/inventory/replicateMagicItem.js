@@ -28,6 +28,7 @@ import { itemHasProperty } from './weaponProperties.js';
 import { stripSource } from '../../content/nameKeys.js';
 import { baseChoiceKey } from '../progression/choiceUtils.js';
 import { byName, compareText } from '../../lists.js';
+import { isWeaponItem } from './itemCodes.js';
 
 const lc = (value) => String(value || '').toLowerCase();
 const typeOf = (item) => stripSource(item?.type).toUpperCase();
@@ -36,7 +37,6 @@ const typeOf = (item) => stripSource(item?.type).toUpperCase();
 const POTION = 'P';
 const SCROLL = 'SC';
 
-const isWeapon = (item) => ['M', 'R'].includes(typeOf(item)); // Melee / Ranged
 // Body armor (Light / Medium / Heavy). Excludes shields (S): a shield is a
 // single base item, so "Shield +N" stays a concrete plan with no choice.
 const isBodyArmor = (item) => ['LA', 'MA', 'HA'].includes(typeOf(item));
@@ -52,7 +52,7 @@ export const isReplicateArmorItem = (item) => {
 };
 // Standard fantasy weapon: drop modern/futuristic firearms (5etools tags them
 // with `age` = "modern"/"futuristic"; renaissance Musket/Pistol carry none).
-const isMundaneWeapon = (item) => isWeapon(item) && !item.age;
+const isMundaneWeapon = (item) => isWeaponItem(item) && !item.age;
 const isBaseWeapon = (item) => (
   isMundaneWeapon(item)
   && ['simple', 'martial'].includes(lc(item.weaponCategory))

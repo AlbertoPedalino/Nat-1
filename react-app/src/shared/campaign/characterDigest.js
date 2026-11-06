@@ -14,11 +14,7 @@ import { normalizeEffects } from '../character/combat/combatEffects.js';
 import { normalizeDeathSaves, pickCharacterVitals } from '../character/combat/vitals.js';
 import { normalizeHexColor } from '../ui/colors.js';
 import { byName, compareText } from '../lists.js';
-
-function numberOrNull(value) {
-  const parsed = Number(value);
-  return value == null || value === '' || !Number.isFinite(parsed) ? null : parsed;
-}
+import { numberOrNull } from '../numbers.js';
 
 function fromFields(fields, meta) {
   return {

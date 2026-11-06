@@ -6,6 +6,7 @@
 
 import { getHP, getMonsterTokenUrls } from '../../bestiary/monsterUtils.js';
 import { makeSourceRef } from './encounterSync.js';
+import { numberOrNull } from '../../numbers.js';
 
 // D&D creature sizes in squares. A Large creature is the first that stops
 // fitting in one, and Tiny still gets a whole square: two goblins sharing a
@@ -75,8 +76,8 @@ export function combatantToToken(combatant, { layer = 'tokens', instanceId, figh
     // A monster's hit points belong to the piece — its sheet is the stat block,
     // which has no per-creature state. A player's piece leaves these null and
     // reads the character sheet instead.
-    hp_current: numberOrNull(combatant?.hpCurrent),
-    hp_max: numberOrNull(combatant?.hpMax),
+    hp_current: roundedOrNull(combatant?.hpCurrent),
+    hp_max: roundedOrNull(combatant?.hpMax),
     // Where it came from, so a browser with both tabs open can keep the two in
     // step. Null when imported outside that context — the piece still works, it
     // just stops hearing about the fight.
@@ -85,9 +86,9 @@ export function combatantToToken(combatant, { layer = 'tokens', instanceId, figh
   };
 }
 
-function numberOrNull(value) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? Math.round(parsed) : null;
+function roundedOrNull(value) {
+  const n = numberOrNull(value);
+  return n == null ? null : Math.round(n);
 }
 
 // Straight from the bestiary, with no encounter behind it. Average hit points
@@ -98,7 +99,7 @@ function numberOrNull(value) {
 export function monsterToToken(monster, { layer = 'tokens', label } = {}) {
   const span = monsterSpan(monster);
   const [artwork] = getMonsterTokenUrls(monster);
-  const hp = numberOrNull(getHP(monster?.hp));
+  const hp = roundedOrNull(getHP(monster?.hp));
   return {
     layer,
     label: label || monster?.name || 'Creature',
