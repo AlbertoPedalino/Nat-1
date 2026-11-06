@@ -1,8 +1,8 @@
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
-import { FULL_SLOTS, HALF_SLOTS, PACT_SLOTS, THIRD_SLOTS } from '../../../shared/character/spells/spellTables.js';
 import { getPrimaryClassLevel } from '../progression/calculations.js';
 import { getClassSpellLimits } from '../../../shared/character/spells/spellProgression.js';
 import { enumerateEntityGrants, enumerateSpeciesGrants, grantSourceLabel } from '../../../shared/character/spells/autoGrantedSpells.js';
+import { maxSpellLevelFor } from '../../../shared/character/spells/casterProgression.js';
 
 export function getSpellcastingProfile(character) {
   const classProfile = installedRegistry.getClassRuntimeConfig(character.className)?.spellcasting || {};
@@ -64,21 +64,6 @@ export function collectAutoGrantedSpells(character) {
   });
 }
 
-function normalizeCasterProgression(value) {
-  const progression = String(value || '').toLowerCase();
-  if (progression === '1/3' || progression === 'third') return 'third';
-  if (progression === 'half' || progression === 'artificer' || progression === 'full' || progression === 'pact') return progression;
-  return null;
-}
-
-function slotsForProgression(progression, level) {
-  const normalized = normalizeCasterProgression(progression);
-  if (normalized === 'full') return FULL_SLOTS[level] || [];
-  if (normalized === 'half' || normalized === 'artificer') return HALF_SLOTS[level] || [];
-  if (normalized === 'third') return THIRD_SLOTS[level] || [];
-  return [];
-}
-
 export function getSpellCounts(character) {
   const level = getClassSpellLevel(character);
   const profile = getSpellcastingProfile(character);
@@ -87,9 +72,5 @@ export function getSpellCounts(character) {
 }
 
 export function maxSpellLevel(character) {
-  const level = getClassSpellLevel(character);
-  const profile = getSpellcastingProfile(character);
-  const progression = normalizeCasterProgression(profile.casterProgression);
-  if (progression === 'pact') return PACT_SLOTS[level]?.level || 0;
-  return slotsForProgression(progression, level).reduce((max, count, index) => (count ? index + 1 : max), 0);
+  return maxSpellLevelFor(getSpellcastingProfile(character).casterProgression, getClassSpellLevel(character));
 }

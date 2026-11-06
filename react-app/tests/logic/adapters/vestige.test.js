@@ -35,7 +35,6 @@ test('Magical Cunning restores Divine Power only from Warlock level 6', () => {
   const context = (level) => ({
     character: { className: 'Warlock', level },
     resources: { vestige_power: 0 },
-    PACT_SLOTS: { [level]: { slots: 2, level: 2 } },
   });
 
   assert.deepEqual(sideEffect(context(5)).recoverResourceKeys, []);

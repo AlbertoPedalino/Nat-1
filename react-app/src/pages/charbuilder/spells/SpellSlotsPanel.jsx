@@ -35,7 +35,7 @@ export default function SpellSlotsPanel({ character }) {
         ))}
       </Grid>
       {slotData.pact ? (
-        <Chip sx={{ mt: 2 }} color="secondary" label={`Pact: ${slotData.pact.slots} slot(s), level ${slotData.pact.level}`} />
+        <Chip sx={{ mt: 2 }} color="secondary" label={`Pact: ${slotData.pact.count} slot(s), level ${slotData.pact.level}`} />
       ) : null}
     </BuilderPanel>
   );

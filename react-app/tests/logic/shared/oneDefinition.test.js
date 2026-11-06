@@ -405,3 +405,11 @@ test('spell attack and save DC are computed only by spellcastingNumbers', () => 
     allow: ['shared/character/spells/spellcastingNumbers.js'],
   }), []);
 });
+
+// Spell slots come from casterProgression.js (single class, multiclass table,
+// Pact Magic); the slot tables are read nowhere else.
+test('spell slot tables are read only by casterProgression.js', () => {
+  assert.deepEqual(sourceFilesMatching(/\b(FULL_SLOTS|HALF_SLOTS|THIRD_SLOTS|PACT_SLOTS)\b/, {
+    allow: ['shared/character/spells/spellTables.js', 'shared/character/spells/casterProgression.js'],
+  }), []);
+});

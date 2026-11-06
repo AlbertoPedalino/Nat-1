@@ -1,7 +1,7 @@
-import { FULL_SLOTS, HALF_SLOTS, PACT_SLOTS, THIRD_SLOTS } from '../../../shared/character/spells/spellTables.js';
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
 import { getClassSpellLimits } from '../../../shared/character/spells/spellProgression.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
+import { combinedSpellSlots, maxSpellLevelFor, normalizeCasterProgression } from '../../../shared/character/spells/casterProgression.js';
 
 // Spellcasting as the sheet sees it: the casting entities (primary class and
 // multiclasses), their spellcasting profile from the adapters, the slot table
@@ -23,51 +23,16 @@ export function getSpellLimits(C) {
 }
 
 export function getSheetSlots(C) {
-  const entities = getSpellEntities(C);
-  const casterEntities = entities
-    .map((entity) => ({ ...entity, profile: getSpellcastingProfile(entity) }))
-    .filter((entity) => hasSpellcastingProfile(entity.profile));
-  if (!casterEntities.length) return { regular: [], pact: null };
-
-  const pactEntity = casterEntities.find((entity) => normalizeProgression(entity.profile.casterProgression) === 'pact');
-  const pact = pactEntity ? pactSlots(clampLevel(pactEntity.level)) : null;
-
-  const regularEntities = casterEntities.filter((entity) => normalizeProgression(entity.profile.casterProgression) !== 'pact');
-  if (!regularEntities.length) return { regular: [], pact };
-
-  if (regularEntities.length === 1) {
-    const entity = regularEntities[0];
-    const level = clampLevel(entity.level);
-    const prog = normalizeProgression(entity.profile.casterProgression);
-    if (prog === 'full') return { regular: FULL_SLOTS[level] || [], pact };
-    if (prog === 'half') return { regular: HALF_SLOTS[level] || [], pact };
-    if (prog === 'third') return { regular: THIRD_SLOTS[level] || [], pact };
-    if (prog === 'artificer') return { regular: HALF_SLOTS[level] || [], pact };
-  }
-
-  const casterLevel = regularEntities.reduce((sum, entity) => (
-    sum + casterContribution(normalizeProgression(entity.profile.casterProgression), clampLevel(entity.level))
-  ), 0);
-  return { regular: casterLevel > 0 ? FULL_SLOTS[Math.min(20, casterLevel)] || [] : [], pact };
-}
-
-function getMaxCastableSpellLevel(slots) {
-  const regularMax = (slots?.regular || []).reduce((max, count, index) => (count ? index + 1 : max), 0);
-  return Math.max(regularMax, Number(slots?.pact?.level || 0));
+  return combinedSpellSlots(getSpellEntities(C)
+    .map((entity) => ({ entity, profile: getSpellcastingProfile(entity) }))
+    .filter(({ profile }) => hasSpellcastingProfile(profile))
+    .map(({ entity, profile }) => ({ progression: profile.casterProgression, level: entity.level })));
 }
 
 export function getMaxLearnableSpellLevel(C) {
-  return getSpellEntities(C).reduce((max, entity) => {
-    const profile = getSpellcastingProfile(entity);
-    const level = clampLevel(entity.level);
-    const prog = normalizeProgression(profile.casterProgression);
-    if (prog === 'pact') return Math.max(max, Number(pactSlots(level).level || 0));
-    if (prog === 'full') return Math.max(max, getMaxCastableSpellLevel({ regular: FULL_SLOTS[level] || [] }));
-    if (prog === 'half') return Math.max(max, getMaxCastableSpellLevel({ regular: HALF_SLOTS[level] || [] }));
-    if (prog === 'third') return Math.max(max, getMaxCastableSpellLevel({ regular: THIRD_SLOTS[level] || [] }));
-    if (prog === 'artificer') return Math.max(max, getMaxCastableSpellLevel({ regular: HALF_SLOTS[level] || [] }));
-    return max;
-  }, 0);
+  return getSpellEntities(C).reduce((max, entity) => (
+    Math.max(max, maxSpellLevelFor(getSpellcastingProfile(entity).casterProgression, entity.level))
+  ), 0);
 }
 
 export function canManageSpells(C, limits) {
@@ -117,7 +82,7 @@ export function getSpellcastingProfile(entity) {
 
 export function hasSpellcastingProfile(profile) {
   return Boolean(
-    normalizeProgression(profile?.casterProgression)
+    normalizeCasterProgression(profile?.casterProgression)
     || profile?.cantripKnown
     || profile?.cantripProgression
     || profile?.spellsKnown
@@ -136,34 +101,6 @@ function clampLevel(level) {
   return Math.max(1, Math.min(20, Number(level || 1)));
 }
 
-function casterContribution(prog, level) {
-  if (prog === 'full') return level;
-  if (prog === 'half') return Math.floor(level / 2);
-  if (prog === 'artificer') return Math.ceil(level / 2);
-  if (prog === 'third') return Math.floor(level / 3);
-  return 0;
-}
-
-function pactSlots(level) {
-  const row = PACT_SLOTS[Math.min(level, 20)] || {};
-  return { count: row.slots || row.n || 0, level: row.level || row.l || 1 };
-}
-
-export function normalizeProgression(value) {
-  const v = String(value || '').toLowerCase();
-  if (v === '1/2') return 'half';
-  if (v === '1/3') return 'third';
-  return v;
-}
-
 export function getMaxLearnableSpellLevelForEntity(entity) {
-  const profile = getSpellcastingProfile(entity);
-  const level = clampLevel(entity?.level);
-  const prog = normalizeProgression(profile.casterProgression);
-  if (prog === 'pact') return Math.max(0, Number(pactSlots(level).level || 0));
-  if (prog === 'full') return getMaxCastableSpellLevel({ regular: FULL_SLOTS[level] || [] });
-  if (prog === 'half') return getMaxCastableSpellLevel({ regular: HALF_SLOTS[level] || [] });
-  if (prog === 'third') return getMaxCastableSpellLevel({ regular: THIRD_SLOTS[level] || [] });
-  if (prog === 'artificer') return getMaxCastableSpellLevel({ regular: HALF_SLOTS[level] || [] });
-  return 0;
+  return maxSpellLevelFor(getSpellcastingProfile(entity).casterProgression, entity?.level);
 }

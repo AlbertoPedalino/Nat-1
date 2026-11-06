@@ -19,6 +19,6 @@ describe('getSpellSlots', () => {
     const character = { className: 'Paladin', classLevel: 3, level: 5, extraClasses: [extra('Warlock', 2)] };
     const result = getSpellSlots(character);
     expect(result.slots[0]).toBe(3);
-    expect(result.pact).toMatchObject({ level: 1, slots: 2 });
+    expect(result.pact).toMatchObject({ level: 1, count: 2 });
   });
 });

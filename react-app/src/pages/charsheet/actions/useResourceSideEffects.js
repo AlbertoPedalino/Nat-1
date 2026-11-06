@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { installedRegistry } from '../../../adapters/index.js';
-import { PACT_SLOTS, SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
+import { SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
 import { getSheetSlots } from '../spells/spellcasting.js';
 import {
   addCreatedSlot,
@@ -357,7 +357,7 @@ export function useResourceSideEffects({
         let result = null;
         try {
           const slots = getSheetSlots(C);
-          result = sideEffect({ character: C, C, sheet, resources: res, PACT_SLOTS, slots });
+          result = sideEffect({ character: C, C, sheet, resources: res, slots });
         } catch {
           result = null;
         }

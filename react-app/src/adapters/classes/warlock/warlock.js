@@ -13,6 +13,7 @@ import {
 import { entriesToPlainText } from '../../../shared/character/spells/spellEntries.js';
 import { matchKey, stripSource } from '../../../shared/content/nameKeys.js';
 import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
+import { pactSlots } from '../../../shared/character/spells/casterProgression.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -588,13 +589,10 @@ registerClassSheetResources("Warlock", [
 // Magical Cunning: recover ceil(max Pact Magic slots / 2), or all slots at Warlock 20.
 registerResourceSideEffect('magical_cunning', function (ctx = {}) {
   const C = ctx.character || ctx.C;
-  const slots = ctx.PACT_SLOTS || {};
   const wlv = Math.min(20, Math.max(0, _warlockLevel(C)));
   if (!wlv) return null;
 
-  const row = slots[wlv] || {};
-  const slotCount = Number(row.slots ?? row.n ?? 0);
-  const slotLevel = Number(row.level ?? row.l ?? 1);
+  const { count: slotCount, level: slotLevel } = pactSlots(wlv);
   if (!slotCount) return null;
 
   const recover = wlv >= 20 ? slotCount : Math.ceil(slotCount / 2);

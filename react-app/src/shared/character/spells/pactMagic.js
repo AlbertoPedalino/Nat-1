@@ -1,10 +1,5 @@
-import { PACT_SLOTS } from './spellTables.js';
 import { classLevel } from '../progression/classLevel.js';
-
-function getPactSlotsForLevel(level) {
-  const row = PACT_SLOTS[Math.min(level, 20)] || {};
-  return { count: row.slots || row.n || 0, level: row.level || row.l || 1 };
-}
+import { pactSlots } from './casterProgression.js';
 
 export function getWarlockLevel(C) {
   return classLevel(C, 'Warlock');
@@ -14,7 +9,7 @@ export function getPactMagicInfo(C) {
   if (!C) return null;
   const warlockLevel = getWarlockLevel(C);
   if (!warlockLevel) return null;
-  const pactData = getPactSlotsForLevel(warlockLevel);
+  const pactData = pactSlots(warlockLevel);
   if (!pactData || !pactData.count) return null;
   return {
     hasPactMagic: true,
