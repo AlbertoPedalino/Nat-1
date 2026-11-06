@@ -6,13 +6,7 @@
 import { normalizeConditions } from '../character/combat/conditions.js';
 import { normalizeEffects } from '../character/combat/combatEffects.js';
 import { normalizeDeathSaves } from '../character/combat/vitals.js';
-
-const HEX_COLOR_RE = /^#[0-9a-f]{6}$/i;
-
-export function normalizeIconColor(value) {
-  const color = typeof value === 'string' ? value.trim() : '';
-  return HEX_COLOR_RE.test(color) ? color.toLowerCase() : null;
-}
+import { normalizeHexColor } from '../ui/colors.js';
 
 export function toRosterEntry(row) {
   if (!row?.id) return null;
@@ -22,7 +16,7 @@ export function toRosterEntry(row) {
     name: sheet.name || row.name || 'Character',
     ownerId: row.owner || null,
     ownerUsername: row.owner_username || null,
-    color: normalizeIconColor(sheet.classIconColor),
+    color: normalizeHexColor(sheet.classIconColor),
     className: typeof sheet.className === 'string' ? sheet.className : null,
     deathSaves: normalizeDeathSaves(sheet.deathSaves),
     // The portrait belongs to the sheet, exactly as hit points and conditions

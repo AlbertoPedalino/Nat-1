@@ -296,3 +296,11 @@ test('total and multiclass levels and Hit Die faces have one definition', () => 
     allow: ['shared/character/progression/classLevel.js', 'shared/character/combat/hp.js', 'adapters/adapterPipeline.js'],
   }), []);
 });
+
+// A saved colour is checked by normalizeHexColor (shared/ui/colors.js); seven
+// copies of the '#rrggbb' test had grown, three returning different fallbacks.
+test('saved colours are validated only by normalizeHexColor', () => {
+  assert.deepEqual(sourceFilesMatching(/\^#\[0-9a-f\]\{6\}\$/i, {
+    allow: ['shared/ui/colors.js'],
+  }), []);
+});

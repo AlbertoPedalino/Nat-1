@@ -2,18 +2,12 @@ import { summarizeCharacter } from '../../../shared/campaign/sheetSummary.js';
 import { combatantToSheetPatch, resolveCombatVitals } from '../../../shared/encounter/sheetSync.js';
 import { clampInt } from '../../../shared/numbers.js';
 import { totalLevel } from '../../../shared/character/progression/classLevel.js';
+import { normalizeHexColor } from '../../../shared/ui/colors.js';
 
 // Maps a stored campaign character row into the player shape the encounter
 // builder imports. Kept out of `useCampaignPlayers` — which must import the
 // adapter barrel for its loaders, and so cannot be loaded by a test runner —
 // so this mapping stays covered.
-
-const HEX_COLOR_RE = /^#[0-9a-f]{6}$/i;
-
-export function normalizeIconColor(value) {
-  const color = typeof value === 'string' ? value.trim() : '';
-  return HEX_COLOR_RE.test(color) ? color.toLowerCase() : null;
-}
 
 export function characterClassNames(character) {
   return [
@@ -43,7 +37,7 @@ export function toEncounterPlayer(row, campaign) {
     hpMax: clampInt(hpMax, 1, 999, 10),
     ...combatantToSheetPatch(vitals),
     initMod: clampInt(summary.initiative, -20, 30, 0),
-    iconColor: normalizeIconColor(sheet.classIconColor),
+    iconColor: normalizeHexColor(sheet.classIconColor),
     // The face the sheet chose. A path, not a picture: the bytes are in the
     // bucket and every screen that shows this character reads the same one.
     portraitPath: typeof sheet.portraitPath === 'string' ? sheet.portraitPath : null,

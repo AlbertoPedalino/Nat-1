@@ -44,6 +44,7 @@ import { SYNCED_VITALS, pickCharacterVitals } from '../../../shared/character/co
 import { absorbMonsterVitals } from '../../../shared/vtt/tokens/fightVitals.js';
 import { dedupeFightsByEncounter, dedupeLibraryById } from '../../../shared/encounter/library.js';
 import { clampInt } from '../../../shared/numbers.js';
+import { normalizeHexColor } from '../../../shared/ui/colors.js';
 
 export const DEFAULT_PARTY = Object.freeze({ count: 4, level: 5 });
 
@@ -572,8 +573,8 @@ function normalizePlayer(player, index) {
     initMod: clampInt(player.initMod, -20, 30, 0),
     ac: clampInt(player.ac, 1, 99, 10),
     hpMax,
-    color: sanitizePlayerColor(player.color) || sanitizePlayerColor(player.iconColor) || PLAYER_COLORS[index % PLAYER_COLORS.length],
-    iconColor: sanitizePlayerColor(player.iconColor) || null,
+    color: normalizeHexColor(player.color, '') || normalizeHexColor(player.iconColor, '') || PLAYER_COLORS[index % PLAYER_COLORS.length],
+    iconColor: normalizeHexColor(player.iconColor, '') || null,
   };
   // Only clamp what the player actually carries: a party member typed straight
   // into the encounter has no current HP and must not be given one.
@@ -582,11 +583,6 @@ function normalizePlayer(player, index) {
     normalized[field.data] = vitals[field.data];
   }
   return normalized;
-}
-
-function sanitizePlayerColor(value) {
-  const color = String(value || '').trim();
-  return /^#[0-9a-f]{6}$/i.test(color) ? color.toLowerCase() : '';
 }
 
 function isDefaultPlaceholderParty(players) {

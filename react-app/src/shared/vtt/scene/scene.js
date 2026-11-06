@@ -11,6 +11,7 @@ import { normalizeImageAtmospheres } from './atmosphere.js';
 import { normalizeImageFilters } from './imageFilters.js';
 import { clamp } from '../../numbers.js';
 import { numberOr } from '../../numbers.js';
+import { normalizeHexColor } from '../../ui/colors.js';
 
 export const LAYERS = Object.freeze(['map', 'tokens', 'gm']);
 export const DEFAULT_GRID = Object.freeze({
@@ -26,7 +27,6 @@ const MAX_CELL = 512;
 const MIN_GRID_LINE = 0.5;
 const MAX_GRID_LINE = 6;
 const MAX_SPAN = 40;
-const HEX_COLOR_RE = /^#[0-9a-f]{6}$/i;
 
 // Columns a client is allowed to write on a token. The GM layer and the
 // character link are deliberately absent: RLS rejects a player who touches
@@ -59,7 +59,7 @@ export function normalizeGrid(grid) {
     // How the lines are drawn. A printed battlemap already has squares on it and
     // a dark ink over a dark cave is unreadable, so the pair travels with the
     // scene rather than being one look for every map anyone uploads.
-    color: HEX_COLOR_RE.test(source.color) ? String(source.color).toLowerCase() : DEFAULT_GRID.color,
+    color: normalizeHexColor(source.color, DEFAULT_GRID.color),
     lineWidth: normalizeGridLineWidth(source.lineWidth),
     // Squares or hexes. Token x/y mean cell col/row on one and axial q/r on the
     // other, so this single key decides how every stored coordinate is read —
@@ -68,9 +68,7 @@ export function normalizeGrid(grid) {
     // What a hex the party has walked is tinted with. On the scene rather than
     // in the GM's browser, because the players and the projector are looking at
     // the same country and it cannot be green on one screen and blue on another.
-    hexColor: HEX_COLOR_RE.test(source.hexColor)
-      ? String(source.hexColor).toLowerCase()
-      : DEFAULT_GRID.hexColor,
+    hexColor: normalizeHexColor(source.hexColor, DEFAULT_GRID.hexColor),
     // Which scale the ruler answers in, and how far one cell is on the
     // wilderness one. The two are kept apart so switching back to feet does not
     // throw away the miles this map was set up with.
@@ -101,7 +99,7 @@ export function normalizeGridLineWidth(value) {
 // The grid is a hint over the picture, never a lid on it: whatever colour it is
 // given, it is drawn at a quarter strength so the map underneath keeps reading.
 export function gridLineColor(grid) {
-  const color = HEX_COLOR_RE.test(grid?.color) ? String(grid.color).toLowerCase() : DEFAULT_GRID.color;
+  const color = normalizeHexColor(grid?.color, DEFAULT_GRID.color);
   return `${color}40`;
 }
 
@@ -148,11 +146,6 @@ export function isTokenVisibleToPlayers(token, playArea) {
 
 export function normalizeLayer(layer) {
   return LAYERS.includes(layer) ? layer : 'tokens';
-}
-
-export function normalizeColor(value) {
-  const color = typeof value === 'string' ? value.trim() : '';
-  return HEX_COLOR_RE.test(color) ? color.toLowerCase() : null;
 }
 
 export function sanitizeName(value, fallback = 'Scene') {
@@ -298,7 +291,7 @@ export function toToken(row) {
     z: Math.round(numberOr(row.z, 0)),
     characterId: row.character_id || null,
     label: typeof row.label === 'string' ? row.label : '',
-    color: normalizeColor(row.color),
+    color: normalizeHexColor(row.color),
     imagePath: row.image_path || null,
     imageUrl: row.image_url || null,
     // A Lucide catalog key, never an SVG or image payload.
@@ -337,7 +330,7 @@ export function toTokenPatch(patch) {
     if (!Object.prototype.hasOwnProperty.call(source, key)) continue;
     if (key === 'conditions') row.conditions = normalizeConditions(source.conditions);
     else if (key === 'effects') row.effects = normalizeEffects(source.effects);
-    else if (key === 'color') row.color = normalizeColor(source.color);
+    else if (key === 'color') row.color = normalizeHexColor(source.color);
     else if (key === 'label') row.label = String(source.label ?? '').slice(0, 60);
     else if (key === 'image_path') row.image_path = source.image_path || null;
     else if (key === 'image_url') row.image_url = source.image_url || null;

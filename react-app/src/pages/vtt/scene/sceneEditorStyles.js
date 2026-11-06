@@ -1,6 +1,7 @@
 import { battleMapSurfaceSx } from '../map/battleMapSurface.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { SHEET_SIDE_BY_SIDE_QUERY } from '../../../shared/vtt/sheets/sheetLayout.js';
+import { normalizeHexColor } from '../../../shared/ui/colors.js';
 
 export const sceneTopbarSx = {
   ...battleMapSurfaceSx,
@@ -203,6 +204,6 @@ export const sheetLoadingSx = {
 
 // Half-transparent version of a stroke colour, for the layers not being edited.
 export function fade(color) {
-  const hex = typeof color === 'string' && /^#[0-9a-f]{6}$/i.test(color) ? color : VTT_COLORS.gold;
+  const hex = normalizeHexColor(color, VTT_COLORS.gold);
   return `${hex}55`;
 }

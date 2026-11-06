@@ -1,5 +1,6 @@
 import { parseFormula } from './dice.js';
-import { UI_COLORS } from '../../ui/colors.js';
+import { UI_COLORS, normalizeHexColor } from '../../ui/colors.js';
+import { COMBAT_LABEL_SHAPES } from '../../encounter/combatLabels.js';
 
 // The result and the roller have separate meanings: critical d20 outcomes
 // colour the result; the character icon/monster marker colours the author.
@@ -25,10 +26,9 @@ export function rollLogDieColor(die) {
 }
 
 export function normalizeRollIdentity(entry) {
-  const color = typeof entry?.actorColor === 'string' ? entry.actorColor.trim() : '';
   return {
-    actorColor: /^#[0-9a-f]{6}$/i.test(color) ? color.toLowerCase() : null,
-    actorShape: ['■', '●', '⬟', '⬢', '▲', '◆', '★', '◉', '▼', '◈'].includes(entry?.actorShape) ? entry.actorShape : null,
+    actorColor: normalizeHexColor(entry?.actorColor),
+    actorShape: COMBAT_LABEL_SHAPES.includes(entry?.actorShape) ? entry.actorShape : null,
     actorLabel: typeof entry?.actorLabel === 'string' ? entry.actorLabel.slice(0, 3) : '',
   };
 }

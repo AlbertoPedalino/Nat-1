@@ -95,3 +95,10 @@ export function uiAlpha(hex, alpha) {
   const b = parseInt(value.slice(4, 6), 16);
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
+
+// A colour someone saved (a scene grid, a player, a class icon) as '#rrggbb'
+// in lowercase, or `fallback` when it is not one.
+export function normalizeHexColor(value, fallback = null) {
+  const color = typeof value === 'string' ? value.trim() : '';
+  return /^#[0-9a-f]{6}$/i.test(color) ? color.toLowerCase() : fallback;
+}

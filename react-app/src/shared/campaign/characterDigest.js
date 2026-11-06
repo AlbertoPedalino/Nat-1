@@ -12,7 +12,7 @@
 import { normalizeConditions } from '../character/combat/conditions.js';
 import { normalizeEffects } from '../character/combat/combatEffects.js';
 import { normalizeDeathSaves, pickCharacterVitals } from '../character/combat/vitals.js';
-import { normalizeIconColor } from './roster.js';
+import { normalizeHexColor } from '../ui/colors.js';
 
 function numberOrNull(value) {
   const parsed = Number(value);
@@ -31,7 +31,7 @@ function fromFields(fields, meta) {
     name: String(fields.name || 'Character'),
     ownerUsername: fields.ownerUsername || null,
     className: typeof fields.className === 'string' ? fields.className : null,
-    classIconColor: normalizeIconColor(fields.classIconColor),
+    classIconColor: normalizeHexColor(fields.classIconColor),
     portraitPath: typeof fields.portraitPath === 'string' ? fields.portraitPath : null,
     currentHP: numberOrNull(fields.currentHP),
     tempHP: numberOrNull(fields.tempHP),
