@@ -1,7 +1,8 @@
 import { Chip, Grid, MenuItem, Select, Stack, TextField, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { HeartPulse } from 'lucide-react';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
-import { getPrimaryClassLevel, getProficiencyBonus } from './calculations.js';
+import { getPrimaryClassLevel } from './calculations.js';
+import { getProficiencyBonus } from '../../../shared/character/progression/proficiency.js';
 import { computeMaxHp } from '../../../shared/character/combat/hp.js';
 
 export default function LevelPanel({ character, dispatch }) {
@@ -39,7 +40,7 @@ export default function LevelPanel({ character, dispatch }) {
       icon={HeartPulse}
       note={isExtra
         ? `Class Lv ${currentLevel} (max ${maxLv}) - Total Lv ${character.level} - Hit Die ${faces}`
-        : `Class Lv ${currentLevel} - Total Lv ${character.level} - HP ${hp || '-'} - PB +${getProficiencyBonus(character.level)} - Hit Die ${faces}`}
+        : `Class Lv ${currentLevel} - Total Lv ${character.level} - HP ${hp || '-'} - PB +${getProficiencyBonus(character)} - Hit Die ${faces}`}
     >
       <Grid container spacing={1.5} alignItems="center">
         <Grid size={{ xs: 12, md: 4 }} sx={{ display: { xs: 'block', md: 'none' } }}>

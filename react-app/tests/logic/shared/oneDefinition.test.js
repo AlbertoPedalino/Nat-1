@@ -6,7 +6,7 @@ import { sourceFilesMatching, sourceLinesMatching } from '../sourceScan.js';
 // inline proficiency bonus, for one, missed the bonus magic items grant.
 
 test('the proficiency bonus is read only through getProficiencyBonus', () => {
-  assert.deepEqual(sourceFilesMatching(/\/\s*4\s*\)\s*\+\s*2\b/, {
+  assert.deepEqual(sourceFilesMatching(/\/\s*4\s*\)\s*\+\s*2\b|\[\s*null\s*,\s*2\s*,\s*2\s*,\s*2\s*,\s*2\s*,\s*3\b/, {
     allow: ['shared/character/progression/proficiency.js'],
   }), []);
 });

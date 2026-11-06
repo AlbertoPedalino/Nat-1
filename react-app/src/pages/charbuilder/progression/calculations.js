@@ -3,7 +3,6 @@ import {
   HALF_SLOTS,
   PACT_SLOTS,
   PB_COST,
-  PROFICIENCY_BONUS,
   STATS,
   THIRD_SLOTS,
 } from '../constants.js';
@@ -82,10 +81,6 @@ export function getSpellSlots(character) {
   }
   const casterLevel = regular.reduce((sum, entry) => sum + getCasterContribution(entry.progression, entry.level), 0);
   return { slots: casterLevel > 0 ? FULL_SLOTS[Math.min(20, casterLevel)] || [] : [], pact };
-}
-
-export function getProficiencyBonus(level) {
-  return PROFICIENCY_BONUS[level] || 2;
 }
 
 // Re-exported from the shared canonical accessor so the builder and sheet share
