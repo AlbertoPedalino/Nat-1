@@ -1,10 +1,11 @@
 import { createAdapterBindings } from '../adapterBindings.js';
 import { resolveScalingFormula } from '../../shared/character/dice/scalingFormula.js';
+import { withModifier } from '../../shared/ui/numberFormat.js';
 
 // The bite deals 1d4 + CON Piercing instead of the Unarmed Strike's damage.
 function biteDamageFormula(character) {
   const con = resolveScalingFormula('abilityMod:con', character) ?? 0;
-  return con ? `1d4${con > 0 ? '+' : ''}${con}` : '1d4';
+  return withModifier('1d4', con);
 }
 
 export default function install(registry, context = {}) {

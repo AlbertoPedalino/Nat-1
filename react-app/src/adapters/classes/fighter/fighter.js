@@ -1,4 +1,5 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
+import { withModifier } from '../../../shared/ui/numberFormat.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -53,7 +54,7 @@ registerClassSheetActions("Fighter", [
     resKey: 'second_wind',
     rollers: [{ kind: 'heal', formula: ({ ownerLevel }) => {
       const lvNum = Number(ownerLevel || 1);
-      return `1d10${lvNum >= 0 ? '+' : ''}${lvNum}`;
+      return withModifier('1d10', lvNum);
     } }],
     rollLabelPrefix: 'Heal'
   },

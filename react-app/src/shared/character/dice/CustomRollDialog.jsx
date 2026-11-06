@@ -3,6 +3,7 @@ import { Box, Button, Typography } from '@mui/material';
 import { Dices } from 'lucide-react';
 import { DICE_LIMITS } from './dice.js';
 import SheetDialog from '../../ui/SheetDialog.jsx';
+import { signed, withModifier } from '../../ui/numberFormat.js';
 
 // Shared custom-roll dialog: a dice-count picker (d4…d100) plus a flat modifier
 // that builds a formula string. It does NOT roll or show results itself — the
@@ -40,10 +41,10 @@ export default function CustomRollDialog({ open, onClose, onRoll, ...dialogProps
     });
   };
 
-  const formula = DICE_TYPES
+  const formula = withModifier(DICE_TYPES
     .filter((d) => counts[d] > 0)
     .map((d) => `${counts[d]}d${d}`)
-    .join('+') + (modifier !== 0 ? (modifier > 0 ? `+${modifier}` : `${modifier}`) : '');
+    .join('+'), modifier);
 
   const hasSelection = DICE_TYPES.some((d) => counts[d] > 0);
   const totalDice = Object.values(counts).reduce((sum, count) => sum + count, 0);
@@ -92,7 +93,7 @@ export default function CustomRollDialog({ open, onClose, onRoll, ...dialogProps
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, py: 0.8 }}>
         <Typography sx={CUSTOM_ROLL_SX.modLabel}>Modifier</Typography>
         <Button size="small" variant="outlined" onClick={() => setModifier((m) => m - 1)} sx={CUSTOM_ROLL_SX.stepBtn}>−</Button>
-        <Typography sx={CUSTOM_ROLL_SX.countLabel}>{modifier >= 0 ? `+${modifier}` : modifier}</Typography>
+        <Typography sx={CUSTOM_ROLL_SX.countLabel}>{signed(modifier)}</Typography>
         <Button size="small" variant="outlined" onClick={() => setModifier((m) => m + 1)} sx={CUSTOM_ROLL_SX.stepBtn}>+</Button>
       </Box>
       {hasSelection && (

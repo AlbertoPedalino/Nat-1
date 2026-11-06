@@ -1,3 +1,4 @@
+import { withModifier } from '../../../shared/ui/numberFormat.js';
 
 // Dice formulas of spell rows: upcast steps, scaled formulas, cantrip damage
 // by character level, the damage dice found in a spell's text, and signed
@@ -10,9 +11,7 @@ function parseDice(formula) {
 }
 
 function formatDice(count, faces, mod) {
-  let s = `${count}d${faces}`;
-  if (mod) s += `${mod > 0 ? '+' : ''}${mod}`;
-  return s;
+  return withModifier(`${count}d${faces}`, mod);
 }
 
 export function computeScaledFormula(baseFormula, stepFormula, steps) {
@@ -80,6 +79,3 @@ export function extractDamageDice(entries) {
   return out;
 }
 
-export function formatBonus(value) {
-  return value >= 0 ? `+${value}` : String(value);
-}

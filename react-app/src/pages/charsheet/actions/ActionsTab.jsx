@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Box, Button, Chip, Typography } from '@mui/material';
-import { getMod, getFinal, fbonus } from '../state/calculations.js';
+import { getMod, getFinal } from '../state/calculations.js';
 import { describeAttackRoll } from '../../../shared/character/combat/conditions.js';
 import { loadCoreAdapters, loadClassAdapters } from '../../../adapters/index.js';
 import { ToggleButton, ToggleButtonGroup } from '@mui/material';
@@ -52,6 +52,7 @@ import { ItemPropertyTable } from '../../../shared/character/inventory/ItemPrope
 import { formatRollTitle } from '../../../shared/character/dice/dice.js';
 import RollerButtons from '../../../shared/character/dice/RollerButtons.jsx';
 import { CHIP_TONES, chipToneStyle } from '../../../shared/ui/entityColors.js';
+import { signed } from '../../../shared/ui/numberFormat.js';
 
 const _danglingResKeyWarned = typeof Set === 'function' ? new Set() : null;
 function warnDanglingResKey(action, resMaxMap) {
@@ -215,7 +216,7 @@ export default function ActionsTab({ C, sheet, resources }) {
             <Box component="tbody">
               {attacks.map((item, i) => {
                 const prof = getMod(getFinal(C, 'str')) > getMod(getFinal(C, 'dex')) ? getMod(getFinal(C, 'str')) : getMod(getFinal(C, 'dex'));
-                const hitBonus = fbonus(prof);
+                const hitBonus = signed(prof);
                 return (
                   <Box component="tr" key={i} sx={{ '& td': { p: '6px 6px', borderBottom: 1, borderColor: 'divider', color: 'text.secondary' }, '&:hover td': { bgcolor: 'rgba(35,32,26,1)' } }}>
                     <Box component="td"><Typography sx={{ color: 'text.primary', fontWeight: 600 }}>{item.name}</Typography></Box>

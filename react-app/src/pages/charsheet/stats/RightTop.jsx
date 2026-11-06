@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Box, Typography, Tooltip } from '@mui/material';
 import { Sparkles } from 'lucide-react';
-import { getInitiative, getPB, fbonus } from '../state/calculations.js';
+import { getInitiative, getPB } from '../state/calculations.js';
 import { getConditionsWithEffect } from '../../../shared/character/combat/conditions.js';
 import { getArmorTrainingInfo } from '../proficiency/proficiencies.js';
 import {
@@ -27,6 +27,7 @@ import RemindersBlock from './RemindersBlock.jsx';
 import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
 import { rollD20 } from '../../../shared/character/dice/dice.js';
 import DefensesPanel from './DefensesPanel.jsx';
+import { signed } from '../../../shared/ui/numberFormat.js';
 
 export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearConditions, effectActions, onSetExhaustion, conditionEntries, onToggleInspiration, resources, setResources, onShowToast }) {
   // Initiative is a DEX check (D20 Test) but rolls its own d20 here (it also fires
@@ -51,7 +52,7 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
     const total = roll.total;
     setLastInitiativeRoll({ d20, mod: initMod, total });
 
-    const bonusText = initMod >= 0 ? `+${initMod}` : `${initMod}`;
+    const bonusText = signed(initMod);
     const advText = initMode === 'adv' ? ' (Adv)' : initMode === 'disadv' ? ' (Dis)' : '';
     const recoveryParts = [];
 
@@ -102,7 +103,7 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
               onPick={rollInitiative}
               onClick={() => rollInitiative(initAdvArg)}
             >
-              <SquareStat value={initMod >= 0 ? `+${initMod}` : initMod} label="Initiative" clickable />
+              <SquareStat value={signed(initMod)} label="Initiative" clickable />
             </RollModeArea>
           </Tooltip>
           {initHasAdv && (() => {
@@ -126,7 +127,7 @@ export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearC
             </Typography>
           )}
         </Box>
-        <SquareStat value={fbonus(getPB(C))} label="Prof. Bonus" />
+        <SquareStat value={signed(getPB(C))} label="Prof. Bonus" />
         <InspirationBlock sheet={sheet} onToggle={onToggleInspiration} />
         <DefensesBlock C={C} activeConditions={sheet?.activeConditions || []} />
       </Box>

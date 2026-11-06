@@ -1,4 +1,5 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
+import { withModifier } from '../../../shared/ui/numberFormat.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -89,7 +90,7 @@ registerClassSheetActions("Monk", [
         ? Number(getMod(getFinal(character, 'dex')) || 0)
         : 0;
       const total = dex + lv;
-      return `1d10${total >= 0 ? '+' : ''}${total}`;
+      return withModifier('1d10', total);
     }, label: ({ formula }) => `${String(formula || '')} reduce`, title: 'Reduction' }],
     rollLabelPrefix: 'Deflect Attacks'
   },

@@ -1,10 +1,11 @@
 import { Box, Typography, Tooltip } from '@mui/material';
 import { getEquippedArmorPenalties } from '../inventory/armorPenalties.js';
-import { STATS, SLBL, FULL_LBL, getFinal, getMod, fbonus, effectiveD20Modifier } from '../state/calculations.js';
+import { STATS, SLBL, FULL_LBL, getFinal, getMod, effectiveD20Modifier } from '../state/calculations.js';
 import { describeCheckDisadvantage } from '../../../shared/character/combat/conditions.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import { advantageVisual, conditionalDisadvantageVisual } from './advantageMark.jsx';
 import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
+import { signed } from '../../../shared/ui/numberFormat.js';
 
 export default function AbilityScores({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
@@ -53,7 +54,7 @@ export default function AbilityScores({ C, sheet, onRoll }) {
                 {SLBL[s]}
               </Typography>
               <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '1.5rem', fontWeight: 700, color: '#edd48a', lineHeight: 1 }}>
-                {fbonus(shownMod)}
+                {signed(shownMod)}
               </Typography>
               <Box sx={{
                 fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.56rem', fontWeight: 600, color: 'text.secondary',

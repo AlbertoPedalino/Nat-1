@@ -16,12 +16,10 @@ import {
 import { Plus, X } from 'lucide-react';
 import { getLegendaryGroup } from './bestiary.js';
 import {
-  abilityModString,
   crPB,
   crXP,
   formatAlignment,
   formatDamageList,
-  formatMod,
   formatNumber,
   formatSpeed,
   getAC,
@@ -44,6 +42,8 @@ import { advArgFor } from '../../../shared/character/dice/advantage.js';
 import { creatureRollSources } from '../../../shared/character/combat/rollSources.js';
 import { StatRollContext, advTag, d20RollKind } from './statRolls.js';
 import RollText from './RollText.jsx';
+import { signed } from '../../../shared/ui/numberFormat.js';
+import { abilityModifier } from '../../../shared/character/progression/abilityModifier.js';
 
 const ABILITIES = [
   ['str', 'STR'],
@@ -238,7 +238,7 @@ export function StatBlockSheet({ monster, legendaryGroups, conditions = null, on
         <Prop label="Speed">{formatSpeed(monster.speed)}</Prop>
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(6,minmax(0,1fr))', gap: 1 }}>
           {ABILITIES.map(([key, label]) => {
-            const mod = abilityModString(monster[key]);
+            const mod = signed(abilityModifier(monster[key]));
             const type = `${label} Check`;
             const sources = sourcesFor(type);
             return (
@@ -269,7 +269,7 @@ export function StatBlockSheet({ monster, legendaryGroups, conditions = null, on
         <OptionalProp label="Senses" value={[...(monster.senses || []), monster.passive != null ? `passive Perception ${monster.passive}` : ''].filter(Boolean).join(', ')} />
         <Prop label="Languages">{Array.isArray(monster.languages) ? monster.languages.join(', ') : monster.languages || '—'}</Prop>
         <Prop label="Challenge">{cr} ({formatNumber(crXP(cr))} XP)</Prop>
-        <Prop label="Proficiency Bonus">{monster.pbNote || formatMod(crPB(cr))}</Prop>
+        <Prop label="Proficiency Bonus">{monster.pbNote || signed(crPB(cr))}</Prop>
         <Divider />
         <Section title="Traits" entries={monster.trait} extra={spellcasting.trait} onRoll={handleRoll} />
         <Section title="Actions" entries={monster.action} extra={spellcasting.action} onRoll={handleRoll} />
@@ -318,7 +318,7 @@ function renderRollMap(value, suffix, onRoll) {
     return (
       <Box component="span" key={key}>
         {index ? ', ' : null}
-        <RollText notation={mod} type={type} onRoll={onRoll}>{label} {formatMod(mod)}</RollText>
+        <RollText notation={mod} type={type} onRoll={onRoll}>{label} {signed(mod)}</RollText>
       </Box>
     );
   });

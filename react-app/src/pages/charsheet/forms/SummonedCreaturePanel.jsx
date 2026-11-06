@@ -32,6 +32,7 @@ import {
   panelSx,
   subSx,
 } from './BeastStatBlock.jsx';
+import { signed } from '../../../shared/ui/numberFormat.js';
 
 function capitalize(value) {
   const text = String(value || 'Creature');
@@ -208,7 +209,7 @@ export default function SummonedCreaturePanel({
         {config.levelClass
           ? `Scaled for ${config.levelClass} level ${resolvedClassLevel}.`
           : `Scaled for a level ${resolvedSpellLevel} spell slot.`}
-        {' '}Attack {resolvedAttack >= 0 ? '+' : ''}{resolvedAttack}; save DC {resolvedDc}.
+        {' '}Attack {signed(resolvedAttack)}; save DC {resolvedDc}.
       </Typography>
     </Box>
   );

@@ -103,10 +103,6 @@ export const getMod = abilityModifier;
 
 export const getPB = getProficiencyBonus;
 
-export function fmod(v) { const m = getMod(v); return (m >= 0 ? '+' : '') + m; }
-
-export function fbonus(n) { return (n >= 0 ? '+' : '') + n; }
-
 // Whether YOUR class grants a save proficiency for `stat` (your own, computed
 // with your Proficiency Bonus). Wild Shape keeps these (RAW 2024).
 function hasOwnSaveProficiency(C, stat) {

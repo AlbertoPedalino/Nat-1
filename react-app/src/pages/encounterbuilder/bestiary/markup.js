@@ -1,4 +1,5 @@
 import { spell5eUrl } from './monsterUtils.js';
+import { signed } from '../../../shared/ui/numberFormat.js';
 
 const ABILITY_NAMES = {
   str: 'Strength',
@@ -53,12 +54,12 @@ function tagToTokens(rawTag) {
   if (lower === 'acttrigger') return [styleToken('italic', 'Trigger:')];
   if (lower === 'actresponse') return [styleToken('italic', 'Response:')];
   if (lower === 'hit') {
-    const notation = Number(arg) >= 0 ? `+${arg}` : arg;
+    const notation = signed(arg);
     return [rollToken(notation, 'Attack Roll', notation)];
   }
   if (lower === 'damage') return [rollToken(arg, 'Damage', arg)];
   if (lower === 'd20') {
-    const notation = Number(arg) >= 0 ? `+${arg}` : arg;
+    const notation = signed(arg);
     return [rollToken(notation, 'D20 Roll', notation)];
   }
   if (lower === 'spell') {

@@ -17,6 +17,12 @@ test('the ability modifier is computed only in abilityModifier.js', () => {
   }), []);
 });
 
+test('a signed modifier is written only by numberFormat.js', () => {
+  assert.deepEqual(sourceFilesMatching(/>=?\s*0\s*\?\s*(['"]\+['"]\s*:\s*['"]['"]|`\+\$\{)/, {
+    allow: ['shared/ui/numberFormat.js'],
+  }), []);
+});
+
 test('every realtime channel opens through openRealtimeChannel', () => {
   assert.deepEqual(sourceFilesMatching(/\.(channel|removeChannel)\(/, {
     allow: ['shared/cloud/realtimeChannel.js'],

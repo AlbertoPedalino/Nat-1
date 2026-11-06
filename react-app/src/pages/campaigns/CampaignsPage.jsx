@@ -14,6 +14,7 @@ import { listMyCharacters } from '../../shared/cloud/api/cloudCharacters.js';
 import { summarizeCharacter } from './sheetSummary.js';
 import { resolveCampaignsPageState } from './campaignsPageState.js';
 import { ensureSheetRuntimeAdapters } from '../charsheet/state/sheetRuntimeAdapters.js';
+import { signed } from '../../shared/ui/numberFormat.js';
 
 export default function CampaignsPage() {
   const { cloudEnabled, status, user, isGm } = useAuth();
@@ -237,7 +238,7 @@ export default function CampaignsPage() {
                                       <Box component="span" sx={statSx}>HP <Box component="b" sx={hpStatSx}>{s.currentHP}</Box>/{s.maxHP}</Box>
                                       <Box component="span" sx={statSx}>AC <Box component="b" sx={acStatSx}>{s.ac}</Box></Box>
                                       <Box component="span" sx={statSx}>PP <Box component="b" sx={ppStatSx}>{s.passivePerception}</Box></Box>
-                                      <Box component="span" sx={statSx}>Init <Box component="b" sx={initStatSx}>{s.initiative >= 0 ? `+${s.initiative}` : s.initiative}</Box></Box>
+                                      <Box component="span" sx={statSx}>Init <Box component="b" sx={initStatSx}>{signed(s.initiative)}</Box></Box>
                                     </Box>
                                   ) : null}
                                 </Box>

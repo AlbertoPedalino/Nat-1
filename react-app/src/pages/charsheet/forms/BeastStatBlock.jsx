@@ -4,6 +4,7 @@ import { ChevronDown, ChevronRight, ExternalLink } from 'lucide-react';
 import { SKILLS, getMod } from '../state/calculations.js';
 import { beast5eToolsUrl, parseBeastActions, parseBeastActionsRich } from '../../../shared/character/forms/beasts.js';
 import { formatRollTitle } from '../../../shared/character/dice/dice.js';
+import { signed } from '../../../shared/ui/numberFormat.js';
 
 // Shared presentational layer for a normalized beast snapshot, used by both the
 // Wild Shape and Wild Companion sheet panels. Renders a compact Monster-Manual
@@ -12,8 +13,7 @@ import { formatRollTitle } from '../../../shared/character/dice/dice.js';
 
 const ABILITY_ORDER = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
 
-const fmtBonus = (n) => `${n >= 0 ? '+' : ''}${n}`;
-const fmtMod = (score) => fmtBonus(getMod(Number(score) || 10));
+const fmtMod = (score) => signed(getMod(Number(score) || 10));
 
 // letters-only beast skill key ("animalhandling") → display name ("Animal Handling").
 const SKILL_LABEL = Object.fromEntries(
@@ -71,13 +71,13 @@ export function BeastStatBlock({
     .map(([k, v]) => `${k} ${v} ft.`).join(', ');
   const saveItems = ABILITY_ORDER.filter((k) => b.saves?.[k] != null).map((k) => ({
     key: k,
-    text: `${k.toUpperCase()} ${fmtBonus(b.saves[k])}`,
+    text: `${k.toUpperCase()} ${signed(b.saves[k])}`,
     bonus: b.saves[k],
     rollLabel: formatRollTitle(b.name, `${k.toUpperCase()} Save`),
   }));
   const skillItems = Object.entries(b.skills || {}).map(([k, v]) => ({
     key: k,
-    text: `${SKILL_LABEL[k] || k} ${fmtBonus(v)}`,
+    text: `${SKILL_LABEL[k] || k} ${signed(v)}`,
     bonus: v,
     rollLabel: formatRollTitle(b.name, SKILL_LABEL[k] || k),
   }));
@@ -104,7 +104,7 @@ export function BeastStatBlock({
       ) : (
         <StatLine label={hpLabel} value={`${b.hp.average}${b.hp.formula ? ` (${b.hp.formula})` : ''}`} />
       )}
-      {tempHP > 0 ? <StatLine label="Temp HP" value={fmtBonus(tempHP)} accent /> : null}
+      {tempHP > 0 ? <StatLine label="Temp HP" value={signed(tempHP)} accent /> : null}
       {speed ? <StatLine label="Speed" value={speed} /> : null}
       <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2px 8px', my: 0.5, py: 0.5, borderTop: 1, borderBottom: 1, borderColor: 'divider' }}>
         {ABILITY_ORDER.map((k) => {

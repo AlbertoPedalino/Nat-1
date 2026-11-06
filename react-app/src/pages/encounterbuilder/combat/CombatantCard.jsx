@@ -9,6 +9,7 @@ import CombatantConditions from './CombatantConditions.jsx';
 import CombatantReminders from './CombatantReminders.jsx';
 import MonsterToken from '../bestiary/MonsterToken.jsx';
 import PortraitBadge from '../../../shared/character/profile/PortraitBadge.jsx';
+import { signed } from '../../../shared/ui/numberFormat.js';
 
 export default function CombatantCard({ combatant, active }) {
   const { dispatch } = useEncounterBuilder();
@@ -24,7 +25,7 @@ export default function CombatantCard({ combatant, active }) {
   const isDown = !isMonster && combatant.hpCurrent === 0 && Boolean(combatant.deathSaves);
   const tempHp = Number(combatant.tempHP) || 0;
   const maxHpBonus = Number(combatant.maxHPBonus) || 0;
-  const maxHpBonusText = `${maxHpBonus > 0 ? '+' : ''}${maxHpBonus}`;
+  const maxHpBonusText = signed(maxHpBonus);
 
   const openDetails = () => {
     if (combatant.monsterData) {

@@ -27,6 +27,7 @@ import {
 import { fullscreenContainer } from '../map/fullscreenContainer.js';
 import { coarsePointer, useMenuPlacement } from '../map/menuPlacement.js';
 import { battleMapDialogPaperSx } from '../map/battleMapSurface.js';
+import { signed } from '../../../shared/ui/numberFormat.js';
 
 // Right-click menu on the piece itself. Label, conditions and removal used to be
 // spread between a top-bar button and nothing at all; they belong on the thing
@@ -387,7 +388,7 @@ export default function TokenMenu({
                     title={`Maximum ${maxBonus > 0 ? 'raised' : 'lowered'} by ${Math.abs(maxBonus)}`}
                     sx={{ ...maxBonusSx, color: maxBonus > 0 ? 'success.main' : 'error.main' }}
                   >
-                    {maxBonus > 0 ? '+' : ''}{maxBonus}
+                    {signed(maxBonus)}
                   </Box>
                 ) : null}
               </Box>

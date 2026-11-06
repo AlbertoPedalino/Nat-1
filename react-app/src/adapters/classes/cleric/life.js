@@ -1,4 +1,5 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
+import { withModifier } from '../../../shared/ui/numberFormat.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -61,7 +62,7 @@ registerSubclassSheetSpellModifiers("Cleric_Life", [
     const faces = Number(m[2] || 0);
     const mod = Number(m[3] || 0) + 2 + castLevel;
     if (!Number.isFinite(count) || !Number.isFinite(faces) || count < 1 || faces < 1) return ctx?.formula;
-    return `${count}d${faces}${mod ? (mod > 0 ? "+" : "") + mod : ""}`;
+    return withModifier(`${count}d${faces}`, mod);
   }
 ]);
 

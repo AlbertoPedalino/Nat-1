@@ -1,3 +1,4 @@
+import { signed } from '../../ui/numberFormat.js';
 // The dice engine of the whole app: every die is rolled here (sheet, builder,
 // compendium, battle map, GM Board, character builder). The battle map's dice
 // tray only animates a roll made here: it paints each value on the face that
@@ -21,11 +22,6 @@ export function rollDie(faces, rng = Math.random) {
 // `count` dice of `faces` sides, in the order rolled.
 export function rollPool(count, faces, rng = Math.random) {
   return Array.from({ length: Math.max(0, Number(count) || 0) }, () => rollDie(faces, rng));
-}
-
-function bonusText(bonus) {
-  const b = Number(bonus) || 0;
-  return b >= 0 ? `+${b}` : `${b}`;
 }
 
 // A d20 test: `advantage: true` keeps the higher of two d20s, `advantage:
@@ -67,7 +63,7 @@ export function rollD20(bonus, options = {}) {
 
 export function formatD20Detail(result) {
   const modifier = Number(result.bonus) || 0;
-  const expression = modifier ? `d20 ${bonusText(modifier)}` : 'd20';
+  const expression = modifier ? `d20 ${signed(modifier)}` : 'd20';
   if (result.mode === 'advantage') return `Advantage: keep ${result.kept}; ${expression} = ${result.total}`;
   if (result.mode === 'disadvantage') return `Disadvantage: keep ${result.kept}; ${expression} = ${result.total}`;
   return `${expression} = ${result.total}`;

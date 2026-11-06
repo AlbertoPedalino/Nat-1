@@ -1,10 +1,11 @@
 import { Button, Tooltip } from '@mui/material';
 import { Sword } from 'lucide-react';
-import { fbonus, effectiveD20Modifier } from '../state/calculations.js';
+import { effectiveD20Modifier } from '../state/calculations.js';
 import { inlineButtonSx } from '../spells/spellsTabStyles.js';
 import { attackRollerToneSx } from '../../../shared/ui/entityColors.js';
 import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
 import { sourcesFromAdvArg } from '../../../shared/character/dice/advantage.js';
+import { signed } from '../../../shared/ui/numberFormat.js';
 
 // Single source for the "Hit +X" attack-roll button (weapon + spell). It both
 // renders the modifier and fires the roll, so the two can never diverge: the
@@ -39,7 +40,7 @@ export default function AttackRollButton({
       onClick={(e) => { e.stopPropagation(); onRoll?.(rawBonus, label, advArg); }}
       sx={{ ...inlineButtonSx, ...attackRollerToneSx({ disadv, notProficient }), ...sx }}
     >
-      <Sword size={12} style={{ marginRight: 2 }} /> Hit {fbonus(effectiveD20Modifier(rawBonus, exhaustionLevel))}{tag}
+      <Sword size={12} style={{ marginRight: 2 }} /> Hit {signed(effectiveD20Modifier(rawBonus, exhaustionLevel))}{tag}
     </RollModeArea>
   );
   return tooltip ? <Tooltip title={tooltip}>{button}</Tooltip> : button;

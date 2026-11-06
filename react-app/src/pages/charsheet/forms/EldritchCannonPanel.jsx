@@ -35,6 +35,7 @@ import {
   updateCannonHpPatch,
   eldritchCannonRuleGroups,
 } from '../../../shared/character/forms/eldritchCannonForm.js';
+import { withModifier } from '../../../shared/ui/numberFormat.js';
 
 const CINZEL = '"Cinzel", Georgia, serif';
 
@@ -49,7 +50,6 @@ const CINZEL = '"Cinzel", Georgia, serif';
 // The cannon's defenses, as the character's Defenses box lists them.
 const CANNON_DEFENSES = CANNON_DAMAGE_IMMUNITIES.map((type) => ({ kind: 'Immune', type }));
 
-const signed = (n) => (n >= 0 ? `+${n}` : `${n}`);
 
 export default function EldritchCannonPanel({ action, character, sheet, resources, onResChange }) {
   const { onUpdateCharacter, onUpdateSheet, onRoll, onShowToast } = useSheetActions();
@@ -65,7 +65,7 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
   const dc = 8 + pb + intMod;
   const maxHp = cannonMaxHp(lv);
   const dmgDice = cannonDamageDice(lv);
-  const thpFormula = `${protectorThpDice(lv)}${intMod !== 0 ? signed(intMod) : ''}`;
+  const thpFormula = withModifier(protectorThpDice(lv), intMod);
 
   const cannons = getActiveCannons(C);
   const capacity = maxCannons(lv);

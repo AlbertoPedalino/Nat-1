@@ -5,11 +5,11 @@ import { PB_COST, STANDARD_ARRAY, STAT_LABELS, STATS } from '../constants.js';
 import { getAbilityScoreBonusBreakdown, getBaseScore, getFinalScore, pointBuySpent } from '../progression/calculations.js';
 import { getActiveScores } from '../state/state.js';
 import { abilityModifier } from '../../../shared/character/progression/abilityModifier.js';
+import { signed } from '../../../shared/ui/numberFormat.js';
 
 function scoreMod(value) {
   if (value == null) return '-';
-  const mod = abilityModifier(value);
-  return `${mod >= 0 ? '+' : ''}${mod}`;
+  return signed(abilityModifier(value));
 }
 
 function methodBucket(method) {

@@ -53,6 +53,7 @@ import SummonedCreaturePanel from '../forms/SummonedCreaturePanel.jsx';
 import CollapsibleNote from '../../../shared/ui/CollapsibleNote.jsx';
 import { spellWeaponAttack, spellWeaponOptions } from '../actions/weaponActions.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
+import { signed, withModifier } from '../../../shared/ui/numberFormat.js';
 
 function applyFlatToFormula(formula, flat) {
   if (!formula) return formula;
@@ -63,7 +64,7 @@ function applyFlatToFormula(formula, flat) {
   const count = Number(match[1]);
   const faces = Number(match[2]);
   const total = Number(match[3] || 0) + Number(flat || 0);
-  return `${count}d${faces}${total ? (total > 0 ? '+' : '') + total : ''}`;
+  return withModifier(`${count}d${faces}`, total);
 }
 
 // Source badge for a spell row. When the same spell is granted by more than
@@ -469,7 +470,7 @@ export default function SpellEntry({
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', flexWrap: 'wrap', justifyContent: 'space-between' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', flexWrap: 'wrap' }}>
-            <SourceBadge sourceInfo={entry.sourceInfo} sources={entry.sources} suffix={beamBonus ? ` ${beamBonus >= 0 ? '+' : ''}${beamBonus}` : ''} />
+            <SourceBadge sourceInfo={entry.sourceInfo} sources={entry.sources} suffix={beamBonus ? ` ${signed(beamBonus)}` : ''} />
             {weaponStrike ? (
               <MiniBadge label={weaponStrike.name} color={CHIP_TONES.info} bg={alpha(CHIP_TONES.info, 0.16)} />
             ) : null}

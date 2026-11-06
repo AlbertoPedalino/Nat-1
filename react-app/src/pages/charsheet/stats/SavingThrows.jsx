@@ -7,7 +7,6 @@ import {
   FULL_LBL,
   hasSaveProficiency,
   getSaveBonus,
-  fbonus,
   effectiveD20Modifier,
 } from '../state/calculations.js';
 import { getConcentrationBonus, getD20FloorReminders } from '../state/effectBonuses.js';
@@ -21,6 +20,7 @@ import {
 } from './saveModifiers.js';
 import { advantageVisual, autoFailVisual } from './advantageMark.jsx';
 import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
+import { signed } from '../../../shared/ui/numberFormat.js';
 
 export default function SavingThrows({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
@@ -104,7 +104,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
                 {FULL_LBL[st]}
               </Typography>
               <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.75rem', fontWeight: 600, color: 'text.primary', ml: 'auto' }}>
-                {fbonus(shownBonus)}
+                {signed(shownBonus)}
               </Typography>
               {visual && (
                 <Tooltip title={tooltipText}>

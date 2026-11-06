@@ -1,3 +1,4 @@
+import { signed } from '../../ui/numberFormat.js';
 // How a roll is laid out for a reader: which die was kept, what was added, what
 // colour the total wears, whether it was a natural 20 or a natural 1.
 //
@@ -19,11 +20,6 @@ export function rollDieColor(value, faces) {
   return 'text.primary';
 }
 
-export function formatRollBonus(n) {
-  const bonus = Number(n) || 0;
-  return bonus >= 0 ? `+${bonus}` : `${bonus}`;
-}
-
 export function resolveToastLayout(toast) {
   const rolls = toast?.rolls || [];
   const d20s = rolls.filter((r) => r.faces === 20);
@@ -40,7 +36,7 @@ export function resolveToastLayout(toast) {
     : null;
 
   const modifier = hasBonus
-    ? formatRollBonus(bonus)
+    ? signed(bonus)
     : (formulaMod && Number(formulaMod) !== 0 ? formulaMod : null);
 
   const isCrit = keptD20?.v >= 20;

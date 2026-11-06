@@ -1,5 +1,6 @@
 import { createAdapterBindings } from '../adapterBindings.js';
 import { finalAbilityModifier } from '../../shared/character/progression/abilityModifier.js';
+import { withModifier } from '../../shared/ui/numberFormat.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -93,7 +94,7 @@ registerSpeciesSheetActions("Goliath_XPHB", [
     condition: requiresGiantAncestry('stone'),
     inlinePills: ({ character }) => {
       const conMod = finalAbilityModifier(character, 'con');
-      return [{ icon: 'shield', label: 'Reduction', value: `1d12${conMod >= 0 ? '+' : ''}${conMod}` }];
+      return [{ icon: 'shield', label: 'Reduction', value: withModifier('1d12', conMod) }];
     },
   },
   {

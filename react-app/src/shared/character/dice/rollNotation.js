@@ -1,4 +1,5 @@
 import { parseFormula, rollD20, rollPool } from './dice.js';
+import { signed } from '../../ui/numberFormat.js';
 
 // A roll typed or clicked as notation — "2d6+3", or "+5" for a d20 test — in
 // the shape the roll logs, the dice toast and the battle map show: the total,
@@ -70,7 +71,7 @@ export function rollDice(notation, type = 'Roll', rng = Math.random, { advantage
 
 function rollModifier(formula, rng, advantage) {
   const mod = parseInt(formula, 10) || 0;
-  const modText = mod >= 0 ? `+${mod}` : String(mod);
+  const modText = signed(mod);
   const roll = rollD20(mod, { advantage, rng });
   if (roll.mode === 'normal') {
     return {

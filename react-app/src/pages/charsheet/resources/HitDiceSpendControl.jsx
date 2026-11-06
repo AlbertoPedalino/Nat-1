@@ -1,5 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import PipButton from '../../../shared/ui/PipButton.jsx';
+import { withModifier } from '../../../shared/ui/numberFormat.js';
 
 // Interactive Hit Dice pips for the Short Rest dialog. Mirrors the look of
 // the old standalone Hit Dice panel: hollow pips are dice already used,
@@ -43,7 +44,7 @@ export default function HitDiceSpendControl({ pool, value, onChange, conMod }) {
         })}
       </Box>
       <Typography sx={{ fontSize: '0.66rem', color: 'text.secondary', textAlign: 'right', mt: 0.5 }}>
-        Spend: {value}d{pool.faces}{conMod >= 0 ? '+' : ''}{conMod} each
+        Spend: {withModifier(`${value}d${pool.faces}`, conMod)} each
       </Typography>
     </Box>
   );

@@ -5,7 +5,6 @@ import {
   SKILLS,
   getSkillTraining,
   getSkillBonus,
-  fbonus,
   SLBL,
   effectiveD20Modifier,
 } from '../state/calculations.js';
@@ -15,6 +14,7 @@ import { getSkillAdvantageFromEffects } from '../state/effectBonuses.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import { characterItemBonuses } from '../../../shared/character/inventory/itemBonus.js';
 import { getItemAdvantageOnSkill } from '../../../shared/character/inventory/itemEffects.js';
+import { signed } from '../../../shared/ui/numberFormat.js';
 
 function SkillProficiencyDot({ training }) {
   const dotColor = training === 'exp' ? 'secondary.main' : training ? 'primary.main' : 'divider';
@@ -116,7 +116,7 @@ export default function Skills({ C, sheet, onRoll }) {
                 {SLBL[sk.a]}
               </Typography>
               <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.75rem', fontWeight: 600, color: 'text.primary', textAlign: 'right' }}>
-                {fbonus(shownBonus)}
+                {signed(shownBonus)}
               </Typography>
               {visual && (
                 <Tooltip title={skillTooltip}>

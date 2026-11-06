@@ -14,7 +14,6 @@ import { Feather, Languages, Layers, Shield, Sparkles, Sword } from 'lucide-reac
 import { STAT_LABELS, STATS } from '../constants.js';
 import {
   calcMaxHp,
-  formatMod,
   getAllFinalScores,
   getPrimaryClassLevel,
 } from '../progression/calculations.js';
@@ -50,6 +49,8 @@ import { featDescriptionEntries } from '../../../shared/character/progression/fe
 import { buildPreviewSheetCharacter } from './previewSheet.js';
 
 import { ENTITY_COLORS as SOURCE_COLOR, NEUTRAL_TONE } from '../../../shared/ui/entityColors.js';
+import { signed } from '../../../shared/ui/numberFormat.js';
+import { abilityModifier } from '../../../shared/character/progression/abilityModifier.js';
 
 const darkChipText = '#17120d';
 const PROFICIENCY_TONE = NEUTRAL_TONE;
@@ -181,7 +182,7 @@ function AbilityScoreGrid({ scores }) {
                 {scores[stat] ?? '-'}
               </Typography>
               <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.68rem' }}>
-                {formatMod(scores[stat])}
+                {signed(abilityModifier(scores[stat]))}
               </Typography>
             </CardContent>
           </Card>

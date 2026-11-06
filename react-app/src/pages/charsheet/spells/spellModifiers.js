@@ -1,6 +1,7 @@
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
 import { getFinal as getFinalScore, getMod as getAbilityMod } from '../state/calculations.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
+import { withModifier } from '../../../shared/ui/numberFormat.js';
 
 // What the character's features change on a spell row, registered by the
 // adapters: riders (extra rollers, tags, text), spell modifiers (flat damage or
@@ -213,5 +214,5 @@ function applyFlatBonus(formula, amount) {
   const count = Number(match[1]);
   const faces = Number(match[2]);
   const flat = Number(match[3] || 0) + amount;
-  return `${count}d${faces}${flat ? (flat > 0 ? '+' : '') + flat : ''}`;
+  return withModifier(`${count}d${faces}`, flat);
 }

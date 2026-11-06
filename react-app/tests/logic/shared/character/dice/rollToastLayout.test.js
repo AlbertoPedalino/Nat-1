@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { formatRollBonus, resolveToastLayout, rollDieColor } from '../../../../../src/shared/character/dice/rollToastLayout.js';
+import { resolveToastLayout, rollDieColor } from '../../../../../src/shared/character/dice/rollToastLayout.js';
 
 test('the kept d20 decides the crit, not the one advantage threw away', () => {
   const layout = resolveToastLayout({
@@ -68,12 +68,6 @@ test('a die is coloured by its own faces, not by twenty', () => {
 test('a coin is neither a triumph nor a disaster', () => {
   assert.equal(rollDieColor(1, 2), 'text.primary');
   assert.equal(rollDieColor(2, 2), 'text.primary');
-});
-
-test('a bonus always carries its sign', () => {
-  assert.equal(formatRollBonus(3), '+3');
-  assert.equal(formatRollBonus(-1), '-1');
-  assert.equal(formatRollBonus(0), '+0');
 });
 
 test('a zero d20 modifier is omitted from the toast layout', () => {

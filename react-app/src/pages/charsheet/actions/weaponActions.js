@@ -39,6 +39,7 @@ import {
   getWeaponEffectBonuses,
   getWeaponNotes,
 } from '../state/effectBonuses.js';
+import { withModifier } from '../../../shared/ui/numberFormat.js';
 
 // Action cards for weapons: one per wielded weapon (main hand, off hand,
 // thrown, two-handed), with ability, proficiency, mastery, fighting-style and
@@ -157,7 +158,7 @@ export function spellWeaponAttack(C, item, { ability, inventory, extraDamage = '
   const bonus = getWeaponEffectBonuses(C, info);
   const flat = mod + enhancement.damage + bonus.damage;
   const dice = [getWeaponDamageDice(item, item.equippedSlot), extraDamage].filter(Boolean).join('+');
-  const damageFormula = dice ? dice + (flat ? (flat > 0 ? '+' : '') + flat : '') : '';
+  const damageFormula = dice ? withModifier(dice, flat) : '';
   return {
     name: weaponCardName(item).name,
     attackBonus: getPB(C) + mod + enhancement.attack + bonus.attack,
@@ -195,7 +196,7 @@ function makeWeaponAction(C, item, index, overrides, selectedMasteriesByWeapon, 
   const fsBonus = getWeaponEffectBonuses(C, weaponInfo);
   const weaponNotes = getWeaponNotes(C, weaponInfo);
   const finalMod = (opts.damageMod != null ? opts.damageMod : mod) + enhancement.damage + strMeleeDamageBonus + fsBonus.damage;
-  const damageFormula = base ? base + (finalMod !== 0 ? (finalMod >= 0 ? '+' : '') + finalMod : '') : '';
+  const damageFormula = base ? withModifier(base, finalMod) : '';
   const dtype = weaponDamageType(item);
   // XPHB 2024 Heavy weapon: Disadvantage on attack rolls if both STR and DEX < 13.
   const heavyUnderStat = isHeavy && getFinal(C, 'str') < 13 && getFinal(C, 'dex') < 13;
@@ -325,7 +326,7 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
       ? (ohSelectedEntry.mastery || ohDirectMastery || resolveWeaponMasteryForItem(ohDbItem))
       : null;
     const isNick = ohMastery === 'Nick';
-    const ohDamageFormula = ohBase ? ohBase + (ohDmgMod !== 0 ? (ohDmgMod >= 0 ? '+' : '') + ohDmgMod : '') : '';
+    const ohDamageFormula = ohBase ? withModifier(ohBase, ohDmgMod) : '';
 
     const ohCard = weaponCardName(offHandItem);
     weaponActions.push({
@@ -360,7 +361,7 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
   // Rage Damage applies to Strength-based Unarmed Strikes too.
   const unarmedDmgMod = mod + (ability === 'str' ? ctx.strMeleeDamageBonus : 0);
   const die = unarmed.face > 1 ? `1d${unarmed.face}` : '1';
-  const unarmedDamageFormula = die + (unarmedDmgMod !== 0 ? (unarmedDmgMod >= 0 ? '+' : '') + unarmedDmgMod : '');
+  const unarmedDamageFormula = withModifier(die, unarmedDmgMod);
   weaponActions.push({
     name: 'Unarmed Strike',
     cat: 'action',

@@ -7,6 +7,7 @@
 // and the sheet can never disagree on a form's numbers.
 
 import { isAllowedSource, BEAST_ALLOWED_SOURCES } from '../../content/sourcePriority.js';
+import { signed } from '../../ui/numberFormat.js';
 
 const ABILITIES = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
 
@@ -255,7 +256,7 @@ function beastTagToTokens(tag, arg, formulaRollType) {
   if (t === 'h') return [textToken('Hit: ')];
   if (t === 'hit') {
     const bonus = Number(arg);
-    return [{ type: 'roll', kind: 'd20', bonus, text: bonus >= 0 ? `+${bonus}` : String(bonus), rollType: 'Attack Roll' }];
+    return [{ type: 'roll', kind: 'd20', bonus, text: signed(bonus), rollType: 'Attack Roll' }];
   }
   if (t === 'damage' || t === 'dice') {
     const formula = arg.replace(/\s+/g, '');

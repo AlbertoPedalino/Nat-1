@@ -4,6 +4,7 @@ import { HeartPulse, Sparkles, Skull } from 'lucide-react';
 import HpStepper from '../../../shared/character/combat/HpStepper.jsx';
 import { normalizeDeathSaves } from '../../../shared/character/combat/vitals.js';
 import { EXHAUSTION_MAX } from '../state/calculations.js';
+import { signed } from '../../../shared/ui/numberFormat.js';
 
 const CINZEL = '"Cinzel", Georgia, serif';
 // When the panel fills its row (embedded sheet) the content follows the panel:
@@ -182,7 +183,7 @@ export default function HPBlock({
                 onClick={() => startEdit('mod', sheet.maxHPBonus)}
                 sx={{ color: '#edd48a', fontWeight: 700, ml: 'auto', cursor: 'pointer', '&:hover': { opacity: 0.7 } }}
               >
-                {sheet.maxHPBonus > 0 ? '+' : ''}{sheet.maxHPBonus}
+                {signed(sheet.maxHPBonus)}
               </Box>
             )}
           </Box>

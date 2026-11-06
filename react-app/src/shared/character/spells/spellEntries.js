@@ -1,3 +1,4 @@
+import { signed } from '../../ui/numberFormat.js';
 function asArray(value) {
   if (value == null) return [];
   return Array.isArray(value) ? value : [value];
@@ -31,7 +32,7 @@ function pickTagDisplay(tag, rawValue) {
   if (!parts.length) return '';
   if (tag === 'dc') return `DC ${parts[0]}`;
   if (tag === 'hit') return `+${parts[0].replace(/^\+/, '')}`;
-  if (tag === 'd20') return `${Number(parts[0]) >= 0 ? '+' : ''}${parts[0]}`;
+  if (tag === 'd20') return signed(parts[0]);
   if (tag === 'atk') return `${parts[0]} Attack:`;
   if (tag === 'recharge') return `(Recharge ${parts[0]}-6)`;
   if (tag === 'chance') return `${parts[0]}%`;

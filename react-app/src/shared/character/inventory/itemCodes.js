@@ -1,5 +1,6 @@
 import { getWeaponMasteryReminderText } from '../combat/weaponMastery.js';
-import { formatSignedBonus, parseSignedBonus } from './itemBonus.js';
+import { parseSignedBonus } from './itemBonus.js';
+import { signed } from '../../ui/numberFormat.js';
 
 // Type codes match 5etools schema. Note: "R" here means a Ranged Weapon item type;
 // the same letter as a weapon property means "Reach" (see WEAPON_PROPERTY_LABELS).
@@ -341,16 +342,16 @@ registerItemPropertySegment('enhancement', (item) => {
   const spellAtk = parseSignedBonus(item?.bonusSpellAttack);
   const spellDc = parseSignedBonus(item?.bonusSpellSaveDc);
   const parts = [];
-  if (atk && atk === dmg) parts.push(`${formatSignedBonus(atk)} attack & damage`);
+  if (atk && atk === dmg) parts.push(`${signed(atk)} attack & damage`);
   else {
-    if (atk) parts.push(`${formatSignedBonus(atk)} attack`);
-    if (dmg) parts.push(`${formatSignedBonus(dmg)} damage`);
+    if (atk) parts.push(`${signed(atk)} attack`);
+    if (dmg) parts.push(`${signed(dmg)} damage`);
   }
-  if (ac) parts.push(`${formatSignedBonus(ac)} AC`);
-  if (save) parts.push(`${formatSignedBonus(save)} saves`);
-  if (check) parts.push(`${formatSignedBonus(check)} ability checks`);
-  if (spellAtk) parts.push(`${formatSignedBonus(spellAtk)} spell attack`);
-  if (spellDc) parts.push(`${formatSignedBonus(spellDc)} spell DC`);
+  if (ac) parts.push(`${signed(ac)} AC`);
+  if (save) parts.push(`${signed(save)} saves`);
+  if (check) parts.push(`${signed(check)} ability checks`);
+  if (spellAtk) parts.push(`${signed(spellAtk)} spell attack`);
+  if (spellDc) parts.push(`${signed(spellDc)} spell DC`);
   return parts.length ? [{ kind: 'enhancement', label: 'Enhancement', value: parts.join(', ') }] : [];
 });
 registerItemPropertySegment('charges', (item) => {

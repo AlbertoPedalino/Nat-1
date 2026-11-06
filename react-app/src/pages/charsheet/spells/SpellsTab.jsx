@@ -45,7 +45,6 @@ import {
   getSpellLimits,
   hasSpellcastingProfile,
 } from './spellcasting.js';
-import { formatBonus } from './spellDice.js';
 import { getClassSpellLimits } from '../../../shared/character/spells/spellProgression.js';
 import { getPactMagicInfo, getSpellCastMode } from '../../../shared/character/spells/pactMagic.js';
 import {
@@ -71,6 +70,7 @@ import {
   getPactSlotUsedKey,
   getRegularSlotUsed,
 } from '../../../shared/character/spells/spellSlots.js';
+import { signed } from '../../../shared/ui/numberFormat.js';
 
 const SPELL_ACTION_FILTERS = [
   { key: 'all', label: 'All' },
@@ -483,7 +483,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
     <Box sx={panelRootSx}>
       <Box sx={{ display: 'flex', gap: 1, mb: 0.75, flexWrap: 'wrap' }}>
         <StatBox value={dc} label="Spell DC" />
-        <StatBox value={formatBonus(effectiveD20Modifier(atk, sheet?.exhaustionLevel))} label="Spell Attack" />
+        <StatBox value={signed(effectiveD20Modifier(atk, sheet?.exhaustionLevel))} label="Spell Attack" />
         <StatBox value={SLBL[ability] || ability.toUpperCase()} label="Spell Ability" />
       </Box>
 

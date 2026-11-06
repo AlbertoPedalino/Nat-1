@@ -13,11 +13,6 @@ import { collectOwnedFeatNames } from '../../../shared/character/progression/sel
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { abilityModifier } from '../../../shared/character/progression/abilityModifier.js';
 
-export function formatMod(value) {
-  const mod = abilityModifier(value);
-  return `${mod >= 0 ? '+' : ''}${mod}`;
-}
-
 export function pointBuySpent(scores) {
   return STATS.reduce((sum, stat) => sum + (PB_COST[scores[stat]] || 0), 0);
 }

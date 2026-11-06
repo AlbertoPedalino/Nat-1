@@ -1,4 +1,5 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
+import { withModifier } from '../../../shared/ui/numberFormat.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -192,7 +193,7 @@ registerClassSheetActions("Cleric", [
             : 0;
           const lv = Number(ownerLevel || 1);
           const dice = lv >= 18 ? 4 : lv >= 13 ? 3 : lv >= 7 ? 2 : 1;
-          return `${dice}d8${wis >= 0 ? "+" : ""}${wis}`;
+          return withModifier(`${dice}d8`, wis);
         },
         label: ({ formula }) => `${String(formula || "")} radiant/necrotic`,
       },
@@ -204,7 +205,7 @@ registerClassSheetActions("Cleric", [
             : 0;
           const lv = Number(ownerLevel || 1);
           const dice = lv >= 18 ? 4 : lv >= 13 ? 3 : lv >= 7 ? 2 : 1;
-          return `${dice}d8${wis >= 0 ? "+" : ""}${wis}`;
+          return withModifier(`${dice}d8`, wis);
         },
       },
     ],
@@ -306,7 +307,7 @@ registerClassSheetSpellModifiers("Cleric", [
     }
 
     const nextMod = existingMod + wis;
-    return `${count}d${faces}${nextMod ? (nextMod > 0 ? "+" : "") + nextMod : ""}`;
+    return withModifier(`${count}d${faces}`, nextMod);
   }
 ]);
 registerClassSheetResources("Cleric", [

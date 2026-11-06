@@ -12,11 +12,6 @@ export function parseSignedBonus(value) {
   return Number.isFinite(n) ? n : 0;
 }
 
-export function formatSignedBonus(value) {
-  const n = Number(value) || 0;
-  return n >= 0 ? `+${n}` : `${n}`;
-}
-
 export function weaponEnhancement(item) {
   if (!isItemEffectActive(item)) return { attack: 0, damage: 0 };
   return {
