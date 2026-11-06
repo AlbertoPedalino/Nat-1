@@ -139,19 +139,6 @@ export function normalizeBeast(raw) {
   };
 }
 
-// 5e.tools bestiary page URL for a beast. Mirrors the encounter builder's slug
-// (UrlUtil.getSluggedHash of `${name}_${source}`): lowercase, strip diacritics,
-// drop non-word chars, spaces/underscores → hyphens.
-export function beast5eToolsUrl(name, source) {
-  if (!name || !source) return null;
-  const slug = `${name}_${source}`
-    .trim().toLowerCase()
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')
-    .replace(/[^\w ]+/g, '')
-    .replace(/[ _]+/g, '-');
-  return `https://5e.tools/bestiary/${slug}.html`;
-}
-
 // Stable reference string for a chosen form, mirroring the item-choice scheme.
 export function beastRefValue(beast) {
   if (!beast?.name) return '';

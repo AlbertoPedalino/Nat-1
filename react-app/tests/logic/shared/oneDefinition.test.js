@@ -333,3 +333,11 @@ test('the signed-in user and command timeouts come from shared/cloud/cloudCall.j
 test('app events are named by constants, not string literals', () => {
   assert.deepEqual(sourceLinesMatching(/(Event|addEventListener|removeEventListener|useEventListener)\([^)]*['"]gb:/), []);
 });
+
+// Links to 5e.tools pages are built by shared/content/fiveEToolsLinks.js (one
+// slug and source rule per page type); adapters keep their hand-written links.
+test('5e.tools page links are built only by fiveEToolsLinks.js', () => {
+  assert.deepEqual(sourceFilesMatching(/https:\/\/5e\.tools\/(bestiary|spells|items)/, {
+    allow: ['shared/content/fiveEToolsLinks.js'],
+  }), []);
+});

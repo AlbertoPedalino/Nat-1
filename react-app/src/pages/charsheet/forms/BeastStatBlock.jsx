@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { Box, Button, Collapse, Link, Typography } from '@mui/material';
 import { ChevronDown, ChevronRight, ExternalLink } from 'lucide-react';
 import { getMod } from '../../../shared/character/sheet/sheetStats.js';
-import { beast5eToolsUrl, parseBeastActions, parseBeastActionsRich } from '../../../shared/character/forms/beasts.js';
+import { parseBeastActions, parseBeastActionsRich } from '../../../shared/character/forms/beasts.js';
 import { formatRollTitle } from '../../../shared/character/dice/dice.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { ABILITIES, SKILL_NAMES } from '../../../shared/content/rulesVocabulary.js';
+import { get5eToolsBestiaryUrl } from '../../../shared/content/fiveEToolsLinks.js';
 
 // Shared presentational layer for a normalized beast snapshot, used by both the
 // Wild Shape and Wild Companion sheet panels. Renders a compact Monster-Manual
@@ -25,7 +26,7 @@ const SKILL_LABEL = Object.fromEntries(
 // tab). Falls back to plain text if the URL can't be built. stopPropagation keeps
 // the click from toggling the surrounding action card.
 export function BeastNameLink({ name, source, sx }) {
-  const url = beast5eToolsUrl(name, source);
+  const url = get5eToolsBestiaryUrl(name, source);
   if (!url) return <Typography noWrap sx={{ color: 'text.primary', ...sx }}>{name}</Typography>;
   return (
     <Link

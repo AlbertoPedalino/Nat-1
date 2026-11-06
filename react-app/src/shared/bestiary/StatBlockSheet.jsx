@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import { X } from 'lucide-react';
 import { getLegendaryGroup } from './bestiary.js';
-import { formatAlignment, formatDamageList, formatSpeed, getAC, getACDesc, getHP, getSizeLabel, getType, getTypeTags, monster5eUrl } from './monsterUtils.js';
+import { formatAlignment, formatDamageList, formatSpeed, getAC, getACDesc, getHP, getSizeLabel, getType, getTypeTags } from './monsterUtils.js';
 import EntryRenderer from './EntryRenderer.jsx';
 import InlineText from './InlineText.jsx';
 import MonsterToken from './MonsterToken.jsx';
@@ -28,9 +28,10 @@ import { abilityModifier } from '../character/progression/abilityModifier.js';
 import { capitalize } from '../ui/textCase.js';
 import { ABILITIES, ABILITY_ABBREVIATIONS } from '../content/rulesVocabulary.js';
 import { crKey, crPB, crXP } from './challengeRating.js';
+import { get5eToolsBestiaryUrl } from '../content/fiveEToolsLinks.js';
 
 export function StatBlockHeader({ monster, onClose }) {
-  const url = monster5eUrl(monster);
+  const url = get5eToolsBestiaryUrl(monster?.name, monster?.source);
   return (
     <>
       <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', minWidth: 0, pr: onClose ? 4 : 0 }}>

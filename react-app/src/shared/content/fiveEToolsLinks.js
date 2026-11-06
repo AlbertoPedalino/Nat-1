@@ -76,4 +76,17 @@ function get5eToolsItemUrl(item) {
   return `https://5e.tools/items.html#${namePart}_${source}`;
 }
 
-export { slugify5eToolsName, normalize5eToolsSource, get5eToolsSpellUrl, get5eToolsItemUrl };
+// A creature's 5e.tools bestiary page: 5e.tools' slugged hash of
+// `${name}_${source}` (lowercase, no diacritics or other punctuation, spaces
+// and underscores as hyphens).
+function get5eToolsBestiaryUrl(name, source) {
+  if (!name || !source) return null;
+  const slug = `${name}_${source}`
+    .trim().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^\w ]+/g, '')
+    .replace(/[ _]+/g, '-');
+  return `https://5e.tools/bestiary/${slug}.html`;
+}
+
+export { slugify5eToolsName, normalize5eToolsSource, get5eToolsSpellUrl, get5eToolsItemUrl, get5eToolsBestiaryUrl };

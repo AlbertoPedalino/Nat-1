@@ -1,6 +1,6 @@
-import { spell5eUrl } from './monsterUtils.js';
 import { signed } from '../ui/numberFormat.js';
 import { isStatBlockLeadIn, statBlockTagText } from '../content/statBlockTags.js';
+import { get5eToolsSpellUrl } from '../content/fiveEToolsLinks.js';
 
 function text(value) {
   return { type: 'text', text: String(value || '') };
@@ -50,7 +50,7 @@ function tagToTokens(rawTag) {
   if (lower === 'spell') {
     const parts = arg.split('|');
     const display = parts[2] || parts[0] || '';
-    const href = spell5eUrl(arg);
+    const href = get5eToolsSpellUrl({ name: parts[0], source: parts[1] || 'XPHB' });
     return href ? [{ type: 'link', text: display, href }] : [text(display)];
   }
   if (lower === 'i') return [styleToken('italic', arg)];

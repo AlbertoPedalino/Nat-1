@@ -90,31 +90,6 @@ export function monsterKey(monster) {
   return `${monster?.name || ''}__${monster?.source || ''}`;
 }
 
-export function slugify5e(value) {
-  return String(value || '')
-    .trim()
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^\w ]+/g, '')
-    .replace(/[ _]+/g, '-');
-}
-
-export function monster5eUrl(monster) {
-  if (!monster?.name || !monster?.source) return null;
-  return `https://5e.tools/bestiary/${slugify5e(`${monster.name}_${monster.source}`)}.html`;
-}
-
-export function spell5eUrl(value) {
-  const [name, source = 'xphb'] = String(value || '').split('|');
-  const slug = String(name || '')
-    .toLowerCase()
-    .replace(/'/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
-  return slug ? `https://5e.tools/spells/${slug}-${String(source).toLowerCase()}.html` : null;
-}
-
 export function getMonsterTokenUrls(monster) {
   if (!monster?.name || !monster?.source) return [FALLBACK_MONSTER_TOKEN];
   const encodedName = encodeURIComponent(String(monster.name).replace(/[’]/g, "'"));
