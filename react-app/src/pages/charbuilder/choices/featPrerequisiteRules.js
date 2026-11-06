@@ -1,7 +1,4 @@
-function asArray(value) {
-  return Array.isArray(value) ? value : value == null ? [] : [value];
-}
-
+import { asArray } from '../../../shared/lists.js';
 function norm(value) {
   return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 }

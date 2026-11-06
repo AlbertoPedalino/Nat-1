@@ -1,6 +1,7 @@
 import { normalizeConditions } from './conditions.js';
 import { normalizeEffects } from './combatEffects.js';
 import { clampInt } from '../../numbers.js';
+import { numberOr } from '../../numbers.js';
 
 // Vitals are the character `data` fields kept in sync between the sheet and the
 // encounter combat: current HP, temp HP, max-HP bonus, death saves, active
@@ -25,11 +26,6 @@ import { clampInt } from '../../numbers.js';
 //   clampData - clamp a raw `data` value (with a fallback) for the sheet
 //   normalize - stable form used to build echo-suppression keys
 //   defaultCombat - optional; value when neither payload nor combatant has one
-
-function numberOr(value, fallback) {
-  const n = Number(value);
-  return Number.isFinite(n) ? n : fallback;
-}
 
 function finiteNumber(value) {
   const n = Number(value);

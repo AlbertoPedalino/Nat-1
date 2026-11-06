@@ -15,6 +15,7 @@ import {
   WEAPON_MASTERY_RULES,
 } from '../shared/character/combat/weaponMastery.js';
 import { backgroundOriginFeat } from '../shared/character/progression/backgroundFeatOptions.js';
+import { asArray } from '../shared/lists.js';
 
 export function splitClassSubclass(rawKey) {
   const value = String(rawKey || '');
@@ -187,10 +188,6 @@ export function createAdapterBindings(registry, context = {}) {
     getGenericBackgroundChoiceMeta,
     getGenericBackgroundOriginFeat,
   };
-}
-
-function asArray(value) {
-  return Array.isArray(value) ? value : value == null ? [] : [value];
 }
 
 function title(value) {

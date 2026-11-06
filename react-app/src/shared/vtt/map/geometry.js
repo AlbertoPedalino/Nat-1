@@ -12,15 +12,11 @@
 import {
   axialRound, hexPlayAreaForImage, hexToWorld, hexWidth, isHexGrid, worldToAxial,
 } from './hexGeometry.js';
+import { numberOr } from '../../numbers.js';
 
 export const ZOOM_MIN = 0.15;
 export const ZOOM_MAX = 6;
 export const DEFAULT_VIEW = Object.freeze({ x: 0, y: 0, zoom: 1 });
-
-function numberOr(value, fallback) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : fallback;
-}
 
 export function clampZoom(zoom) {
   return Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, numberOr(zoom, 1)));

@@ -3,10 +3,8 @@ import { getAcBonusEffects } from '../../../pages/charsheet/state/effectBonuses.
 import { wildShapeArmorClass } from '../forms/wildShapeForm.js';
 import { primaryClassLevel } from '../progression/classLevel.js';
 import { finalAbilityModifier } from '../progression/abilityModifier.js';
-
-function asArray(value) {
-  return Array.isArray(value) ? value : (value == null ? [] : [value]);
-}
+import { aggregateMiscAcBonus, armorEnhancement } from '../inventory/itemBonus.js';
+import { asArray } from '../../lists.js';
 
 function norm(value) {
   return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -145,8 +143,6 @@ export function getEquippedArmor(character, items) {
 export function getEquippedShield(character, items) {
   return (items || []).find((i) => i.equipped && i.type === 'S');
 }
-
-import { aggregateMiscAcBonus, armorEnhancement } from '../inventory/itemBonus.js';
 
 export function computeArmorItemAc(character, items) {
   const armor = getEquippedArmor(character, items);

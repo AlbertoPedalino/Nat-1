@@ -1,3 +1,4 @@
+import { numberOr } from '../../numbers.js';
 // Hex maps, in the same three spaces as the square grid (screen / world / cell).
 // Pure on purpose, like geometry.js: hex rounding is where the off-by-one bugs
 // live, and a canvas is a terrible place to debug them.
@@ -13,11 +14,6 @@
 // somebody re-calibrating an existing map expects to see.
 
 const SQRT3 = Math.sqrt(3);
-
-function numberOr(value, fallback) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : fallback;
-}
 
 export function hexWidth(grid) {
   return Math.max(1, numberOr(grid?.size, 70));

@@ -1,4 +1,5 @@
 import { isFeatKey, isFeatDetailKey } from './featChoiceKeys.js';
+import { flattenList } from '../../lists.js';
 
 const SKILL_NAMES = [
   'Acrobatics',
@@ -54,13 +55,6 @@ const SIZE_KEYS = new Set([
   'species_size',
 ]);
 
-function asArray(value) {
-  if (value == null) return [];
-  if (Array.isArray(value)) return value.flatMap(asArray);
-  if (value instanceof Set) return Array.from(value).flatMap(asArray);
-  return [value];
-}
-
 function cleanText(value) {
   if (value == null) return '';
   if (typeof value === 'string') {
@@ -90,11 +84,11 @@ function uniquePush(target, value) {
 }
 
 function uniquePushMany(target, values) {
-  asArray(values).forEach((value) => uniquePush(target, value));
+  flattenList(values).forEach((value) => uniquePush(target, value));
 }
 
 function normalizeChoiceValues(value) {
-  return asArray(value)
+  return flattenList(value)
     .map(cleanText)
     .filter(Boolean);
 }

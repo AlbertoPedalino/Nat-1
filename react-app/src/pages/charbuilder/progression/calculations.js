@@ -62,11 +62,6 @@ function abilityBonusSourceLabel(key) {
   return 'Feat';
 }
 
-function asArray(value) {
-  if (Array.isArray(value)) return value;
-  return value ? [value] : [];
-}
-
 export function getBaseScore(character, stat) {
   let base = 8;
   if (character.scoreMethod === 'standard') base = character.arrAssign[stat] ?? 8;

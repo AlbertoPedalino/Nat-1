@@ -1,8 +1,4 @@
-function asArray(value) {
-  if (value == null) return [];
-  return Array.isArray(value) ? value : [value];
-}
-
+import { asArray } from '../../lists.js';
 function truthy(value) {
   return value === true || value === 'true' || value === 1;
 }

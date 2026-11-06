@@ -1,5 +1,5 @@
+import { asArray } from '../../../shared/lists.js';
 import {
-  asArray,
   cleanText,
   norm,
   displayLabel,

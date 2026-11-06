@@ -1,5 +1,6 @@
 import { strip5eMarkup } from './spellEntries.js';
 import { SPELL_SOURCE_PRIORITY, sourceRank } from '../../content/sourcePriority.js';
+import { asArray } from '../../lists.js';
 
 const SCHOOL_FULL = {
   A: 'Abjuration',
@@ -11,11 +12,6 @@ const SCHOOL_FULL = {
   N: 'Necromancy',
   T: 'Transmutation',
 };
-
-function asArray(value) {
-  if (value == null) return [];
-  return Array.isArray(value) ? value : [value];
-}
 
 function norm(value) {
   return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');

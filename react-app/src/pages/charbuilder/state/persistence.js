@@ -18,6 +18,7 @@ import {
 } from '../../../shared/character/progression/typedProficiencies.js';
 import { enumerateFixedAdditionalSpells } from '../../../shared/character/spells/additionalSpellGrants.js';
 import { resolveActionRollers } from '../../../shared/character/dice/rollers.js';
+import { asArray } from '../../../shared/lists.js';
 
 const FEAT_SNAPSHOT_FIELDS = [
   'name',
@@ -62,11 +63,6 @@ export function extractSheetData(text) {
   }
 }
 
-
-function asArray(value) {
-  if (value == null) return [];
-  return Array.isArray(value) ? value : [value];
-}
 
 function collectTypedProficiencyChoices(choices = {}) {
   const all = Object.values(choices || {}).flatMap(asArray);

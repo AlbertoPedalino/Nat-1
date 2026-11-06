@@ -1,3 +1,4 @@
+import { numberOr } from '../numbers.js';
 // Turning a rolled encounter into creatures to put in the room.
 //
 // The dungeon engine answers in difficulty and experience — "Hard, level 5,
@@ -8,8 +9,6 @@
 // below the party that it is scenery, and the total as near the budget as the
 // bestiary allows. It is deliberately not clever — a search for the perfect
 // combination would produce three quarters of a beholder.
-
-const numberOr = (value, fallback = 0) => (Number.isFinite(Number(value)) ? Number(value) : fallback);
 
 // How far over the budget a group may go before it is worse than being under.
 // Slightly over is a fight; twice over is a funeral.

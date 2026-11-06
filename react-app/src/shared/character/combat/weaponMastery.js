@@ -4,6 +4,7 @@ import {
   ITEM_SOURCE_PRIORITY,
 } from '../../content/sourcePriority.js';
 import { itemHasProperty } from '../inventory/weaponProperties.js';
+import { flattenList } from '../../lists.js';
 
 const MASTERY_DATA_URL = 'https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/items-base.json';
 
@@ -12,13 +13,6 @@ let _masteryLoadPromise = null;
 
 function compactKey(value) {
   return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-}
-
-function asArray(value) {
-  if (value == null) return [];
-  if (Array.isArray(value)) return value.flatMap(asArray);
-  if (value instanceof Set) return Array.from(value).flatMap(asArray);
-  return [value];
 }
 
 function isMundaneWeapon(item) {
@@ -95,8 +89,8 @@ function weaponMatchesRule(item, rule) {
 }
 
 export function getWeaponMasteryChoiceNames(items, fallbackItems = [], rules = ALL_WEAPON_MASTERY_RULES) {
-  const primary = asArray(items).filter((item) => item && typeof item === 'object');
-  const fallback = asArray(fallbackItems).filter((item) => item && typeof item === 'object');
+  const primary = flattenList(items).filter((item) => item && typeof item === 'object');
+  const fallback = flattenList(fallbackItems).filter((item) => item && typeof item === 'object');
   const itemDb = primary.length ? primary : fallback;
   const activeRules = Array.isArray(rules) && rules.length ? rules : ALL_WEAPON_MASTERY_RULES;
   const names = itemDb
@@ -216,13 +210,13 @@ function normalizeExplicitMasteryName(value) {
 
 function getExplicitItemMastery(item) {
   const direct = item?.mastery ?? item?.weaponMastery ?? item?.masteryProperty ?? item?.masteryName;
-  return asArray(direct)
+  return flattenList(direct)
     .map(normalizeExplicitMasteryName)
     .find(Boolean) || null;
 }
 
 function itemMasteryFromProperties(item) {
-  const properties = [...asArray(item?.property), ...asArray(item?.properties)].map((prop) => String(prop).trim());
+  const properties = [...flattenList(item?.property), ...flattenList(item?.properties)].map((prop) => String(prop).trim());
   for (const prop of properties) {
     const canonical = canonicalMasteryName(prop);
     if (canonical) return canonical;
@@ -231,7 +225,7 @@ function itemMasteryFromProperties(item) {
 }
 
 function itemMasteryFromEntries(item) {
-  const entriesText = asArray(item?.entries).join(' ').toLowerCase();
+  const entriesText = flattenList(item?.entries).join(' ').toLowerCase();
   if (!entriesText) return null;
   for (const record of _masteries.values()) {
     if (entriesText.includes(record.name.toLowerCase())) return record.name;
@@ -282,7 +276,7 @@ export function findWeaponItemByName(items, weaponName, source = '', { supported
   const targetSource = compactKey(source);
   if (!targetName) return null;
 
-  const weaponItems = asArray(items).filter((item) => item && typeof item === 'object');
+  const weaponItems = flattenList(items).filter((item) => item && typeof item === 'object');
   const matchingItems = weaponItems.filter((item) => {
     if (supportedOnly && !isSupportedMasteryItem(item)) return false;
     const itemName = compactKey(normalizeWeaponName(item.name));

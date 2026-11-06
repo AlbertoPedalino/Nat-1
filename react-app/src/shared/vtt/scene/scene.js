@@ -10,6 +10,7 @@ import { VTT_COLORS } from '../colors.js';
 import { normalizeImageAtmospheres } from './atmosphere.js';
 import { normalizeImageFilters } from './imageFilters.js';
 import { clamp } from '../../numbers.js';
+import { numberOr } from '../../numbers.js';
 
 export const LAYERS = Object.freeze(['map', 'tokens', 'gm']);
 export const DEFAULT_GRID = Object.freeze({
@@ -42,11 +43,6 @@ export const TOKEN_PATCH_KEYS = Object.freeze([
   'x', 'y', 'w', 'h', 'z', 'label', 'color', 'image_path', 'image_url', 'conditions',
   'hp_current', 'hp_max', 'source_ref', 'show_hp', 'effects', 'icon_key', 'icon_stroke_width', 'rotation',
 ]);
-
-function numberOr(value, fallback) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : fallback;
-}
 
 export function normalizeGrid(grid) {
   const source = grid && typeof grid === 'object' ? grid : {};

@@ -1,3 +1,4 @@
+import { numberOr } from '../numbers.js';
 // The things in a room that are not creatures: what was rolled as a trap, a
 // hazard or a hoard, as a marker the GM can see on the board.
 //
@@ -11,8 +12,6 @@ export const MARKER_COLORS = Object.freeze({
   hazard: '#d69245',
   loot: '#e8a030',
 });
-
-const numberOr = (value, fallback = null) => (Number.isFinite(Number(value)) ? Number(value) : fallback);
 
 // Lucide's own names, which is what the map's object layer draws by.
 const TRAP_ICONS = Object.freeze({
@@ -60,7 +59,7 @@ export function trapIconFor(name) {
 // Everything the GM needs while the party is standing on it. A trap has one
 // DC, and the label says what it is for: finding the trap and disarming it.
 export function trapLabel(trap) {
-  const dc = numberOr(trap?.dc);
+  const dc = numberOr(trap?.dc, null);
   return [
     String(trap?.tipo || 'Trap'),
     dc != null ? `DC ${dc} (detect & disarm)` : null,
@@ -70,7 +69,7 @@ export function trapLabel(trap) {
 
 export function lootLabel(loot, lootDc) {
   const rarity = loot?.rarita && loot.rarita !== '—' ? String(loot.rarita) : null;
-  const dc = numberOr(lootDc?.sum);
+  const dc = numberOr(lootDc?.sum, null);
   return [
     String(loot?.tipo || 'Loot'),
     rarity,

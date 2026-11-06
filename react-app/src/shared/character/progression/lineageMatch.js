@@ -1,3 +1,4 @@
+import { asArray } from '../../lists.js';
 /**
  * Predicates for `requiredChoice` gating across builder specs, sheet effects,
  * and auto-granted spells.
@@ -6,11 +7,6 @@
  * `requiredChoice.value` and in option `key`s. Stored choice values are
  * compared by normalized (lowercased, alphanumeric) equality.
  */
-
-function asArray(value) {
-  if (value == null) return [];
-  return Array.isArray(value) ? value : [value];
-}
 
 function cleanText(value) {
   if (value == null) return '';

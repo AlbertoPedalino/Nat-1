@@ -9,13 +9,9 @@
 // and the redraw is cheaper — for a line nobody can tell apart from the original.
 
 import { areaGeometry, isPointOnArea, normalizeArea } from './areas.js';
+import { numberOr } from '../../numbers.js';
 
 const DEFAULT_TOLERANCE = 0.08; // cells
-
-function numberOr(value, fallback) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : fallback;
-}
 
 export function normalizePoint(point) {
   if (!point) return null;

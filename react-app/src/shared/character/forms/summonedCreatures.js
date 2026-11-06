@@ -1,3 +1,4 @@
+import { asArray } from '../../lists.js';
 // Bestiary files holding creatures a spell or class feature summons (their
 // records carry `summonedBySpell` / `summonedByClass`). XPHB has the Ranger's
 // primal beasts.
@@ -43,10 +44,6 @@ export function findSummonedCreature(records, name, source = '') {
     String(record?.name || '').trim().toLowerCase() === wantedName
     && (!wantedSource || String(record?.source || '').trim().toLowerCase() === wantedSource)
   )) || null;
-}
-
-function asArray(value) {
-  return Array.isArray(value) ? value : value == null ? [] : [value];
 }
 
 function applyArrayMod(value, mod) {

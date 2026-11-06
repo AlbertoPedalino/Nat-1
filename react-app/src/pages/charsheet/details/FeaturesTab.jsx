@@ -11,6 +11,7 @@ import { primaryClassLevel } from '../../../shared/character/progression/classLe
 import { featDescriptionEntries } from '../../../shared/character/progression/featDescription.js';
 
 import { ENTITY_COLORS as SOURCE_COLOR } from '../../../shared/ui/entityColors.js';
+import { asArray } from '../../../shared/lists.js';
 
 export default function FeaturesTab({ C }) {
   if (!C) return null;
@@ -442,11 +443,6 @@ function FeatureItem({ feature, tone }) {
       </CollapsibleBody>
     </Box>
   );
-}
-
-function asArray(value) {
-  if (value == null) return [];
-  return Array.isArray(value) ? value : [value];
 }
 
 function featureKey(feature) {

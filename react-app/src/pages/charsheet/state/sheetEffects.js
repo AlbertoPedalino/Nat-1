@@ -7,11 +7,7 @@ import { matchesRequiredChoice } from '../../../shared/character/progression/lin
 import { inventoryHasFlag } from '../../../shared/character/progression/choiceUtils.js';
 import { ownedFeatNames } from '../../../shared/character/progression/selectedFeats.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
-
-export function asArray(value) {
-  if (value == null) return [];
-  return Array.isArray(value) ? value : [value];
-}
+import { asArray } from '../../../shared/lists.js';
 
 export function cleanText(value) {
   if (value == null) return '';

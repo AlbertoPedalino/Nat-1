@@ -1,18 +1,13 @@
 // Shared helper for collecting ASI (Ability Score Improvement) bonuses from feat choices.
 // Supports multiple formats for retroactive compatibility.
 import { collectOwnedFeatNames } from './selectedFeats.js';
+import { asArray } from '../../lists.js';
 
 const VALID_STATS = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
 
 function normalizeStat(value) {
   const s = String(value || '').toLowerCase().trim();
   return VALID_STATS.includes(s) ? s : null;
-}
-
-function asArray(value) {
-  if (Array.isArray(value)) return value;
-  if (value) return [value];
-  return [];
 }
 
 /**
@@ -37,7 +32,8 @@ function collectChosenFeatAsiBonuses(character) {
     // Skip non-ASI choices
     if (!key.includes('_asi')) return;
 
-    const values = asArray(value);
+    // An empty choice ('') counts as none.
+    const values = asArray(value).filter(Boolean);
     if (!values.length) return;
 
     // Format 1: Single ASI (feat_asi_lv4_asi = ["int"])

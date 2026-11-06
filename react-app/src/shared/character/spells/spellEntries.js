@@ -1,9 +1,5 @@
 import { signed } from '../../ui/numberFormat.js';
-function asArray(value) {
-  if (value == null) return [];
-  return Array.isArray(value) ? value : [value];
-}
-
+import { asArray } from '../../lists.js';
 // The 2024 stat block labels ({@atkr m}, {@actSave dex}, …).
 const ATTACK_ROLL_LABELS = {
   m: 'Melee Attack Roll:',

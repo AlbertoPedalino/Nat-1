@@ -1,4 +1,10 @@
-// Keeping a number inside a range, the same way everywhere.
+// Reading numbers and keeping them inside a range, the same way everywhere.
+
+// `value` as a number, or `fallback` when it does not read as a finite one.
+export function numberOr(value, fallback = 0) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallback;
+}
 
 // `value` held between `min` and `max`. A range whose max fell below its min
 // (a container smaller than the minimum size) gives min, never a value past it.

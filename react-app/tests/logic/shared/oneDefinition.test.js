@@ -23,9 +23,15 @@ test('a signed modifier is written only by numberFormat.js', () => {
   }), []);
 });
 
-test('clamp and clampInt are defined only in shared/numbers.js', () => {
-  assert.deepEqual(sourceFilesMatching(/(function|const)\s+clamp(Int)?\b/, {
+test('clamp, clampInt and numberOr are defined only in shared/numbers.js', () => {
+  assert.deepEqual(sourceFilesMatching(/(function|const)\s+(clamp|clampInt|numberOr)\b/, {
     allow: ['shared/numbers.js'],
+  }), []);
+});
+
+test('asArray and flattenList are defined only in shared/lists.js', () => {
+  assert.deepEqual(sourceFilesMatching(/(function|const)\s+(asArray|flattenList)\b/, {
+    allow: ['shared/lists.js'],
   }), []);
 });
 

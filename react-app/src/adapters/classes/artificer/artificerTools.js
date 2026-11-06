@@ -1,3 +1,4 @@
+import { asArray } from '../../../shared/lists.js';
 const CHOICE_KEYS = [
   'choose',
   'any',
@@ -41,10 +42,6 @@ export function artificerToolKey(value) {
   return normalizeArtificerTool(value)
     .toLowerCase()
     .replace(/[^a-z0-9]/g, '');
-}
-
-function asArray(value) {
-  return Array.isArray(value) ? value : value == null ? [] : [value];
 }
 
 function addTool(out, value) {

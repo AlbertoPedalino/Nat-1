@@ -17,6 +17,7 @@
 
 import { VTT_COLORS } from '../colors.js';
 import { FEET_PER_CELL, formatFeet } from './measure.js';
+import { numberOr } from '../../numbers.js';
 
 export const AREA_SHAPES = Object.freeze(['circle', 'square', 'cone', 'line']);
 
@@ -61,11 +62,6 @@ export function squareTurn(dx, dy) {
 }
 
 const MAX_REACH_CELLS = 200;
-
-function numberOr(value, fallback) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : fallback;
-}
 
 export function areaEffect(key) {
   return AREA_EFFECTS.find((effect) => effect.key === key) || null;

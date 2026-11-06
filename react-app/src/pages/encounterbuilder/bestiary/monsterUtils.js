@@ -1,11 +1,7 @@
 import { CR_XP, FALLBACK_MONSTER_TOKEN, IMAGE_BASE, SIZE_LABELS } from '../state/constants.js';
 import { parseCr } from '../../../shared/character/forms/beasts.js';
 import { clampInt } from '../../../shared/numbers.js';
-
-export function numberOr(value, fallback = 0) {
-  const n = Number(value);
-  return Number.isFinite(n) ? n : fallback;
-}
+import { numberOr } from '../../../shared/numbers.js';
 
 export function formatNumber(value) {
   return Number(value || 0).toLocaleString('en-US');
