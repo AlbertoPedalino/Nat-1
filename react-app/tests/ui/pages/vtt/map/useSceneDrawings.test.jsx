@@ -2,9 +2,9 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { useState } from 'react';
 import { expect, test, vi } from 'vitest';
 import { useSceneDrawings } from '../../../../../src/pages/vtt/map/useSceneDrawings.js';
-import { createDrawing, deleteDrawing } from '../../../../../src/shared/cloud/api/vtt.js';
+import { createDrawing, deleteDrawing } from '../../../../../src/shared/cloud/api/vttDrawings.js';
 
-vi.mock('../../../../../src/shared/cloud/api/vtt.js', () => ({
+vi.mock('../../../../../src/shared/cloud/api/vttDrawings.js', () => ({
   createDrawing: vi.fn(async (sceneId, draft) => ({ id: 'new', createdBy: 'me', createdAt: 3, ...draft })),
   deleteDrawing: vi.fn(async () => {}),
   moveDrawing: vi.fn(async () => null),

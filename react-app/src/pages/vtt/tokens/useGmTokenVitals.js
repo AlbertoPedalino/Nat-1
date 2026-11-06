@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { openRealtimeChannel } from '../../../shared/cloud/realtimeChannel.js';
-import { listTokenSecretHp, secretVitals } from '../../../shared/cloud/api/vtt.js';
+import { listTokenSecretHp, secretVitals } from '../../../shared/cloud/api/vttTokens.js';
 import { listFightRevisions, listFightVitals } from '../../../shared/cloud/api/encounterFights.js';
 import { diffRevisions, readChanged } from '../../../shared/cloud/sync/revisionDiff.js';
 import { parseSourceRef } from '../../../shared/vtt/tokens/encounterSync.js';

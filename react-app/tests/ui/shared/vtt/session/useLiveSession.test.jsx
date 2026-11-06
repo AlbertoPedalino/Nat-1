@@ -22,7 +22,7 @@ vi.mock('../../../../../src/shared/cloud/supabaseClient.js', () => ({
   },
 }));
 
-vi.mock('../../../../../src/shared/cloud/api/vtt.js', () => ({
+vi.mock('../../../../../src/shared/cloud/api/vttScenes.js', () => ({
   readLiveSceneId: mocks.readLiveSceneId,
 }));
 

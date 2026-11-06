@@ -32,13 +32,14 @@ vi.mock('../../../../src/shared/cloud/supabaseClient.js', () => ({
 vi.mock('../../../../src/shared/cloud/sync/useRollChannel.js', () => ({ useRollChannel: () => ({ publish: vi.fn() }) }));
 vi.mock('../../../../src/shared/cloud/sync/useCharacterCampaign.js', () => ({ useCharacterCampaign: () => null }));
 vi.mock('../../../../src/pages/charsheet/state/sheetRuntimeAdapters.js', () => ({ ensureSheetRuntimeAdapters: async () => {} }));
-vi.mock('../../../../src/pages/charbuilder/data/dataLoaders.js', async () => {
-  const catalog = [{ name: 'Agonizing Blast', source: 'XPHB', featureType: ['EI'], entries: ['Add your Charisma modifier.'] }];
-  return {
-    loadItems: async () => [], loadOptionalFeatures: async () => catalog, loadConditions: async () => ({}),
-    reconcileInventoryWithItemsDb: (inventory) => inventory,
-  };
-});
+vi.mock('../../../../src/pages/charbuilder/data/itemData.js', () => ({ loadItems: async () => [] }));
+vi.mock('../../../../src/pages/charbuilder/data/classData.js', () => ({
+  loadOptionalFeatures: async () => [{ name: 'Agonizing Blast', source: 'XPHB', featureType: ['EI'], entries: ['Add your Charisma modifier.'] }],
+}));
+vi.mock('../../../../src/pages/charbuilder/data/rulesData.js', () => ({ loadConditions: async () => ({}) }));
+vi.mock('../../../../src/pages/charbuilder/data/inventoryReconcile.js', () => ({
+  reconcileInventoryWithItemsDb: (inventory) => inventory,
+}));
 vi.mock('../../../../src/pages/charsheet/resources/HPBlock.jsx', () => ({ default: () => null }));
 vi.mock('../../../../src/pages/charsheet/layout/TopBar.jsx', () => ({ default: () => null }));
 vi.mock('../../../../src/pages/charsheet/stats/AbilityScores.jsx', () => ({ default: () => null }));

@@ -2,9 +2,9 @@ import { act, renderHook } from '@testing-library/react';
 import { useState } from 'react';
 import { expect, test, vi } from 'vitest';
 import { useTokenPlacement } from '../../../../../src/pages/vtt/tokens/useTokenPlacement.js';
-import { createToken } from '../../../../../src/shared/cloud/api/vtt.js';
+import { createToken } from '../../../../../src/shared/cloud/api/vttTokens.js';
 
-vi.mock('../../../../../src/shared/cloud/api/vtt.js', async (importOriginal) => ({
+vi.mock('../../../../../src/shared/cloud/api/vttTokens.js', async (importOriginal) => ({
   ...(await importOriginal()),
   createToken: vi.fn(async (sceneId, row) => ({ id: `t${row.x}-${row.y}`, ...row })),
 }));

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { updateScene } from '../../../shared/cloud/api/vtt.js';
+import { updateScene } from '../../../shared/cloud/api/vttScenes.js';
 import { sceneView, viewBackgroundPath, viewPatch } from '../../../shared/vtt/scene/scene.js';
 import { createCameraSourceId } from '../../../shared/vtt/session/cameraSync.js';
 import { shouldApplyPresenterFrame, spectatorUrl } from '../../../shared/vtt/session/spectator.js';

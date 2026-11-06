@@ -121,7 +121,7 @@ test('no inline style on HTML elements', () => {
 test('no literal colours outside the palettes and colour data', () => {
   const DATA = [
     'shared/ui/colors.js', 'shared/vtt/colors.js', 'app/theme.js', 'shared/ui/entityColors.js',
-    'pages/charsheet/spells/spellsTabLogic.js', 'shared/character/inventory/currency.js',
+    'pages/charsheet/spells/spellSourceDisplay.js', 'shared/character/inventory/currency.js',
     'shared/ui/IconColorPicker.jsx', 'shared/ui/ColorField.jsx', 'shared/vtt/scene/imageFilters.js',
     'pages/encounterbuilder/state/constants.js', 'shared/hexcrawl/hexCell.js', 'shared/dungeon/roomMarkers.js',
     'shared/character/dice/D100Orb.jsx', 'shared/character/dice/Die3D.jsx', 'shared/vtt/tokens/encounterImport.js',
@@ -177,5 +177,44 @@ test('font stacks come from UI_FONTS', () => {
 test('panel title bars are PanelHeader (or SheetDialog, built on its bar)', () => {
   assert.deepEqual(sourceFilesMatching(/headerBg[^\n]*borderLeft: 3|borderLeft: 3[^\n]*headerBg/, {
     allow: ['shared/ui/PanelHeader.jsx'],
+  }), []);
+});
+
+// A component or hook listens to the DOM through useEventListener. The files
+// left are not straight equivalents: listeners added for the length of a
+// gesture (ResourceBar, PiecePreview, the resize hint in TokenSprite), plain
+// modules (recoveryTriggers, gestureSelection, reminderHistory), and effects
+// whose listeners share a closure or a lifecycle with other work in the same
+// effect (render loops, realtime channels, store subscriptions, cancellable
+// refreshes, the projector link, the pinch guards).
+test('DOM listeners in components and hooks go through useEventListener', () => {
+  assert.deepEqual(sourceFilesMatching(/addEventListener/, {
+    allow: [
+      'shared/ui/useEventListener.js',
+      'pages/charsheet/resources/ResourceBar.jsx',
+      'pages/vtt/tokens/PiecePreview.jsx',
+      'pages/vtt/tokens/TokenSprite.jsx',
+      'shared/cloud/sync/recoveryTriggers.js',
+      'shared/vtt/map/gestureSelection.js',
+      'shared/character/combat/reminderHistory.js',
+      'pages/vtt/atmosphere/AtmosphereOverlay.jsx',
+      'pages/vtt/map/AreaEffectsCanvas.jsx',
+      'pages/vtt/map/usePinchZoom.js',
+      'pages/vtt/scene/useProjector.js',
+      'pages/vtt/VttPage.jsx',
+      'pages/vtt/dungeon/useSceneDungeon.js',
+      'shared/hexcrawl/useBoardCampaign.js',
+      'shared/cloud/sync/CloudAutoSync.jsx',
+      'shared/cloud/sync/useCharacterDigests.js',
+      'shared/cloud/sync/useCharacterSheetRevision.js',
+      'pages/encounterbuilder/sync/useExternalFightSync.js',
+      'pages/vtt/tokens/EncounterImportDialog.jsx',
+    ],
+  }), []);
+});
+
+test('a wizard spellbook is normalized only by shared/character/spells/wizardBook.js', () => {
+  assert.deepEqual(sourceFilesMatching(/function\s+normalizeWizardBook\b/, {
+    allow: ['shared/character/spells/wizardBook.js'],
   }), []);
 });

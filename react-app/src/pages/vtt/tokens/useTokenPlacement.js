@@ -1,10 +1,6 @@
 import { useCallback, useRef } from 'react';
-import {
-  createToken,
-  deleteMapImage,
-  setTokenSecret,
-  uploadMapImage,
-} from '../../../shared/cloud/api/vtt.js';
+import { createToken, setTokenSecret } from '../../../shared/cloud/api/vttTokens.js';
+import { deleteMapImage, uploadMapImage } from '../../../shared/cloud/api/vttMapImages.js';
 import {
   combatantToToken,
   layoutTokens,

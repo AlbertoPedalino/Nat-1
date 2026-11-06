@@ -17,17 +17,16 @@ vi.mock('../../../../../src/shared/cloud/supabaseClient.js', () => ({
   requireClient: () => mocks.client,
 }));
 
+import { deleteCampaignMapImages } from '../../../../../src/shared/cloud/api/vttMapImages.js';
+import { deleteScene } from '../../../../../src/shared/cloud/api/vttScenes.js';
+import { deleteToken, setTokenVisibility } from '../../../../../src/shared/cloud/api/vttTokens.js';
 import {
-  deleteCampaignMapImages,
-  deleteScene,
-  deleteToken,
   addSceneBackground,
   removeSceneBackground,
   removeSceneImage,
   replaceSceneImage,
-  setTokenVisibility,
-  updateDrawing,
-} from '../../../../../src/shared/cloud/api/vtt.js';
+} from '../../../../../src/shared/cloud/api/vttScenePictures.js';
+import { updateDrawing } from '../../../../../src/shared/cloud/api/vttDrawings.js';
 
 describe('VTT Storage cleanup', () => {
   beforeEach(() => {

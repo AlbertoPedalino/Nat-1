@@ -19,8 +19,8 @@ import {
   listScenes,
   setLiveScene,
   updateScene,
-  uploadMapImage,
-} from '../../../shared/cloud/api/vtt.js';
+} from '../../../shared/cloud/api/vttScenes.js';
+import { uploadMapImage } from '../../../shared/cloud/api/vttMapImages.js';
 import NewSceneDialog from './NewSceneDialog.jsx';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';

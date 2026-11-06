@@ -3,7 +3,7 @@ import { Box, Button, ButtonBase, CircularProgress, IconButton, Stack } from '@m
 import {
   ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ImagePlus, Images, Trash2,
 } from 'lucide-react';
-import { signMapImage } from '../../../shared/cloud/api/vtt.js';
+import { signMapImage } from '../../../shared/cloud/api/vttMapImages.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { getStorageItem, setStorageItem } from '../../../shared/storage/storage.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';

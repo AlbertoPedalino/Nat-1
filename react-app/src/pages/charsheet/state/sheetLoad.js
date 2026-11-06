@@ -1,10 +1,8 @@
 import { ensureSheetRuntimeAdapters } from './sheetRuntimeAdapters.js';
-import {
-  loadItems,
-  loadOptionalFeatures,
-  loadConditions,
-  reconcileInventoryWithItemsDb,
-} from '../../charbuilder/data/dataLoaders.js';
+import { loadItems } from '../../charbuilder/data/itemData.js';
+import { loadOptionalFeatures } from '../../charbuilder/data/classData.js';
+import { loadConditions } from '../../charbuilder/data/rulesData.js';
+import { reconcileInventoryWithItemsDb } from '../../charbuilder/data/inventoryReconcile.js';
 import {
   collectReplicatePlanChoices,
 } from '../../../shared/character/inventory/replicateMagicItem.js';

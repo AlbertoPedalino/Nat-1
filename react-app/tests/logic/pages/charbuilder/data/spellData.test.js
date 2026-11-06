@@ -5,7 +5,7 @@ import {
   buildClassSpellIndex,
   buildClassSpellIndexFromSpells,
   loadSpells,
-} from '../../../../../src/pages/charbuilder/data/dataLoaders.js';
+} from '../../../../../src/pages/charbuilder/data/spellData.js';
 import { SPELL_FILES } from '../../../../../src/pages/charbuilder/constants.js';
 
 test('class spell index includes AU classVariant additions but rejects unsupported books', () => {

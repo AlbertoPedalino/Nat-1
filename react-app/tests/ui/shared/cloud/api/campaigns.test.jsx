@@ -12,7 +12,7 @@ vi.mock('../../../../../src/shared/cloud/supabaseClient.js', () => ({
   requireClient: () => mocks.client,
 }));
 
-vi.mock('../../../../../src/shared/cloud/api/vtt.js', () => ({
+vi.mock('../../../../../src/shared/cloud/api/vttMapImages.js', () => ({
   deleteCampaignMapImages: mocks.cleanup,
 }));
 

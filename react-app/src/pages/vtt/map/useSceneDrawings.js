@@ -4,7 +4,7 @@ import {
   deleteDrawing,
   moveDrawing,
   updateDrawing,
-} from '../../../shared/cloud/api/vtt.js';
+} from '../../../shared/cloud/api/vttDrawings.js';
 import { addById, applyCommittedDrawing } from '../../../shared/vtt/session/liveScene.js';
 import {
   canEraseDrawing,

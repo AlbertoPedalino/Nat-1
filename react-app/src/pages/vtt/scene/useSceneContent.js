@@ -1,8 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  listDrawingRevisions, listDrawings, listDrawingsByIds, listTokenRevisions, listTokenSecrets,
-  listTokens, listTokensByIds, signMapImage,
-} from '../../../shared/cloud/api/vtt.js';
+  listDrawingRevisions,
+  listDrawings,
+  listDrawingsByIds,
+} from '../../../shared/cloud/api/vttDrawings.js';
+import {
+  listTokenRevisions,
+  listTokenSecrets,
+  listTokens,
+  listTokensByIds,
+} from '../../../shared/cloud/api/vttTokens.js';
+import { signMapImage } from '../../../shared/cloud/api/vttMapImages.js';
 import {
   assembleSnapshot, diffRevisions, readChanged,
 } from '../../../shared/cloud/sync/revisionDiff.js';

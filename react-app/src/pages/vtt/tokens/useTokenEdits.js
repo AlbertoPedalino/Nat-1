@@ -12,7 +12,7 @@ import {
   setTokenHp,
   setTokenSecret,
   updateToken,
-} from '../../../shared/cloud/api/vtt.js';
+} from '../../../shared/cloud/api/vttTokens.js';
 import { useTokenVitalCommands } from './useTokenVitalCommands.js';
 import {
   FIGHT_UNAVAILABLE,

@@ -24,7 +24,8 @@ import { getFinal, getMod, getPB } from '../state/calculations.js';
 import { describeAttackRoll } from '../../../shared/character/combat/conditions.js';
 import { getSpellAttackAdvantage } from '../state/effectBonuses.js';
 import { entriesToTextBlocks } from '../../../shared/character/spells/spellEntries.js';
-import { getCastBadge, getSpellAbilityForEntry, getSpellStatusChips } from './spellsTabLogic.js';
+import { getCastBadge, getSpellStatusChips } from './spellBadges.js';
+import { getSpellAbilityForEntry } from './spellAbility.js';
 import {
   applySpellModifiers,
   getResolvedCantripData,

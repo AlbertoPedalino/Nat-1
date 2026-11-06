@@ -7,7 +7,7 @@ import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.js
 import { toRoster } from '../../shared/campaign/roster.js';
 import { useGmCampaigns } from '../../shared/campaign/useGmCampaigns.js';
 import { useAuth } from '../../shared/cloud/auth/AuthProvider.jsx';
-import { fetchScene } from '../../shared/cloud/api/vtt.js';
+import { fetchScene } from '../../shared/cloud/api/vttScenes.js';
 import { useLiveSession } from '../../shared/vtt/session/useLiveSession.js';
 import { sessionCameraSource } from '../../shared/vtt/session/cameraSync.js';
 import { VTT_COLORS, vttAlpha } from '../../shared/vtt/colors.js';

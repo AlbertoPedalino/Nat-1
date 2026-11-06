@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { signMapImage } from '../../../shared/cloud/api/vtt.js';
+import { signMapImage } from '../../../shared/cloud/api/vttMapImages.js';
 import { sceneView, viewImagePath } from '../../../shared/vtt/scene/scene.js';
 
 function waitForImage(image) {

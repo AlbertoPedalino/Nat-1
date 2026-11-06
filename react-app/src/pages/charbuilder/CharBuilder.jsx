@@ -28,7 +28,11 @@ import { STEPS } from './constants.js';
 import { adapterRegistry, loadClassAdapters, loadCoreAdapters } from '../../adapters/index.js';
 import { getMod, getFinal } from '../charsheet/state/calculations.js';
 import { adaptBuilderData } from '../../adapters/adapterPipeline.js';
-import { loadBackgrounds, loadClassIndex, loadFeats, loadItems, loadSpecies, loadSpells, loadOptionalFeatures, loadBeasts } from './data/dataLoaders.js';
+import { loadBackgrounds, loadFeats, loadSpecies } from './data/characterOptionData.js';
+import { loadClassIndex, loadOptionalFeatures } from './data/classData.js';
+import { loadItems } from './data/itemData.js';
+import { loadSpells } from './data/spellData.js';
+import { loadBeasts } from './data/beastData.js';
 import { extractSheetData, buildImportedCharacter, saveCharacter, buildSheetCharacter } from './state/persistence.js';
 import { builderReducer, initialBuilderState, normalizeCharacterLevels } from './state/state.js';
 import { BackgroundStep, ClassStep, EquipmentStep, ScoresStep, SheetStep, SpeciesStep } from './steps/index.js';
@@ -49,6 +53,7 @@ import {
   setActiveCharId,
 } from '../../shared/character/profile/store.js';
 import { confirmAction } from '../../shared/ui/confirmAction.js';
+import { useEventListener } from '../../shared/ui/useEventListener.js';
 import { UI_COLORS, uiAlpha } from '../../shared/ui/colors.js';
 import { UI_FONTS } from '../../shared/ui/fonts.js';
 
@@ -230,16 +235,12 @@ export default function CharBuilder() {
 
   // A save of this character made elsewhere in this tab (e.g. the autosync
   // push of a "Save local" copy) is ours: its revision becomes the one held.
-  useEffect(() => {
-    const onSaved = ({ detail }) => {
-      if (String(detail?.characterId ?? '') !== String(builderIdRef.current ?? '')) return;
-      if (sheetRevisionRef.current == null || detail.sheetRevision > sheetRevisionRef.current) {
-        sheetRevisionRef.current = detail.sheetRevision;
-      }
-    };
-    window.addEventListener(CHARACTER_SHEET_SAVED_EVENT, onSaved);
-    return () => window.removeEventListener(CHARACTER_SHEET_SAVED_EVENT, onSaved);
-  }, []);
+  useEventListener(window, CHARACTER_SHEET_SAVED_EVENT, ({ detail }) => {
+    if (String(detail?.characterId ?? '') !== String(builderIdRef.current ?? '')) return;
+    if (sheetRevisionRef.current == null || detail.sheetRevision > sheetRevisionRef.current) {
+      sheetRevisionRef.current = detail.sheetRevision;
+    }
+  });
   // An imported JSON is a DRAFT: held in builder state, persisted NOWHERE (no
   // localStorage, no cloud) until the user explicitly saves it from the Sheet
   // step. While true the autosave effect is suppressed. Applies on/offline.

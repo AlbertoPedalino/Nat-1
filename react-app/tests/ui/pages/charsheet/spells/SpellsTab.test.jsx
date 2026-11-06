@@ -9,7 +9,7 @@ import { theme } from '../../../../../src/app/theme.js';
 const loaders = vi.hoisted(() => ({
   loadSpells: vi.fn(), loadCoreAdapters: vi.fn(), loadClassAdapters: vi.fn(), loadSpellsAdapters: vi.fn(),
 }));
-vi.mock('../../../../../src/pages/charbuilder/data/dataLoaders.js', () => ({ loadSpells: loaders.loadSpells }));
+vi.mock('../../../../../src/pages/charbuilder/data/spellData.js', () => ({ loadSpells: loaders.loadSpells }));
 vi.mock('../../../../../src/adapters/index.js', async () => ({
   ...loaders,
   installedRegistry: (await import('../../../../../src/adapters/registry.js')).adapterRegistry,

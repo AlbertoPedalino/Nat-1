@@ -1,5 +1,5 @@
 import { requireClient } from '../supabaseClient.js';
-import { deleteCampaignMapImages } from './vtt.js';
+import { deleteCampaignMapImages } from './vttMapImages.js';
 
 // Create a campaign — caller becomes its GM and gets a unique invite code.
 export async function createCampaign(name) {

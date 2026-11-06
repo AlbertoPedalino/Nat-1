@@ -1,5 +1,5 @@
 import { useCallback, useRef } from 'react';
-import { updateScene } from '../../../shared/cloud/api/vtt.js';
+import { updateScene } from '../../../shared/cloud/api/vttScenes.js';
 import {
   applyCells,
   applyFogDelta,

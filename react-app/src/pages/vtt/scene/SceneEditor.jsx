@@ -9,7 +9,7 @@ import {
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
 import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
 import { commandCharacterVitals } from '../../../shared/cloud/api/cloudCharacters.js';
-import { fetchScene, fetchSceneRevision } from '../../../shared/cloud/api/vtt.js';
+import { fetchScene, fetchSceneRevision } from '../../../shared/cloud/api/vttScenes.js';
 import { applyTokenEvent } from '../../../shared/vtt/session/liveScene.js';
 import {
   canMarkToken,

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../cloud/auth/AuthProvider.jsx';
 import { supabase } from '../../cloud/supabaseClient.js';
 import { openRealtimeChannel } from '../../cloud/realtimeChannel.js';
-import { readLiveSceneId } from '../../cloud/api/vtt.js';
+import { readLiveSceneId } from '../../cloud/api/vttScenes.js';
 import { listenForRecovery } from '../../cloud/sync/recoveryTriggers.js';
 
 

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { updateScene } from '../../../shared/cloud/api/vtt.js';
+import { updateScene } from '../../../shared/cloud/api/vttScenes.js';
 import { sceneBackgrounds, samePlayArea } from '../../../shared/vtt/scene/scene.js';
 import { atmosphereFor, withImageAtmosphere } from '../../../shared/vtt/scene/atmosphere.js';
 import { imageFilterFor, withImageFilter } from '../../../shared/vtt/scene/imageFilters.js';

@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, vi } from 'vitest';
 
-vi.mock('../../../../../src/shared/cloud/api/vtt.js', () => ({
+vi.mock('../../../../../src/shared/cloud/api/vttMapImages.js', () => ({
   signMapImage: vi.fn(async (path) => `signed:${path}`),
 }));
 

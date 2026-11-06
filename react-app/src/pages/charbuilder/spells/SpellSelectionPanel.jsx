@@ -9,6 +9,7 @@ import { SpellMiniTags, SpellReferenceBody, SpellRowLabel, SpellSelectButton } f
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import { entityChipSx } from '../../../shared/ui/entityColors.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
+import { normalizeWizardBook } from '../../../shared/character/spells/wizardBook.js';
 
 export default function SpellSelectionPanel({ state, dispatch }) {
   const [wizardMode, setWizardMode] = useState('prepare');
@@ -225,22 +226,6 @@ function dedupeSpells(spells) {
 function containsSpellName(list, name) {
   const target = matchKey(name);
   return (list || []).some((entry) => matchKey(entry) === target);
-}
-
-function normalizeWizardBook(book) {
-  const next = {};
-  for (let level = 0; level <= 9; level++) {
-    const seen = new Set();
-    next[level] = [];
-    (book?.[level] || []).forEach((entry) => {
-      const name = typeof entry === 'string' ? entry : entry?.name;
-      const key = matchKey(name);
-      if (!key || seen.has(key)) return;
-      seen.add(key);
-      next[level].push(name);
-    });
-  }
-  return next;
 }
 
 function getSpellbookLevel(book, level) {

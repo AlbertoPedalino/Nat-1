@@ -19,8 +19,18 @@ vi.mock('../../../../../src/shared/cloud/supabaseClient.js', () => {
 });
 
 import {
-  fetchSceneRevision, listDrawingRevisions, listLiveCampaignIds, readLiveSceneId, listDrawingsByIds, listTokenRevisions, listTokensByIds,
-} from '../../../../../src/shared/cloud/api/vtt.js';
+  fetchSceneRevision,
+  listLiveCampaignIds,
+  readLiveSceneId,
+} from '../../../../../src/shared/cloud/api/vttScenes.js';
+import {
+  listDrawingRevisions,
+  listDrawingsByIds,
+} from '../../../../../src/shared/cloud/api/vttDrawings.js';
+import {
+  listTokenRevisions,
+  listTokensByIds,
+} from '../../../../../src/shared/cloud/api/vttTokens.js';
 import {
   listCharacterDigestRevisions, listCharacterDigests, readCharacterSheets,
 } from '../../../../../src/shared/cloud/api/characterDigests.js';

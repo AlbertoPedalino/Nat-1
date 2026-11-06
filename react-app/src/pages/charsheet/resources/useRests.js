@@ -16,7 +16,8 @@ import {
   getUsedHitDiceTotal,
 } from './restResources.js';
 import { clearedToggles } from '../state/toggleState.js';
-import { applyFreeCastRest, getFreeCastDefsForCharacter } from '../spells/spellsTabLogic.js';
+import { applyFreeCastRest } from '../../../shared/character/spells/spellFreeCasts.js';
+import { getFreeCastDefsForCharacter } from '../spells/spellFreeCastDefs.js';
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
 import { rollDie } from '../../../shared/character/dice/dice.js';
 

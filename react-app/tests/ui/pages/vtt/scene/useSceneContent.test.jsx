@@ -6,7 +6,9 @@ const cloud = vi.hoisted(() => ({
   listTokens: vi.fn(), listDrawings: vi.fn(), listTokenSecrets: vi.fn(), signMapImage: vi.fn(),
   listTokenRevisions: vi.fn(), listTokensByIds: vi.fn(), listDrawingRevisions: vi.fn(), listDrawingsByIds: vi.fn(),
 }));
-vi.mock('../../../../../src/shared/cloud/api/vtt.js', () => cloud);
+vi.mock('../../../../../src/shared/cloud/api/vttTokens.js', () => cloud);
+vi.mock('../../../../../src/shared/cloud/api/vttDrawings.js', () => cloud);
+vi.mock('../../../../../src/shared/cloud/api/vttMapImages.js', () => cloud);
 
 function deferred() {
   let resolve;

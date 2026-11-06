@@ -4,7 +4,7 @@ import { Backpack, Coins, PackagePlus, Trash2 } from 'lucide-react';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { ItemNameIcon } from '../../../shared/content/FiveEToolsLink.jsx';
-import { equipmentTypeCandidates } from '../data/dataLoaders.js';
+import { equipmentTypeCandidates } from '../data/equipmentTypes.js';
 import { CurrencyRow } from '../../../shared/character/inventory/CurrencyCoinBox.jsx';
 import { findInventoryItem } from '../../../shared/character/inventory/itemContainers.js';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
@@ -21,7 +21,7 @@ import { stripSource } from '../../../shared/content/nameKeys.js';
 const CHOICE_KEYS = ['A', 'B', 'C', 'D', 'E', 'a', 'b', 'c', 'd', 'e'];
 
 // Human labels for 5etools `equipmentType` codes that resolve to a player choice.
-// Keys must match EQUIPMENT_TYPE_MATCHERS in dataLoaders.js.
+// Keys must match EQUIPMENT_TYPE_MATCHERS in equipmentTypes.js.
 const EQUIP_TYPE_LABELS = {
   focusSpellcastingArcane: 'Arcane Focus',
   focusSpellcastingDruidic: 'Druidic Focus',

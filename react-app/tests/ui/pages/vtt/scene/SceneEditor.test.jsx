@@ -59,13 +59,19 @@ beforeEach(() => {
   sceneLiveOptions.current = null;
 });
 
-vi.mock('../../../../../src/shared/cloud/api/vtt.js', async (importOriginal) => ({
+vi.mock('../../../../../src/shared/cloud/api/vttMapImages.js', async (importOriginal) => ({
   ...await importOriginal(),
   signMapImage: signMapImageMock,
+}));
+vi.mock('../../../../../src/shared/cloud/api/vttScenes.js', async (importOriginal) => ({
+  ...await importOriginal(),
   updateScene: updateSceneMock,
-  updateToken: updateTokenMock,
   fetchScene: fetchSceneMock,
   fetchSceneRevision: fetchSceneRevisionMock,
+}));
+vi.mock('../../../../../src/shared/cloud/api/vttTokens.js', async (importOriginal) => ({
+  ...await importOriginal(),
+  updateToken: updateTokenMock,
 }));
 vi.mock('../../../../../src/shared/cloud/api/cloudCharacters.js', () => ({ patchCharacterData: patchCharacterMock }));
 

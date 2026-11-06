@@ -1,6 +1,6 @@
 import { useCallback, useRef } from 'react';
 import { commitFightCombatantVitals } from '../../../shared/cloud/api/encounterFights.js';
-import { setTokenHp } from '../../../shared/cloud/api/vtt.js';
+import { setTokenHp } from '../../../shared/cloud/api/vttTokens.js';
 import { parseSourceRef } from '../../../shared/vtt/tokens/encounterSync.js';
 import {
   applyMonsterVitalCommand,

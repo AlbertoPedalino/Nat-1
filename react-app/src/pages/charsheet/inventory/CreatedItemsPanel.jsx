@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Box, IconButton, Typography } from '@mui/material';
 import { Minus, Plus } from 'lucide-react';
 import SearchField from '../../../shared/ui/SearchField.jsx';
-import { loadItems } from '../../charbuilder/data/dataLoaders.js';
+import { loadItems } from '../../charbuilder/data/itemData.js';
 import { ItemNameIcon } from '../../../shared/content/FiveEToolsLink.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import { ItemReferenceBody } from '../../../shared/character/inventory/ItemReference.jsx';

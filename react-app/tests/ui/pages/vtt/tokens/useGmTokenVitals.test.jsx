@@ -11,7 +11,7 @@ const m = vi.hoisted(() => ({
 vi.mock('../../../../../src/shared/cloud/supabaseClient.js', () => ({
   supabase: { channel: () => m.channel, removeChannel: vi.fn() },
 }));
-vi.mock('../../../../../src/shared/cloud/api/vtt.js', () => ({ listTokenSecretHp: m.listTokenSecretHp }));
+vi.mock('../../../../../src/shared/cloud/api/vttTokens.js', () => ({ listTokenSecretHp: m.listTokenSecretHp }));
 vi.mock('../../../../../src/shared/cloud/api/encounterFights.js', () => ({
   listFightVitals: m.listFightVitals,
   listFightRevisions: m.listFightRevisions,

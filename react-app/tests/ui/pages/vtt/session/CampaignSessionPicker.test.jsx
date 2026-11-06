@@ -3,7 +3,7 @@ import { beforeEach, expect, test, vi } from 'vitest';
 
 const m = vi.hoisted(() => ({ live: vi.fn() }));
 vi.mock('../../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({ useAuth: () => ({ user: { id: 'me' } }) }));
-vi.mock('../../../../../src/shared/cloud/api/vtt.js', () => ({ listLiveCampaignIds: (...args) => m.live(...args) }));
+vi.mock('../../../../../src/shared/cloud/api/vttScenes.js', () => ({ listLiveCampaignIds: (...args) => m.live(...args) }));
 
 import CampaignSessionPicker from '../../../../../src/pages/vtt/session/CampaignSessionPicker.jsx';
 

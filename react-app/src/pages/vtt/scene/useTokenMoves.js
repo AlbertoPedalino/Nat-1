@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { setTokenVisibility, updateToken } from '../../../shared/cloud/api/vtt.js';
+import { setTokenVisibility, updateToken } from '../../../shared/cloud/api/vttTokens.js';
 import { applyCommittedToken, movableFilter } from '../../../shared/vtt/session/liveScene.js';
 import { isTokenVisibleToPlayers } from '../../../shared/vtt/scene/scene.js';
 

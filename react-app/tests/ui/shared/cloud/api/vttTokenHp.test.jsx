@@ -1,5 +1,9 @@
 import { beforeEach, vi } from 'vitest';
-import { createToken, setTokenHp, setTokenSecret } from '../../../../../src/shared/cloud/api/vtt.js';
+import {
+  createToken,
+  setTokenHp,
+  setTokenSecret,
+} from '../../../../../src/shared/cloud/api/vttTokens.js';
 
 const calls = vi.hoisted(() => []);
 

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Autocomplete, Box, Stack, TextField, Typography } from '@mui/material';
-import { loadSpells } from '../../charbuilder/data/dataLoaders.js';
+import { loadSpells } from '../../charbuilder/data/spellData.js';
 import { scrollSpellStats, spellScrollLevel } from '../../../shared/character/inventory/spellScrolls.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';

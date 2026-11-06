@@ -4,8 +4,8 @@ import {
   removeSceneBackground,
   removeSceneImage,
   replaceSceneImage,
-  updateScene,
-} from '../../../shared/cloud/api/vtt.js';
+} from '../../../shared/cloud/api/vttScenePictures.js';
+import { updateScene } from '../../../shared/cloud/api/vttScenes.js';
 import { sceneView, viewPatch } from '../../../shared/vtt/scene/scene.js';
 
 // The scene's pictures: uploading or removing the battlemap and backgrounds,

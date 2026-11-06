@@ -19,7 +19,8 @@ import {
   buildActionTags,
 } from './actionsTabLogic.js';
 import { makeWeaponActions } from './weaponActions.js';
-import { loadItems, loadVariantRules } from '../../charbuilder/data/dataLoaders.js';
+import { loadItems } from '../../charbuilder/data/itemData.js';
+import { loadVariantRules } from '../../charbuilder/data/rulesData.js';
 import { loadMasteryEntries } from '../../../shared/character/combat/weaponMastery.js';
 import { WeaponMasteryBlock } from '../../../shared/character/combat/WeaponMasteryBlock.jsx';
 import { WeaponNoteBlock } from '../../../shared/character/combat/WeaponNoteBlock.jsx';

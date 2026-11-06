@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { clearLiveScene, setLiveScene, updateScene } from '../../../shared/cloud/api/vtt.js';
+import { clearLiveScene, setLiveScene, updateScene } from '../../../shared/cloud/api/vttScenes.js';
 
 // The scene's own row, from the header: going live and renaming.
 export function useSceneHeaderActions({ scene, onSceneChange, notify }) {

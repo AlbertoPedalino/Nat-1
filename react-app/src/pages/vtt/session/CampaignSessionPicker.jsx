@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Box, Chip, CircularProgress, Paper, Stack, Typography } from '@mui/material';
 import { Flag, Radio } from 'lucide-react';
 import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
-import { listLiveCampaignIds } from '../../../shared/cloud/api/vtt.js';
+import { listLiveCampaignIds } from '../../../shared/cloud/api/vttScenes.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 // Several campaigns can be running at the same time, so a player picks the table

@@ -12,7 +12,7 @@ import { Plus, Sparkles } from 'lucide-react';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import { SPELL_LEVEL_LABELS } from '../../charbuilder/constants.js';
 import { SLBL, getFinal, getMod, getPB, effectiveD20Modifier } from '../state/calculations.js';
-import { loadSpells } from '../../charbuilder/data/dataLoaders.js';
+import { loadSpells } from '../../charbuilder/data/spellData.js';
 import { scrollRowKey } from '../../../shared/character/inventory/spellScrolls.js';
 import { spellMatchesClass } from '../../charbuilder/spells/spells.js';
 import {
@@ -26,14 +26,10 @@ import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import { characterItemBonuses } from '../../../shared/character/inventory/itemBonus.js';
 import { getSpellSaveDcBonus } from '../state/effectBonuses.js';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
-import {
-  buildSpellInfo,
-  dedupeSpells,
-  getSpellAbility,
-  normalizeWizardBook,
-  toSnapshot,
-  upsertSnapshot,
-} from './spellsTabLogic.js';
+import { buildSpellInfo } from './spellsTabLogic.js';
+import { dedupeSpells, toSnapshot, upsertSnapshot } from './spellSnapshots.js';
+import { getSpellAbility } from './spellAbility.js';
+import { normalizeWizardBook } from '../../../shared/character/spells/wizardBook.js';
 import {
   canManageSpells,
   getMaxLearnableSpellLevel,

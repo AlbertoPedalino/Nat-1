@@ -32,11 +32,17 @@ vi.mock('../../../../../src/shared/cloud/api/encounterFights.js', () => ({
   listFightRevisions: async () => m.fightRows.current.map((row) => ({ id: row.id, updated_at: row.updated_at })),
   saveInstanceFight: vi.fn(),
 }));
-vi.mock('../../../../../src/shared/cloud/api/vtt.js', async (importOriginal) => ({
+vi.mock('../../../../../src/shared/cloud/api/vttMapImages.js', async (importOriginal) => ({
   ...await importOriginal(),
   signMapImage: vi.fn(async () => null),
+}));
+vi.mock('../../../../../src/shared/cloud/api/vttScenes.js', async (importOriginal) => ({
+  ...await importOriginal(),
   updateScene: vi.fn(async () => null),
   fetchScene: vi.fn(async () => null),
+}));
+vi.mock('../../../../../src/shared/cloud/api/vttTokens.js', async (importOriginal) => ({
+  ...await importOriginal(),
   updateToken: (...args) => m.updateToken(...args),
   setTokenConditions: (...args) => m.setTokenConditions(...args),
   setTokenEffects: (...args) => m.setTokenEffects(...args),

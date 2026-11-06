@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { loadBeasts } from '../../charbuilder/data/dataLoaders.js';
+import { loadBeasts } from '../../charbuilder/data/beastData.js';
 
 // Loads the normalized beast DB for a sheet panel (Wild Shape / Wild Companion).
-// loadBeasts is cached per-file in dataLoaders, so multiple callers share one
+// loadBeasts is cached per-file by loadGameData, so multiple callers share one
 // fetch; this hook just manages the async-to-state plus the unmount guard, which
 // both beast panels would otherwise duplicate.
 export function useBeastsDb() {
