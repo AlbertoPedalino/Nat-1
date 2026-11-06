@@ -8,6 +8,7 @@ import { SELECTOR_CONTRACTS } from '../ui/selectorContracts.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { isValidRoomCount, roomCountInputFrom } from './dungeon.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 export default function DungeonView() {
   const { state, dispatch, generateDungeon } = useGmBoard();
@@ -113,7 +114,7 @@ const panelSx = {
 };
 
 const titleSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.8rem',
   letterSpacing: '0.06em',
   color: 'primary.main',

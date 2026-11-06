@@ -23,6 +23,7 @@ import { isItemCarried, itemQty as qty } from '../../../shared/character/invento
 import { canOneHand, canTwoHand, isThrownWeapon, isWeapon, THROWN_SLOT } from './equipmentSlots.js';
 import ItemExtras from './ItemExtras.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 const itemStateChipBaseSx = {
   minWidth: 0,
@@ -30,7 +31,7 @@ const itemStateChipBaseSx = {
   py: '2px',
   border: 1,
   borderRadius: '3px',
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.58rem',
   fontWeight: 700,
   lineHeight: 1.75,
@@ -119,7 +120,7 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
             </Box>
           ) : carried && canEquip ? (
             <Button size="small" onClick={() => actions.equip(index)} startIcon={item.equipped ? <Check size={11} /> : null}
-              sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: item.equipped ? UI_COLORS.tealDeep : 'divider', borderRadius: '3px', color: item.equipped ? UI_COLORS.tealDeep : 'text.secondary', bgcolor: item.equipped ? uiAlpha(UI_COLORS.tealFlat, 0.12) : 'transparent', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem' }}>
+              sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: item.equipped ? UI_COLORS.tealDeep : 'divider', borderRadius: '3px', color: item.equipped ? UI_COLORS.tealDeep : 'text.secondary', bgcolor: item.equipped ? uiAlpha(UI_COLORS.tealFlat, 0.12) : 'transparent', fontFamily: UI_FONTS.display, fontSize: '0.58rem' }}>
               {item.equipped ? 'Equip.' : 'Equip'}
             </Button>
           ) : null}
@@ -159,12 +160,12 @@ const InventoryRow = memo(function InventoryRow({ item, index, character, penalt
           {/* Where the item is and how many, apart from how it is being used. */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, ml: 'auto' }}>
             <Button size="small" onClick={() => actions.carried(index)} startIcon={!carried ? <Archive size={11} /> : null}
-              sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: carried ? 'divider' : UI_COLORS.borderMuted, borderRadius: '3px', color: carried ? 'text.secondary' : UI_COLORS.textParchmentSoft, bgcolor: carried ? 'transparent' : uiAlpha(UI_COLORS.borderMuted, 0.14), fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem' }}>
+              sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: carried ? 'divider' : UI_COLORS.borderMuted, borderRadius: '3px', color: carried ? 'text.secondary' : UI_COLORS.textParchmentSoft, bgcolor: carried ? 'transparent' : uiAlpha(UI_COLORS.borderMuted, 0.14), fontFamily: UI_FONTS.display, fontSize: '0.58rem' }}>
               {carried ? 'Stash' : 'Carry'}
             </Button>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
               <QtyButton onClick={() => actions.qty(index, -1)}><Minus size={12} /></QtyButton>
-              <Box sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.8125rem', fontWeight: 700, color: UI_COLORS.goldLight, minWidth: 18, textAlign: 'center' }}>{qty(item)}</Box>
+              <Box sx={{ fontFamily: UI_FONTS.display, fontSize: '0.8125rem', fontWeight: 700, color: UI_COLORS.goldLight, minWidth: 18, textAlign: 'center' }}>{qty(item)}</Box>
               <QtyButton onClick={() => actions.qty(index, 1)}><Plus size={12} /></QtyButton>
             </Box>
             <Tooltip title="Remove">
@@ -185,7 +186,7 @@ function ItemFlagButton({ def, active, onClick }) {
   return (
     <Button size="small" onClick={onClick} startIcon={active ? <Check size={11} /> : null}
       sx={{
-        minWidth: 0, px: '7px', py: '2px', border: 1, borderRadius: '3px', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem',
+        minWidth: 0, px: '7px', py: '2px', border: 1, borderRadius: '3px', fontFamily: UI_FONTS.display, fontSize: '0.58rem',
         ...(active ? chipTintStyle(tone, { bgAlpha: 0.14, borderAlpha: 1 }) : { borderColor: 'divider', color: 'text.secondary', bgcolor: 'transparent' }),
       }}>
       {active ? (def.activeLabel || def.label) : def.label}
@@ -234,7 +235,7 @@ function SlotBtn({ active, onClick, label }) {
         borderRadius: '3px',
         color: active ? UI_COLORS.goldLight : 'text.secondary',
         bgcolor: active ? uiAlpha(UI_COLORS.gold, 0.14) : 'transparent',
-        fontFamily: '"Cinzel", Georgia, serif',
+        fontFamily: UI_FONTS.display,
         fontSize: '0.48rem',
         fontWeight: 700,
         letterSpacing: '0.04em',
@@ -277,7 +278,7 @@ function AttuneButton({ item, index, attunement, character, onAttune }) {
       {cursedAttuned ? (
         <Tooltip title="Use Remove Curse or equivalent magic, then end attunement" arrow>
           <Button size="small" onClick={() => onAttune?.(index, { curseBroken: true })}
-            sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: UI_COLORS.dangerDim, borderRadius: '3px', color: UI_COLORS.dangerSoft, fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem' }}>
+            sx={{ minWidth: 0, px: '7px', py: '2px', border: 1, borderColor: UI_COLORS.dangerDim, borderRadius: '3px', color: UI_COLORS.dangerSoft, fontFamily: UI_FONTS.display, fontSize: '0.58rem' }}>
             Break Curse & Unattune
           </Button>
         </Tooltip>

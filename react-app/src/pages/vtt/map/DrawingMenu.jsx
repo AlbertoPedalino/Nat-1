@@ -21,6 +21,7 @@ import { isNote as isNoteDrawing, scaledPoints } from '../../../shared/vtt/map/d
 import { fullscreenContainer } from './fullscreenContainer.js';
 import { useMenuPlacement } from './menuPlacement.js';
 import { battleMapDialogPaperSx } from './battleMapSurface.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 // Right-click (or a long press) on a mark: the same idea as a piece's menu.
 // Its label, who sees it, its colour, its size, and taking it away. Every
@@ -343,7 +344,7 @@ const TYPING_DELAY = 400;
 const COLOR_DELAY = 180;
 
 const sectionTitleSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.72rem',
   fontWeight: 800,
   letterSpacing: '0.06em',

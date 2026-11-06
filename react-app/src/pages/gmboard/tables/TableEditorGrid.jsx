@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, useTheme } from '@mui/material';
 import { resolveCellCommit } from './tableEdit.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 export default function TableEditorGrid({ rows, columns, matchField, onEdit, tableLabel }) {
   const theme = useTheme();
@@ -118,7 +119,7 @@ const visuallyHiddenSx = {
 };
 
 const headCellSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.66rem',
   letterSpacing: '0.06em',
   textTransform: 'uppercase',

@@ -37,8 +37,9 @@ import {
 } from '../../../shared/character/forms/eldritchCannonForm.js';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
-const CINZEL = '"Cinzel", Georgia, serif';
+const CINZEL = UI_FONTS.display;
 
 // Sheet panel for the Artillerist's Eldritch Cannon (EFA 2024). Mirrors the
 // Wild Shape / Wild Companion panels: an "Activate" control creates a cannon

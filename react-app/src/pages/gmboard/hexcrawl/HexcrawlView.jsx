@@ -10,6 +10,7 @@ import HexResultSteps from './HexResultSteps.jsx';
 import SessionLog from '../session/SessionLog.jsx';
 import { SELECTOR_CONTRACTS } from '../ui/selectorContracts.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 function missingSelections(state) {
   const missing = [];
@@ -107,7 +108,7 @@ const panelSx = {
 };
 
 const titleSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.8rem',
   letterSpacing: '0.06em',
   color: 'primary.main',

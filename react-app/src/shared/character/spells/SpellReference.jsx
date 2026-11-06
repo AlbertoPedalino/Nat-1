@@ -8,9 +8,10 @@ import { isConcentrationSpell, isRitualSpell } from './spellTags.js';
 import { RICH_TEXT_ACCENT, SPELL_TAG_COLORS } from '../../ui/entityColors.js';
 import MiniBadge from '../../ui/MiniBadge.jsx';
 import { SpellNameIcon } from '../../content/FiveEToolsLink.jsx';
+import { UI_FONTS } from '../../ui/fonts.js';
 
 const META_LABEL_SX = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontWeight: 700,
   letterSpacing: '0.06em',
   textTransform: 'uppercase',
@@ -20,7 +21,7 @@ const META_LABEL_SX = {
 };
 
 const SECTION_HEADING_SX = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.6rem',
   fontWeight: 700,
   letterSpacing: '0.08em',

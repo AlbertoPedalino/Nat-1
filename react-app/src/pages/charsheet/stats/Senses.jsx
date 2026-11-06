@@ -7,6 +7,7 @@ import { loadSenseDescriptions, getSenseDescriptionEntries, getFeatureDescriptio
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 export default function Senses({ C }) {
   const passPerc = 10 + getSkillBonus(C, { n: 'Perception', a: 'wis' });
@@ -46,7 +47,7 @@ export default function Senses({ C }) {
     <Paper variant="outlined" sx={{ mb: '0.6rem', overflow: 'hidden' }}>
       <Box sx={{ bgcolor: UI_COLORS.headerBg, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1, px: '0.8rem', py: '0.48rem', borderLeft: 3, borderLeftColor: 'primary.main' }}>
         <Eye size={14} />
-        <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'primary.main' }}>
+        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'primary.main' }}>
           Senses
         </Typography>
       </Box>
@@ -73,7 +74,7 @@ function SenseRow({ value, label, source, color, entries, note, expanded, onTogg
           '&:hover': clickable ? { bgcolor: uiAlpha(UI_COLORS.gold, 0.05) } : undefined,
         }}
       >
-        <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '1.15rem', fontWeight: 700, color: color || UI_COLORS.goldLight, flexShrink: 0 }}>
+        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '1.15rem', fontWeight: 700, color: color || UI_COLORS.goldLight, flexShrink: 0 }}>
           {value}
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, minWidth: 0 }}>

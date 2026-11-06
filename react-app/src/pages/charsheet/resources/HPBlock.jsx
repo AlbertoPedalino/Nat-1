@@ -6,8 +6,9 @@ import { normalizeDeathSaves } from '../../../shared/character/combat/vitals.js'
 import { EXHAUSTION_MAX } from '../state/calculations.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
-const CINZEL = '"Cinzel", Georgia, serif';
+const CINZEL = UI_FONTS.display;
 // When the panel fills its row (embedded sheet) the content follows the panel:
 // 90% of it, never below the desktop column's 260px nor above 680px, never
 // wider than the panel. The extra room goes between each value and its stepper.

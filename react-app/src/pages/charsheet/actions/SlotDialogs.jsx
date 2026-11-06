@@ -2,6 +2,7 @@ import { Box, Button, Typography } from '@mui/material';
 import { SPELL_LEVEL_LABELS } from '../../charbuilder/constants.js';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 // The dialogs a resource side effect opens (see useResourceSideEffects): pick
 // the slot to create, convert or spend, the Wild Resurgence option, the Pact
@@ -144,7 +145,7 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
                   '&:hover': { borderColor: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.06) },
                 }}
               >
-                <Box sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.72rem', color: UI_COLORS.goldLight }}>{opt.label}</Box>
+                <Box sx={{ fontFamily: UI_FONTS.display, fontSize: '0.72rem', color: UI_COLORS.goldLight }}>{opt.label}</Box>
               </Box>
             ))}
           </Box>
@@ -239,7 +240,7 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
                     {SPELL_LEVEL_LABELS[entry.level] || `Level ${entry.level}`} · expended {entry.expended}
                   </Typography>
                   <Button size="small" variant="outlined" onClick={() => adjustSlotRecoveryLevel(entry.level, -1)} sx={{ minWidth: 26, px: 0.7 }}>-</Button>
-                  <Typography sx={{ minWidth: 16, textAlign: 'center', fontSize: '0.78rem', color: UI_COLORS.goldLight, fontFamily: '"Cinzel", Georgia, serif' }}>{value}</Typography>
+                  <Typography sx={{ minWidth: 16, textAlign: 'center', fontSize: '0.78rem', color: UI_COLORS.goldLight, fontFamily: UI_FONTS.display }}>{value}</Typography>
                   <Button size="small" variant="outlined" onClick={() => adjustSlotRecoveryLevel(entry.level, 1)} disabled={slotRecoveryRemaining < entry.level || value >= entry.expended} sx={{ minWidth: 26, px: 0.7 }}>+</Button>
                 </Box>
               );

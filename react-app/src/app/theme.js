@@ -1,4 +1,5 @@
 import { createTheme } from '@mui/material';
+import { UI_FONTS } from '../shared/ui/fonts.js';
 
 // Portalled controls must remain descendants of the browser's fullscreen
 // element or they are not painted at all. Outside fullscreen this is exactly
@@ -109,7 +110,7 @@ export const theme = createTheme({
     borderRadius: 8,
   },
   typography: {
-    fontFamily: 'Georgia, "Times New Roman", serif',
+    fontFamily: UI_FONTS.body,
     h1: {
       fontSize: '2rem',
       fontWeight: 700,

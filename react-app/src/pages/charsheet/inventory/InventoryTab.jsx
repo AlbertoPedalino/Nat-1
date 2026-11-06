@@ -84,6 +84,7 @@ import {
   loadItemsCached,
 } from './itemSearch.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 // Keys and labels come from the shared chip taxonomy; the sheet only adds the
 // icons, which are its own presentation. The add-item search gets the plain set
@@ -122,7 +123,7 @@ const filterButtonSx = (active) => ({
   borderRadius: 1,
   bgcolor: active ? uiAlpha(UI_COLORS.gold, 0.12) : 'transparent',
   color: active ? UI_COLORS.goldLight : 'text.secondary',
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.56rem',
   fontWeight: 700,
   letterSpacing: '0.08em',
@@ -151,7 +152,7 @@ const inventorySectionTitleSx = {
   alignItems: 'center',
   gap: 0.5,
   minWidth: 0,
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.65rem',
   fontWeight: 700,
   letterSpacing: '0.12em',
@@ -168,7 +169,7 @@ const addPanelToggleSx = (open) => ({
   borderRadius: 1,
   bgcolor: open ? uiAlpha(UI_COLORS.gold, 0.14) : UI_COLORS.headerBg,
   color: open ? UI_COLORS.goldLight : 'text.secondary',
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.6rem',
   fontWeight: 700,
   letterSpacing: '0.08em',
@@ -263,7 +264,7 @@ function ShowMoreButton({ remaining, onClick }) {
     <Button
       size="small"
       onClick={onClick}
-      sx={{ alignSelf: 'center', my: 0.5, px: '12px', py: '2px', border: 1, borderColor: 'divider', borderRadius: 1, color: 'text.secondary', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.6rem', letterSpacing: '0.06em', textTransform: 'uppercase', '&:hover': { borderColor: UI_COLORS.gold, color: UI_COLORS.gold } }}
+      sx={{ alignSelf: 'center', my: 0.5, px: '12px', py: '2px', border: 1, borderColor: 'divider', borderRadius: 1, color: 'text.secondary', fontFamily: UI_FONTS.display, fontSize: '0.6rem', letterSpacing: '0.06em', textTransform: 'uppercase', '&:hover': { borderColor: UI_COLORS.gold, color: UI_COLORS.gold } }}
     >
       Show more ({remaining})
     </Button>
@@ -628,7 +629,7 @@ export default function InventoryTab({ C, sheet }) {
           const attunedCount = countAttunedItems(inv);
           const over = attunedCount > attunementState.limit;
           return (
-            <Box sx={{ ...statPillSx, bgcolor: over ? uiAlpha(UI_COLORS.danger, 0.12) : UI_COLORS.headerBg, borderColor: over ? UI_COLORS.danger : 'divider', '& b': { color: over ? UI_COLORS.danger : UI_COLORS.goldLight, fontFamily: '"Cinzel", Georgia, serif' } }}>
+            <Box sx={{ ...statPillSx, bgcolor: over ? uiAlpha(UI_COLORS.danger, 0.12) : UI_COLORS.headerBg, borderColor: over ? UI_COLORS.danger : 'divider', '& b': { color: over ? UI_COLORS.danger : UI_COLORS.goldLight, fontFamily: UI_FONTS.display } }}>
               Attuned: <b>{attunedCount} / {attunementState.limit}</b>{over ? ' (over limit)' : ''}
             </Box>
           );
@@ -638,8 +639,8 @@ export default function InventoryTab({ C, sheet }) {
             <Box sx={{ width: `${carryPct}%`, height: '100%', bgcolor: overloaded ? UI_COLORS.danger : UI_COLORS.success }} />
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.65rem', mt: 0.25 }}>
-            <Box sx={{ color: 'text.secondary', fontFamily: '"Cinzel", Georgia, serif' }}>{formatWeight(totalWeight)} / {formatWeight(maxCarry)} lb</Box>
-            <Box sx={{ px: 0.75, py: '1px', borderRadius: 1, bgcolor: overloaded ? uiAlpha(UI_COLORS.danger, 0.14) : uiAlpha(UI_COLORS.successDeep, 0.14), color: overloaded ? UI_COLORS.danger : UI_COLORS.success, fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.6rem' }}>
+            <Box sx={{ color: 'text.secondary', fontFamily: UI_FONTS.display }}>{formatWeight(totalWeight)} / {formatWeight(maxCarry)} lb</Box>
+            <Box sx={{ px: 0.75, py: '1px', borderRadius: 1, bgcolor: overloaded ? uiAlpha(UI_COLORS.danger, 0.14) : uiAlpha(UI_COLORS.successDeep, 0.14), color: overloaded ? UI_COLORS.danger : UI_COLORS.success, fontFamily: UI_FONTS.display, fontSize: '0.6rem' }}>
               {overloaded ? 'Over Capacity' : 'OK'}
             </Box>
           </Box>
@@ -692,7 +693,7 @@ export default function InventoryTab({ C, sheet }) {
                 onKeyDown={(event) => { if (event.key === 'Enter') addCustom(); }}
                 inputProps={{ min: 0, step: 0.01 }} sx={{ ...compactInputSx, width: 62 }} />
               <Button size="small" onClick={addCustom} disabled={!customName.trim()}
-                sx={{ px: '14px', border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: UI_COLORS.headerBg, color: 'text.secondary', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.65rem', whiteSpace: 'nowrap', '&:hover': { borderColor: UI_COLORS.gold, color: UI_COLORS.gold } }}>
+                sx={{ px: '14px', border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: UI_COLORS.headerBg, color: 'text.secondary', fontFamily: UI_FONTS.display, fontSize: '0.65rem', whiteSpace: 'nowrap', '&:hover': { borderColor: UI_COLORS.gold, color: UI_COLORS.gold } }}>
                 + Add
               </Button>
             </Box>
@@ -772,7 +773,7 @@ function InventorySectionTitle({ icon: Icon, label }) {
 
 function SectionHeader({ icon: Icon, label }) {
   return (
-    <Typography sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'text.secondary', borderBottom: 1, borderColor: 'divider', pb: '3px', mt: 0.6, mb: 0.4 }}>
+    <Typography sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontFamily: UI_FONTS.display, fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'text.secondary', borderBottom: 1, borderColor: 'divider', pb: '3px', mt: 0.6, mb: 0.4 }}>
       {Icon ? <Icon size={12} /> : null}
       {label}
     </Typography>
@@ -825,5 +826,5 @@ const statPillSx = {
   py: '4px',
   fontSize: '0.8125rem',
   color: 'text.secondary',
-  '& b': { color: UI_COLORS.goldLight, fontFamily: '"Cinzel", Georgia, serif' },
+  '& b': { color: UI_COLORS.goldLight, fontFamily: UI_FONTS.display },
 };

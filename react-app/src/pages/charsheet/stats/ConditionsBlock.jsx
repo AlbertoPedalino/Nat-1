@@ -9,6 +9,7 @@ import {
   ConditionPill,
 } from '../../../shared/character/combat/ConditionChips.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 const DEAD_ACCENT = UI_COLORS.dangerBright;
 
@@ -58,7 +59,7 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
 
   return (
     <Box sx={{ flex: 1, minWidth: 140, bgcolor: UI_COLORS.headerBg, border: 1, borderColor: 'divider', borderRadius: 1, p: '0.4rem 0.62rem' }}>
-      <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'primary.main', mb: 0.4 }}>Conditions</Typography>
+      <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'primary.main', mb: 0.4 }}>Conditions</Typography>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.3 }}>
           {active.length === 0 && <Chip size="small" label="— None" variant="outlined" sx={{ fontSize: '0.5rem', borderStyle: 'dashed' }} />}
@@ -99,7 +100,7 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
             component="button"
             type="button"
             onClick={() => setOpen(!open)}
-            sx={{ width: '100%', bgcolor: 'transparent', border: 0, p: '2px 3px', borderRadius: '3px', cursor: 'pointer', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.56rem', color: 'text.secondary', letterSpacing: '0.06em', display: 'flex', alignItems: 'center', gap: 0.5, userSelect: 'none', '&:hover': { bgcolor: uiAlpha(UI_COLORS.white, 0.04), color: 'text.primary' } }}
+            sx={{ width: '100%', bgcolor: 'transparent', border: 0, p: '2px 3px', borderRadius: '3px', cursor: 'pointer', fontFamily: UI_FONTS.display, fontSize: '0.56rem', color: 'text.secondary', letterSpacing: '0.06em', display: 'flex', alignItems: 'center', gap: 0.5, userSelect: 'none', '&:hover': { bgcolor: uiAlpha(UI_COLORS.white, 0.04), color: 'text.primary' } }}
           >
             <ListChecks size={12} /> Manage ({active.length})
             <ChevronDown size={12} style={{ marginLeft: 'auto', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }} />

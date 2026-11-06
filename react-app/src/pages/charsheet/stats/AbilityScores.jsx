@@ -7,6 +7,7 @@ import { advantageVisual, conditionalDisadvantageVisual } from './advantageMark.
 import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 export default function AbilityScores({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
@@ -51,14 +52,14 @@ export default function AbilityScores({ C, sheet, onRoll }) {
                 cursor: 'pointer', transition: 'border-color 0.15s',
                 '&:hover': { borderColor: 'primary.main' },
               }}>
-              <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.14em', color: 'text.secondary', textTransform: 'uppercase', mb: 0.1 }}>
+              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.14em', color: 'text.secondary', textTransform: 'uppercase', mb: 0.1 }}>
                 {SLBL[s]}
               </Typography>
-              <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '1.5rem', fontWeight: 700, color: UI_COLORS.goldLight, lineHeight: 1 }}>
+              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '1.5rem', fontWeight: 700, color: UI_COLORS.goldLight, lineHeight: 1 }}>
                 {signed(shownMod)}
               </Typography>
               <Box sx={{
-                fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.56rem', fontWeight: 600, color: 'text.secondary',
+                fontFamily: UI_FONTS.display, fontSize: '0.56rem', fontWeight: 600, color: 'text.secondary',
                 bgcolor: UI_COLORS.headerBg, border: 1, borderColor: 'divider', borderRadius: '50%',
                 width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', mt: 0.25,
               }}>

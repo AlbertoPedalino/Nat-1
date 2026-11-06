@@ -2,12 +2,13 @@ import { Box, Typography } from '@mui/material';
 import { levelHeaderSx, panelSurfaceSx, statBoxSx } from './spellsTabStyles.js';
 import { getPactSlotUsed, getRegularSlotUsed } from '../../../shared/character/spells/spellSlots.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 export function StatBox({ value, label }) {
   return (
     <Box sx={statBoxSx}>
-      <Box sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '1rem', fontWeight: 700, color: UI_COLORS.goldLight }}>{value}</Box>
-      <Box sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.56rem', letterSpacing: '0.1em', color: 'text.secondary', textTransform: 'uppercase' }}>{label}</Box>
+      <Box sx={{ fontFamily: UI_FONTS.display, fontSize: '1rem', fontWeight: 700, color: UI_COLORS.goldLight }}>{value}</Box>
+      <Box sx={{ fontFamily: UI_FONTS.display, fontSize: '0.56rem', letterSpacing: '0.1em', color: 'text.secondary', textTransform: 'uppercase' }}>{label}</Box>
     </Box>
   );
 }
@@ -70,7 +71,7 @@ function SlotGroup({ level, total, used, created = 0, kind = 'regular', onToggle
   const dotHover = readOnly ? {} : { '&:hover': { borderColor: UI_COLORS.goldLight } };
   return (
     <Box sx={{ minWidth: 42 }}>
-      <Box sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.56rem', color: 'text.secondary', textAlign: 'center', mb: '3px', letterSpacing: '0.08em' }}>{level}</Box>
+      <Box sx={{ fontFamily: UI_FONTS.display, fontSize: '0.56rem', color: 'text.secondary', textAlign: 'center', mb: '3px', letterSpacing: '0.08em' }}>{level}</Box>
       <Box sx={{ display: 'flex', gap: '4px', flexWrap: 'wrap', justifyContent: 'center' }}>
         {Array.from({ length: total }, (_, index) => (
           <Box
@@ -103,7 +104,7 @@ function SlotGroup({ level, total, used, created = 0, kind = 'regular', onToggle
         ) : null}
       </Box>
       {created > 0 ? (
-        <Box sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.5rem', color: UI_COLORS.success, textAlign: 'center', mt: '2px', letterSpacing: '0.04em' }}>
+        <Box sx={{ fontFamily: UI_FONTS.display, fontSize: '0.5rem', color: UI_COLORS.success, textAlign: 'center', mt: '2px', letterSpacing: '0.04em' }}>
           +{created}
         </Box>
       ) : null}

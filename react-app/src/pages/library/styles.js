@@ -1,6 +1,7 @@
 import { alpha } from '@mui/material/styles';
 import { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
 import { UI_COLORS, uiAlpha } from '../../shared/ui/colors.js';
+import { UI_FONTS } from '../../shared/ui/fonts.js';
 
 // Row/panel visuals carried over from the old Home "Continue" section, now
 // serving the full-page instance picker instead of a compact home panel.
@@ -26,7 +27,7 @@ export const headerSx = {
 };
 
 export const titleSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: 'clamp(1.3rem, 4vw, 1.7rem)',
   fontWeight: 800,
   letterSpacing: '0.06em',
@@ -36,7 +37,7 @@ export const titleSx = {
 };
 
 export const newBtnSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.68rem',
   letterSpacing: '0.06em',
 };
@@ -44,7 +45,7 @@ export const newBtnSx = {
 export const sectionHeadSx = {
   width: '100%',
   maxWidth: '640px',
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.86rem',
   fontWeight: 700,
   letterSpacing: '0.1em',
@@ -140,7 +141,7 @@ export function badgeSx(kind, theme) {
   return {
     height: '18px',
     fontSize: '0.62rem',
-    fontFamily: '"Cinzel", Georgia, serif',
+    fontFamily: UI_FONTS.display,
     letterSpacing: '0.04em',
     borderRadius: '4px',
     color,
@@ -163,7 +164,7 @@ export const emptyTextSx = {
   color: UI_COLORS.textDim,
   fontSize: '0.9rem',
   fontStyle: 'italic',
-  fontFamily: '"EB Garamond", Georgia, serif',
+  fontFamily: UI_FONTS.prose,
 };
 
 export const errorTextSx = {

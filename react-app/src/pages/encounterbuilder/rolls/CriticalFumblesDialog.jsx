@@ -23,6 +23,7 @@ import {
 } from './fumbles.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 export default function CriticalFumblesDialog({ open, onClose }) {
   const { state, dispatch, roll } = useEncounterBuilder();
@@ -265,7 +266,7 @@ const sectionSx = {
 };
 
 const sectionTitleSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.7rem',
   fontWeight: 800,
   letterSpacing: '0.08em',
@@ -291,7 +292,7 @@ const dieControlSx = {
 };
 
 const dieLabelSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.72rem',
   fontWeight: 800,
 };
@@ -299,7 +300,7 @@ const dieLabelSx = {
 const countSx = {
   minWidth: 18,
   textAlign: 'center',
-  fontFamily: '"JetBrains Mono", monospace',
+  fontFamily: UI_FONTS.mono,
   fontSize: '0.76rem',
   color: UI_COLORS.goldLight,
 };
@@ -313,7 +314,7 @@ const stepButtonSx = {
 };
 
 const formulaSx = {
-  fontFamily: '"JetBrains Mono", monospace',
+  fontFamily: UI_FONTS.mono,
   fontSize: '0.78rem',
   fontWeight: 700,
   color: UI_COLORS.teal,
@@ -339,13 +340,13 @@ const outcomeNumberSx = {
   borderRadius: 1,
   bgcolor: 'error.main',
   color: UI_COLORS.dangerInk,
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: { xs: '1rem', sm: '1.2rem' },
   fontWeight: 900,
 };
 
 const outcomeTitleSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.65rem',
   fontWeight: 800,
   letterSpacing: '0.08em',
@@ -371,7 +372,7 @@ const entryRowSx = {
 };
 
 const resultLabelSx = {
-  fontFamily: '"JetBrains Mono", monospace',
+  fontFamily: UI_FONTS.mono,
   fontSize: '0.7rem',
   fontWeight: 800,
   color: UI_COLORS.goldLight,

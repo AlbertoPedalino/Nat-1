@@ -1,8 +1,9 @@
 import { Box, Typography } from '@mui/material';
 import HpStepper from './HpStepper.jsx';
 import { UI_COLORS } from '../../ui/colors.js';
+import { UI_FONTS } from '../../ui/fonts.js';
 
-const CINZEL = '"Cinzel", Georgia, serif';
+const CINZEL = UI_FONTS.display;
 
 // Green above half, amber below, red at zero — the shared HP readout colour ramp.
 function hpColor(current, max) {

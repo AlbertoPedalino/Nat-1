@@ -1,5 +1,6 @@
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { mapIconButtonSx } from './battleMapSurface.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 // Styles of the battle-map viewport: host, covering overlay, play area,
 // placement target, selection marquee and toolbar, corner and fullscreen
@@ -79,7 +80,7 @@ export const placementTargetHintSx = {
   color: VTT_COLORS.gold,
   border: `1px solid ${vttAlpha(VTT_COLORS.gold, 0.62)}`,
   boxShadow: `0 4px 14px ${vttAlpha(VTT_COLORS.black, 0.55)}`,
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.62rem',
   fontWeight: 700,
   letterSpacing: '0.05em',
@@ -114,7 +115,7 @@ export const selectionToolbarSx = {
 
 export const selectionCountSx = {
   color: VTT_COLORS.gold,
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.68rem',
   fontWeight: 700,
   whiteSpace: 'nowrap',
@@ -140,7 +141,7 @@ export const fullscreenSheetButtonSx = {
   minWidth: 88,
   borderColor: vttAlpha(VTT_COLORS.gold, 0.42),
   bgcolor: vttAlpha(VTT_COLORS.ink, 0.82),
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.62rem',
   letterSpacing: '0.07em',
   '&:hover': { bgcolor: vttAlpha(VTT_COLORS.ink, 0.96) },
@@ -226,7 +227,7 @@ export const distanceSx = {
   borderRadius: 1,
   bgcolor: vttAlpha(VTT_COLORS.ink, 0.9),
   color: VTT_COLORS.gold,
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.65rem',
   whiteSpace: 'nowrap',
   pointerEvents: 'none',

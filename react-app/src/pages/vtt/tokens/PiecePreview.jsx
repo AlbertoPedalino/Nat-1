@@ -2,6 +2,7 @@ import { Box, Typography } from '@mui/material';
 import { classIcon } from '../../../shared/character/profile/classIcon.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { suppressGestureSelection } from '../../../shared/vtt/map/gestureSelection.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 export const PIECE_POINTER_DRAG_EVENT = 'gb:vtt-piece-pointer-drag';
 const POINTER_DRAG_THRESHOLD = 7;
@@ -196,7 +197,7 @@ const imageSx = {
 
 const initialsSx = {
   color: VTT_COLORS.goldPreview,
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.68rem',
   fontWeight: 800,
 };

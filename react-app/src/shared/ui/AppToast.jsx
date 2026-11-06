@@ -1,5 +1,6 @@
 import { Snackbar, Alert, Portal, useMediaQuery, useTheme } from '@mui/material';
 import { UI_COLORS, uiAlpha } from './colors.js';
+import { UI_FONTS } from './fonts.js';
 
 // One toast look for the whole app. MUI's default `filled` Alert uses the stock
 // Material palette (bright green/red) which clashes with the parchment/gold
@@ -46,7 +47,7 @@ export default function AppToast({ toast, onClose, autoHideDuration = 3500 }) {
             variant="outlined"
             onClose={onClose}
             sx={{
-              fontFamily: '"EB Garamond", Georgia, serif',
+              fontFamily: UI_FONTS.prose,
               fontSize: '0.84rem',
               alignItems: 'center',
               minWidth: 240,

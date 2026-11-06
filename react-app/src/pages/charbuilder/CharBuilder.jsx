@@ -50,6 +50,7 @@ import {
 } from '../../shared/character/profile/store.js';
 import { confirmAction } from '../../shared/ui/confirmAction.js';
 import { UI_COLORS, uiAlpha } from '../../shared/ui/colors.js';
+import { UI_FONTS } from '../../shared/ui/fonts.js';
 
 function StepLabel({ step, index }) {
   const Icon = step.icon;
@@ -621,7 +622,7 @@ const builderRootSx = {
   '& .MuiButton-root': {
     minHeight: 0,
     borderRadius: 1,
-    fontFamily: '"Cinzel", Georgia, serif',
+    fontFamily: UI_FONTS.display,
     fontSize: '0.62rem',
     letterSpacing: '0.04em',
     px: 1,
@@ -631,7 +632,7 @@ const builderRootSx = {
     minHeight: 0,
     py: 0.75,
     px: 1.05,
-    fontFamily: '"Cinzel", Georgia, serif',
+    fontFamily: UI_FONTS.display,
     fontSize: '0.6rem',
     letterSpacing: '0.06em',
     color: 'text.secondary',
@@ -663,7 +664,7 @@ const builderRootSx = {
 // Builder-scoped component defaults use theme overrides instead of descendant
 // selectors in `builderRootSx`. This keeps component `sx` authoritative for
 // custom colors/sizes. Scoped to the builder via the ThemeProvider in render.
-const CINZEL = '"Cinzel", Georgia, serif';
+const CINZEL = UI_FONTS.display;
 const BUILDER_SELECTED_SX = {
   color: UI_COLORS.textPrimary,
   backgroundColor: uiAlpha(UI_COLORS.primary, 0.20),
@@ -746,7 +747,7 @@ const builderAppNavSx = {
 };
 
 const appNavButtonSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.625rem',
   letterSpacing: '0.08em',
 };

@@ -1,6 +1,7 @@
 import { Box, Chip, Typography } from '@mui/material';
 import { chipTintStyle, damageTypeTone } from '../../../shared/ui/entityColors.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 // The "Defenses" box: one chip per defense `{ kind, type, source? }`, kind being
 // 'Resist', 'Immune', 'Cond. Immune', 'Adv', 'Trait'… Resistances and
@@ -30,7 +31,7 @@ export default function DefensesPanel({ items = [], emptyText = 'No resistances 
 }
 
 const titleSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.625rem',
   fontWeight: 700,
   letterSpacing: '0.12em',

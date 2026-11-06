@@ -5,6 +5,7 @@ import {
 import { Footprints, Rabbit } from 'lucide-react';
 import { MAX_MOUNT_SPEED, MIN_MOUNT_SPEED, MOUNT_OPTIONS, normalizeMountSpeed } from '../state/constants.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 // What the party is travelling on, as a multiplier on its speed.
 //
@@ -89,7 +90,7 @@ function ordinal(value) {
 }
 
 const labelSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.68rem',
   letterSpacing: '0.08em',
   textTransform: 'uppercase',

@@ -5,6 +5,7 @@ import {
 import { Check, ChevronLeft, ChevronRight, EyeOff, Swords } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { battleMapSurfaceSx } from '../map/battleMapSurface.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 // The turn order over the battle map. What it lists is decided by the caller:
 // the pieces the viewer can see (players, projector) or the whole shown fight
@@ -221,7 +222,7 @@ const roundSx = {
   lineHeight: 1,
   px: 0.75,
   color: 'gmboard.vtt.gold',
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.62rem',
   fontWeight: 700,
   letterSpacing: '0.06em',

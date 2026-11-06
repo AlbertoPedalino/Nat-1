@@ -4,6 +4,7 @@ import {
 } from '@mui/material';
 import { ExternalLink } from 'lucide-react';
 import { loadBookList } from './books.js';
+import { UI_FONTS } from '../../shared/ui/fonts.js';
 
 // The supported manuals and adventures, each opening its 5etools page in a new
 // tab.
@@ -56,7 +57,7 @@ const scrollSx = { minHeight: 0, overflowY: 'auto', flex: 1 };
 const subheaderSx = {
   bgcolor: 'background.paper',
   color: 'primary.main',
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   letterSpacing: '0.06em',
   lineHeight: '36px',
 };

@@ -50,6 +50,7 @@ import { IMAGE_FILTER_PRESETS, imageFilterFor } from '../../../shared/vtt/scene/
 import { battleMapDialogPaperSx } from '../map/battleMapSurface.js';
 import { numberSx, pillLabelSx, colorInputSx } from './panelStyles.js';
 import { getStorageJson, setStorageJson } from '../../../shared/storage/storage.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 // The GM's scene panel (MapCorner): four collapsible sections — Pictures,
 // Light & weather (per-picture light filter and atmosphere), Grid, Play area —
@@ -734,7 +735,7 @@ const sectionIconSx = { display: 'flex', color: VTT_COLORS.gold, flexShrink: 0 }
 
 const sectionTitleSx = {
   display: 'block',
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.68rem',
   letterSpacing: '0.06em',
   lineHeight: 1.4,

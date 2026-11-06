@@ -2,6 +2,7 @@ import { Box, Stack, Typography, alpha, useTheme } from '@mui/material';
 import { Castle, Coins, Flame, Leaf, Lock, Minus, ShieldCheck, Swords } from 'lucide-react';
 import ResultBadge from '../ui/ResultBadge.jsx';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 function formatLoot(loot) {
   const valueLine = [loot.value, loot.extra].filter(Boolean).join(' ');
@@ -108,7 +109,7 @@ const headerBandSx = {
 };
 
 const roomChipSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.78rem',
   letterSpacing: '0.04em',
   color: 'primary.main',
@@ -123,7 +124,7 @@ const slotSx = {
 };
 
 const microLabelSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.6rem',
   letterSpacing: '0.06em',
   textTransform: 'uppercase',

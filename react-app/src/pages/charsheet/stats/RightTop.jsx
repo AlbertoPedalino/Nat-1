@@ -29,6 +29,7 @@ import { rollD20 } from '../../../shared/character/dice/dice.js';
 import DefensesPanel from './DefensesPanel.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 export default function RightTop({ C, sheet, onRoll, onToggleCondition, onClearConditions, effectActions, onSetExhaustion, conditionEntries, onToggleInspiration, resources, setResources, onShowToast }) {
   // Initiative is a DEX check (D20 Test) but rolls its own d20 here (it also fires
@@ -147,8 +148,8 @@ function SquareStat({ value, label, clickable }) {
         bgcolor: UI_COLORS.headerBg,
         ...(clickable ? { cursor: 'pointer', '&:hover': { borderColor: 'primary.main' } } : {}),
       }}>
-      <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '1.25rem', fontWeight: 700, color: UI_COLORS.goldLight, lineHeight: 1 }}>{value}</Typography>
-      <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.44rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'text.secondary', mt: 0.15 }}>{label}</Typography>
+      <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '1.25rem', fontWeight: 700, color: UI_COLORS.goldLight, lineHeight: 1 }}>{value}</Typography>
+      <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.44rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'text.secondary', mt: 0.15 }}>{label}</Typography>
     </Box>
   );
 }
@@ -158,7 +159,7 @@ function InspirationBlock({ sheet, onToggle }) {
   return (
     <Box onClick={onToggle} sx={{ minWidth: 90, maxWidth: 110, bgcolor: UI_COLORS.headerBg, border: 1, borderColor: insp ? 'primary.main' : 'divider', borderRadius: 1, p: '0.4rem 0.62rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 0.25, cursor: 'pointer', '&:hover': { borderColor: 'primary.main' }, ...(insp ? { bgcolor: uiAlpha(UI_COLORS.gold, 0.14) } : {}) }}>
       <Sparkles size={20} style={{ color: insp ? UI_COLORS.goldLight : 'text.secondary', filter: insp ? `drop-shadow(0 0 6px ${uiAlpha(UI_COLORS.gold, 0.6)})` : 'none' }} />
-      <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: insp ? 'primary.main' : 'text.secondary', textAlign: 'center' }}>
+      <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: insp ? 'primary.main' : 'text.secondary', textAlign: 'center' }}>
         {insp ? 'Insp.' : 'No Insp.'}
       </Typography>
     </Box>

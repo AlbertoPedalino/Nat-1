@@ -1,5 +1,6 @@
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
-const FONT_TITLE = '"Cinzel", Georgia, serif';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
+const FONT_TITLE = UI_FONTS.display;
 
 export const panelRootSx = {
   display: 'grid',

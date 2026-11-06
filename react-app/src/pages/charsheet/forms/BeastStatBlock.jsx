@@ -6,6 +6,7 @@ import { beast5eToolsUrl, parseBeastActions, parseBeastActionsRich } from '../..
 import { formatRollTitle } from '../../../shared/character/dice/dice.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 // Shared presentational layer for a normalized beast snapshot, used by both the
 // Wild Shape and Wild Companion sheet panels. Renders a compact Monster-Manual
@@ -309,7 +310,7 @@ export const panelSx = {
 };
 
 export const headerSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.66rem',
   fontWeight: 700,
   letterSpacing: '0.08em',
@@ -348,7 +349,7 @@ export const dismissButtonSx = {
   px: 0.8,
   py: 0.1,
   fontSize: '0.58rem',
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   letterSpacing: '0.04em',
   color: UI_COLORS.dangerMuted,
   border: 1,

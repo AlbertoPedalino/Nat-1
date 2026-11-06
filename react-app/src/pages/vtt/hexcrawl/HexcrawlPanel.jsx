@@ -19,6 +19,7 @@ import {
 import {
   mergeBoardClock, missingHexSetup, populationOption, terrainOption, tierOption,
 } from '../../../shared/hexcrawl/hexEntry.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 // The hexcrawl as it stands, in the corner where the map's other settings live.
 //
@@ -348,7 +349,7 @@ const lastCardSx = {
 };
 
 const lastHexSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.68rem',
   letterSpacing: '0.04em',
   color: VTT_COLORS.panelText,

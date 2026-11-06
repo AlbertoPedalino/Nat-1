@@ -22,6 +22,7 @@ import {
   GENERATORS, GENERATOR_CREDIT, isMapImage, joinedSceneName, orderForFloors, sceneNamesFor,
 } from './generators.js';
 import { stitchImages } from './stitch.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 const GENERATOR_ICONS = {
   dungeon: Castle,
@@ -249,7 +250,7 @@ export default function NewSceneDialog({ open, campaignId, onClose, onCreate, on
   );
 }
 
-const titleSx = { fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.95rem' };
+const titleSx = { fontFamily: UI_FONTS.display, fontSize: '0.95rem' };
 
 const gridSx = {
   display: 'grid',
@@ -276,7 +277,7 @@ const cardSx = {
 const freshSx = { ...cardSx, borderColor: 'primary.main' };
 
 const cardTitleSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.82rem',
   color: 'primary.main',
 };
@@ -298,7 +299,7 @@ const openSx = { fontSize: '0.72rem' };
 
 const pillSx = {
   ml: 0.5,
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.6rem',
   letterSpacing: '0.04em',
 };

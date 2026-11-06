@@ -72,6 +72,7 @@ import {
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { lowerKey } from '../../../shared/content/nameKeys.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 const SPELL_ACTION_FILTERS = [
   { key: 'all', label: 'All' },
@@ -572,7 +573,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
                   variant={pickerClassIndex === index ? 'filled' : 'outlined'}
                   color={pickerClassIndex === index ? 'primary' : 'default'}
                   onClick={() => { setPickerClassIndex(index); setPickerLevel(0); setPickerWizardMode('prepare'); }}
-                  sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem', letterSpacing: '0.06em' }}
+                  sx={{ fontFamily: UI_FONTS.display, fontSize: '0.58rem', letterSpacing: '0.06em' }}
                 />
               ))}
             </Box>
@@ -581,7 +582,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
           {activePicker ? (
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: activeIsWizard ? '1fr auto' : '1fr' }, gap: 0.5, mb: 0.75 }}>
               <Box sx={{ bgcolor: UI_COLORS.headerBg, border: 1, borderColor: 'divider', borderRadius: 1, px: 1, py: 0.65, display: 'flex', gap: 0.75, flexWrap: 'wrap', alignItems: 'center' }}>
-                <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.72rem', color: UI_COLORS.goldLight, letterSpacing: '0.06em' }}>{activePicker.label}</Typography>
+                <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.72rem', color: UI_COLORS.goldLight, letterSpacing: '0.06em' }}>{activePicker.label}</Typography>
                 <Typography sx={{ fontSize: '0.68rem', color: 'text.secondary' }}>{activePicker.note}</Typography>
                 <Typography sx={{ fontSize: '0.68rem', color: 'text.secondary' }}>Max level {activePicker.maxLevel || 0}</Typography>
                 {activeIsWizard ? <Typography sx={{ fontSize: '0.68rem', color: UI_COLORS.blue }}>Spellbook {activeSpellbookSize}</Typography> : null}
@@ -689,7 +690,7 @@ function PickerSpellRow({ spell, selected, disabled, atLimit, autoGranted, locke
           {autoGranted ? (
             sourceInfo
               ? <SourceBadge sourceInfo={sourceInfo} sources={sources} />
-              : <Box sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.7rem', color: UI_COLORS.success, flexShrink: 0 }}>AUTO</Box>
+              : <Box sx={{ fontFamily: UI_FONTS.display, fontSize: '0.7rem', color: UI_COLORS.success, flexShrink: 0 }}>AUTO</Box>
           ) : null}
           {!locked ? (
             <SpellSelectButton selected={selected} disabled={disabled} onToggle={onToggle} addColor="success" />

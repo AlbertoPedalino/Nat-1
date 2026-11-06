@@ -7,6 +7,7 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import HexcrawlPanel from './HexcrawlPanel.jsx';
 import HexcrawlSettingsDialog from './HexcrawlSettingsDialog.jsx';
 import { ICON_STRIP } from '../scene/MapCorner.jsx';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 // Top left, beside the picture settings: the hexcrawl is how this map is played
 // rather than a tool you pick up, so it belongs with the scene's own settings
@@ -95,7 +96,7 @@ const panelSx = {
 };
 
 const titleSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.7rem',
   letterSpacing: '0.08em',
   color: 'primary.main',

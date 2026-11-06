@@ -1,4 +1,5 @@
 import { Box } from '@mui/material';
+import { UI_FONTS } from './fonts.js';
 
 // Shared mini chip/badge: a small bordered, tinted label. One look for every
 // spell-row tag — cast time, Concentration/Ritual, source, modifiers — across
@@ -19,7 +20,7 @@ export default function MiniBadge({ label, color, bg = 'transparent', title, sx 
         borderRadius: '3px',
         px: '6px',
         py: '1px',
-        fontFamily: '"Cinzel", Georgia, serif',
+        fontFamily: UI_FONTS.display,
         fontSize: '0.56rem',
         fontWeight: 700,
         lineHeight: 1.3,

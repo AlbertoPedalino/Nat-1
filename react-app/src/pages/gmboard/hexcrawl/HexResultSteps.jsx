@@ -2,6 +2,7 @@ import { Box, Stack, Typography, useTheme } from '@mui/material';
 import { Coins, Dice5, Eye, Flame, Leaf, Lock, Map, Swords, CloudRain } from 'lucide-react';
 import ResultBadge from '../ui/ResultBadge.jsx';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 function formatLoot(loot) {
   const valueLine = [loot.value, loot.extra].filter(Boolean).join(' ');
@@ -124,7 +125,7 @@ const boxSx = {
 };
 
 const headerSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.72rem',
   letterSpacing: '0.08em',
   textTransform: 'uppercase',
@@ -147,7 +148,7 @@ const stepIconColSx = {
 };
 
 const microLabelSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.6rem',
   letterSpacing: '0.06em',
   textTransform: 'uppercase',

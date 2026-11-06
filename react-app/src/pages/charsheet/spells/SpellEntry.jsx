@@ -55,6 +55,7 @@ import { spellWeaponAttack, spellWeaponOptions } from '../actions/weaponActions.
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import { signed, withModifier } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 function applyFlatToFormula(formula, flat) {
   if (!formula) return formula;
@@ -89,7 +90,7 @@ function FreeCastsInline({ freeCasts, freeCastUses, onToggleFreeCast, sx }) {
   const interactive = typeof onToggleFreeCast === 'function';
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap', mt: 0.35, px: '7px', py: '4px', border: 1, borderColor: uiAlpha(UI_COLORS.gold, 0.28), borderRadius: '5px', bgcolor: uiAlpha(UI_COLORS.gold, 0.06), ...(sx || {}) }}>
-      <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontFamily: '"Cinzel", Georgia, serif', mr: 0.25, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+      <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontFamily: UI_FONTS.display, mr: 0.25, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
         Free Cast
       </Typography>
         {freeCasts.map((fc) => {
@@ -184,7 +185,7 @@ function SpellWeaponPicker({ spellName, options, selectedKey, onUpdateCharacter 
   }
   return (
     <Box sx={{ mt: 0.7, pt: 0.5, borderTop: '1px dashed', borderColor: 'divider' }}>
-      <Typography sx={{ fontSize: '0.6rem', color: RICH_TEXT_ACCENT, fontFamily: '"Cinzel", Georgia, serif', fontWeight: 700, letterSpacing: '0.08em', mb: 0.3 }}>
+      <Typography sx={{ fontSize: '0.6rem', color: RICH_TEXT_ACCENT, fontFamily: UI_FONTS.display, fontWeight: 700, letterSpacing: '0.08em', mb: 0.3 }}>
         Weapon
       </Typography>
       <ToggleButtonGroup
@@ -540,7 +541,7 @@ export default function SpellEntry({
                 >
                   <Typography
                     sx={{
-                      fontFamily: '"Cinzel", Georgia, serif',
+                      fontFamily: UI_FONTS.display,
                       fontSize: '0.6rem',
                       fontWeight: 700,
                       letterSpacing: '0.08em',

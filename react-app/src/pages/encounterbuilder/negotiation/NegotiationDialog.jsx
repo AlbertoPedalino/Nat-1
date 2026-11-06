@@ -23,6 +23,7 @@ import {
 } from './negotiation.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 const ACTION_UI = Object.freeze([
   { id: 'passed', Icon: Check, color: 'success' },
@@ -233,7 +234,7 @@ const contentSx = {
 };
 
 const sectionTitleSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.7rem',
   fontWeight: 800,
   letterSpacing: '0.08em',
@@ -254,12 +255,12 @@ const attitudeButtonSx = {
   flexDirection: { xs: 'row', sm: 'column' },
   justifyContent: 'center',
   gap: { xs: 1, sm: 0.15 },
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.68rem',
   fontWeight: 800,
   letterSpacing: '0.05em',
   '& small': {
-    fontFamily: '"JetBrains Mono", monospace',
+    fontFamily: UI_FONTS.mono,
     fontSize: '0.62rem',
     fontWeight: 600,
     opacity: 0.8,
@@ -283,7 +284,7 @@ const prominentMeterSx = {
 };
 
 const meterLabelSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.69rem',
   fontWeight: 800,
   letterSpacing: '0.08em',
@@ -291,7 +292,7 @@ const meterLabelSx = {
 };
 
 const meterValueSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '1.55rem',
   fontWeight: 900,
   lineHeight: 1,
@@ -323,7 +324,7 @@ const finalResultSx = {
 };
 
 const finalEyebrowSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.62rem',
   fontWeight: 800,
   letterSpacing: '0.1em',
@@ -333,7 +334,7 @@ const finalEyebrowSx = {
 
 const finalResultTextSx = {
   my: 0.35,
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: { xs: '1rem', sm: '1.1rem' },
   fontWeight: 800,
   lineHeight: 1.35,
@@ -353,12 +354,12 @@ const actionButtonSx = {
   display: 'flex',
   flexDirection: 'column',
   gap: 0.25,
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: { xs: '0.61rem', sm: '0.66rem' },
   fontWeight: 800,
   lineHeight: 1.25,
   '& small': {
-    fontFamily: '"JetBrains Mono", monospace',
+    fontFamily: UI_FONTS.mono,
     fontSize: { xs: '0.54rem', sm: '0.58rem' },
     fontWeight: 600,
     opacity: 0.75,

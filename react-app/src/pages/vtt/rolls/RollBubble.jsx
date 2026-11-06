@@ -3,8 +3,9 @@ import { X } from 'lucide-react';
 import { resolveToastLayout } from '../../../shared/character/dice/rollToastLayout.js';
 import DiceRow from '../../../shared/character/dice/DiceRow.jsx';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
-const FONT = '"Cinzel", Georgia, serif';
+const FONT = UI_FONTS.display;
 
 // What somebody just rolled, over their piece. A speech bubble because that is
 // what it is: a thing said at the table, not a record — it fades on its own and

@@ -4,6 +4,7 @@ import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeMarkMatches from '../search/rehypeMarkMatches.js';
 import { MARK_SX } from '../search/HighlightedText.jsx';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 // GFM without any raw-HTML plugin: note bodies are user text, so markup stays
 // markdown-only and anything HTML-like renders as inert characters.
@@ -93,7 +94,7 @@ const quoteSx = {
 };
 
 const codeSx = {
-  fontFamily: 'ui-monospace, "SFMono-Regular", Consolas, monospace',
+  fontFamily: UI_FONTS.mono,
   fontSize: '0.8125rem',
   bgcolor: 'action.hover',
   borderRadius: 1,

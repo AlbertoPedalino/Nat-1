@@ -3,6 +3,7 @@ import { ScrollText } from 'lucide-react';
 import { collectAllProficiencies } from './proficiencies.js';
 import { useProficiencySets } from './ProficiencySetsContext.jsx';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 export default function Proficiencies({ C }) {
   const profSets = useProficiencySets();
@@ -11,7 +12,7 @@ export default function Proficiencies({ C }) {
     <Paper variant="outlined" sx={{ mb: '0.6rem', overflow: 'hidden' }}>
       <Box sx={{ bgcolor: UI_COLORS.headerBg, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1, px: '0.8rem', py: '0.48rem', borderLeft: 3, borderLeftColor: 'primary.main' }}>
         <ScrollText size={14} />
-        <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'primary.main' }}>
+        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'primary.main' }}>
           Proficiencies
         </Typography>
       </Box>
@@ -21,7 +22,7 @@ export default function Proficiencies({ C }) {
         )}
         {sections.map(sec => (
           <Box key={sec.title} sx={{ mb: '0.7rem' }}>
-            <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'text.secondary', mb: 0.25 }}>
+            <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'text.secondary', mb: 0.25 }}>
               {sec.title}
             </Typography>
             <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', lineHeight: 1.5 }}>

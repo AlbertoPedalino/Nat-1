@@ -8,6 +8,7 @@ import { hasWeatherDisadvantage } from '../../gmboard/session/weather.js';
 import { terrainOption } from '../../../shared/hexcrawl/hexEntry.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { fullscreenContainer } from '../map/fullscreenContainer.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 // What the party walked into. A dialog rather than a panel because it is the
 // answer to a click and wants reading once, not living on the map.
@@ -80,7 +81,7 @@ const titleRowSx = {
 };
 
 const titleSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.9rem',
   letterSpacing: '0.06em',
   color: 'primary.main',

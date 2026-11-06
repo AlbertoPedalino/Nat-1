@@ -6,8 +6,9 @@ import {
 } from '../../gmboard/hexcrawl/hexIcons.js';
 import { terrainOption } from '../../../shared/hexcrawl/hexEntry.js';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
-const FONT = '"Cinzel", Georgia, serif';
+const FONT = UI_FONTS.display;
 
 // What the hex just did, spoken over the hex. The same speech bubble a piece
 // gets when it rolls, for the same reason: a hexcrawl is a sequence of small

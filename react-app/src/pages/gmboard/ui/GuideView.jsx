@@ -1,5 +1,6 @@
 import { Box, Stack, Typography, useTheme } from '@mui/material';
 import { Castle, Dices, Map, ScrollText, Table as TableIcon } from 'lucide-react';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 function StepMarker({ n }) {
   return <Box component="span" sx={stepMarkerSx}>{n}</Box>;
@@ -117,7 +118,7 @@ const cardSx = {
 };
 
 const cardTitleSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.86rem',
   letterSpacing: '0.06em',
   color: 'primary.main',
@@ -159,7 +160,7 @@ const kwSx = {
   borderRadius: 0.75,
   border: '1px solid',
   borderColor: 'divider',
-  fontFamily: 'ui-monospace, Menlo, Consolas, monospace',
+  fontFamily: UI_FONTS.mono,
   fontSize: '0.78em',
   color: 'text.primary',
 };

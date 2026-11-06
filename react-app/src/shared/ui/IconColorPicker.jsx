@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import { Box, Popover, Typography } from '@mui/material';
+import { UI_FONTS } from './fonts.js';
 
 export const ICON_COLORS = [
   '#de675f', '#d69245', '#caa550', '#e9c46a',
@@ -30,7 +31,7 @@ export default function IconColorPicker({ anchorEl, onClose, currentColor, onSel
       transformOrigin={{ vertical: 'top', horizontal: 'center' }}
       slotProps={{ paper: { sx: { bgcolor: 'rgba(26,23,19,0.98)', border: 1, borderColor: 'divider', borderRadius: 1, p: 1 } } }}
     >
-      <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary', mb: 0.5, fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+      <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary', mb: 0.5, fontFamily: UI_FONTS.display, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
         {title}
       </Typography>
       <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '4px' }}>
@@ -63,7 +64,7 @@ export default function IconColorPicker({ anchorEl, onClose, currentColor, onSel
         </Box>
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.75, pt: 0.5, borderTop: '1px solid', borderColor: 'divider' }}>
-        <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}>
+        <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontFamily: UI_FONTS.display, letterSpacing: '0.06em' }}>
           Custom
         </Typography>
         <Box
@@ -87,7 +88,7 @@ export default function IconColorPicker({ anchorEl, onClose, currentColor, onSel
           />
         </Box>
         {currentColor ? (
-          <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontFamily: 'monospace' }}>
+          <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontFamily: UI_FONTS.mono }}>
             {currentColor}
           </Typography>
         ) : null}

@@ -7,6 +7,7 @@ import {
 } from '../../../shared/character/inventory/itemEffects.js';
 import ScrollSpellPicker from './ScrollSpellPicker.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 // What an expanded inventory entry offers beyond its reference text, by kind of
 // item: the spell written on a Spell Scroll, reading a manual or tome, and the
@@ -32,7 +33,7 @@ function TomeConsumePanel({ item, onConsume }) {
         Read & study to permanently gain <Box component="b" sx={{ color: UI_COLORS.goldLight }}>+{bonus.value} {ABILITY_LABEL[bonus.ability]}</Box>. The book then loses its magic.
       </Typography>
       <Button size="small" variant="outlined" onClick={onConsume}
-        sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.6rem', letterSpacing: '0.06em', borderColor: UI_COLORS.goldLight, color: UI_COLORS.goldLight, '&:hover': { bgcolor: uiAlpha(UI_COLORS.goldLight, 0.08), borderColor: UI_COLORS.goldLight } }}>
+        sx={{ fontFamily: UI_FONTS.display, fontSize: '0.6rem', letterSpacing: '0.06em', borderColor: UI_COLORS.goldLight, color: UI_COLORS.goldLight, '&:hover': { bgcolor: uiAlpha(UI_COLORS.goldLight, 0.08), borderColor: UI_COLORS.goldLight } }}>
         Read & Consume
       </Button>
     </Box>
@@ -46,7 +47,7 @@ function AbilityChoicePanel({ item, onPick }) {
 
   return (
     <Box sx={{ mt: '8px', pt: '8px', borderTop: '1px dashed', borderColor: 'divider' }}>
-      <Typography sx={{ fontSize: '0.6rem', color: UI_COLORS.goldLight, fontFamily: '"Cinzel", Georgia, serif', fontWeight: 700, letterSpacing: '0.08em', mb: 0.3 }}>
+      <Typography sx={{ fontSize: '0.6rem', color: UI_COLORS.goldLight, fontFamily: UI_FONTS.display, fontWeight: 700, letterSpacing: '0.08em', mb: 0.3 }}>
         Ability Choice
       </Typography>
       {groups.map((group, groupIdx) => {
@@ -74,7 +75,7 @@ function AbilityChoicePanel({ item, onPick }) {
                 return (
                   <Button key={abil} size="small" variant={isOn ? 'contained' : 'outlined'}
                     onClick={() => togglePick(abil)}
-                    sx={{ minWidth: 0, px: '8px', py: '2px', fontSize: '0.6rem', fontFamily: '"Cinzel", Georgia, serif',
+                    sx={{ minWidth: 0, px: '8px', py: '2px', fontSize: '0.6rem', fontFamily: UI_FONTS.display,
                       ...(isOn ? { bgcolor: uiAlpha(UI_COLORS.goldLight, 0.18), color: UI_COLORS.goldLight, borderColor: UI_COLORS.goldLight } : { color: 'text.secondary' }) }}>
                     {ABILITY_LABEL[abil] || abil.toUpperCase()}
                   </Button>

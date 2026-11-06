@@ -23,6 +23,7 @@ import {
 } from '../../../shared/cloud/api/vtt.js';
 import NewSceneDialog from './NewSceneDialog.jsx';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 // Scenes belong to a campaign, so the picker is grouped by campaign rather than
 // being a flat list like the local tools' Library.
@@ -245,7 +246,7 @@ const emptySx = {
 const liveChipSx = {
   height: 18,
   fontSize: '0.6rem',
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   letterSpacing: '0.06em',
   flexShrink: 0,
 };

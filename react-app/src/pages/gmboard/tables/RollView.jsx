@@ -4,6 +4,7 @@ import ResultBadge from '../ui/ResultBadge.jsx';
 import TierSelector from '../ui/TierSelector.jsx';
 import { ROLL_TABLES, describeRoll, followUpTables, formatDice, summarizeStats } from './rollTable.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 const TABLE_ICON = { event: Map, encounter: Swords, loot: Coins, trap: Flame, compl: AlertTriangle, env: Leaf };
 const TABLE_LABEL = Object.fromEntries(ROLL_TABLES.map((table) => [table.id, table.label]));
@@ -204,7 +205,7 @@ const panelSx = {
 };
 
 const titleSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.8rem',
   letterSpacing: '0.06em',
   color: 'primary.main',
@@ -246,7 +247,7 @@ const wrapRowSx = {
 };
 
 const cardTitleSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.78rem',
   letterSpacing: '0.04em',
   color: 'primary.main',
@@ -288,7 +289,7 @@ const statSx = {
 };
 
 const statLabelSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.58rem',
   letterSpacing: '0.08em',
   textTransform: 'uppercase',
@@ -350,7 +351,7 @@ const historySx = {
 };
 
 const historyTitleSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.68rem',
   letterSpacing: '0.08em',
   textTransform: 'uppercase',
@@ -380,7 +381,7 @@ const historyRowSx = {
 };
 
 const historyTableSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.64rem',
   letterSpacing: '0.06em',
   textTransform: 'uppercase',

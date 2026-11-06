@@ -9,6 +9,7 @@ import {
 } from './currency.js';
 import IconColorPicker from '../../ui/IconColorPicker.jsx';
 import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
+import { UI_FONTS } from '../../ui/fonts.js';
 
 // Accent colors shared across every variant.
 const HOVER_SUBTRACT = UI_COLORS.danger;
@@ -42,7 +43,7 @@ const VARIANTS = {
     },
   },
   sheet: {
-    fontFamily: '"Cinzel", Georgia, serif',
+    fontFamily: UI_FONTS.display,
     box: { bgcolor: UI_COLORS.headerBg, p: '4px 3px' },
     labelGap: 0.35,
     labelTop: { fontSize: '0.52rem', letterSpacing: '0.08em' },

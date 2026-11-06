@@ -9,6 +9,7 @@ import {
   rangeFilterKeys,
 } from './itemFilters.js';
 import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
+import { UI_FONTS } from '../../ui/fonts.js';
 
 // Collapsible advanced-filter panel for item lists (inventory + add-item
 // search). Rows are generated from ITEM_FILTER_FIELDS, so this file never needs
@@ -28,7 +29,7 @@ const toggleSx = (open, active) => ({
   borderRadius: 1,
   bgcolor: open || active ? uiAlpha(UI_COLORS.gold, 0.14) : UI_COLORS.headerBg,
   color: open || active ? UI_COLORS.goldLight : 'text.secondary',
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.6rem',
   fontWeight: 700,
   letterSpacing: '0.08em',
@@ -43,7 +44,7 @@ const clearButtonSx = {
   py: '3px',
   borderRadius: 1,
   color: 'text.secondary',
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.58rem',
   textTransform: 'uppercase',
   letterSpacing: '0.06em',
@@ -51,7 +52,7 @@ const clearButtonSx = {
 };
 
 const labelSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontWeight: 700,
   letterSpacing: '0.06em',
   textTransform: 'uppercase',

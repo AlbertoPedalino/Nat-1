@@ -5,6 +5,7 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { cellSize, worldToScreen } from '../../../shared/vtt/map/geometry.js';
 import { CONE_SPREAD, areaGeometry, areaLabelAnchor, squareTurn } from '../../../shared/vtt/map/areas.js';
 import { isNote, strokeLabelAnchor } from '../../../shared/vtt/map/drawing.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 // Committed strokes plus the one still under the pointer, on the same canvas so
 // the live stroke lines up exactly with where it will land.
@@ -107,7 +108,7 @@ export default function DrawingCanvas({ drawings, selectedId, live, measure, gri
       context.setLineDash([]);
 
       if (measure.label) {
-        context.font = '700 13px "Cinzel", Georgia, serif';
+        context.font = `700 13px ${UI_FONTS.display}`;
         context.textAlign = 'center';
         context.textBaseline = 'bottom';
         context.lineWidth = 3;
@@ -138,7 +139,7 @@ function drawStroke(context, stroke, points, toScreen, cell, view) {
   if (isNote(stroke)) {
     const at = toScreen(points[0]);
     const fontSize = Math.max(10, ((stroke.width || 3) / 3) * cell * view.zoom * 0.4);
-    context.font = `700 ${fontSize}px "EB Garamond", Georgia, serif`;
+    context.font = `700 ${fontSize}px ${UI_FONTS.prose}`;
     context.textAlign = 'center';
     context.textBaseline = 'middle';
     // Outlined rather than boxed: a plate would hide the map under every label,
@@ -236,7 +237,7 @@ function drawArea(context, stroke, toScreen, cell, view) {
   // ruler's colours.
   if (stroke.hint && stroke.points?.[1]) {
     const tip = toScreen(stroke.points[1]);
-    context.font = '700 13px "Cinzel", Georgia, serif';
+    context.font = `700 13px ${UI_FONTS.display}`;
     context.textAlign = 'center';
     context.textBaseline = 'bottom';
     context.lineWidth = 3;
@@ -251,7 +252,7 @@ function drawArea(context, stroke, toScreen, cell, view) {
 // squares so it reads at any zoom without swamping a small mark.
 function drawMapLabel(context, text, at, cellPixels, baseline) {
   const fontSize = Math.max(11, Math.min(26, cellPixels * 0.32));
-  context.font = `700 ${fontSize}px "EB Garamond", Georgia, serif`;
+  context.font = `700 ${fontSize}px ${UI_FONTS.prose}`;
   context.textAlign = 'center';
   context.textBaseline = baseline;
   context.lineWidth = Math.max(2, fontSize / 5);

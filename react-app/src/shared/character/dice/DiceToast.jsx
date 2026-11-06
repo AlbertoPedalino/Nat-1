@@ -4,8 +4,9 @@ import { X } from 'lucide-react';
 import { resolveToastLayout } from './rollToastLayout.js';
 import DiceRow from './DiceRow.jsx';
 import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
+import { UI_FONTS } from '../../ui/fonts.js';
 
-const FONT = '"Cinzel", Georgia, serif';
+const FONT = UI_FONTS.display;
 
 // Shared, not the character sheet's own: the sheet, the encounter builder and
 // the battle map all show a roll the same way, and the layout behind it is

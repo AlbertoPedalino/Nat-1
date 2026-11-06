@@ -7,6 +7,7 @@ import { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
 import { fullscreenContainer } from '../vtt/map/fullscreenContainer.js';
 import CompendiumHome from './CompendiumHome.jsx';
 import { useCompendium } from './loadCompendium.js';
+import { UI_FONTS } from '../../shared/ui/fonts.js';
 
 // The compendium beside a session (battle map, DM Screen): a side panel on the
 // left that leaves the page usable — the creature stat block takes the right.
@@ -70,7 +71,7 @@ const headerSx = {
 };
 
 const titleSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.8rem',
   fontWeight: 700,
   letterSpacing: '0.08em',

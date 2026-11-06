@@ -1,6 +1,7 @@
 import { Box, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Stack, Typography } from '@mui/material';
 import { X } from 'lucide-react';
 import { UI_COLORS, uiAlpha } from './colors.js';
+import { UI_FONTS } from './fonts.js';
 
 // Dialog chrome that matches the character-sheet panels (dark surface, gold
 // left-accent header bar, uppercase Cinzel title) so dialogs feel native to
@@ -32,7 +33,7 @@ const titleSx = {
 };
 
 const titleTextSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontWeight: 700,
   fontSize: '0.74rem',
   letterSpacing: '0.12em',
@@ -56,7 +57,7 @@ const actionsSx = {
   borderColor: 'divider',
   // Small Cinzel buttons matching the sheet's button scale.
   '& .MuiButton-root': {
-    fontFamily: '"Cinzel", Georgia, serif',
+    fontFamily: UI_FONTS.display,
     fontSize: '0.62rem',
     fontWeight: 700,
     letterSpacing: '0.08em',

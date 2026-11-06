@@ -1,5 +1,6 @@
 import { Box, IconButton, TextField } from '@mui/material';
 import { Plus, Minus } from 'lucide-react';
+import { UI_FONTS } from '../../ui/fonts.js';
 
 // Visual presets for the call sites (sheet HP block vs encounter combatant card).
 // Add a key here for a new look instead of leaking inner `sx` through props —
@@ -10,7 +11,7 @@ const VARIANTS = {
     iconSize: 12,
     amountWidth: 46,
     gap: 0.3,
-    amountInputSx: { py: 0.25, fontSize: '0.72rem', fontFamily: '"Cinzel", Georgia, serif', fontWeight: 600 },
+    amountInputSx: { py: 0.25, fontSize: '0.72rem', fontFamily: UI_FONTS.display, fontWeight: 600 },
   },
   combat: {
     btnSize: 26,

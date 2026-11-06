@@ -5,6 +5,7 @@ import { useGmBoard } from '../state/GmBoardContext.jsx';
 import { formatDate, formatHM, parseHM, validateStart } from './time.js';
 import { travelTime } from './weather.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 export default function TimePanel() {
   const { state, setStart, setTime, advanceManual } = useGmBoard();
@@ -122,14 +123,14 @@ const panelSx = {
 };
 
 const titleSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.8rem',
   letterSpacing: '0.06em',
   color: 'primary.main',
 };
 
 const dateSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: { xs: '1.12rem', sm: '1.35rem' },
   fontWeight: 700,
   lineHeight: 1.25,
@@ -174,7 +175,7 @@ const clockLabelSx = {
 };
 
 const bigTimeSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: { xs: '1.8rem', sm: '2.2rem' },
   fontWeight: 700,
   lineHeight: 1.1,

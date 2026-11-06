@@ -3,6 +3,7 @@ import { Autocomplete, Box, Stack, TextField, Typography } from '@mui/material';
 import { loadSpells } from '../../charbuilder/data/dataLoaders.js';
 import { scrollSpellStats, spellScrollLevel } from '../../../shared/character/inventory/spellScrolls.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 let spellsPromise = null;
 function loadSpellsCached() {
@@ -109,7 +110,7 @@ const panelSx = { mt: '8px', pt: '8px', borderTop: '1px dashed', borderColor: 'd
 const titleSx = {
   fontSize: '0.6rem',
   color: UI_COLORS.goldLight,
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontWeight: 700,
   letterSpacing: '0.08em',
   mb: 0.5,

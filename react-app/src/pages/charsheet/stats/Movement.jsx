@@ -15,6 +15,7 @@ import {
 import { isWildShaped, wildShapeSpeed } from '../../../shared/character/forms/wildShapeForm.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 const EXTRA_SPEED_MODES = ['burrow', 'climb', 'fly', 'swim'];
 
@@ -93,7 +94,7 @@ export default function Movement({ C, sheet }) {
     <Paper variant="outlined" sx={{ mb: '0.6rem', overflow: 'hidden' }}>
       <Box sx={{ bgcolor: UI_COLORS.headerBg, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1, px: '0.8rem', py: '0.48rem', borderLeft: 3, borderLeftColor: hasPenalty ? 'warning.main' : 'primary.main' }}>
         <Footprints size={14} />
-        <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: hasPenalty ? 'warning.main' : 'primary.main' }}>
+        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: hasPenalty ? 'warning.main' : 'primary.main' }}>
           Movement
         </Typography>
         {hasPenalty ? (
@@ -107,7 +108,7 @@ export default function Movement({ C, sheet }) {
           <Box key={entry.key} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 1, py: 0.35, bgcolor: UI_COLORS.headerBg, border: 1, borderColor: hasPenalty ? 'warning.main' : 'divider', borderRadius: 1 }}>
             <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary' }}>{speedLabel(entry.key)}</Typography>
             <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>
-              <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '1.15rem', fontWeight: 700, color: hasPenalty ? UI_COLORS.orangeLight : UI_COLORS.goldLight, lineHeight: 1 }}>
+              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '1.15rem', fontWeight: 700, color: hasPenalty ? UI_COLORS.orangeLight : UI_COLORS.goldLight, lineHeight: 1 }}>
                 {entry.final}
               </Typography>
               <Typography sx={{ fontSize: '0.62rem', color: 'text.secondary' }}>ft</Typography>

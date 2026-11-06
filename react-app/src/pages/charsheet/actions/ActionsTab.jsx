@@ -55,6 +55,7 @@ import { CHIP_TONES, chipToneStyle } from '../../../shared/ui/entityColors.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 const _danglingResKeyWarned = typeof Set === 'function' ? new Set() : null;
 function warnDanglingResKey(action, resMaxMap) {
@@ -209,7 +210,7 @@ export default function ActionsTab({ C, sheet, resources }) {
           <Typography sx={levelHeaderSx}>Attacks</Typography>
           <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.75rem' }}>
             <Box component="thead">
-              <Box component="tr" sx={{ '& th': { fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'text.secondary', borderBottom: 1, borderColor: 'divider', p: '4px 6px', textAlign: 'left' } }}>
+              <Box component="tr" sx={{ '& th': { fontFamily: UI_FONTS.display, fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'text.secondary', borderBottom: 1, borderColor: 'divider', p: '4px 6px', textAlign: 'left' } }}>
                 <Box component="th">Name</Box>
                 <Box component="th">Hit</Box>
                 <Box component="th">Damage</Box>
@@ -222,8 +223,8 @@ export default function ActionsTab({ C, sheet, resources }) {
                 return (
                   <Box component="tr" key={i} sx={{ '& td': { p: '6px 6px', borderBottom: 1, borderColor: 'divider', color: 'text.secondary' }, '&:hover td': { bgcolor: UI_COLORS.headerBg } }}>
                     <Box component="td"><Typography sx={{ color: 'text.primary', fontWeight: 600 }}>{item.name}</Typography></Box>
-                    <Box component="td"><Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontWeight: 700, color: UI_COLORS.goldLight, fontSize: '0.875rem' }}>{hitBonus}</Typography></Box>
-                    <Box component="td"><Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', color: 'text.primary' }}>{item.damage?.[0]?.damage || '—'}</Typography></Box>
+                    <Box component="td"><Typography sx={{ fontFamily: UI_FONTS.display, fontWeight: 700, color: UI_COLORS.goldLight, fontSize: '0.875rem' }}>{hitBonus}</Typography></Box>
+                    <Box component="td"><Typography sx={{ fontFamily: UI_FONTS.display, color: 'text.primary' }}>{item.damage?.[0]?.damage || '—'}</Typography></Box>
                   </Box>
                 );
               })}
@@ -384,7 +385,7 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
         const statusStyle = chipToneStyle(statusTone);
         return (
         <Box sx={persistentRowSx(uiAlpha(UI_COLORS.blueSoft, 0.06), !hasRes, open)}>
-          <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontFamily: '"Cinzel", Georgia, serif', mr: 0.5, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Status</Typography>
+          <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontFamily: UI_FONTS.display, mr: 0.5, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Status</Typography>
           <Chip
             size="small"
             label={label}
@@ -400,7 +401,7 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
             sx={{
               cursor: isActive || canToggleOn ? 'pointer' : 'not-allowed',
               fontSize: '0.58rem',
-              fontFamily: '"Cinzel", Georgia, serif',
+              fontFamily: UI_FONTS.display,
               fontWeight: 700,
               letterSpacing: '0.06em',
               ...statusStyle,
@@ -413,17 +414,17 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
 
       {hasRes ? (
         <Box sx={persistentRowSx(uiAlpha(UI_COLORS.gold, 0.06), true, open)}>
-          <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontFamily: '"Cinzel", Georgia, serif', mr: 0.5, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{resTrack === 'used' ? 'Spent' : 'Uses'}</Typography>
+          <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontFamily: UI_FONTS.display, mr: 0.5, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{resTrack === 'used' ? 'Spent' : 'Uses'}</Typography>
           {safeMax === Infinity ? (
             typeof onResChange === 'function' ? (
               <Button
                 size="small"
                 variant="outlined"
                 onClick={(e) => { e.stopPropagation(); onResChange(action.resKey, -1); }}
-                sx={{ fontSize: '0.6rem', fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em', minWidth: 0, py: 0.2, px: 0.6, color: UI_COLORS.goldLight, borderColor: uiAlpha(UI_COLORS.goldLight, 0.35), '&:hover': { borderColor: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.08) } }}
+                sx={{ fontSize: '0.6rem', fontFamily: UI_FONTS.display, letterSpacing: '0.06em', minWidth: 0, py: 0.2, px: 0.6, color: UI_COLORS.goldLight, borderColor: uiAlpha(UI_COLORS.goldLight, 0.35), '&:hover': { borderColor: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.08) } }}
               >{action.buttonLabel || (action.controller ? 'Open' : 'Use')}</Button>
             ) : (
-              <Typography sx={{ fontSize: '0.7rem', color: UI_COLORS.goldLight, fontFamily: '"Cinzel", Georgia, serif', fontWeight: 700 }}>∞</Typography>
+              <Typography sx={{ fontSize: '0.7rem', color: UI_COLORS.goldLight, fontFamily: UI_FONTS.display, fontWeight: 700 }}>∞</Typography>
             )
           ) : (isPool || safeMax > 10) ? (
             <ResourceBar value={resCur} max={safeMax} onChange={(delta) => onResChange(action.resKey, delta)} />
@@ -521,7 +522,7 @@ function ChoicePicker({ action, C, onUpdateCharacter, onShowToast }) {
 
   return (
     <Box sx={{ mt: 0.7, pt: 0.5, borderTop: '1px dashed', borderColor: 'divider' }}>
-      <Typography sx={{ fontSize: '0.6rem', color: UI_COLORS.goldLight, fontFamily: '"Cinzel", Georgia, serif', fontWeight: 700, letterSpacing: '0.08em', mb: 0.3 }}>
+      <Typography sx={{ fontSize: '0.6rem', color: UI_COLORS.goldLight, fontFamily: UI_FONTS.display, fontWeight: 700, letterSpacing: '0.08em', mb: 0.3 }}>
         {action.choiceLabel || 'Active Option'}
       </Typography>
       <ToggleButtonGroup size="small" exclusive value={activeValue} onChange={handleChange}

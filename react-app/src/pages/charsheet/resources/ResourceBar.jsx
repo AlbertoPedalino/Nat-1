@@ -1,8 +1,9 @@
 import { useCallback, useRef } from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
-const FONT = '"Cinzel", Georgia, serif';
+const FONT = UI_FONTS.display;
 
 const btnSx = {
   fontSize: '0.7rem', fontFamily: FONT, minWidth: 24, px: 0.4, py: 0, lineHeight: 1.4,

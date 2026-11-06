@@ -2,6 +2,7 @@ import { Box, Chip, Tooltip, Typography, alpha } from '@mui/material';
 import { ChevronDown, X } from 'lucide-react';
 import { EntryBlocks } from '../../content/EntryBlocks.jsx';
 import { UI_COLORS } from '../../ui/colors.js';
+import { UI_FONTS } from '../../ui/fonts.js';
 
 // The condition pill and its rules-text card, shared by the character sheet and
 // the encounter builder. The two surfaces are meant to read identically — a GM
@@ -86,7 +87,7 @@ const cardSx = {
 const cardHeaderSx = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.4 };
 
 const cardTitleSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.62rem',
   fontWeight: 700,
   letterSpacing: '0.06em',

@@ -167,3 +167,9 @@ test('5etools data is downloaded only through loadGameData', () => {
     allow: ['shared/content/gameData.js'],
   }).filter((file) => !file.startsWith('data/')), []);
 });
+
+test('font stacks come from UI_FONTS', () => {
+  assert.deepEqual(sourceLinesMatching(/Cinzel|Garamond|Georgia|JetBrains|monospace/, {
+    allow: ['shared/ui/fonts.js'],
+  }).filter((hit) => !hit.startsWith('data/')), []);
+});

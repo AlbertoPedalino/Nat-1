@@ -1,6 +1,7 @@
 import { Button, MenuItem, Stack, TextField } from '@mui/material';
 import { PanelRightClose, ScrollText } from 'lucide-react';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 export default function BattleMapViewSwitch({
   view,
@@ -77,7 +78,7 @@ const selectSx = {
 const buttonSx = {
   minWidth: 92,
   height: 32,
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.65rem',
   letterSpacing: '0.08em',
 };

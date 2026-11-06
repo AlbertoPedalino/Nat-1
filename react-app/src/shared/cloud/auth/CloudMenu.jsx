@@ -8,6 +8,7 @@ import { reportCloudSyncState } from '../sync/cloudSyncState.js';
 import { isSyncExcluded, includeInSync } from '../sync/cloudSyncExclude.js';
 import { useToast } from '../../ui/ToastProvider.jsx';
 import { UI_COLORS } from '../../ui/colors.js';
+import { UI_FONTS } from '../../ui/fonts.js';
 
 // The "active sheet" for the cloud menu is the one in the URL (builder/charsheet
 // ?char=…). We deliberately do NOT fall back to localStorage's gb:active_char:
@@ -19,7 +20,7 @@ function resolveActiveCharId() {
 }
 
 const loginBtnSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.625rem',
   letterSpacing: '0.08em',
 };

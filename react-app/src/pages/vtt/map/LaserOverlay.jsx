@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from 'react';
 import { Box } from '@mui/material';
 import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { cellSize, worldToScreen } from '../../../shared/vtt/map/geometry.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 // Remote positions arrive as snapshots, one every LASER_BROADCAST_MS at most.
 // Reaching each target in exactly that interval keeps the motion continuous —
@@ -218,7 +219,7 @@ const labelSx = {
   top: 'calc(100% + var(--laser-label-gap))',
   transform: 'translateX(-50%)',
   color: VTT_COLORS.laserText,
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: 11,
   fontWeight: 700,
   lineHeight: 1,

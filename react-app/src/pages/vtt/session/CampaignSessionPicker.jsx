@@ -3,6 +3,7 @@ import { Box, Chip, CircularProgress, Paper, Stack, Typography } from '@mui/mate
 import { Flag, Radio } from 'lucide-react';
 import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
 import { listLiveCampaignIds } from '../../../shared/cloud/api/vtt.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 // Several campaigns can be running at the same time, so a player picks the table
 // first. They never pick a scene: once inside, the GM decides what is on it and
@@ -108,5 +109,5 @@ const rowButtonSx = {
 const chipSx = {
   height: 20,
   fontSize: '0.62rem',
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
 };

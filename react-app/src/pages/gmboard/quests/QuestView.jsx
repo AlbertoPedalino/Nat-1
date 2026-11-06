@@ -7,6 +7,7 @@ import { QUEST_SCOPE_OPTIONS } from '../state/constants.js';
 import { SELECTOR_CONTRACTS } from '../ui/selectorContracts.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 function QuestCountHeader({ questSet }) {
   const theme = useTheme();
@@ -113,7 +114,7 @@ const panelSx = {
 };
 
 const titleSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.8rem',
   letterSpacing: '0.06em',
   color: 'primary.main',
@@ -138,7 +139,7 @@ const headerSx = {
 };
 
 const headerLabelSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.68rem',
   letterSpacing: '0.08em',
   textTransform: 'uppercase',
@@ -164,7 +165,7 @@ const dieSx = {
 };
 
 const maxSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '1.15rem',
   fontWeight: 900,
   color: 'primary.main',

@@ -6,6 +6,7 @@ import { EDITOR_TABS } from '../state/constants.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 const WEATHER_COLUMNS = [
   { field: 's', label: 'Season', editable: false },
@@ -192,7 +193,7 @@ const activeHeaderSx = {
 };
 
 const activeNameSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.8rem',
   color: 'primary.main',
 };

@@ -2,6 +2,7 @@ import { Box, Button, Stack, Typography, useTheme } from '@mui/material';
 import { ScrollText, Trash2 } from 'lucide-react';
 import { LOG_RENDER_LIMIT } from '../state/constants.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 export default function SessionLog() {
   const { state, dispatch } = useGmBoard();
@@ -53,7 +54,7 @@ const headRowSx = {
 };
 
 const titleSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.8rem',
   letterSpacing: '0.06em',
   color: 'primary.main',

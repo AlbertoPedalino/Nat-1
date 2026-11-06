@@ -19,6 +19,7 @@ import SceneEditor from './scene/SceneEditor.jsx';
 import ScenePicker from './scene/ScenePicker.jsx';
 import SessionGate from './session/SessionGate.jsx';
 import * as s from './styles.js';
+import { UI_FONTS } from '../../shared/ui/fonts.js';
 
 // The VTT is cloud-only: without a signed-in account there is no scene to show,
 // because scenes never exist locally. Every other tool degrades to local-only
@@ -316,6 +317,6 @@ const spectatorWaitingSx = {
   display: 'grid',
   placeItems: 'center',
   color: vttAlpha(VTT_COLORS.white, 0.58),
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   letterSpacing: '0.08em',
 };

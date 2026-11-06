@@ -24,6 +24,7 @@ import { fullscreenContainer } from '../map/fullscreenContainer.js';
 import {
   battleMapDialogActionsSx, battleMapDialogContentSx, battleMapDialogPaperSx, battleMapDialogTitleSx,
 } from '../map/battleMapSurface.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 const DEFAULT_HEX_COLOR = DEFAULT_GRID.hexColor;
 
@@ -370,7 +371,7 @@ const sectionTitleSx = {
   display: 'flex',
   alignItems: 'center',
   gap: 0.6,
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.72rem',
   fontWeight: 700,
   letterSpacing: '0.08em',
@@ -382,7 +383,7 @@ const sectionTitleSx = {
 
 // Matches SelectorGroup's own label, so every row in the dialog reads alike.
 const groupLabelSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.68rem',
   letterSpacing: '0.08em',
   textTransform: 'uppercase',

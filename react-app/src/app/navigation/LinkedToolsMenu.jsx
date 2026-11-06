@@ -17,6 +17,7 @@ import { ensureInstanceInCloud, linkCloudInstance, listToolInstances } from '../
 import { SECTION_KEYS, SECTION_REGISTRY } from '../../shared/instances/sectionRegistry.js';
 import { useToast } from '../../shared/ui/ToastProvider.jsx';
 import { confirmAction } from '../../shared/ui/confirmAction.js';
+import { UI_FONTS } from '../../shared/ui/fonts.js';
 
 const TOOL_UI = {
   gmboard: { label: 'GM Board', icon: LayoutDashboard },
@@ -282,6 +283,6 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
 
 export const LINKED_TOOLS_BUTTON_SX = {
   minWidth: { xs: 32, md: 64 }, px: { xs: 0.75, md: 1.25 },
-  fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', letterSpacing: '0.08em',
+  fontFamily: UI_FONTS.display, fontSize: '0.625rem', letterSpacing: '0.08em',
   '& .MuiButton-startIcon': { mr: { xs: 0, md: 1 }, ml: 0 },
 };

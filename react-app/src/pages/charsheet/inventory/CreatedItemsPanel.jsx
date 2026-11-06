@@ -23,6 +23,7 @@ import {
 } from '../../../shared/character/inventory/createdItemResolution.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 // Generic interactive "create items from a list" panel. Driven entirely by the
 // action's `detail` config so Replicate Magic Item, Tinker's Magic and Fast
@@ -201,7 +202,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
     <Box onClick={(e) => e.stopPropagation()} sx={panelSx}>
       <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', mb: 0.6 }}>
         <Typography sx={headerSx}>{tagLabel}</Typography>
-        <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.62rem', fontWeight: 700, color: remaining > 0 ? UI_COLORS.goldLight : UI_COLORS.danger }}>
+        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.62rem', fontWeight: 700, color: remaining > 0 ? UI_COLORS.goldLight : UI_COLORS.danger }}>
           {total} / {max} active
         </Typography>
       </Box>
@@ -239,7 +240,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
               <IconButton size="small" aria-label={`Remove ${label}`} disabled={removeDisabled} onClick={() => handleRemove(value)} sx={stepBtnSx(removeDisabled)}>
                 <Minus size={13} />
               </IconButton>
-              <Box sx={{ minWidth: 16, textAlign: 'center', fontFamily: '"Cinzel", Georgia, serif', fontWeight: 700, fontSize: '0.78rem', color: UI_COLORS.goldLight }}>{count}</Box>
+              <Box sx={{ minWidth: 16, textAlign: 'center', fontFamily: UI_FONTS.display, fontWeight: 700, fontSize: '0.78rem', color: UI_COLORS.goldLight }}>{count}</Box>
               <IconButton size="small" aria-label={`Add ${label}`} disabled={addDisabled} onClick={() => handleAdd(value)} sx={stepBtnSx(addDisabled)}>
                 <Plus size={13} />
               </IconButton>
@@ -307,7 +308,7 @@ const panelSx = {
 };
 
 const headerSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.66rem',
   fontWeight: 700,
   letterSpacing: '0.08em',

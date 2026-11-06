@@ -18,6 +18,7 @@ import CriticalFumblesDialog from './rolls/CriticalFumblesDialog.jsx';
 import NegotiationDialog from './negotiation/NegotiationDialog.jsx';
 import { EncounterBuilderProvider, useEncounterBuilder } from './state/EncounterBuilderContext.jsx';
 import { UI_COLORS, uiAlpha } from '../../shared/ui/colors.js';
+import { UI_FONTS } from '../../shared/ui/fonts.js';
 
 export default function EncounterBuilderPage() {
   const tool = useToolInstance('encounters');
@@ -138,7 +139,7 @@ const contentSx = {
 
 const utilityButtonSx = {
   flexShrink: 0,
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.625rem',
   letterSpacing: '0.08em',
   color: UI_COLORS.goldLight,

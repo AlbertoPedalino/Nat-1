@@ -22,6 +22,7 @@ import { advantageVisual, autoFailVisual } from './advantageMark.jsx';
 import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 export default function SavingThrows({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
@@ -76,7 +77,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
     <Paper variant="outlined" sx={{ mb: '0.6rem', overflow: 'hidden' }}>
       <Box sx={{ bgcolor: UI_COLORS.headerBg, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1, px: '0.8rem', py: '0.48rem', borderLeft: 3, borderLeftColor: 'primary.main' }}>
         <Dice5 size={14} />
-        <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'primary.main' }}>
+        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'primary.main' }}>
           Saving Throws
         </Typography>
       </Box>
@@ -98,13 +99,13 @@ export default function SavingThrows({ C, sheet, onRoll }) {
               onPick={(advArg) => onRoll(st, { advantage: advArg === true || undefined, disadvantage: advArg === false || undefined })}
               sx={{ display: 'flex', alignItems: 'center', gap: 1, py: '3px', cursor: 'pointer', borderRadius: 1, '&:hover': { bgcolor: uiAlpha(UI_COLORS.gold, 0.04) } }}>
               <Box sx={{ width: 10, height: 10, borderRadius: '50%', flexShrink: 0, transition: 'all 0.1s', border: 1, borderColor: 'divider', bgcolor: prof ? 'primary.main' : 'transparent' }} />
-              <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', fontWeight: 600, color: 'text.secondary', letterSpacing: '0.08em', width: 28, flexShrink: 0 }}>
+              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.625rem', fontWeight: 600, color: 'text.secondary', letterSpacing: '0.08em', width: 28, flexShrink: 0 }}>
                 {SLBL[st]}
               </Typography>
               <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
                 {FULL_LBL[st]}
               </Typography>
-              <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.75rem', fontWeight: 600, color: 'text.primary', ml: 'auto' }}>
+              <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.75rem', fontWeight: 600, color: 'text.primary', ml: 'auto' }}>
                 {signed(shownBonus)}
               </Typography>
               {visual && (

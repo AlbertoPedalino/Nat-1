@@ -7,6 +7,7 @@ import { clearAppLocalStorage, listAppLocalStorageKeys } from '../../shared/stor
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
 import { confirmAction } from '../../shared/ui/confirmAction.js';
 import { UI_COLORS, uiAlpha } from '../../shared/ui/colors.js';
+import { UI_FONTS } from '../../shared/ui/fonts.js';
 
 export const TOOLS = [
   { path: '/library/characters', label: 'Character Sheet', desc: 'View and manage your character in play', icon: ScrollText, color: 'success.main' },
@@ -109,7 +110,7 @@ const homeRootSx = {
 const heroSx = { textAlign: 'center', mb: '3rem' };
 
 const heroTitleSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: 'clamp(2rem, 6vw, 3.5rem)',
   fontWeight: 900,
   letterSpacing: '0.06em',
@@ -184,7 +185,7 @@ const cardContentSx = {
 };
 
 const cardLabelSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.9rem',
   fontWeight: 700,
   letterSpacing: '0.08em',
@@ -199,7 +200,7 @@ const cardDescSx = {
   textAlign: 'center',
   lineHeight: 1.4,
   fontStyle: 'italic',
-  fontFamily: '"EB Garamond", Georgia, serif',
+  fontFamily: UI_FONTS.prose,
 };
 
 const clearDataWrapSx = {
@@ -214,7 +215,7 @@ const clearDataWrapSx = {
 const clearDataButtonSx = {
   borderColor: uiAlpha(UI_COLORS.danger, 0.42),
   color: UI_COLORS.danger,
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.64rem',
   letterSpacing: '0.08em',
   '&:hover': {
@@ -226,5 +227,5 @@ const clearDataButtonSx = {
 const clearDataMessageSx = {
   color: UI_COLORS.textBrown,
   fontSize: '0.72rem',
-  fontFamily: '"EB Garamond", Georgia, serif',
+  fontFamily: UI_FONTS.prose,
 };

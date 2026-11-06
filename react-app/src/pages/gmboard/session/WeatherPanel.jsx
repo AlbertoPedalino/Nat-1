@@ -4,6 +4,7 @@ import { FALLBACK_WEATHER_ICON, SEASON_ICONS, WEATHER_ICONS } from '../hexcrawl/
 import { SELECTOR_CONTRACTS } from '../ui/selectorContracts.js';
 import { weatherEffectLabel, weatherTimerLabel } from './weather.js';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 export default function WeatherPanel() {
   const { state, setSeason, setWeatherOverride } = useGmBoard();
@@ -63,7 +64,7 @@ const panelSx = {
 };
 
 const titleSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.8rem',
   letterSpacing: '0.06em',
   color: 'primary.main',

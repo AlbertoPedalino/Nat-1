@@ -5,6 +5,7 @@ import CloudMenu from '../../shared/cloud/auth/CloudMenu.jsx';
 import CompendiumButton from '../../pages/compendium/CompendiumButton.jsx';
 import { iconOnlyOnPhoneButtonSx, phoneHiddenLabelSx } from '../../shared/ui/iconOnlyOnPhone.js';
 import { UI_COLORS, uiAlpha } from '../../shared/ui/colors.js';
+import { UI_FONTS } from '../../shared/ui/fonts.js';
 
 export const APP_TOP_BAR_HEIGHT = '48px';
 
@@ -61,7 +62,7 @@ const leftActionsSx = {
 };
 
 const navFontSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.625rem',
   letterSpacing: '0.08em',
   whiteSpace: 'nowrap',

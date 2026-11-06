@@ -32,6 +32,7 @@ import {
   setReplicatedItemCharges,
 } from '../../../shared/character/inventory/magicItemTinker.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 const sectionSx = {
   p: 0.8,
@@ -41,7 +42,7 @@ const sectionSx = {
   bgcolor: UI_COLORS.headerBg,
 };
 const labelSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.62rem',
   fontWeight: 700,
   color: UI_COLORS.goldLight,

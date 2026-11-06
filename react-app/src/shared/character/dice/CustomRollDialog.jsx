@@ -5,6 +5,7 @@ import { DICE_LIMITS } from './dice.js';
 import SheetDialog from '../../ui/SheetDialog.jsx';
 import { signed, withModifier } from '../../ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
+import { UI_FONTS } from '../../ui/fonts.js';
 
 // Shared custom-roll dialog: a dice-count picker (d4…d100) plus a flat modifier
 // that builds a formula string. It does NOT roll or show results itself — the
@@ -111,9 +112,9 @@ export default function CustomRollDialog({ open, onClose, onRoll, ...dialogProps
 
 const CUSTOM_ROLL_SX = {
   diceRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 0.5, py: 0.4, borderBottom: 1, borderColor: 'divider' },
-  diceLabel: { fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.8rem', fontWeight: 700, color: 'text.primary', minWidth: 42 },
-  countLabel: { fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.9rem', fontWeight: 700, color: UI_COLORS.goldLight, minWidth: 24, textAlign: 'center' },
-  stepBtn: { minWidth: 28, px: 0.4, py: 0.2, fontSize: '0.8rem', fontFamily: '"Cinzel", Georgia, serif', fontWeight: 700, color: UI_COLORS.goldLight, borderColor: uiAlpha(UI_COLORS.goldLight, 0.35), '&:hover': { borderColor: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.08) } },
-  modLabel: { fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.7rem', color: 'text.secondary', mr: 0.5 },
-  formula: { fontFamily: '"JetBrains Mono", monospace', fontSize: '0.75rem', color: UI_COLORS.teal, textAlign: 'center', py: 0.5 },
+  diceLabel: { fontFamily: UI_FONTS.display, fontSize: '0.8rem', fontWeight: 700, color: 'text.primary', minWidth: 42 },
+  countLabel: { fontFamily: UI_FONTS.display, fontSize: '0.9rem', fontWeight: 700, color: UI_COLORS.goldLight, minWidth: 24, textAlign: 'center' },
+  stepBtn: { minWidth: 28, px: 0.4, py: 0.2, fontSize: '0.8rem', fontFamily: UI_FONTS.display, fontWeight: 700, color: UI_COLORS.goldLight, borderColor: uiAlpha(UI_COLORS.goldLight, 0.35), '&:hover': { borderColor: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.08) } },
+  modLabel: { fontFamily: UI_FONTS.display, fontSize: '0.7rem', color: 'text.secondary', mr: 0.5 },
+  formula: { fontFamily: UI_FONTS.mono, fontSize: '0.75rem', color: UI_COLORS.teal, textAlign: 'center', py: 0.5 },
 };

@@ -13,6 +13,7 @@ import { MARKER_COLORS } from '../../../shared/dungeon/roomMarkers.js';
 import InfoHint from '../../../shared/ui/InfoHint.jsx';
 import PiecePreview, { beginPiecePointerDrag } from '../tokens/PiecePreview.jsx';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 // The dungeon this map is being played as.
 //
@@ -284,7 +285,7 @@ const roomSx = {
 };
 
 const numberSx = {
-  fontFamily: '"Cinzel", Georgia, serif',
+  fontFamily: UI_FONTS.display,
   fontSize: '0.95rem',
   color: 'primary.main',
   minWidth: 20,

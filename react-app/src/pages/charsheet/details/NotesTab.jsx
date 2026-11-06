@@ -3,6 +3,7 @@ import { Box, IconButton, TextField, Typography } from '@mui/material';
 import { Plus, Minus, PencilLine, Check } from 'lucide-react';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 function normalizePages(raw) {
   if (!raw) return [{ id: 'page_1', name: 'General', content: '' }];
@@ -19,7 +20,7 @@ function PageTab({ page, active, onClick }) {
     <Box
       onClick={onClick}
       sx={{
-        px: 1.2, py: 0.5, borderRadius: 1, cursor: 'pointer', userSelect: 'none', fontSize: '0.75rem', fontWeight: 700, fontFamily: '"Cinzel", Georgia, serif',
+        px: 1.2, py: 0.5, borderRadius: 1, cursor: 'pointer', userSelect: 'none', fontSize: '0.75rem', fontWeight: 700, fontFamily: UI_FONTS.display,
         bgcolor: active ? 'primary.main' : uiAlpha(UI_COLORS.goldPale, 0.08), color: active ? 'primary.contrastText' : 'text.secondary',
         border: 1, borderColor: active ? 'primary.main' : 'divider', whiteSpace: 'nowrap', minWidth: 0,
         '&:hover': { bgcolor: active ? 'primary.dark' : uiAlpha(UI_COLORS.goldPale, 0.15) },
@@ -102,12 +103,12 @@ export default function NotesTab({ sheet }) {
               if (e.key === 'Escape') setEditingName(null);
             }}
             sx={{
-              '& .MuiInputBase-root': { fontSize: '0.8rem', fontFamily: '"Cinzel", Georgia, serif', fontWeight: 700 },
+              '& .MuiInputBase-root': { fontSize: '0.8rem', fontFamily: UI_FONTS.display, fontWeight: 700 },
               '& fieldset': { borderColor: 'primary.main' },
             }}
           />
         ) : (
-          <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.8rem', fontWeight: 700, color: 'text.primary' }}>
+          <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.8rem', fontWeight: 700, color: 'text.primary' }}>
             {activePage.name}
           </Typography>
         )}
@@ -127,7 +128,7 @@ export default function NotesTab({ sheet }) {
         value={activePage.content}
         onChange={(e) => changeContent(activeIdx, e.target.value)}
         sx={{
-          '& .MuiInputBase-root': { bgcolor: UI_COLORS.headerBg, color: 'text.primary', fontFamily: 'Georgia, serif', fontSize: '0.875rem' },
+          '& .MuiInputBase-root': { bgcolor: UI_COLORS.headerBg, color: 'text.primary', fontFamily: UI_FONTS.body, fontSize: '0.875rem' },
           '& fieldset': { borderColor: 'divider' },
           '&:focus-within fieldset': { borderColor: 'primary.main' },
         }}

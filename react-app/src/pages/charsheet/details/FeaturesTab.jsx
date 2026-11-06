@@ -15,6 +15,7 @@ import { asArray } from '../../../shared/lists.js';
 import { choiceKey } from '../../../shared/content/nameKeys.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 export default function FeaturesTab({ C }) {
   if (!C) return null;
@@ -383,12 +384,12 @@ function FeatureSection({ title, color, features }) {
 
   return (
     <Box sx={{ mb: 1 }}>
-      <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color, borderBottom: 1, borderColor: uiAlpha(UI_COLORS.blue, 0.14), pb: 0.25, mb: 0.4 }}>
+      <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color, borderBottom: 1, borderColor: uiAlpha(UI_COLORS.blue, 0.14), pb: 0.25, mb: 0.4 }}>
         {title}
       </Typography>
       {Object.entries(groups).sort(([a], [b]) => Number(a) - Number(b)).map(([lv, feats]) => (
         <Box key={`${title}-${lv}`} sx={{ mb: 0.75 }}>
-          <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: UI_COLORS.goldLight, borderBottom: 1, borderColor: uiAlpha(UI_COLORS.goldLight, 0.2), pb: 0.25, mb: 0.35 }}>
+          <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: UI_COLORS.goldLight, borderBottom: 1, borderColor: uiAlpha(UI_COLORS.goldLight, 0.2), pb: 0.25, mb: 0.35 }}>
             {Number(lv) === 0 ? 'General' : `Level ${lv}`}
           </Typography>
           {feats.map((feature, index) => (

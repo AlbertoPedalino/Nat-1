@@ -4,6 +4,7 @@ import { getRollTable, rollTable } from '../../../shared/character/dice/rollTabl
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { classLevel } from '../../../shared/character/progression/classLevel.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 // Lenient variant: falls back to the TOTAL character level when the character
 // has no levels in `className` (used by generic feature panels that still want a
@@ -16,7 +17,7 @@ function getClassLevel(C, className) {
 function FeatureBox({ title, accent, children }) {
   return (
     <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 1.2 }}>
-      <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.68rem', fontWeight: 700, color: accent || UI_COLORS.goldLight, letterSpacing: '0.08em', mb: 0.4 }}>
+      <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.68rem', fontWeight: 700, color: accent || UI_COLORS.goldLight, letterSpacing: '0.08em', mb: 0.4 }}>
         {title}
       </Typography>
       {children}
@@ -129,7 +130,7 @@ export default function ActionDetailPanel({ action, character, sheet }) {
               size="small"
               variant="outlined"
               onClick={doRoll}
-              sx={{ fontSize: '0.6rem', fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em' }}
+              sx={{ fontSize: '0.6rem', fontFamily: UI_FONTS.display, letterSpacing: '0.06em' }}
             >
               {dual ? (roll.dualLabel || 'Roll Two') : (roll.label || `Roll d${tableMeta.sides}`)}
             </Button>

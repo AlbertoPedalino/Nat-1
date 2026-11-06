@@ -2,6 +2,7 @@ import { Box, Typography } from '@mui/material';
 import PipButton from '../../../shared/ui/PipButton.jsx';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 // Interactive Hit Dice pips for the Short Rest dialog. Mirrors the look of
 // the old standalone Hit Dice panel: hollow pips are dice already used,
@@ -14,7 +15,7 @@ export default function HitDiceSpendControl({ pool, value, onChange, conMod }) {
   return (
     <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 1, bgcolor: uiAlpha(UI_COLORS.headerBg, 0.72) }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.6 }}>
-        <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.72rem', color: 'primary.main', flex: 1 }}>
+        <Typography sx={{ fontFamily: UI_FONTS.display, fontSize: '0.72rem', color: 'primary.main', flex: 1 }}>
           {pool.label} d{pool.faces}
         </Typography>
         <Typography sx={{ fontSize: '0.66rem', color: 'text.secondary' }}>
