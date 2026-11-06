@@ -1,6 +1,6 @@
-import { createCloudSaveQueue } from '../../../../src/shared/cloud/sync/cloudSaveQueue.js';
-import { saveBuilderCharacter } from '../../../../src/pages/charbuilder/state/cloudSave.js';
-import { SHEET_CONFLICT } from '../../../../src/shared/cloud/api/cloudCharacters.js';
+import { createCloudSaveQueue } from '../../../../../src/shared/cloud/sync/cloudSaveQueue.js';
+import { saveBuilderCharacter } from '../../../../../src/pages/charbuilder/state/cloudSave.js';
+import { SHEET_CONFLICT } from '../../../../../src/shared/cloud/api/cloudCharacters.js';
 
 // The builder's cloud saves go through one queue (as CharBuilder wires it):
 // never two at once, a save requested meanwhile waits and then writes the
@@ -24,7 +24,7 @@ async function held(run) {
     db.inFlight -= 1;
   }
 }
-vi.mock('../../../../src/shared/cloud/supabaseClient.js', () => ({
+vi.mock('../../../../../src/shared/cloud/supabaseClient.js', () => ({
   requireClient: () => ({
     auth: { getUser: async () => ({ data: { user: { id: 'player', user_metadata: {} } }, error: null }) },
     from: () => ({
