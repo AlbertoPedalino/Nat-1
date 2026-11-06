@@ -28,11 +28,8 @@ import { STEPS } from './constants.js';
 import { adapterRegistry, loadClassAdapters, loadCoreAdapters } from '../../adapters/index.js';
 import { getMod, getFinal } from '../charsheet/state/calculations.js';
 import { adaptBuilderData } from '../../adapters/adapterPipeline.js';
-import { loadBackgrounds, loadFeats, loadSpecies } from './data/characterOptionData.js';
-import { loadClassIndex, loadOptionalFeatures } from './data/classData.js';
-import { loadItems } from './data/itemData.js';
-import { loadSpells } from './data/spellData.js';
-import { loadBeasts } from './data/beastData.js';
+import { useBuilderData } from './state/useBuilderData.js';
+import BuilderDataAlert from './layout/BuilderDataAlert.jsx';
 import { extractSheetData, buildImportedCharacter, saveCharacter, buildSheetCharacter } from './state/persistence.js';
 import { builderReducer, initialBuilderState, normalizeCharacterLevels } from './state/state.js';
 import { BackgroundStep, ClassStep, EquipmentStep, ScoresStep, SheetStep, SpeciesStep } from './steps/index.js';
@@ -350,32 +347,7 @@ export default function CharBuilder() {
     }
   }, [authResolved, cloudActive]);
 
-  useEffect(() => {
-    const run = async (scope, loader, mapResult) => {
-      dispatch({ type: 'data/load-start', scope });
-      try {
-        const result = await loader();
-        dispatch({ type: 'data/load-success', scope, payload: mapResult(result) });
-      } catch (error) {
-        dispatch({ type: 'data/load-error', scope, error: error?.message || String(error) });
-      }
-    };
-
-    run('classes', loadClassIndex, (result) => ({
-      classCache: result.cache,
-      classes: result.classes,
-      subclasses: result.subclasses,
-      classFeatures: result.classFeatures,
-      subclassFeatures: result.subclassFeatures,
-    }));
-    run('species', loadSpecies, (species) => ({ species }));
-    run('backgrounds', loadBackgrounds, (backgrounds) => ({ backgrounds }));
-    run('feats', loadFeats, (feats) => ({ feats }));
-    run('spells', loadSpells, (result) => ({ spells: result.spells, classSpellIndex: result.classSpellIndex }));
-    run('items', loadItems, (items) => ({ items }));
-    run('optionalFeatures', loadOptionalFeatures, (optionalFeatures) => ({ optionalFeatures }));
-    run('beasts', loadBeasts, (beasts) => ({ beasts }));
-  }, []);
+  const reloadData = useBuilderData(dispatch);
 
   useEffect(() => {
     if (state.adaptersLoaded || state.loading.items) return;
@@ -548,6 +520,7 @@ export default function CharBuilder() {
           }}
         >
           <Box sx={{ minWidth: 0 }}>
+            <BuilderDataAlert errors={state.errors} onRetry={reloadData} />
             {cloudConflict ? (
               <SheetConflictBanner subject="character" onLoadRemote={loadCloudVersion} onKeepLocal={keepBuilderVersion} />
             ) : null}
