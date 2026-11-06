@@ -133,9 +133,7 @@ export default function FeaturesTab({ C }) {
 }
 
 function collectWarlockInvocationFeatures(C) {
-  const meta = typeof adapterRegistry.getClassSheetChoiceMeta === 'function'
-    ? (adapterRegistry.getClassSheetChoiceMeta('Warlock') || {})
-    : {};
+  const meta = adapterRegistry.getClassSheetChoiceMeta('Warlock');
   const invocationData = Array.isArray(meta?.invocationData) ? meta.invocationData : [];
   if (!invocationData.length) return [];
 

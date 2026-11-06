@@ -66,12 +66,8 @@ export function collectSpellRiders(C, { hasHeal = false, hasDamage = false, entr
 
 export function getResolvedCantripData(C, name) {
   if (!name) return null;
-  const base = typeof adapterRegistry.getCantripData === 'function'
-    ? adapterRegistry.getCantripData(name)
-    : null;
-  const modifiers = typeof adapterRegistry.getCantripDataModifiers === 'function'
-    ? (adapterRegistry.getCantripDataModifiers(name) || [])
-    : [];
+  const base = adapterRegistry.getCantripData(name);
+  const modifiers = adapterRegistry.getCantripDataModifiers(name);
   if (!base && !modifiers.length) return null;
   return modifiers.reduce((data, fn) => {
     if (typeof fn !== 'function') return data;

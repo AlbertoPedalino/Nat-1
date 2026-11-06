@@ -27,19 +27,12 @@ function isChoiceFeatOwnerKey(key) {
   for (let i = 0; i < FRAMEWORK_PATTERNS.length; i++) {
     if (FRAMEWORK_PATTERNS[i].test(key)) return true;
   }
-  const exact = typeof adapterRegistry?.getFeatOwnerKeyExact === 'function'
-    ? adapterRegistry.getFeatOwnerKeyExact()
-    : null;
-  if (exact && exact.has(key)) return true;
-  const prefixes = typeof adapterRegistry?.getFeatOwnerKeyPrefixes === 'function'
-    ? adapterRegistry.getFeatOwnerKeyPrefixes()
-    : [];
+  if (adapterRegistry.getFeatOwnerKeyExact().has(key)) return true;
+  const prefixes = adapterRegistry.getFeatOwnerKeyPrefixes();
   for (let i = 0; i < prefixes.length; i++) {
     if (key.startsWith(prefixes[i])) return true;
   }
-  const patterns = typeof adapterRegistry?.getFeatOwnerKeyPatterns === 'function'
-    ? adapterRegistry.getFeatOwnerKeyPatterns()
-    : [];
+  const patterns = adapterRegistry.getFeatOwnerKeyPatterns();
   for (let i = 0; i < patterns.length; i++) {
     const pattern = patterns[i];
     if (pattern instanceof RegExp) {

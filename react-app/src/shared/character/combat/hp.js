@@ -21,15 +21,10 @@ function levelEntry(character, key, faces) {
   return Math.floor(faces / 2) + 1;
 }
 
-function safeArray(getter, ...args) {
-  if (typeof getter !== 'function') return [];
-  try { return getter(...args) || []; } catch { return []; }
-}
-
 function classHpBonusFor(className, subclassShortName, classLevel, snapshotEffects) {
   const live = [
-    ...safeArray(adapterRegistry.getClassSheetEffects, className),
-    ...safeArray(adapterRegistry.getSubclassSheetEffects, className, subclassShortName),
+    ...adapterRegistry.getClassSheetEffects(className),
+    ...adapterRegistry.getSubclassSheetEffects(className, subclassShortName),
   ];
   const effects = live.length ? live : (snapshotEffects || []);
   return effects.reduce((sum, eff) => {
@@ -43,18 +38,14 @@ function classHpBonusFor(className, subclassShortName, classLevel, snapshotEffec
 }
 
 function speciesHpBonus(character) {
-  const live = adapterRegistry.getSpeciesSheetHpBonus
-    ? Number(adapterRegistry.getSpeciesSheetHpBonus(character?.speciesName, character?.speciesSource) || 0)
-    : 0;
+  const live = adapterRegistry.getSpeciesSheetHpBonus(character?.speciesName, character?.speciesSource);
   if (live) return live;
   return Number(character?.speciesSnapshot?.hpBonusPerLevel || 0);
 }
 
 function featHpBonusPerLevel(featName, featSnapshot) {
   if (featSnapshot?.hpBonusPerLevel != null) return Number(featSnapshot.hpBonusPerLevel) || 0;
-  const adapter = typeof adapterRegistry.getFeatAdapter === 'function'
-    ? adapterRegistry.getFeatAdapter(featName)
-    : null;
+  const adapter = adapterRegistry.getFeatAdapter(featName);
   if (typeof adapter !== 'function') return 0;
   try {
     const out = adapter({ name: featName }) || {};
