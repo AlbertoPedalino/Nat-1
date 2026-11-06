@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { adapterRegistry } from '../../../../src/adapters/registry.js';
 import installArtificer from '../../../../src/adapters/classes/artificer/artificer.js';
 import { collectFeatAsiBonuses } from '../../../../src/shared/character/progression/abilityBonuses.js';
-import { initialBuilderState } from '../../../../src/pages/charbuilder/state/state.js';
+import { initialBuilderState } from '../../../../src/pages/charbuilder/state/initialState.js';
 import { classChoiceSpecs } from '../../../../src/pages/charbuilder/choices/choiceSpecs.js';
 import { makeSheetPayload } from '../../../../src/pages/charbuilder/state/persistence.js';
 import { getFinal } from '../../../../src/shared/character/sheet/sheetStats.js';

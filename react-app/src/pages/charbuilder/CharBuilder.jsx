@@ -28,8 +28,12 @@ import { adaptBuilderData } from '../../adapters/adapterPipeline.js';
 import { useBuilderData } from './state/useBuilderData.js';
 import BuilderDataAlert from './layout/BuilderDataAlert.jsx';
 import { builderRootSx, builderTheme } from './layout/builderTheme.js';
-import { extractSheetData, buildImportedCharacter, saveCharacter, buildSheetCharacter } from './state/persistence.js';
-import { builderReducer, initialBuilderState, normalizeCharacterLevels } from './state/state.js';
+import {
+  extractSheetData, buildImportedCharacter, saveCharacter, buildSheetCharacter,
+} from './state/persistence.js';
+import { builderReducer } from './state/state.js';
+import { initialBuilderState } from './state/initialState.js';
+import { normalizeCharacterLevels } from './state/choiceCleanup.js';
 import BackgroundStep from './steps/BackgroundStep.jsx';
 import ClassStep from './steps/ClassStep.jsx';
 import EquipmentStep from './steps/EquipmentStep.jsx';
@@ -56,7 +60,9 @@ import { confirmAction } from '../../shared/ui/confirmAction.js';
 import { useEventListener } from '../../shared/ui/useEventListener.js';
 import { UI_COLORS, uiAlpha } from '../../shared/ui/colors.js';
 import { UI_FONTS } from '../../shared/ui/fonts.js';
-import { NEW_CHARACTER, characterIdFromUrl, replaceCharacterIdInUrl } from '../../shared/character/profile/characterRoutes.js';
+import {
+  NEW_CHARACTER, characterIdFromUrl, replaceCharacterIdInUrl,
+} from '../../shared/character/profile/characterRoutes.js';
 import { classNames } from '../../shared/character/progression/classLevel.js';
 
 function StepLabel({ step, index }) {

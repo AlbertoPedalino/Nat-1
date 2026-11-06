@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { builderReducer, initialBuilderState } from '../../../../../src/pages/charbuilder/state/state.js';
+import { builderReducer } from '../../../../../src/pages/charbuilder/state/state.js';
+import { initialBuilderState } from '../../../../../src/pages/charbuilder/state/initialState.js';
 import { countActiveFilterValues } from '../../../../../src/shared/character/inventory/itemFilters.js';
 
 const EQUIPMENT_UI_ACTIONS = [

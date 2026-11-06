@@ -5,7 +5,7 @@ import {
   stripRuntimeOnlyCharacterFields,
   withRuntimeOnlyCharacterFields,
 } from '../../../../../src/shared/character/profile/runtimeFields.js';
-import { initialBuilderState } from '../../../../../src/pages/charbuilder/state/state.js';
+import { initialBuilderState } from '../../../../../src/pages/charbuilder/state/initialState.js';
 import { buildSheetCharacter } from '../../../../../src/pages/charbuilder/state/persistence.js';
 import { serializeCharacterForExport } from '../../../../../src/shared/character/profile/characterExport.js';
 

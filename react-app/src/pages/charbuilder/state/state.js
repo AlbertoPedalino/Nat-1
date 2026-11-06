@@ -1,8 +1,7 @@
-import { BACKGROUND_SUMMARIES, CLASS_SUMMARIES, FEAT_SUMMARIES, SPECIES_SUMMARIES, STANDARD_ARRAY } from '../constants.js';
-import { ITEM_SUMMARIES } from '../../../shared/content/catalogs/itemData.js';
-import { getBackgroundPattern, getPrimaryClassLevel } from '../progression/calculations.js';
-import { handleBackgroundSelect, handleClassSelect, handleSpellToggle, handleWizardSpellbookToggle } from './stateHandlers.js';
-import { getChoiceLevel } from '../../../shared/character/progression/choiceLevels.js';
+import { getBackgroundPattern } from '../progression/calculations.js';
+import {
+  handleBackgroundSelect, handleClassSelect, handleSpellToggle, handleWizardSpellbookToggle,
+} from './stateHandlers.js';
 import { rollPool } from '../../../shared/character/dice/dice.js';
 import {
   normalizeCoinAmount,
@@ -13,190 +12,21 @@ import {
   reorderCurrency,
 } from '../../../shared/character/inventory/currency.js';
 import { addInventoryEntries } from '../../../shared/character/inventory/itemContainers.js';
-import { emptyItemFilters } from '../../../shared/character/inventory/itemFilters.js';
-import { isFeatKey, isFeatDetailKey } from '../../../shared/character/progression/featChoiceKeys.js';
 import { normalizeCharacterChoices } from '../../../shared/character/progression/choiceNormalization.js';
 import { withOwnedFeatSnapshots } from '../../../shared/character/progression/selectedFeats.js';
-import { matchKey, splitNameSource, stripSource } from '../../../shared/content/nameKeys.js';
+import { splitNameSource } from '../../../shared/content/nameKeys.js';
 import { ABILITIES } from '../../../shared/content/rulesVocabulary.js';
 import { multiclassLevels } from '../../../shared/character/progression/classLevel.js';
-import { stripMarkup } from '../../../shared/content/markupText.js';
-
-// Fields whose value feeds normalizeCharacterChoices. When a reducer patch touches
-// any of them, normalizedChoices is rebuilt so it stays the single source of truth
-// for derived proficiencies/expertise/spells (consumed by the sheet and previews).
-const NORMALIZE_SOURCE_FIELDS = [
-  'choices',
-  'selectedSkills',
-  'selectedTools',
-  'selectedLanguages',
-  'selectedCantrips',
-  'selectedSpells',
-  'wizardSpellbook',
-  'wizardSpellMastery',
-  'wizardSignatureSpells',
-];
-
-function patchTouchesNormalizeSource(patch) {
-  return !!patch && NORMALIZE_SOURCE_FIELDS.some(
-    (field) => Object.prototype.hasOwnProperty.call(patch, field),
-  );
-}
-
-function pruneOrphanFeatChoices(choices = {}) {
-  if (!choices || typeof choices !== 'object') return choices;
-  const ownerKeys = Object.keys(choices)
-    .filter((key) => isFeatKey(key) && !isFeatDetailKey(key) && choices[key] != null && choices[key] !== '');
-  const next = { ...choices };
-  let mutated = false;
-  Object.keys(next).forEach((key) => {
-    if (!isFeatDetailKey(key)) return;
-    const hasOwner = ownerKeys.some((owner) => key === owner || key.startsWith(`${owner}_`));
-    if (!hasOwner) {
-      delete next[key];
-      mutated = true;
-    }
-  });
-  return mutated ? next : choices;
-}
-
-function hasLevelAbove(key, classLevel) {
-  const k = String(key || '');
-  // Generic: feat_asi_lv{N}, bard_expertise_lv{N}, etc.
-  var match = k.match(/lv(\d+)/i);
-  if (match) return Number(match[1]) > Number(classLevel);
-  // Adapter-registered patterns: invocations, mystic arcanum, etc.
-  var choiceLv = getChoiceLevel(k);
-  return choiceLv != null && Number(classLevel) < choiceLv;
-}
-
-function cleanChoicesForLevel(choices, classLevel) {
-  const out = {};
-  Object.keys(choices || {}).forEach(function(key) {
-    if (!hasLevelAbove(key, classLevel)) out[key] = choices[key];
-  });
-  return out;
-}
-
-// Sum of levels from selected (named) multiclass slots. A blank slot — just added
-
-// Total character level = primary class level + selected multiclass levels.
-// Single source of truth for the stats level; XP is tracked separately (xp/set).
-function totalCharacterLevel(classLevel, extraClasses) {
-  return (Number(classLevel) || 1) + multiclassLevels(extraClasses);
-}
-
-export function normalizeCharacterLevels(character = {}) {
-  const classLevel = getPrimaryClassLevel(character);
-  return {
-    ...character,
-    classLevel,
-    level: totalCharacterLevel(classLevel, character.extraClasses),
-  };
-}
-
-function normChoice(value) {
-  return matchKey(stripSource(stripMarkup(value)));
-}
-
-export const initialCharacter = {
-  name: '',
-  xp: 0,
-  activeClassTab: 0,
-  className: '',
-  classSource: '',
-  classLevel: 1,
-  cls: null,
-  allFeatures: [],
-  subclasses: [],
-  allSubFeatures: [],
-  level: 1,
-  subclassShortName: '',
-  subclassSource: '',
-  extraClasses: [],
-  speciesName: '',
-  speciesSource: '',
-  speciesObj: null,
-  backgroundName: '',
-  backgroundSource: '',
-  backgroundObj: null,
-  backgroundAbilities: [],
-  backgroundPattern: [],
-  backgroundPatternIdx: 0,
-  scoreMethod: 'pointbuy',
-  hpMode: 'average',
-  hpManualRolls: {},
-  pbScores: { str: 8, dex: 8, con: 8, int: 8, wis: 8, cha: 8 },
-  arrAssign: Object.fromEntries(ABILITIES.map((stat, index) => [stat, STANDARD_ARRAY[index] ?? null])),
-  dicePool: [],
-  diceAssign: Object.fromEntries(ABILITIES.map((stat) => [stat, null])),
-  manualScores: { str: 8, dex: 8, con: 8, int: 8, wis: 8, cha: 8 },
-  selDiceIdx: null,
-  selectedCantrips: [],
-  selectedSpells: {},
-  wizardSpellbook: {},
-  wizardSpellMastery: {},
-  wizardSignatureSpells: {},
-  choices: {},
-  equipChoices: {},
-  selectedSkills: [],
-  selectedLanguages: [],
-  selectedTools: [],
-  currency: { cp: 0, sp: 0, gp: 0, pp: 0, custom: [] },
-  inventory: [],
-};
-
-export const initialBuilderState = {
-  tab: 0,
-  character: initialCharacter,
-  loading: {
-    classes: true,
-    species: true,
-    backgrounds: true,
-    feats: true,
-    spells: true,
-    items: true,
-    optionalFeatures: true,
-  },
-  errors: {},
-  data: {
-    classCache: {},
-    classes: CLASS_SUMMARIES,
-    subclasses: [],
-    classFeatures: [],
-    subclassFeatures: [],
-    species: SPECIES_SUMMARIES,
-    backgrounds: BACKGROUND_SUMMARIES,
-    feats: FEAT_SUMMARIES,
-    spells: [],
-    classSpellIndex: {},
-    items: ITEM_SUMMARIES,
-    optionalFeatures: [],
-    beasts: [],
-  },
-  search: {
-    classes: '',
-    species: '',
-    background: '',
-    inventory: '',
-    currentInventory: '',
-    feats: '',
-    spells: '',
-  },
-  // Equipment step list state. UI only — `saveCharacter` persists
-  // `state.character`, so none of this reaches storage. It lives here rather
-  // than in the step so it survives navigating away and back, the same way the
-  // search boxes above already do.
-  inventoryFilter: 'all',
-  inventoryFilters: emptyItemFilters(),
-  currentInventoryFilter: 'all',
-  currentInventoryFilters: emptyItemFilters(),
-  choiceDialog: null,
-  adaptersLoaded: false,
-  adaptersVersion: 0,
-  loadedAdapterClasses: [],
-  dataAdapted: false,
-};
+import {
+  patchTouchesNormalizeSource, pruneOrphanFeatChoices, cleanChoicesForLevel, totalCharacterLevel,
+  normalizeCharacterLevels, normChoice, clearSpeciesChoices, pruneStaleSpeciesLineageChoices,
+  clearChoicePrefix,
+} from './choiceCleanup.js';
+import { initialCharacter } from './initialState.js';
+import {
+  handleExtraClassLevel, handleExtraClassSelect, handleExtraSubclassSelect, handleMulticlassAdd,
+  handleMulticlassRemove, handleSubclassSelect,
+} from './classHandlers.js';
 
 function updateCharacter(state, patch) {
   const merged = { ...state.character, ...patch };
@@ -237,45 +67,6 @@ function removeOneByRef(inventory, ref) {
   const qty = Math.max(0, Number(next[idx].qty ?? 1) - 1);
   if (qty > 0) next[idx] = { ...next[idx], qty };
   else next.splice(idx, 1);
-  return next;
-}
-
-function isSpeciesChoiceKey(key) {
-  const k = String(key || '');
-  return (
-    k.startsWith('species_') ||
-    k === 'khoravar_skill_versatility'
-  );
-}
-
-function clearSpeciesChoices(choices = {}) {
-  const next = { ...choices };
-  Object.keys(next).forEach((key) => {
-    if (isSpeciesChoiceKey(key)) delete next[key];
-  });
-  return next;
-}
-
-function pruneStaleSpeciesLineageChoices(choices = {}, versionValue) {
-  const stored = matchKey(Array.isArray(versionValue) ? versionValue[0] : versionValue);
-  const next = { ...choices };
-  Object.keys(next).forEach((key) => {
-    const m = key.match(/^species_(.+?)_(cantrip|spell)(?:_|$)/);
-    if (!m) return;
-    if (key === 'species_spell_ability') return;
-    const keyLineage = m[1].replace(/_/g, '').toLowerCase();
-    if (!stored || keyLineage !== stored) delete next[key];
-  });
-  return next;
-}
-
-function clearChoicePrefix(choices = {}, prefix) {
-  const target = String(prefix || '');
-  if (!target) return { ...choices };
-  const next = { ...choices };
-  Object.keys(next).forEach((key) => {
-    if (String(key).startsWith(target)) delete next[key];
-  });
   return next;
 }
 
@@ -372,154 +163,21 @@ export function builderReducer(state, action) {
       return { ...state, search: { ...state.search, [action.scope]: action.value } };
     case 'class-tab/set':
       return updateCharacter(state, { activeClassTab: action.tab });
-    case 'multiclass/add': {
-      if (Number(state.character.level || 1) >= 20) return state;
-      if ((state.character.extraClasses || []).some((extraClass) => !extraClass?.name)) return state;
-      const extraClasses = [
-        ...state.character.extraClasses,
-        {
-          name: '',
-          source: '',
-          level: 1,
-          cls: null,
-          subclassShortName: '',
-          subclasses: [],
-          allFeatures: [],
-          allSubFeatures: [],
-        },
-      ];
-      const total = totalCharacterLevel(state.character.classLevel, extraClasses);
-      return updateCharacter(state, {
-        activeClassTab: extraClasses.length,
-        extraClasses,
-        level: total,
-      });
-    }
-    case 'multiclass/remove': {
-      const index = Number(action.index);
-      if (!Number.isInteger(index) || index < 0) return state;
-      const extraClasses = state.character.extraClasses.filter((_, itemIndex) => itemIndex !== index);
-      const choices = { ...state.character.choices };
-      const removedPrefix = `mc${index}_`;
-      Object.keys(choices).forEach((key) => {
-        if (key.startsWith(removedPrefix)) delete choices[key];
-      });
-      const remappedChoices = {};
-      Object.entries(choices).forEach(([key, value]) => {
-        const match = key.match(/^mc(\d+)_(.*)$/);
-        if (match) {
-          const oldIdx = Number(match[1]);
-          if (oldIdx > index) remappedChoices[`mc${oldIdx - 1}_${match[2]}`] = value;
-          else remappedChoices[key] = value;
-        } else {
-          remappedChoices[key] = value;
-        }
-      });
-      const total = totalCharacterLevel(state.character.classLevel, extraClasses);
-      return updateCharacter(state, { extraClasses, activeClassTab: 0, choices: remappedChoices, level: total });
-    }
+    case 'multiclass/add':
+      return handleMulticlassAdd(state, action, { findByNameSource, updateCharacter });
+    case 'multiclass/remove':
+      return handleMulticlassRemove(state, action, { findByNameSource, updateCharacter });
     case 'class/select': {
       return handleClassSelect(state, action, { findByNameSource, updateCharacter });
     }
-    case 'subclass/select': {
-      const choices = { ...state.character.choices };
-      Object.keys(choices).forEach((key) => {
-        if (key.startsWith('subclass_') || key.includes('_skill_') || key.includes('_exp_')) delete choices[key];
-      });
-      const selectedSubclass = (state.character.subclasses || []).find(
-        (s) => s.shortName === action.subclassShortName
-      );
-      const subclassSource = selectedSubclass?.source || '';
-      const allSubFeatures = state.data.subclassFeatures.filter(
-        (feature) => feature.className === state.character.className
-          && (feature.classSource === state.character.classSource || !feature.classSource)
-          && (!subclassSource || !feature._copy || feature.subclassSource === subclassSource)
-      );
-      return updateCharacter(state, { subclassShortName: action.subclassShortName, subclassSource, allSubFeatures, choices });
-    }
-    case 'extra-class/select': {
-      const idx = Number(action.index);
-      if (!Number.isInteger(idx) || idx < 0) return state;
-      const classObject = action.classObject || findByNameSource(state.data.classes, action.className, action.source);
-      if (!classObject) return state;
-
-      const previous = state.character.extraClasses?.[idx] || {};
-      const sameClass = previous.name === classObject.name && (!action.source || previous.source === classObject.source);
-      const subclasses = state.data.subclasses.filter((subclass) => subclass.className === classObject.name && (subclass.classSource === classObject.source || !subclass.classSource));
-      const allFeatures = state.data.classFeatures.filter((feature) => feature.className === classObject.name && (feature.classSource === classObject.source || !feature.classSource));
-      const allSubFeatures = state.data.subclassFeatures.filter((feature) => feature.className === classObject.name && (feature.classSource === classObject.source || !feature.classSource));
-
-      const prefix = `mc${idx}_`;
-      const choices = { ...state.character.choices };
-      if (!sameClass) {
-        Object.keys(choices).forEach((key) => {
-          if (key.startsWith(prefix)) delete choices[key];
-        });
-      }
-
-      const extraClasses = state.character.extraClasses.map((extraClass, itemIndex) => (
-        itemIndex === idx
-          ? {
-              ...extraClass,
-              name: classObject.name,
-              source: classObject.source,
-              cls: classObject,
-              clsSnapshot: null,
-              level: Math.max(1, Number(extraClass.level) || 1),
-              subclassShortName: sameClass ? (extraClass.subclassShortName || '') : '',
-              subclasses,
-              allFeatures,
-              allSubFeatures,
-            }
-          : extraClass
-      ));
-      const total = totalCharacterLevel(state.character.classLevel, extraClasses);
-      if (!previous.name && total > 20) return state;
-      return updateCharacter(state, { extraClasses, choices, activeClassTab: idx + 1, level: total });
-    }
-    case 'extra-subclass/select': {
-      const idx = Number(action.index);
-      if (!Number.isInteger(idx) || idx < 0) return state;
-      const prefix = `mc${idx}_`;
-      const choices = { ...state.character.choices };
-      Object.keys(choices).forEach((key) => {
-        if (key.startsWith(`${prefix}subclass_`) || (key.startsWith(prefix) && (key.includes('_skill_') || key.includes('_exp_')))) delete choices[key];
-      });
-      const extraClasses = state.character.extraClasses.map((extraClass, itemIndex) => {
-        if (itemIndex !== idx) return extraClass;
-        const selectedSubclass = (extraClass.subclasses || []).find(
-          (s) => s.shortName === action.subclassShortName
-        );
-        const subclassSource = selectedSubclass?.source || '';
-        const allSubFeatures = state.data.subclassFeatures.filter(
-          (feature) => feature.className === extraClass.name
-            && (feature.classSource === extraClass.source || !feature.classSource)
-            && (!subclassSource || !feature._copy || feature.subclassSource === subclassSource)
-        );
-        return { ...extraClass, subclassShortName: action.subclassShortName, subclassSource, allSubFeatures };
-      });
-      return updateCharacter(state, { extraClasses, choices });
-    }
-    case 'extra-class/level': {
-      const idx = Number(action.index);
-      if (!Number.isInteger(idx) || idx < 0) return state;
-      const primaryLevel = getPrimaryClassLevel(state.character);
-      const otherExtraLevels = multiclassLevels(state.character.extraClasses, { except: idx });
-      const maxLevel = Math.max(1, 20 - primaryLevel - otherExtraLevels);
-      const newLevel = Math.min(maxLevel, Math.max(1, Number(action.level) || 1));
-      const extraClasses = state.character.extraClasses.map((extraClass, itemIndex) => (
-        itemIndex === idx ? { ...extraClass, level: newLevel } : extraClass
-      ));
-      const total = totalCharacterLevel(state.character.classLevel, extraClasses);
-      const prefix = `mc${idx}_`;
-      const choices = { ...(state.character.choices || {}) };
-      Object.keys(choices).forEach(function(key) {
-        if (!key.startsWith(prefix)) return;
-        const withoutPrefix = key.slice(prefix.length);
-        if (hasLevelAbove(withoutPrefix, newLevel)) delete choices[key];
-      });
-      return updateCharacter(state, { extraClasses, level: total, choices });
-    }
+    case 'subclass/select':
+      return handleSubclassSelect(state, action, { findByNameSource, updateCharacter });
+    case 'extra-class/select':
+      return handleExtraClassSelect(state, action, { findByNameSource, updateCharacter });
+    case 'extra-subclass/select':
+      return handleExtraSubclassSelect(state, action, { findByNameSource, updateCharacter });
+    case 'extra-class/level':
+      return handleExtraClassLevel(state, action, { findByNameSource, updateCharacter });
     case 'species/select': {
       const speciesObj = action.speciesObj || findByNameSource(state.data.species, action.name, action.source);
       const sameSpecies = state.character.speciesName === action.name

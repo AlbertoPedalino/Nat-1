@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { adapterRegistry } from '../../../src/adapters/registry.js';
 import installTelekinetic from '../../../src/adapters/feats/telekinetic.js';
-import { initialBuilderState } from '../../../src/pages/charbuilder/state/state.js';
+import { initialBuilderState } from '../../../src/pages/charbuilder/state/initialState.js';
 import { makeSheetPayload } from '../../../src/pages/charbuilder/state/persistence.js';
 import { buildSpellInfo } from '../../../src/pages/charsheet/spells/spellsTabLogic.js';
 import { getSpellMetaFields } from '../../../src/shared/character/spells/spellMeta.js';
