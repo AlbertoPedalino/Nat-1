@@ -1,3 +1,4 @@
+import { makeId } from '../../ids.js';
 // XPHB 2024 coins: copper, silver, gold, platinum. Electrum (EP) was dropped
 // from the 2024 Player's Handbook and is intentionally not included.
 export const CURRENCY_TYPES = [
@@ -32,7 +33,7 @@ const DEFAULT_CUSTOM_LABEL = 'Custom';
 const HEX_COLOR_RE = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
 
 export function generateCustomCurrencyId() {
-  return `cur_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
+  return makeId('cur');
 }
 
 // Heavy, canonical sanitizing — used for new entries and at load. Trims,

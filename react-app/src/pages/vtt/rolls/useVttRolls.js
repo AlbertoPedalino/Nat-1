@@ -14,6 +14,7 @@ import { rollCustomFormula } from '../../../shared/vtt/rolls/customRoll.js';
 import { normalizeRollIdentity } from '../../../shared/character/dice/rollLogPresentation.js';
 import { rollDice } from '../../../shared/character/dice/rollNotation.js';
 import { buildEncounterDiceToast } from '../../encounterbuilder/rolls/EncounterDiceToast.jsx';
+import { makeId } from '../../../shared/ids.js';
 
 export function useVttRolls({ campaignId, role, roster, tokens }) {
   const [feed, setFeed] = useState([]);
@@ -60,7 +61,7 @@ export function useVttRolls({ campaignId, role, roster, tokens }) {
   }, [campaignId, role.isGm]);
 
   const handleCustomRoll = useCallback((formula) => {
-    const id = `custom:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
+    const id = makeId('custom');
     const thrown = rollCustomFormula(formula);
     if (!thrown) return;
     const entry = {
@@ -98,7 +99,7 @@ export function useVttRolls({ campaignId, role, roster, tokens }) {
     const timestamp = Date.now();
     const entry = {
       ...toast,
-      id: `creature:${timestamp}:${Math.random().toString(36).slice(2, 12)}`,
+      id: makeId('creature'),
       timestamp,
       actorName,
       characterId: null,

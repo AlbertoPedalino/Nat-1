@@ -10,6 +10,7 @@
 
 import { DICE_LIMITS } from '../../character/dice/dice.js';
 import { normalizeRollIdentity } from '../../character/dice/rollLogPresentation.js';
+import { makeId } from '../../ids.js';
 
 export const ROLL_TTL_MS = 8000;
 export const MAX_FEED = 40;
@@ -78,7 +79,7 @@ export function normalizeRoll(entry) {
   return {
     // Its own id: two identical rolls a second apart are two events, and the
     // feed has to show both.
-    id: suppliedId || `roll:${at}:${Math.random().toString(36).slice(2, 12)}`,
+    id: suppliedId || makeId('roll'),
     characterId,
     sourceRef: boundedText(entry.sourceRef, 360) || null,
     actorName,

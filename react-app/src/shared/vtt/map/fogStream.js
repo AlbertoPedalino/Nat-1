@@ -1,3 +1,4 @@
+import { makeId } from '../../ids.js';
 // Live fog painting travels as deltas (see fogDelta in fog.js): each frame
 // carries only the cells it flipped, numbered within its stroke. A receiver
 // applies them in order; once one is missing — joined mid-stroke, a dropped
@@ -5,7 +6,7 @@
 // the brush lifts (plus the saved row) puts everyone back on the same fog.
 
 export function newFogStroke() {
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+  return makeId('stroke');
 }
 
 // `streams`: a Map kept by the receiver, one entry per painter.

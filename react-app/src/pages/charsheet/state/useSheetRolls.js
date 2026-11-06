@@ -10,6 +10,7 @@ import { useRollChannel } from '../../../shared/cloud/sync/useRollChannel.js';
 import { useCharacterCampaign } from '../../../shared/cloud/sync/useCharacterCampaign.js';
 import { normalizeRoll } from '../../../shared/vtt/rolls/rollFeed.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
+import { makeId } from '../../../shared/ids.js';
 
 // Every roll and notice on the sheet: the dice toast, the roll log (this sheet's
 // rolls plus the campaign's), publishing to the campaign, and the D20 executor
@@ -35,7 +36,7 @@ export function useSheetRolls({ C, sheet, charId, onRoll, showOwnRollToast }) {
   const showDiceToast = useCallback((label, detail, total, rolls, meta) => {
     const timestamp = Date.now();
     const entry = {
-      id: `sheet:${charId || 'anon'}:${timestamp}:${Math.random().toString(36).slice(2, 8)}`,
+      id: makeId('sheet'),
       label,
       detail,
       total,

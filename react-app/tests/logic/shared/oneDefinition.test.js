@@ -45,6 +45,12 @@ test('capitalizing is done only by shared/ui/textCase.js', () => {
   ), []);
 });
 
+test('new ids are made only by makeId in shared/ids.js', () => {
+  assert.deepEqual(sourceFilesMatching(/Math\.random\(\)\.toString\(36\)|randomUUID/, {
+    allow: ['shared/ids.js'],
+  }), []);
+});
+
 test('asArray and flattenList are defined only in shared/lists.js', () => {
   assert.deepEqual(sourceFilesMatching(/(function|const)\s+(asArray|flattenList)\b/, {
     allow: ['shared/lists.js'],

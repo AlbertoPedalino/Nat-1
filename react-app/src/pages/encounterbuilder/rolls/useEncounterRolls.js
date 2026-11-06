@@ -4,6 +4,7 @@ import { normalizeRoll } from '../../../shared/vtt/rolls/rollFeed.js';
 import { buildEncounterDiceToast } from './EncounterDiceToast.jsx';
 import { normalizeRollIdentity } from '../../../shared/character/dice/rollLogPresentation.js';
 import { getStorageJson, setStorageJson } from '../../../shared/storage/storage.js';
+import { makeId } from '../../../shared/ids.js';
 
 function readSettings(instanceId) {
   return getStorageJson(`gb-enc-rolls:${instanceId}`, {});
@@ -52,7 +53,7 @@ export function useEncounterRolls({ instanceId, players, campaigns, dispatch }) 
   const shareRoll = useCallback((result, actor) => {
     const visibility = showToPlayers ? 'public' : 'gm';
     const timestamp = Date.now();
-    const id = `encounter:${timestamp}:${Math.random().toString(36).slice(2, 12)}`;
+    const id = makeId('encounter');
     const toast = buildEncounterDiceToast(result);
     const annotated = { ...result, rolls: toast.rolls, id, timestamp, visibility };
     dispatch({ type: 'addRoll', roll: annotated, actor: actor || 'GM' });

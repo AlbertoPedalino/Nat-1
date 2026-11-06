@@ -3,6 +3,7 @@ import {
   getStorageItem, getStorageJson, removeStorageItem, removeStorageItemStrict,
   setStorageItem, setStorageJson, writeStorageItemStrict,
 } from '../../storage/storage.js';
+import { makeId } from '../../ids.js';
 
 const CHAR_KEY = (id) => `gb:char:${id}`;
 // Sync bookkeeping kept beside the sheet, never inside it: the cloud
@@ -51,7 +52,7 @@ function upsertIndex(id, name) {
 }
 
 export function generateCharId() {
-  return `c_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+  return makeId('c');
 }
 
 export function loadCharacter(id) {

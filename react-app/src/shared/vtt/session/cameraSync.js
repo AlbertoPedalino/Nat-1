@@ -1,4 +1,5 @@
 import { clampZoom, normalizeView } from '../map/geometry.js';
+import { makeId } from '../../ids.js';
 
 const SOURCE_RE = /^[a-z0-9_-]{8,80}$/i;
 export const CAMERA_SOURCE_STORAGE_KEY = 'gb:vtt:presenter-source:v1';
@@ -9,9 +10,7 @@ export function normalizeCameraSource(value) {
 }
 
 export function createCameraSourceId() {
-  const uuid = globalThis.crypto?.randomUUID?.();
-  if (uuid) return uuid;
-  return `camera-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+  return makeId('camera');
 }
 
 export function sessionCameraSource(storage) {

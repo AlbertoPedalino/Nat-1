@@ -1,3 +1,4 @@
+import { makeId } from '../ids.js';
 function section(config) {
   return Object.freeze({ ...config });
 }
@@ -70,5 +71,5 @@ export function sanitizeInstanceId(value) {
 export function makeInstanceId(sectionKey, now = Date.now(), random = Math.random) {
   const section = getSection(sectionKey);
   if (!section) return '';
-  return `${section.idPrefix}_${now.toString(36)}_${random().toString(36).slice(2, 7)}`;
+  return makeId(section.idPrefix, { now, random });
 }

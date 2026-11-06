@@ -1,3 +1,4 @@
+import { makeId } from '../ids.js';
 const LINK_GROUP_PATTERN = /^[a-z0-9_-]{1,80}$/i;
 
 export function normalizeLinkGroupId(value) {
@@ -6,7 +7,5 @@ export function normalizeLinkGroupId(value) {
 }
 
 export function makeLinkGroupId() {
-  const uuid = globalThis.crypto?.randomUUID?.();
-  if (uuid) return `link_${uuid}`;
-  return `link_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 12)}`;
+  return makeId('link');
 }
