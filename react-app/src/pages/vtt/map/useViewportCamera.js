@@ -15,6 +15,7 @@ import { axialRound, isHexGrid, worldToAxial } from '../../../shared/vtt/map/hex
 import {
   cameraPoseToView, viewToCameraPose,
 } from '../../../shared/vtt/session/cameraSync.js';
+import { useEventListener } from '../../../shared/ui/useEventListener.js';
 
 const WHEEL_STEP = 1.12;
 // What sits on the map without being the map: tool panels, dialogs, popovers.
@@ -154,12 +155,7 @@ export function useViewportCamera({
 
   // Wheel has to be a non-passive native listener: React's onWheel is passive,
   // and preventDefault there is ignored, so the page scrolls while zooming.
-  useEffect(() => {
-    const host = hostRef.current;
-    if (!host) return undefined;
-    host.addEventListener('wheel', handleWheel, { passive: false });
-    return () => host.removeEventListener('wheel', handleWheel);
-  }, [handleWheel, hostRef]);
+  useEventListener(hostRef, 'wheel', handleWheel, { passive: false });
 
   // Strokes are stored in cells, fractionally: recalibrating the grid must not
   // slide a drawing off the wall it was traced on.

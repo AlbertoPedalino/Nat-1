@@ -4,6 +4,7 @@ import {
 } from '../../../shared/vtt/map/geometry.js';
 import { isMapPiece } from '../../../shared/vtt/map/mapObjects.js';
 import { overlapsSelection, screenSelectionRect } from './viewportGeometry.js';
+import { useEventListener } from '../../../shared/ui/useEventListener.js';
 
 // What is selected on the board: the piece of scenery whose resize/rotate
 // handles are showing, and the box selection — its marquee, moving the
@@ -102,23 +103,18 @@ export function useViewportSelection({
     )));
   }, [activeLayer, tokens]);
 
-  useEffect(() => {
-    if (paintMode !== 'marquee' || !selectedTokenIds.length) return undefined;
-    const handleKeyDown = (event) => {
-      if (event.defaultPrevented || event.repeat || deleteDialogOpen || deletingRef.current) return;
-      const target = event.target;
-      if (target?.closest?.('input, textarea, select, [contenteditable="true"], .MuiModal-root')) return;
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        clearSelection();
-      } else if (event.key === 'Delete' || event.key === 'Backspace') {
-        event.preventDefault();
-        deleteSelection();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [clearSelection, deleteDialogOpen, deleteSelection, paintMode, selectedTokenIds.length]);
+  useEventListener(window, 'keydown', (event) => {
+    if (event.defaultPrevented || event.repeat || deleteDialogOpen || deletingRef.current) return;
+    const target = event.target;
+    if (target?.closest?.('input, textarea, select, [contenteditable="true"], .MuiModal-root')) return;
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      clearSelection();
+    } else if (event.key === 'Delete' || event.key === 'Backspace') {
+      event.preventDefault();
+      deleteSelection();
+    }
+  }, { enabled: paintMode === 'marquee' && selectedTokenIds.length > 0 });
 
   // Resize and rotation furniture belongs only to the piece of scenery the user
   // has picked. Drop the selection if that piece is removed or stops being

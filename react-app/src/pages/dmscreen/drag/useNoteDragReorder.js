@@ -7,6 +7,7 @@ import {
   grabOffsetFor,
 } from './dragMotion.js';
 import { clearOffset, writeOffset } from './dragStyles.js';
+import { useEventListener } from '../../../shared/ui/useEventListener.js';
 
 // Pointer-events drag reorder: works with mouse, pen, and touch without pulling
 // in a drag-and-drop dependency. The dragged card is moved by writing custom
@@ -80,19 +81,13 @@ export function useNoteDragReorder({ notes, onReorder, onDrop }) {
   }, [notes, measureNatural, paintDrag]);
 
   // A page scroll or a window resize moves every cached rectangle at once.
-  useEffect(() => {
-    if (!draggingId) return undefined;
-    const refresh = () => {
-      measureNatural();
-      paintDrag();
-    };
-    window.addEventListener('scroll', refresh, true);
-    window.addEventListener('resize', refresh);
-    return () => {
-      window.removeEventListener('scroll', refresh, true);
-      window.removeEventListener('resize', refresh);
-    };
-  }, [draggingId, measureNatural, paintDrag]);
+  const dragging = Boolean(draggingId);
+  const refreshDragRects = () => {
+    measureNatural();
+    paintDrag();
+  };
+  useEventListener(window, 'scroll', refreshDragRects, { enabled: dragging, capture: true });
+  useEventListener(window, 'resize', refreshDragRects, { enabled: dragging });
 
   useEffect(() => () => cancelAnimationFrame(frameRef.current), []);
 
@@ -131,19 +126,11 @@ export function useNoteDragReorder({ notes, onReorder, onDrop }) {
   // The drag is followed on the window, not on the handle. Reordering moves the
   // card's DOM node, and moving a node releases its pointer capture — so a
   // handle-bound drag dies the moment the note first changes place, which is
-  // precisely when the GM is still dragging. Rebinding as `notes` changes also
-  // keeps the move handler from closing over a stale order.
-  useEffect(() => {
-    if (!draggingId) return undefined;
-    window.addEventListener('pointermove', handlePointerMove);
-    window.addEventListener('pointerup', endDrag);
-    window.addEventListener('pointercancel', endDrag);
-    return () => {
-      window.removeEventListener('pointermove', handlePointerMove);
-      window.removeEventListener('pointerup', endDrag);
-      window.removeEventListener('pointercancel', endDrag);
-    };
-  }, [draggingId, endDrag, handlePointerMove]);
+  // precisely when the GM is still dragging. The listener always calls the
+  // latest move handler, so it never closes over a stale order.
+  useEventListener(window, 'pointermove', handlePointerMove, { enabled: dragging });
+  useEventListener(window, 'pointerup', endDrag, { enabled: dragging });
+  useEventListener(window, 'pointercancel', endDrag, { enabled: dragging });
 
   const getHandleProps = useCallback((id) => ({
     onPointerDown: (event) => {

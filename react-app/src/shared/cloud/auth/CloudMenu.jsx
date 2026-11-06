@@ -9,6 +9,7 @@ import { isSyncExcluded, includeInSync } from '../sync/cloudSyncExclude.js';
 import { useToast } from '../../ui/ToastProvider.jsx';
 import { UI_COLORS } from '../../ui/colors.js';
 import { UI_FONTS } from '../../ui/fonts.js';
+import { useEventListener } from '../../ui/useEventListener.js';
 
 // The "active sheet" for the cloud menu is the one in the URL (builder/charsheet
 // ?char=…). We deliberately do NOT fall back to localStorage's gb:active_char:
@@ -71,18 +72,14 @@ export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUplo
   };
 
   // Live status from the headless auto-sync engine.
-  useEffect(() => {
-    const onSync = (e) => {
-      const state = e?.detail?.state || 'idle';
-      // Waiting for the debounce, or dropped: nothing to show yet.
-      if (state === 'scheduled' || state === 'cancelled') return;
-      // A conflict wrote nothing and needs a decision (the open sheet asks it).
-      setSyncState(state === 'conflict' ? 'error' : state);
-      if (state === 'error' || state === 'conflict') notify('error', `Sync failed: ${e.detail.error || ''}`);
-    };
-    window.addEventListener('gb:cloud-sync', onSync);
-    return () => window.removeEventListener('gb:cloud-sync', onSync);
-  }, []);
+  useEventListener(window, 'gb:cloud-sync', (e) => {
+    const state = e?.detail?.state || 'idle';
+    // Waiting for the debounce, or dropped: nothing to show yet.
+    if (state === 'scheduled' || state === 'cancelled') return;
+    // A conflict wrote nothing and needs a decision (the open sheet asks it).
+    setSyncState(state === 'conflict' ? 'error' : state);
+    if (state === 'error' || state === 'conflict') notify('error', `Sync failed: ${e.detail.error || ''}`);
+  });
 
   if (!cloudEnabled) {
     return (

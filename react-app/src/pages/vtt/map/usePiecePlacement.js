@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { screenToWorld, worldToCell } from '../../../shared/vtt/map/geometry.js';
 import { axialRound, isHexGrid, worldToAxial } from '../../../shared/vtt/map/hexGeometry.js';
 import { PIECE_POINTER_DRAG_EVENT } from '../tokens/PiecePreview.jsx';
+import { useEventListener } from '../../../shared/ui/useEventListener.js';
 
 // Pieces dragged in from outside the map — from the Pieces panel, a placement
 // dialog or the initiative strip (pointer events), or a character dragged with
@@ -53,39 +54,34 @@ export function usePiecePlacement({
   // same reliable path instead of depending on native HTML drag-and-drop.
   // Listening on the window lets a drag cross the floating tool panel or a
   // placement dialog before it reaches the map beneath.
-  useEffect(() => {
-    const handlePointerPlacement = (event) => {
-      const detail = event.detail;
-      const host = hostRef.current;
-      if (!detail?.placement || !host) return;
-      if (detail.phase === 'cancel') {
-        setPlacementHover(null);
-        return;
-      }
+  useEventListener(window, PIECE_POINTER_DRAG_EVENT, (event) => {
+    const detail = event.detail;
+    const host = hostRef.current;
+    if (!detail?.placement || !host) return;
+    if (detail.phase === 'cancel') {
+      setPlacementHover(null);
+      return;
+    }
 
-      const box = host.getBoundingClientRect();
-      const inside = detail.clientX >= box.left && detail.clientX <= box.right
-        && detail.clientY >= box.top && detail.clientY <= box.bottom;
-      if (!inside || backgroundOnly) {
-        setPlacementHover(null);
-        return;
-      }
+    const box = host.getBoundingClientRect();
+    const inside = detail.clientX >= box.left && detail.clientX <= box.right
+      && detail.clientY >= box.top && detail.clientY <= box.bottom;
+    if (!inside || backgroundOnly) {
+      setPlacementHover(null);
+      return;
+    }
 
-      const pointer = { clientX: detail.clientX, clientY: detail.clientY };
-      const next = placementPosition(pointer, detail.placement);
-      if (detail.phase === 'drop') {
-        setPlacementHover(null);
-        onDropPlacement?.(detail.placement, next);
-        return;
-      }
-      setPlacementHover((current) => (
-        current?.x === next.x && current?.y === next.y ? current : next
-      ));
-    };
-
-    window.addEventListener(PIECE_POINTER_DRAG_EVENT, handlePointerPlacement);
-    return () => window.removeEventListener(PIECE_POINTER_DRAG_EVENT, handlePointerPlacement);
-  }, [backgroundOnly, hostRef, onDropPlacement, placementPosition]);
+    const pointer = { clientX: detail.clientX, clientY: detail.clientY };
+    const next = placementPosition(pointer, detail.placement);
+    if (detail.phase === 'drop') {
+      setPlacementHover(null);
+      onDropPlacement?.(detail.placement, next);
+      return;
+    }
+    setPlacementHover((current) => (
+      current?.x === next.x && current?.y === next.y ? current : next
+    ));
+  });
 
   // Native drag and drop onto the map host.
   const dragHandlers = {

@@ -10,6 +10,7 @@ import { VTT_COLORS, vttAlpha } from '../../../shared/vtt/colors.js';
 import { fullscreenContainer } from '../map/fullscreenContainer.js';
 import MapObjectGlyph from '../objects/MapObjectGlyph.jsx';
 import { isMapPiece } from '../../../shared/vtt/map/mapObjects.js';
+import { useEventListener } from '../../../shared/ui/useEventListener.js';
 import {
   initialsSx,
   classIconSx,
@@ -115,14 +116,9 @@ export default function TokenSprite({
     setPinned(false);
     onInspectionChange?.(null);
   };
-  useEffect(() => {
-    if (!pinned) return undefined;
-    const closeOutside = (event) => {
-      if (!rootRef.current?.contains(event.target)) unpin();
-    };
-    document.addEventListener('pointerdown', closeOutside, true);
-    return () => document.removeEventListener('pointerdown', closeOutside, true);
-  });
+  useEventListener(document, 'pointerdown', (event) => {
+    if (!rootRef.current?.contains(event.target)) unpin();
+  }, { enabled: pinned, capture: true });
   // The resize hint is controlled rather than left to MUI's own hover, so it can
   // be dismissed the moment the drag starts: a label sitting over the piece
   // being sized is exactly what you need to see past. It stays down until the
@@ -138,24 +134,19 @@ export default function TokenSprite({
   // portrait still leaves a usable piece on the board.
   const [artworkFailed, setArtworkFailed] = useState(false);
   useEffect(() => { setArtworkFailed(false); }, [token.imageUrl]);
+  // Remount the failed image even when signing returns the same cached URL.
+  const retryArtwork = () => setArtworkFailed(false);
+  const retriesArtwork = artworkFailed && Boolean(token.imageUrl);
   useEffect(() => {
-    if (!artworkFailed || !token.imageUrl) return undefined;
-    // Remount the failed image even when signing returns the same cached URL.
-    const retry = () => setArtworkFailed(false);
-    const retryWhenVisible = () => {
-      if (document.visibilityState === 'visible') retry();
-    };
-    const timer = window.setTimeout(retry, 5000);
-    window.addEventListener('online', retry);
-    window.addEventListener('focus', retry);
-    document.addEventListener('visibilitychange', retryWhenVisible);
-    return () => {
-      window.clearTimeout(timer);
-      window.removeEventListener('online', retry);
-      window.removeEventListener('focus', retry);
-      document.removeEventListener('visibilitychange', retryWhenVisible);
-    };
-  }, [artworkFailed, token.imageUrl]);
+    if (!retriesArtwork) return undefined;
+    const timer = window.setTimeout(() => setArtworkFailed(false), 5000);
+    return () => window.clearTimeout(timer);
+  }, [retriesArtwork, token.imageUrl]);
+  useEventListener(window, 'online', retryArtwork, { enabled: retriesArtwork });
+  useEventListener(window, 'focus', retryArtwork, { enabled: retriesArtwork });
+  useEventListener(document, 'visibilitychange', () => {
+    if (document.visibilityState === 'visible') retryArtwork();
+  }, { enabled: retriesArtwork });
   const showArtwork = Boolean(token.imageUrl) && !artworkFailed;
   // Scenery is a rectangle: a rug or a door forced into a circle is unusable,
   // and it wants none of the creature furniture either. This is based on what

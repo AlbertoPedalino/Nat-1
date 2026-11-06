@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useRef } from 'react';
+import { useEventListener } from '../../../shared/ui/useEventListener.js';
 
 // Where a piece's or a mark's menu opens, and what it does when a field in it
 // is typed into.
@@ -43,38 +44,29 @@ export function useMenuPlacement(anchor) {
     paper.style.top = `${Math.round(top)}px`;
   }, [anchor]);
 
-  useEffect(() => {
-    if (!touch || !anchor) return undefined;
-    const viewport = globalThis.visualViewport;
-    const keepFieldInView = () => {
-      const paper = paperRef.current;
-      if (!paper) return;
-      const field = document.activeElement;
-      const typing = paper.contains(field) && /^(INPUT|TEXTAREA)$/.test(field?.tagName || '');
-      let lift = 0;
-      if (typing) {
-        const visibleBottom = (viewport ? viewport.offsetTop + viewport.height : globalThis.innerHeight) - EDGE;
-        // Where the field's bottom would be with the menu back in its place.
-        const bottom = field.getBoundingClientRect().bottom + liftRef.current;
-        lift = Math.max(0, Math.min(bottom - visibleBottom, baseTopRef.current - EDGE));
-      }
-      if (lift === liftRef.current) return;
-      liftRef.current = lift;
-      paper.style.top = `${Math.round(baseTopRef.current - lift)}px`;
-    };
-    viewport?.addEventListener('resize', keepFieldInView);
-    viewport?.addEventListener('scroll', keepFieldInView);
-    globalThis.addEventListener('resize', keepFieldInView);
-    document.addEventListener('focusin', keepFieldInView);
-    document.addEventListener('focusout', keepFieldInView);
-    return () => {
-      viewport?.removeEventListener('resize', keepFieldInView);
-      viewport?.removeEventListener('scroll', keepFieldInView);
-      globalThis.removeEventListener('resize', keepFieldInView);
-      document.removeEventListener('focusin', keepFieldInView);
-      document.removeEventListener('focusout', keepFieldInView);
-    };
-  }, [anchor, touch]);
+  const viewport = globalThis.visualViewport;
+  const keepFieldInView = () => {
+    const paper = paperRef.current;
+    if (!paper) return;
+    const field = document.activeElement;
+    const typing = paper.contains(field) && /^(INPUT|TEXTAREA)$/.test(field?.tagName || '');
+    let lift = 0;
+    if (typing) {
+      const visibleBottom = (viewport ? viewport.offsetTop + viewport.height : globalThis.innerHeight) - EDGE;
+      // Where the field's bottom would be with the menu back in its place.
+      const bottom = field.getBoundingClientRect().bottom + liftRef.current;
+      lift = Math.max(0, Math.min(bottom - visibleBottom, baseTopRef.current - EDGE));
+    }
+    if (lift === liftRef.current) return;
+    liftRef.current = lift;
+    paper.style.top = `${Math.round(baseTopRef.current - lift)}px`;
+  };
+  const followsKeyboard = touch && Boolean(anchor);
+  useEventListener(viewport, 'resize', keepFieldInView, { enabled: followsKeyboard });
+  useEventListener(viewport, 'scroll', keepFieldInView, { enabled: followsKeyboard });
+  useEventListener(globalThis, 'resize', keepFieldInView, { enabled: followsKeyboard });
+  useEventListener(document, 'focusin', keepFieldInView, { enabled: followsKeyboard });
+  useEventListener(document, 'focusout', keepFieldInView, { enabled: followsKeyboard });
 
   if (!touch) {
     return {

@@ -15,6 +15,7 @@ import {
   saveCharacter as storeSaveCharacter,
 } from '../../../shared/character/profile/store.js';
 import { listenForRecovery } from '../../../shared/cloud/sync/recoveryTriggers.js';
+import { useEventListener } from '../../../shared/ui/useEventListener.js';
 
 const CLOUD_SAVE_DELAY_MS = 1_200;
 
@@ -126,17 +127,16 @@ export function useSheetCloudSave({
     if (cloudSyncState(healthId) === 'conflict' && hasUnsyncedLocalChanges(healthId) && !sheetConflictRef.current) {
       refreshForConflict();
     }
-    const onSync = ({ detail }) => {
-      if (String(detail?.id ?? '') !== String(healthId)) return;
-      if (detail.state === 'conflict') {
-        if (!sheetConflictRef.current) refreshForConflict();
-      } else if (detail.state === 'synced' || detail.state === 'cancelled' || detail.state === 'error') {
-        sheetSync.settle();
-      }
-    };
-    window.addEventListener(CLOUD_SYNC_EVENT, onSync);
-    return () => window.removeEventListener(CLOUD_SYNC_EVENT, onSync);
+    return undefined;
   }, [usesExternalChar, healthId, refreshForConflict, sheetSync]);
+  useEventListener(window, CLOUD_SYNC_EVENT, ({ detail }) => {
+    if (String(detail?.id ?? '') !== String(healthId)) return;
+    if (detail.state === 'conflict') {
+      if (!sheetConflictRef.current) refreshForConflict();
+    } else if (detail.state === 'synced' || detail.state === 'cancelled' || detail.state === 'error') {
+      sheetSync.settle();
+    }
+  }, { enabled: !usesExternalChar && Boolean(healthId) });
 
   // "Load the updated version": local changes are dropped for the cloud's.
   const loadRemoteVersion = useCallback(() => {

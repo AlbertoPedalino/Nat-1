@@ -6,6 +6,7 @@ import { REGISTRY_META } from '../../shared/storage/localStorageRegistries.js';
 import { clearAppLocalStorage, listAppLocalStorageKeys } from '../../shared/storage/storage.js';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
 import { confirmAction } from '../../shared/ui/confirmAction.js';
+import { useEventListener } from '../../shared/ui/useEventListener.js';
 import { UI_COLORS, uiAlpha } from '../../shared/ui/colors.js';
 import { UI_FONTS } from '../../shared/ui/fonts.js';
 
@@ -30,9 +31,8 @@ export default function HomePage() {
 
   useEffect(() => {
     refreshAppDataCount();
-    window.addEventListener('storage', refreshAppDataCount);
-    return () => window.removeEventListener('storage', refreshAppDataCount);
   }, [refreshAppDataCount]);
+  useEventListener(window, 'storage', refreshAppDataCount);
 
   const handleClearAppData = useCallback(() => {
     const confirmed = confirmAction('Delete all local Nat-1 data in this browser? Characters, boards, encounters and legacy data will be removed.');

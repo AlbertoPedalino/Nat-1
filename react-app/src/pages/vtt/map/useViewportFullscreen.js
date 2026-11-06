@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useEventListener } from '../../../shared/ui/useEventListener.js';
 
 // Fullscreen for the map — the browser's own, or a window-covering stand-in
 // where the browser will not give us the real thing — and the floating
@@ -42,14 +43,9 @@ export function useViewportFullscreen({ hostRef, fullscreenSheet, onFullscreenCh
 
   const fullscreenActive = fullscreen || covering;
 
-  useEffect(() => {
-    if (!covering) return undefined;
-    const leaveOnEscape = (event) => {
-      if (event.key === 'Escape' && !event.defaultPrevented) setCovering(false);
-    };
-    document.addEventListener('keydown', leaveOnEscape);
-    return () => document.removeEventListener('keydown', leaveOnEscape);
-  }, [covering]);
+  useEventListener(document, 'keydown', (event) => {
+    if (event.key === 'Escape' && !event.defaultPrevented) setCovering(false);
+  }, { enabled: covering });
 
   useEffect(() => {
     onFullscreenChange?.(fullscreenActive);
@@ -58,18 +54,12 @@ export function useViewportFullscreen({ hostRef, fullscreenSheet, onFullscreenCh
 
   // Escape and the browser's own control leave fullscreen without telling us,
   // so the icon follows the document rather than our last click.
-  useEffect(() => {
-    const sync = () => setFullscreen(
-      document.fullscreenElement === hostRef.current
-      || document.webkitFullscreenElement === hostRef.current,
-    );
-    document.addEventListener('fullscreenchange', sync);
-    document.addEventListener('webkitfullscreenchange', sync);
-    return () => {
-      document.removeEventListener('fullscreenchange', sync);
-      document.removeEventListener('webkitfullscreenchange', sync);
-    };
-  }, [hostRef]);
+  const syncFullscreen = () => setFullscreen(
+    document.fullscreenElement === hostRef.current
+    || document.webkitFullscreenElement === hostRef.current,
+  );
+  useEventListener(document, 'fullscreenchange', syncFullscreen);
+  useEventListener(document, 'webkitfullscreenchange', syncFullscreen);
 
   return {
     covering, fullscreenActive, toggleFullscreen, floatingSheetOpen, setFloatingSheetOpen,
