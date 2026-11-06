@@ -1,4 +1,5 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
+import { finalAbilityModifier } from '../../../shared/character/progression/abilityModifier.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -80,8 +81,7 @@ registerClassSheetResources("Bard", [
 ]);
 
 registerResourceSideEffect('bard_font_insp', ({ C, resources }) => {
-  const chaScore = Number(C?.finalScores?.cha ?? 10);
-  const chaMod = Math.floor((chaScore - 10) / 2);
+  const chaMod = finalAbilityModifier(C, 'cha');
   const biMax = Math.max(1, chaMod);
   const biCur = Number(resources?.['bardic_insp'] ?? biMax);
   if (biCur >= biMax) {

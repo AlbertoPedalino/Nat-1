@@ -11,6 +11,12 @@ test('the proficiency bonus is read only through getProficiencyBonus', () => {
   }), []);
 });
 
+test('the ability modifier is computed only in abilityModifier.js', () => {
+  assert.deepEqual(sourceFilesMatching(/-\s*10\s*\)\s*\/\s*2\b/, {
+    allow: ['shared/character/progression/abilityModifier.js'],
+  }), []);
+});
+
 test('every realtime channel opens through openRealtimeChannel', () => {
   assert.deepEqual(sourceFilesMatching(/\.(channel|removeChannel)\(/, {
     allow: ['shared/cloud/realtimeChannel.js'],

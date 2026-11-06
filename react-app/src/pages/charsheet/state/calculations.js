@@ -5,6 +5,7 @@ import { extractFixedProficiencyLabels } from '../../../shared/character/progres
 import { getFinalAbilityScore } from '../../../shared/character/inventory/itemEffects.js';
 import { wildShapeAbilityScore, wildShapeSaveBonus, wildShapeSaveProficient, wildShapeSkillBonus } from '../../../shared/character/forms/wildShapeForm.js';
 import { getProficiencyBonus } from '../../../shared/character/progression/proficiency.js';
+import { abilityModifier } from '../../../shared/character/progression/abilityModifier.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { XP_THRESHOLDS } from '../../../shared/character/progression/xp.js';
 import { collectSheetEffects } from './sheetEffects.js';
@@ -98,7 +99,7 @@ export function getFinal(C, stat) {
   return getFinalAbilityScore(C, stat, base);
 }
 
-export function getMod(v) { return Math.floor((v - 10) / 2); }
+export const getMod = abilityModifier;
 
 export const getPB = getProficiencyBonus;
 

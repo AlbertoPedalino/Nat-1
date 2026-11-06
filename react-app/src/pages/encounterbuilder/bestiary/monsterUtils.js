@@ -1,5 +1,6 @@
 import { CR_XP, FALLBACK_MONSTER_TOKEN, IMAGE_BASE, SIZE_LABELS } from '../state/constants.js';
 import { parseCr } from '../../../shared/character/forms/beasts.js';
+import { abilityModifier } from '../../../shared/character/progression/abilityModifier.js';
 
 export function numberOr(value, fallback = 0) {
   const n = Number(value);
@@ -75,17 +76,13 @@ export function getHP(hp) {
   return hp.average || 1;
 }
 
-export function abilityMod(score) {
-  return Math.floor((numberOr(score, 10) - 10) / 2);
-}
-
 export function formatMod(value) {
   const n = numberOr(value, 0);
   return `${n >= 0 ? '+' : ''}${n}`;
 }
 
 export function abilityModString(score) {
-  return formatMod(abilityMod(score));
+  return formatMod(abilityModifier(score));
 }
 
 export function getSizeLabel(monster) {

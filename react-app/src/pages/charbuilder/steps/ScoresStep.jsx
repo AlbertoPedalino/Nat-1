@@ -4,10 +4,11 @@ import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { PB_COST, STANDARD_ARRAY, STAT_LABELS, STATS } from '../constants.js';
 import { getAbilityScoreBonusBreakdown, getBaseScore, getFinalScore, pointBuySpent } from '../progression/calculations.js';
 import { getActiveScores } from '../state/state.js';
+import { abilityModifier } from '../../../shared/character/progression/abilityModifier.js';
 
 function scoreMod(value) {
   if (value == null) return '-';
-  const mod = Math.floor((Number(value) - 10) / 2);
+  const mod = abilityModifier(value);
   return `${mod >= 0 ? '+' : ''}${mod}`;
 }
 

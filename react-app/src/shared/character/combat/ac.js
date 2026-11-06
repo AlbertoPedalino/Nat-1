@@ -2,6 +2,7 @@ import { adapterRegistry as installedRegistry } from '../../../adapters/registry
 import { getAcBonusEffects } from '../../../pages/charsheet/state/effectBonuses.js';
 import { wildShapeArmorClass } from '../forms/wildShapeForm.js';
 import { primaryClassLevel } from '../progression/classLevel.js';
+import { finalAbilityModifier } from '../progression/abilityModifier.js';
 
 function asArray(value) {
   return Array.isArray(value) ? value : (value == null ? [] : [value]);
@@ -9,16 +10,6 @@ function asArray(value) {
 
 function norm(value) {
   return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-}
-
-function statMod(score) {
-  return Math.floor((Number(score || 0) - 10) / 2);
-}
-
-function getAbilityMod(character, ability) {
-  const score = character?.finalScores?.[ability];
-  if (score != null) return statMod(score);
-  return 0;
 }
 
 function ownerLevelOf(character, className, isPrimary) {
@@ -160,7 +151,7 @@ import { aggregateMiscAcBonus, armorEnhancement } from '../inventory/itemBonus.j
 export function computeArmorItemAc(character, items) {
   const armor = getEquippedArmor(character, items);
   if (!armor) return null;
-  const dex = getAbilityMod(character, 'dex');
+  const dex = finalAbilityModifier(character, 'dex');
   const base = (Number(armor.ac) || 10) + armorEnhancement(armor);
   if (armor.type === 'LA') return { value: base + dex, source: armor.name || 'Light Armor', label: 'Light Armor' };
   if (armor.type === 'MA') return { value: base + Math.min(2, dex), source: armor.name || 'Medium Armor', label: 'Medium Armor' };
@@ -170,7 +161,7 @@ export function computeArmorItemAc(character, items) {
 
 export function computeAcFormulaValue(character, formula) {
   if (!formula) return null;
-  const mods = (formula.abilities || ['dex']).map((a) => getAbilityMod(character, a));
+  const mods = (formula.abilities || ['dex']).map((a) => finalAbilityModifier(character, a));
   return (formula.base || 10) + mods.reduce((s, m) => s + m, 0);
 }
 
@@ -212,7 +203,7 @@ export function computeBestArmorClass(character, items, shieldTrained) {
     });
   });
 
-  const dexMod = getAbilityMod(character, 'dex');
+  const dexMod = finalAbilityModifier(character, 'dex');
   candidates.push({
     value: 10 + dexMod + shieldBonus,
     source: 'Base AC',

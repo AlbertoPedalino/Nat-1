@@ -1,4 +1,5 @@
 import { createAdapterBindings } from '../adapterBindings.js';
+import { finalAbilityModifier } from '../../shared/character/progression/abilityModifier.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -91,8 +92,7 @@ registerSpeciesSheetActions("Goliath_XPHB", [
     minLevel: 1,
     condition: requiresGiantAncestry('stone'),
     inlinePills: ({ character }) => {
-      const conScore = character?.finalScores?.con ?? 10;
-      const conMod = Math.floor((conScore - 10) / 2);
+      const conMod = finalAbilityModifier(character, 'con');
       return [{ icon: 'shield', label: 'Reduction', value: `1d12${conMod >= 0 ? '+' : ''}${conMod}` }];
     },
   },

@@ -1,4 +1,5 @@
 import { createAdapterBindings } from '../adapterBindings.js';
+import { finalAbilityModifier } from '../../shared/character/progression/abilityModifier.js';
 import { getProficiencyBonus } from '../../shared/character/progression/proficiency.js';
 
 export default function install(registry, context = {}) {
@@ -62,8 +63,7 @@ registerSpeciesSheetActions("Dragonborn_XPHB", [
     } }],
     inlinePills: ({ character }) => {
       const pb = getProficiencyBonus(character);
-      const conScore = character?.finalScores?.con ?? 10;
-      const conMod = Math.floor((conScore - 10) / 2);
+      const conMod = finalAbilityModifier(character, 'con');
       return [{ icon: 'shield', label: 'Save DC', value: 8 + pb + conMod }];
     },
     minLevel: 1,

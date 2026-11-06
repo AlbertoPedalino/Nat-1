@@ -12,16 +12,12 @@
  * the two callers cannot drift apart.
  */
 import { getProficiencyBonus } from '../progression/proficiency.js';
-
-function abilityModFromFinal(character, ability) {
-  const score = Number(character?.finalScores?.[String(ability).toLowerCase()] ?? 10);
-  return Math.floor((score - 10) / 2);
-}
+import { finalAbilityModifier } from '../progression/abilityModifier.js';
 
 export function resolveScalingFormula(formula, character) {
   if (typeof formula !== 'string') return null;
   const key = formula.toLowerCase();
   if (key === 'proficiencybonus' || key === 'pb') return getProficiencyBonus(character);
-  if (key.startsWith('abilitymod:')) return abilityModFromFinal(character, key.split(':')[1]);
+  if (key.startsWith('abilitymod:')) return finalAbilityModifier(character, key.split(':')[1]);
   return null;
 }

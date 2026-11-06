@@ -1,5 +1,6 @@
 import { COMBAT_LABEL_COLORS, COMBAT_LABEL_SHAPES, PLAYER_COLORS } from '../state/constants.js';
-import { abilityMod, clampInt, getAC, getHP, numberOr } from '../bestiary/monsterUtils.js';
+import { clampInt, getAC, getHP, numberOr } from '../bestiary/monsterUtils.js';
+import { abilityModifier } from '../../../shared/character/progression/abilityModifier.js';
 import { resolveCombatVitals, combatVitalsMatch } from '../campaign/sheetSync.js';
 import {
   normalizeConditions,
@@ -121,7 +122,7 @@ export function buildCombat(encounter, players, encounterId = null, rng = Math.r
   (Array.isArray(encounter) ? encounter : []).forEach((item, itemIndex) => {
     const monster = item.monsterData;
     if (!monster) return;
-    const initMod = abilityMod(monster.dex || 10);
+    const initMod = abilityModifier(monster.dex);
     const hp = getHP(monster.hp);
     const ac = getAC(monster.ac);
     for (let i = 0; i < clampInt(item.qty, 0, 99, 0); i += 1) {
@@ -449,7 +450,7 @@ export function addMonsterCombatant(combat, monster, rng = Math.random) {
   if (!monster) return combat;
   const current = combat.combatants?.[combat.currentTurn || 0];
   const assignLabel = createLabeler(combat.combatants || []);
-  const initMod = abilityMod(monster.dex || 10);
+  const initMod = abilityModifier(monster.dex);
   const hp = getHP(monster.hp);
   const next = {
     id: nextCombatantId(combat.combatants),

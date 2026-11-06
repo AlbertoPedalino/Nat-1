@@ -27,6 +27,7 @@
 // synced combat vital.
 
 import { getChoiceValue, setChoiceValuePatch } from '../progression/choiceUtils.js';
+import { abilityModifier } from '../progression/abilityModifier.js';
 
 export const PRIMAL_BEASTS = Object.freeze([
   { name: 'Beast of the Land', short: 'Land', damageTypes: ['Bludgeoning', 'Piercing', 'Slashing'] },
@@ -110,14 +111,13 @@ function withStrikeDamageType(action, damageType) {
 }
 
 const ABILITIES = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
-const abilityMod = (score) => Math.floor(((Number(score) || 10) - 10) / 2);
 
 // Applies the Ranger's side of the stat block to a normalized creature: Primal
 // Bond (PB on every check and save) and the chosen Beast's Strike damage type.
 export function applyPrimalCompanionTraits(creature, { proficiencyBonus = 0, damageType = '' } = {}) {
   if (!creature) return null;
   const pb = Number(proficiencyBonus) || 0;
-  const saves = Object.fromEntries(ABILITIES.map((key) => [key, abilityMod(creature.abilities?.[key]) + pb]));
+  const saves = Object.fromEntries(ABILITIES.map((key) => [key, abilityModifier(creature.abilities?.[key]) + pb]));
   return {
     ...creature,
     saves,

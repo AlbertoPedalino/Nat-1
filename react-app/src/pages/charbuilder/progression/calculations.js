@@ -11,14 +11,11 @@ import { computeMaxHp as sharedComputeMaxHp } from '../../../shared/character/co
 import { getFeatAsiBonus } from '../../../shared/character/progression/abilityBonuses.js';
 import { collectOwnedFeatNames } from '../../../shared/character/progression/selectedFeats.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
+import { abilityModifier } from '../../../shared/character/progression/abilityModifier.js';
 
 export function formatMod(value) {
-  const mod = Math.floor((Number(value || 0) - 10) / 2);
+  const mod = abilityModifier(value);
   return `${mod >= 0 ? '+' : ''}${mod}`;
-}
-
-export function statMod(value) {
-  return Math.floor((Number(value || 0) - 10) / 2);
 }
 
 export function pointBuySpent(scores) {
@@ -113,7 +110,7 @@ export function getHitDieFaces(classObject) {
 
 export function calcMaxHp(character) {
   if (!character?.className) return 0;
-  return sharedComputeMaxHp(character, statMod(getFinalScore(character, 'con')));
+  return sharedComputeMaxHp(character, abilityModifier(getFinalScore(character, 'con')));
 }
 
 export function getCasterProgression(className, classObject, subclassName) {

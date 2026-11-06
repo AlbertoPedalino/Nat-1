@@ -1,5 +1,6 @@
 import { weaponFilterMatches } from '../../../shared/character/inventory/weaponFilters.js';
 import { featNamedEntries } from '../../../shared/character/progression/featDescription.js';
+import { finalAbilityModifier } from '../../../shared/character/progression/abilityModifier.js';
 import { asArray, cleanText, norm, collectSheetEffects } from './sheetEffects.js';
 
 // One question per rule, answered from the active sheet effects: AC bonuses,
@@ -7,7 +8,7 @@ import { asArray, cleanText, norm, collectSheetEffects } from './sheetEffects.js
 // concentration, D20 floors, spell save DC, melee Strength damage, speed.
 
 function bladesingerIntMod(character) {
-  return Math.max(1, Math.floor((Number(character?.finalScores?.int ?? 10) - 10) / 2));
+  return Math.max(1, finalAbilityModifier(character, 'int'));
 }
 
 // Additive AC bonus from active effects. Some effects are gated on wearing armor
