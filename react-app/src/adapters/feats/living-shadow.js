@@ -1,4 +1,5 @@
 import { createAdapterBindings } from '../adapterBindings.js';
+import { SPELL_ABILITY_CHOICE } from '../featAdapterHelpers.js';
 
 export default function install(registry, context = {}) {
   const { registerFeatAdapter, registerFeatSheetActions, registerFeatSheetResources } = createAdapterBindings(registry, context);
@@ -10,15 +11,7 @@ export default function install(registry, context = {}) {
       ...feat,
       choiceUi: {
         ...(feat.choiceUi && typeof feat.choiceUi === 'object' ? feat.choiceUi : {}),
-        spellAbility: {
-          keySuffix: 'spell_ability',
-          label: 'Spellcasting Ability',
-          options: [
-            { value: 'int', label: 'Intelligence' },
-            { value: 'wis', label: 'Wisdom' },
-            { value: 'cha', label: 'Charisma' },
-          ],
-        },
+        spellAbility: SPELL_ABILITY_CHOICE,
       },
       spellGrantOverrides: {
         'Mage Hand': {

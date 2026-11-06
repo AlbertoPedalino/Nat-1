@@ -1,18 +1,20 @@
 import { createAdapterBindings } from './adapterBindings.js';
 import { ABILITY_NAMES } from '../shared/content/rulesVocabulary.js';
 
-const SPELL_ABILITIES = ['int', 'wis', 'cha'].map((value) => ({ value, label: ABILITY_NAMES[value] }));
+// The Intelligence / Wisdom / Charisma pick a feat's granted spells are cast
+// with, as one choiceUi entry.
+export const SPELL_ABILITY_CHOICE = Object.freeze({
+  keySuffix: 'spell_ability',
+  label: 'Spellcasting Ability',
+  options: ['int', 'wis', 'cha'].map((value) => ({ value, label: ABILITY_NAMES[value] })),
+});
 
 export function withSpellAbilityChoice(feat) {
   return {
     ...feat,
     choiceUi: {
       ...(feat.choiceUi || {}),
-      spellAbility: {
-        keySuffix: 'spell_ability',
-        label: 'Spellcasting Ability',
-        options: SPELL_ABILITIES,
-      },
+      spellAbility: SPELL_ABILITY_CHOICE,
     },
   };
 }
