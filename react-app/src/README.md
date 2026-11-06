@@ -27,8 +27,8 @@ and `logic/` trees.
 | --- | --- |
 | `vtt/` | `scene/`: editing, selection, creation, and image stitching; `map/`: viewport, grids, fog, drawing, and laser; `tokens/`: roster, token interaction, and encounter import; `objects/`: map objects; `atmosphere/`: overlay and shaders; `sheets/`: floating sheets; `rolls/`: dice and roll feed; `initiative/`: turn-order strip and the scene's shown fight; `session/`: access and campaign selection; `dungeon/` and `hexcrawl/`: linked exploration panels |
 | `charsheet/` | `actions/`, `spells/`, `inventory/`, and `forms/`: respective tabs and controls; `resources/`: HP, hit dice, and rests; `stats/`: scores, saves, skills, movement, and senses; `proficiency/`: proficiency rules and context; `details/`: background, features, and notes; `layout/`: header and tab layout; `state/`: derived sheet state, effects, action context, and the sheet's hooks (`useSheetCloudSave`: content save and conflicts; `useSheetRolls`: dice, toast, roll log; `useSheetVitals`: HP, death saves, conditions; `sheetLoad.js`: opening a character) |
-| `charbuilder/` | `choices/`: selection controls and feat prerequisites; `progression/`: classes, levels, XP, and calculations; `spells/`: spell selection and slots; `preview/`: preview UI and model; `data/`: reference-data loading and item variants; `state/`: reducer, persistence, import, and export; `layout/`: builder panels; `steps/`: wizard steps |
-| `encounterbuilder/` | `bestiary/`: monster browsing, stat blocks, and data; `builder/`: party setup and difficulty; `combat/`: combatants, effects, and reinforcements; `rolls/`: rolls, sharing, and fumbles; `campaign/`: campaign players and sheet synchronization; `library/`: saved fights; `negotiation/`: negotiation dialog and rules; `sync/`: cloud/external fight and map synchronization; `state/`: context, reducer, persistence, and constants |
+| `charbuilder/` | `choices/`: selection controls and feat prerequisites; `progression/`: classes, levels, XP, and calculations; `spells/`: spell selection and slots; `preview/`: preview UI and model; `data/`: reference-data loading and item variants; `state/`: reducer (`state.js`, with `classHandlers.js`, `stateHandlers.js`, `choiceCleanup.js`, `initialState.js`), persistence (`persistence.js`, `sheetImport.js`, `proficiencyPersistence.js`), and export; `layout/`: builder panels; `steps/`: wizard steps |
+| `encounterbuilder/` | `bestiary/`: monster browsing, stat blocks, and data; `builder/`: party setup and difficulty; `combat/`: combatants, effects, and reinforcements; `rolls/`: rolls, sharing, and fumbles; `campaign/`: campaign players and sheet synchronization; `library/`: saved fights; `negotiation/`: negotiation dialog and rules; `sync/`: cloud/external fight and map synchronization; `state/`: context, reducer (with `partyState.js`, `combatState.js`, `libraryState.js`), persistence, and constants |
 | `gmboard/` | `dungeon/`, `hexcrawl/`, and `quests/`: generation and result views; `tables/`: tables, editing, and single-table rolls; `session/`: time, weather, log, and campaign link; `ui/`: controls used across the page; `state/`: context, reducer, defaults, migration, and persistence; `logic/`: common RNG |
 | `dmscreen/` | `notes/`: note board, cards, and layout; `search/`: filtering and highlighting; `drag/`: drag/reorder behavior and styles; `state/`: context, reducer, and persistence |
 
@@ -62,7 +62,11 @@ adapter (`adapters/classes/<class>/<subclass>.js`, `adapters/feats/`,
 `adapters/species/`): action cards, resources, effects, proficiencies, item
 flags (`registerItemFlagDef`) and what spending a resource triggers
 (`registerResourceSideEffect`). An adapter destructures from
-`createAdapterBindings` only the names it calls. New sheet code reads what
+`createAdapterBindings` only the names it calls. The register/get pairs are
+generated from `KEYED_SLOTS` in `adapters/registry.js`; a new kind of
+per-owner data is one row there. Class runtime config (spellcasting tables,
+prerequisites) lives in `adapters/classes/runtime-config.js`; a subclass's in
+its own file. New sheet code reads what
 the registry returns instead of checking a class or feature name.
 
 A feature with its own state and an interactive panel (Wild Shape, Wild

@@ -11,14 +11,14 @@ See the [source map](../README.md) for the page feature folders.
 | `character/` | Character rules and the UI tied to those rules; see below |
 | `cloud/` | Supabase access, authentication, and synchronization; see below |
 | `numbers.js` | `clamp` / `clampInt`, the one way to keep a number in range |
-| `content/` | D&D entry rendering, 5etools links and loading (`gameData.js`), catalogs built from it (`catalogs/`: classes, species, backgrounds, feats, spells, items, rules, beasts), source filtering, text search |
+| `content/` | D&D entry rendering (`entryText.js`, stat-block tag labels in `statBlockTags.js`), `stripMarkup` for labels and keys (`markupText.js`), the rules vocabulary (`rulesVocabulary.js`: abilities, skills, tools, languages, sizes, schools, damage and creature types), 5etools links and loading (`gameData.js`), catalogs built from it (`catalogs/`: classes, species, backgrounds, feats, spells, items, rules, beasts), name keys, source filtering, text search |
 | `dungeon/` | Dungeon generation (`dungeon.js`), room markers, linked encounters |
-| `encounter/` | The combat model (combatants, initiative, vitals), combatant labels, fight records, the encounter library, sheet-vitals sync |
-| `gmboard/` | What other pages read of a GM Board: options, storage format, default state and tables, table dice, campaign time, weather, selector UI |
+| `encounter/` | The combat model: building and snapshotting fights (`combat.js`), initiative and turns (`initiative.js`), combatant vitals (`combatantVitals.js`); combatant labels, fight records, the encounter library, sheet-vitals sync |
+| `gmboard/` | What other pages read of a GM Board: options, storage format, default state and tables, table dice, campaign time, weather (`weather.js` + `ui/WeatherSummary.jsx`), rolled-result text (`resultText.js`), selector UI (`ui/TierSelector.jsx` and others) |
 | `hexcrawl/` | Hex data, hex travel rules (`hexRules.js`), icons, hex result and mount UI |
 | `instances/` | GM Board / Encounter Builder / DM Screen instances: identity, local store, sync engine, page hook, links; see below |
 | `storage/` | Generic localStorage helpers and character registry metadata |
-| `ui/` | Reusable presentation components/hooks, toasts, colors (`colors.js`: `UI_COLORS`, `uiAlpha`, the source the theme is built from), route titles, number/date/text formatting, `confirmAction`, `useEventListener` (DOM listeners for a mounted component) |
+| `ui/` | Reusable presentation components/hooks, toasts, colors (`colors.js`: `UI_COLORS`, `uiAlpha`, the source the theme is built from), route titles, number/date/text formatting, `confirmAction` / `promptText`, `useEventListener` (DOM listeners for a mounted component), `useDebouncedCallback`, `useLoaded` + `LoadStatus` (async loads and their status), `ConflictBanner` (pick one of two copies), long-press timing (`longPress.js`) |
 | `vtt/` | Battle-map geometry, fog, scenes, dice physics, sheets, and realtime state |
 
 ## Character
@@ -34,7 +34,7 @@ See the [source map](../README.md) for the page feature folders.
 | `progression/` | Levels, ability bonuses, choices, feats, proficiencies, languages, XP |
 | `resources/` | Rest and recharge rules, resource definitions (`restResources.js`) |
 | `sheet/` | The sheet's numbers: stats (`sheetStats.js`), effects, defenses, effect bonuses, runtime adapters, derived state |
-| `spells/` | Spell grants, metadata, slots, Pact Magic, free casts, spell references |
+| `spells/` | Spell grants, metadata, slots, caster progression (`casterProgression.js`), attack and DC (`spellcastingNumbers.js`), a class entry's spell picks (`spellBuckets.js`), Pact Magic, free casts, spell references |
 
 Keep domain UI alongside its rules (for example, `combat/ConditionChips.jsx`).
 General-purpose presentation belongs in `ui/`; shared entry/source handling
@@ -44,9 +44,9 @@ belongs in `content/`.
 
 | Folder/file | Responsibility |
 | --- | --- |
-| `api/` | Resource operations for campaigns, characters, art, fights, dungeons, hexcrawls, VTT |
+| `api/` | Resource operations for campaigns, characters (`cloudCharacters.js`; vitals commands in `healthCommands.js`), art, fights, dungeons, hexcrawls, VTT |
 | `auth/` | Auth provider, sign-in dialog, account/cloud menu |
-| `sync/` | Autosync engine, sync exclusions/ownership, realtime character and roll hooks |
+| `sync/` | Autosync engine, the editors' cloud save (`useCharacterCloudSave.js` on `cloudSaveQueue.js`: one queue, conflict hold, retry on the recovery triggers), recovery triggers, sync exclusions/ownership, realtime character and roll hooks |
 | `supabaseClient.js` | Shared Supabase client configuration |
 | `realtimeChannel.js` | `openRealtimeChannel`: the one way to open a realtime channel (topic rule, guarded listeners, SUBSCRIBED status, fail-soft close) |
 
