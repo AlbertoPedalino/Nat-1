@@ -4,27 +4,23 @@ export default function install(registry, context = {}) {
   const { registerFeatAdapter, registerFeatSheetActions } = createAdapterBindings(registry, context);
 
 
-  if (typeof registerFeatAdapter === "function") {
-    registerFeatAdapter("Artificer Initiate", function (feat) {
-      return {
-        ...feat,
-        choiceUi: {
-          ...(feat.choiceUi && typeof feat.choiceUi === "object" ? feat.choiceUi : {}),
-          spellAbility: {
-            keySuffix: "spell_ability",
-            label: "Spellcasting Ability",
-            options: [
-              { value: "int", label: "Intelligence" }
-            ]
-          }
+  registerFeatAdapter("Artificer Initiate", function (feat) {
+    return {
+      ...feat,
+      choiceUi: {
+        ...(feat.choiceUi && typeof feat.choiceUi === "object" ? feat.choiceUi : {}),
+        spellAbility: {
+          keySuffix: "spell_ability",
+          label: "Spellcasting Ability",
+          options: [
+            { value: "int", label: "Intelligence" }
+          ]
         }
-      };
-    });
-  }
+      }
+    };
+  });
 
-  if (typeof registerFeatSheetActions === "function") {
-    registerFeatSheetActions("Artificer Initiate", []);
-  }
+  registerFeatSheetActions("Artificer Initiate", []);
 
 }
 

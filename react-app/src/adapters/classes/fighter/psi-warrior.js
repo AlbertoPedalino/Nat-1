@@ -35,16 +35,14 @@ registerSubclassSheetResources("Fighter_Psi Warrior", [
   { key: "bulwark_force",        name: "Bulwark of Force",     icon: "shield", recharge: "LR", max: () => 1 },
   { key: "telekinetic_master",   name: "Telekinetic Master",   icon: "zap",    recharge: "LR", max: () => 1 },
 ]);
-if (typeof registerSubclassRuntimeConfig === "function") {
-  registerSubclassRuntimeConfig("Fighter_Psi Warrior", {
-    spellcasting: {
-      ability: "int",
-      alwaysPreparedSpells: [
-        { name: "Telekinesis", minLevel: 18, level: 5 },
-      ],
-    },
-  });
-}
+registerSubclassRuntimeConfig("Fighter_Psi Warrior", {
+  spellcasting: {
+    ability: "int",
+    alwaysPreparedSpells: [
+      { name: "Telekinesis", minLevel: 18, level: 5 },
+    ],
+  },
+});
 
 registerSubclassSheetEffects("Fighter_Psi Warrior", [
 

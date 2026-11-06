@@ -1,4 +1,5 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
+import { addWizardSavantSpellChoices } from '../../classAdapterHelpers.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -9,9 +10,7 @@ export default function install(registry, context = {}) {
     registerSubclassRuntimeConfig,
   } = createAdapterBindings(registry, context);
 registerSubclassAdapter("Wizard_Illusionist", function (cls, lv, specs) {
-  if (typeof addWizardSavantSpellChoices === "function") {
-    addWizardSavantSpellChoices(specs, lv, { key: "illusionist", label: "Illusion", school: "I" });
-  }
+  addWizardSavantSpellChoices(specs, lv, { key: "illusionist", label: "Illusion", school: "I" });
 });
 
 // [SheetRuntime] START
@@ -24,19 +23,17 @@ registerSubclassSheetResources("Wizard_Illusionist", [
   { key: "phantasmal_creatures", name: "Phantasmal Creatures", icon: "ghost", recharge: "LR", max: () => 2 },
   { key: "illusory_self",        name: "Illusory Self",         icon: "user",  recharge: "SR", max: () => 1 },
 ]);
-if (typeof registerSubclassRuntimeConfig === "function") {
-  registerSubclassRuntimeConfig("Wizard_Illusionist", {
-    spellcasting: {
-      alwaysKnownSpells: [
-        { name: "Minor Illusion", minLevel: 3 },
-      ],
-      alwaysPreparedSpells: [
-        { name: "Summon Beast", minLevel: 6 },
-        { name: "Summon Fey", minLevel: 6 },
-      ],
-    },
-  });
-}
+registerSubclassRuntimeConfig("Wizard_Illusionist", {
+  spellcasting: {
+    alwaysKnownSpells: [
+      { name: "Minor Illusion", minLevel: 3 },
+    ],
+    alwaysPreparedSpells: [
+      { name: "Summon Beast", minLevel: 6 },
+      { name: "Summon Fey", minLevel: 6 },
+    ],
+  },
+});
 
 registerSubclassSheetEffects("Wizard_Illusionist", [
   { type: "passiveNote", minLevel: 3, note: "Improved Illusions: no Verbal component; +60 ft range when range is 10+ ft." },

@@ -16,16 +16,14 @@ registerSubclassSheetActions("Monk_Shadow", [
   { name: "Improved Shadow Step", icon: "", cat: "bonus", uses: "1 Focus Point", resKey: "ki", minLevel: 11 },
   { name: "Cloak of Shadows", icon: "", cat: "action", uses: "3 Focus Points / 1 min", resKey: "ki", minLevel: 17 },
 ]);
-if (typeof registerSubclassRuntimeConfig === "function") {
-  registerSubclassRuntimeConfig("Monk_Shadow", {
-    spellcasting: {
-      ability: "wis",
-      alwaysKnownSpells: [
-        { name: "Minor Illusion", minLevel: 3, level: 0 },
-      ],
-    },
-  });
-}
+registerSubclassRuntimeConfig("Monk_Shadow", {
+  spellcasting: {
+    ability: "wis",
+    alwaysKnownSpells: [
+      { name: "Minor Illusion", minLevel: 3, level: 0 },
+    ],
+  },
+});
 
 registerSubclassSheetEffects("Monk_Shadow", [
 

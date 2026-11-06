@@ -51,16 +51,14 @@ registerSubclassSheetActions("Barbarian_Wild Heart", [
     minLevel: 14
   }
 ]);
-if (typeof registerSubclassRuntimeConfig === "function") {
-  registerSubclassRuntimeConfig("Barbarian_Wild Heart", {
-    spellcasting: {
-      ability: "wis",
-      alwaysPreparedSpells: [
-        { name: "Commune with Nature", minLevel: 10, level: 5 },
-      ],
-    },
-  });
-}
+registerSubclassRuntimeConfig("Barbarian_Wild Heart", {
+  spellcasting: {
+    ability: "wis",
+    alwaysPreparedSpells: [
+      { name: "Commune with Nature", minLevel: 10, level: 5 },
+    ],
+  },
+});
 
 registerSubclassSheetEffects("Barbarian_Wild Heart", [
   { type: "passiveNote", minLevel: 3, note: "Rage of the Wilds: Bear → Resistance to all damage except Psychic while raging. Eagle/Wolf grant utility, not damage resistance." },

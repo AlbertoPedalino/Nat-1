@@ -4,29 +4,25 @@ export default function install(registry, context = {}) {
   const { registerFeatAdapter, registerFeatSheetActions } = createAdapterBindings(registry, context);
 
 
-  if (typeof registerFeatAdapter === "function") {
-    registerFeatAdapter("Ritual Caster", function (feat) {
-      return {
-        ...feat,
-        choiceUi: {
-          ...(feat.choiceUi && typeof feat.choiceUi === "object" ? feat.choiceUi : {}),
-          spellAbility: {
-            keySuffix: "spell_ability",
-            label: "Spellcasting Ability",
-            options: [
-              { value: "int", label: "Intelligence" },
-              { value: "wis", label: "Wisdom" },
-              { value: "cha", label: "Charisma" }
-            ]
-          }
+  registerFeatAdapter("Ritual Caster", function (feat) {
+    return {
+      ...feat,
+      choiceUi: {
+        ...(feat.choiceUi && typeof feat.choiceUi === "object" ? feat.choiceUi : {}),
+        spellAbility: {
+          keySuffix: "spell_ability",
+          label: "Spellcasting Ability",
+          options: [
+            { value: "int", label: "Intelligence" },
+            { value: "wis", label: "Wisdom" },
+            { value: "cha", label: "Charisma" }
+          ]
         }
-      };
-    });
-  }
+      }
+    };
+  });
 
-  if (typeof registerFeatSheetActions === "function") {
-    registerFeatSheetActions("Ritual Caster", []);
-  }
+  registerFeatSheetActions("Ritual Caster", []);
 
 }
 

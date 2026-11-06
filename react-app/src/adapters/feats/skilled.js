@@ -3,7 +3,6 @@ import { createAdapterBindings } from '../adapterBindings.js';
 export default function install(registry, context = {}) {
   const { registerFeatAdapter, registerFeatSheetActions } = createAdapterBindings(registry, context);
 
-  if (typeof registerFeatAdapter !== 'function') return;
 
   registerFeatAdapter('Skilled', function (feat) {
     return {
@@ -21,7 +20,5 @@ export default function install(registry, context = {}) {
     };
   });
 
-  if (typeof registerFeatSheetActions === 'function') {
-    registerFeatSheetActions('Skilled', []);
-  }
+  registerFeatSheetActions('Skilled', []);
 }

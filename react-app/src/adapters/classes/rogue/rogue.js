@@ -13,9 +13,7 @@ export default function install(registry, context = {}) {
     registerClassSheetProficiencies,
   } = createAdapterBindings(registry, context);
 registerClassAdapter("Rogue", function (cls, lv, specs, ctx = {}) {
-  const expertiseFrom = typeof SKILLS !== 'undefined'
-    ? SKILLS.map(function (s) { return s.n; }).concat(["Thieves' Tools"])
-    : ["Thieves' Tools"];
+  const expertiseFrom = SKILLS.map(function (s) { return s.n; }).concat(["Thieves' Tools"]);
   const weapons = getWeaponMasteryChoiceNames(ctx.items, allItemsDb, WEAPON_MASTERY_RULES.rogue);
 
   if (lv >= 1) {

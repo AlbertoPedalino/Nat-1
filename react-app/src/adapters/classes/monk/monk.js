@@ -1,5 +1,6 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
+import { finalAbilityModifier } from '../../../shared/character/progression/abilityScores.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -10,8 +11,6 @@ export default function install(registry, context = {}) {
     registerClassSheetResources,
     registerClassSheetEffects,
   } = createAdapterBindings(registry, context);
-  const getMod = context?.getMod;
-  const getFinal = context?.getFinal;
 
 registerClassAdapter("Monk", function (cls, lv, specs) {
   if (lv >= 1) {
@@ -86,9 +85,7 @@ registerClassSheetActions("Monk", [
     minLevel: 3,
     rollers: [{ kind: 'utility', formula: ({ ownerLevel, character }) => {
       const lv = Number(ownerLevel || 1);
-      const dex = typeof getMod === 'function' && typeof getFinal === 'function'
-        ? Number(getMod(getFinal(character, 'dex')) || 0)
-        : 0;
+      const dex = Number(finalAbilityModifier(character, 'dex') || 0);
       const total = dex + lv;
       return withModifier('1d10', total);
     }, label: ({ formula }) => `${String(formula || '')} reduce`, title: 'Reduction' }],

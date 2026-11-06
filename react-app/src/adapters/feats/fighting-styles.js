@@ -72,15 +72,11 @@ const FIGHTING_STYLE_ACTIONS = {
 export default function install(registry, context = {}) {
   const { registerFeatSheetEffects, registerFeatSheetActions } = createAdapterBindings(registry, context);
 
-  if (typeof registerFeatSheetEffects === 'function') {
-    Object.entries(FIGHTING_STYLES).forEach(([name, effects]) => {
-      registerFeatSheetEffects(name, effects);
-    });
-  }
+  Object.entries(FIGHTING_STYLES).forEach(([name, effects]) => {
+    registerFeatSheetEffects(name, effects);
+  });
 
-  if (typeof registerFeatSheetActions === 'function') {
-    Object.entries(FIGHTING_STYLE_ACTIONS).forEach(([name, actions]) => {
-      registerFeatSheetActions(name, actions);
-    });
-  }
+  Object.entries(FIGHTING_STYLE_ACTIONS).forEach(([name, actions]) => {
+    registerFeatSheetActions(name, actions);
+  });
 }

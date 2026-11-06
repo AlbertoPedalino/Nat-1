@@ -11,9 +11,7 @@ export default function install(registry, context = {}) {
 // Human XPHB: Skillful + Versatile — one skill proficiency and one extra Origin Feat.
 registerSpeciesAdapter("Human_XPHB", function (s) {
   let specs = getGenericSpeciesChoiceSpecs(s);
-  const skillNames = typeof SKILLS !== 'undefined'
-    ? SKILLS.map(function (skill) { return skill.n; })
-    : ['Acrobatics', 'Animal Handling', 'Arcana', 'Athletics', 'Deception', 'History', 'Insight', 'Intimidation', 'Investigation', 'Medicine', 'Nature', 'Perception', 'Performance', 'Persuasion', 'Religion', 'Sleight of Hand', 'Stealth', 'Survival'];
+  const skillNames = SKILLS.map(function (skill) { return skill.n; });
 
   if (!specs.some(function (spec) { return spec.type === 'skill_choice' || String(spec.key || '').startsWith('species_skill_'); })) {
     specs.push({
@@ -45,9 +43,7 @@ registerSpeciesSheetCommonChoiceMeta("Human_XPHB", {
 });
 
 // Heroic Inspiration: regain Inspiration on Long Rest
-if (typeof registerSpeciesLongRestGrants === 'function') {
-  registerSpeciesLongRestGrants('Human', 'XPHB', { inspiration: true });
-}
+registerSpeciesLongRestGrants('Human', 'XPHB', { inspiration: true });
 
 }
 

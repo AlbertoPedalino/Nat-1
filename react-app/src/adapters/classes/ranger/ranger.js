@@ -13,9 +13,7 @@ export default function install(registry, context = {}) {
     registerClassSheetResources,
   } = createAdapterBindings(registry, context);
 registerClassAdapter("Ranger", function (cls, lv, specs, ctx = {}) {
-  const skills = typeof SKILLS !== 'undefined'
-    ? SKILLS.map(function (s) { return s.n; })
-    : ['Acrobatics','Animal Handling','Arcana','Athletics','Deception','History','Insight','Intimidation','Investigation','Medicine','Nature','Perception','Performance','Persuasion','Religion','Sleight of Hand','Stealth','Survival'];
+  const skills = SKILLS.map(function (s) { return s.n; });
   if (lv >= 1) {
     const weapons = getWeaponMasteryChoiceNames(ctx.items, allItemsDb, WEAPON_MASTERY_RULES.ranger);
     specs.push({

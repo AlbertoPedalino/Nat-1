@@ -11,28 +11,26 @@ export default function install(registry, context = {}) {
   // Bonus Action attack with the same Melee weapon, is a reminder on Melee
   // weapon cards too rather than a card with nothing to use. Both carry the
   // feat's tag: a Heavy weapon shows one GWM tag, and both rules when expanded.
-  if (typeof registerFeatSheetEffects === "function") {
-    registerFeatSheetEffects("Great Weapon Master", [
-      {
-        type: "weaponNote",
-        weaponFilter: WEAPON_FILTERS.HEAVY,
-        tag: "GWM",
-        title: "Heavy Weapon Mastery",
-        note: "Great Weapon Master: Heavy Weapon Mastery",
-        entries: [
-          "When you hit a creature with a weapon that has the Heavy property as part of the Attack action on your turn, you can cause the weapon to deal extra damage to the target. The extra damage equals your Proficiency Bonus."
-        ]
-      },
-      {
-        type: "weaponNote",
-        weaponFilter: WEAPON_FILTERS.MELEE,
-        tag: "GWM",
-        title: "Hew",
-        note: "Great Weapon Master: Hew",
-        entries: [
-          "Immediately after you score a Critical Hit with a Melee weapon or reduce a creature to 0 Hit Points with one, you can make one attack with the same weapon as a Bonus Action."
-        ]
-      }
-    ]);
-  }
+  registerFeatSheetEffects("Great Weapon Master", [
+    {
+      type: "weaponNote",
+      weaponFilter: WEAPON_FILTERS.HEAVY,
+      tag: "GWM",
+      title: "Heavy Weapon Mastery",
+      note: "Great Weapon Master: Heavy Weapon Mastery",
+      entries: [
+        "When you hit a creature with a weapon that has the Heavy property as part of the Attack action on your turn, you can cause the weapon to deal extra damage to the target. The extra damage equals your Proficiency Bonus."
+      ]
+    },
+    {
+      type: "weaponNote",
+      weaponFilter: WEAPON_FILTERS.MELEE,
+      tag: "GWM",
+      title: "Hew",
+      note: "Great Weapon Master: Hew",
+      entries: [
+        "Immediately after you score a Critical Hit with a Melee weapon or reduce a creature to 0 Hit Points with one, you can make one attack with the same weapon as a Bonus Action."
+      ]
+    }
+  ]);
 }

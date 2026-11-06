@@ -25,12 +25,7 @@ registerClassAdapter("Barbarian", function (cls, lv, specs, ctx = {}) {
     });
   }
   if (lv >= 3) {
-    const allSkills = typeof SKILLS !== 'undefined'
-      ? SKILLS.map(function (s) { return s.n; })
-      : ['Acrobatics','Animal Handling','Arcana','Athletics','Perception',
-         'Sleight of Hand','Stealth','Investigation','Deception','Insight',
-         'Intimidation','Medicine','Nature','History','Performance',
-         'Persuasion','Religion','Survival'];
+    const allSkills = SKILLS.map(function (s) { return s.n; });
     specs.push({
       key: 'barbarian_primal_knowledge',
       label: 'Primal Knowledge (Extra Skill)',

@@ -1,4 +1,5 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
+import { finalAbilityModifier } from '../../../shared/character/progression/abilityScores.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -8,8 +9,6 @@ export default function install(registry, context = {}) {
     registerSubclassSheetEffects,
     registerSubclassRuntimeConfig,
   } = createAdapterBindings(registry, context);
-  const getMod = context?.getMod;
-  const getFinal = context?.getFinal;
 
 registerSubclassAdapter("Warlock_Great Old One", function (cls, lv, specs) {
   if (lv >= 10) {
@@ -29,8 +28,7 @@ registerSubclassSheetActions("Warlock_Great Old One", [
   { name: "Awakened Mind", icon: "brain", cat: "bonus", uses: "CHA mod / LR", resKey: "goo_awakened", minLevel: 3,
     inlinePills: ({ ownerLevel, character }) => {
       const lv = Number(ownerLevel || 1);
-      const cha = typeof getMod === "function" && typeof getFinal === "function"
-        ? Number(getMod(getFinal(character, "cha")) || 0) : 0;
+      const cha = Number(finalAbilityModifier(character, "cha") || 0);
       return [
         { icon: "radio", label: "Range", value: Math.max(1, cha) + " mi" },
         { icon: "clock", label: "Duration", value: lv + " min" },
@@ -53,28 +51,26 @@ registerSubclassSheetResources("Warlock_Great Old One", [
   { key: "goo_create_thrall", name: "Create Thrall", icon: "brain", recharge: "LR", max: () => 1 },
 ]);
 
-if (typeof registerSubclassRuntimeConfig === "function") {
-  registerSubclassRuntimeConfig("Warlock_Great Old One", {
-    spellcasting: {
-      alwaysPreparedSpells: [
-        { name: 'Detect Thoughts', minLevel: 3, level: 2, source: 'Great Old One', sourceType: 'subclass' },
-        { name: 'Dissonant Whispers', minLevel: 3, level: 1, source: 'Great Old One', sourceType: 'subclass' },
-        { name: 'Phantasmal Force', minLevel: 3, level: 2, source: 'Great Old One', sourceType: 'subclass' },
-        { name: "Tasha's Hideous Laughter", minLevel: 3, level: 1, source: 'Great Old One', sourceType: 'subclass' },
-        { name: 'Clairvoyance', minLevel: 5, level: 3, source: 'Great Old One', sourceType: 'subclass' },
-        { name: 'Hunger of Hadar', minLevel: 5, level: 3, source: 'Great Old One', sourceType: 'subclass' },
-        { name: 'Confusion', minLevel: 7, level: 4, source: 'Great Old One', sourceType: 'subclass' },
-        { name: 'Summon Aberration', minLevel: 7, level: 4, source: 'Great Old One', sourceType: 'subclass' },
-        { name: 'Modify Memory', minLevel: 9, level: 5, source: 'Great Old One', sourceType: 'subclass' },
-        { name: 'Telekinesis', minLevel: 9, level: 5, source: 'Great Old One', sourceType: 'subclass' },
-        // TODO: XPHB lists Hex as innate (free cast) at Lv.10, not alwaysPrepared.
-        // Current alwaysPrepared approach is functional but not RAW-perfect.
-        // When the system supports innate/free spell grants, move Hex there.
-        { name: 'Hex', minLevel: 10, level: 1, source: 'Eldritch Hex', sourceType: 'subclass' }
-      ],
-    },
-  });
-}
+registerSubclassRuntimeConfig("Warlock_Great Old One", {
+  spellcasting: {
+    alwaysPreparedSpells: [
+      { name: 'Detect Thoughts', minLevel: 3, level: 2, source: 'Great Old One', sourceType: 'subclass' },
+      { name: 'Dissonant Whispers', minLevel: 3, level: 1, source: 'Great Old One', sourceType: 'subclass' },
+      { name: 'Phantasmal Force', minLevel: 3, level: 2, source: 'Great Old One', sourceType: 'subclass' },
+      { name: "Tasha's Hideous Laughter", minLevel: 3, level: 1, source: 'Great Old One', sourceType: 'subclass' },
+      { name: 'Clairvoyance', minLevel: 5, level: 3, source: 'Great Old One', sourceType: 'subclass' },
+      { name: 'Hunger of Hadar', minLevel: 5, level: 3, source: 'Great Old One', sourceType: 'subclass' },
+      { name: 'Confusion', minLevel: 7, level: 4, source: 'Great Old One', sourceType: 'subclass' },
+      { name: 'Summon Aberration', minLevel: 7, level: 4, source: 'Great Old One', sourceType: 'subclass' },
+      { name: 'Modify Memory', minLevel: 9, level: 5, source: 'Great Old One', sourceType: 'subclass' },
+      { name: 'Telekinesis', minLevel: 9, level: 5, source: 'Great Old One', sourceType: 'subclass' },
+      // TODO: XPHB lists Hex as innate (free cast) at Lv.10, not alwaysPrepared.
+      // Current alwaysPrepared approach is functional but not RAW-perfect.
+      // When the system supports innate/free spell grants, move Hex there.
+      { name: 'Hex', minLevel: 10, level: 1, source: 'Eldritch Hex', sourceType: 'subclass' }
+    ],
+  },
+});
 // [SheetRuntime] END
 
 }

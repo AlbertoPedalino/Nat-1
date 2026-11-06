@@ -131,40 +131,36 @@ registerClassSheetProficiencies("Druid", [
 ]);
 
 // Druidic feature (lv.1) always keeps Speak with Animals prepared.
-if (typeof registerClassRuntimeConfig === "function") {
-  registerClassRuntimeConfig("Druid", {
-    spellcasting: {
-      alwaysPreparedSpells: [
-        { name: "Speak with Animals", minLevel: 1, level: 1 }
-      ],
-    },
-  });
-}
+registerClassRuntimeConfig("Druid", {
+  spellcasting: {
+    alwaysPreparedSpells: [
+      { name: "Speak with Animals", minLevel: 1, level: 1 }
+    ],
+  },
+});
 
-if (typeof registerResourceSideEffect === 'function') {
-  registerResourceSideEffect('wild_resurgence', function (ctx = {}) {
-    const res = ctx.resources || {};
-    const currentWS = Number(res.wild_shape || 0);
-    const slots = ctx.slots || { regular: [] };
-    const used = ctx.sheet?.spellSlotUsed || {};
-    const created = ctx.sheet?.createdSpellSlots || {};
-    const hasWildShape = currentWS > 0;
-    let hasAvailableSlot = false;
-    for (let lv = 1; lv <= slots.regular.length; lv++) {
-      const total = Number(slots.regular[lv - 1] || 0);
-      if (!total) continue;
-      const avail = total - Number(used[lv] || used[String(lv)] || 0) + Number(created[lv] || 0);
-      if (avail > 0) { hasAvailableSlot = true; break; }
-    }
-    return {
-      type: 'wild_resurgence',
-      hasWildShape,
-      hasAvailableSlot,
-      currentWS,
-      label: 'Wild Resurgence',
-    };
-  });
-}
+registerResourceSideEffect('wild_resurgence', function (ctx = {}) {
+  const res = ctx.resources || {};
+  const currentWS = Number(res.wild_shape || 0);
+  const slots = ctx.slots || { regular: [] };
+  const used = ctx.sheet?.spellSlotUsed || {};
+  const created = ctx.sheet?.createdSpellSlots || {};
+  const hasWildShape = currentWS > 0;
+  let hasAvailableSlot = false;
+  for (let lv = 1; lv <= slots.regular.length; lv++) {
+    const total = Number(slots.regular[lv - 1] || 0);
+    if (!total) continue;
+    const avail = total - Number(used[lv] || used[String(lv)] || 0) + Number(created[lv] || 0);
+    if (avail > 0) { hasAvailableSlot = true; break; }
+  }
+  return {
+    type: 'wild_resurgence',
+    hasWildShape,
+    hasAvailableSlot,
+    currentWS,
+    label: 'Wild Resurgence',
+  };
+});
 // [SheetRuntime] END
 
 }

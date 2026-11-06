@@ -108,19 +108,17 @@ function getSorcererLevel(C) {
   return classLevel(C, 'Sorcerer');
 }
 
-if (typeof registerResourceSideEffect === 'function') {
-  registerResourceSideEffect('wild_magic', function (ctx = {}) {
-    const C = ctx.character || ctx.C;
-    const sorcererLevel = getSorcererLevel(C);
-    if (sorcererLevel < 3) return null;
-    const resources = ctx.resources || {};
-    return {
-      type: 'wild_magic_controller',
-      sorcererLevel,
-      tidesAvailable: (resources.wild_tides || 0) > 0,
-      tamedAvailable: (resources.wild_tamed || 0) > 0,
-      label: 'Wild Magic',
-    };
-  });
-}
+registerResourceSideEffect('wild_magic', function (ctx = {}) {
+  const C = ctx.character || ctx.C;
+  const sorcererLevel = getSorcererLevel(C);
+  if (sorcererLevel < 3) return null;
+  const resources = ctx.resources || {};
+  return {
+    type: 'wild_magic_controller',
+    sorcererLevel,
+    tidesAvailable: (resources.wild_tides || 0) > 0,
+    tamedAvailable: (resources.wild_tamed || 0) > 0,
+    label: 'Wild Magic',
+  };
+});
 }

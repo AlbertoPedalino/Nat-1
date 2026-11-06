@@ -31,9 +31,7 @@ export default function install(registry, context = {}) {
     registerFeatOwnerKeyPattern,
   } = createAdapterBindings(registry, context);
 
-if (typeof registerFeatOwnerKeyPattern === 'function') {
-  registerFeatOwnerKeyPattern(/^(?:mc\d+_)?warlock_lessons(?:_first_ones_origin)?_feat(?:_\d+)?$/i);
-}
+registerFeatOwnerKeyPattern(/^(?:mc\d+_)?warlock_lessons(?:_first_ones_origin)?_feat(?:_\d+)?$/i);
 
 // Eldritch Invocations XPHB 2024 — structural data only (name, minLevel, prereq
 // invocation, repeatable). Descriptions are NOT stored here: they are resolved live
@@ -93,7 +91,7 @@ function _warlockAdapterCharacter(localContext) {
     || context.char
     || context.C
     || context.activeCharacter
-    || ((typeof char !== 'undefined' && char) ? char : null);
+    || null;
 }
 
 function _warlockInvocationCountScoped(C, name, keyPrefix) {
@@ -150,7 +148,7 @@ const MODIFIER_ELIGIBLE_CANTRIPS = [
 
 // Cantrip range in feet from registered cantrip data; 0 for Touch/Self/unknown.
 function _cantripRangeFeet(name) {
-  var data = typeof getCantripData === 'function' ? getCantripData(name) : null;
+  var data = getCantripData(name);
   var match = /(\d+)\s*ft/i.exec(String((data && data.range) || ''));
   return match ? Number(match[1]) : 0;
 }
@@ -434,18 +432,16 @@ registerClassSheetActions("Warlock", [
 // [SheetRuntime] END
 
 // Pact Weapon: unified via `pactWeapon` item flag. Weapon override `pact_blade` binds to it.
-if (typeof registerItemFlagDef === 'function') {
-  registerItemFlagDef("pactWeapon", {
-    label: "Pact Weapon",
-    activeLabel: "Pact",
-    tone: "#9d7fb8",
-    icon: "swords",
-    types: ['M', 'R', 'WEAPON'],
-    maxCount: 1,
-    requireClass: "Warlock",
-    requireInvocation: "Pact of the Blade",
-  });
-}
+registerItemFlagDef("pactWeapon", {
+  label: "Pact Weapon",
+  activeLabel: "Pact",
+  tone: "#9d7fb8",
+  icon: "swords",
+  types: ['M', 'R', 'WEAPON'],
+  maxCount: 1,
+  requireClass: "Warlock",
+  requireInvocation: "Pact of the Blade",
+});
 
 // Sheet effects driven by Eldritch Invocations (free-form choice keys → use condition fn)
 registerClassSheetEffects("Warlock", [
@@ -466,93 +462,87 @@ registerClassSheetEffects("Warlock", [
     condition: function(C){ return _warlockHasInvocation(C, "Gift of the Depths"); } },
 ]);
 
-if (typeof registerClassAtWillSpells === 'function') {
-  registerClassAtWillSpells('Warlock', [
-    { invocation: 'Armor of Shadows',          spell: 'Mage Armor',      minLevel: 1  },
-    { invocation: 'Fiendish Vigor',            spell: 'False Life',      minLevel: 1  },
-    { invocation: 'Mask of Many Faces',        spell: 'Disguise Self',   minLevel: 1  },
-    { invocation: 'Misty Visions',             spell: 'Silent Image',    minLevel: 1  },
-    { invocation: 'One with Shadows',          spell: 'Invisibility',   minLevel: 5  },
-    { invocation: 'Otherworldly Leap',         spell: 'Jump',            minLevel: 2  },
-    { invocation: 'Ascendant Step',            spell: 'Levitate',        minLevel: 5  },
-    { invocation: 'Master of Myriad Forms',    spell: 'Alter Self',      minLevel: 5  },
-    { invocation: 'Whispers of the Grave',     spell: 'Speak with Dead', minLevel: 7  },
-    { invocation: 'Visions of Distant Realms', spell: 'Arcane Eye',      minLevel: 9  },
-    { invocation: 'Pact of the Chain',         spell: 'Find Familiar',  minLevel: 1  },
-  ]);
-}
+registerClassAtWillSpells('Warlock', [
+  { invocation: 'Armor of Shadows',          spell: 'Mage Armor',      minLevel: 1  },
+  { invocation: 'Fiendish Vigor',            spell: 'False Life',      minLevel: 1  },
+  { invocation: 'Mask of Many Faces',        spell: 'Disguise Self',   minLevel: 1  },
+  { invocation: 'Misty Visions',             spell: 'Silent Image',    minLevel: 1  },
+  { invocation: 'One with Shadows',          spell: 'Invisibility',   minLevel: 5  },
+  { invocation: 'Otherworldly Leap',         spell: 'Jump',            minLevel: 2  },
+  { invocation: 'Ascendant Step',            spell: 'Levitate',        minLevel: 5  },
+  { invocation: 'Master of Myriad Forms',    spell: 'Alter Self',      minLevel: 5  },
+  { invocation: 'Whispers of the Grave',     spell: 'Speak with Dead', minLevel: 7  },
+  { invocation: 'Visions of Distant Realms', spell: 'Arcane Eye',      minLevel: 9  },
+  { invocation: 'Pact of the Chain',         spell: 'Find Familiar',  minLevel: 1  },
+]);
 
 // Eldritch Blast invocation effects — adapter sets flags, sheet computes numeric values
-if (typeof registerCantripDataModifier === 'function') {
-  function _pushCantripModifierMeta(out, meta) {
-    if (!meta || !meta.label) return;
-    out.modifierTags = out.modifierTags || [];
-    var tag = meta.tagLabel || meta.label;
-    if (tag && out.modifierTags.indexOf(tag) === -1) out.modifierTags.push(tag);
+function _pushCantripModifierMeta(out, meta) {
+  if (!meta || !meta.label) return;
+  out.modifierTags = out.modifierTags || [];
+  var tag = meta.tagLabel || meta.label;
+  if (tag && out.modifierTags.indexOf(tag) === -1) out.modifierTags.push(tag);
 
-    out.modifiers = Array.isArray(out.modifiers) ? out.modifiers.slice() : [];
-    var key = meta.key || meta.label;
-    var hasSame = out.modifiers.some(function (entry) {
-      var entryKey = entry && (entry.key || entry.label || entry.tagLabel);
-      return entryKey === key;
+  out.modifiers = Array.isArray(out.modifiers) ? out.modifiers.slice() : [];
+  var key = meta.key || meta.label;
+  var hasSame = out.modifiers.some(function (entry) {
+    var entryKey = entry && (entry.key || entry.label || entry.tagLabel);
+    return entryKey === key;
+  });
+  if (!hasSame) {
+    out.modifiers.push({
+      key: key,
+      label: meta.label,
+      tagLabel: meta.tagLabel || meta.label,
+      detailGroupLabel: meta.detailGroupLabel || null,
+      detailTitle: meta.detailTitle || meta.label,
+      detailText: meta.detailText || meta.description || '',
+      description: meta.description || meta.detailText || '',
     });
-    if (!hasSame) {
-      out.modifiers.push({
-        key: key,
-        label: meta.label,
-        tagLabel: meta.tagLabel || meta.label,
-        detailGroupLabel: meta.detailGroupLabel || null,
-        detailTitle: meta.detailTitle || meta.label,
-        detailText: meta.detailText || meta.description || '',
-        description: meta.description || meta.detailText || '',
-      });
-    }
   }
+}
 
-  MODIFIER_ELIGIBLE_CANTRIPS.forEach(function (cantripName) {
-    registerCantripDataModifier(cantripName, function (data, C) {
-      var out = Object.assign({}, data || {});
-      var liveInvocation = buildOptionalFeatureEntryLookup(C && C.optionalFeatureEntries, 'EI');
-      WARLOCK_MODIFIER_CANTRIP_INVOCATIONS.forEach(function (mod) {
-        var effect = _MODIFIER_CANTRIP_EFFECTS[mod.slug];
-        if (!effect) return;
-        if (mod.minRangeFeet && _cantripRangeFeet(cantripName) < mod.minRangeFeet) return;
-        if (!_warlockHasInvocation(C, mod.invocation)) return;
-        if (!_warlockChoiceMatches(C, 'warlock_' + mod.slug + '_cantrip', cantripName, null)) return;
-        if (effect.apply) effect.apply(out, C);
-        var liveText = entriesToPlainText(liveInvocation(mod.invocation) || []);
-        _pushCantripModifierMeta(out, {
-          key: mod.slug.replace(/_/g, '-'),
-          label: mod.invocation,
-          tagLabel: mod.invocation,
-          detailGroupLabel: 'Eldritch Invocations',
-          detailTitle: mod.invocation,
-          detailText: liveText,
-          description: liveText,
-        });
+MODIFIER_ELIGIBLE_CANTRIPS.forEach(function (cantripName) {
+  registerCantripDataModifier(cantripName, function (data, C) {
+    var out = Object.assign({}, data || {});
+    var liveInvocation = buildOptionalFeatureEntryLookup(C && C.optionalFeatureEntries, 'EI');
+    WARLOCK_MODIFIER_CANTRIP_INVOCATIONS.forEach(function (mod) {
+      var effect = _MODIFIER_CANTRIP_EFFECTS[mod.slug];
+      if (!effect) return;
+      if (mod.minRangeFeet && _cantripRangeFeet(cantripName) < mod.minRangeFeet) return;
+      if (!_warlockHasInvocation(C, mod.invocation)) return;
+      if (!_warlockChoiceMatches(C, 'warlock_' + mod.slug + '_cantrip', cantripName, null)) return;
+      if (effect.apply) effect.apply(out, C);
+      var liveText = entriesToPlainText(liveInvocation(mod.invocation) || []);
+      _pushCantripModifierMeta(out, {
+        key: mod.slug.replace(/_/g, '-'),
+        label: mod.invocation,
+        tagLabel: mod.invocation,
+        detailGroupLabel: 'Eldritch Invocations',
+        detailTitle: mod.invocation,
+        detailText: liveText,
+        description: liveText,
       });
-      return out;
     });
+    return out;
   });
-}
+});
 
-if (typeof registerWeaponAbilityOverride === 'function') {
-  registerWeaponAbilityOverride({
-    key: 'pact_blade',
-    label: 'Pact Weapon',
-    ability: 'cha',
-    grantsProficiency: true,
-    weaponTypes: ['M', 'R'],
-    itemFlag: 'pactWeapon',
-    condition: function (C) {
-      if (!C) return false;
-      const isWarlock = C.className === 'Warlock' ||
-        (C.extraClasses || []).some(function (ec) { return ec.name === 'Warlock'; });
-      if (!isWarlock) return false;
-      return _warlockHasInvocation(C, 'Pact of the Blade');
-    }
-  });
-}
+registerWeaponAbilityOverride({
+  key: 'pact_blade',
+  label: 'Pact Weapon',
+  ability: 'cha',
+  grantsProficiency: true,
+  weaponTypes: ['M', 'R'],
+  itemFlag: 'pactWeapon',
+  condition: function (C) {
+    if (!C) return false;
+    const isWarlock = C.className === 'Warlock' ||
+      (C.extraClasses || []).some(function (ec) { return ec.name === 'Warlock'; });
+    if (!isWarlock) return false;
+    return _warlockHasInvocation(C, 'Pact of the Blade');
+  }
+});
 
 registerClassSheetResources("Warlock", [
   {
@@ -597,69 +587,65 @@ registerClassSheetResources("Warlock", [
 ]);
 
 // Magical Cunning: recover ceil(max Pact Magic slots / 2), or all slots at Warlock 20.
-if (typeof registerResourceSideEffect === 'function') {
-  registerResourceSideEffect('magical_cunning', function (ctx = {}) {
-    const C = ctx.character || ctx.C;
-    const slots = ctx.PACT_SLOTS || {};
-    const wlv = Math.min(20, Math.max(0, _warlockLevel(C)));
-    if (!wlv) return null;
+registerResourceSideEffect('magical_cunning', function (ctx = {}) {
+  const C = ctx.character || ctx.C;
+  const slots = ctx.PACT_SLOTS || {};
+  const wlv = Math.min(20, Math.max(0, _warlockLevel(C)));
+  if (!wlv) return null;
 
-    const row = slots[wlv] || {};
-    const slotCount = Number(row.slots ?? row.n ?? 0);
-    const slotLevel = Number(row.level ?? row.l ?? 1);
-    if (!slotCount) return null;
+  const row = slots[wlv] || {};
+  const slotCount = Number(row.slots ?? row.n ?? 0);
+  const slotLevel = Number(row.level ?? row.l ?? 1);
+  if (!slotCount) return null;
 
-    const recover = wlv >= 20 ? slotCount : Math.ceil(slotCount / 2);
-    return {
-      type: 'recover_pact_slots',
-      recover,
-      slotLevel,
-      label: wlv >= 20 ? 'Eldritch Master' : 'Magical Cunning',
-      recoverResourceKeys: wlv >= 6 && Object.prototype.hasOwnProperty.call(ctx.resources || {}, 'vestige_power')
-        ? ['vestige_power']
-        : [],
-    };
-  });
-}
+  const recover = wlv >= 20 ? slotCount : Math.ceil(slotCount / 2);
+  return {
+    type: 'recover_pact_slots',
+    recover,
+    slotLevel,
+    label: wlv >= 20 ? 'Eldritch Master' : 'Magical Cunning',
+    recoverResourceKeys: wlv >= 6 && Object.prototype.hasOwnProperty.call(ctx.resources || {}, 'vestige_power')
+      ? ['vestige_power']
+      : [],
+  };
+});
 
-if (typeof registerClassRuntimeConfig === 'function') {
-  const existingRuntimeConfig = typeof getClassRuntimeConfig === 'function' ? (getClassRuntimeConfig('Warlock') || {}) : {};
-  const existingSpellcasting = existingRuntimeConfig.spellcasting || {};
-  const warlockCantripKnown = existingSpellcasting.cantripKnown || [2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4];
-  const warlockPreparedSpells = existingSpellcasting.preparedSpellsProgression || existingSpellcasting.spellsKnown || [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15];
+const existingRuntimeConfig = getClassRuntimeConfig('Warlock') || {};
+const existingSpellcasting = existingRuntimeConfig.spellcasting || {};
+const warlockCantripKnown = existingSpellcasting.cantripKnown || [2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4];
+const warlockPreparedSpells = existingSpellcasting.preparedSpellsProgression || existingSpellcasting.spellsKnown || [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15];
 
-  registerClassRuntimeConfig('Warlock', {
-    ...existingRuntimeConfig,
-    multiclassPrerequisites: [{ cha: 13 }],
-    spellcasting: {
-      ...existingSpellcasting,
-      ability: 'cha',
-      casterProgression: 'pact',
-      preparedMode: 'prepared',
-      cantripKnown: warlockCantripKnown,
-      preparedSpellsProgression: warlockPreparedSpells,
-      alwaysPreparedSpells: [
-        { name: 'Contact Other Plane', minLevel: 9, level: 5, source: 'Contact Patron', sourceType: 'class' },
-      ],
-      alwaysKnownSpells: [
-        { name: 'Find Familiar', minLevel: 1, level: 1, source: 'Pact of the Chain', sourceType: 'class', invocation: 'Pact of the Chain' },
-        { name: 'Water Breathing', minLevel: 5, level: 3, source: 'Gift of the Depths', sourceType: 'class', invocation: 'Gift of the Depths' },
-      ],
-      choiceSpellSources: {
-        ...(existingSpellcasting.choiceSpellSources || {}),
-        warlock_tome_cantrip_1: { label: 'Pact of the Tome', ability: 'cha' },
-        warlock_tome_cantrip_2: { label: 'Pact of the Tome', ability: 'cha' },
-        warlock_tome_cantrip_3: { label: 'Pact of the Tome', ability: 'cha' },
-        warlock_tome_ritual_1: { label: 'Pact of the Tome', ability: 'cha' },
-        warlock_tome_ritual_2: { label: 'Pact of the Tome', ability: 'cha' },
-        warlock_mystic_arcanum_6: { label: 'Mystic Arcanum VI', ability: 'cha' },
-        warlock_mystic_arcanum_7: { label: 'Mystic Arcanum VII', ability: 'cha' },
-        warlock_mystic_arcanum_8: { label: 'Mystic Arcanum VIII', ability: 'cha' },
-        warlock_mystic_arcanum_9: { label: 'Mystic Arcanum IX', ability: 'cha' },
-      },
+registerClassRuntimeConfig('Warlock', {
+  ...existingRuntimeConfig,
+  multiclassPrerequisites: [{ cha: 13 }],
+  spellcasting: {
+    ...existingSpellcasting,
+    ability: 'cha',
+    casterProgression: 'pact',
+    preparedMode: 'prepared',
+    cantripKnown: warlockCantripKnown,
+    preparedSpellsProgression: warlockPreparedSpells,
+    alwaysPreparedSpells: [
+      { name: 'Contact Other Plane', minLevel: 9, level: 5, source: 'Contact Patron', sourceType: 'class' },
+    ],
+    alwaysKnownSpells: [
+      { name: 'Find Familiar', minLevel: 1, level: 1, source: 'Pact of the Chain', sourceType: 'class', invocation: 'Pact of the Chain' },
+      { name: 'Water Breathing', minLevel: 5, level: 3, source: 'Gift of the Depths', sourceType: 'class', invocation: 'Gift of the Depths' },
+    ],
+    choiceSpellSources: {
+      ...(existingSpellcasting.choiceSpellSources || {}),
+      warlock_tome_cantrip_1: { label: 'Pact of the Tome', ability: 'cha' },
+      warlock_tome_cantrip_2: { label: 'Pact of the Tome', ability: 'cha' },
+      warlock_tome_cantrip_3: { label: 'Pact of the Tome', ability: 'cha' },
+      warlock_tome_ritual_1: { label: 'Pact of the Tome', ability: 'cha' },
+      warlock_tome_ritual_2: { label: 'Pact of the Tome', ability: 'cha' },
+      warlock_mystic_arcanum_6: { label: 'Mystic Arcanum VI', ability: 'cha' },
+      warlock_mystic_arcanum_7: { label: 'Mystic Arcanum VII', ability: 'cha' },
+      warlock_mystic_arcanum_8: { label: 'Mystic Arcanum VIII', ability: 'cha' },
+      warlock_mystic_arcanum_9: { label: 'Mystic Arcanum IX', ability: 'cha' },
     },
-  });
-}
+  },
+});
 
 // Register choice-to-level mappings for the builder's choice cleanup system.
 // XPHB 2024: invocation slots 1..10 unlock at warlock levels [1,2,2,5,5,7,9,12,15,18].

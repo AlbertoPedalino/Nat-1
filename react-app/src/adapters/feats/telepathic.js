@@ -9,9 +9,7 @@ export default function install(registry, context = {}) {
   // (additionalSpells ability "inherit" → the slot's `_asi` choice).
 
   // Telepathic Utterance: telepathy 60 ft, shown under Senses.
-  if (typeof registerFeatSheetEffects === "function") {
-    registerFeatSheetEffects("Telepathic", [
-      { type: "sense", senseType: "telepathy", value: 60, note: "Telepathic" }
-    ]);
-  }
+  registerFeatSheetEffects("Telepathic", [
+    { type: "sense", senseType: "telepathy", value: 60, note: "Telepathic" }
+  ]);
 }

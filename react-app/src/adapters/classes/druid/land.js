@@ -76,20 +76,18 @@ registerSubclassSheetEffects("Druid_Land", [
 
 ]);
 
-if (typeof registerResourceSideEffect === 'function') {
-  registerResourceSideEffect('natural_recovery', function (ctx = {}) {
-    const C = ctx.character || ctx.C;
-    const druidLv = classLevel(C, 'Druid');
-    if (!druidLv) return null;
-    const budget = Math.ceil(druidLv / 2);
-    return {
-      type: 'recover_spell_slots',
-      budget,
-      maxSlotLevel: 5,
-      label: 'Natural Recovery',
-    };
-  });
-}
+registerResourceSideEffect('natural_recovery', function (ctx = {}) {
+  const C = ctx.character || ctx.C;
+  const druidLv = classLevel(C, 'Druid');
+  if (!druidLv) return null;
+  const budget = Math.ceil(druidLv / 2);
+  return {
+    type: 'recover_spell_slots',
+    budget,
+    maxSlotLevel: 5,
+    label: 'Natural Recovery',
+  };
+});
 // [SheetRuntime] END
 
 }

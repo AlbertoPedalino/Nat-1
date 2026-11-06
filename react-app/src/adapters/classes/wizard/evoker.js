@@ -1,4 +1,5 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
+import { addWizardSavantSpellChoices } from '../../classAdapterHelpers.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -9,9 +10,7 @@ export default function install(registry, context = {}) {
     registerSubclassSheetSpellModifiers,
   } = createAdapterBindings(registry, context);
 registerSubclassAdapter("Wizard_Evoker", function (cls, lv, specs) {
-  if (typeof addWizardSavantSpellChoices === "function") {
-    addWizardSavantSpellChoices(specs, lv, { key: "evoker", label: "Evocation", school: "V" });
-  }
+  addWizardSavantSpellChoices(specs, lv, { key: "evoker", label: "Evocation", school: "V" });
 });
 
 // [SheetRuntime] START
@@ -29,17 +28,15 @@ registerSubclassSheetEffects("Wizard_Evoker", [
   { type: "maximizeSpellDamage", minLevel: 14, note: "Overchannel." },
 ]);
 
-if (typeof registerSubclassSheetSpellModifiers === "function") {
-  registerSubclassSheetSpellModifiers("Wizard_Evoker", [
-    {
-      kind: "damage",
-      school: "V",
-      minLevel: 10,
-      amount: "int",
-      note: "Empowered Evocation",
-    },
-  ]);
-}
+registerSubclassSheetSpellModifiers("Wizard_Evoker", [
+  {
+    kind: "damage",
+    school: "V",
+    minLevel: 10,
+    amount: "int",
+    note: "Empowered Evocation",
+  },
+]);
 // [SheetRuntime] END
 
 }

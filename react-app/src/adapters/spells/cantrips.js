@@ -21,7 +21,6 @@ export default function install(registry, context = {}) {
 
 (function () {
   "use strict";
-  if (typeof registerCantripData !== "function") return;
 
   /* ── Damaging — attack roll ─────────────────────────────────── */
   registerCantripData("Fire Bolt", {

@@ -1,6 +1,7 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
+import { finalAbilityModifier } from '../../../shared/character/progression/abilityScores.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -11,8 +12,6 @@ export default function install(registry, context = {}) {
     registerClassSheetProficiencies,
     registerClassSheetSpellModifiers,
   } = createAdapterBindings(registry, context);
-  const getMod = context?.getMod;
-  const getFinal = context?.getFinal;
 
 function cleanChoice(value) {
   return String(value || '')
@@ -187,9 +186,7 @@ registerClassSheetActions("Cleric", [
       {
         kind: "damage",
         formula: ({ character, ownerLevel }) => {
-          const wis = typeof getMod === "function" && typeof getFinal === "function"
-            ? Number(getMod(getFinal(character, "wis")) || 0)
-            : 0;
+          const wis = Number(finalAbilityModifier(character, "wis") || 0);
           const lv = Number(ownerLevel || 1);
           const dice = lv >= 18 ? 4 : lv >= 13 ? 3 : lv >= 7 ? 2 : 1;
           return withModifier(`${dice}d8`, wis);
@@ -199,9 +196,7 @@ registerClassSheetActions("Cleric", [
       {
         kind: "heal",
         formula: ({ character, ownerLevel }) => {
-          const wis = typeof getMod === "function" && typeof getFinal === "function"
-            ? Number(getMod(getFinal(character, "wis")) || 0)
-            : 0;
+          const wis = Number(finalAbilityModifier(character, "wis") || 0);
           const lv = Number(ownerLevel || 1);
           const dice = lv >= 18 ? 4 : lv >= 13 ? 3 : lv >= 7 ? 2 : 1;
           return withModifier(`${dice}d8`, wis);
@@ -218,9 +213,7 @@ registerClassSheetActions("Cleric", [
     "resKey": "channel_div",
     "minLevel": 5,
     rollers: [{ kind: 'damage', formula: ({ character }) => {
-      const wis = typeof getMod === 'function' && typeof getFinal === 'function'
-        ? Number(getMod(getFinal(character, 'wis')) || 1)
-        : 1;
+      const wis = Number(finalAbilityModifier(character, 'wis') || 1);
       return `${Math.max(1, wis)}d8`;
     }, label: ({ formula }) => `${formula} radiant` }]
   },
@@ -287,9 +280,7 @@ registerClassSheetSpellModifiers("Cleric", [
       return ctx?.formula;
     }
 
-    const wis = typeof getMod === "function" && typeof getFinal === "function"
-      ? Number(getMod(getFinal(character, "wis")) || 0)
-      : 0;
+    const wis = Number(finalAbilityModifier(character, "wis") || 0);
 
     if (!wis) return ctx?.formula;
 

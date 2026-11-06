@@ -4,7 +4,6 @@ export default function install(registry, context = {}) {
   const { registerGlobalSpellAdapter } = createAdapterBindings(registry, context);
 
 
-  if (typeof registerGlobalSpellAdapter !== "function") return;
 
   // Promote _adapterData fields to top-level so consumers can read
   // spell.icon, spell.die, spell.toHit etc. without calling getCantripData().

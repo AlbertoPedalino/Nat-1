@@ -27,7 +27,6 @@ const FAST_CRAFTING_TABLE = [
 export default function install(registry, context = {}) {
   const { registerFeatAdapter, registerFeatSheetActions } = createAdapterBindings(registry, context);
 
-  if (typeof registerFeatAdapter !== 'function') return;
 
   registerFeatAdapter('Crafter', function (feat) {
     const next = { ...feat };
@@ -44,25 +43,23 @@ export default function install(registry, context = {}) {
     return next;
   });
 
-  if (typeof registerFeatSheetActions === 'function') {
-    registerFeatSheetActions('Crafter', [
-      {
-        name: 'Fast Crafting',
-        icon: '',
-        cat: 'special',
-        uses: '1 item / LR',
-        // Description lives in the Features tab; the card drives the create panel.
-        entries: [],
-        noDescription: true,
-        detailType: 'createdItems',
-        detail: () => ({
-          flag: 'fastcraft',
-          tagLabel: 'Fast Crafting',
-          toolGroups: FAST_CRAFTING_TABLE,
-          max: 1,
-          emptyHint: "Gain proficiency with an Artisan's Tools to craft gear here.",
-        }),
-      },
-    ]);
-  }
+  registerFeatSheetActions('Crafter', [
+    {
+      name: 'Fast Crafting',
+      icon: '',
+      cat: 'special',
+      uses: '1 item / LR',
+      // Description lives in the Features tab; the card drives the create panel.
+      entries: [],
+      noDescription: true,
+      detailType: 'createdItems',
+      detail: () => ({
+        flag: 'fastcraft',
+        tagLabel: 'Fast Crafting',
+        toolGroups: FAST_CRAFTING_TABLE,
+        max: 1,
+        emptyHint: "Gain proficiency with an Artisan's Tools to craft gear here.",
+      }),
+    },
+  ]);
 }

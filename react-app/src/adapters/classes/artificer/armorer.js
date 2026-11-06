@@ -6,11 +6,10 @@ import {
   isReplicateArmorItem,
 } from '../../../shared/character/inventory/replicateMagicItem.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
+import { finalAbilityModifier } from '../../../shared/character/progression/abilityScores.js';
+import { getProficiencyBonus } from '../../../shared/character/progression/proficiency.js';
 
 export default function install(registry, context = {}) {
-  const getPB = context?.getPB;
-  const getMod = context?.getMod;
-  const getFinal = context?.getFinal;
   const {
     _ARTISAN_TOOLS,
     registerSubclassAdapter,
@@ -83,13 +82,11 @@ registerSubclassSheetActions("Artificer_Armorer", [
     "requiresChoice": { "key": "armorer_model", "value": "Guardian" },
     "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true },
     "attackBonus": ({ character }) => {
-      if (typeof getPB !== 'function' || typeof getMod !== 'function' || typeof getFinal !== 'function') return 0;
-      try { return getPB(character) + getMod(getFinal(character, 'int')); } catch { return 0; }
+      try { return getProficiencyBonus(character) + finalAbilityModifier(character, 'int'); } catch { return 0; }
     },
     rollers: [{ kind: 'damage', formula: ({ character }) => {
-      if (typeof getMod !== 'function' || typeof getFinal !== 'function') return '1d8';
       try {
-        const intMod = getMod(getFinal(character, 'int'));
+        const intMod = finalAbilityModifier(character, 'int');
         return intMod > 0 ? `1d8+${intMod}` : intMod < 0 ? `1d8${intMod}` : '1d8';
       } catch { return '1d8'; }
     }, label: ({ formula }) => `${formula} thunder` }]
@@ -112,13 +109,11 @@ registerSubclassSheetActions("Artificer_Armorer", [
     "requiresChoice": { "key": "armorer_model", "value": "Infiltrator" },
     "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true },
     "attackBonus": ({ character }) => {
-      if (typeof getPB !== 'function' || typeof getMod !== 'function' || typeof getFinal !== 'function') return 0;
-      try { return getPB(character) + getMod(getFinal(character, 'int')); } catch { return 0; }
+      try { return getProficiencyBonus(character) + finalAbilityModifier(character, 'int'); } catch { return 0; }
     },
     rollers: [{ kind: 'damage', formula: ({ character }) => {
-      if (typeof getMod !== 'function' || typeof getFinal !== 'function') return '1d6';
       try {
-        const intMod = getMod(getFinal(character, 'int'));
+        const intMod = finalAbilityModifier(character, 'int');
         return intMod > 0 ? `1d6+${intMod}` : intMod < 0 ? `1d6${intMod}` : '1d6';
       } catch { return '1d6'; }
     }, label: ({ formula }) => `${formula} lightning` }]
@@ -132,13 +127,11 @@ registerSubclassSheetActions("Artificer_Armorer", [
     "requiresChoice": { "key": "armorer_model", "value": "Dreadnaught" },
     "requiresInventoryFlag": { "flag": "arcaneArmor", "itemType": ["LA", "MA", "HA"], "equipped": true },
     "attackBonus": ({ character }) => {
-      if (typeof getPB !== 'function' || typeof getMod !== 'function' || typeof getFinal !== 'function') return 0;
-      try { return getPB(character) + getMod(getFinal(character, 'int')); } catch { return 0; }
+      try { return getProficiencyBonus(character) + finalAbilityModifier(character, 'int'); } catch { return 0; }
     },
     rollers: [{ kind: 'damage', formula: ({ character }) => {
-      if (typeof getMod !== 'function' || typeof getFinal !== 'function') return '1d10';
       try {
-        const intMod = getMod(getFinal(character, 'int'));
+        const intMod = finalAbilityModifier(character, 'int');
         return intMod > 0 ? `1d10+${intMod}` : intMod < 0 ? `1d10${intMod}` : '1d10';
       } catch { return '1d10'; }
     }, label: ({ formula }) => `${formula} force` }]
@@ -214,19 +207,17 @@ registerSubclassSheetProficiencies("Artificer_Armorer", [
   { type: "tool", values: ["Smith's Tools"], minLevel: 3 },
   { type: "armor", values: ["Heavy"], minLevel: 3 }
 ]);
-if (typeof registerItemFlagDef === 'function') {
-  registerItemFlagDef("arcaneArmor", {
-    label: "Arcane Armor",
-    activeLabel: "Arcane",
-    tone: "#58b879",
-    icon: "shield",
-    types: ['LA','MA','HA'],
-    maxCount: 1,
-    requireClass: "Artificer",
-    requireSubclass: "Armorer",
-    requireMinLevel: 3,
-  });
-}
+registerItemFlagDef("arcaneArmor", {
+  label: "Arcane Armor",
+  activeLabel: "Arcane",
+  tone: "#58b879",
+  icon: "shield",
+  types: ['LA','MA','HA'],
+  maxCount: 1,
+  requireClass: "Artificer",
+  requireSubclass: "Armorer",
+  requireMinLevel: 3,
+});
 registerSubclassSheetEffects("Artificer_Armorer", [
   // Infiltrator model — gated on Arcane Armor flag + model choice
   { type: "speed", speedType: "walk", value: 5, minLevel: 3,
@@ -259,43 +250,41 @@ registerSubclassSheetFeatureFilter("Artificer_Armorer", (ctx, features) => {
 });
 // [SheetRuntime] END
 
-if (typeof registerSubclassChoiceDetailDataProvider === "function") {
-  registerSubclassChoiceDetailDataProvider("Artificer", "Armorer", function (choiceKey, values, subFeatures) {
-    if (choiceKey !== "armorer_model") return null;
-    if (!Array.isArray(values) || !values.length) return null;
-    if (!Array.isArray(subFeatures) || !subFeatures.length) return null;
+registerSubclassChoiceDetailDataProvider("Artificer", "Armorer", function (choiceKey, values, subFeatures) {
+  if (choiceKey !== "armorer_model") return null;
+  if (!Array.isArray(values) || !values.length) return null;
+  if (!Array.isArray(subFeatures) || !subFeatures.length) return null;
 
-    function canon(v) {
-      const k = matchKey(v);
-      if (k === "dreadnaught" || k.includes("dreadnought")) return "dreadnought";
-      if (k.includes("guardian")) return "guardian";
-      if (k.includes("infiltrator")) return "infiltrator";
-      return "";
-    }
+  function canon(v) {
+    const k = matchKey(v);
+    if (k === "dreadnaught" || k.includes("dreadnought")) return "dreadnought";
+    if (k.includes("guardian")) return "guardian";
+    if (k.includes("infiltrator")) return "infiltrator";
+    return "";
+  }
 
-    const target = canon(values[0]);
-    if (!target) return null;
+  const target = canon(values[0]);
+  if (!target) return null;
 
-    const ordered = subFeatures.slice().sort(function (a, b) { return (a.level || 0) - (b.level || 0); });
+  const ordered = subFeatures.slice().sort(function (a, b) { return (a.level || 0) - (b.level || 0); });
 
-    function walk(node) {
-      if (!node) return null;
-      if (Array.isArray(node)) {
-        for (var i = 0; i < node.length; i++) { var r = walk(node[i]); if (r) return r; }
-        return null;
-      }
-      if (typeof node !== "object") return null;
-      if (node.name && canon(node.name) === target && (node.entries || node.entry)) return node;
-      var kids = [node.entries, node.entry, node.items, node.rows];
-      for (var j = 0; j < kids.length; j++) { var r2 = walk(kids[j]); if (r2) return r2; }
+  function walk(node) {
+    if (!node) return null;
+    if (Array.isArray(node)) {
+      for (var i = 0; i < node.length; i++) { var r = walk(node[i]); if (r) return r; }
       return null;
     }
+    if (typeof node !== "object") return null;
+    if (node.name && canon(node.name) === target && (node.entries || node.entry)) return node;
+    var kids = [node.entries, node.entry, node.items, node.rows];
+    for (var j = 0; j < kids.length; j++) { var r2 = walk(kids[j]); if (r2) return r2; }
+    return null;
+  }
 
-    var direct = ordered.find(function (f) { return canon(f && f.name) === target && (f.entries || f.entry); });
-    if (direct) return direct;
-    return walk(ordered.map(function (f) { return f.entries; }));
-  });
-}
+  var direct = ordered.find(function (f) { return canon(f && f.name) === target && (f.entries || f.entry); });
+  if (direct) return direct;
+  return walk(ordered.map(function (f) { return f.entries; }));
+});
 
 }
 

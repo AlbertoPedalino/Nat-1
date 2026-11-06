@@ -26,7 +26,6 @@ export default function install(registry, context = {}) {
 
 (function () {
   "use strict";
-  if (typeof registerSpellData !== "function") return;
 
   /* ════════════════════════════
      LIVELLO 1

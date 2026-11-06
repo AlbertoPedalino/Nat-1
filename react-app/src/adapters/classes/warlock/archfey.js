@@ -29,25 +29,23 @@ registerSubclassSheetResources("Warlock_Archfey", [
   { key: "archfey_beguiling", name: "Beguiling Defenses", icon: "shield",   recharge: "LR", max: () => 1 },
 ]);
 
-if (typeof registerSubclassRuntimeConfig === "function") {
-  registerSubclassRuntimeConfig("Warlock_Archfey", {
-    spellcasting: {
-      alwaysPreparedSpells: [
-        { name: 'Calm Emotions', minLevel: 3, level: 2, source: 'Archfey', sourceType: 'subclass' },
-        { name: 'Faerie Fire', minLevel: 3, level: 1, source: 'Archfey', sourceType: 'subclass' },
-        { name: 'Misty Step', minLevel: 3, level: 2, source: 'Archfey', sourceType: 'subclass' },
-        { name: 'Phantasmal Force', minLevel: 3, level: 2, source: 'Archfey', sourceType: 'subclass' },
-        { name: 'Sleep', minLevel: 3, level: 1, source: 'Archfey', sourceType: 'subclass' },
-        { name: 'Blink', minLevel: 5, level: 3, source: 'Archfey', sourceType: 'subclass' },
-        { name: 'Plant Growth', minLevel: 5, level: 3, source: 'Archfey', sourceType: 'subclass' },
-        { name: 'Dominate Beast', minLevel: 7, level: 4, source: 'Archfey', sourceType: 'subclass' },
-        { name: 'Greater Invisibility', minLevel: 7, level: 4, source: 'Archfey', sourceType: 'subclass' },
-        { name: 'Dominate Person', minLevel: 9, level: 5, source: 'Archfey', sourceType: 'subclass' },
-        { name: 'Seeming', minLevel: 9, level: 5, source: 'Archfey', sourceType: 'subclass' }
-      ],
-    },
-  });
-}
+registerSubclassRuntimeConfig("Warlock_Archfey", {
+  spellcasting: {
+    alwaysPreparedSpells: [
+      { name: 'Calm Emotions', minLevel: 3, level: 2, source: 'Archfey', sourceType: 'subclass' },
+      { name: 'Faerie Fire', minLevel: 3, level: 1, source: 'Archfey', sourceType: 'subclass' },
+      { name: 'Misty Step', minLevel: 3, level: 2, source: 'Archfey', sourceType: 'subclass' },
+      { name: 'Phantasmal Force', minLevel: 3, level: 2, source: 'Archfey', sourceType: 'subclass' },
+      { name: 'Sleep', minLevel: 3, level: 1, source: 'Archfey', sourceType: 'subclass' },
+      { name: 'Blink', minLevel: 5, level: 3, source: 'Archfey', sourceType: 'subclass' },
+      { name: 'Plant Growth', minLevel: 5, level: 3, source: 'Archfey', sourceType: 'subclass' },
+      { name: 'Dominate Beast', minLevel: 7, level: 4, source: 'Archfey', sourceType: 'subclass' },
+      { name: 'Greater Invisibility', minLevel: 7, level: 4, source: 'Archfey', sourceType: 'subclass' },
+      { name: 'Dominate Person', minLevel: 9, level: 5, source: 'Archfey', sourceType: 'subclass' },
+      { name: 'Seeming', minLevel: 9, level: 5, source: 'Archfey', sourceType: 'subclass' }
+    ],
+  },
+});
 // [SheetRuntime] END
 
 }

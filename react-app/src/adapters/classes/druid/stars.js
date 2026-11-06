@@ -1,20 +1,17 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
 import { getChoiceValue } from '../../../shared/character/progression/choiceUtils.js';
 import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
+import { finalAbilityModifier } from '../../../shared/character/progression/abilityScores.js';
+import { getProficiencyBonus } from '../../../shared/character/progression/proficiency.js';
 
 export default function install(registry, context = {}) {
-  const getPB = context?.getPB;
-  const getMod = context?.getMod;
-  const getFinal = context?.getFinal;
-
   // Starry Form constellations (Archer attack / Chalice heal) share one scaling
   // rule: a d8 that doubles at level 10 (Twinkling Constellations), plus WIS.
   // Single source so the action roller and the spell rider can't drift.
   const starryFormDie = (level) => (Number(level || 0) >= 10 ? '2d8' : '1d8');
   const withWisMod = (dice, character) => {
-    if (typeof getMod !== 'function' || typeof getFinal !== 'function') return dice;
     try {
-      const wis = getMod(getFinal(character, 'wis'));
+      const wis = finalAbilityModifier(character, 'wis');
       return wis > 0 ? `${dice}+${wis}` : wis < 0 ? `${dice}${wis}` : dice;
     } catch { return dice; }
   };
@@ -59,8 +56,7 @@ registerSubclassSheetActions("Druid_Stars", [
     "noDescription": true,
     "requiresChoice": { "key": "stars_constellation", "value": "Archer" },
     "attackBonus": ({ character }) => {
-      if (typeof getPB !== 'function' || typeof getMod !== 'function' || typeof getFinal !== 'function') return 0;
-      try { return getPB(character) + getMod(getFinal(character, 'wis')); } catch { return 0; }
+      try { return getProficiencyBonus(character) + finalAbilityModifier(character, 'wis'); } catch { return 0; }
     },
     rollers: [{ kind: 'damage', formula: ({ character, ownerLevel }) => withWisMod(starryFormDie(ownerLevel), character), label: ({ formula }) => `${formula} radiant` }],
     "entries": ["Archer constellation. When you assume Starry Form and as a Bonus Action on later turns, make a ranged spell attack (60 ft) hurling a luminous arrow. On a hit it deals Radiant damage equal to 1d8 + your WIS modifier (2d8 + WIS at level 10)."]
@@ -74,32 +70,30 @@ registerSubclassSheetActions("Druid_Stars", [
     "minLevel": 6
   }
 ]);
-if (typeof registerSubclassRuntimeConfig === "function") {
-  registerSubclassRuntimeConfig("Druid_Stars", {
-    spellcasting: {
-      alwaysPreparedSpells: [
-        { name: "Guidance", minLevel: 3, level: 0 },
-        {
-          name: "Guiding Bolt",
-          minLevel: 3,
-          level: 1,
+registerSubclassRuntimeConfig("Druid_Stars", {
+  spellcasting: {
+    alwaysPreparedSpells: [
+      { name: "Guidance", minLevel: 3, level: 0 },
+      {
+        name: "Guiding Bolt",
+        minLevel: 3,
+        level: 1,
+        source: "Star Map",
+        sourceType: "subclass",
+        freeCast: {
+          id: "druid-stars-star-map-guiding-bolt",
+          label: "Star Map",
           source: "Star Map",
           sourceType: "subclass",
-          freeCast: {
-            id: "druid-stars-star-map-guiding-bolt",
-            label: "Star Map",
-            source: "Star Map",
-            sourceType: "subclass",
-            usesFormula: "abilityMod:wis",
-            recharge: "longRest",
-            consumesSlot: false,
-            canAlsoUseSlots: true,
-          },
+          usesFormula: "abilityMod:wis",
+          recharge: "longRest",
+          consumesSlot: false,
+          canAlsoUseSlots: true,
         },
-      ],
-    },
-  });
-}
+      },
+    ],
+  },
+});
 registerSubclassSheetResources("Druid_Stars", [
   {
     "key": "stars_cosmic_omen",
@@ -125,25 +119,23 @@ registerSubclassSheetEffects("Druid_Stars", [
 // Starry Form: Chalice constellation. While selected, every healing spell also
 // restores extra HP to you or a creature within 30 ft. Surfaced on each healing
 // spell row (extra heal button + tag + description) via the spell-rider system.
-if (typeof registerSubclassSpellRiders === "function") {
-  registerSubclassSpellRiders("Druid_Stars", [
-    ({ character, hasHeal, ownerLevel }) => {
-      if (!hasHeal || ownerLevel < 3 || !isConstellation(character, "chalice")) return null;
-      const formula = withWisMod(starryFormDie(ownerLevel), character);
-      return {
-        id: "stars-chalice",
-        tag: { label: "Chalice", color: ENTITY_COLORS.subclass },
-        rollers: [{ key: "chalice-heal", kind: "heal", formula, label: `Chalice ${formula}`, title: "Chalice Heal" }],
-        modifierDetails: [{
-          key: "stars-chalice",
-          detailGroupLabel: "Starry Form",
-          detailTitle: "Chalice (extra healing)",
-          detailText: `Chalice constellation (Starry Form): whenever you cast a spell with a spell slot that restores Hit Points, you or another creature within 30 ft of you also regains ${formula} Hit Points.`,
-        }],
-      };
-    },
-  ]);
-}
+registerSubclassSpellRiders("Druid_Stars", [
+  ({ character, hasHeal, ownerLevel }) => {
+    if (!hasHeal || ownerLevel < 3 || !isConstellation(character, "chalice")) return null;
+    const formula = withWisMod(starryFormDie(ownerLevel), character);
+    return {
+      id: "stars-chalice",
+      tag: { label: "Chalice", color: ENTITY_COLORS.subclass },
+      rollers: [{ key: "chalice-heal", kind: "heal", formula, label: `Chalice ${formula}`, title: "Chalice Heal" }],
+      modifierDetails: [{
+        key: "stars-chalice",
+        detailGroupLabel: "Starry Form",
+        detailTitle: "Chalice (extra healing)",
+        detailText: `Chalice constellation (Starry Form): whenever you cast a spell with a spell slot that restores Hit Points, you or another creature within 30 ft of you also regains ${formula} Hit Points.`,
+      }],
+    };
+  },
+]);
 // [SheetRuntime] END
 
 }

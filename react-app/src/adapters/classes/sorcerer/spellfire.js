@@ -36,15 +36,13 @@ registerSubclassSheetResources("Sorcerer_Spellfire", [
     "max": () => 1
   }
 ]);
-if (typeof registerSubclassRuntimeConfig === "function") {
-  registerSubclassRuntimeConfig("Sorcerer_Spellfire", {
-    spellcasting: {
-      alwaysPreparedSpells: [
-        { name: "Counterspell", minLevel: 6, level: 3 },
-      ],
-    },
-  });
-}
+registerSubclassRuntimeConfig("Sorcerer_Spellfire", {
+  spellcasting: {
+    alwaysPreparedSpells: [
+      { name: "Counterspell", minLevel: 6, level: 3 },
+    ],
+  },
+});
 // [SheetRuntime] END
 
 }

@@ -33,24 +33,22 @@ registerSubclassSheetResources("Cleric_Light", [
   { key: "corona_light", name: "Corona of Light", icon: "sun", recharge: "LR",
     max: (lv, { wis } = {}) => lv >= 17 ? Math.max(1, wis ?? 0) : 0 },
 ]);
-if (typeof registerSubclassRuntimeConfig === "function") {
-  registerSubclassRuntimeConfig("Cleric_Light", {
-    spellcasting: {
-      alwaysPreparedSpells: [
-        { name: "Burning Hands", minLevel: 3, level: 1 },
-        { name: "Faerie Fire", minLevel: 3, level: 1 },
-        { name: "Scorching Ray", minLevel: 3, level: 2 },
-        { name: "See Invisibility", minLevel: 3, level: 2 },
-        { name: "Daylight", minLevel: 5, level: 3 },
-        { name: "Fireball", minLevel: 5, level: 3 },
-        { name: "Arcane Eye", minLevel: 7, level: 4 },
-        { name: "Wall of Fire", minLevel: 7, level: 4 },
-        { name: "Flame Strike", minLevel: 9, level: 5 },
-        { name: "Scrying", minLevel: 9, level: 5 },
-      ],
-    },
-  });
-}
+registerSubclassRuntimeConfig("Cleric_Light", {
+  spellcasting: {
+    alwaysPreparedSpells: [
+      { name: "Burning Hands", minLevel: 3, level: 1 },
+      { name: "Faerie Fire", minLevel: 3, level: 1 },
+      { name: "Scorching Ray", minLevel: 3, level: 2 },
+      { name: "See Invisibility", minLevel: 3, level: 2 },
+      { name: "Daylight", minLevel: 5, level: 3 },
+      { name: "Fireball", minLevel: 5, level: 3 },
+      { name: "Arcane Eye", minLevel: 7, level: 4 },
+      { name: "Wall of Fire", minLevel: 7, level: 4 },
+      { name: "Flame Strike", minLevel: 9, level: 5 },
+      { name: "Scrying", minLevel: 9, level: 5 },
+    ],
+  },
+});
 
 registerSubclassSheetEffects("Cleric_Light", [
 

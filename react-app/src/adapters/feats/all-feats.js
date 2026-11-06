@@ -4,7 +4,6 @@ export default function install(registry, context = {}) {
   const { registerGlobalFeatAdapter } = createAdapterBindings(registry, context);
 
 
-  if (typeof registerGlobalFeatAdapter !== "function") return;
 
   function _toTitleClass(raw) {
     const map = {

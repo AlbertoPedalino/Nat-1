@@ -33,24 +33,22 @@ registerSubclassSheetResources("Cleric_War", [
   { key: "war_priest", name: "War Priest", icon: "swords", recharge: "SR+LR",
     max: (lv, { wis } = {}) => Math.max(1, wis ?? 0) },
 ]);
-if (typeof registerSubclassRuntimeConfig === "function") {
-  registerSubclassRuntimeConfig("Cleric_War", {
-    spellcasting: {
-      alwaysPreparedSpells: [
-        { name: "Guiding Bolt", minLevel: 3, level: 1 },
-        { name: "Magic Weapon", minLevel: 3, level: 2 },
-        { name: "Shield of Faith", minLevel: 3, level: 1 },
-        { name: "Spiritual Weapon", minLevel: 3, level: 2 },
-        { name: "Crusader's Mantle", minLevel: 5, level: 3 },
-        { name: "Spirit Guardians", minLevel: 5, level: 3 },
-        { name: "Fire Shield", minLevel: 7, level: 4 },
-        { name: "Freedom of Movement", minLevel: 7, level: 4 },
-        { name: "Hold Monster", minLevel: 9, level: 5 },
-        { name: "Steel Wind Strike", minLevel: 9, level: 5 },
-      ],
-    },
-  });
-}
+registerSubclassRuntimeConfig("Cleric_War", {
+  spellcasting: {
+    alwaysPreparedSpells: [
+      { name: "Guiding Bolt", minLevel: 3, level: 1 },
+      { name: "Magic Weapon", minLevel: 3, level: 2 },
+      { name: "Shield of Faith", minLevel: 3, level: 1 },
+      { name: "Spiritual Weapon", minLevel: 3, level: 2 },
+      { name: "Crusader's Mantle", minLevel: 5, level: 3 },
+      { name: "Spirit Guardians", minLevel: 5, level: 3 },
+      { name: "Fire Shield", minLevel: 7, level: 4 },
+      { name: "Freedom of Movement", minLevel: 7, level: 4 },
+      { name: "Hold Monster", minLevel: 9, level: 5 },
+      { name: "Steel Wind Strike", minLevel: 9, level: 5 },
+    ],
+  },
+});
 
 registerSubclassSheetEffects("Cleric_War", [
   { type: "attackBonus", value: 10, minLevel: 3, note: "Guided Strike: add +10 to a missed attack roll using Channel Divinity." },

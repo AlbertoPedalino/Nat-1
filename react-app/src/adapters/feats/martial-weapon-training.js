@@ -4,7 +4,6 @@ export default function install(registry, context = {}) {
   const { registerFeatAdapter } = createAdapterBindings(registry, context);
 
 
-  if (typeof registerFeatAdapter !== "function") return;
 
   var _MARTIAL_WEAPONS = [
     "Battleaxe", "Flail", "Glaive", "Greataxe", "Greatsword",

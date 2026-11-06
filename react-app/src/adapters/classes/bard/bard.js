@@ -14,9 +14,7 @@ export default function install(registry, context = {}) {
     registerResourceSideEffect,
   } = createAdapterBindings(registry, context);
 registerClassAdapter("Bard", function (cls, lv, specs, ctx = {}) {
-  const skills = typeof SKILLS !== 'undefined'
-    ? SKILLS.map(function (s) { return s.n; })
-    : ['Acrobatics','Animal Handling','Arcana','Athletics','Deception','History','Insight','Intimidation','Investigation','Medicine','Nature','Perception','Performance','Persuasion','Religion','Sleight of Hand','Stealth','Survival'];
+  const skills = SKILLS.map(function (s) { return s.n; });
 
   if (lv >= 2) {
     specs.push({

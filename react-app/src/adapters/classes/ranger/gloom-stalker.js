@@ -39,19 +39,17 @@ registerSubclassSheetResources("Ranger_Gloom Stalker", [
   }
 ]);
 
-if (typeof registerSubclassRuntimeConfig === "function") {
-  registerSubclassRuntimeConfig("Ranger_Gloom Stalker", {
-    spellcasting: {
-      alwaysPreparedSpells: [
-        { name: "Disguise Self", minLevel: 3, level: 1 },
-        { name: "Rope Trick", minLevel: 5, level: 2 },
-        { name: "Fear", minLevel: 9, level: 3 },
-        { name: "Greater Invisibility", minLevel: 13, level: 4 },
-        { name: "Seeming", minLevel: 17, level: 5 }
-      ],
-    },
-  });
-}
+registerSubclassRuntimeConfig("Ranger_Gloom Stalker", {
+  spellcasting: {
+    alwaysPreparedSpells: [
+      { name: "Disguise Self", minLevel: 3, level: 1 },
+      { name: "Rope Trick", minLevel: 5, level: 2 },
+      { name: "Fear", minLevel: 9, level: 3 },
+      { name: "Greater Invisibility", minLevel: 13, level: 4 },
+      { name: "Seeming", minLevel: 17, level: 5 }
+    ],
+  },
+});
 
 registerSubclassSheetEffects("Ranger_Gloom Stalker", [
 

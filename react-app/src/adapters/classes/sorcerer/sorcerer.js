@@ -146,44 +146,42 @@ registerClassSheetResources("Sorcerer", [
   }
 ]);
 
-if (typeof registerResourceSideEffect === 'function') {
-  registerResourceSideEffect('sorc_restoration', function (ctx = {}) {
-    const C = ctx.character || ctx.C;
-    const sorcLv = classLevel(C, 'Sorcerer');
-    if (!sorcLv) return null;
-    return {
-      type: 'recover_resource',
-      targetResourceKey: 'sorc_pts',
-      amount: Math.floor(sorcLv / 2),
-      label: 'Sorcerous Restoration',
-    };
-  });
+registerResourceSideEffect('sorc_restoration', function (ctx = {}) {
+  const C = ctx.character || ctx.C;
+  const sorcLv = classLevel(C, 'Sorcerer');
+  if (!sorcLv) return null;
+  return {
+    type: 'recover_resource',
+    targetResourceKey: 'sorc_pts',
+    amount: Math.floor(sorcLv / 2),
+    label: 'Sorcerous Restoration',
+  };
+});
 
-  registerResourceSideEffect('sorc_create_slot', function (ctx = {}) {
-    const C = ctx.character || ctx.C;
-    const res = ctx.resources || {};
-    const currentSP = Number(res.sorc_pts || 0);
-    if (currentSP < 2) return null;
-    const sorcLv = classLevel(C, 'Sorcerer');
-    return {
-      type: 'create_spell_slot_from_points',
-      sourceResourceKey: 'sorc_pts',
-      currentSP,
-      maxSorcererLevel: sorcLv,
-      conversionTable: { 1: 2, 2: 3, 3: 5, 4: 6, 5: 7 },
-      maxCreatedSlotLevel: 5,
-      label: 'Create Spell Slot',
-    };
-  });
+registerResourceSideEffect('sorc_create_slot', function (ctx = {}) {
+  const C = ctx.character || ctx.C;
+  const res = ctx.resources || {};
+  const currentSP = Number(res.sorc_pts || 0);
+  if (currentSP < 2) return null;
+  const sorcLv = classLevel(C, 'Sorcerer');
+  return {
+    type: 'create_spell_slot_from_points',
+    sourceResourceKey: 'sorc_pts',
+    currentSP,
+    maxSorcererLevel: sorcLv,
+    conversionTable: { 1: 2, 2: 3, 3: 5, 4: 6, 5: 7 },
+    maxCreatedSlotLevel: 5,
+    label: 'Create Spell Slot',
+  };
+});
 
-  registerResourceSideEffect('sorc_convert_slot', function (ctx = {}) {
-    return {
-      type: 'convert_spell_slot_to_points',
-      targetResourceKey: 'sorc_pts',
-      label: 'Convert Spell Slot',
-    };
-  });
-}
+registerResourceSideEffect('sorc_convert_slot', function (ctx = {}) {
+  return {
+    type: 'convert_spell_slot_to_points',
+    targetResourceKey: 'sorc_pts',
+    label: 'Convert Spell Slot',
+  };
+});
 // [SheetRuntime] END
 
 }

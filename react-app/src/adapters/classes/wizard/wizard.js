@@ -106,19 +106,17 @@ registerClassSheetResources("Wizard", [
 // [SheetRuntime] END
 
 // Arcane Recovery: when used, recover spell slots up to budget (Wizard level/2, rounded up).
-if (typeof registerResourceSideEffect === 'function') {
-  registerResourceSideEffect('arc_recovery', function (ctx = {}) {
-    const C = ctx.character || ctx.C;
-    const wizLv = classLevel(C, 'Wizard');
-    if (!wizLv) return null;
-    const budget = Math.ceil(wizLv / 2);
-    return {
-      type: 'recover_spell_slots',
-      budget,
-      maxSlotLevel: 6,
-      label: 'Arcane Recovery',
-    };
-  });
-}
+registerResourceSideEffect('arc_recovery', function (ctx = {}) {
+  const C = ctx.character || ctx.C;
+  const wizLv = classLevel(C, 'Wizard');
+  if (!wizLv) return null;
+  const budget = Math.ceil(wizLv / 2);
+  return {
+    type: 'recover_spell_slots',
+    budget,
+    maxSlotLevel: 6,
+    label: 'Arcane Recovery',
+  };
+});
 
 }

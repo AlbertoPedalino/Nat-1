@@ -20,16 +20,14 @@ registerSubclassSheetActions("Monk_Elements", [
       return `3d${die}`;
     }, label: ({ formula }) => `${formula} elemental` }] },
 ]);
-if (typeof registerSubclassRuntimeConfig === "function") {
-  registerSubclassRuntimeConfig("Monk_Elements", {
-    spellcasting: {
-      ability: "wis",
-      alwaysKnownSpells: [
-        { name: "Elementalism", minLevel: 3, level: 0 },
-      ],
-    },
-  });
-}
+registerSubclassRuntimeConfig("Monk_Elements", {
+  spellcasting: {
+    ability: "wis",
+    alwaysKnownSpells: [
+      { name: "Elementalism", minLevel: 3, level: 0 },
+    ],
+  },
+});
 
 registerSubclassSheetEffects("Monk_Elements", [
 

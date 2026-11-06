@@ -1,4 +1,5 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
+import { addWizardSavantSpellChoices } from '../../classAdapterHelpers.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -8,9 +9,7 @@ export default function install(registry, context = {}) {
     registerSubclassSheetEffects,
   } = createAdapterBindings(registry, context);
 registerSubclassAdapter("Wizard_Diviner", function (cls, lv, specs) {
-  if (typeof addWizardSavantSpellChoices === "function") {
-    addWizardSavantSpellChoices(specs, lv, { key: "diviner", label: "Divination", school: "D" });
-  }
+  addWizardSavantSpellChoices(specs, lv, { key: "diviner", label: "Divination", school: "D" });
 });
 
 // [SheetRuntime] START

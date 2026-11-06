@@ -4,9 +4,7 @@ export default function install(registry, context = {}) {
   const { registerFeatSheetActions } = createAdapterBindings(registry, context);
 
 
-  if (typeof registerFeatSheetActions === "function") {
-    registerFeatSheetActions("Dual Wielder", []);
-  }
+  registerFeatSheetActions("Dual Wielder", []);
 
 }
 
