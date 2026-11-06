@@ -4,7 +4,7 @@ import {
   Box, Button, CircularProgress, Dialog, DialogActions, DialogContent,
   DialogTitle, IconButton, MenuItem, Stack, TextField, Tooltip, Typography,
 } from '@mui/material';
-import { LayoutDashboard, Map, Network, Plus, StickyNote, Swords, Unlink } from 'lucide-react';
+import { Network, Plus, Unlink } from 'lucide-react';
 import { useAuth } from '../../shared/cloud/auth/AuthProvider.jsx';
 import { listMyCampaigns } from '../../shared/cloud/api/campaigns.js';
 import { setCampaignDungeonEncounter, setCampaignToolGroup } from '../../shared/cloud/api/campaignTools.js';
@@ -18,12 +18,13 @@ import { useToast } from '../../shared/ui/ToastProvider.jsx';
 import { confirmAction } from '../../shared/ui/confirmAction.js';
 import { UI_FONTS } from '../../shared/ui/fonts.js';
 import { CAMPAIGN_BOARD_LINK_CHANGED_EVENT, INSTANCE_LINKS_CHANGED_EVENT } from '../../shared/appEvents.js';
+import { TOOL_CATALOG } from './toolCatalog.js';
 
 const TOOL_UI = {
-  gmboard: { label: 'GM Board', icon: LayoutDashboard },
-  encounters: { label: 'Encounter Builder', icon: Swords },
-  dmscreen: { label: 'DM Screen', icon: StickyNote },
-  campaign: { label: 'Campaign · Battlemap', icon: Map },
+  gmboard: TOOL_CATALOG.gmboard,
+  encounters: TOOL_CATALOG.encounters,
+  dmscreen: TOOL_CATALOG.dmscreen,
+  campaign: { label: 'Campaign · Battlemap', icon: TOOL_CATALOG.vtt.icon },
 };
 const rowKey = (row) => `${row.sectionKey}:${row.id}`;
 const rowRoute = (row) => row.sectionKey === 'campaign'

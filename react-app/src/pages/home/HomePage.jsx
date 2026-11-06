@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { alpha, Box, Button, Typography, Card, CardContent } from '@mui/material';
-import { ScrollText, UserPen, LayoutDashboard, Swords, StickyNote, Flag, Map, Trash2, BookOpen } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { REGISTRY_META } from '../../shared/storage/localStorageRegistries.js';
 import { clearAppLocalStorage, listAppLocalStorageKeys } from '../../shared/storage/storage.js';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
@@ -9,16 +9,22 @@ import { confirmAction } from '../../shared/ui/confirmAction.js';
 import { useEventListener } from '../../shared/ui/useEventListener.js';
 import { UI_COLORS, uiAlpha } from '../../shared/ui/colors.js';
 import { UI_FONTS } from '../../shared/ui/fonts.js';
+import { TOOL_CATALOG } from '../../app/navigation/toolCatalog.js';
+
+const toolLink = (id, path) => {
+  const { label, description, icon, color } = TOOL_CATALOG[id];
+  return { path, label, desc: description, icon, color };
+};
 
 export const TOOLS = [
-  { path: '/library/characters', label: 'Character Sheet', desc: 'View and manage your character in play', icon: ScrollText, color: 'success.main' },
-  { path: REGISTRY_META.gb_char_registry.newRoute, label: 'Char Builder', desc: 'Create or level up your character', icon: UserPen, color: 'gmboard.rarity.Very Rare' },
-  { path: '/campaigns', label: 'Campaigns', desc: 'Create, join, and manage online campaigns', icon: Flag, color: 'primary.main' },
-  { path: '/library/gmboard', label: 'GM Board', desc: 'Hexcrawl, dungeon, and quest generators', icon: LayoutDashboard, color: 'warning.main' },
-  { path: '/library/dmscreen', label: 'DM Screen', desc: 'Keep notes and reminders close during play', icon: StickyNote, color: 'secondary.main' },
-  { path: '/vtt', label: 'Battle Map', desc: 'Maps and tokens for the campaigns you run', icon: Map, color: 'info.main' },
-  { path: '/library/encounters', label: 'Encounter Builder', desc: 'Build and balance combat encounters', icon: Swords, color: 'error.main' },
-  { path: '/compendium', label: 'Compendium', desc: 'Spells, items, monsters and rules in one search', icon: BookOpen, color: 'gmboard.rarity.Rare' },
+  toolLink('characters', '/library/characters'),
+  toolLink('builder', REGISTRY_META.gb_char_registry.newRoute),
+  toolLink('campaigns', '/campaigns'),
+  toolLink('gmboard', '/library/gmboard'),
+  toolLink('dmscreen', '/library/dmscreen'),
+  toolLink('vtt', '/vtt'),
+  toolLink('encounters', '/library/encounters'),
+  toolLink('compendium', '/compendium'),
 ];
 
 export default function HomePage() {
