@@ -114,6 +114,22 @@ test('no inline style on HTML elements', () => {
   assert.deepEqual(sourceFilesMatching(/<(span|div|b|i|p|a|img|input|button|label|section|ul|li)\b[^>]*\sstyle=\{\{/), []);
 });
 
+// Interface colours come from shared/ui/colors.js (UI_COLORS, uiAlpha) and the
+// battle map's from shared/vtt/colors.js; the theme is built from them.
+// Literal colours remain only where they are data: selectable palettes,
+// stored tones, map cell/marker colours, rendered die pixels, adapter cards.
+test('no literal colours outside the palettes and colour data', () => {
+  const DATA = [
+    'shared/ui/colors.js', 'shared/vtt/colors.js', 'app/theme.js', 'shared/ui/entityColors.js',
+    'pages/charsheet/spells/spellsTabLogic.js', 'shared/character/inventory/currency.js',
+    'shared/ui/IconColorPicker.jsx', 'shared/ui/ColorField.jsx', 'shared/vtt/scene/imageFilters.js',
+    'pages/encounterbuilder/state/constants.js', 'shared/hexcrawl/hexCell.js', 'shared/dungeon/roomMarkers.js',
+    'shared/character/dice/D100Orb.jsx', 'shared/character/dice/Die3D.jsx', 'shared/vtt/tokens/encounterImport.js',
+  ];
+  assert.deepEqual(sourceLinesMatching(/['"`]#[0-9a-fA-F]{3,8}['"`]|rgba?\(\s*\d/, { allow: DATA })
+    .filter((hit) => !hit.startsWith('adapters/') && !hit.startsWith('data/')), []);
+});
+
 test('asArray and flattenList are defined only in shared/lists.js', () => {
   assert.deepEqual(sourceFilesMatching(/(function|const)\s+(asArray|flattenList)\b/, {
     allow: ['shared/lists.js'],

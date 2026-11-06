@@ -54,6 +54,7 @@ import CollapsibleNote from '../../../shared/ui/CollapsibleNote.jsx';
 import { spellWeaponAttack, spellWeaponOptions } from '../actions/weaponActions.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import { signed, withModifier } from '../../../shared/ui/numberFormat.js';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 function applyFlatToFormula(formula, flat) {
   if (!formula) return formula;
@@ -76,7 +77,7 @@ export function SourceBadge({ sourceInfo, sources, suffix = '' }) {
   const all = (sources && sources.length ? sources : [sourceInfo]).filter(Boolean);
   const extra = all.length - 1;
   const label = sourceInfo.label + suffix + (extra > 0 ? ` +${extra}` : '');
-  const tone = sourceInfo.color || '#9d7fb8';
+  const tone = sourceInfo.color || UI_COLORS.purple;
   const badge = <MiniBadge label={label} color={tone} bg={alpha(tone, 0.16)} />;
   if (extra <= 0) return badge;
   const title = 'Sources: ' + all.map((s) => s.originLabel || s.label).filter(Boolean).join(', ');
@@ -87,7 +88,7 @@ function FreeCastsInline({ freeCasts, freeCastUses, onToggleFreeCast, sx }) {
   if (!Array.isArray(freeCasts) || !freeCasts.length) return null;
   const interactive = typeof onToggleFreeCast === 'function';
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap', mt: 0.35, px: '7px', py: '4px', border: 1, borderColor: 'rgba(202,165,80,0.28)', borderRadius: '5px', bgcolor: 'rgba(202,165,80,0.06)', ...(sx || {}) }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap', mt: 0.35, px: '7px', py: '4px', border: 1, borderColor: uiAlpha(UI_COLORS.gold, 0.28), borderRadius: '5px', bgcolor: uiAlpha(UI_COLORS.gold, 0.06), ...(sx || {}) }}>
       <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontFamily: '"Cinzel", Georgia, serif', mr: 0.25, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
         Free Cast
       </Typography>
@@ -112,15 +113,15 @@ function FreeCastsInline({ freeCasts, freeCastUses, onToggleFreeCast, sx }) {
                       onClick={interactive ? (e) => { e.stopPropagation(); onToggleFreeCast(fc); } : undefined}
                       sx={{
                         border: '1.5px solid',
-                        borderColor: isUsed ? '#edd48a' : 'rgba(202,165,80,0.35)',
-                        bgcolor: isUsed ? '#caa550' : 'transparent',
-                        '&:hover:not(:disabled)': interactive ? { borderColor: '#edd48a', boxShadow: '0 0 0 2px rgba(202,165,80,0.22)' } : undefined,
+                        borderColor: isUsed ? UI_COLORS.goldLight : uiAlpha(UI_COLORS.gold, 0.35),
+                        bgcolor: isUsed ? UI_COLORS.gold : 'transparent',
+                        '&:hover:not(:disabled)': interactive ? { borderColor: UI_COLORS.goldLight, boxShadow: `0 0 0 2px ${uiAlpha(UI_COLORS.gold, 0.22)}` } : undefined,
                       }}
                     />
                   );
                 })}
               </Box>
-              <Typography variant="caption" color={used >= max ? '#a04848' : 'text.secondary'} sx={{ lineHeight: 1.1 }}>
+              <Typography variant="caption" color={used >= max ? UI_COLORS.dangerDeep : 'text.secondary'} sx={{ lineHeight: 1.1 }}>
                 {fc.rechargeLabel}
                 {fc.canAlsoUseSlots === false ? ' · free only' : ' · also slots'}
                 {used >= max ? ' · spent' : ''}
@@ -474,7 +475,7 @@ export default function SpellEntry({
             {weaponStrike ? (
               <MiniBadge label={weaponStrike.name} color={CHIP_TONES.info} bg={alpha(CHIP_TONES.info, 0.16)} />
             ) : null}
-            {modifierTags.map(function (tag) { return <MiniBadge key={tag} label={tag} color="#9d7fb8" bg="rgba(157,127,184,0.16)" />; })}
+            {modifierTags.map(function (tag) { return <MiniBadge key={tag} label={tag} color={UI_COLORS.purple} bg={uiAlpha(UI_COLORS.purple, 0.16)} />; })}
             {spellRiders.filter((rider) => rider.tag).map((rider) => (
               <MiniBadge key={rider.id} label={rider.tag.label} color={rider.tag.color} bg={alpha(rider.tag.color, 0.16)} />
             ))}
@@ -482,7 +483,7 @@ export default function SpellEntry({
             {ritualOnly ? <MiniBadge label="Ritual only" color={SPELL_TAG_COLORS.ritual} bg={alpha(SPELL_TAG_COLORS.ritual, 0.16)} /> : null}
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px', flexShrink: 0 }}>
-            {beamCount > 1 ? <MiniBadge label={`${beamCount} beams`} color="#9d7fb8" bg="rgba(157,127,184,0.16)" /> : null}
+            {beamCount > 1 ? <MiniBadge label={`${beamCount} beams`} color={UI_COLORS.purple} bg={uiAlpha(UI_COLORS.purple, 0.16)} /> : null}
             {hasConcentrationTag ? <MiniBadge label="C" color={SPELL_TAG_COLORS.concentration} bg={alpha(SPELL_TAG_COLORS.concentration, 0.16)} /> : null}
             {hasRitualTag ? <MiniBadge label="R" color={SPELL_TAG_COLORS.ritual} bg={alpha(SPELL_TAG_COLORS.ritual, 0.16)} /> : null}
             <MiniBadge {...getCastBadge(entry)} />

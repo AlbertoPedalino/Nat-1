@@ -21,6 +21,7 @@ import { crXP, getCR, getType } from './monsterUtils.js';
 import MonsterToken from './MonsterToken.jsx';
 import { capitalize } from '../../../shared/ui/textCase.js';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 const PAGE_SIZE = 50;
 
@@ -172,14 +173,14 @@ const rowSx = {
   border: '1px solid',
   borderColor: 'divider',
   borderRadius: 1,
-  bgcolor: 'rgba(255,255,255,0.025)',
+  bgcolor: uiAlpha(UI_COLORS.white, 0.025),
   cursor: 'pointer',
   minWidth: 0,
   userSelect: 'none',
   touchAction: 'pan-y',
   '&:hover': {
     borderColor: 'primary.main',
-    bgcolor: 'rgba(215,173,82,0.08)',
+    bgcolor: uiAlpha(UI_COLORS.primary, 0.08),
   },
 };
 

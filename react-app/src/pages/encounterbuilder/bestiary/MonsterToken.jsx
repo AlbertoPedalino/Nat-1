@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Avatar } from '@mui/material';
 import { getMonsterTokenUrls } from './monsterUtils.js';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 export default function MonsterToken({ monster, size = 32, fallbackText = '?' }) {
   const urls = getMonsterTokenUrls(monster);
@@ -19,8 +20,8 @@ export default function MonsterToken({ monster, size = 32, fallbackText = '?' })
       sx={{
         width: size,
         height: size,
-        bgcolor: 'rgba(215,173,82,0.12)',
-        border: '1px solid rgba(215,173,82,0.35)',
+        bgcolor: uiAlpha(UI_COLORS.primary, 0.12),
+        border: `1px solid ${uiAlpha(UI_COLORS.primary, 0.35)}`,
         color: 'primary.main',
         fontSize: size > 40 ? '1rem' : '0.75rem',
       }}

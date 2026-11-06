@@ -22,6 +22,7 @@ import {
   getFumbleRange,
 } from './fumbles.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 export default function CriticalFumblesDialog({ open, onClose }) {
   const { state, dispatch, roll } = useEncounterBuilder();
@@ -260,7 +261,7 @@ const sectionSx = {
   border: 1,
   borderColor: 'divider',
   borderRadius: 1.5,
-  bgcolor: 'rgba(255,255,255,0.02)',
+  bgcolor: uiAlpha(UI_COLORS.white, 0.02),
 };
 
 const sectionTitleSx = {
@@ -286,7 +287,7 @@ const dieControlSx = {
   alignItems: 'center',
   justifyContent: 'space-between',
   gap: 0.5,
-  bgcolor: 'rgba(0,0,0,0.12)',
+  bgcolor: uiAlpha(UI_COLORS.black, 0.12),
 };
 
 const dieLabelSx = {
@@ -300,7 +301,7 @@ const countSx = {
   textAlign: 'center',
   fontFamily: '"JetBrains Mono", monospace',
   fontSize: '0.76rem',
-  color: '#edd48a',
+  color: UI_COLORS.goldLight,
 };
 
 const stepButtonSx = {
@@ -315,7 +316,7 @@ const formulaSx = {
   fontFamily: '"JetBrains Mono", monospace',
   fontSize: '0.78rem',
   fontWeight: 700,
-  color: '#70b7a6',
+  color: UI_COLORS.teal,
 };
 
 const outcomeSx = {
@@ -327,7 +328,7 @@ const outcomeSx = {
   alignItems: 'center',
   border: 1,
   borderColor: 'error.main',
-  bgcolor: 'rgba(211,71,58,0.09)',
+  bgcolor: uiAlpha(UI_COLORS.dangerFumble, 0.09),
 };
 
 const outcomeNumberSx = {
@@ -337,7 +338,7 @@ const outcomeNumberSx = {
   placeItems: 'center',
   borderRadius: 1,
   bgcolor: 'error.main',
-  color: '#220d0b',
+  color: UI_COLORS.dangerInk,
   fontFamily: '"Cinzel", Georgia, serif',
   fontSize: { xs: '1rem', sm: '1.2rem' },
   fontWeight: 900,
@@ -366,13 +367,13 @@ const entryRowSx = {
   gridTemplateColumns: { xs: '1fr', sm: '76px minmax(0,1fr)' },
   gap: { xs: 0.55, sm: 1 },
   alignItems: 'center',
-  bgcolor: 'rgba(255,255,255,0.018)',
+  bgcolor: uiAlpha(UI_COLORS.white, 0.018),
 };
 
 const resultLabelSx = {
   fontFamily: '"JetBrains Mono", monospace',
   fontSize: '0.7rem',
   fontWeight: 800,
-  color: '#edd48a',
+  color: UI_COLORS.goldLight,
   whiteSpace: 'nowrap',
 };

@@ -4,6 +4,7 @@ import PortraitBadge from '../../../shared/character/profile/PortraitBadge.jsx';
 import CampaignSheetView from '../../campaignsheet/CampaignSheetView.jsx';
 import { campaignSheetUrl } from './campaignSheetUrl.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 export default function PlayerSheetPanel({ selection, onClose }) {
   const { state, characterDigests } = useEncounterBuilder();
@@ -99,7 +100,7 @@ const playerBodySx = {
 const avatarSx = {
   width: 58,
   height: 58,
-  color: '#101010',
+  color: UI_COLORS.avatarText,
   fontSize: 14,
   fontWeight: 900,
   flex: '0 0 auto',
@@ -126,5 +127,5 @@ const fallbackSx = {
   border: '1px solid',
   borderColor: 'divider',
   borderRadius: 1,
-  bgcolor: 'rgba(255,255,255,0.025)',
+  bgcolor: uiAlpha(UI_COLORS.white, 0.025),
 };

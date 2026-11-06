@@ -22,6 +22,7 @@ import { getCR, getType } from '../bestiary/monsterUtils.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import MonsterToken from '../bestiary/MonsterToken.jsx';
 import { capitalize } from '../../../shared/ui/textCase.js';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 export default function Reinforcements() {
   const { state, dispatch, monsterDb } = useEncounterBuilder();
@@ -133,10 +134,10 @@ const monsterRowSx = {
   border: '1px solid',
   borderColor: 'divider',
   borderRadius: 1,
-  bgcolor: 'rgba(255,255,255,0.025)',
+  bgcolor: uiAlpha(UI_COLORS.white, 0.025),
   cursor: 'pointer',
   '&:hover': {
     borderColor: 'primary.main',
-    bgcolor: 'rgba(215,173,82,0.08)',
+    bgcolor: uiAlpha(UI_COLORS.primary, 0.08),
   },
 };

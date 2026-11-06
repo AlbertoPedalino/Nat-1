@@ -17,6 +17,7 @@ import EncounterDiceToast, { buildEncounterDiceToast } from './rolls/EncounterDi
 import CriticalFumblesDialog from './rolls/CriticalFumblesDialog.jsx';
 import NegotiationDialog from './negotiation/NegotiationDialog.jsx';
 import { EncounterBuilderProvider, useEncounterBuilder } from './state/EncounterBuilderContext.jsx';
+import { UI_COLORS, uiAlpha } from '../../shared/ui/colors.js';
 
 export default function EncounterBuilderPage() {
   const tool = useToolInstance('encounters');
@@ -140,6 +141,6 @@ const utilityButtonSx = {
   fontFamily: '"Cinzel", Georgia, serif',
   fontSize: '0.625rem',
   letterSpacing: '0.08em',
-  color: '#edd48a',
-  borderColor: 'rgba(237,212,138,0.4)',
+  color: UI_COLORS.goldLight,
+  borderColor: uiAlpha(UI_COLORS.goldLight, 0.4),
 };

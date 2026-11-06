@@ -3,6 +3,7 @@ import { Box, Chip, Typography, IconButton } from '@mui/material';
 import { X } from 'lucide-react';
 import { resolveToastLayout } from './rollToastLayout.js';
 import DiceRow from './DiceRow.jsx';
+import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
 
 const FONT = '"Cinzel", Georgia, serif';
 
@@ -12,9 +13,9 @@ const FONT = '"Cinzel", Georgia, serif';
 
 const toastRootSx = {
   position: 'fixed', bottom: '1.2rem', right: '1.2rem', zIndex: 999,
-  bgcolor: 'rgba(26,23,19,0.97)', border: 2, borderColor: 'divider', borderRadius: 2,
+  bgcolor: uiAlpha(UI_COLORS.surfaceDeep, 0.97), border: 2, borderColor: 'divider', borderRadius: 2,
   p: '1rem 1.2rem', minWidth: 260, maxWidth: 360,
-  boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
+  boxShadow: `0 8px 32px ${uiAlpha(UI_COLORS.black, 0.6)}`,
   backdropFilter: 'blur(8px)',
 };
 
@@ -43,8 +44,8 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
   return (
     <Box sx={{
       ...toastRootSx,
-      ...(layout.isCrit ? { borderColor: '#edd48a', boxShadow: '0 8px 32px rgba(0,0,0,0.6), 0 0 20px rgba(237,212,138,0.25)' } : {}),
-      ...(layout.isFail ? { borderColor: '#de675f', boxShadow: '0 8px 32px rgba(0,0,0,0.6), 0 0 20px rgba(222,103,95,0.25)' } : {}),
+      ...(layout.isCrit ? { borderColor: UI_COLORS.goldLight, boxShadow: `0 8px 32px ${uiAlpha(UI_COLORS.black, 0.6)}, 0 0 20px ${uiAlpha(UI_COLORS.goldLight, 0.25)}` } : {}),
+      ...(layout.isFail ? { borderColor: UI_COLORS.danger, boxShadow: `0 8px 32px ${uiAlpha(UI_COLORS.black, 0.6)}, 0 0 20px ${uiAlpha(UI_COLORS.danger, 0.25)}` } : {}),
     }}>
       <IconButton size="small" onClick={onClose} sx={{ position: 'absolute', top: 6, right: 8, color: 'text.secondary' }}>
         <X size={14} />
@@ -55,12 +56,12 @@ export default function DiceToast({ toast, onClose, hidden = false }) {
       </Typography>
 
       {layout.isCrit && (
-        <Typography sx={{ fontFamily: FONT, fontSize: '0.75rem', fontWeight: 900, letterSpacing: '0.1em', color: '#edd48a', mb: 0.3 }}>
+        <Typography sx={{ fontFamily: FONT, fontSize: '0.75rem', fontWeight: 900, letterSpacing: '0.1em', color: UI_COLORS.goldLight, mb: 0.3 }}>
           NATURAL 20!
         </Typography>
       )}
       {layout.isFail && (
-        <Typography sx={{ fontFamily: FONT, fontSize: '0.75rem', fontWeight: 900, letterSpacing: '0.1em', color: '#de675f', mb: 0.3 }}>
+        <Typography sx={{ fontFamily: FONT, fontSize: '0.75rem', fontWeight: 900, letterSpacing: '0.1em', color: UI_COLORS.danger, mb: 0.3 }}>
           NATURAL 1
         </Typography>
       )}

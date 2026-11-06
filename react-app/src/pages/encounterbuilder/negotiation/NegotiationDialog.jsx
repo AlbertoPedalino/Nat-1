@@ -22,6 +22,7 @@ import {
   NPC_ATTITUDES,
 } from './negotiation.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 const ACTION_UI = Object.freeze([
   { id: 'passed', Icon: Check, color: 'success' },
@@ -129,14 +130,14 @@ export default function NegotiationDialog({ open, onClose }) {
             label="Interest"
             value={negotiation.interest}
             max={MAX_INTEREST}
-            color="#70b7a6"
+            color={UI_COLORS.teal}
             prominent
           />
           <MeterCard
             label="Patience"
             value={negotiation.patience}
             max={attitude.patience}
-            color="#d5a84b"
+            color={UI_COLORS.goldAmber}
           />
         </Box>
 
@@ -198,7 +199,7 @@ function MeterCard({ label, value, max, color, prominent = false }) {
             sx={{
               height: prominent ? 9 : 7,
               borderRadius: 99,
-              bgcolor: index < value ? color : 'rgba(255,255,255,0.09)',
+              bgcolor: index < value ? color : uiAlpha(UI_COLORS.white, 0.09),
               boxShadow: index < value ? `0 0 8px ${color}55` : 'none',
             }}
           />
@@ -273,12 +274,12 @@ const meterGridSx = {
 
 const meterCardSx = {
   p: 1.25,
-  bgcolor: 'rgba(255,255,255,0.02)',
+  bgcolor: uiAlpha(UI_COLORS.white, 0.02),
 };
 
 const prominentMeterSx = {
-  borderColor: 'rgba(112,183,166,0.45)',
-  bgcolor: 'rgba(112,183,166,0.055)',
+  borderColor: uiAlpha(UI_COLORS.teal, 0.45),
+  bgcolor: uiAlpha(UI_COLORS.teal, 0.055),
 };
 
 const meterLabelSx = {
@@ -304,7 +305,7 @@ const meterMaxSx = {
 
 const currentStateSx = {
   p: 1.1,
-  bgcolor: 'rgba(255,255,255,0.018)',
+  bgcolor: uiAlpha(UI_COLORS.white, 0.018),
 };
 
 const currentResultSx = {
@@ -318,7 +319,7 @@ const finalResultSx = {
   p: { xs: 1.25, sm: 1.5 },
   border: 1,
   borderColor: 'primary.main',
-  bgcolor: 'rgba(213,168,75,0.08)',
+  bgcolor: uiAlpha(UI_COLORS.goldAmber, 0.08),
 };
 
 const finalEyebrowSx = {

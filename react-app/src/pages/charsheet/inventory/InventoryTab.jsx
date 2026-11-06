@@ -83,6 +83,7 @@ import {
   byItemName,
   loadItemsCached,
 } from './itemSearch.js';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 // Keys and labels come from the shared chip taxonomy; the sheet only adds the
 // icons, which are its own presentation. The add-item search gets the plain set
@@ -99,7 +100,7 @@ const GROUP_LABELS = Object.fromEntries(ITEM_GROUP_CHIPS.map((chip) => [chip.key
 const GROUPS = ITEM_GROUP_KEYS.map((key) => ({ key, label: GROUP_LABELS[key], icon: CHIP_ICONS[key] }));
 
 const compactInputSx = {
-  '& .MuiOutlinedInput-root': { bgcolor: 'rgba(35,32,26,1)', borderRadius: 1 },
+  '& .MuiOutlinedInput-root': { bgcolor: UI_COLORS.headerBg, borderRadius: 1 },
   '& input': { fontSize: '0.75rem', py: '7px' },
 };
 
@@ -117,10 +118,10 @@ const filterButtonSx = (active) => ({
   px: '10px',
   py: '3px',
   border: 1,
-  borderColor: active ? '#caa550' : 'divider',
+  borderColor: active ? UI_COLORS.gold : 'divider',
   borderRadius: 1,
-  bgcolor: active ? 'rgba(202,165,80,0.12)' : 'transparent',
-  color: active ? '#edd48a' : 'text.secondary',
+  bgcolor: active ? uiAlpha(UI_COLORS.gold, 0.12) : 'transparent',
+  color: active ? UI_COLORS.goldLight : 'text.secondary',
   fontFamily: '"Cinzel", Georgia, serif',
   fontSize: '0.56rem',
   fontWeight: 700,
@@ -132,7 +133,7 @@ const inventorySectionSx = {
   border: 1,
   borderColor: 'divider',
   borderRadius: 1,
-  bgcolor: 'rgba(18,16,14,0.48)',
+  bgcolor: uiAlpha(UI_COLORS.ink, 0.48),
   p: '8px',
   mb: 1,
 };
@@ -163,10 +164,10 @@ const addPanelToggleSx = (open) => ({
   px: '12px',
   py: '4px',
   border: 1,
-  borderColor: open ? '#caa550' : 'divider',
+  borderColor: open ? UI_COLORS.gold : 'divider',
   borderRadius: 1,
-  bgcolor: open ? 'rgba(202,165,80,0.14)' : 'rgba(35,32,26,1)',
-  color: open ? '#edd48a' : 'text.secondary',
+  bgcolor: open ? uiAlpha(UI_COLORS.gold, 0.14) : UI_COLORS.headerBg,
+  color: open ? UI_COLORS.goldLight : 'text.secondary',
   fontFamily: '"Cinzel", Georgia, serif',
   fontSize: '0.6rem',
   fontWeight: 700,
@@ -174,9 +175,9 @@ const addPanelToggleSx = (open) => ({
   textTransform: 'uppercase',
   whiteSpace: 'nowrap',
   '&:hover': {
-    borderColor: '#caa550',
-    color: '#edd48a',
-    bgcolor: open ? 'rgba(202,165,80,0.18)' : 'rgba(202,165,80,0.08)',
+    borderColor: UI_COLORS.gold,
+    color: UI_COLORS.goldLight,
+    bgcolor: open ? uiAlpha(UI_COLORS.gold, 0.18) : uiAlpha(UI_COLORS.gold, 0.08),
   },
 });
 
@@ -243,8 +244,8 @@ function groupEntriesByType(entries) {
 function AddResultRow({ item, onAdd }) {
   return (
     <ExpandableCard
-      containerSx={{ flexShrink: 0, border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: 'rgba(35,32,26,1)', overflow: 'hidden', '&:hover': { borderColor: '#caa550' } }}
-      detailsSx={{ px: '10px', pt: '2px', pb: '8px', bgcolor: '#12100e', fontSize: '0.7rem', color: 'text.secondary' }}
+      containerSx={{ flexShrink: 0, border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: UI_COLORS.headerBg, overflow: 'hidden', '&:hover': { borderColor: UI_COLORS.gold } }}
+      detailsSx={{ px: '10px', pt: '2px', pb: '8px', bgcolor: UI_COLORS.ink, fontSize: '0.7rem', color: 'text.secondary' }}
       details={<ItemReferenceBody item={item} />}
       summary={({ toggle }) => (
         <Box onClick={toggle} sx={{ display: 'flex', alignItems: 'center', gap: 1, px: '10px', py: '5px', cursor: 'pointer' }}>
@@ -262,7 +263,7 @@ function ShowMoreButton({ remaining, onClick }) {
     <Button
       size="small"
       onClick={onClick}
-      sx={{ alignSelf: 'center', my: 0.5, px: '12px', py: '2px', border: 1, borderColor: 'divider', borderRadius: 1, color: 'text.secondary', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.6rem', letterSpacing: '0.06em', textTransform: 'uppercase', '&:hover': { borderColor: '#caa550', color: '#caa550' } }}
+      sx={{ alignSelf: 'center', my: 0.5, px: '12px', py: '2px', border: 1, borderColor: 'divider', borderRadius: 1, color: 'text.secondary', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.6rem', letterSpacing: '0.06em', textTransform: 'uppercase', '&:hover': { borderColor: UI_COLORS.gold, color: UI_COLORS.gold } }}
     >
       Show more ({remaining})
     </Button>
@@ -273,7 +274,7 @@ const SearchResultsList = memo(function SearchResultsList({ items, itemsDbCount,
   const { visible, remaining, showMore, listProps } = usePagedList(items, { pageSize: SEARCH_PAGE, resetKey });
 
   return (
-    <Box {...listProps} sx={{ maxHeight: 320, overflowY: 'auto', mb: 0.75, border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: 'rgba(18,16,14,0.65)', p: '2px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+    <Box {...listProps} sx={{ maxHeight: 320, overflowY: 'auto', mb: 0.75, border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: uiAlpha(UI_COLORS.ink, 0.65), p: '2px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
       {visible.map((item) => (
         <AddResultRow key={`${item.name}-${item.source}`} item={item} onAdd={onAddItem} />
       ))}
@@ -627,18 +628,18 @@ export default function InventoryTab({ C, sheet }) {
           const attunedCount = countAttunedItems(inv);
           const over = attunedCount > attunementState.limit;
           return (
-            <Box sx={{ ...statPillSx, bgcolor: over ? 'rgba(222,103,95,0.12)' : 'rgba(35,32,26,1)', borderColor: over ? '#de675f' : 'divider', '& b': { color: over ? '#de675f' : '#edd48a', fontFamily: '"Cinzel", Georgia, serif' } }}>
+            <Box sx={{ ...statPillSx, bgcolor: over ? uiAlpha(UI_COLORS.danger, 0.12) : UI_COLORS.headerBg, borderColor: over ? UI_COLORS.danger : 'divider', '& b': { color: over ? UI_COLORS.danger : UI_COLORS.goldLight, fontFamily: '"Cinzel", Georgia, serif' } }}>
               Attuned: <b>{attunedCount} / {attunementState.limit}</b>{over ? ' (over limit)' : ''}
             </Box>
           );
         })()}
         <Box sx={{ width: '100%', mt: 0.3 }}>
-          <Box sx={{ height: 6, borderRadius: 1, bgcolor: 'rgba(255,255,255,0.08)', overflow: 'hidden', border: 1, borderColor: 'divider' }}>
-            <Box sx={{ width: `${carryPct}%`, height: '100%', bgcolor: overloaded ? '#de675f' : '#58b879' }} />
+          <Box sx={{ height: 6, borderRadius: 1, bgcolor: uiAlpha(UI_COLORS.white, 0.08), overflow: 'hidden', border: 1, borderColor: 'divider' }}>
+            <Box sx={{ width: `${carryPct}%`, height: '100%', bgcolor: overloaded ? UI_COLORS.danger : UI_COLORS.success }} />
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.65rem', mt: 0.25 }}>
             <Box sx={{ color: 'text.secondary', fontFamily: '"Cinzel", Georgia, serif' }}>{formatWeight(totalWeight)} / {formatWeight(maxCarry)} lb</Box>
-            <Box sx={{ px: 0.75, py: '1px', borderRadius: 1, bgcolor: overloaded ? 'rgba(222,103,95,0.14)' : 'rgba(63,166,108,0.14)', color: overloaded ? '#de675f' : '#58b879', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.6rem' }}>
+            <Box sx={{ px: 0.75, py: '1px', borderRadius: 1, bgcolor: overloaded ? uiAlpha(UI_COLORS.danger, 0.14) : uiAlpha(UI_COLORS.successDeep, 0.14), color: overloaded ? UI_COLORS.danger : UI_COLORS.success, fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.6rem' }}>
               {overloaded ? 'Over Capacity' : 'OK'}
             </Box>
           </Box>
@@ -691,7 +692,7 @@ export default function InventoryTab({ C, sheet }) {
                 onKeyDown={(event) => { if (event.key === 'Enter') addCustom(); }}
                 inputProps={{ min: 0, step: 0.01 }} sx={{ ...compactInputSx, width: 62 }} />
               <Button size="small" onClick={addCustom} disabled={!customName.trim()}
-                sx={{ px: '14px', border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: 'rgba(35,32,26,1)', color: 'text.secondary', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.65rem', whiteSpace: 'nowrap', '&:hover': { borderColor: '#caa550', color: '#caa550' } }}>
+                sx={{ px: '14px', border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: UI_COLORS.headerBg, color: 'text.secondary', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.65rem', whiteSpace: 'nowrap', '&:hover': { borderColor: UI_COLORS.gold, color: UI_COLORS.gold } }}>
                 + Add
               </Button>
             </Box>
@@ -816,7 +817,7 @@ const getPenaltyMessage = (() => {
 })();
 
 const statPillSx = {
-  bgcolor: 'rgba(35,32,26,1)',
+  bgcolor: UI_COLORS.headerBg,
   border: 1,
   borderColor: 'divider',
   borderRadius: 1,
@@ -824,5 +825,5 @@ const statPillSx = {
   py: '4px',
   fontSize: '0.8125rem',
   color: 'text.secondary',
-  '& b': { color: '#edd48a', fontFamily: '"Cinzel", Georgia, serif' },
+  '& b': { color: UI_COLORS.goldLight, fontFamily: '"Cinzel", Georgia, serif' },
 };

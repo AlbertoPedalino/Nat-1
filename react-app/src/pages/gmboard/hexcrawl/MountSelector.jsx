@@ -4,6 +4,7 @@ import {
 } from '@mui/material';
 import { Footprints, Rabbit } from 'lucide-react';
 import { MAX_MOUNT_SPEED, MIN_MOUNT_SPEED, MOUNT_OPTIONS, normalizeMountSpeed } from '../state/constants.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 // What the party is travelling on, as a multiplier on its speed.
 //
@@ -97,7 +98,7 @@ const labelSx = {
 };
 
 const denseLabelSx = {
-  color: '#9f947d',
+  color: UI_COLORS.textFaint,
   fontSize: '0.62rem',
   letterSpacing: '0.04em',
   mb: 0.5,

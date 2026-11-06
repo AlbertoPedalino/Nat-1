@@ -1,4 +1,5 @@
 import { signed } from '../../ui/numberFormat.js';
+import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
 // How a roll is laid out for a reader: which die was kept, what was added, what
 // colour the total wears, whether it was a natural 20 or a natural 1.
 //
@@ -7,16 +8,16 @@ import { signed } from '../../ui/numberFormat.js';
 // and they have to agree. Dependency-free so the plain node runner can cover it.
 
 export const ROLL_MODE_CHIP = {
-  advantage: { label: 'ADV', color: '#58b879', borderColor: 'rgba(88,184,121,0.55)', bgColor: 'rgba(88,184,121,0.14)' },
-  disadvantage: { label: 'DIS', color: '#d69245', borderColor: 'rgba(214,146,69,0.55)', bgColor: 'rgba(214,146,69,0.14)' },
+  advantage: { label: 'ADV', color: UI_COLORS.success, borderColor: uiAlpha(UI_COLORS.success, 0.55), bgColor: uiAlpha(UI_COLORS.success, 0.14) },
+  disadvantage: { label: 'DIS', color: UI_COLORS.warning, borderColor: uiAlpha(UI_COLORS.warning, 0.55), bgColor: uiAlpha(UI_COLORS.warning, 0.14) },
 };
 
 export function rollDieColor(value, faces) {
   // A coin has no good side and no bad one. Heads is 1, and colouring it like a
   // fumbled roll made the head come up red.
   if ((faces || 20) <= 2) return 'text.primary';
-  if (value >= (faces || 20)) return '#edd48a';
-  if (value <= 1) return '#de675f';
+  if (value >= (faces || 20)) return UI_COLORS.goldLight;
+  if (value <= 1) return UI_COLORS.danger;
   return 'text.primary';
 }
 
@@ -42,8 +43,8 @@ export function resolveToastLayout(toast) {
   const isCrit = keptD20?.v >= 20;
   const isFail = keptD20?.v <= 1;
   let totalColor = 'text.primary';
-  if (isCrit) totalColor = '#edd48a';
-  else if (isFail) totalColor = '#de675f';
+  if (isCrit) totalColor = UI_COLORS.goldLight;
+  else if (isFail) totalColor = UI_COLORS.danger;
 
   return {
     label: toast?.label,

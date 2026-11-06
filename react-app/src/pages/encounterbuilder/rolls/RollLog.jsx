@@ -3,6 +3,7 @@ import { Trash2, X } from 'lucide-react';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import RollActorLabel from '../../../shared/character/dice/RollActorLabel.jsx';
 import RollCalculation from '../../../shared/character/dice/RollCalculation.jsx';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 export default function RollLog({ maxHeight = 320, onClose, sx }) {
   const { state, dispatch } = useEncounterBuilder();
@@ -52,5 +53,5 @@ const entrySx = {
   border: '1px solid',
   borderColor: 'divider',
   borderRadius: 1,
-  bgcolor: 'rgba(255,255,255,0.025)',
+  bgcolor: uiAlpha(UI_COLORS.white, 0.025),
 };

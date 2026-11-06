@@ -1,5 +1,6 @@
 import { Box, Chip, Typography } from '@mui/material';
 import { chipTintStyle, damageTypeTone } from '../../../shared/ui/entityColors.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 // The "Defenses" box: one chip per defense `{ kind, type, source? }`, kind being
 // 'Resist', 'Immune', 'Cond. Immune', 'Adv', 'Trait'… Resistances and
@@ -8,7 +9,7 @@ import { chipTintStyle, damageTypeTone } from '../../../shared/ui/entityColors.j
 // (the Eldritch Cannon), so both read the same.
 export default function DefensesPanel({ items = [], emptyText = 'No resistances detected.', sx }) {
   return (
-    <Box sx={{ bgcolor: 'rgba(35,32,26,1)', border: 1, borderColor: 'divider', borderRadius: 1, p: '0.4rem 0.62rem', ...sx }}>
+    <Box sx={{ bgcolor: UI_COLORS.headerBg, border: 1, borderColor: 'divider', borderRadius: 1, p: '0.4rem 0.62rem', ...sx }}>
       <Typography sx={titleSx}>Defenses</Typography>
       {items.length === 0 && <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', fontStyle: 'italic' }}>{emptyText}</Typography>}
       {items.map((d, i) => {

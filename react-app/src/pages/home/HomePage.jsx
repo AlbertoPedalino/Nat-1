@@ -6,6 +6,7 @@ import { REGISTRY_META } from '../../shared/storage/localStorageRegistries.js';
 import { clearAppLocalStorage, listAppLocalStorageKeys } from '../../shared/storage/storage.js';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
 import { confirmAction } from '../../shared/ui/confirmAction.js';
+import { UI_COLORS, uiAlpha } from '../../shared/ui/colors.js';
 
 export const TOOLS = [
   { path: '/library/characters', label: 'Character Sheet', desc: 'View and manage your character in play', icon: ScrollText, color: 'success.main' },
@@ -96,7 +97,7 @@ export default function HomePage() {
 
 const homeRootSx = {
   minHeight: '100vh',
-  bgcolor: '#0f0e0d',
+  bgcolor: UI_COLORS.inkDeep,
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
@@ -112,8 +113,8 @@ const heroTitleSx = {
   fontSize: 'clamp(2rem, 6vw, 3.5rem)',
   fontWeight: 900,
   letterSpacing: '0.06em',
-  color: '#e8c96a',
-  textShadow: '0 0 40px rgba(200,168,75,0.35)',
+  color: UI_COLORS.goldBright,
+  textShadow: `0 0 40px ${uiAlpha(UI_COLORS.goldDeep, 0.35)}`,
   lineHeight: 1.1,
 };
 
@@ -122,13 +123,13 @@ const heroLogoSx = {
   width: 'clamp(76px, 15vw, 112px)',
   height: 'auto',
   margin: '0 auto 1rem',
-  filter: 'drop-shadow(0 0 22px rgba(110,175,95,0.35))',
+  filter: `drop-shadow(0 0 22px ${uiAlpha(UI_COLORS.successGlow, 0.35)})`,
 };
 
 const dividerSx = {
   width: '120px',
   height: '1px',
-  background: 'linear-gradient(90deg, transparent, #c8a84b, transparent)',
+  background: `linear-gradient(90deg, transparent, ${UI_COLORS.goldDeep}, transparent)`,
   margin: '1.4rem auto 0',
 };
 
@@ -156,7 +157,7 @@ function getCardSx(color) {
     borderStyle: 'solid',
     borderColor: (theme) => alpha(paletteValue(theme, color), 0.3),
     borderRadius: '12px',
-    bgcolor: '#1a1815',
+    bgcolor: UI_COLORS.surfaceHome,
     backgroundImage: 'none',
     transition: 'border-color 0.15s, box-shadow 0.15s, transform 0.12s',
     '&:hover': {
@@ -188,13 +189,13 @@ const cardLabelSx = {
   fontWeight: 700,
   letterSpacing: '0.08em',
   textAlign: 'center',
-  color: '#bda98a',
+  color: UI_COLORS.textSecondary,
   transition: 'color 0.15s',
 };
 
 const cardDescSx = {
   fontSize: '0.8rem',
-  color: '#7a6a4a',
+  color: UI_COLORS.textBrown,
   textAlign: 'center',
   lineHeight: 1.4,
   fontStyle: 'italic',
@@ -211,19 +212,19 @@ const clearDataWrapSx = {
 };
 
 const clearDataButtonSx = {
-  borderColor: 'rgba(222,103,95,0.42)',
-  color: '#de675f',
+  borderColor: uiAlpha(UI_COLORS.danger, 0.42),
+  color: UI_COLORS.danger,
   fontFamily: '"Cinzel", Georgia, serif',
   fontSize: '0.64rem',
   letterSpacing: '0.08em',
   '&:hover': {
-    borderColor: '#de675f',
-    bgcolor: 'rgba(222,103,95,0.08)',
+    borderColor: UI_COLORS.danger,
+    bgcolor: uiAlpha(UI_COLORS.danger, 0.08),
   },
 };
 
 const clearDataMessageSx = {
-  color: '#7a6a4a',
+  color: UI_COLORS.textBrown,
   fontSize: '0.72rem',
   fontFamily: '"EB Garamond", Georgia, serif',
 };

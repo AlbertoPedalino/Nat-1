@@ -49,6 +49,7 @@ import {
   setActiveCharId,
 } from '../../shared/character/profile/store.js';
 import { confirmAction } from '../../shared/ui/confirmAction.js';
+import { UI_COLORS, uiAlpha } from '../../shared/ui/colors.js';
 
 function StepLabel({ step, index }) {
   const Icon = step.icon;
@@ -479,7 +480,7 @@ export default function CharBuilder() {
   return (
     <ThemeProvider theme={builderTheme}>
     <Box sx={builderRootSx}>
-      <AppBar position="sticky" color="default" elevation={0} sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'rgba(26,23,19,0.98)', backgroundImage: 'none' }}>
+      <AppBar position="sticky" color="default" elevation={0} sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: uiAlpha(UI_COLORS.surfaceDeep, 0.98), backgroundImage: 'none' }}>
         <Box sx={{ maxWidth: 1360, width: '100%', mx: 'auto', px: { xs: 0.75, md: 1.1 } }}>
           <Box sx={builderAppNavSx}>
             <Button
@@ -510,7 +511,7 @@ export default function CharBuilder() {
           <Toolbar disableGutters sx={{ gap: 1, minHeight: '52px !important', pr: { xs: 12, md: 16 } }}>
             <Wand2 size={19} />
             <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography variant="h1" noWrap sx={{ fontSize: '1.12rem', letterSpacing: '0.04em', color: '#edd48a' }}>
+              <Typography variant="h1" noWrap sx={{ fontSize: '1.12rem', letterSpacing: '0.04em', color: UI_COLORS.goldLight }}>
                 Character Builder
               </Typography>
               <Typography variant="body2" color="text.secondary" noWrap sx={{ fontSize: '0.64rem' }}>
@@ -522,7 +523,7 @@ export default function CharBuilder() {
       </AppBar>
 
       <Box sx={{ maxWidth: 1360, mx: 'auto', px: { xs: 0.75, md: 1.1 }, py: 1.1 }}>
-        <Paper variant="outlined" sx={{ mb: 1, bgcolor: 'rgba(35,32,26,1)', overflow: 'hidden' }}>
+        <Paper variant="outlined" sx={{ mb: 1, bgcolor: UI_COLORS.headerBg, overflow: 'hidden' }}>
           <Tabs
             value={state.tab}
             onChange={(_, tab) => dispatch({ type: 'tab/set', tab })}
@@ -610,7 +611,7 @@ const builderRootSx = {
   minHeight: '100vh',
   bgcolor: 'background.default',
   '& .MuiPaper-root, & .MuiCard-root': {
-    bgcolor: 'rgba(35,32,26,1)',
+    bgcolor: UI_COLORS.headerBg,
     backgroundImage: 'none',
     borderColor: 'divider',
     borderRadius: 1,
@@ -637,7 +638,7 @@ const builderRootSx = {
   },
   '& .MuiTabs-indicator': { bgcolor: 'primary.main' },
   '& .MuiInputBase-root': {
-    bgcolor: 'rgba(26,23,19,1)',
+    bgcolor: UI_COLORS.surfaceDeep,
     borderRadius: 1,
     fontSize: '0.74rem',
   },
@@ -649,8 +650,8 @@ const builderRootSx = {
     py: 0.35,
     px: 1,
     fontSize: '0.7rem',
-    bgcolor: 'rgba(35,32,26,1)',
-    border: '1px solid rgba(215,173,82,0.18)',
+    bgcolor: UI_COLORS.headerBg,
+    border: `1px solid ${uiAlpha(UI_COLORS.primary, 0.18)}`,
     color: 'text.secondary',
   },
   '& .MuiCardContent-root': {
@@ -664,11 +665,11 @@ const builderRootSx = {
 // custom colors/sizes. Scoped to the builder via the ThemeProvider in render.
 const CINZEL = '"Cinzel", Georgia, serif';
 const BUILDER_SELECTED_SX = {
-  color: '#f0e6d4',
-  backgroundColor: 'rgba(215, 173, 82, 0.20)',
-  boxShadow: 'inset 3px 0 0 #d7ad52',
+  color: UI_COLORS.textPrimary,
+  backgroundColor: uiAlpha(UI_COLORS.primary, 0.20),
+  boxShadow: `inset 3px 0 0 ${UI_COLORS.primary}`,
 };
-const BUILDER_SELECTED_HOVER_BG = 'rgba(215, 173, 82, 0.28)';
+const BUILDER_SELECTED_HOVER_BG = uiAlpha(UI_COLORS.primary, 0.28);
 const builderTheme = createTheme(theme, {
   components: {
     MuiTypography: {
@@ -689,8 +690,8 @@ const builderTheme = createTheme(theme, {
           fontFamily: CINZEL,
           fontSize: '0.54rem',
           letterSpacing: '0.04em',
-          backgroundColor: 'rgba(202,165,80,0.08)',
-          borderColor: 'rgba(202,165,80,0.28)',
+          backgroundColor: uiAlpha(UI_COLORS.gold, 0.08),
+          borderColor: uiAlpha(UI_COLORS.gold, 0.28),
         },
       },
     },
@@ -698,13 +699,13 @@ const builderTheme = createTheme(theme, {
       styleOverrides: {
         root: {
           padding: '4.4px 7.2px',
-          backgroundColor: 'rgba(35,32,26,1)',
+          backgroundColor: UI_COLORS.headerBg,
           '&.Mui-selected': BUILDER_SELECTED_SX,
           '&.Mui-selected:hover': {
             backgroundColor: BUILDER_SELECTED_HOVER_BG,
           },
           '&:hover': {
-            backgroundColor: 'rgba(46,42,34,1)',
+            backgroundColor: UI_COLORS.surfaceRaised,
           },
         },
       },
@@ -712,7 +713,7 @@ const builderTheme = createTheme(theme, {
     MuiToggleButton: {
       styleOverrides: {
         root: {
-          color: '#bda98a',
+          color: UI_COLORS.textSecondary,
           '&.Mui-selected': BUILDER_SELECTED_SX,
           '&.Mui-selected:hover': {
             backgroundColor: BUILDER_SELECTED_HOVER_BG,
@@ -741,7 +742,7 @@ const builderAppNavSx = {
   gap: '0.35rem',
   py: '0.35rem',
   borderBottom: 1,
-  borderColor: 'rgba(237,212,138,0.14)',
+  borderColor: uiAlpha(UI_COLORS.goldLight, 0.14),
 };
 
 const appNavButtonSx = {

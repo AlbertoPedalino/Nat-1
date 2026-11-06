@@ -1,6 +1,7 @@
 import { Box, Typography, CircularProgress } from '@mui/material';
 import CharacterSheet from '../charsheet/CharacterSheet.jsx';
 import { useCloudCharacterRow } from '../../shared/cloud/sync/useCloudCharacterRow.js';
+import { UI_COLORS } from '../../shared/ui/colors.js';
 
 function charIdFromUrl() {
   return new URLSearchParams(window.location.search).get('id');
@@ -32,7 +33,7 @@ export default function CampaignSheetView({
       {loading ? (
         <Box sx={{ p: 4, textAlign: 'center' }}><CircularProgress size={24} /></Box>
       ) : !row ? (
-        <Typography sx={{ p: 4, color: '#de675f', textAlign: 'center' }}>{error}</Typography>
+        <Typography sx={{ p: 4, color: UI_COLORS.danger, textAlign: 'center' }}>{error}</Typography>
       ) : (
         <CharacterSheet
           externalChar={row.data}

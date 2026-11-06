@@ -15,7 +15,7 @@ See the [source map](../README.md) for the page feature folders.
 | `hexcrawl/` | Hex data and campaign clock |
 | `instances/` | GM Board / Encounter Builder / DM Screen instances: identity, local store, sync engine, page hook, links; see below |
 | `storage/` | Generic localStorage helpers and character registry metadata |
-| `ui/` | Reusable presentation components/hooks, toasts, colors, route titles |
+| `ui/` | Reusable presentation components/hooks, toasts, colors (`colors.js`: `UI_COLORS`, `uiAlpha`, the source the theme is built from), route titles, number/date/text formatting, `confirmAction` |
 | `vtt/` | Battle-map geometry, fog, scenes, dice physics, sheets, and realtime state |
 
 ## Character

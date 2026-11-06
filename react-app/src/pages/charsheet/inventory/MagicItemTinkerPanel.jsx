@@ -31,19 +31,20 @@ import {
   replicatedNonArmorCount,
   setReplicatedItemCharges,
 } from '../../../shared/character/inventory/magicItemTinker.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 const sectionSx = {
   p: 0.8,
   border: 1,
   borderColor: 'divider',
   borderRadius: 1,
-  bgcolor: 'rgba(35,32,26,1)',
+  bgcolor: UI_COLORS.headerBg,
 };
 const labelSx = {
   fontFamily: '"Cinzel", Georgia, serif',
   fontSize: '0.62rem',
   fontWeight: 700,
-  color: '#edd48a',
+  color: UI_COLORS.goldLight,
   letterSpacing: '0.06em',
 };
 const selectSx = {

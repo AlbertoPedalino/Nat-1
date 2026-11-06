@@ -1,6 +1,7 @@
 import { Box, Button, Typography } from '@mui/material';
 import { SPELL_LEVEL_LABELS } from '../../charbuilder/constants.js';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 // The dialogs a resource side effect opens (see useResourceSideEffects): pick
 // the slot to create, convert or spend, the Wild Resurgence option, the Pact
@@ -62,16 +63,16 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
                 onClick={() => setCreateSlotSelection(level)}
                 sx={{
                   display: 'flex', alignItems: 'center', gap: 1, border: 1,
-                  borderColor: createSlotSelection === level ? '#edd48a' : 'divider',
+                  borderColor: createSlotSelection === level ? UI_COLORS.goldLight : 'divider',
                   borderRadius: 1, px: 1, py: 0.8, cursor: 'pointer',
-                  bgcolor: createSlotSelection === level ? 'rgba(237,212,138,0.1)' : 'transparent',
-                  '&:hover': { borderColor: '#edd48a', bgcolor: 'rgba(237,212,138,0.06)' },
+                  bgcolor: createSlotSelection === level ? uiAlpha(UI_COLORS.goldLight, 0.1) : 'transparent',
+                  '&:hover': { borderColor: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.06) },
                 }}
               >
                 <Typography sx={{ flex: 1, fontSize: '0.78rem', color: 'text.primary' }}>
                   Level {level}
                 </Typography>
-                <Typography sx={{ fontSize: '0.7rem', color: '#9d7fb8' }}>
+                <Typography sx={{ fontSize: '0.7rem', color: UI_COLORS.purple }}>
                   {cost} SP
                 </Typography>
               </Box>
@@ -104,16 +105,16 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
                 onClick={() => setConvertSlotSelection(level)}
                 sx={{
                   display: 'flex', alignItems: 'center', gap: 1, border: 1,
-                  borderColor: convertSlotSelection === level ? '#edd48a' : 'divider',
+                  borderColor: convertSlotSelection === level ? UI_COLORS.goldLight : 'divider',
                   borderRadius: 1, px: 1, py: 0.8, cursor: 'pointer',
-                  bgcolor: convertSlotSelection === level ? 'rgba(237,212,138,0.1)' : 'transparent',
-                  '&:hover': { borderColor: '#edd48a', bgcolor: 'rgba(237,212,138,0.06)' },
+                  bgcolor: convertSlotSelection === level ? uiAlpha(UI_COLORS.goldLight, 0.1) : 'transparent',
+                  '&:hover': { borderColor: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.06) },
                 }}
               >
                 <Typography sx={{ flex: 1, fontSize: '0.78rem', color: 'text.primary' }}>
                   Level {level} ({available} available{hasCreated ? ' · includes temporary' : ''})
                 </Typography>
-                <Typography sx={{ fontSize: '0.7rem', color: '#9d7fb8' }}>
+                <Typography sx={{ fontSize: '0.7rem', color: UI_COLORS.purple }}>
                   +{level} SP
                 </Typography>
               </Box>
@@ -140,10 +141,10 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
                 sx={{
                   display: 'flex', alignItems: 'center', gap: 1, border: 1,
                   borderColor: 'divider', borderRadius: 1, px: 1, py: 0.8, cursor: 'pointer',
-                  '&:hover': { borderColor: '#edd48a', bgcolor: 'rgba(237,212,138,0.06)' },
+                  '&:hover': { borderColor: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.06) },
                 }}
               >
-                <Box sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.72rem', color: '#edd48a' }}>{opt.label}</Box>
+                <Box sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.72rem', color: UI_COLORS.goldLight }}>{opt.label}</Box>
               </Box>
             ))}
           </Box>
@@ -175,10 +176,10 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
                 onClick={() => setSpendSlotRecoverSelection(level)}
                 sx={{
                   display: 'flex', alignItems: 'center', gap: 1, border: 1,
-                  borderColor: spendSlotRecoverSelection === level ? '#edd48a' : 'divider',
+                  borderColor: spendSlotRecoverSelection === level ? UI_COLORS.goldLight : 'divider',
                   borderRadius: 1, px: 1, py: 0.8, cursor: 'pointer',
-                  bgcolor: spendSlotRecoverSelection === level ? 'rgba(237,212,138,0.1)' : 'transparent',
-                  '&:hover': { borderColor: '#edd48a', bgcolor: 'rgba(237,212,138,0.06)' },
+                  bgcolor: spendSlotRecoverSelection === level ? uiAlpha(UI_COLORS.goldLight, 0.1) : 'transparent',
+                  '&:hover': { borderColor: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.06) },
                 }}
               >
                 <Typography sx={{ flex: 1, fontSize: '0.78rem', color: 'text.primary' }}>
@@ -238,7 +239,7 @@ export default function SlotDialogs({ dialogs, resNameMap }) {
                     {SPELL_LEVEL_LABELS[entry.level] || `Level ${entry.level}`} · expended {entry.expended}
                   </Typography>
                   <Button size="small" variant="outlined" onClick={() => adjustSlotRecoveryLevel(entry.level, -1)} sx={{ minWidth: 26, px: 0.7 }}>-</Button>
-                  <Typography sx={{ minWidth: 16, textAlign: 'center', fontSize: '0.78rem', color: '#edd48a', fontFamily: '"Cinzel", Georgia, serif' }}>{value}</Typography>
+                  <Typography sx={{ minWidth: 16, textAlign: 'center', fontSize: '0.78rem', color: UI_COLORS.goldLight, fontFamily: '"Cinzel", Georgia, serif' }}>{value}</Typography>
                   <Button size="small" variant="outlined" onClick={() => adjustSlotRecoveryLevel(entry.level, 1)} disabled={slotRecoveryRemaining < entry.level || value >= entry.expended} sx={{ minWidth: 26, px: 0.7 }}>+</Button>
                 </Box>
               );

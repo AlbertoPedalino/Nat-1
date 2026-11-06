@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Autocomplete, Box, Stack, TextField, Typography } from '@mui/material';
 import { loadSpells } from '../../charbuilder/data/dataLoaders.js';
 import { scrollSpellStats, spellScrollLevel } from '../../../shared/character/inventory/spellScrolls.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 let spellsPromise = null;
 function loadSpellsCached() {
@@ -107,7 +108,7 @@ function StatField({ label, value, placeholder, onCommit }) {
 const panelSx = { mt: '8px', pt: '8px', borderTop: '1px dashed', borderColor: 'divider' };
 const titleSx = {
   fontSize: '0.6rem',
-  color: '#edd48a',
+  color: UI_COLORS.goldLight,
   fontFamily: '"Cinzel", Georgia, serif',
   fontWeight: 700,
   letterSpacing: '0.08em',

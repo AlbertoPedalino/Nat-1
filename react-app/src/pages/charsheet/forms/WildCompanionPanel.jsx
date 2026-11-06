@@ -31,6 +31,7 @@ import {
   summonWildCompanionPatch,
   dismissWildCompanionPatch,
 } from '../../../shared/character/forms/wildCompanionForm.js';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 // Sheet panel for the Druid's Wild Companion (XPHB 2024). Casts Find Familiar by
 // expending either a Wild Shape use or a spell slot: pick any Beast of CR 0 to
@@ -96,7 +97,7 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
     return (
       <Box onClick={(e) => e.stopPropagation()} sx={panelSx}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, mb: 0.5 }}>
-          <Sparkles size={14} color="#edd48a" />
+          <Sparkles size={14} color={UI_COLORS.goldLight} />
           <Typography sx={headerSx} component="span">Familiar —</Typography>
           <BeastNameLink name={b.name} source={b.source} sx={headerSx} />
           <Button size="small" onClick={dismiss} sx={{ ...dismissButtonSx, ml: 'auto' }}>
@@ -128,7 +129,7 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
   return (
     <Box onClick={(e) => e.stopPropagation()} sx={panelSx}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, mb: 0.5 }}>
-        <Sparkles size={14} color="#edd48a" />
+        <Sparkles size={14} color={UI_COLORS.goldLight} />
         <Typography sx={headerSx}>Summon Familiar — CR 0 Beast</Typography>
       </Box>
       <ToggleButtonGroup
@@ -172,7 +173,7 @@ export default function WildCompanionPanel({ character, sheet, resources, onResC
           {!visible.length ? <Typography sx={{ ...subSx, fontStyle: 'italic' }}>No matches.</Typography> : null}
         </Stack>
       )}
-      <Typography sx={{ ...subSx, fontStyle: 'italic', mt: 0.6, color: canSummon ? 'text.secondary' : '#c98a8a' }}>
+      <Typography sx={{ ...subSx, fontStyle: 'italic', mt: 0.6, color: canSummon ? 'text.secondary' : UI_COLORS.dangerMuted }}>
         {!canSummon
           ? 'No Wild Shape uses or spell slots left — finish a rest.'
           : `Summoning spends ${effectiveCost === 'slot' ? `a level ${slotLevel} spell slot` : 'one Wild Shape use'}; the familiar is Fey and lasts until a Long Rest.`}
@@ -186,8 +187,8 @@ const toggleSx = {
   py: '3px',
   px: '10px',
   textTransform: 'none',
-  color: '#edd48a',
-  borderColor: 'rgba(202,165,80,0.4)',
-  '&.Mui-selected': { bgcolor: 'rgba(237,212,138,0.18)', color: '#edd48a' },
-  '&.Mui-selected:hover': { bgcolor: 'rgba(237,212,138,0.24)' },
+  color: UI_COLORS.goldLight,
+  borderColor: uiAlpha(UI_COLORS.gold, 0.4),
+  '&.Mui-selected': { bgcolor: uiAlpha(UI_COLORS.goldLight, 0.18), color: UI_COLORS.goldLight },
+  '&.Mui-selected:hover': { bgcolor: uiAlpha(UI_COLORS.goldLight, 0.24) },
 };

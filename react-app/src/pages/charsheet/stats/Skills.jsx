@@ -15,6 +15,7 @@ import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import { characterItemBonuses } from '../../../shared/character/inventory/itemBonus.js';
 import { getItemAdvantageOnSkill } from '../../../shared/character/inventory/itemEffects.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 function SkillProficiencyDot({ training }) {
   const dotColor = training === 'exp' ? 'secondary.main' : training ? 'primary.main' : 'divider';
@@ -59,7 +60,7 @@ export default function Skills({ C, sheet, onRoll }) {
 
   return (
     <Paper variant="outlined" sx={{ overflow: 'hidden' }}>
-      <Box sx={{ bgcolor: 'rgba(35,32,26,1)', borderBottom: 1, borderColor: 'divider', px: '0.8rem', py: '0.48rem', borderLeft: 3, borderLeftColor: 'primary.main' }}>
+      <Box sx={{ bgcolor: UI_COLORS.headerBg, borderBottom: 1, borderColor: 'divider', px: '0.8rem', py: '0.48rem', borderLeft: 3, borderLeftColor: 'primary.main' }}>
         <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'primary.main' }}>
           Skills
         </Typography>
@@ -105,7 +106,7 @@ export default function Skills({ C, sheet, onRoll }) {
           }}
             sources={{ adv: Boolean(hasAdv), disadv: hasDisadv }}
             onPick={(advArg) => onRoll(sk.n, bonus, advArg === true ? { advantage: true } : advArg === false ? { disadvantage: true } : {})}
-            sx={{ display: 'grid', gridTemplateColumns: '20px 30px 1fr auto', gap: '4px', px: '0.9rem', py: '3px', alignItems: 'center', cursor: 'pointer', transition: 'background 0.1s', '&:hover': { bgcolor: 'rgba(202,165,80,0.05)' } }}>
+            sx={{ display: 'grid', gridTemplateColumns: '20px 30px 1fr auto', gap: '4px', px: '0.9rem', py: '3px', alignItems: 'center', cursor: 'pointer', transition: 'background 0.1s', '&:hover': { bgcolor: uiAlpha(UI_COLORS.gold, 0.05) } }}>
             <Box />
             <SkillProficiencyDot training={training} />
             <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>

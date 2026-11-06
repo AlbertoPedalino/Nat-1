@@ -2,6 +2,7 @@ import { Box, Typography, Chip, CircularProgress, useTheme } from '@mui/material
 import { Link } from 'react-router-dom';
 import { Pencil, Trash2 } from 'lucide-react';
 import * as s from '../styles.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 // Shared row for every instance picker: generic tool lists render it with a
 // plain `to` link, the characters picker renders it with an async `onOpen`
@@ -23,7 +24,7 @@ export default function InstanceRow({
         {subtitle ? <Typography component="span" sx={{ ...s.subtitleSx, display: 'block' }}>{subtitle}</Typography> : null}
       </Box>
       {opening ? (
-        <CircularProgress size={12} sx={{ color: '#c8a84b', flexShrink: 0 }} />
+        <CircularProgress size={12} sx={{ color: UI_COLORS.goldDeep, flexShrink: 0 }} />
       ) : (
         <Typography component="span" sx={s.metaSx}>{updatedAtLabel}</Typography>
       )}

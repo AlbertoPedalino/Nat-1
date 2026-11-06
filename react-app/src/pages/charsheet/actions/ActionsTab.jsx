@@ -54,6 +54,7 @@ import RollerButtons from '../../../shared/character/dice/RollerButtons.jsx';
 import { CHIP_TONES, chipToneStyle } from '../../../shared/ui/entityColors.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 const _danglingResKeyWarned = typeof Set === 'function' ? new Set() : null;
 function warnDanglingResKey(action, resMaxMap) {
@@ -219,9 +220,9 @@ export default function ActionsTab({ C, sheet, resources }) {
                 const prof = getMod(getFinal(C, 'str')) > getMod(getFinal(C, 'dex')) ? getMod(getFinal(C, 'str')) : getMod(getFinal(C, 'dex'));
                 const hitBonus = signed(prof);
                 return (
-                  <Box component="tr" key={i} sx={{ '& td': { p: '6px 6px', borderBottom: 1, borderColor: 'divider', color: 'text.secondary' }, '&:hover td': { bgcolor: 'rgba(35,32,26,1)' } }}>
+                  <Box component="tr" key={i} sx={{ '& td': { p: '6px 6px', borderBottom: 1, borderColor: 'divider', color: 'text.secondary' }, '&:hover td': { bgcolor: UI_COLORS.headerBg } }}>
                     <Box component="td"><Typography sx={{ color: 'text.primary', fontWeight: 600 }}>{item.name}</Typography></Box>
-                    <Box component="td"><Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontWeight: 700, color: '#edd48a', fontSize: '0.875rem' }}>{hitBonus}</Typography></Box>
+                    <Box component="td"><Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontWeight: 700, color: UI_COLORS.goldLight, fontSize: '0.875rem' }}>{hitBonus}</Typography></Box>
                     <Box component="td"><Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', color: 'text.primary' }}>{item.damage?.[0]?.damage || '—'}</Typography></Box>
                   </Box>
                 );
@@ -382,7 +383,7 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
         const statusTone = isSuppressed ? CHIP_TONES.negative : (isActive ? CHIP_TONES.positive : CHIP_TONES.info);
         const statusStyle = chipToneStyle(statusTone);
         return (
-        <Box sx={persistentRowSx('rgba(129,179,232,0.06)', !hasRes, open)}>
+        <Box sx={persistentRowSx(uiAlpha(UI_COLORS.blueSoft, 0.06), !hasRes, open)}>
           <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontFamily: '"Cinzel", Georgia, serif', mr: 0.5, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Status</Typography>
           <Chip
             size="small"
@@ -411,7 +412,7 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
       })() : null}
 
       {hasRes ? (
-        <Box sx={persistentRowSx('rgba(202,165,80,0.06)', true, open)}>
+        <Box sx={persistentRowSx(uiAlpha(UI_COLORS.gold, 0.06), true, open)}>
           <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontFamily: '"Cinzel", Georgia, serif', mr: 0.5, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{resTrack === 'used' ? 'Spent' : 'Uses'}</Typography>
           {safeMax === Infinity ? (
             typeof onResChange === 'function' ? (
@@ -419,10 +420,10 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
                 size="small"
                 variant="outlined"
                 onClick={(e) => { e.stopPropagation(); onResChange(action.resKey, -1); }}
-                sx={{ fontSize: '0.6rem', fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em', minWidth: 0, py: 0.2, px: 0.6, color: '#edd48a', borderColor: 'rgba(237,212,138,0.35)', '&:hover': { borderColor: '#edd48a', bgcolor: 'rgba(237,212,138,0.08)' } }}
+                sx={{ fontSize: '0.6rem', fontFamily: '"Cinzel", Georgia, serif', letterSpacing: '0.06em', minWidth: 0, py: 0.2, px: 0.6, color: UI_COLORS.goldLight, borderColor: uiAlpha(UI_COLORS.goldLight, 0.35), '&:hover': { borderColor: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.08) } }}
               >{action.buttonLabel || (action.controller ? 'Open' : 'Use')}</Button>
             ) : (
-              <Typography sx={{ fontSize: '0.7rem', color: '#edd48a', fontFamily: '"Cinzel", Georgia, serif', fontWeight: 700 }}>∞</Typography>
+              <Typography sx={{ fontSize: '0.7rem', color: UI_COLORS.goldLight, fontFamily: '"Cinzel", Georgia, serif', fontWeight: 700 }}>∞</Typography>
             )
           ) : (isPool || safeMax > 10) ? (
             <ResourceBar value={resCur} max={safeMax} onChange={(delta) => onResChange(action.resKey, delta)} />
@@ -439,8 +440,8 @@ function AdapterActionCard({ C, sheet, action, resources, onResChange, onRoll, o
                   onClick={(e) => { e.stopPropagation(); onResChange(action.resKey, available ? -1 : 1); }}
                   sx={{
                     border: '1.5px solid',
-                    bgcolor: available ? 'transparent' : '#edd48a',
-                    borderColor: available ? 'rgba(202,165,80,0.35)' : '#edd48a',
+                    bgcolor: available ? 'transparent' : UI_COLORS.goldLight,
+                    borderColor: available ? uiAlpha(UI_COLORS.gold, 0.35) : UI_COLORS.goldLight,
                   }}
                 />
               );
@@ -520,11 +521,11 @@ function ChoicePicker({ action, C, onUpdateCharacter, onShowToast }) {
 
   return (
     <Box sx={{ mt: 0.7, pt: 0.5, borderTop: '1px dashed', borderColor: 'divider' }}>
-      <Typography sx={{ fontSize: '0.6rem', color: '#edd48a', fontFamily: '"Cinzel", Georgia, serif', fontWeight: 700, letterSpacing: '0.08em', mb: 0.3 }}>
+      <Typography sx={{ fontSize: '0.6rem', color: UI_COLORS.goldLight, fontFamily: '"Cinzel", Georgia, serif', fontWeight: 700, letterSpacing: '0.08em', mb: 0.3 }}>
         {action.choiceLabel || 'Active Option'}
       </Typography>
       <ToggleButtonGroup size="small" exclusive value={activeValue} onChange={handleChange}
-        sx={{ flexWrap: 'wrap', gap: '3px', '& .MuiToggleButton-root': { fontSize: '0.65rem', px: '8px', py: '3px', border: 1, borderColor: 'divider', borderRadius: '999px !important', color: 'text.secondary', bgcolor: 'transparent', '&.Mui-selected': { bgcolor: 'rgba(202,165,80,0.14)', color: '#edd48a', borderColor: '#caa550' } } }}
+        sx={{ flexWrap: 'wrap', gap: '3px', '& .MuiToggleButton-root': { fontSize: '0.65rem', px: '8px', py: '3px', border: 1, borderColor: 'divider', borderRadius: '999px !important', color: 'text.secondary', bgcolor: 'transparent', '&.Mui-selected': { bgcolor: uiAlpha(UI_COLORS.gold, 0.14), color: UI_COLORS.goldLight, borderColor: UI_COLORS.gold } } }}
       >
         {options.map((opt) => (
           <ToggleButton key={opt.value} value={opt.value}>{opt.label}</ToggleButton>

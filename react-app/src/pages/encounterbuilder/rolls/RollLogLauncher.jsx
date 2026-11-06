@@ -3,6 +3,7 @@ import { Box, Button } from '@mui/material';
 import { ScrollText } from 'lucide-react';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import RollLog from './RollLog.jsx';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 export default function RollLogLauncher() {
   const { state } = useEncounterBuilder();
@@ -24,7 +25,7 @@ export default function RollLogLauncher() {
           <RollLog
             onClose={() => setOpen(false)}
             maxHeight="min(430px, calc(100vh - 170px))"
-            sx={{ boxShadow: '0 14px 40px rgba(0,0,0,0.55)' }}
+            sx={{ boxShadow: `0 14px 40px ${uiAlpha(UI_COLORS.black, 0.55)}` }}
           />
         </Box>
       ) : null}
@@ -37,7 +38,7 @@ const buttonSx = {
   left: { xs: 12, sm: 18 },
   bottom: { xs: 12, sm: 18 },
   zIndex: 1250,
-  boxShadow: '0 8px 26px rgba(0,0,0,0.45)',
+  boxShadow: `0 8px 26px ${uiAlpha(UI_COLORS.black, 0.45)}`,
 };
 
 const popupSx = {

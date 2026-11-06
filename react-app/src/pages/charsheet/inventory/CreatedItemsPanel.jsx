@@ -22,6 +22,7 @@ import {
   resolveCreatedItemValue,
 } from '../../../shared/character/inventory/createdItemResolution.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 // Generic interactive "create items from a list" panel. Driven entirely by the
 // action's `detail` config so Replicate Magic Item, Tinker's Magic and Fast
@@ -54,7 +55,7 @@ const stepBtnSx = (disabled) => ({
   borderRadius: '3px',
   color: 'text.secondary',
   opacity: disabled ? 0.35 : 1,
-  '&:hover': disabled ? {} : { borderColor: '#caa550', color: '#caa550' },
+  '&:hover': disabled ? {} : { borderColor: UI_COLORS.gold, color: UI_COLORS.gold },
 });
 
 export default function CreatedItemsPanel({ action, character, sheet }) {
@@ -200,7 +201,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
     <Box onClick={(e) => e.stopPropagation()} sx={panelSx}>
       <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', mb: 0.6 }}>
         <Typography sx={headerSx}>{tagLabel}</Typography>
-        <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.62rem', fontWeight: 700, color: remaining > 0 ? '#edd48a' : '#de675f' }}>
+        <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.62rem', fontWeight: 700, color: remaining > 0 ? UI_COLORS.goldLight : UI_COLORS.danger }}>
           {total} / {max} active
         </Typography>
       </Box>
@@ -238,14 +239,14 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
               <IconButton size="small" aria-label={`Remove ${label}`} disabled={removeDisabled} onClick={() => handleRemove(value)} sx={stepBtnSx(removeDisabled)}>
                 <Minus size={13} />
               </IconButton>
-              <Box sx={{ minWidth: 16, textAlign: 'center', fontFamily: '"Cinzel", Georgia, serif', fontWeight: 700, fontSize: '0.78rem', color: '#edd48a' }}>{count}</Box>
+              <Box sx={{ minWidth: 16, textAlign: 'center', fontFamily: '"Cinzel", Georgia, serif', fontWeight: 700, fontSize: '0.78rem', color: UI_COLORS.goldLight }}>{count}</Box>
               <IconButton size="small" aria-label={`Add ${label}`} disabled={addDisabled} onClick={() => handleAdd(value)} sx={stepBtnSx(addDisabled)}>
                 <Plus size={13} />
               </IconButton>
             </Box>
           );
-          const rowBorder = count > 0 ? 'rgba(202,165,80,0.4)' : 'divider';
-          const rowBg = count > 0 ? 'rgba(202,165,80,0.06)' : 'rgba(35,32,26,1)';
+          const rowBorder = count > 0 ? uiAlpha(UI_COLORS.gold, 0.4) : 'divider';
+          const rowBg = count > 0 ? uiAlpha(UI_COLORS.gold, 0.06) : UI_COLORS.headerBg;
 
           if (!dbItem) {
             return (
@@ -263,7 +264,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
             <ExpandableCard
               key={value}
               containerSx={{ border: 1, borderColor: rowBorder, borderRadius: 1, bgcolor: rowBg, overflow: 'hidden' }}
-              detailsSx={{ px: '10px', pt: '2px', pb: '8px', bgcolor: '#12100e', fontSize: '0.7rem', color: 'text.secondary' }}
+              detailsSx={{ px: '10px', pt: '2px', pb: '8px', bgcolor: UI_COLORS.ink, fontSize: '0.7rem', color: 'text.secondary' }}
               details={<ItemReferenceBody item={dbItem} />}
               summary={({ toggle }) => (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: '7px', px: '8px', py: '5px' }}>
@@ -299,7 +300,7 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
 const panelSx = {
   mt: 0.8,
   p: 1,
-  bgcolor: 'rgba(237,212,138,0.04)',
+  bgcolor: uiAlpha(UI_COLORS.goldLight, 0.04),
   border: 1,
   borderColor: 'divider',
   borderRadius: 1,
@@ -310,5 +311,5 @@ const headerSx = {
   fontSize: '0.66rem',
   fontWeight: 700,
   letterSpacing: '0.08em',
-  color: '#edd48a',
+  color: UI_COLORS.goldLight,
 };

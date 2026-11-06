@@ -5,6 +5,7 @@ import { SKILLS, getMod } from '../state/calculations.js';
 import { beast5eToolsUrl, parseBeastActions, parseBeastActionsRich } from '../../../shared/character/forms/beasts.js';
 import { formatRollTitle } from '../../../shared/character/dice/dice.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 // Shared presentational layer for a normalized beast snapshot, used by both the
 // Wild Shape and Wild Companion sheet panels. Renders a compact Monster-Manual
@@ -34,7 +35,7 @@ export function BeastNameLink({ name, source, sx }) {
       underline="hover"
       title="Open stat block on 5e.tools"
       onClick={(e) => e.stopPropagation()}
-      sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.4, minWidth: 0, color: '#edd48a', cursor: 'pointer', ...sx }}
+      sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.4, minWidth: 0, color: UI_COLORS.goldLight, cursor: 'pointer', ...sx }}
     >
       <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</Box>
       <ExternalLink size={11} style={{ flexShrink: 0, opacity: 0.7 }} />
@@ -97,7 +98,7 @@ export function BeastStatBlock({
       <StatLine label="AC" value={b.ac ?? '—'} />
       {onRollFormula && b.hp?.formula ? (
         <Typography sx={subSx}>
-          <Box component="span" sx={{ color: '#edd48a', fontWeight: 700 }}>{hpLabel}:</Box>{' '}
+          <Box component="span" sx={{ color: UI_COLORS.goldLight, fontWeight: 700 }}>{hpLabel}:</Box>{' '}
           {b.hp.average} (
           <RollChip onClick={() => onRollFormula(b.hp.formula, formatRollTitle(b.name, hpLabel))}>{b.hp.formula}</RollChip>)
         </Typography>
@@ -111,7 +112,7 @@ export function BeastStatBlock({
           const scoreText = `${b.abilities[k]} (${fmtMod(b.abilities[k])})`;
           return (
             <Box key={k} sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>
-              <Typography component="span" sx={{ fontSize: '0.56rem', fontWeight: 700, letterSpacing: '0.06em', color: '#edd48a', width: 22, flexShrink: 0 }}>{k.toUpperCase()}</Typography>
+              <Typography component="span" sx={{ fontSize: '0.56rem', fontWeight: 700, letterSpacing: '0.06em', color: UI_COLORS.goldLight, width: 22, flexShrink: 0 }}>{k.toUpperCase()}</Typography>
               {rollable ? (
                 <RollChip
                   sx={{ fontSize: '0.64rem' }}
@@ -172,11 +173,11 @@ export function BeastPickerRow({
         sx={{
           display: 'flex', alignItems: 'center', gap: '8px', px: '8px', py: '5px',
           cursor: expandable ? 'pointer' : 'default',
-          '&:hover': expandable ? { bgcolor: 'rgba(202,165,80,0.06)' } : undefined,
+          '&:hover': expandable ? { bgcolor: uiAlpha(UI_COLORS.gold, 0.06) } : undefined,
         }}
       >
         {expandable
-          ? <Chevron size={14} color="#9a8f7a" style={{ flexShrink: 0 }} />
+          ? <Chevron size={14} color={UI_COLORS.textMuted} style={{ flexShrink: 0 }} />
           : <Box sx={{ width: 14, flexShrink: 0 }} />}
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <BeastNameLink name={name} source={source} sx={{ fontSize: '0.8rem' }} />
@@ -187,7 +188,7 @@ export function BeastPickerRow({
           variant="outlined"
           disabled={actionDisabled}
           onClick={(e) => { e.stopPropagation(); onAction(); }}
-          sx={{ fontSize: '0.68rem', flexShrink: 0, borderColor: 'rgba(202,165,80,0.5)', color: '#edd48a' }}
+          sx={{ fontSize: '0.68rem', flexShrink: 0, borderColor: uiAlpha(UI_COLORS.gold, 0.5), color: UI_COLORS.goldLight }}
         >
           {actionLabel}
         </Button>
@@ -222,7 +223,7 @@ function RollChip({ onClick, children, sx }) {
 function RollableStatLine({ label, items, onRoll }) {
   return (
     <Typography sx={subSx}>
-      <Box component="span" sx={{ color: '#edd48a', fontWeight: 700 }}>{label}:</Box>{' '}
+      <Box component="span" sx={{ color: UI_COLORS.goldLight, fontWeight: 700 }}>{label}:</Box>{' '}
       {items.map((it, i) => (
         <Box component="span" key={it.key}>
           {i ? ', ' : null}
@@ -236,8 +237,8 @@ function RollableStatLine({ label, items, onRoll }) {
 function StatLine({ label, value, accent }) {
   return (
     <Typography sx={subSx}>
-      <Box component="span" sx={{ color: '#edd48a', fontWeight: 700 }}>{label}:</Box>{' '}
-      <Box component="span" sx={accent ? { color: '#edd48a', fontWeight: 700 } : undefined}>{value}</Box>
+      <Box component="span" sx={{ color: UI_COLORS.goldLight, fontWeight: 700 }}>{label}:</Box>{' '}
+      <Box component="span" sx={accent ? { color: UI_COLORS.goldLight, fontWeight: 700 } : undefined}>{value}</Box>
     </Typography>
   );
 }
@@ -275,7 +276,7 @@ function renderEntryToken(tok, key, onRoll, onRollFormula, beastName) {
 const statBlockSx = {
   p: 0.8,
   borderRadius: 1,
-  bgcolor: 'rgba(35,32,26,0.6)',
+  bgcolor: uiAlpha(UI_COLORS.headerBg, 0.6),
   border: 1,
   borderColor: 'divider',
 };
@@ -286,22 +287,22 @@ const rollChipSx = {
   appearance: 'none',
   display: 'inline-flex',
   alignItems: 'baseline',
-  border: '1px solid rgba(202,165,80,0.45)',
-  bgcolor: 'rgba(202,165,80,0.12)',
-  color: '#edd48a',
+  border: `1px solid ${uiAlpha(UI_COLORS.gold, 0.45)}`,
+  bgcolor: uiAlpha(UI_COLORS.gold, 0.12),
+  color: UI_COLORS.goldLight,
   borderRadius: '4px',
   px: '0.28em',
   py: 0,
   font: 'inherit',
   lineHeight: 1.35,
   cursor: 'pointer',
-  '&:hover': { bgcolor: 'rgba(202,165,80,0.24)' },
+  '&:hover': { bgcolor: uiAlpha(UI_COLORS.gold, 0.24) },
 };
 
 export const panelSx = {
   mt: 0.8,
   p: 1,
-  bgcolor: 'rgba(237,212,138,0.04)',
+  bgcolor: uiAlpha(UI_COLORS.goldLight, 0.04),
   border: 1,
   borderColor: 'divider',
   borderRadius: 1,
@@ -312,7 +313,7 @@ export const headerSx = {
   fontSize: '0.66rem',
   fontWeight: 700,
   letterSpacing: '0.08em',
-  color: '#edd48a',
+  color: UI_COLORS.goldLight,
 };
 
 export const subSx = { fontSize: '0.62rem', color: 'text.secondary' };
@@ -333,9 +334,9 @@ export const optionToggleSx = {
   py: '3px',
   px: '8px',
   textTransform: 'none',
-  color: '#edd48a',
-  borderColor: 'rgba(202,165,80,0.4)',
-  '&.Mui-selected': { bgcolor: 'rgba(237,212,138,0.18)', color: '#edd48a' },
+  color: UI_COLORS.goldLight,
+  borderColor: uiAlpha(UI_COLORS.gold, 0.4),
+  '&.Mui-selected': { bgcolor: uiAlpha(UI_COLORS.goldLight, 0.18), color: UI_COLORS.goldLight },
 };
 
 // Muted text button for "dismiss / revert" actions on summon-style panels
@@ -349,11 +350,11 @@ export const dismissButtonSx = {
   fontSize: '0.58rem',
   fontFamily: '"Cinzel", Georgia, serif',
   letterSpacing: '0.04em',
-  color: '#c98a8a',
+  color: UI_COLORS.dangerMuted,
   border: 1,
-  borderColor: 'rgba(201,138,138,0.45)',
+  borderColor: uiAlpha(UI_COLORS.dangerMuted, 0.45),
   borderRadius: 1,
-  '&:hover': { borderColor: '#c98a8a', bgcolor: 'rgba(201,138,138,0.1)' },
+  '&:hover': { borderColor: UI_COLORS.dangerMuted, bgcolor: uiAlpha(UI_COLORS.dangerMuted, 0.1) },
 };
 
 // The box holding a summon's HP bar (and, at 0 HP, what brings it back):
@@ -368,7 +369,7 @@ export const creatureHpBoxSx = {
   border: 1,
   borderColor: 'divider',
   borderRadius: 1,
-  bgcolor: 'rgba(35,32,26,1)',
+  bgcolor: UI_COLORS.headerBg,
 };
 
 export const rowSx = {
@@ -380,5 +381,5 @@ export const rowSx = {
   border: 1,
   borderColor: 'divider',
   borderRadius: 1,
-  bgcolor: 'rgba(35,32,26,1)',
+  bgcolor: UI_COLORS.headerBg,
 };

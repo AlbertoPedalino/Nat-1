@@ -7,6 +7,7 @@ import { pushCharacter, SHEET_CONFLICT } from '../api/cloudCharacters.js';
 import { reportCloudSyncState } from '../sync/cloudSyncState.js';
 import { isSyncExcluded, includeInSync } from '../sync/cloudSyncExclude.js';
 import { useToast } from '../../ui/ToastProvider.jsx';
+import { UI_COLORS } from '../../ui/colors.js';
 
 // The "active sheet" for the cloud menu is the one in the URL (builder/charsheet
 // ?char=…). We deliberately do NOT fall back to localStorage's gb:active_char:
@@ -95,7 +96,7 @@ export default function CloudMenu({ sx, buttonSx, canUploadDraft = false, onUplo
   }
 
   const dot = status === 'authed'
-    ? (syncState === 'syncing' ? '#d6a849' : syncState === 'error' ? '#de675f' : '#58b879')
+    ? (syncState === 'syncing' ? UI_COLORS.amberBright : syncState === 'error' ? UI_COLORS.danger : UI_COLORS.success)
     : null;
 
   return (

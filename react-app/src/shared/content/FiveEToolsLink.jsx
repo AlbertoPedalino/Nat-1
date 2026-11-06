@@ -4,6 +4,7 @@ import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import { ExternalLink } from 'lucide-react';
 import { get5eToolsSpellUrl, get5eToolsItemUrl } from './fiveEToolsLinks.js';
+import { UI_COLORS } from '../ui/colors.js';
 
 function FiveEToolsLinkContent({ url, children, noIcon }) {
   return (
@@ -19,7 +20,7 @@ function FiveEToolsLinkContent({ url, children, noIcon }) {
           sx={{
             display: 'inline-flex', alignItems: 'center', gap: 0.5,
             fontWeight: 'inherit', cursor: 'pointer',
-            '&:hover': { color: '#edd48a' },
+            '&:hover': { color: UI_COLORS.goldLight },
           }}
         >
           {children}
@@ -72,7 +73,7 @@ export function SpellNameIcon({ spell, size = 14 }) {
         rel="noreferrer noopener"
         onClick={(e) => e.stopPropagation()}
         size="small"
-        sx={{ width: 22, height: 22, color: 'text.secondary', '&:hover': { color: '#edd48a' } }}
+        sx={{ width: 22, height: 22, color: 'text.secondary', '&:hover': { color: UI_COLORS.goldLight } }}
       >
         <ExternalLink size={size} aria-hidden />
       </IconButton>
@@ -92,7 +93,7 @@ export function ItemNameIcon({ item, size = 14 }) {
         rel="noreferrer noopener"
         onClick={(e) => e.stopPropagation()}
         size="small"
-        sx={{ width: 22, height: 22, color: 'text.secondary', '&:hover': { color: '#edd48a' } }}
+        sx={{ width: 22, height: 22, color: 'text.secondary', '&:hover': { color: UI_COLORS.goldLight } }}
       >
         <ExternalLink size={size} aria-hidden />
       </IconButton>

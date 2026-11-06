@@ -1,12 +1,13 @@
 import { alpha } from '@mui/material/styles';
 import { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
+import { UI_COLORS, uiAlpha } from '../../shared/ui/colors.js';
 
 // Row/panel visuals carried over from the old Home "Continue" section, now
 // serving the full-page instance picker instead of a compact home panel.
 
 export const rootSx = {
   minHeight: '100vh',
-  bgcolor: '#0f0e0d',
+  bgcolor: UI_COLORS.inkDeep,
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
@@ -29,7 +30,7 @@ export const titleSx = {
   fontSize: 'clamp(1.3rem, 4vw, 1.7rem)',
   fontWeight: 800,
   letterSpacing: '0.06em',
-  color: '#e8c96a',
+  color: UI_COLORS.goldBright,
   flex: 1,
   minWidth: '160px',
 };
@@ -48,7 +49,7 @@ export const sectionHeadSx = {
   fontWeight: 700,
   letterSpacing: '0.1em',
   textTransform: 'uppercase',
-  color: '#b8a87a',
+  color: UI_COLORS.textRail,
   mb: '0.75rem',
 };
 
@@ -65,10 +66,10 @@ export const rowSx = {
   alignItems: 'center',
   gap: '0.5rem',
   p: '0.6rem 0.75rem',
-  border: '1px solid rgba(180,150,90,0.18)',
+  border: `1px solid ${uiAlpha(UI_COLORS.goldDim, 0.18)}`,
   borderRadius: '10px',
-  bgcolor: '#1a1815',
-  '&:hover': { borderColor: '#c8a84b' },
+  bgcolor: UI_COLORS.surfaceHome,
+  '&:hover': { borderColor: UI_COLORS.goldDeep },
 };
 
 export const rowInnerSx = {
@@ -96,12 +97,12 @@ export const nameSx = {
 };
 
 export const subtitleSx = {
-  color: '#7a6a4a',
+  color: UI_COLORS.textBrown,
   fontSize: '0.7rem',
 };
 
 export const metaSx = {
-  color: '#7a6a4a',
+  color: UI_COLORS.textBrown,
   fontSize: '0.76rem',
   whiteSpace: 'nowrap',
   flexShrink: 0,
@@ -120,22 +121,22 @@ export const iconBtnSx = {
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
-  border: '1px solid rgba(180,150,90,0.18)',
+  border: `1px solid ${uiAlpha(UI_COLORS.goldDim, 0.18)}`,
   borderRadius: '6px',
-  background: 'rgba(0,0,0,0.18)',
-  color: '#7a6a4a',
+  background: uiAlpha(UI_COLORS.black, 0.18),
+  color: UI_COLORS.textBrown,
   cursor: 'pointer',
   p: 0,
-  '&:hover': { borderColor: '#c8a84b', color: '#e8c96a' },
+  '&:hover': { borderColor: UI_COLORS.goldDeep, color: UI_COLORS.goldBright },
 };
 
 export const deleteBtnSx = {
   ...iconBtnSx,
-  '&:hover': { borderColor: '#e74c3c', color: '#e74c3c' },
+  '&:hover': { borderColor: UI_COLORS.dangerFlat, color: UI_COLORS.dangerFlat },
 };
 
 export function badgeSx(kind, theme) {
-  const color = kind === 'cloud' ? theme.palette.gmboard.badge.cloud : '#b8a87a';
+  const color = kind === 'cloud' ? theme.palette.gmboard.badge.cloud : UI_COLORS.textRail;
   return {
     height: '18px',
     fontSize: '0.62rem',
@@ -154,12 +155,12 @@ export const emptyBoxSx = {
   maxWidth: '640px',
   textAlign: 'center',
   p: '2rem 1rem',
-  border: '1px dashed rgba(180,150,90,0.25)',
+  border: `1px dashed ${uiAlpha(UI_COLORS.goldDim, 0.25)}`,
   borderRadius: '12px',
 };
 
 export const emptyTextSx = {
-  color: '#9a8a6a',
+  color: UI_COLORS.textDim,
   fontSize: '0.9rem',
   fontStyle: 'italic',
   fontFamily: '"EB Garamond", Georgia, serif',
@@ -168,7 +169,7 @@ export const emptyTextSx = {
 export const errorTextSx = {
   width: '100%',
   maxWidth: '640px',
-  color: '#de675f',
+  color: UI_COLORS.danger,
   fontSize: '0.82rem',
   mb: '0.75rem',
 };

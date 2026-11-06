@@ -5,6 +5,7 @@ import HpStepper from '../../../shared/character/combat/HpStepper.jsx';
 import { normalizeDeathSaves } from '../../../shared/character/combat/vitals.js';
 import { EXHAUSTION_MAX } from '../state/calculations.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 const CINZEL = '"Cinzel", Georgia, serif';
 // When the panel fills its row (embedded sheet) the content follows the panel:
@@ -61,7 +62,7 @@ export default function HPBlock({
   const { success: dsSuccess, fail: dsFail } = normalizeDeathSaves(sheet.deathSaves);
   const atZero = sheet.currentHP === 0;
   const dead = (sheet.exhaustionLevel || 0) >= EXHAUSTION_MAX;
-  const hpColor = sheet.currentHP > sheet.maxHP / 2 ? '#58b879' : sheet.currentHP > 0 ? '#d69245' : '#c54a3f';
+  const hpColor = sheet.currentHP > sheet.maxHP / 2 ? UI_COLORS.success : sheet.currentHP > 0 ? UI_COLORS.warning : UI_COLORS.dangerHp;
 
   const startEdit = (key, current) => {
     setEditVal(String(current));
@@ -97,16 +98,16 @@ export default function HPBlock({
   const rowSx = { display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto', alignItems: 'center', gap: fillWidth ? FILL_COLUMN_GAP : '0.4rem', mt: 0.3 };
 
   return (
-    <Box sx={{ width: fillWidth ? '100%' : { xs: '100%', md: 260 }, flexShrink: 0, bgcolor: 'rgba(35,32,26,1)', border: 1, borderColor: 'divider', borderRadius: 1 }}>
+    <Box sx={{ width: fillWidth ? '100%' : { xs: '100%', md: 260 }, flexShrink: 0, bgcolor: UI_COLORS.headerBg, border: 1, borderColor: 'divider', borderRadius: 1 }}>
       <Box sx={{ width: fillWidth ? FILL_CONTENT_WIDTH : undefined, mx: 'auto', p: '0.3rem 0.45rem' }}>
         <Typography sx={{ fontFamily: CINZEL, fontSize: '0.5rem', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'text.secondary' }}>
           HP
         </Typography>
 
         {dead && (
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, my: 0.3, py: 0.2, border: 1, borderColor: '#e5484d', borderRadius: 1, bgcolor: 'rgba(229,72,77,0.12)' }}>
-            <Skull size={12} style={{ color: '#e5484d' }} />
-            <Typography sx={{ fontFamily: CINZEL, fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#e5484d' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, my: 0.3, py: 0.2, border: 1, borderColor: UI_COLORS.dangerBright, borderRadius: 1, bgcolor: uiAlpha(UI_COLORS.dangerBright, 0.12) }}>
+            <Skull size={12} style={{ color: UI_COLORS.dangerBright }} />
+            <Typography sx={{ fontFamily: CINZEL, fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: UI_COLORS.dangerBright }}>
               Dead — Exhaustion {EXHAUSTION_MAX}
             </Typography>
           </Box>
@@ -137,8 +138,8 @@ export default function HPBlock({
             onAmount={setHpAmt}
             onPlus={(n) => onHeal(n)}
             onMinus={(n) => onDamage(n)}
-            plusColor="#58b879"
-            minusColor="#de675f"
+            plusColor={UI_COLORS.success}
+            minusColor={UI_COLORS.danger}
             plusLabel="Heal"
             minusLabel="Damage"
           />
@@ -149,12 +150,12 @@ export default function HPBlock({
           <Box sx={chipSx}>
             <Sparkles size={10} /> TEMP
             {editing === 'temp' ? (
-              editField({ width: 40, ml: 'auto' }, { fontSize: '0.7rem', color: '#edd48a' })
+              editField({ width: 40, ml: 'auto' }, { fontSize: '0.7rem', color: UI_COLORS.goldLight })
             ) : (
               <Box
                 component="b"
                 onClick={() => startEdit('temp', sheet.tempHP)}
-                sx={{ color: '#edd48a', fontWeight: 700, ml: 'auto', cursor: 'pointer', '&:hover': { opacity: 0.7 } }}
+                sx={{ color: UI_COLORS.goldLight, fontWeight: 700, ml: 'auto', cursor: 'pointer', '&:hover': { opacity: 0.7 } }}
               >
                 {sheet.tempHP}
               </Box>
@@ -176,12 +177,12 @@ export default function HPBlock({
           <Box sx={chipSx}>
             <HeartPulse size={10} /> MAX MOD
             {editing === 'mod' ? (
-              editField({ width: 44, ml: 'auto' }, { fontSize: '0.7rem', color: '#edd48a' })
+              editField({ width: 44, ml: 'auto' }, { fontSize: '0.7rem', color: UI_COLORS.goldLight })
             ) : (
               <Box
                 component="b"
                 onClick={() => startEdit('mod', sheet.maxHPBonus)}
-                sx={{ color: '#edd48a', fontWeight: 700, ml: 'auto', cursor: 'pointer', '&:hover': { opacity: 0.7 } }}
+                sx={{ color: UI_COLORS.goldLight, fontWeight: 700, ml: 'auto', cursor: 'pointer', '&:hover': { opacity: 0.7 } }}
               >
                 {signed(sheet.maxHPBonus)}
               </Box>
@@ -210,7 +211,7 @@ export default function HPBlock({
                     <Box
                       key={`s${i}`}
                       onClick={() => onDeathSaveSet?.('success', dsSuccess === i + 1 ? i : i + 1)}
-                      sx={{ width: 13, height: 13, borderRadius: '50%', border: 1, borderColor: 'divider', bgcolor: i < dsSuccess ? '#58b879' : 'transparent', cursor: 'pointer', '&:hover': { borderColor: '#58b879' } }}
+                      sx={{ width: 13, height: 13, borderRadius: '50%', border: 1, borderColor: 'divider', bgcolor: i < dsSuccess ? UI_COLORS.success : 'transparent', cursor: 'pointer', '&:hover': { borderColor: UI_COLORS.success } }}
                     />
                   ))}
                 </Box>
@@ -221,7 +222,7 @@ export default function HPBlock({
                     <Box
                       key={`f${i}`}
                       onClick={() => onDeathSaveSet?.('fail', dsFail === i + 1 ? i : i + 1)}
-                      sx={{ width: 13, height: 13, borderRadius: '50%', border: 1, borderColor: 'divider', bgcolor: i < dsFail ? '#de675f' : 'transparent', cursor: 'pointer', '&:hover': { borderColor: '#de675f' } }}
+                      sx={{ width: 13, height: 13, borderRadius: '50%', border: 1, borderColor: 'divider', bgcolor: i < dsFail ? UI_COLORS.danger : 'transparent', cursor: 'pointer', '&:hover': { borderColor: UI_COLORS.danger } }}
                     />
                   ))}
                 </Box>

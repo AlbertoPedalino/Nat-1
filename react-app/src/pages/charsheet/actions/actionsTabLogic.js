@@ -23,13 +23,14 @@ import {
 } from '../../../shared/character/dice/rollers.js';
 import { ownedFeatNames } from '../../../shared/character/progression/selectedFeats.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 export { getActionRollers } from '../../../shared/character/dice/rollers.js';
 
 export const FILTERS = ['all', 'action', 'bonus', 'reaction', 'special'];
 // Weapon/unarmed attacks get a red left-bar so attacks stand apart from other
 // Actions at a glance; the rest follow the shared action-economy colours.
-export const CAT_COLORS = { ...ACTION_COLORS, attack: '#de675f' };
+export const CAT_COLORS = { ...ACTION_COLORS, attack: UI_COLORS.danger };
 // 'special' = features used with no action or on a trigger (Lengthened Strike,
 // Umbral Form, Portal Step…), shown in the "Other" section.
 const EXECUTABLE_CATS = new Set(['attack', 'action', 'bonus', 'reaction', 'special']);

@@ -4,6 +4,7 @@ import { CalendarDays, Check, Clock, Compass, FastForward } from 'lucide-react';
 import { useGmBoard } from '../state/GmBoardContext.jsx';
 import { formatDate, formatHM, parseHM, validateStart } from './time.js';
 import { travelTime } from './weather.js';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 export default function TimePanel() {
   const { state, setStart, setTime, advanceManual } = useGmBoard();
@@ -145,7 +146,7 @@ const clockDisplaySx = {
   border: '1px solid',
   borderColor: 'divider',
   borderRadius: 2,
-  bgcolor: 'rgba(237, 212, 138, 0.045)',
+  bgcolor: uiAlpha(UI_COLORS.goldLight, 0.045),
 };
 
 const dateBlockSx = {

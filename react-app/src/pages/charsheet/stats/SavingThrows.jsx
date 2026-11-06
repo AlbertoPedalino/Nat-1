@@ -21,6 +21,7 @@ import {
 import { advantageVisual, autoFailVisual } from './advantageMark.jsx';
 import RollModeArea from '../../../shared/character/dice/RollModeArea.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 export default function SavingThrows({ C, sheet, onRoll }) {
   const profSets = useProficiencySets();
@@ -73,7 +74,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
 
   return (
     <Paper variant="outlined" sx={{ mb: '0.6rem', overflow: 'hidden' }}>
-      <Box sx={{ bgcolor: 'rgba(35,32,26,1)', borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1, px: '0.8rem', py: '0.48rem', borderLeft: 3, borderLeftColor: 'primary.main' }}>
+      <Box sx={{ bgcolor: UI_COLORS.headerBg, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1, px: '0.8rem', py: '0.48rem', borderLeft: 3, borderLeftColor: 'primary.main' }}>
         <Dice5 size={14} />
         <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'primary.main' }}>
           Saving Throws
@@ -95,7 +96,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
             <RollModeArea key={st} onClick={(e) => handleSaveClick(e, st, hasDisadv, hasAdv)}
               sources={{ adv: hasAdv, disadv: hasDisadv }}
               onPick={(advArg) => onRoll(st, { advantage: advArg === true || undefined, disadvantage: advArg === false || undefined })}
-              sx={{ display: 'flex', alignItems: 'center', gap: 1, py: '3px', cursor: 'pointer', borderRadius: 1, '&:hover': { bgcolor: 'rgba(202,165,80,0.04)' } }}>
+              sx={{ display: 'flex', alignItems: 'center', gap: 1, py: '3px', cursor: 'pointer', borderRadius: 1, '&:hover': { bgcolor: uiAlpha(UI_COLORS.gold, 0.04) } }}>
               <Box sx={{ width: 10, height: 10, borderRadius: '50%', flexShrink: 0, transition: 'all 0.1s', border: 1, borderColor: 'divider', bgcolor: prof ? 'primary.main' : 'transparent' }} />
               <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', fontWeight: 600, color: 'text.secondary', letterSpacing: '0.08em', width: 28, flexShrink: 0 }}>
                 {SLBL[st]}
@@ -113,7 +114,7 @@ export default function SavingThrows({ C, sheet, onRoll }) {
               )}
               {hasContextMenu ? (
                 <Tooltip title="Click to pick save context (vs spell / vs poison / etc.)">
-                  <ChevronDown size={12} style={{ color: '#edd48a', flexShrink: 0, opacity: 0.6 }} />
+                  <ChevronDown size={12} style={{ color: UI_COLORS.goldLight, flexShrink: 0, opacity: 0.6 }} />
                 </Tooltip>
               ) : null}
             </RollModeArea>
@@ -125,10 +126,10 @@ export default function SavingThrows({ C, sheet, onRoll }) {
         <Box sx={{ borderTop: 1, borderColor: 'divider', px: '0.8rem', py: '0.5rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
           {d20FloorReminders.map((r, i) => (
             <Box key={`d20floor-${i}`} sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75 }}>
-              <Dice5 size={13} style={{ color: '#c9a86a', flexShrink: 0, marginTop: 2 }} />
+              <Dice5 size={13} style={{ color: UI_COLORS.goldWarm, flexShrink: 0, marginTop: 2 }} />
               <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
-                  <Typography component="span" sx={{ fontSize: '0.7rem', color: '#c9a86a', fontWeight: 700, flexShrink: 0 }}>
+                  <Typography component="span" sx={{ fontSize: '0.7rem', color: UI_COLORS.goldWarm, fontWeight: 700, flexShrink: 0 }}>
                     Min {r.minRoll}
                   </Typography>
                   <Typography component="span" sx={{ fontSize: '0.7rem', color: 'text.primary' }}>
@@ -145,10 +146,10 @@ export default function SavingThrows({ C, sheet, onRoll }) {
           ))}
           {concentrationBonus > 0 && (
             <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75 }}>
-              <Sparkles size={13} style={{ color: '#70b7a6', flexShrink: 0, marginTop: 2 }} />
+              <Sparkles size={13} style={{ color: UI_COLORS.teal, flexShrink: 0, marginTop: 2 }} />
               <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
-                  <Typography component="span" sx={{ fontSize: '0.7rem', color: '#70b7a6', fontWeight: 700, flexShrink: 0 }}>
+                  <Typography component="span" sx={{ fontSize: '0.7rem', color: UI_COLORS.teal, fontWeight: 700, flexShrink: 0 }}>
                     +{concentrationBonus}
                   </Typography>
                   <Typography component="span" sx={{ fontSize: '0.7rem', color: 'text.primary' }}>
@@ -188,12 +189,12 @@ export default function SavingThrows({ C, sheet, onRoll }) {
       )}
 
       <Menu anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={() => setMenuAnchor(null)}
-        slotProps={{ paper: { sx: { bgcolor: 'rgba(26,23,19,0.98)', border: 1, borderColor: 'divider' } } }}>
+        slotProps={{ paper: { sx: { bgcolor: uiAlpha(UI_COLORS.surfaceDeep, 0.98), border: 1, borderColor: 'divider' } } }}>
         <MenuItem onClick={() => handleMenuPick('none')} sx={{ fontSize: '0.75rem' }}>
           Normal save
         </MenuItem>
         {saveContexts.map(([target, sources]) => (
-          <MenuItem key={target} onClick={() => handleMenuPick(target)} sx={{ fontSize: '0.75rem', color: '#70b7a6' }}>
+          <MenuItem key={target} onClick={() => handleMenuPick(target)} sx={{ fontSize: '0.75rem', color: UI_COLORS.teal }}>
             vs {target} — Advantage
             <Typography sx={{ ml: 1, fontSize: '0.6rem', color: 'text.secondary', fontStyle: 'italic' }}>
               ({sources.join(', ')})

@@ -1,5 +1,6 @@
 import { Box } from '@mui/material';
 import { usePortrait } from './usePortraits.js';
+import { UI_COLORS } from '../../ui/colors.js';
 
 // The round badge that stands for a character: their portrait if they have one,
 // and the class icon in their chosen colour if they do not.
@@ -29,7 +30,7 @@ export default function PortraitBadge({ path, size, color, children, sx, ...prop
         overflow: 'hidden',
         // The colour still shows behind a portrait that has not arrived yet, so
         // the badge never flashes as a hole in the layout.
-        bgcolor: color || 'rgba(46,42,34,1)',
+        bgcolor: color || UI_COLORS.surfaceRaised,
         ...sx,
       }}
     >

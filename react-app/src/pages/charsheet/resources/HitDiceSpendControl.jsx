@@ -1,6 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import PipButton from '../../../shared/ui/PipButton.jsx';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 // Interactive Hit Dice pips for the Short Rest dialog. Mirrors the look of
 // the old standalone Hit Dice panel: hollow pips are dice already used,
@@ -11,7 +12,7 @@ export default function HitDiceSpendControl({ pool, value, onChange, conMod }) {
   const setCount = (n) => onChange(Math.max(0, Math.min(n, pool.remaining)));
 
   return (
-    <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 1, bgcolor: 'rgba(35,32,26,0.72)' }}>
+    <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 1, bgcolor: uiAlpha(UI_COLORS.headerBg, 0.72) }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.6 }}>
         <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.72rem', color: 'primary.main', flex: 1 }}>
           {pool.label} d{pool.faces}
@@ -32,9 +33,9 @@ export default function HitDiceSpendControl({ pool, value, onChange, conMod }) {
               title={used ? 'Already used' : spending ? 'Will spend' : 'Available'}
               sx={{
                 fontSize: '0.66rem',
-                borderColor: spending ? '#caa550' : used ? 'divider' : 'rgba(202,165,80,0.5)',
-                color: spending ? '#1a1713' : used ? 'text.disabled' : 'primary.main',
-                bgcolor: spending ? '#caa550' : used ? 'rgba(35,32,26,1)' : 'rgba(202,165,80,0.14)',
+                borderColor: spending ? UI_COLORS.gold : used ? 'divider' : uiAlpha(UI_COLORS.gold, 0.5),
+                color: spending ? UI_COLORS.surfaceDeep : used ? 'text.disabled' : 'primary.main',
+                bgcolor: spending ? UI_COLORS.gold : used ? UI_COLORS.headerBg : uiAlpha(UI_COLORS.gold, 0.14),
                 opacity: used ? 0.35 : 1,
               }}
             >

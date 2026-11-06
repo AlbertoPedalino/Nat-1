@@ -3,6 +3,7 @@ import { Box, Button, Stack, Typography } from '@mui/material';
 import { getRollTable, rollTable } from '../../../shared/character/dice/rollTables.js';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { classLevel } from '../../../shared/character/progression/classLevel.js';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 // Lenient variant: falls back to the TOTAL character level when the character
 // has no levels in `className` (used by generic feature panels that still want a
@@ -15,7 +16,7 @@ function getClassLevel(C, className) {
 function FeatureBox({ title, accent, children }) {
   return (
     <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 1.2 }}>
-      <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.68rem', fontWeight: 700, color: accent || '#edd48a', letterSpacing: '0.08em', mb: 0.4 }}>
+      <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.68rem', fontWeight: 700, color: accent || UI_COLORS.goldLight, letterSpacing: '0.08em', mb: 0.4 }}>
         {title}
       </Typography>
       {children}
@@ -109,7 +110,7 @@ export default function ActionDetailPanel({ action, character, sheet }) {
   return (
     <Box
       onClick={(e) => e.stopPropagation()}
-      sx={{ mt: 0.8, p: 1, bgcolor: 'rgba(237,212,138,0.04)', border: 1, borderColor: 'divider', borderRadius: 1 }}
+      sx={{ mt: 0.8, p: 1, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.04), border: 1, borderColor: 'divider', borderRadius: 1 }}
     >
       <Stack spacing={1.2}>
         {sections.map((s, i) => (
@@ -133,15 +134,15 @@ export default function ActionDetailPanel({ action, character, sheet }) {
               {dual ? (roll.dualLabel || 'Roll Two') : (roll.label || `Roll d${tableMeta.sides}`)}
             </Button>
             {dual && roll.dualNote ? (
-              <Typography sx={{ mt: 0.3, fontSize: '0.6rem', color: '#70b7a6', fontStyle: 'italic' }}>
+              <Typography sx={{ mt: 0.3, fontSize: '0.6rem', color: UI_COLORS.teal, fontStyle: 'italic' }}>
                 {roll.dualNote}
               </Typography>
             ) : null}
             {result ? (
-              <Box sx={{ mt: 0.4, p: 0.6, bgcolor: 'rgba(237,212,138,0.06)', borderRadius: 1 }}>
+              <Box sx={{ mt: 0.4, p: 0.6, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.06), borderRadius: 1 }}>
                 {result.dual ? (
                   <>
-                    <Typography sx={{ fontSize: '0.65rem', color: '#edd48a', fontWeight: 700, mb: 0.3 }}>
+                    <Typography sx={{ fontSize: '0.65rem', color: UI_COLORS.goldLight, fontWeight: 700, mb: 0.3 }}>
                       Choose one:
                     </Typography>
                     {result.rolls.map((r, i) => (
@@ -152,7 +153,7 @@ export default function ActionDetailPanel({ action, character, sheet }) {
                   </>
                 ) : (
                   <>
-                    <Typography sx={{ fontSize: '0.65rem', color: '#edd48a', fontWeight: 700 }}>
+                    <Typography sx={{ fontSize: '0.65rem', color: UI_COLORS.goldLight, fontWeight: 700 }}>
                       d{tableMeta.sides}: {result.rolls[0].value}
                     </Typography>
                     <Typography sx={{ fontSize: '0.62rem', color: 'text.secondary', mt: 0.2 }}>
@@ -170,7 +171,7 @@ export default function ActionDetailPanel({ action, character, sheet }) {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
-                  sx={{ fontSize: '0.55rem', color: '#4d95d6', textDecoration: 'underline', cursor: 'pointer' }}
+                  sx={{ fontSize: '0.55rem', color: UI_COLORS.blue, textDecoration: 'underline', cursor: 'pointer' }}
                 >
                   {roll.sourceLinkLabel || roll.sourceLink}
                 </Typography>

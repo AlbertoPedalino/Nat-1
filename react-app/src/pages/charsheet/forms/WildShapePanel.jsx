@@ -11,6 +11,7 @@ import {
   exitWildShapePatch,
 } from '../../../shared/character/forms/wildShapeForm.js';
 import { classLevel } from '../../../shared/character/progression/classLevel.js';
+import { UI_COLORS } from '../../../shared/ui/colors.js';
 
 // Sheet panel for the Wild Shape action. Lists the player's known beast forms
 // (chosen in the builder), and transforms into / reverts from one. Transform
@@ -67,7 +68,7 @@ export default function WildShapePanel({ action, character, sheet, resources, on
     return (
       <Box onClick={(e) => e.stopPropagation()} sx={panelSx}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, mb: 0.5 }}>
-          <PawPrint size={14} color="#edd48a" />
+          <PawPrint size={14} color={UI_COLORS.goldLight} />
           <Typography sx={headerSx} component="span">Transformed —</Typography>
           <BeastNameLink name={b.name} source={b.source} sx={headerSx} />
           <Button size="small" onClick={revert} sx={{ ...dismissButtonSx, ml: 'auto' }}>
@@ -85,7 +86,7 @@ export default function WildShapePanel({ action, character, sheet, resources, on
   return (
     <Box onClick={(e) => e.stopPropagation()} sx={panelSx}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, mb: 0.5 }}>
-        <PawPrint size={14} color="#edd48a" />
+        <PawPrint size={14} color={UI_COLORS.goldLight} />
         <Typography sx={headerSx}>Known Beast Forms</Typography>
       </Box>
       {!forms.length ? (
@@ -103,7 +104,7 @@ export default function WildShapePanel({ action, character, sheet, resources, on
               summary={beast
                 ? `CR ${beast.cr} · ${beast.size} · AC ${beast.ac ?? '—'} · HP ${beast.hp.average}`
                 : 'Beast data unavailable'}
-              summaryColor={beast ? undefined : '#c98a8a'}
+              summaryColor={beast ? undefined : UI_COLORS.dangerMuted}
               actionLabel="Transform"
               onAction={() => transform(beast)}
               actionDisabled={!beast || usesLeft <= 0}
@@ -114,7 +115,7 @@ export default function WildShapePanel({ action, character, sheet, resources, on
         </Stack>
       )}
       {lv >= 2 ? (
-        <Typography sx={{ ...subSx, fontStyle: 'italic', mt: 0.6, color: usesLeft <= 0 ? '#c98a8a' : 'text.secondary' }}>
+        <Typography sx={{ ...subSx, fontStyle: 'italic', mt: 0.6, color: usesLeft <= 0 ? UI_COLORS.dangerMuted : 'text.secondary' }}>
           {usesLeft <= 0
             ? 'No Wild Shape uses left — finish a Short or Long Rest.'
             : `Transform spends one Wild Shape use (${usesLeft} left).`}

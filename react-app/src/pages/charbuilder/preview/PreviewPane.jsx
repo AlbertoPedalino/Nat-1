@@ -52,8 +52,9 @@ import { ENTITY_COLORS as SOURCE_COLOR, NEUTRAL_TONE } from '../../../shared/ui/
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { abilityModifier } from '../../../shared/character/progression/abilityModifier.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
-const darkChipText = '#17120d';
+const darkChipText = UI_COLORS.primaryContrast;
 const PROFICIENCY_TONE = NEUTRAL_TONE;
 
 
@@ -64,14 +65,14 @@ const PANEL_SX = {
   maxHeight: { md: 'calc(100vh - 76px)' },
   overflow: 'auto',
   minWidth: 0,
-  borderColor: 'rgba(237, 212, 138, 0.22)',
-  bgcolor: 'rgba(17, 16, 14, 0.72)',
+  borderColor: uiAlpha(UI_COLORS.goldLight, 0.22),
+  bgcolor: uiAlpha(UI_COLORS.inkSoft, 0.72),
 };
 
 const SECTION_CARD_SX = {
   minWidth: 0,
-  borderColor: 'rgba(237, 212, 138, 0.18)',
-  bgcolor: 'rgba(255, 255, 255, 0.025)',
+  borderColor: uiAlpha(UI_COLORS.goldLight, 0.18),
+  bgcolor: uiAlpha(UI_COLORS.white, 0.025),
   backgroundImage: 'none',
 };
 
@@ -151,7 +152,7 @@ function PreviewHeader({ character, hp }) {
   ];
 
   return (
-    <Card variant="outlined" sx={{ ...SECTION_CARD_SX, borderColor: 'rgba(237, 212, 138, 0.32)' }}>
+    <Card variant="outlined" sx={{ ...SECTION_CARD_SX, borderColor: uiAlpha(UI_COLORS.goldLight, 0.32) }}>
       <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
         <Stack spacing={0.4} sx={{ minWidth: 0 }}>
           <Typography sx={{ ...SECTION_HEADER_SX, color: 'primary.main' }}>Preview</Typography>
@@ -198,8 +199,8 @@ function filledChipSx(bg) {
     backgroundColor: bg,
     color: darkChipText,
     fontWeight: 700,
-    border: '1px solid rgba(255, 232, 176, 0.65)',
-    boxShadow: '0 0 0 1px rgba(0, 0, 0, 0.28) inset',
+    border: `1px solid ${uiAlpha(UI_COLORS.goldPale, 0.65)}`,
+    boxShadow: `0 0 0 1px ${uiAlpha(UI_COLORS.black, 0.28)} inset`,
     '& .MuiChip-label': { color: darkChipText },
   };
 }
@@ -301,7 +302,7 @@ function LevelGroup({ level, classFeatures, subFeatures }) {
   return (
     <Stack spacing={0.5} sx={{ minWidth: 0 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 0.4 }}>
-        <Divider sx={{ flex: 1, borderColor: 'rgba(237,212,138,0.22)' }} />
+        <Divider sx={{ flex: 1, borderColor: uiAlpha(UI_COLORS.goldLight, 0.22) }} />
         <Chip
           size="small"
           label={`Level ${level}`}
@@ -313,7 +314,7 @@ function LevelGroup({ level, classFeatures, subFeatures }) {
             letterSpacing: '0.08em',
           }}
         />
-        <Divider sx={{ flex: 1, borderColor: 'rgba(237,212,138,0.22)' }} />
+        <Divider sx={{ flex: 1, borderColor: uiAlpha(UI_COLORS.goldLight, 0.22) }} />
       </Box>
       <Stack spacing={0.5} sx={{ minWidth: 0 }}>
         {classFeatures.map((feature) => (

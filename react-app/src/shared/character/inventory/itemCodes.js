@@ -3,6 +3,7 @@ import { parseSignedBonus } from './itemBonus.js';
 import { signed } from '../../ui/numberFormat.js';
 import { capitalize, titleCase } from '../../ui/textCase.js';
 import { stripSource } from '../../content/nameKeys.js';
+import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
 
 // Type codes match 5etools schema. Note: "R" here means a Ranged Weapon item type;
 // the same letter as a weapon property means "Reach" (see WEAPON_PROPERTY_LABELS).
@@ -453,12 +454,12 @@ export function buildItemPropertySegments(item, options = {}) {
 }
 
 export const PROPERTY_CHIP_TONES = {
-  prop: { color: '#c4b393', borderColor: 'rgba(196,179,147,0.45)', bgcolor: 'rgba(196,179,147,0.10)' },
-  damage: { color: '#de675f', borderColor: 'rgba(222,103,95,0.45)', bgcolor: 'rgba(222,103,95,0.12)' },
-  ac: { color: '#4d95d6', borderColor: 'rgba(77,149,214,0.45)', bgcolor: 'rgba(77,149,214,0.12)' },
-  req: { color: '#d69245', borderColor: 'rgba(214,146,69,0.45)', bgcolor: 'rgba(214,146,69,0.12)' },
-  penalty: { color: '#de675f', borderColor: 'rgba(222,103,95,0.45)', bgcolor: 'rgba(222,103,95,0.12)' },
-  range: { color: '#4d95d6', borderColor: 'rgba(77,149,214,0.45)', bgcolor: 'rgba(77,149,214,0.12)' },
-  weight: { color: '#a89882', borderColor: 'rgba(168,152,130,0.45)', bgcolor: 'transparent' },
-  mastery: { color: '#edd48a', borderColor: 'rgba(237,212,138,0.55)', bgcolor: 'rgba(237,212,138,0.14)' },
+  prop: { color: UI_COLORS.textParchment, borderColor: uiAlpha(UI_COLORS.textParchment, 0.45), bgcolor: uiAlpha(UI_COLORS.textParchment, 0.10) },
+  damage: { color: UI_COLORS.danger, borderColor: uiAlpha(UI_COLORS.danger, 0.45), bgcolor: uiAlpha(UI_COLORS.danger, 0.12) },
+  ac: { color: UI_COLORS.blue, borderColor: uiAlpha(UI_COLORS.blue, 0.45), bgcolor: uiAlpha(UI_COLORS.blue, 0.12) },
+  req: { color: UI_COLORS.warning, borderColor: uiAlpha(UI_COLORS.warning, 0.45), bgcolor: uiAlpha(UI_COLORS.warning, 0.12) },
+  penalty: { color: UI_COLORS.danger, borderColor: uiAlpha(UI_COLORS.danger, 0.45), bgcolor: uiAlpha(UI_COLORS.danger, 0.12) },
+  range: { color: UI_COLORS.blue, borderColor: uiAlpha(UI_COLORS.blue, 0.45), bgcolor: uiAlpha(UI_COLORS.blue, 0.12) },
+  weight: { color: UI_COLORS.textStone, borderColor: uiAlpha(UI_COLORS.textStone, 0.45), bgcolor: 'transparent' },
+  mastery: { color: UI_COLORS.goldLight, borderColor: uiAlpha(UI_COLORS.goldLight, 0.55), bgcolor: uiAlpha(UI_COLORS.goldLight, 0.14) },
 };

@@ -6,6 +6,7 @@ import { makeSheetPayload, saveCharacter } from '../state/persistence.js';
 import { downloadCharacterExport } from '../state/characterExport.js';
 import { getActiveCharId } from '../../../shared/character/profile/store.js';
 import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 function charIdFromUrl() {
   const id = new URLSearchParams(window.location.search).get('char');
@@ -42,7 +43,7 @@ export default function SheetStep({ state, dispatch, importDraft = false, onUplo
             border: 1,
             borderColor: 'divider',
             borderRadius: 1,
-            bgcolor: 'rgba(26,23,19,0.66)',
+            bgcolor: uiAlpha(UI_COLORS.surfaceDeep, 0.66),
             px: 1.4,
             py: 1.25,
             display: 'flex',

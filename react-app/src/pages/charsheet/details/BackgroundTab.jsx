@@ -4,6 +4,7 @@ import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import { ENTITY_COLORS } from '../../../shared/ui/entityColors.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
 import { stripSource } from '../../../shared/content/nameKeys.js';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 const BG = ENTITY_COLORS.background;
 
@@ -107,8 +108,8 @@ export default function BackgroundTab({ C }) {
   const equipment = renderEquipment(background.startingEquipment);
 
   return (
-    <Paper variant="outlined" sx={{ p: 1.5, bgcolor: 'rgba(35,32,26,1)', overflow: 'hidden' }}>
-      <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mb: 1, pb: 0.5, borderBottom: 1, borderColor: 'rgba(237,212,138,0.22)' }}>
+    <Paper variant="outlined" sx={{ p: 1.5, bgcolor: UI_COLORS.headerBg, overflow: 'hidden' }}>
+      <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mb: 1, pb: 0.5, borderBottom: 1, borderColor: uiAlpha(UI_COLORS.goldLight, 0.22) }}>
         <GraduationCap size={16} color={BG} />
         <Typography variant="overline" sx={{ letterSpacing: 1, color: BG, fontWeight: 700 }}>
           Background — {backgroundName || '?'}
@@ -143,7 +144,7 @@ export default function BackgroundTab({ C }) {
       </Box>
 
       {equipment.length > 0 && (
-        <Box sx={{ mt: 0.75, pt: 0.5, borderTop: 1, borderColor: 'rgba(237,212,138,0.22)' }}>
+        <Box sx={{ mt: 0.75, pt: 0.5, borderTop: 1, borderColor: uiAlpha(UI_COLORS.goldLight, 0.22) }}>
           <Typography variant="caption" sx={{ color: BG, fontWeight: 700, letterSpacing: 0.5, mb: 0.2, display: 'block' }}>
             Starting Equipment
           </Typography>

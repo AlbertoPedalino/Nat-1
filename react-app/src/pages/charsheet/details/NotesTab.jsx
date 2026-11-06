@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { Box, IconButton, TextField, Typography } from '@mui/material';
 import { Plus, Minus, PencilLine, Check } from 'lucide-react';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 function normalizePages(raw) {
   if (!raw) return [{ id: 'page_1', name: 'General', content: '' }];
@@ -19,9 +20,9 @@ function PageTab({ page, active, onClick }) {
       onClick={onClick}
       sx={{
         px: 1.2, py: 0.5, borderRadius: 1, cursor: 'pointer', userSelect: 'none', fontSize: '0.75rem', fontWeight: 700, fontFamily: '"Cinzel", Georgia, serif',
-        bgcolor: active ? 'primary.main' : 'rgba(255,232,176,0.08)', color: active ? 'primary.contrastText' : 'text.secondary',
+        bgcolor: active ? 'primary.main' : uiAlpha(UI_COLORS.goldPale, 0.08), color: active ? 'primary.contrastText' : 'text.secondary',
         border: 1, borderColor: active ? 'primary.main' : 'divider', whiteSpace: 'nowrap', minWidth: 0,
-        '&:hover': { bgcolor: active ? 'primary.dark' : 'rgba(255,232,176,0.15)' },
+        '&:hover': { bgcolor: active ? 'primary.dark' : uiAlpha(UI_COLORS.goldPale, 0.15) },
       }}
     >
       {page.name}
@@ -126,7 +127,7 @@ export default function NotesTab({ sheet }) {
         value={activePage.content}
         onChange={(e) => changeContent(activeIdx, e.target.value)}
         sx={{
-          '& .MuiInputBase-root': { bgcolor: 'rgba(35,32,26,1)', color: 'text.primary', fontFamily: 'Georgia, serif', fontSize: '0.875rem' },
+          '& .MuiInputBase-root': { bgcolor: UI_COLORS.headerBg, color: 'text.primary', fontFamily: 'Georgia, serif', fontSize: '0.875rem' },
           '& fieldset': { borderColor: 'divider' },
           '&:focus-within fieldset': { borderColor: 'primary.main' },
         }}

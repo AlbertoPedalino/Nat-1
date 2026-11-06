@@ -1,5 +1,6 @@
 import { Box, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Stack, Typography } from '@mui/material';
 import { X } from 'lucide-react';
+import { UI_COLORS, uiAlpha } from './colors.js';
 
 // Dialog chrome that matches the character-sheet panels (dark surface, gold
 // left-accent header bar, uppercase Cinzel title) so dialogs feel native to
@@ -8,19 +9,19 @@ import { X } from 'lucide-react';
 // title-bar extras (counts, a Clear button) and `actions` for the button bar.
 
 const paperSx = {
-  bgcolor: 'rgba(26,23,19,0.98)',
+  bgcolor: uiAlpha(UI_COLORS.surfaceDeep, 0.98),
   border: 1,
   borderColor: 'divider',
   borderRadius: 2,
   backgroundImage: 'none',
-  boxShadow: '0 18px 52px rgba(0,0,0,0.62)',
+  boxShadow: `0 18px 52px ${uiAlpha(UI_COLORS.black, 0.62)}`,
 };
 
 const titleSx = {
   display: 'flex',
   alignItems: 'center',
   gap: 1,
-  bgcolor: 'rgba(35,32,26,1)',
+  bgcolor: UI_COLORS.headerBg,
   borderBottom: 1,
   borderColor: 'divider',
   borderLeft: 3,
@@ -44,13 +45,13 @@ const titleTextSx = {
 // `.MuiDialogTitle-root + .MuiDialogContent-root { padding-top: 0 }` rule —
 // a plain `pt` loses to it and is silently ignored. The gap below the title
 // bar is set via the `topPad` prop.
-const contentSx = { bgcolor: 'rgba(26,23,19,0.98)', px: 2.25, pb: 2 };
+const contentSx = { bgcolor: uiAlpha(UI_COLORS.surfaceDeep, 0.98), px: 2.25, pb: 2 };
 
 const actionsSx = {
   px: 2.25,
   py: 1.25,
   gap: 0.75,
-  bgcolor: 'rgba(26,23,19,0.98)',
+  bgcolor: uiAlpha(UI_COLORS.surfaceDeep, 0.98),
   borderTop: 1,
   borderColor: 'divider',
   // Small Cinzel buttons matching the sheet's button scale.

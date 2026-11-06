@@ -43,6 +43,7 @@ import {
 } from './BeastStatBlock.jsx';
 import { useSummonedCreatureRecords } from './useSummonedCreatureRecords.js';
 import { useCreatureRolls } from './useCreatureRolls.js';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 // Sheet panel for the Beast Master's Primal Companion (XPHB 2024), in the
 // family of the Eldritch Cannon and Wild Companion panels: pick the beast and
@@ -123,7 +124,7 @@ export default function PrimalCompanionPanel({ character, sheet }) {
   return (
     <Box onClick={(event) => event.stopPropagation()} sx={panelSx}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, mb: 0.6 }}>
-        <PawPrint size={14} color="#edd48a" />
+        <PawPrint size={14} color={UI_COLORS.goldLight} />
         <BeastNameLink name={creature.name} source={creature.source} sx={headerSx} />
         <Typography sx={{ ...subSx, ml: 'auto' }}>Ranger {rangerLevel}</Typography>
       </Box>
@@ -181,7 +182,7 @@ export default function PrimalCompanionPanel({ character, sheet }) {
             >
               {reviveSlot ? `Revive (level ${reviveSlot} slot)` : 'Revive'}
             </Button>
-            <Typography sx={{ ...subSx, mt: 0.4, fontStyle: 'italic', color: reviveSlot ? 'text.secondary' : '#c98a8a' }}>
+            <Typography sx={{ ...subSx, mt: 0.4, fontStyle: 'italic', color: reviveSlot ? 'text.secondary' : UI_COLORS.dangerMuted }}>
               {reviveSlot
                 ? 'Within an hour of its death: Magic action, touch it, expend a spell slot. It returns after 1 minute with all its HP.'
                 : 'No spell slot to expend — it can be summoned again after a Long Rest.'}
@@ -202,7 +203,7 @@ export default function PrimalCompanionPanel({ character, sheet }) {
         <Box sx={{ mt: 0.6 }}>
           {rules.map((rule) => (
             <Typography key={rule.title} sx={{ ...subSx, mt: 0.3 }}>
-              <Box component="span" sx={{ fontWeight: 700, color: '#edd48a' }}>{rule.title}.</Box> {rule.text}
+              <Box component="span" sx={{ fontWeight: 700, color: UI_COLORS.goldLight }}>{rule.title}.</Box> {rule.text}
             </Typography>
           ))}
         </Box>
@@ -232,7 +233,7 @@ function companionRules(rangerLevel) {
 
 const reviveButtonSx = {
   fontSize: '0.68rem',
-  borderColor: 'rgba(202,165,80,0.5)',
-  color: '#edd48a',
-  '&:hover': { borderColor: '#edd48a', bgcolor: 'rgba(237,212,138,0.08)' },
+  borderColor: uiAlpha(UI_COLORS.gold, 0.5),
+  color: UI_COLORS.goldLight,
+  '&:hover': { borderColor: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.08) },
 };

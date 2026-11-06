@@ -6,6 +6,7 @@ import { collectSenses } from './visionSenses.js';
 import { loadSenseDescriptions, getSenseDescriptionEntries, getFeatureDescriptionEntries } from './senseDescriptions.js';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
 import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 export default function Senses({ C }) {
   const passPerc = 10 + getSkillBonus(C, { n: 'Perception', a: 'wis' });
@@ -43,7 +44,7 @@ export default function Senses({ C }) {
 
   return (
     <Paper variant="outlined" sx={{ mb: '0.6rem', overflow: 'hidden' }}>
-      <Box sx={{ bgcolor: 'rgba(35,32,26,1)', borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1, px: '0.8rem', py: '0.48rem', borderLeft: 3, borderLeftColor: 'primary.main' }}>
+      <Box sx={{ bgcolor: UI_COLORS.headerBg, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1, px: '0.8rem', py: '0.48rem', borderLeft: 3, borderLeftColor: 'primary.main' }}>
         <Eye size={14} />
         <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'primary.main' }}>
           Senses
@@ -63,16 +64,16 @@ export default function Senses({ C }) {
 function SenseRow({ value, label, source, color, entries, note, expanded, onToggle }) {
   const clickable = !!(entries?.length || note);
   return (
-    <Box sx={{ bgcolor: 'rgba(35,32,26,1)', border: 1, borderColor: 'divider', borderRadius: 1, mb: 0.2, overflow: 'hidden' }}>
+    <Box sx={{ bgcolor: UI_COLORS.headerBg, border: 1, borderColor: 'divider', borderRadius: 1, mb: 0.2, overflow: 'hidden' }}>
       <Box
         onClick={clickable ? onToggle : undefined}
         sx={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, px: 1, py: 0.25,
           cursor: clickable ? 'pointer' : 'default',
-          '&:hover': clickable ? { bgcolor: 'rgba(202,165,80,0.05)' } : undefined,
+          '&:hover': clickable ? { bgcolor: uiAlpha(UI_COLORS.gold, 0.05) } : undefined,
         }}
       >
-        <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '1.15rem', fontWeight: 700, color: color || '#edd48a', flexShrink: 0 }}>
+        <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '1.15rem', fontWeight: 700, color: color || UI_COLORS.goldLight, flexShrink: 0 }}>
           {value}
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, minWidth: 0 }}>
@@ -87,7 +88,7 @@ function SenseRow({ value, label, source, color, entries, note, expanded, onTogg
           {clickable ? (
             <ChevronDown
               size={13}
-              style={{ color: '#caa550', flexShrink: 0, opacity: 0.7, transition: 'transform 0.15s', transform: expanded ? 'rotate(180deg)' : 'none' }}
+              style={{ color: UI_COLORS.gold, flexShrink: 0, opacity: 0.7, transition: 'transform 0.15s', transform: expanded ? 'rotate(180deg)' : 'none' }}
             />
           ) : null}
         </Box>

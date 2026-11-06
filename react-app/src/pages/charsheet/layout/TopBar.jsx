@@ -19,6 +19,7 @@ import RollCalculation from '../../../shared/character/dice/RollCalculation.jsx'
 import { rollOutcome } from '../../../shared/character/dice/rollLogPresentation.js';
 import { getActiveCharId } from '../../../shared/character/profile/store.js';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 function cleanFormula(detail) {
   if (!detail) return '';
@@ -41,7 +42,7 @@ function splitLabel(label, detail) {
 const ROLL_LOG_SX = {
   entry: {
     border: 1, borderColor: 'divider', borderRadius: 1, px: 1, py: 0.5, mb: 0.4,
-    bgcolor: 'rgba(35,32,26,0.6)',
+    bgcolor: uiAlpha(UI_COLORS.headerBg, 0.6),
   },
   label: { fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.7rem', color: 'text.primary', fontWeight: 700, letterSpacing: '0.04em', mb: 0.15 },
   formula: { fontSize: '0.6rem', color: 'text.secondary', fontFamily: '"JetBrains Mono", monospace', lineHeight: 1.2 },
@@ -124,7 +125,7 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
           gap: '0.35rem',
           py: '0.35rem',
           borderBottom: 1,
-          borderColor: 'rgba(237,212,138,0.14)',
+          borderColor: uiAlpha(UI_COLORS.goldLight, 0.14),
         }}>
           <Box sx={{ display: 'flex', gap: '0.35rem' }}>
             <Button size="small" variant="outlined" color="primary" startIcon={<Home size={14} />}
@@ -170,7 +171,7 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
               cursor: readOnly ? 'default' : 'pointer',
               fontSize: embedded ? '1rem' : { xs: '1rem', md: '1.4rem' },
               transition: 'border-color 0.15s',
-              ...(readOnly ? {} : { '&:hover': { borderColor: '#caa550' } }),
+              ...(readOnly ? {} : { '&:hover': { borderColor: UI_COLORS.gold } }),
             }}
             onClick={readOnly ? undefined : (event) => setBadgeAnchor(event.currentTarget)}
           >
@@ -217,12 +218,12 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
           />
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, minWidth: 0 }}>
-              <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: embedded ? '0.85rem' : { xs: '0.85rem', md: '1.1rem' }, fontWeight: 700, color: '#edd48a', letterSpacing: '0.04em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: embedded ? '0.85rem' : { xs: '0.85rem', md: '1.1rem' }, fontWeight: 700, color: UI_COLORS.goldLight, letterSpacing: '0.04em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {C.name || 'Unnamed Character'}
               </Typography>
               {readOnly && (
                 <Chip size="small" icon={<Eye size={11} />} label="READ ONLY"
-                  sx={{ flexShrink: 0, height: 18, fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.52rem', letterSpacing: '0.08em', color: '#9ec5e6', borderColor: 'rgba(158,197,230,0.45)', bgcolor: 'rgba(158,197,230,0.08)', '& .MuiChip-icon': { color: '#9ec5e6', ml: '4px' } }}
+                  sx={{ flexShrink: 0, height: 18, fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.52rem', letterSpacing: '0.08em', color: UI_COLORS.blueLight, borderColor: uiAlpha(UI_COLORS.blueLight, 0.45), bgcolor: uiAlpha(UI_COLORS.blueLight, 0.08), '& .MuiChip-icon': { color: UI_COLORS.blueLight, ml: '4px' } }}
                   variant="outlined" />
               )}
             </Box>
@@ -234,14 +235,14 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
 
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.35, width: embedded ? '100%' : { xs: '100%', md: 280, lg: 340 }, flexShrink: 0, alignItems: 'center' }}>
           <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', width: '100%', gap: 1 }}>
-            <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.62rem', color: '#edd48a', letterSpacing: '0.08em', fontWeight: 700 }}>
+            <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.62rem', color: UI_COLORS.goldLight, letterSpacing: '0.08em', fontWeight: 700 }}>
               XP · Level {level}
             </Typography>
             <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary', whiteSpace: 'nowrap' }}>
               {isMaxLevel ? `${formatNumber(currentXp)} XP` : `${formatNumber(currentXp)} / ${formatNumber(nextXp)}`}
             </Typography>
           </Box>
-          <Box sx={{ width: '100%', height: 8, bgcolor: 'rgba(46,42,34,1)', borderRadius: 1, border: '1px solid', borderColor: 'divider', overflow: 'hidden' }}>
+          <Box sx={{ width: '100%', height: 8, bgcolor: UI_COLORS.surfaceRaised, borderRadius: 1, border: '1px solid', borderColor: 'divider', overflow: 'hidden' }}>
             <Box sx={{ height: '100%', bgcolor: 'primary.main', borderRadius: 1, transition: 'width 0.4s', width: `${Math.min(100, xpProgress)}%` }} />
           </Box>
           {!readOnly && (
@@ -269,12 +270,12 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
           )}
           <Button size="small" variant="outlined" startIcon={<Dices size={14} />}
             onClick={() => setCustomRollOpen(true)}
-            sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', letterSpacing: '0.08em', color: '#edd48a', borderColor: 'rgba(237,212,138,0.4)' }}>
+            sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', letterSpacing: '0.08em', color: UI_COLORS.goldLight, borderColor: uiAlpha(UI_COLORS.goldLight, 0.4) }}>
             ROLL
           </Button>
           <Button size="small" variant="outlined" startIcon={<Dices size={14} />}
             onClick={() => setRollLogOpen(true)}
-            sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', letterSpacing: '0.08em', color: '#58b879', borderColor: 'rgba(88,184,121,0.4)' }}>
+            sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', letterSpacing: '0.08em', color: UI_COLORS.success, borderColor: uiAlpha(UI_COLORS.success, 0.4) }}>
             LOG ({rollLog?.length || 0})
           </Button>
       </Box>

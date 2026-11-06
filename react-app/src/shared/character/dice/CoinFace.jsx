@@ -1,5 +1,6 @@
 import { Box } from '@mui/material';
 import { Cross, User } from 'lucide-react';
+import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
 
 // The two sides of a coin: a head, and a cross.
 //
@@ -25,5 +26,5 @@ const faceSx = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  filter: 'drop-shadow(0 1px 0 rgba(0,0,0,0.45))',
+  filter: `drop-shadow(0 1px 0 ${uiAlpha(UI_COLORS.black, 0.45)})`,
 };

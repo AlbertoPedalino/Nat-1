@@ -1,4 +1,5 @@
 import { Box } from '@mui/material';
+import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
 
 // A result, not another roll: roll history uses a quiet, flat silhouette that
 // identifies the die and keeps the face that actually came up readable.
@@ -19,11 +20,11 @@ export default function DieFace2D({ value, faces, color = 'text.primary', dimmed
       sx={{ display: 'block', flex: '0 0 auto', color, opacity: dimmed ? 0.38 : 1 }}
     >
       {sides === 2 ? (
-        <circle cx="20" cy="20" r="17" fill="rgba(232,201,106,0.08)" stroke="currentColor" strokeWidth="2" />
+        <circle cx="20" cy="20" r="17" fill={uiAlpha(UI_COLORS.goldBright, 0.08)} stroke="currentColor" strokeWidth="2" />
       ) : (
         <polygon
           points={pointsForDie(sides)}
-          fill="rgba(232,201,106,0.08)"
+          fill={uiAlpha(UI_COLORS.goldBright, 0.08)}
           stroke="currentColor"
           strokeWidth="2"
           strokeLinejoin="round"

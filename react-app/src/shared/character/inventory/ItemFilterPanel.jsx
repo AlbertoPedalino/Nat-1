@@ -8,6 +8,7 @@ import {
   emptyItemFilters,
   rangeFilterKeys,
 } from './itemFilters.js';
+import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
 
 // Collapsible advanced-filter panel for item lists (inventory + add-item
 // search). Rows are generated from ITEM_FILTER_FIELDS, so this file never needs
@@ -23,17 +24,17 @@ const toggleSx = (open, active) => ({
   px: '12px',
   py: '4px',
   border: 1,
-  borderColor: open || active ? '#caa550' : 'divider',
+  borderColor: open || active ? UI_COLORS.gold : 'divider',
   borderRadius: 1,
-  bgcolor: open || active ? 'rgba(202,165,80,0.14)' : 'rgba(35,32,26,1)',
-  color: open || active ? '#edd48a' : 'text.secondary',
+  bgcolor: open || active ? uiAlpha(UI_COLORS.gold, 0.14) : UI_COLORS.headerBg,
+  color: open || active ? UI_COLORS.goldLight : 'text.secondary',
   fontFamily: '"Cinzel", Georgia, serif',
   fontSize: '0.6rem',
   fontWeight: 700,
   letterSpacing: '0.08em',
   textTransform: 'uppercase',
   whiteSpace: 'nowrap',
-  '&:hover': { borderColor: '#caa550', color: '#edd48a' },
+  '&:hover': { borderColor: UI_COLORS.gold, color: UI_COLORS.goldLight },
 });
 
 const clearButtonSx = {
@@ -46,7 +47,7 @@ const clearButtonSx = {
   fontSize: '0.58rem',
   textTransform: 'uppercase',
   letterSpacing: '0.06em',
-  '&:hover': { color: '#de675f' },
+  '&:hover': { color: UI_COLORS.danger },
 };
 
 const labelSx = {
@@ -63,14 +64,14 @@ const labelSx = {
 const controlSx = {
   width: '100%',
   fontSize: '0.72rem',
-  bgcolor: 'rgba(35,32,26,1)',
+  bgcolor: UI_COLORS.headerBg,
   borderRadius: 1,
   '& .MuiSelect-select': { py: '5px' },
 };
 
 const numberFieldSx = {
   width: 72,
-  '& .MuiOutlinedInput-root': { bgcolor: 'rgba(35,32,26,1)', borderRadius: 1 },
+  '& .MuiOutlinedInput-root': { bgcolor: UI_COLORS.headerBg, borderRadius: 1 },
   '& input': { fontSize: '0.72rem', py: '6px' },
 };
 
@@ -85,7 +86,7 @@ const gridSx = {
   border: 1,
   borderColor: 'divider',
   borderRadius: 1,
-  bgcolor: 'rgba(18,16,14,0.65)',
+  bgcolor: uiAlpha(UI_COLORS.ink, 0.65),
 };
 
 const unitSx = { fontSize: '0.6rem', color: 'text.secondary' };
@@ -137,10 +138,10 @@ function SelectedChips({ values }) {
           sx={{
             px: '5px',
             border: 1,
-            borderColor: 'rgba(202,165,80,0.45)',
+            borderColor: uiAlpha(UI_COLORS.gold, 0.45),
             borderRadius: '3px',
-            bgcolor: 'rgba(202,165,80,0.12)',
-            color: '#edd48a',
+            bgcolor: uiAlpha(UI_COLORS.gold, 0.12),
+            color: UI_COLORS.goldLight,
             fontSize: '0.6rem',
           }}
         >

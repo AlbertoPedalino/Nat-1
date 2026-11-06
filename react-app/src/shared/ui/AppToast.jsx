@@ -1,14 +1,15 @@
 import { Snackbar, Alert, Portal, useMediaQuery, useTheme } from '@mui/material';
+import { UI_COLORS, uiAlpha } from './colors.js';
 
 // One toast look for the whole app. MUI's default `filled` Alert uses the stock
 // Material palette (bright green/red) which clashes with the parchment/gold
 // theme — every screen rolled its own Snackbar, so they drifted apart (e.g. the
 // logout toast looked nothing like the rest). Route all of them through here.
 const SEVERITY_COLOR = {
-  success: '#58b879',
-  error: '#de675f',
-  warning: '#e0a33a',
-  info: '#9ec5e6',
+  success: UI_COLORS.success,
+  error: UI_COLORS.danger,
+  warning: UI_COLORS.warningToast,
+  info: UI_COLORS.blueLight,
 };
 
 // Desktop toasts sit below the sticky top bar; mobile toasts anchor to the bottom.
@@ -50,14 +51,14 @@ export default function AppToast({ toast, onClose, autoHideDuration = 3500 }) {
               alignItems: 'center',
               minWidth: 240,
               maxWidth: 360,
-              bgcolor: 'rgba(26,23,19,0.98)',
-              color: '#edd9b0',
+              bgcolor: uiAlpha(UI_COLORS.surfaceDeep, 0.98),
+              color: UI_COLORS.textToast,
               border: '1px solid',
               borderColor: color,
               borderRadius: 1,
-              boxShadow: '0 6px 24px rgba(0,0,0,0.45)',
+              boxShadow: `0 6px 24px ${uiAlpha(UI_COLORS.black, 0.45)}`,
               '& .MuiAlert-icon': { color },
-              '& .MuiAlert-action': { color: '#bda98a' },
+              '& .MuiAlert-action': { color: UI_COLORS.textSecondary },
             }}
           >
             {toast.msg}

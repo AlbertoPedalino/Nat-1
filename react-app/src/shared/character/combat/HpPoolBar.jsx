@@ -1,12 +1,13 @@
 import { Box, Typography } from '@mui/material';
 import HpStepper from './HpStepper.jsx';
+import { UI_COLORS } from '../../ui/colors.js';
 
 const CINZEL = '"Cinzel", Georgia, serif';
 
 // Green above half, amber below, red at zero — the shared HP readout colour ramp.
 function hpColor(current, max) {
-  if (current <= 0) return '#c54a3f';
-  return current > max / 2 ? '#58b879' : '#d69245';
+  if (current <= 0) return UI_COLORS.dangerHp;
+  return current > max / 2 ? UI_COLORS.success : UI_COLORS.warning;
 }
 
 // "HP cur / max [state] + stepper" pool tracker shared by creature-like sheet
@@ -27,7 +28,7 @@ export default function HpPoolBar({
         <Typography component="span" sx={{ fontFamily: CINZEL, fontSize: '1.25rem', fontWeight: 700, color: hpColor(current, max), lineHeight: 1 }}>{current}</Typography>
         <Typography component="span" sx={{ fontFamily: CINZEL, fontSize: '0.85rem', color: 'text.secondary' }}>/</Typography>
         <Typography component="span" sx={{ fontFamily: CINZEL, fontSize: '0.85rem', fontWeight: 600, color: 'text.secondary' }}>{max}</Typography>
-        {current <= 0 && stateLabel ? <Typography component="span" sx={{ fontSize: '0.62rem', color: '#c98a8a', ml: 0.5 }}>{stateLabel}</Typography> : null}
+        {current <= 0 && stateLabel ? <Typography component="span" sx={{ fontSize: '0.62rem', color: UI_COLORS.dangerMuted, ml: 0.5 }}>{stateLabel}</Typography> : null}
       </Box>
       <HpStepper
         variant="sheet"
@@ -35,8 +36,8 @@ export default function HpPoolBar({
         onAmount={onAmount}
         onPlus={(n) => onDelta(n)}
         onMinus={(n) => onDelta(-n)}
-        plusColor="#58b879"
-        minusColor="#de675f"
+        plusColor={UI_COLORS.success}
+        minusColor={UI_COLORS.danger}
         plusLabel={plusLabel}
         minusLabel={minusLabel}
       />

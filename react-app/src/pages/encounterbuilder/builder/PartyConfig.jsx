@@ -4,6 +4,7 @@ import PortraitBadge from '../../../shared/character/profile/PortraitBadge.jsx';
 import ColorField from '../../../shared/ui/ColorField.jsx';
 import { campaignSheetUrl } from '../campaign/campaignSheetUrl.js';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 export default function PartyConfig() {
   const { state, dispatch } = useEncounterBuilder();
@@ -39,7 +40,7 @@ export default function PartyConfig() {
                 <PortraitBadge path={player.portraitPath} color={player.color} size={30} />
               ) : (
                 <ColorField
-                  value={player.color || '#5c8fe0'}
+                  value={player.color || UI_COLORS.pcToken}
                   onChange={(value) => dispatch({ type: 'updatePlayer', index, patch: { color: value } })}
                   label={`${player.name} color`}
                   sx={colorSwatchSx}
@@ -148,7 +149,7 @@ const playerRowSx = {
   border: '1px solid',
   borderColor: 'divider',
   borderRadius: 1,
-  bgcolor: 'rgba(255,255,255,0.025)',
+  bgcolor: uiAlpha(UI_COLORS.white, 0.025),
 };
 
 const stepperGroupSx = {
@@ -157,7 +158,7 @@ const stepperGroupSx = {
   border: '1px solid',
   borderColor: 'divider',
   borderRadius: 1,
-  bgcolor: 'rgba(255,255,255,0.025)',
+  bgcolor: uiAlpha(UI_COLORS.white, 0.025),
 };
 
 const stepperLabelSx = {

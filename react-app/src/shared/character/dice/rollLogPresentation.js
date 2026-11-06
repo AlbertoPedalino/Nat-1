@@ -1,11 +1,12 @@
 import { parseFormula } from './dice.js';
+import { UI_COLORS } from '../../ui/colors.js';
 
 // The result and the roller have separate meanings: critical d20 outcomes
 // colour the result; the character icon/monster marker colours the author.
 export const ROLL_LOG_COLORS = Object.freeze({
   normal: 'text.primary',
-  nat20: '#edd48a',
-  nat1: '#de675f',
+  nat20: UI_COLORS.goldLight,
+  nat1: UI_COLORS.danger,
 });
 
 export function rollOutcome(entry) {

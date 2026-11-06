@@ -1,29 +1,30 @@
 import { useCallback, useRef } from 'react';
 import { Box, Button, Typography } from '@mui/material';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 const FONT = '"Cinzel", Georgia, serif';
 
 const btnSx = {
   fontSize: '0.7rem', fontFamily: FONT, minWidth: 24, px: 0.4, py: 0, lineHeight: 1.4,
-  color: '#edd48a', borderColor: 'rgba(237,212,138,0.35)',
-  '&:hover': { borderColor: '#edd48a', bgcolor: 'rgba(237,212,138,0.08)' },
+  color: UI_COLORS.goldLight, borderColor: uiAlpha(UI_COLORS.goldLight, 0.35),
+  '&:hover': { borderColor: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.08) },
 };
 
 const trackSx = {
   position: 'relative', flex: 1, height: 10,
-  bgcolor: 'rgba(46,42,34,1)', borderRadius: 1,
-  border: '1px solid', borderColor: 'rgba(202,165,80,0.25)',
+  bgcolor: UI_COLORS.surfaceRaised, borderRadius: 1,
+  border: '1px solid', borderColor: uiAlpha(UI_COLORS.gold, 0.25),
   overflow: 'hidden', minWidth: 60, cursor: 'pointer', touchAction: 'none',
 };
 
 const fillSx = (pct) => ({
   position: 'absolute', top: 0, left: 0, height: '100%',
-  width: `${pct}%`, bgcolor: '#edd48a', borderRadius: 1, pointerEvents: 'none',
+  width: `${pct}%`, bgcolor: UI_COLORS.goldLight, borderRadius: 1, pointerEvents: 'none',
 });
 
 const labelSx = {
   fontSize: '0.65rem', fontFamily: FONT, fontWeight: 700,
-  color: '#edd48a', minWidth: 36, textAlign: 'center',
+  color: UI_COLORS.goldLight, minWidth: 36, textAlign: 'center',
 };
 
 export default function ResourceBar({ value, max, onChange }) {

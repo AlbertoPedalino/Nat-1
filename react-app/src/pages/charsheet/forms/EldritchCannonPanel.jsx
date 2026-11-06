@@ -36,6 +36,7 @@ import {
   eldritchCannonRuleGroups,
 } from '../../../shared/character/forms/eldritchCannonForm.js';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 const CINZEL = '"Cinzel", Georgia, serif';
 
@@ -249,11 +250,11 @@ export default function EldritchCannonPanel({ action, character, sheet, resource
             variant="outlined"
             disabled={!canCreate}
             onClick={activate}
-            sx={{ fontSize: '0.72rem', borderColor: 'rgba(202,165,80,0.5)', color: '#edd48a', '&:hover': { borderColor: '#edd48a', bgcolor: 'rgba(237,212,138,0.08)' } }}
+            sx={{ fontSize: '0.72rem', borderColor: uiAlpha(UI_COLORS.gold, 0.5), color: UI_COLORS.goldLight, '&:hover': { borderColor: UI_COLORS.goldLight, bgcolor: uiAlpha(UI_COLORS.goldLight, 0.08) } }}
           >
             Activate Cannon
           </Button>
-          <Typography sx={{ ...subSx, fontStyle: 'italic', mt: 0.5, color: canCreate ? 'text.secondary' : '#c98a8a' }}>
+          <Typography sx={{ ...subSx, fontStyle: 'italic', mt: 0.5, color: canCreate ? 'text.secondary' : UI_COLORS.dangerMuted }}>
             {!canCreate
               ? 'No Long Rest use left and no spell slot to expend — finish a rest.'
               : `Creating spends ${effectiveCost === 'slot' ? `a level ${slotLevel} spell slot` : 'the 1/Long Rest use'}.`}
@@ -274,7 +275,7 @@ function CannonRulesSummary({ maxHp, level }) {
         const Chevron = open ? ChevronDown : ChevronRight;
         return (
           <Box onClick={toggle} sx={rulesToggleSx}>
-            <Chevron size={13} color="#9a8f7a" style={{ flexShrink: 0 }} />
+            <Chevron size={13} color={UI_COLORS.textMuted} style={{ flexShrink: 0 }} />
             <Typography sx={rulesToggleTitleSx}>Cannon Rules</Typography>
             <Typography sx={rulesToggleMetaSx}>Create / Operate / Object</Typography>
           </Box>
@@ -312,7 +313,7 @@ function CannonActionRow({ mode, exhaustionLevel, onRoll, onShowToast }) {
           sx={{
             display: 'flex', alignItems: 'center', gap: '6px', px: '8px', py: '5px',
             border: 1, borderColor: 'divider', borderRadius: open ? '6px 6px 0 0' : 1,
-            bgcolor: 'rgba(35,32,26,0.85)', cursor: disabled ? 'default' : 'pointer',
+            bgcolor: uiAlpha(UI_COLORS.headerBg, 0.85), cursor: disabled ? 'default' : 'pointer',
           }}
         >
           <Box sx={{ width: 5, height: 22, borderRadius: 1, bgcolor: barColor, flexShrink: 0, opacity: 0.95 }} />
@@ -337,7 +338,7 @@ function CannonActionRow({ mode, exhaustionLevel, onRoll, onShowToast }) {
       )}
       detailsSx={{
         px: '8px', py: '6px', border: 1, borderTop: 'none', borderColor: 'divider',
-        borderRadius: '0 0 6px 6px', bgcolor: 'rgba(35,32,26,0.5)',
+        borderRadius: '0 0 6px 6px', bgcolor: uiAlpha(UI_COLORS.headerBg, 0.5),
         fontSize: '0.62rem', color: 'text.secondary',
       }}
       details={mode.desc ? <RichText text={mode.desc} /> : null}
@@ -362,10 +363,10 @@ const toggleSx = {
   py: '3px',
   px: '10px',
   textTransform: 'none',
-  color: '#edd48a',
-  borderColor: 'rgba(202,165,80,0.4)',
-  '&.Mui-selected': { bgcolor: 'rgba(237,212,138,0.18)', color: '#edd48a' },
-  '&.Mui-selected:hover': { bgcolor: 'rgba(237,212,138,0.24)' },
+  color: UI_COLORS.goldLight,
+  borderColor: uiAlpha(UI_COLORS.gold, 0.4),
+  '&.Mui-selected': { bgcolor: uiAlpha(UI_COLORS.goldLight, 0.18), color: UI_COLORS.goldLight },
+  '&.Mui-selected:hover': { bgcolor: uiAlpha(UI_COLORS.goldLight, 0.24) },
 };
 
 const rulesPanelSx = {
@@ -379,13 +380,13 @@ const rulesToggleSx = {
   px: '8px',
   py: '5px',
   border: 1,
-  borderColor: 'rgba(202,165,80,0.25)',
+  borderColor: uiAlpha(UI_COLORS.gold, 0.25),
   borderRadius: 1,
-  bgcolor: 'rgba(35,32,26,0.58)',
+  bgcolor: uiAlpha(UI_COLORS.headerBg, 0.58),
   cursor: 'pointer',
   '&:hover': {
-    borderColor: 'rgba(202,165,80,0.45)',
-    bgcolor: 'rgba(202,165,80,0.07)',
+    borderColor: uiAlpha(UI_COLORS.gold, 0.45),
+    bgcolor: uiAlpha(UI_COLORS.gold, 0.07),
   },
 };
 
@@ -394,7 +395,7 @@ const rulesToggleTitleSx = {
   fontSize: '0.58rem',
   fontWeight: 700,
   letterSpacing: '0.08em',
-  color: '#edd48a',
+  color: UI_COLORS.goldLight,
   textTransform: 'uppercase',
 };
 
@@ -416,9 +417,9 @@ const rulesGroupSx = {
   px: '8px',
   py: '6px',
   border: 1,
-  borderColor: 'rgba(255,255,255,0.08)',
+  borderColor: uiAlpha(UI_COLORS.white, 0.08),
   borderRadius: 1,
-  bgcolor: 'rgba(35,32,26,0.42)',
+  bgcolor: uiAlpha(UI_COLORS.headerBg, 0.42),
 };
 
 const rulesGroupTitleSx = {
@@ -426,7 +427,7 @@ const rulesGroupTitleSx = {
   fontSize: '0.54rem',
   fontWeight: 700,
   letterSpacing: '0.12em',
-  color: '#edd48a',
+  color: UI_COLORS.goldLight,
   textTransform: 'uppercase',
   mb: 0.25,
 };
@@ -437,7 +438,7 @@ const rulesRowSx = {
   gap: '6px',
   alignItems: 'baseline',
   py: '3px',
-  borderTop: '1px solid rgba(255,255,255,0.045)',
+  borderTop: `1px solid ${uiAlpha(UI_COLORS.white, 0.045)}`,
   '&:first-of-type': { borderTop: 0 },
 };
 
@@ -445,7 +446,7 @@ const rulesLabelSx = {
   minWidth: 0,
   fontSize: '0.55rem',
   fontWeight: 700,
-  color: '#9a8f7a',
+  color: UI_COLORS.textMuted,
   textTransform: 'uppercase',
   letterSpacing: '0.04em',
 };

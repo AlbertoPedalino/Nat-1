@@ -1,6 +1,7 @@
 import { Box, Chip, Tooltip, Typography, alpha } from '@mui/material';
 import { ChevronDown, X } from 'lucide-react';
 import { EntryBlocks } from '../../content/EntryBlocks.jsx';
+import { UI_COLORS } from '../../ui/colors.js';
 
 // The condition pill and its rules-text card, shared by the character sheet and
 // the encounter builder. The two surfaces are meant to read identically — a GM
@@ -11,8 +12,8 @@ import { EntryBlocks } from '../../content/EntryBlocks.jsx';
 // Only sizing differs between them, passed as `sx` / `fontSize`.
 
 // The conditions accent, matching the theme's warning tone.
-export const CONDITION_ACCENT = '#d69245';
-const CONDITION_BODY = '#cabd9f';
+export const CONDITION_ACCENT = UI_COLORS.warning;
+const CONDITION_BODY = UI_COLORS.textCondition;
 
 // Body click expands the rules text; the X removes the condition. The chevron
 // advertises the expand affordance and rotates when open, so the two actions on

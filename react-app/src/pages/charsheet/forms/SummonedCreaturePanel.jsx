@@ -34,6 +34,7 @@ import {
 } from './BeastStatBlock.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 function variantToken(name) {
   return String(name || '').match(/\(([^)]+)\)\s*$/)?.[1] || String(name || '');
@@ -142,7 +143,7 @@ export default function SummonedCreaturePanel({
   return (
     <Box onClick={(event) => event.stopPropagation()} sx={panelSx}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, mb: 0.6 }}>
-        <PawPrint size={14} color="#edd48a" />
+        <PawPrint size={14} color={UI_COLORS.goldLight} />
         <BeastNameLink name={creature.name} source={creature.source} sx={headerSx} />
       </Box>
       {versions.length > 1 ? (
@@ -230,12 +231,12 @@ export function DivinePowerStatusButton({ available, onToggle }) {
         fontSize: '0.54rem',
         lineHeight: 1.45,
         textTransform: 'none',
-        color: available ? '#a9d6ae' : '#c98a8a',
-        borderColor: available ? 'rgba(104,170,113,0.55)' : 'rgba(201,138,138,0.55)',
-        bgcolor: available ? 'rgba(104,170,113,0.08)' : 'rgba(201,138,138,0.08)',
+        color: available ? UI_COLORS.successLight : UI_COLORS.dangerMuted,
+        borderColor: available ? uiAlpha(UI_COLORS.successMuted, 0.55) : uiAlpha(UI_COLORS.dangerMuted, 0.55),
+        bgcolor: available ? uiAlpha(UI_COLORS.successMuted, 0.08) : uiAlpha(UI_COLORS.dangerMuted, 0.08),
         '&:hover': {
-          borderColor: available ? '#a9d6ae' : '#c98a8a',
-          bgcolor: available ? 'rgba(104,170,113,0.16)' : 'rgba(201,138,138,0.16)',
+          borderColor: available ? UI_COLORS.successLight : UI_COLORS.dangerMuted,
+          bgcolor: available ? uiAlpha(UI_COLORS.successMuted, 0.16) : uiAlpha(UI_COLORS.dangerMuted, 0.16),
         },
       }}
     >

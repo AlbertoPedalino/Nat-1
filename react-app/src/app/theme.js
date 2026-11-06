@@ -9,6 +9,7 @@ function activePortalContainer() {
 }
 import { chipTintStyle } from '../shared/ui/entityColors.js';
 import { VTT_COLORS, vttAlpha } from '../shared/vtt/colors.js';
+import { UI_COLORS } from '../shared/ui/colors.js';
 
 export const theme = createTheme({
   palette: {
@@ -18,28 +19,28 @@ export const theme = createTheme({
       paper: '#211d18',
     },
     primary: {
-      main: '#d7ad52',
-      contrastText: '#17120d',
+      main: UI_COLORS.primary,
+      contrastText: UI_COLORS.primaryContrast,
     },
     secondary: {
-      main: '#70b7a6',
+      main: UI_COLORS.teal,
     },
     error: {
-      main: '#de675f',
+      main: UI_COLORS.danger,
     },
     warning: {
-      main: '#d69245',
+      main: UI_COLORS.warning,
     },
     success: {
-      main: '#58b879',
+      main: UI_COLORS.success,
     },
     text: {
-      primary: '#f0e6d4',
-      secondary: '#bda98a',
+      primary: UI_COLORS.textPrimary,
+      secondary: UI_COLORS.textSecondary,
     },
     divider: 'rgba(215, 173, 82, 0.22)',
     // Default token color for player-character combatants without a custom color.
-    pcToken: '#5c8fe0',
+    pcToken: UI_COLORS.pcToken,
     // GM Board semantic tokens: tier/difficulty/rarity distinctions and panel
     // overlay tints, kept here so components consume theme.sx tokens instead
     // of scattering literal hex/rgba values.

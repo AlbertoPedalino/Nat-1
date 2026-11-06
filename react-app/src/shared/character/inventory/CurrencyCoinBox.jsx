@@ -8,10 +8,11 @@ import {
   sanitizeCoinInput,
 } from './currency.js';
 import IconColorPicker from '../../ui/IconColorPicker.jsx';
+import { UI_COLORS, uiAlpha } from '../../ui/colors.js';
 
 // Accent colors shared across every variant.
-const HOVER_SUBTRACT = '#de675f';
-const HOVER_ADD = '#58b879';
+const HOVER_SUBTRACT = UI_COLORS.danger;
+const HOVER_ADD = UI_COLORS.success;
 
 const buttonBaseSx = {
   borderRadius: 0,
@@ -42,19 +43,19 @@ const VARIANTS = {
   },
   sheet: {
     fontFamily: '"Cinzel", Georgia, serif',
-    box: { bgcolor: 'rgba(35,32,26,1)', p: '4px 3px' },
+    box: { bgcolor: UI_COLORS.headerBg, p: '4px 3px' },
     labelGap: 0.35,
     labelTop: { fontSize: '0.52rem', letterSpacing: '0.08em' },
     labelBottom: { fontSize: '0.48rem', letterSpacing: '0.08em' },
-    field: { variant: 'standard', fontSize: '0.85rem', color: '#edd48a', py: '2px' },
+    field: { variant: 'standard', fontSize: '0.85rem', color: UI_COLORS.goldLight, py: '2px' },
     stepper: {
       columns: '20px minmax(26px, 1fr) 20px',
       mt: 0.3,
-      bgcolor: '#12100e',
+      bgcolor: UI_COLORS.ink,
       button: 20,
       icon: 11,
       stepFontSize: '0.6rem',
-      stepColor: '#edd48a',
+      stepColor: UI_COLORS.goldLight,
     },
   },
 };
@@ -159,7 +160,7 @@ export function CurrencyCoinBox({
                 borderRadius: '50%',
                 bgcolor: coin.tone,
                 border: '1px solid',
-                borderColor: 'rgba(255,255,255,0.5)',
+                borderColor: uiAlpha(UI_COLORS.white, 0.5),
                 cursor: 'pointer',
                 zIndex: 1,
                 transition: 'transform 0.12s',

@@ -8,8 +8,9 @@ import {
   ConditionCard,
   ConditionPill,
 } from '../../../shared/character/combat/ConditionChips.jsx';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
-const DEAD_ACCENT = '#e5484d';
+const DEAD_ACCENT = UI_COLORS.dangerBright;
 
 // The sheet's pills sit in a panel rather than an initiative row, so they run
 // smaller than the encounter's.
@@ -56,7 +57,7 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
   const openCards = active.filter((c) => expanded.includes(c.key) && conditionEntries?.[c.key]?.length);
 
   return (
-    <Box sx={{ flex: 1, minWidth: 140, bgcolor: 'rgba(35,32,26,1)', border: 1, borderColor: 'divider', borderRadius: 1, p: '0.4rem 0.62rem' }}>
+    <Box sx={{ flex: 1, minWidth: 140, bgcolor: UI_COLORS.headerBg, border: 1, borderColor: 'divider', borderRadius: 1, p: '0.4rem 0.62rem' }}>
       <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'primary.main', mb: 0.4 }}>Conditions</Typography>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.3 }}>
@@ -98,7 +99,7 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
             component="button"
             type="button"
             onClick={() => setOpen(!open)}
-            sx={{ width: '100%', bgcolor: 'transparent', border: 0, p: '2px 3px', borderRadius: '3px', cursor: 'pointer', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.56rem', color: 'text.secondary', letterSpacing: '0.06em', display: 'flex', alignItems: 'center', gap: 0.5, userSelect: 'none', '&:hover': { bgcolor: 'rgba(255,255,255,0.04)', color: 'text.primary' } }}
+            sx={{ width: '100%', bgcolor: 'transparent', border: 0, p: '2px 3px', borderRadius: '3px', cursor: 'pointer', fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.56rem', color: 'text.secondary', letterSpacing: '0.06em', display: 'flex', alignItems: 'center', gap: 0.5, userSelect: 'none', '&:hover': { bgcolor: uiAlpha(UI_COLORS.white, 0.04), color: 'text.primary' } }}
           >
             <ListChecks size={12} /> Manage ({active.length})
             <ChevronDown size={12} style={{ marginLeft: 'auto', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }} />
@@ -111,7 +112,7 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
                   return (
                     <Chip key={c.key} size="small" label={c.label} variant={isOn ? 'filled' : 'outlined'}
                       onClick={() => onToggle(c.key)}
-                      sx={{ fontSize: '0.5rem', cursor: 'pointer', justifyContent: 'flex-start', '&:hover': { boxShadow: `0 0 0 1px ${isOn ? COND_ACCENT : 'rgba(255,255,255,0.25)'}` }, ...(isOn ? { color: COND_ACCENT, bgcolor: alpha(COND_ACCENT, 0.14) } : {}) }} />
+                      sx={{ fontSize: '0.5rem', cursor: 'pointer', justifyContent: 'flex-start', '&:hover': { boxShadow: `0 0 0 1px ${isOn ? COND_ACCENT : '${uiAlpha(UI_COLORS.white, 0.25)}'}` }, ...(isOn ? { color: COND_ACCENT, bgcolor: alpha(COND_ACCENT, 0.14) } : {}) }} />
                   );
                 })}
               </Box>
@@ -121,7 +122,7 @@ export default function ConditionsBlock({ sheet, onToggle, onClear, onSetExhaust
                   variant="outlined"
                   startIcon={<X size={12} />}
                   onClick={onClear}
-                  sx={{ mt: 0.6, fontSize: '0.5rem', py: 0.1, lineHeight: 1.4, color: 'text.secondary', borderColor: 'divider', '&:hover': { borderColor: '#a04848', color: '#a04848', bgcolor: 'rgba(160,72,72,0.08)' } }}
+                  sx={{ mt: 0.6, fontSize: '0.5rem', py: 0.1, lineHeight: 1.4, color: 'text.secondary', borderColor: 'divider', '&:hover': { borderColor: UI_COLORS.dangerDeep, color: UI_COLORS.dangerDeep, bgcolor: uiAlpha(UI_COLORS.dangerDeep, 0.08) } }}
                 >
                   Clear all
                 </Button>

@@ -71,6 +71,7 @@ import {
 } from '../../../shared/character/spells/spellSlots.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { lowerKey } from '../../../shared/content/nameKeys.js';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 const SPELL_ACTION_FILTERS = [
   { key: 'all', label: 'All' },
@@ -579,11 +580,11 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
 
           {activePicker ? (
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: activeIsWizard ? '1fr auto' : '1fr' }, gap: 0.5, mb: 0.75 }}>
-              <Box sx={{ bgcolor: 'rgba(35,32,26,1)', border: 1, borderColor: 'divider', borderRadius: 1, px: 1, py: 0.65, display: 'flex', gap: 0.75, flexWrap: 'wrap', alignItems: 'center' }}>
-                <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.72rem', color: '#edd48a', letterSpacing: '0.06em' }}>{activePicker.label}</Typography>
+              <Box sx={{ bgcolor: UI_COLORS.headerBg, border: 1, borderColor: 'divider', borderRadius: 1, px: 1, py: 0.65, display: 'flex', gap: 0.75, flexWrap: 'wrap', alignItems: 'center' }}>
+                <Typography sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.72rem', color: UI_COLORS.goldLight, letterSpacing: '0.06em' }}>{activePicker.label}</Typography>
                 <Typography sx={{ fontSize: '0.68rem', color: 'text.secondary' }}>{activePicker.note}</Typography>
                 <Typography sx={{ fontSize: '0.68rem', color: 'text.secondary' }}>Max level {activePicker.maxLevel || 0}</Typography>
-                {activeIsWizard ? <Typography sx={{ fontSize: '0.68rem', color: '#4d95d6' }}>Spellbook {activeSpellbookSize}</Typography> : null}
+                {activeIsWizard ? <Typography sx={{ fontSize: '0.68rem', color: UI_COLORS.blue }}>Spellbook {activeSpellbookSize}</Typography> : null}
               </Box>
               {activeIsWizard ? (
                 <ToggleButtonGroup size="small" exclusive value={pickerWizardMode} onChange={(_, next) => next && setPickerWizardMode(next)} sx={levelToggleSx}>
@@ -675,20 +676,20 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
 function PickerSpellRow({ spell, selected, disabled, atLimit, autoGranted, locked, sourceInfo, sources, onToggle }) {
   return (
     <ExpandableCard
-      containerSx={{ flexShrink: 0, border: 1, borderColor: selected ? '#58b879' : 'transparent', borderRadius: 1, overflow: 'hidden', opacity: atLimit ? 0.5 : 1, '&:hover': { borderColor: selected ? '#58b879' : 'divider' } }}
+      containerSx={{ flexShrink: 0, border: 1, borderColor: selected ? UI_COLORS.success : 'transparent', borderRadius: 1, overflow: 'hidden', opacity: atLimit ? 0.5 : 1, '&:hover': { borderColor: selected ? UI_COLORS.success : 'divider' } }}
       bodySx={{ px: '9px', pt: '2px', pb: '8px' }}
       body={<SpellReferenceBody spell={spell} />}
       header={({ toggle }) => (
         <Box
           onClick={toggle}
-          sx={{ display: 'flex', alignItems: 'center', gap: 0.5, px: '9px', py: '6px', cursor: 'pointer', bgcolor: selected ? 'rgba(39,174,96,0.08)' : 'transparent', '&:hover': { bgcolor: selected ? 'rgba(39,174,96,0.08)' : 'rgba(35,32,26,1)' } }}
+          sx={{ display: 'flex', alignItems: 'center', gap: 0.5, px: '9px', py: '6px', cursor: 'pointer', bgcolor: selected ? uiAlpha(UI_COLORS.successFlat, 0.08) : 'transparent', '&:hover': { bgcolor: selected ? uiAlpha(UI_COLORS.successFlat, 0.08) : UI_COLORS.headerBg } }}
         >
           <SpellRowLabel spell={spell} selected={selected} nameSx={{ fontSize: '0.875rem' }} sx={{ gap: 0.4 }} />
           <SpellMiniTags spell={spell} sx={{ mx: 1 }} />
           {autoGranted ? (
             sourceInfo
               ? <SourceBadge sourceInfo={sourceInfo} sources={sources} />
-              : <Box sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.7rem', color: '#58b879', flexShrink: 0 }}>AUTO</Box>
+              : <Box sx={{ fontFamily: '"Cinzel", Georgia, serif', fontSize: '0.7rem', color: UI_COLORS.success, flexShrink: 0 }}>AUTO</Box>
           ) : null}
           {!locked ? (
             <SpellSelectButton selected={selected} disabled={disabled} onToggle={onToggle} addColor="success" />

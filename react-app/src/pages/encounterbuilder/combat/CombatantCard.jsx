@@ -11,6 +11,7 @@ import MonsterToken from '../bestiary/MonsterToken.jsx';
 import PortraitBadge from '../../../shared/character/profile/PortraitBadge.jsx';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
+import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 
 export default function CombatantCard({ combatant, active }) {
   const { dispatch } = useEncounterBuilder();
@@ -377,7 +378,7 @@ const identityClusterSx = {
   minWidth: 0,
 };
 
-const avatarBaseSx = { width: 34, height: 34, color: '#101010', fontSize: 11, fontWeight: 800 };
+const avatarBaseSx = { width: 34, height: 34, color: UI_COLORS.avatarText, fontSize: 11, fontWeight: 800 };
 
 const nameButtonSx = { justifyContent: 'flex-start', minWidth: 0, px: 0.5 };
 
@@ -401,7 +402,7 @@ const acBadgeSx = {
   border: 1,
   borderColor: 'divider',
   borderRadius: 1,
-  bgcolor: 'rgba(255,255,255,0.04)',
+  bgcolor: uiAlpha(UI_COLORS.white, 0.04),
   color: 'text.secondary',
   lineHeight: 1,
 };
@@ -491,7 +492,7 @@ const hpBarSx = {
   width: '100%',
   height: 5,
   borderRadius: 1,
-  bgcolor: 'rgba(255,255,255,0.08)',
+  bgcolor: uiAlpha(UI_COLORS.white, 0.08),
 };
 
 const cardSx = {
