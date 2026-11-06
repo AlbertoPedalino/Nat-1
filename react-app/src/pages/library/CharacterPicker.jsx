@@ -7,12 +7,11 @@ import { useToast } from '../../shared/ui/ToastProvider.jsx';
 import SheetDialog from '../../shared/ui/SheetDialog.jsx';
 import {
   listAllCharacters, listMyCharacters, fetchCloudMeta, pullCharacter,
-  deleteCloudCharacter, deleteOwnCloudCharacter,
+  deleteCloudCharacter, deleteOwnCloudCharacter, getCloudCharacter,
 } from '../../shared/cloud/api/cloudCharacters.js';
 import { deleteCharacter } from '../../shared/character/profile/store.js';
 import { readRegistry, renameRegistryEntry, REGISTRY_META } from '../../shared/storage/localStorageRegistries.js';
-import { createCharacterExport } from '../charbuilder/state/characterExport.js';
-import { supabase } from '../../shared/cloud/supabaseClient.js';
+import { downloadCharacterExport } from '../charbuilder/state/characterExport.js';
 import { loadCharacterRows, canDeleteRow, deletePlanFor } from './logic/characterRows.js';
 import { shouldPullCloudCopy } from './logic/instanceRows.js';
 import { formatUpdatedAt } from './logic/tools.js';
@@ -106,15 +105,8 @@ export default function CharacterPicker() {
 
   const downloadJson = async (row) => {
     try {
-      const { data, error: err } = await supabase.from('characters').select('data').eq('id', row.id).single();
-      if (err) throw err;
-      const blob = new Blob([JSON.stringify(createCharacterExport(data.data), null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${row.name || row.id}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
+      const cloud = await getCloudCharacter(row.id, { reason: 'export' });
+      downloadCharacterExport(cloud.data, row.name || row.id);
     } catch (e) {
       setError(e?.message || 'Failed to download.');
     }

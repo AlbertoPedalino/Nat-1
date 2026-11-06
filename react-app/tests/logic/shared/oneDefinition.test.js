@@ -29,6 +29,17 @@ test('clamp and clampInt are defined only in shared/numbers.js', () => {
   }), []);
 });
 
+test('pages reach Supabase only through shared/cloud', () => {
+  assert.deepEqual(sourceFilesMatching(/supabaseClient\.js['"]/)
+    .filter((file) => file.startsWith('pages/') || file.startsWith('app/')), []);
+});
+
+test('a character file is downloaded only by downloadCharacterExport', () => {
+  assert.deepEqual(sourceFilesMatching(/\.download\s*=/, {
+    allow: ['pages/charbuilder/state/characterExport.js'],
+  }), []);
+});
+
 test('every realtime channel opens through openRealtimeChannel', () => {
   assert.deepEqual(sourceFilesMatching(/\.(channel|removeChannel)\(/, {
     allow: ['shared/cloud/realtimeChannel.js'],

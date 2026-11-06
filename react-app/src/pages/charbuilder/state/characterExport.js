@@ -80,3 +80,15 @@ export function createCharacterExport(character) {
     data: serializeCharacterForExport(character),
   };
 }
+
+// The export file, saved through the browser as <name>.json. The builder and
+// the library both download a character this way.
+export function downloadCharacterExport(character, name) {
+  const blob = new Blob([JSON.stringify(createCharacterExport(character), null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${name || 'character'}.json`;
+  link.click();
+  URL.revokeObjectURL(url);
+}

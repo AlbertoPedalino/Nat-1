@@ -3,7 +3,7 @@ import { ClipboardList, CloudUpload, Download, FileText, Save } from 'lucide-rea
 import { useNavigate } from 'react-router-dom';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { makeSheetPayload, saveCharacter } from '../state/persistence.js';
-import { createCharacterExport } from '../state/characterExport.js';
+import { downloadCharacterExport } from '../state/characterExport.js';
 import { getActiveCharId } from '../../../shared/character/profile/store.js';
 import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
 
@@ -13,14 +13,7 @@ function charIdFromUrl() {
 }
 
 function downloadBuilderSheet(character, data) {
-  const payload = createCharacterExport(makeSheetPayload(character, data));
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `${character?.name || 'character'}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
+  downloadCharacterExport(makeSheetPayload(character, data), character?.name);
 }
 
 export default function SheetStep({ state, dispatch, importDraft = false, onUploadToCloud, onDraftLocalSaved, onCloudCopySavedLocally, onNotify }) {
