@@ -1,8 +1,8 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
 import {
   warlockHasInvocation,
+  warlockInvocationCount,
   warlockLevel,
-  warlockInvocationSelections,
   WARLOCK_MODIFIER_CANTRIP_INVOCATIONS,
   warlockModifierCantripChoiceKey,
 } from '../../../shared/character/progression/warlockUtils.js';
@@ -82,11 +82,6 @@ registerClassSheetChoiceMeta("Warlock", {
   }),
 });
 
-// Check if a character has a specific Eldritch Invocation chosen (works for both sheet C and charbuilder char)
-function _warlockHasInvocation(C, name) {
-  return warlockHasInvocation(C, name);
-}
-
 function _warlockAdapterCharacter(localContext) {
   return (localContext && (localContext.character || localContext.char || localContext.C || localContext.activeCharacter))
     || context.character
@@ -94,26 +89,6 @@ function _warlockAdapterCharacter(localContext) {
     || context.C
     || context.activeCharacter
     || null;
-}
-
-function _warlockInvocationCountScoped(C, name, keyPrefix) {
-  if (!C) return 0;
-  var target = matchKey(name);
-  return warlockInvocationSelections(C, keyPrefix).filter(function (invName) {
-    return matchKey(invName) === target;
-  }).length;
-}
-
-function _warlockHasInvocationScoped(C, name, keyPrefix) {
-  if (!C || !name) return false;
-  var target = matchKey(name);
-  return warlockInvocationSelections(C, keyPrefix).some(function (invName) {
-    return matchKey(invName) === target;
-  });
-}
-
-function _warlockLevel(C) {
-  return warlockLevel(C);
 }
 
 function _warlockChoiceValuesByBase(C, baseKey, fallback) {
@@ -177,7 +152,7 @@ function _eligibleCantrips(mod) {
 const _MODIFIER_CANTRIP_EFFECTS = {
   agonizing_blast: { apply: function (out) { out.dmgBonusPerBeam = 'cha'; } },
   repelling_blast: {},
-  eldritch_spear: { apply: function (out, C) { out.range = (30 * Math.max(1, _warlockLevel(C))) + ' ft'; } },
+  eldritch_spear: { apply: function (out, C) { out.range = (30 * Math.max(1, warlockLevel(C))) + ' ft'; } },
 };
 
 registerClassAdapter("Warlock", function (cls, lv, specs, adapterContext = {}) {
@@ -193,7 +168,7 @@ registerClassAdapter("Warlock", function (cls, lv, specs, adapterContext = {}) {
   WARLOCK_MODIFIER_CANTRIP_INVOCATIONS.forEach(function (mod) {
     _modCantripBySlug[mod.slug] = {
       mod: mod,
-      total: Math.max(1, _warlockInvocationCountScoped(_charRef, mod.invocation, _choicePrefix)),
+      total: Math.max(1, warlockInvocationCount(_charRef, mod.invocation, _choicePrefix)),
       seen: 0,
     };
     _slugByInvocation[matchKey(mod.invocation)] = mod.slug;
@@ -235,7 +210,7 @@ registerClassAdapter("Warlock", function (cls, lv, specs, adapterContext = {}) {
         .filter(function(inv) {
           if (Number(threshold || 0) < Number(inv.minLevel || 1)) return false;
           if (!inv.prereq) return true;
-          return _warlockHasInvocationScoped(_charRef, inv.prereq, _choicePrefix);
+          return warlockHasInvocation(_charRef, inv.prereq, _choicePrefix);
         })
         .map(function(inv) { return inv.name; });
       if (slotInvocations.length) {
@@ -262,7 +237,7 @@ registerClassAdapter("Warlock", function (cls, lv, specs, adapterContext = {}) {
   });
 
   // Pact of the Tome: 3 cantrips from any list + 2 level-1 rituals.
-  if (_charRef && _warlockHasInvocationScoped(_charRef, 'Pact of the Tome', _choicePrefix)) {
+  if (_charRef && warlockHasInvocation(_charRef, 'Pact of the Tome', _choicePrefix)) {
     [1, 2, 3].forEach(function (n) {
       specs.push({
         key: 'warlock_tome_cantrip_' + n,
@@ -286,8 +261,8 @@ registerClassAdapter("Warlock", function (cls, lv, specs, adapterContext = {}) {
   }
 
   // Lessons of the First Ones: Origin feat choice.
-  if (_charRef && _warlockHasInvocationScoped(_charRef, 'Lessons of the First Ones', _choicePrefix)) {
-    var lessonsCount = Math.max(1, _warlockInvocationCountScoped(_charRef, 'Lessons of the First Ones', _choicePrefix));
+  if (_charRef && warlockHasInvocation(_charRef, 'Lessons of the First Ones', _choicePrefix)) {
+    var lessonsCount = Math.max(1, warlockInvocationCount(_charRef, 'Lessons of the First Ones', _choicePrefix));
     for (var lessonIndex = 0; lessonIndex < lessonsCount; lessonIndex += 1) {
       specs.push({
         key: 'warlock_lessons_first_ones_origin_feat_' + lessonIndex,
@@ -302,7 +277,7 @@ registerClassAdapter("Warlock", function (cls, lv, specs, adapterContext = {}) {
     }
   }
 
-  if (_charRef && _warlockHasInvocationScoped(_charRef, 'Lifedrinker', _choicePrefix)) {
+  if (_charRef && warlockHasInvocation(_charRef, 'Lifedrinker', _choicePrefix)) {
     specs.push({
       key: 'warlock_lifedrinker_damage_type',
       label: 'Lifedrinker — Damage Type',
@@ -366,7 +341,7 @@ registerClassSheetActions("Warlock", [
     "cat": "bonus",
     "uses": "Bonus Action",
     "minLevel": 1,
-    "condition": function(C) { return _warlockHasInvocation(C, 'Pact of the Blade'); }
+    "condition": function(C) { return warlockHasInvocation(C, 'Pact of the Blade'); }
   },
   {
     "name": "Pact of the Chain",
@@ -374,7 +349,7 @@ registerClassSheetActions("Warlock", [
     "cat": "action",
     "uses": "Magic Action",
     "minLevel": 1,
-    "condition": function(C) { return _warlockHasInvocation(C, 'Pact of the Chain'); }
+    "condition": function(C) { return warlockHasInvocation(C, 'Pact of the Chain'); }
   },
   {
     "name": "Investment of the Chain Master",
@@ -382,7 +357,7 @@ registerClassSheetActions("Warlock", [
     "cat": "bonus",
     "uses": "Bonus Action / Reaction",
     "minLevel": 5,
-    "condition": function(C) { return _warlockHasInvocation(C, 'Investment of the Chain Master') && _warlockHasInvocation(C, 'Pact of the Chain'); }
+    "condition": function(C) { return warlockHasInvocation(C, 'Investment of the Chain Master') && warlockHasInvocation(C, 'Pact of the Chain'); }
   },
   {
     "name": "Gift of the Protectors",
@@ -391,7 +366,7 @@ registerClassSheetActions("Warlock", [
     "uses": "1 / LR",
     "resKey": "gift_of_the_protectors",
     "minLevel": 9,
-    "condition": function(C) { return _warlockHasInvocation(C, 'Gift of the Protectors') && _warlockHasInvocation(C, 'Pact of the Tome'); }
+    "condition": function(C) { return warlockHasInvocation(C, 'Gift of the Protectors') && warlockHasInvocation(C, 'Pact of the Tome'); }
   },
 
   // ── INVOCATIONS: other action types ───────────────────────────────────────
@@ -402,7 +377,7 @@ registerClassSheetActions("Warlock", [
     "cat": "action",
     "uses": "Magic Action",
     "minLevel": 5,
-    "condition": function(C) { return _warlockHasInvocation(C, 'One with Shadows'); }
+    "condition": function(C) { return warlockHasInvocation(C, 'One with Shadows'); }
   },
   {
     "name": "Gift of the Depths",
@@ -410,7 +385,7 @@ registerClassSheetActions("Warlock", [
     "cat": "action",
     "uses": "1 / LR",
     "minLevel": 5,
-    "condition": function(C) { return _warlockHasInvocation(C, 'Gift of the Depths'); }
+    "condition": function(C) { return warlockHasInvocation(C, 'Gift of the Depths'); }
   },
   {
     "name": "Gaze of Two Minds",
@@ -418,7 +393,7 @@ registerClassSheetActions("Warlock", [
     "cat": "bonus",
     "uses": "Bonus Action",
     "minLevel": 5,
-    "condition": function(C) { return _warlockHasInvocation(C, 'Gaze of Two Minds'); }
+    "condition": function(C) { return warlockHasInvocation(C, 'Gaze of Two Minds'); }
   },
 
   {
@@ -427,7 +402,7 @@ registerClassSheetActions("Warlock", [
     "cat": "action",
     "uses": "Spend a Pact Slot on hit",
     "minLevel": 5,
-    "condition": function(C) { return _warlockHasInvocation(C, 'Eldritch Smite') && _warlockHasInvocation(C, 'Pact of the Blade'); },
+    "condition": function(C) { return warlockHasInvocation(C, 'Eldritch Smite') && warlockHasInvocation(C, 'Pact of the Blade'); },
     rollers: [{ kind: 'damage', formula: function(ctx) { var lv = Number(ctx.ownerLevel || 1); var slotLevel = lv >= 9 ? 5 : lv >= 7 ? 4 : lv >= 5 ? 3 : 1; return (slotLevel + 1) + 'd8'; }, label: function(ctx) { var lv = Number(ctx.ownerLevel || 1); var slotLevel = lv >= 9 ? 5 : lv >= 7 ? 4 : lv >= 5 ? 3 : 1; return 'Smite ' + (slotLevel + 1) + 'd8 Force'; } }],}
 ]);
 
@@ -447,19 +422,19 @@ registerItemFlagDef("pactWeapon", {
 registerClassSheetEffects("Warlock", [
   { type: "sense", senseType: "truesight", value: 30,
     note: "Witch Sight",
-    condition: function(C){ return _warlockHasInvocation(C, "Witch Sight"); } },
+    condition: function(C){ return warlockHasInvocation(C, "Witch Sight"); } },
   { type: "sense", senseType: "devilsSight", value: 120,
     note: "Devil's Sight (normal vision in dim light and magical/nonmagical darkness)",
-    condition: function(C){ return _warlockHasInvocation(C, "Devil's Sight"); } },
+    condition: function(C){ return warlockHasInvocation(C, "Devil's Sight"); } },
   { type: "advantage", target: "save", source: "Concentration",
     note: "Eldritch Mind",
-    condition: function(C){ return _warlockHasInvocation(C, "Eldritch Mind"); } },
+    condition: function(C){ return warlockHasInvocation(C, "Eldritch Mind"); } },
   { type: "speed", speedType: "swim", value: "walking",
     note: "Gift of the Depths",
-    condition: function(C){ return _warlockHasInvocation(C, "Gift of the Depths"); } },
+    condition: function(C){ return warlockHasInvocation(C, "Gift of the Depths"); } },
   { type: "trait", key: "underwater_breathing",
     note: "Gift of the Depths: breathe underwater",
-    condition: function(C){ return _warlockHasInvocation(C, "Gift of the Depths"); } },
+    condition: function(C){ return warlockHasInvocation(C, "Gift of the Depths"); } },
 ]);
 
 registerClassAtWillSpells('Warlock', [
@@ -510,7 +485,7 @@ MODIFIER_ELIGIBLE_CANTRIPS.forEach(function (cantripName) {
       var effect = _MODIFIER_CANTRIP_EFFECTS[mod.slug];
       if (!effect) return;
       if (mod.minRangeFeet && _cantripRangeFeet(cantripName) < mod.minRangeFeet) return;
-      if (!_warlockHasInvocation(C, mod.invocation)) return;
+      if (!warlockHasInvocation(C, mod.invocation)) return;
       if (!_warlockChoiceMatches(C, 'warlock_' + mod.slug + '_cantrip', cantripName, null)) return;
       if (effect.apply) effect.apply(out, C);
       var liveText = entriesToPlainText(liveInvocation(mod.invocation) || []);
@@ -540,7 +515,7 @@ registerWeaponAbilityOverride({
     const isWarlock = C.className === 'Warlock' ||
       (C.extraClasses || []).some(function (ec) { return ec.name === 'Warlock'; });
     if (!isWarlock) return false;
-    return _warlockHasInvocation(C, 'Pact of the Blade');
+    return warlockHasInvocation(C, 'Pact of the Blade');
   }
 });
 
@@ -568,7 +543,7 @@ registerClassSheetResources("Warlock", [
     "icon": "waves",
     "recharge": "LR",
     "minLevel": 5,
-    "condition": function(C) { return _warlockHasInvocation(C, 'Gift of the Depths'); },
+    "condition": function(C) { return warlockHasInvocation(C, 'Gift of the Depths'); },
     "max": function() { return 1; }
   },
   {
@@ -577,7 +552,7 @@ registerClassSheetResources("Warlock", [
     "icon": "shield",
     "recharge": "LR",
     "minLevel": 9,
-    "condition": function(C) { return _warlockHasInvocation(C, 'Gift of the Protectors') && _warlockHasInvocation(C, 'Pact of the Tome'); },
+    "condition": function(C) { return warlockHasInvocation(C, 'Gift of the Protectors') && warlockHasInvocation(C, 'Pact of the Tome'); },
     "max": function() { return 1; }
   },
   { "key": "mystic_arcanum_6", "name": "Mystic Arcanum VI",   "icon": "sparkles", "recharge": "LR", "minLevel": 11, "max": function() { return 1; } },
@@ -589,7 +564,7 @@ registerClassSheetResources("Warlock", [
 // Magical Cunning: recover ceil(max Pact Magic slots / 2), or all slots at Warlock 20.
 registerResourceSideEffect('magical_cunning', function (ctx = {}) {
   const C = ctx.character || ctx.C;
-  const wlv = Math.min(20, Math.max(0, _warlockLevel(C)));
+  const wlv = Math.min(20, Math.max(0, warlockLevel(C)));
   if (!wlv) return null;
 
   const { count: slotCount, level: slotLevel } = pactSlots(wlv);

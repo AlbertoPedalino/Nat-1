@@ -42,10 +42,17 @@ export function warlockInvocationSelections(character, keyPrefix = '') {
   return warlockInvocationSelectionsFromChoices(character?.choices || {}, keyPrefix);
 }
 
-export function warlockHasInvocation(character, invocationName) {
-  if (!invocationName) return false;
+// How many times an invocation is picked (Lessons of the First Ones and the
+// cantrip modifiers repeat). `keyPrefix` scopes the count to one class entry's
+// choice keys (a multiclass slot's prefix); without it every entry counts.
+export function warlockInvocationCount(character, invocationName, keyPrefix = '') {
+  if (!character || !invocationName) return 0;
   const wanted = invocationKey(invocationName);
-  return warlockInvocationSelections(character).some(function(name) { return invocationKey(name) === wanted; });
+  return warlockInvocationSelections(character, keyPrefix).filter((name) => invocationKey(name) === wanted).length;
+}
+
+export function warlockHasInvocation(character, invocationName, keyPrefix = '') {
+  return warlockInvocationCount(character, invocationName, keyPrefix) > 0;
 }
 
 export function warlockLevel(character) {
