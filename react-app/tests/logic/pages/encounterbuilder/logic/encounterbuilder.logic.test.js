@@ -28,6 +28,7 @@ import {
   modifyHp,
   nextTurn,
   removeCombatantEffect,
+  rerollInitiative,
   restoreFight,
   setDeathSave,
   setTempHp,
@@ -1352,4 +1353,11 @@ test('a speed with a condition reads as one, and hover is not a speed', async ()
   assert.equal(formatSpeed({ walk: 10, fly: { number: 60, condition: '(hover)' }, canHover: true }), '10 ft., fly 60 ft. (hover)');
   assert.equal(formatSpeed({ walk: 30, swim: 30 }), '30 ft., swim 30 ft.');
   assert.equal(formatSpeed(null), '—');
+});
+
+test('a reroll keeps each creature\'s own advantage or disadvantage on initiative', () => {
+  // The dice come up 20, then 10: one die is 20, disadvantage keeps 10.
+  const highFirst = () => { let i = 0; return () => [0.95, 0.45][i++ % 2]; };
+  const combat = { currentTurn: 0, combatants: [{ id: 0, name: 'Aria', initMod: 0, initiative: 3, activeConditions: ['poisoned'] }] };
+  assert.equal(rerollInitiative(combat, highFirst()).combatants[0].initiative, 10);
 });

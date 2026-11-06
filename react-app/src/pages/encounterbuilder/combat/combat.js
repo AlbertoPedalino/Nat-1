@@ -12,18 +12,18 @@ import {
 import { addReminder, normalizeEffects, removeEffect } from '../../../shared/character/combat/combatEffects.js';
 import { creatureRollSources } from '../../../shared/character/combat/rollSources.js';
 import { advArgFor, withExtraSource } from '../../../shared/character/dice/advantage.js';
-import { rollD20, rollDie } from '../../../shared/character/dice/dice.js';
+import { rollD20 } from '../../../shared/character/dice/dice.js';
 import { clampInt, numberOr } from '../../../shared/numbers.js';
 
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-export function d20(rng = Math.random) {
-  return rollDie(20, rng);
-}
-
-// Initiative is a Dexterity check: a d20 test (advArg as rollD20 takes it).
-function rollInitiativeD20(advArg, rng) {
-  return rollD20(0, { advantage: advArg, rng }).kept;
+// Initiative is a Dexterity check: a d20 test on the creature's own sources
+// (its conditions), plus the GM's launch choice ('adv' | 'disadv') if any.
+// Every initiative roll goes through here: launch, reroll, added creatures.
+function rollInitiative(creature, initMod, rng, choice = null) {
+  const sources = creatureInitiativeSources(creature);
+  const advantage = advArgFor(choice === 'adv' || choice === 'disadv' ? withExtraSource(sources, choice) : sources);
+  return rollD20(0, { advantage, rng }).kept + initMod;
 }
 
 // Who rolls initiative when an encounter launches, one row per creature in
@@ -39,7 +39,7 @@ export function initiativeRoster(encounter, players) {
       key: initiativeKey('player', index),
       side: 'party',
       name: player.name || 'PC',
-      sources: playerInitiativeSources(player),
+      sources: creatureInitiativeSources(player),
     });
   });
   const items = Array.isArray(encounter) ? encounter : [];
@@ -67,14 +67,9 @@ function initiativeKey(kind, index, n = 0) {
   return kind === 'player' ? `player:${index}` : `monster:${index}:${n}`;
 }
 
-function playerInitiativeSources(player) {
-  const { adv, disadv } = creatureRollSources({ conditions: player?.activeConditions }, 'check');
+function creatureInitiativeSources(creature) {
+  const { adv, disadv } = creatureRollSources({ conditions: creature?.activeConditions }, 'check');
   return { adv, disadv };
-}
-
-// The GM's launch choice ('adv' | 'disadv') on top of the creature's own.
-function initiativeAdvArg(sources, choice) {
-  return advArgFor(choice === 'adv' || choice === 'disadv' ? withExtraSource(sources, choice) : sources);
 }
 
 function clampTempHp(value) {
@@ -132,9 +127,7 @@ export function buildCombat(encounter, players, encounterId = null, rng = Math.r
         name: monster.name,
         source: monster.source,
         type: 'monster',
-        initiative: rollInitiativeD20(
-          initiativeAdvArg({ adv: false, disadv: false }, initiative[initiativeKey('monster', itemIndex, i)]), rng,
-        ) + initMod,
+        initiative: rollInitiative(null, initMod, rng, initiative[initiativeKey('monster', itemIndex, i)]),
         initMod,
         ac,
         hpMax: hp,
@@ -158,9 +151,7 @@ export function buildCombat(encounter, players, encounterId = null, rng = Math.r
       type: 'player',
       sourceId: player.sourceId || null,
       campaignId: player.campaignId || null,
-      initiative: rollInitiativeD20(
-        initiativeAdvArg(playerInitiativeSources(player), initiative[initiativeKey('player', index)]), rng,
-      ) + initMod,
+      initiative: rollInitiative(player, initMod, rng, initiative[initiativeKey('player', index)]),
       initMod,
       ac: clampInt(player.ac, 1, 99, 10),
       // Includes the player's reminders, a synced vital.
@@ -191,7 +182,7 @@ export function rerollInitiative(combat, rng = Math.random) {
     ...combat,
     combatants: sortCombatants((combat.combatants || []).map((combatant) => ({
       ...combatant,
-      initiative: d20(rng) + numberOr(combatant.initMod, 0),
+      initiative: rollInitiative(combatant, numberOr(combatant.initMod, 0), rng),
     }))),
     currentTurn: 0,
   };
@@ -458,7 +449,7 @@ export function addMonsterCombatant(combat, monster, rng = Math.random) {
     name: monster.name,
     source: monster.source,
     type: 'monster',
-    initiative: d20(rng) + initMod,
+    initiative: rollInitiative(null, initMod, rng),
     initMod,
     hpCurrent: hp,
     hpMax: hp,
@@ -490,7 +481,7 @@ export function addManualCombatant(combat, payload, rng = Math.random) {
     id: nextCombatantId(combat.combatants),
     name,
     type: 'monster',
-    initiative: d20(rng) + initMod,
+    initiative: rollInitiative(null, initMod, rng),
     initMod,
     hpCurrent: hp,
     hpMax: hp,
