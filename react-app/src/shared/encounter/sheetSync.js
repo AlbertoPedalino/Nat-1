@@ -56,7 +56,7 @@ export function resolveCombatVitals(combatant = {}, vitals = {}) {
   // win over the fallback and drop the combatant to 0 HP.
   out.hpCurrent = Math.max(0, Math.min(hpMax, Math.round(numberOr(out.hpCurrent ?? hpMax, hpMax))));
   const dead = out.hpCurrent === 0 && (
-    out.deathSaves.f >= 3
+    out.deathSaves.fail >= 3
     || normalizeConditions(out.activeConditions).includes(DEAD_CONDITION_KEY)
   );
   out.isDead = dead;

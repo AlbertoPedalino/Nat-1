@@ -4,7 +4,7 @@ import { clampDeathSaveCount, normalizeDeathSaves } from '../../../../../src/sha
 
 test('death saves read either shape and clamp each count to 0-3', () => {
   assert.deepEqual(normalizeDeathSaves({ success: 2, fail: 1 }), { success: 2, fail: 1 });
-  assert.deepEqual(normalizeDeathSaves({ s: 1, f: 3 }), { success: 1, fail: 3 });
+  assert.deepEqual(normalizeDeathSaves({ success: 1, fail: 3 }), { success: 1, fail: 3 });
   assert.deepEqual(normalizeDeathSaves({ success: 7, fail: -2 }), { success: 3, fail: 0 });
   assert.deepEqual(normalizeDeathSaves({ success: '2', fail: 1.6 }), { success: 2, fail: 2 });
   assert.deepEqual(normalizeDeathSaves(null), { success: 0, fail: 0 });

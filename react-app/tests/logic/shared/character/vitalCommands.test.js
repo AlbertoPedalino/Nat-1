@@ -20,7 +20,7 @@ test('temp HP grants keep the greater pool and long rest uses current maximum', 
   assert.deepEqual(v.activeConditions, []);
 });
 test('death-save commands preserve the other track and a natural 20 recovers', () => {
-  let v = apply({ currentHP: 0, deathSaves: { success: 1, fail: 1 } }, { type: 'setDeathSave', saveType: 's', value: 2 });
+  let v = apply({ currentHP: 0, deathSaves: { success: 1, fail: 1 } }, { type: 'setDeathSave', saveType: 'success', value: 2 });
   assert.deepEqual(v.deathSaves, { success: 2, fail: 1 });
   v = apply(v, { type: 'deathSaveRoll', roll: 20, total: 20 });
   assert.equal(v.currentHP, 1);

@@ -293,12 +293,12 @@ export function clearCombatantEffects(combat, id) {
 }
 
 export function setDeathSave(combat, id, type, value) {
-  if (!['s', 'f'].includes(type)) return combat;
+  if (!['success', 'fail'].includes(type)) return combat;
   return updateCombatant(combat, id, (combatant) => {
     if (!combatant.deathSaves) return combatant;
     const nextValue = combatant.deathSaves[type] === value ? value - 1 : value;
     const deathSaves = { ...combatant.deathSaves, [type]: clampInt(nextValue, 0, 3, 0) };
-    const isDead = deathSaves.f >= 3;
+    const isDead = deathSaves.fail >= 3;
     return {
       ...combatant,
       hpCurrent: isDead ? 0 : combatant.hpCurrent,
@@ -375,7 +375,7 @@ function applyHp(combatant, value) {
   const dead = isMonster
     ? hpCurrent === 0
     : hpCurrent === 0 && (
-      Number(combatant.deathSaves?.f || 0) >= 3
+      Number(combatant.deathSaves?.fail || 0) >= 3
       || normalizeConditions(combatant.activeConditions).includes(DEAD_CONDITION_KEY)
     );
   return {
@@ -383,7 +383,7 @@ function applyHp(combatant, value) {
     hpCurrent,
     isDead: dead,
     activeConditions: setConditionActive(combatant.activeConditions, DEAD_CONDITION_KEY, dead),
-    deathSaves: hpCurrent > 0 && combatant.deathSaves ? { s: 0, f: 0 } : combatant.deathSaves,
+    deathSaves: hpCurrent > 0 && combatant.deathSaves ? { success: 0, fail: 0 } : combatant.deathSaves,
   };
 }
 
@@ -394,7 +394,7 @@ function killCombatant(combatant) {
     hpCurrent: 0,
     isDead: true,
     activeConditions: setConditionActive(combatant.activeConditions, DEAD_CONDITION_KEY, true),
-    deathSaves: player ? { s: 0, f: 3 } : combatant.deathSaves,
+    deathSaves: player ? { success: 0, fail: 3 } : combatant.deathSaves,
   };
 }
 
@@ -405,7 +405,7 @@ function reviveCombatant(combatant) {
     hpCurrent: 1,
     isDead: false,
     activeConditions: setConditionActive(combatant.activeConditions, DEAD_CONDITION_KEY, false),
-    deathSaves: player ? { s: 0, f: 0 } : combatant.deathSaves,
+    deathSaves: player ? { success: 0, fail: 0 } : combatant.deathSaves,
   };
 }
 
@@ -417,7 +417,7 @@ function restoreCombatantMortality(combatant) {
   const player = combatant.type === 'player';
   const dead = player
     ? hpCurrent === 0 && (
-      Number(combatant.deathSaves?.f || 0) >= 3
+      Number(combatant.deathSaves?.fail || 0) >= 3
       || normalizeConditions(combatant.activeConditions).includes(DEAD_CONDITION_KEY)
     )
     : hpCurrent === 0;
@@ -457,7 +457,7 @@ export function addMonsterCombatant(combat, monster, rng = Math.random) {
     activeConditions: [],
     activeEffects: [],
     ac: getAC(monster.ac),
-    deathSaves: { s: 0, f: 0 },
+    deathSaves: { success: 0, fail: 0 },
     isDead: false,
     monsterData: monster,
     ...assignLabel(monster.name),
@@ -489,7 +489,7 @@ export function addManualCombatant(combat, payload, rng = Math.random) {
     activeConditions: [],
     activeEffects: [],
     ac: clampInt(payload.ac, 0, 99, 10),
-    deathSaves: { s: 0, f: 0 },
+    deathSaves: { success: 0, fail: 0 },
     isDead: false,
     monsterData: null,
     ...assignLabel(name),

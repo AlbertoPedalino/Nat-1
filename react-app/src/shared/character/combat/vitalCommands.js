@@ -33,7 +33,7 @@ export function applyVitalCommand(data, command, baseMaxHP) {
       recover = true;
       break;
     case 'setDeathSave': {
-      const key = command.saveType === 's' ? 'success' : command.saveType === 'f' ? 'fail' : command.saveType;
+      const key = command.saveType;
       if (!['success', 'fail'].includes(key)) throw new Error('Invalid death save.');
       v.deathSaves[key] = command.toggle && v.deathSaves[key] === n ? n - 1 : n;
       v.activeConditions = setConditionActive(v.activeConditions, 'dead', v.deathSaves.fail >= 3);

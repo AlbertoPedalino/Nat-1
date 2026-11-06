@@ -252,14 +252,14 @@ test('sheet sync mappers clamp and keep the sheet patch shallow', () => {
     // difference is what stops it from wiping the combat's own.
     activeConditions: null,
     activeEffects: null,
-    deathSaves: { s: 3, f: 0 },
+    deathSaves: { success: 3, fail: 0 },
   });
 
   const patch = combatantToSheetPatch({
     hpCurrent: -4,
     hpMax: 22,
     tempHP: 3,
-    deathSaves: { s: 2, f: 9 },
+    deathSaves: { success: 2, fail: 9 },
   });
   assert.deepEqual(patch, {
     currentHP: 0,
@@ -307,7 +307,7 @@ test('combat launch seeds linked players from sheet current HP and death saves',
   assert.equal(combat.combatants.length, 1);
   assert.equal(combat.combatants[0].hpCurrent, 7);
   assert.equal(combat.combatants[0].tempHP, 4);
-  assert.deepEqual(combat.combatants[0].deathSaves, { s: 2, f: 1 });
+  assert.deepEqual(combat.combatants[0].deathSaves, { success: 2, fail: 1 });
 });
 
 test('fumble tables start as editable 1d6 categories with the supplied entries', () => {
@@ -477,7 +477,7 @@ test('temp HP mutator clamps and fight snapshots preserve temp HP', () => {
       hpMax: 12,
       tempHP: 5,
       ac: 15,
-      deathSaves: { s: 0, f: 0 },
+      deathSaves: { success: 0, fail: 0 },
       isDead: false,
     }],
     currentTurn: 0,
@@ -500,7 +500,7 @@ test('applySheetVitals syncs linked PCs with max HP reclamp and idempotence', ()
         hpCurrent: 18,
         hpMax: 20,
         tempHP: 3,
-        deathSaves: { s: 0, f: 0 },
+        deathSaves: { success: 0, fail: 0 },
         isDead: false,
       },
       {
@@ -510,7 +510,7 @@ test('applySheetVitals syncs linked PCs with max HP reclamp and idempotence', ()
         hpCurrent: 6,
         hpMax: 6,
         tempHP: 0,
-        deathSaves: { s: 0, f: 0 },
+        deathSaves: { success: 0, fail: 0 },
         isDead: false,
       },
     ],
@@ -527,7 +527,7 @@ test('applySheetVitals syncs linked PCs with max HP reclamp and idempotence', ()
   assert.equal(synced.combatants[0].hpMax, 12);
   assert.equal(synced.combatants[0].hpCurrent, 12);
   assert.equal(synced.combatants[0].tempHP, 0);
-  assert.deepEqual(synced.combatants[0].deathSaves, { s: 2, f: 3 });
+  assert.deepEqual(synced.combatants[0].deathSaves, { success: 2, fail: 3 });
   assert.equal(synced.combatants[0].isDead, false);
   assert.equal(synced.combatants[1], combat.combatants[1]);
 
@@ -549,17 +549,17 @@ test('applySheetVitals syncs linked PCs with max HP reclamp and idempotence', ()
 
 test('hp and death saves preserve player death-save flow', () => {
   const combat = {
-    combatants: [{ id: 1, type: 'player', hpCurrent: 5, hpMax: 10, deathSaves: { s: 0, f: 0 }, isDead: false }],
+    combatants: [{ id: 1, type: 'player', hpCurrent: 5, hpMax: 10, deathSaves: { success: 0, fail: 0 }, isDead: false }],
     currentTurn: 0,
     round: 1,
   };
   const down = modifyHp(combat, 1, -10);
   assert.equal(down.combatants[0].hpCurrent, 0);
   assert.equal(down.combatants[0].isDead, false);
-  const failed = setDeathSave(setDeathSave(setDeathSave(down, 1, 'f', 1), 1, 'f', 2), 1, 'f', 3);
+  const failed = setDeathSave(setDeathSave(setDeathSave(down, 1, 'fail', 1), 1, 'fail', 2), 1, 'fail', 3);
   assert.equal(failed.combatants[0].isDead, true);
   const healed = modifyHp(failed, 1, 4);
-  assert.deepEqual(healed.combatants[0].deathSaves, { s: 0, f: 0 });
+  assert.deepEqual(healed.combatants[0].deathSaves, { success: 0, fail: 0 });
   assert.equal(healed.combatants[0].isDead, false);
 });
 
@@ -580,17 +580,17 @@ test('Dead follows monster HP and player death saves in both directions', () => 
       type: 'player',
       hpCurrent: 0,
       hpMax: 20,
-      deathSaves: { s: 0, f: 2 },
+      deathSaves: { success: 0, fail: 2 },
       activeConditions: [],
       isDead: false,
     }],
   };
-  const deadPlayer = setDeathSave(playerCombat, 2, 'f', 3);
+  const deadPlayer = setDeathSave(playerCombat, 2, 'fail', 3);
   assert.equal(deadPlayer.combatants[0].isDead, true);
   assert.deepEqual(deadPlayer.combatants[0].activeConditions, ['dead']);
   const revivedPlayer = toggleCombatantCondition(deadPlayer, 2, 'dead');
   assert.equal(revivedPlayer.combatants[0].hpCurrent, 1);
-  assert.deepEqual(revivedPlayer.combatants[0].deathSaves, { s: 0, f: 0 });
+  assert.deepEqual(revivedPlayer.combatants[0].deathSaves, { success: 0, fail: 0 });
 });
 
 test('dice parses formulas and d20 modifiers', () => {
@@ -932,7 +932,7 @@ test('closing an encounter deactivates it but keeps the fight resumable', () => 
 test('external fight refresh keeps linked sheet vitals, reminders included, while updating monsters', () => {
   const player = {
     id: 'player', type: 'player', sourceId: 'character', name: 'Aria', hpMax: 30,
-    hpCurrent: 20, tempHP: 4, maxHPBonus: 2, activeConditions: ['prone'], deathSaves: { s: 0, f: 0 },
+    hpCurrent: 20, tempHP: 4, maxHPBonus: 2, activeConditions: ['prone'], deathSaves: { success: 0, fail: 0 },
   };
   const monster = { id: 'monster', type: 'monster', name: 'Ogre', hpMax: 50, hpCurrent: 50 };
   const state = encounterReducer(createInitialState(), {
@@ -1217,7 +1217,7 @@ test('a fight snapshot persists and restores every synced vital', () => {
     hpCurrent: 9,
     tempHP: 3,
     maxHPBonus: 2,
-    deathSaves: { s: 1, f: 2 },
+    deathSaves: { success: 1, fail: 2 },
     activeConditions: ['prone', 'poisoned'],
   };
 
@@ -1231,7 +1231,7 @@ test('a fight snapshot persists and restores every synced vital', () => {
   assert.equal(restored.hpCurrent, 9);
   assert.equal(restored.tempHP, 3);
   assert.equal(restored.maxHPBonus, 2);
-  assert.deepEqual(restored.deathSaves, { s: 1, f: 2 });
+  assert.deepEqual(restored.deathSaves, { success: 1, fail: 2 });
   assert.deepEqual(restored.activeConditions, ['poisoned', 'prone']);
 });
 

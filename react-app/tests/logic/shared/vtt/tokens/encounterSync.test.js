@@ -71,7 +71,7 @@ test('Dead set on the map kills creatures and completes a player death track', (
       sourceId: 'char-1',
       hpCurrent: 8,
       hpMax: 20,
-      deathSaves: { s: 0, f: 0 },
+      deathSaves: { success: 0, fail: 0 },
       activeConditions: [],
       isDead: false,
     }],
@@ -83,7 +83,7 @@ test('Dead set on the map kills creatures and completes a player death track', (
     },
   );
   assert.equal(player[0].isDead, true);
-  assert.deepEqual(player[0].deathSaves, { s: 0, f: 3 });
+  assert.deepEqual(player[0].deathSaves, { success: 0, fail: 3 });
 });
 
 // Returning null lets the caller skip the write and the event it would emit,

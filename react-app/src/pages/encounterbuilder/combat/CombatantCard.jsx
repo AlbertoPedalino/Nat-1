@@ -303,18 +303,18 @@ function DeathSaves({ combatant }) {
       {[1, 2, 3].map((value) => (
         <Dot
           key={`s-${value}`}
-          active={combatant.deathSaves.s >= value}
+          active={combatant.deathSaves.success >= value}
           color="success.main"
-          onClick={() => dispatch({ type: 'setDeathSave', id: combatant.id, saveType: 's', value })}
+          onClick={() => dispatch({ type: 'setDeathSave', id: combatant.id, saveType: 'success', value })}
         />
       ))}
       <Typography variant="caption" color="error.main">F</Typography>
       {[1, 2, 3].map((value) => (
         <Dot
           key={`f-${value}`}
-          active={combatant.deathSaves.f >= value}
+          active={combatant.deathSaves.fail >= value}
           color="error.main"
-          onClick={() => dispatch({ type: 'setDeathSave', id: combatant.id, saveType: 'f', value })}
+          onClick={() => dispatch({ type: 'setDeathSave', id: combatant.id, saveType: 'fail', value })}
         />
       ))}
     </Stack>

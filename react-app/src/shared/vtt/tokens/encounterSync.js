@@ -103,7 +103,7 @@ export function fightWithTokenVitals(combatants, token) {
       hpMax,
       activeConditions: conditions,
       activeEffects: effects,
-      ...(player ? { deathSaves: { s: deathSaves.success, f: deathSaves.fail } } : {}),
+      ...(player ? { deathSaves: { success: deathSaves.success, fail: deathSaves.fail } } : {}),
       // isDead is the encounter builder's own flag and has to keep agreeing
       // with the hit points, or a creature killed on the map comes back alive
       // there.

@@ -41,8 +41,9 @@ function getDeathSave(raw, sheetKey, combatKey) {
   return clampInt(raw[sheetKey] ?? raw[combatKey], 0, 3, 0);
 }
 
-// Death saves in their stored shape `{ success, fail }`, each 0-3; reads the
-// combat shape `{ s, f }` too. The one clamp every view uses.
+// Death saves are `{ success, fail }`, each 0-3, on sheets and in fights alike;
+// fights saved before that used `{ s, f }`, which is still read. The one clamp
+// every view uses.
 export function clampDeathSaveCount(value) {
   return clampInt(value, 0, 3, 0);
 }
@@ -118,7 +119,7 @@ export const SYNCED_VITALS = [
     combat: 'deathSaves',
     toCombat: (src) => {
       const ds = src.deathSaves || {};
-      return { s: getDeathSave(ds, 'success', 's'), f: getDeathSave(ds, 'fail', 'f') };
+      return { success: getDeathSave(ds, 'success', 's'), fail: getDeathSave(ds, 'fail', 'f') };
     },
     toData: (c) => {
       const ds = c.deathSaves || {};

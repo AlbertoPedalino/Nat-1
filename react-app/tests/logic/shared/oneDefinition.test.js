@@ -428,3 +428,9 @@ test('spell slot changes are saved only through spellSlots.js', () => {
     allow: ['shared/character/spells/spellSlots.js'],
   }), []);
 });
+
+// Death saves are { success, fail } everywhere; fights saved as { s, f } are
+// still read by normalizeDeathSaves, and nothing writes that shape again.
+test('death saves are written as { success, fail } only', () => {
+  assert.deepEqual(sourceLinesMatching(/\{ s: \d, f: \d \}|deathSaves\??\.(s|f)\b|saveType: ['"](s|f)['"]/), []);
+});

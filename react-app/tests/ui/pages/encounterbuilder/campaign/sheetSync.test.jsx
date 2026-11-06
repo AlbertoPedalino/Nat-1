@@ -29,7 +29,7 @@ vi.mock('../../../../../src/shared/cloud/supabaseClient.js', () => ({ supabase: 
   removeChannel(channel) { cloud.receivers.delete(channel.receive); },
 } }));
 
-const player = { id: 1, type: 'player', sourceId: 'character', name: 'Player', hpCurrent: 30, hpMax: 30, tempHP: 0, deathSaves: { s: 0, f: 0 }, activeConditions: [] };
+const player = { id: 1, type: 'player', sourceId: 'character', name: 'Player', hpCurrent: 30, hpMax: 30, tempHP: 0, deathSaves: { success: 0, fail: 0 }, activeConditions: [] };
 const monster = { id: 2, type: 'monster', name: 'Ogre', hpCurrent: 40, hpMax: 40 };
 const fight = { id: 'fight', encounterId: 'encounter', combatants: [player, monster], currentTurn: 0, round: 1 };
 const vitals = (hp) => ({ currentHP: hp, tempHP: 0, maxHPBonus: 0, activeConditions: [], deathSaves: { success: 0, fail: 0 } });
