@@ -8,6 +8,7 @@ import { collectAutoGrantedSpells, getSpellCounts, maxSpellLevel, spellMatchesAn
 import { SpellMiniTags, SpellReferenceBody, SpellRowLabel, SpellSelectButton } from '../../../shared/character/spells/SpellReference.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import { entityChipSx } from '../../../shared/ui/entityColors.js';
+import { matchKey } from '../../../shared/content/nameKeys.js';
 
 export default function SpellSelectionPanel({ state, dispatch }) {
   const [wizardMode, setWizardMode] = useState('prepare');
@@ -44,7 +45,7 @@ export default function SpellSelectionPanel({ state, dispatch }) {
     const map = new Map();
     state.data.spells.forEach((spell) => {
       if (!spell?.name) return;
-      map.set(normSpell(spell.name), spell);
+      map.set(matchKey(spell.name), spell);
     });
     return map;
   }, [state.data.spells]);
@@ -56,7 +57,7 @@ export default function SpellSelectionPanel({ state, dispatch }) {
     _autoGranted: auto,
   }));
   const basePool = spellbookNames
-    ? spellbookNames.map((name) => spellIndex.get(normSpell(name)) || { name, level })
+    ? spellbookNames.map((name) => spellIndex.get(matchKey(name)) || { name, level })
     : state.data.spells
       .filter((spell) => spell.level === level)
       .filter((spell) => spellMatchesAnyClass(spell, classNames, state.data.classSpellIndex))
@@ -221,13 +222,9 @@ function dedupeSpells(spells) {
   });
 }
 
-function normSpell(value) {
-  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-}
-
 function containsSpellName(list, name) {
-  const target = normSpell(name);
-  return (list || []).some((entry) => normSpell(entry) === target);
+  const target = matchKey(name);
+  return (list || []).some((entry) => matchKey(entry) === target);
 }
 
 function normalizeWizardBook(book) {
@@ -237,7 +234,7 @@ function normalizeWizardBook(book) {
     next[level] = [];
     (book?.[level] || []).forEach((entry) => {
       const name = typeof entry === 'string' ? entry : entry?.name;
-      const key = normSpell(name);
+      const key = matchKey(name);
       if (!key || seen.has(key)) return;
       seen.add(key);
       next[level].push(name);
@@ -255,5 +252,5 @@ function getSpellbookSize(book) {
 }
 
 function isInWizardBook(book, name, level) {
-  return getSpellbookLevel(book, level).some((entry) => normSpell(entry) === normSpell(name));
+  return getSpellbookLevel(book, level).some((entry) => matchKey(entry) === matchKey(name));
 }

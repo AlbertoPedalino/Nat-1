@@ -5,6 +5,7 @@ import {
   backgroundGuaranteedFeatNames,
   backgroundOriginFeat as normalizeBackgroundOriginFeat,
 } from './backgroundFeatOptions.js';
+import { matchKey } from '../../content/nameKeys.js';
 
 const FRAMEWORK_EXACT = new Set(['feat_origin', 'species_origin_feat']);
 const FRAMEWORK_PREFIXES = ['feat_'];
@@ -164,7 +165,7 @@ export function ownedFeatNames(character) {
 }
 
 function compactFeatName(value) {
-  return featNameText(value).toLowerCase().replace(/[^a-z0-9]/g, '');
+  return matchKey(featNameText(value));
 }
 
 export function hasOwnedFeat(character, name) {

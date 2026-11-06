@@ -12,6 +12,7 @@ import {
   buildOptionalFeatureEntryLookup,
 } from '../../../shared/character/progression/optionalFeatures.js';
 import { entriesToPlainText } from '../../../shared/character/spells/spellEntries.js';
+import { matchKey } from '../../../shared/content/nameKeys.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -98,25 +99,25 @@ function _warlockAdapterCharacter(localContext) {
 
 function _warlockInvocationCount(C, name) {
   if (!C) return 0;
-  var target = String(name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  var target = matchKey(name);
   return warlockInvocationSelections(C).filter(function (invName) {
-    return String(invName || '').toLowerCase().replace(/[^a-z0-9]/g, '') === target;
+    return matchKey(invName) === target;
   }).length;
 }
 
 function _warlockInvocationCountScoped(C, name, keyPrefix) {
   if (!C) return 0;
-  var target = String(name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  var target = matchKey(name);
   return warlockInvocationSelections(C, keyPrefix).filter(function (invName) {
-    return String(invName || '').toLowerCase().replace(/[^a-z0-9]/g, '') === target;
+    return matchKey(invName) === target;
   }).length;
 }
 
 function _warlockHasInvocationScoped(C, name, keyPrefix) {
   if (!C || !name) return false;
-  var target = String(name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  var target = matchKey(name);
   return warlockInvocationSelections(C, keyPrefix).some(function (invName) {
-    return String(invName || '').toLowerCase().replace(/[^a-z0-9]/g, '') === target;
+    return matchKey(invName) === target;
   });
 }
 
@@ -213,8 +214,6 @@ registerClassAdapter("Warlock", function (cls, lv, specs, adapterContext = {}) {
   var _charRef = _warlockAdapterCharacter(adapterContext);
   var _choicePrefix = String(adapterContext?.keyPrefix || '');
 
-  function _normInvocation(v) { return String(v || '').toLowerCase().replace(/[^a-z0-9]/g, ''); }
-
   // Modifier-cantrip invocations (Agonizing/Repelling Blast, Eldritch Spear) attach a
   // cantrip choice. It is rendered directly under the invocation slot that selected it
   // (interleaved in the loop below) rather than grouped at the end. Precompute the total
@@ -227,7 +226,7 @@ registerClassAdapter("Warlock", function (cls, lv, specs, adapterContext = {}) {
       total: Math.max(1, _warlockInvocationCountScoped(_charRef, mod.invocation, _choicePrefix)),
       seen: 0,
     };
-    _slugByInvocation[_normInvocation(mod.invocation)] = mod.slug;
+    _slugByInvocation[matchKey(mod.invocation)] = mod.slug;
   });
 
   function _pushModifierCantripChoice(slug) {
@@ -287,7 +286,7 @@ registerClassAdapter("Warlock", function (cls, lv, specs, adapterContext = {}) {
       // Place the chosen invocation's cantrip selector directly under this slot,
       // instead of grouping all modifier-cantrip choices at the end of the step.
       var _slotInvocation = _slotSelectedInvocation(i + 1);
-      var _slotSlug = _slotInvocation ? _slugByInvocation[_normInvocation(_slotInvocation)] : null;
+      var _slotSlug = _slotInvocation ? _slugByInvocation[matchKey(_slotInvocation)] : null;
       if (_slotSlug) _pushModifierCantripChoice(_slotSlug);
     }
   });

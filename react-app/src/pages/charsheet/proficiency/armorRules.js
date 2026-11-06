@@ -1,4 +1,4 @@
-import { normKey } from './weaponRules.js';
+import { matchKey } from '../../../shared/content/nameKeys.js';
 
 export const ARMOR_KIND_KEYS = {
   LA: { kind: 'Light Armor', set: new Set(['light', 'lightarmor']) },
@@ -13,5 +13,5 @@ export function getArmorKindEntry(item) {
 
 export function armorSetTrainsKind(armorSet, entry) {
   if (!entry) return true;
-  return Array.from(armorSet).some((label) => entry.set.has(normKey(label)));
+  return Array.from(armorSet).some((label) => entry.set.has(matchKey(label)));
 }

@@ -18,10 +18,10 @@ import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import {
   buildCreatedItemLookup,
-  exactCreatedItemKey,
   prepareCreatedItemData,
   resolveCreatedItemValue,
 } from '../../../shared/character/inventory/createdItemResolution.js';
+import { matchKey } from '../../../shared/content/nameKeys.js';
 
 // Generic interactive "create items from a list" panel. Driven entirely by the
 // action's `detail` config so Replicate Magic Item, Tinker's Magic and Fast
@@ -98,10 +98,10 @@ export default function CreatedItemsPanel({ action, character, sheet }) {
     if (Array.isArray(detail.toolGroups)) {
       const sections = collectAllProficiencies(character, profSets) || [];
       const toolItems = (sections.find((s) => s.title === 'Tools')?.items) || [];
-      const known = new Set(toolItems.map((t) => exactCreatedItemKey(t)));
+      const known = new Set(toolItems.map((t) => matchKey(t)));
       const out = [];
       detail.toolGroups.forEach((group) => {
-        if (known.has(exactCreatedItemKey(group.tool))) (group.items || []).forEach((it) => out.push(it));
+        if (known.has(matchKey(group.tool))) (group.items || []).forEach((it) => out.push(it));
       });
       return [...new Set(out)];
     }

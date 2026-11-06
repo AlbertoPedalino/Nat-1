@@ -38,6 +38,13 @@ test('name keys come from shared/content/nameKeys.js, no local norm helpers', ()
   }), []);
 });
 
+test('a lowercase-alphanumeric key is made only by matchKey, never inline or under another name', () => {
+  assert.deepEqual(sourceFilesMatching(
+    /toLowerCase\(\)\s*\.replace\(\/\[\^a-z0-9\]\+?\/g,\s*(''|"")\)|(function\s+\w+\((\w+)\)\s*\{\s*return matchKey\(\3\);\s*\}|const\s+\w+\s*=\s*\(?(\w+)\)?\s*=>\s*matchKey\(\4\);)/,
+    { allow: ['shared/content/nameKeys.js'] },
+  ), []);
+});
+
 test('capitalizing is done only by shared/ui/textCase.js', () => {
   assert.deepEqual(sourceFilesMatching(
     /charAt\(0\)\.toUpperCase\(\)\s*\+|\.replace\(\/(\^|\\b)\\w\/g?,\s*(\(c\)|c|function\s*\(c\))\s*(=>|\{)|function\s+(capitalize|titleCase)\s*\(|const\s+(capitalize|titleCase)\s*=/,

@@ -1,4 +1,5 @@
 import { canonicalProficiencyLabel } from './proficiencyDisplay.js';
+import { matchKey } from '../../content/nameKeys.js';
 
 const TYPED_PROFICIENCY_RE = /^(skill|tool|language|weapon):(.+)$/i;
 const TYPED_PROFICIENCY_PREFIX_RE = /^(skill|tool|language|weapon):\s*/i;
@@ -108,7 +109,7 @@ export function uniqueProficiencyLabels(values) {
   (Array.isArray(values) ? values : [values]).flat().forEach((value) => {
     if (value == null || value === '') return;
     const label = canonicalProficiencyLabel(value);
-    const key = label.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const key = matchKey(label);
     if (!label || !key || seen.has(key)) return;
     seen.add(key);
     out.push(label);
@@ -116,6 +117,3 @@ export function uniqueProficiencyLabels(values) {
   return out;
 }
 
-export function normalizedKey(label) {
-  return String(label || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-}

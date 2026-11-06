@@ -22,6 +22,7 @@ import {
   resolveActionRollers,
 } from '../../../shared/character/dice/rollers.js';
 import { ownedFeatNames } from '../../../shared/character/progression/selectedFeats.js';
+import { matchKey } from '../../../shared/content/nameKeys.js';
 
 export { getActionRollers } from '../../../shared/character/dice/rollers.js';
 
@@ -110,15 +111,11 @@ export function buildActionTags(action, C) {
 // resource-max map from the same resolver instead of a divergent copy.
 export { normalizeResourceMax } from '../resources/restResources.js';
 
-function normActionKey(value) {
-  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-}
-
 function actionDedupeKey(item) {
   return [
-    normActionKey(item.name || item.key || ''),
-    normActionKey(item.resKey || ''),
-    normActionKey(item.cat || ''),
+    matchKey(item.name || item.key || ''),
+    matchKey(item.resKey || ''),
+    matchKey(item.cat || ''),
     String(item.minLevel || ''),
   ].join('|');
 }

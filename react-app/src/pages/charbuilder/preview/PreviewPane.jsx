@@ -51,6 +51,7 @@ import { buildPreviewSheetCharacter } from './previewSheet.js';
 import { ENTITY_COLORS as SOURCE_COLOR, NEUTRAL_TONE } from '../../../shared/ui/entityColors.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { abilityModifier } from '../../../shared/character/progression/abilityModifier.js';
+import { matchKey } from '../../../shared/content/nameKeys.js';
 
 const darkChipText = '#17120d';
 const PROFICIENCY_TONE = NEUTRAL_TONE;
@@ -534,10 +535,6 @@ function FeatNameCard({ name }) {
   );
 }
 
-function normalizedName(value) {
-  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-}
-
 function collectPreviewFeats(character, feats) {
   const ownedNames = collectOwnedFeatNames(character);
   if (!ownedNames.length) return [];
@@ -547,12 +544,12 @@ function collectPreviewFeats(character, feats) {
     ...(character.allFeatSnapshots || []),
     ...(feats || []),
   ].forEach((feat) => {
-    const key = normalizedName(feat?.name);
+    const key = matchKey(feat?.name);
     if (key && !byName.has(key)) byName.set(key, feat);
   });
 
   return ownedNames.map((name) => {
-    const feat = byName.get(normalizedName(name));
+    const feat = byName.get(matchKey(name));
     return feat ? { ...feat, name: feat.name || name } : { name, entries: [] };
   });
 }
@@ -661,7 +658,7 @@ function PreviewPaneImpl({ character, items = [], feats = [] }) {
           <PreviewSection icon={Layers} title="Feats" tone={SOURCE_COLOR.feat}>
             <Stack spacing={0.6} sx={{ minWidth: 0 }}>
               {previewFeats.map((feat, index) => (
-                <PreviewFeat key={`${normalizedName(feat.name)}-${index}`} feat={feat} />
+                <PreviewFeat key={`${matchKey(feat.name)}-${index}`} feat={feat} />
               ))}
             </Stack>
           </PreviewSection>

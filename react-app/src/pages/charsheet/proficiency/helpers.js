@@ -2,7 +2,7 @@ import { adapterRegistry as installedRegistry } from '../../../adapters/registry
 import { canonicalProficiencyLabel } from '../../../shared/character/progression/proficiencyDisplay.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { isChoicePlaceholderValue } from '../../../shared/character/progression/typedProficiencies.js';
-import { normKey } from './weaponRules.js';
+import { matchKey } from '../../../shared/content/nameKeys.js';
 
 export const CHOICE_KEYS = ['choose', 'any', 'anyTool', 'anyArtisansTool', 'anyMusicalInstrument', 'anyGamingSet', 'anyStandard', 'anyExotic'];
 
@@ -62,11 +62,11 @@ function choiceMatches(character, requiredChoice, prefix = '') {
   const choices = character?.choices || {};
   const keys = [requiredChoice.key, `${prefix || ''}${requiredChoice.key}`].filter(Boolean);
   const wanted = Array.isArray(requiredChoice.value) ? requiredChoice.value : [requiredChoice.value];
-  const wantedNorm = wanted.map((value) => normKey(String(value).split('|')[0]));
+  const wantedNorm = wanted.map((value) => matchKey(String(value).split('|')[0]));
   return keys.some((key) => {
     const stored = choices[key];
     const values = Array.isArray(stored) ? stored : (stored ? [stored] : []);
-    return values.some((value) => wantedNorm.includes(normKey(String(value).split('|')[0])));
+    return values.some((value) => wantedNorm.includes(matchKey(String(value).split('|')[0])));
   });
 }
 

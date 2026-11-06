@@ -1,3 +1,4 @@
+import { matchKey } from '../../../shared/content/nameKeys.js';
 function cloneJson(value) {
   if (value == null || typeof value !== 'object') return value;
   if (Array.isArray(value)) return value.map(cloneJson);
@@ -118,10 +119,6 @@ function normalizeComparable(value) {
   return String(value || '').split('|')[0].trim().toLowerCase();
 }
 
-function normalizeName(value) {
-  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-}
-
 function isWeaponType(type) {
   return ['M', 'R', 'WEAPON'].includes(type);
 }
@@ -143,7 +140,7 @@ export function matchesItemRequirement(item, requirement) {
   if (!item || !requirement || typeof requirement !== 'object') return false;
   const type = String(item.type || '').split('|')[0].toUpperCase();
 
-  if (requirement.name && normalizeName(item.name) !== normalizeName(requirement.name)) return false;
+  if (requirement.name && matchKey(item.name) !== matchKey(requirement.name)) return false;
   if (requirement.source && String(item.source || '').toUpperCase() !== String(requirement.source).toUpperCase()) return false;
   if (requirement.type) {
     const requiredType = String(requirement.type).split('|')[0].toUpperCase();

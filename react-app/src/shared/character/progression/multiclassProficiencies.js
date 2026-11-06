@@ -1,4 +1,5 @@
 import { strip5eMarkup } from '../spells/spellEntries.js';
+import { matchKey } from '../../content/nameKeys.js';
 
 const ARMOR_LABELS = { light: 'Light armor', medium: 'Medium armor', heavy: 'Heavy armor', shield: 'Shields', shields: 'Shields' };
 const WEAPON_LABELS = { simple: 'Simple weapons', martial: 'Martial weapons' };
@@ -82,13 +83,9 @@ const XPHB_MULTICLASS_FALLBACK = {
 
 const MUSICAL_INSTRUMENTS = ['Bagpipes', 'Drum', 'Dulcimer', 'Flute', 'Hand Drum', 'Horn', 'Lute', 'Lyre', 'Pan Flute', 'Shawm', 'Viol'];
 
-function classKey(className) {
-  return String(className || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-}
-
 function fallbackForClass(className) {
-  const wanted = classKey(className);
-  return Object.entries(XPHB_MULTICLASS_FALLBACK).find(([name]) => classKey(name) === wanted)?.[1] || {};
+  const wanted = matchKey(className);
+  return Object.entries(XPHB_MULTICLASS_FALLBACK).find(([name]) => matchKey(name) === wanted)?.[1] || {};
 }
 
 export function isPrimaryClassContext(ctx = {}) {

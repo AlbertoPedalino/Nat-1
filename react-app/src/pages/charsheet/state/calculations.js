@@ -10,6 +10,7 @@ import { primaryClassLevel } from '../../../shared/character/progression/classLe
 import { XP_THRESHOLDS } from '../../../shared/character/progression/xp.js';
 import { collectSheetEffects } from './sheetEffects.js';
 import { getNormalizedChoices } from '../../../shared/character/progression/choiceNormalization.js';
+import { matchKey } from '../../../shared/content/nameKeys.js';
 
 const STATS = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
 const SLBL = { str: 'STR', dex: 'DEX', con: 'CON', int: 'INT', wis: 'WIS', cha: 'CHA' };
@@ -125,10 +126,6 @@ export function getSaveBonus(C, stat) {
   return formSave != null ? Math.max(own, formSave) : own;
 }
 
-function initEffectType(t) {
-  return String(t || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-}
-
 // Passive, always-on bonuses to Initiative. Adapters (class/subclass/species/feat)
 // grant these via sheet effects:
 //   { type: 'initiativeProficiency' }            → + Proficiency Bonus (Alert feat)
@@ -142,7 +139,7 @@ export function collectInitiativeModifiers(C) {
   const out = [];
   let hasFullProficiency = false;
   collectSheetEffects(C).forEach((e) => {
-    const t = initEffectType(e.type);
+    const t = matchKey(e.type);
     if (t === 'initiativeproficiency') {
       hasFullProficiency = true;
       out.push({ source: e.note || e.ownerName || 'Proficiency', amount: getPB(C) });
@@ -260,7 +257,7 @@ function collectRuntimeEffects(C) {
 
 function hasHalfProficiencyOnUntrainedChecks(C) {
   return collectRuntimeEffects(C).some((effect) => {
-    const type = String(effect?.type || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const type = matchKey(effect?.type);
     const bonus = String(effect?.bonus || '').toLowerCase();
     return type === 'jackofalltrades' || bonus.includes('halfproficiency');
   });

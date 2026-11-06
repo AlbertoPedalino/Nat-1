@@ -7,7 +7,6 @@ export {
   itemHasProperty,
   labelToFormattedWeaponLabel,
   normalizeRule,
-  normKey,
   processStructuredWeaponProficiencies,
   ruleKey,
   weaponMatchesRule,

@@ -34,7 +34,7 @@ import {
   mergeSpellSourceDisplay,
 } from './spellSourceDisplay.js';
 import { spellModifierEntities } from './spellModifiers.js';
-import { lowerKey } from '../../../shared/content/nameKeys.js';
+import { lowerKey, matchKey } from '../../../shared/content/nameKeys.js';
 import { titleCase } from '../../../shared/ui/textCase.js';
 
 // The Spells tab's list: every spell the character has, from each source
@@ -570,7 +570,7 @@ function _speciesChoiceKeyMatchesActiveLineage(C, key) {
   const keyLineage = _speciesChoiceKeyLineage(key);
   if (!keyLineage) return true;
   const stored = String(C?.normalizedChoices?.species?.version || C?.choices?.species_version || '');
-  const storedNorm = stored.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const storedNorm = matchKey(stored);
   return !storedNorm || storedNorm === keyLineage;
 }
 

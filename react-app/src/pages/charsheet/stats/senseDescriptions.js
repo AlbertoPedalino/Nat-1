@@ -12,14 +12,11 @@
 
 import { loadSenses, loadOptionalFeatures, loadFeats } from '../../charbuilder/data/dataLoaders.js';
 import { sourceRank, CORE_2024_SOURCE_PRIORITY } from '../../../shared/content/sourcePriority.js';
+import { matchKey } from '../../../shared/content/nameKeys.js';
 
-const _byType = new Map(); // compactKey(sense name) -> { entries, rank }
-const _byFeature = new Map(); // compactKey(feature name) -> { entries, rank }
+const _byType = new Map(); // matchKey(sense name) -> { entries, rank }
+const _byFeature = new Map(); // matchKey(feature name) -> { entries, rank }
 let _loadPromise = null;
-
-function compactKey(value) {
-  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-}
 
 // Insert into a lookup keeping the entry whose source ranks highest. Ranking is
 // the shared 2024 priority (lower index = higher priority; non-2024 ranks last),
@@ -27,7 +24,7 @@ function compactKey(value) {
 function upsert(map, name, source, entries) {
   if (!name || !Array.isArray(entries) || !entries.length) return;
   const rank = sourceRank(source, CORE_2024_SOURCE_PRIORITY);
-  const key = compactKey(name);
+  const key = matchKey(name);
   const existing = map.get(key);
   if (!existing || rank < existing.rank) map.set(key, { entries, rank });
 }
@@ -59,11 +56,11 @@ export async function loadSenseDescriptions() {
 // 5etools `entries` for a generic sense type (camelCase maps to the rules name),
 // or null when the sense isn't in senses.json.
 export function getSenseDescriptionEntries(type) {
-  return _byType.get(compactKey(type))?.entries || null;
+  return _byType.get(matchKey(type))?.entries || null;
 }
 
 // 5etools `entries` for a named feature (invocation/feat) that grants a sense,
 // or null when not found.
 export function getFeatureDescriptionEntries(name) {
-  return _byFeature.get(compactKey(name))?.entries || null;
+  return _byFeature.get(matchKey(name))?.entries || null;
 }

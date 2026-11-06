@@ -1,4 +1,5 @@
 import { titleCase } from '../../ui/textCase.js';
+import { matchKey } from '../../content/nameKeys.js';
 const CANONICAL_DISPLAY_LABELS = {
   light: 'Light',
   medium: 'Medium',
@@ -81,7 +82,7 @@ export function cleanProficiencyText(value) {
 }
 
 export function labelKey(value) {
-  return cleanProficiencyText(value).toLowerCase().replace(/[^a-z0-9]/g, '');
+  return matchKey(cleanProficiencyText(value));
 }
 
 export function canonicalDisplayLabel(value) {

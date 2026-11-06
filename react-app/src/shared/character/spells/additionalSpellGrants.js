@@ -1,3 +1,4 @@
+import { matchKey } from '../../content/nameKeys.js';
 const MODES = ['known', 'innate', 'prepared'];
 
 function spellNameFromRef(value) {
@@ -70,9 +71,9 @@ function resolveGrantEntry(additionalSpells, entryIndex) {
 }
 
 function overrideForSpell(overrides, spellName) {
-  const wanted = String(spellName || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const wanted = matchKey(spellName);
   return Object.entries(overrides || {}).find(([name]) => (
-    String(name).toLowerCase().replace(/[^a-z0-9]/g, '') === wanted
+    matchKey(String(name)) === wanted
   ))?.[1] || null;
 }
 

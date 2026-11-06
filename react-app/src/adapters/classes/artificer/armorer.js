@@ -5,6 +5,7 @@ import {
   REPLICATE_GENERAL_CHOICE_KEY,
   isReplicateArmorItem,
 } from '../../../shared/character/inventory/replicateMagicItem.js';
+import { matchKey } from '../../../shared/content/nameKeys.js';
 
 export default function install(registry, context = {}) {
   const getPB = context?.getPB;
@@ -240,14 +241,14 @@ registerSubclassSheetFeatureFilter("Artificer_Armorer", (ctx, features) => {
   const choiceKey = prefix + "armorer_model";
   const raw = ctx?.choices?.[choiceKey];
   const first = Array.isArray(raw) ? raw[0] : raw;
-  const nk = String(first || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const nk = matchKey(first);
   let selected = "";
   if (nk === "dreadnaught" || nk.includes("dreadnought")) selected = "dreadnought";
   else if (nk.includes("guardian")) selected = "guardian";
   else if (nk.includes("infiltrator")) selected = "infiltrator";
   if (!selected) return features || [];
   return (features || []).filter(f => {
-    const fk = String(f?.name || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+    const fk = matchKey(f?.name);
     let tag = "";
     if (fk === "dreadnaught" || fk.includes("dreadnought")) tag = "dreadnought";
     else if (fk.includes("guardian")) tag = "guardian";
@@ -265,7 +266,7 @@ if (typeof registerSubclassChoiceDetailDataProvider === "function") {
     if (!Array.isArray(subFeatures) || !subFeatures.length) return null;
 
     function canon(v) {
-      const k = String(v || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+      const k = matchKey(v);
       if (k === "dreadnaught" || k.includes("dreadnought")) return "dreadnought";
       if (k.includes("guardian")) return "guardian";
       if (k.includes("infiltrator")) return "infiltrator";

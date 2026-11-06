@@ -7,10 +7,7 @@ import {
   isSupportedEdition,
   normalizeSource,
 } from './sourcePriority.js';
-
-function normKey(value) {
-  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-}
+import { matchKey } from './nameKeys.js';
 
 export { normalizeSource };
 
@@ -28,14 +25,14 @@ export function isSupportedSubclassRecord(subclass) {
 
 export function isSupportedSubclassFeature(feature, supportedSubclasses = []) {
   if (!feature || typeof feature !== 'object') return false;
-  const featureClass = normKey(feature.className);
-  const featureShort = normKey(feature.subclassShortName || feature.shortName || feature.name);
+  const featureClass = matchKey(feature.className);
+  const featureShort = matchKey(feature.subclassShortName || feature.shortName || feature.name);
   const featureSource = normalizeSource(feature.subclassSource || feature.source);
   if (!featureClass || !featureShort) return false;
 
   return (supportedSubclasses || []).some((subclass) => {
-    if (featureClass !== normKey(subclass?.className)) return false;
-    if (featureShort !== normKey(subclass?.shortName || subclass?.name)) return false;
+    if (featureClass !== matchKey(subclass?.className)) return false;
+    if (featureShort !== matchKey(subclass?.shortName || subclass?.name)) return false;
     if (featureSource && featureSource !== normalizeSource(subclass?.source)) return false;
     return true;
   });

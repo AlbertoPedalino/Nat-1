@@ -1,7 +1,4 @@
-export function exactCreatedItemKey(value) {
-  return String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
-}
-
+import { matchKey } from '../../content/nameKeys.js';
 export function looseCreatedItemKey(value) {
   return String(value || '')
     .toLowerCase()
@@ -17,7 +14,7 @@ export function buildCreatedItemLookup(items) {
   const exact = new Map();
   const loose = new Map();
   (items || []).forEach((item) => {
-    const exactKey = exactCreatedItemKey(item?.name);
+    const exactKey = matchKey(item?.name);
     const looseKey = looseCreatedItemKey(item?.name);
     if (exactKey && !exact.has(exactKey)) exact.set(exactKey, item);
     if (looseKey && !loose.has(looseKey)) loose.set(looseKey, item);
@@ -48,7 +45,7 @@ export function resolveCreatedItemValue(
   const lookup = exactMap && looseMap
     ? { exactMap, looseMap }
     : buildCreatedItemLookup(itemsDb);
-  return lookup.exactMap.get(exactCreatedItemKey(value))
+  return lookup.exactMap.get(matchKey(value))
     || lookup.looseMap.get(looseCreatedItemKey(value))
     || null;
 }

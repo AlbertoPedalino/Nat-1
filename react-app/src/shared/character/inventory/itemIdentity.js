@@ -1,8 +1,5 @@
 import { itemChargeMaximum } from './itemCharges.js';
-
-export function normalizeItemIdentityName(value) {
-  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-}
+import { matchKey } from '../../content/nameKeys.js';
 
 export function normalizeItemIdentitySource(value) {
   return String(value || '').trim().toUpperCase();
@@ -12,7 +9,7 @@ export function itemIdentityKey(nameOrItem, source = '') {
   const item = nameOrItem && typeof nameOrItem === 'object' ? nameOrItem : null;
   const name = item ? item.name : nameOrItem;
   const itemSource = item ? item.source : source;
-  return `${normalizeItemIdentityName(name)}|${normalizeItemIdentitySource(itemSource)}`;
+  return `${matchKey(name)}|${normalizeItemIdentitySource(itemSource)}`;
 }
 
 function stableValue(value) {

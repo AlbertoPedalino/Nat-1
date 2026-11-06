@@ -1,15 +1,12 @@
-function normKey(value) {
-  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-}
-
+import { matchKey } from '../shared/content/nameKeys.js';
 function subclassKey(className, subclassShortName) {
-  const cls = normKey(className);
-  const sub = normKey(subclassShortName);
+  const cls = matchKey(className);
+  const sub = matchKey(subclassShortName);
   return cls && sub ? `${cls}_${sub}` : '';
 }
 
 function subclassAlias(value) {
-  const raw = normKey(value)
+  const raw = matchKey(value)
     .replace(/^(schoolof|collegeof|circleof|oathof|pathof|wayof|domainof|traditionof)/, '');
   const aliases = {
     abjuration: 'abjurer',
@@ -25,7 +22,7 @@ function subclassAlias(value) {
 function getSubclassStore(store, className, subclassShortName) {
   const exact = subclassKey(className, subclassShortName);
   if (store.has(exact)) return store.get(exact);
-  const cls = normKey(className);
+  const cls = matchKey(className);
   const sub = subclassAlias(subclassShortName);
   if (!cls || !sub) return null;
   for (const [key, value] of store.entries()) {
@@ -37,14 +34,14 @@ function getSubclassStore(store, className, subclassShortName) {
 }
 
 function speciesKey(speciesName, speciesSource) {
-  const name = normKey(speciesName);
-  const source = normKey(speciesSource);
+  const name = matchKey(speciesName);
+  const source = matchKey(speciesSource);
   return name && source ? `${name}_${source}` : name;
 }
 
 function setStore(store, rawKey, value) {
   const raw = String(rawKey || '');
-  const norm = normKey(raw);
+  const norm = matchKey(raw);
   if (raw) store.set(raw, value);
   if (norm) store.set(norm, value);
 }
@@ -69,7 +66,7 @@ function mergeRuntimeConfig(base, patch) {
 
 function setMergedStore(store, rawKey, value) {
   const raw = String(rawKey || '');
-  const norm = normKey(raw);
+  const norm = matchKey(raw);
   const existing = (raw && store.get(raw)) || (norm && store.get(norm)) || {};
   const merged = mergeRuntimeConfig(existing, value);
   if (raw) store.set(raw, merged);
@@ -78,7 +75,7 @@ function setMergedStore(store, rawKey, value) {
 
 function getStore(store, rawKey, fallbackKey = '') {
   const raw = String(rawKey || '');
-  return store.get(raw) || store.get(normKey(raw)) || (fallbackKey ? store.get(fallbackKey) : null);
+  return store.get(raw) || store.get(matchKey(raw)) || (fallbackKey ? store.get(fallbackKey) : null);
 }
 
 export function createAdapterRegistry() {

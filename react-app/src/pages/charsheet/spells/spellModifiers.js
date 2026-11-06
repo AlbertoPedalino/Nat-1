@@ -2,6 +2,7 @@ import { adapterRegistry as installedRegistry } from '../../../adapters/registry
 import { getFinal as getFinalScore, getMod as getAbilityMod } from '../state/calculations.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
+import { matchKey } from '../../../shared/content/nameKeys.js';
 
 // What the character's features change on a spell row, registered by the
 // adapters: riders (extra rollers, tags, text), spell modifiers (flat damage or
@@ -100,10 +101,6 @@ export function spellModifierEntities(C) {
   return out.filter((entry) => entry.className);
 }
 
-function normOwner(value) {
-  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-}
-
 const SCHOOL_ALIASES = {
   A: 'abjuration',
   C: 'conjuration',
@@ -165,11 +162,11 @@ export function applySpellModifiers(C, ctx) {
   collectSpellModifiers(C, ctx).forEach(({ mod, modifierOwnerType, ownerLevel, ownerClassName, ownerSubclassShortName }) => {
     if (!mod) return;
 
-    if (modifierOwnerType === 'class' && spellOwnerClass && normOwner(ownerClassName) !== normOwner(spellOwnerClass)) return;
+    if (modifierOwnerType === 'class' && spellOwnerClass && matchKey(ownerClassName) !== matchKey(spellOwnerClass)) return;
     if (
       modifierOwnerType === 'subclass' &&
       spellOwnerClass &&
-      (normOwner(ownerClassName) !== normOwner(spellOwnerClass) || (spellOwnerSubclass && normOwner(ownerSubclassShortName) !== normOwner(spellOwnerSubclass)))
+      (matchKey(ownerClassName) !== matchKey(spellOwnerClass) || (spellOwnerSubclass && matchKey(ownerSubclassShortName) !== matchKey(spellOwnerSubclass)))
     ) return;
 
     const modifierContext = {

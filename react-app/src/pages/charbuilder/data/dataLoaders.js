@@ -32,10 +32,7 @@ import {
   resolveCopyRecords,
 } from './itemVariants.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
-
-function normalizeName(value) {
-  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-}
+import { matchKey } from '../../../shared/content/nameKeys.js';
 
 // Memoize by path: 5etools data is static per session, so repeated loads of the
 // same file (across builder + sheet panels) share one network request. The
@@ -277,7 +274,7 @@ export function buildClassSpellIndexFromSpells(spells) {
     const fromClassList = spell.classes.fromClassList || [];
     if (Array.isArray(fromClassList)) {
       fromClassList.forEach((entry) => {
-        const className = normalizeName(entry?.name);
+        const className = matchKey(entry?.name);
         if (CASTERS.includes(className)) {
           if (!out[className]) out[className] = new Set();
           out[className].add(String(spell.name || '').toLowerCase());
@@ -292,7 +289,7 @@ export function buildClassSpellIndexFromSpells(spells) {
     const fromClassListVariant = spell.classes.fromClassListVariant || [];
     if (Array.isArray(fromClassListVariant)) {
       fromClassListVariant.forEach((entry) => {
-        const className = normalizeName(entry?.name);
+        const className = matchKey(entry?.name);
         if (CASTERS.includes(className) && isSupportedClassVariant(entry)) {
           if (!out[className]) out[className] = new Set();
           out[className].add(String(spell.name || '').toLowerCase());
@@ -306,7 +303,7 @@ export function buildClassSpellIndexFromSpells(spells) {
       Object.values(classObj).forEach((obj) => {
         if (typeof obj === 'object') {
           Object.keys(obj || {}).forEach((className) => {
-            const key = normalizeName(className);
+            const key = matchKey(className);
             if (CASTERS.includes(key)) {
               if (!out[key]) out[key] = new Set();
               out[key].add(String(spell.name || '').toLowerCase());
@@ -333,7 +330,7 @@ export function buildClassSpellIndex(node) {
   debugLog('[buildClassSpellIndex] Processing gendata with', Object.keys(node).length, 'sources');
   
   const collect = (className, spellName) => {
-    const key = normalizeName(className);
+    const key = matchKey(className);
     if (!CASTERS.includes(key)) return;
     if (!out[key]) out[key] = new Set();
     out[key].add(String(spellName || '').toLowerCase());
@@ -359,7 +356,7 @@ export function buildClassSpellIndex(node) {
     Object.entries(sourceBlock).forEach(([spellName, info]) => {
       if (!info || typeof info !== 'object') return;
       const collectClassSpell = (className) => {
-        const key = normalizeName(className);
+        const key = matchKey(className);
         if (CASTERS.includes(key)) hasClassSpells.add(key);
         collect(className, spellName);
       };
@@ -379,7 +376,7 @@ export function buildClassSpellIndex(node) {
         Object.values(subclassMap).forEach((bySource) => {
           if (!bySource || typeof bySource !== 'object') return;
           Object.keys(bySource).forEach((className) => {
-            if (!hasClassSpells.has(normalizeName(className))) {
+            if (!hasClassSpells.has(matchKey(className))) {
               collect(className, spellName);
             }
           });
@@ -555,7 +552,7 @@ export async function loadItems() {
   const byName = new Map();
   all.forEach((item) => {
     if (!item?.name) return;
-    const key = normalizeName(formatLeadingBonusName(item.name));
+    const key = matchKey(formatLeadingBonusName(item.name));
     const existing = byName.get(key);
     if (!existing) { byName.set(key, item); return; }
     if (shouldReplaceItem(existing, item)) byName.set(key, item);

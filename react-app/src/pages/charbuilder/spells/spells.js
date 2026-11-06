@@ -3,13 +3,10 @@ import { FULL_SLOTS, HALF_SLOTS, PACT_SLOTS, THIRD_SLOTS } from '../constants.js
 import { getPrimaryClassLevel } from '../progression/calculations.js';
 import { getClassSpellLimits } from '../../../shared/character/spells/spellProgression.js';
 import { enumerateEntityGrants, enumerateSpeciesGrants, grantSourceLabel } from '../../../shared/character/spells/autoGrantedSpells.js';
-
-export function normClassKey(value) {
-  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-}
+import { matchKey } from '../../../shared/content/nameKeys.js';
 
 export function spellMatchesClass(spell, className, classSpellIndex) {
-  const classKey = normClassKey(className);
+  const classKey = matchKey(className);
   if (!classKey) return false;
   
   // 1. Check classSpellIndex first
@@ -20,11 +17,11 @@ export function spellMatchesClass(spell, className, classSpellIndex) {
   
   // 2. Check fromClassList format: { fromClassList: [{ name: "Cleric" }, ...] }
   const fromClassList = spell.classes.fromClassList || [];
-  if (Array.isArray(fromClassList) && fromClassList.some((entry) => normClassKey(entry?.name) === classKey)) return true;
+  if (Array.isArray(fromClassList) && fromClassList.some((entry) => matchKey(entry?.name) === classKey)) return true;
   
   // 3. Check fromSubclass format: { fromSubclass: [{ class: { name: "Cleric" } }, ...] }
   const fromSubclass = spell.classes.fromSubclass || [];
-  if (Array.isArray(fromSubclass) && fromSubclass.some((entry) => normClassKey(entry?.class?.name) === classKey)) return true;
+  if (Array.isArray(fromSubclass) && fromSubclass.some((entry) => matchKey(entry?.class?.name) === classKey)) return true;
   
   // 4. Check classes.class format: { class: { "Cleric": {}, "Wizard": {} } } (5etools multi-source)
   const classObj = spell.classes.class || {};
@@ -36,17 +33,17 @@ export function spellMatchesClass(spell, className, classSpellIndex) {
       }
       return acc;
     }, []);
-    if (allClasses.some((clsName) => normClassKey(clsName) === classKey)) return true;
+    if (allClasses.some((clsName) => matchKey(clsName) === classKey)) return true;
     
     // Or might be flat: { "Cleric": {}, "Wizard": {} }
-    if (Object.keys(classObj).some((clsName) => normClassKey(clsName) === classKey)) return true;
+    if (Object.keys(classObj).some((clsName) => matchKey(clsName) === classKey)) return true;
   }
   
   // 5. Check direct classes array: { classes: ["Cleric", "Wizard"] }
   if (Array.isArray(spell.classes)) {
     if (spell.classes.some((entry) => {
       const entryName = typeof entry === 'string' ? entry : entry?.name || '';
-      return normClassKey(entryName) === classKey;
+      return matchKey(entryName) === classKey;
     })) return true;
   }
   

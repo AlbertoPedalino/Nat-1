@@ -5,10 +5,7 @@
 
 import { canonicalProperty, itemHasProperty } from '../../../shared/character/inventory/weaponProperties.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
-
-export function normKey(value) {
-  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-}
+import { matchKey } from '../../../shared/content/nameKeys.js';
 
 // Properties are read by the shared reader.
 export { canonicalProperty, itemHasProperty };
@@ -35,7 +32,7 @@ function stripPluralSuffix(key) {
 
 export function weaponNameKeys(item) {
   const raw = String(item?.name || '').replace(/,\s*\+\d+$/i, '').replace(/\s*\+\d+$/i, '').trim();
-  const key = normKey(raw);
+  const key = matchKey(raw);
   const keys = new Set([key]);
   if (WEAPON_NAME_ALIASES[key]) keys.add(WEAPON_NAME_ALIASES[key]);
   Array.from(keys).forEach((k) => keys.add(stripPluralSuffix(k)));
@@ -52,7 +49,7 @@ export function weaponMatchesRule(item, rule) {
   if (rule.melee === true && itemType !== 'M') return false;
   if (rule.ranged === true && itemType !== 'R') return false;
   if (rule.weaponName) {
-    const target = stripPluralSuffix(normKey(rule.weaponName));
+    const target = stripPluralSuffix(matchKey(rule.weaponName));
     const names = weaponNameKeys(item);
     if (!names.has(target)) return false;
   }
@@ -119,7 +116,7 @@ export function normalizeRule(rule) {
 
 export function ruleKey(rule) {
   if (!rule) return '';
-  if (rule.weaponName) return `weapon:${stripPluralSuffix(normKey(rule.weaponName))}`;
+  if (rule.weaponName) return `weapon:${stripPluralSuffix(matchKey(rule.weaponName))}`;
   const parts = [];
   if (rule.category) parts.push(`cat=${rule.category}`);
   if (rule.type) parts.push(`type=${rule.type}`);
@@ -180,7 +177,7 @@ export function processStructuredWeaponProficiencies(struct) {
 // into a structured rule. Falls back to a named-weapon rule when label is not
 // a recognised category descriptor.
 export function inferRuleFromLabel(label) {
-  const lk = normKey(label);
+  const lk = matchKey(label);
   if (!lk) return null;
   if (lk === 'weapons' || lk === 'allweapons') return {};
   if (lk === 'simple' || lk === 'simpleweapon' || lk === 'simpleweapons') return { category: 'simple' };

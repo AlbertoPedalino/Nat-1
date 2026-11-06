@@ -10,14 +10,14 @@ import { useOptionSearch } from '../../../shared/content/searchText.js';
 import {
   parseTypedProficiencyValue,
   isChoicePlaceholderValue,
-  normalizedKey,
 } from '../../../shared/character/progression/typedProficiencies.js';
+import { matchKey } from '../../../shared/content/nameKeys.js';
 
 const CHOICE_KEYS = ['choose', 'any', 'anyTool', 'anyArtisansTool', 'anyMusicalInstrument', 'anyGamingSet', 'anyStandard', 'anyExotic'];
 
 function parseTypedChoiceValue(value) {
   const parsed = parseTypedProficiencyValue(value);
-  return { kind: parsed.kind, label: parsed.label, norm: normalizedKey(parsed.label) };
+  return { kind: parsed.kind, label: parsed.label, norm: matchKey(parsed.label) };
 }
 
 function proficiencyBlockKey(kind, value) {

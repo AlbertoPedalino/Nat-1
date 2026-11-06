@@ -1,13 +1,6 @@
 import { getBackgroundPattern } from '../progression/calculations.js';
 import { findSpellListEntryIndexByClass } from '../../../shared/character/spells/featSpellLists.js';
-
-function normKey(value) {
-  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-}
-
-function normSpellName(value) {
-  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-}
+import { matchKey } from '../../../shared/content/nameKeys.js';
 
 function normalizeWizardSpellbook(book) {
   const next = {};
@@ -16,7 +9,7 @@ function normalizeWizardSpellbook(book) {
     next[level] = [];
     (book?.[level] || []).forEach((entry) => {
       const name = typeof entry === 'string' ? entry : entry?.name;
-      const key = normSpellName(name);
+      const key = matchKey(name);
       if (!key || seen.has(key)) return;
       seen.add(key);
       next[level].push(name);
@@ -26,17 +19,17 @@ function normalizeWizardSpellbook(book) {
 }
 
 function removeSelectedSpellAtLevel(bucket, level, name) {
-  const normalized = normSpellName(name);
+  const normalized = matchKey(name);
   if (level === 0) {
     return {
-      selectedCantrips: (bucket?.selectedCantrips || []).filter((entry) => normSpellName(entry) !== normalized),
+      selectedCantrips: (bucket?.selectedCantrips || []).filter((entry) => matchKey(entry) !== normalized),
     };
   }
   const selectedSpells = Object.fromEntries(
     Object.entries(bucket?.selectedSpells || {}).map(([spellLevel, list]) => [spellLevel, Array.isArray(list) ? [...list] : []]),
   );
   const key = String(level);
-  selectedSpells[key] = (selectedSpells[key] || []).filter((entry) => normSpellName(entry) !== normalized);
+  selectedSpells[key] = (selectedSpells[key] || []).filter((entry) => matchKey(entry) !== normalized);
   if (!selectedSpells[key].length) delete selectedSpells[key];
   return { selectedSpells };
 }
@@ -116,7 +109,7 @@ export function handleBackgroundSelect(state, action, { findByNameSource, update
   if (action.feat) {
     choices.feat_origin = action.feat;
     if (action.classHint) {
-      const featObj = state.data.feats.find((feat) => normKey(feat.name) === normKey(action.feat));
+      const featObj = state.data.feats.find((feat) => matchKey(feat.name) === matchKey(action.feat));
       const idx = findSpellListEntryIndexByClass(featObj?.additionalSpells, action.classHint);
       if (idx >= 0) choices.feat_origin_entry = idx;
     }
@@ -180,7 +173,7 @@ export function handleWizardSpellbookToggle(state, action, { updateCharacter }) 
   const level = Math.max(0, Math.min(9, Number(action.level || 0)));
   const name = String(action.name || '');
   if (!name) return state;
-  const normalized = normSpellName(name);
+  const normalized = matchKey(name);
   const extraIndex = action.extraIndex;
 
   if (Number.isInteger(extraIndex) && extraIndex >= 0) {
@@ -188,9 +181,9 @@ export function handleWizardSpellbookToggle(state, action, { updateCharacter }) 
       if (itemIndex !== extraIndex) return extraClass;
       const wizardSpellbook = normalizeWizardSpellbook(extraClass.wizardSpellbook);
       const current = wizardSpellbook[level] || [];
-      const has = current.some((entry) => normSpellName(entry) === normalized);
+      const has = current.some((entry) => matchKey(entry) === normalized);
       wizardSpellbook[level] = has
-        ? current.filter((entry) => normSpellName(entry) !== normalized)
+        ? current.filter((entry) => matchKey(entry) !== normalized)
         : [...current, name];
 
       const nextExtra = { ...extraClass, wizardSpellbook };
@@ -201,9 +194,9 @@ export function handleWizardSpellbookToggle(state, action, { updateCharacter }) 
 
   const wizardSpellbook = normalizeWizardSpellbook(state.character.wizardSpellbook);
   const current = wizardSpellbook[level] || [];
-  const has = current.some((entry) => normSpellName(entry) === normalized);
+  const has = current.some((entry) => matchKey(entry) === normalized);
   wizardSpellbook[level] = has
-    ? current.filter((entry) => normSpellName(entry) !== normalized)
+    ? current.filter((entry) => matchKey(entry) !== normalized)
     : [...current, name];
 
   return updateCharacter(state, has

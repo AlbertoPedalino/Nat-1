@@ -1,6 +1,7 @@
 import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
 import { isGrantUnlocked } from './spellGrants.js';
 import { primaryClassLevel } from '../progression/classLevel.js';
+import { matchKey } from '../../content/nameKeys.js';
 
 /**
  * Shared enumeration of auto-granted spells from class/subclass/species runtime
@@ -219,10 +220,6 @@ function classEntities(character) {
   ];
 }
 
-function normName(value) {
-  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-}
-
 /**
  * All grants for one class entity: runtime config + subclass-feature text.
  * A feature-text scrape of a spell already granted by runtime config is dropped
@@ -238,10 +235,10 @@ export function enumerateEntityGrants(entity, character) {
     entity?.subclassShortName,
   )?.spellcasting;
   if (subclassSpellcasting?.disableFeatureSpellScrape) return configGrants;
-  const granted = new Set(configGrants.map((r) => normName(r.name)));
+  const granted = new Set(configGrants.map((r) => matchKey(r.name)));
   return [
     ...configGrants,
-    ...enumerateSubclassFeatureSpells(entity).filter((r) => !granted.has(normName(r.name))),
+    ...enumerateSubclassFeatureSpells(entity).filter((r) => !granted.has(matchKey(r.name))),
   ];
 }
 

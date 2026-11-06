@@ -26,7 +26,7 @@ function featChoiceName(value) {
 }
 
 function featChoiceKey(value) {
-  return featChoiceName(value).toLowerCase().replace(/[^a-z0-9]/g, '');
+  return matchKey(featChoiceName(value));
 }
 
 function findFeat(feats, name) {

@@ -13,6 +13,7 @@ import {
   MAGIC_ITEM_TINKER_TRANSMUTE_RESOURCE,
 } from '../../../shared/character/inventory/magicItemTinker.js';
 import { titleCase } from '../../../shared/ui/textCase.js';
+import { matchKey } from '../../../shared/content/nameKeys.js';
 
 const _REPLICATE_BUCKET_LABEL = Object.fromEntries(REPLICATE_BUCKETS.map((b) => [b.id, b.label]));
 
@@ -340,7 +341,7 @@ registerClassSheetChoiceMeta("Artificer", {
       return replicateChoiceLabel(raw);
     }
     if (k === "armorer_model" || /^auto_(primary|ec\d+)_feat_.*_opt_\d+$/i.test(k)) {
-      const nk = raw.toLowerCase().replace(/[^a-z0-9]/g, "");
+      const nk = matchKey(raw);
       if (nk === "dreadnaught" || nk.includes("dreadnought")) return "Dreadnought";
       if (nk.includes("guardian")) return "Guardian";
       if (nk.includes("infiltrator")) return "Infiltrator";

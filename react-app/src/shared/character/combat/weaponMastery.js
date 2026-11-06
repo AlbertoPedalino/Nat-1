@@ -5,15 +5,12 @@ import {
 } from '../../content/sourcePriority.js';
 import { itemHasProperty } from '../inventory/weaponProperties.js';
 import { flattenList } from '../../lists.js';
+import { matchKey } from '../../content/nameKeys.js';
 
 const MASTERY_DATA_URL = 'https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/items-base.json';
 
 const _masteries = new Map();
 let _masteryLoadPromise = null;
-
-function compactKey(value) {
-  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-}
 
 function isMundaneWeapon(item) {
   if (!item || typeof item !== 'object' || !item.name) return false;
@@ -103,7 +100,7 @@ export function getWeaponMasteryChoiceNames(items, fallbackItems = [], rules = A
 }
 
 export function getWeaponMasteryChoiceCount(className, level) {
-  const progression = WEAPON_MASTERY_PROGRESSIONS[compactKey(className)] || [];
+  const progression = WEAPON_MASTERY_PROGRESSIONS[matchKey(className)] || [];
   const currentLevel = Number(level) || 0;
   return progression.reduce(
     (count, step) => currentLevel >= step.level ? step.count : count,
@@ -161,7 +158,7 @@ export async function loadMasteryEntries() {
       const data = await response.json();
       (data?.itemMastery || []).forEach((entry) => {
         if (!entry?.name || !Array.isArray(entry.entries)) return;
-        _masteries.set(compactKey(entry.name), { name: entry.name, entries: entry.entries });
+        _masteries.set(matchKey(entry.name), { name: entry.name, entries: entry.entries });
       });
     } catch {
       _masteryLoadPromise = null;
@@ -173,10 +170,10 @@ export async function loadMasteryEntries() {
 
 function getMasteryRecord(value) {
   if (!value) return null;
-  // Mastery values may carry a source suffix ("Graze|XPHB"); compactKey would
+  // Mastery values may carry a source suffix ("Graze|XPHB"); matchKey would
   // fold that into "grazexphb" and miss the record, so strip the source first.
   const name = String(value).split('|')[0];
-  return _masteries.get(compactKey(name)) || null;
+  return _masteries.get(matchKey(name)) || null;
 }
 
 export function areMasteriesLoaded() {
@@ -244,7 +241,7 @@ export function collectWeaponMasteryChoiceEntries(character) {
   const out = [];
 
   Object.entries(choices).forEach(([key, rawValue]) => {
-    const keyNorm = compactKey(key);
+    const keyNorm = matchKey(key);
     if (!(keyNorm.includes('weapon') && keyNorm.includes('mastery'))) return;
     parseChoiceValue(rawValue).forEach((parsed) => {
       const normalizedName = normalizeWeaponName(parsed.name);
@@ -259,7 +256,7 @@ export function collectWeaponMasteryChoiceEntries(character) {
 
   const seen = new Set();
   return out.filter((entry) => {
-    const dedupeKey = `${compactKey(entry.key)}|${compactKey(entry.weaponName)}|${compactKey(entry.source)}`;
+    const dedupeKey = `${matchKey(entry.key)}|${matchKey(entry.weaponName)}|${matchKey(entry.source)}`;
     if (seen.has(dedupeKey)) return false;
     seen.add(dedupeKey);
     return true;
@@ -272,20 +269,20 @@ export function resolveWeaponMasteryForItem(item) {
 }
 
 export function findWeaponItemByName(items, weaponName, source = '', { supportedOnly = false } = {}) {
-  const targetName = compactKey(normalizeWeaponName(weaponName));
-  const targetSource = compactKey(source);
+  const targetName = matchKey(normalizeWeaponName(weaponName));
+  const targetSource = matchKey(source);
   if (!targetName) return null;
 
   const weaponItems = flattenList(items).filter((item) => item && typeof item === 'object');
   const matchingItems = weaponItems.filter((item) => {
     if (supportedOnly && !isSupportedMasteryItem(item)) return false;
-    const itemName = compactKey(normalizeWeaponName(item.name));
+    const itemName = matchKey(normalizeWeaponName(item.name));
     return itemName === targetName;
   });
   if (!matchingItems.length) return null;
 
   if (targetSource) {
-    const sourceMatch = matchingItems.find((item) => compactKey(item.source) === targetSource);
+    const sourceMatch = matchingItems.find((item) => matchKey(item.source) === targetSource);
     if (sourceMatch) return sourceMatch;
   }
 
@@ -301,7 +298,7 @@ export function collectResolvedWeaponMasteries(character, items = []) {
     const item = findWeaponItemByName(items, entry.weaponName, entry.source, { supportedOnly: true });
     if (!item) return;
     const mastery = resolveWeaponMasteryForItem(item);
-    const dedupeKey = compactKey(entry.weaponName);
+    const dedupeKey = matchKey(entry.weaponName);
     if (seen.has(dedupeKey)) return;
     seen.add(dedupeKey);
     out.push({

@@ -1,3 +1,4 @@
+import { matchKey } from '../../shared/content/nameKeys.js';
 /**
  * Build canonical lineage option list from a 5etools species `_versions` array.
  *
@@ -16,8 +17,6 @@
  * the predicates would silently stop matching. With `expect` set, that drift
  * fails loud at install time (throw in dev, console.error otherwise) instead.
  */
-const canonToken = (value) => String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-
 export function buildLineageOptions(versions, { parentName = '', suffixes = [], expect = [] } = {}) {
   if (!Array.isArray(versions)) return [];
   const parentLower = String(parentName).toLowerCase();
@@ -39,7 +38,7 @@ export function buildLineageOptions(versions, { parentName = '', suffixes = [], 
     if (!tail || tail.toLowerCase() === parentLower) return;
 
     const label = stripSuffix(tail);
-    const token = canonToken(label);
+    const token = matchKey(label);
     if (!label || !token || seen.has(token)) return;
 
     seen.add(token);
@@ -47,8 +46,8 @@ export function buildLineageOptions(versions, { parentName = '', suffixes = [], 
   });
 
   if (expect && expect.length) {
-    const produced = new Set(options.map((o) => canonToken(o.key)));
-    const missing = expect.filter((t) => !produced.has(canonToken(t)));
+    const produced = new Set(options.map((o) => matchKey(o.key)));
+    const missing = expect.filter((t) => !produced.has(matchKey(t)));
     if (missing.length) {
       const msg = `[buildLineageOptions] ${parentName || 'species'}: expected lineage token(s) `
         + `${missing.map((m) => `'${m}'`).join(', ')} did not parse out of _versions `
