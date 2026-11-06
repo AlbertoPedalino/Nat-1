@@ -1,6 +1,6 @@
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { Box, Button, Stack, Typography } from '@mui/material';
-import { getRollTable, rollTable } from '../../../shared/character/dice/rollTables.js';
+import { loadRollTable, rollOnTable } from '../../../shared/character/dice/rollTables.js';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
 import { classLevel } from '../../../shared/character/progression/classLevel.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
@@ -88,15 +88,22 @@ export default function ActionDetailPanel({ action, character, sheet }) {
       body: resolveMaybeFunction(section.body, { action, character, sheet, charLevel, section }, ''),
     }));
   const roll = detail.roll || null;
-  const tableMeta = roll?.tableKey ? getRollTable(roll.tableKey) : null;
+  const tableKey = roll?.tableKey || null;
+  const [tableMeta, setTableMeta] = useState(null);
+  useEffect(() => {
+    if (!tableKey) return undefined;
+    let alive = true;
+    // A table that cannot be downloaded just leaves the roll button out.
+    loadRollTable(tableKey).then((table) => { if (alive) setTableMeta(table); }).catch(() => {});
+    return () => { alive = false; };
+  }, [tableKey]);
   const dual = Boolean(roll?.dualRollFromLevel != null && charLevel >= Number(roll.dualRollFromLevel));
 
   const doRoll = (e) => {
     e?.stopPropagation?.();
     if (!roll || !tableMeta) return;
     const count = dual ? 2 : 1;
-    const out = rollTable(roll.tableKey, { count });
-    if (!out) return;
+    const out = rollOnTable(tableMeta, { count });
     setResult({ ...out, dual });
     const toastLines = out.rolls.map((r, i) =>
       `${dual ? `#${i + 1} ` : ''}[${r.range}] ${r.effect}`).join('\n');
