@@ -1,5 +1,9 @@
 import { getSection, makeInstanceId } from './sectionRegistry.js';
 import { normalizeLinkGroupId } from './linkGroupId.js';
+import {
+  getStorageItem, getStorageJson, listStorageKeys, removeStorageItem,
+  removeStorageItemStrict, setStorageItem, writeStorageItemStrict,
+} from '../storage/storage.js';
 
 // The local repository of GM Board, Encounter Builder and DM Screen instances.
 //
@@ -88,24 +92,18 @@ export function normalizeEntry(section, raw) {
 }
 
 function readRaw(section) {
-  try {
-    const parsed = JSON.parse(localStorage.getItem(section.registryKey) || '[]');
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
+  const parsed = getStorageJson(section.registryKey, []);
+  return Array.isArray(parsed) ? parsed : [];
 }
 
 function writeEntries(section, entries) {
-  localStorage.setItem(section.registryKey, JSON.stringify(entries));
+  writeStorageItemStrict(section.registryKey, JSON.stringify(entries));
 }
 
 function storedIds(section) {
   const prefix = section.keyPrefix;
   const ids = new Set();
-  for (let index = 0; index < localStorage.length; index += 1) {
-    const key = localStorage.key(index);
-    if (typeof key !== 'string' || !key.startsWith(prefix)) continue;
+  for (const key of listStorageKeys(prefix)) {
     const id = key.slice(prefix.length).split(':')[0];
     if (id) ids.add(id);
   }
@@ -176,7 +174,7 @@ export function createInstance(sectionKey, { id, name, linkGroupId, nameDirty = 
   const instanceId = id || makeInstanceId(sectionKey);
   const existing = getInstance(sectionKey, instanceId);
   if (existing) return existing;
-  const previous = localStorage.getItem(section.registryKey);
+  const previous = getStorageItem(section.registryKey);
   try {
     const entry = addEntry(sectionKey, {
       id: instanceId,
@@ -192,8 +190,8 @@ export function createInstance(sectionKey, { id, name, linkGroupId, nameDirty = 
   } catch {
     // Quota/denied: leave no half-created instance behind.
     try {
-      if (previous == null) localStorage.removeItem(section.registryKey);
-      else localStorage.setItem(section.registryKey, previous);
+      if (previous == null) removeStorageItemStrict(section.registryKey);
+      else writeStorageItemStrict(section.registryKey, previous);
     } catch (_) {}
     return null;
   }
@@ -201,27 +199,24 @@ export function createInstance(sectionKey, { id, name, linkGroupId, nameDirty = 
 
 export function setActiveInstance(sectionKey, id) {
   const section = requireSection(sectionKey);
-  try { localStorage.setItem(section.activeKey, id); } catch (_) {}
+  setStorageItem(section.activeKey, id);
 }
 
 export function getActiveInstanceId(sectionKey) {
   const section = requireSection(sectionKey);
-  try { return localStorage.getItem(section.activeKey) || ''; } catch { return ''; }
+  return getStorageItem(section.activeKey) || '';
 }
 
 export function readInstanceValue(sectionKey, id, subKey) {
   const section = requireSection(sectionKey);
-  try { return localStorage.getItem(section.scopedPrefix(id) + subKey); } catch { return null; }
+  return getStorageItem(section.scopedPrefix(id) + subKey);
 }
 
 export function readInstancePayload(sectionKey, id) {
   const section = requireSection(sectionKey);
   const prefix = section.scopedPrefix(id);
   const payload = {};
-  for (let index = 0; index < localStorage.length; index += 1) {
-    const key = localStorage.key(index);
-    if (typeof key === 'string' && key.startsWith(prefix)) payload[key] = localStorage.getItem(key);
-  }
+  for (const key of listStorageKeys(prefix)) payload[key] = getStorageItem(key);
   return payload;
 }
 
@@ -254,14 +249,14 @@ export function saveLocal(sectionKey, id, values) {
   if (!id) return false;
   const prefix = section.scopedPrefix(id);
   const changed = Object.entries(values || {}).filter(([subKey, raw]) => (
-    localStorage.getItem(prefix + subKey) !== (raw ?? null)
+    getStorageItem(prefix + subKey) !== (raw ?? null)
   ));
   if (!changed.length) return false;
-  const previous = changed.map(([subKey]) => [prefix + subKey, localStorage.getItem(prefix + subKey)]);
+  const previous = changed.map(([subKey]) => [prefix + subKey, getStorageItem(prefix + subKey)]);
   try {
     for (const [subKey, raw] of changed) {
-      if (raw == null) localStorage.removeItem(prefix + subKey);
-      else localStorage.setItem(prefix + subKey, raw);
+      if (raw == null) removeStorageItemStrict(prefix + subKey);
+      else writeStorageItemStrict(prefix + subKey, raw);
     }
     // Only a change the cloud carries is an edit to sync.
     if (changed.some(([subKey]) => !isLocalOnlyKey(section, prefix, prefix + subKey))) {
@@ -275,8 +270,8 @@ export function saveLocal(sectionKey, id, values) {
   } catch (error) {
     for (const [key, raw] of previous) {
       try {
-        if (raw == null) localStorage.removeItem(key);
-        else localStorage.setItem(key, raw);
+        if (raw == null) removeStorageItemStrict(key);
+        else writeStorageItemStrict(key, raw);
       } catch (_) {}
     }
     throw error;
@@ -316,10 +311,10 @@ export function replaceInstancePayload(sectionKey, id, payload, entryPatch) {
   // This device's local-only keys stay; an older cloud copy may still carry
   // them, and is not let in over them.
   for (const key of Object.keys(readInstancePayload(sectionKey, id))) {
-    if (!isLocalOnlyKey(section, prefix, key)) localStorage.removeItem(key);
+    if (!isLocalOnlyKey(section, prefix, key)) removeStorageItemStrict(key);
   }
   for (const [key, value] of Object.entries(payload)) {
-    if (!isLocalOnlyKey(section, prefix, key)) localStorage.setItem(key, value);
+    if (!isLocalOnlyKey(section, prefix, key)) writeStorageItemStrict(key, value);
   }
   const exists = getInstance(sectionKey, id);
   const entry = exists
@@ -336,10 +331,10 @@ export function announceSyncChange(sectionKey, id) {
 
 export function deleteLocalInstance(sectionKey, id) {
   const section = requireSection(sectionKey);
-  for (const key of Object.keys(readInstancePayload(sectionKey, id))) localStorage.removeItem(key);
+  for (const key of Object.keys(readInstancePayload(sectionKey, id))) removeStorageItemStrict(key);
   writeEntries(section, listInstances(sectionKey).filter((entry) => entry.id !== id));
   if (getActiveInstanceId(sectionKey) === id) {
-    try { localStorage.removeItem(section.activeKey); } catch (_) {}
+    removeStorageItem(section.activeKey);
   }
   notify(sectionKey, id, 'deleted');
 }

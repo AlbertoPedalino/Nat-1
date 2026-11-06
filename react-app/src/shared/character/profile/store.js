@@ -1,4 +1,8 @@
 import { stripRuntimeOnlyCharacterFields } from './runtimeFields.js';
+import {
+  getStorageItem, getStorageJson, removeStorageItem, removeStorageItemStrict,
+  setStorageItem, setStorageJson, writeStorageItemStrict,
+} from '../../storage/storage.js';
 
 const CHAR_KEY = (id) => `gb:char:${id}`;
 // Sync bookkeeping kept beside the sheet, never inside it: the cloud
@@ -10,26 +14,27 @@ const SYNC_KEY = (id) => `gb:char-sync:${id}`;
 const INDEX_KEY = 'gb:chars';
 const ACTIVE_KEY = 'gb:active_char';
 
+// The sheet and its index are data: their writes throw when they do not fit
+// (writeStorageItemStrict), so the caller learns the save failed. The active
+// id and the sync bookkeeping are kept like a preference: a blocked storage
+// only forgets them.
+
 export function getActiveCharId() {
-  return localStorage.getItem(ACTIVE_KEY);
+  return getStorageItem(ACTIVE_KEY);
 }
 
 export function setActiveCharId(id) {
-  if (id) localStorage.setItem(ACTIVE_KEY, id);
-  else localStorage.removeItem(ACTIVE_KEY);
+  if (id) setStorageItem(ACTIVE_KEY, id);
+  else removeStorageItem(ACTIVE_KEY);
 }
 
 export function listCharacters() {
-  try {
-    const list = JSON.parse(localStorage.getItem(INDEX_KEY) || '[]');
-    return Array.isArray(list) ? list.filter((e) => e && e.id) : [];
-  } catch {
-    return [];
-  }
+  const list = getStorageJson(INDEX_KEY, []);
+  return Array.isArray(list) ? list.filter((e) => e && e.id) : [];
 }
 
 function writeIndex(list) {
-  localStorage.setItem(INDEX_KEY, JSON.stringify(list));
+  writeStorageItemStrict(INDEX_KEY, JSON.stringify(list));
 }
 
 function upsertIndex(id, name) {
@@ -53,7 +58,7 @@ export function loadCharacter(id) {
   if (!id) return null;
   try {
     // An older copy may still carry runtime-only fields; they are never read back.
-    return stripRuntimeOnlyCharacterFields(JSON.parse(localStorage.getItem(CHAR_KEY(id)))) || null;
+    return stripRuntimeOnlyCharacterFields(getStorageJson(CHAR_KEY(id))) || null;
   } catch {
     return null;
   }
@@ -69,7 +74,7 @@ export function saveCharacter(id, character, options = {}) {
     createdAt: character.createdAt || now,
     updatedAt: now,
   };
-  localStorage.setItem(CHAR_KEY(id), JSON.stringify(next));
+  writeStorageItemStrict(CHAR_KEY(id), JSON.stringify(next));
   upsertIndex(id, next.name);
   // Notify any cloud auto-sync listener that this character changed locally.
   // A save that is not a local edit (a copy of the cloud) passes emit: false.
@@ -92,8 +97,8 @@ export function patchCharacter(id, patch, options = {}) {
 
 export function deleteCharacter(id) {
   if (!id) return;
-  localStorage.removeItem(CHAR_KEY(id));
-  localStorage.removeItem(SYNC_KEY(id));
+  removeStorageItemStrict(CHAR_KEY(id));
+  removeStorageItem(SYNC_KEY(id));
   writeIndex(listCharacters().filter((e) => e.id !== id));
   if (getActiveCharId() === id) setActiveCharId(null);
   // Local delete only — the cloud copy is NOT removed (server deletion is an
@@ -121,12 +126,11 @@ export function createCharacter(seed = {}) {
 }
 
 function writeSyncMeta(id, meta) {
-  try { localStorage.setItem(SYNC_KEY(id), JSON.stringify(meta)); } catch (_) {}
+  setStorageJson(SYNC_KEY(id), meta);
 }
 
 export function getCharacterSyncMeta(id) {
-  let raw = null;
-  try { raw = id ? JSON.parse(localStorage.getItem(SYNC_KEY(id))) : null; } catch (_) { raw = null; }
+  const raw = id ? getStorageJson(SYNC_KEY(id)) : null;
   const revision = Number(raw?.sheetRevision);
   return {
     sheetRevision: raw?.sheetRevision == null || !Number.isFinite(revision) ? null : revision,

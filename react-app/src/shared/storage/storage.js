@@ -12,19 +12,24 @@ export function isAppLocalStorageKey(key) {
   return APP_STORAGE_PREFIXES.some((prefix) => key.startsWith(prefix));
 }
 
-export function listAppLocalStorageKeys() {
+// Every key that starts with `prefix`; none when storage is blocked.
+export function listStorageKeys(prefix = '') {
   try {
     const storage = getStorage();
     if (!storage) return [];
     const keys = [];
     for (let i = 0; i < storage.length; i += 1) {
       const key = storage.key(i);
-      if (key && isAppLocalStorageKey(key)) keys.push(key);
+      if (typeof key === 'string' && key.startsWith(prefix)) keys.push(key);
     }
     return keys;
   } catch (_) {
     return [];
   }
+}
+
+export function listAppLocalStorageKeys() {
+  return listStorageKeys().filter(isAppLocalStorageKey);
 }
 
 export function clearAppLocalStorage() {
@@ -77,4 +82,22 @@ export function removeStorageItem(key) {
   try {
     getStorage()?.removeItem(key);
   } catch (_) {}
+}
+
+// The data stores (characters, tool instances) write through these two: a
+// write that does not fit, or a blocked storage, throws, so the store can roll
+// back what it had half written. Everything else uses the forgiving functions
+// above, where a blocked storage only forgets.
+export function writeStorageItemStrict(key, value) {
+  requireStorage().setItem(key, String(value));
+}
+
+export function removeStorageItemStrict(key) {
+  requireStorage().removeItem(key);
+}
+
+function requireStorage() {
+  const storage = getStorage();
+  if (!storage) throw new Error('Local storage is not available in this browser.');
+  return storage;
 }
