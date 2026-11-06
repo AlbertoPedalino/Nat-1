@@ -30,7 +30,6 @@ import {
   buildSpellInfo,
   dedupeSpells,
   getSpellAbility,
-  norm,
   normalizeWizardBook,
   toSnapshot,
   upsertSnapshot,
@@ -71,6 +70,7 @@ import {
   getRegularSlotUsed,
 } from '../../../shared/character/spells/spellSlots.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
+import { lowerKey } from '../../../shared/content/nameKeys.js';
 
 const SPELL_ACTION_FILTERS = [
   { key: 'all', label: 'All' },
@@ -163,13 +163,13 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
 
   const spellIndex = useMemo(() => {
     const map = new Map();
-    spellDb.forEach((spell) => { if (spell?.name) map.set(norm(spell.name), spell); });
+    spellDb.forEach((spell) => { if (spell?.name) map.set(lowerKey(spell.name), spell); });
     spellVersions.forEach((spell) => {
-      if (spell?.name && spell.source) map.set(`${norm(spell.name)}|${norm(spell.source)}`, spell);
+      if (spell?.name && spell.source) map.set(`${lowerKey(spell.name)}|${lowerKey(spell.source)}`, spell);
     });
     (C?.spellSnapshots || []).forEach((spell) => {
-      if (spell?.name && !map.has(norm(spell.name))) map.set(norm(spell.name), spell);
-      const key = `${norm(spell?.name)}|${norm(spell?.source)}`;
+      if (spell?.name && !map.has(lowerKey(spell.name))) map.set(lowerKey(spell.name), spell);
+      const key = `${lowerKey(spell?.name)}|${lowerKey(spell?.source)}`;
       if (spell?.name && spell.source && !map.has(key)) map.set(key, spell);
     });
     return map;
@@ -198,8 +198,8 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
       if (!result.leveled[lv]) result.leveled[lv] = [];
       const castLv = Number(nextEntry?.castLevel || nextEntry?.level || lv);
       const idx = result.leveled[lv].findIndex((existing) => (
-        norm(existing?.name) === norm(nextEntry?.name)
-        && norm(existing?.source) === norm(nextEntry?.source)
+        lowerKey(existing?.name) === lowerKey(nextEntry?.name)
+        && lowerKey(existing?.source) === lowerKey(nextEntry?.source)
         && Number(existing?.castLevel || existing?.level || lv) === castLv
       ));
       if (idx >= 0) {
@@ -263,7 +263,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
   const lockedSourceBySpell = useMemo(() => {
     const map = new Map();
     (spellInfo?.lockedEntries || []).forEach((entry) => {
-      if (entry?.name) map.set(`${norm(entry.name)}|${norm(entry.source)}`, entry);
+      if (entry?.name) map.set(`${lowerKey(entry.name)}|${lowerKey(entry.source)}`, entry);
     });
     return map;
   }, [spellInfo]);
@@ -325,7 +325,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
       ? getSpellbookLevel(activePicker.bucket, pickerLevel)
       : null;
     const base = spellbookNames
-      ? spellbookNames.map((name) => spellIndex.get(norm(name)) || spellDb.find((spell) => norm(spell.name) === norm(name)) || { name, level: pickerLevel })
+      ? spellbookNames.map((name) => spellIndex.get(lowerKey(name)) || spellDb.find((spell) => lowerKey(spell.name) === lowerKey(name)) || { name, level: pickerLevel })
       : spellDb
         .filter((spell) => Number(spell.level || 0) === pickerLevel)
         .filter((spell) => Number(spell.level || 0) === 0 || Number(spell.level || 0) <= activePicker.maxLevel)
@@ -412,11 +412,11 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
       const next = cloneBucket(bucket);
       const book = normalizeWizardBook(next.wizardSpellbook);
       const list = book[level] || [];
-      const has = list.some((entry) => norm(entry) === norm(name));
-      book[level] = has ? list.filter((entry) => norm(entry) !== norm(name)) : [...list, name];
+      const has = list.some((entry) => lowerKey(entry) === lowerKey(name));
+      book[level] = has ? list.filter((entry) => lowerKey(entry) !== lowerKey(name)) : [...list, name];
       next.wizardSpellbook = book;
       if (has) {
-        if (level === 0) next.selectedCantrips = (next.selectedCantrips || []).filter((entry) => norm(entry) !== norm(name));
+        if (level === 0) next.selectedCantrips = (next.selectedCantrips || []).filter((entry) => lowerKey(entry) !== lowerKey(name));
         else next.selectedSpells = removeFromSelectedSpells(next.selectedSpells, level, name);
       }
       return next;
@@ -464,7 +464,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
 
   const sq = spellSearch.trim().toLowerCase();
   const matchSpell = (entry) => (
-    (catalogStatus === 'ready' || spellIndex.has(norm(entry.name)))
+    (catalogStatus === 'ready' || spellIndex.has(lowerKey(entry.name)))
     && (spellFilter === 'all' || getSpellActionFilter(entry) === spellFilter)
     && (!sq || String(entry?.name || '').toLowerCase().includes(sq))
   );
@@ -625,7 +625,7 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
               // so it always carries a source badge. `locked` = not user-editable in the
               // current mode. In Wizard "book" mode the row stays editable (you manage the
               // spellbook), but the badge must still show — hence the two are decoupled.
-              const autoEntry = lockedSourceBySpell.get(`${norm(spell.name)}|${norm(spell.source)}`);
+              const autoEntry = lockedSourceBySpell.get(`${lowerKey(spell.name)}|${lowerKey(spell.source)}`);
               const autoGranted = !!autoEntry;
               const locked = pickerWizardMode === 'book' ? false : autoGranted;
               const inWizardBook = activeIsWizard && isInWizardBook(activePicker?.bucket, spell.name, Number(spell.level || 0));
@@ -719,7 +719,7 @@ function addToSelectedSpells(selectedSpells, level, name) {
 function removeFromSelectedSpells(selectedSpells, level, name) {
   const next = Object.fromEntries(Object.entries(selectedSpells || {}).map(([lv, names]) => [lv, [...(names || [])]]));
   const key = String(level);
-  next[key] = (next[key] || []).filter((entry) => norm(entry) !== norm(name));
+  next[key] = (next[key] || []).filter((entry) => lowerKey(entry) !== lowerKey(name));
   if (!next[key].length) delete next[key];
   return next;
 }
@@ -756,5 +756,5 @@ function getSpellbookSize(bucket) {
 }
 
 function isInWizardBook(bucket, name, level) {
-  return getSpellbookLevel(bucket, level).some((entry) => norm(entry) === norm(name));
+  return getSpellbookLevel(bucket, level).some((entry) => lowerKey(entry) === lowerKey(name));
 }

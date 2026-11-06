@@ -1,5 +1,6 @@
 import { classLevel } from '../progression/classLevel.js';
 import { warlockHasInvocation } from '../progression/warlockUtils.js';
+import { lowerKey } from '../../content/nameKeys.js';
 
 // Item flags a feature lets the player set on an inventory item (Pact Weapon,
 // Arcane Armor…). Adapters declare them with `registerItemFlagDef(key, def)`:
@@ -24,15 +25,11 @@ export function hasItemFlag(item, flag) {
   return itemFlagsOf(item).includes(flag);
 }
 
-function norm(value) {
-  return String(value || '').trim().toLowerCase();
-}
-
 function hasSubclass(C, className, subclass) {
-  const cls = norm(className);
-  const sub = norm(subclass);
-  if (norm(C?.className) === cls && norm(C?.subclassShortName) === sub) return true;
-  return (C?.extraClasses || []).some((extra) => norm(extra?.name) === cls && norm(extra?.subclassShortName) === sub);
+  const cls = lowerKey(className);
+  const sub = lowerKey(subclass);
+  if (lowerKey(C?.className) === cls && lowerKey(C?.subclassShortName) === sub) return true;
+  return (C?.extraClasses || []).some((extra) => lowerKey(extra?.name) === cls && lowerKey(extra?.subclassShortName) === sub);
 }
 
 export function itemFlagDefAvailable(def, C) {

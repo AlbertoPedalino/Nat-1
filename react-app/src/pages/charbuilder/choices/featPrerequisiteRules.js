@@ -1,10 +1,7 @@
 import { asArray } from '../../../shared/lists.js';
-function norm(value) {
-  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-}
-
+import { matchKey } from '../../../shared/content/nameKeys.js';
 function refName(value) {
-  return norm(String(value || '').split('|')[0]);
+  return matchKey(String(value || '').split('|')[0]);
 }
 
 function meetsAbilityRequirement(requirement, scores) {
@@ -12,7 +9,7 @@ function meetsAbilityRequirement(requirement, scores) {
     alternative
     && typeof alternative === 'object'
     && Object.entries(alternative).every(([ability, minimum]) => (
-      Number(scores[norm(ability)] || 0) >= Number(minimum || 0)
+      Number(scores[matchKey(ability)] || 0) >= Number(minimum || 0)
     ))
   ));
 }

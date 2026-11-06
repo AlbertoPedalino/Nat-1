@@ -10,10 +10,10 @@ import { findSpellListEntryIndexByClass } from '../../../shared/character/spells
 import { featChoiceSpecs } from './choiceSpecs.js';
 import { buildFeatPrerequisiteContext, meetsFeatPrerequisites } from './featPrerequisites.js';
 import { featDescriptionEntries } from '../../../shared/character/progression/featDescription.js';
+import { matchKey } from '../../../shared/content/nameKeys.js';
 
 function featMatchesCategory(feat, wanted, fixedOptions = []) {
-  const norm = (value) => String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-  if (fixedOptions.some((name) => norm(name) === norm(feat?.name))) return true;
+  if (fixedOptions.some((name) => matchKey(name) === matchKey(feat?.name))) return true;
   if (!wanted?.length) return fixedOptions.length === 0;
   const cats = (feat.categories?.length ? feat.categories : [feat.category]).filter(Boolean).map((value) => String(value));
   const exact = wanted.some((cat) => String(cat || '').startsWith('FS'));

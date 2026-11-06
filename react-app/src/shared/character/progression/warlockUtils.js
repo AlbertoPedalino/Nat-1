@@ -1,8 +1,8 @@
 import { classLevel } from './classLevel.js';
+import { matchKey, stripSource } from '../../content/nameKeys.js';
 
-function norm(value) {
-  return String(value || '').split('|')[0].trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-}
+// An invocation name compared without its source.
+const invocationKey = (value) => matchKey(stripSource(value));
 
 function invocationNameFromValue(value) {
   if (value == null) return '';
@@ -42,14 +42,14 @@ export function warlockInvocationSelections(character, keyPrefix = '') {
 
 export function warlockHasInvocation(character, invocationName) {
   if (!invocationName) return false;
-  const wanted = norm(invocationName);
-  return warlockInvocationSelections(character).some(function(name) { return norm(name) === wanted; });
+  const wanted = invocationKey(invocationName);
+  return warlockInvocationSelections(character).some(function(name) { return invocationKey(name) === wanted; });
 }
 
 export function warlockHasInvocationInChoices(choices, invocationName) {
   if (!invocationName) return false;
-  const wanted = norm(invocationName);
-  return warlockInvocationSelectionsFromChoices(choices).some(function(name) { return norm(name) === wanted; });
+  const wanted = invocationKey(invocationName);
+  return warlockInvocationSelectionsFromChoices(choices).some(function(name) { return invocationKey(name) === wanted; });
 }
 
 export function warlockLevel(character) {
@@ -58,7 +58,7 @@ export function warlockLevel(character) {
 
 export function warlockKnownInvocations(character) {
   return warlockInvocationSelections(character)
-    .map(function (name) { return norm(name); })
+    .map(function (name) { return invocationKey(name); })
     .filter(Boolean);
 }
 

@@ -12,6 +12,7 @@ import { featDescriptionEntries } from '../../../shared/character/progression/fe
 
 import { ENTITY_COLORS as SOURCE_COLOR } from '../../../shared/ui/entityColors.js';
 import { asArray } from '../../../shared/lists.js';
+import { choiceKey } from '../../../shared/content/nameKeys.js';
 
 export default function FeaturesTab({ C }) {
   if (!C) return null;
@@ -137,7 +138,7 @@ function collectWarlockInvocationFeatures(C) {
   if (!invocationData.length) return [];
 
   const invByName = new Map(
-    invocationData.map((entry) => [norm(entry?.name), entry]).filter(([key]) => key),
+    invocationData.map((entry) => [choiceKey(entry?.name), entry]).filter(([key]) => key),
   );
   // Live 2024 invocation descriptions (rich 5etools entries) from optionalfeatures.json.
   const liveEntries = buildOptionalFeatureEntryLookup(C?.optionalFeatureEntries, 'EI');
@@ -152,7 +153,7 @@ function collectWarlockInvocationFeatures(C) {
       counts.set(clean, (counts.get(clean) || 0) + 1);
     });
     counts.forEach((count, selectedName) => {
-      const data = invByName.get(norm(selectedName)) || null;
+      const data = invByName.get(choiceKey(selectedName)) || null;
       const repeatable = !!data?.repeatable;
       out.push({
         name: count > 1 ? `${selectedName} x${count}` : selectedName,
@@ -164,9 +165,9 @@ function collectWarlockInvocationFeatures(C) {
     });
   };
 
-  if (norm(C?.className) === 'warlock') pushForPrefix('', primaryClassLevel(C));
+  if (choiceKey(C?.className) === 'warlock') pushForPrefix('', primaryClassLevel(C));
   (C?.extraClasses || []).forEach((extra, index) => {
-    if (norm(extra?.name) !== 'warlock') return;
+    if (choiceKey(extra?.name) !== 'warlock') return;
     pushForPrefix(`mc${index}_`, Number(extra?.level || 1));
   });
 
@@ -264,15 +265,15 @@ function featureIsAvailable(feature, level) {
 }
 
 function featureMatchesClass(feature, className) {
-  const target = norm(className);
+  const target = choiceKey(className);
   if (!target) return true;
 
   const explicit = feature?.className || feature?.class?.name || feature?.class;
-  if (explicit) return norm(explicit) === target;
+  if (explicit) return choiceKey(explicit) === target;
 
   const ref = feature?.classFeature || feature?.subclassFeature;
   const parsedClass = parseFeatureRefClass(ref);
-  if (parsedClass) return norm(parsedClass) === target;
+  if (parsedClass) return choiceKey(parsedClass) === target;
 
   // If the feature has no class metadata, assume the caller already supplied
   // the class-specific list (common for saved snapshots).
@@ -290,17 +291,17 @@ function hasSubclassIdentity(feature) {
 }
 
 function featureMatchesSubclass(feature, subclassName) {
-  const target = norm(subclassName);
+  const target = choiceKey(subclassName);
   if (!target) return false;
 
   const explicit = feature?.subclassShortName
     || feature?.subclassName
     || feature?.subclass?.shortName
     || feature?.subclass?.name;
-  if (explicit) return norm(explicit) === target;
+  if (explicit) return choiceKey(explicit) === target;
 
   const parsedSubclass = parseFeatureRefSubclass(feature?.subclassFeature);
-  if (parsedSubclass) return norm(parsedSubclass) === target;
+  if (parsedSubclass) return choiceKey(parsedSubclass) === target;
 
   // If this list is already pre-filtered and lacks subclass metadata, keep it.
   return true;
@@ -351,8 +352,8 @@ function hasChoiceValue(character, key, expected, choicePrefix = '') {
   if (stored == null || stored === '') return false;
   if (expected == null) return true;
 
-  const storedValues = asArray(stored).map(cleanChoiceText).map(norm).filter(Boolean);
-  const expectedValues = asArray(expected).map(cleanChoiceText).map(norm).filter(Boolean);
+  const storedValues = asArray(stored).map(cleanChoiceText).map(choiceKey).filter(Boolean);
+  const expectedValues = asArray(expected).map(cleanChoiceText).map(choiceKey).filter(Boolean);
   if (!expectedValues.length) return true;
   return expectedValues.some((value) => storedValues.includes(value));
 }
@@ -361,7 +362,7 @@ function dedupeFeatures(features) {
   const seen = new Set();
   const out = [];
   (features || []).forEach((feature) => {
-    const key = `${norm(feature?.name)}|${Number(feature?.level || 0)}|${norm(feature?.source)}`;
+    const key = `${choiceKey(feature?.name)}|${Number(feature?.level || 0)}|${choiceKey(feature?.source)}`;
     if (seen.has(key)) return;
     seen.add(key);
     out.push(feature);
@@ -446,11 +447,7 @@ function FeatureItem({ feature, tone }) {
 }
 
 function featureKey(feature) {
-  return `${norm(feature?.name)}|${Number(feature?.level || 0)}|${norm(feature?.source)}`;
-}
-
-function norm(value) {
-  return cleanChoiceText(value).toLowerCase().replace(/[^a-z0-9]/g, '');
+  return `${choiceKey(feature?.name)}|${Number(feature?.level || 0)}|${choiceKey(feature?.source)}`;
 }
 
 function cleanChoiceText(text) {

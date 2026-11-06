@@ -1,4 +1,5 @@
 import { normalizeSpellRecord } from '../shared/character/spells/spellNormalization.js';
+import { matchKey } from '../shared/content/nameKeys.js';
 
 const SCHOOL_FULL = {
   A: 'Abjuration',
@@ -17,10 +18,6 @@ const AMMO_TYPES = new Set(['A', 'AF', 'AT']);
 
 function arr(value) {
   return Array.isArray(value) ? value : value == null ? [] : [value];
-}
-
-function norm(value) {
-  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
 function runAdapters(record, adapters, label, context) {
@@ -70,7 +67,7 @@ export function adaptClassRecord(rawClass, registry, context = {}) {
     _featureRefs: normalizeFeatureRefs(raw.classFeatures),
     _meta: {
       ...(raw._meta && typeof raw._meta === 'object' ? raw._meta : {}),
-      classKey: `${norm(name)}_${norm(source)}`,
+      classKey: `${matchKey(name)}_${matchKey(source)}`,
       isAdapted: true,
     },
   };
@@ -92,7 +89,7 @@ export function adaptSubclassRecord(rawSubclass, registry, context = {}) {
     _featureRefs: normalizeFeatureRefs(raw.subclassFeatures),
     _meta: {
       ...(raw._meta && typeof raw._meta === 'object' ? raw._meta : {}),
-      subclassKey: `${norm(className)}_${norm(shortName)}_${norm(source)}`,
+      subclassKey: `${matchKey(className)}_${matchKey(shortName)}_${matchKey(source)}`,
       isAdapted: true,
     },
   };
@@ -110,7 +107,7 @@ export function adaptSpeciesRecord(rawSpecies, registry, context = {}) {
     size: Array.isArray(raw.size) ? raw.size : raw.size ? [raw.size] : ['M'],
     _meta: {
       ...(raw._meta && typeof raw._meta === 'object' ? raw._meta : {}),
-      speciesKey: `${norm(name)}_${norm(source)}`,
+      speciesKey: `${matchKey(name)}_${matchKey(source)}`,
       isAdapted: true,
     },
   };
@@ -210,7 +207,7 @@ function normalizeFeatRecord(rawFeat, context = {}) {
     entries: arr(raw.entries),
     _meta: {
       ...(raw._meta && typeof raw._meta === 'object' ? raw._meta : {}),
-      featKey: `${norm(name)}_${norm(source)}`,
+      featKey: `${matchKey(name)}_${matchKey(source)}`,
       minLevel: Number.isFinite(minLevel) ? minLevel : null,
       categoryCodes: categories,
       isFeatAdapted: true,
@@ -287,7 +284,7 @@ export function adaptSpellRecord(rawSpell, registry, context = {}) {
     ...(adapterData && typeof adapterData === 'object' ? { _adapterData: adapterData } : {}),
     _meta: {
       ...(raw._meta && typeof raw._meta === 'object' ? raw._meta : {}),
-      spellKey: `${norm(name)}_${norm(raw.source)}`,
+      spellKey: `${matchKey(name)}_${matchKey(raw.source)}`,
       isCantrip: level === 0,
       isAdapted: true,
     },
@@ -330,7 +327,7 @@ export function adaptItemRecord(rawItem, registry, context = {}) {
     value: Number(raw.value || 0),
     _meta: {
       ...(raw._meta && typeof raw._meta === 'object' ? raw._meta : {}),
-      itemKey: `${norm(name)}_${norm(source)}`,
+      itemKey: `${matchKey(name)}_${matchKey(source)}`,
       isWeapon: WEAPON_TYPES.has(type),
       isMeleeWeapon: type === 'M',
       isRangedWeapon: type === 'R',

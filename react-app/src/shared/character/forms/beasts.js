@@ -8,6 +8,7 @@
 
 import { isAllowedSource, BEAST_ALLOWED_SOURCES } from '../../content/sourcePriority.js';
 import { signed } from '../../ui/numberFormat.js';
+import { stripSource } from '../../content/nameKeys.js';
 
 const ABILITIES = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
 
@@ -20,8 +21,6 @@ export function wildShapeKnownFormsLimit(druidLevel) {
   if (lv >= 2) return 4;
   return 0;
 }
-
-const norm = (value) => String(value || '').split('|')[0].trim();
 
 // CR may be a string ('1/4'), a number, or an object ({ cr: '1/4', ... }).
 export function parseCr(cr) {
@@ -76,7 +75,7 @@ function firstAc(raw) {
   const ac = Array.isArray(raw?.ac) ? raw.ac[0] : raw?.ac;
   if (ac == null) return { value: null, from: '' };
   if (typeof ac === 'number') return { value: ac, from: '' };
-  return { value: Number(ac.ac) || null, from: Array.isArray(ac.from) ? ac.from.map(norm).join(', ') : '' };
+  return { value: Number(ac.ac) || null, from: Array.isArray(ac.from) ? ac.from.map(stripSource).join(', ') : '' };
 }
 
 function normalizeSpeed(raw) {
@@ -156,7 +155,7 @@ export function normalizeBeast(raw) {
     saves: normalizeSaves(raw),
     skills: normalizeSkills(raw),
     speed: normalizeSpeed(raw),
-    senses: Array.isArray(raw.senses) ? raw.senses.map(norm) : [],
+    senses: Array.isArray(raw.senses) ? raw.senses.map(stripSource) : [],
     passivePerception: Number(raw.passive) || null,
     actions: Array.isArray(raw.action) ? raw.action : [],
     bonusActions: Array.isArray(raw.bonus) ? raw.bonus : [],

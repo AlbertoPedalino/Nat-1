@@ -1,6 +1,7 @@
 import { canStackInventoryItems } from './itemIdentity.js';
 import { itemChargeMaximum } from './itemCharges.js';
 import { isItemCarried } from './weight.js';
+import { matchKey } from '../../content/nameKeys.js';
 
 export function parseInventoryItemRef(ref) {
   const [name, source] = String(ref || '').split('|');
@@ -17,10 +18,6 @@ export function cleanItemName(name) {
     .trim();
 }
 
-function norm(value) {
-  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-}
-
 function matchSource(item, source) {
   return !source || String(item?.source || '').toUpperCase() === String(source || '').toUpperCase();
 }
@@ -30,15 +27,15 @@ function inventoryQty(item) {
 }
 
 export function findInventoryItem(itemDb, name, source = '') {
-  const targetName = norm(name);
+  const targetName = matchKey(name);
   if (!targetName) return null;
 
-  const exact = (itemDb || []).find((item) => norm(item?.name) === targetName && matchSource(item, source));
+  const exact = (itemDb || []).find((item) => matchKey(item?.name) === targetName && matchSource(item, source));
   if (exact) return exact;
 
   const groupMatch = (itemDb || []).find((item) => (
     Array.isArray(item?.group)
-    && item.group.some((groupName) => norm(groupName) === targetName)
+    && item.group.some((groupName) => matchKey(groupName) === targetName)
     && matchSource(item, source)
   ));
   if (groupMatch) return groupMatch;
@@ -70,7 +67,7 @@ export function expandInventoryItem(item, itemDb, qty = 1, visited = new Set()) 
   if (!item?.name) return [];
 
   const itemQty = Math.max(1, Number(qty ?? 1) || 1);
-  const key = `${norm(item.name)}|${String(item.source || '').toUpperCase()}`;
+  const key = `${matchKey(item.name)}|${String(item.source || '').toUpperCase()}`;
   if (visited.has(key) || !shouldExpandItemContents(item)) {
     return [{ ...item, qty: itemQty }];
   }

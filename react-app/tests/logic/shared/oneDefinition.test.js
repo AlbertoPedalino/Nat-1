@@ -29,6 +29,15 @@ test('clamp, clampInt and numberOr are defined only in shared/numbers.js', () =>
   }), []);
 });
 
+// One name, one meaning: a comparison key is matchKey, lowerKey, stripSource
+// or choiceKey from nameKeys.js, never a local `norm`/`compact` whose meaning
+// depends on the file.
+test('name keys come from shared/content/nameKeys.js, no local norm helpers', () => {
+  assert.deepEqual(sourceFilesMatching(/(function\s+(norm|compact|matchKey|lowerKey|stripSource|choiceText|choiceKey)\s*\(|const\s+(norm|compact|matchKey|lowerKey|stripSource|choiceText|choiceKey)\s*=\s*(\([^)]*\)|\w+)\s*=>)/, {
+    allow: ['shared/content/nameKeys.js'],
+  }), []);
+});
+
 test('asArray and flattenList are defined only in shared/lists.js', () => {
   assert.deepEqual(sourceFilesMatching(/(function|const)\s+(asArray|flattenList)\b/, {
     allow: ['shared/lists.js'],

@@ -8,6 +8,7 @@ import { inventoryHasFlag } from '../../../shared/character/progression/choiceUt
 import { ownedFeatNames } from '../../../shared/character/progression/selectedFeats.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { asArray } from '../../../shared/lists.js';
+import { matchKey } from '../../../shared/content/nameKeys.js';
 
 export function cleanText(value) {
   if (value == null) return '';
@@ -17,8 +18,9 @@ export function cleanText(value) {
   return cleanProficiencyText(value);
 }
 
-export function norm(value) {
-  return cleanText(value).toLowerCase().replace(/[^a-z0-9]/g, '');
+// An effect's text (cleaned like a proficiency) as a comparison key.
+export function effectKey(value) {
+  return matchKey(cleanText(value));
 }
 
 const DAMAGE_TYPES = [
@@ -43,7 +45,7 @@ export function displayLabel(value) {
 
 function ownerLevelOf(character, className, isPrimary) {
   if (isPrimary) return primaryClassLevel(character);
-  const found = (character?.extraClasses || []).find((entry) => norm(entry?.name) === norm(className));
+  const found = (character?.extraClasses || []).find((entry) => effectKey(entry?.name) === effectKey(className));
   return Number(found?.level || 1);
 }
 
@@ -97,11 +99,11 @@ function dedupeEffects(effects) {
 
   effects.forEach((effect) => {
     const key = [
-      norm(effect.type),
-      norm(effect.key || effect.note || effect.senseType || effect.speedType || effect.ability || effect.target || ''),
-      norm(asArray(effect.damageTypes).join(',')),
-      norm(asArray(effect.conditions).join(',')),
-      norm(effect.ownerName),
+      effectKey(effect.type),
+      effectKey(effect.key || effect.note || effect.senseType || effect.speedType || effect.ability || effect.target || ''),
+      effectKey(asArray(effect.damageTypes).join(',')),
+      effectKey(asArray(effect.conditions).join(',')),
+      effectKey(effect.ownerName),
       String(effect.minLevel || ''),
     ].join('|');
 
@@ -166,7 +168,7 @@ function parentheticalDamageType(text) {
   const match = cleanText(text).match(/\(([^)]+)\)/);
   if (!match) return '';
   const inside = match[1];
-  return DAMAGE_TYPES.find((type) => norm(type) === norm(inside)) || '';
+  return DAMAGE_TYPES.find((type) => effectKey(type) === effectKey(inside)) || '';
 }
 
 export function inferDamageTypeFromText(text) {
@@ -174,8 +176,8 @@ export function inferDamageTypeFromText(text) {
   const inParen = parentheticalDamageType(cleaned);
   if (inParen) return inParen;
 
-  const compact = norm(cleaned);
-  const direct = DAMAGE_TYPES.find((type) => compact.includes(norm(type)));
+  const compact = effectKey(cleaned);
+  const direct = DAMAGE_TYPES.find((type) => compact.includes(effectKey(type)));
   if (direct) return direct;
 
   return '';
@@ -208,7 +210,7 @@ export function resolveChoiceValue(effect, character) {
   let choice = firstChoiceText(character, effect?.key);
   if (!choice && effect?.ownerType === 'feat' && effect?.choiceKeySuffix) {
     const featSlot = Object.entries(character?.choices || {}).find(([, value]) => (
-      asArray(value).some((entry) => norm(entry) === norm(effect.ownerName))
+      asArray(value).some((entry) => effectKey(entry) === effectKey(effect.ownerName))
     ))?.[0];
     if (featSlot) choice = firstChoiceText(character, `${featSlot}_${effect.choiceKeySuffix}`);
   }
@@ -288,7 +290,7 @@ export function collectSheetEffects(character = {}) {
 
 export function effectTitle(effect) {
   const type = cleanText(effect?.type);
-  const normalizedType = norm(type);
+  const normalizedType = effectKey(type);
 
   const labels = {
     resistance: 'Resistance',
@@ -330,7 +332,7 @@ export function effectTitle(effect) {
 
 export function effectSummary(effect, character = {}) {
   const parts = [];
-  const type = norm(effect?.type);
+  const type = effectKey(effect?.type);
 
   if (type.includes('resistancechoice') || type.includes('immunitychoice')) {
     const resolved = resolveChoiceValue(effect, character);
@@ -349,13 +351,13 @@ export function effectSummary(effect, character = {}) {
   if (effect?.key && !String(effect.key).startsWith('subclass_')) parts.push(cleanText(effect.key));
 
   const note = cleanText(effect?.note);
-  if (note && !parts.some((part) => norm(note).includes(norm(part)))) parts.push(note);
+  if (note && !parts.some((part) => effectKey(note).includes(effectKey(part)))) parts.push(note);
 
   return parts.filter(Boolean).join(' • ');
 }
 
 export function effectCategory(effect) {
-  const type = norm(effect?.type);
+  const type = effectKey(effect?.type);
 
   if (
     type.includes('resistance')
@@ -439,14 +441,14 @@ const SENSE_EFFECT_TYPES = [
 export function collectSenseEffects(character = {}) {
   return collectSheetEffects(character).filter((effect) => {
     if (effect.senseType) return true;
-    const type = norm(effect.type);
+    const type = effectKey(effect.type);
     return SENSE_EFFECT_TYPES.some((token) => type.includes(token));
   });
 }
 
 export function collectMovementEffects(character = {}) {
   return collectSheetEffects(character).filter((effect) => {
-    const type = norm(effect.type);
+    const type = effectKey(effect.type);
     return type.includes('speed')
       || type.includes('fly')
       || type.includes('climb')
@@ -459,7 +461,7 @@ export function collectMovementEffects(character = {}) {
 }
 
 export function collectResistanceEffects(character = {}) {
-  return collectSheetEffects(character).filter((effect) => norm(effect.type).includes('resistance'));
+  return collectSheetEffects(character).filter((effect) => effectKey(effect.type).includes('resistance'));
 }
 
 export function collectPreviewEffectProficiencySections(character = {}) {
@@ -473,7 +475,7 @@ export function collectPreviewEffectProficiencySections(character = {}) {
   };
 
   collectSheetEffects(character).forEach((effect) => {
-    const type = norm(effect.type);
+    const type = effectKey(effect.type);
     const summary = effectSummary(effect, character);
     const source = effect.ownerName ? ` (${effect.ownerName})` : '';
 

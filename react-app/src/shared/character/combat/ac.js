@@ -5,14 +5,11 @@ import { primaryClassLevel } from '../progression/classLevel.js';
 import { finalAbilityModifier } from '../progression/abilityModifier.js';
 import { aggregateMiscAcBonus, armorEnhancement } from '../inventory/itemBonus.js';
 import { asArray } from '../../lists.js';
-
-function norm(value) {
-  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-}
+import { matchKey } from '../../content/nameKeys.js';
 
 function ownerLevelOf(character, className, isPrimary) {
   if (isPrimary) return primaryClassLevel(character);
-  const found = (character?.extraClasses || []).find((e) => norm(e?.name) === norm(className));
+  const found = (character?.extraClasses || []).find((e) => matchKey(e?.name) === matchKey(className));
   return Number(found?.level || 1);
 }
 
@@ -24,7 +21,7 @@ function collectFromSheetEffects(out, list, meta, character, seenKeys) {
     const minLevel = Number(effect.minLevel || 1);
     if (Number(meta.ownerLevel || 1) < minLevel) return;
     const rawKey = effect.key || `${meta.sourceKey}_${type}_${(effect.abilities || []).join('_')}`;
-    const key = norm(rawKey);
+    const key = matchKey(rawKey);
     if (seenKeys.has(key)) return;
     seenKeys.add(key);
     out.push({
@@ -57,7 +54,7 @@ function collectRuntimeConfigFormulas(out, character, seenKeys) {
     if (clsCfg?.unarmoredDefense) {
       asArray(clsCfg.unarmoredDefense).forEach((cfg) => {
         if (ol < Number(cfg.minLevel || 1)) return;
-        const key = norm(`${entity.className}_unarmored_defense`);
+        const key = matchKey(`${entity.className}_unarmored_defense`);
         if (seenKeys.has(key)) return;
         seenKeys.add(key);
         out.push({
@@ -81,7 +78,7 @@ function collectRuntimeConfigFormulas(out, character, seenKeys) {
       if (subCfg?.unarmoredDefense) {
         asArray(subCfg.unarmoredDefense).forEach((cfg) => {
           if (ol < Number(cfg.minLevel || 1)) return;
-          const key = norm(`${entity.className}_${entity.subclassShortName}_${cfg.name || 'unarmored_defense'}`);
+          const key = matchKey(`${entity.className}_${entity.subclassShortName}_${cfg.name || 'unarmored_defense'}`);
           if (seenKeys.has(key)) return;
           seenKeys.add(key);
           out.push({

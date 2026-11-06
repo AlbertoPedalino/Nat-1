@@ -1,7 +1,7 @@
 import { weaponFilterMatches } from '../../../shared/character/inventory/weaponFilters.js';
 import { featNamedEntries } from '../../../shared/character/progression/featDescription.js';
 import { finalAbilityModifier } from '../../../shared/character/progression/abilityModifier.js';
-import { cleanText, norm, collectSheetEffects } from './sheetEffects.js';
+import { cleanText, effectKey, collectSheetEffects } from './sheetEffects.js';
 import { asArray } from '../../../shared/lists.js';
 
 // One question per rule, answered from the active sheet effects: AC bonuses,
@@ -18,7 +18,7 @@ function bladesingerIntMod(character) {
 export function getAcBonusEffects(character = {}, ctx = {}) {
   let total = 0;
   collectSheetEffects(character).forEach((effect) => {
-    if (norm(effect.type) !== 'acbonus') return;
+    if (effectKey(effect.type) !== 'acbonus') return;
     if (effect.requiresArmor && !ctx.wearingArmor) return;
     if (effect.ability === 'int') total += bladesingerIntMod(character);
     else total += Number(effect.value ?? 1);
@@ -37,7 +37,7 @@ export function getWeaponEffectBonuses(character = {}, info = {}) {
   let attack = 0;
   let damage = 0;
   collectSheetEffects(character).forEach((effect) => {
-    const type = norm(effect.type);
+    const type = effectKey(effect.type);
     if (type !== 'weaponattackbonus' && type !== 'weapondamagebonus') return;
     if (effect.requiresSoloWeapon && !info.soloWeapon) return;
     if (!weaponFilterMatches(effect.weaponFilter, info)) return;
@@ -48,7 +48,7 @@ export function getWeaponEffectBonuses(character = {}, info = {}) {
 }
 
 function ownerFeatNamedEntries(character, ownerName, entryName) {
-  const feat = asArray(character?.allFeatSnapshots).find((f) => norm(f?.name) === norm(ownerName));
+  const feat = asArray(character?.allFeatSnapshots).find((f) => effectKey(f?.name) === effectKey(ownerName));
   return feat ? featNamedEntries(feat, entryName) : null;
 }
 
@@ -63,11 +63,11 @@ function ownerFeatNamedEntries(character, ownerName, entryName) {
 export function getWeaponNotes(character = {}, info = {}) {
   const notes = [];
   collectSheetEffects(character).forEach((effect) => {
-    if (norm(effect.type) !== 'weaponnote') return;
+    if (effectKey(effect.type) !== 'weaponnote') return;
     if (!weaponFilterMatches(effect.weaponFilter, info)) return;
     const title = String(effect.title || effect.ownerName || '').trim();
     notes.push({
-      key: norm(`${effect.ownerName}-${title}`),
+      key: effectKey(`${effect.ownerName}-${title}`),
       tag: String(effect.tag || title).trim(),
       title,
       source: String(effect.ownerName || '').trim(),
@@ -81,7 +81,7 @@ export function getSkillAdvantageFromEffects(character = {}, skillName) {
   const s = String(skillName || '').toLowerCase();
   let found = null;
   collectSheetEffects(character).forEach((effect) => {
-    if (norm(effect.type) !== 'advantage') return;
+    if (effectKey(effect.type) !== 'advantage') return;
     if (effect.target !== 'skill') return;
     if (String(effect.skill || '').toLowerCase() !== s) return;
     found = { source: effect.note || effect.ownerName || 'Advantage' };
@@ -97,7 +97,7 @@ export function getSkillAdvantageFromEffects(character = {}, skillName) {
 export function getInitiativeAdvantageFromEffects(character = {}) {
   let found = null;
   collectSheetEffects(character).forEach((effect) => {
-    if (norm(effect.type) !== 'advantage') return;
+    if (effectKey(effect.type) !== 'advantage') return;
     if (effect.target !== 'initiative') return;
     found = { source: effect.note || effect.ownerName || 'Advantage' };
   });
@@ -107,7 +107,7 @@ export function getInitiativeAdvantageFromEffects(character = {}) {
 export function getConcentrationBonus(character = {}) {
   let total = 0;
   collectSheetEffects(character).forEach((effect) => {
-    if (norm(effect.type) !== 'concentrationbonus') return;
+    if (effectKey(effect.type) !== 'concentrationbonus') return;
     if (effect.ability === 'int') total += bladesingerIntMod(character);
     else total += Number(effect.value ?? 0);
   });
@@ -120,7 +120,7 @@ export function getConcentrationBonus(character = {}) {
 // appears only when its requiredChoice matches. Surfaced as a reminder.
 export function getD20FloorReminders(character = {}) {
   return collectSheetEffects(character)
-    .filter((effect) => norm(effect?.type) === 'd20floor')
+    .filter((effect) => effectKey(effect?.type) === 'd20floor')
     .map((effect) => ({
       minRoll: Number(effect.minRoll || 10),
       note: cleanText(effect.note) || '',
@@ -133,7 +133,7 @@ export function getD20FloorReminders(character = {}) {
 export function getSpellSaveDcBonus(character = {}) {
   let total = 0;
   collectSheetEffects(character).forEach((effect) => {
-    if (norm(effect.type) !== 'spellsavedcbonus') return;
+    if (effectKey(effect.type) !== 'spellsavedcbonus') return;
     total += Number(effect.value ?? 0);
   });
   return total;
@@ -147,8 +147,8 @@ export function getSpellAttackAdvantage(character = {}, { ownerClassName } = {})
   let found = null;
   collectSheetEffects(character).forEach((effect) => {
     if (found) return;
-    if (norm(effect.type) !== 'spellattackadvantage') return;
-    if (effect.spellClass && norm(effect.spellClass) !== norm(ownerClassName)) return;
+    if (effectKey(effect.type) !== 'spellattackadvantage') return;
+    if (effect.spellClass && effectKey(effect.spellClass) !== effectKey(ownerClassName)) return;
     found = { source: effect.note || effect.ownerName || 'Advantage' };
   });
   return found;
@@ -160,7 +160,7 @@ export function getSpellAttackAdvantage(character = {}, { ownerClassName } = {})
 export function getMeleeStrDamageBonus(character = {}) {
   let bonus = 0;
   collectSheetEffects(character).forEach((effect) => {
-    if (norm(effect.type) !== 'meleedamagebonus') return;
+    if (effectKey(effect.type) !== 'meleedamagebonus') return;
     if (effect.ability && String(effect.ability).toLowerCase() !== 'str') return;
     bonus = Math.max(bonus, Number(effect.value ?? 0));
   });
@@ -170,8 +170,8 @@ export function getMeleeStrDamageBonus(character = {}) {
 export function getSpeedBonus(character = {}) {
   let total = 0;
   collectSheetEffects(character).forEach((effect) => {
-    if (!norm(effect.type).includes('speed')) return;
-    if (norm(effect.type).includes('fly') || norm(effect.type).includes('climb') || norm(effect.type).includes('swim')) return;
+    if (!effectKey(effect.type).includes('speed')) return;
+    if (effectKey(effect.type).includes('fly') || effectKey(effect.type).includes('climb') || effectKey(effect.type).includes('swim')) return;
     total += Number(effect.value ?? 0);
   });
   return total;
@@ -186,7 +186,7 @@ export function getUnarmedStrike(character = {}, { emptyHanded = false } = {}) {
   let dexterity = false;
   let uses = null;
   collectSheetEffects(character).forEach((effect) => {
-    if (norm(effect.type) !== 'unarmedstrike') return;
+    if (effectKey(effect.type) !== 'unarmedstrike') return;
     const value = Number(emptyHanded && effect.emptyHandedFace ? effect.emptyHandedFace : effect.face) || 0;
     if (value > face) face = value;
     if (effect.dexterity) dexterity = true;

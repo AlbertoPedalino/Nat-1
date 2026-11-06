@@ -1,6 +1,7 @@
 import { strip5eMarkup } from './spellEntries.js';
 import { SPELL_SOURCE_PRIORITY, sourceRank } from '../../content/sourcePriority.js';
 import { asArray } from '../../lists.js';
+import { matchKey } from '../../content/nameKeys.js';
 
 const SCHOOL_FULL = {
   A: 'Abjuration',
@@ -12,10 +13,6 @@ const SCHOOL_FULL = {
   N: 'Necromancy',
   T: 'Transmutation',
 };
-
-function norm(value) {
-  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-}
 
 function title(value) {
   const text = String(value || '').replace(/_/g, ' ').trim();
@@ -155,7 +152,7 @@ export function dedupeSpellsBySourcePriority(spells) {
   const byName = new Map();
   asArray(spells).forEach((spell) => {
     if (!spell?.name) return;
-    const key = norm(spell.name);
+    const key = matchKey(spell.name);
     const existing = byName.get(key);
     if (!existing) {
       byName.set(key, spell);

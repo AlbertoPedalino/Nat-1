@@ -1,5 +1,6 @@
 import { createAdapterBindings } from '../../adapterBindings.js';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
+import { matchKey } from '../../../shared/content/nameKeys.js';
 
 export default function install(registry, context = {}) {
   const {
@@ -26,8 +27,7 @@ registerSubclassSheetFeatureFilter("Cleric_Life", function (ctx, features) {
   const desc =
     "When a spell you cast with a spell slot restores Hit Points to a creature, that creature regains additional Hit Points on the turn you cast the spell. The additional Hit Points equal 2 plus the spell slot's level.";
 
-  const norm = (v) => String(v || "").toLowerCase().replace(/[^a-z0-9]/g, "");
-  const idx = out.findIndex(f => norm(f?.name) === "discipleoflife");
+  const idx = out.findIndex(f => matchKey(f?.name) === "discipleoflife");
   if (idx >= 0) {
     const cur = out[idx] || {};
     out[idx] = {

@@ -1,4 +1,5 @@
 import { asArray } from '../../lists.js';
+import { choiceKey } from '../../content/nameKeys.js';
 /**
  * Predicates for `requiredChoice` gating across builder specs, sheet effects,
  * and auto-granted spells.
@@ -7,27 +8,6 @@ import { asArray } from '../../lists.js';
  * `requiredChoice.value` and in option `key`s. Stored choice values are
  * compared by normalized (lowercased, alphanumeric) equality.
  */
-
-function cleanText(value) {
-  if (value == null) return '';
-  if (typeof value === 'string') {
-    return value
-      .split('|')[0]
-      .replace(/\{@\w+\s+/g, '')
-      .replace(/\}/g, '')
-      .trim();
-  }
-  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
-  if (typeof value === 'object') {
-    const candidate = value.label ?? value.name ?? value.key ?? value.value ?? value.id;
-    return cleanText(candidate);
-  }
-  return String(value).trim();
-}
-
-function norm(value) {
-  return cleanText(value).toLowerCase().replace(/[^a-z0-9]/g, '');
-}
 
 function readChoiceValue(character, key) {
   if (!character || !key) return null;
@@ -59,10 +39,10 @@ function readChoiceValue(character, key) {
 
 export function matchesRequiredChoice(character, requiredChoice) {
   if (!requiredChoice?.key) return true;
-  const expectedValues = asArray(requiredChoice.value).map(norm).filter(Boolean);
+  const expectedValues = asArray(requiredChoice.value).map(choiceKey).filter(Boolean);
   if (!expectedValues.length) return true;
   const stored = readChoiceValue(character, requiredChoice.key);
-  const storedNorms = asArray(stored).map(norm);
+  const storedNorms = asArray(stored).map(choiceKey);
   return expectedValues.some((expected) => storedNorms.includes(expected));
 }
 

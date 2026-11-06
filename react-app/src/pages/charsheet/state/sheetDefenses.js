@@ -1,7 +1,7 @@
 import { asArray } from '../../../shared/lists.js';
 import {
   cleanText,
-  norm,
+  effectKey,
   displayLabel,
   inferDamageTypeFromText,
   resolveChoiceValue,
@@ -75,7 +75,7 @@ function collectSelectedSpeciesResistanceChoices(character = {}, source = 'Speci
   };
 
   const speciesChoiceCanGrantResistance = (key) => {
-    const k = norm(String(key).replace(/^mc\d+_/, ''));
+    const k = effectKey(String(key).replace(/^mc\d+_/, ''));
     if (!k.startsWith('species')) return false;
     return k.includes('resist') || k.includes('resistance');
   };
@@ -127,7 +127,7 @@ function collectStaticDefenseItems(character = {}) {
 
 function resistanceItemsFromEffects(character = {}) {
   return collectSheetEffects(character)
-    .filter((effect) => norm(effect.type).includes('resistance'))
+    .filter((effect) => effectKey(effect.type).includes('resistance'))
     .flatMap((effect) => {
       const summary = effectSummary(effect, character);
       const fromSummary = summary
@@ -153,11 +153,11 @@ function resistanceItemsFromEffects(character = {}) {
 
 function immunityItemsFromEffects(character = {}) {
   return collectSheetEffects(character)
-    .filter((effect) => norm(effect.type).includes('immunity'))
+    .filter((effect) => effectKey(effect.type).includes('immunity'))
     .flatMap((effect) => {
       const labels = [];
 
-      if (norm(effect.type).includes('immunitychoice')) {
+      if (effectKey(effect.type).includes('immunitychoice')) {
         const resolved = resolveChoiceValue(effect, character);
         if (resolved && !/^choose$/i.test(resolved)) labels.push(resolved);
       } else {
@@ -188,7 +188,7 @@ function dedupeDefenseItems(items) {
   items.forEach((item) => {
     const label = displayLabel(item.label);
     if (!label) return;
-    const key = `${norm(item.kind)}|${norm(label)}`;
+    const key = `${effectKey(item.kind)}|${effectKey(label)}`;
     const existing = byKey.get(key);
     if (!existing) {
       byKey.set(key, { ...item, label });

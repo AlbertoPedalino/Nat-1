@@ -1,5 +1,6 @@
 import { isFeatKey, isFeatDetailKey } from './featChoiceKeys.js';
 import { flattenList } from '../../lists.js';
+import { choiceKey, choiceText } from '../../content/nameKeys.js';
 
 const SKILL_NAMES = [
   'Acrobatics',
@@ -55,31 +56,10 @@ const SIZE_KEYS = new Set([
   'species_size',
 ]);
 
-function cleanText(value) {
-  if (value == null) return '';
-  if (typeof value === 'string') {
-    return value
-      .split('|')[0]
-      .replace(/\{@\w+\s+/g, '')
-      .replace(/\}/g, '')
-      .trim();
-  }
-  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
-  if (typeof value === 'object') {
-    const candidate = value.label ?? value.name ?? value.key ?? value.value ?? value.id;
-    return cleanText(candidate);
-  }
-  return String(value).trim();
-}
-
-function compact(value) {
-  return cleanText(value).toLowerCase().replace(/[^a-z0-9]/g, '');
-}
-
 function uniquePush(target, value) {
-  const text = cleanText(value);
+  const text = choiceText(value);
   if (!text) return;
-  const exists = target.some((item) => compact(item) === compact(text));
+  const exists = target.some((item) => choiceKey(item) === choiceKey(text));
   if (!exists) target.push(text);
 }
 
@@ -89,31 +69,31 @@ function uniquePushMany(target, values) {
 
 function normalizeChoiceValues(value) {
   return flattenList(value)
-    .map(cleanText)
+    .map(choiceText)
     .filter(Boolean);
 }
 
 function makeLookup(values) {
-  return new Set(values.map(compact).filter(Boolean));
+  return new Set(values.map(choiceKey).filter(Boolean));
 }
 
 const SKILL_LOOKUP = makeLookup(SKILL_NAMES);
 const LANGUAGE_LOOKUP = makeLookup(COMMON_LANGUAGES);
 
 function isAbility(value) {
-  return ABILITY_KEYS.includes(compact(value));
+  return ABILITY_KEYS.includes(choiceKey(value));
 }
 
 function isSkill(value) {
-  return SKILL_LOOKUP.has(compact(value));
+  return SKILL_LOOKUP.has(choiceKey(value));
 }
 
 function isLanguage(value) {
-  return LANGUAGE_LOOKUP.has(compact(value));
+  return LANGUAGE_LOOKUP.has(choiceKey(value));
 }
 
 function isToolLike(value) {
-  const c = compact(value);
+  const c = choiceKey(value);
   if (!c) return false;
   return (
     c.includes('tool') ||
@@ -135,13 +115,13 @@ function isToolLike(value) {
 }
 
 function isWeaponMasteryKey(key) {
-  const k = compact(key);
+  const k = choiceKey(key);
   return k.includes('weaponmastery') || (k.includes('weapon') && k.includes('mastery'));
 }
 
 // Plain weapon-proficiency choices (not mastery, which is handled above first).
 function isWeaponProficiencyKey(key) {
-  const k = compact(key);
+  const k = choiceKey(key);
   return k.includes('weapon') && !k.includes('mastery');
 }
 
@@ -151,41 +131,41 @@ function isExpertiseKey(key) {
   // abbreviated feat-granted form (..._feat_exp_..., ..._exp). Underscore
   // boundaries keep this from matching unrelated words like "export".
   if (raw.includes('expertise') || raw.includes('_exp_') || raw.endsWith('_exp')) return true;
-  const k = compact(key);
+  const k = choiceKey(key);
   return k.includes('expertise') || k.includes('expert');
 }
 
 function isSkillKey(key) {
-  const k = compact(key);
+  const k = choiceKey(key);
   return k.includes('skill') && !k.includes('spell');
 }
 
 function isToolKey(key) {
-  const k = compact(key);
+  const k = choiceKey(key);
   return k.includes('tool') || k.includes('instrument') || k.includes('kit') || k.includes('gaming') || k.includes('vehicle');
 }
 
 function isLanguageKey(key) {
-  const k = compact(key);
+  const k = choiceKey(key);
   return k.includes('language') || k.endsWith('lang') || k.includes('polyglot');
 }
 
 function isSpellChoiceKey(key) {
-  const k = compact(key);
+  const k = choiceKey(key);
   return k.includes('spell') || k.includes('cantrip') || k.includes('arcanum');
 }
 
 function isSubclassKey(key) {
-  return compact(key).startsWith('subclass');
+  return choiceKey(key).startsWith('subclass');
 }
 
 function isBackgroundKey(key) {
-  const k = compact(key);
+  const k = choiceKey(key);
   return k.startsWith('bg') || k === 'featorigin';
 }
 
 function classifyProficiencyValue(out, key, value, options = {}) {
-  const text = cleanText(value);
+  const text = choiceText(value);
   if (!text) return;
 
   const forceExpertise = Boolean(options.expertise);
@@ -240,7 +220,7 @@ function normalizeChoiceEntry(out, key, value) {
 
   if (SPELL_ABILITY_KEYS.has(key)) {
     const ability = values.find(isAbility) || values[0];
-    out.species.spellAbility = compact(ability) || null;
+    out.species.spellAbility = choiceKey(ability) || null;
     out.spells.spellAbilityChoices[key] = out.species.spellAbility;
     out.species.options[key] = out.species.spellAbility;
     return;
@@ -280,7 +260,7 @@ function normalizeChoiceEntry(out, key, value) {
 
   if (isSpellChoiceKey(key)) {
     out.spells.byKey[key] = out.rawByKey[key];
-    if (compact(key).includes('cantrip')) uniquePushMany(out.spells.cantrips, values);
+    if (choiceKey(key).includes('cantrip')) uniquePushMany(out.spells.cantrips, values);
     else uniquePushMany(out.spells.spells, values);
     out.choiceKeysByCategory.spells.push(key);
     return;

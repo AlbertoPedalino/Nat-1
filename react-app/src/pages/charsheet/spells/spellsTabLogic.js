@@ -34,6 +34,7 @@ import {
   mergeSpellSourceDisplay,
 } from './spellSourceDisplay.js';
 import { spellModifierEntities } from './spellModifiers.js';
+import { lowerKey } from '../../../shared/content/nameKeys.js';
 
 // The Spells tab's list: every spell the character has, from each source
 // (class, subclass, species, feats, items, scrolls, at-will grants), merged into
@@ -80,7 +81,7 @@ function _unionSources(a, b) {
   const seen = new Set();
   [...(a || []), ...(b || [])].forEach((src) => {
     if (!src) return;
-    const key = norm(src.originLabel || src.label || '');
+    const key = lowerKey(src.originLabel || src.label || '');
     if (!key || seen.has(key)) return;
     seen.add(key);
     out.push(src);
@@ -154,11 +155,11 @@ export function buildSpellInfo(C, spellIndex) {
   const rows = new Map();
   const lockedNames = new Set();
   const freeCastsByKey = new Map();
-  const rowKey = (spell, castLevel) => `${norm(spell.name)}|${norm(spell.source)}|${castLevel || spell.level}`;
+  const rowKey = (spell, castLevel) => `${lowerKey(spell.name)}|${lowerKey(spell.source)}|${castLevel || spell.level}`;
   const push = (name, source, locked = false, castLevel = null, fallbackLevel = 0, ownerClassName = null, spellcastingAbility = null, freeCasts = null, sources = null, grantMeta = null) => {
     const full = grantMeta?.spellSource
-      ? spellIndex.get(`${norm(name)}|${norm(grantMeta.spellSource)}`)
-      : spellIndex.get(norm(name));
+      ? spellIndex.get(`${lowerKey(name)}|${lowerKey(grantMeta.spellSource)}`)
+      : spellIndex.get(lowerKey(name));
     // Item cards require the referenced record; never substitute another edition
     // or render an unresolved reference as a level-zero spell.
     if (source?.originType === 'item' && !full) return;
@@ -187,7 +188,7 @@ export function buildSpellInfo(C, spellIndex) {
     rows.set(key, _mergeRow(existing, row, locked));
     if (locked) {
       lockedNames.add(name);
-      lockedNames.add(norm(name));
+      lockedNames.add(lowerKey(name));
     }
     if (Array.isArray(freeCasts) && freeCasts.length) {
       freeCastsByKey.set(key, mergeFreeCastsById(freeCastsByKey.get(key) || [], freeCasts));
@@ -205,9 +206,9 @@ export function buildSpellInfo(C, spellIndex) {
     });
   });
 
-  if (norm(C?.className) === 'wizard') pushWizardRitualBook(C, C.className);
+  if (lowerKey(C?.className) === 'wizard') pushWizardRitualBook(C, C.className);
   (C?.extraClasses || []).forEach((ec) => {
-    if (norm(ec?.name) === 'wizard') pushWizardRitualBook(ec, ec.name);
+    if (lowerKey(ec?.name) === 'wizard') pushWizardRitualBook(ec, ec.name);
   });
 
   collectAtWillSpells(C).forEach(({ name, source }) => push(name, source, true));
@@ -263,7 +264,7 @@ export function buildSpellInfo(C, spellIndex) {
   return { cantrips, atWill, leveled, lockedNames, freeCastDefs, lockedEntries: all.filter((entry) => entry.locked) };
 
   function pushKnown(name, level, source, ownerClassName) {
-    const full = spellIndex.get(norm(name));
+    const full = spellIndex.get(lowerKey(name));
     if (full) push(name, source, false, null, 0, ownerClassName);
     else {
       const key = rowKey({ name, level }, null);
@@ -279,8 +280,8 @@ export function buildSpellInfo(C, spellIndex) {
       const selectedAtLevel = spellLevel === 0 ? selectedCantrips : (selectedSpells[spellLevel] || selectedSpells[String(spellLevel)] || []);
       (names || []).forEach((name) => {
         if (!name) return;
-        if ((selectedAtLevel || []).some((entry) => norm(entry) === norm(name))) return;
-        const full = spellIndex.get(norm(name));
+        if ((selectedAtLevel || []).some((entry) => lowerKey(entry) === lowerKey(name))) return;
+        const full = spellIndex.get(lowerKey(name));
         if (!isRitualSpell(full)) return;
         push(name, { label: 'Ritual Book', color: SRC_COLOR.ritual, kind: 'ritualBook' }, false, null, spellLevel, ownerClassName);
       });
@@ -436,10 +437,10 @@ function _findFeatName(C, slotKey) {
   const direct = C?.choices?.[slotKey];
   if (direct && typeof direct === 'string' && !direct.startsWith('feat_')) return direct;
 
-  const norm = C?.normalizedChoices;
-  if (norm) {
+  const normalized = C?.normalizedChoices;
+  if (normalized) {
     try {
-      const byKey = norm.feats?.byKey?.[slotKey];
+      const byKey = normalized.feats?.byKey?.[slotKey];
       if (byKey && typeof byKey === 'string') return byKey;
     } catch {}
   }
@@ -450,9 +451,9 @@ function _buildFeatMetaMap(C) {
   const map = new Map();
   const choices = C?.choices || {};
   const snapshots = Array.isArray(C?.allFeatSnapshots) ? C.allFeatSnapshots : [];
-  const snapshotByName = new Map(snapshots.map((feat) => [norm(feat?.name), feat]));
+  const snapshotByName = new Map(snapshots.map((feat) => [lowerKey(feat?.name), feat]));
   const addMeta = (slotKey, name) => {
-    const snapshot = snapshotByName.get(norm(name));
+    const snapshot = snapshotByName.get(lowerKey(name));
     if (!slotKey || !snapshot || map.has(slotKey)) return;
     const abilityKey = `${slotKey}_spell_ability`;
     const ability = _normalizeAbility(
@@ -477,9 +478,9 @@ function _buildFeatMetaMap(C) {
     addMeta(slotKey, _findFeatName(C, slotKey));
   });
 
-  const mappedNames = new Set([...map.values()].map((meta) => norm(meta.name)));
+  const mappedNames = new Set([...map.values()].map((meta) => lowerKey(meta.name)));
   snapshots.forEach((snapshot, index) => {
-    if (!snapshot?.name || mappedNames.has(norm(snapshot.name))) return;
+    if (!snapshot?.name || mappedNames.has(lowerKey(snapshot.name))) return;
     map.set(`feat_snapshot_${index}`, { name: snapshot.name, ability: null, snapshot });
   });
   return map;
@@ -584,12 +585,12 @@ function collectChoiceSpells(C, spellIndex) {
       if (typeof entry !== 'string') return;
       const name = entry.split('|')[0].trim();
       if (!name) return;
-      if (!spellIndex.has(norm(name)) && !/(spell|cantrip|tome|magical|known|prepared|innate|expanded)/i.test(key)) return;
-      if (['str', 'dex', 'con', 'int', 'wis', 'cha'].includes(norm(name))) return;
+      if (!spellIndex.has(lowerKey(name)) && !/(spell|cantrip|tome|magical|known|prepared|innate|expanded)/i.test(key)) return;
+      if (['str', 'dex', 'con', 'int', 'wis', 'cha'].includes(lowerKey(name))) return;
       const slotKey = _getSlotKey(C, key);
       const meta = slotKey ? featMetaMap.get(slotKey) : null;
       const ownerClassName = _ownerClassFromChoiceKey(C, key);
-      const spellLevelInfo = spellIndex.get(norm(name));
+      const spellLevelInfo = spellIndex.get(lowerKey(name));
       const isCantrip = Number(spellLevelInfo?.level || 0) === 0 || _choiceKeyIsCantripChoice(key);
       if (meta) {
         const featTpl = getFeatFreeCastTemplate(meta.name, { isCantrip });
@@ -655,7 +656,7 @@ function collectAutoGrantedSpells(C) {
   // a Forest Gnome Druid's Speak with Animals — keeps all its source tags.
   const runtimeByName = new Map();
   runtimeOut.forEach((entry) => {
-    const key = norm(entry.name);
+    const key = lowerKey(entry.name);
     if (!key) return;
     const existing = runtimeByName.get(key);
     if (existing) {
@@ -673,13 +674,13 @@ function collectAutoGrantedSpells(C) {
 
   (C?.autoGrantedSpells || []).forEach((entry) => {
     if (!entry?.name) return;
-    const key = norm(entry.name);
+    const key = lowerKey(entry.name);
     if (runtimeByName.has(key)) return;
     // Check invocation requirement from runtime config before falling back to saved data
     const ownerClass = entry.ownerClassName || C?.className;
     const cfg = ownerClass ? installedRegistry.getClassRuntimeConfig(ownerClass)?.spellcasting : null;
     const allCfgSpells = [...(cfg?.alwaysKnownSpells || []), ...(cfg?.alwaysPreparedSpells || [])];
-    const cfgEntry = allCfgSpells.find((s) => norm(s?.name || '') === key);
+    const cfgEntry = allCfgSpells.find((s) => lowerKey(s?.name || '') === key);
     if (cfgEntry && !isGrantUnlocked(cfgEntry, C)) return;
     const fallbackSource = { label: entry.source || 'Auto', color: SRC_COLOR[entry.sourceType] || SRC_COLOR.granted, originType: entry.sourceType || 'auto_granted', originLabel: entry.source || 'Auto' };
     runtimeByName.set(key, {
@@ -784,7 +785,7 @@ export function normalizeWizardBook(book) {
     next[level] = [];
     (book?.[level] || []).forEach((entry) => {
       const name = typeof entry === 'string' ? entry : entry?.name;
-      const key = norm(name);
+      const key = lowerKey(name);
       if (!key || seen.has(key)) return;
       seen.add(key);
       next[level].push(name);
@@ -828,7 +829,7 @@ export function getSpellAbilityForEntry(C, entry = {}) {
 const _PREP_CFG_CACHE = new Map();
 function _getPrepMode(className) {
   if (!className) return null;
-  const key = norm(className);
+  const key = lowerKey(className);
   let mode = _PREP_CFG_CACHE.get(key);
   if (mode === undefined) {
     try {
@@ -975,7 +976,7 @@ export function toSnapshot(spell) {
 }
 
 export function upsertSnapshot(snapshots, snapshot) {
-  const idx = snapshots.findIndex((entry) => norm(entry.name) === norm(snapshot.name));
+  const idx = snapshots.findIndex((entry) => lowerKey(entry.name) === lowerKey(snapshot.name));
   if (idx >= 0) return snapshots.map((entry, index) => (index === idx ? { ...entry, ...snapshot } : entry));
   return [...snapshots, snapshot];
 }
@@ -987,13 +988,10 @@ function sortByName(a, b) {
 export function dedupeSpells(spells) {
   const seen = new Set();
   return (spells || []).filter((spell) => {
-    const key = norm(spell?.name);
+    const key = lowerKey(spell?.name);
     if (!key || seen.has(key)) return false;
     seen.add(key);
     return true;
   });
 }
 
-export function norm(value) {
-  return String(value || '').toLowerCase();
-}

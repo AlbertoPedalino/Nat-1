@@ -10,10 +10,7 @@ import {
 } from './featPrerequisiteRules.js';
 import { buildPreviewSheetCharacter } from '../preview/previewSheet.js';
 import { asArray } from '../../../shared/lists.js';
-
-function norm(value) {
-  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-}
+import { matchKey } from '../../../shared/content/nameKeys.js';
 
 function featCategories(feat) {
   return asArray(feat?.categories?.length ? feat.categories : feat?.category)
@@ -41,7 +38,7 @@ function collectFeatureNames(character, slotCategories) {
   const addAvailable = (features, level) => {
     (features || []).forEach((feature) => {
       if ((Number(feature?.level) || 0) > level) return;
-      const name = norm(feature?.name);
+      const name = matchKey(feature?.name);
       if (name) names.add(name);
     });
   };
@@ -74,18 +71,18 @@ function hasArmorTraining(equipmentSets, armor) {
     heavy: 'HA',
     shield: 'S',
     shields: 'S',
-  }[norm(armor)];
+  }[matchKey(armor)];
   return !!code && armorSetTrainsKind(equipmentSets.armorSet, ARMOR_KIND_KEYS[code]);
 }
 
 function hasWeaponGroup(equipmentSets, items, group) {
-  const wanted = norm(group);
+  const wanted = matchKey(group);
   if (!wanted) return false;
   if (equipmentSets.weaponRules.some((rule) => (
-    Object.keys(rule).length === 0 || norm(rule.category) === wanted
+    Object.keys(rule).length === 0 || matchKey(rule.category) === wanted
   ))) return true;
   return (items || []).some((item) => (
-    norm(getWeaponCategory(item)) === wanted
+    matchKey(getWeaponCategory(item)) === wanted
     && equipmentSets.weaponRules.some((rule) => weaponMatchesRule(item, rule))
   ));
 }
@@ -98,10 +95,10 @@ export function buildFeatPrerequisiteContext({
   slotCategories = [],
 }) {
   const baseCharacter = characterWithoutFeatChoiceSlot(character || {}, slotKey);
-  const ownedFeatNames = new Set(collectOwnedFeatNames(baseCharacter).map(norm));
+  const ownedFeatNames = new Set(collectOwnedFeatNames(baseCharacter).map(matchKey));
   const ownedCategories = new Set();
   (feats || []).forEach((feat) => {
-    if (!ownedFeatNames.has(norm(feat?.name))) return;
+    if (!ownedFeatNames.has(matchKey(feat?.name))) return;
     featCategories(feat).forEach((category) => ownedCategories.add(category));
   });
   const sheetCharacter = buildPreviewSheetCharacter(baseCharacter);
@@ -120,7 +117,7 @@ export function buildFeatPrerequisiteContext({
     hasArmorTraining: (armor) => hasArmorTraining(equipmentSets, armor),
     hasWeaponGroup: (group) => hasWeaponGroup(equipmentSets, items, group),
     hasFeature: (value) => {
-      const feature = norm(value);
+      const feature = matchKey(value);
       if (feature === 'spellcasting') return hasSpellcasting;
       if (feature === 'pactmagic') return hasPactMagic;
       return featureNames.has(feature);

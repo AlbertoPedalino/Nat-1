@@ -25,10 +25,10 @@
 import { itemDisplayName, itemIdentityKey } from './itemIdentity.js';
 import { primaryClassLevel } from '../progression/classLevel.js';
 import { itemHasProperty } from './weaponProperties.js';
+import { stripSource } from '../../content/nameKeys.js';
 
-const norm = (value) => String(value || '').split('|')[0];
 const lc = (value) => String(value || '').toLowerCase();
-const typeOf = (item) => norm(item?.type).toUpperCase();
+const typeOf = (item) => stripSource(item?.type).toUpperCase();
 
 // 5etools type codes excluded from the Common bucket.
 const POTION = 'P';
@@ -67,7 +67,7 @@ function rarityFilter({ rarity, wondrousOnly = false, excludeTypes = [], exclude
   return (item) => {
     if (lc(item.rarity) !== rarity) return false;
     if (wondrousOnly && !item.wondrous) return false;
-    if (excluded.has(norm(item.type))) return false;
+    if (excluded.has(stripSource(item.type))) return false;
     if (excludeCursed && item.curse === true) return false;
     return true;
   };

@@ -1,10 +1,7 @@
 import { collectSheetEffects } from '../../../pages/charsheet/state/sheetEffects.js';
 import { getAllResourceDefs } from '../../../pages/charsheet/resources/restResources.js';
 import { primaryClassLevel } from '../progression/classLevel.js';
-
-function norm(value) {
-  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-}
+import { matchKey } from '../../content/nameKeys.js';
 
 function buildResourceLabelMap(character) {
   const map = {};
@@ -24,7 +21,7 @@ export function resolveInitiativeTriggeredResourceRecoveries(character, resource
   let modified = false;
 
   effects.forEach((effect) => {
-    if (norm(effect.type) !== 'initiativerecovery') return;
+    if (matchKey(effect.type) !== 'initiativerecovery') return;
     if (primaryClassLevel(character) < Number(effect.minLevel || 1)) return;
     const resourceKey = effect.resourceKey;
     if (!resourceKey) return;
@@ -62,7 +59,7 @@ export function applyInitiativeTriggeredResourceRecoveries(character, resources,
 export function collectInitiativeRecoveryEffects(character) {
   if (!character) return [];
   return collectSheetEffects(character).filter((effect) => {
-    if (norm(effect.type) !== 'initiativerecovery') return false;
+    if (matchKey(effect.type) !== 'initiativerecovery') return false;
     if (primaryClassLevel(character) < Number(effect.minLevel || 1)) return false;
     return true;
   });
