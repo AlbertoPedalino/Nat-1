@@ -1,4 +1,5 @@
 import { listCharacters, renameCharacter } from '../character/profile/store.js';
+import { NEW_CHARACTER, characterBuilderPath, characterSheetPath } from '../character/profile/characterRoutes.js';
 
 // Character registry metadata for the library and home pages. Tool instances
 // (GM Board, Encounter Builder, DM Screen) have their own store:
@@ -6,8 +7,8 @@ import { listCharacters, renameCharacter } from '../character/profile/store.js';
 export const REGISTRY_META = Object.freeze({
   gb_char_registry: {
     label: 'Character',
-    route: (id) => `/charsheet?char=${encodeURIComponent(id)}`,
-    newRoute: '/charbuilder?char=new',
+    route: characterSheetPath,
+    newRoute: characterBuilderPath(NEW_CHARACTER),
     custom: true,
   },
 });

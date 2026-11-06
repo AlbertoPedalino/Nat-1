@@ -21,6 +21,7 @@ import { getActiveCharId } from '../../../shared/character/profile/store.js';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { NEW_CHARACTER, characterBuilderPath } from '../../../shared/character/profile/characterRoutes.js';
 
 function cleanFormula(detail) {
   if (!detail) return '';
@@ -143,8 +144,8 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
                   // or wrong builder). C.id covers chars whose id lives in the data.
                   const targetId = charId || C?.id
                     || params.get('char') || params.get('id')
-                    || getActiveCharId() || 'new';
-                  navigate(`/charbuilder?char=${encodeURIComponent(targetId)}`);
+                    || getActiveCharId() || NEW_CHARACTER;
+                  navigate(characterBuilderPath(targetId));
                 }}
                 sx={appNavButtonSx}>
                 Builder

@@ -375,3 +375,11 @@ test('a value-or-list is wrapped only by asArray', () => {
     allow: ['shared/lists.js'],
   }), []);
 });
+
+// The `?char=` of the sheet and the builder is read, written and linked
+// through shared/character/profile/characterRoutes.js.
+test('character page links and the ?char= param go through characterRoutes.js', () => {
+  assert.deepEqual(sourceLinesMatching(/\?char=\$\{|['"`]\/(charsheet|charbuilder)\?char=|\.get\(['"]char['"]\) \|\| getActive|URLSearchParams\(window\.location\.search\)\.get\(['"]char['"]\)/, {
+    allow: ['shared/character/profile/characterRoutes.js'],
+  }), []);
+});

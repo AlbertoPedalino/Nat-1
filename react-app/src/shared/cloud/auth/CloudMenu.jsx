@@ -10,13 +10,14 @@ import { useToast } from '../../ui/ToastProvider.jsx';
 import { UI_COLORS } from '../../ui/colors.js';
 import { UI_FONTS } from '../../ui/fonts.js';
 import { useEventListener } from '../../ui/useEventListener.js';
+import { characterIdFromUrl } from '../../character/profile/characterRoutes.js';
 
 // The "active sheet" for the cloud menu is the one in the URL (builder/charsheet
 // ?char=…). We deliberately do NOT fall back to localStorage's gb:active_char:
 // that id is stale on pages with no sheet (e.g. Home), which made the upload
 // option wrongly appear there.
 function resolveActiveCharId() {
-  const fromUrl = new URLSearchParams(window.location.search).get('char');
+  const fromUrl = characterIdFromUrl();
   return (fromUrl && fromUrl !== 'new') ? fromUrl : null;
 }
 

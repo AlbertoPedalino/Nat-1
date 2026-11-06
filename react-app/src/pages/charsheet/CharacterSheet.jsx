@@ -46,11 +46,12 @@ import {
   patchCharacter as storePatchCharacter,
   setActiveCharId,
 } from '../../shared/character/profile/store.js';
+import { characterIdFromUrl } from '../../shared/character/profile/characterRoutes.js';
 
 const noopEffect = () => {};
 
 function getCharIdFromUrl() {
-  return new URLSearchParams(window.location.search).get('char') || getActiveCharId();
+  return characterIdFromUrl() || getActiveCharId();
 }
 
 const EMBEDDED_SHEET_GRID = {

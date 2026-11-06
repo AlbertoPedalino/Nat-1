@@ -58,6 +58,7 @@ import { confirmAction } from '../../shared/ui/confirmAction.js';
 import { useEventListener } from '../../shared/ui/useEventListener.js';
 import { UI_COLORS, uiAlpha } from '../../shared/ui/colors.js';
 import { UI_FONTS } from '../../shared/ui/fonts.js';
+import { NEW_CHARACTER, characterIdFromUrl, replaceCharacterIdInUrl } from '../../shared/character/profile/characterRoutes.js';
 
 function StepLabel({ step, index }) {
   const Icon = step.icon;
@@ -91,9 +92,8 @@ function ActiveStep({ state, dispatch, sheetProps }) {
 }
 
 function createInitialBuilderState() {
-  const params = new URLSearchParams(window.location.search);
-  const charParam = params.get('char');
-  if (charParam === 'new') return initialBuilderState;
+  const charParam = characterIdFromUrl();
+  if (charParam === NEW_CHARACTER) return initialBuilderState;
   const targetId = (charParam && charParam !== 'new') ? charParam : getActiveCharId();
   if (!targetId) return initialBuilderState;
   const stored = storeLoadCharacter(targetId);
@@ -105,8 +105,7 @@ function createInitialBuilderState() {
 }
 
 function ensureActiveCharacter() {
-  const params = new URLSearchParams(window.location.search);
-  const charParam = params.get('char');
+  const charParam = characterIdFromUrl();
 
   if (charParam === 'new') {
     setActiveCharId(null);
@@ -261,7 +260,7 @@ export default function CharBuilder() {
       if (!result) return null;
       includeInSync(id);
       setImportDraft(false);
-      window.history.replaceState(null, '', `${window.location.pathname}?char=${id}`);
+      replaceCharacterIdInUrl(id);
       notify('success', 'Uploaded to cloud.');
       return id;
     } catch (error) {
@@ -280,7 +279,7 @@ export default function CharBuilder() {
     cloudPrevRef.current = null;
     sheetRevisionRef.current = null;
     setImportDraft(false);
-    window.history.replaceState(null, '', `${window.location.pathname}?char=${id}`);
+    replaceCharacterIdInUrl(id);
   };
 
   const handleImportSheetFile = async (file) => {
@@ -310,7 +309,7 @@ export default function CharBuilder() {
       sheetRevisionRef.current = null;
       setImportDraft(true);
       dispatch({ type: 'character/restore', character });
-      window.history.replaceState(null, '', `${window.location.pathname}?char=new`);
+      replaceCharacterIdInUrl(NEW_CHARACTER);
       notify('success', 'Imported. Save local or upload to cloud from the Sheet step.');
     } catch (error) {
       notify('error', `Import error: ${error?.message || error}`);
@@ -319,7 +318,7 @@ export default function CharBuilder() {
 
   useEffect(() => {
     if (!authResolved || hydratedRef.current) return;
-    const charParam = new URLSearchParams(window.location.search).get('char');
+    const charParam = characterIdFromUrl();
     const excluded = charParam && charParam !== 'new' && isSyncExcluded(charParam);
 
     if (!cloudActive || excluded) {
@@ -420,7 +419,7 @@ export default function CharBuilder() {
         if (!builderIdRef.current) {
           builderIdRef.current = generateCharId();
           // Point the URL at the new id so a reload/edit targets the same character.
-          window.history.replaceState(null, '', `${window.location.pathname}?char=${builderIdRef.current}`);
+          replaceCharacterIdInUrl(builderIdRef.current);
         }
         saveToCloud().catch((error) => reportCloudError(error, 'Cloud save error'));
         return;
@@ -430,7 +429,7 @@ export default function CharBuilder() {
       const hadId = getActiveCharId();
       const saved = saveCharacter(state.character, state.data, { createIfMissing: true });
       if (saved?.id && !hadId) {
-        window.history.replaceState(null, '', `${window.location.pathname}?char=${saved.id}`);
+        replaceCharacterIdInUrl(saved.id);
       }
     }, cloudActive ? 1200 : 300);
     return () => clearTimeout(handle);

@@ -7,9 +7,10 @@ import { downloadCharacterExport } from '../../../shared/character/profile/chara
 import { getActiveCharId } from '../../../shared/character/profile/store.js';
 import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
+import { characterIdFromUrl, characterSheetPath } from '../../../shared/character/profile/characterRoutes.js';
 
 function charIdFromUrl() {
-  const id = new URLSearchParams(window.location.search).get('char');
+  const id = characterIdFromUrl();
   return id && id !== 'new' ? id : null;
 }
 
@@ -115,7 +116,7 @@ export default function SheetStep({ state, dispatch, importDraft = false, onUplo
                 const saved = saveCharacter(character, state.data);
                 if (saved?.id && importDraft) onDraftLocalSaved?.(saved.id);
                 const charId = saved?.id || getActiveCharId();
-                navigate(charId ? `/charsheet?char=${encodeURIComponent(charId)}` : '/charsheet');
+                navigate(characterSheetPath(charId));
               }}
             >
               Open sheet
