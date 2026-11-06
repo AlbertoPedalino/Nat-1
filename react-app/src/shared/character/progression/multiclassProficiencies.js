@@ -1,4 +1,4 @@
-import { strip5eMarkup } from '../spells/spellEntries.js';
+import { strip5eMarkup } from '../../content/entryText.js';
 import { matchKey } from '../../content/nameKeys.js';
 import { MUSICAL_INSTRUMENTS } from '../../content/rulesVocabulary.js';
 

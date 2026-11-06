@@ -10,7 +10,7 @@ import { registerChoiceLevelMap } from '../../../shared/character/progression/ch
 import {
   buildOptionalFeatureEntryLookup,
 } from '../../../shared/character/progression/optionalFeatures.js';
-import { entriesToPlainText } from '../../../shared/character/spells/spellEntries.js';
+import { entriesToPlainText } from '../../../shared/content/entryText.js';
 import { matchKey, stripSource } from '../../../shared/content/nameKeys.js';
 import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
 import { pactSlots } from '../../../shared/character/spells/casterProgression.js';

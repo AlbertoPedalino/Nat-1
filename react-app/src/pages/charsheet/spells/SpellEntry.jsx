@@ -21,7 +21,7 @@ import { formatRollTitle } from '../../../shared/character/dice/dice.js';
 import { getFinal, getMod } from '../../../shared/character/sheet/sheetStats.js';
 import { describeAttackRoll } from '../../../shared/character/combat/conditions.js';
 import { getSpellAttackAdvantage } from '../../../shared/character/sheet/effectBonuses.js';
-import { entriesToTextBlocks } from '../../../shared/character/spells/spellEntries.js';
+import { entriesToTextBlocks } from '../../../shared/content/entryText.js';
 import { getCastBadge, getSpellStatusChips } from './spellBadges.js';
 import { getSpellAbilityForEntry } from './spellAbility.js';
 import {

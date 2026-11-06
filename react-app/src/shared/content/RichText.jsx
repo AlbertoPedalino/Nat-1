@@ -1,5 +1,5 @@
 import { Box, Typography } from '@mui/material';
-import { tokenizeInlineMarkup } from '../character/spells/spellEntries.js';
+import { tokenizeInlineMarkup } from './entryText.js';
 import { RICH_TEXT_ACCENT } from '../ui/entityColors.js';
 
 function renderTokens(tokens, keyPrefix, { strongColor, refColor } = {}) {

@@ -2,7 +2,7 @@ import { Fragment } from 'react';
 import { alpha, Box, Button, Typography } from '@mui/material';
 import { EntryBlocks } from '../../content/EntryBlocks.jsx';
 import { RichInline } from '../../content/RichText.jsx';
-import { entriesToHigherLevelBlocks } from './spellEntries.js';
+import { entriesToHigherLevelBlocks } from '../../content/entryText.js';
 import { getSpellMetaSegments } from './spellMeta.js';
 import { isConcentrationSpell, isRitualSpell } from './spellTags.js';
 import { RICH_TEXT_ACCENT, SPELL_TAG_COLORS } from '../../ui/entityColors.js';

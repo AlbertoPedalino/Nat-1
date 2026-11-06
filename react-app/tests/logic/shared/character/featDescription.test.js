@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { featDescriptionEntries, featNamedEntries } from '../../../../src/shared/character/progression/featDescription.js';
-import { entriesToTextBlocks } from '../../../../src/shared/character/spells/spellEntries.js';
+import { entriesToTextBlocks } from '../../../../src/shared/content/entryText.js';
 
 const textOf = (feat) => entriesToTextBlocks(featDescriptionEntries(feat)).map((block) => block.text).join('\n');
 const allAbilities = ['str', 'dex', 'con', 'int', 'wis', 'cha'];

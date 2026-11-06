@@ -1,6 +1,6 @@
 import { Box, Stack, Typography } from '@mui/material';
 import { RichInline } from './RichText.jsx';
-import { entriesToTextBlocks } from '../character/spells/spellEntries.js';
+import { entriesToTextBlocks } from './entryText.js';
 import { RICH_TEXT_ACCENT } from '../ui/entityColors.js';
 
 function groupBlocks(blocks) {

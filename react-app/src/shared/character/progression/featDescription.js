@@ -1,4 +1,4 @@
-import { entriesToTextBlocks } from '../spells/spellEntries.js';
+import { entriesToTextBlocks } from '../../content/entryText.js';
 import { matchKey } from '../../content/nameKeys.js';
 import { ABILITY_NAMES } from '../../content/rulesVocabulary.js';
 import { asArray } from '../../lists.js';

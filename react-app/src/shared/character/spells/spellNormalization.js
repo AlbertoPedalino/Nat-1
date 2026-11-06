@@ -1,4 +1,4 @@
-import { strip5eMarkup } from './spellEntries.js';
+import { strip5eMarkup } from '../../content/entryText.js';
 import { SPELL_SOURCE_PRIORITY, sourceRank } from '../../content/sourcePriority.js';
 import { asArray } from '../../lists.js';
 import { matchKey } from '../../content/nameKeys.js';

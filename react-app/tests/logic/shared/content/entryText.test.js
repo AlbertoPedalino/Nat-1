@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { strip5eMarkup } from '../../../../../src/shared/character/spells/spellEntries.js';
+import { strip5eMarkup } from '../../../../src/shared/content/entryText.js';
 
 test('2024 stat block labels and nested tags read as words', () => {
   assert.equal(strip5eMarkup('{@atkr m} {@hit 4}, reach 5 ft. {@h}5 ({@damage 1d6 + 2}) Slashing damage.'),

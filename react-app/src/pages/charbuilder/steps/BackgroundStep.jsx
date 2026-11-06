@@ -9,7 +9,7 @@ import { backgroundChoiceSpecs, fixedKeysFromBlocks } from '../choices/choiceSpe
 import { NEUTRAL_TONE } from '../../../shared/ui/entityColors.js';
 import { backgroundOriginFeat } from '../../../shared/character/progression/selectedFeats.js';
 import { backgroundFeatOptionLabel } from '../../../shared/character/progression/backgroundFeatOptions.js';
-import { strip5eMarkup } from '../../../shared/character/spells/spellEntries.js';
+import { strip5eMarkup } from '../../../shared/content/entryText.js';
 import { titleCase } from '../../../shared/ui/textCase.js';
 import { backgroundAbilityBonus } from '../../../shared/character/progression/abilityScores.js';
 import { ABILITY_ABBREVIATIONS } from '../../../shared/content/rulesVocabulary.js';

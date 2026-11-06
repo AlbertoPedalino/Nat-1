@@ -1,5 +1,5 @@
 import { loadGameData } from '../../content/gameData.js';
-import { strip5eMarkup } from '../spells/spellEntries.js';
+import { strip5eMarkup } from '../../content/entryText.js';
 import { rollDie } from './dice.js';
 
 // Tables a feature rolls on (Wild Magic Surge), read from the 5etools data

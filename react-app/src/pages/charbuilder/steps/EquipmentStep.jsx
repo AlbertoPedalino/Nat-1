@@ -9,7 +9,7 @@ import { CurrencyRow } from '../../../shared/character/inventory/CurrencyCoinBox
 import { findInventoryItem } from '../../../shared/character/inventory/itemContainers.js';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import { ItemReferenceBody, QuantityAdder } from '../../../shared/character/inventory/ItemReference.jsx';
-import { strip5eMarkup } from '../../../shared/character/spells/spellEntries.js';
+import { strip5eMarkup } from '../../../shared/content/entryText.js';
 import { formatWeight, totalCarriedWeight } from '../../../shared/character/inventory/weight.js';
 import ItemFilterPanel from '../../../shared/character/inventory/ItemFilterPanel.jsx';
 import { itemMatchesFilters } from '../../../shared/character/inventory/itemFilters.js';

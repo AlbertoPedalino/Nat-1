@@ -5,7 +5,7 @@ import { warlockInvocationSelections } from '../../../shared/character/progressi
 import { buildOptionalFeatureEntryLookup } from '../../../shared/character/progression/optionalFeatures.js';
 import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
 import { EntryBlocks } from '../../../shared/content/EntryBlocks.jsx';
-import { entriesToTextBlocks } from '../../../shared/character/spells/spellEntries.js';
+import { entriesToTextBlocks } from '../../../shared/content/entryText.js';
 import { backgroundFeatNames } from '../../../shared/character/progression/selectedFeats.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { featDescriptionEntries } from '../../../shared/character/progression/featDescription.js';

@@ -55,7 +55,7 @@ test('a name without its source comes from stripSource', () => {
       'shared/content/nameKeys.js',
       'shared/bestiary/markup.js',
       'shared/character/forms/beasts.js',
-      'shared/character/spells/spellEntries.js',
+      'shared/content/entryText.js',
       'pages/charbuilder/choices/choiceSpecs.js',
     ] },
   ), []);

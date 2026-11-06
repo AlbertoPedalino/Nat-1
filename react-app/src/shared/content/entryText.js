@@ -1,6 +1,6 @@
-import { signed } from '../../ui/numberFormat.js';
-import { asArray } from '../../lists.js';
-import { statBlockTagText } from '../../content/statBlockTags.js';
+import { signed } from '../ui/numberFormat.js';
+import { asArray } from '../lists.js';
+import { statBlockTagText } from './statBlockTags.js';
 
 function pickTagDisplay(tag, rawValue) {
   const parts = String(rawValue || '').split('|').map((part) => part.trim()).filter(Boolean);
