@@ -3,7 +3,7 @@ import { getFinal as getFinalScore, getMod as getAbilityMod } from '../../../sha
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
-import { ABILITIES } from '../../../shared/content/rulesVocabulary.js';
+import { ABILITIES, SPELL_SCHOOL_NAMES } from '../../../shared/content/rulesVocabulary.js';
 
 // What the character's features change on a spell row, registered by the
 // adapters: riders (extra rollers, tags, text), spell modifiers (flat damage or
@@ -100,22 +100,11 @@ export function spellModifierEntities(C) {
   return out.filter((entry) => entry.className);
 }
 
-const SCHOOL_ALIASES = {
-  A: 'abjuration',
-  C: 'conjuration',
-  D: 'divination',
-  E: 'enchantment',
-  V: 'evocation',
-  I: 'illusion',
-  N: 'necromancy',
-  T: 'transmutation',
-};
-
 function normalizeSpellSchool(value) {
   const raw = String(value || '').trim();
   if (!raw) return '';
   const upper = raw.toUpperCase();
-  return SCHOOL_ALIASES[upper] || raw.toLowerCase();
+  return (SPELL_SCHOOL_NAMES[upper] || raw).toLowerCase();
 }
 
 function schoolMatches(spellSchool, modifierSchool) {
