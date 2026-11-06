@@ -1,3 +1,4 @@
+import { currentUser } from '../cloud/cloudCall.js';
 // The only Supabase path for tool instances (tables `boards`, `encounters`,
 // `dm_screens`; rows are owner-only by RLS).
 //
@@ -11,13 +12,6 @@
 
 const META_COLUMNS = 'id, name, link_group_id, version, updated_at';
 const ROW_COLUMNS = 'id, name, link_group_id, data, version, updated_at';
-
-export async function currentUser(client) {
-  const { data, error } = await client.auth.getUser();
-  if (error) throw error;
-  if (!data?.user) throw new Error('Not signed in.');
-  return data.user;
-}
 
 // Postgres unique_violation: the id already has a row.
 function isDuplicate(error) {

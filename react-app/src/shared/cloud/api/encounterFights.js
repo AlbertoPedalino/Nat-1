@@ -5,6 +5,7 @@ import {
   toFightEntry,
   toFightRow,
 } from '../../encounter/fightRecord.js';
+import { CLOUD_COMMAND_TIMEOUT_MS, currentUser, withTimeout } from '../cloudCall.js';
 
 // Fights, as rows.
 //
@@ -61,11 +62,9 @@ export async function listInstanceFightsByIds(instanceId, ids) {
 // the same statement.
 export async function saveInstanceFight(instanceId, entry) {
   const client = requireClient();
-  const { data: auth, error: authError } = await client.auth.getUser();
-  if (authError) throw authError;
-  if (!auth?.user) throw new Error('Not signed in.');
+  const user = await currentUser(client);
 
-  const row = toFightRow(instanceId, auth.user.id, entry);
+  const row = toFightRow(instanceId, user.id, entry);
   if (!row) return null;
   const { error } = await client.from('encounter_fights').upsert(row, { onConflict: 'id' });
   if (error) throw error;
@@ -109,7 +108,7 @@ export async function listFightRevisions(fightIds) {
   return data || [];
 }
 
-export const FIGHT_VITALS_TIMEOUT_MS = 8_000;
+export const FIGHT_VITALS_TIMEOUT_MS = CLOUD_COMMAND_TIMEOUT_MS;
 export const FIGHT_UNAVAILABLE = 'FIGHT_UNAVAILABLE';
 export const FIGHT_TIMEOUT = 'FIGHT_TIMEOUT';
 
@@ -122,12 +121,6 @@ export const FIGHT_TIMEOUT = 'FIGHT_TIMEOUT';
 export async function commitFightCombatantVitals(fightId, combatantId, { base = null, patch }, {
   timeoutMs = FIGHT_VITALS_TIMEOUT_MS,
 } = {}) {
-  let timer;
-  const timeout = new Promise((_, reject) => {
-    timer = setTimeout(() => {
-      reject(Object.assign(new Error('Enemy health update timed out.'), { code: FIGHT_TIMEOUT }));
-    }, timeoutMs);
-  });
   const request = Promise.resolve(requireClient().rpc('commit_fight_combatant_vitals', {
     p_fight_id: String(fightId),
     p_combatant_id: String(combatantId),
@@ -142,11 +135,7 @@ export async function commitFightCombatantVitals(fightId, combatantId, { base = 
     }
     return { applied: Boolean(data?.applied), row: data?.row || null };
   });
-  try {
-    return await Promise.race([request, timeout]);
-  } finally {
-    clearTimeout(timer);
-  }
+  return withTimeout(request, timeoutMs, 'Enemy health update', FIGHT_TIMEOUT);
 }
 
 // The GM's next (1) or previous (-1) turn, from the battle map. `base` is the
@@ -154,12 +143,6 @@ export async function commitFightCombatantVitals(fightId, combatantId, { base = 
 // moves nothing if the fight has moved on and returns the current row instead.
 // Resolves to { applied, row }. Nothing here retries.
 export async function commitFightTurn(fightId, base, step, { timeoutMs = FIGHT_VITALS_TIMEOUT_MS } = {}) {
-  let timer;
-  const timeout = new Promise((_, reject) => {
-    timer = setTimeout(() => {
-      reject(Object.assign(new Error('Turn change timed out.'), { code: FIGHT_TIMEOUT }));
-    }, timeoutMs);
-  });
   const request = Promise.resolve(requireClient().rpc('commit_fight_turn', {
     p_fight_id: String(fightId),
     p_base: base || null,
@@ -173,11 +156,7 @@ export async function commitFightTurn(fightId, base, step, { timeoutMs = FIGHT_V
     }
     return { applied: Boolean(data?.applied), row: data?.row || null };
   });
-  try {
-    return await Promise.race([request, timeout]);
-  } finally {
-    clearTimeout(timer);
-  }
+  return withTimeout(request, timeoutMs, 'Turn change', FIGHT_TIMEOUT);
 }
 
 export async function deleteInstanceFight(fightId) {

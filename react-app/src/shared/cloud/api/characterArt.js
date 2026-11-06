@@ -1,5 +1,5 @@
 import { requireClient, supabase } from '../supabaseClient.js';
-import { currentUser, getCharacterOwner } from './cloudCharacters.js';
+import { getCharacterOwner } from './cloudCharacters.js';
 import {
   PORTRAIT_SIZE,
   forgetPortrait,
@@ -8,6 +8,7 @@ import {
   readPortrait,
   writePortrait,
 } from '../../character/profile/portrait.js';
+import { currentUser } from '../cloudCall.js';
 
 // A character's portrait, from the file the player picked to the picture every
 // screen shows.
@@ -61,7 +62,7 @@ async function downscale(file) {
 export async function uploadPortrait(characterId, file) {
   if (!isSupportedPortrait(file)) throw new Error('Pick an image file under 12 MB.');
   const client = requireClient();
-  const user = await currentUser();
+  const user = await currentUser(client);
   // The owner's folder, so the old portrait the sheet replaces is in the same
   // folder whoever uploads the new one — and either of them can remove it. A
   // character not yet in the cloud will be the uploader's when it gets there.

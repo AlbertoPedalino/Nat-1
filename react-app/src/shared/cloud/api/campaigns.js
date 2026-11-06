@@ -1,5 +1,6 @@
 import { requireClient } from '../supabaseClient.js';
 import { deleteCampaignMapImages } from './vttMapImages.js';
+import { currentUser } from '../cloudCall.js';
 
 // Create a campaign — caller becomes its GM and gets a unique invite code.
 export async function createCampaign(name) {
@@ -75,12 +76,11 @@ export async function deleteCampaign(campaignId) {
 
 export async function leaveCampaign(campaignId) {
   const supabase = requireClient();
-  const { data: u } = await supabase.auth.getUser();
-  const uid = u?.user?.id;
+  const user = await currentUser(supabase);
   const { error } = await supabase
     .from('campaign_members')
     .delete()
     .eq('campaign_id', campaignId)
-    .eq('user_id', uid);
+    .eq('user_id', user.id);
   if (error) throw error;
 }

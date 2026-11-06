@@ -10,6 +10,7 @@ import { publishCharacterSheetSaved, publishCharacterVitals, requestCharacterRec
 import { tagSync } from '../sync/syncDiagnostics.js';
 import { listCharacterDigests } from './characterDigests.js';
 import { healthCommandRoute } from './healthCommandRoute.js';
+import { CLOUD_COMMAND_TIMEOUT_MS, currentUser, withTimeout } from '../cloudCall.js';
 
 const TABLE = 'characters';
 
@@ -21,14 +22,6 @@ function sheetData(character) {
 
 // Exported because a portrait's address begins with the owner's id, which is
 // what the storage policies key on.
-export async function currentUser() {
-  const supabase = requireClient();
-  const { data, error } = await supabase.auth.getUser();
-  if (error) throw error;
-  const user = data?.user;
-  if (!user) throw new Error('Not signed in.');
-  return user;
-}
 
 async function getCloudOwner(supabase, charId) {
   const { data, error } = await supabase
@@ -99,7 +92,7 @@ function saved(charId, sheetRevision) {
 // chooses a version. A missing row is created.
 export async function pushCharacter(charId) {
   const supabase = requireClient();
-  const user = await currentUser();
+  const user = await currentUser(requireClient());
   const local = storeLoadCharacter(charId);
   if (!local) throw new Error('Character not found locally.');
   const { sheetRevision: expected, editVersion } = getCharacterSyncMeta(charId);
@@ -198,7 +191,7 @@ export async function updateCloudCharacterData(charId, character, { expectedShee
   return saved(charId, sheetRevision);
 }
 
-export const HEALTH_COMMAND_TIMEOUT_MS = 8_000;
+export const HEALTH_COMMAND_TIMEOUT_MS = CLOUD_COMMAND_TIMEOUT_MS;
 export const HEALTH_CONFLICT = 'HEALTH_CONFLICT';
 export const HEALTH_TIMEOUT = 'HEALTH_TIMEOUT';
 
@@ -212,16 +205,6 @@ const routeCounts = { digest: 0, legacy: 0 };
 
 export function healthCommandStats() {
   return { ...routeCounts };
-}
-
-function withTimeout(promise, ms, label) {
-  let timer;
-  const timeout = new Promise((_, reject) => {
-    timer = setTimeout(() => {
-      reject(Object.assign(new Error(`${label} timed out.`), { code: HEALTH_TIMEOUT }));
-    }, ms);
-  });
-  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
 }
 
 // The normal path: everything is already in hand. `digest` is the character
@@ -340,7 +323,7 @@ export function commandCharacterVitals(charId, command, { timeoutMs = HEALTH_COM
   const previous = healthQueues.get(charId) || Promise.resolve();
   const pending = previous.catch(() => {}).then(async () => {
     try {
-      return await withTimeout(commitHealthCommand(charId, command, { digest, base }), timeoutMs, 'Character health update');
+      return await withTimeout(commitHealthCommand(charId, command, { digest, base }), timeoutMs, 'Character health update', HEALTH_TIMEOUT);
     } catch (error) {
       if (error?.code !== HEALTH_CONFLICT) requestCharacterRecheck(charId);
       throw error;
@@ -364,7 +347,7 @@ export function commandCharacterVitals(charId, command, { timeoutMs = HEALTH_COM
 export async function pushCharacterData(charId, character, { expectedSheetRevision = null } = {}) {
   if (!charId || !character) throw new Error('Character data missing.');
   const supabase = requireClient();
-  const user = await currentUser();
+  const user = await currentUser(requireClient());
   const owner = await getCloudOwner(supabase, charId);
   const username = user.user_metadata?.username || null;
   if (owner) {
@@ -409,7 +392,7 @@ export async function pullCharacter(charId) {
 // scope by owner here: "My sheets" must never leak sheets shared via a campaign.
 export async function listMyCharacters() {
   const supabase = requireClient();
-  const user = await currentUser();
+  const user = await currentUser(requireClient());
   const { data, error } = await supabase
     .from(TABLE)
     .select('id, name, owner, owner_username, campaign_id, updated_at')
@@ -443,7 +426,7 @@ export async function deleteCloudCharacter(charId) {
 // user's row, even if the caller happens to be a GM.
 export async function deleteOwnCloudCharacter(charId) {
   const supabase = requireClient();
-  const user = await currentUser();
+  const user = await currentUser(requireClient());
   const { error } = await supabase.from(TABLE).delete().eq('id', charId).eq('owner', user.id);
   if (error) throw error;
 }

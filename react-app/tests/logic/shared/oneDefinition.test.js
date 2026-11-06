@@ -319,3 +319,10 @@ test('lists sort through compareText and byName', () => {
     allow: ['shared/lists.js', 'shared/instances/instanceSync.js'],
   }), []);
 });
+
+// Cloud calls read the signed-in user and set deadlines through cloudCall.js.
+test('the signed-in user and command timeouts come from shared/cloud/cloudCall.js', () => {
+  assert.deepEqual(sourceFilesMatching(/auth\.getUser\(\)|Promise\.race\(/, {
+    allow: ['shared/cloud/cloudCall.js'],
+  }), []);
+});
