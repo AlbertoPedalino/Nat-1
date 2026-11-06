@@ -1,10 +1,8 @@
 import {
-  absorbFightTurn,
   addCombatantEffect,
   addManualCombatant,
   addMonsterCombatant,
   applySheetVitals,
-  buildCombat,
   clearCombatantConditions,
   clearCombatantEffects,
   modifyHp,
@@ -19,9 +17,7 @@ import {
   setMaxHp,
   setInitiative,
   setTempHp,
-  snapshotFight,
   toggleCombatantCondition,
-  autoFightName,
 } from '../../../shared/encounter/combat.js';
 import { addRollLogEntry } from '../rolls/dice.js';
 import {
@@ -36,28 +32,19 @@ import {
   normalizeNegotiationThreshold,
   resolveNegotiation,
 } from '../negotiation/negotiation.js';
-import { PLAYER_COLORS } from '../../../shared/encounter/combatLabels.js';
-import { makeSavedEncounter, normalizeEncounterQuest } from './storage.js';
-import { hydrateEncounterItems, monsterKey, toEncounterMonster } from '../../../shared/bestiary/monsterUtils.js';
-import { combatantToSheetPatch, resolveCombatVitals } from '../../../shared/encounter/sheetSync.js';
-import { SYNCED_VITALS, pickCharacterVitals } from '../../../shared/character/combat/vitals.js';
+import {
+  hydrateEncounterItems, monsterKey, toEncounterMonster,
+} from '../../../shared/bestiary/monsterUtils.js';
 import { absorbMonsterVitals } from '../../../shared/vtt/tokens/fightVitals.js';
 import { dedupeFightsByEncounter, dedupeLibraryById } from '../../../shared/encounter/library.js';
 import { clampInt } from '../../../shared/numbers.js';
-import { normalizeHexColor } from '../../../shared/ui/colors.js';
-
-export const DEFAULT_PARTY = Object.freeze({ count: 4, level: 5 });
-
-export function createDefaultPlayers(count = DEFAULT_PARTY.count) {
-  return Array.from({ length: count }, (_, index) => ({
-    id: index,
-    name: `Player ${index + 1}`,
-    initMod: [2, 1, 3, 0][index] ?? 0,
-    ac: [15, 14, 16, 18][index] ?? 10,
-    hpMax: [30, 25, 28, 35][index] ?? 30,
-    color: PLAYER_COLORS[index % PLAYER_COLORS.length],
-  }));
-}
+import {
+  DEFAULT_PARTY, createDefaultPlayers, setPartyCount, updatePlayer, removePlayer, importCampaignPlayers,
+} from './partyState.js';
+import {
+  launchCombat, withCombat, closeCombat, syncCombatantVitals, absorbFightVitals, absorbActiveFightTurn,
+} from './combatState.js';
+import { absorbExternal, deleteLibraryEncounter, assignEncounterQuest, deleteFight } from './libraryState.js';
 
 export function createInitialState() {
   return {
@@ -316,82 +303,6 @@ function reduceEncounterState(state, action) {
   }
 }
 
-// Fights and saved encounters written into this instance's storage by something
-// other than this tab: the battle map sending a dungeon room, or the map writing
-// hit points back into a fight that is not the one on screen.
-//
-// This tab's arrays are the whole record when it persists, so anything it has
-// not heard about is not merely missing from the screen — the next save deletes
-// it. That is what made a room sent from the map look unsynced: its fight was
-// written, then quietly removed by the builder that was already open, and the
-// pieces on the board were left pointing at a fight that no longer existed.
-//
-// The caller decides what is new or newer; this only merges, and answers with
-// the same state when there is nothing to merge so a save cannot loop.
-function absorbExternal(state, { fights = [], library = [] }) {
-  const currentFights = state.fights || [];
-  const currentLibrary = state.library || [];
-  const known = new Set(currentFights.map((fight) => String(fight.id)));
-  const knownEncounters = new Set(currentLibrary.map((entry) => String(entry.id)));
-  const addedEncounters = library.filter((entry) => !knownEncounters.has(String(entry.id)));
-  const addedFights = fights.filter((fight) => !known.has(String(fight.id)));
-  const incoming = new Map(fights.map((fight) => [String(fight.id), fight]));
-  if (!fights.length && !library.length) return state;
-  const merged = [
-    ...addedFights,
-    ...currentFights.map((fight) => incoming.get(String(fight.id)) || fight),
-  ];
-  return {
-    ...state,
-    // A launch supersedes the fight before it, but a fight that arrives from
-    // elsewhere never went through a launch. Left alone, the row of an older
-    // launch comes back and the encounter stands twice in every list that reads
-    // this array — the battle map's import dialog among them.
-    fights: dedupeFightsByEncounter(merged, state.activeFightId),
-    library: dedupeLibraryById([...addedEncounters, ...currentLibrary, ...library]),
-  };
-}
-
-function syncCombatantVitals(state, sourceId, vitals) {
-  const cacheChanged = JSON.stringify(state.characterVitals?.[sourceId]) !== JSON.stringify(vitals);
-  let changed = cacheChanged;
-  const players = state.players.map((player) => {
-    if (String(player.sourceId || '') !== String(sourceId)) return player;
-    const resolved = resolveCombatVitals(player, vitals);
-    const patch = { ...combatantToSheetPatch(resolved), hpMax: resolved.hpMax };
-    if (Object.keys(patch).every((key) => JSON.stringify(player[key]) === JSON.stringify(patch[key]))) return player;
-    changed = true;
-    return { ...player, ...patch };
-  });
-  const fights = state.fights.map((fight) => {
-    const next = applySheetVitals(fight, sourceId, vitals);
-    if (next !== fight) changed = true;
-    return next;
-  });
-  const combat = state.combat ? applySheetVitals(state.combat, sourceId, vitals) : null;
-  if (combat !== state.combat) changed = true;
-  return changed ? {
-    ...state, players, fights, combat,
-    characterVitals: cacheChanged ? { ...state.characterVitals, [sourceId]: vitals } : state.characterVitals,
-  } : state;
-}
-
-// Enemy vitals from the fight's database row, the only authority for them.
-// Unchanged vitals answer with the same state, so absorbing the echo of our
-// own write neither re-renders nor saves.
-function absorbFightVitals(state, fightId, fight) {
-  if (!state.combat || fightId == null || String(state.combat.fightId) !== String(fightId)) return state;
-  const combat = absorbMonsterVitals(state.combat, fight);
-  return combat === state.combat ? state : withCombat(state, combat);
-}
-
-// The turn from the fight's database row, when the battle map moved it.
-function absorbActiveFightTurn(state, fightId, fight) {
-  if (!state.combat || fightId == null || String(state.combat.fightId) !== String(fightId)) return state;
-  const combat = absorbFightTurn(state.combat, fight);
-  return combat === state.combat ? state : withCombat(state, combat);
-}
-
 function hydrateState(state, payload, monsters) {
   const partyData = payload?.partyData;
   const draftData = payload?.draftData;
@@ -464,260 +375,3 @@ function changeMonsterQty(state, id, delta) {
   return { ...state, encounter };
 }
 
-function setPartyCount(state, value) {
-  const count = clampInt(value, 1, 10, state.party.count);
-  let players = state.players.slice(0, count);
-  while (players.length < count) {
-    const index = players.length;
-    players.push({
-      id: index,
-      name: `Player ${index + 1}`,
-      initMod: 0,
-      ac: 10,
-      hpMax: 30,
-      color: PLAYER_COLORS[index % PLAYER_COLORS.length],
-    });
-  }
-  return { ...state, party: { ...state.party, count }, players };
-}
-
-function updatePlayer(state, index, patch) {
-  return {
-    ...state,
-    players: state.players.map((player, i) => (i === index ? normalizePlayer({ ...player, ...patch }, i) : player)),
-  };
-}
-
-function removePlayer(state, index) {
-  if (!Number.isInteger(index) || index < 0 || index >= state.players.length) return state;
-  const removed = state.players[index];
-  let players = state.players
-    .filter((_, i) => i !== index)
-    .map((player, i) => normalizePlayer(player.sourceId ? player : { ...player, id: i }, i));
-
-  if (!players.length) {
-    players = createDefaultPlayers(1);
-  }
-
-  return {
-    ...state,
-    players,
-    party: {
-      ...state.party,
-      count: Math.max(1, Math.min(10, players.length)),
-    },
-    campaignNotice: `${removed?.name || 'Player'} removed from encounter.`,
-  };
-}
-
-function importCampaignPlayers(state, campaignPlayers) {
-  const incoming = Array.isArray(campaignPlayers) ? campaignPlayers : [];
-  if (!incoming.length) return { ...state, campaignNotice: '' };
-  let players = isDefaultPlaceholderParty(state.players) ? [] : [...state.players];
-  let added = 0;
-  let updated = 0;
-  let skipped = 0;
-
-  incoming.forEach((player) => {
-    const next = normalizePlayer({
-      id: `cloud:${player.sourceId}`,
-      sourceId: player.sourceId,
-      campaignId: player.campaignId,
-      name: player.name,
-      level: player.level,
-      initMod: player.initMod,
-      ac: player.ac,
-      hpMax: player.hpMax,
-      // From the registry, not listed here: naming the fields is what left an
-      // imported character's conditions behind on their sheet.
-      ...pickCharacterVitals(player),
-      iconColor: player.iconColor,
-      portraitPath: player.portraitPath || null,
-      color: player.iconColor || PLAYER_COLORS[players.length % PLAYER_COLORS.length],
-    }, players.length);
-    const existingIndex = players.findIndex((item) => item.sourceId === next.sourceId);
-    if (existingIndex >= 0) {
-      players[existingIndex] = { ...players[existingIndex], ...next, color: next.iconColor || players[existingIndex].color || next.color };
-      updated += 1;
-      return;
-    }
-    if (players.length >= 10) {
-      skipped += 1;
-      return;
-    }
-    players.push(next);
-    added += 1;
-  });
-
-  const level = campaignAverageLevel(incoming);
-  const parts = [];
-  if (added) parts.push(`${added} added`);
-  if (updated) parts.push(`${updated} updated`);
-  if (skipped) parts.push(`${skipped} skipped (party limit 10)`);
-  return {
-    ...state,
-    players,
-    party: { count: Math.max(1, Math.min(10, players.length)), level },
-    campaignNotice: parts.length ? `${parts.join(', ')}.` : 'Campaign players already in party.',
-  };
-}
-
-function normalizePlayer(player, index) {
-  const hpMax = clampInt(player.hpMax, 1, 999, 10);
-  // resolveCombatVitals rather than the raw mapper: it is the one that reads an
-  // absent current HP as "undamaged" instead of 0.
-  const vitals = combatantToSheetPatch(resolveCombatVitals({ hpMax }, { ...player, hpMax }));
-  const normalized = {
-    ...player,
-    name: String(player.name || `Player ${index + 1}`),
-    initMod: clampInt(player.initMod, -20, 30, 0),
-    ac: clampInt(player.ac, 1, 99, 10),
-    hpMax,
-    color: normalizeHexColor(player.color, '') || normalizeHexColor(player.iconColor, '') || PLAYER_COLORS[index % PLAYER_COLORS.length],
-    iconColor: normalizeHexColor(player.iconColor, '') || null,
-  };
-  // Only clamp what the player actually carries: a party member typed straight
-  // into the encounter has no current HP and must not be given one.
-  for (const field of SYNCED_VITALS) {
-    if (player[field.data] == null && player[field.combat] == null) continue;
-    normalized[field.data] = vitals[field.data];
-  }
-  return normalized;
-}
-
-function isDefaultPlaceholderParty(players) {
-  if (!players.length) return true;
-  return players.every((player, index) => (
-    !player.sourceId
-    // Placeholders were named "Giocatore N" before the interface went all
-    // English; a party saved then is still recognized as one.
-    && /^(Player|Giocatore) \d+$/i.test(String(player.name || ''))
-    && (player.id == null || Number(player.id) === index)
-  ));
-}
-
-function campaignAverageLevel(players) {
-  if (!players.length) return 1;
-  const total = players.reduce((sum, player) => sum + clampInt(player.level, 1, 20, 1), 0);
-  return clampInt(total / players.length, 1, 20, 1);
-}
-
-// Every launch is backed by a library encounter, so its card always exposes the
-// full Load/Launch/Resume/Delete actions. Builder launches always pass a null
-// id to save a new snapshot; Library launches restart the selected saved entry.
-// `initiative`: the optional per-creature advantage/disadvantage chosen in the
-// launch panel (initiativeRoster keys); a plain Launch passes none.
-function launchCombat(state, encounter, encounterId, name, quest = null, initiative = {}) {
-  let library = state.library;
-  let id = encounterId || null;
-  if (id == null && encounter.length) {
-    const entry = makeSavedEncounter(name, encounter, state.party, quest);
-    while (library.some((saved) => saved.id === entry.id)) entry.id += 1;
-    library = [entry, ...library];
-    id = entry.id;
-  }
-  const combat = buildCombat(encounter, state.players, id, Math.random, { initiative: initiative || {} });
-  // Two quick launches must not replace each other through Date.now() ids.
-  while (state.fights.some((fight) => fight.id === combat.fightId)) combat.fightId += 1;
-  combat.name = library.find((entry) => entry.id === id)?.name || autoFightName(combat.combatants);
-  return withCombat({
-    ...state,
-    library,
-    encounter,
-    currentEncounterId: id,
-    encounterName: name || library.find((entry) => entry.id === id)?.name || '',
-    encounterQuest: quest || library.find((entry) => entry.id === id)?.quest || null,
-  }, combat, { view: 'combat' });
-}
-
-function withCombat(state, combat, patch = {}) {
-  const existing = (state.fights || []).find((fight) => fight.id === combat.fightId);
-  const fightEntry = {
-    id: combat.fightId,
-    name: existing?.name || combat.name || autoFightName(combat.combatants),
-    savedAt: Date.now(),
-    encounterId: combat.encounterId || null,
-    // The library card a fight sent from the battle map carries with it, so a
-    // device that never wrote the library blob still has something to open it
-    // from. Kept across a launch: dropping it here would clear the column on the
-    // next save, and the fight would go dark on every other screen.
-    ...(existing?.encounter ? { encounter: existing.encounter } : {}),
-    fight: snapshotFight(combat),
-  };
-  // Keep one fight per encounter: a fresh launch supersedes the previous fight.
-  const fights = [fightEntry, ...state.fights.filter((fight) => (
-    fight.id !== fightEntry.id
-    && !(fightEntry.encounterId != null && fight.encounterId === fightEntry.encounterId)
-  ))];
-  return {
-    ...state,
-    ...patch,
-    combat,
-    fights,
-    activeFightId: fightEntry.id,
-  };
-}
-
-// Closing only drops the fight as the active one: its snapshot stays in
-// `fights`, so a fight whose encounter is in the library can still be resumed
-// from there. Nothing is deleted here.
-function closeCombat(state) {
-  if (!state.combat) return state;
-  return {
-    ...state,
-    combat: null,
-    activeFightId: null,
-    view: 'builder',
-    selectedStatblock: null,
-  };
-}
-
-function deleteLibraryEncounter(state, id) {
-  const fights = state.fights.filter((fight) => fight.encounterId !== id);
-  // Only the fight that was running matters here. Asking whether the active one
-  // survived, when there was no active one, answered "no" and sent the GM to the
-  // builder every time they tidied up the library — a page they were reading,
-  // closed for them because something they were not running was deleted.
-  const lostTheRunningFight = state.activeFightId != null
-    && !fights.some((fight) => fight.id === state.activeFightId);
-  if (!lostTheRunningFight) {
-    return {
-      ...state,
-      library: state.library.filter((entry) => entry.id !== id),
-      currentEncounterId: state.currentEncounterId === id ? null : state.currentEncounterId,
-      fights,
-    };
-  }
-  return {
-    ...state,
-    library: state.library.filter((entry) => entry.id !== id),
-    currentEncounterId: state.currentEncounterId === id ? null : state.currentEncounterId,
-    fights,
-    activeFightId: null,
-    combat: null,
-    view: 'builder',
-  };
-}
-
-function assignEncounterQuest(state, id, value) {
-  const quest = normalizeEncounterQuest(value);
-  if (!quest || !state.library.some((entry) => entry.id === id)) return state;
-  return {
-    ...state,
-    library: state.library.map((entry) => (
-      entry.id === id ? { ...entry, quest } : entry
-    )),
-    encounterQuest: state.currentEncounterId === id ? quest : state.encounterQuest,
-  };
-}
-
-function deleteFight(state, id) {
-  const fights = state.fights.filter((fight) => fight.id !== id);
-  return {
-    ...state,
-    fights,
-    activeFightId: state.activeFightId === id ? null : state.activeFightId,
-    combat: state.activeFightId === id ? null : state.combat,
-    view: state.activeFightId === id ? 'builder' : state.view,
-  };
-}
