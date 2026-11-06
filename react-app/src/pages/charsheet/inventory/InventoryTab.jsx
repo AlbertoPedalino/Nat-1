@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Box } from '@mui/material';
-import { installedRegistry } from '../../../adapters/index.js';
+import { adapterRegistry } from '../../../adapters/index.js';
 import { availableItemFlagDefs } from '../../../shared/character/inventory/itemFlags.js';
 import { countAttunedItems } from '../../../shared/character/inventory/itemAttunement.js';
 import { getCharacterAttunementState } from './attunement.js';
@@ -46,7 +46,7 @@ export default function InventoryTab({ C, sheet }) {
 
   // Flags a class feature lets the player put on an item (Pact Weapon, Arcane
   // Armor…), declared by the adapters with registerItemFlagDef.
-  const itemFlagDefs = useMemo(() => availableItemFlagDefs(installedRegistry.getAllItemFlagDefs(), C), [C]);
+  const itemFlagDefs = useMemo(() => availableItemFlagDefs(adapterRegistry.getAllItemFlagDefs(), C), [C]);
 
   const updateCoin = useCallback((coin, value) => {
     onUpdateCurrency?.(setCoinAmount(currency, coin, value));

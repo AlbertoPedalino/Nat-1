@@ -2,7 +2,7 @@ import {
   classEntities,
   primaryClassLevel,
 } from '../../../shared/character/progression/classLevel.js';
-import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
+import { adapterRegistry } from '../../../adapters/registry.js';
 import { adapterEntryApplies } from '../../../shared/character/progression/choiceUtils.js';
 import {
   featDescriptionEntries,
@@ -363,20 +363,20 @@ export function collectAdapterActions(C, sheet) {
   // Prefer live registry data so function properties such as condition/max/formula survive
   // after the character has been serialized to localStorage.
   classEntities(C).forEach((entity) => {
-    pushFiltered(installedRegistry.getClassSheetActions(entity.className), entity.ownerName, entity.level);
+    pushFiltered(adapterRegistry.getClassSheetActions(entity.className), entity.ownerName, entity.level);
     if (entity.subclassShortName) {
       pushFiltered(
-        installedRegistry.getSubclassSheetActions(entity.className, entity.subclassShortName),
+        adapterRegistry.getSubclassSheetActions(entity.className, entity.subclassShortName),
         `${entity.subclassShortName} (${entity.className})`,
         entity.level,
       );
     }
   });
   if (C?.speciesName) {
-    pushFiltered(installedRegistry.getSpeciesSheetActions(C.speciesName, C.speciesSource), C.speciesName, C.level || 1);
+    pushFiltered(adapterRegistry.getSpeciesSheetActions(C.speciesName, C.speciesSource), C.speciesName, C.level || 1);
   }
   ownedFeatNames(C).forEach((featName) => {
-    pushFiltered(installedRegistry.getFeatSheetActions(featName), featName, C.level || 1);
+    pushFiltered(adapterRegistry.getFeatSheetActions(featName), featName, C.level || 1);
   });
 
   // Fallback for older exported characters that already contain adapterRuntime.

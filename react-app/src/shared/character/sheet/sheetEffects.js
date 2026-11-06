@@ -1,4 +1,4 @@
-import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
+import { adapterRegistry } from '../../../adapters/registry.js';
 import {
   canonicalDisplayLabel,
   cleanProficiencyText,
@@ -203,7 +203,7 @@ export function collectSheetEffects(character = {}) {
   ].filter((entry) => entry.className);
 
   entities.forEach((entity) => {
-    collectFromList(out, installedRegistry.getClassSheetEffects(entity.className), {
+    collectFromList(out, adapterRegistry.getClassSheetEffects(entity.className), {
       ownerName: entity.className,
       ownerType: 'class',
       ownerLevel: entity.ownerLevel,
@@ -211,7 +211,7 @@ export function collectSheetEffects(character = {}) {
     }, character);
 
     if (entity.subclassShortName) {
-      collectFromList(out, installedRegistry.getSubclassSheetEffects(entity.className, entity.subclassShortName), {
+      collectFromList(out, adapterRegistry.getSubclassSheetEffects(entity.className, entity.subclassShortName), {
         ownerName: entity.subclassShortName,
         ownerType: 'subclass',
         ownerLevel: entity.ownerLevel,
@@ -221,7 +221,7 @@ export function collectSheetEffects(character = {}) {
   });
 
   if (character.speciesName) {
-    collectFromList(out, installedRegistry.getSpeciesSheetEffects(character.speciesName, character.speciesSource), {
+    collectFromList(out, adapterRegistry.getSpeciesSheetEffects(character.speciesName, character.speciesSource), {
       ownerName: character.speciesName,
       ownerType: 'species',
       ownerLevel: Number(character.level || 1),
@@ -230,7 +230,7 @@ export function collectSheetEffects(character = {}) {
   }
 
   ownedFeatNames(character).forEach((feat) => {
-    collectFromList(out, installedRegistry.getFeatSheetEffects(feat), {
+    collectFromList(out, adapterRegistry.getFeatSheetEffects(feat), {
       ownerName: feat,
       ownerType: 'feat',
       ownerLevel: Number(character.level || 1),

@@ -1,4 +1,4 @@
-import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
+import { adapterRegistry } from '../../../adapters/registry.js';
 import { getFinal as getFinalScore, getMod as getAbilityMod } from '../../../shared/character/sheet/sheetStats.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { withModifier } from '../../../shared/ui/numberFormat.js';
@@ -49,16 +49,16 @@ export function collectSpellRiders(C, { hasHeal = false, hasDamage = false, entr
       ownerClassName: entity.className,
       ownerSubclassShortName: entity.subclassShortName,
     };
-    run(installedRegistry.getClassSpellRiders(entity.className), ctx);
+    run(adapterRegistry.getClassSpellRiders(entity.className), ctx);
     if (entity.subclassShortName) {
-      run(installedRegistry.getSubclassSpellRiders(entity.className, entity.subclassShortName), ctx);
+      run(adapterRegistry.getSubclassSpellRiders(entity.className, entity.subclassShortName), ctx);
     }
   });
 
   const baseCtx = { character: C, hasHeal, hasDamage, entry, ownerLevel: Number(C?.level || 1) };
-  run(installedRegistry.getSpeciesSpellRiders(C?.speciesName, C?.speciesSource), baseCtx);
+  run(adapterRegistry.getSpeciesSpellRiders(C?.speciesName, C?.speciesSource), baseCtx);
   (C?.allFeatSnapshots || []).forEach((feat) => {
-    if (feat?.name) run(installedRegistry.getFeatSpellRiders(feat.name), baseCtx);
+    if (feat?.name) run(adapterRegistry.getFeatSpellRiders(feat.name), baseCtx);
   });
 
   return out;
@@ -66,11 +66,11 @@ export function collectSpellRiders(C, { hasHeal = false, hasDamage = false, entr
 
 export function getResolvedCantripData(C, name) {
   if (!name) return null;
-  const base = typeof installedRegistry.getCantripData === 'function'
-    ? installedRegistry.getCantripData(name)
+  const base = typeof adapterRegistry.getCantripData === 'function'
+    ? adapterRegistry.getCantripData(name)
     : null;
-  const modifiers = typeof installedRegistry.getCantripDataModifiers === 'function'
-    ? (installedRegistry.getCantripDataModifiers(name) || [])
+  const modifiers = typeof adapterRegistry.getCantripDataModifiers === 'function'
+    ? (adapterRegistry.getCantripDataModifiers(name) || [])
     : [];
   if (!base && !modifiers.length) return null;
   return modifiers.reduce((data, fn) => {
@@ -114,14 +114,14 @@ function schoolMatches(spellSchool, modifierSchool) {
 function collectSpellModifiers(C, ctx = {}) {
   const out = [];
   spellModifierEntities(C).forEach((entity) => {
-    out.push(...((installedRegistry.getClassSheetSpellModifiers(entity.className) || []).map((mod) => ({
+    out.push(...((adapterRegistry.getClassSheetSpellModifiers(entity.className) || []).map((mod) => ({
       mod,
       modifierOwnerType: 'class',
       ownerLevel: entity.level,
       ownerClassName: entity.className,
       ownerSubclassShortName: null,
     }))));
-    out.push(...((installedRegistry.getSubclassSheetSpellModifiers(entity.className, entity.subclassShortName) || []).map((mod) => ({
+    out.push(...((adapterRegistry.getSubclassSheetSpellModifiers(entity.className, entity.subclassShortName) || []).map((mod) => ({
       mod,
       modifierOwnerType: 'subclass',
       ownerLevel: entity.level,
@@ -130,7 +130,7 @@ function collectSpellModifiers(C, ctx = {}) {
     }))));
   });
   if (C?.speciesName) {
-    out.push(...((installedRegistry.getSpeciesSheetSpellModifiers(C.speciesName, C.speciesSource) || []).map((mod) => ({
+    out.push(...((adapterRegistry.getSpeciesSheetSpellModifiers(C.speciesName, C.speciesSource) || []).map((mod) => ({
       mod,
       modifierOwnerType: 'species',
       ownerLevel: C.level || 1,

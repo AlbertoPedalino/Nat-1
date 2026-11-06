@@ -1,4 +1,4 @@
-import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
+import { adapterRegistry } from '../../../adapters/registry.js';
 import { builtAbilityScore } from '../../../shared/character/progression/abilityScores.js';
 
 /**
@@ -7,7 +7,7 @@ import { builtAbilityScore } from '../../../shared/character/progression/ability
  */
 
 export function getMulticlassPrerequisites(className) {
-  const cfg = installedRegistry.getClassRuntimeConfig(className);
+  const cfg = adapterRegistry.getClassRuntimeConfig(className);
   return cfg?.multiclassPrerequisites || [];
 }
 
@@ -43,7 +43,7 @@ export function checkMulticlassPrerequisite(character, className) {
 }
 
 export function getMulticlassProficienciesGained(className, cls = null) {
-  const cfg = installedRegistry.getClassRuntimeConfig(className);
+  const cfg = adapterRegistry.getClassRuntimeConfig(className);
   // Live only: adapter runtime config, then the class JSON
   // (`cls.multiclassing.proficienciesGained`). No hardcoded fallback — returns
   // null when the data source carries nothing.

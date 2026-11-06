@@ -12,7 +12,7 @@ const loaders = vi.hoisted(() => ({
 vi.mock('../../../../../src/shared/content/catalogs/spellData.js', () => ({ loadSpells: loaders.loadSpells }));
 vi.mock('../../../../../src/adapters/index.js', async () => ({
   ...loaders,
-  installedRegistry: (await import('../../../../../src/adapters/registry.js')).adapterRegistry,
+  adapterRegistry: (await import('../../../../../src/adapters/registry.js')).adapterRegistry,
 }));
 
 const catalog = {

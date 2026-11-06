@@ -23,7 +23,7 @@ function view(entry) {
     <ThemeProvider theme={theme}>
       <SheetActionsProvider value={{ onUpdateCharacter: vi.fn(), onRoll: vi.fn(), onShowToast: vi.fn() }}>
         <ProficiencySetsProvider character={wizard}>
-          <SpellEntry entry={entry} C={wizard} installedRegistry={adapterRegistry} />
+          <SpellEntry entry={entry} C={wizard} adapterRegistry={adapterRegistry} />
         </ProficiencySetsProvider>
       </SheetActionsProvider>
     </ThemeProvider>

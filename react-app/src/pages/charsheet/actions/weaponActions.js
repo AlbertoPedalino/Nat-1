@@ -1,5 +1,5 @@
 import { getMod, getFinal, getPB } from '../../../shared/character/sheet/sheetStats.js';
-import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
+import { adapterRegistry } from '../../../adapters/registry.js';
 import { getWeaponProficiencyInfo, hasNonProficientArmor } from '../../../shared/character/proficiency/proficiencyQueries.js';
 import {
   collectResolvedWeaponMasteries,
@@ -37,7 +37,7 @@ import { isWeaponItem } from '../../../shared/character/inventory/itemCodes.js';
 function weaponAbility(C, item, weaponOverride) {
   if (weaponOverride?.ability) return weaponOverride.ability;
   const type = String(item?.type || '').toUpperCase();
-  const overrides = installedRegistry.getWeaponAbilityOverrides();
+  const overrides = adapterRegistry.getWeaponAbilityOverrides();
   for (const o of overrides) {
     if (o.weaponTypes && !o.weaponTypes.includes(type)) continue;
     if (o.itemFlag && !(item?.flags || []).includes(o.itemFlag)) continue;
@@ -110,7 +110,7 @@ export function spellWeaponKey(item) {
 // The weapons True Strike can be cast through — its material component is "a
 // weapon with which you have proficiency" — the ones in hand first.
 export function spellWeaponOptions(C, inventory, profSets) {
-  const overrides = installedRegistry.getWeaponAbilityOverrides();
+  const overrides = adapterRegistry.getWeaponAbilityOverrides();
   const seen = new Set();
   return (inventory || [])
     .filter((item) => isWeaponItem(item)
@@ -247,7 +247,7 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
   if (!equipmentSets) {
     throw new Error('makeWeaponActions requires equipmentSets from collectEquipmentProficiencySets(character)');
   }
-  const overrides = installedRegistry.getWeaponAbilityOverrides();
+  const overrides = adapterRegistry.getWeaponAbilityOverrides();
   const selectedMasteriesByWeapon = new Map(
     collectResolvedWeaponMasteries(C, items)
       .map((entry) => [normalizeWeaponName(entry.weaponName), entry])
@@ -273,7 +273,7 @@ export function makeWeaponActions(C, attacks, inventory, items = [], equipmentSe
   const hasTWF = hasTwoWeaponFightingStyle(C);
   const offHandItem = attacks.find(i => i.equippedSlot === 'offHand');
   const canLightExtra = offHandItem && canUseLightExtraAttack(C, inventory);
-  const extraAttackOverrides = installedRegistry.getWeaponExtraAttacks();
+  const extraAttackOverrides = adapterRegistry.getWeaponExtraAttacks();
 
   attacks.forEach((item) => {
     if (item.equippedSlot === 'offHand' && canLightExtra) return;

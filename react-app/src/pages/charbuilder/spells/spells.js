@@ -1,13 +1,13 @@
-import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
+import { adapterRegistry } from '../../../adapters/registry.js';
 import { getPrimaryClassLevel } from '../progression/calculations.js';
 import { getClassSpellLimits } from '../../../shared/character/spells/spellProgression.js';
 import { enumerateEntityGrants, enumerateSpeciesGrants, grantSourceLabel } from '../../../shared/character/spells/autoGrantedSpells.js';
 import { maxSpellLevelFor } from '../../../shared/character/spells/casterProgression.js';
 
 export function getSpellcastingProfile(character) {
-  const classProfile = installedRegistry.getClassRuntimeConfig(character.className)?.spellcasting || {};
+  const classProfile = adapterRegistry.getClassRuntimeConfig(character.className)?.spellcasting || {};
   const subclassProfile = character.subclassShortName
-    ? installedRegistry.getSubclassRuntimeConfig(character.className, character.subclassShortName)?.spellcasting || {}
+    ? adapterRegistry.getSubclassRuntimeConfig(character.className, character.subclassShortName)?.spellcasting || {}
     : {};
   return {
     ...classProfile,

@@ -73,8 +73,6 @@ async function loadPaths(paths, context) {
   return triggeredPaths;
 }
 
-export const installedRegistry = adapterRegistry;
-
 export async function loadItemAdapters(context = {}) {
   await loadPaths(pathsForItems(), context);
   return adapterRegistry;

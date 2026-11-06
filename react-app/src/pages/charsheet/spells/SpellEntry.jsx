@@ -231,7 +231,7 @@ export default function SpellEntry({
   C,
   exhaustionLevel = 0,
   activeConditions = [],
-  installedRegistry,
+  adapterRegistry,
   freeCastUses,
   inventory = [],
 }) {
@@ -253,7 +253,7 @@ export default function SpellEntry({
     : [];
   const rawDamages = scaledCantripDamages.length ? scaledCantripDamages : textDamages;
   const hasAttack = !!entry.spellAttack;
-  const spellData = installedRegistry.getSpellData(entry.name);
+  const spellData = adapterRegistry.getSpellData(entry.name);
   const hasConcentrationTag = entry?.spellOverrides?.concentration === false
     ? false
     : (isConcentrationSpell(entry) || isConcentrationSpell(spellData));

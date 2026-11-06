@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { installedRegistry } from '../../../adapters/index.js';
+import { adapterRegistry } from '../../../adapters/index.js';
 import { SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
 import { getSheetSlots } from '../spells/spellcasting.js';
 import { addCreatedSlot, availableRegularSlotLevels, consumeSlot, getPactSlotUsed, getPactSlotUsedKey, getRegularSlotUsed, lowestAvailableSlotLevel, persistUsedSlots, recoverPactSlots } from '../../../shared/character/spells/spellSlots.js';
@@ -340,7 +340,7 @@ export function useResourceSideEffects({
     setResources(res);
 
     if (delta < 0) {
-      const sideEffect = installedRegistry.getResourceSideEffect(key);
+      const sideEffect = adapterRegistry.getResourceSideEffect(key);
       if (typeof sideEffect === 'function') {
         let result = null;
         try {

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Box, Typography, Chip } from '@mui/material';
-import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
+import { adapterRegistry } from '../../../adapters/registry.js';
 import { warlockInvocationSelections } from '../../../shared/character/progression/warlockUtils.js';
 import { buildOptionalFeatureEntryLookup } from '../../../shared/character/progression/optionalFeatures.js';
 import CollapsibleBody from '../../../shared/ui/CollapsibleBody.jsx';
@@ -133,8 +133,8 @@ export default function FeaturesTab({ C }) {
 }
 
 function collectWarlockInvocationFeatures(C) {
-  const meta = typeof installedRegistry.getClassSheetChoiceMeta === 'function'
-    ? (installedRegistry.getClassSheetChoiceMeta('Warlock') || {})
+  const meta = typeof adapterRegistry.getClassSheetChoiceMeta === 'function'
+    ? (adapterRegistry.getClassSheetChoiceMeta('Warlock') || {})
     : {};
   const invocationData = Array.isArray(meta?.invocationData) ? meta.invocationData : [];
   if (!invocationData.length) return [];

@@ -1,4 +1,4 @@
-import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
+import { adapterRegistry } from '../../../adapters/registry.js';
 import { getPrimaryClassLevel } from '../progression/calculations.js';
 import { backgroundOriginFeat } from '../../../shared/character/progression/selectedFeats.js';
 import { getMulticlassChoiceSpecs } from '../../../shared/character/progression/multiclassProficiencies.js';
@@ -299,11 +299,11 @@ function buildClassSpecs(cls, classLevel, options) {
     specs.push(...getMulticlassChoiceSpecs(options.className, options.keyPrefix, cls));
   }
 
-  const classAdapter = installedRegistry.getClassAdapter(options.className);
+  const classAdapter = adapterRegistry.getClassAdapter(options.className);
   if (typeof classAdapter === 'function') classAdapter(cls, classLevel, specs, options.context || {});
 
   if (options.subclassShortName) {
-    const subclassAdapter = installedRegistry.getSubclassAdapter(options.className, options.subclassShortName);
+    const subclassAdapter = adapterRegistry.getSubclassAdapter(options.className, options.subclassShortName);
     if (typeof subclassAdapter === 'function') subclassAdapter(cls, classLevel, specs, options.context || {});
   }
 
@@ -374,7 +374,7 @@ export function speciesChoiceSpecs(character) {
     count: 2,
     level: 1,
   });
-  const adapter = installedRegistry.getSpeciesAdapter(character.speciesName, character.speciesSource);
+  const adapter = adapterRegistry.getSpeciesAdapter(character.speciesName, character.speciesSource);
   if (adapter) {
     const adapterSpecs = adapter(species);
     if (Array.isArray(adapterSpecs)) {

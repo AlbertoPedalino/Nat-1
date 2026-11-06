@@ -1,4 +1,4 @@
-import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
+import { adapterRegistry } from '../../../adapters/registry.js';
 import { isGrantUnlocked } from '../../../shared/character/spells/spellGrants.js';
 import {
   enumerateAutoGrantedSpells,
@@ -37,7 +37,7 @@ export function collectAtWillSpells(C) {
   const out = [];
   const entities = [{ name: C?.className, level: primaryClassLevel(C) }, ...(C?.extraClasses || []).map((ec) => ({ name: ec.name, level: ec.level || 1 }))];
   entities.forEach((entity) => {
-    (installedRegistry.getClassAtWillSpells(entity.name) || []).forEach((entry) => {
+    (adapterRegistry.getClassAtWillSpells(entity.name) || []).forEach((entry) => {
       if (entity.level < Number(entry.minLevel || 1)) return;
       if (!isGrantUnlocked(entry, C)) return;
       out.push({ name: entry.spell, source: { label: entry.invocation || 'At Will', color: SRC_COLOR.choice, kind: 'atWill', originType: 'invocation', originLabel: entry.invocation || 'At Will' } });
@@ -107,7 +107,7 @@ export function collectAutoGrantedSpells(C) {
     if (runtimeByName.has(key)) return;
     // Check invocation requirement from runtime config before falling back to saved data
     const ownerClass = entry.ownerClassName || C?.className;
-    const cfg = ownerClass ? installedRegistry.getClassRuntimeConfig(ownerClass)?.spellcasting : null;
+    const cfg = ownerClass ? adapterRegistry.getClassRuntimeConfig(ownerClass)?.spellcasting : null;
     const allCfgSpells = [...(cfg?.alwaysKnownSpells || []), ...(cfg?.alwaysPreparedSpells || [])];
     const cfgEntry = allCfgSpells.find((s) => lowerKey(s?.name || '') === key);
     if (cfgEntry && !isGrantUnlocked(cfgEntry, C)) return;

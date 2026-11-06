@@ -16,7 +16,7 @@ import { loadSpells } from '../../../shared/content/catalogs/spellData.js';
 import { scrollRowKey } from '../../../shared/character/inventory/spellScrolls.js';
 import { spellMatchesClass } from '../../../shared/character/spells/spellClassMatch.js';
 import {
-  installedRegistry,
+  adapterRegistry,
   loadClassAdapters,
   loadCoreAdapters,
   loadSpellsAdapters,
@@ -506,20 +506,20 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
 
       {visibleCantrips.length || showEmptyCantrips ? (
         <SpellSection title="Cantrip">
-          {visibleCantrips.map((entry) => <SpellEntry key={`${entry.name}|${entry.source}${scrollRowKey(entry.scroll)}`} entry={entry} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} inventory={inventoryForBonuses} />)}
+          {visibleCantrips.map((entry) => <SpellEntry key={`${entry.name}|${entry.source}${scrollRowKey(entry.scroll)}`} entry={entry} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} adapterRegistry={adapterRegistry} freeCastUses={freeCastUses} inventory={inventoryForBonuses} />)}
           {!visibleCantrips.length ? <Empty text="None" /> : null}
         </SpellSection>
       ) : null}
 
       {visibleAtWill.length ? (
         <SpellSection title="At Will">
-          {visibleAtWill.map((entry) => <SpellEntry key={`at-will-${entry.name}-${entry.source}`} entry={entry} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} inventory={inventoryForBonuses} />)}
+          {visibleAtWill.map((entry) => <SpellEntry key={`at-will-${entry.name}-${entry.source}`} entry={entry} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} adapterRegistry={adapterRegistry} freeCastUses={freeCastUses} inventory={inventoryForBonuses} />)}
         </SpellSection>
       ) : null}
 
       {visibleLeveled.map(([level, entries]) => (
         <SpellSection key={level} title={SPELL_LEVEL_LABELS[level] || `Level ${level}`}>
-          {entries.map((entry) => <SpellEntry key={`${level}-${entry.name}-${entry.source}-${entry.castLevel || 'base'}${scrollRowKey(entry.scroll)}`} entry={entry} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} installedRegistry={installedRegistry} freeCastUses={freeCastUses} inventory={inventoryForBonuses} />)}
+          {entries.map((entry) => <SpellEntry key={`${level}-${entry.name}-${entry.source}-${entry.castLevel || 'base'}${scrollRowKey(entry.scroll)}`} entry={entry} C={C} exhaustionLevel={sheet?.exhaustionLevel || 0} activeConditions={sheet?.activeConditions || []} adapterRegistry={adapterRegistry} freeCastUses={freeCastUses} inventory={inventoryForBonuses} />)}
         </SpellSection>
       ))}
 

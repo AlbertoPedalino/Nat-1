@@ -1,4 +1,4 @@
-import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
+import { adapterRegistry } from '../../../adapters/registry.js';
 import { getClassSpellLimits } from '../../../shared/character/spells/spellProgression.js';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { combinedSpellSlots, maxSpellLevelFor, normalizeCasterProgression } from '../../../shared/character/spells/casterProgression.js';
@@ -61,8 +61,8 @@ export function getSpellEntities(C) {
 }
 
 export function getSpellcastingProfile(entity) {
-  const classCfg = installedRegistry.getClassRuntimeConfig(entity.className)?.spellcasting || {};
-  const subCfg = installedRegistry.getSubclassRuntimeConfig(entity.className, entity.subclassShortName)?.spellcasting || {};
+  const classCfg = adapterRegistry.getClassRuntimeConfig(entity.className)?.spellcasting || {};
+  const subCfg = adapterRegistry.getSubclassRuntimeConfig(entity.className, entity.subclassShortName)?.spellcasting || {};
   return {
     ...classCfg,
     ...subCfg,

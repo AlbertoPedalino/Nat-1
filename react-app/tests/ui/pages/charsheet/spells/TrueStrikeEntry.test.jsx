@@ -39,7 +39,7 @@ function view(C, onUpdateCharacter) {
     <ThemeProvider theme={theme}>
       <SheetActionsProvider value={{ onUpdateCharacter, onRoll: vi.fn(), onShowToast: vi.fn() }}>
         <ProficiencySetsProvider character={C}>
-          <SpellEntry entry={trueStrike} C={C} installedRegistry={adapterRegistry} inventory={[dagger, staff]} />
+          <SpellEntry entry={trueStrike} C={C} adapterRegistry={adapterRegistry} inventory={[dagger, staff]} />
         </ProficiencySetsProvider>
       </SheetActionsProvider>
     </ThemeProvider>

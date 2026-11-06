@@ -1,4 +1,4 @@
-import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
+import { adapterRegistry } from '../../../adapters/registry.js';
 import { choiceSpellSlotKey, firstChoiceString } from './spellChoiceKeys.js';
 import { abilityKey } from '../../../shared/content/rulesVocabulary.js';
 
@@ -28,8 +28,8 @@ export function getChoiceSpellAbility(C, key) {
 }
 
 export function getSpellAbility(C) {
-  const clsCfg = installedRegistry.getClassRuntimeConfig(C?.className)?.spellcasting;
-  const subCfg = installedRegistry.getSubclassRuntimeConfig(C?.className, C?.subclassShortName)?.spellcasting;
+  const clsCfg = adapterRegistry.getClassRuntimeConfig(C?.className)?.spellcasting;
+  const subCfg = adapterRegistry.getSubclassRuntimeConfig(C?.className, C?.subclassShortName)?.spellcasting;
   return String(subCfg?.ability || clsCfg?.ability || C?.choices?.species_spell_ability || 'cha').toLowerCase();
 }
 
@@ -38,8 +38,8 @@ export function resolveEntrySpellAbility(C, entry = {}) {
   const normalized = abilityKey(raw);
   if (normalized) return normalized;
   if (entry.ownerClassName) {
-    const clsCfg = installedRegistry.getClassRuntimeConfig(entry.ownerClassName)?.spellcasting;
-    const subCfg = installedRegistry.getSubclassRuntimeConfig(entry.ownerClassName, entry.ownerSubclassShortName)?.spellcasting;
+    const clsCfg = adapterRegistry.getClassRuntimeConfig(entry.ownerClassName)?.spellcasting;
+    const subCfg = adapterRegistry.getSubclassRuntimeConfig(entry.ownerClassName, entry.ownerSubclassShortName)?.spellcasting;
     const ownerAbility = subCfg?.ability || clsCfg?.ability || null;
     if (ownerAbility) return String(ownerAbility).toLowerCase();
   }
@@ -48,8 +48,8 @@ export function resolveEntrySpellAbility(C, entry = {}) {
     const sa = abilityKey(speciesAbility);
     if (sa) return sa;
   }
-  const clsCfg = installedRegistry.getClassRuntimeConfig(C?.className)?.spellcasting;
-  const subCfg = installedRegistry.getSubclassRuntimeConfig(C?.className, C?.subclassShortName)?.spellcasting;
+  const clsCfg = adapterRegistry.getClassRuntimeConfig(C?.className)?.spellcasting;
+  const subCfg = adapterRegistry.getSubclassRuntimeConfig(C?.className, C?.subclassShortName)?.spellcasting;
   const primaryAbility = subCfg?.ability || clsCfg?.ability || null;
   if (primaryAbility) return String(primaryAbility).toLowerCase();
   return null;

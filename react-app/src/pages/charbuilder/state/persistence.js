@@ -1,6 +1,6 @@
 import { getPrimaryClassLevel } from '../progression/calculations.js';
 import { collectOwnedFeatNames, withOwnedFeatSnapshots } from '../../../shared/character/progression/selectedFeats.js';
-import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
+import { adapterRegistry } from '../../../adapters/registry.js';
 import {
   createCharacter as storeCreateCharacter,
   getActiveCharId,
@@ -159,8 +159,8 @@ export function makeSheetPayload(character, data) {
   const ownedFeatNames = collectOwnedFeatNames(character);
   const ownedFeatSnapshots = character.allFeatSnapshots
     .map((feat) => {
-      const adapter = installedRegistry.getFeatAdapter
-        ? installedRegistry.getFeatAdapter(feat.name)
+      const adapter = adapterRegistry.getFeatAdapter
+        ? adapterRegistry.getFeatAdapter(feat.name)
         : null;
       const adapted = typeof adapter === 'function' ? (adapter(feat) || {}) : {};
       return {
@@ -256,20 +256,20 @@ export function makeSheetPayload(character, data) {
   );
   const extraClasses = character.extraClasses || [];
   const runtimeClassActions = [
-    ...annotateActions(installedRegistry.getClassSheetActions(character.className), character.className, primaryClassLevel, 'class'),
-    ...extraClasses.flatMap((extra) => annotateActions(installedRegistry.getClassSheetActions(extra.name), extra.name, Number(extra.level || 1), 'class')),
+    ...annotateActions(adapterRegistry.getClassSheetActions(character.className), character.className, primaryClassLevel, 'class'),
+    ...extraClasses.flatMap((extra) => annotateActions(adapterRegistry.getClassSheetActions(extra.name), extra.name, Number(extra.level || 1), 'class')),
   ];
   const runtimeClassResources = [
-    ...annotateResources(installedRegistry.getClassSheetResources(character.className), character.className, primaryClassLevel, 'class'),
-    ...extraClasses.flatMap((extra) => annotateResources(installedRegistry.getClassSheetResources(extra.name), extra.name, Number(extra.level || 1), 'class')),
+    ...annotateResources(adapterRegistry.getClassSheetResources(character.className), character.className, primaryClassLevel, 'class'),
+    ...extraClasses.flatMap((extra) => annotateResources(adapterRegistry.getClassSheetResources(extra.name), extra.name, Number(extra.level || 1), 'class')),
   ];
   const runtimeSubclassActions = [
-    ...annotateActions(installedRegistry.getSubclassSheetActions(character.className, character.subclassShortName), character.subclassShortName || character.className, primaryClassLevel, 'subclass'),
-    ...extraClasses.flatMap((extra) => annotateActions(installedRegistry.getSubclassSheetActions(extra.name, extra.subclassShortName), extra.subclassShortName || extra.name, Number(extra.level || 1), 'subclass')),
+    ...annotateActions(adapterRegistry.getSubclassSheetActions(character.className, character.subclassShortName), character.subclassShortName || character.className, primaryClassLevel, 'subclass'),
+    ...extraClasses.flatMap((extra) => annotateActions(adapterRegistry.getSubclassSheetActions(extra.name, extra.subclassShortName), extra.subclassShortName || extra.name, Number(extra.level || 1), 'subclass')),
   ];
   const runtimeSubclassResources = [
-    ...annotateResources(installedRegistry.getSubclassSheetResources(character.className, character.subclassShortName), character.subclassShortName || character.className, primaryClassLevel, 'subclass'),
-    ...extraClasses.flatMap((extra) => annotateResources(installedRegistry.getSubclassSheetResources(extra.name, extra.subclassShortName), extra.subclassShortName || extra.name, Number(extra.level || 1), 'subclass')),
+    ...annotateResources(adapterRegistry.getSubclassSheetResources(character.className, character.subclassShortName), character.subclassShortName || character.className, primaryClassLevel, 'subclass'),
+    ...extraClasses.flatMap((extra) => annotateResources(adapterRegistry.getSubclassSheetResources(extra.name, extra.subclassShortName), extra.subclassShortName || extra.name, Number(extra.level || 1), 'subclass')),
   ];
 
   return {
@@ -312,8 +312,8 @@ export function makeSheetPayload(character, data) {
       armorProficiencies: character.speciesObj?.armorProficiencies,
       weaponProficiencies: character.speciesObj?.weaponProficiencies,
       entries: character.speciesObj?.entries || [],
-      hpBonusPerLevel: Number(installedRegistry.getSpeciesSheetHpBonus
-        ? installedRegistry.getSpeciesSheetHpBonus(character.speciesName, character.speciesSource) || 0
+      hpBonusPerLevel: Number(adapterRegistry.getSpeciesSheetHpBonus
+        ? adapterRegistry.getSpeciesSheetHpBonus(character.speciesName, character.speciesSource) || 0
         : 0),
     },
     backgroundSnapshot: {
@@ -332,26 +332,26 @@ export function makeSheetPayload(character, data) {
     adapterRuntime: {
       classActions: runtimeClassActions,
       classResources: runtimeClassResources,
-      classEffects: installedRegistry.getClassSheetEffects(character.className),
+      classEffects: adapterRegistry.getClassSheetEffects(character.className),
       subclassActions: runtimeSubclassActions,
       subclassResources: runtimeSubclassResources,
-      subclassEffects: installedRegistry.getSubclassSheetEffects(character.className, character.subclassShortName),
+      subclassEffects: adapterRegistry.getSubclassSheetEffects(character.className, character.subclassShortName),
       speciesActions: annotateActions(
-        installedRegistry.getSpeciesSheetActions(character.speciesName, character.speciesSource),
+        adapterRegistry.getSpeciesSheetActions(character.speciesName, character.speciesSource),
         character.speciesName,
         Number(character.level || 1),
         'species',
       ),
-      speciesResources: installedRegistry.getSpeciesSheetResources(character.speciesName, character.speciesSource) || [],
-      speciesEffects: installedRegistry.getSpeciesSheetEffects(character.speciesName, character.speciesSource),
+      speciesResources: adapterRegistry.getSpeciesSheetResources(character.speciesName, character.speciesSource) || [],
+      speciesEffects: adapterRegistry.getSpeciesSheetEffects(character.speciesName, character.speciesSource),
       featActions: ownedFeatNames.flatMap((feat) => annotateActions(
-        installedRegistry.getFeatSheetActions(feat),
+        adapterRegistry.getFeatSheetActions(feat),
         feat,
         Number(character.level || 1),
         'feat',
       )),
-      featResources: ownedFeatNames.flatMap((feat) => installedRegistry.getFeatSheetResources(feat) || []),
-      featEffects: ownedFeatNames.flatMap((feat) => installedRegistry.getFeatSheetEffects(feat)),
+      featResources: ownedFeatNames.flatMap((feat) => adapterRegistry.getFeatSheetResources(feat) || []),
+      featEffects: ownedFeatNames.flatMap((feat) => adapterRegistry.getFeatSheetEffects(feat)),
     },
     selectedCantrips: character.selectedCantrips || [],
     selectedSpells: character.selectedSpells || {},

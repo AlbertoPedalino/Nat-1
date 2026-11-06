@@ -8,7 +8,7 @@
 // Both the toggle UI (ActionsTab) and the Long Rest reset (CharacterSheet) read
 // the convention from here, so adding a toggle never touches either of them.
 
-import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
+import { adapterRegistry } from '../../../adapters/registry.js';
 import { ownedFeatNames } from '../../../shared/character/progression/selectedFeats.js';
 
 export function toggleActiveField(toggleKey) {
@@ -30,11 +30,11 @@ export function collectToggleActiveFields(C) {
   ].filter((c) => c.name);
 
   classes.forEach(({ name, sub }) => {
-    scan(installedRegistry.getClassSheetActions(name));
-    if (sub) scan(installedRegistry.getSubclassSheetActions(name, sub));
+    scan(adapterRegistry.getClassSheetActions(name));
+    if (sub) scan(adapterRegistry.getSubclassSheetActions(name, sub));
   });
-  if (C?.speciesName) scan(installedRegistry.getSpeciesSheetActions(C.speciesName, C.speciesSource));
-  ownedFeatNames(C).forEach((feat) => scan(installedRegistry.getFeatSheetActions(feat)));
+  if (C?.speciesName) scan(adapterRegistry.getSpeciesSheetActions(C.speciesName, C.speciesSource));
+  ownedFeatNames(C).forEach((feat) => scan(adapterRegistry.getFeatSheetActions(feat)));
 
   return [...fields];
 }

@@ -1,4 +1,4 @@
-import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
+import { adapterRegistry } from '../../../adapters/registry.js';
 import { getAcBonusEffects } from '../sheet/effectBonuses.js';
 import { wildShapeArmorClass } from '../forms/wildShapeForm.js';
 import { primaryClassLevel } from '../progression/classLevel.js';
@@ -50,7 +50,7 @@ function collectRuntimeConfigFormulas(out, character, seenKeys) {
   entities.forEach((entity) => {
     const ol = ownerLevelOf(character, entity.className, entity.isPrimary);
 
-    const clsCfg = installedRegistry.getClassRuntimeConfig(entity.className);
+    const clsCfg = adapterRegistry.getClassRuntimeConfig(entity.className);
     if (clsCfg?.unarmoredDefense) {
       asArray(clsCfg.unarmoredDefense).forEach((cfg) => {
         if (ol < Number(cfg.minLevel || 1)) return;
@@ -74,7 +74,7 @@ function collectRuntimeConfigFormulas(out, character, seenKeys) {
     }
 
     if (entity.subclassShortName) {
-      const subCfg = installedRegistry.getSubclassRuntimeConfig(entity.className, entity.subclassShortName);
+      const subCfg = adapterRegistry.getSubclassRuntimeConfig(entity.className, entity.subclassShortName);
       if (subCfg?.unarmoredDefense) {
         asArray(subCfg.unarmoredDefense).forEach((cfg) => {
           if (ol < Number(cfg.minLevel || 1)) return;
@@ -112,18 +112,18 @@ export function collectAcFormulas(character) {
 
   entities.forEach((entity) => {
     const ol = ownerLevelOf(character, entity.className, entity.isPrimary);
-    collectFromSheetEffects(out, installedRegistry.getClassSheetEffects(entity.className), {
+    collectFromSheetEffects(out, adapterRegistry.getClassSheetEffects(entity.className), {
       ownerName: entity.className, ownerType: 'class', ownerLevel: ol, sourceKey: entity.className,
     }, character, seenKeys);
     if (entity.subclassShortName) {
-      collectFromSheetEffects(out, installedRegistry.getSubclassSheetEffects(entity.className, entity.subclassShortName), {
+      collectFromSheetEffects(out, adapterRegistry.getSubclassSheetEffects(entity.className, entity.subclassShortName), {
         ownerName: entity.subclassShortName, ownerType: 'subclass', ownerLevel: ol, sourceKey: `${entity.className}_${entity.subclassShortName}`,
       }, character, seenKeys);
     }
   });
 
   if (character.speciesName) {
-    collectFromSheetEffects(out, installedRegistry.getSpeciesSheetEffects(character.speciesName, character.speciesSource), {
+    collectFromSheetEffects(out, adapterRegistry.getSpeciesSheetEffects(character.speciesName, character.speciesSource), {
       ownerName: character.speciesName, ownerType: 'species', ownerLevel: Number(character.level || 1), sourceKey: character.speciesName,
     }, character, seenKeys);
   }

@@ -1,4 +1,4 @@
-import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
+import { adapterRegistry } from '../../../adapters/registry.js';
 import { isGrantUnlocked } from './spellGrants.js';
 import { primaryClassLevel } from '../progression/classLevel.js';
 import { matchKey, stripSource } from '../../content/nameKeys.js';
@@ -52,8 +52,8 @@ export function enumerateClassGrants(entity, character) {
   const level = Number(entity?.level || 1);
   const subclassName = subclassFullName(entity);
   const configs = [
-    { spellcasting: installedRegistry.getClassRuntimeConfig(entity?.className)?.spellcasting, fromSubclass: false },
-    { spellcasting: installedRegistry.getSubclassRuntimeConfig(entity?.className, entity?.subclassShortName)?.spellcasting, fromSubclass: true },
+    { spellcasting: adapterRegistry.getClassRuntimeConfig(entity?.className)?.spellcasting, fromSubclass: false },
+    { spellcasting: adapterRegistry.getSubclassRuntimeConfig(entity?.className, entity?.subclassShortName)?.spellcasting, fromSubclass: true },
   ];
   const out = [];
   configs.forEach(({ spellcasting, fromSubclass }) => {
@@ -90,7 +90,7 @@ function subclassFullName(entity) {
 
 /** Grants from the character's species. */
 export function enumerateSpeciesGrants(character) {
-  const spellcasting = installedRegistry.getSpeciesRuntimeConfig(
+  const spellcasting = adapterRegistry.getSpeciesRuntimeConfig(
     character?.speciesName,
     character?.speciesSource,
   )?.spellcasting || {};
@@ -230,7 +230,7 @@ function classEntities(character) {
  */
 export function enumerateEntityGrants(entity, character) {
   const configGrants = enumerateClassGrants(entity, character);
-  const subclassSpellcasting = installedRegistry.getSubclassRuntimeConfig(
+  const subclassSpellcasting = adapterRegistry.getSubclassRuntimeConfig(
     entity?.className,
     entity?.subclassShortName,
   )?.spellcasting;

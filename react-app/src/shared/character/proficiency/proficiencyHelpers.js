@@ -1,4 +1,4 @@
-import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
+import { adapterRegistry } from '../../../adapters/registry.js';
 import { canonicalProficiencyLabel } from '../progression/proficiencyDisplay.js';
 import { primaryClassLevel } from '../progression/classLevel.js';
 import { PROFICIENCY_CHOICE_KEYS, isChoicePlaceholderValue } from '../progression/typedProficiencies.js';
@@ -80,8 +80,8 @@ export function collectAdapterProfGrants(character) {
     });
   };
   const collectEntity = (className, subclassShortName, level, prefix = '') => {
-    push(installedRegistry.getClassSheetProficiencies(className), level, prefix, 'class', className);
-    push(installedRegistry.getSubclassSheetProficiencies(className, subclassShortName), level, prefix, 'subclass', subclassShortName);
+    push(adapterRegistry.getClassSheetProficiencies(className), level, prefix, 'class', className);
+    push(adapterRegistry.getSubclassSheetProficiencies(className, subclassShortName), level, prefix, 'subclass', subclassShortName);
   };
   collectEntity(
     character?.className || '',
@@ -93,7 +93,7 @@ export function collectAdapterProfGrants(character) {
     collectEntity(extra?.name || '', extra?.subclassShortName || '', extra?.level || 1, `mc${index}_`);
   });
   push(
-    installedRegistry.getSpeciesSheetProficiencies(character?.speciesName || '', character?.speciesSource || ''),
+    adapterRegistry.getSpeciesSheetProficiencies(character?.speciesName || '', character?.speciesSource || ''),
     character?.level || 1,
     '',
     'species',

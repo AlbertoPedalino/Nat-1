@@ -1,4 +1,4 @@
-import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
+import { adapterRegistry } from '../../../adapters/registry.js';
 import { getFinal, getMod, getPB } from '../sheet/sheetStats.js';
 import {
   classEntities,
@@ -103,21 +103,21 @@ export function getAllResourceDefs(character) {
   const out = [];
 
   classEntities(character).forEach((entity) => {
-    (installedRegistry.getClassSheetResources(entity.className) || [])
+    (adapterRegistry.getClassSheetResources(entity.className) || [])
       .forEach((def) => pushResource(out, def, character, entity.ownerName, entity.level));
     if (entity.subclassShortName) {
-      (installedRegistry.getSubclassSheetResources(entity.className, entity.subclassShortName) || [])
+      (adapterRegistry.getSubclassSheetResources(entity.className, entity.subclassShortName) || [])
         .forEach((def) => pushResource(out, def, character, `${entity.subclassShortName} (${entity.className})`, entity.level));
     }
   });
 
   if (character?.speciesName) {
-    (installedRegistry.getSpeciesSheetResources(character.speciesName, character.speciesSource) || [])
+    (adapterRegistry.getSpeciesSheetResources(character.speciesName, character.speciesSource) || [])
       .forEach((def) => pushResource(out, def, character, character.speciesName, character.level || 1));
   }
 
   ownedFeatNames(character).forEach((featName) => {
-    (installedRegistry.getFeatSheetResources(featName) || [])
+    (adapterRegistry.getFeatSheetResources(featName) || [])
       .forEach((def) => pushResource(out, def, character, featName, character?.level || 1));
   });
 

@@ -1,4 +1,4 @@
-import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
+import { adapterRegistry } from '../../../adapters/registry.js';
 import {
   enforceAttunementRules,
   resolveAttunementLimit,
@@ -21,12 +21,12 @@ export function characterCanCastSpells(character) {
   ].filter((entry) => entry.name);
 
   if (classes.some((entry) => (
-    hasSpellcastingConfig(installedRegistry.getClassRuntimeConfig(entry.name))
-    || hasSpellcastingConfig(installedRegistry.getSubclassRuntimeConfig(entry.name, entry.subclass))
+    hasSpellcastingConfig(adapterRegistry.getClassRuntimeConfig(entry.name))
+    || hasSpellcastingConfig(adapterRegistry.getSubclassRuntimeConfig(entry.name, entry.subclass))
   ))) return true;
 
   return hasSpellcastingConfig(
-    installedRegistry.getSpeciesRuntimeConfig(character?.speciesName, character?.speciesSource),
+    adapterRegistry.getSpeciesRuntimeConfig(character?.speciesName, character?.speciesSource),
   );
 }
 

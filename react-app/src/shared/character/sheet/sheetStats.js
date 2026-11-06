@@ -1,4 +1,4 @@
-import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
+import { adapterRegistry } from '../../../adapters/registry.js';
 import { extractFixedProficiencyLabels } from '../progression/typedProficiencies.js';
 import { wildShapeSaveBonus, wildShapeSaveProficient, wildShapeSkillBonus } from '../forms/wildShapeForm.js';
 import { getProficiencyBonus } from '../progression/proficiency.js';
@@ -178,11 +178,11 @@ function characterClassEntities(C) {
 function collectRuntimeEffects(C) {
   const effects = [];
   characterClassEntities(C).forEach((entity) => {
-    (installedRegistry.getClassSheetEffects(entity.className) || []).forEach((effect) => {
+    (adapterRegistry.getClassSheetEffects(entity.className) || []).forEach((effect) => {
       if (entity.level >= Number(effect?.minLevel || 1)) effects.push(effect);
     });
     if (entity.subclassShortName) {
-      (installedRegistry.getSubclassSheetEffects(entity.className, entity.subclassShortName) || []).forEach((effect) => {
+      (adapterRegistry.getSubclassSheetEffects(entity.className, entity.subclassShortName) || []).forEach((effect) => {
         if (entity.level >= Number(effect?.minLevel || 1)) effects.push(effect);
       });
     }

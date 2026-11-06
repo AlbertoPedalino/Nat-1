@@ -1,4 +1,4 @@
-import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
+import { adapterRegistry } from '../../../adapters/registry.js';
 import { lowerKey } from '../../../shared/content/nameKeys.js';
 
 // How a spell row is held: its origin, its preparation state (prepared, known,
@@ -12,7 +12,7 @@ function getPrepMode(className) {
   let mode = PREP_MODE_CACHE.get(key);
   if (mode === undefined) {
     try {
-      const cfg = installedRegistry.getClassRuntimeConfig(className)?.spellcasting;
+      const cfg = adapterRegistry.getClassRuntimeConfig(className)?.spellcasting;
       mode = cfg?.preparedMode || 'prepared';
     } catch { mode = 'prepared'; }
     PREP_MODE_CACHE.set(key, mode);

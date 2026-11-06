@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react';
 import { useState } from 'react';
 import { expect, test, vi } from 'vitest';
-import { installedRegistry } from '../../../../../src/adapters/index.js';
+import { adapterRegistry } from '../../../../../src/adapters/index.js';
 import { useResourceSideEffects } from '../../../../../src/pages/charsheet/actions/useResourceSideEffects.js';
 
 // Three 1st- and two 2nd-level slots, no Pact Magic.
@@ -10,11 +10,11 @@ vi.mock('../../../../../src/pages/charsheet/spells/spellcasting.js', async (impo
   getSheetSlots: () => ({ regular: [3, 2], pact: null }),
 }));
 
-installedRegistry.registerResourceSideEffect('test_sorc_pts', () => ({
+adapterRegistry.registerResourceSideEffect('test_sorc_pts', () => ({
   type: 'create_spell_slot_from_points', label: 'Create Spell Slot', currentSP: 3,
   conversionTable: { 1: 2, 2: 3, 3: 5 }, sourceResourceKey: 'test_sorc_pts',
 }));
-installedRegistry.registerResourceSideEffect('test_resurgence', () => ({
+adapterRegistry.registerResourceSideEffect('test_resurgence', () => ({
   type: 'wild_resurgence', label: 'Wild Resurgence', hasWildShape: true, hasAvailableSlot: true, currentWS: 1,
 }));
 

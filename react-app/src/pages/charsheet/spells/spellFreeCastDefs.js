@@ -1,4 +1,4 @@
-import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
+import { adapterRegistry } from '../../../adapters/registry.js';
 import { filterByRequiredChoice } from '../../../shared/character/progression/lineageMatch.js';
 import {
   collectFreeCastsForGrant,
@@ -18,7 +18,7 @@ import { asArray } from '../../../shared/lists.js';
 
 export function getFreeCastDefsForCharacter(C) {
   const defs = [];
-  const speciesCfg = installedRegistry.getSpeciesRuntimeConfig(C?.speciesName, C?.speciesSource)?.spellcasting || {};
+  const speciesCfg = adapterRegistry.getSpeciesRuntimeConfig(C?.speciesName, C?.speciesSource)?.spellcasting || {};
   filterByRequiredChoice([
     ...(speciesCfg.alwaysKnownSpells || []),
     ...(speciesCfg.alwaysPreparedSpells || []),
@@ -35,8 +35,8 @@ export function getFreeCastDefsForCharacter(C) {
 
   spellModifierEntities(C).forEach(({ className, subclassShortName, level }) => {
     const cfgs = [
-      { cfg: installedRegistry.getClassRuntimeConfig(className), type: 'class', label: className },
-      { cfg: installedRegistry.getSubclassRuntimeConfig(className, subclassShortName), type: 'subclass', label: subclassShortName || className },
+      { cfg: adapterRegistry.getClassRuntimeConfig(className), type: 'class', label: className },
+      { cfg: adapterRegistry.getSubclassRuntimeConfig(className, subclassShortName), type: 'subclass', label: subclassShortName || className },
     ];
     cfgs.forEach(({ cfg, type, label }) => {
       const sp = cfg?.spellcasting;

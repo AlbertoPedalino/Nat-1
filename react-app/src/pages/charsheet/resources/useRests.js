@@ -15,7 +15,7 @@ import {
 import { clearedToggles } from '../state/toggleState.js';
 import { applyFreeCastRest } from '../../../shared/character/spells/spellFreeCasts.js';
 import { getFreeCastDefsForCharacter } from '../spells/spellFreeCastDefs.js';
-import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
+import { adapterRegistry } from '../../../adapters/registry.js';
 import { rollDie } from '../../../shared/character/dice/dice.js';
 
 // A long rest reduces Exhaustion by 1 (XPHB 2024). Returns the patch fields that
@@ -140,7 +140,7 @@ export function useRests({ C, sheet, setSheet, resources, setResources, freeCast
     }
 
     if (C?.speciesName) {
-      const grants = installedRegistry.getSpeciesLongRestGrants(C.speciesName, C.speciesSource);
+      const grants = adapterRegistry.getSpeciesLongRestGrants(C.speciesName, C.speciesSource);
       if (grants?.inspiration) {
         s.sheetInspiration = true;
         patch.inspiration = true;

@@ -1,4 +1,4 @@
-import { adapterRegistry as installedRegistry } from '../../../adapters/registry.js';
+import { adapterRegistry } from '../../../adapters/registry.js';
 import { ownedFeatNames } from '../progression/selectedFeats.js';
 import { finalAbilityModifier } from '../progression/abilityScores.js';
 import { primaryClassLevel, totalLevel } from '../progression/classLevel.js';
@@ -28,8 +28,8 @@ function safeArray(getter, ...args) {
 
 function classHpBonusFor(className, subclassShortName, classLevel, snapshotEffects) {
   const live = [
-    ...safeArray(installedRegistry.getClassSheetEffects, className),
-    ...safeArray(installedRegistry.getSubclassSheetEffects, className, subclassShortName),
+    ...safeArray(adapterRegistry.getClassSheetEffects, className),
+    ...safeArray(adapterRegistry.getSubclassSheetEffects, className, subclassShortName),
   ];
   const effects = live.length ? live : (snapshotEffects || []);
   return effects.reduce((sum, eff) => {
@@ -43,8 +43,8 @@ function classHpBonusFor(className, subclassShortName, classLevel, snapshotEffec
 }
 
 function speciesHpBonus(character) {
-  const live = installedRegistry.getSpeciesSheetHpBonus
-    ? Number(installedRegistry.getSpeciesSheetHpBonus(character?.speciesName, character?.speciesSource) || 0)
+  const live = adapterRegistry.getSpeciesSheetHpBonus
+    ? Number(adapterRegistry.getSpeciesSheetHpBonus(character?.speciesName, character?.speciesSource) || 0)
     : 0;
   if (live) return live;
   return Number(character?.speciesSnapshot?.hpBonusPerLevel || 0);
@@ -52,8 +52,8 @@ function speciesHpBonus(character) {
 
 function featHpBonusPerLevel(featName, featSnapshot) {
   if (featSnapshot?.hpBonusPerLevel != null) return Number(featSnapshot.hpBonusPerLevel) || 0;
-  const adapter = typeof installedRegistry.getFeatAdapter === 'function'
-    ? installedRegistry.getFeatAdapter(featName)
+  const adapter = typeof adapterRegistry.getFeatAdapter === 'function'
+    ? adapterRegistry.getFeatAdapter(featName)
     : null;
   if (typeof adapter !== 'function') return 0;
   try {
