@@ -8,6 +8,7 @@ import { compareText, flattenList } from '../../lists.js';
 import { matchKey, splitNameSource, stripSource } from '../../content/nameKeys.js';
 import { loadGameData } from '../../content/gameData.js';
 import { titleCase } from '../../ui/textCase.js';
+import { stripMarkup } from '../../content/markupText.js';
 
 const _masteries = new Map();
 let _masteryLoadPromise = null;
@@ -109,8 +110,7 @@ export function getWeaponMasteryChoiceCount(className, level) {
 }
 
 function cleanTagText(value) {
-  return String(value || '')
-    .replace(/\{@[a-z]+ ([^|}]+)(?:\|[^}]*)?\}/gi, '$1')
+  return stripMarkup(value)
     .replace(/[{}]/g, '')
     .trim();
 }

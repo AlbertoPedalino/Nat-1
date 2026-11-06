@@ -1,6 +1,7 @@
 import { normalizeSpellRecord } from '../shared/character/spells/spellNormalization.js';
 import { matchKey, stripSource } from '../shared/content/nameKeys.js';
 import { asArray, byName } from '../shared/lists.js';
+import { stripMarkup } from '../shared/content/markupText.js';
 
 const WEAPON_TYPES = new Set(['M', 'R']);
 const ARMOR_TYPES = new Set(['LA', 'MA', 'HA']);
@@ -113,7 +114,7 @@ function featCategoryCodes(rawCategory) {
 }
 
 function cleanTag(value) {
-  return stripSource(value).replace(/\{@\w+\s+/g, '').replace(/\}/g, '').trim();
+  return stripSource(stripMarkup(value));
 }
 
 function extractNumericLevel(node, expectLevelValue = false) {

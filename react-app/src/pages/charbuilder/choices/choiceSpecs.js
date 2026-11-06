@@ -7,6 +7,7 @@ import { getLanguageOptions } from '../../../shared/character/progression/langua
 import { filterByRequiredChoice } from '../../../shared/character/progression/lineageMatch.js';
 import { PROFICIENCY_CHOICE_KEYS } from '../../../shared/character/progression/typedProficiencies.js';
 import { asArray } from '../../../shared/lists.js';
+import { stripMarkup } from '../../../shared/content/markupText.js';
 
 const STD_LANGS = STANDARD_LANGUAGES;
 const EXOTIC_LANGS = EXOTIC_LANGUAGES;
@@ -34,8 +35,7 @@ export function fixedKeysFromBlocks(blocks, excluded = PROFICIENCY_CHOICE_KEYS) 
 }
 
 function specSan(value) {
-  return String(value || '')
-    .replace(/\{@[^}]+\}/g, (match) => match.split('|')[0].replace(/\{@\w+ /, '').replace(/\}/g, ''))
+  return stripMarkup(value)
     .split('|')[0]
     .trim();
 }

@@ -2,6 +2,7 @@ import { canStackInventoryItems } from './itemIdentity.js';
 import { itemChargeMaximum } from './itemCharges.js';
 import { isItemCarried } from './weight.js';
 import { matchKey, splitNameSource } from '../../content/nameKeys.js';
+import { stripMarkup } from '../../content/markupText.js';
 
 export function parseInventoryItemRef(ref) {
   const { name, source } = splitNameSource(ref);
@@ -12,8 +13,7 @@ export function parseInventoryItemRef(ref) {
 }
 
 export function cleanItemName(name) {
-  return String(name || '')
-    .replace(/\{@(?:item|filter|book|dice|damage|dc)\s+([^}|]+)(?:\|[^}]*)?\}/gi, '$1')
+  return stripMarkup(name)
     .replace(/\s+/g, ' ')
     .trim();
 }

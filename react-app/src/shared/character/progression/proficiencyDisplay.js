@@ -2,6 +2,7 @@ import { titleCase } from '../../ui/textCase.js';
 import { matchKey } from '../../content/nameKeys.js';
 import { DAMAGE_TYPES } from '../../content/rulesVocabulary.js';
 import { compareText } from '../../lists.js';
+import { stripMarkup } from '../../content/markupText.js';
 const CANONICAL_DISPLAY_LABELS = {
   light: 'Light',
   medium: 'Medium',
@@ -62,8 +63,7 @@ const MARTIAL_WEAPONS = new Set([
 ]);
 
 export function cleanProficiencyText(value) {
-  return String(value ?? '')
-    .replace(/\{@[a-z]+ ([^|}]+)(?:\|[^}]*)?\}/gi, '$1')
+  return stripMarkup(value)
     .replace(/[{}]/g, '')
     .replace(/\.$/, '')
     .split('|')[0]

@@ -12,6 +12,7 @@ import { capitalize } from '../../shared/ui/textCase.js';
 import { ABILITY_NAMES } from '../../shared/content/rulesVocabulary.js';
 import { crKey } from '../../shared/bestiary/challengeRating.js';
 import { asArray, byName, compareText } from '../../shared/lists.js';
+import { stripMarkup } from '../../shared/content/markupText.js';
 
 export const COMPENDIUM_KINDS = Object.freeze([
   { key: 'spell', label: 'Spells', single: 'Spell' },
@@ -137,7 +138,7 @@ const textCache = new WeakMap();
 
 function collectText(value, out) {
   if (typeof value === 'string') {
-    out.push(value.replace(/\{@\w+\s+([^}|]*)[^}]*\}/g, '$1'));
+    out.push(stripMarkup(value));
   } else if (Array.isArray(value)) {
     value.forEach((item) => collectText(item, out));
   } else if (value && typeof value === 'object') {

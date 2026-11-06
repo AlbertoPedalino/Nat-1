@@ -1,13 +1,12 @@
 import { asArray } from '../../../shared/lists.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
 import { PROFICIENCY_CHOICE_KEYS } from '../../../shared/character/progression/typedProficiencies.js';
+import { stripMarkup } from '../../../shared/content/markupText.js';
 
 export function normalizeArtificerTool(value) {
   if (!value) return '';
 
-  const raw = String(value)
-    .replace(/\{@[a-z]+ ([^|}]+)(?:\|[^}]*)?\}/gi, '$1')
-    .replace(/\{@[a-z]+\s*/gi, '')
+  const raw = stripMarkup(value)
     .replace(/[{}]/g, '')
     .split('|')[0]
     .trim();

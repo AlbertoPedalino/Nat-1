@@ -1,6 +1,7 @@
 import { canonicalProficiencyLabel } from './proficiencyDisplay.js';
 import { matchKey } from '../../content/nameKeys.js';
 import { asArray } from '../../lists.js';
+import { stripMarkup } from '../../content/markupText.js';
 
 const TYPED_PROFICIENCY_RE = /^(skill|tool|language|weapon):(.+)$/i;
 const CHOICE_PLACEHOLDER_RE = /\bchoose\b|\byour choice\b|\bof your choice\b|\bone type\b/i;
@@ -12,8 +13,7 @@ export const PROFICIENCY_CHOICE_KEYS = Object.freeze([
 ]);
 
 function stripTags(value) {
-  return String(value ?? '')
-    .replace(/\{@[a-z]+ ([^|}]+)(?:\|[^}]*)?\}/gi, '$1')
+  return stripMarkup(value)
     .replace(/[{}]/g, '')
     .split('|')[0]
     .trim();

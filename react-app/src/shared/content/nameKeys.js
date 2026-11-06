@@ -1,3 +1,5 @@
+import { stripMarkup } from './markupText.js';
+
 // Turning a name into something to compare or show, the same way everywhere.
 // Each helper has one meaning; pick the one that says what the comparison is.
 
@@ -30,11 +32,7 @@ export function splitNameSource(value) {
 export function choiceText(value) {
   if (value == null) return '';
   if (typeof value === 'string') {
-    return value
-      .split('|')[0]
-      .replace(/\{@\w+\s+/g, '')
-      .replace(/\}/g, '')
-      .trim();
+    return stripMarkup(value).split('|')[0].trim();
   }
   if (typeof value === 'number' || typeof value === 'boolean') return String(value);
   if (typeof value === 'object') {

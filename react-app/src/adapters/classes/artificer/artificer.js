@@ -15,6 +15,7 @@ import {
 import { titleCase } from '../../../shared/ui/textCase.js';
 import { matchKey, stripSource } from '../../../shared/content/nameKeys.js';
 import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
+import { stripMarkup } from '../../../shared/content/markupText.js';
 
 const _REPLICATE_BUCKET_LABEL = Object.fromEntries(REPLICATE_BUCKETS.map((b) => [b.id, b.label]));
 
@@ -333,7 +334,7 @@ registerClassSheetChoiceMeta("Artificer", {
   },
   normalizeChoiceValue: (value, key) => {
     const k = String(key || "");
-    const raw = stripSource(value).replace(/\{@\w+ /g, "").replace(/\}/g, "").trim();
+    const raw = stripSource(stripMarkup(value));
     if (!raw) return "";
     if (baseChoiceKey(k) === "artificer_replicate_magic_item_plans") {
       return replicateChoiceLabel(raw);

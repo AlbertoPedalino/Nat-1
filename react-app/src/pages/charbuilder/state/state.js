@@ -20,6 +20,7 @@ import { withOwnedFeatSnapshots } from '../../../shared/character/progression/se
 import { matchKey, splitNameSource, stripSource } from '../../../shared/content/nameKeys.js';
 import { ABILITIES } from '../../../shared/content/rulesVocabulary.js';
 import { multiclassLevels } from '../../../shared/character/progression/classLevel.js';
+import { stripMarkup } from '../../../shared/content/markupText.js';
 
 // Fields whose value feeds normalizeCharacterChoices. When a reducer patch touches
 // any of them, normalizedChoices is rebuilt so it stays the single source of truth
@@ -95,8 +96,7 @@ export function normalizeCharacterLevels(character = {}) {
 }
 
 function normChoice(value) {
-  return matchKey(stripSource(value)
-    .replace(/\{@[a-z]+ ([^|}]+)(?:\|[^}]*)?\}/gi, '$1'));
+  return matchKey(stripSource(stripMarkup(value)));
 }
 
 export const initialCharacter = {

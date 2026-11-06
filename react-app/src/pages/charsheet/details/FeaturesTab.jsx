@@ -16,6 +16,7 @@ import { choiceKey } from '../../../shared/content/nameKeys.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
+import { stripMarkup } from '../../../shared/content/markupText.js';
 
 export default function FeaturesTab({ C }) {
   if (!C) return null;
@@ -451,8 +452,7 @@ function featureKey(feature) {
 }
 
 function cleanChoiceText(text) {
-  return String(text || '')
-    .replace(/\{@[a-z]+ ([^|}]+)(?:\|[^}]*)?\}/gi, '$1')
+  return stripMarkup(text)
     .split('|')[0]
     .replace(/_/g, ' ')
     .trim();
