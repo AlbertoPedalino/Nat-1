@@ -38,11 +38,12 @@ import {
 } from '../negotiation/negotiation.js';
 import { PLAYER_COLORS } from './constants.js';
 import { makeSavedEncounter, normalizeEncounterQuest } from './storage.js';
-import { clampInt, hydrateEncounterItems, monsterKey, toEncounterMonster } from '../bestiary/monsterUtils.js';
+import { hydrateEncounterItems, monsterKey, toEncounterMonster } from '../bestiary/monsterUtils.js';
 import { combatantToSheetPatch, resolveCombatVitals } from '../campaign/sheetSync.js';
 import { SYNCED_VITALS, pickCharacterVitals } from '../../../shared/character/combat/vitals.js';
 import { absorbMonsterVitals } from '../../../shared/vtt/tokens/fightVitals.js';
 import { dedupeFightsByEncounter, dedupeLibraryById } from '../library/library.js';
+import { clampInt } from '../../../shared/numbers.js';
 
 export const DEFAULT_PARTY = Object.freeze({ count: 4, level: 5 });
 

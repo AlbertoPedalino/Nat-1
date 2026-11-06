@@ -14,6 +14,7 @@ import {
   writeSheetFrame,
 } from '../../../shared/vtt/sheets/sheetFrame.js';
 import { battleMapSurfaceSx } from '../map/battleMapSurface.js';
+import { clamp } from '../../../shared/numbers.js';
 
 // One key for the window itself, not one per character: the player is arranging
 // a place on their screen to read a sheet, and it should not move because they
@@ -294,10 +295,6 @@ export default function FloatingSheetPanel({
       </IconButton>
     </Box>
   );
-}
-
-function clamp(value, lower, upper) {
-  return Math.max(lower, Math.min(upper, value));
 }
 
 const panelSx = {

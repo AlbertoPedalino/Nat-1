@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { Box, Button, Chip, FormControl, InputLabel, MenuItem, Paper, Select, Stack, Typography } from '@mui/material';
 import { Users } from 'lucide-react';
 import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
-import { clampInt } from '../bestiary/monsterUtils.js';
+import { clampInt } from '../../../shared/numbers.js';
 
 export default function CampaignImport() {
   const { campaignPlayers, state, dispatch } = useEncounterBuilder();

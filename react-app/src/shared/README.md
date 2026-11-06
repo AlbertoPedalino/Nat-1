@@ -9,6 +9,7 @@ See the [source map](../README.md) for the page feature folders.
 | `campaign/` | Campaign roster, shared character vitals, campaign selection |
 | `character/` | Character rules and the UI tied to those rules; see below |
 | `cloud/` | Supabase access, authentication, and synchronization; see below |
+| `numbers.js` | `clamp` / `clampInt`, the one way to keep a number in range |
 | `content/` | D&D entry rendering, 5etools links, source filtering, text search |
 | `dungeon/` | Dungeon generation helpers, room markers, linked encounters |
 | `hexcrawl/` | Hex data and campaign clock |

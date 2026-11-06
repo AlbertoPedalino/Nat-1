@@ -1,6 +1,7 @@
 import { summarizeCharacter } from '../../campaigns/sheetSummary.js';
-import { clampInt, numberOr } from '../bestiary/monsterUtils.js';
+import { numberOr } from '../bestiary/monsterUtils.js';
 import { combatantToSheetPatch, resolveCombatVitals } from './sheetSync.js';
+import { clampInt } from '../../../shared/numbers.js';
 
 // Maps a stored campaign character row into the player shape the encounter
 // builder imports. Kept out of `useCampaignPlayers` — which must import the

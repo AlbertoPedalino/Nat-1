@@ -1,3 +1,4 @@
+import { clamp } from '../../numbers.js';
 // A light filter on a scene picture: the same daylight map shown at dusk or at
 // night without uploading a second painting. Each picture — the battlemap and
 // every background — keeps its own, keyed by its storage path, so one uploaded
@@ -41,7 +42,6 @@ export const IMAGE_FILTER_TYPES = Object.freeze(IMAGE_FILTER_PRESETS.map((preset
 
 export const DEFAULT_IMAGE_FILTER = Object.freeze({ type: 'none', intensity: 1 });
 
-const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
 export function normalizeImageFilter(value) {
   const source = value && typeof value === 'object' ? value : {};

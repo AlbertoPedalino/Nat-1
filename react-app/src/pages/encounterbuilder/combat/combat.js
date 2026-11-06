@@ -1,5 +1,5 @@
 import { COMBAT_LABEL_COLORS, COMBAT_LABEL_SHAPES, PLAYER_COLORS } from '../state/constants.js';
-import { clampInt, getAC, getHP, numberOr } from '../bestiary/monsterUtils.js';
+import { getAC, getHP, numberOr } from '../bestiary/monsterUtils.js';
 import { abilityModifier } from '../../../shared/character/progression/abilityModifier.js';
 import { resolveCombatVitals, combatVitalsMatch } from '../campaign/sheetSync.js';
 import {
@@ -13,6 +13,7 @@ import { addReminder, normalizeEffects, removeEffect } from '../../../shared/cha
 import { creatureRollSources } from '../../../shared/character/combat/rollSources.js';
 import { advArgFor, withExtraSource } from '../../../shared/character/dice/advantage.js';
 import { rollD20, rollDie } from '../../../shared/character/dice/dice.js';
+import { clampInt } from '../../../shared/numbers.js';
 
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 

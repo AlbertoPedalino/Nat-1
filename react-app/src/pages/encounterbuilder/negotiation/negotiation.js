@@ -1,3 +1,4 @@
+import { clampInt } from '../../../shared/numbers.js';
 export const DEFAULT_NPC_ATTITUDE = 'neutral';
 export const MIN_INTEREST = 1;
 export const MAX_INTEREST = 5;
@@ -106,7 +107,3 @@ export function resolveNegotiation(value, actionId) {
   };
 }
 
-function clampInt(value, min, max, fallback) {
-  const parsed = Math.trunc(Number(value));
-  return Number.isFinite(parsed) ? Math.max(min, Math.min(max, parsed)) : fallback;
-}

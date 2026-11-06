@@ -1,5 +1,6 @@
 import { DIFFICULTY_COLORS, DIFFICULTY_LABELS, XT } from '../state/constants.js';
-import { clampInt, numberOr } from '../bestiary/monsterUtils.js';
+import { numberOr } from '../bestiary/monsterUtils.js';
+import { clampInt } from '../../../shared/numbers.js';
 
 export function calculateDifficulty(encounter, party) {
   const totalXp = (Array.isArray(encounter) ? encounter : [])

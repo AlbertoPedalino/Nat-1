@@ -1,3 +1,4 @@
+import { clamp } from '../../numbers.js';
 // Where a player has put the floating sheet over the map, and how big they made
 // it. Session state, never a row: this is one person's window on one screen, not
 // something the table shares or the campaign remembers.
@@ -25,12 +26,6 @@ export const SHEET_VISIBLE_HEADER = 40;
 // under it, and a sheet edge-to-edge reads as a page rather than a window.
 export const MAX_SHEET_WIDTH_RATIO = 0.94;
 export const MAX_SHEET_HEIGHT_RATIO = 0.92;
-
-function clamp(value, lower, upper) {
-  // An upper below the lower would otherwise invert the range and return the
-  // smaller of the two, which on a tiny container is a negative size.
-  return Math.max(lower, Math.min(Math.max(lower, upper), value));
-}
 
 // Strict on purpose. `Number(null)` and `Number([])` are both 0, so coercing
 // here would read a truncated entry as a deliberate placement in the corner

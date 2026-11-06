@@ -23,6 +23,12 @@ test('a signed modifier is written only by numberFormat.js', () => {
   }), []);
 });
 
+test('clamp and clampInt are defined only in shared/numbers.js', () => {
+  assert.deepEqual(sourceFilesMatching(/(function|const)\s+clamp(Int)?\b/, {
+    allow: ['shared/numbers.js'],
+  }), []);
+});
+
 test('every realtime channel opens through openRealtimeChannel', () => {
   assert.deepEqual(sourceFilesMatching(/\.(channel|removeChannel)\(/, {
     allow: ['shared/cloud/realtimeChannel.js'],

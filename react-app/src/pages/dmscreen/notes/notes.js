@@ -1,4 +1,5 @@
 import { BOARD_COLUMNS } from './layout.js';
+import { clampInt } from '../../../shared/numbers.js';
 
 export const MIN_NOTE_HEIGHT = 160;
 export const MAX_NOTE_HEIGHT = 1200;
@@ -12,12 +13,6 @@ export const AUTO_NOTE_HEIGHT = 0;
 export const DEFAULT_NOTE_SIZE = Object.freeze({ cols: DEFAULT_NOTE_COLS, height: AUTO_NOTE_HEIGHT });
 // Pre-12-column notes stored `span` as 1..3 thirds of the board.
 const LEGACY_SPAN_TO_COLS = BOARD_COLUMNS / 3;
-
-function clampInt(value, min, max, fallback) {
-  const number = Math.round(Number(value));
-  if (!Number.isFinite(number)) return fallback;
-  return Math.min(max, Math.max(min, number));
-}
 
 export function normalizeNoteSize(size) {
   const legacySpan = size?.cols == null && size?.span != null

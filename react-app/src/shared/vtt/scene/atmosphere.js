@@ -1,3 +1,4 @@
+import { clamp } from '../../numbers.js';
 // Atmosphere is scene state, but its animation is not. Every viewer receives this
 // small description and renders the same seeded atmosphere locally; no frame or
 // particle position ever crosses the wire.
@@ -32,7 +33,6 @@ export const DEFAULT_ATMOSPHERE = Object.freeze({
   seed: 1,
 });
 
-const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
 function numberOr(value, fallback) {
   const parsed = Number(value);

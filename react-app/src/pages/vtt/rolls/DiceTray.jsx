@@ -11,6 +11,7 @@ import {
   simulateThrow,
   thrownDieSize,
 } from '../../../shared/vtt/rolls/dicePhysics.js';
+import { clamp } from '../../../shared/numbers.js';
 
 // Keep the final pose visible for a moment before revealing the result. The
 // extra animation frame guarantees that the browser has painted the last
@@ -292,10 +293,6 @@ function DiceThrow({ roll, at, table, startedAt, onSettled, centered }) {
       ))}
     </Box>
   );
-}
-
-function clamp(value, lower, upper) {
-  return Math.max(lower, Math.min(upper, value));
 }
 
 const rootSx = {

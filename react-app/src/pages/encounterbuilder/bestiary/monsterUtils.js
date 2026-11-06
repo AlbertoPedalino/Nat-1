@@ -1,14 +1,10 @@
 import { CR_XP, FALLBACK_MONSTER_TOKEN, IMAGE_BASE, SIZE_LABELS } from '../state/constants.js';
 import { parseCr } from '../../../shared/character/forms/beasts.js';
+import { clampInt } from '../../../shared/numbers.js';
 
 export function numberOr(value, fallback = 0) {
   const n = Number(value);
   return Number.isFinite(n) ? n : fallback;
-}
-
-export function clampInt(value, min, max, fallback = min) {
-  const n = Math.round(numberOr(value, fallback));
-  return Math.max(min, Math.min(max, n));
 }
 
 export function formatNumber(value) {

@@ -9,6 +9,7 @@ import { normalizeMapObjectKey, normalizeMapObjectStroke } from '../map/mapObjec
 import { VTT_COLORS } from '../colors.js';
 import { normalizeImageAtmospheres } from './atmosphere.js';
 import { normalizeImageFilters } from './imageFilters.js';
+import { clamp } from '../../numbers.js';
 
 export const LAYERS = Object.freeze(['map', 'tokens', 'gm']);
 export const DEFAULT_GRID = Object.freeze({
@@ -45,10 +46,6 @@ export const TOKEN_PATCH_KEYS = Object.freeze([
 function numberOr(value, fallback) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
-}
-
-function clamp(value, min, max) {
-  return Math.min(max, Math.max(min, value));
 }
 
 export function normalizeGrid(grid) {

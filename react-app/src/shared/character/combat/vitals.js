@@ -1,5 +1,6 @@
 import { normalizeConditions } from './conditions.js';
 import { normalizeEffects } from './combatEffects.js';
+import { clampInt } from '../../numbers.js';
 
 // Vitals are the character `data` fields kept in sync between the sheet and the
 // encounter combat: current HP, temp HP, max-HP bonus, death saves, active
@@ -33,12 +34,6 @@ function numberOr(value, fallback) {
 function finiteNumber(value) {
   const n = Number(value);
   return Number.isFinite(n) ? n : null;
-}
-
-function clampInt(value, min, max, fallback) {
-  const n = Math.round(Number(value));
-  if (!Number.isFinite(n)) return fallback;
-  return Math.max(min, Math.min(max, n));
 }
 
 function clampNonNegativeInt(value, fallback = 0) {
