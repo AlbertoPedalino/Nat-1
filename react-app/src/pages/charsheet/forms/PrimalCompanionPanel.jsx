@@ -113,7 +113,7 @@ export default function PrimalCompanionPanel({ character, sheet }) {
   if (!creature) {
     return (
       <Box onClick={(event) => event.stopPropagation()} sx={panelSx}>
-        <Typography sx={subSx} color={status === 'error' ? 'error.main' : 'text.secondary'}>
+        <Typography sx={[subSx, { color: status === 'error' ? 'error.main' : 'text.secondary' }]}>
           Primal beast stat block unavailable.
         </Typography>
       </Box>

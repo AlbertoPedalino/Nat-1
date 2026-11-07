@@ -38,7 +38,7 @@ export function RichText({ text, sx, variant = 'body2', color = 'text.secondary'
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px', ...sx }}>
       {paragraphs.map((paragraph, index) => (
-        <Typography key={`rt-${index}`} variant={variant} color={color} sx={{ lineHeight }}>
+        <Typography key={`rt-${index}`} variant={variant} sx={{ lineHeight, color }}>
           <RichInline text={paragraph} keyPrefix={`rt-${index}`} />
         </Typography>
       ))}

@@ -67,8 +67,10 @@ test('MUI layout components get their styles through sx, not removed system prop
           if (attr.type !== 'JSXAttribute' || attr.name.type !== 'JSXIdentifier') return;
           const key = attr.name.name;
           if (!SYSTEM.has(key) || OWN[comp].has(key)) return;
+          // Typography's own color takes palette names only; a theme path
+          // ("text.secondary") or a computed colour belongs in sx.
           if (comp === 'Typography' && key === 'color'
-            && (attr.value?.type !== 'StringLiteral' || TYPOGRAPHY_COLORS.has(attr.value.value))) return;
+            && attr.value?.type === 'StringLiteral' && TYPOGRAPHY_COLORS.has(attr.value.value)) return;
           found.push(`${relative(SRC, file).replace(/\\/g, '/')}:${attr.loc.start.line} <${comp} ${key}>`);
         });
       },

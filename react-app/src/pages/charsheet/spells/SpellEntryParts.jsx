@@ -68,7 +68,7 @@ export function FreeCastsInline({ freeCasts, freeCastUses, onToggleFreeCast, sx 
                   );
                 })}
               </Box>
-              <Typography variant="caption" color={used >= max ? UI_COLORS.dangerDeep : 'text.secondary'} sx={{ lineHeight: 1.1 }}>
+              <Typography variant="caption" sx={{ lineHeight: 1.1, color: used >= max ? UI_COLORS.dangerDeep : 'text.secondary' }}>
                 {fc.rechargeLabel}
                 {fc.canAlsoUseSlots === false ? ' · free only' : ' · also slots'}
                 {used >= max ? ' · spent' : ''}

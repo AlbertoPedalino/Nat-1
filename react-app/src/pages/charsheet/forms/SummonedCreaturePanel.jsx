@@ -128,7 +128,7 @@ export default function SummonedCreaturePanel({
   if (!creature) {
     return (
       <Box onClick={(event) => event.stopPropagation()} sx={panelSx}>
-        <Typography sx={subSx} color={status === 'error' ? 'error.main' : 'text.secondary'}>
+        <Typography sx={[subSx, { color: status === 'error' ? 'error.main' : 'text.secondary' }]}>
           Summoned statblock unavailable.
         </Typography>
       </Box>
