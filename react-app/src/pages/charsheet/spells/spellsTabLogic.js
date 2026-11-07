@@ -1,3 +1,4 @@
+import { getPactMagicInfo, getSpellCastMode } from '../../../shared/character/spells/pactMagic.js';
 import { mergeFreeCastsById, normalizeFreeCast } from '../../../shared/character/spells/spellFreeCasts.js';
 import { collectItemAttachedSpells } from '../../../shared/character/inventory/itemAttachedSpells.js';
 import { collectScrollSpells, scrollRowKey } from '../../../shared/character/inventory/spellScrolls.js';
@@ -237,4 +238,114 @@ function applySpellGrantOverrides(spell, overrides) {
 
 function sortByName(a, b) {
   return compareText(a.name, b.name);
+}
+
+// The tab's action filter chips, and which one a spell falls under.
+export const SPELL_ACTION_FILTERS = [
+  { key: 'all', label: 'All' },
+  { key: 'action', label: 'Action' },
+  { key: 'bonus', label: 'Bonus Action' },
+  { key: 'reaction', label: 'Reaction' },
+];
+
+export function getSpellActionFilter(entry) {
+  const unit = String(entry?.time?.[0]?.unit || '').toLowerCase();
+  if (unit === 'bonus') return 'bonus';
+  if (unit === 'reaction') return 'reaction';
+  if (unit === 'action') return 'action';
+  if (unit) return 'other';
+
+  const castingTime = String(entry?.castingTimeLabel || entry?.castingTime || '').toLowerCase();
+  if (/\breaction\b/.test(castingTime)) return 'reaction';
+  if (/\bbonus\b/.test(castingTime)) return 'bonus';
+  if (/\baction\b/.test(castingTime)) return 'action';
+  return 'action';
+}
+
+// The leveled spells as the tab lists them: each under every slot level it
+// can be cast at — a Pact Magic spell at the pact level (and its own level
+// when regular slots exist there), an upcastable spell at each higher level
+// with a slot, an item's slot-free spell at its own level only.
+export function expandSpellInfoBySlots(C, spellInfo, slots) {
+  if (!spellInfo) return spellInfo;
+  const maxRegular = (slots.regular || []).reduce((m, c, i) => c > 0 ? i + 1 : m, 0);
+  const maxPact = slots.pact?.level || 0;
+  const maxSlotLv = Math.max(maxRegular, maxPact);
+  if (maxSlotLv <= 0) return spellInfo;
+
+  const pactInfo = getPactMagicInfo(C);
+  const result = {
+    cantrips: spellInfo.cantrips,
+    atWill: spellInfo.atWill,
+    leveled: {},
+    lockedNames: spellInfo.lockedNames,
+    lockedEntries: spellInfo.lockedEntries,
+  };
+  const addLeveledEntry = (slotLevel, nextEntry) => {
+    const lv = Number(slotLevel || 0);
+    if (lv <= 0) return;
+    if (!result.leveled[lv]) result.leveled[lv] = [];
+    const castLv = Number(nextEntry?.castLevel || nextEntry?.level || lv);
+    const idx = result.leveled[lv].findIndex((existing) => (
+      lowerKey(existing?.name) === lowerKey(nextEntry?.name)
+      && lowerKey(existing?.source) === lowerKey(nextEntry?.source)
+      && Number(existing?.castLevel || existing?.level || lv) === castLv
+    ));
+    if (idx >= 0) {
+      const existing = result.leveled[lv][idx];
+      if (existing?.castMode !== 'pact_magic' && nextEntry?.castMode === 'pact_magic') {
+        result.leveled[lv][idx] = nextEntry;
+      }
+      return;
+    }
+    result.leveled[lv].push(nextEntry);
+  };
+
+  Object.entries(spellInfo.leveled).forEach(([level, entries]) => {
+    entries.forEach((entry) => {
+      if (entry.level <= 0) return;
+      if (entry.originType === 'item' && entry.consumesSlot === false) {
+        addLeveledEntry(Number(level), {
+          ...entry,
+          castLevel: Number(level),
+          castMode: entry.originType === 'item' ? 'item' : (entry.castMode || 'regular'),
+        });
+        return;
+      }
+      const baseLevel = Number(level);
+      const castMode = getSpellCastMode(C, entry, pactInfo);
+      if (castMode.mode === 'pact_magic') {
+        const pactLevel = Number(castMode.castLevel || baseLevel);
+        addLeveledEntry(pactLevel, { ...entry, castLevel: pactLevel, castMode: 'pact_magic' });
+        if (slots.regular?.[baseLevel - 1] > 0) {
+          addLeveledEntry(baseLevel, { ...entry, castLevel: baseLevel, castMode: 'regular' });
+        }
+      } else {
+        addLeveledEntry(baseLevel, { ...entry, castLevel: baseLevel, castMode: castMode.mode || 'regular' });
+      }
+    });
+  });
+
+  Object.entries(spellInfo.leveled).forEach(([level, entries]) => {
+    entries.forEach((entry) => {
+      if (entry.level <= 0) return;
+      if (entry.originType === 'item' && entry.consumesSlot === false) return;
+      if (entry.ritualOnly) return;
+      if (!entry.entriesHigherLevel) return;
+      const baseLevel = Number(level);
+      const castMode = getSpellCastMode(C, entry, pactInfo);
+      for (let lv = baseLevel + 1; lv <= maxSlotLv; lv++) {
+        const hasRegularSlot = slots.regular?.[lv - 1] > 0;
+        const hasPactSlot = slots.pact?.level === lv && slots.pact.count > 0;
+        // The allowance belongs to the granted spell, not to every upcast row.
+        const upcastEntry = { ...entry, freeCasts: undefined, castLevel: lv };
+        if (castMode.mode === 'pact_magic') {
+          if (hasRegularSlot) addLeveledEntry(lv, { ...upcastEntry, castMode: 'regular' });
+        } else if (hasRegularSlot || hasPactSlot) {
+          addLeveledEntry(lv, { ...upcastEntry, castMode: castMode.mode || 'regular' });
+        }
+      }
+    });
+  });
+  return result;
 }

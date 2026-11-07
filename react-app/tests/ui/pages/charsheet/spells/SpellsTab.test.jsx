@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { ThemeProvider } from '@mui/material';
 import { vi } from 'vitest';
 import SpellsTab from '../../../../../src/pages/charsheet/spells/SpellsTab.jsx';
@@ -105,4 +105,26 @@ test('an item reference without a source uses the preferred catalog printing', a
   render(view(C));
   fireEvent.click(await screen.findByText('Levitate', { exact: true }));
   expect(await screen.findByText('The target rises into the air.')).toBeVisible();
+});
+
+test('the spell picker lists the class spells of a level and, for a Wizard, edits the spellbook', async () => {
+  loaders.loadSpells.mockResolvedValue({
+    spells: [
+      { name: 'Magic Missile', source: 'XPHB', level: 1, school: 'V' },
+      { name: 'Cure Wounds', source: 'XPHB', level: 1, school: 'A' },
+    ],
+    classSpellIndex: { wizard: ['magic missile'] },
+    failedFiles: [],
+  });
+  const wizard = {
+    className: 'Wizard', classLevel: 3, level: 3, abilityScores: { int: 16 }, wizardSpellbook: {},
+    clsSnapshot: { casterProgression: 'full', cantripProgression: [3, 3, 3], preparedSpellsProgression: [4, 5, 6] },
+  };
+  render(view(wizard));
+  fireEvent.click(await screen.findByRole('button', { name: 'Add / Remove Spell' }));
+  const dialog = await screen.findByRole('dialog');
+  fireEvent.click(within(dialog).getByRole('button', { name: 'Spellbook' }));
+  fireEvent.click(within(dialog).getByRole('button', { name: /^1 / }));
+  expect(await within(dialog).findByText('Magic Missile')).toBeInTheDocument();
+  expect(within(dialog).queryByText('Cure Wounds')).not.toBeInTheDocument();
 });
