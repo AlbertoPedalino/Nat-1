@@ -5,7 +5,7 @@ import { openRealtimeChannel } from '../../cloud/realtimeChannel.js';
 import {
   cameraMessage, normalizeCameraSource, presenterInspectionMessage, presenterStateMessage,
 } from './cameraSync.js';
-import { listenForRecovery } from '../../cloud/sync/recoveryTriggers.js';
+import { listenForRecovery, RECOVERY_INTERVAL_MS } from '../../cloud/sync/recoveryTriggers.js';
 
 // One channel per scene carries both streams: committed row changes for tokens,
 // strokes and the scene itself, plus ephemeral drag previews. This is the only
@@ -29,7 +29,8 @@ const FOLLOWER_EVENT = 'camera-follower';
 // Sent by a presenter whose channel (re)subscribed — a GM refresh — so an
 // already-open projector answers at once instead of at its next heartbeat.
 const FOLLOWER_QUERY_EVENT = 'camera-follower-query';
-export const FOLLOWER_HEARTBEAT_MS = 30_000;
+// A follower says it still follows on every recovery heartbeat.
+export const FOLLOWER_HEARTBEAT_MS = RECOVERY_INTERVAL_MS;
 export const FOLLOWER_TTL_MS = 75_000;
 const CAMERA_SEND_MS = 50;
 
@@ -181,17 +182,18 @@ export function useSceneLive({
     if (!channel) return undefined;
     channelRef.current = channel;
 
-    const followerTimer = window.setInterval(() => {
+    // Missed events are recovered on the shared triggers, and on each
+    // heartbeat a follower says it still follows. The map keeps following in
+    // a background tab (a projector, a second screen), so its heartbeat runs
+    // while hidden too.
+    const stopRecovery = listenForRecovery((reason) => {
+      requestReconcile(reason);
+      if (reason !== 'interval') return;
       const source = followed();
       if (source) send(FOLLOWER_EVENT, { source });
-    }, FOLLOWER_HEARTBEAT_MS);
-    // Missed events are recovered on the shared triggers. The map keeps
-    // following in a background tab (a projector, a second screen), so its
-    // timer runs while hidden too.
-    const stopRecovery = listenForRecovery(requestReconcile, { periodic: true, whenHidden: true });
+    }, { periodic: true, whenHidden: true });
 
     return () => {
-      window.clearInterval(followerTimer);
       stopRecovery();
       channelRef.current = null;
       const cameraState = cameraSendRef.current;
