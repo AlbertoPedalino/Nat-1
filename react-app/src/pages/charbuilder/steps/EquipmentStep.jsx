@@ -7,7 +7,7 @@ import { Backpack, Coins, PackagePlus, Trash2 } from 'lucide-react';
 import SearchField from '../../../shared/ui/SearchField.jsx';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { ItemNameIcon } from '../../../shared/content/FiveEToolsLink.jsx';
-import { CurrencyRow } from '../../../shared/character/inventory/CurrencyCoinBox.jsx';
+import { CurrencyRow } from '../../../shared/character/inventory/CurrencyRow.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import { ItemReferenceBody, QuantityAdder } from '../../../shared/character/inventory/ItemReference.jsx';
 import { formatWeight, totalCarriedWeight } from '../../../shared/character/inventory/weight.js';

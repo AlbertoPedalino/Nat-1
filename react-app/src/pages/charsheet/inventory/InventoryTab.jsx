@@ -4,7 +4,7 @@ import { adapterRegistry } from '../../../adapters/index.js';
 import { availableItemFlagDefs } from '../../../shared/character/inventory/itemFlags.js';
 import { countAttunedItems } from '../../../shared/character/inventory/itemAttunement.js';
 import { getCharacterAttunementState } from './attunement.js';
-import { CurrencyRow } from '../../../shared/character/inventory/CurrencyCoinBox.jsx';
+import { CurrencyRow } from '../../../shared/character/inventory/CurrencyRow.jsx';
 import {
   setCoinAmount,
   updateCustomCurrency,
