@@ -11,9 +11,6 @@ import {
   sceneView,
   viewBackgroundPath,
 } from '../../../shared/vtt/scene/scene.js';
-import { DEFAULT_AREA_OPTIONS } from '../../../shared/vtt/map/areas.js';
-import { FEET_PER_CELL } from '../../../shared/vtt/map/measure.js';
-import { VTT_COLORS } from '../../../shared/vtt/colors.js';
 import { gridShape } from '../../../shared/vtt/map/hexGeometry.js';
 import { useSceneRole } from '../../../shared/vtt/session/useSceneRole.js';
 import { sheetGridColumns } from '../../../shared/vtt/sheets/sheetLayout.js';
@@ -69,6 +66,8 @@ import { useViewerProjection } from './useViewerProjection.js';
 import { useSceneSources } from './useSceneSources.js';
 import { useSceneSync } from './useSceneSync.js';
 import { usePlayerPreview } from './usePlayerPreview.js';
+import { useSceneTools } from './useSceneTools.js';
+import { viewportEdits } from './viewportEdits.js';
 import { useMapFullscreen } from './useMapFullscreen.js';
 import SceneHexcrawlCorner from './SceneHexcrawlCorner.jsx';
 import SceneTokenMenu from './SceneTokenMenu.jsx';
@@ -118,20 +117,17 @@ export default function SceneEditor({
     importOpen, setImportOpen, monsterOpen, setMonsterOpen, placementDrag, setPlacementDrag,
     selectedDrawingId, setSelectedDrawingId, contentView, setContentView,
   } = usePlayerPreview({ isGm: role.isGm });
-  const [brushSize, setBrushSize] = useState(3);
-  const [activeLayer, setActiveLayer] = useState('tokens');
+  // The GM editing the scene (not looking through the player preview).
+  const gmEditing = role.isGm && !gmPlayerPreview;
+  const {
+    brushSize, setBrushSize, activeLayer, setActiveLayer, drawColor, setDrawColor, drawWidth, setDrawWidth,
+    areaOptions, setAreaOptions, measureShape, setMeasureShape, feetPerCell, setFeetPerCell,
+  } = useSceneTools();
   const [imageSize, setImageSize] = useState(null);
-  const [drawColor, setDrawColor] = useState(VTT_COLORS.gold);
-  const [drawWidth, setDrawWidth] = useState(3);
-  // The next area of effect to place. Kept between placements, so a row of
-  // fire is a row of clicks.
-  const [areaOptions, setAreaOptions] = useState(DEFAULT_AREA_OPTIONS);
   const {
     mapFullscreen, handleMapFullscreenChange, floatingSheetOpen, setFloatingSheetOpen,
   } = useMapFullscreen(onMapFullscreenChange);
   const contentLayoutRef = useRef(null);
-  const [measureShape, setMeasureShape] = useState('line');
-  const [feetPerCell, setFeetPerCell] = useState(FEET_PER_CELL);
   const conditionEntries = useConditionEntries();
   const {
     clearFeed: clearRollFeed,
@@ -160,7 +156,7 @@ export default function SceneEditor({
   // backgrounds. The others stay uploaded and one click away.
   const viewForViewport = spectator
     ? projectorView
-    : role.isGm && !gmPlayerPreview ? gmView : sceneView(scene);
+    : gmEditing ? gmView : sceneView(scene);
   const shownImageForViewport = viewForViewport.shownImage;
   // Resolved against the scene's list: a view pointing at a background removed
   // since falls back instead of going blank.
@@ -323,6 +319,67 @@ export default function SceneEditor({
     ) : null;
   };
 
+  // What the viewport may change, and how: none of it in the GM's player
+  // preview (viewportEdits.js).
+  const viewportEditProps = viewportEdits(gmPlayerPreview, {
+    canMove,
+    selectedHex: hexcrawl.selected,
+    onHexClick: hexcrawl.enabled ? hexcrawl.clickHex : undefined,
+    hexBubble: hexcrawl.enabled ? hexcrawl.bubble : null,
+    onHexBubbleClose: hexcrawl.dismissBubble,
+    onDragToken: handleDragToken,
+    onMoveToken: handleMoveToken,
+    onMoveTokens: handleMoveTokens,
+    onDeleteTokens: handleDeleteTokens,
+    onResizeToken: handleMoveToken,
+    onRotateToken: handleMoveToken,
+    canSetDeathSaves: (token) => role.isGm || canMove(token),
+    onDeathSaveChange: handleDeathSaveChange,
+    onPaint: handlePaint,
+    onPaintEnd: handlePaintEnd,
+    onContextMenu: (token, at) => setMenu({ tokenId: token.id, at }),
+    onDropCharacter: handleDropCharacter,
+    placementDrag,
+    onDropPlacement: handleDropPlacement,
+    movableDrawing,
+    selectedDrawingId,
+    onSelectDrawing: setSelectedDrawingId,
+    onMoveDrawing: handleMoveDrawing,
+    onDrawEnd: handleDrawEnd,
+    onErase: handleErase,
+    onWriteNote: handleWriteNote,
+    onPlaceArea: handlePlaceArea,
+    drawingForMenu,
+    onDrawingMenu: (drawing, at) => setDrawingMenu({ drawingId: drawing.id, at }),
+    onLaser: handleLaser,
+    onMeasure: handleMeasure,
+    // On the map, not in the scene bar, so fullscreen keeps it too.
+    rolls: (
+      <RollsButton
+        feed={rollFeed}
+        onCustomRoll={handleCustomRoll}
+        onClear={clearRollFeed}
+      />
+    ),
+    controls: (
+      <SceneToolRail
+        groups={toolGroups}
+        activeId={paintToolGroup(allowedPaintMode)}
+        onCursor={() => setPaintMode('select')}
+        cursorContent={<CursorPanel paintMode={allowedPaintMode} onPaintModeChange={setPaintMode} />}
+        placing={Boolean(placementDrag)}
+      />
+    ),
+    fullscreenSheet: hasSheetContent ? {
+      choices: sheetChoices,
+      selectedId: sheetAreaSelectedId,
+      onSelectionChange: selectSheetCharacter,
+      open: floatingSheetOpen,
+      onOpenChange: setFloatingSheetOpen,
+      content: sheetAreaContent('floating'),
+    } : null,
+  });
+
   if (loading || role.loading) return <CircularProgress size={24} />;
 
   if (spectator) {
@@ -392,23 +449,23 @@ export default function SceneEditor({
         <Box sx={viewportCellSx}>
           <SceneViewport
         scene={scene}
+        {...viewportEditProps}
         imageUrl={viewportDisplay.url}
         preparedImageSize={viewportDisplay.imageSize}
         tokens={gmPlayerPreview ? projectedTokens : visibleTokens}
         snap
-        canMove={gmPlayerPreview ? () => false : canMove}
         fog={scene.fog}
         atmosphere={viewportAtmosphere}
         imageFilter={viewportImageFilter}
-        fogOpacity={role.isGm && !gmPlayerPreview ? GM_FOG_OPACITY : PLAYER_FOG_OPACITY}
+        fogOpacity={gmEditing ? GM_FOG_OPACITY : PLAYER_FOG_OPACITY}
         fogOnTop={!role.isGm || gmPlayerPreview}
         canSeeThroughFog={!role.isGm ? canMove : undefined}
         // Fog brushes are the GM's; drawing is everyone's, so a player keeps
         // the pencil and the eraser and loses only reveal/hide.
         paintMode={gmPlayerPreview ? 'select' : allowedPaintMode}
         brushSize={brushSize}
-        activeLayer={role.isGm && !gmPlayerPreview ? activeLayer : null}
-        showPlayArea={role.isGm && !gmPlayerPreview}
+        activeLayer={gmEditing ? activeLayer : null}
+        showPlayArea={gmEditing}
         backgroundOnly={viewportDisplay.shownImage === 'background'}
         initiative={(
           <InitiativeStrip
@@ -427,7 +484,7 @@ export default function SceneEditor({
         onTokenClick={gmTurnView ? handleTokenClick : null}
         // Top left: which picture is up is constant state, like the layer in the
         // opposite corner, and switching it is a move you make mid-scene.
-        imageSwitch={role.isGm && !gmPlayerPreview
+        imageSwitch={gmEditing
           ? (
             <Stack direction="row" spacing={0.75} sx={{ alignItems: 'flex-start' }}>
               <MapCorner
@@ -462,40 +519,11 @@ export default function SceneEditor({
         // Painted for everyone at the table; only the GM may click one.
         hexCells={projectedHexCells}
         partyHex={hexcrawl.partyHex}
-        selectedHex={gmPlayerPreview ? null : hexcrawl.selected}
-        onHexClick={!gmPlayerPreview && hexcrawl.enabled ? hexcrawl.clickHex : undefined}
-        hexBubble={!gmPlayerPreview && hexcrawl.enabled ? hexcrawl.bubble : null}
-        onHexBubbleClose={!gmPlayerPreview ? hexcrawl.dismissBubble : undefined}
         onImageSize={setImageSize}
-        onDragToken={gmPlayerPreview ? undefined : handleDragToken}
-        onMoveToken={gmPlayerPreview ? undefined : handleMoveToken}
-        onMoveTokens={gmPlayerPreview ? undefined : handleMoveTokens}
-        onDeleteTokens={gmPlayerPreview ? undefined : handleDeleteTokens}
-        onResizeToken={gmPlayerPreview ? undefined : handleMoveToken}
-        onRotateToken={gmPlayerPreview ? undefined : handleMoveToken}
-        canSetDeathSaves={gmPlayerPreview ? () => false : (token) => role.isGm || canMove(token)}
-        onDeathSaveChange={gmPlayerPreview ? undefined : handleDeathSaveChange}
-        onPaint={gmPlayerPreview ? undefined : handlePaint}
-        onPaintEnd={gmPlayerPreview ? undefined : handlePaintEnd}
-        onContextMenu={gmPlayerPreview ? undefined : (token, at) => setMenu({ tokenId: token.id, at })}
-        onDropCharacter={gmPlayerPreview ? undefined : handleDropCharacter}
-        placementDrag={gmPlayerPreview ? null : placementDrag}
-        onDropPlacement={gmPlayerPreview ? undefined : handleDropPlacement}
         drawings={visibleDrawings}
-        movableDrawing={gmPlayerPreview ? null : movableDrawing}
-        selectedDrawingId={gmPlayerPreview ? null : selectedDrawingId}
-        onSelectDrawing={gmPlayerPreview ? undefined : setSelectedDrawingId}
-        onMoveDrawing={gmPlayerPreview ? undefined : handleMoveDrawing}
         drawColor={drawColor}
         drawWidth={drawWidth}
-        onDrawEnd={gmPlayerPreview ? undefined : handleDrawEnd}
-        onErase={gmPlayerPreview ? undefined : handleErase}
-        onWriteNote={gmPlayerPreview ? undefined : handleWriteNote}
         areaOptions={areaOptions}
-        onPlaceArea={gmPlayerPreview ? undefined : handlePlaceArea}
-        drawingForMenu={gmPlayerPreview ? undefined : drawingForMenu}
-        onDrawingMenu={gmPlayerPreview ? undefined : (drawing, at) => setDrawingMenu({ drawingId: drawing.id, at })}
-        onLaser={gmPlayerPreview ? undefined : handleLaser}
         lasers={laserDots}
         rollBubbles={gmPlayerPreview ? projectedRollBubbles : rollBubbles}
         onRollBubbleDismiss={dismissRollBubble}
@@ -503,47 +531,21 @@ export default function SceneEditor({
         measureShape={measureShape}
         feetPerCellForRuler={feetPerCell}
         conditionEntries={conditionEntries}
-        onTokenInspection={role.isGm && !gmPlayerPreview ? handleTokenInspection : undefined}
-        onMeasure={gmPlayerPreview ? undefined : handleMeasure}
+        onTokenInspection={gmEditing ? handleTokenInspection : undefined}
         remoteMeasure={remoteMeasure}
         feetPerCell={feetPerCell}
-        // On the map, not in the scene bar, so fullscreen keeps it too.
-        rolls={gmPlayerPreview ? null : (
-          <RollsButton
-            feed={rollFeed}
-            onCustomRoll={handleCustomRoll}
-            onClear={clearRollFeed}
-          />
-        )}
-        controls={gmPlayerPreview ? null : (
-          <SceneToolRail
-            groups={toolGroups}
-            activeId={paintToolGroup(allowedPaintMode)}
-            onCursor={() => setPaintMode('select')}
-            cursorContent={<CursorPanel paintMode={allowedPaintMode} onPaintModeChange={setPaintMode} />}
-            placing={Boolean(placementDrag)}
-          />
-        )}
         // Inside the viewport, not beside it: a fullscreen map paints nothing
         // that is not one of its own descendants.
         toast={<DiceToast toast={rollToast} onClose={dismissRollToast} />}
         onFullscreenChange={handleMapFullscreenChange}
-        onViewChange={role.isGm && !gmPlayerPreview ? handleCameraViewChange : undefined}
+        onViewChange={gmEditing ? handleCameraViewChange : undefined}
         viewCenterRef={viewCenterRef}
-        fullscreenSheet={!gmPlayerPreview && hasSheetContent ? {
-          choices: sheetChoices,
-          selectedId: sheetAreaSelectedId,
-          onSelectionChange: selectSheetCharacter,
-          open: floatingSheetOpen,
-          onOpenChange: setFloatingSheetOpen,
-          content: sheetAreaContent('floating'),
-        } : null}
         // Bottom left, opposite the fullscreen button: the layer you are editing
         // is a constant piece of state, not a setting you go and find.
-        layerSwitch={role.isGm && !gmPlayerPreview
+        layerSwitch={gmEditing
           ? <LayerPanel compact activeLayer={activeLayer} onActiveLayerChange={setActiveLayer} />
           : null}
-        backgroundStrip={role.isGm && !gmPlayerPreview && shownImageForViewport === 'background'
+        backgroundStrip={gmEditing && shownImageForViewport === 'background'
           ? (
             <BackgroundStrip
               backgrounds={sceneBackgrounds(scene)}
