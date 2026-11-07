@@ -1,21 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useInstancePersistence } from '../../../shared/instances/useInstancePersistence.js';
 import { persistNotes, readPersistedNotes } from './storage.js';
 
-// Loads the screen once per instance (the provider is remounted via its key on
-// switch or after a cloud pull), then saves every change locally. A new
-// screen's first save writes its (empty) notes, which gives it data to sync.
-// Saving unchanged notes is a no-op in the store.
+// The screen's local persistence (useInstancePersistence): hydrated once per
+// screen, saved on every change of its notes.
 export function useDmScreenPersistence({ instanceId, notes, dispatch }) {
-  const [hydrated, setHydrated] = useState(false);
-
-  useEffect(() => {
-    if (hydrated || !instanceId) return;
-    dispatch({ type: 'hydrate', notes: readPersistedNotes(instanceId) });
-    setHydrated(true);
-  }, [dispatch, hydrated, instanceId]);
-
-  // Runs from the render after hydration, so it never writes pre-hydration notes.
-  useEffect(() => {
-    if (hydrated && instanceId) persistNotes(instanceId, notes);
-  }, [hydrated, instanceId, notes]);
+  useInstancePersistence({
+    instanceId,
+    hydrate: () => dispatch({ type: 'hydrate', notes: readPersistedNotes(instanceId) }),
+    persist: () => persistNotes(instanceId, notes),
+    persistDeps: [notes],
+  });
 }
