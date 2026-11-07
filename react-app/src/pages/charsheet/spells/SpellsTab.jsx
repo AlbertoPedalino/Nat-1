@@ -13,13 +13,11 @@ import SearchField from '../../../shared/ui/SearchField.jsx';
 import { SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
 import { effectiveD20Modifier } from '../../../shared/character/sheet/sheetStats.js';
 import { scrollRowKey } from '../../../shared/character/inventory/spellScrolls.js';
-import { spellMatchesClass } from '../../../shared/character/spells/spellClassMatch.js';
 import { adapterRegistry } from '../../../adapters/index.js';
 import { getEquippedArmorPenalties } from '../inventory/armorPenalties.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import { buildSpellInfo } from './spellsTabLogic.js';
-import { dedupeSpells } from '../../../shared/character/spells/spellSnapshots.js';
 import { getSpellAbility } from './spellAbility.js';
 import {
   canManageSpells,
@@ -62,6 +60,7 @@ import { getPickerLimits } from './spellPickerLimits.js';
 import { useSpellCatalog } from './useSpellCatalog.js';
 import { useSpellSlotState } from './useSpellSlotState.js';
 import { spellPickerActions } from './spellPickerActions.js';
+import { spellPickerPool } from '../../../shared/character/spells/spellPickerPool.js';
 
 const SPELL_ACTION_FILTERS = [
   { key: 'all', label: 'All' },
@@ -252,22 +251,20 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
     if (!activeIsWizard && pickerWizardMode !== 'prepare') setPickerWizardMode('prepare');
   }, [activePicker, activeIsWizard, pickerLevel, pickerWizardMode]);
 
-  const pickerList = useMemo(() => {
-    if (!activePicker) return [];
-    const hasIndex = Object.keys(classSpellIndex).length > 0;
-    const spellbookNames = activeIsWizard && pickerWizardMode === 'prepare'
+  const pickerList = useMemo(() => (activePicker ? spellPickerPool({
+    spells: spellDb,
+    level: pickerLevel,
+    // Until the class lists load, every spell of the level is offered.
+    classNames: Object.keys(classSpellIndex).length ? [activePicker.className] : null,
+    classSpellIndex,
+    maxLevel: activePicker.maxLevel,
+    spellbookNames: activeIsWizard && pickerWizardMode === 'prepare'
       ? wizardBookLevel(activePicker.bucket, pickerLevel)
-      : null;
-    const base = spellbookNames
-      ? spellbookNames.map((name) => spellIndex.get(lowerKey(name)) || spellDb.find((spell) => lowerKey(spell.name) === lowerKey(name)) || { name, level: pickerLevel })
-      : spellDb
-        .filter((spell) => Number(spell.level || 0) === pickerLevel)
-        .filter((spell) => Number(spell.level || 0) === 0 || Number(spell.level || 0) <= activePicker.maxLevel)
-        .filter((spell) => !hasIndex || spellMatchesClass(spell, activePicker.className, classSpellIndex));
-    return dedupeSpells(base)
-      .filter((spell) => matchesQuery(pickerSearch, spell.name, spell.schoolFull || spell.school))
-      .slice(0, 200);
-  }, [spellDb, spellIndex, pickerLevel, pickerSearch, classSpellIndex, activePicker, activeIsWizard, pickerWizardMode]);
+      : null,
+    query: pickerSearch,
+    // A spellbook spell missing from the catalog is still known by its snapshot.
+    findSpell: (name) => spellIndex.get(lowerKey(name)),
+  }) : []), [spellDb, spellIndex, pickerLevel, pickerSearch, classSpellIndex, activePicker, activeIsWizard, pickerWizardMode]);
 
   const {
     selectedManualNames, addSpell, removeSpell, toggleWizardBookSpell, toggleWizardPreparedSpell,

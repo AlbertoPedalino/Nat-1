@@ -5,13 +5,12 @@ import SearchField from '../../../shared/ui/SearchField.jsx';
 import BuilderPanel from '../layout/BuilderPanel.jsx';
 import { SPELL_LEVEL_LABELS } from '../../../shared/character/spells/spellTables.js';
 import { collectAutoGrantedSpells, getSpellCounts, maxSpellLevel } from './spells.js';
-import { spellMatchesAnyClass } from '../../../shared/character/spells/spellClassMatch.js';
 import { SpellMiniTags, SpellReferenceBody, SpellRowLabel, SpellSelectButton } from '../../../shared/character/spells/SpellReference.jsx';
 import { ExpandableCard } from '../../../shared/ui/ExpandableCard.jsx';
 import { entityChipSx } from '../../../shared/ui/entityColors.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
-import { normalizeWizardBook } from '../../../shared/character/spells/wizardBook.js';
-import { matchesQuery } from '../../../shared/content/searchText.js';
+import { spellPickerPool } from '../../../shared/character/spells/spellPickerPool.js';
+import { isInWizardBook, wizardBookLevel, wizardBookSize } from '../../../shared/character/spells/spellBuckets.js';
 
 export default function SpellSelectionPanel({ state, dispatch }) {
   const [wizardMode, setWizardMode] = useState('prepare');
@@ -39,7 +38,8 @@ export default function SpellSelectionPanel({ state, dispatch }) {
   const selectedSpellsCount = Object.values(selectedSpells).reduce((sum, list) => sum + (Array.isArray(list) ? list.length : 0), 0);
   const activeIsWizard = String(activeCharacter.className || '').toLowerCase() === 'wizard';
   const activeWizardSpellbook = (activeExtra ? activeExtra.wizardSpellbook : character.wizardSpellbook) || {};
-  const activeSpellbookSize = activeIsWizard ? getSpellbookSize(activeWizardSpellbook) : 0;
+  const activeBucket = { wizardSpellbook: activeWizardSpellbook };
+  const activeSpellbookSize = activeIsWizard ? wizardBookSize(activeBucket) : 0;
   const autoGrantedSpells = collectAutoGrantedSpells(activeCharacter);
   const query = state.search.spells;
   const levels = [0, ...Array.from({ length: Math.max(0, maxLevel) }, (_, index) => index + 1)];
@@ -54,20 +54,21 @@ export default function SpellSelectionPanel({ state, dispatch }) {
   }, [state.data.spells]);
   const autoNames = new Set(autoGrantedSpells.map((spell) => spell.name));
   const autoByName = new Map(autoGrantedSpells.map((spell) => [spell.name, spell]));
-  const spellbookNames = activeIsWizard && wizardMode === 'prepare' ? getSpellbookLevel(activeWizardSpellbook, level) : null;
   const autoPool = autoGrantedSpells.map((auto) => ({
-    ...(state.data.spells.find((spell) => spell.name === auto.name) || { name: auto.name, level: auto.level ?? 0 }),
+    ...(spellIndex.get(matchKey(auto.name)) || { name: auto.name, level: auto.level ?? 0 }),
     _autoGranted: auto,
   }));
-  const basePool = spellbookNames
-    ? spellbookNames.map((name) => spellIndex.get(matchKey(name)) || { name, level })
-    : state.data.spells
-      .filter((spell) => spell.level === level)
-      .filter((spell) => spellMatchesAnyClass(spell, classNames, state.data.classSpellIndex))
-      .filter((spell) => matchesQuery(query, spell.name, spell.schoolFull || spell.school));
-  const pool = dedupeSpells([...autoPool.filter((spell) => Number(spell.level || 0) === level), ...basePool])
-    .filter((spell) => matchesQuery(query, spell.name, spell.schoolFull || spell.school))
-    .slice(0, 120);
+  const pool = spellPickerPool({
+    spells: state.data.spells,
+    level,
+    classNames,
+    classSpellIndex: state.data.classSpellIndex,
+    spellbookNames: activeIsWizard && wizardMode === 'prepare' ? wizardBookLevel(activeBucket, level) : null,
+    granted: autoPool,
+    query,
+    limit: 120,
+    findSpell: (name) => spellIndex.get(matchKey(name)),
+  });
   const isCaster = !!profile.casterProgression || cantrips > 0 || spells > 0 || maxLevel > 0 || autoGrantedSpells.length > 0;
   const wizardBookMode = activeIsWizard && wizardMode === 'book';
 
@@ -123,7 +124,7 @@ export default function SpellSelectionPanel({ state, dispatch }) {
                   const manualSelected = level === 0
                     ? containsSpellName(selectedCantrips, spell.name)
                     : containsSpellName(selectedSpells[level] || [], spell.name);
-                  const inWizardBook = activeIsWizard ? isInWizardBook(activeWizardSpellbook, spell.name, level) : false;
+                  const inWizardBook = activeIsWizard ? isInWizardBook(activeBucket, spell.name, level) : false;
                   const selected = wizardBookMode ? inWizardBook : (manualSelected || autoSelected);
                   const atLimit = !selected && !autoSelected && !wizardBookMode
                     && (level === 0 ? selectedCantrips.length >= cantrips : selectedSpellsCount >= spells);
@@ -229,14 +230,3 @@ function containsSpellName(list, name) {
   return (list || []).some((entry) => matchKey(entry) === target);
 }
 
-function getSpellbookLevel(book, level) {
-  return normalizeWizardBook(book)[Number(level || 0)] || [];
-}
-
-function getSpellbookSize(book) {
-  return Object.values(normalizeWizardBook(book)).reduce((sum, list) => sum + list.length, 0);
-}
-
-function isInWizardBook(book, name, level) {
-  return getSpellbookLevel(book, level).some((entry) => matchKey(entry) === matchKey(name));
-}
