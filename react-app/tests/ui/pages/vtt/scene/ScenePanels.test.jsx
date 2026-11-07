@@ -1,7 +1,8 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
 import { DEFAULT_GRID } from '../../../../../src/shared/vtt/scene/scene.js';
-import { DrawPanel, FogPanel } from '../../../../../src/pages/vtt/scene/ScenePanels.jsx';
+import { FogPanel } from '../../../../../src/pages/vtt/scene/ScenePanels.jsx';
+import { DrawPanel } from '../../../../../src/pages/vtt/scene/DrawPanel.jsx';
 import { MapPanel } from '../../../../../src/pages/vtt/scene/MapPanel.jsx';
 import { DEFAULT_AREA_OPTIONS } from '../../../../../src/shared/vtt/map/areas.js';
 

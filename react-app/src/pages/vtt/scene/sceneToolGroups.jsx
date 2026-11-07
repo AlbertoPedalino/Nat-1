@@ -4,7 +4,9 @@ import DungeonPanel from '../dungeon/DungeonPanel.jsx';
 import PlayerPanel from '../session/PlayerPanel.jsx';
 import RosterPanel from '../tokens/RosterPanel.jsx';
 import MapObjectsPanel from '../objects/MapObjectsPanel.jsx';
-import { DrawPanel, FogPanel, LaserPanel, MeasurePanel } from './ScenePanels.jsx';
+import { FogPanel, LaserPanel } from './ScenePanels.jsx';
+import { MeasurePanel } from './MeasurePanel.jsx';
+import { DrawPanel } from './DrawPanel.jsx';
 
 // Which rail group a paint mode belongs to, so the rail lights the right one.
 export function paintToolGroup(mode) {
