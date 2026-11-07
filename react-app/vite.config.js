@@ -54,6 +54,9 @@ export default defineConfig({
     globals: true,
     include: ['tests/ui/**/*.test.jsx'],
     setupFiles: ['./tests/setup.js'],
+    // No test reaches the real Supabase project in .env: the client is not
+    // created (supabaseClient.js) unless a test mocks it.
+    env: { VITE_SUPABASE_URL: '', VITE_SUPABASE_ANON_KEY: '' },
     restoreMocks: true,
     // The component suites drive real interactions through user-event, which
     // types a character at a time and waits for each render. NoteBoard alone
