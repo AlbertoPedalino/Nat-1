@@ -1,80 +1,28 @@
-import { signed } from '../ui/numberFormat.js';
 import { asArray } from '../lists.js';
-import { statBlockTagText } from './statBlockTags.js';
+import { REF_TAGS, scanMarkup, tagDisplayText, tagParts } from './inlineMarkup.js';
 
-function pickTagDisplay(tag, rawValue) {
-  const parts = String(rawValue || '').split('|').map((part) => part.trim()).filter(Boolean);
-  const label = statBlockTagText(tag, parts[0]);
-  if (label != null) return label;
-  if (!parts.length) return '';
-  if (tag === 'hit') return `+${parts[0].replace(/^\+/, '')}`;
-  if (tag === 'd20') return signed(parts[0]);
-  if (tag === 'chance') return `${parts[0]}%`;
-  // {@scaledamage base|levels|step} — cantrip scaling at character levels: show base + per-level step.
-  if (tag === 'scaledamage') {
-    return parts[2] ? `${parts[0]} (+${parts[2]}/level)` : parts[0];
-  }
-  // {@scaledice base|levels|step} — spell-slot scaling: the wrapping sentence already
-  // says "for each spell slot level above N", so render just the per-level step die.
-  if (tag === 'scaledice') {
-    return parts[2] || parts[0];
-  }
-  if (parts.length >= 3) return parts[parts.length - 1];
-  return parts[0];
-}
-
-const REF_TAGS = new Set([
-  'spell', 'item', 'creature', 'condition', 'skill', 'sense',
-  'feat', 'class', 'subclass', 'race', 'background', 'action',
-  'object', 'optfeature', 'reward', 'deity', 'language', 'variantrule',
-]);
-
-// A tag inside another tag ({@tip {@link DnD Beyond|https://…}|…}) becomes its
-// shown text first, so the outer one can be read like any other.
-function flattenNestedTags(text) {
-  const nested = /(\{@\w+\s+[^{}]*)\{@(\w+)(?:\s+([^{}]*))?\}/g;
-  let current = text;
-  let previous;
-  do {
-    previous = current;
-    current = current.replace(nested, (_match, head, tag, content) => `${head}${pickTagDisplay(tag.toLowerCase(), content || '')}`);
-  } while (current !== previous);
-  return current;
-}
-
+// Entry prose as tokens: text, em/strong runs and record references; every
+// other tag shows its display text (inlineMarkup.js), plain {braces} their
+// content.
 function tokenizeInlineMarkup(raw) {
-  const text = flattenNestedTags(String(raw ?? ''));
-  if (!text) return [];
   const out = [];
-  const re = /\{@(\w+)(?:\s+([^{}]+))?\}|\{([^{}]+)\}/g;
-  let lastIndex = 0;
-  let match;
-  while ((match = re.exec(text)) !== null) {
-    if (match.index > lastIndex) {
-      out.push({ type: 'text', text: text.slice(lastIndex, match.index) });
+  scanMarkup(raw).segments.forEach((segment) => {
+    if (segment.type === 'text') {
+      out.push({ type: 'text', text: segment.text.replace(/\{([^{}]+)\}/g, '$1') });
+      return;
     }
-    if (match[1]) {
-      const tag = match[1].toLowerCase();
-      const content = match[2] || '';
-      if (tag === 'i' || tag === 'italic') {
-        out.push({ type: 'em', text: content.split('|')[0].trim() });
-      } else if (tag === 'b' || tag === 'bold') {
-        out.push({ type: 'strong', text: content.split('|')[0].trim() });
-      } else if (REF_TAGS.has(tag)) {
-        const parts = content.split('|').map((p) => p.trim());
-        const display = parts.length >= 3 ? parts[parts.length - 1] : parts[0];
-        out.push({ type: 'ref', refType: tag, text: display, target: parts[0], source: parts[1] || '' });
-      } else {
-        out.push({ type: 'text', text: pickTagDisplay(tag, content) });
-      }
-    } else if (match[3]) {
-      out.push({ type: 'text', text: match[3] });
+    const { tag, arg } = segment;
+    if (tag === 'i' || tag === 'italic') {
+      out.push({ type: 'em', text: tagParts(arg)[0] });
+    } else if (tag === 'b' || tag === 'bold') {
+      out.push({ type: 'strong', text: tagParts(arg)[0] });
+    } else if (REF_TAGS.has(tag)) {
+      const parts = tagParts(arg);
+      out.push({ type: 'ref', refType: tag, text: tagDisplayText(tag, arg), target: parts[0], source: parts[1] || '' });
+    } else {
+      out.push({ type: 'text', text: tagDisplayText(tag, arg) });
     }
-    lastIndex = re.lastIndex;
-  }
-  if (lastIndex < text.length) {
-    out.push({ type: 'text', text: text.slice(lastIndex) });
-  }
+  });
   return out
     .filter((token) => token.text != null && String(token.text).length > 0)
     .map((token) => ({

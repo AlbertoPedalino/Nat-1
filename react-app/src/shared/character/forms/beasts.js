@@ -10,6 +10,7 @@ import { isAllowedSource, BEAST_ALLOWED_SOURCES } from '../../content/sourcePrio
 import { signed } from '../../ui/numberFormat.js';
 import { splitNameSource, stripSource } from '../../content/nameKeys.js';
 import { statBlockTagText } from '../../content/statBlockTags.js';
+import { scanMarkup, tagDisplayText } from '../../content/inlineMarkup.js';
 import { ABILITIES, sizeName } from '../../content/rulesVocabulary.js';
 import { crNumber, formatCr } from '../../bestiary/challengeRating.js';
 import { byName } from '../../lists.js';
@@ -220,7 +221,7 @@ function beastTagToTokens(tag, arg, formulaRollType) {
       rollType: t === 'damage' ? 'Damage' : (formulaRollType || 'Roll'),
     }];
   }
-  const display = arg.split('|')[0];
+  const display = tagDisplayText(t, arg);
   return display ? [textToken(display)] : [];
 }
 
@@ -282,30 +283,24 @@ export function parseBeastActions(actions) {
 // rolls in place. This is the single parser: stripTags is its text projection and
 // parseBeastActionsRich renders the tokens as pills.
 export function tokenizeBeastEntry(rawText) {
-  const src = String(rawText || '');
-  const tagRe = /\{@([^}]+)\}/g;
   const out = [];
   const pushText = (text) => {
     const last = out[out.length - 1];
     if (last?.type === 'text') last.text += text;
     else out.push(textToken(text));
   };
-  let cursor = 0;
-  let m;
-  while ((m = tagRe.exec(src))) {
-    if (m.index > cursor) pushText(src.slice(cursor, m.index));
-    const inner = m[1];
-    const sp = inner.indexOf(' ');
-    const tag = sp === -1 ? inner : inner.slice(0, sp);
-    const arg = sp === -1 ? '' : inner.slice(sp + 1);
-    const formulaRollType = tag.toLowerCase() === 'dice'
-      ? inferDiceRollType(src, m.index, tagRe.lastIndex)
+  const { text: src, segments } = scanMarkup(rawText || '');
+  segments.forEach((segment) => {
+    if (segment.type === 'text') {
+      pushText(segment.text);
+      return;
+    }
+    const formulaRollType = segment.tag === 'dice'
+      ? inferDiceRollType(src, segment.start, segment.end)
       : null;
-    beastTagToTokens(tag, arg, formulaRollType)
+    beastTagToTokens(segment.tag, segment.arg, formulaRollType)
       .forEach((tok) => (tok.type === 'text' ? pushText(tok.text) : out.push(tok)));
-    cursor = tagRe.lastIndex;
-  }
-  if (cursor < src.length) pushText(src.slice(cursor));
+  });
 
   // Tidy each text run, then trim the outer edges of the whole stream.
   out.forEach((tok) => { if (tok.type === 'text') tok.text = tidyProse(tok.text); });

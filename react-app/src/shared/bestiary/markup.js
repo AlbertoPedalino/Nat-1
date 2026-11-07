@@ -1,5 +1,6 @@
 import { signed } from '../ui/numberFormat.js';
 import { isStatBlockLeadIn, statBlockTagText } from '../content/statBlockTags.js';
+import { scanMarkup, tagDisplayText } from '../content/inlineMarkup.js';
 import { get5eToolsSpellUrl } from '../content/fiveEToolsLinks.js';
 
 function text(value) {
@@ -14,27 +15,20 @@ function rollToken(notation, rollType, display = notation) {
   return { type: 'roll', notation: String(notation || ''), rollType, text: String(display || notation || '') };
 }
 
+// A monster's stat-block prose as tokens: text, rolls ({@hit}, {@damage},
+// {@d20}), spell links and styled runs; every other tag shows its display
+// text (inlineMarkup.js).
 export function parseCleanTokens(value) {
   if (!value) return [];
-  const source = String(value);
   const tokens = [];
-  const tagRe = /\{@([^}]+)\}/g;
-  let cursor = 0;
-  let match;
-  while ((match = tagRe.exec(source))) {
-    if (match.index > cursor) tokens.push(text(source.slice(cursor, match.index)));
-    tokens.push(...tagToTokens(match[1]));
-    cursor = tagRe.lastIndex;
-  }
-  if (cursor < source.length) tokens.push(text(source.slice(cursor)));
+  scanMarkup(value).segments.forEach((segment) => {
+    if (segment.type === 'text') tokens.push(text(segment.text));
+    else tokens.push(...tagToTokens(segment.tag, segment.arg));
+  });
   return tokens.filter((token) => token.type !== 'text' || token.text);
 }
 
-function tagToTokens(rawTag) {
-  const firstSpace = rawTag.indexOf(' ');
-  const tag = (firstSpace === -1 ? rawTag : rawTag.slice(0, firstSpace)).trim();
-  const arg = firstSpace === -1 ? '' : rawTag.slice(firstSpace + 1);
-  const lower = tag.toLowerCase();
+function tagToTokens(lower, arg) {
 
   const label = statBlockTagText(lower, arg);
   if (label != null) return [isStatBlockLeadIn(lower) ? styleToken('italic', label) : text(label)];
@@ -55,9 +49,7 @@ function tagToTokens(rawTag) {
   }
   if (lower === 'i') return [styleToken('italic', arg)];
   if (lower === 'b') return [styleToken('bold', arg)];
-  if (lower === 'filter') return [text(arg.split('|')[0] || '')];
-  if (/^[a-z]+$/i.test(lower) && arg) return [text(arg.split('|')[0] || '')];
-  return [];
+  return [text(tagDisplayText(lower, arg))];
 }
 
 export function cleanToText(value) {
