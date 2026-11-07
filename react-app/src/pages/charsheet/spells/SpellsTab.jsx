@@ -19,7 +19,7 @@ import { getEquippedArmorPenalties } from '../inventory/armorPenalties.js';
 import { useProficiencySets } from '../proficiency/ProficiencySetsContext.jsx';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import { buildSpellInfo } from './spellsTabLogic.js';
-import { dedupeSpells, toSnapshot, upsertSnapshot } from '../../../shared/character/spells/spellSnapshots.js';
+import { dedupeSpells } from '../../../shared/character/spells/spellSnapshots.js';
 import { getSpellAbility } from './spellAbility.js';
 import {
   canManageSpells,
@@ -43,9 +43,6 @@ import {
 import SpellEntry from './SpellEntry.jsx';
 import { Empty, SlotPanel, SpellSection, StatBox } from './SpellsUiParts.jsx';
 import { useSheetActions } from '../state/SheetActionsContext.jsx';
-import {
-  getPactSlotUsed, getPactSlotUsedKey, getRegularSlotUsed, persistCreatedSlots, persistUsedSlots,
-} from '../../../shared/character/spells/spellSlots.js';
 import { signed } from '../../../shared/ui/numberFormat.js';
 import { lowerKey } from '../../../shared/content/nameKeys.js';
 import { UI_COLORS } from '../../../shared/ui/colors.js';
@@ -55,12 +52,16 @@ import { matchesQuery } from '../../../shared/content/searchText.js';
 import { classNames } from '../../../shared/character/progression/classLevel.js';
 import { spellcastingNumbers } from '../../../shared/character/spells/spellcastingNumbers.js';
 import {
-  bucketCounts, isInWizardBook, wizardBookLevel, wizardBookSize, withoutSpellPicked, withSpellPicked,
-  withWizardBookToggled,
+  bucketCounts,
+  isInWizardBook,
+  wizardBookLevel,
+  wizardBookSize,
 } from '../../../shared/character/spells/spellBuckets.js';
 import { PickerSpellRow } from './SpellPickerRow.jsx';
 import { getPickerLimits } from './spellPickerLimits.js';
 import { useSpellCatalog } from './useSpellCatalog.js';
+import { useSpellSlotState } from './useSpellSlotState.js';
+import { spellPickerActions } from './spellPickerActions.js';
 
 const SPELL_ACTION_FILTERS = [
   { key: 'all', label: 'All' },
@@ -92,17 +93,12 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
   const [pickerLevel, setPickerLevel] = useState(0);
   const [pickerClassIndex, setPickerClassIndex] = useState(0);
   const [pickerWizardMode, setPickerWizardMode] = useState('prepare');
-  const [slotUsed, setSlotUsed] = useState(sheet?.spellSlotUsed || {});
-  const [createdSlots, setCreatedSlots] = useState(sheet?.createdSpellSlots || {});
 
   const {
     spellDb, spellVersions, classSpellIndex, catalogStatus, adapterRevision,
   } = useSpellCatalog(classNames(C));
 
-  useEffect(() => {
-    setSlotUsed(sheet?.spellSlotUsed || {});
-    setCreatedSlots(sheet?.createdSpellSlots || {});
-  }, [sheet?.spellSlotUsed, sheet?.createdSpellSlots]);
+  const { slotUsed, createdSlots, toggleSlot } = useSpellSlotState(sheet, { readOnly, onUpdateSheet, onUpdateCharacter });
 
   const spellIndex = useMemo(() => {
     const map = new Map();
@@ -273,107 +269,9 @@ export default function SpellsTab({ C, sheet, freeCastUses }) {
       .slice(0, 200);
   }, [spellDb, spellIndex, pickerLevel, pickerSearch, classSpellIndex, activePicker, activeIsWizard, pickerWizardMode]);
 
-  const selectedManualNames = new Set([
-    ...(activePicker?.bucket?.selectedCantrips || []),
-    ...Object.values(activePicker?.bucket?.selectedSpells || {}).flat(),
-  ]);
-
-  const toggleSlot = (level, total, index, createdCount, kind = 'regular') => {
-    // Read-only sheets must not mutate the local slotUsed/createdSlots mirror:
-    // the change never reaches the server, so showing a consumed slot would lie.
-    if (readOnly) return;
-    const key = kind === 'pact' ? getPactSlotUsedKey(level) : String(level);
-    const used = kind === 'pact'
-      ? getPactSlotUsed(slotUsed, level)
-      : getRegularSlotUsed(slotUsed, level);
-    if (kind === 'pact') {
-      const nextUsed = index < used ? Math.max(0, index) : index + 1;
-      const next = { ...slotUsed, [key]: Math.max(0, Math.min(total, nextUsed)) };
-      setSlotUsed(next);
-      persistUsedSlots(next, onUpdateSheet, onUpdateCharacter);
-      return;
-    }
-    if (index >= total) {
-      const created = createdCount || createdSlots[level] || 0;
-      if (created <= 0) return;
-      const next = { ...createdSlots };
-      next[level] = created - 1;
-      if (next[level] <= 0) delete next[level];
-      setCreatedSlots(next);
-      persistCreatedSlots(next, onUpdateSheet, onUpdateCharacter);
-      return;
-    }
-    const nextUsed = index < used ? Math.max(0, index) : index + 1;
-    const next = { ...slotUsed, [key]: nextUsed };
-    setSlotUsed(next);
-    persistUsedSlots(next, onUpdateSheet, onUpdateCharacter);
-  };
-
-  const addSpell = (spell) => {
-    if (!activePicker) return;
-    const level = Number(spell?.level || 0);
-    const name = spell?.name;
-    if (!name || selectedManualNames.has(name)) return;
-    if (level > 0 && level > activePicker.maxLevel) return;
-    if (level === 0 && activeLimits.cantrips != null && activeCounts.cantrips >= activeLimits.cantrips) return;
-    if (level > 0 && activeLimits.spells != null && activeCounts.spells >= activeLimits.spells) return;
-    updateBucketSpell(activePicker, (bucket) => ({ ...bucket, ...withSpellPicked(bucket, level, name) }), spell);
-  };
-
-  const removeSpell = (spell) => {
-    if (!activePicker) return;
-    const name = spell?.name;
-    const level = Number(spell?.level || 0);
-    if (!name || !selectedManualNames.has(name)) return;
-    updateBucketSpell(activePicker, (bucket) => ({ ...bucket, ...withoutSpellPicked(bucket, level, name) }));
-  };
-
-  const toggleWizardBookSpell = (spell) => {
-    if (!activePicker || !activeIsWizard) return;
-    const level = Number(spell?.level || 0);
-    const name = spell?.name;
-    if (!name || level > activePicker.maxLevel) return;
-    updateBucketSpell(activePicker, (bucket) => ({ ...bucket, ...withWizardBookToggled(bucket, level, name) }), spell);
-  };
-
-  const toggleWizardPreparedSpell = (spell) => {
-    if (!activePicker || !activeIsWizard) return;
-    const level = Number(spell?.level || 0);
-    const name = spell?.name;
-    if (!name || !isInWizardBook(activePicker.bucket, name, level)) return;
-    const selected = selectedManualNames.has(name);
-    if (!selected) {
-      if (level === 0 && activeLimits.cantrips != null && activeCounts.cantrips >= activeLimits.cantrips) return;
-      if (level > 0 && activeLimits.spells != null && activeCounts.spells >= activeLimits.spells) return;
-    }
-    selected ? removeSpell(spell) : addSpell(spell);
-  };
-
-  const updateBucketSpell = (picker, updater, snapshotSpell) => {
-    if (!picker?.bucket) return;
-    const nextBucket = updater(picker.bucket);
-    const nextSnapshots = snapshotSpell ? upsertSnapshot(C?.spellSnapshots || [], toSnapshot(snapshotSpell)) : (C?.spellSnapshots || []);
-    if (picker.isPrimary) {
-      onUpdateSpells?.({
-        selectedCantrips: nextBucket.selectedCantrips || [],
-        selectedSpells: nextBucket.selectedSpells || {},
-        wizardSpellbook: nextBucket.wizardSpellbook || C?.wizardSpellbook || {},
-        spellSnapshots: nextSnapshots,
-      });
-      return;
-    }
-    const nextExtraClasses = (C?.extraClasses || []).map((extra, index) => (
-      index === picker.extraIndex
-        ? {
-            ...extra,
-            selectedCantrips: nextBucket.selectedCantrips || [],
-            selectedSpells: nextBucket.selectedSpells || {},
-            wizardSpellbook: nextBucket.wizardSpellbook || extra.wizardSpellbook || {},
-          }
-        : extra
-    ));
-    onUpdateSpells?.({ extraClasses: nextExtraClasses, spellSnapshots: nextSnapshots });
-  };
+  const {
+    selectedManualNames, addSpell, removeSpell, toggleWizardBookSpell, toggleWizardPreparedSpell,
+  } = spellPickerActions({ C, activePicker, activeLimits, activeCounts, activeIsWizard, onUpdateSpells });
 
   const matchSpell = (entry) => (
     (catalogStatus === 'ready' || spellIndex.has(lowerKey(entry.name)))
