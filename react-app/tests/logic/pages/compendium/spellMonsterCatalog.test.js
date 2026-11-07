@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { buildCompendiumIndex } from '../../../../src/pages/compendium/compendiumIndex.js';
 import { castingTimeKind, filterSpells, spellClasses } from '../../../../src/pages/compendium/spellCatalog.js';
-import { filterMonsters } from '../../../../src/pages/compendium/monsterCatalog.js';
+import { filterCatalogMonsters } from '../../../../src/pages/compendium/monsterCatalog.js';
 
 test('spells filter by level, school, class, casting time, concentration and ritual', () => {
   const classSpellIndex = { wizard: new Set(['fireball', 'detect magic']), cleric: new Set(['detect magic', 'healing word']) };
@@ -36,7 +36,7 @@ test('monsters filter by challenge rating range, type and size', () => {
       { name: 'Pseudodragon', source: 'XMM', cr: '1/4', type: 'dragon', size: ['T'] },
     ],
   });
-  const names = (filters) => filterMonsters(index, filters).map((entry) => entry.name);
+  const names = (filters) => filterCatalogMonsters(index, filters).map((entry) => entry.name);
   assert.deepEqual(names({ type: 'dragon', sort: 'cr' }), ['Pseudodragon', 'Young Red Dragon', 'Adult Red Dragon']);
   assert.deepEqual(names({ crFrom: '1', crTo: '15' }), ['Young Red Dragon']);
   assert.deepEqual(names({ crTo: '1/2' }), ['Goblin Warrior', 'Pseudodragon']);

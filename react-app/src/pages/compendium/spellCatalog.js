@@ -3,9 +3,8 @@
 //
 // Pure; the page is SpellCatalog.jsx.
 
-import { normalizeSearchText } from '../../shared/content/searchText.js';
 import { SPELL_SCHOOL_NAMES } from '../../shared/content/rulesVocabulary.js';
-import { byName } from '../../shared/lists.js';
+import { runCatalogFilter } from './catalogFilter.js';
 
 export const SPELL_LEVELS = Object.freeze([
   { key: '0', label: 'Cantrip' },
@@ -47,22 +46,17 @@ export const SPELL_FILTERS = Object.freeze({
 });
 
 export function filterSpells(entries, filters = SPELL_FILTERS) {
-  const f = { ...SPELL_FILTERS, ...filters };
-  const terms = normalizeSearchText(f.search).split(' ').filter(Boolean);
-  const list = entries.filter((entry) => {
-    const spell = entry.record;
-    if (terms.length && !terms.every((term) => entry.nameText.includes(term))) return false;
-    if (f.level !== 'all' && String(Number(spell.level) || 0) !== f.level) return false;
-    if (f.school !== 'all' && spell.schoolFull !== f.school) return false;
-    if (f.class !== 'all' && !(entry.classes || []).includes(f.class)) return false;
-    if (f.time !== 'all' && castingTimeKind(spell) !== f.time) return false;
-    if (f.concentration !== 'any' && Boolean(spell.concentration) !== (f.concentration === 'yes')) return false;
-    if (f.ritual !== 'any' && Boolean(spell.ritual) !== (f.ritual === 'yes')) return false;
-    if (f.source !== 'all' && entry.source !== f.source) return false;
-    return true;
+  return runCatalogFilter(entries, filters, SPELL_FILTERS, {
+    tests: (f) => [
+      (spell) => f.level === 'all' || String(Number(spell.level) || 0) === f.level,
+      (spell) => f.school === 'all' || spell.schoolFull === f.school,
+      (spell, entry) => f.class === 'all' || (entry.classes || []).includes(f.class),
+      (spell) => f.time === 'all' || castingTimeKind(spell) === f.time,
+      (spell) => f.concentration === 'any' || Boolean(spell.concentration) === (f.concentration === 'yes'),
+      (spell) => f.ritual === 'any' || Boolean(spell.ritual) === (f.ritual === 'yes'),
+    ],
+    sorts: { level: (a, b) => (Number(a.record.level) || 0) - (Number(b.record.level) || 0) },
   });
-  if (f.sort === 'level') return list.sort((a, b) => (Number(a.record.level) || 0) - (Number(b.record.level) || 0) || byName(a, b));
-  return list.sort(byName);
 }
 
 export function spellLevelLabel(spell) {

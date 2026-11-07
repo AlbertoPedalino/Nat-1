@@ -3,12 +3,11 @@
 //
 // Pure; the page is MonsterCatalog.jsx.
 
-import { normalizeSearchText } from '../../shared/content/searchText.js';
 import { getHP, getAC, getType, getSizeLabel } from '../../shared/bestiary/monsterUtils.js';
 import { CR_ORDER } from '../../shared/bestiary/bestiaryConstants.js';
 import { CREATURE_TYPES, SIZE_NAMES } from '../../shared/content/rulesVocabulary.js';
 import { crKey, crNumber } from '../../shared/bestiary/challengeRating.js';
-import { byName } from '../../shared/lists.js';
+import { runCatalogFilter } from './catalogFilter.js';
 
 export const CHALLENGE_RATINGS = Object.freeze(CR_ORDER.map((cr) => ({ key: cr, label: `CR ${cr}` })));
 
@@ -36,21 +35,17 @@ export const MONSTER_FILTERS = Object.freeze({
   search: '', crFrom: 'all', crTo: 'all', type: 'all', size: 'all', source: 'all', sort: 'name',
 });
 
-export function filterMonsters(entries, filters = MONSTER_FILTERS) {
-  const f = { ...MONSTER_FILTERS, ...filters };
-  const terms = normalizeSearchText(f.search).split(' ').filter(Boolean);
-  const from = f.crFrom === 'all' ? -Infinity : crNumber(f.crFrom);
-  const to = f.crTo === 'all' ? Infinity : crNumber(f.crTo);
-  const list = entries.filter((entry) => {
-    const monster = entry.record;
-    if (terms.length && !terms.every((term) => entry.nameText.includes(term))) return false;
-    const cr = crValue(monster);
-    if (cr < from || cr > to) return false;
-    if (f.type !== 'all' && monsterType(monster) !== f.type) return false;
-    if (f.size !== 'all' && !monsterSizes(monster).includes(f.size)) return false;
-    if (f.source !== 'all' && entry.source !== f.source) return false;
-    return true;
+export function filterCatalogMonsters(entries, filters = MONSTER_FILTERS) {
+  return runCatalogFilter(entries, filters, MONSTER_FILTERS, {
+    tests: (f) => {
+      const from = f.crFrom === 'all' ? -Infinity : crNumber(f.crFrom);
+      const to = f.crTo === 'all' ? Infinity : crNumber(f.crTo);
+      return [
+        (monster) => crValue(monster) >= from && crValue(monster) <= to,
+        (monster) => f.type === 'all' || monsterType(monster) === f.type,
+        (monster) => f.size === 'all' || monsterSizes(monster).includes(f.size),
+      ];
+    },
+    sorts: { cr: (a, b) => crValue(a.record) - crValue(b.record) },
   });
-  if (f.sort === 'cr') return list.sort((a, b) => crValue(a.record) - crValue(b.record) || byName(a, b));
-  return list.sort(byName);
 }

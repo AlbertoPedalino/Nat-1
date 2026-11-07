@@ -15,7 +15,7 @@ import {
   MONSTER_FILTERS,
   MONSTER_SIZES,
   MONSTER_TYPES,
-  filterMonsters,
+  filterCatalogMonsters,
   monsterStats,
 } from './monsterCatalog.js';
 
@@ -59,7 +59,7 @@ export function MonsterCatalog({ compendium, layout = 'page' }) {
       compendium={compendium}
       entries={entries}
       initialFilters={MONSTER_FILTERS}
-      filter={filterMonsters}
+      filter={filterCatalogMonsters}
       layout={layout}
       label="monsters"
       columns={MONSTER_COLUMNS}

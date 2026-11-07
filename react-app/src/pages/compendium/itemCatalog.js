@@ -4,13 +4,12 @@
 //
 // Pure, testable in node; the pages are MagicItemCatalog/EquipmentCatalog.
 
-import { normalizeSearchText } from '../../shared/content/searchText.js';
 import { CORE_2024_SOURCE_PRIORITY, isAllowedSource } from '../../shared/content/sourcePriority.js';
 import { decodeDamageType, decodeProperty, itemMasteryLabels } from '../../shared/character/inventory/itemCodes.js';
 import { capitalize } from '../../shared/ui/textCase.js';
 import { formatNumber } from '../../shared/ui/numberFormat.js';
 import { splitNameSource, stripSource } from '../../shared/content/nameKeys.js';
-import { byName } from '../../shared/lists.js';
+import { runCatalogFilter } from './catalogFilter.js';
 
 const typeCode = (item) => stripSource(item?.type).toUpperCase();
 const rarityOf = (item) => String(item?.rarity || 'none').toLowerCase();
@@ -147,33 +146,23 @@ export function catalogSources(entries) {
   return [...new Set(entries.map((entry) => entry.source))].sort();
 }
 
-const matchesSearch = (entry, query) => {
-  const terms = normalizeSearchText(query).split(' ').filter(Boolean);
-  return terms.every((term) => entry.nameText.includes(term));
-};
-
 export const MAGIC_FILTERS = Object.freeze({
   search: '', type: 'all', rarity: 'all', attunement: 'any', bonus: 'any', charges: 'any', source: 'all', sort: 'name',
 });
 
 export function filterMagicItems(entries, filters = MAGIC_FILTERS) {
-  const f = { ...MAGIC_FILTERS, ...filters };
-  const list = entries.filter((entry) => {
-    const item = entry.record;
-    if (f.search && !matchesSearch(entry, f.search)) return false;
-    if (f.type !== 'all' && magicItemType(item) !== f.type) return false;
-    if (f.rarity !== 'all' && rarityOf(item) !== f.rarity) return false;
-    if (f.attunement !== 'any' && Boolean(item.reqAttune) !== (f.attunement === 'yes')) return false;
-    if (f.bonus !== 'any' && magicBonus(item) !== Number(f.bonus)) return false;
-    if (f.charges !== 'any' && (item.charges != null) !== (f.charges === 'yes')) return false;
-    if (f.source !== 'all' && entry.source !== f.source) return false;
-    return true;
+  return runCatalogFilter(entries, filters, MAGIC_FILTERS, {
+    tests: (f) => [
+      (item) => f.type === 'all' || magicItemType(item) === f.type,
+      (item) => f.rarity === 'all' || rarityOf(item) === f.rarity,
+      (item) => f.attunement === 'any' || Boolean(item.reqAttune) === (f.attunement === 'yes'),
+      (item) => f.bonus === 'any' || magicBonus(item) === Number(f.bonus),
+      (item) => f.charges === 'any' || (item.charges != null) === (f.charges === 'yes'),
+    ],
+    sorts: {
+      rarity: (a, b) => (RARITY_RANK[rarityOf(a.record)] ?? 99) - (RARITY_RANK[rarityOf(b.record)] ?? 99),
+    },
   });
-  if (f.sort === 'rarity') {
-    return list.sort((a, b) => (RARITY_RANK[rarityOf(a.record)] ?? 99) - (RARITY_RANK[rarityOf(b.record)] ?? 99)
-      || byName(a, b));
-  }
-  return list.sort(byName);
 }
 
 export const EQUIPMENT_FILTERS = Object.freeze({
@@ -181,21 +170,21 @@ export const EQUIPMENT_FILTERS = Object.freeze({
 });
 
 export function filterEquipment(entries, filters = EQUIPMENT_FILTERS) {
-  const f = { ...EQUIPMENT_FILTERS, ...filters };
-  const costTest = COST_RANGES.find((range) => range.key === f.cost)?.test;
-  const weightTest = WEIGHT_RANGES.find((range) => range.key === f.weight)?.test;
-  const list = entries.filter((entry) => {
-    const item = entry.record;
-    if (f.search && !matchesSearch(entry, f.search)) return false;
-    if (f.category !== 'all' && equipmentCategory(item) !== f.category) return false;
-    if (costTest && !costTest(Number(item.value) || 0)) return false;
-    if (weightTest && !weightTest(Number(item.weight) || 0)) return false;
-    if (f.source !== 'all' && entry.source !== f.source) return false;
-    return true;
+  return runCatalogFilter(entries, filters, EQUIPMENT_FILTERS, {
+    tests: (f) => {
+      const costTest = COST_RANGES.find((range) => range.key === f.cost)?.test;
+      const weightTest = WEIGHT_RANGES.find((range) => range.key === f.weight)?.test;
+      return [
+        (item) => f.category === 'all' || equipmentCategory(item) === f.category,
+        (item) => !costTest || costTest(Number(item.value) || 0),
+        (item) => !weightTest || weightTest(Number(item.weight) || 0),
+      ];
+    },
+    sorts: {
+      cost: (a, b) => (Number(a.record.value) || 0) - (Number(b.record.value) || 0),
+      weight: (a, b) => (Number(a.record.weight) || 0) - (Number(b.record.weight) || 0),
+    },
   });
-  if (f.sort === 'cost') return list.sort((a, b) => (Number(a.record.value) || 0) - (Number(b.record.value) || 0) || byName(a, b));
-  if (f.sort === 'weight') return list.sort((a, b) => (Number(a.record.weight) || 0) - (Number(b.record.weight) || 0) || byName(a, b));
-  return list.sort(byName);
 }
 
 // The books pictures may come from: the supported 2024 manuals, never an
