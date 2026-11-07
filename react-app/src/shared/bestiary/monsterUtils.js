@@ -2,6 +2,8 @@ import { FALLBACK_MONSTER_TOKEN, GAME_IMAGE_BASE } from '../content/gameData.js'
 import { crKey, crXP } from './challengeRating.js';
 import { clampInt, numberOr } from '../numbers.js';
 import { sizeName } from '../content/rulesVocabulary.js';
+import { asArray } from '../lists.js';
+import { stripMarkup } from '../content/markupText.js';
 
 export function getType(type) {
   if (!type) return '';
@@ -29,16 +31,45 @@ export function getTypeTags(type) {
   return tags.length ? ` (${tags.join(', ')})` : '';
 }
 
+// The first entry of a 5etools record's `ac`: its number (null when only a
+// special rule is given), what it comes from (markup reduced to words) and the
+// special rule's text. Monsters, beasts and summons all read their AC here.
+export function armorClassEntry(ac) {
+  const first = Array.isArray(ac) ? ac[0] : ac;
+  if (first == null) return { value: null, from: '', special: '' };
+  if (typeof first === 'number') return { value: first, from: '', special: '' };
+  const value = Number(first.ac);
+  return {
+    value: Number.isFinite(value) && value > 0 ? value : null,
+    from: asArray(first.from).map((item) => stripMarkup(item)).join(', '),
+    special: String(first.special || '').trim(),
+  };
+}
+
 export function getAC(ac) {
-  if (!ac || !ac[0]) return 10;
-  const first = ac[0];
-  return typeof first === 'number' ? first : first.ac || 10;
+  return armorClassEntry(ac).value ?? 10;
 }
 
 export function getACDesc(ac) {
-  if (!ac || !ac[0] || typeof ac[0] === 'number') return '';
-  const from = Array.isArray(ac[0].from) ? ac[0].from.join(', ') : '';
+  const { from } = armorClassEntry(ac);
   return from ? ` (${from})` : '';
+}
+
+// A creature's speeds in feet ({ walk, fly, swim, climb, burrow }, hover
+// flagged) from a 5etools `speed`: a number of feet, or modes given as feet
+// or { number, condition }.
+export function creatureSpeeds(speed) {
+  if (typeof speed === 'number') return { walk: speed };
+  if (!speed || typeof speed !== 'object') return {};
+  const out = {};
+  ['walk', 'fly', 'swim', 'climb', 'burrow'].forEach((mode) => {
+    const raw = speed[mode];
+    if (raw == null) return;
+    const feet = typeof raw === 'object' ? Number(raw.number) : Number(raw);
+    if (Number.isFinite(feet)) out[mode] = feet;
+  });
+  if (speed.canHover || String(speed.fly?.condition || '').includes('hover')) out.hover = true;
+  return out;
 }
 
 export function getHP(hp) {

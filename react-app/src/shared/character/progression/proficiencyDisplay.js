@@ -1,5 +1,5 @@
 import { titleCase } from '../../ui/textCase.js';
-import { matchKey } from '../../content/nameKeys.js';
+import { matchKey, uniqueLabels } from '../../content/nameKeys.js';
 import { DAMAGE_TYPES } from '../../content/rulesVocabulary.js';
 import { compareText } from '../../lists.js';
 import { stripMarkup } from '../../content/markupText.js';
@@ -117,16 +117,7 @@ function lookupWeaponCategory(label, allItemsDb) {
 }
 
 export function uniqueDisplayLabels(values) {
-  const seen = new Set();
-  const out = [];
-  (values || []).flat().forEach((value) => {
-    const label = canonicalDisplayLabel(value);
-    const key = label.toLowerCase();
-    if (!label || seen.has(key)) return;
-    seen.add(key);
-    out.push(label);
-  });
-  return out.sort(compareText);
+  return uniqueLabels(values, canonicalDisplayLabel, { sort: true });
 }
 
 export function collapseWeaponProficiencies(items, options = {}) {

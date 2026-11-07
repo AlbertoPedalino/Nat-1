@@ -1,4 +1,5 @@
 import { stripMarkup } from './markupText.js';
+import { asArray, compareText } from '../lists.js';
 
 // Turning a name into something to compare or show, the same way everywhere.
 // Each helper has one meaning; pick the one that says what the comparison is.
@@ -49,4 +50,21 @@ export function choiceText(value) {
 // A stored choice as a comparison key.
 export function choiceKey(value) {
   return matchKey(choiceText(value));
+}
+
+// Labels without repeats: each value turned into its label by `toLabel`,
+// compared loosely (matchKey), empty ones dropped, first spelling kept;
+// alphabetical with `sort`.
+export function uniqueLabels(values, toLabel = (value) => String(value ?? ''), { sort = false } = {}) {
+  const seen = new Set();
+  const out = [];
+  asArray(values).flat().forEach((value) => {
+    if (value == null || value === '') return;
+    const label = toLabel(value);
+    const key = matchKey(label);
+    if (!label || !key || seen.has(key)) return;
+    seen.add(key);
+    out.push(label);
+  });
+  return sort ? out.sort(compareText) : out;
 }

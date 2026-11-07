@@ -1,5 +1,5 @@
 import { canonicalProficiencyLabel } from './proficiencyDisplay.js';
-import { matchKey } from '../../content/nameKeys.js';
+import { uniqueLabels } from '../../content/nameKeys.js';
 import { asArray } from '../../lists.js';
 import { stripMarkup } from '../../content/markupText.js';
 
@@ -91,16 +91,6 @@ export function extractFixedProficiencyLabels(blocks) {
 }
 
 export function uniqueProficiencyLabels(values) {
-  const seen = new Set();
-  const out = [];
-  asArray(values).flat().forEach((value) => {
-    if (value == null || value === '') return;
-    const label = canonicalProficiencyLabel(value);
-    const key = matchKey(label);
-    if (!label || !key || seen.has(key)) return;
-    seen.add(key);
-    out.push(label);
-  });
-  return out;
+  return uniqueLabels(values, canonicalProficiencyLabel);
 }
 

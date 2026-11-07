@@ -14,6 +14,7 @@ import { scanMarkup, tagDisplayText } from '../../content/inlineMarkup.js';
 import { ABILITIES, sizeName } from '../../content/rulesVocabulary.js';
 import { crNumber, formatCr } from '../../bestiary/challengeRating.js';
 import { byName } from '../../lists.js';
+import { armorClassEntry, creatureSpeeds } from '../../bestiary/monsterUtils.js';
 
 // Known Beast forms by Druid level (XPHB 2024 "Beast Shapes" table): 4 at lv.2,
 // 6 at lv.4, 8 at lv.8. You may swap one known form per Long Rest.
@@ -54,26 +55,13 @@ export function recordIsBeast(raw) {
 }
 
 function firstAc(raw) {
-  const ac = Array.isArray(raw?.ac) ? raw.ac[0] : raw?.ac;
-  if (ac == null) return { value: null, from: '' };
-  if (typeof ac === 'number') return { value: ac, from: '' };
-  return { value: Number(ac.ac) || null, from: Array.isArray(ac.from) ? ac.from.map(stripSource).join(', ') : '' };
+  return armorClassEntry(raw?.ac);
 }
 
+// A beast always has a walking speed, 0 when its record gives none.
 function normalizeSpeed(raw) {
-  const speed = raw?.speed;
-  if (!speed || typeof speed !== 'object') {
-    return { walk: typeof speed === 'number' ? speed : 0 };
-  }
-  const out = {};
-  ['walk', 'fly', 'swim', 'climb', 'burrow'].forEach((mode) => {
-    const v = speed[mode];
-    if (v == null) return;
-    const n = typeof v === 'object' ? Number(v.number) : Number(v);
-    if (Number.isFinite(n)) out[mode] = n;
-  });
-  if (speed.canHover || (typeof speed.fly === 'object' && speed.fly?.condition?.includes('hover'))) out.hover = true;
-  return out;
+  const speeds = creatureSpeeds(raw?.speed);
+  return raw?.speed && typeof raw.speed === 'object' ? speeds : { walk: speeds.walk ?? 0 };
 }
 
 // Beast stat blocks list saving throws as signed totals, e.g.

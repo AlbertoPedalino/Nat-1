@@ -1,6 +1,7 @@
 import { asArray } from '../../lists.js';
 import { loadGameData } from '../../content/gameData.js';
 import { ABILITIES, sizeName } from '../../content/rulesVocabulary.js';
+import { armorClassEntry, creatureSpeeds } from '../../bestiary/monsterUtils.js';
 // Bestiary files holding creatures a spell or class feature summons (their
 // records carry `summonedBySpell` / `summonedByClass`). XPHB has the Ranger's
 // primal beasts.
@@ -96,19 +97,6 @@ export function getSummonedCreatureTypeChoices(record) {
   return choices.map((choice) => String(choice || '').trim()).filter(Boolean);
 }
 
-function normalizeSpeed(speed) {
-  if (typeof speed === 'number') return { walk: speed };
-  if (!speed || typeof speed !== 'object') return {};
-  const out = {};
-  ['walk', 'fly', 'swim', 'climb', 'burrow'].forEach((key) => {
-    const raw = speed[key];
-    const value = typeof raw === 'object' ? Number(raw?.number) : Number(raw);
-    if (Number.isFinite(value)) out[key] = value;
-  });
-  if (speed.canHover) out.hover = true;
-  return out;
-}
-
 function typeLabel(type) {
   if (typeof type === 'string') return type;
   if (typeof type?.type === 'string') return type.type;
@@ -117,10 +105,8 @@ function typeLabel(type) {
 }
 
 function resolveAc(ac, { spellLevel, abilityMod }) {
-  const first = asArray(ac)[0];
-  if (typeof first === 'number') return first;
-  if (Number.isFinite(Number(first?.ac))) return Number(first.ac);
-  const special = String(first?.special || '').trim();
+  const { value, special } = armorClassEntry(ac);
+  if (value != null) return value;
   const base = Number(special.match(/^(\d+)/)?.[1]);
   if (Number.isFinite(base) && /spell's level/i.test(special)) return base + spellLevel;
   if (Number.isFinite(base) && ABILITY_MODIFIER.test(special)) return base + abilityMod;
@@ -219,7 +205,7 @@ export function normalizeSummonedCreature(record, options = {}) {
     abilities,
     saves: {},
     skills: {},
-    speed: normalizeSpeed(record.speed),
+    speed: creatureSpeeds(record.speed),
     senses: asArray(record.senses),
     passivePerception: Number(record.passive) || null,
     vulnerable: flattenDamageList(record.vulnerable, 'vulnerable'),
