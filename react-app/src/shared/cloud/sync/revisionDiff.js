@@ -29,10 +29,11 @@ export function diffRevisions(remote, held, isStale = (theirs, ours) => theirs !
 
 // The list in the database's order: fetched rows where we asked for them, held
 // ones elsewhere. An id that vanished between the check and the fetch is left
-// out, exactly as a full read would have done.
-export function assembleSnapshot(ids, changed, fetched, held) {
+// out, exactly as a full read would have done. `keyOf` names a row by the id
+// the diff used (its `id` unless the table keys rows otherwise).
+export function assembleSnapshot(ids, changed, fetched, held, keyOf = (item) => item.id) {
   const wanted = new Set(changed);
-  const fresh = new Map((fetched || []).map((item) => [item.id, item]));
+  const fresh = new Map((fetched || []).map((item) => [keyOf(item), item]));
   return ids.map((id) => (wanted.has(id) ? fresh.get(id) : held.get(id))).filter(Boolean);
 }
 

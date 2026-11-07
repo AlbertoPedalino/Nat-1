@@ -142,6 +142,22 @@ export async function listHexCells(sceneId) {
   return (data || []).map(toHexCell).filter(Boolean);
 }
 
+// The hexes at these coordinates ("q:r", as the recovery's diff names them).
+export async function listHexCellsAt(sceneId, coordinates) {
+  const pairs = (coordinates || [])
+    .map((key) => String(key).split(':').map(Number))
+    .filter(([q, r]) => Number.isInteger(q) && Number.isInteger(r));
+  if (!sceneId || !pairs.length) return [];
+  const supabase = requireClient();
+  const { data, error } = await supabase
+    .from('map_hex_cells')
+    .select(CELL_COLUMNS)
+    .eq('scene_id', sceneId)
+    .or(pairs.map(([q, r]) => `and(q.eq.${q},r.eq.${r})`).join(','));
+  if (error) throw error;
+  return (data || []).map(toHexCell).filter(Boolean);
+}
+
 // The light recovery's read: which hexes exist (that this reader may see) and
 // their versions, a few bytes each.
 export async function listHexCellRevisions(sceneId) {

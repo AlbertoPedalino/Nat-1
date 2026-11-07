@@ -4,12 +4,13 @@ import {
 import {
   listHexCellRevisions,
   listHexCells,
+  listHexCellsAt,
   subscribeHexcrawl,
 } from '../../../shared/cloud/api/hexcrawl.js';
 import { hexCellsByKey } from '../../../shared/hexcrawl/hexCell.js';
 import { watchRevisions } from '../../../shared/cloud/sync/recoveryTriggers.js';
 import { syncKeys } from '../../../shared/cloud/sync/syncKeys.js';
-import { diffRevisions } from '../../../shared/cloud/sync/revisionDiff.js';
+import { assembleSnapshot, diffRevisions, readChanged } from '../../../shared/cloud/sync/revisionDiff.js';
 
 const EMPTY_CELLS = new Map();
 
@@ -48,7 +49,7 @@ export function useHexCells({
   }, [clockStamp, isGm, sceneId, visible]);
 
   // Hex events Realtime missed are recovered like the scene's pieces: versions
-  // first (a few bytes a hex), the list again only when one moved. On every
+  // first (a few bytes a hex), then only the hexes that moved. On every
   // reconnect and on the shared triggers; map content, so also while hidden.
   const cellsRef = useRef(cells);
   cellsRef.current = cells;
@@ -63,18 +64,23 @@ export function useHexCells({
       } catch (_) {
         return false; // The next trigger tries again.
       }
-      if (cancelled) return;
+      if (cancelled) return true;
+      const held = new Map(cellsRef.current.map((cell) => [keyOf(cell), cell]));
       const diff = diffRevisions(
         revisions.map((row) => ({ id: keyOf(row), version: row.updatedAt })),
-        new Map(cellsRef.current.map((cell) => [keyOf(cell), cell.updatedAt])),
+        new Map([...held].map(([key, cell]) => [key, cell.updatedAt])),
       );
-      if (diff.clean) return;
+      if (diff.clean) return true;
+      let rows;
       try {
-        const rows = await listHexCells(sceneId);
-        if (!cancelled) setCells(rows);
+        rows = await readChanged(diff, {
+          fetchAll: () => listHexCells(sceneId),
+          fetchSome: (coordinates) => listHexCellsAt(sceneId, coordinates),
+        });
       } catch (_) {
         return false; // The map keeps the hexes it has.
       }
+      if (!cancelled) setCells(assembleSnapshot(diff.ids, diff.changed, rows, held, keyOf));
       return true;
     };
     const unsubscribe = subscribeHexcrawl({

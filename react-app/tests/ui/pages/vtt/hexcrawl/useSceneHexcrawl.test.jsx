@@ -6,6 +6,7 @@ import { createDefaultTables } from '../../../../../src/shared/gmboard/defaultTa
 const cloud = vi.hoisted(() => ({
   listHexCellRevisions: vi.fn(),
   listHexCells: vi.fn(),
+  listHexCellsAt: vi.fn(),
   readCampaignHexcrawlBoard: vi.fn(),
   readHexcrawlBoard: vi.fn(),
   readHexcrawlBoardVersion: vi.fn(),
@@ -156,7 +157,7 @@ test('time passed off the map moves the clock and the weather count', async () =
   expect(campaignClock.saveClock).toHaveBeenCalledTimes(1);
 });
 
-// Hex events Realtime missed: versions first, the list again only if one moved.
+// Hex events Realtime missed: versions first, then only the hexes that moved.
 test('a missed hex change is recovered on the next check; an unchanged map reads only versions', async () => {
   const hex = { sceneId: 'scene-one', q: 1, r: 2, terrain: 'Forest', tier: 1, pop: null, status: null, note: '', revealed: true, updatedAt: 10 };
   cloud.listHexCells.mockResolvedValue([hex]);
@@ -170,10 +171,14 @@ test('a missed hex change is recovered on the next check; an unchanged map reads
   await waitFor(() => expect(cloud.listHexCellRevisions).toHaveBeenCalledTimes(1));
   expect(cloud.listHexCells).toHaveBeenCalledTimes(1);
 
-  // The GM changed it elsewhere and the event never arrived.
-  cloud.listHexCellRevisions.mockResolvedValue([{ q: 1, r: 2, updatedAt: 20 }]);
-  cloud.listHexCells.mockResolvedValue([{ ...hex, terrain: 'Hills', updatedAt: 20 }]);
+  // The GM changed it elsewhere and the event never arrived; another hex
+  // appeared too. Only those two are read, never the whole map again.
+  const other = { ...hex, q: 3, r: 4, terrain: 'Swamp', updatedAt: 30 };
+  cloud.listHexCellRevisions.mockResolvedValue([{ q: 1, r: 2, updatedAt: 20 }, { q: 3, r: 4, updatedAt: 30 }]);
+  cloud.listHexCellsAt.mockResolvedValue([{ ...hex, terrain: 'Hills', updatedAt: 20 }, other]);
   await act(async () => { window.dispatchEvent(new Event('online')); });
-  await waitFor(() => expect(cloud.listHexCells).toHaveBeenCalledTimes(2));
-  await waitFor(() => expect([...hexcrawl.cellsByKey.values()][0].terrain).toBe('Hills'));
+  await waitFor(() => expect(cloud.listHexCellsAt).toHaveBeenCalledWith('scene-one', ['1:2', '3:4']));
+  await waitFor(() => expect(hexcrawl.cellsByKey.size).toBe(2));
+  expect([...hexcrawl.cellsByKey.values()].map((cell) => cell.terrain).sort()).toEqual(['Hills', 'Swamp']);
+  expect(cloud.listHexCells).toHaveBeenCalledTimes(1);
 });
