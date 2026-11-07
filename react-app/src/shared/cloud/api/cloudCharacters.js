@@ -15,8 +15,10 @@ function sheetData(character) {
   return stripRuntimeOnlyCharacterFields(character);
 }
 
-// Exported because a portrait's address begins with the owner's id, which is
-// what the storage policies key on.
+// The fields every whole-sheet write sets.
+function sheetFields(character) {
+  return { name: character.name || 'Character', data: sheetData(character) };
+}
 
 async function getCloudOwner(supabase, charId) {
   const { data, error } = await supabase
@@ -79,45 +81,47 @@ function saved(charId, sheetRevision) {
   return { id: String(charId), sheetRevision };
 }
 
-// Push the local sheet. The database preserves existing combat vitals; only an
-// explicit health command can edit those on an existing character. An existing
-// row is updated only if it is still at the revision this local copy was last
-// aligned with, so a stale copy never overwrites a change made elsewhere; a
-// local copy with no known revision is refused (SHEET_CONFLICT) until the user
-// chooses a version. A missing row is created.
-export async function pushCharacter(charId) {
+// Write a whole sheet and answer with the sheet revision it produced. The
+// database preserves existing combat vitals; only an explicit health command
+// can edit those on an existing character. An existing row is updated only if
+// it is still at `expectedSheetRevision`, the revision the caller's copy is
+// based on, so a stale copy never overwrites a change made elsewhere; a copy
+// with no known revision is refused (SHEET_CONFLICT) until the user chooses a
+// version. The owner also keeps their username current; a GM saving a
+// player's row writes data/name only. A missing row is created (INSERT; its
+// first sheet_revision comes back).
+async function writeSheet(charId, character, expectedSheetRevision) {
   const supabase = requireClient();
-  const user = await currentUser(requireClient());
+  const user = await currentUser(supabase);
+  const owner = await getCloudOwner(supabase, charId);
+  const username = user.user_metadata?.username || null;
+  if (owner) {
+    const fields = owner === user.id
+      ? { owner_username: username, ...sheetFields(character) }
+      : sheetFields(character);
+    return updateSheet(charId, fields, expectedSheetRevision);
+  }
+  const row = {
+    id: charId,
+    owner: user.id,
+    owner_username: username,
+    ...sheetFields(character),
+    updated_at: new Date().toISOString(),
+  };
+  const { data, error } = await supabase.from(TABLE).insert(row).select('sheet_revision').maybeSingle();
+  // Created elsewhere in between (unique violation): not ours to overwrite.
+  if (error?.code === '23505') throw sheetConflict(charId, await getCloudSheetRevision(charId));
+  if (error) throw error;
+  return Number(data?.sheet_revision ?? 0);
+}
+
+// Push the local sheet (writeSheet), based on the revision this local copy
+// was last aligned with.
+export async function pushCharacter(charId) {
   const local = storeLoadCharacter(charId);
   if (!local) throw new Error('Character not found locally.');
   const { sheetRevision: expected, editVersion } = getCharacterSyncMeta(charId);
-
-  const owner = await getCloudOwner(supabase, charId);
-  if (owner && owner !== user.id) {
-    return updateForeignCharacter(charId);
-  }
-
-  const username = user.user_metadata?.username || null;
-  let sheetRevision;
-  if (owner) {
-    sheetRevision = await updateSheet(charId, {
-      owner_username: username, name: local.name || 'Character', data: sheetData(local),
-    }, expected);
-  } else {
-    const row = {
-      id: charId,
-      owner: user.id,
-      owner_username: username,
-      name: local.name || 'Character',
-      data: sheetData(local),
-      updated_at: new Date().toISOString(),
-    };
-    const { data, error } = await supabase.from(TABLE).insert(row).select('sheet_revision').maybeSingle();
-    // Created elsewhere in between (unique violation): not ours to overwrite.
-    if (error?.code === '23505') throw sheetConflict(charId, await getCloudSheetRevision(charId));
-    if (error) throw error;
-    sheetRevision = Number(data?.sheet_revision ?? 0);
-  }
+  const sheetRevision = await writeSheet(charId, local, expected);
   markCharacterSynced(charId, sheetRevision, editVersion);
   return saved(charId, sheetRevision);
 }
@@ -169,7 +173,7 @@ export async function updateForeignCharacter(charId) {
   const local = storeLoadCharacter(charId);
   if (!local) throw new Error('Character not found locally.');
   const { sheetRevision: expected, editVersion } = getCharacterSyncMeta(charId);
-  const sheetRevision = await updateSheet(charId, { name: local.name || 'Character', data: sheetData(local) }, expected);
+  const sheetRevision = await updateSheet(charId, sheetFields(local), expected);
   markCharacterSynced(charId, sheetRevision, editVersion);
   return saved(charId, sheetRevision);
 }
@@ -180,46 +184,18 @@ export async function updateForeignCharacter(charId) {
 // fails with SHEET_CONFLICT instead of overwriting a newer sheet.
 export async function updateCloudCharacterData(charId, character, { expectedSheetRevision = null } = {}) {
   if (!charId || !character) throw new Error('Character data missing.');
-  const sheetRevision = await updateSheet(
-    charId, { name: character.name || 'Character', data: sheetData(character) }, expectedSheetRevision,
-  );
+  const sheetRevision = await updateSheet(charId, sheetFields(character), expectedSheetRevision);
   return saved(charId, sheetRevision);
 }
 
-// Save a character to the cloud straight from an in-memory object — no local
-// store dependency (the builder's cloud-only autosave never writes
-// localStorage, so there's nothing for pushCharacter() to read).
-//
-// A character that does not exist yet is created (INSERT; its first
-// sheet_revision comes back). An existing one is only ever updated conditionally
-// on `expectedSheetRevision`, the revision the caller's copy is based on: a
-// caller that never saw the row has none, and gets SHEET_CONFLICT instead of
-// overwriting it blind. A GM saving a player's row writes data/name only.
+// Save a character to the cloud straight from an in-memory object (writeSheet)
+// — no local store dependency (the builder's cloud-only autosave never writes
+// localStorage, so there's nothing for pushCharacter() to read). A caller that
+// never saw the row has no `expectedSheetRevision`, and gets SHEET_CONFLICT
+// instead of overwriting it blind.
 export async function pushCharacterData(charId, character, { expectedSheetRevision = null } = {}) {
   if (!charId || !character) throw new Error('Character data missing.');
-  const supabase = requireClient();
-  const user = await currentUser(requireClient());
-  const owner = await getCloudOwner(supabase, charId);
-  const username = user.user_metadata?.username || null;
-  if (owner) {
-    const fields = owner === user.id
-      ? { owner_username: username, name: character.name || 'Character', data: sheetData(character) }
-      : { name: character.name || 'Character', data: sheetData(character) };
-    return saved(charId, await updateSheet(charId, fields, expectedSheetRevision));
-  }
-  const row = {
-    id: charId,
-    owner: user.id,
-    owner_username: username,
-    name: character.name || 'Character',
-    data: sheetData(character),
-    updated_at: new Date().toISOString(),
-  };
-  const { data, error } = await supabase.from(TABLE).insert(row).select('sheet_revision').maybeSingle();
-  // Created by someone else in between (unique violation): not ours to overwrite.
-  if (error?.code === '23505') throw sheetConflict(charId, await getCloudSheetRevision(charId));
-  if (error) throw error;
-  return saved(charId, Number(data?.sheet_revision ?? 0));
+  return saved(charId, await writeSheet(charId, character, expectedSheetRevision));
 }
 
 // Pull a cloud character back into local storage (so existing screens can open it).
