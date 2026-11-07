@@ -5,7 +5,7 @@ import { nextTurn, prevTurn, rerollInitiative, setInitiative } from '../../../sh
 import {
   addCombatantEffect, applySheetVitals, clearCombatantConditions, clearCombatantEffects, modifyHp, removeCombatantEffect, setDeathSave, setHp, setMaxHp, setTempHp, toggleCombatantCondition,
 } from '../../../shared/encounter/combatantVitals.js';
-import { addRollLogEntry } from '../rolls/dice.js';
+import { addRollLogEntry } from '../rolls/rollLog.js';
 import {
   createDefaultFumbleCategory,
   createDefaultFumbleTables,
