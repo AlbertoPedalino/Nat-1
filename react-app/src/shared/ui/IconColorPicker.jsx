@@ -1,6 +1,7 @@
-import { useRef, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, Popover, Typography } from '@mui/material';
 import { UI_FONTS } from './fonts.js';
+import ColorField from './ColorField.jsx';
 
 export const ICON_COLORS = [
   '#de675f', '#d69245', '#caa550', '#e9c46a',
@@ -11,7 +12,6 @@ export const ICON_COLORS = [
 
 export default function IconColorPicker({ anchorEl, onClose, currentColor, onSelect, title = 'Icon Color' }) {
   const open = Boolean(anchorEl);
-  const inputRef = useRef(null);
   const [localColor, setLocalColor] = useState(currentColor);
 
   useEffect(() => { setLocalColor(currentColor); }, [currentColor]);
@@ -67,20 +67,18 @@ export default function IconColorPicker({ anchorEl, onClose, currentColor, onSel
         <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary', fontFamily: UI_FONTS.display, letterSpacing: '0.06em' }}>
           Custom
         </Typography>
+        {/* The well's input fills the swatch, so a click on it opens the picker. */}
         <Box
-          onClick={() => inputRef.current?.click()}
           sx={{
             width: 24, height: 24, borderRadius: '50%', cursor: 'pointer',
             bgcolor: displayColor, border: 2, borderColor: 'divider',
             position: 'relative', overflow: 'hidden',
           }}
         >
-          <Box
-            component="input"
-            ref={inputRef}
-            type="color"
+          <ColorField
+            label={`${title}: custom`}
             value={localColor || '#4d95d6'}
-            onInput={(e) => setLocalColor(e.target.value)}
+            onChange={setLocalColor}
             sx={{
               position: 'absolute', left: -40, top: -40, width: 100, height: 100,
               cursor: 'pointer', border: 'none', padding: 0,

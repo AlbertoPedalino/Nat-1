@@ -108,6 +108,12 @@ test('every confirmation goes through confirmAction', () => {
   assert.deepEqual(sourceFilesMatching(/window\.confirm\(/, { allow: ['shared/ui/confirmAction.js'] }), []);
 });
 
+// A native colour input jumps under the pointer unless it holds its own value
+// while the picker is open: ColorField does, so every colour well is one.
+test('every colour well is a ColorField', () => {
+  assert.deepEqual(sourceFilesMatching(/type="color"/, { allow: ['shared/ui/ColorField.jsx'] }), []);
+});
+
 test('deep copies use structuredClone', () => {
   assert.deepEqual(sourceFilesMatching(/JSON\.parse\(JSON\.stringify\(/), []);
 });
