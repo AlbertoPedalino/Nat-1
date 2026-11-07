@@ -99,7 +99,7 @@ export default function BeastChoice({ spec, character, dispatch, beasts }) {
                           </Typography>
                         )}
                         secondary={`CR ${beast.cr} · ${beast.size} · AC ${beast.ac ?? '—'} · HP ${beast.hp.average} · ${beast.source}`}
-                        secondaryTypographyProps={{ noWrap: true, sx: { fontSize: '0.58rem' } }}
+                        slotProps={{ secondary: { noWrap: true, sx: { fontSize: '0.58rem' } } }}
                       />
                       {active ? <Check size={16} color="currentColor" /> : null}
                     </ListItemButton>

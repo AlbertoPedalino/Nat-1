@@ -193,8 +193,6 @@ export function CurrencyCoinBox({
             placeholder="Name"
             variant="standard"
             fullWidth
-            inputProps={{ 'aria-label': 'Currency name', maxLength: 24 }}
-            InputProps={{ disableUnderline: true }}
             sx={{
               '& input': {
                 ...labelBaseSx,
@@ -205,6 +203,7 @@ export function CurrencyCoinBox({
                 py: 0,
               },
             }}
+            slotProps={{ htmlInput: { 'aria-label': 'Currency name', maxLength: 24 }, input: { disableUnderline: true } }}
           />
           <TextField
             value={coin.shortLabel}
@@ -212,8 +211,6 @@ export function CurrencyCoinBox({
             placeholder="ABBR"
             variant="standard"
             fullWidth
-            inputProps={{ 'aria-label': 'Currency abbreviation', maxLength: 5 }}
-            InputProps={{ disableUnderline: true }}
             sx={{
               '& input': {
                 ...labelBaseSx,
@@ -224,6 +221,7 @@ export function CurrencyCoinBox({
                 py: 0,
               },
             }}
+            slotProps={{ htmlInput: { 'aria-label': 'Currency abbreviation', maxLength: 5 }, input: { disableUnderline: true } }}
           />
           <IconColorPicker
             anchorEl={colorAnchor}
@@ -251,11 +249,6 @@ export function CurrencyCoinBox({
         onFocus={handleFocus}
         onChange={handleChange}
         onBlur={handleBlur}
-        inputProps={{
-          inputMode: 'numeric',
-          pattern: '[0-9]*',
-          'aria-label': `${coin.label} amount`,
-        }}
         sx={{
           '& input': {
             textAlign: 'center',
@@ -266,6 +259,11 @@ export function CurrencyCoinBox({
             py: v.field.py,
           },
         }}
+        slotProps={{ htmlInput: {
+          inputMode: 'numeric',
+          pattern: '[0-9]*',
+          'aria-label': `${coin.label} amount`,
+        } }}
       />
       <Box
         sx={{
@@ -298,12 +296,6 @@ export function CurrencyCoinBox({
           size="small"
           variant="standard"
           fullWidth
-          inputProps={{
-            inputMode: 'numeric',
-            pattern: '[0-9]*',
-            'aria-label': `Custom ${coin.label} add amount`,
-          }}
-          InputProps={{ disableUnderline: true }}
           sx={{
             '& .MuiInputBase-root': {
               height: v.stepper.button,
@@ -319,6 +311,11 @@ export function CurrencyCoinBox({
               py: 0,
             },
           }}
+          slotProps={{ htmlInput: {
+            inputMode: 'numeric',
+            pattern: '[0-9]*',
+            'aria-label': `Custom ${coin.label} add amount`,
+          }, input: { disableUnderline: true } }}
         />
         <Tooltip title={`Add ${addStep}`}>
           <IconButton

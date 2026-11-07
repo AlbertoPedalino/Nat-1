@@ -69,7 +69,7 @@ function ClassRow({ cls, selected, onSelect, prereqMet = true, prereqReason = ''
                     {saves ? <Chip size="small" label={`Saves ${saves}`} /> : null}
                   </Stack>
                 )}
-                secondaryTypographyProps={{ component: 'div' }}
+                slotProps={{ secondary: { component: 'div' } }}
               />
               <Chip size="small" label={cls.source} />
             </Box>

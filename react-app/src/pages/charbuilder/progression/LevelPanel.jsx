@@ -77,9 +77,9 @@ export default function LevelPanel({ character, dispatch }) {
                   type="number"
                   label={isExtra ? `${extraClass?.name || 'MC'} Lv ${level}` : `Lv ${level}`}
                   value={character.hpManualRolls[rollKeyFor(level)] || ''}
-                  inputProps={{ min: 1, max: faces || 12 }}
                   sx={{ width: 92 }}
                   onChange={(event) => dispatch({ type: 'hp/roll', key: rollKeyFor(level), value: Number(event.target.value) || 0 })}
+                  slotProps={{ htmlInput: { min: 1, max: faces || 12 } }}
                 />
               ))}
             </Stack>

@@ -78,3 +78,39 @@ test('MUI layout components get their styles through sx, not removed system prop
   }
   assert.deepEqual(found, []);
 });
+
+// MUI 9 also dropped the old per-part props in favour of slotProps:
+// TextField's inputProps/InputProps lost min, max, maxLength and labels, and
+// ListItemText's secondaryTypographyProps its styling.
+const REMOVED_PROPS = {
+  TextField: ['inputProps', 'InputProps', 'InputLabelProps', 'FormHelperTextProps', 'SelectProps'],
+  ListItemText: ['primaryTypographyProps', 'secondaryTypographyProps'],
+};
+
+test('TextField and ListItemText parts are styled through slotProps', () => {
+  const found = [];
+  for (const file of sourceFiles(SRC)) {
+    const code = readFileSync(file, 'utf8');
+    if (!code.includes('@mui/material')) continue;
+    const tree = parse(code, { sourceType: 'module', plugins: ['jsx'] });
+    const local = new Map();
+    tree.program.body.forEach((node) => {
+      if (node.type === 'ImportDeclaration' && node.source.value === '@mui/material') {
+        node.specifiers.forEach((s) => { if (s.type === 'ImportSpecifier' && REMOVED_PROPS[s.imported.name]) local.set(s.local.name, s.imported.name); });
+      }
+    });
+    if (!local.size) continue;
+    traverse(tree, {
+      JSXOpeningElement(p) {
+        const comp = p.node.name.type === 'JSXIdentifier' ? local.get(p.node.name.name) : null;
+        if (!comp) return;
+        p.node.attributes.forEach((attr) => {
+          if (attr.type === 'JSXAttribute' && REMOVED_PROPS[comp].includes(attr.name.name)) {
+            found.push(`${relative(SRC, file).replace(/\\/g, '/')}:${attr.loc.start.line} <${comp} ${attr.name.name}>`);
+          }
+        });
+      },
+    });
+  }
+  assert.deepEqual(found, []);
+});

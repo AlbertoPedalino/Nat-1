@@ -228,7 +228,7 @@ export default function CriticalFumblesDialog({ open, onClose }) {
               multiline
               maxRows={4}
               placeholder="Describe the consequence…"
-              inputProps={{ 'aria-label': `${category.label} fumble result ${result}` }}
+              slotProps={{ htmlInput: { 'aria-label': `${category.label} fumble result ${result}` } }}
             />
           </Paper>
         ))}

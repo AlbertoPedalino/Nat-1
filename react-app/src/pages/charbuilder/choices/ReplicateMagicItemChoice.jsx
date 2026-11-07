@@ -66,7 +66,7 @@ function ItemPlanRow({ name, source, item, active, selectionDisabled, onSelect }
                 </Typography>
               )}
               secondary={source || null}
-              secondaryTypographyProps={{ noWrap: true, sx: { fontSize: '0.58rem' } }}
+              slotProps={{ secondary: { noWrap: true, sx: { fontSize: '0.58rem' } } }}
             />
             {active ? <Check size={16} color="currentColor" /> : null}
           </ListItemButton>

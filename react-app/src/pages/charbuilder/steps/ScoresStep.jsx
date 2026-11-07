@@ -122,9 +122,9 @@ export default function ScoresStep({ state, dispatch }) {
                       fullWidth
                       type="number"
                       value={scores[stat] ?? ''}
-                      inputProps={{ min: 1, max: 30 }}
                       onChange={(event) => dispatch({ type: 'score/set', bucket, stat, value: Number(event.target.value) || 1 })}
                       sx={{ mt: 1.5 }}
+                      slotProps={{ htmlInput: { min: 1, max: 30 } }}
                     />
                   ) : (
                     <Box sx={{ px: 0.75, pt: 2.25, pb: 0.25 }}>

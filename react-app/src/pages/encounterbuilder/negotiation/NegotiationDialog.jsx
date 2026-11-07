@@ -122,8 +122,8 @@ export default function NegotiationDialog({ open, onClose }) {
           placeholder="Set the threshold"
           size="small"
           fullWidth
-          inputProps={{ min: MIN_THRESHOLD, max: MAX_THRESHOLD, inputMode: 'numeric' }}
           helperText="The roll is made separately; record its outcome using the buttons below."
+          slotProps={{ htmlInput: { min: MIN_THRESHOLD, max: MAX_THRESHOLD, inputMode: 'numeric' } }}
         />
 
         <Box sx={meterGridSx}>

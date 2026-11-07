@@ -73,10 +73,10 @@ export default function ExpandableSelectionList({
                             </Typography>
                           )}
                           secondary={option.secondary || null}
-                          secondaryTypographyProps={{
+                          slotProps={{ secondary: {
                             noWrap: true,
                             sx: { mt: 0.15, fontSize: '0.72rem' },
-                          }}
+                          } }}
                         />
                       </ListItemButton>
                       <IconButton

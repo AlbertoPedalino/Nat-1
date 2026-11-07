@@ -26,7 +26,7 @@ export default function SearchList({ value, onSearch, placeholder, items, select
                 <ListItemText
                   primary={<Typography sx={{ fontWeight: 500, fontSize: '0.76rem' }}>{item.name}</Typography>}
                   secondary={meta?.(item)}
-                  secondaryTypographyProps={{ component: 'div' }}
+                  slotProps={{ secondary: { component: 'div' } }}
                 />
                 <Chip size="small" label={item.source} />
               </ListItemButton>
