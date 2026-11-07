@@ -9,13 +9,15 @@ import { UI_FONTS } from '../../shared/ui/fonts.js';
 
 export const APP_TOP_BAR_HEIGHT = '48px';
 
-// Every bar offers the compendium, except the compendium's own page.
+// Every bar offers the compendium, except the compendium's own page. `start`
+// adds page buttons next to Home/Back; `children` sit on the right, before
+// the compendium and the cloud menu (which takes `cloudMenuProps`).
 export default function AppTopBar({
-  sx, children, home = false, backTo, backLabel = 'Back', compendium = true,
+  sx, children, home = false, backTo, backLabel = 'Back', compendium = true, start = null, cloudMenuProps = null,
 }) {
   return (
     <Box sx={{ ...appTopBarSx, ...sx }}>
-      {home || backTo ? (
+      {home || backTo || start ? (
         <Box sx={leftActionsSx}>
           {home ? (
             <Button
@@ -26,7 +28,7 @@ export default function AppTopBar({
               color="primary"
               aria-label="Home"
               startIcon={<Home size={14} />}
-              sx={navBtnSx}
+              sx={appTopBarButtonSx}
             >
               <Box component="span" sx={phoneHiddenLabelSx}>HOME</Box>
             </Button>
@@ -40,16 +42,17 @@ export default function AppTopBar({
               color="primary"
               aria-label={`Back to ${backLabel}`}
               startIcon={<ArrowLeft size={14} />}
-              sx={navBtnSx}
+              sx={appTopBarButtonSx}
             >
               <Box component="span" sx={phoneHiddenLabelSx}>{backLabel}</Box>
             </Button>
           ) : null}
+          {start}
         </Box>
       ) : null}
       {children}
       {compendium ? <CompendiumButton sx={navFontSx} /> : null}
-      <CloudMenu />
+      <CloudMenu {...cloudMenuProps} />
     </Box>
   );
 }
@@ -68,7 +71,7 @@ const navFontSx = {
   whiteSpace: 'nowrap',
 };
 
-const navBtnSx = {
+export const appTopBarButtonSx = {
   ...navFontSx,
   ...iconOnlyOnPhoneButtonSx,
 };

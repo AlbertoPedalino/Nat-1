@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { Box, Typography, Button, Chip, Menu, MenuItem } from '@mui/material';
-import { ArrowLeft, Home, Sun, Moon, Dices, Trash2, ImagePlus, Palette, Eye } from 'lucide-react';
+import { ArrowLeft, Sun, Moon, Dices, Trash2, ImagePlus, Palette, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { levelFromXp, xpForLevel, xpProgressPct, MAX_LEVEL } from '../../../shared/character/progression/xp.js';
 import { rollFormula as rollFormulaDice, formatRollTitle } from '../../../shared/character/dice/dice.js';
@@ -9,8 +9,6 @@ import PortraitBadge from '../../../shared/character/profile/PortraitBadge.jsx';
 import { deletePortrait, uploadPortrait } from '../../../shared/cloud/api/characterArt.js';
 import SheetDialog from '../../../shared/ui/SheetDialog.jsx';
 import XpDeltaControl from '../../../shared/character/progression/XpDeltaControl.jsx';
-import CloudMenu from '../../../shared/cloud/auth/CloudMenu.jsx';
-import CompendiumButton from '../../compendium/CompendiumButton.jsx';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { classIcon } from '../../../shared/character/profile/classIcon.js';
 import CustomRollDialog from '../../../shared/character/dice/CustomRollDialog.jsx';
@@ -22,6 +20,7 @@ import { formatNumber } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { NEW_CHARACTER, characterBuilderPath } from '../../../shared/character/profile/characterRoutes.js';
+import AppTopBar, { APP_TOP_BAR_HEIGHT, appTopBarButtonSx } from '../../../app/navigation/AppTopBar.jsx';
 
 function cleanFormula(detail) {
   if (!detail) return '';
@@ -49,12 +48,6 @@ const ROLL_LOG_SX = {
   label: { fontFamily: UI_FONTS.display, fontSize: '0.7rem', color: 'text.primary', fontWeight: 700, letterSpacing: '0.04em', mb: 0.15 },
   formula: { fontSize: '0.6rem', color: 'text.secondary', fontFamily: UI_FONTS.mono, lineHeight: 1.2 },
   empty: { fontSize: '0.75rem', color: 'text.secondary', fontStyle: 'italic', textAlign: 'center', py: 3 },
-};
-
-const appNavButtonSx = {
-  fontFamily: UI_FONTS.display,
-  fontSize: '0.625rem',
-  letterSpacing: '0.08em',
 };
 
 export default function TopBar({ C, sheet, charId, readOnly = false, embedded = false, onShortRest, onLongRest, onUpdateXp, onUpdateCharacter, rollLog, onClearRollLog, onShowToast }) {
@@ -118,23 +111,11 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
     <Box sx={{
       bgcolor: 'background.paper', borderBottom: 2, borderColor: 'divider',
     }}>
-      <Box sx={{ maxWidth: embedded ? 'none' : 1280, mx: embedded ? 0 : { md: 'auto' }, px: embedded ? '0.45rem' : { xs: '0.6rem', md: '1.1rem' } }}>
       {!embedded ? (
-        <Box sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          gap: '0.35rem',
-          py: '0.35rem',
-          borderBottom: 1,
-          borderColor: uiAlpha(UI_COLORS.goldLight, 0.14),
-        }}>
-          <Box sx={{ display: 'flex', gap: '0.35rem' }}>
-            <Button size="small" variant="outlined" color="primary" startIcon={<Home size={14} />}
-              onClick={() => navigate('/')} sx={appNavButtonSx}>
-              HOME
-            </Button>
-            {!readOnly && (
+        <>
+          <AppTopBar
+            home
+            start={readOnly ? null : (
               <Button size="small" variant="outlined" color="primary" startIcon={<ArrowLeft size={14} />}
                 onClick={() => {
                   const params = new URLSearchParams(window.location.search);
@@ -147,17 +128,15 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
                     || getActiveCharId() || NEW_CHARACTER;
                   navigate(characterBuilderPath(targetId));
                 }}
-                sx={appNavButtonSx}>
+                sx={appTopBarButtonSx}>
                 Builder
               </Button>
             )}
-          </Box>
-          <Box sx={{ display: 'flex', gap: '0.35rem', flexShrink: 0, alignItems: 'center' }}>
-            <CompendiumButton sx={appNavButtonSx} />
-            <CloudMenu buttonSx={appNavButtonSx} />
-          </Box>
-        </Box>
+          />
+          <Box sx={{ height: APP_TOP_BAR_HEIGHT }} />
+        </>
       ) : null}
+      <Box sx={{ maxWidth: embedded ? 'none' : 1280, mx: embedded ? 0 : { md: 'auto' }, px: embedded ? '0.45rem' : { xs: '0.6rem', md: '1.1rem' } }}>
       <Box sx={{
         display: 'flex', alignItems: 'center', gap: embedded ? '0.4rem' : { xs: '0.4rem', md: '1rem' },
         flexDirection: embedded ? 'column' : { xs: 'column', md: 'row' },
