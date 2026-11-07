@@ -11,6 +11,7 @@ import { itemGroupLookup, itemImageMap, itemPicture } from './itemCatalog.js';
 import { spellClasses } from './spellCatalog.js';
 import { getMonsterTokenUrls } from '../../shared/bestiary/monsterUtils.js';
 import { buildCompendiumIndex } from './compendiumIndex.js';
+import { cachedLoader } from '../../shared/content/cachedLoader.js';
 
 // Every kind at once, each from the loader the rest of the app uses (and so
 // from the same per-file cache). A kind that fails to load is left out and
@@ -45,17 +46,15 @@ function classFeatureRecords({ classFeatures = [], subclasses = [], subclassFeat
   ];
 }
 
-let compendiumPromise = null;
-
-export function loadCompendium() {
-  if (compendiumPromise) return compendiumPromise;
+// Offline, nothing loads: the next opening asks again.
+export const loadCompendium = cachedLoader(() => {
   const kinds = Object.keys(LOADERS);
   // Item pictures ride along; without them the items still load.
   const pictures = Promise.all([
     loadGameData('fluff-items.json').then((json) => itemImageMap(json, GAME_IMAGE_BASE)),
     loadItemGroups().then(itemGroupLookup).catch(() => () => null),
   ]).catch(() => null);
-  compendiumPromise = Promise.all([Promise.allSettled(kinds.map((kind) => LOADERS[kind]())), pictures]).then(([results, images]) => {
+  return Promise.all([Promise.allSettled(kinds.map((kind) => LOADERS[kind]())), pictures]).then(([results, images]) => {
     const records = {};
     const failed = [];
     let legendaryGroups = new Map();
@@ -78,8 +77,6 @@ export function loadCompendium() {
         records[kind] = result.value;
       }
     });
-    // Offline, nothing loads: the next opening asks again.
-    if (failed.length === kinds.length) compendiumPromise = null;
     const index = buildCompendiumIndex(records);
     // Noted on the compendium's own entries: the class lists a spell is on, a
     // creature's token when 5etools has one.
@@ -97,8 +94,7 @@ export function loadCompendium() {
     }
     return { index, legendaryGroups, failed };
   });
-  return compendiumPromise;
-}
+}, { failed: (result) => result.failed.length === Object.keys(LOADERS).length });
 
 export function useCompendium() {
   const [state, setState] = useState({ status: 'loading', index: [], legendaryGroups: new Map(), failed: [] });

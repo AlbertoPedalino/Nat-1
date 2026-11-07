@@ -15,6 +15,7 @@ import {
   normalizeResourceMax,
   resourceFullValue,
 } from '../../../shared/character/resources/restResources.js';
+import { cachedLoader } from '../../../shared/content/cachedLoader.js';
 
 // What opening a sheet needs besides the stored character: the reference data
 // (cached per tab), the character reconciled with it, and its resources.
@@ -23,35 +24,8 @@ import {
 // datasets into sheet-ready records is also expensive. Share that processed
 // work between every sheet mounted in this tab; a failed load is evicted so a
 // later character can still retry it.
-let itemsDbPromise = null;
-let optionalFeaturesPromise = null;
-let conditionsPromise = null;
-
-function cachedReferenceLoad(current, load, clear) {
-  if (current) return current;
-  const pending = load();
-  pending.catch(() => clear());
-  return pending;
-}
-
-function loadCachedItems() {
-  itemsDbPromise = cachedReferenceLoad(itemsDbPromise, loadItems, () => { itemsDbPromise = null; });
-  return itemsDbPromise;
-}
-
-function loadCachedOptionalFeatures() {
-  optionalFeaturesPromise = cachedReferenceLoad(
-    optionalFeaturesPromise,
-    loadOptionalFeatures,
-    () => { optionalFeaturesPromise = null; },
-  );
-  return optionalFeaturesPromise;
-}
-
-function loadCachedConditions() {
-  conditionsPromise = cachedReferenceLoad(conditionsPromise, loadConditions, () => { conditionsPromise = null; });
-  return conditionsPromise;
-}
+const loadCachedOptionalFeatures = cachedLoader(loadOptionalFeatures);
+const loadCachedConditions = cachedLoader(loadConditions);
 
 // The adapters for this character and the reference data, each failing soft:
 // a failed adapter chunk (e.g. a stale-deploy 404) must not blank the whole
@@ -59,7 +33,7 @@ function loadCachedConditions() {
 export async function loadSheetReferenceData(character) {
   const [, itemsDb, optionalFeatures, conditionEntries] = await Promise.all([
     ensureSheetRuntimeAdapters(character),
-    loadCachedItems().catch(() => []),
+    loadItems().catch(() => []),
     loadCachedOptionalFeatures().catch(() => []),
     loadCachedConditions().catch(() => ({})),
   ]);

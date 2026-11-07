@@ -4,6 +4,7 @@ import { itemDisplayName } from '../../../shared/character/inventory/itemIdentit
 import { itemGroupKey as itemType } from '../../../shared/character/inventory/itemGroups.js';
 import { stripSource } from '../../../shared/content/nameKeys.js';
 import { byName, compareText } from '../../../shared/lists.js';
+import { cachedLoader } from '../../../shared/content/cachedLoader.js';
 
 // Searching the item database from the inventory's add panel: normalized
 // search text per item (name, type, rarity, properties), relevance order (name
@@ -110,11 +111,4 @@ export function byItemName(a, b) {
   return compareText(a.item?.name, b.item?.name);
 }
 
-let itemsCachePromise = null;
-
-export function loadItemsCached() {
-  if (!itemsCachePromise) {
-    itemsCachePromise = loadItems().then((items) => (items || []).map(prepareSearchItem));
-  }
-  return itemsCachePromise;
-}
+export const loadItemsCached = cachedLoader(async () => (await loadItems() || []).map(prepareSearchItem));

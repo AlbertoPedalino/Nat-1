@@ -9,9 +9,9 @@ import { matchKey, splitNameSource, stripSource } from '../../content/nameKeys.j
 import { loadGameData } from '../../content/gameData.js';
 import { titleCase } from '../../ui/textCase.js';
 import { stripMarkup } from '../../content/markupText.js';
+import { cachedLoader } from '../../content/cachedLoader.js';
 
 const _masteries = new Map();
-let _masteryLoadPromise = null;
 
 function isMundaneWeapon(item) {
   if (!item || typeof item !== 'object' || !item.name) return false;
@@ -142,23 +142,18 @@ function parseChoiceValue(value) {
   return [];
 }
 
-export async function loadMasteryEntries() {
-  if (_masteries.size > 0) return _masteries;
-  if (_masteryLoadPromise) return _masteryLoadPromise;
-  _masteryLoadPromise = (async () => {
-    try {
-      const data = await loadGameData('items-base.json');
-      (data?.itemMastery || []).forEach((entry) => {
-        if (!entry?.name || !Array.isArray(entry.entries)) return;
-        _masteries.set(matchKey(entry.name), { name: entry.name, entries: entry.entries });
-      });
-    } catch {
-      _masteryLoadPromise = null;
-    }
-    return _masteries;
-  })();
-  return _masteryLoadPromise;
-}
+// Resolves with the mastery map (empty when the file could not be read, and
+// then read again on the next call).
+export const loadMasteryEntries = cachedLoader(async () => {
+  try {
+    const data = await loadGameData('items-base.json');
+    (data?.itemMastery || []).forEach((entry) => {
+      if (!entry?.name || !Array.isArray(entry.entries)) return;
+      _masteries.set(matchKey(entry.name), { name: entry.name, entries: entry.entries });
+    });
+  } catch { /* the empty map says so */ }
+  return _masteries;
+}, { failed: (masteries) => masteries.size === 0 });
 
 function getMasteryRecord(value) {
   if (!value) return null;

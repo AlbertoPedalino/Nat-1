@@ -15,10 +15,10 @@ import { loadOptionalFeatures } from '../../../shared/content/catalogs/classData
 import { loadFeats } from '../../../shared/content/catalogs/characterOptionData.js';
 import { sourceRank, CORE_2024_SOURCE_PRIORITY } from '../../../shared/content/sourcePriority.js';
 import { matchKey } from '../../../shared/content/nameKeys.js';
+import { cachedLoader } from '../../../shared/content/cachedLoader.js';
 
 const _byType = new Map(); // matchKey(sense name) -> { entries, rank }
 const _byFeature = new Map(); // matchKey(feature name) -> { entries, rank }
-let _loadPromise = null;
 
 // Insert into a lookup keeping the entry whose source ranks highest. Ranking is
 // the shared 2024 priority (lower index = higher priority; non-2024 ranks last),
@@ -31,29 +31,23 @@ function upsert(map, name, source, entries) {
   if (!existing || rank < existing.rank) map.set(key, { entries, rank });
 }
 
-export async function loadSenseDescriptions() {
-  if (_byType.size > 0 || _byFeature.size > 0) return;
-  if (_loadPromise) return _loadPromise;
-  _loadPromise = (async () => {
-    const [senses, optionalFeatures, feats] = await Promise.allSettled([
-      loadSenses(),
-      loadOptionalFeatures(),
-      loadFeats(),
-    ]);
-    if (senses.status === 'fulfilled') {
-      senses.value.forEach((s) => upsert(_byType, s.name, s.source, s.entries));
-    }
-    if (optionalFeatures.status === 'fulfilled') {
-      optionalFeatures.value.forEach((f) => upsert(_byFeature, f.name, f.source, f.entries));
-    }
-    if (feats.status === 'fulfilled') {
-      feats.value.forEach((f) => upsert(_byFeature, f.name, f.source, f.entries));
-    }
-    // Total failure (e.g. offline): clear so a later call retries.
-    if (_byType.size === 0 && _byFeature.size === 0) _loadPromise = null;
-  })();
-  return _loadPromise;
-}
+// Total failure (e.g. offline) is not kept: a later call retries.
+export const loadSenseDescriptions = cachedLoader(async () => {
+  const [senses, optionalFeatures, feats] = await Promise.allSettled([
+    loadSenses(),
+    loadOptionalFeatures(),
+    loadFeats(),
+  ]);
+  if (senses.status === 'fulfilled') {
+    senses.value.forEach((s) => upsert(_byType, s.name, s.source, s.entries));
+  }
+  if (optionalFeatures.status === 'fulfilled') {
+    optionalFeatures.value.forEach((f) => upsert(_byFeature, f.name, f.source, f.entries));
+  }
+  if (feats.status === 'fulfilled') {
+    feats.value.forEach((f) => upsert(_byFeature, f.name, f.source, f.entries));
+  }
+}, { failed: () => _byType.size === 0 && _byFeature.size === 0 });
 
 // 5etools `entries` for a generic sense type (camelCase maps to the rules name),
 // or null when the sense isn't in senses.json.

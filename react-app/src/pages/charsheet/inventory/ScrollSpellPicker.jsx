@@ -5,22 +5,12 @@ import { scrollSpellStats, spellScrollLevel } from '../../../shared/character/in
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { byName } from '../../../shared/lists.js';
+import { cachedLoader } from '../../../shared/content/cachedLoader.js';
 
-let spellsPromise = null;
-function loadSpellsCached() {
-  if (!spellsPromise) {
-    spellsPromise = loadSpells().then((result) => {
-      // A catalog with files missing is not kept: the next scroll opened asks
-      // again for what failed.
-      if (result?.failedFiles?.length) spellsPromise = null;
-      return result?.spells || [];
-    }, (error) => {
-      spellsPromise = null;
-      throw error;
-    });
-  }
-  return spellsPromise;
-}
+// A catalog with files missing is not kept: the next scroll opened asks again
+// for what failed.
+const loadSpellCatalogCached = cachedLoader(loadSpells, { failed: (result) => result?.failedFiles?.length > 0 });
+const loadSpellsCached = async () => (await loadSpellCatalogCached())?.spells || [];
 
 // The spell written on a Spell Scroll: any spell of the scroll's level. Once
 // picked it is cast from the Spells tab; the card keeps the scroll's own text.

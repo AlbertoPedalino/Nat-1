@@ -14,6 +14,7 @@ import {
 } from './itemRecords.js';
 import { expandMagicVariants, isAllowedMagicVariant, resolveCopyRecords } from './itemVariants.js';
 import { byName } from '../../lists.js';
+import { cachedLoader } from '../cachedLoader.js';
 
 // The item catalog of the supported manuals: base items, magic items and
 // expanded magic variants, one record per name, normalized and adapter-enriched.
@@ -62,7 +63,11 @@ function buildMissingGroupParents(items) {
   return [...groups.values()];
 }
 
-export async function loadItems() {
+// Whether the last build had to fall back to the bundled summaries (offline):
+// such a catalog is not kept, so the next call tries the download again.
+let builtFromFallback = false;
+
+async function buildItems() {
   const [base, magic, variants] = await Promise.allSettled([
     loadGameData('items-base.json'),
     loadGameData('items.json'),
@@ -92,6 +97,7 @@ export async function loadItems() {
     : [];
 
   const fetchedItems = [...baseItems, ...magicItems, ...magicVariants];
+  builtFromFallback = fetchedItems.length === 0;
   const fallback = fetchedItems.length === 0
     ? ITEM_SUMMARIES.map(withCanonicalSource)
     : [];
@@ -121,6 +127,10 @@ export async function loadItems() {
   const registry = await loadItemAdapters(context);
   return items.map((item) => applyItemAdapters(item, registry, context));
 }
+
+// The item catalog, built once per tab and shared by the builder, the sheet
+// and the compendium.
+export const loadItems = cachedLoader(buildItems, { failed: () => builtFromFallback });
 
 // Item groups (Belt of Giant Strength and its six belts…): the same file the
 // item load reads, so this costs no second download.

@@ -2,6 +2,7 @@ import { RAW_ALLOWED_SOURCES, SOURCE_LABELS } from './bestiaryConstants.js';
 import { loadGameData } from '../content/gameData.js';
 import { monsterKey } from './monsterUtils.js';
 import { byName } from '../lists.js';
+import { cachedLoader } from '../content/cachedLoader.js';
 
 function legendaryGroupKey(name, source) {
   return `${source || ''}__${name || ''}`;
@@ -67,15 +68,7 @@ export async function loadBestiaryIndex() {
 // and its encounter import (and the compendium) share one database instead of
 // each flattening, filtering and sorting every monster again. A failed build is
 // forgotten, so the next caller tries again.
-let monsterDatabase = null;
-
-export function loadMonsterDatabase() {
-  if (!monsterDatabase) {
-    monsterDatabase = buildMonsterDatabase();
-    monsterDatabase.catch(() => { monsterDatabase = null; });
-  }
-  return monsterDatabase;
-}
+export const loadMonsterDatabase = cachedLoader(() => buildMonsterDatabase());
 
 async function buildMonsterDatabase() {
   const { index, availableSources, legendaryGroups } = await loadBestiaryIndex();

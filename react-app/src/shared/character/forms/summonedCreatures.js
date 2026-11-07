@@ -2,6 +2,7 @@ import { asArray } from '../../lists.js';
 import { loadGameData } from '../../content/gameData.js';
 import { ABILITIES, sizeName } from '../../content/rulesVocabulary.js';
 import { armorClassEntry, creatureSpeeds } from '../../bestiary/monsterUtils.js';
+import { cachedLoader } from '../../content/cachedLoader.js';
 // Bestiary files holding creatures a spell or class feature summons (their
 // records carry `summonedBySpell` / `summonedByClass`). XPHB has the Ranger's
 // primal beasts.
@@ -14,24 +15,17 @@ const DAMAGE_PLUS_ABILITY = new RegExp(String.raw`\{@damage ([^}]+)\}\s+plus you
 const DICE_PLUS_ABILITY = new RegExp(String.raw`\{@dice ([^}]+)\}\s+plus your ${ABILITY_NAME} modifier`, 'gi');
 const NUMBER_WORDS = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10 };
 
-let recordsPromise = null;
-
 const clone = (value) => {
   if (value == null) return value;
   return structuredClone(value);
 };
 
-export async function loadSummonedCreatureRecords() {
-  if (recordsPromise) return recordsPromise;
-  recordsPromise = (async () => {
-    const files = await Promise.all(SUMMONED_CREATURE_FILES.map((file) => loadGameData(`bestiary/${file}`)));
-    return files.flatMap((data) => (data.monster || []).filter((monster) => (
-      monster?.summonedBySpell || monster?.summonedByClass || monster?.summonedByClassFeature
-    )));
-  })();
-  recordsPromise.catch(() => { recordsPromise = null; });
-  return recordsPromise;
-}
+export const loadSummonedCreatureRecords = cachedLoader(async () => {
+  const files = await Promise.all(SUMMONED_CREATURE_FILES.map((file) => loadGameData(`bestiary/${file}`)));
+  return files.flatMap((data) => (data.monster || []).filter((monster) => (
+    monster?.summonedBySpell || monster?.summonedByClass || monster?.summonedByClassFeature
+  )));
+});
 
 export function findSummonedCreature(records, name, source = '') {
   const wantedName = String(name || '').trim().toLowerCase();
