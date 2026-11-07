@@ -1,3 +1,6 @@
+// Where every reference link points.
+const FIVE_E_TOOLS = 'https://5e.tools';
+
 function slugify5eToolsName(name) {
   return String(name || '')
     .trim()
@@ -52,7 +55,7 @@ function get5eToolsSpellUrl(spell) {
   if (!slug) return null;
   const source = normalize5eToolsSource(spell.source || spell.src || spell.sourceShort || spell.sourceAbbreviation);
   if (!source) return null;
-  return `https://5e.tools/spells/${slug}-${source}.html`;
+  return `${FIVE_E_TOOLS}/spells/${slug}-${source}.html`;
 }
 
 // The app reorders a leading magic bonus to a trailing one for display
@@ -65,15 +68,21 @@ function toLeadingBonusName(name) {
 
 function get5eToolsItemUrl(item) {
   if (!item?.name) return null;
-  if (item.url && String(item.url).startsWith('https://5e.tools/')) return item.url;
-  if (item.href && String(item.href).startsWith('https://5e.tools/')) return item.href;
-  if (item.hash) return `https://5e.tools/items.html#${item.hash}`;
+  if (item.url && String(item.url).startsWith(`${FIVE_E_TOOLS}/`)) return item.url;
+  if (item.href && String(item.href).startsWith(`${FIVE_E_TOOLS}/`)) return item.href;
+  if (item.hash) return `${FIVE_E_TOOLS}/items.html#${item.hash}`;
   if (String(item.source || '').toLowerCase() === 'custom') return null;
   const namePart = toLeadingBonusName(item.name).toLowerCase();
   if (!namePart) return null;
   const source = normalize5eToolsSource(item.source || item.src || item.sourceShort || item.sourceAbbreviation);
   if (!source) return null;
-  return `https://5e.tools/items.html#${namePart}_${source}`;
+  return `${FIVE_E_TOOLS}/items.html#${namePart}_${source}`;
+}
+
+// A book's or adventure's reader page.
+function get5eToolsBookUrl(id, { adventure = false } = {}) {
+  if (!id) return null;
+  return `${FIVE_E_TOOLS}/${adventure ? 'adventure' : 'book'}.html#${String(id).toLowerCase()}`;
 }
 
 // A creature's 5e.tools bestiary page: 5e.tools' slugged hash of
@@ -86,7 +95,9 @@ function get5eToolsBestiaryUrl(name, source) {
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/[^\w ]+/g, '')
     .replace(/[ _]+/g, '-');
-  return `https://5e.tools/bestiary/${slug}.html`;
+  return `${FIVE_E_TOOLS}/bestiary/${slug}.html`;
 }
 
-export { slugify5eToolsName, normalize5eToolsSource, get5eToolsSpellUrl, get5eToolsItemUrl, get5eToolsBestiaryUrl };
+export {
+  slugify5eToolsName, normalize5eToolsSource, get5eToolsSpellUrl, get5eToolsItemUrl, get5eToolsBestiaryUrl, get5eToolsBookUrl,
+};

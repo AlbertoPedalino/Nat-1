@@ -4,13 +4,13 @@
 import { loadGameData } from '../../shared/content/gameData.js';
 import { CORE_2024_SOURCE_PRIORITY } from '../../shared/content/sourcePriority.js';
 import { byName, compareText } from '../../shared/lists.js';
+import { get5eToolsBookUrl } from '../../shared/content/fiveEToolsLinks.js';
 
 // The player manuals, plus the 2024 Monster Manual.
 export const BOOK_IDS = Object.freeze([...new Set([...CORE_2024_SOURCE_PRIORITY, 'XMM'])]);
 
 export function bookUrl(book) {
-  const page = book.kind === 'adventure' ? 'adventure' : 'book';
-  return `https://5e.tools/${page}.html#${String(book.id).toLowerCase()}`;
+  return get5eToolsBookUrl(book.id, { adventure: book.kind === 'adventure' });
 }
 
 export function toBookList(booksJson, adventuresJson) {
