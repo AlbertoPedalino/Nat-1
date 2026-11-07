@@ -13,7 +13,8 @@ import {
 import { diffRevisions, readChanged } from '../../../shared/cloud/sync/revisionDiff.js';
 import { externalDelta } from './externalSync.js';
 import { fightSignature, libraryCardUpdates, toFightEntry } from '../../../shared/encounter/fightRecord.js';
-import { listenForRecovery } from '../../../shared/cloud/sync/recoveryTriggers.js';
+import { listenForRecovery, watchRevisions } from '../../../shared/cloud/sync/recoveryTriggers.js';
+import { syncKeys } from '../../../shared/cloud/sync/syncKeys.js';
 
 // The fights of this instance, with the database as the record.
 //
@@ -199,7 +200,7 @@ export function useCloudFights({
       all = await listInstanceFights(instanceId);
     } catch (_) {
       // Offline or refused: the local copy carries the session.
-      return;
+      return false;
     }
     loadedRef.current = true;
     const wanted = new Set(settleStanding(all.map((entry) => entry.id)));
@@ -216,7 +217,7 @@ export function useCloudFights({
     try {
       revisions = await listInstanceFightRevisions(instanceId);
     } catch (_) {
-      return undefined;
+      return false;
     }
     const wanted = new Set(settleStanding(revisions.map((revision) => revision.id)));
     // A fight this screen does not hold is read whatever its version: the
@@ -235,7 +236,7 @@ export function useCloudFights({
         fetchSome: (ids) => listInstanceFightsByIds(instanceId, ids),
       });
     } catch (_) {
-      return undefined;
+      return false;
     }
     absorbRows(rows);
     return undefined;
@@ -347,15 +348,17 @@ export function useCloudFights({
     });
   }, [canSync, handleChange, instanceId, reconcile, refresh]);
 
-  // The safety net: every RECOVERY_INTERVAL_MS while the tab is shown, and at
-  // once when it is shown again or the network comes back.
+  // The safety net, on the shared recovery triggers: unsaved fights are sent
+  // again every time, and the instance's fights are read when they moved.
   useEffect(() => {
     if (!canSync) return undefined;
-    return listenForRecovery(() => {
-      retryUnsaved();
-      reconcile();
-    }, { periodic: true });
-  }, [canSync, reconcile, retryUnsaved]);
+    const stopRetry = listenForRecovery(() => retryUnsaved(), { periodic: true });
+    const stopWatch = watchRevisions([syncKeys.instanceFights(instanceId)], () => reconcile());
+    return () => {
+      stopRetry();
+      stopWatch();
+    };
+  }, [canSync, instanceId, reconcile, retryUnsaved]);
 
   // Local -> row. One write per fight that actually changed, so running a combat
   // does not rewrite the twenty rooms sitting beside it.

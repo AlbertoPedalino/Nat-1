@@ -52,6 +52,8 @@ health changes only through their RPCs.
 Run 20 **before** deploying a frontend that shows initiative on the battle map: the
 map reads `map_tokens.turn_order / turn_active`, and without them no piece loads.
 
+26 may come before or after the frontend: until it is run, the recovery falls back to one read per open view on every trigger, as before.
+
 Run 18 **before** deploying a frontend that syncs GM Board, Encounter Builder or
 DM Screen instances by `version`: without the column every data sync fails safely
 (nothing is overwritten) until it is applied.

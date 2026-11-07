@@ -1,8 +1,10 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { fetchScene, fetchSceneRevision } from '../../../shared/cloud/api/vttScenes.js';
 import { applyTokenEvent } from '../../../shared/vtt/session/liveScene.js';
 import { toScene } from '../../../shared/vtt/scene/scene.js';
 import { useSceneLive } from '../../../shared/vtt/session/useSceneLive.js';
+import { listenForRecovery, watchRevisions } from '../../../shared/cloud/sync/recoveryTriggers.js';
+import { syncKeys } from '../../../shared/cloud/sync/syncKeys.js';
 import { useRemotePreviews } from './useRemotePreviews.js';
 import { useFogReceiver } from './useFogPainting.js';
 import { useSceneWriteGuard } from './useSceneWriteGuard.js';
@@ -78,24 +80,50 @@ export function useSceneSync({
     receivePreview(payload);
   }, [receiveFog, receivePreview, reconcileContent, refreshVisibleTokens]);
 
-  // Runs every 30 seconds on every device at the table, so it asks for
-  // versions first and reads a row (the scene with its fog, a piece, a mark, a
-  // fight) only when that version moved.
-  const reconcilePersistentState = useCallback(async () => {
-    repairImage();
+  // Catching up with what realtime may have missed. `moved` are the sync keys
+  // the shared recovery saw move (syncKeys.js); without them (a reconnect)
+  // every part catches up, a picture that failed to load included. Each part still asks for versions first and reads
+  // a row (the scene with its fog, a piece, a mark, a fight) only when that
+  // version moved. False when a read failed, so the keys count as moved again.
+  const reconcilePersistentState = useCallback(async ({ moved = null } = {}) => {
+    if (!moved) repairImage();
+    const kinds = moved && new Set(moved.map((key) => key.split(':')[0]));
+    const has = (...wanted) => !kinds || wanted.some((kind) => kinds.has(kind));
     const readSceneIfMoved = async () => {
-      const revision = await fetchSceneRevision(scene.id).catch(() => null);
-      if (revision === null || revision === sceneUpdatedAtRef.current) return null;
-      return fetchScene(scene.id).catch(() => null);
+      try {
+        const revision = await fetchSceneRevision(scene.id);
+        if (revision === null || revision === sceneUpdatedAtRef.current) return { ok: true, scene: null };
+        return { ok: true, scene: await fetchScene(scene.id) };
+      } catch (_) {
+        return { ok: false, scene: null };
+      }
     };
-    const [freshScene] = await Promise.all([
-      readSceneIfMoved(),
-      reconcileContent(),
-      gmVitals.reconcile(),
-      sceneTurns.reload(),
+    const [fresh, ...parts] = await Promise.all([
+      has('scene') ? readSceneIfMoved() : { ok: true, scene: null },
+      has('tokens', 'drawings', 'token-secrets') ? reconcileContent() : true,
+      has('token-secrets', 'fight') ? gmVitals.reconcile() : true,
+      has('scene-turn') ? sceneTurns.reload() : true,
     ]);
-    if (acceptsScene(freshScene)) onSceneChange(freshScene);
+    if (acceptsScene(fresh.scene)) onSceneChange(fresh.scene);
+    return fresh.ok && parts.every((part) => part !== false);
   }, [acceptsScene, gmVitals, onSceneChange, reconcileContent, repairImage, scene.id, sceneTurns]);
+  const reconcileRef = useRef(reconcilePersistentState);
+  reconcileRef.current = reconcilePersistentState;
+
+  // What this screen shows, for the shared recovery: the scene, its pieces
+  // and marks, the fight it follows and, for the GM, the private HP and the
+  // linked fights. A background map (a projector) keeps following.
+  const watchedKeys = [
+    syncKeys.scene(scene.id), syncKeys.tokens(scene.id), syncKeys.drawings(scene.id), syncKeys.sceneTurn(scene.id),
+    ...(gmVitals.enabled ? [syncKeys.tokenSecrets(scene.id), ...gmVitals.fightIds.map(syncKeys.fight)] : []),
+  ].join('|');
+  useEffect(() => watchRevisions(
+    watchedKeys.split('|'),
+    (reason, moved) => reconcileRef.current({ moved }),
+    { whenHidden: true },
+  ), [watchedKeys]);
+  // A picture that failed to load is tried again on the same triggers.
+  useEffect(() => listenForRecovery(() => repairImage(), { periodic: true, whenHidden: true }), [repairImage]);
   const {
     sendDrag, sendCamera, sendPresenterState, sendPresenterInspection,
   } = useSceneLive({

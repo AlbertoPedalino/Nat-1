@@ -20,7 +20,8 @@ import { readPersistedInstance } from '../../encounterbuilder/state/storage.js';
 import { restoreFight } from '../../../shared/encounter/combat.js';
 import { importableCombatants } from '../../../shared/vtt/tokens/encounterImport.js';
 import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
-import { listenForRecovery } from '../../../shared/cloud/sync/recoveryTriggers.js';
+import { watchRevisions } from '../../../shared/cloud/sync/recoveryTriggers.js';
+import { syncKeys } from '../../../shared/cloud/sync/syncKeys.js';
 import { crKey, crXP } from '../../../shared/bestiary/challengeRating.js';
 import { CAMPAIGN_BOARD_LINK_CHANGED_EVENT, INSTANCE_LINKS_CHANGED_EVENT } from '../../../shared/appEvents.js';
 import { runBusy } from '../../../shared/ui/busyAction.js';
@@ -89,12 +90,17 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize, roster }) {
           setEncounterInstance(null);
           setLinkHint(cause?.message || 'Could not load campaign links.');
         }
+        return false;
       } finally {
         if (!cancelled && ticket === request) setResolvingLink(false);
       }
     };
     refresh();
-    const stopRecovery = listenForRecovery(() => refresh(), { periodic: true });
+    // Another device relinking the campaign or renaming an encounter builder.
+    const stopRecovery = watchRevisions(
+      [syncKeys.campaign(campaignId), syncKeys.myInstances('encounters')],
+      () => refresh(),
+    );
     window.addEventListener(CAMPAIGN_BOARD_LINK_CHANGED_EVENT, refresh);
     window.addEventListener(INSTANCE_LINKS_CHANGED_EVENT, refresh);
     window.addEventListener('storage', refresh);

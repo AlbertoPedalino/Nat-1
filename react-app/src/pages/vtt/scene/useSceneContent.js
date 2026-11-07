@@ -193,8 +193,9 @@ export function useSceneContent({ scene, isGm, spectator, notify }) {
     } catch (_) {
       // Best effort: the next tick, focus or reconnect tries again, and a
       // transient failure must not toast every 30 seconds.
+      return false;
     }
-    return undefined;
+    return true;
   }, [isGm, loadContent, scene.id, spectator]);
 
   useEffect(() => {

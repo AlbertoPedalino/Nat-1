@@ -11,6 +11,7 @@ import { toScene } from '../../../../../src/shared/vtt/scene/scene.js';
 import { persistFights } from '../../../../../src/pages/encounterbuilder/state/storage.js';
 import { createInstance } from '../../../../../src/shared/instances/instanceStore.js';
 import { createProjectorLink } from '../../../../../src/shared/vtt/session/projectorLink.js';
+import { syncDigest } from '../../../support/syncDigest.js';
 
 const sceneViewportMock = vi.hoisted(() => vi.fn());
 const signMapImageMock = vi.hoisted(() => vi.fn());
@@ -72,6 +73,11 @@ vi.mock('../../../../../src/shared/cloud/api/vttScenes.js', async (importOrigina
 vi.mock('../../../../../src/shared/cloud/api/vttTokens.js', async (importOriginal) => ({
   ...await importOriginal(),
   updateToken: updateTokenMock,
+  listTokenSecretHp: async () => ({}),
+}));
+vi.mock('../../../../../src/shared/cloud/api/vttSceneTurns.js', () => ({
+  fetchSceneTurns: async () => null,
+  setSceneTurnFight: async () => null,
 }));
 vi.mock('../../../../../src/shared/cloud/api/cloudCharacters.js', () => ({ patchCharacterData: patchCharacterMock }));
 
@@ -1016,6 +1022,34 @@ describe('light scene reconciliation', () => {
     renderScene();
     await act(async () => { await sceneLiveOptions.current.onReconcile({ reason: 'subscribed' }); });
     expect(refreshContentMock).toHaveBeenCalledWith();
+  });
+
+  test('the shared recovery reads only the parts whose keys moved', async () => {
+    syncDigest.answers = {};
+    fetchSceneRevisionMock.mockResolvedValue(1000);
+    renderScene();
+    await act(async () => {});
+    fetchSceneRevisionMock.mockClear();
+    refreshContentMock.mockClear();
+
+    // First sight: every part catches up once.
+    await act(async () => { window.dispatchEvent(new Event('online')); });
+    await waitFor(() => expect(fetchSceneRevisionMock).toHaveBeenCalledTimes(1));
+    expect(refreshContentMock).toHaveBeenCalledTimes(1);
+
+    // Quiet: one digest read, no table read.
+    fetchSceneRevisionMock.mockClear();
+    refreshContentMock.mockClear();
+    await act(async () => { window.dispatchEvent(new Event('online')); });
+    await act(async () => {});
+    expect(fetchSceneRevisionMock).not.toHaveBeenCalled();
+    expect(refreshContentMock).not.toHaveBeenCalled();
+
+    // A piece moved elsewhere: the pieces and marks, never the scene row.
+    syncDigest.answers['tokens:scene-light'] = 'v1';
+    await act(async () => { window.dispatchEvent(new Event('online')); });
+    await waitFor(() => expect(refreshContentMock).toHaveBeenCalledTimes(1));
+    expect(fetchSceneRevisionMock).not.toHaveBeenCalled();
   });
 
   test('a scene the caller can no longer see is left as it is', async () => {

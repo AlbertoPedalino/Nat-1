@@ -3,7 +3,8 @@ import { useAuth } from '../../cloud/auth/AuthProvider.jsx';
 import { supabase } from '../../cloud/supabaseClient.js';
 import { openRealtimeChannel } from '../../cloud/realtimeChannel.js';
 import { readLiveSceneId } from '../../cloud/api/vttScenes.js';
-import { listenForRecovery } from '../../cloud/sync/recoveryTriggers.js';
+import { watchRevisions } from '../../cloud/sync/recoveryTriggers.js';
+import { syncKeys } from '../../cloud/sync/syncKeys.js';
 
 
 // A player has no scene list — they pick a campaign and join its session, which
@@ -41,7 +42,9 @@ export function useLiveSession({ campaignId, enabled = true } = {}) {
       if (request === requestRef.current) {
         setSession((current) => (current.loading ? { loading: false, scene: current.scene } : current));
       }
+      return false;
     }
+    return true;
   }, [apply, campaignId]);
 
   useEffect(() => {
@@ -76,9 +79,9 @@ export function useLiveSession({ campaignId, enabled = true } = {}) {
       onStatus: (state) => { if (state === 'SUBSCRIBED') refresh(); },
     });
 
-    // One tiny row: cheap enough to re-read after sleep, network changes or a
-    // background tab, which is when realtime can silently miss a change.
-    const stopRecovery = listenForRecovery(() => { refresh(); }, { periodic: true, whenHidden: true });
+    // Re-read when the row moved while realtime may have missed it (sleep,
+    // network changes, a background tab): followed while hidden too.
+    const stopRecovery = watchRevisions([syncKeys.liveScene(campaignId)], () => refresh(), { whenHidden: true });
 
     return () => {
       requestRef.current += 1;

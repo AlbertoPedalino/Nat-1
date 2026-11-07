@@ -8,7 +8,8 @@ import {
 import { readBaseMaxHp } from '../../campaign/characterVitals.js';
 import { digestFromVitalsAnswer, isNewerDigest, toCharacterDigest } from '../../campaign/characterDigest.js';
 import { CHARACTER_RECHECK_EVENT, CHARACTER_VITALS_EVENT } from './characterEvents.js';
-import { listenForRecovery } from './recoveryTriggers.js';
+import { watchRevisions } from './recoveryTriggers.js';
+import { syncKeys } from './syncKeys.js';
 import { diffRevisions, readChanged } from './revisionDiff.js';
 
 const EMPTY = new Map();
@@ -166,9 +167,9 @@ export function useCharacterDigests({ campaignId = null, characterIds = null, en
         });
       }
     } catch (_) {
-      return; // The next trigger tries again.
+      return false; // The next trigger tries again.
     }
-    if (!stillWanted()) return;
+    if (!stillWanted()) return true;
     const scoped = (digest) => inScope(digest, target);
     setDigests((held) => mergeRecovered(held, fetched, diff, scoped));
     setReady(true);
@@ -224,7 +225,12 @@ export function useCharacterDigests({ campaignId = null, characterIds = null, en
     };
     window.addEventListener(CHARACTER_VITALS_EVENT, receiveVitals);
     window.addEventListener(CHARACTER_RECHECK_EVENT, recheck);
-    const stopRecovery = listenForRecovery(() => reconcile(), { periodic: true });
+    const stopRecovery = watchRevisions(
+      scope.campaignId
+        ? [syncKeys.campaignDigests(scope.campaignId)]
+        : scope.characterIds.map(syncKeys.characterDigest),
+      () => reconcile(),
+    );
     return () => {
       readRef.current += 1;
       window.removeEventListener(CHARACTER_VITALS_EVENT, receiveVitals);

@@ -4,7 +4,8 @@ import { supabase } from '../supabaseClient.js';
 import { openRealtimeChannel } from '../realtimeChannel.js';
 import { getCloudSheetRevision } from '../api/cloudCharacters.js';
 import { CHARACTER_SHEET_SAVED_EVENT } from './characterEvents.js';
-import { listenForRecovery } from './recoveryTriggers.js';
+import { watchRevisions } from './recoveryTriggers.js';
+import { syncKeys } from './syncKeys.js';
 
 // Whether the whole sheet this view holds is still the cloud's.
 //
@@ -118,16 +119,17 @@ export function useCharacterSheetRevision({
     };
 
     const check = async () => {
-      if (!alive) return;
-      if (checking) { again = true; return; }
+      if (!alive) return true;
+      if (checking) { again = true; return true; }
       checking = true;
       try {
         const revision = await getCloudSheetRevision(id);
-        if (!alive) return;
+        if (!alive) return true;
         if (revision == null) deleted();
         else consider(revision);
+        return true;
       } catch (_) {
-        // The next recovery trigger reads again.
+        return false; // The next recovery trigger reads again.
       } finally {
         checking = false;
         if (again && alive) { again = false; check(); }
@@ -154,7 +156,7 @@ export function useCharacterSheetRevision({
       if (String(detail?.characterId ?? '') === id) noteSaved(detail.sheetRevision);
     };
     window.addEventListener(CHARACTER_SHEET_SAVED_EVENT, receiveSaved);
-    const stopRecovery = listenForRecovery(() => check(), { periodic: true });
+    const stopRecovery = watchRevisions([syncKeys.sheet(id)], () => check());
     return () => {
       alive = false;
       window.removeEventListener(CHARACTER_SHEET_SAVED_EVENT, receiveSaved);

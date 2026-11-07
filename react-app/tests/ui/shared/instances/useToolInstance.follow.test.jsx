@@ -41,7 +41,7 @@ test('an open linked instance checks the cloud every 30 s and tells the user whe
   expect(result.current.ready).toBe(true);
   mocks.refresh.mockClear(); // the check made on opening
   mocks.refresh.mockResolvedValueOnce('pulled');
-  await act(async () => { vi.advanceTimersByTime(RECOVERY_INTERVAL_MS); });
+  await act(async () => { await vi.advanceTimersByTimeAsync(RECOVERY_INTERVAL_MS); });
   expect(mocks.refresh).toHaveBeenCalledWith('dmscreen', 'dm_follow');
   expect(mocks.notify).toHaveBeenCalledWith('info', 'Changes made on another device are now shown.');
 });
@@ -52,9 +52,9 @@ test('no check runs while the user is typing in a text field: it waits for the n
   const field = document.createElement('textarea');
   document.body.appendChild(field);
   field.focus();
-  await act(async () => { vi.advanceTimersByTime(RECOVERY_INTERVAL_MS); });
+  await act(async () => { await vi.advanceTimersByTimeAsync(RECOVERY_INTERVAL_MS); });
   expect(mocks.refresh).not.toHaveBeenCalled();
   field.blur();
-  await act(async () => { vi.advanceTimersByTime(RECOVERY_INTERVAL_MS); });
+  await act(async () => { await vi.advanceTimersByTimeAsync(RECOVERY_INTERVAL_MS); });
   expect(mocks.refresh).toHaveBeenCalledTimes(1);
 });

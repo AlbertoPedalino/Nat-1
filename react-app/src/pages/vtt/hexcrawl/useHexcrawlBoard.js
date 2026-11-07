@@ -6,7 +6,8 @@ import {
   readHexcrawlBoard,
   readHexcrawlBoardVersion,
 } from '../../../shared/cloud/api/hexcrawl.js';
-import { listenForRecovery } from '../../../shared/cloud/sync/recoveryTriggers.js';
+import { watchRevisions } from '../../../shared/cloud/sync/recoveryTriggers.js';
+import { syncKeys } from '../../../shared/cloud/sync/syncKeys.js';
 
 // The board whose tables the map's rolls come from, followed for as long as
 // this browser may run the crawl.
@@ -60,18 +61,26 @@ export function useHexcrawlBoard({ campaignId, enabled }) {
       return undefined;
     }
     let cancelled = false;
-    const refresh = () => refreshBoard().catch(() => {
+    refreshBoard().catch(() => {
       if (!cancelled && !boardRef.current) setBoard(null);
     });
-    refresh();
-    // Map content: followed in a background tab too, like the scene.
-    const stopRecovery = listenForRecovery(() => refresh(), { periodic: true, whenHidden: true });
     return () => {
       cancelled = true;
       if (boardScopeRef.current === scope) boardScopeRef.current = null;
-      stopRecovery();
     };
   }, [refreshBoard]);
+
+  // Another device relinking the campaign's board or saving the board. Map
+  // content: followed in a background tab too, like the scene.
+  const boardId = board?.id || null;
+  useEffect(() => {
+    if (!enabled || !campaignId) return undefined;
+    return watchRevisions(
+      [syncKeys.campaign(campaignId), boardId && syncKeys.instance('boards', boardId)],
+      () => refreshBoard().then(() => true, () => false),
+      { whenHidden: true },
+    );
+  }, [boardId, campaignId, enabled, refreshBoard]);
 
   return { board, refreshBoard };
 }

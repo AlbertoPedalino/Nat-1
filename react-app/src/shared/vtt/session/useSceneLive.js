@@ -182,12 +182,11 @@ export function useSceneLive({
     if (!channel) return undefined;
     channelRef.current = channel;
 
-    // Missed events are recovered on the shared triggers, and on each
-    // heartbeat a follower says it still follows. The map keeps following in
-    // a background tab (a projector, a second screen), so its heartbeat runs
-    // while hidden too.
+    // On each recovery heartbeat a follower says it still follows (missed
+    // rows are the scene's own watch, useSceneSync). The map keeps following
+    // in a background tab (a projector, a second screen), so this runs while
+    // hidden too.
     const stopRecovery = listenForRecovery((reason) => {
-      requestReconcile(reason);
       if (reason !== 'interval') return;
       const source = followed();
       if (source) send(FOLLOWER_EVENT, { source });

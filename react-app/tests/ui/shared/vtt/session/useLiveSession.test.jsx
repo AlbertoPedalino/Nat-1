@@ -79,6 +79,7 @@ describe('useLiveSession', () => {
     let finish;
     mocks.readLiveSceneId.mockReturnValueOnce(new Promise((resolve) => { finish = resolve; }));
     act(() => { window.dispatchEvent(new Event('online')); });
+    await waitFor(() => expect(mocks.readLiveSceneId).toHaveBeenCalledTimes(2));
     act(() => { mocks.onChange({ eventType: 'UPDATE', new: { campaign_id: 'campaign-1', scene_id: 'scene-b' } }); });
     await act(async () => finish('scene-a'));
     expect(result.current.scene?.id).toBe('scene-b');

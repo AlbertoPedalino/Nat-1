@@ -20,7 +20,8 @@ import {
   resolveConflict,
   subscribeInstanceSyncAvailability,
 } from './instanceSync.js';
-import { listenForRecovery } from '../cloud/sync/recoveryTriggers.js';
+import { watchRevisions } from '../cloud/sync/recoveryTriggers.js';
+import { syncKeys } from '../cloud/sync/syncKeys.js';
 
 function isEditingText() {
   const element = document.activeElement;
@@ -135,22 +136,23 @@ export function useToolInstance(sectionKey) {
 
   const id = current?.id || '';
 
-  // The open instance follows the cloud while it is shown: on the shared
-  // recovery triggers (every 30 s, coming back to the tab, back online) it
-  // reads only the row's version, pulls the copy when it moved and nothing
-  // here is unsynced, and sends what is unsynced here. Never while a text
-  // field has the focus: a pull remounts the editor, so it waits a turn.
+  // The open instance follows the cloud while it is shown: when the shared
+  // recovery (every 30 s, coming back to the tab, back online) sees the row's
+  // version move, it pulls the copy if nothing here is unsynced, and sends
+  // what is unsynced here. Never while a text field has the focus: a pull
+  // remounts the editor, so it waits a turn.
   const shown = gate.id === id && gate.ready;
   useEffect(() => {
     if (!id || !shown || !online) return undefined;
     const entry = getInstance(sectionKey, id);
     if (!entry || entry.cloud === CLOUD_STATES.LOCAL) return undefined;
-    return listenForRecovery(() => {
-      if (isEditingText()) return;
-      refreshInstance(sectionKey, id).then((outcome) => {
+    return watchRevisions([syncKeys.instance(getSection(sectionKey).table, id)], () => {
+      if (isEditingText()) return false;
+      return refreshInstance(sectionKey, id).then((outcome) => {
         if (outcome === 'pulled') notify('info', 'Changes made on another device are now shown.');
-      }, () => {});
-    }, { periodic: true });
+        return outcome !== 'failed';
+      }, () => false);
+    });
   }, [id, notify, online, sectionKey, shown]);
 
   useEffect(() => {

@@ -1,8 +1,17 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
-import { listenForRecovery, RECOVERY_INTERVAL_MS } from '../../../../../src/shared/cloud/sync/recoveryTriggers.js';
+
+const digest = vi.hoisted(() => ({ answers: {}, read: null, missing: false }));
+vi.mock('../../../../../src/shared/cloud/api/syncDigest.js', () => ({
+  readSyncDigest: (...args) => digest.read(...args),
+  isMissingSyncDigest: (error) => error?.code === 'PGRST202',
+}));
+
+import { listenForRecovery, RECOVERY_INTERVAL_MS, watchRevisions } from '../../../../../src/shared/cloud/sync/recoveryTriggers.js';
 
 let visibility = 'visible';
 beforeEach(() => {
+  digest.answers = {};
+  digest.read = vi.fn(async (keys) => Object.fromEntries(keys.map((key) => [key, digest.answers[key] ?? null])));
   vi.useFakeTimers();
   visibility = 'visible';
   vi.spyOn(document, 'visibilityState', 'get').mockImplementation(() => visibility);
@@ -87,4 +96,73 @@ test('a check that throws does not stop the others', () => {
   expect(queued).toHaveBeenCalledTimes(1);
   stopFailing();
   stopHealthy();
+});
+
+test('one read covers every watcher; only views whose keys moved are called', async () => {
+  const scene = vi.fn();
+  const sheet = vi.fn();
+  digest.answers = { 'scene:1': 'a', 'tokens:1': 'x', 'sheet:pc': '3' };
+  const stopScene = watchRevisions(['scene:1', 'tokens:1'], scene);
+  const stopSheet = watchRevisions(['sheet:pc'], sheet);
+
+  // First sight: everything counts as moved.
+  await vi.advanceTimersByTimeAsync(RECOVERY_INTERVAL_MS);
+  expect(digest.read).toHaveBeenCalledTimes(1);
+  expect(digest.read).toHaveBeenCalledWith(['scene:1', 'tokens:1', 'sheet:pc']);
+  expect(scene).toHaveBeenCalledWith('interval', ['scene:1', 'tokens:1']);
+  expect(sheet).toHaveBeenCalledWith('interval', ['sheet:pc']);
+
+  // Quiet: one read, nobody called.
+  scene.mockClear();
+  sheet.mockClear();
+  await vi.advanceTimersByTimeAsync(RECOVERY_INTERVAL_MS);
+  expect(digest.read).toHaveBeenCalledTimes(2);
+  expect(scene).not.toHaveBeenCalled();
+  expect(sheet).not.toHaveBeenCalled();
+
+  // A piece moved: only the scene, only that key.
+  digest.answers['tokens:1'] = 'y';
+  window.dispatchEvent(new Event('online'));
+  await vi.advanceTimersByTimeAsync(0);
+  expect(scene).toHaveBeenCalledWith('online', ['tokens:1']);
+  expect(sheet).not.toHaveBeenCalled();
+  stopScene();
+  stopSheet();
+});
+
+test('a view that could not catch up is called again next time', async () => {
+  const onChange = vi.fn().mockResolvedValueOnce(false).mockResolvedValue(undefined);
+  digest.answers = { 'clock:c': 't1' };
+  const stop = watchRevisions(['clock:c'], onChange);
+  await vi.advanceTimersByTimeAsync(RECOVERY_INTERVAL_MS);
+  await vi.advanceTimersByTimeAsync(RECOVERY_INTERVAL_MS);
+  await vi.advanceTimersByTimeAsync(RECOVERY_INTERVAL_MS);
+  expect(onChange).toHaveBeenCalledTimes(2);
+  stop();
+});
+
+test('a view whose catch-up never answers is asked again after an interval', async () => {
+  const onChange = vi.fn(() => new Promise(() => {}));
+  digest.answers = { 'scene:1': 'a' };
+  const stop = watchRevisions(['scene:1'], onChange);
+  await vi.advanceTimersByTimeAsync(RECOVERY_INTERVAL_MS);
+  expect(onChange).toHaveBeenCalledTimes(1);
+  window.dispatchEvent(new Event('online'));
+  await vi.advanceTimersByTimeAsync(0);
+  expect(onChange).toHaveBeenCalledTimes(1);
+  await vi.advanceTimersByTimeAsync(RECOVERY_INTERVAL_MS);
+  expect(onChange).toHaveBeenCalledTimes(2);
+  stop();
+});
+
+test('without the database function every view is called, and the function is not asked again', async () => {
+  digest.read = vi.fn(async () => { throw Object.assign(new Error('missing'), { code: 'PGRST202' }); });
+  const onChange = vi.fn();
+  const stop = watchRevisions(['scene:1'], onChange);
+  await vi.advanceTimersByTimeAsync(RECOVERY_INTERVAL_MS);
+  await vi.advanceTimersByTimeAsync(RECOVERY_INTERVAL_MS);
+  expect(onChange).toHaveBeenCalledTimes(2);
+  expect(onChange).toHaveBeenLastCalledWith('interval', ['scene:1']);
+  expect(digest.read).toHaveBeenCalledTimes(1);
+  stop();
 });

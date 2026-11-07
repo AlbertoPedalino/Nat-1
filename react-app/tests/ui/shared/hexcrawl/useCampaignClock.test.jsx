@@ -2,6 +2,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, vi } from 'vitest';
 import { useCampaignClock } from '../../../../src/shared/hexcrawl/useCampaignClock.js';
 import { RECOVERY_INTERVAL_MS } from '../../../../src/shared/cloud/sync/recoveryTriggers.js';
+import { syncDigest } from '../../support/syncDigest.js';
 
 const api = vi.hoisted(() => ({
   readCampaignClock: vi.fn(), saveCampaignClock: vi.fn(), subscribeHexcrawl: vi.fn(),
@@ -81,22 +82,27 @@ test('editing before initial loading finishes patches the existing row without s
 describe('traffic', () => {
   afterEach(() => { vi.useRealTimers(); });
 
-  test('the safety poll is slow, reads only the clock, and does not flash loading', async () => {
+  test('the safety poll reads only what moved, and does not flash loading', async () => {
     vi.useFakeTimers();
+    syncDigest.answers = {};
     api.readCampaignClock.mockResolvedValue({ updatedAt: 1, season: 'Summer' });
     const { result } = renderHook(() => useCampaignClock('campaign-one', { withLog: true }));
     await act(async () => { await vi.advanceTimersByTimeAsync(0); });
     expect(api.readCampaignClock).toHaveBeenCalledTimes(1);
     expect(api.listCampaignLog).toHaveBeenCalledTimes(1);
 
-    const loadingSeen = [];
-    await act(async () => { await vi.advanceTimersByTimeAsync(5_000); });
-    expect(api.readCampaignClock).toHaveBeenCalledTimes(1);
+    // The first poll catches up once (clock and log); a quiet one reads nothing.
     await act(async () => { await vi.advanceTimersByTimeAsync(RECOVERY_INTERVAL_MS); });
-    loadingSeen.push(result.current.loading);
+    await act(async () => { await vi.advanceTimersByTimeAsync(RECOVERY_INTERVAL_MS); });
     expect(api.readCampaignClock).toHaveBeenCalledTimes(2);
-    expect(api.listCampaignLog).toHaveBeenCalledTimes(1);
-    expect(loadingSeen).toEqual([false]);
+    expect(api.listCampaignLog).toHaveBeenCalledTimes(2);
+
+    // The clock moved elsewhere, its log did not: the clock row only.
+    syncDigest.answers['clock:campaign-one'] = 'v1';
+    await act(async () => { await vi.advanceTimersByTimeAsync(RECOVERY_INTERVAL_MS); });
+    expect(api.readCampaignClock).toHaveBeenCalledTimes(3);
+    expect(api.listCampaignLog).toHaveBeenCalledTimes(2);
+    expect(result.current.loading).toBe(false);
   });
 
   test('a clock moved elsewhere re-reads the log; our own echo does not', async () => {

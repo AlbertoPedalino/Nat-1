@@ -12,17 +12,19 @@ export function useSceneTurns({ sceneId, isGm }) {
   // either, and must not land on top of them.
   const requestRef = useRef(0);
 
+  // False when the read failed (the scene's recovery asks again).
   const reload = useCallback(async () => {
-    if (!sceneId) return;
+    if (!sceneId) return true;
     const request = ++requestRef.current;
     let fresh;
     try {
       fresh = await fetchSceneTurns(sceneId);
     } catch (_) {
       // Offline, or a database without 20_scene_turns.sql: nothing to show.
-      return;
+      return false;
     }
     if (request === requestRef.current) setTurns(fresh);
+    return true;
   }, [sceneId]);
 
   useEffect(() => {

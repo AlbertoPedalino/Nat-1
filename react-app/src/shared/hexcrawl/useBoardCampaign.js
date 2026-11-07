@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../cloud/auth/AuthProvider.jsx';
 import { readHexcrawlBoardCampaign } from '../cloud/api/hexcrawl.js';
-import { listenForRecovery } from '../cloud/sync/recoveryTriggers.js';
+import { watchRevisions } from '../cloud/sync/recoveryTriggers.js';
+import { syncKeys } from '../cloud/sync/syncKeys.js';
 import { CAMPAIGN_BOARD_LINK_CHANGED_EVENT } from '../appEvents.js';
 
 // The board-campaign link changes rarely and local changes announce
@@ -27,10 +28,12 @@ export function useBoardCampaign(boardId) {
         if (!cancelled && ticket === request) {
           setState({ boardId, campaign: null, error: cause?.message || 'Could not read the linked campaign.' });
         }
+        return false;
       }
+      return true;
     };
     refresh();
-    const stopRecovery = listenForRecovery(() => refresh(), { periodic: true });
+    const stopRecovery = watchRevisions([syncKeys.boardCampaigns(boardId)], () => refresh());
     window.addEventListener(CAMPAIGN_BOARD_LINK_CHANGED_EVENT, refresh);
     return () => {
       cancelled = true;

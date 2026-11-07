@@ -40,7 +40,7 @@ describe('useSceneLive recovery', () => {
     };
   });
 
-  test('reconciles on subscription, online recovery and the 30-second safety interval', () => {
+  test('reconciles when the channel subscribes; the recovery triggers belong to the scene watch', () => {
     const onReconcile = vi.fn();
     const { unmount } = renderHook(() => useSceneLive({
       sceneId: 'scene-1',
@@ -50,47 +50,14 @@ describe('useSceneLive recovery', () => {
 
     act(() => { mocks.subscriptionState('SUBSCRIBED'); });
     expect(onReconcile).toHaveBeenCalledTimes(1);
+    expect(onReconcile).toHaveBeenLastCalledWith({ reason: 'subscribed' });
 
-    act(() => { window.dispatchEvent(new Event('online')); });
-    expect(onReconcile).toHaveBeenCalledTimes(2);
-
-    act(() => { vi.advanceTimersByTime(30_000); });
-    expect(onReconcile).toHaveBeenCalledTimes(3);
-
-    unmount();
-    act(() => { vi.advanceTimersByTime(30_000); });
-    expect(onReconcile).toHaveBeenCalledTimes(3);
-    vi.useRealTimers();
-  });
-
-  test('tells the caller why it is reconciling, so only a reconnect is thorough', () => {
-    const onReconcile = vi.fn();
-    const { unmount } = renderHook(() => useSceneLive({ sceneId: 'scene-1', onReconcile }));
-
-    act(() => { mocks.subscriptionState('SUBSCRIBED'); });
+    // Missed rows on these triggers are read by useSceneSync's watch.
     act(() => { window.dispatchEvent(new Event('online')); });
     act(() => { window.dispatchEvent(new Event('focus')); });
     act(() => { vi.advanceTimersByTime(30_000); });
-    expect(onReconcile.mock.calls.map(([options]) => options.reason))
-      .toEqual(['subscribed', 'online', 'focus', 'interval']);
-
-    unmount();
-    act(() => { window.dispatchEvent(new Event('focus')); });
-    expect(onReconcile).toHaveBeenCalledTimes(4);
-    vi.useRealTimers();
-  });
-
-  test('focus and visibility arriving together reconcile once', () => {
-    const onReconcile = vi.fn();
-    const { unmount } = renderHook(() => useSceneLive({ sceneId: 'scene-1', onReconcile }));
-    act(() => {
-      window.dispatchEvent(new Event('focus'));
-      document.dispatchEvent(new Event('visibilitychange'));
-    });
     expect(onReconcile).toHaveBeenCalledTimes(1);
-    act(() => { vi.advanceTimersByTime(3_500); });
-    act(() => { window.dispatchEvent(new Event('focus')); });
-    expect(onReconcile).toHaveBeenCalledTimes(2);
+
     unmount();
     vi.useRealTimers();
   });

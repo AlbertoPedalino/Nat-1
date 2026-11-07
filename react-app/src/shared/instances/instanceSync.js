@@ -358,7 +358,7 @@ export async function refreshInstance(sectionKey, id) {
   try {
     meta = await cloud.fetchMeta(client(), section, id);
   } catch {
-    return 'local';
+    return 'failed';
   }
   if (!meta) return 'local';
   if (entry.version == null || entry.dirty.data) {

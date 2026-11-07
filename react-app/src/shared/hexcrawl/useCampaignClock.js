@@ -7,7 +7,8 @@ import {
   subscribeHexcrawl,
 } from '../cloud/api/hexcrawl.js';
 import { useAuth } from '../cloud/auth/AuthProvider.jsx';
-import { listenForRecovery } from '../cloud/sync/recoveryTriggers.js';
+import { watchRevisions } from '../cloud/sync/recoveryTriggers.js';
+import { syncKeys } from '../cloud/sync/syncKeys.js';
 
 // The campaign's travelling clock, shared by the GM Board and the map.
 //
@@ -96,7 +97,7 @@ export function useCampaignClock(campaignId, { withLog = false } = {}) {
       if (scopeRef.current !== campaignId) return null;
       if (firstLoad) setState((current) => ({ ...current, loading: false }));
       setError(cause?.message || 'Could not read the campaign clock.');
-      return null;
+      return false;
     }
   }, [acceptClock, acceptLog, active, campaignId, withLog]);
 
@@ -105,13 +106,14 @@ export function useCampaignClock(campaignId, { withLog = false } = {}) {
     refresh();
     if (!active) return undefined;
     // Realtime carries changes; this only recovers ones missed while a phone
-    // slept or a tab sat in the background.
-    // The periodic check reads the clock only; coming back reads the log too.
-    return listenForRecovery(
-      (reason) => refresh(reason === 'interval' ? { includeLog: false } : undefined),
-      { periodic: true },
+    // slept or a tab sat in the background: the clock when it moved, the GM
+    // log only when it did.
+    const logKey = syncKeys.clockLog(campaignId);
+    return watchRevisions(
+      [syncKeys.clock(campaignId), withLog && logKey],
+      async (reason, moved) => (await refresh({ includeLog: moved.includes(logKey) })) !== false,
     );
-  }, [active, refresh]);
+  }, [active, campaignId, refresh, withLog]);
 
   useEffect(() => {
     if (!active) return undefined;

@@ -41,26 +41,27 @@ export function useGmTokenVitals({ sceneId, tokens, enabled }) {
   // whole; a fight's JSON is fetched only when its updated_at moved. Mount and
   // this channel's own SUBSCRIBED still use the full `reload`.
   const reconcile = useCallback(async () => {
-    if (!enabled || !sceneId) return;
+    if (!enabled || !sceneId) return true;
     const request = ++requestRef.current;
     const ids = fightKey ? fightKey.split(',') : [];
     const [secretHp, revisions] = await Promise.all([
       listTokenSecretHp(sceneId).catch(() => null),
       listFightRevisions(ids).catch(() => null),
     ]);
-    if (request !== requestRef.current) return;
+    if (request !== requestRef.current) return true;
     if (secretHp) setByToken(secretHp);
-    if (!revisions) return;
+    if (!secretHp || !revisions) return false;
     const diff = diffRevisions(
       revisions.map((row) => ({ id: String(row.id), version: Date.parse(row.updated_at) || 0 })),
       new Map(Object.entries(fightsRef.current).map(([id, row]) => [id, Date.parse(row?.updated_at) || 0])),
     );
-    if (diff.clean) return;
+    if (diff.clean) return true;
     const fresh = await readChanged(diff, {
       fetchAll: () => listFightVitals(ids),
       fetchSome: (changed) => listFightVitals(changed),
     }).catch(() => null);
-    if (request !== requestRef.current || !fresh) return;
+    if (request !== requestRef.current) return true;
+    if (!fresh) return false;
     const byId = new Map(fresh.map((row) => [String(row.id), row]));
     setFights((current) => Object.fromEntries(diff.ids
       .map((id) => [id, byId.has(id)
@@ -153,5 +154,7 @@ export function useGmTokenVitals({ sceneId, tokens, enabled }) {
     [byToken, enabled, fights],
   );
 
-  return { overlay, reconcile, reload, setLocal, fights, acceptFight };
+  // `enabled` and `fightIds`: what the scene's recovery watches for the GM.
+  const fightIds = useMemo(() => (fightKey ? fightKey.split(',') : []), [fightKey]);
+  return { overlay, reconcile, reload, setLocal, fights, acceptFight, enabled, fightIds };
 }

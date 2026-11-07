@@ -7,7 +7,8 @@ import {
   subscribeHexcrawl,
 } from '../../../shared/cloud/api/hexcrawl.js';
 import { hexCellsByKey } from '../../../shared/hexcrawl/hexCell.js';
-import { listenForRecovery } from '../../../shared/cloud/sync/recoveryTriggers.js';
+import { watchRevisions } from '../../../shared/cloud/sync/recoveryTriggers.js';
+import { syncKeys } from '../../../shared/cloud/sync/syncKeys.js';
 import { diffRevisions } from '../../../shared/cloud/sync/revisionDiff.js';
 
 const EMPTY_CELLS = new Map();
@@ -60,7 +61,7 @@ export function useHexCells({
       try {
         revisions = await listHexCellRevisions(sceneId);
       } catch (_) {
-        return; // The next trigger tries again.
+        return false; // The next trigger tries again.
       }
       if (cancelled) return;
       const diff = diffRevisions(
@@ -71,7 +72,10 @@ export function useHexCells({
       try {
         const rows = await listHexCells(sceneId);
         if (!cancelled) setCells(rows);
-      } catch (_) { /* the map keeps the hexes it has */ }
+      } catch (_) {
+        return false; // The map keeps the hexes it has.
+      }
+      return true;
     };
     const unsubscribe = subscribeHexcrawl({
       sceneId,
@@ -87,7 +91,7 @@ export function useHexCells({
       // for what Realtime did not deliver.
       onStatus: (status) => { if (status === 'SUBSCRIBED') reconcileCells(); },
     });
-    const stopRecovery = listenForRecovery(() => reconcileCells(), { periodic: true, whenHidden: true });
+    const stopRecovery = watchRevisions([syncKeys.hexCells(sceneId)], () => reconcileCells(), { whenHidden: true });
     return () => {
       cancelled = true;
       unsubscribe();

@@ -46,7 +46,7 @@ belongs in `content/`.
 | --- | --- |
 | `api/` | Resource operations for campaigns, characters (`cloudCharacters.js`; vitals commands in `healthCommands.js`), art, fights, dungeons, hexcrawls, VTT |
 | `auth/` | Auth provider, sign-in dialog, account/cloud menu |
-| `sync/` | Autosync engine, the editors' cloud save (`useCharacterCloudSave.js` on `cloudSaveQueue.js`: one queue, conflict hold, retry on the recovery triggers), recovery triggers, sync exclusions/ownership, realtime character and roll hooks |
+| `sync/` | Autosync engine, the editors' cloud save (`useCharacterCloudSave.js` on `cloudSaveQueue.js`: one queue, conflict hold, retry on the recovery triggers), the recovery heartbeat (`recoveryTriggers.js`: one 30 s timer and return/online triggers for the whole client; `watchRevisions(keys, onChange)` for server state — one `sync_digest` read per trigger, keys from `syncKeys.js`, a view called only when its keys moved — and `listenForRecovery(run)` for local work), sync exclusions/ownership, realtime character and roll hooks |
 | `supabaseClient.js` | Shared Supabase client configuration |
 | `realtimeChannel.js` | `openRealtimeChannel`: the one way to open a realtime channel (topic rule, guarded listeners, SUBSCRIBED status, fail-soft close) |
 
