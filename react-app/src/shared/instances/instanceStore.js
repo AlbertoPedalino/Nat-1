@@ -52,6 +52,25 @@ export function subscribeInstanceData(sectionKey, id, listener) {
   });
 }
 
+// One instance's stored data wherever it was written: this tab's saves and
+// pulls (subscribeInstanceData) and other tabs' writes (the browser's
+// `storage` event, filtered to the instance's keys; a cleared storage passes).
+// Returns the function that stops following.
+export function followInstanceData(sectionKey, id, listener) {
+  const prefix = id ? requireSection(sectionKey).scopedPrefix(id) : null;
+  const onStorage = (event) => {
+    if (prefix && event?.key != null && !String(event.key).startsWith(prefix)) return;
+    listener(event);
+  };
+  const hasWindow = typeof window !== 'undefined';
+  if (hasWindow) window.addEventListener('storage', onStorage);
+  const unsubscribe = subscribeInstanceData(sectionKey, id, listener);
+  return () => {
+    if (hasWindow) window.removeEventListener('storage', onStorage);
+    unsubscribe();
+  };
+}
+
 function notify(sectionKey, id, kind) {
   for (const listener of [...listeners]) {
     try { listener({ sectionKey, id, kind }); } catch (_) {}

@@ -24,7 +24,7 @@ vi.mock('../../../../../src/pages/encounterbuilder/state/storage.js', () => ({
 vi.mock('../../../../../src/shared/instances/instanceStore.js', () => ({
   CLOUD_STATES: { LOCAL: 'local-only', LINKED: 'linked', CONFLICT: 'conflict' },
   listInstances: () => [{ id: 'enc_a', name: 'Session 4', updatedAt: 10, cloud: 'local-only' }],
-  subscribeInstanceData: (_sectionKey, _id, listener) => {
+  followInstanceData: (_sectionKey, _id, listener) => {
     mocks.listeners.add(listener);
     return () => mocks.listeners.delete(listener);
   },

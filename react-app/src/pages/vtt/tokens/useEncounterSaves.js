@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { readPersistedInstance } from '../../encounterbuilder/state/storage.js';
-import { CLOUD_STATES, listInstances, subscribeInstanceData } from '../../../shared/instances/instanceStore.js';
+import { CLOUD_STATES, followInstanceData, listInstances } from '../../../shared/instances/instanceStore.js';
 import { listToolInstances, pullInstance, refreshInstance } from '../../../shared/instances/instanceSync.js';
 
 // The GM's Encounter Builder saves, in this browser and in the cloud, and the
@@ -131,12 +131,7 @@ export function useEncounterSaves(open) {
       setLibrary(persisted?.library || []);
     };
     read();
-    window.addEventListener('storage', read);
-    const unsubscribe = subscribeInstanceData('encounters', instanceId, read);
-    return () => {
-      window.removeEventListener('storage', read);
-      unsubscribe();
-    };
+    return followInstanceData('encounters', instanceId, read);
   }, [instanceId, open]);
 
   // A save the GM chose stays chosen when the cloud list lands under it.

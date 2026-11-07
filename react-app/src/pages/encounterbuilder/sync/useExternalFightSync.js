@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { subscribeInstanceData } from '../../../shared/instances/instanceStore.js';
+import { followInstanceData } from '../../../shared/instances/instanceStore.js';
 import { readPersistedInstance } from '../state/storage.js';
 import { externalDelta } from './externalSync.js';
 
@@ -61,13 +61,7 @@ export function useExternalFightSync({
       .find((fight) => String(fight.id) === String(activeFightId));
     lastRef.current = current ? fightSignature(current) : '';
 
-    // `storage` fires for writes from other tabs, the store's feed for this one.
-    window.addEventListener('storage', apply);
-    const unsubscribe = subscribeInstanceData('encounters', instanceId, apply);
-    return () => {
-      window.removeEventListener('storage', apply);
-      unsubscribe();
-    };
+    return followInstanceData('encounters', instanceId, apply);
   }, [activeFightId, cloudFights, dispatch, instanceId, monsters]);
 
   useEffect(() => {
@@ -81,11 +75,6 @@ export function useExternalFightSync({
 
     // Not run on mount: hydration has just read the same storage, and until it
     // has this tab's arrays are empty — every fight in storage would look new.
-    window.addEventListener('storage', absorb);
-    const unsubscribe = subscribeInstanceData('encounters', instanceId, absorb);
-    return () => {
-      window.removeEventListener('storage', absorb);
-      unsubscribe();
-    };
+    return followInstanceData('encounters', instanceId, absorb);
   }, [dispatch, instanceId, monsters]);
 }
