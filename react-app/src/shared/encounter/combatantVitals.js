@@ -1,14 +1,15 @@
 import { resolveCombatVitals, combatVitalsMatch } from './sheetSync.js';
 import {
   normalizeConditions,
-  setConditionActive,
   toggleCondition as toggleConditionKey,
   DEAD_CONDITION_KEY,
   EXHAUSTION_KEY,
 } from '../character/combat/conditions.js';
 import { addReminder, normalizeEffects, removeEffect } from '../character/combat/combatEffects.js';
 import { clampInt, numberOr } from '../numbers.js';
-import { resolveMortality } from '../character/combat/mortality.js';
+import {
+  clickedDeathSaveCount, markDead, resolveMortality, revive, withDeathSave,
+} from '../character/combat/mortality.js';
 
 // A combatant's vitals in a running fight: hit points, temporary and maximum
 // HP, death saves, conditions and reminders, dying and reviving, and vitals
@@ -86,16 +87,8 @@ export function setDeathSave(combat, id, type, value) {
   if (!['success', 'fail'].includes(type)) return combat;
   return updateCombatant(combat, id, (combatant) => {
     if (!combatant.deathSaves) return combatant;
-    const nextValue = combatant.deathSaves[type] === value ? value - 1 : value;
-    const deathSaves = { ...combatant.deathSaves, [type]: clampInt(nextValue, 0, 3, 0) };
-    const isDead = deathSaves.fail >= 3;
-    return {
-      ...combatant,
-      hpCurrent: isDead ? 0 : combatant.hpCurrent,
-      deathSaves,
-      isDead,
-      activeConditions: setConditionActive(combatant.activeConditions, DEAD_CONDITION_KEY, isDead),
-    };
+    const count = clickedDeathSaveCount(combatant.deathSaves[type], value);
+    return fromMortal(combatant, withDeathSave(mortalState(combatant), type, count));
   });
 }
 
@@ -178,22 +171,26 @@ function applyHp(combatant, value) {
   return withMortality(healed, hpCurrent);
 }
 
+// A combatant in the neutral shape mortality.js works on, and back.
+function mortalState(combatant) {
+  return {
+    player: combatant.type === 'player',
+    hp: combatant.hpCurrent,
+    deathSaves: combatant.deathSaves,
+    conditions: combatant.activeConditions,
+  };
+}
+
+function fromMortal(combatant, { hp, deathSaves, conditions, dead }) {
+  return { ...combatant, hpCurrent: hp, deathSaves, activeConditions: conditions, isDead: dead };
+}
+
 function killCombatant(combatant) {
-  const player = combatant.type === 'player';
-  return withMortality({
-    ...combatant,
-    activeConditions: setConditionActive(combatant.activeConditions, DEAD_CONDITION_KEY, true),
-    deathSaves: player ? { success: 0, fail: 3 } : combatant.deathSaves,
-  }, 0);
+  return fromMortal(combatant, markDead(mortalState(combatant)));
 }
 
 function reviveCombatant(combatant) {
-  const player = combatant.type === 'player';
-  return withMortality({
-    ...combatant,
-    activeConditions: setConditionActive(combatant.activeConditions, DEAD_CONDITION_KEY, false),
-    deathSaves: player ? { success: 0, fail: 0 } : combatant.deathSaves,
-  }, 1);
+  return fromMortal(combatant, revive(mortalState(combatant)));
 }
 
 // A combatant read back from a saved fight, its HP clamped and its mortality

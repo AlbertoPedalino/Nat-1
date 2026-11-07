@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { addReminder, removeEffect } from '../../../shared/character/combat/combatEffects.js';
-import { clampDeathSaveCount, normalizeDeathSaves } from '../../../shared/character/combat/vitals.js';
+import { normalizeDeathSaves } from '../../../shared/character/combat/vitals.js';
 import { applyMonsterVitalCommand } from '../../../shared/vtt/tokens/fightVitals.js';
+import { DEAD_CONDITION_KEY, toggleCondition } from '../../../shared/character/combat/conditions.js';
 import {
-  DEAD_CONDITION_KEY,
-  setConditionActive,
-  toggleCondition,
-} from '../../../shared/character/combat/conditions.js';
+  clickedDeathSaveCount, markDead, resolveMortality, revive, withDeathSave,
+} from '../../../shared/character/combat/mortality.js';
 
 // Long enough that a word is not written mid-keystroke, short enough that
 // closing the menu straight after typing still catches it.
@@ -224,11 +223,7 @@ export function useTokenMenuState(token, { onSave, onVitals }) {
       saveSoon({ hpCurrent: value });
       return;
     }
-    const nextConditions = setConditionActive(
-      conditions,
-      DEAD_CONDITION_KEY,
-      Number(value) <= 0,
-    );
+    const nextConditions = resolveMortality({ player: false, hp: Number(value), conditions }).conditions;
     setConditions(nextConditions);
     saveSoon({ hpCurrent: value, conditions: nextConditions });
   };
@@ -250,11 +245,10 @@ export function useTokenMenuState(token, { onSave, onVitals }) {
   };
 
   const markDeathSave = (type, value) => {
-    const current = deathSaves[type];
-    const nextValue = current === value ? value - 1 : value;
-    const nextDeathSaves = { ...deathSaves, [type]: clampDeathSaveCount(nextValue) };
-    const dead = nextDeathSaves.fail >= 3;
-    const nextConditions = setConditionActive(conditions, DEAD_CONDITION_KEY, dead);
+    const count = clickedDeathSaveCount(deathSaves[type], value);
+    const {
+      deathSaves: nextDeathSaves, conditions: nextConditions, dead,
+    } = withDeathSave({ hp: hpCurrent, deathSaves, conditions }, type, count);
     setDeathSaves(nextDeathSaves);
     setConditions(nextConditions);
     save({
@@ -271,11 +265,10 @@ export function useTokenMenuState(token, { onSave, onVitals }) {
       save({ conditions: next });
       return;
     }
-    const dead = next.includes(DEAD_CONDITION_KEY);
-    const nextHp = dead ? 0 : 1;
-    const nextDeathSaves = token.characterId
-      ? (dead ? { success: 0, fail: 3 } : { success: 0, fail: 0 })
-      : deathSaves;
+    const mortal = { player: Boolean(token.characterId), deathSaves, conditions: next };
+    const { hp: nextHp, deathSaves: nextDeathSaves } = next.includes(DEAD_CONDITION_KEY)
+      ? markDead(mortal)
+      : revive(mortal);
     setHpCurrent(nextHp);
     setDeathSaves(nextDeathSaves);
     save({

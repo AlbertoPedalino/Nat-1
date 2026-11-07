@@ -1,10 +1,5 @@
 import { useCallback } from 'react';
 import { tokenHealthCommand } from '../../../shared/vtt/tokens/characterHealth.js';
-import { clampDeathSaveCount, normalizeDeathSaves } from '../../../shared/character/combat/vitals.js';
-import {
-  DEAD_CONDITION_KEY,
-  setConditionActive,
-} from '../../../shared/character/combat/conditions.js';
 import {
   deleteToken,
   setTokenConditions,
@@ -24,6 +19,7 @@ import {
   monsterVitalsBase,
   monsterVitalsPatch,
 } from '../../../shared/vtt/tokens/fightVitals.js';
+import { withDeathSave } from '../../../shared/character/combat/mortality.js';
 
 // Changing pieces already on the scene: conditions, reminders, HP and the rest
 // of the token menu, death saves, visibility, deletion. A character's vitals go
@@ -160,11 +156,11 @@ export function useTokenEdits({
 
   const handleDeathSaveChange = useCallback((token, type, value) => {
     if (!token?.characterId || !['success', 'fail'].includes(type)) return;
-    const deathSaves = { ...normalizeDeathSaves(token.deathSaves), [type]: clampDeathSaveCount(value) };
-    const conditions = setConditionActive(
-      token.conditions || [],
-      DEAD_CONDITION_KEY,
-      deathSaves.fail >= 3,
+    // A character marking death saves is at 0 HP.
+    const { deathSaves, conditions } = withDeathSave(
+      { hp: 0, deathSaves: token.deathSaves, conditions: token.conditions || [] },
+      type,
+      value,
     );
     const patch = {
       label: token.secretLabel || token.label || '',

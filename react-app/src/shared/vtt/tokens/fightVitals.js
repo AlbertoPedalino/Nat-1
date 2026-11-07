@@ -5,8 +5,9 @@
 //
 // Everything here is pure: the callers own the requests and the state.
 
-import { DEAD_CONDITION_KEY, setConditionActive } from '../../character/combat/conditions.js';
+import { DEAD_CONDITION_KEY } from '../../character/combat/conditions.js';
 import { fightWithTokenVitals, parseSourceRef } from './encounterSync.js';
+import { resolveMortality } from '../../character/combat/mortality.js';
 
 // Must match public.fight_monster_vital_keys() in 14_token_vitals.sql.
 export const MONSTER_VITAL_KEYS = Object.freeze([
@@ -139,11 +140,10 @@ export function applyMonsterVitalCommand(before, command) {
     default: throw new Error('Unknown creature health command.');
   }
   if (next.hpCurrent !== before?.hpCurrent) {
-    const dead = next.hpCurrent <= 0;
     const conditions = Array.isArray(before?.activeConditions) ? before.activeConditions : [];
-    if (conditions.includes(DEAD_CONDITION_KEY) !== dead) {
-      next.activeConditions = setConditionActive(conditions, DEAD_CONDITION_KEY, dead);
-    }
+    const resolved = resolveMortality({ player: false, hp: next.hpCurrent, conditions });
+    const { dead } = resolved;
+    if (conditions.includes(DEAD_CONDITION_KEY) !== dead) next.activeConditions = resolved.conditions;
     if (Boolean(before?.isDead) !== dead) next.isDead = dead;
   }
   return next;
