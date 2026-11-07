@@ -139,10 +139,6 @@ function ImageAtmosphereSection({ scene, onAtmosphereChange }) {
         onClose={() => setAtmosphereAnchor(null)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
         transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-        container={() => (
-          atmosphereAnchor?.ownerDocument?.fullscreenElement
-          || atmosphereAnchor?.ownerDocument?.body
-        )}
         slotProps={{
           paper: {
             sx: {
