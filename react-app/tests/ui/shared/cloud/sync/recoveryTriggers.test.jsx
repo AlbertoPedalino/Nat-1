@@ -60,3 +60,31 @@ test('without an interval nothing runs on a timer', () => {
   expect(run).not.toHaveBeenCalled();
   stop();
 });
+
+test('checks registered at different times share one heartbeat', () => {
+  const setIntervalSpy = vi.spyOn(window, 'setInterval');
+  const first = vi.fn();
+  const second = vi.fn();
+  const stopFirst = listenForRecovery(first, { periodic: true });
+  vi.advanceTimersByTime(RECOVERY_INTERVAL_MS / 2);
+  const stopSecond = listenForRecovery(second, { periodic: true });
+  expect(setIntervalSpy).toHaveBeenCalledTimes(1);
+  vi.advanceTimersByTime(RECOVERY_INTERVAL_MS / 2);
+  expect(first).toHaveBeenCalledTimes(1);
+  expect(second).toHaveBeenCalledTimes(1);
+  stopFirst();
+  stopSecond();
+});
+
+test('a check that throws does not stop the others', () => {
+  const failing = vi.fn(() => { throw new Error('boom'); });
+  const healthy = vi.fn();
+  const queued = vi.spyOn(globalThis, 'queueMicrotask').mockImplementation(() => {});
+  const stopFailing = listenForRecovery(failing);
+  const stopHealthy = listenForRecovery(healthy);
+  window.dispatchEvent(new Event('online'));
+  expect(healthy).toHaveBeenCalledWith('online');
+  expect(queued).toHaveBeenCalledTimes(1);
+  stopFailing();
+  stopHealthy();
+});
