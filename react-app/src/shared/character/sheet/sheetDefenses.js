@@ -1,14 +1,6 @@
 import { asArray, compareText } from '../../lists.js';
-import {
-  cleanText,
-  effectKey,
-  displayLabel,
-  inferDamageTypeFromText,
-  resolveChoiceValue,
-  collectSheetEffects,
-  effectTitle,
-  effectSummary,
-} from './sheetEffects.js';
+import { collectSheetEffects } from './sheetEffects.js';
+import { cleanText, effectKey, displayLabel, inferDamageTypeFromText, resolveChoiceValue, effectTitle, effectSummary } from './sheetEffectText.js';
 import { baseChoiceKey } from '../progression/choiceUtils.js';
 
 // Damage resistances and immunities as the sheet and the builder preview show

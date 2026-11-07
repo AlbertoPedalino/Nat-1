@@ -1,7 +1,8 @@
 import { weaponFilterMatches } from '../inventory/weaponFilters.js';
 import { featNamedEntries } from '../progression/featDescription.js';
 import { finalAbilityModifier } from '../progression/abilityScores.js';
-import { cleanText, effectKey, collectSheetEffects } from './sheetEffects.js';
+import { collectSheetEffects } from './sheetEffects.js';
+import { cleanText, effectKey } from './sheetEffectText.js';
 import { asArray } from '../../lists.js';
 
 // One question per rule, answered from the active sheet effects: AC bonuses,
