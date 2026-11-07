@@ -1,3 +1,5 @@
+import { createKeyedDebounce } from './keyed.js';
+
 export const PERMISSION_ERROR_PATTERN = /row-level security|policy|owner|permission|denied|not authentic/i;
 
 // Debounced pushes, at most one in flight per key. A save requested while that
@@ -20,17 +22,15 @@ export function createCloudAutoSyncEngine({
   setTimer = setTimeout,
   clearTimer = clearTimeout,
 }) {
-  const timers = new Map();
+  const pending = createKeyedDebounce({ delay, setTimer, clearTimer });
   const blocked = new Set();
   const inFlight = new Set();
   const waiting = new Map();
 
   function cancel(key, id = null) {
-    const timer = timers.get(key);
-    if (timer != null) clearTimer(timer);
-    timers.delete(key);
+    const hadTimer = pending.cancel(key);
     const held = waiting.delete(key);
-    if ((timer != null || held) && id) emit(id, 'cancelled');
+    if ((hadTimer || held) && id) emit(id, 'cancelled');
   }
 
   async function run(job) {
@@ -61,25 +61,19 @@ export function createCloudAutoSyncEngine({
   function schedule(job) {
     const { key, id, canSync = () => true } = job;
     if (!key || !id || blocked.has(key) || !isActive() || !canSync()) return false;
-    const timer = timers.get(key);
-    if (timer != null) clearTimer(timer);
-    timers.delete(key);
+    pending.cancel(key);
     if (inFlight.has(key)) {
       waiting.set(key, job);
       emit(id, 'scheduled');
       return true;
     }
-    timers.set(key, setTimer(() => {
-      timers.delete(key);
-      return run(job);
-    }, delay));
+    pending.schedule(key, () => run(job));
     emit(id, 'scheduled');
     return true;
   }
 
   function dispose() {
-    for (const timer of timers.values()) clearTimer(timer);
-    timers.clear();
+    pending.cancelAll();
     waiting.clear();
   }
 

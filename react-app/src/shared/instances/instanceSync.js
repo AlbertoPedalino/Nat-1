@@ -14,6 +14,7 @@ import {
 } from './instanceStore.js';
 import { getSection, SECTION_KEYS } from './sectionRegistry.js';
 import { normalizeLinkGroupId } from './linkGroupId.js';
+import { createKeyedDebounce, createKeyedQueue } from '../cloud/sync/keyed.js';
 
 // The sync engine of tool instances: the only code that talks to the cloud
 // about them, and the only place that decides between INSERT, UPDATE, pull and
@@ -35,8 +36,10 @@ import { normalizeLinkGroupId } from './linkGroupId.js';
 let config = null;
 let active = false;
 let unsubscribe = null;
-const timers = new Map();
-const locks = new Map();
+// A pending sync per instance (the edit debounce), and one sync or pull per
+// instance at a time, in call order.
+const pendingSyncs = createKeyedDebounce();
+const instanceQueue = createKeyedQueue();
 const syncing = new Set();
 const availability = new Set();
 
@@ -58,8 +61,7 @@ export function configureInstanceSync({ getClient, delay = 1200, onStatus } = {}
 export function disposeInstanceSync() {
   unsubscribe?.();
   unsubscribe = null;
-  for (const timer of timers.values()) clearTimeout(timer);
-  timers.clear();
+  pendingSyncs.cancelAll();
   config = null;
   announceAvailability();
 }
@@ -97,15 +99,6 @@ function report(id, state, message) {
   try { config?.onStatus?.(id, state, message); } catch (_) {}
 }
 
-// One sync or pull per instance at a time, in call order.
-function withLock(key, run) {
-  const previous = locks.get(key) || Promise.resolve();
-  const next = previous.catch(() => {}).then(run);
-  locks.set(key, next);
-  next.finally(() => { if (locks.get(key) === next) locks.delete(key); }).catch(() => {});
-  return next;
-}
-
 export function getSyncState(sectionKey, id) {
   if (syncing.has(keyOf(sectionKey, id))) return 'syncing';
   return getInstance(sectionKey, id)?.cloud || null;
@@ -120,19 +113,12 @@ function needsSync(sectionKey, entry) {
 
 function scheduleSync(sectionKey, id, delay = config?.delay ?? 0) {
   if (!isInstanceSyncOnline()) return false;
-  const key = keyOf(sectionKey, id);
-  clearTimeout(timers.get(key));
-  timers.set(key, setTimeout(() => {
-    timers.delete(key);
-    syncInstance(sectionKey, id).catch(() => {});
-  }, delay));
+  pendingSyncs.schedule(keyOf(sectionKey, id), () => { syncInstance(sectionKey, id).catch(() => {}); }, delay);
   return true;
 }
 
 function cancelSync(sectionKey, id) {
-  const key = keyOf(sectionKey, id);
-  clearTimeout(timers.get(key));
-  timers.delete(key);
+  pendingSyncs.cancel(keyOf(sectionKey, id));
 }
 
 // Syncs every instance with local changes the cloud lacks. Called when the
@@ -250,7 +236,7 @@ export function syncInstance(sectionKey, id) {
   const section = getSection(sectionKey);
   if (!section || !id) return Promise.resolve(null);
   const key = keyOf(sectionKey, id);
-  return withLock(key, async () => {
+  return instanceQueue.run(key, async () => {
     const entry = getInstance(sectionKey, id);
     if (!needsSync(sectionKey, entry)) return entry;
     const c = client();
@@ -295,7 +281,7 @@ function pullLocked(sectionKey, id, row) {
 // explicit conflict.
 export function pullInstance(sectionKey, id, { onlyIfClean = false } = {}) {
   const section = getSection(sectionKey);
-  return withLock(keyOf(sectionKey, id), async () => {
+  return instanceQueue.run(keyOf(sectionKey, id), async () => {
     const row = await cloud.fetchRow(client(), section, id);
     if (!row?.data) throw new Error('No cloud data for this instance.');
     if (onlyIfClean && getInstance(sectionKey, id)?.dirty.data) {
@@ -424,7 +410,7 @@ export async function linkCloudInstance(sectionKey, id, linkGroupId) {
 // just deleted. The cloud row goes first: if that fails, the local copy stays.
 export function deleteInstance(sectionKey, id, { cloud: fromCloud = false } = {}) {
   cancelSync(sectionKey, id);
-  return withLock(keyOf(sectionKey, id), async () => {
+  return instanceQueue.run(keyOf(sectionKey, id), async () => {
     if (fromCloud) await cloud.deleteRow(client(), getSection(sectionKey), id);
     if (getInstance(sectionKey, id)) deleteLocalInstance(sectionKey, id);
   });

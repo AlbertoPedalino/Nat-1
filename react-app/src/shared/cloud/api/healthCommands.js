@@ -8,6 +8,7 @@ import { listCharacterDigests } from './characterDigests.js';
 import { healthCommandRoute } from './healthCommandRoute.js';
 import { CLOUD_COMMAND_TIMEOUT_MS, withTimeout } from '../cloudCall.js';
 import { getCloudCharacter, getCloudSheetRevision, pushCharacter } from './cloudCharacters.js';
+import { createKeyedQueue } from '../sync/keyed.js';
 
 // Health commands: hit points, temporary HP, death saves and conditions sent
 // as small commands against a character's digest revision, one at a time per
@@ -19,7 +20,8 @@ export const HEALTH_CONFLICT = 'HEALTH_CONFLICT';
 
 export const HEALTH_TIMEOUT = 'HEALTH_TIMEOUT';
 
-const healthQueues = new Map();
+// One command per character at a time, in click order.
+const healthQueue = createKeyedQueue();
 
 // The newest answer this tab received per character, so a command queued
 // behind another starts from what that one committed, not from the digest the
@@ -146,8 +148,7 @@ export function commandCharacterVitals(charId, command, { timeoutMs = HEALTH_COM
   // Preserve click order within this tab. Every link settles within the
   // timeout, so a hung request cannot block the queue. Other tabs and devices
   // are serialized by the database's digest check.
-  const previous = healthQueues.get(charId) || Promise.resolve();
-  const pending = previous.catch(() => {}).then(async () => {
+  return healthQueue.run(charId, async () => {
     try {
       return await withTimeout(commitHealthCommand(charId, command, { digest, base }), timeoutMs, 'Character health update', HEALTH_TIMEOUT);
     } catch (error) {
@@ -155,8 +156,4 @@ export function commandCharacterVitals(charId, command, { timeoutMs = HEALTH_COM
       throw error;
     }
   });
-  healthQueues.set(charId, pending);
-  const cleanup = () => { if (healthQueues.get(charId) === pending) healthQueues.delete(charId); };
-  pending.then(cleanup, cleanup);
-  return pending;
 }

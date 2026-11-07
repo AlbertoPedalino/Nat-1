@@ -15,6 +15,7 @@ import { externalDelta } from './externalSync.js';
 import { fightSignature, libraryCardUpdates, toFightEntry } from '../../../shared/encounter/fightRecord.js';
 import { listenForRecovery, watchRevisions } from '../../../shared/cloud/sync/recoveryTriggers.js';
 import { syncKeys } from '../../../shared/cloud/sync/syncKeys.js';
+import { createKeyedDebounce } from '../../../shared/cloud/sync/keyed.js';
 
 // The fights of this instance, with the database as the record.
 //
@@ -76,7 +77,9 @@ export function useCloudFights({
   // Discovering a cloud row is not a local deletion intent. The reducer may
   // hide it in favour of the fight still running on this screen.
   const localIdsRef = useRef(new Set());
-  const timersRef = useRef(new Map());
+  // One pending write per fight: a burst of edits becomes one save.
+  const writesRef = useRef(null);
+  writesRef.current ??= createKeyedDebounce({ delay: WRITE_DEBOUNCE_MS });
   // Nothing is deleted from the cloud until its list has been read once, or a
   // page that opens before the first load would take an empty local list for
   // "the GM cleared everything".
@@ -100,13 +103,11 @@ export function useCloudFights({
     versionsRef.current.clear();
     localIdsRef.current.clear();
     removedRef.current.clear();
-    timersRef.current.forEach((timer) => clearTimeout(timer));
-    timersRef.current.clear();
+    writesRef.current.cancelAll();
   }, [instanceId]);
 
   useEffect(() => () => {
-    timersRef.current.forEach((timer) => clearTimeout(timer));
-    timersRef.current.clear();
+    writesRef.current.cancelAll();
   }, []);
 
   // Ask for a row to go, and check afterwards that it went. Realtime reports a
@@ -305,7 +306,7 @@ export function useCloudFights({
   const retryUnsaved = useCallback(() => {
     for (const key of [...unsavedRef.current]) {
       // A newer write of it is already on its way.
-      if (timersRef.current.has(key)) continue;
+      if (writesRef.current.has(key)) continue;
       unsavedRef.current.delete(key);
       const entry = (heldRef.current.fights || []).find((fight) => String(fight.id) === key);
       if (!entry || removedRef.current.has(key)) continue;
@@ -327,13 +328,10 @@ export function useCloudFights({
     const find = () => (heldRef.current.fights || []).find((fight) => String(fight.id) === key);
     if (!canSync || !find()) return;
     settledRef.current.set(key, fightSignature(find()));
-    const running = timersRef.current.get(key);
-    if (running) clearTimeout(running);
-    timersRef.current.set(key, setTimeout(() => {
-      timersRef.current.delete(key);
+    writesRef.current.schedule(key, () => {
       const entry = find();
       if (entry) writeFight(key, entry);
-    }, WRITE_DEBOUNCE_MS));
+    });
   }, [canSync, writeFight]);
 
   // First read, then every change to this instance's fights from anywhere.
@@ -377,12 +375,7 @@ export function useCloudFights({
       if (settledRef.current.get(key) === signature) continue;
       settledRef.current.set(key, signature);
 
-      const running = timersRef.current.get(key);
-      if (running) clearTimeout(running);
-      timersRef.current.set(key, setTimeout(() => {
-        timersRef.current.delete(key);
-        writeFight(key, entry);
-      }, WRITE_DEBOUNCE_MS));
+      writesRef.current.schedule(key, () => writeFight(key, entry));
     }
 
     if (!loadedRef.current) return;
@@ -396,9 +389,7 @@ export function useCloudFights({
       // deleted now would otherwise have its own timer put the row back after
       // the delete had already run, and the encounter would be standing there
       // again — deleted, restored by us, and blamed on the database.
-      const pending = timersRef.current.get(key);
-      if (pending) clearTimeout(pending);
-      timersRef.current.delete(key);
+      writesRef.current.cancel(key);
       askAgain(key);
     }
   }, [canSync, fights, writeFight]);

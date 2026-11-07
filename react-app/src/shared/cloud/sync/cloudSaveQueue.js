@@ -1,3 +1,5 @@
+import { createKeyedQueue } from './keyed.js';
+
 // At most one builder cloud save in flight. `enqueue()` asks for a save of the
 // builder's current state: if one is already running, it waits behind it, and
 // every further request made while it waits is the same save (it reads the
@@ -7,16 +9,14 @@
 // revision or a second INSERT. Resolves with the save's result; a failed save
 // does not stop the next one, which decides for itself whether to run.
 export function createCloudSaveQueue(save) {
-  let chain = Promise.resolve();
+  const queue = createKeyedQueue();
   let waiting = null;
   return function enqueue() {
     if (waiting) return waiting;
-    const next = chain.catch(() => {}).then(() => {
+    waiting = queue.run('save', () => {
       waiting = null;
       return save();
     });
-    waiting = next;
-    chain = next;
-    return next;
+    return waiting;
   };
 }

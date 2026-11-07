@@ -108,6 +108,12 @@ test('every confirmation goes through confirmAction', () => {
   assert.deepEqual(sourceFilesMatching(/window\.confirm\(/, { allow: ['shared/ui/confirmAction.js'] }), []);
 });
 
+// Waiting for a previous task before starting the next (a per-key queue) is
+// createKeyedQueue's job (shared/cloud/sync/keyed.js).
+test('task chains go through createKeyedQueue', () => {
+  assert.deepEqual(sourceFilesMatching(/\.catch\(\(\) => \{\}\)\.then\(/, { allow: ['shared/cloud/sync/keyed.js'] }), []);
+});
+
 // A native colour input jumps under the pointer unless it holds its own value
 // while the picker is open: ColorField does, so every colour well is one.
 test('every colour well is a ColorField', () => {
