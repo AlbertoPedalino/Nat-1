@@ -20,6 +20,8 @@ import {
   monsterVitalsPatch,
 } from '../../../shared/vtt/tokens/fightVitals.js';
 import { withDeathSave } from '../../../shared/character/combat/mortality.js';
+import { runBusy } from '../../../shared/ui/busyAction.js';
+import { patchById, replaceById } from '../../../shared/vtt/session/liveScene.js';
 
 // Changing pieces already on the scene: conditions, reminders, HP and the rest
 // of the token menu, death saves, visibility, deletion. A character's vitals go
@@ -95,7 +97,7 @@ export function useTokenEdits({
       if (!token.characterId) await setTokenEffects(token.id, effects);
       if (owned) await updateToken(token.id, { show_hp: showHp });
     } catch (cause) {
-      setTokens((current) => current.map((item) => (item.id === token.id ? token : item)));
+      setTokens((current) => replaceById(current, token));
       notify('error', cause?.message || 'Could not mark that token.');
     }
   }, [canMove, characterHealth, notify, writeConditions]);
@@ -108,19 +110,14 @@ export function useTokenEdits({
     // No piece writes hit points to its public row: a character's belong to the
     // sheet, a linked enemy's to its fight, any other piece's to the GM-only
     // secrets. Whether the bar is shown is the piece's own business.
-    setTokens((current) => current.map((item) => (
-      item.id === token.id
-        ? {
-          ...item,
-          label: publicLabel,
-          secretLabel: secret,
-          conditions,
-          effects,
-          showHp,
-          ...(token.characterId ? {} : { hpCurrent, deathSaves, hpMax }),
-        }
-        : item
-    )));
+    setTokens((current) => patchById(current, token.id, {
+      label: publicLabel,
+      secretLabel: secret,
+      conditions,
+      effects,
+      showHp,
+      ...(token.characterId ? {} : { hpCurrent, deathSaves, hpMax }),
+    }));
     try {
       // Vitals take the route that suits the piece: a character's go to the
       // sheet, a cloud fight's enemy to its combatant, anything else to its row.
@@ -145,7 +142,7 @@ export function useTokenEdits({
       });
       if (secret !== (token.secretLabel || '')) await setTokenSecret(token.id, secret);
     } catch (cause) {
-      setTokens((current) => current.map((item) => (item.id === token.id ? token : item)));
+      setTokens((current) => replaceById(current, token));
       notify('error', cause?.message || 'Could not update that token.');
     }
   }, [characterHealth, commitLinkedMonster, gmVitals, notify, writeConditions]);
@@ -178,18 +175,13 @@ export function useTokenEdits({
   }, [handleMarkToken, handleSaveToken, role.isGm]);
 
   const handleDeleteToken = useCallback(async (token) => {
-    setBusy(true);
-    try {
+    return runBusy({ setBusy, notify }, async () => {
       const { cleanupError } = await deleteToken(token.id, token.imagePath);
       setTokens((current) => current.filter((item) => item.id !== token.id));
       if (cleanupError) {
         notify('warning', 'The piece was removed, but its uploaded image could not be cleaned up.');
       }
-    } catch (cause) {
-      notify('error', cause?.message || 'Could not remove that token.');
-    } finally {
-      setBusy(false);
-    }
+    }, 'Could not remove that token.');
   }, [notify]);
 
   const handleDeleteTokens = useCallback(async (selected) => {

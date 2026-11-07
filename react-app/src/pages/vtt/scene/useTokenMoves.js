@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { setTokenVisibility, updateToken } from '../../../shared/cloud/api/vttTokens.js';
-import { applyCommittedToken, movableFilter } from '../../../shared/vtt/session/liveScene.js';
+import { applyCommittedToken, movableFilter, patchById, replaceById } from '../../../shared/vtt/session/liveScene.js';
 import { isTokenVisibleToPlayers } from '../../../shared/vtt/scene/scene.js';
 
 // A piece held still under the pointer sends no frames, and the other screens
@@ -64,9 +64,7 @@ export function useTokenMoves({
     const finishMove = beginTokenMove([token.id]);
     const wasVisible = isTokenVisibleToPlayers(token, playArea);
     const willBeVisible = isTokenVisibleToPlayers({ ...token, ...position }, playArea);
-    setTokens((current) => current.map((item) => (
-      item.id === token.id ? { ...item, ...position } : item
-    )));
+    setTokens((current) => patchById(current, token.id, position));
     dragFrameRef.current = null;
     // Let go where it landed, before the write: other screens keep showing
     // the drag until then, and only then take the row that comes back. A turn
@@ -78,7 +76,7 @@ export function useTokenMoves({
       committed = await updateToken(token.id, position);
       if (wasVisible !== willBeVisible) sendDrag({ tokensChanged: true });
     } catch (cause) {
-      setTokens((current) => current.map((item) => (item.id === token.id ? token : item)));
+      setTokens((current) => replaceById(current, token));
       notify('error', cause?.message || 'Could not move that token.');
     } finally {
       // Released only after the write settles: until then a remote echo would
@@ -144,13 +142,11 @@ export function useTokenMoves({
     }
     if (!Object.keys(rowPatch).length) return;
 
-    setTokens((current) => current.map((item) => (
-      item.id === token.id ? { ...item, ...localPatch } : item
-    )));
+    setTokens((current) => patchById(current, token.id, localPatch));
     try {
       await updateToken(token.id, rowPatch);
     } catch (cause) {
-      setTokens((current) => current.map((item) => (item.id === token.id ? token : item)));
+      setTokens((current) => replaceById(current, token));
       notify('error', cause?.message || 'Could not update that object.');
     }
   }, [notify]);
@@ -162,11 +158,7 @@ export function useTokenMoves({
   const handleTokenVisibility = useCallback(async (token, gmOnly) => {
     if (!token || Boolean(token.hiddenFromPlayers) === Boolean(gmOnly)) return;
     const nextLayer = !gmOnly && token.layer === 'gm' ? 'tokens' : token.layer;
-    setTokens((current) => current.map((item) => (
-      item.id === token.id
-        ? { ...item, layer: nextLayer, hiddenFromPlayers: Boolean(gmOnly) }
-        : item
-    )));
+    setTokens((current) => patchById(current, token.id, { layer: nextLayer, hiddenFromPlayers: Boolean(gmOnly) }));
     try {
       const updated = await setTokenVisibility(token.id, gmOnly, token.layer);
       // Not taken whole: the row knows nothing of the GM-only label, which
@@ -174,7 +166,7 @@ export function useTokenMoves({
       setTokens((current) => applyCommittedToken(current, updated));
       sendDrag({ tokensChanged: true });
     } catch (cause) {
-      setTokens((current) => current.map((item) => (item.id === token.id ? token : item)));
+      setTokens((current) => replaceById(current, token));
       notify('error', cause?.message || 'Could not change who can see that piece.');
     }
   }, [notify, sendDrag]);

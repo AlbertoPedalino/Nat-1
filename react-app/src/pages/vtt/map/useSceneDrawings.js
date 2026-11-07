@@ -5,7 +5,7 @@ import {
   moveDrawing,
   updateDrawing,
 } from '../../../shared/cloud/api/vttDrawings.js';
-import { addById, applyCommittedDrawing } from '../../../shared/vtt/session/liveScene.js';
+import { addById, applyCommittedDrawing, patchById, replaceById } from '../../../shared/vtt/session/liveScene.js';
 import {
   canEraseDrawing,
   canMoveDrawing,
@@ -75,17 +75,13 @@ export function useSceneDrawings({
   const handleMoveDrawing = useCallback(async (drawing, offset) => {
     const points = movedPoints(drawing, offset.x, offset.y);
     // Shown where it was dropped straight away; the row catches up.
-    setDrawings((current) => current.map((item) => (
-      item.id === drawing.id ? { ...item, points } : item
-    )));
+    setDrawings((current) => patchById(current, drawing.id, { points }));
     const finishWrite = beginDrawingWrite(drawing.id);
     let committed = null;
     try {
       committed = await moveDrawing(drawing.id, points);
     } catch (cause) {
-      setDrawings((current) => current.map((item) => (
-        item.id === drawing.id ? drawing : item
-      )));
+      setDrawings((current) => replaceById(current, drawing));
       notify('error', cause?.message || 'Could not move that mark.');
     } finally {
       // Echoes of this mark waited while it was being written; the last
@@ -130,7 +126,7 @@ export function useSceneDrawings({
   ), [drawings, role.isGm, user?.id]);
 
   const handlePreviewDrawing = useCallback((drawing, patch) => {
-    setDrawings((current) => current.map((item) => (item.id === drawing.id ? { ...item, ...patch } : item)));
+    setDrawings((current) => patchById(current, drawing.id, patch));
   }, [setDrawings]);
 
   const handleSaveDrawing = useCallback(async (drawing, patch) => {

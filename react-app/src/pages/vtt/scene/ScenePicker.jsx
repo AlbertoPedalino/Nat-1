@@ -25,6 +25,7 @@ import NewSceneDialog from './NewSceneDialog.jsx';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { promptText } from '../../../shared/ui/promptText.js';
+import { runBusy } from '../../../shared/ui/busyAction.js';
 
 // Scenes belong to a campaign, so the picker is grouped by campaign rather than
 // being a flat list like the local tools' Library.
@@ -56,15 +57,10 @@ export default function ScenePicker({
   }, [campaigns, refresh]);
 
   const handleCreate = async (campaignId) => {
-    setBusy(true);
-    try {
+    return runBusy({ setBusy, notify }, async () => {
       const scene = await createScene(campaignId, 'New scene');
       onOpen(scene.id);
-    } catch (cause) {
-      notify('error', cause?.message || 'Could not create the scene.');
-    } finally {
-      setBusy(false);
-    }
+    }, 'Could not create the scene.');
   };
 
   // One scene per picture. A floor plan is a map you walk onto, not a layer of

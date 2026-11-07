@@ -23,6 +23,7 @@ import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
 import { listenForRecovery } from '../../../shared/cloud/sync/recoveryTriggers.js';
 import { crKey, crXP } from '../../../shared/bestiary/challengeRating.js';
 import { CAMPAIGN_BOARD_LINK_CHANGED_EVENT, INSTANCE_LINKS_CHANGED_EVENT } from '../../../shared/appEvents.js';
+import { runBusy } from '../../../shared/ui/busyAction.js';
 
 // Links change rarely and every local change announces itself (the gb:* link
 // events, storage); the shared recovery triggers catch another device's edit.
@@ -170,8 +171,7 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize, roster }) {
     roomCount, popMode = 'random', thr = 0, tier = 1,
   }) => {
     if (!enabled) return null;
-    setBusy(true);
-    try {
+    return runBusy({ setBusy, report: setError }, async () => {
       const board = boardId ? await readHexcrawlBoard(boardId) : null;
       if (!board?.tables) {
         throw new Error('This campaign has no GM Board linked, and the tables come from it.');
@@ -183,26 +183,16 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize, roster }) {
       setState({ key: saved.key, fights: saved.fights });
       setError('');
       return saved.key;
-    } catch (cause) {
-      setError(cause?.message || 'Could not roll the dungeon.');
-      return null;
-    } finally {
-      setBusy(false);
-    }
+    }, 'Could not roll the dungeon.');
   }, [boardId, enabled, sceneId]);
 
   const clear = useCallback(async () => {
     if (!enabled) return;
-    setBusy(true);
-    try {
+    return runBusy({ setBusy, report: setError }, async () => {
       const saved = await saveSceneDungeon(sceneId, { key: null, fights: {} });
       setState({ key: saved.key, fights: saved.fights });
       setError('');
-    } catch (cause) {
-      setError(cause?.message || 'Could not clear the dungeon.');
-    } finally {
-      setBusy(false);
-    }
+    }, 'Could not clear the dungeon.');
   }, [enabled, sceneId]);
 
   // A room's creatures, written into the linked Encounter Builder as a saved
@@ -250,8 +240,7 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize, roster }) {
       }
     }
 
-    setBusy(true);
-    try {
+    return runBusy({ setBusy, report: setError }, async () => {
       const link = sendEncounterToBuilder(encounterInstance.id, {
         name: `${title || 'Dungeon'} — room ${roomNumber}`,
         groups: chosen.groups,
@@ -282,12 +271,7 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize, roster }) {
       await saveSceneDungeon(sceneId, { fights });
       setError(reach);
       return roomLink;
-    } catch (cause) {
-      setError(cause?.message || 'Could not send that room to the Encounter Builder.');
-      return null;
-    } finally {
-      setBusy(false);
-    }
+    }, 'Could not send that room to the Encounter Builder.');
   }, [
     linkHint, chooseFor, cloudEnabled, enabled, encounterInstance, priced, roster, sceneId, status,
     state.fights, state.key,

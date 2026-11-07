@@ -3,6 +3,7 @@ import {
   clockFromResult, clockFromState, mergeBoardClock, travelFromState,
 } from '../../../shared/hexcrawl/hexEntry.js';
 import { resolveManualAdvance } from '../../../shared/hexcrawl/hexRules.js';
+import { runBusy } from '../../../shared/ui/busyAction.js';
 
 // The campaign clock written by hand from the map: the travel defaults, the
 // season, the date and sky, and hours passed off the map. Each write reads the
@@ -12,8 +13,7 @@ export function useHexcrawlClockControls({
 }) {
   const setDefaults = useCallback(async (patch) => {
     if (!enabled || !clock.active) return null;
-    setBusy(true);
-    try {
+    return runBusy({ setBusy, report: setError }, async () => {
       const activeBoard = await refreshBoard({ force: true });
       if (!activeBoard) throw new Error('This campaign has no hexcrawl board linked.');
       const fields = {};
@@ -32,12 +32,7 @@ export function useHexcrawlClockControls({
       });
       setError(null);
       return saved;
-    } catch (cause) {
-      setError(cause?.message || 'Could not save the hexcrawl settings.');
-      return null;
-    } finally {
-      setBusy(false);
-    }
+    }, 'Could not save the hexcrawl settings.');
   }, [clock, enabled, refreshBoard]);
 
   // The season, the date and the sky belong to the campaign once there is one:
@@ -47,8 +42,7 @@ export function useHexcrawlClockControls({
   // queued write runs, so it builds on whatever the write before it saved.
   const patchClock = useCallback(async (patch, failure) => {
     if (!enabled || !clock.active) return null;
-    setBusy(true);
-    try {
+    return runBusy({ setBusy, report: setError }, async () => {
       const activeBoard = await refreshBoard({ force: true });
       if (!activeBoard) throw new Error('This campaign has no hexcrawl board linked.');
       const saved = await clock.saveClock((current) => {
@@ -61,12 +55,7 @@ export function useHexcrawlClockControls({
       });
       setError(null);
       return saved;
-    } catch (cause) {
-      setError(cause?.message || failure);
-      return null;
-    } finally {
-      setBusy(false);
-    }
+    }, failure);
   }, [clock, enabled, refreshBoard]);
 
   const setSeason = useCallback(

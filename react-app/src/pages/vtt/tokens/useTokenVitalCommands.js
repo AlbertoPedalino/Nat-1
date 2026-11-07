@@ -9,6 +9,7 @@ import {
   monsterVitalsPatch,
   newerFightRow,
 } from '../../../shared/vtt/tokens/fightVitals.js';
+import { patchById } from '../../../shared/vtt/session/liveScene.js';
 
 // The hit points of any piece, from its menu: damage, healing, temporary and
 // maximum hit points as one intent (a character health command's name)
@@ -81,9 +82,7 @@ export function useTokenVitalCommands({
     try {
       await setTokenHp(token.id, vitals);
       if (after.activeConditions && after.activeConditions !== before.activeConditions) {
-        setTokens((current) => current.map((item) => (
-          item.id === token.id ? { ...item, conditions: after.activeConditions } : item
-        )));
+        setTokens((current) => patchById(current, token.id, { conditions: after.activeConditions }));
         await writeConditions(token, after.activeConditions);
       }
     } catch (cause) {

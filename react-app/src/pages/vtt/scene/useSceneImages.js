@@ -7,6 +7,7 @@ import {
 } from '../../../shared/cloud/api/vttScenePictures.js';
 import { updateScene } from '../../../shared/cloud/api/vttScenes.js';
 import { sceneView, viewPatch } from '../../../shared/vtt/scene/scene.js';
+import { runBusy } from '../../../shared/ui/busyAction.js';
 
 // The scene's pictures: uploading or removing the battlemap and backgrounds,
 // and switching what is on show. While the projector is frozen (not
@@ -18,20 +19,14 @@ export function useSceneImages({
   // Every picture change takes the same shape: one cloud call returning the
   // updated row, plus a cleanup that may fail without failing the change.
   const runSceneImageChange = useCallback(async (change, failure) => {
-    setBusy(true);
-    try {
+    return runBusy({ setBusy, notify }, async () => {
       const result = await change();
       onSceneChange(result.scene);
       if (result.cleanupError) {
         notify('warning', 'The picture was saved, but an old uploaded file could not be cleaned up.');
       }
       return result;
-    } catch (cause) {
-      notify('error', cause?.message || failure);
-      return null;
-    } finally {
-      setBusy(false);
-    }
+    }, failure);
   }, [notify, onSceneChange]);
 
   const handleUploadMap = useCallback(

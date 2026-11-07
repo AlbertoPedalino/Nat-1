@@ -21,6 +21,19 @@ export function addById(list, row) {
   return current.some((item) => item.id === row.id) ? current : [...current, row];
 }
 
+// The list with the row of `row.id` swapped for `row` (an optimistic edit
+// undone, or a row confirmed by the server).
+export function replaceById(list, row) {
+  const current = Array.isArray(list) ? list : [];
+  return current.map((item) => (item.id === row?.id ? row : item));
+}
+
+// The list with `patch` merged into the row whose id is `id`.
+export function patchById(list, id, patch) {
+  const current = Array.isArray(list) ? list : [];
+  return current.map((item) => (item.id === id ? { ...item, ...patch } : item));
+}
+
 // The row a remote event carries is the same shape a fetch returns, so it goes
 // through the same normalizer instead of being trusted raw.
 //

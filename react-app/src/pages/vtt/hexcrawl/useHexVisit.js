@@ -4,6 +4,7 @@ import {
 import { saveHexCell } from '../../../shared/cloud/api/hexcrawl.js';
 import { hexEntrySummary, mergeBoardClock, runHexEntry } from '../../../shared/hexcrawl/hexEntry.js';
 import { hexKey } from '../../../shared/vtt/map/hexGeometry.js';
+import { runBusy } from '../../../shared/ui/busyAction.js';
 
 // Long enough to read three lines and decide whether to open the rolls, short
 // enough that a bubble is never still sitting on the map two hexes later.
@@ -53,8 +54,7 @@ export function useHexVisit({
   // the hex that was clicked, not for whichever one a render has caught up with.
   const enterHexAt = useCallback(async (hex, mode = 'proceed') => {
     if (!enabled || !hex) return null;
-    setBusy(true);
-    try {
+    return runBusy({ setBusy, report: setError }, async () => {
       const activeBoard = await refreshBoard({ force: true });
       if (!activeBoard) {
         throw new Error('This campaign has no hexcrawl board linked. Link one from the GM Board.');
@@ -119,12 +119,7 @@ export function useHexVisit({
       storeCell(saved);
       setError(null);
       return entry.result;
-    } catch (cause) {
-      setError(cause?.message || 'Could not enter that hex.');
-      return null;
-    } finally {
-      setBusy(false);
-    }
+    }, 'Could not enter that hex.');
   }, [clock, enabled, refreshBoard, sceneId, storeCell]);
 
   // Taking a hex back. The terrain, population and tier stay — those are what
@@ -136,8 +131,7 @@ export function useHexVisit({
   // record of the day at odds with the campaign's.
   const clearHexAt = useCallback(async (cell) => {
     if (!enabled || !cell) return null;
-    setBusy(true);
-    try {
+    return runBusy({ setBusy, report: setError }, async () => {
       const saved = await saveHexCell(sceneId, cell, { status: 'unexplored', revealed: false });
       storeCell(saved);
       const isLast = lastVisit && lastVisit.hex.q === cell.q && lastVisit.hex.r === cell.r;
@@ -155,12 +149,7 @@ export function useHexVisit({
       }
       setError(null);
       return saved;
-    } catch (cause) {
-      setError(cause?.message || 'Could not clear that hex.');
-      return null;
-    } finally {
-      setBusy(false);
-    }
+    }, 'Could not clear that hex.');
   }, [clock, enabled, lastVisit, sceneId, storeCell]);
 
   // What a click on the board does: pick the hex, and — while the crawl is

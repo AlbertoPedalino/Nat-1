@@ -14,7 +14,8 @@ import {
   deleteInstanceFight,
   saveInstanceFight,
 } from '../../../shared/cloud/api/encounterFights.js';
-import { addById } from '../../../shared/vtt/session/liveScene.js';
+import { addById, patchById } from '../../../shared/vtt/session/liveScene.js';
+import { runBusy } from '../../../shared/ui/busyAction.js';
 
 // Putting pieces on the scene: markers, uploaded images, campaign characters,
 // monsters, map objects and a whole encounter from the library, by click (in
@@ -46,17 +47,11 @@ export function useTokenPlacement({
   setImportOpen, setPlacementDrag, shownImageForViewport,
 }) {
   const addToken = useCallback(async (token) => {
-    setBusy(true);
-    try {
+    return runBusy({ setBusy, notify }, async () => {
       const created = await createToken(scene.id, token);
       setTokens((current) => addById(current, created));
       return created;
-    } catch (cause) {
-      notify('error', cause?.message || 'Could not add that token.');
-      return null;
-    } finally {
-      setBusy(false);
-    }
+    }, 'Could not add that token.');
   }, [notify, scene.id]);
 
   const canPlacePiece = useCallback(() => {
@@ -100,9 +95,8 @@ export function useTokenPlacement({
   // on the map layer, a handout among the tokens, something the party must not
   // see yet on the GM layer.
   const handleAddImage = useCallback(async (file) => {
-    setBusy(true);
     let uploadedPath = null;
-    try {
+    return runBusy({ setBusy, notify }, async () => {
       const span = await imageSpan(file);
       uploadedPath = await uploadMapImage(scene.campaignId, scene.id, file);
       const created = await createToken(scene.id, {
@@ -113,14 +107,10 @@ export function useTokenPlacement({
         image_path: uploadedPath,
       });
       setTokens((current) => addById(current, created));
-    } catch (cause) {
-      if (uploadedPath) {
-        try { await deleteMapImage(uploadedPath); } catch {}
-      }
-      notify('error', cause?.message || 'Could not add that image.');
-    } finally {
-      setBusy(false);
-    }
+    }, 'Could not add that image.', {
+      // A failed placement leaves no orphaned upload behind.
+      onError: () => uploadedPath && deleteMapImage(uploadedPath),
+    });
   }, [activeLayer, nextFreeCell, notify, scene.campaignId, scene.id]);
 
   const characterToken = useCallback((entry, position) => ({
@@ -153,8 +143,7 @@ export function useTokenPlacement({
   // dropped on the map has nothing to stay in step with.
   const handlePlaceMonster = useCallback(async (monster, count, { layer, position } = {}) => {
     if (!canPlacePiece()) return;
-    setBusy(true);
-    try {
+    return runBusy({ setBusy, notify }, async () => {
       const pieces = monsterGroupTokens(monster, count, { layer });
       const laid = (!position && placeInView(pieces))
         || layoutTokens(pieces, tokens, position ? { origin: position } : undefined);
@@ -163,19 +152,14 @@ export function useTokenPlacement({
         const created = await createToken(scene.id, token);
         setTokens((current) => addById(current, created));
       }
-    } catch (cause) {
-      notify('error', cause?.message || 'Could not place that creature.');
-    } finally {
-      setBusy(false);
-    }
+    }, 'Could not place that creature.');
   }, [canPlacePiece, notify, placeInView, scene.id, tokens]);
 
   const handleAddToken = useCallback(async (draft = {}, position) => {
     if (!canPlacePiece()) return;
     const layer = draft.layer || activeLayer;
     let uploadedPath = null;
-    setBusy(true);
-    try {
+    return runBusy({ setBusy, notify }, async () => {
       if (draft.imageFile) {
         uploadedPath = await uploadMapImage(scene.campaignId, scene.id, draft.imageFile);
       }
@@ -187,14 +171,10 @@ export function useTokenPlacement({
         image_path: uploadedPath,
       });
       setTokens((current) => addById(current, created));
-    } catch (cause) {
-      if (uploadedPath) {
-        try { await deleteMapImage(uploadedPath); } catch {}
-      }
-      notify('error', cause?.message || 'Could not add that token.');
-    } finally {
-      setBusy(false);
-    }
+    }, 'Could not add that token.', {
+      // A failed placement leaves no orphaned upload behind.
+      onError: () => uploadedPath && deleteMapImage(uploadedPath),
+    });
   }, [activeLayer, canPlacePiece, nextFreeCell, notify, scene.campaignId, scene.id, setTokens]);
 
   const handlePlaceObject = useCallback(async (object, position) => {
@@ -222,9 +202,7 @@ export function useTokenPlacement({
     if (!created || !secret) return;
     try {
       await setTokenSecret(created.id, secret);
-      setTokens((current) => current.map((item) => (
-        item.id === created.id ? { ...item, secretLabel: secret } : item
-      )));
+      setTokens((current) => patchById(current, created.id, { secretLabel: secret }));
     } catch (cause) {
       notify('error', cause?.message || 'The marker was placed, but its note could not be kept secret.');
     }
@@ -236,9 +214,8 @@ export function useTokenPlacement({
     } = {},
   ) => {
     if (!canPlacePiece()) return;
-    setBusy(true);
     setImportOpen(false);
-    try {
+    return runBusy({ setBusy, notify }, async () => {
       // A piece with no fight behind it is a picture: nothing is tracking its
       // hit points. Both roads to one end here rather than at a button the GM
       // had to press first — an encounter saved in the builder and never
@@ -298,11 +275,7 @@ export function useTokenPlacement({
         const created = await createToken(scene.id, token);
         setTokens((current) => addById(current, created));
       }
-    } catch (cause) {
-      notify('error', cause?.message || 'Could not import that encounter.');
-    } finally {
-      setBusy(false);
-    }
+    }, 'Could not import that encounter.');
   }, [
     canPlacePiece, dungeon.linkHint, dungeon.sendRoomToBuilder, monsterDb.monsters, notify,
     placeInView, roster, scene.id, tokens,
