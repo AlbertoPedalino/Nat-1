@@ -22,3 +22,19 @@ test('a deferred color field stays native while dragging and emits only after th
 
   vi.useRealTimers();
 });
+
+test('a commit-on-blur color field emits once, when the picker closes', () => {
+  const onChange = vi.fn();
+  render(<ColorField value="#111111" label="Object color" commitOnBlur disabled={false} title="Object color" onChange={onChange} />);
+  const input = screen.getByLabelText('Object color');
+
+  fireEvent.pointerDown(input);
+  fireEvent.input(input, { target: { value: '#3366ff' } });
+  fireEvent.input(input, { target: { value: '#ff3355' } });
+  expect(onChange).not.toHaveBeenCalled();
+
+  fireEvent.blur(input);
+  expect(onChange).toHaveBeenCalledOnce();
+  expect(onChange).toHaveBeenCalledWith('#ff3355');
+  expect(input).toHaveAttribute('title', 'Object color');
+});

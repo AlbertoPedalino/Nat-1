@@ -18,6 +18,7 @@ import TokenMarkers from './TokenMarkers.jsx';
 import TokenMenuActions from './TokenMenuActions.jsx';
 import { compactFieldSx, sectionTitleSx } from './tokenMenuStyles.js';
 import { useDebouncedCallback } from '../../../shared/ui/useDebouncedCallback.js';
+import ColorField from '../../../shared/ui/ColorField.jsx';
 
 // Right-click menu on the piece itself. Label, conditions and removal used to be
 // spread between a top-bar button and nothing at all; they belong on the thing
@@ -145,15 +146,13 @@ export default function TokenMenu({
         {isMapObject ? (
           <Box sx={objectStyleSx}>
             <Typography sx={sectionTitleSx}>Object color</Typography>
-            <Box
+            <ColorField
               key={`${token.id}-color`}
-              component="input"
-              type="color"
-              aria-label="Object color"
+              label="Object color"
               title="Object color"
               disabled={!canStyleObject}
-              defaultValue={token.color || VTT_COLORS.gold}
-              onInput={(event) => saveObjectColor(event.currentTarget.value)}
+              value={token.color || VTT_COLORS.gold}
+              onChange={saveObjectColor}
               sx={objectColorInputSx}
             />
           </Box>

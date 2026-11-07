@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Box, InputAdornment, Pagination, Slider, TextField, Typography,
 } from '@mui/material';
@@ -14,6 +14,7 @@ import {
 import { beginPiecePointerDrag } from '../tokens/PiecePreview.jsx';
 import MapObjectGlyph from './MapObjectGlyph.jsx';
 import { compareText } from '../../../shared/lists.js';
+import ColorField from '../../../shared/ui/ColorField.jsx';
 
 const PAGE_SIZE = 32;
 const DEFAULT_COLOR = VTT_COLORS.gold;
@@ -25,7 +26,6 @@ export default function MapObjectsPanel({
   const [page, setPage] = useState(1);
   const [color, setColor] = useState(DEFAULT_COLOR);
   const [strokeWidth, setStrokeWidth] = useState(DEFAULT_MAP_OBJECT_STROKE);
-  const colorRef = useRef(DEFAULT_COLOR);
   const filtered = useMemo(() => {
     const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
     return [...new Set(iconNames)]
@@ -43,12 +43,12 @@ export default function MapObjectsPanel({
   const placement = (iconKey) => ({
     kind: 'object',
     object: {
-      key: iconKey, label: mapObjectLabel(iconKey), color: colorRef.current, strokeWidth, layer,
+      key: iconKey, label: mapObjectLabel(iconKey), color, strokeWidth, layer,
     },
     token: {
       iconKey,
       label: mapObjectLabel(iconKey),
-      color: colorRef.current,
+      color,
       iconStrokeWidth: strokeWidth,
       layer,
       rotation: 0,
@@ -77,14 +77,12 @@ export default function MapObjectsPanel({
           }}
           sx={{ flex: 1, minWidth: 0 }}
         />
-        <Box
-          component="input"
-          type="color"
-          aria-label="Object color"
+        <ColorField
+          label="Object color"
           title="Object color"
-          defaultValue={DEFAULT_COLOR}
-          onInput={(event) => { colorRef.current = event.currentTarget.value; }}
-          onBlur={() => setColor(colorRef.current)}
+          value={color}
+          commitOnBlur
+          onChange={setColor}
           sx={colorInputSx}
         />
       </Box>

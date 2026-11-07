@@ -13,7 +13,10 @@ test('the objects panel searches and paginates the complete Lucide catalog', () 
   fireEvent.change(screen.getByRole('textbox', { name: 'Search Lucide icons' }), {
     target: { value: 'zodiac virgo' },
   });
-  fireEvent.input(screen.getByLabelText('Object color'), { target: { value: '#ff3355' } });
+  const colorInput = screen.getByLabelText('Object color');
+  fireEvent.input(colorInput, { target: { value: '#ff3355' } });
+  // The picker closes (focus leaves the well) before a button is pressed.
+  fireEvent.blur(colorInput);
   fireEvent.change(screen.getByRole('slider', { name: 'Icon stroke width' }), {
     target: { value: '3.2' },
   });

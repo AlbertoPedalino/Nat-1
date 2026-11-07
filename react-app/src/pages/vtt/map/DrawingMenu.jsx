@@ -23,6 +23,7 @@ import { UI_FONTS } from '../../../shared/ui/fonts.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
 import AreaEffectSelect from './AreaEffectSelect.jsx';
 import { gridCellWord } from '../../../shared/vtt/map/hexGeometry.js';
+import ColorField from '../../../shared/ui/ColorField.jsx';
 
 // Right-click (or a long press) on a mark: the same idea as a piece's menu.
 // Its label, who sees it, its colour, its size, and taking it away. Every
@@ -42,7 +43,6 @@ export default function DrawingMenu({
   // than compounding on every step, and a refused write goes back to it.
   const openedRef = useRef(null);
   const typingTimerRef = useRef(null);
-  const colorTimerRef = useRef(null);
   // A slider or a number moves many times a frame; the board is redrawn once a
   // frame with the latest of them, or dragging stutters.
   const previewRef = useRef(null);
@@ -71,7 +71,6 @@ export default function DrawingMenu({
 
   useEffect(() => () => {
     clearTimeout(typingTimerRef.current);
-    clearTimeout(colorTimerRef.current);
     cancelAnimationFrame(previewFrameRef.current);
   }, []);
 
@@ -198,21 +197,14 @@ export default function DrawingMenu({
 
         <Box sx={colorRowSx}>
           <Typography sx={controlLabelSx}>Colour</Typography>
-          {/* Uncontrolled, and nothing reaches the board until the hand
-              rests: redrawing the scene for every step of the native palette
-              is what made it stutter. Remounted when an effect sets the
-              colour, so the swatch shows it. */}
-          <Box
-            key={`${drawing.id}-color-${area?.effect || ''}`}
-            component="input"
-            type="color"
-            aria-label="Colour"
-            defaultValue={drawing.color || VTT_COLORS.gold}
-            onInput={(event) => {
-              const color = event.currentTarget.value;
-              clearTimeout(colorTimerRef.current);
-              colorTimerRef.current = setTimeout(() => onSave(drawing, { color }), COLOR_DELAY);
-            }}
+          {/* Nothing reaches the board until the hand rests: redrawing the
+              scene for every step of the native palette is what made it
+              stutter. */}
+          <ColorField
+            label="Colour"
+            value={drawing.color || VTT_COLORS.gold}
+            deferMs={COLOR_DELAY}
+            onChange={(color) => onSave(drawing, { color })}
             sx={colorInputSx}
           />
         </Box>
