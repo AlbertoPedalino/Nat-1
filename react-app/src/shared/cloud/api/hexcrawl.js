@@ -1,11 +1,9 @@
 import { requireClient } from '../supabaseClient.js';
 import { openRealtimeChannel } from '../realtimeChannel.js';
 import { toHexCell, toHexCellPatch } from '../../hexcrawl/hexCell.js';
-import { STORAGE_KEYS, scopeKey } from '../../gmboard/boardFormat.js';
-import { sanitizeInstanceId } from '../../instances/sectionRegistry.js';
-import { createDefaultCoreState } from '../../gmboard/defaultState.js';
-import { createDefaultTables } from '../../gmboard/defaultTables.js';
-import { CAMPAIGN_BOARD_LINK_CHANGED_EVENT } from '../../appEvents.js';
+import { decodeBoard, scopeKey } from '../../gmboard/boardFormat.js';
+import { fetchRow } from '../../instances/instanceCloud.js';
+import { getSection, sanitizeInstanceId } from '../../instances/sectionRegistry.js';
 
 // Cloud side of the hexcrawl. Three stores, split by how often each is written
 // (see supabase/10_hexcrawl.sql): the clock is one row per campaign, the log is
@@ -217,8 +215,6 @@ export async function linkHexcrawlBoardCampaign(boardId, campaignId) {
     .eq('hexcrawl_board_id', boardId);
   if (campaignId) cleanup = cleanup.neq('id', campaignId);
   const { error } = await cleanup;
-  // Readers refresh even if cleanup failed, since the destination may be saved.
-  window.dispatchEvent(new Event(CAMPAIGN_BOARD_LINK_CHANGED_EVENT));
   if (error) throw error;
 }
 
@@ -229,27 +225,10 @@ export async function linkHexcrawlBoardCampaign(boardId, campaignId) {
 export async function readHexcrawlBoard(boardId) {
   const id = sanitizeInstanceId(boardId);
   if (!id) return null;
-  const supabase = requireClient();
-  const { data, error } = await supabase
-    .from('boards')
-    .select('id, name, data, version')
-    .eq('id', id)
-    .maybeSingle();
-  if (error) throw error;
-  if (!data?.data) return null;
-
-  const parse = (key, fallback) => {
-    const raw = data.data[scopeKey(id, key)];
-    if (typeof raw !== 'string') return fallback;
-    try { return JSON.parse(raw); } catch { return fallback; }
-  };
-  return {
-    id: data.id,
-    name: data.name || id,
-    state: parse(STORAGE_KEYS.state, createDefaultCoreState()),
-    tables: parse(STORAGE_KEYS.tables, createDefaultTables()),
-    version: Number(data.version),
-  };
+  const row = await fetchRow(requireClient(), getSection('gmboard'), id);
+  if (!row?.data) return null;
+  const { state, tables } = decodeBoard((key) => row.data[scopeKey(id, key)]);
+  return { id: row.id, name: row.name || id, state, tables, version: Number(row.version) };
 }
 
 // The board's data revision (supabase/18_section_versions.sql): it changes

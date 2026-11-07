@@ -3,7 +3,7 @@ import { createDefaultTables } from '../../../shared/gmboard/defaultTables.js';
 import { LEGACY_KEYS, migrateLegacyBoard } from './migration.js';
 import { readInstanceValue, saveLocal } from '../../../shared/instances/instanceStore.js';
 import { getStorageItem } from '../../../shared/storage/storage.js';
-import { STORAGE_KEYS } from '../../../shared/gmboard/boardFormat.js';
+import { STORAGE_KEYS, decodeBoard } from '../../../shared/gmboard/boardFormat.js';
 
 // GM Board payload adapter: which keys an instance stores and how they are
 // (de)serialized. Registry, sync and opening are shared (shared/instances/);
@@ -12,16 +12,6 @@ import { STORAGE_KEYS } from '../../../shared/gmboard/boardFormat.js';
 const SECTION_KEY = 'gmboard';
 
 const readScoped = (id, key) => readInstanceValue(SECTION_KEY, id, key);
-
-function parseJsonOr(raw, fallback) {
-  if (raw == null) return fallback;
-  try {
-    const value = JSON.parse(raw);
-    return value == null ? fallback : value;
-  } catch {
-    return fallback;
-  }
-}
 
 function readLegacyRecord(readKey) {
   const raw = {};
@@ -35,16 +25,8 @@ function readLegacyRecord(readKey) {
 }
 
 export function readPersistedBoard(id) {
-  const stateRaw = readScoped(id, STORAGE_KEYS.state);
-  const tablesRaw = readScoped(id, STORAGE_KEYS.tables);
-  const resultsRaw = readScoped(id, STORAGE_KEYS.results);
-
-  if (stateRaw != null || tablesRaw != null) {
-    return {
-      state: parseJsonOr(stateRaw, createDefaultCoreState()),
-      tables: parseJsonOr(tablesRaw, createDefaultTables()),
-      results: parseJsonOr(resultsRaw, createDefaultResults()),
-    };
+  if (readScoped(id, STORAGE_KEYS.state) != null || readScoped(id, STORAGE_KEYS.tables) != null) {
+    return decodeBoard((key) => readScoped(id, key));
   }
 
   const legacyScoped = readLegacyRecord((key) => readScoped(id, key));

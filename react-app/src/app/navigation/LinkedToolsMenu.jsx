@@ -64,6 +64,7 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
       ? 'Some links could not be loaded. Reopen this panel to retry before changing links.' : '';
     // Persist the sole available board so the map and the board's own clock
     // resolve the same assignment, including groups created before auto-selection.
+    let linkedBoard = false;
     if (!failure) {
       try {
         for (const campaign of merged.filter((row) => row.sectionKey === 'campaign' && row.linkGroupId && !row.hexcrawlBoardId)) {
@@ -74,12 +75,16 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
           const campaignMembers = merged.filter((row) => row.sectionKey === 'campaign' && row.linkGroupId === campaign.linkGroupId);
           if (campaignMembers.length !== 1 || merged.some((row) => row.sectionKey === 'campaign' && row.hexcrawlBoardId === board.id)) continue;
           if (board.origin === 'local') await ensureInstanceInCloud('gmboard', board.id);
+          linkedBoard = true;
           await linkHexcrawlBoardCampaign(board.id, campaign.id);
           campaign.hexcrawlBoardId = board.id;
         }
       } catch (cause) {
         failure = cause?.message || 'Could not select the linked GM Board. Reopen this panel to retry.';
       }
+      // Readers of the board's tables refresh, even after a partial failure:
+      // the destination campaign may already point at the board.
+      if (linkedBoard) window.dispatchEvent(new Event(CAMPAIGN_BOARD_LINK_CHANGED_EVENT));
     }
     setRows(merged);
     setIncomplete(Boolean(failure));
