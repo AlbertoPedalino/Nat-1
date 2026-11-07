@@ -13,6 +13,7 @@ import { useEncounterBuilder } from '../state/EncounterBuilderContext.jsx';
 import InitiativeLaunchDialog from '../builder/InitiativeLaunchDialog.jsx';
 import { formatDateTime } from '../../../shared/ui/dateFormat.js';
 import { confirmAction } from '../../../shared/ui/confirmAction.js';
+import { findMonster } from '../../../shared/bestiary/monsterUtils.js';
 
 export default function LibraryView() {
   const { state, dispatch, monsterDb } = useEncounterBuilder();
@@ -86,7 +87,7 @@ function LibraryCard({ item, monsters, players, questOptions, dispatch, notify }
     .join(', ');
   const alive = fight?.fight?.combatants?.filter((combatant) => !combatant.isDead).length || 0;
   const dead = fight?.fight?.combatants?.filter((combatant) => combatant.isDead).length || 0;
-  const missingMonster = enc.encounter.some((entry) => !monsters.find((monster) => monster.name === entry.name && (!entry.source || monster.source === entry.source)));
+  const missingMonster = enc.encounter.some((entry) => !findMonster(monsters, entry));
 
   return (
     <Stack spacing={1.5}>

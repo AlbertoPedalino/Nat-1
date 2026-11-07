@@ -17,7 +17,7 @@ import {
 import { Plus } from 'lucide-react';
 import { CR_ORDER, TYPE_OPTIONS } from './bestiaryConstants.js';
 import { filterMonsters } from './filters.js';
-import { getType } from './monsterUtils.js';
+import { getType, monsterKey } from './monsterUtils.js';
 import MonsterToken from './MonsterToken.jsx';
 import { capitalize } from '../ui/textCase.js';
 import { formatNumber } from '../ui/numberFormat.js';
@@ -113,7 +113,7 @@ export default function MonsterBrowser({
       <Stack spacing={0.75} sx={{ ...defaultListSx, ...listSx }} {...page.listProps}>
         {page.visible.length ? page.visible.map((monster) => (
           <Box
-            key={`${monster.name}-${monster.source}`}
+            key={monsterKey(monster)}
             role="button"
             tabIndex={0}
             onPointerDown={onPointerDragStart

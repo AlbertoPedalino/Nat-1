@@ -11,6 +11,7 @@ import {
   turnEntriesFromTokens,
 } from '../../../shared/vtt/tokens/initiative.js';
 import { previewToken } from '../../../shared/vtt/tokens/placement.js';
+import { findMonster } from '../../../shared/bestiary/monsterUtils.js';
 
 // The initiative strip and creature stat blocks on the map. The GM reads the
 // shown fight row and sees every combatant; everyone else (player preview and
@@ -88,9 +89,7 @@ export function useSceneInitiative({
   }, [gmVitals.fights]);
   const monsterFor = useCallback((combatant) => {
     const wanted = combatant?.monsterRef;
-    return wanted
-      ? monsterDb.monsters.find((entry) => entry.name === wanted.name && entry.source === wanted.source) || null
-      : null;
+    return wanted ? findMonster(monsterDb.monsters, wanted, { strictSource: true }) : null;
   }, [monsterDb.monsters]);
   const statBlockFor = useCallback((ref) => {
     const combatant = combatantFor(ref);

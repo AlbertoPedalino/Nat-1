@@ -1,5 +1,5 @@
 import { COMBAT_LABEL_COLORS, COMBAT_LABEL_SHAPES, PLAYER_COLORS } from './combatLabels.js';
-import { getAC, getHP } from '../bestiary/monsterUtils.js';
+import { findMonster, getAC, getHP } from '../bestiary/monsterUtils.js';
 import { abilityModifier } from '../character/progression/abilityModifier.js';
 import { resolveCombatVitals } from './sheetSync.js';
 import { normalizeConditions } from '../character/combat/conditions.js';
@@ -286,7 +286,7 @@ export function restoreFight(entry, monsters) {
       activeConditions: normalizeConditions(combatant.activeConditions),
       activeEffects: normalizeEffects(combatant.activeEffects),
       monsterData: combatant.monsterRef
-        ? db.find((monster) => monster.name === combatant.monsterRef.name && monster.source === combatant.monsterRef.source) || null
+        ? findMonster(db, combatant.monsterRef, { strictSource: true })
         : null,
     })),
     currentTurn: fight?.currentTurn || 0,

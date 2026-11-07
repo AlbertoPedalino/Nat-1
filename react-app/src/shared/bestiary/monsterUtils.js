@@ -90,6 +90,15 @@ export function monsterKey(monster) {
   return `${monster?.name || ''}__${monster?.source || ''}`;
 }
 
+// The bestiary record a stored reference { name, source } points at. A saved
+// encounter may omit the source (any book matches); a fight's monsterRef
+// always names it (`strictSource`).
+export function findMonster(monsters, ref, { strictSource = false } = {}) {
+  if (!ref?.name || !Array.isArray(monsters)) return null;
+  return monsters.find((monster) => monster.name === ref.name
+    && ((!strictSource && !ref.source) || monster.source === ref.source)) || null;
+}
+
 export function getMonsterTokenUrls(monster) {
   if (!monster?.name || !monster?.source) return [FALLBACK_MONSTER_TOKEN];
   const encodedName = encodeURIComponent(String(monster.name).replace(/[’]/g, "'"));
@@ -125,9 +134,7 @@ export function serializeEncounterItem(item) {
 export function hydrateEncounterItems(items, monsters) {
   const db = Array.isArray(monsters) ? monsters : [];
   return (Array.isArray(items) ? items : []).map((item, index) => {
-    const monsterData = db.find((monster) => (
-      monster.name === item.name && (!item.source || monster.source === item.source)
-    )) || null;
+    const monsterData = findMonster(db, item);
     const cr = item.cr || crKey(monsterData?.cr);
     return {
       id: item.id || `enc-${index}-${item.name || 'monster'}`,

@@ -8,7 +8,7 @@ import { CORE_2024_SOURCE_PRIORITY, isAllowedSource } from '../../shared/content
 import { decodeDamageType, decodeProperty, itemMasteryLabels } from '../../shared/character/inventory/itemCodes.js';
 import { capitalize } from '../../shared/ui/textCase.js';
 import { formatNumber } from '../../shared/ui/numberFormat.js';
-import { splitNameSource, stripSource } from '../../shared/content/nameKeys.js';
+import { recordKey, splitNameSource, stripSource } from '../../shared/content/nameKeys.js';
 import { runCatalogFilter } from './catalogFilter.js';
 
 const typeCode = (item) => stripSource(item?.type).toUpperCase();
@@ -196,15 +196,14 @@ export const PICTURE_SOURCES = Object.freeze([...CORE_2024_SOURCE_PRIORITY, 'XMM
 // Only records of `sources` are kept, so no lookup — direct, through a copy,
 // a group or a base item — can reach a picture of an older edition.
 export function itemImageMap(fluffJson, imageBase, { sources = PICTURE_SOURCES } = {}) {
-  const key = (name, source) => `${String(name || '').toLowerCase()}|${String(source || '').toLowerCase()}`;
   const records = new Map((fluffJson?.itemFluff || [])
     .filter((record) => isAllowedSource(record.source, sources))
-    .map((record) => [key(record.name, record.source), record]));
+    .map((record) => [recordKey(record.name, record.source), record]));
   const pathOf = (record, depth = 0) => {
     const path = record?.images?.find((image) => image?.href?.path)?.href?.path;
     if (path) return path;
     const copy = record?._copy;
-    return copy && depth < 3 ? pathOf(records.get(key(copy.name, copy.source)), depth + 1) : null;
+    return copy && depth < 3 ? pathOf(records.get(recordKey(copy.name, copy.source)), depth + 1) : null;
   };
   const images = new Map();
   for (const [entryKey, record] of records) {
@@ -212,7 +211,7 @@ export function itemImageMap(fluffJson, imageBase, { sources = PICTURE_SOURCES }
     if (path) images.set(entryKey, `${imageBase}${encodeURI(path.replace(/^\/+/, ''))}`);
   }
   return {
-    get: (name, source) => images.get(key(name, source)) || null,
+    get: (name, source) => images.get(recordKey(name, source)) || null,
     size: images.size,
   };
 }
@@ -234,13 +233,12 @@ export function itemPicture(item, images, groupOf = () => null) {
 
 // Member name|source -> its group, from the items file's itemGroup list.
 export function itemGroupLookup(groups) {
-  const key = (name, source) => `${String(name || '').toLowerCase()}|${String(source || '').toLowerCase()}`;
   const byMember = new Map();
   (groups || []).forEach((group) => {
     (group.items || []).forEach((ref) => {
       const { name, source } = splitNameSource(ref);
-      byMember.set(key(name, source || group.source), { name: group.name, source: group.source });
+      byMember.set(recordKey(name, source || group.source), { name: group.name, source: group.source });
     });
   });
-  return (name, source) => byMember.get(key(name, source)) || null;
+  return (name, source) => byMember.get(recordKey(name, source)) || null;
 }

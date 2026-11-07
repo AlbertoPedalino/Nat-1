@@ -16,6 +16,11 @@ export function lowerKey(value) {
 }
 
 // A 5etools reference without its source: "Longsword|XPHB" -> "Longsword".
+// A lowercase "name|source" key for records looked up by both.
+export function recordKey(name, source) {
+  return `${String(name || '').toLowerCase()}|${String(source || '').toLowerCase()}`;
+}
+
 export function stripSource(value) {
   return String(value || '').split('|')[0].trim();
 }
