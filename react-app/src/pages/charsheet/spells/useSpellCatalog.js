@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { loadClassAdapters, loadCoreAdapters, loadSpellsAdapters } from '../../../adapters/index.js';
+import { ensureClassAdapters } from '../../../shared/character/sheet/sheetRuntimeAdapters.js';
 import { loadSpells } from '../../../shared/content/catalogs/spellData.js';
 
 // The spell catalog and adapters the spell tab reads. `adapterRevision` moves
@@ -16,15 +16,10 @@ export function useSpellCatalog(classNameList) {
 
   useEffect(() => {
     let alive = true;
-    Promise.all([
-      loadCoreAdapters(),
-      loadClassAdapters(JSON.parse(classKey)),
-      loadSpellsAdapters(),
-    ]).then(() => {
-      if (!alive) return;
-      setAdapterRevision((revision) => revision + 1);
-    }).catch(() => {
-      // Keep the available catalog usable if an adapter cannot be loaded.
+    // Whatever loaded (a failed chunk only leaves its adapter out), the
+    // derived spell data is rebuilt.
+    ensureClassAdapters(JSON.parse(classKey), { spells: true }).then(() => {
+      if (alive) setAdapterRevision((revision) => revision + 1);
     });
     return () => { alive = false; };
   }, [classKey]);

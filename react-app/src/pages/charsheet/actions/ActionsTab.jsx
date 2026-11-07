@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Box, Chip, Typography } from '@mui/material';
 import { getMod, getFinal } from '../../../shared/character/sheet/sheetStats.js';
-import { loadCoreAdapters, loadClassAdapters } from '../../../adapters/index.js';
 import { getAllResourceDefs } from '../../../shared/character/resources/restResources.js';
 import {
   FILTERS,
@@ -37,6 +36,7 @@ import { matchesQuery } from '../../../shared/content/searchText.js';
 import { isWeaponItem } from '../../../shared/character/inventory/itemCodes.js';
 import { classNames } from '../../../shared/character/progression/classLevel.js';
 import { AdapterActionCard } from './AdapterActionCard.jsx';
+import { ensureClassAdapters } from '../../../shared/character/sheet/sheetRuntimeAdapters.js';
 
 const _danglingResKeyWarned = typeof Set === 'function' ? new Set() : null;
 function warnDanglingResKey(action, resMaxMap) {
@@ -69,7 +69,7 @@ export default function ActionsTab({ C, sheet, resources }) {
   useEffect(() => {
     // Best-effort: a stale chunk leaves the cards it would add out, it does not
     // throw an unhandled rejection.
-    Promise.all([loadCoreAdapters(), loadClassAdapters(ownedClassNames)]).catch(() => {});
+    ensureClassAdapters(ownedClassNames);
   }, [classNamesKey]);
 
   useEffect(() => {
