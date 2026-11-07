@@ -7,7 +7,7 @@ import { RECOVERY_INTERVAL_MS } from '../../../../src/shared/cloud/sync/recovery
 
 const mocks = vi.hoisted(() => ({ refresh: vi.fn(async () => 'local'), notify: vi.fn() }));
 vi.mock('../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({
-  useAuth: () => ({ cloudEnabled: true, status: 'authed' }),
+  useAuth: () => ({ cloudEnabled: true, status: 'authed', cloudActive: true }),
 }));
 vi.mock('../../../../src/shared/ui/ToastProvider.jsx', () => ({ useToast: () => ({ notify: mocks.notify }) }));
 vi.mock('../../../../src/shared/instances/instanceSync.js', async (original) => ({

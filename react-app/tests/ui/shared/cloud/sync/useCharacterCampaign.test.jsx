@@ -9,7 +9,7 @@ const mocks = vi.hoisted(() => ({
   channels: [],
 }));
 vi.mock('../../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({
-  useAuth: () => mocks.auth,
+  useAuth: () => ({ ...mocks.auth, cloudActive: Boolean(mocks.auth.cloudEnabled && mocks.auth.status === 'authed') }),
 }));
 vi.mock('../../../../../src/shared/cloud/api/cloudCharacters.js', () => ({
   fetchCloudMeta: mocks.fetchCloudMeta,

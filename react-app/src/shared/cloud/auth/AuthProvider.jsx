@@ -95,6 +95,8 @@ export function AuthProvider({ children }) {
   const value = {
     cloudEnabled: isCloudConfigured(),
     status,
+    // Cloud configured and signed in: what every cloud read, write and channel waits for.
+    cloudActive: isCloudConfigured() && status === 'authed',
     user,
     profile,
     username: profile?.username || user?.user_metadata?.username || null,

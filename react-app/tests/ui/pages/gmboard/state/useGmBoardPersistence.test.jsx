@@ -32,7 +32,7 @@ vi.mock('../../../../../src/shared/cloud/api/hexcrawl.js', () => ({
   readHexcrawlBoardCampaign: campaignClock.readLink,
 }));
 vi.mock('../../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({
-  useAuth: () => ({ cloudEnabled: true, status: 'authed' }),
+  useAuth: () => ({ cloudEnabled: true, status: 'authed', cloudActive: true }),
 }));
 
 let board;

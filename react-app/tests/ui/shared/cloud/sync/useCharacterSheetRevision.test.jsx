@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 const m = vi.hoisted(() => ({ channels: [], revision: vi.fn(), removeChannel: vi.fn() }));
 
 vi.mock('../../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({
-  useAuth: () => ({ cloudEnabled: true, status: 'authed', user: { id: 'player' } }),
+  useAuth: () => ({ cloudEnabled: true, status: 'authed', cloudActive: true, user: { id: 'player' } }),
 }));
 vi.mock('../../../../../src/shared/cloud/supabaseClient.js', () => ({
   supabase: {

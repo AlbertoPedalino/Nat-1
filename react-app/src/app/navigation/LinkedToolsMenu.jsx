@@ -34,7 +34,7 @@ const rowRoute = (row) => row.sectionKey === 'campaign'
 // instance always exists locally (campaigns are cloud rows).
 export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGroupId }) {
   const navigate = useNavigate();
-  const { cloudEnabled, status, user } = useAuth();
+  const { user, cloudActive } = useAuth();
   const { notify } = useToast();
   const [open, setOpen] = useState(false);
   const [adding, setAdding] = useState(false);
@@ -43,12 +43,11 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
   const [rows, setRows] = useState([]);
   const [error, setError] = useState('');
   const [incomplete, setIncomplete] = useState(false);
-  const canUseCloud = cloudEnabled && status === 'authed';
 
   const loadRows = useCallback(async () => {
     const results = await Promise.allSettled([
-      ...SECTION_KEYS.map((key) => listToolInstances(key, { includeCloud: canUseCloud })),
-      canUseCloud ? listMyCampaigns() : Promise.resolve([]),
+      ...SECTION_KEYS.map((key) => listToolInstances(key, { includeCloud: cloudActive })),
+      cloudActive ? listMyCampaigns() : Promise.resolve([]),
     ]);
     const merged = SECTION_KEYS.flatMap((key, index) => (
       results[index].status === 'fulfilled' ? results[index].value.rows : []
@@ -85,7 +84,7 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
     setRows(merged);
     setIncomplete(Boolean(failure));
     setError(failure);
-  }, [canUseCloud, user?.id]);
+  }, [cloudActive, user?.id]);
 
   const handleOpen = async () => {
     setOpen(true);
@@ -110,8 +109,8 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
     // A local copy is relinked locally and synced; a cloud-only row directly.
     if (row.hasLocal) {
       setLocalInstanceLink(row.sectionKey, row.id, nextGroupId);
-      if (canUseCloud) await ensureInstanceInCloud(row.sectionKey, row.id);
-    } else if (canUseCloud) {
+      if (cloudActive) await ensureInstanceInCloud(row.sectionKey, row.id);
+    } else if (cloudActive) {
       await linkCloudInstance(row.sectionKey, row.id, nextGroupId);
     }
   };
@@ -149,12 +148,12 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
     await changeLinks(async () => {
       // Only remove the selected member. Singleton groups remain valid because
       // a campaign can still belong to one when its board has been removed.
-      if (target.sectionKey === 'gmboard' && canUseCloud) {
+      if (target.sectionKey === 'gmboard' && cloudActive) {
         for (const campaign of rows.filter((row) => row.sectionKey === 'campaign' && row.hexcrawlBoardId === target.id)) {
           await setCampaignHexcrawlBoard(campaign.id, null);
         }
       }
-      if (target.sectionKey === 'encounters' && canUseCloud) {
+      if (target.sectionKey === 'encounters' && cloudActive) {
         for (const campaign of rows.filter((row) => row.sectionKey === 'campaign' && row.dungeonEncounterId === target.id)) {
           await setCampaignDungeonEncounter(campaign.id, null);
         }

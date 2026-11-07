@@ -25,7 +25,7 @@ import { promptText } from '../../shared/ui/promptText.js';
 // stale-response guard, same Save/Export dialog, plus local-only rows and
 // contextual delete routing (local / own-cloud / foreign-cloud-as-GM).
 export default function CharacterPicker() {
-  const { cloudEnabled, status, isGm, user } = useAuth();
+  const { cloudEnabled, status, isGm, user, cloudActive } = useAuth();
   const myId = user?.id;
   const navigate = useNavigate();
   const { notify } = useToast();
@@ -45,8 +45,7 @@ export default function CharacterPicker() {
   const refresh = useCallback(async () => {
     const token = ++reqRef.current;
     setLoading(true);
-    const canQueryCloud = cloudEnabled && status === 'authed';
-    const listCloud = canQueryCloud ? (isGm ? listAllCharacters : listMyCharacters) : async () => [];
+    const listCloud = cloudActive ? (isGm ? listAllCharacters : listMyCharacters) : async () => [];
     const listLocal = () => readRegistry('gb_char_registry');
     const { rows: merged, error: cloudError } = await loadCharacterRows({ listCloud, listLocal });
     if (token !== reqRef.current) return;
@@ -64,7 +63,7 @@ export default function CharacterPicker() {
       return;
     }
     const route = REGISTRY_META.gb_char_registry.route(row.id);
-    if (cloudEnabled && status === 'authed') {
+    if (cloudActive) {
       setOpeningId(row.id);
       let pulled = row.hasLocal;
       try {

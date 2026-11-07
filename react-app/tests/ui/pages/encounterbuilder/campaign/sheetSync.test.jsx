@@ -20,7 +20,7 @@ vi.mock('../../../../../src/shared/campaign/characterVitals.js', () => ({
   readBaseMaxHp: async (rows) => new Map(rows.map((row) => [row.id, 30])),
 }));
 vi.mock('../../../../../src/shared/ui/ToastProvider.jsx', () => ({ useToast: () => ({ notify: cloud.notify }) }));
-vi.mock('../../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({ useAuth: () => ({ cloudEnabled: true, status: 'authed', user: { id: 'owner' } }) }));
+vi.mock('../../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({ useAuth: () => ({ cloudEnabled: true, status: 'authed', cloudActive: true, user: { id: 'owner' } }) }));
 vi.mock('../../../../../src/shared/cloud/supabaseClient.js', () => ({ supabase: {
   channel: () => ({
     on(_type, filter, fn) { this.receive = fn; cloud.filters.push(filter); cloud.receivers.add(fn); return this; },

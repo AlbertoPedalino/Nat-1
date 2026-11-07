@@ -23,7 +23,7 @@ vi.mock('react-router-dom', () => ({
   Link: ({ to, children, ...props }) => <a href={to} {...props}>{children}</a>,
 }));
 vi.mock('../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({
-  useAuth: () => mocks.auth,
+  useAuth: () => ({ ...mocks.auth, cloudActive: Boolean(mocks.auth.cloudEnabled && mocks.auth.status === 'authed') }),
 }));
 vi.mock('../../../../src/shared/instances/instanceSync.js', async (importOriginal) => {
   const actual = await importOriginal();

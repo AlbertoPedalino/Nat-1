@@ -20,8 +20,7 @@ function downloadBuilderSheet(character, data) {
 
 export default function SheetStep({ state, dispatch, importDraft = false, onUploadToCloud, onDraftLocalSaved, onCloudCopySavedLocally, onNotify }) {
   const navigate = useNavigate();
-  const { cloudEnabled, status } = useAuth();
-  const cloudActive = cloudEnabled && status === 'authed';
+  const { cloudActive } = useAuth();
   const { character } = state;
   const required = [
     ['name', 'Name'],

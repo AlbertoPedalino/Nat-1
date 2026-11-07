@@ -26,7 +26,7 @@ const mocks = vi.hoisted(() => ({
   notify: vi.fn(),
 }));
 
-vi.mock('../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({ useAuth: () => mocks.auth }));
+vi.mock('../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({ useAuth: () => ({ ...mocks.auth, cloudActive: Boolean(mocks.auth.cloudEnabled && mocks.auth.status === 'authed') }) }));
 vi.mock('../../../../src/shared/ui/ToastProvider.jsx', () => ({ useToast: () => ({ notify: mocks.notify }) }));
 vi.mock('../../../../src/shared/cloud/api/campaigns.js', () => ({ listMyCampaigns: async () => [] }));
 vi.mock('../../../../src/shared/cloud/api/campaignTools.js', () => ({

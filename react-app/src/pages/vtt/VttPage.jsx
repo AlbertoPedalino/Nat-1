@@ -32,7 +32,7 @@ import { UI_FONTS } from '../../shared/ui/fonts.js';
 export default function VttPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { cloudEnabled, status } = useAuth();
+  const { cloudEnabled, status, cloudActive } = useAuth();
   const params = new URLSearchParams(location.search);
   const requestedScene = params.get('scene') || '';
   const joinedCampaign = params.get('campaign') || '';
@@ -57,7 +57,7 @@ export default function VttPage() {
 
   const { scene: liveScene, loading: loadingSession } = useLiveSession({
     campaignId: joinedCampaign,
-    enabled: cloudEnabled && status === 'authed' && Boolean(joinedCampaign),
+    enabled: cloudActive && Boolean(joinedCampaign),
   });
 
   const [scene, setScene] = useState(null);

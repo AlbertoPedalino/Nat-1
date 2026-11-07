@@ -9,7 +9,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('../../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({
-  useAuth: () => ({ cloudEnabled: true, status: 'authed', user: { id: 'user-1' } }),
+  useAuth: () => ({ cloudEnabled: true, status: 'authed', cloudActive: true, user: { id: 'user-1' } }),
 }));
 
 vi.mock('../../../../../src/shared/cloud/supabaseClient.js', () => ({

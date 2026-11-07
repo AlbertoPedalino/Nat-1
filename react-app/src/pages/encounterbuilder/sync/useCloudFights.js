@@ -38,9 +38,9 @@ export function useCloudFights({
 }) {
   const isVitalsBusyRef = useRef(isVitalsBusy);
   isVitalsBusyRef.current = isVitalsBusy;
-  const { cloudEnabled, status } = useAuth();
+  const { cloudActive } = useAuth();
   const { notify } = useToast();
-  const canSync = Boolean(cloudEnabled && status === 'authed' && instanceId);
+  const canSync = Boolean(cloudActive && instanceId);
 
   const heldRef = useRef({ fights, library, activeFightId });
   heldRef.current = { fights, library, activeFightId };

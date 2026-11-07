@@ -24,12 +24,11 @@ function hasFinishedLoading(loading) {
 // (cloud or local store), autosave, the conflict a refused cloud save raises,
 // and the explicit import / save-local / upload actions.
 export function useBuilderPersistence({ state, dispatch, notify }) {
-  const { cloudEnabled, status } = useAuth();
+  const { cloudEnabled, status, cloudActive } = useAuth();
   // When logged into the cloud the builder is cloud-backed: the character is
   // created/saved on the server and never written to localStorage. Logged out,
   // it falls back to the local store. 'loading' = auth not resolved yet — wait.
   const authResolved = !cloudEnabled || status !== 'loading';
-  const cloudActive = cloudEnabled && status === 'authed';
   const hydratedRef = useRef(false);   // initial load (cloud pull / local) done
   const builderIdRef = useRef(null);   // cloud character id for this session
   const cloudCreatedRef = useRef(false); // cloud row already inserted

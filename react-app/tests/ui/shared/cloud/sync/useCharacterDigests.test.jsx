@@ -14,7 +14,7 @@ const m = vi.hoisted(() => ({
 }));
 
 vi.mock('../../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({
-  useAuth: () => ({ cloudEnabled: true, status: 'authed', user: { id: 'gm' } }),
+  useAuth: () => ({ cloudEnabled: true, status: 'authed', cloudActive: true, user: { id: 'gm' } }),
 }));
 vi.mock('../../../../../src/shared/cloud/supabaseClient.js', () => ({
   supabase: {

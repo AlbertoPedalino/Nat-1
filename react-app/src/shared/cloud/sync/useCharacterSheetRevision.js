@@ -46,7 +46,7 @@ export function useCharacterSheetRevision({
   onDeleted = null,
 } = {}) {
   const id = characterId ? String(characterId) : '';
-  const { cloudEnabled, status, user } = useAuth();
+  const { user, cloudActive } = useAuth();
   const instanceId = useId();
   const known = useRef(-1);
   const held = useRef(-1);
@@ -102,7 +102,7 @@ export function useCharacterSheetRevision({
     settle();
   }, [baseRevision, settle]);
 
-  const ready = Boolean(enabled && id && baseRevision != null && cloudEnabled && status === 'authed' && user?.id && supabase);
+  const ready = Boolean(enabled && id && baseRevision != null && cloudActive && user?.id && supabase);
 
   useEffect(() => {
     if (!ready) return undefined;

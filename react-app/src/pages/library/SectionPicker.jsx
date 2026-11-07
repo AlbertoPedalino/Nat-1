@@ -20,7 +20,7 @@ import { promptText } from '../../shared/ui/promptText.js';
 // copy this browser lacks, refreshing a linked one) through the shared
 // instance layer, exactly as for a link or a bookmark.
 export default function SectionPicker({ meta }) {
-  const { cloudEnabled, status } = useAuth();
+  const { cloudEnabled, status, cloudActive } = useAuth();
   const navigate = useNavigate();
   const [rows, setRows] = useState(() => mergeInstanceRows(meta.sectionKey, [], listInstances(meta.sectionKey)));
   const [loading, setLoading] = useState(false);
@@ -29,9 +29,8 @@ export default function SectionPicker({ meta }) {
 
   const refresh = useCallback(async () => {
     const token = ++requestRef.current;
-    const canQueryCloud = cloudEnabled && status === 'authed';
-    setLoading(canQueryCloud);
-    const result = await listToolInstances(meta.sectionKey, { includeCloud: canQueryCloud });
+    setLoading(cloudActive);
+    const result = await listToolInstances(meta.sectionKey, { includeCloud: cloudActive });
     if (token !== requestRef.current) return;
     setRows(result.rows);
     if (result.error) setError(result.error);

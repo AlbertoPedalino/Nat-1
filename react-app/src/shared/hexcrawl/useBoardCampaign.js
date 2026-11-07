@@ -10,8 +10,8 @@ import { CAMPAIGN_BOARD_LINK_CHANGED_EVENT } from '../appEvents.js';
 // Read the same campaign -> board relation as the map. Saved board blobs never
 // decide which campaign receives writes, including after a link is replaced.
 export function useBoardCampaign(boardId) {
-  const { cloudEnabled, status } = useAuth();
-  const active = Boolean(boardId && cloudEnabled && status === 'authed');
+  const { cloudActive } = useAuth();
+  const active = Boolean(boardId && cloudActive);
   const [state, setState] = useState({ boardId: null, campaign: null, error: null });
   useEffect(() => {
     let cancelled = false;

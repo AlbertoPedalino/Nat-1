@@ -54,12 +54,12 @@ function acquire(topic, account, privateChannel, online) {
 }
 
 export function useRollChannel({ campaignId, onRoll, isGm = false }) {
-  const { cloudEnabled, status, user } = useAuth();
+  const { user, cloudActive } = useAuth();
   const channelsRef = useRef(null);
   const handlerRef = useRef(onRoll);
   handlerRef.current = onRoll;
   const account = user?.id || 'local';
-  const online = Boolean(cloudEnabled && status === 'authed' && supabase);
+  const online = Boolean(cloudActive && supabase);
 
   useEffect(() => {
     if (!campaignId) return undefined;

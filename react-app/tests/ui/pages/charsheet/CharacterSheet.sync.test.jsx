@@ -31,7 +31,7 @@ vi.mock('../../../../src/shared/cloud/api/characterDigests.js', async (original)
   readCharacterSheets: (...args) => cloud.sheets(...args),
 }));
 vi.mock('../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({
-  useAuth: () => ({ cloudEnabled: true, status: 'authed', user: { id: 'owner' } }),
+  useAuth: () => ({ cloudEnabled: true, status: 'authed', cloudActive: true, user: { id: 'owner' } }),
 }));
 vi.mock('../../../../src/shared/cloud/supabaseClient.js', () => ({
   supabase: {

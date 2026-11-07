@@ -49,7 +49,7 @@ function roomLinkWithFight(link, entry, monsters) {
 }
 
 export function useSceneDungeon({ scene, isGm, monsters, partySize, roster }) {
-  const { cloudEnabled, status } = useAuth();
+  const { cloudEnabled, status, cloudActive } = useAuth();
   const sceneId = scene?.id || null;
   const campaignId = scene?.campaignId || null;
   const enabled = Boolean(isGm && sceneId);
@@ -77,7 +77,7 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize, roster }) {
         const campaign = await readCampaignToolLinks(campaignId);
         if (cancelled || ticket !== request) return;
         setBoardId(campaign?.hexcrawl_board_id || null);
-        const listed = await listToolInstances('encounters', { includeCloud: cloudEnabled && status === 'authed' });
+        const listed = await listToolInstances('encounters', { includeCloud: cloudActive });
         if (cancelled || ticket !== request) return;
         if (listed.error) throw new Error(listed.error);
         const encounters = listed.rows;
@@ -224,7 +224,7 @@ export function useSceneDungeon({ scene, isGm, monsters, partySize, roster }) {
           .find((fight) => String(fight.id) === String(existing.fightId));
         return roomLinkWithFight(existing, entry, priced);
       }
-      if (cloudEnabled && status === 'authed') {
+      if (cloudActive) {
         try {
           const rows = await listInstanceFights(existing.instanceId);
           const entry = rows.find((row) => String(row.id) === String(existing.fightId));

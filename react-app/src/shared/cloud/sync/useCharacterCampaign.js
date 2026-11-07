@@ -8,9 +8,9 @@ const CAMPAIGN_RETRY_MS = 5000;
 // A sheet needs its campaign before it can share rolls with other devices.
 // Recover a failed lookup without requiring the player to reload the sheet.
 export function useCharacterCampaign(charId) {
-  const { cloudEnabled, status, user } = useAuth();
+  const { user, cloudActive } = useAuth();
   const account = user?.id || null;
-  const enabled = Boolean(charId && cloudEnabled && status === 'authed' && account);
+  const enabled = Boolean(charId && cloudActive && account);
   const [resolved, setResolved] = useState(null);
 
   useEffect(() => {

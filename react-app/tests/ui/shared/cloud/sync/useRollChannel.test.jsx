@@ -2,7 +2,7 @@ import { act, renderHook } from '@testing-library/react';
 import { useRollChannel } from '../../../../../src/shared/cloud/sync/useRollChannel.js';
 
 const mocks = vi.hoisted(() => ({ channels: [], failSubscribe: false, removeChannel: vi.fn(), auth: { cloudEnabled: true, status: 'authed', user: { id: 'gm' } } }));
-vi.mock('../../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({ useAuth: () => mocks.auth }));
+vi.mock('../../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({ useAuth: () => ({ ...mocks.auth, cloudActive: Boolean(mocks.auth.cloudEnabled && mocks.auth.status === 'authed') }) }));
 vi.mock('../../../../../src/shared/cloud/supabaseClient.js', () => ({ supabase: {
   channel: (topic, options) => {
     const channel = {

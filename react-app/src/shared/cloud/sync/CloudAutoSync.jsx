@@ -28,9 +28,9 @@ function emit(id, state, message, error) {
 // (shared/instances/instanceSync.js) is wired and told when the cloud is
 // reachable. No opt-in — sync is always on.
 export default function CloudAutoSync() {
-  const { cloudEnabled, status } = useAuth();
+  const { cloudEnabled, status, cloudActive } = useAuth();
   const activeRef = useRef(false);
-  activeRef.current = cloudEnabled && status === 'authed';
+  activeRef.current = cloudActive;
   const resendRef = useRef(() => {});
 
   useEffect(() => {
@@ -59,7 +59,7 @@ export default function CloudAutoSync() {
   }, [cloudEnabled]);
 
   useEffect(() => {
-    setInstanceSyncActive(cloudEnabled && status === 'authed');
+    setInstanceSyncActive(cloudActive);
   }, [cloudEnabled, status]);
 
   useEffect(() => {

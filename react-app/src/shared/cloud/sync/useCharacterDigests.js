@@ -52,14 +52,14 @@ function mergeRecovered(held, fetched, diff, inScope) {
 // `deriveMaxHp: false` is for a consumer that already holds the sheet (an
 // editable CharacterSheet derives its own maximum): no sheet is ever read.
 export function useCharacterDigests({ campaignId = null, characterIds = null, enabled = true, deriveMaxHp = true } = {}) {
-  const { cloudEnabled, status } = useAuth();
+  const { cloudActive } = useAuth();
   const idsKey = campaignId ? '' : safeCharacterIds(characterIds).join(',');
   const scope = useMemo(() => {
     if (campaignId) return { key: `campaign:${campaignId}`, campaignId, characterIds: null };
     if (idsKey) return { key: `ids:${idsKey}`, campaignId: null, characterIds: idsKey.split(',') };
     return null;
   }, [campaignId, idsKey]);
-  const active = Boolean(enabled && scope && cloudEnabled && status === 'authed' && supabase);
+  const active = Boolean(enabled && scope && cloudActive && supabase);
 
   const [digests, setDigests] = useState(EMPTY);
   const [baseMax, setBaseMax] = useState(EMPTY);

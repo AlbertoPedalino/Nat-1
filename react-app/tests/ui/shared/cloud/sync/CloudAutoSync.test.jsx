@@ -10,7 +10,7 @@ vi.mock('../../../../../src/shared/cloud/api/cloudCharacters.js', () => ({
   pushCharacter: cloud.push, updateForeignCharacter: cloud.push, SHEET_CONFLICT: 'SHEET_CONFLICT',
 }));
 vi.mock('../../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({
-  useAuth: () => ({ cloudEnabled: true, status: 'authed', user: { id: 'owner' } }),
+  useAuth: () => ({ cloudEnabled: true, status: 'authed', cloudActive: true, user: { id: 'owner' } }),
 }));
 vi.mock('../../../../../src/shared/cloud/supabaseClient.js', () => ({ requireClient: () => ({}) }));
 

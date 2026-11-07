@@ -9,7 +9,7 @@ const api = vi.hoisted(() => ({
 }));
 vi.mock('../../../../src/shared/cloud/api/hexcrawl.js', () => api);
 vi.mock('../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({
-  useAuth: () => ({ cloudEnabled: true, status: 'authed' }),
+  useAuth: () => ({ cloudEnabled: true, status: 'authed', cloudActive: true }),
 }));
 
 beforeEach(() => {

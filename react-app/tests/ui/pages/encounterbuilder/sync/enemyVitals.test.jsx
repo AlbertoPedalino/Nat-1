@@ -37,7 +37,7 @@ vi.mock('../../../../../src/shared/cloud/api/encounterFights.js', () => ({
   },
 }));
 vi.mock('../../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({
-  useAuth: () => ({ cloudEnabled: true, status: 'authed' }),
+  useAuth: () => ({ cloudEnabled: true, status: 'authed', cloudActive: true }),
 }));
 vi.mock('../../../../../src/shared/ui/ToastProvider.jsx', () => ({
   useToast: () => ({ notify: db.notify }),
