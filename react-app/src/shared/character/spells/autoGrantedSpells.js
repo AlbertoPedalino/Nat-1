@@ -1,6 +1,6 @@
 import { adapterRegistry } from '../../../adapters/registry.js';
 import { isGrantUnlocked } from './spellGrants.js';
-import { primaryClassLevel } from '../progression/classLevel.js';
+import { classEntities } from '../progression/classLevel.js';
 import { matchKey, stripSource } from '../../content/nameKeys.js';
 
 /**
@@ -200,24 +200,6 @@ export function enumerateSubclassFeatureSpells(entity) {
       });
     });
   return out;
-}
-
-/** Class entities (primary + multiclass) shaped for the enumerators. */
-function classEntities(character) {
-  return [
-    {
-      className: character?.className,
-      subclassShortName: character?.subclassShortName,
-      level: primaryClassLevel(character),
-      allSubFeatures: character?.allSubFeatures || [],
-    },
-    ...((character?.extraClasses || []).map((ec) => ({
-      className: ec.name,
-      subclassShortName: ec.subclassShortName,
-      level: ec.level || 1,
-      allSubFeatures: ec.allSubFeatures || [],
-    }))),
-  ];
 }
 
 /**

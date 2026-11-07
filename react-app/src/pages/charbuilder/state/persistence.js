@@ -9,7 +9,7 @@ import {
   setActiveCharId,
 } from '../../../shared/character/profile/store.js';
 import { stripRuntimeOnlyCharacterFields } from '../../../shared/character/profile/runtimeFields.js';
-import { collectAutoGrantedSpells as collectEntityAutoGrantedSpells } from '../spells/spells.js';
+import { collectCharacterAutoGrantedSpells } from '../spells/spells.js';
 import { DEFAULT_CURRENCY, normalizeCurrency } from '../../../shared/character/inventory/currency.js';
 import { enumerateFixedAdditionalSpells } from '../../../shared/character/spells/additionalSpellGrants.js';
 import { resolveActionRollers } from '../../../shared/character/dice/rollers.js';
@@ -146,7 +146,7 @@ export function makeSheetPayload(character, data) {
       if ((knownSpell || spellChoiceKey) && !ABILITIES.includes(name.toLowerCase())) choiceSpellNames.push(name);
     });
   });
-  const autoGrantedSpells = collectAutoGrantedSpells(character);
+  const autoGrantedSpells = collectCharacterAutoGrantedSpells(character);
   const spellNames = [
     ...(character.selectedCantrips || []),
     ...Object.values(character.selectedSpells || {}).flat(),
@@ -297,33 +297,6 @@ export function makeSheetPayload(character, data) {
     spellSnapshots,
     classIconColor: character.classIconColor || null,
   };
-}
-
-function collectAutoGrantedSpells(character) {
-  const primaryLevel = getPrimaryClassLevel(character);
-  const entities = [
-    { ...character, classLevel: primaryLevel },
-    ...(character.extraClasses || []).map((extra) => ({
-      ...character,
-      className: extra.name,
-      classSource: extra.source,
-      classLevel: Number(extra.level || 1),
-      level: Number(extra.level || 1),
-      cls: extra.cls,
-      subclassShortName: extra.subclassShortName || '',
-      allSubFeatures: extra.allSubFeatures || [],
-      extraClasses: [],
-    })),
-  ];
-  const out = [];
-  entities.forEach((entity) => {
-    collectEntityAutoGrantedSpells(entity).forEach((spell) => {
-      const key = `${String(spell.name || '').toLowerCase()}-${spell.source || ''}`;
-      if (!spell.name || out.some((entry) => `${String(entry.name || '').toLowerCase()}-${entry.source || ''}` === key)) return;
-      out.push(spell);
-    });
-  });
-  return out;
 }
 
 const HEAVY_BUILDER_FIELDS = [

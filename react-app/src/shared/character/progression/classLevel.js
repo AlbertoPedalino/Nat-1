@@ -58,6 +58,7 @@ export function classEntities(C) {
       subclassShortName: C.subclassShortName || '',
       level: primaryClassLevel(C),
       ownerName: C.className,
+      allSubFeatures: C.allSubFeatures || [],
     });
   }
   (C.extraClasses || []).forEach((extra) => {
@@ -67,6 +68,7 @@ export function classEntities(C) {
       subclassShortName: extra.subclassShortName || '',
       level: Number(extra.level || 1),
       ownerName: extra.name,
+      allSubFeatures: extra.allSubFeatures || [],
     });
   });
   return out;

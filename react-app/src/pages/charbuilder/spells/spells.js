@@ -1,7 +1,9 @@
 import { adapterRegistry } from '../../../adapters/registry.js';
 import { getPrimaryClassLevel } from '../progression/calculations.js';
 import { getClassSpellLimits } from '../../../shared/character/spells/spellProgression.js';
-import { enumerateEntityGrants, enumerateSpeciesGrants, grantSourceLabel } from '../../../shared/character/spells/autoGrantedSpells.js';
+import {
+  enumerateAutoGrantedSpells, enumerateEntityGrants, enumerateSpeciesGrants, grantSourceLabel,
+} from '../../../shared/character/spells/autoGrantedSpells.js';
 import { maxSpellLevelFor } from '../../../shared/character/spells/casterProgression.js';
 
 export function getSpellcastingProfile(character) {
@@ -28,6 +30,42 @@ function getClassSpellLevel(character) {
   return Math.max(1, Math.min(20, getPrimaryClassLevel(character)));
 }
 
+// A grant record as the builder lists it: name, levels, mode, and its source
+// label and type.
+function builderGrant(record, character) {
+  if (record.origin === 'species') {
+    return {
+      name: record.name,
+      minLevel: record.minLevel,
+      level: record.level,
+      mode: record.mode,
+      source: grantSourceLabel(record, character?.speciesName || 'Species'),
+      sourceType: record.sourceType || 'species',
+      spellcastingAbility: record.ability,
+    };
+  }
+  return {
+    name: record.name,
+    minLevel: record.minLevel,
+    level: record.level,
+    mode: record.mode,
+    source: grantSourceLabel(record, 'Class'),
+    sourceType: record.sourceType || (record.subclassShortName ? 'subclass' : 'class'),
+  };
+}
+
+function uniqueBy(list, keyOf) {
+  const seen = new Set();
+  return list.filter((spell) => {
+    const key = keyOf(spell);
+    if (!spell.name || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+// The spells the builder's spell panel shows as granted for the class being
+// edited (its class and subclass) and the species.
 export function collectAutoGrantedSpells(character) {
   const entity = {
     className: character?.className,
@@ -35,33 +73,20 @@ export function collectAutoGrantedSpells(character) {
     level: getClassSpellLevel(character),
     allSubFeatures: character?.allSubFeatures || [],
   };
-  const out = [
-    ...enumerateEntityGrants(entity, character).map((r) => ({
-      name: r.name,
-      minLevel: r.minLevel,
-      level: r.level,
-      mode: r.mode,
-      source: grantSourceLabel(r, 'Class'),
-      sourceType: r.sourceType || (r.subclassShortName ? 'subclass' : 'class'),
-    })),
-    ...enumerateSpeciesGrants(character).map((r) => ({
-      name: r.name,
-      minLevel: r.minLevel,
-      level: r.level,
-      mode: r.mode,
-      source: grantSourceLabel(r, character?.speciesName || 'Species'),
-      sourceType: r.sourceType || 'species',
-      spellcastingAbility: r.ability,
-    })),
-  ];
+  return uniqueBy(
+    [...enumerateEntityGrants(entity, character), ...enumerateSpeciesGrants(character)]
+      .map((record) => builderGrant(record, character)),
+    (spell) => `${String(spell.name || '').toLowerCase()}-${spell.mode || ''}`,
+  );
+}
 
-  const seen = new Set();
-  return out.filter((spell) => {
-    const key = `${String(spell.name || '').toLowerCase()}-${spell.mode || ''}`;
-    if (!spell.name || seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
+// Every class's and the species' granted spells, as the saved character lists
+// them (one per name and source).
+export function collectCharacterAutoGrantedSpells(character) {
+  return uniqueBy(
+    enumerateAutoGrantedSpells(character).map((record) => builderGrant(record, character)),
+    (spell) => `${String(spell.name || '').toLowerCase()}-${spell.source || ''}`,
+  );
 }
 
 export function getSpellCounts(character) {
