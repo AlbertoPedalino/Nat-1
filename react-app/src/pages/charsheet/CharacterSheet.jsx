@@ -21,12 +21,12 @@ import { SheetActionsProvider } from './state/SheetActionsContext.jsx';
 import { useSheetVitals } from './state/useSheetVitals.js';
 import { useSheetRolls } from './state/useSheetRolls.js';
 import { useSheetCloudSave } from './state/useSheetCloudSave.js';
+import { useSheetEditors } from './state/useSheetEditors.js';
 import {
   initialSheetResources,
   loadSheetReferenceData,
   reconcileLoadedCharacter,
 } from './state/sheetLoad.js';
-import { normalizeCharacterAttunement } from './inventory/attunement.js';
 import { commandCharacterVitals } from '../../shared/cloud/api/healthCommands.js';
 import { useCharacterDigests } from '../../shared/cloud/sync/useCharacterDigests.js';
 import { useAuth } from '../../shared/cloud/auth/AuthProvider.jsx';
@@ -236,32 +236,11 @@ export default function CharacterSheet({
     persist(next, { fromCloud: true });
   }, [incomingDigest, sheetReady, persist]);
 
-  const updateCurrentCharacter = useCallback((updater) => {
-    if (!C) return;
-    const next = typeof updater === 'function' ? updater(C) : updater;
-    const patch = Object.fromEntries(Object.entries(next).filter(([key, value]) => JSON.stringify(value) !== JSON.stringify(C[key])));
-    persist(patch, Object.hasOwn(patch, 'tempHP') ? { command: { type: 'grantTempHp', value: patch.tempHP } } : {});
-  }, [C, persist]);
-
-  const updateInventory = useCallback((inventory) => {
-    const normalized = normalizeCharacterAttunement(C, inventory);
-    setSheet((prev) => ({ ...prev, sheetInventory: normalized }));
-    updateCurrentCharacter((prev) => ({ ...prev, inventory: normalized }));
-  }, [C, updateCurrentCharacter]);
-
-  const updateCurrency = useCallback((currency) => {
-    setSheet((prev) => ({ ...prev, sheetCurrency: currency }));
-    updateCurrentCharacter((prev) => ({ ...prev, currency }));
-  }, [updateCurrentCharacter]);
-
-  const updateSpells = useCallback((nextSpellData) => {
-    updateCurrentCharacter((prev) => ({ ...prev, ...nextSpellData }));
-  }, [updateCurrentCharacter]);
-
-  const saveResourcesState = useCallback((next) => {
-    setResources(next);
-    persist({ resources: next });
-  }, [persist]);
+  const {
+    updateCurrentCharacter, saveResourcesState, updateXp, actions: effectiveActions,
+  } = useSheetEditors({
+    C, setSheet, setResources, setFreeCastUses, persist, syncSheet, rollD20, showDiceToast, readOnly,
+  });
 
   const rest = useRests({
     C, sheet, setSheet, resources, setResources, freeCastUses, setFreeCastUses, persist, showDiceToast, showNotice,
@@ -287,66 +266,7 @@ export default function CharacterSheet({
     add: noopEffect, remove: noopEffect, readOnly: true,
   }), []);
 
-  const updateXp = useCallback((val) => {
-    const xp = parseInt(val) || 0;
-    setSheet((prev) => ({ ...prev, xpStored: xp }));
-    updateCurrentCharacter((prev) => ({ ...prev, xp }));
-  }, [updateCurrentCharacter]);
-
-  const updateNotes = useCallback((val) => {
-    setSheet((prev) => ({ ...prev, notes: val }));
-    persist({ notes: val });
-  }, [persist]);
-
-  const toggleFreeCast = useCallback((freeCast) => {
-    setFreeCastUses((prev) => {
-      const used = Math.max(0, Number(prev?.[freeCast.id] || 0));
-      const max = Math.max(1, Number(freeCast.max || 1));
-      const next = { ...(prev || {}) };
-      if (used >= max) delete next[freeCast.id];
-      else next[freeCast.id] = used + 1;
-      persist({ freeCastUses: next });
-      return next;
-    });
-  }, [persist]);
-
   const noop = useCallback(() => {}, []);
-
-  // Stable, cross-cutting handlers shared with the deep tab/card tree via context.
-  const sheetActions = useMemo(() => ({
-    onRoll: rollD20,
-    onShowToast: showDiceToast,
-    setResources: saveResourcesState,
-    onUpdateInventory: updateInventory,
-    onUpdateCurrency: updateCurrency,
-    onUpdateSpells: updateSpells,
-    onUpdateSheet: syncSheet,
-    onUpdateNotes: updateNotes,
-    onUpdateCharacter: updateCurrentCharacter,
-    onToggleFreeCast: toggleFreeCast,
-  }), [
-    rollD20, showDiceToast, saveResourcesState, updateInventory, updateCurrency,
-    updateSpells, syncSheet, updateNotes, updateCurrentCharacter, toggleFreeCast,
-  ]);
-
-  // Read-only keeps navigation + dice rolls, but every data mutation becomes a
-  // no-op (no spending slots, no adding items/spells, no HP/condition changes).
-  const effectiveActions = useMemo(() => (
-    readOnly
-      ? {
-          ...sheetActions,
-          readOnly: true,
-          setResources: noop,
-          onUpdateInventory: noop,
-          onUpdateCurrency: noop,
-          onUpdateSpells: noop,
-          onUpdateSheet: noop,
-          onUpdateNotes: noop,
-          onUpdateCharacter: noop,
-          onToggleFreeCast: noop,
-        }
-      : { ...sheetActions, readOnly: false }
-  ), [readOnly, sheetActions, noop]);
 
   if (!C || !sheet) {
     return (
