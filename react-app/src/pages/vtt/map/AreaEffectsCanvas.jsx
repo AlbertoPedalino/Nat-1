@@ -3,7 +3,7 @@ import { Box } from '@mui/material';
 import { AREA_EFFECTS, areaGeometry } from '../../../shared/vtt/map/areas.js';
 import { cellSize, worldToScreen } from '../../../shared/vtt/map/geometry.js';
 import { createProgram, shaderSeconds } from '../atmosphere/AtmosphereOverlay.jsx';
-import { releaseContext, useContextRecovery } from '../atmosphere/webglCanvas.js';
+import { releaseContext, runWebglLoop, useContextRecovery } from '../atmosphere/webglCanvas.js';
 import { AREA_FRAGMENT_SHADER, AREA_SHAPE_INDEX, AREA_VERTEX_SHADER } from './areaEffectShader.js';
 
 // The animated insides of the areas that carry an effect (fire, poison…). Its
@@ -61,11 +61,7 @@ export default function AreaEffectsCanvas({ drawings, grid, view }) {
       opacity: uniform('u_opacity'),
     };
     const reducedMotion = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
-    let frame = 0;
-    let lastFrame = 0;
-    let running = false;
-
-    const draw = (timestamp = 0) => {
+    const draw = () => {
       const host = canvas.parentElement;
       const width = host?.clientWidth || 0;
       const height = host?.clientHeight || 0;
@@ -120,43 +116,13 @@ export default function AreaEffectsCanvas({ drawings, grid, view }) {
         gl.uniform1f(uniforms.opacity, drawing.hiddenFromPlayers ? 0.45 : 1);
         gl.drawArrays(gl.TRIANGLES, 0, 6);
       }
-      lastFrame = timestamp;
     };
 
-    const stop = () => {
-      running = false;
-      cancelAnimationFrame(frame);
-    };
-    const loop = (timestamp) => {
-      if (!running) return;
-      if (timestamp - lastFrame >= 32) draw(timestamp);
-      frame = requestAnimationFrame(loop);
-    };
-    const start = () => {
-      stop();
-      draw();
-      if (!document.hidden && !reducedMotion?.matches) {
-        running = true;
-        frame = requestAnimationFrame(loop);
-      }
-    };
-    const handleVisibility = () => (document.hidden ? stop() : start());
-    const handleContextLost = (event) => {
-      event.preventDefault();
-      stop();
-      recover();
-    };
-    document.addEventListener('visibilitychange', handleVisibility);
-    reducedMotion?.addEventListener?.('change', start);
-    canvas.addEventListener('webglcontextlost', handleContextLost);
     drawRef.current = draw;
-    start();
+    const stopLoop = runWebglLoop(canvas, draw, { onContextLost: recover, reducedMotion });
 
     return () => {
-      stop();
-      document.removeEventListener('visibilitychange', handleVisibility);
-      reducedMotion?.removeEventListener?.('change', start);
-      canvas.removeEventListener('webglcontextlost', handleContextLost);
+      stopLoop();
       drawRef.current = null;
       gl.deleteBuffer(buffer);
       gl.deleteProgram(program);

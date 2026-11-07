@@ -60,3 +60,58 @@ export function useContextRecovery() {
 
   return { generation, failed, recover, reset };
 }
+
+// The animation every overlay runs: `draw(timestamp)` about 30 times a second
+// while the page is shown and motion is allowed, one still frame otherwise
+// (hidden tab, prefers-reduced-motion), and a lost context handed to
+// `onContextLost` once the loop has stopped. Returns the function that stops
+// the loop and removes its listeners.
+const FRAME_MS = 32;
+
+export function runWebglLoop(canvas, draw, { onContextLost, reducedMotion = null } = {}) {
+  let frame = 0;
+  let lastFrame = 0;
+  let running = false;
+
+  const paint = (timestamp = 0) => {
+    draw(timestamp);
+    lastFrame = timestamp;
+  };
+  const stop = () => {
+    running = false;
+    cancelAnimationFrame(frame);
+  };
+  const loop = (timestamp) => {
+    if (!running) return;
+    if (timestamp - lastFrame >= FRAME_MS) paint(timestamp);
+    frame = requestAnimationFrame(loop);
+  };
+  const start = () => {
+    stop();
+    paint();
+    if (!document.hidden && !reducedMotion?.matches) {
+      running = true;
+      frame = requestAnimationFrame(loop);
+    }
+  };
+  const handleVisibility = () => (document.hidden ? stop() : start());
+  // Taken by the browser (too many contexts, the GPU reset, the app sent to
+  // the background on a phone): the overlay starts again on a new canvas.
+  const handleContextLost = (event) => {
+    event.preventDefault();
+    stop();
+    onContextLost?.();
+  };
+
+  document.addEventListener('visibilitychange', handleVisibility);
+  reducedMotion?.addEventListener?.('change', start);
+  canvas.addEventListener('webglcontextlost', handleContextLost);
+  start();
+
+  return () => {
+    stop();
+    document.removeEventListener('visibilitychange', handleVisibility);
+    reducedMotion?.removeEventListener?.('change', start);
+    canvas.removeEventListener('webglcontextlost', handleContextLost);
+  };
+}

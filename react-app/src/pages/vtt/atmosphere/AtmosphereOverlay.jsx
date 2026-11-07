@@ -4,7 +4,7 @@ import { normalizeAtmosphere } from '../../../shared/vtt/scene/atmosphere.js';
 import { ATMOSPHERE_VERTEX_SHADER } from './shaders/common.js';
 import { atmosphereFallbackSx } from './shaders/fallback.js';
 import { getAtmosphereFragmentShader } from './shaders/index.js';
-import { releaseContext, useContextRecovery } from './webglCanvas.js';
+import { releaseContext, runWebglLoop, useContextRecovery } from './webglCanvas.js';
 
 // The renderer owns one low-resolution fullscreen triangle. Each atmosphere keeps
 // its own fragment shader module, so changing one effect cannot alter another.
@@ -72,10 +72,6 @@ export default function AtmosphereOverlay({ atmosphere }) {
       seed: gl.getUniformLocation(program, 'u_seed'),
     };
     const reducedMotion = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
-    let frame = 0;
-    let lastFrame = 0;
-    let running = false;
-
     const resize = () => {
       const host = canvas.parentElement;
       const width = host?.clientWidth || canvas.clientWidth || 1;
@@ -91,7 +87,7 @@ export default function AtmosphereOverlay({ atmosphere }) {
       }
     };
 
-    const draw = (timestamp = 0) => {
+    const draw = () => {
       resize();
       const active = configRef.current;
       const seconds = reducedMotion?.matches
@@ -107,51 +103,19 @@ export default function AtmosphereOverlay({ atmosphere }) {
       gl.uniform1f(uniforms.speed, active.speed);
       gl.uniform1f(uniforms.seed, active.seed);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
-      lastFrame = timestamp;
     };
 
-    const stop = () => {
-      running = false;
-      cancelAnimationFrame(frame);
-    };
-    const loop = (timestamp) => {
-      if (!running) return;
-      if (timestamp - lastFrame >= 32) draw(timestamp);
-      frame = requestAnimationFrame(loop);
-    };
-    const start = () => {
-      stop();
-      draw();
-      if (!document.hidden && !reducedMotion?.matches) {
-        running = true;
-        frame = requestAnimationFrame(loop);
-      }
-    };
-    const handleVisibility = () => (document.hidden ? stop() : start());
-    // Taken by the browser (too many contexts, the GPU reset, the app sent to
-    // the background on a phone): start again on a new canvas.
-    const handleContextLost = (event) => {
-      event.preventDefault();
-      stop();
-      recover();
-    };
     const observer = typeof ResizeObserver === 'function' ? new ResizeObserver(() => draw()) : null;
     observer?.observe(canvas.parentElement || canvas);
     const handleResize = () => draw();
     globalThis.addEventListener?.('resize', handleResize);
-    document.addEventListener('visibilitychange', handleVisibility);
-    reducedMotion?.addEventListener?.('change', start);
-    canvas.addEventListener('webglcontextlost', handleContextLost);
     drawRef.current = draw;
-    start();
+    const stopLoop = runWebglLoop(canvas, draw, { onContextLost: recover, reducedMotion });
 
     return () => {
-      stop();
+      stopLoop();
       observer?.disconnect();
       globalThis.removeEventListener?.('resize', handleResize);
-      document.removeEventListener('visibilitychange', handleVisibility);
-      reducedMotion?.removeEventListener?.('change', start);
-      canvas.removeEventListener('webglcontextlost', handleContextLost);
       drawRef.current = null;
       gl.deleteBuffer(buffer);
       gl.deleteProgram(program);

@@ -202,7 +202,7 @@ test('DOM listeners in components and hooks go through useEventListener', () => 
       'shared/vtt/map/gestureSelection.js',
       'shared/character/combat/reminderHistory.js',
       'pages/vtt/atmosphere/AtmosphereOverlay.jsx',
-      'pages/vtt/map/AreaEffectsCanvas.jsx',
+      'pages/vtt/atmosphere/webglCanvas.js',
       'pages/vtt/map/usePinchZoom.js',
       'pages/vtt/scene/useProjector.js',
       'pages/vtt/VttPage.jsx',
