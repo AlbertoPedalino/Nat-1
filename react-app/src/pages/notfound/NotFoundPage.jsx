@@ -24,12 +24,12 @@ export default function NotFoundPage() {
               <Typography variant="h1" sx={titleSx}>
                 You wandered off the map.
               </Typography>
-              <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
+              <Typography variant="body1" sx={{ color: 'text.secondary', mt: 1 }}>
                 No marked road leads to this corner of the realm.
               </Typography>
             </Box>
             <Box sx={pathBoxSx}>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                 Missing path
               </Typography>
               <Typography component="code" sx={pathTextSx}>

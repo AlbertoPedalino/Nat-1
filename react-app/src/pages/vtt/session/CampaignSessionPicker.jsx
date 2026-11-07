@@ -43,7 +43,7 @@ export default function CampaignSessionPicker({ campaigns = [], onJoin, showEmpt
     if (!showEmpty) return null;
     return (
       <Paper sx={emptySx}>
-        <Typography color="text.secondary">
+        <Typography sx={{ color: 'text.secondary' }}>
           You have not joined a campaign yet. Ask your GM for the invite code and join it from the
           Campaigns page.
         </Typography>
@@ -63,13 +63,13 @@ export default function CampaignSessionPicker({ campaigns = [], onJoin, showEmpt
               {campaign.hasLive ? (
                 <Chip size="small" color="success" icon={<Radio size={12} />} label="Live" sx={chipSx} />
               ) : (
-                <Typography variant="caption" color="text.secondary">no map up</Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>no map up</Typography>
               )}
             </Box>
           </Box>
         ))}
       </Stack>
-      <Typography variant="caption" color="text.secondary">
+      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
         Join a table with no map up and the page will wait; it opens by itself when the GM puts one on.
       </Typography>
     </Stack>

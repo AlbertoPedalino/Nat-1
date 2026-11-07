@@ -46,7 +46,7 @@ function GmBoardShell({ tool }) {
           <InstanceConflictBanner tool={tool} />
           <Box>
             <Typography variant="h1">GM Board</Typography>
-            <Typography variant="body2" color="text.secondary">Instance {tool.id}</Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Instance {tool.id}</Typography>
           </Box>
           <Tabs
             value={state.tab}

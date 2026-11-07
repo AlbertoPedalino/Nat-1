@@ -200,7 +200,7 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
       <DialogTitle>Linked tools</DialogTitle>
       <DialogContent dividers>
         {loading ? <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}><CircularProgress size={24} /></Box> : <Stack spacing={2}>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
             Tools in this list are connected to each other. Removing one keeps the others connected.
           </Typography>
           {error && <Typography role="alert" color="error" variant="body2">{error}</Typography>}
@@ -222,9 +222,9 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
                 <Icon size={18} />
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography variant="body2" sx={{ overflowWrap: 'anywhere' }}>{row.name}{isCurrent ? ' · Current' : ''}</Typography>
-                  <Typography component="div" variant="caption" color="text.secondary">{TOOL_UI[row.sectionKey].label}</Typography>
-                  {row.sectionKey === 'gmboard' && clockCampaigns.length > 0 && <Typography component="div" variant="caption" color="text.secondary"
-                    sx={{ mt: 0.5, lineHeight: 1.5, overflowWrap: 'anywhere' }}>
+                  <Typography component="div" variant="caption" sx={{ color: 'text.secondary' }}>{TOOL_UI[row.sectionKey].label}</Typography>
+                  {row.sectionKey === 'gmboard' && clockCampaigns.length > 0 && <Typography component="div" variant="caption"
+                    sx={{ color: 'text.secondary', mt: 0.5, lineHeight: 1.5, overflowWrap: 'anywhere' }}>
                     Provides time, weather and tables for {clockCampaigns.map((campaign) => campaign.name).join(', ')}.
                   </Typography>}
                   {row.sectionKey === 'campaign' && <TextField select fullWidth size="small"
@@ -263,7 +263,7 @@ export default function LinkedToolsMenu({ sectionKey, instanceId, initialLinkGro
               </Stack>;
             })}
           </Stack>
-          {!linkedRows.length && <Typography variant="body2" color="text.secondary">No other tools are linked yet.</Typography>}
+          {!linkedRows.length && <Typography variant="body2" sx={{ color: 'text.secondary' }}>No other tools are linked yet.</Typography>}
           {adding ? <TextField select fullWidth size="small" label="Add a tool or campaign" value="" disabled={disabled}
             onChange={(event) => {
               const value = event.target.value;

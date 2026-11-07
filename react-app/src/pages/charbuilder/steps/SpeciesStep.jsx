@@ -18,7 +18,7 @@ function SpeciesDetailCard({ species }) {
   return (
     <Box sx={{ minWidth: 0, p: 1 }}>
       <Stack spacing={1.25} sx={{ minWidth: 0 }}>
-        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+        <Stack direction="row" spacing={1} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
           <Typography variant="h2" sx={{ flex: 1, minWidth: 0 }}>{species.name}</Typography>
           <Chip size="small" label={species.source || ''} />
         </Stack>
@@ -30,7 +30,7 @@ function SpeciesDetailCard({ species }) {
             ))}
           </Stack>
         ) : (
-          <Typography color="text.secondary">No description available.</Typography>
+          <Typography sx={{ color: 'text.secondary' }}>No description available.</Typography>
         )}
       </Stack>
     </Box>
@@ -59,12 +59,12 @@ export default function SpeciesStep({ state, dispatch }) {
         {selectedSpecies ? (
           <SpeciesDetailCard species={selectedSpecies} />
         ) : (
-          <Typography color="text.secondary">Select a species.</Typography>
+          <Typography sx={{ color: 'text.secondary' }}>Select a species.</Typography>
         )}
       </BuilderPanel>
 
       <BuilderPanel id="panel-species-choices" title="Species Choices" icon={Sparkles}>
-        <Typography color="text.secondary" sx={{ mb: 1.5 }}>
+        <Typography sx={{ color: 'text.secondary', mb: 1.5 }}>
           Active species: {character.speciesName}
         </Typography>
         <Stack spacing={1.5}>

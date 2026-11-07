@@ -44,7 +44,7 @@ function LaunchPanel({ encounter, players, onClose, onLaunch }) {
     <>
       <DialogTitle>Initiative at launch</DialogTitle>
       <DialogContent dividers>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+        <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1.5 }}>
           Set only the exceptions; everyone else rolls as usual. Any advantage plus any disadvantage is a straight roll.
         </Typography>
         <Stack spacing={2}>
@@ -72,7 +72,7 @@ function LaunchPanel({ encounter, players, onClose, onLaunch }) {
                       <Box sx={{ flex: 1, minWidth: 0 }}>
                         <Typography variant="body2" noWrap sx={{ fontWeight: 700 }}>{row.name}</Typography>
                         {own || choice ? (
-                          <Typography variant="caption" color="text.secondary" noWrap component="div">
+                          <Typography variant="caption" noWrap component="div" sx={{ color: 'text.secondary' }}>
                             {own ? `Own: ${rollModeLabel(advArgFor(row.sources))} · ` : ''}→ {rollModeLabel(result)}
                           </Typography>
                         ) : null}

@@ -24,7 +24,7 @@ function SlotBlock({ slot, tones }) {
   const Icon = SLOT_ICON[slot.type] || Minus;
   return (
     <Box sx={{ ...slotSx, borderLeftColor: tone, bgcolor: alpha(tone, 0.08) }}>
-      <Stack direction="row" spacing={0.6} alignItems="center" flexWrap="wrap">
+      <Stack direction="row" spacing={0.6} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
         <Icon size={13} color={tone} />
         <Typography sx={microLabelSx}>Roll {slot.n}/{slot.thr}</Typography>
         <ResultBadge tone={tone}>{slot.type}</ResultBadge>
@@ -62,9 +62,7 @@ export default function RoomCard({ room }) {
       <Stack
         direction="row"
         spacing={0.75}
-        alignItems="center"
-        flexWrap="wrap"
-        sx={{ ...headerBandSx, bgcolor: theme.palette.gmboard.headerOverlay }}
+        sx={{ alignItems: 'center', flexWrap: 'wrap', ...headerBandSx, bgcolor: theme.palette.gmboard.headerOverlay }}
       >
         <Castle size={13} color={theme.palette.primary.main} />
         <Typography sx={roomChipSx}>ROOM {room.index}</Typography>
@@ -76,7 +74,7 @@ export default function RoomCard({ room }) {
       <Stack spacing={0.75} sx={{ p: 1.25 }}>
         {room.slots.map((slot) => <SlotBlock key={slot.n} slot={slot} tones={tones} />)}
         <Box sx={{ ...slotSx, borderLeftColor: lootTone, bgcolor: alpha(lootTone, 0.08) }}>
-          <Stack direction="row" spacing={0.6} alignItems="center" flexWrap="wrap">
+          <Stack direction="row" spacing={0.6} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
             <Coins size={13} color={lootTone} />
             <Typography sx={microLabelSx}>Loot</Typography>
             <ResultBadge tone={lootTone}>{room.loot.data.type}</ResultBadge>
@@ -84,7 +82,7 @@ export default function RoomCard({ room }) {
           </Stack>
           {room.loot.data.rarity !== '—' ? <Typography sx={lineSx}>{formatLoot(room.loot.data)}</Typography> : null}
           {room.lootDc ? (
-            <Stack direction="row" spacing={0.4} alignItems="center" sx={{ mt: 0.3 }}>
+            <Stack direction="row" spacing={0.4} sx={{ alignItems: 'center', mt: 0.3 }}>
               <Lock size={11} color={theme.palette.text.secondary} />
               <Typography sx={dcSx}>DC to find it: {room.lootDc.sum}</Typography>
             </Stack>

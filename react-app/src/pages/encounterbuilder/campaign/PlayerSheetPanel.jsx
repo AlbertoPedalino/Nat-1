@@ -22,7 +22,7 @@ export default function PlayerSheetPanel({ selection, onClose }) {
         </Box>
         <Divider />
         <Box sx={playerBodySx}>
-          <Typography color="text.secondary">That combatant is no longer in the active encounter.</Typography>
+          <Typography sx={{ color: 'text.secondary' }}>That combatant is no longer in the active encounter.</Typography>
         </Box>
       </>
     );
@@ -37,7 +37,7 @@ export default function PlayerSheetPanel({ selection, onClose }) {
           </PortraitBadge>
           <Box sx={{ minWidth: 0, flex: '1 1 180px' }}>
             <Typography variant="h2" component="div" noWrap>{combatant.name}</Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
               Player character
             </Typography>
           </Box>
@@ -76,7 +76,7 @@ export default function PlayerSheetPanel({ selection, onClose }) {
         ) : (
           <Box sx={fallbackSx}>
             <Typography variant="h2">Encounter Stats</Typography>
-            <Typography color="text.secondary">
+            <Typography sx={{ color: 'text.secondary' }}>
               No campaign sheet is linked to this player combatant.
             </Typography>
           </Box>

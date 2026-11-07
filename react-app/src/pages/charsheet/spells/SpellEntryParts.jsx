@@ -85,7 +85,7 @@ export function FreeCastsInline({ freeCasts, freeCastUses, onToggleFreeCast, sx 
 export function SpellWeaponPicker({ spellName, options, selectedKey, onUpdateCharacter }) {
   if (!options.length) {
     return (
-      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.7 }}>
+      <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 0.7 }}>
         No weapon you are proficient with in your inventory.
       </Typography>
     );

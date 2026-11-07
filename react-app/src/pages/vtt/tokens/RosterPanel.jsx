@@ -31,11 +31,11 @@ export default function RosterPanel({
     <Box sx={panelInnerSx}>
       <Stack spacing={1.25}>
         {!roster.length ? (
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
             No characters in this campaign yet.
           </Typography>
         ) : placementDisabled ? (
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
             Switch to the battlemap to place or move pieces.
           </Typography>
         ) : null}
@@ -128,7 +128,7 @@ export default function RosterPanel({
         >
           Import encounter
         </Button>
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
           {activeLayer === 'gm'
             ? 'GM pieces are filtered out by the database, not just hidden in the view.'
             : 'Right-click a piece for its label and conditions.'}

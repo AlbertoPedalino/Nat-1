@@ -56,7 +56,7 @@ export default function SheetStep({ state, dispatch, importDraft = false, onUplo
             <Typography variant="h2" sx={{ color: ready ? 'primary.main' : 'text.secondary' }}>
               {ready ? 'Character sheet ready' : 'Character sheet not ready'}
             </Typography>
-            <Typography color="text.secondary" sx={{ fontSize: '0.72rem', mt: 0.35 }}>
+            <Typography sx={{ color: 'text.secondary', fontSize: '0.72rem', mt: 0.35 }}>
               {ready
                 ? 'Download JSON without local storage, save a local copy, or open the local sheet.'
                 : 'The character is missing minimum data.'}

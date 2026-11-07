@@ -45,7 +45,7 @@ export default function MonsterPickerDialog({
         <>
           {/* The dialog stays open after a pick: placing a pack one creature at a
               time is the normal case, and reopening it each time is not. */}
-          <Typography variant="caption" color="text.secondary" sx={{ mr: 'auto', pl: 1 }}>
+          <Typography variant="caption" sx={{ color: 'text.secondary', mr: 'auto', pl: 1 }}>
             Drag with mouse, touch or pen, or use + to place automatically.
           </Typography>
           <Button onClick={onClose} disabled={busy}>Done</Button>
@@ -68,7 +68,7 @@ export default function MonsterPickerDialog({
             control={<Switch size="small" checked={hidden} onChange={(event) => setHidden(event.target.checked)} />}
             label={<Typography variant="body2">GM layer</Typography>}
           />
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
             {hidden ? 'The party will not receive these pieces.' : 'The party sees them as soon as they land.'}
           </Typography>
         </Stack>

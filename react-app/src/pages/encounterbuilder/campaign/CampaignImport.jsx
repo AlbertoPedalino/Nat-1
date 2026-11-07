@@ -40,13 +40,13 @@ export default function CampaignImport() {
           <Users size={17} />
           <Typography variant="h2">Campaign Players</Typography>
         </Stack>
-        {campaignPlayers.loading ? <Typography color="text.secondary">Loading campaign players...</Typography> : null}
+        {campaignPlayers.loading ? <Typography sx={{ color: 'text.secondary' }}>Loading campaign players...</Typography> : null}
         {!campaignPlayers.loading && !campaignPlayers.signedIn ? (
-          <Typography color="text.secondary">Log in to import players from your GM campaigns.</Typography>
+          <Typography sx={{ color: 'text.secondary' }}>Log in to import players from your GM campaigns.</Typography>
         ) : null}
-        {campaignPlayers.error ? <Typography color="error.main">{campaignPlayers.error}</Typography> : null}
+        {campaignPlayers.error ? <Typography sx={{ color: 'error.main' }}>{campaignPlayers.error}</Typography> : null}
         {!campaignPlayers.loading && campaignPlayers.signedIn && !campaignPlayers.campaigns.length ? (
-          <Typography color="text.secondary">No campaigns where you are GM.</Typography>
+          <Typography sx={{ color: 'text.secondary' }}>No campaigns where you are GM.</Typography>
         ) : null}
         {selected ? (
           <>
@@ -74,7 +74,7 @@ export default function CampaignImport() {
                 {importing ? 'Adding...' : 'Add'}
               </Button>
             </Stack>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
               {selected.players.length
                 ? `${selected.players.length} sheet${selected.players.length === 1 ? '' : 's'} · avg Lv ${campaignAverageLevel(selected.players)}`
                 : 'No sheets attached to this campaign.'}
@@ -90,7 +90,7 @@ export default function CampaignImport() {
               {selected.players.length > 10 ? <Chip size="small" label={`+${selected.players.length - 10} more`} /> : null}
             </Box>
             {state.campaignNotice ? (
-              <Typography variant="caption" color="primary.main">{state.campaignNotice}</Typography>
+              <Typography variant="caption" sx={{ color: 'primary.main' }}>{state.campaignNotice}</Typography>
             ) : null}
           </>
         ) : null}

@@ -44,7 +44,7 @@ function useDebouncedSearch(value, commit) {
 
 function FilterChips({ filters, value, onChange }) {
   return (
-    <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
+    <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: 'wrap' }}>
       {filters.map((filter) => (
         <Chip
           key={filter.key}
@@ -79,7 +79,7 @@ function AddItemRow({ item, onAdd }) {
       header={({ open, toggle }) => (
         <ListItemButton onClick={toggle} aria-expanded={open} sx={{ gap: 1, alignItems: 'flex-start' }}>
           <ItemNameIcon item={item} />
-          <ListItemText primary={<Typography fontWeight={500} noWrap>{item.name}</Typography>} />
+          <ListItemText primary={<Typography noWrap sx={{ fontWeight: 500 }}>{item.name}</Typography>} />
           <QuantityAdder onAdd={(qty) => onAdd(item, qty)} sx={{ alignSelf: 'center' }} />
         </ListItemButton>
       )}
@@ -101,7 +101,7 @@ function CurrentInventoryRow({ item, index, dispatch }) {
             <ItemNameIcon item={item} />
             <Typography sx={{ fontWeight: 500, fontSize: '0.875rem', minWidth: 0 }} noWrap>{item.name}</Typography>
           </Box>
-          <Stack direction="row" spacing={0.75} alignItems="center" sx={{ flexShrink: 0 }}>
+          <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', flexShrink: 0 }}>
             <Button size="small" onClick={() => dispatch({ type: 'inventory/qty', index, delta: -1 })}>-</Button>
             <Typography sx={{ width: 28, textAlign: 'center' }}>{item.qty ?? 1}</Typography>
             <Button size="small" onClick={() => dispatch({ type: 'inventory/qty', index, delta: 1 })}>+</Button>
@@ -202,7 +202,7 @@ export default function EquipmentStep({ state, dispatch }) {
           <StartingEquipmentBlock title={character.className} eq={character.cls?.startingEquipment} prefix="cls" character={character} items={state.data.items} dispatch={dispatch} />
           <StartingEquipmentBlock title={character.backgroundName} eq={character.backgroundObj?.startingEquipment} prefix="bg" character={character} items={state.data.items} dispatch={dispatch} />
           {!character.cls?.startingEquipment && !character.backgroundObj?.startingEquipment ? (
-            <Typography color="text.secondary">Select class and background to see starting equipment.</Typography>
+            <Typography sx={{ color: 'text.secondary' }}>Select class and background to see starting equipment.</Typography>
           ) : null}
         </Stack>
       </BuilderPanel>
@@ -236,7 +236,7 @@ export default function EquipmentStep({ state, dispatch }) {
 
           <ItemFilterPanel {...addList.panelProps} />
 
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
             {sortedItems.length} of {state.data.items.length} items
           </Typography>
 
@@ -274,7 +274,7 @@ export default function EquipmentStep({ state, dispatch }) {
                 <CurrentInventoryRow key={`${item.name}-${index}`} item={item} index={index} dispatch={dispatch} />
               ))}
               {character.inventory.length && !currentInventory.length ? (
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', px: 2, py: 1 }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', px: 2, py: 1 }}>
                   No matches.
                 </Typography>
               ) : null}

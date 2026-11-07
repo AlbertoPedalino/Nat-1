@@ -12,7 +12,7 @@ export default function ChoiceDescriptionDialog({ value, onClose }) {
       icon={<Info size={20} />}
       showClose
     >
-      <Typography color="text.secondary" sx={{ whiteSpace: 'pre-wrap' }}>
+      <Typography sx={{ color: 'text.secondary', whiteSpace: 'pre-wrap' }}>
         {value?.body || ''}
       </Typography>
     </SheetDialog>

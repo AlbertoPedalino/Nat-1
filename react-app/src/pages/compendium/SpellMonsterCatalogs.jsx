@@ -85,7 +85,7 @@ const SPELL_COLUMNS = [
     render: (entry) => (
       <>
         <Typography variant="body2" sx={nameSx}>{entry.name}{tags(entry.record) ? ` (${tags(entry.record)})` : ''}</Typography>
-        <Typography variant="caption" color="text.secondary" noWrap component="div">{entry.subtitle}</Typography>
+        <Typography variant="caption" noWrap component="div" sx={{ color: 'text.secondary' }}>{entry.subtitle}</Typography>
       </>
     ),
   },
@@ -103,7 +103,7 @@ const MONSTER_COLUMNS = [
     width: '2fr',
     render: (entry) => (
       <NameCell entry={entry}>
-        <Typography variant="caption" color="text.secondary" noWrap component="div">{entry.subtitle}</Typography>
+        <Typography variant="caption" noWrap component="div" sx={{ color: 'text.secondary' }}>{entry.subtitle}</Typography>
       </NameCell>
     ),
   },

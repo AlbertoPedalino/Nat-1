@@ -52,7 +52,7 @@ export default function RollLogPanel({ feed, onCustomRoll, onClear }) {
       </Stack>
 
       {!feed?.length ? (
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
           Nothing rolled yet. Rolls made on a character sheet in this campaign show up here.
         </Typography>
       ) : (
@@ -60,7 +60,7 @@ export default function RollLogPanel({ feed, onCustomRoll, onClear }) {
       )}
 
       {feed?.length ? (
-        <Typography variant="caption" color="text.disabled">
+        <Typography variant="caption" sx={{ color: 'text.disabled' }}>
           Kept in memory only — this list is gone on reload.
         </Typography>
       ) : null}

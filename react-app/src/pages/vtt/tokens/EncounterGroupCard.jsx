@@ -34,7 +34,7 @@ export default function EncounterGroupCard({
               ? `${combatants.length} creature${combatants.length === 1 ? '' : 's'} to place`
               : 'Nothing to import from this fight.')}
         </Typography>
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
           {combatants.length
             ? (selected?.fight
               ? 'Drag this group with mouse, touch or pen, or use Place them.'

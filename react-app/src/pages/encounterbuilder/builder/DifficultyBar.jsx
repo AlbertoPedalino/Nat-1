@@ -9,9 +9,9 @@ export default function DifficultyBar({ encounter, party }) {
   return (
     <Stack spacing={1}>
       <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
-        <Typography variant="body2" color="text.secondary">Total XP</Typography>
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>Total XP</Typography>
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-          <Typography fontWeight={700}>{formatNumber(difficulty.totalXp)} XP</Typography>
+          <Typography sx={{ fontWeight: 700 }}>{formatNumber(difficulty.totalXp)} XP</Typography>
           <Chip size="small" label={difficulty.label} sx={{ bgcolor: difficulty.color, color: UI_COLORS.primaryContrast }} />
         </Stack>
       </Stack>
@@ -37,8 +37,8 @@ export default function DifficultyBar({ encounter, party }) {
               bgcolor: difficulty.difficultyIndex === index ? uiAlpha(UI_COLORS.primary, 0.10) : uiAlpha(UI_COLORS.white, 0.03),
             }}
           >
-            <Typography variant="caption" color="text.secondary">{label}</Typography>
-            <Typography fontWeight={700}>{formatNumber(difficulty.thresholds[index])}</Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>{label}</Typography>
+            <Typography sx={{ fontWeight: 700 }}>{formatNumber(difficulty.thresholds[index])}</Typography>
           </Box>
         ))}
       </Box>

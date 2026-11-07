@@ -35,7 +35,7 @@ export default function CombatView() {
         <Stack spacing={1.5} sx={{ alignItems: 'center' }}>
           <Swords size={28} />
           <Typography variant="h2">No active encounter</Typography>
-          <Typography color="text.secondary">Launch an encounter from Builder or resume a saved fight from Library.</Typography>
+          <Typography sx={{ color: 'text.secondary' }}>Launch an encounter from Builder or resume a saved fight from Library.</Typography>
           <Button variant="contained" onClick={() => dispatch({ type: 'setView', view: 'builder' })}>Back to Builder</Button>
         </Stack>
       </Paper>
@@ -63,7 +63,7 @@ export default function CombatView() {
             <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} sx={{ alignItems: { xs: 'stretch', md: 'center' }, justifyContent: 'space-between' }}>
               <Box>
                 <Typography variant="h2">Round {combat.round}</Typography>
-                <Typography color="text.secondary">
+                <Typography sx={{ color: 'text.secondary' }}>
                   Turn: <Box component="span" sx={{ color: 'primary.main', fontWeight: 800 }}>{current?.name || '—'}</Box>
                 </Typography>
               </Box>

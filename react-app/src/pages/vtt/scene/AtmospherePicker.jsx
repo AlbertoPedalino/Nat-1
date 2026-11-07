@@ -130,7 +130,7 @@ export function AtmospherePicker({ value, onSelect }) {
         ))}
       </Box>
       {visiblePresets.length === 0 ? (
-        <Typography variant="caption" color="text.secondary" sx={{ py: 1, textAlign: 'center' }}>
+        <Typography variant="caption" sx={{ color: 'text.secondary', py: 1, textAlign: 'center' }}>
           No atmospheres found
         </Typography>
       ) : null}

@@ -44,7 +44,7 @@ export function StartingEquipmentBlock({ title, eq, prefix, character, items, di
       <Stack spacing={1}>
         {blocks.map((block) => (
           <Paper key={block.key} variant="outlined" sx={{ p: 1.25, bgcolor: 'background.default' }}>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{block.label}</Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>{block.label}</Typography>
             <Stack spacing={0.75}>
               {block.options.map((option) => {
                 const selected = character.equipChoices[block.key] === option.value;
@@ -79,7 +79,7 @@ export function StartingEquipmentBlock({ title, eq, prefix, character, items, di
           const selectedRef = character.equipChoices[slot.slotKey] || null;
           return (
             <Paper key={slot.slotKey} variant="outlined" sx={{ p: 1.25, bgcolor: 'background.default' }}>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
                 Choose {EQUIP_TYPE_LABELS[slot.code] || 'item'}
               </Typography>
               <Stack spacing={0.75}>

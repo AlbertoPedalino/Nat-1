@@ -126,7 +126,7 @@ const EQUIPMENT_COLUMNS = [
     width: '2fr',
     render: (entry) => (
       <NameCell entry={entry}>
-        <Typography variant="caption" color="text.secondary">{EQUIPMENT_LABEL[equipmentCategory(entry.record)]}</Typography>
+        <Typography variant="caption" sx={{ color: 'text.secondary' }}>{EQUIPMENT_LABEL[equipmentCategory(entry.record)]}</Typography>
       </NameCell>
     ),
   },

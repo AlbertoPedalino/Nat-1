@@ -7,7 +7,7 @@ export default function LoadStatus({ status, loadingLabel = 'Loading…', errorM
     return (
       <Stack direction="row" spacing={1} sx={{ p: 2, alignItems: 'center' }}>
         <CircularProgress size={16} />
-        <Typography variant="body2" color="text.secondary">{loadingLabel}</Typography>
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>{loadingLabel}</Typography>
       </Stack>
     );
   }

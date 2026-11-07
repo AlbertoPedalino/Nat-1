@@ -35,7 +35,7 @@ export default function LibraryView() {
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ alignItems: { xs: 'stretch', sm: 'center' }, justifyContent: 'space-between' }}>
           <Box>
             <Typography variant="h2">Library</Typography>
-            <Typography variant="body2" color="text.secondary">Saved encounters and resumable fights for this instance.</Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Saved encounters and resumable fights for this instance.</Typography>
           </Box>
           <Button color="error" variant="outlined" startIcon={<Trash2 size={15} />} onClick={clearAll} disabled={!items.length}>
             Clear All
@@ -48,7 +48,7 @@ export default function LibraryView() {
             <Typography variant="h2" sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
               <ScrollText size={17} />
               {group.quest || 'Unassigned'}
-              <Typography component="span" variant="caption" color="text.secondary">
+              <Typography component="span" variant="caption" sx={{ color: 'text.secondary' }}>
                 {group.items.length}
               </Typography>
             </Typography>
@@ -70,7 +70,7 @@ export default function LibraryView() {
         ))
       ) : (
         <Paper sx={{ p: 4, bgcolor: 'background.paper', textAlign: 'center' }}>
-          <Typography color="text.secondary">No encounters saved.</Typography>
+          <Typography sx={{ color: 'text.secondary' }}>No encounters saved.</Typography>
         </Paper>
       )}
     </Stack>
@@ -113,7 +113,7 @@ function LibraryCard({ item, monsters, players, questOptions, dispatch, notify }
           ) : null}
         </Stack>
       </Stack>
-      <Typography variant="body2" color="text.secondary" sx={{ minHeight: 42 }}>
+      <Typography variant="body2" sx={{ color: 'text.secondary', minHeight: 42 }}>
         {monsterText || 'No combatants'}
       </Typography>
       {!enc.quest ? (
@@ -181,7 +181,7 @@ function LibraryCard({ item, monsters, players, questOptions, dispatch, notify }
           Delete
         </Button>
       </Stack>
-      <Typography variant="caption" color="text.secondary">{formatDateTime(toTime(date))}</Typography>
+      <Typography variant="caption" sx={{ color: 'text.secondary' }}>{formatDateTime(toTime(date))}</Typography>
       <InitiativeLaunchDialog
         open={initiativeOpen}
         onClose={() => setInitiativeOpen(false)}

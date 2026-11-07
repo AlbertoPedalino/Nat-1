@@ -26,7 +26,7 @@ export default function HexcrawlView() {
 
   return (
     <Stack spacing={2}>
-      {clockError ? <Typography color="warning.main" variant="body2">{clockError}</Typography> : null}
+      {clockError ? <Typography variant="body2" sx={{ color: 'warning.main' }}>{clockError}</Typography> : null}
       <WeatherPanel />
       <TimePanel />
 

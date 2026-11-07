@@ -29,7 +29,7 @@ function DmScreenShell({ tool }) {
           <InstanceConflictBanner tool={tool} />
           <Box>
             <Typography variant="h1">DM Screen</Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
               Screen {tool.id}
             </Typography>
           </Box>

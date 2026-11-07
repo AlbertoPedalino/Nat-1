@@ -11,7 +11,7 @@ export default function SessionGate({ loading }) {
         <Typography variant="h2">
           {loading ? 'Looking for the table…' : 'No map on the table'}
         </Typography>
-        <Typography color="text.secondary" sx={{ maxWidth: 420 }}>
+        <Typography sx={{ color: 'text.secondary', maxWidth: 420 }}>
           {loading
             ? null
             : 'Your GM has not put a map up yet. This page will open it by itself as soon as they do.'}

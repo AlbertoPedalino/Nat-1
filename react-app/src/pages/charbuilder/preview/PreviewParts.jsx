@@ -36,7 +36,7 @@ export const SECTION_HEADER_SX = {
 
 function EmptyCaption({ children }) {
   return (
-    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontSize: '0.72rem', lineHeight: 1.45 }}>
+    <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: '0.72rem', lineHeight: 1.45 }}>
       {children}
     </Typography>
   );
@@ -48,14 +48,14 @@ export function PreviewSection({ icon: Icon, title, subtitle, tone = NEUTRAL_TON
     <Card variant="outlined" sx={SECTION_CARD_SX}>
       <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
         <Stack spacing={0.85} sx={{ minWidth: 0 }}>
-          <Stack direction="row" spacing={0.75} alignItems="center" sx={{ minWidth: 0 }}>
+          <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', minWidth: 0 }}>
             {Icon ? <Icon size={15} color={tone} /> : null}
             <Box sx={{ minWidth: 0, flex: 1 }}>
               <Typography sx={{ ...SECTION_HEADER_SX, color: tone }} noWrap>
                 {title}
               </Typography>
               {subtitle ? (
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontSize: '0.68rem', lineHeight: 1.2 }} noWrap>
+                <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: '0.68rem', lineHeight: 1.2 }} noWrap>
                   {subtitle}
                 </Typography>
               ) : null}
@@ -73,7 +73,7 @@ export function InlineMetadata({ items }) {
   if (!visibleItems.length) return null;
 
   return (
-    <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.72rem', lineHeight: 1.2 }}>
+    <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.72rem', lineHeight: 1.2 }}>
       {visibleItems.map((item, index) => (
         <Box component="span" key={item.key}>
           {index > 0 ? (
@@ -172,7 +172,7 @@ export function FeatureAccordion({ feature, source, children }) {
     <EntryAccordion title={feature.name} tone={tone} titleColor={tone} dense>
       <Stack spacing={0.75} sx={{ minWidth: 0 }}>
         {children != null ? children : hasDefaultBody ? <PreviewEntryText entries={body} /> : (
-          <Typography variant="caption" component="div" color="text.secondary" sx={{ lineHeight: 1.45, wordBreak: 'break-word' }}>
+          <Typography variant="caption" component="div" sx={{ color: 'text.secondary', lineHeight: 1.45, wordBreak: 'break-word' }}>
             No description.
           </Typography>
         )}

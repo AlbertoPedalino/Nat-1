@@ -31,9 +31,7 @@ export default function QuestCard({ quest }) {
       <Stack
         direction="row"
         spacing={0.75}
-        alignItems="center"
-        flexWrap="wrap"
-        sx={{ ...headerBandSx, bgcolor: theme.palette.gmboard.headerOverlay }}
+        sx={{ alignItems: 'center', flexWrap: 'wrap', ...headerBandSx, bgcolor: theme.palette.gmboard.headerOverlay }}
       >
         <ScrollText size={13} color={theme.palette.primary.main} />
         <Typography sx={questChipSx}>QUEST {quest.index}</Typography>
@@ -41,7 +39,7 @@ export default function QuestCard({ quest }) {
       </Stack>
       <Stack spacing={0.75} sx={{ p: 1.25 }}>
         <Box sx={{ ...slotSx, borderLeftColor: eventTone, bgcolor: alpha(eventTone, 0.08) }}>
-          <Stack direction="row" spacing={0.6} alignItems="center" flexWrap="wrap">
+          <Stack direction="row" spacing={0.6} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
             <EventIcon size={13} color={eventTone} />
             <Typography sx={microLabelSx}>Event Hook</Typography>
             <Typography sx={detailSx}>d20({quest.event.d1})+d20({quest.event.d2})={quest.event.sum}</Typography>
@@ -49,7 +47,7 @@ export default function QuestCard({ quest }) {
         </Box>
         {quest.encounter ? (
           <Box sx={{ ...slotSx, borderLeftColor: encounterTone, bgcolor: alpha(encounterTone, 0.08) }}>
-            <Stack direction="row" spacing={0.6} alignItems="center" flexWrap="wrap">
+            <Stack direction="row" spacing={0.6} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
               <Swords size={13} color={encounterTone} />
               <Typography sx={microLabelSx}>Encounter</Typography>
               <ResultBadge tone={difficultyTone[quest.encounter.data.diff] || fallback}>{quest.encounter.data.diff}</ResultBadge>
@@ -59,7 +57,7 @@ export default function QuestCard({ quest }) {
           </Box>
         ) : null}
         <Box sx={{ ...slotSx, borderLeftColor: rewardTone, bgcolor: alpha(rewardTone, 0.08) }}>
-          <Stack direction="row" spacing={0.6} alignItems="center" flexWrap="wrap">
+          <Stack direction="row" spacing={0.6} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
             <Coins size={13} color={rewardTone} />
             <Typography sx={microLabelSx}>Reward</Typography>
             <ResultBadge tone={rewardTone}>{quest.reward.data.type}</ResultBadge>

@@ -51,9 +51,9 @@ export default function CompendiumDetail({ entry, legendaryGroups }) {
           <Chip size="small" variant="outlined" label={compendiumKind(kind)?.single || kind} sx={chipTintStyle(COMPENDIUM_KIND_COLORS[kind])} />
           {/* "Condition" beside a Condition tag says nothing new. */}
           {entry.subtitle && entry.subtitle !== compendiumKind(kind)?.single
-            ? <Typography variant="body2" color="text.secondary">{entry.subtitle}</Typography>
+            ? <Typography variant="body2" sx={{ color: 'text.secondary' }}>{entry.subtitle}</Typography>
             : null}
-          <Typography variant="caption" color="text.secondary">{entry.source}</Typography>
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>{entry.source}</Typography>
         </Stack>
       </Box>
       {entry.image ? (
@@ -76,7 +76,7 @@ function ItemFacts({ item }) {
     item.value ? formatValue(item.value) : '',
   ].filter(Boolean);
   if (!facts.length) return null;
-  return <Typography variant="body2" color="text.secondary">{facts.join(' · ')}</Typography>;
+  return <Typography variant="body2" sx={{ color: 'text.secondary' }}>{facts.join(' · ')}</Typography>;
 }
 
 // 5etools values are in copper pieces.

@@ -58,7 +58,7 @@ export default function SubclassPanel({ character, dispatch }) {
                 <SubclassFeatureRow key={`${feature.name}-${feature.level}`} feature={feature} />
               ))}
               {!subclassFeatures.length ? (
-                <Typography color="text.secondary">No subclass features loaded for this subclass.</Typography>
+                <Typography sx={{ color: 'text.secondary' }}>No subclass features loaded for this subclass.</Typography>
               ) : null}
             </Stack>
           </Box>

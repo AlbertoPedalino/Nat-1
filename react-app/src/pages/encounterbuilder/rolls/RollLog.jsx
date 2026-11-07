@@ -28,19 +28,19 @@ export default function RollLog({ maxHeight = 320, onClose, sx }) {
             <Box key={`${entry.timeStr}-${index}`} sx={entrySx}>
               <Box sx={{ minWidth: 0 }}>
                 <RollActorLabel entry={entry} />
-                <Typography fontWeight={700} noWrap>{entry.type}</Typography>
-                {entry.visibility === 'gm' ? <Typography variant="caption" color="text.secondary">GM only</Typography> : null}
+                <Typography noWrap sx={{ fontWeight: 700 }}>{entry.type}</Typography>
+                {entry.visibility === 'gm' ? <Typography variant="caption" sx={{ color: 'text.secondary' }}>GM only</Typography> : null}
                 <RollCalculation entry={entry} />
                 {entry.note ? (
                   <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary', whiteSpace: 'normal', lineHeight: 1.35 }}>
                     {entry.note}
                   </Typography>
                 ) : null}
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>{entry.timeStr}</Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>{entry.timeStr}</Typography>
               </Box>
             </Box>
           )) : (
-            <Typography color="text.secondary" sx={{ py: 2 }}>No rolls yet. Click statblock dice, attacks, or abilities.</Typography>
+            <Typography sx={{ color: 'text.secondary', py: 2 }}>No rolls yet. Click statblock dice, attacks, or abilities.</Typography>
           )}
         </Stack>
       </Stack>

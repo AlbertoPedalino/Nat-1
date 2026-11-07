@@ -88,12 +88,12 @@ function BackgroundDetailCard({ background }) {
   return (
     <Box sx={{ minWidth: 0, p: 1 }}>
       <Stack spacing={1.25} sx={{ minWidth: 0 }}>
-        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+        <Stack direction="row" spacing={1} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
           <Typography variant="h2" sx={{ flex: 1, minWidth: 0, color: 'primary.main' }}>{background.name}</Typography>
           <Chip size="small" label={background.source || ''} />
         </Stack>
         {lore ? (
-          <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6, fontStyle: 'italic' }}>
+          <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6, fontStyle: 'italic' }}>
             {lore}
           </Typography>
         ) : null}
@@ -138,7 +138,7 @@ export default function BackgroundStep({ state, dispatch }) {
           meta={(item) => {
             const featLabel = backgroundFeatOptionLabel(item);
             return (
-              <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap sx={{ mt: 1.5 }}>
+              <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: 'wrap', mt: 1.5 }}>
                 {(item.abilities || getBackgroundPool(item)).map((ability) => (
                   <Chip key={ability} size="small" label={ABILITY_ABBREVIATIONS[ability]} />
                 ))}
@@ -153,17 +153,17 @@ export default function BackgroundStep({ state, dispatch }) {
         {selectedBackground ? (
           <BackgroundDetailCard background={selectedBackground} />
         ) : (
-          <Typography color="text.secondary">Select a background.</Typography>
+          <Typography sx={{ color: 'text.secondary' }}>Select a background.</Typography>
         )}
       </BuilderPanel>
 
       <BuilderPanel id="panel-bg-ability" title="Background Ability Bonus" icon={SlidersHorizontal}>
-        <Typography color="text.secondary" sx={{ mb: 1.5 }}>
+        <Typography sx={{ color: 'text.secondary', mb: 1.5 }}>
           Choose +2/+1 or +1/+1/+1 from selected background ability pool.
         </Typography>
         <Stack spacing={1.5}>
           {patterns.length > 1 ? (
-            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+            <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
               {patterns.map((pattern, index) => (
                 <Chip
                   key={pattern.join('-')}
@@ -174,7 +174,7 @@ export default function BackgroundStep({ state, dispatch }) {
               ))}
             </Stack>
           ) : null}
-          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+          <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
             {abilityPool.map((stat) => {
               const bonus = backgroundAbilityBonus(character, stat);
               return (

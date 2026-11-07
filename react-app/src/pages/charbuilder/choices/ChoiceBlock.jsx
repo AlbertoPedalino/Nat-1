@@ -243,7 +243,7 @@ export default function ChoiceBlock({ spec, choices, dispatch, character, getOpt
   return (
     <Paper variant="outlined" sx={{ p: 1, minWidth: 0 }}>
       <Stack spacing={0.8} sx={{ minWidth: 0 }}>
-        <Stack direction="row" spacing={0.65} alignItems="center" flexWrap="wrap" useFlexGap>
+        <Stack direction="row" spacing={0.65} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
           <Typography
             sx={{
               flex: 1,
@@ -274,7 +274,7 @@ export default function ChoiceBlock({ spec, choices, dispatch, character, getOpt
               const isOpen = expanded.has(value);
               return (
                 <Box key={`${spec.key}-${value}`} sx={{ borderBottom: isOpen ? 0 : 1, borderColor: 'divider' }}>
-                  <Stack direction="row" alignItems="stretch" sx={{ minWidth: 0 }}>
+                  <Stack direction="row" sx={{ alignItems: 'stretch', minWidth: 0 }}>
                     <ListItemButton
                       selected={active}
                       disabled={full || duplicate}
@@ -326,7 +326,7 @@ export default function ChoiceBlock({ spec, choices, dispatch, character, getOpt
           </List>
           ) : (
             <Box sx={{ px: 1, py: 0.75 }}>
-              <Typography color="text.secondary" sx={{ fontSize: '0.78rem' }}>No matches.</Typography>
+              <Typography sx={{ color: 'text.secondary', fontSize: '0.78rem' }}>No matches.</Typography>
             </Box>
           )}
         </Paper>

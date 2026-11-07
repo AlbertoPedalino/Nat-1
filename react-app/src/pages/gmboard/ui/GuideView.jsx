@@ -10,7 +10,7 @@ function GuideCard({ title, icon: Icon, children }) {
   const theme = useTheme();
   return (
     <Box sx={cardSx}>
-      <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mb: 1 }}>
+      <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', mb: 1 }}>
         {Icon ? <Icon size={15} color={theme.palette.primary.main} /> : null}
         <Typography sx={cardTitleSx}>{title}</Typography>
       </Stack>

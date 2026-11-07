@@ -39,7 +39,7 @@ export default function LevelPanel({ character, dispatch }) {
         ? `Class Lv ${currentLevel} (max ${maxLv}) - Total Lv ${character.level} - Hit Die ${faces}`
         : `Class Lv ${currentLevel} - Total Lv ${character.level} - HP ${hp || '-'} - PB +${getProficiencyBonus(character)} - Hit Die ${faces}`}
     >
-      <Grid container spacing={1.5} alignItems="center">
+      <Grid container spacing={1.5} sx={{ alignItems: 'center' }}>
         <Grid size={{ xs: 12, md: 4 }} sx={{ display: { xs: 'block', md: 'none' } }}>
           <Select fullWidth value={currentLevel} onChange={(event) => setLevel(Number(event.target.value))}>
             {Array.from({ length: maxLv }, (_, index) => index + 1).map((level) => (
@@ -47,14 +47,16 @@ export default function LevelPanel({ character, dispatch }) {
             ))}
           </Select>
         </Grid>
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid size={{ xs: 12, md: 'auto' }}>
           <ToggleButtonGroup value={character.hpMode} exclusive size="small" onChange={(_, mode) => mode && dispatch({ type: 'hp/mode', mode })}>
             <ToggleButton value="average">Average HP</ToggleButton>
             <ToggleButton value="rolled">Manual HP</ToggleButton>
           </ToggleButtonGroup>
         </Grid>
-        <Grid size={{ xs: 12, md: isExtra ? 12 : 8 }} sx={{ display: { xs: 'none', md: 'block' } }}>
-          <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
+        {/* The level picks take the room the HP toggle leaves, so they start
+            right after it and wrap under each other. */}
+        <Grid size={{ xs: 12, md: 'grow' }} sx={{ display: { xs: 'none', md: 'block' } }}>
+          <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: 'wrap' }}>
             {Array.from({ length: maxLv }, (_, index) => index + 1).map((level) => (
               <Chip
                 key={level}
@@ -67,7 +69,7 @@ export default function LevelPanel({ character, dispatch }) {
         </Grid>
         {character.hpMode === 'rolled' && rollLevels.length ? (
           <Grid size={{ xs: 12 }}>
-            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+            <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
               {rollLevels.map((level) => (
                 <TextField
                   key={level}

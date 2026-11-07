@@ -381,7 +381,7 @@ export default function SpellEntry({
                         <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, lineHeight: 1.2 }}>
                           {modifier.detailTitle || modifier.tagLabel || modifier.label}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', lineHeight: 1.3, mt: 0.1 }}>
+                        <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', lineHeight: 1.3, mt: 0.1 }}>
                           {modifier.detailText || modifier.description}
                         </Typography>
                       </Box>

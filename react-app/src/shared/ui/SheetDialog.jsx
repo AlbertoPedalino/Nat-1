@@ -101,7 +101,7 @@ export default function SheetDialog({
     >
       {title != null ? (
         <DialogTitle sx={{ ...titleSx, ...titleSxOverride }}>
-          <Stack direction="row" spacing={1} alignItems="center" sx={{ width: '100%' }}>
+          <Stack direction="row" spacing={1} sx={{ alignItems: 'center', width: '100%' }}>
             {icon}
             <Typography component="span" sx={titleTextSx}>{title}</Typography>
             {right != null ? <><Box component="span" sx={{ flex: 1 }} />{right}</> : null}

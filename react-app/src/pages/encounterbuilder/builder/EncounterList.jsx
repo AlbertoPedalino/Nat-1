@@ -46,7 +46,7 @@ export default function EncounterList() {
             New Encounter
           </Button>
         </Stack>
-        <Typography variant="body2" color="text.secondary">{formatNumber(difficulty.totalXp)} XP</Typography>
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>{formatNumber(difficulty.totalXp)} XP</Typography>
         <TextField
           size="small"
           label="Library name"
@@ -75,12 +75,12 @@ export default function EncounterList() {
           {state.encounter.length ? state.encounter.map((item) => (
             <Box key={item.id} sx={rowSx}>
               <Box sx={{ minWidth: 0, flex: 1 }}>
-                <Typography fontWeight={700} noWrap>{item.name}</Typography>
-                <Typography variant="caption" color="text.secondary">
+                <Typography noWrap sx={{ fontWeight: 700 }}>{item.name}</Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                   {item.source} · CR {item.cr}
                 </Typography>
               </Box>
-              <Typography variant="body2" color="primary.main" sx={{ minWidth: 90, textAlign: 'right' }}>
+              <Typography variant="body2" sx={{ color: 'primary.main', minWidth: 90, textAlign: 'right' }}>
                 {formatNumber(item.xp * item.qty)} XP
               </Typography>
               <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
@@ -103,7 +103,7 @@ export default function EncounterList() {
               </Stack>
             </Box>
           )) : (
-            <Typography color="text.secondary" sx={{ py: 2 }}>Add monsters from the bestiary list.</Typography>
+            <Typography sx={{ color: 'text.secondary', py: 2 }}>Add monsters from the bestiary list.</Typography>
           )}
         </Stack>
         <DifficultyBar encounter={state.encounter} party={state.party} />
@@ -143,7 +143,7 @@ export default function EncounterList() {
             {editingExisting ? 'Update in Library' : 'Save to Library'}
           </Button>
         </Stack>
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
           Launch saves a new encounter in Library and starts combat.
         </Typography>
         <InitiativeLaunchDialog

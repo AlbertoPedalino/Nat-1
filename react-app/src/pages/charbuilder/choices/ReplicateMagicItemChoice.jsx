@@ -51,7 +51,7 @@ function ItemPlanRow({ name, source, item, active, selectionDisabled, onSelect }
       detailsSx={itemDetailsSx}
       details={item ? <ItemReferenceBody item={item} /> : null}
       summary={({ open, toggle, disabled: expandDisabled }) => (
-        <Stack direction="row" alignItems="stretch" sx={{ minWidth: 0 }}>
+        <Stack direction="row" sx={{ alignItems: 'stretch', minWidth: 0 }}>
           <ListItemButton
             selected={active}
             disabled={selectionDisabled}
@@ -132,7 +132,7 @@ function ItemPlanPanel({
           </List>
         ) : (
           <Box sx={{ px: 1, py: 0.75 }}>
-            <Typography color="text.secondary" sx={{ fontSize: '0.78rem' }}>
+            <Typography sx={{ color: 'text.secondary', fontSize: '0.78rem' }}>
               {options.length ? 'No matches.' : emptyText}
             </Typography>
           </Box>
@@ -202,7 +202,7 @@ export default function ReplicateMagicItemChoice({ spec, character, dispatch, it
   return (
     <Paper variant="outlined" sx={{ p: 1, minWidth: 0 }}>
       <Stack spacing={0.8} sx={{ minWidth: 0 }}>
-        <Stack direction="row" spacing={0.65} alignItems="center" flexWrap="wrap" useFlexGap>
+        <Stack direction="row" spacing={0.65} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
           <Typography
             sx={{
               flex: 1,

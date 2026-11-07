@@ -21,7 +21,7 @@ export default function BuilderAppBar({ canUploadDraft, onUploadDraft, onNotify,
               <Typography variant="h1" noWrap sx={{ fontSize: '1.12rem', letterSpacing: '0.04em', color: UI_COLORS.goldLight }}>
                 Character Builder
               </Typography>
-              <Typography variant="body2" color="text.secondary" noWrap sx={{ fontSize: '0.64rem' }}>
+              <Typography variant="body2" noWrap sx={{ color: 'text.secondary', fontSize: '0.64rem' }}>
                 D&D 5e 2024
               </Typography>
             </Box>

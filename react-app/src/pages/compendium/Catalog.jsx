@@ -97,7 +97,7 @@ export default function Catalog({
             <Button size="small" onClick={() => setFilters(initialFilters)}>Reset filters</Button>
           ) : null}
         </Box>
-        <Typography variant="caption" color="text.secondary">{results.length} {label}</Typography>
+        <Typography variant="caption" sx={{ color: 'text.secondary' }}>{results.length} {label}</Typography>
       </Stack>
       {!narrow ? (
         <Box aria-hidden sx={[headerRowSx, { gridTemplateColumns: template }]}>
@@ -117,7 +117,7 @@ export default function Catalog({
             sx={{ height: '100%' }}
           />
         ) : (
-          <Typography variant="body2" color="text.secondary" sx={statusSx}>Nothing matches these filters.</Typography>
+          <Typography variant="body2" sx={[{ color: 'text.secondary' }, statusSx]}>Nothing matches these filters.</Typography>
         )}
       </Box>
       <Dialog open={Boolean(opened)} onClose={() => setOpened(null)} maxWidth="sm" fullWidth>
@@ -148,14 +148,14 @@ function CatalogRow({
       {narrow ? (
         <>
           <Box>{columns[0].render(entry)}</Box>
-          <Typography variant="caption" color="text.secondary" noWrap>
+          <Typography variant="caption" noWrap sx={{ color: 'text.secondary' }}>
             {columns.slice(1).map((column) => column.render(entry)).filter((value) => value && value !== '—').join(' · ')}
           </Typography>
         </>
       ) : columns.map((column) => (
         <Box key={column.key} sx={cellSx}>
           {typeof column.render(entry) === 'string'
-            ? <Typography variant="body2" color="text.secondary" noWrap>{column.render(entry)}</Typography>
+            ? <Typography variant="body2" noWrap sx={{ color: 'text.secondary' }}>{column.render(entry)}</Typography>
             : column.render(entry)}
         </Box>
       ))}

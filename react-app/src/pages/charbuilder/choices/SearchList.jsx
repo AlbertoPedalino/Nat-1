@@ -24,7 +24,7 @@ export default function SearchList({ value, onSearch, placeholder, items, select
                 sx={{ alignItems: 'flex-start', gap: 1, py: 0.55 }}
               >
                 <ListItemText
-                  primary={<Typography fontWeight={500} sx={{ fontSize: '0.76rem' }}>{item.name}</Typography>}
+                  primary={<Typography sx={{ fontWeight: 500, fontSize: '0.76rem' }}>{item.name}</Typography>}
                   secondary={meta?.(item)}
                   secondaryTypographyProps={{ component: 'div' }}
                 />

@@ -100,7 +100,7 @@ export default function TablesView() {
 
   return (
     <Stack spacing={2}>
-      <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" rowGap={0.5}>
+      <Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap', rowGap: 0.5 }}>
         <Button size="small" variant="outlined" color="error" startIcon={<RotateCcw size={14} />} onClick={handleReset}>
           Reset to defaults
         </Button>

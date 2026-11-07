@@ -24,12 +24,12 @@ export default function ExpandableSelectionList({
   return (
     <Paper variant="outlined" sx={{ p: 1.5, minWidth: 0 }}>
       <Stack spacing={1} sx={{ minWidth: 0 }}>
-        <Stack direction="row" spacing={1} alignItems="baseline">
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'baseline' }}>
           <Typography variant="h2" sx={{ flex: 1, minWidth: 0 }}>
             {title}
           </Typography>
           {status ? (
-            <Typography variant="caption" color="text.secondary" sx={{ flexShrink: 0 }}>
+            <Typography variant="caption" sx={{ color: 'text.secondary', flexShrink: 0 }}>
               {status}
             </Typography>
           ) : null}
@@ -39,11 +39,11 @@ export default function ExpandableSelectionList({
 
         {!options.length ? (
           <Box sx={{ px: 0.25 }}>
-            <Typography color="text.secondary">{emptyText}</Typography>
+            <Typography sx={{ color: 'text.secondary' }}>{emptyText}</Typography>
           </Box>
         ) : !visibleOptions.length ? (
           <Box sx={{ px: 0.25 }}>
-            <Typography color="text.secondary">No matches.</Typography>
+            <Typography sx={{ color: 'text.secondary' }}>No matches.</Typography>
           </Box>
         ) : (
           <Paper variant="outlined" sx={{ maxHeight, overflow: 'auto', bgcolor: 'background.default' }}>
@@ -55,7 +55,7 @@ export default function ExpandableSelectionList({
                   containerSx={{ borderBottom: 1, borderColor: 'divider' }}
                   detailsSx={{ px: 1, py: 1, bgcolor: 'background.paper' }}
                   summary={({ open, toggle, disabled }) => (
-                    <Stack direction="row" alignItems="stretch" sx={{ minWidth: 0 }}>
+                    <Stack direction="row" sx={{ alignItems: 'stretch', minWidth: 0 }}>
                       <ListItemButton
                         selected={option.selected}
                         disabled={option.disabled}

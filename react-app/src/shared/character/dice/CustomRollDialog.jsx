@@ -102,7 +102,7 @@ export default function CustomRollDialog({ open, onClose, onRoll, ...dialogProps
         <Typography sx={CUSTOM_ROLL_SX.formula}>{formula}</Typography>
       )}
       {totalDice >= DICE_LIMITS.maxDice ? (
-        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center' }}>
+        <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', textAlign: 'center' }}>
           Maximum {DICE_LIMITS.maxDice} dice per roll.
         </Typography>
       ) : null}

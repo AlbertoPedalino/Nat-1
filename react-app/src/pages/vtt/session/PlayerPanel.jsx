@@ -86,7 +86,7 @@ export default function PlayerPanel({
             })}
           </Stack>
         ) : (
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
             None of your characters is attached to this campaign yet.
           </Typography>
         )}
@@ -103,7 +103,7 @@ export default function PlayerPanel({
 
         <Stack direction="row" spacing={0.75} sx={{ alignItems: 'flex-start' }}>
           <Box sx={{ color: 'text.secondary', mt: '2px' }}><MapPin size={13} /></Box>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
             Right-click any creature to flag a condition on it — that works on enemies too.
           </Typography>
         </Stack>

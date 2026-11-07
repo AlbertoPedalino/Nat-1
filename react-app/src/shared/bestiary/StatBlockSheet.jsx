@@ -40,7 +40,7 @@ export function StatBlockHeader({ monster, onClose }) {
           <Typography variant="h2" component="div" noWrap>
             {url ? <Link href={url} target="_blank" rel="noopener" color="inherit" underline="hover">{monster.name}</Link> : monster.name}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
             {[getSizeLabel(monster), getType(monster.type)].filter(Boolean).join(' ')}
             {getTypeTags(monster.type)}
             {formatAlignment(monster.alignment) ? `, ${formatAlignment(monster.alignment)}` : ''}
@@ -114,7 +114,7 @@ export function StatBlockSheet({ monster, legendaryGroups, conditions = null, on
               >
                 <Stack spacing={0} sx={{ alignItems: 'center' }}>
                   <Typography variant="caption">{label}{advTag(advArgFor(sources))}</Typography>
-                  <Typography fontWeight={700}>{monster[key] ?? 10} ({mod})</Typography>
+                  <Typography sx={{ fontWeight: 700 }}>{monster[key] ?? 10} ({mod})</Typography>
                 </Stack>
               </RollModeArea>
             );
@@ -138,7 +138,7 @@ export function StatBlockSheet({ monster, legendaryGroups, conditions = null, on
         {(monster.legendary?.length || spellcasting.legendary.length) ? (
           <Stack spacing={1}>
             <SectionHeading>Legendary Actions</SectionHeading>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
               {monster.legendaryHeader
                 ? <EntryRenderer entries={monster.legendaryHeader} onRoll={handleRoll} />
                 : defaultLegendaryIntro(monster)}

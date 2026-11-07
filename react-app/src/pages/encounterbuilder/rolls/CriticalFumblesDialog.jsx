@@ -151,7 +151,7 @@ export default function CriticalFumblesDialog({ open, onClose }) {
       <Box sx={sectionSx}>
         <Stack spacing={0.4}>
           <Typography sx={sectionTitleSx}>Dice combination</Typography>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
             Choose any combination. At least one die is always kept.
           </Typography>
         </Stack>
@@ -193,7 +193,7 @@ export default function CriticalFumblesDialog({ open, onClose }) {
           sx={{ alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between' }}
         >
           <Typography sx={formulaSx}>{formula}</Typography>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
             Results {range.min}–{range.max} · {range.count} entries
           </Typography>
         </Stack>
@@ -205,14 +205,14 @@ export default function CriticalFumblesDialog({ open, onClose }) {
           <Box sx={{ minWidth: 0 }}>
             <Typography sx={outcomeTitleSx}>{outcome.categoryLabel} Fumble</Typography>
             <Typography sx={outcomeTextSx}>{outcome.consequence}</Typography>
-            <Typography variant="caption" color="text.secondary">{outcome.mathStr}</Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>{outcome.mathStr}</Typography>
           </Box>
         </Paper>
       ) : null}
 
       <Stack spacing={0.4} sx={{ mt: 1.75, mb: 1 }}>
         <Typography sx={sectionTitleSx}>Result table</Typography>
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
           Entries outside the current range are preserved when you change dice.
         </Typography>
       </Stack>

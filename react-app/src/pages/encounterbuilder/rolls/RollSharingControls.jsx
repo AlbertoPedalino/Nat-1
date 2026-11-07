@@ -21,7 +21,7 @@ export default function RollSharingControls() {
           control={<Switch checked={rollSync.showToPlayers} onChange={(_, checked) => rollSync.updateSettings({ showToPlayers: checked })} />}
           label="Show my rolls to players"
         />
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
           {rollSync.campaignId
             ? 'Applies to new monster sheet and custom rolls. Hidden rolls stay in the GM logs.'
             : 'Select a campaign to sync with its battle map and player logs.'}

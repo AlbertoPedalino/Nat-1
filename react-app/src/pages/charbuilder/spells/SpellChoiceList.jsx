@@ -79,7 +79,7 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
   return (
     <Paper variant="outlined" sx={{ p: 1.5, minWidth: 0 }}>
       <Stack spacing={1} sx={{ minWidth: 0 }}>
-        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+        <Stack direction="row" spacing={1} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
           <Typography variant="h2" sx={{ flex: 1, minWidth: 0 }}>{spec.label}</Typography>
           <Chip size="small" label={`${selected.length}/${max}`} color={selected.length >= max ? 'primary' : 'default'} />
         </Stack>
@@ -124,7 +124,7 @@ export default function SpellChoiceList({ spec, state, dispatch }) {
             })}
           </List>
         </Paper>
-        {!pool.length ? <Typography variant="body2" color="text.secondary">No spells found for this filter.</Typography> : null}
+        {!pool.length ? <Typography variant="body2" sx={{ color: 'text.secondary' }}>No spells found for this filter.</Typography> : null}
       </Stack>
     </Paper>
   );

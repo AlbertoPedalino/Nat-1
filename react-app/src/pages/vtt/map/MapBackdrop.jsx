@@ -112,9 +112,7 @@ export default function MapBackdrop({
           component="svg"
           aria-hidden
           data-play-area={hexPlayAreaMatchesMap ? 'hex-map' : 'hex-custom'}
-          width="100%"
-          height="100%"
-          sx={playAreaSvgSx}
+          sx={[{ width: '100%', height: '100%' }, playAreaSvgSx]}
         >
           {hexPlayAreaMatchesMap ? (
             <rect

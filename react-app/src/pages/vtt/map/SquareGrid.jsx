@@ -50,9 +50,7 @@ function SquareGrid({
       component="svg"
       aria-hidden
       data-square-grid
-      width={width}
-      height={height}
-      sx={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
+      sx={{ width: width, height: height, position: 'absolute', inset: 0, pointerEvents: 'none' }}
     >
       {clipRect ? (
         <defs>

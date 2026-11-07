@@ -36,7 +36,7 @@ export default function Reinforcements() {
           <Stack spacing={1.25}>
             <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
               <Search size={16} />
-              <Typography fontWeight={700}>Search global database</Typography>
+              <Typography sx={{ fontWeight: 700 }}>Search global database</Typography>
             </Stack>
             <MonsterBrowser
               monsterDb={monsterDb}
@@ -49,7 +49,7 @@ export default function Reinforcements() {
             />
           </Stack>
           <Stack spacing={1.25}>
-            <Typography fontWeight={700}>Manual quick-add</Typography>
+            <Typography sx={{ fontWeight: 700 }}>Manual quick-add</Typography>
             <TextField size="small" label="Name" value={manual.name} onChange={(event) => setManual((prev) => ({ ...prev, name: event.target.value }))} />
             <Stack direction="row" spacing={1}>
               <TextField size="small" label="HP Max" type="number" value={manual.hpMax} onChange={(event) => setManual((prev) => ({ ...prev, hpMax: event.target.value }))} />

@@ -85,10 +85,10 @@ export default function SpellSelectionPanel({ state, dispatch }) {
     <BuilderPanel id="panel-spells" title="Spells" icon={BookOpen} note={profile.preparedMode ? `${profile.preparedMode} casting` : 'Known/prepared spell selection'}>
       <Stack spacing={1.5}>
         {!isCaster ? (
-          <Typography color="text.secondary">No spellcasting for current class/subclass.</Typography>
+          <Typography sx={{ color: 'text.secondary' }}>No spellcasting for current class/subclass.</Typography>
         ) : (
           <>
-            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+            <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
               <Chip color={selectedCantrips.length > cantrips ? 'error' : 'primary'} label={`Cantrips ${selectedCantrips.length}/${cantrips}`} />
               <Chip color={selectedSpellsCount > spells ? 'error' : 'primary'} label={`Spells ${selectedSpellsCount}/${spells}`} />
               {profile.ability ? <Chip label={`Ability ${profile.ability.toUpperCase()}`} /> : null}
@@ -108,7 +108,7 @@ export default function SpellSelectionPanel({ state, dispatch }) {
               ))}
             </ToggleButtonGroup>
             {activeIsWizard ? (
-              <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+              <Stack direction="row" spacing={1} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
                 <ToggleButtonGroup size="small" exclusive value={wizardMode} onChange={(_, next) => next && setWizardMode(next)}>
                   <ToggleButton value="prepare">Prepare</ToggleButton>
                   <ToggleButton value="book">Spellbook</ToggleButton>
@@ -158,7 +158,7 @@ export default function SpellSelectionPanel({ state, dispatch }) {
               </List>
             </Paper>
             {!pool.length ? (
-              <Typography color="text.secondary">
+              <Typography sx={{ color: 'text.secondary' }}>
                 {activeIsWizard && !wizardBookMode ? 'No spells in this Wizard spellbook level.' : 'No spells found for this level/filter.'}
               </Typography>
             ) : null}

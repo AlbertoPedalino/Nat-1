@@ -9,8 +9,7 @@ export default function ImportSheetFab({ onNotify, onFile, sx, buttonSx }) {
     <Stack
       direction="row"
       spacing={1}
-      alignItems="center"
-      sx={sx}
+      sx={[{ alignItems: 'center' }, sx]}
     >
       <input
         ref={inputRef}

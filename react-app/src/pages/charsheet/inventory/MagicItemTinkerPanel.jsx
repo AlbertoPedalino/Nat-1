@@ -198,7 +198,7 @@ export default function MagicItemTinkerPanel({ character, sheet, resources }) {
         <Typography sx={{ fontSize: '0.62rem', color: 'text.secondary', mb: 0.55 }}>
           Spend a level 1+ spell slot; the replicated item regains charges equal to the slot level.
         </Typography>
-        <Stack direction="row" spacing={0.5} useFlexGap flexWrap="wrap">
+        <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: 'wrap' }}>
           <Select size="small" displayEmpty value={chargeSource} onChange={(event) => setChargeSource(event.target.value)} sx={selectSx}>
             <MenuItem value=""><em>Select charged item…</em></MenuItem>
             {chargeable.map((item) => (
@@ -217,7 +217,7 @@ export default function MagicItemTinkerPanel({ character, sheet, resources }) {
           </Select>
         </Stack>
         {selectedChargeItem ? (
-          <Stack direction="row" spacing={0.5} alignItems="center" sx={{ mt: 0.5 }}>
+          <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', mt: 0.5 }}>
             <Button size="small" variant="outlined" onClick={() => updateCharges(-1)} disabled={readOnly || itemChargeCurrent(selectedChargeItem) <= 0}>− Charge</Button>
             <Button size="small" variant="outlined" onClick={() => updateCharges(1)} disabled={readOnly || itemChargeCurrent(selectedChargeItem) >= itemChargeMaximum(selectedChargeItem)}>+ Charge</Button>
             <Button size="small" variant="contained" onClick={chargeItem} disabled={readOnly || !selectedSlot || itemChargeCurrent(selectedChargeItem) >= itemChargeMaximum(selectedChargeItem)}>Spend Slot</Button>
@@ -244,7 +244,7 @@ export default function MagicItemTinkerPanel({ character, sheet, resources }) {
         <Typography sx={{ fontSize: '0.62rem', color: 'text.secondary', mb: 0.55 }}>
           Transform one replicated item into a different item based on another plan you know. Once per Long Rest.
         </Typography>
-        <Stack direction="row" spacing={0.5} useFlexGap flexWrap="wrap">
+        <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: 'wrap' }}>
           <Select size="small" displayEmpty value={transmuteSource} onChange={(event) => { setTransmuteSource(event.target.value); setTransmuteTarget(''); }} sx={selectSx}>
             <MenuItem value=""><em>Transform item…</em></MenuItem>
             {sourceOptions.map((option) => <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>)}

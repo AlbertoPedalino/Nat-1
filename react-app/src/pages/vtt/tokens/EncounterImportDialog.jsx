@@ -113,11 +113,11 @@ export default function EncounterImportDialog({
         {!instances.length && listing ? (
           <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
             <CircularProgress size={16} />
-            <Typography color="text.secondary" variant="body2">Loading your encounter saves…</Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Loading your encounter saves…</Typography>
           </Stack>
         ) : null}
         {!instances.length && !listing ? (
-          <Typography color="text.secondary" variant="body2">
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
             No Encounter Builder saves yet. Prepare one in the Encounter Builder, and sign in to
             see the ones made on another device.
           </Typography>
@@ -170,7 +170,7 @@ export default function EncounterImportDialog({
               control={<Switch size="small" checked={hidden} onChange={(event) => setHidden(event.target.checked)} />}
               label={<Typography variant="body2">Place on the GM layer</Typography>}
             />
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
               {hidden
                 ? 'The party will not receive these pieces until you move them to the token layer.'
                 : 'The party sees these pieces as soon as they land.'}

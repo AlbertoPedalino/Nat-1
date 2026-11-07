@@ -36,7 +36,7 @@ import { UI_COLORS } from '../../shared/ui/colors.js';
 function StepLabel({ step, index }) {
   const Icon = step.icon;
   return (
-    <Stack direction="row" spacing={0.65} alignItems="center" sx={{ minWidth: 0 }}>
+    <Stack direction="row" spacing={0.65} sx={{ alignItems: 'center', minWidth: 0 }}>
       <Chip size="small" label={index + 1} sx={{ height: 18, fontSize: '0.56rem' }} />
       <Icon size={14} />
       <span>{step.label}</span>
@@ -140,7 +140,7 @@ export default function CharBuilder() {
             {cloudConflict ? (
               <SheetConflictBanner subject="character" onLoadRemote={loadCloudVersion} onKeepLocal={keepBuilderVersion} />
             ) : null}
-            <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mb: 0.75, color: 'primary.main' }}>
+            <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', mb: 0.75, color: 'primary.main' }}>
               <ActiveIcon size={16} />
               <Typography variant="h2" sx={{ fontSize: '0.86rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'primary.main' }}>{activeStep.label}</Typography>
               <Chip size="small" label={`${state.tab + 1} / ${STEPS.length}`} sx={{ height: 18, fontSize: '0.54rem' }} />
@@ -159,7 +159,7 @@ export default function CharBuilder() {
             />
 
             <Divider sx={{ my: 1 }} />
-            <Stack direction="row" justifyContent="space-between">
+            <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
               <Button
                 startIcon={<ChevronLeft size={16} />}
                 disabled={state.tab === 0}
@@ -187,7 +187,7 @@ export default function CharBuilder() {
           </Box>
         </Box>
 
-        <Typography component="footer" variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1.4, textAlign: 'center', fontSize: '0.58rem' }}>
+        <Typography component="footer" variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 1.4, textAlign: 'center', fontSize: '0.58rem' }}>
           Data from 5etools via GitHub mirror - D&D 5e is a trademark of Wizards of the Coast
         </Typography>
       </Box>

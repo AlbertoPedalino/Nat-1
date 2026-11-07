@@ -66,7 +66,7 @@ export function LayerPanel({ activeLayer, compact = false, onActiveLayerChange }
   return (
     <Stack spacing={1}>
       {buttons}
-      <Typography variant="caption" color="text.secondary">
+      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
         Pieces on the other layers stay visible but cannot be moved, so arranging
         the party never nudges the scenery. The GM layer is never sent to players.
       </Typography>
@@ -88,7 +88,7 @@ export function FogPanel({ scene, busy, paintMode, brushSize, onEnableFog, onPai
         <Button size="small" variant="outlined" startIcon={<Cloud size={15} />} disabled={busy} onClick={onEnableFog}>
           Cover the map
         </Button>
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
           Sized to the map image, and revealed with the brush as the party explores.
         </Typography>
       </Stack>
@@ -120,7 +120,7 @@ export function FogPanel({ scene, busy, paintMode, brushSize, onEnableFog, onPai
         <Button size="small" fullWidth onClick={() => onFogAll(true)} disabled={busy}>Reveal all</Button>
         <Button size="small" fullWidth onClick={() => onFogAll(false)} disabled={busy}>Cover all</Button>
       </Stack>
-      <Typography variant="caption" color="text.secondary">
+      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
         While a brush is selected the left button paints and the middle one pans.
       </Typography>
     </Stack>
@@ -282,7 +282,7 @@ function AreaOptions({ options, feetPerCell, gridShape, onChange, onFeetPerCellC
         slotProps={{ htmlInput: { maxLength: 120 } }}
       />
 
-      <Typography variant="caption" color="text.secondary">
+      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
         {`Press where it starts and drag it out, one ${cellWord} (${feetPerCell} ft) at a time; a cone or a line faces where you drag. Right-click it (or hold it on a touch screen) to change it later.`}
       </Typography>
     </Stack>
@@ -359,7 +359,7 @@ export function MeasurePanel({
         />
       )}
 
-      <Typography variant="caption" color="text.secondary">
+      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
         {miles
           ? `Drag from the origin. Distance is counted in ${cellPlural} — on hexes every neighbour is one step, which is what travel time is reckoned in.`
           : 'Drag from the origin. A 5e cone is as wide at the far end as it is long, and a diagonal counts as one square — three across and two down is 15 ft.'}
@@ -400,7 +400,7 @@ export function CursorPanel({ paintMode, onPaintModeChange }) {
           <Box component="span" sx={pillLabelSx}>Box select</Box>
         </ToggleButton>
       </ToggleButtonGroup>
-      <Typography variant="caption" color="text.secondary">
+      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
         {boxSelect
           ? 'Drag a rectangle over pieces you can control. Drag any selected piece to move the group; hold Shift or Ctrl to add another area. Use Delete or Backspace to remove it, and Escape to clear.'
           : 'Drag a piece to move it. Right-click a piece for its label and conditions.'}
@@ -423,7 +423,7 @@ export function LaserPanel({ paintMode, onPaintModeChange }) {
       >
         {active ? 'Put the pointer down' : 'Take the pointer'}
       </Button>
-      <Typography variant="caption" color="text.secondary">
+      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
         Once selected, the whole table sees the dot follow your cursor. Choose
         Cursor or another tool to put it away. It is never saved.
       </Typography>

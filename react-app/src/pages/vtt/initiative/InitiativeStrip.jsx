@@ -47,7 +47,7 @@ export default function InitiativeStrip({
 
   return (
     <Box data-viewport-control sx={stripRootSx}>
-      <Stack direction="row" alignItems="center" spacing={0.5} sx={stripSx}>
+      <Stack direction="row" spacing={0.5} sx={[{ alignItems: 'center' }, stripSx]}>
         {controls ? (
           <Tooltip title="Previous turn">
             <span>

@@ -208,7 +208,7 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
                   variant="outlined" />
               )}
             </Box>
-            <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {[race, clsDisplay, bg].filter(Boolean).join(' · ')}
             </Typography>
           </Box>

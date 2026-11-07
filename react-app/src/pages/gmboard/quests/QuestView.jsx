@@ -18,11 +18,11 @@ function QuestCountHeader({ questSet }) {
 
   return (
     <Box sx={{ ...headerSx, bgcolor: theme.palette.gmboard.panelOverlay }}>
-      <Stack direction="row" spacing={0.5} alignItems="center">
+      <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
         <Dices size={12} color={theme.palette.text.secondary} />
         <Typography sx={headerLabelSx}>Quest Count</Typography>
       </Stack>
-      <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" sx={{ mt: 0.5 }}>
+      <Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap', mt: 0.5 }}>
         <Typography sx={headerTextSx}>{scopeLabel} → rolls:</Typography>
         {questSet.rolls.map((r, i) => (
           <Box

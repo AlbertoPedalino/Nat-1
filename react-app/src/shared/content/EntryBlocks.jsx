@@ -39,7 +39,7 @@ export function EntryBlocks({
 }) {
   const resolved = Array.isArray(blocks) ? blocks : entriesToTextBlocks(entries);
   if (!resolved?.length) {
-    return emptyText ? <Typography variant="body2" color="text.secondary" sx={{ fontSize }}>{emptyText}</Typography> : null;
+    return emptyText ? <Typography variant="body2" sx={{ color: 'text.secondary', fontSize }}>{emptyText}</Typography> : null;
   }
   const grouped = groupBlocks(resolved);
 

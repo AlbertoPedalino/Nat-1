@@ -19,7 +19,7 @@ export function playAreaSummary(scene) {
 export function PlayAreaControls({ scene, busy, onPlayAreaChange, onFitPlayArea }) {
   return (
     <>
-      <Typography variant="caption" color="text.secondary">
+      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
         Outside it is staging: the players never receive what stands there.
       </Typography>
       {scene.playArea ? (

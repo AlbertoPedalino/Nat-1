@@ -85,7 +85,7 @@ function FeatSpellListSelector({ feat, additional, entryIdx, slotKey, dispatch, 
   const listLabel = feat?.choiceUi?.listLabel || `${feat?.name || 'Feat'} Spell List`;
   return (
     <Stack spacing={0.6}>
-      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 700 }}>
+      <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 700 }}>
         {listLabel}
       </Typography>
       {locked ? (
@@ -98,7 +98,7 @@ function FeatSpellListSelector({ feat, additional, entryIdx, slotKey, dispatch, 
           sx={{ alignSelf: 'flex-start' }}
         />
       ) : (
-        <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
+        <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: 'wrap' }}>
           {additional.map((entry, idx) => (
             <Button
               key={`${slotKey}-entry-${idx}`}
@@ -121,7 +121,7 @@ function FeatSpellListSelector({ feat, additional, entryIdx, slotKey, dispatch, 
 function FeatDescriptionRows({ feat }) {
   const { introEntries, namedEntries } = partitionNamedEntries(featDescriptionEntries(feat));
   if (!introEntries.length && !namedEntries.length) {
-    return <Typography color="text.secondary">No description available.</Typography>;
+    return <Typography sx={{ color: 'text.secondary' }}>No description available.</Typography>;
   }
   return (
     <Stack spacing={0.5} sx={{ minWidth: 0 }}>

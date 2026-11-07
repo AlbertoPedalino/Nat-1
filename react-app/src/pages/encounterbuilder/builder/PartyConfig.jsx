@@ -115,7 +115,7 @@ function StepperControls({ label, value, min, max, onChange }) {
           </IconButton>
         </span>
       </Tooltip>
-      <Typography fontWeight={700} sx={{ width: 34, textAlign: 'center' }}>
+      <Typography sx={{ fontWeight: 700, width: 34, textAlign: 'center' }}>
         {value}
       </Typography>
       <Tooltip title={`Increase ${label}`}>

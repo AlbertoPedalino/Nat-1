@@ -38,7 +38,7 @@ export function LightWeatherControls({ scene, onImageFilterChange, onAtmosphereC
   return (
     <>
       {pictureOnShow ? null : (
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
           Upload a battlemap or a background first: light and weather belong to a picture.
         </Typography>
       )}

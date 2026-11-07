@@ -164,9 +164,7 @@ function HexGrid({
     <Box
       component="svg"
       aria-hidden
-      width={width}
-      height={height}
-      sx={{
+      sx={{ width: width, height: height,
         position: 'absolute',
         inset: 0,
         pointerEvents: 'none',

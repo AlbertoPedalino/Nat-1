@@ -46,7 +46,7 @@ export function StatBlockPanel() {
       <Paper sx={statPanelSx}>
         <Stack spacing={1} sx={{ p: 2, minHeight: 220, alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
           <Typography variant="h2">Statblock</Typography>
-          <Typography color="text.secondary">Click a monster or player combatant to inspect it here.</Typography>
+          <Typography sx={{ color: 'text.secondary' }}>Click a monster or player combatant to inspect it here.</Typography>
         </Stack>
       </Paper>
     );
@@ -65,7 +65,7 @@ export function StatBlockPanel() {
       <Paper sx={statPanelSx}>
         <Stack spacing={1} sx={{ p: 2, minHeight: 220, alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
           <Typography variant="h2">Statblock</Typography>
-          <Typography color="text.secondary">Click a monster or player combatant to inspect it here.</Typography>
+          <Typography sx={{ color: 'text.secondary' }}>Click a monster or player combatant to inspect it here.</Typography>
         </Stack>
       </Paper>
     );

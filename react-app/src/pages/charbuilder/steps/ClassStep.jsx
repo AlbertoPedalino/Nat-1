@@ -91,7 +91,7 @@ export default function ClassStep({ state, dispatch }) {
         <Stack spacing={1.5}>
           {choiceSpecs.map(renderSpec)}
           {!choiceSpecs.length ? (
-            <Typography color="text.secondary">No class choices at current level.</Typography>
+            <Typography sx={{ color: 'text.secondary' }}>No class choices at current level.</Typography>
           ) : null}
         </Stack>
       </BuilderPanel>

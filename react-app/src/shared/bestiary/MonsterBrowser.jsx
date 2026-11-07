@@ -50,13 +50,13 @@ export default function MonsterBrowser({
     return (
       <Stack spacing={2} sx={{ alignItems: 'center', justifyContent: 'center', minHeight: 220 }}>
         <CircularProgress size={28} />
-        <Typography color="text.secondary">Loading 2024 bestiary...</Typography>
+        <Typography sx={{ color: 'text.secondary' }}>Loading 2024 bestiary...</Typography>
       </Stack>
     );
   }
 
   if (monsterDb.status === 'error') {
-    return <Typography color="error.main">{monsterDb.error}</Typography>;
+    return <Typography sx={{ color: 'error.main' }}>{monsterDb.error}</Typography>;
   }
 
   const allSourcesActive = !filters.sources?.length;
@@ -106,7 +106,7 @@ export default function MonsterBrowser({
         </FormControl>
       </Stack>
 
-      <Typography variant="caption" color="text.secondary">
+      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
         {formatNumber(filtered.length)} monsters from allowed 2024 sources
       </Typography>
 
@@ -125,12 +125,12 @@ export default function MonsterBrowser({
           >
             <MonsterToken monster={monster} size={30} fallbackText={monster.name?.[0]} />
             <Box sx={{ minWidth: 0, flex: 1 }}>
-              <Typography fontWeight={700} noWrap>{monster.name}</Typography>
-              <Typography variant="caption" color="text.secondary" noWrap>
+              <Typography noWrap sx={{ fontWeight: 700 }}>{monster.name}</Typography>
+              <Typography variant="caption" noWrap sx={{ color: 'text.secondary' }}>
                 {getType(monster.type)} · {monster.source}
               </Typography>
             </Box>
-            <Typography variant="caption" color="primary.main" sx={{ minWidth: 92, textAlign: 'right' }}>
+            <Typography variant="caption" sx={{ color: 'primary.main', minWidth: 92, textAlign: 'right' }}>
               CR {crKey(monster.cr)} · {formatNumber(crXP(monster.cr))} XP
             </Typography>
             <Tooltip title={pickLabel}>
@@ -147,7 +147,7 @@ export default function MonsterBrowser({
             </Tooltip>
           </Box>
         )) : (
-          <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>No monsters found.</Typography>
+          <Typography sx={{ color: 'text.secondary', py: 4, textAlign: 'center' }}>No monsters found.</Typography>
         )}
       </Stack>
 

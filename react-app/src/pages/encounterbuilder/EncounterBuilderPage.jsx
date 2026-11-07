@@ -56,7 +56,7 @@ function EncounterBuilderShell({ tool }) {
           <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} sx={{ alignItems: { xs: 'stretch', md: 'center' }, justifyContent: 'space-between' }}>
             <Box>
               <Typography variant="h1">Encounter Builder</Typography>
-              <Typography variant="body2" color="text.secondary">Instance {tool.id}</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>Instance {tool.id}</Typography>
             </Box>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ alignItems: { xs: 'stretch', sm: 'center' }, minWidth: 0 }}>
               <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: 'wrap' }}>

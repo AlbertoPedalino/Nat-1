@@ -100,7 +100,7 @@ export default function CompendiumBrowser({ compendium, layout = 'page', autoFoc
               >
                 <Box sx={{ minWidth: 0, flex: 1 }}>
                   <Typography variant="body2" sx={resultNameSx}>{entry.name}</Typography>
-                  <Typography variant="caption" color="text.secondary" noWrap component="div">
+                  <Typography variant="caption" noWrap component="div" sx={{ color: 'text.secondary' }}>
                     {[entry.subtitle, entry.source].filter(Boolean).join(' · ')}
                   </Typography>
                 </Box>
@@ -114,10 +114,10 @@ export default function CompendiumBrowser({ compendium, layout = 'page', autoFoc
             ))}
           </List>
         ) : (
-          <Typography variant="body2" color="text.secondary" sx={statusSx}>Nothing found.</Typography>
+          <Typography variant="body2" sx={[{ color: 'text.secondary' }, statusSx]}>Nothing found.</Typography>
         )}
         {results.length === RESULT_LIMIT ? (
-          <Typography variant="caption" color="text.secondary" sx={statusSx}>
+          <Typography variant="caption" sx={[{ color: 'text.secondary' }, statusSx]}>
             Showing the first {RESULT_LIMIT}: type more to narrow it down.
           </Typography>
         ) : null}
@@ -164,7 +164,7 @@ export default function CompendiumBrowser({ compendium, layout = 'page', autoFoc
               {detail}
             </>
           ) : (
-            <Typography variant="body2" color="text.secondary" sx={statusSx}>
+            <Typography variant="body2" sx={[{ color: 'text.secondary' }, statusSx]}>
               Pick an entry to read it.
             </Typography>
           )}

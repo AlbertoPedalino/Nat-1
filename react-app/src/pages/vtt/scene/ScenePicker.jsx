@@ -154,7 +154,7 @@ export default function ScenePicker({
 
       {!campaigns.length ? (
         <Paper sx={emptySx}>
-          <Typography color="text.secondary">
+          <Typography sx={{ color: 'text.secondary' }}>
             Maps belong to a campaign you run. Create one from the Campaigns page first.
           </Typography>
         </Paper>
@@ -167,7 +167,7 @@ export default function ScenePicker({
             <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', mb: 1.5, gap: 1 }}>
               <Box>
                 <Typography variant="h2">{campaign.name}</Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                   {campaign.members.length} character{campaign.members.length === 1 ? '' : 's'} in the campaign
                 </Typography>
               </Box>
@@ -193,7 +193,7 @@ export default function ScenePicker({
                       </Typography>
                       {scene.isLive ? <Chip size="small" color="primary" label="Live" sx={liveChipSx} /> : null}
                       {!scene.imagePath ? (
-                        <Typography variant="caption" color="text.secondary">no map yet</Typography>
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>no map yet</Typography>
                       ) : null}
                     </Box>
                     <Tooltip title={scene.isLive ? 'The players are seeing this scene' : 'Show this scene to the players'}>
@@ -217,7 +217,7 @@ export default function ScenePicker({
                 ))}
               </Stack>
             ) : (
-              <Typography color="text.secondary" variant="body2">No scenes yet.</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>No scenes yet.</Typography>
             )}
           </Paper>
         );

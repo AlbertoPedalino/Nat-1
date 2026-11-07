@@ -19,7 +19,7 @@ import { UI_FONTS } from '../../../shared/ui/fonts.js';
 export function SectionLabel({ label, hint }) {
   return (
     <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-      <Typography variant="caption" color="text.secondary">{label}</Typography>
+      <Typography variant="caption" sx={{ color: 'text.secondary' }}>{label}</Typography>
       {hint ? <InfoHint label={`About the ${label.toLowerCase()}`} text={hint} /> : null}
     </Stack>
   );

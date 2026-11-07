@@ -72,7 +72,7 @@ export default function BeastChoice({ spec, character, dispatch, beasts }) {
   return (
     <Paper variant="outlined" sx={{ p: 1, minWidth: 0 }}>
       <Stack spacing={0.8} sx={{ minWidth: 0 }}>
-        <Stack direction="row" spacing={0.65} alignItems="center" flexWrap="wrap" useFlexGap>
+        <Stack direction="row" spacing={0.65} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
           <Typography sx={{ flex: 1, minWidth: 0, color: 'text.secondary', fontSize: '0.72rem', fontWeight: 800, lineHeight: 1.25 }}>
             {spec.label}
           </Typography>
@@ -109,7 +109,7 @@ export default function BeastChoice({ spec, character, dispatch, beasts }) {
             </List>
           ) : (
             <Box sx={{ px: 1, py: 0.75 }}>
-              <Typography color="text.secondary" sx={{ fontSize: '0.78rem' }}>
+              <Typography sx={{ color: 'text.secondary', fontSize: '0.78rem' }}>
                 {options.length ? 'No matches.' : (lv < 2 ? 'Reach Druid level 2 to learn beast forms.' : 'No beasts available.')}
               </Typography>
             </Box>

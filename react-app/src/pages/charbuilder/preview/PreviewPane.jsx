@@ -83,13 +83,13 @@ function AbilityScoreGrid({ scores }) {
         <Grid key={stat} size={{ xs: 4 }}>
           <Card variant="outlined" sx={{ textAlign: 'center', ...SECTION_CARD_SX }}>
             <CardContent sx={{ p: 0.65, '&:last-child': { pb: 0.65 } }}>
-              <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.61rem', fontWeight: 700, letterSpacing: '0.04em' }}>
+              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: '0.61rem', fontWeight: 700, letterSpacing: '0.04em' }}>
                 {ABILITY_ABBREVIATIONS[stat]}
               </Typography>
               <Typography variant="h2" sx={{ fontSize: '1rem', lineHeight: 1.15, color: 'text.primary' }}>
                 {scores[stat] ?? '-'}
               </Typography>
-              <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.68rem' }}>
+              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: '0.68rem' }}>
                 {signed(abilityModifier(scores[stat]))}
               </Typography>
             </CardContent>

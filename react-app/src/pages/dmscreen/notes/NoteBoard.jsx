@@ -106,7 +106,7 @@ export default function NoteBoard() {
         ) : null}
         {/* Always rendered so the live region exists before it has anything to
             say; a region added to the page mid-update is announced unreliably. */}
-        <Typography variant="caption" role="status" aria-live="polite" color="text.secondary">
+        <Typography variant="caption" role="status" aria-live="polite" sx={{ color: 'text.secondary' }}>
           {partial ? `${visibleNotes.length} of ${notes.length} notes` : ''}
         </Typography>
         <Button variant="contained" startIcon={<Plus size={16} />} onClick={addNewNote}>
@@ -118,7 +118,7 @@ export default function NoteBoard() {
         <Paper variant="outlined" sx={emptySx}>
           <StickyNote size={34} aria-hidden="true" />
           <Typography variant="h2">Build your quick-reference screen</Typography>
-          <Typography color="text.secondary" sx={{ maxWidth: 520 }}>
+          <Typography sx={{ color: 'text.secondary', maxWidth: 520 }}>
             Keep house rules, NPC names, session hooks, loot, and reminders close during play.
           </Typography>
           <Button variant="outlined" startIcon={<Plus size={16} />} onClick={addNewNote}>
@@ -129,7 +129,7 @@ export default function NoteBoard() {
         <Paper variant="outlined" sx={emptySx}>
           <SearchX size={34} aria-hidden="true" />
           <Typography variant="h2">No notes match that search</Typography>
-          <Typography color="text.secondary" sx={{ maxWidth: 520 }}>
+          <Typography sx={{ color: 'text.secondary', maxWidth: 520 }}>
             Every word has to appear in a note's title or text.
           </Typography>
           {/* Not another "Clear search": two controls with the same accessible

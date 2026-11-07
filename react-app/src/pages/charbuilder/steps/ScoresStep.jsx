@@ -50,7 +50,7 @@ export default function ScoresStep({ state, dispatch }) {
             <Button startIcon={<Dice5 size={16} />} onClick={() => dispatch({ type: 'dice/roll' })}>
               Roll Stats
             </Button>
-            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+            <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
               {character.dicePool.map((value, index) => (
                 <Button
                   key={`${value}-${index}`}
@@ -73,10 +73,10 @@ export default function ScoresStep({ state, dispatch }) {
             return (
               <Grid key={stat} size={{ xs: 12, md: 6 }}>
                 <Paper variant="outlined" sx={{ p: 1.5, height: '100%' }}>
-                  <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1.25}>
+                  <Stack direction="row" spacing={1.25} sx={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <Box sx={{ minWidth: 0, flex: 1 }}>
                       <Typography variant="h2" sx={{ lineHeight: 1.15 }}>{ABILITY_ABBREVIATIONS[stat]}</Typography>
-                      <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap sx={{ mt: 1 }}>
+                      <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: 'wrap', mt: 1 }}>
                         <Chip size="small" label={`Base ${baseScore}`} variant="outlined" />
                         {bonusBreakdown.map((bonus, index) => (
                           <Chip
@@ -102,7 +102,7 @@ export default function ScoresStep({ state, dispatch }) {
                       }}
                     >
                       <Typography sx={{ fontSize: '1.15rem', fontWeight: 800, lineHeight: 1 }}>{finalScore ?? '-'}</Typography>
-                      <Typography color="text.secondary" sx={{ fontSize: '0.72rem', mt: 0.35 }}>
+                      <Typography sx={{ color: 'text.secondary', fontSize: '0.72rem', mt: 0.35 }}>
                         {scoreMod(finalScore)}
                       </Typography>
                     </Box>

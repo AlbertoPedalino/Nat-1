@@ -49,7 +49,7 @@ function ClassRow({ cls, selected, onSelect, prereqMet = true, prereqReason = ''
       containerSx={{ borderBottom: 1, borderColor: 'divider' }}
       detailsSx={{ px: 2, pt: 0.25, pb: 1.25, bgcolor: 'background.paper' }}
       summary={({ open, toggle, disabled: caretDisabled }) => (
-        <Stack direction="row" alignItems="stretch" sx={{ minWidth: 0 }}>
+        <Stack direction="row" sx={{ alignItems: 'stretch', minWidth: 0 }}>
           <ListItemButton
             selected={selected}
             disabled={!prereqMet}
@@ -61,9 +61,9 @@ function ClassRow({ cls, selected, onSelect, prereqMet = true, prereqReason = ''
                 <Icon size={15} />
               </Box>
               <ListItemText
-                primary={<Typography fontWeight={500} sx={{ fontSize: '0.76rem' }}>{cls.name}</Typography>}
+                primary={<Typography sx={{ fontWeight: 500, fontSize: '0.76rem' }}>{cls.name}</Typography>}
                 secondary={(
-                  <Stack direction="row" spacing={0.45} flexWrap="wrap" useFlexGap sx={{ mt: 0.35 }}>
+                  <Stack direction="row" spacing={0.45} useFlexGap sx={{ flexWrap: 'wrap', mt: 0.35 }}>
                     <Chip size="small" label={`Hit Die ${hitDie}`} />
                     {cls.primary ? <Chip size="small" label={`Primary ${cls.primary}`} /> : null}
                     {saves ? <Chip size="small" label={`Saves ${saves}`} /> : null}
@@ -145,7 +145,7 @@ export default function ClassPanel({ state, character, dispatch }) {
       icon={PanelIcon}
       note={activeExtra ? 'Selecting multiclass class' : 'Selecting primary class'}
       action={
-        <Stack direction="row" spacing={0.55} flexWrap="wrap" useFlexGap sx={{ mt: 0.5 }}>
+        <Stack direction="row" spacing={0.55} useFlexGap sx={{ flexWrap: 'wrap', mt: 0.5 }}>
           {activeExtra ? (
             <Button size="small" color="error" startIcon={<Trash2 size={16} />} onClick={requestRemove}>
               Remove
@@ -232,7 +232,7 @@ export default function ClassPanel({ state, character, dispatch }) {
               );
             })}
             {!visibleClasses.length ? (
-              <Typography color="text.secondary" sx={{ px: 1, py: 1.25 }}>
+              <Typography sx={{ color: 'text.secondary', px: 1, py: 1.25 }}>
                 No classes found.
               </Typography>
             ) : null}
@@ -257,7 +257,7 @@ export default function ClassPanel({ state, character, dispatch }) {
         >
           <Stack spacing={1.5}>
             <Typography>{pendingConfirm.message}</Typography>
-            <Typography variant="body2" color="text.secondary">{pendingConfirm.note}</Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>{pendingConfirm.note}</Typography>
           </Stack>
         </SheetDialog>
       )}

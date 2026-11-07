@@ -113,7 +113,7 @@ export default function CombatantCard({ combatant, active }) {
                     <span style={nameSpanStyle}>{combatant.name}</span>
                   </Button>
                 ) : (
-                  <Typography fontWeight={800} noWrap>{combatant.name}</Typography>
+                  <Typography noWrap sx={{ fontWeight: 800 }}>{combatant.name}</Typography>
                 )}
                 {!isMonster && combatant.sourceId ? (
                   <Tooltip title="Open sheet">
@@ -171,7 +171,7 @@ export default function CombatantCard({ combatant, active }) {
                     value={combatant.hpCurrent}
                     onChange={(value) => dispatch({ type: 'setHp', id: combatant.id, value })}
                   />
-                  <Typography color="text.secondary" sx={hpMaxSx}>/</Typography>
+                  <Typography sx={[{ color: 'text.secondary' }, hpMaxSx]}>/</Typography>
                   <HpField
                     label="Max"
                     value={combatant.hpMax}

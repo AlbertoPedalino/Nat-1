@@ -92,7 +92,7 @@ export default function NegotiationDialog({ open, onClose }) {
       <Stack spacing={1.75}>
         <Box>
           <Typography sx={sectionTitleSx}>NPC attitude</Typography>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
             Changing attitude resets Patience and Interest. The threshold is preserved.
           </Typography>
           <Box sx={attitudeGridSx}>
@@ -146,11 +146,11 @@ export default function NegotiationDialog({ open, onClose }) {
           <Paper sx={finalResultSx}>
             <Typography sx={finalEyebrowSx}>Negotiation concluded</Typography>
             <Typography sx={finalResultTextSx}>{status.result}</Typography>
-            <Typography variant="caption" color="text.secondary">{status.reason}</Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>{status.reason}</Typography>
           </Paper>
         ) : (
           <Paper variant="outlined" sx={currentStateSx}>
-            <Typography variant="caption" color="text.secondary">Current position</Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>Current position</Typography>
             <Typography sx={currentResultSx}>
               Interest {negotiation.interest}: {NEGOTIATION_RESULTS[negotiation.interest]}
             </Typography>

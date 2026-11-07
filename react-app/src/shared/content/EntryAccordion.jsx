@@ -37,9 +37,9 @@ export function EntryAccordion({ title, entries, tone, titleColor = 'text.primar
           '& .MuiAccordionSummary-content.Mui-expanded': { my: contentMy },
         }}
       >
-        <Stack direction="row" spacing={1} alignItems="center" sx={{ minWidth: 0 }}>
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center', minWidth: 0 }}>
           {leading}
-          <Typography variant="body2" fontWeight={700} noWrap sx={{ minWidth: 0, color: titleColor, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <Typography variant="body2" noWrap sx={{ fontWeight: 700, minWidth: 0, color: titleColor, overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {title}
           </Typography>
         </Stack>
