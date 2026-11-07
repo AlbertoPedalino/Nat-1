@@ -1,6 +1,6 @@
 import { adapterRegistry } from '../../../adapters/registry.js';
 import { canonicalProficiencyLabel } from '../progression/proficiencyDisplay.js';
-import { primaryClassLevel } from '../progression/classLevel.js';
+import { classEntities } from '../progression/classLevel.js';
 import { PROFICIENCY_CHOICE_KEYS, isChoicePlaceholderValue } from '../progression/typedProficiencies.js';
 import { matchKey, stripSource } from '../../content/nameKeys.js';
 import { asArray } from '../../lists.js';
@@ -83,14 +83,8 @@ export function collectAdapterProfGrants(character) {
     push(adapterRegistry.getClassSheetProficiencies(className), level, prefix, 'class', className);
     push(adapterRegistry.getSubclassSheetProficiencies(className, subclassShortName), level, prefix, 'subclass', subclassShortName);
   };
-  collectEntity(
-    character?.className || '',
-    character?.subclassShortName || '',
-    primaryClassLevel(character),
-    '',
-  );
-  (character?.extraClasses || []).forEach((extra, index) => {
-    collectEntity(extra?.name || '', extra?.subclassShortName || '', extra?.level || 1, `mc${index}_`);
+  classEntities(character).forEach((entity) => {
+    collectEntity(entity.className, entity.subclassShortName, entity.level, entity.choicePrefix);
   });
   push(
     adapterRegistry.getSpeciesSheetProficiencies(character?.speciesName || '', character?.speciesSource || ''),

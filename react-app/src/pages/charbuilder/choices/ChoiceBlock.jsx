@@ -11,6 +11,7 @@ import { PROFICIENCY_CHOICE_KEYS, isChoicePlaceholderValue, parseTypedProficienc
 import { matchKey } from '../../../shared/content/nameKeys.js';
 import { baseChoiceKey } from '../../../shared/character/progression/choiceUtils.js';
 import { asArray } from '../../../shared/lists.js';
+import { characterClassFeatures } from '../../../shared/character/progression/classLevel.js';
 
 function parseTypedChoiceValue(value) {
   const parsed = parseTypedProficiencyValue(value);
@@ -101,11 +102,7 @@ function collectBlockedForKind({ character, kind }) {
     addFixedBlocks(blocked, character.cls?.startingProficiencies?.weaponProficiencies || character.clsSnapshot?.startingProficiencies?.weaponProficiencies, 'weapon');
   }
 
-  [
-    ...(character.allFeatures || []),
-    ...(character.allSubFeatures || []),
-    ...((character.extraClasses || []).flatMap((extra) => [...(extra.allFeatures || []), ...(extra.allSubFeatures || [])])),
-  ].forEach((feature) => {
+  characterClassFeatures(character).forEach((feature) => {
     if (kind === 'skill') addFixedBlocks(blocked, feature.skillProficiencies, 'skill');
     if (kind === 'tool') addFixedBlocks(blocked, feature.toolProficiencies, 'tool');
     if (kind === 'language') addFixedBlocks(blocked, feature.languageProficiencies, 'language');
@@ -137,11 +134,7 @@ function collectCurrentProficientSkills({ character }) {
   addFixedBlocks(skills, character?.backgroundObj?.skillProficiencies || character?.backgroundSnapshot?.skillProficiencies, 'skill');
   addFixedBlocks(skills, character?.speciesObj?.skillProficiencies || character?.speciesSnapshot?.skillProficiencies, 'skill');
 
-  [
-    ...(character?.allFeatures || []),
-    ...(character?.allSubFeatures || []),
-    ...((character?.extraClasses || []).flatMap((extra) => [...(extra.allFeatures || []), ...(extra.allSubFeatures || [])])),
-  ].forEach((feature) => addFixedBlocks(skills, feature.skillProficiencies, 'skill'));
+  characterClassFeatures(character).forEach((feature) => addFixedBlocks(skills, feature.skillProficiencies, 'skill'));
 
   return skills;
 }

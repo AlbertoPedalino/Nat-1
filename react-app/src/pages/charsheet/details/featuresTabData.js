@@ -1,7 +1,7 @@
 import { adapterRegistry } from '../../../adapters/registry.js';
 import { warlockInvocationSelections } from '../../../shared/character/progression/warlockUtils.js';
 import { buildOptionalFeatureEntryLookup } from '../../../shared/character/progression/optionalFeatures.js';
-import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
+import { classEntities } from '../../../shared/character/progression/classLevel.js';
 import { asArray } from '../../../shared/lists.js';
 import { choiceKey } from '../../../shared/content/nameKeys.js';
 import { stripMarkup } from '../../../shared/content/markupText.js';
@@ -42,78 +42,44 @@ export function collectWarlockInvocationFeatures(C) {
     });
   };
 
-  if (choiceKey(C?.className) === 'warlock') pushForPrefix('', primaryClassLevel(C));
-  (C?.extraClasses || []).forEach((extra, index) => {
-    if (choiceKey(extra?.name) !== 'warlock') return;
-    pushForPrefix(`mc${index}_`, Number(extra?.level || 1));
+  classEntities(C).forEach((entity) => {
+    if (choiceKey(entity.className) === 'warlock') pushForPrefix(entity.choicePrefix, entity.level);
   });
 
   return dedupeFeatures(out);
 }
 
 export function collectClassBuckets(C) {
-  const out = [];
-  const primaryLevel = primaryClassLevel(C);
-
-  if (C?.className) {
+  return classEntities(C).map((entity) => {
+    const { className, subclassShortName, level, choicePrefix, entry } = entity;
     const classFeatures = collectValidClassFeatures({
-      features: C?.allClassFeatures || C?.allFeatures || [],
-      className: C.className,
-      level: primaryLevel,
-      character: C,
-      choicePrefix: '',
-    }).map((feature) => ({ ...feature, source: C.className || 'Class', sourceKind: 'class' }));
-
-    const subclassFeatures = collectValidSubclassFeatures({
-      features: C?.allSubFeatures || [],
-      className: C.className,
-      subclassName: C?.subclassShortName || '',
-      level: primaryLevel,
-      character: C,
-      choicePrefix: '',
-    }).map((feature) => ({ ...feature, source: C.subclassShortName || 'Subclass', sourceKind: 'subclass' }));
-
-    out.push({
-      kind: 'class',
-      name: C.className,
-      title: `${C.className} ${primaryLevel}${C?.subclassShortName ? ` - ${C.subclassShortName}` : ''}`,
-      index: null,
-      features: dedupeFeatures([...classFeatures, ...subclassFeatures]),
-    });
-  }
-
-  (C?.extraClasses || []).forEach((extra, index) => {
-    if (!extra?.name) return;
-    const level = Number(extra?.level || 1);
-    const choicePrefix = `mc${index}_`;
-
-    const classFeatures = collectValidClassFeatures({
-      features: extra?.allClassFeatures || extra?.allFeatures || [],
-      className: extra.name,
+      features: entry?.allClassFeatures || entry?.allFeatures || [],
+      className,
       level,
       character: C,
       choicePrefix,
-    }).map((feature) => ({ ...feature, source: extra.name || 'Class', sourceKind: 'class' }));
+    }).map((feature) => ({ ...feature, source: className || 'Class', sourceKind: 'class' }));
 
     const subclassFeatures = collectValidSubclassFeatures({
-      features: extra?.allSubFeatures || [],
-      className: extra.name,
-      subclassName: extra?.subclassShortName || '',
+      features: entry?.allSubFeatures || [],
+      className,
+      subclassName: subclassShortName,
       level,
       character: C,
       choicePrefix,
-    }).map((feature) => ({ ...feature, source: extra.subclassShortName || 'Subclass', sourceKind: 'subclass' }));
+    }).map((feature) => ({ ...feature, source: subclassShortName || 'Subclass', sourceKind: 'subclass' }));
 
-    out.push({
-      kind: 'multiclass',
-      name: extra.name,
-      title: `MC ${index + 1} - ${extra.name} ${level}${extra?.subclassShortName ? ` - ${extra.subclassShortName}` : ''}`,
-      index,
+    const subtitle = subclassShortName ? ` - ${subclassShortName}` : '';
+    return {
+      kind: entity.isPrimary ? 'class' : 'multiclass',
+      name: className,
+      title: entity.isPrimary
+        ? `${className} ${level}${subtitle}`
+        : `MC ${entity.extraIndex + 1} - ${className} ${level}${subtitle}`,
+      index: entity.extraIndex,
       features: dedupeFeatures([...classFeatures, ...subclassFeatures]),
-    });
-  });
-
-  return out.filter((bucket) => bucket.features.length);
+    };
+  }).filter((bucket) => bucket.features.length);
 }
 
 function collectValidClassFeatures({ features, className, level, character, choicePrefix }) {

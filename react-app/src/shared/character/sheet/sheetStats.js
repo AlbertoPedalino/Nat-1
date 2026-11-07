@@ -4,7 +4,7 @@ import { wildShapeSaveBonus, wildShapeSaveProficient, wildShapeSkillBonus } from
 import { getProficiencyBonus } from '../progression/proficiency.js';
 import { abilityModifier } from '../progression/abilityModifier.js';
 import { abilityScore } from '../progression/abilityScores.js';
-import { primaryClassLevel } from '../progression/classLevel.js';
+import { characterClassFeatures, primaryClassLevel } from '../progression/classLevel.js';
 import { XP_THRESHOLDS } from '../progression/xp.js';
 import { collectSheetEffects } from './sheetEffects.js';
 import { getNormalizedChoices } from '../progression/choiceNormalization.js';
@@ -134,13 +134,8 @@ function proficiencyBearingFeatures(C) {
   return [
     C?.backgroundSnapshot,
     C?.speciesSnapshot,
-    ...(C?.allClassFeatures || []),
-    ...(C?.allSubFeatures || []),
+    ...characterClassFeatures(C),
     ...(C?.allFeatSnapshots || []),
-    ...((C?.extraClasses || []).flatMap((extra) => [
-      ...(extra?.allClassFeatures || extra?.allFeatures || []),
-      ...(extra?.allSubFeatures || []),
-    ])),
   ].filter(Boolean);
 }
 

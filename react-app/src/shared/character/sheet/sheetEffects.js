@@ -6,7 +6,7 @@ import {
 import { matchesRequiredChoice } from '../progression/lineageMatch.js';
 import { inventoryHasFlag, readChoiceValue } from '../progression/choiceUtils.js';
 import { ownedFeatNames } from '../progression/selectedFeats.js';
-import { primaryClassLevel } from '../progression/classLevel.js';
+import { classEntities } from '../progression/classLevel.js';
 import { asArray } from '../../lists.js';
 import { matchKey, stripSource } from '../../content/nameKeys.js';
 import { DAMAGE_TYPES } from '../../content/rulesVocabulary.js';
@@ -26,12 +26,6 @@ export function effectKey(value) {
 
 export function displayLabel(value) {
   return canonicalDisplayLabel(value);
-}
-
-function ownerLevelOf(character, className, isPrimary) {
-  if (isPrimary) return primaryClassLevel(character);
-  const found = (character?.extraClasses || []).find((entry) => effectKey(entry?.name) === effectKey(className));
-  return Number(found?.level || 1);
 }
 
 function conditionPasses(effect, context) {
@@ -185,28 +179,11 @@ export function resolveChoiceValue(effect, character) {
 export function collectSheetEffects(character = {}) {
   const out = [];
 
-  const entities = [
-    {
-      className: character.className,
-      subclassShortName: character.subclassShortName,
-      ownerName: character.className,
-      ownerLevel: ownerLevelOf(character, character.className, true),
-      isPrimary: true,
-    },
-    ...(character.extraClasses || []).map((entry) => ({
-      className: entry.name,
-      subclassShortName: entry.subclassShortName,
-      ownerName: entry.name,
-      ownerLevel: Number(entry.level || 1),
-      isPrimary: false,
-    })),
-  ].filter((entry) => entry.className);
-
-  entities.forEach((entity) => {
+  classEntities(character).forEach((entity) => {
     collectFromList(out, adapterRegistry.getClassSheetEffects(entity.className), {
       ownerName: entity.className,
       ownerType: 'class',
-      ownerLevel: entity.ownerLevel,
+      ownerLevel: entity.level,
       sourceKey: entity.className,
     }, character);
 
@@ -214,7 +191,7 @@ export function collectSheetEffects(character = {}) {
       collectFromList(out, adapterRegistry.getSubclassSheetEffects(entity.className, entity.subclassShortName), {
         ownerName: entity.subclassShortName,
         ownerType: 'subclass',
-        ownerLevel: entity.ownerLevel,
+        ownerLevel: entity.level,
         sourceKey: `${entity.className}_${entity.subclassShortName}`,
       }, character);
     }

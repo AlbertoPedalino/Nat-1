@@ -49,6 +49,10 @@ export function classLevel(C, className) {
 
 // Each class the character has (primary first, then multiclasses), with its
 // subclass and level: the owners whose adapter actions/resources apply.
+// `isPrimary`, `extraIndex` (its index in extraClasses, null for the primary)
+// and `choicePrefix` ('' or "mcN_", the prefix of its stored choices) say where
+// it lives; `entry` is the object holding it (the character, or the extra
+// class) for its feature lists.
 export function classEntities(C) {
   if (!C) return [];
   const out = [];
@@ -59,9 +63,13 @@ export function classEntities(C) {
       level: primaryClassLevel(C),
       ownerName: C.className,
       allSubFeatures: C.allSubFeatures || [],
+      isPrimary: true,
+      extraIndex: null,
+      choicePrefix: '',
+      entry: C,
     });
   }
-  (C.extraClasses || []).forEach((extra) => {
+  (C.extraClasses || []).forEach((extra, index) => {
     if (!extra?.name) return;
     out.push({
       className: extra.name,
@@ -69,9 +77,24 @@ export function classEntities(C) {
       level: Number(extra.level || 1),
       ownerName: extra.name,
       allSubFeatures: extra.allSubFeatures || [],
+      isPrimary: false,
+      extraIndex: index,
+      choicePrefix: `mc${index}_`,
+      entry: extra,
     });
   });
   return out;
+}
+
+// Every class and subclass feature of every class the character has, in
+// class order (a class's own features, then its subclass's). The builder's
+// live list (`allFeatures`) comes before the one saved with a sheet
+// (`allClassFeatures`).
+export function characterClassFeatures(C) {
+  return classEntities(C).flatMap(({ entry }) => [
+    ...(entry?.allFeatures || entry?.allClassFeatures || []),
+    ...(entry?.allSubFeatures || []),
+  ]);
 }
 
 // The names of the character's classes, primary first.

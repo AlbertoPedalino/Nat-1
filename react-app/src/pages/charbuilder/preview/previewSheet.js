@@ -1,3 +1,5 @@
+import { characterClassFeatures } from '../../../shared/character/progression/classLevel.js';
+
 export function buildPreviewSheetCharacter(character = {}) {
   const species = character.speciesObj || character.speciesSnapshot || {};
   const extraClasses = (character.extraClasses || []).map((extra) => ({
@@ -14,13 +16,6 @@ export function buildPreviewSheetCharacter(character = {}) {
       languageProficiencies: [{ common: true }, ...(species.languageProficiencies || [])],
     },
     extraClasses,
-    allClassFeatures: [
-      ...(character.allFeatures || []),
-      ...(character.allSubFeatures || []),
-      ...extraClasses.flatMap((extra) => [
-        ...(extra.allFeatures || []),
-        ...(extra.allSubFeatures || []),
-      ]),
-    ],
+    allClassFeatures: characterClassFeatures({ ...character, extraClasses }),
   };
 }

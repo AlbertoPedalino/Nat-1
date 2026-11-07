@@ -1,17 +1,11 @@
 import { adapterRegistry } from '../../../adapters/registry.js';
 import { getAcBonusEffects } from '../sheet/effectBonuses.js';
 import { wildShapeArmorClass } from '../forms/wildShapeForm.js';
-import { primaryClassLevel } from '../progression/classLevel.js';
+import { classEntities } from '../progression/classLevel.js';
 import { finalAbilityModifier } from '../progression/abilityScores.js';
 import { aggregateMiscAcBonus, armorEnhancement } from '../inventory/itemBonus.js';
 import { asArray } from '../../lists.js';
 import { matchKey } from '../../content/nameKeys.js';
-
-function ownerLevelOf(character, className, isPrimary) {
-  if (isPrimary) return primaryClassLevel(character);
-  const found = (character?.extraClasses || []).find((e) => matchKey(e?.name) === matchKey(className));
-  return Number(found?.level || 1);
-}
 
 function collectFromSheetEffects(out, list, meta, character, seenKeys) {
   asArray(list).forEach((effect) => {
@@ -42,13 +36,8 @@ function collectFromSheetEffects(out, list, meta, character, seenKeys) {
 }
 
 function collectRuntimeConfigFormulas(out, character, seenKeys) {
-  const entities = [
-    { className: character.className, subclassShortName: character.subclassShortName, isPrimary: true },
-    ...(character.extraClasses || []).map((e) => ({ className: e.name, subclassShortName: e.subclassShortName, isPrimary: false })),
-  ].filter((e) => e.className);
-
-  entities.forEach((entity) => {
-    const ol = ownerLevelOf(character, entity.className, entity.isPrimary);
+  classEntities(character).forEach((entity) => {
+    const ol = entity.level;
 
     const clsCfg = adapterRegistry.getClassRuntimeConfig(entity.className);
     if (clsCfg?.unarmoredDefense) {
@@ -105,13 +94,8 @@ export function collectAcFormulas(character) {
   const out = [];
   const seenKeys = new Set();
 
-  const entities = [
-    { className: character.className, subclassShortName: character.subclassShortName, isPrimary: true },
-    ...(character.extraClasses || []).map((e) => ({ className: e.name, subclassShortName: e.subclassShortName, isPrimary: false })),
-  ].filter((e) => e.className);
-
-  entities.forEach((entity) => {
-    const ol = ownerLevelOf(character, entity.className, entity.isPrimary);
+  classEntities(character).forEach((entity) => {
+    const ol = entity.level;
     collectFromSheetEffects(out, adapterRegistry.getClassSheetEffects(entity.className), {
       ownerName: entity.className, ownerType: 'class', ownerLevel: ol, sourceKey: entity.className,
     }, character, seenKeys);
