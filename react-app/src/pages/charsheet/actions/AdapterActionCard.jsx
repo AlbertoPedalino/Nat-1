@@ -3,7 +3,7 @@ import { describeAttackRoll } from '../../../shared/character/combat/conditions.
 import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { getChoiceValue } from '../../../shared/character/progression/choiceUtils.js';
 import { toggleActiveField } from '../state/toggleState.js';
-import { CAT_COLORS } from './actionsTabLogic.js';
+import { CAT_COLORS } from './actionTags.js';
 import { getActionRollers } from '../../../shared/character/dice/rollers.js';
 import { WeaponMasteryBlock } from '../../../shared/character/combat/WeaponMasteryBlock.jsx';
 import { WeaponNoteBlock } from '../../../shared/character/combat/WeaponNoteBlock.jsx';

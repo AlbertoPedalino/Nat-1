@@ -11,7 +11,7 @@
 //   - equipment                      itemEffectInventory (merges: no item counts;
 //                                     read through characterItemEffects /
 //                                     characterItemBonuses / armor penalties)
-//   - attacks and actions            the beast's own, as cards (actionsTabLogic)
+//   - attacks and actions            the beast's own, as cards (wildShapeActions.js)
 //
 // Shape of `C.wildShape` (null when not transformed):
 //   { beast: <normalizeBeast snapshot> }   // name, abilities, ac, hp, actions…

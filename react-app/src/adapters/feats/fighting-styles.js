@@ -12,10 +12,10 @@ import { getProficiencyBonus } from '../../shared/character/progression/proficie
 //
 // Effect contract (consumers live in the calc layer):
 //   - acBonus { value, requiresArmor }                          → sheetEffects.getAcBonusEffects / ac.js
-//   - weaponAttackBonus { value, weaponFilter, requiresSoloWeapon? } → sheetEffects.getWeaponEffectBonuses / actionsTabLogic
-//   - weaponDamageBonus { value, weaponFilter, requiresSoloWeapon? } → sheetEffects.getWeaponEffectBonuses / actionsTabLogic
+//   - weaponAttackBonus { value, weaponFilter, requiresSoloWeapon? } → sheetEffects.getWeaponEffectBonuses / weaponActions
+//   - weaponDamageBonus { value, weaponFilter, requiresSoloWeapon? } → sheetEffects.getWeaponEffectBonuses / weaponActions
 //   - sense { senseType, value }                                → visionSenses.collectSenses
-//   - unarmedStrike { face, emptyHandedFace?, dexterity?, uses? } → effectBonuses.getUnarmedStrike / actionsTabLogic
+//   - unarmedStrike { face, emptyHandedFace?, dexterity?, uses? } → effectBonuses.getUnarmedStrike / weaponActions
 // weaponFilter values come from the shared WEAPON_FILTERS enum (typos → dev-warn,
 // never a silent no-op). requiresSoloWeapon gates "no other weapons" (Dueling).
 //

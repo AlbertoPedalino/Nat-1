@@ -1,113 +1,30 @@
+// The action cards a character's adapters give (class, subclass, species,
+// feats), live from the registry or from the sheet's serialized runtime, one
+// per signature, with their formulas resolved for the character.
 import {
   classEntities,
   primaryClassLevel,
-} from '../../../shared/character/progression/classLevel.js';
+} from '../progression/classLevel.js';
 import { adapterRegistry } from '../../../adapters/registry.js';
-import { adapterEntryApplies } from '../../../shared/character/progression/choiceUtils.js';
+import { adapterEntryApplies } from '../progression/choiceUtils.js';
 import {
   featDescriptionEntries,
   featNamedEntries,
-} from '../../../shared/character/progression/featDescription.js';
-import { parseBeastActions } from '../../../shared/character/forms/beasts.js';
-import { getActiveWildShape } from '../../../shared/character/forms/wildShapeForm.js';
-import { alpha } from '@mui/material';
-import {
-  ACTION_COLORS,
-  CHIP_TONES,
-  ENTITY_COLORS,
-  ITEM_ATTUNEMENT,
-} from '../../../shared/ui/entityColors.js';
+} from '../progression/featDescription.js';
 import {
   getActionRollers,
   resolveActionRollers,
-} from '../../../shared/character/dice/rollers.js';
-import { ownedFeatNames } from '../../../shared/character/progression/selectedFeats.js';
-import { matchKey } from '../../../shared/content/nameKeys.js';
-import { UI_COLORS } from '../../../shared/ui/colors.js';
+} from '../dice/rollers.js';
+import { ownedFeatNames } from '../progression/selectedFeats.js';
+import { matchKey } from '../../content/nameKeys.js';
 
-export const FILTERS = ['all', 'action', 'bonus', 'reaction', 'special'];
-// Weapon/unarmed attacks get a red left-bar so attacks stand apart from other
-// Actions at a glance; the rest follow the shared action-economy colours.
-export const CAT_COLORS = { ...ACTION_COLORS, attack: UI_COLORS.danger };
+// Development warnings already given, so each is logged once.
+const _featureKeyConflicts = typeof Set === 'function' ? new Set() : null;
+const _missingDescWarned = typeof Set === 'function' ? new Set() : null;
+
 // 'special' = features used with no action or on a trigger (Lengthened Strike,
 // Umbral Form, Portal Step…), shown in the "Other" section.
 const EXECUTABLE_CATS = new Set(['attack', 'action', 'bonus', 'reaction', 'special']);
-export const SECTION_DEFS = [
-  { key: 'action', title: 'Actions', cats: ['action', 'attack'] },
-  { key: 'bonus', title: 'Bonus Actions', cats: ['bonus'] },
-  { key: 'reaction', title: 'Reactions', cats: ['reaction'] },
-  { key: 'special', title: 'Other', cats: ['special'] },
-];
-
-// Action-tab tags render as MiniBadges — the same primitive the spell tab uses —
-// so a tag reads identically across both tabs. Each is keyed by a semantic tone:
-// status/fact tones from CHIP_TONES, source tones from an entity-kind colour
-// (Wild Shape = class). bg follows the spell-tab convention of a 0.16 tint.
-const TAG_TONES = {
-  mastery:    CHIP_TONES.mastery,    // active weapon mastery
-  noprof:     CHIP_TONES.negative,   // warning: non-proficient
-  slot:       CHIP_TONES.info,       // neutral fact: weapon hand
-  inlinePill: CHIP_TONES.info,       // neutral fact: range/DC/etc.
-  wildShape:  ENTITY_COLORS.class,   // source: form-granted (class colour)
-  weaponNote: ENTITY_COLORS.feat,    // source: feat rule reminder (e.g. GWM)
-  itemProperty: ITEM_ATTUNEMENT,     // source: rule an item plan adds (Repeating Shot)
-};
-
-// A MiniBadge descriptor ({ key, label, color, bg }) for a semantic tone.
-function tagBadge(key, tone, label) {
-  const color = TAG_TONES[tone];
-  return { key, label, color, bg: alpha(color, 0.16) };
-}
-
-export function buildActionTags(action, C) {
-  const tags = [];
-  const ownerLevel = action.ownerLevel ?? primaryClassLevel(C);
-
-  if (action._wildShapeTag) {
-    tags.push(tagBadge('wildshape', 'wildShape', 'Wild Shape'));
-  }
-  if (action._weaponMastery) {
-    tags.push(tagBadge('mastery', 'mastery', action._weaponMastery));
-  }
-  if (action._itemProperty) {
-    tags.push(tagBadge('item-property', 'itemProperty', action._itemProperty.tag));
-  }
-  // One tag per feat: its rules on this weapon share it, and each is spelled
-  // out in the expanded card.
-  const noteTags = new Set();
-  (action._weaponNotes || []).forEach((note) => {
-    if (!note.tag || noteTags.has(note.tag)) return;
-    noteTags.add(note.tag);
-    tags.push(tagBadge(`note-${note.key}`, 'weaponNote', note.tag));
-  });
-  if (action._notProficient) {
-    tags.push(tagBadge('noprof', 'noprof', 'No Prof'));
-  }
-  if (action._weaponSlot) {
-    tags.push(tagBadge('slot', 'slot', action._weaponSlot));
-  }
-
-  // Convention: an adapter's `inlinePills` are for facts the action's resource
-  // bar can't show (range, duration, save DC, THP amount, a chosen damage type,
-  // etc.). Never add a pill that just restates the action's own resource-bar
-  // value — e.g. a "Pool = level×5 HP" pill on an action whose resKey already
-  // tracks that pool. That's redundant; let the bar own the number.
-  const pills = typeof action.inlinePills === 'function'
-    ? action.inlinePills({ character: C, ownerLevel })
-    : (Array.isArray(action.inlinePills) ? action.inlinePills : []);
-  pills.forEach((pill, idx) => {
-    const label = `${pill.label || ''}${pill.value != null ? ` ${pill.value}` : ''}`.trim();
-    if (label) {
-      tags.push(tagBadge(`pill-${idx}`, 'inlinePill', label));
-    }
-  });
-
-  return { ...action, tags };
-}
-
-// Single source of truth lives in restResources (handles string formulas like
-// 'proficiencyBonus' + function form). Re-exported so ActionsTab builds its
-// resource-max map from the same resolver instead of a divergent copy.
 
 function actionDedupeKey(item) {
   return [
@@ -197,7 +114,6 @@ function nameKeyCandidates(value) {
   return Array.from(candidates);
 }
 
-const _featureKeyConflicts = typeof Set === 'function' ? new Set() : null;
 function reportKeyConflict(scope, key, existingName, incomingName) {
   if (typeof import.meta === 'undefined' || !import.meta.env?.DEV) return;
   if (!_featureKeyConflicts) return;
@@ -260,7 +176,6 @@ function buildFeatureMapFromRecords(records, scope) {
   return map;
 }
 
-const _missingDescWarned = typeof Set === 'function' ? new Set() : null;
 function warnMissingDescription(action, source) {
   if (typeof import.meta === 'undefined' || !import.meta.env?.DEV) return;
   if (!_missingDescWarned) return;
@@ -391,42 +306,4 @@ export function collectAdapterActions(C, sheet) {
   }
 
   return uniqBySignature(out);
-}
-
-// Beast attacks/actions while Wild Shaped → action cards. Reads the active form
-// snapshot on the character (no beast DB needed here): attacks become rollable
-// attack cards (beast's own to-hit + damage), other actions become info cards.
-export function makeWildShapeActions(C) {
-  const active = getActiveWildShape(C);
-  if (!active?.beast) return [];
-  const beast = active.beast;
-  const beastName = beast.name;
-  // Every form-granted action/attack/bonus/reaction shares the section list with
-  // the Druid's own, so each carries a "Wild Shape" tag to mark its source.
-  const toCard = (a, cat) => {
-    const rollers = (a.damage || []).map((formula, i) => ({
-      kind: 'damage',
-      formula,
-      label: `Damage ${formula}`,
-      key: `wildshape-dmg-${i}`,
-    }));
-    return {
-      name: a.name,
-      cat,
-      uses: 'Wild Shape',
-      _source: `Wild Shape (${beastName})`,
-      _colorBarCat: a.isAttack ? 'attack' : undefined,
-      _wildShapeTag: true,
-      ...(a.attackBonus != null ? { attackBonus: a.attackBonus } : {}),
-      ...(rollers.length ? { rollers } : {}),
-      rollLabelPrefix: `${beastName}: ${a.name}`,
-      entries: a.text ? [a.text] : null,
-      noDescription: !a.text,
-    };
-  };
-  return [
-    ...parseBeastActions(beast.actions).map((a) => toCard(a, a.isAttack ? 'attack' : 'action')),
-    ...parseBeastActions(beast.bonusActions).map((a) => toCard(a, 'bonus')),
-    ...parseBeastActions(beast.reactions).map((a) => toCard(a, 'reaction')),
-  ];
 }

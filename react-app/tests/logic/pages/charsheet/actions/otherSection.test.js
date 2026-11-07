@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { adapterRegistry } from '../../../../../src/adapters/registry.js';
 import installLivingShadow from '../../../../../src/adapters/feats/living-shadow.js';
-import { collectAdapterActions, FILTERS, SECTION_DEFS } from '../../../../../src/pages/charsheet/actions/actionsTabLogic.js';
+import { collectAdapterActions } from '../../../../../src/shared/character/sheet/adapterActions.js';
+import { FILTERS, SECTION_DEFS } from '../../../../../src/pages/charsheet/actions/actionTags.js';
 
 installLivingShadow(adapterRegistry);
 
