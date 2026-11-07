@@ -73,7 +73,6 @@ export function useHexCells({
         if (!cancelled) setCells(rows);
       } catch (_) { /* the map keeps the hexes it has */ }
     };
-    let subscribedOnce = false;
     const unsubscribe = subscribeHexcrawl({
       sceneId,
       onCell: ({ cell, removed }) => {
@@ -83,13 +82,10 @@ export function useHexCells({
           return removed ? rest : [...rest, cell];
         });
       },
-      // The first subscription follows the mount read; later ones are
-      // reconnects, which do not replay what was missed.
-      onStatus: (status) => {
-        if (status !== 'SUBSCRIBED') return;
-        if (subscribedOnce) reconcileCells();
-        subscribedOnce = true;
-      },
+      // Like every synced view: each SUBSCRIBED (the first join too, which
+      // closes the gap between the mount read and the subscription) checks
+      // for what Realtime did not deliver.
+      onStatus: (status) => { if (status === 'SUBSCRIBED') reconcileCells(); },
     });
     const stopRecovery = listenForRecovery(() => reconcileCells(), { periodic: true, whenHidden: true });
     return () => {

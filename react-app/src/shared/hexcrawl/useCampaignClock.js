@@ -115,7 +115,6 @@ export function useCampaignClock(campaignId, { withLog = false } = {}) {
 
   useEffect(() => {
     if (!active) return undefined;
-    let subscribedOnce = false;
     return subscribeHexcrawl({
       campaignId,
       onClock: (clock) => {
@@ -125,13 +124,10 @@ export function useCampaignClock(campaignId, { withLog = false } = {}) {
         // save echoing back changes nothing and costs nothing.
         if (acceptClock(clock) !== before) readLog();
       },
-      onStatus: (status) => {
-        if (status !== 'SUBSCRIBED') return;
-        // The first subscription follows the mount read; later ones are
-        // reconnects, which do not replay what was missed.
-        if (subscribedOnce) refresh();
-        subscribedOnce = true;
-      },
+      // Like every synced view: each SUBSCRIBED (the first join too, which
+      // closes the gap between the mount read and the subscription) reads
+      // again what Realtime may not have delivered.
+      onStatus: (status) => { if (status === 'SUBSCRIBED') refresh(); },
     });
   }, [acceptClock, active, campaignId, readLog, refresh]);
 

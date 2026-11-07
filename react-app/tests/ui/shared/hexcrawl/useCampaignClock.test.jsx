@@ -116,16 +116,15 @@ describe('traffic', () => {
     expect(api.listCampaignLog).toHaveBeenCalledTimes(reads + 1);
   });
 
-  test('a reconnect re-reads; the first subscription does not repeat the mount read', async () => {
+  test('every subscription re-reads, the first join included, like every synced view', async () => {
     api.readCampaignClock.mockResolvedValue({ updatedAt: 1 });
     renderHook(() => useCampaignClock('campaign-one'));
     await waitFor(() => expect(api.readCampaignClock).toHaveBeenCalledTimes(1));
     const { onStatus } = api.subscribeHexcrawl.mock.calls[0][0];
     act(() => onStatus('SUBSCRIBED'));
-    await act(async () => {});
-    expect(api.readCampaignClock).toHaveBeenCalledTimes(1);
-    act(() => onStatus('SUBSCRIBED'));
     await waitFor(() => expect(api.readCampaignClock).toHaveBeenCalledTimes(2));
+    act(() => onStatus('SUBSCRIBED'));
+    await waitFor(() => expect(api.readCampaignClock).toHaveBeenCalledTimes(3));
   });
 
   test('focus and visibility together read once', async () => {
