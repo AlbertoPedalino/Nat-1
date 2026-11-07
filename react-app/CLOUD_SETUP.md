@@ -44,6 +44,7 @@ or on a script missing from this table.
 | 23 | [`23_scene_image_filters.sql`](supabase/23_scene_image_filters.sql) | `map_scenes.image_filters`: a light filter (dawn, dusk, night…) per scene picture, keyed by its storage path |
 | 24 | [`24_scene_image_atmospheres.sql`](supabase/24_scene_image_atmospheres.sql) | `map_scenes.image_atmospheres`: the atmosphere (rain, fog, snow…) per scene picture, keyed by its storage path; the old scene-wide `atmosphere` column is no longer read |
 | 25 | [`25_player_token_images.sql`](supabase/25_player_token_images.sql) | Players may upload a picture for their own token pieces (live scene of their campaign only) and delete the pictures they uploaded; replaces the `map-images` insert/delete policies of 06 |
+| 26 | [`26_sync_digest.sql`](supabase/26_sync_digest.sql) | `sync_digest(keys)`: one read answering, for everything a client has open, a revision or a hash of a list's revisions — the 30-second recovery asks once and reads in full only what moved. Stores nothing; runs under the caller's RLS |
 
 Run 13 and 14 **before** deploying a frontend that needs them: the app sends
 health changes only through their RPCs.
