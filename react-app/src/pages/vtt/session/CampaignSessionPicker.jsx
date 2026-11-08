@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { Box, Chip, CircularProgress, Paper, Stack, Typography } from '@mui/material';
 import { Flag, Radio } from 'lucide-react';
 import { useAuth } from '../../../shared/cloud/auth/AuthProvider.jsx';
-import { listLiveCampaignIds } from '../../../shared/cloud/api/vttScenes.js';
+import { useLiveCampaigns } from '../../../shared/vtt/session/useLiveCampaigns.js';
 import { UI_FONTS } from '../../../shared/ui/fonts.js';
 
 // Several campaigns can be running at the same time, so a player picks the table
@@ -10,29 +10,18 @@ import { UI_FONTS } from '../../../shared/ui/fonts.js';
 // the view follows along.
 export default function CampaignSessionPicker({ campaigns = [], onJoin, showEmpty = true }) {
   const { user } = useAuth();
-  const [state, setState] = useState({ loading: true, campaigns: [] });
-
-  useEffect(() => {
-    let cancelled = false;
-    // Campaigns the user runs are managed from the GM side of this page; here
-    // they are only a player.
-    const joined = campaigns.filter((campaign) => campaign.gm !== user?.id);
-    // A failed lookup only loses the badges: every table can still be joined.
-    listLiveCampaignIds(joined.map((campaign) => campaign.id)).catch(() => new Set())
-      .then((live) => {
-        if (cancelled) return;
-        setState({
-          loading: false,
-          campaigns: joined.map((campaign) => ({
-            id: campaign.id,
-            name: campaign.name || 'Campaign',
-            hasLive: live.has(campaign.id),
-          })),
-        });
-      })
-      .catch(() => { if (!cancelled) setState({ loading: false, campaigns: [] }); });
-    return () => { cancelled = true; };
-  }, [campaigns, user?.id]);
+  // Campaigns the user runs are managed from the GM side of this page; here
+  // they are only a player.
+  const joined = useMemo(() => campaigns.filter((campaign) => campaign.gm !== user?.id), [campaigns, user?.id]);
+  const { loading, live } = useLiveCampaigns(joined.map((campaign) => campaign.id));
+  const state = {
+    loading,
+    campaigns: joined.map((campaign) => ({
+      id: campaign.id,
+      name: campaign.name || 'Campaign',
+      hasLive: live.has(campaign.id),
+    })),
+  };
 
   if (state.loading) return <CircularProgress size={24} />;
 

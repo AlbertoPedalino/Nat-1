@@ -1,9 +1,16 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, expect, test, vi } from 'vitest';
 
-const m = vi.hoisted(() => ({ live: vi.fn() }));
-vi.mock('../../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({ useAuth: () => ({ user: { id: 'me' } }) }));
+const m = vi.hoisted(() => ({ live: vi.fn(), channels: [] }));
+vi.mock('../../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({ useAuth: () => ({ user: { id: 'me' }, cloudEnabled: true, status: 'authed' }) }));
 vi.mock('../../../../../src/shared/cloud/api/vttScenes.js', () => ({ listLiveCampaignIds: (...args) => m.live(...args) }));
+vi.mock('../../../../../src/shared/cloud/supabaseClient.js', () => ({ supabase: {} }));
+vi.mock('../../../../../src/shared/cloud/realtimeChannel.js', () => ({
+  openRealtimeChannel: (topic, options) => {
+    m.channels.push(options);
+    return { close: vi.fn() };
+  },
+}));
 
 import CampaignSessionPicker from '../../../../../src/pages/vtt/session/CampaignSessionPicker.jsx';
 
@@ -13,7 +20,7 @@ const campaigns = [
   { id: 'mine', name: 'Run by me', gm: 'me' },
 ];
 
-beforeEach(() => { m.live.mockReset(); });
+beforeEach(() => { m.live.mockReset(); m.channels.length = 0; });
 
 test('marks only the campaigns with a scene up, asking only about the ones joined as a player', async () => {
   m.live.mockResolvedValue(new Set(['c2']));
@@ -42,4 +49,16 @@ test('someone who only runs campaigns sees the invite hint, or nothing when aske
   unmount();
   const { container } = render(<CampaignSessionPicker campaigns={[campaigns[2]]} onJoin={vi.fn()} showEmpty={false} />);
   await waitFor(() => expect(container).toBeEmptyDOMElement());
+});
+
+test('a table going live, or ending, shows without a reload', async () => {
+  m.live.mockResolvedValue(new Set());
+  render(<CampaignSessionPicker campaigns={campaigns} onJoin={vi.fn()} />);
+  await waitFor(() => expect(screen.getAllByText('no map up')).toHaveLength(2));
+  const [{ changes: [watch] }] = m.channels;
+  expect(watch).toMatchObject({ table: 'campaign_live_scenes', filter: 'campaign_id=in.(c1,c2)' });
+  act(() => watch.onChange({ new: { campaign_id: 'c1', scene_id: 's9' } }));
+  expect(screen.getByText('Tavern').closest('button')).toHaveTextContent('Live');
+  act(() => watch.onChange({ new: { campaign_id: 'c1', scene_id: null } }));
+  expect(screen.getByText('Tavern').closest('button')).toHaveTextContent('no map up');
 });
