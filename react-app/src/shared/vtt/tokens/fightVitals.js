@@ -8,6 +8,7 @@
 import { DEAD_CONDITION_KEY } from '../../character/combat/conditions.js';
 import { fightWithTokenVitals, parseSourceRef } from './encounterSync.js';
 import { resolveMortality } from '../../character/combat/mortality.js';
+import { HP_COMMANDS, clampTempHp, hpCommandFields } from '../../encounter/combatantVitals.js';
 
 // Must match public.fight_monster_vital_keys() in 14_token_vitals.sql.
 export const MONSTER_VITAL_KEYS = Object.freeze([
@@ -80,7 +81,7 @@ export function withGmTokenVitals(tokens, { byToken = {}, fights = {} } = {}) {
     const real = {
       hpCurrent: stored.hpCurrent ?? null,
       hpMax: stored.hpMax ?? null,
-      tempHp: tempHpOf(stored.tempHp),
+      tempHp: clampTempHp(stored.tempHp),
       maxHpBonus: Math.round(Number(stored.maxHpBonus) || 0),
     };
     if (Object.keys(real).every((key) => real[key] === token[key])) return token;
@@ -96,49 +97,15 @@ export function linkedCombatant(fights, ref) {
   return (row.fight?.combatants || []).find((c) => String(c?.id) === ref.combatantId && isMonsterCombatant(c)) || null;
 }
 
-function tempHpOf(value) {
-  return Math.max(0, Math.round(Number(value) || 0));
-}
 
-// Damage, healing, temporary and maximum hit points for a creature, with the
-// builder's rules (combat.js): damage takes temporary HP first, healing never
-// passes the maximum, lowering the maximum lowers current HP but raising it
-// heals nothing, and 0 HP is Dead. The commands are the character health
-// command names, so the menu sends one intent whatever the piece is.
-// Only the fields the command touched change, so the result diffs into a
-// minimal fight patch.
+// Damage, healing, temporary and maximum hit points for a creature, by the
+// builder's rules (hpCommandFields). The commands are the character health
+// command names, so the menu sends one intent whatever the piece is. Only the
+// fields the command touched change, so the result diffs into a minimal fight
+// patch; 0 HP is Dead.
 export function applyMonsterVitalCommand(before, command) {
-  const n = Math.trunc(Number(command?.value ?? command?.delta) || 0);
-  const hpMax = before?.hpMax == null ? null : Math.round(Number(before.hpMax));
-  const current = Math.round(Number(before?.hpCurrent ?? hpMax ?? 0));
-  const clampHp = (value, max = hpMax) => Math.max(0, max == null ? value : Math.min(max, value));
-  const next = { ...before };
-  switch (command?.type) {
-    case 'modifyHp': {
-      const temp = tempHpOf(before?.tempHP);
-      const absorbed = n < 0 ? Math.min(temp, -n) : 0;
-      if (absorbed) next.tempHP = temp - absorbed;
-      next.hpCurrent = clampHp(current + n + absorbed);
-      break;
-    }
-    case 'setHp': next.hpCurrent = clampHp(n); break;
-    case 'setTempHp': next.tempHP = Math.max(0, n); break;
-    case 'modifyTempHp': next.tempHP = Math.max(0, tempHpOf(before?.tempHP) + n); break;
-    // A maximum moved by an amount is a new maximum.
-    case 'modifyMaxHp':
-      return applyMonsterVitalCommand(before, { type: 'setMaxHp', value: (hpMax ?? current) + n });
-    case 'setMaxHp': {
-      const max = Math.max(1, n);
-      next.hpMax = max;
-      // A creature without hit points yet starts whole.
-      next.hpCurrent = before?.hpCurrent == null && hpMax == null ? max : clampHp(current, max);
-      // As the builder's setMaxHp: the change is tracked as a bonus so the
-      // base maximum stays recoverable.
-      next.maxHPBonus = (Number(before?.maxHPBonus) || 0) + (max - (hpMax ?? max));
-      break;
-    }
-    default: throw new Error('Unknown creature health command.');
-  }
+  if (!HP_COMMANDS.includes(command?.type)) throw new Error('Unknown creature health command.');
+  const next = { ...before, ...hpCommandFields(before, command) };
   if (next.hpCurrent !== before?.hpCurrent) {
     const conditions = Array.isArray(before?.activeConditions) ? before.activeConditions : [];
     const resolved = resolveMortality({ player: false, hp: next.hpCurrent, conditions });

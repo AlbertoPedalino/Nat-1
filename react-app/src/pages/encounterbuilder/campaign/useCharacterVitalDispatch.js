@@ -1,11 +1,11 @@
 import { useCallback, useRef } from 'react';
 import { commandCharacterVitals } from '../../../shared/cloud/api/healthCommands.js';
 import { useToast } from '../../../shared/ui/ToastProvider.jsx';
+import { HP_COMMANDS, MARK_COMMANDS } from '../../../shared/encounter/combatantVitals.js';
 
-const VITAL_ACTIONS = new Set(['modifyHp', 'setHp', 'setTempHp', 'modifyTempHp', 'setMaxHp',
-  'modifyMaxHp', 'setMaxHpBonus', 'setDeathSave', 'toggleCombatantCondition', 'clearCombatantConditions',
-  // A linked PC's reminders live on the sheet like its conditions.
-  'addCombatantEffect', 'removeCombatantEffect', 'clearCombatantEffects']);
+// Everything that changes a linked player's vitals, conditions or reminders:
+// all of it lives on their sheet.
+const VITAL_ACTIONS = new Set([...HP_COMMANDS, 'setDeathSave', ...MARK_COMMANDS]);
 
 // `vitalsRef.current` is `{ digests, baseMax }` from useCharacterVitalSync: a
 // command starts from the digest the builder follows and the base max HP

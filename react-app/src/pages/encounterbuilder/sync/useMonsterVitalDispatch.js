@@ -4,6 +4,7 @@ import {
   FIGHT_UNAVAILABLE,
   commitFightCombatantVitals,
   getInstanceFight,
+  pendingFightVitals,
 } from '../../../shared/cloud/api/encounterFights.js';
 import {
   isMonsterCombatant,
@@ -11,30 +12,25 @@ import {
   monsterVitalsPatch,
 } from '../../../shared/vtt/tokens/fightVitals.js';
 import { snapshotFight } from '../../../shared/encounter/combat.js';
+import { HP_COMMANDS, MARK_COMMANDS } from '../../../shared/encounter/combatantVitals.js';
 import { encounterReducer } from '../state/reducer.js';
 
 // Everything that changes an enemy's vitals or marks.
-export const MONSTER_VITAL_ACTIONS = new Set([
-  'modifyHp', 'setHp', 'setMaxHp', 'setTempHp', 'modifyTempHp', 'modifyMaxHp', 'setMaxHpBonus',
-  'toggleCombatantCondition', 'clearCombatantConditions',
-  'addCombatantEffect', 'removeCombatantEffect', 'clearCombatantEffects',
-]);
+const MONSTER_VITAL_ACTIONS = new Set([...HP_COMMANDS, ...MARK_COMMANDS]);
 
 // Enemy vitals of a cloud fight are written in one place: the combatant in its
 // `encounter_fights` row, through one RPC per edit. The screen updates at once;
 // the row's answer (or, after a failure, one read of the row) realigns it.
-// Commands of one fight are sent in order and never retried.
+// Commands of one fight are sent in order (commitFightCombatantVitals queues
+// them) and never retried.
 //
 // `cloudRef.current` is what useCloudFights returns for this instance.
 export function useMonsterVitalDispatch({ state, reduce, cloudRef }) {
   const { notify } = useToast();
   const stateRef = useRef(state);
   stateRef.current = state;
-  const queuesRef = useRef(new Map());
 
-  const isBusy = useCallback((fightId) => (
-    (queuesRef.current.get(String(fightId))?.pending || 0) > 0
-  ), []);
+  const isBusy = useCallback((fightId) => pendingFightVitals(fightId) > 0, []);
 
   const dispatch = useCallback((action) => {
     const current = stateRef.current;
@@ -61,11 +57,7 @@ export function useMonsterVitalDispatch({ state, reduce, cloudRef }) {
     stateRef.current = next;
     reduce(action);
 
-    const queue = queuesRef.current.get(fightId) || { chain: Promise.resolve(), pending: 0 };
-    queuesRef.current.set(fightId, queue);
-    queue.pending += 1;
-    queue.chain = queue.chain
-      .then(() => commitFightCombatantVitals(fightId, action.id, { base: monsterVitalsBase(before), patch }))
+    commitFightCombatantVitals(fightId, action.id, { base: monsterVitalsBase(before), patch })
       .then(({ applied, row }) => {
         if (!applied) notify('warning', 'This creature changed elsewhere. Showing the latest values; try again if needed.');
         return { row };
@@ -75,16 +67,12 @@ export function useMonsterVitalDispatch({ state, reduce, cloudRef }) {
         return { row: await getInstanceFight(fightId).catch(() => null) };
       })
       .then(({ row, unavailable }) => {
-        queue.pending -= 1;
         // No cloud row yet (or no migration): the local edit stands and the
         // ordinary fight save stores it.
         if (unavailable) cloudRef.current?.requestSave(fightId);
         // Only the last answer realigns, so a burst of clicks does not flicker
         // back through intermediate values.
-        if (queue.pending === 0) {
-          queuesRef.current.delete(fightId);
-          if (row) cloudRef.current?.acceptRemoteFight(row);
-        }
+        if (row && pendingFightVitals(fightId) === 0) cloudRef.current?.acceptRemoteFight(row);
       });
   }, [cloudRef, notify, reduce]);
 

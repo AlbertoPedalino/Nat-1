@@ -9,16 +9,25 @@
 
 export function createKeyedQueue() {
   const tails = new Map();
+  const counts = new Map();
   return Object.freeze({
     // Runs `task()` after the key's previous task; resolves or rejects with it.
     run(key, task) {
       const previous = tails.get(key) || Promise.resolve();
       const next = previous.catch(() => {}).then(task);
       tails.set(key, next);
-      const release = () => { if (tails.get(key) === next) tails.delete(key); };
+      counts.set(key, (counts.get(key) || 0) + 1);
+      const release = () => {
+        if (tails.get(key) === next) tails.delete(key);
+        const left = counts.get(key) - 1;
+        if (left > 0) counts.set(key, left);
+        else counts.delete(key);
+      };
       next.then(release, release);
       return next;
     },
+    // How many of the key's tasks have not settled yet (running or waiting).
+    pending: (key) => counts.get(key) || 0,
   });
 }
 

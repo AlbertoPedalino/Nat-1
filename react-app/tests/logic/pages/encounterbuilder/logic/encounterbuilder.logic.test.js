@@ -23,7 +23,7 @@ import {
 } from '../../../../../src/shared/encounter/combat.js';
 import { nextTurn, rerollInitiative } from '../../../../../src/shared/encounter/initiative.js';
 import {
-  addCombatantEffect, applySheetVitals, clearCombatantConditions, clearCombatantEffects, modifyHp, removeCombatantEffect, setDeathSave, setTempHp, toggleCombatantCondition,
+  addCombatantEffect, applySheetVitals, clearCombatantConditions, clearCombatantEffects, applyHpCommand, removeCombatantEffect, setDeathSave, toggleCombatantCondition,
 } from '../../../../../src/shared/encounter/combatantVitals.js';
 import { effectId } from '../../../../../src/shared/character/combat/combatEffects.js';
 import { rollDice, rollDiceFormula } from '../../../../../src/shared/character/dice/rollNotation.js';
@@ -477,10 +477,10 @@ test('temp HP mutator clamps and fight snapshots preserve temp HP', () => {
     currentTurn: 0,
     round: 1,
   };
-  const clamped = setTempHp(combat, 1, -12);
+  const clamped = applyHpCommand(combat, 1, { type: 'setTempHp', value: -12 });
   assert.equal(clamped.combatants[0].tempHP, 0);
 
-  const restored = restoreFight({ id: 42, fight: snapshotFight(setTempHp(combat, 1, 9)) }, []);
+  const restored = restoreFight({ id: 42, fight: snapshotFight(applyHpCommand(combat, 1, { type: 'setTempHp', value: 9 })) }, []);
   assert.equal(restored.combatants[0].tempHP, 9);
 });
 
@@ -547,12 +547,12 @@ test('hp and death saves preserve player death-save flow', () => {
     currentTurn: 0,
     round: 1,
   };
-  const down = modifyHp(combat, 1, -10);
+  const down = applyHpCommand(combat, 1, { type: 'modifyHp', delta: -10 });
   assert.equal(down.combatants[0].hpCurrent, 0);
   assert.equal(down.combatants[0].isDead, false);
   const failed = setDeathSave(setDeathSave(setDeathSave(down, 1, 'fail', 1), 1, 'fail', 2), 1, 'fail', 3);
   assert.equal(failed.combatants[0].isDead, true);
-  const healed = modifyHp(failed, 1, 4);
+  const healed = applyHpCommand(failed, 1, { type: 'modifyHp', delta: 4 });
   assert.deepEqual(healed.combatants[0].deathSaves, { success: 0, fail: 0 });
   assert.equal(healed.combatants[0].isDead, false);
 });
@@ -561,7 +561,7 @@ test('Dead follows monster HP and player death saves in both directions', () => 
   const monsterCombat = {
     combatants: [{ id: 1, type: 'monster', hpCurrent: 7, hpMax: 7, activeConditions: [], isDead: false }],
   };
-  const killedMonster = modifyHp(monsterCombat, 1, -7);
+  const killedMonster = applyHpCommand(monsterCombat, 1, { type: 'modifyHp', delta: -7 });
   assert.equal(killedMonster.combatants[0].isDead, true);
   assert.deepEqual(killedMonster.combatants[0].activeConditions, ['dead']);
   const revivedMonster = toggleCombatantCondition(killedMonster, 1, 'dead');

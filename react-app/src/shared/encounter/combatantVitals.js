@@ -92,49 +92,63 @@ export function setDeathSave(combat, id, type, value) {
   });
 }
 
-export function modifyHp(combat, id, delta) {
-  const amount = numberOr(delta, 0);
-  return updateCombatant(combat, id, (combatant) => {
-    if (amount >= 0) {
-      // Healing goes straight to current HP; temporary HP is unaffected.
-      return applyHp(combatant, numberOr(combatant.hpCurrent, 0) + amount);
+// The hit point commands every surface sends for a combatant — the builder's
+// buttons and the map's menu use the character health command names — and the
+// conditions and reminders that travel the same way.
+export const HP_COMMANDS = Object.freeze([
+  'modifyHp', 'setHp', 'setTempHp', 'modifyTempHp', 'setMaxHp', 'modifyMaxHp', 'setMaxHpBonus',
+]);
+export const MARK_COMMANDS = Object.freeze([
+  'toggleCombatantCondition', 'clearCombatantConditions', 'addCombatantEffect', 'removeCombatantEffect', 'clearCombatantEffects',
+]);
+
+// The hit point fields a command changes, and only those: damage takes
+// temporary HP first (RAW), healing never passes the maximum, lowering the
+// maximum lowers current HP but raising it heals nothing, and a maximum change
+// is tracked as a maxHPBonus delta so the base maximum (hpMax - maxHPBonus)
+// stays recoverable. A creature with no maximum yet is not clamped, and starts
+// whole when it gets one. A command without a number changes nothing.
+export function hpCommandFields(before, command) {
+  const raw = Number(command?.delta ?? command?.value);
+  if (!Number.isFinite(raw)) return {};
+  const n = Math.trunc(raw);
+  const hpMax = before?.hpMax == null ? null : Math.round(Number(before.hpMax));
+  const current = Math.round(Number(before?.hpCurrent ?? hpMax ?? 0));
+  const temp = clampTempHp(before?.tempHP);
+  const clampHp = (value, max = hpMax) => Math.max(0, max == null ? value : Math.min(max, value));
+  switch (command?.type) {
+    case 'modifyHp': {
+      const absorbed = n < 0 ? Math.min(temp, -n) : 0;
+      return { hpCurrent: clampHp(current + n + absorbed), ...(absorbed ? { tempHP: temp - absorbed } : {}) };
     }
-    // Damage depletes temporary HP first (D&D RAW), then current HP.
-    const temp = clampTempHp(combatant.tempHP);
-    const absorbed = Math.min(temp, -amount);
-    const next = applyHp(combatant, numberOr(combatant.hpCurrent, 0) - (-amount - absorbed));
-    return absorbed ? { ...next, tempHP: temp - absorbed } : next;
-  });
+    case 'setHp': return { hpCurrent: clampHp(n) };
+    case 'setTempHp': return { tempHP: Math.max(0, n) };
+    case 'modifyTempHp': return { tempHP: Math.max(0, temp + n) };
+    case 'modifyMaxHp': return hpCommandFields(before, { type: 'setMaxHp', value: (hpMax ?? current) + n });
+    case 'setMaxHpBonus': {
+      const baseMax = (hpMax ?? current) - (Number(before?.maxHPBonus) || 0);
+      return hpCommandFields(before, { type: 'setMaxHp', value: baseMax + n });
+    }
+    case 'setMaxHp': {
+      const max = clampInt(n, 1, 999, hpMax ?? 1);
+      if (max === hpMax) return {};
+      return {
+        hpMax: max,
+        hpCurrent: before?.hpCurrent == null ? max : clampHp(current, max),
+        maxHPBonus: (Number(before?.maxHPBonus) || 0) + (max - (hpMax ?? max)),
+      };
+    }
+    default: throw new Error('Unknown creature health command.');
+  }
 }
 
-export function setHp(combat, id, value) {
-  return updateCombatant(combat, id, (combatant) => applyHp(combatant, numberOr(value, combatant.hpCurrent)));
-}
-
-export function setMaxHp(combat, id, value) {
+// A hit point command on one combatant of the fight, with mortality resolved
+// (0 HP is Dead for a monster, dying for a player; healing clears death saves).
+export function applyHpCommand(combat, id, command) {
   return updateCombatant(combat, id, (combatant) => {
-    const hpMax = clampInt(value, 1, 999, combatant.hpMax);
-    if (hpMax === combatant.hpMax) return combatant;
-    // Lowering max can't leave current above it; raising max never auto-heals.
-    const hpCurrent = Math.min(numberOr(combatant.hpCurrent, hpMax), hpMax);
-    const next = applyHp({
-      ...combatant,
-      hpMax,
-    }, hpCurrent);
-    // Track the change as a maxHPBonus delta so base max (hpMax - maxHPBonus)
-    // stays recoverable for the "Max+" control. Base max is constant, so
-    // ΔmaxHP === ΔmaxHPBonus. For linked PCs this also drives outbound sync,
-    // which writes maxHPBonus so the sheet re-derives the same max; for monsters
-    // it's inert bookkeeping (they never sync).
-    next.maxHPBonus = numberOr(combatant.maxHPBonus, 0) + (hpMax - numberOr(combatant.hpMax, hpMax));
-    return next;
-  });
-}
-
-export function setTempHp(combat, id, value) {
-  return updateCombatant(combat, id, (combatant) => {
-    const tempHP = clampTempHp(value);
-    return tempHP === clampTempHp(combatant.tempHP) ? combatant : { ...combatant, tempHP };
+    const { hpCurrent, ...rest } = hpCommandFields(combatant, command);
+    const next = { ...combatant, ...rest };
+    return hpCurrent === undefined ? next : applyHp(next, hpCurrent);
   });
 }
 

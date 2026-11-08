@@ -6,6 +6,7 @@ import {
   toFightRow,
 } from '../../encounter/fightRecord.js';
 import { CLOUD_COMMAND_TIMEOUT_MS, currentUser, withTimeout } from '../cloudCall.js';
+import { createKeyedQueue } from '../sync/keyed.js';
 
 // Fights, as rows.
 //
@@ -117,10 +118,22 @@ export const FIGHT_TIMEOUT = 'FIGHT_TIMEOUT';
 // nothing if they no longer match and returns the current row instead.
 // Resolves to { applied, row }. FIGHT_UNAVAILABLE means there is no cloud row
 // for this combatant (or the migration is missing): the caller keeps its local
-// behaviour. Nothing here retries.
-export async function commitFightCombatantVitals(fightId, combatantId, { base = null, patch }, {
+// behaviour. Nothing here retries. Edits of one fight go out one at a time, in
+// call order, whichever screen sent them (the builder, the battle map).
+const fightVitalsQueue = createKeyedQueue();
+
+export function commitFightCombatantVitals(fightId, combatantId, { base = null, patch }, {
   timeoutMs = FIGHT_VITALS_TIMEOUT_MS,
 } = {}) {
+  return fightVitalsQueue.run(String(fightId), () => sendFightCombatantVitals(fightId, combatantId, { base, patch }, timeoutMs));
+}
+
+// How many enemy edits of this fight have not been answered yet.
+export function pendingFightVitals(fightId) {
+  return fightVitalsQueue.pending(String(fightId));
+}
+
+function sendFightCombatantVitals(fightId, combatantId, { base, patch }, timeoutMs) {
   const request = Promise.resolve(requireClient().rpc('commit_fight_combatant_vitals', {
     p_fight_id: String(fightId),
     p_combatant_id: String(combatantId),

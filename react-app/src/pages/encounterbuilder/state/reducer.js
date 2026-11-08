@@ -3,7 +3,7 @@ import {
 } from '../../../shared/encounter/combat.js';
 import { nextTurn, prevTurn, rerollInitiative, setInitiative } from '../../../shared/encounter/initiative.js';
 import {
-  addCombatantEffect, applySheetVitals, clearCombatantConditions, clearCombatantEffects, modifyHp, removeCombatantEffect, setDeathSave, setHp, setMaxHp, setTempHp, toggleCombatantCondition,
+  addCombatantEffect, applyHpCommand, applySheetVitals, clearCombatantConditions, clearCombatantEffects, removeCombatantEffect, setDeathSave, toggleCombatantCondition,
 } from '../../../shared/encounter/combatantVitals.js';
 import { addRollLogEntry } from '../rolls/rollLog.js';
 import {
@@ -182,25 +182,13 @@ function reduceEncounterState(state, action) {
     case 'setInitiative':
       return state.combat ? withCombat(state, setInitiative(state.combat, action.id, action.value)) : state;
     case 'modifyHp':
-      return state.combat ? withCombat(state, modifyHp(state.combat, action.id, action.delta)) : state;
     case 'setHp':
-      return state.combat ? withCombat(state, setHp(state.combat, action.id, action.value)) : state;
-    case 'setMaxHp':
-      return state.combat ? withCombat(state, setMaxHp(state.combat, action.id, action.value)) : state;
     case 'setTempHp':
-      return state.combat ? withCombat(state, setTempHp(state.combat, action.id, action.value)) : state;
-    case 'modifyTempHp': {
-      const c = state.combat?.combatants.find((item) => item.id === action.id);
-      return c ? withCombat(state, setTempHp(state.combat, action.id, (Number(c.tempHP) || 0) + action.delta)) : state;
-    }
-    case 'modifyMaxHp': {
-      const c = state.combat?.combatants.find((item) => item.id === action.id);
-      return c ? withCombat(state, setMaxHp(state.combat, action.id, c.hpMax + action.delta)) : state;
-    }
-    case 'setMaxHpBonus': {
-      const c = state.combat?.combatants.find((item) => item.id === action.id);
-      return c ? withCombat(state, setMaxHp(state.combat, action.id, c.hpMax - (c.maxHPBonus || 0) + action.value)) : state;
-    }
+    case 'modifyTempHp':
+    case 'setMaxHp':
+    case 'modifyMaxHp':
+    case 'setMaxHpBonus':
+      return state.combat ? withCombat(state, applyHpCommand(state.combat, action.id, action)) : state;
     case 'setDeathSave':
       return state.combat ? withCombat(state, setDeathSave(state.combat, action.id, action.saveType, action.value)) : state;
     case 'toggleCombatantCondition':

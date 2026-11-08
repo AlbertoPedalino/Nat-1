@@ -19,23 +19,29 @@ const db = vi.hoisted(() => ({
   notify: vi.fn(),
 }));
 
-vi.mock('../../../../../src/shared/cloud/api/encounterFights.js', () => ({
-  FIGHT_UNAVAILABLE: 'FIGHT_UNAVAILABLE',
-  listInstanceFights: (...args) => db.list(...args),
-  // The light recovery reads the same fake table.
-  listInstanceFightRevisions: async () => (db.row
-    ? [{ id: String(db.row.id), updatedAt: Date.parse(db.row.updated_at) || 0 }] : []),
-  listInstanceFightsByIds: async (_instanceId, ids) => (db.row && ids.includes(String(db.row.id))
-    ? [toFightEntry(structuredClone(db.row))] : []),
-  saveInstanceFight: (...args) => db.save(...args),
-  deleteInstanceFight: vi.fn(async () => {}),
-  getInstanceFight: (...args) => db.get(...args),
-  commitFightCombatantVitals: (...args) => db.commit(...args),
-  subscribeInstanceFights: (_instanceId, onChange) => {
-    db.subscribers.add(onChange);
-    return () => db.subscribers.delete(onChange);
-  },
-}));
+vi.mock('../../../../../src/shared/cloud/api/encounterFights.js', async () => {
+  // The real per-fight queue, so commands reach the fake table in order.
+  const { createKeyedQueue } = await import('../../../../../src/shared/cloud/sync/keyed.js');
+  const queue = createKeyedQueue();
+  return {
+    FIGHT_UNAVAILABLE: 'FIGHT_UNAVAILABLE',
+    listInstanceFights: (...args) => db.list(...args),
+    // The light recovery reads the same fake table.
+    listInstanceFightRevisions: async () => (db.row
+      ? [{ id: String(db.row.id), updatedAt: Date.parse(db.row.updated_at) || 0 }] : []),
+    listInstanceFightsByIds: async (_instanceId, ids) => (db.row && ids.includes(String(db.row.id))
+      ? [toFightEntry(structuredClone(db.row))] : []),
+    saveInstanceFight: (...args) => db.save(...args),
+    deleteInstanceFight: vi.fn(async () => {}),
+    getInstanceFight: (...args) => db.get(...args),
+    commitFightCombatantVitals: (fightId, ...args) => queue.run(String(fightId), () => db.commit(fightId, ...args)),
+    pendingFightVitals: (fightId) => queue.pending(String(fightId)),
+    subscribeInstanceFights: (_instanceId, onChange) => {
+      db.subscribers.add(onChange);
+      return () => db.subscribers.delete(onChange);
+    },
+  };
+});
 vi.mock('../../../../../src/shared/cloud/auth/AuthProvider.jsx', () => ({
   useAuth: () => ({ cloudEnabled: true, status: 'authed', cloudActive: true }),
 }));
