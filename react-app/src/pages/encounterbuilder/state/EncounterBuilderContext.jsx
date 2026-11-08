@@ -88,8 +88,7 @@ export function EncounterBuilderProvider({ instanceId, children }) {
     const actor = identity.actorName;
     const resolvedNote = typeof note === 'function' ? note(result) : note;
     const annotated = { ...result, ...identity, note: String(resolvedNote || '') };
-    if (localOnly) dispatch({ type: 'addRoll', roll: annotated, actor });
-    else shareRoll(annotated, actor);
+    shareRoll(annotated, actor, { localOnly });
     return { ...annotated, actor };
   }, [getRollActor, shareRoll]);
 

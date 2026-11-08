@@ -1,6 +1,6 @@
 import { UI_COLORS } from '../../../shared/ui/colors.js';
 
-// Encounter difficulty (XPHB 2024 XP budgets) and the roll log size.
+// Encounter difficulty (XPHB 2024 XP budgets).
 export const XT = Object.freeze([
   [50, 75, 100, 150],
   [100, 150, 200, 300],
@@ -26,4 +26,3 @@ export const XT = Object.freeze([
 
 export const DIFFICULTY_LABELS = Object.freeze(['Low', 'Moderate', 'High', 'Deadly']);
 export const DIFFICULTY_COLORS = Object.freeze([UI_COLORS.success, UI_COLORS.warning, UI_COLORS.difficultyHigh, UI_COLORS.danger]);
-export const LOG_MAX = 60;

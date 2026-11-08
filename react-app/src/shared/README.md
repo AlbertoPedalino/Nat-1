@@ -26,7 +26,7 @@ See the [source map](../README.md) for the page feature folders.
 | Folder | Responsibility |
 | --- | --- |
 | `combat/` | AC, HP, conditions, reminders, initiative, weapon mastery |
-| `dice/` | The one dice engine (`dice.js`: `rollDie`, `rollPool`, `rollD20`, `rollFormula`, each with an optional `rng`; every die in the app is rolled here; the battle map's dice tray only animates the result), notation rolls for logs and creatures (`rollNotation.js`), dice rendering, roll logs and toasts |
+| `dice/` | The one dice engine (`dice.js`: `rollDie`, `rollPool`, `rollD20`, `rollFormula`, each with an optional `rng`; every die in the app is rolled here; the battle map's dice tray only animates the result), notation rolls for logs and creatures (`rollNotation.js`), dice rendering and toasts; the dice control every rolling screen shows (`DiceControl.jsx`: Roll then Log, the custom roll picker and the log popover) and the one roll log (`RollLogList.jsx`, entries in the `rollFeed.normalizeRoll` shape, added with `rollFeed.addRoll`) |
 | `forms/` | Wild Shape, companions, summons, and cannon forms |
 | `inventory/` | Items, crafting, currency, attunement, charges, inventory filtering |
 | `profile/` | Character persistence, export, portraits, class icons |

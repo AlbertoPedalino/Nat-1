@@ -7,12 +7,10 @@ import { rollFormula as rollFormulaDice, formatRollTitle } from '../../../shared
 import IconColorPicker from '../../../shared/ui/IconColorPicker.jsx';
 import PortraitBadge from '../../../shared/character/profile/PortraitBadge.jsx';
 import { deletePortrait, uploadPortrait } from '../../../shared/cloud/api/characterArt.js';
-import RollLogDialog from './RollLogDialog.jsx';
 import SheetActions from './SheetActions.jsx';
 import XpDeltaControl from '../../../shared/character/progression/XpDeltaControl.jsx';
 import { primaryClassLevel } from '../../../shared/character/progression/classLevel.js';
 import { classIcon } from '../../../shared/character/profile/classIcon.js';
-import CustomRollDialog from '../../../shared/character/dice/CustomRollDialog.jsx';
 import { getActiveCharId } from '../../../shared/character/profile/store.js';
 import { formatNumber } from '../../../shared/ui/numberFormat.js';
 import { UI_COLORS, uiAlpha } from '../../../shared/ui/colors.js';
@@ -49,8 +47,6 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
     onUpdateCharacter?.((prev) => ({ ...prev, portraitPath: null }));
     if (previous) deletePortrait(previous);
   };
-  const [rollLogOpen, setRollLogOpen] = useState(false);
-  const [customRollOpen, setCustomRollOpen] = useState(false);
   const navigate = useNavigate();
   const extra = C.extraClasses || [];
   const pLv = primaryClassLevel(C);
@@ -221,31 +217,18 @@ export default function TopBar({ C, sheet, charId, readOnly = false, embedded = 
           <SheetActions
             readOnly={readOnly}
             embedded={embedded}
-            rollCount={rollLog?.length || 0}
+            rollLog={rollLog}
             onShortRest={onShortRest}
             onLongRest={onLongRest}
-            onRoll={() => setCustomRollOpen(true)}
-            onOpenLog={() => setRollLogOpen(true)}
+            onRoll={(formula) => {
+              const { total, rolls } = rollFormulaDice(formula);
+              onShowToast?.(formatRollTitle('Custom Roll', formula), formula, total, rolls);
+            }}
+            onClearLog={onClearRollLog}
           />
         </Box>
       </Box>
       </Box>
-
-      <RollLogDialog
-        open={rollLogOpen}
-        onClose={() => setRollLogOpen(false)}
-        rollLog={rollLog}
-        onClear={onClearRollLog}
-      />
-
-      <CustomRollDialog
-        open={customRollOpen}
-        onClose={() => setCustomRollOpen(false)}
-        onRoll={(formula) => {
-          const { total, rolls } = rollFormulaDice(formula);
-          onShowToast?.(formatRollTitle('Custom Roll', formula), formula, total, rolls);
-        }}
-      />
     </Box>
   );
 }

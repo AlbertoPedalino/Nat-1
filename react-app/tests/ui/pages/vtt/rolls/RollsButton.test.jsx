@@ -17,7 +17,7 @@ describe('RollsButton', () => {
     render(<RollsButton feed={feed} onCustomRoll={vi.fn()} onClear={vi.fn()} />);
     const [roll, log] = screen.getAllByRole('button');
     expect(roll).toHaveAccessibleName('Roll dice');
-    expect(log).toHaveAccessibleName('Roll log');
+    expect(log).toHaveAccessibleName('Roll log, 1 roll');
   });
 
   it('opens the dice picker straight from the dice half', () => {
@@ -31,7 +31,7 @@ describe('RollsButton', () => {
     const onClear = vi.fn();
     render(<RollsButton feed={feed} onCustomRoll={vi.fn()} onClear={onClear} />);
     expect(screen.queryByText('Attack')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Roll log' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Roll log, 1 roll' }));
     expect(screen.getByText('Attack')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Clear' }));
     expect(onClear).toHaveBeenCalledOnce();

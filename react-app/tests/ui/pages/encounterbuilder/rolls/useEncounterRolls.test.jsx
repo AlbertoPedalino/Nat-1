@@ -26,7 +26,7 @@ test('infers the imported party campaign and keeps monster/custom rolls private 
   const { result } = openRolls();
   expect(channel.campaignId).toBe('campaign');
   act(() => result.current.sync.shareRoll(monsterRoll, 'Goblin'));
-  expect(result.current.state.rollLog[0]).toMatchObject({ actor: 'Goblin', result: 17, visibility: 'gm', actorColor: '#3498db', actorShape: '■', actorLabel: 'B' });
+  expect(result.current.state.rollLog[0]).toMatchObject({ actorName: 'Goblin', label: 'Claw', total: 17, visibility: 'gm', actorColor: '#3498db', actorShape: '■', actorLabel: 'B' });
   expect(channel.publish).toHaveBeenLastCalledWith(expect.objectContaining({
     actorName: 'Goblin', total: 17, rolls: [{ v: 12, faces: 20 }], note: 'Hit',
     actorColor: '#3498db', actorShape: '■', actorLabel: 'B',
@@ -70,6 +70,14 @@ test('receives player and map rolls once, without rebroadcasting them', () => {
   const roll = { id: 'remote', actorName: 'Wizard', label: 'Arcana', total: 24, detail: '1d20+4', actorColor: '#b05ce0', rolls: [{ faces: 20, v: 20 }] };
   act(() => { channel.onRoll(roll); channel.onRoll(roll); });
   expect(result.current.state.rollLog).toHaveLength(1);
-  expect(result.current.state.rollLog[0]).toMatchObject({ actor: 'Wizard', type: 'Arcana', result: 24, actorColor: '#b05ce0', rolls: [{ faces: 20, v: 20 }] });
+  expect(result.current.state.rollLog[0]).toMatchObject({ actorName: 'Wizard', label: 'Arcana', total: 24, actorColor: '#b05ce0', rolls: [{ faces: 20, v: 20 }] });
+  expect(channel.publish).not.toHaveBeenCalled();
+});
+
+test('a local-only roll goes into the log as GM-only and is not published', () => {
+  const { result } = openRolls();
+  act(() => result.current.sync.updateSettings({ showToPlayers: true }));
+  act(() => result.current.sync.shareRoll(monsterRoll, 'Goblin', { localOnly: true }));
+  expect(result.current.state.rollLog[0]).toMatchObject({ actorName: 'Goblin', visibility: 'gm' });
   expect(channel.publish).not.toHaveBeenCalled();
 });

@@ -1,12 +1,12 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import RollLogPanel from '../../../../../src/pages/vtt/rolls/RollLogPanel.jsx';
+import RollLogList from '../../../../../src/shared/character/dice/RollLogList.jsx';
 
-describe('RollLogPanel', () => {
+describe('RollLogList', () => {
   it('shows landed values as static two-dimensional die faces', () => {
     const { container } = render(
-      <RollLogPanel
-        feed={[{
+      <RollLogList
+        log={[{
           id: 'roll-1',
           actorName: 'Arannis',
           label: 'Attack',
@@ -24,8 +24,8 @@ describe('RollLogPanel', () => {
 
   it('omits a zero modifier from a stat roll', () => {
     render(
-      <RollLogPanel
-        feed={[{
+      <RollLogList
+        log={[{
           id: 'roll-zero',
           actorName: 'Arannis',
           label: 'Strength Check',

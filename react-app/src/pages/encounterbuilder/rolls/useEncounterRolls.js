@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useRollChannel } from '../../../shared/cloud/sync/useRollChannel.js';
-import { makeRollEntry, normalizeRoll } from '../../../shared/vtt/rolls/rollFeed.js';
+import { makeRollEntry } from '../../../shared/vtt/rolls/rollFeed.js';
 import { buildEncounterDiceToast } from '../../../shared/character/dice/encounterDiceToast.js';
-import { normalizeRollIdentity } from '../../../shared/character/dice/rollLogPresentation.js';
 import { persistRollSettings, readRollSettings } from '../state/storage.js';
 
 export function useEncounterRolls({ instanceId, players, campaigns, dispatch }) {
@@ -13,23 +12,8 @@ export function useEncounterRolls({ instanceId, players, campaigns, dispatch }) 
   const campaignId = campaigns.some((campaign) => campaign.id === requested) ? requested : null;
   const showToPlayers = settings.showToPlayers === true;
 
-  const receive = useCallback((entry) => {
-    const roll = normalizeRoll(entry);
-    if (!roll) return;
-    dispatch({ type: 'addRoll', actor: roll.actorName, roll: {
-      id: roll.id,
-      timestamp: roll.at,
-      type: roll.label,
-      result: roll.total,
-      mathStr: roll.detail,
-      note: roll.note,
-      visibility: roll.visibility,
-      ...normalizeRollIdentity(roll),
-      rolls: roll.rolls,
-      bonus: roll.bonus,
-      mode: roll.mode,
-    } });
-  }, [dispatch]);
+  // Rolls from the campaign land in the log as the channel carries them.
+  const receive = useCallback((entry) => dispatch({ type: 'addRoll', entry }), [dispatch]);
 
   const { publish } = useRollChannel({ campaignId, isGm: true, onRoll: receive });
 
@@ -45,24 +29,20 @@ export function useEncounterRolls({ instanceId, players, campaigns, dispatch }) 
     });
   }, [instanceId]);
 
-  const shareRoll = useCallback((result, actor) => {
-    const toast = buildEncounterDiceToast(result);
-    const entry = makeRollEntry(toast, {
+  // A roll made here: into the log, and out to the campaign unless it is
+  // `localOnly` (a GM-only table roll), in which case it stays GM-only.
+  const shareRoll = useCallback((result, actor, { localOnly = false } = {}) => {
+    const entry = makeRollEntry(buildEncounterDiceToast(result), {
       idPrefix: 'encounter',
       actorName: actor || 'GM',
       characterId: result.characterId,
       sourceRef: result.sourceRef,
       identity: result,
       note: result.note,
-      visibility: showToPlayers ? 'public' : 'gm',
+      visibility: !localOnly && showToPlayers ? 'public' : 'gm',
     });
-    // The builder's own log keeps the full result (natural d20, class).
-    dispatch({
-      type: 'addRoll',
-      roll: { ...result, rolls: toast.rolls, id: entry.id, timestamp: entry.timestamp, visibility: entry.visibility },
-      actor: entry.actorName,
-    });
-    publish(entry, { visibility: entry.visibility });
+    dispatch({ type: 'addRoll', entry, local: true });
+    if (!localOnly) publish(entry, { visibility: entry.visibility });
   }, [dispatch, publish, showToPlayers]);
 
   return { campaignId, showToPlayers, updateSettings, shareRoll };

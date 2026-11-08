@@ -5,7 +5,7 @@ import { nextTurn, prevTurn, rerollInitiative, setInitiative } from '../../../sh
 import {
   addCombatantEffect, applyHpCommand, applySheetVitals, clearCombatantConditions, clearCombatantEffects, removeCombatantEffect, setDeathSave, toggleCombatantCondition,
 } from '../../../shared/encounter/combatantVitals.js';
-import { addRollLogEntry } from '../rolls/rollLog.js';
+import { addRoll } from '../../../shared/vtt/rolls/rollFeed.js';
 import {
   createDefaultFumbleCategory,
   createDefaultFumbleTables,
@@ -214,7 +214,7 @@ function reduceEncounterState(state, action) {
     case 'closeStatblock':
       return { ...state, selectedStatblock: null };
     case 'addRoll':
-      return { ...state, rollLog: addRollLogEntry(state.rollLog, action.roll, action.actor) };
+      return { ...state, rollLog: addRoll(state.rollLog, action.entry, { local: action.local }) };
     case 'clearRollLog':
       return { ...state, rollLog: [] };
     case 'setFumbleDice':

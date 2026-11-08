@@ -8,7 +8,7 @@ import { characterItemBonuses } from '../../../shared/character/inventory/itemBo
 import { getSaveBonus, exhaustionD20Penalty } from '../../../shared/character/sheet/sheetStats.js';
 import { useRollChannel } from '../../../shared/cloud/sync/useRollChannel.js';
 import { useCharacterCampaign } from '../../../shared/cloud/sync/useCharacterCampaign.js';
-import { normalizeRoll } from '../../../shared/vtt/rolls/rollFeed.js';
+import { addRoll, normalizeRoll } from '../../../shared/vtt/rolls/rollFeed.js';
 import { capitalize } from '../../../shared/ui/textCase.js';
 import { makeId } from '../../../shared/ids.js';
 
@@ -22,13 +22,8 @@ export function useSheetRolls({ C, sheet, charId, onRoll, showOwnRollToast }) {
   // which map is up and does not need to learn.
   const [rollLog, setRollLog] = useState([]);
   const receiveRoll = useCallback((entry) => {
-    const roll = normalizeRoll(entry);
-    if (!roll || roll.visibility === 'gm') return;
-    const toastEntry = {
-      ...roll, timestamp: roll.at, meta: { mode: roll.mode, bonus: roll.bonus },
-    };
-    setRollLog((current) => current.some((item) => item.id === roll.id)
-      ? current : [toastEntry, ...current].slice(0, 50));
+    if (normalizeRoll(entry)?.visibility === 'gm') return;
+    setRollLog((current) => addRoll(current, entry));
   }, []);
   const { publish: publishRoll } = useRollChannel({ campaignId, onRoll: receiveRoll });
   useEffect(() => { setRollLog([]); }, [campaignId, charId]);
@@ -52,7 +47,7 @@ export function useSheetRolls({ C, sheet, charId, onRoll, showOwnRollToast }) {
       actorColor: C?.classIconColor || null,
     };
     if (showOwnRollToast) setDiceToast(entry);
-    setRollLog((prev) => [entry, ...prev].slice(0, 50));
+    setRollLog((prev) => addRoll(prev, entry, { local: true }));
     // Said out loud at the table: the same entry the toast shows, so a roll
     // reads on the battle map exactly as it read here. Every roll on this sheet
     // goes through this one function, custom rolls included.

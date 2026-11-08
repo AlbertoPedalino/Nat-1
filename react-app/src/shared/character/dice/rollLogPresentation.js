@@ -14,10 +14,8 @@ export function rollOutcome(entry) {
   const dice = Array.isArray(entry?.rolls) ? entry.rolls : [];
   const d20s = dice.filter((die) => die.faces === 20 && die.kept !== false);
   const kept = d20s.find((die) => die.kept === true) || (d20s.length === 1 ? d20s[0] : null);
-  const natural = kept?.v ?? (!dice.length ? entry?.naturalD20 : null);
-  const legacy = !dice.length && natural == null ? entry?.cls : null;
-  const kind = natural === 20 || legacy === 'nat20' ? 'nat20'
-    : natural === 1 || legacy === 'nat1' ? 'nat1' : 'normal';
+  const natural = kept?.v;
+  const kind = natural === 20 ? 'nat20' : natural === 1 ? 'nat1' : 'normal';
   return { kind, color: ROLL_LOG_COLORS[kind], isCrit: kind === 'nat20', isFail: kind === 'nat1' };
 }
 
@@ -33,12 +31,12 @@ export function normalizeRollIdentity(entry) {
   };
 }
 
-// Old encounter entries embed values in the formula; sheet entries carry them
-// separately. Display both as a formula followed by one visual calculation.
+// A roll's formula ("1d10 [5] + 3" or "2d4+3", the values in brackets or not)
+// laid out as the formula once and one visual calculation.
 export function rollLogCalculation(entry) {
-  const detail = String(entry.detail ?? entry.mathStr ?? '').trim();
+  const detail = String(entry.detail ?? '').trim();
   const dice = Array.isArray(entry.rolls) ? entry.rolls : [];
-  const total = entry.total ?? entry.result;
+  const total = entry.total;
   const source = detail.replace(/^(?:Advantage|Disadvantage):[^;]*;\s*/i, '')
     .replace(/\[[^\]]*\]|\(\s*\d+\s*\)/g, '').split('=')[0].replace(/\s+/g, '');
   const parsed = parseFormula(source);

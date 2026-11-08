@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Box, Button, Stack, Tab, Tabs, Typography } from '@mui/material';
-import { BookOpen, Library, Swords, Dices, Handshake, Skull } from 'lucide-react';
+import { BookOpen, Library, Swords, Handshake, Skull } from 'lucide-react';
 import AppTopBar, { APP_TOP_BAR_HEIGHT } from '../../app/navigation/AppTopBar.jsx';
 import LinkedToolsMenu from '../../app/navigation/LinkedToolsMenu.jsx';
-import CustomRollDialog from '../../shared/character/dice/CustomRollDialog.jsx';
+import DiceControl from '../../shared/character/dice/DiceControl.jsx';
 import { useToolInstance } from '../../shared/instances/useToolInstance.js';
 import CloudInstanceLoading from '../../shared/instances/CloudInstanceLoading.jsx';
 import InstanceConflictBanner from '../../shared/instances/InstanceConflictBanner.jsx';
@@ -12,7 +12,6 @@ import CombatView from './combat/CombatView.jsx';
 import LibraryView from './library/LibraryView.jsx';
 import StatBlockDialog from './bestiary/StatBlockDialog.jsx';
 import RollSharingControls from './rolls/RollSharingControls.jsx';
-import RollLogLauncher from './rolls/RollLogLauncher.jsx';
 import DiceToast from '../../shared/character/dice/DiceToast.jsx';
 import { buildEncounterDiceToast } from '../../shared/character/dice/encounterDiceToast.js';
 import CriticalFumblesDialog from './rolls/CriticalFumblesDialog.jsx';
@@ -34,7 +33,6 @@ export default function EncounterBuilderPage() {
 
 function EncounterBuilderShell({ tool }) {
   const { state, dispatch, roll } = useEncounterBuilder();
-  const [customRollOpen, setCustomRollOpen] = useState(false);
   const [fumblesOpen, setFumblesOpen] = useState(false);
   const [negotiationOpen, setNegotiationOpen] = useState(false);
   const [diceToast, setDiceToast] = useState(null);
@@ -60,15 +58,12 @@ function EncounterBuilderShell({ tool }) {
             </Box>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ alignItems: { xs: 'stretch', sm: 'center' }, minWidth: 0 }}>
               <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: 'wrap' }}>
-                <Button
-                  size="small"
-                  variant="outlined"
-                  startIcon={<Dices size={14} />}
-                  onClick={() => setCustomRollOpen(true)}
-                  sx={utilityButtonSx}
-                >
-                  Roll
-                </Button>
+                <DiceControl
+                  log={state.rollLog}
+                  onRoll={handleCustomRoll}
+                  onClear={() => dispatch({ type: 'clearRollLog' })}
+                  emptyText="No rolls yet. Click statblock dice, attacks, or abilities."
+                />
                 <Button
                   size="small"
                   variant="outlined"
@@ -112,12 +107,6 @@ function EncounterBuilderShell({ tool }) {
         </Stack>
       </Box>
       <StatBlockDialog />
-      <RollLogLauncher />
-      <CustomRollDialog
-        open={customRollOpen}
-        onClose={() => setCustomRollOpen(false)}
-        onRoll={handleCustomRoll}
-      />
       <CriticalFumblesDialog open={fumblesOpen} onClose={() => setFumblesOpen(false)} />
       <NegotiationDialog open={negotiationOpen} onClose={() => setNegotiationOpen(false)} />
       {diceToast ? <DiceToast toast={diceToast} onClose={() => setDiceToast(null)} /> : null}

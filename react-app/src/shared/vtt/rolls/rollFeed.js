@@ -14,7 +14,7 @@ import { makeId } from '../../ids.js';
 import { numberOrNull } from '../../numbers.js';
 
 export const ROLL_TTL_MS = 8000;
-export const MAX_FEED = 40;
+export const MAX_FEED = 50;
 export const MAX_ROLL_ID_LENGTH = 120;
 
 const MAX_CHARACTER_ID_LENGTH = 120;
